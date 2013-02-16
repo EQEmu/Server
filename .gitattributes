@@ -1,0 +1,26 @@
+# automatic eol conversions
+* text=auto
+
+*.c text
+*.cc text
+*.cpp text
+*.h text
+*.hpp text
+*.txt text
+*.pl text
+*.sql text
+*.xml text
+*.yaml text
+*.conf text
+*.resx text
+*.cs text
+*.ini text
+*.settings text
+*.html text
+*.css text
+*.js text
+*.types text
+
+*.vcproj text merge=union
+*.csproj text merge=union
+*.sln text merge=union eol=crlf
