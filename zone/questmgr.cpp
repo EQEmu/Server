@@ -526,12 +526,12 @@ void QuestManager::shout2(const char *str) {
 	worldserver.SendEmoteMessage(0,0,0,13, "%s shouts, '%s'", owner->GetCleanName(), str);
 }
 
-void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint32 to_guilddbid) {
+void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world) {
 	if(send_to_world) {
-        worldserver.SendEmoteMessage(0, to_guilddbid, 80, color, "%s", str);
+        worldserver.SendEmoteMessage(0, 0, 80, color, "%s", str);
 	}
 	else {
-		entity_list.MessageStatus(to_guilddbid, 80, color, "%s", str);
+		entity_list.MessageStatus(0, 80, color, "%s", str);
 	}
 }
 

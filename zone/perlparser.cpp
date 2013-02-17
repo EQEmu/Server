@@ -644,13 +644,12 @@ XS(XS__gmsay);
 XS(XS__gmsay)
 {
 	dXSARGS;
-	if ((items < 1) || (items > 4))
+	if (items != 1 && items != 2 && items != 3)
 		Perl_croak(aTHX_ "Usage: gmsay(str, color, send_to_world?)");
 
 	char * str = (char *)SvPV_nolen(ST(0));
 	int	color = 7;
 	bool send_to_world = 0;
-	uint32 to_guilddbid = 0;
 
 	if (items > 1) {
 		color = (int)SvIV(ST(1));
@@ -660,11 +659,7 @@ XS(XS__gmsay)
 		send_to_world = ((int)SvIV(ST(2))) == 0?false:true;
 	}
 
-	if (items > 3) {
-		to_guilddbid = (int)SvIV(ST(3));
-	}
-
-	quest_manager.gmsay(str, color, send_to_world, to_guilddbid);
+	quest_manager.gmsay(str, color, send_to_world);
 
 	XSRETURN_EMPTY;
 }

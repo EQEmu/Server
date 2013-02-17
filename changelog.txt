@@ -1,9 +1,6 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
-== 02/16/2013 ==
-Derision: Added optional guildid to quest::gmsay, i.e. quest::gmsay(<messsage>, [color], [toworld], [guildid])
-
 == 02/12/2013 ==
 Kayen: AA fix
 

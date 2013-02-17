@@ -68,7 +68,7 @@ public:
 	void emote(const char *str);
 	void shout(const char *str);
 	void shout2(const char *str);
-	void gmsay(const char *str, uint32 color, bool send_to_world, uint32 to_guilddbid);
+	void gmsay(const char *str, uint32 color, bool send_to_world);
 	void depop(int npc_type = 0); // depop NPC and don't start spawn timer
 	void depop_withtimer(int npc_type = 0); // depop NPC and start spawn timer
 	void depopall(int npc_type = 0);
