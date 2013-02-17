@@ -395,7 +395,6 @@ bool Client::CheckTitle(int titleset) {
    char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
     MYSQL_RES *result;
-    MYSQL_ROW row;
 
    if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT `id` FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i LIMIT 1", titleset, CharacterID()), errbuf, &result)) {
       safe_delete_array(query);

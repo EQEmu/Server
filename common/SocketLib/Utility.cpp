@@ -37,8 +37,7 @@ namespace SOCKETS_NAMESPACE {
 std::string Utility::base64(const std::string& str_in)
 {
 	std::string str;
-	Base64 m_b;
-	m_b.encode(str_in, str, false); // , false == do not add cr/lf
+	Base64::encode(str_in, str, false); // , false == do not add cr/lf
 	return str;
 }
 
@@ -46,8 +45,7 @@ std::string Utility::base64(const std::string& str_in)
 std::string Utility::base64d(const std::string& str_in)
 {
 	std::string str;
-	Base64 m_b;
-	m_b.decode(str_in, str);
+	Base64::decode(str_in, str);
 	return str;
 }
 

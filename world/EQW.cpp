@@ -447,7 +447,6 @@ void EQW::ResolveBug(const char *id) {
     vector<string> res;
     char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
-	MYSQL_ROW row;
     if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE bugs SET status=1 WHERE id=%s", id), errbuf)) {
 		safe_delete_array(query);
     }

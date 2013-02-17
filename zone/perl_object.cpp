@@ -787,7 +787,6 @@ XS(XS_Object_Repop)
 		Perl_croak(aTHX_ "Usage: Object::Repop(THIS)");
 	{
 		Object *		THIS;
-		Const_char *		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
@@ -811,7 +810,6 @@ XS(XS_Object_Depop)
 		Perl_croak(aTHX_ "Usage: Object::Depop(THIS)");
 	{
 		Object *		THIS;
-		Const_char *		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {

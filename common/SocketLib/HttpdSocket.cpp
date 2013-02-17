@@ -216,8 +216,6 @@ void HttpdSocket::OnData(const char *p,size_t l)
 
 void HttpdSocket::Send64(const std::string& str64, const std::string& type)
 {
-	Base64 bb;
-
 	if (!strcasecmp(m_start.c_str(), m_if_modified_since.c_str()))
 	{
 		SetStatus("304");
@@ -226,7 +224,7 @@ void HttpdSocket::Send64(const std::string& str64, const std::string& type)
 	}
 	else
 	{
-		size_t len = bb.decode_length(str64);
+		size_t len = Base64::decode_length(str64);
 		unsigned char *buf = new unsigned char[len];
 
 		SetStatus("200");
@@ -237,7 +235,7 @@ void HttpdSocket::Send64(const std::string& str64, const std::string& type)
 		AddResponseHeader("Last-modified", m_start);
 		SendResponse();
 
-		bb.decode(str64, buf, len);
+		Base64::decode(str64, buf, len);
 		SendBuf( (char *)buf, len);
 		delete[] buf;
 	}

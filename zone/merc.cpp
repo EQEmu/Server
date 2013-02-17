@@ -2281,7 +2281,6 @@ bool Merc::AICastSpell(int8 iChance, int16 iSpellTypes) {
 
 						for( int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 							if(g->members[i]) {
-								int32 oDontDoAgainBefore;
 								Mob* tar = g->members[i];
 
 								if( !tar->IsImmuneToSpell(selectedMercSpell.spellid, this)
@@ -3715,8 +3714,6 @@ bool Merc::LoadMercSpells() {
 }
 
 Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id) {
-	Merc* merc;
-
 	if(c)
 	{
 		if(c->GetMercID()) {

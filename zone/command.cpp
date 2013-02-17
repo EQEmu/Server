@@ -9626,9 +9626,7 @@ void command_object(Client *c, const Seperator *sep)
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char query[512];
-	char line[256];
 	uint32 col;
-	uint32 lastid;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int iObjectsFound = 0;

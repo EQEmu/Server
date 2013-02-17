@@ -1318,7 +1318,6 @@ uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;
-	MYSQL_ROW row;
 	
 	if (!m_db->RunQuery(query,
 			    MakeAnyLenString(&query,

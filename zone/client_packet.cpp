@@ -2542,7 +2542,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		}
 	}
 	else if (tcorpse && tcorpse->IsPlayerCorpse()) {
-		uint32 day, hour, min, sec, ttime, restime;
+		uint32 day, hour, min, sec, ttime;
 		if ((ttime = tcorpse->GetDecayTime()) != 0) {
 			sec = (ttime/1000)%60; // Total seconds
 			min = (ttime/60000)%60; // Total seconds
@@ -13536,8 +13536,6 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
     if(tar) {
 		int mercTypeCount = 0;
 		int mercCount = 0;
-		//int mercStanceCount = 2;	// Temporarily Hard Set
-		int packetSize;
 
 		MercenaryMerchantList_Struct* mml = new MercenaryMerchantList_Struct;
 
