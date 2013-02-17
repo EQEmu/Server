@@ -30,6 +30,7 @@ SET(common_sources
     extprofile.cpp
     guild_base.cpp
     guilds.cpp
+    ipc_mutex.cpp
     Item.cpp
     logsys.cpp
     logsys_eqemu.cpp
@@ -130,6 +131,7 @@ SET(common_headers
     extprofile.h
     guild_base.h
     guilds.h
+    ipc_mutex.h
     Item.h
     item_fieldlist.h
     item_struct.h
