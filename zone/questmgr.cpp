@@ -526,13 +526,12 @@ void QuestManager::shout2(const char *str) {
 	worldserver.SendEmoteMessage(0,0,0,13, "%s shouts, '%s'", owner->GetCleanName(), str);
 }
 
-void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world) {
-	if(send_to_world) {
-        worldserver.SendEmoteMessage(0, 0, 80, color, "%s", str);
-	}
-	else {
-		entity_list.MessageStatus(0, 80, color, "%s", str);
-	}
+void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint32 to_guilddbid, uint32 to_minstatus)
+{
+	if(send_to_world)
+        	worldserver.SendEmoteMessage(0, to_guilddbid, to_minstatus, color, "%s", str);
+	else
+		entity_list.MessageStatus(to_guilddbid, to_minstatus, color, "%s", str);
 }
 
 void QuestManager::depop(int npc_type) { // depop NPC and don't start spawn timer
