@@ -2,6 +2,8 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 02/16/2013 ==
 demonstar55: Fix AA reuse timer calc
+demonstar55: Remove old filters and change all remaining old to new (Also fix
+Auction filtering out OOC as well due to incorrect define)
 
 == 02/12/2013 ==
 Kayen: AA fix

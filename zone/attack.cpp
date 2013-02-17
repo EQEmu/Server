@@ -3318,7 +3318,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			int32 origdmg = damage;
 			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
 			if (origdmg != damage && attacker && attacker->IsClient()) {
-				if(attacker->CastToClient()->GetFilter(FILTER_DAMAGESHIELD) != FilterHide)
+				if(attacker->CastToClient()->GetFilter(FilterDamageShields) != FilterHide)
 					attacker->Message(15, "The Spellshield absorbed %d of %d points of damage", origdmg - damage, origdmg);
 			}
 			if (damage == 0  && attacker && origdmg != damage && IsClient()) {
@@ -3505,11 +3505,11 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 						if(spell_id != SPELL_UNKNOWN)
 							filter = iBuffTic ? FilterDOT : FilterSpellDamage;
 						else
-							filter = FILTER_MYPETHITS;
+							filter = FilterPetHits;
 					} else if(damage == -5)
 						filter = FilterNone;	//cant filter invulnerable
 					else
-						filter = FILTER_MYPETMISSES;
+						filter = FilterPetMisses;
 
 					if(!FromDamageShield)
 						owner->CastToClient()->QueuePacket(outapp,true,CLIENT_CONNECTED,filter);
@@ -3542,7 +3542,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 					} else if(damage == -5)
 						filter = FilterNone;	//cant filter invulnerable
 					else
-						filter = FILTER_MYMISSES;
+						filter = FilterMyMisses;
 
 					attacker->CastToClient()->QueuePacket(outapp, true, CLIENT_CONNECTED, filter);
 				}
@@ -3555,11 +3555,11 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			if(spell_id != SPELL_UNKNOWN)
 				filter = iBuffTic ? FilterDOT : FilterSpellDamage;
 			else
-				filter = FILTER_OTHERHITS;
+				filter = FilterOthersHit;
 		} else if(damage == -5)
 			filter = FilterNone;	//cant filter invulnerable
 		else
-			filter = FILTER_OTHERMISSES;
+			filter = FilterOthersMiss;
 		//make attacker (the attacker) send the packet so we can skip them and the owner
 		//this call will send the packet to `this` as well (using the wrong filter) (will not happen until PC charm works)
 //LogFile->write(EQEMuLog::Debug, "Queue damage to all except %s with filter %d (%d), type %d", skip->GetName(), filter, IsClient()?CastToClient()->GetFilter(filter):-1, a->type);

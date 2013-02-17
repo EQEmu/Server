@@ -1303,9 +1303,9 @@ void EntityList::ChannelMessage(Mob* from, uint8 chan_num, uint8 language, uint8
 		Client* client = iterator.GetData();
 		eqFilterType filter = FilterNone;
 		if(chan_num==3)//shout
-			filter=FILTER_SHOUT;
+			filter=FilterShouts;
 		else if(chan_num==4) //auction
-			filter=FILTER_AUCTION;
+			filter=FilterAuctions;
 		
 		if (chan_num != 8 || client->Dist(*from) < 200) // Only say is limited in range
 		{
@@ -2258,10 +2258,10 @@ void EntityList::ChannelMessageFromWorld(const char* from, const char* to, uint8
 				continue;
 			if(!guild_mgr.CheckPermission(guild_id, client->GuildRank(), GUILD_HEAR))
 				continue;
-			if(client->GetFilter(FILTER_GUILDSAY) == FilterHide)
+			if(client->GetFilter(FilterGuildChat) == FilterHide)
 				continue;
 		} else if(chan_num == 5) {
-			if(client->GetFilter(FILTER_OOC) == FilterHide)
+			if(client->GetFilter(FilterOOC) == FilterHide)
 				continue;
 		}
 		client->ChannelMessageSend(from, to, chan_num, language, message);
