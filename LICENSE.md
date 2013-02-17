@@ -8,3 +8,4 @@ StackWalker - New BSD License
 ZLib - ZLib License
 MySQL - GPL
 Perl - GPL / ActiveState (under the assumption that this is a free project).
+Google Test - New BSD License
