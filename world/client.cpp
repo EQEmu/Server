@@ -58,6 +58,7 @@ using namespace std;
 #include "wguild_mgr.h"
 #include "../common/rulesys.h"
 #include "SoFCharCreateData.h"
+#include "../common/clientversions.h"
 
 std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
@@ -93,32 +94,7 @@ Client::Client(EQStreamInterface* ieqs)
 	ClientVersionBit = 0;
 	numclients++;
 
-	string StreamDescription = eqs->Describe();
-
-	if(StreamDescription == "Patch Titanium")
-	{
-		ClientVersionBit = BIT_Titanium;
-	}
-	else if(StreamDescription == "Patch 6.2")
-	{
-		ClientVersionBit = BIT_Client62;
-	}
-	else if(StreamDescription == "Patch SoF")
-	{
-		ClientVersionBit = BIT_SoF;
-	}
-	else if(StreamDescription == "Patch SoD")
-	{
-		ClientVersionBit = BIT_SoD;
-	}
-	else if(StreamDescription == "Patch Underfoot")
-	{
-		ClientVersionBit = BIT_Underfoot;
-	}
-	else if(StreamDescription == "Patch RoF")
-	{
-		ClientVersionBit = BIT_RoF;
-	}
+	ClientVersionBit = 1 << (eqs->ClientVersion() - 1);
 }
 
 Client::~Client() {

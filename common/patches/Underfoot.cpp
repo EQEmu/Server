@@ -100,7 +100,10 @@ std::string Strategy::Describe() const {
 	return(r);
 }
  
-
+const EQClientVersion Strategy::ClientVersion() const
+{
+	return EQClientUnderfoot;
+}
 
 #include "SSDefine.h"
 

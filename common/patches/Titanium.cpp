@@ -97,7 +97,10 @@ std::string Strategy::Describe() const {
 	return(r);
 }
  
-
+const EQClientVersion Strategy::ClientVersion() const
+{
+	return EQClientTitanium;
+}
 
 #include "SSDefine.h"
 

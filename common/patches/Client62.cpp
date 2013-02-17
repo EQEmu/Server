@@ -9,6 +9,7 @@
 #include "../eq_packet_structs.h"
 #include "../MiscFunctions.h"
 #include "../Item.h"
+#include "../clientversions.h"
 #include "Client62_structs.h"
 
 namespace Client62 {
@@ -93,6 +94,10 @@ std::string Strategy::Describe() const {
 	return(r);
 }
 
+const EQClientVersion Strategy::ClientVersion() const
+{
+	return EQClient62;
+}
 
 #include "SSDefine.h"
 

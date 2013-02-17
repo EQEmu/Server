@@ -98,9 +98,12 @@ std::string Strategy::Describe() const {
 	r += name;
 	return(r);
 }
+
+const EQClientVersion Strategy::ClientVersion() const
+{
+	return EQClientRoF;
+}
  
-
-
 #include "SSDefine.h"
 
 // Converts Titanium Slot IDs to RoF Slot IDs for use in Encodes

@@ -517,38 +517,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	conn_state = ReceivedZoneEntry;
 
-	string StreamDescription = Connection()->Describe();
 
-	if(StreamDescription == "Patch Titanium")
-	{
-		ClientVersion = EQClientTitanium;
-		ClientVersionBit = BIT_Titanium;
-	}
-	else if(StreamDescription == "Patch 6.2")
-	{
-		ClientVersion = EQClient62;
-		ClientVersionBit = BIT_Client62;
-	}
-	else if(StreamDescription == "Patch SoF")
-	{
-		ClientVersion = EQClientSoF;
-		ClientVersionBit = BIT_SoF;
-	}
-	else if(StreamDescription == "Patch SoD")
-	{
-		ClientVersion = EQClientSoD;
-		ClientVersionBit = BIT_SoD;
-	}
-	else if(StreamDescription == "Patch Underfoot")
-	{
-		ClientVersion = EQClientUnderfoot;
-		ClientVersionBit = BIT_Underfoot;
-	}
-	else if(StreamDescription == "Patch RoF")
-	{
-		ClientVersion = EQClientRoF;
-		ClientVersionBit = BIT_RoF;
-	}
+	ClientVersion = Connection()->ClientVersion();
+	ClientVersionBit = 1 << (ClientVersion - 1);
+
 	// Antighost code
 	// tmp var is so the search doesnt find this object
 	Client* client = entity_list.GetClientByName(cze->char_name);

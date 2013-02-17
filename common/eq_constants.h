@@ -18,19 +18,6 @@
 #ifndef EQ_CONSTANTS_H
 #define EQ_CONSTANTS_H 
 
-#define BIT_Client62			1
-#define BIT_Titanium			2
-#define BIT_SoF				4
-#define BIT_SoD				8
-#define BIT_Underfoot			16
-#define BIT_RoF				32
-#define BIT_TitaniumAndEarlier		3
-#define BIT_SoFAndLater 		0xFFFFFFFC
-#define BIT_SoDAndLater			0xFFFFFFF8
-#define BIT_UnderfootAndLater		0xFFFFFFF0
-#define BIT_RoFAndLater			0xFFFFFFE0
-#define BIT_AllClients			0xFFFFFFFF
-
 #include "skills.h"
 
 /*

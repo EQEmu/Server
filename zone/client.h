@@ -47,6 +47,7 @@ class Client;
 #include <set>
 #include <string>
 #include "../common/item_struct.h"
+#include "../common/clientversions.h"
 #include "QGlobals.h"
 
 #define CLIENT_TIMEOUT		90000
@@ -119,16 +120,6 @@ typedef enum {
 	MQGate,
 	MQGhost
 } CheatTypes;
-
-typedef enum {
-	EQClientUnknown = 0,
-	EQClient62,
-	EQClientTitanium,
-	EQClientSoF,
-	EQClientSoD,
-	EQClientUnderfoot,
-	EQClientRoF
-} EQClientVersion;
 
 enum {
 	HideCorpseNone = 0,

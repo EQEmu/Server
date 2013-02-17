@@ -23,7 +23,7 @@ namespace TEMPLATE {
 	protected:
 		
 		virtual std::string Describe() const;
-		
+		virtual const EQClientVersion ClientVersion() const;
 		//magic macro to declare our opcodes
 		#include "SSDeclare.h"
 		#include "TEMPLATE_ops.h"

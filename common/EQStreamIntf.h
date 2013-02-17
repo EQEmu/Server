@@ -4,6 +4,7 @@
 //this is the only part of an EQStream that is seen by the application.
 
 #include <string>
+#include "clientversions.h"
 
 typedef enum {
 	ESTABLISHED,
@@ -34,6 +35,7 @@ public:
 	virtual const uint32 GetBytesRecieved() const { return 0; }
 	virtual const uint32 GetBytesSentPerSecond() const { return 0; }
 	virtual const uint32 GetBytesRecvPerSecond() const { return 0; }
+	virtual const EQClientVersion ClientVersion() const { return EQClientUnknown; }
 };
 
 #endif /*EQSTREAMINTF_H_*/
