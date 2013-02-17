@@ -18,6 +18,7 @@ SET(common_sources
     EmuTCPServer.cpp
     EQDB.cpp
     EQDBRes.cpp
+    eqemu_exception.cpp
     EQEmuConfig.cpp
     EQEMuError.cpp
     EQPacket.cpp
@@ -112,6 +113,7 @@ SET(common_headers
     eq_packet_structs.h
     EQDB.h
     EQDBRes.h
+    eqemu_exception.h
     EQEmuConfig.h
     EQEmuConfig_elements.h
     EQEMuError.h
