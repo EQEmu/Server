@@ -15,6 +15,7 @@ extern Zone* zone;
 QuestParserCollection::QuestParserCollection() {
     _player_quest_status = QuestUnloaded;
     _global_player_quest_status = QuestUnloaded;
+    _global_npc_quest_status = QuestUnloaded;
 }
 
 QuestParserCollection::~QuestParserCollection() {
@@ -57,6 +58,7 @@ bool QuestParserCollection::HasQuestSub(uint32 npcid, const char *subname) {
 			return qi->HasGlobalQuestSub(subname);
         }
 	}
+
     if(iter != _npc_quest_status.end()) {
         //loaded or failed to load
         if(iter->second != QuestFailedToLoad) {
@@ -169,16 +171,15 @@ void QuestParserCollection::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std:
 
 	// K, lets also parse templates/global_npc.pl
     if(_global_npc_quest_status != QuestUnloaded) {
-		QuestInterface *qi = GetQIByGlobalNPCQuest();
+        std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(_global_npc_quest_status);
+        qiter->second->EventGlobalNPC(evt, npc, init, data, extra_data);
+    } else {
+        QuestInterface *qi = GetQIByGlobalNPCQuest();
         if(qi) {
             _global_npc_quest_status = qi->GetIdentifier();
             qi->EventGlobalNPC(evt, npc, init, data, extra_data);
-        }
-    } else {
-       if(_global_npc_quest_status != QuestFailedToLoad) {
-            std::map<uint32, QuestInterface*>::iterator iter = _interfaces.find(_global_npc_quest_status);
-			if(iter != _interfaces.end())
-            	iter->second->EventGlobalNPC(evt, npc, init, data, extra_data);
+        } else {
+            _global_npc_quest_status = QuestFailedToLoad;
         }
     }
 }
