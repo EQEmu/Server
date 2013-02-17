@@ -1,0 +1,12 @@
+On the move from svn -> git we lost the ability to track revision numbers on the repo.
+
+No big deal!
+
+What we'll do instead as follows:
+
+-Optional SQL updates go in optional/
+-Required SQL updates go in required/
+All updates will follow a specific format of YYYY_MM_DD_Desc.sql, this is so it's easy to sort.
+
+So the following is a good example of what I expect to see
+2013_02_16_GitConversion.sql
