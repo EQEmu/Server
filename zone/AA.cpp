@@ -1347,7 +1347,8 @@ void Client::SendAA(uint32 id, int seq) {
 
 	if(value > 0)
 	{
-		const AA_DBAction *caa = &AA_Actions[saa->id][value - 1];
+        // AA_Action stores the base ID
+		const AA_DBAction *caa = &AA_Actions[saa->id - value + 1][value - 1];
 
 		if(caa && caa->reuse_time > 0)
 			saa->spell_refresh = CalcAAReuseTimer(caa);
