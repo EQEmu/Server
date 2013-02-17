@@ -1,5 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/16/2013 ==
+demonstar55: Fix AA reuse timer calc
 
 == 02/12/2013 ==
 Kayen: AA fix
