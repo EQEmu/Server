@@ -1,0 +1,10 @@
+UPDATE `aa_effects` SET `base1`=5 WHERE `aaid`=78 && `effectid`=125;
+UPDATE `aa_effects` SET `base1`=0 WHERE `aaid`=78 && `effectid`=141;
+UPDATE `aa_effects` SET `base1`=10 WHERE `aaid`=79 && `effectid`=125;
+UPDATE `aa_effects` SET `base1`=0 WHERE `aaid`=79 && `effectid`=141;
+UPDATE `aa_effects` SET `base1`=13 WHERE `aaid`=434 && `effectid`=125;
+UPDATE `aa_effects` SET `base1`=0 WHERE `aaid`=434 && `effectid`=141;
+UPDATE `aa_effects` SET `base1`=16 WHERE `aaid`=435 && `effectid`=125;
+UPDATE `aa_effects` SET `base1`=0 WHERE `aaid`=435 && `effectid`=141;
+UPDATE `aa_effects` SET `base1`=19 WHERE `aaid`=436 && `effectid`=125;
+UPDATE `aa_effects` SET `base1`=0 WHERE `aaid`=436 && `effectid`=141;

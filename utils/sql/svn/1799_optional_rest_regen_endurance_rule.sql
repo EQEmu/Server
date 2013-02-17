@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Character:RestRegenEndurance', 'false', 'Whether rest regen will affect endurance or not');

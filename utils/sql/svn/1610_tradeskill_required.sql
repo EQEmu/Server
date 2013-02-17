@@ -1,0 +1,1 @@
+ALTER TABLE tradeskill_recipe ADD COLUMN quest TINYINT(1) NOT NULL DEFAULT '0';

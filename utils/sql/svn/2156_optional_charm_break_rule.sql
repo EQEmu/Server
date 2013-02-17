@@ -1,0 +1,2 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:CharismaEffectiveness', '10', 'Default 10 CHA = -1 resist mod. Deterimes how much resist modification charisma applies to charm/pacify checks.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:CharmBreakCheckChance', '25', 'Default 25. Determines percent chance for a charm break check to occur each buff tick.');

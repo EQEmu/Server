@@ -1,0 +1,26 @@
+#objects for EQ extractor
+PPOBJS=ppconvert.o .obj/Mutex.o .obj/unix.o \
+  .obj/dbcore.o 
+
+JOE=  ExtractDB.o .obj/MiscFunctions.o Explorers.o ../common/misc.o \
+  StructExplorer.o ../common/packet_dump.o ../common/buildfile.o \
+  patches/versions.o patches/patch_021505.o patches/patch_current.o \
+  patches/patch_local.o patches/patch_121504.o
+
+all: ppconvert
+
+ppconvert: $(PPOBJS)
+	g++ -I.. $^ $(LDFLAGS) $(MYSQL_LIBS) -o $@ 
+
+clean:
+	rm -f ppconvert $(PPOBJS)
+
+.obj/%.o: ../../common/%.cpp ../../common/%.h
+	mkdir -p .obj
+	g++ -I.. $(CXXFLAGS) -c $< -o $@
+
+%.o: %.cpp %.h
+	mkdir -p .obj
+	g++ -I.. $(CXXFLAGS) -c $< -o $@
+
+

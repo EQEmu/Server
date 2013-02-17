@@ -1,0 +1,1415 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>/home/cmorgan/sharppcap_git/SharpPcap/bin/Release/SharpPcap</name>
+    </assembly>
+    <members>
+        <member name="T:SharpPcap.LivePcapDevice">
+            <summary>
+            Capture live packets from a network device
+            </summary>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.#ctor(SharpPcap.PcapInterface)">
+            <summary>
+            Constructs a new PcapDevice based on a 'pcapIf' struct
+            </summary>
+            <param name="pcapIf">A 'pcapIf' struct representing
+            the pcap device</param>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.#ctor">
+            <summary>
+            Default contructor for subclasses
+            </summary>
+        </member>
+        <member name="P:SharpPcap.LivePcapDevice.Name">
+            <summary>
+            Gets the pcap name of this network device
+            </summary>
+        </member>
+        <member name="P:SharpPcap.LivePcapDevice.Addresses">
+            <summary>
+            Addresses that represent this device
+            </summary>
+        </member>
+        <member name="P:SharpPcap.LivePcapDevice.Description">
+            <summary>
+            Gets the pcap description of this device
+            </summary>
+        </member>
+        <member name="P:SharpPcap.LivePcapDevice.Flags">
+            <summary>
+            Interface flags, see pcap_findalldevs() man page for more info
+            </summary>
+        </member>
+        <member name="P:SharpPcap.LivePcapDevice.Loopback">
+            <summary>
+            True if device is a loopback interface, false if not
+            </summary>
+        </member>
+        <member name="P:SharpPcap.LivePcapDevice.NonBlockingMode">
+            <summary>
+            Set/Get Non-Blocking Mode. returns allways false for savefiles.
+            </summary>
+        </member>
+        <member name="P:SharpPcap.LivePcapDevice.KernelBufferSize">
+            <value>
+            Set the kernel value buffer size in bytes
+            WinPcap extension
+            </value>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.Finalize">
+            <summary>
+            PcapDevice finalizer.  Ensure PcapDevices are stopped and closed before exit.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.Open">
+            <summary>
+            Open the device with default values of: promiscuous_mode = false, read_timeout = 1000
+            To start capturing call the 'StartCapture' function
+            </summary>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.Open(SharpPcap.DeviceMode)">
+            <summary>
+            Open the device. To start capturing call the 'StartCapture' function
+            </summary>
+            <param name="mode">
+            A <see cref="T:SharpPcap.DeviceMode" /></param>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.Open(SharpPcap.DeviceMode,System.Int32)">
+            <summary>
+            Open the device. To start capturing call the 'StartCapture' function
+            </summary>
+            <param name="mode">
+            A <see cref="T:SharpPcap.DeviceMode" /></param>
+            <param name="read_timeout">
+            A <see cref="T:System.Int32" /></param>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.SendPacket(PacketDotNet.Packet)">
+            <summary>
+            Sends a raw packet throgh this device
+            </summary>
+            <param name="p">The packet to send</param>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.SendPacket(PacketDotNet.Packet,System.Int32)">
+            <summary>
+            Sends a raw packet throgh this device
+            </summary>
+            <param name="p">The packet to send</param>
+            <param name="size">The number of bytes to send</param>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.SendPacket(System.Byte[])">
+            <summary>
+            Sends a raw packet throgh this device
+            </summary>
+            <param name="p">The packet bytes to send</param>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.SendPacket(System.Byte[],System.Int32)">
+            <summary>
+            Sends a raw packet throgh this device
+            </summary>
+            <param name="p">The packet bytes to send</param>
+            <param name="size">The number of bytes to send</param>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.SendQueue(SharpPcap.SendQueue,SharpPcap.SendQueueTransmitModes)">
+            <summary>
+            Sends all packets in a 'PcapSendQueue' out this pcap device
+            </summary>
+            <param name="q">
+            A <see cref="T:SharpPcap.SendQueue" /></param>
+            <param name="transmitMode">
+            A <see cref="T:SharpPcap.SendQueueTransmitModes" /></param>
+            <returns>
+            A <see cref="T:System.Int32" /></returns>
+        </member>
+        <member name="M:SharpPcap.LivePcapDevice.Statistics">
+            <summary>
+            Retrieves pcap statistics
+            </summary>
+            <returns>
+            A <see cref="T:SharpPcap.PcapStatistics" /></returns>
+        </member>
+        <member name="T:SharpPcap.PcapException">
+            <summary>
+            General Pcap Exception.
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapHeader">
+            <summary>
+            A wrapper class for libpcap's pcap_pkthdr structure
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapHeader.#ctor">
+            <summary>
+            Constructs a new PcapHeader
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapHeader.#ctor(System.UInt64,System.UInt64,System.UInt32,System.UInt32)">
+            <summary>
+            Constructs a new PcapHeader
+            </summary>
+            <param name="seconds">The seconds value of the packet's timestamp</param>
+            <param name="microseconds">The microseconds value of the packet's timestamp</param>
+            <param name="packetLength">The actual length of the packet</param>
+            <param name="captureLength">The length of the capture</param>
+        </member>
+        <member name="P:SharpPcap.PcapHeader.Seconds">
+            <summary>
+            The seconds value of the packet's timestamp
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapHeader.MicroSeconds">
+            <summary>
+            The microseconds value of the packet's timestamp
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapHeader.PacketLength">
+            <summary>
+            The actual length of the packet
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapHeader.CaptureLength">
+            <summary>
+            The length of the capture
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapHeader.Date">
+            <summary>
+            Return the DateTime value of this pcap header
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapHeader.MarshalToIntPtr">
+            <summary>
+            Marshal this structure into the platform dependent version and return
+            and IntPtr to that memory
+            NOTE: IntPtr MUST BE FREED via Marshal.FreeHGlobal()
+            </summary>
+            <returns>
+            A <see cref="T:System.IntPtr" /></returns>
+        </member>
+        <member name="T:SharpPcap.OfflinePcapDevice">
+            <summary>
+            Capture packets from an offline pcap file
+            </summary>
+        </member>
+        <member name="M:SharpPcap.OfflinePcapDevice.#ctor(System.String)">
+            <summary>
+            Constructs a new offline device for reading
+            pcap files
+            </summary>
+            <param name="pcapFile">
+            </param>
+        </member>
+        <member name="F:SharpPcap.OfflinePcapDevice.PCAP_OFFLINE_DESCRIPTION">
+            <summary>
+            The description of this device
+            </summary>
+        </member>
+        <member name="P:SharpPcap.OfflinePcapDevice.Name">
+            <value>
+            The name of the capture file
+            </value>
+        </member>
+        <member name="P:SharpPcap.OfflinePcapDevice.Description">
+            <value>
+            Description of the device
+            </value>
+        </member>
+        <member name="P:SharpPcap.OfflinePcapDevice.FileSize">
+            <value>
+            Number of bytes in the capture file
+            </value>
+        </member>
+        <member name="P:SharpPcap.OfflinePcapDevice.FileName">
+            <summary>
+            The underlying pcap file name
+            </summary>
+        </member>
+        <member name="M:SharpPcap.OfflinePcapDevice.Open">
+            <summary>
+            Opens the device for capture
+            </summary>
+        </member>
+        <member name="M:SharpPcap.OfflinePcapDevice.Statistics">
+            <summary>
+            Retrieves pcap statistics
+            </summary>
+            <returns>
+            A <see cref="T:SharpPcap.PcapStatistics" /></returns>
+        </member>
+        <member name="T:SharpPcap.SendQueue">
+            <summary>
+            Interface to the WinPcap send queue extension methods
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SendQueue.#ctor(System.Int32)">
+            <summary>
+            Creates and allocates a new SendQueue
+            </summary>
+            <param name="memSize">
+            The maximun amount of memory (in bytes)
+            to allocate for the queue</param>
+        </member>
+        <member name="P:SharpPcap.SendQueue.CurrentLength">
+            <summary>
+            The current length in bytes of this queue
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SendQueue.AddInternal(System.Byte[],SharpPcap.PcapHeader)">
+            <summary>
+            Add a packet to this send queue. The PcapHeader defines the packet length.
+            </summary>
+            <param name="packet">The packet bytes to add</param>
+            <param name="pcapHdr">The pcap header of the packet</param>
+            <returns>True if success, else false</returns>
+        </member>
+        <member name="M:SharpPcap.SendQueue.Add(System.Byte[],SharpPcap.PcapHeader)">
+            <summary>
+            Add a packet to this send queue.
+            </summary>
+            <param name="packet">The packet bytes to add</param>
+            <param name="pcapHdr">The pcap header of the packet</param>
+            <returns>True if success, else false</returns>
+        </member>
+        <member name="M:SharpPcap.SendQueue.Add(System.Byte[])">
+            <summary>
+            Add a packet to this send queue.
+            </summary>
+            <param name="packet">The packet bytes to add</param>
+            <returns>True if success, else false</returns>
+        </member>
+        <member name="M:SharpPcap.SendQueue.Add(PacketDotNet.RawPacket)">
+            <summary>
+            Add a packet to this send queue.
+            </summary>
+            <param name="packet">The packet to add</param>
+            <returns>True if success, else false</returns>
+        </member>
+        <member name="M:SharpPcap.SendQueue.Add(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Add a packet to this send queue.
+            </summary>
+            <param name="packet">The packet to add</param>
+            <param name="seconds">The 'seconds' part of the packet's timestamp</param>
+            <param name="microseconds">The 'microseconds' part of the packet's timestamp</param>
+            <returns>True if success, else false</returns>
+        </member>
+        <member name="M:SharpPcap.SendQueue.Transmit(SharpPcap.LivePcapDevice,SharpPcap.SendQueueTransmitModes)">
+            <summary>
+            Send a queue of raw packets to the network.
+            </summary>
+            <param name="device">
+            The device on which to send the queue
+            A <see cref="T:SharpPcap.PcapDevice" /></param>
+            <param name="transmitMode">
+            A <see cref="T:SharpPcap.SendQueueTransmitModes" /></param>
+            <returns>
+            A <see cref="T:System.Int32" /></returns>
+        </member>
+        <member name="M:SharpPcap.SendQueue.Dispose">
+            <summary>
+            Destroy the send queue.
+            </summary>
+        </member>
+        <member name="T:SharpPcap.StatisticsModePacket">
+            <summary>
+            Holds network statistics entry from winpcap when in statistics mode
+            See http://www.winpcap.org/docs/docs_41b5/html/group__wpcap__tut9.html
+            </summary>
+        </member>
+        <member name="F:SharpPcap.StatisticsModePacket.m_pktData">
+            <summary>
+            This holds byte received and packets received
+            </summary>
+        </member>
+        <member name="P:SharpPcap.StatisticsModePacket.Timeval">
+            <summary>
+            This holds time value
+            </summary>
+        </member>
+        <member name="P:SharpPcap.StatisticsModePacket.RecievedPackets">
+            <summary>
+            Number of packets received since last sample
+            </summary>
+        </member>
+        <member name="P:SharpPcap.StatisticsModePacket.RecievedBytes">
+            <summary>
+            Number of bytes received since last sample
+            </summary>
+        </member>
+        <member name="T:SharpPcap.Pcap">
+            <summary>
+            Constants and static helper methods
+            </summary>
+        </member>
+        <member name="F:SharpPcap.Pcap.InfinitePacketCount">
+            <summary>Represents the infinite number for packet captures </summary>
+        </member>
+        <member name="P:SharpPcap.Pcap.Version">
+            <summary>
+            Returns the pcap version string retrieved via a call to pcap_lib_version()
+            </summary>
+        </member>
+        <member name="T:SharpPcap.Version">
+            <summary>
+            Helper class/method to retrieve the version of the SharpPcap assembly
+            </summary>
+        </member>
+        <member name="P:SharpPcap.Version.VersionString">
+            <summary>
+            Returns the current version string of the SharpPcap library
+            </summary>
+            <returns>the current version string of the SharpPcap library</returns>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.pcap_if">
+            <summary>
+            Item in a list of interfaces.
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.pcap_addr">
+            <summary>
+            Representation of an interface address.
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.sockaddr">
+            <summary>
+            Structure used by kernel to store a generic address
+            Look at the sa_family value to determine which specific structure to use
+            'struct sockaddr'
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.in_addr">
+            <summary>
+            Structure that holds an ipv4 address
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.sockaddr_in">
+            <summary>
+            Structure that holds an ipv4 address
+            'struct sockaddr'
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.sockaddr_in6">
+            <summary>
+            Structure that holds an ipv6 address
+            NOTE: we cast the 'struct sockaddr*' to this structure based on the sa_family type
+            'struct sockaddr_in6'
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.sockaddr_ll">
+            <summary>
+            Structure to represent a low level address, like a hardware address
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.timeval_unix">
+            <summary>
+            Windows and Unix differ in their memory models and make it difficult to
+            support struct timeval in a single library, like this one, across
+            multiple platforms.
+            See http://en.wikipedia.org/wiki/64bit#Specific_data_models
+            The issue is that struct timeval { long tv_sec; long tv_usec; }
+            has different sizes on Linux 32 and 64bit but the same size on
+            Windows 32 and 64 bit
+            Thanks to Jon Pryor for his help in figuring out both the issue with Linux
+            32/64bit and the issue between Windows and Unix
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.timeval_windows">
+            <summary>
+            Windows version of struct timeval, the longs are 32bit even on 64-bit versions of Windows
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.pcap_pkthdr_unix">
+            <summary>
+            Each packet in the dump file is prepended with this generic header.
+            This gets around the problem of different headers for different
+            packet interfaces.
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.pcap_pkthdr_windows">
+            <summary>
+            Each packet in the dump file is prepended with this generic header.
+            This gets around the problem of different headers for different
+            packet interfaces.
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.PCAP_PKTDATA">
+            <summary>
+            Packet data bytes
+            NOTE: This struct doesn't exist in header files, it is a construct to map to an
+            unmanaged byte array
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.bpf_program">
+            <summary>
+            A BPF pseudo-assembly program for packet filtering
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.pcap_send_queue">
+            <summary>
+            A queue of raw packets that will be sent to the network with pcap_sendqueue_transmit()
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.PcapStatReturnValue">
+            <summary>
+            Define the return values from int pcap_stats()
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.pcap_stat_unix">
+            <summary>
+            Unix version of 'struct pcap_stat'
+            Uses the same trick as timeval_unix
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapUnmanagedStructures.pcap_stat_unix.ps_recv">
+            <summary>
+            Packets received
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapUnmanagedStructures.pcap_stat_unix.ps_drop">
+            <summary>
+            Packets dropped
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapUnmanagedStructures.pcap_stat_unix.ps_ifdrop">
+            <summary>
+            Drops by interface (maybe not yet supported)
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapUnmanagedStructures.pcap_stat_windows">
+            <summary>
+            Windows version of 'struct pcap_stat'
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapUnmanagedStructures.pcap_stat_windows.ps_recv">
+            <summary>
+            Packets received
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapUnmanagedStructures.pcap_stat_windows.ps_drop">
+            <summary>
+            Packets dropped
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapUnmanagedStructures.pcap_stat_windows.ps_ifdrop">
+            <summary>
+            Drops by interface (maybe not yet supported)
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapUnmanagedStructures.pcap_stat_windows.bs_capt">
+            <summary>
+            Packets that reach the application
+            WIN32 only, based on struct pcap_stat in pcap.h
+            </summary>
+        </member>
+        <member name="T:SharpPcap.SafeNativeMethods">
+            <summary>
+            Per http://msdn.microsoft.com/en-us/ms182161.aspx
+            </summary>
+        </member>
+        <member name="T:SharpPcap.SafeNativeMethods.pcap_handler">
+            <summary>
+            The delegate declaration for PcapHandler requires an UnmanagedFunctionPointer attribute.
+            Without this it fires for one time and then throws null pointer exception
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_findalldevs_ex(System.String,System.IntPtr,System.IntPtr@,System.Text.StringBuilder)">
+            <summary>Create a list of network devices that can be opened with pcap_open().</summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_dump_open(System.IntPtr,System.String)">
+            <summary>Open a file to write packets. </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_dump(System.IntPtr,System.IntPtr,System.IntPtr)">
+            <summary>
+            Save a packet to disk.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_close(System.IntPtr)">
+            <summary> close the files associated with p and deallocates resources.</summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_next_ex(System.IntPtr,System.IntPtr@,System.IntPtr@)">
+            <summary>
+            To avoid callback, this returns one packet at a time
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_sendpacket(System.IntPtr,System.IntPtr,System.Int32)">
+            <summary>
+            Send a raw packet.<br />
+            This function allows to send a raw packet to the network.
+            The MAC CRC doesn't need to be included, because it is transparently calculated
+            and added by the network interface driver.
+            </summary>
+            <param name="adaptHandle">the interface that will be used to send the packet</param>
+            <param name="data">contains the data of the packet to send (including the various protocol headers)</param>
+            <param name="size">the dimension of the buffer pointed by data</param>
+            <returns>0 if the packet is succesfully sent, -1 otherwise.</returns>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_compile(System.IntPtr,System.IntPtr,System.String,System.Int32,System.UInt32)">
+            <summary>
+            Compile a packet filter, converting an high level filtering expression (see Filtering expression syntax) in a program that can be interpreted by the kernel-level filtering engine.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_freecode(System.IntPtr)">
+            <summary>
+            Free up allocated memory pointed to by a bpf_program struct generated by pcap_compile()
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_geterr(System.IntPtr)">
+            <summary>
+            return the error text pertaining to the last pcap library error.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_lib_version">
+            <summary>Returns a pointer to a string giving information about the version of the libpcap library being used; note that it contains more information than just a version number. </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_dump_file(System.IntPtr)">
+            <summary>return the standard I/O stream of the 'savefile' opened by pcap_dump_open().</summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_dump_flush(System.IntPtr)">
+            <summary>Flushes the output buffer to the 'savefile', so that any packets
+            written with pcap_dump() but not yet written to the 'savefile' will be written.
+            -1 is returned on error, 0 on success. </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_dump_close(System.IntPtr)">
+            <summary>Closes a savefile. </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_datalink(System.IntPtr)">
+            <summary> Return the link layer of an adapter. </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_setnonblock(System.IntPtr,System.Int32,System.Text.StringBuilder)">
+            <summary>
+            Set nonblocking mode. pcap_loop() and pcap_next() doesnt work in  nonblocking mode!
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_getnonblock(System.IntPtr,System.Text.StringBuilder)">
+            <summary>
+            Get nonblocking mode, returns allways 0 for savefiles.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_dispatch(System.IntPtr,System.Int32,SharpPcap.SafeNativeMethods.pcap_handler,System.IntPtr)">
+            <summary>
+            Read packets until cnt packets are processed or an error occurs.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_get_selectable_fd(System.IntPtr)">
+            <summary>
+            Retrieves a selectable file descriptor
+            </summary>
+            <param name="adaptHandle">
+            A <see cref="T:System.IntPtr" /></param>
+            <returns>
+            A <see cref="T:System.Int32" /></returns>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_stats(System.IntPtr,System.IntPtr)">
+            <summary>
+            Fills in the pcap_stat structure passed to the function
+            based on the pcap_t adapter
+            </summary>
+            <param name="adapter">
+            A <see cref="T:System.IntPtr" /></param>
+            <param name="stat">
+            A <see cref="T:System.IntPtr" /></param>
+            <returns>
+            A <see cref="T:System.Int32" /></returns>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_fileno(System.IntPtr)">
+            <summary>
+            Returns the file descriptor number from which captured packets are read,
+            if a network device was opened with pcap_create() and pcap_activate() or
+            with pcap_open_live(), or -1, if a ``savefile'' was opened with
+            pcap_open_offline()
+            Libpcap specific method
+            </summary>
+            <param name="adapter">
+            A <see cref="T:System.IntPtr" /></param>
+            <returns>
+            A <see cref="T:System.Int32" /></returns>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_setmode(System.IntPtr,System.Int32)">
+            <summary>
+            Set the working mode of the interface p to mode.
+            Valid values for mode are MODE_CAPT (default capture mode)
+            and MODE_STAT (statistical mode). See the tutorial
+            "\ref wpcap_tut9" for details about statistical mode.
+            WinPcap specific method
+            </summary>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_setbuff(System.IntPtr,System.Int32)">
+            <summary>
+            WinPcap specific method for setting the kernel buffer size
+            associated with this adapter. The old buffer is discarded
+            when the buffer size is changed.
+            See http://www.winpcap.org/docs/docs_40_2/html/group__wpcapfunc.html
+            </summary>
+            <param name="adapter">
+            A <see cref="T:System.IntPtr" /></param>
+            <param name="bufferSizeInBytes">
+            A <see cref="T:System.Int32" /></param>
+            <returns>
+            A <see cref="T:System.Int32" /></returns>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_sendqueue_alloc(System.Int32)">
+            <summary>
+            Allocate a send queue.
+            </summary>
+            <param name="memsize">The size of the queue</param>
+            <returns>A pointer to the allocated buffer</returns>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_sendqueue_destroy(System.IntPtr)">
+            <summary>
+            Destroy a send queue.
+            </summary>
+            <param name="queue">A pointer to the queue start address</param>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_sendqueue_queue(System.IntPtr,System.IntPtr,System.IntPtr)">
+            <summary>
+            Add a packet to a send queue.
+            </summary>
+            <param name="queue">A pointer to a queue</param>
+            <param name="header">The pcap header of the packet to send</param>
+            <param name="data">The packet data</param>
+        </member>
+        <member name="M:SharpPcap.SafeNativeMethods.pcap_sendqueue_transmit(System.IntPtr,System.IntPtr,System.Int32)">
+            <summary>
+            Send a queue of raw packets to the network.
+            </summary>
+            <param name="p">
+            </param>
+            <param name="queue">
+            </param>
+            <param name="sync">determines if the send operation must be synchronized:
+            if it is non-zero, the packets are sent respecting the timestamps,
+            otherwise they are sent as fast as possible</param>
+            <returns>The amount of bytes actually sent.
+            If it is smaller than the size parameter, an error occurred
+            during the send. The error can be caused by a driver/adapter
+            problem or by an inconsistent/bogus send queue.</returns>
+        </member>
+        <member name="T:SharpPcap.PcapDevice">
+            <summary>
+            Base class for all pcap devices
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapDevice.MonoUnixFound">
+            <summary>
+            If Environment.OSVersion.Platform is unix and MonoUnixFound is true
+            then we can support proper termination of the capture loop
+            </summary>
+            <returns>
+            A <see cref="T:System.Boolean" /></returns>
+        </member>
+        <member name="F:SharpPcap.PcapDevice.m_pcapIf">
+            <summary>
+            Low level interface object that contains device specific information
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapDevice.m_pcapDumpHandle">
+            <summary>
+            Handle to an open dump file, not equal to IntPtr.Zero if a dump file is open
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapDevice.m_pcapAdapterHandle">
+            <summary>
+            Handle to a pcap adapter, not equal to IntPtr.Zero if an adapter is open
+            </summary>
+        </member>
+        <member name="F:SharpPcap.PcapDevice.m_pcapPacketCount">
+            <summary>
+            Number of packets that this adapter should capture
+            </summary>
+        </member>
+        <member name="E:SharpPcap.PcapDevice.OnPacketArrival">
+            <summary>
+            Fires whenever a new packet is processed, either when the packet arrives
+            from the network device or when the packet is read from the on-disk file.<br />
+            For network captured packets this event is invoked only when working in "PcapMode.Capture" mode.
+            </summary>
+        </member>
+        <member name="E:SharpPcap.PcapDevice.OnPcapStatistics">
+            <summary>
+            Fires whenever a new pcap statistics is available for this Pcap Device.<br />
+            For network captured packets this event is invoked only when working in "PcapMode.Statistics" mode.
+            </summary>
+        </member>
+        <member name="E:SharpPcap.PcapDevice.OnCaptureStopped">
+            <summary>
+            Fired when the capture process of this pcap device is stopped
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.Started">
+            <summary>
+            Return a value indicating if the capturing process of this adapter is started
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.StopCaptureTimeout">
+            <summary>
+            Maximum time within which the capture thread must join the main thread (on
+            <see cref="M:SharpPcap.PcapDevice.StopCapture" />) or else the thread is aborted and an exception thrown.
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.Interface">
+            <value>
+            Low level pcap device values
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.Opened">
+            <summary>
+            Return a value indicating if this adapter is opened
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.DumpOpened">
+            <summary>
+            Gets a value indicating wether pcap dump file is already associated with this device
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.Name">
+            <summary>
+            Gets the name of the device
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.Description">
+            <value>
+            Description of the device
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.PcapDataLink">
+            <summary>
+            Return the pcap link layer value of an adapter.
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.Mode">
+            <value>
+            WinPcap specific property
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.PcapHandle">
+            <summary>
+            The underlying pcap device handle
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapDevice.LastError">
+            <summary>
+            The last pcap error associated with this pcap device
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.UnixSetupMonoUnixNative">
+            <summary>
+            Setup the reflection type and methodinfo for invocation of
+            Mono.Unix.Native.Syscall.poll() to avoid timeouts when
+            stopping the capture thread
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.StartCapture">
+            <summary>
+            Starts the capturing process
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.StopCapture">
+            <summary>
+            Stops the capture process
+            Throws an exception if the stop capture timeout is exceeded and the
+            capture thread was aborted
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.Capture">
+            <summary>
+            Synchronously capture packets on this device. Method blocks forever.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.Capture(System.Int32)">
+            <summary>
+            Synchronously captures packets on this network device. This method will block
+            until capturing is finished.
+            </summary>
+            <param name="packetCount">The number of packets to be captured.
+            -1 means capture indefiniately</param>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.CaptureThread">
+            <summary>
+            The capture thread
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.GetLastError(System.IntPtr)">
+            <summary>
+            Retrieve the last error string for a given pcap_t* device
+            </summary>
+            <param name="deviceHandle">
+            A <see cref="T:System.IntPtr" /></param>
+            <returns>
+            A <see cref="T:System.String" /></returns>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.Open">
+            <summary>
+            Open the device with class specific options
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.Close">
+            <summary>
+            Closes this adapter
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.Statistics">
+            <summary>
+            Retrieves pcap statistics
+            </summary>
+            <returns>
+            A <see cref="T:SharpPcap.PcapStatistics" /></returns>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.SendPacketArrivalEvent(PacketDotNet.RawPacket)">
+            <summary>
+            Notify the OnPacketArrival delegates about a newly captured packet
+            </summary>
+            <param name="p">
+            A <see cref="T:PacketDotNet.RawPacket" /></param>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.SendCaptureStoppedEvent(SharpPcap.CaptureStoppedEventStatus)">
+            <summary>
+            Notify the delegates that are subscribed to the capture stopped event
+            </summary>
+            <param name="status">
+            A <see cref="T:SharpPcap.CaptureStoppedEventStatus" /></param>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.GetNextPacket">
+            <summary>
+            Gets the next packet captured on this device
+            </summary>
+            <returns>The next packet captured on this device</returns>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.GetNextPacket(PacketDotNet.RawPacket@)">
+            <summary>
+            Gets the next packet captured on this device
+            </summary>
+            <param name="p">A packet reference</param>
+            <returns>A reference to a packet object</returns>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.PacketHandler(System.IntPtr,System.IntPtr,System.IntPtr)">
+            <summary>
+            Pcap_loop callback method.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.MarshalRawPacket(System.IntPtr,System.IntPtr)">
+            <summary>
+            Convert an unmanaged packet into a managed PacketDotNet.RawPacket
+            </summary>
+            <param name="header">
+            A <see cref="T:System.IntPtr" /></param>
+            <param name="data">
+            A <see cref="T:System.IntPtr" /></param>
+            <returns>
+            A <see cref="T:PacketDotNet.RawPacket" /></returns>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.DumpOpen(System.String)">
+            <summary>
+            Opens a file for packet writings
+            </summary>
+            <param name="fileName">
+            </param>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.DumpClose">
+            <summary>
+            Closes the opened dump file
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.DumpFlush">
+            <summary>
+            Flushes all write buffers of the opened dump file
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.Dump(System.Byte[],SharpPcap.PcapHeader)">
+            <summary>
+            Writes a packet to the pcap dump file associated with this device.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.Dump(System.Byte[])">
+            <summary>
+            Writes a packet to the pcap dump file associated with this device.
+            </summary>
+            <param name="p">The packet to write</param>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.Dump(PacketDotNet.RawPacket)">
+            <summary>
+            Writes a packet to the pcap dump file associated with this device.
+            </summary>
+            <param name="p">The packet to write</param>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.SetFilter(System.String)">
+            <summary>
+            Compile a kernel level filtering expression, and associate the filter
+            with this device. For more info on filter expression syntax, see:
+            http://www.winpcap.org/docs/docs31/html/group__language.html
+            </summary>
+            <param name="filterExpression">The filter expression to compile</param>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.CompileFilter(System.IntPtr,System.String,System.UInt32,System.IntPtr@,System.String@)">
+            or unmanaged memory will be leaked</member>
+        <member name="M:SharpPcap.PcapDevice.FreeBpfProgram(System.IntPtr)">
+            <summary>
+            Free memory allocated in CompileFilter()
+            </summary>
+            <param name="bpfProgram">
+            A <see cref="T:System.IntPtr" /></param>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.CheckFilter(System.String,System.String@)">
+            <summary>
+            Returns true if the filter expression was able to be compiled into a
+            program without errors
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.ThrowIfNotWinPcap">
+            <summary>
+            Helper method for ensuring we are running in winpcap. Throws
+            a PcapWinPcapRequiredException() if not on a windows platform
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.ThrowIfNotOpen(System.String)">
+            <summary>
+            Helper method for checking that the adapter is open, throws an
+            exception with a string of ExceptionString if the device isn't open
+            </summary>
+            <param name="ExceptionString">
+            A <see cref="T:System.String" /></param>
+        </member>
+        <member name="M:SharpPcap.PcapDevice.ToString">
+            <summary>
+            Override the default ToString() implementation
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /></returns>
+        </member>
+        <member name="T:SharpPcap.PcapAddress">
+            <summary>
+            Managed representation of the unmanaged pcap_addr structure
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapAddress.Addr">
+            <summary>
+            The address value of this PcapAddress, null if none is present
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapAddress.Netmask">
+            <summary>
+            Netmask of this PcapAddress, null if none is present
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapAddress.Broadaddr">
+            <summary>
+            Broadcast address of this PcapAddress, null if none is present
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapAddress.Dstaddr">
+            <summary>
+            Destination address, null if the interface isn't a point-to-point interface
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapAddress.ToString">
+            <summary>
+            ToString override
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /></returns>
+        </member>
+        <member name="T:SharpPcap.Sockaddr">
+            <summary>
+            Container class that represents either an ip address or a mac address
+            An analog to the 'sockaddr_' series of structures
+            </summary>
+        </member>
+        <member name="M:SharpPcap.Sockaddr.#ctor(System.Net.NetworkInformation.PhysicalAddress)">
+            <summary>
+            Create a Sockaddr from a PhysicalAddress which is presumed to
+            be a hardware address
+            </summary>
+            <param name="hardwareAddress">
+            A <see cref="T:System.Net.NetworkInformation.PhysicalAddress" /></param>
+        </member>
+        <member name="T:SharpPcap.Sockaddr.Type">
+            <summary>
+            Types of addresses a Sockaddr can represent
+            </summary>
+        </member>
+        <member name="F:SharpPcap.Sockaddr.Type.AF_INET_AF_INET6">
+            <summary>
+            Address represents an ipv4 or ipv6 address
+            </summary>
+        </member>
+        <member name="F:SharpPcap.Sockaddr.Type.HARDWARE">
+            <summary>
+            Address represents a physical hardware address eg. a ethernet mac address
+            </summary>
+        </member>
+        <member name="F:SharpPcap.Sockaddr.Type.UNKNOWN">
+            <summary>
+            Unknown address type
+            </summary>
+        </member>
+        <member name="F:SharpPcap.Sockaddr.type">
+            <summary>
+            Address type represented by this Sockaddr
+            </summary>
+        </member>
+        <member name="F:SharpPcap.Sockaddr.ipAddress">
+            <summary>
+            If type == AF_INET_AF_INET6
+            </summary>
+        </member>
+        <member name="F:SharpPcap.Sockaddr.hardwareAddress">
+            <summary>
+            If type == HARDWARE
+            </summary>
+        </member>
+        <member name="P:SharpPcap.Sockaddr.sa_family">
+            <summary>
+            Address family
+            </summary>
+        </member>
+        <member name="M:SharpPcap.Sockaddr.ToString">
+            <summary>
+            ToString override
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /></returns>
+        </member>
+        <member name="T:SharpPcap.PcapInterface">
+            <summary>
+            managed version of struct pcap_if
+            NOTE: we can't use pcap_if directly because the class contains
+            a pointer to pcap_if that will be freed when the
+            device memory is freed, so instead convert the unmanaged structure
+            to a managed one to avoid this issue
+            </summary>
+        </member>
+        <member name="P:SharpPcap.PcapInterface.Name">
+            <value>
+            Name of the interface. Used internally when passed to pcap_open_live()
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapInterface.FriendlyName">
+            <value>
+            Human readable interface name derived from System.Net.NetworkInformation.NetworkInterface.Name
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapInterface.Description">
+            <value>
+            Text description of the interface as given by pcap/winpcap
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapInterface.GatewayAddress">
+            <value>
+            Gateway address of this device
+            NOTE: May only be available on Windows
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapInterface.Addresses">
+            <value>
+            Addresses associated with this device
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapInterface.Flags">
+            <value>
+            Pcap interface flags
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapInterface.MacAddress">
+            <summary>
+            MacAddress of the interface
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapInterface.ToString">
+            <summary>
+            ToString override
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /></returns>
+        </member>
+        <member name="T:SharpPcap.DeviceNotReadyException">
+            <summary>
+            A PcapDevice or dumpfile is not ready for capture operations.
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PcapStatistics">
+            <summary>
+            Adapter statistics, received, dropped packet counts etc
+            </summary>
+        </member>
+        <member name="M:SharpPcap.PcapStatistics.#ctor(System.IntPtr)">
+            <summary>
+            Retrieve pcap statistics from the adapter
+            </summary>
+            <param name="pcap_t">
+            pcap_t* for the adapter
+            A <see cref="T:System.IntPtr" /></param>
+        </member>
+        <member name="P:SharpPcap.PcapStatistics.ReceivedPackets">
+            <value>
+            Number of packets received
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapStatistics.DroppedPackets">
+            <value>
+            Number of packets dropped
+            </value>
+        </member>
+        <member name="P:SharpPcap.PcapStatistics.InterfaceDroppedPackets">
+            <value>
+            Number of interface dropped packets
+            </value>
+        </member>
+        <member name="M:SharpPcap.PcapStatistics.ToString">
+            <summary>
+            ToString override
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /></returns>
+        </member>
+        <member name="T:SharpPcap.StatisticsException">
+            <summary>
+            thrown when pcap_stats() reports an error
+            </summary>
+        </member>
+        <member name="M:SharpPcap.StatisticsException.#ctor(System.String)">
+            <summary>
+            string constructor
+            </summary>
+            <param name="msg">
+            A <see cref="T:System.String" /></param>
+        </member>
+        <member name="T:SharpPcap.WinPcapRequiredException">
+            <summary>
+            Exception thrown when a WinPcap extension method is called from
+            a non-Windows platform
+            </summary>
+        </member>
+        <member name="M:SharpPcap.WinPcapRequiredException.#ctor(System.String)">
+            <summary>
+            string constructor
+            </summary>
+            <param name="msg">
+            A <see cref="T:System.String" /></param>
+        </member>
+        <member name="T:SharpPcap.NotSupportedOnOfflineDeviceException">
+            <summary>
+            Thrown when a method not supported on an offline device is called
+            </summary>
+        </member>
+        <member name="M:SharpPcap.NotSupportedOnOfflineDeviceException.#ctor(System.String)">
+            <summary>
+            string constructor
+            </summary>
+            <param name="msg">
+            A <see cref="T:System.String" /></param>
+        </member>
+        <member name="T:SharpPcap.DeviceMode">
+            <summary>
+            The mode used when opening a device
+            </summary>
+        </member>
+        <member name="F:SharpPcap.DeviceMode.Promiscuous">
+            <summary>
+            Promiscuous mode.
+            Instructs the OS that we want to receive all packets, even those not
+            intended for the adapter. On non-switched networks this can result in
+            a large amount of addtional traffic.
+            NOTE: Devices in this mode CAN be detected via the network
+            </summary>
+        </member>
+        <member name="F:SharpPcap.DeviceMode.Normal">
+            <summary>
+            Not promiscuous mode
+            </summary>
+        </member>
+        <member name="T:SharpPcap.CaptureEventArgs">
+            <summary>
+            Capture event arguments
+            </summary>
+        </member>
+        <member name="M:SharpPcap.CaptureEventArgs.#ctor(PacketDotNet.RawPacket,SharpPcap.PcapDevice)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="packet">
+            A <see cref="T:PacketDotNet.RawPacket" /></param>
+            <param name="device">
+            A <see cref="T:SharpPcap.PcapDevice" /></param>
+        </member>
+        <member name="P:SharpPcap.CaptureEventArgs.Packet">
+            <summary>
+            Packet that was captured
+            </summary>
+        </member>
+        <member name="P:SharpPcap.CaptureEventArgs.Device">
+            <summary>
+            Device this EventArgs was generated for
+            </summary>
+        </member>
+        <member name="T:SharpPcap.StatisticsModeEventArgs">
+            <summary>
+            Event that contains statistics mode data
+            NOTE: WinPcap only
+            </summary>
+        </member>
+        <member name="M:SharpPcap.StatisticsModeEventArgs.#ctor(PacketDotNet.RawPacket,SharpPcap.PcapDevice)">
+            <summary>
+            Constructor for a statistics mode event
+            </summary>
+            <param name="packet">
+            A <see cref="T:PacketDotNet.RawPacket" /></param>
+            <param name="device">
+            A <see cref="T:SharpPcap.PcapDevice" /></param>
+        </member>
+        <member name="P:SharpPcap.StatisticsModeEventArgs.Statistics">
+            <summary>
+            Statistics data for this event
+            </summary>
+        </member>
+        <member name="T:SharpPcap.SendQueueTransmitModes">
+            <summary>
+            The types of transmit modes allowed by the WinPcap specific send queue
+            implementation
+            </summary>
+        </member>
+        <member name="F:SharpPcap.SendQueueTransmitModes.Normal">
+            <summary>
+            Packets are sent as fast as possible
+            </summary>
+        </member>
+        <member name="F:SharpPcap.SendQueueTransmitModes.Synchronized">
+            <summary>
+            Packets are synchronized in the kernel with a high precision timestamp
+            </summary>
+        </member>
+        <member name="T:SharpPcap.CaptureMode">
+            <summary>
+            The working mode of a Pcap device
+            </summary>
+        </member>
+        <member name="F:SharpPcap.CaptureMode.Packets">
+            <summary>
+            Set a Pcap device to capture packets, Capture mode
+            </summary>
+        </member>
+        <member name="F:SharpPcap.CaptureMode.Statistics">
+            <summary>
+            Set a Pcap device to report statistics.
+            <br />
+            Statistics mode is only supported in WinPcap
+            </summary>
+        </member>
+        <member name="T:SharpPcap.LivePcapDeviceList">
+            <summary>
+            List of available Pcap Interfaces.
+            </summary>
+        </member>
+        <member name="M:SharpPcap.LivePcapDeviceList.#ctor">
+            <summary>
+            Represents a strongly typed, read-only list of PcapDevices.
+            </summary>
+        </member>
+        <member name="P:SharpPcap.LivePcapDeviceList.Item(System.String)">
+            <param name="Name">The name or description of the pcap interface to get.</param>
+        </member>
+        <member name="P:SharpPcap.LivePcapDeviceList.Instance">
+            <summary>
+            Method to retrieve this classes singleton instance
+            </summary>
+        </member>
+        <member name="M:SharpPcap.LivePcapDeviceList.New">
+            <summary>
+            Caution: Use the singlton instance unless you know why you need to call this.
+            One use is for multiple filters on the same physical device. To apply multiple
+            filters open the same physical device multiple times, one for each
+            filter by calling this routine and picking the same device out of each list.
+            </summary>
+            <returns>
+            A <see cref="T:SharpPcap.LivePcapDeviceList" /></returns>
+        </member>
+        <member name="M:SharpPcap.LivePcapDeviceList.GetDevices">
+            <summary>
+            Retrieve a list of the current PcapDevices
+            </summary>
+            <returns>
+            A <see cref="!:List&lt;LivePcapDevice&gt;" /></returns>
+        </member>
+        <member name="M:SharpPcap.LivePcapDeviceList.Refresh">
+            <summary>
+            Refresh the device list
+            </summary>
+        </member>
+        <member name="T:SharpPcap.ARP">
+            <summary>
+            Resolves MAC addresses from IP addresses using the Address Resolution Protocol (ARP)
+            </summary>
+        </member>
+        <member name="M:SharpPcap.ARP.#ctor">
+            <summary>
+            Constructs a new ARP Resolver
+            </summary>
+        </member>
+        <member name="M:SharpPcap.ARP.#ctor(System.String)">
+            <summary>
+            Constructs a new ARP Resolver
+            </summary>
+            <param name="deviceName">The name of the network device on which this resolver sends its ARP packets</param>
+        </member>
+        <member name="P:SharpPcap.ARP.LocalMAC">
+            <summary>
+            The source MAC address to be used for ARP requests.
+            If null, the local device MAC address is used
+            </summary>
+        </member>
+        <member name="P:SharpPcap.ARP.LocalIP">
+            <summary>
+            The source IP address to be used for ARP requests.
+            If null, the local device IP address is used
+            </summary>
+        </member>
+        <member name="P:SharpPcap.ARP.DeviceName">
+            <summary>
+            The default device name on which to send ARP requests
+            </summary>
+        </member>
+        <member name="M:SharpPcap.ARP.Resolve(System.Net.IPAddress)">
+            <summary>
+            Resolves the MAC address of the specified IP address. The 'DeviceName' propery must be set
+            prior to using this method.
+            </summary>
+            <param name="destIP">The IP address to resolve</param>
+            <returns>The MAC address that matches to the given IP address</returns>
+        </member>
+        <member name="M:SharpPcap.ARP.Resolve(System.Net.IPAddress,System.String)">
+            <summary>
+            Resolves the MAC address of the specified IP address
+            </summary>
+            <param name="destIP">The IP address to resolve</param>
+            <param name="deviceName">The local network device name on which to send the ARP request</param>
+            <returns>The MAC address that matches to the given IP address</returns>
+        </member>
+        <member name="T:SharpPcap.CaptureStoppedEventStatus">
+            <summary>
+            Status types when capture is stopped
+            </summary>
+        </member>
+        <member name="F:SharpPcap.CaptureStoppedEventStatus.CompletedWithoutError">
+            <summary>
+            Capture completed without errors
+            </summary>
+        </member>
+        <member name="F:SharpPcap.CaptureStoppedEventStatus.ErrorWhileCapturing">
+            <summary>
+            Error while capturing
+            </summary>
+        </member>
+        <member name="T:SharpPcap.PacketArrivalEventHandler">
+            <summary>A delegate for Packet Arrival events</summary>
+        </member>
+        <member name="T:SharpPcap.StatisticsModeEventHandler">
+            <summary>
+            A delegate for delivering network statistics when using winpcap in
+            statistics mode
+            </summary>
+        </member>
+        <member name="T:SharpPcap.CaptureStoppedEventHandler">
+            <summary>
+            A delegate for notifying of a capture stopped event
+            </summary>
+        </member>
+    </members>
+</doc>

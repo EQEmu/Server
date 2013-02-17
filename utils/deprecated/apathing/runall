@@ -1,0 +1,23 @@
+#!/bin/sh
+
+#shortnames update...
+#echo "SELECT short_name FROM zone" | ~/eqemu/runmysql  -B|grep -v _ >shortnames
+
+mkdir -p images
+mkdir -p output
+
+for f in `cat shortnames`
+do
+	if [ -r "$f.path" ]; then
+		echo "We allready have $f's path file. Remove it to rebuild"
+		continue;
+	fi
+
+	echo
+	echo
+	echo "********************************************************************************"
+	echo "Building $f"
+	
+	./apath "$f" | tee "output/$f.txt"
+	mv "paths-${f}-mstree.png" images/
+done

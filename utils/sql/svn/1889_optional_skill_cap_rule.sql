@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`,`rule_name`,`rule_value`,`notes`) VALUES ('1','Character:SkillCapMaxLevel','-1','Sets the Max Level used for Skill Caps (from skill_caps table).  Default of -1 makes it use MaxLevel rule value.');

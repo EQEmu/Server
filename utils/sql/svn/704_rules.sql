@@ -1,0 +1,2 @@
+INSERT INTO `rule_values` VALUES ('1', 'NPC:LastFightingDelayMovingMin', '10000','Minimum time (in ms) before mob goes home after all aggro loss');
+INSERT INTO `rule_values` VALUES ('1', 'NPC:LastFightingDelayMovingMax', '20000','Maximum time (in ms) before mob goes home after all aggro loss');

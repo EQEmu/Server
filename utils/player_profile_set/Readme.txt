@@ -1,0 +1,1 @@
+Simple utility to modify fields in player profile... far from complete.  Right now just sets ldon points to 0 but going to expand it.

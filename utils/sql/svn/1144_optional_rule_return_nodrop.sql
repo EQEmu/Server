@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` VALUES ('1', 'NPC:ReturnNonQuestNoDropItems', 'false', 'Return NO DROP items on NPCs that do not have an EVENT_ITEM sub in their script');

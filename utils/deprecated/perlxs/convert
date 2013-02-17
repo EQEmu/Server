@@ -1,0 +1,44 @@
+#!/bin/sh
+
+if [ ! -r "$1" -o -z "$2" ]; then
+	echo "Usage: $0 headerfile classname"
+fi
+
+name=`basename "$1" .h`
+name="perl_${name}"
+
+echo "Starting conversion of $2" >&2
+
+{
+cat "$1.xs"
+
+cat "$1" \
+| sed -e 's/inline//g' -e 's/const//g' -e 's/virtual//g' \
+-e 's/{.*}/;/g' -e 's#//.*$##g' \
+-e 's/(void)/()/g' \
+| tr -d '[&;]' \
+| perl -p -e "s/^\\s+(.+)[ \\t]([a-zA-Z0-9_]*)\\(/&\$1&$2::\$2(/g" \
+| tr '&' '\n'
+
+} > tmp
+
+{
+
+xsubpp -typemap class.typemap tmp \
+| sed -e "s/\"$2::/\"/g" \
+  -e 's/("\([a-zA-Z0-9_]*\)"/(strcpy(buf, "\1")/g' \
+  -e 's/	/		/g' -e 's/    /	/g' \
+  -e 's#char\* file = __FILE__;#char file[256];^	strncpy(file, __FILE__, 256);^	file[255] = '\0';^	^	if(items != 1)^		fprintf(stderr, "boot_quest does not take any arguments.");^	char buf[128];^^	//add the strcpy stuff to get rid of const warnings....^^#g' \
+  -e 's/Ptr//g' \
+  -e 's/Mob__e/Mob::e/g' \
+| tr '^' '\n' \
+| grep -v "^#line"
+
+echo "#endif //EMBPERL_XS_CLASSES"
+echo
+} > "$name.cpp"
+
+
+#rm -f tmp
+
+

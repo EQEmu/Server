@@ -1,0 +1,1 @@
+Insert into rule_values values (0, 'Character:MaxExpLevel', 0);

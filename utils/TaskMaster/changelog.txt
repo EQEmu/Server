@@ -1,0 +1,21 @@
+=01/09/2010=
+Trevius: The xpreward field now allows a negative value to match a change in Rev1803.
+
+=04/27/2009=
+KLS: Fix for reward method not saving.
+
+=10/12/2008=
+KLS: Improved some sql syntax to be more safe.
+KLS: Increased the size of goal count box significantly.
+KLS: Added id select for new task.
+KLS: Made change goal value more smooth.
+KLS: Removed database.cpp and database.h from project file.
+
+=10/11/2008=
+KLS: SQL logging will now include a time stamped comment
+KLS: Updated some SQL queries.
+KLS: Changed default sql log file.
+KLS: Added method to account for ' in SQL syntax.  Can expand to other control characters if needed
+
+=10/10/2008=
+KLS: Initial Entry.

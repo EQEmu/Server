@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:LiveLikeFocusEffects', 'true', 'Makes certain healing, dmg and mana reduction focuses random like live');

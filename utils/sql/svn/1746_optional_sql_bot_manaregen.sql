@@ -1,0 +1,1 @@
+UPDATE rule_values SET rule_value = 1.0 WHERE rule_name = 'Bots:BotManaRegen';

@@ -1,0 +1,2 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Combat:AvgDefProcsPerMinute', '2', 'Default 2. Determines defensive procs per minute.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Combat:DefProcPerMinAgiContrib', '0.075', 'Default 25. Determines how much agility effects proc rate.');

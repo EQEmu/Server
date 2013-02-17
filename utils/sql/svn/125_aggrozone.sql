@@ -1,0 +1,1 @@
+INSERT INTO commands VALUES ('aggrozone', 100, '[aggro] - Aggro every mob in the zone with X aggro. Default is 0. Not recommend if you\'re not invulnerable.');

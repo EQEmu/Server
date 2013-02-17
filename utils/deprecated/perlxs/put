@@ -1,0 +1,10 @@
+#!/bin/sh
+
+cp perl_PlayerCorpse.cpp perl_client.cpp perl_entity.cpp perl_groups.cpp \
+ perl_mob.cpp perl_npc.cpp perl_perlpacket.cpp \
+../../zone/
+
+cp perl_EQW.cpp perl_HTTPRequest.cpp perl_EQLConfig.cpp ../../world/
+
+cp perl_EQDB.cpp perl_EQDBRes.cpp ../../common/
+

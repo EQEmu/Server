@@ -1,0 +1,8 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Mercs:AllowMercs', 'false', 'Turns mercs on for the server - will not load merc data if set to false.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Mercs:SuspendIntervalMS', '10000', 'Time interval for suspend command in milliseconds.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Mercs:UpkeepIntervalMS', '180000', 'Time interval for merc upkeep in milliseconds.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Mercs:SuspendIntervalS', '10', 'Time interval for suspend command in seconds.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Mercs:UpkeepIntervalS', '180', 'Time interval for merc upkeep in seconds.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Mercs:ScaleRate', '100', 'Allows scaling of merc stats vs livelike values.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Mercs:AggroRadius', '100', 'Determines the distance from which a merc will aggro target(also used to determine the distance at which a healer merc will begin healing a group member)');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Mercs:AggroRadiusPuller', '25', 'Determines the distance from which a merc will aggro target, if they have the group role of puller (also used to determine the distance at which a healer merc will begin healing a group member, if they have the group role of puller)');

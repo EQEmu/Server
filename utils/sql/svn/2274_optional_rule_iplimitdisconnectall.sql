@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'World:IPLimitDisconnectAll', 'false', 'Disconnect all current clients by IP if they go over the IP limit.  This should allow people to quickly reconnect in the case of dead sessions waiting to timeout.');

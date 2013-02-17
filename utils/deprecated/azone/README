@@ -1,0 +1,24 @@
+Father Nitwit's Zone file converter
+
+purpose: convert 23d files into .map files for LOS
+
+If there are any 3d math folks reading this who know how to figure out
+if a 3d triangle passes through a 3d, infinitely tall box (bounded x,y),
+please let me know. The code in the converter dosent work right now, and
+has been 'commented' out with the return on line 717 of azone.cpp
+
+
+This does not work on windows, if you get it working, please let me know how.
+You need to use a unix box to convert your map files, then the .maps should work
+on your windows server.
+
+how to use it:
+built it with make
+upload your s3d files into a directory.
+	You do not need the _obj or _chr files, just the zone.s3d files.
+copy the azone binary to that directory.
+run it on each map file:
+example: converting gfaydark
+	./azone gfaydark
+	this will read gfaydark.s3d and produce gfaydark.map
+put these map files into Maps/ in your eqemu running directory.

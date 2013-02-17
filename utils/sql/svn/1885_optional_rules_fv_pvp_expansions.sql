@@ -1,0 +1,5 @@
+INSERT INTO `rule_values` (`ruleset_id`,`rule_name`,`rule_value`,`notes`) VALUES ('1','World:ExpansionSettings','16383','Expansion settings. Affects client features related to expansions.');
+INSERT INTO `rule_values` (`ruleset_id`,`rule_name`,`rule_value`,`notes`) VALUES ('1','World:PVPSettings','0','PVP Settings, affects clients\' attack state and Sony-hardcoded checks for PVP rules.');
+INSERT INTO `rule_values` (`ruleset_id`,`rule_name`,`rule_value`,`notes`) VALUES ('1','World:IsGMPetitionWindowEnabled','false','Enables the petition queue window on the client. This menu is accessable by pressing the G key ingame with the GM flag on.');
+INSERT INTO `rule_values` (`ruleset_id`,`rule_name`,`rule_value`,`notes`) VALUES ('1','World:FVNoDropFlag','0','Sets the FV ruleset to on or off. Enable with rule 2 for GM-trading only. Keep in mind this disables OOC chatter for GMs only if you choose that option.');
+INSERT INTO `rule_values` (`ruleset_id`,`rule_name`,`rule_value`,`notes`) VALUES ('1','Character:MinStatusForNoDropExemptions','80','Enables bypassing of no-drop flags if status is set to this value and FVNoDropFlag is set to 2.');

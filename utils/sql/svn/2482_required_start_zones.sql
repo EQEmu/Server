@@ -1,0 +1,1 @@
+alter table `start_zones` add column `heading` float not null default 0 AFTER `z`;

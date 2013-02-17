@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` VALUES ('1', 'Character:SoDClientUseSoDHPManaEnd', 'false', 'Setting this to true will allow SoD clients to use the SoD HP/Mana/End formulas and previous clients will use the old formulas');

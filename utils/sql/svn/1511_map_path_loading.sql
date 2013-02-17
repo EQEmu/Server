@@ -1,0 +1,1 @@
+ALTER TABLE zone ADD map_file_name varchar(100) default NULL AFTER long_name;

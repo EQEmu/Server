@@ -1,0 +1,1 @@
+ALTER TABLE `spawn2` DROP INDEX `ZoneGroup`, ADD INDEX `ZoneGroup` (`zone`)

@@ -1,0 +1,1 @@
+ALTER TABLE `zone` ADD `hotzone` TINYINT UNSIGNED DEFAULT '0' NOT NULL AFTER `castoutdoor`;

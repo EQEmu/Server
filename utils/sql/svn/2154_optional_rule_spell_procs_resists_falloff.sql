@@ -1,0 +1,2 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AvgSpellProcsPerMinute', '6.0', 'Default = 6.0 Determines proc rate of spells applied from sympathetic focus effect');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:ResistFalloff', '67', 'Default = 67 Max that level that will adjust our resist chance based on level modifiers');

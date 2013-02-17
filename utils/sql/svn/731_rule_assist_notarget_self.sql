@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` VALUES ('1', 'Combat:AssistNoTargetSelf', 'true','When assisting a target without a target: true = target self, false = leave target as was before assist (this is the behavior on live)');

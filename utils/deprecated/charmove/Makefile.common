@@ -1,0 +1,24 @@
+
+GOBJS=.obj/Mutex.o .obj/unix.o \
+  .obj/dbcore.o 
+
+all: export_char import_char
+
+export_char: $(GOBJS) export_char.o
+	g++ -I.. $^ $(LDFLAGS) $(MYSQL_LIBS) -o $@ 
+
+import_char: $(GOBJS) import_char.o
+	g++ -I.. $^ $(LDFLAGS) $(MYSQL_LIBS) -o $@ 
+
+clean:
+	rm -f import_char export_char *.o
+
+.obj/%.o: ../../common/%.cpp ../../common/%.h
+	mkdir -p .obj
+	g++ -I.. $(CXXFLAGS) -c $< -o $@
+
+%.o: %.cpp %.h
+	mkdir -p .obj
+	g++ -I.. $(CXXFLAGS) -c $< -o $@
+
+

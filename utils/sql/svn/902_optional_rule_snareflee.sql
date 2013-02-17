@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` VALUES ('1', 'Combat:FleeSnareHPRatio', '11', 'HP at which snare will halt movement of a fleeing NPC.');

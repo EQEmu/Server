@@ -1,0 +1,2 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'NPC:StartEnrageValue', '9', '% HP value that mobs will begin to enrage.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'NPC:LiveLikeEnrage', 'false', 'If enabled, will cause all non-player pets to lose the ability to enrage.');

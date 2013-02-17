@@ -1,0 +1,239 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\hexvis.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\hexvis.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About hexvis"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "hexvis Version 1.2",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2006",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
+END
+
+IDD_HEXVIS_DIALOG DIALOGEX 0, 0, 387, 314
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "hexvis"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_PACKET_BODY,"RICHEDIT",ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_NOHIDESEL | 
+                    ES_WANTRETURN | WS_BORDER | WS_VSCROLL | WS_HSCROLL | 
+                    WS_TABSTOP,7,7,373,107
+    DEFPUSHBUTTON   "Process",IDC_PROCESS,330,116,50,12
+    PUSHBUTTON      "Clear",IDC_CLEAR,263,116,50,12
+    PUSHBUTTON      "Load File",IDC_LOAD_FILE,330,135,50,12
+    EDITTEXT        IDC_SEARCH_NUMBER,39,128,63,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Find",IDC_FIND_NUMBER,107,128,26,12
+    GROUPBOX        "Field Values",IDC_STATIC,7,151,373,151
+    LTEXT           "Byte:",IDC_STATIC,154,166,20,8
+    EDITTEXT        IDC_BYTE,175,163,62,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Short:",IDC_STATIC,24,183,21,8
+    EDITTEXT        IDC_SHORT_BE,50,180,99,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_SHORT_LE,50,197,99,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Long:",IDC_STATIC,154,182,19,8
+    EDITTEXT        IDC_LONG_BE,175,180,199,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_LONG_LE,175,197,199,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "UNIX Time:",IDC_STATIC,11,216,38,8
+    EDITTEXT        IDC_UNIX_TIME,50,214,324,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Real:",IDC_STATIC,24,233,21,8
+    EDITTEXT        IDC_REAL,50,231,324,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "INT64:",IDC_STATIC,22,250,21,8
+    EDITTEXT        IDC_INT64_BE,50,248,324,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_INT64_LE,50,265,324,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "String:",IDC_STATIC,23,283,21,8
+    EDITTEXT        IDC_STRING,50,282,324,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Offset:",IDC_STATIC,23,168,23,8
+    EDITTEXT        IDC_OFFSET,50,163,99,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Number:",IDC_STATIC,7,130,28,8
+    LTEXT           "Binary:",IDC_STATIC,250,165,21,8
+    EDITTEXT        IDC_BIN_REP,274,163,100,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Paste text above an process",IDC_STATE,7,117,191,8
+    PUSHBUTTON      "Copy",IDC_COPY_TO_CLIP,263,134,50,12
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "hexvis MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "hexvis\0"
+            VALUE "LegalCopyright", "Copyright (C) 2006\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "hexvis.EXE\0"
+            VALUE "ProductName", "hexvis Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_HEXVIS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 380
+        VERTGUIDE, 50
+        VERTGUIDE, 374
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 307
+        HORZGUIDE, 128
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ABOUTBOX            "&About hexvis..."
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\hexvis.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

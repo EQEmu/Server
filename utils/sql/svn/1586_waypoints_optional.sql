@@ -1,0 +1,1 @@
+UPDATE grid_entries SET heading = -1;

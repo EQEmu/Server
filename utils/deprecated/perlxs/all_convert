@@ -1,0 +1,27 @@
+#!/bin/sh
+
+if [ ! -h ./miniperl ]; then
+	echo "You must have a link in this dir to perl named ./miniperl"
+	exit 1
+fi
+
+./convert client.h Client
+./convert entity.h EntityList
+./convert mob.h Mob
+./convert npc.h NPC
+./convert PlayerCorpse.h Corpse
+./convert groups.h Group
+./convert perlpacket.h PerlPacket
+./export ../../world/EQW.h EQW.h
+./convert EQW.h EQW
+./export ../../common/EQDB.h EQDB.h
+./convert EQDB.h EQDB
+./export ../../common/EQDBRes.h EQDBRes.h
+./convert EQDBRes.h EQDBRes
+./export ../../world/HTTPRequest.h HTTPRequest.h
+./convert HTTPRequest.h HTTPRequest
+./export ../../world/EQLConfig.h EQLConfig.h
+./convert EQLConfig.h EQLConfig
+
+echo "Putting files in place..."
+./put

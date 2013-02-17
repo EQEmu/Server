@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "player_profile_set", "player_profile_set\player_profile_set.vcproj", "{3307DA97-CDDB-4C89-AAE7-BC0AF03D3D6D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3307DA97-CDDB-4C89-AAE7-BC0AF03D3D6D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3307DA97-CDDB-4C89-AAE7-BC0AF03D3D6D}.Debug|Win32.Build.0 = Debug|Win32
+		{3307DA97-CDDB-4C89-AAE7-BC0AF03D3D6D}.Release|Win32.ActiveCfg = Release|Win32
+		{3307DA97-CDDB-4C89-AAE7-BC0AF03D3D6D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

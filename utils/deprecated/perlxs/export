@@ -1,0 +1,12 @@
+#!/bin/sh
+
+FROM="$1"
+TO="$2"
+
+if [ ! -r "$1" -o -z "$2" ]; then
+	echo "Usage: $0 [src] [dest]"
+fi
+
+grep -A100000 "BEGIN PERL EXPORT" "$FROM" \
+| grep -B 100000 "END PERL EXPORT" \
+| grep -v "PERL EXPORT" >"$TO"

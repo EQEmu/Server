@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Character:EnableDiscoveredItems', 'true', 'If enabled, it enables EVENT_DISCOVER_ITEM and also saves character names and timestamps');

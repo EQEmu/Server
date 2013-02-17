@@ -1,0 +1,2 @@
+ALTER TABLE `tasks` ADD `repeatable` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '1';
+

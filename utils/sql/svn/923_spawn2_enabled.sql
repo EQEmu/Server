@@ -1,0 +1,1 @@
+ALTER TABLE `spawn2` ADD `enabled` TINYINT UNSIGNED DEFAULT '1' NOT NULL AFTER `cond_value`;

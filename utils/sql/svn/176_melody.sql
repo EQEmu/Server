@@ -1,0 +1,1 @@
+INSERT INTO commands (command, access, description) VALUES ('melody', 0, 'A supplement for /melody until the OP code is found.')

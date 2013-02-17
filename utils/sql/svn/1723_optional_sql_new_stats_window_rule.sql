@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Character:UseNewStatsWindow', 'true', 'New stats window shows so much it got the TSA seal of approval');

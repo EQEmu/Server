@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Combat:SpecialAttackACBonus', '15', '(Default=15) Percent amount of damage per AC gained for certain special attacks (damage = AC*SpecialAttackACBonus/100).');

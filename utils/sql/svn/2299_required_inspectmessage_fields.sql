@@ -1,0 +1,2 @@
+ALTER TABLE `character_`  ADD COLUMN `inspectmessage` VARCHAR(256) NOT NULL DEFAULT '';
+ALTER TABLE `bots`  ADD COLUMN `BotInspectMessage` VARCHAR(256) NOT NULL DEFAULT '';

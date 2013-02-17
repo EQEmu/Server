@@ -1,0 +1,34 @@
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`, `maxlevel`) VALUES (18145, 705, 190, 2048, 47, 55);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`, `maxlevel`) VALUES (18146, 705, 292, 2048, 2, 55);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`, `maxlevel`) VALUES (18147, 705, 187, 2048, 13, 55);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`, `maxlevel`) VALUES (18148, 705, 188, 2048, 30, 55);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`) VALUES (18150, 705, 1691, 2048, 54);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`) VALUES (18151, 705, 1692, 2048, 59);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`) VALUES (18152, 705, 2120, 2048, 60);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`) VALUES (18153, 705, 3341, 2048, 61);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`) VALUES (18154, 705, 3354, 2048, 63);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`) VALUES (18155, 705, 3358, 2048, 64);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`) VALUES (18156, 705, 5503, 2048, 67);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`) VALUES (18157, 705, 8035, 2048, 68);
+INSERT INTO `npc_spells_entries` (`id`, `npc_spells_id`, `spellid`, `type`, `minlevel`) VALUES (18158, 705, 5520, 2048, 69);
+
+UPDATE `npc_spells_entries` SET `priority`=1 WHERE `priority`=0 AND 'npc_spells_id' = 705;
+UPDATE `npc_spells_entries` SET `priority`=8 WHERE `priority`=7 AND 'npc_spells_id' = 705;
+UPDATE `npc_spells_entries` SET `priority`=7 WHERE `priority`=6 AND 'npc_spells_id' = 705;
+UPDATE `npc_spells_entries` SET `priority`=6 WHERE `priority`=5 AND 'npc_spells_id' = 705;
+UPDATE `npc_spells_entries` SET `priority`=5 WHERE `priority`=4 AND 'npc_spells_id' = 705;
+UPDATE `npc_spells_entries` SET `priority`=4 WHERE `priority`=3 AND 'npc_spells_id' = 705;
+UPDATE `npc_spells_entries` SET `priority`=3 WHERE `priority`=2 AND 'npc_spells_id' = 705;
+UPDATE `npc_spells_entries` SET `priority`=2 WHERE `priority`=1 AND TYPE != 2048 AND 'npc_spells_id' = 705;
+
+UPDATE `npc_spells_entries` SET `maxlevel`=12 WHERE `id`=18146 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=29 WHERE `id`=18147 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=46 WHERE `id`=18148 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=58 WHERE `id`=18150 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=59 WHERE `id`=18151 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=60 WHERE `id`=18152 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=62 WHERE `id`=18153 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=63 WHERE `id`=18154 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=66 WHERE `id`=18155 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=67 WHERE `id`=18156 LIMIT 1;
+UPDATE `npc_spells_entries` SET `maxlevel`=68 WHERE `id`=18157 LIMIT 1;

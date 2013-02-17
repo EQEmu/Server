@@ -1,0 +1,72 @@
+#!/usr/bin/perl
+
+my $date = $ARGV[0];
+my $opcodes_out = $ARGV[1];
+
+my %opcodes = ();
+
+open(F, "<worldopcodes.xml") || die "Unable to open worldopcodes.xml";
+while(<F>) {
+	chomp;
+	next unless (/updated="$date"/);
+	if(/^.*id="([0-9a-fA-F]+)".*name="(OP_[^"]+)".*$/) {
+		$opcodes{$2} = $1;
+	}
+}
+close(F);
+open(F, "<zoneopcodes.xml") || die "Unable to open zoneopcodes.xml";
+while(<F>) {
+	chomp;
+	next unless (/updated="$date"/);
+	if(/^.*id="([0-9a-fA-F]+)".*name="(OP_[^"]+)".*$/) {
+		$opcodes{$2} = $1;
+	}
+}
+close(F);
+
+my %fixes = ( 
+'OP_TributeInfo' => 'OP_SendTributes',
+'OP_CancelInvite' => 'OP_GroupCancelInvite',
+'OP_GMFind' => 'OP_FindPersonRequest',
+'OP_CommonMessage' => 'OP_ChannelMessage',
+'OP_FindResponse' => 'OP_FindPersonReply',
+'OP_SpawnRename' => 'OP_MobRename',
+'OP_SendZonePoints' => 'OP_SendZonepoints',
+'OP_RequestZoneChange' => 'OP_RequestClientZoneChange',
+'OP_Lockouts' => 'OP_LockoutTimerInfo',
+'OP_GuildList' => 'OP_ZoneGuildList',
+'OP_Action2' => 'OP_Damage'
+);
+
+foreach my $seq (keys(%fixes)) {
+	if(defined($opcodes{$seq})) {
+		$opcodes{ $fixes{$seq} } = $opcodes{$seq};
+		delete($opcodes{$seq});
+	}
+}
+
+open(F, "<$opcodes_out") || die "Unable to open $opcodes_out";
+while(<F>) {
+	chomp;
+	my $line = $_;
+	$line =~ s/# ShowEQ [0-9\/]+//g;
+	my $found = 0;
+	foreach my $op (keys(%opcodes)) {
+		if($line =~ /^$op=0x.*$/) {
+			print "$op=0x".$opcodes{$op}."\t\t\t# ShowEQ $date\n";
+			delete($opcodes{$op});
+			$found = 1;
+			last;
+		}
+	}
+	if(!$found) {
+		print "$line\n";
+	}
+}
+close(F);
+
+foreach my $op (keys(%opcodes)) {
+	print "# Unmatched: $op=0x".$opcodes{$op}."\n";
+}
+
+

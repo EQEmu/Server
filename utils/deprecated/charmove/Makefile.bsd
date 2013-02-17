@@ -1,0 +1,16 @@
+
+#Mysql flags, for linuxthreads
+#MYSQL_FLAGS=`mysql_config --cflags`
+#MYSQL_LIB=`mysql_config --libs`
+MYSQL_FLAGS=-I'/usr/local/include/mysql'
+MYSQL_LIBS=-L'/usr/local/lib/mysql' -llmysqlclient -lz -lcrypt -lm
+
+#linux threads flags:
+LTFLAGS=-I/usr/local/include/pthread/linuxthreads -D_GNU_SOURCE -D__USE_UNIX98 -D_REENTRANT -D_THREAD_SAFE
+LTLDFLAGS=-llthread -llstdc++ -llsupc++ -llgcc_r -L/usr/local/lib
+
+CXXFLAGS=-ggdb -O -pipe -Wall -I. -I../common -fno-inline -DFREEBSD $(LTFLAGS) $(MYSQL_FLAGS)
+LDFLAGS=-lpcap -lz -rdynamic -O2 -ggdb -pipe -L/usr/local/lib $(LTLDFLAGS)
+
+
+include Makefile.common

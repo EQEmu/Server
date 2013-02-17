@@ -1,0 +1,63 @@
+UPDATE altadv_vars SET sof_next_skill = skill_id;
+UPDATE altadv_vars SET aa_expansion = type;
+
+UPDATE altadv_vars SET sof_type = 1 WHERE classes = 65534 AND type < 8;
+UPDATE altadv_vars SET sof_type = type WHERE type < 4 AND classes < 65534;
+UPDATE altadv_vars SET sof_type = 1 WHERE type = 4;
+UPDATE altadv_vars SET sof_type = 3 WHERE type = 5 AND classes < 65534;
+UPDATE altadv_vars SET sof_type = 2 WHERE type = 6 AND classes < 65534;
+UPDATE altadv_vars SET sof_type = 2 WHERE type = 7 AND classes < 65534;
+UPDATE altadv_vars SET sof_type = 4 WHERE type = 8;
+
+UPDATE altadv_vars SET special_category = 6 WHERE skill_id = 244;
+UPDATE altadv_vars SET special_category = 6 WHERE skill_id = 412;
+UPDATE altadv_vars SET special_category = 6 WHERE skill_id = 979;
+UPDATE altadv_vars SET special_category = 6 WHERE skill_id = 982;
+UPDATE altadv_vars SET special_category = 6 WHERE skill_id = 985;
+UPDATE altadv_vars SET special_category = 6 WHERE skill_id = 988;
+UPDATE altadv_vars SET special_category = 6 WHERE skill_id = 991;
+UPDATE altadv_vars SET special_category = 6 WHERE skill_id = 994;
+UPDATE altadv_vars SET special_category = 6 WHERE skill_id = 997;
+
+UPDATE altadv_vars SET sof_next_skill = prereq_skill WHERE prereq_skill > 0 AND prereq_skill < 74;
+
+UPDATE altadv_vars SET sof_next_skill = 74 WHERE skill_id = 263;
+UPDATE altadv_vars SET sof_next_skill = 77 WHERE skill_id = 434;
+UPDATE altadv_vars SET sof_next_skill = 80 WHERE skill_id = 437;
+UPDATE altadv_vars SET sof_next_skill = 86 WHERE skill_id = 266;
+UPDATE altadv_vars SET sof_next_skill = 92 WHERE skill_id = 267;
+UPDATE altadv_vars SET sof_next_skill = 101 WHERE skill_id = 446;
+UPDATE altadv_vars SET sof_next_skill = 113 WHERE skill_id = 443;
+UPDATE altadv_vars SET sof_next_skill = 119 WHERE skill_id = 440;
+UPDATE altadv_vars SET sof_next_skill = 122 WHERE skill_id = 454;
+UPDATE altadv_vars SET sof_next_skill = 125 WHERE skill_id = 449;
+UPDATE altadv_vars SET sof_next_skill = 213 WHERE skill_id = 700;
+UPDATE altadv_vars SET sof_next_skill = 247 WHERE skill_id = 504;
+UPDATE altadv_vars SET sof_next_skill = 255 WHERE skill_id = 542;
+UPDATE altadv_vars SET sof_next_skill = 267 WHERE skill_id = 640;
+UPDATE altadv_vars SET sof_next_skill = 275 WHERE skill_id = 701;
+UPDATE altadv_vars SET sof_next_skill = 288 WHERE skill_id = 1129;
+UPDATE altadv_vars SET sof_next_skill = 418 WHERE skill_id = 1001;
+UPDATE altadv_vars SET sof_next_skill = 77 WHERE skill_id = 1083;
+UPDATE altadv_vars SET sof_next_skill = 80 WHERE skill_id = 1086;
+UPDATE altadv_vars SET sof_next_skill = 119 WHERE skill_id = 1053;
+UPDATE altadv_vars SET sof_next_skill = 125 WHERE skill_id = 1061;
+UPDATE altadv_vars SET sof_next_skill = 122 WHERE skill_id = 1066;
+UPDATE altadv_vars SET sof_next_skill = 498 WHERE skill_id = 886;
+UPDATE altadv_vars SET sof_next_skill = 528 WHERE skill_id = 900;
+UPDATE altadv_vars SET sof_next_skill = 589 WHERE skill_id = 893;
+UPDATE altadv_vars SET sof_next_skill = 110 WHERE skill_id = 1031;
+UPDATE altadv_vars SET sof_next_skill = 71 WHERE skill_id = 978;
+UPDATE altadv_vars SET sof_next_skill = 155 WHERE skill_id = 533;
+UPDATE altadv_vars SET sof_next_skill = 267 WHERE skill_id = 924;
+UPDATE altadv_vars SET sof_next_skill = 619 WHERE skill_id = 721;
+UPDATE altadv_vars SET sof_next_skill = 724 WHERE skill_id = 1340;
+UPDATE altadv_vars SET sof_next_skill = 729 WHERE skill_id = 1341;
+UPDATE altadv_vars SET sof_next_skill = 734 WHERE skill_id = 1342;
+UPDATE altadv_vars SET sof_next_skill = 290 WHERE skill_id = 1344;
+UPDATE altadv_vars SET sof_next_skill = 230 WHERE skill_id = 539;
+UPDATE altadv_vars SET sof_next_skill = 767 WHERE skill_id = 1099;
+UPDATE altadv_vars SET sof_next_skill = 637 WHERE skill_id = 770;
+UPDATE altadv_vars SET sof_next_skill = 131 WHERE skill_id = 531;
+
+UPDATE altadv_vars SET prereq_skill = 1134 WHERE skill_id = 1158;

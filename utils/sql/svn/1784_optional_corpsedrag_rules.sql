@@ -1,0 +1,2 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Character:MaxDraggedCorpses', '2', 'Maximum number of corpses that a player can /corpsedrag at once');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Character:DragCorpseDistance', '400.000000', 'If a player is using /corpsedrag and moving, the corpse will not move until the player exceeds this distance (NoRootNoZ)');

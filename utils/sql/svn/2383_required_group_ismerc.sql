@@ -1,0 +1,1 @@
+ALTER TABLE `group_id` ADD COLUMN `ismerc`  tinyint(3) NOT NULL DEFAULT 0 AFTER `name`, DROP PRIMARY KEY, ADD PRIMARY KEY (`groupid`, `charid`, `ismerc`);
