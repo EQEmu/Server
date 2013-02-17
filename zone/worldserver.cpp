@@ -1344,7 +1344,7 @@ void WorldServer::Process() {
 							if(strcmp(rmsg->from, r->members[x].member->GetName()) != 0)
 							{
 								if(r->members[x].GroupNumber == rmsg->gid){
-									if(r->members[x].member->GetFilter(FILTER_GROUP)!=0)
+									if(r->members[x].member->GetFilter(FilterGroupChat)!=0)
 									{
 										r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), 2, 0, rmsg->message);
 									}
@@ -1369,7 +1369,7 @@ void WorldServer::Process() {
 						if(r->members[x].member){
 							if(strcmp(rmsg->from, r->members[x].member->GetName()) != 0)
 							{
-								if(r->members[x].member->GetFilter(FILTER_GROUP)!=0)
+								if(r->members[x].member->GetFilter(FilterGroupChat)!=0)
 								{
 									r->members[x].member->ChannelMessageSend(rmsg->from, r->members[x].member->GetName(), 15, 0, rmsg->message);
 								}

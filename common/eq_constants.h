@@ -425,30 +425,6 @@ typedef enum {
 	FilterShowSelfOnly
 } eqFilterMode;
 
-//im lazy today, dont wanna find/replace these
-#define FILTER_DAMAGESHIELD FilterDamageShields
-#define FILTER_NPCSPELLS	FilterNPCSpells
-#define FILTER_PCSPELLS		FilterPCSpells
-#define FILTER_BARDSONGS	FilterBardSongs
-#define FILTER_GUILDSAY		FilterGuildChat
-#define FILTER_SOCIALS		FilterSocials
-#define FILTER_GROUP		FilterGroupChat
-#define FILTER_SHOUT		FilterShouts
-#define FILTER_AUCTION		FilterAuctions
-#define FILTER_OOC			FilterAuctions
-#define FILTER_MYMISSES		FilterMyMisses
-#define FILTER_OTHERMISSES	FilterOthersMiss
-#define FILTER_OTHERHITS	FilterOthersHit
-#define FILTER_ATKMISSESME	FilterMissedMe
-#define FILTER_CRITSPELLS	FilterSpellCrits
-#define FILTER_CRITMELEE	FilterMeleeCrits
-#define FILTER_SPELLDAMAGE	FilterSpellDamage
-#define FILTER_DOTDAMAGE	FilterDOT
-#define FILTER_MYPETHITS	FilterPetHits
-#define FILTER_MYPETMISSES	FilterPetMisses
-
-
-
 #define	STAT_STR		0
 #define	STAT_STA		1
 #define	STAT_AGI		2
