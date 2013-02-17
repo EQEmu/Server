@@ -35,6 +35,7 @@ SET(common_sources
     logsys.cpp
     logsys_eqemu.cpp
     md5.cpp
+    memory_mapped_file.cpp
     misc.cpp
     MiscFunctions.cpp
     moremath.cpp
@@ -129,6 +130,7 @@ SET(common_headers
     eqtime.h
     errmsg.h
     extprofile.h
+    fixed_memory_hash_set.h
     guild_base.h
     guilds.h
     ipc_mutex.h
@@ -141,6 +143,7 @@ SET(common_headers
     logtypes.h
     mail_oplist.h
     md5.h
+    memory_mapped_file.h
     misc.h
     MiscFunctions.h
     moremath.h
