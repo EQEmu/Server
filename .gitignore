@@ -23,3 +23,9 @@ CMakeFiles
 Makefile
 cmake_install.cmake
 install_manifest.txt
+Build/
+build/
+Build32/
+build32/
+Build64/
+build64/
