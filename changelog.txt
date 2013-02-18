@@ -4,6 +4,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 Bad_Captain: Moved merc save to merc table, save merc buffs, added cure and rez spells to healer merc.
 JJ: Chat garbled for drunk characters.
 Derision: Charmed pets should no longer be targettable with F8. Charmed pets no longer get a surname of Soandso's Pet.
+demonstar55: Added potionbelt tool tip
 
 REQUIRED SQL: 2013_02_18_Merc_Rules_and_Tables.sql
 OPTIONAL SQL: 2013_02_18_Merc_Spells.sql
