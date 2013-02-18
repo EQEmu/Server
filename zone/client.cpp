@@ -751,7 +751,11 @@ void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CON
 	return;
 }
 
-void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, const char* targetname) {
+void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname) {
+	char message[4096];
+	strcpy(message, orig_message);
+
+
 	#if EQDEBUG >= 11
 		LogFile->write(EQEMuLog::Debug,"Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
 	#endif
@@ -806,8 +810,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 
 
-	if(RuleB(QueryServ, PlayerChatLogging)){
-		ServerPacket* pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct)+strlen(message)+1);
+	if(RuleB(QueryServ, PlayerChatLogging)) {
+		ServerPacket* pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct) + strlen(message) + 1);
 		Server_Speech_Struct* sem = (Server_Speech_Struct*) pack->pBuffer;
 	
 		if(chan_num == 0)
@@ -819,15 +823,21 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		sem->minstatus = this->Admin();
 		sem->type = chan_num;
 		if(targetname != 0)
-			strcpy(sem->to,targetname);
+			strcpy(sem->to, targetname);
 	
 		if(GetName() != 0)
-			strcpy(sem->from,GetName());
-	
+			strcpy(sem->from, GetName());
+
 		pack->Deflate();
 		if(worldserver.Connected())
 			worldserver.SendPacket(pack);
 		safe_delete(pack);
+	}
+
+	// Garble the message based on drunkness
+	if (m_pp.intoxication > 0) {
+		GarbleMessage(message, (int)(m_pp.intoxication / 3));
+		language = 0; // No need for language when drunk
 	}
 
 	switch(chan_num)
@@ -843,7 +853,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 	case 2: { // GroupChat
 		Raid* raid = entity_list.GetRaidByClient(this);
-		if(raid){
+		if(raid) {
 			raid->RaidGroupSay((const char*) message, this);
 			break;
 		}
@@ -874,7 +884,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		{
 			if(!global_channel_timer.Check())
 			{
-				if(strlen(targetname)==0)
+				if(strlen(targetname) == 0)
 					ChannelMessageReceived(5, language, lang_skill, message, "discard"); //Fast typer or spammer??
 				else
 					return;
@@ -898,7 +908,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
             if (!worldserver.SendChannelMessage(this, 0, 4, 0, language, message))
 			Message(0, "Error: World server disconnected");
 		}
-		else if(!RuleB(Chat, ServerWideAuction)){
+		else if(!RuleB(Chat, ServerWideAuction)) {
 			Mob *sender = this;
 
 		    if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
@@ -913,8 +923,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		{
 			if(!global_channel_timer.Check())
 			{
-				if(strlen(targetname)==0)
-					ChannelMessageReceived(5, language, lang_skill, message,"discard"); //Fast typer or spammer??
+				if(strlen(targetname) == 0)
+					ChannelMessageReceived(5, language, lang_skill, message, "discard"); //Fast typer or spammer??
 				else
 					return;
 			}
@@ -966,7 +976,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	case 7: { // Tell
 			if(!global_channel_timer.Check())
 			{
-				if(strlen(targetname)==0)
+				if(strlen(targetname) == 0)
 					ChannelMessageReceived(7, language, lang_skill, message, "discard"); //Fast typer or spammer??
 				else
 					return;
@@ -1013,12 +1023,12 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 	case 8: { // /say
 		if(message[0] == COMMAND_CHAR)  {
-			if(command_dispatch(this, message) == -2){
-				if(RuleB(Chat, FlowCommandstoPerl_EVENT_SAY)){
-					if(parse->PlayerHasQuestSub("EVENT_SAY"))  {
+			if(command_dispatch(this, message) == -2) {
+				if(RuleB(Chat, FlowCommandstoPerl_EVENT_SAY)) {
+					if(parse->PlayerHasQuestSub("EVENT_SAY")) {
 						parse->EventPlayer(EVENT_SAY, this, message, language);
 					}
-				}else{
+				} else {
 					this->Message(13, "Command '%s' not recognized.", message);
 				}
 			}
@@ -1044,9 +1054,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if (GetTarget() != 0 && GetTarget()->IsNPC()) {
 			if(!GetTarget()->CastToNPC()->IsEngaged()) {
 				CheckLDoNHail(GetTarget());
-				CheckEmoteHail(GetTarget(),message);
+				CheckEmoteHail(GetTarget(), message);
 
-				if(parse->HasQuestSub(GetTarget()->GetNPCTypeID(),"EVENT_SAY")){
+				if(parse->HasQuestSub(GetTarget()->GetNPCTypeID(), "EVENT_SAY")){
 					if (DistNoRootNoZ(*GetTarget()) <= 200) {
 						if(GetTarget()->CastToNPC()->IsMoving() && !GetTarget()->CastToNPC()->IsOnHatelist(GetTarget()))
 							GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
@@ -1068,7 +1078,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 			else {
-				if(parse->HasQuestSub(GetTarget()->GetNPCTypeID(),"EVENT_AGGRO_SAY")) {
+				if(parse->HasQuestSub(GetTarget()->GetNPCTypeID(), "EVENT_AGGRO_SAY")) {
 					if (DistNoRootNoZ(*GetTarget()) <= 200) {
                         parse->EventNPC(EVENT_AGGRO_SAY, GetTarget()->CastToNPC(), this, message, language);
 					}
@@ -1093,13 +1103,12 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		char *Buffer = (char *)es;
 		Buffer += 4;
 		snprintf(Buffer, sizeof(Emote_Struct) - 4, "%s %s", GetName(), message);
-		entity_list.QueueCloseClients(this, outapp, true, 100,0,true,FilterSocials);
+		entity_list.QueueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
 		safe_delete(outapp);
-
 		break;
 	}
 	default: {
-		Message(0, "Channel (%i) not implemented",(uint16)chan_num);
+		Message(0, "Channel (%i) not implemented", (uint16)chan_num);
 	}
 	}
 }
@@ -7267,6 +7276,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 
 void Client::GarbleMessage(char *message, uint8 variance)
 {
+	// Garble message by variance%
 	const char alpha_list[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; // only change alpha characters for now
 
 	for (size_t i = 0; i < strlen(message); i++) {

@@ -4,6 +4,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 Derision: Added optional guildid and minstatus parameters to quest::gmsay(<messsage>, [color], [toworld], [guildid], [minstatus])
 Derision: Client version is now returned by the stream proxy as a number.
 Derision: Fixed bug where BecomeTrader packets were only being sent to the Trader, not all other clients in the bazaar.
+JJ: Chat garbled for drunk characters.
 
 == 02/16/2013 ==
 demonstar55: Fix AA reuse timer calc

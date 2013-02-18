@@ -714,7 +714,7 @@ bool Client::Process() {
 #ifdef REVERSE_AGGRO
 	//At this point, we are still connected, everything important has taken
 	//place, now check to see if anybody wants to aggro us.
-	// Everhood 6/15/06 - only if client is not feigned
+	// only if client is not feigned
 	if(ret && !GetFeigned() && scanarea_timer.Check()) {
 		entity_list.CheckClientAggro(this);
 	}
@@ -772,7 +772,7 @@ bool Client::Process() {
 		}
 		OnDisconnect(true);
 	}
-	// EverHood Feign Death 2 minutes and zone forgets you
+	// Feign Death 2 minutes and zone forgets you
 	if (forget_timer.Check()) {
 		forget_timer.Disable();
 		entity_list.ClearZoneFeignAggro(this);
@@ -1336,7 +1336,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	{
 		case -1:	// destroy
 		{
-			// solar: I don't think you can move coin from the void, 
+			// I don't think you can move coin from the void, 
 			// but need to check this
 			break;
 		}
@@ -1529,7 +1529,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	// don't allow them to go into negatives (from our point of view)
 	amount_to_take = *from_bucket < mc->amount ? *from_bucket : mc->amount;
 
-	// solar: if you move 11 gold into a bank platinum location, the packet
+	// if you move 11 gold into a bank platinum location, the packet
 	// will say 11, but the client will have 1 left on their cursor, so we have
 	// to figure out the conversion ourselves
 
@@ -1539,14 +1539,10 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	// we have to adjust the amount we take as well
 	amount_to_take = amount_to_add * ((float)CoinTypeCoppers(mc->cointype2) / (float)CoinTypeCoppers(mc->cointype1));
 
-	// solar: now we should have a from_bucket, a to_bucket, an amount_to_take
+	// now we should have a from_bucket, a to_bucket, an amount_to_take
 	// and an amount_to_add
 
-#ifdef SOLAR
-	printf("taking %d coins, adding %d coins\n", amount_to_take, amount_to_add);
-#endif
-
-	// solar: now we actually take it from the from bucket.  if there's an error
+	// now we actually take it from the from bucket.  if there's an error
 	// with the destination slot, they lose their money
 	*from_bucket -= amount_to_take;
 	// why are intentionally inducing a crash here rather than letting the code attempt to stumble on?
@@ -1569,13 +1565,6 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			}
 		}
 	}
-
-#ifdef SOLAR
-	printf("from bucket = %d  ", *from_bucket);
-	if(to_bucket)
-		printf("to bucket = %d", *to_bucket);
-	printf("\n");
-#endif
 
 	// if this is a trade move, inform the person being traded with
 	if(mc->to_slot == 3 && trader && trader->IsClient())
