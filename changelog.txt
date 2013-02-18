@@ -4,7 +4,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 Bad_Captain: Moved merc save to merc table, save merc buffs, added cure and rez spells to healer merc.
 
 REQUIRED SQL: 2013_02_18_Merc_Rules_and_Tables.sql
-OPTIONAL SQL: Re-run utils/sql/svn/merc.sql for latest spell lists.
+OPTIONAL SQL: 2013_02_18_Merc_Spells.sql
 
 == 02/17/2013 ==
 Derision: Added optional guildid and minstatus parameters to quest::gmsay(<messsage>, [color], [toworld], [guildid], [minstatus])
