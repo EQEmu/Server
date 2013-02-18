@@ -10637,11 +10637,13 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
 		if(BaseItem) {
 			m_pp.potionbelt.items[mptbs->SlotNumber].item_id = BaseItem->ID;
 			m_pp.potionbelt.items[mptbs->SlotNumber].icon = BaseItem->Icon;
+			strn0cpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, BaseItem->Name, sizeof(BaseItem->Name));
 		}
 	}
 	else {
 		m_pp.potionbelt.items[mptbs->SlotNumber].item_id = 0;
 		m_pp.potionbelt.items[mptbs->SlotNumber].icon = 0;
+		strncpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, "\0", 1);
 	}
 
 	Save();
