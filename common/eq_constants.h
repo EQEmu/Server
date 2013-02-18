@@ -145,6 +145,7 @@ enum {
 #define AT_GuildID		22
 #define AT_GuildRank	23	// 0=member, 1=officer, 2=leader
 #define AT_AFK			24	// 0 = normal, 1 = afk
+#define AT_Pet			25	// Param is EntityID of owner, or 0 for when charm breaks
 #define AT_Split		28	// 0 = normal, 1 = autosplit on
 #define AT_Size			29	// spawn's size
 #define AT_NPCName		31	// change PC's name's color to NPC color 0 = normal, 1 = npc name

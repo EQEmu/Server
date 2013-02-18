@@ -732,6 +732,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					entity_list.QueueClients(this, app);
 					safe_delete(app);
 					SendPetBuffsToClient();
+					SendAppearancePacket(AT_Pet, caster->GetID(), true, true);
 				}
 
 				if (IsClient()) 
@@ -3499,6 +3500,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if(IsNPC())
 				{
 					CastToNPC()->RestoreGuardSpotCharm();
+					SendAppearancePacket(AT_Pet, 0, true, true);
 				}
 
 				Mob* tempmob = GetOwner();
