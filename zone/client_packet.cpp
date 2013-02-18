@@ -13629,11 +13629,12 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 			SendMercMerchantResponsePacket(0);
 
 			// Set time remaining to max on Hire
-			GetEPP().mercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
+			GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 
 			// Get merc, assign it to client & spawn
-			Merc* merc = Merc::LoadMerc(this, merc_template, merchant_id);
-			SpawnMerc(merc);
+			Merc* merc = Merc::LoadMerc(this, merc_template, merchant_id, false);
+			SpawnMerc(merc, true);
+			merc->Save();
 		}
 	}
 
@@ -13677,7 +13678,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 
 	if(option >= 0)
 	{
-		GetEPP().mercState = option;
+		GetMercInfo().State = option;
 	}
 
 	DumpPacket(app);
@@ -13777,10 +13778,10 @@ void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 
 		if(merc) {
 			entityID = merc->GetID();
-			
-			if(GetEPP().mercIsSuspended) {
+
+			if(GetMercInfo().IsSuspended) {
 				mercState = 1;
-				suspendedTime = GetEPP().mercSuspendedTime;
+				suspendedTime = GetMercInfo().SuspendedTime;
 			}
 		}
 	}

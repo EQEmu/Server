@@ -110,6 +110,7 @@ struct MercTemplate {
 	uint8	ClassID;
 	uint32  MercNPCID;
 	uint8	ProficiencyID;
+	uint8	TierID;
 	uint8	CostFormula;			// To determine cost to client
 	uint32	ClientVersion;				// Only send valid mercs per expansion
 	uint8	MercNameType;			// Determines if merc gets random name or default text
@@ -119,18 +120,35 @@ struct MercTemplate {
 };
 
 struct MercInfo {
-	MercTemplate myTemplate;
+	uint32  mercid;
+	uint8	slot;
+	char	merc_name[64];
+	uint32  MercTemplateID;
+	const	MercTemplate* myTemplate;
 	uint32	SuspendedTime;
 	bool	IsSuspended;
 	uint32	MercTimerRemaining;
 	uint8	Gender;
 	int32	State;
+	int32	hp;
+	int32	mana;
+	int32	endurance;
+	uint8	face;
+	uint8	luclinHairStyle;
+	uint8	luclinHairColor;
+	uint8	luclinEyeColor;
+	uint8	luclinEyeColor2;
+	uint8	luclinBeardColor;
+	uint8	luclinBeard;
+	uint32	drakkinHeritage;
+	uint32	drakkinTattoo;
+	uint32	drakkinDetails;
 };
 
 struct MercSpellEntry {
 	uint8	proficiencyid;
 	uint16	spellid;		// <= 0 = no spell
-	uint16	type;			// 0 = never, must be one (and only one) of the defined values
+	uint32	type;			// 0 = never, must be one (and only one) of the defined values
 	int16	stance;			// 0 = all, + = only this stance, - = all except this stance
 	uint8	minlevel;
 	uint8	maxlevel;
@@ -325,7 +343,6 @@ public:
 	 * NPCs
 	 */
 	const NPCType*			GetNPCType(uint32 id);
-	const NPCType*			GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
 	uint32	NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn = 0, uint32 extra = 0); // 0 = Create 1 = Add; 2 = Update; 3 = Remove; 4 = Delete
 	bool	SetSpecialAttkFlag(uint8 id, const char* flag);
 	bool	GetPetEntry(const char *pet_type, PetRecord *into);
@@ -335,7 +352,19 @@ public:
 	void	AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* itemlist, uint8 droplimit, uint8 mindrop);
 	uint32	GetMaxNPCSpellsID();
 	DBnpcspells_Struct* GetNPCSpells(uint32 iDBSpellsID);
-	
+
+	/*
+	 * Mercs
+	 */
+	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
+	void	SaveMercBuffs(Merc *merc);
+    void	LoadMercBuffs(Merc *merc);
+	bool	LoadMercInfo(Client *c);
+	bool	SaveMerc(Merc *merc);
+	bool	DeleteMerc(uint32 merc_id);
+	//void	LoadMercTypesForMercMerchant(NPC *merchant);
+	//void	LoadMercsForMercMerchant(NPC *merchant);
+
 	/*
 	 * Petitions
 	 */

@@ -258,6 +258,8 @@ Client::Client(EQStreamInterface* ieqs)
 	keyring.clear();
 	bind_sight_target = NULL;
 	mercid = 0;
+	mercSlot = 0;
+	InitializeMercInfo();
 	SetMerc(0);
 
 	logging_enabled = CLIENT_DEFAULT_LOGGING_ENABLED;
@@ -557,12 +559,17 @@ bool Client::Save(uint8 iCommitNow) {
 	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
-	if(GetEPP().mercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS))
-		GetEPP().mercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
+	if(GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS))
+		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 
-	if(merc_timer.Enabled())
-	{
-		GetEPP().mercTimerRemaining = merc_timer.GetRemainingTime();
+	if(merc_timer.Enabled()) {
+		GetMercInfo().MercTimerRemaining = merc_timer.GetRemainingTime();
+	}
+
+	if (GetMerc() && !dead) {
+
+	} else {
+		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
 	}
 
 	m_pp.lastlogin = time(NULL);
@@ -7127,7 +7134,7 @@ void Client::SendMercPersonalInfo()
 	{
 		MercenaryDataUpdate_Struct* mdus = new MercenaryDataUpdate_Struct;
 
-		MercTemplate *mercData = &zone->merc_templates[GetEPP().mercTemplateID];
+		MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
 
 		if (mercData)
 		{
@@ -7146,13 +7153,13 @@ void Client::SendMercPersonalInfo()
 					mdus->MercData[i].AltCurrencyUpkeep = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
 					mdus->MercData[i].AltCurrencyType = altCurrentType;
 					mdus->MercData[i].MercUnk01 = 0;
-					mdus->MercData[i].TimeLeft = GetEPP().mercTimerRemaining;	//GetMercTimer().GetRemainingTime();
+					mdus->MercData[i].TimeLeft = GetMercInfo().MercTimerRemaining;	//GetMercTimer().GetRemainingTime();
 					mdus->MercData[i].MerchantSlot = i + 1;
 					mdus->MercData[i].MercUnk02 = 1;
 					mdus->MercData[i].StanceCount = zone->merc_stance_list[mercData->MercTemplateID].size();
 					mdus->MercData[i].MercUnk03 = 0;
 					mdus->MercData[i].MercUnk04 = 1;
-					strn0cpy(mdus->MercData[i].MercName, GetEPP().merc_name , sizeof(mdus->MercData[i].MercName));
+					strn0cpy(mdus->MercData[i].MercName, GetMercInfo().merc_name , sizeof(mdus->MercData[i].MercName));
 					uint32 stanceindex = 0;
 					if (mdus->MercData[i].StanceCount != 0)
 					{
@@ -7179,7 +7186,7 @@ void Client::SendMercPersonalInfo()
 	else
 	{
 		MercenaryMerchantList_Struct* mml = new MercenaryMerchantList_Struct;
-		MercTemplate *mercData = &zone->merc_templates[GetEPP().mercTemplateID];
+		MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
 
 		if(mercData)
 		{
@@ -7202,7 +7209,7 @@ void Client::SendMercPersonalInfo()
 				mml->Mercs[i].AltCurrencyUpkeep = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
 				mml->Mercs[i].AltCurrencyType = altCurrentType;
 				mml->Mercs[i].MercUnk01 = 0;
-				mml->Mercs[i].TimeLeft = GetEPP().mercTimerRemaining;
+				mml->Mercs[i].TimeLeft = GetMercInfo().MercTimerRemaining;
 				mml->Mercs[i].MerchantSlot = i + 1;
 				mml->Mercs[i].MercUnk02 = 1;
 				mml->Mercs[i].StanceCount = zone->merc_stance_list[mercData->MercTemplateID].size();

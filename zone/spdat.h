@@ -65,6 +65,7 @@ const int SpellType_Charm=4096;
 const int SpellType_Slow = 8192;
 const int SpellType_Debuff = 16384;
 const int SpellType_Cure = 32768;
+const int SpellType_Resurrect = 65536;
 
 const int SpellTypes_Detrimental = SpellType_Nuke|SpellType_Root|SpellType_Lifetap|SpellType_Snare|SpellType_DOT|SpellType_Dispel|SpellType_Mez|SpellType_Charm|SpellType_Debuff|SpellType_Slow;
 const int SpellTypes_Beneficial = SpellType_Heal|SpellType_Buff|SpellType_Escape|SpellType_Pet|SpellType_InCombatBuff|SpellType_Cure;
