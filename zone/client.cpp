@@ -760,7 +760,7 @@ void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CON
 
 void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname) {
 	char message[4096];
-	strcpy(message, orig_message);
+	strn0cpy(message, orig_message, sizeof(message));
 
 
 	#if EQDEBUG >= 11
