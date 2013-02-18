@@ -195,6 +195,7 @@ bool Client::Process() {
 			LeaveGroup();
 			if (GetMerc())
 			{
+				GetMerc()->Save();
 				GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 				GetMerc()->Depop();
 			}
@@ -211,6 +212,7 @@ bool Client::Process() {
 			Save();
 			if (GetMerc())
 			{
+				GetMerc()->Save();
 				GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 				GetMerc()->Depop();
 			}
@@ -251,7 +253,7 @@ bool Client::Process() {
 				UpdateMercTimer();
 		}
 
-		if(GetEPP().mercTemplateID != 0)
+		if(GetMercInfo().MercTemplateID != 0)
 		{
 			if(p_timers.Expired(&database, pTimerMercSuspend, false)) {
 					CheckMercSuspendTimer();
@@ -679,6 +681,7 @@ bool Client::Process() {
 		if (GetGM()) {
 			if (GetMerc())
 			{
+				GetMerc()->Save();
 				GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 				GetMerc()->Depop();
 			}

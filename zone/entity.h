@@ -156,6 +156,7 @@ public:
 	Raid*	GetRaidByLeaderName(const char *leader);
 
 	Corpse*	GetCorpseByOwner(Client* client);
+	Corpse*	GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
 	Corpse* GetCorpseByID(uint16 id);
 	Corpse* GetCorpseByDBID(uint32 dbid);
 	Corpse* GetCorpseByName(const char* name);
@@ -357,7 +358,7 @@ public:
 	int	GetHatedCount(Mob *attacker, Mob *exclude);
 	void	AIYellForHelp(Mob* sender, Mob* attacker);
 	bool	AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint16 iSpellTypes);
-	bool	Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint16 iSpellTypes);
+	bool	Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	Mob*	GetTargetForMez(Mob* caster);
 	uint32	CheckNPCsClose(Mob *center);
 

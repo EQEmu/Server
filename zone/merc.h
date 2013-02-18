@@ -5,6 +5,7 @@
 #include "npc.h"
 using namespace std;
 
+#define MAXMERCS 1
 #define MERC_DEBUG 0
 #define TANK		1
 #define HEALER      2
@@ -26,7 +27,7 @@ enum MercStanceType {
 
 struct MercSpell {
 	uint16	spellid;		// <= 0 = no spell
-	uint16	type;			// 0 = never, must be one (and only one) of the defined values
+	uint32	type;			// 0 = never, must be one (and only one) of the defined values
 	int16	stance;			// 0 = all, + = only this stance, - = all except this stance
 	int16	slot;
 	uint16  proc_chance;
@@ -60,7 +61,7 @@ public:
 	virtual void AI_Process();
 
 	//virtual bool AICastSpell(Mob* tar, int8 iChance, int16 iSpellTypes);
-	virtual bool AICastSpell(int8 iChance, int16 iSpellTypes);
+	virtual bool AICastSpell(int8 iChance, int32 iSpellTypes);
 	virtual bool AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	virtual bool AI_EngagedCastCheck();
 	//virtual bool AI_PursueCastCheck();
@@ -73,6 +74,7 @@ public:
 	static bool RemoveMercFromGroup(Merc* merc, Group* group);
 	void ProcessClientZoneChange(Client* mercOwner);
 	static void MercGroupSay(Mob *speaker, const char *msg, ...);
+	Corpse* GetGroupMemberCorpse();
 
 	// Merc Spell Casting Methods
 	int8 GetChanceToCastBySpellType(int16 spellType);
@@ -100,21 +102,25 @@ public:
 	static MercSpell GetBestMercSpellForAETaunt(Merc* caster);
 	static MercSpell GetBestMercSpellForTaunt(Merc* caster);
 	static MercSpell GetBestMercSpellForHate(Merc* caster);
+	static MercSpell GetBestMercSpellForCure(Merc* caster, Mob* target);
+	static bool GetNeedsCured(Mob *tar);
 	bool UseDiscipline(int32 spell_id, int32 target);
 
 	virtual bool IsMerc() const { return true; }
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
-	static Merc* LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id);
+	static Merc* LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
+	void UpdateMercInfo(Client *c);
 	void UpdateMercStats(Client *c);
 	void UpdateMercAppearance(Client *c);
 	static const char *GetRandomName();
 	bool Spawn(Client *owner);
 	bool Dismiss();
 	bool Suspend();
-	bool Unsuspend();
+	bool Unsuspend(bool setMaxStats);
 	void Zone();
 	virtual void Depop();
+	virtual bool Save();
 	bool GetDepop() { return p_depop; }
 
 	bool IsDead() { return GetHP() < 0;};
@@ -133,10 +139,12 @@ public:
 	uint32 GetMercTemplateID() { return _MercTemplateID; }
 	uint32 GetMercType() { return _MercType; }
 	uint32 GetMercSubType() { return _MercSubType; }
-	uint32 GetProficiencyID() { return _ProficiencyID; }
+	uint8  GetProficiencyID() { return _ProficiencyID; }
+	uint8  GetTierID() { return _TierID; }
 	uint32 GetCostFormula() { return _CostFormula; }
 	uint32 GetMercNameType() { return _NameType; }
 	uint32 GetStance() { return _currentStance; }
+	int    GetHatedCount() { return _hatedCount; }
 
 	inline const uint8 GetClientVersion() const { return _OwnerClientVersion; }
 
@@ -148,9 +156,12 @@ public:
 	virtual void DoClassAttacks(Mob *target);
 	bool	CheckTaunt();
 	bool	CheckAETaunt();
+	bool    CheckConfidence();
+	bool    TryHide();
 
 	// stat functions
 	virtual void CalcBonuses();
+	int32	GetEndurance()	const {return cur_end;}	//This gets our current endurance
 	inline virtual int16	GetAC()		const { return AC; }
 	inline virtual int16 GetATK() const { return ATK; }
 	inline virtual int16 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -215,11 +226,13 @@ public:
 	void SetMercType( uint32 type ) { _MercType = type; }
 	void SetMercSubType( uint32 subtype ) { _MercSubType = subtype; }
 	void SetProficiencyID( uint8 proficiency_id ) { _ProficiencyID = proficiency_id; }
+	void SetTierID( uint8 tier_id ) { _TierID = tier_id; }
 	void SetCostFormula( uint8 costformula ) { _CostFormula = costformula; }
 	void SetMercNameType( uint8 nametype ) { _NameType = nametype; }
 	void SetClientVersion(uint8 clientVersion) { _OwnerClientVersion = clientVersion; }
 	void SetSuspended(bool suspended) { _suspended = suspended; }
 	void SetStance( uint32 stance ) { _currentStance = stance; }
+	void SetHatedCount( uint8 count ) { _hatedCount = count; }
 
 	void Sit();
 	void Stand();
@@ -283,7 +296,6 @@ private:
 	int32	CalcManaRegenCap();
 	void	CalcMaxEndurance();	//This calculates the maximum endurance we can have
 	int32	CalcBaseEndurance();	//Calculates Base End
-	int32	GetEndurance()	const {return cur_end;}	//This gets our current endurance
 	int32	GetMaxEndurance() const {return max_end;}	//This gets our endurance from the last CalcMaxEndurance() call
 	int32	CalcEnduranceRegen();	//Calculates endurance regen used in DoEnduranceRegen()
 	int32	CalcEnduranceRegenCap();
@@ -331,6 +343,7 @@ private:
 	uint32 _MercType;
 	uint32 _MercSubType;
 	uint8  _ProficiencyID;
+	uint8  _TierID;
 	uint8 _CostFormula;
 	uint8 _NameType;
 	uint8 _OwnerClientVersion;
@@ -342,11 +355,15 @@ private:
 	bool	_medding;
 	bool	_suspended;
 	bool	p_depop;
+	bool    _check_confidence;
+	bool    _lost_confidence;
+	int     _hatedCount;
 	uint32	owner_char_id;
 	const NPCType*	ourNPCData;
 
 	Timer	endupkeep_timer;
 	Timer	rest_timer;
+	Timer	confidence_timer;
 };
 
 #endif // MERC_H

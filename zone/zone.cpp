@@ -660,7 +660,7 @@ void Zone::LoadMercTemplates(){
 		mysql_free_result(DatasetResult);
 	}
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, MTem.dbstring AS merc_subtype_id, MTyp.race_id, MS.class_id, MTyp.proficiency_id,  0 AS CostFormula, MTem.clientversion, MTem.merc_npc_type_id FROM merc_types MTyp, merc_templates MTem, merc_subtypes MS WHERE MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;"), TempErrorMessageBuffer, &DatasetResult)) {
+	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, MTem.dbstring AS merc_subtype_id, MTyp.race_id, MS.class_id, MTyp.proficiency_id, MS.tier_id, 0 AS CostFormula, MTem.clientversion, MTem.merc_npc_type_id FROM merc_types MTyp, merc_templates MTem, merc_subtypes MS WHERE MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;"), TempErrorMessageBuffer, &DatasetResult)) {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
@@ -673,9 +673,10 @@ void Zone::LoadMercTemplates(){
 			tempMercTemplate.RaceID = atoi(DataRow[3]);
 			tempMercTemplate.ClassID = atoi(DataRow[4]);
 			tempMercTemplate.ProficiencyID = atoi(DataRow[5]);
-			tempMercTemplate.CostFormula = atoi(DataRow[6]);
-			tempMercTemplate.ClientVersion = atoi(DataRow[7]);
-			tempMercTemplate.MercNPCID = atoi(DataRow[8]);
+			tempMercTemplate.TierID = atoi(DataRow[6]);
+			tempMercTemplate.CostFormula = atoi(DataRow[7]);
+			tempMercTemplate.ClientVersion = atoi(DataRow[8]);
+			tempMercTemplate.MercNPCID = atoi(DataRow[9]);
 
 				for(std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); mercStanceListItr++) {
 				if(mercStanceListItr->ClassID == tempMercTemplate.ClassID && mercStanceListItr->ProficiencyID == tempMercTemplate.ProficiencyID) {

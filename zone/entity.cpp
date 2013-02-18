@@ -1987,6 +1987,24 @@ Corpse*	EntityList::GetCorpseByOwner(Client* client){
 	} 
 	return 0; 
 }
+
+Corpse*	EntityList::GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range){
+	LinkedListIterator<Corpse*> iterator(corpse_list);
+
+	iterator.Reset();
+	while(iterator.MoreElements())
+	{
+		if (iterator.GetData()->IsPlayerCorpse())
+		{
+			if (center->DistNoRootNoZ(*iterator.GetData()) < range && strcasecmp(iterator.GetData()->GetOwnerName(), client->GetName()) == 0) {
+				return iterator.GetData();
+			}
+		}
+		iterator.Advance();
+	}
+	return 0;
+}
+
 Corpse* EntityList::GetCorpseByID(uint16 id){
 	LinkedListIterator<Corpse*> iterator(corpse_list);
 	iterator.Reset();
