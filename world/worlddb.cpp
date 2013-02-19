@@ -293,23 +293,18 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = 0;
 
-	RunQuery
-	(
-		query,
-		MakeAnyLenString
-		(
-			&query,
-			"SELECT x,y,z,heading,zone_id,bind_id FROM start_zones "
-			"WHERE player_choice=%i AND player_class=%i "
+	if(!RunQuery(query, MakeAnyLenString(&query, "SELECT x,y,z,heading,zone_id,bind_id FROM start_zones WHERE player_choice=%i AND player_class=%i "
 			"AND player_deity=%i AND player_race=%i",
 			in_cc->start_zone,
 			in_cc->class_,
 			in_cc->deity,
-			in_cc->race
-		),
-		errbuf,
-		&result
-	);
+			in_cc->race), errbuf, &result))
+	{
+		LogFile->write(EQEMuLog::Error, "Start zone query failed: %s : %s\n", query, errbuf);
+		safe_delete_array(query); 
+		return false;
+	}
+		
 	LogFile->write(EQEMuLog::Status, "Start zone query: %s\n", query);
 	safe_delete_array(query); 
 	
@@ -450,25 +445,19 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = 0;
 
-	RunQuery
-	(
-		query,
-		MakeAnyLenString
-		(
-			&query,
-			"SELECT x,y,z,heading,bind_id FROM start_zones "
-			"WHERE zone_id=%i AND player_class=%i "
+	if(!RunQuery(query, MakeAnyLenString(&query, "SELECT x,y,z,heading,bind_id FROM start_zones WHERE zone_id=%i AND player_class=%i "
 			"AND player_deity=%i AND player_race=%i",
 			in_cc->start_zone,
 			in_cc->class_,
 			in_cc->deity,
-			in_cc->race
-		),
-		errbuf,
-		&result
-	);
+			in_cc->race), errbuf, &result))
+	{
+		LogFile->write(EQEMuLog::Status, "SoF Start zone query failed: %s : %s\n", query, errbuf);
+		safe_delete_array(query); 
+		return false;
+	}
+
 	LogFile->write(EQEMuLog::Status, "SoF Start zone query: %s\n", query);
-	_log(WORLD__CLIENT_TRACE, "SoF Start zone query: %s\n", query);
 	safe_delete_array(query); 
 	
 	if((rows = mysql_num_rows(result)) > 0)

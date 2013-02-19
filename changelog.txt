@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/19/2013 ==
+Derision: World should no longer crash if the start_zone query fails at character creation.
+
 == 02/18/2013 ==
 Bad_Captain: Moved merc save to merc table, save merc buffs, added cure and rez spells to healer merc.
 JJ: Chat garbled for drunk characters.

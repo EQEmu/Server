@@ -1458,11 +1458,16 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 				clog(WORLD__CLIENT_ERR,"Error getting zone id for '%s'", startzone);
 		}
 		else   // otherwise use normal starting zone logic
-		{
+		{	
+			bool ValidStartZone = false;
+
 			if(ClientVersionBit & BIT_TitaniumAndEarlier)
-				database.GetStartZone(&pp, cc);
+				ValidStartZone = database.GetStartZone(&pp, cc);
 			else
-				database.GetStartZoneSoF(&pp, cc);
+				ValidStartZone = database.GetStartZoneSoF(&pp, cc);
+
+			if(!ValidStartZone)
+				return false;
 		}
 	}
 
