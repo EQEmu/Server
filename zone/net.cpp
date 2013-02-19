@@ -67,8 +67,6 @@ extern volatile bool ZoneLoaded;
 #endif
 
 
-
-
 #include "../common/queue.h"
 #include "../common/timer.h"
 #include "../common/EQStream.h"
@@ -91,7 +89,7 @@ extern volatile bool ZoneLoaded;
 #include "masterentity.h"
 #include "worldserver.h"
 #include "net.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "zone.h"
 #include "command.h"
 #include "parser.h"
@@ -104,11 +102,11 @@ extern volatile bool ZoneLoaded;
 #include "tasks.h"
 #include "QuestParserCollection.h"
 
-TimeoutManager          timeout_manager;
-NetConnection		net;
-EntityList			entity_list;
-WorldServer			worldserver;
-uint32				numclients = 0;
+TimeoutManager timeout_manager;
+NetConnection net;
+EntityList entity_list;
+WorldServer worldserver;
+uint32 numclients = 0;
 char errorname[32];
 uint16 adverrornum = 0;
 extern Zone* zone;
@@ -120,9 +118,6 @@ DBAsync *dbasync = NULL;
 RuleManager *rules = new RuleManager();
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
-
-bool zoneprocess;
-
 
 const SPDat_Spell_Struct* spells; 
 SPDat_Spell_Struct* spells_delete; 
@@ -140,9 +135,6 @@ int32 SPDAT_RECORDS = -1;
 
 void Shutdown();
 extern void MapOpcodes();
-
-//bool ZoneBootup(uint32 iZoneID, bool iStaticZone = false);
-//char *strsep(char **stringp, const char *delim);
 
 #ifdef ADDONCMD
 #include "addoncmd.h"
@@ -213,7 +205,6 @@ int main(int argc, char** argv) {
 
 #ifdef _EQDEBUG
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-//	_crtBreakAlloc = 2025;
 #endif
 	
 	_log(ZONE__INIT, "CURRENT_ZONE_VERSION: %s", CURRENT_ZONE_VERSION);
@@ -431,35 +422,35 @@ int main(int argc, char** argv) {
 				entity_list.ChannelMessageFromWorld(0, 0, 6, 0, 0, "WARNING: World server connection lost");
 			worldwasconnected = false;
 		}
+
 		if (ZoneLoaded && temp_timer.Check()) {
 			{
-				uint8 error2 = 4;
 				if(net.group_timer.Enabled() && net.group_timer.Check())
 					entity_list.GroupProcess();
-				error2 = 99;
+
 				if(net.door_timer.Enabled() && net.door_timer.Check())
 					entity_list.DoorProcess();
-				error2 = 98;
+
 				if(net.object_timer.Enabled() && net.object_timer.Check())
 					entity_list.ObjectProcess();
-				error2 = 97;
+
 				if(net.corpse_timer.Enabled() && net.corpse_timer.Check())
 					entity_list.CorpseProcess();
+
 				if(net.trap_timer.Enabled() && net.trap_timer.Check())
 					entity_list.TrapProcess();
+
 				if(net.raid_timer.Enabled() && net.raid_timer.Check())
 					entity_list.RaidProcess();
-				error2 = 98;
-				error2 = 96;
+
 				entity_list.Process();
-				error2 = 95;
+
 				entity_list.MobProcess();
-				error2 = 94;
+
 				entity_list.BeaconProcess();
 
 				if (zone) {
-					zoneprocess= zone->Process();
-					if (!zoneprocess) {
+					if(!zone->Process()) {
 						Zone::Shutdown();
 					}
 				}
@@ -663,11 +654,7 @@ void LoadSPDat() {
 	}
 	int32 MaxSpellID = GetMaxSpellID();
 	if (MaxSpellID == -1) {
-#ifdef NEW_LoadSPDat
-		_log(SPELLS__LOAD, "LoadSPDat() MaxSpellID == -1, %s missing?", ZoneConfig::get()->SpellsFile.c_str());
-#else	// defined(DB_LoadSPDat)
 		_log(SPELLS__LOAD, "LoadSPDat() MaxSpellID == -1, error in GetMaxSpellID()?");
-#endif
 		return;
 	}
 #ifdef SHAREMEM

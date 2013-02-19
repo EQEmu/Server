@@ -73,7 +73,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 
 
 #include "../common/debug.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"

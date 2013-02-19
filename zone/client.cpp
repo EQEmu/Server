@@ -51,7 +51,7 @@ extern bool spells_loaded;
 #include "worldserver.h"
 #include "../common/misc.h"
 #include "zonedb.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "net.h"
 #include "../common/packet_dump.h"
 #include "../common/packet_functions.h"

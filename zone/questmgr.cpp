@@ -66,7 +66,7 @@ using namespace std;
 #include "../common/classes.h"
 #include "../common/races.h"
 #include "zonedb.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "../common/packet_functions.h"
 #include "../common/MiscFunctions.h"
 #include "spawn2.h"
@@ -76,7 +76,6 @@ using namespace std;
 #include "guild_mgr.h"
 #include "../common/rulesys.h"
 #include "QGlobals.h"
-#include "spdat.h"
 #include "QuestParserCollection.h"
 
 #ifdef BOTS

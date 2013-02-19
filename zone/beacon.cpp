@@ -34,7 +34,7 @@ target to center around.
 #endif
 
 #include "masterentity.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 
 extern EntityList entity_list;
 extern Zone* zone;

@@ -52,7 +52,7 @@
 #include "../common/breakdowns.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "petitions.h"
 #include "NpcAI.h"
 #include "../common/skills.h"

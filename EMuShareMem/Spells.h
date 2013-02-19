@@ -2,7 +2,7 @@
 #define MEMSHARE_SPELLS_H
 
 #include "../common/types.h"
-#include "../zone/spdat.h"
+#include "../common/spdat.h"
 #include "../common/EMuShareMem.h"
 
 struct MMFSpells_Struct {

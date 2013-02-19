@@ -16,7 +16,7 @@ Copyright (C) 2001-2004  EQEMu Development Team (http://eqemu.org)
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "../common/debug.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"
@@ -595,7 +595,8 @@ void Client::CalcAABonuses(StatBonuses* newbon) {
 }
 
 
-//A lot of the normal spell functions (IsBlankSpellEffect, etc) are set for just spells (in zone/spdat.h). For now, we'll just put them directly into the code and comment with the corresponding normal function
+//A lot of the normal spell functions (IsBlankSpellEffect, etc) are set for just spells (in common/spdat.h). 
+//For now, we'll just put them directly into the code and comment with the corresponding normal function
 //Maybe we'll fix it later? :-D
 void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon) 
 {

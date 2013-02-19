@@ -100,6 +100,8 @@ bool EQEMuLog::open(LogIDs id) {
         snprintf(exename, sizeof(exename), "_ucs");
     } else if(platform == ExePlatformQueryServ) {
         snprintf(exename, sizeof(exename), "_queryserv");
+    } else if(platform == ExePlatformSharedMemory) {
+        snprintf(exename, sizeof(exename), "_shared_memory");
     }
 
 	char filename[200];

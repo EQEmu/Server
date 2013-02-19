@@ -107,10 +107,6 @@ public:
 	bool Connect(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	~Database();
 	
-	
-//	void	ExtraOptions();
-	
-
 	/*
 	 * General Character Related Stuff
 	 */
@@ -256,7 +252,6 @@ public:
 
 protected:
 	void	HandleMysqlError(uint32 errnum);
-	//bool	RunQuery(const char* query, uint32 querylen, char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* errnum = 0, bool retry = true);
 	
 private:
 	void DBInitVars();

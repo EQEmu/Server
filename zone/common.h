@@ -2,7 +2,7 @@
 #define __EQEMU_ZONE_COMMON_H
 
 #include "../common/types.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 
 #define	HIGHEST_RESIST 9 //Max resist type value
 

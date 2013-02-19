@@ -34,7 +34,7 @@ typedef const char Const_char;
 
 #include "mob.h"
 #include "client.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 
 #ifdef THIS	 /* this macro seems to leak out on some systems */
 #undef THIS		

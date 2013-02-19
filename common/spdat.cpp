@@ -72,20 +72,18 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 
 
 
-#include "../common/debug.h"
+#include "debug.h"
 #include "spdat.h"
-#include "masterentity.h"
-#include "../common/packet_dump.h"
-#include "../common/moremath.h"
-#include "../common/Item.h"
-#include "worldserver.h"
-#include "../common/skills.h"
-#include "../common/bodytypes.h"
-#include "../common/classes.h"
+#include "packet_dump.h"
+#include "moremath.h"
+#include "Item.h"
+#include "skills.h"
+#include "bodytypes.h"
+#include "classes.h"
 #include <math.h>
 #ifndef WIN32
 #include <stdlib.h>
-#include "../common/unix.h"
+#include "unix.h"
 #endif
 extern bool spells_loaded;
 

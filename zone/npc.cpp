@@ -38,7 +38,7 @@ using namespace std;
 #include "map.h"
 #include "entity.h"
 #include "masterentity.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "../common/bodytypes.h"
 #include "spawngroup.h"
 #include "../common/MiscFunctions.h"

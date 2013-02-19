@@ -51,7 +51,7 @@
 #include "worldserver.h"
 #include "../common/packet_dump_file.h"
 #include "../common/MiscFunctions.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "petitions.h"
 #include "NpcAI.h"
 #include "../common/skills.h"

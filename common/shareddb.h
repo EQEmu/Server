@@ -5,7 +5,7 @@
 
 #include "database.h"
 #include "skills.h"
-#include "../zone/spdat.h"
+#include "spdat.h"
 #include "Item.h"
 
 #include <list>
@@ -82,8 +82,6 @@ public:
 	const NPCFactionList*	GetNPCFactionEntry(uint32 id);
 	uint16	GetSkillCap(uint8 Class_, SkillType Skill, uint8 Level);
 	uint8	GetTrainLevel(uint8 Class_, SkillType Skill, uint8 Level);
-//	const Door*				GetDoor(uint8 door_id, const char* zone_name);
-//	const Door*				GetDoorDBID(uint32 db_id);
 	const	LootTable_Struct* GetLootTable(uint32 loottable_id);
 	const	LootDrop_Struct* GetLootDrop(uint32 lootdrop_id);
 	bool	LoadItems();

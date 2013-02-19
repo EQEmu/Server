@@ -65,7 +65,6 @@ SET(zone_sources
     spawn2.cpp
     spawn2.h
     spawngroup.cpp
-    spdat.cpp
     special_attacks.cpp
     spell_effects.cpp
     spells.cpp
@@ -142,7 +141,6 @@ SET(zone_headers
     spawn2.cpp
     spawn2.h
     spawngroup.h
-    spdat.h
     StringIDs.h
     tasks.h
     titles.h

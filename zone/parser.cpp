@@ -22,7 +22,7 @@ using namespace std;
 #include "../common/classes.h"
 #include "../common/races.h"
 #include "zonedb.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "../common/packet_functions.h"
 #include "spawn2.h"
 #include "zone.h"

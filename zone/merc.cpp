@@ -5,7 +5,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/skills.h"
-#include "spdat.h"
+#include "../common/spdat.h"
 #include "zone.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"

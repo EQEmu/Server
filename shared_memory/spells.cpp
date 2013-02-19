@@ -15,3 +15,28 @@
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#include "spells.h"
+#include "../common/debug.h"
+#include "../common/shareddb.h"
+#include "../common/ipc_mutex.h"
+#include "../common/memory_mapped_file.h"
+#include "../common/eqemu_exception.h"
+#include "../common/spdat.h"
+
+void LoadSpells(SharedDatabase *database) {
+    EQEmu::IPCMutex mutex("spells");
+    mutex.Lock();
+    int max_spells = 0; //database->GetMaxSpellID();
+    if(max_spells == -1) {
+        EQ_EXCEPT("Shared Memory", "Unable to get maximum number of spells from the database.");
+    }
+
+    uint32 size = max_spells * sizeof(SPDat_Spell_Struct);
+    EQEmu::MemoryMappedFile mmf("shared/spells", size);
+
+    void *ptr = mmf.Get();
+    //database->LoadSpells(ptr, max_spells);
+
+    //Mutex will unlock on destruction because it's RAII but still.
+    mutex.Unlock();
+}
