@@ -38,9 +38,6 @@ Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
 #include "../common/logsys.h"
 #include "zonedb.h"
 #include "StringIDs.h"
-#if !defined(NEW_LoadSPDat) && !defined(DB_LoadSPDat)
-	extern SPDat_Spell_Struct spells[SPDAT_RECORDS];
-#endif
 
 //static data arrays, really not big enough to warrant shared mem.
 AA_DBAction AA_Actions[aaHighestID][MAX_AA_ACTION_RANKS];	//[aaid][rank]

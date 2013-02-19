@@ -76,9 +76,6 @@ extern EntityList entity_list;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
-#if !defined(NEW_LoadSPDat) && !defined(DB_LoadSPDat)
-	extern SPDat_Spell_Struct spells[SPDAT_RECORDS];
-#endif
 extern uint32 numclients;
 extern PetitionList petition_list;
 bool commandlogged;

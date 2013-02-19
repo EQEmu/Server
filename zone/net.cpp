@@ -109,9 +109,6 @@ NetConnection		net;
 EntityList			entity_list;
 WorldServer			worldserver;
 uint32				numclients = 0;
-#ifdef CATCH_CRASH
-uint8			error = 0;
-#endif
 char errorname[32];
 uint16 adverrornum = 0;
 extern Zone* zone;
@@ -126,23 +123,13 @@ QuestParserCollection *parse = 0;
 
 bool zoneprocess;
 
-#if defined(NEW_LoadSPDat) || defined(DB_LoadSPDat)
-	// For NewLoadSPDat function
-	const SPDat_Spell_Struct* spells; 
-	SPDat_Spell_Struct* spells_delete; 
-	int32 GetMaxSpellID();
 
-
-	void LoadSPDat();
-	bool FileLoadSPDat(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
-	int32 SPDAT_RECORDS = -1;
-#else
-	#define SPDat_Location	"spdat.eff"
-	SPDat_Spell_Struct spells[SPDAT_RECORDS];
-	void LoadSPDat(SPDat_Spell_Struct** SpellsPointer = 0);
-
-
-#endif
+const SPDat_Spell_Struct* spells; 
+SPDat_Spell_Struct* spells_delete; 
+int32 GetMaxSpellID();
+void LoadSPDat();
+bool FileLoadSPDat(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
+int32 SPDAT_RECORDS = -1;
 
 #ifdef _WINDOWS
 #include <process.h>
@@ -396,18 +383,8 @@ int main(int argc, char** argv) {
 		Timer::SetCurrentTime();
 		
 		//process stuff from world
-#ifdef CATCH_CRASH
-		try{
-#endif
-			worldserver.Process();
-#ifdef CATCH_CRASH
-		}
-		catch(...){
-			error = 1;
-			worldserver.Disconnect();
-			worldwasconnected = false;
-		}
-#endif
+		worldserver.Process();
+
 		if (!eqsf.IsOpen() && Config->ZonePort!=0) {
 			_log(ZONE__INIT, "Starting EQ Network server on port %d",Config->ZonePort);
 			if (!eqsf.Open(Config->ZonePort)) {
@@ -457,103 +434,54 @@ int main(int argc, char** argv) {
 		if (ZoneLoaded && temp_timer.Check()) {
 			{
 				uint8 error2 = 4;
-#ifdef CATCH_CRASH
-				try{
-#endif
-					if(net.group_timer.Enabled() && net.group_timer.Check())
-						entity_list.GroupProcess();
-					error2 = 99;
-					if(net.door_timer.Enabled() && net.door_timer.Check())
-						entity_list.DoorProcess();
-					error2 = 98;
-					if(net.object_timer.Enabled() && net.object_timer.Check())
-						entity_list.ObjectProcess();
-					error2 = 97;
-					if(net.corpse_timer.Enabled() && net.corpse_timer.Check())
-						entity_list.CorpseProcess();
-					if(net.trap_timer.Enabled() && net.trap_timer.Check())
-						entity_list.TrapProcess();
-					if(net.raid_timer.Enabled() && net.raid_timer.Check())
-						entity_list.RaidProcess();
-					error2 = 98;
-					error2 = 96;
-					entity_list.Process();
-					error2 = 95;
-#ifdef CATCH_CRASH
-					try{
-					entity_list.MobProcess();
+				if(net.group_timer.Enabled() && net.group_timer.Check())
+					entity_list.GroupProcess();
+				error2 = 99;
+				if(net.door_timer.Enabled() && net.door_timer.Check())
+					entity_list.DoorProcess();
+				error2 = 98;
+				if(net.object_timer.Enabled() && net.object_timer.Check())
+					entity_list.ObjectProcess();
+				error2 = 97;
+				if(net.corpse_timer.Enabled() && net.corpse_timer.Check())
+					entity_list.CorpseProcess();
+				if(net.trap_timer.Enabled() && net.trap_timer.Check())
+					entity_list.TrapProcess();
+				if(net.raid_timer.Enabled() && net.raid_timer.Check())
+					entity_list.RaidProcess();
+				error2 = 98;
+				error2 = 96;
+				entity_list.Process();
+				error2 = 95;
+				entity_list.MobProcess();
+				error2 = 94;
+				entity_list.BeaconProcess();
+
+				if (zone) {
+					zoneprocess= zone->Process();
+					if (!zoneprocess) {
+						Zone::Shutdown();
 					}
-					catch(...){
-						printf("Catching Mob Crash...\n");
-					}
-#else
-					entity_list.MobProcess();
-#endif
-					error2 = 94;
-					entity_list.BeaconProcess();
-#ifdef CATCH_CRASH
 				}
-				catch(...){
-					error=error2;
-				}
-				try{
-#endif
-					if (zone) {
-						zoneprocess= zone->Process();
-						if (!zoneprocess) {
-							Zone::Shutdown();
-						}
-					}
-#ifdef CATCH_CRASH
-				}
-				catch(...){
-					error = 2;
-				}
-				try{
-#endif
-					if(quest_timers.Check())
-						quest_manager.Process();
-#ifdef CATCH_CRASH
-				}
-				catch(...){
-					error = 77777;
-				}
-#endif
+
+				if(quest_timers.Check())
+					quest_manager.Process();
+
 			}
 		}
 		DBAsyncWork* dbaw = 0;
 		while ((dbaw = MTdbafq.Pop())) {
 			DispatchFinishedDBAsync(dbaw);
 		}
-		if (InterserverTimer.Check()
-#ifdef CATCH_CRASH
-			&& !error
-#endif
-			) {
-#ifdef CATCH_CRASH
-			try{
-#endif
-				InterserverTimer.Start();
-				database.ping();
-				AsyncLoadVariables(dbasync, &database);
-//				NPC::GetAILevel(true);
-				entity_list.UpdateWho();
-				if (worldserver.TryReconnect() && (!worldserver.Connected()))
-					worldserver.AsyncConnect();
-#ifdef CATCH_CRASH
-			}
-			catch(...)
-			{
-				error = 16;
-				RunLoops = false;
-			}
-#endif
+		if (InterserverTimer.Check()) {
+			InterserverTimer.Start();
+			database.ping();
+			AsyncLoadVariables(dbasync, &database);
+			entity_list.UpdateWho();
+			if (worldserver.TryReconnect() && (!worldserver.Connected()))
+				worldserver.AsyncConnect();
 		}
-#ifdef CATCH_CRASH
-		if (error){
-			RunLoops = false;
-		}
-#endif
+
 #if defined(_EQDEBUG) && defined(DEBUG_PC)
 		QueryPerformanceCounter(&tmp3);
 		mainloop_time += tmp3.QuadPart - tmp2.QuadPart;
@@ -588,38 +516,14 @@ int main(int argc, char** argv) {
     safe_delete(pxs);
     safe_delete(ps);
 	
-#ifdef CATCH_CRASH
-	if (error)
-		FilePrint("eqemudebug.log",true,true,"Zone %i crashed. Errorcode: %i/%i. Current zone loaded:%s. Current clients:%i. Caused by: %s",Config->ZonePort, error,adverrornum, zone->GetShortName(), numclients,errorname);
-	try{
-		entity_list.Message(0, 15, "ZONEWIDE_MESSAGE: This zone caused a fatal error and will shut down now. Your character will be restored to the last saved status. We are sorry for any inconvenience!");
-	}
-	catch(...){}
-	if (error){
-#ifdef _WINDOWS		
-		ExitProcess(error);
-#else	
-		entity_list.Clear();
-		safe_delete(zone);
-#endif
-	}
-#endif
-
 	entity_list.Clear();
-	if (zone != 0
-#ifdef CATCH_CRASH
-		& !error
-#endif
-		)
+	if (zone != 0)
 		Zone::Shutdown(true);
 	//Fix for Linux world server problem.
 	eqsf.Close();
 	worldserver.Disconnect();
 	dbasync->CommitWrites();
 	dbasync->StopThread();
-#if defined(NEW_LoadSPDat) || defined(DB_LoadSPDat)
-	safe_delete(spells_delete);
-#endif
 	safe_delete(taskmanager);
 	command_deinit();
 	
@@ -726,73 +630,7 @@ bool chrcmpI(const char* a, const char* b) {
 		return true;
 }
 
-#if defined(NEW_LoadSPDat) || defined(DB_LoadSPDat)
 int32 GetMaxSpellID() {
-#ifdef NEW_LoadSPDat
-	int tempid=0, oldid=-1;
-	char spell_line_start[2048];
-	char* spell_line = spell_line_start;
-	char token[64]="";
-	char seps[] = "^";
-	const char *spells_file=ZoneConfig::get()->SpellsFile.c_str();
-	//ifstream in(spells_file);
-	
-	/*struct stat s;
-	if(stat(spells_file, &s) != 0) {
-		_log(SPELLS__LOAD_ERR, "File '%s' not found (stat failed), spell loading FAILED!", spells_file);
-		return(-1);
-	}
-	*/
-
-	FILE *sf = fopen(spells_file, "r");
-	
-	if(sf == NULL) {
-		_log(SPELLS__LOAD_ERR, "File '%s' not found, spell loading FAILED!", spells_file);
-		return -1;
-	}
-	
-	fgets(spell_line, sizeof(spell_line_start), sf);
-	while(!feof(sf)) {
-		strcpy(token,strtok(spell_line, seps));
-		if(token!=NULL);
-		{
-			tempid = atoi(token);
-			if(tempid>oldid)
-				oldid = tempid;
-			else
-				break;
-		}
-		fgets(spell_line, sizeof(spell_line_start), sf);
-	}
-	
-	fclose(sf);
-	
-	/*ifstream in(spells_file);
-	
-	if(!in) {
-		_log(SPELLS__LOAD_ERR, "File '%s' not found, spell loading FAILED!", spells_file);
-		return -1;
-	}
-	
-	in.getline(spell_line, sizeof(spell_line_start));
-	while(strlen(spell_line)>1)
-	{
-		strcpy(token,strtok(spell_line, seps));
-		if(token!=NULL);
-		{
-			tempid = atoi(token);
-			if(tempid>oldid)
-				oldid = tempid;
-			else
-				break;
-		}
-		in.getline(spell_line, sizeof(spell_line_start));
-	}*/
-	
-		
-	return oldid;
-
-#else	// defined(DB_LoadSPDat)
 	//load from DB
 	
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -813,8 +651,8 @@ int32 GetMaxSpellID() {
 		ret = -1;
 	}
 	return ret;
-#endif
 }
+
 #ifdef SHAREMEM
 extern "C" bool extFileLoadSPDat(void* sp, int32 iMaxSpellID) { return FileLoadSPDat((SPDat_Spell_Struct*) sp, iMaxSpellID); }
 #endif
@@ -860,242 +698,7 @@ void LoadSPDat() {
 }
 
 bool FileLoadSPDat(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
-#ifdef NEW_LoadSPDat
-	int tempid=0;
-	uint16 counter=0;
-	char spell_line[2048];
-	const char *spells_file=ZoneConfig::get()->SpellsFile.c_str();
-	_log(SPELLS__LOAD,"FileLoadSPDat() Loading spells from %s", spells_file);
-	
-	FILE *sf = fopen(spells_file, "r");
-	
-	if(sf == NULL) {
-		_log(SPELLS__LOAD_ERR, "File '%s' not found, spell loading FAILED!", spells_file);
-		return false;
-	}
-/*	ifstream in(spells_file);
-	if(!in) {
-		_log(SPELLS__LOAD_ERR, "File '%s' not found, spell loading FAILED!", spells_file);
-		return false;
-	}
-	*/
-	if (iMaxSpellID < 0) {
-		_log(SPELLS__LOAD_ERR,"FileLoadSPDat() Loading spells FAILED! iMaxSpellID:%i < 0", iMaxSpellID);
-		return false;
-	}
-/*
-
-This is hanging on freebsd for me, not sure why...
-
-//#if EQDEBUG >= 1
-	else {
-		_log(SPELLS__LOAD,"FileLoadSPDat() Highest spell ID:%i", iMaxSpellID);
-	}
-//#endif
-*/
-/*	in.close();
-	in.open(spells_file);
-	if(!in) {
-		_log(SPELLS__LOAD_ERR, "File '%s' not found, spell loading FAILED!", spells_file);
-		return false;
-	}
-	while(!in.eof()) {
-		in.getline(spell_line, sizeof(spell_line));
-		Seperator sep(spell_line, '^', 200, 100, false, 0, 0, false);
-		
-		if(spell_line[0]=='\0')
-			break;
-		
-		tempid = atoi(sep.arg[0]);
-		if (tempid > iMaxSpellID) {
-			_log(SPELLS__LOAD_ERR, "FATAL FileLoadSPDat() tempid:%i >= iMaxSpellID:%i", tempid, iMaxSpellID);
-			return false;
-		}
-		*/
-		
-	while(!feof(sf)) {
-		if(fgets(spell_line, sizeof(spell_line), sf) == NULL)
-			break;
-		if(spell_line[0]=='\0')
-			continue;
-		
-		Seperator sep(spell_line, '^', 220, 100, false, 0, 0, false);
-		
-		
-		tempid = atoi(sep.arg[0]);
-		if (tempid > iMaxSpellID) {
-			_log(SPELLS__LOAD_ERR, "FATAL FileLoadSPDat() tempid:%i >= iMaxSpellID:%i", tempid, iMaxSpellID);
-			return false;
-		}
-		
-		counter++;
-		strcpy(sp[tempid].name, sep.arg[1]);
-		strcpy(sp[tempid].player_1, sep.arg[2]);
-		strcpy(sp[tempid].teleport_zone, sep.arg[3]);
-		strcpy(sp[tempid].you_cast,  sep.arg[4]);
-		strcpy(sp[tempid].other_casts, sep.arg[5]);
-		strcpy(sp[tempid].cast_on_you, sep.arg[6]);
-		strcpy(sp[tempid].cast_on_other, sep.arg[7]);
-		strcpy(sp[tempid].spell_fades, sep.arg[8]);
-
-		sp[tempid].range=atof(sep.arg[9]);
-		sp[tempid].aoerange=atof(sep.arg[10]);
-		sp[tempid].pushback=atof(sep.arg[11]);
-		sp[tempid].pushup=atof(sep.arg[12]);
-		sp[tempid].cast_time=atoi(sep.arg[13]);
-		sp[tempid].recovery_time=atoi(sep.arg[14]);
-		sp[tempid].recast_time=atoi(sep.arg[15]);
-		sp[tempid].buffdurationformula=atoi(sep.arg[16]);
-		sp[tempid].buffduration=atoi(sep.arg[17]);
-		sp[tempid].AEDuration=atoi(sep.arg[18]);
-		sp[tempid].mana=atoi(sep.arg[19]);
-		
-		int y=0;
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].base[y]=atoi(sep.arg[20+y]);
-		for(y=0; y < EFFECT_COUNT; y++)
-			sp[tempid].base2[y]=atoi(sep.arg[32+y]);
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].max[y]=atoi(sep.arg[44+y]);
-		
-		sp[tempid].icon=atoi(sep.arg[56]);
-		sp[tempid].memicon=atoi(sep.arg[57]);
-		
-		for(y=0; y< 4;y++)
-			sp[tempid].components[y]=atoi(sep.arg[58+y]);
-		
-		for(y=0; y< 4;y++)
-			sp[tempid].component_counts[y]=atoi(sep.arg[62+y]);
-		
-		for(y=0; y< 4;y++)
-			sp[tempid].NoexpendReagent[y]=atoi(sep.arg[66+y]);
-		
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].formula[y]=atoi(sep.arg[70+y]);
-		
-		sp[tempid].LightType=atoi(sep.arg[82]);
-		sp[tempid].goodEffect=atoi(sep.arg[83]);
-		sp[tempid].Activated=atoi(sep.arg[84]);
-		sp[tempid].resisttype=atoi(sep.arg[85]);
-		
-		for(y=0; y< 12;y++)
-			sp[tempid].effectid[y]=atoi(sep.arg[86+y]);
-		
-		sp[tempid].targettype = (SpellTargetType) atoi(sep.arg[98]);
-		sp[tempid].basediff=atoi(sep.arg[99]);
-		int tmp_skill = atoi(sep.arg[100]);;
-		if(tmp_skill < 0 || tmp_skill > HIGHEST_SKILL)
-			sp[tempid].skill = BEGGING;	/* not much better we can do. */
-		else
-			sp[tempid].skill = (SkillType) tmp_skill;
-		sp[tempid].zonetype=atoi(sep.arg[101]);
-		sp[tempid].EnvironmentType=atoi(sep.arg[102]);
-		sp[tempid].TimeOfDay=atoi(sep.arg[103]);
-		
-		for(y=0; y < PLAYER_CLASS_COUNT;y++)
-			sp[tempid].classes[y]=atoi(sep.arg[104+y]);
-		
-		sp[tempid].CastingAnim=atoi(sep.arg[120]);
-		sp[tempid].TargetAnim=atoi(sep.arg[121]);
-		sp[tempid].TravelType=atoi(sep.arg[122]);
-		sp[tempid].SpellAffectIndex=atoi(sep.arg[123]);
-		sp[tempid].disallow_sit = atoi(sep.arg[124]);
-		sp[tempid].spacing125=atoi(sep.arg[125]);
-
-		for (y = 0; y < 16; y++)
-			sp[tempid].deities[y]=atoi(sep.arg[126+y]);
-
-		for (y = 0; y < 2; y++)
-			sp[tempid].spacing142[y]=atoi(sep.arg[142+y]);
-
-		sp[tempid].new_icon=atoi(sep.arg[144]);
-		sp[tempid].spellanim=atoi(sep.arg[145]);
-		sp[tempid].uninterruptable=atoi(sep.arg[146]);
-		sp[tempid].ResistDiff=atoi(sep.arg[147]);
-		sp[tempid].dot_stacking_exempt=atoi(sep.arg[148]);
-		sp[tempid].deletable=atoi(sep.arg[149]);
-		sp[tempid].RecourseLink = atoi(sep.arg[150]);
-
-		for(y = 0; y < 3;y++)
-			sp[tempid].spacing151[y]=atoi(sep.arg[151+y]);
-
-		sp[tempid].short_buff_box = atoi(sep.arg[154]);
-		sp[tempid].descnum = atoi(sep.arg[155]);
-		sp[tempid].typedescnum = atoi(sep.arg[156]);
-		sp[tempid].effectdescnum = atoi(sep.arg[157]);
-		
-		for(y = 0; y < 4;y++)
-			sp[tempid].spacing158[y]=atoi(sep.arg[158+y]);
-
-		sp[tempid].bonushate=atoi(sep.arg[162]);
-
-		for(y = 0; y < 3;y++)
-			sp[tempid].spacing163[y]=atoi(sep.arg[163+y]);
-
-		sp[tempid].EndurCost=atoi(sep.arg[166]);
-		sp[tempid].EndurTimerIndex=atoi(sep.arg[167]);
-        sp[tempid].IsDisciplineBuff=atoi(sep.arg[168]);
-
-		for(y = 0; y < 4;y++)
-			sp[tempid].spacing169[y]=atoi(sep.arg[169+y]);
-
-		sp[tempid].HateAdded=atoi(sep.arg[173]);
-		sp[tempid].EndurUpkeep=atoi(sep.arg[174]);
-
-		sp[tempid].spacing175=atoi(sep.arg[175]);
-		sp[tempid].numhits = atoi(sep.arg[176]);
-
-		sp[tempid].pvpresistbase=atoi(sep.arg[177]);
-		sp[tempid].pvpresistcalc=atoi(sep.arg[178]);
-		sp[tempid].pvpresistcap=atoi(sep.arg[179]);
-		sp[tempid].spell_category=atoi(sep.arg[180]);
-
-		for(y = 0; y < 4;y++)
-			sp[tempid].spacing181[y]=atoi(sep.arg[181+y]);
-
-		sp[tempid].can_mgb=atoi(sep.arg[185]);
-		sp[tempid].dispel_flag = atoi(sep.arg[186]);
-		sp[tempid].MinResist = atoi(sep.arg[189]);
-		sp[tempid].MaxResist = atoi(sep.arg[190]);
-		sp[tempid].viral_targets = atoi(sep.arg[191]);
-		sp[tempid].viral_timer = atoi(sep.arg[192]);
-		sp[tempid].NimbusEffect = atoi(sep.arg[193]);
-		sp[tempid].directional_start = (float)atoi(sep.arg[194]);
-		sp[tempid].directional_end = (float)atoi(sep.arg[195]);
-		sp[tempid].spellgroup=atoi(row[207]);
-		sp[tempid].field209=atoi(row[209]);
-        sp[tempid].CastRestriction = atoi(sep.arg[211]);
-		sp[tempid].AllowRest = atoi(sep.arg[212]);
-	
-		// May crash zone
-		/*
-		sp[tempid].nodispell=atoi(row[186]);
-		sp[tempid].npc_category=atoi(row[187]);
-		sp[tempid].npc_usefulness=atoi(row[188]);
-
-		for (y = 0; y < 18; y++)
-			sp[tempid].spacing189[y]=atoi(row[189+y]);
-
-		sp[tempid].spellgroup=atoi(row[207]);
-
-		for (y = 0; y < 18; y++)
-			sp[tempid].spacing208[y]=atoi(row[208+y]);
-		*/
-		sp[tempid].DamageShieldType = 0;
-
-	} 
-	_log(SPELLS__LOAD, "FileLoadSPDat() spells loaded: %i", counter);
-	//in.close();
-	fclose(sf);
-	// Now fill in the DamageShieldType from the damageshieldtypes table, if it exists.
-	//
-	database.DBLoadDamageShieldTypes(sp, iMaxSpellID);
-
-	return true;
-
-#else	// defined(DB_LoadSPDat)
 	//load from db
-
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
     MYSQL_RES *result;
@@ -1137,10 +740,10 @@ This is hanging on freebsd for me, not sure why...
 			strn0cpy(sp[tempid].spell_fades, row[8], sizeof(sp[tempid].spell_fades));
 
 			// Numeric fields (everything else)
-			sp[tempid].range=atof(row[9]);
-			sp[tempid].aoerange=atof(row[10]);
-			sp[tempid].pushback=atof(row[11]);
-			sp[tempid].pushup=atof(row[12]);
+			sp[tempid].range=static_cast<float>(atof(row[9]));
+			sp[tempid].aoerange=static_cast<float>(atof(row[10]));
+			sp[tempid].pushback=static_cast<float>(atof(row[11]));
+			sp[tempid].pushup=static_cast<float>(atof(row[12]));
 			sp[tempid].cast_time=atoi(row[13]);
 			sp[tempid].recovery_time=atoi(row[14]);
 			sp[tempid].recast_time=atoi(row[15]);
@@ -1264,22 +867,7 @@ This is hanging on freebsd for me, not sure why...
 			sp[tempid].spellgroup=atoi(row[207]);
 			sp[tempid].field209=atoi(row[209]);
             sp[tempid].CastRestriction = atoi(row[211]);
-			sp[tempid].AllowRest = atoi(row[212]);
-
-			// May crash zone
-/*
-			sp[tempid].nodispell=atoi(row[186]);
-			sp[tempid].npc_category=atoi(row[187]);
-			sp[tempid].npc_usefulness=atoi(row[188]);
-
-			for (y = 0; y < 18; y++)
-				sp[tempid].spacing189[y]=atoi(row[189+y]);
-
-			sp[tempid].spellgroup=atoi(row[207]);
-
-			for (y = 0; y < 18; y++)
-				sp[tempid].spacing208[y]=atoi(row[208+y]);
-*/
+			sp[tempid].AllowRest = atoi(row[212]) != 0;
 			sp[tempid].DamageShieldType = 0;
 
 		}
@@ -1295,11 +883,7 @@ This is hanging on freebsd for me, not sure why...
 		safe_delete_array(query);
 		return false;
 	}
-#endif
-
 }
-
-#endif	//from just above GetMaxSpellID(): #if defined(NEW_LoadSPDat) || defined(DB_LoadSPDat)
 
 void UpdateWindowTitle(char* iNewTitle) {
 #ifdef _WINDOWS

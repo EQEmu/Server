@@ -33,15 +33,6 @@
 #define SPELL_NPC_HARM_TOUCH 929
 
 
-//#define SPDAT_SIZE		1824000
-/* 
-   solar: look at your spells_en.txt and find the id of the last spell.
-   this number has to be 1 more than that.  if it's higher, your zone will
-   NOT start up.  gonna autodetect this later..
-*/
-//#define NEW_LoadSPDat
-#define DB_LoadSPDat	//load from DB vs spells_us.txt. for now, we're piggybacking NEW_LoadSPDat, so it will take precedence
-
 #define EFFECT_COUNT 12
 #define MAX_SPELL_TRIGGER 12	// One for each slot(only 6 for AA since AA use 2)
 #define MAX_RESISTABLE_EFFECTS 12	// Number of effects that are typcially checked agianst resists.
@@ -722,12 +713,8 @@ struct SPDat_Spell_Struct
 			uint8		DamageShieldType; // This field does not exist in spells_us.txt
 };
 
-#if defined(NEW_LoadSPDat) || defined(DB_LoadSPDat)
-	extern const SPDat_Spell_Struct* spells; 
-	extern int32 SPDAT_RECORDS;
-#else
-	#define SPDAT_RECORDS	3602
-#endif
+extern const SPDat_Spell_Struct* spells; 
+extern int32 SPDAT_RECORDS;
 
 bool IsTargetableAESpell(uint16 spell_id);
 bool IsSacrificeSpell(uint16 spell_id);

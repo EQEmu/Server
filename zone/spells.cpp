@@ -99,9 +99,6 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
-#if !defined(NEW_LoadSPDat) && !defined(DB_LoadSPDat)
-	extern SPDat_Spell_Struct spells[SPDAT_RECORDS];
-#endif
 extern bool spells_loaded;
 extern WorldServer worldserver;
 uchar blah[]={0x0D,0x00,0x00,0x00,0x01,0x00,0x00,0x00};

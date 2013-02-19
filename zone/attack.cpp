@@ -52,10 +52,6 @@ extern WorldServer worldserver;
 #endif
 
 extern EntityList entity_list;
-#if !defined(NEW_LoadSPDat) && !defined(DB_LoadSPDat)
-	extern SPDat_Spell_Struct spells[SPDAT_RECORDS];
-#endif
-
 extern Zone* zone;
 
 bool Mob::AttackAnimation(SkillType &skillinuse, int Hand, const ItemInst* weapon)

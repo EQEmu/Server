@@ -214,11 +214,6 @@ bool MRMutex::TryReadLock() {
 void MRMutex::UnReadLock() {
 	MCounters.lock();
 	rl--;
-#ifdef _EQDEBUG
-	if (rl < 0) {
-		ThrowError("rl < 0 in MRMutex::UnReadLock()");
-	}
-#endif
 	MCounters.unlock();
 }
 
@@ -261,11 +256,6 @@ bool MRMutex::TryWriteLock() {
 void MRMutex::UnWriteLock() {
 	MCounters.lock();
 	wl--;
-#ifdef _EQDEBUG
-	if (wl < 0) {
-		ThrowError("wl < 0 in MRMutex::UnWriteLock()");
-	}
-#endif
 	MCounters.unlock();
 }
 

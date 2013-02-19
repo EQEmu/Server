@@ -67,6 +67,7 @@
 extern WorldServer worldserver;	
 extern bool spells_loaded;
 extern TaskManager *taskmanager;
+void CatchSignal(int sig_num);
 
 #include "QuestParserCollection.h"
 

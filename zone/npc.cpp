@@ -51,9 +51,6 @@ using namespace std;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern EntityList entity_list;
-#if !defined(NEW_LoadSPDat) && !defined(DB_LoadSPDat)
-	extern SPDat_Spell_Struct spells[SPDAT_RECORDS];
-#endif
 
 #include "QuestParserCollection.h"
 

@@ -67,7 +67,6 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 #endif
 	if (tmp == 0) {
-//		ThrowError("BaseTCPServerLoop(): tmp = 0!");
 		THREAD_RETURN(NULL);
 	}
 	BaseTCPServer* tcps = (BaseTCPServer*) tmp;

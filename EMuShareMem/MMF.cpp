@@ -158,15 +158,10 @@ bool MMF::Open(const char* iName, uint32 iSize) {
 		case 'O': load_share = 7;  break;
 		case 'Z': load_share = 8;  break;
 		case 'K': load_share = 9;  break;
-#ifdef CATCH_CRASH
-		default:
-		    cerr<<"Failed to load shared memory segment="<<MMFname<<" ("<<MMFname[16]<<")"<<endl;
-		    // malloc some memory here or something fancy
-		    return false; // and make this return true
-		break;
-#else
-		default: cerr<<"FATAL="<<(char)MMFname[16]<<endl; return false; break;
-#endif
+		default: 
+            cerr << "FATAL=" << (char)MMFname[16] << endl; 
+            return false; 
+            break;
 	}
 	switch (load_share) {
 		// Item

@@ -55,15 +55,6 @@
 	#endif
 #endif
 
-#ifndef ThrowError
-	void CatchSignal(int);
-	#if defined(CATCH_CRASH) || defined(_EQDEBUG)
-		#define ThrowError(errstr)	{ cout << "Fatal error: " << errstr << " (" << __FILE__ << ", line " << __LINE__ << ")" << endl; LogFile->write(EQEMuLog::Error, "Thown Error: %s (%s:%i)", errstr, __FILE__, __LINE__); throw errstr; }
-	#else
-		#define ThrowError(errstr)	{ cout << "Fatal error: " << errstr << " (" << __FILE__ << ", line " << __LINE__ << ")" << endl; LogFile->write(EQEMuLog::Error, "Thown Error: %s (%s:%i)", errstr, __FILE__, __LINE__); CatchSignal(0); }
-	#endif
-#endif
-
 #ifdef _WINDOWS
 	// VS6 doesn't like the length of STL generated names: disabling
 	#pragma warning(disable:4786)

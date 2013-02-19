@@ -28,8 +28,7 @@
 extern uint32			numzones;
 extern bool holdzones;
 extern ConsoleList		console_list;
-
-
+void CatchSignal(int sig_num);
 
 ZSList::ZSList()
 {

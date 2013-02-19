@@ -62,9 +62,6 @@ extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
 extern NetConnection net;
 extern uint32 numclients;
-#if !defined(NEW_LoadSPDat) && !defined(DB_LoadSPDat)
-	extern SPDat_Spell_Struct spells[SPDAT_RECORDS];
-#endif
 extern bool spells_loaded;
 extern PetitionList petition_list;
 extern DBAsync *dbasync;
@@ -3259,12 +3256,6 @@ BulkZoneSpawnPacket::BulkZoneSpawnPacket(Client* iSendTo, uint32 iMaxSpawnsPerPa
 	data = 0;
 	pSendTo = iSendTo;
 	pMaxSpawnsPerPacket = iMaxSpawnsPerPacket;
-#ifdef _EQDEBUG
-	if (pMaxSpawnsPerPacket <= 0 || pMaxSpawnsPerPacket > MAX_SPAWNS_PER_PACKET) {
-		// ok, this *cant* be right =p
-		ThrowError("Error in BulkZoneSpawnPacket::BulkZoneSpawnPacket(): pMaxSpawnsPerPacket outside range that makes sense");
-	}
-#endif
 }
 
 BulkZoneSpawnPacket::~BulkZoneSpawnPacket() {

@@ -66,6 +66,7 @@ extern QueryServConnection QSLink;
 extern volatile bool	RunLoops;
 
 ConsoleList console_list;
+void CatchSignal(int sig_num);
 
 Console::Console(EmuTCPConnection* itcpc)
 : WorldTCPConnection(),

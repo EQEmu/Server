@@ -96,9 +96,9 @@ public:
 	//Access to perl variables
 	//all varnames here should be of the form package::name
 	//returns the contents of the perl variable named in varname as a c int
-	int geti(const char * varname) { return SvIV(my_get_sv(varname)); };
+	int geti(const char * varname) { return static_cast<int>(SvIV(my_get_sv(varname))); };
 	//returns the contents of the perl variable named in varname as a c float
-	float getd(const char * varname) { return SvNV(my_get_sv(varname));};
+	float getd(const char * varname) { return static_cast<float>(SvNV(my_get_sv(varname)));};
 	//returns the contents of the perl variable named in varname as a string
 	std::string getstr(const char * varname) {
 		SV * temp = my_get_sv(varname);
@@ -133,7 +133,7 @@ public:
  		// Iterate through key-value pairs, storing them in hash
  		for (it = vals.begin(); it != vals.end(); it++)
  		{
- 			int keylen = it->first.length();
+ 			int keylen = static_cast<int>(it->first.length());
  
  			SV *val = newSVpv(it->second.c_str(), it->second.length());
  

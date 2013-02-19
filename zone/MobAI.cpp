@@ -36,10 +36,6 @@ using namespace std;
 #include "QuestParserCollection.h"
 #include "watermap.h"
 
-#if !defined(NEW_LoadSPDat) && !defined(DB_LoadSPDat)
-	extern SPDat_Spell_Struct spells[SPDAT_RECORDS];
-#endif
-
 extern EntityList entity_list;
 
 extern Zone *zone;

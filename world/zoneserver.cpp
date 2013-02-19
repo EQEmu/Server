@@ -46,6 +46,7 @@ extern volatile bool RunLoops;
 extern AdventureManager adventure_manager;
 extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
+void CatchSignal(int sig_num);
 
 ZoneServer::ZoneServer(EmuTCPConnection* itcpc) 
 : WorldTCPConnection(), tcpc(itcpc), ls_zboot(5000) {

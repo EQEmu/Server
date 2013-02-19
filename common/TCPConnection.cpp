@@ -165,12 +165,6 @@ bool TCPConnection::GetSockName(char *host, uint16 *port)
 }
 
 void TCPConnection::Free() {
-	if (ConnectionType == Outgoing) {
-		ThrowError("TCPConnection::Free() called on an Outgoing connection");
-	}
-#if TCPN_DEBUG_Memory >= 5
-	cout << "Free on TCP# " << GetID() << endl;
-#endif
 	Disconnect();
 	pFree = true;
 }
@@ -362,7 +356,6 @@ void TCPConnection::AsyncConnect(uint32 irIP, uint16 irPort) {
 	if (ConnectionType != Outgoing) {
 		// If this code runs, we got serious problems
 		// Crash and burn.
-		ThrowError("TCPConnection::AsyncConnect() call on a Incomming connection object!");
 		return;
 	}
 	if(!ConnectReady()) {
@@ -423,7 +416,6 @@ bool TCPConnection::ConnectIP(uint32 in_ip, uint16 in_port, char* errbuf) {
 	if (ConnectionType != Outgoing) {
 		// If this code runs, we got serious problems
 		// Crash and burn.
-		ThrowError("TCPConnection::Connect() call on a Incomming connection object!");
 		return false;
 	}
 	MState.lock();
@@ -862,7 +854,6 @@ bool TCPConnection::SendData(bool &sent_something, char* errbuf) {
 				ServerSendQueuePushFront(&data[status], size - status);
 			}
 			else if (status > (signed)size) {
-				ThrowError("TCPConnection::SendData(): WTF! status > size");
 				return false;
 			}
 			// else if (status == size) {}
@@ -905,7 +896,6 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 #endif
 	if (tmp == 0) {
-		ThrowError("TCPConnectionLoop(): tmp = 0!");
 		THREAD_RETURN(NULL);
 	}
 	TCPConnection* tcpc = (TCPConnection*) tmp;

@@ -73,9 +73,6 @@ using namespace std;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
-#if !defined(NEW_LoadSPDat) && !defined(DB_LoadSPDat)
-	extern SPDat_Spell_Struct spells[SPDAT_RECORDS];
-#endif
 extern bool spells_loaded;
 extern PetitionList petition_list;
 extern EntityList entity_list;

@@ -128,8 +128,6 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, EmuTCPConne
 	RelayServer = true;
 	RelayCount = 0;
 	RemoteID = iRemoteID;
-	if (!RemoteID)
-		ThrowError("Error: TCPConnection: RemoteID == 0 on RelayLink constructor");
 	pOldFormat = false;
 	ConnectionType = Incomming;
 	TCPMode = modePacket;
