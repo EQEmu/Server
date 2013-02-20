@@ -99,11 +99,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
-extern bool spells_loaded;
 extern WorldServer worldserver;
-uchar blah[]={0x0D,0x00,0x00,0x00,0x01,0x00,0x00,0x00};
-uchar blah2[]={0x12,0x00,0x00,0x00,0x16,0x01,0x00,0x00};
-
 
 // this is run constantly for every mob
 void Mob::SpellProcess()

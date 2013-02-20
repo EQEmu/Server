@@ -43,7 +43,6 @@ using namespace std;
 #define strcasecmp  _stricmp
 #endif
 
-bool spells_loaded = false;
 volatile bool RunLoops = true;
 extern volatile bool ZoneLoaded;
 #ifdef SHAREMEM
@@ -123,7 +122,7 @@ TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 
 const SPDat_Spell_Struct* spells; 
-void LoadSPDat(EQEmu::MemoryMappedFile **mmf);
+void LoadSpells(EQEmu::MemoryMappedFile **mmf);
 int32 SPDAT_RECORDS = -1;
 
 #ifdef _WINDOWS
@@ -260,7 +259,7 @@ int main(int argc, char** argv) {
 	}
 	_log(ZONE__INIT, "Loading spells");
     EQEmu::MemoryMappedFile *mmf = NULL;
-	LoadSPDat(&mmf);
+	LoadSpells(&mmf);
 
 	_log(ZONE__INIT, "Loading guilds");
 	guild_mgr.LoadGuilds();
@@ -610,20 +609,23 @@ bool chrcmpI(const char* a, const char* b) {
 		return true;
 }
 
-void LoadSPDat(EQEmu::MemoryMappedFile **mmf) {
+void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
     int records = database.GetMaxSpellID() + 1;
 
     try {
         EQEmu::IPCMutex mutex("spells");
         mutex.Lock();
         *mmf = new EQEmu::MemoryMappedFile("shared/spells");
-        if((*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)) {
+        uint32 size = (*mmf)->Size();
+        if(size != (records * sizeof(SPDat_Spell_Struct))) {
             EQ_EXCEPT("zone", "Unable to load spells: (*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)");
         }
 
         spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
         mutex.Unlock();
     } catch(std::exception &ex) {
+        LogFile->write(EQEMuLog::Error, "Error loading spells: %s", ex.what());
+        return;
     }
 
     SPDAT_RECORDS = records;

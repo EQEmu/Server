@@ -91,7 +91,6 @@ SET(zone_headers
     AA.h
     basic_functions.h
     beacon.h
-    blah.h
     bot.h
     botStructs.h
     client.h

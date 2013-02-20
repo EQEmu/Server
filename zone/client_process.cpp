@@ -73,7 +73,6 @@ using namespace std;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
-extern bool spells_loaded;
 extern PetitionList petition_list;
 extern EntityList entity_list;
 

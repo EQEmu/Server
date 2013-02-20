@@ -118,21 +118,21 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	//int char_num = 0;
 	//unsigned long* lengths;
 	if (database.GetVariable("loglevel",tmp, 9)) {
-		int blah[4];
+		int log_levels[4];
 		if (atoi(tmp)>9){ //Server is using the new code
 			for(int i=0;i<4;i++){
 				if (((int)tmp[i]>=48) && ((int)tmp[i]<=57))
-					blah[i]=(int)tmp[i]-48; //get the value to convert it to an int from the ascii value
+					log_levels[i]=(int)tmp[i]-48; //get the value to convert it to an int from the ascii value
 				else
-					blah[i]=0; //set to zero on a bogue char
+					log_levels[i]=0; //set to zero on a bogue char
 			}
-			zone->loglevelvar = blah[0];
+			zone->loglevelvar = log_levels[0];
 			LogFile->write(EQEMuLog::Status, "General logging level: %i", zone->loglevelvar);
-			zone->merchantvar = blah[1];
+			zone->merchantvar = log_levels[1];
 			LogFile->write(EQEMuLog::Status, "Merchant logging level: %i", zone->merchantvar);
-			zone->tradevar = blah[2];
+			zone->tradevar = log_levels[2];
 			LogFile->write(EQEMuLog::Status, "Trade logging level: %i", zone->tradevar);
-			zone->lootvar = blah[3];
+			zone->lootvar = log_levels[3];
 			LogFile->write(EQEMuLog::Status, "Loot logging level: %i", zone->lootvar);
 		}
 		else {

@@ -34,11 +34,12 @@ void LoadSpells(SharedDatabase *database) {
 
     uint32 size = records * sizeof(SPDat_Spell_Struct);
     EQEmu::MemoryMappedFile mmf("shared/spells", size);
+    mmf.ZeroFile();
 
     void *ptr = mmf.Get();
     database->LoadSpells(ptr, records);
     mmf.SetLoaded();
-
+    
     //Mutex will unlock on destruction because it's RAII but still.
     mutex.Unlock();
 }

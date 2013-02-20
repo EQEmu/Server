@@ -27,7 +27,6 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 #include <limits.h>
 
 extern EntityList entity_list;
-extern bool spells_loaded;
 
 extern Zone* zone;
 extern WorldServer worldserver;
@@ -1221,7 +1220,7 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) 
 }
 
 void Mob::ShowBuffs(Client* client) {
-	if (!spells_loaded)
+	if(SPDAT_RECORDS <= 0)
 		return;
 	client->Message(0, "Buffs on: %s", this->GetName());
 	uint32 i;
@@ -1254,7 +1253,7 @@ void Mob::ShowBuffs(Client* client) {
 }
 
 void Mob::ShowBuffList(Client* client) {
-	if (!spells_loaded)
+	if(SPDAT_RECORDS <= 0)
 		return;
 
 	client->Message(0, "Buffs on: %s", this->GetCleanName());

@@ -79,7 +79,6 @@ using namespace std;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
-extern bool spells_loaded;
 extern PetitionList petition_list;
 extern EntityList entity_list;
 extern DBAsyncFinishedQueue MTdbafq;
@@ -8991,7 +8990,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	}
 
 
-	if (spells_loaded)
+	if(SPDAT_RECORDS > 0)
 	{
 		for(uint32 z=0;z<MAX_PP_MEMSPELL;z++)
 		{

@@ -44,7 +44,6 @@ using namespace std;
 #endif
 
 extern volatile bool RunLoops;
-extern bool spells_loaded;
 
 #include "features.h"
 #include "masterentity.h"

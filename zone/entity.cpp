@@ -62,7 +62,6 @@ extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
 extern NetConnection net;
 extern uint32 numclients;
-extern bool spells_loaded;
 extern PetitionList petition_list;
 extern DBAsync *dbasync;
 

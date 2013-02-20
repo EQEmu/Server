@@ -65,7 +65,6 @@
 
 // these should be in the headers...
 extern WorldServer worldserver;	
-extern bool spells_loaded;
 extern TaskManager *taskmanager;
 void CatchSignal(int sig_num);
 
@@ -1149,7 +1148,7 @@ void command_showpetspell(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #ShowPetSpells [spellid | searchstring]");
-	else if (!spells_loaded)
+	else if (SPDAT_RECORDS <= 0)
 		c->Message(0, "Spells not loaded");
 	else if (Seperator::IsNumber(sep->argplus[1]))
 	{
@@ -2584,7 +2583,7 @@ void command_findspell(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #FindSpell [spellname]");
-	else if (!spells_loaded)
+	else if (SPDAT_RECORDS <= 0)
 		c->Message(0, "Spells not loaded");
 	else if (Seperator::IsNumber(sep->argplus[1])) {
 		int spellid = atoi(sep->argplus[1]);
@@ -3657,12 +3656,12 @@ void command_listpetition(Client *c, const Seperator *sep)
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	int blahloopcount=0;
+	bool header = false;
 	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT petid, charname, accountname from petitions order by petid"), errbuf, &result)) {
 		LogFile->write(EQEMuLog::Normal,"Petition list requested by %s", c->GetName());
 		while ((row = mysql_fetch_row(result))) {
-			if (blahloopcount==0) {
-				blahloopcount=1;
+			if(!header) {
+				header = true;
 				c->Message(13,"	ID : Character Name , Account Name");
 			}
 			c->Message(15, " %s:	%s , %s ",row[0],row[1],row[2]);

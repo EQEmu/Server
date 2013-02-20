@@ -85,7 +85,6 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 #include <stdlib.h>
 #include "unix.h"
 #endif
-extern bool spells_loaded;
 
 ///////////////////////////////////////////////////////////////////////////////
 // spell property testing functions
@@ -460,7 +459,7 @@ bool IsValidSpell(uint32 spellid)
 {
 	return
 	(
-		spells_loaded &&
+        SPDAT_RECORDS > 0 &&
 		spellid != 0 &&
 		spellid != 1 &&
 		spellid != 0xFFFFFFFF &&
