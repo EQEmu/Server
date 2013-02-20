@@ -9,7 +9,7 @@
 #include "client.h"
 #include "parser.h"
 #include "embperl.h"
-#include "features.h"
+#include "../common/features.h"
 #include "QuestParserCollection.h"
 #include "QuestInterface.h"
 

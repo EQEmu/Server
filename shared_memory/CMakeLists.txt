@@ -3,10 +3,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(shared_memory_sources
     main.cpp
     spells.cpp
+    skill_caps.cpp
 )
 
 SET(shared_memory_headers
     spells.h
+    skill_caps.h
 )
 
 ADD_EXECUTABLE(shared_memory ${shared_memory_sources} ${shared_memory_headers})

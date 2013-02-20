@@ -45,7 +45,7 @@ using namespace std;
 
 extern volatile bool RunLoops;
 
-#include "features.h"
+#include "../common/features.h"
 #include "masterentity.h"
 #include "worldserver.h"
 #include "../common/misc.h"

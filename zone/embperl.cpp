@@ -16,7 +16,7 @@ Eglin
 #include <vector>
 #include "embperl.h"
 #include "embxs.h"
-#include "features.h"
+#include "../common/features.h"
 #ifndef GvCV_set
 #define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
 #endif

@@ -18,7 +18,7 @@
 #ifndef UPDATE_MANAGER_H
 #define UPDATE_MANAGER_H
 
-#include "features.h"
+#include "../common/features.h"
 #ifdef PACKET_UPDATE_MANAGER
 
 #include "../common/timer.h"

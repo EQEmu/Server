@@ -1,5 +1,5 @@
 #include "../common/types.h"
-#include "../zone/features.h"
+#include "../common/features.h"
 #include "../zone/faction.h"
 #include "../common/EMuShareMem.h"
 

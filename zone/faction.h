@@ -19,7 +19,7 @@
 #define FACTION_H
 
 #include "../common/types.h"
-#include "features.h"
+#include "../common/features.h"
 #include <map>
 #include <string>
 

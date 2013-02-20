@@ -56,7 +56,7 @@
 #include "masterentity.h"
 #include "map.h"
 #include "watermap.h"
-#include "features.h"
+#include "../common/features.h"
 #include "pathing.h"
 #include "client_logs.h"
 #include "guild_mgr.h"
@@ -4285,13 +4285,10 @@ void command_spellinfo(Client *c, const Seperator *sep)
 		c->Message(0, "  base[12]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d", s->base[0], s->base[1], s->base[2], s->base[3], s->base[4], s->base[5], s->base[6], s->base[7], s->base[8], s->base[9], s->base[10], s->base[11]);
 		c->Message(0, "  base22[12]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d", s->base2[0], s->base2[1], s->base2[2], s->base2[3], s->base2[4], s->base2[5], s->base2[6], s->base2[7], s->base2[8], s->base2[9], s->base2[10], s->base2[11]);
 		c->Message(0, "  max[12]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d", s->max[0], s->max[1], s->max[2], s->max[3], s->max[4], s->max[5], s->max[6], s->max[7], s->max[8], s->max[9], s->max[10], s->max[11]);
-		c->Message(0, "  icon: %d", s->icon);
-		c->Message(0, "  memicon: %d", s->memicon);
 		c->Message(0, "  components[4]: %d, %d, %d, %d", s->components[0], s->components[1], s->components[2], s->components[3]);
 		c->Message(0, "  component_counts[4]: %d, %d, %d, %d", s->component_counts[0], s->component_counts[1], s->component_counts[2], s->component_counts[3]);
 		c->Message(0, "  NoexpendReagent[4]: %d, %d, %d, %d", s->NoexpendReagent[0], s->NoexpendReagent[1], s->NoexpendReagent[2], s->NoexpendReagent[3]);
 		c->Message(0, "  formula[12]: 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x", s->formula[0], s->formula[1], s->formula[2], s->formula[3], s->formula[4], s->formula[5], s->formula[6], s->formula[7], s->formula[8], s->formula[9], s->formula[10], s->formula[11]);
-		c->Message(0, "  LightType: %d", s->LightType);
 		c->Message(0, "  goodEffect: %d", s->goodEffect);
 		c->Message(0, "  Activated: %d", s->Activated);
 		c->Message(0, "  resisttype: %d", s->resisttype);
@@ -4307,7 +4304,6 @@ void command_spellinfo(Client *c, const Seperator *sep)
 			s->classes[5], s->classes[6], s->classes[7], s->classes[8], s->classes[9],
 			s->classes[10], s->classes[11], s->classes[12], s->classes[13], s->classes[14]);
 		c->Message(0, "  CastingAnim: %d", s->CastingAnim);
-		c->Message(0, "  TargetAnim: %d", s->TargetAnim);
 		c->Message(0, "  SpellAffectIndex: %d", s->SpellAffectIndex);
 		c->Message(0, " RecourseLink: %d", s->RecourseLink);
 	}

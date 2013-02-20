@@ -24,7 +24,7 @@
 #include "../common/eq_packet_structs.h"
 #include "entity.h"
 #include "mob.h"
-#include "features.h"
+#include "../common/features.h"
 #include "../common/servertalk.h"
 
 #define MAX_MARKED_NPCS 3

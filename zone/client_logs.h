@@ -19,7 +19,7 @@
 #ifndef CLIENT_LOGS_H
 #define CLIENT_LOGS_H
 #include "../common/debug.h"
-#include "features.h"
+#include "../common/features.h"
 
 #ifdef CLIENT_LOGS
 #include "../common/eq_packet_structs.h"

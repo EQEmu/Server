@@ -18,8 +18,8 @@
 #ifndef SPDAT_H
 #define SPDAT_H
 
-#include "../common/classes.h"
-#include "../common/skills.h"
+#include "classes.h"
+#include "skills.h"
 
 #define SPELL_UNKNOWN 0xFFFF
 #define SPELLBOOK_UNKNOWN 0xFFFFFFFF		//player profile spells are 32 bit
@@ -603,7 +603,7 @@ typedef enum  {
 //
 struct SPDat_Spell_Struct
 {
-/* 000 */	int			id;	// not used
+/* 000 */	//int id;	// not used
 /* 001 */	char		name[64]; // Name of the spell
 /* 002 */	char		player_1[32]; // "PLAYER_1"
 /* 003 */	char		teleport_zone[64];	// Teleport zone, pet name summoned, or item summoned
@@ -623,93 +623,82 @@ struct SPDat_Spell_Struct
 /* 017 */	uint32		buffduration;
 /* 018 */	uint32		AEDuration;	// sentinel, rain of something
 /* 019 */	uint16		mana; // Mana Used
-/* 020 */	int32		base[EFFECT_COUNT];	//various purposes
-/* 032 */	int			base2[EFFECT_COUNT]; //various purposes
+/* 020 */	int         base[EFFECT_COUNT];	//various purposes
+/* 032 */	int         base2[EFFECT_COUNT]; //various purposes
 /* 044 */	int16		max[EFFECT_COUNT];
-/* 056 */	uint16		icon; // Spell icon
-/* 057 */	uint16		memicon; // Icon on membarthing
+/* 056 */	//uint16 icon; // Spell icon
+/* 057 */	//uint16 memicon; // Icon on membarthing
 /* 058 */	int32		components[4]; // reagents
 /* 062 */	int			component_counts[4]; // amount of regents used
-/* 066 */	signed		NoexpendReagent[4];	// focus items (Need but not used; Flame Lick has a Fire Beetle Eye focus.)
+/* 066 */	int         NoexpendReagent[4];	// focus items (Need but not used; Flame Lick has a Fire Beetle Eye focus.)
 											// If it is a number between 1-4 it means components[number] is a focus and not to expend it
 											// If it is a valid itemid it means this item is a focus as well
 /* 070 */	uint16		formula[EFFECT_COUNT]; // Spell's value formula
-/* 082 */	int			LightType; // probaly another effecttype flag
-/* 083 */	int			goodEffect; //0=detrimental, 1=Beneficial, 2=Beneficial, Group Only
+/* 082 */	//int LightType; // probaly another effecttype flag
+/* 083 */	int8 goodEffect; //0=detrimental, 1=Beneficial, 2=Beneficial, Group Only
 /* 084 */	int			Activated; // probaly another effecttype flag	
 /* 085 */	int			resisttype;
 /* 086 */	int			effectid[EFFECT_COUNT];	// Spell's effects
 /* 098 */	SpellTargetType	targettype;	// Spell's Target
 /* 099 */	int			basediff; // base difficulty fizzle adjustment
 /* 100 */	SkillType	skill;
-/* 101 */	int16		zonetype;	// 01=Outdoors, 02=dungeons, ff=Any 
-/* 102 */	uint16		EnvironmentType;
-/* 103 */	int			TimeOfDay;
+/* 101 */	int8 zonetype; // 01=Outdoors, 02=dungeons, ff=Any 
+/* 102 */	int8 EnvironmentType;
+/* 103 */	int8 TimeOfDay;
 /* 104 */	uint8		classes[PLAYER_CLASS_COUNT]; // Classes, and their min levels
 /* 120 */	uint8		CastingAnim;
-/* 121 */	uint8		TargetAnim;
-/* 122 */	uint32		TravelType;
+/* 121 */	//uint8 TargetAnim;
+/* 122 */	//uint32 TravelType;
 /* 123 */	uint16		SpellAffectIndex;
-/* 124 */   int         disallow_sit;	// 124: high-end Yaulp spells (V, VI, VII, VIII [Rk 1, 2, & 3], & Gallenite's Bark of Fury
-/* 125 */   int         spacing125;   // 125: Words of the Skeptic
+/* 124 */   int8 disallow_sit; // 124: high-end Yaulp spells (V, VI, VII, VIII [Rk 1, 2, & 3], & Gallenite's Bark of Fury
+/* 125 */                               // 125: Words of the Skeptic
 /* 126 */	int8		deities[16];	// Deity check. 201 - 216 per http://www.eqemulator.net/wiki/wikka.php?wakka=DeityList
 										// -1: Restrict to Deity; 1: Restrict to Deity, but only used on non-Live (Test Server "Blessing of ...") spells; 0: Don't restrict
-/* 142 */ int spacing142[2];	// 142: between 0 & 100
+/* 142 */                       // 142: between 0 & 100
 								// 143: always set to 0
-/* 144 */	int16		new_icon;	// Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon
-/* 145 */	int16		spellanim;	// Doesn't look like it's the same as #doanim, so not sure what this is
+/* 144 */	//int16 new_icon    // Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon
+/* 145 */	//int16 spellanim;  // Doesn't look like it's the same as #doanim, so not sure what this is
 /* 146 */	int8		uninterruptable;	// Looks like anything != 0 is uninterruptable. Values are mostly -1, 0, & 1 (Fetid Breath = 90?)
 /* 147 */	int16		ResistDiff; 
-/* 148 */   int			dot_stacking_exempt;
-/* 149 */   int			deletable;
-/* 150 */	uint16		RecourseLink;
-/* 151 */ int spacing151[3];	// 151: -1, 0, or 1
+/* 148 */   //int dot_stacking_exempt;
+/* 149 */   //int deletable;
+/* 150 */	uint16 RecourseLink;
+/* 151 */                       // 151: -1, 0, or 1
 								// 152 & 153: all set to 0
-/* 154 */	int8		short_buff_box;	// != 0, goes to short buff box. Not really supported in the server code
+/* 154 */	int8		short_buff_box;	// != 0, goes to short buff box. 
 /* 155 */   int			descnum; // eqstr of description of spell
-/* 156 */   int			typedescnum; // eqstr of type description
+/* 156 */   //int typedescnum;   // eqstr of type description
 /* 157 */   int			effectdescnum; // eqstr of effect description
-/* 158 */ int spacing158[4];
+/* 158 */ 
 /* 162 */   int			bonushate;
-/* 163 */ int spacing163[3];
+/* 163 */ 
 /* 166 */   int			EndurCost;
-/* 167 */   int			EndurTimerIndex;
-/* 168 */   int			IsDisciplineBuff; //Will goto the combat window when cast
-/* 169 */ int spacing169[4];
+/* 167 */   int8 EndurTimerIndex;
+/* 168 */   //int IsDisciplineBuff; //Will goto the combat window when cast
+/* 169 */ 
 /* 173 */   int			HateAdded;
 /* 174 */   int			EndurUpkeep;
-/* 175 */ int spacing175;
+/* 175 */ 
 /* 176 */ 	int 		numhits;
 /* 177 */ 	int 		pvpresistbase;
 /* 178 */ 	int 		pvpresistcalc;
 /* 179 */ 	int 		pvpresistcap;
 /* 180 */ 	int 		spell_category;
-/* 181 */ int spacing181[4];
-/* 185 */ 	int 		can_mgb;	// 0=no, -1 or 1 = yes
+/* 181 */ 
+/* 185 */ 	int8 can_mgb; // 0=no, -1 or 1 = yes
 /* 186 */ 	int 		dispel_flag;
 /* 189 */ 	int 		MinResist;
 /* 190 */ 	int 		MaxResist;
-/* 191 */ 	int 		viral_targets;
-/* 192 */ 	int 		viral_timer;
+/* 191 */ 	uint8 viral_targets;
+/* 192 */ 	uint8 viral_timer;
 /* 193 */ 	int 		NimbusEffect;
 /* 194 */ 	float 		directional_start;
 /* 195 */ 	float 		directional_end;
 /* 207 */ 	int 		spellgroup;
-/* 209 */ 	int 		field209; // Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
+/* 209 */ 	int 		powerful_flag; // Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
 /* 211 */   int         CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
 /* 212 */ 	bool 		AllowRest;
-/* 219 */	int			maxtargets; // not in DB yet, is used for beam and ring spells for target # limits
-
-//shared memory errors
-/* 186 */	/*int8		nodispell;*/	// 0=can be dispelled, -1=can't be dispelled at all, 1=most can be cancelled w/ a cure but not dispelled
-/* 187 */	/*uint8		npc_category;*/	// 0=not used, 1=AoE Detrimental, 2=DD, 3=Buffs, 4=Pets, 5=Healing, 6=Gate, 7=Debuff, 8=Dispell
-/* 188 */	/*uint32		npc_usefulness;*/	// higher number = more useful, lower number = less useful
-/* 189 */ /*int spacing189[18];*/
-/* 207 */	/*uint32		spellgroup;*/
-/* 208 */ /*int spacing208[7];*/
-// Might be newer fields in the live version, which is what some of the last fields are
-
-
+/* 219 */	//int maxtargets; // not in DB yet, is used for beam and ring spells for target # limits
 			uint8		DamageShieldType; // This field does not exist in spells_us.txt
 };
 

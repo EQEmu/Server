@@ -1,17 +1,20 @@
 
 #include "shareddb.h"
-#include "../common/Item.h"
-#include "../common/EMuShareMem.h"
-#include "../common/classes.h"
-#include "../common/rulesys.h"
-#include "../common/seperator.h"
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include "Item.h"
+#include "EMuShareMem.h"
+#include "classes.h"
+#include "rulesys.h"
+#include "seperator.h"
 #include "MiscFunctions.h"
 #include "eq_packet_structs.h"
 #include "guilds.h"
 #include "extprofile.h"
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
+#include "memory_mapped_file.h"
+#include "ipc_mutex.h"
+#include "eqemu_exception.h"
 
 using namespace std;
 
@@ -22,14 +25,14 @@ extern LoadEMuShareMemDLL EMuShareMemDLL;
 SharedDatabase *SharedDatabase::s_usedb = NULL;
 
 SharedDatabase::SharedDatabase()
-: Database()
+: Database(), skill_caps_mmf(NULL)
 {
 	SDBInitVars();
 	s_usedb = this;
 }
 
 SharedDatabase::SharedDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
-: Database(host, user, passwd, database, port)
+: Database(host, user, passwd, database, port), skill_caps_mmf(NULL)
 {
 	SDBInitVars();
 	s_usedb = this;
@@ -46,6 +49,7 @@ void SharedDatabase::SDBInitVars() {
 }
 
 SharedDatabase::~SharedDatabase() {
+    safe_delete(skill_caps_mmf);
 }
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
@@ -1519,15 +1523,62 @@ bool SharedDatabase::extDBLoadSkillCaps() {
 }
 
 bool SharedDatabase::LoadSkillCaps() {
-	if (!EMuShareMemDLL.Load())
-		return false;
-	
-	uint8 class_count = PLAYER_CLASS_COUNT;
-	uint8 skill_count = HIGHEST_SKILL+1;
-	uint8 level_count = HARD_LEVEL_CAP+1;
+    if(skill_caps_mmf)
+        return true;
 
-	return EMuShareMemDLL.SkillCaps.LoadSkillCaps(&extDBLoadSkillCaps,
-			 sizeof(uint16), class_count, skill_count, level_count);
+	uint32 class_count = PLAYER_CLASS_COUNT;
+	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 level_count = HARD_LEVEL_CAP + 1;
+    uint32 size = (class_count * skill_count * level_count * sizeof(uint16));
+
+    try {
+        EQEmu::IPCMutex mutex("skill_caps");
+        mutex.Lock();
+        skill_caps_mmf = new EQEmu::MemoryMappedFile("shared/skill_caps");
+        if(skill_caps_mmf->Size() != size) {
+            EQ_EXCEPT("SharedDatabase", "Unable to load skill caps: skill_caps_mmf->Size() != size");
+        }
+
+        mutex.Unlock();
+    } catch(std::exception &ex) {
+        LogFile->write(EQEMuLog::Error, "Error loading skill caps: %s", ex.what());
+        return false;
+    }
+
+    return true;
+}
+
+void SharedDatabase::LoadSkillCaps(void *data) {
+    uint32 class_count = PLAYER_CLASS_COUNT;
+	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 level_count = HARD_LEVEL_CAP + 1;
+
+    char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+    MYSQL_RES *result;
+    MYSQL_ROW row;
+	if(RunQuery(query, MakeAnyLenString(&query, 
+        "SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level"), 
+        errbuf, &result)) {
+        safe_delete_array(query);
+        
+        while((row = mysql_fetch_row(result))) {
+            uint8 skillID = atoi(row[0]);
+            uint8 class_ = atoi(row[1]) - 1;
+            uint8 level = atoi(row[2]);
+            uint16 cap = atoi(row[3]);
+            if(skillID >= skill_count || class_ >= class_count || level >= level_count)
+                continue;
+
+            uint32 index = (((class_ * class_count) + skillID) * level_count) + level;
+            uint16 *skill_caps_table = reinterpret_cast<uint16*>(data);               
+            skill_caps_table[index] = cap;
+		}
+		mysql_free_result(result);
+    } else {
+        LogFile->write(EQEMuLog::Error, "Error loading skill caps from database: %s", errbuf);
+        safe_delete_array(query);
+    }
 }
 
 bool SharedDatabase::DBLoadSkillCaps() {
@@ -1567,48 +1618,82 @@ bool SharedDatabase::DBLoadSkillCaps() {
 }
 
 uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillType Skill, uint8 Level) {
-	if(Class_ == 0)
-		return(0);
-	int SkillMaxLevel = RuleI(Character, SkillCapMaxLevel);
-	if (SkillMaxLevel < 1) {
-		SkillMaxLevel = RuleI(Character, MaxLevel);
-	}
-	if(Level > SkillMaxLevel){
-		return EMuShareMemDLL.SkillCaps.GetSkillCap(Class_-1, Skill, SkillMaxLevel);
-	}
-	else{
-		return EMuShareMemDLL.SkillCaps.GetSkillCap(Class_-1, Skill, Level);
-	}
+    if(!skill_caps_mmf) {
+        return 0;
+    }
+
+    if(Class_ == 0)
+        return 0;
+
+    int SkillMaxLevel = RuleI(Character, SkillCapMaxLevel);
+    if(SkillMaxLevel < 1) {
+        SkillMaxLevel = RuleI(Character, MaxLevel);
+    }
+
+    uint32 class_count = PLAYER_CLASS_COUNT;
+	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 level_count = HARD_LEVEL_CAP + 1;
+    if(Level > static_cast<uint8>(SkillMaxLevel)){
+        Level = static_cast<uint8>(SkillMaxLevel);
+    }
+
+    uint32 index = ((((Class_ - 1) * class_count) + Skill) * level_count) + Level;
+    uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
+    return skill_caps_table[index];
 }
 
 uint8 SharedDatabase::GetTrainLevel(uint8 Class_, SkillType Skill, uint8 Level) {
-	if(Class_ == 0)
-		return(0);
+    if(!skill_caps_mmf) {
+        return 0;
+    }
 
-	uint8 ret = 0;
-	int SkillMaxLevel = RuleI(Character, SkillCapMaxLevel);
-	if (SkillMaxLevel < 1) {
-		SkillMaxLevel = RuleI(Character, MaxLevel);
-	}
-	if(Level > SkillMaxLevel) {
-		ret = EMuShareMemDLL.SkillCaps.GetTrainLevel(Class_-1, Skill, SkillMaxLevel);
+    if(Class_ == 0)
+        return 0;
+
+    int SkillMaxLevel = RuleI(Character, SkillCapMaxLevel);
+    if (SkillMaxLevel < 1) {
+        SkillMaxLevel = RuleI(Character, MaxLevel);
+    }
+
+    uint32 class_count = PLAYER_CLASS_COUNT;
+	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 level_count = HARD_LEVEL_CAP + 1;
+    uint8 ret = 0;
+
+	if(Level > static_cast<uint8>(SkillMaxLevel)) {
+        uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
+        uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
+        for(uint8 x = 0; x < Level; x++){
+            if(skill_caps_table[index + x]){
+                ret = x;
+                break;
+            }
+        }
 	}
 	else
 	{
-		ret = EMuShareMemDLL.SkillCaps.GetTrainLevel(Class_-1, Skill, Level);
+        uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
+        uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
+        for(int x = 0; x < SkillMaxLevel; x++){
+            if(skill_caps_table[index + x]){
+                ret = x;
+                break;
+            }
+        }
 	}
-	if(ret > GetSkillCap(Class_, Skill, Level))
-		ret = GetSkillCap(Class_, Skill, Level);
+    
+    if(ret > GetSkillCap(Class_, Skill, Level))
+        ret = GetSkillCap(Class_, Skill, Level);
 
-	return ret;
+    return ret;
 }
 
-void SharedDatabase::DBLoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
+void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
 
 	const char *DSQuery = "SELECT `spellid`, `type` from `damageshieldtypes` WHERE `spellid` > 0 "
 	                         "AND `spellid` <= %i";
 
-	const char *ERR_MYSQLERROR = "Error in DBLoadDamageShieldTypes: %s %s";
+	const char *ERR_MYSQLERROR = "Error in LoadDamageShieldTypes: %s %s";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
@@ -1777,10 +1862,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
                 sp[tempid].base2[y]=atoi(row[32+y]);    // effect_limit_value
             for(y=0; y< EFFECT_COUNT;y++)
                 sp[tempid].max[y]=atoi(row[44+y]);
-            
-            sp[tempid].icon=atoi(row[56]);
-            sp[tempid].memicon=atoi(row[57]);
-            
+                        
             for(y=0; y< 4;y++)
                 sp[tempid].components[y]=atoi(row[58+y]);
             
@@ -1793,7 +1875,6 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
             for(y=0; y< EFFECT_COUNT;y++)
                 sp[tempid].formula[y]=atoi(row[70+y]);
             
-            sp[tempid].LightType=atoi(row[82]);
             sp[tempid].goodEffect=atoi(row[83]);
             sp[tempid].Activated=atoi(row[84]);
             sp[tempid].resisttype=atoi(row[85]);
@@ -1816,63 +1897,31 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
                 sp[tempid].classes[y]=atoi(row[104+y]);
             
             sp[tempid].CastingAnim=atoi(row[120]);
-            sp[tempid].TargetAnim=atoi(row[121]);
-            sp[tempid].TravelType=atoi(row[122]);
             sp[tempid].SpellAffectIndex=atoi(row[123]);
             sp[tempid].disallow_sit=atoi(row[124]);
-            sp[tempid].spacing125=atoi(row[125]);
 
             for (y = 0; y < 16; y++)
                 sp[tempid].deities[y]=atoi(row[126+y]);
 
-            for (y = 0; y < 2; y++)
-                sp[tempid].spacing142[y]=atoi(row[142+y]);
-
-            sp[tempid].new_icon=atoi(row[144]);
-            sp[tempid].spellanim=atoi(row[145]);
             sp[tempid].uninterruptable=atoi(row[146]);
             sp[tempid].ResistDiff=atoi(row[147]);
-            sp[tempid].dot_stacking_exempt=atoi(row[148]);
-            sp[tempid].deletable=atoi(row[149]);
             sp[tempid].RecourseLink = atoi(row[150]);
-
-            for(y = 0; y < 3;y++)
-                sp[tempid].spacing151[y]=atoi(row[151+y]);
 
             sp[tempid].short_buff_box = atoi(row[154]);
             sp[tempid].descnum = atoi(row[155]);
-            sp[tempid].typedescnum = atoi(row[156]);
             sp[tempid].effectdescnum = atoi(row[157]);
             
-            for(y = 0; y < 4;y++)
-                sp[tempid].spacing158[y]=atoi(row[158+y]);
-
             sp[tempid].bonushate=atoi(row[162]);
-
-            for(y = 0; y < 3;y++)
-                sp[tempid].spacing163[y]=atoi(row[163+y]);
 
             sp[tempid].EndurCost=atoi(row[166]);
             sp[tempid].EndurTimerIndex=atoi(row[167]);
-            sp[tempid].IsDisciplineBuff=atoi(row[168]);
-
-            for(y = 0; y < 4; y++)
-                sp[tempid].spacing169[y]=atoi(row[169+y]);
-
             sp[tempid].HateAdded=atoi(row[173]);
             sp[tempid].EndurUpkeep=atoi(row[174]);
-
-            sp[tempid].spacing175=atoi(row[175]);
             sp[tempid].numhits = atoi(row[176]);
-
             sp[tempid].pvpresistbase=atoi(row[177]);
             sp[tempid].pvpresistcalc=atoi(row[178]);
             sp[tempid].pvpresistcap=atoi(row[179]);
             sp[tempid].spell_category=atoi(row[180]);
-
-            for(y = 0; y < 4;y++)
-                sp[tempid].spacing181[y]=atoi(row[181+y]);
-
             sp[tempid].can_mgb=atoi(row[185]);
             sp[tempid].dispel_flag = atoi(row[186]);
             sp[tempid].MinResist = atoi(row[189]);
@@ -1883,14 +1932,14 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
             sp[tempid].directional_start = (float)atoi(row[194]);
             sp[tempid].directional_end = (float)atoi(row[195]);
             sp[tempid].spellgroup=atoi(row[207]);
-            sp[tempid].field209=atoi(row[209]);
+            sp[tempid].powerful_flag=atoi(row[209]);
             sp[tempid].CastRestriction = atoi(row[211]);
             sp[tempid].AllowRest = atoi(row[212]) != 0;
             sp[tempid].DamageShieldType = 0;
         }
         mysql_free_result(result);
 
-        DBLoadDamageShieldTypes(sp, max_spells);
+        LoadDamageShieldTypes(sp, max_spells);
     } else {
 		_log(SPELLS__LOAD_ERR, "Error in LoadSpells query '%s' %s", query, errbuf);
 		safe_delete_array(query);

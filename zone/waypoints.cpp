@@ -33,7 +33,7 @@ using namespace std;
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"
 #include "../common/rulesys.h"
-#include "features.h"
+#include "../common/features.h"
 #include "QuestParserCollection.h"
 
 struct wp_distance

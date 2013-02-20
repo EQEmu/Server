@@ -16,6 +16,9 @@ struct NPCFactionList;
 struct Faction;
 struct LootTable_Struct;
 struct LootDrop_Struct;
+namespace EQEmu {
+    class MemoryMappedFile;
+}
 
 /*
  * This object is inherited by world and zone's DB object,
@@ -94,10 +97,11 @@ public:
 	bool	DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
 	bool	DBLoadLoot();
 	bool	DBLoadSkillCaps();
-	void	DBLoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
 
     int GetMaxSpellID();
     void LoadSpells(void *data, int max_spells);
+    void LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
+
     void LoadSkillCaps(void *data);
     bool LoadSkillCaps();
 
@@ -125,6 +129,7 @@ protected:
 	
 	uint32				npc_spells_maxid;
 	
+    EQEmu::MemoryMappedFile *skill_caps_mmf;
 private:
 	static SharedDatabase *s_usedb;
 };

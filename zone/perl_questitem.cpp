@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "features.h"
+#include "../common/features.h"
 #include "client.h"
 #ifdef EMBPERL_XS_CLASSES
 #include "../common/debug.h"

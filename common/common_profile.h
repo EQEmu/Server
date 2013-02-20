@@ -19,7 +19,7 @@
 #define COMMON_PROFILE_H
 
 #ifdef ZONE
-#include "../zone/features.h"
+#include "../common/features.h"
 
 #ifndef EQPROFILE
 #ifdef COMMON_PROFILE

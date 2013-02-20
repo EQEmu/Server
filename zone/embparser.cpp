@@ -25,7 +25,7 @@
 
 #include "../common/debug.h"
 #include "masterentity.h"
-#include "features.h"
+#include "../common/features.h"
 #include "embparser.h"
 #include "questmgr.h"
 #include "command.h"

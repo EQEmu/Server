@@ -130,6 +130,7 @@ SET(common_headers
     eqtime.h
     errmsg.h
     extprofile.h
+    features.h
     fixed_memory_hash_set.h
     guild_base.h
     guilds.h

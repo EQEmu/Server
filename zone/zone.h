@@ -25,7 +25,7 @@
 #include "../common/servertalk.h"
 #include "../common/rulesys.h"
 #include "../common/eq_packet_structs.h"
-#include "features.h"
+#include "../common/features.h"
 #include "spawngroup.h"
 //#include "mob.h"
 #include "zonedump.h"

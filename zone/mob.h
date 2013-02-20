@@ -18,7 +18,7 @@
 #ifndef MOB_H
 #define MOB_H
 
-#include "features.h"
+#include "../common/features.h"
 #include "common.h"
 #include "entity.h"
 #include "hate_list.h"

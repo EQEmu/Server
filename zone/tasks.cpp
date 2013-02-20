@@ -30,7 +30,7 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "../common/MiscFunctions.h"
 #include "../common/rulesys.h"
 #include "masterentity.h"
-#include "features.h"
+#include "../common/features.h"
 #include "QuestParserCollection.h"
 
 

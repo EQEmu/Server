@@ -1441,7 +1441,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 
 	if(IsCharmSpell(spell_id)) {
 
-		if (spells[spell_id].field209 == -1) //If charm spell has this set(-1), it can not break till end of duration.
+		if (spells[spell_id].powerful_flag == -1) //If charm spell has this set(-1), it can not break till end of duration.
 			return true;
 
 		//1: The mob has a default 25% chance of being allowed a resistance check against the charm.

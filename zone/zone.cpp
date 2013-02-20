@@ -35,7 +35,7 @@ using namespace std;
 #endif
 
 #include "masterentity.h"
-#include "features.h"
+#include "../common/features.h"
 #include "spawngroup.h"
 #include "spawn2.h"
 #include "zone.h"

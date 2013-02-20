@@ -40,7 +40,7 @@ using namespace std;
 #include "../common/packet_functions.h"
 #include "petitions.h"
 #include "../common/spdat.h"
-#include "features.h"
+#include "../common/features.h"
 #include "StringIDs.h"
 #include "parser.h"
 #include "../common/dbasync.h"

@@ -16,30 +16,10 @@
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "spells.h"
-#include "../common/debug.h"
-#include "../common/shareddb.h"
-#include "../common/ipc_mutex.h"
-#include "../common/memory_mapped_file.h"
-#include "../common/eqemu_exception.h"
-#include "../common/spdat.h"
+#ifndef __EQEMU_SHARED_MEMORY_SKILL_CAPS_H
+#define __EQEMU_SHARED_MEMORY_SKILL_CAPS_H
 
-void LoadSpells(SharedDatabase *database) {
-    EQEmu::IPCMutex mutex("spells");
-    mutex.Lock();
-    int records = database->GetMaxSpellID() + 1;
-    if(records == 0) {
-        EQ_EXCEPT("Shared Memory", "Unable to get any spells from the database.");
-    }
+class SharedDatabase;
+void LoadSkillCaps(SharedDatabase *database);
 
-    uint32 size = records * sizeof(SPDat_Spell_Struct);
-    EQEmu::MemoryMappedFile mmf("shared/spells", size);
-    mmf.ZeroFile();
-
-    void *ptr = mmf.Get();
-    database->LoadSpells(ptr, records);
-    mmf.SetLoaded();
-    
-    //Mutex will unlock on destruction because it's RAII but still.
-    mutex.Unlock();
-}
+#endif

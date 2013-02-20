@@ -19,7 +19,7 @@
 #define ZONE_PROFILE_H
 
 #ifdef ZONE	//only possibly profile if we are building zone
-#include "features.h"
+#include "../common/features.h"
 #endif
 
 #ifdef EQPROFILE

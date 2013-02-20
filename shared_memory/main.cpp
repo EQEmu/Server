@@ -25,6 +25,7 @@
 #include "../common/rulesys.h"
 #include "../common/eqemu_exception.h"
 #include "spells.h"
+#include "skill_caps.h"
 
 //blah global variables =(
 RuleManager *rules = new RuleManager();
@@ -55,10 +56,22 @@ int main(int argc, char **argv) {
 
     bool load_all = true;
     bool load_spells = true;
+    bool load_skill_caps = true;
+    
     if(load_all || load_spells) {
         LogFile->write(EQEMuLog::Status, "Loading spells...");
         try {
             LoadSpells(&database);
+        } catch(std::exception &ex) {
+            LogFile->write(EQEMuLog::Error, "%s", ex.what());
+            return 0;
+        }
+    }
+    
+    if(load_all || load_skill_caps) {
+        LogFile->write(EQEMuLog::Status, "Loading skill caps...");
+        try {
+            LoadSkillCaps(&database);
         } catch(std::exception &ex) {
             LogFile->write(EQEMuLog::Error, "%s", ex.what());
             return 0;

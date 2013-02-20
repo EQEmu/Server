@@ -741,7 +741,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				// define spells with fixed duration
 				// charm spells with -1 in field 209 are all of fixed duration, so lets use that instead of spell_ids
-				if(spells[spell_id].field209 == -1)
+				if(spells[spell_id].powerful_flag == -1)
 					bBreak = true;
 
 				if (!bBreak)

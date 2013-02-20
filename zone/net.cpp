@@ -17,7 +17,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "../common/debug.h"
-#include "features.h"
+#include "../common/features.h"
 #include <iostream>
 using namespace std;
 #include <string.h>
@@ -599,15 +599,6 @@ NetConnection::~NetConnection() {
 	if (WorldAddress != 0)
 		safe_delete_array(WorldAddress);
 }
-bool chrcmpI(const char* a, const char* b) {
-#if EQDEBUG >= 11
-    _log(EQEMuLog::Debug, "crhcmpl() a:%i b:%i", (int*) a, (int*) b);
-#endif
-	if(((int)* a)==((int)* b))
-		return false;
-	else
-		return true;
-}
 
 void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
     int records = database.GetMaxSpellID() + 1;
@@ -618,7 +609,7 @@ void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
         *mmf = new EQEmu::MemoryMappedFile("shared/spells");
         uint32 size = (*mmf)->Size();
         if(size != (records * sizeof(SPDat_Spell_Struct))) {
-            EQ_EXCEPT("zone", "Unable to load spells: (*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)");
+            EQ_EXCEPT("Zone", "Unable to load spells: (*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)");
         }
 
         spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
@@ -658,59 +649,3 @@ void UpdateWindowTitle(char* iNewTitle) {
 #endif
 }
 
-/*bool ZoneBootup(uint32 iZoneID, bool iStaticZone) {
-	const char* zonename = database.GetZoneName(iStaticZone);
-	if (iZoneID == 0 || zonename == 0)
-		return false;
-	if (zone != 0 || ZoneLoaded) {
-		cerr << "Error: Zone::Bootup call when zone already booted!" << endl;
-		worldserver.SetZone(0);
-		return false;
-	}
-	numclients = 0;
-	zone = new Zone(iZoneID, zonename, net.GetZoneAddress(), net.GetZonePort());
-	if (!zone->Init(iStaticZone)) {
-		safe_delete(zone);
-		cerr << "Zone->Init failed" << endl;
-		worldserver.SetZone(0);
-		return false;
-	}
-	if (!eqns.Open(net.GetZonePort())) {
-		safe_delete(zone);
-		cerr << "NetConnection::Init failed" << endl;
-		worldserver.SetZone(0);
-		return false;
-	}
-	if (!zone->LoadZoneCFG(zone->GetShortName(), true)) // try loading the zone name...
-		zone->LoadZoneCFG(zone->GetFileName()); // if that fails, try the file name, then load defaults
-	
-	//petition_list.ClearPetitions();
-	//petition_list.ReadDatabase();
-	ZoneLoaded = true;
-	worldserver.SetZone(iZoneID);
-	zone->GetTimeSync();
-	cout << "-----------" << endl << "Zone server '" << zonename << "' listening on port:" << net.GetZonePort() << endl << "-----------" << endl;
-	//entity_list.WriteEntityIDs();
-	UpdateWindowTitle();
-	return true;
-}*/
-
-// Original source found at http://www.castaglia.org/proftpd/doc/devel-guide/src/lib/strsep.c.html
-char *strsep(char **stringp, const char *delim)
-{
-  char *res;
-
-  if(!stringp || !*stringp || !**stringp)
-    return (char*)0;
-
-  res = *stringp;
-  while(**stringp && !strchr(delim,**stringp))
-    (*stringp)++;
-  
-  if(**stringp) {
-    **stringp = '\0';
-    (*stringp)++;
-  }
-
-  return res;
-}

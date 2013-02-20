@@ -50,7 +50,7 @@ namespace EQEmu {
 
             byte *ptr = data;
             *reinterpret_cast<key_type*>(ptr) = max_element_id;
-            offset_count_ = max_element_id;
+            offset_count_ = max_element_id + 1;
             ptr += sizeof(key_type);
 
             *reinterpret_cast<key_type*>(ptr) = element_count;
@@ -227,7 +227,7 @@ namespace EQEmu {
         //! Calculates how much memory we should allocate based on element size and count 
         static size_type estimated_size(key_type element_count, key_type max_elements) {
             size_type total_size = 3 * sizeof(key_type);
-            total_size += sizeof(key_type) * max_elements;
+            total_size += sizeof(key_type) * (max_elements + 1);
             total_size += sizeof(T) * element_count;
             return total_size;
         }

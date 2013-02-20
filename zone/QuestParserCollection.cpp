@@ -4,7 +4,7 @@
 #include "QuestInterface.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "features.h"
+#include "../common/features.h"
 
 #include <stdio.h>
 #include <stdlib.h>

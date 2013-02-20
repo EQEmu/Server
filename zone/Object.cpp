@@ -25,7 +25,7 @@
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "../common/MiscFunctions.h"
-#include "features.h"
+#include "../common/features.h"
 #include "StringIDs.h"
 using namespace std;
 
