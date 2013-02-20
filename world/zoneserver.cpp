@@ -796,12 +796,12 @@ bool ZoneServer::Process() {
 		case ServerOP_ReloadRules:
 		{
 			zoneserver_list.SendPacket(pack);
-			rules->LoadRules(&database, "default");
+			RuleManager::Instance()->LoadRules(&database, "default");
 			break;
 		}
 		case ServerOP_ReloadRulesWorld:
 		{
-			rules->LoadRules(&database, "default");
+			RuleManager::Instance()->LoadRules(&database, "default");
 			break;
 		}
 		case ServerOP_CameraShake:

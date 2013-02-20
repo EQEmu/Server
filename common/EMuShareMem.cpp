@@ -72,7 +72,6 @@ bool LoadEMuShareMemDLL::Load() {
 		Doors.GetDoor = (DLLFUNC_GetDoor) GetSym("GetDoor");
 		Doors.cbAddDoor = (DLLFUNC_AddDoor) GetSym("AddDoor");
 		Doors.DLLLoadDoors = (DLLFUNC_DLLLoadDoors) GetSym("DLLLoadDoors");
-		Spells.DLLLoadSPDat = (DLLFUNC_DLLLoadSPDat) GetSym("DLLLoadSPDat");
 		NPCFactionList.DLLLoadNPCFactionLists = (DLLFUNC_DLLLoadNPCFactionLists) GetSym("DLLLoadNPCFactionLists");
 		NPCFactionList.GetNPCFactionList = (DLLFUNC_GetNPCFactionList) GetSym("GetNPCFactionList");
 		NPCFactionList.cbAddNPCFactionList = (DLLFUNC_AddNPCFactionList) GetSym("AddNPCFactionList");
@@ -82,16 +81,6 @@ bool LoadEMuShareMemDLL::Load() {
 		Loot.cbAddLootDrop = (DLLFUNC_AddLootDrop) GetSym("AddLootDrop");
 		Loot.GetLootTable = (DLLFUNC_GetLootTable) GetSym("GetLootTable");
 		Loot.GetLootDrop = (DLLFUNC_GetLootDrop) GetSym("GetLootDrop");
-		Opcodes.GetEQOpcode = (DLLFUNC_GetEQOpcode) GetSym("GetEQOpcode");
-		Opcodes.GetEmuOpcode = (DLLFUNC_GetEmuOpcode) GetSym("GetEmuOpcode");
-		Opcodes.SetOpcodePair = (DLLFUNC_SetOpcodePair) GetSym("SetOpcodePair");
-		Opcodes.DLLLoadOpcodes = (DLLFUNC_DLLLoadOpcodes) GetSym("DLLLoadOpcodes");
-		Opcodes.ClearEQOpcodes = (DLLFUNC_ClearEQOpcodes) GetSym("ClearEQOpcodes");
-		SkillCaps.LoadSkillCaps = (DLLFUNC_DLLLoadSkillCaps) GetSym("LoadSkillCaps");
-		SkillCaps.GetSkillCap = (DLLFUNC_GetSkillCap) GetSym("GetSkillCap");
-		SkillCaps.SetSkillCap = (DLLFUNC_SetSkillCap) GetSym("SetSkillCap");
-		SkillCaps.ClearSkillCaps = (DLLFUNC_ClearSkillCaps) GetSym("ClearSkillCaps");
-		SkillCaps.GetTrainLevel = (DLLFUNC_GetTrainLevel) GetSym("GetTrainLevel");	
 		if(Items.GetItem == NULL) {
 			Unload();
 			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach Items.GetItem");
@@ -131,12 +120,6 @@ bool LoadEMuShareMemDLL::Load() {
 		if(Doors.DLLLoadDoors == NULL) {
 			Unload();
 			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach Doors.DLLLoadDoors");
-			return(false);
-		}
-
-		if(Spells.DLLLoadSPDat == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach Spells.DLLLoadSPDat");
 			return(false);
 		}
 
@@ -193,66 +176,6 @@ bool LoadEMuShareMemDLL::Load() {
 			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach Loot.GetLootDrop");
 			return(false);
 		}
-
-		if(Opcodes.GetEQOpcode == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach Opcodes.GetEQOpcode");
-			return(false);
-		}
-
-		if(Opcodes.GetEmuOpcode == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach Opcodes.GetEmuOpcode");
-			return(false);
-		}
-
-		if(Opcodes.SetOpcodePair == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach Opcodes.SetOpcodePair");
-			return(false);
-		}
-
-		if(Opcodes.DLLLoadOpcodes == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach Opcodes.DLLLoadOpcodes");
-			return(false);
-		}
-
-		if(Opcodes.ClearEQOpcodes == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach Opcodes.ClearEQOpcodes");
-			return(false);
-		}
-
-		if(SkillCaps.LoadSkillCaps == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach SkillCaps.LoadSkillCaps");
-			return(false);
-		}
-
-		if(SkillCaps.GetSkillCap == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach SkillCaps.GetSkillCap");
-			return(false);
-		}
-
-		if(SkillCaps.SetSkillCap == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach SkillCaps.SetSkillCap");
-			return(false);
-		}
-
-		if(SkillCaps.ClearSkillCaps == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach SkillCaps.ClearSkillCaps");
-			return(false);
-		}
-		
-		if(SkillCaps.GetTrainLevel == NULL) {
-			Unload();
-			LogFile->write(EQEMuLog::Error, "LoadEMuShareMemDLL::Load() failed to attach SkillCaps.GetTrainLevel");
-			return(false);
-		}
 				
 		LogFile->write(EQEMuLog::Status, "%s loaded", EmuLibName);
 		loaded = true;
@@ -286,15 +209,5 @@ void LoadEMuShareMemDLL::ClearFunc() {
 	Loot.cbAddLootDrop = 0;
 	Loot.GetLootTable = 0;
 	Loot.GetLootDrop = 0;
-	Opcodes.GetEQOpcode = NULL;
-	Opcodes.GetEmuOpcode = NULL;
-	Opcodes.SetOpcodePair = NULL;
-	Opcodes.DLLLoadOpcodes = NULL;
-	Opcodes.ClearEQOpcodes = NULL;
-	SkillCaps.LoadSkillCaps = NULL;
-	SkillCaps.GetSkillCap = NULL;
-	SkillCaps.SetSkillCap = NULL;
-	SkillCaps.ClearSkillCaps = NULL;
-	SkillCaps.GetTrainLevel = NULL;
 	loaded = false;
 }

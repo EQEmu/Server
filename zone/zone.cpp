@@ -1144,12 +1144,12 @@ bool Zone::Init(bool iStaticZone) {
 	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion(), true)) // try loading the zone name...
 		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
 
-	if(rules->GetActiveRulesetID() != default_ruleset)
+	if(RuleManager::Instance()->GetActiveRulesetID() != default_ruleset)
 	{
-		string r_name = rules->GetRulesetName(&database, default_ruleset);
+		string r_name = RuleManager::Instance()->GetRulesetName(&database, default_ruleset);
 		if(r_name.size() > 0)
 		{
-			rules->LoadRules(&database, r_name.c_str());
+			RuleManager::Instance()->LoadRules(&database, r_name.c_str());
 		}
 	}
 		

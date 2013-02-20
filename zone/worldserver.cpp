@@ -1753,7 +1753,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_ReloadRules:
 		{
-			rules->LoadRules(&database, rules->GetActiveRuleset());
+			RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset());
 			break;
 		}
 		case ServerOP_CameraShake:

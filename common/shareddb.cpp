@@ -25,14 +25,14 @@ extern LoadEMuShareMemDLL EMuShareMemDLL;
 SharedDatabase *SharedDatabase::s_usedb = NULL;
 
 SharedDatabase::SharedDatabase()
-: Database(), skill_caps_mmf(NULL)
+: Database(), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL)
 {
 	SDBInitVars();
 	s_usedb = this;
 }
 
 SharedDatabase::SharedDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
-: Database(host, user, passwd, database, port), skill_caps_mmf(NULL)
+: Database(host, user, passwd, database, port), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL)
 {
 	SDBInitVars();
 	s_usedb = this;
@@ -50,6 +50,8 @@ void SharedDatabase::SDBInitVars() {
 
 SharedDatabase::~SharedDatabase() {
     safe_delete(skill_caps_mmf);
+    safe_delete(items_mmf);
+    safe_delete(items_hash);
 }
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
@@ -1518,10 +1520,6 @@ bool SharedDatabase::GetCommandSettings(map<string,uint8> &commands) {
 	return false;
 }
 
-bool SharedDatabase::extDBLoadSkillCaps() {
-	return s_usedb->DBLoadSkillCaps();
-}
-
 bool SharedDatabase::LoadSkillCaps() {
     if(skill_caps_mmf)
         return true;
@@ -1579,42 +1577,6 @@ void SharedDatabase::LoadSkillCaps(void *data) {
         LogFile->write(EQEMuLog::Error, "Error loading skill caps from database: %s", errbuf);
         safe_delete_array(query);
     }
-}
-
-bool SharedDatabase::DBLoadSkillCaps() {
-	LogFile->write(EQEMuLog::Status, "Loading skill caps from database...");
-	
-	uint8 class_count = PLAYER_CLASS_COUNT;
-	uint8 skill_count = HIGHEST_SKILL+1;
-	uint8 level_count = HARD_LEVEL_CAP+1;
-	
-	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, 
-		"SELECT skillID,class,level,cap FROM skill_caps ORDER BY skillID,class,level"), 
-		errbuf, &result)) {
-		safe_delete_array(query);
-		
-		while ((row = mysql_fetch_row(result))) {
-			uint8 skillID = atoi(row[0]);
-			uint8 class_ = atoi(row[1])-1;	//classes are base 1... 
-			uint8 level = atoi(row[2]);
-			uint16 cap = atoi(row[3]);
-			if(skillID >= skill_count || class_ >= class_count || level >= level_count)
-				continue;
-			EMuShareMemDLL.SkillCaps.SetSkillCap(class_, skillID, level, cap);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		cerr << "Error in DBLoadSkillCaps (memshare) #2 query '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
-		return false;
-	}
-
-	return true;
 }
 
 uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillType Skill, uint8 Level) {

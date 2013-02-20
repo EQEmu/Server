@@ -8,9 +8,6 @@ SET(sharedmem_src
     MMF.cpp
     MMFMutex.cpp
     NPCFactionLists.cpp
-    Opcodes.cpp
-    SkillCaps.cpp
-    Spells.cpp
 )
 
 SET(sharedmem_headers
@@ -20,9 +17,6 @@ SET(sharedmem_headers
     MMF.h
     MMFMutex.h
     NPCFactionLists.h
-    Opcodes.h
-    SkillCaps.h
-    Spells.h
 )
 
 SET(EQEMU_MAX_ITEMS 300000 CACHE STRING "Maxium number of items to load into memory. Make sure this is bigger than the total number of items in the server database")

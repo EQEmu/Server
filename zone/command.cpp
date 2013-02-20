@@ -8551,10 +8551,11 @@ void command_rules(Client *c, const Seperator *sep) {
 	}
 	
 	if(!strcasecmp(sep->arg[1], "current")) {
-		c->Message(0, "Currently running ruleset '%s' (%d)", rules->GetActiveRuleset(), rules->GetActiveRulesetID());
+		c->Message(0, "Currently running ruleset '%s' (%d)", RuleManager::Instance()->GetActiveRuleset(), 
+            RuleManager::Instance()->GetActiveRulesetID());
 	} else if(!strcasecmp(sep->arg[1], "listsets")) {
 		std::map<int, std::string> sets;
-		if(!rules->ListRulesets(&database, sets)) {
+		if(!RuleManager::Instance()->ListRulesets(&database, sets)) {
 			c->Message(13, "Failed to list rule sets!");
 			return;
 		}
@@ -8567,11 +8568,12 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(0, "(%d) %s", cur->first, cur->second.c_str());
 		}
 	} else if(!strcasecmp(sep->arg[1], "reload")) {
-		rules->LoadRules(&database, rules->GetActiveRuleset());
-		c->Message(0, "The active ruleset (%s (%d)) has been reloaded", rules->GetActiveRuleset(), rules->GetActiveRulesetID());
+		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset());
+		c->Message(0, "The active ruleset (%s (%d)) has been reloaded", RuleManager::Instance()->GetActiveRuleset(), 
+            RuleManager::Instance()->GetActiveRulesetID());
 	} else if(!strcasecmp(sep->arg[1], "switch")) {
 		//make sure this is a valid rule set..
-		int rsid = rules->GetRulesetID(&database, sep->arg[2]);
+		int rsid = RuleManager::Instance()->GetRulesetID(&database, sep->arg[2]);
 		if(rsid < 0) {
 			c->Message(13, "Unknown rule set '%s'", sep->arg[2]);
 			return;
@@ -8582,27 +8584,27 @@ void command_rules(Client *c, const Seperator *sep) {
 		}
 		
 		//TODO: we likely want to reload this ruleset everywhere...
-		rules->LoadRules(&database, sep->arg[2]);
+		RuleManager::Instance()->LoadRules(&database, sep->arg[2]);
 		
 		c->Message(0, "The selected ruleset has been changed to (%s (%d)) and reloaded locally", sep->arg[2], rsid);
 	} else if(!strcasecmp(sep->arg[1], "load")) {
 		//make sure this is a valid rule set..
-		int rsid = rules->GetRulesetID(&database, sep->arg[2]);
+		int rsid = RuleManager::Instance()->GetRulesetID(&database, sep->arg[2]);
 		if(rsid < 0) {
 			c->Message(13, "Unknown rule set '%s'", sep->arg[2]);
 			return;
 		}
-		rules->LoadRules(&database, sep->arg[2]);
+		RuleManager::Instance()->LoadRules(&database, sep->arg[2]);
 		c->Message(0, "Loaded ruleset '%s' (%d) locally", sep->arg[2], rsid);
 	} else if(!strcasecmp(sep->arg[1], "store")) {
 		if(sep->argnum == 1) {
 			//store current rule set.
-			rules->SaveRules(&database);
+			RuleManager::Instance()->SaveRules(&database);
 			c->Message(0, "Rules saved");
 		} else if(sep->argnum == 2) {
-			rules->SaveRules(&database, sep->arg[2]);
-			int prersid = rules->GetActiveRulesetID();
-			int rsid = rules->GetRulesetID(&database, sep->arg[2]);
+			RuleManager::Instance()->SaveRules(&database, sep->arg[2]);
+			int prersid = RuleManager::Instance()->GetActiveRulesetID();
+			int rsid = RuleManager::Instance()->GetRulesetID(&database, sep->arg[2]);
 			if(rsid < 0) {
 				c->Message(13, "Unable to query ruleset ID after store, it most likely failed.");
 			} else {
@@ -8616,7 +8618,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			return;
 		}
 	} else if(!strcasecmp(sep->arg[1], "reset")) {
-		rules->ResetRules();
+		RuleManager::Instance()->ResetRules();
 		c->Message(0, "The running ruleset has been set to defaults");
 
 	} else if(!strcasecmp(sep->arg[1], "get")) {
@@ -8625,7 +8627,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			return;
 		}
 		std::string value;
-		if(!rules->GetRule(sep->arg[2], value))
+		if(!RuleManager::Instance()->GetRule(sep->arg[2], value))
 			c->Message(13, "Unable to find rule %s", sep->arg[2]);
 		else
 			c->Message(0, "%s - %s", sep->arg[2], value.c_str());
@@ -8635,7 +8637,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(13, "Invalid argument count, see help.");
 			return;
 		}
-		if(!rules->SetRule(sep->arg[2], sep->arg[3])) {
+		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3])) {
 			c->Message(13, "Failed to modify rule");
 		} else {
 			c->Message(0, "Rule modified locally.");
@@ -8645,7 +8647,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			c->Message(13, "Invalid argument count, see help.");
 			return;
 		}
-		if(!rules->SetRule(sep->arg[2], sep->arg[3], &database, true)) {
+		if(!RuleManager::Instance()->SetRule(sep->arg[2], sep->arg[3], &database, true)) {
 			c->Message(13, "Failed to modify rule");
 		} else {
 			c->Message(0, "Rule modified locally and in the database.");
@@ -8653,7 +8655,7 @@ void command_rules(Client *c, const Seperator *sep) {
 	} else if(!strcasecmp(sep->arg[1], "list")) {
 		if(sep->argnum == 1) {
 			std::vector<const char *> rule_list;
-			if(!rules->ListCategories(rule_list)) {
+			if(!RuleManager::Instance()->ListCategories(rule_list)) {
 				c->Message(13, "Failed to list categories!");
 				return;
 			}
@@ -8669,7 +8671,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			if(std::string("all") != sep->arg[2])
 				catfilt = sep->arg[2];
 			std::vector<const char *> rule_list;
-			if(!rules->ListRules(catfilt, rule_list)) {
+			if(!RuleManager::Instance()->ListRules(catfilt, rule_list)) {
 				c->Message(13, "Failed to list rules!");
 				return;
 			}
@@ -8692,7 +8694,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			if(std::string("all") != sep->arg[2])
 				catfilt = sep->arg[2];
 			std::vector<const char *> rule_list;
-			if(!rules->ListRules(catfilt, rule_list)) {
+			if(!RuleManager::Instance()->ListRules(catfilt, rule_list)) {
 				c->Message(13, "Failed to list rules!");
 				return;
 			}
@@ -8701,7 +8703,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			cur = rule_list.begin();
 			end = rule_list.end();
 			for(std::string tmp_value; cur != end; cur++) {
-				if (rules->GetRule(*cur, tmp_value))
+				if (RuleManager::Instance()->GetRule(*cur, tmp_value))
 					c->Message(0, " %s - %s", *cur, tmp_value.c_str());
 			}
 		}

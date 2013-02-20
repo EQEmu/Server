@@ -43,19 +43,6 @@ struct ItemsDLLFunc_Struct {
 	DLLFUNC_IterateItems IterateItems;
 	DLLFUNC_AddItem cbAddItem;
 };
-/*
-typedef bool(*CALLBACK_DBLoadNPCTypes)(int32, uint32);
-
-typedef bool(*DLLFUNC_DLLLoadNPCTypes)(const CALLBACK_DBLoadNPCTypes, uint32, int32*, uint32*);
-typedef const NPCType*(*DLLFUNC_GetNPCType)(uint32);
-typedef bool(*DLLFUNC_AddNPCType)(uint32, const NPCType*);
-struct NPCTypesDLLFunc_Struct {
-	DLLFUNC_DLLLoadNPCTypes DLLLoadNPCTypes;
-	DLLFUNC_GetNPCType GetNPCType;
-	DLLFUNC_AddNPCType cbAddNPCType;
-};
-*/
-
 
 ////////////
 // Doors ///
@@ -69,16 +56,6 @@ struct DoorsDLLFunc_Struct {
 	DLLFUNC_DLLLoadDoors DLLLoadDoors;
 	DLLFUNC_GetDoor GetDoor;
 	DLLFUNC_AddDoor cbAddDoor;
-};
-
-////////////
-// Spells //
-////////////
-typedef bool(*CALLBACK_FileLoadSPDat)(void*, int32);
-
-typedef bool(*DLLFUNC_DLLLoadSPDat)(const CALLBACK_FileLoadSPDat, const void**, int32*, uint32);
-struct SpellsDLLFunc_Struct {
-	DLLFUNC_DLLLoadSPDat DLLLoadSPDat;
 };
 
 //////////////
@@ -117,45 +94,6 @@ struct LootDLLFunc_Struct {
 	DLLFUNC_GetLootDrop GetLootDrop;
 };
 
-/////////////
-// Opcodes //
-/////////////
-
-typedef bool(*CALLBACK_DBLoadOpcodes)(const char *filename);
-
-typedef bool(*DLLFUNC_DLLLoadOpcodes)(const CALLBACK_DBLoadOpcodes, uint32 opsize, uint32 eq_count, uint32 emu_count, const char *filename);
-typedef uint16 (*DLLFUNC_GetEQOpcode)(uint16 emu_op);
-typedef uint16 (*DLLFUNC_GetEmuOpcode)(uint16 eq_op);
-typedef void (*DLLFUNC_ClearEQOpcodes)();
-typedef bool(*DLLFUNC_SetOpcodePair)(uint16 emu_op, uint16 eq_op);
-struct OpcodeDLLFunc_Struct {
-	DLLFUNC_DLLLoadOpcodes DLLLoadOpcodes;
-	DLLFUNC_GetEQOpcode GetEQOpcode;
-	DLLFUNC_GetEmuOpcode GetEmuOpcode;
-	DLLFUNC_SetOpcodePair SetOpcodePair;
-	DLLFUNC_ClearEQOpcodes ClearEQOpcodes;
-};
-
-////////////////
-// Skill Caps //
-////////////////
-
-typedef bool(*CALLBACK_DBLoadSkillCaps)();
-
-typedef bool(*DLLFUNC_DLLLoadSkillCaps)(const CALLBACK_DBLoadSkillCaps, uint32 opsize, uint8 ClassCount, uint8 SkillCount, uint8 LevelCount);
-typedef uint16 (*DLLFUNC_GetSkillCap)(uint8 Class_, uint8 Skill, uint8 Level);
-typedef void (*DLLFUNC_ClearSkillCaps)();
-typedef bool(*DLLFUNC_SetSkillCap)(uint8 Class_, uint8 Skill, uint8 Level, uint16 cap);
-typedef uint8 (*DLLFUNC_GetTrainLevel)(uint8 Class_, uint8 Skill, uint8 Level);
-struct SkillCapDLLFunc_Struct {
-	DLLFUNC_DLLLoadSkillCaps LoadSkillCaps;
-	DLLFUNC_GetSkillCap GetSkillCap;
-	DLLFUNC_SetSkillCap SetSkillCap;
-	DLLFUNC_ClearSkillCaps ClearSkillCaps;
-	DLLFUNC_GetTrainLevel GetTrainLevel;
-};
-
-
 class LoadEMuShareMemDLL : public SharedLibrary {
 public:
 	LoadEMuShareMemDLL();
@@ -165,13 +103,9 @@ public:
 	void Unload();
 	
 	ItemsDLLFunc_Struct				Items;
-	//NPCTypesDLLFunc_Struct			NPCTypes;
 	DoorsDLLFunc_Struct				Doors;
-	SpellsDLLFunc_Struct			Spells;
 	NPCFactionListDLLFunc_Struct	NPCFactionList;
 	LootDLLFunc_Struct				Loot;
-	OpcodeDLLFunc_Struct			Opcodes;
-	SkillCapDLLFunc_Struct			SkillCaps;
 private:
 	void ClearFunc();
 	

@@ -44,8 +44,6 @@ Database database;
 LFGuildManager lfguildmanager;
 string WorldShortName;
 
-// RuleManager *rules = new RuleManager();
-
 const queryservconfig *Config;
 
 WorldServer *worldserver = 0;
@@ -96,22 +94,6 @@ int main() {
 		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
 		return(1);
 	}
-
-	char tmp[64];
-
-	// Disable the Rule system, since we could be split brained from the main database
-	// if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-	// 	_log(WORLD__INIT, "Loading rule set '%s'", tmp);
-	// 	if(!rules->LoadRules(&database, tmp)) {
-	// 		_log(QUERYSERV__ERROR, "Failed to load ruleset '%s', falling back to defaults.", tmp);
-	// 	}
-	// } else {
-	// 	if(!rules->LoadRules(&database, "default")) {
-	// 		_log(QUERYSERV__INIT, "No rule set configured, using default rules");
-	// 	} else {
-	// 		_log(QUERYSERV__INIT, "Loaded default rule set 'default'", tmp);
-	// 	}
-	// }
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(QUERYSERV__ERROR, "Could not set signal handler");

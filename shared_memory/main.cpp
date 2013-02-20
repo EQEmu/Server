@@ -27,9 +27,6 @@
 #include "spells.h"
 #include "skill_caps.h"
 
-//blah global variables =(
-RuleManager *rules = new RuleManager();
-
 int main(int argc, char **argv) {
     RegisterExecutablePlatform(ExePlatformSharedMemory);
     set_exception_handler();
@@ -55,23 +52,22 @@ int main(int argc, char **argv) {
 	}
 
     bool load_all = true;
-    bool load_spells = true;
     bool load_skill_caps = true;
-    
-    if(load_all || load_spells) {
-        LogFile->write(EQEMuLog::Status, "Loading spells...");
+    bool load_spells = true;
+    if(load_all || load_skill_caps) {
+        LogFile->write(EQEMuLog::Status, "Loading skill caps...");
         try {
-            LoadSpells(&database);
+            LoadSkillCaps(&database);
         } catch(std::exception &ex) {
             LogFile->write(EQEMuLog::Error, "%s", ex.what());
             return 0;
         }
     }
-    
-    if(load_all || load_skill_caps) {
-        LogFile->write(EQEMuLog::Status, "Loading skill caps...");
+
+    if(load_all || load_spells) {
+        LogFile->write(EQEMuLog::Status, "Loading spells...");
         try {
-            LoadSkillCaps(&database);
+            LoadSpells(&database);
         } catch(std::exception &ex) {
             LogFile->write(EQEMuLog::Error, "%s", ex.what());
             return 0;

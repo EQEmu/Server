@@ -30,11 +30,11 @@
 //which makes it a global for now, but with instancing we will do exactly
 //what we do with the zone global and just make it a member of core classes
 #define RuleI(cat, rule) \
-	rules->GetIntRule( RuleManager::Int__##rule )
+    RuleManager::Instance()->GetIntRule( RuleManager::Int__##rule )
 #define RuleR(cat, rule) \
-	rules->GetRealRule( RuleManager::Real__##rule )
+	RuleManager::Instance()->GetRealRule( RuleManager::Real__##rule )
 #define RuleB(cat, rule) \
-	rules->GetBoolRule( RuleManager::Bool__##rule )
+	RuleManager::Instance()->GetBoolRule( RuleManager::Bool__##rule )
 
 
 #include <vector>
@@ -76,14 +76,17 @@ public:
 		_CatCount
 	} CategoryType;
 
+    static RuleManager* Instance() {
+        static RuleManager rules;
+        return &rules;
+    }
+
 	static const IntType  InvalidInt  = _IntRuleCount;
 	static const RealType InvalidReal = _RealRuleCount;
 	static const BoolType InvalidBool = _BoolRuleCount;
 	static const CategoryType InvalidCategory = _CatCount;
 	
 	static const uint32 _RulesCount = _IntRuleCount+_RealRuleCount+_BoolRuleCount;
-
-	RuleManager();
 	
 	//fetch routines, you should generally use the Rule* macros instead of this
 	int32 GetIntRule (IntType  t) const;
@@ -111,9 +114,12 @@ public:
 	bool LoadRules(Database *db, const char *ruleset = NULL);
 	void SaveRules(Database *db, const char *ruleset = NULL);
 	
-protected:
+private:
+    RuleManager();
+    RuleManager(const RuleManager&);
+    const RuleManager& operator=(const RuleManager&);
 
-	int		m_activeRuleset;
+	int	m_activeRuleset;
 	std::string m_activeName;
 #ifdef WIN64
 	uint32 	m_RuleIntValues [_IntRuleCount ];
@@ -144,9 +150,5 @@ protected:
 	static const RuleInfo s_RuleInfo[];
 	
 };
-
-//this is not the right way to do this, but I 
-//dont feel like solving it correctly right now:
-extern RuleManager *rules;
 
 #endif /*RULESYS_H_*/

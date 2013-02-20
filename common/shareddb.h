@@ -7,6 +7,7 @@
 #include "skills.h"
 #include "spdat.h"
 #include "Item.h"
+#include "fixed_memory_hash_set.h"
 
 #include <list>
 
@@ -96,7 +97,6 @@ public:
 	bool	DBLoadNPCTypes(int32 iNPCTypeCount, uint32 iMaxNPCTypeID);
 	bool	DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
 	bool	DBLoadLoot();
-	bool	DBLoadSkillCaps();
 
     int GetMaxSpellID();
     void LoadSpells(void *data, int max_spells);
@@ -117,7 +117,6 @@ protected:
 	static bool extDBLoadItems(int32 iItemCount, uint32 iMaxItemID);
 	static bool extDBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
 	static bool extDBLoadLoot();
-	static bool extDBLoadSkillCaps();
 	
 	
 	uint32				max_item;
@@ -129,6 +128,8 @@ protected:
 	
 	uint32				npc_spells_maxid;
 	
+    EQEmu::MemoryMappedFile *items_mmf;
+    EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
     EQEmu::MemoryMappedFile *skill_caps_mmf;
 private:
 	static SharedDatabase *s_usedb;

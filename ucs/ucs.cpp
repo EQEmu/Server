@@ -49,8 +49,6 @@ Database database;
 
 string WorldShortName;
 
-RuleManager *rules = new RuleManager();
-
 const ucsconfig *Config;
 
 WorldServer *worldserver = 0;
@@ -114,11 +112,11 @@ int main() {
 
 	if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
 		_log(WORLD__INIT, "Loading rule set '%s'", tmp);
-		if(!rules->LoadRules(&database, tmp)) {
+		if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
 			_log(UCS__ERROR, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 		}
 	} else {
-		if(!rules->LoadRules(&database, "default")) {
+		if(!RuleManager::Instance()->LoadRules(&database, "default")) {
 			_log(UCS__INIT, "No rule set configured, using default rules");
 		} else {
 			_log(UCS__INIT, "Loaded default rule set 'default'", tmp);

@@ -117,7 +117,6 @@ npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 DBAsyncFinishedQueue MTdbafq;
 DBAsync *dbasync = NULL;
-RuleManager *rules = new RuleManager();
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 
@@ -257,7 +256,8 @@ int main(int argc, char** argv) {
 		CheckEQEMuErrorAndPause();
 		return 0;
 	}
-	_log(ZONE__INIT, "Loading spells");
+	
+    _log(ZONE__INIT, "Loading spells");
     EQEmu::MemoryMappedFile *mmf = NULL;
 	LoadSpells(&mmf);
 
@@ -285,11 +285,11 @@ int main(int argc, char** argv) {
 		char tmp[64];
 		if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
 			_log(ZONE__INIT, "Loading rule set '%s'", tmp);
-			if(!rules->LoadRules(&database, tmp)) {
+			if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
 				_log(ZONE__INIT_ERR, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 			}
 		} else {
-			if(!rules->LoadRules(&database, "default")) {
+			if(!RuleManager::Instance()->LoadRules(&database, "default")) {
 				_log(ZONE__INIT, "No rule set configured, using default rules");
 			} else {
 				_log(ZONE__INIT, "Loaded default rule set 'default'", tmp);
