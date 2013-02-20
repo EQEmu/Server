@@ -1605,7 +1605,7 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, SkillType Skill, uint8 Level) 
 
 void SharedDatabase::DBLoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
 
-	const char *DSQuery = "SELECT `spellid`, `type` from `damageshieldtypes` WHERE `spellid` >0 "
+	const char *DSQuery = "SELECT `spellid`, `type` from `damageshieldtypes` WHERE `spellid` > 0 "
 	                         "AND `spellid` <= %i";
 
 	const char *ERR_MYSQLERROR = "Error in DBLoadDamageShieldTypes: %s %s";

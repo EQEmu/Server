@@ -87,7 +87,6 @@ public:
 	bool	LoadItems();
 	bool	LoadLoot();
 	bool	LoadNPCFactionLists();
-	bool	LoadSkillCaps();
 	bool	GetCommandSettings(map<string,uint8> &commands);
 	const Item_Struct* IterateItems(uint32* NextIndex);
 	bool	DBLoadItems(int32 iItemCount, uint32 iMaxItemID);
@@ -99,6 +98,8 @@ public:
 
     int GetMaxSpellID();
     void LoadSpells(void *data, int max_spells);
+    void LoadSkillCaps(void *data);
+    bool LoadSkillCaps();
 
 protected:
 	void SDBInitVars();
