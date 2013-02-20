@@ -26,16 +26,18 @@
 void LoadSpells(SharedDatabase *database) {
     EQEmu::IPCMutex mutex("spells");
     mutex.Lock();
-    int max_spells = 0; //database->GetMaxSpellID();
-    if(max_spells == -1) {
+    int records = database->GetMaxSpellID();
+    if(records == -1) {
         EQ_EXCEPT("Shared Memory", "Unable to get maximum number of spells from the database.");
     }
+    ++records;
 
-    uint32 size = max_spells * sizeof(SPDat_Spell_Struct);
+    uint32 size = records * sizeof(SPDat_Spell_Struct);
     EQEmu::MemoryMappedFile mmf("shared/spells", size);
 
     void *ptr = mmf.Get();
-    //database->LoadSpells(ptr, max_spells);
+    database->LoadSpells(ptr, records);
+    mmf.SetLoaded();
 
     //Mutex will unlock on destruction because it's RAII but still.
     mutex.Unlock();

@@ -85,6 +85,9 @@ extern volatile bool ZoneLoaded;
 #include "../common/MiscFunctions.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "../common/ipc_mutex.h"
+#include "../common/memory_mapped_file.h"
+#include "../common/eqemu_exception.h"
 
 #include "masterentity.h"
 #include "worldserver.h"
@@ -120,10 +123,7 @@ TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 
 const SPDat_Spell_Struct* spells; 
-SPDat_Spell_Struct* spells_delete; 
-int32 GetMaxSpellID();
-void LoadSPDat();
-bool FileLoadSPDat(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
+void LoadSPDat(EQEmu::MemoryMappedFile **mmf);
 int32 SPDAT_RECORDS = -1;
 
 #ifdef _WINDOWS
@@ -135,11 +135,6 @@ int32 SPDAT_RECORDS = -1;
 
 void Shutdown();
 extern void MapOpcodes();
-
-#ifdef ADDONCMD
-#include "addoncmd.h"
-extern  AddonCmd addonCmd;
-#endif
 
 int main(int argc, char** argv) {
     RegisterExecutablePlatform(ExePlatformZone);
@@ -264,10 +259,9 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 	_log(ZONE__INIT, "Loading spells");
-	LoadSPDat();
+    EQEmu::MemoryMappedFile *mmf = NULL;
+	LoadSPDat(&mmf);
 
-	// New Load function.  keeping it commented till I figure out why its not working correctly in linux. Trump.
-	// NewLoadSPDat();
 	_log(ZONE__INIT, "Loading guilds");
 	guild_mgr.LoadGuilds();
 	_log(ZONE__INIT, "Loading factions");
@@ -322,12 +316,6 @@ int main(int argc, char** argv) {
 	parse->ReloadQuests();
 	
 
-#ifdef ADDONCMD	
-	_log(ZONE__INIT, "Looding addon commands from dll");
-	if ( !addonCmd.openLib() ) {
-		_log(ZONE__INIT_ERR, "Loading addons failed =(");
-	}
-#endif
 #ifdef CLIENT_LOGS
 	LogFile->SetAllCallbacks(ClientLogs::EQEmuIO_buf);
 	LogFile->SetAllCallbacks(ClientLogs::EQEmuIO_fmt);
@@ -506,6 +494,7 @@ int main(int argc, char** argv) {
     safe_delete(parse);
     safe_delete(pxs);
     safe_delete(ps);
+    safe_delete(mmf);
 	
 	entity_list.Clear();
 	if (zone != 0)
@@ -621,256 +610,25 @@ bool chrcmpI(const char* a, const char* b) {
 		return true;
 }
 
-int32 GetMaxSpellID() {
-	//load from DB
-	
-	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-	int32 ret = 0;
-	if (database.RunQuery(query, MakeAnyLenString(&query, 
-		"SELECT MAX(id) FROM spells_new"), 
-		errbuf, &result)) {
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		ret = atoi(row[0]);
-		mysql_free_result(result);
-	} else {
-		_log(SPELLS__LOAD_ERR, "Error in GetMaxSpellID query '%s' %s", query, errbuf);
-		safe_delete_array(query);
-		ret = -1;
-	}
-	return ret;
+void LoadSPDat(EQEmu::MemoryMappedFile **mmf) {
+    int records = database.GetMaxSpellID() + 1;
+
+    try {
+        EQEmu::IPCMutex mutex("spells");
+        mutex.Lock();
+        *mmf = new EQEmu::MemoryMappedFile("shared/spells");
+        if((*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)) {
+            EQ_EXCEPT("zone", "Unable to load spells: (*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)");
+        }
+
+        spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
+        mutex.Unlock();
+    } catch(std::exception &ex) {
+    }
+
+    SPDAT_RECORDS = records;
 }
 
-#ifdef SHAREMEM
-extern "C" bool extFileLoadSPDat(void* sp, int32 iMaxSpellID) { return FileLoadSPDat((SPDat_Spell_Struct*) sp, iMaxSpellID); }
-#endif
-
-void LoadSPDat() {
-	if (SPDAT_RECORDS != -1) {
-		_log(SPELLS__LOAD, "LoadSPDat() SPDAT_RECORDS:%i != -1, spells already loaded?", SPDAT_RECORDS);
-	}
-	int32 MaxSpellID = GetMaxSpellID();
-	if (MaxSpellID == -1) {
-		_log(SPELLS__LOAD, "LoadSPDat() MaxSpellID == -1, error in GetMaxSpellID()?");
-		return;
-	}
-#ifdef SHAREMEM
-	if (!EMuShareMemDLL.Load())
-		return;
-	SPDAT_RECORDS = MaxSpellID+1;
-	if (EMuShareMemDLL.Spells.DLLLoadSPDat((const CALLBACK_FileLoadSPDat)&extFileLoadSPDat, (const void**) &spells, &SPDAT_RECORDS, sizeof(SPDat_Spell_Struct))) {
-		spells_loaded = true;
-	}
-	else {
-		SPDAT_RECORDS = 0;
-		_log(SPELLS__LOAD_ERR, "LoadSPDat() EMuShareMemDLL.Spells.DLLLoadSPDat() returned false");
-		return;
-	}
-#else
-	spells_delete = new SPDat_Spell_Struct[MaxSpellID+1];
-	if (FileLoadSPDat(spells_delete, MaxSpellID)) {
-		spells = spells_delete;
-		SPDAT_RECORDS = MaxSpellID+1;
-		spells_loaded = true;
-	}
-	else {
-		safe_delete(spells_delete);
-		_log(SPELLS__LOAD_ERR, "LoadSPDat() FileLoadSPDat() returned false");
-		return;
-	}
-#endif
-}
-
-bool FileLoadSPDat(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
-	//load from db
-	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-
-	_log(SPELLS__LOAD,"FileLoadSPDat() Loading spells from database");
-
-	if (iMaxSpellID < 0) {
-		_log(SPELLS__LOAD_ERR,"FileLoadSPDat() Loading spells FAILED! iMaxSpellID:%i < 0", iMaxSpellID);
-		return false;
-	} else 
-		_log(SPELLS__LOAD,"FileLoadSPDat() Highest spell ID:%i", iMaxSpellID);
-	
-	if (database.RunQuery(query, MakeAnyLenString(&query, 
-		"SELECT * FROM spells_new ORDER BY id ASC"), 
-		errbuf, &result)) {
-		safe_delete_array(query);
-
-		int tempid = 0;
-		uint16 counter = 0;
-
-		while (row = mysql_fetch_row(result)) {
-
-			tempid = atoi(row[0]);
-			if (tempid > iMaxSpellID) {	// Is this really needed?
-				_log(SPELLS__LOAD_ERR, "FATAL FileLoadSPDat() tempid:%i >= iMaxSpellID:%i", tempid, iMaxSpellID);
-				return false;
-			}
-
-			counter++;
-			// String fields
-			strn0cpy(sp[tempid].name, row[1], sizeof(sp[tempid].name));
-			strn0cpy(sp[tempid].player_1, row[2], sizeof(sp[tempid].player_1));
-			strn0cpy(sp[tempid].teleport_zone, row[3], sizeof(sp[tempid].teleport_zone));
-			strn0cpy(sp[tempid].you_cast,  row[4], sizeof(sp[tempid].you_cast));
-			strn0cpy(sp[tempid].other_casts, row[5], sizeof(sp[tempid].other_casts));
-			strn0cpy(sp[tempid].cast_on_you, row[6], sizeof(sp[tempid].cast_on_you));
-			strn0cpy(sp[tempid].cast_on_other, row[7], sizeof(sp[tempid].cast_on_other));
-			strn0cpy(sp[tempid].spell_fades, row[8], sizeof(sp[tempid].spell_fades));
-
-			// Numeric fields (everything else)
-			sp[tempid].range=static_cast<float>(atof(row[9]));
-			sp[tempid].aoerange=static_cast<float>(atof(row[10]));
-			sp[tempid].pushback=static_cast<float>(atof(row[11]));
-			sp[tempid].pushup=static_cast<float>(atof(row[12]));
-			sp[tempid].cast_time=atoi(row[13]);
-			sp[tempid].recovery_time=atoi(row[14]);
-			sp[tempid].recast_time=atoi(row[15]);
-			sp[tempid].buffdurationformula=atoi(row[16]);
-			sp[tempid].buffduration=atoi(row[17]);
-			sp[tempid].AEDuration=atoi(row[18]);
-			sp[tempid].mana=atoi(row[19]);
-			
-			int y=0;
-			for(y=0; y< EFFECT_COUNT;y++)
-				sp[tempid].base[y]=atoi(row[20+y]);	// effect_base_value
-			for(y=0; y < EFFECT_COUNT; y++)
-				sp[tempid].base2[y]=atoi(row[32+y]);	// effect_limit_value
-			for(y=0; y< EFFECT_COUNT;y++)
-				sp[tempid].max[y]=atoi(row[44+y]);
-			
-			sp[tempid].icon=atoi(row[56]);
-			sp[tempid].memicon=atoi(row[57]);
-			
-			for(y=0; y< 4;y++)
-				sp[tempid].components[y]=atoi(row[58+y]);
-			
-			for(y=0; y< 4;y++)
-				sp[tempid].component_counts[y]=atoi(row[62+y]);
-			
-			for(y=0; y< 4;y++)
-				sp[tempid].NoexpendReagent[y]=atoi(row[66+y]);
-			
-			for(y=0; y< EFFECT_COUNT;y++)
-				sp[tempid].formula[y]=atoi(row[70+y]);
-			
-			sp[tempid].LightType=atoi(row[82]);
-			sp[tempid].goodEffect=atoi(row[83]);
-			sp[tempid].Activated=atoi(row[84]);
-			sp[tempid].resisttype=atoi(row[85]);
-			
-			for(y=0; y< EFFECT_COUNT;y++)
-				sp[tempid].effectid[y]=atoi(row[86+y]);
-			
-			sp[tempid].targettype = (SpellTargetType) atoi(row[98]);
-			sp[tempid].basediff=atoi(row[99]);
-			int tmp_skill = atoi(row[100]);;
-			if(tmp_skill < 0 || tmp_skill > HIGHEST_SKILL)
-				sp[tempid].skill = BEGGING;	/* not much better we can do. */
-			else
-				sp[tempid].skill = (SkillType) tmp_skill;
-			sp[tempid].zonetype=atoi(row[101]);
-			sp[tempid].EnvironmentType=atoi(row[102]);
-			sp[tempid].TimeOfDay=atoi(row[103]);
-			
-			for(y=0; y < PLAYER_CLASS_COUNT;y++)
-				sp[tempid].classes[y]=atoi(row[104+y]);
-			
-			sp[tempid].CastingAnim=atoi(row[120]);
-			sp[tempid].TargetAnim=atoi(row[121]);
-			sp[tempid].TravelType=atoi(row[122]);
-			sp[tempid].SpellAffectIndex=atoi(row[123]);
-			sp[tempid].disallow_sit=atoi(row[124]);
-			sp[tempid].spacing125=atoi(row[125]);
-
-			for (y = 0; y < 16; y++)
-				sp[tempid].deities[y]=atoi(row[126+y]);
-
-			for (y = 0; y < 2; y++)
-				sp[tempid].spacing142[y]=atoi(row[142+y]);
-
-			sp[tempid].new_icon=atoi(row[144]);
-			sp[tempid].spellanim=atoi(row[145]);
-			sp[tempid].uninterruptable=atoi(row[146]);
-			sp[tempid].ResistDiff=atoi(row[147]);
-			sp[tempid].dot_stacking_exempt=atoi(row[148]);
-			sp[tempid].deletable=atoi(row[149]);
-			sp[tempid].RecourseLink = atoi(row[150]);
-
-			for(y = 0; y < 3;y++)
-				sp[tempid].spacing151[y]=atoi(row[151+y]);
-
-			sp[tempid].short_buff_box = atoi(row[154]);
-			sp[tempid].descnum = atoi(row[155]);
-			sp[tempid].typedescnum = atoi(row[156]);
-			sp[tempid].effectdescnum = atoi(row[157]);
-			
-			for(y = 0; y < 4;y++)
-				sp[tempid].spacing158[y]=atoi(row[158+y]);
-
-			sp[tempid].bonushate=atoi(row[162]);
-
-			for(y = 0; y < 3;y++)
-				sp[tempid].spacing163[y]=atoi(row[163+y]);
-
-			sp[tempid].EndurCost=atoi(row[166]);
-			sp[tempid].EndurTimerIndex=atoi(row[167]);
-            sp[tempid].IsDisciplineBuff=atoi(row[168]);
-
-			for(y = 0; y < 4; y++)
-				sp[tempid].spacing169[y]=atoi(row[169+y]);
-
-			sp[tempid].HateAdded=atoi(row[173]);
-			sp[tempid].EndurUpkeep=atoi(row[174]);
-
-			sp[tempid].spacing175=atoi(row[175]);
-			sp[tempid].numhits = atoi(row[176]);
-
-			sp[tempid].pvpresistbase=atoi(row[177]);
-			sp[tempid].pvpresistcalc=atoi(row[178]);
-			sp[tempid].pvpresistcap=atoi(row[179]);
-			sp[tempid].spell_category=atoi(row[180]);
-
-			for(y = 0; y < 4;y++)
-				sp[tempid].spacing181[y]=atoi(row[181+y]);
-
-			sp[tempid].can_mgb=atoi(row[185]);
-			sp[tempid].dispel_flag = atoi(row[186]);
-			sp[tempid].MinResist = atoi(row[189]);
-			sp[tempid].MaxResist = atoi(row[190]);
-			sp[tempid].viral_targets = atoi(row[191]);
-			sp[tempid].viral_timer = atoi(row[192]);
-			sp[tempid].NimbusEffect = atoi(row[193]);
-			sp[tempid].directional_start = (float)atoi(row[194]);
-			sp[tempid].directional_end = (float)atoi(row[195]);
-			sp[tempid].spellgroup=atoi(row[207]);
-			sp[tempid].field209=atoi(row[209]);
-            sp[tempid].CastRestriction = atoi(row[211]);
-			sp[tempid].AllowRest = atoi(row[212]) != 0;
-			sp[tempid].DamageShieldType = 0;
-
-		}
-		mysql_free_result(result);
-		_log(SPELLS__LOAD, "FileLoadSPDat() spells loaded: %i", counter);
-		// Now fill in the DamageShieldType from the damageshieldtypes table, if it exists.
-		//
-		database.DBLoadDamageShieldTypes(sp, iMaxSpellID);
-		
-		return true;
-	} else {
-		_log(SPELLS__LOAD_ERR, "Error in FileLoadSPDat query '%s' %s", query, errbuf);
-		safe_delete_array(query);
-		return false;
-	}
-}
 
 void UpdateWindowTitle(char* iNewTitle) {
 #ifdef _WINDOWS

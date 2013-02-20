@@ -1706,3 +1706,193 @@ void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Str
 	
 	safe_delete_array(query);
 }
+
+int SharedDatabase::GetMaxSpellID() {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = NULL;
+    MYSQL_RES *result;
+    MYSQL_ROW row;
+	int32 ret = 0;
+	if(RunQuery(query, MakeAnyLenString(&query, "SELECT MAX(id) FROM spells_new"), 
+		errbuf, &result)) {
+		safe_delete_array(query);
+		row = mysql_fetch_row(result);
+		ret = atoi(row[0]);
+		mysql_free_result(result);
+	} else {
+		_log(SPELLS__LOAD_ERR, "Error in GetMaxSpellID query '%s' %s", query, errbuf);
+		safe_delete_array(query);
+		ret = -1;
+	}
+	return ret;
+}
+
+void SharedDatabase::LoadSpells(void *data, int max_spells) {
+    SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>(data);
+	char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+    MYSQL_RES *result;
+    MYSQL_ROW row;
+
+    if(RunQuery(query, MakeAnyLenString(&query, 
+		"SELECT * FROM spells_new ORDER BY id ASC"), 
+		errbuf, &result)) {
+		safe_delete_array(query);
+        
+        int tempid = 0;
+		int counter = 0;
+        while (row = mysql_fetch_row(result)) {
+            tempid = atoi(row[0]);
+            if(tempid >= max_spells) {
+                _log(SPELLS__LOAD_ERR, "Non fatal error: spell.id >= max_spells, ignoring.");
+                continue;
+            }
+
+            ++counter;
+            strn0cpy(sp[tempid].name, row[1], sizeof(sp[tempid].name));
+            strn0cpy(sp[tempid].player_1, row[2], sizeof(sp[tempid].player_1));
+            strn0cpy(sp[tempid].teleport_zone, row[3], sizeof(sp[tempid].teleport_zone));
+            strn0cpy(sp[tempid].you_cast,  row[4], sizeof(sp[tempid].you_cast));
+            strn0cpy(sp[tempid].other_casts, row[5], sizeof(sp[tempid].other_casts));
+            strn0cpy(sp[tempid].cast_on_you, row[6], sizeof(sp[tempid].cast_on_you));
+            strn0cpy(sp[tempid].cast_on_other, row[7], sizeof(sp[tempid].cast_on_other));
+            strn0cpy(sp[tempid].spell_fades, row[8], sizeof(sp[tempid].spell_fades));
+
+            sp[tempid].range=static_cast<float>(atof(row[9]));
+            sp[tempid].aoerange=static_cast<float>(atof(row[10]));
+            sp[tempid].pushback=static_cast<float>(atof(row[11]));
+            sp[tempid].pushup=static_cast<float>(atof(row[12]));
+            sp[tempid].cast_time=atoi(row[13]);
+            sp[tempid].recovery_time=atoi(row[14]);
+            sp[tempid].recast_time=atoi(row[15]);
+            sp[tempid].buffdurationformula=atoi(row[16]);
+            sp[tempid].buffduration=atoi(row[17]);
+            sp[tempid].AEDuration=atoi(row[18]);
+            sp[tempid].mana=atoi(row[19]);
+            
+            int y=0;
+            for(y=0; y< EFFECT_COUNT;y++)
+                sp[tempid].base[y]=atoi(row[20+y]);    // effect_base_value
+            for(y=0; y < EFFECT_COUNT; y++)
+                sp[tempid].base2[y]=atoi(row[32+y]);    // effect_limit_value
+            for(y=0; y< EFFECT_COUNT;y++)
+                sp[tempid].max[y]=atoi(row[44+y]);
+            
+            sp[tempid].icon=atoi(row[56]);
+            sp[tempid].memicon=atoi(row[57]);
+            
+            for(y=0; y< 4;y++)
+                sp[tempid].components[y]=atoi(row[58+y]);
+            
+            for(y=0; y< 4;y++)
+                sp[tempid].component_counts[y]=atoi(row[62+y]);
+            
+            for(y=0; y< 4;y++)
+                sp[tempid].NoexpendReagent[y]=atoi(row[66+y]);
+            
+            for(y=0; y< EFFECT_COUNT;y++)
+                sp[tempid].formula[y]=atoi(row[70+y]);
+            
+            sp[tempid].LightType=atoi(row[82]);
+            sp[tempid].goodEffect=atoi(row[83]);
+            sp[tempid].Activated=atoi(row[84]);
+            sp[tempid].resisttype=atoi(row[85]);
+            
+            for(y=0; y< EFFECT_COUNT;y++)
+                sp[tempid].effectid[y]=atoi(row[86+y]);
+            
+            sp[tempid].targettype = (SpellTargetType) atoi(row[98]);
+            sp[tempid].basediff=atoi(row[99]);
+            int tmp_skill = atoi(row[100]);;
+            if(tmp_skill < 0 || tmp_skill > HIGHEST_SKILL)
+                sp[tempid].skill = BEGGING;    /* not much better we can do. */
+            else
+                sp[tempid].skill = (SkillType) tmp_skill;
+            sp[tempid].zonetype=atoi(row[101]);
+            sp[tempid].EnvironmentType=atoi(row[102]);
+            sp[tempid].TimeOfDay=atoi(row[103]);
+            
+            for(y=0; y < PLAYER_CLASS_COUNT;y++)
+                sp[tempid].classes[y]=atoi(row[104+y]);
+            
+            sp[tempid].CastingAnim=atoi(row[120]);
+            sp[tempid].TargetAnim=atoi(row[121]);
+            sp[tempid].TravelType=atoi(row[122]);
+            sp[tempid].SpellAffectIndex=atoi(row[123]);
+            sp[tempid].disallow_sit=atoi(row[124]);
+            sp[tempid].spacing125=atoi(row[125]);
+
+            for (y = 0; y < 16; y++)
+                sp[tempid].deities[y]=atoi(row[126+y]);
+
+            for (y = 0; y < 2; y++)
+                sp[tempid].spacing142[y]=atoi(row[142+y]);
+
+            sp[tempid].new_icon=atoi(row[144]);
+            sp[tempid].spellanim=atoi(row[145]);
+            sp[tempid].uninterruptable=atoi(row[146]);
+            sp[tempid].ResistDiff=atoi(row[147]);
+            sp[tempid].dot_stacking_exempt=atoi(row[148]);
+            sp[tempid].deletable=atoi(row[149]);
+            sp[tempid].RecourseLink = atoi(row[150]);
+
+            for(y = 0; y < 3;y++)
+                sp[tempid].spacing151[y]=atoi(row[151+y]);
+
+            sp[tempid].short_buff_box = atoi(row[154]);
+            sp[tempid].descnum = atoi(row[155]);
+            sp[tempid].typedescnum = atoi(row[156]);
+            sp[tempid].effectdescnum = atoi(row[157]);
+            
+            for(y = 0; y < 4;y++)
+                sp[tempid].spacing158[y]=atoi(row[158+y]);
+
+            sp[tempid].bonushate=atoi(row[162]);
+
+            for(y = 0; y < 3;y++)
+                sp[tempid].spacing163[y]=atoi(row[163+y]);
+
+            sp[tempid].EndurCost=atoi(row[166]);
+            sp[tempid].EndurTimerIndex=atoi(row[167]);
+            sp[tempid].IsDisciplineBuff=atoi(row[168]);
+
+            for(y = 0; y < 4; y++)
+                sp[tempid].spacing169[y]=atoi(row[169+y]);
+
+            sp[tempid].HateAdded=atoi(row[173]);
+            sp[tempid].EndurUpkeep=atoi(row[174]);
+
+            sp[tempid].spacing175=atoi(row[175]);
+            sp[tempid].numhits = atoi(row[176]);
+
+            sp[tempid].pvpresistbase=atoi(row[177]);
+            sp[tempid].pvpresistcalc=atoi(row[178]);
+            sp[tempid].pvpresistcap=atoi(row[179]);
+            sp[tempid].spell_category=atoi(row[180]);
+
+            for(y = 0; y < 4;y++)
+                sp[tempid].spacing181[y]=atoi(row[181+y]);
+
+            sp[tempid].can_mgb=atoi(row[185]);
+            sp[tempid].dispel_flag = atoi(row[186]);
+            sp[tempid].MinResist = atoi(row[189]);
+            sp[tempid].MaxResist = atoi(row[190]);
+            sp[tempid].viral_targets = atoi(row[191]);
+            sp[tempid].viral_timer = atoi(row[192]);
+            sp[tempid].NimbusEffect = atoi(row[193]);
+            sp[tempid].directional_start = (float)atoi(row[194]);
+            sp[tempid].directional_end = (float)atoi(row[195]);
+            sp[tempid].spellgroup=atoi(row[207]);
+            sp[tempid].field209=atoi(row[209]);
+            sp[tempid].CastRestriction = atoi(row[211]);
+            sp[tempid].AllowRest = atoi(row[212]) != 0;
+            sp[tempid].DamageShieldType = 0;
+        }
+        mysql_free_result(result);
+
+        DBLoadDamageShieldTypes(sp, max_spells);
+    } else {
+		_log(SPELLS__LOAD_ERR, "Error in LoadSpells query '%s' %s", query, errbuf);
+		safe_delete_array(query);
+	}
+}

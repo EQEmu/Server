@@ -97,6 +97,8 @@ public:
 	bool	DBLoadSkillCaps();
 	void	DBLoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
 
+    int GetMaxSpellID();
+    void LoadSpells(void *data, int max_spells);
 
 protected:
 	void SDBInitVars();
