@@ -1,5 +1,5 @@
 /*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+    Copyright (C) 2001-2013  EQEMu Development Team (http://eqemulator.net)
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

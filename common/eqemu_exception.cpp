@@ -35,7 +35,8 @@ namespace EQEmu
         name_(e.name_)
     {
     }
-    
+
+#ifdef EQEMU_RVALUE_MOVE
     Exception::Exception(const Exception&& e) 
         : line_(e.line_),
         file_(e.file_),
@@ -43,6 +44,7 @@ namespace EQEmu
         name_(e.name_)
     {
     }
+#endif
     
     void Exception::operator=(const Exception& e) {
         line_ = e.line_;

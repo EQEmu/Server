@@ -1,5 +1,5 @@
 /*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+    Copyright (C) 2001-2013  EQEMu Development Team (http://eqemulator.net)
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
 #include "spells.h"
 #include "../common/debug.h"
 #include "../common/shareddb.h"
