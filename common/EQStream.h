@@ -52,7 +52,7 @@ struct SessionStats {
 /*014*/	uint32 high_delta;
 /*018*/	uint32 last_remote_delta;
 /*022*/	uint64 packets_sent;
-/*030*/	uint64 packets_recieved;
+/*030*/	uint64 packets_received;
 /*038*/
 };
 	
