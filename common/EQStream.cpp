@@ -438,11 +438,11 @@ if(NextSequencedSend > SequencedQueue.size()) {
 #ifndef COLLECTOR
 			SessionStats *Stats=(SessionStats *)p->pBuffer;
 			_log(NET__NET_TRACE, _L "Received Stats: %lu packets received, %lu packets sent, Deltas: local %lu, (%lu <- %lu -> %lu) remote %lu" __L, 
-				(unsigned long)ntohl(Stats->packets_recieved), (unsigned long)ntohl(Stats->packets_sent), (unsigned long)ntohl(Stats->last_local_delta), 
+				(unsigned long)ntohl(Stats->packets_received), (unsigned long)ntohl(Stats->packets_sent), (unsigned long)ntohl(Stats->last_local_delta), 
 				(unsigned long)ntohl(Stats->low_delta), (unsigned long)ntohl(Stats->average_delta), 
 				(unsigned long)ntohl(Stats->high_delta), (unsigned long)ntohl(Stats->last_remote_delta));
-			uint64 x=Stats->packets_recieved;
-			Stats->packets_recieved=Stats->packets_sent;
+			uint64 x=Stats->packets_received;
+			Stats->packets_received=Stats->packets_sent;
 			Stats->packets_sent=x;
 			NonSequencedPush(new EQProtocolPacket(OP_SessionStatResponse,p->pBuffer,p->size));
 			AdjustRates(ntohl(Stats->average_delta));

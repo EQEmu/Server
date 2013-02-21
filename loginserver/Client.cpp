@@ -41,7 +41,7 @@ bool Client::Process()
 	{
 		if(server.options.IsTraceOn())
 		{
-			server_log->Log(log_network, "Application packet recieved from client (size %u)", app->Size());
+			server_log->Log(log_network, "Application packet received from client (size %u)", app->Size());
 		}
 
 		if(server.options.IsDumpInPacketsOn())
@@ -55,7 +55,7 @@ bool Client::Process()
 			{
 				if(server.options.IsTraceOn())
 				{
-					server_log->Log(log_network, "Session ready recieved from client.");
+					server_log->Log(log_network, "Session ready received from client.");
 				}
 				Handle_SessionReady((const char*)app->pBuffer, app->Size());
 				break;
@@ -64,13 +64,13 @@ bool Client::Process()
 			{
 				if(app->Size() < 20)
 				{
-					server_log->Log(log_network_error, "Login recieved but it is too small, discarding.");
+					server_log->Log(log_network_error, "Login received but it is too small, discarding.");
 					break;
 				}
 
 				if(server.options.IsTraceOn())
 				{
-					server_log->Log(log_network, "Login recieved from client.");
+					server_log->Log(log_network, "Login received from client.");
 				}
 
 				Handle_Login((const char*)app->pBuffer, app->Size());
@@ -80,7 +80,7 @@ bool Client::Process()
 			{
 				if(server.options.IsTraceOn())
 				{
-					server_log->Log(log_network, "Server list request recieved from client.");
+					server_log->Log(log_network, "Server list request received from client.");
 				}
 
 				SendServerListPacket();
@@ -90,7 +90,7 @@ bool Client::Process()
 			{
 				if(app->Size() < sizeof(PlayEverquestRequest_Struct))
 				{
-					server_log->Log(log_network_error, "Play recieved but it is too small, discarding.");
+					server_log->Log(log_network_error, "Play received but it is too small, discarding.");
 					break;
 				}
 
@@ -116,7 +116,7 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 {
 	if(status != cs_not_sent_session_ready)
 	{
-		server_log->Log(log_network_error, "Session ready recieved again after already being recieved.");
+		server_log->Log(log_network_error, "Session ready received again after already being received.");
 		return;
 	}
 
@@ -177,13 +177,13 @@ void Client::Handle_Login(const char* data, unsigned int size)
 {
 	if(status != cs_waiting_for_login)
 	{
-		server_log->Log(log_network_error, "Login recieved after already having logged in.");
+		server_log->Log(log_network_error, "Login received after already having logged in.");
 		return;
 	}
 
 	if((size - 12) % 8 != 0)
 	{
-		server_log->Log(log_network_error, "Login recieved packet of size: %u, this would cause a block corruption, discarding.", size);
+		server_log->Log(log_network_error, "Login received packet of size: %u, this would cause a block corruption, discarding.", size);
 		return;
 	}
 
@@ -341,7 +341,7 @@ void Client::Handle_Play(const char* data)
 
 	if(server.options.IsTraceOn())
 	{
-		server_log->Log(log_network, "Play recieved from client, server number %u sequence %u.", server_id_in, sequence_in);
+		server_log->Log(log_network, "Play received from client, server number %u sequence %u.", server_id_in, sequence_in);
 	}
 
 	this->play_server_id = (unsigned int)play->ServerNumber;

@@ -64,7 +64,7 @@ bool WorldServer::Process()
 	{
 		if(server.options.IsWorldTraceOn())
 		{
-			server_log->Log(log_network_trace, "Application packet recieved from server: 0x%.4X, (size %u)", app->opcode, app->size);
+			server_log->Log(log_network_trace, "Application packet received from server: 0x%.4X, (size %u)", app->opcode, app->size);
 		}
 
 		if(server.options.IsDumpInPacketsOn())
@@ -78,7 +78,7 @@ bool WorldServer::Process()
 			{
 				if(app->size < sizeof(ServerNewLSInfo_Struct))
 				{
-					server_log->Log(log_network_error, "Recieved application packet from server that had opcode ServerOP_NewLSInfo, "
+					server_log->Log(log_network_error, "Received application packet from server that had opcode ServerOP_NewLSInfo, "
 						"but was too small. Discarded to avoid buffer overrun.");
 					break;
 				}
@@ -137,7 +137,7 @@ bool WorldServer::Process()
 				//While keeping world server spam with multiple servers connected almost impossible.
 				if(server.options.IsTraceOn())
 				{
-					server_log->Log(log_network_trace, "User-To-World Response recieved.");
+					server_log->Log(log_network_trace, "User-To-World Response received.");
 				}
 
 				UsertoWorldResponse_Struct *utwr = (UsertoWorldResponse_Struct*)app->pBuffer;
@@ -201,7 +201,7 @@ bool WorldServer::Process()
 			}
 		case ServerOP_LSAccountUpdate:
 			{
-				server_log->Log(log_network_trace, "ServerOP_LSAccountUpdate packet recieved from: %s", short_name.c_str());
+				server_log->Log(log_network_trace, "ServerOP_LSAccountUpdate packet received from: %s", short_name.c_str());
 				ServerLSAccountUpdate_Struct *lsau = (ServerLSAccountUpdate_Struct*)app->pBuffer;
 				if(trusted)
 				{
