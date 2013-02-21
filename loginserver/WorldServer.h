@@ -121,12 +121,12 @@ public:
 	unsigned int GetPlayersOnline() const { return players_online; }
 
 	/**
-	 * Takes the info struct we recieved from world and processes it.
+	 * Takes the info struct we received from world and processes it.
 	 */
 	void Handle_NewLSInfo(ServerNewLSInfo_Struct* i);
 
 	/**
-	 * Takes the status struct we recieved from world and processes it.
+	 * Takes the status struct we received from world and processes it.
 	 */
 	void Handle_LSStatus(ServerLSStatus_Struct *s);
 
