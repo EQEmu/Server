@@ -42,23 +42,15 @@
 
 int main() {
     try {
-        std::unique_ptr<Test::Output> output(new Test::HtmlOutput);
+        std::ofstream outfile("test_output.txt");
+        std::unique_ptr<Test::Output> output(new Test::TextOutput(Test::TextOutput::Verbose, outfile));
         Test::Suite tests;
         tests.add(std::auto_ptr<MemoryMappedFileTest>(new MemoryMappedFileTest()));
         tests.add(std::auto_ptr<IPCMutexTest>(new IPCMutexTest()));
         tests.add(std::auto_ptr<FixedMemoryHashTest>(new FixedMemoryHashTest()));
         tests.run(*output, true);
-
-        std::ofstream outfile("tests.html");
-        Test::HtmlOutput* const html = dynamic_cast<Test::HtmlOutput*>(output.get());
-        if(html)
-            html->generate(outfile, true, "EQEmuTests");
-
-        outfile.close();
     } catch(...) {
-        getchar();
         return -1;
     }
-    getchar();
     return 0;
 }

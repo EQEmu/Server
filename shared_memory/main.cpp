@@ -24,8 +24,9 @@
 #include "../common/crash.h"
 #include "../common/rulesys.h"
 #include "../common/eqemu_exception.h"
-#include "spells.h"
+#include "items.h"
 #include "skill_caps.h"
+#include "spells.h"
 
 int main(int argc, char **argv) {
     RegisterExecutablePlatform(ExePlatformSharedMemory);
@@ -52,8 +53,19 @@ int main(int argc, char **argv) {
 	}
 
     bool load_all = true;
+    bool load_items = true;
     bool load_skill_caps = true;
     bool load_spells = true;
+    if(load_all || load_items) {
+        LogFile->write(EQEMuLog::Status, "Loading items...");
+        try {
+            LoadItems(&database);
+        } catch(std::exception &ex) {
+            LogFile->write(EQEMuLog::Error, "%s", ex.what());
+            return 0;
+        }
+    }
+
     if(load_all || load_skill_caps) {
         LogFile->write(EQEMuLog::Status, "Loading skill caps...");
         try {

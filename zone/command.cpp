@@ -381,7 +381,6 @@ int command_init(void) {
 		command_add("opcode","- opcode management",250,command_opcode) || 
 		command_add("logs","[status|normal|error|debug|quest|all] - Subscribe to a log type",250,command_logs) ||
 		command_add("nologs","[status|normal|error|debug|quest|all] - Unsubscribe to a log type",250,command_nologs) ||
-		command_add("datarate","[rate] - Query/set datarate",100,command_datarate) ||
 		command_add("ban","[name] - Ban by character name",150,command_ban) ||
 		command_add("suspend","[name][days] - Suspend by character name and for specificed number of days",150,command_suspend) ||
 		command_add("ipban","[IP address] - Ban IP by character name",200,command_ipban) ||
@@ -6302,9 +6301,8 @@ void command_itemsearch(Client *c, const Seperator *sep)
 				c->Message(0, "Item #%s not found", search_criteria);
 			return;
 		}
-#ifdef SHAREMEM
-		int count=0;
-		//int iSearchLen = strlen(search_criteria)+1;
+
+		int count = 0;
 		char sName[64];
 		char sCriteria[255];
 		strn0cpy(sCriteria, search_criteria, sizeof(sCriteria));
@@ -6337,27 +6335,8 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			c->Message(0, "50 items shown...too many results.");
 		else
 			c->Message(0, "%i items found", count);
-#endif
-	}
-}
 
-void command_datarate(Client *c, const Seperator *sep)
-{
-//	EQStream *eqs = c->Connection();
-
-	if (sep->arg[1][0] == 0) {
-		//c->Message(0, "Datarate: %1.1f", eqs->GetDataRate());
-		//if (c->Admin() >= commandChangeDatarate) {
-			//c->Message(0, "Dataflow: %i", eqs->GetDataFlow());
-			//c->Message(0, "Datahigh: %i", eqs->GetDataHigh());
-		//}
 	}
-	else if (sep->IsNumber(1) && atof(sep->arg[1]) > 0 && (c->Admin() >= commandChangeDatarate || atof(sep->arg[1]) <= 25)) {
-		//eqs->SetDataRate(atof(sep->arg[1]));
-		//c->Message(0, "Datarate: %1.1f", eqs->GetDataRate());
-	}
-	else
-		c->Message(0, "Usage: #DataRate [new data rate in kb/sec, max 25]");
 }
 
 void command_setaaxp(Client *c, const Seperator *sep)

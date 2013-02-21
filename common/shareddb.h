@@ -81,29 +81,32 @@ public:
 	inline const uint32	GetMaxLootDropID()		{ return lootdrop_max; }
 	inline const uint32	GetMaxNPCType()			{ return max_npc_type; }
 	inline const uint32  GetMaxNPCFactionList()	{ return npcfactionlist_max; }
-	const Item_Struct*	GetItem(uint32 id);
 	const EvolveInfo*	GetEvolveInfo(uint32 loregroup);
 	const NPCFactionList*	GetNPCFactionEntry(uint32 id);
-	uint16	GetSkillCap(uint8 Class_, SkillType Skill, uint8 Level);
-	uint8	GetTrainLevel(uint8 Class_, SkillType Skill, uint8 Level);
 	const	LootTable_Struct* GetLootTable(uint32 loottable_id);
 	const	LootDrop_Struct* GetLootDrop(uint32 lootdrop_id);
-	bool	LoadItems();
 	bool	LoadLoot();
 	bool	LoadNPCFactionLists();
 	bool	GetCommandSettings(map<string,uint8> &commands);
-	const Item_Struct* IterateItems(uint32* NextIndex);
 	bool	DBLoadItems(int32 iItemCount, uint32 iMaxItemID);
 	bool	DBLoadNPCTypes(int32 iNPCTypeCount, uint32 iMaxNPCTypeID);
 	bool	DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
 	bool	DBLoadLoot();
 
-    int GetMaxSpellID();
-    void LoadSpells(void *data, int max_spells);
-    void LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
+    int32 GetItemsCount(uint32* max_id = 0);
+    void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
+    bool LoadItems();
+    const Item_Struct* IterateItems(uint32* id);
+    const Item_Struct* GetItem(uint32 id);
 
     void LoadSkillCaps(void *data);
     bool LoadSkillCaps();
+	uint16 GetSkillCap(uint8 Class_, SkillType Skill, uint8 Level);
+	uint8 GetTrainLevel(uint8 Class_, SkillType Skill, uint8 Level);
+
+    int GetMaxSpellID();
+    void LoadSpells(void *data, int max_spells);
+    void LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
 
 protected:
 	void SDBInitVars();
@@ -111,10 +114,8 @@ protected:
 	/*
 	 * Private shared mem stuff
 	 */
-	int32	GetItemsCount(uint32* oMaxID = 0);
 	int32	GetNPCTypesCount(uint32* oMaxID = 0);
 	int32	GetNPCFactionListsCount(uint32* oMaxID = 0);
-	static bool extDBLoadItems(int32 iItemCount, uint32 iMaxItemID);
 	static bool extDBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
 	static bool extDBLoadLoot();
 	

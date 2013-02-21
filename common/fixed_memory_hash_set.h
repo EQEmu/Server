@@ -49,7 +49,7 @@ namespace EQEmu {
             size_ = size;
 
             byte *ptr = data;
-            *reinterpret_cast<key_type*>(ptr) = max_element_id;
+            *reinterpret_cast<key_type*>(ptr) = max_element_id + 1;
             offset_count_ = max_element_id + 1;
             ptr += sizeof(key_type);
 
@@ -62,8 +62,8 @@ namespace EQEmu {
             ptr += sizeof(key_type);
 
             offsets_ = reinterpret_cast<key_type*>(ptr);
-            memset(ptr, 0xFFFFFFFFU, sizeof(key_type) * max_element_id);
-            ptr += sizeof(key_type) * max_element_id;
+            memset(ptr, 0xFFFFFFFFU, sizeof(key_type) * (max_element_id + 1));
+            ptr += sizeof(key_type) * (max_element_id + 1);
 
             elements_ = reinterpret_cast<value_type*>(ptr);
         }
@@ -150,6 +150,11 @@ namespace EQEmu {
         //! Returns the maximum number of elements one can insert into the set.
         size_type max_size() const {
             return max_elements_;
+        }
+
+        //! Returns the maximum key one can use with the set.
+        key_type max_key() const {
+            return offset_count_ > 0 ? (offset_count_ - 1) : 0;
         }
         
         /*!
