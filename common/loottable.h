@@ -1,5 +1,5 @@
 /*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+    Copyright (C) 2001-2013  EQEMu Development Team (http://eqemu.org)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,33 +15,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/*
-alter table npc_types add column loottable_id int(11) unsigned not null;
 
-create table loottable (id int(11) unsigned auto_increment primary key, name varchar(255) not null unique, 
-mincash int(11) unsigned not null, maxcash int(11) unsigned not null, avgcoin smallint(4) unsigned not null default 0);
+#ifndef _EQEMU_LOOTTABLE_H
+#define _EQEMU_LOOTTABLE_H
 
-create table loottable_entries (loottable_id int(11) unsigned not null, lootdrop_id int(11) unsigned not null, 
-multiplier tinyint(2) unsigned default 1 not null, probability tinyint(2) unsigned default 100 not null, 
-primary key (loottable_id, lootdrop_id));
-
-create table lootdrop (id int(11) unsigned auto_increment primary key, name varchar(255) not null unique);
-
-create table lootdrop_entries (lootdrop_id int(11) unsigned not null, item_id int(11) not null, 
-item_charges tinyint(2) default 1 not null, equip_item tinyint(2) unsigned not null, 
-chance tinyint(2) unsigned default 1 not null, primary key (lootdrop_id, item_id));
-
-ALTER TABLE  `loottable_entries` ADD  `probability` FLOAT NOT NULL DEFAULT  '100';
-*/
-
-
-#ifndef LOOTTABLE_H
-#define LOOTTABLE_H
-#include "zonedump.h"
-#include "../common/linked_list.h"
-
-#include <list>
-using namespace std;
 
 #pragma pack(1)
 struct LootTableEntries_Struct {
@@ -75,7 +52,5 @@ struct LootDrop_Struct {
 	LootDropEntries_Struct Entries[0];
 };
 #pragma pack()
-
-typedef list<ServerLootItem_Struct*> ItemList;
 
 #endif

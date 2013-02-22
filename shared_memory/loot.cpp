@@ -16,31 +16,35 @@
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "items.h"
+#include "loot.h"
 #include "../common/debug.h"
 #include "../common/shareddb.h"
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
-#include "../common/item_struct.h"
+#include "../common/loottable.h"
 
-void LoadItems(SharedDatabase *database) {
-    EQEmu::IPCMutex mutex("items");
+void LoadLoot(SharedDatabase *database) {
+    EQEmu::IPCMutex mutex("loot");
     mutex.Lock();
     
-    uint32 max_item = 0;
-    int32 items = database->GetItemsCount(&max_item);
-    if(items == -1) {
-        EQ_EXCEPT("Shared Memory", "Unable to get any items from the database.");
-    }
-    
-    uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(items, max_item));
-    EQEmu::MemoryMappedFile mmf("shared/items", size);
+    uint32 loottable_count, loottable_max, loottable_entries_count, lootdrop_count, lootdrop_max, lootdrop_entries_count;
+    database->GetLootTableInfo(loottable_max, loottable_entries_count, 
+                               lootdrop_max, lootdrop_entries_count);
+    uint32 size = (sizeof(uint32) *3) +
+        (sizeof(uint32) * (loottable_max + 1)) +
+        (sizeof(LootTable_Struct) * loottable_count) +
+        (sizeof(LootTableEntries_Struct) * loottable_entries_count) + 
+        (sizeof(uint32) * (lootdrop_max + 1)) +
+        (sizeof(LootDrop_Struct) * lootdrop_count) + 
+        (sizeof(LootDropEntries_Struct) * lootdrop_entries_count);
+
+    EQEmu::MemoryMappedFile mmf("shared/loot", size);
     mmf.ZeroFile();
     
     void *ptr = mmf.Get();
-    database->LoadItems(ptr, size, items, max_item);
+    database->LoadLoot(ptr, loottable_count, loottable_max, loottable_entries_count, lootdrop_count, 
+        lootdrop_max, lootdrop_entries_count);
     mmf.SetLoaded();
-    
     mutex.Unlock();
 }

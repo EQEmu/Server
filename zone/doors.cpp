@@ -665,38 +665,6 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 	return -1;
 }
 
-/*
-extern "C" bool extDBLoadDoors(int32 iDoorCount, uint32 iMaxDoorID) { return database.DBLoadDoors(iDoorCount, iMaxDoorID); }
-const Door* ZoneDatabase::GetDoor(uint8 door_id, const char* zone_name) {
-	for(uint32 i=0; i!=max_door_type;i++)
-	{
-        const Door* door;
-        door = GetDoorDBID(i);
-        if (!door)
-		continue;
-	if(door->door_id == door_id && strcasecmp(door->zone_name, zone_name) == 0)
-	return door;
-	}
-return 0;
-}
-
-const Door* ZoneDatabase::GetDoorDBID(uint32 db_id) {
-	return EMuShareMemDLL.Doors.GetDoor(db_id);
-}
-
-bool ZoneDatabase::LoadDoors() {
-	if (!EMuShareMemDLL.Load())
-		return false;
-	int32 tmp = 0;
-	tmp = GetDoorsCount(&max_door_type);
-	if (tmp == -1) {
-		cout << "Error: ZoneDatabase::LoadDoors-ShareMem: GetDoorsCount() returned < 0" << endl;
-		return false;
-	}
-	bool ret = EMuShareMemDLL.Doors.DLLLoadDoors(&extDBLoadDoors, sizeof(Door), &tmp, &max_door_type);
-	return ret;
-}*/
-
 bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name, int16 version) {
 	LogFile->write(EQEMuLog::Status, "Loading Doors from database...");
 	char errbuf[MYSQL_ERRMSG_SIZE];

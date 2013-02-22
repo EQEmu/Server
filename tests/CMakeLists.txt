@@ -7,9 +7,10 @@ SET(tests_sources
 )
 
 SET(tests_headers
-    memory_mapped_file_test.h
-    ipc_mutex_test.h
     fixed_memory_test.h
+    fixed_memory_variable_test.h
+    ipc_mutex_test.h
+    memory_mapped_file_test.h
 )
 
 ADD_EXECUTABLE(tests ${tests_sources} ${tests_headers})

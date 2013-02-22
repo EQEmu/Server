@@ -28,7 +28,7 @@ class NPC;
 using namespace std;
 
 #include "spawn2.h"
-#include "loottable.h"
+#include "../common/loottable.h"
 #include "zonedump.h"
 #include "QGlobals.h"
 #include "../common/rulesys.h"

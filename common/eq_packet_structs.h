@@ -21,6 +21,7 @@
 #include "types.h"
 #include <string.h>
 #include <string>
+#include <list>
 #include <time.h>
 #include "../common/version.h"
 //#include "../common/item_struct.h"
@@ -5038,6 +5039,22 @@ struct MercenaryMerchantResponse_Struct {
 /*0000*/	uint32	ResponseType;
 /*0004*/
 };
+
+struct ServerLootItem_Struct {
+	uint32	item_id;
+	int16	equipSlot;
+	uint8	charges;
+	uint16	lootslot;
+	uint32 aug1;
+	uint32 aug2;
+	uint32 aug3;
+	uint32 aug4;
+	uint32 aug5;
+	uint8 minlevel;
+	uint8 maxlevel;
+};
+
+typedef std::list<ServerLootItem_Struct*> ItemList;
 
 // Restore structure packing to default
 #pragma pack()

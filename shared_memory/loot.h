@@ -16,31 +16,10 @@
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "items.h"
-#include "../common/debug.h"
-#include "../common/shareddb.h"
-#include "../common/ipc_mutex.h"
-#include "../common/memory_mapped_file.h"
-#include "../common/eqemu_exception.h"
-#include "../common/item_struct.h"
+#ifndef __EQEMU_SHARED_MEMORY_LOOT_H
+#define __EQEMU_SHARED_MEMORY_LOOT_H
 
-void LoadItems(SharedDatabase *database) {
-    EQEmu::IPCMutex mutex("items");
-    mutex.Lock();
-    
-    uint32 max_item = 0;
-    int32 items = database->GetItemsCount(&max_item);
-    if(items == -1) {
-        EQ_EXCEPT("Shared Memory", "Unable to get any items from the database.");
-    }
-    
-    uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(items, max_item));
-    EQEmu::MemoryMappedFile mmf("shared/items", size);
-    mmf.ZeroFile();
-    
-    void *ptr = mmf.Get();
-    database->LoadItems(ptr, size, items, max_item);
-    mmf.SetLoaded();
-    
-    mutex.Unlock();
-}
+class SharedDatabase;
+void LoadLoot(SharedDatabase *database);
+
+#endif

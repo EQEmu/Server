@@ -7867,7 +7867,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			// Verify there are no NODROP or items with a zero price
 			bool TradeItemsValid = true;
 
-			for(int i=0; i<max_items; i++) {
+			for(uint32 i = 0; i < max_items; i++) {
 
 				if(gis->Items[i] == 0) break;
 
@@ -7897,11 +7897,11 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 				return;
 			}
 
-			for (int i=0;i<max_items;i++) {
-				if(gis->Items[i]>0 && gis->Items[i]<database.GetMaxItem() && database.GetItem(gis->Items[i])!=0)
+			for (uint32 i = 0; i < max_items; i++) {
+                if(database.GetItem(gis->Items[i])) {
 					database.SaveTraderItem(this->CharacterID(),gis->Items[i],gis->SerialNumber[i],
 								gis->Charges[i],ints->ItemCost[i],i);
-				else {
+                } else {
 					//return; //sony doesnt memset so assume done on first bad item
 					break;
 				}

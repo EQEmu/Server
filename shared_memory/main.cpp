@@ -25,6 +25,7 @@
 #include "../common/rulesys.h"
 #include "../common/eqemu_exception.h"
 #include "items.h"
+#include "loot.h"
 #include "skill_caps.h"
 #include "spells.h"
 
@@ -52,14 +53,25 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-    bool load_all = true;
-    bool load_items = true;
-    bool load_skill_caps = true;
-    bool load_spells = true;
+    bool load_all = false;
+    bool load_items = false;
+    bool load_loot = true;
+    bool load_skill_caps = false;
+    bool load_spells = false;
     if(load_all || load_items) {
         LogFile->write(EQEMuLog::Status, "Loading items...");
         try {
             LoadItems(&database);
+        } catch(std::exception &ex) {
+            LogFile->write(EQEMuLog::Error, "%s", ex.what());
+            return 0;
+        }
+    }
+
+    if(load_all || load_loot) {
+        LogFile->write(EQEMuLog::Status, "Loading loot...");
+        try {
+            LoadLoot(&database);
         } catch(std::exception &ex) {
             LogFile->write(EQEMuLog::Error, "%s", ex.what());
             return 0;

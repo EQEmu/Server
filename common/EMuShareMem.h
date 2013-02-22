@@ -24,7 +24,7 @@
 #endif
 #include "../common/eq_packet_structs.h"
 #include "../zone/zonedump.h"
-#include "../zone/loottable.h"
+#include "../common/loottable.h"
 #include "SharedLibrary.h"
 
 ////////////

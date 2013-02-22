@@ -47,7 +47,7 @@ public:
 	void	SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message);
 	void	GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message);
 	void	SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message);
-
+    bool	GetCommandSettings(map<string,uint8> &commands);
 	uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
 
 	/*
@@ -76,28 +76,29 @@ public:
 	/*
 	 * Shared Memory crap
 	 */
-	inline const uint32	GetMaxItem()			{ return max_item; }
-	inline const uint32	GetMaxLootTableID()		{ return loottable_max; }
-	inline const uint32	GetMaxLootDropID()		{ return lootdrop_max; }
-	inline const uint32	GetMaxNPCType()			{ return max_npc_type; }
-	inline const uint32  GetMaxNPCFactionList()	{ return npcfactionlist_max; }
-	const EvolveInfo*	GetEvolveInfo(uint32 loregroup);
-	const NPCFactionList*	GetNPCFactionEntry(uint32 id);
-	const	LootTable_Struct* GetLootTable(uint32 loottable_id);
-	const	LootDrop_Struct* GetLootDrop(uint32 lootdrop_id);
-	bool	LoadLoot();
-	bool	LoadNPCFactionLists();
-	bool	GetCommandSettings(map<string,uint8> &commands);
-	bool	DBLoadItems(int32 iItemCount, uint32 iMaxItemID);
-	bool	DBLoadNPCTypes(int32 iNPCTypeCount, uint32 iMaxNPCTypeID);
-	bool	DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
-	bool	DBLoadLoot();
 
+    //items
     int32 GetItemsCount(uint32* max_id = 0);
     void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
     bool LoadItems();
     const Item_Struct* IterateItems(uint32* id);
     const Item_Struct* GetItem(uint32 id);
+    const EvolveInfo*	GetEvolveInfo(uint32 loregroup);
+    
+    //faction lists
+	const NPCFactionList* GetNPCFactionEntry(uint32 id);
+	bool LoadNPCFactionLists();
+	bool DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
+
+    //loot
+    void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries,
+                          uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries);
+    void LoadLoot(void *ptr, uint32 loot_table_count, uint32 max_loot_table, uint32 loot_table_entries,
+                             uint32 loot_drop_count, uint32 max_loot_drop, uint32 loot_drop_entries);
+    bool LoadLoot();
+    const LootTable_Struct* GetLootTable(uint32 loottable_id);
+	const LootDrop_Struct* GetLootDrop(uint32 lootdrop_id);
+    bool DBLoadLoot();
 
     void LoadSkillCaps(void *data);
     bool LoadSkillCaps();
@@ -109,31 +110,18 @@ public:
     void LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
 
 protected:
-	void SDBInitVars();
 	
 	/*
 	 * Private shared mem stuff
 	 */
-	int32	GetNPCTypesCount(uint32* oMaxID = 0);
 	int32	GetNPCFactionListsCount(uint32* oMaxID = 0);
 	static bool extDBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
-	static bool extDBLoadLoot();
-	
-	
-	uint32				max_item;
-	uint32				max_npc_type;
-	uint32				max_door_type;
-	uint32				npcfactionlist_max;
-	uint32				loottable_max;
-	uint32				lootdrop_max;
-	
-	uint32				npc_spells_maxid;
 	
     EQEmu::MemoryMappedFile *items_mmf;
     EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
+    EQEmu::MemoryMappedFile *faction_mmf;
+    EQEmu::MemoryMappedFile *loot_mmf;
     EQEmu::MemoryMappedFile *skill_caps_mmf;
-private:
-	static SharedDatabase *s_usedb;
 };
 
 

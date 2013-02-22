@@ -18,40 +18,25 @@
 
 using namespace std;
 
-
 extern LoadEMuShareMemDLL EMuShareMemDLL;
 
-//hackish mechanism to support callbacks from sharedmem
-SharedDatabase *SharedDatabase::s_usedb = NULL;
-
 SharedDatabase::SharedDatabase()
-: Database(), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL)
+: Database(), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL), faction_mmf(NULL), loot_mmf(NULL)
 {
-	SDBInitVars();
-	s_usedb = this;
 }
 
 SharedDatabase::SharedDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
-: Database(host, user, passwd, database, port), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL)
+: Database(host, user, passwd, database, port), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL), 
+    faction_mmf(NULL), loot_mmf(NULL)
 {
-	SDBInitVars();
-	s_usedb = this;
-}
-
-void SharedDatabase::SDBInitVars() {
-	max_item = 0;
-	max_npc_type = 0;
-	
-	loottable_max = 0;
-	lootdrop_max = 0;
-	max_door_type = 0;
-	npcfactionlist_max = 0;
 }
 
 SharedDatabase::~SharedDatabase() {
     safe_delete(skill_caps_mmf);
     safe_delete(items_mmf);
     safe_delete(items_hash);
+    safe_delete(faction_mmf);
+    safe_delete(loot_mmf);
 }
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
@@ -753,41 +738,6 @@ int32 SharedDatabase::GetItemsCount(uint32* max_id) {
 	return ret;
 }
 
-
-int32 SharedDatabase::GetNPCTypesCount(uint32* oMaxID) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-	query = new char[256];
-	strcpy(query, "SELECT MAX(id), count(*) FROM npc_types");
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if (row != NULL && row[1] != 0) {
-			int32 ret = atoi(row[1]);
-			if (oMaxID) {
-				if (row[0])
-					*oMaxID = atoi(row[0]);
-				else
-					*oMaxID = 0;
-			}
-			mysql_free_result(result);
-			return ret;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		cerr << "Error in GetNPCTypesCount query '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
-
-		return -1;
-	}
-	
-	return -1;
-}
-
 bool SharedDatabase::LoadItems() {
     if(items_mmf) {
         return true;
@@ -1133,7 +1083,8 @@ string SharedDatabase::GetBook(const char *txtfile)
 
 
 bool SharedDatabase::extDBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID) {
-	return s_usedb->DBLoadNPCFactionLists(iNPCFactionListCount, iMaxNPCFactionListID);
+	return false;
+    //return s_usedb->DBLoadNPCFactionLists(iNPCFactionListCount, iMaxNPCFactionListID);
 }
 
 const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) {
@@ -1150,8 +1101,7 @@ bool SharedDatabase::LoadNPCFactionLists() {
 		cout << "Error: SharedDatabase::LoadNPCFactionLists-ShareMem: GetNPCFactionListsCount() returned < 0" << endl;
 		return false;
 	}
-	npcfactionlist_max = tmp_npcfactionlist_max;
-	bool ret = EMuShareMemDLL.NPCFactionList.DLLLoadNPCFactionLists(&extDBLoadNPCFactionLists, sizeof(NPCFactionList), &tmp, &npcfactionlist_max, MAX_NPC_FACTIONS);
+	bool ret = EMuShareMemDLL.NPCFactionList.DLLLoadNPCFactionLists(&extDBLoadNPCFactionLists, sizeof(NPCFactionList), &tmp, &tmp_npcfactionlist_max, MAX_NPC_FACTIONS);
 	return ret;
 }
 
@@ -1181,7 +1131,7 @@ bool SharedDatabase::DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iM
 				mysql_free_result(result);
 				return false;
 			}
-			npcfactionlist_max = atoi(row[0]);
+			//npcfactionlist_max = atoi(row[0]);
 			mysql_free_result(result);
 			NPCFactionList tmpnfl;
 			if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, primaryfaction, ignore_primary_assist from npc_faction"), errbuf, &result)) {
@@ -1698,76 +1648,6 @@ const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
 	return NULL;	// nothing here for now... database and/or sharemem pulls later
 }
 
-void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT inspectmessage FROM character_ WHERE name='%s'", playername), errbuf, &result)) {
-		safe_delete_array(query);
-
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			memcpy(message, row[0], sizeof(InspectMessage_Struct));
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		cerr << "Error in GetPlayerInspectMessage query '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
-	}
-}
-
-void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-	
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET inspectmessage='%s' WHERE name='%s'", message->text, playername), errbuf)) {
-		cerr << "Error in SetPlayerInspectMessage query '" << query << "' " << errbuf << endl;
-	}
-	
-	safe_delete_array(query);
-}
-
-void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT BotInspectMessage FROM bots WHERE BotID=%i", botid), errbuf, &result)) {
-		safe_delete_array(query);
-
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			memcpy(message, row[0], sizeof(InspectMessage_Struct));
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		cerr << "Error in GetBotInspectMessage query '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
-	}
-}
-
-void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-	
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE bots SET BotInspectMessage='%s' WHERE BotID=%i", message->text, botid), errbuf)) {
-		cerr << "Error in SetBotInspectMessage query '" << query << "' " << errbuf << endl;
-	}
-	
-	safe_delete_array(query);
-}
-
 int SharedDatabase::GetMaxSpellID() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = NULL;
@@ -1920,4 +1800,380 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		_log(SPELLS__LOAD_ERR, "Error in LoadSpells query '%s' %s", query, errbuf);
 		safe_delete_array(query);
 	}
+}
+
+bool SharedDatabase::LoadLoot() {
+	//char errbuf[MYSQL_ERRMSG_SIZE];
+    //char *query = 0;
+    //MYSQL_RES *result;
+    //MYSQL_ROW row;
+	//uint32 tmpLootTableCount = 0;
+	//uint32 tmpLootTableEntriesCount = 0;
+	//uint32 tmpLootDropCount = 0;
+	//uint32 tmpLootDropEntriesCount = 0;
+	//if (RunQuery(query, MakeAnyLenString(&query, "SELECT max(id), count(*) FROM loottable"), errbuf, &result)) {
+	//	safe_delete_array(query);
+	//	if (mysql_num_rows(result) == 1) {
+	//		row = mysql_fetch_row(result);
+	//		if (row[0])
+	//			loottable_max = atoi(row[0]);
+	//		else
+	//			loottable_max = 0;
+	//		tmpLootTableCount = atoi(row[1]);
+	//	}
+	//	else {
+	//		mysql_free_result(result);
+	//		return false;
+	//	}
+	//	mysql_free_result(result);
+	//}
+	//else {
+	//	cerr << "Error in LoadLoot query, loottable part: '" << query << "' " << errbuf << endl;
+	//	safe_delete_array(query);
+	//	return false;
+	//}
+	//if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(*) FROM loottable_entries"), errbuf, &result)) {
+	//	safe_delete_array(query);
+	//	if (mysql_num_rows(result) == 1) {
+	//		row = mysql_fetch_row(result);
+	//		tmpLootTableEntriesCount = atoi(row[0]);
+	//	}
+	//	else {
+	//		mysql_free_result(result);
+	//		return false;
+	//	}
+	//	mysql_free_result(result);
+	//}
+	//else {
+	//	cerr << "Error in LoadLoot query, loottable2 part: '" << query << "' " << errbuf << endl;
+	//	safe_delete_array(query);
+	//	return false;
+	//}
+    //
+	//if (RunQuery(query, MakeAnyLenString(&query, "SELECT max(id), count(*) FROM lootdrop"), errbuf, &result)) {
+	//	safe_delete_array(query);
+	//	if (mysql_num_rows(result) == 1) {
+	//		row = mysql_fetch_row(result);
+	//		if (row[0])
+	//			lootdrop_max = atoi(row[0]);
+	//		else
+	//			lootdrop_max = 0;
+	//		tmpLootDropCount = atoi(row[1]);
+	//	}
+	//	else {
+	//		mysql_free_result(result);
+	//		return false;
+	//	}
+	//	mysql_free_result(result);
+	//}
+	//else {
+	//	cerr << "Error in LoadLoot query, lootdrop1 part: '" << query << "' " << errbuf << endl;
+	//	safe_delete_array(query);
+	//	return false;
+	//}
+	//if (RunQuery(query, MakeAnyLenString(&query, "SELECT max(lootdrop_id), count(*) FROM lootdrop_entries"), errbuf, &result)) {
+	//	safe_delete_array(query);
+	//	if (mysql_num_rows(result) == 1) {
+	//		row = mysql_fetch_row(result);
+	//		tmpLootDropEntriesCount = atoi(row[1]);
+	//	}
+	//	else {
+	//		mysql_free_result(result);
+	//		return false;
+	//	}
+	//	mysql_free_result(result);
+	//}
+	//else {
+	//	cerr << "Error in LoadLoot query, lootdrop part: '" << query << "' " << errbuf << endl;
+	//	safe_delete_array(query);
+	//	return false;
+	//}
+	//return EMuShareMemDLL.Loot.DLLLoadLoot(&extDBLoadLoot,
+	//		 sizeof(LootTable_Struct), tmpLootTableCount, loottable_max,
+	//		 sizeof(LootTableEntries_Struct), tmpLootTableEntriesCount,
+	//		 sizeof(LootDrop_Struct), tmpLootDropCount, lootdrop_max,
+	//		 sizeof(LootDropEntries_Struct), tmpLootDropEntriesCount);
+    return false;
+}
+
+void SharedDatabase::LoadLoot(void *ptr, uint32 loot_table_count, uint32 max_loot_table, uint32 loot_table_entries,
+                             uint32 loot_drop_count, uint32 max_loot_drop, uint32 loot_drop_entries) 
+{
+    uint8 *data = reinterpret_cast<uint8*>(ptr);
+    uint32 *loottable_max = reinterpret_cast<uint32*>(ptr); data += sizeof(uint32);
+    uint32 *lootdrop_max = reinterpret_cast<uint32*>(ptr); data += sizeof(uint32);
+    uint32 *lootdrop_offset = reinterpret_cast<uint32*>(ptr); data += sizeof(uint32);
+    uint32 *loottable_offset = reinterpret_cast<uint32*>(ptr); data += (sizeof(uint32) * (max_loot_table + 1));
+
+    *loottable_max = max_loot_table + 1;
+    *lootdrop_max = max_loot_drop + 1;
+    *loottable_offset = sizeof(uint32) * 3;
+    data += sizeof(uint32) * (*loottable_max + 1);
+
+    uint32 *loottable_offsets = reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(ptr) + (*loottable_offset));
+    uint32 *lootdrop_offsets = NULL;
+
+    const char *loottable_query = "SELECT * FROM loottable ORDER BY id";
+    char errbuf[MYSQL_ERRMSG_SIZE];
+    MYSQL_RES *result;
+    MYSQL_ROW row;
+    if(RunQuery(loottable_query, strlen(loottable_query), errbuf, &result)) {
+        while(row = mysql_fetch_row(result)) {
+            LootTable_Struct *table = reinterpret_cast<LootTable_Struct*>(data); data += sizeof(LootTable_Struct);
+
+        }
+        mysql_free_result(result);
+    }
+}
+
+void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries,
+                                      uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries)
+{
+    loot_table_count = 0;
+    max_loot_table = 0;
+    loot_table_entries = 0;
+    loot_drop_count = 0;
+    max_loot_drop = 0;
+    loot_drop_entries = 0;
+    const char *count_query = "SELECT (SELECT COUNT(*) FROM loottable) as loot_table_count, "
+        "(SELECT COUNT(*) FROM lootdrop) as loot_drop_count";
+    const char *max_query = "SELECT MAX(loottable.id) AS max_loot_table, MAX(lootdrop.id) as max_loot_drop"
+        " FROM loottable, lootdrop";
+    const char *entries_count_query = "SELECT (SELECT COUNT(*) FROM loottable_entries) as loot_table_count, "
+        "(SELECT COUNT(*) FROM lootdrop_entries) as loot_drop_count";
+    char errbuf[MYSQL_ERRMSG_SIZE];
+    MYSQL_RES *result;
+    MYSQL_ROW row;
+
+    if(RunQuery(count_query, strlen(count_query), errbuf, &result)) {
+        if(row = mysql_fetch_row(result)) {
+            loot_table_count = static_cast<uint32>(atoul(row[0]));
+            loot_drop_count = static_cast<uint32>(atoul(row[1]));
+        }
+        mysql_free_result(result);
+    } else {
+        LogFile->write(EQEMuLog::Error, "Error getting loot table info from database: %s, %s", max_query, errbuf);
+        return;
+    }
+
+    if(RunQuery(max_query, strlen(max_query), errbuf, &result)) {
+        if(row = mysql_fetch_row(result)) {
+            max_loot_table = static_cast<uint32>(atoul(row[0]));
+            max_loot_drop = static_cast<uint32>(atoul(row[1]));
+        }
+        mysql_free_result(result);
+    } else {
+        LogFile->write(EQEMuLog::Error, "Error getting loot table info from database: %s, %s", max_query, errbuf);
+        return;
+    }
+
+    if(RunQuery(entries_count_query, strlen(entries_count_query), errbuf, &result)) {
+        if(row = mysql_fetch_row(result)) {
+            loot_table_entries = static_cast<uint32>(atoul(row[0]));
+            loot_drop_entries = static_cast<uint32>(atoul(row[1]));
+        }
+        mysql_free_result(result);
+    } else {
+        LogFile->write(EQEMuLog::Error, "Error getting loot table info from database: %s, %s", entries_count_query, errbuf);
+        return;
+    }
+}
+
+bool SharedDatabase::DBLoadLoot() {
+	LogFile->write(EQEMuLog::Status, "Loading Loot tables from database...");
+	char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+    MYSQL_RES *result;
+    MYSQL_ROW row;
+    MYSQL_RES *result2;
+	uint32 i, tmpid = 0, tmpmincash = 0, tmpmaxcash = 0, tmpavgcoin = 0;
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, mincash, maxcash, avgcoin FROM loottable"), errbuf, &result)) {
+		safe_delete_array(query);
+		LootTable_Struct* tmpLT = 0;
+		while ((row = mysql_fetch_row(result))) {
+			tmpid = atoi(row[0]);
+			tmpmincash = atoi(row[1]);
+			tmpmaxcash = atoi(row[2]);
+			tmpavgcoin = atoi(row[3]);
+			if (RunQuery(query, MakeAnyLenString(&query, "SELECT loottable_id, lootdrop_id, droplimit, mindrop, multiplier, probability FROM loottable_entries WHERE loottable_id=%i", tmpid), errbuf, &result2)) {
+				safe_delete_array(query);
+				tmpLT = (LootTable_Struct*) new uchar[sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * mysql_num_rows(result2))];
+				memset(tmpLT, 0, sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * mysql_num_rows(result2)));
+				tmpLT->NumEntries = mysql_num_rows(result2);
+				tmpLT->mincash = tmpmincash;
+				tmpLT->maxcash = tmpmaxcash;
+				tmpLT->avgcoin = tmpavgcoin;
+				i=0;
+				while ((row = mysql_fetch_row(result2))) {
+					if (i >= tmpLT->NumEntries) {
+						mysql_free_result(result);
+						mysql_free_result(result2);
+						safe_delete_array(tmpLT);
+						cerr << "Error in ZoneDatabase::DBLoadLoot, i >= NumEntries" << endl;
+						return false;
+					}
+					tmpLT->Entries[i].lootdrop_id = atoi(row[1]);
+					tmpLT->Entries[i].droplimit = atoi(row[2]);
+					tmpLT->Entries[i].mindrop = atoi(row[3]);
+					tmpLT->Entries[i].multiplier = atoi(row[4]);
+                    tmpLT->Entries[i].probability = atof(row[5]);
+					i++;
+				}
+				if (!EMuShareMemDLL.Loot.cbAddLootTable(tmpid, tmpLT)) {
+					mysql_free_result(result);
+					mysql_free_result(result2);
+					safe_delete_array(tmpLT);
+					cout << "Error in ZoneDatabase::DBLoadLoot: !cbAddLootTable(" << tmpid << ")" << endl;
+					return false;
+				}
+				safe_delete_array(tmpLT);
+				mysql_free_result(result2);
+			}
+			else {
+				mysql_free_result(result);
+				cerr << "Error in LoadLoot (memshare) #1 query '" << query << "' " << errbuf << endl;
+				safe_delete_array(query);
+				return false;
+			}
+		}
+		mysql_free_result(result);
+	}
+	else {
+		cerr << "Error in LoadLoot (memshare) #2 query '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+		return false;
+	}
+
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM lootdrop", tmpid), errbuf, &result)) {
+		safe_delete_array(query);
+		LootDrop_Struct* tmpLD = 0;
+		while ((row = mysql_fetch_row(result))) {
+			tmpid = atoi(row[0]);
+			if (RunQuery(query, MakeAnyLenString(&query, "SELECT lootdrop_id, item_id, item_charges, equip_item, chance, minlevel, maxlevel, multiplier FROM lootdrop_entries WHERE lootdrop_id=%i order by chance desc", tmpid), errbuf, &result2)) {
+				safe_delete_array(query);
+				tmpLD = (LootDrop_Struct*) new uchar[sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * mysql_num_rows(result2))];
+				memset(tmpLD, 0, sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * mysql_num_rows(result2)));
+				tmpLD->NumEntries = mysql_num_rows(result2);
+				i=0;
+				while ((row = mysql_fetch_row(result2))) {
+					if (i >= tmpLD->NumEntries) {
+						mysql_free_result(result);
+						mysql_free_result(result2);
+						safe_delete_array(tmpLD);
+						cerr << "Error in ZoneDatabase::DBLoadLoot, i >= NumEntries" << endl;
+						return false;
+					}
+					tmpLD->Entries[i].item_id = atoi(row[1]);
+					tmpLD->Entries[i].item_charges = atoi(row[2]);
+					tmpLD->Entries[i].equip_item = atoi(row[3]);
+					tmpLD->Entries[i].chance = atof(row[4]);
+					tmpLD->Entries[i].minlevel = atoi(row[5]);
+					tmpLD->Entries[i].maxlevel = atoi(row[6]);
+					tmpLD->Entries[i].multiplier = atoi(row[7]);
+					i++;
+				}
+				if (!EMuShareMemDLL.Loot.cbAddLootDrop(tmpid, tmpLD)) {
+					mysql_free_result(result);
+					mysql_free_result(result2);
+					safe_delete_array(tmpLD);
+					cout << "Error in ZoneDatabase::DBLoadLoot: !cbAddLootDrop(" << tmpid << ")" << endl;
+					return false;
+				}
+				safe_delete_array(tmpLD);
+				mysql_free_result(result2);
+			}
+			else {
+				cerr << "Error in LoadLoot (memshare) #3 query '" << query << "' " << errbuf << endl;
+				mysql_free_result(result);
+				safe_delete_array(query);
+				return false;
+			}
+		}
+		mysql_free_result(result);
+	}
+	else {
+		cerr << "Error in LoadLoot (memshare) #4 query '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+		return false;
+	}
+
+	return true;
+}
+
+const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) {
+	return EMuShareMemDLL.Loot.GetLootTable(loottable_id);
+}
+
+const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
+	return EMuShareMemDLL.Loot.GetLootDrop(lootdrop_id);
+}
+
+void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message) {
+
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT inspectmessage FROM character_ WHERE name='%s'", playername), errbuf, &result)) {
+		safe_delete_array(query);
+
+		if (mysql_num_rows(result) == 1) {
+			row = mysql_fetch_row(result);
+			memcpy(message, row[0], sizeof(InspectMessage_Struct));
+		}
+
+		mysql_free_result(result);
+	}
+	else {
+		cerr << "Error in GetPlayerInspectMessage query '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+	}
+}
+
+void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message) {
+
+	char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+	
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET inspectmessage='%s' WHERE name='%s'", message->text, playername), errbuf)) {
+		cerr << "Error in SetPlayerInspectMessage query '" << query << "' " << errbuf << endl;
+	}
+	
+	safe_delete_array(query);
+}
+
+void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {
+
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT BotInspectMessage FROM bots WHERE BotID=%i", botid), errbuf, &result)) {
+		safe_delete_array(query);
+
+		if (mysql_num_rows(result) == 1) {
+			row = mysql_fetch_row(result);
+			memcpy(message, row[0], sizeof(InspectMessage_Struct));
+		}
+
+		mysql_free_result(result);
+	}
+	else {
+		cerr << "Error in GetBotInspectMessage query '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+	}
+}
+
+void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message) {
+
+	char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+	
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE bots SET BotInspectMessage='%s' WHERE BotID=%i", message->text, botid), errbuf)) {
+		cerr << "Error in SetBotInspectMessage query '" << query << "' " << errbuf << endl;
+	}
+	
+	safe_delete_array(query);
 }

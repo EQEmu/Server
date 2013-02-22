@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(shared_memory_sources
     items.cpp
+    loot.cpp
     main.cpp
     spells.cpp
     skill_caps.cpp
@@ -9,6 +10,7 @@ SET(shared_memory_sources
 
 SET(shared_memory_headers
     items.h
+    loot.h
     spells.h
     skill_caps.h
 )

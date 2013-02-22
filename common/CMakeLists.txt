@@ -132,6 +132,7 @@ SET(common_headers
     extprofile.h
     features.h
     fixed_memory_hash_set.h
+    fixed_memory_variable_hash_set.h
     guild_base.h
     guilds.h
     ipc_mutex.h
@@ -142,6 +143,7 @@ SET(common_headers
     linked_list.h
     logsys.h
     logtypes.h
+    loottable.h
     mail_oplist.h
     md5.h
     memory_mapped_file.h

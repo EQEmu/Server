@@ -111,7 +111,6 @@ SET(zone_headers
     guild_mgr.h
     hate_list.h
     horse.h
-    loottable.h
     map.h
     masterentity.h
     maxskill.h

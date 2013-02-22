@@ -39,6 +39,7 @@
 #include "memory_mapped_file_test.h"
 #include "ipc_mutex_test.h"
 #include "fixed_memory_test.h"
+#include "fixed_memory_variable_test.h"
 
 int main() {
     try {
@@ -48,6 +49,7 @@ int main() {
         tests.add(std::auto_ptr<MemoryMappedFileTest>(new MemoryMappedFileTest()));
         tests.add(std::auto_ptr<IPCMutexTest>(new IPCMutexTest()));
         tests.add(std::auto_ptr<FixedMemoryHashTest>(new FixedMemoryHashTest()));
+        tests.add(std::auto_ptr<FixedMemoryVariableHashTest>(new FixedMemoryVariableHashTest()));
         tests.run(*output, true);
     } catch(...) {
         return -1;

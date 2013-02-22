@@ -3,7 +3,8 @@
 
 #include "../common/shareddb.h"
 #include "../common/eq_packet_structs.h"
-#include "loottable.h"
+#include "../common/loottable.h"
+#include "zonedump.h"
 #include "faction.h"
 //#include "doors.h"
 
@@ -169,6 +170,7 @@ struct LootTable_Struct;
 
 
 class ZoneDatabase : public SharedDatabase {
+    typedef list<ServerLootItem_Struct*> ItemList;
 public:
 	ZoneDatabase();
 	ZoneDatabase(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
@@ -482,8 +484,8 @@ protected:
 	
 	uint32				max_faction;
 	Faction**			faction_array;
-	
-	uint32				npc_spells_maxid;
+	uint32 max_door_type;
+	uint32 npc_spells_maxid;
 	DBnpcspells_Struct** npc_spells_cache;
 	bool*				npc_spells_loadtried;
 	uint8 item_minstatus[MAX_ITEM_ID];
