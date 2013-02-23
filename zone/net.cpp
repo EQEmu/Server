@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
 //	_crtBreakAlloc = 2025;
 #endif
 	
-	_log(ZONE__INIT, "CURRENT_ZONE_VERSION: %s", CURRENT_ZONE_VERSION);
+	_log(ZONE__INIT, "CURRENT_VERSION: %s", CURRENT_VERSION);
 	
 	/*
 	 * Setup nice signal handlers

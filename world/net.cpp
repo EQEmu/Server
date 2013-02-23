@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
 
-	_log(WORLD__INIT, "CURRENT_WORLD_VERSION:%s", CURRENT_WORLD_VERSION);
+	_log(WORLD__INIT, "CURRENT_VERSION: %s", CURRENT_VERSION);
 	
 	#ifdef _DEBUG
 		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);

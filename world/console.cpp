@@ -749,7 +749,7 @@ void Console::ProcessCommand(const char* command) {
 			}
 			else if (strcasecmp(sep.arg[0], "version") == 0 && admin >= consoleWorldStatus) {
 				SendMessage(1, "Current version information.");
-				SendMessage(1, "  %s", CURRENT_WORLD_VERSION);
+				SendMessage(1, "  %s", CURRENT_VERSION);
 				SendMessage(1, "  Compiled on: %s at %s", COMPILE_DATE, COMPILE_TIME);
 				SendMessage(1, "  Last modified on: %s", LAST_MODIFIED);
 			}

@@ -943,7 +943,7 @@ void command_help(Client *c, const Seperator *sep)
 void command_version(Client *c, const Seperator *sep)
 {
 	c->Message(0, "Current version information.");
-	c->Message(0, "	%s", CURRENT_ZONE_VERSION);
+	c->Message(0, "	%s", CURRENT_VERSION);
 	c->Message(0, "	Compiled on: %s at %s", COMPILE_DATE, COMPILE_TIME);
 	c->Message(0, "	Last modified on: %s", LAST_MODIFIED);
 }
