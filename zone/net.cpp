@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 	
-	_log(ZONE__INIT, "CURRENT_ZONE_VERSION: %s", CURRENT_ZONE_VERSION);
+	_log(ZONE__INIT, "CURRENT_VERSION: %s", CURRENT_VERSION);
 	
 	/*
 	 * Setup nice signal handlers

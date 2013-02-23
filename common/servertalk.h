@@ -1,8 +1,6 @@
 #ifndef EQ_SOPCODES_H
 #define EQ_SOPCODES_H
 
-#define EQEMU_PROTOCOL_VERSION	"0.3.10"
-
 #include "../common/types.h"
 #include "../common/packet_functions.h"
 #include "../common/eq_packet_structs.h"

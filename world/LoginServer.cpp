@@ -268,7 +268,7 @@ void LoginServer::SendInfo() {
 	memset(pack->pBuffer, 0, pack->size);
 	ServerLSInfo_Struct* lsi = (ServerLSInfo_Struct*) pack->pBuffer;
 	strcpy(lsi->protocolversion, EQEMU_PROTOCOL_VERSION);
-	strcpy(lsi->serverversion, CURRENT_VERSION);
+	strcpy(lsi->serverversion, LOGIN_VERSION);
 	strcpy(lsi->name, Config->LongName.c_str());
 	strcpy(lsi->account, LoginAccount);
 	strcpy(lsi->password, LoginPassword);
@@ -288,7 +288,7 @@ void LoginServer::SendNewInfo() {
 	memset(pack->pBuffer, 0, pack->size);
 	ServerNewLSInfo_Struct* lsi = (ServerNewLSInfo_Struct*) pack->pBuffer;
 	strcpy(lsi->protocolversion, EQEMU_PROTOCOL_VERSION);
-	strcpy(lsi->serverversion, CURRENT_VERSION);
+	strcpy(lsi->serverversion, LOGIN_VERSION);
 	strcpy(lsi->name, Config->LongName.c_str());
 	strcpy(lsi->shortname, Config->ShortName.c_str());
 	strcpy(lsi->account, LoginAccount);
