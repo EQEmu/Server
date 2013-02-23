@@ -269,7 +269,7 @@ int command_init(void) {
 		command_add("reloadquest"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
 		command_add("reloadqst",NULL,0,command_reloadqst) ||
 		command_add("reloadpl",NULL,0,command_reloadqst) ||
-		command_add("reloadworld",NULL,0,command_reloadworld) ||
+		command_add("reloadworld",NULL,255,command_reloadworld) ||
 		command_add("reloadlevelmods",NULL,0,command_reloadlevelmods) ||
 		command_add("rq",NULL,0,command_reloadqst) ||
 		command_add("reloadzonepoints","- Reload zone points from database",150,command_reloadzps) ||
