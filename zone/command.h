@@ -122,7 +122,6 @@ void command_spon(Client *c, const Seperator *sep);
 void command_spoff(Client *c, const Seperator *sep);
 void command_itemtest(Client *c, const Seperator *sep);
 void command_gassign(Client *c, const Seperator *sep);
-void command_setitemstatus(Client *c, const Seperator *sep);
 void command_ai(Client *c, const Seperator *sep);
 void command_worldshutdown(Client *c, const Seperator *sep);
 void command_sendzonespawns(Client *c, const Seperator *sep);

@@ -1884,6 +1884,11 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
             ++(ld->NumEntries);
             ++current_entry;
         }
+        if(current_id != 0) {
+            hash.insert(current_id, loot_drop, (sizeof(LootDrop_Struct) + 
+                (sizeof(LootDropEntries_Struct) * ld->NumEntries)));
+        }
+
         mysql_free_result(result);
     } else {
         LogFile->write(EQEMuLog::Error, "Error getting loot drop info from database: %s, %s", query, errbuf);

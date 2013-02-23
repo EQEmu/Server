@@ -27,6 +27,7 @@ SET(common_sources
     EQStreamProxy.cpp
     eqtime.cpp
     extprofile.cpp
+	faction.cpp
     guild_base.cpp
     guilds.cpp
     ipc_mutex.cpp

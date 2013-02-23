@@ -2348,3 +2348,62 @@ void NPC::PrintOutQuestItems(Client* c){
 
 		c->Message(4,"End of quest items list.");
 }
+
+//this is called with 'this' as the mob being looked at, and
+//iOther the mob who is doing the looking. It should figure out
+//what iOther thinks about 'this'
+FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {	
+	_ZP(NPC_GetReverseFactionCon);
+
+	iOther = iOther->GetOwnerOrSelf();
+	int primaryFaction= iOther->GetPrimaryFaction();
+	
+	//I am pretty sure that this special faction call is backwards
+	//and should be iOther->GetSpecialFactionCon(this)
+	if (primaryFaction < 0)
+		return GetSpecialFactionCon(iOther);
+	
+	if (primaryFaction == 0)
+		return FACTION_INDIFFERENT;
+	
+	//if we are a pet, use our owner's faction stuff
+	Mob *own = GetOwner();
+	if (own != NULL)
+		return own->GetReverseFactionCon(iOther);
+	
+	//make sure iOther is an npc
+	//also, if we dont have a faction, then they arnt gunna think anything of us either
+	if(!iOther->IsNPC() || GetPrimaryFaction() == 0)
+		return(FACTION_INDIFFERENT);
+	
+	//if we get here, iOther is an NPC too
+	
+	//otherwise, employ the npc faction stuff
+	//so we need to look at iOther's faction table to see
+	//what iOther thinks about our primary faction
+	return(iOther->CastToNPC()->CheckNPCFactionAlly(GetPrimaryFaction()));
+}
+
+//Look through our faction list and return a faction con based 
+//on the npc_value for the other person's primary faction in our list.
+FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
+	list<struct NPCFaction*>::iterator cur,end;
+	cur = faction_list.begin();
+	end = faction_list.end();
+	for(; cur != end; cur++) {
+		struct NPCFaction* fac = *cur;
+		if ((int32)fac->factionID == other_faction) {
+			if (fac->npc_value > 0)
+				return FACTION_ALLY;
+			else if (fac->npc_value < 0)
+				return FACTION_SCOWLS;
+			else
+				return FACTION_INDIFFERENT;
+		}
+	}
+	return FACTION_INDIFFERENT;
+}
+
+bool NPC::IsFactionListAlly(uint32 other_faction) {
+	return(CheckNPCFactionAlly(other_faction) == FACTION_ALLY);
+}

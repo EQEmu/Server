@@ -60,6 +60,51 @@ int main(int argc, char **argv) {
     bool load_loot = true;
     bool load_skill_caps = true;
     bool load_spells = true;
+    if(argc > 1) {
+        load_all = false;
+        load_items = false;
+        load_factions = false;
+        load_loot = false;
+        load_skill_caps = false;
+        load_spells = false;
+
+        for(int i = 1; i < argc; ++i) {
+            switch(argv[i][0]) {
+            case 'a':
+                if(strcasecmp("all", argv[i]) == 0) {
+                    load_all = true;
+                }
+                break;
+
+            case 'i':
+                if(strcasecmp("items", argv[i]) == 0) {
+                    load_items = true;
+                }
+                break;
+
+            case 'f':
+                if(strcasecmp("factions", argv[i]) == 0) {
+                    load_factions = true;
+                }
+                break;
+
+            case 'l':
+                if(strcasecmp("loot", argv[i]) == 0) {
+                    load_loot = true;
+                }
+                break;
+                
+            case 's':
+                if(strcasecmp("skill_caps", argv[i]) == 0) {
+                    load_skill_caps = true;
+                } else if(strcasecmp("spells", argv[i]) == 0) {
+                    load_spells = true;
+                }
+                break;
+            }
+        }
+    }
+
     if(load_all || load_items) {
         LogFile->write(EQEMuLog::Status, "Loading items...");
         try {

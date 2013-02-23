@@ -54,14 +54,15 @@ struct FactionMods
 	int32 race_mod;
 	int32 deity_mod;
 };
+
 struct Faction {
 	int32	id;
     std::map<std::string, int16> mods;
 	int16	base;
 	char	name[50];
 };
-typedef map<uint32, int16> faction_map;
 
+typedef std::map<uint32, int16> faction_map;
 struct NPCFaction    
 {    
     uint32 factionID;
@@ -71,6 +72,5 @@ struct NPCFaction
 }; 
 
 const char *FactionValueToString(FACTION_VALUE fv);
-char* BuildFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalvalue, uint8 temp);
 FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value);
 #endif

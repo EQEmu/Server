@@ -91,7 +91,6 @@ public:
 	const NPCFactionList* GetNPCFactionEntry(uint32 id);
     void LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists);
 	bool LoadNPCFactionLists();
-	//bool DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
 
     //loot
     void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries);

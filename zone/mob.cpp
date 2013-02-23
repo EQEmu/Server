@@ -4473,3 +4473,191 @@ bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
 	}
 	return false; 
 }
+
+// Faction Mods for Alliance type spells
+void Mob::AddFactionBonus(uint32 pFactionID,int32 bonus) {
+    map <uint32, int32> :: const_iterator faction_bonus;
+	typedef std::pair <uint32, int32> NewFactionBonus;
+
+	faction_bonus = faction_bonuses.find(pFactionID);
+	if(faction_bonus == faction_bonuses.end())
+	{
+		faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+	}
+	else
+	{
+		if(faction_bonus->second<bonus)
+		{
+			faction_bonuses.erase(pFactionID);
+			faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+		}
+	}
+}
+
+// Faction Mods from items
+void Mob::AddItemFactionBonus(uint32 pFactionID,int32 bonus) {
+    map <uint32, int32> :: const_iterator faction_bonus;
+	typedef std::pair <uint32, int32> NewFactionBonus;
+
+	faction_bonus = item_faction_bonuses.find(pFactionID);
+	if(faction_bonus == item_faction_bonuses.end())
+	{
+		item_faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+	}
+	else
+	{
+		if((bonus > 0 && faction_bonus->second < bonus) || (bonus < 0 && faction_bonus->second > bonus))
+		{
+			item_faction_bonuses.erase(pFactionID);
+			item_faction_bonuses.insert(NewFactionBonus(pFactionID,bonus));
+		}
+	}
+}
+
+int32 Mob::GetFactionBonus(uint32 pFactionID) {
+    map <uint32, int32> :: const_iterator faction_bonus;
+	faction_bonus = faction_bonuses.find(pFactionID);
+	if(faction_bonus != faction_bonuses.end())
+	{
+		return (*faction_bonus).second;
+	}
+	return 0;
+}
+
+int32 Mob::GetItemFactionBonus(uint32 pFactionID) {
+    map <uint32, int32> :: const_iterator faction_bonus;
+	faction_bonus = item_faction_bonuses.find(pFactionID);
+	if(faction_bonus != item_faction_bonuses.end())
+	{
+		return (*faction_bonus).second;
+	}
+	return 0;
+}
+
+void Mob::ClearItemFactionBonuses() {
+	map <uint32, int32> :: iterator itr;
+	for(itr = item_faction_bonuses.begin(); itr != item_faction_bonuses.end(); itr++)
+	{
+		item_faction_bonuses.erase(itr->first);
+	}
+}
+
+FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
+	if (!iOther)
+		return FACTION_INDIFFERENT;
+
+	iOther = iOther->GetOwnerOrSelf();
+	Mob* self = this->GetOwnerOrSelf();
+
+	bool selfAIcontrolled = self->IsAIControlled();
+	bool iOtherAIControlled = iOther->IsAIControlled();
+	int selfPrimaryFaction = self->GetPrimaryFaction();
+	int iOtherPrimaryFaction = iOther->GetPrimaryFaction();
+	
+	if (selfPrimaryFaction >= 0 && selfAIcontrolled)
+		return FACTION_INDIFFERENT;
+	if (iOther->GetPrimaryFaction() >= 0)
+		return FACTION_INDIFFERENT;
+/* special values:
+	-2 = indiff to player, ally to AI on special values, indiff to AI
+	-3 = dub to player, ally to AI on special values, indiff to AI
+	-4 = atk to player, ally to AI on special values, indiff to AI
+	-5 = indiff to player, indiff to AI
+	-6 = dub to player, indiff to AI
+	-7 = atk to player, indiff to AI
+	-8 = indiff to players, ally to AI on same value, indiff to AI
+	-9 = dub to players, ally to AI on same value, indiff to AI
+	-10 = atk to players, ally to AI on same value, indiff to AI
+	-11 = indiff to players, ally to AI on same value, atk to AI
+	-12 = dub to players, ally to AI on same value, atk to AI
+	-13 = atk to players, ally to AI on same value, atk to AI
+*/
+	switch (iOtherPrimaryFaction) {
+		case -2: // -2 = indiff to player, ally to AI on special values, indiff to AI
+			if (selfAIcontrolled && iOtherAIControlled)
+				return FACTION_ALLY;
+			else
+				return FACTION_INDIFFERENT;
+		case -3: // -3 = dub to player, ally to AI on special values, indiff to AI
+			if (selfAIcontrolled && iOtherAIControlled)
+				return FACTION_ALLY;
+			else
+				return FACTION_DUBIOUS;
+		case -4: // -4 = atk to player, ally to AI on special values, indiff to AI
+			if (selfAIcontrolled && iOtherAIControlled)
+				return FACTION_ALLY;
+			else
+				return FACTION_SCOWLS;
+		case -5: // -5 = indiff to player, indiff to AI
+			return FACTION_INDIFFERENT;
+		case -6: // -6 = dub to player, indiff to AI
+			if (selfAIcontrolled && iOtherAIControlled)
+				return FACTION_INDIFFERENT;
+			else
+				return FACTION_DUBIOUS;
+		case -7: // -7 = atk to player, indiff to AI
+			if (selfAIcontrolled && iOtherAIControlled)
+				return FACTION_INDIFFERENT;
+			else
+				return FACTION_SCOWLS;
+		case -8: // -8 = indiff to players, ally to AI on same value, indiff to AI
+			if (selfAIcontrolled && iOtherAIControlled) {
+				if (selfPrimaryFaction == iOtherPrimaryFaction)
+					return FACTION_ALLY;
+				else
+					return FACTION_INDIFFERENT;
+			}
+			else
+				return FACTION_INDIFFERENT;
+		case -9: // -9 = dub to players, ally to AI on same value, indiff to AI
+			if (selfAIcontrolled && iOtherAIControlled) {
+				if (selfPrimaryFaction == iOtherPrimaryFaction)
+					return FACTION_ALLY;
+				else
+					return FACTION_INDIFFERENT;
+			}
+			else
+				return FACTION_DUBIOUS;
+		case -10: // -10 = atk to players, ally to AI on same value, indiff to AI
+			if (selfAIcontrolled && iOtherAIControlled) {
+				if (selfPrimaryFaction == iOtherPrimaryFaction)
+					return FACTION_ALLY;
+				else
+					return FACTION_INDIFFERENT;
+			}
+			else
+				return FACTION_SCOWLS;
+		case -11: // -11 = indiff to players, ally to AI on same value, atk to AI
+			if (selfAIcontrolled && iOtherAIControlled) {
+				if (selfPrimaryFaction == iOtherPrimaryFaction)
+					return FACTION_ALLY;
+				else
+					return FACTION_SCOWLS;
+			}
+			else
+				return FACTION_INDIFFERENT;
+		case -12: // -12 = dub to players, ally to AI on same value, atk to AI
+			if (selfAIcontrolled && iOtherAIControlled) {
+				if (selfPrimaryFaction == iOtherPrimaryFaction)
+					return FACTION_ALLY;
+				else
+					return FACTION_SCOWLS;
+
+
+			}
+			else
+				return FACTION_DUBIOUS;
+		case -13: // -13 = atk to players, ally to AI on same value, atk to AI
+			if (selfAIcontrolled && iOtherAIControlled) {
+				if (selfPrimaryFaction == iOtherPrimaryFaction)
+					return FACTION_ALLY;
+				else
+					return FACTION_SCOWLS;
+			}
+			else
+				return FACTION_SCOWLS;
+		default:
+			return FACTION_INDIFFERENT;
+	}
+}
+

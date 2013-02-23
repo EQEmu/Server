@@ -217,7 +217,7 @@ int main(int argc, char** argv) {
 		_log(ZONE__INIT_ERR, "Loading items FAILED!");
 		_log(ZONE__INIT, "Failed.  But ignoring error and going on...");
 	}
-	database.LoadItemStatus();
+
 	_log(ZONE__INIT, "Loading npc faction lists");
 	if (!database.LoadNPCFactionLists()) {
 		_log(ZONE__INIT_ERR, "Loading npcs faction lists FAILED!");

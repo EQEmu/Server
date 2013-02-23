@@ -8995,11 +8995,7 @@ void Bot::AI_Stop() {
 //this is called with 'this' as the mob being looked at, and
 //iOther the mob who is doing the looking. It should figure out
 //what iOther thinks about 'this'
-FACTION_VALUE Bot::GetReverseFactionCon(Mob* iOther) {
-#if FACTIONS_DEBUG >= 20
-	LogFile->write(EQEMuLog::Debug, "called N $s::GetReverseFactionCon(%s)", GetName(), iOther->GetName());
-#endif
-	
+FACTION_VALUE Bot::GetReverseFactionCon(Mob* iOther) {	
 	_ZP(Bot_GetReverseFactionCon);
 
 	if(iOther->IsBot()) {

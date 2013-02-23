@@ -33,7 +33,6 @@ ZoneDatabase::ZoneDatabase(const char* host, const char* user, const char* passw
 }
 
 void ZoneDatabase::ZDBInitVars() {
-	memset(item_minstatus, 0, sizeof(item_minstatus));
 	memset(door_isopen_array, 0, sizeof(door_isopen_array));
 	npc_spells_maxid = 0;
 	npc_spells_cache = 0;
@@ -981,41 +980,6 @@ bool ZoneDatabase::NoRentExpired(const char* name){
 	}
 	return false;
 }
-
-
-void ZoneDatabase::LoadItemStatus() {
-	memset(item_minstatus, 0, sizeof(item_minstatus));
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 tmp;
-	if (RunQuery(query, MakeAnyLenString(&query, "Select id, minstatus from items where minstatus > 0"), errbuf, &result)) {
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)) && row[0] && row[1]) {
-			tmp = atoi(row[0]);
-			if (tmp < MAX_ITEM_ID)
-				item_minstatus[tmp] = atoi(row[1]);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		cout << "Error in LoadItemStatus query: '" << query << "'" << endl;
-		safe_delete_array(query);
-	}
-}
-
-bool ZoneDatabase::DBSetItemStatus(uint32 id, uint8 status) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, "Update items set minstatus=%u where id=%u", status, id), errbuf, 0, &affected_rows)) {
-		cout << "Error in LoadItemStatus query: '" << query << "'" << endl;
-	}
-	safe_delete_array(query);
-	return (bool) (affected_rows == 1);
-}
-
 
 /* Searches npctable for matching id, and returns the item if found,
  * or NULL otherwise. If id passed is 0, loads all npc_types for
@@ -2883,5 +2847,289 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 		safe_delete_array(query);
         	return;
 	}
+}
 
+bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id) {
+	if (faction_id <= 0 || faction_id > (int32) max_faction)
+		return false;	
+
+    if (faction_array[faction_id] == 0){
+		return false;
+	}
+
+    fm->base = faction_array[faction_id]->base;
+
+    if(class_mod > 0) {
+        char str[32];
+        sprintf(str, "c%u", class_mod);
+
+        std::map<std::string, int16>::const_iterator iter = faction_array[faction_id]->mods.find(str);
+        if(iter != faction_array[faction_id]->mods.end()) {
+            fm->class_mod = iter->second;
+        } else {
+            fm->class_mod = 0;
+        }
+    } else {
+        fm->class_mod = 0;
+    }
+
+    if(race_mod > 0) {
+        char str[32];
+        sprintf(str, "r%u", race_mod);
+
+        std::map<std::string, int16>::iterator iter = faction_array[faction_id]->mods.find(str);
+        if(iter != faction_array[faction_id]->mods.end()) {
+            fm->race_mod = iter->second;
+        } else {
+            fm->race_mod = 0;
+        }
+    } else {
+        fm->race_mod = 0;
+    }
+
+    if(deity_mod > 0) {
+        char str[32];
+        sprintf(str, "d%u", deity_mod);
+
+        std::map<std::string, int16>::iterator iter = faction_array[faction_id]->mods.find(str);
+        if(iter != faction_array[faction_id]->mods.end()) {
+            fm->deity_mod = iter->second;
+        } else {
+            fm->deity_mod = 0;
+        }
+    } else {
+        fm->deity_mod = 0;
+    }
+
+	return true;
+}
+
+bool ZoneDatabase::LoadFactionValues(uint32 char_id, faction_map & val_list) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+    MYSQL_RES *result;
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT faction_id,current_value FROM faction_values WHERE char_id = %i",char_id), errbuf, &result)) {
+		safe_delete_array(query);
+		bool ret = LoadFactionValues_result(result, val_list);
+		mysql_free_result(result);
+		return ret;
+	}
+	else {
+		cerr << "Error in LoadFactionValues query '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+	}
+	return false;
+}
+
+bool ZoneDatabase::LoadFactionValues_result(MYSQL_RES* result, faction_map & val_list) {
+    MYSQL_ROW row;
+	while((row = mysql_fetch_row(result))) {
+		val_list[atoi(row[0])] = atoi(row[1]);
+	}
+	return true;
+}
+
+//o--------------------------------------------------------------
+//| Name: GetFactionName; rembrant, Dec. 16
+//o--------------------------------------------------------------
+//| Notes: Retrieves the name of the specified faction
+//|        Returns false on failure.
+//o--------------------------------------------------------------
+bool ZoneDatabase::GetFactionName(int32 faction_id, char* name, uint32 buflen) {
+	if ((faction_id <= 0) || faction_id > int32(max_faction) ||(faction_array[faction_id] == 0))
+		return false;
+	if (faction_array[faction_id]->name[0] != 0) {
+		strn0cpy(name, faction_array[faction_id]->name, buflen);
+		return true;
+	}
+	return false;
+
+}
+
+//o--------------------------------------------------------------
+//| Name: GetNPCFactionList; rembrant, Dec. 16, 2001
+//o--------------------------------------------------------------
+//| Purpose: Gets a list of faction_id's and values bound to
+//|          the npc_id.
+//|          Returns false on failure.
+//o--------------------------------------------------------------
+bool ZoneDatabase::GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction) {
+	if (npcfaction_id <= 0) {
+		if (primary_faction)
+			*primary_faction = npcfaction_id;
+		return true;
+	}
+	const NPCFactionList* nfl = GetNPCFactionEntry(npcfaction_id);
+	if (!nfl)
+		return false;
+	if (primary_faction)
+		*primary_faction = nfl->primaryfaction;
+	for (int i=0; i<MAX_NPC_FACTIONS; i++) {
+		faction_id[i] = nfl->factionid[i];
+		value[i] = nfl->factionvalue[i];
+		temp[i] = nfl->factiontemp[i];
+	}
+	return true;
+}
+
+//o--------------------------------------------------------------
+//| Name: SetCharacterFactionLevel; rembrant, Dec. 20, 2001
+//o--------------------------------------------------------------
+//| Purpose: Update characters faction level with specified
+//|          faction_id to specified value.
+//|          Returns false on failure.
+//o--------------------------------------------------------------
+bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list)
+{
+	char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+	uint32 affected_rows = 0;
+	
+	if (!RunQuery(query, MakeAnyLenString(&query, 
+		"DELETE FROM faction_values WHERE char_id=%i AND faction_id = %i", 
+		char_id, faction_id), errbuf)) {
+		cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+		return false;
+	}
+
+	if(value == 0)
+	{
+		safe_delete_array(query);
+		return true;
+	}
+
+	if(temp == 2)
+		temp = 0;
+
+	if(temp == 3)
+		temp = 1;
+
+	if (!RunQuery(query, MakeAnyLenString(&query, 
+		"INSERT INTO faction_values (char_id,faction_id,current_value,temp) VALUES (%i,%i,%i,%i)", 
+		char_id, faction_id,value,temp), errbuf, 0, &affected_rows)) {
+		cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+		return false;
+	}
+	
+	safe_delete_array(query);
+	
+	if (affected_rows == 0)
+	{
+		return false;
+	}
+	
+	val_list[faction_id] = value;
+	return(true);
+}
+
+bool ZoneDatabase::LoadFactionData()
+{
+	char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+    MYSQL_RES *result;
+    MYSQL_ROW row;
+	query = new char[256];
+	strcpy(query, "SELECT MAX(id) FROM faction_list");
+	
+	
+	if (RunQuery(query, strlen(query), errbuf, &result)) {
+		safe_delete_array(query);
+		row = mysql_fetch_row(result);
+		if (row && row[0])
+		{ 
+			max_faction = atoi(row[0]);
+			faction_array = new Faction*[max_faction+1];
+			for(unsigned int i=0; i<max_faction; i++)
+			{
+				faction_array[i] = NULL;
+			}
+			mysql_free_result(result);
+			
+			MakeAnyLenString(&query, "SELECT id,name,base FROM faction_list");
+			if (RunQuery(query, strlen(query), errbuf, &result))
+			{
+				safe_delete_array(query);
+				while((row = mysql_fetch_row(result)))
+				{
+					uint32 index = atoi(row[0]);
+					faction_array[index] = new Faction;
+					strn0cpy(faction_array[index]->name, row[1], 50);					
+					faction_array[index]->base = atoi(row[2]);
+
+                    char sec_errbuf[MYSQL_ERRMSG_SIZE];
+                    MYSQL_RES *sec_result;
+                    MYSQL_ROW sec_row;
+                    MakeAnyLenString(&query, "SELECT `mod`, `mod_name` FROM `faction_list_mod` WHERE faction_id=%u", index);
+                    if (RunQuery(query, strlen(query), sec_errbuf, &sec_result)) {
+                        while((sec_row = mysql_fetch_row(sec_result)))
+                        {
+                            faction_array[index]->mods[sec_row[1]] = atoi(sec_row[0]);
+                        }
+                        mysql_free_result(sec_result);
+                    }
+                    safe_delete_array(query);
+				}
+				mysql_free_result(result);
+			}
+			else {
+				cerr << "Error in LoadFactionData '" << query << "' " << errbuf << endl;
+				safe_delete_array(query);
+				return false;
+			}
+		}
+		else {
+			mysql_free_result(result);
+		}
+	}
+	else {
+		cerr << "Error in LoadFactionData '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+		return false;
+	}
+	return true;
+}
+
+bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, list<struct NPCFaction*> *faction_list, int32* primary_faction) {
+	if (nfl_id <= 0) {
+		list<struct NPCFaction*>::iterator cur,end;
+		cur = faction_list->begin();
+		end = faction_list->end();
+		for(; cur != end; cur++) {
+			struct NPCFaction* tmp = *cur;
+			safe_delete(tmp);
+		}
+		
+		faction_list->clear();
+		if (primary_faction)
+			*primary_faction = nfl_id;
+		return true;
+	}
+	const NPCFactionList* nfl = GetNPCFactionEntry(nfl_id);
+	if (!nfl)
+		return false;
+	if (primary_faction)
+		*primary_faction = nfl->primaryfaction;
+	
+	list<struct NPCFaction*>::iterator cur,end;
+	cur = faction_list->begin();
+	end = faction_list->end();
+	for(; cur != end; cur++) {
+		struct NPCFaction* tmp = *cur;
+		safe_delete(tmp);
+	}
+	faction_list->clear();
+	for (int i=0; i<MAX_NPC_FACTIONS; i++) {
+		struct NPCFaction *pFac;
+		if (nfl->factionid[i]) {
+			pFac = new struct NPCFaction;
+			pFac->factionID = nfl->factionid[i];
+			pFac->value_mod = nfl->factionvalue[i];
+			pFac->npc_value = nfl->factionnpcvalue[i];
+			pFac->temp = nfl->factiontemp[i];
+			faction_list->push_back(pFac);
+		}
+	}
+	return true;
 }

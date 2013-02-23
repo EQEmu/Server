@@ -21,7 +21,6 @@ SET(zone_sources
     embxs.cpp
     entity.cpp
     exp.cpp
-    faction.cpp
     fearpath.cpp
     forage.cpp
     groups.cpp

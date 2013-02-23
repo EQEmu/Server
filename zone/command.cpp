@@ -219,7 +219,6 @@ int command_init(void) {
 		command_add("spoff","- Sends OP_ManaChange",80,command_spoff) ||
 		command_add("itemtest","- merth's test function",250,command_itemtest) ||
 		command_add("gassign","[id] - Assign targetted NPC to predefined wandering grid id",100,command_gassign) ||
-		command_add("setitemstatus","[itemid] [status] - Set the minimum admin status required to use itemid",100,command_setitemstatus) ||
 		command_add("ai","[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target",100,command_ai) ||
 		command_add("worldshutdown","- Shut down world and all zones",200,command_worldshutdown) ||
 		command_add("sendzonespawns","- Refresh spawn list for all clients in zone",150,command_sendzonespawns) ||
@@ -2172,27 +2171,6 @@ void command_gassign(Client *c, const Seperator *sep)
 	}
 	else
 		c->Message(0,"Usage: #gassign [num] - must have an npc target!");
-}
-
-void command_setitemstatus(Client *c, const Seperator *sep)
-{
-	if (sep->IsNumber(1) && sep->IsNumber(2)) {
-		uint32 tmp = atoi(sep->arg[1]);
-		if (tmp >= 0xFFFF)
-			c->Message(0, "Item# out of range");
-		else if (!database.DBSetItemStatus(tmp, atoi(sep->arg[2])))
-			c->Message(0, "DB query failed");
-		else {
-			c->Message(0, "Item updated");
-			ServerPacket* pack = new ServerPacket(ServerOP_ItemStatus, 5);
-			*((uint32*) &pack->pBuffer[0]) = tmp;
-			*((uint8*) &pack->pBuffer[4]) = atoi(sep->arg[2]);
-			worldserver.SendPacket(pack);
-			delete pack;
-		}
-	}
-	else
-		c->Message(0, "Usage: #setitemstatus [itemid] [status]");
 }
 
 void command_ai(Client *c, const Seperator *sep)
@@ -4834,7 +4812,7 @@ void command_iteminfo(Client *c, const Seperator *sep)
 		c->Message(0, "  Lore: %s  ND: %i  NS: %i  Type: %i", (item->LoreFlag) ? "true":"false", item->NoDrop, item->NoRent, item->ItemClass);
 		c->Message(0, "  IDF: %s  Size: %i  Weight: %i  icon_id: %i  Price: %i", item->IDFile, item->Size, item->Weight, item->Icon, item->Price);
 		if (c->Admin() >= 200)
-			c->Message(0, "MinStatus: %i", database.GetItemStatus(item->ID));
+            c->Message(0, "MinStatus: %i", item->MinStatus);
 		if (item->ItemClass==ItemClassBook)
 			c->Message(0, "  This item is a Book: %s", item->Filename);
 		else if (item->ItemClass==ItemClassContainer)
@@ -6189,7 +6167,13 @@ void command_summonitem(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #summonitem [item id] [charges], charges are optional");
 	else {
 		uint32 itemid = atoi(sep->arg[1]);
-		if (database.GetItemStatus(itemid) > c->Admin())
+        int16 item_status = 0;
+        const Item_Struct* item = database.GetItem(itemid);
+        if(item) {
+            item_status = static_cast<int16>(item->MinStatus);
+        }
+
+		if (item_status > c->Admin())
 			c->Message(13, "Error: Insufficient status to summon this item.");
 		else if (sep->argnum==2 && sep->IsNumber(2)) {
 			c->SummonItem(itemid, atoi(sep->arg[2]) );
@@ -6220,7 +6204,13 @@ void command_giveitem(Client *c, const Seperator *sep)
 	} else {
 		Client *t = c->GetTarget()->CastToClient();
 		uint32 itemid = atoi(sep->arg[1]);
-		if (database.GetItemStatus(itemid) > c->Admin())
+        int16 item_status = 0;
+        const Item_Struct* item = database.GetItem(itemid);
+        if(item) {
+            item_status = static_cast<int16>(item->MinStatus);
+        }
+
+		if (item_status > c->Admin())
 			c->Message(13, "Error: Insufficient status to summon this item.");
 		else if (sep->argnum==2 && sep->IsNumber(2)) {
 			t->SummonItem(itemid, atoi(sep->arg[2]) );
@@ -11585,8 +11575,13 @@ void command_zopp(Client *c, const Seperator *sep)
 			c->Message(13, "Error: Item [%u] is not a valid item id.", itemid);
 			return;
 		}
-				
-		if (database.GetItemStatus(itemid) > c->Admin()) {
+	    
+        int16 item_status = 0;
+        const Item_Struct* item = database.GetItem(itemid);
+        if(item) {
+            item_status = static_cast<int16>(item->MinStatus);
+        }
+		if (item_status > c->Admin()) {
 			c->Message(13, "Error: Insufficient status to use this command.");
 			return;
 		}

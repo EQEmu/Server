@@ -7290,3 +7290,298 @@ void Client::GarbleMessage(char *message, uint8 variance)
 		}
 	}
 }
+
+// returns what Other thinks of this
+FACTION_VALUE Client::GetReverseFactionCon(Mob* iOther) {
+	if (GetOwnerID()) {
+		return GetOwnerOrSelf()->GetReverseFactionCon(iOther);
+	}
+	
+	iOther = iOther->GetOwnerOrSelf();
+	
+	if (iOther->GetPrimaryFaction() < 0)
+		return GetSpecialFactionCon(iOther);
+	
+	if (iOther->GetPrimaryFaction() == 0)
+		return FACTION_INDIFFERENT;
+
+	return GetFactionLevel(CharacterID(), 0, GetRace(), GetClass(), GetDeity(), iOther->GetPrimaryFaction(), iOther);
+}
+
+//o--------------------------------------------------------------
+//| Name: GetFactionLevel; rembrant, Dec. 16, 2001
+//o--------------------------------------------------------------
+//| Notes: Gets the characters faction standing with the
+//|        specified NPC.
+//|        Will return Indifferent on failure.
+//o--------------------------------------------------------------
+FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
+{	
+	_ZP(Client_GetFactionLevel);
+
+	if (pFaction < 0)
+		return GetSpecialFactionCon(tnpc);
+	FACTION_VALUE fac = FACTION_INDIFFERENT;
+	//int32 pFacValue;  -Trumpcard: commenting. Not currently used.
+	int32 tmpFactionValue;
+	FactionMods fmods;
+
+    // neotokyo: few optimizations
+    if (GetFeigned())
+		return FACTION_INDIFFERENT;
+    if (invisible_undead && tnpc && !tnpc->SeeInvisibleUndead())
+        return FACTION_INDIFFERENT;
+    if (IsInvisible(tnpc))
+		return FACTION_INDIFFERENT;
+    if (tnpc && tnpc->GetOwnerID() != 0) // pets con amiably to owner and indiff to rest
+		if (char_id == tnpc->GetOwner()->CastToClient()->CharacterID())
+			return FACTION_AMIABLE;
+		else
+			return FACTION_INDIFFERENT;
+
+    //First get the NPC's Primary faction
+	if(pFaction > 0)
+	{
+		//Get the faction data from the database
+		if(database.GetFactionData(&fmods, p_class, p_race, p_deity, pFaction))
+		{
+			//Get the players current faction with pFaction
+			tmpFactionValue = GetCharacterFactionLevel(pFaction);
+			// Everhood - tack on any bonuses from Alliance type spell effects
+			tmpFactionValue += GetFactionBonus(pFaction);
+			tmpFactionValue += GetItemFactionBonus(pFaction);
+			//Return the faction to the client
+			fac = CalculateFaction(&fmods, tmpFactionValue);
+		}
+	}
+	else
+    {
+    	return(FACTION_INDIFFERENT);
+    }
+
+    // merchant fix
+    if (tnpc && tnpc->IsNPC() && tnpc->CastToNPC()->MerchantType && (fac == FACTION_THREATENLY || fac == FACTION_SCOWLS))
+        fac = FACTION_DUBIOUS;
+
+	if (tnpc != 0 && fac != FACTION_SCOWLS && tnpc->CastToNPC()->CheckAggro(this))
+		fac = FACTION_THREATENLY;
+
+	return fac;
+}
+
+//o--------------------------------------------------------------
+//| Name: SetFactionLevel; rembrant, Dec. 20, 2001
+//o--------------------------------------------------------------
+//| Notes: Sets the characters faction standing with the
+//|        specified NPC.
+//o--------------------------------------------------------------
+void  Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity)
+{
+	_ZP(Client_SetFactionLevel);
+	int32 faction_id[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
+	int32 npc_value[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
+	uint8 temp[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
+	int32 mod;
+	int32 t;
+	int32 tmpValue;
+	int32 current_value;
+	FactionMods fm;
+	// Get the npc faction list
+	if(!database.GetNPCFactionList(npc_id, faction_id, npc_value, temp))
+		return;
+	for(int i = 0;i<MAX_NPC_FACTIONS;i++)
+	{
+		if(faction_id[i] <= 0)
+			continue;
+		
+		// Get the faction modifiers
+		if(database.GetFactionData(&fm,char_class,char_race,char_deity,faction_id[i]))
+		{
+			// Get the characters current value with that faction
+			current_value = GetCharacterFactionLevel(faction_id[i]);
+			
+			if(this->itembonuses.HeroicCHA) {
+				int faction_mod = itembonuses.HeroicCHA / 5;
+				// If our result isn't truncated, then just do that
+				if(npc_value[i] * faction_mod / 100 != 0) 
+					npc_value[i] += npc_value[i] * faction_mod / 100;
+				// If our result is truncated, then double a mob's value every once and a while to equal what they would have got
+				else {
+					if(MakeRandomInt(0, 100) < faction_mod)
+						npc_value[i] *= 2;
+				}
+			}
+			//figure out their modifier
+			mod = fm.base + fm.class_mod + fm.race_mod + fm.deity_mod;
+			if(mod > MAX_FACTION)
+				mod = MAX_FACTION;
+			else if(mod < MIN_FACTION)
+				mod = MIN_FACTION;
+			
+			// Calculate the faction
+            if(npc_value[i] != 0) {
+			    tmpValue = current_value + mod + npc_value[i];
+			    
+			    // Make sure faction hits don't go to GMs...
+			    if (m_pp.gm==1 && (tmpValue < current_value)) {
+			    	tmpValue = current_value;
+			    }
+			    
+			    // Make sure we dont go over the min/max faction limits
+			    if(tmpValue >= MAX_FACTION)
+			    {
+			    	t = MAX_FACTION - mod;
+			    	if(current_value == t) {
+			    		//do nothing, it is already maxed out
+			    	} else if(!(database.SetCharacterFactionLevel(char_id, faction_id[i], t, temp[i], factionvalues)))
+			    	{
+			    		return;
+			    	}
+			    }
+			    else if(tmpValue <= MIN_FACTION)
+			    {
+			    	t = MIN_FACTION - mod;
+			    	if(current_value == t) {
+			    		//do nothing, it is already maxed out
+			    	} else if(!(database.SetCharacterFactionLevel(char_id, faction_id[i], t, temp[i], factionvalues)))
+			    	{
+			    		return;
+			    	}
+			    }
+			    else
+			    {
+			    	if(!(database.SetCharacterFactionLevel(char_id, faction_id[i], current_value + npc_value[i], temp[i], factionvalues)))
+			    	{
+			    		return;
+			    	}
+			    }
+			    if(tmpValue <= MIN_FACTION)
+			    	tmpValue = MIN_FACTION;
+
+			    char* msg = BuildFactionMessage(npc_value[i],faction_id[i],tmpValue,temp[i]);
+			    if (msg != 0)
+			    	Message(0, msg);
+			    safe_delete_array(msg);
+            }
+        }
+	}
+	return;
+}
+
+void  Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp)
+{
+	_ZP(Client_SetFactionLevel2);
+	int32 current_value;
+	//Get the npc faction list
+	if(faction_id > 0 && value != 0) {
+		//Get the faction modifiers
+		current_value = GetCharacterFactionLevel(faction_id) + value;
+		if(!(database.SetCharacterFactionLevel(char_id, faction_id, current_value, temp, factionvalues)))
+			return;
+
+		char* msg = BuildFactionMessage(value, faction_id, current_value, temp);
+		if (msg != 0)
+			Message(0, msg);
+		safe_delete(msg);
+
+	}
+	return;
+}
+
+int32 Client::GetCharacterFactionLevel(int32 faction_id)
+{
+	if (faction_id <= 0)
+		return 0;
+	faction_map::iterator res;
+	res = factionvalues.find(faction_id);
+	if(res == factionvalues.end())
+		return(0);
+	return(res->second);
+}
+
+// returns the character's faction level, adjusted for racial, class, and deity modifiers
+int32 Client::GetModCharacterFactionLevel(int32 faction_id) {
+	int32 Modded = GetCharacterFactionLevel(faction_id);
+	FactionMods fm;
+	if(database.GetFactionData(&fm,GetClass(),GetRace(),GetDeity(),faction_id)) 
+		Modded += fm.base + fm.class_mod + fm.race_mod + fm.deity_mod;
+	if (Modded > MAX_FACTION)
+		Modded = MAX_FACTION;
+
+	return Modded;
+}
+
+bool Client::HatedByClass(uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction)
+{
+	
+	bool Result = false;
+	_ZP(Client_GetFactionLevel);
+
+	int32 tmpFactionValue;
+	FactionMods fmods;
+
+    //First get the NPC's Primary faction
+	if(pFaction > 0)
+	{
+		//Get the faction data from the database
+		if(database.GetFactionData(&fmods, p_class, p_race, p_deity, pFaction))
+		{
+			tmpFactionValue = GetCharacterFactionLevel(pFaction);
+			tmpFactionValue += GetFactionBonus(pFaction);
+			tmpFactionValue += GetItemFactionBonus(pFaction);
+			CalculateFaction(&fmods, tmpFactionValue);
+			if(fmods.class_mod < fmods.race_mod)
+				Result = true;
+		}
+	}
+	return Result;
+}
+
+//o--------------------------------------------------------------
+//| Name: BuildFactionMessage; rembrant, Dec. 16, 2001
+//o--------------------------------------------------------------
+//| Purpose: duh?
+//o--------------------------------------------------------------
+char* Client::BuildFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalvalue, uint8 temp)
+{
+/*
+
+This should be replaced to send string-ID based messages using:
+#define FACTION_WORST 469 //Your faction standing with %1 could not possibly get any worse.
+#define FACTION_WORSE 470 //Your faction standing with %1 got worse.
+#define FACTION_BEST 471 //Your faction standing with %1 could not possibly get any better.
+#define FACTION_BETTER 472 //Your faction standing with %1 got better.
+
+some day.
+
+*/
+	//tmpvalue is the change as best I can tell.
+	char *faction_message = 0;
+
+	char name[50];
+
+	if(database.GetFactionName(faction_id, name, sizeof(name)) == false) {
+		snprintf(name, sizeof(name),"Faction%i",faction_id);
+	}
+
+	if(tmpvalue == 0 || temp == 1 || temp == 2) {
+		return 0;
+	}
+	else if (totalvalue >= MAX_FACTION) {
+		MakeAnyLenString(&faction_message, "Your faction standing with %s could not possibly get any better!", name);
+		return faction_message;
+	}
+	else if(tmpvalue > 0 && totalvalue < MAX_FACTION) {
+		MakeAnyLenString(&faction_message, "Your faction standing with %s has gotten better!", name);
+		return faction_message;
+	}
+	else if(tmpvalue < 0 && totalvalue > MIN_FACTION) {
+		MakeAnyLenString(&faction_message, "Your faction standing with %s has gotten worse!", name);
+		return faction_message;
+	}
+	else if(totalvalue <= MIN_FACTION) {
+		MakeAnyLenString(&faction_message, "Your faction standing with %s could not possibly get any worse!", name);
+		return faction_message;
+	}
+	return 0;
+}
