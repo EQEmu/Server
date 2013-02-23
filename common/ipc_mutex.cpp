@@ -20,11 +20,9 @@
 #ifdef _WINDOWS
 #include <Windows.h>
 #else
-#include <fcntl.h>
+#include <sys/types.h>
 #include <sys/stat.h>
-#include <semaphore.h>
-#include <unistd.h>
-#include <time.h>
+#include <fcntl.h>
 #endif
 #include "types.h"
 #include "eqemu_exception.h"
@@ -35,7 +33,7 @@ namespace EQEmu {
 #ifdef _WINDOWS
         HANDLE mut_;
 #else
-        sem_t *sem_;
+        int fd_;
 #endif
     };
 
@@ -53,11 +51,14 @@ namespace EQEmu {
             EQ_EXCEPT("IPC Mutex", "Could not create mutex.");
         }
 #else
-        std::string final_name = "/EQEmuMutex_";
-        final_name += name;
+        std::string final_name = name;
+        final_name += ".lock";
         
-        imp_->sem_ = sem_open(final_name.c_str(), O_CREAT, S_IRUSR | S_IWUSR, 1);
-        if(imp_->sem_ == SEM_FAILED) {
+        imp_->fd_ = open(final_name.c_str(), 
+            O_RDWR | O_CREAT | O_CLOEXEC,
+            S_IRUSR | S_IWUSR);
+
+        if(imp_->fd_ == -1) {
                 EQ_EXCEPT("IPC Mutex", "Could not create mutex.");
         }
 #endif
@@ -65,19 +66,17 @@ namespace EQEmu {
 
     IPCMutex::~IPCMutex() {
 #ifdef _WINDOWS
-        if(imp_->mut_) {
-            if(locked_) {
-                ReleaseMutex(imp_->mut_);
-            }
-            CloseHandle(imp_->mut_);
+        if(locked_) {
+            ReleaseMutex(imp_->mut_);
         }
+        CloseHandle(imp_->mut_);
+
 #else
-        if(imp_->sem_) {
-            if(locked_) {
-                sem_post(imp_->sem_);
-            }
-            sem_close(imp_->sem_);
+        if(locked_) {
+            lockf(imp_->fd_, F_ULOCK, 0);
         }
+        close(imp_->fd_);
+
 #endif
         delete imp_;
     }
@@ -93,9 +92,7 @@ namespace EQEmu {
             return false;
         }
 #else
-        if(sem_wait(imp_->sem_) == -1) {
-            return false;
-        }
+        lockf(imp_->fd_, F_TLOCK, 0);
 #endif
         locked_ = true;
         return true;
@@ -110,9 +107,7 @@ namespace EQEmu {
             return false;
         }
 #else
-        if(sem_post(imp_->sem_) == -1) {
-            return false;
-        }
+        lockf(imp_->fd_, F_ULOCK, 0);
 #endif
         locked_ = false;
         return true;
