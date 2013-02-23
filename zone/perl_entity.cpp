@@ -31,6 +31,10 @@
 #include <list>
 #include "embperl.h"
 
+#ifdef seed
+#undef seed
+#endif
+
 #include "entity.h"
 
 #ifdef THIS	 /* this macro seems to leak out on some systems */

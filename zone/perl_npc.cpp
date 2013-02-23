@@ -30,6 +30,10 @@
 #include "../common/debug.h"
 #include "embperl.h"
 
+#ifdef seed
+#undef seed
+#endif
+
 typedef const char Const_char;
 
 #include "npc.h"

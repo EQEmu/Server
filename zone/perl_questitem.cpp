@@ -22,6 +22,10 @@
 #include "../common/debug.h"
 #include "embperl.h"
 
+#ifdef seed
+#undef seed
+#endif
+
 #include "../common/Item.h"
 
 #ifdef THIS		/* this macro seems to leak out on some systems */

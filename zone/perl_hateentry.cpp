@@ -22,6 +22,10 @@
 #include "../common/debug.h"
 #include "embperl.h"
 
+#ifdef seed
+#undef seed
+#endif
+
 #include "../common/linked_list.h"
 #include "hate_list.h"
 

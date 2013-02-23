@@ -30,6 +30,10 @@
 #include "../common/debug.h"
 #include "embperl.h"
 
+#ifdef seed
+#undef seed
+#endif
+
 #include "raids.h"
 #include "client.h"
 

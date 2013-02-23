@@ -32,6 +32,10 @@ typedef const char Const_char;
 #include "EQWParser.h"
 #include "EQLConfig.h"
 
+#ifdef seed
+#undef seed
+#endif
+
 #ifdef THIS	 /* this macro seems to leak out on some systems */
 #undef THIS		
 #endif
