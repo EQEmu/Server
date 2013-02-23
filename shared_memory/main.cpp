@@ -53,11 +53,11 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-    bool load_all = false;
-    bool load_items = false;
+    bool load_all = true;
+    bool load_items = true;
     bool load_loot = true;
-    bool load_skill_caps = false;
-    bool load_spells = false;
+    bool load_skill_caps = true;
+    bool load_spells = true;
     if(load_all || load_items) {
         LogFile->write(EQEMuLog::Status, "Loading items...");
         try {

@@ -8,6 +8,7 @@
 #include "spdat.h"
 #include "Item.h"
 #include "fixed_memory_hash_set.h"
+#include "fixed_memory_variable_hash_set.h"
 
 #include <list>
 
@@ -91,14 +92,13 @@ public:
 	bool DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
 
     //loot
-    void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries,
-                          uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries);
-    void LoadLoot(void *ptr, uint32 loot_table_count, uint32 max_loot_table, uint32 loot_table_entries,
-                             uint32 loot_drop_count, uint32 max_loot_drop, uint32 loot_drop_entries);
+    void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries);
+    void GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries);
+    void LoadLootTables(void *data, uint32 size);
+    void LoadLootDrops(void *data, uint32 size);
     bool LoadLoot();
     const LootTable_Struct* GetLootTable(uint32 loottable_id);
 	const LootDrop_Struct* GetLootDrop(uint32 lootdrop_id);
-    bool DBLoadLoot();
 
     void LoadSkillCaps(void *data);
     bool LoadSkillCaps();
@@ -120,31 +120,11 @@ protected:
     EQEmu::MemoryMappedFile *items_mmf;
     EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
     EQEmu::MemoryMappedFile *faction_mmf;
-    EQEmu::MemoryMappedFile *loot_mmf;
+    EQEmu::MemoryMappedFile *loot_table_mmf;
+    EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> *loot_table_hash;
+    EQEmu::MemoryMappedFile *loot_drop_mmf;
+    EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> *loot_drop_hash;
     EQEmu::MemoryMappedFile *skill_caps_mmf;
 };
 
-
-
-
-
 #endif /*SHAREDDB_H_*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

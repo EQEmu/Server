@@ -205,6 +205,7 @@ namespace EQEmu {
     
     void MemoryMappedFile::ZeroFile() {
         memset(reinterpret_cast<void*>(memory_), 0, sizeof(shared_memory_struct));
+        memset(memory_->data, 0, size_);
         memory_->loaded = false;
         memory_->size = size_;
     }

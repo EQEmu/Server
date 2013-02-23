@@ -967,7 +967,7 @@ bool Inventory::CheckNoDrop(int16 slot_id) {
 	if (!inst) return false;
 	if (!inst->GetItem()->NoDrop) return true;
 	if (inst->GetItem()->ItemClass == 1) {
-		for (uint16 i=0; i<10; i++) {
+		for (uint8 i = 0; i < 10; i++) {
 			ItemInst* bagitem = GetItem(Inventory::CalcSlotId(slot_id, i));
 			if (bagitem && !bagitem->GetItem()->NoDrop) return true;
 		}
