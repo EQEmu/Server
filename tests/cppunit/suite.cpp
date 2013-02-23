@@ -117,9 +117,9 @@ namespace Test
 	/// \param suite %Test suite to add.
 	///
 	void
-	Suite::add(auto_ptr<Suite> suite)
+	Suite::add(Suite* suite)
 	{
-		_suites.push_back(suite.release());
+		_suites.push_back(suite);
 	}
 	
 	/// Registers a test function.

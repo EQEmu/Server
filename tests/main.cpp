@@ -46,10 +46,10 @@ int main() {
         std::ofstream outfile("test_output.txt");
         std::unique_ptr<Test::Output> output(new Test::TextOutput(Test::TextOutput::Verbose, outfile));
         Test::Suite tests;
-        tests.add(std::auto_ptr<MemoryMappedFileTest>(new MemoryMappedFileTest()));
-        tests.add(std::auto_ptr<IPCMutexTest>(new IPCMutexTest()));
-        tests.add(std::auto_ptr<FixedMemoryHashTest>(new FixedMemoryHashTest()));
-        tests.add(std::auto_ptr<FixedMemoryVariableHashTest>(new FixedMemoryVariableHashTest()));
+        tests.add(new MemoryMappedFileTest());
+        tests.add(new IPCMutexTest());
+        tests.add(new FixedMemoryHashTest());
+        tests.add(new FixedMemoryVariableHashTest());
         tests.run(*output, true);
     } catch(...) {
         return -1;
