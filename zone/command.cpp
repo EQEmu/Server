@@ -11373,7 +11373,14 @@ void command_camerashake(Client *c, const Seperator *sep)
 
 void command_disarmtrap(Client *c, const Seperator *sep) 
 {
-    Mob * target = c->GetTarget();
+	Mob *target = c->GetTarget();
+
+	if(!target)
+	{
+		c->Message(13, "You must have a target.");
+		return;
+	}
+
 	if(target->IsNPC())
 	{
 		if(c->HasSkill(DISARM_TRAPS))
@@ -11392,7 +11399,13 @@ void command_disarmtrap(Client *c, const Seperator *sep)
 
 void command_sensetrap(Client *c, const Seperator *sep) 
 {
-    Mob * target = c->GetTarget();
+	Mob * target = c->GetTarget();
+	if(!target)
+	{
+		c->Message(13, "You must have a target.");
+		return;
+	}
+
 	if(target->IsNPC())
 	{
 		if(c->HasSkill(SENSE_TRAPS))
@@ -11411,7 +11424,13 @@ void command_sensetrap(Client *c, const Seperator *sep)
 
 void command_picklock(Client *c, const Seperator *sep) 
 {
-    Mob * target = c->GetTarget();
+	Mob * target = c->GetTarget();
+	if(!target)
+	{
+		c->Message(13, "You must have a target.");
+		return;
+	}
+
 	if(target->IsNPC())
 	{
 		if(c->HasSkill(PICK_LOCK))
