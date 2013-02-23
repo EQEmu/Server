@@ -29,7 +29,6 @@
 #include <stdio.h>
 #endif
 #include "eqemu_exception.h"
-#include "ipc_mutex.h"
 
 namespace EQEmu {
 
@@ -44,12 +43,7 @@ namespace EQEmu {
     MemoryMappedFile::MemoryMappedFile(std::string filename, uint32 size) 
         : filename_(filename), size_(size) {
         imp_ = new Implementation;
-        IPCMutex mut(filename + "Internal");
-    
-        if(!mut.Lock()) {
-            EQ_EXCEPT("Shared Memory", "Could not lock shared mutex.");
-        }
-    
+       
 #ifdef _WINDOWS
         DWORD total_size = size + sizeof(shared_memory_struct);
         HANDLE file = CreateFile(filename.c_str(), 
@@ -72,7 +66,6 @@ namespace EQEmu {
             filename.c_str());
     
         if(!imp_->mapped_object_) {
-            mut.Unlock();
             EQ_EXCEPT("Shared Memory", "Could not create a file mapping for this shared memory file.");
         }
     
@@ -83,7 +76,6 @@ namespace EQEmu {
             total_size));
     
         if(!memory_) {
-            mut.Unlock();
             EQ_EXCEPT("Shared Memory", "Could not map a view of the shared memory file.");
         }
     
@@ -91,7 +83,6 @@ namespace EQEmu {
         size_t total_size = size + sizeof(shared_memory_struct);
         imp_->fd_ = open(filename.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
         if(imp_->fd_ == -1) {
-            mut.Unlock();
             EQ_EXCEPT("Shared Memory", "Could not open a file for this shared memory segment.");
         }
 
@@ -103,21 +94,14 @@ namespace EQEmu {
             mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, imp_->fd_, 0));
 
         if(memory_ == MAP_FAILED) {
-            mut.Unlock();
             EQ_EXCEPT("Shared Memory", "Could not create a file mapping for this shared memory file.");
         }
 #endif
-        mut.Unlock();
     }
     
     MemoryMappedFile::MemoryMappedFile(std::string filename) 
         : filename_(filename) {
         imp_ = new Implementation;
-        IPCMutex mut(filename + "Internal");
-
-        if(!mut.Lock()) {
-            EQ_EXCEPT("Shared Memory", "Could not lock shared mutex.");
-        }
     
         //get existing size
         FILE *f = fopen(filename.c_str(), "rb");
@@ -150,7 +134,6 @@ namespace EQEmu {
             filename.c_str());
     
         if(!imp_->mapped_object_) {
-            mut.Unlock();
             EQ_EXCEPT("Shared Memory", "Could not create a file mapping for this shared memory file.");
         }
     
@@ -161,7 +144,6 @@ namespace EQEmu {
             total_size));
     
         if(!memory_) {
-            mut.Unlock();
             EQ_EXCEPT("Shared Memory", "Could not map a view of the shared memory file.");
         }
     
@@ -169,7 +151,6 @@ namespace EQEmu {
         size_t total_size = size + sizeof(shared_memory_struct);
         imp_->fd_ = open(filename.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
         if(imp_->fd_ == -1) {
-            mut.Unlock();
             EQ_EXCEPT("Shared Memory", "Could not open a file for this shared memory segment.");
         }
 
@@ -181,11 +162,9 @@ namespace EQEmu {
             mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, imp_->fd_, 0));
 
         if(memory_ == MAP_FAILED) {
-            mut.Unlock();
             EQ_EXCEPT("Shared Memory", "Could not create a file mapping for this shared memory file.");
         }
 #endif
-        mut.Unlock();
     }
 
     MemoryMappedFile::~MemoryMappedFile() {
