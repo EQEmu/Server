@@ -38,6 +38,12 @@
 #include "LauncherLink.h"
 #include "wguild_mgr.h"
 
+
+#ifdef seed
+#undef seed
+#endif
+
+
 #include <algorithm>
 
 using namespace std;
