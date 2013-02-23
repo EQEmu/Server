@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/22/2013 ==
+demonstar55: Mobs will now be removed from XTargets when they get back to their way point, should be last instance of XTarget mobs not clearing when they are not aggroed anymore
+
 == 02/19/2013 ==
 Derision: World should no longer crash if the start_zone query fails at character creation.
 
