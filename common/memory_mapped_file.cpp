@@ -110,6 +110,7 @@ namespace EQEmu {
         }
         fseek(f, 0U, SEEK_END);
         uint32 size = static_cast<uint32>(ftell(f)) - sizeof(shared_memory_struct);
+        size_ = size;
         fclose(f);
 
 #ifdef _WINDOWS
