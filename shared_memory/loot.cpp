@@ -57,8 +57,5 @@ void LoadLoot(SharedDatabase *database) {
 
     database->LoadLootTables(mmf_loot_table.Get(), loot_table_max);
     database->LoadLootDrops(mmf_loot_drop.Get(), loot_drop_max);
-
-    mmf_loot_table.SetLoaded();
-    mmf_loot_drop.SetLoaded();
     mutex.Unlock();
 }

@@ -79,17 +79,19 @@ public:
 	 */
 
     //items
-    int32 GetItemsCount(uint32* max_id = 0);
+    void GetItemsCount(int32 &item_count, uint32 &max_id);
     void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
     bool LoadItems();
     const Item_Struct* IterateItems(uint32* id);
     const Item_Struct* GetItem(uint32 id);
-    const EvolveInfo*	GetEvolveInfo(uint32 loregroup);
+    const EvolveInfo* GetEvolveInfo(uint32 loregroup);
     
     //faction lists
+    void GetFactionListInfo(uint32 &list_count, uint32 &max_lists);
 	const NPCFactionList* GetNPCFactionEntry(uint32 id);
+    void LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists);
 	bool LoadNPCFactionLists();
-	bool DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
+	//bool DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
 
     //loot
     void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries);
@@ -111,15 +113,10 @@ public:
 
 protected:
 	
-	/*
-	 * Private shared mem stuff
-	 */
-	int32	GetNPCFactionListsCount(uint32* oMaxID = 0);
-	static bool extDBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID);
-	
     EQEmu::MemoryMappedFile *items_mmf;
     EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
     EQEmu::MemoryMappedFile *faction_mmf;
+    EQEmu::FixedMemoryHashSet<NPCFactionList> *faction_hash;
     EQEmu::MemoryMappedFile *loot_table_mmf;
     EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> *loot_table_hash;
     EQEmu::MemoryMappedFile *loot_drop_mmf;

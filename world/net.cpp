@@ -72,9 +72,6 @@ using namespace std;
 
 #endif
 
-#include "../common/EMuShareMem.h"
-extern LoadEMuShareMemDLL EMuShareMemDLL;
-
 /*
 Zone only right now.
 #ifdef EQPROFILE
@@ -496,50 +493,6 @@ int main(int argc, char** argv) {
 	eqsf.Close();
 	_log(WORLD__SHUTDOWN,"Signaling HTTP service to stop...");
 	http_server.Stop();
-#if 0
-#if defined(SHAREMEM) && !defined(WIN32)
-		for (int ipc_files = 0; ipc_files <= 4; ipc_files++) {
-			key_t share_key;
-			switch (ipc_files) {
-				// Item
-				case 0: share_key = ftok(".", 'I'); break;
-				// Npctype
-				case 1: share_key = ftok(".", 'N'); break;
-				// Door
-				case 2: share_key = ftok(".", 'D'); break;
-				// Spell
-				case 3: share_key = ftok(".", 'S'); break;
-				// Faction
-				case 4: share_key = ftok(".", 'F'); break;
-				// ERROR Fatal
-				default: cerr<<"Opps!"<<endl; share_key = 0xFF; break;
-			}
-			
-			int share_id = shmget(share_key, 0, IPC_NOWAIT|0400);
-			if (share_id <= 0) {
-				cerr<<"exiting could not check user count on shared memory ipcs mem leak!!!!!!!! id="<<share_id<<" key:"<<share_key<<endl;
-				exit(1);
-			}
-			struct shmid_ds mem_users;
-			if ((shmctl(share_id, IPC_STAT, &mem_users)) != 0) {
-				cerr<<"exiting error checking user count on shared memory, marking for deletion!!!!!id="<<share_id<<" key:"<<share_key<<endl;
-				shmctl(share_id, IPC_RMID, 0);
-				exit(1);
-			}
-			if (mem_users.shm_nattch == 0) {
-				//cerr<<"exiting stale share marked for deletion!id="<<share_id<<" key:"<<share_key<<endl;
-				shmctl(share_id, IPC_RMID, 0);
-			}
-			else if (mem_users.shm_nattch == 1) {
-				//cerr<<"mem_users = 1"<<endl;
-				// Detatch and delete shared mem here
-				EMuShareMemDLL.Unload();
-				shmctl(share_id, IPC_RMID, 0);
-			}
-
-		}
-#endif
-#endif
 
 	CheckEQEMuErrorAndPause();
 	return 0;

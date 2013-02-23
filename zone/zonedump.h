@@ -26,7 +26,7 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 
 #ifndef ZONEDUMP_H
 #define ZONEDUMP_H
-#include "faction.h"
+#include "../common/faction.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/Item.h"
 

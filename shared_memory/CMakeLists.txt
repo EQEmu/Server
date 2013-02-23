@@ -4,6 +4,7 @@ SET(shared_memory_sources
     items.cpp
     loot.cpp
     main.cpp
+    npc_faction.cpp
     spells.cpp
     skill_caps.cpp
 )
@@ -11,6 +12,7 @@ SET(shared_memory_sources
 SET(shared_memory_headers
     items.h
     loot.h
+    npc_faction.h
     spells.h
     skill_caps.h
 )

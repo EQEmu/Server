@@ -24,7 +24,7 @@ using namespace std;
 #ifndef WIN32
 	#include <pthread.h>
 #endif
-#include "faction.h"
+#include "../common/faction.h"
 #include "zonedb.h"
 #include "masterentity.h"
 #include "zone.h"
@@ -32,6 +32,7 @@ using namespace std;
 
 extern Zone* zone;
 
+//TODO: This file is terrible: half of it needs to be in common and half in zone
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf

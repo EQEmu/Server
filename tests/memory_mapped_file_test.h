@@ -38,22 +38,17 @@ public:
     void LoadAndZeroMMF() {
         EQEmu::MemoryMappedFile mmf("testfile.txt", 512);
         mmf.ZeroFile();
-        TEST_ASSERT(!mmf.Loaded());
         TEST_ASSERT(mmf.Size() == 512);
     
         unsigned char *data = reinterpret_cast<unsigned char*>(mmf.Get());
         TEST_ASSERT(data != NULL);
     
         *reinterpret_cast<uint32*>(data) = 562;
-        mmf.SetLoaded();
-    
-        TEST_ASSERT(mmf.Loaded());
     }
     
     void LoadExistingMMF() {
         EQEmu::MemoryMappedFile mmf("testfile.txt");
         TEST_ASSERT(mmf.Size() == 512);
-        TEST_ASSERT(mmf.Loaded());
     
         unsigned char *data = reinterpret_cast<unsigned char*>(mmf.Get());
         TEST_ASSERT(data != NULL);

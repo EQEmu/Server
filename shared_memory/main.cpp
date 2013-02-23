@@ -25,6 +25,7 @@
 #include "../common/rulesys.h"
 #include "../common/eqemu_exception.h"
 #include "items.h"
+#include "npc_faction.h"
 #include "loot.h"
 #include "skill_caps.h"
 #include "spells.h"
@@ -55,6 +56,7 @@ int main(int argc, char **argv) {
 
     bool load_all = true;
     bool load_items = true;
+    bool load_factions = true;
     bool load_loot = true;
     bool load_skill_caps = true;
     bool load_spells = true;
@@ -68,6 +70,16 @@ int main(int argc, char **argv) {
         }
     }
 
+    if(load_all || load_factions) {
+        LogFile->write(EQEMuLog::Status, "Loading factions...");
+        try {
+            LoadFactions(&database);
+        } catch(std::exception &ex) {
+            LogFile->write(EQEMuLog::Error, "%s", ex.what());
+            return 0;
+        }
+    }
+    
     if(load_all || load_loot) {
         LogFile->write(EQEMuLog::Status, "Loading loot...");
         try {

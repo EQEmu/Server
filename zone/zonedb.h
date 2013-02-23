@@ -5,7 +5,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/loottable.h"
 #include "zonedump.h"
-#include "faction.h"
+#include "../common/faction.h"
 //#include "doors.h"
 
 struct wplist {

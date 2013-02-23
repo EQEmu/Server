@@ -38,8 +38,5 @@ void LoadSpells(SharedDatabase *database) {
 
     void *ptr = mmf.Get();
     database->LoadSpells(ptr, records);
-    mmf.SetLoaded();
-    
-    //Mutex will unlock on destruction because it's RAII but still.
     mutex.Unlock();
 }

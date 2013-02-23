@@ -157,7 +157,6 @@ int command_init(void) {
 		command_add("incstat","- Increases or Decreases a client's stats permanently.",200,command_incstat) ||
 		command_add("help","[search term] - List available commands and their description, specify partial command as argument to search",0,command_help) ||
 		command_add("version","- Display current version of EQEmu server",0,command_version) ||
-		command_add("eitem","- Changes item stats",200,command_eitem) ||
 		command_add("setfaction","[faction number] - Sets targeted NPC's faction in the database",170,command_setfaction) ||
 		command_add("serversidename","- Prints target's server side name",0,command_serversidename) ||
 		command_add("testspawn","[memloc] [value] - spawns a NPC for you only, with the specified values set in the spawn struct",200,command_testspawn) ||
@@ -945,20 +944,6 @@ void command_version(Client *c, const Seperator *sep)
 	c->Message(0, "	%s", CURRENT_VERSION);
 	c->Message(0, "	Compiled on: %s at %s", COMPILE_DATE, COMPILE_TIME);
 	c->Message(0, "	Last modified on: %s", LAST_MODIFIED);
-}
-
-void command_eitem(Client *c, const Seperator *sep)
-{
-#ifdef SHAREMEM
-	c->Message(0, "Error: Function doesnt work in ShareMem mode");
-#else
-	char hehe[255];
-	if(strstr(sep->arg[2],"classes"))
-		snprintf(hehe,255,"%s %s",sep->arg[3],strstr(sep->argplus[0],sep->arg[3]));
-	else
-		strcpy(hehe,sep->arg[3]);
-	database.SetItemAtt(sep->arg[2],hehe,atoi(sep->arg[1]));
-#endif
 }
 
 void command_setfaction(Client *c, const Seperator *sep)

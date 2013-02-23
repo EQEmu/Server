@@ -1,5 +1,5 @@
 /*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+    Copyright (C) 2001-2013  EQEMu Development Team (http://eqemu.org)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,11 +15,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#ifndef FACTION_H
-#define FACTION_H
+#ifndef _EQEMU_FACTION_H
+#define _EQEMU_FACTION_H
 
-#include "../common/types.h"
-#include "../common/features.h"
+#include "types.h"
+#include "features.h"
 #include <map>
 #include <string>
 
@@ -64,11 +64,10 @@ typedef map<uint32, int16> faction_map;
 
 struct NPCFaction    
 {    
-uint32 factionID;
-int32 value_mod;
-int8 npc_value;
-uint8 temp;
-//bool primary;    
+    uint32 factionID;
+    int32 value_mod;
+    int8 npc_value;
+    uint8 temp; 
 }; 
 
 const char *FactionValueToString(FACTION_VALUE fv);

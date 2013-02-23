@@ -23,18 +23,9 @@
 #include <cstdlib>
 #include <cstring>
 
-#ifdef SHARED_OPCODES
-#include "EMuShareMem.h"
-extern LoadEMuShareMemDLL EMuShareMemDLL;
-#endif
-
 #include <map>
 #include <string>
 using namespace std;
-
-
-//#define DEBUG_TRANSLATE
-
 
 OpcodeManager::OpcodeManager() {
 	loaded = false;
@@ -140,80 +131,6 @@ EmuOpcode OpcodeManager::NameSearch(const char *name) {
 	}
 	return(OP_Unknown);
 }
-
-#ifdef SHARED_OPCODES
-bool SharedOpcodeManager::LoadOpcodes(const char *filename, bool report_errors) {
-	if (!EMuShareMemDLL.Load()) {
-		printf("Unable to load EMuShareMem for opcodes.\n");
-		return false;
-	}
-	MOpcodes.lock();
-	
-	loaded = true;
-	
-	bool ret = EMuShareMemDLL.Opcodes.DLLLoadOpcodes(DLLLoadOpcodesCallback, sizeof(uint16), MAX_EQ_OPCODE, _maxEmuOpcode, filename);
-	
-	MOpcodes.unlock();
-	return ret;
-}
-
-bool SharedOpcodeManager::DLLLoadOpcodesCallback(const char *filename) {
-	SharedMemStrategy s;
-	return(LoadOpcodesFile(filename, &s, true));
-}
-
-bool SharedOpcodeManager::ReloadOpcodes(const char *filename, bool report_errors) {
-/*	if(!loaded)
-		return(LoadOpcodes(filename));
-	
-	MOpcodes.lock();
-	EMuShareMemDLL.Opcodes.ClearEQOpcodes();
-	
-	SharedMemStrategy s;
-	bool ret = LoadOpcodesFile(filename, &s);
-	
-	MOpcodes.unlock();
-	return(ret);*/
-	
-	//shared memory is read only right now, cant reload it
-	return(false);
-}
-
-
-uint16 SharedOpcodeManager::EmuToEQ(const EmuOpcode emu_op) {
-	//opcode is checked for validity in GetEQOpcode
-	uint16 res;
-	MOpcodes.lock();
-	res = EMuShareMemDLL.Opcodes.GetEQOpcode((uint16)emu_op);
-	MOpcodes.unlock();
-#ifdef DEBUG_TRANSLATE
-	fprintf(stderr, "S Translate Emu %s (%d) to EQ 0x%.4x\n", OpcodeNames[emu_op], emu_op, res);
-#endif
-	return(res);
-}
-
-EmuOpcode SharedOpcodeManager::EQToEmu(const uint16 eq_op) {
-	//opcode is checked for validity in GetEmuOpcode
-//Disabled since current live EQ uses the entire uint16 bitspace for opcodes
-//	if(eq_op > MAX_EQ_OPCODE)
-//		return(OP_Unknown);
-	uint16 res;
-	MOpcodes.lock();
-	res = EMuShareMemDLL.Opcodes.GetEmuOpcode(eq_op);
-	MOpcodes.unlock();
-#ifdef DEBUG_TRANSLATE
-	fprintf(stderr, "S Translate EQ 0x%.4x to Emu %s (%d)\n", eq_op, OpcodeNames[res], res);
-#endif
-	return((EmuOpcode)res);
-}
-
-
-void SharedOpcodeManager::SharedMemStrategy::Set(EmuOpcode emu_op, uint16 eq_op) {
-	EMuShareMemDLL.Opcodes.SetOpcodePair((uint16)emu_op, eq_op);
-}
-
-#endif
-
 
 RegularOpcodeManager::RegularOpcodeManager()
 : MutableOpcodeManager()

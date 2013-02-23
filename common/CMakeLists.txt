@@ -13,7 +13,6 @@ SET(common_sources
     DBMemLeak.cpp
     debug.cpp
     emu_opcodes.cpp
-    EMuShareMem.cpp
     EmuTCPConnection.cpp
     EmuTCPServer.cpp
     EQDB.cpp
@@ -54,7 +53,6 @@ SET(common_sources
     rulesys.cpp
     serverinfo.cpp
     shareddb.cpp
-    SharedLibrary.cpp
     spdat.cpp
     StructStrategy.cpp
     TCPConnection.cpp
@@ -108,7 +106,6 @@ SET(common_headers
     deity.h
     emu_opcodes.h
     emu_oplist.h
-    EMuShareMem.h
     EmuTCPConnection.h
     EmuTCPServer.h
     eq_constants.h
@@ -130,6 +127,7 @@ SET(common_headers
     eqtime.h
     errmsg.h
     extprofile.h
+	faction.h
     features.h
     fixed_memory_hash_set.h
     fixed_memory_variable_hash_set.h
@@ -169,7 +167,6 @@ SET(common_headers
     serverinfo.h
     servertalk.h
     shareddb.h
-    SharedLibrary.h
     skills.h
     spdat.h
     StructStrategy.h

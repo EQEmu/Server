@@ -58,7 +58,7 @@
 #include "forage.h"
 #include "zone.h"
 #include "event_codes.h"
-#include "faction.h"
+#include "../common/faction.h"
 #include "../common/crc32.h"
 #include "../common/rulesys.h"
 #include "StringIDs.h"

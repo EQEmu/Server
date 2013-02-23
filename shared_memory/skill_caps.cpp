@@ -37,8 +37,6 @@ void LoadSkillCaps(SharedDatabase *database) {
     mmf.ZeroFile();
     
     void *ptr = mmf.Get();
-    database->LoadSkillCaps(ptr);
-    mmf.SetLoaded();
-    
+    database->LoadSkillCaps(ptr);   
     mutex.Unlock();
 }

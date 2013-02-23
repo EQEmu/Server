@@ -35,7 +35,6 @@ namespace EQEmu {
 
         //! Underlying data structure.
         struct shared_memory_struct {
-            bool loaded;
             uint32 size;
             unsigned char data[1];
         };
@@ -66,13 +65,7 @@ namespace EQEmu {
         
         //! Get Size Function
         inline uint32 Size() const { return memory_->size; }
-        
-        //! Returns whether this memory is loaded or not
-        inline bool Loaded() const { return memory_->loaded; }
-        
-        //! Sets the memory to be loaded
-        inline void SetLoaded() { memory_->loaded = true; }
-        
+               
         //! Zeros all the memory in the file, and set it to be unloaded
         void ZeroFile();
     private:

@@ -1,5 +1,5 @@
 /*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+    Copyright (C) 2001-2013  EQEMu Development Team (http://eqemulator.net)
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -15,35 +15,11 @@
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#ifndef _SHAREDLIBRARY_H
-#define _SHAREDLIBRARY_H
 
-#ifdef _WINDOWS
-#include <windows.h>
-#endif
+#ifndef __EQEMU_SHARED_MEMORY_NPC_FACTION_H
+#define __EQEMU_SHARED_MEMORY_NPC_FACTION_H
 
-class SharedLibrary {
-public:
-	SharedLibrary();
-	virtual ~SharedLibrary();
-	
-	//two call styles for GetSym, one returns bool, other NULL for fail
-	bool GetSym(const char *name, void **sym);
-	void *GetSym(const char *name);
-	
-	const char *GetError();
-	
-	virtual bool Load(const char *file);
-	virtual void Unload();
-	
-	inline bool	Loaded() { return (hDLL != 0); }
-	
-protected:
-#ifdef _WINDOWS
-	HINSTANCE hDLL;
-#else
-	void* hDLL;
-#endif
-};
+class SharedDatabase;
+void LoadFactions(SharedDatabase *database);
 
 #endif

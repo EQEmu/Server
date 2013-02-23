@@ -19,7 +19,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 #include <stdlib.h>
 #include <math.h>
 #include "masterentity.h"
-#include "faction.h"
+#include "../common/faction.h"
 #include "map.h"
 #include "../common/spdat.h"
 #include "../common/skills.h"

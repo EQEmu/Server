@@ -4,7 +4,6 @@
 #include <cstring>
 #include <cstdlib>
 #include "Item.h"
-#include "EMuShareMem.h"
 #include "classes.h"
 #include "rulesys.h"
 #include "seperator.h"
@@ -15,20 +14,22 @@
 #include "memory_mapped_file.h"
 #include "ipc_mutex.h"
 #include "eqemu_exception.h"
+#include "loottable.h"
+#include "faction.h"
+#include "features.h"
 
 using namespace std;
 
-extern LoadEMuShareMemDLL EMuShareMemDLL;
-
 SharedDatabase::SharedDatabase()
-: Database(), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL), faction_mmf(NULL), 
+: Database(), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL), faction_mmf(NULL), faction_hash(NULL),
     loot_table_mmf(NULL), loot_drop_mmf(NULL), loot_table_hash(NULL), loot_drop_hash(NULL)
 {
 }
 
 SharedDatabase::SharedDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 : Database(host, user, passwd, database, port), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL), 
-    faction_mmf(NULL), loot_table_mmf(NULL), loot_drop_mmf(NULL), loot_table_hash(NULL), loot_drop_hash(NULL)
+    faction_mmf(NULL), faction_hash(NULL), loot_table_mmf(NULL), loot_drop_mmf(NULL), loot_table_hash(NULL), 
+    loot_drop_hash(NULL)
 {
 }
 
@@ -37,6 +38,7 @@ SharedDatabase::~SharedDatabase() {
     safe_delete(items_mmf);
     safe_delete(items_hash);
     safe_delete(faction_mmf);
+    safe_delete(faction_hash);
     safe_delete(loot_table_mmf);
     safe_delete(loot_drop_mmf);
     safe_delete(loot_table_hash);
@@ -715,31 +717,26 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 }
 
 
-int32 SharedDatabase::GetItemsCount(uint32* max_id) {
+void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     MYSQL_RES *result;
     MYSQL_ROW row;
-	int32 ret = -1;
+	item_count = -1;
+    max_id = 0;
 	
 	char query[] = "SELECT MAX(id), count(*) FROM items";
 	if (RunQuery(query, static_cast<uint32>(strlen(query)), errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		if (row != NULL && row[1] != 0) {
-			ret = atoi(row[1]);
-			if (max_id) {
-				if (row[0])
-					*max_id = atoi(row[0]);
-				else
-					*max_id = 0;
-			}
+			item_count = atoi(row[1]);
+			if(row[0])
+				max_id = atoi(row[0]);
 		}
 		mysql_free_result(result);
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, "Error in GetItemsCount '%s': '%s'", query, errbuf);
 	}
-	
-	return ret;
 }
 
 bool SharedDatabase::LoadItems() {
@@ -752,8 +749,9 @@ bool SharedDatabase::LoadItems() {
         mutex.Lock();
         items_mmf = new EQEmu::MemoryMappedFile("shared/items");
 
+        int32 items = -1;
         uint32 max_item = 0;
-        int32 items = GetItemsCount(&max_item);
+        GetItemsCount(items, max_item);
         if(items == -1) {
             EQ_EXCEPT("SharedDatabase", "Database returned no result");
         }
@@ -1085,149 +1083,118 @@ string SharedDatabase::GetBook(const char *txtfile)
 	}
 }
 
+void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
+    list_count = 0;
+    max_lists = 0;
+    const char *query = "SELECT COUNT(*), MAX(id) FROM npc_faction";
+    char errbuf[MYSQL_ERRMSG_SIZE];
+    MYSQL_RES *result;
+    MYSQL_ROW row;
 
-bool SharedDatabase::extDBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID) {
-	return false;
-    //return s_usedb->DBLoadNPCFactionLists(iNPCFactionListCount, iMaxNPCFactionListID);
+    if(RunQuery(query, strlen(query), errbuf, &result)) {
+        if(row = mysql_fetch_row(result)) {
+            list_count = static_cast<uint32>(atoul(row[0]));
+            max_lists = static_cast<uint32>(atoul(row[1]));
+        }
+        mysql_free_result(result);
+    } else {
+        LogFile->write(EQEMuLog::Error, "Error getting npc faction info from database: %s, %s", query, errbuf);
+    }
 }
 
 const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) {
-	return NULL;
-    //return EMuShareMemDLL.NPCFactionList.GetNPCFactionList(id);
+	if(!faction_hash) {
+        return NULL;
+    }
+
+    if(faction_hash->exists(id)) {
+        return &(faction_hash->at(id));
+    }
+
+    return NULL;
+}
+
+void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists) {
+    EQEmu::FixedMemoryHashSet<NPCFactionList> hash(reinterpret_cast<uint8*>(data), size, list_count, max_lists);
+    const char *query = "SELECT npc_faction.id, npc_faction.primaryfaction, npc_faction.ignore_primary_assist, "
+        "npc_faction_entries.faction_id, npc_faction_entries.value, npc_faction_entries.npc_value, npc_faction_entries.temp "
+        "FROM npc_faction JOIN npc_faction_entries ON npc_faction.id = npc_faction_entries.npc_faction_id ORDER BY "
+        "npc_faction.id;";
+
+    char errbuf[MYSQL_ERRMSG_SIZE];
+    MYSQL_RES *result;
+    MYSQL_ROW row;
+    NPCFactionList faction;
+
+    if(RunQuery(query, strlen(query), errbuf, &result)) {
+        uint32 current_id = 0;
+        uint32 current_entry = 0;
+        while(row = mysql_fetch_row(result)) {
+            uint32 id = static_cast<uint32>(atoul(row[0]));
+            if(id != current_id) {
+                if(current_id != 0) {
+                    hash.insert(current_id, faction);
+                }
+
+                memset(&faction, 0, sizeof(faction));
+                current_entry = 0;
+                current_id = id;
+                faction.id = id;
+                faction.primaryfaction = static_cast<uint32>(atoul(row[1]));
+                faction.assistprimaryfaction = (atoi(row[2]) == 0);
+            }
+
+            if(current_entry >= MAX_NPC_FACTIONS) {
+                continue;
+            }
+
+            faction.factionid[current_entry] = static_cast<uint32>(atoul(row[3]));
+            faction.factionvalue[current_entry] = static_cast<int32>(atoi(row[4]));
+            faction.factionnpcvalue[current_entry] = static_cast<int8>(atoi(row[5]));
+            faction.factiontemp[current_entry] = static_cast<uint8>(atoi(row[6]));
+        }
+
+        if(current_id != 0) {
+            hash.insert(current_id, faction);
+        }
+
+        mysql_free_result(result);
+    } else {
+        LogFile->write(EQEMuLog::Error, "Error getting npc faction info from database: %s, %s", query, errbuf);
+    }
 }
 
 bool SharedDatabase::LoadNPCFactionLists() {
-	//if (!EMuShareMemDLL.Load())
-	//	return false;
-	//int32 tmp = -1;
-	//uint32 tmp_npcfactionlist_max;
-	//tmp = GetNPCFactionListsCount(&tmp_npcfactionlist_max);
-	//if (tmp < 0) {
-	//	cout << "Error: SharedDatabase::LoadNPCFactionLists-ShareMem: GetNPCFactionListsCount() returned < 0" << endl;
-	//	return false;
-	//}
-	//bool ret = EMuShareMemDLL.NPCFactionList.DLLLoadNPCFactionLists(&extDBLoadNPCFactionLists, sizeof(NPCFactionList), &tmp, &tmp_npcfactionlist_max, MAX_NPC_FACTIONS);
-	//return ret;
+    if(faction_hash) {
+        return true;
+    }
+	
+    try {
+        EQEmu::IPCMutex mutex("faction");
+        mutex.Lock();
+        faction_mmf = new EQEmu::MemoryMappedFile("shared/faction");
+
+        uint32 list_count = 0;
+        uint32 max_lists = 0;
+        GetFactionListInfo(list_count, max_lists);
+        if(list_count == 0) {
+            EQ_EXCEPT("SharedDatabase", "Database returned no result");
+        }
+        uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<NPCFactionList>::estimated_size(
+            list_count, max_lists));
+
+        if(faction_mmf->Size() != size) {
+            EQ_EXCEPT("SharedDatabase", "Couldn't load npc factions because faction_mmf->Size() != size");
+        }
+
+        faction_hash = new EQEmu::FixedMemoryHashSet<NPCFactionList>(reinterpret_cast<uint8*>(faction_mmf->Get()), size);
+        mutex.Unlock();
+    } catch(std::exception& ex) {
+        LogFile->write(EQEMuLog::Error, "Error Loading npc factions: %s", ex.what());
+        return false;
+    }
+
     return true;
-}
-
-bool SharedDatabase::DBLoadNPCFactionLists(int32 iNPCFactionListCount, uint32 iMaxNPCFactionListID) {
-	_CP(Database_DBLoadNPCFactionLists);
-	LogFile->write(EQEMuLog::Status, "Loading NPC Faction Lists from database...");
-	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-	query = new char[256];
-	strcpy(query, "SELECT MAX(id), Count(*) FROM npc_faction");
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if (row && row[0]) {
-			if ((uint32)atoi(row[0]) > iMaxNPCFactionListID) {
-				cout << "Error: Insufficient shared memory to load NPC Faction Lists." << endl;
-				cout << "Max(id): " << atoi(row[0]) << ", iMaxNPCFactionListID: " << iMaxNPCFactionListID << endl;
-				cout << "Fix this by increasing the MMF_MAX_NPCFactionList_ID define statement" << endl;
-				mysql_free_result(result);
-				return false;
-			}
-			if (atoi(row[1]) != iNPCFactionListCount) {
-				cout << "Error: number of NPCFactionLists in memshare doesnt match database." << endl;
-				cout << "Count(*): " << atoi(row[1]) << ", iNPCFactionListCount: " << iNPCFactionListCount << endl;
-				mysql_free_result(result);
-				return false;
-			}
-			//npcfactionlist_max = atoi(row[0]);
-			mysql_free_result(result);
-			NPCFactionList tmpnfl;
-			if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, primaryfaction, ignore_primary_assist from npc_faction"), errbuf, &result)) {
-				safe_delete_array(query);
-				while((row = mysql_fetch_row(result))) {
-					memset(&tmpnfl, 0, sizeof(NPCFactionList));
-					tmpnfl.id = atoi(row[0]);
-					tmpnfl.primaryfaction = atoi(row[1]);
-					//if we have ignore_primary_assist set to non-zero then we will not assist our own faction
-					//else we will assist (this is the default)
-					tmpnfl.assistprimaryfaction = (atoi(row[2]) == 0) ? true : false;
-					if (!EMuShareMemDLL.NPCFactionList.cbAddNPCFactionList(tmpnfl.id, &tmpnfl)) {
-						mysql_free_result(result);
-						cout << "Error: SharedDatabase::DBLoadNPCFactionLists: !EMuShareMemDLL.NPCFactionList.cbAddNPCFactionList" << endl;
-						return false;
-					}
-
-					Sleep(0);
-				}
-				mysql_free_result(result);
-			}
-			else {
-				cerr << "Error in DBLoadNPCFactionLists query2 '" << query << "' " << errbuf << endl;
-				safe_delete_array(query);
-				return false;
-			}
-			if (RunQuery(query, MakeAnyLenString(&query, "SELECT npc_faction_id, faction_id, value, npc_value, temp FROM npc_faction_entries order by npc_faction_id"), errbuf, &result)) {
-				safe_delete_array(query);
-				int8 i = 0;
-				uint32 curflid = 0;
-				uint32 tmpflid = 0;
-				uint32 tmpfactionid[MAX_NPC_FACTIONS];
-				int32 tmpfactionvalue[MAX_NPC_FACTIONS];
-				int8 tmpfactionnpcvalue[MAX_NPC_FACTIONS];
-				uint8 tmpfactiontemp[MAX_NPC_FACTIONS];
-
-				memset(tmpfactionid, 0, sizeof(tmpfactionid));
-				memset(tmpfactionvalue, 0, sizeof(tmpfactionvalue));
-				memset(tmpfactionnpcvalue, 0, sizeof(tmpfactionnpcvalue));
-				memset(tmpfactiontemp, 0, sizeof(tmpfactiontemp));
-				
-				while((row = mysql_fetch_row(result))) {
-					tmpflid = atoi(row[0]);
-					if (curflid != tmpflid && curflid != 0) {
-						if (!EMuShareMemDLL.NPCFactionList.cbSetFaction(curflid, tmpfactionid, tmpfactionvalue, tmpfactionnpcvalue, tmpfactiontemp)) {
-							mysql_free_result(result);
-							cout << "Error: SharedDatabase::DBLoadNPCFactionLists: !EMuShareMemDLL.NPCFactionList.cbSetFaction" << endl;
-							return false;
-						}
-						memset(tmpfactionid, 0, sizeof(tmpfactionid));
-						memset(tmpfactionvalue, 0, sizeof(tmpfactionvalue));
-						memset(tmpfactionnpcvalue, 0, sizeof(tmpfactionnpcvalue));
-						memset(tmpfactiontemp, 0, sizeof(tmpfactiontemp));
-						i = 0;
-					}
-					curflid = tmpflid;
-					tmpfactionid[i] = atoi(row[1]);
-					tmpfactionvalue[i] = atoi(row[2]);
-					tmpfactionnpcvalue[i] = atoi(row[3]);
-					tmpfactiontemp[i] = atoi(row[4]);
-					i++;
-					if (i >= MAX_NPC_FACTIONS) {
-						cerr << "Error in DBLoadNPCFactionLists: More than MAX_NPC_FACTIONS factions returned, flid=" << tmpflid << endl;
-						break;
-					}
-					Sleep(0);
-				}
-				if (tmpflid) {
-					EMuShareMemDLL.NPCFactionList.cbSetFaction(curflid, tmpfactionid, tmpfactionvalue, tmpfactionnpcvalue, tmpfactiontemp);
-				}
-
-				mysql_free_result(result);
-			}
-			else {
-				cerr << "Error in DBLoadNPCFactionLists query3 '" << query << "' " << errbuf << endl;
-				safe_delete_array(query);
-				return false;
-			}
-		}
-		else {
-			mysql_free_result(result);
-			//return false;
-		}
-	}
-	else {
-		cerr << "Error in DBLoadNPCFactionLists query1 '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
-		return false;
-	}
-	return true;
 }
 
 // Get the player profile and inventory for the given account "account_id" and
@@ -1426,37 +1393,6 @@ int32 SharedDatabase::DeleteStalePlayerBackups() {
 	safe_delete_array(query);
 	
 	return affected_rows;
-}
-
-int32 SharedDatabase::GetNPCFactionListsCount(uint32* oMaxID) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-	query = new char[256];
-	strcpy(query, "SELECT MAX(id), count(*) FROM npc_faction");
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if (row != NULL && row[1] != 0) {
-			int32 ret = atoi(row[1]);
-			if (oMaxID) {
-				if (row[0])
-					*oMaxID = atoi(row[0]);
-				else
-					*oMaxID = 0;
-			}
-			mysql_free_result(result);
-			return ret;
-		}
-	}
-	else {
-		cerr << "Error in GetNPCFactionListsCount query '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
-		return -1;
-	}
-	
-	return -1;
 }
 
 bool SharedDatabase::GetCommandSettings(map<string,uint8> &commands) {
@@ -1894,6 +1830,11 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
             ++(lt->NumEntries);
             ++current_entry;
         }
+        if(current_id != 0) {
+            hash.insert(current_id, loot_table, (sizeof(LootTable_Struct) + 
+                (sizeof(LootTableEntries_Struct) * lt->NumEntries)));
+        }
+
         mysql_free_result(result);
     } else {
         LogFile->write(EQEMuLog::Error, "Error getting loot table info from database: %s, %s", query, errbuf);

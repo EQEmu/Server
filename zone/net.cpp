@@ -45,26 +45,6 @@ using namespace std;
 
 volatile bool RunLoops = true;
 extern volatile bool ZoneLoaded;
-#ifdef SHAREMEM
-       #include "../common/EMuShareMem.h"
-       extern LoadEMuShareMemDLL EMuShareMemDLL;
-    #ifndef WIN32
-       #include <sys/types.h>
-       #include <sys/ipc.h>
-       #include <sys/sem.h>
-       #include <sys/shm.h>
-#ifndef FREEBSD
-       union semun {
-           int val;
-           struct semid_ds *buf;
-           ushort *array;
-           struct seminfo *__buf;
-           void *__pad;
-       };        
-#endif
-    #endif
-#endif
-
 
 #include "../common/queue.h"
 #include "../common/timer.h"

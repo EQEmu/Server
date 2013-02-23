@@ -105,7 +105,6 @@ SET(zone_headers
     entity.h
     errmsg.h
     event_codes.h
-    faction.h
     forage.h
     groups.h
     guild_mgr.h

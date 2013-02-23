@@ -16,30 +16,30 @@
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "items.h"
+#include "npc_faction.h"
 #include "../common/debug.h"
 #include "../common/shareddb.h"
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
-#include "../common/item_struct.h"
+#include "../common/faction.h"
 
-void LoadItems(SharedDatabase *database) {
-    EQEmu::IPCMutex mutex("items");
+void LoadFactions(SharedDatabase *database) {
+    EQEmu::IPCMutex mutex("faction");
     mutex.Lock();
     
-    int32 items = -1;
-    uint32 max_item = 0;
-    database->GetItemsCount(items, max_item);
-    if(items == -1) {
-        EQ_EXCEPT("Shared Memory", "Unable to get any items from the database.");
+    uint32 lists = 0;
+    uint32 max_list = 0;
+    database->GetFactionListInfo(lists, max_list);
+    if(lists == 0) {
+        EQ_EXCEPT("Shared Memory", "Unable to get any factions from the database.");
     }
     
-    uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(items, max_item));
-    EQEmu::MemoryMappedFile mmf("shared/items", size);
+    uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<NPCFactionList>::estimated_size(lists, max_list));
+    EQEmu::MemoryMappedFile mmf("shared/faction", size);
     mmf.ZeroFile();
     
     void *ptr = mmf.Get();
-    database->LoadItems(ptr, size, items, max_item);   
+    database->LoadNPCFactionLists(ptr, size, lists, max_list);   
     mutex.Unlock();
 }
