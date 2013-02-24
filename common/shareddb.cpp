@@ -1152,6 +1152,7 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
             faction.factionvalue[current_entry] = static_cast<int32>(atoi(row[4]));
             faction.factionnpcvalue[current_entry] = static_cast<int8>(atoi(row[5]));
             faction.factiontemp[current_entry] = static_cast<uint8>(atoi(row[6]));
+            ++current_entry;
         }
 
         if(current_id != 0) {
