@@ -1790,7 +1790,7 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
     EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> hash(reinterpret_cast<uint8*>(data), size);
     const char *query = "SELECT loottable.id, loottable.mincash, loottable.maxcash, loottable.avgcoin,"
         " loottable_entries.lootdrop_id, loottable_entries.multiplier, loottable_entries.droplimit, "
-        "loottable_entries.mindrop, loottable_entries.probability FROM loottable JOIN loottable_entries"
+        "loottable_entries.mindrop, loottable_entries.probability FROM loottable LEFT JOIN loottable_entries"
         " ON loottable.id = loottable_entries.loottable_id ORDER BY id";
     char errbuf[MYSQL_ERRMSG_SIZE];
     MYSQL_RES *result;
@@ -1819,6 +1819,10 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
             
             if(current_entry > 128) {
                continue;
+            }
+
+            if(!row[4]) {
+                continue;
             }
             
             lt->Entries[current_entry].lootdrop_id = static_cast<uint32>(atoul(row[4]));
@@ -1924,7 +1928,7 @@ const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) {
         return NULL;
 
     try {
-        if(loot_drop_hash->exists(loottable_id)) {
+        if(loot_table_hash->exists(loottable_id)) {
             return &loot_table_hash->at(loottable_id);
         }
     } catch(std::exception &ex) {
