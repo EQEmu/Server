@@ -92,7 +92,9 @@ namespace EQEmu {
             return false;
         }
 #else
-        lockf(imp_->fd_, F_TLOCK, 0);
+        if(lockf(imp_->fd_, F_LOCK, 0) != 0) {
+            return false;
+        }
 #endif
         locked_ = true;
         return true;
@@ -107,7 +109,9 @@ namespace EQEmu {
             return false;
         }
 #else
-        lockf(imp_->fd_, F_ULOCK, 0);
+        if(lockf(imp_->fd_, F_ULOCK, 0) != 0) {
+            return false;
+        }
 #endif
         locked_ = false;
         return true;
