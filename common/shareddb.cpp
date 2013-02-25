@@ -1450,6 +1450,7 @@ void SharedDatabase::LoadSkillCaps(void *data) {
     uint32 class_count = PLAYER_CLASS_COUNT;
 	uint32 skill_count = HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
+    uint16 *skill_caps_table = reinterpret_cast<uint16*>(data);
 
     char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
@@ -1468,8 +1469,7 @@ void SharedDatabase::LoadSkillCaps(void *data) {
             if(skillID >= skill_count || class_ >= class_count || level >= level_count)
                 continue;
 
-            uint32 index = (((class_ * class_count) + skillID) * level_count) + level;
-            uint16 *skill_caps_table = reinterpret_cast<uint16*>(data);               
+            uint32 index = (((class_ * skill_count) + skillID) * level_count) + level;
             skill_caps_table[index] = cap;
 		}
 		mysql_free_result(result);
@@ -1503,7 +1503,7 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillType Skill, uint8 Level) {
         Level = static_cast<uint8>(SkillMaxLevel);
     }
 
-    uint32 index = ((((Class_ - 1) * class_count) + Skill) * level_count) + Level;
+    uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count) + Level;
     uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
     return skill_caps_table[index];
 }
