@@ -1306,8 +1306,8 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_SummonedPet:
 		{
 			uint8 body_type = spell_target ? spell_target->GetBodyType() : 0;
-			if(!spell_target || (spell_target != GetPet()) ||
-			   (body_type != BT_Summoned && body_type != BT_Summoned2 && body_type != BT_Summoned3 && body_type != BT_Animal))
+			if(spell_target && (spell_target == GetPet()) &&
+				(body_type == BT_Summoned || body_type == BT_Summoned2 || body_type == BT_Summoned3 || body_type == BT_Animal))
 			{
 				mlog(SPELLS__CASTING_ERR, "Spell %d canceled: invalid target of body type %d (summoned pet)",
 							  spell_id, body_type);

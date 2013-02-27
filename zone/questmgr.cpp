@@ -667,6 +667,14 @@ bool QuestManager::isdisctome(int item_id) {
 		item->Name[2] == 'm' &&
 		item->Name[3] == 'e' &&
 		item->Name[4] == ' '
+		) && !(
+		item->Name[0] == 'S' &&
+		item->Name[1] == 'k' &&
+		item->Name[2] == 'i' &&
+		item->Name[3] == 'l' &&
+		item->Name[4] == 'l' &&
+		item->Name[5] == ':' &&
+		item->Name[6] == ' '
 		)) {
 		return(false);
 	}
