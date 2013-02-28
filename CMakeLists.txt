@@ -113,9 +113,19 @@ OPTION(EQEMU_BUILD_LOGIN "Build the login server." OFF)
 OPTION(EQEMU_BUILD_AZONE "Build azone utility." OFF)
 OPTION(EQEMU_BUILD_TESTS "Build utility tests." OFF)
 
-IF(UNIX)
+#C++11 stuff
+IF(NOT MSVC)
     ADD_DEFINITIONS(-std=c++0x)
-ENDIF(UNIX)
+    #Rvalue-Move - todo: auto set this based on gcc version
+    OPTION(EQEMU_ENABLE_RVALUE_MOVE "Enable EQEmu RValue References (Enable if GCC 4.3 or higher)" OFF)
+ELSE(NOT MSVC)
+    #Rvalue-Move - todo: auto set this based on msvc version
+    OPTION(EQEMU_ENABLE_RVALUE_MOVE "Enable EQEmu RValue References (Enable if Visual Studio 2010 or higher)" OFF)
+ENDIF(NOT MSVC)
+
+IF(EQEMU_ENABLE_RVALUE_MOVE)
+    ADD_DEFINITIONS(-DEQEMU_RVALUE_MOVE)
+ENDIF(EQEMU_ENABLE_RVALUE_MOVE)
 
 #Various definitions
 ADD_DEFINITIONS(-DEMBPERL)

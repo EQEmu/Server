@@ -1,5 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/27/2013 ==
+KLS: Changed how shared memory works:
+    Instead of System V/windows pagefile shared memory we now have shared memory that's backed by the filesystem.
+    What that means is basically instead of EMuSharedMem(shared library) we now have shared_memory(executable), shared memory will be persistent between runs until you delete or reload it using the shared_memory executable.
+    
+    STEPS FOR PEOPLE WHO CAN'T BE BOTHERED TO FIGURE IT OUT:
+        1) Create a directory in the place you run world/zone named shared and make sure files can write there.
+        2) Run the shared_memory executable from the same place you run world/zone (it's basically doing the loading we would do on startup so will take a moment).
+        3) Run world/zone/whatever
+
 == 02/22/2013 ==
 demonstar55: Mobs will now be removed from XTargets when they get back to their way point, should be last instance of XTarget mobs not clearing when they are not aggroed anymore
 
