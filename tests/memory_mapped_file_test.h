@@ -33,8 +33,7 @@ public:
     ~MemoryMappedFileTest() { 
     }
 
-    private:
-    
+    private:    
     void LoadAndZeroMMF() {
         EQEmu::MemoryMappedFile mmf("testfile.txt", 512);
         mmf.ZeroFile();

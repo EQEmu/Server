@@ -1118,7 +1118,7 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
     EQEmu::FixedMemoryHashSet<NPCFactionList> hash(reinterpret_cast<uint8*>(data), size, list_count, max_lists);
     const char *query = "SELECT npc_faction.id, npc_faction.primaryfaction, npc_faction.ignore_primary_assist, "
         "npc_faction_entries.faction_id, npc_faction_entries.value, npc_faction_entries.npc_value, npc_faction_entries.temp "
-        "FROM npc_faction JOIN npc_faction_entries ON npc_faction.id = npc_faction_entries.npc_faction_id ORDER BY "
+        "FROM npc_faction LEFT JOIN npc_faction_entries ON npc_faction.id = npc_faction_entries.npc_faction_id ORDER BY "
         "npc_faction.id;";
 
     char errbuf[MYSQL_ERRMSG_SIZE];
@@ -1142,6 +1142,10 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
                 faction.id = id;
                 faction.primaryfaction = static_cast<uint32>(atoul(row[1]));
                 faction.assistprimaryfaction = (atoi(row[2]) == 0);
+            }
+
+            if(!row[3]) {
+                continue;
             }
 
             if(current_entry >= MAX_NPC_FACTIONS) {

@@ -46,6 +46,7 @@ public:
         delete[] data_;
     }
     
+    private:
     void InitTest() {
         EQEmu::FixedMemoryVariableHashSet<test_struct> hash(data_, size_, 501);
         TEST_ASSERT(!hash.exists(0));

@@ -35,6 +35,7 @@ public:
     ~IPCMutexTest() { 
     }
     
+    private:
     void LockMutexTest() {
         EQEmu::IPCMutex mutex("TestMutex1");
         TEST_ASSERT(mutex.Lock());
