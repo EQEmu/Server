@@ -13546,11 +13546,11 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 				mml->Mercs[i].MercID = mercListItr->MercTemplateID;				
 				mml->Mercs[i].MercType = mercListItr->MercType;			
 				mml->Mercs[i].MercSubType = mercListItr->MercSubType;		
-				mml->Mercs[i].PurchaseCost = Merc::CalcPurchaseCost(mercListItr->MercTemplateID, GetLevel(), 0);	
-				mml->Mercs[i].UpkeepCost = Merc::CalcUpkeepCost(mercListItr->MercTemplateID, GetLevel(), 0);			
+				mml->Mercs[i].PurchaseCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercListItr->MercTemplateID, GetLevel(), 0): 0;	
+				mml->Mercs[i].UpkeepCost = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercListItr->MercTemplateID, GetLevel(), 0): 0;			
 				mml->Mercs[i].Status = 0;				
-				mml->Mercs[i].AltCurrencyCost = Merc::CalcPurchaseCost(mercListItr->MercTemplateID, GetLevel(), altCurrentType);	
-				mml->Mercs[i].AltCurrencyUpkeep = Merc::CalcUpkeepCost(mercListItr->MercTemplateID, GetLevel(), altCurrentType);	
+				mml->Mercs[i].AltCurrencyCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercListItr->MercTemplateID, GetLevel(), altCurrentType): 0;	
+				mml->Mercs[i].AltCurrencyUpkeep = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercListItr->MercTemplateID, GetLevel(), altCurrentType): 0;	
 				mml->Mercs[i].AltCurrencyType = altCurrentType;
 				mml->Mercs[i].MercUnk01 = 0;			
 				mml->Mercs[i].TimeLeft = -1;			
@@ -13612,30 +13612,46 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 	//HirePending = true;
 	SetHoTT(0);
 	SendTargetCommand(0);
+	
+	if(!RuleB(Mercs, AllowMercs))
+		return;
 
 	MercTemplate* merc_template = zone->GetMercTemplate(merc_template_id);
 
 	if(merc_template) {
 
-		if (GetMercID()) {
-			// 6 - You must dismiss the mercenary before hiring a new one.
-			SendMercMerchantResponsePacket(6);	
+		Mob* merchant = entity_list.GetNPCByID(merchant_id);
+		if(!CheckCanHireMerc(merchant, merc_template_id)) {
+		    return;
 		}
-		else
-		{
-			// 0 is approved hire request
-			SendMercMerchantResponsePacket(0);
+		
+		if(RuleB(Mercs, ChargeMercPurchaseCost)) {
+		    uint32 cost = Merc::CalcPurchaseCost(merc_template->MercTemplateID, GetLevel()) * 100; 	// Cost is in gold
+		    TakeMoneyFromPP(cost, true);
+		}
 
-			// Set time remaining to max on Hire
-			GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
+		// Set time remaining to max on Hire
+		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 
-			// Get merc, assign it to client & spawn
-			Merc* merc = Merc::LoadMerc(this, merc_template, merchant_id, false);
+		// Get merc, assign it to client & spawn
+		Merc* merc = Merc::LoadMerc(this, merc_template, merchant_id, false);
+		
+		if(merc) {
 			SpawnMerc(merc, true);
 			merc->Save();
+
+			// 0 is approved hire request
+			SendMercMerchantResponsePacket(0);
+		}
+		else {
+			//merc failed to spawn
+			SendMercMerchantResponsePacket(3);
 		}
 	}
-
+	else {
+		//merc doesn't exist in db
+		SendMercMerchantResponsePacket(2);
+	}
 }
 
 void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app)
@@ -13655,6 +13671,9 @@ void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app)
 
 	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Suspend ( %i ) received.", merc_suspend);
+		
+	if(!RuleB(Mercs, AllowMercs))
+		return;
 	
 	// Check if the merc is suspended and if so, unsuspend, otherwise suspend it
 	SuspendMercCommand();
@@ -13683,6 +13702,9 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 
 	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Command %i, Option %i received.", merc_command, option);
+		
+	if(!RuleB(Mercs, AllowMercs))
+		return;
 	
 	// Handle the Command here...
 	// Will need a list of what every type of command is supposed to do
@@ -13784,7 +13806,9 @@ void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 		}
 	}
 
-	SendMercTimerPacket(entityID, mercState, suspendedTime, RuleI(Mercs, UpkeepIntervalMS), RuleI(Mercs, SuspendIntervalMS));
+    if(entityID > 0) {
+	    SendMercTimerPacket(entityID, mercState, suspendedTime, RuleI(Mercs, UpkeepIntervalMS), RuleI(Mercs, SuspendIntervalMS));
+	}
 }
 
 void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app) {

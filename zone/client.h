@@ -1097,6 +1097,9 @@ public:
 	void RemoveGroupXTargets();
 	void ShowXTargets(Client *c);
 	void InitializeMercInfo();
+	bool CheckCanHireMerc(Mob* merchant, uint32 template_id);
+	bool CheckCanRetainMerc(uint32 upkeep);
+	bool CheckCanUnsuspendMerc();
 	inline uint32 GetMercID()	const { return mercid; }
 	inline uint8 GetMercSlot()	const { return mercSlot; }
 	void SetMercID( uint32 newmercid) { mercid = newmercid; }

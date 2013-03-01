@@ -77,6 +77,12 @@ public:
 	Corpse* GetGroupMemberCorpse();
 
 	// Merc Spell Casting Methods
+	int32 Additional_SpellDmg(uint16 spell_id, bool bufftick = false);
+	int32 Additional_Heal(uint16 spell_id);
+	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value);
+	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value);
+	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
+	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
 	int8 GetChanceToCastBySpellType(int16 spellType);
 	void SetSpellRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
 	void SetDisciplineRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
@@ -113,6 +119,7 @@ public:
 	void UpdateMercInfo(Client *c);
 	void UpdateMercStats(Client *c);
 	void UpdateMercAppearance(Client *c);
+	void AddItem(uint8 slot, uint32 item_id);
 	static const char *GetRandomName();
 	bool Spawn(Client *owner);
 	bool Dismiss();
@@ -221,7 +228,7 @@ public:
 	// "SET" Class Methods
 	void SetMercData (uint32 templateID );
 	void SetMercID( uint32 mercID ) { _MercID = mercID; }
-	void SetMercCharacterID( uint32 mercID ) { owner_char_id = mercID; }
+	void SetMercCharacterID( uint32 ownerID ) { owner_char_id = ownerID; }
 	void SetMercTemplateID( uint32 templateID ) { _MercTemplateID = templateID; }
 	void SetMercType( uint32 type ) { _MercType = type; }
 	void SetMercSubType( uint32 subtype ) { _MercSubType = subtype; }
@@ -232,7 +239,7 @@ public:
 	void SetClientVersion(uint8 clientVersion) { _OwnerClientVersion = clientVersion; }
 	void SetSuspended(bool suspended) { _suspended = suspended; }
 	void SetStance( uint32 stance ) { _currentStance = stance; }
-	void SetHatedCount( uint8 count ) { _hatedCount = count; }
+	void SetHatedCount( int count ) { _hatedCount = count; }
 
 	void Sit();
 	void Stand();
@@ -248,8 +255,10 @@ public:
 
 protected:
 	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false);
+	void AddItemBonuses(const Item_Struct *item, StatBonuses* newbon);
 	int  CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
+
+	int16	GetFocusEffect(focusType type, uint16 spell_id);
 
 	std::vector<MercSpell> merc_spells;
 	std::map<uint32,MercTimer> timers;
