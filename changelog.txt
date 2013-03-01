@@ -1,5 +1,13 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/1/2013 ==
+Bad_Captain: Fixed Merc duplicate save bug.
+Bad_Captain: Focus items, spell_scale and heal_scale now work implemented and new merc equipment (with focus items).
+Bad_Captain: Added checks during merc hire, unsuspend, & timer update for states where a merc can't be hired, unsuspended, or can't be retained due to insufficient funds, no room in group, in raid, invalid merc data, etc, and give appropriate feedback.
+Bad_Captain: Added rules for charging of merc purchase and upkeep costs.
+
+REQUIRED SQL: 2013_03_1_Merc_Rules_and_Equipment.sql
+
 == 02/27/2013 ==
 KLS: Changed how shared memory works:
     Instead of System V/windows pagefile shared memory we now have shared memory that's backed by the filesystem.

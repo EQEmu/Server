@@ -7207,11 +7207,11 @@ void Client::SendMercPersonalInfo()
 				mml->Mercs[i].MercID = mercData->MercTemplateID;
 				mml->Mercs[i].MercType = mercData->MercType;
 				mml->Mercs[i].MercSubType = mercData->MercSubType;
-				mml->Mercs[i].PurchaseCost = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), 0);
-				mml->Mercs[i].UpkeepCost = Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), 0);
-				mml->Mercs[i].Status = 0;
-				mml->Mercs[i].AltCurrencyCost = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
-				mml->Mercs[i].AltCurrencyUpkeep = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
+				mml->Mercs[i].PurchaseCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), 0): 0;	
+				mml->Mercs[i].UpkeepCost = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), 0): 0;			
+				mml->Mercs[i].Status = 0;				
+				mml->Mercs[i].AltCurrencyCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType): 0;	
+				mml->Mercs[i].AltCurrencyUpkeep = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), altCurrentType): 0;
 				mml->Mercs[i].AltCurrencyType = altCurrentType;
 				mml->Mercs[i].MercUnk01 = 0;
 				mml->Mercs[i].TimeLeft = GetMercInfo().MercTimerRemaining;

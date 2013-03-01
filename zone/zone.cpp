@@ -1212,7 +1212,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDe
 	{
 		map_name = NULL;
 		if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, 
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, default_ruleset, &map_name)) 
+			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name)) 
 		{
 			LogFile->write(EQEMuLog::Error, "Error loading the Zone Config."); 
 			return false;
@@ -1223,11 +1223,11 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDe
 		//Fall back to base zone if we don't find the instance version.
 		map_name = NULL;
 		if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind, 
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, default_ruleset, &map_name)) 
+			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name)) 
 		{
 			safe_delete_array(map_name);
 			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, 
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, default_ruleset, &map_name)) 
+			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name)) 
 			{
 				LogFile->write(EQEMuLog::Error, "Error loading the Zone Config."); 
 				return false;
