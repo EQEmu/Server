@@ -18,6 +18,8 @@ extern volatile bool ZoneLoaded;
 Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	: NPC(d, 0, x, y, z, heading, 0, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000)
 {
+	base_hp = d->max_hp;
+	base_mana = d->Mana;
 	_baseAC = d->AC;
 	_baseSTR = d->STR;
 	_baseSTA = d->STA;
@@ -35,6 +37,9 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	_baseFR = d->FR;
 	_basePR = d->PR;
 	_baseCorrup = d->Corrup;
+	RestRegenHP = 0;
+	RestRegenMana = 0;
+	RestRegenEndurance = 0;
 
 	_medding = false;
 	_suspended = false;
@@ -44,6 +49,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	_hatedCount = 0;
 
 	ourNPCData = d;
+	memset(equipment, 0, sizeof(equipment));
 
 	SetMercID(0);
 	SetStance(MercStancePassive);
@@ -331,27 +337,27 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
 	for (i=0; i<SLOT_AMMO; i++) {
-		const ItemInst* inst = m_inv[i];
-		if(inst == 0)
+		if(equipment[i] == 0)
 			continue;
-		AddItemBonuses(inst, newbon);
+		const Item_Struct * itm = database.GetItem(equipment[i]);
+		AddItemBonuses(itm, newbon);
 	}
 
 	//Power Source Slot
-	if (GetClientVersion() >= EQClientSoF)
+	/*if (GetClientVersion() >= EQClientSoF)
 	{
 		const ItemInst* inst = m_inv[9999];
 		if(inst)
 			AddItemBonuses(inst, newbon);
-	}
+	}*/
 
 	//tribute items
-	for (i = 0; i < MAX_PLAYER_TRIBUTES; i++) {
+	/*for (i = 0; i < MAX_PLAYER_TRIBUTES; i++) {
 		const ItemInst* inst = m_inv[TRIBUTE_SLOT_START + i];
 		if(inst == 0)
 			continue;
 		AddItemBonuses(inst, newbon, false, true);
-	}
+	}*/
 	// Caps
 	if(newbon->HPRegen > CalcHPRegenCap())
 		newbon->HPRegen = CalcHPRegenCap();
@@ -365,24 +371,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	SetAttackTimer();
 }
 
-void Merc::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, bool isTribute) {
-	if(!inst || !inst->IsType(ItemClassCommon))
-	{
-		return;
-	}
-
-	if(inst->GetAugmentType()==0 && isAug == true)
-	{
-		return;
-	}
-
-	const Item_Struct *item = inst->GetItem();
-
-	if(!isTribute && !inst->IsEquipable(GetBaseRace(),GetClass()))
-	{
-		if(item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink)
-			return;
-	}
+void Merc::AddItemBonuses(const Item_Struct *item, StatBonuses* newbon) {
 
 	if(GetLevel() < item->ReqLevel)
 	{
@@ -711,15 +700,6 @@ void Merc::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug,
 		else
 			newbon->SkillDamageAmount[item->ExtraDmgSkill] += item->ExtraDmgAmt;
 	}
-
-	if (!isAug)
-	{
-		int i;
-		for(i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-			AddItemBonuses(inst->GetAugment(i),newbon,true);
-		}
-	}
-
 }
 
 int Merc::GroupLeadershipAAHealthEnhancement()
@@ -1093,7 +1073,6 @@ int32 Merc::CalcBaseManaRegen()
 int32 Merc::CalcManaRegen()
 {
 	int32 regen = 0;
-	//this should be changed so we dont med while camping, etc...
 	if (IsSitting())
 	{
 		BuffFadeBySitModifier();
@@ -1109,6 +1088,13 @@ int32 Merc::CalcManaRegen()
 		this->_medding = false;
 		regen = mana_regen + spellbonuses.ManaRegen + itembonuses.ManaRegen;
 	}
+
+	if(GetCasterClass() == 'I')
+		regen += (itembonuses.HeroicINT / 25);
+	else if(GetCasterClass() == 'W')
+		regen += (itembonuses.HeroicWIS / 25);
+	else
+		regen = 0;
 
 	//AAs
 	regen += aabonuses.ManaRegen;
@@ -1451,8 +1437,9 @@ bool Merc::Process()
 		this->stunned_timer.Disable();
 	}
 
-	if (p_depop)
+	if (GetDepop())
     {
+		SetMercCharacterID(0);
 		SetOwnerID(0);
 		SetID(0);
 		return false;
@@ -2509,6 +2496,414 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 	}
 
 	return castedSpell;
+}
+
+int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
+
+	int16 realTotal = 0;
+	int16 realTotal2 = 0;
+	int16 realTotal3 = 0;
+	bool rand_effectiveness = false;
+
+	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
+	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
+	if((type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage)
+		&& RuleB(Spells, LiveLikeFocusEffects))
+	{
+		rand_effectiveness = true;
+	}
+
+	//Check if item focus effect exists for the client.
+	if (itembonuses.FocusEffects[type]){
+
+		const Item_Struct* TempItem = 0;
+		const Item_Struct* UsedItem = 0;
+		uint16 UsedFocusID = 0;
+		int16 Total = 0;
+		int16 focus_max = 0;
+		int16 focus_max_real = 0;
+
+		//item focus
+		for(int x=0; x<=MAX_WORN_INVENTORY; x++)
+		{
+			TempItem = NULL;
+			if (equipment[x] == 0)
+				continue;
+			TempItem = database.GetItem(equipment[x]);
+			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+				if(rand_effectiveness) {
+					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
+					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
+						focus_max_real = focus_max;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					} else if (focus_max < 0 && focus_max < focus_max_real) {
+						focus_max_real = focus_max;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					}
+				}
+				else {
+					Total = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
+					if (Total > 0 && realTotal >= 0 && Total > realTotal) {
+						realTotal = Total;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					} else if (Total < 0 && Total < realTotal) {
+						realTotal = Total;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					}
+				}
+			}
+		}
+
+		//Tribute Focus
+		for(int x = TRIBUTE_SLOT_START; x < (TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); ++x)
+		{
+			TempItem = NULL;
+			if (equipment[x] == 0)
+				continue;
+			TempItem = database.GetItem(equipment[x]);
+			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+				if(rand_effectiveness) {
+					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
+					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
+						focus_max_real = focus_max;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					} else if (focus_max < 0 && focus_max < focus_max_real) {
+						focus_max_real = focus_max;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					}
+				}
+				else {
+					Total = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
+					if (Total > 0 && realTotal >= 0 && Total > realTotal) {
+						realTotal = Total;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					}
+					else if (Total < 0 && Total < realTotal) {
+						realTotal = Total;
+						UsedItem = TempItem;
+						UsedFocusID = TempItem->Focus.Effect;
+					}
+				}
+			}
+		}
+
+		if(UsedItem && rand_effectiveness && focus_max_real != 0)
+			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
+
+		if (realTotal != 0 && UsedItem)
+			Message_StringID(MT_Spells, BEGINS_TO_GLOW, UsedItem->Name);
+	}
+
+	//Check if spell focus effect exists for the client.
+	if (spellbonuses.FocusEffects[type]){
+
+		//Spell Focus
+		int16 Total2 = 0;
+		int16 focus_max2 = 0;
+		int16 focus_max_real2 = 0;
+
+		int buff_tracker = -1;
+		int buff_slot = 0;
+		uint16 focusspellid  = 0;
+		uint16 focusspell_tracker  = 0;
+		uint32 buff_max = GetMaxTotalSlots();
+		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
+			focusspellid = buffs[buff_slot].spellid;
+			if (focusspellid == 0 || focusspellid >= SPDAT_RECORDS)
+				continue;
+
+			if(rand_effectiveness) {
+				focus_max2 = CalcFocusEffect(type, focusspellid, spell_id, true);
+				if (focus_max2 > 0 && focus_max_real2 >= 0 && focus_max2 > focus_max_real2) {
+					focus_max_real2 = focus_max2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				} else if (focus_max2 < 0 && focus_max2 < focus_max_real2) {
+					focus_max_real2 = focus_max2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				}
+			}
+			else {
+				Total2 = CalcFocusEffect(type, focusspellid, spell_id);
+				if (Total2 > 0 && realTotal2 >= 0 && Total2 > realTotal2) {
+					realTotal2 = Total2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				} else if (Total2 < 0 && Total2 < realTotal2) {
+					realTotal2 = Total2;
+					buff_tracker = buff_slot;
+					focusspell_tracker = focusspellid;
+				}
+			}
+		}
+
+		if(focusspell_tracker && rand_effectiveness && focus_max_real2 != 0)
+			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id);
+
+		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
+		if(buff_tracker >= 0 && buffs[buff_tracker].numhits > 0) {
+			m_spellHitsLeft[buff_tracker] = focusspell_tracker;
+		}
+	}
+
+
+	// AA Focus
+	/*if (aabonuses.FocusEffects[type]){
+
+		int16 Total3 = 0;
+		uint32 slots = 0;
+		uint32 aa_AA = 0;
+		uint32 aa_value = 0;
+
+		for (int i = 0; i < MAX_PP_AA_ARRAY; i++)
+		{
+			aa_AA = this->aa[i]->AA;
+			aa_value = this->aa[i]->value;
+			if (aa_AA < 1 || aa_value < 1)
+				continue;
+
+			Total3 = CalcAAFocus(type, aa_AA, spell_id);
+			if (Total3 > 0 && realTotal3 >= 0 && Total3 > realTotal3) {
+				realTotal3 = Total3;
+			}
+			else if (Total3 < 0 && Total3 < realTotal3) {
+				realTotal3 = Total3;
+			}
+		}
+	}*/
+
+	if(type == focusReagentCost && IsSummonPetSpell(spell_id) && GetAA(aaElementalPact))
+		return 100;
+
+	if(type == focusReagentCost && (IsEffectInSpell(spell_id, SE_SummonItem) || IsSacrificeSpell(spell_id)))
+		return 0;
+	//Summon Spells that require reagents are typically imbue type spells, enchant metal, sacrifice and shouldn't be affected
+	//by reagent conservation for obvious reasons.
+
+	return realTotal + realTotal2 + realTotal3;
+}
+
+int32 Merc::Additional_SpellDmg(uint16 spell_id, bool bufftick)
+{
+	int32 spell_dmg = 0;
+	spell_dmg  += GetFocusEffect(focusFF_Damage_Amount, spell_id);
+	spell_dmg  += GetFocusEffect(focusSpellDamage, spell_id);
+
+	//For DOTs you need to apply the damage over the duration of the dot to each tick (this is how live did it)
+	if (bufftick){
+		int duration = CalcBuffDuration(this, this, spell_id);
+		if (duration > 0)
+			return spell_dmg /= duration;
+		else
+			return 0;
+	}
+	return spell_dmg;
+}
+
+int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value) {
+	// Important variables:
+	// value: the actual damage after resists, passed from Mob::SpellEffect
+	// modifier: modifier to damage (from spells & focus effects?)
+	// ratio: % of the modifier to apply (from AAs & natural bonus?)
+	// chance: critital chance %
+
+	int32 modifier = 100;
+	int16 spell_dmg = 0;
+
+
+	//Dunno if this makes sense:
+	if (spells[spell_id].resisttype > 0)
+		modifier += GetFocusEffect((focusType)(0-spells[spell_id].resisttype), spell_id);
+
+
+	int tt = spells[spell_id].targettype;
+	if (tt == ST_UndeadAE || tt == ST_Undead || tt == ST_Summoned) {
+		//undead/summoned spells
+		modifier += GetFocusEffect(focusImprovedUndeadDamage, spell_id);
+    } else {
+    	//damage spells.
+		modifier += GetFocusEffect(focusImprovedDamage, spell_id);
+		modifier += GetFocusEffect(focusSpellEffectiveness, spell_id);
+		modifier += GetFocusEffect(focusImprovedDamage2, spell_id);
+	}
+
+	//spell crits, dont make sense if cast on self.
+	if(tt != ST_Self) {
+		// item SpellDmg bonus
+		// Formula = SpellDmg * (casttime + recastime) / 7; Cant trigger off spell less than 5 levels below and cant cause more dmg than the spell itself.
+		if(this->itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5) {
+			spell_dmg = this->itembonuses.SpellDmg * (spells[spell_id].cast_time + spells[spell_id].recast_time) / 7000;
+			if(spell_dmg > -value)
+				spell_dmg = -value;
+		}
+
+		// Spell-based SpellDmg adds directly but it restricted by focuses.
+		spell_dmg += Additional_SpellDmg(spell_id);
+
+		int chance = RuleI(Spells, BaseCritChance);
+		int32 ratio = RuleI(Spells, BaseCritRatio);
+
+		chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
+		ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
+
+		if(GetClass() == CASTERDPS) {
+			if (GetLevel() >= RuleI(Spells, WizCritLevel)) {
+				chance += RuleI(Spells, WizCritChance);
+				ratio += RuleI(Spells, WizCritRatio);
+			}
+			if(aabonuses.SpellCritDmgIncrease > 0) // wizards get an additional bonus
+				ratio +=  aabonuses.SpellCritDmgIncrease * 1.5; //108%, 115%, 124%, close to Graffe's 207%, 215%, & 225%
+		}
+
+
+		if (chance > 0) {
+			mlog(SPELLS__CRITS, "Attempting spell crit. Spell: %s (%d), Value: %d, Modifier: %d, Chance: %d, Ratio: %d", spells[spell_id].name, spell_id, value, modifier, chance, ratio);
+			if(MakeRandomInt(0,100) <= chance) {
+				modifier += modifier*ratio/100;
+				spell_dmg *= 2;
+				mlog(SPELLS__CRITS, "Spell crit successful. Final damage modifier: %d, Final Damage: %d", modifier, (value * modifier / 100) - spell_dmg);
+				entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), (-value * modifier / 100) + spell_dmg);
+			} else
+				mlog(SPELLS__CRITS, "Spell crit failed. Final Damage Modifier: %d, Final Damage: %d", modifier, (value * modifier / 100) - spell_dmg);
+		}
+	}
+
+	spell_dmg = ((value * modifier / 100) - spell_dmg);
+	spell_dmg = (spell_dmg * GetSpellScale() / 100);
+
+	return spell_dmg;
+}
+
+int32 Merc::Additional_Heal(uint16 spell_id)
+{
+	int32 heal_amt = 0;
+
+	heal_amt  += GetFocusEffect(focusAdditionalHeal, spell_id);
+	heal_amt  += GetFocusEffect(focusAdditionalHeal2, spell_id);
+
+	if (heal_amt){
+		int duration = CalcBuffDuration(this, this, spell_id);
+		if (duration > 0)
+			return heal_amt /= duration;
+	}
+
+	return heal_amt;
+}
+
+int32 Merc::GetActSpellHealing(uint16 spell_id, int32 value) {
+
+	int32 modifier = 100;
+	int16 heal_amt = 0;
+	modifier += GetFocusEffect(focusImprovedHeal, spell_id);
+	modifier += GetFocusEffect(focusSpellEffectiveness, spell_id);
+	heal_amt += Additional_Heal(spell_id);
+	int chance = 0;
+
+	// Instant Heals
+	if(spells[spell_id].buffduration < 1)
+	{
+		// Formula = HealAmt * (casttime + recastime) / 7; Cant trigger off spell less than 5 levels below and cant heal more than the spell itself.
+		if(this->itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5) {
+			heal_amt = this->itembonuses.HealAmt * (spells[spell_id].cast_time + spells[spell_id].recast_time) / 7000;
+			if(heal_amt > value)
+				heal_amt = value;
+		}
+
+		// Check for buffs that affect the healrate of the target and critical heal rate of target
+		if(GetTarget()){
+			value += value * GetHealRate(spell_id) / 100;
+			chance += GetCriticalHealRate(spell_id);
+		}
+
+		//Live AA - Healing Gift, Theft of Life
+		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
+
+		if(MakeRandomInt(0,99) < chance) {
+			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), ((value * modifier / 50) + heal_amt*2));
+			 heal_amt = ((value * modifier / 50) + heal_amt*2);
+		}
+		else{
+			heal_amt =  ((value * modifier / 100) + heal_amt);
+		}
+	}
+	// Hots
+	else {
+		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
+		if(MakeRandomInt(0,99) < chance)
+			heal_amt =  ((value * modifier / 50) + heal_amt*2);
+	}
+
+	heal_amt = (heal_amt * GetHealScale() / 100);
+
+	return heal_amt;
+}
+
+int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
+{
+	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
+	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+	{
+		int16 mana_back = this->itembonuses.Clairvoyance * MakeRandomInt(1, 100) / 100;
+		// Doesnt generate mana, so best case is a free spell
+		if(mana_back > cost)
+			mana_back = cost;
+
+		cost -= mana_back;
+	}
+
+	// This formula was derived from the following resource:
+	// http://www.eqsummoners.com/eq1/specialization-library.html
+	// WildcardX
+	float PercentManaReduction = 0;
+
+	int16 focus_redux = GetFocusEffect(focusManaCost, spell_id);
+
+	if(focus_redux > 0)
+	{
+		PercentManaReduction += MakeRandomFloat(1, (double)focus_redux);
+	}
+
+	cost -= (cost * (PercentManaReduction / 100));
+
+	// Gift of Mana - reduces spell cost to 1 mana
+	if(focus_redux >= 100) {
+		uint32 buff_max = GetMaxTotalSlots();
+		for (int buffSlot = 0; buffSlot < buff_max; buffSlot++) {
+			if (buffs[buffSlot].spellid == 0 || buffs[buffSlot].spellid >= SPDAT_RECORDS)
+				continue;
+
+			if(IsEffectInSpell(buffs[buffSlot].spellid, SE_ReduceManaCost)) {
+				if(CalcFocusEffect(focusManaCost, buffs[buffSlot].spellid, spell_id) == 100)
+					cost = 1;
+			}
+		}
+	}
+
+	if(cost < 0)
+		cost = 0;
+
+	return cost;
+}
+
+int32 Merc::GetActSpellCasttime(uint16 spell_id, int32 casttime)
+{
+	int32 cast_reducer = 0;
+	cast_reducer += GetFocusEffect(focusSpellHaste, spell_id);
+
+	if (cast_reducer > RuleI(Spells, MaxCastTimeReduction))
+		cast_reducer = RuleI(Spells, MaxCastTimeReduction);
+
+	casttime = (casttime*(100 - cast_reducer)/100);
+
+	return casttime;
 }
 
 int8 Merc::GetChanceToCastBySpellType(int16 spellType) {
@@ -4180,7 +4575,6 @@ bool Merc::Save() {
 }
 
 Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB) {
-	Merc* merc;
 
 	if(c) {
 		if(c->GetMercID()) {
@@ -4226,9 +4620,12 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 
 			Merc* merc = new Merc(npc_type, c->GetX(), c->GetY(), c->GetZ(), 0);
 			merc->SetMercData( merc_template->MercTemplateID );
+			database.LoadMercEquipment(merc);
 			merc->UpdateMercStats(c);
 
 			if(updateFromDB) {
+				database.LoadCurrentMerc(c);
+
 				merc->SetMercID(c->GetMercInfo().mercid);
 				snprintf(merc->name, 64, "%s", c->GetMercInfo().merc_name);
 				snprintf(c->GetEPP().merc_name, 64, "%s", c->GetMercInfo().merc_name);
@@ -4262,6 +4659,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 
 void Merc::UpdateMercInfo(Client *c) {
 	snprintf(c->GetMercInfo().merc_name, 64, "%s", name);
+	c->GetMercInfo().mercid = GetMercID();
 	c->GetMercInfo().IsSuspended = IsSuspended();
 	c->GetMercInfo().Gender = gender;
 	c->GetMercInfo().hp = GetHP();
@@ -4287,8 +4685,8 @@ void Merc::UpdateMercStats(Client *c) {
 		{
 			max_hp = (npc_type->max_hp * npc_type->scalerate) / 100;
 			base_hp = (npc_type->max_hp * npc_type->scalerate) / 100;
-			max_mana = (npc_type->max_hp * npc_type->scalerate) / 100;
-			base_mana = (npc_type->max_hp * npc_type->scalerate) / 100;
+			max_mana = (npc_type->Mana * npc_type->scalerate) / 100;
+			base_mana = (npc_type->Mana * npc_type->scalerate) / 100;
 			hp_regen = (npc_type->hp_regen * npc_type->scalerate) / 100;
 			mana_regen = (npc_type->mana_regen * npc_type->scalerate) / 100;
 			level = npc_type->level;
@@ -4324,6 +4722,10 @@ void Merc::UpdateMercStats(Client *c) {
 }
 
 void Merc::UpdateMercAppearance(Client *c) {
+}
+
+void Merc::AddItem(uint8 slot, uint32 item_id) {
+    equipment[slot] = item_id;
 }
 
 bool Merc::Spawn(Client *owner) {
@@ -4370,7 +4772,17 @@ void Client::UpdateMercTimer()
 		if(merc_timer.Check())
 		{
 			uint32 upkeep = Merc::CalcUpkeepCost(merc->GetMercTemplateID(), GetLevel());
-			//TakeMoneyFromPP((upkeep * 100), true);	// Upkeep is in gold
+
+			if(CheckCanRetainMerc(upkeep)) {
+				if(RuleB(Mercs, ChargeMercUpkeepCost)) {
+			        TakeMoneyFromPP((upkeep * 100), true);
+				}
+			}
+			else {
+				merc->Suspend();
+				return;
+			}
+
 			GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 			SendMercTimerPacket(GetMercID(), 5, 0, RuleI(Mercs, UpkeepIntervalMS), RuleI(Mercs, SuspendIntervalMS));
 			merc_timer.Start(RuleI(Mercs, UpkeepIntervalMS));
@@ -4402,6 +4814,133 @@ void Client::UpdateMercTimer()
 	}
 }
 
+bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
+	bool result = true;
+
+	//check for valid merchant - can check near area for any merchants
+	if(!merchant) {
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(14);
+		else
+			SendMercMerchantResponsePacket(16);
+		result = false;
+	}
+
+	//check for merchant too far away
+	if(DistNoRoot(*merchant) > USE_NPC_RANGE2) {
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(15);
+		else
+			SendMercMerchantResponsePacket(17);
+		result = false;
+	}
+
+
+	if(GetClientVersion() >= EQClientRoF && GetNumMercs() >= MAXMERCS) {
+		SendMercMerchantResponsePacket(6);
+		result = false;
+	}
+	else if(GetMerc()) {													//check for current merc
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(6);
+		else
+			SendMercMerchantResponsePacket(6);
+		result = false;
+	}
+	else if(GetMercInfo().mercid != 0 && GetMercInfo().IsSuspended) {		//has suspended merc
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(7);
+		else
+			SendMercMerchantResponsePacket(6);
+		result = false;
+	}
+
+	//check for sufficient funds
+	if(RuleB(Mercs, ChargeMercPurchaseCost)) {
+		uint32 cost = Merc::CalcPurchaseCost(template_id, GetLevel()) * 100; 	// Cost is in gold
+		if(!HasMoney(cost)) {
+			SendMercMerchantResponsePacket(1);
+			result = false;
+		}
+	}
+
+	//check for raid
+	if(HasRaid()) {
+		SendMercMerchantResponsePacket(4);
+		result = false;
+	}
+
+	//check group size
+	if(HasGroup() && GetGroup()->GroupCount() == 6) {
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(8);
+		else
+			SendMercMerchantResponsePacket(7);
+		result = false;
+	}
+
+	//check in combat
+	if(GetClientVersion() >= EQClientRoF && GetAggroCount() > 0) {
+		SendMercMerchantResponsePacket(8);
+		result = false;
+	}
+
+	return result;
+}
+
+bool Client::CheckCanRetainMerc(uint32 upkeep) {
+	bool result = true;
+
+	Merc* merc = GetMerc();
+
+	//check for sufficient funds
+	if(RuleB(Mercs, ChargeMercPurchaseCost)) {
+		if(merc) {
+			if(!HasMoney(upkeep * 100)) {
+				SendMercMerchantResponsePacket(1);
+				result = false;
+			}
+		}
+	}
+
+	return result;
+}
+
+bool Client::CheckCanUnsuspendMerc() {
+	bool result = true;
+
+	//check for raid
+	if(HasRaid()) {
+		SendMercMerchantResponsePacket(4);
+		result = false;
+	}
+
+	//check group size
+	if(HasGroup() && GetGroup()->GroupCount() == 6) {
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(8);
+		else
+			SendMercMerchantResponsePacket(7);
+		result = false;
+	}
+
+	//check if zone allows mercs
+	if(!zone->AllowMercs()) {
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(4);	// ??
+		else
+			SendMercMerchantResponsePacket(4);   // ??
+	}
+
+	//check in combat
+	if(GetClientVersion() >= EQClientRoF && GetAggroCount() > 0) {
+		SendMercMerchantResponsePacket(8);
+		result = false;
+	}
+
+	return result;
+}
+
 void Client::CheckMercSuspendTimer()
 {
 	if(GetMercInfo().SuspendedTime != 0) {
@@ -4423,17 +4962,26 @@ void Client::SuspendMercCommand()
 
 			// Set time remaining to max on unsuspend - there is a charge for unsuspending as well
 			// GetEPP().mercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
+			if(!CheckCanUnsuspendMerc()){
+				return;
+			}
 
 			// Get merc, assign it to client & spawn
-			Merc* merc = Merc::LoadMerc(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, false);
-			SpawnMerc(merc, true);
+			Merc* merc = Merc::LoadMerc(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
+			if(merc) {
+				SpawnMerc(merc, true);
+			}
+			else {
+				//merc failed to spawn
+				SendMercMerchantResponsePacket(3);
+			}
 		}
 		else
 		{
 			Merc* CurrentMerc = GetMerc();
 
 			if(CurrentMerc && GetMercID()) {
-			    CurrentMerc->Save();
+			    //CurrentMerc->Save();
 				CurrentMerc->Suspend();
 			}
 		}
@@ -4539,6 +5087,8 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		uint32 suspendedTime = 0;
 
 		SetSuspended(false);
+		
+		mercOwner->GetMercInfo().mercid = GetMercID();
 		mercOwner->GetMercInfo().IsSuspended = false;
 		mercOwner->GetMercInfo().SuspendedTime = 0;
 
@@ -4785,6 +5335,7 @@ void Client::SetMerc(Merc* newmerc) {
 		newmerc->SetOwnerID(this->GetID());
 		newmerc->SetMercCharacterID(this->CharacterID());
 		newmerc->SetClientVersion((uint8)this->GetClientVersion());
+		GetMercInfo().mercid = newmerc->GetMercID();
 		GetMercInfo().MercTemplateID = newmerc->GetMercTemplateID();
 		GetMercInfo().myTemplate = zone->GetMercTemplate(GetMercInfo().MercTemplateID);
 		GetMercInfo().IsSuspended = newmerc->IsSuspended();

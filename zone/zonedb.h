@@ -293,7 +293,7 @@ public:
 	/*
 	 * Zone related
 	 */
-	bool	GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, int &ruleset, char **map_filename);
+	bool	GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, int &ruleset, char **map_filename);
 	bool	SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd);
 	bool	DumpZoneState();
 	int8	LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spawn2_list);
@@ -350,9 +350,11 @@ public:
 	 * Mercs
 	 */
 	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
+	void    LoadMercEquipment(Merc *merc);
 	void	SaveMercBuffs(Merc *merc);
     void	LoadMercBuffs(Merc *merc);
 	bool	LoadMercInfo(Client *c);
+	bool	LoadCurrentMerc(Client *c);
 	bool	SaveMerc(Merc *merc);
 	bool	DeleteMerc(uint32 merc_id);
 	//void	LoadMercTypesForMercMerchant(NPC *merchant);

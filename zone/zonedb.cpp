@@ -80,7 +80,7 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
 	return true;
 }
 
-bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *zone_data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, int &ruleset, char **map_filename) {
+bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *zone_data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, int &ruleset, char **map_filename) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;
@@ -135,6 +135,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 			can_levitate = atoi(row[r++])==0?false:true;
 			can_castoutdoor = atoi(row[r++])==0?false:true;
 			is_hotzone = atoi(row[r++])==0?false:true;
+			allow_mercs = true;
 			ruleset = atoi(row[r++]);
 			zone_data->SuspendBuffs = atoi(row[r++]);
 			char *file = row[r++];
@@ -1616,6 +1617,11 @@ bool ZoneDatabase::LoadMercInfo(Client *c) {
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
 				uint8 slot = atoi(DataRow[1]);
+
+				if(slot >= MAXMERCS) {
+				    continue;
+				}
+
 				c->GetMercInfo(slot).mercid = atoi(DataRow[0]);
 				c->GetMercInfo(slot).slot = slot;
 				snprintf(c->GetMercInfo(slot).merc_name, 64, "%s", std::string(DataRow[2]).c_str());
@@ -1638,6 +1644,62 @@ bool ZoneDatabase::LoadMercInfo(Client *c) {
 				c->GetMercInfo(slot).drakkinHeritage = atoi(DataRow[19]);
 				c->GetMercInfo(slot).drakkinTattoo = atoi(DataRow[20]);
 				c->GetMercInfo(slot).drakkinDetails = atoi(DataRow[21]);
+				loaded = true;
+			}
+
+			mysql_free_result(DatasetResult);
+		}
+
+		safe_delete_array(Query);
+	}
+
+	return loaded;
+}
+
+bool ZoneDatabase::LoadCurrentMerc(Client *c) {
+	bool loaded = false;
+
+	if(c->GetEPP().merc_name[0] != 0) {
+		std::string errorMessage;
+		char* Query = 0;
+		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+		MYSQL_RES* DatasetResult;
+		MYSQL_ROW DataRow;
+		//char name[64];
+
+		uint8 slot = c->GetMercSlot();
+
+		if(slot > MAXMERCS) {
+			return false;
+		}
+
+		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT MercID, Name, TemplateID, SuspendedTime, IsSuspended, TimerRemaining, Gender, StanceID, HP, Mana, Endurance, Face, LuclinHairStyle, LuclinHairColor, LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails FROM mercs WHERE OwnerCharacterID = '%i' AND Slot = '%u'", c->CharacterID(), slot), TempErrorMessageBuffer, &DatasetResult)) {
+			errorMessage = std::string(TempErrorMessageBuffer);
+		}
+		else {
+			while(DataRow = mysql_fetch_row(DatasetResult)) {		
+				c->GetMercInfo(slot).mercid = atoi(DataRow[0]);
+				c->GetMercInfo(slot).slot = slot;
+				snprintf(c->GetMercInfo(slot).merc_name, 64, "%s", std::string(DataRow[1]).c_str());
+				c->GetMercInfo(slot).MercTemplateID = atoi(DataRow[2]);
+				c->GetMercInfo(slot).SuspendedTime = atoi(DataRow[3]);
+				c->GetMercInfo(slot).IsSuspended = atoi(DataRow[4]) == 1 ? true : false;
+				c->GetMercInfo(slot).MercTimerRemaining = atoi(DataRow[5]);
+				c->GetMercInfo(slot).Gender = atoi(DataRow[6]);
+				c->GetMercInfo(slot).State = atoi(DataRow[7]);
+				c->GetMercInfo(slot).hp = atoi(DataRow[8]);
+				c->GetMercInfo(slot).mana = atoi(DataRow[9]);
+				c->GetMercInfo(slot).endurance = atoi(DataRow[10]);
+				c->GetMercInfo(slot).face = atoi(DataRow[11]);
+				c->GetMercInfo(slot).luclinHairStyle = atoi(DataRow[12]);
+				c->GetMercInfo(slot).luclinHairColor = atoi(DataRow[13]);
+				c->GetMercInfo(slot).luclinEyeColor = atoi(DataRow[14]);
+				c->GetMercInfo(slot).luclinEyeColor2 = atoi(DataRow[15]);
+				c->GetMercInfo(slot).luclinBeardColor = atoi(DataRow[16]);
+				c->GetMercInfo(slot).luclinBeard = atoi(DataRow[17]);
+				c->GetMercInfo(slot).drakkinHeritage = atoi(DataRow[18]);
+				c->GetMercInfo(slot).drakkinTattoo = atoi(DataRow[19]);
+				c->GetMercInfo(slot).drakkinDetails = atoi(DataRow[20]);
 				loaded = true;
 			}
 
@@ -1718,7 +1780,7 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 		if(buffs[BuffCount].spellid > 0 && buffs[BuffCount].spellid != SPELL_UNKNOWN) {
 			if(InsertCount == 0) {
 				// Remove any existing buff saves
-				if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM mercbuffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer)) {
+				if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer)) {
 					errorMessage = std::string(TempErrorMessageBuffer);
 					safe_delete(Query);
 					Query = 0;
@@ -1733,7 +1795,7 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 			else
 				IsPersistent = 0;
 
-			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO mercbuffs (MercId, SpellId, CasterLevel, DurationFormula, "
+			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO merc_buffs (MercId, SpellId, CasterLevel, DurationFormula, "
                 "TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, "
                 "DeathSaveSuccessChance, CasterAARank, Persistent) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
                 merc->GetMercID(), buffs[BuffCount].spellid, buffs[BuffCount].casterlevel, spells[buffs[BuffCount].spellid].buffdurationformula,
@@ -1776,7 +1838,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 
 	bool BuffsLoaded = false;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, DeathSaveSuccessChance, CasterAARank, Persistent FROM mercbuffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer, &DatasetResult)) {
+	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, DeathSaveSuccessChance, CasterAARank, Persistent FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer, &DatasetResult)) {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
@@ -1825,7 +1887,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 	Query = 0;
 
 	if(errorMessage.empty() && BuffsLoaded) {
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM mercbuffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer)) {
+		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer)) {
 			errorMessage = std::string(TempErrorMessageBuffer);
 			safe_delete(Query);
 			Query = 0;
@@ -1848,7 +1910,7 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 
 		// TODO: These queries need to be ran together as a transaction.. ie, if one or more fail then they all will fail to commit to the database.
 
-		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM mercbuffs WHERE MercID = '%u'", merc_id), TempErrorMessageBuffer)) {
+		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM merc_buffs WHERE MercID = '%u'", merc_id), TempErrorMessageBuffer)) {
 			errorMessage = std::string(TempErrorMessageBuffer);
 		}
 		else
@@ -1869,6 +1931,41 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
     }
 
 	return Result;
+}
+
+void ZoneDatabase::LoadMercEquipment(Merc *merc) {
+	std::string errorMessage;
+	char* Query = 0;
+	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+	MYSQL_RES* DatasetResult;
+	MYSQL_ROW DataRow;
+
+	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT item_id FROM merc_inventory WHERE merc_subtype_id = (SELECT merc_subtype_id FROM merc_subtypes WHERE class_id = '%u' AND tier_id = '%u') AND min_level <= %u AND max_level >= %u", merc->GetClass(), merc->GetTierID(), merc->GetLevel(), merc->GetLevel()), TempErrorMessageBuffer, &DatasetResult)) {
+		errorMessage = std::string(TempErrorMessageBuffer);
+	}
+	else {
+		int itemCount = 0;
+
+		while(DataRow = mysql_fetch_row(DatasetResult)) {
+			if(itemCount == MAX_WORN_INVENTORY)
+				break;
+
+            if(atoi(DataRow[0]) > 0) {
+                merc->AddItem(itemCount, atoi(DataRow[0]));
+
+                itemCount++;
+            }
+		}
+
+		mysql_free_result(DatasetResult);
+	}
+
+	safe_delete_array(Query);
+	Query = 0;
+
+	if(!errorMessage.empty()) {
+		LogFile->write(EQEMuLog::Error, "Error Loading Merc Inventory: %s", errorMessage.c_str());
+	}
 }
 
 uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
