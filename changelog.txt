@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/2/2013 ==
+Bad_Captain: Fixed Merc depop bug.
+Bad_Captain: Added merc rest regen.
+Bad_Captain: Fixed merc group spell casting bug where mercs would continue to try to cast group buffs on pets of caster who didn't have Pet Affinity AA.
+
+
 == 03/1/2013 ==
 Bad_Captain: Fixed Merc duplicate save bug.
 Bad_Captain: Focus items, spell_scale and heal_scale now work implemented and new merc equipment (with focus items).

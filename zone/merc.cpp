@@ -1441,7 +1441,6 @@ bool Merc::Process()
     {
 		SetMercCharacterID(0);
 		SetOwnerID(0);
-		SetID(0);
 		return false;
     }
 
@@ -1479,13 +1478,13 @@ bool Merc::Process()
 		CalcRestState();
 
 		if(GetHP() < GetMaxHP())
-			SetHP(GetHP() + CalcHPRegen());
+			SetHP(GetHP() + CalcHPRegen() + RestRegenHP);
 
 		if(GetMana() < GetMaxMana())
-			SetMana(GetMana() + CalcManaRegen());
+			SetMana(GetMana() + CalcManaRegen() + RestRegenMana);
 
 		if(GetEndurance() < GetMaxEndurance())
-			SetEndurance(GetEndurance() + CalcEnduranceRegen());
+			SetEndurance(GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance);
 	}
 
 	if(confidence_timer.Check()) {
@@ -2350,21 +2349,36 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 										continue;
 									}
 
-									int32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
+									uint32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
 
-									if(AIDoSpellCast(selectedMercSpell.spellid, tar, -1))
+									if(AIDoSpellCast(selectedMercSpell.spellid, tar, -1, &TempDontBuffMeBeforeTime)) {
+										if(TempDontBuffMeBeforeTime != tar->DontBuffMeBefore())
+											tar->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
+
 										castedSpell =  true;
+									}
 								}
 
 								if(!castedSpell && tar->GetPet()) {
 
+									//don't cast group spells on pets
+									if(IsGroupSpell(selectedMercSpell.spellid)  
+											|| spells[selectedMercSpell.spellid].targettype == ST_Group 
+											|| spells[selectedMercSpell.spellid].targettype == ST_GroupTeleport ) {
+										continue;
+									}
+
 									if(!tar->GetPet()->IsImmuneToSpell(selectedMercSpell.spellid, this)
 										&& (tar->GetPet()->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
 
-										int32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
+										uint32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
 
-										if(AIDoSpellCast(selectedMercSpell.spellid, tar->GetPet(), -1))
+										if(AIDoSpellCast(selectedMercSpell.spellid, tar->GetPet(), -1, &TempDontBuffMeBeforeTime)) {
+											if(TempDontBuffMeBeforeTime != tar->DontBuffMeBefore())
+												tar->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
+
 											castedSpell =  true;
+										}
 									}
 								}
 							}
@@ -4644,9 +4658,11 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 				merc->drakkin_heritage = c->GetMercInfo().drakkinHeritage;
 				merc->drakkin_tattoo = c->GetMercInfo().drakkinTattoo;
 				merc->drakkin_details = c->GetMercInfo().drakkinDetails;
-
-				database.LoadMercBuffs(merc);
             }
+
+			if(merc->GetMercID()) {
+				database.LoadMercBuffs(merc);
+			}
 
 			merc->LoadMercSpells();
 
