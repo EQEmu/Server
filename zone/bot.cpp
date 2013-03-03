@@ -15372,7 +15372,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	if(!strcasecmp(sep->arg[1], "stance")) {
 		if(sep->argnum == 3){
-			Bot* tempBot;
+			Bot* tempBot = NULL;
 			std::string botName = std::string(sep->arg[2]);
 			
 			if(!botName.empty())
