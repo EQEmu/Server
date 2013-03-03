@@ -5165,12 +5165,9 @@ bool Merc::Unsuspend(bool setMaxStats) {
 	return true;
 }
 
-bool Merc::Dismiss() {
-	Client* mercOwner;
+bool Merc::Dismiss(){
 
-	if(GetMercOwner()) {
-		mercOwner = GetMercOwner();
-	}
+	Client* mercOwner = GetMercOwner();
 
 	if(!mercOwner)
 		return false;
