@@ -13503,18 +13503,19 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 	}
 
 	NPC* tar = entity_list.GetNPCByID(merchant_id);
-    if(tar) {
+
+	if(tar) {
 		int mercTypeCount = 0;
 		int mercCount = 0;
 
+		if(DistNoRoot(*tar) > USE_NPC_RANGE2)
+			return;
+
+		if(tar->GetClass() != MERCERNARY_MASTER) {
+			return;
+		}
+
 		MercenaryMerchantList_Struct* mml = new MercenaryMerchantList_Struct;
-
-        if(DistNoRoot(*tar) > USE_NPC_RANGE2)
-		    return;
-
-        if(tar->GetClass() != MERCERNARY_MASTER) {
-            return;
-        }
 
 		mercTypeCount = tar->GetNumMercTypes(GetClientVersion());
 		mercCount = tar->GetNumMercs(GetClientVersion());
