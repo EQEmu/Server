@@ -24,8 +24,12 @@ KLS: Changed how shared memory works:
         2) Run the shared_memory executable from the same place you run world/zone (it's basically doing the loading we would do on startup so will take a moment).
         3) Run world/zone/whatever
 
+== 02/25/2013 ==
+af4t: Add Touch of the Wicked AA redux to SK Improved Harm Touch and Leech Touch.
+
 == 02/22/2013 ==
 demonstar55: Mobs will now be removed from XTargets when they get back to their way point, should be last instance of XTarget mobs not clearing when they are not aggroed anymore
+af4t: Melee tomes with names beginning "Skill:" (e.g. RNG Warder's Wrath, etc) can be memorized now.
 
 == 02/19/2013 ==
 Derision: World should no longer crash if the start_zone query fails at character creation.
