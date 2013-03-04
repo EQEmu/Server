@@ -32,7 +32,7 @@ const int MaxSpellTypes = 16;
 const int MaxHealRotationMembers = 6;
 const int MaxHealRotationTargets = 3;
 
-typedef enum BotStanceType {
+enum BotStanceType {
 	BotStancePassive,
 	BotStanceBalanced,
 	BotStanceEfficient,
@@ -42,7 +42,7 @@ typedef enum BotStanceType {
 	BotStanceBurnAE
 };
 
-typedef enum SpellTypeIndex {
+enum SpellTypeIndex {
 	SpellType_NukeIndex,
 	SpellType_HealIndex,
 	SpellType_RootIndex,
@@ -64,7 +64,7 @@ typedef enum SpellTypeIndex {
 class Bot : public NPC {
 public:
 	// Class enums
-	typedef enum BotfocusType {	//focus types
+	enum BotfocusType {	//focus types
 		BotfocusSpellHaste = 1,
 		BotfocusSpellDuration,
 		BotfocusRange,
@@ -97,18 +97,18 @@ public:
 		BotfocusAdditionalHeal,
 	};
 
-	typedef enum BotTradeType {	// types of trades a bot can do
+	enum BotTradeType {	// types of trades a bot can do
 		BotTradeClientNormal,
 		BotTradeClientNoDropNoTrade
 	};
 
-	typedef enum BotRoleType {
+	enum BotRoleType {
 		BotRoleMainAssist,
 		BotRoleGroupHealer,
 		BotRoleRaidHealer
 	};
 
-	typedef enum EqExpansions {
+	enum EqExpansions {
 		ExpansionNone,
 		ExpansionEQ,
 		ExpansionRoK,
@@ -143,7 +143,7 @@ public:
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
 	virtual Raid* GetRaid() { return entity_list.GetRaidByMob(this); }
 	virtual Group* GetGroup() { return entity_list.GetGroupByMob(this); }
-	
+
 	// Common, but informal "interfaces" with Client object
 	uint32 CharacterID() { return GetBotID(); } // Just returns the Bot Id
 	inline bool IsInAGuild() const { return (_guildId != GUILD_NONE && _guildId != 0); }
@@ -237,7 +237,7 @@ public:
 	bool RemoveHealRotationTarget( Mob* target );
 	bool RemoveHealRotationTarget( int index);
 	void NotifyNextHealRotationMember( bool notifyNow = false );
-	void ClearHealRotationLeader() { _healRotationLeader = NULL; }
+	void ClearHealRotationLeader() { _healRotationLeader = 0; }
 	void ClearHealRotationMembers();
 	void ClearHealRotationTargets();
 	inline virtual int16  GetMaxStat();
@@ -285,7 +285,7 @@ public:
 	int32	CalcEnduranceRegen();	//Calculates endurance regen used in DoEnduranceRegen()
 	int32	GetEndurance()	const {return cur_end;}	//This gets our current endurance
 	int32	GetMaxEndurance() const {return max_end;}	//This gets our endurance from the last CalcMaxEndurance() call
-	int32	CalcEnduranceRegenCap();	
+	int32	CalcEnduranceRegenCap();
 	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
 	void SetEndurance(int32 newEnd);	//This sets the current endurance to the new value
 	void DoEnduranceRegen();	//This Regenerates endurance
@@ -516,7 +516,7 @@ public:
 	inline virtual int16	GetPercMod()		const { return itembonuses.percussionMod; }
 	inline virtual int16	GetStringMod()		const { return itembonuses.stringedMod; }
 	inline virtual int16	GetWindMod()		const { return itembonuses.windMod; }
-	
+
 	inline virtual int16	GetDelayDeath()		const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath; }
 
 	inline InspectMessage_Struct& GetInspectMessage()			  { return _botInspectMessage; }
