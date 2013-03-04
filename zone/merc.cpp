@@ -5450,7 +5450,7 @@ void NPC::LoadMercTypes(){
 		mysql_free_result(DatasetResult);
 	}
 
-	safe_delete(Query);
+	safe_delete_array(Query);
 	Query = 0;
 
 	if(!errorMessage.empty()) {
@@ -5486,7 +5486,7 @@ void NPC::LoadMercs(){
 		mysql_free_result(DatasetResult);
 	}
 
-	safe_delete(Query);
+	safe_delete_array(Query);
 	Query = 0;
 
 	if(!errorMessage.empty()) {

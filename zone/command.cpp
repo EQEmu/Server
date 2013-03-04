@@ -11629,5 +11629,5 @@ void command_augmentitem(Client *c, const Seperator *sep)
 		in_augment->augment_slot = -1;
 		if(c->GetTradeskillObject() != NULL)
 		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
-		safe_delete(in_augment);
+		safe_delete_array(in_augment);
 }

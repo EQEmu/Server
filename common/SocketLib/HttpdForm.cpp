@@ -80,7 +80,7 @@ HttpdForm::HttpdForm(IFile *infil) : raw(false)
 			std::string content_type;
 			std::string current_name;
 			std::string current_filename;
-			char slask[200];
+			char slask[2000];
 			infil -> fgets(slask, 200);
 			while (!infil -> eof())
 			{

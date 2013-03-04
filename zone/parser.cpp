@@ -1094,7 +1094,7 @@ int Parser::LoadScript(int npcid, const char * zone, Mob* activater)
 				buffer.replace(buffer.length()-1,buffer.length(),"");
 				int heh = ParseCommands(buffer,line_num,0,0,0,0,filename);
 				if (!heh){
-					safe_delete_array(NewEventList);
+					safe_delete(NewEventList);
 					return 0;
 				}
 				event1->command = buffer;
