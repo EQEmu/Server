@@ -118,7 +118,7 @@ static char *temp=NULL;
 		return false;
 	}
 	ptr++;
-	
+
 	for(i=(name_pos-1);i<(max_field-1);i++) {
 		end=ptr-1;
 		while((end=strchr(end+1,'|'))!=NULL) {
@@ -463,7 +463,7 @@ bool in_quote=false;
 		}
 		if (in_quote)
 			continue;
-		if (seps.find(c)!=string::npos) { 
+		if (seps.find(c)!=string::npos) {
 			break;
 		}
 	}
@@ -554,7 +554,7 @@ void build_hex_line(const char *buffer, unsigned long length, unsigned long offs
 char *ptr=out_buffer;
 int i;
 char printable[17];
-	ptr+=sprintf(ptr,"%0*i:",padding,offset);
+	ptr+=sprintf(ptr,"%0*lu:",padding,offset);
 	for(i=0;i<16; i++) {
 		if (i==8) {
 			strcpy(ptr," -");
