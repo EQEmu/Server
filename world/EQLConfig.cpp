@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -38,11 +38,11 @@ void EQLConfig::LoadSettings() {
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	LauncherZone tmp;
-    
+
     char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
-	
+
 	if (database.RunQuery(query, MakeAnyLenString(&query,
 			"SELECT dynamics FROM launcher WHERE name='%s'",
 			namebuf)
@@ -56,7 +56,7 @@ void EQLConfig::LoadSettings() {
 		LogFile->write(EQEMuLog::Error, "EQLConfig::LoadSettings: %s", errbuf);
 	}
 	safe_delete_array(query);
-	
+
 	if (database.RunQuery(query, MakeAnyLenString(&query,
 			"SELECT zone,port FROM launcher_zones WHERE launcher='%s'",
 			namebuf)
@@ -78,20 +78,20 @@ void EQLConfig::LoadSettings() {
 EQLConfig *EQLConfig::CreateLauncher(const char *name, uint8 dynamic_count) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
-    
+
     char namebuf[128];
 	database.DoEscapeString(namebuf, name, strlen(name)&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
-	
+
 	if (!database.RunQuery(query, MakeAnyLenString(&query,
 		"INSERT INTO launcher (name,dynamics) VALUES('%s', %d)",
 		 namebuf, dynamic_count), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in CreateLauncher query: %s", errbuf);
 		safe_delete_array(query);
-		return false;
+		return NULL;
 	}
 	safe_delete_array(query);
-	
+
 	return(new EQLConfig(name));
 }
 
@@ -123,27 +123,27 @@ vector<string> EQLConfig::ListZones() {
 }
 
 void EQLConfig::DeleteLauncher() {
-	
+
 	launcher_list.Remove(m_name.c_str());
-	
+
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
-    
+
     char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
-	
-	if (!database.RunQuery(query, MakeAnyLenString(&query, 
-		"DELETE FROM launcher WHERE name='%s'", 
+
+	if (!database.RunQuery(query, MakeAnyLenString(&query,
+		"DELETE FROM launcher WHERE name='%s'",
 		namebuf), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 1 query: %s", errbuf);
 		safe_delete_array(query);
 		return;
 	}
 	safe_delete_array(query);
-	
-	if (!database.RunQuery(query, MakeAnyLenString(&query, 
-		"DELETE FROM launcher_zones WHERE launcher='%s'", 
+
+	if (!database.RunQuery(query, MakeAnyLenString(&query,
+		"DELETE FROM launcher_zones WHERE launcher='%s'",
 		namebuf), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in DeleteLauncher 2 query: %s", errbuf);
 		safe_delete_array(query);
@@ -182,18 +182,18 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 	//make sure the short name is valid.
 	if(database.GetZoneID(short_name) == 0)
 		return(false);
-	
+
 	//database update
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
-    
+
     char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
     char zonebuf[32];
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
-	
+
 	if (!database.RunQuery(query, MakeAnyLenString(&query,
 		"INSERT INTO launcher_zones (launcher,zone,port) VALUES('%s', '%s', %d)",
 		 namebuf, zonebuf, port), errbuf)) {
@@ -202,19 +202,19 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 		return false;
 	}
 	safe_delete_array(query);
-	
+
 	//update our internal state.
 	LauncherZone lz;
 	lz.name = short_name;
 	lz.port = port;
 	m_zones[lz.name] = lz;
-	
+
 	//if the launcher is connected, update it.
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
 	if(ll != NULL) {
 		ll->BootZone(short_name, port);
 	}
-	
+
 	return(true);
 }
 
@@ -222,7 +222,7 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 	//make sure the short name is valid.
 	if(database.GetZoneID(short_name) == 0)
 		return(false);
-	
+
 	//check internal state
 	map<string, LauncherZone>::iterator res;
 	res = m_zones.find(short_name);
@@ -231,19 +231,19 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 		LogFile->write(EQEMuLog::Error, "Update for unknown zone %s", short_name);
 		return(false);
 	}
-	
-	
+
+
 	//database update
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
-    
+
     char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
     char zonebuf[32];
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
-	
+
 	if (!database.RunQuery(query, MakeAnyLenString(&query,
 		"UPDATE launcher_zones SET port=%d WHERE launcher='%s' AND zone='%s'",
 		 port, namebuf, zonebuf), errbuf)) {
@@ -252,17 +252,17 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 		return false;
 	}
 	safe_delete_array(query);
-	
-	
+
+
 	//update internal state
 	res->second.port = port;
-	
+
 	//if the launcher is connected, update it.
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
 	if(ll != NULL) {
 		ll->RestartZone(short_name);
 	}
-	
+
 	return(true);
 }
 
@@ -275,47 +275,47 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 		LogFile->write(EQEMuLog::Error, "Update for unknown zone %s", short_name);
 		return(false);
 	}
-	
+
 	//database update
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
-    
+
     char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
     char zonebuf[32];
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
-	
-	if (!database.RunQuery(query, MakeAnyLenString(&query, 
-		"DELETE FROM launcher_zones WHERE launcher='%s' AND zone='%s'", 
+
+	if (!database.RunQuery(query, MakeAnyLenString(&query,
+		"DELETE FROM launcher_zones WHERE launcher='%s' AND zone='%s'",
 		namebuf, zonebuf), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in DeleteStaticZone query: %s", errbuf);
 		safe_delete_array(query);
 		return false;
 	}
 	safe_delete_array(query);
-	
+
 	//internal update.
 	m_zones.erase(res);
-	
+
 	//if the launcher is connected, update it.
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
 	if(ll != NULL) {
 		ll->StopZone(short_name);
 	}
-	
+
 	return true;
 }
 
 bool EQLConfig::SetDynamicCount(int count) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
-    
+
     char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
-	
+
 	if (!database.RunQuery(query, MakeAnyLenString(&query,
 		"UPDATE launcher SET dynamics=%d WHERE name='%s'",
 		 count, namebuf), errbuf)) {
@@ -324,16 +324,16 @@ bool EQLConfig::SetDynamicCount(int count) {
 		return false;
 	}
 	safe_delete_array(query);
-	
+
 	//update in-memory version.
 	m_dynamics = count;
-	
+
 	//if the launcher is connected, update it.
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
 	if(ll != NULL) {
 		ll->BootDynamics(count);
 	}
-	
+
 	return(false);
 }
 
@@ -343,7 +343,7 @@ int EQLConfig::GetDynamicCount() const {
 
 map<string,string> EQLConfig::GetZoneDetails(Const_char *zone_ref) {
 	map<string,string> res;
-	
+
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
 	if(ll == NULL) {
 		res["name"] = zone_ref;
@@ -353,7 +353,7 @@ map<string,string> EQLConfig::GetZoneDetails(Const_char *zone_ref) {
 	} else {
 		ll->GetZoneDetails(zone_ref, res);
 	}
-	
+
 	return(res);
 }
 
