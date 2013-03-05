@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/02/2013 ==
+af4t: Stop NPCs aggroing each other with buffs/beneficial spells.
+
 == 03/2/2013 ==
 Bad_Captain: Fixed Merc depop bug.
 Bad_Captain: Added merc rest regen.

@@ -3689,7 +3689,10 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	
 	if(!IsValidSpell(spell_id))
 		return true;
-
+	
+	if(IsBeneficialSpell(spell_id) && (caster->GetNPCTypeID()))  //then skip the rest, stop NPCs aggroing each other with buff spells. 2013-03-05
+		return false;
+		
 	if(IsMezSpell(spell_id))
 	{
 		if(SpecAttacks[UNMEZABLE]) {
