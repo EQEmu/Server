@@ -347,7 +347,7 @@ bool PTimerList::Load(Database *db) {
 		//if it expired allready, dont bother.
 
 		cur = new PersistentTimer(_char_id, type, start_time, timer_time, enabled);
-		if(!cur->Expired(NULL, false))
+		if(!cur->Expired(NULL))
 			_list[type] = cur;
 		else
 			delete cur;

@@ -292,7 +292,7 @@ bool RuleManager::LoadRules(Database *db, const char *ruleset) {
 	{
 		safe_delete_array(query);
 		while((row = mysql_fetch_row(result))) {
-			if(!SetRule(row[0], row[1],NULL, false))
+			if(!SetRule(row[0], row[1], NULL, false))
 				_log(RULES__ERROR, "Unable to interpret rule record for %s", row[0]);
 		}
 		mysql_free_result(result);
