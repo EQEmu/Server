@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/07/2013 ==
+af4t: Melee tomes named "Skill: ...": had overlooked learn-by-right-click, updated.
+
 == 03/02/2013 ==
 af4t: Stop NPCs aggroing each other with buffs/beneficial spells.
 
