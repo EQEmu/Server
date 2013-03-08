@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/07/2013 ==
+af4t: Melee tomes with names beginning "Skill:" (e.g. RNG Warder's Wrath, etc) can be memorized now, by hand-in-to-guildmaster or right-click-from-inventory.
+
 == 03/02/2013 ==
 af4t: Stop NPCs aggroing each other with buffs/beneficial spells.
 
@@ -32,7 +35,6 @@ af4t: Add Touch of the Wicked AA redux to SK Improved Harm Touch and Leech Touch
 
 == 02/22/2013 ==
 demonstar55: Mobs will now be removed from XTargets when they get back to their way point, should be last instance of XTarget mobs not clearing when they are not aggroed anymore
-af4t: Melee tomes with names beginning "Skill:" (e.g. RNG Warder's Wrath, etc) can be memorized now.
 
 == 02/19/2013 ==
 Derision: World should no longer crash if the start_zone query fails at character creation.

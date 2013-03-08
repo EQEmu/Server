@@ -2082,7 +2082,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		}
 		else if (inst->IsType(ItemClassCommon))
 		{
-			if(item->ItemType == ItemTypeSpell && strstr((const char*)item->Name, "Tome of "))
+			if(item->ItemType == ItemTypeSpell && (strstr((const char*)item->Name, "Tome of ") || strstr((const char*)item->Name, "Skill: ")))
 			{
 				DeleteItemInInventory(slot_id, 1, true);
 				TrainDiscipline(item->ID);
