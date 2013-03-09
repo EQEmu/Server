@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/09/2013 ==
+Zaela_S: Stop mobs aggroing on dead players when using RespawnFromHover.
+Derision: Removed _log message from zone/CatchSignal on Linux as it can deadlock on shutdown if another signal is received while the _log call is being processed.
+
 == 03/07/2013 ==
 af4t: Melee tomes with names beginning "Skill:" (e.g. RNG Warder's Wrath, etc) can be memorized now, by hand-in-to-guildmaster or right-click-from-inventory.
 
