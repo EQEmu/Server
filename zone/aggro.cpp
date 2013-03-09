@@ -249,8 +249,10 @@ bool Mob::CheckWillAggro(Mob *mob) {
 
 	//sometimes if a client has some lag while zoning into a dangerous place while either invis or a GM
 	//they will aggro mobs even though it's supposed to be impossible, to lets make sure we've finished connecting
-	if(mob->IsClient() && !mob->CastToClient()->ClientFinishedLoading())
-		return false;
+	if (mob->IsClient()) { 
+		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn())
+			return false;
+	}
 	
 	Mob *ownr = mob->GetOwner();
 	if(ownr && ownr->IsClient() && !ownr->CastToClient()->ClientFinishedLoading())
