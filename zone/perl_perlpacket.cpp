@@ -47,9 +47,9 @@ XS(XS_PerlPacket_new)
 	if (items < 1 || items > 3)
 		Perl_croak(aTHX_ "Usage: PerlPacket::new(CLASS, opcode= \"OP_Unknown\", len= 0)");
 	{
-		char *		CLASS = (char *)SvPV_nolen(ST(0));
-		PerlPacket *		RETVAL;
-		char *		opcode;
+		char       *CLASS = (char *)SvPV_nolen(ST(0));
+		PerlPacket *RETVAL;
+		const char *opcode;
 		uint32		len;
 
 		if (items < 2)
