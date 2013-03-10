@@ -93,6 +93,7 @@ private:
     
     bool HandleLoginInfoPacket(const EQApplicationPacket *app);
     bool HandleApproveNamePacket(const EQApplicationPacket *app);
+    bool HandleRandomNameGeneratorPacket(const EQApplicationPacket *app);
     
 	ClientListEntry* cle;
 	Timer	CLE_keepalive_timer;
