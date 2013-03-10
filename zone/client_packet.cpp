@@ -13446,7 +13446,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 		outapp->WriteUInt32(0); //unknown
 		outapp->WriteUInt32(1); // Always seen as 1
 		outapp->WriteUInt32(0); //unknown
-		outapp->WriteUInt32(0xCDCCCC3D); //0x3DCCCCCD/3452750909
+		outapp->WriteUInt32(0xCDCCCC3D); // Unknown
 		outapp->WriteUInt32(0);
 		outapp->WriteUInt16(8256); //0x4020/8256
 		outapp->WriteUInt16(0);
