@@ -461,7 +461,7 @@ WLDLoader::~WLDLoader() {
   this->Close();
 }
 
-int WLDLoader::Open(char *base_path, char *zone_name, Archive *archive) {
+int WLDLoader::Open(char *base_path, const char *zone_name, Archive *archive) {
   uchar *buffer;
   int buf_len;
   int i, j, vc, pc, bc, mlen, *pmap;

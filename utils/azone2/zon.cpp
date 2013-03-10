@@ -22,7 +22,7 @@ ZonLoader::~ZonLoader() {
   this->Close();
 }
 
-int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
+int ZonLoader::Open(char *base_path, const char *zone_name, Archive *archive) {
   uchar *buffer, *orig_buffer;
   int buf_len;
 

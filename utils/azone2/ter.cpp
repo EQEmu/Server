@@ -20,7 +20,7 @@ TERLoader::~TERLoader() {
   this->Close();
 }
 
-int TERLoader::Open(char *base_path, char *zone_name, Archive *archive) {
+int TERLoader::Open(char *base_path, const char *zone_name, Archive *archive) {
 
 #ifdef DEBUGTER
   printf("TERLoader::Open %s, [%s]\n", base_path, zone_name);

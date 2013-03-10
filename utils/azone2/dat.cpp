@@ -136,7 +136,7 @@ DATLoader::~DATLoader()
 	this->Close();
 }
 
-int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
+int DATLoader::Open(char *base_path, const char *zone_name, Archive *archive) {
 
 #ifdef DEBUGDAT
 	printf("DATLoader::Open %s, [%s]\n", base_path, zone_name);
