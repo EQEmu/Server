@@ -654,8 +654,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_RandomNameGenerator:
 		{
-			
-
+			return HandleRandomNameGeneratorPacket(app);
 		}
 		case OP_CharacterCreateRequest: {
 			// New OpCode in SoF
