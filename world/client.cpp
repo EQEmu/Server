@@ -609,6 +609,85 @@ bool Client::HandleRandomNameGeneratorPacket(const EQApplicationPacket *app)
 	return true;
 }
 
+bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app)
+{
+    // New OpCode in SoF
+    uint32 allocs = character_create_allocations.size();
+    uint32 combos = character_create_race_class_combos.size();
+    uint32 len = sizeof(RaceClassAllocation) * allocs;
+    len += sizeof(RaceClassCombos) * combos;
+    len += sizeof(uint8);
+    len += sizeof(uint32);
+    len += sizeof(uint32);
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_CharacterCreateRequest, len);
+    unsigned char *ptr = outapp->pBuffer;
+    *((uint8*)ptr) = 0;
+    ptr += sizeof(uint8);
+
+    *((uint32*)ptr) = allocs;
+    ptr += sizeof(uint32);
+
+    for(int i = 0; i < allocs; ++i) {
+        RaceClassAllocation *alc = (RaceClassAllocation*)ptr;
+
+        alc->Index = character_create_allocations[i].Index;
+        for(int j = 0; j < 7; ++j) {
+            alc->BaseStats[j] = character_create_allocations[i].BaseStats[j];
+            alc->DefaultPointAllocation[j] = character_create_allocations[i].DefaultPointAllocation[j];
+        }
+        
+        ptr += sizeof(RaceClassAllocation);
+    }
+
+    *((uint32*)ptr) = combos;
+    ptr += sizeof(uint32);
+    for(int i = 0; i < combos; ++i) {
+        RaceClassCombos *cmb = (RaceClassCombos*)ptr;
+        cmb->ExpansionRequired = character_create_race_class_combos[i].ExpansionRequired;
+        cmb->Race = character_create_race_class_combos[i].Race;
+        cmb->Class = character_create_race_class_combos[i].Class;
+        cmb->Deity = character_create_race_class_combos[i].Deity;
+        cmb->AllocationIndex = character_create_race_class_combos[i].AllocationIndex;
+        cmb->Zone = character_create_race_class_combos[i].Zone;
+        ptr += sizeof(RaceClassCombos);
+    }
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+	return true;
+}
+
+bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app)
+{
+    if (GetAccountID() == 0)
+	{
+		clog(WORLD__CLIENT_ERR,"Account ID not set; unable to create character.");
+		return false;
+	}
+	else if (app->size != sizeof(CharCreate_Struct))
+	{
+		clog(WORLD__CLIENT_ERR,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",app->size,sizeof(CharCreate_Struct));
+		DumpPacket(app);
+		return false;
+	}
+
+	CharCreate_Struct *cc = (CharCreate_Struct*)app->pBuffer;
+	if(OPCharCreate(char_name, cc) == false)
+	{
+		database.DeleteCharacter(char_name);
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ApproveName, 1);
+		outapp->pBuffer[0] = 0;
+		QueuePacket(outapp);
+		safe_delete(outapp);
+		return false;
+	}
+    
+    SendCharInfo();
+    return true;
+}
+
+
 bool Client::HandlePacket(const EQApplicationPacket *app) {
 	const WorldConfig *Config=WorldConfig::get();
 	EmuOpcode opcode = app->GetOpcode();
@@ -656,80 +735,13 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleRandomNameGeneratorPacket(app);
 		}
-		case OP_CharacterCreateRequest: {
-			// New OpCode in SoF
-            uint32 allocs = character_create_allocations.size();
-            uint32 combos = character_create_race_class_combos.size();
-            uint32 len = sizeof(RaceClassAllocation) * allocs;
-            len += sizeof(RaceClassCombos) * combos;
-            len += sizeof(uint8);
-            len += sizeof(uint32);
-            len += sizeof(uint32);
-
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_CharacterCreateRequest, len);
-            unsigned char *ptr = outapp->pBuffer;
-            *((uint8*)ptr) = 0;
-            ptr += sizeof(uint8);
-
-            *((uint32*)ptr) = allocs;
-            ptr += sizeof(uint32);
-
-            for(int i = 0; i < allocs; ++i) {
-                RaceClassAllocation *alc = (RaceClassAllocation*)ptr;
-
-                alc->Index = character_create_allocations[i].Index;
-                for(int j = 0; j < 7; ++j) {
-                    alc->BaseStats[j] = character_create_allocations[i].BaseStats[j];
-                    alc->DefaultPointAllocation[j] = character_create_allocations[i].DefaultPointAllocation[j];
-                }
-                ptr += sizeof(RaceClassAllocation);
-            }
-
-            *((uint32*)ptr) = combos;
-            ptr += sizeof(uint32);
-            for(int i = 0; i < combos; ++i) {
-                RaceClassCombos *cmb = (RaceClassCombos*)ptr;
-                cmb->ExpansionRequired = character_create_race_class_combos[i].ExpansionRequired;
-                cmb->Race = character_create_race_class_combos[i].Race;
-                cmb->Class = character_create_race_class_combos[i].Class;
-                cmb->Deity = character_create_race_class_combos[i].Deity;
-                cmb->AllocationIndex = character_create_race_class_combos[i].AllocationIndex;
-                cmb->Zone = character_create_race_class_combos[i].Zone;
-                ptr += sizeof(RaceClassCombos);
-            }
-
-			QueuePacket(outapp);
-			safe_delete(outapp);
-			break;
+		case OP_CharacterCreateRequest: 
+		{
+			return HandleCharacterCreateRequestPacket(app);
 		}
-
 		case OP_CharacterCreate: //Char create
 		{
-			if (GetAccountID() == 0)
-			{
-				clog(WORLD__CLIENT_ERR,"Account ID not set; unable to create character.");
-				ret = false;
-				break;
-			}
-			else if (app->size != sizeof(CharCreate_Struct))
-			{
-				clog(WORLD__CLIENT_ERR,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",app->size,sizeof(CharCreate_Struct));
-				DumpPacket(app);
-				break;
-			}
-
-			CharCreate_Struct *cc = (CharCreate_Struct*)app->pBuffer;
-			if(OPCharCreate(char_name, cc) == false)
-			{
-				database.DeleteCharacter(char_name);
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_ApproveName, 1);
-				outapp->pBuffer[0] = 0;
-				QueuePacket(outapp);
-				safe_delete(outapp);
-			}
-            else
-				SendCharInfo();
-			break;
+			return HandleCharacterCreatePacket(app);
 		}
 		case OP_EnterWorld: // Enter world
 		{
