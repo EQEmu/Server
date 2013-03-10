@@ -37,9 +37,6 @@ PerlPacket::~PerlPacket() {
 }
 
 bool PerlPacket::SetOpcode(const char *opcode) {
-#ifndef WIN32
-#warning Rewrite this!
-#endif
 	op = OP_Unknown;
 //	op = ZoneOpcodeManager->NameSearch(opcode);
 	return(op != OP_Unknown);
@@ -69,9 +66,6 @@ void PerlPacket::SendTo(Client *who) {
 	if(len > 0)
 		memcpy(outapp->pBuffer, packet, len);
 	
-#ifndef WIN32
-#warning Rewrite this!
-#endif
 	//	printf("Created this packet with PerlPacket: OP: %s\n", ZoneOpcodeManager->EmuToName(op));
 	DumpPacket(outapp);
 	

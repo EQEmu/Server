@@ -443,7 +443,6 @@ void Client::HandleAAAction(aaID activate) {
 			}
 			break;
 
-           // seveian 2008-09-23
 		case aaActionProjectIllusion:
 			EnableAAEffect(aaEffectProjectIllusion, 3600);
 			Message(10, "The power of your next illusion spell will flow to your grouped target in your place.");
@@ -453,8 +452,9 @@ void Client::HandleAAAction(aaID activate) {
 		case aaActionEscape:
 			Escape();
 			break;
-
-		case aaBeastialAlignment:
+		
+		// Don't think this code is used any longer for Bestial Alignment as the AA has a spell_id and no nonspell_action.
+		case aaActionBeastialAlignment:
 			switch(GetBaseRace()) {
 				case BARBARIAN:
 					spell_id = AA_Choose3(activate_val, 4521, 4522, 4523);
@@ -1038,7 +1038,7 @@ void Client::BuyAA(AA_Action* action)
 		m_pp.aapoints -= real_cost;
 
 		Save();
-		if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (aa2->hotkey_sid == 4294967295))
+		if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (aa2->hotkey_sid == 4294967295u))
 			&& ((aa2->max_level == (cur_level+1)) && aa2->sof_next_id)){
 			SendAA(aa2->id);
 			SendAA(aa2->sof_next_id);
@@ -1240,7 +1240,7 @@ void Client::SendAA(uint32 id, int seq) {
 	3) When you zone/buy your player profile will be checked and determine what AA can be displayed base on what you have already.
 	*/
 
-	if (RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (saa2->hotkey_sid == 4294967295))
+	if (RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (saa2->hotkey_sid == 4294967295u))
 		aa_stack = true;
 
 	if (aa_stack){

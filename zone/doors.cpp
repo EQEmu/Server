@@ -110,7 +110,7 @@ Doors::Doors(const char *dmodel, float dx, float dy, float dz, float dheading, u
 	dest_heading = 0;
 
 	is_ldon_door = 0;
-	client_version_mask = 4294967295;
+	client_version_mask = 4294967295u;
 }
 
 

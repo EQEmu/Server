@@ -1450,7 +1450,7 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 		}
 	}
 
-	for (int i = 0; i < str_name.size(); i++)
+	for (size_t i = 0; i < str_name.size(); i++)
 	{
 		if(!isalpha(str_name[i]))
 		{
@@ -1458,14 +1458,14 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 		}
 	}
 
-	for(int x = 0; x < str_name.size(); ++x)
+	for(size_t x = 0; x < str_name.size(); ++x)
 	{
 		str_name[x] = tolower(str_name[x]);
 	}
 
 	char c = '\0';
 	uint8 num_c = 0;
-	for(int x = 0; x < str_name.size(); ++x)
+	for(size_t x = 0; x < str_name.size(); ++x)
 	{
 		if(str_name[x] == c)
 		{
@@ -1484,10 +1484,10 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name FROM name_filter"), errbuf, &result)) {
 		safe_delete_array(query);
-		while(row = mysql_fetch_row(result))
+		while((row = mysql_fetch_row(result)))
 		{
 			std::string current_row = row[0];
-			for(int x = 0; x < current_row.size(); ++x)
+			for(size_t x = 0; x < current_row.size(); ++x)
 			{
 				current_row[x] = tolower(current_row[x]);
 			}
@@ -2399,8 +2399,8 @@ bool Database::CheckInstanceExpired(uint16 instance_id)
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	uint32 start_time = 0;
-	uint32 duration = 0;
+	int32 start_time = 0;
+	int32 duration = 0;
 	uint32 never_expires = 0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_lockout WHERE id=%u", 
 		instance_id), errbuf, &result))
@@ -2591,15 +2591,15 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		return false;
 	}
 
-	uint32 count = RuleI(Zone, ReservedInstances) + 1;
-	uint32 max = 65535;
+	int32 count = RuleI(Zone, ReservedInstances) + 1;
+	int32 max = 65535;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_lockout where id >= %i ORDER BY id", count), errbuf, &result))
 	{
 		safe_delete_array(query);
 		if (mysql_num_rows(result) != 0) 
 		{
-			while(row = mysql_fetch_row(result))
+			while((row = mysql_fetch_row(result)))
 			{
 				if(count < atoi(row[0]))
 				{
