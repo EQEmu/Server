@@ -34,7 +34,7 @@ public:
   WLDLoader();
   ~WLDLoader();
   
-  virtual int Open(char *base_path, char *zone_name, Archive *archive);
+  virtual int Open(char *base_path, const char *zone_name, Archive *archive);
   virtual int Close();
 
   int fragcount;

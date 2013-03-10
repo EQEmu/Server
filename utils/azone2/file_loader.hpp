@@ -9,7 +9,7 @@ public:
   FileLoader() {}
   virtual ~FileLoader() {}
 
-  virtual int Open(char *base_path, char *zone_name, Archive *archive) = 0;
+  virtual int Open(char *base_path, const char *zone_name, Archive *archive) = 0;
   virtual int Close() = 0;
 
   Content_3D model_data;

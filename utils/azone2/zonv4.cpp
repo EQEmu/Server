@@ -24,7 +24,7 @@ Zonv4Loader::~Zonv4Loader()
 	this->Close();
 }
 
-int Zonv4Loader::Open(char *base_path, char *zone_name, Archive *archive)
+int Zonv4Loader::Open(char *base_path, const char *zone_name, Archive *archive)
 {
 	
 	uchar *buffer;
