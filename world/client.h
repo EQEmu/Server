@@ -90,7 +90,9 @@ private:
 	void SetClassStartingSkills( PlayerProfile_Struct *pp );
 	void SetRaceStartingSkills( PlayerProfile_Struct *pp );
 	void SetRacialLanguages( PlayerProfile_Struct *pp );
-
+    
+    bool SendLoginInfoPacket(const EQApplicationPacket *app);
+    
 	ClientListEntry* cle;
 	Timer	CLE_keepalive_timer;
 	Timer	connect;
