@@ -91,7 +91,8 @@ private:
 	void SetRaceStartingSkills( PlayerProfile_Struct *pp );
 	void SetRacialLanguages( PlayerProfile_Struct *pp );
     
-    bool SendLoginInfoPacket(const EQApplicationPacket *app);
+    bool HandleLoginInfoPacket(const EQApplicationPacket *app);
+    bool HandleApproveNamePacket(const EQApplicationPacket *app);
     
 	ClientListEntry* cle;
 	Timer	CLE_keepalive_timer;

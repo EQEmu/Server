@@ -368,7 +368,7 @@ void Client::SendPostEnterWorld() {
 	safe_delete(outapp);
 }
 
-bool Client::SendLoginInfoPacket(const EQApplicationPacket *app)
+bool Client::HandleLoginInfoPacket(const EQApplicationPacket *app)
 {
     if (app->size != sizeof(LoginInfo_Struct)) {
 		return false;
@@ -477,6 +477,53 @@ bool Client::SendLoginInfoPacket(const EQApplicationPacket *app)
     return true;
 }
 
+bool Client::HandleApproveNamePacket(const EQApplicationPacket *app)
+{
+    if (GetAccountID() == 0) {
+        clog(WORLD__CLIENT_ERR,"Name approval request with no logged in account");
+		return false;
+    }
+    
+    snprintf(char_name, 64, "%s", (char*)app->pBuffer);
+	uchar race = app->pBuffer[64];
+	uchar clas = app->pBuffer[68];
+
+	clog(WORLD__CLIENT,"Name approval request.  Name=%s, race=%s, class=%s",char_name,GetRaceName(race),GetEQClassName(clas));
+
+	EQApplicationPacket *outapp;
+	outapp = new EQApplicationPacket;
+	outapp->SetOpcode(OP_ApproveName);
+	outapp->pBuffer = new uchar[1];
+	outapp->size = 1;
+	
+	bool valid;
+	
+	if(!database.CheckNameFilter(char_name)) {
+		valid = false;
+	}
+	else if(char_name[0] < 'A' && char_name[0] > 'Z') {
+		//name must begin with an upper-case letter.
+		valid = false;
+	}
+	else if (database.ReserveName(GetAccountID(), char_name)) {
+		valid = true;
+	}
+	else {
+		valid = false;
+	}
+	
+	outapp->pBuffer[0] = valid? 1 : 0;
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+    if(!valid) {
+        memset(char_name, 0, sizeof(char_name));
+        return false;
+    }
+    
+    return true;
+}
+
 bool Client::HandlePacket(const EQApplicationPacket *app) {
 	const WorldConfig *Config=WorldConfig::get();
 	EmuOpcode opcode = app->GetOpcode();
@@ -514,49 +561,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 			break;
 		case OP_SendLoginInfo:
 		{
-			return SendLoginInfoPacket(app);
+			return HandleLoginInfoPacket(app);
 		}
 		case OP_ApproveName: //Name approval
 		{
-			if (GetAccountID() == 0) {
-				clog(WORLD__CLIENT_ERR,"Name approval request with no logged in account");
-				ret = false;
-				break;
-			}
-			snprintf(char_name, 64, "%s", (char*)app->pBuffer);
-			uchar race = app->pBuffer[64];
-			uchar clas = app->pBuffer[68];
-
-			clog(WORLD__CLIENT,"Name approval request.  Name=%s, race=%s, class=%s",char_name,GetRaceName(race),GetEQClassName(clas));
-
-			EQApplicationPacket *outapp;
-			outapp = new EQApplicationPacket;
-			outapp->SetOpcode(OP_ApproveName);
-			outapp->pBuffer = new uchar[1];
-			outapp->size = 1;
-			bool valid;
-			if(!database.CheckNameFilter(char_name)) {
-				valid = false;
-			}
-			else if(char_name[0] < 'A' && char_name[0] > 'Z') {
-				//name must begin with an upper-case letter.
-				valid = false;
-			}
-			else if (database.ReserveName(GetAccountID(), char_name)) {
-				valid = true;
-			}
-			else {
-				valid = false;
-			}
-			outapp->pBuffer[0] = valid? 1 : 0;
-			QueuePacket(outapp);
-			safe_delete(outapp);
-
-            if(!valid) {
-                memset(char_name, 0, sizeof(char_name));
-            }
-
-			break;
+			return HandleApproveNamePacket(app);
 		}
 		case OP_RandomNameGenerator:
 		{
