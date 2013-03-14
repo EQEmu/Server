@@ -337,6 +337,10 @@ Client::~Client() {
 	if (horse)
 		horse->Depop();
 
+	Mob* merc = entity_list.GetMob(this->GetMercID());
+	if (merc)
+		merc->Depop();
+
 	if(Trader)
 		database.DeleteTraderItem(this->CharacterID());
 

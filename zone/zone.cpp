@@ -665,6 +665,7 @@ void Zone::LoadMercTemplates(){
 	}
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
+			int stanceIndex = 0;
 			MercTemplate tempMercTemplate;
 
 			tempMercTemplate.MercTemplateID = atoi(DataRow[0]);
@@ -678,11 +679,17 @@ void Zone::LoadMercTemplates(){
 			tempMercTemplate.ClientVersion = atoi(DataRow[8]);
 			tempMercTemplate.MercNPCID = atoi(DataRow[9]);
 
-				for(std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); mercStanceListItr++) {
+			for(int i = 0; i < MaxMercStanceID; i++) {
+				tempMercTemplate.Stances[i] = 0;
+			}
+
+			for(std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); mercStanceListItr++) {
 				if(mercStanceListItr->ClassID == tempMercTemplate.ClassID && mercStanceListItr->ProficiencyID == tempMercTemplate.ProficiencyID) {
-						zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
-					}
+					zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
+					tempMercTemplate.Stances[stanceIndex] = mercStanceListItr->StanceID;
+					stanceIndex++;
 				}
+			}
 
 			merc_templates[tempMercTemplate.MercTemplateID] = tempMercTemplate;
 		}

@@ -1441,6 +1441,10 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	SetHorseId(0);
 	dead = true;
 
+	if(GetMerc()) {
+		GetMerc()->Suspend();
+	}
+
     parse->EventPlayer(EVENT_DEATH, this, "", 0);
 
 	if (killerMob != NULL)

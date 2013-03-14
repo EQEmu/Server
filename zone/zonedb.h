@@ -131,6 +131,7 @@ struct MercInfo {
 	uint32	MercTimerRemaining;
 	uint8	Gender;
 	int32	State;
+	uint32	Stance;
 	int32	hp;
 	int32	mana;
 	int32	endurance;
