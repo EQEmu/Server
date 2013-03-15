@@ -1476,7 +1476,7 @@ void Client::SendSound(){//Makes a sound.
     memset(&x[64],0xffffffff,sizeof(uint32));
 	memcpy(outapp->pBuffer,x,outapp->size);
 	QueuePacket(outapp);
-	DumpPacket(outapp);
+	//DumpPacket(outapp);
 	safe_delete(outapp);
 
 }
@@ -7141,61 +7141,68 @@ void Client::SendMercPersonalInfo()
 
 	if (GetClientVersion() >= EQClientRoF)
 	{
-		MercenaryDataUpdate_Struct* mdus = new MercenaryDataUpdate_Struct;
-
 		MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
 
 		if (mercData)
 		{
+			int i = 0;
+			int stancecount = 0;
+			stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
+
+			if (mercCount > 0)
+			{
+				EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(MercenaryDataUpdate_Struct) + (mercTypeCount * sizeof(MercenaryData_Struct)) + stancecount * sizeof(MercenaryStance_Struct));
+				MercenaryDataUpdate_Struct* mdus = (MercenaryDataUpdate_Struct*)outapp->pBuffer;
 				mdus->MercStatus = 0;
 				mdus->MercCount = mercCount;
-				if (mercCount > 0)
+				mdus->MercData = new MercenaryData_Struct[mercCount];
+				mdus->MercData[i].MercID = mercData->MercTemplateID;
+				mdus->MercData[i].MercType = mercData->MercType;
+				mdus->MercData[i].MercSubType = mercData->MercSubType;
+				mdus->MercData[i].PurchaseCost = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), 0);
+				mdus->MercData[i].UpkeepCost = Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), 0);
+				mdus->MercData[i].Status = 0;
+				mdus->MercData[i].AltCurrencyCost = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
+				mdus->MercData[i].AltCurrencyUpkeep = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
+				mdus->MercData[i].AltCurrencyType = altCurrentType;
+				mdus->MercData[i].MercUnk01 = 0;
+				mdus->MercData[i].TimeLeft = GetMercInfo().MercTimerRemaining;	//GetMercTimer().GetRemainingTime();
+				mdus->MercData[i].MerchantSlot = i + 1;
+				mdus->MercData[i].MercUnk02 = 1;
+				mdus->MercData[i].StanceCount = zone->merc_stance_list[mercData->MercTemplateID].size();
+				mdus->MercData[i].MercUnk03 = 0;
+				mdus->MercData[i].MercUnk04 = 1;
+				strn0cpy(mdus->MercData[i].MercName, GetMercInfo().merc_name , sizeof(mdus->MercData[i].MercName));
+				uint32 stanceindex = 0;
+				if (mdus->MercData[i].StanceCount != 0)
 				{
-					mdus->MercData = new MercenaryData_Struct[mercCount];
-					mdus->MercData[i].MercID = mercData->MercTemplateID;
-					mdus->MercData[i].MercType = mercData->MercType;
-					mdus->MercData[i].MercSubType = mercData->MercSubType;
-					mdus->MercData[i].PurchaseCost = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), 0);
-					mdus->MercData[i].UpkeepCost = Merc::CalcUpkeepCost(mercData->MercTemplateID, GetLevel(), 0);
-					mdus->MercData[i].Status = 0;
-					mdus->MercData[i].AltCurrencyCost = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
-					mdus->MercData[i].AltCurrencyUpkeep = Merc::CalcPurchaseCost(mercData->MercTemplateID, GetLevel(), altCurrentType);
-					mdus->MercData[i].AltCurrencyType = altCurrentType;
-					mdus->MercData[i].MercUnk01 = 0;
-					mdus->MercData[i].TimeLeft = GetMercInfo().MercTimerRemaining;	//GetMercTimer().GetRemainingTime();
-					mdus->MercData[i].MerchantSlot = i + 1;
-					mdus->MercData[i].MercUnk02 = 1;
-					mdus->MercData[i].StanceCount = zone->merc_stance_list[mercData->MercTemplateID].size();
-					mdus->MercData[i].MercUnk03 = 0;
-					mdus->MercData[i].MercUnk04 = 1;
-					strn0cpy(mdus->MercData[i].MercName, GetMercInfo().merc_name , sizeof(mdus->MercData[i].MercName));
-					uint32 stanceindex = 0;
-					if (mdus->MercData[i].StanceCount != 0)
+					mdus->MercData[i].Stances = new MercenaryStance_Struct[mdus->MercData[i].StanceCount];
+					list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
+					while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
 					{
-						mdus->MercData[i].Stances = new MercenaryStance_Struct[mdus->MercData[i].StanceCount];
-						list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
-						while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
-						{
-							mdus->MercData[i].Stances[stanceindex].StanceIndex = stanceindex;
-							mdus->MercData[i].Stances[stanceindex].Stance = (iter->StanceID);
-							stanceindex++;
-							iter++;
-						}
+						mdus->MercData[i].Stances[stanceindex].StanceIndex = stanceindex;
+						mdus->MercData[i].Stances[stanceindex].Stance = (iter->StanceID);
+						stanceindex++;
+						iter++;
 					}
+				}
 
-					mdus->MercData[i].MercUnk05 = 1;
-
-					EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataUpdate, 1); //Packet sizes are handled by the encoder.
-					outapp->pBuffer = (unsigned char*)mdus;
-					//DumpPacket(outapp);
-					FastQueuePacket(&outapp);
+				mdus->MercData[i].MercUnk05 = 1;
+				//DumpPacket(outapp);
+				FastQueuePacket(&outapp);
+				return;
 			}
 		}
 	}
 	else
 	{
-		MercenaryMerchantList_Struct* mml = new MercenaryMerchantList_Struct;
+		int stancecount = 0;
+		stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
+
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct) + (mercTypeCount * sizeof(MercenaryGrade_Struct)) + (mercCount * sizeof(MercenaryListEntry_Struct)) + stancecount * sizeof(MercenaryStance_Struct)); //Packet sizes are handled by the encoder.
+		MercenaryMerchantList_Struct* mml = (MercenaryMerchantList_Struct*)outapp->pBuffer;
 		MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
+
 
 		if(mercData)
 		{
@@ -7203,6 +7210,7 @@ void Client::SendMercPersonalInfo()
 			{
 				mml->MercTypeCount = mercTypeCount; //We only should have one merc entry.
 				mml->MercGrades = new MercenaryGrade_Struct[mercTypeCount]; // DBStringID for Type
+				mml->MercGrades[0].GradeCountEntry = 1;
 			}
 			mml->MercCount = mercCount;
 			if(mercCount > 0)
@@ -7238,16 +7246,24 @@ void Client::SendMercPersonalInfo()
 						iter++;
 					}
 				}
-
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, 1); //Packet sizes are handled by the encoder.
-				outapp->pBuffer = (unsigned char*)mml;
-				// DumpPacket(outapp);
 				FastQueuePacket(&outapp);
+			}
+			else
+			{
+				safe_delete(outapp);
+				SendMercMerchantResponsePacket(0);
+				return;
 			}
 			if (GetClientVersion() == EQClientSoD)
 			{
 				SendMercMerchantResponsePacket(0);
 			}
+		}
+		else
+		{
+			safe_delete(outapp);
+			SendMercMerchantResponsePacket(0);
+			return;
 		}
 	}
 }
@@ -7260,7 +7276,7 @@ void Client::SendClearMercInfo()
 	nmhs->MercCount = 0;
 	nmhs->MercID = 1;
 
-	DumpPacket(outapp);
+	//DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
