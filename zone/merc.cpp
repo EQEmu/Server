@@ -12,7 +12,6 @@
 #include "../common/rulesys.h"
 #include "QuestParserCollection.h"
 #include "watermap.h"
-#include "vld.h"
 
 extern volatile bool ZoneLoaded;
 
