@@ -7847,6 +7847,11 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		damage = -3;
 		mlog(COMBAT__DAMAGE, "I am enraged, riposting frontal attack.");
 	}
+	// same as enrage just no behind check needed.
+	if (IsInfuriated()) {
+		damage = -3;
+		mlog(COMBAT__DAMAGE, "I am infuriated, riposting attacks from all sides.");
+	}
 
 	/////////////////////////////////////////////////////////
 	// riposte
