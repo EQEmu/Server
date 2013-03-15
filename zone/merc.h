@@ -86,6 +86,7 @@ public:
 	int8 GetChanceToCastBySpellType(int16 spellType);
 	void SetSpellRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
 	void SetDisciplineRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
+	void SetSpellTimeCanCast(uint16 spellid, uint32 recast_delay);
 	static int32 GetSpellRecastTimer(Merc *caster, uint16 timer_id);
 	static bool CheckSpellRecastTimers(Merc *caster, uint16 spellid);
 	static int32 GetDisciplineRecastTimer(Merc *caster, uint16 timer_id);
@@ -109,7 +110,16 @@ public:
 	static MercSpell GetBestMercSpellForTaunt(Merc* caster);
 	static MercSpell GetBestMercSpellForHate(Merc* caster);
 	static MercSpell GetBestMercSpellForCure(Merc* caster, Mob* target);
+	static MercSpell GetBestMercSpellForStun(Merc* caster);
+	static MercSpell GetBestMercSpellForAENuke(Merc* caster, Mob* target);
+	static MercSpell GetBestMercSpellForTargetedAENuke(Merc* caster, Mob* target);
+	static MercSpell GetBestMercSpellForPBAENuke(Merc* caster, Mob* target);
+	static MercSpell GetBestMercSpellForAERainNuke(Merc* caster, Mob* target);
+	static MercSpell GetBestMercSpellForNuke(Merc* caster);
+	static MercSpell GetBestMercSpellForNukeByTargetResists(Merc* caster, Mob* target);
+	static bool CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTargets);
 	static bool GetNeedsCured(Mob *tar);
+	bool HasOrMayGetAggro();
 	bool UseDiscipline(int32 spell_id, int32 target);
 
 	virtual bool IsMerc() const { return true; }
@@ -161,6 +171,7 @@ public:
 	uint16	MaxSkill(SkillType skillid, uint16 class_, uint16 level) const;
 	inline	uint16	MaxSkill(SkillType skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	virtual void DoClassAttacks(Mob *target);
+	void	CheckHateList();
 	bool	CheckTaunt();
 	bool	CheckAETaunt();
 	bool    CheckConfidence();
@@ -247,7 +258,7 @@ public:
 	bool IsStanding();
 
 	// Merc-specific functions
-	bool IsMercCaster() { return (GetClass() == CLERIC || GetClass() == DRUID || GetClass() == SHAMAN || GetClass() == NECROMANCER || GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == ENCHANTER); }
+	bool IsMercCaster() { return (GetClass() == HEALER || GetClass() == CASTERDPS); }
 	bool IsMercCasterCombatRange(Mob *target);
 	virtual float GetMaxMeleeRangeToTarget(Mob* target);
 	virtual void MercMeditate(bool isSitting);
@@ -373,6 +384,7 @@ private:
 	Timer	endupkeep_timer;
 	Timer	rest_timer;
 	Timer	confidence_timer;
+	Timer	check_target_timer;
 };
 
 #endif // MERC_H

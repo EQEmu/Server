@@ -13701,11 +13701,6 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 	uint32 merc_command = mc->MercCommand;	// Seen 0 (zone in with no merc or suspended), 1 (dismiss merc), 5 (normal state), 20 (unknown), 36 (zone in with merc)
 	int32 option = mc->Option;	// Seen -1 (zone in with no merc), 0 (setting to passive stance), 1 (normal or setting to balanced stance)
 
-	if(option >= 0)
-	{
-		GetMercInfo().State = option;
-	}
-
 	//DumpPacket(app);
 
 	if(MERC_DEBUG > 0)
@@ -13717,6 +13712,36 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 	// Handle the Command here...
 	// Will need a list of what every type of command is supposed to do
 	// Unsure if there is a server response to this packet
+	if(option >= 0)
+	{
+		Merc* merc = GetMerc();
+		GetMercInfo().State = option;
+
+		if(merc) {
+			uint8 numStances = 0;
+
+			//get number of available stances for the current merc
+			std::list<MercStanceInfo> mercStanceList = zone->merc_stance_list[merc->GetMercTemplateID()];
+			list<MercStanceInfo>::iterator iter = mercStanceList.begin();
+			while(iter != mercStanceList.end()) {
+				numStances++;	
+				iter++;
+			}
+
+			MercTemplate* mercTemplate = zone->GetMercTemplate(GetMerc()->GetMercTemplateID());
+			if(mercTemplate) {
+
+				//check to see if selected option is a valid stance slot (option is the slot the stance is in, not the actual stance)
+				if(option >= 0 && option < numStances) {
+					merc->SetStance(mercTemplate->Stances[option]);
+					GetMercInfo().Stance = mercTemplate->Stances[option];
+
+					if(MERC_DEBUG > 0)
+						Message(7, "Mercenary Debug: Set Stance: %u", merc->GetStance());
+				}
+			}
+		}
+	}
 }
 
 void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket *app)

@@ -16,7 +16,7 @@
 extern volatile bool ZoneLoaded;
 
 Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
-	: NPC(d, 0, x, y, z, heading, 0, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000)
+	: NPC(d, 0, x, y, z, heading, 0, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000), check_target_timer(2000)
 {
 	base_hp = d->max_hp;
 	base_mana = d->Mana;
@@ -52,7 +52,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	memset(equipment, 0, sizeof(equipment));
 
 	SetMercID(0);
-	SetStance(MercStancePassive);
+	SetStance(MercStanceBalanced);
 	rest_timer.Disable();
 
 	int r;
@@ -1564,32 +1564,8 @@ void Merc::AI_Process() {
 		return;
 	}
 
-	if(!IsEngaged()) {
-		if(GetFollowID()) {
-			Group* g = GetGroup();
-			if(g) {
-				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->IsNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
-						float range = g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
-						range = range * range;
-						if(MercOwner->GetTarget()->DistNoRootNoZ(*this) < range) {
-							AddToHateList(MercOwner->GetTarget(), 1);
-						}
-				}
-				else {
-					for(int counter = 0; counter < g->GroupCount(); counter++) {
-						if(g->members[counter]) {
-							if(g->members[counter]->GetTarget() && g->members[counter]->GetTarget()->IsNPC() && g->members[counter]->GetTarget()->GetHateAmount(MercOwner) && IsAttackAllowed(MercOwner->GetTarget())) {
-								float range = g->HasRole(g->members[counter], RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
-								range = range * range;
-								if(g->members[counter]->GetTarget()->DistNoRootNoZ(*this) < range) {
-									AddToHateList(g->members[counter]->GetTarget(), 1);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+	if(check_target_timer.Check()) {
+		CheckHateList();
 	}
 
 	if(IsEngaged())
@@ -1620,9 +1596,11 @@ void Merc::AI_Process() {
         if(GetHatedCount() < hateCount) {
             SetHatedCount(hateCount);
 
-            if(!confidence_timer.Enabled()) {
-                confidence_timer.Start(10000);
-            }
+			if(!CheckConfidence()) {
+				if(!confidence_timer.Enabled()) {
+					confidence_timer.Start(10000);
+				}
+			}
         }
 
 		//Check specific conditions for merc to lose confidence and flee (or regain confidence once fleeing)
@@ -1633,9 +1611,9 @@ void Merc::AI_Process() {
                 if(!CheckConfidence()) {
                     _lost_confidence = true;
 
-                    //move to bottome of hate lists?
+                    //move to bottom of hate lists?
                     //Iterate though hatelist
-                    // SetHate(otherm hate, damage)
+                    // SetHate(other, hate, damage)
 
                     if(RuleB(Combat, EnableFearPathing)) {
                         CalculateNewFearpoint();
@@ -1879,6 +1857,9 @@ void Merc::AI_Process() {
 		SetHatedCount(0);
 		confidence_timer.Disable();
 		_check_confidence = false;
+		
+		if(!check_target_timer.Enabled())
+			check_target_timer.Start(2000, false);
 
 		if(!IsMoving() && AIthink_timer->Check() && !spellend_timer.Enabled()) {
 
@@ -1987,14 +1968,20 @@ bool Merc::AI_EngagedCastCheck() {
 				}
 				break;
 			case MELEEDPS:
-				if (!AICastSpell(GetChanceToCastBySpellType(SpellType_Nuke), SpellType_Nuke)) {
-					if (!AICastSpell(GetChanceToCastBySpellType(SpellType_InCombatBuff), SpellType_InCombatBuff)) {
-						failedToCast = true;
+				if (!AICastSpell(GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {
+					if (!AICastSpell(GetChanceToCastBySpellType(SpellType_Nuke), SpellType_Nuke)) {
+						if (!AICastSpell(GetChanceToCastBySpellType(SpellType_InCombatBuff), SpellType_InCombatBuff)) {
+							failedToCast = true;
+						}
 					}
 				}
 				break;
 			case CASTERDPS:
-				failedToCast = true;
+				if (!AICastSpell(GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {
+					if (!AICastSpell(GetChanceToCastBySpellType(SpellType_Nuke), SpellType_Nuke)) {
+						failedToCast = true;
+					}
+				}
 				break;
 		}
 
@@ -2158,7 +2145,8 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 		extraMana = false;
 	}
 	else {  //handle spell recast and recast timers
-		mercSpell.time_cancast = Timer::GetCurrentTime() + spells[spellid].recast_time;
+		SetSpellTimeCanCast(mercSpell.spellid, spells[spellid].recast_time);
+		//mercSpell.time_cancast = Timer::GetCurrentTime() + spells[spellid].recast_time;
 
 		if(spells[spellid].EndurTimerIndex > 0) {
 			SetSpellRecastTimer(spells[spellid].EndurTimerIndex, spellid, spells[spellid].recast_time);
@@ -2184,8 +2172,8 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 	uint8 mercLevel = GetLevel();
 
 	bool checked_los = false;	//we do not check LOS until we are absolutely sure we need to, and we only do it once.
-
 	bool castedSpell = false;
+	bool isDiscipline = false;
 
 	if(HasGroup()) {
 		Group *g = GetGroup();
@@ -2198,6 +2186,17 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 			selectedMercSpell.slot = 0;
 			selectedMercSpell.proc_chance = 0;
 			selectedMercSpell.time_cancast = 0;
+
+			switch(mercClass)
+            {
+                case TANK:
+				case MELEEDPS:
+					isDiscipline = true;
+				break;
+				default:
+                    isDiscipline = false;
+				break;
+            }
 
 			switch (iSpellTypes) {
 				case SpellType_Heal: {
@@ -2301,8 +2300,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 					}
 
 					if(selectedMercSpell.spellid > 0) {
-						if(AIDoSpellCast(selectedMercSpell.spellid, tar, -1))
-							castedSpell =  true;
+						castedSpell = AIDoSpellCast(selectedMercSpell.spellid, tar, -1);
 					}
 
 					if(castedSpell) {
@@ -2374,8 +2372,9 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 										uint32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
 
 										if(AIDoSpellCast(selectedMercSpell.spellid, tar->GetPet(), -1, &TempDontBuffMeBeforeTime)) {
-											if(TempDontBuffMeBeforeTime != tar->DontBuffMeBefore())
+											if(TempDontBuffMeBeforeTime != tar->DontBuffMeBefore()) {
 												tar->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
+											}
 
 											castedSpell =  true;
 										}
@@ -2387,7 +2386,6 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 					break;
 				}
 				case SpellType_Nuke: {
-					bool isDiscipline = false;
 					switch(mercClass)
 					{
 						case TANK:
@@ -2409,29 +2407,43 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 								selectedMercSpell = GetBestMercSpellForHate(this);
 							}
 
-							isDiscipline = true;
 						break;
 						case HEALER:
-
 						break;
 						case MELEEDPS:
-							isDiscipline = true;
 						break;
 						case CASTERDPS:
+							Mob* tar = GetTarget();
 
-							break;
+							selectedMercSpell = GetBestMercSpellForAENuke(this, tar);
+
+                            if(selectedMercSpell.spellid == 0 && !tar->SpecAttacks[UNSTUNABLE] && !tar->IsStunned()) {
+                                uint8 stunChance = 15;
+                                if(MakeRandomInt(1, 100) <= stunChance) {
+                                    selectedMercSpell = GetBestMercSpellForStun(this);
+                                }
+                            }
+
+                            if(selectedMercSpell.spellid == 0) {
+                                uint8 lureChance = 25;
+                                if(MakeRandomInt(1, 100) <= lureChance) {
+                                    selectedMercSpell = GetBestMercSpellForNukeByTargetResists(this, tar);
+                                }
+                            }
+
+                            if(selectedMercSpell.spellid == 0) {
+                                selectedMercSpell = GetBestMercSpellForNuke(this);
+                            }
+
+                        break;
 					}
 
 					if(selectedMercSpell.spellid > 0) {
 						if(isDiscipline) {
-							if(UseDiscipline(selectedMercSpell.spellid, GetTarget()->GetID())) {
-								castedSpell =  true;
-							}
+							castedSpell = UseDiscipline(selectedMercSpell.spellid, GetTarget()->GetID());
 						}
 						else {
-							if(AIDoSpellCast(selectedMercSpell.spellid, GetTarget(), -1)) {
-								castedSpell =  true;
-							}
+							castedSpell = AIDoSpellCast(selectedMercSpell.spellid, GetTarget(), -1);
 						}
 					}
 
@@ -2505,11 +2517,151 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 					break;
 				}
+				case SpellType_Escape: {
+					Mob* tar = GetTarget();
+                    uint8 hpr = (uint8)GetHPRatio();
+                    bool mayGetAggro = false;
+
+                    if(tar && (mercClass == CASTERDPS) || (mercClass == MELEEDPS)) {
+                        mayGetAggro = HasOrMayGetAggro();   //classes have hate reducing spells
+
+                        if (mayGetAggro) {
+                            selectedMercSpell = GetFirstMercSpellBySpellType(this, SpellType_Escape);
+
+                            if(selectedMercSpell.spellid == 0)
+                                break;
+
+                            if(isDiscipline) {
+                                castedSpell = UseDiscipline(selectedMercSpell.spellid, tar->GetID());
+                            }
+                            else {
+                                castedSpell = AIDoSpellCast(selectedMercSpell.spellid, tar, -1);
+                            }
+                        }
+                    }
+                    break;
+                }
 			}
 		}
 	}
 
 	return castedSpell;
+}
+
+void Merc::CheckHateList() {
+	if(check_target_timer.Enabled())
+		check_target_timer.Disable();
+
+	if(!IsEngaged()) {
+		if(GetFollowID()) {
+			Group* g = GetGroup();
+			if(g) {
+				Mob* MercOwner = GetOwner();
+				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->IsNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
+						float range = g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+						range = range * range;
+						if(MercOwner->GetTarget()->DistNoRootNoZ(*this) < range) {
+							AddToHateList(MercOwner->GetTarget(), 1);
+						}
+				}
+				else {
+					std::list<NPC*> npc_list;
+					entity_list.GetNPCList(npc_list);
+
+					for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); itr++) {
+						NPC* npc = *itr;
+						float dist = npc->DistNoRootNoZ(*this);
+						int radius = RuleI(Mercs, AggroRadius);
+						radius *= radius;
+						if(dist <= radius) {
+
+							for(int counter = 0; counter < g->GroupCount(); counter++) {
+								Mob* groupMember = g->members[counter];
+								if(groupMember) {
+									if(npc->IsOnHatelist(groupMember)) {
+										if(!hate_list.IsOnHateList(npc)) {
+											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+											range *= range;
+											if(npc->DistNoRootNoZ(*this) < range) {
+												hate_list.Add(npc, 1);
+											}
+										}
+									}
+								}
+							}
+
+
+							/*std::list<tHateEntry*> their_hate_list;
+							npc->GetHateList(their_hate_list);
+							std::list<tHateEntry*>::iterator hateEntryIter = their_hate_list.begin();
+
+							while(hateEntryIter != their_hate_list.end())
+							{
+								tHateEntry *entry = (*hateEntryIter);
+
+								if(g->IsGroupMember(entry->ent)) {
+									if(!hate_list.IsOnHateList(npc)) {
+										float range = g->HasRole(entry->ent, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+										range *= range;
+										if(entry->ent->DistNoRootNoZ(*this) < range) {
+											hate_list.Add(entry->ent, 1);
+										}
+									}
+								}
+
+								
+								hateEntryIter++;
+							}*/
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+bool Merc::HasOrMayGetAggro() {
+	bool mayGetAggro = false;
+
+	if(GetTarget() && GetTarget()->GetHateTop()) {
+		Mob *topHate = GetTarget()->GetHateTop();
+
+		if(topHate == this)
+			mayGetAggro = true;  //I currently have aggro
+		else {
+			uint32 myHateAmt = GetTarget()->GetHateAmount(this);
+			uint32 topHateAmt = GetTarget()->GetHateAmount(topHate);
+
+			if(myHateAmt > 0 && topHateAmt > 0 && (uint8)((myHateAmt/topHateAmt)*100) > 90)  //I have 90% as much hate as top, next action may give me aggro
+				mayGetAggro = true;
+		}
+	}
+
+	return mayGetAggro;
+}
+
+bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTargets) {
+	std::list<NPC*> npc_list;
+	entity_list.GetNPCList(npc_list);
+
+	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); itr++) {
+		NPC* npc = *itr;
+
+		if(npc->DistNoRootNoZ(*tar) <= spells[spell_id].aoerange * spells[spell_id].aoerange) {
+			if(!npc->IsMezzed()) {
+				numTargets++;
+			}
+			else {
+				numTargets = 0;
+				return false;
+			}
+		}
+	}
+
+	if(numTargets > 1)
+		return true;
+
+	return false;
 }
 
 int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
@@ -2937,6 +3089,7 @@ int8 Merc::GetChanceToCastBySpellType(int16 spellType) {
                     break;
                 }
                 case MELEEDPS:{
+					chance = 100;
                     break;
                 }
                 case CASTERDPS:{
@@ -3021,6 +3174,26 @@ int8 Merc::GetChanceToCastBySpellType(int16 spellType) {
             }
 			break;
 		}
+		case SpellType_Escape: {
+			switch(mercClass)
+            {
+                case TANK: {
+                    break;
+                }
+                case HEALER:{
+                    break;
+                }
+                case MELEEDPS:{
+					chance = 100;
+                    break;
+                }
+                case CASTERDPS:{
+					chance = 100;
+                    break;
+                }
+            }
+			break;
+		}
 		default:
 			chance = 0;
 			break;
@@ -3033,7 +3206,7 @@ bool Merc::CheckStance(int16 stance) {
 
 	if(stance == 0
 		|| (stance > 0 && stance == GetStance())
-		|| (stance < 0 && abs(stance) != GetStance())) {
+		|| (stance < 0 && abs(stance) == GetStance())) {
 		return true;
 	}
 
@@ -3158,7 +3331,7 @@ std::list<MercSpell> Merc::GetMercSpellsForSpellEffect(Merc* caster, int spellEf
 				continue;
 			}
 
-			if(IsEffectInSpell(mercSpellList[i].spellid, spellEffect)) {
+			if(IsEffectInSpell(mercSpellList[i].spellid, spellEffect) && caster->CheckStance(mercSpellList[i].stance)) {
 				MercSpell MercSpell;
 				MercSpell.spellid = mercSpellList[i].spellid;
 				MercSpell.stance = mercSpellList[i].stance;
@@ -3188,7 +3361,7 @@ std::list<MercSpell> Merc::GetMercSpellsForSpellEffectAndTargetType(Merc* caster
 				continue;
 			}
 
-			if(IsEffectInSpell(mercSpellList[i].spellid, spellEffect)) {
+			if(IsEffectInSpell(mercSpellList[i].spellid, spellEffect) && caster->CheckStance(mercSpellList[i].stance)) {
 				if(spells[mercSpellList[i].spellid].targettype == targetType) {
 					MercSpell MercSpell;
 					MercSpell.spellid = mercSpellList[i].spellid;
@@ -3282,30 +3455,25 @@ MercSpell Merc::GetBestMercSpellForHealOverTime(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> botHoTSpellList = GetMercSpellsForSpellEffect(caster, SE_HealOverTime);
-		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
+		std::list<MercSpell> mercHoTSpellList = GetMercSpellsForSpellEffect(caster, SE_HealOverTime);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = botHoTSpellList.begin(); mercSpellListItr != botHoTSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercHoTSpellList.begin(); mercSpellListItr != mercHoTSpellList.end(); mercSpellListItr++) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsHealOverTimeSpell(mercSpellListItr->spellid)) {
 
-				for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-					if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
-						// this is both to quit early to save cpu and to avoid casting bad spells
-						// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
-						continue;
-					}
+				if (mercSpellListItr->spellid <= 0 || mercSpellListItr->spellid >= SPDAT_RECORDS) {
+					// this is both to quit early to save cpu and to avoid casting bad spells
+					// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
+					continue;
+				}
 
-					if(mercSpellList[i].spellid == mercSpellListItr->spellid
-						&& (mercSpellList[i].type & SpellType_Heal)
-						&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
-						result.spellid = mercSpellList[i].spellid;
-						result.stance = mercSpellList[i].stance;
-						result.type = mercSpellList[i].type;
-						result.slot = mercSpellList[i].slot;
-						result.proc_chance = mercSpellList[i].proc_chance;
-						result.time_cancast = mercSpellList[i].time_cancast;
-					}
+				if(CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+					result.spellid = mercSpellListItr->spellid;
+					result.stance = mercSpellListItr->stance;
+					result.type = mercSpellListItr->type;
+					result.slot = mercSpellListItr->slot;
+					result.proc_chance = mercSpellListItr->proc_chance;
+					result.time_cancast = mercSpellListItr->time_cancast;
 				}
 
 				break;
@@ -3327,23 +3495,18 @@ MercSpell Merc::GetBestMercSpellForPercentageHeal(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster && caster->AI_HasSpells()) {
-		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
 
-		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
-				// this is both to quit early to save cpu and to avoid casting bad spells
-				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
-				continue;
-			}
-
-			if(IsCompleteHealSpell(mercSpellList[i].spellid)
-				&& CheckSpellRecastTimers(caster, mercSpellList[i].spellid)) {
-				result.spellid = mercSpellList[i].spellid;
-				result.stance = mercSpellList[i].stance;
-				result.type = mercSpellList[i].type;
-				result.slot = mercSpellList[i].slot;
-				result.proc_chance = mercSpellList[i].proc_chance;
-				result.time_cancast = mercSpellList[i].time_cancast;
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+			if(IsCompleteHealSpell(mercSpellListItr->spellid)
+				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+				result.spellid = mercSpellListItr->spellid;
+				result.stance = mercSpellListItr->stance;
+				result.type = mercSpellListItr->type;
+				result.slot = mercSpellListItr->slot;
+				result.proc_chance = mercSpellListItr->proc_chance;
+				result.time_cancast = mercSpellListItr->time_cancast;
 
 				break;
 			}
@@ -3461,35 +3624,30 @@ MercSpell Merc::GetBestMercSpellForGroupHealOverTime(Merc* caster) {
 	result.time_cancast = 0;
 
     if(caster) {
-			std::list<MercSpell> botHoTSpellList = GetMercSpellsForSpellEffect(caster, SE_HealOverTime);
-			std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
+		std::list<MercSpell> mercHoTSpellList = GetMercSpellsForSpellEffect(caster, SE_HealOverTime);
 
-			for(std::list<MercSpell>::iterator mercSpellListItr = botHoTSpellList.begin(); mercSpellListItr != botHoTSpellList.end(); mercSpellListItr++) {
-				// Assuming all the spells have been loaded into this list by level and in descending order
-				if(IsGroupHealOverTimeSpell(mercSpellListItr->spellid)) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercHoTSpellList.begin(); mercSpellListItr != mercHoTSpellList.end(); mercSpellListItr++) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+			if(IsGroupHealOverTimeSpell(mercSpellListItr->spellid)) {
 
-					for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-						if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
-							// this is both to quit early to save cpu and to avoid casting bad spells
-							// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
-							continue;
-						}
-
-						if(mercSpellList[i].spellid == mercSpellListItr->spellid
-							&& (mercSpellList[i].type & SpellType_Heal)
-							&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
-							result.spellid = mercSpellList[i].spellid;
-							result.stance = mercSpellList[i].stance;
-							result.type = mercSpellList[i].type;
-							result.slot = mercSpellList[i].slot;
-							result.proc_chance = mercSpellList[i].proc_chance;
-							result.time_cancast = mercSpellList[i].time_cancast;
-						}
-					}
-
-					break;
+				if (mercSpellListItr->spellid <= 0 || mercSpellListItr->spellid >= SPDAT_RECORDS) {
+					// this is both to quit early to save cpu and to avoid casting bad spells
+					// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
+					continue;
 				}
+
+				if(CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+					result.spellid = mercSpellListItr->spellid;
+					result.stance = mercSpellListItr->stance;
+					result.type = mercSpellListItr->type;
+					result.slot = mercSpellListItr->slot;
+					result.proc_chance = mercSpellListItr->proc_chance;
+					result.time_cancast = mercSpellListItr->time_cancast;
+				}
+
+				break;
 			}
+		}
     }
 
     return result;
@@ -3744,6 +3902,339 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 	return result;
 }
 
+MercSpell Merc::GetBestMercSpellForStun(Merc* caster) {
+	MercSpell result;
+	bool spellSelected = false;
+
+	result.spellid = 0;
+	result.stance = 0;
+	result.type = 0;
+	result.slot = 0;
+	result.proc_chance = 0;
+	result.time_cancast = 0;
+
+	if(caster) {
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_Stun);
+
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+			if(CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+				result.spellid = mercSpellListItr->spellid;
+				result.stance = mercSpellListItr->stance;
+				result.type = mercSpellListItr->type;
+				result.slot = mercSpellListItr->slot;
+				result.proc_chance = mercSpellListItr->proc_chance;
+				result.time_cancast = mercSpellListItr->time_cancast;
+
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
+MercSpell Merc::GetBestMercSpellForAENuke(Merc* caster, Mob* tar) {
+	MercSpell result;
+	bool spellSelected = false;
+
+	result.spellid = 0;
+	result.stance = 0;
+	result.type = 0;
+	result.slot = 0;
+	result.proc_chance = 0;
+	result.time_cancast = 0;
+
+	if(caster) {
+		uint8 initialCastChance = 0;
+		uint8 castChanceFalloff = 75;
+
+		switch(caster->GetStance())
+		{
+			case MercStanceBurnAE:
+				initialCastChance = 50;
+				break;
+			case MercStanceBalanced:
+				initialCastChance = 25;
+				break;
+			case MercStanceBurn:
+				initialCastChance = 0;
+				break;
+		}
+
+		//check of we even want to cast an AE nuke
+		if(MakeRandomInt(1, 100) <= initialCastChance) {
+
+			result = GetBestMercSpellForAERainNuke(caster, tar);
+
+			//check if we have a spell & allow for other AE nuke types
+			if(result.spellid == 0 && MakeRandomInt(1, 100) <= castChanceFalloff) {
+				
+				result = GetBestMercSpellForPBAENuke(caster, tar);
+
+				//check if we have a spell & allow for other AE nuke types
+				if(result.spellid == 0 && MakeRandomInt(1, 100) <= castChanceFalloff) {
+					
+					result = GetBestMercSpellForTargetedAENuke(caster, tar);
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+MercSpell Merc::GetBestMercSpellForTargetedAENuke(Merc* caster, Mob* tar) {
+	MercSpell result;
+	int castChance = 50;		//used to cycle through multiple spells (first has 50% overall chance, 2nd has 25%, etc.)
+	int numTargetsCheck = 1;	//used to check for min number of targets to use AE
+	bool spellSelected = false;
+
+	result.spellid = 0;
+	result.stance = 0;
+	result.type = 0;
+	result.slot = 0;
+	result.proc_chance = 0;
+	result.time_cancast = 0;
+
+	switch(caster->GetStance())
+	{
+		case MercStanceBurnAE:
+			numTargetsCheck = 1;
+			break;
+		case MercStanceBalanced:
+		case MercStanceBurn:
+			numTargetsCheck = 2;
+			break;
+	}
+
+	if(caster) {
+		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
+
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+			if(IsAENukeSpell(mercSpellListItr->spellid) && !IsAERainNukeSpell(mercSpellListItr->spellid)
+				&& !IsPBAENukeSpell(mercSpellListItr->spellid) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+				uint8 numTargets = 0;
+				if(CheckAENuke(caster, tar, mercSpellListItr->spellid, numTargets)) {
+					if(numTargets >= numTargetsCheck && MakeRandomInt(1, 100) <= castChance) {
+						result.spellid = mercSpellListItr->spellid;
+						result.stance = mercSpellListItr->stance;
+						result.type = mercSpellListItr->type;
+						result.slot = mercSpellListItr->slot;
+						result.proc_chance = mercSpellListItr->proc_chance;
+						result.time_cancast = mercSpellListItr->time_cancast;
+					}
+				}
+
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
+MercSpell Merc::GetBestMercSpellForPBAENuke(Merc* caster, Mob* tar) {
+	MercSpell result;
+	int castChance = 50;		//used to cycle through multiple spells (first has 50% overall chance, 2nd has 25%, etc.)
+	int numTargetsCheck = 1;	//used to check for min number of targets to use AE
+	bool spellSelected = false;
+
+	result.spellid = 0;
+	result.stance = 0;
+	result.type = 0;
+	result.slot = 0;
+	result.proc_chance = 0;
+	result.time_cancast = 0;
+
+	switch(caster->GetStance())
+	{
+		case MercStanceBurnAE:
+			numTargetsCheck = 2;
+			break;
+		case MercStanceBalanced:
+		case MercStanceBurn:
+			numTargetsCheck = 3;
+			break;
+	}
+
+	if(caster) {
+		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
+
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+			if(IsPBAENukeSpell(mercSpellListItr->spellid) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+				uint8 numTargets = 0;
+				if(CheckAENuke(caster, caster, mercSpellListItr->spellid, numTargets)) {
+					if(numTargets >= numTargetsCheck && MakeRandomInt(1, 100) <= castChance) {
+						result.spellid = mercSpellListItr->spellid;
+						result.stance = mercSpellListItr->stance;
+						result.type = mercSpellListItr->type;
+						result.slot = mercSpellListItr->slot;
+						result.proc_chance = mercSpellListItr->proc_chance;
+						result.time_cancast = mercSpellListItr->time_cancast;
+					}
+				}
+
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
+MercSpell Merc::GetBestMercSpellForAERainNuke(Merc* caster, Mob* tar) {
+	MercSpell result;
+	int castChance = 50;		//used to cycle through multiple spells (first has 50% overall chance, 2nd has 25%, etc.)
+	int numTargetsCheck = 1;	//used to check for min number of targets to use AE
+	bool spellSelected = false;
+
+	result.spellid = 0;
+	result.stance = 0;
+	result.type = 0;
+	result.slot = 0;
+	result.proc_chance = 0;
+	result.time_cancast = 0;
+
+	switch(caster->GetStance())
+	{
+		case MercStanceBurnAE:
+			numTargetsCheck = 1;
+			break;
+		case MercStanceBalanced:
+		case MercStanceBurn:
+			numTargetsCheck = 2;
+			break;
+	}
+
+	if(caster) {
+		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
+
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+			if(IsAERainNukeSpell(mercSpellListItr->spellid) && MakeRandomInt(1, 100) <= castChance && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+				uint8 numTargets = 0;
+				if(CheckAENuke(caster, tar, mercSpellListItr->spellid, numTargets)) {
+					if(numTargets >= numTargetsCheck) {
+						result.spellid = mercSpellListItr->spellid;
+						result.stance = mercSpellListItr->stance;
+						result.type = mercSpellListItr->type;
+						result.slot = mercSpellListItr->slot;
+						result.proc_chance = mercSpellListItr->proc_chance;
+						result.time_cancast = mercSpellListItr->time_cancast;
+					}
+				}
+
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
+MercSpell Merc::GetBestMercSpellForNuke(Merc* caster) {
+	MercSpell result;
+	int castChance = 50;	//used to cycle through multiple spells (first has 50% overall chance, 2nd has 25%, etc.)
+	bool spellSelected = false;
+
+	result.spellid = 0;
+	result.stance = 0;
+	result.type = 0;
+	result.slot = 0;
+	result.proc_chance = 0;
+	result.time_cancast = 0;
+
+	if(caster) {
+		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
+
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+			if(IsPureNukeSpell(mercSpellListItr->spellid) && !IsAENukeSpell(mercSpellListItr->spellid) 
+					&& MakeRandomInt(1, 100) <= castChance && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+				result.spellid = mercSpellListItr->spellid;
+				result.stance = mercSpellListItr->stance;
+				result.type = mercSpellListItr->type;
+				result.slot = mercSpellListItr->slot;
+				result.proc_chance = mercSpellListItr->proc_chance;
+				result.time_cancast = mercSpellListItr->time_cancast;
+
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
+MercSpell Merc::GetBestMercSpellForNukeByTargetResists(Merc* caster, Mob* target) {
+	MercSpell result;
+	bool spellSelected = false;
+
+	result.spellid = 0;
+	result.stance = 0;
+	result.type = 0;
+	result.slot = 0;
+	result.proc_chance = 0;
+	result.time_cancast = 0;
+
+	if(!target)
+		return result;
+
+	if(caster) {
+		const int lureResisValue = -100;
+		const int maxTargetResistValue = 300;
+		bool selectLureNuke = false;
+
+		if((target->GetMR() > maxTargetResistValue) && (target->GetCR() > maxTargetResistValue) && (target->GetFR() > maxTargetResistValue))
+			selectLureNuke = true;
+
+		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
+
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+			// Assuming all the spells have been loaded into this list by level and in descending order
+
+			if(IsPureNukeSpell(mercSpellListItr->spellid) && !IsAENukeSpell(mercSpellListItr->spellid) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
+				if(selectLureNuke && (spells[mercSpellListItr->spellid].ResistDiff < lureResisValue)) {
+					spellSelected = true;
+				}
+				else {
+					if(((target->GetMR() < target->GetCR()) || (target->GetMR() < target->GetFR())) && (GetSpellResistType(mercSpellListItr->spellid) == RESIST_MAGIC)
+						&& (spells[mercSpellListItr->spellid].ResistDiff > lureResisValue))
+					{
+						spellSelected = true;
+					}
+					else if(((target->GetCR() < target->GetMR()) || (target->GetCR() < target->GetFR())) && (GetSpellResistType(mercSpellListItr->spellid) == RESIST_COLD)
+						&& (spells[mercSpellListItr->spellid].ResistDiff > lureResisValue))
+					{
+						spellSelected = true;
+					}
+					else if(((target->GetFR() < target->GetCR()) || (target->GetFR() < target->GetMR())) && (GetSpellResistType(mercSpellListItr->spellid) == RESIST_FIRE)
+						&& (spells[mercSpellListItr->spellid].ResistDiff > lureResisValue))
+					{
+						spellSelected = true;
+					}
+				}
+			}
+
+			if(spellSelected) {
+				result.spellid = mercSpellListItr->spellid;
+				result.stance = mercSpellListItr->stance;
+				result.type = mercSpellListItr->type;
+				result.slot = mercSpellListItr->slot;
+				result.proc_chance = mercSpellListItr->proc_chance;
+				result.time_cancast = mercSpellListItr->time_cancast;
+
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
 bool Merc::GetNeedsCured(Mob *tar) {
 	bool needCured = false;
 
@@ -3919,6 +4410,14 @@ bool Merc::CheckDisciplineRecastTimers(Merc *caster, uint16 spell_id) {
 	return false;
 }
 
+void Merc::SetSpellTimeCanCast(uint16 spellid, uint32 recast_delay) {
+	for (int i = 0; i < merc_spells.size(); i++) {
+		if(merc_spells[i].spellid == spellid) {
+			merc_spells[i].time_cancast = Timer::GetCurrentTime() + recast_delay;
+		}
+	}
+}
+
 bool Merc::CheckTaunt() {
 	Mob* tar = GetTarget();
 	//Only taunt if we are not top on target's hate list
@@ -3941,8 +4440,11 @@ bool Merc::CheckAETaunt() {
 
 		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); itr++) {
 			NPC* npc = *itr;
+			float dist = npc->DistNoRootNoZ(*this);
+			int range = GetActSpellRange(mercSpell.spellid, spells[mercSpell.spellid].range);
+			range *= range;
 
-			if(npc->DistNoRootNoZ(*this) <= GetActSpellRange(mercSpell.spellid, spells[mercSpell.spellid].range)) {
+			if(dist <= range) {
 				if(!npc->IsMezzed()) {
 					if(HasGroup()) {
 						Group* g = GetGroup();
@@ -5058,6 +5560,7 @@ void Client::SpawnMerc(Merc* merc, bool setMaxStats)
 		merc->SetSuspended(false);
 		SetMerc(merc);
 		merc->Unsuspend(setMaxStats);
+		merc->SetStance(GetMercInfo().Stance);
 	}
 }
 
@@ -5078,6 +5581,7 @@ bool Merc::Suspend() {
 	mercOwner->GetMercInfo().IsSuspended = true;
 	mercOwner->GetMercInfo().SuspendedTime = time(NULL) + RuleI(Mercs, SuspendIntervalS);
 	mercOwner->GetMercInfo().MercTimerRemaining = mercOwner->GetMercTimer().GetRemainingTime();
+	mercOwner->GetMercInfo().Stance = GetStance();
 	mercOwner->GetMercTimer().Disable();
 	//mercOwner->UpdateMercTimer();
 	mercOwner->SendMercSuspendResponsePacket(mercOwner->GetMercInfo().SuspendedTime);
@@ -5342,7 +5846,9 @@ void Client::SetMerc(Merc* newmerc) {
 	}
 	if (!newmerc) {
 		SetMercID(0);
+		GetMercInfo().mercid = 0;
 		GetMercInfo().MercTemplateID = 0;
+		GetMercInfo().myTemplate = NULL;
 		GetMercInfo().IsSuspended = false;
 		GetMercInfo().SuspendedTime = 0;
 		GetMercInfo().Gender = 0;
@@ -5363,6 +5869,8 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().IsSuspended = newmerc->IsSuspended();
 		GetMercInfo().SuspendedTime = 0;
 		GetMercInfo().Gender = newmerc->GetGender();
+		//GetMercInfo().State = newmerc->GetStance(); 
+		GetMercInfo().MercTimerRemaining = 0;
 	}
 }
 

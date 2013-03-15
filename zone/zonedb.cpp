@@ -1630,7 +1630,8 @@ bool ZoneDatabase::LoadMercInfo(Client *c) {
 				c->GetMercInfo(slot).IsSuspended = atoi(DataRow[5]) == 1 ? true : false;
 				c->GetMercInfo(slot).MercTimerRemaining = atoi(DataRow[6]);
 				c->GetMercInfo(slot).Gender = atoi(DataRow[7]);
-				c->GetMercInfo(slot).State = atoi(DataRow[8]);
+				c->GetMercInfo(slot).State = 5;
+				c->GetMercInfo(slot).Stance = atoi(DataRow[8]);
 				c->GetMercInfo(slot).hp = atoi(DataRow[9]);
 				c->GetMercInfo(slot).mana = atoi(DataRow[10]);
 				c->GetMercInfo(slot).endurance = atoi(DataRow[11]);

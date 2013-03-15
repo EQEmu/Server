@@ -1,7 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
 == 03/14/2013 ==
 JJ: (NatedogEZ) Fix for hate list random never selecting last member of hate list.
+Bad_Captain: Fixed Merc spell recast timers. 
+Bad_Captain: Changed how Mercs add mobs to their hate lists (should prevent IsEngaged() issues).
+Bad_Captain: Initial Caster DPS Merc spell casting AI, including initial Merc stance implementation. 
+Bad_Captain: Mercs now suspend when their owner dies to prevent them being bugged (until it can be fixed).
+
+OPTIONAL SQL: 2013_03_14_Merc_Spells.sql
 
 == 03/09/2013 ==
 Zaela_S: Stop mobs aggroing on dead players when using RespawnFromHover.

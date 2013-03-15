@@ -352,6 +352,22 @@ bool IsPureNukeSpell(uint16 spell_id)
 	);
 }
 
+bool IsAENukeSpell(uint16 spell_id)
+{
+	return IsValidSpell(spell_id) && IsPureNukeSpell(spell_id) && spells[spell_id].aoerange > 0;
+}
+
+bool IsPBAENukeSpell(uint16 spell_id)
+{
+	return IsValidSpell(spell_id) && IsPureNukeSpell(spell_id) && spells[spell_id].aoerange > 0 && spells[spell_id].targettype == ST_AECaster;
+}
+
+bool IsAERainNukeSpell(uint16 spell_id)
+{
+	return IsValidSpell(spell_id) && IsPureNukeSpell(spell_id) 
+		&& spells[spell_id].aoerange > 0 && spells[spell_id].AEDuration > 1000;
+}
+
 bool IsPartialCapableSpell(uint16 spell_id)
 {
 	if(IsPureNukeSpell(spell_id) || 
