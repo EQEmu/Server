@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/15/2013 ==
+Derision: RoF: Added ENCODE for Resurrect_struct (Accepting a rez should now work).
+Derision: Fixed a couple of memory leaks in Rez code.
 
 == 03/14/2013 ==
 JJ: (NatedogEZ) Fix for hate list random never selecting last member of hate list.

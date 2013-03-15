@@ -1578,9 +1578,9 @@ uint32 ZoneDatabase::UpdatePlayerCorpse(uint32 dbid, uint32 charid, const char* 
 	}
 	if(rezzed){
 		if (!RunQuery(query, MakeAnyLenString(&query, "update player_corpses set rezzed = 1 WHERE id=%d",dbid), errbuf)) {
-			safe_delete_array(query);
 			cerr << "Error in UpdatePlayerCorpse/Rezzed query: " << errbuf << endl;
 		}
+		safe_delete_array(query);
 	}
 	return dbid;
 }

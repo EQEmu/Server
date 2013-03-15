@@ -2792,20 +2792,23 @@ struct Underworld_Struct {
 	float z;
 };
 
-struct Resurrect_Struct	{
-	uint32	unknown00;
-	uint16	zone_id;
-	uint16	instance_id;
-	float	y;
-	float	x;
-	float	z;
-	char	your_name[64];
-	uint32	unknown88;
-	char	rezzer_name[64];
-	uint32	spellid;
-	char	corpse_name[64];
-	uint32	action;
-/* 228 */
+struct Resurrect_Struct
+{
+/*000*/	uint32	unknown000;
+/*004*/	uint16	zone_id;
+/*006*/	uint16	instance_id;
+/*008*/	float	y;
+/*012*/	float	x;
+/*016*/	float	z;
+/*020*/	uint32	unknown020;
+/*024*/	char	your_name[64];
+/*088*/	uint32	unknown088;
+/*092*/	char	rezzer_name[64];
+/*156*/	uint32	spellid;
+/*160*/	char	corpse_name[64];
+/*224*/	uint32	action;
+/*228*/	uint32	unknown228;
+/*232*/
 };
 
 struct SetRunMode_Struct {

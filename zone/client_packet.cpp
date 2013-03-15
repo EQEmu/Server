@@ -4768,10 +4768,8 @@ void Client::Handle_OP_InstillDoubt(const EQApplicationPacket *app)
 
 void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(Resurrect_Struct)) {
-		LogFile->write(EQEMuLog::Error, "Wrong size: OP_RezzAnswer, size=%i, expected %i", app->size, sizeof(Resurrect_Struct));
-		return;
-	}
+	VERIFY_PACKET_LENGTH(OP_RezzAnswer, app, Resurrect_Struct);
+	
 	const Resurrect_Struct* ra = (const Resurrect_Struct*) app->pBuffer;
 
 	_log(SPELLS__REZ, "Received OP_RezzAnswer from client. Pendingrezzexp is %i, action is %s",
@@ -4788,6 +4786,7 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 		// the rezzed corpse is in to mark the corpse as rezzed.
 		outapp->SetOpcode(OP_RezzComplete);
 		worldserver.RezzPlayer(outapp, 0, 0, OP_RezzComplete);
+		safe_delete(outapp);
 	}
 	return;
 }
