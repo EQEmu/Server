@@ -1445,6 +1445,9 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 			case 'E':
 				SpecAttacks[SPECATK_ENRAGE] = (remove ? false : true);
 				break;
+			case 'e':
+				SpecAttacks[SPECATK_INFURIATE] = (remove ? false : true);
+				break;
 			case 'F':
 				SpecAttacks[SPECATK_FLURRY] = (remove ? false : true);
 				break;
@@ -1588,6 +1591,10 @@ bool Mob::HasNPCSpecialAtk(const char* parse) {
 		{
 			case 'E':
 				if (!SpecAttacks[SPECATK_ENRAGE])
+					HasAllAttacks = false;
+				break;
+			case 'e':
+				if (!SpecAttacks[SPECATK_INFURIATE])
 					HasAllAttacks = false;
 				break;
 			case 'F':

@@ -3755,6 +3755,9 @@ void Bot::AI_Process() {
 				// Stop attacking if the target is enraged
 				if(IsEngaged() && !BehindMob(GetTarget(), GetX(), GetY()) && GetTarget()->IsEnraged())
 					return;
+				// Stop attacking if the target is infuriated
+				if(IsEngaged() && GetTarget()->IsInfuriated())
+					return;
 
 				if(GetBotStance() == BotStancePassive)
 					return;
@@ -4082,6 +4085,9 @@ void Bot::PetAIProcess() {
 				if(botPet->GetAttackTimer().Check()) {
 					// Stop attacking while we are on a front arc and the target is enraged
 					if(!botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY()) && botPet->GetTarget()->IsEnraged())
+						return;
+					// Stop attacking while the target is infuriated
+					if(botPet->GetTarget()->IsInfuriated())
 						return;
 
 					if(botPet->Attack(GetTarget(), SLOT_PRIMARY))			// try the main hand

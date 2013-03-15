@@ -35,3 +35,7 @@ Build_64/
 build_64/
 log/
 logs/
+
+# Patch files
+*.orig
+*.rej

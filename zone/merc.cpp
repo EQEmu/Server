@@ -1722,6 +1722,9 @@ void Merc::AI_Process() {
 				// Stop attacking if the target is enraged
 				if(IsEngaged() && !BehindMob(GetTarget(), GetX(), GetY()) && GetTarget()->IsEnraged())
 					return;
+				// stop attacking if the target is infuriated
+				if(IsEngaged() && GetTarget()->IsInfuriated())
+					return;
 				//TODO: Implement Stances.
 				/*if(GetBotStance() == BotStancePassive)
 					return;*/
