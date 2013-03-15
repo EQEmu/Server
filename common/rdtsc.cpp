@@ -30,10 +30,6 @@
 
 #ifdef i386
 	#define USE_RDTSC
-#else
-	#ifndef WIN32
-		#warning RDTSC_Timer cannot use rdtsc on a non-intel platform, using gettimeofday
-	#endif
 #endif
 
 bool RDTSC_Timer::_inited = false;

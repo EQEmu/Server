@@ -3919,7 +3919,7 @@ void command_fixmob(Client *c, const Seperator *sep)
 		uint32 DrakkinTattoo = target->GetDrakkinTattoo();
 		uint32 DrakkinDetails = target->GetDrakkinDetails();
 
-		char* ChangeType = NULL; // If it's still NULL after processing, they didn't send a valid command
+		const char* ChangeType = NULL; // If it's still NULL after processing, they didn't send a valid command
 		uint32 ChangeSetting;
 		char* command = sep->arg[1];
 			
@@ -9566,8 +9566,8 @@ void command_object(Client *c, const Seperator *sep)
 	}
 
 	// Save it here. We sometimes have need to refer to it in multiple places.
-	char* usage_string = "Usage: #object List|Add|Edit|Move|Rotate|Save|Copy|Delete|Undo";
-	
+	const char* usage_string = "Usage: #object List|Add|Edit|Move|Rotate|Save|Copy|Delete|Undo";
+
 	if ((!sep) || (sep->argnum == 0))
 	{
 		// Crash Suppressant: Shouldn't be able to get here, either, but fail gracefully if we do.
@@ -11629,5 +11629,5 @@ void command_augmentitem(Client *c, const Seperator *sep)
 		in_augment->augment_slot = -1;
 		if(c->GetTradeskillObject() != NULL)
 		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
-		safe_delete(in_augment);
+		safe_delete_array(in_augment);
 }

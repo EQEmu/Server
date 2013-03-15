@@ -48,7 +48,7 @@ to store them in the DB: Load and Store.
 
 All durations are in seconds.
 
-Each persistent timer is attached to a character, and given 
+Each persistent timer is attached to a character, and given
 a specific type. A given character can only have one timer
 of each type. While the type is just an arbitrary number,
 please record what you are using it for in the enum for
@@ -59,7 +59,7 @@ client has a facility called p_timers which should handle
 most of what you need. The idea is that instead of making
 your own PersistentTimer, you use the methods on p_timers:
 Start, Check, Clear, GetRemainingTime to access them. You
-starting a timer which does not exist will create it. If 
+starting a timer which does not exist will create it. If
 you need to do more than that with your timer, you should
 still use p_timers, just use the Get() method to get direct
 access to the PersistentTimer. All timers in the p_timers
@@ -101,7 +101,7 @@ PersistentTimer *PersistentTimer::LoadTimer(Database *db, uint32 char_id, pTimer
 PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_timer_time) {
 	_char_id = char_id;
 	_type = type;
-	
+
 	timer_time = in_timer_time;
 	start_time = get_current_time();
 	if (timer_time == 0) {
@@ -117,7 +117,7 @@ PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_time
 PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_start_time, uint32 in_timer_time, bool in_enable) {
 	_char_id = char_id;
 	_type = type;
-	
+
 	timer_time = in_timer_time;
 	start_time = in_start_time;
 	enabled = in_enable;
@@ -133,14 +133,14 @@ bool PersistentTimer::Load(Database *db) {
     char *query = 0;
 	uint32 qlen = 0;
 	uint32 qcount = 0;
-	
+
 	qlen = MakeAnyLenString(&query, "SELECT start,duration,enable "
 	" FROM timers WHERE char_id=%lu AND type=%u", (unsigned long)_char_id, _type);
-	
+
 #ifdef DEBUG_PTIMERS
 	printf("Loading timer: char %lu of type %u\n", (unsigned long)_char_id, _type);
 #endif
-	
+
 	if (!db->RunQuery(query, qlen, errbuf, &result)) {
 		safe_delete_array(query);
 #if EQDEBUG > 5
@@ -149,39 +149,39 @@ bool PersistentTimer::Load(Database *db) {
 		return(false);
 	}
 	safe_delete_array(query);
-	
+
 	bool res = false;
 	qcount = mysql_num_rows(result);
 	if(qcount == 1 && (row = mysql_fetch_row(result)) ) {
 		start_time = strtoul(row[0], NULL, 10);
 		timer_time = strtoul(row[1], NULL, 10);
 		enabled = (row[2][0] == '1');
-		
+
 		res = true;
 	}
 	mysql_free_result(result);
-	
+
 	return(res);
 }
 
 bool PersistentTimer::Store(Database *db) {
 	if(Expired(db, false))	//dont need to store expired timers.
 		return(true);
-	
+
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32 qlen = 0;
-	
+
 	qlen = MakeAnyLenString(&query, "REPLACE INTO timers "
 		" (char_id,type,start,duration,enable) "
 		" VALUES(%lu,%u,%lu,%lu,%d)",
 		(unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time, enabled?1:0);
-	
-	
+
+
 #ifdef DEBUG_PTIMERS
 	printf("Storing timer: char %lu of type %u: '%s'\n", (unsigned long)_char_id, _type, query);
 #endif
-	
+
 	if (!db->RunQuery(query, qlen, errbuf)) {
 		safe_delete_array(query);
 #if EQDEBUG > 5
@@ -190,7 +190,7 @@ bool PersistentTimer::Store(Database *db) {
 		return(false);
 	}
 	safe_delete_array(query);
-	
+
 	return(true);
 }
 
@@ -198,15 +198,15 @@ bool PersistentTimer::Clear(Database *db) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32 qlen = 0;
-	
+
 	qlen = MakeAnyLenString(&query, "DELETE FROM timers "
 		" WHERE char_id=%lu AND type=%u ",
 		(unsigned long)_char_id, _type);
-	
+
 #ifdef DEBUG_PTIMERS
 	printf("Clearing timer: char %lu of type %u: '%s'\n", (unsigned long)_char_id, _type, query);
 #endif
-	
+
 	if (!db->RunQuery(query, qlen, errbuf)) {
 		safe_delete_array(query);
 #if EQDEBUG > 5
@@ -215,15 +215,15 @@ bool PersistentTimer::Clear(Database *db) {
 		return(false);
 	}
 	safe_delete_array(query);
-	
+
 	return(true);
 
 }
 
 /* This function checks if the timer triggered */
 bool PersistentTimer::Expired(Database *db, bool iReset) {
-    if (this == NULL) { 
-		LogFile->write(EQEMuLog::Error, "Null timer during ->Check()!?\n"); 
+    if (this == NULL) {
+		LogFile->write(EQEMuLog::Error, "Null timer during ->Check()!?\n");
 		return(true);
 	}
 	uint32 current_time = get_current_time();
@@ -235,7 +235,7 @@ bool PersistentTimer::Expired(Database *db, bool iReset) {
 		}
 		return(true);
     }
-	
+
     return(false);
 }
 
@@ -287,7 +287,7 @@ uint32 PersistentTimer::get_current_time() {
 PTimerList::PTimerList(uint32 char_id) {
 	_char_id = char_id;
 }
-	
+
 PTimerList::~PTimerList() {
 	map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
@@ -308,21 +308,21 @@ bool PTimerList::Load(Database *db) {
 		s++;
 	}
 	_list.clear();
-	
+
 	char errbuf[MYSQL_ERRMSG_SIZE];
     MYSQL_RES *result;
     MYSQL_ROW row;
     char *query = 0;
 	uint32 qlen = 0;
 	uint32 qcount = 0;
-	
+
 	qlen = MakeAnyLenString(&query, "SELECT type,start,duration,enable "
 	" FROM timers WHERE char_id=%lu", (unsigned long)_char_id);
-	
+
 #ifdef DEBUG_PTIMERS
 	printf("Loading all timers for char %lu\n", (unsigned long)_char_id);
 #endif
-	
+
 	if (!db->RunQuery(query, qlen, errbuf, &result)) {
 		safe_delete_array(query);
 #if EQDEBUG > 5
@@ -331,11 +331,11 @@ bool PTimerList::Load(Database *db) {
 		return(false);
 	}
 	safe_delete_array(query);
-	
+
 	pTimerType type;
 	uint32 start_time, timer_time;
 	bool enabled;
-	
+
 	PersistentTimer *cur;
 	qcount = mysql_num_rows(result);
 	while((row = mysql_fetch_row(result)) ) {
@@ -343,17 +343,17 @@ bool PTimerList::Load(Database *db) {
 		start_time = strtoul(row[1], NULL, 10);
 		timer_time = strtoul(row[2], NULL, 10);
 		enabled = (row[3][0] == '1');
-		
+
 		//if it expired allready, dont bother.
-		
+
 		cur = new PersistentTimer(_char_id, type, start_time, timer_time, enabled);
-		if(!cur->Expired(false))
+		if(!cur->Expired(NULL))
 			_list[type] = cur;
 		else
 			delete cur;
 	}
 	mysql_free_result(result);
-	
+
 	return(true);
 }
 
@@ -380,18 +380,18 @@ bool PTimerList::Store(Database *db) {
 
 bool PTimerList::Clear(Database *db) {
 	_list.clear();
-	
+
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32 qlen = 0;
-	
+
 	qlen = MakeAnyLenString(&query, "DELETE FROM timers "
 		" WHERE char_id=%lu ", (unsigned long)_char_id);
-	
+
 #ifdef DEBUG_PTIMERS
 	printf("Storing all timers for char %lu: '%s'\n", (unsigned long)_char_id, query);
 #endif
-	
+
 	if (!db->RunQuery(query, qlen, errbuf)) {
 		safe_delete_array(query);
 #if EQDEBUG > 5
@@ -400,10 +400,10 @@ bool PTimerList::Clear(Database *db) {
 		return(false);
 	}
 	safe_delete_array(query);
-	
+
 	return(true);
 }
-	
+
 void PTimerList::Start(pTimerType type, uint32 duration) {
 	if(_list.count(type) == 1 && _list[type] != NULL) {
 		_list[type]->Start(duration);
@@ -463,9 +463,9 @@ PersistentTimer *PTimerList::Get(pTimerType type) {
 }
 
 void PTimerList::ToVector(vector< pair<pTimerType, PersistentTimer *> > &out) {
-	
+
 	pair<pTimerType, PersistentTimer *> p;
-	
+
 	map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	while(s != _list.end()) {
@@ -482,13 +482,13 @@ bool PTimerList::ClearOffline(Database *db, uint32 char_id, pTimerType type) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32 qlen = 0;
-	
+
 	qlen = MakeAnyLenString(&query, "DELETE FROM timers WHERE char_id=%lu AND type=%u ",(unsigned long)char_id, type);
-	
+
 #ifdef DEBUG_PTIMERS
 	printf("Clearing timer (offline): char %lu of type %u: '%s'\n", (unsigned long)char_id, type, query);
 #endif
-	
+
 	if (!db->RunQuery(query, qlen, errbuf)) {
 		safe_delete_array(query);
 #if EQDEBUG > 5
@@ -497,7 +497,7 @@ bool PTimerList::ClearOffline(Database *db, uint32 char_id, pTimerType type) {
 		return(false);
 	}
 	safe_delete_array(query);
-	
+
 	return(true);
 
 

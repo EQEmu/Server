@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -25,7 +25,7 @@
 
 /*
 
- FatherNitwit: Added new rules subsystem to allow game rules to be changed       
+ FatherNitwit: Added new rules subsystem to allow game rules to be changed
                 at runtime. more about this will come as time goes on.
 FatherNitwit: Added #rules command to manage rules data from in game.
 FatherNitwit: Renamed old #rules to #serverrules
@@ -162,12 +162,12 @@ bool RuleManager::GetRule(const char *rule_name, std::string &ret_val) {
 bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Database *db, bool db_save) {
 	if(rule_name == NULL || rule_value == NULL)
 		return(false);
-	
+
 	RuleType type;
 	uint16 index;
 	if(!_FindRule(rule_name, type, index))
 		return(false);
-	
+
 	switch(type) {
 	case IntRule:
 		m_RuleIntValues [index] = atoi(rule_value);
@@ -181,11 +181,11 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 		uint32 val = 0;
 		if(!strcasecmp(rule_value, "on") || !strcasecmp(rule_value, "true") || !strcasecmp(rule_value, "yes") || !strcasecmp(rule_value, "enabled") || !strcmp(rule_value, "1"))
 			val = 1;
-		m_RuleBoolValues[index] = val;		
+		m_RuleBoolValues[index] = val;
 		_log(RULES__CHANGE, "Set rule %s to value %s", rule_name, m_RuleBoolValues[index] == 1 ?"true":"false");
 		break;
 	}
-	
+
 	if(db_save)
 		_SaveRule(db, type, index);
 
@@ -206,7 +206,7 @@ void RuleManager::ResetRules() {
 bool RuleManager::_FindRule(const char *rule_name, RuleType &type_into, uint16 &index_into) {
 	if(rule_name == NULL)
 		return(false);
-	
+
 	int r;
 	int rcount = CountRules();
 	for(r = 0; r < rcount; r++) {
@@ -253,7 +253,7 @@ void RuleManager::SaveRules(Database *db, const char *ruleset) {
 	} else {
 		_log(RULES__CHANGE, "Saving running rules into running rule set %s", m_activeName.c_str(), m_activeRuleset);
 	}
-	
+
 	int r;
 	for(r = 0; r < _IntRuleCount; r++) {
 		_SaveRule(db, IntRule, r);
@@ -284,15 +284,15 @@ bool RuleManager::LoadRules(Database *db, const char *ruleset) {
 
 	m_activeRuleset = rsid;
 	m_activeName = ruleset;
-	
-	if (db->RunQuery(query, MakeAnyLenString(&query, 
+
+	if (db->RunQuery(query, MakeAnyLenString(&query,
 		"SELECT rule_name, rule_value"
 		" FROM rule_values"
 		" WHERE ruleset_id=%d", rsid), errbuf, &result))
 	{
 		safe_delete_array(query);
 		while((row = mysql_fetch_row(result))) {
-			if(!SetRule(row[0], row[1], false))
+			if(!SetRule(row[0], row[1], NULL, false))
 				_log(RULES__ERROR, "Unable to interpret rule record for %s", row[0]);
 		}
 		mysql_free_result(result);
@@ -319,10 +319,10 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 		sprintf(vstr, "%s", m_RuleBoolValues[index]?"true":"false");
 		break;
 	}
-	
+
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char* query = 0;
-	if (!db->RunQuery(query, MakeAnyLenString(&query, 
+	if (!db->RunQuery(query, MakeAnyLenString(&query,
 		"REPLACE INTO rule_values (ruleset_id, rule_name, rule_value) "
 		" VALUES(%d, '%s', '%s')",
 		m_activeRuleset, _GetRuleName(type, index), vstr),errbuf))
@@ -338,14 +338,14 @@ int RuleManager::GetRulesetID(Database *db, const char *rulesetname) {
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	
+
 	uint32 len = strlen(rulesetname);
 	char* rst = new char[2*len+1];
 	db->DoEscapeString(rst, rulesetname, len);
 
 	int res = -1;
-	
-	if (db->RunQuery(query, MakeAnyLenString(&query, 
+
+	if (db->RunQuery(query, MakeAnyLenString(&query,
 		"SELECT ruleset_id"
 		" FROM rule_sets"
 		" WHERE name='%s'", rst), errbuf, &result))
@@ -369,7 +369,7 @@ int RuleManager::_FindOrCreateRuleset(Database *db, const char *ruleset) {
 	res = GetRulesetID(db, ruleset);
 	if(res >= 0)
 		return(res);	//found and existing one...
-	
+
 	uint32 len = strlen(ruleset);
 	char* rst = new char[2*len+1];
 	db->DoEscapeString(rst, ruleset, len);
@@ -377,7 +377,7 @@ int RuleManager::_FindOrCreateRuleset(Database *db, const char *ruleset) {
 	uint32 new_id;
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char* query = 0;
-	if (!db->RunQuery(query, MakeAnyLenString(&query, 
+	if (!db->RunQuery(query, MakeAnyLenString(&query,
 		"INSERT INTO rule_sets (ruleset_id, name) "
 		" VALUES(0, '%s')",
 		rst),errbuf,NULL,NULL,&new_id))
@@ -399,8 +399,8 @@ std::string RuleManager::GetRulesetName(Database *db, int id) {
 	MYSQL_ROW row;
 
 	std::string res;
-	
-	if (db->RunQuery(query, MakeAnyLenString(&query, 
+
+	if (db->RunQuery(query, MakeAnyLenString(&query,
 		"SELECT name"
 		" FROM rule_sets"
 		" WHERE ruleset_id=%d", id), errbuf, &result))
@@ -425,8 +425,8 @@ bool RuleManager::ListRulesets(Database *db, std::map<int, std::string> &into) {
 
 	//start out with the default set which is always present.
 	into[0] = "default";
-	
-	if (db->RunQuery(query, MakeAnyLenString(&query, 
+
+	if (db->RunQuery(query, MakeAnyLenString(&query,
 		"SELECT ruleset_id,name"
 		" FROM rule_sets"), errbuf, &result))
 	{
@@ -444,18 +444,18 @@ bool RuleManager::ListRulesets(Database *db, std::map<int, std::string> &into) {
 }
 
 int32 RuleManager::GetIntRule(RuleManager::IntType t) const
-{ 
-    return(m_RuleIntValues[t]); 
+{
+    return(m_RuleIntValues[t]);
 }
 
 float RuleManager::GetRealRule(RuleManager::RealType t) const
-{ 
-    return(m_RuleRealValues[t]); 
+{
+    return(m_RuleRealValues[t]);
 }
 
 bool RuleManager::GetBoolRule(RuleManager::BoolType t) const
-{ 
-    return (m_RuleBoolValues[t] == 1); 
+{
+    return (m_RuleBoolValues[t] == 1);
 }
 
 

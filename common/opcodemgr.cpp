@@ -140,8 +140,8 @@ RegularOpcodeManager::RegularOpcodeManager()
 }
 
 RegularOpcodeManager::~RegularOpcodeManager() {
-	safe_delete(emu_to_eq);
-	safe_delete(eq_to_emu);
+	safe_delete_array(emu_to_eq);
+	safe_delete_array(eq_to_emu);
 }
 
 bool RegularOpcodeManager::LoadOpcodes(const char *filename, bool report_errors) {

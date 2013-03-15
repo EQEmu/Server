@@ -1791,7 +1791,7 @@ void Merc::AI_Process() {
 				//now off hand
 				if(GetTarget() && attack_dw_timer.Check() && CanThisClassDualWield()) {
 
-						int weapontype = NULL;
+						int weapontype = 0; // No weapon type
 						bool bIsFist = true;
 
 						if(bIsFist || ((weapontype != ItemType2HS) && (weapontype != ItemType2HPierce) && (weapontype != ItemType2HB))) {
@@ -5959,7 +5959,7 @@ void NPC::LoadMercTypes(){
 		mysql_free_result(DatasetResult);
 	}
 
-	safe_delete(Query);
+	safe_delete_array(Query);
 	Query = 0;
 
 	if(!errorMessage.empty()) {
@@ -5995,7 +5995,7 @@ void NPC::LoadMercs(){
 		mysql_free_result(DatasetResult);
 	}
 
-	safe_delete(Query);
+	safe_delete_array(Query);
 	Query = 0;
 
 	if(!errorMessage.empty()) {

@@ -494,8 +494,6 @@ int main(int argc, char** argv) {
 void CatchSignal(int sig_num) {
 #ifdef _WINDOWS
 	_log(ZONE__INIT, "Recieved signal: %i", sig_num);
-#else
-	_log(ZONE__INIT, "Recieved signal: %i in thread %d", sig_num, pthread_self());
 #endif
 	RunLoops = false;
 }

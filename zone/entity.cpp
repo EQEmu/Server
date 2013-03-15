@@ -5124,7 +5124,7 @@ NPC* EntityList::GetClosestBanker(Mob* sender, uint32 &distance)
 	if(!sender) 
 		return NULL;
 
-	distance = 4294967295;
+	distance = 4294967295u;
 	NPC* nc = NULL;
 
 	LinkedListIterator<NPC*> iterator(npc_list);

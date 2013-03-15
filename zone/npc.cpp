@@ -1023,6 +1023,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			if (npc_type_id)
 			{
 				if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (id, name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(%i,\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
+		    			LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 					safe_delete(query);
 					return false;
 				}
@@ -1030,6 +1031,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			else
 			{
 				if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
+		    			LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 					safe_delete(query);
 					return false;
 				}
@@ -1038,18 +1040,21 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			safe_delete_array(query);
 			snprintf(tmpstr, sizeof(tmpstr), "%s-%s", zone, spawn->GetName());
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (id, name) values(%i, '%s')", tmp, tmpstr), errbuf, 0, 0, &spawngroupid)) {
+		    		LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
 			if(c) c->LogSQL(query);
 			safe_delete_array(query);
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), 1200, spawn->GetHeading(), spawngroupid), errbuf, 0, 0, &tmp)) {
+		    		LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
 			if(c) c->LogSQL(query);
 			safe_delete_array(query);
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawnentry (spawngroupID, npcID, chance) values(%i, %i, %i)", spawngroupid, npc_type_id, 100), errbuf, 0)) {
+		    		LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
@@ -1063,7 +1068,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			char tmpstr[64];
 			snprintf(tmpstr, sizeof(tmpstr), "%s%s%i", zone, spawn->GetName(),Timer::GetCurrentTime());
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (name) values('%s')", tmpstr), errbuf, 0, 0, &last_insert_id)) {
-				printf("ReturnFalse: spawngroup query in NPCSpawnDB() (query: %s)\n",query);
+		    		LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
@@ -1079,16 +1084,16 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			else
 				respawntime = 1200;
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), respawntime, spawn->GetHeading(), last_insert_id), errbuf, 0, 0, &spawnid)) {
+		    		LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
-				printf("ReturnFalse: spawn2 query in NPCSpawnDB()\n");
 				return false;
 			}
 			if(c) c->LogSQL(query);
 			safe_delete_array(query);
 
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawnentry (spawngroupID, npcID, chance) values(%i, %i, %i)", last_insert_id, tmp2, 100), errbuf, 0)) {
+		    		LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
-				printf("ReturnFalse: spawnentry query in NPCSpawnDB()\n");
 				return false;
 			}
 			if(c) c->LogSQL(query);
