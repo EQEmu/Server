@@ -5123,7 +5123,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		if(!mercOwner->IsGrouped())
 		{
 			Group *g = new Group(mercOwner);
-			if(AddMercToGroup(this, g))
+			if(g && AddMercToGroup(this, g))
 			{
 				entity_list.AddGroup(g);
 				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
@@ -5133,6 +5133,15 @@ bool Merc::Unsuspend(bool setMaxStats) {
 				g->SaveGroupLeaderAA();
 
 				loaded = true;
+			}
+			else
+			{
+			if(MERC_DEBUG > 0)
+				mercOwner->Message(7, "Mercenary failed to join the group - Suspending");
+
+			Suspend();
+				safe_delete(g);
+				return false;
 			}
 		}
 		else if (AddMercToGroup(this, mercOwner->GetGroup()))
