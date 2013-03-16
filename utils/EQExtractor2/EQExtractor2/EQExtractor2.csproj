@@ -92,6 +92,7 @@
     <Compile Include="PatchJuly13-2012.cs" />
     <Compile Include="PatchJune25-2012.cs" />
     <Compile Include="PatchMar15-2012.cs" />
+    <Compile Include="PatchMarch13-2013.cs" />
     <Compile Include="PatchMarch15-2011.cs" />
     <Compile Include="PatchMay12-2010.cs" />
     <Compile Include="PatchMay12-2011.cs" />
@@ -161,6 +162,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="patch_June25-2012.conf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="patch_Mar13-2013.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="patch_Mar15-2012.conf">
