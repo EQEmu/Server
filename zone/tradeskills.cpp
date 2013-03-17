@@ -517,7 +517,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	outp->reply_code = 0x00000000;	//success for finding it...
 	
 	user->QueuePacket(outapp);
-	//DumpPacket(outapp);
+	
 	safe_delete(outapp);
 	
 	
@@ -665,7 +665,6 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen,
 		reply->trivial = trivial;
 		strn0cpy(reply->recipe_name, name, sizeof(reply->recipe_name));
 		
-		//DumpPacket(outapp);
 		FastQueuePacket(&outapp);
 	}
 	mysql_free_result(result);
