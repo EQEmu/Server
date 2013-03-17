@@ -392,7 +392,6 @@ void WorldServer::Process() {
 					_log(ZONE__WORLD, "Error: WhoAllReturnStruct did not point to a valid client!  "
 						"id=%i, playerineqstring=%i, playersinzonestring=%i.  Dumping WhoAllReturnStruct:",
 						wars->id, wars->playerineqstring, wars->playersinzonestring);
-					//DumpPacket(pack);
 					#endif
 				}
 			}
@@ -495,7 +494,7 @@ void WorldServer::Process() {
 			if (!(Zone::Bootup(zst->zoneid, zst->instanceid, zst->makestatic))) {
 				SendChannelMessage(0, 0, 10, 0, 0, "%s:%i Zone::Bootup failed: %s", net.GetZoneAddress(), net.GetZonePort(), database.GetZoneName(zst->zoneid));
 			}
-			// Moved annoucement to ZoneBootup() - Quagmire
+			// Moved annoucement to ZoneBootup()
 			//			else
 			//				SendEmoteMessage(0, 0, 15, "Zone bootup: %s", zone->GetLongName());
 			break;
@@ -1822,7 +1821,6 @@ void WorldServer::Process() {
 		default: {
 			cout << " Unknown ZSopcode:" << (int)pack->opcode;
 			cout << " size:" << pack->size << endl;
-			//DumpPacket(pack->pBuffer, pack->size);
 			break;
 		}
 		}
