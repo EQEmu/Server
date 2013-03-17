@@ -546,7 +546,10 @@ namespace EQExtractor2.Patches
         public void DecodeItemPacket(StreamWriter OutputStream, ByteStream Buffer, PacketDirection Direction)
         {
             String UnkString = Buffer.ReadString(false);
-            Buffer.SkipBytes(88);
+            //Buffer.SkipBytes(88);
+            Buffer.SkipBytes(35);
+            UInt32 RecastTimer = Buffer.ReadUInt32();
+            Buffer.SkipBytes(49);
             String ItemName = Buffer.ReadString(false);
             String ItemLore = Buffer.ReadString(false);
             String ItemIDFile = Buffer.ReadString(false);
@@ -554,6 +557,7 @@ namespace EQExtractor2.Patches
 
             UInt32 ItemID = Buffer.ReadUInt32();
             OutputStream.WriteLine("ItemName: {0}, IDFile: {1}", ItemName, ItemIDFile);
+            OutputStream.WriteLine("Recast Time: {0:X}", RecastTimer);
 
             Buffer.SkipBytes(251);
 
