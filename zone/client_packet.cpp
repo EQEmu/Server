@@ -13515,6 +13515,9 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		mercTypeCount = tar->GetNumMercTypes(GetClientVersion());
 		mercCount = tar->GetNumMercs(GetClientVersion());
 
+		if(mercCount > MAX_MERC)
+		return;
+
 		std::list<MercType> mercTypeList = tar->GetMercTypesList(GetClientVersion());
 		std::list<MercData> mercDataList = tar->GetMercsList(GetClientVersion());
 
@@ -13530,15 +13533,14 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 			}
 		}
 
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct) + (mercTypeCount * sizeof(MercenaryGrade_Struct)) + (mercCount * sizeof(MercenaryListEntry_Struct)) + (StanceCount * sizeof(MercenaryStance_Struct)));
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct));
 		MercenaryMerchantList_Struct* mml = (MercenaryMerchantList_Struct*)outapp->pBuffer;
 
 		mml->MercTypeCount = mercTypeCount;
 		if(mercTypeCount > 0)
 		{
-			mml->MercGrades = new MercenaryGrade_Struct[mercTypeCount];
 			for(std::list<MercType>::iterator mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); mercTypeListItr++) {
-			mml->MercGrades[i].GradeCountEntry = mercTypeListItr->Type;	// DBStringID for Type
+			mml->MercGrades[i] = mercTypeListItr->Type;	// DBStringID for Type
 			i++;
 			}
 		}
@@ -13547,7 +13549,6 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		if(mercCount > 0)
 		{
 			i = 0;
-			mml->Mercs = new MercenaryListEntry_Struct[mercCount];
 			for(std::list<MercData>::iterator mercListIter = mercDataList.begin(); mercListIter != mercDataList.end(); mercListIter++)
 			{
 				mml->Mercs[i].MercID = mercListIter->MercTemplateID;
@@ -13576,7 +13577,6 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 				int stanceindex = 0;
 				if(mercStanceCount > 0)
 				{
-					mml->Mercs[i].Stances = new MercenaryStance_Struct[mercStanceCount];
 					list<MercStanceInfo>::iterator iter2 = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
 					while(iter2 != zone->merc_stance_list[mercListIter->MercTemplateID].end())
 					{

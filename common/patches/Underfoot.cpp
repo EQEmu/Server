@@ -1297,7 +1297,7 @@ ENCODE(OP_MercenaryDataResponse) {
 
 	for(r = 0; r < emu->MercTypeCount; r++)
 	{
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->MercGrades[r].GradeCountEntry);
+		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->MercGrades[r]);
 	}
 
 	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->MercCount);
