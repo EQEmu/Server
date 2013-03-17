@@ -2206,7 +2206,7 @@ uint8 ZoneDatabase::GetZoneWeather(uint32 zoneid, uint32 version) {
     MYSQL_RES *result;
     MYSQL_ROW row;
 	
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT weather FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneid), errbuf, &result))
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT weather FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneid, version), errbuf, &result))
 	{
 		safe_delete_array(query);
 		if (mysql_num_rows(result) > 0) {
