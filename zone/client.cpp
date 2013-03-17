@@ -1476,7 +1476,6 @@ void Client::SendSound(){//Makes a sound.
     memset(&x[64],0xffffffff,sizeof(uint32));
 	memcpy(outapp->pBuffer,x,outapp->size);
 	QueuePacket(outapp);
-	//DumpPacket(outapp);
 	safe_delete(outapp);
 
 }
@@ -7149,13 +7148,17 @@ void Client::SendMercPersonalInfo()
 			int stancecount = 0;
 			stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
 
-			if (mercCount > 0)
+			if(stancecount > MAX_MERC_STANCES || mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
 			{
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(MercenaryDataUpdate_Struct) + (mercTypeCount * sizeof(MercenaryData_Struct)) + stancecount * sizeof(MercenaryStance_Struct));
+				SendMercMerchantResponsePacket(0);
+				return;
+			}
+			if (mercCount > 0 && mercCount)
+			{
+				EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(MercenaryDataUpdate_Struct));
 				MercenaryDataUpdate_Struct* mdus = (MercenaryDataUpdate_Struct*)outapp->pBuffer;
 				mdus->MercStatus = 0;
 				mdus->MercCount = mercCount;
-				mdus->MercData = new MercenaryData_Struct[mercCount];
 				mdus->MercData[i].MercID = mercData->MercTemplateID;
 				mdus->MercData[i].MercType = mercData->MercType;
 				mdus->MercData[i].MercSubType = mercData->MercSubType;
@@ -7176,7 +7179,6 @@ void Client::SendMercPersonalInfo()
 				uint32 stanceindex = 0;
 				if (mdus->MercData[i].StanceCount != 0)
 				{
-					mdus->MercData[i].Stances = new MercenaryStance_Struct[mdus->MercData[i].StanceCount];
 					list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
 					while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
 					{
@@ -7188,7 +7190,6 @@ void Client::SendMercPersonalInfo()
 				}
 
 				mdus->MercData[i].MercUnk05 = 1;
-				//DumpPacket(outapp);
 				FastQueuePacket(&outapp);
 				return;
 			}
@@ -7199,7 +7200,16 @@ void Client::SendMercPersonalInfo()
 		int stancecount = 0;
 		stancecount += zone->merc_stance_list[GetMercInfo().MercTemplateID].size();
 
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct) + (mercTypeCount * sizeof(MercenaryGrade_Struct)) + (mercCount * sizeof(MercenaryListEntry_Struct)) + stancecount * sizeof(MercenaryStance_Struct)); //Packet sizes are handled by the encoder.
+		if(mercCount > MAX_MERC || mercTypeCount > MAX_MERC_GRADES)
+		{
+			if (GetClientVersion() == EQClientSoD)
+			{
+				SendMercMerchantResponsePacket(0);
+			}
+			return;
+		}
+
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct));
 		MercenaryMerchantList_Struct* mml = (MercenaryMerchantList_Struct*)outapp->pBuffer;
 		MercTemplate *mercData = &zone->merc_templates[GetMercInfo().MercTemplateID];
 
@@ -7209,13 +7219,12 @@ void Client::SendMercPersonalInfo()
 			if(mercTypeCount > 0)
 			{
 				mml->MercTypeCount = mercTypeCount; //We only should have one merc entry.
-				mml->MercGrades = new MercenaryGrade_Struct[mercTypeCount]; // DBStringID for Type
-				mml->MercGrades[0].GradeCountEntry = 1;
+				mml->MercGrades[i] = 1;
 			}
 			mml->MercCount = mercCount;
 			if(mercCount > 0)
 			{
-				mml->Mercs = new MercenaryListEntry_Struct[mercCount];
+
 				mml->Mercs[i].MercID = mercData->MercTemplateID;
 				mml->Mercs[i].MercType = mercData->MercType;
 				mml->Mercs[i].MercSubType = mercData->MercSubType;
@@ -7236,7 +7245,6 @@ void Client::SendMercPersonalInfo()
 				int stanceindex = 0;
 				if(mml->Mercs[i].StanceCount != 0)
 				{
-					mml->Mercs[i].Stances = new MercenaryStance_Struct[mml->Mercs[i].StanceCount];
 					list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
 					while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
 					{
@@ -7251,7 +7259,10 @@ void Client::SendMercPersonalInfo()
 			else
 			{
 				safe_delete(outapp);
-				SendMercMerchantResponsePacket(0);
+				if (GetClientVersion() == EQClientSoD)
+				{
+					SendMercMerchantResponsePacket(0);
+				}
 				return;
 			}
 			if (GetClientVersion() == EQClientSoD)
@@ -7262,7 +7273,10 @@ void Client::SendMercPersonalInfo()
 		else
 		{
 			safe_delete(outapp);
+			if (GetClientVersion() == EQClientSoD)
+			{
 			SendMercMerchantResponsePacket(0);
+			}
 			return;
 		}
 	}
@@ -7275,8 +7289,6 @@ void Client::SendClearMercInfo()
 	nmhs->MercStatus = -1;
 	nmhs->MercCount = 0;
 	nmhs->MercID = 1;
-
-	//DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 

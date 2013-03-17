@@ -27,6 +27,9 @@
 //#include "../common/item_struct.h"
 
 static const uint32 BUFF_COUNT = 25;
+static const uint32 MAX_MERC = 100;
+static const uint32 MAX_MERC_GRADES = 10;
+static const uint32 MAX_MERC_STANCES = 10;
 static const uint32 BLOCKED_BUFF_COUNT = 20;
 
 #include "eq_constants.h"
@@ -4871,10 +4874,27 @@ struct ItemPreview_Struct
 /*026*/	uint8	unknown026[54];
 };
 
-//Not an EQ packet, just a single int for the mercenary merchant structure.
-struct MercenaryGrade_Struct {
-uint32 GradeCountEntry;	
+// Used by specific packets
+struct MercenaryList_Struct {
+/*0000*/	uint32	MercID;				// ID unique to each type of mercenary (probably a DB id)
+/*0004*/	uint32	MercType;			// From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
+/*0008*/	uint32	MercSubType;		// From dbstr_us.txt - 330020105^23^Race: Guktan<br>Type: Healer<br>Confidence: High<br>Proficiency: Apprentice, Tier V...
+/*0012*/	uint32	PurchaseCost;		// Purchase Cost (in gold)
+/*0016*/	uint32	UpkeepCost;			// Upkeep Cost (in gold)
+/*0020*/	uint32	Status;				// Required Account Status (Free = 0, Silver = 1, Gold = 2) at merchants - Seen 0 (suspended) or 1 (unsuspended) on hired mercs ?
+/*0024*/	uint32	AltCurrencyCost;	// Alternate Currency Purchase Cost? (all seen costs show N/A Bayle Mark) - Seen 0
+/*0028*/	uint32	AltCurrencyUpkeep;	// Alternate Currency Upkeep Cost? (all seen costs show 1 Bayle Mark) - Seen 1
+/*0032*/	uint32	AltCurrencyType;	// Alternate Currency Type? - 19^17^Bayle Mark^0 - Seen 19
+/*0036*/	uint8	MercUnk01;			// Unknown (always see 0)
+/*0037*/	int32	TimeLeft;			// Unknown (always see -1 at merchant) - Seen 900000 (15 minutes in ms for newly hired merc)
+/*0041*/	uint32	MerchantSlot;		// Merchant Slot? Increments, but not always by 1 - May be for Merc Window Options (Seen 5, 36, 1 for active mercs)?
+/*0045*/	uint32	MercUnk02;			// Unknown (normally see 1, but sometimes 2 or 0)
+/*0049*/	uint32	StanceCount;		// Iterations of MercenaryStance_Struct - Normally 2 to 4 seen
+/*0053*/	int32	MercUnk03;			// Unknown (always 0 at merchant) - Seen on active merc: 93 a4 03 77, b8 ed 2f 26, 88 d5 8b c3, and 93 a4 ad 77
+/*0057*/	uint8	MercUnk04;			// Seen 1 
+/*0058*/	char	MercName[1];		// Null Terminated Mercenary Name (00 at merchants)
 };
+
 
 // Used by MercenaryMerchantList_Struct
 struct MercenaryListEntry_Struct {
@@ -4895,7 +4915,7 @@ struct MercenaryListEntry_Struct {
 /*0053*/	int32	MercUnk03;			// Unknown (always 0 at merchant) - Seen on active merc: 93 a4 03 77, b8 ed 2f 26, 88 d5 8b c3, and 93 a4 ad 77
 /*0057*/	uint8	MercUnk04;			// Seen 1 
 /*0058*/	char	MercName[1];		// Null Terminated Mercenary Name (00 at merchants)
-/*0000*/	MercenaryStance_Struct* Stances;	// Count Varies, but hard set to 5 max for now - From dbstr_us.txt - 1^24^Passive^0, 2^24^Balanced^0, etc (1 to 9 as of April 2012)
+/*0000*/	MercenaryStance_Struct Stances[MAX_MERC_STANCES];	// Count Varies, but hard set to 5 max for now - From dbstr_us.txt - 1^24^Passive^0, 2^24^Balanced^0, etc (1 to 9 as of April 2012)
 };
 
 // [OPCode: 0x27ac OP_MercenaryDataResponse] On Live as of April 2 2012 [Server->Client]
@@ -4903,9 +4923,9 @@ struct MercenaryListEntry_Struct {
 // Sent by the server when browsing the Mercenary Merchant
 struct MercenaryMerchantList_Struct {
 /*0000*/	uint32	MercTypeCount;			// Number of Merc Types to follow
-/*0004*/	MercenaryGrade_Struct* MercGrades;	// Count varies, but hard set to 3 max for now - From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
+/*0004*/	uint32  MercGrades[MAX_MERC_GRADES];	// Count varies, but hard set to 3 max for now - From dbstr_us.txt - Apprentice (330000100), Journeyman (330000200), Master (330000300)
 /*0016*/	uint32	MercCount;				// Number of MercenaryInfo_Struct to follow
-/*0020*/	MercenaryListEntry_Struct* Mercs;	// Data for individual mercenaries in the Merchant List
+/*0020*/	MercenaryListEntry_Struct Mercs[MAX_MERC];	// Data for individual mercenaries in the Merchant List
 };
 
 // [OPCode: 0x4dd9 OP_MercenaryDataRequest] On Live as of April 2 2012 [Client->Server]
@@ -4935,7 +4955,7 @@ struct MercenaryData_Struct {
 /*0053*/	int32	MercUnk03;			// Unknown (always 0 at merchant) - Seen on active merc: 93 a4 03 77, b8 ed 2f 26, 88 d5 8b c3, and 93 a4 ad 77
 /*0057*/	uint8	MercUnk04;			// Seen 1 
 /*0058*/	char	MercName[64];		// Null Terminated Mercenary Name (00 at merchants)
-/*0000*/	MercenaryStance_Struct* Stances;	// Count Varies, but hard set to 2 for now - From dbstr_us.txt - 1^24^Passive^0, 2^24^Balanced^0, etc (1 to 9 as of April 2012)
+/*0000*/	MercenaryStance_Struct Stances[MAX_MERC_STANCES];	// Count Varies, but hard set to 2 for now - From dbstr_us.txt - 1^24^Passive^0, 2^24^Balanced^0, etc (1 to 9 as of April 2012)
 /*0000*/	uint32	MercUnk05;			// Seen 1 - Extra Merc Data field that differs from MercenaryListEntry_Struct
 // MercUnk05 may be a field that is at the end of the packet only, even if multiple mercs are listed (haven't seen examples of multiple mercs owned at once)
 };
@@ -4947,7 +4967,7 @@ struct MercenaryData_Struct {
 struct MercenaryDataUpdate_Struct {
 /*0000*/	int32	MercStatus;					// Seen 0 with merc and -1 with no merc hired
 /*0004*/	uint32	MercCount;					// Seen 1 with 1 merc hired and 0 with no merc hired
-/*0008*/	MercenaryData_Struct* MercData;	// Data for individual mercenaries in the Merchant List
+/*0008*/	MercenaryData_Struct MercData[MAX_MERC];	// Data for individual mercenaries in the Merchant List
 };
 
 // [OPCode: 0x6537] On Live as of April 2 2012 [Server->Client]

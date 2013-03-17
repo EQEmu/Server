@@ -5886,24 +5886,18 @@ void Client::SendMercMerchantResponsePacket(int32 response_type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryHire, sizeof(MercenaryMerchantResponse_Struct));
 	MercenaryMerchantResponse_Struct* mmr = (MercenaryMerchantResponse_Struct*)outapp->pBuffer;
 	mmr->ResponseType = response_type;		// send specified response type
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
 void Client::SendMercenaryUnknownPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnknown1, 1);
 	outapp->WriteUInt8(type);
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
 void Client::SendMercenaryUnsuspendPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnsuspendResponse, 1);
 	outapp->WriteUInt8(type);
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
@@ -5911,8 +5905,6 @@ void Client::SendMercSuspendResponsePacket(uint32 suspended_time) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenarySuspendResponse, sizeof(SuspendMercenaryResponse_Struct));
 	SuspendMercenaryResponse_Struct* smr = (SuspendMercenaryResponse_Struct*)outapp->pBuffer;
 	smr->SuspendTime = suspended_time;		// Seen 0 (not suspended) or c9 c2 64 4f (suspended on Sat Mar 17 11:58:49 2012) - Unix Timestamp
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
@@ -5930,8 +5922,6 @@ void Client::SendMercTimerPacket(int32 entity_id, int32 merc_state, int32 suspen
 	mss->MercUnk01 = unk01; // Seen 180000 - 3 minutes in ms - Used for the unsuspend button refresh timer
 	mss->MercState = merc_state; // Seen 5 (normal) or 1 (suspended)
 	mss->SuspendedTime = suspended_time; // Seen 0 for not suspended or Unix Timestamp for suspended merc
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
