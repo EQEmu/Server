@@ -840,7 +840,6 @@ void ClientTaskState::EnableTask(int CharID, int TaskCount, int *TaskList) {
 	_log(TASKS__UPDATE, "New enabled task list ");
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
 		_log(TASKS__UPDATE, "%i ", EnabledTasks[i]);
-	fflush(stdout);
 
 	if(TasksEnabled.size() == 0 ) return;
 
@@ -901,7 +900,6 @@ void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
 	_log(TASKS__UPDATE, "New enabled task list ");
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
 		_log(TASKS__UPDATE, "%i ", EnabledTasks[i]);
-	fflush(stdout);
 
 	if(TasksDisabled.size() == 0) return;
 
@@ -2561,7 +2559,7 @@ void Client::SendTaskFailed(int TaskID, int TaskIndex) {
 	tac->unknown5 = 0; // 0 for task complete or failed.
 
 	_log(TASKS__UPDATE, "TaskFailed");
-	//DumpPacket(outapp); fflush(stdout);
+	
 	_pkt(TASKS__PACKETS, outapp);
 
 	QueuePacket(outapp);

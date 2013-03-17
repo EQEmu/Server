@@ -930,7 +930,6 @@ void Client::BulkSendInventoryItems() {
 			ptr += length;
 		}
 	}
-	//DumpPacket(outapp);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -1309,8 +1308,6 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	int32 *from_bucket = 0, *to_bucket = 0;
 	Mob* trader = trade->With();
 	
-	//DumpPacket(app);
-
 	// could just do a range, but this is clearer and explicit
 	if
 	(

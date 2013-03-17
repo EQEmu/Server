@@ -148,7 +148,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 
     EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 	MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
-	//DumpPacket(app);
+	
 	md->doorid = door_id;
 	/////////////////////////////////////////////////////////////////
 	//used_pawn: Locked doors! Rogue friendly too =)

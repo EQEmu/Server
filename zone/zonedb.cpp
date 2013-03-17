@@ -1748,7 +1748,7 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 		}
 	}
 
-	safe_delete(Query);
+	safe_delete_array(Query);
 
 	if(!errorMessage.empty() || (Result && affectedRows != 1)) {
 		if(owner && !errorMessage.empty())
@@ -1917,11 +1917,15 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 		else
 			TempCounter++;
 
+		safe_delete_array(Query);
+
 		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM mercs WHERE MercID = '%u'", merc_id), TempErrorMessageBuffer)) {
 			errorMessage = std::string(TempErrorMessageBuffer);
 		}
 		else
 			TempCounter++;
+
+		safe_delete_array(Query);
 
 		if(TempCounter == 2)
 			Result = true;
