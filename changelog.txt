@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/17/2013 ==
+Secrets: Fixed that pesky merc memleak.
+Secrets: Bit of code cleanup regarding mercs.
+
 == 03/15/2013 ==
 Derision: RoF: Added ENCODE for Resurrect_struct (Accepting a rez should now work).
 Derision: Fixed a couple of memory leaks in Rez code.
