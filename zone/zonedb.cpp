@@ -1884,15 +1884,14 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 		BuffsLoaded = true;
 	}
 
-	safe_delete(Query);
+	safe_delete_array(Query);
 	Query = 0;
 
 	if(errorMessage.empty() && BuffsLoaded) {
 		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer)) {
 			errorMessage = std::string(TempErrorMessageBuffer);
-			safe_delete(Query);
-			Query = 0;
 		}
+		safe_delete_array(Query);
 	}
 
 	if(!errorMessage.empty()) {

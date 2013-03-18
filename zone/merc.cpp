@@ -2310,7 +2310,10 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 							//we don't need spam of bots healing themselves
 							MakeAnyLenString(&gmsg, "Casting %s on %s.", spells[selectedMercSpell.spellid].name, tar->GetCleanName());
 							if(gmsg)
+							{
 								MercGroupSay(this, gmsg);
+								safe_delete_array(gmsg);
+							}
 						}
 					}
 
