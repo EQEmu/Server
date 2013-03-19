@@ -3150,6 +3150,7 @@ ENCODE(OP_VetRewardsAvaliable)
 	unsigned char * __emu_buffer = inapp->pBuffer;
 
 	uint32 count = ((*p)->Size() / sizeof(InternalVeteranReward));
+	*p = NULL;
 
 	EQApplicationPacket *outapp_create = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(structs::VeteranReward)*count));
 	uchar *old_data = __emu_buffer;
@@ -3174,7 +3175,7 @@ ENCODE(OP_VetRewardsAvaliable)
 	}
 	
 	dest->FastQueuePacket(&outapp_create);
-	delete[] __emu_buffer;
+	delete inapp;
 }
 
 ENCODE(OP_WhoAllResponse)
