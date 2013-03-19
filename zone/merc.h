@@ -90,7 +90,7 @@ public:
 	static int32 GetSpellRecastTimer(Merc *caster, uint16 timer_id);
 	static bool CheckSpellRecastTimers(Merc *caster, uint16 spellid);
 	static int32 GetDisciplineRecastTimer(Merc *caster, uint16 timer_id);
-	static bool CheckDisciplineRecastTimers(Merc *caster, uint16 spellid);
+	static bool CheckDisciplineRecastTimers(Merc *caster, uint16 spell_id, uint16 timer_id);
 	static int32 GetDisciplineRemainingTime(Merc *caster, uint16 timer_id);
 	static std::list<MercSpell> GetMercSpellsForSpellEffect(Merc* caster, int spellEffect);
 	static std::list<MercSpell> GetMercSpellsForSpellEffectAndTargetType(Merc* caster, int spellEffect, SpellTargetType targetType);
