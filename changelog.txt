@@ -1,15 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-<<<<<<< HEAD
+
 == 03/18/2013 ==
 Bad_Captain: Fixed zone crash due to merc focus effects & tribute.
 Bad_Captain: Fixed merc aggro issues when client in melee range & spell recast timers. 
 Bad_Captain: Added melee DPS spells/disciplines & support.
-=======
+
 == 03/17/2013 ==
 Secrets: Fixed that pesky merc memleak.
 Secrets: Bit of code cleanup regarding mercs.
->>>>>>> 5c9f2c0d50ca6920305999d9d3e1127be44238a4
 
 == 03/15/2013 ==
 Derision: RoF: Added ENCODE for Resurrect_struct (Accepting a rez should now work).
