@@ -258,8 +258,8 @@ Mob *HateList::GetTop(Mob *center)
 	int32 hate = -1;
 	
 	if (RuleB(Aggro,SmartAggroList)){
-		Mob* topClientInRange = NULL;
-		int32 hateClientInRange = -1;
+		Mob* topClientTypeInRange = NULL;
+		int32 hateClientTypeInRange = -1;
         int skipped_count = 0;
 
 		LinkedListIterator<tHateEntry*> iterator(list);
@@ -313,9 +313,9 @@ Mob *HateList::GetTop(Mob *center)
 						if(center->CombatRange(cur->ent)){
 							aggroMod += RuleI(Aggro, MeleeRangeAggroMod);
 
-							if(currentHate > hateClientInRange || cur->bFrenzy){
-								hateClientInRange = currentHate;
-								topClientInRange = cur->ent;
+							if(currentHate > hateClientTypeInRange || cur->bFrenzy){
+								hateClientTypeInRange = currentHate;
+								topClientTypeInRange = cur->ent;
 							}
 						}
 					}
@@ -351,18 +351,26 @@ Mob *HateList::GetTop(Mob *center)
 			iterator.Advance();
 		}
 
-		if(topClientInRange != NULL && top != NULL) {
+		if(topClientTypeInRange != NULL && top != NULL) {
 			bool isTopClientType = top->IsClient();
 #ifdef BOTS
 			if(!isTopClientType) {
 				if(top->IsBot()) {
 					isTopClientType = true;
-					topClientInRange = top;
+					topClientTypeInRange = top;
 				}
 			}
 #endif //BOTS
+
+            if(!isTopClientType) {
+				if(top->IsMerc()) {
+					isTopClientType = true;
+					topClientTypeInRange = top;
+				}
+			}
+
 			if(!isTopClientType)
-				return topClientInRange;
+				return topClientTypeInRange;
 
 			return top;
         }
