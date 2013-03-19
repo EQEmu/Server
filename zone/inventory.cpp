@@ -1980,7 +1980,6 @@ void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType 
 #if EQDEBUG >= 9
 		DumpPacket(outapp);
 #endif
-	//DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 

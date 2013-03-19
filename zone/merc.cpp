@@ -2300,7 +2300,10 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 							//we don't need spam of bots healing themselves
 							MakeAnyLenString(&gmsg, "Casting %s on %s.", spells[selectedMercSpell.spellid].name, tar->GetCleanName());
 							if(gmsg)
+							{
 								MercGroupSay(this, gmsg);
+								safe_delete_array(gmsg);
+							}
 						}
 					}
 
@@ -5644,7 +5647,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		if(!mercOwner->IsGrouped())
 		{
 			Group *g = new Group(mercOwner);
-			if(AddMercToGroup(this, g))
+			if(g && AddMercToGroup(this, g))
 			{
 				entity_list.AddGroup(g);
 				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
@@ -5654,6 +5657,15 @@ bool Merc::Unsuspend(bool setMaxStats) {
 				g->SaveGroupLeaderAA();
 
 				loaded = true;
+			}
+			else
+			{
+			if(MERC_DEBUG > 0)
+				mercOwner->Message(7, "Mercenary failed to join the group - Suspending");
+
+			Suspend();
+				safe_delete(g);
+				return false;
 			}
 		}
 		else if (AddMercToGroup(this, mercOwner->GetGroup()))
@@ -5894,24 +5906,18 @@ void Client::SendMercMerchantResponsePacket(int32 response_type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryHire, sizeof(MercenaryMerchantResponse_Struct));
 	MercenaryMerchantResponse_Struct* mmr = (MercenaryMerchantResponse_Struct*)outapp->pBuffer;
 	mmr->ResponseType = response_type;		// send specified response type
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
 void Client::SendMercenaryUnknownPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnknown1, 1);
 	outapp->WriteUInt8(type);
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
 void Client::SendMercenaryUnsuspendPacket(uint8 type) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryUnsuspendResponse, 1);
 	outapp->WriteUInt8(type);
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
@@ -5919,8 +5925,6 @@ void Client::SendMercSuspendResponsePacket(uint32 suspended_time) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenarySuspendResponse, sizeof(SuspendMercenaryResponse_Struct));
 	SuspendMercenaryResponse_Struct* smr = (SuspendMercenaryResponse_Struct*)outapp->pBuffer;
 	smr->SuspendTime = suspended_time;		// Seen 0 (not suspended) or c9 c2 64 4f (suspended on Sat Mar 17 11:58:49 2012) - Unix Timestamp
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 
@@ -5938,8 +5942,6 @@ void Client::SendMercTimerPacket(int32 entity_id, int32 merc_state, int32 suspen
 	mss->MercUnk01 = unk01; // Seen 180000 - 3 minutes in ms - Used for the unsuspend button refresh timer
 	mss->MercState = merc_state; // Seen 5 (normal) or 1 (suspended)
 	mss->SuspendedTime = suspended_time; // Seen 0 for not suspended or Unix Timestamp for suspended merc
-
-	DumpPacket(outapp);
 	FastQueuePacket(&outapp);
 }
 

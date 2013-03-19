@@ -3540,13 +3540,11 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(WearChange_Struct)) {
 		cout << "Wrong size: OP_WearChange, size=" << app->size << ", expected " << sizeof(WearChange_Struct) << endl;
-		//DumpPacket(app);
+		DumpPacket(app);
 		return;
 	}
 
 	WearChange_Struct* wc=(WearChange_Struct*)app->pBuffer;
-	//printf("Wearchange:\n");
-	//DumpPacket(app);
 	if(wc->spawn_id != GetID())
 		return;
 
@@ -3597,7 +3595,7 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Who_All_Struct)) {
 		cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << endl;
-		//DumpPacket(app);
+		DumpPacket(app);
 		return;
 	}
 	Who_All_Struct* whoall = (Who_All_Struct*) app->pBuffer;
@@ -3696,7 +3694,6 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
 	if (entity == 0) {
-		//DumpPacket(app);
 		Message(13, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
 		if(GetClientVersion() >= EQClientSoD)
 			Corpse::SendEndLootErrorPacket(this);
@@ -7388,27 +7385,6 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 	memcpy(out->message, name, len_name);
 	memcpy(&out->message[len_name], in->message, len_msg);
 
-	//cout << "######### Outgoing emote packet" << endl;
-	//DumpPacket(outapp);
-
-	/*
-	if (target && target->IsClient()) {
-		entity_list.QueueCloseClients(this, outapp, false, 100, target);
-
-		cptr = outapp->pBuffer + 2;
-
-                        // not sure if live does this or not.  thought it was a nice feature, but would take a lot to
-		// clean up grammatical and other errors.  Maybe with a regex parser...
-		replacestr((char *)cptr, target->GetName(), "you");
-		replacestr((char *)cptr, " he", " you");
-		replacestr((char *)cptr, " she", " you");
-		replacestr((char *)cptr, " him", " you");
-		replacestr((char *)cptr, " her", " you");
-		target->CastToClient()->QueuePacket(outapp);
-
-	}
-	else
-	*/
 	entity_list.QueueCloseClients(this, outapp, true, 100,0,true,FilterSocials);
 
 	safe_delete(outapp);
@@ -7429,7 +7405,6 @@ void Client::Handle_OP_Animation(const EQApplicationPacket *app)
 
 	//might verify spawn ID, but it wouldent affect anything
 
-	// an emote (i.e., waving arm to say hello)
 	DoAnim(s->action, s->value);
 
 	return;
@@ -7853,7 +7828,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 		if(Buyer) {
 			Trader_EndTrader();
 			Message(13, "You cannot be a Trader and Buyer at the same time.");
-			DumpPacket(app);
 			return;
 		}
 
@@ -7892,7 +7866,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 
 			if(!TradeItemsValid) {
 				Trader_EndTrader();
-				DumpPacket(app);
 				return;
 			}
 
@@ -7948,7 +7921,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 		return;
 	}
 
-	DumpPacket(app);
 	return;
 }
 
@@ -8127,8 +8099,6 @@ void Client::Handle_OP_ClientError(const EQApplicationPacket *app)
 	ClientError_Struct* error = (ClientError_Struct*)app->pBuffer;
 	LogFile->write(EQEMuLog::Error, "Client error: %s", error->character_name);
 	LogFile->write(EQEMuLog::Error, "Error message:%s", error->message);
-	//if (EQDEBUG>=5)
-	//	DumpPacket(app);
 	return;
 }
 
@@ -13495,8 +13465,6 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		//send info about your current merc(s)
 	}
 
-	DumpPacket(app);
-
 	if(!RuleB(Mercs, AllowMercs)) {
 		return;
 	}
@@ -13514,24 +13482,35 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 			return;
 		}
 
-		MercenaryMerchantList_Struct* mml = new MercenaryMerchantList_Struct;
-
 		mercTypeCount = tar->GetNumMercTypes(GetClientVersion());
 		mercCount = tar->GetNumMercs(GetClientVersion());
 
+		if(mercCount > MAX_MERC)
+		return;
 
 		std::list<MercType> mercTypeList = tar->GetMercTypesList(GetClientVersion());
 		std::list<MercData> mercDataList = tar->GetMercsList(GetClientVersion());
 
-		mml->MercTypeCount = mercTypeCount;
 		int i = 0;
+		int StanceCount = 0;
 
+		for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); mercListItr++)
+		{
+			list<MercStanceInfo>::iterator siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin();
+			for(siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin(); siter != zone->merc_stance_list[mercListItr->MercTemplateID].end(); siter++)
+			{
+				StanceCount++;
+			}
+		}
 
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct));
+		MercenaryMerchantList_Struct* mml = (MercenaryMerchantList_Struct*)outapp->pBuffer;
+
+		mml->MercTypeCount = mercTypeCount;
 		if(mercTypeCount > 0)
 		{
-			mml->MercGrades = new MercenaryGrade_Struct[mercTypeCount];
 			for(std::list<MercType>::iterator mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); mercTypeListItr++) {
-			mml->MercGrades[i].GradeCountEntry = mercTypeListItr->Type;	// DBStringID for Type
+			mml->MercGrades[i] = mercTypeListItr->Type;	// DBStringID for Type
 			i++;
 			}
 		}
@@ -13539,50 +13518,48 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 
 		if(mercCount > 0)
 		{
-			mml->Mercs = new MercenaryListEntry_Struct[mercCount];
 			i = 0;
-			for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); mercListItr++)
+			for(std::list<MercData>::iterator mercListIter = mercDataList.begin(); mercListIter != mercDataList.end(); mercListIter++)
 			{
-				mml->Mercs[i].MercID = mercListItr->MercTemplateID;
-				mml->Mercs[i].MercType = mercListItr->MercType;
-				mml->Mercs[i].MercSubType = mercListItr->MercSubType;
-				mml->Mercs[i].PurchaseCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercListItr->MercTemplateID, GetLevel(), 0): 0;
-				mml->Mercs[i].UpkeepCost = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercListItr->MercTemplateID, GetLevel(), 0): 0;
+				mml->Mercs[i].MercID = mercListIter->MercTemplateID;
+				mml->Mercs[i].MercType = mercListIter->MercType;
+				mml->Mercs[i].MercSubType = mercListIter->MercSubType;
+				mml->Mercs[i].PurchaseCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercListIter->MercTemplateID, GetLevel(), 0): 0;
+				mml->Mercs[i].UpkeepCost = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercListIter->MercTemplateID, GetLevel(), 0): 0;
 				mml->Mercs[i].Status = 0;
-				mml->Mercs[i].AltCurrencyCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercListItr->MercTemplateID, GetLevel(), altCurrentType): 0;
-				mml->Mercs[i].AltCurrencyUpkeep = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercListItr->MercTemplateID, GetLevel(), altCurrentType): 0;
+				mml->Mercs[i].AltCurrencyCost = RuleB(Mercs, ChargeMercPurchaseCost) ? Merc::CalcPurchaseCost(mercListIter->MercTemplateID, GetLevel(), altCurrentType): 0;
+				mml->Mercs[i].AltCurrencyUpkeep = RuleB(Mercs, ChargeMercUpkeepCost) ? Merc::CalcUpkeepCost(mercListIter->MercTemplateID, GetLevel(), altCurrentType): 0;
 				mml->Mercs[i].AltCurrencyType = altCurrentType;
 				mml->Mercs[i].MercUnk01 = 0;
 				mml->Mercs[i].TimeLeft = -1;
 				mml->Mercs[i].MerchantSlot = i + 1;
 				mml->Mercs[i].MercUnk02 = 1;
-				mml->Mercs[i].StanceCount = zone->merc_stance_list[mercListItr->MercTemplateID].size();
+				int mercStanceCount = 0;
+				list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
+				for(iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin(); iter != zone->merc_stance_list[mercListIter->MercTemplateID].end(); iter++)
+				{
+				mercStanceCount++;
+				}
+				mml->Mercs[i].StanceCount = mercStanceCount;
 				mml->Mercs[i].MercUnk03 = 519044964;
 				mml->Mercs[i].MercUnk04 = 1;
 				//mml->Mercs[i].MercName;
 				int stanceindex = 0;
-				if(mml->Mercs[i].StanceCount != 0)
+				if(mercStanceCount > 0)
 				{
-					mml->Mercs[i].Stances = new MercenaryStance_Struct[mml->Mercs[i].StanceCount];
-					list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercListItr->MercTemplateID].begin();
-					while(iter != zone->merc_stance_list[mercListItr->MercTemplateID].end())
+					list<MercStanceInfo>::iterator iter2 = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
+					while(iter2 != zone->merc_stance_list[mercListIter->MercTemplateID].end())
 					{
 						mml->Mercs[i].Stances[stanceindex].StanceIndex = stanceindex;
-						mml->Mercs[i].Stances[stanceindex].Stance = (iter->StanceID);
+						mml->Mercs[i].Stances[stanceindex].Stance = (iter2->StanceID);
 						stanceindex++;
-						iter++;
+						iter2++;
 					}
 				}
 				i++;
 			}
 		}
-
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, 1); //Packet sizes are handled by the encoder.
-		outapp->pBuffer = (unsigned char*)mml;
-	//	DumpPacket(outapp);
 		FastQueuePacket(&outapp);
-
 	}
 }
 
@@ -13603,8 +13580,6 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 	uint32 merchant_id = mmrq->MercMerchantID;
 	uint32 merc_unk1 = mmrq->MercUnk01;
 	uint32 merc_unk2 = mmrq->MercUnk02;
-
-	DumpPacket(app);
 
 	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Template ID (%i), Merchant ID (%i), Unknown1 (%i), Unknown2 (%i)", merc_template_id, merchant_id, merc_unk1, merc_unk2);
@@ -13667,8 +13642,6 @@ void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app)
 	SuspendMercenary_Struct* sm = (SuspendMercenary_Struct*) app->pBuffer;
 	uint32 merc_suspend = sm->SuspendMerc;	// Seen 30 for suspending or unsuspending
 
-	DumpPacket(app);
-
 	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Suspend ( %i ) received.", merc_suspend);
 
@@ -13692,8 +13665,6 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 	MercenaryCommand_Struct* mc = (MercenaryCommand_Struct*) app->pBuffer;
 	uint32 merc_command = mc->MercCommand;	// Seen 0 (zone in with no merc or suspended), 1 (dismiss merc), 5 (normal state), 20 (unknown), 36 (zone in with merc)
 	int32 option = mc->Option;	// Seen -1 (zone in with no merc), 0 (setting to passive stance), 1 (normal or setting to balanced stance)
-
-	DumpPacket(app);
 
 	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Command %i, Option %i received.", merc_command, option);
@@ -13747,8 +13718,6 @@ void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket *app
 		return;
 	}
 
-	DumpPacket(app);
-
 	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Data Update Request Received.");
 
@@ -13769,8 +13738,6 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 		return;
 	}
 
-	DumpPacket(app);
-
 	uint8 Command = 0;
 	if(app->size > 0)
 	{
@@ -13789,7 +13756,7 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 			merc->Dismiss();
 	}
 
-	// Unsure if there is a server response to this packet
+	SendMercMerchantResponsePacket(10);
 
 }
 
@@ -13803,8 +13770,6 @@ void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
-
-	DumpPacket(app);
 
 	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Timer Request received.");
