@@ -37,9 +37,11 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	_baseFR = d->FR;
 	_basePR = d->PR;
 	_baseCorrup = d->Corrup;
+	_OwnerClientVersion = EQClientTitanium;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
 	RestRegenEndurance = 0;
+	cur_end = 0;
 
 	_medding = false;
 	_suspended = false;
@@ -2749,7 +2751,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 		int16 focus_max_real = 0;
 
 		//item focus
-		for(int x=0; x<=MAX_WORN_INVENTORY; x++)
+		for(int x  =0; x < MAX_WORN_INVENTORY; ++x)
 		{
 			TempItem = NULL;
 			if (equipment[x] == 0)
