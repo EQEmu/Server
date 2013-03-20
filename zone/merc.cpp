@@ -5660,8 +5660,6 @@ bool Merc::Unsuspend(bool setMaxStats) {
 			if(g->GetID() == 0) {
 				delete g;
 				g = NULL;
-				Message(13, "Unable to get new group id. Cannot create group.");
-				mercOwner->Message(13, "Unable to get new group id. Cannot create group.");
 				return false;
 			}
 
