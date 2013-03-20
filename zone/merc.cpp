@@ -37,9 +37,11 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	_baseFR = d->FR;
 	_basePR = d->PR;
 	_baseCorrup = d->Corrup;
+	_OwnerClientVersion = EQClientTitanium;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
 	RestRegenEndurance = 0;
+	cur_end = 0;
 
 	_medding = false;
 	_suspended = false;
@@ -352,13 +354,6 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 			AddItemBonuses(inst, newbon);
 	}*/
 
-	//tribute items
-	/*for (i = 0; i < MAX_PLAYER_TRIBUTES; i++) {
-		const ItemInst* inst = m_inv[TRIBUTE_SLOT_START + i];
-		if(inst == 0)
-			continue;
-		AddItemBonuses(inst, newbon, false, true);
-	}*/
 	// Caps
 	if(newbon->HPRegen > CalcHPRegenCap())
 		newbon->HPRegen = CalcHPRegenCap();
@@ -1867,10 +1862,6 @@ void Merc::AI_Process() {
 			//TODO: Implement passive stances.
 			//if(GetStance() != MercStancePassive) {
 			if(!AI_IdleCastCheck() && !IsCasting()) {
-                if(GetClass() == MELEEDPS && !hidden) {
-                    TryHide();
-                }
-
                 if(GetArchetype() == ARCHETYPE_CASTER) {
                     MercMeditate(true);
                 }
@@ -2030,7 +2021,9 @@ bool Merc::AI_IdleCastCheck() {
 				result = true;
 				break;
 			case MELEEDPS:
-				failedToCast = true;
+				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Buff)) {
+                    failedToCast = true;
+				}
 				break;
 			case CASTERDPS:
 				failedToCast = true;
@@ -2148,7 +2141,6 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 	}
 	else {  //handle spell recast and recast timers
 		SetSpellTimeCanCast(mercSpell.spellid, spells[spellid].recast_time);
-		//mercSpell.time_cancast = Timer::GetCurrentTime() + spells[spellid].recast_time;
 
 		if(spells[spellid].EndurTimerIndex > 0) {
 			SetSpellRecastTimer(spells[spellid].EndurTimerIndex, spellid, spells[spellid].recast_time);
@@ -2312,7 +2304,10 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 							//we don't need spam of bots healing themselves
 							MakeAnyLenString(&gmsg, "Casting %s on %s.", spells[selectedMercSpell.spellid].name, tar->GetCleanName());
 							if(gmsg)
+							{
 								MercGroupSay(this, gmsg);
+								safe_delete_array(gmsg);
+							}
 						}
 					}
 
@@ -2323,7 +2318,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 				}
 				case SpellType_Buff: {
 
-					if(GetManaRatio() < 50) {
+					if(GetClass() == HEALER && GetManaRatio() < 50) {
 						return false;			//mercs buff when Mana > 50%
 					}
 
@@ -2333,52 +2328,87 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 						MercSpell selectedMercSpell = *itr;
 
 						if(!((spells[selectedMercSpell.spellid].targettype == ST_Target || spells[selectedMercSpell.spellid].targettype == ST_Pet ||
-							spells[selectedMercSpell.spellid].targettype == ST_Group || spells[selectedMercSpell.spellid].targettype == ST_GroupTeleport ))) {
+							spells[selectedMercSpell.spellid].targettype == ST_Group || spells[selectedMercSpell.spellid].targettype == ST_GroupTeleport ||
+							spells[selectedMercSpell.spellid].targettype == ST_Self))) {
 								continue;
 						}
 
-						for( int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-							if(g->members[i]) {
-								int32 oDontDoAgainBefore;
-								Mob* tar = g->members[i];
+						if(spells[selectedMercSpell.spellid].targettype == ST_Self) {
+							if( !this->IsImmuneToSpell(selectedMercSpell.spellid, this)
+								&& (this->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
 
-								if( !tar->IsImmuneToSpell(selectedMercSpell.spellid, this)
-									&& (tar->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
-
-									if( tar->GetArchetype() == ARCHETYPE_MELEE && IsEffectInSpell(selectedMercSpell.spellid, SE_IncreaseSpellHaste)) {
-										continue;
-									}
-
-									uint32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
-
-									if(AIDoSpellCast(selectedMercSpell.spellid, tar, -1, &TempDontBuffMeBeforeTime)) {
-										if(TempDontBuffMeBeforeTime != tar->DontBuffMeBefore())
-											tar->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
-
-										castedSpell =  true;
-									}
+								if( this->GetArchetype() == ARCHETYPE_MELEE && IsEffectInSpell(selectedMercSpell.spellid, SE_IncreaseSpellHaste)) {
+									continue;
 								}
 
-								if(!castedSpell && tar->GetPet()) {
+								uint32 TempDontBuffMeBeforeTime = this->DontBuffMeBefore();
 
-									//don't cast group spells on pets
-									if(IsGroupSpell(selectedMercSpell.spellid)
-											|| spells[selectedMercSpell.spellid].targettype == ST_Group
-											|| spells[selectedMercSpell.spellid].targettype == ST_GroupTeleport ) {
-										continue;
+								if(selectedMercSpell.spellid > 0) {
+									if(isDiscipline) {
+										castedSpell = UseDiscipline(selectedMercSpell.spellid, GetID());
 									}
+									else {
+										castedSpell = AIDoSpellCast(selectedMercSpell.spellid, this, -1, &TempDontBuffMeBeforeTime);
 
-									if(!tar->GetPet()->IsImmuneToSpell(selectedMercSpell.spellid, this)
-										&& (tar->GetPet()->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
+										if(TempDontBuffMeBeforeTime != this->DontBuffMeBefore())
+											this->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
+									}
+								}
+							}
+						}
+						else {
+							for( int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+								if(g->members[i]) {
+									int32 oDontDoAgainBefore;
+									Mob* tar = g->members[i];
+
+									if( !tar->IsImmuneToSpell(selectedMercSpell.spellid, this)
+										&& (tar->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
+
+										if( tar->GetArchetype() == ARCHETYPE_MELEE && IsEffectInSpell(selectedMercSpell.spellid, SE_IncreaseSpellHaste)) {
+											continue;
+										}
 
 										uint32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
 
-										if(AIDoSpellCast(selectedMercSpell.spellid, tar->GetPet(), -1, &TempDontBuffMeBeforeTime)) {
-											if(TempDontBuffMeBeforeTime != tar->DontBuffMeBefore()) {
-												tar->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
+										if(selectedMercSpell.spellid > 0) {
+											if(isDiscipline) {
+												castedSpell = UseDiscipline(selectedMercSpell.spellid, GetID());
 											}
+											else {
+												castedSpell = AIDoSpellCast(selectedMercSpell.spellid, this, -1, &TempDontBuffMeBeforeTime);
 
-											castedSpell =  true;
+												if(TempDontBuffMeBeforeTime != this->DontBuffMeBefore())
+													this->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
+											}
+										}
+									}
+
+									if(!castedSpell && tar->GetPet()) {
+
+										//don't cast group spells on pets
+										if(IsGroupSpell(selectedMercSpell.spellid)
+												|| spells[selectedMercSpell.spellid].targettype == ST_Group
+												|| spells[selectedMercSpell.spellid].targettype == ST_GroupTeleport ) {
+											continue;
+										}
+
+										if(!tar->GetPet()->IsImmuneToSpell(selectedMercSpell.spellid, this)
+											&& (tar->GetPet()->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
+
+											uint32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
+
+											if(selectedMercSpell.spellid > 0) {
+												if(isDiscipline) {
+													castedSpell = UseDiscipline(selectedMercSpell.spellid, GetID());
+												}
+												else {
+													castedSpell = AIDoSpellCast(selectedMercSpell.spellid, this, -1, &TempDontBuffMeBeforeTime);
+
+													if(TempDontBuffMeBeforeTime != this->DontBuffMeBefore())
+														this->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
+												}
+											}
 										}
 									}
 								}
@@ -2452,6 +2482,37 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 					break;
 				}
 				case SpellType_InCombatBuff: {
+					std::list<MercSpell> buffSpellList = GetMercSpellsBySpellType(this, SpellType_InCombatBuff);
+					Mob* tar = this;
+
+					for(std::list<MercSpell>::iterator itr = buffSpellList.begin(); itr != buffSpellList.end(); itr++) {
+						MercSpell selectedMercSpell = *itr;
+
+						if(!(spells[selectedMercSpell.spellid].targettype == ST_Self)) {
+							continue;
+						}
+
+						if(spells[selectedMercSpell.spellid].skill == BACKSTAB && spells[selectedMercSpell.spellid].targettype == ST_Self) {
+							if(!hidden) {
+								continue;
+							}
+						}
+
+						if( !tar->IsImmuneToSpell(selectedMercSpell.spellid, this)
+									&& (tar->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
+
+							uint32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
+
+							if(selectedMercSpell.spellid > 0) {
+								if(isDiscipline) {
+									castedSpell = UseDiscipline(selectedMercSpell.spellid, GetID());
+								}
+								else {
+									castedSpell = AIDoSpellCast(selectedMercSpell.spellid, this, -1);
+								}
+							}
+						}
+					}
 					break;
 				}
 				case SpellType_Cure: {
@@ -2692,7 +2753,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 		int16 focus_max_real = 0;
 
 		//item focus
-		for(int x=0; x<=MAX_WORN_INVENTORY; x++)
+		for(int x  =0; x < MAX_WORN_INVENTORY; ++x)
 		{
 			TempItem = NULL;
 			if (equipment[x] == 0)
@@ -2718,42 +2779,6 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 						UsedItem = TempItem;
 						UsedFocusID = TempItem->Focus.Effect;
 					} else if (Total < 0 && Total < realTotal) {
-						realTotal = Total;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					}
-				}
-			}
-		}
-
-		//Tribute Focus
-		for(int x = TRIBUTE_SLOT_START; x < (TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); ++x)
-		{
-			TempItem = NULL;
-			if (equipment[x] == 0)
-				continue;
-			TempItem = database.GetItem(equipment[x]);
-			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
-				if(rand_effectiveness) {
-					focus_max = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id, true);
-					if (focus_max > 0 && focus_max_real >= 0 && focus_max > focus_max_real) {
-						focus_max_real = focus_max;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					} else if (focus_max < 0 && focus_max < focus_max_real) {
-						focus_max_real = focus_max;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					}
-				}
-				else {
-					Total = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
-					if (Total > 0 && realTotal >= 0 && Total > realTotal) {
-						realTotal = Total;
-						UsedItem = TempItem;
-						UsedFocusID = TempItem->Focus.Effect;
-					}
-					else if (Total < 0 && Total < realTotal) {
 						realTotal = Total;
 						UsedItem = TempItem;
 						UsedFocusID = TempItem->Focus.Effect;
@@ -3168,6 +3193,7 @@ int8 Merc::GetChanceToCastBySpellType(int16 spellType) {
                     break;
                 }
                 case MELEEDPS:{
+					chance = 50;
                     break;
                 }
                 case CASTERDPS:{
@@ -3206,9 +3232,11 @@ int8 Merc::GetChanceToCastBySpellType(int16 spellType) {
 
 bool Merc::CheckStance(int16 stance) {
 
+    //checks of current stance matches stances listed as valid for spell in database
+    //stance = 0 for all stances, stance # for only that stance & -stance# for all but that stance
 	if(stance == 0
 		|| (stance > 0 && stance == GetStance())
-		|| (stance < 0 && abs(stance) == GetStance())) {
+		|| (stance < 0 && abs(stance) != GetStance())) {
 		return true;
 	}
 
@@ -3303,7 +3331,7 @@ MercSpell Merc::GetMercSpellBySpellID(Merc* caster, uint16 spellid) {
 				continue;
 			}
 
-			if((mercSpellList[i].spellid = spellid)
+			if((mercSpellList[i].spellid == spellid)
 				&& caster->CheckStance(mercSpellList[i].stance)) {
 				result.spellid = mercSpellList[i].spellid;
 				result.stance = mercSpellList[i].stance;
@@ -4298,15 +4326,20 @@ bool Merc::UseDiscipline(int32 spell_id, int32 target) {
 		return(false);
 	}
 
-	//can we use the spell?
 	const SPDat_Spell_Struct &spell = spells[spell_id];
-	int8 level_to_use = spell.classes[GetClass() - 1];
-	if(level_to_use == 255) {
-		return(false);
-	}
 
-	if(level_to_use > GetLevel()) {
-		return(false);
+	if(spell.recast_time > 0)
+	{
+		if(CheckDisciplineRecastTimers(this, spell_id, spells[spell_id].EndurTimerIndex)) {
+			if(spells[spell_id].EndurTimerIndex > 0) {
+				SetDisciplineRecastTimer(spells[spell_id].EndurTimerIndex, spell_id, spell.recast_time);
+			}
+
+			SetSpellTimeCanCast(spell_id, spells[spell_id].recast_time);
+		}
+		else {
+			return(false);
+		}
 	}
 
 	if(GetEndurance() > spell.EndurCost) {
@@ -4314,18 +4347,6 @@ bool Merc::UseDiscipline(int32 spell_id, int32 target) {
 	} else {
 		//too fatigued to use this skill right now.
 		return(false);
-	}
-
-	if(spell.recast_time > 0)
-	{
-		if(CheckDisciplineRecastTimers(this, spells[spell_id].EndurTimerIndex)) {
-			if(spells[spell_id].EndurTimerIndex > 0) {
-				SetDisciplineRecastTimer(spells[spell_id].EndurTimerIndex, spell_id, spell.recast_time);
-			}
-		}
-		else {
-			return(false);
-		}
 	}
 
 	if(IsCasting())
@@ -4400,13 +4421,14 @@ int32 Merc::GetDisciplineRemainingTime(Merc *caster, uint16 timer_id) {
 	return result;
 }
 
-bool Merc::CheckDisciplineRecastTimers(Merc *caster, uint16 spell_id) {
+bool Merc::CheckDisciplineRecastTimers(Merc *caster, uint16 spell_id, uint16 timer_id) {
 	if(caster) {
 		MercSpell mercSpell = GetMercSpellBySpellID(caster, spell_id);
 		if(mercSpell.spellid > 0 && mercSpell.time_cancast < Timer::GetCurrentTime()) {  //checks spell recast
-			if(GetDisciplineRecastTimer(caster, spells[spell_id].EndurTimerIndex) < Timer::GetCurrentTime()) {   //checks for spells on the same timer
-				return true;    //can cast spell
+			if(timer_id > 0 && !(GetDisciplineRecastTimer(caster, timer_id) < Timer::GetCurrentTime())) {   //checks for spells on the same timer
+				return false;    //can't cast spell
 			}
+			return true;
 		}
 	}
 	return false;
@@ -5378,7 +5400,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 	//check for sufficient funds
 	if(RuleB(Mercs, ChargeMercPurchaseCost)) {
 		uint32 cost = Merc::CalcPurchaseCost(template_id, GetLevel()) * 100; 	// Cost is in gold
-		if(!HasMoney(cost)) {
+		if(cost > 0 && !HasMoney(cost)) {
 			SendMercMerchantResponsePacket(1);
 			result = false;
 		}
@@ -5416,7 +5438,7 @@ bool Client::CheckCanRetainMerc(uint32 upkeep) {
 	//check for sufficient funds
 	if(RuleB(Mercs, ChargeMercPurchaseCost)) {
 		if(merc) {
-			if(!HasMoney(upkeep * 100)) {
+			if(upkeep > 0 && !HasMoney(upkeep * 100)) {
 				SendMercMerchantResponsePacket(1);
 				result = false;
 			}

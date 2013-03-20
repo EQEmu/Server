@@ -1884,15 +1884,13 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 		BuffsLoaded = true;
 	}
 
-	safe_delete(Query);
-	Query = 0;
+	safe_delete_array(Query);
 
 	if(errorMessage.empty() && BuffsLoaded) {
 		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer)) {
 			errorMessage = std::string(TempErrorMessageBuffer);
-			safe_delete(Query);
-			Query = 0;
 		}
+		safe_delete_array(Query);
 	}
 
 	if(!errorMessage.empty()) {
@@ -2206,7 +2204,7 @@ uint8 ZoneDatabase::GetZoneWeather(uint32 zoneid, uint32 version) {
     MYSQL_RES *result;
     MYSQL_ROW row;
 	
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT weather FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneid), errbuf, &result))
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT weather FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneid, version), errbuf, &result))
 	{
 		safe_delete_array(query);
 		if (mysql_num_rows(result) > 0) {

@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 03/18/2013 ==
+Bad_Captain: Fixed zone crash due to merc focus effects & tribute.
+Bad_Captain: Fixed merc aggro issues when client in melee range & spell recast timers. 
+Bad_Captain: Added melee DPS spells/disciplines & support.
+
 == 03/17/2013 ==
 Secrets: Fixed that pesky merc memleak.
 Secrets: Bit of code cleanup regarding mercs.
