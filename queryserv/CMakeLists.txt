@@ -19,7 +19,7 @@ ADD_EXECUTABLE(queryserv ${qserv_sources} ${qserv_headers})
 
 ADD_DEFINITIONS(-DQSERV)
 
-TARGET_LINK_LIBRARIES(queryserv Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE})
+TARGET_LINK_LIBRARIES(queryserv Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
 IF(MSVC)
 	

@@ -3540,7 +3540,6 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(WearChange_Struct)) {
 		cout << "Wrong size: OP_WearChange, size=" << app->size << ", expected " << sizeof(WearChange_Struct) << endl;
-		DumpPacket(app);
 		return;
 	}
 
@@ -3595,7 +3594,6 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Who_All_Struct)) {
 		cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << endl;
-		DumpPacket(app);
 		return;
 	}
 	Who_All_Struct* whoall = (Who_All_Struct*) app->pBuffer;
@@ -7385,6 +7383,24 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 	memcpy(out->message, name, len_name);
 	memcpy(&out->message[len_name], in->message, len_msg);
 
+	/*
+	if (target && target->IsClient()) {
+		entity_list.QueueCloseClients(this, outapp, false, 100, target);
+
+		cptr = outapp->pBuffer + 2;
+
+                        // not sure if live does this or not.  thought it was a nice feature, but would take a lot to
+		// clean up grammatical and other errors.  Maybe with a regex parser...
+		replacestr((char *)cptr, target->GetName(), "you");
+		replacestr((char *)cptr, " he", " you");
+		replacestr((char *)cptr, " she", " you");
+		replacestr((char *)cptr, " him", " you");
+		replacestr((char *)cptr, " her", " you");
+		target->CastToClient()->QueuePacket(outapp);
+
+	}
+	else
+	*/
 	entity_list.QueueCloseClients(this, outapp, true, 100,0,true,FilterSocials);
 
 	safe_delete(outapp);
@@ -13580,6 +13596,7 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 	uint32 merchant_id = mmrq->MercMerchantID;
 	uint32 merc_unk1 = mmrq->MercUnk01;
 	uint32 merc_unk2 = mmrq->MercUnk02;
+
 	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Template ID (%i), Merchant ID (%i), Unknown1 (%i), Unknown2 (%i)", merc_template_id, merchant_id, merc_unk1, merc_unk2);
 
@@ -13641,7 +13658,6 @@ void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app)
 	SuspendMercenary_Struct* sm = (SuspendMercenary_Struct*) app->pBuffer;
 	uint32 merc_suspend = sm->SuspendMerc;	// Seen 30 for suspending or unsuspending
 
-
 	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Suspend ( %i ) received.", merc_suspend);
 
@@ -13666,7 +13682,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 	uint32 merc_command = mc->MercCommand;	// Seen 0 (zone in with no merc or suspended), 1 (dismiss merc), 5 (normal state), 20 (unknown), 36 (zone in with merc)
 	int32 option = mc->Option;	// Seen -1 (zone in with no merc), 0 (setting to passive stance), 1 (normal or setting to balanced stance)
 
-		if(MERC_DEBUG > 0)
+	if(MERC_DEBUG > 0)
 		Message(7, "Mercenary Debug: Command %i, Option %i received.", merc_command, option);
 
 	if(!RuleB(Mercs, AllowMercs))

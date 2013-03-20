@@ -20,6 +20,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 #include "../common/features.h"
 #include <iostream>
 using namespace std;
+#include <vld.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

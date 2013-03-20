@@ -248,6 +248,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	npc_aggro = d->npc_aggro;
 
+	if(!IsMerc()) //memleak fix, this really shouldn't be here
 	AI_Start();
 
 	d_meele_texture1 = d->d_meele_texture1;
