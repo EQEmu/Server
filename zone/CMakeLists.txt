@@ -155,82 +155,12 @@ ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 
 ADD_DEFINITIONS(-DZONE)
 
-TARGET_LINK_LIBRARIES(zone Common ${PERL_LIBRARY} debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY} ${VLD_LIBRARY_VLD})
+TARGET_LINK_LIBRARIES(zone Common ${PERL_LIBRARY} debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
 IF(MSVC)
     SET_TARGET_PROPERTIES(zone PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
     TARGET_LINK_LIBRARIES(zone "Ws2_32.lib")
 ENDIF(MSVC)
-SET(VLD_FOUND FALSE)
-
-## VLD works only in Microsoft Visual Studio on Windows:
-IF(WIN32)
-IF(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv)")
-
-FIND_PATH(VLD_INCLUDE_DIR vld.h
- $ENV{VLD_HOME}/include
- $ENV{VLD_HOME}
- "$ENV{ProgramFiles}/Microsoft Visual Studio .NET 2003/Vc7/include"
- )
-#MESSAGE("VLD_INCLUDE_DIR=${VLD_INCLUDE_DIR}")
-
-## this is just required for runtim enabling/disabling: 
-FIND_PATH(VLD_INCLUDE_DIR_API vldapi.h
- $ENV{VLD_HOME}/include
- $ENV{VLD_HOME}
- "$ENV{ProgramFiles}/Microsoft Visual Studio .NET 2003/Vc7/include"
-)
-#MESSAGE("VLD_INCLUDE_DIR_API=${VLD_INCLUDE_DIR}")
-
-FIND_LIBRARY(VLD_LIBRARY_VLD
- NAMES vld
- PATHS 
- $ENV{VLD_HOME}/lib
- $ENV{VLD_HOME}
- "$ENV{ProgramFiles}/Microsoft Visual Studio .NET 2003/Vc7/lib"
- DOC "Visual Leak Debugger multithreaded library"
- )
-#MESSAGE("VLD_LIBRARY_VLD=${VLD_LIBRARY_VLD}")
-
-FIND_LIBRARY(VLD_LIBRARY_VLDMT
- NAMES vldmt
- PATHS 
- $ENV{VLD_HOME}/lib
- $ENV{VLD_HOME}
- "$ENV{ProgramFiles}/Microsoft Visual Studio .NET 2003/Vc7/lib"
- DOC "Visual Leak Debugger multithreaded library"
- )
-#MESSAGE("VLD_LIBRARY_VLDMT=${VLD_LIBRARY_VLDMT}")
-
-FIND_LIBRARY(VLD_LIBRARY_VLDMTDLL
- NAMES vldmtdll
- PATHS 
- $ENV{VLD_HOME}/lib
- $ENV{VLD_HOME}
- "$ENV{ProgramFiles}/Microsoft Visual Studio .NET 2003/Vc7/lib"
- DOC "Visual Leak Debugger multithreaded library"
- )
-#MESSAGE("VLD_LIBRARY_VLDMTDLL=${VLD_LIBRARY_VLDMTDLL}")
-
-IF(VLD_INCLUDE_DIR)
- IF (VLD_LIBRARY_VLD OR VLD_LIBRARY_VLDMT OR VLD_LIBRARY_VLDMTDLL)
-   ## do NOT add LIBRARIES because dependencies are handled through pragmas.
-   SET(VLD_FOUND TRUE)
-   # MESSAGE("found VLD.")
- ENDIF (VLD_LIBRARY_VLD OR VLD_LIBRARY_VLDMT OR VLD_LIBRARY_VLDMTDLL)
-ENDIF(VLD_INCLUDE_DIR)
-
-MARK_AS_ADVANCED(
- VLD_INCLUDE_DIR
- VLD_INCLUDE_DIR_API
- VLD_LIBRARY_VLD
- VLD_LIBRARY_VLDMT
- VLD_LIBRARY_VLDMTDLL
- VLD_LIBRARIES
-)
-
-ENDIF(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv)")
-ENDIF(WIN32)
 
 IF(MINGW)
     TARGET_LINK_LIBRARIES(zone "WS2_32")
