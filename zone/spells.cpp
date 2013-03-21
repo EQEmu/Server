@@ -2564,6 +2564,22 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if(effect1 != effect2)
 			continue;
 
+        /*
+        Skip check if effect is SE_Limit*
+        skip checking effect2 since we know they are equal
+        */
+        if(effect1 == SE_LimitMaxLevel ||
+            effect1 == SE_LimitResist ||
+            effect1 == SE_LimitTarget ||
+            effect1 == SE_LimitEffect ||
+            effect1 == SE_LimitSpellType ||
+            effect1 == SE_LimitSpell ||
+            effect1 == SE_LimitMinDur ||
+            effect1 == SE_LimitInstant ||
+            effect1 == SE_LimitMinLevel ||
+            effect1 == SE_LimitCastTime)
+            continue;
+
 		/*
 		If target is a npc and caster1 and caster2 exist
 		If Caster1 isn't the same as Caster2 and the effect is a DoT then ignore it.

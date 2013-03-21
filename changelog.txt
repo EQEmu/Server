@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 03/20/2013 ==
+demonstar55: Fixed stacking issues with SE_Limit* (ex. Unholy Aura Discipline and Aura of Reverence)
+
 == 03/18/2013 ==
 Bad_Captain: Fixed zone crash due to merc focus effects & tribute.
 Bad_Captain: Fixed merc aggro issues when client in melee range & spell recast timers. 
