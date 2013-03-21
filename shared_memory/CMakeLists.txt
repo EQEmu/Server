@@ -19,7 +19,7 @@ SET(shared_memory_headers
 
 ADD_EXECUTABLE(shared_memory ${shared_memory_sources} ${shared_memory_headers})
 
-TARGET_LINK_LIBRARIES(shared_memory Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE})
+TARGET_LINK_LIBRARIES(shared_memory Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
 IF(MSVC)
     SET_TARGET_PROPERTIES(shared_memory PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")

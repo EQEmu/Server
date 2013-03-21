@@ -3015,7 +3015,8 @@ ENCODE(OP_ReadBook) {
 		eq->window = emu->window;
 	OUT(type);
 	eq->invslot = 0; // Set to hard 0 since it's not required for the structure to work
-	memcpy(eq->txtfile, emu->booktext, sizeof(eq->txtfile));
+	if(sizeof(emu->booktext) > 0 && sizeof(emu->booktext) < 8194)
+	strncpy(eq->txtfile, emu->booktext, sizeof(eq->txtfile));
 	FINISH_ENCODE();
 }
 

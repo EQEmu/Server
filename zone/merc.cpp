@@ -73,6 +73,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 }
 
 Merc::~Merc() {
+	AI_Stop();
 	safe_delete(ourNPCData); //Since mercs are dynamically alloc'd we should probably safe_delete the data they were made from. I'm not entirely sure this is safe to delete a const.
 	entity_list.RemoveMerc(this->GetID());
 	UninitializeBuffSlots();
@@ -1902,15 +1903,16 @@ void Merc::AI_Process() {
 }
 
 void Merc::AI_Start(int32 iMoveDelay) {
-	Mob::AI_Start(iMoveDelay);
+	NPC::AI_Start(iMoveDelay);
+
 	if (!pAIControlled)
 		return;
 
 	if (merc_spells.size() == 0) {
-		AIautocastspell_timer = new Timer(1000);
+		AIautocastspell_timer->SetTimer(1000);
 		AIautocastspell_timer->Disable();
 	} else {
-		AIautocastspell_timer = new Timer(750);
+		AIautocastspell_timer->SetTimer(750);
 		AIautocastspell_timer->Start(RandomTimer(0, 2000), false);
 	}
 
@@ -5594,10 +5596,6 @@ bool Merc::Suspend() {
 
 	SetSuspended(true);
 
-	if(HasGroup()) {
-		RemoveMercFromGroup(this, GetGroup());
-	}
-
 	Save();
 
 	mercOwner->GetMercInfo().IsSuspended = true;
@@ -5645,31 +5643,41 @@ bool Merc::Unsuspend(bool setMaxStats) {
 			mercOwner->GetPTimers().Clear(&database, pTimerMercSuspend);
 
 		mercOwner->SendMercPersonalInfo();
+		Group* g = entity_list.GetGroupByClient(mercOwner);
 
-		if(!mercOwner->IsGrouped())
-		{
-			Group *g = new Group(mercOwner);
-			if(g && AddMercToGroup(this, g))
+		if(!g)
+		{	//nobody from our group is here... start a new group
+			g = new Group(mercOwner);
+
+			if(!g)
 			{
-				entity_list.AddGroup(g);
+				delete g;
+				g = NULL;
+				return false;
+			}
+			entity_list.AddGroup(g);
+
+			if(g->GetID() == 0) {
+				delete g;
+				g = NULL;
+				return false;
+			}
+
+			if(AddMercToGroup(this, g))
+			{
+				entity_list.AddGroup(g, g->GetID());
 				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
 				database.SetGroupID(mercOwner->GetName(), g->GetID(), mercOwner->CharacterID());
 				database.SetGroupID(this->GetName(), g->GetID(), mercOwner->CharacterID(), true);
 				database.RefreshGroupFromDB(mercOwner);
 				g->SaveGroupLeaderAA();
-
 				loaded = true;
 			}
 			else
 			{
-			if(MERC_DEBUG > 0)
-				mercOwner->Message(7, "Mercenary failed to join the group - Suspending");
-
-			Suspend();
-				safe_delete(g);
-				return false;
+			g->DisbandGroup();
 			}
-		}
+		}	//else, somebody from our group is already here...
 		else if (AddMercToGroup(this, mercOwner->GetGroup()))
 		{
 			database.SetGroupID(GetName(), mercOwner->GetGroup()->GetID(), mercOwner->CharacterID(), true);

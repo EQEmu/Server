@@ -3540,7 +3540,6 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(WearChange_Struct)) {
 		cout << "Wrong size: OP_WearChange, size=" << app->size << ", expected " << sizeof(WearChange_Struct) << endl;
-		DumpPacket(app);
 		return;
 	}
 
@@ -3595,7 +3594,6 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Who_All_Struct)) {
 		cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << endl;
-		DumpPacket(app);
 		return;
 	}
 	Who_All_Struct* whoall = (Who_All_Struct*) app->pBuffer;
@@ -6484,15 +6482,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			database.SetGroupID(inviter->GetName(), group->GetID(), inviter->CastToClient()->CharacterID());
 			database.SetGroupLeaderName(group->GetID(), inviter->GetName());
 
-			// Add the merc back into the new group
-			if (GetMerc())
-			{
-				if (GetMerc()->AddMercToGroup(GetMerc(), group))
-				{
-					database.SetGroupID(GetMerc()->GetName(), group->GetID(), inviter->CastToClient()->CharacterID(), true);
-				}
-			}
-
 			group->UpdateGroupAAs();
 
 			//Invite the inviter into the group first.....dont ask
@@ -6527,11 +6516,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 		if(!group->AddMember(this))
 			return;
 
-		if(GetMerc())
-		{
-			group->AddMember(GetMerc());
-		}
-
 		if(inviter->CastToClient()->IsLFP()) {
 			// If the player who invited us to a group is LFP, have them update world now that we have joined
 			// their group.
@@ -6547,6 +6531,16 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 		// Temporary hack for SoD, as things seem to work quite differently
 		if(inviter->CastToClient()->GetClientVersion() >= EQClientSoD)
 			database.RefreshGroupFromDB(inviter->CastToClient());
+
+		// Add the merc back into the new group
+		if (GetMerc())
+		{
+			if (GetMerc()->AddMercToGroup(GetMerc(), group))
+			{
+					database.SetGroupID(GetMerc()->GetName(), group->GetID(), inviter->CastToClient()->CharacterID(), true);
+			}
+		}
+
 
 		//send updates to clients out of zone...
 		ServerPacket* pack = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
@@ -6663,9 +6657,9 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 			{
 				if(group->IsLeader(this)) // the group leader can kick other members out of the group...
 				{
-					group->DelMember(memberToDisband,false);
 					if(memberToDisband->IsClient())
 					{
+						group->DelMember(memberToDisband,false);
 						Client* memberClient = memberToDisband->CastToClient();
 						Merc* memberMerc = memberToDisband->CastToClient()->GetMerc();
 							if(memberMerc != NULL)
@@ -6674,8 +6668,22 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 								if(!memberMerc->IsGrouped() && !memberClient->IsGrouped())
 								{
 									Group *g = new Group(memberClient);
+
+									if(!g) 
+									{
+										delete g;
+										g = NULL;
+										return;
+									}
+
+									entity_list.AddGroup(g);
+
+									if(g->GetID() == 0)
+									{
+										safe_delete(g);
+										return;
+									}
 									if(memberMerc->AddMercToGroup(memberMerc, g)) {
-										entity_list.AddGroup(g);
 										database.SetGroupLeaderName(g->GetID(), memberClient->GetName());
 										g->SaveGroupLeaderAA();
 										database.SetGroupID(memberClient->GetName(), g->GetID(), memberClient->CharacterID());
@@ -6687,19 +6695,36 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 					}
 					else if(memberToDisband->IsMerc())
 					{
+						memberToDisband->CastToMerc()->RemoveMercFromGroup(memberToDisband->CastToMerc(), group);
 						memberToDisband->CastToMerc()->Suspend();
 					}
 				}
 				else
-				{   // ...but other members can only remove themselves
+				{   
+					// ...but other members can only remove themselves
 					group->DelMember(this,false);
 
 					if(!IsGrouped() && GetMerc() != NULL)
 					{
 						if(!IsGrouped()) {
-						Group *g = new Group(this);
+							Group *g = new Group(this);
+
+							if(!g) 
+							{
+								delete g;
+								g = NULL;
+								return;
+							}
+
+							entity_list.AddGroup(g);
+
+							if(g->GetID() == 0)
+							{
+								safe_delete(g);
+								return;
+							}
+
 							if(GetMerc()->AddMercToGroup(GetMerc(), g)) {
-								entity_list.AddGroup(g);
 								database.SetGroupLeaderName(g->GetID(), this->GetName());
 								g->SaveGroupLeaderAA();
 								database.SetGroupID(this->GetName(), g->GetID(), this->CharacterID());
@@ -7385,6 +7410,24 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 	memcpy(out->message, name, len_name);
 	memcpy(&out->message[len_name], in->message, len_msg);
 
+	/*
+	if (target && target->IsClient()) {
+		entity_list.QueueCloseClients(this, outapp, false, 100, target);
+
+		cptr = outapp->pBuffer + 2;
+
+                        // not sure if live does this or not.  thought it was a nice feature, but would take a lot to
+		// clean up grammatical and other errors.  Maybe with a regex parser...
+		replacestr((char *)cptr, target->GetName(), "you");
+		replacestr((char *)cptr, " he", " you");
+		replacestr((char *)cptr, " she", " you");
+		replacestr((char *)cptr, " him", " you");
+		replacestr((char *)cptr, " her", " you");
+		target->CastToClient()->QueuePacket(outapp);
+
+	}
+	else
+	*/
 	entity_list.QueueCloseClients(this, outapp, true, 100,0,true,FilterSocials);
 
 	safe_delete(outapp);
@@ -13755,9 +13798,6 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 		if(merc)
 			merc->Dismiss();
 	}
-
-	SendMercMerchantResponsePacket(10);
-
 }
 
 void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)

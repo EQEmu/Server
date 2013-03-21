@@ -21,7 +21,7 @@ ADD_EXECUTABLE(ucs ${ucs_sources} ${ucs_headers})
 
 ADD_DEFINITIONS(-DUCS)
 
-TARGET_LINK_LIBRARIES(ucs Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE})
+TARGET_LINK_LIBRARIES(ucs Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
 IF(MSVC)
 	

@@ -621,7 +621,7 @@ void EntityList::AddNPC(NPC* npc, bool SendSpawnPacket, bool dontqueue) {
 	npc->SetID(GetFreeID());
     parse->EventNPC(EVENT_SPAWN, npc, NULL, "", 0);
 
-	uint16 emoteid = npc->GetNPCEmoteID();
+	uint16 emoteid = npc->GetEmoteID();
 	if(emoteid != 0)
 		npc->DoNPCEmote(ONSPAWN,emoteid);
 	
