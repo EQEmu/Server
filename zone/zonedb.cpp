@@ -1885,7 +1885,6 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 	}
 
 	safe_delete_array(Query);
-	Query = 0;
 
 	if(errorMessage.empty() && BuffsLoaded) {
 		if(!database.RunQuery(Query, MakeAnyLenString(&Query, "DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer)) {

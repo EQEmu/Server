@@ -274,7 +274,7 @@ Mob::Mob(const char*   in_name,
 	
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	memset(&spellbonuses, 0, sizeof(StatBonuses));
-	//memset(&aabonuses, 0, sizeof(StatBonuses)); //don't need this until we start using Client::CalcAABonuses()
+	memset(&aabonuses, 0, sizeof(StatBonuses));
 	spellbonuses.AggroRange = -1;
 	spellbonuses.AssistRange = -1;
 	pLastChange = 0;
