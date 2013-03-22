@@ -6484,15 +6484,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			database.SetGroupID(inviter->GetName(), group->GetID(), inviter->CastToClient()->CharacterID());
 			database.SetGroupLeaderName(group->GetID(), inviter->GetName());
 
-			// Add the merc back into the new group
-			if (GetMerc())
-			{
-				if (GetMerc()->AddMercToGroup(GetMerc(), group))
-				{
-					database.SetGroupID(GetMerc()->GetName(), group->GetID(), inviter->CastToClient()->CharacterID(), true);
-				}
-			}
-
 			group->UpdateGroupAAs();
 
 			//Invite the inviter into the group first.....dont ask
@@ -6527,11 +6518,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 		if(!group->AddMember(this))
 			return;
 
-		if(GetMerc())
-		{
-			group->AddMember(GetMerc());
-		}
-
 		if(inviter->CastToClient()->IsLFP()) {
 			// If the player who invited us to a group is LFP, have them update world now that we have joined
 			// their group.
@@ -6547,6 +6533,13 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 		// Temporary hack for SoD, as things seem to work quite differently
 		if(inviter->CastToClient()->GetClientVersion() >= EQClientSoD)
 			database.RefreshGroupFromDB(inviter->CastToClient());
+
+		// Add the merc back into the new group
+		if (GetMerc()) {
+			if (GetMerc()->AddMercToGroup(GetMerc(), group)) {
+				database.SetGroupID(GetMerc()->GetName(), group->GetID(), inviter->CastToClient()->CharacterID(), true);
+			}
+		}
 
 		//send updates to clients out of zone...
 		ServerPacket* pack = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
@@ -6659,47 +6652,69 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 
 		if(!memberToDisband)
 			memberToDisband = entity_list.GetMob(gd->name2);
-			if(memberToDisband )
-			{
-				if(group->IsLeader(this)) // the group leader can kick other members out of the group...
-				{
-					group->DelMember(memberToDisband,false);
+
+			if(memberToDisband ) {
+				if(group->IsLeader(this)) {
+					// the group leader can kick other members out of the group...
+					//group->DelMember(memberToDisband,false);
 					if(memberToDisband->IsClient())
 					{
+						group->DelMember(memberToDisband,false);
 						Client* memberClient = memberToDisband->CastToClient();
 						Merc* memberMerc = memberToDisband->CastToClient()->GetMerc();
-							if(memberMerc != NULL)
-							{
-								memberMerc->RemoveMercFromGroup(memberMerc, group);
-								if(!memberMerc->IsGrouped() && !memberClient->IsGrouped())
-								{
-									Group *g = new Group(memberClient);
-									if(memberMerc->AddMercToGroup(memberMerc, g)) {
-										entity_list.AddGroup(g);
-										database.SetGroupLeaderName(g->GetID(), memberClient->GetName());
-										g->SaveGroupLeaderAA();
-										database.SetGroupID(memberClient->GetName(), g->GetID(), memberClient->CharacterID());
-										database.SetGroupID(memberMerc->GetName(), g->GetID(), memberClient->CharacterID(), true);
-										database.RefreshGroupFromDB(memberClient);
-									}
-								}
+						memberMerc->RemoveMercFromGroup(memberMerc, group);
+
+						if(!memberMerc->IsGrouped() && !memberClient->IsGrouped()) {
+							Group *g = new Group(memberClient);
+
+							if(!g) {
+								delete g;
+								g = NULL;
+								return;
 							}
+
+							entity_list.AddGroup(g);
+
+							if(g->GetID() == 0) {
+								safe_delete(g);
+								return;
+							}
+							if(memberMerc->AddMercToGroup(memberMerc, g)) {
+								database.SetGroupLeaderName(g->GetID(), memberClient->GetName());
+								g->SaveGroupLeaderAA();
+								database.SetGroupID(memberClient->GetName(), g->GetID(), memberClient->CharacterID());
+								database.SetGroupID(memberMerc->GetName(), g->GetID(), memberClient->CharacterID(), true);
+								database.RefreshGroupFromDB(memberClient);
+							}
+						}
 					}
-					else if(memberToDisband->IsMerc())
-					{
+					else if(memberToDisband->IsMerc()) {
+						memberToDisband->CastToMerc()->RemoveMercFromGroup(memberToDisband->CastToMerc(), group);
 						memberToDisband->CastToMerc()->Suspend();
 					}
 				}
-				else
-				{   // ...but other members can only remove themselves
+				else {   
+					// ...but other members can only remove themselves
 					group->DelMember(this,false);
 
-					if(!IsGrouped() && GetMerc() != NULL)
-					{
+					if(!IsGrouped() && GetMerc() != NULL) {
 						if(!IsGrouped()) {
-						Group *g = new Group(this);
+							Group *g = new Group(this);
+
+							if(!g) {
+								delete g;
+								g = NULL;
+								return;
+							}
+
+							entity_list.AddGroup(g);
+
+							if(g->GetID() == 0) {
+								safe_delete(g);
+								return;
+							}
+
 							if(GetMerc()->AddMercToGroup(GetMerc(), g)) {
-								entity_list.AddGroup(g);
 								database.SetGroupLeaderName(g->GetID(), this->GetName());
 								g->SaveGroupLeaderAA();
 								database.SetGroupID(this->GetName(), g->GetID(), this->CharacterID());
@@ -13752,12 +13767,14 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 	if(GetMercID()) {
 		Merc* merc = GetMerc();
 
-		if(merc)
-			merc->Dismiss();
+		if(merc) {
+			if(CheckCanDismissMerc()) {
+				merc->Dismiss();
+			}
+		}
 	}
 
-	SendMercMerchantResponsePacket(10);
-
+	//SendMercMerchantResponsePacket(10);
 }
 
 void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)

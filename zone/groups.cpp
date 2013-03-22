@@ -214,6 +214,9 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
         if(!newmember && !NewMemberName)
                 return false;
 
+		if(GroupCount() >= MAX_GROUP_MEMBERS) //Sanity check for merging groups together.
+			return false;
+
         if(!newmember)
                 InZone = false;
         else
