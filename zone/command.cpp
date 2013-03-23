@@ -1867,7 +1867,7 @@ void command_npcstats(Client *c, const Seperator *sep)
 		c->Message(0, "Gender: %i  Size: %f  Bodytype: %d", c->GetTarget()->GetGender(), c->GetTarget()->GetSize(), c->GetTarget()->GetBodyType());
 		c->Message(0, "Runspeed: %f  Walkspeed: %f", c->GetTarget()->GetRunspeed(), c->GetTarget()->GetWalkspeed());
 		c->Message(0, "Spawn Group: %i  Grid: %i", c->GetTarget()->CastToNPC()->GetSp2(), c->GetTarget()->CastToNPC()->GetGrid());
-		c->Message(0, "EmoteID: %i", c->GetTarget()->CastToNPC()->GetNPCEmoteID());
+		c->Message(0, "EmoteID: %i", c->GetTarget()->CastToNPC()->GetEmoteID());
 		c->GetTarget()->CastToNPC()->QueryLoot(c);
 	}
 }
@@ -11031,7 +11031,7 @@ void command_emoteview(Client *c, const Seperator *sep)
 	if(c->GetTarget() && c->GetTarget()->IsNPC())
 	{ 
 		int count=0;
-		int emoteid = c->GetTarget()->CastToNPC()->GetNPCEmoteID();
+		int emoteid = c->GetTarget()->CastToNPC()->GetEmoteID();
 
 		LinkedListIterator<NPC_Emote_Struct*> iterator(zone->NPCEmoteList);
 		iterator.Reset();

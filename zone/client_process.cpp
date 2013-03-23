@@ -1307,7 +1307,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	uint64 value = 0, amount_to_take = 0, amount_to_add = 0;
 	int32 *from_bucket = 0, *to_bucket = 0;
 	Mob* trader = trade->With();
-	
+
 	// could just do a range, but this is clearer and explicit
 	if
 	(

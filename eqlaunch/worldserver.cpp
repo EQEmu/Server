@@ -126,7 +126,6 @@ void WorldServer::Process() {
 		
 		default: {
 			_log(LAUNCHER__NET, "Unknown opcode 0x%x from World of len %d", pack->opcode, pack->size);
-			//DumpPacket(pack->pBuffer, pack->size);
 			break;
 		}
 		}

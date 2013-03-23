@@ -3540,7 +3540,6 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(WearChange_Struct)) {
 		cout << "Wrong size: OP_WearChange, size=" << app->size << ", expected " << sizeof(WearChange_Struct) << endl;
-		DumpPacket(app);
 		return;
 	}
 
@@ -3595,7 +3594,6 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Who_All_Struct)) {
 		cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << endl;
-		DumpPacket(app);
 		return;
 	}
 	Who_All_Struct* whoall = (Who_All_Struct*) app->pBuffer;
@@ -6690,6 +6688,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 					}
 					else if(memberToDisband->IsMerc()) {
 						memberToDisband->CastToMerc()->RemoveMercFromGroup(memberToDisband->CastToMerc(), group);
+						memberToDisband->CastToMerc()->RemoveMercFromGroup(memberToDisband->CastToMerc(), group);
 						memberToDisband->CastToMerc()->Suspend();
 					}
 				}
@@ -7400,6 +7399,24 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 	memcpy(out->message, name, len_name);
 	memcpy(&out->message[len_name], in->message, len_msg);
 
+	/*
+	if (target && target->IsClient()) {
+		entity_list.QueueCloseClients(this, outapp, false, 100, target);
+
+		cptr = outapp->pBuffer + 2;
+
+                        // not sure if live does this or not.  thought it was a nice feature, but would take a lot to
+		// clean up grammatical and other errors.  Maybe with a regex parser...
+		replacestr((char *)cptr, target->GetName(), "you");
+		replacestr((char *)cptr, " he", " you");
+		replacestr((char *)cptr, " she", " you");
+		replacestr((char *)cptr, " him", " you");
+		replacestr((char *)cptr, " her", " you");
+		target->CastToClient()->QueuePacket(outapp);
+
+	}
+	else
+	*/
 	entity_list.QueueCloseClients(this, outapp, true, 100,0,true,FilterSocials);
 
 	safe_delete(outapp);
