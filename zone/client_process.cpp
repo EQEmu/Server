@@ -191,7 +191,7 @@ bool Client::Process() {
 			if (GetMerc())
 			{
 				GetMerc()->Save();
-				if(GetMerc()->GetGroup != NULL)
+				if(GetMerc()->GetGroup() != NULL)
 				GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 				GetMerc()->Depop();
 			}

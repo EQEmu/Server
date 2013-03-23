@@ -4915,8 +4915,6 @@ void Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_sk
 	if(entity_list.GetCorpseByID(GetID()))
 		entity_list.GetCorpseByID(GetID())->Depop();
 
-	entity_list.RemoveMerc(GetID());
-
 	if(Suspend())
 	{
 	}
@@ -5775,13 +5773,12 @@ bool Merc::Dismiss(){
 
 void Merc::Zone() {
 	Save();
-	entity_list.RemoveMerc(this->GetID());
 	Depop();
 }
 
 void Merc::Depop() {
 	WipeHateList();
-
+	entity_list.RemoveMerc(this->GetID());
 	entity_list.RemoveFromHateLists(this);
 
 	if(HasGroup())
