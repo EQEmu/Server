@@ -232,6 +232,7 @@ Client::Client(EQStreamInterface* ieqs)
 	dead_timer.Disable();
 	camp_timer.Disable();
 	autosave_timer.Disable();
+	GetMercTimer()->Disable();
 	instalog = false;
 	pLastUpdate = 0;
 	pLastUpdateWZ = 0;
@@ -562,8 +563,8 @@ bool Client::Save(uint8 iCommitNow) {
 	if(GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS))
 		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 
-	if(merc_timer.Enabled()) {
-		GetMercInfo().MercTimerRemaining = merc_timer.GetRemainingTime();
+	if(GetMercTimer()->Enabled()) {
+		GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime();
 	}
 
 	if (GetMerc() && !dead) {

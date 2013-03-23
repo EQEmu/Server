@@ -249,7 +249,7 @@ bool Client::Process() {
 				UpdateMercTimer();
 		}
 
-		if(GetMercInfo().MercTemplateID != 0)
+		if(GetMercInfo().MercTemplateID != 0 && GetMercInfo().IsSuspended)
 		{
 			if(p_timers.Expired(&database, pTimerMercSuspend, false)) {
 					CheckMercSuspendTimer();

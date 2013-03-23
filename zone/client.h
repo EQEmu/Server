@@ -1124,7 +1124,7 @@ public:
 	void UpdateMercTimer();
 	void UpdateMercLevel();
 	void CheckMercSuspendTimer();
-	Timer GetMercTimer() { return merc_timer; };
+	Timer* GetMercTimer() { return &merc_timer; };
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
 	void  SendWebLink(const char* website);
