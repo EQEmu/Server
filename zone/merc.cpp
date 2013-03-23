@@ -1904,7 +1904,6 @@ void Merc::AI_Process() {
 
 void Merc::AI_Start(int32 iMoveDelay) {
 	NPC::AI_Start(iMoveDelay);
-
 	if (!pAIControlled)
 		return;
 
@@ -2373,13 +2372,13 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 										if(selectedMercSpell.spellid > 0) {
 											if(isDiscipline) {
-												castedSpell = UseDiscipline(selectedMercSpell.spellid, GetID());
+												castedSpell = UseDiscipline(selectedMercSpell.spellid, tar->GetID());
 											}
 											else {
-												castedSpell = AIDoSpellCast(selectedMercSpell.spellid, this, -1, &TempDontBuffMeBeforeTime);
+												castedSpell = AIDoSpellCast(selectedMercSpell.spellid, tar, -1, &TempDontBuffMeBeforeTime);
 
-												if(TempDontBuffMeBeforeTime != this->DontBuffMeBefore())
-													this->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
+												if(TempDontBuffMeBeforeTime != tar->DontBuffMeBefore())
+													tar->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
 											}
 										}
 									}
@@ -2400,13 +2399,13 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 											if(selectedMercSpell.spellid > 0) {
 												if(isDiscipline) {
-													castedSpell = UseDiscipline(selectedMercSpell.spellid, GetID());
+													castedSpell = UseDiscipline(selectedMercSpell.spellid, tar->GetPet()->GetID());
 												}
 												else {
-													castedSpell = AIDoSpellCast(selectedMercSpell.spellid, this, -1, &TempDontBuffMeBeforeTime);
+													castedSpell = AIDoSpellCast(selectedMercSpell.spellid, tar->GetPet(), -1, &TempDontBuffMeBeforeTime);
 
-													if(TempDontBuffMeBeforeTime != this->DontBuffMeBefore())
-														this->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
+													if(TempDontBuffMeBeforeTime != tar->GetPet()->DontBuffMeBefore())
+														tar->GetPet()->SetDontBuffMeBefore(TempDontBuffMeBeforeTime);
 												}
 											}
 										}
@@ -5171,8 +5170,8 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 				snprintf(c->GetEPP().merc_name, 64, "%s", c->GetMercInfo().merc_name);
 				merc->SetSuspended(c->GetMercInfo().IsSuspended);
 				merc->gender = c->GetMercInfo().Gender;
-				merc->SetHP(c->GetMercInfo().hp);
-				merc->SetMana(c->GetMercInfo().mana);
+				merc->SetHP(c->GetMercInfo().hp <= 0 ? merc->GetMaxHP() : c->GetMercInfo().hp);
+				merc->SetMana(c->GetMercInfo().hp <= 0 ? merc->GetMaxMana() : c->GetMercInfo().mana);
 				merc->SetEndurance(c->GetMercInfo().endurance);
 				merc->luclinface = c->GetMercInfo().face;
 				merc->hairstyle = c->GetMercInfo().luclinHairStyle;
@@ -5357,7 +5356,71 @@ void Client::UpdateMercTimer()
 }
 
 bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
-	bool result = true;
+	MercTemplate* mercTemplate = zone->GetMercTemplate(template_id);
+
+	//invalid merc data
+	if(!mercTemplate) {
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(9);
+		else
+			SendMercMerchantResponsePacket(10);
+		return false;
+	}
+
+	//check client version
+	if(GetClientVersion() < mercTemplate->ClientVersion) {
+		SendMercMerchantResponsePacket(3);
+		return false;
+	}
+
+	if(GetClientVersion() >= EQClientRoF && GetNumMercs() >= MAXMERCS) {
+		SendMercMerchantResponsePacket(6);
+		return false;
+	}
+	else if(GetMerc()) {													//check for current merc
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(6);
+		else
+			SendMercMerchantResponsePacket(6);
+		return false;
+	}
+	else if(GetMercInfo().mercid != 0 && GetMercInfo().IsSuspended) {		//has suspended merc
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(7);
+		else
+			SendMercMerchantResponsePacket(6);
+		return false;
+	}
+
+	//check for sufficient funds
+	if(RuleB(Mercs, ChargeMercPurchaseCost)) {
+		uint32 cost = Merc::CalcPurchaseCost(template_id, GetLevel()) * 100; 	// Cost is in gold
+		if(cost > 0 && !HasMoney(cost)) {
+			SendMercMerchantResponsePacket(1);
+			return false;
+		}
+	}
+
+	//check for raid
+	if(HasRaid()) {
+		SendMercMerchantResponsePacket(4);
+		return false;
+	}
+
+	//check group size
+	if(HasGroup() && GetGroup()->GroupCount() >= MAX_GROUP_MEMBERS) {
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(8);
+		else
+			SendMercMerchantResponsePacket(7);
+		return false;
+	}
+
+	//check in combat
+	if(GetClientVersion() >= EQClientRoF && GetAggroCount() > 0) {
+		SendMercMerchantResponsePacket(8);
+		return false;
+	}
 
 	//check for valid merchant - can check near area for any merchants
 	if(!merchant) {
@@ -5365,7 +5428,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 			SendMercMerchantResponsePacket(14);
 		else
 			SendMercMerchantResponsePacket(16);
-		result = false;
+		return false;
 	}
 
 	//check for merchant too far away
@@ -5374,65 +5437,13 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 			SendMercMerchantResponsePacket(15);
 		else
 			SendMercMerchantResponsePacket(17);
-		result = false;
+		return false;
 	}
 
-
-	if(GetClientVersion() >= EQClientRoF && GetNumMercs() >= MAXMERCS) {
-		SendMercMerchantResponsePacket(6);
-		result = false;
-	}
-	else if(GetMerc()) {													//check for current merc
-		if (GetClientVersion() < EQClientRoF)
-			SendMercMerchantResponsePacket(6);
-		else
-			SendMercMerchantResponsePacket(6);
-		result = false;
-	}
-	else if(GetMercInfo().mercid != 0 && GetMercInfo().IsSuspended) {		//has suspended merc
-		if (GetClientVersion() < EQClientRoF)
-			SendMercMerchantResponsePacket(7);
-		else
-			SendMercMerchantResponsePacket(6);
-		result = false;
-	}
-
-	//check for sufficient funds
-	if(RuleB(Mercs, ChargeMercPurchaseCost)) {
-		uint32 cost = Merc::CalcPurchaseCost(template_id, GetLevel()) * 100; 	// Cost is in gold
-		if(cost > 0 && !HasMoney(cost)) {
-			SendMercMerchantResponsePacket(1);
-			result = false;
-		}
-	}
-
-	//check for raid
-	if(HasRaid()) {
-		SendMercMerchantResponsePacket(4);
-		result = false;
-	}
-
-	//check group size
-	if(HasGroup() && GetGroup()->GroupCount() == 6) {
-		if (GetClientVersion() < EQClientRoF)
-			SendMercMerchantResponsePacket(8);
-		else
-			SendMercMerchantResponsePacket(7);
-		result = false;
-	}
-
-	//check in combat
-	if(GetClientVersion() >= EQClientRoF && GetAggroCount() > 0) {
-		SendMercMerchantResponsePacket(8);
-		result = false;
-	}
-
-	return result;
+	return true;
 }
 
 bool Client::CheckCanRetainMerc(uint32 upkeep) {
-	bool result = true;
-
 	Merc* merc = GetMerc();
 
 	//check for sufficient funds
@@ -5440,30 +5451,45 @@ bool Client::CheckCanRetainMerc(uint32 upkeep) {
 		if(merc) {
 			if(upkeep > 0 && !HasMoney(upkeep * 100)) {
 				SendMercMerchantResponsePacket(1);
-				result = false;
+				return false;
 			}
 		}
 	}
 
-	return result;
+	return true;
 }
 
 bool Client::CheckCanUnsuspendMerc() {
-	bool result = true;
+	MercTemplate* mercTemplate = zone->GetMercTemplate(GetMercInfo().MercTemplateID);
+
+	//invalid merc data
+	if(!mercTemplate) {
+		if (GetClientVersion() < EQClientRoF)
+			SendMercMerchantResponsePacket(9);
+		else
+			SendMercMerchantResponsePacket(10);
+		return false;
+	}
+
+	//check client version
+	if(GetClientVersion() < mercTemplate->ClientVersion) {
+		SendMercMerchantResponsePacket(3);
+		return false;
+	}
 
 	//check for raid
 	if(HasRaid()) {
 		SendMercMerchantResponsePacket(4);
-		result = false;
+		return false;
 	}
 
 	//check group size
-	if(HasGroup() && GetGroup()->GroupCount() == 6) {
+	if(HasGroup() && GetGroup()->GroupCount() >= MAX_GROUP_MEMBERS) {
 		if (GetClientVersion() < EQClientRoF)
 			SendMercMerchantResponsePacket(8);
 		else
 			SendMercMerchantResponsePacket(7);
-		result = false;
+		return false;
 	}
 
 	//check if zone allows mercs
@@ -5472,15 +5498,30 @@ bool Client::CheckCanUnsuspendMerc() {
 			SendMercMerchantResponsePacket(4);	// ??
 		else
 			SendMercMerchantResponsePacket(4);   // ??
+		return false;
 	}
 
 	//check in combat
 	if(GetClientVersion() >= EQClientRoF && GetAggroCount() > 0) {
 		SendMercMerchantResponsePacket(8);
-		result = false;
+		return false;
 	}
 
-	return result;
+	return true;
+}
+
+bool Client::CheckCanDismissMerc() {
+	if(!GetMerc()) {
+		Message(7, "You have no mercenary to dismiss.");
+		return false;
+	}
+
+	if(GetMerc()->IsCasting()) {
+		Message(7, "Unable to dismiss mercenary.");
+		return false;
+	}
+
+	return true;
 }
 
 void Client::CheckMercSuspendTimer()
@@ -5596,6 +5637,10 @@ bool Merc::Suspend() {
 
 	SetSuspended(true);
 
+	/*if(HasGroup()) {
+		RemoveMercFromGroup(this, GetGroup());
+	}*/
+
 	Save();
 
 	mercOwner->GetMercInfo().IsSuspended = true;
@@ -5645,16 +5690,15 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		mercOwner->SendMercPersonalInfo();
 		Group* g = entity_list.GetGroupByClient(mercOwner);
 
-		if(!g)
-		{	//nobody from our group is here... start a new group
+		if(!g) {	//nobody from our group is here... start a new group
 			g = new Group(mercOwner);
 
-			if(!g)
-			{
+			if(!g) {
 				delete g;
 				g = NULL;
 				return false;
 			}
+
 			entity_list.AddGroup(g);
 
 			if(g->GetID() == 0) {
@@ -5663,8 +5707,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 				return false;
 			}
 
-			if(AddMercToGroup(this, g))
-			{
+			if(AddMercToGroup(this, g)) {
 				entity_list.AddGroup(g, g->GetID());
 				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
 				database.SetGroupID(mercOwner->GetName(), g->GetID(), mercOwner->CharacterID());
@@ -5673,20 +5716,17 @@ bool Merc::Unsuspend(bool setMaxStats) {
 				g->SaveGroupLeaderAA();
 				loaded = true;
 			}
-			else
-			{
-			g->DisbandGroup();
+			else {
+				g->DisbandGroup();
 			}
 		}	//else, somebody from our group is already here...
-		else if (AddMercToGroup(this, mercOwner->GetGroup()))
-		{
+		else if (AddMercToGroup(this, mercOwner->GetGroup())) {
 			database.SetGroupID(GetName(), mercOwner->GetGroup()->GetID(), mercOwner->CharacterID(), true);
 			database.RefreshGroupFromDB(mercOwner);
 
 			loaded = true;
 		}
-		else
-		{
+		else {
 			if(MERC_DEBUG > 0)
 				mercOwner->Message(7, "Mercenary failed to join the group - Suspending");
 
@@ -5913,10 +5953,12 @@ void Client::UpdateMercLevel() {
 
 void Client::SendMercMerchantResponsePacket(int32 response_type) {
 	// This response packet brings up the Mercenary Manager window
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryHire, sizeof(MercenaryMerchantResponse_Struct));
-	MercenaryMerchantResponse_Struct* mmr = (MercenaryMerchantResponse_Struct*)outapp->pBuffer;
-	mmr->ResponseType = response_type;		// send specified response type
-	FastQueuePacket(&outapp);
+	if(GetClientVersion() >= EQClientSoD) {
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryHire, sizeof(MercenaryMerchantResponse_Struct));
+		MercenaryMerchantResponse_Struct* mmr = (MercenaryMerchantResponse_Struct*)outapp->pBuffer;
+		mmr->ResponseType = response_type;		// send specified response type
+		FastQueuePacket(&outapp);
+	}
 }
 
 void Client::SendMercenaryUnknownPacket(uint8 type) {
