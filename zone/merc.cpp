@@ -5775,6 +5775,7 @@ bool Merc::Dismiss(){
 
 void Merc::Zone() {
 	Save();
+	entity_list.RemoveMerc(this->GetID());
 	Depop();
 }
 
