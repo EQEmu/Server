@@ -208,15 +208,28 @@ void QuestManager::echo(int colour, const char *str) {
 }
 
 void QuestManager::say(const char *str) {
-
-       if(RuleB(NPC, EnableNPCQuestJournal) && initiator)
-               owner->QuestJournalledSay(initiator, str);
-       else
-               owner->Say(str);
+	if (!owner) {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::say called with NULL owner. Probably syntax error in quest file.");
+		return;
+	}
+	else {
+       if(RuleB(NPC, EnableNPCQuestJournal) && initiator) {
+		   owner->QuestJournalledSay(initiator, str);
+	   }
+       else {
+		   owner->Say(str);
+	   }
+	}
 }
 
 void QuestManager::say(const char *str, uint8 language) {
-	entity_list.ChannelMessage(owner, 8, language, str);
+	if (!owner) {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::say called with NULL owner. Probably syntax error in quest file.");
+		return;
+	}
+	else {
+		entity_list.ChannelMessage(owner, 8, language, str);
+	}
 }
 
 void QuestManager::me(const char *str) {
@@ -242,14 +255,14 @@ void QuestManager::write(const char *file, const char *str) {
 
 uint16 QuestManager::spawn2(int npc_type, int grid, int unused, float x, float y, float z, float heading) {
 	const NPCType* tmp = 0;
-	if ((tmp = database.GetNPCType(npc_type)))
+	if (tmp = database.GetNPCType(npc_type))
 	{
 		NPC* npc = new NPC(tmp, 0, x, y, z, heading, FlyMode3);
 		npc->AddLootTable();
 		entity_list.AddNPC(npc,true,true);
-		// Quag: Sleep in main thread? ICK!
+		// Sleep in main thread? ICK!
 		// Sleep(200);
-		// Quag: check is irrelevent, it's impossible for npc to be 0 here
+		// check is irrelevent, it's impossible for npc to be 0 here
 		// (we're in main thread, nothing else can possibly modify it)
 		if(grid > 0)
 		{
@@ -268,14 +281,14 @@ uint16 QuestManager::unique_spawn(int npc_type, int grid, int unused, float x, f
 	}
 
 	const NPCType* tmp = 0;
-	if ((tmp = database.GetNPCType(npc_type)))
+	if (tmp = database.GetNPCType(npc_type))
 	{
 		NPC* npc = new NPC(tmp, 0, x, y, z, heading, FlyMode3);
 		npc->AddLootTable();
 		entity_list.AddNPC(npc,true,true);
-		// Quag: Sleep in main thread? ICK!
+		// Sleep in main thread? ICK!
 		// Sleep(200);
-		// Quag: check is irrelevent, it's impossible for npc to be 0 here
+		// check is irrelevent, it's impossible for npc to be 0 here
 		// (we're in main thread, nothing else can possibly modify it)
 		if(grid > 0)
 		{
@@ -514,76 +527,113 @@ void QuestManager::stopalltimers() {
 }
 
 void QuestManager::emote(const char *str) {
-	owner->Emote(str);
+	if (!owner) {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::emote called with NULL owner. Probably syntax error in quest file.");
+		return;
+	}
+	else {
+		owner->Emote(str);
+	}
 }
 
 void QuestManager::shout(const char *str) {
-	owner->Shout(str);
+	if (!owner) {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::shout called with NULL owner. Probably syntax error in quest file.");
+		return;
+	}
+	else {
+		owner->Shout(str);
+	}
 }
 
 void QuestManager::shout2(const char *str) {
-	worldserver.SendEmoteMessage(0,0,0,13, "%s shouts, '%s'", owner->GetCleanName(), str);
+	if (!owner) {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::shout2 called with NULL owner. Probably syntax error in quest file.");
+		return;
+	}
+	else {
+		worldserver.SendEmoteMessage(0,0,0,13, "%s shouts, '%s'", owner->GetCleanName(), str);
+	}
 }
 
-void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint32 to_guilddbid, uint32 to_minstatus)
-{
+void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint32 to_guilddbid, uint32 to_minstatus) {
 	if(send_to_world)
-        	worldserver.SendEmoteMessage(0, to_guilddbid, to_minstatus, color, "%s", str);
+        worldserver.SendEmoteMessage(0, to_guilddbid, to_minstatus, color, "%s", str);
 	else
 		entity_list.MessageStatus(to_guilddbid, to_minstatus, color, "%s", str);
 }
 
 void QuestManager::depop(int npc_type) { // depop NPC and don't start spawn timer
-	if (!owner->IsNPC())
+	if (!owner || !owner->IsNPC()) {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::depop called with NULL owner or non-NPC owner. Probably syntax error in quest file.");
 		return;
-	if (npc_type != 0) {
-		Mob * tmp = entity_list.GetMobByNpcTypeID(npc_type);
-		if (tmp) {
-			if (tmp != owner) {
-				tmp->CastToNPC()->Depop();
-			}
-			else {
-				depop_npc = true;
+	}
+	else {
+		if (npc_type != 0) {
+			Mob * tmp = entity_list.GetMobByNpcTypeID(npc_type);
+			if (tmp) {
+				if (tmp != owner) {
+					tmp->CastToNPC()->Depop();
+				}
+				else {
+					depop_npc = true;
+				}
 			}
 		}
-	}
-	else {	//depop self
-		depop_npc = true;
+		else {	//depop self
+			depop_npc = true;
+		}
 	}
 }
 
 void QuestManager::depop_withtimer(int npc_type) { // depop NPC and start spawn timer
-	if (!owner->IsNPC())
+	if (!owner || !owner->IsNPC()) {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::depop_withtimer called with NULL owner or non-NPC owner. Probably syntax error in quest file.");
 		return;
-	if (npc_type != 0) {
-		Mob * tmp = entity_list.GetMobByNpcTypeID(npc_type);
-		if (tmp) {
-			if (tmp != owner) {
-				tmp->CastToNPC()->Depop(true);
-			}
-			else {
-				owner->Depop(true);
+	}
+	else {
+		if (npc_type != 0) {
+			Mob * tmp = entity_list.GetMobByNpcTypeID(npc_type);
+			if (tmp) {
+				if (tmp != owner) {
+					tmp->CastToNPC()->Depop(true);
+				}
+				else {
+					owner->Depop(true);
+				}
 			}
 		}
-	}
-	else {	//depop self
-		owner->Depop(true);
+		else {	//depop self
+			owner->Depop(true);
+		}
 	}
 }
 
 void QuestManager::depopall(int npc_type) {
-	if(owner->IsNPC() && npc_type > 0)
+	if(owner && owner->IsNPC() && (npc_type > 0)) {
 		entity_list.DepopAll(npc_type);
+	}
+	else {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::depopall called with NULL owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file.");
+	}
 }
 
 void QuestManager::depopzone(bool StartSpawnTimer) {
-	if(zone)
+	if(zone) {
 		zone->Depop(StartSpawnTimer);
+	}
+	else {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::depopzone called with NULL zone. Probably syntax error in quest file.");
+	}
 }
 
 void QuestManager::repopzone() {
-	if(zone)
+	if(zone) {
 		zone->Repop();
+	}
+	else {
+		LogFile->write(EQEMuLog::Quest, "QuestManager::repopzone called with NULL zone. Probably syntax error in quest file.");
+	}
 }
 
 void QuestManager::settarget(const char *type, int target_id) {
@@ -615,7 +665,7 @@ void QuestManager::sfollow() {
 }
 
 void QuestManager::changedeity(int diety_id) {
-	//Cofruben:-Changes the deity.
+	//Changes the deity.
 	if(initiator)
 	{	
 		if(initiator->IsClient())
@@ -731,7 +781,7 @@ void QuestManager::snow(int weather) {
 }
 
 void QuestManager::surname(const char *name) {
-	//Cofruben:-Changes the last name.
+	//Changes the last name.
 	if(initiator)
 	{
 		if(initiator->IsClient())
@@ -747,21 +797,21 @@ void QuestManager::surname(const char *name) {
 }
 
 void QuestManager::permaclass(int class_id) {
- 	//Cofruben:-Makes the client the class specified
+ 	//Makes the client the class specified
 	initiator->SetBaseClass(class_id);
 	initiator->Save(2);
 	initiator->Kick();
 }
 
 void QuestManager::permarace(int race_id) {
- 	//Cofruben:-Makes the client the race specified
+ 	//Makes the client the race specified
 	initiator->SetBaseRace(race_id);
 	initiator->Save(2);
 	initiator->Kick();
 }
 
 void QuestManager::permagender(int gender_id) {
- 	//Cofruben:-Makes the client the gender specified
+ 	//Makes the client the gender specified
 	initiator->SetBaseGender(gender_id);
 	initiator->Save(2);
 	initiator->Kick();
@@ -1039,7 +1089,7 @@ void QuestManager::save() {
 void QuestManager::faction(int faction_id, int faction_value, int temp) {
 	if (initiator && initiator->IsClient()) {
 		if(faction_id != 0 && faction_value != 0) {
-	// SCORPIOUS2K - fixed faction command
+	// fixed faction command
 			//Client *p;
 			initiator->SetFactionLevel2(
 				initiator->CharacterID(),
@@ -1111,7 +1161,7 @@ void QuestManager::itemlink(int item_id) {
 }
 
 void QuestManager::signalwith(int npc_id, int signal_id, int wait_ms) {
-// SCORPIOUS2K - signal command
+// signal command
 	// signal(npcid) - generates EVENT_SIGNAL on specified npc
 	if(wait_ms > 0) {
 		STimerList.push_back(SignalTimer(wait_ms, npc_id, signal_id));
@@ -1134,7 +1184,7 @@ void QuestManager::signal(int npc_id, int wait_ms) {
 }
 
 void QuestManager::setglobal(const char *varname, const char *newvalue, int options, const char *duration) {
-// SCORPIOUS2K - qglobal variable commands
+// qglobal variable commands
 	// setglobal(varname,value,options,duration)
 	//MYSQL_ROW row;
 	int qgZoneid=zone->GetZoneID();
@@ -1376,7 +1426,7 @@ int QuestManager::QGVarDuration(const char *fmt)
 }
 
 void QuestManager::ding() {
-	//-Cofruben:makes a sound.
+	//makes a sound.
 	if (initiator && initiator->IsClient())
 		initiator->SendSound();
 
@@ -1495,7 +1545,7 @@ void QuestManager::clear_proximity() {
 }
 
 void QuestManager::setanim(int npc_type, int animnum) {
-	//Cisyouc: adds appearance changes
+	//adds appearance changes
 	Mob* thenpc = entity_list.GetMobByNpcTypeID(npc_type);
 	if(animnum < 0 || animnum >= _eaMaxAppearance)
 		return;
