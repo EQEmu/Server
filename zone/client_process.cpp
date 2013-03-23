@@ -188,13 +188,14 @@ bool Client::Process() {
 
 		if(linkdead_timer.Check()){
 			Save();
-			LeaveGroup();
 			if (GetMerc())
 			{
 				GetMerc()->Save();
+				if(GetMerc()->GetGroup != NULL)
 				GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 				GetMerc()->Depop();
 			}
+			LeaveGroup();
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
 			{

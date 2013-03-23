@@ -4915,9 +4915,10 @@ void Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_sk
 	if(entity_list.GetCorpseByID(GetID()))
 		entity_list.GetCorpseByID(GetID())->Depop();
 
+	entity_list.RemoveMerc(GetID());
+
 	if(Suspend())
 	{
-		//todo: perl event?
 	}
 }
 

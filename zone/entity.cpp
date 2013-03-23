@@ -2760,6 +2760,8 @@ void EntityList::RemoveEntity(uint16 id)
 		return;
 	else if(entity_list.RemoveTrap(id))
 		return;
+	else if(entity_list.RemoveMerc(id))
+		return;
 
 #ifdef BOTS
 	// This block of code is necessary to clean up bot objects
