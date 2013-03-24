@@ -6462,7 +6462,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 		// Remove the merc from the old group
 		if (GetMerc())
 		{
-			if(GetGroup())
+			if(GetMerc()->GetGroup())
 			{
 			Merc::RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 			}
