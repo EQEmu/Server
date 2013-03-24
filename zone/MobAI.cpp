@@ -1721,7 +1721,7 @@ void Mob::AI_Event_Engaged(Mob* attacker, bool iYellForHelp) {
 				if(!CastToNPC()->GetCombatEvent() && GetHP() > 0)
 				{
                     parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
-					uint16 emoteid = CastToNPC()->GetNPCEmoteID();
+					uint16 emoteid = GetEmoteID();
 					if(emoteid != 0)
 						CastToNPC()->DoNPCEmote(ENTERCOMBAT,emoteid);
 					CastToNPC()->SetCombatEvent(true);
@@ -1754,11 +1754,14 @@ void Mob::AI_Event_NoLongerEngaged() {
 	{
 		if(CastToNPC()->GetCombatEvent() && GetHP() > 0)
 		{
-			uint16 emoteid = CastToNPC()->GetNPCEmoteID();
+			if(entity_list.GetNPCByID(this->GetID()))
+			{
+			uint16 emoteid = CastToNPC()->GetEmoteID();
             parse->EventNPC(EVENT_COMBAT, CastToNPC(), NULL, "0", 0);
 			if(emoteid != 0)
 				CastToNPC()->DoNPCEmote(LEAVECOMBAT,emoteid);
 			CastToNPC()->SetCombatEvent(false);
+			}
 		}
 	}
 }

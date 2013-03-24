@@ -2559,7 +2559,6 @@ void Client::SendTaskFailed(int TaskID, int TaskIndex) {
 	tac->unknown5 = 0; // 0 for task complete or failed.
 
 	_log(TASKS__UPDATE, "TaskFailed");
-	
 	_pkt(TASKS__PACKETS, outapp);
 
 	QueuePacket(outapp);
