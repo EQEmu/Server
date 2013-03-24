@@ -3129,22 +3129,10 @@ uint8 Client::SlotConvert2(uint8 slot){
 
 void Client::Escape()
 {
-	hidden = true;
-	entity_list.ClearFeignAggro(this);
+    entity_list.RemoveFromTargets(this, true);
+    SetInvisible(1);
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage,12);
-	SimpleMessage_Struct *msg=(SimpleMessage_Struct *)outapp->pBuffer;
-	msg->color=0x010E;
-	msg->string_id=114;
-	FastQueuePacket(&outapp);
-
-	outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa_out->spawn_id = GetID();
-	sa_out->type = 0x03;
-	sa_out->parameter = 1;
-	entity_list.QueueClients(this, outapp);
-	safe_delete(outapp);
+    Message_StringID(MT_Skills, ESCAPE);
 }
 
 float Client::CalcPriceMod(Mob* other, bool reverse)

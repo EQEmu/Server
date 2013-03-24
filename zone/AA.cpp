@@ -480,8 +480,7 @@ void Client::HandleAAAction(aaID activate) {
 			break;
 
 		case aaActionFadingMemories:
-			entity_list.RemoveFromTargets(this, true);
-			SetInvisible(1);
+            // Do nothing since spell effect works correctly, but mana isn't used.
 			break;
 
 		default:
