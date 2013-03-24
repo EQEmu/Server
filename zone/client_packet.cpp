@@ -6461,7 +6461,12 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 
 		// Remove the merc from the old group
 		if (GetMerc())
-			GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
+		{
+			if(GetGroup())
+			{
+			Merc::RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
+			}
+		}
 
 		Group* group = entity_list.GetGroupByClient(inviter->CastToClient());
 
@@ -6660,35 +6665,31 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 						group->DelMember(memberToDisband,false);
 						Client* memberClient = memberToDisband->CastToClient();
 						Merc* memberMerc = memberToDisband->CastToClient()->GetMerc();
-						memberMerc->RemoveMercFromGroup(memberMerc, group);
+						if(memberClient && memberMerc && group)
+						{
+							Merc::RemoveMercFromGroup(memberMerc, group);
 
-						if(!memberMerc->IsGrouped() && !memberClient->IsGrouped()) {
-							Group *g = new Group(memberClient);
+							if(!memberMerc->IsGrouped() && !memberClient->IsGrouped()) {
+								Group *g = new Group(memberClient);
 
-							if(!g) {
-								delete g;
-								g = NULL;
-								return;
-							}
+								entity_list.AddGroup(g);
 
-							entity_list.AddGroup(g);
-
-							if(g->GetID() == 0) {
-								safe_delete(g);
-								return;
-							}
-							if(memberMerc->AddMercToGroup(memberMerc, g)) {
-								database.SetGroupLeaderName(g->GetID(), memberClient->GetName());
-								g->SaveGroupLeaderAA();
-								database.SetGroupID(memberClient->GetName(), g->GetID(), memberClient->CharacterID());
-								database.SetGroupID(memberMerc->GetName(), g->GetID(), memberClient->CharacterID(), true);
-								database.RefreshGroupFromDB(memberClient);
+								if(g->GetID() == 0) {
+									safe_delete(g);
+									return;
+								}
+								if(Merc::AddMercToGroup(memberMerc, g)) {
+									database.SetGroupLeaderName(g->GetID(), memberClient->GetName());
+									g->SaveGroupLeaderAA();
+									database.SetGroupID(memberClient->GetName(), g->GetID(), memberClient->CharacterID());
+									database.SetGroupID(memberMerc->GetName(), g->GetID(), memberClient->CharacterID(), true);
+									database.RefreshGroupFromDB(memberClient);
+								}
 							}
 						}
 					}
 					else if(memberToDisband->IsMerc()) {
-						memberToDisband->CastToMerc()->RemoveMercFromGroup(memberToDisband->CastToMerc(), group);
-						memberToDisband->CastToMerc()->RemoveMercFromGroup(memberToDisband->CastToMerc(), group);
+						Merc::RemoveMercFromGroup(memberToDisband->CastToMerc(), group);
 						memberToDisband->CastToMerc()->Suspend();
 					}
 				}

@@ -5642,9 +5642,6 @@ bool Merc::Suspend() {
 
 	SetSuspended(true);
 
-	/*if(HasGroup()) {
-		RemoveMercFromGroup(this, GetGroup());
-	}*/
 	mercOwner->GetMercInfo().IsSuspended = true;
 	mercOwner->GetMercInfo().SuspendedTime = time(NULL) + RuleI(Mercs, SuspendIntervalS);
 	mercOwner->GetMercInfo().MercTimerRemaining = mercOwner->GetMercTimer()->GetRemainingTime();
@@ -5652,7 +5649,6 @@ bool Merc::Suspend() {
 	Save();
 	mercOwner->GetMercTimer()->Disable();
 
-	//mercOwner->UpdateMercTimer();
 	mercOwner->SendMercSuspendResponsePacket(mercOwner->GetMercInfo().SuspendedTime);
 
 	Depop();
@@ -5782,7 +5778,7 @@ void Merc::Depop() {
 	entity_list.RemoveFromHateLists(this);
 
 	if(HasGroup())
-		RemoveMercFromGroup(this, GetGroup());
+		Merc::RemoveMercFromGroup(this, GetGroup());
 
 	if(HasPet()) {
 		GetPet()->Depop();
@@ -5843,7 +5839,7 @@ bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 	if(merc && group) {
 		// Remove merc from current group if any
 		if(merc->HasGroup()) {
-			merc->RemoveMercFromGroup(merc, merc->GetGroup());
+			Merc::RemoveMercFromGroup(merc, merc->GetGroup());
 		}
 		// Add merc to this group
 		if(group->AddMember(merc)) {
