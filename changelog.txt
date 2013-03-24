@@ -1,6 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 03/23/2013 ==
+demonstar55: Fix issues with escape not always working and fixed SE_FadingMemories to have the message since the message isn't part of the spell data.
+    Escape now uses just the spell and not the AA Actoin
+    Fading Memories now only uses the AA Action to eat mana
+
 == 03/21/2013 ==
 Bad_Captain: Fixed merc buffing bugs.
 Bad_Captain: Added checks before dismissing merc to prevent possible bugged mercs.
