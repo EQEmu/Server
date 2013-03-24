@@ -1451,7 +1451,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	{
 		if (killerMob->IsNPC()) {
             parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
-			uint16 emoteid = killerMob->CastToNPC()->GetNPCEmoteID();
+			uint16 emoteid = killerMob->GetEmoteID();
 			if(emoteid != 0)
 				killerMob->CastToNPC()->DoNPCEmote(KILLEDPC,emoteid);
 			killerMob->TrySpellOnKill(killed_level,spell);
@@ -2209,7 +2209,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 				this->CheckMinMaxLevel(killer);
 		}
 		entity_list.RemoveFromAutoXTargets(this);
-		uint16 emoteid = this->GetNPCEmoteID();
+		uint16 emoteid = this->GetEmoteID();
 		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,level>54?RuleI(NPC,MajorNPCCorpseDecayTimeMS):RuleI(NPC,MinorNPCCorpseDecayTimeMS));
 		entity_list.LimitRemoveNPC(this);
 		entity_list.AddCorpse(corpse, this->GetID());
@@ -2302,13 +2302,13 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	if(killerMob) {
 		Mob *oos = killerMob->GetOwnerOrSelf();
         parse->EventNPC(EVENT_DEATH, this, oos, "", 0);
-		uint16 emoteid = this->GetNPCEmoteID();
+		uint16 emoteid = this->GetEmoteID();
 		if(emoteid != 0)
 			this->DoNPCEmote(ONDEATH,emoteid);
 		if(oos->IsNPC())
 		{
             parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
-			uint16 emoteid = oos->CastToNPC()->GetNPCEmoteID();
+			uint16 emoteid = oos->GetEmoteID();
 			if(emoteid != 0)
 				oos->CastToNPC()->DoNPCEmote(KILLEDNPC,emoteid);
 			killerMob->TrySpellOnKill(killed_level,spell);

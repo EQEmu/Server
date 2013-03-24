@@ -784,6 +784,9 @@ public:
     void TarGlobal(const char *varname, const char *value, const char *duration, int npcid, int charid, int zoneid);
     void DelGlobal(const char *varname);
 
+	inline void SetEmoteID(uint16 emote) { emoteid = emote; }
+	inline uint16 GetEmoteID() { return emoteid; }
+
 protected:
     void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);
     static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
@@ -1110,6 +1113,7 @@ protected:
     bool m_targetable;
     int QGVarDuration(const char *fmt);
     void InsertQuestGlobal(int charid, int npcid, int zoneid, const char *name, const char *value, int expdate);
+	uint16 emoteid;
 
 private:
     void _StopSong();        //this is not what you think it is

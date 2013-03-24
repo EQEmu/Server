@@ -350,6 +350,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	guard_y_saved = 0;
 	guard_z_saved = 0;
 	guard_heading_saved = 0;
+	SetEmoteID(d->emoteid);
 	InitializeBuffSlots();
 	CalcBonuses();
 }
@@ -734,7 +735,7 @@ void NPC::DumpLoot(uint32 npcdump_index, ZSDump_NPC_Loot* npclootdump, uint32* N
 }
 
 void NPC::Depop(bool StartSpawnTimer) {
-	uint16 emoteid = this->GetNPCEmoteID();
+	uint16 emoteid = this->GetEmoteID();
 	if(emoteid != 0)
 		this->DoNPCEmote(ONDESPAWN,emoteid);
 	p_depop = true;
