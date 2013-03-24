@@ -6689,7 +6689,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 						}
 					}
 					else if(memberToDisband->IsMerc()) {
-						Merc::RemoveMercFromGroup(memberToDisband->CastToMerc(), group);
 						memberToDisband->CastToMerc()->Suspend();
 					}
 				}
