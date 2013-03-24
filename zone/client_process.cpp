@@ -191,8 +191,6 @@ bool Client::Process() {
 			if (GetMerc())
 			{
 				GetMerc()->Save();
-				if(GetMerc()->GetGroup() != NULL)
-				Merc::RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 				GetMerc()->Depop();
 			}
 			LeaveGroup();
@@ -210,8 +208,6 @@ bool Client::Process() {
 			if (GetMerc())
 			{
 				GetMerc()->Save();
-				if(GetMerc()->GetGroup() != NULL)
-				GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 				GetMerc()->Depop();
 			}
 			instalog = true;
@@ -680,8 +676,6 @@ bool Client::Process() {
 			if (GetMerc())
 			{
 				GetMerc()->Save();
-				if(GetMerc()->GetGroup() != NULL)
-				GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 				GetMerc()->Depop();
 			}
 			return false;
@@ -730,8 +724,6 @@ bool Client::Process() {
 		}
 		if (GetMerc())
 		{
-			if(GetMerc()->GetGroup() != NULL)
-			Merc::RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
 			GetMerc()->Depop();
 		}
 		adverrorinfo = 811;
