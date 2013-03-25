@@ -6459,15 +6459,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			}
 		}
 
-		// Remove the merc from the old group
-		if (GetMerc())
-		{
-			if(GetMerc()->GetGroup())
-			{
-			Merc::RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
-			}
-		}
-
 		Group* group = entity_list.GetGroupByClient(inviter->CastToClient());
 
 		if(!group){
@@ -6539,8 +6530,9 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 
 		// Add the merc back into the new group
 		if (GetMerc()) {
-			if (GetMerc()->AddMercToGroup(GetMerc(), group)) {
+			if (Merc::AddMercToGroup(GetMerc(), group)) {
 				database.SetGroupID(GetMerc()->GetName(), group->GetID(), inviter->CastToClient()->CharacterID(), true);
+				database.RefreshGroupFromDB(this);
 			}
 		}
 
@@ -6667,8 +6659,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 						Merc* memberMerc = memberToDisband->CastToClient()->GetMerc();
 						if(memberClient && memberMerc && group)
 						{
-							Merc::RemoveMercFromGroup(memberMerc, group);
-
 							if(!memberMerc->IsGrouped() && !memberClient->IsGrouped()) {
 								Group *g = new Group(memberClient);
 
@@ -6713,12 +6703,17 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 								return;
 							}
 
-							if(GetMerc()->AddMercToGroup(GetMerc(), g)) {
+							if(Merc::AddMercToGroup(GetMerc(), g)) {
 								database.SetGroupLeaderName(g->GetID(), this->GetName());
 								g->SaveGroupLeaderAA();
 								database.SetGroupID(this->GetName(), g->GetID(), this->CharacterID());
 								database.SetGroupID(GetMerc()->GetName(), g->GetID(), this->CharacterID(), true);
 								database.RefreshGroupFromDB(this);
+							}
+							else
+							{
+								if(GetMerc())
+								GetMerc()->Depop();
 							}
 						}
 					}

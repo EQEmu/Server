@@ -50,7 +50,6 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	_lost_confidence = false;
 	_hatedCount = 0;
 
-	ourNPCData = d;
 	memset(equipment, 0, sizeof(equipment));
 
 	SetMercID(0);
@@ -74,7 +73,6 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 
 Merc::~Merc() {
 	AI_Stop();
-	safe_delete(ourNPCData); //Since mercs are dynamically alloc'd we should probably safe_delete the data they were made from. I'm not entirely sure this is safe to delete a const.
 	entity_list.RemoveMerc(this->GetID());
 	UninitializeBuffSlots();
 }
@@ -1915,9 +1913,9 @@ void Merc::AI_Start(int32 iMoveDelay) {
 		AIautocastspell_timer->Start(RandomTimer(0, 2000), false);
 	}
 
-	if (ourNPCData) {
+	if (NPCTypedata_ours) {
 		//AI_AddNPCSpells(ourNPCData->npc_spells_id);
-		NPCSpecialAttacks(ourNPCData->npc_attacks,0);
+		NPCSpecialAttacks(NPCTypedata_ours->npc_attacks,0);
 	}
 
 	SendTo(GetX(), GetY(), GetZ());
@@ -5841,16 +5839,15 @@ bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 		if(merc->HasGroup()) {
 			Merc::RemoveMercFromGroup(merc, merc->GetGroup());
 		}
-		// Add merc to this group
-		if(group->AddMember(merc)) {
-			merc->SetFollowID(merc->GetMercOwner()->GetID());
-			Result = true;
+		//Try and add the member, followed by checking if the merc owner exists.
+		if(group->AddMember(merc) && merc->GetMercOwner() != NULL) { 
+				merc->SetFollowID(merc->GetMercOwner()->GetID());
+				Result = true;
 		}
-		else
-		{
+		else {
+			//Suspend it if the member is not added and the merc's owner is not valid.
 			merc->Suspend();
 		}
-
 	}
 
 	return Result;
