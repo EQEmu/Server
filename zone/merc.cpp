@@ -5839,16 +5839,15 @@ bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 		if(merc->HasGroup()) {
 			Merc::RemoveMercFromGroup(merc, merc->GetGroup());
 		}
-		// Add merc to this group
-		if(group->AddMember(merc)) {
-			merc->SetFollowID(merc->GetMercOwner()->GetID());
-			Result = true;
+		//Try and add the member, followed by checking if the merc owner exists.
+		if(group->AddMember(merc) && merc->GetMercOwner() != NULL) { 
+				merc->SetFollowID(merc->GetMercOwner()->GetID());
+				Result = true;
 		}
-		else
-		{
+		else {
+			//Suspend it if the member is not added and the merc's owner is not valid.
 			merc->Suspend();
 		}
-
 	}
 
 	return Result;
