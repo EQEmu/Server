@@ -125,6 +125,7 @@
 #define OTHER_HIT_NONMELEE			434		//%1 was hit by non-melee for %2 points of damage.
 #define SPELL_WORN_OFF_OF			436		//Your %1 spell has worn off of %2.
 #define SPELL_WORN_OFF				437		//Your %1 spell has worn off.
+#define PET_TAUNTING                438     //Taunting attacker, Master.
 #define INTERRUPT_SPELL				439		//Your spell is interrupted.
 #define LOSE_LEVEL					442		//You LOST a level! You are now level %1!
 #define GAIN_ABILITY_POINT			446		//You have gained an ability point!  You now have %1 ability point%2.
@@ -137,6 +138,8 @@
 #define FACTION_BEST				471		//Your faction standing with %1 could not possibly get any better.
 #define FACTION_BETTER				472		//Your faction standing with %1 got better.
 #define PET_REPORT_HP				488		//I have %1 percent of my hit points left.
+#define PET_NO_TAUNT                489     //No longer taunting attackers, Master.
+#define PET_DO_TAUNT                490     //Taunting attackers as normal, Master.
 #define CORPSE_DECAY1				495		//This corpse will decay in %1 minute(s) %2 seconds.
 #define DISC_LEVEL_ERROR			503		//You must be a level %1 ... to use this discipline.
 #define DISCIPLINE_CANUSEIN			504		//You can use a new discipline in %1 minutes %2 seconds.
@@ -176,6 +179,8 @@
 #define PET_GETLOST_STRING			1135	//As you wish, oh great one.
 #define PET_LEADERIS				1136	//My leader is %3.
 #define I_FOLLOW_NOONE				1137	//I follow no one.
+#define PET_ON_HOLD                 1138    //Waiting for your order to attack, Master.
+#define NOT_LEGAL_TARGET            1139    //I beg forgiveness, Master.  That is not a legal target.
 #define MERCHANT_BUSY				1143	//I'm sorry, I am busy right now.
 #define MERCHANT_GREETING			1144	//Welcome to my shop, %3.
 #define MERCHANT_HANDY_ITEM1		1145	//Hello there, %3. How about a nice %4?
@@ -273,6 +278,10 @@
 #define STRIKETHROUGH_STRING		9078	//You strike through your opponent's defenses!
 #define SPELL_REFLECT				9082	//%1's spell has been reflected by %2.
 #define NEW_SPELLS_AVAIL			9149	//You have new spells available to you.  Check the merchants near your guild master.
+#define PET_NOW_FOCUSING            9254    //Focusing on one target, Master.
+#define PET_NOT_FOCUSING            9263    //No longer focusing on one target, Master.
+#define PET_NOT_CASTING             9264    //Not casting spells, Master.
+#define PET_CASTING                 9291    //Casting spells normally, Master.
 #define AE_RAMPAGE					11015	//%1 goes on a WILD RAMPAGE!
 #define FACE_ACCEPTED				12028	//Facial features accepted.
 #define SPELL_LEVEL_TO_LOW			12048	//You will have to achieve level %1 before you can scribe the %2.
