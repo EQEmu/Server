@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 03/30/2013 ==
+demonstar55: Fixed most of the pet talking, all use StringIDs now. Pet now informs you when it taunts.
+
 == 03/23/2013 ==
 demonstar55: Fix issues with escape not always working and fixed SE_FadingMemories to have the message since the message isn't part of the spell data.
     Escape now uses just the spell and not the AA Actoin
