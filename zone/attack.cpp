@@ -1707,8 +1707,10 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	//Check that we can attack before we calc heading and face our target	
 	if (!IsAttackAllowed(other)) {
 		if (this->GetOwnerID())
-			entity_list.MessageClose(this, 1, 200, 10, "%s says, 'That is not a legal target master.'", this->GetCleanName());
+            this->Say_StringID(NOT_LEGAL_TARGET);
 		if(other) {
+            if (other->IsClient())
+                other->CastToClient()->RemoveXTarget(this, false);
 			RemoveFromHateList(other);
 			mlog(COMBAT__ATTACKS, "I am not allowed to attack %s", other->GetName());
 		}
