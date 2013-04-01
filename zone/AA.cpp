@@ -480,7 +480,7 @@ void Client::HandleAAAction(aaID activate) {
 			break;
 
 		case aaActionFadingMemories:
-            // Do nothing since spell effect works correctly, but mana isn't used.
+            Escape();
 			break;
 
 		default:
