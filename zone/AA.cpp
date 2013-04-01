@@ -257,7 +257,7 @@ void Client::ActivateAA(aaID activate){
 	if(caa->action != aaActionNone) {
 		if(caa->mana_cost > 0) {
 			if(GetMana() < caa->mana_cost) {
-				Message(0, "Not enough mana to use this skill.");
+				Message_StringID(13, INSUFFICIENT_MANA);
 				return;
 			}
 			SetMana(GetMana() - caa->mana_cost);
@@ -271,8 +271,7 @@ void Client::ActivateAA(aaID activate){
 				p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
 			}
 			p_timers.Start(AATimerID + pTimerAAStart, timer_base);
-			time_t timestamp = time(NULL);
-			SendAATimer(AATimerID, static_cast<uint32>(timestamp), static_cast<uint32>(timestamp));
+			SendAATimer(AATimerID, 0, 0);
 		}
 	}
 
@@ -282,13 +281,30 @@ void Client::ActivateAA(aaID activate){
 		if(caa->reuse_time > 0)
 		{
 			uint32 timer_base = CalcAAReuseTimer(caa);
+            SendAATimer(AATimerID, 0, 0);
+            p_timers.Start(AATimerID + pTimerAAStart, timer_base);
 			if(activate == aaImprovedHarmTouch || activate == aaLeechTouch)
 			{
 				p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
 			}
-
-			if(!CastSpell(caa->spell_id, target_id, 10, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1))
-					return;
+            // Bards can cast instant cast AAs while they are casting another song
+            if (spells[caa->spell_id].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
+                if(!SpellFinished(caa->spell_id, entity_list.GetMob(target_id), 10, -1, -1, spells[caa->spell_id].ResistDiff, false)) {
+                    //Reset on failed cast
+                    SendAATimer(AATimerID, 0, 0xFFFFFF);
+                    Message_StringID(15,ABILITY_FAILED);
+                    p_timers.Clear(&database, AATimerID + pTimerAAStart);
+                    return;
+                }
+            } else {
+                if(!CastSpell(caa->spell_id, target_id, 10, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
+                    //Reset on failed cast
+                    SendAATimer(AATimerID, 0, 0xFFFFFF);
+                    Message_StringID(15,ABILITY_FAILED);
+                    p_timers.Clear(&database, AATimerID + pTimerAAStart);
+                    return;
+                }
+            }
 		}
 		else
 		{
