@@ -1,6 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 04/01/2013 ==
+demonstar55: AA reuse timers now start when you hit the button and are reset upon failure
+demonstar55: Instant Cast bard AAs can now be used while singing a song
+
 == 03/30/2013 ==
 demonstar55: Fixed most of the pet talking, all use StringIDs now. Pet now informs you when it taunts.
 

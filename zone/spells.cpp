@@ -707,23 +707,26 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 		CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
 	}
     
-	if(casting_spell_type == 1 && IsClient()) //Rest AA Timer on failed cast
-		CastToClient()->GetPTimers().Clear(&database, casting_spell_timer);
-	
+    if(casting_spell_type == 1 && IsClient()) { //Rest AA Timer on failed cast
+        CastToClient()->SendAATimer(casting_spell_timer - pTimerAAStart, 0, 0xFFFFFF);
+        CastToClient()->Message_StringID(15,ABILITY_FAILED);
+        CastToClient()->GetPTimers().Clear(&database, casting_spell_timer);
+    }
+
 	ZeroCastingVars();	// resets all the state keeping stuff
-	
+
 	mlog(SPELLS__CASTING, "Spell %d has been interrupted.", spellid);
-	
+
 	if(!spellid)
 		return;
-	
+
 	if (bardsong || IsBardSong(casting_spell_id))
 		_StopSong();
 
     if(bard_song_mode) {
         return;
     }
-	
+
 	if(!message)
 		message = IsBardSong(spellid) ? SONG_ENDS_ABRUPTLY : INTERRUPT_SPELL;
 
@@ -1971,11 +1974,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		{
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			mlog(SPELLS__CASTING, "Spell %d: Setting custom reuse timer %d to %d", spell_id, casting_spell_timer, casting_spell_timer_duration);
-			if(casting_spell_type == 1) //AA
-			{
-				time_t timestamp = time(NULL);
-				CastToClient()->SendAATimer((casting_spell_timer - pTimerAAStart), timestamp, timestamp);
-			}
 		}
 		else if(spells[spell_id].recast_time > 1000) {
 			int recast = spells[spell_id].recast_time/1000;
