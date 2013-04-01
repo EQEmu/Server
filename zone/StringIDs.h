@@ -10,6 +10,7 @@
 #define SPELL_DOES_NOT_WORK_PLANE	107		//This spell does not work on this plane.
 #define CANT_SEE_TARGET				108		//You cannot see your target.
 #define MGB_STRING					113		//The next group buff you cast will hit all targets in range.
+#define ABILITY_FAILED              116     //Your ability failed. Timer has been reset.
 #define ESCAPE                      114     //You escape from combat, hiding yourself from view.
 #define TARGET_TOO_FAR				124		//Your target is too far away, get closer!
 #define PROC_TOOLOW					126		//Your will is not sufficient to command this weapon.
