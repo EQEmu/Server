@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 04/01/2013 ==
+demonstar55: Switched Fading Memories to use purely AA action so bards can use it while singing.
+
 == 03/30/2013 ==
 demonstar55: Fixed most of the pet talking, all use StringIDs now. Pet now informs you when it taunts.
 
