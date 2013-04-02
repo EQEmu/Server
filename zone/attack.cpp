@@ -562,7 +562,14 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 		}
 		else if(IsNPC())
 		{
-			armor = spellbonuses.AC + itembonuses.AC + (CastToNPC()->GetRawAC() / RuleR(Combat, NPCACFactor)) + 1;
+			armor = CastToNPC()->GetRawAC();
+
+			if(!IsPet()) 
+			{
+				armor = (armor / RuleR(Combat, NPCACFactor));
+			}
+
+			armor += spellbonuses.AC + itembonuses.AC + 1;
 		}
 
 		if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER)
