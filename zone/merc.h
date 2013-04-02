@@ -379,8 +379,6 @@ private:
 	bool    _lost_confidence;
 	int     _hatedCount;
 	uint32	owner_char_id;
-	const NPCType*	ourNPCData;
-
 	Timer	endupkeep_timer;
 	Timer	rest_timer;
 	Timer	confidence_timer;

@@ -6459,15 +6459,6 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			}
 		}
 
-		// Remove the merc from the old group
-		if (GetMerc())
-		{
-			if(GetMerc()->GetGroup())
-			{
-			Merc::RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
-			}
-		}
-
 		Group* group = entity_list.GetGroupByClient(inviter->CastToClient());
 
 		if(!group){
@@ -6539,8 +6530,9 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 
 		// Add the merc back into the new group
 		if (GetMerc()) {
-			if (GetMerc()->AddMercToGroup(GetMerc(), group)) {
+			if (Merc::AddMercToGroup(GetMerc(), group)) {
 				database.SetGroupID(GetMerc()->GetName(), group->GetID(), inviter->CastToClient()->CharacterID(), true);
+				database.RefreshGroupFromDB(this);
 			}
 		}
 
@@ -6667,8 +6659,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 						Merc* memberMerc = memberToDisband->CastToClient()->GetMerc();
 						if(memberClient && memberMerc && group)
 						{
-							Merc::RemoveMercFromGroup(memberMerc, group);
-
 							if(!memberMerc->IsGrouped() && !memberClient->IsGrouped()) {
 								Group *g = new Group(memberClient);
 
@@ -6713,12 +6703,17 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 								return;
 							}
 
-							if(GetMerc()->AddMercToGroup(GetMerc(), g)) {
+							if(Merc::AddMercToGroup(GetMerc(), g)) {
 								database.SetGroupLeaderName(g->GetID(), this->GetName());
 								g->SaveGroupLeaderAA();
 								database.SetGroupID(this->GetName(), g->GetID(), this->CharacterID());
 								database.SetGroupID(GetMerc()->GetName(), g->GetID(), this->CharacterID(), true);
 								database.RefreshGroupFromDB(this);
+							}
+							else
+							{
+								if(GetMerc())
+								GetMerc()->Depop();
 							}
 						}
 					}
@@ -7082,7 +7077,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				}
 				zone->AddAggroMob();
 				mypet->AddToHateList(GetTarget(), 1);
-				Message_StringID(10, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
+				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
 			}
 		}
 		break;
@@ -7098,7 +7093,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		break;
 	}
 	case PET_HEALTHREPORT: {
-		Message_StringID(10, PET_REPORT_HP, ConvertArrayF(mypet->GetHPRatio(), val1));
+		Message_StringID(MT_PetResponse, PET_REPORT_HP, ConvertArrayF(mypet->GetHPRatio(), val1));
 		mypet->ShowBuffList(this);
 		//Message(10,"%s tells you, 'I have %d percent of my hit points left.'",mypet->GetName(),(uint8)mypet->GetHPRatio());
 		break;
@@ -7155,14 +7150,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_TAUNT: {
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
-			Message(0,"%s says, 'Now taunting foes, Master!",mypet->GetCleanName());
+            Message_StringID(MT_PetResponse, PET_DO_TAUNT);
 			mypet->CastToNPC()->SetTaunting(true);
 		}
 		break;
 	}
 	case PET_NOTAUNT: {
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
-			Message(0,"%s says, 'No longer taunting foes, Master!",mypet->GetCleanName());
+			Message_StringID(MT_PetResponse, PET_NO_TAUNT);
 			mypet->CastToNPC()->SetTaunting(false);
 		}
 		break;
@@ -7219,7 +7214,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsFeared())
 				break; //could be exploited like PET_BACKOFF
 
-			mypet->Say("I will hold until given an order, master.");
+			mypet->Say_StringID(PET_ON_HOLD);
 			mypet->WipeHateList();
 			mypet->SetHeld(true);
 		}
@@ -7230,10 +7225,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsFeared())
 				break;
 			if (mypet->IsNoCast()) {
-				Message(0,"%s says, 'I will now cast spells, Master!",mypet->GetCleanName());
+				Message_StringID(MT_PetResponse, PET_CASTING);
 				mypet->CastToNPC()->SetNoCast(false);
 			} else {
-				Message(0,"%s says, 'I will no longer cast spells, Master!",mypet->GetCleanName());
+				Message_StringID(MT_PetResponse, PET_NOT_CASTING);
 				mypet->CastToNPC()->SetNoCast(true);
 			}
 		}
@@ -7244,10 +7239,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsFeared())
 				break;
 			if (mypet->IsFocused()) {
-				Message(0,"%s says, 'I am no longer focused, Master!",mypet->GetCleanName());
+				Message_StringID(MT_PetResponse, PET_NOT_FOCUSING);
 				mypet->CastToNPC()->SetFocused(false);
 			} else {
-				Message(0,"%s says, 'I will now focus my attention, Master!",mypet->GetCleanName());
+				Message_StringID(MT_PetResponse, PET_NOW_FOCUSING);
 				mypet->CastToNPC()->SetFocused(true);
 			}
 		}
@@ -7257,10 +7252,8 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if(GetAA(aaAdvancedPetDiscipline) >= 1 && mypet->IsNPC()) {
 			if (mypet->IsFeared())
 				break;
-			if (mypet->IsFocused()) {
-				Message(0,"%s says, 'I am already focused, Master!",mypet->GetCleanName());
-			} else {
-				Message(0,"%s says, 'I will now focus my attention, Master!",mypet->GetCleanName());
+			if (!mypet->IsFocused()) {
+				Message_StringID(MT_PetResponse, PET_NOW_FOCUSING);
 				mypet->CastToNPC()->SetFocused(true);
 			}
 		}
@@ -7271,10 +7264,8 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsFeared())
 				break;
 			if (mypet->IsFocused()) {
-				Message(0,"%s says, 'I am no longer focused, Master!",mypet->GetCleanName());
+				Message_StringID(MT_PetResponse, PET_NOT_FOCUSING);
 				mypet->CastToNPC()->SetFocused(false);
-			} else {
-				Message(0,"%s says, 'I am already not focused, Master!",mypet->GetCleanName());
 			}
 		}
 		break;

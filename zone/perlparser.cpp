@@ -158,6 +158,14 @@ void PerlXSParser::SendCommands(const char * pkgprefix, const char *event, uint3
 		//now call the requested sub
 		perl->dosub(std::string(pkgprefix).append("::").append(event).c_str());
 
+#ifdef EMBPERL_XS_CLASSES
+	    std::string eval_str = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client = undef;";
+		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::npc = undef;";
+		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::questitem = undef;";
+		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::entity_list = undef;";
+		perl->eval(eval_str.c_str());
+#endif
+
 	} catch(const char * err) {
 
 		//try to reduce some of the console spam...
