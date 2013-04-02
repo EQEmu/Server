@@ -1,6 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 04/2/2013 ==
+Bad_Captain: Fixed Merc lack of use of heal over time spells (causing excessive healing).
+Bad_Captain: Fixed pet mitigation/AC issues.
+
 == 04/01/2013 ==
 demonstar55: AA reuse timers now start when you hit the button and are reset upon failure
 demonstar55: Instant Cast bard AAs can now be used while singing a song
