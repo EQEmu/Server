@@ -2544,10 +2544,22 @@ void Mob::Say(const char *format, ...)
 void Mob::Say_StringID(uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
 {
 	char string_id_str[10];
-	
+
 	snprintf(string_id_str, 10, "%d", string_id);
 
 	entity_list.MessageClose_StringID(this, false, 200, 10,
+		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
+		message6, message7, message8, message9
+	);
+}
+
+void Mob::Say_StringID(uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+{
+	char string_id_str[10];
+
+	snprintf(string_id_str, 10, "%d", string_id);
+
+	entity_list.MessageClose_StringID(this, false, 200, type,
 		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
