@@ -1,6 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 04/03/2013 ==
+demonstar55: Overloaded Mob::Say_StringID with the option to provide a message type
+demonstar55: Switched rest of the Pet Messages to MT_PetResponse (Leader commands intentionally left the old way)
+
 == 04/2/2013 ==
 Bad_Captain: Fixed Merc lack of use of heal over time spells (causing excessive healing).
 Bad_Captain: Fixed pet mitigation/AC issues.
