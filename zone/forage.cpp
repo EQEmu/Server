@@ -400,7 +400,7 @@ void Client::GoFish()
 	}
 }
 
-void Client::ForageItem() {
+void Client::ForageItem(bool guarantee) {
 	
 	int skill_level = GetSkill(FORAGE);
 	
@@ -417,7 +417,7 @@ void Client::ForageItem() {
 	};
 	
 	// these may need to be fine tuned, I am just guessing here
-	if (MakeRandomInt(0,199) < skill_level) {
+	if (guarantee || MakeRandomInt(0,199) < skill_level) {
 		uint32 foragedfood = 0;
 		uint32 stringid = FORAGE_NOEAT;
 		
@@ -476,6 +476,12 @@ void Client::ForageItem() {
 		}
 		
         parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "",  inst != NULL ? inst->GetItem()->ID : 0);
+        
+        int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
+        if(!guarantee && MakeRandomInt(0,99) < ChanceSecondForage) {
+            this->Message_StringID(MT_Skills, FORAGE_MASTERY);
+            this->ForageItem(true);
+        }
 
 	} else {
 		Message_StringID(MT_Skills, FORAGE_FAILED);

@@ -345,6 +345,7 @@ struct StatBonuses {
 	bool	FrontalBackstabMinDmg;				// Allow frontal backstabs for min damage
 	uint8   FrontalBackstabChance;				// Chance to backstab from the front for full damage
 	uint8	ConsumeProjectile;					// Chance to not consume arrow.
+    uint8   ForageAdditionalItems;              // Chance to forage another item.
 	uint16 	ArcheryDamageModifier;				// Increase Archery Damage by percent
 	bool	SecondaryDmgInc;					// Allow off hand weapon to recieve damage bonus.
 	uint16	GiveDoubleAttack;					// Allow classes to double attack with a specified chance.

@@ -238,6 +238,7 @@
 #define DISCIPLINE_REUSE_MSG2		5808	//You can use the ability %1 again in %2 minute(s) %3 seconds.
 #define FAILED_TAUNT                5811    //You have failed to taunt your target.
 #define AA_NO_TARGET				5825	//You must first select a target for this ability!
+#define FORAGE_MASTERY              6012    //Your forage mastery has enabled you to find something else!
 #define GUILD_BANK_CANNOT_DEPOSIT	6097	// Cannot deposit this item.  Containers must be empty, and only one of each LORE and no NO TRADE or TEMPORARY items may be deposited.
 #define GUILD_BANK_FULL				6098	// There is no more room in the Guild Bank.
 #define GUILD_BANK_TRANSFERRED		6100	// '%1' transferred to Guild Bank from Deposits.
