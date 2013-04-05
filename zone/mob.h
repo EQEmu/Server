@@ -646,6 +646,7 @@ public:
     void StartEnrage();
     void ProcessEnrage();
     bool IsEnraged();
+	bool IsInfuriated();
     void Taunt(NPC* who, bool always_succeed,  float chance_bonus = 0);
 
     virtual void        AI_Init();
@@ -919,6 +920,7 @@ protected:
     char lastname[64];
 
     bool bEnraged;
+	bool bInfuriated;
     Timer *SpecAttackTimers[SPECATK_MAXNUM];
     bool destructibleobject;
 
