@@ -7086,7 +7086,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //keeps pet running while feared
 
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
-			mypet->Say_StringID(PET_CALMING);
+			mypet->Say_StringID(MT_PetResponse, PET_CALMING);
 			mypet->WipeHateList();
 			mypet->SetTarget(NULL);
 		}
@@ -7111,7 +7111,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			SetPet(NULL);
 		}
 
-		mypet->Say_StringID(PET_GETLOST_STRING);
+		mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
 		mypet->CastToNPC()->Depop();
 
 		//Oddly, the client (Titanium) will still allow "/pet get lost" command despite me adding the code below. If someone can figure that out, you can uncomment this code and use it.
@@ -7130,7 +7130,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 1) || mypet->GetPetType() != petAnimation) {
 			if(mypet->IsNPC()) {
 				mypet->SetHeld(false);
-				mypet->Say_StringID(PET_GUARDINGLIFE);
+				mypet->Say_StringID(MT_PetResponse, PET_GUARDINGLIFE);
 				mypet->SetPetOrder(SPO_Guard);
 				mypet->CastToNPC()->SaveGuardSpot();
 			}
@@ -7142,7 +7142,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 1) || mypet->GetPetType() != petAnimation) {
 			mypet->SetHeld(false);
-			mypet->Say_StringID(PET_FOLLOWING);
+			mypet->Say_StringID(MT_PetResponse, PET_FOLLOWING);
 			mypet->SetPetOrder(SPO_Follow);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
 		}
@@ -7167,7 +7167,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 1) || mypet->GetPetType() != petAnimation) {
 			mypet->SetHeld(false);
-			mypet->Say_StringID(PET_GUARDME_STRING);
+			mypet->Say_StringID(MT_PetResponse, PET_GUARDME_STRING);
 			mypet->SetPetOrder(SPO_Follow);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
 		}
@@ -7177,7 +7177,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
-			mypet->Say_StringID(PET_SIT_STRING);
+			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
 			mypet->SetPetOrder(SPO_Sit);
 			mypet->SetRunAnimSpeed(0);
 			if(!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
@@ -7190,7 +7190,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
-			mypet->Say_StringID(PET_SIT_STRING);
+			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
 			mypet->SetPetOrder(SPO_Follow);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
 		}
@@ -7200,7 +7200,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if(mypet->GetPetType() != petAnimation) {
-			mypet->Say_StringID(PET_SIT_STRING);
+			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
 			mypet->SetPetOrder(SPO_Sit);
 			mypet->SetRunAnimSpeed(0);
 			if(!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
@@ -7214,7 +7214,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsFeared())
 				break; //could be exploited like PET_BACKOFF
 
-			mypet->Say_StringID(PET_ON_HOLD);
+			mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD);
 			mypet->WipeHateList();
 			mypet->SetHeld(true);
 		}
