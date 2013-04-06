@@ -457,7 +457,7 @@ typedef enum  {
 #define SE_ReduceReuseTimer				310 // implemented
 #define SE_CombatSkills					311 // implemented
 #define SE_Sanctuary					312 // *not implemented
-#define SE_ForageAdditionalItems		313	// *not implemented[AA] - chance to forage additional items
+#define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
 #define SE_Invisibility2				314 // implemented - fixed duration invisible
 #define SE_InvisVsUndead2				315 // implemented - fixed duration ITU
 //#define SE_Unknown316					316	// not used
