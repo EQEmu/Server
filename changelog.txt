@@ -8,6 +8,10 @@ required SQL: 2013_04_04_NaturesBounty.sql
 demonstar55: Overloaded Mob::Say_StringID with the option to provide a message type
 demonstar55: Switched rest of the Pet Messages to MT_PetResponse (Leader commands intentionally left the old way)
 
+== 04/04/2013 ==
+demonstar55: Implemented SE_ForageAdditionalItems as a bonus
+required SQL: 2013_04_04_NaturesBounty.sql
+
 == 04/2/2013 ==
 Bad_Captain: Fixed Merc lack of use of heal over time spells (causing excessive healing).
 Bad_Captain: Fixed pet mitigation/AC issues.
