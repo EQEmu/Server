@@ -46,6 +46,7 @@ struct DBTradeskillRecipe_Struct {
 	bool replace_container;
 	vector< pair<uint32,uint8> > onsuccess;
 	vector< pair<uint32,uint8> > onfail;
+	vector< pair<uint32,uint8> > salvage;
 	string name;
 	uint8 must_learn;
 	bool has_learnt;

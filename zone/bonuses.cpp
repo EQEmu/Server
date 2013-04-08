@@ -838,6 +838,9 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
             case SE_ForageAdditionalItems:
                 newbon->ForageAdditionalItems += base1;
                 break;
+            case SE_Salvage:
+                newbon->SalvageChance += base1;
+                break;
 			case SE_ArcheryDamageModifier:
 				newbon->ArcheryDamageModifier += base1;
 				break;
@@ -2199,6 +2202,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
                 newbon->ForageAdditionalItems += effect_value;
                 break;
 
+            case SE_Salvage:
+                newbon->SalvageChance += effect_value;
+                break;
+
 			case SE_ArcheryDamageModifier:
 				newbon->ArcheryDamageModifier += effect_value;
 				break;
@@ -3342,6 +3349,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
                     spellbonuses.ForageAdditionalItems = effect_value;
                     aabonuses.ForageAdditionalItems = effect_value;
                     itembonuses.ForageAdditionalItems = effect_value;
+                    break;
+
+                case SE_Salvage:
+                    spellbonuses.SalvageChance = effect_value;
+                    aabonuses.SalvageChance = effect_value;
+                    itembonuses.SalvageChance = effect_value;
                     break;
 
 				case SE_ArcheryDamageModifier:

@@ -2716,6 +2716,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ArcheryDamageModifier:
 			case SE_ConsumeProjectile:
             case SE_ForageAdditionalItems:
+            case SE_Salvage:
 			case SE_FrontalBackstabChance:
 			case SE_FrontalBackstabMinDmg:
 			case SE_TripleBackstab:
