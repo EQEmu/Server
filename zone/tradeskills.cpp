@@ -1426,36 +1426,18 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 
     spec->salvage.clear();
     // Don't bother with the query if TS is nofail
-    if (!spec->nofail) {
-        if (RunQuery(query, qlen, errbuf, &result)) {
-            qcount = mysql_num_rows(result);
-            uint8 r;
-            for(r = 0; r < qcount; r++) {
-                row = mysql_fetch_row(result);
-                uint32 item = (uint32)atoi(row[0]);
-                uint8 num = (uint8)atoi(row[1]);
-                spec->salvage.push_back(pair<uint32,uint8>(item, num));
-            }
-            mysql_free_result(result);
+    if (!spec->nofail && RunQuery(query, qlen, errbuf, &result)) {
+        qcount = mysql_num_rows(result);
+        uint8 r;
+        for(r = 0; r < qcount; r++) {
+            row = mysql_fetch_row(result);
+            uint32 item = (uint32)atoi(row[0]);
+            uint8 num = (uint8)atoi(row[1]);
+            spec->salvage.push_back(pair<uint32,uint8>(item, num));
         }
-
-        // Previous query returned nothing, default to component list
-        if (!spec->salvage.size()) {
-            qlen = MakeAnyLenString(&query, "SELECT item_id,componentcount FROM tradeskill_recipe_entries"
-             " WHERE componentcount>0 AND recipe_id=%u", recipe_id);
-            if (RunQuery(query, qlen, errbuf, &result)) {
-                qcount = mysql_num_rows(result);
-                uint8 r;
-                for(r =0; r < qcount; r++) {
-                    row = mysql_fetch_row(result);
-                    uint32 item = (uint32)atoi(row[0]);
-                    uint8 num = (uint8)atoi(row[1]);
-                    spec->salvage.push_back(pair<uint32,uint8>(item, num));
-                }
-                mysql_free_result(result);
-            }
-        }
+        mysql_free_result(result);
     }
+
     safe_delete_array(query);
 
 	return(true);
