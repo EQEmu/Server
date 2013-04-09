@@ -1060,6 +1060,21 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			SummonItem(itr->first, itr->second);
 			itr++;
 		}
+
+        // Rolls on each item, is possible to return everything
+        int SalvageChance = aabonuses.SalvageChance + itembonuses.SalvageChance + spellbonuses.SalvageChance;
+        // Skip check if not a normal TS or if a quest recipe these should be nofail, but check amyways
+        if(SalvageChance && spec->tradeskill != 75 && !spec->quest) {
+            itr = spec->salvage.begin();
+            uint8 sc = 0;
+            while(itr != spec->salvage.end()) {
+                for(sc = 0; sc < itr->second; sc++)
+                    if(MakeRandomInt(0,99) < SalvageChance)
+                        SummonItem(itr->first, 1);
+                itr++;
+            }
+        }
+
 	}
 	return(false);
 }
@@ -1404,8 +1419,45 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 		}
 		mysql_free_result(result);
 	}
-	safe_delete_array(query);
-	
+
+    // Pull the salvage list
+    qlen = MakeAnyLenString(&query, "SELECT item_id,salvagecount FROM tradeskill_recipe_entries"
+     " WHERE salvagecount>0 AND recipe_id=%u", recipe_id);
+
+    spec->salvage.clear();
+    // Don't bother with the query if TS is nofail
+    if (!spec->nofail) {
+        if (RunQuery(query, qlen, errbuf, &result)) {
+            qcount = mysql_num_rows(result);
+            uint8 r;
+            for(r = 0; r < qcount; r++) {
+                row = mysql_fetch_row(result);
+                uint32 item = (uint32)atoi(row[0]);
+                uint8 num = (uint8)atoi(row[1]);
+                spec->salvage.push_back(pair<uint32,uint8>(item, num));
+            }
+            mysql_free_result(result);
+        }
+
+        // Previous query returned nothing, default to component list
+        if (!spec->salvage.size()) {
+            qlen = MakeAnyLenString(&query, "SELECT item_id,componentcount FROM tradeskill_recipe_entries"
+             " WHERE componentcount>0 AND recipe_id=%u", recipe_id);
+            if (RunQuery(query, qlen, errbuf, &result)) {
+                qcount = mysql_num_rows(result);
+                uint8 r;
+                for(r =0; r < qcount; r++) {
+                    row = mysql_fetch_row(result);
+                    uint32 item = (uint32)atoi(row[0]);
+                    uint8 num = (uint8)atoi(row[1]);
+                    spec->salvage.push_back(pair<uint32,uint8>(item, num));
+                }
+                mysql_free_result(result);
+            }
+        }
+    }
+    safe_delete_array(query);
+
 	return(true);
 }
 

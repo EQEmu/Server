@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 04/04/2013==
+demonstar55: Implemented Salvage AA
+required SQL: 2013_04_08_Salvage.sql
+script: generate_salvage.py - will generate the entries for some exceptions for salvage returns.
+
 == 04/04/2013 ==
 demonstar55: Implemented SE_ForageAdditionalItems as a bonus
 required SQL: 2013_04_04_NaturesBounty.sql
