@@ -33,7 +33,6 @@ def main():
         data = cur.fetchone()
         highest = data[0]
         for recipe_id in range(1, highest+1):
-            genflag = False
             complist = []
             cur.execute("SELECT item_id,componentcount FROM " + table + " WHERE componentcount>0 AND recipe_id=" + str(recipe_id))
             rows = cur.fetchall()
@@ -49,7 +48,6 @@ def main():
             # Remove any items that are returned on a failure
             for item in faillist:
                 if item in complist:
-                    genflag = True
                     complist.remove(item)
 
             # Remove some items that don't make sense
@@ -57,18 +55,15 @@ def main():
                 if item[0] == 10062:
                     for item2 in complist:
                         if item2[0] == 93510:
-                            genflag = True
                             complist.remove(item2)
                 if item[0] == 93618:
                     for item2 in complist:
                         if item2[0] in [93508, 93509]:
-                            genflag = True
                             complist.remove(item2)
 
 
-            if genflag:
-                for item in complist:
-                    cur.execute("INSERT INTO `" + table + "` (`recipe_id`, `item_id`, `componentcount`, `salvagecount`) VALUES ('" + str(recipe_id) + "', '" + str(item[0]) + "', '0', '" + str(item[1]) + "');\n")
+            for item in complist:
+                cur.execute("UPDATE `" + table + "` SET `salvagecount` = '" + str(item[1]) + "' WHERE `componentcount` > '0' AND `item_id` = '" + str(item[0]) + "' AND `recipe_id` = '" + str(recipe_id) + "';")
 
     except mdb.Error, e:
         print("Error %d: %s", e.args[0],e.args[1])

@@ -1,7 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
-== 04/04/2013==
+== 04/09/2013 ==
+demonstar55: Realized I was an idiot, changed salvage script to be better
+optional SQL: 2013_04_09_SalvageCleanOld.sql - run if ran old script
+
+== 04/08/2013 ==
 demonstar55: Implemented Salvage AA
 required SQL: 2013_04_08_Salvage.sql
 script: generate_salvage.py - will generate the entries for some exceptions for salvage returns.
