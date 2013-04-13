@@ -470,12 +470,13 @@ int main(int argc, char** argv) {
 		Sleep(ZoneTimerResolution);
 	}
 
-    safe_delete(parse);
-    safe_delete(pxs);
-    safe_delete(ps);
-    safe_delete(mmf);
-	
 	entity_list.Clear();
+
+	safe_delete(parse);
+	safe_delete(pxs);
+	safe_delete(ps);
+	safe_delete(mmf);
+	
 	if (zone != 0)
 		Zone::Shutdown(true);
 	//Fix for Linux world server problem.
