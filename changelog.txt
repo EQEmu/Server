@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/20/2013 ==
+JJ: Fixed rare case where heals from buffs could go negative.
+
 == 04/12/2013 ==
 Derision: Moved entity_list.Clear() prior to destruction of Perl objects in zone shutdown as I was seeing a segfault due to attempts to call EVENT_HATE_LIST as mobs were being destroyed.
 

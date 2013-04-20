@@ -1178,7 +1178,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				{
 					Gate();
 				}
-				// solar: shadow step is handled by client already, nothing required
+				// shadow step is handled by client already, nothing required
 				break;
 			}
 
@@ -1189,7 +1189,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				if (spells[spell_id].base[i] == 1)
 					BuffFadeByEffect(SE_Blind);
-				// solar: handled by client
+				// handled by client
 				// TODO: blind flag?
 				break;
 			}
@@ -1369,7 +1369,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Spin: %d", effect_value);
 #endif
-				// solar: the spinning is handled by the client
+				// the spinning is handled by the client
 				int max_level = spells[spell_id].max[i];
 				if(max_level == 0)
 					max_level = RuleI(Spells, BaseImmunityLevel); // Default max is 55 level limit
@@ -1383,7 +1383,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				}
 				else
 				{
-					// solar: the spinning is handled by the client
+					// the spinning is handled by the client
 					// Stun duration is based on the effect_value, not the buff duration(alot don't have buffs)
 					Stun(effect_value);
 					if(!IsClient()) {
@@ -2004,7 +2004,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Call Pet");
 #endif
-				// solar: this is cast on self, not on the pet
+				// this is cast on self, not on the pet
 				if(GetPet() && GetPet()->IsNPC())
 				{
 					GetPet()->CastToNPC()->GMMove(GetX(), GetY(), GetZ(), GetHeading());
@@ -2015,7 +2015,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_StackingCommand_Block:
 			case SE_StackingCommand_Overwrite:
 			{
-				// solar: these are special effects used by the buff stuff
+				// these are special effects used by the buff stuff
 				break;
 			}
 
@@ -2100,7 +2100,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Skill Attack");
 #endif
-				/*Kayen:
+				/*
 				Weapon Damage = spells[spell_id].base[i]
 				Chance to Hit Bonus = spells[spell_id].base2[i]
 				????  = spells[spell_id].max[i] - MOST of the effects have this value.
@@ -2812,11 +2812,10 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	return(effect_value);
 }
 
-// solar: generic formula calculations
+// generic formula calculations
 int Mob::CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int ticsremaining)
 {
 /*
-neotokyo: i need those formulas checked!!!!
 
 0 = base
 1 - 99 = base + level * formulaID
@@ -2845,8 +2844,11 @@ neotokyo: i need those formulas checked!!!!
 	int result = 0, updownsign = 1, ubase = base;
 	if(ubase < 0)
 		ubase = 0 - ubase;
+	int level_diff = caster_level - GetMinLevel(spell_id);
+	if (level_diff < 0)
+		level_diff = 0;
 
-	// solar: this updown thing might look messed up but if you look at the
+	// this updown thing might look messed up but if you look at the
 	// spells it actually looks like some have a positive base and max where
 	// the max is actually less than the base, hence they grow downward
 /*
@@ -2875,17 +2877,17 @@ snare has both of them negative, yet their range should work the same:
 		case 70:
 			result = ubase/100; break;
 		case   0:
-		case 100:	// solar: confirmed 2/6/04
+		case 100:	// confirmed 2/6/04
 			result = ubase; break;
-		case 101:	// solar: confirmed 2/6/04
+		case 101:	// confirmed 2/6/04
 			result = updownsign * (ubase + (caster_level / 2)); break;
-		case 102:	// solar: confirmed 2/6/04
+		case 102:	// confirmed 2/6/04
 			result = updownsign * (ubase + caster_level); break;
-		case 103:	// solar: confirmed 2/6/04
+		case 103:	// confirmed 2/6/04
 			result = updownsign * (ubase + (caster_level * 2)); break;
-		case 104:	// solar: confirmed 2/6/04
+		case 104:	// confirmed 2/6/04
 			result = updownsign * (ubase + (caster_level * 3)); break;
-		case 105:	// solar: confirmed 2/6/04
+		case 105:	// confirmed 2/6/04
 			result = updownsign * (ubase + (caster_level * 4)); break;
 
 		case 107:
@@ -2893,35 +2895,35 @@ snare has both of them negative, yet their range should work the same:
 			result = updownsign * (ubase + (caster_level / 2)); break;
 		case 108:
 			result = updownsign * (ubase + (caster_level / 3)); break;
-		case 109:	// solar: confirmed 2/6/04
+		case 109:	// confirmed 2/6/04
 			result = updownsign * (ubase + (caster_level / 4)); break;
 
-		case 110:	// solar: confirmed 2/6/04
+		case 110:	// confirmed 2/6/04
 			//is there a reason we dont use updownsign here???
 			result = ubase + (caster_level / 5); break;
 
 		case 111:
-            result = updownsign * (ubase + 6 * (caster_level - GetMinLevel(spell_id))); break;
+            result = updownsign * (ubase + 6 * level_diff); break;
 		case 112:
-            result = updownsign * (ubase + 8 * (caster_level - GetMinLevel(spell_id))); break;
+            result = updownsign * (ubase + 8 * level_diff); break;
 		case 113:
-            result = updownsign * (ubase + 10 * (caster_level - GetMinLevel(spell_id))); break;
+            result = updownsign * (ubase + 10 * level_diff); break;
 		case 114:
-            result = updownsign * (ubase + 15 * (caster_level - GetMinLevel(spell_id))); break;
+            result = updownsign * (ubase + 15 * level_diff); break;
 
         //these formula were updated according to lucy 10/16/04
-		case 115:	// solar: this is only in symbol of transal
-			result = ubase + 6 * (caster_level - GetMinLevel(spell_id)); break;
-		case 116:	// solar: this is only in symbol of ryltan
-            result = ubase + 8 * (caster_level - GetMinLevel(spell_id)); break;
-		case 117:	// solar: this is only in symbol of pinzarn
-            result = ubase + 12 * (caster_level - GetMinLevel(spell_id)); break;
-		case 118:	// solar: used in naltron and a few others
-            result = ubase + 20 * (caster_level - GetMinLevel(spell_id)); break;
+		case 115:	// this is only in symbol of transal
+			result = ubase + 6 * level_diff; break;
+		case 116:	// this is only in symbol of ryltan
+            result = ubase + 8 * level_diff; break;
+		case 117:	// this is only in symbol of pinzarn
+            result = ubase + 12 * level_diff; break;
+		case 118:	// used in naltron and a few others
+            result = ubase + 20 * level_diff; break;
 
-		case 119:	// solar: confirmed 2/6/04
+		case 119:	// confirmed 2/6/04
 			result = ubase + (caster_level / 8); break;
-		case 121:	// solar: corrected 2/6/04
+		case 121:	// corrected 2/6/04
 			result = ubase + (caster_level / 3); break;
 		case 122:
 		{
@@ -2933,7 +2935,7 @@ snare has both of them negative, yet their range should work the same:
 			result = updownsign * (ubase - (12 * ticdif));
 			break;
 		}
-		case 123:	// solar: added 2/6/04
+		case 123:	// added 2/6/04
 			result = MakeRandomInt(ubase, abs(max));
 			break;
 
@@ -3304,7 +3306,7 @@ void Mob::DoBuffTic(uint16 spell_id, uint32 ticsremaining, uint8 caster_level, M
 	}
 }
 
-// solar: removes the buff in the buff slot 'slot'
+// removes the buff in the buff slot 'slot'
 void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 {
 	if(slot < 0 || slot > GetMaxTotalSlots())
@@ -5317,7 +5319,7 @@ int32 Mob::GetAdditionalDamage(Mob *caster, uint32 spell_id, bool use_skill, uin
 
 int32 Mob::ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard) {
 
-	//Kayen 9-17-12: This is likely causing crashes, disabled till can resolve.
+	//9-17-12: This is likely causing crashes, disabled till can resolve.
 	if (IsBard)
 		return value;
 
