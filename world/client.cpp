@@ -906,6 +906,15 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 	return true;
 }
 
+bool Client::HandleZoneChangePacket(const EQApplicationPacket *app) {
+	// HoT sends this to world while zoning and wants it echoed back.
+	if(ClientVersionBit & BIT_RoFAndLater)
+	{
+		QueuePacket(app);
+	}
+	return true;
+}
+
 bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	EmuOpcode opcode = app->GetOpcode();
@@ -981,6 +990,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 			eqs->Close();
 			return true;
 		}
+		case OP_ZoneChange:
+		{
+			// HoT sends this to world while zoning and wants it echoed back.
+			return HandleZoneChangePacket(app);
+		}
 		case OP_LoginUnknown1:
 		case OP_LoginUnknown2:
 		case OP_CrashDump:
@@ -988,16 +1002,9 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		case OP_LoginComplete:
 		case OP_ApproveWorld:
 		case OP_WorldClientReady:
-		{
-			return true;
-		}
-		case OP_ZoneChange:
-		{
-			// HoT sends this to world while zoning and wants it echoed back.
-			if(ClientVersionBit & BIT_RoFAndLater)
-			{
-				QueuePacket(app);
-			}
+		{ 
+			// Essentially we are just 'eating' these packets, indicating
+			// they are handled.
 			return true;
 		}
 		default: 
