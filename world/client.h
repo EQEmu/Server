@@ -98,6 +98,8 @@ private:
 	bool seencharsel;
 	bool realfirstlogin;
 	bool HandlePacket(const EQApplicationPacket *app);
+	bool HandleNameApprovalPacket(const EQApplicationPacket *app);
+
 	EQStreamInterface* const eqs;
 };
 
