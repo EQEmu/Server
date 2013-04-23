@@ -104,6 +104,7 @@ private:
 	bool HandleGenerateRandomNamePacket(const EQApplicationPacket *app);
 	bool HandleCharacterCreateRequestPacket(const EQApplicationPacket *app);
 	bool HandleCharacterCreatePacket(const EQApplicationPacket *app);
+	bool HandleEnterWorldPacket(const EQApplicationPacket *app);
 
 	EQStreamInterface* const eqs;
 };
