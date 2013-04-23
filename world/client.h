@@ -102,6 +102,7 @@ private:
 	bool HandleNameApprovalPacket(const EQApplicationPacket *app);
 	bool HandleSendLoginInfoPacket(const EQApplicationPacket *app);
 	bool HandleGenerateRandomNamePacket(const EQApplicationPacket *app);
+	bool HandleCharacterCreateRequestPacket(const EQApplicationPacket *app);
 
 	EQStreamInterface* const eqs;
 };

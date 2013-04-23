@@ -595,12 +595,54 @@ bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
 	memset(ngs->name,0,64);
 	strcpy(ngs->name,rndname);
 
-//			char names[8][64] = { "How", "About", "You", "Think", "Of", "Your", "Own", "Name" };
-//			//Could have parts of the random name in this struct and they compile together
-//			NameGeneration_Struct* ngs = (NameGeneration_Struct*)app->pBuffer;
-//			strncpy(ngs->name,"Notcreated",64);
-
 	QueuePacket(app);
+	return true;
+}
+
+bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) {
+	// New OpCode in SoF
+    uint32 allocs = character_create_allocations.size();
+    uint32 combos = character_create_race_class_combos.size();
+    uint32 len = sizeof(RaceClassAllocation) * allocs;
+    len += sizeof(RaceClassCombos) * combos;
+    len += sizeof(uint8);
+    len += sizeof(uint32);
+    len += sizeof(uint32);
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_CharacterCreateRequest, len);
+    unsigned char *ptr = outapp->pBuffer;
+    *((uint8*)ptr) = 0;
+    ptr += sizeof(uint8);
+
+    *((uint32*)ptr) = allocs;
+    ptr += sizeof(uint32);
+
+    for(int i = 0; i < allocs; ++i) {
+        RaceClassAllocation *alc = (RaceClassAllocation*)ptr;
+
+        alc->Index = character_create_allocations[i].Index;
+        for(int j = 0; j < 7; ++j) {
+            alc->BaseStats[j] = character_create_allocations[i].BaseStats[j];
+            alc->DefaultPointAllocation[j] = character_create_allocations[i].DefaultPointAllocation[j];
+        }
+        ptr += sizeof(RaceClassAllocation);
+    }
+
+    *((uint32*)ptr) = combos;
+    ptr += sizeof(uint32);
+    for(int i = 0; i < combos; ++i) {
+        RaceClassCombos *cmb = (RaceClassCombos*)ptr;
+        cmb->ExpansionRequired = character_create_race_class_combos[i].ExpansionRequired;
+        cmb->Race = character_create_race_class_combos[i].Race;
+        cmb->Class = character_create_race_class_combos[i].Class;
+        cmb->Deity = character_create_race_class_combos[i].Deity;
+        cmb->AllocationIndex = character_create_race_class_combos[i].AllocationIndex;
+        cmb->Zone = character_create_race_class_combos[i].Zone;
+        ptr += sizeof(RaceClassCombos);
+    }
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
 	return true;
 }
 
@@ -651,53 +693,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleGenerateRandomNamePacket(app);
 		}
-		case OP_CharacterCreateRequest: {
+		case OP_CharacterCreateRequest: 
+		{
 			// New OpCode in SoF
-            uint32 allocs = character_create_allocations.size();
-            uint32 combos = character_create_race_class_combos.size();
-            uint32 len = sizeof(RaceClassAllocation) * allocs;
-            len += sizeof(RaceClassCombos) * combos;
-            len += sizeof(uint8);
-            len += sizeof(uint32);
-            len += sizeof(uint32);
-
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_CharacterCreateRequest, len);
-            unsigned char *ptr = outapp->pBuffer;
-            *((uint8*)ptr) = 0;
-            ptr += sizeof(uint8);
-
-            *((uint32*)ptr) = allocs;
-            ptr += sizeof(uint32);
-
-            for(int i = 0; i < allocs; ++i) {
-                RaceClassAllocation *alc = (RaceClassAllocation*)ptr;
-
-                alc->Index = character_create_allocations[i].Index;
-                for(int j = 0; j < 7; ++j) {
-                    alc->BaseStats[j] = character_create_allocations[i].BaseStats[j];
-                    alc->DefaultPointAllocation[j] = character_create_allocations[i].DefaultPointAllocation[j];
-                }
-                ptr += sizeof(RaceClassAllocation);
-            }
-
-            *((uint32*)ptr) = combos;
-            ptr += sizeof(uint32);
-            for(int i = 0; i < combos; ++i) {
-                RaceClassCombos *cmb = (RaceClassCombos*)ptr;
-                cmb->ExpansionRequired = character_create_race_class_combos[i].ExpansionRequired;
-                cmb->Race = character_create_race_class_combos[i].Race;
-                cmb->Class = character_create_race_class_combos[i].Class;
-                cmb->Deity = character_create_race_class_combos[i].Deity;
-                cmb->AllocationIndex = character_create_race_class_combos[i].AllocationIndex;
-                cmb->Zone = character_create_race_class_combos[i].Zone;
-                ptr += sizeof(RaceClassCombos);
-            }
-
-			QueuePacket(outapp);
-			safe_delete(outapp);
-			break;
+			return HandleCharacterCreateRequestPacket(app);
 		}
-
 		case OP_CharacterCreate: //Char create
 		{
 			if (GetAccountID() == 0)
