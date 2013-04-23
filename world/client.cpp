@@ -907,13 +907,11 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 }
 
 bool Client::HandlePacket(const EQApplicationPacket *app) {
-	const WorldConfig *Config=WorldConfig::get();
+
 	EmuOpcode opcode = app->GetOpcode();
 
 	clog(WORLD__CLIENT_TRACE,"Recevied EQApplicationPacket");
 	_pkt(WORLD__CLIENT_TRACE,app);
-
-	bool ret = true;
 
 	if (!eqs->CheckState(ESTABLISHED)) {
 		clog(WORLD__CLIENT,"Client disconnected (net inactive on send)");
@@ -939,8 +937,14 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	switch(opcode)
 	{
-		case OP_CrashDump:
+		case OP_World_Client_CRC1:
+		case OP_World_Client_CRC2: 
 		{
+			// There is no obvious entry in the CC struct to indicate that the 'Start Tutorial button
+			// is selected when a character is created. I have observed that in this case, OP_EnterWorld is sent
+			// before OP_World_Client_CRC1. Therefore, if we receive OP_World_Client_CRC1 before OP_EnterWorld,
+			// then 'Start Tutorial' was not chosen.
+			StartInTutorial = false;
 			return true;
 		}
 		case OP_SendLoginInfo:
@@ -968,35 +972,9 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleEnterWorldPacket(app);
 		}
-		case OP_LoginComplete:
-		{
-			return true;
-		}
 		case OP_DeleteCharacter: 
 		{
 			return HandleDeleteCharacterPacket(app);
-		}
-		case OP_ApproveWorld:
-		{
-			return true;
-		}
-		case OP_WorldClientReady:
-		{
-			return true;
-		}
-		case OP_World_Client_CRC1:
-		case OP_World_Client_CRC2: 
-		{
-			// There is no obvious entry in the CC struct to indicate that the 'Start Tutorial button
-			// is selected when a character is created. I have observed that in this case, OP_EnterWorld is sent
-			// before OP_World_Client_CRC1. Therefore, if we receive OP_World_Client_CRC1 before OP_EnterWorld,
-			// then 'Start Tutorial' was not chosen.
-			StartInTutorial = false;
-			return true;
-		}
-		case OP_WearChange: 
-		{ // User has selected a different character
-			return true;
 		}
 		case OP_WorldComplete: 
 		{
@@ -1005,6 +983,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_LoginUnknown1:
 		case OP_LoginUnknown2:
+		case OP_CrashDump:
+		case OP_WearChange:
+		case OP_LoginComplete:
+		case OP_ApproveWorld:
+		case OP_WorldClientReady:
 		{
 			return true;
 		}
