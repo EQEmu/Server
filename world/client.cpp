@@ -646,6 +646,36 @@ bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) 
 	return true;
 }
 
+bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
+	if (GetAccountID() == 0)
+	{
+		clog(WORLD__CLIENT_ERR,"Account ID not set; unable to create character.");
+		return false;
+	}
+	else if (app->size != sizeof(CharCreate_Struct))
+	{
+		clog(WORLD__CLIENT_ERR,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",app->size,sizeof(CharCreate_Struct));
+		DumpPacket(app);
+		// the previous behavior was essentially returning true here
+		// but that seems a bit odd to me.
+		return true; 
+	}
+
+	CharCreate_Struct *cc = (CharCreate_Struct*)app->pBuffer;
+	if(OPCharCreate(char_name, cc) == false)
+	{
+		database.DeleteCharacter(char_name);
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ApproveName, 1);
+		outapp->pBuffer[0] = 0;
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+    else
+		SendCharInfo();
+	
+	return true;
+}
+
 bool Client::HandlePacket(const EQApplicationPacket *app) {
 	const WorldConfig *Config=WorldConfig::get();
 	EmuOpcode opcode = app->GetOpcode();
@@ -700,31 +730,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_CharacterCreate: //Char create
 		{
-			if (GetAccountID() == 0)
-			{
-				clog(WORLD__CLIENT_ERR,"Account ID not set; unable to create character.");
-				ret = false;
-				break;
-			}
-			else if (app->size != sizeof(CharCreate_Struct))
-			{
-				clog(WORLD__CLIENT_ERR,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",app->size,sizeof(CharCreate_Struct));
-				DumpPacket(app);
-				break;
-			}
-
-			CharCreate_Struct *cc = (CharCreate_Struct*)app->pBuffer;
-			if(OPCharCreate(char_name, cc) == false)
-			{
-				database.DeleteCharacter(char_name);
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_ApproveName, 1);
-				outapp->pBuffer[0] = 0;
-				QueuePacket(outapp);
-				safe_delete(outapp);
-			}
-            else
-				SendCharInfo();
-			break;
+			return HandleCharacterCreatePacket(app);
 		}
 		case OP_EnterWorld: // Enter world
 		{
