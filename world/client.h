@@ -97,9 +97,11 @@ private:
 	bool firstlogin;
 	bool seencharsel;
 	bool realfirstlogin;
+
 	bool HandlePacket(const EQApplicationPacket *app);
 	bool HandleNameApprovalPacket(const EQApplicationPacket *app);
 	bool HandleSendLoginInfoPacket(const EQApplicationPacket *app);
+	bool HandleGenerateRandomNamePacket(const EQApplicationPacket *app);
 
 	EQStreamInterface* const eqs;
 };
