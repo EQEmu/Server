@@ -105,6 +105,7 @@ private:
 	bool HandleCharacterCreateRequestPacket(const EQApplicationPacket *app);
 	bool HandleCharacterCreatePacket(const EQApplicationPacket *app);
 	bool HandleEnterWorldPacket(const EQApplicationPacket *app);
+	bool HandleDeleteCharacterPacket(const EQApplicationPacket *app);
 
 	EQStreamInterface* const eqs;
 };

@@ -893,6 +893,19 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	return true;
 }
 
+bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
+
+	uint32 char_acct_id = database.GetAccountIDByChar((char*)app->pBuffer);
+	if(char_acct_id == GetAccountID())
+	{
+		clog(WORLD__CLIENT,"Delete character: %s",app->pBuffer);
+		database.DeleteCharacter((char *)app->pBuffer);
+		SendCharInfo();
+	}
+
+	return true;
+}
+
 bool Client::HandlePacket(const EQApplicationPacket *app) {
 	const WorldConfig *Config=WorldConfig::get();
 	EmuOpcode opcode = app->GetOpcode();
@@ -955,18 +968,13 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleEnterWorldPacket(app);
 		}
-		case OP_LoginComplete:{
+		case OP_LoginComplete:
+		{
 			return true;
 		}
-		case OP_DeleteCharacter: {
-			uint32 char_acct_id = database.GetAccountIDByChar((char*)app->pBuffer);
-			if(char_acct_id == GetAccountID())
-			{
-				clog(WORLD__CLIENT,"Delete character: %s",app->pBuffer);
-				database.DeleteCharacter((char *)app->pBuffer);
-				SendCharInfo();
-			}
-			break;
+		case OP_DeleteCharacter: 
+		{
+			return HandleDeleteCharacterPacket(app);
 		}
 		case OP_ApproveWorld:
 		{
