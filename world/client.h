@@ -99,6 +99,7 @@ private:
 	bool realfirstlogin;
 	bool HandlePacket(const EQApplicationPacket *app);
 	bool HandleNameApprovalPacket(const EQApplicationPacket *app);
+	bool HandleSendLoginInfoPacket(const EQApplicationPacket *app);
 
 	EQStreamInterface* const eqs;
 };

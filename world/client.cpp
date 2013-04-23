@@ -368,6 +368,114 @@ void Client::SendPostEnterWorld() {
 	safe_delete(outapp);
 }
 
+bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
+	if (app->size != sizeof(LoginInfo_Struct)) {
+		return false;
+	}
+
+	LoginInfo_Struct *li=(LoginInfo_Struct *)app->pBuffer;
+
+	// Quagmire - max len for name is 18, pass 15
+	char name[19] = {0};
+	char password[16] = {0};
+	strn0cpy(name, (char*)li->login_info,18);
+	strn0cpy(password, (char*)&(li->login_info[strlen(name)+1]), 15);
+
+	if (strlen(password) <= 1) {
+		// TODO: Find out how to tell the client wrong username/password
+		clog(WORLD__CLIENT_ERR,"Login without a password");
+		return false;
+	}
+
+	pZoning=(li->zoning==1);
+
+#ifdef IPBASED_AUTH_HACK
+	struct in_addr tmpip;
+	tmpip.s_addr = ip;
+#endif
+	uint32 id=0;
+	bool minilogin = loginserverlist.MiniLogin();
+	if(minilogin){
+		struct in_addr miniip;
+		miniip.s_addr = ip;
+		id = database.GetMiniLoginAccount(inet_ntoa(miniip));
+	}
+	else if(strncasecmp(name, "LS#", 3) == 0)
+		id=atoi(&name[3]);
+	else
+		id=atoi(name);
+#ifdef IPBASED_AUTH_HACK
+	if ((cle = zoneserver_list.CheckAuth(inet_ntoa(tmpip), password)))
+#else
+	if (loginserverlist.Connected() == false && !pZoning) {
+		clog(WORLD__CLIENT_ERR,"Error: Login server login while not connected to login server.");
+		return false;
+	}
+	if ((minilogin && (cle = client_list.CheckAuth(id,password,ip))) || (cle = client_list.CheckAuth(id, password)))
+#endif
+	{
+		if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {
+			clog(WORLD__CLIENT_ERR,"ID is 0.  Is this server connected to minilogin?");
+			if(!minilogin)
+				clog(WORLD__CLIENT_ERR,"If so you forget the minilogin variable...");
+			else
+				clog(WORLD__CLIENT_ERR,"Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
+			return false;
+		}
+
+		cle->SetOnline();
+
+		clog(WORLD__CLIENT,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
+
+		if(minilogin){
+			WorldConfig::DisableStats();
+			clog(WORLD__CLIENT,"MiniLogin Account #%d",cle->AccountID());
+		}
+		else {
+			clog(WORLD__CLIENT,"LS Account #%d",cle->LSID());
+		}
+
+		const WorldConfig *Config=WorldConfig::get();
+
+		if(Config->UpdateStats){
+			ServerPacket* pack = new ServerPacket;
+			pack->opcode = ServerOP_LSPlayerJoinWorld;
+			pack->size = sizeof(ServerLSPlayerJoinWorld_Struct);
+			pack->pBuffer = new uchar[pack->size];
+			memset(pack->pBuffer,0,pack->size);
+			ServerLSPlayerJoinWorld_Struct* join =(ServerLSPlayerJoinWorld_Struct*)pack->pBuffer;
+			strcpy(join->key,GetLSKey());
+			join->lsaccount_id = GetLSID();
+			loginserverlist.SendPacket(pack);
+			safe_delete(pack);
+		}
+
+		if (!pZoning)
+			SendGuildList();
+		SendLogServer();
+		SendApproveWorld();
+		SendEnterWorld(cle->name());
+		SendPostEnterWorld();
+		if (!pZoning) {
+			SendExpansionInfo();
+			SendCharInfo();
+			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
+		}
+
+	}
+	else {
+		// TODO: Find out how to tell the client wrong username/password
+		clog(WORLD__CLIENT_ERR,"Bad/Expired session key '%s'",name);
+		return false;
+	}
+
+	if (!cle)
+		return true;
+
+	cle->SetIP(GetIP());
+	return true;
+}
+
 bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 
 	if (GetAccountID() == 0) {
@@ -412,6 +520,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 	return true;
 }
 
+
 bool Client::HandlePacket(const EQApplicationPacket *app) {
 	const WorldConfig *Config=WorldConfig::get();
 	EmuOpcode opcode = app->GetOpcode();
@@ -449,112 +558,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 			break;
 		case OP_SendLoginInfo:
 		{
-			if (app->size != sizeof(LoginInfo_Struct)) {
-				ret = false;
-				break;
-			}
-
-			LoginInfo_Struct *li=(LoginInfo_Struct *)app->pBuffer;
-
-			// Quagmire - max len for name is 18, pass 15
-			char name[19] = {0};
-			char password[16] = {0};
-			strn0cpy(name, (char*)li->login_info,18);
-			strn0cpy(password, (char*)&(li->login_info[strlen(name)+1]), 15);
-
-			if (strlen(password) <= 1) {
-				// TODO: Find out how to tell the client wrong username/password
-				clog(WORLD__CLIENT_ERR,"Login without a password");
-				ret = false;
-				break;
-			}
-
-			pZoning=(li->zoning==1);
-
-#ifdef IPBASED_AUTH_HACK
-			struct in_addr tmpip;
-			tmpip.s_addr = ip;
-#endif
-			uint32 id=0;
-			bool minilogin = loginserverlist.MiniLogin();
-			if(minilogin){
-				struct in_addr miniip;
-				miniip.s_addr = ip;
-				id = database.GetMiniLoginAccount(inet_ntoa(miniip));
-			}
-			else if(strncasecmp(name, "LS#", 3) == 0)
-				id=atoi(&name[3]);
-			else
-				id=atoi(name);
-#ifdef IPBASED_AUTH_HACK
-			if ((cle = zoneserver_list.CheckAuth(inet_ntoa(tmpip), password)))
-#else
-			if (loginserverlist.Connected() == false && !pZoning) {
-				clog(WORLD__CLIENT_ERR,"Error: Login server login while not connected to login server.");
-				ret = false;
-				break;
-			}
-			if ((minilogin && (cle = client_list.CheckAuth(id,password,ip))) || (cle = client_list.CheckAuth(id, password)))
-#endif
-			{
-				if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {
-					clog(WORLD__CLIENT_ERR,"ID is 0.  Is this server connected to minilogin?");
-					if(!minilogin)
-						clog(WORLD__CLIENT_ERR,"If so you forget the minilogin variable...");
-					else
-						clog(WORLD__CLIENT_ERR,"Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
-					ret = false;
-					break;
-				}
-
-				cle->SetOnline();
-
-				clog(WORLD__CLIENT,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
-
-				if(minilogin){
-					WorldConfig::DisableStats();
-					clog(WORLD__CLIENT,"MiniLogin Account #%d",cle->AccountID());
-				}
-				else {
-					clog(WORLD__CLIENT,"LS Account #%d",cle->LSID());
-				}
-				if(Config->UpdateStats){
-					ServerPacket* pack = new ServerPacket;
-					pack->opcode = ServerOP_LSPlayerJoinWorld;
-					pack->size = sizeof(ServerLSPlayerJoinWorld_Struct);
-					pack->pBuffer = new uchar[pack->size];
-					memset(pack->pBuffer,0,pack->size);
-					ServerLSPlayerJoinWorld_Struct* join =(ServerLSPlayerJoinWorld_Struct*)pack->pBuffer;
-					strcpy(join->key,GetLSKey());
-					join->lsaccount_id = GetLSID();
-					loginserverlist.SendPacket(pack);
-					safe_delete(pack);
-				}
-
-				if (!pZoning)
-					SendGuildList();
-				SendLogServer();
-				SendApproveWorld();
-				SendEnterWorld(cle->name());
-				SendPostEnterWorld();
-				if (!pZoning) {
-					SendExpansionInfo();
-					SendCharInfo();
-					database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
-				}
-
-			}
-			else {
-				// TODO: Find out how to tell the client wrong username/password
-				clog(WORLD__CLIENT_ERR,"Bad/Expired session key '%s'",name);
-				ret = false;
-				break;
-			}
-
-			if (!cle)
-				break;
-			cle->SetIP(GetIP());
-			break;
+			return HandleSendLoginInfoPacket(app);
 		}
 		case OP_ApproveName: //Name approval
 		{
