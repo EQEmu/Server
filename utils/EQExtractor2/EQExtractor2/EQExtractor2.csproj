@@ -72,6 +72,7 @@
       <DependentUpon>LogForm.cs</DependentUpon>
     </Compile>
     <Compile Include="OpcodeManager.cs" />
+    <Compile Include="PatchApril15-2013.cs" />
     <Compile Include="PatchAug04-2011.cs" />
     <Compile Include="PatchAugust15-2012.cs" />
     <Compile Include="PatchDec7-2010.cs" />
@@ -137,6 +138,9 @@
       <DependentUpon>UserOptions.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="patch_April15-2013.conf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="patch_Aug04-2011.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
