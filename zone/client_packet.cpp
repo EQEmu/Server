@@ -2076,6 +2076,30 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 		}
 
+        //DCBOOKMARK
+        int r;
+        bool tryaug = false;
+        ItemInst* clickaug = 0;
+        Item_Struct* augitem = 0;
+
+        for(r = 0; r < MAX_AUGMENT_SLOTS; r++) {
+            const ItemInst* aug_i = inst->GetAugment(r);
+            if(!aug_i)
+                continue;
+            const Item_Struct* aug = aug_i->GetItem();
+            if(!aug)
+                continue;
+
+            if ( (aug->Click.Type == ET_ClickEffect) || (aug->Click.Type == ET_Expendable) || (aug->Click.Type == ET_EquipClick) || (aug->Click.Type == ET_ClickEffect2) )
+            {
+                tryaug = true;
+                clickaug = (ItemInst*)aug_i;
+                augitem = (Item_Struct*)aug;
+                spell_id = aug->Click.Effect;
+                break;
+            }
+        }
+
 		if((spell_id <= 0) && (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol && item->ItemType != ItemTypeSpell))
 		{
 			LogFile->write(EQEMuLog::Debug, "Item with no effect right clicked by %s",GetName());
@@ -2123,6 +2147,39 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					return;
 				}
 			}
+            else if (tryaug) //DCBOOKMARK
+            {
+                if (clickaug->GetCharges() == 0)
+                {
+                    //Message(0, "This item is out of charges.");
+                    Message_StringID(13, ITEM_OUT_OF_CHARGES);
+                    return;
+                }
+                if(GetLevel() >= augitem->Click.Level2)
+                {
+                    if(parse->ItemHasQuestSub(clickaug, "EVENT_ITEM_CLICK_CAST"))
+                    {
+                        //TODO: need to enforce and set recast timers here because the spell may not be cast.
+                        parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, clickaug->GetID(), slot_id);
+                        inst = m_inv[slot_id];
+                        if (!inst)
+                        {
+                            // Item was deleted by the perl event
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        //We assume augs aren't consumable
+                        CastSpell(augitem->Click.Effect, target_id, 10, augitem->CastTime, 0, 0, slot_id);
+                    }
+                }
+                else
+                {
+                    Message_StringID(13, ITEMS_INSUFFICIENT_LEVEL);
+                    return;
+                }
+            }
 			else
 			{
 				if(GetClientVersion() >= EQClientSoD && !inst->IsEquipable(GetBaseRace(),GetClass()))
@@ -2604,6 +2661,9 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
     } else if(con->faction == FACTION_THREATENLY) {
         con->faction = FACTION_DUBIOUS;
     }
+
+	//DCBOOKMARK
+	mod_consider(tmob, con);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -3200,6 +3260,9 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 			if((response).size() > 0)
 			{
+				//DCBOOKMARK
+				if( !mod_saylink(response, silentsaylink) ) { return; }
+
 				if(this->GetTarget() && this->GetTarget()->IsNPC())
 				{
 					if(silentsaylink)
@@ -7714,7 +7777,12 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		SetHP(GetHP() - damage);
 
 	if(GetHP() <= 0)
+	{
+		//DCBOOKMARK
+		mod_client_death_env();
+
 		Death(0, 32000, SPELL_UNKNOWN, HAND_TO_HAND);
+	}
 	SendHPUpdate();
 	return;
 }

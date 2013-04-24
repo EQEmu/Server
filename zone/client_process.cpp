@@ -645,6 +645,12 @@ bool Client::Process() {
 				--m_pp.intoxication;
 				CalcBonuses();
 			}
+
+			//DCBOOKMARK
+			if(ItemTickTimer.Check())
+            {
+                TickItemCheck();
+            }
 		}
 	}
 	

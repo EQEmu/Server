@@ -78,6 +78,8 @@ public:
 	map<string,string> GetBugDetails(const char *id);
     void ResolveBug(const char *id);
 	
+	void SendMessage(uint32 type, const char *msg);
+	void WorldShutDown(uint32 time, uint32 interval);
 //END PERL EXPORT
 
 protected:

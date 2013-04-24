@@ -722,11 +722,24 @@ void Console::ProcessCommand(const char* command) {
 				}
 			}
 			else if (strcasecmp(sep.arg[0], "worldshutdown") == 0 && admin >= consoleWorldStatus) {
-				ServerPacket* pack = new ServerPacket(ServerOP_ShutdownAll);
-				zoneserver_list.SendPacket(pack);
-				delete pack;
-				SendMessage(1, "Sending shutdown packet... goodbye.");
-				CatchSignal(0);
+				int32 time, interval;
+				if(sep.IsNumber(1) && sep.IsNumber(2) && ((time=atoi(sep.arg[1]))>0) && ((interval=atoi(sep.arg[2]))>0)) {
+					zoneserver_list.WorldShutDown(time, interval);
+				}
+				else if(strcasecmp(sep.arg[1], "now") == 0) {
+					zoneserver_list.WorldShutDown(0, 0);
+				}
+				else if(strcasecmp(sep.arg[1], "disable") == 0) {
+        			SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
+					zoneserver_list.SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
+        			zoneserver_list.shutdowntimer->Disable();
+			        zoneserver_list.reminder->Disable();
+				}
+				else {
+					SendMessage(1, "Usage: worldshutdown [now] [disable] ([time] [interval])");
+					//Go ahead and shut down since that's what this used to do when invoked this way.
+					zoneserver_list.WorldShutDown(0, 0);
+				}
 			}
 			else if (strcasecmp(sep.arg[0], "lock") == 0 && admin >= consoleLockStatus) {
 				WorldConfig::LockWorld();
