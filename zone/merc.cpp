@@ -61,6 +61,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 		skills[r] = database.GetSkillCap(GetClass(),(SkillType)r,GetLevel());
 	}
 
+    GetMercSize();
 	CalcBonuses();
 
 	SetHP(GetMaxHP());
@@ -80,7 +81,6 @@ Merc::~Merc() {
 void Merc::CalcBonuses()
 {
 	//_ZP(Merc_CalcBonuses);
-	GenerateBaseStats();
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	memset(&aabonuses, 0, sizeof(StatBonuses));
 	CalcItemBonuses(&itembonuses);
@@ -117,59 +117,7 @@ void Merc::CalcBonuses()
 	rooted = FindType(SE_Root);
 }
 
-void Merc::GenerateBaseStats() {
-
-	// base stats
-	uint16 Strength = _baseSTR;
-	uint16 Stamina = _baseSTA;
-	uint16 Dexterity = _baseDEX;
-	uint16 Agility = _baseAGI;
-	uint16 Wisdom = _baseWIS;
-	uint16 Intelligence = _baseINT;
-	uint16 Charisma = _baseCHA;
-	uint16 Attack = _baseATK;
-	uint16 MagicResist = _baseMR;
-	uint16 FireResist = _baseFR;
-	uint16 DiseaseResist = _baseDR;
-	uint16 PoisonResist = _basePR;
-	uint16 ColdResist = _baseCR;
-	uint16 CorruptionResist = _baseCorrup;
-
-	switch(this->GetClass()) {
-		case 1: // Warrior
-			Strength += 10;
-			Stamina += 20;
-			Agility += 10;
-			Dexterity += 10;
-			Attack += 12;
-			break;
-		case 2: // Cleric
-			Strength += 5;
-			Stamina += 5;
-			Agility += 10;
-			Wisdom += 30;
-			Attack += 8;
-			break;
-		case 4: // Ranger
-			Strength += 15;
-			Stamina += 10;
-			Agility += 10;
-			Wisdom += 15;
-			Attack += 17;
-			break;
-		case 9: // Rogue
-			Strength += 10;
-			Stamina += 20;
-			Agility += 10;
-			Dexterity += 10;
-			Attack += 12;
-			break;
-		case 12: // Wizard
-			Stamina += 20;
-			Intelligence += 30;
-			Attack += 5;
-			break;
-	}
+void Merc::GetMercSize() {
 
 	float MercSize = GetSize();
 
@@ -220,20 +168,6 @@ void Merc::GenerateBaseStats() {
 				break;
 	}
 
-	this->_baseSTR = Strength;
-	this->_baseSTA = Stamina;
-	this->_baseDEX = Dexterity;
-	this->_baseAGI = Agility;
-	this->_baseWIS = Wisdom;
-	this->_baseINT = Intelligence;
-	this->_baseCHA = Charisma;
-	this->_baseATK = Attack;
-	this->_baseMR = MagicResist;
-	this->_baseFR = FireResist;
-	this->_baseDR = DiseaseResist;
-	this->_basePR = PoisonResist;
-	this->_baseCR = ColdResist;
-	this->_baseCorrup = CorruptionResist;
 	this->size = MercSize;
 }
 
@@ -940,7 +874,7 @@ int16	Merc::CalcCorrup()
 }
 
 int16 Merc::CalcATK() {
-	ATK = _baseATK + itembonuses.ATK + spellbonuses.ATK + aabonuses.ATK + GroupLeadershipAAOffenseEnhancement() + ((GetSTR() + GetSkill(OFFENSE)) * 9 / 10);
+	ATK = _baseATK + itembonuses.ATK + spellbonuses.ATK + aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 	return(ATK);
 }
 
