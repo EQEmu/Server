@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 04/24/2013 ==
+Bad_Captain: Fixed a couple of merc stat issues.
+Bad_Captain: Removed unneeded bot pet AI.
+Bad_Captain: Fixed a few bot aggro issues. (Uleat)
+
 == 04/20/2013 ==
 JJ: Fixed rare case where heals from buffs could go negative.
 

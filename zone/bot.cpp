@@ -3122,10 +3122,6 @@ bool Bot::Process()
 	// Bot AI
 	AI_Process();
 
-	// Bot Pet AI
-	if(HasPet())
-		PetAIProcess();
-
 	return true;
 }
 
@@ -3581,8 +3577,8 @@ void Bot::AI_Process() {
 
 	if(!IsEngaged()) {
 		if(GetFollowID()) {
-			if(BotOwner && BotOwner->CastToClient()->AutoAttackEnabled() && BotOwner->GetTarget() &&
-				BotOwner->GetTarget()->IsNPC() && BotOwner->GetTarget()->GetHateAmount(BotOwner)) {
+			if(BotOwner && BotOwner->GetTarget() && BotOwner->GetTarget()->IsNPC() && (BotOwner->GetTarget()->GetHateAmount(BotOwner) 
+				|| BotOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(BotOwner->GetTarget())) {
 					AddToHateList(BotOwner->GetTarget(), 1);
 
 					if(HasPet())
@@ -3594,11 +3590,12 @@ void Bot::AI_Process() {
 				if(g) {
 					for(int counter = 0; counter < g->GroupCount(); counter++) {
 						if(g->members[counter]) {
-							if(g->members[counter]->IsEngaged() && g->members[counter]->GetTarget()) {
-								AddToHateList(g->members[counter]->GetTarget(), 1);
+							Mob* tar = g->members[counter]->GetTarget();
+							if(tar && tar->IsNPC() && tar->GetHateAmount(g->members[counter])  && IsAttackAllowed(g->members[counter]->GetTarget())) {
+								AddToHateList(tar, 1);
 
 								if(HasPet())
-									GetPet()->AddToHateList(g->members[counter]->GetTarget(), 1);
+									GetPet()->AddToHateList(tar, 1);
 
 								break;
 							}
@@ -6364,6 +6361,10 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillType attack_skil
 
 	SendHPUpdate();
 
+	if(this == from) { 
+		return; 
+	}
+
 	// Aggro the bot's group members
 	if(IsGrouped())
 	{
@@ -6372,7 +6373,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillType attack_skil
 		{
 			for(int i=0; i<MAX_GROUP_MEMBERS; i++)
 			{
-				if(g->members[i] && g->members[i]->IsBot() && from && !g->members[i]->CheckAggro(from))
+				if(g->members[i] && g->members[i]->IsBot() && from && !g->members[i]->CheckAggro(from) && g->members[i]->IsAttackAllowed(from))
 				{
 					g->members[i]->AddToHateList(from, 1);
 				}
@@ -9034,7 +9035,12 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined)
 
 	if(attacker && target)
 	{
-		if(attacker->IsClient() && target->IsBot() && attacker->CastToClient()->GetPVP() && target->CastToBot()->GetBotOwner()->CastToClient()->GetPVP())
+		if(attacker == target)
+		{
+			hasRuleDefined = true;
+			Result = false;
+		}
+		else if(attacker->IsClient() && target->IsBot() && attacker->CastToClient()->GetPVP() && target->CastToBot()->GetBotOwner()->CastToClient()->GetPVP())
 		{
 			hasRuleDefined = true;
 			Result = true;
