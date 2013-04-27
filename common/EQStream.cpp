@@ -284,6 +284,11 @@ uint32 processed=0,subpacket_length=0;
 		}
 		break;
 		case OP_Ack: {
+			if(!p->pBuffer || (p->Size() < 4))
+			{
+				_log(NET__ERROR, _L "Received OP_Ack that was of malformed size" __L);
+				break;
+			}
 #ifndef COLLECTOR
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			AckPackets(seq);

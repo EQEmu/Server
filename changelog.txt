@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 04/27/2013 ==
+Pixel Bounds: Verify OP_Ack size & fix crash in BasePacket::build_raw_header_dump due to uninitialised timestamp.
+
 == 04/24/2013 ==
 Bad_Captain: Fixed a couple of merc stat issues.
 Bad_Captain: Removed unneeded bot pet AI.
