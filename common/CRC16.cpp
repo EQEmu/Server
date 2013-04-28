@@ -1,6 +1,6 @@
 #include "crc32.h"
 
-unsigned long CRC16(const unsigned char *buf, int size, int key) 
+uint16 CRC16(const unsigned char *buf, int size, int key) 
 {
     // This is computed as the lowest 16 bits of an Ethernet CRC32 checksum
     // where the key is prepended to the data in little endian order.
