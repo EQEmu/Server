@@ -1,5 +1,18 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 04/27/2013 ==
+Pixel Bounds: Verify OP_Ack size & fix crash in BasePacket::build_raw_header_dump due to uninitialised timestamp.
+Derision: Verify minimum size of OP_Packet, OP_Fragment and OP_OutOfOrderAck.
+
+== 04/24/2013 ==
+Bad_Captain: Fixed a couple of merc stat issues.
+Bad_Captain: Removed unneeded bot pet AI.
+Bad_Captain: Fixed a few bot aggro issues. (Uleat)
+
+== 04/20/2013 ==
+JJ: Fixed rare case where heals from buffs could go negative.
+
 == 04/12/2013 ==
 Derision: Moved entity_list.Clear() prior to destruction of Perl objects in zone shutdown as I was seeing a segfault due to attempts to call EVENT_HATE_LIST as mobs were being destroyed.
 

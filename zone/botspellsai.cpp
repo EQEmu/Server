@@ -308,7 +308,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						continue;
 
 					// no buffs with illusions.. use #bot command to cast illusions
-					if(IsEffectInSpell(selectedBotSpell.SpellId, SE_Illusion))
+					if(IsEffectInSpell(selectedBotSpell.SpellId, SE_Illusion) && tar != this)
 						continue;
 
 					//no teleport spells use #bot command to cast teleports

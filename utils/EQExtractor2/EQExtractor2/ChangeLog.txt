@@ -1,5 +1,11 @@
 ﻿EQExtractor2 Changelog. All changes since the 1.0 release.
 
+==04/25/2013==
+Derision: Added SQL generation support to current Live client decoder.
+
+==04/24/2013==
+Derision: Added decoder to support packet dumps from current Live client. SQL generation NOT SUPPORTED YET (need tweaks to position struct).
+
 ==03/17/2013==
 Derision: Added SQL generation support to current Live client decoder.
 

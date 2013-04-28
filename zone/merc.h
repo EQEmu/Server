@@ -328,7 +328,7 @@ private:
 	int		GroupLeadershipAAHealthRegeneration();
 	int 	GroupLeadershipAAOffenseEnhancement();
 
-	void GenerateBaseStats();
+	void GetMercSize();
 	void GenerateAppearance();
 
 	bool LoadMercSpells();

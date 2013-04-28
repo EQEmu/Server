@@ -1083,6 +1083,15 @@ void Mob::AI_Process() {
 			RemoveFromHateList(this);
 			return;
 		}
+
+#ifdef BOTS
+		if (IsPet() && GetOwner()->IsBot() && target == GetOwner())
+        {
+                // this blocks all pet attacks against owner..bot pet test (copied above check)
+                RemoveFromHateList(this);
+                return;
+        }
+#endif //BOTS
       
 		if(DivineAura())
 			return;
