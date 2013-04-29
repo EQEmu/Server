@@ -1,8 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/28/2013 ==
+PiB: Implement CRC16 using CRC32.
 
 == 04/27/2013 ==
-Pixel Bounds: Verify OP_Ack size & fix crash in BasePacket::build_raw_header_dump due to uninitialised timestamp.
+PiB: Verify OP_Ack size & fix crash in BasePacket::build_raw_header_dump due to uninitialised timestamp.
 Derision: Verify minimum size of OP_Packet, OP_Fragment and OP_OutOfOrderAck.
 
 == 04/24/2013 ==
