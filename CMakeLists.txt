@@ -112,7 +112,7 @@ OPTION(EQEMU_BUILD_SERVER "Build the game server." ON)
 OPTION(EQEMU_BUILD_LOGIN "Build the login server." OFF)
 OPTION(EQEMU_BUILD_AZONE "Build azone utility." OFF)
 OPTION(EQEMU_BUILD_TESTS "Build utility tests." OFF)
-OPTION(EQEMU_BUILD_PERL "Build Perl parser." OFF)
+OPTION(EQEMU_BUILD_PERL "Build Perl parser." ON)
 
 #C++11 stuff
 IF(NOT MSVC)
