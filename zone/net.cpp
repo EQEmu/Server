@@ -284,9 +284,11 @@ int main(int argc, char** argv) {
 	}
 
     parse = new QuestParserCollection();
-    PerlXSParser *pxs = new PerlXSParser();
-    Parser *ps = new Parser();
-    parse->RegisterQuestInterface(pxs, "pl");
+#ifdef EMBPERL
+	PerlXSParser *pxs = new PerlXSParser();
+	parse->RegisterQuestInterface(pxs, "pl");
+#endif
+	Parser *ps = new Parser();
     //parse->RegisterQuestInterface(ps, "qst");
 
 
@@ -473,7 +475,9 @@ int main(int argc, char** argv) {
 	entity_list.Clear();
 
 	safe_delete(parse);
-	safe_delete(pxs);
+#ifdef EMBPERL
+ 	safe_delete(pxs);
+#endif
 	safe_delete(ps);
 	safe_delete(mmf);
 	
