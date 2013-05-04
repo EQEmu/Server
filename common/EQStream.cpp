@@ -173,6 +173,11 @@ uint32 processed=0,subpacket_length=0;
 		break;
 		
 		case OP_Packet: {
+			if(!p->pBuffer || (p->Size() < 4))
+			{
+				_log(NET__ERROR, _L "Received OP_Packet that was of malformed size" __L);
+				break;
+			}
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			SeqOrder check=CompareSequence(NextInSeq,seq);
 			if (check == SeqFuture) {
@@ -218,6 +223,11 @@ uint32 processed=0,subpacket_length=0;
 		break;
 		
 		case OP_Fragment: {
+			if(!p->pBuffer || (p->Size() < 4))
+			{
+				_log(NET__ERROR, _L "Received OP_Fragment that was of malformed size" __L);
+				break;
+			}
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			SeqOrder check=CompareSequence(NextInSeq,seq);
 			if (check == SeqFuture) {
@@ -284,6 +294,11 @@ uint32 processed=0,subpacket_length=0;
 		}
 		break;
 		case OP_Ack: {
+			if(!p->pBuffer || (p->Size() < 4))
+			{
+				_log(NET__ERROR, _L "Received OP_Ack that was of malformed size" __L);
+				break;
+			}
 #ifndef COLLECTOR
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			AckPackets(seq);
@@ -383,6 +398,11 @@ uint32 processed=0,subpacket_length=0;
 		}
 		break;
 		case OP_OutOfOrderAck: {
+			if(!p->pBuffer || (p->Size() < 4))
+			{
+				_log(NET__ERROR, _L "Received OP_OutOfOrderAck that was of malformed size" __L);
+				break;
+			}
 #ifndef COLLECTOR
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			MOutboundQueue.lock();

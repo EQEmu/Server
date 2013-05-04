@@ -28,6 +28,7 @@ BasePacket::BasePacket(const unsigned char *buf, uint32 len)
 	this->size=0;
 	this->_wpos = 0;
 	this->_rpos = 0;
+	this->timestamp.tv_sec = 0;
 	if (len>0) {
 		this->size=len;
 		pBuffer= new unsigned char[len];
