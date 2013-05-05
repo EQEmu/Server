@@ -7001,7 +7001,7 @@ void Client::RemoveAutoXTargets()
 		{
 			XTargets[i].ID = 0;
 			XTargets[i].Name[0] = 0;
-			SendXTargetPacket(i, NULL);
+			SendXTargetPacket(i, nullptr);
 		}
 	}
 }
