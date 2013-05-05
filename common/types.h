@@ -68,9 +68,6 @@ typedef const char Const_char;	//for perl XS
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp  _stricmp
 	typedef void ThreadReturnType;
