@@ -318,7 +318,6 @@ bool Mob::CheckHitChance(Mob* other, SkillType skillinuse, int Hand, int16 chanc
 	if(skillinuse == ARCHERY)
 		chancetohit -= (chancetohit * RuleR(Combat, ArcheryHitPenalty)) / 100.0f;
 
-	//DCBOOKMARK
 	chancetohit = mod_hit_chance(chancetohit, skillinuse, attacker);
 
 	// Chance to hit;   Max 95%, Min 30%
@@ -399,7 +398,6 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		if (!ghit) {	//if they are not using a garunteed hit discipline
 			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
 			bonus *= riposte_chance;
-			//DCBOOKMARK
 			bonus = mod_riposte_chance(bonus, attacker);
 			RollTable[0] = bonus + (itembonuses.HeroicDEX / 25); // 25 heroic = 1%, applies to ripo, parry, block
 		}
@@ -439,7 +437,6 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		
 		if (!ghit) {	//if they are not using a garunteed hit discipline
 			bonus = 2.0 + skill/35.0 + (GetDEX()/200);
-			//DCBOOKMARK
 			bonus = mod_block_chance(bonus, attacker);
 			RollTable[1] = RollTable[0] + (bonus * block_chance);
 		}
@@ -492,7 +489,6 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		if (!ghit) {	//if they are not using a garunteed hit discipline
 			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
 			bonus *= parry_chance;
-			//DCBOOKMARK
 			bonus = mod_parry_chance(bonus, attacker);
 			RollTable[2] = RollTable[1] + bonus;
 		}
@@ -567,7 +563,6 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 		int armor = 0;
 		float weight = 0.0;
 
-		//DCBOOKMARK
 		float monkweight = RuleI(Combat, MonkACBonusWeight);
 		monkweight = mod_monk_weight(monkweight, attacker);
 
@@ -653,7 +648,6 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 		}
 		mitigation_rating *= 0.847;
 
-		//DCBOOKMARK
 		mitigation_rating = mod_mitigation_rating(mitigation_rating, attacker);
 
 		if(attacker->IsClient())
@@ -665,7 +659,6 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 			attack_rating = (attacker->GetATK() + (attacker->GetSkill(OFFENSE)*1.345) + ((attacker->GetSTR()-66) * 0.9));
 		}
 
-		//DCBOOKMARK
 		attack_rating = attacker->mod_attack_rating(attack_rating, this);
 
 		float d = 10.0;
@@ -1246,7 +1239,6 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		else
 			damage = MakeRandomInt(min_hit, max_hit);
 
-		//DCBOOKMARK
 		damage = mod_client_damage(damage, skillinuse, Hand, weapon, other);
 
 		mlog(COMBAT__DAMAGE, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
@@ -1487,7 +1479,6 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 		if (killerMob->IsNPC()) {
             parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
 
-			//DCBOOKMARK
 			mod_client_death_npc(killerMob);
 
 			uint16 emoteid = killerMob->GetEmoteID();
@@ -1506,7 +1497,6 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 				killerMob->CastToClient()->SetDuelTarget(0);
 				entity_list.DuelMessage(killerMob,this,false);
 
-				//DCBOOKMARK
 				mod_client_death_duel(killerMob);
 
 			} else {
@@ -1880,7 +1870,6 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		    damage = (max_dmg+eleBane);
 		}
 		
-		//DCBOOKMARK
 		damage = mod_npc_damage(damage, skillinuse, Hand, &weapon_inst, other);
 
 		int32 hate = damage;
@@ -2137,7 +2126,6 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 				if (kr->members[i].member != NULL) { // If Group Member is Client
                     parse->EventNPC(EVENT_KILLED_MERIT, this, kr->members[i].member, "killed", 0);
 
-					//DCBOOKMARK
 					mod_npc_killed_merit(kr->members[i].member);
 
 					if(RuleB(TaskSystem, EnableTaskSystem))
@@ -2181,7 +2169,6 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 					Client *c = kg->members[i]->CastToClient();
                     parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
 
-					//DCBOOKMARK
 					mod_npc_killed_merit(c);
 
 					if(RuleB(TaskSystem, EnableTaskSystem))
@@ -2229,7 +2216,6 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 			 /* Send the EVENT_KILLED_MERIT event */
             parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
 
-			//DCBOOKMARK
 			mod_npc_killed_merit(give_exp_client);
 
 			if(RuleB(TaskSystem, EnableTaskSystem))
@@ -2363,7 +2349,6 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 		Mob *oos = killerMob->GetOwnerOrSelf();
         parse->EventNPC(EVENT_DEATH, this, oos, "", 0);
 
-		//DCBOOKMARK
 		mod_npc_killed(oos);
 
 		uint16 emoteid = this->GetEmoteID();
@@ -3457,7 +3442,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		if (damage > 0 && ((skill_used == BASH || skill_used == KICK) && attacker))
 		{
 			// NPCs can stun with their bash/kick as soon as they recieve it.
-			// Clients can stun mobs under level 56 with their bash/kick when they get level 55 or greater. -- DCBOOKMARK for rules
+			// Clients can stun mobs under level 56 with their bash/kick when they get level 55 or greater.
 			if( attacker->IsNPC() || (attacker->IsClient() && attacker->GetLevel() >= RuleI(Combat, ClientStunLevel) && GetLevel() < RuleI(Spells, BaseImmunityLevel)) )
 			{
 				if (MakeRandomInt(0,99) < (RuleI(Character, NPCBashKickStunChance)) || attacker->IsClient())

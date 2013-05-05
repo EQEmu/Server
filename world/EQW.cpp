@@ -459,7 +459,6 @@ void EQW::ResolveBug(const char *id) {
     safe_delete_array(query);
 }
 
-//DCBOOKMARK
 void EQW::SendMessage(uint32 type, const char *msg) {
     zoneserver_list.SendEmoteMessage(0, 0, 0, type, msg);
 }

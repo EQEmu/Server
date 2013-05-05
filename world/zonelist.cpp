@@ -716,7 +716,6 @@ void ZSList::GetZoneIDList(vector<uint32> &zones) {
 	
 }
 
-//DCBOOKMARK
 void ZSList::WorldShutDown(uint32 time, uint32 interval)
 {
    	if( time > 0 ) {

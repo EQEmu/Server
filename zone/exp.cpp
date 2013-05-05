@@ -290,7 +290,6 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 	if(check_level > maxlevel) {
 		check_level = maxlevel;
 
-		//DCBOOKMARK
 		if(RuleB(Character, KeepLevelOverMax))
 		{
 			set_exp = GetEXPForLevel(GetLevel()+1);

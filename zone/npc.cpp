@@ -1895,7 +1895,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "special_attacks")
 	{
-		//DCBOOKMARK - Added reset flag.
+		//Added reset flag.
 		NPCSpecialAttacks(val.c_str(), 0, 1);
 		return;
 	}
@@ -2416,7 +2416,6 @@ bool NPC::IsFactionListAlly(uint32 other_faction) {
 	return(CheckNPCFactionAlly(other_faction) == FACTION_ALLY);
 }
 
-//DCBOOKMARK
 int NPC::GetScore()
 {
     int lv = min(70, (int)GetLevel());

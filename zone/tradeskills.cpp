@@ -1016,7 +1016,6 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		}
 	}
 
-	//DCBOOKMARK
 	chance = mod_tradeskill_chance(chance, spec);
 
 	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || MakeRandomInt(0, 99) < AAChance){
@@ -1111,7 +1110,6 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 		}
 	}
 	   
-	//DCBOOKMARK
 	chance_stage2 = mod_tradeskill_skillup(chance_stage2);
 
 	if (chance_stage2 > MakeRandomFloat(0, 99)) {

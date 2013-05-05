@@ -252,7 +252,6 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 	//figure out what its worth
 	int32 pts = inst->GetItem()->Favor;
 
-	//DCBOOKMARK
 	pts = mod_tribute_item_value(pts);
 
 	if(pts < 1) {

@@ -2076,7 +2076,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 		}
 
-        //DCBOOKMARK
         int r;
         bool tryaug = false;
         ItemInst* clickaug = 0;
@@ -2147,7 +2146,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					return;
 				}
 			}
-            else if (tryaug) //DCBOOKMARK
+            else if (tryaug)
             {
                 if (clickaug->GetCharges() == 0)
                 {
@@ -2662,7 +2661,6 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
         con->faction = FACTION_DUBIOUS;
     }
 
-	//DCBOOKMARK
 	mod_consider(tmob, con);
 
 	QueuePacket(outapp);
@@ -3260,7 +3258,6 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 			if((response).size() > 0)
 			{
-				//DCBOOKMARK
 				if( !mod_saylink(response, silentsaylink) ) { return; }
 
 				if(this->GetTarget() && this->GetTarget()->IsNPC())
@@ -7778,7 +7775,6 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 
 	if(GetHP() <= 0)
 	{
-		//DCBOOKMARK
 		mod_client_death_env();
 
 		Death(0, 32000, SPELL_UNKNOWN, HAND_TO_HAND);

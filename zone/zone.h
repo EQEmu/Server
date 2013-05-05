@@ -70,7 +70,6 @@ struct ZoneEXPModInfo {
 	float AAExpMod; 
 };
 
-//DCBOOKMARK
 struct item_tick_struct {
     uint32       itemid;
     uint32       chance;
@@ -263,7 +262,6 @@ public:
 	
 	LinkedList<NPC_Emote_Struct*> NPCEmoteList;
 
-	//DCBOOKMARK
     void    LoadTickItems();
     uint32  GetSpawnKillCount(uint32 in_spawnid);
     void    UpdateHotzone();

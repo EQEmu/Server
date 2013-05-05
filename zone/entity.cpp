@@ -1888,7 +1888,6 @@ void EntityList::QueueClientsStatus(Mob* sender, const EQApplicationPacket* app,
 void EntityList::DuelMessage(Mob* winner, Mob* loser, bool flee) {
 	LinkedListIterator<Client*> iterator(client_list);
 
-	//DCBOOKMARK
 	if(winner->GetLevelCon(winner->GetLevel(), loser->GetLevel()) > 2)
 	{
 		parse->EventPlayer(EVENT_DUEL_WIN, winner->CastToClient(), loser->GetName(), loser->CastToClient()->CharacterID());

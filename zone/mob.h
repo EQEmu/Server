@@ -789,7 +789,6 @@ public:
 	inline void SetEmoteID(uint16 emote) { emoteid = emote; }
 	inline uint16 GetEmoteID() { return emoteid; }
 
-	//DCBOOKMARK
 	bool 	HasSpellEffect(int effectid);
 	int 	mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster);
 	float 	mod_hit_chance(float chancetohit, SkillType skillinuse, Mob* attacker);

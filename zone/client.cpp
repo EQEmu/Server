@@ -326,7 +326,6 @@ Client::Client(EQStreamInterface* ieqs)
 	}
 	MaxXTargets = 5;	
 	XTargetAutoAddHaters = true;
-	//DCBOOKMARK
 	LoadAccountFlags();
 }
 
@@ -845,7 +844,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		safe_delete(pack);
 	}
 
-	//DCBOOKMARK - Return true to proceed, false to return
+	//Return true to proceed, false to return
 	if(!mod_client_message(message, chan_num)) { return; }
 
 	// Garble the message based on drunkness
@@ -2343,7 +2342,7 @@ bool Client::CheckIncreaseSkill(SkillType skillid, Mob *against_who, int chancem
 		if( against_who->SpecAttacks[IMMUNE_AGGRO] || against_who->IsClient() ||
 			GetLevelCon(against_who->GetLevel()) == CON_GREEN )
 		{
-			//DCBOOKMARK - false by default
+			//false by default
 			return mod_can_increase_skill(skillid, against_who);
 		}
 	}
@@ -2357,7 +2356,6 @@ bool Client::CheckIncreaseSkill(SkillType skillid, Mob *against_who, int chancem
 			Chance = 1; // Make it always possible
 		Chance = (Chance * RuleI(Character, SkillUpModifier) / 100);
 
-		//DCBOOKMARK
 		Chance = mod_increase_skill_chance(Chance, against_who);
 
 		if(MakeRandomFloat(0, 99) < Chance)
@@ -2728,7 +2726,6 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 						max_percent = 70 + 10 * maxHPBonus;
 					}
 
-					//DCBOOKMARK
 					max_percent = mod_bindwound_percent(max_percent, bindmob);
 
 					int max_hp = bindmob->GetMaxHP()*max_percent/100;
@@ -2750,7 +2747,6 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 
 						bindhps += bindhps*bindBonus / 100;
 
-						//DCBOOKMARK
 						bindhps = mod_bindwound_hp(bindhps, bindmob);
 
 						//if the bind takes them above the max bindable
@@ -7624,7 +7620,6 @@ some day.
 	return 0;
 }
 
-//DCBOOKMARK
 void Client::LoadAccountFlags()
 {
     char errbuf[MYSQL_ERRMSG_SIZE];
@@ -7674,6 +7669,8 @@ std::string Client::GetAccountFlag(std::string flag)
 void Client::TickItemCheck()
 {
     int i;
+
+	if(zone->tick_items.empty()) { return; }
 
     //Scan equip slots for items
     for(i = 0; i <= 21; i++)

@@ -1133,7 +1133,6 @@ public:
 	void DuplicateLoreMessage(uint32 ItemID);
 	void GarbleMessage(char *, uint8);
 
-    //DCBOOKMARK
     void TickItemCheck();
 	void TryItemTick(int slot);
 	int16 GetActSTR() { return( min(GetMaxSTR(), GetSTR()) ); }
@@ -1466,7 +1465,6 @@ private:
 
     struct XTarget_Struct XTargets[XTARGET_HARDCAP];
 
-	//DCBOOKMARK
     Timer   ItemTickTimer;
 	std::map<std::string,std::string> accountflags;
 };

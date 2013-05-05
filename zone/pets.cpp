@@ -234,7 +234,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, c
 	if (petpower == -1) {
 		if (this->IsClient()) {
 			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
-			//DCBOOKMARK
 			act_power = CastToClient()->mod_pet_power(act_power, spell_id);
 		}
 	}

@@ -646,7 +646,6 @@ bool Client::Process() {
 				CalcBonuses();
 			}
 
-			//DCBOOKMARK
 			if(ItemTickTimer.Check())
             {
                 TickItemCheck();

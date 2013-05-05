@@ -440,7 +440,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		return(true);
 	}
 
-	//DCBOOKMARK
 	cast_time = mod_cast_time(cast_time);
 
 	// ok we know it has a cast time so we can start the timer now
@@ -2373,7 +2372,6 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 		IsBlindSpell(spell_id))
 		res += 1;
 	
-	//DCBOOKMARK
 	res = mod_buff_duration(res, caster, target, spell_id);
 
 	mlog(SPELLS__CASTING, "Spell %d: Casting level %d, formula %d, base_duration %d: result %d",
@@ -2479,7 +2477,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			return -1;
 		}
 
-	//DCBOOKMARK
 	int modval = mod_spell_stack(spellid1, caster_level1, caster1, spellid2, caster_level2, caster2);
 	if(modval < 2) { return(modval); }
 
@@ -4139,7 +4136,6 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	resist_chance += resist_modifier;
 	resist_chance += target_resist;
 
-	//DCBOOKMARK
 	resist_chance = mod_spell_resist(resist_chance, level_mod, resist_modifier, target_resist, resist_type, spell_id, caster);
 
 	//Do our min and max resist checks.

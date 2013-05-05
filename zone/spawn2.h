@@ -71,7 +71,6 @@ public:
 	bool	NPCPointerValid() { return (npcthis!=NULL); }
 	void	SetNPCPointer(NPC* n) { npcthis = n; }
 	void	SetTimer(uint32 duration) { timer.Start(duration); }
-	//DCBOOKMARK
 	uint32  GetKillCount() { return killcount; }
 protected:
 	friend class Zone;
@@ -94,7 +93,6 @@ private:
 	bool enabled;
     EmuAppearance anim;
 	bool IsDespawned;
-	//DCBOOKMARK
 	uint32  killcount;
 };
 

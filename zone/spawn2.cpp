@@ -220,7 +220,6 @@ bool Spawn2::Process() {
 		currentnpcid = npcid;
 		NPC* npc = new NPC(tmp, this, x, y, z, heading, FlyMode3);
 
-		//DCBOOKMARK
 		npc->mod_prespawn(this);
 
 		npcthis = npc;
@@ -342,7 +341,6 @@ void Spawn2::DeathReset(bool realdeath)
 	//zero out our NPC since he is now gone
 	npcthis = NULL;
 
-	//DCBOOKMARK
 	if(realdeath) { killcount++; }
 
 	//if we have a valid spawn id

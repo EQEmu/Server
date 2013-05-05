@@ -4675,7 +4675,6 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 	}
 }
 
-//DCBOOKMARK
 bool Mob::HasSpellEffect(int effectid)
 {
     int i;

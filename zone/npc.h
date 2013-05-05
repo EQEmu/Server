@@ -454,7 +454,6 @@ public:
 
 	void PrintOutQuestItems(Client* c);
 
-	//DCBOOKMARK
     uint32 	GetSpawnKillCount();
     int 	GetScore();
     void 	mod_prespawn(Spawn2 *sp);

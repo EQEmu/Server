@@ -1166,7 +1166,6 @@ bool Zone::Init(bool iStaticZone) {
 	
 	LogFile->write(EQEMuLog::Status, "Init Finished: ZoneID = %d, Time Offset = %d", zoneid, zone->zone_time.getEQTimeZone());
 
-	//DCBOOKMARK
 	LoadTickItems();
 
 	//MODDING HOOK FOR ZONE INIT
@@ -1491,7 +1490,6 @@ bool Zone::Process() {
 		}
 	}
 
-	//DCBOOKMARK
     if(hotzone_timer.Check()) { UpdateHotzone(); }
 
 	return true;
@@ -2672,7 +2670,6 @@ void Zone::ReloadWorld(uint32 Option){
 	}
 }
 
-//DCBOOKMARK
 void Zone::LoadTickItems()
 {
     char errbuf[MYSQL_ERRMSG_SIZE];

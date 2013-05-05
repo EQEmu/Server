@@ -48,7 +48,6 @@ int Mob::GetKickDamage() {
 	int32 mindmg = 1;
 	ApplySpecialAttackMod(KICK, dmg,mindmg);
 
-	//DCBOOKMARK
 	dmg = mod_kick_damage(dmg);
 
 	return(dmg);
@@ -70,7 +69,6 @@ int Mob::GetBashDamage() {
 	int32 mindmg = 1;
 	ApplySpecialAttackMod(BASH, dmg, mindmg);
 
-	//DCBOOKMARK
 	dmg = mod_bash_damage(dmg);
 
 	return(dmg);
@@ -287,7 +285,6 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 		int32 min_dmg = 0;
 		DoAnim(anim2HSlashing); 
 
-		//DCBOOKMARK
 		max_dmg = mod_frenzy_damage(max_dmg);
 
 		if (GetLevel() < 51)
@@ -500,7 +497,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 		}
 	}
 
-	//DCBOOKMARK -- This can potentially stack with changes to kick damage
+	//This can potentially stack with changes to kick damage
 	ht = ndamage = mod_monk_special_damage(ndamage, skill_type);
 
 	DoSpecialAttackDamage(other, skill_type, ndamage, min_dmg, ht, reuse);
@@ -675,7 +672,6 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 		ndamage = -5;
 	}
 
-	//DCBOOKMARK
 	ndamage = mod_backstab_damage(ndamage);
 
 	DoSpecialAttackDamage(other, BACKSTAB, ndamage, min_hit, hate, ReuseTime);
@@ -897,7 +893,6 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 				bool dobonus = false;
 				if(GetClass() == RANGER && GetLevel() > 50)
 				{
-					//DCBOOKMARK
 					int bonuschance = RuleI(Combat, ArcheryBonusChance);
 
 					bonuschance = mod_archery_bonus_chance(bonuschance, RangeWeapon);
@@ -954,7 +949,6 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					TotalDmg += other->GetAdditionalDamage(this, 0, true, ARCHERY);
 					TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(ARCHERY) / 100) + GetSkillDmgAmt(ARCHERY);
 
-					//DCBOOKMARK
 					TotalDmg = mod_archery_damage(TotalDmg, dobonus);
 
 					TryCriticalHit(other, ARCHERY, TotalDmg);
@@ -974,7 +968,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 		TryWeaponProc(RangeWeapon, other, 11);
 	}
 
-	//DCBOOKMARK - Arrow procs because why not?
+	//Arrow procs because why not?
     if((Ammo != NULL) && GetTarget() && other && (other->GetHP() > -10))
     {
         TryWeaponProc(Ammo, other, 11);
@@ -1126,7 +1120,6 @@ uint16 Mob::GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg)
 	if(MaxDmg < minDmg)
 		MaxDmg = minDmg;
 
-	//DCBOOKMARK
 	MaxDmg = mod_throwing_damage(MaxDmg);
 
 	return MaxDmg;
