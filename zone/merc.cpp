@@ -275,7 +275,8 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 		if(equipment[i] == 0)
 			continue;
 		const Item_Struct * itm = database.GetItem(equipment[i]);
-		AddItemBonuses(itm, newbon);
+		if(itm)
+			AddItemBonuses(itm, newbon);
 	}
 
 	//Power Source Slot
