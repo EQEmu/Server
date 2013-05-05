@@ -1486,6 +1486,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 
 	entity_list.RemoveFromTargets(this);
 	hate_list.RemoveEnt(this);
+	RemoveAutoXTargets();
 	
 	
 	//remove ourself from all proximities
