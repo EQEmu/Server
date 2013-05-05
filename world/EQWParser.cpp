@@ -76,12 +76,12 @@ EQWParser::EQWParser() {
 void EQWParser::DoInit() {
 	const char *argv_eqemu[] = { "",
 		"-w", "-W",
-		"-e", "0;", NULL };
+		"-e", "0;", nullptr };
 
 	int argc = 5;
 
 	char **argv = (char **)argv_eqemu;
-	char **env = { NULL };
+	char **env = { nullptr };
 
 	PL_perl_destruct_level = 1;
 
@@ -151,7 +151,7 @@ void EQWParser::DoInit() {
 	//make sure the EQW pointer is set up in this package
 	EQW *curc = EQW::Singleton();
 	SV *l = get_sv("world::EQW", true);
-	if(curc != NULL) {
+	if(curc != nullptr) {
 		sv_setref_pv(l, "EQW", curc);
 	} else {
 		//clear out the value, mainly to get rid of blessedness
@@ -162,7 +162,7 @@ void EQWParser::DoInit() {
 	EQDB::SetMySQL(database.getMySQL());
 	EQDB *curc_db = EQDB::Singleton();
 	SV *l_db = get_sv("world::EQDB", true);
-	if(curc_db != NULL) {
+	if(curc_db != nullptr) {
 		sv_setref_pv(l_db, "EQDB", curc_db);
 	} else {
 		//clear out the value, mainly to get rid of blessedness
@@ -272,7 +272,7 @@ void EQWParser::EQW_eval(const char *pkg, const char *code) {
 	snprintf(namebuf, 64, "EQW");
 //	snprintf(namebuf, 64, "%s::EQW", pkg);
 	SV *l = get_sv(namebuf, true);
-	if(curc != NULL) {
+	if(curc != nullptr) {
 		sv_setref_pv(l, "EQW", curc);
 	} else {
 		//clear out the value, mainly to get rid of blessedness
@@ -283,7 +283,7 @@ void EQWParser::EQW_eval(const char *pkg, const char *code) {
 	snprintf(namebuf, 64, "EQDB");
 //	snprintf(namebuf, 64, "%s::EQW", pkg);
 	SV *l_db = get_sv(namebuf, true);
-	if(curc_db != NULL) {
+	if(curc_db != nullptr) {
 		sv_setref_pv(l_db, "EQDB", curc_db);
 	} else {
 		//clear out the value, mainly to get rid of blessedness
@@ -305,7 +305,7 @@ void EQWParser::SetHTTPRequest(const char *pkg, HTTPRequest *it) {
 	snprintf(namebuf, 64, "request");
 //	snprintf(namebuf, 64, "%s::EQW", pkg);
 	SV *l = get_sv(namebuf, true);
-	if(it != NULL) {
+	if(it != nullptr) {
 		sv_setref_pv(l, "HTTPRequest", it);
 	} else {
 		//clear out the value, mainly to get rid of blessedness

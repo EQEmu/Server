@@ -47,7 +47,7 @@ namespace SOCKETS_NAMESPACE {
 
 HttpdForm::HttpdForm(IFile *infil) : raw(false)
 {
-	CGI *cgi = NULL;
+	CGI *cgi = nullptr;
 	char *c_t = getenv("CONTENT_TYPE");
 	char *c_l = getenv("CONTENT_LENGTH");
 	size_t extra = 2;
@@ -59,7 +59,7 @@ HttpdForm::HttpdForm(IFile *infil) : raw(false)
 	if (c_t && !strncmp(c_t, "multipart/form-data",19))
 	{
 		Parse pa(c_t,";=");
-		char *tempcmp = NULL;
+		char *tempcmp = nullptr;
 		size_t tc = 0;
 		size_t l = 0;
 		std::string str = pa.getword();
@@ -209,7 +209,7 @@ HttpdForm::HttpdForm(IFile *infil) : raw(false)
 #else
 						sprintf(fn,"/tmp/%s",current_filename.c_str());
 #endif
-						if ((fil = fopen(fn, "wb")) != NULL)
+						if ((fil = fopen(fn, "wb")) != nullptr)
 						{
 							infil -> fread(&c,1,1);
 							while (!infil -> eof())
@@ -353,7 +353,7 @@ HttpdForm::HttpdForm(IFile *infil) : raw(false)
 
 HttpdForm::HttpdForm(const std::string& buffer,size_t l) : raw(false)
 {
-	CGI *cgi = NULL;
+	CGI *cgi = nullptr;
 	char slask[8888];
 	char name[200];
 	int i = 0;
@@ -424,7 +424,7 @@ HttpdForm::HttpdForm(const std::string& buffer,size_t l) : raw(false)
 
 HttpdForm::~HttpdForm()
 {
-	CGI *cgi = NULL; //,*tmp;
+	CGI *cgi = nullptr; //,*tmp;
 
 	for (cgi_v::iterator it = m_cgi.begin(); it != m_cgi.end(); it++)
 	{
@@ -525,7 +525,7 @@ bool HttpdForm::getnext(std::string& n,std::string& v) //char *n,size_t len,char
 
 int HttpdForm::getvalue(const std::string& n,std::string& v) //char *v,size_t len)
 {
-	CGI *cgi = NULL;
+	CGI *cgi = nullptr;
 	int r = 0;
 
 	for (cgi_v::iterator it = m_cgi.begin(); it != m_cgi.end(); it++)
@@ -533,7 +533,7 @@ int HttpdForm::getvalue(const std::string& n,std::string& v) //char *v,size_t le
 		cgi = *it;
 		if (cgi -> name == n)
 			break;
-		cgi = NULL;
+		cgi = nullptr;
 	}
 	if (cgi)
 	{
@@ -572,7 +572,7 @@ std::string HttpdForm::getvalue(const std::string& n)
 
 size_t HttpdForm::getlength(const std::string& n)
 {
-	CGI *cgi = NULL;
+	CGI *cgi = nullptr;
 	size_t l;
 
 	for (cgi_v::iterator it = m_cgi.begin(); it != m_cgi.end(); it++)
@@ -580,7 +580,7 @@ size_t HttpdForm::getlength(const std::string& n)
 		cgi = *it;
 		if (cgi -> name == n)
 			break;
-		cgi = NULL;
+		cgi = nullptr;
 	}
 	l = cgi ? cgi -> value.size() : 0;
 	if (cgi && !raw)

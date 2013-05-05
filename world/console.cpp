@@ -781,10 +781,10 @@ void Console::ProcessCommand(const char* command) {
 			}
 			else if (strcasecmp(sep.arg[0], "LSReconnect") == 0 && admin >= 100) {
 				#ifdef _WINDOWS
-					_beginthread(AutoInitLoginServer, 0, NULL);
+					_beginthread(AutoInitLoginServer, 0, nullptr);
 				#else
 					pthread_t thread;
-					pthread_create(&thread, NULL, &AutoInitLoginServer, NULL);
+					pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
 				#endif
 				RunLoops = true;
 				SendMessage(1, "  Login Server Reconnect manually restarted by Console");

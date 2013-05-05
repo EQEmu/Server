@@ -40,14 +40,14 @@ public:
 
 	// Produce a const singleton
 	static const WorldConfig *get() {
-		if (_world_config == NULL) 
+		if (_world_config == nullptr) 
 			LoadConfig();
 		return(_world_config);
 	}
 
 	// Load the config
 	static bool LoadConfig() {
-		if (_world_config != NULL)
+		if (_world_config != nullptr)
 			delete _world_config;
 		_world_config=new WorldConfig;
 		_config=_world_config;

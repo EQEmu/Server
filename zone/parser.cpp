@@ -581,7 +581,7 @@ void Parser::SendCommands(const char * event, uint32 npcid, NPC* npcmob, Mob* mo
 			if(mob && mob->IsClient())
 				quest_manager.StartQuest(npcmob, mob->CastToClient());
 			else
-				quest_manager.StartQuest(npcmob, NULL);
+				quest_manager.StartQuest(npcmob, nullptr);
 			while (listIt2 != p->Event.end())
 			{
 				pp = *listIt2;
@@ -615,7 +615,7 @@ void Parser::scanformat(char *string, const char *format, char arg[10][1024])
 
 	for(;;)
 	{
-		// increment while they're the same (and not NULL)
+		// increment while they're the same (and not nullptr)
 		while(*format && *string && *format == *string) {
 			format++;
 			string++;
@@ -1150,7 +1150,7 @@ printf("GetVar(%s) = '%s'\n", varname.c_str(), p->value.c_str());
 		iterator++;
 	}
 	checkfirst="";
-	checkfirst = "NULL";
+	checkfirst = "nullptr";
 	return checkfirst;
 }
 

@@ -34,7 +34,7 @@ bool TitleManager::LoadTitles()
 	TitleEntry Title;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = NULL;
+	char *query = nullptr;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -252,7 +252,7 @@ void TitleManager::CreateNewPlayerTitle(Client *c, const char *Title)
 		return;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = NULL;
+	char *query = nullptr;
 	MYSQL_RES *result;
 
 	char *EscTitle = new char[strlen(Title) * 2 + 1];
@@ -296,7 +296,7 @@ void TitleManager::CreateNewPlayerSuffix(Client *c, const char *Suffix)
 		return;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = NULL;
+	char *query = nullptr;
 	MYSQL_RES *result;
 
 	char *EscSuffix = new char[strlen(Suffix) * 2 + 1];

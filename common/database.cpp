@@ -428,7 +428,7 @@ bool Database::ReserveName(uint32 account_id, char* name)
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into character_ SET account_id=%i, name='%s', profile=NULL", account_id, name), errbuf)) {
+	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into character_ SET account_id=%i, name='%s', profile=nullptr", account_id, name), errbuf)) {
 		cerr << "Error in ReserveName query '" << query << "' " << errbuf << endl;
 		safe_delete_array(query);
 		return false;
@@ -465,7 +465,7 @@ bool Database::DeleteCharacter(char *name)
 	if (query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 	matches = mysql_num_rows(result);
 	if(matches == 1)
@@ -482,7 +482,7 @@ bool Database::DeleteCharacter(char *name)
 		if(result)
 		{
 			mysql_free_result(result);
-			result = NULL;
+			result = nullptr;
 		}
 		return false;
 	}
@@ -490,7 +490,7 @@ bool Database::DeleteCharacter(char *name)
 	if(result)
 	{
 		mysql_free_result(result);
-		result = NULL;
+		result = nullptr;
 	}
 
 
@@ -499,195 +499,195 @@ bool Database::DeleteCharacter(char *name)
 	printf("DeleteCharacter: deleting '%s' (id %d): ", name, charid);
 	printf(" quest_globals");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from quest_globals WHERE charid='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from quest_globals WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" character_tasks");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_tasks WHERE charid='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_tasks WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" character_activities");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_activities WHERE charid='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_activities WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" character_enabledtasks");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_enabledtasks WHERE charid='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_enabledtasks WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" completed_tasks");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from completed_tasks WHERE charid='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from completed_tasks WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" friends");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from friends WHERE charid='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from friends WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" mail");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from mail WHERE charid='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from mail WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" ptimers");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from timers WHERE char_id='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from timers WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" inventory");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from inventory WHERE charid='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from inventory WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" guild_members");
 #endif
 #ifdef BOTS
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM guild_members WHERE char_id='%d' AND GetMobTypeById(%i) = 'C'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM guild_members WHERE char_id='%d' AND GetMobTypeById(%i) = 'C'", charid), errbuf, nullptr, &affected_rows);
 #else
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM guild_members WHERE char_id='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM guild_members WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 #endif
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" recipes");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM char_recipe_list WHERE char_id='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM char_recipe_list WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" adventure_stats");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM adventure_stats WHERE player_id='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM adventure_stats WHERE player_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" zone_flags");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM zone_flags WHERE charID='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM zone_flags WHERE charID='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" titles");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM titles WHERE char_id='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM titles WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
 	printf(" titlesets");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE char_id='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 
 #if DEBUG >= 5
     printf(" keyring");
 #endif
-    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM keyring WHERE char_id='%d'", charid), errbuf, NULL, &affected_rows);
+    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM keyring WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
     if(query)
     {
         safe_delete_array(query);
-        query = NULL;
+        query = nullptr;
     }
 
 #if DEBUG >= 5
     printf(" factions");
 #endif
-    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM faction_values WHERE char_id='%d'", charid), errbuf, NULL, &affected_rows);
+    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM faction_values WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
     if(query)
     {
         safe_delete_array(query);
-        query = NULL;
+        query = nullptr;
     }
 
 #if DEBUG >= 5
     printf(" instances");
 #endif
-    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_lockout_player WHERE charid='%d'", charid), errbuf, NULL, &affected_rows);
+    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_lockout_player WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
     if(query)
     {
         safe_delete_array(query);
-        query = NULL;
+        query = nullptr;
     }
 
 #if DEBUG >= 5
 	printf(" _character");
 #endif
-	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_ WHERE id='%d'", charid), errbuf, NULL, &affected_rows);
+	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_ WHERE id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
 	{
 		safe_delete_array(query);
-		query = NULL;
+		query = nullptr;
 	}
 	if(affected_rows != 1)	// here we have to have a match or it's an error
 	{
@@ -698,11 +698,11 @@ bool Database::DeleteCharacter(char *name)
 #if DEBUG >= 5
     printf(" alternate currency");
 #endif
-    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM character_alt_currency WHERE char_id='%d'", charid), errbuf, NULL, &affected_rows);
+    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM character_alt_currency WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
     if(query)
     {
         safe_delete_array(query);
-        query = NULL;
+        query = nullptr;
     }
 
 #if DEBUG >= 5
@@ -764,7 +764,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	}
 
 	const char *zname = GetZoneName(pp->zone_id);
-	if(zname == NULL) {
+	if(zname == nullptr) {
 		//zone not in the DB, something to prevent crash...
 		strn0cpy(zone, "qeynos", 49);
 		pp->zone_id = 1;
@@ -1184,7 +1184,7 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 				*minstatus = atoi(row[3]);
 			if (minlevel != 0)
 				*minlevel = atoi(row[4]);
-			if (flag_needed != NULL)
+			if (flag_needed != nullptr)
 				strcpy(flag_needed, row[5]);
 			mysql_free_result(result);
 			return true;
@@ -1196,9 +1196,9 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 	{
 		cerr << "Error in GetSafePoint query '" << query << "' " << errbuf << endl;
 		cerr << "If it errors, run the following querys:\n";
-		cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
-		cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
-		cerr << "ALTER TABLE `zone` ADD flag_needed VARCHAR(128) NOT NULL DEFAULT '';\n";
+		cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT nullptr;\n";
+		cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT nullptr;\n";
+		cerr << "ALTER TABLE `zone` ADD flag_needed VARCHAR(128) NOT nullptr DEFAULT '';\n";
 
 		safe_delete_array(query);
 	}
@@ -1682,7 +1682,7 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename,ui
 	char *query = 0;
 	uint32	affected_rows = 0;
 
-	if(zonename == NULL || strlen(zonename) == 0)
+	if(zonename == nullptr || strlen(zonename) == 0)
 		return(false);
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=-1, y=-1, z=-1 WHERE name='%s'", zonename,zoneid, charname), errbuf, 0,&affected_rows)) {
@@ -2113,7 +2113,7 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 		row = mysql_fetch_row(result);
 		unsigned long* Lengths = mysql_fetch_lengths(result);
 
-		if(row != NULL){
+		if(row != nullptr){
 
 			if(leaderbuf)
 				strcpy(leaderbuf, row[0]);
@@ -2178,7 +2178,7 @@ MYSQL_ROW row;
 unsigned long num_fields,i;
 bool  retval=false;
 	rowmap.clear();
-	if (result && (num_fields=mysql_num_fields(result)) && (row = mysql_fetch_row(result))!=NULL && (fields = mysql_fetch_fields(result))!=NULL) {
+	if (result && (num_fields=mysql_num_fields(result)) && (row = mysql_fetch_row(result))!=nullptr && (fields = mysql_fetch_fields(result))!=nullptr) {
 		retval=true;
 		for(i=0;i<num_fields;i++) {
 			rowmap[fields[i].name]=(row[i] ? row[i] : "");
@@ -2285,7 +2285,7 @@ const char *Database::GetRaidLeaderName(uint32 rid)
 	
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1", 
 		rid), errbuf, &result)) {
-		if((row = mysql_fetch_row(result)) != NULL)
+		if((row = mysql_fetch_row(result)) != nullptr)
 		{
 			memset(name, 0, 128);
 			strcpy(name, row[0]);
@@ -2432,7 +2432,7 @@ bool Database::CheckInstanceExpired(uint16 instance_id)
 	}
 
 	timeval tv;
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, nullptr);
 	if((start_time + duration) <= tv.tv_sec)
 	{
 		return true;
@@ -2553,7 +2553,7 @@ uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 	}
 
 	timeval tv;
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, nullptr);
 	return ((start_time + duration) - tv.tv_sec);
 }
 
@@ -2666,7 +2666,7 @@ void Database::PurgeExpiredInstances()
 		if (mysql_num_rows(result) > 0) 
 		{
 			row = mysql_fetch_row(result);
-			while(row != NULL)
+			while(row != nullptr)
 			{
 				id = atoi(row[0]);
 				DeleteInstance(id);
@@ -2895,7 +2895,7 @@ void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 		errbuf, &result))
 	{
 		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)) != NULL)
+		while((row = mysql_fetch_row(result)) != nullptr)
 		{
 			uint32 charid = atoi(row[0]);
 			if(GetInstanceID(zone_id, charid, version) == 0)
@@ -2924,7 +2924,7 @@ void Database::AssignRaidToInstance(uint32 rid, uint32 instance_id)
 		errbuf, &result))
 	{
 		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)) != NULL)
+		while((row = mysql_fetch_row(result)) != nullptr)
 		{
 			uint32 charid = atoi(row[0]);
 			if(GetInstanceID(zone_id, charid, version) == 0)
@@ -3100,7 +3100,7 @@ void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 	}
 
 	if(RunQuery(query, MakeAnyLenString(&query, "UPDATE `adventure_stats` SET %s=%s+1 WHERE player_id=%u",
-		field.c_str(), field.c_str(), char_id), errbuf, NULL, &affected))
+		field.c_str(), field.c_str(), char_id), errbuf, nullptr, &affected))
 	{
 		safe_delete_array(query);
 	}
@@ -3138,7 +3138,7 @@ bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, u
 		char_id), errbuf, &result))
 	{
 		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)) != NULL)
+		while((row = mysql_fetch_row(result)) != nullptr)
 		{
 			guk_w = atoi(row[0]);
 			mir_w = atoi(row[1]);

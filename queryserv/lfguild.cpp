@@ -262,7 +262,7 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 
 	safe_delete_array(query);
 
-	uint32 Now = time(NULL);
+	uint32 Now = time(nullptr);
 
 	if(Toggle == 1)
 	{
@@ -313,7 +313,7 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 
 	safe_delete_array(query);
 
-	uint32 Now = time(NULL);
+	uint32 Now = time(nullptr);
 
 	if(Toggle == 1)
 	{
@@ -351,7 +351,7 @@ void LFGuildManager::ExpireEntries()
 
 	for(it = Players.begin(); it != Players.end(); ++it)
 	{
-		if((*it).TimePosted + 604800 <= (uint32)time(NULL))
+		if((*it).TimePosted + 604800 <= (uint32)time(nullptr))
 		{
 			if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE from `lfguild` WHERE `type` = 0 AND `name` = '%s'", (*it).Name.c_str()), errbuf, 0, 0))
 				_log(QUERYSERV__ERROR, "Error expiring player LFGuild entry, query was %s, %s", query, errbuf);
@@ -364,7 +364,7 @@ void LFGuildManager::ExpireEntries()
 
 	for(it2 = Guilds.begin(); it2 != Guilds.end(); ++it2)
 	{
-		if((*it2).TimePosted + 2592000 <= time(NULL))
+		if((*it2).TimePosted + 2592000 <= time(nullptr))
 		{
 			if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE from `lfguild` WHERE `type` = 1 AND `name` = '%s'", (*it2).Name.c_str()), errbuf, 0, 0))
 				_log(QUERYSERV__ERROR, "Error removing guild LFGuild entry, query was %s, %s", query, errbuf);

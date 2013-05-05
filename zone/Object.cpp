@@ -43,15 +43,15 @@ Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object,
  : respawn_timer(0), decay_timer(300000)
 {
 	
-	user = NULL;
-	last_user = NULL;
+	user = nullptr;
+	last_user = nullptr;
 	
 	// Initialize members
 	m_id = id;
 	m_type = type;
 	m_icon = icon;
 	m_inuse = false;
-	m_inst = NULL;
+	m_inst = nullptr;
 	m_ground_spawn=false;
 	// Copy object data
 	memcpy(&m_data, &object, sizeof(Object_Struct));
@@ -72,14 +72,14 @@ Object::Object(const ItemInst* inst, char* name,float max_x,float min_x,float ma
  : respawn_timer(respawntimer), decay_timer(300000)
 {
 	
-	user = NULL;
-	last_user = NULL;
+	user = nullptr;
+	last_user = nullptr;
 	m_max_x=max_x;
 	m_max_y=max_y;
 	m_min_x=min_x;
 	m_min_y=min_y;
 	m_id	= 0;
-	m_inst	= (inst) ? inst->Clone() : NULL;
+	m_inst	= (inst) ? inst->Clone() : nullptr;
 	m_type	= OT_DROPPEDITEM;
 	m_icon	= 0;
 	m_inuse	= false;
@@ -105,12 +105,12 @@ Object::Object(const ItemInst* inst, char* name,float max_x,float min_x,float ma
 Object::Object(Client* client, const ItemInst* inst)
  : respawn_timer(0), decay_timer(300000)
 {
-	user = NULL;
-	last_user = NULL;
+	user = nullptr;
+	last_user = nullptr;
 	
 	// Initialize members
 	m_id	= 0;
-	m_inst	= (inst) ? inst->Clone() : NULL;
+	m_inst	= (inst) ? inst->Clone() : nullptr;
 	m_type	= OT_DROPPEDITEM;
 	m_icon	= 0;
 	m_inuse	= false;
@@ -159,12 +159,12 @@ Object::Object(Client* client, const ItemInst* inst)
 Object::Object(const ItemInst *inst, float x, float y, float z, float heading, uint32 decay_time)
  : respawn_timer(0), decay_timer(decay_time)
 {
-	user = NULL;
-	last_user = NULL;
+	user = nullptr;
+	last_user = nullptr;
 	
 	// Initialize members
 	m_id	= 0;
-	m_inst	= (inst) ? inst->Clone() : NULL;
+	m_inst	= (inst) ? inst->Clone() : nullptr;
 	m_type	= OT_DROPPEDITEM;
 	m_icon	= 0;
 	m_inuse	= false;
@@ -215,14 +215,14 @@ Object::Object(const ItemInst *inst, float x, float y, float z, float heading, u
 Object::Object(const char *model, float x, float y, float z, float heading, uint8 type, uint32 decay_time)
  : respawn_timer(0), decay_timer(decay_time)
 {
-	user = NULL;
-	last_user = NULL;
-	ItemInst* inst = NULL;
+	user = nullptr;
+	last_user = nullptr;
+	ItemInst* inst = nullptr;
 	inst = new ItemInst(ItemUseWorldContainer);
 	
 	// Initialize members
 	m_id	= 0;
-	m_inst	= (inst) ? inst->Clone() : NULL;
+	m_inst	= (inst) ? inst->Clone() : nullptr;
 	m_type	= type;
 	m_icon	= 0;
 	m_inuse	= false;
@@ -254,8 +254,8 @@ Object::Object(const char *model, float x, float y, float z, float heading, uint
 Object::~Object()
 {
 	safe_delete(m_inst);
-	if(user != NULL) {
-		user->SetTradeskillObject(NULL);
+	if(user != nullptr) {
+		user->SetTradeskillObject(nullptr);
 	}
 }
 
@@ -341,27 +341,27 @@ void Object::PutItem(uint8 index, const ItemInst* inst)
 
 void Object::Close() {
 	m_inuse = false;
-	if(user != NULL)
+	if(user != nullptr)
 	{
 		last_user = user;
 		// put any remaining items from the world container back into the player's inventory to avoid item loss
 		//  if they close the container without removing all items
 		ItemInst* container = this->m_inst;
-		if(container != NULL)
+		if(container != nullptr)
 		{
 			for (uint8 i = 0; i < MAX_ITEMS_PER_BAG; i++)
 			{
 				ItemInst* inst = container->PopItem(i);
-				if(inst != NULL)
+				if(inst != nullptr)
 				{
 					user->MoveItemToInventory(inst, true);
 				}
 			}
 		}
 
-		user->SetTradeskillObject(NULL);
+		user->SetTradeskillObject(nullptr);
 	}
-	user = NULL;
+	user = nullptr;
 }
 
 // Remove item from container
@@ -378,7 +378,7 @@ void Object::DeleteItem(uint8 index)
 // Pop item out of container
 ItemInst* Object::PopItem(uint8 index)
 {
-	ItemInst* inst = NULL;
+	ItemInst* inst = nullptr;
 	
 	if (m_inst && m_inst->IsType(ItemClassContainer)) {
 		inst = m_inst->PopItem(index);
@@ -415,7 +415,7 @@ bool Object::Process(){
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		ClickObject_Struct* click_object = (ClickObject_Struct*)outapp->pBuffer;
 		click_object->drop_id = GetID();
-		entity_list.QueueClients(NULL, outapp, false);
+		entity_list.QueueClients(nullptr, outapp, false);
 		safe_delete(outapp);
 
 		// Remove object
@@ -440,7 +440,7 @@ void Object::RandomSpawn(bool send_packet) {
 	if(send_packet) {
 		EQApplicationPacket app;
 		CreateSpawnPacket(&app);
-		entity_list.QueueClients(NULL, &app, true);
+		entity_list.QueueClients(nullptr, &app, true);
 	}
 }
 
@@ -478,14 +478,14 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				safe_delete(m_inst);
 
 			// No longer using a tradeskill object
-			sender->SetTradeskillObject(NULL);
-			user = NULL;
+			sender->SetTradeskillObject(nullptr);
+			user = nullptr;
 		}
 		
 		// Send click to all clients (removes entity on client)
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
-		entity_list.QueueClients(NULL, outapp, false);
+		entity_list.QueueClients(nullptr, outapp, false);
 		safe_delete(outapp);
 		
 		// Remove object
@@ -499,7 +499,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		
 		//TODO: there is prolly a better way to do this.
 		//if this is not the main user, send them a close and a message
-		if(user == NULL || user == sender)
+		if(user == nullptr || user == sender)
 			coa->open		= 0x01;
 		else {
 			coa->open		= 0x00;
@@ -523,7 +523,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		safe_delete(outapp);
 		
 		//if the object allready had a user, we are done
-		if(user != NULL)
+		if(user != nullptr)
 			return(false);
 		
 		// Starting to use this object
@@ -583,7 +583,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 		item_id, charges, object_name, type, icon);
 	
 	// Save new record for object
-	if (!RunQuery(query, len_query, errbuf, NULL, NULL, &database_id)) {
+	if (!RunQuery(query, len_query, errbuf, nullptr, nullptr, &database_id)) {
 		LogFile->write(EQEMuLog::Error, "Unable to insert object: %s", errbuf);
 	}
 	else {
@@ -926,14 +926,14 @@ void Object::SetEntityVariable(const char *id, const char *m_var)
 const char* Object::GetEntityVariable(const char *id)
 {
 	if(!id)
-		return NULL;
+		return nullptr;
 
 	std::map<std::string, std::string>::iterator iter = o_EntityVariables.find(id);
 	if(iter != o_EntityVariables.end())
 	{
 		return iter->second.c_str();
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool Object::EntityVariableExists(const char * id)

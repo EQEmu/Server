@@ -69,7 +69,7 @@ void Client::SendUptime() {
 	ms -= m * 60000;
 	uint32 s = ms / 1000;
 
-	char *Buffer = NULL;
+	char *Buffer = nullptr;
 
 	MakeAnyLenString(&Buffer, "UCS has been up for %02id %02ih %02im %02is", d, h, m, s);
 	GeneralChannelMessage(Buffer);
@@ -510,7 +510,7 @@ Client::Client(EQStream *eqs) {
 	Revoked = false;
 
 	for(int i = 0; i < MAX_JOINED_CHANNELS ; i++)
-		JoinedChannels[i] = NULL;
+		JoinedChannels[i] = nullptr;
 
 	TotalKarma = 0;
 	AttemptedMessages = 0;
@@ -533,13 +533,13 @@ Client::~Client() {
 	if(AccountGrabUpdateTimer)
 	{
 		delete AccountGrabUpdateTimer;
-		AccountGrabUpdateTimer = NULL;
+		AccountGrabUpdateTimer = nullptr;
 	}
 
 	if(GlobalChatLimiterTimer)
 	{
 		delete GlobalChatLimiterTimer;
-		GlobalChatLimiterTimer = NULL;
+		GlobalChatLimiterTimer = nullptr;
 	}
 }
 
@@ -964,7 +964,7 @@ Client *Clientlist::FindCharacter(string CharacterName) {
 
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void Client::AddToChannelList(ChatChannel *JoinedChannel) {
@@ -972,7 +972,7 @@ void Client::AddToChannelList(ChatChannel *JoinedChannel) {
 	if(!JoinedChannel) return;
 
 	for(int i = 0; i < MAX_JOINED_CHANNELS; i++)
-		if(JoinedChannels[i] == NULL) {
+		if(JoinedChannels[i] == nullptr) {
 			JoinedChannels[i] = JoinedChannel;
 			_log(UCS__TRACE, "Added Channel %s to slot %i for %s", JoinedChannel->GetName().c_str(), i + 1, GetName().c_str());
 			return;
@@ -989,7 +989,7 @@ void Client::RemoveFromChannelList(ChatChannel *JoinedChannel) {
 			for(int j = i; j < (MAX_JOINED_CHANNELS - 1); j++)
 				JoinedChannels[j] = JoinedChannels[j + 1];
 
-			JoinedChannels[MAX_JOINED_CHANNELS - 1] = NULL;
+			JoinedChannels[MAX_JOINED_CHANNELS - 1] = nullptr;
 
 			break;
 		}
@@ -1066,7 +1066,7 @@ void Client::JoinChannels(string ChannelNameList) {
 
 	for(int i = 0; i < MAX_JOINED_CHANNELS ; i++) {
 
-		if(JoinedChannels[i] != NULL) {
+		if(JoinedChannels[i] != nullptr) {
 
 			if(ChannelCount) {
 
@@ -1155,7 +1155,7 @@ void Client::LeaveChannels(string ChannelNameList) {
 
 	for(int i = 0; i < MAX_JOINED_CHANNELS ; i++) {
 
-		if(JoinedChannels[i] != NULL) {
+		if(JoinedChannels[i] != nullptr) {
 
 			if(ChannelCount) {
 
@@ -1213,7 +1213,7 @@ void Client::LeaveAllChannels(bool SendUpdatedChannelList) {
 
 			ChannelList->RemoveClientFromChannel(JoinedChannels[i]->GetName(), this);
 
-			JoinedChannels[i] = NULL;
+			JoinedChannels[i] = nullptr;
 		}
 	}
 
@@ -1258,7 +1258,7 @@ void Client::SendChannelList() {
 
 	for(int i = 0; i < MAX_JOINED_CHANNELS ; i++) {
 
-		if(JoinedChannels[i] != NULL) {
+		if(JoinedChannels[i] != nullptr) {
 
 			if(ChannelCount)
 				ChannelMessage = ChannelMessage + ",";
@@ -1313,7 +1313,7 @@ void Client::SendChannelMessage(string Message)
 	{
 		if(GetKarma() <  RuleI(Chat, KarmaGlobalChatLimit))
 		{
-			CharacterEntry *char_ent = NULL;
+			CharacterEntry *char_ent = nullptr;
 			for(int x = 0; x < Characters.size(); ++x)
 			{
 				if(Characters[x].Name.compare(GetName()) == 0)
@@ -1426,7 +1426,7 @@ void Client::SendChannelMessageByNumber(string Message) {
 	{
 		if(GetKarma() <  RuleI(Chat, KarmaGlobalChatLimit))
 		{
-			CharacterEntry *char_ent = NULL;
+			CharacterEntry *char_ent = nullptr;
 			for(int x = 0; x < Characters.size(); ++x)
 			{
 				if(Characters[x].Name.compare(GetName()) == 0)
@@ -2171,7 +2171,7 @@ string Client::ChannelSlotName(int SlotNumber) {
 	if((SlotNumber < 1 ) || (SlotNumber > MAX_JOINED_CHANNELS))
 		return "";
 
-	if(JoinedChannels[SlotNumber - 1] == NULL)
+	if(JoinedChannels[SlotNumber - 1] == nullptr)
 		return "";
 
 	return JoinedChannels[SlotNumber - 1]->GetName();
@@ -2261,7 +2261,7 @@ Client *Clientlist::IsCharacterOnline(string CharacterName) {
 
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int Client::GetMailBoxNumber(string CharacterName) {
@@ -2281,7 +2281,7 @@ void Client::SendNotification(int MailBoxNumber, string Subject, string From, in
 
 	char Sequence[100];
 	
-	sprintf(TimeStamp, "%i", (int)time(NULL));
+	sprintf(TimeStamp, "%i", (int)time(nullptr));
 
 	sprintf(sMessageID, "%i", MessageID);
 

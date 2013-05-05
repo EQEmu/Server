@@ -149,7 +149,7 @@ public:
 	AutoDelete(T** iVar, T* iSetTo = 0) {
 		init(iVar, iSetTo);
 	}
-	AutoDelete() { pVar = NULL; }
+	AutoDelete() { pVar = nullptr; }
 	void init(T** iVar, T* iSetTo = 0)
 	{
 		pVar = iVar;
@@ -157,11 +157,11 @@ public:
 			*pVar = iSetTo;
 	}
 	~AutoDelete() {
-		if(pVar != NULL)
+		if(pVar != nullptr)
 			safe_delete(*pVar);
 	}
 	void ReallyClearIt() {
-		pVar = NULL;
+		pVar = nullptr;
 	}
 private:
 	T** pVar;

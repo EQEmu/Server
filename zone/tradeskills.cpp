@@ -44,7 +44,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		return;
 	}
 
-	ItemInst* container = NULL;
+	ItemInst* container = nullptr;
 
 	if (worldo)
 	{
@@ -54,7 +54,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	{
 		// Check to see if they have an inventory container type 53 that is used for this.
 		Inventory& user_inv = user->GetInv();
-		ItemInst* inst = NULL;
+		ItemInst* inst = nullptr;
 		
 		inst = user_inv.GetItem(in_augment->container_slot);
 		if (inst)
@@ -92,7 +92,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		return;
 	}
 	
-	ItemInst *tobe_auged, *auged_with = NULL;
+	ItemInst *tobe_auged, *auged_with = nullptr;
 	int8 slot=-1;
 
 	// Verify 2 items in the augmentation device
@@ -133,7 +133,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 	bool deleteItems = false;
 
-	ItemInst *itemOneToPush = NULL, *itemTwoToPush = NULL;
+	ItemInst *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
 
 	// Adding augment
 	if (in_augment->augment_slot == -1)
@@ -151,7 +151,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	}
 	else
 	{
-		ItemInst *old_aug=NULL;
+		ItemInst *old_aug=nullptr;
 		const uint32 id=auged_with->GetID();
 		if (id==40408 || id==40409 || id==40410)
 			tobe_auged->DeleteAugment(in_augment->augment_slot);
@@ -215,8 +215,8 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	
 	Inventory& user_inv = user->GetInv();
 	PlayerProfile_Struct& user_pp = user->GetPP();
-	ItemInst* container = NULL;
-	ItemInst* inst = NULL;
+	ItemInst* container = nullptr;
+	ItemInst* inst = nullptr;
  	uint8 c_type = 0xE8;
  	uint32 some_id = 0;
 	bool worldcontainer=false;
@@ -634,7 +634,7 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen,
 	uint8 r;
 	for(r = 0; r < qcount; r++) {
 		row = mysql_fetch_row(result);
-		if(row == NULL || row[0] == NULL || row[1] == NULL || row[2] == NULL || row[3] == NULL || row[5] == NULL)
+		if(row == nullptr || row[0] == nullptr || row[1] == nullptr || row[2] == nullptr || row[3] == nullptr || row[5] == nullptr)
 			continue;
 		uint32 recipe = (uint32)atoi(row[0]);
 		const char *name = row[1];
@@ -647,7 +647,7 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen,
 		// explicitly learned are excempt from that limit
 		if (RuleB(Skills, UseLimitTradeskillSearchSkillDiff)) {
 			if (((int32)trivial - (int32)GetSkill((SkillType)tradeskill)) > RuleI(Skills, MaxTradeskillSearchSkillDiff)
-				&& row[4] == NULL)
+				&& row[4] == nullptr)
 			{
 				continue;
 			}
@@ -731,8 +731,8 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 		row = mysql_fetch_row(result);
 		
 		//watch for references to items which are not in the
-		//items table, which the left join will make NULL...
-		if(row[2] == NULL || row[3] == NULL) {
+		//items table, which the left join will make nullptr...
+		if(row[2] == nullptr || row[3] == nullptr) {
 			continue;
 		}
 		
@@ -789,7 +789,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 //returns true on success
 bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
- 	if(spec == NULL)
+ 	if(spec == nullptr)
 		return(false);
 	
 	uint16 user_skill = GetSkill(spec->tradeskill);
@@ -916,7 +916,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			break;
 		}
 	}
-      const Item_Struct* item = NULL;
+      const Item_Struct* item = nullptr;
 
 	if (spec->tradeskill == BLACKSMITHING) {
 		switch(GetAA(aaBlacksmithingMastery)) {
@@ -1284,7 +1284,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
     MYSQL_RES *TSresult;
     MYSQL_ROW TSrow;
 	if (RunQuery(TSquery, MakeAnyLenString(&TSquery, "SELECT item_id, componentcount from tradeskill_recipe_entries where recipe_id=%i AND componentcount > 0", recipe_id), TSerrbuf, &TSresult)) {
-		while((TSrow = mysql_fetch_row(TSresult))!=NULL) {
+		while((TSrow = mysql_fetch_row(TSresult))!=nullptr) {
 			int ccnt = 0;
 			for(int x = 0; x < 10; x++){
 				const ItemInst* inst = container->GetItem(x);
@@ -1366,7 +1366,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	spec->name = row[6];
 	spec->must_learn = (uint8)atoi(row[7]);
 	spec->quest = atoi(row[8]) ? true : false;
-	if (row[9] == NULL) {
+	if (row[9] == nullptr) {
 		spec->has_learnt = false;
 		spec->madecount = 0;
 	} else {
@@ -1492,9 +1492,9 @@ void Client::LearnRecipe(uint32 recipeID)
 
 	row = mysql_fetch_row(result);
 	
-	if (row != NULL && row[0] != NULL) {
+	if (row != nullptr && row[0] != nullptr) {
 		// Only give Learn message if character doesn't know the recipe
-		if (row[1] == NULL) {
+		if (row[1] == nullptr) {
 			Message_StringID(4, TRADESKILL_LEARN_RECIPE, row[0]);
 			// Actually learn the recipe now
 			qlen = MakeAnyLenString(&query, "INSERT INTO char_recipe_list "

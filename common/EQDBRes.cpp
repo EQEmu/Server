@@ -21,7 +21,7 @@
 
 vector<string> EQDBRes::fetch_row_array() {
 	vector<string> array;
-	if(res == NULL)
+	if(res == nullptr)
 		return(array);
 	
 	int count=mysql_num_fields(res);
@@ -34,14 +34,14 @@ vector<string> EQDBRes::fetch_row_array() {
 
 map<string,string> EQDBRes::fetch_row_hash() {
 	map<string,string> rowhash;
-	if(res == NULL)
+	if(res == nullptr)
 		return(rowhash);
 	
 	MYSQL_FIELD *fields;
 	MYSQL_ROW row;
 	unsigned long num_fields,i;
 
-	if (res && (num_fields=mysql_num_fields(res)) && (row = mysql_fetch_row(res))!=NULL && (fields = mysql_fetch_fields(res))!=NULL) {
+	if (res && (num_fields=mysql_num_fields(res)) && (row = mysql_fetch_row(res))!=nullptr && (fields = mysql_fetch_fields(res))!=nullptr) {
 		for(i=0;i<num_fields;i++) {
 			rowhash[fields[i].name]=(row[i] ? row[i] : "");
 		}

@@ -52,7 +52,7 @@ void TimeoutManager::CheckTimeouts() {
 
 //methods called by Timeoutable objects:
 void TimeoutManager::AddMember(Timeoutable *who) {
-	if(who == NULL)
+	if(who == nullptr)
 		return;
 	
 	DeleteMember(who);	//just in case... prolly not needed.

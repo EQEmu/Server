@@ -113,7 +113,7 @@ void PerlXSParser::SendCommands(const char * pkgprefix, const char *event, uint3
 	if(mob && mob->IsClient())
 		quest_manager.StartQuest(other, mob->CastToClient(), iteminst);
 	else
-		quest_manager.StartQuest(other, NULL, NULL);
+		quest_manager.StartQuest(other, nullptr, nullptr);
 
 	try {
 
@@ -127,7 +127,7 @@ void PerlXSParser::SendCommands(const char * pkgprefix, const char *event, uint3
 		Client *curc = quest_manager.GetInitiator();
 		snprintf(namebuf, 64, "%s::client", pkgprefix);
 		SV *client = get_sv(namebuf, true);
-		if(curc != NULL) {
+		if(curc != nullptr) {
 			sv_setref_pv(client, "Client", curc);
 		} else {
 			//clear out the value, mainly to get rid of blessedness
@@ -262,7 +262,7 @@ XS(XS_MobList_new)
 
 	ListElement<Mob*>* RETVAL;
 
-	RETVAL = NULL;
+	RETVAL = nullptr;
 	ST(0) = sv_newmortal();
 	if(RETVAL)
 		sv_setref_pv(ST(0), "MobList", (void*)RETVAL);

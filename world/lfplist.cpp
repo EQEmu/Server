@@ -265,13 +265,13 @@ void GroupLFPList::SendLFPMatches(ServerLFPMatchesRequest_Struct* smrs) {
 	}
 
 	ClientListEntry* CLE = client_list.FindCharacter(smrs->FromName);
-	if (CLE != NULL) {
-		if (CLE->Server() != NULL) 
+	if (CLE != nullptr) {
+		if (CLE->Server() != nullptr) 
 			CLE->Server()->SendPacket(Pack);
 	}
 	else {
 		ZoneServer* zs = zoneserver_list.FindByName(smrs->FromName);
-		if (zs != NULL) 
+		if (zs != nullptr) 
 			zs->SendPacket(Pack);
 	}
 	safe_delete(Pack);

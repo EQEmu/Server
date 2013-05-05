@@ -123,7 +123,7 @@ SpawnGroupList::~SpawnGroupList() {
 }
 
 void SpawnGroupList::AddSpawnGroup(SpawnGroup* newGroup) {
-	if(newGroup == NULL)
+	if(newGroup == nullptr)
 		return;
 	groups[newGroup->id] = newGroup;
 }

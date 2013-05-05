@@ -13,9 +13,9 @@ string GetToken(uchar *&Buffer, int &Position);
 
 Zonv4Loader::Zonv4Loader()
 {
-	this->buffer = NULL;
+	this->buffer = nullptr;
 	this->buf_len = -1;
-	this->archive = NULL;
+	this->archive = nullptr;
 	this->status = 0;
 }
 
@@ -94,7 +94,7 @@ int Zonv4Loader::Open(char *base_path, char *zone_name, Archive *archive)
 		}
 	}
 
-	this->datloader.Open(NULL, ZonName, archive);
+	this->datloader.Open(nullptr, ZonName, archive);
 
 	this->model_data.zone_model = datloader.model_data.zone_model;
 
@@ -118,7 +118,7 @@ int Zonv4Loader::Open(char *base_path, char *zone_name, Archive *archive)
 			++str;
 		}
 
-		if(model_loaders[i].Open(NULL, tmp, archive))
+		if(model_loaders[i].Open(nullptr, tmp, archive))
 		{
 			this->model_data.models[i] = new Model;
 			this->model_data.models[i]->vert_count = model_loaders[i].model_data.zone_model->vert_count;

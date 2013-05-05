@@ -58,8 +58,8 @@ XS(XS_EQLConfig_GetName)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetName();
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -84,8 +84,8 @@ XS(XS_EQLConfig_GetStaticCount)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetStaticCount();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -109,8 +109,8 @@ XS(XS_EQLConfig_IsConnected)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsConnected();
 		ST(0) = boolSV(RETVAL);
@@ -134,8 +134,8 @@ XS(XS_EQLConfig_DeleteLauncher)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->DeleteLauncher();
 	}
@@ -158,8 +158,8 @@ XS(XS_EQLConfig_RestartZone)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RestartZone(zone_ref);
 	}
@@ -182,8 +182,8 @@ XS(XS_EQLConfig_StopZone)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->StopZone(zone_ref);
 	}
@@ -206,8 +206,8 @@ XS(XS_EQLConfig_StartZone)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->StartZone(zone_ref);
 	}
@@ -232,8 +232,8 @@ XS(XS_EQLConfig_BootStaticZone)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->BootStaticZone(short_name, port);
 		ST(0) = boolSV(RETVAL);
@@ -260,8 +260,8 @@ XS(XS_EQLConfig_ChangeStaticZone)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->ChangeStaticZone(short_name, port);
 		ST(0) = boolSV(RETVAL);
@@ -287,8 +287,8 @@ XS(XS_EQLConfig_DeleteStaticZone)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DeleteStaticZone(short_name);
 		ST(0) = boolSV(RETVAL);
@@ -314,8 +314,8 @@ XS(XS_EQLConfig_SetDynamicCount)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->SetDynamicCount(count);
 		ST(0) = boolSV(RETVAL);
@@ -341,8 +341,8 @@ XS(XS_EQLConfig_GetDynamicCount)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDynamicCount();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -366,8 +366,8 @@ XS(XS_EQLConfig_ListZones)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->ListZones();
 		ST(0) = sv_newmortal();
@@ -407,8 +407,8 @@ XS(XS_EQLConfig_GetZoneDetails)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQLConfig");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetZoneDetails(zone_ref);
 		ST(0) = sv_newmortal();
@@ -425,7 +425,7 @@ XS(XS_EQLConfig_GetZoneDetails)
 				for(; cur != end; cur++) {
 						/* get the element from the hash, creating if needed (will be needed) */
 						SV**ele = hv_fetch(hv, cur->first.c_str(), cur->first.length(), TRUE);
-						if(ele == NULL) {
+						if(ele == nullptr) {
 								Perl_croak(aTHX_ "Unable to create a hash element for RETVAL");
 								break;
 						}

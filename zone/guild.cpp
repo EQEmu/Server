@@ -137,7 +137,7 @@ void Client::SendGuildList() {
 	
 	//ask the guild manager to build us a nice guild list packet
 	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
-	if(outapp->pBuffer == NULL) {
+	if(outapp->pBuffer == nullptr) {
 		mlog(GUILDS__ERROR, "Unable to make guild list!");
 		return;
 	}
@@ -152,13 +152,13 @@ void Client::SendGuildList() {
 void Client::SendGuildMembers() {
 	uint32 len;
 	uint8 *data = guild_mgr.MakeGuildMembers(GuildID(), GetName(), len);
-	if(data == NULL)
+	if(data == nullptr)
 		return;	//invalid guild, shouldent happen.
 	
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildMemberList);
 	outapp->size = len;
 	outapp->pBuffer = data;
-	data = NULL;
+	data = nullptr;
 	
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildMemberList of length %d", outapp->size);
 	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);

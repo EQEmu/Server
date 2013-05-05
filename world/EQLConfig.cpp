@@ -88,7 +88,7 @@ EQLConfig *EQLConfig::CreateLauncher(const char *name, uint8 dynamic_count) {
 		 namebuf, dynamic_count), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in CreateLauncher query: %s", errbuf);
 		safe_delete_array(query);
-		return NULL;
+		return nullptr;
 	}
 	safe_delete_array(query);
 
@@ -107,7 +107,7 @@ void EQLConfig::GetZones(std::vector<LauncherZone> &result) {
 vector<string> EQLConfig::ListZones() {
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
 	vector<string> res;
-	if(ll == NULL) {
+	if(ll == nullptr) {
 		//if the launcher isnt connected, use the list from the database.
 		map<string, LauncherZone>::iterator cur, end;
 		cur = m_zones.begin();
@@ -154,26 +154,26 @@ void EQLConfig::DeleteLauncher() {
 
 bool EQLConfig::IsConnected() const {
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	return(ll != NULL);
+	return(ll != nullptr);
 }
 
 void EQLConfig::RestartZone(Const_char *zone_ref) {
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	if(ll == NULL)
+	if(ll == nullptr)
 		return;
 	ll->RestartZone(zone_ref);
 }
 
 void EQLConfig::StopZone(Const_char *zone_ref) {
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	if(ll == NULL)
+	if(ll == nullptr)
 		return;
 	ll->StopZone(zone_ref);
 }
 
 void EQLConfig::StartZone(Const_char *zone_ref) {
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	if(ll == NULL)
+	if(ll == nullptr)
 		return;
 	ll->StartZone(zone_ref);
 }
@@ -211,7 +211,7 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 
 	//if the launcher is connected, update it.
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	if(ll != NULL) {
+	if(ll != nullptr) {
 		ll->BootZone(short_name, port);
 	}
 
@@ -259,7 +259,7 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 
 	//if the launcher is connected, update it.
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	if(ll != NULL) {
+	if(ll != nullptr) {
 		ll->RestartZone(short_name);
 	}
 
@@ -301,7 +301,7 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 
 	//if the launcher is connected, update it.
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	if(ll != NULL) {
+	if(ll != nullptr) {
 		ll->StopZone(short_name);
 	}
 
@@ -330,7 +330,7 @@ bool EQLConfig::SetDynamicCount(int count) {
 
 	//if the launcher is connected, update it.
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	if(ll != NULL) {
+	if(ll != nullptr) {
 		ll->BootDynamics(count);
 	}
 
@@ -345,7 +345,7 @@ map<string,string> EQLConfig::GetZoneDetails(Const_char *zone_ref) {
 	map<string,string> res;
 
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	if(ll == NULL) {
+	if(ll == nullptr) {
 		res["name"] = zone_ref;
 		res["up"] = "0";
 		res["starts"] = "0";

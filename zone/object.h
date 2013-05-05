@@ -171,7 +171,7 @@ public:
 	virtual uint16 VarSave();
 	virtual void SetID(uint16 set_id);
 	
-	void ClearUser() { user = NULL; }
+	void ClearUser() { user = nullptr; }
 
 	uint32 GetDBID();
 	uint32 GetType();

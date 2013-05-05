@@ -33,7 +33,7 @@ BaseTCPServer::BaseTCPServer(uint16 in_port) {
 	_beginthread(BaseTCPServer::TCPServerLoop, 0, this);
 #else
 	pthread_t thread;
-	pthread_create(&thread, NULL, &BaseTCPServer::TCPServerLoop, this);
+	pthread_create(&thread, nullptr, &BaseTCPServer::TCPServerLoop, this);
 #endif
 }
 
@@ -67,7 +67,7 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 #endif
 	if (tmp == 0) {
-		THREAD_RETURN(NULL);
+		THREAD_RETURN(nullptr);
 	}
 	BaseTCPServer* tcps = (BaseTCPServer*) tmp;
 	
@@ -87,7 +87,7 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 	_log(COMMON__THREADS, "Ending TCPServerLoop with thread ID %d", pthread_self());
 #endif
 	
-	THREAD_RETURN(NULL);
+	THREAD_RETURN(nullptr);
 }
 
 void BaseTCPServer::Process() {
