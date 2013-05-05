@@ -146,12 +146,12 @@ void EQStreamIdentifier::Process() {
 
 void EQStreamIdentifier::AddStream(EQStream *&eqs) {
 	m_streams.push_back(new Record(eqs));
-	eqs = NULL;
+	eqs = nullptr;
 }
 
 EQStreamInterface *EQStreamIdentifier::PopIdentified() {
 	if(m_identified.empty())
-		return(NULL);
+		return(nullptr);
 	EQStreamInterface *res = m_identified.front();
 	m_identified.pop();
 	return(res);

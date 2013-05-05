@@ -108,7 +108,7 @@ LauncherLink *LauncherList::Get(const char *name) {
 	map<string, LauncherLink *>::iterator res;
 	res = m_launchers.find(name);
 	if(res == m_launchers.end())
-		return(NULL);
+		return(nullptr);
 	return(res->second);
 /*	string goal(name);
 	
@@ -119,7 +119,7 @@ LauncherLink *LauncherList::Get(const char *name) {
 		if(goal == (*cur)->GetName())
 			return(*cur);
 	}
-	return(NULL);*/
+	return(nullptr);*/
 }
 
 LauncherLink *LauncherList::FindByZone(const char *short_name) {
@@ -130,7 +130,7 @@ LauncherLink *LauncherList::FindByZone(const char *short_name) {
 		if(cur->second->ContainsZone(short_name))
 			return(cur->second);
 	}
-	return(NULL);
+	return(nullptr);
 }
 
 void LauncherList::Add(EmuTCPConnection *conn) {
@@ -170,7 +170,7 @@ EQLConfig *LauncherList::GetConfig(const char *name) {
 	map<string, EQLConfig *>::iterator res;
 	res = m_configs.find(name);
 	if(res == m_configs.end()) {
-		return(NULL);
+		return(nullptr);
 	}
 	return(res->second);
 }

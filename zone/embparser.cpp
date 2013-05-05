@@ -100,7 +100,7 @@ extern Zone* zone;
 
 PerlembParser::PerlembParser(void) : Parser()
 {
-	perl = NULL;
+	perl = nullptr;
 	eventQueueProcessing = false;
     globalPlayerQuestLoaded = pQuestReadyToLoad;
 	globalNPCQuestLoaded = nQuestReadyToLoad;
@@ -229,7 +229,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		EventRecord e;
 		e.event = event;
 		e.objid = objid;
-		if(data != NULL)
+		if(data != nullptr)
 			e.data = data;
 		e.npcmob = npcmob;
 		e.iteminst = iteminst;
@@ -368,9 +368,9 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		if(npcmob && npcmob->GetQglobal())
 		{
 			map<string, string> globhash;
-			QGlobalCache *npc_c = NULL;
-			QGlobalCache *char_c = NULL;
-			QGlobalCache *zone_c = NULL;
+			QGlobalCache *npc_c = nullptr;
+			QGlobalCache *char_c = nullptr;
+			QGlobalCache *zone_c = nullptr;
 
 			//retrieve our globals
 			npc_c = npcmob->GetQGlobals();
@@ -429,8 +429,8 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	else
 	{
 		map<string, string> globhash;
-		QGlobalCache *char_c = NULL;
-		QGlobalCache *zone_c = NULL;
+		QGlobalCache *char_c = nullptr;
+		QGlobalCache *zone_c = nullptr;
 
 		//retrieve our globals
 		if(mob && mob->IsClient())
@@ -560,7 +560,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 
 		for(int slot=HASITEM_FIRST; slot<=HASITEM_LAST;slot++)
 		{
-			char *hi_decl=NULL;
+			char *hi_decl=nullptr;
 			int itemid=mob->CastToClient()->GetItemIDAt(slot);
 			if(!HASITEM_ISNULLITEM(itemid))
 			{
@@ -578,7 +578,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	if(mob && mob->IsClient()) {
 		string hashname = packagename + std::string("::oncursor");
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
-		char *hi_decl = NULL;
+		char *hi_decl = nullptr;
 		int itemid = mob->CastToClient()->GetItemIDAt(30);
 		if(!HASITEM_ISNULLITEM(itemid)) {
 			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);",hashname.c_str(),itemid,30);
@@ -817,7 +817,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	}
 
 	if(isPlayerQuest || isGlobalPlayerQuest){
-		SendCommands(packagename.c_str(), sub_name, 0, mob, mob, NULL);
+		SendCommands(packagename.c_str(), sub_name, 0, mob, mob, nullptr);
 	}
 	else if(isItemQuest) {
 		SendCommands(packagename.c_str(), sub_name, 0, mob, mob, iteminst);
@@ -825,13 +825,13 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	else if(isSpellQuest)
 	{
         if(mob) {
-            SendCommands(packagename.c_str(), sub_name, 0, mob, mob, NULL);
+            SendCommands(packagename.c_str(), sub_name, 0, mob, mob, nullptr);
         } else {
-            SendCommands(packagename.c_str(), sub_name, 0, npcmob, mob, NULL);
+            SendCommands(packagename.c_str(), sub_name, 0, npcmob, mob, nullptr);
         }
 	}
 	else {
-		SendCommands(packagename.c_str(), sub_name, objid, npcmob, mob, NULL);
+		SendCommands(packagename.c_str(), sub_name, objid, npcmob, mob, nullptr);
 	}
 
 	//now handle any events that cropped up...
@@ -839,27 +839,27 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 }
 
 void PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
-    EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, NULL, init, extra_data, true);
+    EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true);
 }
 
 void PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
-    EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, NULL, init, extra_data);
+    EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data);
 }
 
 void PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-    EventCommon(evt, 0, data.c_str(), NULL, NULL, client, extra_data);
+    EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data);
 }
 
 void PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-    EventCommon(evt, 0, data.c_str(), NULL, NULL, client, extra_data, true);
+    EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true);
 }
 
 void PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
-    EventCommon(evt, objid, NULL, NULL, item, client, extra_data);
+    EventCommon(evt, objid, nullptr, nullptr, item, client, extra_data);
 }
 
 void PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
-    EventCommon(evt, 0, itoa(spell_id), npc, NULL, client, extra_data);
+    EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data);
 }
 
 void PerlembParser::ReloadQuests(bool with_timers) {
@@ -873,22 +873,22 @@ void PerlembParser::ReloadQuests(bool with_timers) {
 	command_clear_perl();
 
 	try {
-		if(perl == NULL)
+		if(perl == nullptr)
 			perl = new Embperl;
 		else
 			perl->Reinit();
 		map_funs();
 	}
 	catch(std::exception &e) {
-		if(perl != NULL) {
+		if(perl != nullptr) {
 			delete perl;
-			perl = NULL;
+			perl = nullptr;
 		}
 		LogFile->write(EQEMuLog::Status, "Error re-initializing perlembed: %s", e.what());
 		throw e.what();
 	}
 	try {
-		LoadScript(0, NULL);
+		LoadScript(0, nullptr);
 	}
 	catch(const char * err) {
 		LogFile->write(EQEMuLog::Status, "Error loading default script: %s", err);
@@ -944,7 +944,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 		int count0 = 0;
 		bool filefound = false;
 		tmpf = fopen(filename.c_str(), "r");
-		if(tmpf != NULL)
+		if(tmpf != nullptr)
 		{
 			fclose(tmpf);
 			filefound = true;
@@ -958,7 +958,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 			//revert to just path
 			filename = bnfilename;
 			const NPCType *npct = database.GetNPCType(npcid);
-			if(npct == NULL)
+			if(npct == nullptr)
 			{
 				//LogFile->write(EQEMuLog::Debug, "	no npc type");
 				//revert and go on with life
@@ -974,7 +974,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 				if(nlen < 64)
 				{
 					int r;
-					//this should get our NULL as well..
+					//this should get our nullptr as well..
 					for(r = 0; r <= nlen; r++)
 					{
 						tmpname[r] = npct->name[r];
@@ -1021,7 +1021,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 #ifdef QUEST_TEMPLATES_BYNAME
 
 		tmpf = fopen(filename.c_str(), "r");
-		if(tmpf != NULL)
+		if(tmpf != nullptr)
 		{
 			fclose(tmpf);
 			filefound = true;
@@ -1063,7 +1063,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 #endif //QUEST_SCRIPTS_BYNAME
 
 		tmpf = fopen(filename.c_str(), "r");
-		if(tmpf != NULL)
+		if(tmpf != nullptr)
 		{
 			fclose(tmpf);
 			filefound = true;
@@ -1080,7 +1080,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 		}
 
 		tmpf = fopen(filename.c_str(), "r");
-		if(tmpf != NULL)
+		if(tmpf != nullptr)
 		{
 			fclose(tmpf);
 			filefound = true;
@@ -1102,7 +1102,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 
 	//check for existance of quest file before trying to make perl load it.
 	tmpf = fopen(filename.c_str(), "r");
-	if(tmpf == NULL)
+	if(tmpf == nullptr)
 	{
 		//the npc has no qst file, attach the defaults
 		std::string setdefcmd = "$";
@@ -1533,7 +1533,7 @@ void PerlembParser::SendCommands(const char * pkgprefix, const char *event, uint
 	if(mob && mob->IsClient())
 		quest_manager.StartQuest(other, mob->CastToClient());
 	else
-		quest_manager.StartQuest(other, NULL);
+		quest_manager.StartQuest(other, nullptr);
 
 	try
 	{
@@ -1570,7 +1570,7 @@ void PerlembParser::SendCommands(const char * pkgprefix, const char *event, uint
 void PerlembParser::ExecCommand(Client *c, Seperator *sep) {
 #ifdef EMBPERL_XS_CLASSES
 	SV *client = get_sv("commands::client", true);
-	if(c != NULL) {
+	if(c != nullptr) {
 		sv_setref_pv(client, "Client", c);
 	} else {
 		//clear out the value, mainly to get rid of blessedness

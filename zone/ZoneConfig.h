@@ -37,14 +37,14 @@ class ZoneConfig : public EQEmuConfig {
 
 	// Produce a const singleton
 	static const ZoneConfig *get() {
-		if (_zone_config == NULL) 
+		if (_zone_config == nullptr) 
 			LoadConfig();
 		return(_zone_config);
 	}
 
 	// Load the config
 	static bool LoadConfig() {
-		if (_zone_config != NULL)
+		if (_zone_config != nullptr)
 			delete _zone_config;
 		_zone_config=new ZoneConfig;
 		_config=_zone_config;

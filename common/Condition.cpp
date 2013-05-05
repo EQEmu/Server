@@ -31,14 +31,14 @@
 
 Condition::Condition() 
 {
-	m_events[SignalEvent] = CreateEvent (NULL,  // security
+	m_events[SignalEvent] = CreateEvent (nullptr,  // security
                                      FALSE, // is auto-reset event?
                                      FALSE, // is signaled initially?
-                                     NULL); // name
-	m_events[BroadcastEvent] = CreateEvent (NULL,  // security
+                                     nullptr); // name
+	m_events[BroadcastEvent] = CreateEvent (nullptr,  // security
                                      TRUE, // is auto-reset event?
                                      FALSE, // is signaled initially?
-                                     NULL); // name
+                                     nullptr); // name
 	m_waiters = 0;
 	InitializeCriticalSection(&CSMutex);
 }
@@ -92,8 +92,8 @@ void Condition::Wait()
 
 Condition::Condition() 
 {
-	pthread_cond_init(&cond,NULL);
-	pthread_mutex_init(&mutex,NULL);
+	pthread_cond_init(&cond,nullptr);
+	pthread_mutex_init(&mutex,nullptr);
 }
 
 void Condition::Signal()
@@ -129,7 +129,7 @@ struct timeval now;
 struct timespec timeout;
 int retcode=0;
 	pthread_mutex_lock(&mutex);
-	gettimeofday(&now,NULL);
+	gettimeofday(&now,nullptr);
 	now.tv_usec+=usec;
 	timeout.tv_sec = now.tv_sec + (now.tv_usec/1000000);
 	timeout.tv_nsec = (now.tv_usec%1000000) *1000;

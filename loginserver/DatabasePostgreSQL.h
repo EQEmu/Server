@@ -37,7 +37,7 @@ public:
 	/**
 	 * Constructor, sets our database to null.
 	 */
-	DatabasePostgreSQL() { db = NULL; }
+	DatabasePostgreSQL() { db = nullptr; }
 
 	/**
 	 * Constructor, tries to set our database to connect to the supplied options.
@@ -52,7 +52,7 @@ public:
 	/**
 	 * Returns true if the database successfully connected.
 	 */
-	virtual bool IsConnected() { return (db != NULL); }
+	virtual bool IsConnected() { return (db != nullptr); }
 
 	/**
 	 * Retrieves the login data (password hash and account id) from the account name provided

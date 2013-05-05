@@ -22,7 +22,7 @@
 #include <sstream>
 
 string EQEmuConfig::ConfigFile = "eqemu_config.xml";
-EQEmuConfig *EQEmuConfig::_config = NULL;
+EQEmuConfig *EQEmuConfig::_config = nullptr;
 
 void EQEmuConfig::do_world(TiXmlElement *ele) {
 	const char *text;
@@ -100,12 +100,12 @@ void EQEmuConfig::do_world(TiXmlElement *ele) {
 	
 	// Check for locked
 	sub_ele = ele->FirstChildElement("locked");
-	if (sub_ele != NULL)
+	if (sub_ele != nullptr)
 		Locked=true;
 
 	// Get the <tcp> element
 	sub_ele = ele->FirstChildElement("tcp");
-	if(sub_ele != NULL) {
+	if(sub_ele != nullptr) {
 
 		text = sub_ele->Attribute("ip");
 		if (text)
@@ -123,7 +123,7 @@ void EQEmuConfig::do_world(TiXmlElement *ele) {
 
 	// Get the <http> element
 	sub_ele = ele->FirstChildElement("http");
-	if(sub_ele != NULL) {
+	if(sub_ele != nullptr) {
 
 //		text = sub_ele->Attribute("ip");
 //		if (text)
@@ -228,7 +228,7 @@ void EQEmuConfig::do_zones(TiXmlElement *ele) {
 
 	// Get the <ports> element
 	sub_ele = ele->FirstChildElement("ports");
-	if(sub_ele != NULL) {
+	if(sub_ele != nullptr) {
 
 		text = sub_ele->Attribute("low");
 		if (text)
@@ -296,7 +296,7 @@ void EQEmuConfig::do_launcher(TiXmlElement *ele) {
 
 	// Get the <timers> element
 	sub_ele = ele->FirstChildElement("timers");
-	if(sub_ele != NULL) {
+	if(sub_ele != nullptr) {
 		text = sub_ele->Attribute("restart");
 		if (text)
 			RestartWait = atoi(text);

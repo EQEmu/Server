@@ -102,7 +102,7 @@ int DeflatePacket(const unsigned char* in_data, int in_length, unsigned char* ou
 	static z_stream zstream;
     int zerror;
     
-    if(in_data == NULL && out_data == NULL && in_length == 0 && max_out_length == 0) {
+    if(in_data == nullptr && out_data == nullptr && in_length == 0 && max_out_length == 0) {
     	//special delete state
     	deflateEnd(&zstream);
     	return(0);
@@ -138,7 +138,7 @@ int DeflatePacket(const unsigned char* in_data, int in_length, unsigned char* ou
 		return 0;
 	}
 #else
-	if(in_data == NULL) {
+	if(in_data == nullptr) {
 		return(0);
 	}
 	
@@ -175,7 +175,7 @@ uint32 InflatePacket(const uchar* indata, uint32 indatalen, uchar* outdata, uint
 	static z_stream zstream;
     int zerror;
     
-    if(indata == NULL && outdata == NULL && indatalen == 0 && outdatalen == 0) {
+    if(indata == nullptr && outdata == nullptr && indatalen == 0 && outdatalen == 0) {
     	//special delete state
     	inflateEnd(&zstream);
     	return(0);
@@ -226,7 +226,7 @@ uint32 InflatePacket(const uchar* indata, uint32 indatalen, uchar* outdata, uint
 		return 0;
 	}
 #else
-	if(indata == NULL)
+	if(indata == nullptr)
 		return(0);
 	
 	z_stream zstream;

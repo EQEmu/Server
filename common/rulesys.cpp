@@ -35,17 +35,17 @@ Requred SQL:
 
 
 CREATE TABLE rule_sets (
-  ruleset_id TINYINT UNSIGNED NOT NULL auto_increment,
-  name VARCHAR(255) NOT NULL,
+  ruleset_id TINYINT UNSIGNED NOT nullptr auto_increment,
+  name VARCHAR(255) NOT nullptr,
   PRIMARY KEY(ruleset_id)
 );
 INSERT INTO rule_sets VALUES(0, "default");
 UPDATE rule_sets SET ruleset_id=0;
 
 CREATE TABLE rule_values (
-  ruleset_id TINYINT UNSIGNED NOT NULL,
-  rule_name VARCHAR(64) NOT NULL,
-  rule_value VARCHAR(10) NOT NULL,
+  ruleset_id TINYINT UNSIGNED NOT nullptr,
+  rule_name VARCHAR(64) NOT nullptr,
+  rule_value VARCHAR(10) NOT nullptr,
   INDEX(ruleset_id),
   PRIMARY KEY(ruleset_id,rule_name)
 );
@@ -107,7 +107,7 @@ RuleManager::CategoryType RuleManager::FindCategory(const char *catname) {
 
 bool RuleManager::ListRules(const char *catname, std::vector<const char *> &into) {
 	CategoryType cat = InvalidCategory;
-	if(catname != NULL) {
+	if(catname != nullptr) {
 		cat = FindCategory(catname);
 		if(cat == InvalidCategory) {
 			_log(RULES__ERROR, "Unable to find category '%s'", catname);
@@ -118,7 +118,7 @@ bool RuleManager::ListRules(const char *catname, std::vector<const char *> &into
 	int rcount = CountRules();
 	for(r = 0; r < rcount; r++) {
 		const RuleInfo &rule = s_RuleInfo[r];
-		if(catname == NULL || cat == rule.category) {
+		if(catname == nullptr || cat == rule.category) {
 			into.push_back(rule.name);
 		}
 	}
@@ -160,7 +160,7 @@ bool RuleManager::GetRule(const char *rule_name, std::string &ret_val) {
 }
 
 bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Database *db, bool db_save) {
-	if(rule_name == NULL || rule_value == NULL)
+	if(rule_name == nullptr || rule_value == nullptr)
 		return(false);
 
 	RuleType type;
@@ -204,7 +204,7 @@ void RuleManager::ResetRules() {
 }
 
 bool RuleManager::_FindRule(const char *rule_name, RuleType &type_into, uint16 &index_into) {
-	if(rule_name == NULL)
+	if(rule_name == nullptr)
 		return(false);
 
 	int r;
@@ -237,7 +237,7 @@ const char *RuleManager::_GetRuleName(RuleType type, uint16 index) {
 
 void RuleManager::SaveRules(Database *db, const char *ruleset) {
 
-	if(ruleset != NULL) {
+	if(ruleset != nullptr) {
 		//saving to a specific name
 		if(m_activeName != ruleset) {
 			//a new name...
@@ -292,7 +292,7 @@ bool RuleManager::LoadRules(Database *db, const char *ruleset) {
 	{
 		safe_delete_array(query);
 		while((row = mysql_fetch_row(result))) {
-			if(!SetRule(row[0], row[1], NULL, false))
+			if(!SetRule(row[0], row[1], nullptr, false))
 				_log(RULES__ERROR, "Unable to interpret rule record for %s", row[0]);
 		}
 		mysql_free_result(result);
@@ -380,7 +380,7 @@ int RuleManager::_FindOrCreateRuleset(Database *db, const char *ruleset) {
 	if (!db->RunQuery(query, MakeAnyLenString(&query,
 		"INSERT INTO rule_sets (ruleset_id, name) "
 		" VALUES(0, '%s')",
-		rst),errbuf,NULL,NULL,&new_id))
+		rst),errbuf,nullptr,nullptr,&new_id))
 	{
 		_log(RULES__ERROR, "Fauled to create rule set in the database: %s: %s", query,errbuf);
 		res = -1;

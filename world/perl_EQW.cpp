@@ -59,8 +59,8 @@ XS(XS_EQW_GetConfig)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetConfig(var_name);
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -83,8 +83,8 @@ XS(XS_EQW_LockWorld)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->LockWorld();
 	}
@@ -106,8 +106,8 @@ XS(XS_EQW_UnlockWorld)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->UnlockWorld();
 	}
@@ -130,8 +130,8 @@ XS(XS_EQW_LSConnected)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->LSConnected();
 		ST(0) = boolSV(RETVAL);
@@ -155,8 +155,8 @@ XS(XS_EQW_LSReconnect)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->LSReconnect();
 	}
@@ -180,8 +180,8 @@ XS(XS_EQW_CountZones)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CountZones();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -205,8 +205,8 @@ XS(XS_EQW_ListBootedZones)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->ListBootedZones();
 		ST(0) = sv_newmortal();
@@ -246,8 +246,8 @@ XS(XS_EQW_GetZoneDetails)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetZoneDetails(zone_ref);
 		ST(0) = sv_newmortal();
@@ -264,7 +264,7 @@ XS(XS_EQW_GetZoneDetails)
 				for(; cur != end; cur++) {
 						/* get the element from the hash, creating if needed (will be needed) */
 						SV**ele = hv_fetch(hv, cur->first.c_str(), cur->first.length(), TRUE);
-						if(ele == NULL) {
+						if(ele == nullptr) {
 								Perl_croak(aTHX_ "Unable to create a hash element for RETVAL");
 								break;
 						}
@@ -310,8 +310,8 @@ XS(XS_EQW_CountPlayers)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CountPlayers();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -336,8 +336,8 @@ XS(XS_EQW_ListPlayers)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			zone_name = "";
@@ -383,8 +383,8 @@ XS(XS_EQW_GetPlayerDetails)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetPlayerDetails(player_ref);
 		ST(0) = sv_newmortal();
@@ -401,7 +401,7 @@ XS(XS_EQW_GetPlayerDetails)
 				for(; cur != end; cur++) {
 						/* get the element from the hash, creating if needed (will be needed) */
 						SV**ele = hv_fetch(hv, cur->first.c_str(), cur->first.length(), TRUE);
-						if(ele == NULL) {
+						if(ele == nullptr) {
 								Perl_croak(aTHX_ "Unable to create a hash element for RETVAL");
 								break;
 						}
@@ -448,8 +448,8 @@ XS(XS_EQW_CountLaunchers)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CountLaunchers(active_only);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -473,8 +473,8 @@ XS(XS_EQW_ListLaunchers)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->ListLaunchers();
 		ST(0) = sv_newmortal();
@@ -514,8 +514,8 @@ XS(XS_EQW_GetLauncher)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetLauncher(launcher_name);
 		ST(0) = sv_newmortal();
@@ -541,8 +541,8 @@ XS(XS_EQW_CreateLauncher)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->CreateLauncher(launcher_name, dynamic_count);
 	}
@@ -568,8 +568,8 @@ XS(XS_EQW_CreateGuild)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CreateGuild(name, leader_char_id);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -594,8 +594,8 @@ XS(XS_EQW_DeleteGuild)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DeleteGuild(guild_id);
 		ST(0) = boolSV(RETVAL);
@@ -622,8 +622,8 @@ XS(XS_EQW_RenameGuild)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RenameGuild(guild_id, name);
 		ST(0) = boolSV(RETVAL);
@@ -651,8 +651,8 @@ XS(XS_EQW_SetGuildMOTD)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->SetGuildMOTD(guild_id, motd, setter);
 		ST(0) = boolSV(RETVAL);
@@ -679,8 +679,8 @@ XS(XS_EQW_SetGuildLeader)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->SetGuildLeader(guild_id, leader_char_id);
 		ST(0) = boolSV(RETVAL);
@@ -708,8 +708,8 @@ XS(XS_EQW_SetGuild)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->SetGuild(charid, guild_id, rank);
 		ST(0) = boolSV(RETVAL);
@@ -736,8 +736,8 @@ XS(XS_EQW_SetGuildRank)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->SetGuildRank(charid, rank);
 		ST(0) = boolSV(RETVAL);
@@ -764,8 +764,8 @@ XS(XS_EQW_SetBankerFlag)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->SetBankerFlag(charid, is_banker);
 		ST(0) = boolSV(RETVAL);
@@ -792,8 +792,8 @@ XS(XS_EQW_SetTributeFlag)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->SetTributeFlag(charid, enabled);
 		ST(0) = boolSV(RETVAL);
@@ -820,8 +820,8 @@ XS(XS_EQW_SetPublicNote)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->SetPublicNote(charid, note);
 		ST(0) = boolSV(RETVAL);
@@ -847,8 +847,8 @@ XS(XS_EQW_CountBugs)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CountBugs();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -874,8 +874,8 @@ XS(XS_EQW_ListBugs)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
         
 		RETVAL = THIS->ListBugs(id);
 		ST(0) = sv_newmortal();
@@ -915,8 +915,8 @@ XS(XS_EQW_GetBugDetails)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetBugDetails(bug_ref);
 		ST(0) = sv_newmortal();
@@ -933,7 +933,7 @@ XS(XS_EQW_GetBugDetails)
 				for(; cur != end; cur++) {
 						/* get the element from the hash, creating if needed (will be needed) */
 						SV**ele = hv_fetch(hv, cur->first.c_str(), cur->first.length(), TRUE);
-						if(ele == NULL) {
+						if(ele == nullptr) {
 								Perl_croak(aTHX_ "Unable to create a hash element for RETVAL");
 								break;
 						}
@@ -961,8 +961,8 @@ XS(XS_EQW_ResolveBug)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQW");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
         
 		THIS->ResolveBug(id);
 	}

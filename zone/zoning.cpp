@@ -49,7 +49,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	uint16 target_zone_id = 0;
 	uint16 target_instance_id = zc->instanceID;
-	ZonePoint* zone_point = NULL;
+	ZonePoint* zone_point = nullptr;
 
 	//figure out where they are going.
 	if(zc->zoneID == 0) {
@@ -146,7 +146,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 		//make sure its a valid zone.
 	const char *target_zone_name = database.GetZoneName(target_zone_id);
-	if(target_zone_name == NULL) {
+	if(target_zone_name == nullptr) {
 		//invalid zone...
 		Message(13, "Invalid target zone ID.");
 		LogFile->write(EQEMuLog::Error, "Zoning %s: Unable to get zone name for zone id '%d'.", GetName(), target_zone_id);
@@ -215,7 +215,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//client requested a zoning... what are the cases when this could happen?
 		
 		//Handle zone point case:
-		if(zone_point != NULL) {
+		if(zone_point != nullptr) {
 			//they are zoning using a valid zone point, figure out coords
 			
 			//999999 is a placeholder for 'same as where they were from'
@@ -422,7 +422,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 		if(GetPetID() != 0) {
 			//if they have a pet and they are staying in zone, move with them
 			Mob *p = GetPet();
-			if(p != NULL){
+			if(p != nullptr){
 				p->SetPetOrder(SPO_Follow);
 				p->GMMove(x+15, y, z);	//so it dosent have to run across the map.
 			}
@@ -464,8 +464,8 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm) {
 	bool ReadyToZone = true;
 	int iZoneNameLength = 0;
-	const char*	pShortZoneName = NULL;
-	char* pZoneName = NULL;
+	const char*	pShortZoneName = nullptr;
+	char* pZoneName = nullptr;
 
 	pShortZoneName = database.GetZoneName(zoneID);
 	database.GetZoneLongName(pShortZoneName, &pZoneName);
@@ -799,9 +799,9 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		
 		const char *short_name = database.GetZoneName(zoneid);
 		
-		char *long_name = NULL;
+		char *long_name = nullptr;
 		database.GetZoneLongName(short_name, &long_name);
-		if(long_name == NULL)
+		if(long_name == nullptr)
 			long_name = empty;
 		
 		float safe_x, safe_y, safe_z;

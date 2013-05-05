@@ -320,9 +320,9 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 {
 	_ZP(Mob_DoCastSpell);
 	
-	Mob* pMob = NULL;
+	Mob* pMob = nullptr;
 	int32 orgcasttime;
-	EQApplicationPacket *outapp = NULL;
+	EQApplicationPacket *outapp = nullptr;
 
 	if(!IsValidSpell(spell_id)) {
 		InterruptSpell();
@@ -463,7 +463,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	outapp->priority = 3;
 	entity_list.QueueCloseClients(this, outapp, false, 200, 0, true); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
 	safe_delete(outapp);
-	outapp = NULL;
+	outapp = nullptr;
 	return(true);
 }
 
@@ -489,19 +489,19 @@ uint16 Mob::GetSpecializeSkillValue(uint16 spell_id) const {
 void Client::CheckSpecializeIncrease(uint16 spell_id) {
 	switch(spells[spell_id].skill) {
 	case ABJURE:
-		CheckIncreaseSkill(SPECIALIZE_ABJURE, NULL);
+		CheckIncreaseSkill(SPECIALIZE_ABJURE, nullptr);
 		break;
 	case ALTERATION:
-		CheckIncreaseSkill(SPECIALIZE_ALTERATION, NULL);
+		CheckIncreaseSkill(SPECIALIZE_ALTERATION, nullptr);
 		break;
 	case CONJURATION:
-		CheckIncreaseSkill(SPECIALIZE_CONJURATION, NULL);
+		CheckIncreaseSkill(SPECIALIZE_CONJURATION, nullptr);
 		break;
 	case DIVINATION:
-		CheckIncreaseSkill(SPECIALIZE_DIVINATION, NULL);
+		CheckIncreaseSkill(SPECIALIZE_DIVINATION, nullptr);
 		break;
 	case EVOCATION:
-		CheckIncreaseSkill(SPECIALIZE_EVOCATION, NULL);
+		CheckIncreaseSkill(SPECIALIZE_EVOCATION, nullptr);
 		break;
 	default:
 		//wtf...
@@ -513,47 +513,47 @@ void Client::CheckSongSkillIncrease(uint16 spell_id){
 	switch(spells[spell_id].skill)
 	{
 	case SINGING:
-		CheckIncreaseSkill(SINGING, NULL, -15);
+		CheckIncreaseSkill(SINGING, nullptr, -15);
 		break;
 	case PERCUSSION_INSTRUMENTS:
 		if(this->itembonuses.percussionMod > 0) {
 			if(GetRawSkill(PERCUSSION_INSTRUMENTS) > 0)	// no skill increases if not trained in the instrument
-				CheckIncreaseSkill(PERCUSSION_INSTRUMENTS, NULL, -15);
+				CheckIncreaseSkill(PERCUSSION_INSTRUMENTS, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);	// tell the client that they need instrument training
 		}
 		else
-			CheckIncreaseSkill(SINGING, NULL, -15);
+			CheckIncreaseSkill(SINGING, nullptr, -15);
 		break;
 	case STRINGED_INSTRUMENTS:
 		if(this->itembonuses.stringedMod > 0) {
 			if(GetRawSkill(STRINGED_INSTRUMENTS) > 0)
-				CheckIncreaseSkill(STRINGED_INSTRUMENTS, NULL, -15);
+				CheckIncreaseSkill(STRINGED_INSTRUMENTS, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);
 		}
 		else
-			CheckIncreaseSkill(SINGING, NULL, -15);
+			CheckIncreaseSkill(SINGING, nullptr, -15);
 		break;
 	case WIND_INSTRUMENTS:
 		if(this->itembonuses.windMod > 0) {
 			if(GetRawSkill(WIND_INSTRUMENTS) > 0)
-				CheckIncreaseSkill(WIND_INSTRUMENTS, NULL, -15);
+				CheckIncreaseSkill(WIND_INSTRUMENTS, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);
 		}
 		else
-			CheckIncreaseSkill(SINGING, NULL, -15);
+			CheckIncreaseSkill(SINGING, nullptr, -15);
 		break;
 	case BRASS_INSTRUMENTS:
 		if(this->itembonuses.brassMod > 0) {
 			if(GetRawSkill(BRASS_INSTRUMENTS) > 0)
-				CheckIncreaseSkill(BRASS_INSTRUMENTS, NULL, -15);
+				CheckIncreaseSkill(BRASS_INSTRUMENTS, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);
 		}
 		else
-			CheckIncreaseSkill(SINGING, NULL, -15);
+			CheckIncreaseSkill(SINGING, nullptr, -15);
 		break;
 	default:
 		break;
@@ -858,7 +858,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				bardsong = spell_id;
 				bardsong_slot = slot;
 				//NOTE: theres a lot more target types than this to think about...
-				if (spell_target == NULL || (spells[spell_id].targettype != ST_Target && spells[spell_id].targettype != ST_AETarget))
+				if (spell_target == nullptr || (spells[spell_id].targettype != ST_Target && spells[spell_id].targettype != ST_AETarget))
 					bardsong_target_id = GetID();
 				else
 					bardsong_target_id = spell_target->GetID();
@@ -1189,10 +1189,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			// skills
 			if(slot < MAX_PP_MEMSPELL)
 			{
-				c->CheckIncreaseSkill(spells[spell_id].skill, NULL);
+				c->CheckIncreaseSkill(spells[spell_id].skill, nullptr);
 				
 				// increased chance of gaining channel skill if you regained concentration
-				c->CheckIncreaseSkill(CHANNELING, NULL, regain_conc ? 5 : 0);
+				c->CheckIncreaseSkill(CHANNELING, nullptr, regain_conc ? 5 : 0);
 				
 				c->CheckSpecializeIncrease(spell_id);	
 			}
@@ -1247,7 +1247,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	bodyType mob_body = spell_target ? spell_target->GetBodyType() : BT_Humanoid;
 
 	if(IsPlayerIllusionSpell(spell_id)
-		&& spell_target != NULL // null ptr crash safeguard
+		&& spell_target != nullptr // null ptr crash safeguard
 		&& !spell_target->IsNPC() // still self only if NPC targetted
 		&& IsClient()
 		&& (IsGrouped() // still self only if not grouped
@@ -1418,7 +1418,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_AEBard:
 		case ST_AECaster:
 		{
-			spell_target = NULL;
+			spell_target = nullptr;
 			ae_center = this;
 			CastAction = AECaster;
 			break;
@@ -1426,7 +1426,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 		case ST_HateList:
 		{
-			spell_target = NULL;
+			spell_target = nullptr;
 			ae_center = this;
 			CastAction = CAHateList;
 			break;
@@ -1588,13 +1588,13 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 		case ST_Directional:
 			CastAction = DirectionalAE;
-			spell_target = NULL;
-			ae_center = NULL;
+			spell_target = nullptr;
+			ae_center = nullptr;
 			break;
 
 		case ST_TargetsTarget:
 		{
-			Mob *spell_target_tot = spell_target ? spell_target->GetTarget() : NULL;
+			Mob *spell_target_tot = spell_target ? spell_target->GetTarget() : nullptr;
 			if(!spell_target_tot)
 				return false;
 			//Verfied from live - Target's Target needs to be in combat range to recieve the effect 
@@ -1625,8 +1625,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 {
 	_ZP(Mob_SpellFinished);
 	
-	//EQApplicationPacket *outapp = NULL;
-	Mob *ae_center = NULL;
+	//EQApplicationPacket *outapp = nullptr;
+	Mob *ae_center = nullptr;
 	
 	if(!IsValidSpell(spell_id))
 		return false;
@@ -1702,7 +1702,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		Beacon *beacon = new Beacon(beacon_loc, spells[spell_id].AEDuration);
 		entity_list.AddBeacon(beacon);
 		mlog(SPELLS__CASTING, "Spell %d: AE duration beacon created, entity id %d", spell_id, beacon->GetName());
-		spell_target = NULL;
+		spell_target = nullptr;
 		ae_center = beacon;
 		CastAction = AECaster;
 	}
@@ -1734,7 +1734,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
 		range = 100;
 	}
-	if(spell_target != NULL && spell_target != this) {
+	if(spell_target != nullptr && spell_target != this) {
 		//casting a spell on somebody but ourself, make sure they are in range
 		float dist2 = DistNoRoot(*spell_target);
 		float range2 = range * range;
@@ -1766,7 +1766,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			}
 #endif //BOTS
 
-			if(spell_target == NULL) {
+			if(spell_target == nullptr) {
 				mlog(SPELLS__CASTING, "Spell %d: Targeted spell, but we have no target", spell_id);
 				return(false);
 			}
@@ -1801,7 +1801,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 #endif //BOTS
 
 			// we can't cast an AE spell without something to center it on
-			assert(ae_center != NULL);
+			assert(ae_center != nullptr);
 
 			if(ae_center->IsBeacon()) {
 				// special ae duration spell
@@ -2026,14 +2026,14 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 	}
 	
 	//determine the type of spell target we have
-	Mob *ae_center = NULL;
+	Mob *ae_center = nullptr;
 	CastAction_type CastAction;
 	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction)) {
 		mlog(SPELLS__BARDS, "Bard Song Pulse %d: was unable to determine target. Stopping.", spell_id);
 		return(false);
 	}
 	
-	if(ae_center != NULL && ae_center->IsBeacon()) {
+	if(ae_center != nullptr && ae_center->IsBeacon()) {
 		mlog(SPELLS__BARDS, "Bard Song Pulse %d: Unsupported Beacon NPC AE spell", spell_id);
 		return(false);
 	}
@@ -2064,7 +2064,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 	float range = 0.00f;
 
 	range = GetActSpellRange(spell_id, spells[spell_id].range, true);
-	if(spell_target != NULL && spell_target != this) {
+	if(spell_target != nullptr && spell_target != this) {
 		//casting a spell on somebody but ourself, make sure they are in range
 		float dist2 = DistNoRoot(*spell_target);
 		float range2 = range * range;
@@ -2085,7 +2085,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		case CastActUnknown:
 		case SingleTarget:
 		{
-			if(spell_target == NULL) {
+			if(spell_target == nullptr) {
 				mlog(SPELLS__BARDS, "Bard Song Pulse %d: Targeted spell, but we have no target", spell_id);
 				return(false);
 			}
@@ -2106,7 +2106,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		case AETarget:
 		{
 			// we can't cast an AE spell without something to center it on
-			if(ae_center == NULL) {
+			if(ae_center == nullptr) {
 				mlog(SPELLS__BARDS, "Bard Song Pulse %d: AE Targeted spell, but we have no target", spell_id);
 				return(false);
 			}
@@ -2422,7 +2422,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	int blocked_effect, blocked_below_value, blocked_slot;
 	int overwrite_effect, overwrite_below_value, overwrite_slot;
 
-	mlog(SPELLS__STACKING, "Check Stacking on old %s (%d) @ lvl %d (by %s) vs. new %s (%d) @ lvl %d (by %s)", sp1.name, spellid1, caster_level1, (caster1==NULL)?"Nobody":caster1->GetName(), sp2.name, spellid2, caster_level2, (caster2==NULL)?"Nobody":caster2->GetName());
+	mlog(SPELLS__STACKING, "Check Stacking on old %s (%d) @ lvl %d (by %s) vs. new %s (%d) @ lvl %d (by %s)", sp1.name, spellid1, caster_level1, (caster1==nullptr)?"Nobody":caster1->GetName(), sp2.name, spellid2, caster_level2, (caster2==nullptr)?"Nobody":caster2->GetName());
 
 	if(((spellid1 == spellid2) && (spellid1 == 2751)) || //special case spells that will block each other no matter what
 		((spellid1 == spellid2) && (spellid1 == 2755)) //manaburn / lifeburn
@@ -2833,7 +2833,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, NULL, true, false, BIT_SoDAndLater);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
  
         if(GetTarget() == this) {
             CastToClient()->QueuePacket(outapp);
@@ -3692,7 +3692,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	_ZP(Mob_IsImmuneToSpell);
 	int effect_index;
 
-	if(caster == NULL)
+	if(caster == nullptr)
 		return(false);
 	
 	//TODO: this function loops through the effect list for 
@@ -4816,7 +4816,7 @@ uint16 Mob::FindSpell(uint16 classp, uint16 level, uint8 type, uint8 spelltype) 
 	uint16 bestsofar = 0;
 	uint16 bestspellid = 0;
 	for (int i = 0; i < SPDAT_RECORDS; i++) {
-		if ((IsLifetapSpell(i) && spelltype == 1) || (spells[i].targettype != ST_Group && spells[i].targettype != ST_Undead && spells[i].targettype != ST_Summoned && spells[i].targettype != ST_Pet && strstr(spells[i].name,"Summoning") == NULL)) {
+		if ((IsLifetapSpell(i) && spelltype == 1) || (spells[i].targettype != ST_Group && spells[i].targettype != ST_Undead && spells[i].targettype != ST_Summoned && spells[i].targettype != ST_Pet && strstr(spells[i].name,"Summoning") == nullptr)) {
 			int Canuse = CanUseSpell(i, classp, level);
 			if (Canuse != 0) {
 				for (int z=0; z < 12; z++) {
@@ -5277,7 +5277,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 		}
 	}
 
-	EQApplicationPacket* outapp = NULL;
+	EQApplicationPacket* outapp = nullptr;
 	
 	//Create it for a targeting window, else create it for a create buff packet.
 	if(for_target)
@@ -5392,7 +5392,7 @@ void Client::InitializeBuffSlots()
 		buffs[x].spellid = SPELL_UNKNOWN;
 	}
 	current_buff_count = 0;
-	buff_tic_timer = NULL;
+	buff_tic_timer = nullptr;
 }
 
 void Client::UninitializeBuffSlots()
@@ -5409,7 +5409,7 @@ void NPC::InitializeBuffSlots()
 		buffs[x].spellid = SPELL_UNKNOWN;
 	}
 	current_buff_count = 0;
-	buff_tic_timer = NULL;
+	buff_tic_timer = nullptr;
 }
 
 void NPC::UninitializeBuffSlots()

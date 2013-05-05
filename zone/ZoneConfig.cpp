@@ -18,5 +18,5 @@
 #include "../common/debug.h"
 #include "ZoneConfig.h"
 
-ZoneConfig *ZoneConfig::_zone_config = NULL;
+ZoneConfig *ZoneConfig::_zone_config = nullptr;
 

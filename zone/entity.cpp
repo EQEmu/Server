@@ -83,7 +83,7 @@ void Entity::SetID(uint16 set_id) {
 
 Client* Entity::CastToClient() {
 	if(this==0x00){
-		cout << "CastToClient error (NULL)" << endl;
+		cout << "CastToClient error (nullptr)" << endl;
 		DebugBreak();
 		return 0;
 	}
@@ -188,7 +188,7 @@ Beacon* Entity::CastToBeacon() {
 
 const Client* Entity::CastToClient() const {
 	if(this==0x00){
-		cout << "CastToClient error (NULL)" << endl;
+		cout << "CastToClient error (nullptr)" << endl;
 		DebugBreak();
 		return 0;
 	}
@@ -350,7 +350,7 @@ void EntityList::TrapProcess() {
 }
 
 
-// Debug function -- checks to see if group_list has any NULL entries.
+// Debug function -- checks to see if group_list has any nullptr entries.
 // Meant to be called after each group-related function, in order
 // to track down bugs.
 void EntityList::CheckGroupList (const char *fname, const int fline)
@@ -359,9 +359,9 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 
 	for (it = group_list.begin(); it != group_list.end(); it++)
 	{
-		if (*it == NULL)
+		if (*it == nullptr)
 		{
-			LogFile->write(EQEMuLog::Error, "NULL group, %s:%i", fname, fline);
+			LogFile->write(EQEMuLog::Error, "nullptr group, %s:%i", fname, fline);
 		}
 	}
 }
@@ -556,7 +556,7 @@ void EntityList::BeaconProcess() {
 
 
 void EntityList::AddGroup(Group* group) {
-	if(group == NULL)	//this seems to be happening somehow...
+	if(group == nullptr)	//this seems to be happening somehow...
 		return;
 	
 	uint32 gid = worldserver.NextGroupID();
@@ -584,7 +584,7 @@ void EntityList::AddGroup(Group* group, uint32 gid) {
 }
 
 void EntityList::AddRaid(Raid* raid) {
-	if(raid == NULL)
+	if(raid == nullptr)
 		return;
 	
 	uint32 gid = worldserver.NextGroupID();
@@ -619,7 +619,7 @@ void EntityList::AddCorpse(Corpse* corpse, uint32 in_id) {
 
 void EntityList::AddNPC(NPC* npc, bool SendSpawnPacket, bool dontqueue) {
 	npc->SetID(GetFreeID());
-    parse->EventNPC(EVENT_SPAWN, npc, NULL, "", 0);
+    parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
 	uint16 emoteid = npc->GetEmoteID();
 	if(emoteid != 0)
@@ -671,7 +671,7 @@ void EntityList::AddMerc(Merc* merc, bool SendSpawnPacket, bool dontqueue) {
 				safe_delete(ns);
 			}
 
-            //parse->EventMERC(EVENT_SPAWN, merc, NULL, "", 0);
+            //parse->EventMERC(EVENT_SPAWN, merc, nullptr, "", 0);
 		}
 
 		merc_list.Insert(merc);
@@ -800,7 +800,7 @@ Object* EntityList::FindObject(uint32 object_id)
 		}
 		iterator.Advance();
 	}
-	return NULL;
+	return nullptr;
 }
 
 Object* EntityList::FindNearbyObject(float x, float y, float z, float radius)
@@ -830,7 +830,7 @@ Object* EntityList::FindNearbyObject(float x, float y, float z, float radius)
 	}
 
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -1604,7 +1604,7 @@ void EntityList::QueueClientsByTarget(Mob* sender, const EQApplicationPacket* ap
 		if(!Target)
 			continue;
 
-		Mob *TargetsTarget = NULL;
+		Mob *TargetsTarget = nullptr;
 
 		if(Target)
 			TargetsTarget = Target->GetTarget();
@@ -1659,7 +1659,7 @@ void EntityList::QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* a
 }
 
 void EntityList::QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender, float dist, Mob* SkipThisMob, bool ackreq, eqFilterType filter) {
-	if (sender == NULL) {
+	if (sender == nullptr) {
 		QueueClients(sender, app, ignore_sender);
 		return;
 	}
@@ -1962,7 +1962,7 @@ Client* EntityList::GetRandomClient(float x, float y, float z, float Distance, C
 	}
 
 	if(ClientsInRange.size() == 0)
-		return NULL;
+		return nullptr;
 
 	return ClientsInRange[MakeRandomInt(0, ClientsInRange.size() - 1)];
 }
@@ -3546,7 +3546,7 @@ void EntityList::AddHealAggro(Mob* target, Mob* caster, uint16 thedam)
 	LinkedListIterator<NPC*> iterator(npc_list);
 
 	iterator.Reset();
-	NPC *cur = NULL;
+	NPC *cur = nullptr;
 	uint16 count = 0;
 	while(iterator.MoreElements())
 	{
@@ -3573,7 +3573,7 @@ void EntityList::AddHealAggro(Mob* target, Mob* caster, uint16 thedam)
 			thedam = 1;
 	}
 
-	cur = NULL;
+	cur = nullptr;
 	iterator.Reset();
 	while(iterator.MoreElements())
 	{
@@ -3717,7 +3717,7 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z) {
 	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
 		NPC *d = iterator.GetData();
 		NPCProximity *l = d->proximity;
-		if(l == NULL)
+		if(l == nullptr)
 			continue;
 
 		//This is done to address the issue of this code not being reentrant 
@@ -3786,7 +3786,7 @@ void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 langu
 	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
 		NPC *d = iterator.GetData();
 		NPCProximity *l = d->proximity;
-		if(l == NULL || !l->say)
+		if(l == nullptr || !l->say)
 			continue;
 
 		if(   c->GetX() < l->min_x || c->GetX() > l->max_x
@@ -4033,7 +4033,7 @@ void EntityList::DestroyTempPets(Mob *owner)
 
 bool Entity::CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk)
 {
-	if(zone->zonemap == NULL) {
+	if(zone->zonemap == nullptr) {
 		return(true);
 	}
 	VERTEX myloc;
@@ -4084,11 +4084,11 @@ void EntityList::QuestJournalledSayClose(Mob *sender, Client *QuestInitiator, fl
 Corpse* EntityList::GetClosestCorpse(Mob* sender, const char* Name)
 {
 	if(!sender) 
-		return NULL;
+		return nullptr;
 
 	uint32 CurrentDistance, ClosestDistance = 4294967295u;
 
-	Corpse *CurrentCorpse, *ClosestCorpse = NULL;
+	Corpse *CurrentCorpse, *ClosestCorpse = nullptr;
 
 	LinkedListIterator<Corpse*> iterator(corpse_list);
 
@@ -4123,7 +4123,7 @@ void EntityList::ForceGroupUpdate(uint32 gid) {
 	iterator.Reset(); 
 	while(iterator.MoreElements()) {
 		if(iterator.GetData()){
-			Group *g = NULL;
+			Group *g = nullptr;
 			g = iterator.GetData()->GetGroup();
 			if(g){
 				if(g->GetID() == gid)
@@ -4142,7 +4142,7 @@ void EntityList::SendGroupLeave(uint32 gid, const char *name) {
 	while(iterator.MoreElements()) {
 		Client *c = iterator.GetData();
 		if(c){
-			Group *g = NULL;
+			Group *g = nullptr;
 			g = c->GetGroup();
 			if(g){
 				if(g->GetID() == gid)
@@ -4172,7 +4172,7 @@ void EntityList::SendGroupJoin(uint32 gid, const char *name) {
 	iterator.Reset(); 
 	while(iterator.MoreElements()) {
 		if(iterator.GetData()){
-			Group *g = NULL;
+			Group *g = nullptr;
 			g = iterator.GetData()->GetGroup();
 			if(g){
 				if(g->GetID() == gid)
@@ -4201,7 +4201,7 @@ void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
 	iterator.Reset(); 
 	while(iterator.MoreElements()) {
 		if(iterator.GetData()){
-			Group *g = NULL;
+			Group *g = nullptr;
 			g = iterator.GetData()->GetGroup();
 			if(g){
 				if(g->GetID() == gid)
@@ -4267,7 +4267,7 @@ uint16 EntityList::CreateDoor(const char *model, float x, float y, float z, floa
 Mob* EntityList::GetTargetForMez(Mob* caster)
 {
 	if(!caster)
-		return NULL;
+		return nullptr;
 
 	LinkedListIterator<Mob*> iterator(mob_list); 
 	iterator.Reset();
@@ -4303,7 +4303,7 @@ Mob* EntityList::GetTargetForMez(Mob* caster)
 		}
 		iterator.Advance();
 	}
-	return NULL;
+	return nullptr;
 }
 
 void EntityList::SendZoneAppearance(Client *c)
@@ -4649,7 +4649,7 @@ void EntityList::UnMarkNPC(uint16 ID)
 	{
 		if(iterator.GetData())
 		{
-			Group *g = NULL;
+			Group *g = nullptr;
 
 			g = iterator.GetData()->GetGroup();
 
@@ -4982,7 +4982,7 @@ void EntityList::HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode)
 		return;
 	}
 
-	Group *g = NULL;
+	Group *g = nullptr;
 
 	if(NewMode == HideCorpseAllButGroup)
 	{
@@ -5124,10 +5124,10 @@ void EntityList::CameraEffect(uint32 duration, uint32 intensity) {
 NPC* EntityList::GetClosestBanker(Mob* sender, uint32 &distance)
 {
 	if(!sender) 
-		return NULL;
+		return nullptr;
 
 	distance = 4294967295u;
-	NPC* nc = NULL;
+	NPC* nc = nullptr;
 
 	LinkedListIterator<NPC*> iterator(npc_list);
 	iterator.Reset();
@@ -5168,11 +5168,11 @@ Mob* EntityList::GetClosestMobByBodyType(Mob* sender, bodyType BodyType)
 {
 
 	if(!sender) 
-		return NULL;
+		return nullptr;
 
 	uint32 CurrentDistance, ClosestDistance = 4294967295u;
 
-	Mob *CurrentMob, *ClosestMob = NULL;
+	Mob *CurrentMob, *ClosestMob = nullptr;
 
 	LinkedListIterator<Mob*> iterator(mob_list);
 
@@ -5296,7 +5296,7 @@ Mob* EntityList::GetTargetForVirus(Mob* spreader)
 	}
 
 	if(TargetsInRange.size() == 0)
-		return NULL;
+		return nullptr;
 
 	return TargetsInRange[MakeRandomInt(0, TargetsInRange.size() - 1)];
 }

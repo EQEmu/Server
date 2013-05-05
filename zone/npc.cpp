@@ -123,12 +123,12 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	int moblevel=GetLevel();
 	
 	NPCTypedata = d;
-	NPCTypedata_ours = NULL;
+	NPCTypedata_ours = nullptr;
 	respawn2 = in_respawn;
 	swarm_timer.Disable();
 	
 	taunting = false;
-	proximity = NULL;
+	proximity = nullptr;
 	copper = 0;
 	silver = 0;
 	gold = 0;
@@ -141,7 +141,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	max_wp=0;
 	save_wp = 0;
 	spawn_group = 0;
-	swarmInfoPtr = NULL;
+	swarmInfoPtr = nullptr;
 	spellscale = d->spellscale;
 	healscale = d->healscale;
 
@@ -345,7 +345,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	}
     reface_timer = new Timer(15000);
     reface_timer->Disable();
-	qGlobals = NULL;
+	qGlobals = nullptr;
 	guard_x_saved = 0;
 	guard_y_saved = 0;
 	guard_z_saved = 0;
@@ -361,7 +361,7 @@ NPC::~NPC()
 	entity_list.RemoveNPC(GetID());
 	AI_Stop();
 
-	if(proximity != NULL) {
+	if(proximity != nullptr) {
 		entity_list.RemoveProximity(GetID());
 		safe_delete(proximity);
 	}
@@ -431,7 +431,7 @@ ServerLootItem_Struct* NPC::GetItem(int slot_id) {
 			return item;
 		}
 	}
-	return(NULL);
+	return(nullptr);
 }
 	  
 void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
@@ -457,7 +457,7 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 
 void NPC::CheckMinMaxLevel(Mob *them)
 {
-	if(them == NULL || !them->IsClient())
+	if(them == nullptr || !them->IsClient())
 		return;
 
 	uint16 themlevel = them->GetLevel();
@@ -1011,7 +1011,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 						}
 						else
 						{
-							// row[0] is NULL - No npc_type IDs set in this range yet
+							// row[0] is nullptr - No npc_type IDs set in this range yet
 							npc_type_id = starting_npc_id;
 						}
 					}
@@ -1123,7 +1123,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			safe_delete_array(query);
 
 			row = mysql_fetch_row(result);
-			if (row == NULL) return false;
+			if (row == nullptr) return false;
 			if (row[0]) tmp = atoi(row[0]);
 			if (row[1]) tmp2 = atoi(row[1]);
 
@@ -1158,7 +1158,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			safe_delete_array(query);
 
 			row = mysql_fetch_row(result);
-			if (row == NULL) return false;
+			if (row == nullptr) return false;
 			if (row[0]) tmp = atoi(row[0]);
 			if (row[1]) tmp2 = atoi(row[1]);
 			mysql_free_result(result);
@@ -1263,7 +1263,7 @@ uint32 NPC::GetMaxDamage(uint8 tlevel)
 
 void NPC::PickPocket(Client* thief) {
 	
-	thief->CheckIncreaseSkill(PICK_POCKETS, NULL, 5);
+	thief->CheckIncreaseSkill(PICK_POCKETS, nullptr, 5);
 	
 	//make sure were allowed to targte them:
 	int olevel = GetLevel();
@@ -2200,7 +2200,7 @@ void NPC::NPCSlotTexture(uint8 slot, uint16 texture)
 
 uint32 NPC::GetSwarmOwner()
 {
-	if(GetSwarmInfo() != NULL)
+	if(GetSwarmInfo() != nullptr)
 	{
 		return GetSwarmInfo()->owner_id;
 	}
@@ -2209,7 +2209,7 @@ uint32 NPC::GetSwarmOwner()
 
 uint32 NPC::GetSwarmTarget()
 {
-	if(GetSwarmInfo() != NULL)
+	if(GetSwarmInfo() != nullptr)
 	{
 		return GetSwarmInfo()->target;
 	}
@@ -2218,7 +2218,7 @@ uint32 NPC::GetSwarmTarget()
 
 void NPC::SetSwarmTarget(int target_id)
 {
-	if(GetSwarmInfo() != NULL)
+	if(GetSwarmInfo() != nullptr)
 	{
 		GetSwarmInfo()->target = target_id;
 	}
@@ -2281,18 +2281,18 @@ NPC_Emote_Struct* NPC::GetNPCEmote(uint16 emoteid, uint8 event_) {
 		}
 		iterator.Advance();
 	}
-	return (NULL);
+	return (nullptr);
 }
 	
 void NPC::DoNPCEmote(uint8 event_, uint16 emoteid)
 {
-	if(this == NULL || emoteid == 0)
+	if(this == nullptr || emoteid == 0)
 	{
 		return;
 	}
 
 	NPC_Emote_Struct* nes = GetNPCEmote(emoteid,event_);
-	if(nes == NULL)
+	if(nes == nullptr)
 	{
 		return;
 	}
@@ -2375,7 +2375,7 @@ FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 	
 	//if we are a pet, use our owner's faction stuff
 	Mob *own = GetOwner();
-	if (own != NULL)
+	if (own != nullptr)
 		return own->GetReverseFactionCon(iOther);
 	
 	//make sure iOther is an npc

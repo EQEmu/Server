@@ -23,7 +23,7 @@ public:
 	~EQTime();
 
 	//Get functions
-	int getEQTimeOfDay( TimeOfDay_Struct *eqTimeOfDay ) { return(getEQTimeOfDay(time(NULL), eqTimeOfDay)); }
+	int getEQTimeOfDay( TimeOfDay_Struct *eqTimeOfDay ) { return(getEQTimeOfDay(time(nullptr), eqTimeOfDay)); }
 	int getEQTimeOfDay( time_t timeConvert, TimeOfDay_Struct *eqTimeOfDay );
 	TimeOfDay_Struct getStartEQTime() { return eqTime.start_eqtime; }
 	time_t getStartRealTime() { return eqTime.start_realtime; }

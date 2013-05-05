@@ -1081,7 +1081,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	_ZP(Client_Attack);
 
 	if (!other) {
-		SetTarget(NULL);
+		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Client::Attack() for evaluation!");
 		return false;
 	}
@@ -1089,12 +1089,12 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	if(!GetTarget())
 		SetTarget(other);
 	
-	mlog(COMBAT__ATTACKS, "Attacking %s with hand %d %s", other?other->GetName():"(NULL)", Hand, bRiposte?"(this is a riposte)":"");
+	mlog(COMBAT__ATTACKS, "Attacking %s with hand %d %s", other?other->GetName():"(nullptr)", Hand, bRiposte?"(this is a riposte)":"");
 	
 	//SetAttackTimer();
 	if (
 		   (IsCasting() && GetClass() != BARD && !IsFromSpell)
-		|| other == NULL
+		|| other == nullptr
 		|| ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead))
 		|| (GetHP() < 0)
 		|| (!IsAttackAllowed(other))
@@ -1122,7 +1122,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		OffHandAtk(false);
 	}
 
-	if(weapon != NULL) {
+	if(weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
 			mlog(COMBAT__ATTACKS, "Attack canceled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
 			return(false);
@@ -1192,7 +1192,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			// Damage bonuses apply only to hits from the main hand (Hand == 13) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
 
-			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) NULL );
+			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -1203,7 +1203,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if (Hand==14) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 				
-				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) NULL );
+				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
 
 				min_hit += (int) ucDamageBonus;
 				max_hit += (int) ucDamageBonus;
@@ -1454,7 +1454,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 
     parse->EventPlayer(EVENT_DEATH, this, "", 0);
 
-	if (killerMob != NULL)
+	if (killerMob != nullptr)
 	{
 		if (killerMob->IsNPC()) {
             parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
@@ -1570,7 +1570,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 
 			char tmp[20];
 			database.GetVariable("ServerType", tmp, 9);
-			if(atoi(tmp)==1 && killerMob != NULL && killerMob->IsClient()){
+			if(atoi(tmp)==1 && killerMob != nullptr && killerMob->IsClient()){
 				char tmp2[10] = {0};
 				database.GetVariable("PvPreward", tmp, 9);
 				int reward = atoi(tmp);
@@ -1592,7 +1592,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 					{
 						for(int i=0;i<6;i++) 
 						{
-							if(group->members[i] != NULL) 
+							if(group->members[i] != nullptr) 
 							{
 								new_corpse->AllowMobLoot(group->members[i],i);
 							}
@@ -1621,7 +1621,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 #if 0	// solar: commenting this out for now TODO reimplement becomenpc stuff
 	if (IsBecomeNPC() == true)
 	{
-		if (killerMob != NULL && killerMob->IsClient()) {
+		if (killerMob != nullptr && killerMob->IsClient()) {
 			if (killerMob->CastToClient()->isgrouped && entity_list.GetGroupByMob(killerMob) != 0)
 				entity_list.GetGroupByMob(killerMob->CastToClient())->SplitExp((uint32)(level*level*75*3.5f), this);
 
@@ -1641,7 +1641,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 				Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
 				if(group != 0) {
 					for(int i=0; i < MAX_GROUP_MEMBERS; i++) { // Doesnt work right, needs work
-						if(group->members[i] != NULL) {
+						if(group->members[i] != nullptr) {
 							corpse->AllowMobLoot(group->members[i],i);
 						}
 					}
@@ -1700,7 +1700,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	int damage = 0;
 	
 	if (!other) {
-		SetTarget(NULL);
+		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to NPC::Attack() for evaluation!");
 		return false;
 	}
@@ -1737,7 +1737,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	//figure out what weapon they are using, if any
-	const Item_Struct* weapon = NULL;
+	const Item_Struct* weapon = nullptr;
 	if (Hand == 13 && equipment[SLOT_PRIMARY] > 0)
 	    weapon = database.GetItem(equipment[SLOT_PRIMARY]);
 	else if (equipment[SLOT_SECONDARY])
@@ -1949,7 +1949,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		TryWeaponProc(weapon, other, Hand);	//no weapon
 	}
 
-	TriggerDefensiveProcs(NULL, other, Hand, damage);
+	TriggerDefensiveProcs(nullptr, other, Hand, damage);
 	
 	// now check ripostes
 	if (damage == -3) { // riposting
@@ -2054,7 +2054,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	
 	Mob *give_exp = hate_list.GetDamageTop(this);
 
-	if(give_exp == NULL)
+	if(give_exp == nullptr)
 		give_exp = killer;
 
 	if(give_exp && give_exp->HasOwner()) {
@@ -2069,14 +2069,14 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 
 #ifdef BOTS
 		if(!RuleB(Bots, BotGroupXP) && !ownerInGroup) {
-			give_exp = NULL;
+			give_exp = nullptr;
 		}
 #endif //BOTS
 	}
 
 	int PlayerCount = 0; // QueryServ Player Counting
 
-	Client *give_exp_client = NULL;
+	Client *give_exp_client = nullptr;
 	if(give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
 	
@@ -2095,7 +2095,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 			}
 			/* Send the EVENT_KILLED_MERIT event for all raid members */
 			for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
-				if (kr->members[i].member != NULL) { // If Group Member is Client
+				if (kr->members[i].member != nullptr) { // If Group Member is Client
                     parse->EventNPC(EVENT_KILLED_MERIT, this, kr->members[i].member, "killed", 0);
 					if(RuleB(TaskSystem, EnableTaskSystem))
 						kr->members[i].member->UpdateTasksOnKill(GetNPCTypeID());
@@ -2112,7 +2112,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 				QS->s1.ZoneID = this->GetZoneID();
 				QS->s1.Type = 2; // Raid Fight
 				for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
-					if (kr->members[i].member != NULL) { // If Group Member is Client
+					if (kr->members[i].member != nullptr) { // If Group Member is Client
 						Client *c = kr->members[i].member;
 						QS->Chars[PlayerCount].char_id = c->CharacterID();
 						PlayerCount++;
@@ -2124,7 +2124,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 			// End QueryServ Logging
 
 		}
-		else if (give_exp_client->IsGrouped() && kg != NULL)
+		else if (give_exp_client->IsGrouped() && kg != nullptr)
 		{
 			if(!IsLdonTreasure) {
 				kg->SplitExp((EXP_FORMULA), this);
@@ -2134,7 +2134,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 			/* Send the EVENT_KILLED_MERIT event and update kill tasks
 			 * for all group members */
 			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if (kg->members[i] != NULL && kg->members[i]->IsClient()) { // If Group Member is Client
+				if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
 					Client *c = kg->members[i]->CastToClient();
                     parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
 					if(RuleB(TaskSystem, EnableTaskSystem))
@@ -2153,7 +2153,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 				QS->s1.ZoneID = this->GetZoneID();
 				QS->s1.Type = 1; // Group Fight
 				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					if (kg->members[i] != NULL && kg->members[i]->IsClient()) { // If Group Member is Client
+					if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
 						Client *c = kg->members[i]->CastToClient();
 						QS->Chars[PlayerCount].char_id = c->CharacterID();
 						PlayerCount++;
@@ -2234,7 +2234,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 				Group* group = entity_list.GetGroupByClient(killer->CastToClient());
 				if(group != 0) {
 					for(int i=0;i<6;i++) { // Doesnt work right, needs work
-						if(group->members[i] != NULL) {
+						if(group->members[i] != nullptr) {
 							corpse->AllowMobLoot(group->members[i],i);
 						}
 					}
@@ -2327,13 +2327,13 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	this->WipeHateList();
 	p_depop = true;
 	if(killerMob && killerMob->GetTarget() == this) //we can kill things without having them targeted
-		killerMob->SetTarget(NULL); //via AE effects and such..
+		killerMob->SetTarget(nullptr); //via AE effects and such..
 
 	entity_list.UpdateFindableNPCState(this, true);
 }
 
 void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic) {
-    assert(other != NULL);
+    assert(other != nullptr);
     if (other == this)
         return;
 
@@ -2577,12 +2577,12 @@ uint8 Mob::GetWeaponDamageBonus( const Item_Struct *Weapon )
 	// Assert: This function should not be called unless the player is a melee class, as casters do not receive a damage bonus.
 
 
-	if( Weapon == NULL || Weapon->ItemType == ItemType1HS || Weapon->ItemType == ItemType1HB || Weapon->ItemType == ItemTypeHand2Hand || Weapon->ItemType == ItemTypePierce )
+	if( Weapon == nullptr || Weapon->ItemType == ItemType1HS || Weapon->ItemType == ItemType1HB || Weapon->ItemType == ItemTypeHand2Hand || Weapon->ItemType == ItemTypePierce )
 	{
 		// The weapon in the player's main (primary) hand is a one-handed weapon, or there is no item equipped at all.
 		//
 		// According to player posts on Allakhazam, 1H damage bonuses apply to bare fists (nothing equipped in the mainhand,
-		// as indicated by Weapon == NULL).
+		// as indicated by Weapon == nullptr).
 		//
 		// The following formula returns the correct damage bonus for all 1H weapons:
 
@@ -3256,7 +3256,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		damage = -5;
 	}
 	
-	if( spell_id != SPELL_UNKNOWN || attacker == NULL )
+	if( spell_id != SPELL_UNKNOWN || attacker == nullptr )
 		avoidable = false;
 	
     // only apply DS if physical damage (no spell damage)
@@ -3485,7 +3485,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 		CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
 		a->target = GetID();
-		if (attacker == NULL)
+		if (attacker == nullptr)
 			a->source = 0;
 		else if (attacker->IsClient() && attacker->CastToClient()->GMHideMe())
 			a->source = 0;
@@ -3619,7 +3619,7 @@ void Mob::HealDamage(uint32 amount, Mob* caster) {
 	else
 		acthealed = amount;
 
-	char *TempString = NULL;
+	char *TempString = nullptr;
 
 	MakeAnyLenString(&TempString, "%d", acthealed);
 		
@@ -3738,7 +3738,7 @@ float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 w
 void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int damage) {
 
 	if (!on) {
-		SetTarget(NULL);
+		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Mob::TryDefensiveProc for evaluation!");
 		return;
 	}
@@ -3753,7 +3753,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 		return;
 
 	float ProcChance, ProcBonus;
-	if(weapon!=NULL)
+	if(weapon!=nullptr)
 		on->GetDefensiveProcChances(ProcBonus, ProcChance, weapon->GetItem()->Delay, hand);
 	else
 		on->GetDefensiveProcChances(ProcBonus, ProcChance);
@@ -3791,18 +3791,18 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	_ZP(Mob_TryWeaponProcA);
 	if(!on) {
-		SetTarget(NULL);
+		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed  to Mob::TryWeaponProc for evaluation!");
 		return;
 	}
 
 	if(!weapon_g) {
-		TryWeaponProc((const Item_Struct*) NULL, on, hand);
+		TryWeaponProc((const Item_Struct*) nullptr, on, hand);
 		return;
 	}
 
 	if(!weapon_g->IsType(ItemClassCommon)) {
-		TryWeaponProc((const Item_Struct*) NULL, on, hand);
+		TryWeaponProc((const Item_Struct*) nullptr, on, hand);
 		return;
 	}
 	
@@ -3834,7 +3834,7 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 			if (MakeRandomFloat(0, 1) < ProcChance) {
 				if(aug->Proc.Level > ourlevel) {
 					Mob * own = GetOwner();
-					if(own != NULL) {
+					if(own != nullptr) {
 						own->Message_StringID(13,PROC_PETTOOLOW);
 					} else {
 						Message_StringID(13,PROC_TOOLOW);
@@ -3852,7 +3852,7 @@ void Mob::TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand) {
 	uint16 skillinuse = 28;
 	int ourlevel = GetLevel();
 	float ProcChance, ProcBonus;
-	if(weapon!=NULL)
+	if(weapon!=nullptr)
 		GetProcChances(ProcBonus, ProcChance, weapon->Delay, hand);
 	else
 		GetProcChances(ProcBonus, ProcChance);
@@ -3861,7 +3861,7 @@ void Mob::TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand) {
 		ProcChance /= 2;	
 
 	//give weapon a chance to proc first.
-	if(weapon != NULL) {
+	if(weapon != nullptr) {
 		skillinuse = GetSkillByItemType(weapon->ItemType);
 		if (weapon->Proc.Type == ET_CombatProc) {
 			float WPC = ProcChance*(100.0f+(float)weapon->ProcRate)/100.0f;
@@ -3869,7 +3869,7 @@ void Mob::TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand) {
 				if(weapon->Proc.Level > ourlevel) {
 					mlog(COMBAT__PROCS, "Tried to proc (%s), but our level (%d) is lower than required (%d)", weapon->Name, ourlevel, weapon->Proc.Level);
 					Mob * own = GetOwner();
-					if(own != NULL) {
+					if(own != nullptr) {
 						own->Message_StringID(13,PROC_PETTOOLOW);
 					} else {
 						Message_StringID(13,PROC_TOOLOW);
@@ -3890,7 +3890,7 @@ void Mob::TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand) {
 	}
 
 	bool bRangedAttack = false;
-	if (weapon != NULL) {
+	if (weapon != nullptr) {
 		if (weapon->ItemType == ItemTypeBow || weapon->ItemType == ItemTypeThrowing || weapon->ItemType == ItemTypeThrowingv2) {
 			bRangedAttack = true;
 		}
@@ -3961,7 +3961,7 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 	//Each rank adds an additional 1% chance for any melee hit (primary, secondary, kick, bash, etc) to critical, 
 	//dealing up to 63% more damage. http://www.magecompendium.com/aa-short-library.html
 		
-	Mob *owner = NULL;
+	Mob *owner = nullptr;
 	float critChance = 0.0f;
 	critChance += RuleI(Combat, MeleeBaseCritChance);
 	uint16 critMod = 163;
@@ -4270,7 +4270,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 {
 
 	if (!on) {
-		SetTarget(NULL);
+		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Mob::TrySkillProc for evaluation!");
 		return;
 	}

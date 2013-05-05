@@ -38,7 +38,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	if (itemnum == 0)
 		return 0;
 	uint32 x = 0;
-	ItemInst *cur = NULL;
+	ItemInst *cur = nullptr;
     
 	int i;
     if(where_to_check & invWhereWorn) {
@@ -201,7 +201,7 @@ bool Client::CheckLoreConflict(const Item_Struct* item) {
 void Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, uint16 to_slot) {
 	const Item_Struct* item = database.GetItem(item_id);
 	
-	if (item == NULL) {
+	if (item == nullptr) {
 		Message(0, "No such item: %i", item_id);
 		return;
 	} else {
@@ -340,7 +340,7 @@ void Client::DropItem(int16 slot_id)
 		list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(CharacterID(), s, e);
 	} else
-		database.SaveInventory(CharacterID(), NULL, slot_id);
+		database.SaveInventory(CharacterID(), nullptr, slot_id);
 
 	// Package as zone object
 	Object* object = new Object(this, inst);
@@ -467,7 +467,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 
 	bool isDeleted = m_inv.DeleteItem(slot_id, quantity);
 
-	const ItemInst* inst=NULL;
+	const ItemInst* inst=nullptr;
 	if (slot_id==SLOT_CURSOR) {
 		list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
         if(update_db)
@@ -569,7 +569,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 		// solar: our bag went into slot_id, now let's pack the contents in
 		for(int i = 0; i < 10; i++)
 		{
-			if(bag_item_data[i] == NULL)
+			if(bag_item_data[i] == nullptr)
 				continue;
 			const ItemInst *bagitem = database.CreateItem(bag_item_data[i]->item_id, bag_item_data[i]->charges, bag_item_data[i]->aug1, bag_item_data[i]->aug2, bag_item_data[i]->aug3, bag_item_data[i]->aug4, bag_item_data[i]->aug5);
 			interior_slot = Inventory::CalcSlotId(slot_id, i);
@@ -1032,7 +1032,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 		if(!banker || distance > USE_NPC_RANGE2)
 		{
-			char *hacked_string = NULL;
+			char *hacked_string = nullptr;
 			MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(items) but %s is non-existant or too far away (%u units).", 
 				banker ? banker->GetName() : "UNKNOWN NPC", distance);
 			database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
@@ -1142,7 +1142,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 	
 	// Step 3: Check for interaction with World Container (tradeskills)
-	if(m_tradeskill_object != NULL) {
+	if(m_tradeskill_object != nullptr) {
 		if (src_slot_id>=4000 && src_slot_id<=4009) {
 			// Picking up item from world container
 			ItemInst* inst = m_tradeskill_object->PopItem(Inventory::CalcBagIdx(src_slot_id));
@@ -1161,7 +1161,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			ItemInst* world_inst = m_tradeskill_object->PopItem(world_idx);
 			
 			// Case 1: No item in container, unidirectional "Put"
-			if (world_inst == NULL) {
+			if (world_inst == nullptr) {
 				m_tradeskill_object->PutItem(world_idx, src_inst);
 				m_inv.DeleteItem(src_slot_id);
 			}
@@ -1277,7 +1277,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				if (src_inst->GetCharges() < 1)
 				{
 					mlog(INVENTORY__SLOTS, "Dest (%d) now has %d charges, source (%d) was entirely consumed. (%d moved)", dst_slot_id, dst_inst->GetCharges(), src_slot_id, usedcharges);
-					database.SaveInventory(CharacterID(),NULL,src_slot_id);
+					database.SaveInventory(CharacterID(),nullptr,src_slot_id);
 					m_inv.DeleteItem(src_slot_id);
 				} else {
 					mlog(INVENTORY__SLOTS, "Dest (%d) now has %d charges, source (%d) has %d (%d moved)", dst_slot_id, dst_inst->GetCharges(), src_slot_id, src_inst->GetCharges(), usedcharges);
@@ -1748,7 +1748,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 		if(inst) {
 			if(CheckLoreConflict(inst->GetItem())) {
 				mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
-				database.SaveInventory(character_id, NULL, slot_id);
+				database.SaveInventory(character_id, nullptr, slot_id);
 			} 
 			else {
 				m_inv.PutItem(slot_id, *inst);
@@ -1762,7 +1762,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 	if(inst) {
 		if(CheckLoreConflict(inst->GetItem())) {
 			mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
-			database.SaveInventory(character_id, NULL, 9999);
+			database.SaveInventory(character_id, nullptr, 9999);
 		} 
 		else {
 			m_inv.PutItem(9999, *inst);
@@ -1776,7 +1776,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 		if(inst) {
 			if(CheckLoreConflict(inst->GetItem())) {
 				mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
-				database.SaveInventory(character_id, NULL, slot_id);
+				database.SaveInventory(character_id, nullptr, slot_id);
 			} 
 			else {
 				m_inv.PutItem(slot_id, *inst);
@@ -1791,7 +1791,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 		if(inst) {
 			if(CheckLoreConflict(inst->GetItem())) {
 				mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
-				database.SaveInventory(character_id, NULL, slot_id);
+				database.SaveInventory(character_id, nullptr, slot_id);
 			} 
 			else {
 				m_inv.PutItem(slot_id, *inst);
@@ -1806,7 +1806,7 @@ void Client::RemoveDuplicateLore(bool client_update) {
 		if(inst) {
 			if(CheckLoreConflict(inst->GetItem())) {
 				mlog(INVENTORY__ERROR, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
-				database.SaveInventory(character_id, NULL, slot_id);
+				database.SaveInventory(character_id, nullptr, slot_id);
 			} 
 			else {
 				m_inv.PutItem(slot_id, *inst);
@@ -1830,7 +1830,7 @@ void Client::MoveSlotNotAllowed(bool client_update) {
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
 			mlog(INVENTORY__ERROR, "Slot Assignment Error: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
 			PutItemInInventory(free_slot_id, *inst, client_update);
-			database.SaveInventory(character_id, NULL, slot_id);
+			database.SaveInventory(character_id, nullptr, slot_id);
 			safe_delete(inst);
 		}
 	}
@@ -1843,7 +1843,7 @@ void Client::MoveSlotNotAllowed(bool client_update) {
 		int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
 		mlog(INVENTORY__ERROR, "Slot Assignment Error: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
 		PutItemInInventory(free_slot_id, *inst, (GetClientVersion() >= EQClientSoF) ? client_update : false);
-		database.SaveInventory(character_id, NULL, slot_id);
+		database.SaveInventory(character_id, nullptr, slot_id);
 		safe_delete(inst);
 	}
 
@@ -1967,8 +1967,8 @@ void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType 
 	string packet = inst->Serialize(slot_id);
 	
 	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = NULL;
-	ItemPacket_Struct* itempacket = NULL;
+	EQApplicationPacket* outapp = nullptr;
+	ItemPacket_Struct* itempacket = nullptr;
 	
 	// Construct packet
 	opcode = (packet_type==ItemPacketViewLink) ? OP_ItemLinkResponse : OP_ItemPacket;
@@ -1992,8 +1992,8 @@ EQApplicationPacket* Client::ReturnItemPacket(int16 slot_id, const ItemInst* ins
 	string packet = inst->Serialize(slot_id);
 	
 	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = NULL;
-	BulkItemPacket_Struct* itempacket = NULL;
+	EQApplicationPacket* outapp = nullptr;
+	BulkItemPacket_Struct* itempacket = nullptr;
 	
 	// Construct packet
 	opcode = OP_ItemPacket;

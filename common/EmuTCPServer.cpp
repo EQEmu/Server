@@ -42,7 +42,7 @@ void EmuTCPServer::SendPacket(EmuTCPNetPacket_Struct** tnps) {
 	MInQueue.lock();
 	m_InQueue.push(*tnps);
 	MInQueue.unlock();
-	tnps = NULL;
+	tnps = nullptr;
 }
 
 void EmuTCPServer::CheckInQueue() {
@@ -61,7 +61,7 @@ void EmuTCPServer::CheckInQueue() {
 }
 
 EmuTCPNetPacket_Struct* EmuTCPServer::InQueuePop() {
-	EmuTCPNetPacket_Struct* ret = NULL;
+	EmuTCPNetPacket_Struct* ret = nullptr;
 	MInQueue.lock();
 	if(!m_InQueue.empty()) {
 		ret = m_InQueue.front();
@@ -80,7 +80,7 @@ EmuTCPConnection *EmuTCPServer::FindConnection(uint32 iID) {
 		if ((*cur)->GetID() == iID)
 			return *cur;
 	}
-	return(NULL);
+	return(nullptr);
 }
 
 

@@ -154,7 +154,7 @@ public:
 	void	BalanceHP(int32 penalty, uint32 gid);
 	void	BalanceMana(int32 penalty, uint32 gid);
 	void	HealGroup(uint32 heal_amt, Mob* caster, uint32 gid);
-	void	SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter = NULL);
+	void	SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter = nullptr);
 	void	GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid);
 
 	void	TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading, uint32 gid);

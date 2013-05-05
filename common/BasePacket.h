@@ -79,7 +79,7 @@ public:
 
 protected:
 	virtual ~BasePacket();
-	BasePacket() { pBuffer=NULL; size=0; _wpos = 0; _rpos = 0; }
+	BasePacket() { pBuffer=nullptr; size=0; _wpos = 0; _rpos = 0; }
 	BasePacket(const unsigned char *buf, const uint32 len);
 };
 

@@ -43,7 +43,7 @@ namespace SOCKETS_NAMESPACE {
 
 
 File::File()
-:m_fil(NULL)
+:m_fil(nullptr)
 {
 }
 
@@ -85,7 +85,7 @@ size_t File::fwrite(const char *ptr, size_t size, size_t nmemb)
 
 char *File::fgets(char *s, int size)
 {
-	return m_fil ? ::fgets(s, size, m_fil) : NULL;
+	return m_fil ? ::fgets(s, size, m_fil) : nullptr;
 }
 
 

@@ -29,7 +29,7 @@ using namespace std;
 
 Mime EQWHTTPHandler::s_mime;
 #ifdef EMBPERL
-EQWParser *EQWHTTPHandler::s_parser = NULL;
+EQWParser *EQWHTTPHandler::s_parser = nullptr;
 #endif
 const int EQWHTTPHandler::READ_BUFFER_LEN = 1024;	//for page IO, was a static const member, but VC6 got mad.
 
@@ -45,7 +45,7 @@ EQWHTTPHandler::~EQWHTTPHandler() {
 
 #ifdef EMBPERL
 EQWParser *EQWHTTPHandler::GetParser() {
-	if(s_parser == NULL) {
+	if(s_parser == nullptr) {
 		EQW::Singleton()->ClearOutput();
 		s_parser = new EQWParser();
 		const string &res = EQW::Singleton()->GetOutput();
@@ -158,7 +158,7 @@ void EQWHTTPHandler::SendPage(const std::string &file) {
 	path += file;
 	
 	FILE *f = fopen(path.c_str(), "rb");
-	if(f == NULL) {
+	if(f == nullptr) {
 		SendResponse("404", "Not Found");
 		SendString("Not found.");
 		printf("%s not found.\n", file.c_str());
@@ -203,7 +203,7 @@ void EQWHTTPHandler::SendPage(const std::string &file) {
 		ProcessAndSend(to_process);
 		
 		//clear out the form, just in case (since it gets destroyed next)
-		GetParser()->SetHTTPRequest("testing", NULL);
+		GetParser()->SetHTTPRequest("testing", nullptr);
 	}
 #endif
 }
@@ -315,7 +315,7 @@ bool EQWHTTPServer::Start(uint16 port, const char *mime_file) {
 #ifdef _WINDOWS
 	_beginthread(ThreadProc, 0, this);
 #else
-	pthread_create(&m_thread, NULL, ThreadProc, this);
+	pthread_create(&m_thread, nullptr, ThreadProc, this);
 #endif*/
 	
 	return(true);
@@ -333,7 +333,7 @@ void EQWHTTPServer::Run() {
 
 ThreadReturnType EQWHTTPServer::ThreadProc(void *data) {
 	((EQWHTTPServer *) data)->Run();
-	THREAD_RETURN(NULL);
+	THREAD_RETURN(nullptr);
 }*/
 
 

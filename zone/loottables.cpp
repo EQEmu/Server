@@ -176,7 +176,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 
 //if itemlist is null, just send wear changes
 void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange) {
-	if(item2 == NULL)
+	if(item2 == nullptr)
 		return;
 	
 	//make sure we are doing something...
@@ -188,8 +188,8 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		LogFile->write(EQEMuLog::Debug, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
 #endif
 	
-	EQApplicationPacket* outapp = NULL;
-	WearChange_Struct* wc = NULL;
+	EQApplicationPacket* outapp = nullptr;
+	WearChange_Struct* wc = nullptr;
 	if(wearchange) {
 		outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 		wc = (WearChange_Struct*)outapp->pBuffer;
@@ -209,7 +209,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 	if (equipit) {
 		uint8 eslot = 0xFF;
 		char newid[20];
-		const Item_Struct* compitem = NULL;
+		const Item_Struct* compitem = nullptr;
 		bool found = false; // track if we found an empty slot we fit into
 		int32 foundslot = -1; // for multi-slot items
 		
@@ -285,7 +285,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			eslot = MATERIAL_PRIMARY;
 		}
 		else if (foundslot == SLOT_SECONDARY 
-			&& (GetOwner() != NULL || (GetLevel() >= 13 && MakeRandomInt(0,99) < NPC_DW_CHANCE) || (item2->Damage==0)) &&
+			&& (GetOwner() != nullptr || (GetLevel() >= 13 && MakeRandomInt(0,99) < NPC_DW_CHANCE) || (item2->Damage==0)) &&
 			(item2->ItemType == ItemType1HS || item2->ItemType == ItemType1HB || item2->ItemType == ItemTypeShield ||
 			item2->ItemType == ItemTypePierce))
 		{
@@ -346,7 +346,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		item->equipSlot = item2->Slots;
 	}
 	
-	if(itemlist != NULL)
+	if(itemlist != nullptr)
 		itemlist->push_back(item);
 	else
 		safe_delete(item);
@@ -365,7 +365,7 @@ void NPC::AddItem(const Item_Struct* item, uint16 charges, bool equipitem) {
 void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem) {
 	//slot isnt needed, its determined from the item.
 	const Item_Struct * i = database.GetItem(itemid);
-	if(i == NULL)
+	if(i == nullptr)
 		return;
 	AddLootDrop(i, &itemlist, charges, 1, 127, equipitem, equipitem);
 }

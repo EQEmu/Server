@@ -48,7 +48,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	_ZP(Mob_SpellEffect);
 
 	int caster_level, buffslot, effect, effect_value, i;
-	ItemInst *SummonedItem=NULL;
+	ItemInst *SummonedItem=nullptr;
 #ifdef SPELL_EFFECT_SPAM
 #define _EDLEN	200
 	char effect_desc[_EDLEN];
@@ -143,7 +143,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	{
 		if(parse->SpellHasQuestSub(spell_id, "EVENT_SPELL_EFFECT_NPC"))
 		{
-            parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), NULL, spell_id, caster ? caster->GetID() : 0);
+            parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
 			CalcBonuses();
 			return true;
 		}
@@ -152,7 +152,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	{
 		if(parse->SpellHasQuestSub(spell_id, "EVENT_SPELL_EFFECT_CLIENT"))
 		{
-            parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, NULL, CastToClient(), spell_id, caster ? caster->GetID() : 0);
+            parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
 			CalcBonuses();
 			return true;
 		}
@@ -697,7 +697,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					caster->Message(0, "Unable to cast charm on a corpse.");
 					BuffFadeByEffect(SE_Charm);
 					break;
-				} else if(caster->GetPet() != NULL && caster->IsClient()) {
+				} else if(caster->GetPet() != nullptr && caster->IsClient()) {
 					caster->Message(0, "You cannot charm something when you already have a pet.");
 					BuffFadeByEffect(SE_Charm);
 					break;
@@ -1128,7 +1128,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						}
 						charges = charges < 1 ? 1 : (charges > 20 ? 20 : charges);
 						ItemInst *SubItem=database.CreateItem(spell.base[i],charges);
-						if (SubItem!=NULL) {
+						if (SubItem!=nullptr) {
 							SummonedItem->PutItem(slot,*SubItem);
 							safe_delete(SubItem);
 						}
@@ -1403,7 +1403,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					char eye_name[64];
 					snprintf(eye_name, sizeof(eye_name), "Eye_of_%s", caster->GetCleanName());
 					int duration = CalcBuffDuration(caster, this, spell_id) * 6;
-					caster->TemporaryPets(spell_id, NULL, eye_name, duration);
+					caster->TemporaryPets(spell_id, nullptr, eye_name, duration);
 				}
 				break;
 			}
@@ -2030,7 +2030,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					caster->TemporaryPets(spell_id, this, pet_name);
 				}
 				else
-					caster->TemporaryPets(spell_id, this, NULL);
+					caster->TemporaryPets(spell_id, this, nullptr);
 				break;
 			}
 
@@ -2114,11 +2114,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				switch(spells[spell_id].skill)
 				{
 					case THROWING:
-						caster->DoThrowingAttackDmg(this, NULL, NULL, spells[spell_id].base[i],spells[spell_id].base2[i], focus);
+						caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus);
 					break; 
 					
 					case ARCHERY:
-						caster->DoArcheryAttackDmg(this, NULL, NULL, spells[spell_id].base[i],spells[spell_id].base2[i],focus);
+						caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus);
 					break;
 					
 					default:
@@ -3070,7 +3070,7 @@ void Mob::DoBuffTic(uint16 spell_id, uint32 ticsremaining, uint8 caster_level, M
 	{
 		if(parse->SpellHasQuestSub(spell_id, "EVENT_SPELL_EFFECT_BUFF_TIC_NPC"))
 		{
-            parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), NULL, spell_id, caster ? caster->GetID() : 0);
+            parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
 			return;
 		}
 	}
@@ -3078,7 +3078,7 @@ void Mob::DoBuffTic(uint16 spell_id, uint32 ticsremaining, uint8 caster_level, M
 	{
 		if(parse->SpellHasQuestSub(spell_id, "EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT"))
 		{
-            parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, NULL, CastToClient(), spell_id, caster ? caster->GetID() : 0);
+            parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
 			return;
 		}
 	}
@@ -3590,7 +3590,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				if(IsClient())
 				{
-					CastToClient()->SetBindSightTarget(NULL);
+					CastToClient()->SetBindSightTarget(nullptr);
 				}
 				break;			
 			}
@@ -3682,7 +3682,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, NULL, true, false, BIT_SoDAndLater);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
         if(GetTarget() == this) {
             CastToClient()->QueuePacket(outapp);
         }
@@ -4654,7 +4654,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			if (SizeProcList > MAX_SYMPATHETIC)
 				continue;
 		
-			TempItem = NULL;
+			TempItem = nullptr;
 			ItemInst* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;
@@ -4675,7 +4675,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				if (SizeProcList > MAX_SYMPATHETIC)
 					continue;
 			
-				ItemInst *aug = NULL;
+				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
 				if(aug)
 				{
@@ -4761,7 +4761,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		//item focus
 		for(int x=0; x<=21; x++)
 		{
-			TempItem = NULL;
+			TempItem = nullptr;
 			ItemInst* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;
@@ -4795,7 +4795,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 			
 			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
 			{
-				ItemInst *aug = NULL;
+				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
 				if(aug)
 				{
@@ -4833,7 +4833,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		//Tribute Focus
 		for(int x = TRIBUTE_SLOT_START; x < (TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); ++x)
 		{
-			TempItem = NULL;
+			TempItem = nullptr;
 			ItemInst* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;

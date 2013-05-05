@@ -275,7 +275,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid) {
     filename += "/";
     filename += itoa(npcid);
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -295,7 +295,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid) {
     //second look for /quests/zone/npcname.ext (precedence)
     const NPCType *npc_type = database.GetNPCType(npcid);
     if(!npc_type) {
-        return NULL;
+        return nullptr;
     }
     std::string npc_name = npc_type->name;
     int sz = static_cast<int>(npc_name.length());
@@ -405,13 +405,13 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid) {
         iter++;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIByPlayerQuest() {
 
 	if(!zone)
-	return NULL;
+	return nullptr;
 
     //first look for /quests/zone/player_v[instance_version].ext (precedence)
     std::string filename = "quests/";
@@ -420,7 +420,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest() {
     filename += "player_v";
     filename += itoa(zone->GetInstanceVersion());
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -478,7 +478,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest() {
         iter++;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(){
@@ -488,7 +488,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(){
     filename += "/";
     filename += "global_npc";
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -505,7 +505,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(){
         iter++;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest() {
@@ -515,7 +515,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest() {
     filename += "/";
     filename += "global_player";
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -532,7 +532,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest() {
         iter++;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id) {
@@ -540,7 +540,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id) {
     std::string filename = "quests/spells/";
     filename += itoa(spell_id);
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -557,7 +557,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id) {
         iter++;
     }    
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script) {
@@ -565,7 +565,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script)
     std::string filename = "quests/items/";
     filename += item_script;
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -582,5 +582,5 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script)
         iter++;
     }    
 
-    return NULL;
+    return nullptr;
 }

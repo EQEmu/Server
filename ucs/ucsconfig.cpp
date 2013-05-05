@@ -22,7 +22,7 @@
 #include "../common/debug.h"
 #include "ucsconfig.h"
 
-ucsconfig *ucsconfig::_chat_config = NULL;
+ucsconfig *ucsconfig::_chat_config = nullptr;
 
 string ucsconfig::GetByName(const string &var_name) const {
 	return(EQEmuConfig::GetByName(var_name));

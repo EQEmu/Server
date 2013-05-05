@@ -553,7 +553,7 @@ bool AdventureManager::IsInExcludedZoneInList(list<AdventureZoneIn> excluded_zon
 
 Adventure **AdventureManager::GetFinishedAdventures(const char *player, int &count)
 {
-	Adventure **ret = NULL;
+	Adventure **ret = nullptr;
 	count = 0;
 
 	list<Adventure*>::iterator iter = adventure_list.begin();
@@ -598,7 +598,7 @@ Adventure *AdventureManager::GetActiveAdventure(const char *player)
 		}
 		iter++;
 	}
-	return NULL;
+	return nullptr;
 }
 
 AdventureTemplate *AdventureManager::GetAdventureTemplate(int theme, int id)
@@ -606,7 +606,7 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int theme, int id)
 	map<uint32, list<AdventureTemplate*> >::iterator iter = adventure_entries.find(theme);
 	if(iter == adventure_entries.end())
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	list<AdventureTemplate*>::iterator l_iter = (*iter).second.begin();
@@ -618,7 +618,7 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int theme, int id)
 		}
 		l_iter++;
 	}
-	return NULL;
+	return nullptr;
 }
 
 AdventureTemplate *AdventureManager::GetAdventureTemplate(int id)
@@ -626,7 +626,7 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int id)
 	map<uint32, AdventureTemplate*>::iterator iter = adventure_templates.find(id);
 	if(iter == adventure_templates.end())
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return iter->second;
@@ -710,7 +710,7 @@ bool AdventureManager::LoadAdventureEntries()
 		{
 			int id = atoi(row[0]);
 			int template_id = atoi(row[1]);
-			AdventureTemplate* tid = NULL;
+			AdventureTemplate* tid = nullptr;
 
 			map<uint32, AdventureTemplate*>::iterator t_iter = adventure_templates.find(template_id);
 			if(t_iter == adventure_templates.end())
@@ -842,7 +842,7 @@ void AdventureManager::LeaveAdventure(const char *name)
 void AdventureManager::IncrementCount(uint16 instance_id)
 {
 	list<Adventure*>::iterator iter = adventure_list.begin();
-	Adventure *current = NULL;
+	Adventure *current = nullptr;
 	while(iter != adventure_list.end())
 	{
 		if((*iter)->GetInstanceID() == instance_id)
@@ -882,7 +882,7 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 void AdventureManager::IncrementAssassinationCount(uint16 instance_id)
 {
 	list<Adventure*>::iterator iter = adventure_list.begin();
-	Adventure *current = NULL;
+	Adventure *current = nullptr;
 	while(iter != adventure_list.end())
 	{
 		if((*iter)->GetInstanceID() == instance_id)
@@ -903,7 +903,7 @@ void AdventureManager::IncrementAssassinationCount(uint16 instance_id)
 void AdventureManager::GetZoneData(uint16 instance_id)
 {
 	list<Adventure*>::iterator iter = adventure_list.begin();
-	Adventure *current = NULL;
+	Adventure *current = nullptr;
 	while(iter != adventure_list.end())
 	{
 		if((*iter)->GetInstanceID() == instance_id)
@@ -2183,7 +2183,7 @@ void AdventureManager::Load()
 	//disabled for now
 	return;
 
-	char *data = NULL;
+	char *data = nullptr;
 	FILE *f = fopen("adventure_state.dat", "r");
 	if(f)
 	{

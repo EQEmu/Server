@@ -41,7 +41,7 @@ int print_stacktrace()
   if (n != 0)
     {
       char **names = backtrace_symbols (ba, n);
-      if (names != NULL)
+      if (names != nullptr)
         {
           int i;
           cerr <<  "called from " << (char*)names[0] << endl;
@@ -82,9 +82,9 @@ bool ItemParse(const char *data, int length, map<int,map<int,string> > &items, i
 int i;
 char *end,*ptr;
 map<int,string> field;
-static char *buffer=NULL;
+static char *buffer=nullptr;
 static int buffsize=0;
-static char *temp=NULL;
+static char *temp=nullptr;
 	if (!buffsize || buffsize<(length+1)) {
 		buffer=(char *)realloc(buffer,length+1);
 		temp=(char *)realloc(temp,length+1);
@@ -97,7 +97,7 @@ static char *temp=NULL;
 
 	for(i=0;i<name_pos-1;i++) {
 		end=ptr-1;
-		while((end=strchr(end+1,'|'))!=NULL) {
+		while((end=strchr(end+1,'|'))!=nullptr) {
 			if (*(end-1)!='\\')
 				break;
 		}
@@ -121,7 +121,7 @@ static char *temp=NULL;
 
 	for(i=(name_pos-1);i<(max_field-1);i++) {
 		end=ptr-1;
-		while((end=strchr(end+1,'|'))!=NULL) {
+		while((end=strchr(end+1,'|'))!=nullptr) {
 			if (*(end-1)!='\\')
 				break;
 		}
@@ -160,7 +160,7 @@ static char *temp=NULL;
 	for(i=0;i<10;i++) {
 		if (*ptr=='"') {
 			end=ptr;
-			while((end=strchr(end+1,'"'))!=NULL && *(end-1)=='\\');
+			while((end=strchr(end+1,'"'))!=nullptr && *(end-1)=='\\');
 			if (end) {
 				string sub;
 				sub.assign(ptr+1,end-ptr-1);
@@ -532,7 +532,7 @@ int i;
 timeval now;
 	static const char *chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	for(i=0;i<length;i++) {
-		gettimeofday(&now,NULL);
+		gettimeofday(&now,nullptr);
 		srand(now.tv_sec^now.tv_usec);
 		key+=(char)chars[(int) (36.0*rand()/(RAND_MAX+1.0))];
 	}

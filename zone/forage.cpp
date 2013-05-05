@@ -56,27 +56,27 @@ very low chance of dropping.
 
 Schema:
 CREATE TABLE forage (
-  id int(11) NOT NULL auto_increment,
-  zoneid int(4) NOT NULL default '0',
-  Itemid int(11) NOT NULL default '0',
-  level smallint(6) NOT NULL default '0',
-  chance smallint(6) NOT NULL default '0',
+  id int(11) NOT nullptr auto_increment,
+  zoneid int(4) NOT nullptr default '0',
+  Itemid int(11) NOT nullptr default '0',
+  level smallint(6) NOT nullptr default '0',
+  chance smallint(6) NOT nullptr default '0',
   PRIMARY KEY  (id)
 ) TYPE=MyISAM;
 
 old table upgrade:
-alter table forage add chance smallint(6) NOT NULL default '0';
+alter table forage add chance smallint(6) NOT nullptr default '0';
 update forage set chance=100;
 
 
 CREATE TABLE fishing (
-  id int(11) NOT NULL auto_increment,
-  zoneid int(4) NOT NULL default '0',
-  Itemid int(11) NOT NULL default '0',
-  skill_level smallint(6) NOT NULL default '0',
-  chance smallint(6) NOT NULL default '0',
-  npc_id int NOT NULL default 0,
-  npc_chance int NOT NULL default 0,
+  id int(11) NOT nullptr auto_increment,
+  zoneid int(4) NOT nullptr default '0',
+  Itemid int(11) NOT nullptr default '0',
+  skill_level smallint(6) NOT nullptr default '0',
+  chance smallint(6) NOT nullptr default '0',
+  npc_id int NOT nullptr default 0,
+  npc_chance int NOT nullptr default 0,
   PRIMARY KEY  (id)
 ) TYPE=MyISAM;
 
@@ -208,7 +208,7 @@ bool Client::CanFish() {
 	//make sure we still have a fishing pole on:
 	const ItemInst* Pole = m_inv[SLOT_PRIMARY];
 	int32 bslot = m_inv.HasItemByUse(ItemTypeFishingBait, 1, invWhereWorn|invWherePersonal);
-	const ItemInst* Bait = NULL;
+	const ItemInst* Bait = nullptr;
 	if(bslot != SLOT_INVALID)
 		Bait = m_inv.GetItem(bslot);
 
@@ -225,7 +225,7 @@ bool Client::CanFish() {
 		return false;
 	}
 
-	if(zone->zonemap!=NULL && zone->watermap != NULL && RuleB(Watermap, CheckForWaterWhenFishing)) {
+	if(zone->zonemap!=nullptr && zone->watermap != nullptr && RuleB(Watermap, CheckForWaterWhenFishing)) {
 		float RodX, RodY, RodZ;
 		// Tweak Rod and LineLength if required
 		const float RodLength = RuleR(Watermap, FishingRodLength);
@@ -246,7 +246,7 @@ bool Client::CanFish() {
 		dest.z = z_pos+10;
 		NodeRef n = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), dest.x, dest.y);
 		if(n != NODE_NONE) {
-			RodZ = zone->zonemap->FindBestZ(n, dest, NULL, NULL) - 1;
+			RodZ = zone->zonemap->FindBestZ(n, dest, nullptr, nullptr) - 1;
 			bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
 			bool in_water = zone->watermap->InWater(RodX, RodY, RodZ) || zone->watermap->InVWater(RodX, RodY, RodZ);
 			//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
@@ -298,7 +298,7 @@ void Client::GoFish()
 	
 	//make sure we still have a fishing pole on:
 	int32 bslot = m_inv.HasItemByUse(ItemTypeFishingBait, 1, invWhereWorn|invWherePersonal);
-	const ItemInst* Bait = NULL;
+	const ItemInst* Bait = nullptr;
 	if(bslot != SLOT_INVALID)
 		Bait = m_inv.GetItem(bslot);
 
@@ -325,8 +325,8 @@ void Client::GoFish()
 			if(npc_chance > 0 && npc_id) {
 				if(npc_chance < MakeRandomInt(0, 99)) {
 					const NPCType* tmp = database.GetNPCType(npc_id);
-					if(tmp != NULL) {
-						NPC* npc = new NPC(tmp, NULL, GetX()+3, GetY(), GetZ(), GetHeading(), FlyMode3);
+					if(tmp != nullptr) {
+						NPC* npc = new NPC(tmp, nullptr, GetX()+3, GetY(), GetZ(), GetHeading(), FlyMode3);
 						npc->AddLootTable();
 						
 						npc->AddToHateList(this, 1, 0, false);	//no help yelling
@@ -351,7 +351,7 @@ void Client::GoFish()
 		
 		Message_StringID(MT_Skills, FISHING_SUCCESS);
 		const ItemInst* inst = database.CreateItem(food_item, 1);
-		if(inst != NULL) {
+		if(inst != nullptr) {
 			if(CheckLoreConflict(inst->GetItem())) 
 			{
 				this->Message_StringID(0,DUP_LORE);
@@ -366,7 +366,7 @@ void Client::GoFish()
 			safe_delete(inst);
 		}
 
-        parse->EventPlayer(EVENT_FISH_SUCCESS, this, "",  inst != NULL ? inst->GetItem()->ID : 0);
+        parse->EventPlayer(EVENT_FISH_SUCCESS, this, "",  inst != nullptr ? inst->GetItem()->ID : 0);
 	}
 	else
 	{
@@ -393,7 +393,7 @@ void Client::GoFish()
 		DeleteItemInInventory(13,0,true);
 	}
 
-	if(CheckIncreaseSkill(FISHING, NULL, 5))
+	if(CheckIncreaseSkill(FISHING, nullptr, 5))
 	{
 		if(title_manager.IsNewTradeSkillTitleAvailable(FISHING, GetRawSkill(FISHING)))
 			NotifyNewTitlesAvailable();
@@ -435,7 +435,7 @@ void Client::ForageItem(bool guarantee) {
 		const Item_Struct* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
-			LogFile->write(EQEMuLog::Error, "NULL returned from database.GetItem in ClientForageItem");
+			LogFile->write(EQEMuLog::Error, "nullptr returned from database.GetItem in ClientForageItem");
 			return;
 		}
 
@@ -460,7 +460,7 @@ void Client::ForageItem(bool guarantee) {
 		
 		Message_StringID(MT_Skills, stringid);
 		const ItemInst* inst = database.CreateItem(food_item, 1);
-		if(inst != NULL) {
+		if(inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
 			if(CheckLoreConflict(inst->GetItem())) 
 			{
@@ -475,7 +475,7 @@ void Client::ForageItem(bool guarantee) {
 			safe_delete(inst);
 		}
 		
-        parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "",  inst != NULL ? inst->GetItem()->ID : 0);
+        parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "",  inst != nullptr ? inst->GetItem()->ID : 0);
         
         int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
         if(!guarantee && MakeRandomInt(0,99) < ChanceSecondForage) {
@@ -488,6 +488,6 @@ void Client::ForageItem(bool guarantee) {
         parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
     }
 	
-	CheckIncreaseSkill(FORAGE, NULL, 5);
+	CheckIncreaseSkill(FORAGE, nullptr, 5);
 	
 }

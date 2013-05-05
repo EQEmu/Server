@@ -50,8 +50,8 @@ XS(XS_EQDBRes_num_rows)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDBRes");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->num_rows();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -76,8 +76,8 @@ XS(XS_EQDBRes_num_fields)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDBRes");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->num_fields();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -100,8 +100,8 @@ XS(XS_EQDBRes_DESTROY)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not a reference");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		delete THIS;
 	}
@@ -123,8 +123,8 @@ XS(XS_EQDBRes_finish)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDBRes");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->finish();
 	}
@@ -147,8 +147,8 @@ XS(XS_EQDBRes_fetch_row_array)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDBRes");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->fetch_row_array();
 		ST(0) = sv_newmortal();
@@ -187,8 +187,8 @@ XS(XS_EQDBRes_fetch_row_hash)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDBRes");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->fetch_row_hash();
 		ST(0) = sv_newmortal();
@@ -205,7 +205,7 @@ XS(XS_EQDBRes_fetch_row_hash)
 				for(; cur != end; cur++) {
 						/* get the element from the hash, creating if needed (will be needed) */
 						SV**ele = hv_fetch(hv, cur->first.c_str(), cur->first.length(), TRUE);
-						if(ele == NULL) {
+						if(ele == nullptr) {
 								Perl_croak(aTHX_ "Unable to create a hash element for RETVAL");
 								break;
 						}
@@ -251,8 +251,8 @@ XS(XS_EQDBRes_fetch_lengths)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDBRes");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->fetch_lengths();
 		XSprePUSH; PUSHp((char *)RETVAL, sizeof(*RETVAL));

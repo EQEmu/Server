@@ -179,7 +179,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = NULL;
+	char* query = nullptr;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
@@ -273,7 +273,7 @@ bool Zone::LoadZoneObjects() {
 			data.unknown076				= (uint32)atoi(row[idx++]);
 			data.unknown084				= 0;
 			
-			ItemInst* inst = NULL;
+			ItemInst* inst = nullptr;
 			//FatherNitwit: this dosent seem to work...
 			//tradeskill containers do not have an itemid of 0... at least what I am seeing
 			if (itemid == 0) {
@@ -286,7 +286,7 @@ bool Zone::LoadZoneObjects() {
 			}
 			
 			//Father Nitwit's fix... not perfect...
-			if(inst == NULL && type != OT_DROPPEDITEM) {
+			if(inst == nullptr && type != OT_DROPPEDITEM) {
 				inst = new ItemInst(ItemUseWorldContainer);
 			}
 			
@@ -327,7 +327,7 @@ bool Zone::LoadGroundSpawns() {
 	uint32 gsnumber=0;
 	for(gsindex=0;gsindex<50;gsindex++){
 		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<500000){
-			ItemInst* inst = NULL;
+			ItemInst* inst = nullptr;
 			inst = database.CreateItem(groundspawn.spawn[gsindex].item);
 			gsnumber=groundspawn.spawn[gsindex].max_allowed;
 			ix=0;
@@ -786,8 +786,8 @@ void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 			char errbuf[MYSQL_ERRMSG_SIZE];
 			MYSQL_RES* result = 0;
 			DBAsyncQuery* dbaq = dbaw->PopAnswer();
-			if(dbaq == NULL) {
-				LogFile->write(EQEMuLog::Error, "NULL answer provided for async merchant list load.");
+			if(dbaq == nullptr) {
+				LogFile->write(EQEMuLog::Error, "nullptr answer provided for async merchant list load.");
 				break;
 			}
 			if(!dbaq->GetAnswer(errbuf, &result)) {
@@ -808,8 +808,8 @@ void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 			char errbuf[MYSQL_ERRMSG_SIZE];
 			MYSQL_RES* result = 0;
 			DBAsyncQuery* dbaq = dbaw->PopAnswer();
-			if(dbaq == NULL) {
-				LogFile->write(EQEMuLog::Error, "NULL answer provided for async temp merchant list load.");
+			if(dbaq == nullptr) {
+				LogFile->write(EQEMuLog::Error, "nullptr answer provided for async temp merchant list load.");
 				break;
 			}
 			if(!dbaq->GetAnswer(errbuf, &result)) {
@@ -922,10 +922,10 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	zoneid = in_zoneid;
 	instanceid = in_instanceid;
 	instanceversion = database.GetInstanceVersion(instanceid);
-	zonemap = NULL; 
-	watermap = NULL; 
-	pathing = NULL; 
-	qGlobals = NULL;
+	zonemap = nullptr; 
+	watermap = nullptr; 
+	pathing = nullptr; 
+	qGlobals = nullptr;
 	default_ruleset = 0;
 
 	if(RuleB(TaskSystem, EnableTaskSystem)) {
@@ -971,13 +971,13 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	LogFile->write(EQEMuLog::Debug, "The next weather check for zone: %s will be in %i seconds.", short_name, Weather_Timer->GetRemainingTime()/1000);
 	weather_type = 0;
 	zone_weather = 0;
-	blocked_spells = NULL;
+	blocked_spells = nullptr;
 	totalBS = 0;
-	aas = NULL;
+	aas = nullptr;
 	totalAAs = 0;
     gottime = false;
 	
-	Instance_Shutdown_Timer = NULL;
+	Instance_Shutdown_Timer = nullptr;
 	bool is_perma = false;
 	if(instanceid > 0)
 	{
@@ -991,23 +991,23 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		}
 		else
 		{
-			Instance_Timer = NULL;
+			Instance_Timer = nullptr;
 		}
 	}
 	else
 	{
-		Instance_Timer = NULL;
+		Instance_Timer = nullptr;
 	}
-	adv_data = NULL;
-	map_name = NULL;
-	Instance_Warning_timer = NULL;
+	adv_data = nullptr;
+	map_name = nullptr;
+	Instance_Warning_timer = nullptr;
 	did_adventure_actions = false;
 	database.QGlobalPurge();
 
 	if(zoneid == RuleI(World, GuildBankZoneID))
 		GuildBanks = new GuildBankManager;
 	else
-		GuildBanks = NULL;
+		GuildBanks = nullptr;
 }
 
 Zone::~Zone() {
@@ -1035,7 +1035,7 @@ Zone::~Zone() {
 	safe_delete_array(adv_data);
 	safe_delete_array(map_name);
 
-	if(aas != NULL) {
+	if(aas != nullptr) {
 		int r;
 		for(r = 0; r < totalAAs; r++) {
 			uchar *data = (uchar *) aas[r];
@@ -1217,7 +1217,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDe
 	memset(&newzone_data, 0, sizeof(NewZone_Struct));
 	if(instance_id == 0)
 	{
-		map_name = NULL;
+		map_name = nullptr;
 		if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, 
 			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name)) 
 		{
@@ -1228,7 +1228,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDe
 	else
 	{
 		//Fall back to base zone if we don't find the instance version.
-		map_name = NULL;
+		map_name = nullptr;
 		if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind, 
 			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name)) 
 		{
@@ -1379,7 +1379,7 @@ bool Zone::Process() {
 
 	if(GetInstanceID() > 0)
 	{
-		if(Instance_Timer != NULL && Instance_Shutdown_Timer == NULL)
+		if(Instance_Timer != nullptr && Instance_Shutdown_Timer == nullptr)
 		{
 			if(Instance_Timer->Check())
 			{
@@ -1388,9 +1388,9 @@ bool Zone::Process() {
 				Instance_Shutdown_Timer = new Timer(20000); //20 seconds
 			}
 
-			if(adv_data == NULL)
+			if(adv_data == nullptr)
 			{
-				if(Instance_Warning_timer == NULL)
+				if(Instance_Warning_timer == nullptr)
 				{
 					uint32 rem_time = Instance_Timer->GetRemainingTime();
 					if(rem_time < 60000 && rem_time > 55000)
@@ -1415,7 +1415,7 @@ bool Zone::Process() {
 				}
 			}
 		}
-		else if(Instance_Shutdown_Timer != NULL)
+		else if(Instance_Shutdown_Timer != nullptr)
 		{
 			if(Instance_Shutdown_Timer->Check())
 			{
@@ -1618,7 +1618,7 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 	}
 	
 	if(closest_dist > max_distance2)
-		closest_zp = NULL;
+		closest_zp = nullptr;
 	
 	if(!closest_zp)
 		closest_zp = GetClosestZonePointWithoutZone(x, y, z, client);
@@ -1627,7 +1627,7 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 }
 
 ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, const char* to_name, Client* client, float max_distance) {
-	if(to_name == NULL)
+	if(to_name == nullptr)
 		return GetClosestZonePointWithoutZone(x,y,z, client, max_distance);
 	return GetClosestZonePoint(x, y, z, database.GetZoneID(to_name), client, max_distance);
 }
@@ -1665,7 +1665,7 @@ ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Clien
 		iterator.Advance();
 	}
 	if(closest_dist > max_distance2)
-		closest_zp = NULL;
+		closest_zp = nullptr;
 
 	return closest_zp;
 }
@@ -1699,7 +1699,7 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 			zp->target_heading = atof(row[8]);
 			zp->number = atoi(row[9]);
 			zp->target_zone_instance = atoi(row[10]);
-			zp->client_version_mask = (uint32)strtoul(row[11], NULL, 0);
+			zp->client_version_mask = (uint32)strtoul(row[11], nullptr, 0);
 			zone_point_list->Insert(zp);
 			zone->numzonepoints++;
 		}
@@ -2386,7 +2386,7 @@ void Zone::LoadLDoNTrapEntries()
 			uint32 id = atoi(row[0]);
 			uint32 trap_id = atoi(row[1]);
 
-			LDoNTrapTemplate *tt = NULL;
+			LDoNTrapTemplate *tt = nullptr;
 			std::map<uint32,LDoNTrapTemplate*>::iterator it;
 			it = ldon_trap_list.find(trap_id);
 			if(it == ldon_trap_list.end())

@@ -167,7 +167,7 @@ void Client::DoTributeUpdate() {
 			
 			//summon the item for them
 			const ItemInst* inst = database.CreateItem(item_id, 1);
-			if(inst == NULL)
+			if(inst == nullptr)
 				continue;
 
 			PutItemInInventory(TRIBUTE_SLOT_START+r, *inst, false);
@@ -246,7 +246,7 @@ void Client::SendTributeDetails(uint32 client_id, uint32 tribute_id) {
 int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 	const ItemInst*inst = m_inv[slot];
 	
-	if(inst == NULL)
+	if(inst == nullptr)
 		return(0);
 	
 	//figure out what its worth
@@ -398,7 +398,7 @@ bool ZoneDatabase::LoadTributes() {
 			uint32 id = atoul(row[r++]);
 			t.name = row[r++];
 			t.description = row[r++];
-			t.unknown = strtoul(row[r++], NULL, 10);
+			t.unknown = strtoul(row[r++], nullptr, 10);
 			t.is_guild = atol(row[r++])==0?false:true;
 			
 			tribute_list[id] = t;

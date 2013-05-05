@@ -36,9 +36,9 @@ class Encryption
 {
 public:
 	/**
-	 * Constructor, sets all member pointers to NULL.
+	 * Constructor, sets all member pointers to nullptr.
 	 */
-	Encryption() : h_dll(NULL), encrypt_func(NULL), decrypt_func(NULL), delete_func(NULL) { };
+	Encryption() : h_dll(nullptr), encrypt_func(nullptr), decrypt_func(nullptr), delete_func(nullptr) { };
 
 	/**
 	 * Destructor, if it's loaded it unloads this library.
@@ -48,7 +48,7 @@ public:
 	/**
 	 * Returns true if the dll is loaded, otherwise false.
 	 */
-	inline bool	Loaded() { return (h_dll != NULL); }
+	inline bool	Loaded() { return (h_dll != nullptr); }
 
 	/**
 	 * Loads the plugin.

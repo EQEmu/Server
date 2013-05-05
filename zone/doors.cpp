@@ -291,14 +291,14 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 				}
 			}
 		}
-		else if(lockpicks != NULL)
+		else if(lockpicks != nullptr)
 		{
 			if(sender->GetSkill(PICK_LOCK))
 			{
 				if(lockpicks->GetItem()->ItemType == ItemTypeLockPick)
 				{
 					float modskill=sender->GetSkill(PICK_LOCK);
-					sender->CheckIncreaseSkill(PICK_LOCK, NULL, 1);
+					sender->CheckIncreaseSkill(PICK_LOCK, nullptr, 1);
 
 #if EQDEBUG>=5
 					LogFile->write(EQEMuLog::Debug, "Client has lockpicks: skill=%f", modskill);
@@ -580,7 +580,7 @@ int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 v
 	if (RunQuery(query, strlen(query), errbuf, &result)) {
 		safe_delete_array(query);
 		row = mysql_fetch_row(result);
-		if (row != NULL && row[1] != 0) {
+		if (row != nullptr && row[1] != 0) {
 			int32 ret = atoi(row[1]);
 			if (oMaxID) {
 				if (row[0])
@@ -614,7 +614,7 @@ int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
 	if (RunQuery(query, strlen(query), errbuf, &result)) {
 		safe_delete_array(query);
 		row = mysql_fetch_row(result);
-		if (row != NULL && row[1] != 0) {
+		if (row != nullptr && row[1] != 0) {
 				if (row[0])
 					oMaxID = atoi(row[0]) + 1;
 				else
@@ -645,7 +645,7 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 	if (RunQuery(query, strlen(query), errbuf, &result)) {
 		safe_delete_array(query);
 		row = mysql_fetch_row(result);
-		if (row != NULL && row[1] != 0) {
+		if (row != nullptr && row[1] != 0) {
 				if (row[0])
 					oMaxID = atoi(row[0]) + 1;
 				else
@@ -711,7 +711,7 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 			into[r].incline=atoi(row[23]);
 			into[r].size=atoi(row[24]);
 			into[r].is_ldon_door=atoi(row[25]);
-			into[r].client_version_mask = (uint32)strtoul(row[26], NULL, 10);
+			into[r].client_version_mask = (uint32)strtoul(row[26], nullptr, 10);
 		}
 		mysql_free_result(result);
 	}
