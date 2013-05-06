@@ -31,7 +31,7 @@ void StructStrategy::Decode(EQApplicationPacket *p) const {
 	
 void StructStrategy::ErrorEncoder(EQApplicationPacket **in_p, EQStream *dest, bool ack_req) {
 	EQApplicationPacket *p = *in_p;
-	*in_p = NULL;
+	*in_p = nullptr;
 	
 	_log(NET__STRUCTS, "Error encoding opcode %s: no encoder provided. Dropping.", OpcodeManager::EmuToName(p->GetOpcode()));
 	
@@ -67,7 +67,7 @@ namespace StructStrategyFactory {
 		map<EmuOpcode, const StructStrategy *>::const_iterator res;
 		res = strategies.find(first_opcode);
 		if(res == strategies.end())
-			return(NULL);
+			return(nullptr);
 		return(res->second);
 	}
 	

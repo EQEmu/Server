@@ -81,7 +81,7 @@ int64 RDTSC_Timer::rdtsc() {
 #else
 	//fall back to get time of day
 	timeval t;
-	gettimeofday(&t, NULL);
+	gettimeofday(&t, nullptr);
 	res = ((int64)t.tv_sec) * 1000 + t.tv_usec;
 #endif
 #endif

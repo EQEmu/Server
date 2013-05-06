@@ -45,9 +45,9 @@ EQEMuLog::EQEMuLog() {
 #else
 		pLogStatus[i] = 0;
 #endif
-		logCallbackFmt[i] = NULL;
-		logCallbackBuf[i] = NULL;
-		logCallbackPva[i] = NULL;
+		logCallbackFmt[i] = nullptr;
+		logCallbackBuf[i] = nullptr;
+		logCallbackPva[i] = nullptr;
 	}
 // TODO: Make this read from an ini or something, everyone has different opinions on what it should be
 #if EQDEBUG < 2

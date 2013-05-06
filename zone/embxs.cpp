@@ -28,13 +28,13 @@
 
 const char *getItemName(unsigned itemid) 
 { 
-  const Item_Struct* item = NULL; 
+  const Item_Struct* item = nullptr; 
   item = database.GetItem(itemid); 
 
   if (item) 
     return item->Name; 
   else 
-    return NULL; 
+    return nullptr; 
 } 
 
 XS(XS_qc_getItemName); /* prototype to pass -Wmissing-prototypes */ 

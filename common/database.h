@@ -38,7 +38,7 @@
 using namespace std;
 
 //atoi is not uint32 or uint32 safe!!!!
-#define atoul(str) strtoul(str, NULL, 10)
+#define atoul(str) strtoul(str, nullptr, 10)
 
 //class Spawn;
 class Corpse;
@@ -204,8 +204,8 @@ public:
 	char*	GetGroupLeaderForLogin(const char* name,char* leaderbuf);
 	
 	void	SetGroupLeaderName(uint32 gid, const char* name);
-	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = NULL, char* assist = NULL, char* puller = NULL, char *marknpc = NULL,
-				       GroupLeadershipAA_Struct* GLAA = NULL);
+	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
+				       GroupLeadershipAA_Struct* GLAA = nullptr);
 	void	ClearGroupLeader(uint32 gid = 0);
 
 	/*
@@ -236,8 +236,8 @@ public:
 	uint8    GetPEQZone(uint32 zoneID, uint32 version);
 	const char*	GetZoneName(uint32 zoneID, bool ErrorUnknown = false);
 	uint8	GetServerType();
-	bool	GetSafePoints(const char* short_name, uint32 version, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, int16* minstatus = 0, uint8* minlevel = 0, char *flag_needed = NULL);
-	bool	GetSafePoints(uint32 zoneID, uint32 version, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, int16* minstatus = 0, uint8* minlevel = 0, char *flag_needed = NULL) { return GetSafePoints(GetZoneName(zoneID), version, safe_x, safe_y, safe_z, minstatus, minlevel, flag_needed); }
+	bool	GetSafePoints(const char* short_name, uint32 version, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, int16* minstatus = 0, uint8* minlevel = 0, char *flag_needed = nullptr);
+	bool	GetSafePoints(uint32 zoneID, uint32 version, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, int16* minstatus = 0, uint8* minlevel = 0, char *flag_needed = nullptr) { return GetSafePoints(GetZoneName(zoneID), version, safe_x, safe_y, safe_z, minstatus, minlevel, flag_needed); }
 	uint8	GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level);
 	uint8	GetRaceSkill(uint8 skillid, uint8 in_race);
 	bool	LoadPTimers(uint32 charid, PTimerList &into);

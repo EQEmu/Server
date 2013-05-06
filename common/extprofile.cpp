@@ -26,7 +26,7 @@ void InitExtendedProfile(ExtendedProfile_Struct *p) {
 }
 
 bool SetExtendedProfile(ExtendedProfile_Struct *to, char *old, unsigned int len) {
-	if(len == 0 || old == NULL) {
+	if(len == 0 || old == nullptr) {
 		//handle old chars without an extended profile...
 		InitExtendedProfile(to);
 		return(true);

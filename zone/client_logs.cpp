@@ -30,7 +30,7 @@ char ClientLogs::_buffer[MAX_CLIENT_LOG_MESSAGE_LENGTH+1];
 void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 	if(id >= EQEMuLog::MaxLogID)
 		return;
-	if(c == NULL)
+	if(c == nullptr)
 		return;
 	
 	//make sure they arnt allready subscribed.
@@ -52,7 +52,7 @@ void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 void ClientLogs::unsubscribe(EQEMuLog::LogIDs id, Client *c) {
 	if(id >= EQEMuLog::MaxLogID)
 		return;
-	if(c == NULL)
+	if(c == nullptr)
 		return;
 	
 	vector<Client *>::iterator cur,end;
@@ -67,7 +67,7 @@ void ClientLogs::unsubscribe(EQEMuLog::LogIDs id, Client *c) {
 }
 
 void ClientLogs::subscribeAll(Client *c) {
-	if(c == NULL)
+	if(c == nullptr)
 		return;
 	int r;
 	for(r = EQEMuLog::Status; r < EQEMuLog::MaxLogID; r++) {
@@ -76,7 +76,7 @@ void ClientLogs::subscribeAll(Client *c) {
 }
 
 void ClientLogs::unsubscribeAll(Client *c) {
-	if(c == NULL)
+	if(c == nullptr)
 		return;
 	int r;
 	for(r = EQEMuLog::Status; r < EQEMuLog::MaxLogID; r++) {

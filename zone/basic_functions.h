@@ -16,7 +16,7 @@ char com_list[512];
 	pch = strtok(temp,ty);
 	for (int i=0; i < pos; i++) {
 		if (pos == i) break;
-		pch = strtok(NULL,ty);
+		pch = strtok(nullptr,ty);
 	}
 	return pch;
 }*/

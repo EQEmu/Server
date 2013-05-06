@@ -1521,7 +1521,7 @@ void Merc::AI_Process() {
 		if(DivineAura())
 			return;
 
-        int hateCount = entity_list.GetHatedCount(this, NULL);
+        int hateCount = entity_list.GetHatedCount(this, nullptr);
         if(GetHatedCount() < hateCount) {
             SetHatedCount(hateCount);
 
@@ -2129,7 +2129,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 			switch (iSpellTypes) {
 				case SpellType_Heal: {
-					Mob* tar = NULL;
+					Mob* tar = nullptr;
 					int8 numToHeal = g->GetNumberNeedingHealedInGroup(IsEngaged() ? 75 : 95, true);
 					int8 checkHPR = IsEngaged() ? 95 : 99;
 					int8 checkPetHPR = IsEngaged() ? 95 : 99;
@@ -2443,7 +2443,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 					break;
 				}
 				case SpellType_Cure: {
-					Mob* tar = NULL;
+					Mob* tar = nullptr;
 					for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 						if(g->members[i] && !g->members[i]->qglobal) {
 							if(GetNeedsCured(g->members[i]) && (g->members[i]->DontCureMeBefore() < Timer::GetCurrentTime())) {
@@ -2682,7 +2682,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 		//item focus
 		for(int x  =0; x < MAX_WORN_INVENTORY; ++x)
 		{
-			TempItem = NULL;
+			TempItem = nullptr;
 			if (equipment[x] == 0)
 				continue;
 			TempItem = database.GetItem(equipment[x]);
@@ -4423,7 +4423,7 @@ bool Merc::CheckAETaunt() {
 }
 
 Corpse* Merc::GetGroupMemberCorpse() {
-    Corpse* corpse = NULL;
+    Corpse* corpse = nullptr;
 
     if(HasGroup()) {
         Group* g = GetGroup();
@@ -4655,7 +4655,7 @@ float Merc::GetMaxMeleeRangeToTarget(Mob* target) {
 }
 
 void Merc::DoClassAttacks(Mob *target) {
-	if(target == NULL)
+	if(target == nullptr)
 		return;	//gotta have a target for all these
 
 	bool ca_time = classattack_timer.Check(false);
@@ -4694,7 +4694,7 @@ void Merc::DoClassAttacks(Mob *target) {
 					DoAnim(animKick);
 					int32 dmg = 0;
 
-					if(GetWeaponDamage(target, (const Item_Struct*)NULL) <= 0){
+					if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
 						dmg = -5;
 					}
 					else{
@@ -4716,7 +4716,7 @@ void Merc::DoClassAttacks(Mob *target) {
 					DoAnim(animTailRake);
 					int32 dmg = 0;
 
-					if(GetWeaponDamage(target, (const Item_Struct*)NULL) <= 0){
+					if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
 						dmg = -5;
 					}
 					else{
@@ -4746,7 +4746,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 	_ZP(Client_Attack);
 
 	if (!other) {
-		SetTarget(NULL);
+		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");
 		return false;
 	}
@@ -4801,7 +4801,7 @@ void Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_sk
 	Save();
 
 	Mob *give_exp = hate_list.GetDamageTop(this);
-	Client *give_exp_client = NULL;
+	Client *give_exp_client = nullptr;
 
 	if(give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
@@ -4820,7 +4820,7 @@ void Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_sk
 	//				br->SplitExp((EXP_FORMULA), this);
 
 	//			if(br->GetBotMainTarget() == this)
-	//				br->SetBotMainTarget(NULL);
+	//				br->SetBotMainTarget(nullptr);
 
 	//			/* Send the EVENT_KILLED_MERIT event for all raid members */
 	//			if(br->BotRaidGroups[0]) {
@@ -5051,7 +5051,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 	//get mercenary data
 	if(merc_template) {
 		const NPCType* npc_type_to_copy = database.GetMercType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel()); //TODO: Maybe add a way of updating client merc stats in a seperate function? like, for example, on leveling up.
-		if(npc_type_to_copy != NULL)
+		if(npc_type_to_copy != nullptr)
 		{
 			NPCType* npc_type = new NPCType; //This is actually a very terrible method of assigning stats, and should be changed at some point. See the comment in merc's deconstructor.
 			memset(npc_type, 0, sizeof(NPCType));
@@ -5461,7 +5461,7 @@ bool Client::CheckCanDismissMerc() {
 void Client::CheckMercSuspendTimer()
 {
 	if(GetMercInfo().SuspendedTime != 0) {
-			if(time(NULL) >= GetMercInfo().SuspendedTime){
+			if(time(nullptr) >= GetMercInfo().SuspendedTime){
 			SendMercSuspendResponsePacket(0);
 		}
 	}
@@ -5542,7 +5542,7 @@ void Client::SpawnMercOnZone()
 			SendMercPersonalInfo();
 
 			if(GetMercInfo().SuspendedTime != 0) {
-				if(time(NULL) >= GetMercInfo().SuspendedTime){
+				if(time(nullptr) >= GetMercInfo().SuspendedTime){
 					GetMercInfo().SuspendedTime = 0;
 				}
 			}
@@ -5574,7 +5574,7 @@ bool Merc::Suspend() {
 	SetSuspended(true);
 
 	mercOwner->GetMercInfo().IsSuspended = true;
-	mercOwner->GetMercInfo().SuspendedTime = time(NULL) + RuleI(Mercs, SuspendIntervalS);
+	mercOwner->GetMercInfo().SuspendedTime = time(nullptr) + RuleI(Mercs, SuspendIntervalS);
 	mercOwner->GetMercInfo().MercTimerRemaining = mercOwner->GetMercTimer()->GetRemainingTime();
 	mercOwner->GetMercInfo().Stance = GetStance();
 	Save();
@@ -5625,7 +5625,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 
 			if(!g) {
 				delete g;
-				g = NULL;
+				g = nullptr;
 				return false;
 			}
 
@@ -5633,7 +5633,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 
 			if(g->GetID() == 0) {
 				delete g;
-				g = NULL;
+				g = nullptr;
 				return false;
 			}
 
@@ -5773,7 +5773,7 @@ bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 			Merc::RemoveMercFromGroup(merc, merc->GetGroup());
 		}
 		//Try and add the member, followed by checking if the merc owner exists.
-		if(group->AddMember(merc) && merc->GetMercOwner() != NULL) { 
+		if(group->AddMember(merc) && merc->GetMercOwner() != nullptr) { 
 				merc->SetFollowID(merc->GetMercOwner()->GetID());
 				Result = true;
 		}
@@ -5794,17 +5794,17 @@ void Client::InitializeMercInfo() {
 
 Merc* Client::GetMerc() {
 	if(GetMercID() == 0)
-		return(NULL);
+		return(nullptr);
 
 	Merc* tmp = entity_list.GetMercByID(GetMercID());
-	if(tmp == NULL) {
+	if(tmp == nullptr) {
 		SetMercID(0);
-		return(NULL);
+		return(nullptr);
 	}
 
 	if(tmp->GetOwnerID() != GetID()) {
 		SetMercID(0);
-		return(NULL);
+		return(nullptr);
 	}
 
 	return(tmp);
@@ -5846,7 +5846,7 @@ void Client::SetMerc(Merc* newmerc) {
 		SetMercID(0);
 		GetMercInfo().mercid = 0;
 		GetMercInfo().MercTemplateID = 0;
-		GetMercInfo().myTemplate = NULL;
+		GetMercInfo().myTemplate = nullptr;
 		GetMercInfo().IsSuspended = false;
 		GetMercInfo().SuspendedTime = 0;
 		GetMercInfo().Gender = 0;

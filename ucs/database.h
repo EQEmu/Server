@@ -36,7 +36,7 @@
 using namespace std;
 
 //atoi is not uint32 or uint32 safe!!!!
-#define atoul(str) strtoul(str, NULL, 10)
+#define atoul(str) strtoul(str, nullptr, 10)
 
 class Database : public DBcore {
 public:

@@ -35,7 +35,7 @@ EQStreamFactory *fs=(EQStreamFactory *)eqfs;
 	_log(COMMON__THREADS, "Ending EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
 #endif
 	
-	THREAD_RETURN(NULL);
+	THREAD_RETURN(nullptr);
 }
 
 ThreadReturnType EQStreamFactoryWriterLoop(void *eqfs)
@@ -52,7 +52,7 @@ ThreadReturnType EQStreamFactoryWriterLoop(void *eqfs)
 	_log(COMMON__THREADS, "Ending EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
 #endif
 
-	THREAD_RETURN(NULL);
+	THREAD_RETURN(nullptr);
 }
 
 EQStreamFactory::EQStreamFactory(EQStreamType type, int port, uint32 timeout) 
@@ -112,15 +112,15 @@ struct sockaddr_in address;
 		_beginthread(EQStreamFactoryReaderLoop,0, this);
 		_beginthread(EQStreamFactoryWriterLoop,0, this);
 	#else
-		pthread_create(&t1,NULL,EQStreamFactoryReaderLoop,this);
-		pthread_create(&t2,NULL,EQStreamFactoryWriterLoop,this);
+		pthread_create(&t1,nullptr,EQStreamFactoryReaderLoop,this);
+		pthread_create(&t2,nullptr,EQStreamFactoryWriterLoop,this);
 	#endif
 	return true;
 }
 
 EQStream *EQStreamFactory::Pop()
 {
-EQStream *s=NULL;
+EQStream *s=nullptr;
 	//cout << "Pop():Locking MNewStreams" << endl;
 	MNewStreams.lock();
 	if (NewStreams.size()) {
@@ -167,7 +167,7 @@ timeval sleep_time;
 
 		sleep_time.tv_sec=30;
 		sleep_time.tv_usec=0;
-		if ((num=select(sock+1,&readset,NULL,NULL,&sleep_time))<0) {
+		if ((num=select(sock+1,&readset,nullptr,nullptr,&sleep_time))<0) {
 			// What do we wanna do?
 			continue;
 		} else if (num==0)
@@ -204,7 +204,7 @@ timeval sleep_time;
 					EQStream *curstream = stream_itr->second;
 					//dont bother processing incoming packets for closed connections
 					if(curstream->CheckClosed())
-						curstream = NULL;
+						curstream = nullptr;
 					else
 						curstream->PutInUse();
 					MStreams.unlock();	//the in use flag prevents the stream from being deleted while we are using it.
@@ -293,8 +293,8 @@ Timer DecayTimer(20);
 				stream_itr->second->Decay();
 			
 			//bullshit checking, to see if this is really happening, GDB seems to think so...
-			if(stream_itr->second == NULL) {
-				fprintf(stderr, "ERROR: NULL Stream encountered in EQStreamFactory::WriterLoop for: %s", stream_itr->first.c_str());
+			if(stream_itr->second == nullptr) {
+				fprintf(stderr, "ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %s", stream_itr->first.c_str());
 				continue;
 			}
 			

@@ -185,7 +185,7 @@ void ClientManager::RemoveExistingClient(unsigned int account_id)
 
 Client *ClientManager::GetClient(unsigned int account_id)
 {
-	Client *cur = NULL;
+	Client *cur = nullptr;
 	int count = 0;
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())

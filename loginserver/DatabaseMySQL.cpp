@@ -35,12 +35,12 @@ DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port,
 	this->host = host;
 	this->name = name;
 
-	db = mysql_init(NULL);
+	db = mysql_init(nullptr);
 	if(db)
 	{
 		my_bool r = 1;
 		mysql_options(db, MYSQL_OPT_RECONNECT, &r);
-		if(!mysql_real_connect(db, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), NULL, 0)) 
+		if(!mysql_real_connect(db, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0)) 
 		{
 			mysql_close(db);
 			server_log->Log(log_database, "Failed to connect to MySQL database.");
@@ -84,7 +84,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 
 	if(res)
 	{
-		while((row = mysql_fetch_row(res)) != NULL)
+		while((row = mysql_fetch_row(res)) != nullptr)
 		{
 			id = atoi(row[0]);
 			password = row[1];
@@ -128,7 +128,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 	res = mysql_use_result(db);
 	if(res)
 	{
-		if((row = mysql_fetch_row(res)) != NULL)
+		if((row = mysql_fetch_row(res)) != nullptr)
 		{
 			id = atoi(row[0]);
 			desc = row[1];
@@ -153,7 +153,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 				res = mysql_use_result(db);
 				if(res)
 				{
-					if((row = mysql_fetch_row(res)) != NULL)
+					if((row = mysql_fetch_row(res)) != nullptr)
 					{
 						account = row[0]; 
 						password = row[1];
@@ -264,7 +264,7 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 	res = mysql_use_result(db);
 	if(res)
 	{
-		if((row = mysql_fetch_row(res)) != NULL)
+		if((row = mysql_fetch_row(res)) != nullptr)
 		{
 			id = atoi(row[0]) + 1;
 			mysql_free_result(res);

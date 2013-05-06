@@ -70,12 +70,12 @@ bool ProcessZoneFile(const char *shortname) {
 
 	archive = new PFSLoader();
 	fff = fopen(bufs, "rb");
-	if(fff != NULL) 
+	if(fff != nullptr) 
 		FileType = S3D;
 	else {
 		sprintf(bufs, "%s.eqg", shortname);
 		fff = fopen(bufs, "rb");
-		if(fff != NULL)
+		if(fff != nullptr)
 			FileType = EQG;
 	}
 
@@ -94,7 +94,7 @@ bool ProcessZoneFile(const char *shortname) {
 	switch(FileType) {
 		case S3D: 
   			fileloader = new WLDLoader();
-  			if(fileloader->Open(NULL, (char *) shortname, archive) == 0) {
+  			if(fileloader->Open(nullptr, (char *) shortname, archive) == 0) {
 	  			printf("Error reading WLD from %s\n", bufs);
 	  			return(false);
   			}
@@ -102,10 +102,10 @@ bool ProcessZoneFile(const char *shortname) {
 
 		case EQG:
 			fileloader = new ZonLoader();
-			if(fileloader->Open(NULL, (char *) shortname, archive) == 0) {
+			if(fileloader->Open(nullptr, (char *) shortname, archive) == 0) {
 				delete fileloader;
 				fileloader = new Zonv4Loader();
-				if(fileloader->Open(NULL, (char *) shortname, archive) == 0) {
+				if(fileloader->Open(nullptr, (char *) shortname, archive) == 0) {
 					printf("Error reading ZON/TER from %s\n", bufs);
 					return(false);
 				}
@@ -131,7 +131,7 @@ void ListPlaceable(FileLoader *fileloader, char *ZoneFileName) {
 
 	for(int i = 0; i < fileloader->model_data.plac_count; ++i) {
 		if(fileloader->model_data.placeable[i]->model==-1) continue;
-		if(fileloader->model_data.models[fileloader->model_data.placeable[i]->model] == NULL) continue;
+		if(fileloader->model_data.models[fileloader->model_data.placeable[i]->model] == nullptr) continue;
 		printf("Placeable Object %4d @ (%9.2f, %9.2f, %9.2f uses model %4d %s\n",i,
 	       	 	fileloader->model_data.placeable[i]->y,
 	        	fileloader->model_data.placeable[i]->x,

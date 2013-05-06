@@ -18,7 +18,7 @@
 #include "../common/debug.h"
 #include "WorldConfig.h"
 
-WorldConfig *WorldConfig::_world_config = NULL;
+WorldConfig *WorldConfig::_world_config = nullptr;
 
 
 string WorldConfig::GetByName(const string &var_name) const {

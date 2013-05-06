@@ -48,7 +48,7 @@ public:
 	/** File block structure. 
 		\ingroup file */
 	struct block_t {
-		block_t() : next(NULL) {}
+		block_t() : next(nullptr) {}
 		struct block_t *next;
 		char data[BLOCKSIZE];
 	};

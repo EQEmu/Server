@@ -40,7 +40,7 @@ public:
         TEST_ASSERT(mmf.Size() == 512);
     
         unsigned char *data = reinterpret_cast<unsigned char*>(mmf.Get());
-        TEST_ASSERT(data != NULL);
+        TEST_ASSERT(data != nullptr);
     
         *reinterpret_cast<uint32*>(data) = 562;
     }
@@ -50,7 +50,7 @@ public:
         TEST_ASSERT(mmf.Size() == 512);
     
         unsigned char *data = reinterpret_cast<unsigned char*>(mmf.Get());
-        TEST_ASSERT(data != NULL);
+        TEST_ASSERT(data != nullptr);
     
         uint32 val = *reinterpret_cast<uint32*>(data);
         TEST_ASSERT(val == 562);

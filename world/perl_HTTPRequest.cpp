@@ -60,8 +60,8 @@ XS(XS_HTTPRequest_get)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type HTTPRequest");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			default_value = "";
@@ -94,8 +94,8 @@ XS(XS_HTTPRequest_getInt)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type HTTPRequest");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			default_value = 0;
@@ -128,8 +128,8 @@ XS(XS_HTTPRequest_getFloat)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type HTTPRequest");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			default_value = 0.0;
@@ -162,8 +162,8 @@ XS(XS_HTTPRequest_getEscaped)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type HTTPRequest");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			default_value = "";
@@ -193,8 +193,8 @@ XS(XS_HTTPRequest_get_all)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type HTTPRequest");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->get_all();
 		ST(0) = sv_newmortal();
@@ -211,7 +211,7 @@ XS(XS_HTTPRequest_get_all)
 				for(; cur != end; cur++) {
 						/* get the element from the hash, creating if needed (will be needed) */
 						SV**ele = hv_fetch(hv, cur->first.c_str(), cur->first.length(), TRUE);
-						if(ele == NULL) {
+						if(ele == nullptr) {
 								Perl_croak(aTHX_ "Unable to create a hash element for RETVAL");
 								break;
 						}
@@ -256,8 +256,8 @@ XS(XS_HTTPRequest_redirect)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type HTTPRequest");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->redirect(URL);
 	}
@@ -280,8 +280,8 @@ XS(XS_HTTPRequest_SetResponseCode)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type HTTPRequest");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetResponseCode(code);
 	}
@@ -305,8 +305,8 @@ XS(XS_HTTPRequest_header)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type HTTPRequest");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->header(name, value);
 	}

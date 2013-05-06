@@ -12,9 +12,9 @@
 //#define DEBUGPLAC
 
 ZonLoader::ZonLoader() {
-  this->buffer = NULL;
+  this->buffer = nullptr;
   this->buf_len = -1;
-  this->archive = NULL;
+  this->archive = nullptr;
   this->status = 0;
 }
 
@@ -112,7 +112,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 #ifdef DEBUGEQG
   printf("Found .TER file %s\n", (char *)buffer);
 #endif
-  this->terloader.Open(NULL, (char *) buffer, archive);
+  this->terloader.Open(nullptr, (char *) buffer, archive);
   buffer = StartOfModelNames;
   this->model_data.zone_model = terloader.model_data.zone_model;
 
@@ -267,11 +267,11 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
     //
     if(!(strcmp(model_names[j]+strlen(model_names[j])-3, "ter"))) {
 //    	printf("Skipping .TER file at model number %d\n", j);
-		this->model_data.models[j] = NULL;
+		this->model_data.models[j] = nullptr;
 		continue;
     }
 //    printf("Attempting to open MOD file %s\n", model_names[j]); fflush(stdout);
-    if(model_loaders[j].Open(NULL, model_names[j], archive)) {
+    if(model_loaders[j].Open(nullptr, model_names[j], archive)) {
     
         this->model_data.models[j] = new Model;
         this->model_data.models[j]->vert_count = model_loaders[j].model_data.zone_model->vert_count;
@@ -305,7 +305,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
             for(k = 0; k < j; ++k) {
 	      if(!this->model_data.models[k]) {
 #ifdef DEBUGEQG
-                  printf("NULL  this->model_data.models[k])\n");
+                  printf("nullptr  this->model_data.models[k])\n");
 #endif
 	          continue;
 	      }
@@ -324,7 +324,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
           }
         }
     }
-	else this->model_data.models[j] = NULL;
+	else this->model_data.models[j] = nullptr;
   }
 
 //  printf("Tex count is %i %X\n", tex_count, tex_count);
@@ -336,7 +336,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
   for(i = 0; i < this->model_data.model_count; ++i) {
     if(!this->model_data.models[i]) {
 #ifdef DEBUGEQG
-        printf("NULL  this->model_data.models[i])\n");
+        printf("nullptr  this->model_data.models[i])\n");
 #endif
     	continue;
     }
@@ -364,7 +364,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
   for(i = 0; i < this->model_data.model_count; ++i) {
     if(!this->model_data.models[i]) {
 #ifdef DEBUGEQG
-        printf(">NULL  this->model_data.models[i])\n");
+        printf(">nullptr  this->model_data.models[i])\n");
 #endif
         continue;
     }

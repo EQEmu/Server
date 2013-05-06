@@ -45,7 +45,7 @@ class Mob;
 class UMType {
 public:
 	UMType() {
-		app = NULL; ack = false;
+		app = nullptr; ack = false;
 	}
 	UMType(EQApplicationPacket *_app, bool _ack) {
 		app = _app; ack = _ack;

@@ -18,7 +18,7 @@
 #define FASTQUEUE(packet) dest->FastQueuePacket(&packet, ack_req);
 #define TAKE(packet_name) \
 	EQApplicationPacket *packet_name = *p; \
-	*p = NULL;
+	*p = nullptr;
 
 //simple buffer-to-buffer movement for fixed length packets
 //the eq packet is mapped into `eq`, the emu packet into `emu`
@@ -29,7 +29,7 @@
 //like a direct encode, but for variable length packets (two stage)
 #define SETUP_VAR_ENCODE(emu_struct) \
 	EQApplicationPacket *__packet = *p; \
-	*p = NULL; \
+	*p = nullptr; \
 	unsigned char *__emu_buffer = __packet->pBuffer; \
 	emu_struct *emu = (emu_struct *) __emu_buffer; \
 	uint32 __i = 0; \
@@ -67,7 +67,7 @@
 		_log(NET__STRUCTS, "Wrong size on outbound %s (" #struct_ "): Got %d, expected %d", opcodes->EmuToName((*p)->GetOpcode()), (*p)->size, sizeof(struct_)); \
 		_hex(NET__STRUCT_HEX, (*p)->pBuffer, (*p)->size); \
 		delete *p; \
-		*p = NULL; \
+		*p = nullptr; \
 		return; \
 	}
 #define ENCODE_LENGTH_ATLEAST(struct_) \
@@ -75,7 +75,7 @@
 		_log(NET__STRUCTS, "Wrong size on outbound %s (" #struct_ "): Got %d, expected at least %d", opcodes->EmuToName((*p)->GetOpcode()), (*p)->size, sizeof(struct_)); \
 		_hex(NET__STRUCT_HEX, (*p)->pBuffer, (*p)->size); \
 		delete *p; \
-		*p = NULL; \
+		*p = nullptr; \
 		return; \
 	}
 
@@ -87,7 +87,7 @@
 #define EAT_ENCODE(op) \
 	ENCODE(op) { \
 	delete *p; \
-	*p = NULL; \
+	*p = nullptr; \
 	}
 
 

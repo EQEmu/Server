@@ -56,8 +56,8 @@ TCPConnection::TCPConnection()
 	pState = TCPS_Ready;
 	pFree = false;
 	pEcho = false;
-	recvbuf = NULL;
-	sendbuf = NULL;
+	recvbuf = nullptr;
+	sendbuf = nullptr;
 	pRunLoop = false;
 	charAsyncConnect = 0;
 	pAsyncConnect = false;
@@ -78,8 +78,8 @@ TCPConnection::TCPConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 ir
 	pState = TCPS_Connected;
 	pFree = false;
 	pEcho = false;
-	recvbuf = NULL;
-	sendbuf = NULL;
+	recvbuf = nullptr;
+	sendbuf = nullptr;
 	pRunLoop = false;
 	charAsyncConnect = 0;
 	pAsyncConnect = false;
@@ -180,7 +180,7 @@ bool TCPConnection::Send(const uchar* data, int32 size) {
 
 void TCPConnection::ServerSendQueuePushEnd(const uchar* data, int32 size) {
 	MSendQueue.lock();
-	if (sendbuf == NULL) {
+	if (sendbuf == nullptr) {
 		sendbuf = new uchar[size];
 		sendbuf_size = size;
 		sendbuf_used = 0;
@@ -387,7 +387,7 @@ void TCPConnection::AsyncConnect(uint32 irIP, uint16 irPort) {
 		_beginthread(TCPConnectionLoop, 0, this);
 #else
 		pthread_t thread;
-		pthread_create(&thread, NULL, TCPConnectionLoop, this);
+		pthread_create(&thread, nullptr, TCPConnectionLoop, this);
 #endif
 	}
 	return;
@@ -433,7 +433,7 @@ bool TCPConnection::ConnectIP(uint32 in_ip, uint16 in_port, char* errbuf) {
 		_beginthread(TCPConnectionLoop, 0, this);
 #else
 		pthread_t thread;
-		pthread_create(&thread, NULL, TCPConnectionLoop, this);
+		pthread_create(&thread, nullptr, TCPConnectionLoop, this);
 #endif
 	}
 
@@ -729,7 +729,7 @@ bool TCPConnection::ProcessReceivedData(char* errbuf) {
 			case 10:
 			case 13: // newline marker
 			{
-				char *line = NULL;
+				char *line = nullptr;
 				if (i==0) { // empty line
 					if(!m_previousLineEnd) {
 						//char right before this was NOT a CR, report the empty line.
@@ -772,7 +772,7 @@ bool TCPConnection::ProcessReceivedData(char* errbuf) {
 				}
 				
 				
-				if(line != NULL) {
+				if(line != nullptr) {
 					bool finish_proc = false;
 					finish_proc = LineOutQueuePush(line);
 					if(finish_proc)
@@ -896,7 +896,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 #endif
 	if (tmp == 0) {
-		THREAD_RETURN(NULL);
+		THREAD_RETURN(nullptr);
 	}
 	TCPConnection* tcpc = (TCPConnection*) tmp;
 #ifndef WIN32
@@ -932,7 +932,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	_log(COMMON__THREADS, "Ending TCPConnectionLoop with thread ID %d", pthread_self());
 #endif
 	
-	THREAD_RETURN(NULL);
+	THREAD_RETURN(nullptr);
 }
 
 bool TCPConnection::RunLoop() {

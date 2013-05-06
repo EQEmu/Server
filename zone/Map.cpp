@@ -69,13 +69,13 @@ Map* Map::LoadMapfile(const char* in_zonename, const char *directory) {
 	//are not all lower anymore, copy since strlwr edits the str.
 	strn0cpy(zBuf, in_zonename, 64);
 	
-	if(directory == NULL)
+	if(directory == nullptr)
 		directory = MAP_DIR;
 	snprintf(cWork, 250, "%s/%s.map", directory, strlwr(zBuf));
 	
 	if ((fp = fopen( cWork, "rb" ))) {
 		ret = new Map();
-		if(ret != NULL) {
+		if(ret != nullptr) {
 			ret->loadMap(fp);
 			printf("Map %s loaded.\n", cWork);
 		} else {
@@ -100,9 +100,9 @@ Map::Map() {
 	m_Faces = 0;
 	m_Nodes = 0;
 	m_FaceLists = 0;
-	mFinalFaces = NULL;
-	mNodes = NULL;
-	mFaceLists = NULL;
+	mFinalFaces = nullptr;
+	mNodes = nullptr;
+	mFaceLists = nullptr;
 }
 
 bool Map::loadMap(FILE *fp) {
@@ -261,19 +261,19 @@ printf("	Kids: %u, %u, %u, %u\n", _node->nodes[0], _node->nodes[1], _node->nodes
 printf("	Contained In Box: (%.2f -> %.2f, %.2f -> %.2f)\n", _node->minx, _node->maxx, _node->miny, _node->maxy);
 		
 /*printf("	Node found has children.\n");
-if(_node->node1 != NULL) {
+if(_node->node1 != nullptr) {
 	printf("\tNode: (%.2f -> %.2f, %.2f -> %.2f)\n", 
 		_node->node1->minx, _node->node1->maxx, _node->node1->miny, _node->node1->maxy);
 }
-if(_node->node2 != NULL) {
+if(_node->node2 != nullptr) {
 	printf("\tNode: (%.2f -> %.2f, %.2f -> %.2f)\n", 
 		_node->node2->minx, _node->node2->maxx, _node->node2->miny, _node->node2->maxy);
 }
-if(_node->node3 != NULL) {
+if(_node->node3 != nullptr) {
 	printf("\tNode: (%.2f -> %.2f, %.2f -> %.2f)\n", 
 		_node->node3->minx, _node->node3->maxx, _node->node3->miny, _node->node3->maxy);
 }
-if(_node->node4 != NULL) {
+if(_node->node4 != nullptr) {
 	printf("\tNode: (%.2f -> %.2f, %.2f -> %.2f)\n", 
 		_node->node4->minx, _node->node4->maxx, _node->node4->miny, _node->node4->maxy);
 }*/
@@ -328,11 +328,11 @@ printf(" No node found.\n");
 // maybe precalc edges.
 int* Map::SeekFace(  NodeRef node_r, float x, float y ) {
 	if( node_r == NODE_NONE || node_r >= m_Nodes) {
-		return(NULL);
+		return(nullptr);
 	}
 	const PNODE _node = &mNodes[node_r];
 	if(!(_node->flags & nodeFinal)) {
-		return(NULL);   //not a final node... could find the proper node...
+		return(nullptr);   //not a final node... could find the proper node...
 	}
 	
 	
@@ -483,7 +483,7 @@ bool Map::LineIntersectsNode( NodeRef node_r, VERTEX p1, VERTEX p2, VERTEX *resu
 			continue;	//watch for invalid lists, they seem to happen
 		cur = &mFinalFaces[ *cfl ];
 		if(LineIntersectsFace(cur,p1, p2, result)) {
-			if(on != NULL)
+			if(on != nullptr)
 				*on = cur;
 			return(true);
 		}
@@ -516,7 +516,7 @@ float Map::FindBestZ( NodeRef node_r, VERTEX p1, VERTEX *result, FACE **on) cons
 	}
 	
 	VERTEX tmp_result;	//dummy placeholder if they do not ask for a result.
-	if(result == NULL)
+	if(result == nullptr)
 		result = &tmp_result;
 	
 	VERTEX p2(p1);
@@ -554,7 +554,7 @@ printf("Start finding best Z...\n");
 					printf("Found a z: %.2f\n", result->z);
 #endif
 				if (result->z > best_z) {
-					if(on != NULL)
+					if(on != nullptr)
 						*on = cur;
 					best_z = result->z;
 				}
@@ -576,7 +576,7 @@ printf("Best Z found: %.2f\n", best_z);
 
 
 bool Map::LineIntersectsFace( PFACE cface, VERTEX p1, VERTEX p2, VERTEX *result) const {
-	if( cface == NULL ) {
+	if( cface == nullptr ) {
 		return(false);  //cant intersect a face we dont have... i guess
 	}
 	
@@ -617,7 +617,7 @@ bool Map::LineIntersectsFace( PFACE cface, VERTEX p1, VERTEX p2, VERTEX *result)
 //	FACE *thisface = &mFinalFaces[ _node->pfaces[ i ] ];
 	
 	VERTEX *p = &intersect;
-	if(result != NULL)
+	if(result != nullptr)
 		p = result;
 
 	// Calculate the parameters for the plane

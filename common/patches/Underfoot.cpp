@@ -19,14 +19,14 @@ namespace Underfoot
 {
 
 static const char *name = "Underfoot";
-static OpcodeManager *opcodes = NULL;
+static OpcodeManager *opcodes = nullptr;
 static Strategy struct_strategy;
 
 char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
 	
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
-	if(opcodes == NULL) {
+	if(opcodes == nullptr) {
 		//TODO: get this file name from the config file
 		string opfile = "patch_";
 		opfile += name;
@@ -70,7 +70,7 @@ void Reload() {
 	//opcode managers because we need to change the manager pointer, which means
 	//we need to go to every stream and replace it's manager.
 	
-	if(opcodes != NULL) {
+	if(opcodes != nullptr) {
 		//TODO: get this file name from the config file
 		string opfile = "patch_";
 		opfile += name;
@@ -186,7 +186,7 @@ ENCODE(OP_OpenNewTasksWindow) {
 	structs::AvailableTaskTrailer_Struct* 	__eq_AvailableTaskTrailer;
 
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	unsigned char *__emu_buffer = in->pBuffer;
 
@@ -775,7 +775,7 @@ ENCODE(OP_NewZone) {
 ENCODE(OP_Track)
 {
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	unsigned char *__emu_buffer = in->pBuffer;
 	Track_Struct *emu = (Track_Struct *) __emu_buffer;
@@ -821,7 +821,7 @@ ENCODE(OP_Track)
 ENCODE(OP_PetBuffWindow)
 {
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	unsigned char *__emu_buffer = in->pBuffer;
 
@@ -860,7 +860,7 @@ ENCODE(OP_PetBuffWindow)
 ENCODE(OP_Barter)
 {
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	char *Buffer = (char *)in->pBuffer;
 
@@ -901,7 +901,7 @@ ENCODE(OP_Barter)
 ENCODE(OP_BazaarSearch)
 {
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	char *Buffer = (char *)in->pBuffer;
 
@@ -957,7 +957,7 @@ ENCODE(OP_ZoneEntry){  ENCODE_FORWARD(OP_ZoneSpawns); }
 ENCODE(OP_ZoneSpawns) {
 		//consume the packet
 		EQApplicationPacket *in = *p;
-		*p = NULL;
+		*p = nullptr;
 		
 		//store away the emu struct
 		unsigned char *__emu_buffer = in->pBuffer;
@@ -1272,7 +1272,7 @@ ENCODE(OP_ZoneSpawns) {
 ENCODE(OP_MercenaryDataResponse) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
@@ -1335,7 +1335,7 @@ ENCODE(OP_MercenaryDataResponse) {
 ENCODE(OP_MercenaryDataUpdate) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
@@ -1411,7 +1411,7 @@ ENCODE(OP_ItemLinkResponse) {  ENCODE_FORWARD(OP_ItemPacket); }
 ENCODE(OP_ItemPacket) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	unsigned char *__emu_buffer = in->pBuffer;
 	ItemPacket_Struct *old_item_pkt=(ItemPacket_Struct *)__emu_buffer;
@@ -1440,7 +1440,7 @@ ENCODE(OP_CharInventory) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 
-	*p = NULL;
+	*p = nullptr;
 
 	if(in->size == 0) {
 
@@ -1518,7 +1518,7 @@ ENCODE(OP_CharInventory) {
 ENCODE(OP_GuildMemberList) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
@@ -1646,7 +1646,7 @@ ENCODE(OP_GroundSpawn)
 	// We are not encoding the spawn_id field here, or a size but it doesn't appear to matter.
 	//
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	Object_Struct *emu = (Object_Struct *) in->pBuffer;
 
@@ -1935,7 +1935,7 @@ ENCODE(OP_Trader) {
 
 	if((*p)->size != sizeof(TraderBuy_Struct)) {
 		EQApplicationPacket *in = *p;
-		*p = NULL;
+		*p = nullptr;
 		dest->FastQueuePacket(&in, ack_req);
 		return;
 	}
@@ -2093,7 +2093,7 @@ ENCODE(OP_AdventureMerchantSell) {
 ENCODE(OP_RaidUpdate) 
 {
 	EQApplicationPacket *inapp = *p;
-	*p = NULL;
+	*p = nullptr;
 	unsigned char * __emu_buffer = inapp->pBuffer;
 	RaidGeneral_Struct *raid_gen = (RaidGeneral_Struct*)__emu_buffer;
 
@@ -2157,7 +2157,7 @@ ENCODE(OP_VetRewardsAvaliable)
 	unsigned char * __emu_buffer = inapp->pBuffer;
 
 	uint32 count = ((*p)->Size() / sizeof(InternalVeteranReward));
-	*p = NULL;
+	*p = nullptr;
 
 	EQApplicationPacket *outapp_create = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(structs::VeteranReward)*count));
 	uchar *old_data = __emu_buffer;
@@ -2188,7 +2188,7 @@ ENCODE(OP_VetRewardsAvaliable)
 ENCODE(OP_WhoAllResponse)
 {
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	char *InBuffer = (char *)in->pBuffer;
 
@@ -2438,7 +2438,7 @@ ENCODE(OP_GroupUpdate)
 ENCODE(OP_ChannelMessage)
 {
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	ChannelMessage_Struct *emu = (ChannelMessage_Struct *) in->pBuffer;
 
@@ -2474,7 +2474,7 @@ ENCODE(OP_ChannelMessage)
 ENCODE(OP_GuildsList)
 {
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	uint32 NumberOfGuilds = in->size / 64;
 
@@ -2742,7 +2742,7 @@ ENCODE(OP_WearChange)
 ENCODE(OP_SpawnAppearance)
 {
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	unsigned char *emu_buffer = in->pBuffer;
 
@@ -2793,7 +2793,7 @@ ENCODE(OP_AltCurrencySell)
 ENCODE(OP_AltCurrency)
 {
     EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	unsigned char *emu_buffer = in->pBuffer;
     uint32 opcode = *((uint32*)emu_buffer);
@@ -3881,7 +3881,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 
 	for(int x = 0; x < 10; ++x) {
 	
-		SubSerializations[x] = NULL;
+		SubSerializations[x] = nullptr;
 
 		const ItemInst* subitem = ((const ItemInst*)inst)->GetItem(x);
 

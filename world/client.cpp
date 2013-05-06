@@ -1073,7 +1073,7 @@ void Client::EnterWorld(bool TryBootup) {
 	if (zoneID == 0)
 		return;
 
-	ZoneServer* zs = NULL;
+	ZoneServer* zs = nullptr;
 	if(instanceID > 0)
 	{
 		if(database.VerifyInstanceAlive(instanceID, GetCharID()))
@@ -1085,7 +1085,7 @@ void Client::EnterWorld(bool TryBootup) {
 			else
 			{
 				instanceID = 0;
-				zs = NULL;
+				zs = nullptr;
 				database.MoveCharacterToBind(GetCharID());
 				ZoneUnavail();
 				return;
@@ -1094,7 +1094,7 @@ void Client::EnterWorld(bool TryBootup) {
 		else
 		{
 			instanceID = 0;
-			zs = NULL;
+			zs = nullptr;
 			database.MoveCharacterToBind(GetCharID());
 			ZoneUnavail();
 			return;
@@ -1159,7 +1159,7 @@ void Client::EnterWorld(bool TryBootup) {
 
 void Client::Clearance(int8 response)
 {
-	ZoneServer* zs = NULL;
+	ZoneServer* zs = nullptr;
 	if(instanceID > 0)
 	{
 		zs = zoneserver_list.FindByInstanceID(instanceID);
@@ -1184,21 +1184,21 @@ void Client::Clearance(int8 response)
 
 	EQApplicationPacket* outapp;
 
-    if (zs->GetCAddress() == NULL) {
+    if (zs->GetCAddress() == nullptr) {
         clog(WORLD__CLIENT_ERR, "Unable to do zs->GetCAddress() in Client::Clearance!!");
         ZoneUnavail();
         return;
     }
 
     if (zoneID == 0) {
-        clog(WORLD__CLIENT_ERR, "zoneID is NULL in Client::Clearance!!");
+        clog(WORLD__CLIENT_ERR, "zoneID is nullptr in Client::Clearance!!");
         ZoneUnavail();
         return;
     }
 
 	const char* zonename = database.GetZoneName(zoneID);
     if (zonename == 0) {
-        clog(WORLD__CLIENT_ERR, "zonename is NULL in Client::Clearance!!");
+        clog(WORLD__CLIENT_ERR, "zonename is nullptr in Client::Clearance!!");
         ZoneUnavail();
         return;
     }
@@ -1252,7 +1252,7 @@ void Client::ZoneUnavail() {
 }
 
 bool Client::GenPassKey(char* key) {
-	char* passKey=NULL;
+	char* passKey=nullptr;
 	*passKey += ((char)('A'+((int)MakeRandomInt(0, 25))));
 	*passKey += ((char)('A'+((int)MakeRandomInt(0, 25))));
 	memcpy(key, passKey, strlen(passKey));
@@ -1273,7 +1273,7 @@ void Client::SendGuildList() {
 
 	//ask the guild manager to build us a nice guild list packet
 	outapp->pBuffer = guild_mgr.MakeGuildList("", outapp->size);
-	if(outapp->pBuffer == NULL) {
+	if(outapp->pBuffer == nullptr) {
 		clog(GUILDS__ERROR, "Unable to make guild list!");
 		return;
 	}
@@ -1353,7 +1353,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
 	Inventory inv;
-	time_t bday = time(NULL);
+	time_t bday = time(nullptr);
 	char startzone[50]={0};
 	uint32 i;
 	struct in_addr	in;

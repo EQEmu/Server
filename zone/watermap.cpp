@@ -32,7 +32,7 @@
 
 
 WaterMap::WaterMap()
-: BSP_Root(NULL)
+: BSP_Root(nullptr)
 {
 }
 
@@ -86,28 +86,28 @@ WaterRegionType WaterMap::BSPReturnRegionType(int32 node_number, float y, float 
 }
 
 bool WaterMap::InWater(float y, float x, float z) const {
-	if(BSP_Root == NULL) {
+	if(BSP_Root == nullptr) {
 		return false;
 	}
 	return(BSPReturnRegionType(1, y, x, z) == RegionTypeWater);
 }
 
 bool WaterMap::InVWater(float y, float x, float z) const {
-	if(BSP_Root == NULL) {
+	if(BSP_Root == nullptr) {
 		return false;
 	}
 	return(BSPReturnRegionType(1, y, x, z) == RegionTypeVWater);
 }
 
 bool WaterMap::InLava(float y, float x, float z) const {
-	if(BSP_Root == NULL) {
+	if(BSP_Root == nullptr) {
 		return false;
 	}
 	return(BSPReturnRegionType(1, y, x, z) == RegionTypeLava);
 }
 
 bool WaterMap::InLiquid(float y, float x, float z) const {
-	if(BSP_Root == NULL)	//if the water map isn't loaded, this will save ~1 CPU cycle
+	if(BSP_Root == nullptr)	//if the water map isn't loaded, this will save ~1 CPU cycle
 		return false;
 	return (InWater(y, x, z) || InLava(y, x, z));
 }
@@ -116,26 +116,26 @@ WaterMap* WaterMap::LoadWaterMapfile(const char* in_zonename, const char *direct
 	FILE *fp;
 	char zBuf[64];
 	char cWork[256];
-	WaterMap* ret = NULL;
+	WaterMap* ret = nullptr;
 
 
 	//have to convert to lower because the short names im getting
 	//are not all lower anymore, copy since strlwr edits the str.
 	strn0cpy(zBuf, in_zonename, 64);
 
-	if(directory == NULL)
+	if(directory == nullptr)
 		directory = MAP_DIR;
 	snprintf(cWork, 250, "%s/%s.wtr", directory, strlwr(zBuf));
 
 	if ((fp = fopen( cWork, "rb" ))) {
 		ret = new WaterMap();
-		if(ret != NULL) {
+		if(ret != nullptr) {
 			if(ret->loadWaterMap(fp)) {
 				printf("Water Map %s loaded.\n", cWork);
 			} else {
 				safe_delete(ret);
 				printf("Water Map %s exists but could not be processed.\n", cWork);
-				return NULL;
+				return nullptr;
 			}
 		} else {
 			printf("Water Map %s loading failed.\n", cWork);
@@ -177,7 +177,7 @@ bool WaterMap::loadWaterMap(FILE *fp) {
 	
 	BSP_Root = (ZBSP_Node *) new ZBSP_Node[BSPTreeSize];
 	
-	if(BSP_Root==NULL) {
+	if(BSP_Root==nullptr) {
 		printf("Memory allocation failed while reading water map.\n");
 		return(false);
 	}
