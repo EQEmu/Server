@@ -49,17 +49,17 @@ namespace EQEmu {
         HANDLE file = CreateFile(filename.c_str(), 
             GENERIC_READ | GENERIC_WRITE, 
             FILE_SHARE_READ | FILE_SHARE_WRITE, 
-            NULL,
+            nullptr,
             OPEN_ALWAYS,
             0,
-            NULL);
+            nullptr);
     
         if(file == INVALID_HANDLE_VALUE) {
             EQ_EXCEPT("Shared Memory", "Could not open a file for this shared memory segment.");
         }
     
         imp_->mapped_object_ = CreateFileMapping(file,
-            NULL,
+            nullptr,
             PAGE_READWRITE, 
             0,
             total_size,
@@ -91,7 +91,7 @@ namespace EQEmu {
         }
 
         memory_ = reinterpret_cast<shared_memory_struct*>(
-            mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, imp_->fd_, 0));
+            mmap(nullptr, total_size, PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, imp_->fd_, 0));
 
         if(memory_ == MAP_FAILED) {
             EQ_EXCEPT("Shared Memory", "Could not create a file mapping for this shared memory file.");
@@ -118,17 +118,17 @@ namespace EQEmu {
         HANDLE file = CreateFile(filename.c_str(), 
             GENERIC_READ | GENERIC_WRITE, 
             FILE_SHARE_READ | FILE_SHARE_WRITE, 
-            NULL,
+            nullptr,
             OPEN_ALWAYS,
             0,
-            NULL);
+            nullptr);
     
         if(file == INVALID_HANDLE_VALUE) {
             EQ_EXCEPT("Shared Memory", "Could not open a file for this shared memory segment.");
         }
     
         imp_->mapped_object_ = CreateFileMapping(file,
-            NULL,
+            nullptr,
             PAGE_READWRITE, 
             0,
             total_size,
@@ -160,7 +160,7 @@ namespace EQEmu {
         }
 
         memory_ = reinterpret_cast<shared_memory_struct*>(
-            mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, imp_->fd_, 0));
+            mmap(nullptr, total_size, PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, imp_->fd_, 0));
 
         if(memory_ == MAP_FAILED) {
             EQ_EXCEPT("Shared Memory", "Could not create a file mapping for this shared memory file.");

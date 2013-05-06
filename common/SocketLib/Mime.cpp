@@ -37,7 +37,7 @@ Mime::Mime(const std::string& filename) {
 
 bool Mime::LoadMimeFile(const std::string& filename) {
 	FILE *fil;
-	if ((fil = fopen(filename.c_str(),"rt")) != NULL) {
+	if ((fil = fopen(filename.c_str(),"rt")) != nullptr) {
 		char * slask = new char[1000];
 		fgets(slask,1000,fil);
 		while (!feof(fil))

@@ -100,10 +100,10 @@ int main(int argc, char *argv[]) {
 }
 
 QTBuilder::QTBuilder() {
-	_root = NULL;
+	_root = nullptr;
 
 	faceCount = 0;
-	faceBlock = NULL;
+	faceBlock = nullptr;
 
 #ifdef COUNT_MACTHES
 	gEasyMatches = 0;
@@ -114,12 +114,12 @@ QTBuilder::QTBuilder() {
 }
 
 QTBuilder::~QTBuilder() {
-	if(_root != NULL)
+	if(_root != nullptr)
 		delete _root;
-	_root = NULL;
-	if(faceBlock != NULL)
+	_root = nullptr;
+	if(faceBlock != nullptr)
 		delete [] faceBlock;
-	faceBlock = NULL;
+	faceBlock = nullptr;
 }
 
 bool QTBuilder::build(const char *shortname) {
@@ -138,12 +138,12 @@ bool QTBuilder::build(const char *shortname) {
 
 	archive = new PFSLoader();
 	fff = fopen(bufs, "rb");
-	if(fff != NULL)
+	if(fff != nullptr)
 		FileType = S3D;
 	else {
 		sprintf(bufs, "%s.eqg", shortname);
 		fff = fopen(bufs, "rb");
-		if(fff != NULL)
+		if(fff != nullptr)
 			FileType = EQG;
 	}
 
@@ -160,17 +160,17 @@ bool QTBuilder::build(const char *shortname) {
 	switch(FileType) {
 		case S3D:
   			fileloader = new WLDLoader();
-  			if(fileloader->Open(NULL, (char *) shortname, archive) == 0) {
+  			if(fileloader->Open(nullptr, (char *) shortname, archive) == 0) {
 	  			printf("Error reading WLD from %s\n", bufs);
 	  			return(false);
   			}
 			break;
 		case EQG:
 			fileloader = new ZonLoader();
-			if(fileloader->Open(NULL, (char *) shortname, archive) == 0) {
+			if(fileloader->Open(nullptr, (char *) shortname, archive) == 0) {
 				delete fileloader;
 				fileloader = new Zonv4Loader();
-				if(fileloader->Open(NULL, (char *) shortname, archive) == 0) {
+				if(fileloader->Open(nullptr, (char *) shortname, archive) == 0) {
 					printf("Error reading ZON/TER from %s\n", bufs);
 					return(false);
 				}
@@ -296,7 +296,7 @@ bool QTBuilder::build(const char *shortname) {
 	printf("Building quadtree.\n");
 
 	_root = new QTNode(this, minx, maxx, miny, maxy);
-	if(_root == NULL) {
+	if(_root == nullptr) {
 		printf("Unable to allocate new QTNode.\n");
 		return(false);
 	}
@@ -332,13 +332,13 @@ bool QTBuilder::build(const char *shortname) {
 
 
 bool QTBuilder::writeMap(const char *file) {
-	if(_root == NULL)
+	if(_root == nullptr)
 		return(false);
 
 	printf("Writing map file.\n");
 
 	FILE *out = fopen(file, "wb");
-	if(out == NULL) {
+	if(out == nullptr) {
 		printf("Unable to open output file '%s'.\n", file);
 		return(1);
 	}
@@ -370,7 +370,7 @@ bool QTBuilder::writeMap(const char *file) {
 	//make our node blocks to write out...
 	nodeHeader *nodes = new nodeHeader[head.node_count];
 	unsigned long *facelist = new unsigned long[head.facelist_count];
-	if(nodes == NULL || facelist == NULL) {
+	if(nodes == nullptr || facelist == nullptr) {
 		printf("Error allocating temporary memory for output.\n");
 		fclose(out);
 		return(1);  //no memory
@@ -404,10 +404,10 @@ bool QTBuilder::writeMap(const char *file) {
 
 
 QTNode::QTNode(QTBuilder *b, float Tminx, float Tmaxx, float Tminy, float Tmaxy) {
-	node1 = NULL;
-	node2 = NULL;
-	node3 = NULL;
-	node4 = NULL;
+	node1 = nullptr;
+	node2 = nullptr;
+	node3 = nullptr;
+	node4 = nullptr;
 	minx = Tminx;
 	maxx = Tmaxx;
 	miny = Tminy;
@@ -423,18 +423,18 @@ QTNode::~QTNode() {
 }
 
 void QTNode::clearNodes() {
-	if(node1 != NULL)
+	if(node1 != nullptr)
 		delete node1;
-	if(node2 != NULL)
+	if(node2 != nullptr)
 		delete node2;
-	if(node3 != NULL)
+	if(node3 != nullptr)
 		delete node3;
-	if(node4 != NULL)
+	if(node4 != nullptr)
 		delete node4;
-	node1 = NULL;
-	node2 = NULL;
-	node3 = NULL;
-	node4 = NULL;
+	node1 = nullptr;
+	node2 = nullptr;
+	node3 = nullptr;
+	node4 = nullptr;
 }
 
 //assumes that both supplied arrays are big enough per countNodes/Facelists
@@ -463,25 +463,25 @@ void QTNode::fillBlocks(nodeHeader *heads, unsigned long *flist, unsigned long &
 		//branch node.
 		head->flags = 0;
 
-		if(node1 != NULL) {
+		if(node1 != nullptr) {
 			head->nodes[0] = hindex;
 			node1->fillBlocks(heads, flist, hindex, findex);
 		} else {
 			head->nodes[0] = NODE_NONE;
 		}
-		if(node2 != NULL) {
+		if(node2 != nullptr) {
 			head->nodes[1] = hindex;
 			node2->fillBlocks(heads, flist, hindex, findex);
 		} else {
 			head->nodes[1] = NODE_NONE;
 		}
-		if(node3 != NULL) {
+		if(node3 != nullptr) {
 			head->nodes[2] = hindex;
 			node3->fillBlocks(heads, flist, hindex, findex);
 		} else {
 			head->nodes[2] = NODE_NONE;
 		}
-		if(node4 != NULL) {
+		if(node4 != nullptr) {
 			head->nodes[3] = hindex;
 			node4->fillBlocks(heads, flist, hindex, findex);
 		} else {
@@ -492,26 +492,26 @@ void QTNode::fillBlocks(nodeHeader *heads, unsigned long *flist, unsigned long &
 
 unsigned long QTNode::countNodes() const {
 	unsigned long c = 1;
-	if(node1 != NULL)
+	if(node1 != nullptr)
 		c += node1->countNodes();
-	if(node2 != NULL)
+	if(node2 != nullptr)
 		c += node2->countNodes();
-	if(node3 != NULL)
+	if(node3 != nullptr)
 		c += node3->countNodes();
-	if(node4 != NULL)
+	if(node4 != nullptr)
 		c += node4->countNodes();
 	return(c);
 }
 
 unsigned long QTNode::countFacelists() const {
 	unsigned long c = final? faces.size() : 0;
-	if(node1 != NULL)
+	if(node1 != nullptr)
 		c += node1->countFacelists();
-	if(node2 != NULL)
+	if(node2 != nullptr)
 		c += node2->countFacelists();
-	if(node3 != NULL)
+	if(node3 != nullptr)
 		c += node3->countFacelists();
-	if(node4 != NULL)
+	if(node4 != nullptr)
 		c += node4->countFacelists();
 	return(c);
 }
@@ -607,13 +607,13 @@ printf("Stopping (empty) on box (%.2f -> %.2f, %.2f -> %.2f) at depth %d with %d
 
 	depth++;
 
-	if(node1 != NULL)
+	if(node1 != nullptr)
 		node1->divideYourself(depth);
-	if(node2 != NULL)
+	if(node2 != nullptr)
 		node2->divideYourself(depth);
-	if(node3 != NULL)
+	if(node3 != nullptr)
 		node3->divideYourself(depth);
-	if(node4 != NULL)
+	if(node4 != nullptr)
 		node4->divideYourself(depth);
 
 
@@ -854,7 +854,7 @@ void QTNode::doSplit() {
 	node2 = new QTNode(builder, minx, midx, midy, maxy);
 	node3 = new QTNode(builder, minx, midx, miny, midy);
 	node4 = new QTNode(builder, midx, maxx, miny, midy);
-	if(node1 == NULL || node2 == NULL || node3 == NULL || node4 == NULL) {
+	if(node1 == nullptr || node2 == nullptr || node3 == nullptr || node4 == nullptr) {
 		printf("Error: unable to allocate new QTNode, giving up.\n");
 		return;
 	}
@@ -876,19 +876,19 @@ void QTNode::doSplit() {
 	//clean up empty sets.
 	if(node1->faces.size() == 0) {
 		delete node1;
-		node1 = NULL;
+		node1 = nullptr;
 	}
 	if(node2->faces.size() == 0) {
 		delete node2;
-		node2 = NULL;
+		node2 = nullptr;
 	}
 	if(node3->faces.size() == 0) {
 		delete node3;
-		node3 = NULL;
+		node3 = nullptr;
 	}
 	if(node4->faces.size() == 0) {
 		delete node4;
-		node4 = NULL;
+		node4 = nullptr;
 	}
 
 }
@@ -1178,8 +1178,8 @@ void QTBuilder::AddPlaceable(FileLoader *fileloader, char *ZoneFileName, bool Li
 
 	for(int i = 0; i < fileloader->model_data.plac_count; ++i) {
 		if(fileloader->model_data.placeable[i]->model==-1) continue;
-		// The model pointer should only really be NULL for the zone model, as we process that separately.
-		if(fileloader->model_data.models[fileloader->model_data.placeable[i]->model] == NULL) continue;
+		// The model pointer should only really be nullptr for the zone model, as we process that separately.
+		if(fileloader->model_data.models[fileloader->model_data.placeable[i]->model] == nullptr) continue;
 		if(ListPlaceable)
 			printf("Placeable Object %4d @ (%9.2f, %9.2f, %9.2f uses model %4d %s\n",i,
 		       	 	fileloader->model_data.placeable[i]->y,

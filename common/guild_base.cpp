@@ -31,7 +31,7 @@ const char *const BaseGuildManager::GuildActionNames[_MaxGuildAction] =
 { "HearGuildChat", "SpeakGuildChat", "Invite", "Remove", "Promote", "Demote", "Set_MOTD", "War/Peace" };
 
 BaseGuildManager::BaseGuildManager()
-: m_db(NULL)
+: m_db(nullptr)
 {
 }
 
@@ -43,7 +43,7 @@ bool BaseGuildManager::LoadGuilds() {
 	
 	ClearGuilds();
 	
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to load guilds when we have no database object.");
 		return(false);
 	}
@@ -107,7 +107,7 @@ bool BaseGuildManager::LoadGuilds() {
 }
 
 bool BaseGuildManager::RefreshGuild(uint32 guild_id) {
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to refresh guild %d when we have no database object.", guild_id);
 		return(false);
 	}
@@ -217,7 +217,7 @@ BaseGuildManager::GuildInfo *BaseGuildManager::_CreateGuild(uint32 guild_id, con
 }
 
 bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to store guild %d when we have no database object.", guild_id);
 		return(false);
 	}
@@ -310,7 +310,7 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 }
 
 uint32 BaseGuildManager::_GetFreeGuildID() {
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested find a free guild ID when we have no database object.");
 		return(GUILD_NONE);
 	}
@@ -523,7 +523,7 @@ bool BaseGuildManager::DBDeleteGuild(uint32 guild_id) {
 		m_guilds.erase(res);
 	}
 	
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to delete guild %d when we have no database object.", guild_id);
 		return(false);
 	}
@@ -552,7 +552,7 @@ bool BaseGuildManager::DBDeleteGuild(uint32 guild_id) {
 }
 
 bool BaseGuildManager::DBRenameGuild(uint32 guild_id, const char* name) {
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to rename guild %d when we have no database object.", guild_id);
 		return(false);
 	}
@@ -592,7 +592,7 @@ bool BaseGuildManager::DBRenameGuild(uint32 guild_id, const char* name) {
 }
 
 bool BaseGuildManager::DBSetGuildLeader(uint32 guild_id, uint32 leader) {
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to set the leader for guild %d when we have no database object.", guild_id);
 		return(false);
 	}
@@ -632,7 +632,7 @@ bool BaseGuildManager::DBSetGuildLeader(uint32 guild_id, uint32 leader) {
 }
 
 bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const char *setter) {
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to set the MOTD for guild %d when we have no database object.", guild_id);
 		return(false);
 	}
@@ -679,7 +679,7 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 
 bool BaseGuildManager::DBSetGuildURL(uint32 GuildID, const char* URL)
 {
-	if(m_db == NULL)
+	if(m_db == nullptr)
 		return(false);
 	
 	map<uint32, GuildInfo *>::const_iterator res;
@@ -720,7 +720,7 @@ bool BaseGuildManager::DBSetGuildURL(uint32 GuildID, const char* URL)
 
 bool BaseGuildManager::DBSetGuildChannel(uint32 GuildID, const char* Channel)
 {
-	if(m_db == NULL)
+	if(m_db == nullptr)
 		return(false);
 	
 	map<uint32, GuildInfo *>::const_iterator res;
@@ -760,7 +760,7 @@ bool BaseGuildManager::DBSetGuildChannel(uint32 GuildID, const char* Channel)
 }
 
 bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested to set char to guild %d when we have no database object.", guild_id);
 		return(false);
 	}
@@ -891,7 +891,7 @@ bool BaseGuildManager::DBSetTributeFlag(uint32 charid, bool enabled) {
 }
 
 bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
-	if(m_db == NULL)
+	if(m_db == nullptr)
 		return(false);
 	
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -921,7 +921,7 @@ bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 }
 
 bool BaseGuildManager::_RunQuery(char *&query, int len, const char *errmsg) {
-	if(m_db == NULL)
+	if(m_db == nullptr)
 		return(false);
 	
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -981,7 +981,7 @@ static void ProcessGuildMember(MYSQL_ROW &row, CharGuildInfo &into) {
 bool BaseGuildManager::GetEntireGuild(uint32 guild_id, vector<CharGuildInfo *> &members) {
 	members.clear();
 	
-	if(m_db == NULL)
+	if(m_db == nullptr)
 		return(false);
 	
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -1012,7 +1012,7 @@ bool BaseGuildManager::GetEntireGuild(uint32 guild_id, vector<CharGuildInfo *> &
 }
 
 bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested char info on %s when we have no database object.", char_name);
 		return(false);
 	}
@@ -1054,7 +1054,7 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
 }
 
 bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into) {
-	if(m_db == NULL) {
+	if(m_db == nullptr) {
 		_log(GUILDS__DB, "Requested char info on %d when we have no database object.", char_id);
 		return(false);
 	}

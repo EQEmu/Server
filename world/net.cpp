@@ -111,7 +111,7 @@ UCSConnection UCSLink;
 QueryServConnection QSLink;
 LauncherList launcher_list;
 AdventureManager adventure_manager;
-DBAsync *dbasync = NULL;
+DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
@@ -468,10 +468,10 @@ int main(int argc, char** argv) {
 				ReconnectCounter = 0;
 				if (loginserverlist.AllConnected() == false) {
 #ifdef _WINDOWS
-					_beginthread(AutoInitLoginServer, 0, NULL);
+					_beginthread(AutoInitLoginServer, 0, nullptr);
 #else
 					pthread_t thread;
-					pthread_create(&thread, NULL, &AutoInitLoginServer, NULL);
+					pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
 #endif
 				}
 			}

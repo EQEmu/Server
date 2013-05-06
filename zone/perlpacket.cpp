@@ -26,13 +26,13 @@
 
 PerlPacket::PerlPacket(const char *opcode, uint32 length) {
 	SetOpcode(opcode);
-	packet = NULL;
+	packet = nullptr;
 	len = 0;
 	Resize(length);
 }
 
 PerlPacket::~PerlPacket() {
-	if(packet != NULL)
+	if(packet != nullptr)
 		safe_delete_array(packet);
 }
 
@@ -46,11 +46,11 @@ void PerlPacket::Resize(uint32 length) {
 	Zero();
 	if(len == length)
 		return;
-	if(packet != NULL)
+	if(packet != nullptr)
 		safe_delete_array(packet);
 	len = length;
 	if(len == 0)
-		packet = NULL;
+		packet = nullptr;
 	else {
 		packet = new unsigned char[len];
 		Zero();
@@ -59,7 +59,7 @@ void PerlPacket::Resize(uint32 length) {
 
 //sending functions
 void PerlPacket::SendTo(Client *who) {
-	if(!who || op == OP_Unknown || (len > 0 && packet == NULL))
+	if(!who || op == OP_Unknown || (len > 0 && packet == nullptr))
 		return;
 	
 	EQApplicationPacket *outapp = new EQApplicationPacket(op, len);
@@ -73,19 +73,19 @@ void PerlPacket::SendTo(Client *who) {
 }
 
 void PerlPacket::SendToAll() {
-	if(op == OP_Unknown || (len > 0 && packet == NULL))
+	if(op == OP_Unknown || (len > 0 && packet == nullptr))
 		return;
 	
 	EQApplicationPacket *outapp = new EQApplicationPacket(op, len);
 	if(len > 0)
 		memcpy(outapp->pBuffer, packet, len);
-	entity_list.QueueClients(NULL, outapp, false);
+	entity_list.QueueClients(nullptr, outapp, false);
 	safe_delete(outapp);
 }
 
 //editing
 void PerlPacket::Zero() {
-	if(len == 0 || packet == NULL)
+	if(len == 0 || packet == nullptr)
 		return;
 	memset(packet, 0, len);
 }
@@ -101,28 +101,28 @@ void PerlPacket::FromArray(int numbers[], uint32 length) {
 }
 
 void PerlPacket::SetByte(uint32 pos, uint8 val) {
-	if(pos + sizeof(val) > len || packet == NULL)
+	if(pos + sizeof(val) > len || packet == nullptr)
 		return;
 	uint8 *p = (uint8 *) (packet + pos);
 	*p = val;
 }
 
 void PerlPacket::SetShort(uint32 pos, uint16 val) {
-	if(pos + sizeof(val) > len || packet == NULL)
+	if(pos + sizeof(val) > len || packet == nullptr)
 		return;
 	uint16 *p = (uint16 *) (packet + pos);
 	*p = val;
 }
 
 void PerlPacket::SetLong(uint32 pos, uint32 val) {
-	if(pos + sizeof(val) > len || packet == NULL)
+	if(pos + sizeof(val) > len || packet == nullptr)
 		return;
 	uint32 *p = (uint32 *) (packet + pos);
 	*p = val;
 }
 
 void PerlPacket::SetFloat(uint32 pos, float val) {
-	if(pos + sizeof(val) > len || packet == NULL)
+	if(pos + sizeof(val) > len || packet == nullptr)
 		return;
 	float *p = (float *) (packet + pos);
 	*p = val;
@@ -130,7 +130,7 @@ void PerlPacket::SetFloat(uint32 pos, float val) {
 
 void PerlPacket::SetString(uint32 pos, char *str) {
 	int slen = strlen(str);
-	if(pos + slen > len || packet == NULL)
+	if(pos + slen > len || packet == nullptr)
 		return;
 	strcpy((char *)(packet+pos), str);
 }
@@ -147,7 +147,7 @@ struct EQ1913 {
 #pragma pack()
 
 void PerlPacket::SetEQ1319(uint32 pos, float part13, float part19) {
-	if(pos + sizeof(EQ1319) > len || packet == NULL)
+	if(pos + sizeof(EQ1319) > len || packet == nullptr)
 		return;
 	EQ1319 *p = (EQ1319 *) (packet + pos);
 	p->part19 = FloatToEQ19(part19);
@@ -155,7 +155,7 @@ void PerlPacket::SetEQ1319(uint32 pos, float part13, float part19) {
 }
 
 void PerlPacket::SetEQ1913(uint32 pos, float part19, float part13) {
-	if(pos + sizeof(EQ1913) > len || packet == NULL)
+	if(pos + sizeof(EQ1913) > len || packet == nullptr)
 		return;
 	EQ1913 *p = (EQ1913 *) (packet + pos);
 	p->part19 = FloatToEQ19(part19);
@@ -164,28 +164,28 @@ void PerlPacket::SetEQ1913(uint32 pos, float part19, float part13) {
 	
 //reading
 uint8 PerlPacket::GetByte(uint32 pos) {
-	if(pos + sizeof(uint8) > len || packet == NULL)
+	if(pos + sizeof(uint8) > len || packet == nullptr)
 		return(0);
 	uint8 *p = (uint8 *) (packet + pos);
 	return(*p);
 }
 
 uint16 PerlPacket::GetShort(uint32 pos) {
-	if(pos + sizeof(uint16) > len || packet == NULL)
+	if(pos + sizeof(uint16) > len || packet == nullptr)
 		return(0);
 	uint16 *p = (uint16 *) (packet + pos);
 	return(*p);
 }
 
 uint32 PerlPacket::GetLong(uint32 pos) {
-	if(pos + sizeof(uint32) > len || packet == NULL)
+	if(pos + sizeof(uint32) > len || packet == nullptr)
 		return(0);
 	uint32 *p = (uint32 *) (packet + pos);
 	return(*p);
 }
 
 float PerlPacket::GetFloat(uint32 pos) {
-	if(pos + sizeof(float) > len || packet == NULL)
+	if(pos + sizeof(float) > len || packet == nullptr)
 		return(0);
 	float *p = (float *) (packet + pos);
 	return(*p);

@@ -48,8 +48,8 @@ XS(XS_QuestItem_GetName) {
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type ItemInst");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetItem()->Name;
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -73,8 +73,8 @@ XS(XS_QuestItem_SetScale)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type ItemInst");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		Mult = (float)SvNV(ST(1));
 
@@ -102,8 +102,8 @@ XS(XS_QuestItem_ItemSay)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type ItemInst");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		text = SvPV_nolen(ST(1));
 		if(items == 3)
@@ -131,8 +131,8 @@ XS(XS_QuestItem_IsType)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type ItemInst");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsType((ItemClass)type);
 		ST(0) = boolSV(RETVAL);
@@ -157,8 +157,8 @@ XS(XS_QuestItem_IsAttuned)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type ItemInst");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsInstNoDrop();
 		ST(0) = boolSV(RETVAL);
@@ -184,8 +184,8 @@ XS(XS_QuestItem_GetCharges)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type ItemInst");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCharges();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -210,8 +210,8 @@ XS(XS_QuestItem_GetAugment)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type ItemInst");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
         RETVAL = THIS->GetAugment(slot_id);
         ST(0) = sv_newmortal();
@@ -237,8 +237,8 @@ XS(XS_QuestItem_GetID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type ItemInst");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
         RETVAL = THIS->GetItem()->ID;
 		XSprePUSH; PUSHi((IV)RETVAL);

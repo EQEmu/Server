@@ -1193,7 +1193,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterId, bool item_bonus, uint32 ticsremaining, int buffslot)
 {
 	int i, effect_value;
-	Mob *caster = NULL;
+	Mob *caster = nullptr;
 	
 	if(!IsValidSpell(spell_id))
 		return;

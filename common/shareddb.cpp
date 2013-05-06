@@ -21,15 +21,15 @@
 using namespace std;
 
 SharedDatabase::SharedDatabase()
-: Database(), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL), faction_mmf(NULL), faction_hash(NULL),
-    loot_table_mmf(NULL), loot_drop_mmf(NULL), loot_table_hash(NULL), loot_drop_hash(NULL)
+: Database(), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), faction_mmf(nullptr), faction_hash(nullptr),
+    loot_table_mmf(nullptr), loot_drop_mmf(nullptr), loot_table_hash(nullptr), loot_drop_hash(nullptr)
 {
 }
 
 SharedDatabase::SharedDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
-: Database(host, user, passwd, database, port), skill_caps_mmf(NULL), items_mmf(NULL), items_hash(NULL), 
-    faction_mmf(NULL), faction_hash(NULL), loot_table_mmf(NULL), loot_drop_mmf(NULL), loot_table_hash(NULL), 
-    loot_drop_hash(NULL)
+: Database(host, user, passwd, database, port), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), 
+    faction_mmf(nullptr), faction_hash(nullptr), loot_table_mmf(nullptr), loot_drop_mmf(nullptr), loot_table_hash(nullptr), 
+    loot_drop_hash(nullptr)
 {
 }
 
@@ -487,7 +487,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 						((is_charid==true) ? "charid" : "acctid"), id, item_id, slot_id);
 
 					if(is_charid)
-						SaveInventory(id,NULL,slot_id);
+						SaveInventory(id,nullptr,slot_id);
 				}
 			}
 			else {
@@ -727,7 +727,7 @@ void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id) {
 	char query[] = "SELECT MAX(id), count(*) FROM items";
 	if (RunQuery(query, static_cast<uint32>(strlen(query)), errbuf, &result)) {
 		row = mysql_fetch_row(result);
-		if (row != NULL && row[1] != 0) {
+		if (row != nullptr && row[1] != 0) {
 			item_count = atoi(row[1]);
 			if(row[0])
 				max_id = atoi(row[0]);
@@ -1020,19 +1020,19 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 const Item_Struct* SharedDatabase::GetItem(uint32 id) {
     if(!items_hash || id > items_hash->max_key()) {
-        return NULL;
+        return nullptr;
     }
 
     if(items_hash->exists(id)) {
         return &(items_hash->at(id));
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const Item_Struct* SharedDatabase::IterateItems(uint32* id) {
     if(!items_hash || !id) {
-        return NULL;
+        return nullptr;
     }
 
     for(;;) {
@@ -1047,7 +1047,7 @@ const Item_Struct* SharedDatabase::IterateItems(uint32* id) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 string SharedDatabase::GetBook(const char *txtfile)
@@ -1104,14 +1104,14 @@ void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
 
 const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) {
 	if(!faction_hash) {
-        return NULL;
+        return nullptr;
     }
 
     if(faction_hash->exists(id)) {
         return &(faction_hash->at(id));
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists) {
@@ -1305,8 +1305,8 @@ uint32 SharedDatabase::SetPlayerProfile_MQ(char** query, uint32 account_id, uint
 // Create appropriate ItemInst class
 ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5)
 {
-	const Item_Struct* item = NULL;
-	ItemInst* inst = NULL;
+	const Item_Struct* item = nullptr;
+	ItemInst* inst = nullptr;
 	item = GetItem(item_id);
 	if (item) {
 		inst = CreateBaseItem(item, charges);
@@ -1324,7 +1324,7 @@ ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1,
 // Create appropriate ItemInst class
 ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5)
 {
-	ItemInst* inst = NULL;
+	ItemInst* inst = nullptr;
 	if (item) {
 		inst = CreateBaseItem(item, charges);
 		inst->PutAugment(this, 0, aug1);
@@ -1338,7 +1338,7 @@ ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uin
 }
 
 ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges) {
-	ItemInst* inst = NULL;
+	ItemInst* inst = nullptr;
 	if (item) {
 		// if maxcharges is -1 that means it is an unlimited use item. 
 		// set it to 1 charge so that it is usable on creation
@@ -1592,12 +1592,12 @@ void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpe
 }
 
 const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
-	return NULL;	// nothing here for now... database and/or sharemem pulls later
+	return nullptr;	// nothing here for now... database and/or sharemem pulls later
 }
 
 int SharedDatabase::GetMaxSpellID() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = NULL;
+    char *query = nullptr;
     MYSQL_RES *result;
     MYSQL_ROW row;
 	int32 ret = 0;
@@ -1930,7 +1930,7 @@ bool SharedDatabase::LoadLoot() {
 
 const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) {
 	if(!loot_table_hash)
-        return NULL;
+        return nullptr;
 
     try {
         if(loot_table_hash->exists(loottable_id)) {
@@ -1939,12 +1939,12 @@ const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) {
     } catch(std::exception &ex) {
         LogFile->write(EQEMuLog::Error, "Could not get loot table: %s", ex.what());
     }
-    return NULL;
+    return nullptr;
 }
 
 const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 	if(!loot_drop_hash)
-        return NULL;
+        return nullptr;
 
     try {
         if(loot_drop_hash->exists(lootdrop_id)) {
@@ -1953,7 +1953,7 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
     } catch(std::exception &ex) {
         LogFile->write(EQEMuLog::Error, "Could not get loot drop: %s", ex.what());
     }
-    return NULL;
+    return nullptr;
 }
 
 void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message) {

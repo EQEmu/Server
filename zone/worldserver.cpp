@@ -321,7 +321,7 @@ void WorldServer::Process() {
 					zc2->success = 1;
 
 					// This block is necessary to clean up any merc objects owned by a Client. Maybe we should do this for bots, too?
-					if(entity->CastToClient()->GetMerc() != NULL)
+					if(entity->CastToClient()->GetMerc() != nullptr)
 					{
 					entity->CastToClient()->GetMerc()->ProcessClientZoneChange(entity->CastToClient());
 					}
@@ -413,7 +413,7 @@ void WorldServer::Process() {
 						if(strstr(sem->message,"^")==0)
 							client->Message(sem->type, (char*)sem->message);
 						else{
-							for(newmessage = strtok((char*)sem->message,"^");newmessage!=NULL;newmessage=strtok(NULL, "^"))
+							for(newmessage = strtok((char*)sem->message,"^");newmessage!=nullptr;newmessage=strtok(nullptr, "^"))
 								client->Message(sem->type, newmessage);
 						}
 					}
@@ -424,7 +424,7 @@ void WorldServer::Process() {
 				if(strstr(sem->message,"^")==0)
 					entity_list.MessageStatus(sem->guilddbid, sem->minstatus, sem->type, sem->message);
 				else{
-					for(newmessage = strtok((char*)sem->message,"^");newmessage!=NULL;newmessage=strtok(NULL, "^"))
+					for(newmessage = strtok((char*)sem->message,"^");newmessage!=nullptr;newmessage=strtok(nullptr, "^"))
 						entity_list.MessageStatus(sem->guilddbid, sem->minstatus, sem->type, newmessage);
 				}
 			}
@@ -525,7 +525,7 @@ void WorldServer::Process() {
 		case ServerOP_ZonePlayer: {
 			ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*) pack->pBuffer;
 			Client* client = entity_list.GetClientByName(szp->name);
-			printf("Zoning %s to %s(%u) - %u\n", client != NULL ? client->GetCleanName() : "Unknown", szp->zone, database.GetZoneID(szp->zone), szp->instance_id);
+			printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, database.GetZoneID(szp->zone), szp->instance_id);
 			if (client != 0) {
 				if (strcasecmp(szp->adminname, szp->name) == 0)
 					client->Message(0, "Zoning to: %s", szp->zone);
@@ -745,9 +745,9 @@ void WorldServer::Process() {
 			char buffer[5];
 			snprintf(buffer,5,"%i",zb->port); //just to be sure that it will work on linux	
 			if(zb->zoneid != 0)
-				execl(net.GetZoneFileName(),net.GetZoneFileName(),database.GetZoneName(zb->zoneid),zb->ip2, buffer,inet_ntoa(in), NULL);
+				execl(net.GetZoneFileName(),net.GetZoneFileName(),database.GetZoneName(zb->zoneid),zb->ip2, buffer,inet_ntoa(in), nullptr);
 			else
-				execl(net.GetZoneFileName(),net.GetZoneFileName(),".",zb->ip2, buffer,inet_ntoa(in), NULL);
+				execl(net.GetZoneFileName(),net.GetZoneFileName(),".",zb->ip2, buffer,inet_ntoa(in), nullptr);
 #endif
 			break;
 		}
@@ -763,7 +763,7 @@ void WorldServer::Process() {
 				safe_delete(outapp);
 				//TEST
 				char timeMessage[255];
-				time_t timeCurrent = time(NULL);
+				time_t timeCurrent = time(nullptr);
 				TimeOfDay_Struct eqTime;
 				zone->zone_time.getEQTimeOfDay( timeCurrent, &eqTime);
 				//if ( eqTime.hour >= 0 && eqTime.minute >= 0 )
@@ -912,7 +912,7 @@ void WorldServer::Process() {
 
 				safe_delete(outapp);
 
-				if(!group->AddMember(NULL, sgfs->gf.name2, sgfs->CharacterID))
+				if(!group->AddMember(nullptr, sgfs->gf.name2, sgfs->CharacterID))
 					break;
 
 				if(Inviter->CastToClient()->IsLFP())
@@ -960,7 +960,7 @@ void WorldServer::Process() {
 			
 			uint32 groupid = database.GetGroupID(c->GetName());
 
-			Group* group = NULL;
+			Group* group = nullptr;
 
 			if(groupid > 0)
 			{
@@ -973,7 +973,7 @@ void WorldServer::Process() {
 					if(group->GetID() != 0)
 						entity_list.AddGroup(group, groupid);
 					else
-						group = NULL;
+						group = nullptr;
 				}	//else, somebody from our group is already here...
 
 				if(group)
@@ -1515,7 +1515,7 @@ void WorldServer::Process() {
 				ServerSpawnStatusChange_Struct *ssc = (ServerSpawnStatusChange_Struct*)pack->pBuffer;
 				LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
 				iterator.Reset();
-				Spawn2 *found_spawn = NULL;
+				Spawn2 *found_spawn = nullptr;
 				while(iterator.MoreElements())
 				{
 					Spawn2* cur = iterator.GetData();

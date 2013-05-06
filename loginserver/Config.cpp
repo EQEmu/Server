@@ -46,7 +46,7 @@ string Config::GetVariable(string title, string parameter)
  */
 void Config::Parse(const char *file_name)
 {
-	if(file_name == NULL)
+	if(file_name == nullptr)
 	{
 		server_log->Log(log_error, "Config::Parse(), file_name passed was null.");
 		return;

@@ -74,11 +74,11 @@ To use ptimers, you need to create the table below in your DB:
 Schema:
 
 CREATE TABLE timers (
-	char_id INT(11) NOT NULL,
-	type MEDIUMINT UNSIGNED NOT NULL,
-	start INT UNSIGNED NOT NULL,
-	duration INT UNSIGNED NOT NULL,
-	enable TINYINT NOT NULL,
+	char_id INT(11) NOT nullptr,
+	type MEDIUMINT UNSIGNED NOT nullptr,
+	start INT UNSIGNED NOT nullptr,
+	duration INT UNSIGNED NOT nullptr,
+	enable TINYINT NOT nullptr,
 	PRIMARY KEY(char_id, type)
 );
 
@@ -95,7 +95,7 @@ PersistentTimer *PersistentTimer::LoadTimer(Database *db, uint32 char_id, pTimer
 	if(p->Load(db))
 		return(p);
 	delete p;
-	return(NULL);
+	return(nullptr);
 }
 
 PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_timer_time) {
@@ -153,8 +153,8 @@ bool PersistentTimer::Load(Database *db) {
 	bool res = false;
 	qcount = mysql_num_rows(result);
 	if(qcount == 1 && (row = mysql_fetch_row(result)) ) {
-		start_time = strtoul(row[0], NULL, 10);
-		timer_time = strtoul(row[1], NULL, 10);
+		start_time = strtoul(row[0], nullptr, 10);
+		timer_time = strtoul(row[1], nullptr, 10);
 		enabled = (row[2][0] == '1');
 
 		res = true;
@@ -222,7 +222,7 @@ bool PersistentTimer::Clear(Database *db) {
 
 /* This function checks if the timer triggered */
 bool PersistentTimer::Expired(Database *db, bool iReset) {
-    if (this == NULL) {
+    if (this == nullptr) {
 		LogFile->write(EQEMuLog::Error, "Null timer during ->Check()!?\n");
 		return(true);
 	}
@@ -280,7 +280,7 @@ uint32 PersistentTimer::GetRemainingTime() {
 
 uint32 PersistentTimer::get_current_time() {
 	timeval tv;
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, nullptr);
 	return(tv.tv_sec);
 }
 
@@ -292,7 +292,7 @@ PTimerList::~PTimerList() {
 	map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	while(s != _list.end()) {
-		if(s->second != NULL)
+		if(s->second != nullptr)
 			delete s->second;
 		s++;
 	}
@@ -303,7 +303,7 @@ bool PTimerList::Load(Database *db) {
 	map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	while(s != _list.end()) {
-		if(s->second != NULL)
+		if(s->second != nullptr)
 			delete s->second;
 		s++;
 	}
@@ -340,14 +340,14 @@ bool PTimerList::Load(Database *db) {
 	qcount = mysql_num_rows(result);
 	while((row = mysql_fetch_row(result)) ) {
 		type = atoi(row[0]);
-		start_time = strtoul(row[1], NULL, 10);
-		timer_time = strtoul(row[2], NULL, 10);
+		start_time = strtoul(row[1], nullptr, 10);
+		timer_time = strtoul(row[2], nullptr, 10);
 		enabled = (row[3][0] == '1');
 
 		//if it expired allready, dont bother.
 
 		cur = new PersistentTimer(_char_id, type, start_time, timer_time, enabled);
-		if(!cur->Expired(NULL))
+		if(!cur->Expired(nullptr))
 			_list[type] = cur;
 		else
 			delete cur;
@@ -366,7 +366,7 @@ bool PTimerList::Store(Database *db) {
 	s = _list.begin();
 	bool res = true;
 	while(s != _list.end()) {
-		if(s->second != NULL) {
+		if(s->second != nullptr) {
 #ifdef DEBUG_PTIMERS
 	printf("Storing timer %u for char %lu\n", s->first, (unsigned long)_char_id);
 #endif
@@ -405,7 +405,7 @@ bool PTimerList::Clear(Database *db) {
 }
 
 void PTimerList::Start(pTimerType type, uint32 duration) {
-	if(_list.count(type) == 1 && _list[type] != NULL) {
+	if(_list.count(type) == 1 && _list[type] != nullptr) {
 		_list[type]->Start(duration);
 	} else {
 		_list[type] = new PersistentTimer(_char_id, type, duration);
@@ -414,7 +414,7 @@ void PTimerList::Start(pTimerType type, uint32 duration) {
 
 void PTimerList::Clear(Database *db, pTimerType type) {
 	if(_list.count(type) == 1) {
-		if(_list[type] != NULL) {
+		if(_list[type] != nullptr) {
 			_list[type]->Clear(db);
 			delete _list[type];
 		}
@@ -425,7 +425,7 @@ void PTimerList::Clear(Database *db, pTimerType type) {
 bool PTimerList::Expired(Database *db, pTimerType type, bool reset) {
 	if(_list.count(type) != 1)
 		return(true);
-	if(_list[type] == NULL)
+	if(_list[type] == nullptr)
 		return(true);
 	return(_list[type]->Expired(db, reset));
 }
@@ -433,32 +433,32 @@ bool PTimerList::Expired(Database *db, pTimerType type, bool reset) {
 bool PTimerList::Enabled(pTimerType type) {
 	if(_list.count(type) != 1)
 		return(false);
-	if(_list[type] == NULL)
+	if(_list[type] == nullptr)
 		return(false);
 	return(_list[type]->Enabled());
 }
 
 void PTimerList::Enable(pTimerType type) {
-	if(_list.count(type) == 1 && _list[type] != NULL)
+	if(_list.count(type) == 1 && _list[type] != nullptr)
 		_list[type]->Enable();
 }
 
 void PTimerList::Disable(pTimerType type) {
-	if(_list.count(type) == 1 && _list[type] != NULL)
+	if(_list.count(type) == 1 && _list[type] != nullptr)
 		_list[type]->Disable();
 }
 
 uint32 PTimerList::GetRemainingTime(pTimerType type) {
 	if(_list.count(type) != 1)
 		return(0);
-	if(_list[type] == NULL)
+	if(_list[type] == nullptr)
 		return(0);
 	return(_list[type]->GetRemainingTime());
 }
 
 PersistentTimer *PTimerList::Get(pTimerType type) {
 	if(_list.count(type) != 1)
-		return(NULL);
+		return(nullptr);
 	return(_list[type]);
 }
 
@@ -469,7 +469,7 @@ void PTimerList::ToVector(vector< pair<pTimerType, PersistentTimer *> > &out) {
 	map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	while(s != _list.end()) {
-		if(s->second != NULL) {
+		if(s->second != nullptr) {
 			p.first = s->first;
 			p.second = s->second;
 			out.push_back(p);

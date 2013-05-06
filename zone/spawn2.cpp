@@ -33,33 +33,33 @@ extern WorldServer worldserver;
 /*
 
 CREATE TABLE spawn_conditions (
-	zone VARCHAR(16) NOT NULL,
-	id MEDIUMINT UNSIGNED NOT NULL DEFAULT '1',
-	value MEDIUMINT NOT NULL DEFAULT '0',
-	onchange TINYINT UNSIGNED NOT NULL DEFAULT '0',
-	name VARCHAR(255) NOT NULL DEFAULT '',
+	zone VARCHAR(16) NOT nullptr,
+	id MEDIUMINT UNSIGNED NOT nullptr DEFAULT '1',
+	value MEDIUMINT NOT nullptr DEFAULT '0',
+	onchange TINYINT UNSIGNED NOT nullptr DEFAULT '0',
+	name VARCHAR(255) NOT nullptr DEFAULT '',
 	PRIMARY KEY(zone,id)
 );
 
 CREATE TABLE spawn_events (
 	#identifiers
 	id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	zone VARCHAR(16) NOT NULL,
-	cond_id MEDIUMINT UNSIGNED NOT NULL,
-	name VARCHAR(255) NOT NULL DEFAULT '',
+	zone VARCHAR(16) NOT nullptr,
+	cond_id MEDIUMINT UNSIGNED NOT nullptr,
+	name VARCHAR(255) NOT nullptr DEFAULT '',
 	
 	#timing information
-	period INT UNSIGNED NOT NULL,
-	next_minute TINYINT UNSIGNED NOT NULL,
-	next_hour TINYINT UNSIGNED NOT NULL,
-	next_day TINYINT UNSIGNED NOT NULL,
-	next_month TINYINT UNSIGNED NOT NULL,
-	next_year INT UNSIGNED NOT NULL,
-	enabled TINYINT NOT NULL DEFAULT '1',
+	period INT UNSIGNED NOT nullptr,
+	next_minute TINYINT UNSIGNED NOT nullptr,
+	next_hour TINYINT UNSIGNED NOT nullptr,
+	next_day TINYINT UNSIGNED NOT nullptr,
+	next_month TINYINT UNSIGNED NOT nullptr,
+	next_year INT UNSIGNED NOT nullptr,
+	enabled TINYINT NOT nullptr DEFAULT '1',
 	
 	#action:
-	action TINYINT UNSIGNED NOT NULL DEFAULT '0',
-	argument MEDIUMINT NOT NULL DEFAULT '0'
+	action TINYINT UNSIGNED NOT nullptr DEFAULT '0',
+	argument MEDIUMINT NOT nullptr DEFAULT '0'
 );
 
 */
@@ -81,7 +81,7 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	grid_ = grid;
 	condition_id = in_cond_id;
 	condition_min_value = in_min_value;
-	npcthis = NULL;
+	npcthis = nullptr;
 	enabled = in_enabled;
 	this->anim = anim;
 
@@ -164,12 +164,12 @@ bool Spawn2::Process() {
 			return(true);
 		}
 		
-		if (sg == NULL) {
+		if (sg == nullptr) {
 			database.LoadSpawnGroupsByID(spawngroup_id_,&zone->spawn_group_list);
 			sg = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
 		}
 
-		if (sg == NULL) {
+		if (sg == nullptr) {
 			_log(SPAWNS__MAIN, "Spawn2 %d: Unable to locate spawn group %d. Disabling.", spawn2_id, spawngroup_id_);
 			return false;
 		}
@@ -184,7 +184,7 @@ bool Spawn2::Process() {
 		
 		//try to find our NPC type.
 		const NPCType* tmp = database.GetNPCType(npcid);
-		if (tmp == NULL) {
+		if (tmp == nullptr) {
 			_log(SPAWNS__MAIN, "Spawn2 %d: Spawn group %d yeilded an invalid NPC type %d", spawn2_id, spawngroup_id_, npcid);
 			Reset();	//try again later
 			return(true);
@@ -268,14 +268,14 @@ void Spawn2::LoadGrid() {
 */
 void Spawn2::Reset() {
 	timer.Start(resetTimer());
-	npcthis = NULL;
+	npcthis = nullptr;
 	_log(SPAWNS__MAIN, "Spawn2 %d: Spawn reset, repop in %d ms", spawn2_id, timer.GetRemainingTime());
 }
 
 void Spawn2::Depop() {
 	timer.Disable();
 	_log(SPAWNS__MAIN, "Spawn2 %d: Spawn reset, repop disabled", spawn2_id);
-	npcthis = NULL;
+	npcthis = nullptr;
 }
 
 void Spawn2::Repop(uint32 delay) {
@@ -286,14 +286,14 @@ void Spawn2::Repop(uint32 delay) {
 		_log(SPAWNS__MAIN, "Spawn2 %d: Spawn reset for repop, repop in %d ms", spawn2_id, delay);
 		timer.Start(delay);
 	}
-	npcthis = NULL;
+	npcthis = nullptr;
 }
 
 void Spawn2::ForceDespawn()
 {
 	SpawnGroup* sg = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
 
-	if(npcthis != NULL)
+	if(npcthis != nullptr)
 	{
 		if(!npcthis->IsEngaged())
 		{
@@ -336,7 +336,7 @@ void Spawn2::DeathReset()
 	timer.Start(cur);
 
 	//zero out our NPC since he is now gone
-	npcthis = NULL;
+	npcthis = nullptr;
 
 	//if we have a valid spawn id
 	if(spawn2_id)
@@ -520,13 +520,13 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 		break;
 	case SpawnCondition::DoDepop:
 		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Depoping our mob.", spawn2_id, new_state?"enabed":"disabled");
-		if(npcthis != NULL)
+		if(npcthis != nullptr)
 			npcthis->Depop(false);	//remove the current mob
 		Reset();	//reset our spawn timer
 		break;
 	case SpawnCondition::DoRepop:
 		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Preforming a repop.", spawn2_id, new_state?"enabed":"disabled");
-		if(npcthis != NULL)
+		if(npcthis != nullptr)
 			npcthis->Depop(false);	//remove the current mob
 		Repop();	//repop
 		break;
@@ -537,7 +537,7 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 		}
 		int signal_id = c.on_change - SpawnCondition::DoSignalMin;
 		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Signaling our mob with %d.", spawn2_id, new_state?"enabed":"disabled", signal_id);
-		if(npcthis != NULL)
+		if(npcthis != nullptr)
 			npcthis->SignalNPC(signal_id);
 	}
 }

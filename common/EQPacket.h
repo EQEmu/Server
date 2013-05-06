@@ -58,7 +58,7 @@ protected:
 
 	EQPacket(EmuOpcode opcode, const unsigned char *buf, const uint32 len);
 //	EQPacket(const EQPacket &p) { }
-	EQPacket() { emu_opcode=OP_Unknown; pBuffer=NULL; size=0; }
+	EQPacket() { emu_opcode=OP_Unknown; pBuffer=nullptr; size=0; }
 
 };
 
@@ -102,11 +102,11 @@ class EQApplicationPacket : public EQPacket {
 //	friend class EQProtocolPacket;
 	friend class EQStream;
 public:
-	EQApplicationPacket() : EQPacket(OP_Unknown,NULL,0) 
+	EQApplicationPacket() : EQPacket(OP_Unknown,nullptr,0) 
         { app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
-	EQApplicationPacket(const EmuOpcode op) : EQPacket(op,NULL,0) 
+	EQApplicationPacket(const EmuOpcode op) : EQPacket(op,nullptr,0) 
         { app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
-	EQApplicationPacket(const EmuOpcode op, const uint32 len) : EQPacket(op,NULL,len) 
+	EQApplicationPacket(const EmuOpcode op, const uint32 len) : EQPacket(op,nullptr,len) 
         { app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
 	EQApplicationPacket(const EmuOpcode op, const unsigned char *buf, const uint32 len) : EQPacket(op,buf,len) 
         { app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }

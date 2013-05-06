@@ -233,7 +233,7 @@ bool Client::Process() {
 				song_target = entity_list.GetMob(bardsong_target_id);
 			}
 			
-			if (song_target == NULL) {
+			if (song_target == nullptr) {
 				InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 			} else {
 				if(!ApplyNextBardPulse(bardsong, song_target, bardsong_slot))
@@ -348,7 +348,7 @@ bool Client::Process() {
 		}
 
 		Mob *auto_attack_target = GetTarget();
-		if (auto_attack && auto_attack_target != NULL && may_use_attacks && attack_timer.Check()) 
+		if (auto_attack && auto_attack_target != nullptr && may_use_attacks && attack_timer.Check()) 
 		{
 			//check if change
 			//only check on primary attack.. sorry offhand you gotta wait!
@@ -486,7 +486,7 @@ bool Client::Process() {
 			}
 		}
 		
-		if(auto_attack && may_use_attacks && auto_attack_target != NULL
+		if(auto_attack && may_use_attacks && auto_attack_target != nullptr
 			&& CanThisClassDualWield() && attack_dw_timer.Check()) 
 		{	
 			// Range check
@@ -839,7 +839,7 @@ void Client::BulkSendInventoryItems() {
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
 			mlog(INVENTORY__ERROR, "Incomplete Trade Transaction: Moving %s from slot %i to %i", inst->GetItem()->Name, slot_id, free_slot_id);
 			PutItemInInventory(free_slot_id, *inst, false);
-			database.SaveInventory(character_id, NULL, slot_id);
+			database.SaveInventory(character_id, nullptr, slot_id);
 			safe_delete(inst);
 		}
 	}
@@ -976,7 +976,7 @@ void Client::BulkSendInventoryItems()
 #endif*/
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
-	const Item_Struct* handyitem = NULL;
+	const Item_Struct* handyitem = nullptr;
 	uint32 numItemSlots=80;  //The max number of items passed in the transaction.
 	const Item_Struct *item;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
@@ -1075,7 +1075,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	}
 	//this resets the slot
 	zone->tmpmerchanttable[npcid] = tmp_merlist;
-	if(merch != NULL && handyitem){
+	if(merch != nullptr && handyitem){
 		char handy_id[8]={0};
 		int greeting=MakeRandomInt(0, 4);
 		int greet_id=0;
@@ -1368,7 +1368,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
-				char *hacked_string = NULL;
+				char *hacked_string = nullptr;
 				MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(coin move) but %s is non-existant or too far away (%u units).", 
 					banker ? banker->GetName() : "UNKNOWN NPC", distance);
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
@@ -1400,7 +1400,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
-				char *hacked_string = NULL;
+				char *hacked_string = nullptr;
 				MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(shared coin move) but %s is non-existant or too far away (%u units).", 
 					banker ? banker->GetName() : "UNKNOWN NPC", distance);
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
@@ -1456,7 +1456,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
-				char *hacked_string = NULL;
+				char *hacked_string = nullptr;
 				MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(coin move) but %s is non-existant or too far away (%u units).", 
 					banker ? banker->GetName() : "UNKNOWN NPC", distance);
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
@@ -1500,7 +1500,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
-				char *hacked_string = NULL;
+				char *hacked_string = nullptr;
 				MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(shared coin move) but %s is non-existant or too far away (%u units).", 
 					banker ? banker->GetName() : "UNKNOWN NPC", distance);
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());

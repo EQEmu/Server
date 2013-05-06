@@ -63,7 +63,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 	bool engaged = from_who->IsEngaged();
 	if(engaged) {
 		Mob *top = from_who->GetHateTop();
-		towho->Message(0, ".. I am currently fighting with %s", top == NULL?"(NULL)":top->GetName());
+		towho->Message(0, ".. I am currently fighting with %s", top == nullptr?"(nullptr)":top->GetName());
 	}
 	bool check_npcs = from_who->WillAggroNPCs();
 	
@@ -72,7 +72,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		
 		int my_primary = from_who->GetPrimaryFaction();
 		Mob *own = from_who->GetOwner();
-		if(own != NULL)
+		if(own != nullptr)
 			my_primary = own->GetPrimaryFaction();
 		
 		if(my_primary == 0) {
@@ -173,10 +173,10 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 		int my_primary = GetPrimaryFaction();
 		int mob_primary = mob->GetPrimaryFaction();
 		Mob *own = GetOwner();
-		if(own != NULL)
+		if(own != nullptr)
 			my_primary = own->GetPrimaryFaction();
 		own = mob->GetOwner();
-		if(mob_primary > 0 && own != NULL)
+		if(mob_primary > 0 && own != nullptr)
 			mob_primary = own->GetPrimaryFaction();
 		
 		if(mob_primary == 0) {
@@ -220,7 +220,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 	if(!(
 			fv == FACTION_SCOWLS
 			||
-			(mob->GetPrimaryFaction() != GetPrimaryFaction() && mob->GetPrimaryFaction() == -4 && GetOwner() == NULL)
+			(mob->GetPrimaryFaction() != GetPrimaryFaction() && mob->GetPrimaryFaction() == -4 && GetOwner() == nullptr)
 			||
 			fv == FACTION_THREATENLY
 		)) {
@@ -335,7 +335,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		(
 			fv == FACTION_SCOWLS
 			||
-			(mob->GetPrimaryFaction() != GetPrimaryFaction() && mob->GetPrimaryFaction() == -4 && GetOwner() == NULL)
+			(mob->GetPrimaryFaction() != GetPrimaryFaction() && mob->GetPrimaryFaction() == -4 && GetOwner() == nullptr)
 			||
 			(
 				fv == FACTION_THREATENLY
@@ -368,7 +368,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 
 Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange) {
 	if (!sender || !sender->IsNPC())
-		return(NULL);
+		return(nullptr);
 	_ZP(EntityList_AICheckCloseAggro);
 
 #ifdef REVERSE_AGGRO
@@ -389,7 +389,7 @@ Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssist
 		iterator.Advance();
 	}
 	//LogFile->write(EQEMuLog::Debug, "Check aggro for %s no target.", sender->GetName());
-	return(NULL);
+	return(nullptr);
 }
 
 int EntityList::GetHatedCount(Mob *attacker, Mob *exclude) {
@@ -1026,7 +1026,7 @@ bool Mob::CheckLosFN(Mob* other) {
 }
 
 bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
-	if(zone->zonemap == NULL) {
+	if(zone->zonemap == nullptr) {
 		//not sure what the best return is on error
 		//should make this a database variable, but im lazy today
 #ifdef LOS_DEFAULT_CAN_SEE
@@ -1405,20 +1405,20 @@ int32 Mob::CheckHealAggroAmount(uint16 spellid, uint32 heal_possible) {
 }
 
 void Mob::AddFeignMemory(Client* attacker) {
-	if(feign_memory_list.empty() && AIfeignremember_timer != NULL)
+	if(feign_memory_list.empty() && AIfeignremember_timer != nullptr)
 		AIfeignremember_timer->Start(AIfeignremember_delay);
 	feign_memory_list.insert(attacker->CharacterID());
 }
 
 void Mob::RemoveFromFeignMemory(Client* attacker) {
 	feign_memory_list.erase(attacker->CharacterID());
-	if(feign_memory_list.empty() && AIfeignremember_timer != NULL)
+	if(feign_memory_list.empty() && AIfeignremember_timer != nullptr)
 	   AIfeignremember_timer->Disable();
 	if(feign_memory_list.empty())
 	{
 		minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 		maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
-		if(AIfeignremember_timer != NULL)
+		if(AIfeignremember_timer != nullptr)
 			AIfeignremember_timer->Disable();
 	}
 }
@@ -1428,7 +1428,7 @@ void Mob::ClearFeignMemory() {
     while (RememberedCharID != feign_memory_list.end()) 
     {
         Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-        if(remember_client != NULL) //Still in zone
+        if(remember_client != nullptr) //Still in zone
             remember_client->RemoveXTarget(this, false);
         ++RememberedCharID;
     }
@@ -1436,7 +1436,7 @@ void Mob::ClearFeignMemory() {
 	feign_memory_list.clear();
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
-	if(AIfeignremember_timer != NULL)
+	if(AIfeignremember_timer != nullptr)
 		AIfeignremember_timer->Disable();
 }
 

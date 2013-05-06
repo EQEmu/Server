@@ -107,7 +107,7 @@ void ProcLauncher::Process() {
 
 void ProcLauncher::ProcessTerminated(std::map<ProcRef, Spec *>::iterator &it) {
 	
-	if(it->second->handler != NULL)
+	if(it->second->handler != nullptr)
 		it->second->handler->OnTerminate(it->first, it->second);
 	
 #ifdef _WINDOWS
@@ -121,7 +121,7 @@ void ProcLauncher::ProcessTerminated(std::map<ProcRef, Spec *>::iterator &it) {
 ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 	//consume the pointer
 	Spec *it = to_launch;
-	to_launch = NULL;
+	to_launch = nullptr;
 
 #ifdef _WINDOWS
 	STARTUPINFO siStartInfo;
@@ -138,7 +138,7 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 	siStartInfo.dwFlags = 0;
 	
 	//handle output redirection.
-	HANDLE logOut = NULL;
+	HANDLE logOut = nullptr;
 	BOOL inherit_handles = FALSE;
 	if(it->logFile.length() > 0) {
 		inherit_handles = TRUE;
@@ -146,7 +146,7 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 		SECURITY_ATTRIBUTES saAttr;
 		saAttr.nLength = sizeof(SECURITY_ATTRIBUTES); 
 		saAttr.bInheritHandle = TRUE; 		//we want this handle to be inherited by the child.
-		saAttr.lpSecurityDescriptor = NULL; 
+		saAttr.lpSecurityDescriptor = nullptr; 
 		logOut = CreateFile(
 			it->logFile.c_str(),	//lpFileName
 			FILE_WRITE_DATA,		//dwDesiredAccess
@@ -154,12 +154,12 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 			&saAttr,				//lpSecurityAttributes
 			CREATE_ALWAYS,			//dwCreationDisposition
 			FILE_FLAG_NO_BUFFERING,	//dwFlagsAndAttributes
-			NULL );					//hTemplateFile
+			nullptr );					//hTemplateFile
 		
 		//configure the startup info to redirect output appropriately.
 		siStartInfo.hStdError = logOut;
 		siStartInfo.hStdOutput = logOut;
-		siStartInfo.hStdInput = NULL;
+		siStartInfo.hStdInput = nullptr;
 		siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 	}
 
@@ -179,12 +179,12 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 	
 	bFuncRetn = CreateProcess(it->program.c_str(), 
 	  const_cast<char *>(args.c_str()), // command line 
-	  NULL, // process security attributes 
-	  NULL, // primary thread security attributes 
+	  nullptr, // process security attributes 
+	  nullptr, // primary thread security attributes 
 	  inherit_handles, // handles are not inherited 
 	  0, // creation flags (CREATE_NEW_PROCESS_GROUP maybe)
-	  NULL, // use parent's environment 
-	  NULL, // use parent's current directory 
+	  nullptr, // use parent's environment 
+	  nullptr, // use parent's current directory 
 	  &siStartInfo,  // STARTUPINFO pointer 
 	  &it->proc_info);  // receives PROCESS_INFORMATION 
 	
@@ -197,7 +197,7 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 	
 	//keep process handle open to get exit code
 	CloseHandle(it->proc_info.hThread);	//we dont need their thread handle
-	if(logOut != NULL)
+	if(logOut != nullptr)
 		CloseHandle(logOut);	//we dont want their output handle either.
 	
 	ProcRef res = it->proc_info.dwProcessId;
@@ -216,7 +216,7 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 	for(r = 1; r <= it->args.size(); r++) {
 		argv[r] = const_cast<char *>(it->args[r-1].c_str());
 	}
-	argv[r] = NULL;
+	argv[r] = nullptr;
 		
 	ProcRef res = fork();		//cant use vfork since we are opening the log file.
 	if(res == -1) {
@@ -334,7 +334,7 @@ void ProcLauncher::HandleSigChild(int signum) {
 
 
 ProcLauncher::Spec::Spec() {
-	handler = NULL;
+	handler = nullptr;
 }
 
 ProcLauncher::Spec::Spec(const Spec &other) {

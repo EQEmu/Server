@@ -53,11 +53,11 @@ EQDBRes * EQDB::query(Const_char *q) {
 			return new EQDBRes(r);
 		} else {
 			//no result, give them back a 'true but empty' result set
-			return(new EQDBRes(NULL));
+			return(new EQDBRes(nullptr));
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //NOT THREAD SAFE!

@@ -210,7 +210,7 @@ void Mob::CalculateNewFearpoint()
 //old fear function, kept for ref.
 /*void Mob::SetFeared(Mob *caster, uint32 duration, bool flee) {
 	//special args to stop fear
-	if(caster == NULL && duration == 0) {
+	if(caster == nullptr && duration == 0) {
 		fear_state = fearStateNotFeared;
 #ifdef FLEE_HP_RATIO
 		flee_mode = false;
@@ -222,14 +222,14 @@ void Mob::CalculateNewFearpoint()
 	flee_mode = flee;
 	
 	//fear dosent work without at least maps
-	if(zone->zonemap == NULL) {
+	if(zone->zonemap == nullptr) {
 		fear_state = fearStateStuck;
 		return;	//just stand there
 	}
 	
 	//if we are allready feared, and we are on a fear grid..
 	//then just stay happy on the grid...
-	if(fear_path_state != NULL) {
+	if(fear_path_state != nullptr) {
 		if(fear_state != fearStateGrid) {
 			LogFile->write(EQEMuLog::Debug, "Umm... %s has a fear path state, but is not in a grid state. Wtf?", GetName());
 			fear_state = fearStateGrid;
@@ -247,7 +247,7 @@ void Mob::CalculateNewFearpoint()
 	//now we have to think a little more.
 	
 	//first, try to find a fear node that we can see.
-	if(zone->pathing != NULL) {
+	if(zone->pathing != nullptr) {
 		fear_path_state = new MobFearState();
 		if(zone->pathing->FindNearestFear(fear_path_state, GetX(), GetY(), GetZ())) {
 #ifdef FEAR_PATHING_DEBUG
@@ -284,7 +284,7 @@ void Mob::CalculateNewFearpoint()
 //old fear function, kept for ref.
 bool Mob::FearTryStraight(Mob *caster, uint32 duration, bool flee, VERTEX &hit, VERTEX &fear_vector) {
 	//gotta have somebody to run from
-	if(caster == NULL)
+	if(caster == nullptr)
 		return(false);
 	
 	//our goal is to run along this vector...
@@ -310,7 +310,7 @@ bool Mob::FearTryStraight(Mob *caster, uint32 duration, bool flee, VERTEX &hit, 
 	end.y = start.y + fear_vector.y * distance;
 	end.z = start.z;
 	
-	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &hit, NULL)) {
+	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &hit, nullptr)) {
 #ifdef FEAR_PATHING_DEBUG
 		LogFile->write(EQEMuLog::Debug, "Fear Pathing Start: can run entire vector from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)",
 			GetX(), GetY(), GetZ(), end.x, end.y, end.z);
@@ -328,7 +328,7 @@ bool Mob::FearTryStraight(Mob *caster, uint32 duration, bool flee, VERTEX &hit, 
 
 //old fear function, kept for ref.
 void Mob::CalculateFearPosition() {
-	if(zone->zonemap == NULL || fear_state == fearStateStuck) {
+	if(zone->zonemap == nullptr || fear_state == fearStateStuck) {
 		return;	//just stand there
 	}
 	
@@ -395,7 +395,7 @@ void Mob::CalculateFearPosition() {
 	}
 	
 	//we wanted to try to find a waypoint now, so lets try..
-	if(zone->pathing != NULL) {
+	if(zone->pathing != nullptr) {
 		fear_path_state = new MobFearState();
 		
 		if(zone->pathing->FindNearestFear(fear_path_state, GetX(), GetY(), GetZ())) {
@@ -473,7 +473,7 @@ void Mob::CalculateFearPosition() {
 	end.y = start.y + fear_vector.y * 10;
 	end.z = start.z;
 	
-	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &normalhit, NULL)) {
+	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &normalhit, nullptr)) {
 #ifdef FEAR_PATHING_DEBUG
 		LogFile->write(EQEMuLog::Debug, "Fear Pathing: From (%.2f, %.2f, %.2f) normal run to (%.2f, %.2f, %.2f)",
 			GetX(), GetY(), GetZ(), end.x, end.y, end.z);
@@ -514,7 +514,7 @@ void Mob::CalculateFearPosition() {
 		
 		NodeRef c = zone->zonemap->SeekNode(zone->zonemap->GetRoot(), end.x, end.y);
 		if(c != NODE_NONE) {
-			cur_wp_z = zone->zonemap->FindBestZ(c, end, &hit, NULL);
+			cur_wp_z = zone->zonemap->FindBestZ(c, end, &hit, nullptr);
 			if(cur_wp_z < start.z)
 				cur_wp_z = end.z;	//revert on error
 		}
@@ -540,7 +540,7 @@ void Mob::CalculateFearPosition() {
 	end.y = start.y + fear_vector.y * speed;
 	end.z = start.z + speed + speed;
 	
-	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &hit, NULL)) {
+	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &hit, nullptr)) {
 #ifdef FEAR_PATHING_DEBUG
 		LogFile->write(EQEMuLog::Debug, "Fear Pathing: From (%.2f, %.2f, %.2f) up hill run to (%.2f, %.2f, %.2f)",
 			GetX(), GetY(), GetZ(), end.x, end.y, end.z);
@@ -555,7 +555,7 @@ void Mob::CalculateFearPosition() {
 		
 		NodeRef c = zone->zonemap->SeekNode(zone->zonemap->GetRoot(), end.x, end.y);
 		if(c != NODE_NONE) {
-			cur_wp_z = zone->zonemap->FindBestZ(c, end, &hit, NULL);
+			cur_wp_z = zone->zonemap->FindBestZ(c, end, &hit, nullptr);
 			if(cur_wp_z < start.z)
 				cur_wp_z = end.z;	//revert on error
 		}
@@ -579,7 +579,7 @@ void Mob::CalculateFearPosition() {
 	}
 	end.z = start.z + 3;	//a little lift as always
 	
-	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &hit, NULL)) {
+	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &hit, nullptr)) {
 #ifdef FEAR_PATHING_DEBUG
 		LogFile->write(EQEMuLog::Debug, "Fear Pathing: From (%.2f, %.2f, %.2f) strafe 1 to (%.2f, %.2f, %.2f)",
 			GetX(), GetY(), GetZ(), end.x, end.y, end.z);
@@ -602,7 +602,7 @@ void Mob::CalculateFearPosition() {
 	}
 	end.z = start.z + 3;	//a little lift as always
 	
-	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &hit, NULL)) {
+	if(!zone->zonemap->LineIntersectsZone(start, end, 0.5, &hit, nullptr)) {
 #ifdef FEAR_PATHING_DEBUG
 		LogFile->write(EQEMuLog::Debug, "Fear Pathing: From (%.2f, %.2f, %.2f) strafe 2 to (%.2f, %.2f, %.2f)",
 			GetX(), GetY(), GetZ(), end.x, end.y, end.z);

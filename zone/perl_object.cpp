@@ -56,8 +56,8 @@ XS(XS_Object_IsGroundSpawn)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsGroundSpawn();
 		ST(0) = boolSV(RETVAL);
@@ -83,8 +83,8 @@ XS(XS_Object_Close)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Close();
 	}
@@ -108,8 +108,8 @@ XS(XS_Object_Delete)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			reset_state = false;
@@ -136,8 +136,8 @@ XS(XS_Object_StartDecay)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->StartDecay();
 	}
@@ -161,8 +161,8 @@ XS(XS_Object_DeleteItem)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->DeleteItem(index);
 	}
@@ -185,8 +185,8 @@ XS(XS_Object_IsObject)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsObject();
 		ST(0) = boolSV(RETVAL);
@@ -212,8 +212,8 @@ XS(XS_Object_Save)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->Save();
 		ST(0) = boolSV(RETVAL);
@@ -239,8 +239,8 @@ XS(XS_Object_SetID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetID(set_id);
 	}
@@ -263,8 +263,8 @@ XS(XS_Object_ClearUser)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->ClearUser();
 	}
@@ -289,8 +289,8 @@ XS(XS_Object_GetDBID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDBID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -315,8 +315,8 @@ XS(XS_Object_GetID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -341,8 +341,8 @@ XS(XS_Object_GetX)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetX();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -367,8 +367,8 @@ XS(XS_Object_GetY)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetY();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -393,8 +393,8 @@ XS(XS_Object_GetZ)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetZ();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -419,8 +419,8 @@ XS(XS_Object_GetHeading)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHeadingData();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -445,8 +445,8 @@ XS(XS_Object_VarSave)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->VarSave();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -472,8 +472,8 @@ XS(XS_Object_GetType)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetType();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -498,8 +498,8 @@ XS(XS_Object_SetType)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetType(type);
 	}
@@ -524,8 +524,8 @@ XS(XS_Object_GetIcon)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetIcon();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -550,8 +550,8 @@ XS(XS_Object_SetIcon)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetIcon(icon);
 	}
@@ -576,8 +576,8 @@ XS(XS_Object_GetItemID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetItemID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -602,8 +602,8 @@ XS(XS_Object_SetItemID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetItemID(itemid);
 	}
@@ -628,8 +628,8 @@ XS(XS_Object_SetLocation)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetLocation(x, y, z);
 	}
@@ -652,8 +652,8 @@ XS(XS_Object_SetX)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetX(pos);
 	}
@@ -676,8 +676,8 @@ XS(XS_Object_SetY)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetY(pos);
 	}
@@ -700,8 +700,8 @@ XS(XS_Object_SetZ)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetZ(pos);
 	}
@@ -724,8 +724,8 @@ XS(XS_Object_SetHeading)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetHeading(heading);
 	}
@@ -740,7 +740,7 @@ XS(XS_Object_SetModelName)
 		Perl_croak(aTHX_ "Usage: Object::SetModelName(THIS, name)");
 	{
 		Object *		THIS;
-		char *		name = NULL;
+		char *		name = nullptr;
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -748,8 +748,8 @@ XS(XS_Object_SetModelName)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items > 1)	{	name = (char *)SvPV_nolen(ST(1));	}
 
@@ -774,8 +774,8 @@ XS(XS_Object_GetModelName)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetModelName();
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -799,8 +799,8 @@ XS(XS_Object_Repop)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 		THIS->Repop();
 	}
 	XSRETURN_EMPTY;
@@ -822,8 +822,8 @@ XS(XS_Object_Depop)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 		THIS->Depop();
 	}
 	XSRETURN_EMPTY;
@@ -848,8 +848,8 @@ XS(XS_Object_GetEntityVariable)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetEntityVariable(id);
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -874,8 +874,8 @@ XS(XS_Object_EntityVariableExists)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->EntityVariableExists(id);
 		ST(0) = boolSV(RETVAL);
@@ -901,8 +901,8 @@ XS(XS_Object_SetEntityVariable)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Object");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetEntityVariable(id, var);
 	}

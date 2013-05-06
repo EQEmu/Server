@@ -24,7 +24,7 @@
 
 BasePacket::BasePacket(const unsigned char *buf, uint32 len)
 {
-	this->pBuffer=NULL;
+	this->pBuffer=nullptr;
 	this->size=0;
 	this->_wpos = 0;
 	this->_rpos = 0;
@@ -44,7 +44,7 @@ BasePacket::~BasePacket()
 {
 	if (pBuffer)
 		delete[] pBuffer;
-	pBuffer=NULL;
+	pBuffer=nullptr;
 }
 
 

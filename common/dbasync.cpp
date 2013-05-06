@@ -65,7 +65,7 @@ ThreadReturnType DBAsyncLoop(void* tmp) {
 	_log(COMMON__THREADS, "Ending DBAsyncLoop with thread ID %d", pthread_self());
 #endif
 	
-	THREAD_RETURN(NULL);
+	THREAD_RETURN(nullptr);
 }
 
 DBAsync::DBAsync(DBcore* iDBC)
@@ -78,7 +78,7 @@ DBAsync::DBAsync(DBcore* iDBC)
 	_beginthread(DBAsyncLoop, 0, this);
 #else
 	pthread_t thread;
-	pthread_create(&thread, NULL, DBAsyncLoop, this);
+	pthread_create(&thread, nullptr, DBAsyncLoop, this);
 #endif
 }
 

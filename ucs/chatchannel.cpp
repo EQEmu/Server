@@ -85,7 +85,7 @@ ChatChannel* ChatChannelList::FindChannel(string Name) {
 		iterator.Advance();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void ChatChannelList::SendAllChannels(Client *c) {
@@ -452,13 +452,13 @@ bool ChatChannel::IsClientInChannel(Client *c) {
 
 ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) {
 
-	if(!c) return NULL;
+	if(!c) return nullptr;
 
 	if((ChannelName.length() > 0) && (isdigit(ChannelName[0]))) {
 		
 		c->GeneralChannelMessage("The channel name can not begin with a number.");
 
-		return NULL;
+		return nullptr;
 	}
 
 	string NormalisedName, Password;
@@ -477,7 +477,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 
 		c->GeneralChannelMessage("The channel name or password cannot exceed 64 characters.");
 
-		return NULL;
+		return nullptr;
 	}
 
 	_log(UCS__TRACE, "AddClient to channel [%s] with password [%s]", NormalisedName.c_str(), Password.c_str());
@@ -493,11 +493,11 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 
 		c->GeneralChannelMessage(Message);
 
-		return NULL;
+		return nullptr;
 	}
 
 	if(RequiredChannel->IsClientInChannel(c))
-		return NULL;
+		return nullptr;
 
 	if(RequiredChannel->IsInvitee(c->GetName())) {
 
@@ -518,12 +518,12 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 
 	c->GeneralChannelMessage("Incorrect password for channel " + (NormalisedName));
 
-	return NULL;
+	return nullptr;
 }
 
 ChatChannel *ChatChannelList::RemoveClientFromChannel(string inChannelName, Client *c) {
 
-	if(!c) return NULL;
+	if(!c) return nullptr;
 
 	string ChannelName = inChannelName;
 
@@ -533,7 +533,7 @@ ChatChannel *ChatChannelList::RemoveClientFromChannel(string inChannelName, Clie
 	ChatChannel *RequiredChannel = FindChannel(ChannelName);
 
 	if(!RequiredChannel)
-		return NULL;
+		return nullptr;
 
 	// RemoveClient will return false if there is no-one left in the channel, and the channel is not permanent and has
 	// no password.

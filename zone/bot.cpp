@@ -1288,7 +1288,7 @@ void Bot::GenerateArmorClass()
 
 uint16 Bot::GetPrimarySkillValue()
 {
-	SkillType skill = HIGHEST_SKILL;  //because NULL == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
+	SkillType skill = HIGHEST_SKILL;  //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
 	bool equiped = m_inv.GetItem(SLOT_PRIMARY);
 
 	if(!equiped)
@@ -3115,7 +3115,7 @@ bool Bot::Process()
 		return true;
 
 	//Handle assists...
-	/*if(assist_timer.Check() && !Charmed() && GetTarget() != NULL) {
+	/*if(assist_timer.Check() && !Charmed() && GetTarget() != nullptr) {
 		entity_list.AIYellForHelp(this, GetTarget());
 	}*/
 
@@ -3307,7 +3307,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillType skil
 
 		if(GetLevel() >= 28 && IsWarriorClass() )
 		{
-			int ucDamageBonus = GetWeaponDamageBonus((const Item_Struct*) NULL );
+			int ucDamageBonus = GetWeaponDamageBonus((const Item_Struct*) nullptr );
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -3425,14 +3425,14 @@ bool Bot::CanDoSpecialAttack(Mob *other)
 {
 	//Make sure everything is valid before doing any attacks.
 	if (!other) {
-		SetTarget(NULL);
+		SetTarget(nullptr);
 		return false;
 	}
 
 	if(!GetTarget())
 		SetTarget(other);
 
-	if ((other == NULL || ((GetAppearance() == eaDead) || (other->IsClient() && other->CastToClient()->IsDead()))
+	if ((other == nullptr || ((GetAppearance() == eaDead) || (other->IsClient() && other->CastToClient()->IsDead()))
 		|| HasDied() || (!IsAttackAllowed(other)))) {
 		return false;
 	}
@@ -4811,7 +4811,7 @@ bool Bot::GroupHasBot(Group* group) {
 
 	if(group) {
 		for(int Counter = 0; Counter < MAX_GROUP_MEMBERS; Counter++) {
-			if (group->members[Counter] == NULL) {
+			if (group->members[Counter] == nullptr) {
 				continue;
 			}
 
@@ -5408,7 +5408,7 @@ ItemInst* Bot::GetBotItem(uint32 slotID) {
 		return item;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // Adds the specified item it bot to the NPC equipment array and to the bot inventory collection.
@@ -6027,7 +6027,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				if(!failedLoreCheck && mWeaponItem && inst->IsEquipable(GetBaseRace(), GetClass()) && (GetLevel() >= mWeaponItem->ReqLevel)) {
 					BotCanWear = true;
 					botCanWear[i] = BotCanWear;
-					ItemInst* swap_item = NULL;
+					ItemInst* swap_item = nullptr;
 
 					const char* equipped[22] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 												"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
@@ -6201,7 +6201,7 @@ void Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillType attack_
 	Save();
 
 	Mob *give_exp = hate_list.GetDamageTop(this);
-	Client *give_exp_client = NULL;
+	Client *give_exp_client = nullptr;
 
 	if(give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
@@ -6220,7 +6220,7 @@ void Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillType attack_
 	//				br->SplitExp((EXP_FORMULA), this);
 
 	//			if(br->GetBotMainTarget() == this)
-	//				br->SetBotMainTarget(NULL);
+	//				br->SetBotMainTarget(nullptr);
 
 	//			/* Send the EVENT_KILLED_MERIT event for all raid members */
 	//			if(br->BotRaidGroups[0]) {
@@ -6272,7 +6272,7 @@ void Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillType attack_
 							strcpy(g->membername[j-1], g->members[j]->GetCleanName());
 							g->membername[j][0] = '\0';
 							memset(g->membername[j], 0, 64);
-							g->members[j] = NULL;
+							g->members[j] = nullptr;
 						}
 					}
 
@@ -6295,10 +6295,10 @@ void Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillType attack_
 						BotRaids* br = entity_list.GetBotRaidByMob(this);
 						if(br) {
 							if(this == br->botmaintank) {
-								br->botmaintank = NULL;
+								br->botmaintank = nullptr;
 							}
 							if(this == br->botsecondtank) {
-								br->botsecondtank = NULL;
+								br->botsecondtank = nullptr;
 							}
 						}
 						if(g->GroupCount() == 0) {
@@ -6392,7 +6392,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	_ZP(Bot_Attack);
 
 	if (!other) {
-		SetTarget(NULL);
+		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
 		return false;
 	}
@@ -6400,10 +6400,10 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	if(!GetTarget() || GetTarget() != other)
 		SetTarget(other);
 
-	mlog(COMBAT__ATTACKS, "Attacking %s with hand %d %s", other?other->GetCleanName():"(NULL)", Hand, FromRiposte?"(this is a riposte)":"");
+	mlog(COMBAT__ATTACKS, "Attacking %s with hand %d %s", other?other->GetCleanName():"(nullptr)", Hand, FromRiposte?"(this is a riposte)":"");
 
 	if ((IsCasting() && (GetClass() != BARD) && !IsFromSpell) ||
-		other == NULL ||
+		other == nullptr ||
 		(GetHP() < 0) ||
 		(GetAppearance() == eaDead) ||
 		(!IsAttackAllowed(other)))
@@ -6432,7 +6432,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 	FaceTarget(GetTarget());
 
-	ItemInst* weapon = NULL;
+	ItemInst* weapon = nullptr;
 	if(Hand == SLOT_PRIMARY) {
 		weapon = GetBotItem(SLOT_PRIMARY);
 		OffHandAtk(false);
@@ -6442,7 +6442,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		OffHandAtk(true);
 	}
 
-	if(weapon != NULL) {
+	if(weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
 			mlog(COMBAT__ATTACKS, "Attack canceled, Item %s (%d) is not a weapon.", weapon->GetItem()->Name, weapon->GetID());
 			return(false);
@@ -6510,7 +6510,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			// Damage bonuses apply only to hits from the main hand (Hand == 13) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
 
-			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) NULL );
+			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -6521,7 +6521,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		if (Hand==SLOT_SECONDARY) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 
-				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) NULL );
+				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
 
 				min_hit += (int) ucDamageBonus;
 				max_hit += (int) ucDamageBonus;
@@ -7135,7 +7135,7 @@ int16 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 		//item focus
 		for(int x=0; x<=21; x++)
 		{
-			TempItem = NULL;
+			TempItem = nullptr;
 			ItemInst* ins = GetBotItem(x);
 			if (!ins)
 				continue;
@@ -7169,7 +7169,7 @@ int16 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 
 			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
 			{
-				ItemInst *aug = NULL;
+				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
 				if(aug)
 				{
@@ -8470,7 +8470,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 	bool bCanFrontalBS = false;
 
 	const ItemInst* inst = GetBotItem(SLOT_PRIMARY);
-	const Item_Struct* botpiercer = NULL;
+	const Item_Struct* botpiercer = nullptr;
 	if(inst)
 		botpiercer = inst->GetItem();
 	if(!botpiercer || (botpiercer->ItemType != ItemTypePierce)) {
@@ -9136,7 +9136,7 @@ void Bot::EquipBot(std::string* errorMessage) {
 //			BotRaids* br = entity_list.GetBotRaidByMob(client);
 //			if(br) {
 //				br->RemoveRaidBots();
-//				br = NULL;
+//				br = nullptr;
 //			}
 //		}
 //
@@ -9339,8 +9339,8 @@ void Bot::SetAttackTimer() {
 	//an invalid weapon equipped:
 	attack_timer.SetAtTrigger(4000, true);
 
-	Timer* TimerToUse = NULL;
-	const Item_Struct* PrimaryWeapon = NULL;
+	Timer* TimerToUse = nullptr;
+	const Item_Struct* PrimaryWeapon = nullptr;
 
 	for (int i=SLOT_RANGE; i<=SLOT_SECONDARY; i++) {
 
@@ -9354,7 +9354,7 @@ void Bot::SetAttackTimer() {
 		else	//invalid slot (hands will always hit this)
 			continue;
 
-		const Item_Struct* ItemToUse = NULL;
+		const Item_Struct* ItemToUse = nullptr;
 		ItemInst* ci = GetBotItem(i);
 		if(ci)
 			ItemToUse = ci->GetItem();
@@ -9362,7 +9362,7 @@ void Bot::SetAttackTimer() {
 		//special offhand stuff
 		if(i == SLOT_SECONDARY) {
 			//if we have a 2H weapon in our main hand, no dual
-			if(PrimaryWeapon != NULL) {
+			if(PrimaryWeapon != nullptr) {
 				if(	PrimaryWeapon->ItemClass == ItemClassCommon
 					&& (PrimaryWeapon->ItemType == ItemType2HS
 					||	PrimaryWeapon->ItemType == ItemType2HB
@@ -9380,18 +9380,18 @@ void Bot::SetAttackTimer() {
 		}
 
 		//see if we have a valid weapon
-		if(ItemToUse != NULL) {
+		if(ItemToUse != nullptr) {
 			//check type and damage/delay
 			if(ItemToUse->ItemClass != ItemClassCommon
 				|| ItemToUse->Damage == 0
 				|| ItemToUse->Delay == 0) {
 					//no weapon
-					ItemToUse = NULL;
+					ItemToUse = nullptr;
 			}
 			// Check to see if skill is valid
 			else if((ItemToUse->ItemType > ItemTypeThrowing) && (ItemToUse->ItemType != ItemTypeHand2Hand) && (ItemToUse->ItemType != ItemType2HPierce)) {
 				//no weapon
-				ItemToUse = NULL;
+				ItemToUse = nullptr;
 			}
 		}
 
@@ -9400,7 +9400,7 @@ void Bot::SetAttackTimer() {
 			DelayMod = -99;
 
 		//if we have no weapon..
-		if (ItemToUse == NULL) {
+		if (ItemToUse == nullptr) {
 			//above checks ensure ranged weapons do not fall into here
 			// Work out if we're a monk
 			if ((GetClass() == MONK) || (GetClass() == BEASTLORD)) {
@@ -11624,7 +11624,7 @@ Bot* Bot::GetFirstBotInGroup(Group* group) {
 
 	if(group) {
 		for(int Counter = 0; Counter < MAX_GROUP_MEMBERS; Counter++) {
-			if (group->members[Counter] == NULL) {
+			if (group->members[Counter] == nullptr) {
 				continue;
 			}
 
@@ -11984,7 +11984,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	// pull
 	if(!strcasecmp(sep->arg[1], "pull")) {
 		Mob *target = c->GetTarget();
-		if(target == NULL || target == c || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
+		if(target == nullptr || target == c || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
 		{
 			c->Message(15, "You must select a monster");
 			return;
@@ -12019,7 +12019,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	// added Bot follow distance - SetFollowDistance
 	if(!strcasecmp(sep->arg[1], "setfollowdistance")) {
-		if((c->GetTarget() == NULL) || (c->GetTarget() == c) || (!c->GetTarget()->IsBot()) || (c->GetTarget()->CastToBot()->GetBotOwner() != c)) {
+		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || (!c->GetTarget()->IsBot()) || (c->GetTarget()->CastToBot()->GetBotOwner() != c)) {
 			c->Message(15, "You must target a bot you own!");
 		}
 		else {
@@ -12201,7 +12201,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "delete") ) {
-		if((c->GetTarget() == NULL) || !c->GetTarget()->IsBot())
+		if((c->GetTarget() == nullptr) || !c->GetTarget()->IsBot())
 		{
 			c->Message(15, "You must target a bot!");
 			return;
@@ -12421,7 +12421,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "archery")) {
-		if((c->GetTarget() == NULL) || (c->GetTarget() == c) || !c->GetTarget()->IsBot()) {
+		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || !c->GetTarget()->IsBot()) {
 			c->Message(15, "You must target a bot!");
 			return;
 		}
@@ -12444,7 +12444,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "picklock")) {
-		if((c->GetTarget() == NULL) || (c->GetTarget() == c) || !c->GetTarget()->IsBot() || (c->GetTarget()->GetClass() != ROGUE)) {
+		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || !c->GetTarget()->IsBot() || (c->GetTarget()->GetClass() != ROGUE)) {
 			c->Message(15, "You must target a rogue bot!");
 		}
 		else {
@@ -12455,7 +12455,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "summon")) {
-		if((c->GetTarget() == NULL) || (c->GetTarget() == c) || !c->GetTarget()->IsBot() || c->GetTarget()->IsPet())
+		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || !c->GetTarget()->IsBot() || c->GetTarget()->IsPet())
 		{
 			c->Message(15, "You must target a bot!");
 		}
@@ -12484,7 +12484,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "inventory") && !strcasecmp(sep->arg[2], "list")) {
-		if(c->GetTarget() != NULL) {
+		if(c->GetTarget() != nullptr) {
 			if(c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID()) {
 				Mob* b = c->GetTarget();
 				int x = c->GetTarget()->CastToBot()->GetBotItemsCount(&TempErrorMessage);
@@ -12497,8 +12497,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				const char* equipped[22] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 					"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 					"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
-				const ItemInst* item1 = NULL;
-				const Item_Struct* item2 = NULL;
+				const ItemInst* item1 = nullptr;
+				const Item_Struct* item2 = nullptr;
 				bool is2Hweapon = false;
 				for(int i=0; i<22; ++i)
 				{
@@ -12510,7 +12510,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					if(item1)
 						item2 = item1->GetItem();
 					else
-						item2 = NULL;
+						item2 = nullptr;
 
 					if(!TempErrorMessage.empty()) {
 						c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
@@ -12610,7 +12610,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "inventory") && !strcasecmp(sep->arg[2], "remove")) {
-		if((c->GetTarget() == NULL) || (sep->arg[3] == '\0') || !c->GetTarget()->IsBot())
+		if((c->GetTarget() == nullptr) || (sep->arg[3] == '\0') || !c->GetTarget()->IsBot())
 		{
 			c->Message(15, "Usage: #bot inventory remove [slotid] (You must have a bot targetted) ");
 			return;
@@ -12629,7 +12629,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 										"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 										"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
 
-			const Item_Struct* itm = NULL;
+			const Item_Struct* itm = nullptr;
 			const ItemInst* itminst = c->GetTarget()->CastToBot()->GetBotItem(slotId);
 			if(itminst)
 				itm = itminst->GetItem();
@@ -12744,7 +12744,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	if(!strcasecmp(sep->arg[1], "update")) {
 		// Congdar: add IsEngaged check for exploit to keep bots alive by repeatedly using #bot update.
-		if((c->GetTarget() != NULL) && c->GetTarget()->IsBot()) {
+		if((c->GetTarget() != nullptr) && c->GetTarget()->IsBot()) {
 			if(c->GetLevel() <= c->GetTarget()->GetLevel()) {
 				c->Message(15, "This bot has already been updated.");
 				return;
@@ -12787,7 +12787,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	//Bind
 	if(!strcasecmp(sep->arg[1], "bindme")) {
-		Mob *binder = NULL;
+		Mob *binder = nullptr;
 		bool hasbinder = false;
 		if(c->IsGrouped())
 		{
@@ -12815,7 +12815,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	// Rune
 	if(!strcasecmp(sep->arg[1], "runeme")) {
-		Mob *runeer = NULL;
+		Mob *runeer = nullptr;
 		bool hasruneer = false;
 		if(c->IsGrouped())
 		{
@@ -13065,7 +13065,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "ai") && !strcasecmp(sep->arg[2], "mez"))
 	{
 		Mob *target = c->GetTarget();
-		if(target == NULL || target == c || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
+		if(target == nullptr || target == c || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
 		{
 			c->Message(15, "You must select a monster");
 			return;
@@ -13147,7 +13147,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "resurrectme"))
 	{
 		Mob *target = c->GetTarget();
-		if(target == NULL || !target->IsCorpse())
+		if(target == nullptr || !target->IsCorpse())
 		{
 			c->Message(15, "You must select a corpse");
 			return;
@@ -13261,7 +13261,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	//Summon Corpse
 	if(!strcasecmp(sep->arg[1], "corpse") && !strcasecmp(sep->arg[2], "summon")) {
-		if(c->GetTarget() == NULL) {
+		if(c->GetTarget() == nullptr) {
 			c->Message(15, "You must select player with his corpse in the zone.");
 			return;
 		}
@@ -13315,7 +13315,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	{
 		Mob *target = c->GetTarget();
 
-		if(target == NULL || target->IsClient() || target->IsBot() || target->IsPet() && target->GetOwner()->IsBot())
+		if(target == nullptr || target->IsClient() || target->IsBot() || target->IsPet() && target->GetOwner()->IsBot())
 			c->Message(15, "You must select a monster");
 		else {
 			if(c->IsGrouped()) {
@@ -13367,7 +13367,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "charm"))
 	{
 		Mob *target = c->GetTarget();
-		if(target == NULL || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
+		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
 		{
 			c->Message(15, "You must select a monster");
 			return;
@@ -13447,7 +13447,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	// Remove Bot's Pet
 	if(!strcasecmp(sep->arg[1], "pet") && !strcasecmp(sep->arg[2], "remove")) {
-		if(c->GetTarget() != NULL) {
+		if(c->GetTarget() != nullptr) {
 			if (c->IsGrouped() && c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner() == c) &&
 				((c->GetTarget()->GetClass() == NECROMANCER) || (c->GetTarget()->GetClass() == ENCHANTER) || (c->GetTarget()->GetClass() == DRUID))) {
 					if(c->GetTarget()->CastToBot()->IsBotCharmer()) {
@@ -13480,7 +13480,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "Dire") && !strcasecmp(sep->arg[2], "Charm"))
 	{
 		Mob *target = c->GetTarget();
-		if(target == NULL || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
+		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
 		{
 			c->Message(15, "You must select a monster");
 			return;
@@ -13560,7 +13560,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	// Evacuate
 	if(!strcasecmp(sep->arg[1], "evac")) {
-		Mob *evac = NULL;
+		Mob *evac = nullptr;
 		bool hasevac = false;
 		if(c->IsGrouped())
 		{
@@ -13728,7 +13728,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		Group *g = c->GetGroup();
 		Mob *target = c->GetTarget();
 
-		if(target == NULL || (!target->IsClient() && (c->GetTarget()->CastToBot()->GetBotOwner() != c)))
+		if(target == nullptr || (!target->IsClient() && (c->GetTarget()->CastToBot()->GetBotOwner() != c)))
 			c->Message(15, "You must select a player or bot you own");
 
 		else if(g) {
@@ -14658,7 +14658,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				BotGroupOrderGuard(c->GetGroup(), c);
 		}
 		else if(!strcasecmp(sep->arg[2], "attack")) {
-			if(c->IsGrouped() && (c->GetTarget() != NULL) && c->IsAttackAllowed(c->GetTarget())) {
+			if(c->IsGrouped() && (c->GetTarget() != nullptr) && c->IsAttackAllowed(c->GetTarget())) {
 				BotGroupOrderAttack(c->GetGroup(), c->GetTarget(), c);
 			}
 			else
@@ -15339,7 +15339,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 			Bot* targetedBot;
 
-			if(c->GetTarget() != NULL) {
+			if(c->GetTarget() != nullptr) {
 				if (c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner() == c))
 					targetedBot = c->GetTarget()->CastToBot();
 				else
@@ -15378,7 +15378,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	if(!strcasecmp(sep->arg[1], "stance")) {
 		if(sep->argnum == 3){
-			Bot* tempBot = NULL;
+			Bot* tempBot = nullptr;
 			std::string botName = std::string(sep->arg[2]);
 
 			if(!botName.empty())
@@ -15627,7 +15627,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				}
 
 				if(leaderBot) {
-					Mob* target = NULL;
+					Mob* target = nullptr;
 					uint32 timer;
 					bool fastHeals = false;
 
@@ -15836,7 +15836,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					if(!targetName.empty())
 						target = entity_list.GetMob(targetName.c_str());
 					else {
-						if(c->GetTarget() != NULL) {
+						if(c->GetTarget() != nullptr) {
 							target = c->GetTarget();
 						}
 					}
@@ -16543,7 +16543,7 @@ void EntityList::AddBot(Bot *newBot, bool SendSpawnPacket, bool dontqueue) {
 				safe_delete(ns);
 			}
 
-            parse->EventNPC(EVENT_SPAWN, newBot, NULL, "", 0);
+            parse->EventNPC(EVENT_SPAWN, newBot, nullptr, "", 0);
 		}
 
 		bot_list.push_back(newBot);
@@ -17376,9 +17376,9 @@ void Bot::ClearHealRotationTargets() {
 }
 
 Mob* Bot::GetHealRotationTarget( ) {
-    Mob* tank = NULL;
-	Mob* first = NULL;
-	Mob* target = NULL;
+    Mob* tank = nullptr;
+	Mob* first = nullptr;
+	Mob* target = nullptr;
 	int removeIndex = 0;
 	int count = 0;
 
@@ -17432,7 +17432,7 @@ Mob* Bot::GetHealRotationTarget( ) {
 }
 
 Mob* Bot::GetHealRotationTarget( uint8 index ) {
-    Mob* target = NULL;
+    Mob* target = nullptr;
 
 	if(_healRotationTargets[index] > 0) {
 		//get target at specified index
@@ -17445,7 +17445,7 @@ Mob* Bot::GetHealRotationTarget( uint8 index ) {
 list<Bot*> Bot::GetBotsInHealRotation(Bot* rotationLeader) {
 	list<Bot*> Result;
 
-	if(rotationLeader != NULL) {
+	if(rotationLeader != nullptr) {
 		Result.push_back(rotationLeader);
 		Bot* rotationMember = rotationLeader->GetNextHealRotationMember();
 

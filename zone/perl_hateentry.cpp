@@ -49,8 +49,8 @@ XS(XS_HateEntry_GetEnt)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->ent;
 		ST(0) = sv_newmortal();
@@ -76,8 +76,8 @@ XS(XS_HateEntry_GetHate)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->hate;
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -102,8 +102,8 @@ XS(XS_HateEntry_GetDamage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->damage;
 		XSprePUSH; PUSHi((IV)RETVAL);

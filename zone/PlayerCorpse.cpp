@@ -872,7 +872,7 @@ void Corpse::AllowMobLoot(Mob *them, uint8 slot)
 {
 	if(slot >= MAX_LOOTERS)
 		return;
-	if(them == NULL || !them->IsClient())
+	if(them == nullptr || !them->IsClient())
 		return;
 
 	looters[slot] = them->CastToClient()->CharacterID();
@@ -1110,7 +1110,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 	}
 	const Item_Struct* item = 0;
 	ItemInst *inst = 0;
-	ServerLootItem_Struct* item_data = NULL, *bag_item_data[10];
+	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
 	
 	memset(bag_item_data, 0, sizeof(bag_item_data));
 	if(GetPKItem()>1)
@@ -1267,11 +1267,11 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, link);
 		if(!IsPlayerCorpse()) {
 			Group *g = client->GetGroup();
-			if(g != NULL) {
+			if(g != nullptr) {
 				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), link);
 			} else {
 				Raid *r = client->GetRaid();
-				if(r != NULL) {
+				if(r != nullptr) {
 					r->RaidMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), link);
 				}
 			}

@@ -64,11 +64,11 @@ std::string HttpdSocket::m_start = "";
 HttpdSocket::HttpdSocket(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 irPort)
 : HTTPSocket(ID,in_socket,irIP,irPort)
 ,m_content_length(0)
-,m_file(NULL)
+,m_file(nullptr)
 ,m_received(0)
 ,m_request_id(++m_request_count)
-,m_cookies(NULL)
-,m_form(NULL)
+,m_cookies(nullptr)
+,m_form(nullptr)
 {
 	m_http_date = datetime2httpdate(GetDate());
 	if (!m_start.size())
@@ -289,7 +289,7 @@ std::string HttpdSocket::datetime2httpdate(const std::string& dt)
 
 std::string HttpdSocket::GetDate()
 {
-	time_t t = time(NULL);
+	time_t t = time(nullptr);
 	struct tm* tp = localtime(&t);
 	char slask[40];
 	if (tp)
@@ -315,16 +315,16 @@ void HttpdSocket::Reset()
 	if (m_file)
 	{
 		delete m_file;
-		m_file = NULL;
+		m_file = nullptr;
 	}
 	m_received = 0;
 	m_request_id = ++m_request_count;
 	if (m_cookies)
 		delete m_cookies;
-	m_cookies = NULL;
+	m_cookies = nullptr;
 	if (m_form)
 		delete m_form;
-	m_form = NULL;
+	m_form = nullptr;
 }
 
 

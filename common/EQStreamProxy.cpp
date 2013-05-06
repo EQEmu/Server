@@ -10,7 +10,7 @@ EQStreamProxy::EQStreamProxy(EQStream *&stream, const StructStrategy *structs, O
   m_structs(structs),
   m_opcodes(opcodes)
 {
-	stream = NULL;	//take the stream.
+	stream = nullptr;	//take the stream.
 	m_stream->SetOpcodeManager(m_opcodes);
 }
 
@@ -28,7 +28,7 @@ const EQClientVersion EQStreamProxy::ClientVersion() const
 }
 
 void EQStreamProxy::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
-	if(p == NULL)
+	if(p == nullptr)
 		return;
 	
 	EQApplicationPacket *newp = p->Copy();
@@ -36,15 +36,15 @@ void EQStreamProxy::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
 }
 
 void EQStreamProxy::FastQueuePacket(EQApplicationPacket **p, bool ack_req) {
-	if(p == NULL || *p == NULL)
+	if(p == nullptr || *p == nullptr)
 		return;
 	m_structs->Encode(p, m_stream, ack_req);
 }
 
 EQApplicationPacket *EQStreamProxy::PopPacket() {
 	EQApplicationPacket *pack = m_stream->PopPacket();
-	if(pack == NULL)
-		return(NULL);
+	if(pack == nullptr)
+		return(nullptr);
 	
 	//pass this packet through the struct strategy.
 	m_structs->Decode(pack);

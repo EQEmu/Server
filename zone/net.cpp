@@ -96,7 +96,7 @@ EQStreamFactory eqsf(ZoneStream);
 npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 DBAsyncFinishedQueue MTdbafq;
-DBAsync *dbasync = NULL;
+DBAsync *dbasync = nullptr;
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
 	dbasync->AddFQ(&MTdbafq);
 	guild_mgr.SetDatabase(&database);
 
-	GuildBanks = NULL;
+	GuildBanks = nullptr;
 
 #ifdef _EQDEBUG
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -238,7 +238,7 @@ int main(int argc, char** argv) {
 	}
 	
     _log(ZONE__INIT, "Loading spells");
-    EQEmu::MemoryMappedFile *mmf = NULL;
+    EQEmu::MemoryMappedFile *mmf = nullptr;
 	LoadSpells(&mmf);
 
 	_log(ZONE__INIT, "Loading guilds");

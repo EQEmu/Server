@@ -247,13 +247,13 @@ public:
 	/////////////////////////
 	
 	// Constructors/Destructor
-	ItemInst(const Item_Struct* item = NULL, int16 charges = 0);
+	ItemInst(const Item_Struct* item = nullptr, int16 charges = 0);
 	
 	ItemInst(SharedDatabase *db, uint32 item_id, int16 charges = 0);
 	
 	ItemInst(ItemUseType use_type) {
 		m_use_type = use_type;
-		m_item = NULL;
+		m_item = nullptr;
 		m_charges = 0;
 		m_price = 0;
 		m_instnodrop = false;
@@ -357,7 +357,7 @@ public:
     void DeleteCustomData(std::string identifier);
 
 	// Allows treatment of this object as though it were a pointer to m_item
-	operator bool() const { return (m_item != NULL); }
+	operator bool() const { return (m_item != nullptr); }
 	
 	// Compare inner Item_Struct of two ItemInst objects
 	bool operator==(const ItemInst& right) const { return (this->m_item == right.m_item); }
@@ -408,7 +408,7 @@ public:
 	// constructor and destructor
 	EvoItemInst(const EvoItemInst& copy);
 	EvoItemInst(const ItemInst& copy);
-	EvoItemInst(const Item_Struct* item = NULL, int16 charges = 0);
+	EvoItemInst(const Item_Struct* item = nullptr, int16 charges = 0);
 	~EvoItemInst();
 	
 	// accessors... a lot of these are for evolving items (not complete yet)
@@ -424,7 +424,7 @@ public:
 	EvoItemInst* Clone() const;
 	const Item_Struct* GetItem() const;
 	const Item_Struct* GetUnscaledItem() const;
-	void Initialize(SharedDatabase *db = NULL);
+	void Initialize(SharedDatabase *db = nullptr);
 	void ScaleItem();
 	bool EvolveOnAllKills() const;	
 	int8 GetMaxEvolveLvl() const;

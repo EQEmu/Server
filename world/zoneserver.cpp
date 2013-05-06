@@ -95,7 +95,7 @@ bool ZoneServer::SetZone(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	if (zn)
 	{
 		strn0cpy(zone_name, zn, sizeof(zone_name));
-		if( database.GetZoneLongName( (char*)zone_name, &longname, NULL, NULL, NULL, NULL, NULL, NULL ) )
+		if( database.GetZoneLongName( (char*)zone_name, &longname, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr ) )
 		{
 			strn0cpy(long_name, longname, sizeof(long_name));
 			safe_delete_array( longname );
@@ -665,7 +665,7 @@ bool ZoneServer::Process() {
 			if(pack->size != sizeof(ZoneToZone_Struct))
 				break;
 			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
-			ClientListEntry* client = NULL;
+			ClientListEntry* client = nullptr;
 			if(WorldConfig::get()->UpdateStats)
 				client = client_list.FindCharacter(ztz->name);
 
@@ -688,7 +688,7 @@ bool ZoneServer::Process() {
 					break;
 				}
 
-				ZoneServer *ingress_server = NULL;
+				ZoneServer *ingress_server = nullptr;
 				if(ztz->requested_instance_id > 0)
 				{
 					ingress_server = zoneserver_list.FindByInstanceID(ztz->requested_instance_id);
@@ -731,7 +731,7 @@ bool ZoneServer::Process() {
 			else	// this is response from the ingress server, route it back to the egress server
 			{
 				zlog(WORLD__ZONE,"Processing ZTZ for ingress to zone for client %s\n", ztz->name);
-				ZoneServer *egress_server = NULL;
+				ZoneServer *egress_server = nullptr;
 				if(ztz->current_instance_id > 0)
 				{
 					egress_server = zoneserver_list.FindByInstanceID(ztz->current_instance_id);

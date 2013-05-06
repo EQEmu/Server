@@ -122,8 +122,8 @@ public:
     //Appearance
     void SendLevelAppearance();
     void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, 
-        Client *specific_target=NULL);
-    void SendTargetable(bool on, Client *specific_target = NULL);
+        Client *specific_target=nullptr);
+    void SendTargetable(bool on, Client *specific_target = nullptr);
     virtual void SendWearChange(uint8 material_slot);
     virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0, 
         uint32 unknown06 = 0, uint32 unknown18 = 0);
@@ -148,7 +148,7 @@ public:
 
     //Spell
     void SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay, bool zone_wide, 
-        uint32 unk020, bool perm_effect = false, Client *c = NULL);
+        uint32 unk020, bool perm_effect = false, Client *c = nullptr);
     bool IsBeneficialAllowed(Mob *target);
     virtual int GetCasterLevel(uint16 spell_id);
     void ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterID = 0, 
@@ -169,7 +169,7 @@ public:
     virtual void SpellProcess();
     virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1, 
         int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, 
-        uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 *resist_adjust = NULL);
+        uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 *resist_adjust = nullptr);
     virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1, 
         int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, 
         uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 resist_adjust = 0);
@@ -212,7 +212,7 @@ public:
     virtual int GetMaxSongSlots() const { return 0; }
     virtual int GetMaxDiscSlots() const { return 0; }
     virtual int GetMaxTotalSlots() const { return 0; }
-    virtual void InitializeBuffSlots() { buffs = NULL; current_buff_count = 0; }
+    virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
     virtual void UninitializeBuffSlots() { }
     inline bool HasRune() const { return m_hasRune; }
     inline bool HasSpellRune() const { return m_hasSpellRune; }
@@ -246,7 +246,7 @@ public:
 
     //Basic Stats/Inventory
     virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }
-    void TempName(const char *newname = NULL);
+    void TempName(const char *newname = nullptr);
     void SetTargetable(bool on);
     bool IsTargetable() const { return m_targetable; }
     virtual uint16 GetSkill(SkillType skill_num) const { return 0; }
@@ -262,7 +262,7 @@ public:
     bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
     inline void SetOOCRegen(int32 newoocregen) {oocregen = newoocregen;}
     virtual void Heal();
-    virtual void HealDamage(uint32 ammount, Mob* caster = NULL);
+    virtual void HealDamage(uint32 ammount, Mob* caster = nullptr);
     virtual void SetMaxHP() { cur_hp = max_hp; }
     virtual inline uint16 GetBaseRace() const { return base_race; }
     virtual inline uint8  GetBaseGender() const { return base_gender; }
@@ -288,7 +288,7 @@ public:
     inline const char* GetOrigName() const { return orig_name; }
     inline const char* GetLastName() const { return lastname; }
     const char *GetCleanName();
-    virtual void SetName(const char *new_name = NULL) { new_name ? strn0cpy(name, new_name, 64) : 
+    virtual void SetName(const char *new_name = nullptr) { new_name ? strn0cpy(name, new_name, 64) : 
         strn0cpy(name, GetName(), 64); return; };
     inline Mob* GetTarget() const { return target; }
     virtual void SetTarget(Mob* mob);
@@ -417,8 +417,8 @@ public:
     inline const uint32 LastChange() const { return pLastChange; }
 
     //Quest
-    void QuestReward(Client *c = NULL, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
-    void CameraEffect(uint32 duration, uint32 intensity, Client *c = NULL, bool global = false);
+    void QuestReward(Client *c = nullptr, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
+    void CameraEffect(uint32 duration, uint32 intensity, Client *c = nullptr, bool global = false);
     inline bool GetQglobal() const { return qglobal; } 
 
     //Other Packet
@@ -434,8 +434,8 @@ public:
     static uint8 GetDefaultGender(uint16 in_race, uint8 in_gender = 0xFF);
     static void CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns);
     uint16 GetSkillByItemType(int ItemType);
-    virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = NULL);
-    virtual void MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname = NULL);
+    virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
+    virtual void MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname = nullptr);
     bool IsWarriorClass() const;
     char GetCasterClass() const;
     uint8 GetArchetype() const;
@@ -505,8 +505,8 @@ public:
     virtual void UnStun();
     inline void Silence(bool newval) { silenced = newval; }
     inline void Amnesia(bool newval) { amnesiad = newval; }
-    void TemporaryPets(uint16 spell_id, Mob *target, const char *name_override = NULL, uint32 duration_override = 0);
-    void TypesTemporaryPets(uint32 typesid, Mob *target, const char *name_override = NULL, uint32 duration_override = 0, bool followme = false);
+    void TemporaryPets(uint16 spell_id, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0);
+    void TypesTemporaryPets(uint32 typesid, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme = false);
     void WakeTheDead(uint16 spell_id, Mob *target, uint32 duration);
     void Spin();
     void Kill();
@@ -535,7 +535,7 @@ public:
     void CastOnCurer(uint32 spell_id);
     void CastOnCure(uint32 spell_id);
     void CastOnNumHitFade(uint32 spell_id);
-    int SlowMitigation(bool slow_msg=false, Mob *caster = NULL,int slow_value = 0); 
+    int SlowMitigation(bool slow_msg=false, Mob *caster = nullptr,int slow_value = 0); 
     int16 GetCritDmgMob(uint16 skill);
     int16 GetMeleeDamageMod_SE(uint16 skill);
     int16 GetMeleeMinDamageMod_SE(uint16 skill);
@@ -565,7 +565,7 @@ public:
     uint8 GetFlurryChance() { return NPC_FlurryChance; }
     
     static uint32 GetAppearanceValue(EmuAppearance iAppearance);
-    void SendAppearancePacket(uint32 type, uint32 value, bool WholeZone = true, bool iIgnoreSelf = false, Client *specific_target=NULL);
+    void SendAppearancePacket(uint32 type, uint32 value, bool WholeZone = true, bool iIgnoreSelf = false, Client *specific_target=nullptr);
     void SetAppearance(EmuAppearance app, bool iIgnoreSelf = true);
     inline EmuAppearance GetAppearance() const { return _appearance; }
     inline const uint8 GetRunAnimSpeed()    const { return pRunAnimSpeed; }
@@ -635,9 +635,9 @@ public:
     int32  AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
 
     virtual void DoSpecialAttackDamage(Mob *who, SkillType skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance=false);
-    virtual void DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon=NULL, const Item_Struct* item=NULL, uint16 weapon_damage=0, int16 chance_mod=0,int16 focus=0);
+    virtual void DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const Item_Struct* item=nullptr, uint16 weapon_damage=0, int16 chance_mod=0,int16 focus=0);
     virtual void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillType skillinuse, int16 chance_mod=0, int16 focus=0, bool CanRiposte=false);
-    virtual void DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon=NULL, const ItemInst* Ammo=NULL, uint16 weapon_damage=0, int16 chance_mod=0, int16 focus=0);
+    virtual void DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const ItemInst* Ammo=nullptr, uint16 weapon_damage=0, int16 chance_mod=0, int16 focus=0);
     bool CanDoSpecialAttack(Mob *other);
     bool Flurry();
     bool Rampage();
@@ -742,9 +742,9 @@ public:
     virtual uint32 GetAA(uint32 aa_id) const { return(0); }
 
     uint16    GetInstrumentMod(uint16 spell_id) const;
-    int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, Mob *caster = NULL, int ticsremaining = 0);
+    int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, Mob *caster = nullptr, int ticsremaining = 0);
     int CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int ticsremaining = 0);
-    virtual int CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1 = NULL, Mob* caster2 = NULL);
+    virtual int CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1 = nullptr, Mob* caster2 = nullptr);
     uint32 GetCastedSpellInvSlot() const { return casting_spell_inventory_slot; }
 
     // HP Event
@@ -782,7 +782,7 @@ public:
     inline virtual bool IsBlockedBuff(int16 SpellID) { return false; }
     inline virtual bool IsBlockedPetBuff(int16 SpellID) { return false; }
 
-    void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Mob *other = NULL);
+    void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Mob *other = nullptr);
     void TarGlobal(const char *varname, const char *value, const char *duration, int npcid, int charid, int zoneid);
     void DelGlobal(const char *varname);
 
@@ -895,7 +895,7 @@ protected:
     virtual float GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
     virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
     int GetWeaponDamage(Mob *against, const Item_Struct *weapon_item);
-    int GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate = NULL);
+    int GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate = nullptr);
     int GetKickDamage();
     int GetBashDamage();
     virtual void ApplySpecialAttackMod(SkillType skill, int32 &dmg, int32 &mindmg);

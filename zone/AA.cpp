@@ -104,7 +104,7 @@ int Client::GetAATimerID(aaID activate)
 
 			aa2 = zone->FindAA(a);
 
-			if(aa2 != NULL)
+			if(aa2 != nullptr)
 				break;
 		}
 	}
@@ -148,7 +148,7 @@ void Client::ActivateAA(aaID activate){
 
 	int AATimerID = GetAATimerID(activate);
 
-	SendAA_Struct* aa2 = NULL;
+	SendAA_Struct* aa2 = nullptr;
 	aaID aaid = activate;
 	uint8 activate_val = GetAA(activate);
 	//this wasn't taking into acct multi tiered act talents before...
@@ -163,7 +163,7 @@ void Client::ActivateAA(aaID activate){
 					break;
 
 				aa2 = zone->FindAA(a);
-				if(aa2 != NULL)
+				if(aa2 != nullptr)
 					break;
 			}
 		}
@@ -237,7 +237,7 @@ void Client::ActivateAA(aaID activate){
 			break;
 		case aaTargetCurrent:
 		case aaTargetCurrentGroup:
-			if(GetTarget() == NULL) {
+			if(GetTarget() == nullptr) {
 				Message_StringID(MT_DefaultText, AA_NO_TARGET);	//You must first select a target for this ability!
 				p_timers.Clear(&database, AATimerID + pTimerAAStart);
 				return;
@@ -245,7 +245,7 @@ void Client::ActivateAA(aaID activate){
 			target_id = GetTarget()->GetID();
 			break;
 		case aaTargetPet:
-			if(GetPet() == NULL) {
+			if(GetPet() == nullptr) {
 				Message(0, "A pet is required for this skill.");
 				return;
 			}
@@ -428,7 +428,7 @@ void Client::HandleAAAction(aaID activate) {
 		}
 
 		case aaActionActOfValor:
-			if(GetTarget() != NULL) {
+			if(GetTarget() != nullptr) {
 				int curhp = GetTarget()->GetHP();
 				target = aaTargetCurrent;
 				GetTarget()->HealDamage(curhp, this);
@@ -514,7 +514,7 @@ void Client::HandleAAAction(aaID activate) {
 			break;
 		case aaTargetCurrent:
 		case aaTargetCurrentGroup:
-			if(GetTarget() == NULL) {
+			if(GetTarget() == nullptr) {
 				Message_StringID(MT_DefaultText, AA_NO_TARGET);	//You must first select a target for this ability!
 				p_timers.Clear(&database, timer_id + pTimerAAEffectStart);
 				return;
@@ -522,7 +522,7 @@ void Client::HandleAAAction(aaID activate) {
 			target_id = GetTarget()->GetID();
 			break;
 		case aaTargetPet:
-			if(GetPet() == NULL) {
+			if(GetPet() == nullptr) {
 				Message(0, "A pet is required for this skill.");
 				return;
 			}
@@ -578,17 +578,17 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	pet.npc_id = record.npc_type;
 
-	NPCType *made_npc = NULL;
+	NPCType *made_npc = nullptr;
 
 	const NPCType *npc_type = database.GetNPCType(pet.npc_id);
-	if(npc_type == NULL) {
+	if(npc_type == nullptr) {
 		//log write
 		LogFile->write(EQEMuLog::Error, "Unknown npc type for swarm pet spell id: %d", spell_id);
 		Message(0,"Unable to find pet!");
 		return;
 	}
 
-	if(name_override != NULL) {
+	if(name_override != nullptr) {
 		//we have to make a custom NPC type for this name change
 		made_npc = new NPCType;
 		memcpy(made_npc, npc_type, sizeof(NPCType));
@@ -617,14 +617,14 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 		//this is a little messy, but the only way to do it right
 		//it would be possible to optimize out this copy for the last pet, but oh well
-		NPCType *npc_dup = NULL;
-		if(made_npc != NULL) {
+		NPCType *npc_dup = nullptr;
+		if(made_npc != nullptr) {
 			npc_dup = new NPCType;
 			memcpy(npc_dup, made_npc, sizeof(NPCType));
 		}
 
 		NPC* npca = new NPC(
-				(npc_dup!=NULL)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
+				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
 				GetX()+swarm_pet_x[summon_count], GetY()+swarm_pet_y[summon_count],
 				GetZ(), GetHeading(), FlyMode3);
@@ -645,13 +645,13 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		npca->GetSwarmInfo()->owner_id = GetID();
 
 		//give the pets somebody to "love"
-		if(targ != NULL){
+		if(targ != nullptr){
 			npca->AddToHateList(targ, 1000, 1000);
 			npca->GetSwarmInfo()->target = targ->GetID();
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
-		if(npc_dup != NULL)
+		if(npc_dup != nullptr)
 			npca->GiveNPCTypeData(npc_dup);
 
 		entity_list.AddNPC(npca, true, true);
@@ -659,7 +659,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	}
 
 	//the target of these swarm pets will take offense to being cast on...
-	if(targ != NULL)
+	if(targ != nullptr)
 		targ->AddToHateList(this, 1, 0);
 }
 
@@ -671,17 +671,17 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 
 	pet.npc_id = typesid;
 
-	NPCType *made_npc = NULL;
+	NPCType *made_npc = nullptr;
 
 	const NPCType *npc_type = database.GetNPCType(typesid);
-	if(npc_type == NULL) {
+	if(npc_type == nullptr) {
 		//log write
 		LogFile->write(EQEMuLog::Error, "Unknown npc type for swarm pet type id: %d", typesid);
 		Message(0,"Unable to find pet!");
 		return;
 	}
 
-	if(name_override != NULL) {
+	if(name_override != nullptr) {
 		//we have to make a custom NPC type for this name change
 		made_npc = new NPCType;
 		memcpy(made_npc, npc_type, sizeof(NPCType));
@@ -710,14 +710,14 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 
 		//this is a little messy, but the only way to do it right
 		//it would be possible to optimize out this copy for the last pet, but oh well
-		NPCType *npc_dup = NULL;
-		if(made_npc != NULL) {
+		NPCType *npc_dup = nullptr;
+		if(made_npc != nullptr) {
 			npc_dup = new NPCType;
 			memcpy(npc_dup, made_npc, sizeof(NPCType));
 		}
 
 		NPC* npca = new NPC(
-				(npc_dup!=NULL)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
+				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
 				GetX()+swarm_pet_x[summon_count], GetY()+swarm_pet_y[summon_count],
 				GetZ(), GetHeading(), FlyMode3);
@@ -735,13 +735,13 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		npca->GetSwarmInfo()->owner_id = GetID();
 
 		//give the pets somebody to "love"
-		if(targ != NULL){
+		if(targ != nullptr){
 			npca->AddToHateList(targ, 1000, 1000);
 			npca->GetSwarmInfo()->target = targ->GetID();
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
-		if(npc_dup != NULL)
+		if(npc_dup != nullptr)
 			npca->GiveNPCTypeData(npc_dup);
 
 		entity_list.AddNPC(npca, true, true);
@@ -751,8 +751,8 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 
 void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 {
-	Corpse *CorpseToUse = NULL;
-	CorpseToUse = entity_list.GetClosestCorpse(this, NULL);
+	Corpse *CorpseToUse = nullptr;
+	CorpseToUse = entity_list.GetClosestCorpse(this, nullptr);
 
 	if(!CorpseToUse)
 		return;
@@ -911,7 +911,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	npca->GetSwarmInfo()->owner_id = GetID();
 
 	//give the pet somebody to "love"
-	if(target != NULL){
+	if(target != nullptr){
 		npca->AddToHateList(target, 100000);
 		npca->GetSwarmInfo()->target = target->GetID();
 	}
@@ -929,13 +929,13 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	}
 
 	//we allocated a new NPC type object, give the NPC ownership of that memory
-	if(make_npc != NULL)
+	if(make_npc != nullptr)
 		npca->GiveNPCTypeData(make_npc);
 
 	entity_list.AddNPC(npca, true, true);
 
 	//the target of these swarm pets will take offense to being cast on...
-	if(target != NULL)
+	if(target != nullptr)
 		target->AddToHateList(this, 1, 0);
 }
 
@@ -1008,11 +1008,11 @@ void Client::BuyAA(AA_Action* action)
 				break;
 			mlog(AA__MESSAGE, "Could not find AA %d, trying potential parent %d", action->ability, a);
 			aa2 = zone->FindAA(a);
-			if(aa2 != NULL)
+			if(aa2 != nullptr)
 				break;
 		}
 	}
-	if(aa2 == NULL)
+	if(aa2 == nullptr)
 		return;	//invalid ability...
 
 	if(aa2->special_category == 1 || aa2->special_category == 2)
@@ -1104,7 +1104,7 @@ void Client::SendAATimers() {
 			continue;	//not an AA timer
 		//send timer
 		uaaout->begin = cur->GetStartTime();
-		uaaout->end = static_cast<uint32>(time(NULL));
+		uaaout->end = static_cast<uint32>(time(nullptr));
 		uaaout->ability = cur->GetType() - pTimerAAStart; // uuaaout->ability is really a shared timer number
 		QueuePacket(outapp);
 	}
@@ -1130,7 +1130,7 @@ void Client::SendAATable() {
 
 void Client::SendPreviousAA(uint32 id, int seq){
 	uint32 value=0;
-	SendAA_Struct* saa2 = NULL;
+	SendAA_Struct* saa2 = nullptr;
 	if(id==0)
 		saa2 = zone->GetAABySequence(seq);
 	else
@@ -1171,9 +1171,9 @@ void Client::SendPreviousAA(uint32 id, int seq){
 void Client::SendAA(uint32 id, int seq) {
 
 	uint32 value=0;
-	SendAA_Struct* saa2 = NULL;
-	SendAA_Struct* qaa = NULL;
-	SendAA_Struct* saa_pp = NULL;
+	SendAA_Struct* saa2 = nullptr;
+	SendAA_Struct* qaa = nullptr;
+	SendAA_Struct* saa_pp = nullptr;
 	bool IsBaseLevel = true;
 	bool aa_stack = false;
 
@@ -1318,7 +1318,7 @@ void Client::SendAA(uint32 id, int seq) {
 			saa->next_id=saa->sof_next_id;
 
 			//Prevent removal of previous AA from window if next AA belongs to a higher client version.
-			SendAA_Struct* saa_next = NULL;
+			SendAA_Struct* saa_next = nullptr;
 			saa_next = zone->FindAA(saa->sof_next_id);
 			if (saa_next &&
 			   (((GetClientVersionBit() == 4) && (saa_next->clientver > 4))
@@ -1442,7 +1442,7 @@ void Zone::LoadAAs() {
 	totalAAs = database.CountAAs();
 	if(totalAAs == 0) {
 		LogFile->write(EQEMuLog::Error, "Failed to load AAs!");
-		aas = NULL;
+		aas = nullptr;
 		return;
 	}
 	aas = new SendAA_Struct *[totalAAs];
@@ -1472,7 +1472,7 @@ bool ZoneDatabase::LoadAAEffects2() {
 	MYSQL_ROW row;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT aaid, slot, effectid, base1, base2 FROM aa_effects ORDER BY aaid ASC, slot ASC"), errbuf, &result)) {
 		int count = 0;
-		while((row = mysql_fetch_row(result))!= NULL) {
+		while((row = mysql_fetch_row(result))!= nullptr) {
 			int aaid = atoi(row[0]);
 			int slot = atoi(row[1]);
 			int effectid = atoi(row[2]);
@@ -1621,7 +1621,7 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 				if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
 					Inspector->Message(0, "%s (Permanent)", spells[buffs[i].spellid].name);
 				else {
-					char *TempString = NULL;
+					char *TempString = nullptr;
 					MakeAnyLenString(&TempString, "%.1f", static_cast<float>(buffs[i].ticsremaining) / 10.0f);
 					Inspector->Message_StringID(0, BUFF_MINUTES_REMAINING, spells[buffs[i].spellid].name, TempString);
 					safe_delete_array(TempString);
@@ -1733,7 +1733,7 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
     MYSQL_ROW row;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT effectid, base1, base2, slot from aa_effects where aaid=%i order by slot asc", aa_struct->id), errbuf, &result)) {
 		int ndx=0;
-		while((row = mysql_fetch_row(result))!=NULL) {
+		while((row = mysql_fetch_row(result))!=nullptr) {
 			aa_struct->abilities[ndx].skill_id=atoi(row[0]);
 			aa_struct->abilities[ndx].base1=atoi(row[1]);
 			aa_struct->abilities[ndx].base2=atoi(row[2]);
@@ -1754,7 +1754,7 @@ uint32 ZoneDatabase::CountAAs(){
     MYSQL_ROW row;
 	int count=0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(title_sid) from altadv_vars"), errbuf, &result)) {
-		if((row = mysql_fetch_row(result))!=NULL)
+		if((row = mysql_fetch_row(result))!=nullptr)
 			count = atoi(row[0]);
 		mysql_free_result(result);
 	} else {
@@ -1771,7 +1771,7 @@ uint32 ZoneDatabase::CountAAEffects(){
     MYSQL_ROW row;
 	int count=0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(id) from aa_effects"), errbuf, &result)) {
-		if((row = mysql_fetch_row(result))!=NULL){
+		if((row = mysql_fetch_row(result))!=nullptr){
 			count = atoi(row[0]);
 		}
 		mysql_free_result(result);
@@ -1798,7 +1798,7 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 	MYSQL_ROW row;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id from altadv_vars order by skill_id"), errbuf, &result)) {
 		int skill=0,ndx=0;
-		while((row = mysql_fetch_row(result))!=NULL) {
+		while((row = mysql_fetch_row(result))!=nullptr) {
 			skill=atoi(row[0]);
 			load[ndx] = GetAASkillVars(skill);
 			load[ndx]->seq = ndx+1;
@@ -1815,7 +1815,7 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id"), errbuf, &result))
 	{
 		AALevelCost_Struct aalcs;
-		while((row = mysql_fetch_row(result))!=NULL)
+		while((row = mysql_fetch_row(result))!=nullptr)
 		{
 			aalcs.Level = atoi(row[1]);
 			aalcs.Cost = atoi(row[2]);
@@ -1833,7 +1833,7 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-	SendAA_Struct* sendaa = NULL;
+	SendAA_Struct* sendaa = nullptr;
 	uchar* buffer;
 	if (RunQuery(query, MakeAnyLenString(&query, "SET @row = 0"), errbuf)) {	//initialize "row" variable in database for next query
 		safe_delete_array(query);
@@ -1965,7 +1965,7 @@ AA_SwarmPetInfo::AA_SwarmPetInfo()
 { 
     target = 0; 
     owner_id = 0; 
-    duration = NULL;
+    duration = nullptr;
 }
 
 AA_SwarmPetInfo::~AA_SwarmPetInfo() 

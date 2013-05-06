@@ -61,8 +61,8 @@ XS(XS_Mob_IsClient)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsClient();
 		ST(0) = boolSV(RETVAL);
@@ -87,8 +87,8 @@ XS(XS_Mob_IsNPC)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsNPC();
 		ST(0) = boolSV(RETVAL);
@@ -113,8 +113,8 @@ XS(XS_Mob_IsMob)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsMob();
 		ST(0) = boolSV(RETVAL);
@@ -139,8 +139,8 @@ XS(XS_Mob_IsCorpse)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsCorpse();
 		ST(0) = boolSV(RETVAL);
@@ -165,8 +165,8 @@ XS(XS_Mob_IsPlayerCorpse)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsPlayerCorpse();
 		ST(0) = boolSV(RETVAL);
@@ -191,8 +191,8 @@ XS(XS_Mob_IsNPCCorpse)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsNPCCorpse();
 		ST(0) = boolSV(RETVAL);
@@ -217,8 +217,8 @@ XS(XS_Mob_IsObject)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsObject();
 		ST(0) = boolSV(RETVAL);
@@ -243,8 +243,8 @@ XS(XS_Mob_IsDoor)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsDoor();
 		ST(0) = boolSV(RETVAL);
@@ -269,8 +269,8 @@ XS(XS_Mob_IsTrap)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsTrap();
 		ST(0) = boolSV(RETVAL);
@@ -295,8 +295,8 @@ XS(XS_Mob_IsBeacon)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsBeacon();
 		ST(0) = boolSV(RETVAL);
@@ -321,8 +321,8 @@ XS(XS_Mob_CastToClient)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CastToClient();
 		ST(0) = sv_newmortal();
@@ -347,8 +347,8 @@ XS(XS_Mob_CastToNPC)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CastToNPC();
 		ST(0) = sv_newmortal();
@@ -373,8 +373,8 @@ XS(XS_Mob_CastToMob)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CastToMob();
 		ST(0) = sv_newmortal();
@@ -399,8 +399,8 @@ XS(XS_Mob_CastToCorpse)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CastToCorpse();
 		ST(0) = sv_newmortal();
@@ -426,8 +426,8 @@ XS(XS_Mob_GetID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -452,8 +452,8 @@ XS(XS_Mob_GetName)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetName();
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -477,8 +477,8 @@ XS(XS_Mob_Depop)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			StartSpawnTimer = true;
@@ -507,8 +507,8 @@ XS(XS_Mob_RogueAssassinate)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -516,8 +516,8 @@ XS(XS_Mob_RogueAssassinate)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		THIS->RogueAssassinate(other);
 	}
@@ -543,8 +543,8 @@ XS(XS_Mob_BehindMob)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			other = 0;
@@ -555,8 +555,8 @@ XS(XS_Mob_BehindMob)
 			}
 			else
 				Perl_croak(aTHX_ "other is not of type Mob");
-			if(other == NULL)
-				Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+			if(other == nullptr)
+				Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 		}
 
 		if (items < 3)
@@ -595,8 +595,8 @@ XS(XS_Mob_SetLevel)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			command = false;
@@ -627,8 +627,8 @@ XS(XS_Mob_GetSkill)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSkill(skill_num);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -652,8 +652,8 @@ XS(XS_Mob_SendWearChange)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendWearChange(material_slot);
 	}
@@ -678,8 +678,8 @@ XS(XS_Mob_GetEquipment)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetEquipment(material_slot);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -705,8 +705,8 @@ XS(XS_Mob_GetEquipmentMaterial)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetEquipmentMaterial(material_slot);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -732,8 +732,8 @@ XS(XS_Mob_GetEquipmentColor)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetEquipmentColor(material_slot);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -759,8 +759,8 @@ XS(XS_Mob_GetArmorTint)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetArmorTint(material_slot);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -784,8 +784,8 @@ XS(XS_Mob_IsMoving)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsMoving();
 		ST(0) = boolSV(RETVAL);
@@ -809,8 +809,8 @@ XS(XS_Mob_GoToBind)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->GoToBind();
 	}
@@ -832,8 +832,8 @@ XS(XS_Mob_Gate)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Gate();
 	}
@@ -859,8 +859,8 @@ XS(XS_Mob_Attack)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -868,8 +868,8 @@ XS(XS_Mob_Attack)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		if (items < 3)
 			Hand = 13;
@@ -912,8 +912,8 @@ XS(XS_Mob_Damage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -921,8 +921,8 @@ XS(XS_Mob_Damage)
 		}
 		else
 			Perl_croak(aTHX_ "from is not of type Mob");
-		if(from == NULL)
-			Perl_croak(aTHX_ "from is NULL, avoiding crash.");
+		if(from == nullptr)
+			Perl_croak(aTHX_ "from is nullptr, avoiding crash.");
 
 		if (items < 6)
 			avoidable = true;
@@ -963,8 +963,8 @@ XS(XS_Mob_RangedAttack)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -972,8 +972,8 @@ XS(XS_Mob_RangedAttack)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		THIS->RangedAttack(other);
 	}
@@ -996,8 +996,8 @@ XS(XS_Mob_ThrowingAttack)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1005,8 +1005,8 @@ XS(XS_Mob_ThrowingAttack)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		THIS->ThrowingAttack(other);
 	}
@@ -1028,8 +1028,8 @@ XS(XS_Mob_Heal)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Heal();
 	}
@@ -1046,7 +1046,7 @@ XS(XS_Mob_HealDamage)
 	{
 		Mob *		THIS;
 		int32	heal_amt = (int32)SvIV(ST(1));
-		Mob *		caster = NULL;
+		Mob *		caster = nullptr;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -1054,8 +1054,8 @@ XS(XS_Mob_HealDamage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if(items == 3)
 		{
@@ -1065,8 +1065,8 @@ XS(XS_Mob_HealDamage)
 			}
 			else
 				Perl_croak(aTHX_ "caster is not of type Mob");
-			if(caster == NULL)
-				Perl_croak(aTHX_ "caster is NULL, avoiding crash.");
+			if(caster == nullptr)
+				Perl_croak(aTHX_ "caster is nullptr, avoiding crash.");
 		}
 
 		THIS->HealDamage(heal_amt, caster);
@@ -1089,8 +1089,8 @@ XS(XS_Mob_SetMaxHP)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetMaxHP();
 	}
@@ -1115,8 +1115,8 @@ XS(XS_Mob_GetLevelCon)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetLevelCon(iOtherLevel);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1140,8 +1140,8 @@ XS(XS_Mob_SetHP)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetHP(hp);
 	}
@@ -1165,8 +1165,8 @@ XS(XS_Mob_DoAnim)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			type = 0;
@@ -1196,8 +1196,8 @@ XS(XS_Mob_ChangeSize)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			bNoRestriction = false;
@@ -1229,8 +1229,8 @@ XS(XS_Mob_GMMove)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 5)
 			heading = 0.01;
@@ -1259,8 +1259,8 @@ XS(XS_Mob_SendPosUpdate)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			iSendToSelf = 0;
@@ -1288,8 +1288,8 @@ XS(XS_Mob_SendPosition)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendPosition();
 	}
@@ -1312,8 +1312,8 @@ XS(XS_Mob_HasProcs)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->HasProcs();
 		ST(0) = boolSV(RETVAL);
@@ -1339,8 +1339,8 @@ XS(XS_Mob_IsInvisible)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			other = 0;
@@ -1351,8 +1351,8 @@ XS(XS_Mob_IsInvisible)
 			}
 			else
 				Perl_croak(aTHX_ "other is not of type Mob");
-			if(other == NULL)
-				Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+			if(other == nullptr)
+				Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 		}
 
 		RETVAL = THIS->IsInvisible(other);
@@ -1378,8 +1378,8 @@ XS(XS_Mob_SetInvisible)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetInvisible(state);
 	}
@@ -1403,8 +1403,8 @@ XS(XS_Mob_FindBuff)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->FindBuff(spellid);
 		ST(0) = boolSV(RETVAL);
@@ -1432,8 +1432,8 @@ XS(XS_Mob_FindType)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			bOffensive = false;
@@ -1472,8 +1472,8 @@ XS(XS_Mob_GetBuffSlotFromType)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetBuffSlotFromType(type);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -1486,7 +1486,7 @@ XS(XS_Mob_MakePet)
 {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::MakePet(THIS, spell_id, pettype, name=NULL)");
+		Perl_croak(aTHX_ "Usage: Mob::MakePet(THIS, spell_id, pettype, name=nullptr)");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
@@ -1499,11 +1499,11 @@ XS(XS_Mob_MakePet)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 4)
-			name = NULL;
+			name = nullptr;
 		else {
 			name = (char *)SvPV_nolen(ST(3));
 		}
@@ -1518,7 +1518,7 @@ XS(XS_Mob_MakeTempPet)
 {
 	dXSARGS;
 	if (items < 2 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::MakeTempPet(THIS, spell_id, name=NULL, duration=0, target=NULL)");
+		Perl_croak(aTHX_ "Usage: Mob::MakeTempPet(THIS, spell_id, name=nullptr, duration=0, target=nullptr)");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
@@ -1532,11 +1532,11 @@ XS(XS_Mob_MakeTempPet)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
-			name = NULL;
+			name = nullptr;
 		else
 			name = (char *)SvPV_nolen(ST(2));
 
@@ -1546,7 +1546,7 @@ XS(XS_Mob_MakeTempPet)
 			duration = (uint32)SvUV(ST(3));
 
 		if (items < 5)
-			target = NULL;
+			target = nullptr;
 		else if (sv_derived_from(ST(4), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(4)));
 			target = INT2PTR(Mob *,tmp);
@@ -1564,7 +1564,7 @@ XS(XS_Mob_TypesTempPet)
 {
 	dXSARGS;
 	if (items < 2 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, typesid, name=NULL, duration=0, target=NULL, follow=0)");
+		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, typesid, name=nullptr, duration=0, target=nullptr, follow=0)");
 	{
 		Mob *		THIS;
 		uint32		typesid = (uint32)SvUV(ST(1));
@@ -1579,11 +1579,11 @@ XS(XS_Mob_TypesTempPet)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
-			name = NULL;
+			name = nullptr;
 		else
 			name = (char *)SvPV_nolen(ST(2));
 
@@ -1593,7 +1593,7 @@ XS(XS_Mob_TypesTempPet)
 			duration = (uint32)SvUV(ST(3));
 
 		if (items < 5)
-			target = NULL;
+			target = nullptr;
 		else if (sv_derived_from(ST(4), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(4)));
 			target = INT2PTR(Mob *,tmp);
@@ -1629,8 +1629,8 @@ XS(XS_Mob_GetBaseRace)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetBaseRace();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1655,8 +1655,8 @@ XS(XS_Mob_GetBaseGender)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetBaseGender();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1681,8 +1681,8 @@ XS(XS_Mob_GetDeity)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDeity();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1707,8 +1707,8 @@ XS(XS_Mob_GetRace)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetRace();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1733,8 +1733,8 @@ XS(XS_Mob_GetGender)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetGender();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1759,8 +1759,8 @@ XS(XS_Mob_GetTexture)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetTexture();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1785,8 +1785,8 @@ XS(XS_Mob_GetHelmTexture)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHelmTexture();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1811,8 +1811,8 @@ XS(XS_Mob_GetHairColor)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHairColor();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1837,8 +1837,8 @@ XS(XS_Mob_GetBeardColor)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetBeardColor();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1863,8 +1863,8 @@ XS(XS_Mob_GetEyeColor1)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetEyeColor1();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1889,8 +1889,8 @@ XS(XS_Mob_GetEyeColor2)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetEyeColor2();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1915,8 +1915,8 @@ XS(XS_Mob_GetHairStyle)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHairStyle();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1941,8 +1941,8 @@ XS(XS_Mob_GetLuclinFace)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetLuclinFace();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1967,8 +1967,8 @@ XS(XS_Mob_GetBeard)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetBeard();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -1993,8 +1993,8 @@ XS(XS_Mob_GetDrakkinHeritage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDrakkinHeritage();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -2019,8 +2019,8 @@ XS(XS_Mob_GetDrakkinTattoo)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDrakkinTattoo();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -2045,8 +2045,8 @@ XS(XS_Mob_GetDrakkinDetails)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDrakkinDetails();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -2071,8 +2071,8 @@ XS(XS_Mob_GetClass)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClass();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -2097,8 +2097,8 @@ XS(XS_Mob_GetLevel)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetLevel();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -2123,8 +2123,8 @@ XS(XS_Mob_GetCleanName)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCleanName();
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -2148,8 +2148,8 @@ XS(XS_Mob_GetTarget)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetTarget();
 		ST(0) = sv_newmortal();
@@ -2174,8 +2174,8 @@ XS(XS_Mob_SetTarget)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -2183,8 +2183,8 @@ XS(XS_Mob_SetTarget)
 		}
 		else
 			Perl_croak(aTHX_ "mob is not of type Mob");
-		if(mob == NULL)
-			Perl_croak(aTHX_ "mob is NULL, avoiding crash.");
+		if(mob == nullptr)
+			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
 		THIS->SetTarget(mob);
 	}
@@ -2208,8 +2208,8 @@ XS(XS_Mob_GetHPRatio)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHPRatio();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -2233,8 +2233,8 @@ XS(XS_Mob_IsWarriorClass)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsWarriorClass();
 		ST(0) = boolSV(RETVAL);
@@ -2260,8 +2260,8 @@ XS(XS_Mob_GetHP)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHP();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2286,8 +2286,8 @@ XS(XS_Mob_GetMaxHP)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMaxHP();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2312,8 +2312,8 @@ XS(XS_Mob_GetItemHPBonuses)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetItemHPBonuses();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2338,8 +2338,8 @@ XS(XS_Mob_GetSpellHPBonuses)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSpellHPBonuses();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2364,8 +2364,8 @@ XS(XS_Mob_GetWalkspeed)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetWalkspeed();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -2390,8 +2390,8 @@ XS(XS_Mob_GetRunspeed)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetRunspeed();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -2417,8 +2417,8 @@ XS(XS_Mob_GetCasterLevel)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCasterLevel(spell_id);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2443,8 +2443,8 @@ XS(XS_Mob_GetMaxMana)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMaxMana();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2469,8 +2469,8 @@ XS(XS_Mob_GetMana)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMana();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2494,8 +2494,8 @@ XS(XS_Mob_SetMana)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetMana(amount);
 	}
@@ -2519,8 +2519,8 @@ XS(XS_Mob_GetManaRatio)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetManaRatio();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -2545,8 +2545,8 @@ XS(XS_Mob_GetAC)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetAC();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -2571,8 +2571,8 @@ XS(XS_Mob_GetATK)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetATK();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -2597,8 +2597,8 @@ XS(XS_Mob_GetSTR)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSTR();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2623,8 +2623,8 @@ XS(XS_Mob_GetSTA)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSTA();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2649,8 +2649,8 @@ XS(XS_Mob_GetDEX)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDEX();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2675,8 +2675,8 @@ XS(XS_Mob_GetAGI)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetAGI();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2701,8 +2701,8 @@ XS(XS_Mob_GetINT)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetINT();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2727,8 +2727,8 @@ XS(XS_Mob_GetWIS)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetWIS();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2753,8 +2753,8 @@ XS(XS_Mob_GetCHA)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCHA();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2779,8 +2779,8 @@ XS(XS_Mob_GetMR)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMR();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2805,8 +2805,8 @@ XS(XS_Mob_GetFR)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetFR();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2831,8 +2831,8 @@ XS(XS_Mob_GetDR)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDR();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2857,8 +2857,8 @@ XS(XS_Mob_GetPR)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetPR();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2883,8 +2883,8 @@ XS(XS_Mob_GetCR)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCR();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2909,8 +2909,8 @@ XS(XS_Mob_GetCorruption)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCorrup();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2935,8 +2935,8 @@ XS(XS_Mob_GetMaxSTR)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMaxSTR();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2961,8 +2961,8 @@ XS(XS_Mob_GetMaxSTA)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMaxSTA();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -2987,8 +2987,8 @@ XS(XS_Mob_GetMaxDEX)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMaxDEX();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3013,8 +3013,8 @@ XS(XS_Mob_GetMaxAGI)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMaxAGI();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3039,8 +3039,8 @@ XS(XS_Mob_GetMaxINT)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMaxINT();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3065,8 +3065,8 @@ XS(XS_Mob_GetMaxWIS)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMaxWIS();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3091,8 +3091,8 @@ XS(XS_Mob_GetMaxCHA)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMaxCHA();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3119,8 +3119,8 @@ XS(XS_Mob_GetActSpellRange)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetActSpellRange(spell_id, range);
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3147,8 +3147,8 @@ XS(XS_Mob_GetActSpellDamage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetActSpellDamage(spell_id, value);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3175,8 +3175,8 @@ XS(XS_Mob_GetActSpellHealing)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetActSpellHealing(spell_id, value);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3203,8 +3203,8 @@ XS(XS_Mob_GetActSpellCost)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetActSpellCost(spell_id, cost);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3231,8 +3231,8 @@ XS(XS_Mob_GetActSpellDuration)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetActSpellDuration(spell_id, duration);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3259,8 +3259,8 @@ XS(XS_Mob_GetActSpellCasttime)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetActSpellCasttime(spell_id, casttime);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -3288,8 +3288,8 @@ XS(XS_Mob_ResistSpell)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(3), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(3)));
@@ -3297,8 +3297,8 @@ XS(XS_Mob_ResistSpell)
 		}
 		else
 			Perl_croak(aTHX_ "caster is not of type Mob");
-		if(caster == NULL)
-			Perl_croak(aTHX_ "caster is NULL, avoiding crash.");
+		if(caster == nullptr)
+			Perl_croak(aTHX_ "caster is nullptr, avoiding crash.");
 
 		RETVAL = THIS->ResistSpell(ressit_type, spell_id, caster);
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3324,8 +3324,8 @@ XS(XS_Mob_GetSpecializeSkillValue)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSpecializeSkillValue(spell_id);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -3350,8 +3350,8 @@ XS(XS_Mob_GetNPCTypeID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetNPCTypeID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -3375,8 +3375,8 @@ XS(XS_Mob_IsTargeted)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsTargeted();
 		ST(0) = boolSV(RETVAL);
@@ -3402,8 +3402,8 @@ XS(XS_Mob_GetX)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetX();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3428,8 +3428,8 @@ XS(XS_Mob_GetY)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetY();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3454,8 +3454,8 @@ XS(XS_Mob_GetZ)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetZ();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3480,8 +3480,8 @@ XS(XS_Mob_GetHeading)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHeading();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3507,8 +3507,8 @@ XS(XS_Mob_GetWaypointX)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCWPX();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3533,8 +3533,8 @@ XS(XS_Mob_GetWaypointY)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCWPY();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3559,8 +3559,8 @@ XS(XS_Mob_GetWaypointZ)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCWPZ();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3585,8 +3585,8 @@ XS(XS_Mob_GetWaypointH)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCWPH();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3611,8 +3611,8 @@ XS(XS_Mob_GetWaypointPause)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCWPP();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -3637,8 +3637,8 @@ XS(XS_Mob_GetWaypointID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCWP();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -3662,8 +3662,8 @@ XS(XS_Mob_SetCurrentWP)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetCurrentWP(waypoint);
 	}
@@ -3687,8 +3687,8 @@ XS(XS_Mob_GetSize)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSize();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -3712,8 +3712,8 @@ XS(XS_Mob_SetFollowID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetFollowID(id);
 	}
@@ -3737,8 +3737,8 @@ XS(XS_Mob_GetFollowID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetFollowID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -3763,8 +3763,8 @@ XS(XS_Mob_Message)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Message(type, message);
 	}
@@ -3789,8 +3789,8 @@ XS(XS_Mob_Message_StringID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 4)
 			distance = 0;
@@ -3819,8 +3819,8 @@ XS(XS_Mob_Say)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Say(format);
 	}
@@ -3843,8 +3843,8 @@ XS(XS_Mob_Shout)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Shout(format);
 	}
@@ -3867,8 +3867,8 @@ XS(XS_Mob_Emote)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Emote(format);
 	}
@@ -3891,8 +3891,8 @@ XS(XS_Mob_InterruptSpell)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			spellid = 0xFFFF;
@@ -3925,8 +3925,8 @@ XS(XS_Mob_CastSpell)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 4)
 			slot = 10;
@@ -3969,8 +3969,8 @@ XS(XS_Mob_SpellFinished)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		spell_target = THIS;
 
@@ -3982,8 +3982,8 @@ XS(XS_Mob_SpellFinished)
 			}
 			else
 				Perl_croak(aTHX_ "spell_target is not of type Mob");
-			if(spell_target == NULL)
-				Perl_croak(aTHX_ "spell_target is NULL, avoiding crash.");
+			if(spell_target == nullptr)
+				Perl_croak(aTHX_ "spell_target is nullptr, avoiding crash.");
 
 		}
 
@@ -4013,8 +4013,8 @@ XS(XS_Mob_IsImmuneToSpell)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(2), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(2)));
@@ -4022,8 +4022,8 @@ XS(XS_Mob_IsImmuneToSpell)
 		}
 		else
 			Perl_croak(aTHX_ "caster is not of type Mob");
-		if(caster == NULL)
-			Perl_croak(aTHX_ "caster is NULL, avoiding crash.");
+		if(caster == nullptr)
+			Perl_croak(aTHX_ "caster is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsImmuneToSpell(spell_id, caster);
 		ST(0) = boolSV(RETVAL);
@@ -4048,8 +4048,8 @@ XS(XS_Mob_BuffFadeBySpellID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->BuffFadeBySpellID(spell_id);
 	}
@@ -4073,8 +4073,8 @@ XS(XS_Mob_BuffFadeByEffect)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			skipslot = -1;
@@ -4102,8 +4102,8 @@ XS(XS_Mob_BuffFadeAll)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->BuffFadeAll();
 	}
@@ -4127,8 +4127,8 @@ XS(XS_Mob_BuffFadeBySlot)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			iRecalcBonuses = true;
@@ -4161,8 +4161,8 @@ XS(XS_Mob_CanBuffStack)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 4)
 			iFailIfOverwrite = false;
@@ -4192,8 +4192,8 @@ XS(XS_Mob_IsCasting)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsCasting();
 		ST(0) = boolSV(RETVAL);
@@ -4219,8 +4219,8 @@ XS(XS_Mob_CastingSpellID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CastingSpellID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -4245,8 +4245,8 @@ XS(XS_Mob_SetAppearance)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 3)
 			iIgnoreSelf = true;
@@ -4276,8 +4276,8 @@ XS(XS_Mob_GetAppearance)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetAppearance();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -4302,8 +4302,8 @@ XS(XS_Mob_GetRunAnimSpeed)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetRunAnimSpeed();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -4327,8 +4327,8 @@ XS(XS_Mob_SetRunAnimSpeed)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetRunAnimSpeed(in);
 	}
@@ -4351,8 +4351,8 @@ XS(XS_Mob_SetPetID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetPetID(NewPetID);
 	}
@@ -4376,8 +4376,8 @@ XS(XS_Mob_GetPetID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetPetID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -4401,8 +4401,8 @@ XS(XS_Mob_SetOwnerID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetOwnerID(NewOwnerID);
 	}
@@ -4426,8 +4426,8 @@ XS(XS_Mob_GetOwnerID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetOwnerID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -4452,8 +4452,8 @@ XS(XS_Mob_GetPetType)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetPetType();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -4478,8 +4478,8 @@ XS(XS_Mob_GetBodyType)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetBodyType();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -4503,8 +4503,8 @@ XS(XS_Mob_Stun)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Stun(duration);
 	}
@@ -4526,8 +4526,8 @@ XS(XS_Mob_Spin)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Spin();
 	}
@@ -4549,8 +4549,8 @@ XS(XS_Mob_Kill)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Kill();
 	}
@@ -4573,8 +4573,8 @@ XS(XS_Mob_SetInvul)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetInvul(invul);
 	}
@@ -4597,8 +4597,8 @@ XS(XS_Mob_GetInvul)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetInvul();
 		ST(0) = boolSV(RETVAL);
@@ -4623,8 +4623,8 @@ XS(XS_Mob_SetExtraHaste)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetExtraHaste(Haste);
 	}
@@ -4648,8 +4648,8 @@ XS(XS_Mob_GetHaste)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHaste();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -4674,8 +4674,8 @@ XS(XS_Mob_GetMonkHandToHandDamage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMonkHandToHandDamage();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -4699,8 +4699,8 @@ XS(XS_Mob_CanThisClassDoubleAttack)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CanThisClassDoubleAttack();
 		ST(0) = boolSV(RETVAL);
@@ -4725,8 +4725,8 @@ XS(XS_Mob_CanThisClassDualWield)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CanThisClassDualWield();
 		ST(0) = boolSV(RETVAL);
@@ -4751,8 +4751,8 @@ XS(XS_Mob_CanThisClassRiposte)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CanThisClassRiposte();
 		ST(0) = boolSV(RETVAL);
@@ -4777,8 +4777,8 @@ XS(XS_Mob_CanThisClassDodge)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CanThisClassDodge();
 		ST(0) = boolSV(RETVAL);
@@ -4803,8 +4803,8 @@ XS(XS_Mob_CanThisClassParry)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CanThisClassParry();
 		ST(0) = boolSV(RETVAL);
@@ -4830,8 +4830,8 @@ XS(XS_Mob_GetMonkHandToHandDelay)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMonkHandToHandDelay();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -4856,8 +4856,8 @@ XS(XS_Mob_GetClassLevelFactor)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClassLevelFactor();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -4880,8 +4880,8 @@ XS(XS_Mob_Mesmerize)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Mesmerize();
 	}
@@ -4904,8 +4904,8 @@ XS(XS_Mob_IsMezzed)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsMezzed();
 		ST(0) = boolSV(RETVAL);
@@ -4930,8 +4930,8 @@ XS(XS_Mob_IsStunned)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsStunned();
 		ST(0) = boolSV(RETVAL);
@@ -4956,8 +4956,8 @@ XS(XS_Mob_StartEnrage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->StartEnrage();
 	}
@@ -4980,8 +4980,8 @@ XS(XS_Mob_IsEnraged)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsEnraged();
 		ST(0) = boolSV(RETVAL);
@@ -5008,8 +5008,8 @@ XS(XS_Mob_GetReverseFactionCon)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -5017,8 +5017,8 @@ XS(XS_Mob_GetReverseFactionCon)
 		}
 		else
 			Perl_croak(aTHX_ "iOther is not of type Mob");
-		if(iOther == NULL)
-			Perl_croak(aTHX_ "iOther is NULL, avoiding crash.");
+		if(iOther == nullptr)
+			Perl_croak(aTHX_ "iOther is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetReverseFactionCon(iOther);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -5042,8 +5042,8 @@ XS(XS_Mob_IsAIControlled)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsAIControlled();
 		ST(0) = boolSV(RETVAL);
@@ -5069,8 +5069,8 @@ XS(XS_Mob_GetAggroRange)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetAggroRange();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -5095,8 +5095,8 @@ XS(XS_Mob_GetAssistRange)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetAssistRange();
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -5120,8 +5120,8 @@ XS(XS_Mob_SetPetOrder)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetPetOrder(i);
 	}
@@ -5145,8 +5145,8 @@ XS(XS_Mob_GetPetOrder)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetPetOrder();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -5170,8 +5170,8 @@ XS(XS_Mob_IsRoamer)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsRoamer();
 		ST(0) = boolSV(RETVAL);
@@ -5196,8 +5196,8 @@ XS(XS_Mob_IsRooted)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsRooted();
 		ST(0) = boolSV(RETVAL);
@@ -5227,8 +5227,8 @@ XS(XS_Mob_AddToHateList)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -5236,8 +5236,8 @@ XS(XS_Mob_AddToHateList)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		if (items < 3)
 			hate = 0;
@@ -5292,8 +5292,8 @@ XS(XS_Mob_SetHate)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -5301,8 +5301,8 @@ XS(XS_Mob_SetHate)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		if (items < 3)
 			hate = 0;
@@ -5340,8 +5340,8 @@ XS(XS_Mob_GetHateAmount)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -5349,8 +5349,8 @@ XS(XS_Mob_GetHateAmount)
 		}
 		else
 			Perl_croak(aTHX_ "tmob is not of type Mob");
-		if(tmob == NULL)
-			Perl_croak(aTHX_ "tmob is NULL, avoiding crash.");
+		if(tmob == nullptr)
+			Perl_croak(aTHX_ "tmob is nullptr, avoiding crash.");
 
 		if (items < 3)
 			is_dam = false;
@@ -5382,8 +5382,8 @@ XS(XS_Mob_GetDamageAmount)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -5391,8 +5391,8 @@ XS(XS_Mob_GetDamageAmount)
 		}
 		else
 			Perl_croak(aTHX_ "tmob is not of type Mob");
-		if(tmob == NULL)
-			Perl_croak(aTHX_ "tmob is NULL, avoiding crash.");
+		if(tmob == nullptr)
+			Perl_croak(aTHX_ "tmob is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDamageAmount(tmob);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -5416,8 +5416,8 @@ XS(XS_Mob_GetHateTop)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHateTop();
 		ST(0) = sv_newmortal();
@@ -5443,8 +5443,8 @@ XS(XS_Mob_GetHateDamageTop)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -5452,8 +5452,8 @@ XS(XS_Mob_GetHateDamageTop)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHateDamageTop(other);
 		ST(0) = sv_newmortal();
@@ -5478,8 +5478,8 @@ XS(XS_Mob_GetHateRandom)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHateRandom();
 		ST(0) = sv_newmortal();
@@ -5504,8 +5504,8 @@ XS(XS_Mob_IsEngaged)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsEngaged();
 		ST(0) = boolSV(RETVAL);
@@ -5530,8 +5530,8 @@ XS(XS_Mob_HateSummon)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->HateSummon();
 		ST(0) = boolSV(RETVAL);
@@ -5556,8 +5556,8 @@ XS(XS_Mob_FaceTarget)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 2)
 			MobToFace = 0;
@@ -5568,8 +5568,8 @@ XS(XS_Mob_FaceTarget)
 			}
 			else
 				Perl_croak(aTHX_ "MobToFace is not of type Mob");
-			if(MobToFace == NULL)
-				Perl_croak(aTHX_ "MobToFace is NULL, avoiding crash.");
+			if(MobToFace == nullptr)
+				Perl_croak(aTHX_ "MobToFace is nullptr, avoiding crash.");
 		}
 
 		THIS->FaceTarget(MobToFace);
@@ -5593,8 +5593,8 @@ XS(XS_Mob_SetHeading)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetHeading(iHeading);
 	}
@@ -5616,8 +5616,8 @@ XS(XS_Mob_WipeHateList)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->WipeHateList();
 	}
@@ -5641,8 +5641,8 @@ XS(XS_Mob_CheckAggro)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -5650,8 +5650,8 @@ XS(XS_Mob_CheckAggro)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CheckAggro(other);
 		ST(0) = boolSV(RETVAL);
@@ -5679,8 +5679,8 @@ XS(XS_Mob_CalculateHeadingToTarget)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CalculateHeadingToTarget(in_x, in_y);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -5709,8 +5709,8 @@ XS(XS_Mob_CalculateNewPosition)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 6)
 			checkZ = false;
@@ -5746,8 +5746,8 @@ XS(XS_Mob_CalculateNewPosition2)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 6)
 			checkZ = false;
@@ -5782,8 +5782,8 @@ XS(XS_Mob_CalculateDistance)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CalculateDistance(x, y, z);
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -5809,8 +5809,8 @@ XS(XS_Mob_SendTo)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendTo(new_x, new_y, new_z);
 	}
@@ -5835,8 +5835,8 @@ XS(XS_Mob_SendToFixZ)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendToFixZ(new_x, new_y, new_z);
 	}
@@ -5862,8 +5862,8 @@ XS(XS_Mob_NPCSpecialAttacks)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->NPCSpecialAttacks(parse, permtag, reset, remove);
 	}
@@ -5887,8 +5887,8 @@ XS(XS_Mob_DontHealMeBefore)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DontHealMeBefore();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -5913,8 +5913,8 @@ XS(XS_Mob_DontBuffMeBefore)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DontBuffMeBefore();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -5939,8 +5939,8 @@ XS(XS_Mob_DontDotMeBefore)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DontDotMeBefore();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -5965,8 +5965,8 @@ XS(XS_Mob_DontRootMeBefore)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DontRootMeBefore();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -5991,8 +5991,8 @@ XS(XS_Mob_DontSnareMeBefore)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DontSnareMeBefore();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -6018,8 +6018,8 @@ XS(XS_Mob_GetResist)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetResist(type);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -6043,8 +6043,8 @@ XS(XS_Mob_GetShieldTarget)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetShieldTarget();
 		ST(0) = sv_newmortal();
@@ -6069,8 +6069,8 @@ XS(XS_Mob_SetShieldTarget)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -6078,8 +6078,8 @@ XS(XS_Mob_SetShieldTarget)
 		}
 		else
 			Perl_croak(aTHX_ "mob is not of type Mob");
-		if(mob == NULL)
-			Perl_croak(aTHX_ "mob is NULL, avoiding crash.");
+		if(mob == nullptr)
+			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
 		THIS->SetShieldTarget(mob);
 	}
@@ -6102,8 +6102,8 @@ XS(XS_Mob_Charmed)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->Charmed();
 		ST(0) = boolSV(RETVAL);
@@ -6130,8 +6130,8 @@ XS(XS_Mob_GetLevelHP)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetLevelHP(tlevel);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -6156,8 +6156,8 @@ XS(XS_Mob_GetZoneID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetZoneID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -6183,8 +6183,8 @@ XS(XS_Mob_CheckAggroAmount)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CheckAggroAmount(spellid);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -6211,8 +6211,8 @@ XS(XS_Mob_CheckHealAggroAmount)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if(items == 3)
 		{
@@ -6243,8 +6243,8 @@ XS(XS_Mob_GetAA)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetAA(aa_id);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -6268,8 +6268,8 @@ XS(XS_Mob_DivineAura)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DivineAura();
 		ST(0) = boolSV(RETVAL);
@@ -6294,8 +6294,8 @@ XS(XS_Mob_AddFeignMemory)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -6303,8 +6303,8 @@ XS(XS_Mob_AddFeignMemory)
 		}
 		else
 			Perl_croak(aTHX_ "attacker is not of type Client");
-		if(attacker == NULL)
-			Perl_croak(aTHX_ "attacker is NULL, avoiding crash.");
+		if(attacker == nullptr)
+			Perl_croak(aTHX_ "attacker is nullptr, avoiding crash.");
 
 		THIS->AddFeignMemory(attacker);
 	}
@@ -6327,8 +6327,8 @@ XS(XS_Mob_RemoveFromFeignMemory)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -6336,8 +6336,8 @@ XS(XS_Mob_RemoveFromFeignMemory)
 		}
 		else
 			Perl_croak(aTHX_ "attacker is not of type Client");
-		if(attacker == NULL)
-			Perl_croak(aTHX_ "attacker is NULL, avoiding crash.");
+		if(attacker == nullptr)
+			Perl_croak(aTHX_ "attacker is nullptr, avoiding crash.");
 
 		THIS->RemoveFromFeignMemory(attacker);
 	}
@@ -6359,8 +6359,8 @@ XS(XS_Mob_ClearFeignMemory)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->ClearFeignMemory();
 	}
@@ -6383,8 +6383,8 @@ XS(XS_Mob_SetOOCRegen)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetOOCRegen(newoocregen);
 	}
@@ -6409,8 +6409,8 @@ XS(XS_Mob_GetEntityVariable)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetEntityVariable(id);
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -6435,8 +6435,8 @@ XS(XS_Mob_EntityVariableExists)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->EntityVariableExists(id);
 		ST(0) = boolSV(RETVAL);
@@ -6462,8 +6462,8 @@ XS(XS_Mob_SetEntityVariable)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetEntityVariable(id, var);
 	}
@@ -6487,8 +6487,8 @@ XS(XS_Mob_GetHateList)
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		std::list<tHateEntry*> hate_list;
 		THIS->GetHateList(hate_list);
@@ -6522,8 +6522,8 @@ XS(XS_Mob_GetHateList)
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		std::list<Corpse*> corpse_list = entity_list.GetCorpseList();
 		std::list<Corpse*>::iterator iter = corpse_list.begin();
@@ -6549,7 +6549,7 @@ XS(XS_Mob_SignalClient)
 		Perl_croak(aTHX_ "Usage: Mob::SignalClient(THIS, client, data)");
 	{
 		Mob *		THIS;
-		Client*		client = NULL;
+		Client*		client = nullptr;
 		uint32		data = (uint32)SvUV(ST(2));
 	
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -6558,8 +6558,8 @@ XS(XS_Mob_SignalClient)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -6567,8 +6567,8 @@ XS(XS_Mob_SignalClient)
 		}
 		else
 			Perl_croak(aTHX_ "client is not of type Client");
-		if(client == NULL)
-			Perl_croak(aTHX_ "client is NULL, avoiding crash.");
+		if(client == nullptr)
+			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 
 		client->Signal(data);
 	}
@@ -6583,7 +6583,7 @@ XS(XS_Mob_CombatRange)
 		Perl_croak(aTHX_ "Usage: Mob::CombatRange(THIS, target)");
 	{
 		Mob *		THIS;
-		Mob	*		target = NULL;
+		Mob	*		target = nullptr;
 		bool		RETVAL;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -6592,8 +6592,8 @@ XS(XS_Mob_CombatRange)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -6601,8 +6601,8 @@ XS(XS_Mob_CombatRange)
 		}
 		else
 			Perl_croak(aTHX_ "target is not of type Mob");
-		if(target == NULL)
-			Perl_croak(aTHX_ "target is NULL, avoiding crash.");
+		if(target == nullptr)
+			Perl_croak(aTHX_ "target is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CombatRange(target);
 		ST(0) = boolSV(RETVAL);
@@ -6631,8 +6631,8 @@ XS(XS_Mob_DoSpecialAttackDamage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -6640,8 +6640,8 @@ XS(XS_Mob_DoSpecialAttackDamage)
 		}
 		else
 			Perl_croak(aTHX_ "target is not of type Mob");
-		if(target == NULL)
-			Perl_croak(aTHX_ "target is NULL, avoiding crash.");
+		if(target == nullptr)
+			Perl_croak(aTHX_ "target is nullptr, avoiding crash.");
 
 		if (items > 4)
 		{
@@ -6675,8 +6675,8 @@ XS(XS_Mob_CheckLoS)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -6684,8 +6684,8 @@ XS(XS_Mob_CheckLoS)
 		}
 		else
 			Perl_croak(aTHX_ "mob is not of type Mob");
-		if(mob == NULL)
-			Perl_croak(aTHX_ "mob is NULL, avoiding crash.");
+		if(mob == nullptr)
+			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CheckLosFN(mob);
 		ST(0) = boolSV(RETVAL);
@@ -6721,8 +6721,8 @@ XS(XS_Mob_CheckLoSToLoc)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CheckLosFN(loc_x, loc_y, loc_z, mob_size);
 		ST(0) = boolSV(RETVAL);
@@ -6758,8 +6758,8 @@ XS(XS_Mob_FindGroundZ)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetGroundZ(new_x, new_y, z_offset);
 		XSprePUSH; PUSHn((double)RETVAL);
@@ -6790,8 +6790,8 @@ XS(XS_Mob_ProjectileAnim)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -6799,8 +6799,8 @@ XS(XS_Mob_ProjectileAnim)
 		}
 		else
 			Perl_croak(aTHX_ "mob is not of type Mob");
-		if(mob == NULL)
-			Perl_croak(aTHX_ "mob is NULL, avoiding crash.");
+		if(mob == nullptr)
+			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
 		if(items > 3){
 			IsArrow = (bool)SvTRUE(ST(3));
@@ -6841,8 +6841,8 @@ XS(XS_Mob_HasNPCSpecialAtk)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->HasNPCSpecialAtk(parse);
 		ST(0) = boolSV(RETVAL);
@@ -6864,7 +6864,7 @@ XS(XS_Mob_SendAppearanceEffect)
 		int32		parm3 = 0;
 		int32		parm4 = 0;
 		int32		parm5 = 0;
-		Client*		client = NULL;
+		Client*		client = nullptr;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -6872,8 +6872,8 @@ XS(XS_Mob_SendAppearanceEffect)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items > 2)	{	parm2 = (int32)SvIV(ST(2));	}
 		if (items > 3)	{	parm3 = (int32)SvIV(ST(3));	}
@@ -6886,8 +6886,8 @@ XS(XS_Mob_SendAppearanceEffect)
 			}
 			else
 				Perl_croak(aTHX_ "client is not of type Client");
-			if(client == NULL)
-				Perl_croak(aTHX_ "client is NULL, avoiding crash.");
+			if(client == nullptr)
+				Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 		}
 
 		THIS->SendAppearanceEffect(parm1, parm2, parm3, parm4, parm5, client);
@@ -6903,7 +6903,7 @@ XS(XS_Mob_QuestReward)
 		Perl_croak(aTHX_ "Usage: Mob::QuestReward(THIS, client, silver, gold, platinum)");
 	{
 		Mob *		THIS;
-		Client*		client = NULL;
+		Client*		client = nullptr;
 		int32		silver = 0;
 		int32		gold = 0;
 		int32		platinum = 0;		
@@ -6914,8 +6914,8 @@ XS(XS_Mob_QuestReward)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items > 1)	{
 			if (sv_derived_from(ST(1), "Client")) {
@@ -6924,8 +6924,8 @@ XS(XS_Mob_QuestReward)
 			}
 			else
 				Perl_croak(aTHX_ "client is not of type Client");
-			if(client == NULL)
-				Perl_croak(aTHX_ "client is NULL, avoiding crash.");
+			if(client == nullptr)
+				Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 		}
 		if (items > 2)	{	silver = (int32)SvIV(ST(2));	}
 		if (items > 3)	{	gold = (int32)SvIV(ST(3));		}
@@ -6952,8 +6952,8 @@ XS(XS_Mob_SetFlyMode)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetFlyMode(flymode);
 	}
@@ -6976,8 +6976,8 @@ XS(XS_Mob_SetTexture)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendIllusionPacket(THIS->GetRace(), 0xFF, texture);
 	}
@@ -7000,8 +7000,8 @@ XS(XS_Mob_SetRace)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendIllusionPacket(race);
 	}
@@ -7024,8 +7024,8 @@ XS(XS_Mob_SetGender)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendIllusionPacket(THIS->GetRace(),gender);
 	}
@@ -7060,8 +7060,8 @@ XS(XS_Mob_SendIllusion)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if(items > 2) {gender = (uint8)SvIV(ST(2));}
 		if(items > 3) {texture = (uint8)SvIV(ST(3));}
@@ -7092,7 +7092,7 @@ XS(XS_Mob_CameraEffect)
 		Mob *		THIS;
 		uint32		duration = (uint32)SvUV(ST(1));
 		uint32		intensity = 0;
-		Client*		client = NULL;
+		Client*		client = nullptr;
 		bool		global = false;
 		bool		nullcli = false;
 
@@ -7102,8 +7102,8 @@ XS(XS_Mob_CameraEffect)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items > 2)	{	intensity = (uint32)SvUV(ST(2));	}
 		if (items > 3)	{
@@ -7113,9 +7113,9 @@ XS(XS_Mob_CameraEffect)
 			}
 			else
 			nullcli = true;
-			if(client == NULL)
+			if(client == nullptr)
 			nullcli = true;
-				//Perl_croak(aTHX_ "client is NULL, avoiding crash.");
+				//Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 		}
 		if (items > 4)	{	global = (bool)SvTRUE(ST(4));	}
 
@@ -7141,7 +7141,7 @@ XS(XS_Mob_SpellEffect)
 		bool		zone_wide = true;
 		uint32		unk20 = 3000;
 		bool		perm_effect = false;
-		Client*		client = NULL;
+		Client*		client = nullptr;
 		
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -7150,8 +7150,8 @@ XS(XS_Mob_SpellEffect)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items > 2)	{	duration = (uint32)SvUV(ST(2));	}
 		if (items > 3)	{	finish_delay = (uint32)SvUV(ST(3));	}
@@ -7165,8 +7165,8 @@ XS(XS_Mob_SpellEffect)
 			}
 			else
 				Perl_croak(aTHX_ "client is not of type Client");
-			if(client == NULL)
-				Perl_croak(aTHX_ "client is NULL, avoiding crash.");
+			if(client == nullptr)
+				Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 		}
 		
 
@@ -7184,7 +7184,7 @@ XS(XS_Mob_TempName)
 		Perl_croak(aTHX_ "Usage: Mob::TempName(THIS, name)");
 	{
 		Mob *		THIS;
-		char *		name = NULL;
+		char *		name = nullptr;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -7192,8 +7192,8 @@ XS(XS_Mob_TempName)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items > 1)	{	name = (char *)SvPV_nolen(ST(1));	}
 
@@ -7221,8 +7221,8 @@ XS(XS_Mob_GetItemStat)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetItemStat(itemid, stat);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -7235,14 +7235,14 @@ XS(XS_Mob_SetGlobal)
 {
 	dXSARGS;
 	if (items < 5 || items > 6)
-		Perl_croak(aTHX_ "Usage: SetGlobal(THIS, varname, newvalue, options, duration, other=NULL)");
+		Perl_croak(aTHX_ "Usage: SetGlobal(THIS, varname, newvalue, options, duration, other=nullptr)");
 	{
 		Mob *		THIS;
 		char *		varname = (char *)SvPV_nolen(ST(1));
 		char *		newvalue = (char *)SvPV_nolen(ST(2));
 		int			options = (int)SvIV(ST(3));
 		char *		duration = (char *)SvPV_nolen(ST(4));
-		Mob *		other = NULL;
+		Mob *		other = nullptr;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -7250,8 +7250,8 @@ XS(XS_Mob_SetGlobal)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items > 5) {
 			if (sv_derived_from(ST(5), "Mob")) {
@@ -7260,8 +7260,8 @@ XS(XS_Mob_SetGlobal)
 			}
 			else
 				Perl_croak(aTHX_ "THIS is not of type Mob");
-			if(other == NULL)
-				Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+			if(other == nullptr)
+				Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 		}
 
 		THIS->SetGlobal(varname, newvalue, options, duration, other);
@@ -7290,8 +7290,8 @@ XS(XS_Mob_TarGlobal)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->TarGlobal(varname, value, duration, npcid, charid, zoneid);
 	}
@@ -7314,8 +7314,8 @@ XS(XS_Mob_DelGlobal)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->DelGlobal(varname);
 	}
@@ -7341,8 +7341,8 @@ XS(XS_Mob_SetSlotTint)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetSlotTint(material_slot, red_tint, green_tint, blue_tint);
 	}
@@ -7367,8 +7367,8 @@ XS(XS_Mob_WearChange)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items > 3) {
 			color = (uint32)SvUV(ST(3));
@@ -7397,8 +7397,8 @@ XS(XS_Mob_DoKnockback)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -7406,8 +7406,8 @@ XS(XS_Mob_DoKnockback)
 		}
 		else
 			Perl_croak(aTHX_ "caster is not of type Mob");
-		if(caster == NULL)
-			Perl_croak(aTHX_ "caster is NULL, avoiding crash.");
+		if(caster == nullptr)
+			Perl_croak(aTHX_ "caster is nullptr, avoiding crash.");
 
 		THIS->DoKnockback(caster, pushback, pushup);
 	}
@@ -7430,8 +7430,8 @@ XS(XS_Mob_RemoveNimbusEffect)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveNimbusEffect(effectid);
 	}
@@ -7454,8 +7454,8 @@ XS(XS_Mob_SetRunning)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
         THIS->SetRunning(value);
 	}
@@ -7479,8 +7479,8 @@ XS(XS_Mob_IsRunning)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
         RETVAL = THIS->IsRunning();
 		ST(0) = boolSV(RETVAL);
@@ -7506,8 +7506,8 @@ XS(XS_Mob_SetBodyType)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
         if(items == 3) {
             overwrite_orig = (bool)SvTRUE(ST(2));
@@ -7537,8 +7537,8 @@ XS(XS_Mob_SetDeltas)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetDeltas(delta_x, delta_y, delta_z, delta_h);
 	}
@@ -7561,8 +7561,8 @@ XS(XS_Mob_SetLD)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
         THIS->SendAppearancePacket(AT_Linkdead, value);
 	}
@@ -7585,8 +7585,8 @@ XS(XS_Mob_SetTargetDestSteps)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetTargetDestSteps(target_steps);
 	}
@@ -7609,8 +7609,8 @@ XS(XS_Mob_SetTargetable)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetTargetable(on);
 	}
@@ -7634,8 +7634,8 @@ XS(XS_Mob_ModSkillDmgTaken)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->ModSkillDmgTaken(skill_num,value);
 	}
@@ -7660,8 +7660,8 @@ XS(XS_Mob_GetModSkillDmgTaken)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetModSkillDmgTaken(skill_num);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -7687,8 +7687,8 @@ XS(XS_Mob_GetSkillDmgTaken)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSkillDmgTaken(skill_num);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -7712,8 +7712,8 @@ XS(XS_Mob_SetAllowBeneficial)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
         THIS->SetAllowBeneficial(value);
 	}
@@ -7736,8 +7736,8 @@ XS(XS_Mob_GetAllowBeneficial)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetAllowBeneficial();
 		ST(0) = boolSV(RETVAL);
@@ -7764,8 +7764,8 @@ XS(XS_Mob_IsBeneficialAllowed)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 		IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -7773,8 +7773,8 @@ XS(XS_Mob_IsBeneficialAllowed)
 		}
 		else
 		Perl_croak(aTHX_ "target is not of type Mob");
-		if(target == NULL)
-		Perl_croak(aTHX_ "target is NULL, avoiding crash.");
+		if(target == nullptr)
+		Perl_croak(aTHX_ "target is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsBeneficialAllowed(target);
 		ST(0) = boolSV(RETVAL);
@@ -7800,8 +7800,8 @@ XS(XS_Mob_ModVulnerability)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->ModVulnerability(resist, value);
 	}
@@ -7826,8 +7826,8 @@ XS(XS_Mob_GetModVulnerability)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetModVulnerability(resist);
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -7856,8 +7856,8 @@ XS(XS_Mob_DoMeleeSkillAttackDmg)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -7865,8 +7865,8 @@ XS(XS_Mob_DoMeleeSkillAttackDmg)
 		}
 		else
 			Perl_croak(aTHX_ "target is not of type Mob");
-		if(target == NULL)
-			Perl_croak(aTHX_ "target is NULL, avoiding crash.");
+		if(target == nullptr)
+			Perl_croak(aTHX_ "target is nullptr, avoiding crash.");
 
 		THIS->DoMeleeSkillAttackDmg(target, weapon_damage, skill, chance_mod, focus, CanRiposte);
 	}
@@ -7878,12 +7878,12 @@ XS(XS_Mob_DoArcheryAttackDmg)
 {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Mob::DoArcheryAttackDmg(THIS, target, RangeWeapon=NULL, Ammo=NULL, weapon_damage, chance_mod, focus)");
+		Perl_croak(aTHX_ "Usage: Mob::DoArcheryAttackDmg(THIS, target, RangeWeapon=nullptr, Ammo=nullptr, weapon_damage, chance_mod, focus)");
 	{
 		Mob *		THIS;
 		Mob*		target;
-		ItemInst*   RangeWeapon = NULL;
-		ItemInst*   Ammo = NULL;
+		ItemInst*   RangeWeapon = nullptr;
+		ItemInst*   Ammo = nullptr;
 		uint16		weapon_damage = (uint16)SvIV(ST(4));
 		int16		chance_mod = (int16)SvIV(ST(5));
 		int16		focus = (int16)SvIV(ST(6));
@@ -7894,8 +7894,8 @@ XS(XS_Mob_DoArcheryAttackDmg)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -7903,8 +7903,8 @@ XS(XS_Mob_DoArcheryAttackDmg)
 		}
 		else
 			Perl_croak(aTHX_ "target is not of type Mob");
-		if(target == NULL)
-			Perl_croak(aTHX_ "target is NULL, avoiding crash.");
+		if(target == nullptr)
+			Perl_croak(aTHX_ "target is nullptr, avoiding crash.");
 
 		THIS->DoArcheryAttackDmg(target, RangeWeapon, Ammo, weapon_damage, chance_mod, focus);
 	}
@@ -7916,12 +7916,12 @@ XS(XS_Mob_DoThrowingAttackDmg)
 {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Mob::DoThrowingAttackDmg(THIS, target, RangeWeapon=NULL,item=NULL,weapon_damage, chance_mod, focus)");
+		Perl_croak(aTHX_ "Usage: Mob::DoThrowingAttackDmg(THIS, target, RangeWeapon=nullptr,item=nullptr,weapon_damage, chance_mod, focus)");
 	{
 		Mob *		THIS;
 		Mob*		target;
-		ItemInst*   RangeWeapon = NULL;
-		Item_Struct* item = NULL;
+		ItemInst*   RangeWeapon = nullptr;
+		Item_Struct* item = nullptr;
 		uint16		weapon_damage = (uint16)SvIV(ST(4));
 		int16		chance_mod = (int16)SvIV(ST(5));
 		int16		focus = (int16)SvIV(ST(6));
@@ -7932,8 +7932,8 @@ XS(XS_Mob_DoThrowingAttackDmg)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -7941,8 +7941,8 @@ XS(XS_Mob_DoThrowingAttackDmg)
 		}
 		else
 			Perl_croak(aTHX_ "target is not of type Mob");
-		if(target == NULL)
-			Perl_croak(aTHX_ "target is NULL, avoiding crash.");
+		if(target == nullptr)
+			Perl_croak(aTHX_ "target is nullptr, avoiding crash.");
 
 		THIS->DoThrowingAttackDmg(target, RangeWeapon, item, weapon_damage, chance_mod, focus);
 	}
@@ -7965,8 +7965,8 @@ XS(XS_Mob_SetDisableMelee)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
         THIS->SetDisableMelee(value);
 	}
@@ -7989,8 +7989,8 @@ XS(XS_Mob_IsMeleeDisabled)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsMeleeDisabled();
 		ST(0) = boolSV(RETVAL);
@@ -8015,8 +8015,8 @@ XS(XS_Mob_SetFlurryChance)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetFlurryChance(value);
 	}
@@ -8040,8 +8040,8 @@ XS(XS_Mob_GetFlurryChance)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetFlurryChance();
 		XSprePUSH; PUSHu((UV)RETVAL);

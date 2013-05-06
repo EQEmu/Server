@@ -76,7 +76,7 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, SOCKET in_s
   timeout_timer(SERVER_TIMEOUT * 2)
 {
 	id = 0;
-	Server = NULL;
+	Server = nullptr;
 	pOldFormat = iOldFormat;
 	#ifdef MINILOGIN
 		TCPMode = modePacket;
@@ -282,7 +282,7 @@ bool EmuTCPConnection::SendPacket(EmuTCPNetPacket_Struct* tnps) {
 ServerPacket* EmuTCPConnection::PopPacket() {
 	ServerPacket* ret;
 	if (!MOutQueueLock.trylock())
-		return NULL;
+		return nullptr;
 	ret = OutQueue.pop();
 	MOutQueueLock.unlock();
 	return ret;

@@ -99,7 +99,7 @@ inline bool operator==(const EQStreamInfo &l, const EQStreamInfo &r) {
 	return(l.src_ip == r.src_ip && l.src_port == r.src_port && l.dst_ip == r.dst_ip && l.dst_port == r.dst_port);
 }
 
-//Forces the pointer T thing so we can return NULL
+//Forces the pointer T thing so we can return nullptr
 template <class T>
 class EQStreamLocator {
 protected:
@@ -157,7 +157,7 @@ public:
 		//may not be a constant time operation in theory, and update our
 		//stored copy only on insert or delete
 		if(res == streams.end())
-			return(NULL);
+			return(nullptr);
 		return(res->second);
 	}
 	

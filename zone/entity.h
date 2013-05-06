@@ -145,7 +145,7 @@ public:
 	Client* GetClientByCharID(uint32 iCharID);
 	Client* GetClientByWID(uint32 iWID);
 	Client* GetClient(uint32 ip, uint16 port);
-	Client* GetRandomClient(float x, float y, float z, float Distance, Client *ExcludeClient = NULL);
+	Client* GetRandomClient(float x, float y, float z, float Distance, Client *ExcludeClient = nullptr);
 	Group*	GetGroupByMob(Mob* mob);
 	Group*	GetGroupByClient(Client* client);
 	Group*  GetGroupByID(uint32 id);
@@ -180,7 +180,7 @@ public:
     void	RefreshAllGuildInfo(uint32 guild_id);
     void	SendGuildList();
 //	void	SendGuildJoin(GuildJoin_Struct* gj);
-	// Check group list for NULL entries
+	// Check group list for nullptr entries
 	void	CheckGroupList (const char *fname, const int fline);
 	void	GroupProcess();
 	void	RaidProcess();
