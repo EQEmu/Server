@@ -35,12 +35,12 @@ public:
     void EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
 private:
-    QuestInterface *GetQIByNPCQuest(uint32 npcid);
-	QuestInterface *GetQIByGlobalNPCQuest();
-    QuestInterface *GetQIByPlayerQuest();
-    QuestInterface *GetQIByGlobalPlayerQuest();
-    QuestInterface *GetQIBySpellQuest(uint32 spell_id);
-    QuestInterface *GetQIByItemQuest(std::string item_script);
+    QuestInterface *GetQIByNPCQuest(uint32 npcid, std::string &filename);
+    QuestInterface *GetQIByGlobalNPCQuest(std::string &filename);
+    QuestInterface *GetQIByPlayerQuest(std::string &filename);
+    QuestInterface *GetQIByGlobalPlayerQuest(std::string &filename);
+    QuestInterface *GetQIBySpellQuest(uint32 spell_id, std::string &filename);
+    QuestInterface *GetQIByItemQuest(std::string item_script, std::string &filename);
 
     std::map<uint32, QuestInterface*> _interfaces;
     std::map<uint32, std::string> _extensions;

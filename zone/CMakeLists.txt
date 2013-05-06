@@ -30,6 +30,7 @@ SET(zone_sources
     horse.cpp
     inventory.cpp
     loottables.cpp
+	lua_parser.cpp
     Map.cpp
     merc.cpp
     mob.cpp
@@ -109,6 +110,7 @@ SET(zone_headers
     guild_mgr.h
     hate_list.h
     horse.h
+	lua_parser.h
     map.h
     masterentity.h
     maxskill.h
@@ -155,7 +157,7 @@ ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 
 ADD_DEFINITIONS(-DZONE)
 
-TARGET_LINK_LIBRARIES(zone Common ${PERL_LIBRARY} debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
+TARGET_LINK_LIBRARIES(zone Common ${PERL_LIBRARY} debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY} ${LUA_LIBRARY})
 
 IF(MSVC)
     SET_TARGET_PROPERTIES(zone PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
@@ -174,7 +176,5 @@ IF(UNIX)
     TARGET_LINK_LIBRARIES(zone "pthread")
     ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)
-
-INCLUDE_DIRECTORIES(${VLD_INCLUDE_DIR})
 
 SET(EXECUTABLE_OUTPUT_PATH ../Bin)

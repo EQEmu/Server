@@ -24,6 +24,13 @@ public:
 	virtual bool SpellHasQuestSub(uint32 spell_id, const char *subname) { return false; }
     virtual bool ItemHasQuestSub(ItemInst *itm, const char *subname) { return false; }
 
+	virtual void LoadNPCScript(std::string filename, int npc_id) { }
+	//virtual void LoadGlobalNPCScript(std::string filename) { }
+	virtual void LoadPlayerScript(std::string filename) { }
+	//virtual void LoadGlobalPlayerScript(std::string filename) { }
+	virtual void LoadItemScript(std::string filename, std::string item_script) { }
+	virtual void LoadSpellScript(std::string filename, uint32 spell_id) { }
+
     virtual void AddVar(std::string name, std::string val) { }
     virtual void ReloadQuests(bool reset_timers = true) { }
     virtual uint32 GetIdentifier() { return 0; }

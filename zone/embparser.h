@@ -118,12 +118,19 @@ public:
     virtual void AddVar(std::string name, std::string val) { Parser::AddVar(name, val); };
     virtual uint32 GetIdentifier() { return 0xf8b05c11; }
 
-    int LoadScript(int npcid, const char * zone, Mob* activater=0);
-	int LoadGlobalNPCScript();
-	int LoadPlayerScript(const char *zone);
-    int LoadGlobalPlayerScript();
-	int LoadItemScript(ItemInst* iteminst, string packagename, itemQuestMode Qtype);
-	int LoadSpellScript(uint32 id);
+	virtual void LoadNPCScript(std::string filename, int npc_id);
+	virtual void LoadGlobalNPCScript(std::string filename);
+	virtual void LoadPlayerScript(std::string filename);
+	virtual void LoadGlobalPlayerScript(std::string filename);
+	virtual void LoadItemScript(std::string filename, std::string item_script);
+	virtual void LoadSpellScript(std::string filename, uint32 spell_id);
+
+    //int LoadScript(int npcid, const char * zone, Mob* activater=0);
+	//int LoadGlobalNPCScript();
+	//int LoadPlayerScript(const char *zone);
+    //int LoadGlobalPlayerScript();
+	//int LoadItemScript(ItemInst* iteminst, string packagename, itemQuestMode Qtype);
+	//int LoadSpellScript(uint32 id);
 	
 	//expose a var to the script (probably parallels addvar))
 	//i.e. exportvar("qst1234", "name", "somemob"); 

@@ -14,8 +14,8 @@ extern Zone* zone;
 
 QuestParserCollection::QuestParserCollection() {
     _player_quest_status = QuestUnloaded;
-    _global_player_quest_status = QuestUnloaded;
-    _global_npc_quest_status = QuestUnloaded;
+    //_global_player_quest_status = QuestUnloaded;
+    //_global_npc_quest_status = QuestUnloaded;
 }
 
 QuestParserCollection::~QuestParserCollection() {
@@ -38,8 +38,8 @@ void QuestParserCollection::AddVar(std::string name, std::string val) {
 void QuestParserCollection::ReloadQuests(bool reset_timers) {
     _npc_quest_status.clear();
     _player_quest_status = QuestUnloaded;
-    _global_player_quest_status = QuestUnloaded;
-	_global_npc_quest_status = QuestUnloaded;
+    //_global_player_quest_status = QuestUnloaded;
+	//_global_npc_quest_status = QuestUnloaded;
     _spell_quest_status.clear();
     _item_quest_status.clear();
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
@@ -61,9 +61,12 @@ bool QuestParserCollection::HasQuestSub(uint32 npcid, const char *subname) {
             }
         }
     } else {
-        QuestInterface *qi = GetQIByNPCQuest(npcid);
+		std::string filename;
+        QuestInterface *qi = GetQIByNPCQuest(npcid, filename);
         if(qi) {
             _npc_quest_status[npcid] = qi->GetIdentifier();
+
+			qi->LoadNPCScript(filename, npcid);
             if(qi->HasQuestSub(npcid, subname)) {
                 return true;
             }
@@ -72,40 +75,45 @@ bool QuestParserCollection::HasQuestSub(uint32 npcid, const char *subname) {
         }
     }
 
-    if(_global_npc_quest_status == QuestUnloaded){
-		QuestInterface *qi = GetQIByGlobalNPCQuest();
-        if(qi) {
-            _global_npc_quest_status = qi->GetIdentifier();
-			if(qi->HasGlobalQuestSub(subname)) {
-                return true;
-            }
-        }
-	} else {
-        if(_global_npc_quest_status != QuestFailedToLoad) {
-            std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(_global_npc_quest_status);
-            if(qiter->second->HasGlobalQuestSub(subname)) {
-                return true;
-            }
-        }
-    }
+    //if(_global_npc_quest_status == QuestUnloaded){
+	//	std::string filename;
+	//	QuestInterface *qi = GetQIByGlobalNPCQuest(filename);
+    //    if(qi) {
+	//		qi->LoadGlobalNPCScript(filename);
+    //        _global_npc_quest_status = qi->GetIdentifier();
+	//		if(qi->HasGlobalQuestSub(subname)) {
+    //            return true;
+    //        }
+    //    }
+	//} else {
+    //    if(_global_npc_quest_status != QuestFailedToLoad) {
+    //        std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(_global_npc_quest_status);
+    //        if(qiter->second->HasGlobalQuestSub(subname)) {
+    //            return true;
+    //        }
+    //    }
+    //}
     return false;
 }
 
 bool QuestParserCollection::PlayerHasQuestSub(const char *subname) {
     if(_player_quest_status == QuestUnloaded) {
-        QuestInterface *qi = GetQIByGlobalPlayerQuest();
-        if(qi) {
-            _global_player_quest_status = qi->GetIdentifier();
-        }
+		std::string filename;
+        //QuestInterface *qi = GetQIByGlobalPlayerQuest(filename);
+        //if(qi) {
+        //    _global_player_quest_status = qi->GetIdentifier();
+		//	qi->LoadGlobalPlayerScript(filename);
+        //}
         
-        qi = GetQIByPlayerQuest();
+        QuestInterface *qi = GetQIByPlayerQuest(filename);
         if(qi) {
             _player_quest_status = qi->GetIdentifier();
-            return qi->PlayerHasQuestSub(subname) || qi->GlobalPlayerHasQuestSub(subname);
+			qi->LoadPlayerScript(filename);
+            return qi->PlayerHasQuestSub(subname); // || qi->GlobalPlayerHasQuestSub(subname);
         }
     } else if(_player_quest_status != QuestFailedToLoad) {
         std::map<uint32, QuestInterface*>::iterator iter = _interfaces.find(_player_quest_status);
-        return iter->second->PlayerHasQuestSub(subname) || iter->second->GlobalPlayerHasQuestSub(subname);
+        return iter->second->PlayerHasQuestSub(subname); // || iter->second->GlobalPlayerHasQuestSub(subname);
     }
     return false;
 }
@@ -119,9 +127,11 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, const char *subnam
             return qiter->second->SpellHasQuestSub(spell_id, subname);
         }
     } else {
-        QuestInterface *qi = GetQIBySpellQuest(spell_id);
+		std::string filename;
+        QuestInterface *qi = GetQIBySpellQuest(spell_id, filename);
         if(qi) {
             _spell_quest_status[spell_id] = qi->GetIdentifier();
+			qi->LoadSpellScript(filename, spell_id);
             return qi->SpellHasQuestSub(spell_id, subname);
         } else {
             _spell_quest_status[spell_id] = QuestFailedToLoad;
@@ -149,9 +159,11 @@ bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, const char *subname) 
             return qiter->second->ItemHasQuestSub(itm, subname);
         }
     } else {
-        QuestInterface *qi = GetQIByItemQuest(item_script);
+		std::string filename;
+        QuestInterface *qi = GetQIByItemQuest(item_script, filename);
         if(qi) {
             _item_quest_status[item_script] = qi->GetIdentifier();
+			qi->LoadItemScript(filename, item_script);
             return qi->ItemHasQuestSub(itm, subname);
         } else {
             _item_quest_status[item_script] = QuestFailedToLoad;
@@ -169,50 +181,58 @@ void QuestParserCollection::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std:
             qiter->second->EventNPC(evt, npc, init, data, extra_data);
         }
     } else {
-        QuestInterface *qi = GetQIByNPCQuest(npc->GetNPCTypeID());
+		std::string filename;
+        QuestInterface *qi = GetQIByNPCQuest(npc->GetNPCTypeID(), filename);
         if(qi) {
             _npc_quest_status[npc->GetNPCTypeID()] = qi->GetIdentifier();
+			qi->LoadNPCScript(filename, npc->GetNPCTypeID());
             qi->EventNPC(evt, npc, init, data, extra_data);
         } else {
             _npc_quest_status[npc->GetNPCTypeID()] = QuestFailedToLoad;
         }
     }
 
-	// K, lets also parse templates/global_npc.pl
-    if(_global_npc_quest_status != QuestUnloaded && _global_npc_quest_status != QuestFailedToLoad) {
-        std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(_global_npc_quest_status);
-        qiter->second->EventGlobalNPC(evt, npc, init, data, extra_data);
-    } else {
-        QuestInterface *qi = GetQIByGlobalNPCQuest();
-        if(qi) {
-            _global_npc_quest_status = qi->GetIdentifier();
-            qi->EventGlobalNPC(evt, npc, init, data, extra_data);
-        } else {
-            _global_npc_quest_status = QuestFailedToLoad;
-        }
-    }
+	//// K, lets also parse templates/global_npc.pl
+    //if(_global_npc_quest_status != QuestUnloaded && _global_npc_quest_status != QuestFailedToLoad) {
+    //    std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(_global_npc_quest_status);
+    //    qiter->second->EventGlobalNPC(evt, npc, init, data, extra_data);
+    //} else {
+	//	std::string filename;
+    //    QuestInterface *qi = GetQIByGlobalNPCQuest(filename);
+    //    if(qi) {
+    //        _global_npc_quest_status = qi->GetIdentifier();
+	//		qi->LoadGlobalNPCScript(filename);
+    //        qi->EventGlobalNPC(evt, npc, init, data, extra_data);
+    //    } else {
+    //        _global_npc_quest_status = QuestFailedToLoad;
+    //    }
+    //}
 }
 
 void QuestParserCollection::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
     if(_player_quest_status == QuestUnloaded) {
-        QuestInterface *qi = GetQIByGlobalPlayerQuest();
-        if(qi) {
-            _global_player_quest_status = qi->GetIdentifier();
-            qi->EventGlobalPlayer(evt, client, data, extra_data);
-        }
+		std::string filename;
+        //QuestInterface *qi = GetQIByGlobalPlayerQuest(filename);
+        //if(qi) {
+        //    _global_player_quest_status = qi->GetIdentifier();
+		//	qi->LoadGlobalPlayerScript(filename);
+        //    qi->EventGlobalPlayer(evt, client, data, extra_data);
+        //}
 
-        qi = GetQIByPlayerQuest();
+        QuestInterface *qi = GetQIByPlayerQuest(filename);
         if(qi) {
             _player_quest_status = qi->GetIdentifier();
+			qi->LoadPlayerScript(filename);
             qi->EventPlayer(evt, client, data, extra_data);
         }
 
     } else { 
-        if(_global_player_quest_status != QuestFailedToLoad) {
-            std::map<uint32, QuestInterface*>::iterator iter = _interfaces.find(_global_player_quest_status);
-			if(iter != _interfaces.end())
-            	iter->second->EventGlobalPlayer(evt, client, data, extra_data);
-        }
+        //if(_global_player_quest_status != QuestFailedToLoad) {
+        //    std::map<uint32, QuestInterface*>::iterator iter = _interfaces.find(_global_player_quest_status);
+		//	if(iter != _interfaces.end())
+        //    	iter->second->EventGlobalPlayer(evt, client, data, extra_data);
+        //}
+
         if(_player_quest_status != QuestFailedToLoad) {
             std::map<uint32, QuestInterface*>::iterator iter = _interfaces.find(_player_quest_status);
             iter->second->EventPlayer(evt, client, data, extra_data);
@@ -239,9 +259,11 @@ void QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst
             qiter->second->EventItem(evt, client, item, objid, extra_data);
         }
     } else {
-        QuestInterface *qi = GetQIByItemQuest(item_script);
+		std::string filename;
+        QuestInterface *qi = GetQIByItemQuest(item_script, filename);
         if(qi) {
             _item_quest_status[item_script] = qi->GetIdentifier();
+			qi->LoadItemScript(filename, item_script);
             qi->EventItem(evt, client, item, objid, extra_data);
         } else {
             _item_quest_status[item_script] = QuestFailedToLoad;
@@ -258,9 +280,11 @@ void QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *clien
             qiter->second->EventSpell(evt, npc, client, spell_id, extra_data);
         }
     } else {
-        QuestInterface *qi = GetQIBySpellQuest(spell_id);
+		std::string filename;
+        QuestInterface *qi = GetQIBySpellQuest(spell_id, filename);
         if(qi) {
             _spell_quest_status[spell_id] = qi->GetIdentifier();
+			qi->LoadSpellScript(filename, spell_id);
             qi->EventSpell(evt, npc, client, spell_id, extra_data);
         } else {
             _spell_quest_status[spell_id] = QuestFailedToLoad;
@@ -268,9 +292,9 @@ void QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *clien
     }
 }
 
-QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid) {
+QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string &filename) {
     //first look for /quests/zone/npcid.ext (precedence)
-    std::string filename = "quests/";
+    filename = "quests/";
     filename += zone->GetShortName();
     filename += "/";
     filename += itoa(npcid);
@@ -408,13 +432,13 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid) {
     return NULL;
 }
 
-QuestInterface *QuestParserCollection::GetQIByPlayerQuest() {
+QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename) {
 
 	if(!zone)
 	return NULL;
 
     //first look for /quests/zone/player_v[instance_version].ext (precedence)
-    std::string filename = "quests/";
+    filename = "quests/";
     filename += zone->GetShortName();
     filename += "/";
     filename += "player_v";
@@ -481,9 +505,9 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest() {
     return NULL;
 }
 
-QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(){
+QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filename) {
     // simply look for templates/global_npc.pl
-    std::string filename = "quests/";
+    filename = "quests/";
     filename += QUEST_TEMPLATES_DIRECTORY;
     filename += "/";
     filename += "global_npc";
@@ -508,9 +532,9 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(){
     return NULL;
 }
 
-QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest() {
+QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &filename) {
     //first look for /quests/templates/player.ext (precedence)
-    std::string filename = "quests/";
+    filename = "quests/";
     filename += QUEST_TEMPLATES_DIRECTORY;
     filename += "/";
     filename += "global_player";
@@ -535,9 +559,9 @@ QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest() {
     return NULL;
 }
 
-QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id) {
+QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::string &filename) {
     //first look for /quests/spells/spell_id.ext (precedence)
-    std::string filename = "quests/spells/";
+    filename = "quests/spells/";
     filename += itoa(spell_id);
     std::string tmp;
     FILE *f = NULL;
@@ -560,9 +584,9 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id) {
     return NULL;
 }
 
-QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script) {
+QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script, std::string &filename) {
     //first look for /quests/items/item_script.ext (precedence)
-    std::string filename = "quests/items/";
+    filename = "quests/items/";
     filename += item_script;
     std::string tmp;
     FILE *f = NULL;
@@ -580,7 +604,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script)
         }
 
         iter++;
-    }    
+    }
 
     return NULL;
 }
