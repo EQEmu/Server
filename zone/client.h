@@ -1095,6 +1095,7 @@ public:
 	void RemoveXTarget(Mob *m, bool OnlyAutoSlots);
 	void SendXTargetPacket(uint32 Slot, Mob *m);
 	void RemoveGroupXTargets();
+	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);
 	void InitializeMercInfo();
 	bool CheckCanHireMerc(Mob* merchant, uint32 template_id);

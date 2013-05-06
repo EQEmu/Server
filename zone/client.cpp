@@ -6990,6 +6990,22 @@ void Client::RemoveGroupXTargets()
 	}
 }
 
+void Client::RemoveAutoXTargets()
+{
+	if(!XTargettingAvailable())
+		return;
+
+	for(int i = 0; i < GetMaxXTargets(); ++i)
+	{
+		if(XTargets[i].Type == Auto)
+		{
+			XTargets[i].ID = 0;
+			XTargets[i].Name[0] = 0;
+			SendXTargetPacket(i, nullptr);
+		}
+	}
+}
+
 void Client::ShowXTargets(Client *c)
 {
 	if(!c)
