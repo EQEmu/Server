@@ -95,7 +95,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 					cs->tutorial[char_num] = 1;
 
 				if(RuleB(World, EnableReturnHomeButton)) {
-					int now = time(NULL);
+					int now = time(nullptr);
 					if((now - pp->lastlogin) >= RuleI(World, MinOfflineTimeToReturnHome))
 						cs->gohome[char_num] = 1;
 				}

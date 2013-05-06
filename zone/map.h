@@ -100,7 +100,7 @@ typedef struct _nodeHeader {
 	
 	uint8 flags;
 	union {
-		uint16 nodes[4];	//index 0 means NULL, not root
+		uint16 nodes[4];	//index 0 means nullptr, not root
 		struct {
 			uint32 count;
 			uint32 offset;
@@ -125,7 +125,7 @@ typedef uint16 NodeRef;
 
 class Map {
 public:
-	static Map* LoadMapfile(const char* in_zonename, const char *directory = NULL);
+	static Map* LoadMapfile(const char* in_zonename, const char *directory = nullptr);
 	
 	Map();
 	~Map();
@@ -142,10 +142,10 @@ public:
 	bool LocWithinNode( NodeRef _node, float x, float y ) const;
 	
 	//nodes to these functions must be final
-	bool LineIntersectsNode( NodeRef _node, VERTEX start, VERTEX end, VERTEX *result, FACE **on = NULL) const;
+	bool LineIntersectsNode( NodeRef _node, VERTEX start, VERTEX end, VERTEX *result, FACE **on = nullptr) const;
 	bool LineIntersectsFace( PFACE cface, VERTEX start, VERTEX end, VERTEX *result) const;
-	float FindBestZ( NodeRef _node, VERTEX start, VERTEX *result, FACE **on = NULL) const;
-	bool LineIntersectsZone(VERTEX start, VERTEX end, float step, VERTEX *result, FACE **on = NULL) const;
+	float FindBestZ( NodeRef _node, VERTEX start, VERTEX *result, FACE **on = nullptr) const;
+	bool LineIntersectsZone(VERTEX start, VERTEX end, float step, VERTEX *result, FACE **on = nullptr) const;
 		
 //	inline unsigned int		GetVertexNumber( ) {return m_Vertex; }
 	inline uint32		GetFacesNumber( ) const { return m_Faces; }

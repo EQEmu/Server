@@ -30,8 +30,8 @@ extern LoginServer server;
 
 DatabasePostgreSQL::DatabasePostgreSQL(string user, string pass, string host, string port, string name)
 {
-	db = NULL;
-	db = PQsetdbLogin(host.c_str(), port.c_str(), NULL, NULL, name.c_str(), user.c_str(), pass.c_str());
+	db = nullptr;
+	db = PQsetdbLogin(host.c_str(), port.c_str(), nullptr, nullptr, name.c_str(), user.c_str(), pass.c_str());
 	if(!db)
 	{
 		server_log->Log(log_database, "Failed to connect to PostgreSQL Database.");
@@ -41,7 +41,7 @@ DatabasePostgreSQL::DatabasePostgreSQL(string user, string pass, string host, st
 	{
 		server_log->Log(log_database, "Failed to connect to PostgreSQL Database.");
 		PQfinish(db);
-		db = NULL;
+		db = nullptr;
 	}
 }
 

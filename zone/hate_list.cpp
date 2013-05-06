@@ -33,7 +33,7 @@ extern Zone *zone;
 
 HateList::HateList()
 {
-	owner = NULL;
+	owner = nullptr;
 }
 
 HateList::~HateList()
@@ -88,7 +88,7 @@ tHateEntry *HateList::Find(Mob *ent)
             return iterator.GetData();
         iterator.Advance();
     }
-	return NULL;
+	return nullptr;
 }
 
 void HateList::Set(Mob* other, uint32 in_hate, uint32 in_dam)
@@ -106,17 +106,17 @@ void HateList::Set(Mob* other, uint32 in_hate, uint32 in_dam)
 Mob* HateList::GetDamageTop(Mob* hater)
 {
 	_ZP(HateList_GetDamageTop);
-	Mob* current = NULL;
-	Group* grp = NULL;
-	Raid* r = NULL;
+	Mob* current = nullptr;
+	Group* grp = nullptr;
+	Raid* r = nullptr;
 	uint32 dmg_amt = 0;
 
     LinkedListIterator<tHateEntry*> iterator(list);
     iterator.Reset();
 	while(iterator.MoreElements())
     {
-		grp = NULL;
-		r = NULL;
+		grp = nullptr;
+		r = nullptr;
 
 		if(iterator.GetData()->ent && iterator.GetData()->ent->IsClient()){
 			r = entity_list.GetRaidByClient(iterator.GetData()->ent->CastToClient());
@@ -131,7 +131,7 @@ Mob* HateList::GetDamageTop(Mob* hater)
 				dmg_amt = r->GetTotalRaidDamage(hater);
 			}
 		}
-		else if (iterator.GetData()->ent != NULL && grp != NULL)
+		else if (iterator.GetData()->ent != nullptr && grp != nullptr)
         {
 			if (grp->GetTotalGroupDamage(hater) >= dmg_amt)
             {
@@ -139,7 +139,7 @@ Mob* HateList::GetDamageTop(Mob* hater)
 				dmg_amt = grp->GetTotalGroupDamage(hater);
             }
         }
-        else if (iterator.GetData()->ent != NULL && (uint32)iterator.GetData()->damage >= dmg_amt)
+        else if (iterator.GetData()->ent != nullptr && (uint32)iterator.GetData()->damage >= dmg_amt)
         {
 			current = iterator.GetData()->ent;
 			dmg_amt = iterator.GetData()->damage;
@@ -151,7 +151,7 @@ Mob* HateList::GetDamageTop(Mob* hater)
 
 Mob* HateList::GetClosest(Mob *hater) {
 	_ZP(HateList_GetClosest);
-	Mob* close = NULL;
+	Mob* close = nullptr;
 	float closedist = 99999.9f;
 	float thisdist;
 	
@@ -159,7 +159,7 @@ Mob* HateList::GetClosest(Mob *hater) {
     iterator.Reset();
 	while(iterator.MoreElements()) {
 		thisdist = iterator.GetData()->ent->DistNoRootNoZ(*hater);
-		if(iterator.GetData()->ent != NULL && thisdist <= closedist) {
+		if(iterator.GetData()->ent != nullptr && thisdist <= closedist) {
 			closedist = thisdist;
 			close = iterator.GetData()->ent;
 		}
@@ -243,7 +243,7 @@ void HateList::DoFactionHits(int32 nfl_id) {
         if (iterator.GetData()->ent && iterator.GetData()->ent->IsClient())
             p = iterator.GetData()->ent->CastToClient();
         else
-            p = NULL;
+            p = nullptr;
 
         if (p)
 			p->SetFactionLevel(p->CharacterID(), nfl_id, p->GetBaseClass(), p->GetBaseRace(), p->GetDeity());
@@ -254,11 +254,11 @@ void HateList::DoFactionHits(int32 nfl_id) {
 Mob *HateList::GetTop(Mob *center)
 {
 	_ZP(HateList_GetTop);
-	Mob* top = NULL;
+	Mob* top = nullptr;
 	int32 hate = -1;
 	
 	if (RuleB(Aggro,SmartAggroList)){
-		Mob* topClientTypeInRange = NULL;
+		Mob* topClientTypeInRange = nullptr;
 		int32 hateClientTypeInRange = -1;
         int skipped_count = 0;
 
@@ -351,7 +351,7 @@ Mob *HateList::GetTop(Mob *center)
 			iterator.Advance();
 		}
 
-		if(topClientTypeInRange != NULL && top != NULL) {
+		if(topClientTypeInRange != nullptr && top != nullptr) {
 			bool isTopClientType = top->IsClient();
 #ifdef BOTS
 			if(!isTopClientType) {
@@ -375,7 +375,7 @@ Mob *HateList::GetTop(Mob *center)
 			return top;
         }
 		else {
-			if(top == NULL && skipped_count > 0) {
+			if(top == nullptr && skipped_count > 0) {
                 return center->GetTarget();
             }
 			return top;
@@ -396,14 +396,14 @@ Mob *HateList::GetTop(Mob *center)
                 }
             }
 
-			if(cur->ent != NULL && ((cur->hate > hate) || cur->bFrenzy ))
+			if(cur->ent != nullptr && ((cur->hate > hate) || cur->bFrenzy ))
 			{
 				top = cur->ent;
 				hate = cur->hate;
 			}
 			iterator.Advance();
 		}
-		if(top == NULL && skipped_count > 0) {
+		if(top == nullptr && skipped_count > 0) {
             return center->GetTarget();
         }
 		return top;
@@ -413,7 +413,7 @@ Mob *HateList::GetTop(Mob *center)
 Mob *HateList::GetMostHate(){
 	_ZP(HateList_GetMostHate);
 
-	Mob* top = NULL;
+	Mob* top = nullptr;
 	int32 hate = -1;
 
 	LinkedListIterator<tHateEntry*> iterator(list);
@@ -421,7 +421,7 @@ Mob *HateList::GetMostHate(){
 	while(iterator.MoreElements())
 	{
 		tHateEntry *cur = iterator.GetData();
-		if(cur->ent != NULL && (cur->hate > hate))
+		if(cur->ent != nullptr && (cur->hate > hate))
 		{
 			top = cur->ent;
 			hate = cur->hate;
@@ -443,7 +443,7 @@ Mob *HateList::GetRandom()
         count++;
     }
 	if(!count)
-		return NULL;
+		return nullptr;
 
     int random = MakeRandomInt(0, count-1);
     iterator.Reset();

@@ -34,7 +34,7 @@ public:
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(Mob *_owner, Client *_initiator = NULL, ItemInst* _questitem = NULL);
+	void StartQuest(Mob *_owner, Client *_initiator = nullptr, ItemInst* _questitem = nullptr);
 	void EndQuest();
 
 	void Process();
@@ -237,7 +237,7 @@ public:
 	//thing ChooseRandom(array_of_things)
 
 	inline Client *GetInitiator() const { return(initiator); }
-	inline NPC *GetNPC() const { return(owner->IsNPC()?owner->CastToNPC():NULL); }
+	inline NPC *GetNPC() const { return(owner->IsNPC()?owner->CastToNPC():nullptr); }
 	inline Mob *GetOwner() const { return(owner); }
 	inline ItemInst *GetQuestItem() const {return questitem; }
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
@@ -258,9 +258,9 @@ public:
 #endif
 
 protected:
-	Mob *owner;	//NPC is never NULL when functions are called.
+	Mob *owner;	//NPC is never nullptr when functions are called.
 	Client *initiator;	//this can be null.
-	ItemInst* questitem;	// this is usually NULL.
+	ItemInst* questitem;	// this is usually nullptr.
 
 	bool depop_npc;	//true if EndQuest should depop the NPC
 

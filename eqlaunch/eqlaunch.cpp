@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 	 */
 	//the storage passed to putenv must remain valid... crazy unix people
 	const char *pv = getenv("LD_LIBRARY_PATH");
-	if(pv == NULL) {
+	if(pv == nullptr) {
 		putenv(strdup("LD_LIBRARY_PATH=."));
 	} else {
 		char *v = (char *) malloc(strlen(pv) + 19);

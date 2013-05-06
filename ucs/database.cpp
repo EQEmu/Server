@@ -583,7 +583,7 @@ bool Database::SendMail(string Recipient, string From, string Subject, string Bo
 
 	uint32 LastMsgID;
 
-	int Now = time(NULL); // time returns a 64 bit int on Windows at least, which vsnprintf doesn't like.
+	int Now = time(nullptr); // time returns a 64 bit int on Windows at least, which vsnprintf doesn't like.
 
 	if(!RunQuery(query, MakeAnyLenString(&query, MailQuery, CharacterID, Now, From.c_str(), EscSubject, EscBody, 
 					     RecipientsString.c_str(), 1), errbuf, 0, 0, &LastMsgID)) {
@@ -661,7 +661,7 @@ void Database::ExpireMail() {
 	// Expire Trash
 	if(RuleI(Mail, ExpireTrash) >= 0) {
 		if(RunQuery(query, MakeAnyLenString(&query, "delete from  `mail` where `status`=4 and `timestamp` < %i", 
-			    time(NULL) - RuleI(Mail, ExpireTrash)), errbuf, 0, &AffectedRows)) {
+			    time(nullptr) - RuleI(Mail, ExpireTrash)), errbuf, 0, &AffectedRows)) {
 			    _log(UCS__INIT, "Expired %i trash messages.", AffectedRows);
 		}
 		else {
@@ -672,7 +672,7 @@ void Database::ExpireMail() {
 	// Expire Read
 	if(RuleI(Mail, ExpireRead) >= 0) {
 		if(RunQuery(query, MakeAnyLenString(&query, "delete from  `mail` where `status`=3 and `timestamp` < %i", 
-			    time(NULL) - RuleI(Mail, ExpireRead)), errbuf, 0, &AffectedRows)) {
+			    time(nullptr) - RuleI(Mail, ExpireRead)), errbuf, 0, &AffectedRows)) {
 			    _log(UCS__INIT, "Expired %i read messages.", AffectedRows);
 		}
 		else {
@@ -683,7 +683,7 @@ void Database::ExpireMail() {
 	// Expire Unread
 	if(RuleI(Mail, ExpireUnread) >= 0) {
 		if(RunQuery(query, MakeAnyLenString(&query, "delete from  `mail` where `status`=1 and `timestamp` < %i", 
-			    time(NULL) - RuleI(Mail, ExpireUnread)), errbuf, 0, &AffectedRows)) {
+			    time(nullptr) - RuleI(Mail, ExpireUnread)), errbuf, 0, &AffectedRows)) {
 			    _log(UCS__INIT, "Expired %i unread messages.", AffectedRows);
 		}
 		else {

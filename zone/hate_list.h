@@ -49,9 +49,9 @@ public:
     Mob *GetTop(Mob *center);
     // gets any on the list
     Mob *GetRandom();
-    // get closest mob or NULL if list empty
+    // get closest mob or nullptr if list empty
     Mob *GetClosest(Mob *hater);
-    // gets top mob or NULL if hate list empty
+    // gets top mob or nullptr if hate list empty
     Mob *GetDamageTop(Mob *hater);
     // used to check if mob is on hatelist
     bool IsOnHateList(Mob *);

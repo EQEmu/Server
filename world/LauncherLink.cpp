@@ -127,7 +127,7 @@ bool LauncherLink::Process() {
 			m_name = it->name;
 			
 			EQLConfig *config = launcher_list.GetConfig(m_name.c_str());
-			if(config == NULL) {
+			if(config == nullptr) {
 				_log(WORLD__LAUNCH, "Unknown launcher '%s' connected. Disconnecting.", it->name);
 				Disconnect();
 				break;

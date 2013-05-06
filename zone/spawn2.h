@@ -68,7 +68,7 @@ public:
 	uint32	spawn2_id;
 	uint32	respawn_;
 
-	bool	NPCPointerValid() { return (npcthis!=NULL); }
+	bool	NPCPointerValid() { return (npcthis!=nullptr); }
 	void	SetNPCPointer(NPC* n) { npcthis = n; }
 	void	SetTimer(uint32 duration) { timer.Start(duration); }
 protected:

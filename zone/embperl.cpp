@@ -114,7 +114,7 @@ void Embperl::DoInit() {
 #ifdef EMBPERL_IO_CAPTURE
 		"-w", "-W",
 #endif
-		"-e", "0;", NULL };
+		"-e", "0;", nullptr };
 
 	int argc = 3;
 #ifdef EMBPERL_IO_CAPTURE
@@ -122,7 +122,7 @@ void Embperl::DoInit() {
 #endif
 
 	char **argv = (char **)argv_eqemu;
-	char **env = { NULL };
+	char **env = { nullptr };
 
 	PL_perl_destruct_level = 1;
 

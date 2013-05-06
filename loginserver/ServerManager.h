@@ -64,12 +64,12 @@ public:
 	/**
 	 * Checks to see if there is a server exists with this name, ignoring option.
 	 */
-	bool ServerExists(string l_name, string s_name, WorldServer *ignore = NULL);
+	bool ServerExists(string l_name, string s_name, WorldServer *ignore = nullptr);
 
 	/**
 	 * Destroys a server with this name, ignoring option.
 	 */
-	void DestroyServerByName(string l_name, string s_name, WorldServer *ignore = NULL);
+	void DestroyServerByName(string l_name, string s_name, WorldServer *ignore = nullptr);
 
 private:
 	/**

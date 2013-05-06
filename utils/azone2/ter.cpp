@@ -10,9 +10,9 @@
 //#define DEBUGTER
 
 TERLoader::TERLoader() {
-  this->buffer = NULL;
+  this->buffer = nullptr;
   this->buf_len = -1;
-  this->archive = NULL;
+  this->archive = nullptr;
   this->status = 0;
 }
 
@@ -84,8 +84,8 @@ int TERLoader::Open(char *base_path, char *zone_name, Archive *archive) {
     return 0;
 
   for(i = 0; i < thdr->mat_count; ++i) {
-    mlist[i].name = NULL;
-    mlist[i].basetex = NULL;
+    mlist[i].name = nullptr;
+    mlist[i].basetex = nullptr;
   }
 
   StartOfNameList = buffer;

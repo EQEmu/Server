@@ -54,8 +54,8 @@ XS(XS_EQDB_field_count)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDB");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->field_count();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -80,8 +80,8 @@ XS(XS_EQDB_affected_rows)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDB");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->affected_rows();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -106,8 +106,8 @@ XS(XS_EQDB_insert_id)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDB");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->insert_id();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -132,8 +132,8 @@ XS(XS_EQDB_get_errno)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDB");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->get_errno();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -158,8 +158,8 @@ XS(XS_EQDB_error)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDB");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->error();
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -184,8 +184,8 @@ XS(XS_EQDB_query)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDB");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->query(q);
 		ST(0) = sv_newmortal();
@@ -212,8 +212,8 @@ XS(XS_EQDB_escape_string)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EQDB");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->escape_string(from);
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;

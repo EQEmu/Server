@@ -96,7 +96,7 @@ void Mob::ApplySpecialAttackMod(SkillType skill, int32 &dmg, int32 &mindmg) {
 		}
 
 		if (item_slot >= 0){
-			const ItemInst* itm = NULL;
+			const ItemInst* itm = nullptr;
 			itm = CastToClient()->GetInv().GetItem(item_slot);
 			if(itm)
 				dmg += itm->GetItem()->AC * (RuleI(Combat, SpecialAttackACBonus))/100;
@@ -472,7 +472,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 		}
 	}
 	else{
-		if(GetWeaponDamage(other, (const Item_Struct*)NULL) <= 0){
+		if(GetWeaponDamage(other, (const Item_Struct*)nullptr) <= 0){
 			ndamage = -5;
 		}
 	}
@@ -600,7 +600,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	int32 backstab_dmg = 0;
 
 	if(IsClient()){
-		const ItemInst *wpn = NULL;
+		const ItemInst *wpn = nullptr;
 		wpn = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
 		primaryweapondamage = GetWeaponDamage(other, wpn);
 		backstab_dmg = wpn->GetItem()->BackstabDmg;
@@ -672,7 +672,7 @@ void Mob::RogueAssassinate(Mob* other)
 {
 	//can you dodge, parry, etc.. an assassinate??
 	//if so, use DoSpecialAttackDamage(other, BACKSTAB, 32000); instead
-	if(GetWeaponDamage(other, IsClient()?CastToClient()->GetInv().GetItem(SLOT_PRIMARY):(const ItemInst*)NULL) > 0){
+	if(GetWeaponDamage(other, IsClient()?CastToClient()->GetInv().GetItem(SLOT_PRIMARY):(const ItemInst*)nullptr) > 0){
 		other->Damage(this, 32000, SPELL_UNKNOWN, BACKSTAB);
 	}else{
 		other->Damage(this, -5, SPELL_UNKNOWN, BACKSTAB);
@@ -731,7 +731,7 @@ void Client::RangedAttack(Mob* other) {
 		bool found = false;
 		for(r = SLOT_PERSONAL_BEGIN; r <= SLOT_PERSONAL_END; r++) {
 			const ItemInst *pi = m_inv[r];
-			if(pi == NULL || !pi->IsType(ItemClassContainer))
+			if(pi == nullptr || !pi->IsType(ItemClassContainer))
 				continue;
 			const Item_Struct* bagitem = pi->GetItem();
 			if(!bagitem || bagitem->BagType != bagTypeQuiver)
@@ -937,7 +937,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 	}
 	
 	//try proc on hits and misses
-	if((RangeWeapon != NULL) && GetTarget() && other && (other->GetHP() > -10))
+	if((RangeWeapon != nullptr) && GetTarget() && other && (other->GetHP() > -10))
 	{
 		TryWeaponProc(RangeWeapon, other, 11);
 	}
@@ -954,8 +954,8 @@ void NPC::RangedAttack(Mob* other)
 	}
 
 	//if we have SPECATK_RANGED_ATK set then we range attack without weapon or ammo
-	const Item_Struct* weapon = NULL;
-	const Item_Struct* ammo = NULL;
+	const Item_Struct* weapon = nullptr;
+	const Item_Struct* ammo = nullptr;
 	if(!SpecAttacks[SPECATK_RANGED_ATK])
 	{
 		//find our bow and ammo return if we can't find them...
@@ -1124,7 +1124,7 @@ void Client::ThrowingAttack(Mob* other) { //old was 51
 	if(RangeWeapon->GetCharges() == 1) {
 		//first check ammo
 		const ItemInst* AmmoItem = m_inv[SLOT_AMMO];
-		if(AmmoItem != NULL && AmmoItem->GetID() == RangeWeapon->GetID()) {
+		if(AmmoItem != nullptr && AmmoItem->GetID() == RangeWeapon->GetID()) {
 			//more in the ammo slot, use it
 			RangeWeapon = AmmoItem;
 			ammo_slot = SLOT_AMMO;
@@ -1217,7 +1217,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 
 		int16 WDmg = 0;
 
-		if (!weapon_damage && item != NULL)
+		if (!weapon_damage && item != nullptr)
 			WDmg = GetWeaponDamage(other, item);
 		else
 			WDmg = weapon_damage;
@@ -1250,7 +1250,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, THROWING);
 	}
 
-	if((RangeWeapon != NULL) && GetTarget() && other && (other->GetHP() > -10))
+	if((RangeWeapon != nullptr) && GetTarget() && other && (other->GetHP() > -10))
 		TryWeaponProc(RangeWeapon, other, 11);
 }
 
@@ -1302,7 +1302,7 @@ void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillType skillInU
 
 void Mob::ProjectileAnimation(Mob* to, uint16 item_id, bool IsArrow, float speed, float angle, float tilt, float arc) {
 
-	const Item_Struct* item = NULL;
+	const Item_Struct* item = nullptr;
 	uint8 item_type = 0;
 
 	if(!item_id) {
@@ -1362,7 +1362,7 @@ void Mob::ProjectileAnimation(Mob* to, uint16 item_id, bool IsArrow, float speed
 
 
 void NPC::DoClassAttacks(Mob *target) {
-	if(target == NULL)
+	if(target == nullptr)
 		return;	//gotta have a target for all these
 	
 	bool taunt_time = taunt_timer.Check();
@@ -1450,7 +1450,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					DoAnim(animKick);
 					int32 dmg = 0;
 
-					if(GetWeaponDamage(target, (const Item_Struct*)NULL) <= 0){
+					if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
 						dmg = -5;
 					}
 					else{
@@ -1472,7 +1472,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					DoAnim(animTailRake);
 					int32 dmg = 0;
 
-					if(GetWeaponDamage(target, (const Item_Struct*)NULL) <= 0){
+					if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
 						dmg = -5;
 					}
 					else{
@@ -1527,7 +1527,7 @@ void NPC::DoClassAttacks(Mob *target) {
 				DoAnim(animKick);
 				int32 dmg = 0;
 
-				if(GetWeaponDamage(target, (const Item_Struct*)NULL) <= 0){
+				if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
 					dmg = -5;
 				}
 				else{
@@ -1553,7 +1553,7 @@ void NPC::DoClassAttacks(Mob *target) {
 				DoAnim(animTailRake);
 				int32 dmg = 0;
 
-				if(GetWeaponDamage(target, (const Item_Struct*)NULL) <= 0){
+				if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
 					dmg = -5;
 				}
 				else{
@@ -1813,7 +1813,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 /*
 void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 
-	if (who == NULL)
+	if (who == nullptr)
 		return;
 	
 	if(DivineAura())
@@ -1832,7 +1832,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 	// a mob will not be taunted if its target's health is below 20%
 	if ((hate_top != this) 
 	&& (who->GetLevel() < level) 
-	&& (hate_top == NULL || hate_top->GetHPRatio() >= 20) ) {
+	&& (hate_top == nullptr || hate_top->GetHPRatio() >= 20) ) {
 		int32 newhate, tauntvalue;
 
 		float tauntchance;
@@ -1898,7 +1898,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 
 void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 
-	if (who == NULL)
+	if (who == nullptr)
 		return;
 	
 	if(DivineAura())
@@ -1921,7 +1921,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 	}
 
 	//All values used based on live parses after taunt was updated in 2006.
-	if ((hate_top && hate_top->GetHPRatio() >= 20) || hate_top == NULL) {
+	if ((hate_top && hate_top->GetHPRatio() >= 20) || hate_top == nullptr) {
 		
 		int32 newhate = 0;
 		float tauntchance = 50.0f; 
@@ -2083,7 +2083,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillType skil
 
 		if(GetLevel() >= 28 && IsWarriorClass() )
 		{
-			int ucDamageBonus = GetWeaponDamageBonus((const Item_Struct*) NULL );
+			int ucDamageBonus = GetWeaponDamageBonus((const Item_Struct*) nullptr );
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -2170,14 +2170,14 @@ bool Mob::CanDoSpecialAttack(Mob *other)
 {
 	//Make sure everything is valid before doing any attacks.
 	if (!other) {
-		SetTarget(NULL);
+		SetTarget(nullptr);
 		return false;
 	}
 	
 	if(!GetTarget())
 		SetTarget(other);
 	
-	if ((other == NULL || ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead))
+	if ((other == nullptr || ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead))
 		|| HasDied() || (!IsAttackAllowed(other)))) {
 		return false; 
 	}

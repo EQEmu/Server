@@ -38,7 +38,7 @@ void ZoneDatabase::ZDBInitVars() {
 	npc_spells_cache = 0;
 	npc_spells_loadtried = 0;
 	max_faction = 0;
-	faction_array = NULL;
+	faction_array = nullptr;
 }
 
 ZoneDatabase::~ZoneDatabase() {
@@ -51,7 +51,7 @@ ZoneDatabase::~ZoneDatabase() {
 	}
 	safe_delete_array(npc_spells_loadtried);
 	
-	if (faction_array != NULL) {
+	if (faction_array != nullptr) {
 		for (x=0; x <= max_faction; x++) {
 			if (faction_array[x] != 0)
 				safe_delete(faction_array[x]);
@@ -167,7 +167,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 timeleft)
 {
 	timeval tv;
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, nullptr);
 	uint32 cur = tv.tv_sec;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -214,7 +214,7 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 		if(row)
 		{
 			timeval tv;
-			gettimeofday(&tv, NULL);
+			gettimeofday(&tv, nullptr);
 			uint32 resStart = atoi(row[0]);
 			uint32 resDuration = atoi(row[1]);
 
@@ -289,7 +289,7 @@ void ZoneDatabase::UpdateBug(BugStruct* bug){
 	
 
 	uint32 len = strlen(bug->bug);
-	char* bugtext = NULL;
+	char* bugtext = nullptr;
 	if(len > 0)
 	{
 		bugtext = new char[2*len+1];
@@ -298,7 +298,7 @@ void ZoneDatabase::UpdateBug(BugStruct* bug){
 	}
 
 	len = strlen(bug->ui);
-	char* uitext = NULL;
+	char* uitext = nullptr;
 	if(len > 0)
 	{
 		uitext = new char[2*len+1];
@@ -307,7 +307,7 @@ void ZoneDatabase::UpdateBug(BugStruct* bug){
 	}
 
 	len = strlen(bug->target_name);
-	char* targettext = NULL;
+	char* targettext = nullptr;
 	if(len > 0)
 	{
 		targettext = new char[2*len+1];
@@ -318,8 +318,8 @@ void ZoneDatabase::UpdateBug(BugStruct* bug){
 	//x and y are intentionally swapped because eq is inversexy coords
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO bugs (zone, name, ui, x, y, z, type, flag, target, bug, date) "
 		"values('%s', '%s', '%s', '%.2f', '%.2f', '%.2f', '%s', %d, '%s', '%s', CURDATE())", zone->GetShortName(), bug->name, 
-		uitext==NULL?"":uitext, bug->y, bug->x, bug->z, bug->chartype, bug->type, targettext==NULL?"Unknown Target":targettext, 
-		bugtext==NULL?"":bugtext), errbuf)) {	
+		uitext==nullptr?"":uitext, bug->y, bug->x, bug->z, bug->chartype, bug->type, targettext==nullptr?"Unknown Target":targettext, 
+		bugtext==nullptr?"":bugtext), errbuf)) {	
 		cerr << "Error in UpdateBug" << query << "' " << errbuf << endl;
 	}
 	safe_delete_array(query);
@@ -473,7 +473,7 @@ void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,
 void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 {
 	if (!container) {
-		LogFile->write(EQEMuLog::Error, "Programming error: LoadWorldContainer passed NULL pointer");
+		LogFile->write(EQEMuLog::Error, "Programming error: LoadWorldContainer passed nullptr pointer");
 		return;
 	}
 	
@@ -481,8 +481,8 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
     char* query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	//const Item_Struct* item = NULL;
-	//ItemInst* inst = NULL;
+	//const Item_Struct* item = nullptr;
+	//ItemInst* inst = nullptr;
 	
 	uint32 len_query =  MakeAnyLenString(&query, "select "
 		"bagidx,itemid,charges,augslot1,augslot2,augslot3,augslot4,augslot5 from object_contents where parentid=%i", parentid);
@@ -646,7 +646,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 
 		if (mysql_num_rows(result) != 1) {
 			_log(TRADING__CLIENT, "Bad result from query\n"); fflush(stdout);
-			return NULL;
+			return nullptr;
 		}
 		row = mysql_fetch_row(result);
 		int ItemID = atoi(row[1]);
@@ -657,14 +657,14 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 
 		if(!item) {
 			_log(TRADING__CLIENT, "Unable to create item\n"); fflush(stdout);
-			return NULL;
+			return nullptr;
 		}
 
 		if (item && (item->NoDrop!=0)) {
 			ItemInst* inst = database.CreateItem(item);
 			if(!inst) {
 				_log(TRADING__CLIENT, "Unable to create item instance\n"); fflush(stdout);
-				return NULL;
+				return nullptr;
 			}
 
 			inst->SetCharges(Charges);
@@ -678,7 +678,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 		}
 	}
 
-	return NULL;
+	return nullptr;
 
 
 }
@@ -898,7 +898,7 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 			pp->y = atof(row[4]);
 			pp->z = atof(row[5]);
 
-			pp->lastlogin = time(NULL);
+			pp->lastlogin = time(nullptr);
 			
 			if (pp->x == -1 && pp->y == -1 && pp->z == -1)
 				GetSafePoints(pp->zone_id, database.GetInstanceVersion(pp->zoneInstance), &pp->x, &pp->y, &pp->z);
@@ -913,13 +913,13 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 			strcpy(current_zone, row[2]);
 
 		if (guilddbid) {
-			if(row[6] != NULL)
+			if(row[6] != nullptr)
 				*guilddbid = atoi(row[6]);
 			else
 				*guilddbid = GUILD_NONE;
 		}
 		if (guildrank) {
-			if(row[7] != NULL)
+			if(row[7] != nullptr)
 				*guildrank = atoi(row[7]);
 			else
 				*guildrank = GUILD_RANK_NONE;
@@ -983,11 +983,11 @@ bool ZoneDatabase::NoRentExpired(const char* name){
 }
 
 /* Searches npctable for matching id, and returns the item if found,
- * or NULL otherwise. If id passed is 0, loads all npc_types for
+ * or nullptr otherwise. If id passed is 0, loads all npc_types for
  * the current zone, returning the last item added.
  */
 const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
-	const NPCType *npc=NULL;
+	const NPCType *npc=nullptr;
 	map<uint32,NPCType *>::iterator itr;
 
    // If NPC is already in tree, return it.
@@ -1179,8 +1179,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 					if (tmpNPCType->armor_tint[0] == 0)
 					{
 						char at_errbuf[MYSQL_ERRMSG_SIZE];
-						char *at_query = NULL;
-						MYSQL_RES *at_result = NULL;
+						char *at_query = nullptr;
+						MYSQL_RES *at_result = nullptr;
 						MYSQL_ROW at_row;
 
 						MakeAnyLenString(&at_query,
@@ -1241,7 +1241,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 
 				tmpNPCType->see_invis = atoi(row[r++]);
 				tmpNPCType->see_invis_undead = atoi(row[r++])==0?false:true;	// Set see_invis_undead flag
-				if (row[r] != NULL)
+				if (row[r] != nullptr)
 					strn0cpy(tmpNPCType->lastname, row[r], 32);
 				r++;
 				
@@ -1269,7 +1269,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				{
 					cerr << "Error loading duplicate NPC " << tmpNPCType->npc_id << endl;
 					delete tmpNPCType;
-					npc = NULL;
+					npc = nullptr;
 				} else {
 					zone->npctable[tmpNPCType->npc_id]=tmpNPCType;
 					npc = tmpNPCType;
@@ -1290,7 +1290,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 
 
 const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 clientlevel) {
-	const NPCType *npc=NULL;
+	const NPCType *npc=nullptr;
 	map<uint32,NPCType *>::iterator itr;
 
 	//need to save based on merc_npc_type & client level
@@ -1299,9 +1299,9 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
    // If NPC is already in tree, return it.
 	if((itr = zone->merctable.find(merc_type_id)) != zone->merctable.end())
 		return itr->second;
-	//If the NPC type is 0, return NULL. (sanity check)
+	//If the NPC type is 0, return nullptr. (sanity check)
 	if(id == 0)
-	return NULL;
+	return nullptr;
    
    // Otherwise, get NPCs from database.
 		char errbuf[MYSQL_ERRMSG_SIZE];
@@ -1490,8 +1490,8 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 					if (tmpNPCType->armor_tint[0] == 0)
 					{
 						char at_errbuf[MYSQL_ERRMSG_SIZE];
-						char *at_query = NULL;
-						MYSQL_RES *at_result = NULL;
+						char *at_query = nullptr;
+						MYSQL_RES *at_result = nullptr;
 						MYSQL_ROW at_row;
 
 						MakeAnyLenString(&at_query,
@@ -1552,7 +1552,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 
 				//tmpNPCType->see_invis = atoi(row[r++]);
 				//tmpNPCType->see_invis_undead = atoi(row[r++])==0?false:true;	// Set see_invis_undead flag
-				//if (row[r] != NULL)
+				//if (row[r] != nullptr)
 				//	strn0cpy(tmpNPCType->lastname, row[r], 32);
 				//r++;
 				
@@ -1579,7 +1579,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				if (zone->merctable.find(tmpNPCType->npc_id * 100 + clientlevel) != zone->merctable.end())
 				{
 					delete tmpNPCType;
-					npc = NULL;
+					npc = nullptr;
 				} else {
 					zone->merctable[tmpNPCType->npc_id * 100 + clientlevel]=tmpNPCType;
 					npc = tmpNPCType;
@@ -2290,7 +2290,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	MYSQL_ROW row;
 
 	strcpy(gu->yourname, c->GetName());
-	GetGroupLeadershipInfo(g->GetID(), gu->leadersname, NULL, NULL, NULL, NULL, &gu->leader_aas);
+	GetGroupLeadershipInfo(g->GetID(), gu->leadersname, nullptr, nullptr, nullptr, nullptr, &gu->leader_aas);
 	gu->NPCMarkerID = g->GetNPCMarkerID();
 
 	int index = 0;
@@ -2336,7 +2336,7 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid){
     MYSQL_ROW row;
 	uint8 count=0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(charid) FROM group_id WHERE groupid=%d", groupid), errbuf, &result)) {
-		if((row = mysql_fetch_row(result))!=NULL)
+		if((row = mysql_fetch_row(result))!=nullptr)
 			count = atoi(row[0]);
 		mysql_free_result(result);
 	} else {
@@ -2354,7 +2354,7 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid){
      MYSQL_ROW row;
  	uint8 count=0;
  	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(charid) FROM raid_members WHERE raidid=%d AND groupid=%d;", raidid, groupid), errbuf, &result)) {
- 		if((row = mysql_fetch_row(result))!=NULL)
+ 		if((row = mysql_fetch_row(result))!=nullptr)
  			count = atoi(row[0]);
  		mysql_free_result(result);
  	} else {
@@ -2376,7 +2376,7 @@ int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 	if (RunQuery(query, strlen(query), errbuf, &result)) {
 		safe_delete_array(query);
 		row = mysql_fetch_row(result);
-		if (row != NULL && row[0] != 0) {
+		if (row != nullptr && row[0] != 0) {
 			int32 ret = atoi(row[0]);
 			mysql_free_result(result);
 			return ret;
@@ -3143,7 +3143,7 @@ bool ZoneDatabase::LoadFactionData()
 			faction_array = new Faction*[max_faction+1];
 			for(unsigned int i=0; i<max_faction; i++)
 			{
-				faction_array[i] = NULL;
+				faction_array[i] = nullptr;
 			}
 			mysql_free_result(result);
 			

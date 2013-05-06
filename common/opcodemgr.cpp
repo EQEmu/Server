@@ -33,7 +33,7 @@ OpcodeManager::OpcodeManager() {
 
 bool OpcodeManager::LoadOpcodesFile(const char *filename, OpcodeSetStrategy *s, bool report_errors) {
 	FILE *opf = fopen(filename, "r");
-	if(opf == NULL) {
+	if(opf == nullptr) {
 		fprintf(stderr, "Unable to open opcodes file '%s'. Thats bad.\n", filename);
 		return(false);
 	}
@@ -47,7 +47,7 @@ bool OpcodeManager::LoadOpcodesFile(const char *filename, OpcodeSetStrategy *s, 
 	while(!feof(opf)) {
 		lineno++;
 		line[0] = '\0';	//for blank line at end of file
-		if(fgets(line, sizeof(line), opf) == NULL)
+		if(fgets(line, sizeof(line), opf) == nullptr)
 			break;
 		
 		//ignore any line that dosent start with OP_
@@ -135,8 +135,8 @@ EmuOpcode OpcodeManager::NameSearch(const char *name) {
 RegularOpcodeManager::RegularOpcodeManager()
 : MutableOpcodeManager()
 {
-	emu_to_eq = NULL;
-	eq_to_emu = NULL;
+	emu_to_eq = nullptr;
+	eq_to_emu = nullptr;
 }
 
 RegularOpcodeManager::~RegularOpcodeManager() {

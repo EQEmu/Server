@@ -272,7 +272,7 @@ void Trade::DumpTrade()
 {
 	Mob* with = With();
 	LogFile->write(EQEMuLog::Debug, "Dumping trade data: '%s' in TradeState %i with '%s'",
-		this->owner->GetName(), state, ((with==NULL)?"(null)":with->GetName()));
+		this->owner->GetName(), state, ((with==nullptr)?"(null)":with->GetName()));
 	
 	if (!owner->IsClient())
 		return;
@@ -341,8 +341,8 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			mlog(TRADING__CLIENT, "Finishing trade with client %s", other->GetName());
 
 			int16 slot_id;
-			const Item_Struct* item			 = NULL;
-			QSPlayerLogTrade_Struct* qsaudit = NULL;
+			const Item_Struct* item			 = nullptr;
+			QSPlayerLogTrade_Struct* qsaudit = nullptr;
 			bool QSPLT						 = false;
 
 			// QS code
@@ -359,7 +359,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 				const ItemInst* inst   = m_inv[i];
 				uint16 parent_offset = 0;
 
-				if(inst == NULL) { continue; }
+				if(inst == nullptr) { continue; }
 
 				mlog(TRADING__CLIENT, "Giving %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, i, other->GetName());
 
@@ -388,7 +388,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 						for(uint8 j = 0; j < inst->GetItem()->BagSlots; j++) {
 							const ItemInst* baginst = inst->GetItem(j);
 
-							if(baginst == NULL) { continue; }
+							if(baginst == nullptr) { continue; }
 							
 							int16 k=Inventory::CalcSlotId(i, j);
 							item_count = qsaudit->char1_count + qsaudit->char2_count;
@@ -427,7 +427,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 								for(uint8 bagslot_idx = 0; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
 									const ItemInst* bag_inst = inst->GetItem(bagslot_idx);
 
-									if(bag_inst == NULL) { continue; }
+									if(bag_inst == nullptr) { continue; }
 									int16 to_bagslot_id = Inventory::CalcSlotId(slot_id, bagslot_idx);
 
 									qsaudit->items[++parent_offset].to_slot = to_bagslot_id;
@@ -447,7 +447,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 								for(uint8 bagslot_idx = 0; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
 									const ItemInst* bag_inst = inst->GetItem(bagslot_idx);
 
-									if(bag_inst == NULL) { continue; }
+									if(bag_inst == nullptr) { continue; }
 									int16 to_bagslot_id = Inventory::CalcSlotId(SLOT_CURSOR, bagslot_idx);
 
 									qsaudit->items[++parent_offset].to_id = this->character_id;
@@ -471,7 +471,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 							for(uint8 bagslot_idx = 0; bagslot_idx < inst->GetItem()->BagSlots; bagslot_idx++) {
 								const ItemInst* bag_inst = inst->GetItem(bagslot_idx);
 
-								if(bag_inst == NULL) { continue; }
+								if(bag_inst == nullptr) { continue; }
 								int16 to_bagslot_id = Inventory::CalcSlotId(SLOT_CURSOR, bagslot_idx);
 
 								qsaudit->items[++parent_offset].to_id = this->character_id;
@@ -505,7 +505,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		}
 	}
 	else if(tradingWith && tradingWith->IsNPC()) {
-		QSPlayerLogHandin_Struct* qsaudit = NULL;
+		QSPlayerLogHandin_Struct* qsaudit = nullptr;
 		bool QSPLH						  = false;
 
 		// QS code
@@ -924,17 +924,17 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 				safe_delete(inst);
 			}
 			else
-				_log(TRADING__CLIENT, "Client::BulkSendTraderInventory NULL inst pointer");
+				_log(TRADING__CLIENT, "Client::BulkSendTraderInventory nullptr inst pointer");
 		}
 		else
-			_log(TRADING__CLIENT, "Client::BulkSendTraderInventory NULL item pointer or item is NODROP %8X",item);
+			_log(TRADING__CLIENT, "Client::BulkSendTraderInventory nullptr item pointer or item is NODROP %8X",item);
 	}
 	safe_delete(TraderItems);
 }
 
 ItemInst* Client::FindTraderItemBySerialNumber(int32 SerialNumber){
 
-	ItemInst* item = NULL;
+	ItemInst* item = nullptr;
 	uint16 SlotID = 0;
 	for(int i = 0; i < 8;i++){
 		item = this->GetInv().GetItem(22 + i);
@@ -951,13 +951,13 @@ ItemInst* Client::FindTraderItemBySerialNumber(int32 SerialNumber){
 	}
 	_log(TRADING__CLIENT, "Client::FindTraderItemBySerialNumber Couldn't find item! Serial No. was %i", SerialNumber);
 
-	return NULL;
+	return nullptr;
 }
 
 
 GetItems_Struct* Client::GetTraderItems(){
 
-	const ItemInst* item = NULL;
+	const ItemInst* item = nullptr;
 	uint16 SlotID = 0;
 
 	GetItems_Struct* gis= new GetItems_Struct;
@@ -988,7 +988,7 @@ GetItems_Struct* Client::GetTraderItems(){
 
 uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
 
-	const ItemInst* item= NULL;
+	const ItemInst* item= nullptr;
 	uint16 SlotID = 0;
 	for(int i = 0; i < 8;i++){
 		item = this->GetInv().GetItem(22+i);
@@ -1082,7 +1082,7 @@ void Client::TraderUpdate(uint16 SlotID,uint32 TraderID){
 
 void Client::FindAndNukeTraderItem(int32 SerialNumber, uint16 Quantity, Client* Customer, uint16 TraderSlot){
 
-	const ItemInst* item= NULL;
+	const ItemInst* item= nullptr;
 	bool Stackable = false;
 	int16 Charges=0;
 
@@ -2050,7 +2050,7 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 		}
 
 		uint32 LastCharID = 0;
-		Client *Buyer = NULL;
+		Client *Buyer = nullptr;
 
 		while ((Row = mysql_fetch_row(Result))) {
 
@@ -2714,7 +2714,7 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 
 		pdest = strstr(Name, Criteria);
 
-		if (pdest != NULL) {
+		if (pdest != nullptr) {
 			sprintf(bisr->Results[Count].ItemName, item->Name);
 			bisr->Results[Count].ItemID = item->ID;
 			bisr->Results[Count].Unknown068 = item->Icon;

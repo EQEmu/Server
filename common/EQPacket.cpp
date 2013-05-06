@@ -248,7 +248,7 @@ uint32 offset;
 		memcpy(pBuffer,buf+offset,len-offset);
 		size=len-offset;
 	} else {
-		pBuffer=NULL;
+		pBuffer=nullptr;
 		size=0;
 	}
 	OpMgr=&RawOpcodeManager;
@@ -294,7 +294,7 @@ get running again... but might be a good thing some day.
 bool EQApplicationPacket::combine(const EQApplicationPacket *rhs)
 {
 uint32 newsize=0, offset=0;
-unsigned char *tmpbuffer=NULL;
+unsigned char *tmpbuffer=nullptr;
 
 	if (opcode!=OP_AppCombined) {
 		newsize=app_opcode_size+size+(size>254?3:1)+app_opcode_size+rhs->size+(rhs->size>254?3:1);

@@ -299,7 +299,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
     filename += "/";
     filename += itoa(npcid);
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -319,7 +319,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
     //second look for /quests/zone/npcname.ext (precedence)
     const NPCType *npc_type = database.GetNPCType(npcid);
     if(!npc_type) {
-        return NULL;
+        return nullptr;
     }
     std::string npc_name = npc_type->name;
     int sz = static_cast<int>(npc_name.length());
@@ -429,13 +429,13 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
         iter++;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename) {
 
 	if(!zone)
-	return NULL;
+	return nullptr;
 
     //first look for /quests/zone/player_v[instance_version].ext (precedence)
     filename = "quests/";
@@ -444,7 +444,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
     filename += "player_v";
     filename += itoa(zone->GetInstanceVersion());
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -502,7 +502,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
         iter++;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filename) {
@@ -512,7 +512,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filena
     filename += "/";
     filename += "global_npc";
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -529,7 +529,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filena
         iter++;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &filename) {
@@ -539,7 +539,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &fil
     filename += "/";
     filename += "global_player";
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -556,7 +556,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &fil
         iter++;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::string &filename) {
@@ -564,7 +564,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
     filename = "quests/spells/";
     filename += itoa(spell_id);
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -581,7 +581,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
         iter++;
     }    
 
-    return NULL;
+    return nullptr;
 }
 
 QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script, std::string &filename) {
@@ -589,7 +589,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
     filename = "quests/items/";
     filename += item_script;
     std::string tmp;
-    FILE *f = NULL;
+    FILE *f = nullptr;
 
     std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
     while(iter != _load_precedence.end()) {
@@ -606,5 +606,5 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
         iter++;
     }
 
-    return NULL;
+    return nullptr;
 }

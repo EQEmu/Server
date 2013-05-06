@@ -510,7 +510,7 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 	uint8 maxlevel = 1;
 	
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) { 
-		if (members[i] != NULL) { 
+		if (members[i] != nullptr) { 
 			if(members[i]->GetLevel() > maxlevel) 
 				maxlevel = members[i]->GetLevel(); 
 
@@ -542,7 +542,7 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 		return; 
 
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++)  {
-		if (members[i] != NULL && members[i]->IsClient()) // If Group Member is Client
+		if (members[i] != nullptr && members[i]->IsClient()) // If Group Member is Client
 		{
 			Client *cmember = members[i]->CastToClient();
 			// add exp + exp cap 
@@ -571,7 +571,7 @@ void Raid::SplitExp(uint32 exp, Mob* other) {
 	uint8 maxlevel = 1;
 
 	for (int i = 0; i < MAX_RAID_MEMBERS; i++) { 
-		if (members[i].member != NULL) { 
+		if (members[i].member != nullptr) { 
 			if(members[i].member->GetLevel() > maxlevel) 
 				maxlevel = members[i].member->GetLevel(); 
 
@@ -589,7 +589,7 @@ void Raid::SplitExp(uint32 exp, Mob* other) {
 		return; 
 
 	for (unsigned int x = 0; x < MAX_RAID_MEMBERS; x++)  {
-		if (members[x].member != NULL) // If Group Member is Client
+		if (members[x].member != nullptr) // If Group Member is Client
 		{
 			Client *cmember = members[x].member;
 			// add exp + exp cap 
@@ -642,7 +642,7 @@ void Client::SendLeadershipEXPUpdate() {
 
 uint32 Client::GetCharMaxLevelFromQGlobal() {
 
-		QGlobalCache *char_c = NULL;
+		QGlobalCache *char_c = nullptr;
 		char_c = this->GetQGlobals();
 
 		std::list<QGlobal> globalMap;

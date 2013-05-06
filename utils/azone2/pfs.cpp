@@ -67,7 +67,7 @@ inline void Lower(char *str) {
 
 PFSLoader::PFSLoader() {
   // Set the status of the loader that nothing is loaded.
-  this->buffer = NULL;
+  this->buffer = nullptr;
   this->buf_len = -1;
   this->status = 0;
 }
@@ -195,7 +195,7 @@ int PFSLoader::Close()
 	else
 		return 0;
 
-	this->buffer = NULL;
+	this->buffer = nullptr;
 	this->buf_len = -1;
 	this->status = 0;
 
@@ -214,7 +214,7 @@ const char *PFSLoader::FindExtension(const char *ext) {
     if(!strcmp(this->filenames[i]+(flen-elen), ext))
 		return(this->filenames[i]);
   }
-  return(NULL);
+  return(nullptr);
 }
 
 int PFSLoader::GetFile(char *name, uchar **buf, int *len) {

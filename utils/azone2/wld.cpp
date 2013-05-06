@@ -25,7 +25,7 @@ FRAG_CONSTRUCTOR(Data03) {
   tex->filenames = new char *[count];
   tex->frame_count = count;
   tex->current_frame = 0;
-  tex->archive = NULL;
+  tex->archive = nullptr;
   tex->flags = 0;
 
   for(i = 0; i < count; ++i) {
@@ -64,7 +64,7 @@ FRAG_CONSTRUCTOR(Data04) {
     tex = new Texture;
     tex->frame_count = count;
     tex->current_frame = 0;
-    tex->archive = NULL;
+    tex->archive = nullptr;
     tex->filenames = new char *[count];
     tex->flags = 0;
 
@@ -272,7 +272,7 @@ FRAG_CONSTRUCTOR(Data30) {
     tex->current_frame = 0;
     tex->filenames = new char *[1];
     tex->filenames[0] = "collide.dds";
-    tex->archive = NULL;
+    tex->archive = nullptr;
     tex->flags = 1;
     this->frag = (void *) tex;
     return;
@@ -478,19 +478,19 @@ int WLDLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 #ifdef DEBUGWLD
   printf("Zone: %s\n", zone_name);
 #endif
-  this->model_data.zone_model = NULL;
+  this->model_data.zone_model = nullptr;
 
   this->model_data.plac_count = 0;
   this->model_data.placeable = 0;
 
-  this->obj_loader = this->plac_loader = NULL;
+  this->obj_loader = this->plac_loader = nullptr;
 
   this->clear_plac = 0;
 
   filename = new char[strlen(zone_name) + 5];
   sprintf(filename, "%s.wld", zone_name);
 
-  if(!GetFile(&buffer, &buf_len, NULL, filename, archive)) {
+  if(!GetFile(&buffer, &buf_len, nullptr, filename, archive)) {
     delete[] filename;
     return 0;
   }
@@ -635,7 +635,7 @@ int WLDLoader::Open(char *base_path, char *zone_name, Archive *archive) {
     sprintf(filename, "%s_obj", zone_name);
 
     this->obj_loader = new WLDLoader();
-    this->obj_loader->Open(NULL, filename, obj_archive);
+    this->obj_loader->Open(nullptr, filename, obj_archive);
 
     delete[] filename;
 
@@ -643,7 +643,7 @@ int WLDLoader::Open(char *base_path, char *zone_name, Archive *archive) {
     this->model_data.models = this->obj_loader->model_data.models;
 
     this->plac_loader = new WLDLoader();
-    this->plac_loader->Open(NULL, "objects", archive);
+    this->plac_loader->Open(nullptr, "objects", archive);
 
     if(this->model_data.plac_count) {
       delete this->model_data.placeable[0];

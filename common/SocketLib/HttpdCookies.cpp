@@ -93,14 +93,14 @@ bool HttpdCookies::getvalue(const std::string& name,std::string& buffer) //char 
 
 void HttpdCookies::replacevalue(const std::string& name,const std::string& value)
 {
-	COOKIE *c = NULL;
+	COOKIE *c = nullptr;
 	
 	for (cookie_v::iterator it = m_cookies.begin(); it != m_cookies.end(); it++)
 	{
 		c = *it;
 		if (!strcasecmp(c -> name.c_str(),name.c_str()))
 			break;
-		c = NULL;
+		c = nullptr;
 	}
 
 	if (c)
@@ -126,14 +126,14 @@ void HttpdCookies::replacevalue(const std::string& name,int i)
 
 size_t HttpdCookies::getlength(const std::string& name)
 {
-	COOKIE *c = NULL;
+	COOKIE *c = nullptr;
 
 	for (cookie_v::iterator it = m_cookies.begin(); it != m_cookies.end(); it++)
 	{
 		c = *it;
 		if (!strcasecmp(c -> name.c_str(),name.c_str()))
 			break;
-		c = NULL;
+		c = nullptr;
 	}
 	return c ? c -> value.size() : 0;
 }
@@ -223,7 +223,7 @@ void HttpdCookies::setcookie(HTTPSocket *sock, const std::string& domain, const 
 
 const std::string& HttpdCookies::expiredatetime()
 {
-	time_t t = time(NULL);
+	time_t t = time(nullptr);
 	struct tm * tp = gmtime(&t);
 	const char *days[7] = {"Sunday", "Monday",
 	 "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};

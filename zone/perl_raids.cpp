@@ -59,8 +59,8 @@ XS(XS_Raid_IsRaidMember)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsRaidMember(name);
 		ST(0) = boolSV(RETVAL);
@@ -87,8 +87,8 @@ XS(XS_Raid_CastGroupSpell)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -96,8 +96,8 @@ XS(XS_Raid_CastGroupSpell)
 		}
 		else
 			Perl_croak(aTHX_ "caster is not of type Mob");
-		if(caster == NULL)
-			Perl_croak(aTHX_ "caster is NULL, avoiding crash.");
+		if(caster == nullptr)
+			Perl_croak(aTHX_ "caster is nullptr, avoiding crash.");
 
 		THIS->CastGroupSpell(caster, spellid, gid);
 	}
@@ -122,8 +122,8 @@ XS(XS_Raid_GroupCount)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GroupCount(gid);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -148,8 +148,8 @@ XS(XS_Raid_RaidCount)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RaidCount();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -175,8 +175,8 @@ XS(XS_Raid_GetGroup)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetGroup(name);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -201,8 +201,8 @@ XS(XS_Raid_SplitExp)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(2), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(2)));
@@ -210,8 +210,8 @@ XS(XS_Raid_SplitExp)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		THIS->SplitExp(exp, other);
 	}
@@ -236,8 +236,8 @@ XS(XS_Raid_GetTotalRaidDamage)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -245,8 +245,8 @@ XS(XS_Raid_GetTotalRaidDamage)
 		}
 		else
 			Perl_croak(aTHX_ "other is not of type Mob");
-		if(other == NULL)
-			Perl_croak(aTHX_ "other is NULL, avoiding crash.");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetTotalRaidDamage(other);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -273,8 +273,8 @@ XS(XS_Raid_SplitMoney)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SplitMoney(copper, silver, gold, platinum);
 	}
@@ -298,8 +298,8 @@ XS(XS_Raid_BalanceHP)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->BalanceHP(penalty, gid);
 	}
@@ -323,8 +323,8 @@ XS(XS_Raid_IsLeader)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsLeader(name);
 		ST(0) = boolSV(RETVAL);
@@ -350,8 +350,8 @@ XS(XS_Raid_IsGroupLeader)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->IsGroupLeader(who);
 		ST(0) = boolSV(RETVAL);
@@ -377,8 +377,8 @@ XS(XS_Raid_GetHighestLevel)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHighestLevel();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -403,8 +403,8 @@ XS(XS_Raid_GetLowestLevel)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetLowestLevel();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -429,8 +429,8 @@ XS(XS_Raid_GetClientByIndex)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByIndex(index);
 		ST(0) = sv_newmortal();
@@ -461,8 +461,8 @@ XS(XS_Raid_TeleportGroup)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -470,8 +470,8 @@ XS(XS_Raid_TeleportGroup)
 		}
 		else
 			Perl_croak(aTHX_ "sender is not of type Mob");
-		if(sender == NULL)
-			Perl_croak(aTHX_ "sender is NULL, avoiding crash.");
+		if(sender == nullptr)
+			Perl_croak(aTHX_ "sender is nullptr, avoiding crash.");
 
 		THIS->TeleportGroup(sender, zoneID, 0, x, y, z, heading, gid);
 	}
@@ -499,8 +499,8 @@ XS(XS_Raid_TeleportRaid)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -508,8 +508,8 @@ XS(XS_Raid_TeleportRaid)
 		}
 		else
 			Perl_croak(aTHX_ "sender is not of type Mob");
-		if(sender == NULL)
-			Perl_croak(aTHX_ "sender is NULL, avoiding crash.");
+		if(sender == nullptr)
+			Perl_croak(aTHX_ "sender is nullptr, avoiding crash.");
 
 		THIS->TeleportRaid(sender, zoneID, 0, x, y, z, heading);
 	}
@@ -533,8 +533,8 @@ XS(XS_Raid_GetID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetID();
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -550,7 +550,7 @@ XS(XS_Raid_GetMember)
 		Perl_croak(aTHX_ "Usage: Raid::GetMember(THIS, index)");
 	{
 		Raid * THIS;
-		Client*	RETVAL = NULL;
+		Client*	RETVAL = nullptr;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Raid")) {
@@ -559,14 +559,14 @@ XS(XS_Raid_GetMember)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		int index = (int)SvUV(ST(1));
 		if (index < 0 || index > 71) 
-			RETVAL = NULL;
+			RETVAL = nullptr;
 		else {
-			if(THIS->members[index].member != NULL)
+			if(THIS->members[index].member != nullptr)
 				RETVAL = THIS->members[index].member->CastToClient();
 		}
 

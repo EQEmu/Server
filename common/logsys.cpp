@@ -88,11 +88,11 @@ void log_toggle(LogType t) {
 bool load_log_settings(const char *filename) {
 	//this is a terrible algorithm, but im lazy today
 	FILE *f = fopen(filename, "r");
-	if(f == NULL)
+	if(f == nullptr)
 		return(false);
 	char linebuf[512], type_name[256], value[256];
 	while(!feof(f)) {
-		if(fgets(linebuf, 512, f) == NULL)
+		if(fgets(linebuf, 512, f) == nullptr)
 			continue;
 #ifdef _WINDOWS
 		if (sscanf(linebuf, "%[^=]=%[^\n]\n", type_name, value) != 2)

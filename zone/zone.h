@@ -239,8 +239,8 @@ public:
 	bool		IsSpellBlocked(uint32 spell_id, float nx, float ny, float nz);
 	const char *GetSpellBlockedMessage(uint32 spell_id, float nx, float ny, float nz);
 	int			GetTotalBlockedSpells() { return totalBS; }
-	inline bool HasMap() { return zonemap != NULL; }
-	inline bool HasWaterMap() { return watermap != NULL; }
+	inline bool HasMap() { return zonemap != nullptr; }
+	inline bool HasWaterMap() { return watermap != nullptr; }
 
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }

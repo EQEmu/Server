@@ -109,7 +109,7 @@ void QuestManager::Process() {
 			//make sure the mob is still in zone.
 			if(entity_list.IsMobInZone(cur->mob)){
 				if(cur->mob->IsNPC()) {
-                    parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), NULL, cur->name, 0);
+                    parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
 				}
 				else {
                     //this is inheriently unsafe if we ever make it so more than npc/client start timers
@@ -184,7 +184,7 @@ void QuestManager::EndQuest() {
 		}
 
 		owner->Depop();
-		owner = NULL;	//just to be safe
+		owner = nullptr;	//just to be safe
 	}
 }
 
@@ -209,7 +209,7 @@ void QuestManager::echo(int colour, const char *str) {
 
 void QuestManager::say(const char *str) {
 	if (!owner) {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::say called with NULL owner. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::say called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -224,7 +224,7 @@ void QuestManager::say(const char *str) {
 
 void QuestManager::say(const char *str, uint8 language) {
 	if (!owner) {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::say called with NULL owner. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::say called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -276,7 +276,7 @@ uint16 QuestManager::spawn2(int npc_type, int grid, int unused, float x, float y
 
 uint16 QuestManager::unique_spawn(int npc_type, int grid, int unused, float x, float y, float z, float heading) {
 	Mob *other = entity_list.GetMobByNpcTypeID(npc_type);
-	if(other != NULL) {
+	if(other != nullptr) {
 		return(other->GetID());
 	}
 
@@ -304,7 +304,7 @@ uint16 QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 {
 	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
 	iterator.Reset();
-	Spawn2 *found_spawn = NULL;
+	Spawn2 *found_spawn = nullptr;
 
 	while(iterator.MoreElements())
 	{
@@ -416,7 +416,7 @@ void QuestManager::incstat(int stat, int value) { //old setstat command aza
 void QuestManager::castspell(int spell_id, int target_id) {
 	if (owner) {
 		Mob *tgt = entity_list.GetMob(target_id);
-		if(tgt != NULL)
+		if(tgt != nullptr)
 			owner->SpellFinished(spell_id, tgt, 10, 0, -1, spells[spell_id].ResistDiff);
 	}
 }
@@ -528,7 +528,7 @@ void QuestManager::stopalltimers() {
 
 void QuestManager::emote(const char *str) {
 	if (!owner) {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::emote called with NULL owner. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::emote called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -538,7 +538,7 @@ void QuestManager::emote(const char *str) {
 
 void QuestManager::shout(const char *str) {
 	if (!owner) {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::shout called with NULL owner. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::shout called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -548,7 +548,7 @@ void QuestManager::shout(const char *str) {
 
 void QuestManager::shout2(const char *str) {
 	if (!owner) {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::shout2 called with NULL owner. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::shout2 called with nullptr owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -565,7 +565,7 @@ void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint
 
 void QuestManager::depop(int npc_type) { // depop NPC and don't start spawn timer
 	if (!owner || !owner->IsNPC()) {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::depop called with NULL owner or non-NPC owner. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::depop called with nullptr owner or non-NPC owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -588,7 +588,7 @@ void QuestManager::depop(int npc_type) { // depop NPC and don't start spawn time
 
 void QuestManager::depop_withtimer(int npc_type) { // depop NPC and start spawn timer
 	if (!owner || !owner->IsNPC()) {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::depop_withtimer called with NULL owner or non-NPC owner. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::depop_withtimer called with nullptr owner or non-NPC owner. Probably syntax error in quest file.");
 		return;
 	}
 	else {
@@ -614,7 +614,7 @@ void QuestManager::depopall(int npc_type) {
 		entity_list.DepopAll(npc_type);
 	}
 	else {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::depopall called with NULL owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::depopall called with nullptr owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file.");
 	}
 }
 
@@ -623,7 +623,7 @@ void QuestManager::depopzone(bool StartSpawnTimer) {
 		zone->Depop(StartSpawnTimer);
 	}
 	else {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::depopzone called with NULL zone. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::depopzone called with nullptr zone. Probably syntax error in quest file.");
 	}
 }
 
@@ -632,21 +632,21 @@ void QuestManager::repopzone() {
 		zone->Repop();
 	}
 	else {
-		LogFile->write(EQEMuLog::Quest, "QuestManager::repopzone called with NULL zone. Probably syntax error in quest file.");
+		LogFile->write(EQEMuLog::Quest, "QuestManager::repopzone called with nullptr zone. Probably syntax error in quest file.");
 	}
 }
 
 void QuestManager::settarget(const char *type, int target_id) {
 	if(!owner->IsNPC())
 		return;
-	Mob* tmp = NULL;
+	Mob* tmp = nullptr;
 	if (!strcasecmp(type,"npctype")) {
 		tmp = entity_list.GetMobByNpcTypeID(target_id);
 	}
 	else if (!strcasecmp(type, "entity")) {
 		tmp = entity_list.GetMob(target_id);
 	}
-	if(tmp != NULL) {
+	if(tmp != nullptr) {
 		owner->SetTarget(tmp);
 	}
 }
@@ -700,7 +700,7 @@ void QuestManager::traindisc(int discipline_tome_item_id) {
 bool QuestManager::isdisctome(int item_id) {
 //get the item info
 	const Item_Struct *item = database.GetItem(item_id);
-	if(item == NULL) {
+	if(item == nullptr) {
 		return(false);
 	}
 
@@ -990,11 +990,11 @@ void QuestManager::movegrp(int zoneid, float x, float y, float z) {
     if (initiator && initiator->IsClient())
 	{
 		Group *g = entity_list.GetGroupByClient(initiator);
-       		if (g != NULL){
+       		if (g != nullptr){
 			g->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f);
 		} else {
 			Raid *r = entity_list.GetRaidByClient(initiator);
-                        if (r != NULL){
+                        if (r != nullptr){
 				uint32 gid = r->GetGroup(initiator);
 				if (gid >= 0 && gid < 12) {
 					r->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f, gid);
@@ -1239,11 +1239,11 @@ int QuestManager::InsertQuestGlobal(
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
-	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
+	// Make duration string either "unix_timestamp(now()) + xxx" or "nullptr"
 	stringstream duration_ss;
 	if (duration == INT_MAX)
 	{
-		duration_ss << "NULL";
+		duration_ss << "nullptr";
 	}
 	else
 	{
@@ -1257,7 +1257,7 @@ int QuestManager::InsertQuestGlobal(
 		"REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
 		"VALUES (%i, %i, %i, '%s', '%s', %s)",
 		charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str()
-		), errbuf, NULL, NULL, &last_id))
+		), errbuf, nullptr, nullptr, &last_id))
 	{
 		cerr << "setglobal error inserting " << varname << " : " << errbuf << endl;
 	}
@@ -1555,7 +1555,7 @@ void QuestManager::setanim(int npc_type, int animnum) {
 
 //displays an in game path based on a waypoint grid
 void QuestManager::showgrid(int grid) {
-	if(initiator == NULL)
+	if(initiator == nullptr)
 		return;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -2157,7 +2157,7 @@ int QuestManager::getlevel(uint8 type)
 	else if(type == 1)
 	{
 		Group *g = entity_list.GetGroupByClient(initiator);
-       	if (g != NULL)
+       	if (g != nullptr)
 			return (g->GetAvgLevel());
 		else
 			return 0;
@@ -2165,7 +2165,7 @@ int QuestManager::getlevel(uint8 type)
 	else if(type == 2)
 	{
 		Raid *r = entity_list.GetRaidByClient(initiator);
-       	if (r != NULL)
+       	if (r != nullptr)
 			return (r->GetAvgLevel());
 		else
 			return 0;
@@ -2173,12 +2173,12 @@ int QuestManager::getlevel(uint8 type)
 	else if(type == 3)
 	{
 		Raid *r = entity_list.GetRaidByClient(initiator);
-		if(r != NULL)
+		if(r != nullptr)
 		{
 			return (r->GetAvgLevel());
 		}
 		Group *g = entity_list.GetGroupByClient(initiator);
-		if(g != NULL)
+		if(g != nullptr)
 		{
 			return (g->GetAvgLevel());
 		}
@@ -2309,7 +2309,7 @@ void QuestManager::MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity)
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return;	// don't do anything if NPCid isn't a merchant
 
-	const Item_Struct* item = NULL;
+	const Item_Struct* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item) return;		// if the item id doesn't correspond to a real item, do nothing
 
@@ -2322,7 +2322,7 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return 0;	// if it isn't a merchant, it doesn't have any items
 
-	const Item_Struct* item = NULL;
+	const Item_Struct* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item) return 0;		// likewise, if it isn't a valid item, the merchant doesn't have any
 
@@ -2688,7 +2688,7 @@ void QuestManager::LearnRecipe(uint32 recipe_id) {
 }
 
 void QuestManager::SendMail(const char *to, const char *from, const char *subject, const char *message) {
-    if(to == NULL || from == NULL || subject == NULL || message == NULL) {
+    if(to == nullptr || from == nullptr || subject == nullptr || message == nullptr) {
         return;
     }
 

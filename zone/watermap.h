@@ -46,7 +46,7 @@ typedef enum {
 class WaterMap {
 
 public:
-	static WaterMap*  LoadWaterMapfile(const char* in_zonename, const char *directory = NULL);
+	static WaterMap*  LoadWaterMapfile(const char* in_zonename, const char *directory = nullptr);
         WaterRegionType BSPReturnRegionType(int32 node_number, float y, float x, float z) const;
         bool InWater(float y, float x, float z) const;
         bool InVWater(float y, float x, float z) const;

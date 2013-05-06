@@ -26,20 +26,20 @@
 
 Schema:
 CREATE TABLE traps (
-  id int(11) NOT NULL auto_increment,
-  zone varchar(16) NOT NULL default '',
-  x int(11) NOT NULL default '0',
-  y int(11) NOT NULL default '0',
-  z int(11) NOT NULL default '0',
-  chance tinyint NOT NULL default '0',
-  maxzdiff float NOT NULL default '0',
-  radius float NOT NULL default '0',
-  effect int(11) NOT NULL default '0',
-  effectvalue int(11) NOT NULL default '0',
-  effectvalue2 int(11) NOT NULL default '0',
-  message varcahr(200) NOT NULL;
-  skill int(11) NOT NULL default '0',
-  spawnchance int(11) NOT NULL default '0',
+  id int(11) NOT nullptr auto_increment,
+  zone varchar(16) NOT nullptr default '',
+  x int(11) NOT nullptr default '0',
+  y int(11) NOT nullptr default '0',
+  z int(11) NOT nullptr default '0',
+  chance tinyint NOT nullptr default '0',
+  maxzdiff float NOT nullptr default '0',
+  radius float NOT nullptr default '0',
+  effect int(11) NOT nullptr default '0',
+  effectvalue int(11) NOT nullptr default '0',
+  effectvalue2 int(11) NOT nullptr default '0',
+  message varcahr(200) NOT nullptr;
+  skill int(11) NOT nullptr default '0',
+  spawnchance int(11) NOT nullptr default '0',
   PRIMARY KEY  (id)
 ) TYPE=MyISAM;
 
@@ -67,7 +67,7 @@ Trap::Trap() :
 	disarmed = false;
 	respawn_time = 0;
 	respawn_var = 0;
-	hiddenTrigger = NULL;
+	hiddenTrigger = nullptr;
 	ownHiddenTrigger = false;
 }
 
@@ -188,7 +188,7 @@ void Trap::Trigger(Mob* trigger)
 				trigger->SetHP(trigger->GetHP() - dmg);
 				a->damage = dmg;
 				a->sequence = MakeRandomInt(0, 1234567);
-				a->source = GetHiddenTrigger()!=NULL ? GetHiddenTrigger()->GetID() : trigger->GetID();
+				a->source = GetHiddenTrigger()!=nullptr ? GetHiddenTrigger()->GetID() : trigger->GetID();
 				a->spellid = 0;
 				a->target = trigger->GetID();
 				a->type = 253;
@@ -205,7 +205,7 @@ Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist) {
 	LinkedListIterator<Trap*> iterator(trap_list);
 	iterator.Reset();
 	float dist = 999999;
-	Trap* current_trap = NULL;
+	Trap* current_trap = nullptr;
 	
 	float max_dist2 = max_dist*max_dist;
 	Trap *cur;
