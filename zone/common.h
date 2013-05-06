@@ -66,7 +66,7 @@ typedef enum {	//focus types
 	focusTwincast,
 	focusSympatheticProc,
 	focusSpellDamage,
-	focusFF_Damage_Amount, 
+	focusFF_Damage_Amount,
 	focusSpellDurByTic,
 	focusSwarmPetDuration,
 	focusReduceRecastTime,
@@ -277,7 +277,7 @@ struct StatBonuses {
 	int16 	ExtraAttackChance;
 	int16	DoTShielding;
 	int16 	DivineSaveChance[2];				// Second Chance (base1 = chance, base2 = spell on trigger)
-	uint16	DeathSave[4];						// Death Pact [0](value = 1 partial 2 = full) [1]=slot [2]=LvLimit [3]=HealAmt 
+	uint16	DeathSave[4];						// Death Pact [0](value = 1 partial 2 = full) [1]=slot [2]=LvLimit [3]=HealAmt
 	int16 	FlurryChance;
 	int16	Accuracy[HIGHEST_SKILL+2];			//Accuracy/15 == % increase	[Spell Effect: Accuracy)
 	int16	HundredHands;						//extra haste, stacks with all other haste  i
@@ -315,7 +315,7 @@ struct StatBonuses {
 	uint16	CharmBreakChance;					// chance to break charm
 	int16  SongRange;							// increases range of beneficial bard songs
 	uint16  HPToManaConvert;					// Uses HP to cast spells at specific conversion
-	uint16 	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have. 
+	uint16 	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
 	bool	NegateEffects;						// Check if you contain a buff with negate effect. (only spellbonuses)
 	int16  SkillDamageAmount2[HIGHEST_SKILL+2];	// Adds skill specific damage
 	uint16	NegateAttacks[2];					// 0 = bool HasEffect   1 = Buff Slot
@@ -326,7 +326,7 @@ struct StatBonuses {
 	int16  BlockBehind;						// Chance to Block Behind (with our without shield)
 	//bool	AbsorbMagicAtt;						// Magic Rune *Need to be implemented for NegateEffect
 	//bool	MeleeRune;							// Melee Rune *Need to be implemented for NegateEffect
-	
+
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
 	uint8	BuffSlotIncrease;					// Increases number of available buff slots
@@ -340,7 +340,7 @@ struct StatBonuses {
 	int16  MaxBindWound;						// Increase max amount of HP you can bind wound.
 	int16  ChannelChanceSpells;				// Modify chance to channel a spell.
 	int16  ChannelChanceItems;					// Modify chance to channel a items.
-	uint8	SeeInvis;							// See Invs. 
+	uint8	SeeInvis;							// See Invs.
 	uint8	TripleBackstab;						// Chance to triple backstab
 	bool	FrontalBackstabMinDmg;				// Allow frontal backstabs for min damage
 	uint8   FrontalBackstabChance;				// Chance to backstab from the front for full damage
@@ -363,7 +363,7 @@ struct StatBonuses {
 	bool	GivePetGroupTarget;					// All pets to recieve group buffs. (Pet Affinity)
 	int16	RootBreakChance;					// Chance root will break;
 	int16  UnfailingDivinity;					// Improves chance that DI will fire + increase partial heal.
-	int16  ItemHPRegenCap;						// Increase item regen cap.	
+	int16  ItemHPRegenCap;						// Increase item regen cap.
 	int16  SEResist[MAX_RESISTABLE_EFFECTS*2];	// Resist chance by specific spell effects.
 	int16  OffhandRiposteFail;					// chance for opponent to fail riposte with offhand attack.
 	int16	ItemATKCap;							// Raise item attack cap
@@ -426,7 +426,7 @@ typedef enum {
 
 struct MercType {
 	uint32	Type;
-	uint32	ClientVersion;	
+	uint32	ClientVersion;
 };
 
 struct MercData {

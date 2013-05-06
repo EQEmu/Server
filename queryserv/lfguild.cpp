@@ -103,7 +103,7 @@ void LFGuildManager::HandlePacket(ServerPacket *pack)
 			pack->ReadString(Comments);
 			uint32 Toggle = pack->ReadUInt32();
 			uint32 TimeZone = pack->ReadUInt32();
-			
+
 			TogglePlayer(FromZoneID, FromInstanceID, From, Class, Level, AAPoints, Comments, Toggle, TimeZone);
 
 			break;
@@ -116,7 +116,7 @@ void LFGuildManager::HandlePacket(ServerPacket *pack)
 		case QSG_LFGuild_UpdateGuildInfo:
 		{
 			char GuildName[33], Comments[257];
-			
+
 			pack->ReadString(GuildName);
 			pack->ReadString(Comments);
 
@@ -154,8 +154,8 @@ void LFGuildManager::HandlePacket(ServerPacket *pack)
 		default:
 			break;
 	}
-				
-			
+
+
 }
 
 void LFGuildManager::SendPlayerMatches(uint32 FromZoneID, uint32 FromInstanceID, char *From, uint32 FromLevel, uint32 ToLevel, uint32 MinAA, uint32 TimeZone, uint32 Classes)
@@ -289,7 +289,7 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 
 	worldserver->SendPacket(pack);
 	safe_delete(pack);
-	
+
 }
 
 void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char *From, char* GuildName, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Toggle, uint32 TimeZone)
@@ -336,7 +336,7 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 	pack->WriteUInt32(TimeZone);
 	pack->WriteUInt32(Now);
 	pack->WriteUInt32(Toggle);
-	
+
 	worldserver->SendPacket(pack);
 	safe_delete(pack);
 }
@@ -396,7 +396,7 @@ void LFGuildManager::SendPlayerStatus(uint32 FromZoneID, uint32 FromInstanceID, 
 			pack->WriteUInt32((*it).TimeZone);
 			pack->WriteUInt32((*it).TimePosted);
 			pack->WriteUInt32(1);
-			
+
 			worldserver->SendPacket(pack);
 			safe_delete(pack);
 			break;

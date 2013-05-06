@@ -50,12 +50,12 @@ public:
 		Client_GetFactionLevel,
 		Client_SetFactionLevel,
 		Client_SetFactionLevel2,
-		
+
 		NPC_Attack,
 		NPC_GetReverseFactionCon,
 		NPC_Process,
 		NPC_Death,
-		
+
 		EntityList_TrapProcess,
 		EntityList_GroupProcess,
 		EntityList_QueueToGroupsForNPCHealthAA,
@@ -71,7 +71,7 @@ public:
 		EntityList_CheckClientAggro,
 		EntityList_CheckClientAggro_Loop,
 		EntityList_AIYellForHelp,
-		
+
 		HateList_Find,
 		HateList_GetDamageTop,
 		HateList_GetClosest,
@@ -79,7 +79,7 @@ public:
 		HateList_GetTop,
 		HateList_IsEmpty,
 		HateList_GetMostHate,
-		
+
 		Mob_CheckWillAggro,
 		Mob_CheckLosFN,
 		Mob_Dist,
@@ -101,7 +101,7 @@ public:
 		Mob_GetWeaponDamageBonus,
 		Mob_TryWeaponProcA,
 		Mob_TryWeaponProcB,
-		
+
 		Map_LineIntersectsZone,
 		Map_LineIntersectsNode,
 		Map_FindBestZ,
@@ -127,29 +127,29 @@ public:
 		Mob_AI_Process_roamer,
 		Mob_AI_Process_guard,
 
-		
-		
+
+
 		Database_AddLootTableToNPC,
-		
+
 		Zone_Bootup,
 		Zone_Process,
-		
+
 		WorldServer_Process,
-		
+
 		Spawn2_Process,
-		
+
 		PerlembParser_SendCommands,
 		PerlXSParser_SendCommands,
-		
+
 		command_realdispatch,
-		
+
 		net_main,
-		
+
 		MaxZoneProfilerId
 	};
-	
+
 	inline ZoneProfiler() : GeneralProfiler(MaxZoneProfilerId) { }
-	
+
 };
 
 extern ZoneProfiler _zp;

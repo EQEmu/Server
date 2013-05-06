@@ -146,7 +146,7 @@ void Config::Tokenize(FILE *input, list<string> &tokens)
 {
 	char c = fgetc(input);
 	string lexeme;
-	
+
 	while(c != EOF)
 	{
 		if(isspace(c))

@@ -74,9 +74,9 @@ class NPC : public Mob
 public:
 	static NPC* SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z, float in_heading = 0, Client* client = 0);
 	static int8 GetAILevel(bool iForceReRead = false);
-	
+
 	NPC(const NPCType* data, Spawn2* respawn, float x, float y, float z, float heading, int iflymode, bool IsCorpse = false);
-	
+
 	virtual ~NPC();
 
 	//abstract virtual function implementations requird by base abstract class
@@ -109,12 +109,12 @@ public:
 	void CalcNPCDamage();
 
 
-	int32 GetActSpellDamage(uint16 spell_id, int32 value); 
-	int32 GetActSpellHealing(uint16 spell_id, int32 value); 
-	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;} 
-	inline void SetSpellFocusHeal(int32 NewSpellFocusHeal) {SpellFocusHeal = NewSpellFocusHeal;} 
-	int32 SpellFocusDMG; 
-	int32 SpellFocusHeal; 
+	int32 GetActSpellDamage(uint16 spell_id, int32 value);
+	int32 GetActSpellHealing(uint16 spell_id, int32 value);
+	inline void SetSpellFocusDMG(int32 NewSpellFocusDMG) {SpellFocusDMG = NewSpellFocusDMG;}
+	inline void SetSpellFocusHeal(int32 NewSpellFocusHeal) {SpellFocusHeal = NewSpellFocusHeal;}
+	int32 SpellFocusDMG;
+	int32 SpellFocusHeal;
 
 	virtual void SetTarget(Mob* mob);
 	virtual uint16 GetSkill(SkillType skill_num) const { if (skill_num <= HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
@@ -216,9 +216,9 @@ public:
 	uint32	GetSwarmOwner();
 	uint32	GetSwarmTarget();
 	void	SetSwarmTarget(int target_id = 0);
-	
+
 	void	SignalNPC(int _signal_id);
-	
+
 	inline int32	GetNPCFactionID()	const { return npc_faction_id; }
 	inline int32			GetPrimaryFaction()	const { return primary_faction; }
 	int32	GetNPCHate(Mob* in_ent)  {return hate_list.GetEntHate(in_ent);}
@@ -227,7 +227,7 @@ public:
 	void	SetNPCFactionID(int32 in) { npc_faction_id = in; database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction); }
 
 	float   org_x, org_y, org_z, org_heading;
-	
+
 	uint32	GetMaxDMG() const {return max_dmg;}
 	uint32	GetMinDMG() const {return min_dmg;}
 	float	GetSlowMitigation() const {return slow_mitigation;}
@@ -242,7 +242,7 @@ public:
 	void	AddLootDrop(const Item_Struct*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
-	
+
 	//waypoint crap
 	int                 GetMaxWp() const { return max_wp; }
 	void				DisplayWaypointInfo(Client *to);
@@ -257,10 +257,10 @@ public:
 	void				PauseWandering(int pausetime);
 	void				MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot);
 	void                GetClosestWaypoint(list<wplist> &wp_list, int count, float m_x, float m_y, float m_z);
-	
+
 	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
-	
+
 	void				NextGuardPosition();
 	void				SaveGuardSpot(bool iClearGuardSpot = false);
 	inline bool			IsGuarding() const { return(guard_heading != 0); }
@@ -268,7 +268,7 @@ public:
 	void				RestoreGuardSpotCharm();
 	void				AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay = 2500);
 	void				AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, float iMinY, uint32 iDelay = 2500);
-	
+
 	//mercenary stuff
 	void	LoadMercTypes();
 	void	LoadMercs();
@@ -280,12 +280,12 @@ public:
 	int		GetNumMercTypes( uint32 expansion );
 	int		GetNumMercs() { return static_cast<int>(mercDataList.size()); };
 	int		GetNumMercs( uint32 expansion );
-	
+
 	inline bool WillAggroNPCs() const { return(npc_aggro); }
-	
+
 	inline void GiveNPCTypeData(NPCType *ours) { NPCTypedata_ours = ours; }
 	inline const uint32 GetNPCSpellsID()	const { return npc_spells_id; }
-	
+
 	ItemList	itemlist; //kathgar - why is this public?  Doing other things or I would check the code
 
 	NPCProximity* proximity;
@@ -361,8 +361,8 @@ public:
 	{
 		ClearQuestDeleteItems(true);
 	}
-	
-	
+
+
 	void ClearQuestItems(bool delete_=false)
 	{
 		LinkedListIterator<ItemInst*> iterator(questItems);
@@ -386,7 +386,7 @@ public:
 
 		questDeletionItems.Clear();
 	}
-	
+
 	ItemInst* FindQuestItemByID(uint32 itmID, int charges, bool flagItemForDeletion=false)
 	{
 		LinkedListIterator<ItemInst*> iterator(questItems);
@@ -413,7 +413,7 @@ public:
 		return nullptr;
 	}
 
-	bool DoesQuestItemExist(uint32 itmID, int charges, bool flagItemForDeletion=false) { 	
+	bool DoesQuestItemExist(uint32 itmID, int charges, bool flagItemForDeletion=false) {
 		ItemInst* inst = FindQuestItemByID(itmID,charges,flagItemForDeletion);
 		if ( inst != nullptr )
 		{
@@ -462,7 +462,7 @@ public:
 	void	mod_npc_killed(Mob* oos);
 
 protected:
-	
+
 	const NPCType*	NPCTypedata;
 	NPCType*	NPCTypedata_ours;	//special case for npcs with uniquely created data.
 
@@ -478,7 +478,7 @@ protected:
 
 	int32	npc_faction_id;
 	int32	primary_faction;
-	
+
 	Timer	attacked_timer;		//running while we are being attacked (damaged)
     Timer	swarm_timer;
     Timer	classattack_timer;
@@ -499,8 +499,8 @@ protected:
 	bool HasAISpell;
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
-	
-	
+
+
 	uint32	max_dmg;
 	uint32	min_dmg;
 	int32	accuracy_rating;
@@ -513,11 +513,11 @@ protected:
 	uint16	pet_spell_id;
 	bool	taunting;
     Timer	taunt_timer;		//for pet taunting
-	
+
 	bool npc_aggro;
-	
+
 	deque<int> signal_q;
-	
+
 	//waypoint crap:
 	vector<wplist> Waypoints;
 	void _ClearWaypints();
@@ -534,7 +534,7 @@ protected:
 	float roambox_movingto_x;
 	float roambox_movingto_y;
 	uint32 roambox_delay;
-	
+
 	uint16   skills[HIGHEST_SKILL+1];
 	uint32   equipment[MAX_WORN_INVENTORY];	//this is an array of item IDs
 	uint16	d_meele_texture1;			//this is an item Material value
@@ -542,7 +542,7 @@ protected:
 	uint8	prim_melee_type;			//Sets the Primary Weapon attack message and animation
 	uint8	sec_melee_type;				//Sets the Secondary Weapon attack message and animation
 	AA_SwarmPetInfo *swarmInfoPtr;
-	
+
 	bool ldon_trapped;
 	uint8 ldon_trap_type;
 	uint16 ldon_spell_id;

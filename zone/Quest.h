@@ -33,7 +33,7 @@ typedef struct _tag_quest_entry{
 
 
 class Quest{
-public:	
+public:
 	Quest();
 	~Quest();
 	static pquest_entry	Test(int NpcId, int QuestObject);

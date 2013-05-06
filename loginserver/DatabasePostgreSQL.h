@@ -66,7 +66,7 @@ public:
 	 * Needed for world login procedure.
 	 * Returns true if the record was found, false otherwise.
 	 */
-	virtual bool GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id, 
+	virtual bool GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
 		unsigned int &trusted, string &list_desc, string &account, string &password);
 
 	/**

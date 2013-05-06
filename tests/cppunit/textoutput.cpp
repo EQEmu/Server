@@ -30,7 +30,7 @@
 # include "winconfig.h"
 #else
 # include "config.h"
-#endif 
+#endif
 
 #include "cpptest-textoutput.h"
 #include "cpptest-time.h"
@@ -55,12 +55,12 @@ namespace Test
 						<< "\tFile:    " << s.file()    << endl
 						<< "\tLine:    " << s.line()    << endl
 						<< "\tMessage: " << s.message() << endl << endl;
-						
+
 			}
 		};
-		
+
 	} // anonymous namespace
-	
+
 	/// Constructs a text output handler.
 	///
 	/// \param mode   Output mode.
@@ -71,7 +71,7 @@ namespace Test
 		_stream(stream),
 		_total_errors(0)
 	{}
-	
+
 	void
 	TextOutput::finished(int tests, const Time& time)
 	{
@@ -79,7 +79,7 @@ namespace Test
 				<< correct(tests, _total_errors) << "% correct"
 				<< " in " << time << " seconds" << endl;
 	}
-	
+
 	void
 	TextOutput::suite_start(int tests, const string& name)
 	{
@@ -89,13 +89,13 @@ namespace Test
 			_suite_tests = _suite_errors = 0;
 			_suite_total_tests = tests;
 			_suite_error_list.clear();
-			
+
 			_stream	<< _suite_name << ": "
 					<< "0/" << _suite_total_tests
 					<< "\r" << flush;
 		}
 	}
-	
+
 	void
 	TextOutput::suite_end(int tests, const string& name, const Time& time)
 	{
@@ -104,15 +104,15 @@ namespace Test
 			_stream	<< name << ": " << tests << "/" << tests << ", "
 					<< correct(tests, _suite_errors) << "% correct"
 					<< " in " << time << " seconds" << endl;
-            			
+
 			if (_mode == Verbose && _suite_errors)
 				for_each(_suite_error_list.begin(), _suite_error_list.end(),
 						 ShowSource(_stream));
-			
+
 			_total_errors += _suite_errors;
 		}
 	}
-	
+
 	void
 	TextOutput::test_end(const string&, bool ok, const Time&)
 	{
@@ -122,11 +122,11 @@ namespace Test
 		if (!ok)
 			++_suite_errors;
 	}
-	
+
 	void
 	TextOutput::assertment(const Source& s)
 	{
 		_suite_error_list.push_back(s);
 	}
-	
+
 } // namespace Test

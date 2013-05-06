@@ -67,7 +67,7 @@ using namespace std;
 		    ushort *array;
 		    struct seminfo *__buf;
 		    void *__pad;
-		};	  
+		};
 	#endif
 
 #endif
@@ -141,11 +141,11 @@ int main(int argc, char** argv) {
 
 
 	_log(WORLD__INIT, "CURRENT_VERSION: %s", CURRENT_VERSION);
-	
+
 	#ifdef _DEBUG
 		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	#endif
-	
+
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(WORLD__INIT_ERR, "Could not set signal handler");
 		return 0;
@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
 			iterator.Advance();
 		}
 	}
-	
+
 	_log(WORLD__INIT, "Connecting to MySQL...");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
 	}
 	dbasync = new DBAsync(&database);
 	guild_mgr.SetDatabase(&database);
-	
+
 	if (argc >= 2) {
 		char tmp[2];
 		if (strcasecmp(argv[1], "help") == 0 || strcasecmp(argv[1], "?") == 0 || strcasecmp(argv[1], "/?") == 0 || strcasecmp(argv[1], "-?") == 0 || strcasecmp(argv[1], "-h") == 0 || strcasecmp(argv[1], "-help") == 0) {
@@ -270,14 +270,14 @@ int main(int argc, char** argv) {
 			return 0;
 		}
 	}
-	
+
 	if(Config->WorldHTTPEnabled) {
 		_log(WORLD__INIT, "Starting HTTP world service...");
 		http_server.Start(Config->WorldHTTPPort, Config->WorldHTTPMimeFile.c_str());
 	} else {
 		_log(WORLD__INIT, "HTTP world service disabled.");
 	}
-	
+
 	_log(WORLD__INIT, "Loading variables..");
 	database.LoadVariables();
 	_log(WORLD__INIT, "Loading zones..");
@@ -318,15 +318,15 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT_ERR, "Unable to load %s", Config->EQTimeFile.c_str());
 	_log(WORLD__INIT, "Loading launcher list..");
 	launcher_list.LoadList();
-	
+
 	char tmp[20];
 	tmp[0] = '\0';
-	database.GetVariable("holdzones",tmp, 20);	
+	database.GetVariable("holdzones",tmp, 20);
 	if ((strcasecmp(tmp, "1") == 0)) {
 		holdzones = true;
 	}
 	_log(WORLD__INIT, "Reboot zone modes %s",holdzones ? "ON" : "OFF");
-	
+
 	_log(WORLD__INIT, "Deleted %i stale player corpses from database", database.DeleteStalePlayerCorpses());
 	if (RuleB(World, DeleteStaleCorpeBackups) == true) {
 	_log(WORLD__INIT, "Deleted %i stale player backups from database", database.DeleteStalePlayerBackups());
@@ -383,10 +383,10 @@ int main(int argc, char** argv) {
 	EQStream* eqs;
 	EmuTCPConnection* tcpc;
 	EQStreamInterface *eqsi;
-	
+
 	while(RunLoops) {
 		Timer::SetCurrentTime();
-		
+
 		//check the factory for any new incoming streams.
 		while ((eqs = eqsf.Pop())) {
 			//pull the stream out of the factory and give it to the stream identifier
@@ -397,10 +397,10 @@ int main(int argc, char** argv) {
 			_log(WORLD__CLIENT, "New connection from %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
 			stream_identifier.AddStream(eqs);	//takes the stream
 		}
-		
+
 		//give the stream identifier a chance to do its work....
 		stream_identifier.Process();
-		
+
 		//check the stream identifier for any now-identified streams
 		while((eqsi = stream_identifier.PopIdentified())) {
 			//now that we know what patch they are running, start up their client object
@@ -425,9 +425,9 @@ int main(int argc, char** argv) {
  					client_list.Add(client);
  			}
 		}
-		
+
 		client_list.Process();
-		
+
 		while ((tcpc = tcps.NewQueuePop())) {
 			struct in_addr in;
 			in.s_addr = tcpc->GetrIP();
@@ -439,26 +439,26 @@ int main(int argc, char** argv) {
 		{
 			database.PurgeExpiredInstances();
 		}
-		
+
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
-		
+
 		loginserverlist.Process();
-		
+
 		console_list.Process();
-		
+
 		zoneserver_list.Process();
-		
+
 		launcher_list.Process();
 
 		UCSLink.Process();
-	
+
 		QSLink.Process();
 
 		LFPGroupList.Process();
 
 		adventure_manager.Process();
-		
+
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();

@@ -55,7 +55,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	if(zc->zoneID == 0) {
 		//client dosent know where they are going...
 		//try to figure it out for them.
-		
+
 		switch(zone_mode) {
 		case EvacToSafeCoords:
 		case ZoneToSafeCoords:
@@ -85,7 +85,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			} else {
 				//unable to find a zone point... is there anything else
 				//that can be a valid un-zolicited zone request?
-				
+
 				CheatDetected(MQZone, zc->x, zc->y, zc->z);
 				Message(13, "Invalid unsolicited zone request.");
 				LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
@@ -102,7 +102,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			target_zone_id = zonesummon_id;
 		else
 			target_zone_id = zc->zoneID;
-		
+
 		//if we are zoning to a specific zone unsolicied,
 		//then until otherwise determined, they must be zoning
 		//on a zone line.
@@ -119,7 +119,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			//then we assume this is invalid.
 			if(!zone_point || zone_point->target_zone_id != target_zone_id) {
 				LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
-				CheatDetected(MQGate, zc->x, zc->y, zc->z);				
+				CheatDetected(MQGate, zc->x, zc->y, zc->z);
 				SendZoneCancel(zc);
 				return;
 			}
@@ -213,11 +213,11 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		break;
 	case ZoneUnsolicited:   //client came up with this on its own.
 		//client requested a zoning... what are the cases when this could happen?
-		
+
 		//Handle zone point case:
 		if(zone_point != nullptr) {
 			//they are zoning using a valid zone point, figure out coords
-			
+
 			//999999 is a placeholder for 'same as where they were from'
 			if(zone_point->target_x == 999999)
 				dest_x = GetX();
@@ -235,12 +235,12 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 				dest_h = GetHeading();
 			else
 				dest_h = zone_point->target_heading;
-			
+
 			break;
 		}
-		
+
 		//for now, there are no other cases...
-		
+
 		//could not find a valid reason for them to be zoning, stop it.
 		CheatDetected(MQZoneUnknownDest, 0.0, 0.0, 0.0);
 		LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%s'. Not near a zone point.", GetName(), target_zone_name);
@@ -256,20 +256,20 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	//not sure when we would use ZONE_ERROR_NOTREADY
 
 	//enforce min status and level
-	if (!ignorerestrictions && (Admin() < minstatus || GetLevel() < minlevel)) 
+	if (!ignorerestrictions && (Admin() < minstatus || GetLevel() < minlevel))
 	{
 		myerror = ZONE_ERROR_NOEXPERIENCE;
 	}
-	
+
 	if(!ignorerestrictions && flag_needed[0] != '\0') {
 		//the flag needed string is not empty, meaning a flag is required.
-		if(Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(target_zone_id)) 
+		if(Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(target_zone_id))
 		{
 			Message(13, "You do not have the flag to enter %s.", target_zone_name);
 			myerror = ZONE_ERROR_NOEXPERIENCE;
 		}
 	}
-	
+
 	//TODO: ADVENTURE ENTRANCE CHECK
 
 	if(myerror == 1) {
@@ -293,15 +293,15 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 	zc2->success = 1;
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
-	
+
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
 }
 
-void Client::SendZoneError(ZoneChange_Struct *zc, int8 err) 
+void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 {
 	LogFile->write(EQEMuLog::Error, "Zone %i is not available because target wasn't found or character insufficent level", zc->zoneID);
-	
+
 	SetPortExemption(true);
 
 	EQApplicationPacket *outapp;
@@ -312,7 +312,7 @@ void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 	zc2->success = err;
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
-	
+
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
 }
@@ -320,15 +320,15 @@ void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instance_id, float dest_x, float dest_y, float dest_z, float dest_h, int8 ignore_r) {
 	//this is called once the client is fully allowed to zone here
 	//it takes care of all the activities which occur when a client zones out
-	
+
 	SendLogoutPackets();
-	
+
 	//dont clear aggro until the zone is successful
 	entity_list.RemoveFromHateLists(this);
-	
+
 	if(this->GetPet())
 		entity_list.RemoveFromHateLists(this->GetPet());
-	
+
 	LogFile->write(EQEMuLog::Status, "Zoning '%s' to: %s (%i) - (%i) x=%f, y=%f, z=%f",
 		m_pp.name, database.GetZoneName(zone_id), zone_id, instance_id,
 		dest_x, dest_y, dest_z);
@@ -342,10 +342,10 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	m_pp.heading = dest_h;
 	m_pp.zone_id = zone_id;
 	m_pp.zoneInstance = instance_id;
-	
+
 	//Force a save so its waiting for them when they zone
 	Save(2);
-	
+
 	if (zone_id == zone->GetZoneID() && instance_id == zone->GetInstanceID()) {
 		// No need to ask worldserver if we're zoning to ourselves (most
 		// likely to a bind point), also fixes a bug since the default response was failure
@@ -357,7 +357,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		zc2->success = 1;
 		outapp->priority = 6;
 		FastQueuePacket(&outapp);
-		
+
 		zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 	} else {
 	// vesuvias - zoneing to another zone so we need to the let the world server
@@ -376,7 +376,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
-	
+
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
 	zonesummon_x = 0;
@@ -478,7 +478,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		return;
 	}
 	iZoneNameLength = strlen(pZoneName);
-		
+
 	switch(zm) {
 		case EvacToSafeCoords:
 		case ZoneToSafeCoords:
@@ -492,7 +492,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			zonesummon_y = y_pos = y;
 			zonesummon_z = z_pos = z;
 			SetHeading(heading);
-			
+
 			zonesummon_id = zoneID;
 			zonesummon_ignorerestrictions = 1;
 			break;
@@ -501,7 +501,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			zonesummon_y = y;
 			zonesummon_z = z;
 			SetHeading(heading);
-			
+
 			zonesummon_id = zoneID;
 			zonesummon_ignorerestrictions = ignorerestrictions;
 			break;
@@ -516,7 +516,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			y = y_pos = m_pp.binds[0].y;
 			z = z_pos = m_pp.binds[0].z;
 			heading = m_pp.binds[0].heading;
-			
+
 			zonesummon_ignorerestrictions = 1;
 			LogFile->write(EQEMuLog::Debug, "Player %s has died and will be zoned to bind point in zone: %s at LOC x=%f, y=%f, z=%f, heading=%f", GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
 			break;
@@ -603,7 +603,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			gmg->heading = heading;
 			gmg->instance_id = instance_id;
 			gmg->type = 0x01;				// '0x01' was an observed value for the type field, not sure of meaning
-			
+
 			// we hide the real zoneid we want to evac/succor to here
 			zonesummon_id = zoneID;
 
@@ -618,19 +618,19 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 				proximity_x = x_pos;
 				proximity_y = y_pos;
 				proximity_z = z_pos;
-				
+
 				//send out updates to people in zone.
 				SendPosition();
-		
-#ifdef PACKET_UPDATE_MANAGER   
+
+#ifdef PACKET_UPDATE_MANAGER
 				//flush our position queues because we dont know where we will end up
 				update_manager.FlushQueues();
 #endif
 			}
-	
+
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
 			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
-			
+
 			gmg->zone_id = zoneID;
 			gmg->x = x;
 			gmg->y = y;
@@ -703,9 +703,9 @@ void Client::SetBindPoint(int to_zone, float new_x, float new_y, float new_z) {
 
 void Client::GoToBind(uint8 bindnum) {
 	// if the bind number is invalid, use the primary bind
-	if(bindnum > 4) 
+	if(bindnum > 4)
 		bindnum = 0;
-	
+
 	// move the client, which will zone them if needed.
 	// ignore restrictions on the zone request..?
 	if(bindnum == 0)
@@ -721,13 +721,13 @@ void Client::GoToDeath() {
 void Client::SetZoneFlag(uint32 zone_id) {
 	if(HasZoneFlag(zone_id))
 		return;
-	
+
 	zone_flags.insert(zone_id);
-	
+
 	//update the DB
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-	
+
     // Retrieve all waypoints for this grid
     if(!database.RunQuery(query,MakeAnyLenString(&query,
     	"INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)",
@@ -739,13 +739,13 @@ void Client::SetZoneFlag(uint32 zone_id) {
 void Client::ClearZoneFlag(uint32 zone_id) {
 	if(!HasZoneFlag(zone_id))
 		return;
-	
+
 	zone_flags.erase(zone_id);
-	
+
 	//update the DB
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-	
+
     // Retrieve all waypoints for this grid
     if(!database.RunQuery(query,MakeAnyLenString(&query,
     	"DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d",
@@ -759,7 +759,7 @@ void Client::LoadZoneFlags() {
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	
+
     // Retrieve all waypoints for this grid
     if(database.RunQuery(query,MakeAnyLenString(&query,
     	"SELECT zoneID from zone_flags WHERE charID=%d",
@@ -786,24 +786,24 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		to->Message(0, "%s has no zone flags.", GetName());
 		return;
 	}
-	
+
 	set<uint32>::const_iterator cur, end;
 	cur = zone_flags.begin();
 	end = zone_flags.end();
 	char empty[1] = { '\0' };
-	
+
 	to->Message(0, "Flags for %s:", GetName());
-	
+
 	for(; cur != end; cur++) {
 		uint32 zoneid = *cur;
-		
+
 		const char *short_name = database.GetZoneName(zoneid);
-		
+
 		char *long_name = nullptr;
 		database.GetZoneLongName(short_name, &long_name);
 		if(long_name == nullptr)
 			long_name = empty;
-		
+
 		float safe_x, safe_y, safe_z;
 		int16 minstatus = 0;
 		uint8 minlevel = 0;
@@ -811,7 +811,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		if(!database.GetSafePoints(short_name, 0, &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_name)) {
 			strcpy(flag_name, "(ERROR GETTING NAME)");
 		}
-		
+
 		to->Message(0, "Has Flag %s for zone %s (%d,%s)", flag_name, long_name, zoneid, short_name);
 		if(long_name != empty)
 			delete[] long_name;
@@ -825,7 +825,7 @@ bool Client::CanBeInZone() {
 
 	if(Admin() >= RuleI(GM, MinStatusToZoneAnywhere))
 		return(true);
-	
+
 	float safe_x, safe_y, safe_z;
 	int16 minstatus = 0;
 	uint8 minlevel = 0;
@@ -835,7 +835,7 @@ bool Client::CanBeInZone() {
 		_log(CLIENT__ERROR, "Unable to query zone info for ourself '%s'", zone->GetShortName());
 		return(false);
 	}
-	
+
 	if(GetLevel() < minlevel) {
 		_log(CLIENT__ERROR, "Character does not meet min level requirement (%d < %d)!", GetLevel(), minlevel);
 		return(false);
@@ -844,7 +844,7 @@ bool Client::CanBeInZone() {
 		_log(CLIENT__ERROR, "Character does not meet min status requirement (%d < %d)!", Admin(), minstatus);
 		return(false);
 	}
-	
+
 	if(flag_needed[0] != '\0') {
 		//the flag needed string is not empty, meaning a flag is required.
 		if(Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(zone->GetZoneID())) {

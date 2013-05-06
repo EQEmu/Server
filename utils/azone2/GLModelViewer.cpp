@@ -30,7 +30,7 @@ typedef struct _vertex{
 	float x;
 	float y;
 	float z;
-	
+
 }VERTEX;
 
 void DrawEQModel(FileLoader *fileloader, int modnum);
@@ -43,10 +43,10 @@ HGLRC		hRC=NULL;
 HWND		hWnd=NULL;
 HINSTANCE	hInstance;
 
-bool	keys[256];	
+bool	keys[256];
 char	ch;
 bool	active=true;
-GLuint	base;	
+GLuint	base;
 
 int modelnum = 1;			// The Number of the model we are currently displaying.
 float angle = 0;			// used to rotate the model. Updated by a timer
@@ -62,72 +62,72 @@ GLvoid BuildFont(GLvoid)
 
 	font = CreateFont(-24, 0, 0, 0, FW_BOLD, false, false, false, ANSI_CHARSET,
 			  OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY,
-		    	  FF_DONTCARE|DEFAULT_PITCH, "Courier New");		
+		    	  FF_DONTCARE|DEFAULT_PITCH, "Courier New");
 
-	oldfont = (HFONT)SelectObject(hDC, font);   
-	wglUseFontBitmaps(hDC, 32, 96, base);	
-	SelectObject(hDC, oldfont);	
-	DeleteObject(font);	
+	oldfont = (HFONT)SelectObject(hDC, font);
+	wglUseFontBitmaps(hDC, 32, 96, base);
+	SelectObject(hDC, oldfont);
+	DeleteObject(font);
 }
 
-GLvoid KillFont(GLvoid)	
+GLvoid KillFont(GLvoid)
 {
-	glDeleteLists(base, 96);	
+	glDeleteLists(base, 96);
 }
 
 GLvoid glPrint(const char *fmt, ...)
 {
 	char		text[256];
-	va_list		ap;	
+	va_list		ap;
 
-	if (fmt == NULL) return;	
+	if (fmt == NULL) return;
 
-	va_start(ap, fmt);	
-	vsprintf(text, fmt, ap);	
-	va_end(ap);		
+	va_start(ap, fmt);
+	vsprintf(text, fmt, ap);
+	va_end(ap);
 
-	glPushAttrib(GL_LIST_BIT);	
-	glListBase(base - 32);	
+	glPushAttrib(GL_LIST_BIT);
+	glListBase(base - 32);
 	glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);
-	glPopAttrib();					
+	glPopAttrib();
 }
 
 GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 {
-	if (height==0)height=1;		
+	if (height==0)height=1;
 
-	glViewport(0,0,width,height);	
+	glViewport(0,0,width,height);
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();	
+	glLoadIdentity();
 	gluPerspective(60.0f,(GLfloat)width/(GLfloat)height,0.1f,12000.0f);
-	glMatrixMode(GL_MODELVIEW);	
-	glLoadIdentity();	
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
-int InitGL(GLvoid)	
+int InitGL(GLvoid)
 {
-	glShadeModel(GL_SMOOTH);	
+	glShadeModel(GL_SMOOTH);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
-	glClearDepth(1.0f);		
+	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	BuildFont();
-	return true;					
+	return true;
 }
 
-int DrawGLScene(char *ZoneFileName)		
+int DrawGLScene(char *ZoneFileName)
 {
 	char textBuffer[100];
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();				
+	glLoadIdentity();
 
 	if(mfileloader->model_data.models[modelnum])
 		DrawEQModel(mfileloader, modelnum);
 
 	glLoadIdentity();
-	glTranslatef(0.0f,0.0f,-1.2f);		
+	glTranslatef(0.0f,0.0f,-1.2f);
 	glColor3f(100.0f,0.0f,0.0f);
 	glRasterPos2f(-1.15f,0.56f);
 
@@ -139,17 +139,17 @@ int DrawGLScene(char *ZoneFileName)
 	else
 		sprintf(textBuffer,"  %s: Model Number %4d. Not Viewable (probably zone mesh).", ZoneFileName, modelnum);
 
-	glPrint(textBuffer); 
+	glPrint(textBuffer);
 	sprintf(textBuffer,"  Use the + and - keys to cycle through models.");
 	glRasterPos2f(-1.15f,0.50f);
-	glPrint(textBuffer); 
+	glPrint(textBuffer);
 
-	
-	return true;		
+
+	return true;
 }
 
 GLvoid KillGLWindow(GLvoid) {
-	if (hRC) {	
+	if (hRC) {
 		if (!wglMakeCurrent(NULL,NULL)) {
 			MessageBox(NULL,"Release Of DC And RC Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
 		}
@@ -157,107 +157,107 @@ GLvoid KillGLWindow(GLvoid) {
 		if (!wglDeleteContext(hRC)) {
 			MessageBox(NULL,"Release Rendering Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
 		}
-		hRC=NULL;		
+		hRC=NULL;
 	}
 
 	if (hDC && !ReleaseDC(hWnd,hDC)) {
 		MessageBox(NULL,"Release Device Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
-		hDC=NULL;		
+		hDC=NULL;
 	}
 
 	if (hWnd && !DestroyWindow(hWnd)) {
 		MessageBox(NULL,"Could Not Release hWnd.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
-		hWnd=NULL;		
+		hWnd=NULL;
 	}
 
 	if (!UnregisterClass("OpenGL",hInstance)) {
 		MessageBox(NULL,"Could Not Unregister Class.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
-		hInstance=NULL;			
+		hInstance=NULL;
 	}
 	KillFont();
 }
 
- 
+
 BOOL CreateGLWindow(char* title, int width, int height, int bits) {
 	GLuint		PixelFormat;
-	WNDCLASS	wc;	
+	WNDCLASS	wc;
 	DWORD		dwExStyle;
 	DWORD		dwStyle;
 	RECT		WindowRect;
 	WindowRect.left=(long)0;
-	WindowRect.right=(long)width;	
-	WindowRect.top=(long)0;	
-	WindowRect.bottom=(long)height;	
+	WindowRect.right=(long)width;
+	WindowRect.top=(long)0;
+	WindowRect.bottom=(long)height;
 
-	hInstance = GetModuleHandle(NULL);	
+	hInstance = GetModuleHandle(NULL);
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	wc.lpfnWndProc = (WNDPROC) WndProc;	
-	wc.cbClsExtra = 0;		
-	wc.cbWndExtra = 0;	
+	wc.lpfnWndProc = (WNDPROC) WndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);	
+	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = NULL;		
-	wc.lpszMenuName = NULL;		
+	wc.hbrBackground = NULL;
+	wc.lpszMenuName = NULL;
 	wc.lpszClassName = "OpenGL";
 
 	if (!RegisterClass(&wc)) {
 		MessageBox(NULL,"Failed To Register The Window Class.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-		return false;	
+		return false;
 	}
-	
+
 	dwExStyle=WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-	dwStyle=WS_OVERLAPPEDWINDOW;		
+	dwStyle=WS_OVERLAPPEDWINDOW;
 
 	AdjustWindowRectEx(&WindowRect, dwStyle, false, dwExStyle);
 
 	if (!(hWnd=CreateWindowEx(dwExStyle, "OpenGL", title, dwStyle|WS_CLIPSIBLINGS|WS_CLIPCHILDREN,
 				  0, 0,	WindowRect.right-WindowRect.left, WindowRect.bottom-WindowRect.top,
 				  NULL,	NULL, hInstance, NULL))) {
-		KillGLWindow();					
+		KillGLWindow();
 		MessageBox(NULL,"Window Creation Error.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-		return false;				
+		return false;
 	}
 
 	static	PIXELFORMATDESCRIPTOR pfd= {
 		sizeof(PIXELFORMATDESCRIPTOR), 1, PFD_DRAW_TO_WINDOW|PFD_SUPPORT_OPENGL|PFD_DOUBLEBUFFER,
 		PFD_TYPE_RGBA, bits, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,	0, 0, PFD_MAIN_PLANE,
-		0, 0, 0, 0	
+		0, 0, 0, 0
 	};
-	
+
 	if (!(hDC=GetDC(hWnd))) {
-		KillGLWindow();	
+		KillGLWindow();
 		MessageBox(NULL,"Can't Create A GL Device Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
 		return false;
 	}
 
 	if (!(PixelFormat=ChoosePixelFormat(hDC,&pfd)))	{
-		KillGLWindow();				
+		KillGLWindow();
 		MessageBox(NULL,"Can't Find A Suitable PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-		return false;			
+		return false;
 	}
 
 	if(!SetPixelFormat(hDC,PixelFormat,&pfd)) {
-		KillGLWindow();			
+		KillGLWindow();
 		MessageBox(NULL,"Can't Set The PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-		return false;		
+		return false;
 	}
 
 	if (!(hRC=wglCreateContext(hDC))) {
-		KillGLWindow();		
+		KillGLWindow();
 		MessageBox(NULL,"Can't Create A GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-		return false;	
+		return false;
 	}
 
 	if(!wglMakeCurrent(hDC,hRC)) {
-		KillGLWindow();	
+		KillGLWindow();
 		MessageBox(NULL,"Can't Activate The GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
 		return false;
 	}
 
 	ShowWindow(hWnd,SW_SHOW);
-	SetForegroundWindow(hWnd);	
-	SetFocus(hWnd);		
+	SetForegroundWindow(hWnd);
+	SetFocus(hWnd);
 	ReSizeGLScene(width, height);
 
 	if (!InitGL()) {
@@ -268,17 +268,17 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits) {
 
 	SetTimer(hWnd, 1, 50, (TIMERPROC) NULL);
 
-	return true;			
+	return true;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
-		case WM_ACTIVATE:				
-			if (!HIWORD(wParam)) active=true;	
+		case WM_ACTIVATE:
+			if (!HIWORD(wParam)) active=true;
 			else
 				active=false;
-			
-			return 0;	
+
+			return 0;
 		case WM_SYSCOMMAND:
 			switch (wParam) {
 				case SC_SCREENSAVE:
@@ -288,19 +288,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case WM_CLOSE:
 			PostQuitMessage(0);
-			return 0;	
+			return 0;
 		case WM_KEYDOWN:
 			keys[wParam] = true;
-			return 0;	
+			return 0;
 		case WM_CHAR:
 			ch = wParam;
 			return 0;
-		case WM_KEYUP:	
-			keys[wParam] = false;	
-			return 0;	
-		case WM_SIZE:	
-			ReSizeGLScene(LOWORD(lParam),HIWORD(lParam)); 
-			return 0;				
+		case WM_KEYUP:
+			keys[wParam] = false;
+			return 0;
+		case WM_SIZE:
+			ReSizeGLScene(LOWORD(lParam),HIWORD(lParam));
+			return 0;
 		case WM_TIMER:
 			angle = angle + 1;
 			if(angle>359) angle = 0;
@@ -327,7 +327,7 @@ void ScaleVertex(VERTEX &v, float XScale, float YScale, float ZScale) {
 
 
 void DrawEQModel(FileLoader *fileloader, int modnum) {
-	
+
 	Polygon *poly;
 	Vertex *verts[3];
 	VERTEX v1, v2, v3;
@@ -363,16 +363,16 @@ void DrawEQModel(FileLoader *fileloader, int modnum) {
 	if(maxz-minz>maxDimension) maxDimension = maxz-minz;
 
 	// Hack for very small models (e.g. spoons)
-	if(maxDimension>1) 
-		glTranslatef(-1.5f,0.0f,-(maxDimension*2));					
+	if(maxDimension>1)
+		glTranslatef(-1.5f,0.0f,-(maxDimension*2));
 	else
-		glTranslatef(-1.5f,0.0f,-10);					
+		glTranslatef(-1.5f,0.0f,-10);
 
 	// angle is updated by a timer every 50ms.
 	glRotatef(angle, 1, 0, 0);
 	glRotatef(angle, 0, 1, 0);
 	glRotatef(angle, 0, 0, 1);
-	
+
 	glBegin(GL_TRIANGLES);
 
 	for(int i = 0; i < model->poly_count; ++i) {
@@ -398,23 +398,23 @@ void DrawEQModel(FileLoader *fileloader, int modnum) {
 			ScaleVertex(v2, 10, 10, 10);
 			ScaleVertex(v3, 10, 10, 10);
 		}
-		
+
 		// Assign a kind of random colour to each polygon
 
 		//glColor3b((i%50)+50,(i*5)%200,(i*10)%200);
 		float col = (float)(100 + ((i*10) % 150)) /250 * 1.0f;
 		glColor3f(col, col, col);
-    
+
 		glVertex3f(v1.x, v1.z, v1.y);
 		glVertex3f(v2.x, v2.z, v2.y);
 		glVertex3f(v3.x, v3.z, v3.y);
-	    
+
 	}
 	glEnd();
 }
 
 bool ProcessZoneFile(const char *shortname) {
-	
+
 	char bufs[96];
   	Archive *archive;
 
@@ -427,7 +427,7 @@ bool ProcessZoneFile(const char *shortname) {
 
 	archive = new PFSLoader();
 	fff = fopen(bufs, "rb");
-	if(fff != NULL) 
+	if(fff != NULL)
 		FileType = S3D;
 	else {
 		sprintf(bufs, "%s.eqg", shortname);
@@ -443,15 +443,15 @@ bool ProcessZoneFile(const char *shortname) {
 
   	if(archive->Open(fff) == 0) {
 		MessageBox(NULL,"Unable to open container file","ERROR",MB_OK|MB_ICONEXCLAMATION);
-		
+
 		return(false);
 	}
 
 	switch(FileType) {
-		case S3D: 
+		case S3D:
   			mfileloader = new WLDLoader();
   			if(mfileloader->Open(NULL, (char *) shortname, archive) == 0) {
-	  			
+
 				MessageBox(NULL,"Error reading WLD from container file","ERROR",MB_OK|MB_ICONEXCLAMATION);
 	  			return(false);
   			}
@@ -485,11 +485,11 @@ bool ProcessZoneFile(const char *shortname) {
 int WINAPI WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	MSG msg;
 	BOOL done=false;
-	FILE *fp; 
+	FILE *fp;
 
-	for(int i=0;i<256;i++) 
+	for(int i=0;i<256;i++)
 		keys[i] = false;
-	
+
 
 	char* buf = (char *) new char[strlen(lpCmdLine) + 1] ;
 	char *pTmp = buf;
@@ -501,48 +501,48 @@ int WINAPI WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	strcpy(buf,lpCmdLine);
-	
+
 	if(!ProcessZoneFile(buf)) return 0;
-	
+
 	if (!CreateGLWindow("EQ Model Viewer",1280,768,16))
-		return 0;	
-	
+		return 0;
+
 	while(!done) {
 		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE)) {
-			if (msg.message==WM_QUIT) 
-				done=true;	
+			if (msg.message==WM_QUIT)
+				done=true;
 			else {
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
 		}
 		else {
-			if ((active && !DrawGLScene(buf)) || keys[VK_ESCAPE]) 
-				done=true;				
+			if ((active && !DrawGLScene(buf)) || keys[VK_ESCAPE])
+				done=true;
 			else
-				SwapBuffers(hDC);	
+				SwapBuffers(hDC);
 
 			// Use + and - to cycle through the models
 
-			if (toupper(ch)=='+') { 
-				if(modelnum+1 < mfileloader->model_data.model_count) 
+			if (toupper(ch)=='+') {
+				if(modelnum+1 < mfileloader->model_data.model_count)
 					modelnum++;
 				else
 					modelnum=0;
 				angle = 0;
 			}
-			if (toupper(ch)=='-') { 
+			if (toupper(ch)=='-') {
 				if(modelnum>0)
 					modelnum--;
 				else
 					modelnum =  mfileloader->model_data.model_count - 1;
 
-				angle = 0; 
+				angle = 0;
 			}
 			ch = 0;
 		}
 	}
 
 	KillGLWindow();
-	return (msg.wParam);	
+	return (msg.wParam);
 }

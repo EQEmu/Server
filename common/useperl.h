@@ -3,7 +3,7 @@
 
 
 //headers from the Perl distribution
-#include <EXTERN.h> 
+#include <EXTERN.h>
 #define WIN32IO_IS_STDIO
 
 #ifndef WIN32
@@ -43,7 +43,7 @@ extern "C" {	//the perl headers dont do this for us...
 #endif
 
 #ifdef THIS     /* this macro seems to leak out on some systems */
-#undef THIS   
+#undef THIS
 #endif
 
 

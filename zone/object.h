@@ -94,7 +94,7 @@ IT10725_ACTORDEF=Shuriken
 #define OT_VALEFORGE    0x31  //halfling
 // gnome forge 0x23 (ak'anon forge)
 // barbarian forge 0x24 (northman forge)
-// 
+//
 // iksar forge 0x26	(cabilis forge)
 // human forge 0x27 (qeynos or freeport?) (royal qeynos forge or freeport forge)
 // human forge 0x28 (qeynos or freeport?)
@@ -136,7 +136,7 @@ public:
 	Object(Client* client, const ItemInst* inst);
 	Object(const ItemInst *inst, float x, float y, float z, float heading, uint32 decay_time = 300000);
 	Object(const char *model, float x, float y, float z, float heading, uint8 type, uint32 decay_time = 0);
-	
+
 	// Destructor
 	~Object();
 	bool Process();
@@ -148,29 +148,29 @@ public:
 	static void HandleCombine(Client* user, const NewCombine_Struct* in_combine, Object *worldo);
 	static void HandleAugmentation(Client* user, const AugmentItem_Struct* in_augment, Object *worldo);
 	static void HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac);
-	
+
 	static SkillType TypeToSkill(uint32 type);
-	
+
 	// Packet functions
 	void CreateSpawnPacket(EQApplicationPacket* app);
 	void CreateDeSpawnPacket(EQApplicationPacket* app);
 	void Depop();
 	void Repop();
-	
+
 	//Decay functions
 	void StartDecay() {decay_timer.Start();}
-	
+
 	// Container functions
 	void PutItem(uint8 index, const ItemInst* inst);
 	void DeleteItem(uint8 index); // Item inside container
 	ItemInst* PopItem(uint8 index); // Pop item out of container
-	
+
 	// Override base class implementations
 	virtual bool IsObject()	const { return true; }
 	virtual bool Save();
 	virtual uint16 VarSave();
 	virtual void SetID(uint16 set_id);
-	
+
 	void ClearUser() { user = nullptr; }
 
 	uint32 GetDBID();
@@ -204,7 +204,7 @@ public:
 protected:
 	void	ResetState();	// Set state back to original
 	void	RandomSpawn(bool send_packet = false);		//spawn this ground spawn at a random place
-	
+
 	Object_Struct	m_data;		// Packet data
 	ItemInst*		m_inst;		// Item representing object
 	bool			m_inuse;	// Currently in use by a client?
@@ -220,10 +220,10 @@ protected:
 	bool			m_ground_spawn;
 
 	std::map<std::string, std::string> o_EntityVariables;
-	
+
 	Client *user;
 	Client *last_user;
-	
+
 	Timer respawn_timer;
 	Timer decay_timer;
 };

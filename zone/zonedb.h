@@ -99,7 +99,7 @@ const int MaxMercStanceID = 9;
 
 struct MercStanceInfo {
 	uint8	ProficiencyID;
-	uint8	ClassID;	
+	uint8	ClassID;
 	uint32	StanceID;
 	uint8	IsDefault;
 };
@@ -162,7 +162,7 @@ struct MercSpellEntry {
 
 struct ClientMercEntry {
 	uint32 id;
-	uint32 npcid;	
+	uint32 npcid;
 };
 
 class ItemInst;
@@ -177,7 +177,7 @@ public:
 	ZoneDatabase();
 	ZoneDatabase(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	virtual ~ZoneDatabase();
-	
+
 	/*
 	 * Objects and World Containers
 	 */
@@ -188,7 +188,7 @@ public:
 	void	UpdateObject(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const ItemInst* inst);
 	void	DeleteObject(uint32 id);
 	Ground_Spawns*	LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs);
-	
+
 	/*
 	 * Traders
 	 */
@@ -214,17 +214,17 @@ public:
 	 */
 	bool	SetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
 	uint32	GetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
-	bool	GetAccountInfoForLogin(uint32 account_id, int16* admin = 0, char* account_name = 0, 
+	bool	GetAccountInfoForLogin(uint32 account_id, int16* admin = 0, char* account_name = 0,
 				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = 0);
-	bool	GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin = 0, char* account_name = 0, 
-				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = false, 
+	bool	GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin = 0, char* account_name = 0,
+				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = false,
 				uint32* account_creation = 0);
-	bool	GetCharacterInfoForLogin_result(MYSQL_RES* result, uint32* character_id = 0, char* current_zone = 0, 
-				PlayerProfile_Struct* pp = 0, Inventory* inv = 0, ExtendedProfile_Struct *ext = 0, uint32* pplen = 0, 
+	bool	GetCharacterInfoForLogin_result(MYSQL_RES* result, uint32* character_id = 0, char* current_zone = 0,
+				PlayerProfile_Struct* pp = 0, Inventory* inv = 0, ExtendedProfile_Struct *ext = 0, uint32* pplen = 0,
 				uint32* guilddbid = 0, uint8* guildrank = 0, uint8 *class_=  0, uint8 *level = 0, bool *LFP = 0,
 				bool *LFG = 0, uint8 *NumXTargets = 0, uint8* firstlogon = 0);
-	bool	GetCharacterInfoForLogin(const char* name, uint32* character_id = 0, char* current_zone = 0, 
-				PlayerProfile_Struct* pp = 0, Inventory* inv = 0, ExtendedProfile_Struct *ext = 0, uint32* pplen = 0, 
+	bool	GetCharacterInfoForLogin(const char* name, uint32* character_id = 0, char* current_zone = 0,
+				PlayerProfile_Struct* pp = 0, Inventory* inv = 0, ExtendedProfile_Struct *ext = 0, uint32* pplen = 0,
 				uint32* guilddbid = 0, uint8* guildrank = 0, uint8 *class_ = 0, uint8 *level = 0, bool *LFP = 0,
 				bool *LFG = 0, uint8 *NumXTargets = 0, uint8* firstlogon = 0);
 	void SaveBuffs(Client *c);
@@ -237,7 +237,7 @@ public:
 	 * Character Inventory
 	 */
 	bool	NoRentExpired(const char* name);
-	
+
 	/*
 	 * Corpses
 	 */
@@ -265,7 +265,7 @@ public:
 	uint32   GetPlayerCorpseID(uint32 char_id, uint8 corpse);
 	uint32  GetPlayerCorpseItemAt(uint32 corpse_id, uint16 slotid);
 	uint32	GetPlayerCorpseTimeLeft(uint8 corpse, uint8 type);
-	
+
 	/*
 	 * Faction
 	 */
@@ -277,7 +277,7 @@ public:
 	bool	LoadFactionData();
 	bool	LoadFactionValues(uint32 char_id, faction_map & val_list);
 	bool	LoadFactionValues_result(MYSQL_RES* result, faction_map & val_list);
-	
+
 	/*
 	 * AAs
 	 */
@@ -291,7 +291,7 @@ public:
 	void	LoadAAs(SendAA_Struct **load);
 	uint32 CountAAEffects();
 	void FillAAEffects(SendAA_Struct* aa_struct);
-	
+
 	/*
 	 * Zone related
 	 */
@@ -303,7 +303,7 @@ public:
 	bool	UpdateZoneSafeCoords(const char* zonename, float x, float y, float z);
 	uint8	GetUseCFGSafeCoords();
     int		getZoneShutDownDelay(uint32 zoneID, uint32 version);
-	
+
 	/*
 	 * Spawns and Spawn Points
 	 */
@@ -315,7 +315,7 @@ public:
 	void	UpdateSpawn2Timeleft(uint32 id, uint16 instance_id,uint32 timeleft);
 	uint32	GetSpawnTimeLeft(uint32 id, uint16 instance_id);
 	void	UpdateSpawn2Status(uint32 id, uint8 new_status);
-	
+
 	/*
 	 * Grids/Paths
 	 */
@@ -333,7 +333,7 @@ public:
 	void	AssignGrid(Client *client, float x, float y, uint32 id);
 	int		GetHighestGrid(uint32 zoneid);
 	int		GetHighestWaypoint(uint32 zoneid, uint32 gridid);
-	
+
 	/*
 	 * NPCs
 	 */
@@ -371,14 +371,14 @@ public:
 	void	UpdatePetitionToDB(Petition* wpet);
 	void	InsertPetitionToDB(Petition* wpet);
 	void	RefreshPetitionsFromDB();
-	
-	
+
+
 	/*
 	 * Merchants
 	 */
 	void	SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint32 charges);
 	void	DeleteMerchantTemp(uint32 npcid, uint32 slot);
-	
+
 	/*
 	 * Tradeskills
 	 */
@@ -387,12 +387,12 @@ public:
 	uint32   GetZoneForage(uint32 ZoneID, uint8 skill);    /* for foraging - BoB */
 	uint32   GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance);
 	void	UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount);
-	
+
 	/*
 	 * Tribute
 	 */
 	bool	LoadTributes();
-	
+
 	/*
 	 * Doors
 	 */
@@ -407,7 +407,7 @@ public:
 	int32	GetDoorsCountPlusOne(const char *zone_name, int16 version);
 	int32	GetDoorsDBCountPlusOne(const char *zone_name, int16 version);
 	void InsertDoor(uint32 did, uint16 ddoorid, const char* ddoor_name, float dxpos, float dypos, float dzpos, float dheading, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize);
-	
+
 	/*
 	 * Blocked Spells
 	 */
@@ -426,7 +426,7 @@ public:
 	 */
 	uint32	GetZoneTZ(uint32 zoneid, uint32 version);
 	bool	SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz);
-	
+
 	/*
 	 * Weather
 	 */
@@ -446,7 +446,7 @@ public:
 	 * Instancing
 	 */
 	void ListAllInstances(Client* c, uint32 charid);
-	
+
 	/*
 	 * QGlobals
 	 */
@@ -457,25 +457,25 @@ public:
      */
     void LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency);
     void UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value);
-    
+
 	/*
 	 * Misc stuff.
-	 * PLEASE DO NOT ADD TO THIS COLLECTION OF CRAP UNLESS YOUR METHOD 
+	 * PLEASE DO NOT ADD TO THIS COLLECTION OF CRAP UNLESS YOUR METHOD
 	 * REALLY HAS NO BETTER SECTION
 	 */
 	bool    logevents(const char* accountname,uint32 accountid,uint8 status,const char* charname,const char* target, const char* descriptiontype, const char* description,int event_nid);
 	void	GetEventLogs(const char* name,char* target,uint32 account_id=0,uint8 eventid=0,char* detail=0,char* timestamp=0, CharacterEventLog_Struct* cel=0);
 	uint32	GetKarma(uint32 acct_id);
 	void	UpdateKarma(uint32 acct_id, uint32 amount);
-	
+
 	/*
 	 * Things which really dont belong here...
 	 */
 	int16	CommandRequirement(const char* commandname);
-	 
+
 protected:
 	void ZDBInitVars();
-	
+
 	uint32				max_faction;
 	Faction**			faction_array;
 	uint32 npc_spells_maxid;

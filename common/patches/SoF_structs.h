@@ -253,7 +253,7 @@ struct Spawn_Struct {
 /*0614*/ uint8  unknown0614[11];
 /*0625*/ uint8  bodytype2;			//New Field -  Seems to do the same thing as bodytype
 /*0626*/ uint8  unknown0626[28];
-union 
+union
 {
 /*0654*/ uint8	equip_chest2;		// This is Texture for NPCs
 /*0654*/ uint8	mount_color;		// This should be merged into 1 field, "texture"
@@ -599,7 +599,7 @@ struct CharCreate_Struct
 {
 /*0000*/	uint32	class_;
 /*0004*/	uint32	haircolor;
-/*0008*/	uint32	beard;	
+/*0008*/	uint32	beard;
 /*0012*/	uint32	beardcolor;
 /*0016*/	uint32	gender;
 /*0020*/	uint32	race;
@@ -1200,7 +1200,7 @@ struct Consider_Struct{
 /*012*/ uint32	level;					// Level
 /*016*/ uint8	pvpcon;					// Pvp con flag 0/1
 /*017*/ uint8	unknown017[3];			//
-/*020*/ 
+/*020*/
 };
 
 /*
@@ -1874,7 +1874,7 @@ struct AdventureLeaderboard_Struct
 /*008*/ uint32 success;
 /*012*/ uint32 failure;
 /*016*/ uint32 our_rank;
-/*020*/	
+/*020*/
 };
 
 /*struct Item_Shop_Struct {
@@ -1899,15 +1899,15 @@ struct Illusion_Struct {  //size: 256
 /*079*/	uint8	unknown079;		//
 /*080*/	uint32	face;			//
 /*084*/	uint8	hairstyle;		// Some Races don't change Hair Style Properly in SoF
-/*085*/	uint8	haircolor;		// 
-/*086*/	uint8	beard;			// 
-/*087*/	uint8	beardcolor;		// 
-/*088*/ float	size;			// 
+/*085*/	uint8	haircolor;		//
+/*086*/	uint8	beard;			//
+/*087*/	uint8	beardcolor;		//
+/*088*/ float	size;			//
 /*092*/	uint8	unknown092[148];
 /*240*/ uint32	unknown240;		// Removes armor?
-/*244*/ uint32	drakkin_heritage;	// 
-/*248*/ uint32	drakkin_tattoo;		// 
-/*252*/ uint32	drakkin_details;	// 
+/*244*/ uint32	drakkin_heritage;	//
+/*248*/ uint32	drakkin_tattoo;		//
+/*252*/ uint32	drakkin_details;	//
 /*256*/
 };
 
@@ -2225,7 +2225,7 @@ struct BookRequest_Struct {
 /*0000*/	uint32 window;		// where to display the text (0xFFFFFFFF means new window).
 /*0004*/	uint32 invslot;		// The inventory slot the book is in. Not used, but echoed in the response packet.
 /*0008*/	uint32 type;		// 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
-/*0012*/	uint32 unknown0012;	
+/*0012*/	uint32 unknown0012;
 /*0016*/	uint16 unknown0016;
 /*0018*/	char txtfile[8194];
 };
@@ -2326,7 +2326,7 @@ struct Door_Struct
 /*0054*/ uint8    unknown0054[4]; // 00 00 00 00
 /*0060*/ uint8   doorId;             // door's id #
 /*0061*/ uint8   opentype;
-/*0062*/ uint8  state_at_spawn;  
+/*0062*/ uint8  state_at_spawn;
 /*0063*/ uint8  invert_state;	// if this is 1, the door is normally open
 /*0064*/ uint32  door_param; // normally ff ff ff ff (-1)
 /*0068*/ uint32	unknown0068; // 00 00 00 00
@@ -2591,7 +2591,7 @@ struct Tracking_Struct_New {
 struct Track_Struct_New {
 	uint16 entityid;				// Entity ID
 	uint16 unknown002;			// 00 00
-	uint32 unknown004;			// 
+	uint32 unknown004;			//
 	uint8  level;				// level of mob
 	uint8  unknown009;			// 01 maybe type of mob? player/npc?
 	char  name[1];				// name of mob
@@ -3750,7 +3750,7 @@ struct ItemBodyStruct
 	uint32 icon;
 	uint8 unknown1;
 	uint8 unknown2;
-	uint32 BenefitFlag; 
+	uint32 BenefitFlag;
 	uint8 tradeskills;
 	int8 CR;
 	int8 DR;
@@ -3819,7 +3819,7 @@ struct ItemBodyStruct
 	int32	FactionAmt3;
 	uint32  FactionMod4;
 	int32	FactionAmt4;
-	
+
 };
 
 struct AugSlotStruct
@@ -3854,9 +3854,9 @@ struct ItemTertiaryBodyStruct
 	uint8 no_transfer;
 	uint16 expendablearrow;
 
-	uint32 unknown8; 
-	uint32 unknown9; 
-	uint32 unknown10; 
+	uint32 unknown8;
+	uint32 unknown9;
+	uint32 unknown10;
 	uint32 unknown11;
 	uint8 unknown12;
 	uint8 unknown13;

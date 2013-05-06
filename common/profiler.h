@@ -35,15 +35,15 @@ public:
 	inline virtual ~GeneralProfiler() {
 		safe_delete_array(timers);
 	}
-	
+
 	inline double getTotalDuration(unsigned int id) {
 		return(id<count? timers[id].getTotalDuration() : 0);
 	}
-	
+
 	inline double getAverage(unsigned int id) {
 		return(id<count? timers[id].getAverage() : 0);
 	}
-	
+
 	inline unsigned long long getTicks(unsigned int id) {
 		return(id<count? timers[id].getTicks() : 0);
 	}
@@ -55,14 +55,14 @@ public:
 	inline unsigned long long getCount(unsigned int id) {
 		return(id<count? timers[id].getCount() : 0);
 	}
-	
+
 	inline void reset() {
 		unsigned int r;
 		RDTSC_Collector *cur = timers;
 		for(r = 0; r < count; r++, cur++)
 			cur->reset();
 	}
-	
+
 	RDTSC_Collector *timers;
 	unsigned int count;
 };

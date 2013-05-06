@@ -40,11 +40,11 @@ RULE_REAL( Character, AAExpMultiplier, 0.5 )
 RULE_REAL( Character, GroupExpMultiplier, 0.5 )
 RULE_REAL( Character, RaidExpMultiplier, 0.2 )
 RULE_BOOL( Character, UseXPConScaling, true )
-RULE_INT ( Character, LightBlueModifier, 40 ) 
+RULE_INT ( Character, LightBlueModifier, 40 )
 RULE_INT ( Character, BlueModifier, 90 )
 RULE_INT ( Character, WhiteModifier, 100 )
 RULE_INT ( Character, YellowModifier, 125 )
-RULE_INT ( Character, RedModifier, 150 ) 
+RULE_INT ( Character, RedModifier, 150 )
 RULE_INT ( Character, AutosaveIntervalS, 300 )	//0=disabled
 RULE_INT ( Character, HPRegenMultiplier, 100)
 RULE_INT ( Character, ManaRegenMultiplier, 100)
@@ -227,7 +227,7 @@ RULE_INT  ( Pathing, RouteUpdateFrequencyLong, 5000)	// How often a new route wi
 // When a path has a path node route and it's target changes position, if it has RouteUpdateFrequencyNodeCount or less nodes to go on it's
 // current path, it will recalculate it's path based on the RouteUpdateFrequencyShort timer, otherwise it will use the
 // RouteUpdateFrequencyLong timer.
-RULE_INT  ( Pathing, RouteUpdateFrequencyNodeCount, 5) 
+RULE_INT  ( Pathing, RouteUpdateFrequencyNodeCount, 5)
 RULE_REAL ( Pathing, MinDistanceForLOSCheckShort, 40000) // (NoRoot). While following a path, only check for LOS to target within this distance.
 RULE_REAL ( Pathing, MinDistanceForLOSCheckLong, 1000000) // (NoRoot). Min distance when initially attempting to acquire the target.
 RULE_INT  ( Pathing, MinNodesLeftForLOSCheck, 4)	// Only check for LOS when we are down to this many path nodes left to run.
@@ -321,7 +321,7 @@ RULE_REAL ( Combat, HitFalloffMajor, 50.0) //hit will fall off sharply if we're 
 RULE_REAL ( Combat, HitBonusPerLevel, 1.2) //You gain this % of hit for every level you are above your target
 RULE_REAL ( Combat, WeaponSkillFalloff, 0.33) //For every weapon skill point that's not maxed you lose this % of hit
 RULE_REAL ( Combat, ArcheryHitPenalty, 0.25) //Archery has a hit penalty to try to help balance it with the plethora of long term +hit modifiers for it
-RULE_REAL ( Combat, AgiHitFactor, 0.01) 
+RULE_REAL ( Combat, AgiHitFactor, 0.01)
 RULE_INT ( Combat, MinRangedAttackDist, 25) //Minimum Distance to use Ranged Attacks
 RULE_BOOL ( Combat, ArcheryBonusRequiresStationary, true) //does the 2x archery bonus chance require a stationary npc
 RULE_REAL ( Combat, ArcheryBaseDamageBonus, 1) // % Modifier to Base Archery Damage (.5 = 50% base damage, 1 = 100%, 2 = 200%)

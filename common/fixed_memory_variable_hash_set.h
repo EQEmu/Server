@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -25,7 +25,7 @@
 
 namespace EQEmu {
 
-    /*! Simple HashSet designed to be used in fixed memory that may be difficult to use an 
+    /*! Simple HashSet designed to be used in fixed memory that may be difficult to use an
     allocator for (shared memory), we assume all keys are unsigned int, values are a pointer and size
     */
     template<class T>
@@ -49,17 +49,17 @@ namespace EQEmu {
             remaining_size_ = size_ - (sizeof(key_type) * 3) - (sizeof(key_type) * (max_element_id + 1));
 
             byte *ptr = data;
-            *reinterpret_cast<key_type*>(ptr) = max_element_id + 1; 
+            *reinterpret_cast<key_type*>(ptr) = max_element_id + 1;
             offset_count_ = max_element_id + 1;
             ptr += sizeof(key_type);
 
             *reinterpret_cast<key_type*>(ptr) = remaining_size_;
             ptr += sizeof(key_type);
-            
+
             *reinterpret_cast<key_type*>(ptr) = 0;
             current_offset_ = 0;
             ptr += sizeof(key_type);
-            
+
 
             offsets_ = reinterpret_cast<key_type*>(ptr);
             memset(ptr, 0xFFFFFFFFU, sizeof(key_type) * (max_element_id + 1));
@@ -69,7 +69,7 @@ namespace EQEmu {
         }
 
         /*!
-            Constructor which does not initialize the hash set.  Builds the hash set from what data is 
+            Constructor which does not initialize the hash set.  Builds the hash set from what data is
             stored in the data pointer passed.
         \param data Raw data
         \param size Raw data size
@@ -87,7 +87,7 @@ namespace EQEmu {
 
             current_offset_ = *reinterpret_cast<key_type*>(ptr);
             ptr += sizeof(key_type);
-            
+
             offsets_ = reinterpret_cast<key_type*>(ptr);
             ptr += sizeof(key_type) * offset_count_;
 
@@ -135,7 +135,7 @@ namespace EQEmu {
             elements_ = other.elements_;
             return *this;
         }
-    
+
         //! Returns the number of bytes in the set currently
         size_type size() const {
             return size_ - remaining_size_;
@@ -150,7 +150,7 @@ namespace EQEmu {
         key_type max_key() const {
             return offset_count_ > 0 ? (offset_count_ - 1) : 0;
         }
-        
+
         /*!
             Retrieve value operator
         \param i Index to retrieve the value from
@@ -208,7 +208,7 @@ namespace EQEmu {
             if(i >= offset_count_) {
                 EQ_EXCEPT("Fixed Memory Variable Hash Set", "Index out of range.");
             }
-            
+
             if(size > remaining_size_) {
                 EQ_EXCEPT("Fixed Memory Hash Set", "Not enough room in hash set to insert this value.");
             }

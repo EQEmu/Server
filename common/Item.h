@@ -105,23 +105,23 @@ public:
 	/////////////////////////
 	// Public Methods
 	/////////////////////////
-	
+
 	inline iter_queue begin()	{ return m_list.begin(); }
 	inline iter_queue end()		{ return m_list.end(); }
-	
+
 	void push(ItemInst* inst);
 	void push_front(ItemInst* inst);
 	ItemInst* pop();
 	ItemInst* peek_front() const;
 	inline int size() 		{ return static_cast<int>(m_list.size()); }
-	
+
 protected:
 	/////////////////////////
 	// Protected Members
 	/////////////////////////
-	
+
 	list<ItemInst*> m_list;
-	
+
 };
 
 // ########################################
@@ -134,9 +134,9 @@ public:
 	///////////////////////////////
 	// Public Methods
 	///////////////////////////////
-	
+
 	virtual ~Inventory();
-	
+
 	// Retrieve a writeable item at specified slot
 	ItemInst* GetItem(int16 slot_id) const;
 	ItemInst* GetItem(int16 slot_id, uint8 bagidx) const;
@@ -144,16 +144,16 @@ public:
 	inline iter_queue cursor_begin()	{ return m_cursor.begin(); }
 	inline iter_queue cursor_end()		{ return m_cursor.end(); }
 	inline bool CursorEmpty()		{ return (m_cursor.size() == 0); }
-	
+
 	// Retrieve a read-only item from inventory
 	inline const ItemInst* operator[](int16 slot_id) const { return GetItem(slot_id); }
-	
+
 	// Add item to inventory
 	int16 PutItem(int16 slot_id, const ItemInst& inst);
 
 	// Add item to cursor queue
 	int16 PushCursor(const ItemInst& inst);
-	
+
 	// Swap items in inventory
 	bool SwapItem(int16 slot_a, int16 slot_b);
 
@@ -162,17 +162,17 @@ public:
 
 	// Checks All items in a bag for No Drop
 	bool CheckNoDrop(int16 slot_id);
-	
+
 	// Remove item from inventory (and take control of memory)
 	ItemInst* PopItem(int16 slot_id);
-	
+
 	// Check whether item exists in inventory
 	// where argument specifies OR'd list of invWhere constants to look
 	int16 HasItem(uint32 item_id, uint8 quantity=0, uint8 where=0xFF);
 
 	// Check whether there is space for the specified number of the specified item.
 	bool HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity);
-	
+
 	// Check whether item exists in inventory
 	// where argument specifies OR'd list of invWhere constants to look
 	int16 HasItemByUse(uint8 use, uint8 quantity=0, uint8 where=0xFF);
@@ -180,10 +180,10 @@ public:
 	// Check whether item exists in inventory
 	// where argument specifies OR'd list of invWhere constants to look
 	int16 HasItemByLoreGroup(uint32 loregroup, uint8 where=0xFF);
-	
+
 	// Locate an available inventory slot
 	int16 FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size = 0, bool is_arrow = false);
-	
+
 	// Calculate slot_id for an item within a bag
 	static int16 CalcSlotId(int16 slot_id); // Calc parent bag's slot_id
 	static int16 CalcSlotId(int16 bagslot_id, uint8 bagidx); // Calc slot_id for item inside bag
@@ -195,7 +195,7 @@ public:
 
 	// Test whether a given slot can support a container item
 	static bool SupportsContainers(int16 slot_id);
-	
+
 	void dumpInventory();
 
 	void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value);
@@ -207,13 +207,13 @@ protected:
 	///////////////////////////////
 	// Protected Methods
 	///////////////////////////////
-	
+
 	// Retrieves item within an inventory bucket
 	ItemInst* _GetItem(const map<int16, ItemInst*>& bucket, int16 slot_id) const;
-	
+
 	// Private "put" item into bucket, without regard for what is currently in bucket
 	int16 _PutItem(int16 slot_id, ItemInst* inst);
-	
+
 	// Checks an inventory bucket for a particular item
 	int16 _HasItem(map<int16, ItemInst*>& bucket, uint32 item_id, uint8 quantity);
 	int16 _HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity);
@@ -221,8 +221,8 @@ protected:
 	int16 _HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity);
 	int16 _HasItemByLoreGroup(map<int16, ItemInst*>& bucket, uint32 loregroup);
 	int16 _HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup);
-	
-	
+
+
 	// Player inventory
 	map<int16, ItemInst*>	m_worn;		// Items worn by character
 	map<int16, ItemInst*>	m_inv;		// Items in character personal inventory
@@ -245,12 +245,12 @@ public:
 	/////////////////////////
 	// Methods
 	/////////////////////////
-	
+
 	// Constructors/Destructor
 	ItemInst(const Item_Struct* item = nullptr, int16 charges = 0);
-	
+
 	ItemInst(SharedDatabase *db, uint32 item_id, int16 charges = 0);
-	
+
 	ItemInst(ItemUseType use_type) {
 		m_use_type = use_type;
 		m_item = nullptr;
@@ -262,19 +262,19 @@ public:
 	}
 
 	ItemInst(const ItemInst& copy);
-	
+
 	virtual ~ItemInst();
-	
+
 	// Query item type
 	virtual bool IsType(ItemClass item_class) const;
-	
+
 	// Can item be stacked?
 	virtual bool IsStackable() const;
 
 	// Can item be equipped by/at?
 	virtual bool IsEquipable(uint16 race, uint16 class_) const;
 	virtual bool IsEquipable(int16 slot_id) const;
-	
+
 	//
 	// Augements
 	//
@@ -322,13 +322,13 @@ public:
 	const uint32 GetItemScriptID() const { return m_item->ScriptFileID; }
 	virtual const Item_Struct* GetItem() const		{ return m_item; }
 	void SetItem(const Item_Struct* item)	{ m_item = item; }
-	
+
 	int16 GetCharges() const				{ return m_charges; }
 	void SetCharges(int16 charges)			{ m_charges = charges; }
-	
+
 	uint32 GetPrice() const					{ return m_price; }
 	void SetPrice(uint32 price)				{ m_price = price; }
-	
+
 	void SetColor(uint32 color)				{ m_color = color; }
 	uint32 GetColor() const					{ return m_color; }
 
@@ -358,14 +358,14 @@ public:
 
 	// Allows treatment of this object as though it were a pointer to m_item
 	operator bool() const { return (m_item != nullptr); }
-	
+
 	// Compare inner Item_Struct of two ItemInst objects
 	bool operator==(const ItemInst& right) const { return (this->m_item == right.m_item); }
 	bool operator!=(const ItemInst& right) const { return (this->m_item != right.m_item); }
-	
+
 	// Clone current item
 	virtual ItemInst* Clone() const;
-	
+
 	bool IsSlotAllowed(int16 slot_id) const;
 
 	virtual bool IsScaling() const		{ return false; }
@@ -383,10 +383,10 @@ protected:
 	iter_contents _end()                 { return m_contents.end(); }
 
 	friend class Inventory;
-	
-	
+
+
 	void _PutItem(uint8 index, ItemInst* inst) { m_contents[index] = inst; }
-	
+
 	ItemUseType			m_use_type;	// Usage type for item
 	const Item_Struct*	m_item;		// Ptr to item data
 	int16				m_charges;	// # of charges for chargeable items
@@ -410,7 +410,7 @@ public:
 	EvoItemInst(const ItemInst& copy);
 	EvoItemInst(const Item_Struct* item = nullptr, int16 charges = 0);
 	~EvoItemInst();
-	
+
 	// accessors... a lot of these are for evolving items (not complete yet)
 	bool IsScaling() const				{ return (m_evolveLvl == -1); }
 	bool IsEvolving() const				{ return (m_evolveLvl >= 1); }
@@ -420,16 +420,16 @@ public:
 	bool IsActivated()					{ return m_activated; }
 	void SetActivated(bool activated)	{ m_activated = activated; }
 	int8 GetEvolveLvl() const			{ return m_evolveLvl; }
-		
+
 	EvoItemInst* Clone() const;
 	const Item_Struct* GetItem() const;
 	const Item_Struct* GetUnscaledItem() const;
 	void Initialize(SharedDatabase *db = nullptr);
 	void ScaleItem();
-	bool EvolveOnAllKills() const;	
+	bool EvolveOnAllKills() const;
 	int8 GetMaxEvolveLvl() const;
 	uint32 GetKillsNeeded(uint8 currentlevel);
-		
+
 
 private:
 	uint32				m_exp;
@@ -447,7 +447,7 @@ public:
 	uint32				FirstItem;
 	uint8				MaxLvl;
 	bool				AllKills;
-		
+
 	EvolveInfo();
 	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);
 	~EvolveInfo();

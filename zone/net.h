@@ -39,7 +39,7 @@ class NetConnection
 public:
 	~NetConnection();
 	NetConnection();
-	
+
 	uint32	GetIP();
 	uint32	GetIP(char* name);
 	void	SaveInfo(char* address, uint32 port, char* waddress,char* filename);

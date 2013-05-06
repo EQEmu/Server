@@ -29,7 +29,7 @@ int32 Database::GetDoorsCount(uint32* oMaxID) {
 		delete[] query;
 		return -1;
 	}
-	
+
 	return -1;
 }
 

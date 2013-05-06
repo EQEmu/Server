@@ -59,7 +59,7 @@ public:
 	 * Accesses connection, it is intentional that this is not const (trust me).
 	 */
 	EmuTCPConnection *GetConnection() { return connection; }
-	
+
 	/**
 	 * Sets the connection to c.
 	 */
@@ -69,7 +69,7 @@ public:
 	 * Gets the runtime id of this server.
 	 */
 	unsigned int GetRuntimeID() const { return runtime_id; }
-	
+
 	/**
 	 * Sets the runtime id of this server.
 	 */

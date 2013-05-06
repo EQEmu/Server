@@ -9,13 +9,13 @@
 #include "QuestInterface.h"
 
 
-struct EventList { 
+struct EventList {
 	std::string event;
 	std::string command;
 };
 
 struct Events {
-uint32 npcid; 
+uint32 npcid;
 std::list<EventList*> Event;
 };
 
@@ -44,7 +44,7 @@ public:
 	virtual ~Parser();
 	int mindex;
 	const std::string DEFAULT_QUEST_PREFIX;
-	
+
 	typedef list<Events*>::iterator iter_events;
 	typedef list<EventList*>::iterator iter_eventlist;
 	std::list<Events*> MainList;
@@ -94,7 +94,7 @@ public:
 	virtual void	SendCommands(const char * event, uint32 npcid, NPC* npcmob, Mob* mob);
 
 	int	HasQuestFile(uint32 npcid);
-	
+
     //interface stuff
     virtual void EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {}
     virtual void EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {}

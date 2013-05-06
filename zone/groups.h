@@ -36,7 +36,7 @@ public:
 	GroupIDConsumer() { id = 0; }
 	GroupIDConsumer(uint32 gid) { id = gid; }
 	inline const uint32 GetID()	const { return id; }
-	
+
 protected:
 	friend class EntityList;
 	//use of this function is highly discouraged
@@ -50,7 +50,7 @@ public:
 	Group(Mob* leader);
 	Group(uint32 gid);
 	~Group();
-	
+
 	bool	AddMember(Mob* newmember, const char* NewMemberName = nullptr, uint32 CharacterID = 0);
 	void	AddMember(const char* NewMemberName);
 	void	SendUpdate(uint32 type,Mob* member);
@@ -131,7 +131,7 @@ public:
 	void	ChangeLeader(Mob* newleader);
 	const char *GetClientNameByIndex(uint8 index);
 	void UpdateXTargetMarkedNPC(uint32 Number, Mob *m);
-	
+
 	Mob* members[MAX_GROUP_MEMBERS];
 	char	membername[MAX_GROUP_MEMBERS][64];
 	uint8	MemberRoles[MAX_GROUP_MEMBERS];

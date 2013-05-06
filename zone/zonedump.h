@@ -19,8 +19,8 @@
 Below are the blob structures for zone state dumping to the database
 -Quagmire
 
-create table zone_state_dump (zonename varchar(16) not null primary key, spawn2_count int unsigned not null default 0, 
-npc_count int unsigned not null default 0, npcloot_count int unsigned not null default 0, gmspawntype_count int unsigned not null default 0, 
+create table zone_state_dump (zonename varchar(16) not null primary key, spawn2_count int unsigned not null default 0,
+npc_count int unsigned not null default 0, npcloot_count int unsigned not null default 0, gmspawntype_count int unsigned not null default 0,
 spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob, time timestamp(14));
 */
 
@@ -36,10 +36,10 @@ struct NPCType
 {
     char    name[64];
     char    lastname[70];
-	
+
     int32  cur_hp;
     int32  max_hp;
-	
+
 	float	size;
 	float	runspeed;
     uint8    gender;
@@ -98,7 +98,7 @@ struct NPCType
 	int32  mana_regen;
 	int32	aggroradius; // added for AI improvement - neotokyo
 	uint8	see_invis;			// See Invis flag added
-	bool	see_invis_undead;   // See Invis vs. Undead flag added 
+	bool	see_invis_undead;   // See Invis vs. Undead flag added
 	bool	see_hide;
 	bool	see_improved_hide;
 	bool	qglobal;
@@ -156,7 +156,7 @@ struct ZSDump_NPC_Loot {
 Below are the blob structures for saving player corpses to the database
 -Quagmire
 
-create table player_corpses (id int(11) unsigned not null auto_increment primary key, charid int(11) unsigned not null, 
+create table player_corpses (id int(11) unsigned not null auto_increment primary key, charid int(11) unsigned not null,
 charname varchar(30) not null, zonename varchar(16)not null, x float not null, y float not null, z float not null,
 heading float not null, data blob not null, time timestamp(14), index zonename (zonename));
 */

@@ -86,7 +86,7 @@ struct ServerListHeader_Struct {
 	uint32 NumberOfServers;
 };
 
-struct PlayEverquestRequest_Struct 
+struct PlayEverquestRequest_Struct
 {
 	uint16 Sequence;
 	uint32 Unknown1;

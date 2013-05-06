@@ -71,7 +71,7 @@ struct EventRecord {
 class PerlembParser : public Parser
 {
 protected:
-	
+
 	//could prolly get rid of this map now, since I check for the
 	//actual subroutine in the quest package as opposed to just seeing
 	//if they do not have a quest or the default.
@@ -84,7 +84,7 @@ protected:
 
 	queue<EventRecord> eventQueue;		//for events that happen when perl is in use.
 	bool eventQueueProcessing;
-	
+
 	void HandleQueue();
 
 	void EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, bool global = false);
@@ -124,9 +124,9 @@ public:
     int LoadGlobalPlayerScript();
 	int LoadItemScript(ItemInst* iteminst, string packagename, itemQuestMode Qtype);
 	int LoadSpellScript(uint32 id);
-	
+
 	//expose a var to the script (probably parallels addvar))
-	//i.e. exportvar("qst1234", "name", "somemob"); 
+	//i.e. exportvar("qst1234", "name", "somemob");
 	//would expose the variable $name='somemob' to the script that handles npc1234
 	void ExportHash(const char *pkgprefix, const char *hashname, std::map<string,string> &vals);
 	void ExportVar(const char * pkgprefix, const char * varname, const char * value) const;
@@ -136,19 +136,19 @@ public:
 	//I don't escape the strings, so use caution!!
 	//Same as export var, except value is not quoted, and is evaluated as perl
 	void ExportVarComplex(const char * pkgprefix, const char * varname, const char * value) const;
-	
+
 	//get an appropriate namespage/packagename from an npcid
 	std::string GetPkgPrefix(uint32 npcid, bool defaultOK = true);
 	//call the appropriate perl handler. afterwards, parse and dispatch the command queue
 	//SendCommands("qst1234", "EVENT_SAY") would trigger sub EVENT_SAY() from the qst1234.pl file
 	virtual void SendCommands(const char * pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst* iteminst);
-	
+
 	int	HasQuestFile(uint32 npcid);
 
 #ifdef EMBPERL_COMMANDS
 	void ExecCommand(Client *c, Seperator *sep);
 #endif
-	
+
 };
 
 #endif //EMBPERL

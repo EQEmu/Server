@@ -34,7 +34,7 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char* iLoginN
 : id(in_id)
 {
 	ClearVars(true);
-	
+
 	pIP = ip;
 	pLSID = iLSID;
 	if(iLSID > 0)
@@ -51,7 +51,7 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccNa
 : id(in_id)
 {
 	ClearVars(true);
-	
+
 	pIP = 0;
 	pLSID = 0;
 	pworldadmin = 0;
@@ -68,7 +68,7 @@ ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList
 : id(in_id)
 {
 	ClearVars(true);
-	
+
 	pIP = 0;
 	pLSID = scl->LSAccountID;
 	strn0cpy(plsname, scl->name, sizeof(plsname));

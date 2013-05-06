@@ -83,8 +83,8 @@ vector<string> ParseRecipients(string RecipientString) {
 
 	// This method parses the Recipient List in the mailto command, which can look like this example:
 	//
-	// "Baalinor <SOE.EQ.BTG2.Baalinor>, 
-	// -Friends <SOE.EQ.BTG2.Playedtest SOE.EQ.BTG2.Dyetest>, 
+	// "Baalinor <SOE.EQ.BTG2.Baalinor>,
+	// -Friends <SOE.EQ.BTG2.Playedtest SOE.EQ.BTG2.Dyetest>,
 	// Guild <SOE.EQ.BTG2.Dsfvxcbcx SOE.EQ.BTG2.Necronor>, SOE.EQ.BTG2.luccerathe, SOE.EQ.BTG2.codsas
 	//
 	// First, it splits it up at commas, so it looks like this:
@@ -180,7 +180,7 @@ vector<string> ParseRecipients(string RecipientString) {
 
 							break;
 						}
-						RecipientList.push_back(Secret + Recips.substr(CurrentPos, 
+						RecipientList.push_back(Secret + Recips.substr(CurrentPos,
 									Space - CurrentPos));
 						CurrentPos = Space + 1;
 					}
@@ -191,9 +191,9 @@ vector<string> ParseRecipients(string RecipientString) {
 			}
 		}
 
-		
+
 		(*Iterator) = Secret + (*Iterator);
-				
+
 		Iterator++;
 
 	}
@@ -212,7 +212,7 @@ vector<string> ParseRecipients(string RecipientString) {
 			if(LastPeriod != string::npos)  {
 
 				(*Iterator) = (*Iterator).substr(LastPeriod + 1);
-			
+
 				for(unsigned int i = 0; i < (*Iterator).length(); i++) {
 
 					if(i == 0)
@@ -240,7 +240,7 @@ vector<string> ParseRecipients(string RecipientString) {
 static void ProcessMailTo(Client *c, string MailMessage) {
 
 	_log(UCS__TRACE, "MAILTO: From %s, %s", c->MailBoxName().c_str(), MailMessage.c_str());
-		
+
 	vector<string> Recipients;
 
 	string::size_type FirstQuote = MailMessage.find_first_of("\"", 0);
@@ -335,7 +335,7 @@ static void ProcessMailTo(Client *c, string MailMessage) {
 			Success = false;
 		}
 	}
-						
+
 	if(Success) {
 		// Success
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailDeliveryStatus, 10);
@@ -494,7 +494,7 @@ Clientlist::Clientlist(int ChatPort) {
 
 Client::Client(EQStream *eqs) {
 
-	ClientStream = eqs; 
+	ClientStream = eqs;
 
 	CurrentMailBox = 0;
 
@@ -571,7 +571,7 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 
 			_log(UCS__CLIENT, "Client connection from %s:%d closed.", inet_ntoa(in),
 										   ntohs((*Iterator)->ClientStream->GetRemotePort()));
-			
+
 			safe_delete((*Iterator));
 
 			Iterator = ClientChatConnections.erase(Iterator);
@@ -611,7 +611,7 @@ void Clientlist::Process() {
 
 			_log(UCS__CLIENT, "Client connection from %s:%d closed.", inet_ntoa(in),
 										   ntohs((*Iterator)->ClientStream->GetRemotePort()));
-			
+
 			safe_delete((*Iterator));
 
 			Iterator = ClientChatConnections.erase(Iterator);
@@ -698,7 +698,7 @@ void Clientlist::Process() {
 				case OP_Mail: {
 
 					string CommandString = (const char*)app->pBuffer;
-					
+
 					ProcessOPMailCommand((*Iterator), CommandString);
 
 					break;
@@ -762,7 +762,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, string CommandString)
 
 	string::size_type Space = CommandString.find_first_of(" ");
 
-	if(Space != string::npos) { 
+	if(Space != string::npos) {
 
 		Command = CommandString.substr(0, Space);
 
@@ -793,7 +793,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, string CommandString)
 		case CommandListAll:
 			ChannelList->SendAllChannels(c);
 			break;
-		
+
 		case CommandList:
 			c->ProcessChannelList(Parameters);
 			break;
@@ -875,7 +875,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, string CommandString)
 		}
 		case CommandSetMailForwarding:
 			break;
-		
+
 		case CommandBuddy:
 			RemoveApostrophes(Parameters);
 			ProcessCommandBuddy(c, Parameters);
@@ -924,7 +924,7 @@ void Client::SendMailBoxes() {
 	int PacketLength = 10;
 
 	string s;
-	
+
 	for(int i = 0; i < Count; i++) {
 
 		s += GetMailPrefix() + Characters[i].Name;
@@ -1028,7 +1028,7 @@ void Client::JoinChannels(string ChannelNameList) {
 		if(NumberOfChannels == MAX_JOINED_CHANNELS) {
 
 			GeneralChannelMessage("You have joined the maximum number of channels. /leave one before trying to join another.");
-			
+
 			break;
 		}
 
@@ -1238,7 +1238,7 @@ void Client::ProcessChannelList(string Input) {
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
-	if(RequiredChannel) 
+	if(RequiredChannel)
 		RequiredChannel->SendChannelMembers(this);
 	else
 		GeneralChannelMessage("Channel " + Input + " not found.");
@@ -1289,7 +1289,7 @@ void Client::SendChannelList() {
 	safe_delete(outapp);
 }
 
-void Client::SendChannelMessage(string Message) 
+void Client::SendChannelMessage(string Message)
 {
 
 	string::size_type MessageStart = Message.find_first_of(" ");
@@ -1348,11 +1348,11 @@ void Client::SendChannelMessage(string Message)
 					}
 				}
 				int AllowedMessages = RuleI(Chat, MinimumMessagesPerInterval) + GetKarma();
-				AllowedMessages = AllowedMessages > RuleI(Chat, MaximumMessagesPerInterval) ? RuleI(Chat, MaximumMessagesPerInterval) : AllowedMessages; 
-				
+				AllowedMessages = AllowedMessages > RuleI(Chat, MaximumMessagesPerInterval) ? RuleI(Chat, MaximumMessagesPerInterval) : AllowedMessages;
+
 				if(RuleI(Chat, MinStatusToBypassAntiSpam) <= Status)
 					AllowedMessages = 10000;
-				
+
 				AttemptedMessages++;
 				if(AttemptedMessages > AllowedMessages)
 				{
@@ -1363,7 +1363,7 @@ void Client::SendChannelMessage(string Message)
 					if(GlobalChatLimiterTimer)
 					{
 						char TimeLeft[256];
-						sprintf(TimeLeft, "You are currently rate limited, you cannot send more messages for %i seconds.", 
+						sprintf(TimeLeft, "You are currently rate limited, you cannot send more messages for %i seconds.",
 							(GlobalChatLimiterTimer->GetRemainingTime() / 1000));
 						GeneralChannelMessage(TimeLeft);
 					}
@@ -1446,7 +1446,7 @@ void Client::SendChannelMessageByNumber(string Message) {
 		}
 	}
 
-	_log(UCS__TRACE, "%s tells %s, [%s]", GetName().c_str(), RequiredChannel->GetName().c_str(), 
+	_log(UCS__TRACE, "%s tells %s, [%s]", GetName().c_str(), RequiredChannel->GetName().c_str(),
 						   Message.substr(MessageStart + 1).c_str());
 
 	if(RuleB(Chat, EnableAntiSpam))
@@ -1463,7 +1463,7 @@ void Client::SendChannelMessageByNumber(string Message) {
 					}
 				}
 				int AllowedMessages = RuleI(Chat, MinimumMessagesPerInterval) + GetKarma();
-				AllowedMessages = AllowedMessages > RuleI(Chat, MaximumMessagesPerInterval) ? RuleI(Chat, MaximumMessagesPerInterval) : AllowedMessages; 
+				AllowedMessages = AllowedMessages > RuleI(Chat, MaximumMessagesPerInterval) ? RuleI(Chat, MaximumMessagesPerInterval) : AllowedMessages;
 				if(RuleI(Chat, MinStatusToBypassAntiSpam) <= Status)
 					AllowedMessages = 10000;
 
@@ -1477,7 +1477,7 @@ void Client::SendChannelMessageByNumber(string Message) {
 					if(GlobalChatLimiterTimer)
 					{
 						char TimeLeft[256];
-						sprintf(TimeLeft, "You are currently rate limited, you cannot send more messages for %i seconds.", 
+						sprintf(TimeLeft, "You are currently rate limited, you cannot send more messages for %i seconds.",
 							(GlobalChatLimiterTimer->GetRemainingTime() / 1000));
 						GeneralChannelMessage(TimeLeft);
 					}
@@ -1544,7 +1544,7 @@ void Client::ToggleAnnounce(string State)
 
 	string Message = "Announcing now ";
 
-	if(Announce) 
+	if(Announce)
 		Message += "on";
 	else
 		Message += "off";
@@ -1746,7 +1746,7 @@ void Client::SetChannelOwner(string CommandString) {
 void Client::OPList(string CommandString) {
 
 	string::size_type ChannelStart = CommandString.find_first_not_of(" ");
- 
+
 	if(ChannelStart == string::npos) {
 		string Message = "Incorrect syntax: /chat oplist <channel>";
 		GeneralChannelMessage(Message);
@@ -1969,7 +1969,7 @@ void Client::ChannelGrantModerator(string CommandString) {
 	}
 	else {
 		RequiredChannel->AddModerator(Moderator);
-	
+
 		if(RequiredClient)
 			RequiredClient->GeneralChannelMessage(GetName() + " has made you a moderator of channel " + ChannelName);
 
@@ -2056,7 +2056,7 @@ void Client::ChannelGrantVoice(string CommandString) {
 	}
 	else {
 		RequiredChannel->AddVoice(Voicee);
-	
+
 		if(RequiredClient)
 			RequiredClient->GeneralChannelMessage(GetName() + " has given you voice in channel " + ChannelName);
 
@@ -2256,7 +2256,7 @@ Client *Clientlist::IsCharacterOnline(string CharacterName) {
 
 		// If the mail is destined for the primary mailbox for this character, or the one they have selected
 		//
-		if((MailBoxNumber == 0) || (MailBoxNumber == (*Iterator)->GetMailBoxNumber())) 
+		if((MailBoxNumber == 0) || (MailBoxNumber == (*Iterator)->GetMailBoxNumber()))
 				return (*Iterator);
 
 	}
@@ -2280,7 +2280,7 @@ void Client::SendNotification(int MailBoxNumber, string Subject, string From, in
 	char sMessageID[100];
 
 	char Sequence[100];
-	
+
 	sprintf(TimeStamp, "%i", (int)time(nullptr));
 
 	sprintf(sMessageID, "%i", MessageID);
@@ -2296,8 +2296,8 @@ void Client::SendNotification(int MailBoxNumber, string Subject, string From, in
 	VARSTRUCT_ENCODE_INTSTRING(PacketBuffer, MailBoxNumber);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, sMessageID);
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, TimeStamp);
-	VARSTRUCT_ENCODE_STRING(PacketBuffer, "1"); 
-	VARSTRUCT_ENCODE_STRING(PacketBuffer, From.c_str()); 
+	VARSTRUCT_ENCODE_STRING(PacketBuffer, "1");
+	VARSTRUCT_ENCODE_STRING(PacketBuffer, From.c_str());
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Subject.c_str());
 
 	_pkt(UCS__PACKETS, outapp);
@@ -2314,13 +2314,13 @@ void Client::ChangeMailBox(int NewMailBox) {
 	SetMailBox(NewMailBox);
 
 	_log(UCS__TRACE, "New mailbox is %s", MailBoxName().c_str());
-						
+
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MailboxChange, 2);
 
 	char *buf = (char *)outapp->pBuffer;
 
 	VARSTRUCT_ENCODE_INTSTRING(buf, NewMailBox);
-						
+
 	_pkt(UCS__PACKETS, outapp);
 
 	QueuePacket(outapp);

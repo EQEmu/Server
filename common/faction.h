@@ -28,9 +28,9 @@ enum FACTION_VALUE {
 	FACTION_WARMLY = 2,
 	FACTION_KINDLY = 3,
 	FACTION_AMIABLE = 4,
-	
+
     FACTION_INDIFFERENT = 5,
-    
+
     FACTION_APPREHENSIVE = 6,
     FACTION_DUBIOUS = 7,
     FACTION_THREATENLY = 8,
@@ -63,13 +63,13 @@ struct Faction {
 };
 
 typedef std::map<uint32, int16> faction_map;
-struct NPCFaction    
-{    
+struct NPCFaction
+{
     uint32 factionID;
     int32 value_mod;
     int8 npc_value;
-    uint8 temp; 
-}; 
+    uint8 temp;
+};
 
 const char *FactionValueToString(FACTION_VALUE fv);
 FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value);

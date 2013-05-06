@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef EQ_CONSTANTS_H
-#define EQ_CONSTANTS_H 
+#define EQ_CONSTANTS_H
 
 #include "skills.h"
 
@@ -170,7 +170,7 @@ typedef enum {
 	_eaMaxAppearance
 } EmuAppearance;
 
-/* 
+/*
 ** Diety List
 */
 #define DEITY_UNKNOWN			0
@@ -190,11 +190,11 @@ typedef enum {
 #define DEITY_TUNARE			215
 
 //Guessed:
-#define DEITY_BERT				201	
+#define DEITY_BERT				201
 #define DEITY_RODCET			212
 #define DEITY_VEESHAN			216
 
-// msg_type's for custom usercolors 
+// msg_type's for custom usercolors
 #define MT_Say					256
 #define MT_Tell					257
 #define MT_Group				258
@@ -435,33 +435,33 @@ typedef enum {
 #define STAT_HASTE		19
 #define STAT_DAMAGE_SHIELD	20
 
-  /** 
-    * Recast timer types. Used as an off set to charProfileStruct timers. 
-    */ 
-   enum RecastTypes 
-   { 
-     RecastTimer0 = 0, 
-     RecastTimer1, 
-     WeaponHealClickTimer, // 2 
-     MuramiteBaneNukeClickTimer, // 3 
-     RecastTimer4, 
-     DispellClickTimer, // 5 (also click heal orbs?) 
-     EpicTimer, // 6 
-     OoWBPClickTimer, // 7 
-     VishQuestClassItemTimer, // 8 
-     HealPotionTimer, // 9 
-     RecastTimer10, 
-     RecastTimer11, 
-     RecastTimer12, 
-     RecastTimer13, 
-     RecastTimer14, 
-     RecastTimer15, 
-     RecastTimer16, 
-     RecastTimer17, 
-     RecastTimer18, 
-     ModRodTimer // 19 
+  /**
+    * Recast timer types. Used as an off set to charProfileStruct timers.
+    */
+   enum RecastTypes
+   {
+     RecastTimer0 = 0,
+     RecastTimer1,
+     WeaponHealClickTimer, // 2
+     MuramiteBaneNukeClickTimer, // 3
+     RecastTimer4,
+     DispellClickTimer, // 5 (also click heal orbs?)
+     EpicTimer, // 6
+     OoWBPClickTimer, // 7
+     VishQuestClassItemTimer, // 8
+     HealPotionTimer, // 9
+     RecastTimer10,
+     RecastTimer11,
+     RecastTimer12,
+     RecastTimer13,
+     RecastTimer14,
+     RecastTimer15,
+     RecastTimer16,
+     RecastTimer17,
+     RecastTimer18,
+     ModRodTimer // 19
    };
-   
+
    enum GroupUpdateAction
 {
   GUA_Joined = 0,
@@ -593,7 +593,7 @@ enum InventorySlot
 	////////////////////////
 	// Equip slots
 	////////////////////////
-	
+
 	SLOT_CHARM		= 0,
 	SLOT_EAR01		= 1,
 	SLOT_HEAD		= 2,
@@ -616,38 +616,38 @@ enum InventorySlot
 	SLOT_FEET		= 19,
 	SLOT_WAIST		= 20,
 	SLOT_AMMO		= 21,
-	
+
 	////////////////////////
 	// All other slots
 	////////////////////////
 	SLOT_PERSONAL_BEGIN = 22,
 	SLOT_PERSONAL_END = 29,
-	
+
 	SLOT_CURSOR		= 30,
-	
+
 	SLOT_CURSOR_END	= (int16)0xFFFE,	// Last item on cursor queue
 	// Cursor bag slots are 331->340 (10 slots)
-	
+
 	// Personal Inventory Slots
 	// Slots 1 through 8 are slots 22->29
 	// Inventory bag slots are 251->330 (10 slots per bag)
-	
+
 	// Tribute slots are 400-404? (upper bound unknown)
 	// storing these in worn item's map
-	
+
 	// Bank slots
 	// Bank slots 1 through 16 are slots 2000->2015
 	// Bank bag slots are 2031->2190
-	
+
 	// Shared bank slots
 	// Shared bank slots 1 through 2 are slots 2500->2501
 	// Shared bank bag slots are 2531->2550
-	
+
 	// Trade session slots
 	// Trade slots 1 through 8 are slots 3000->3007
 	// Trade bag slots are technically 0->79 when passed to client,
 	// but in our code, we treat them as slots 3100->3179
-	
+
 	// Slot used in OP_TradeSkillCombine for world tradeskill containers
 	SLOT_TRADESKILL = 1000,
 	SLOT_AUGMENT = 1001,

@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -28,7 +28,7 @@
 void LoadLoot(SharedDatabase *database) {
     EQEmu::IPCMutex mutex("loot");
     mutex.Lock();
-    
+
     uint32 loot_table_count, loot_table_max, loot_table_entries_count;
     uint32 loot_drop_count, loot_drop_max, loot_drop_entries_count;
     database->GetLootTableInfo(loot_table_count, loot_table_max, loot_table_entries_count);
@@ -49,10 +49,10 @@ void LoadLoot(SharedDatabase *database) {
     mmf_loot_table.ZeroFile();
     mmf_loot_drop.ZeroFile();
 
-    EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> loot_table_hash(reinterpret_cast<byte*>(mmf_loot_table.Get()), 
+    EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> loot_table_hash(reinterpret_cast<byte*>(mmf_loot_table.Get()),
         loot_table_size, loot_table_max);
 
-    EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> loot_drop_hash(reinterpret_cast<byte*>(mmf_loot_drop.Get()), 
+    EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> loot_drop_hash(reinterpret_cast<byte*>(mmf_loot_drop.Get()),
         loot_drop_size, loot_drop_max);
 
     database->LoadLootTables(mmf_loot_table.Get(), loot_table_max);

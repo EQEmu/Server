@@ -7,11 +7,11 @@
     print "\"player_count\" : $player_count,";
     print "\"players\" : ";
     print "[";
-    
+
     my $i = 0;
     for my $player (@players) {
         my $pd = $EQW->GetPlayerDetails($player);
-        
+
         print "{";
         print "\"character\" : \"$pd->{character}\",";
         print "\"account\" : \"$pd->{account}\",";
@@ -29,13 +29,13 @@
         print "\"status\" : \"$pd->{status}\",";
         print "\"client_version\" : \"$pd->{client_version}\"";
         print "}";
-        
+
         if($i != $player_count - 1) {
             print ",";
         }
         $i++;
     }
-    
+
     print "]";
     print "}";
 

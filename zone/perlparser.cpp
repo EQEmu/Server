@@ -1302,7 +1302,7 @@ XS(XS__createguild)
 		Perl_croak(aTHX_ "Usage: createguild(guild_name, leader)");
 
 		char *	guild_name = (char *)SvPV_nolen(ST(0));
-		char *	leader = (char *)SvPV_nolen(ST(1));		
+		char *	leader = (char *)SvPV_nolen(ST(1));
 
 	quest_manager.CreateGuild(guild_name, leader);
 
@@ -3357,7 +3357,7 @@ XS(XS__GetZoneID)
 
     char *zone = (char *)SvPV_nolen(ST(0));
     int32 id = quest_manager.GetZoneID(zone);
-    
+
     XSRETURN_IV(id);
 }
 
@@ -3370,7 +3370,7 @@ XS(XS__GetZoneLongName)
     dXSTARG;
     char *zone = (char *)SvPV_nolen(ST(0));
     Const_char* RETVAL = quest_manager.GetZoneLongName(zone);
-    
+
     sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	XSRETURN(1);
 }
@@ -3392,14 +3392,14 @@ XS(XS__GetTimeSeconds)
 XS(XS__handleturnin); // prototype to pass -Wmissing-prototypes
 XS(XS__handleturnin) {
 	dXSARGS;
-	
+
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: handleturnin(itemid, itemcharges)");
 	int	itemid = (int)SvIV(ST(0));
 	int	charges = (int)SvIV(ST(1));
 
 	bool returnVal = quest_manager.TurnInItem(itemid,charges);
-	
+
 	ST(0) = boolSV(returnVal);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
@@ -3408,36 +3408,36 @@ XS(XS__handleturnin) {
 XS(XS__completehandin); // prototype to pass -Wmissing-prototypes
 XS(XS__completehandin) {
 	dXSARGS;
-	
+
 	if (items != 0)
 		Perl_croak(aTHX_ "Usage: completehandin()");
 
 	quest_manager.CompleteHandIn();
-	
+
 	XSRETURN_EMPTY;
 }
 
 XS(XS__resethandin); // prototype to pass -Wmissing-prototypes
 XS(XS__resethandin) {
 	dXSARGS;
-	
+
 	if (items != 0)
 		Perl_croak(aTHX_ "Usage: resethandin()");
 
 	quest_manager.ResetHandIn();
-	
+
 	XSRETURN_EMPTY;
 }
 
 XS(XS__clearhandin); // prototype to pass -Wmissing-prototypes
 XS(XS__clearhandin) {
 	dXSARGS;
-	
+
 	if (items != 0)
 		Perl_croak(aTHX_ "Usage: clearhandin()");
 
 	quest_manager.ClearHandIn();
-	
+
 	XSRETURN_EMPTY;
 }
 

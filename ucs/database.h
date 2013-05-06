@@ -61,13 +61,13 @@ public:
 	void AddFriendOrIgnore(int CharID, int Type, string Name);
 	void RemoveFriendOrIgnore(int CharID, int Type, string Name);
 	void GetFriendsAndIgnore(int CharID, vector<string> &Friends, vector<string> &Ignorees);
-	
+
 
 protected:
 	void HandleMysqlError(uint32 errnum);
 private:
 	void DBInitVars();
-	
+
 };
 
 #endif

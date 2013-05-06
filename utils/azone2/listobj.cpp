@@ -1,18 +1,18 @@
 /*
 
-  List Placeable Objects in an S3D or EQG. 
+  List Placeable Objects in an S3D or EQG.
   By Derision, based on OpenEQ File Loaders by Daeken et al.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY except by those people which sell it, which
   are required to give you total support for your newly bought product;
   without even the implied warranty of MERCHANTABILITY or FITNESS FOR
   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -48,29 +48,29 @@ enum EQFileType { S3D, EQG, UNKNOWN };
 int main(int argc, char *argv[]) {
 
 	printf("LISTOBJ: List Placeable Objects in .S3D or .EQG zone files.\n");
-	
+
 	if(argc != 2) {
 		printf("Usage: %s (zone short name)\n", argv[0]);
 		return(1);
 	}
-	
+
 	return(ProcessZoneFile(argv[1]));
 }
 
 bool ProcessZoneFile(const char *shortname) {
-	
+
 	char bufs[96];
   	Archive *archive;
   	FileLoader *fileloader;
   	Zone_Model *zm;
 	FILE *fff;
 	EQFileType FileType = UNKNOWN;
-	
+
 	sprintf(bufs, "%s.s3d", shortname);
 
 	archive = new PFSLoader();
 	fff = fopen(bufs, "rb");
-	if(fff != nullptr) 
+	if(fff != nullptr)
 		FileType = S3D;
 	else {
 		sprintf(bufs, "%s.eqg", shortname);
@@ -92,7 +92,7 @@ bool ProcessZoneFile(const char *shortname) {
 	bool V4Zone = false;
 
 	switch(FileType) {
-		case S3D: 
+		case S3D:
   			fileloader = new WLDLoader();
   			if(fileloader->Open(nullptr, (char *) shortname, archive) == 0) {
 	  			printf("Error reading WLD from %s\n", bufs);
@@ -118,7 +118,7 @@ bool ProcessZoneFile(const char *shortname) {
 
 
 	zm = fileloader->model_data.zone_model;
- 
+
  	if(!V4Zone)
 		ListPlaceable(fileloader, bufs);
 	else
@@ -137,11 +137,11 @@ void ListPlaceable(FileLoader *fileloader, char *ZoneFileName) {
 	        	fileloader->model_data.placeable[i]->x,
 	        	fileloader->model_data.placeable[i]->z,
 			fileloader->model_data.placeable[i]->model,
-			fileloader->model_data.models[fileloader->model_data.placeable[i]->model]->name); 
+			fileloader->model_data.models[fileloader->model_data.placeable[i]->model]->name);
 	}
 }
 
-			
+
 void ListPlaceableV4(FileLoader *fileloader, char *ZoneFileName)
 {
 
@@ -175,7 +175,7 @@ void ListPlaceableV4(FileLoader *fileloader, char *ZoneFileName)
 		list<int>::iterator ModelIterator;
 
 		ModelIterator = (*Iterator).SubObjects.begin();
-	
+
 		while(ModelIterator != (*Iterator).SubObjects.end())
 		{
 			int SubModel = (*ModelIterator);

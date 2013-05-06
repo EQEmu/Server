@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef EXTENDED_PROFILE_H
-#define EXTENDED_PROFILE_H 
+#define EXTENDED_PROFILE_H
 
 #include "eq_packet_structs.h"
 #include "Item.h"
@@ -27,11 +27,11 @@
 /*
 	This is a place to store data that dosent have a home in the
 	official player profile.
-	
+
 	Try not to expand or re-arrange thing in this struct
 	to make conversion between sizes easier.
 	if something gets removed from here, just turn it into an unused
-	item, so conversion is not needed. Then reuse old unused values if 
+	item, so conversion is not needed. Then reuse old unused values if
 	possible later instead of adding more, so long as old values left
 	over would not be extrememly unpleasent side effects.
 */
@@ -43,7 +43,7 @@ struct ExtendedProfile_Struct {
 	SpellBuff_Struct	pet_buffs[BUFF_COUNT];
 	uint32				pet_items[MAX_MATERIALS];
 	char				merc_name[64];
-	
+
 	uint32				aa_effects;
 	uint32				perAA;		//% of exp going to AAs
 	uint32				expended_aa;		// Total of expended AA

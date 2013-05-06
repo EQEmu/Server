@@ -58,7 +58,7 @@ int main()
 	server.config = new Config();
 	server_log->Log(log_debug, "Config System Init.");
 	server.config->Parse("login.ini");
-	
+
 	//Parse unregistered allowed option.
 	if(server.config->GetVariable("options", "unregistered_allowed").compare("FALSE") == 0)
 	{
@@ -143,10 +143,10 @@ int main()
 #ifdef EQEMU_MYSQL_ENABLED
 		server_log->Log(log_debug, "MySQL Database Init.");
 		server.db = (Database*)new DatabaseMySQL(
-			server.config->GetVariable("database", "user"), 
-			server.config->GetVariable("database", "password"), 
-			server.config->GetVariable("database", "host"), 
-			server.config->GetVariable("database", "port"), 
+			server.config->GetVariable("database", "user"),
+			server.config->GetVariable("database", "password"),
+			server.config->GetVariable("database", "host"),
+			server.config->GetVariable("database", "port"),
 			server.config->GetVariable("database", "db"));
 #endif
 	}
@@ -155,10 +155,10 @@ int main()
 #ifdef EQEMU_POSTGRESQL_ENABLED
 		server_log->Log(log_debug, "PostgreSQL Database Init.");
 		server.db = (Database*)new DatabasePostgreSQL(
-			server.config->GetVariable("database", "user"), 
-			server.config->GetVariable("database", "password"), 
-			server.config->GetVariable("database", "host"), 
-			server.config->GetVariable("database", "port"), 
+			server.config->GetVariable("database", "user"),
+			server.config->GetVariable("database", "password"),
+			server.config->GetVariable("database", "host"),
+			server.config->GetVariable("database", "port"),
 			server.config->GetVariable("database", "db"));
 #endif
 	}

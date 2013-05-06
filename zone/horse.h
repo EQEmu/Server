@@ -28,14 +28,14 @@ using namespace std;
 class Horse : public NPC {
 public:
 	Horse(Client *owner, uint16 spell_id, float x, float y, float z, float heading);
-	
+
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
-	
+
 	static bool IsHorseSpell(uint16 spell_id);
 protected:
 	uint8 mount_color;
 	Client *owner;
-	
+
 	//generate npc type records for horses
 	static map<uint16, const NPCType *> horse_types;
 	static const NPCType *GetHorseType(uint16 spell_id);

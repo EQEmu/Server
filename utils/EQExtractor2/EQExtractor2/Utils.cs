@@ -4,7 +4,7 @@
 //
 // ShowEQ Distributed under GPL
 // http://www.sourceforge.net/projects/seq
-// 
+//
 //  Copyright 2004 Zaphod (dohpaz@users.sourceforge.net).
 //
 // -----------------------------------------------------------
@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net). Distributed under GPL version 2.
 //
-// 
+//
 
 
 using System;
@@ -21,7 +21,7 @@ using System.Text;
 
 namespace MyUtils
 {
-    public class ByteStream 
+    public class ByteStream
     {
         public ByteStream(byte[] NewBuffer)
         {
@@ -93,7 +93,7 @@ namespace MyUtils
 
             return Slice;
         }
-        
+
         public void SkipBytes(int Count)
         {
             BufferPointer += Count;
@@ -149,7 +149,7 @@ namespace MyUtils
 
         int BufferPointer;
     }
-    
+
     class BitStream
     {
         public BitStream(byte[] Data, UInt32 Length)
@@ -182,7 +182,7 @@ namespace MyUtils
             {
                 // Lead partial is a byte. So just put it in the middle.
                 leadPartialBitCount = 0;
-            }            
+            }
 
             if (leadPartialBitCount > bitCount)
             {
@@ -216,7 +216,7 @@ namespace MyUtils
                 Out = (Out << 8) | m_data[currentByte];
                 currentByte++;
             }
-                        
+
             // And the end.
             if (tailPartialBitCount > 0)
             {
@@ -292,7 +292,7 @@ namespace MyUtils
         {
             StringBuilder CleanName = new StringBuilder();
 
-            foreach(char c in Name)            
+            foreach(char c in Name)
                 if(!Char.IsDigit(c))
                     CleanName.Append(c);
 
@@ -300,15 +300,15 @@ namespace MyUtils
         }
 
         public static float EQ19ToFloat(Int32 EQ19Value)
-        {            
+        {
             if ((EQ19Value & 0x40000) > 0)
                 EQ19Value = -(0x7FFFF - EQ19Value + 1);
 
             return (float)EQ19Value / (float)(1 << 3);
         }
 
-        
+
     }
 
-    
+
 }

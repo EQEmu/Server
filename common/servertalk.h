@@ -105,12 +105,12 @@
 #define ServerOP_GroupCancelInvite	0x0112
 
 #define ServerOP_InstanceUpdateTime       0x014F
-#define ServerOP_AdventureRequest         0x0150 
+#define ServerOP_AdventureRequest         0x0150
 #define ServerOP_AdventureRequestAccept   0x0151
 #define ServerOP_AdventureRequestDeny     0x0152
-#define ServerOP_AdventureRequestCreate   0x0153 
-#define ServerOP_AdventureData            0x0154 
-#define ServerOP_AdventureDataClear       0x0155 
+#define ServerOP_AdventureRequestCreate   0x0153
+#define ServerOP_AdventureData            0x0154
+#define ServerOP_AdventureDataClear       0x0155
 #define ServerOP_AdventureCreateDeny      0x0156
 #define ServerOP_AdventureDataRequest     0x0157
 #define ServerOP_AdventureClickDoor       0x0158
@@ -267,7 +267,7 @@ public:
 	uint8 ReadUInt8() { uint8 value = *(uint8 *)(pBuffer + _rpos); _rpos += sizeof(uint8); return value; }
 	uint32 ReadUInt32() { uint32 value = *(uint32 *)(pBuffer + _rpos); _rpos += sizeof(uint32); return value; }
 	void ReadString(char *str) { uint32 len = static_cast<uint32>(strlen((char *)(pBuffer + _rpos))) + 1; memcpy(str, pBuffer + _rpos, len); _rpos += len; }
-	
+
 	uint32 GetWritePosition() { return _wpos; }
 	uint32 GetReadPosition() { return _rpos; }
 	void SetWritePosition(uint32 Newwpos) { _wpos = Newwpos; }
@@ -584,7 +584,7 @@ struct ServerWhoAll_Struct {
 };
 
 struct ServerFriendsWho_Struct {
-	uint32 FromID; 
+	uint32 FromID;
 	char  FromName[64];
 	char  FriendsString[1];
 };
@@ -838,7 +838,7 @@ struct ServerRaidGeneralAction_Struct {
 struct ServerRaidGroupAction_Struct { //add / remove depends on opcode.
 	char membername[64]; //member who's adding / leaving
 	uint32 gid; //group id to send to.
-	uint32 rid; //raid id to send to. 
+	uint32 rid; //raid id to send to.
 };
 
 struct ServerRaidMessage_Struct {

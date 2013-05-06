@@ -45,41 +45,41 @@ public:
 		Database_DBLoadItems,
 		Database_GetWaypoints,
 		Database_DBLoadNPCFactionLists,
-		
+
 		DBcore_RunQuery,
-		
+
 		DBAsync_ProcessWork,
 		DBAsync_DispatchWork,
 		DBAsyncLoop_loop,
-		
+
 		EQStreamServer_Process,
-		
+
 		EQStream_Process,
-		
+
 		EQStreamServerLoop,
 		EQStreamInLoop,
 		EQStreamOutLoop,
 		TCPServerLoop,
 		TCPConnectionLoop,
-		
+
 		Inventory_GetItem,
 		Inventory_HasItem,
-		
+
 		BaseTCPServerLoop,
 
 		MakeRandomInt,
 		MakeRandomFloat,
-		
+
 		Mutex_lock,
 		Timer_Check,
-		
+
 		WorldConnection_Process,
-		
+
 		MaxCommonProfilerId
 	};
-	
+
 	inline CommonProfiler() : GeneralProfiler(MaxCommonProfilerId) { }
-	
+
 };
 
 extern CommonProfiler _cp;

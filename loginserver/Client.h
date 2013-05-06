@@ -49,7 +49,7 @@ enum LoginMode
 };
 
 /**
- * Client class, controls a single client and it's 
+ * Client class, controls a single client and it's
  * connection to the login server.
  */
 class Client

@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,9 +19,9 @@
 #define LOGSYS_H_
 
 /*
- * 
+ *
  * Usage:
- * 
+ *
  * 	These are the main functions provided by logsys:
  * 		- _log(TYPE, fmt, ...) - Log a message in any context
  * 		- mlog(TYPE, fmt, ...) - Zone only. Log a message from a Mob:: context, prefixing it with the mob's name.
@@ -32,14 +32,14 @@
  * 		- _pkt(TYPE, BasePacket *) - Log a packet hex dump with header in any context.
  * 		- mhex(TYPE, data, length) - Zone only. Log a packet hex dump from a Mob:: context, prefixing it with the mob's name
  * Types are defined in logtypes.h
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
  * this is very C-ish, not C++ish, but thats how I felt like writting it
- * 
- * 
- * 
+ *
+ *
+ *
  */
 
 #include <stdarg.h>
@@ -180,7 +180,7 @@ extern bool load_log_settings(const char *filename);
 
 #endif /*LOGSYS_H_*/
 
-	
+
 
 
 

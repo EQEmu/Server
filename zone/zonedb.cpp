@@ -50,7 +50,7 @@ ZoneDatabase::~ZoneDatabase() {
 		safe_delete_array(npc_spells_cache);
 	}
 	safe_delete_array(npc_spells_loadtried);
-	
+
 	if (faction_array != nullptr) {
 		for (x=0; x <= max_faction; x++) {
 			if (faction_array[x] != 0)
@@ -100,12 +100,12 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		" from zone where zoneidnumber=%i and version=%i",zoneid, instance_id), errbuf, &result)) {
 		safe_delete_array(query);
 		row = mysql_fetch_row(result);
-		if(row) 
+		if(row)
 		{
 			int r = 0;
 			memset(zone_data,0,sizeof(NewZone_Struct));
 			zone_data->ztype=atoi(row[r++]);
-			
+
 			for(i=0;i<4;i++){
 				zone_data->fog_red[i]=atoi(row[r++]);
 				zone_data->fog_green[i]=atoi(row[r++]);
@@ -113,7 +113,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 				zone_data->fog_minclip[i]=atof(row[r++]);
 				zone_data->fog_maxclip[i]=atof(row[r++]);
 			}
-			
+
 			zone_data->fog_density = atof(row[r++]);;
 			zone_data->sky=atoi(row[r++]);
 			zone_data->zone_exp_multiplier=atof(row[r++]);
@@ -123,11 +123,11 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 			zone_data->underworld=atof(row[r++]);
 			zone_data->minclip=atof(row[r++]);
 			zone_data->maxclip=atof(row[r++]);
-			
+
 			zone_data->time_type=atoi(row[r++]);
 //not in the DB yet:
 			zone_data->gravity = 0.4;
-			
+
 			b = atoi(row[r++]);
 			can_bind = b==0?false:true;
 			is_city = b==2?true:false;
@@ -157,9 +157,9 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		strcpy(*map_filename, "default");
 	}
 	safe_delete_array(query);
-	
+
 	zone_data->zone_id = zoneid;
-	
+
 	return(good);
 }
 
@@ -172,7 +172,7 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
-	
+
 	//if we pass timeleft as 0 that means we clear from respawn time
 	//otherwise we update with a REPLACE INTO
 	if(timeleft == 0)
@@ -206,7 +206,7 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 
 	MakeAnyLenString(&query, "SELECT start, duration FROM respawn_times WHERE id=%lu AND instance_id=%lu",
 		(unsigned long)id, (unsigned long)zone->GetInstanceID());
-	
+
 	if (RunQuery(query, strlen(query), errbuf, &result))
 	{
 		safe_delete_array(query);
@@ -251,7 +251,7 @@ void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
-	
+
 	if(!RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET enabled=%i WHERE id=%lu", new_status, (unsigned long)id),errbuf))
 	{
 		LogFile->write(EQEMuLog::Error, "Error in UpdateSpawn2Status query %s: %s", query, errbuf);
@@ -286,7 +286,7 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 void ZoneDatabase::UpdateBug(BugStruct* bug){
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-	
+
 
 	uint32 len = strlen(bug->bug);
 	char* bugtext = nullptr;
@@ -317,15 +317,15 @@ void ZoneDatabase::UpdateBug(BugStruct* bug){
 
 	//x and y are intentionally swapped because eq is inversexy coords
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO bugs (zone, name, ui, x, y, z, type, flag, target, bug, date) "
-		"values('%s', '%s', '%s', '%.2f', '%.2f', '%.2f', '%s', %d, '%s', '%s', CURDATE())", zone->GetShortName(), bug->name, 
-		uitext==nullptr?"":uitext, bug->y, bug->x, bug->z, bug->chartype, bug->type, targettext==nullptr?"Unknown Target":targettext, 
-		bugtext==nullptr?"":bugtext), errbuf)) {	
+		"values('%s', '%s', '%s', '%.2f', '%.2f', '%.2f', '%s', %d, '%s', '%s', CURDATE())", zone->GetShortName(), bug->name,
+		uitext==nullptr?"":uitext, bug->y, bug->x, bug->z, bug->chartype, bug->type, targettext==nullptr?"Unknown Target":targettext,
+		bugtext==nullptr?"":bugtext), errbuf)) {
 		cerr << "Error in UpdateBug" << query << "' " << errbuf << endl;
 	}
 	safe_delete_array(query);
 	safe_delete_array(bugtext);
 	safe_delete_array(uitext);
-	safe_delete_array(targettext);	
+	safe_delete_array(targettext);
 }
 
 void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
@@ -381,17 +381,17 @@ bool ZoneDatabase::SetSpecialAttkFlag(uint8 id, const char* flag) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32	affected_rows = 0;
-	
+
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET npcspecialattks='%s' WHERE id=%i;",flag,id), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
 		return false;
 	}
 	safe_delete_array(query);
-	
+
 	if (affected_rows == 0) {
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -425,21 +425,21 @@ void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,
 		sprintf(modifications,"charname=\'%s\'",name);
 	else if(account_id != 0)
 		sprintf(modifications,"accountid=%i",account_id);
-	
+
 	if(strlen(target) != 0)
 		sprintf(modifications,"%s AND target like \'%%%s%%\'",modifications,target);
-	
+
 	if(strlen(detail) != 0)
 		sprintf(modifications,"%s AND description like \'%%%s%%\'",modifications,detail);
-	
+
 	if(strlen(timestamp) != 0)
 		sprintf(modifications,"%s AND time like \'%%%s%%\'",modifications,timestamp);
-	
+
 	if(eventid == 0)
 		eventid =1;
 	sprintf(modifications,"%s AND event_nid=%i",modifications,eventid);
-	
-	MakeAnyLenString(&query, "SELECT id,accountname,accountid,status,charname,target,time,descriptiontype,description FROM eventlog where %s",modifications);	
+
+	MakeAnyLenString(&query, "SELECT id,accountname,accountid,status,charname,target,time,descriptiontype,description FROM eventlog where %s",modifications);
 	if (RunQuery(query, strlen(query), errbuf, &result))
 	{
 		safe_delete_array(query);
@@ -476,17 +476,17 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 		LogFile->write(EQEMuLog::Error, "Programming error: LoadWorldContainer passed nullptr pointer");
 		return;
 	}
-	
+
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char* query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	//const Item_Struct* item = nullptr;
 	//ItemInst* inst = nullptr;
-	
+
 	uint32 len_query =  MakeAnyLenString(&query, "select "
 		"bagidx,itemid,charges,augslot1,augslot2,augslot3,augslot4,augslot5 from object_contents where parentid=%i", parentid);
-	
+
 	if (RunQuery(query, len_query, errbuf, &result)) {
 		while ((row = mysql_fetch_row(result))) {
 			uint8 index = (uint8)atoi(row[0]);
@@ -498,7 +498,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 			aug[2]	= (uint32)atoi(row[5]);
 			aug[3]	= (uint32)atoi(row[6]);
 			aug[4]	= (uint32)atoi(row[7]);
-			
+
 			ItemInst* inst = database.CreateItem(item_id, charges);
 			if (inst) {
 				if (inst->GetItem()->ItemClass == ItemClassCommon) {
@@ -518,7 +518,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 	else {
 		LogFile->write(EQEMuLog::Error, "Error in DB::LoadWorldContainer: %s", errbuf);
 	}
-	
+
 	safe_delete_array(query);
 }
 
@@ -527,11 +527,11 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char* query = 0;
-	
+
 	// Since state is not saved for each world container action, we'll just delete
 	// all and save from scratch .. we may come back later to optimize
 	//DeleteWorldContainer(parent_id);
-	
+
 	if (!container) {
 		return;
 	}
@@ -553,7 +553,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 
 				"replace into object_contents (zoneid,parentid,bagidx,itemid,charges,augslot1,augslot2,augslot3,augslot4,augslot5,droptime) values (%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,now())",
 				zone_id, parent_id, index, item_id, inst->GetCharges(),augslot[0],augslot[1],augslot[2],augslot[3],augslot[4]);
-			
+
 			if (!RunQuery(query, len_query, errbuf)) {
 				LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", errbuf);
 			}
@@ -568,13 +568,13 @@ void ZoneDatabase::DeleteWorldContainer(uint32 parent_id,uint32 zone_id)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char* query = 0;
-	
+
 	uint32 len_query = MakeAnyLenString(&query,
 		"delete from object_contents where parentid=%i and zoneid=%i", parent_id,zone_id);
 	if (!RunQuery(query, len_query, errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", errbuf);
 	}
-	
+
 	safe_delete_array(query);
 }
 
@@ -726,26 +726,26 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 
 		if (!(RunQuery(Query,MakeAnyLenString(&Query, "delete from trader where char_id=%i and item_id=%i",
 							       CharID, ItemID),errbuf)))
-	
+
 			_log(TRADING__CLIENT, "Failed to remove trader item(s): %i for char_id: %i, the error was: %s\n",
 					      ItemID, CharID, errbuf);
 
 		safe_delete_array(Query);
-		
+
 		return;
 	}
 	else {
 		if(!item->Stackable) {
 			if (!(RunQuery(Query,MakeAnyLenString(&Query, "update trader set item_cost=%i where char_id=%i and item_id=%i"
 								      " and charges=%i", NewPrice, CharID, ItemID, Charges),errbuf)))
-	
+
 				_log(TRADING__CLIENT, "Failed to update price for  trader item: %i for char_id: %i, the error was: %s\n",
 						      ItemID, CharID, errbuf);
 		}
 		else {
 			if (!(RunQuery(Query,MakeAnyLenString(&Query, "update trader set item_cost=%i where char_id=%i and item_id=%i",
 								      NewPrice, CharID, ItemID),errbuf)))
-	
+
 				_log(TRADING__CLIENT, "Failed to update price for  trader item: %i for char_id: %i, the error was: %s\n",
 						      ItemID, CharID, errbuf);
 		}
@@ -823,7 +823,7 @@ void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity)
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 
-	if (!(RunQuery(query,MakeAnyLenString(&query, "update buyer set quantity=%i where charid=%i and buyslot=%i", 
+	if (!(RunQuery(query,MakeAnyLenString(&query, "update buyer set quantity=%i where charid=%i and buyslot=%i",
 					      Quantity, CharID, BuySlot), errbuf)))
 		_log(TRADING__CLIENT, "Failed to update quantity in buyslot %i for charid: %i, the error was: %s\n", BuySlot, CharID, errbuf);
 
@@ -831,20 +831,20 @@ void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity)
 
 }
 
-bool ZoneDatabase::GetCharacterInfoForLogin(const char* name, uint32* character_id, 
-char* current_zone, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, 
-uint32* pplen, uint32* guilddbid, uint8* guildrank, 
+bool ZoneDatabase::GetCharacterInfoForLogin(const char* name, uint32* character_id,
+char* current_zone, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext,
+uint32* pplen, uint32* guilddbid, uint8* guildrank,
 uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *firstlogon) {
 	_CP(Database_GetCharacterInfoForLogin);
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32 querylen;
     MYSQL_RES *result;
-	
+
 	bool ret = false;
-	
+
 	//DO NOT FORGET TO EDIT Client::Handle_Connect_OP_ZoneEntry if you change this.
-	
+
 	if (character_id && *character_id) {
 		// searching by ID should be a lil bit faster
 		querylen = MakeAnyLenString(&query, "SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon FROM character_ LEFT JOIN guild_members ON id=char_id WHERE id=%i", *character_id);
@@ -852,7 +852,7 @@ uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *fi
 	else {
 		querylen = MakeAnyLenString(&query, "SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon FROM character_ LEFT JOIN guild_members ON id=char_id WHERE name='%s'", name);
 	}
-	
+
 	if (RunQuery(query, querylen, errbuf, &result)) {
 		ret = GetCharacterInfoForLogin_result(result, character_id, current_zone, pp, inv, ext, pplen, guilddbid, guildrank, class_, level, LFP, LFG, NumXTargets, firstlogon);
 		mysql_free_result(result);
@@ -860,7 +860,7 @@ uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *fi
 	else {
 		LogFile->write(EQEMuLog::Error, "GetCharacterInfoForLogin query '%s' %s", query, errbuf);
 	}
-	
+
 	safe_delete_array(query);
 	return ret;
 }
@@ -869,15 +869,15 @@ uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *fi
 
 // Process results of GetCharacterInfoForLogin()
 // Query this processes: SELECT id,profile,zonename,x,y,z,guild,guildrank,extprofile,class,level FROM character_ WHERE id=%i
-bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result, 
-	uint32* character_id, char* current_zone, PlayerProfile_Struct* pp, Inventory* inv, 
-	ExtendedProfile_Struct *ext, uint32* pplen, uint32* guilddbid, uint8* guildrank, 
+bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
+	uint32* character_id, char* current_zone, PlayerProfile_Struct* pp, Inventory* inv,
+	ExtendedProfile_Struct *ext, uint32* pplen, uint32* guilddbid, uint8* guildrank,
 	uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8* firstlogon) {
 	_CP(Database_GetCharacterInfoForLogin_result);
-	
+
     MYSQL_ROW row;
 	unsigned long* lengths;
-	
+
 	if (mysql_num_rows(result) == 1) {
 		row = mysql_fetch_row(result);
 		lengths = mysql_fetch_lengths(result);
@@ -889,21 +889,21 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 					sizeof(PlayerProfile_Struct), lengths[1]);
 				return false;
 			}
-			
+
 			*pplen = lengths[1];
 			pp->zone_id = GetZoneID(row[2]);
 			pp->zoneInstance = atoi(row[13]);
-			
+
 			pp->x = atof(row[3]);
 			pp->y = atof(row[4]);
 			pp->z = atof(row[5]);
 
 			pp->lastlogin = time(nullptr);
-			
+
 			if (pp->x == -1 && pp->y == -1 && pp->z == -1)
 				GetSafePoints(pp->zone_id, database.GetInstanceVersion(pp->zoneInstance), &pp->x, &pp->y, &pp->z);
 		}
-		
+
 		uint32 char_id = atoi(row[0]);
 		if (RuleB(Character, SharedBankPlat))
 			pp->platinum_shared = database.GetSharedPlatinum(GetAccountIDByChar(char_id));
@@ -924,21 +924,21 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 			else
 				*guildrank = GUILD_RANK_NONE;
 		}
-		
+
 		if(ext) {
 			//SetExtendedProfile handles any conversion
 			SetExtendedProfile(ext, row[8], lengths[8]);
 		}
-		
+
 		if(class_)
 			*class_ = atoi(row[9]);
-		
+
 		if(level)
 			*level = atoi(row[10]);
 
 		if(LFP)
 			*LFP = atoi(row[11]);
-		
+
 		if(LFG)
 			*LFG = atoi(row[12]);
 
@@ -957,11 +957,11 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 		for(int i = 0; i<9; i++)
 			if(pp->item_tint[i].rgb.use_tint == 1)
 				pp->item_tint[i].rgb.use_tint = 0xFF;
-		
+
 		// Retrieve character inventory
 		return GetInventory(char_id, inv);
 	}
-	
+
 	return false;
 }
 
@@ -993,7 +993,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
    // If NPC is already in tree, return it.
 	if((itr = zone->npctable.find(id)) != zone->npctable.end())
 		return itr->second;
-   
+
    // Otherwise, get NPCs from database.
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
@@ -1094,10 +1094,10 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				NPCType *tmpNPCType;
 				tmpNPCType = new NPCType;
 				memset (tmpNPCType, 0, sizeof *tmpNPCType);
-				
+
 				int r = 0;
 				tmpNPCType->npc_id = atoi(row[r++]);
-				
+
 				strn0cpy(tmpNPCType->name, row[r++], 50);
 
 				tmpNPCType->level = atoi(row[r++]);
@@ -1143,7 +1143,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->trackable = atoi(row[r++]) == 0? false : true;
 				tmpNPCType->hp_regen = atoi(row[r++]);
 				tmpNPCType->mana_regen = atoi(row[r++]);
-				
+
 				tmpNPCType->aggroradius = (int32)atoi(row[r++]);
 				// set defaultvalue for aggroradius
 				if (tmpNPCType->aggroradius <= 0)
@@ -1154,9 +1154,9 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				else
 					tmpNPCType->bodytype = 0;
 				r++;
-				
+
 				tmpNPCType->npc_faction_id = atoi(row[r++]);
-				
+
 				tmpNPCType->luclinface = atoi(row[r++]);
 				tmpNPCType->hairstyle = atoi(row[r++]);
 				tmpNPCType->haircolor = atoi(row[r++]);
@@ -1244,7 +1244,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				if (row[r] != nullptr)
 					strn0cpy(tmpNPCType->lastname, row[r], 32);
 				r++;
-				
+
 				tmpNPCType->qglobal = atoi(row[r++])==0?false:true;	// qglobal
 				tmpNPCType->AC = atoi(row[r++]);
 				tmpNPCType->npc_aggro = atoi(row[r++])==0?false:true;
@@ -1302,7 +1302,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 	//If the NPC type is 0, return nullptr. (sanity check)
 	if(id == 0)
 	return nullptr;
-   
+
    // Otherwise, get NPCs from database.
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
@@ -1404,10 +1404,10 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				NPCType *tmpNPCType;
 				tmpNPCType = new NPCType;
 				memset (tmpNPCType, 0, sizeof *tmpNPCType);
-				
+
 				int r = 0;
 				tmpNPCType->npc_id = atoi(row[r++]);
-				
+
 				strn0cpy(tmpNPCType->name, row[r++], 50);
 
 				tmpNPCType->level = atoi(row[r++]);
@@ -1453,7 +1453,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				//tmpNPCType->trackable = atoi(row[r++]) == 0? false : true;
 				tmpNPCType->hp_regen = atoi(row[r++]);
 				tmpNPCType->mana_regen = atoi(row[r++]);
-				
+
 				//tmpNPCType->aggroradius = (int32)atoi(row[r++]);
 				tmpNPCType->aggroradius = RuleI(Mercs, AggroRadius);
 				// set defaultvalue for aggroradius
@@ -1465,9 +1465,9 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				else
 					tmpNPCType->bodytype = 1;
 				r++;
-				
+
 				//tmpNPCType->npc_faction_id = atoi(row[r++]);
-				
+
 				//tmpNPCType->luclinface = atoi(row[r++]);
 				//tmpNPCType->hairstyle = atoi(row[r++]);
 				//tmpNPCType->haircolor = atoi(row[r++]);
@@ -1555,7 +1555,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				//if (row[r] != nullptr)
 				//	strn0cpy(tmpNPCType->lastname, row[r], 32);
 				//r++;
-				
+
 				//tmpNPCType->qglobal = atoi(row[r++])==0?false:true;	// qglobal
 				tmpNPCType->AC = atoi(row[r++]);
 				//tmpNPCType->npc_aggro = atoi(row[r++])==0?false:true;
@@ -1678,7 +1678,7 @@ bool ZoneDatabase::LoadCurrentMerc(Client *c) {
 			errorMessage = std::string(TempErrorMessageBuffer);
 		}
 		else {
-			while(DataRow = mysql_fetch_row(DatasetResult)) {		
+			while(DataRow = mysql_fetch_row(DatasetResult)) {
 				c->GetMercInfo(slot).mercid = atoi(DataRow[0]);
 				c->GetMercInfo(slot).slot = slot;
 				snprintf(c->GetMercInfo(slot).merc_name, 64, "%s", std::string(DataRow[1]).c_str());
@@ -2000,7 +2000,7 @@ void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint
 	if (!RunQuery(query, MakeAnyLenString(&query, "replace into merchantlist_temp (npcid,slot,itemid,charges) values(%d,%d,%d,%d)", npcid, slot, item, charges), errbuf)) {
 		cerr << "Error in SaveMerchantTemp query '" << query << "' " << errbuf << endl;
 	}
-	safe_delete_array(query);	
+	safe_delete_array(query);
 }
 void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -2009,7 +2009,7 @@ void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
 	if (!RunQuery(query, MakeAnyLenString(&query, "delete from merchantlist_temp where npcid=%d and slot=%d", npcid, slot), errbuf)) {
 		cerr << "Error in DeleteMerchantTemp query '" << query << "' " << errbuf << endl;
 	}
-	safe_delete_array(query);	
+	safe_delete_array(query);
 }
 
 
@@ -2017,18 +2017,18 @@ bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, float x=0, float y
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32	affected_rows = 0;
-	
+
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE zone SET safe_x='%f', safe_y='%f', safe_z='%f' WHERE short_name='%s';", x, y, z, zonename), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
 		return false;
 	}
 	safe_delete_array(query);
-	
+
 	if (affected_rows == 0)
 	{
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -2058,14 +2058,14 @@ uint8 ZoneDatabase::GetUseCFGSafeCoords()
 	}
 	else
 	{
-		
+
 		cerr << "Error in GetUseCFGSafeCoords query '" << query << "' " << errbuf << endl;
 		safe_delete_array(query);
 		return false;
 	}
-	
+
 	return 0;
-	
+
 }
 
 
@@ -2075,13 +2075,13 @@ uint32 ZoneDatabase::GetServerFilters(char* name, ServerSideFilters_Struct *ssfs
     MYSQL_RES *result;
 
     MYSQL_ROW row;
-	
-	
+
+
 	unsigned long* lengths;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT serverfilters FROM account WHERE name='%s'", name), errbuf, &result)) {
 		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {	
+		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			lengths = mysql_fetch_lengths(result);
 			if (lengths[0] == sizeof(ServerSideFilters_Struct)) {
@@ -2107,7 +2107,7 @@ uint32 ZoneDatabase::GetServerFilters(char* name, ServerSideFilters_Struct *ssfs
 		safe_delete_array(query);
 		return 0;
 	}
-	
+
 	return 0;
 }
 
@@ -2115,35 +2115,35 @@ bool ZoneDatabase::SetServerFilters(char* name, ServerSideFilters_Struct *ssfs) 
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char query[256+sizeof(ServerSideFilters_Struct)*2+1];
 	char* end = query;
-	
+
 	//if (strlen(name) > 15)
 	//	return false;
-	
+
 	/*for (int i=0; i<strlen(name); i++)
 	{
-	if ((name[i] < 'a' || name[i] > 'z') && 
-	(name[i] < 'A' || name[i] > 'Z') && 
+	if ((name[i] < 'a' || name[i] > 'z') &&
+	(name[i] < 'A' || name[i] > 'Z') &&
 	(name[i] < '0' || name[i] > '9'))
 	return 0;
 }*/
-	
-	
+
+
 	end += sprintf(end, "UPDATE account SET serverfilters=");
 	*end++ = '\'';
     end += DoEscapeString(end, (char*)ssfs, sizeof(ServerSideFilters_Struct));
     *end++ = '\'';
     end += sprintf(end," WHERE name='%s'", name);
-	
+
 	uint32 affected_rows = 0;
     if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
         cerr << "Error in SetServerSideFilters query " << errbuf << endl;
 		return false;
     }
-	
+
 	if (affected_rows == 0) {
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -2154,7 +2154,7 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
     char *query = 0;
     MYSQL_RES *result;
     MYSQL_ROW row;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT timezone FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneid, version), errbuf, &result))
 	{
 		safe_delete_array(query);
@@ -2177,7 +2177,7 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32 affected_rows = 0;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "UPDATE zone SET timezone=%i WHERE zoneidnumber=%i AND version=%i", tz, zoneid, version), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
 
@@ -2191,7 +2191,7 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
 		safe_delete_array(query);
 		return false;
 	}
-	
+
 	return false;
 }
 //End new timezone functions.
@@ -2203,7 +2203,7 @@ uint8 ZoneDatabase::GetZoneWeather(uint32 zoneid, uint32 version) {
     char *query = 0;
     MYSQL_RES *result;
     MYSQL_ROW row;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT weather FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneid, version), errbuf, &result))
 	{
 		safe_delete_array(query);
@@ -2227,7 +2227,7 @@ bool ZoneDatabase::SetZoneWeather(uint32 zoneid, uint32 version, uint8 w) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32 affected_rows = 0;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "UPDATE zone SET weather=%i WHERE zoneidnumber=%i AND version=%i", w, zoneid, version), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
 		if (affected_rows == 1)
@@ -2240,7 +2240,7 @@ bool ZoneDatabase::SetZoneWeather(uint32 zoneid, uint32 version, uint8 w) {
 		safe_delete_array(query);
 		return false;
 	}
-	
+
 	return false;
 }
 //End weather functions.
@@ -2253,7 +2253,7 @@ bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char*
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
     MYSQL_RES *result;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT status, name, lsaccount_id, gmspeed, revoked, hideme FROM account WHERE id=%i", account_id), errbuf, &result)) {
 		safe_delete_array(query);
 		bool ret = GetAccountInfoForLogin_result(result, admin, account_name, lsaccountid, gmspeed, revoked,gmhideme);
@@ -2266,7 +2266,7 @@ bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char*
 		safe_delete_array(query);
 		return false;
 	}
-	
+
 	return false;
 }
 
@@ -2282,7 +2282,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate2_Struct));
-	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;	
+	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -2313,7 +2313,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
-	
+
 	if(c->GetClientVersion() >= EQClientSoD) {
 		g->NotifyMainTank(c, 1);
 		g->NotifyPuller(c, 1);
@@ -2340,7 +2340,7 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid){
 			count = atoi(row[0]);
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::GroupCount query '%s': %s", query, errbuf);		
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::GroupCount query '%s': %s", query, errbuf);
 	}
 	safe_delete_array(query);
 	return count;
@@ -2358,7 +2358,7 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid){
  			count = atoi(row[0]);
  		mysql_free_result(result);
  	} else {
- 		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query, errbuf);		
+ 		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query, errbuf);
  	}
  	safe_delete_array(query);
  	return count;
@@ -2388,7 +2388,7 @@ int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 		safe_delete_array(query);
 		return -1;
 	}
-	
+
 	return -1;
 }
 
@@ -2441,7 +2441,7 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
     char *query = 0;
     MYSQL_RES *result;
     MYSQL_ROW row;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT shutdowndelay FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version), errbuf, &result))
 	{
 		if (mysql_num_rows(result) > 0) {
@@ -2527,7 +2527,7 @@ void ZoneDatabase::ListAllInstances(Client* c, uint32 charid)
 		c->Message(0, "%s is part of the following instances:", name);
 		while(row = mysql_fetch_row(result))
 		{
-			c->Message(0, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])), 
+			c->Message(0, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
 				(unsigned long)atoi(row[0]), (unsigned long)atoi(row[2]));
 		}
 
@@ -2543,7 +2543,7 @@ void ZoneDatabase::QGlobalPurge()
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
-	database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM quest_globals WHERE expdate < UNIX_TIMESTAMP()"), 
+	database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM quest_globals WHERE expdate < UNIX_TIMESTAMP()"),
 		errbuf);
 	safe_delete_array(query);
 }
@@ -2581,7 +2581,7 @@ void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, ui
     char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	database.RunQuery(query, MakeAnyLenString(&query, "REPLACE INTO character_alt_currency (char_id, currency_id, amount)"
-        " VALUES('%u', '%u', '%u')", char_id, currency_id, value), 
+        " VALUES('%u', '%u', '%u')", char_id, currency_id, value),
 		errbuf);
 	safe_delete_array(query);
 }
@@ -2590,7 +2590,7 @@ void ZoneDatabase::SaveBuffs(Client *c) {
     char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 
-    database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `character_buffs` WHERE `character_id`='%u'", c->CharacterID()), 
+    database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `character_buffs` WHERE `character_id`='%u'", c->CharacterID()),
 		errbuf);
 
     uint32 buff_count = c->GetMaxBuffSlots();
@@ -2602,7 +2602,7 @@ void ZoneDatabase::SaveBuffs(Client *c) {
                 "death_save_aa_chance) VALUES('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
                 c->CharacterID(), i, buffs[i].spellid, buffs[i].casterlevel, buffs[i].caster_name, buffs[i].ticsremaining,
                 buffs[i].counters, buffs[i].numhits, buffs[i].melee_rune, buffs[i].magic_rune, buffs[i].persistant_buff,
-                buffs[i].deathSaveSuccessChance, buffs[i].deathsaveCasterAARank), 
+                buffs[i].deathSaveSuccessChance, buffs[i].deathsaveCasterAARank),
 		        errbuf)) {
                 LogFile->write(EQEMuLog::Error, "Error in SaveBuffs query '%s': %s", query, errbuf);
             }
@@ -2625,8 +2625,8 @@ void ZoneDatabase::LoadBuffs(Client *c) {
     MYSQL_ROW row;
     if (RunQuery(query, MakeAnyLenString(&query, "SELECT spell_id, slot_id, caster_level, caster_name, ticsremaining, counters, "
         "numhits, melee_rune, magic_rune, persistent, death_save_chance, death_save_aa_chance FROM `character_buffs` WHERE "
-        "`character_id`='%u'", 
-        c->CharacterID()), errbuf, &result)) 
+        "`character_id`='%u'",
+        c->CharacterID()), errbuf, &result))
     {
 		safe_delete_array(query);
 		while ((row = mysql_fetch_row(result)))
@@ -2678,8 +2678,8 @@ void ZoneDatabase::LoadBuffs(Client *c) {
             }
             else if(IsMagicRuneSpell(spell_id)) {
                 c->SetHasSpellRune(true);
-            } 
-           
+            }
+
 			/*
             if(IsDeathSaveSpell(spell_id)) {
                 c->SetDeathSaveChance(true);
@@ -2729,13 +2729,13 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 	PetInfo *petinfo = c->GetPetInfo(0);
 	PetInfo *suspended = c->GetPetInfo(1);
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `character_pet_buffs` WHERE `char_id`=%u", c->CharacterID()), 
+	if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `character_pet_buffs` WHERE `char_id`=%u", c->CharacterID()),
 		errbuf)) {
 		safe_delete_array(query);
 		return;
 	}
 	safe_delete_array(query);
-	if (!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `character_pet_inventory` WHERE `char_id`=%u", c->CharacterID()), 
+	if (!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `character_pet_inventory` WHERE `char_id`=%u", c->CharacterID()),
 		errbuf)) {
 		safe_delete_array(query);
 		// error report
@@ -2749,7 +2749,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 		"ON DUPLICATE KEY UPDATE `petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u",
 		c->CharacterID(), petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana,
 		petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana),
-		errbuf)) 
+		errbuf))
 	{
 		safe_delete_array(query);
 		return;
@@ -2762,7 +2762,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 				"INSERT INTO `character_pet_buffs` (`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
 				"`ticsremaining`, `counters`) values "
 				"(%u, 0, %u, %u, %u, %u, %d)",
-				c->CharacterID(), i, petinfo->Buffs[i].spellid, petinfo->Buffs[i].level, petinfo->Buffs[i].duration, 
+				c->CharacterID(), i, petinfo->Buffs[i].spellid, petinfo->Buffs[i].level, petinfo->Buffs[i].duration,
 				petinfo->Buffs[i].counters),
 				errbuf);
 			safe_delete_array(query);
@@ -2772,7 +2772,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 				"INSERT INTO `character_pet_buffs` (`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
 				"`ticsremaining`, `counters`) values "
 				"(%u, 1, %u, %u, %u, %u, %d)",
-				c->CharacterID(), i, suspended->Buffs[i].spellid, suspended->Buffs[i].level, suspended->Buffs[i].duration, 
+				c->CharacterID(), i, suspended->Buffs[i].spellid, suspended->Buffs[i].level, suspended->Buffs[i].duration,
 				suspended->Buffs[i].counters),
 				errbuf);
 			safe_delete_array(query);
@@ -2789,14 +2789,14 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 		}
 	}
 
-	
+
 	if(!database.RunQuery(query, MakeAnyLenString(&query,
 		"INSERT INTO `character_pet_info` (`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`) "
 		"values (%u, 1, '%s', %u, %u, %u, %u) "
 		"ON DUPLICATE KEY UPDATE `petname`='%s', `petpower`=%i, `spell_id`=%u, `hp`=%u, `mana`=%u",
 		c->CharacterID(), suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana,
 		suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana),
-		errbuf)) 
+		errbuf))
 	{
 		safe_delete_array(query);
 		return;
@@ -2840,7 +2840,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 	memset(petinfo, 0, sizeof(PetInfo));
 	memset(suspended, 0, sizeof(PetInfo));
 
-	if(database.RunQuery(query, MakeAnyLenString(&query, 
+	if(database.RunQuery(query, MakeAnyLenString(&query,
 		"SELECT `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana` from `character_pet_info` where `char_id`=%u",
 		c->CharacterID()), errbuf, &result))
 	{
@@ -2870,11 +2870,11 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 	}
 
 
-    if (RunQuery(query, MakeAnyLenString(&query, 
+    if (RunQuery(query, MakeAnyLenString(&query,
 		"SELECT `pet`, `slot`, `spell_id`, `caster_level`, `castername`, "
 		"`ticsremaining`, `counters` FROM `character_pet_buffs` "
-		"WHERE `char_id`=%u", 
-        c->CharacterID()), errbuf, &result)) 
+		"WHERE `char_id`=%u",
+        c->CharacterID()), errbuf, &result))
     {
 		safe_delete_array(query);
 		while ((row = mysql_fetch_row(result)))
@@ -2951,7 +2951,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 
 bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id) {
 	if (faction_id <= 0 || faction_id > (int32) max_faction)
-		return false;	
+		return false;
 
     if (faction_array[faction_id] == 0){
 		return false;
@@ -3084,9 +3084,9 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	uint32 affected_rows = 0;
-	
-	if (!RunQuery(query, MakeAnyLenString(&query, 
-		"DELETE FROM faction_values WHERE char_id=%i AND faction_id = %i", 
+
+	if (!RunQuery(query, MakeAnyLenString(&query,
+		"DELETE FROM faction_values WHERE char_id=%i AND faction_id = %i",
 		char_id, faction_id), errbuf)) {
 		cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << endl;
 		safe_delete_array(query);
@@ -3105,21 +3105,21 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 	if(temp == 3)
 		temp = 1;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, 
-		"INSERT INTO faction_values (char_id,faction_id,current_value,temp) VALUES (%i,%i,%i,%i)", 
+	if (!RunQuery(query, MakeAnyLenString(&query,
+		"INSERT INTO faction_values (char_id,faction_id,current_value,temp) VALUES (%i,%i,%i,%i)",
 		char_id, faction_id,value,temp), errbuf, 0, &affected_rows)) {
 		cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << endl;
 		safe_delete_array(query);
 		return false;
 	}
-	
+
 	safe_delete_array(query);
-	
+
 	if (affected_rows == 0)
 	{
 		return false;
 	}
-	
+
 	val_list[faction_id] = value;
 	return(true);
 }
@@ -3132,13 +3132,13 @@ bool ZoneDatabase::LoadFactionData()
     MYSQL_ROW row;
 	query = new char[256];
 	strcpy(query, "SELECT MAX(id) FROM faction_list");
-	
-	
+
+
 	if (RunQuery(query, strlen(query), errbuf, &result)) {
 		safe_delete_array(query);
 		row = mysql_fetch_row(result);
 		if (row && row[0])
-		{ 
+		{
 			max_faction = atoi(row[0]);
 			faction_array = new Faction*[max_faction+1];
 			for(unsigned int i=0; i<max_faction; i++)
@@ -3146,7 +3146,7 @@ bool ZoneDatabase::LoadFactionData()
 				faction_array[i] = nullptr;
 			}
 			mysql_free_result(result);
-			
+
 			MakeAnyLenString(&query, "SELECT id,name,base FROM faction_list");
 			if (RunQuery(query, strlen(query), errbuf, &result))
 			{
@@ -3155,7 +3155,7 @@ bool ZoneDatabase::LoadFactionData()
 				{
 					uint32 index = atoi(row[0]);
 					faction_array[index] = new Faction;
-					strn0cpy(faction_array[index]->name, row[1], 50);					
+					strn0cpy(faction_array[index]->name, row[1], 50);
 					faction_array[index]->base = atoi(row[2]);
 
                     char sec_errbuf[MYSQL_ERRMSG_SIZE];
@@ -3200,7 +3200,7 @@ bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, list<struct NPCFaction*> *
 			struct NPCFaction* tmp = *cur;
 			safe_delete(tmp);
 		}
-		
+
 		faction_list->clear();
 		if (primary_faction)
 			*primary_faction = nfl_id;
@@ -3211,7 +3211,7 @@ bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, list<struct NPCFaction*> *
 		return false;
 	if (primary_faction)
 		*primary_faction = nfl->primaryfaction;
-	
+
 	list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list->begin();
 	end = faction_list->end();

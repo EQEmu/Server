@@ -25,7 +25,7 @@
 
 		<!-- Sets the shared key used by zone/launcher to connect to world -->
 		<key>some long random string</key>
-		
+
 		<!-- Enable and set the port for the HTTP service.  Defaults are shown -->
 		<http port="9080" enabled="false" mimefile="mime.types" />
 	</world>

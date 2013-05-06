@@ -80,7 +80,7 @@ enum RESISTTYPE
 	RESIST_CHROMATIC = 6,
 	RESIST_PRISMATIC = 7,
 	RESIST_PHYSICAL = 8,	// see Muscle Shock, Back Swing
-	RESIST_CORRUPTION = 9	
+	RESIST_CORRUPTION = 9
 };
 
 //Target Type IDs
@@ -250,17 +250,17 @@ typedef enum  {
 #define SE_CallPet						103	// implemented - Summon Companion
 #define SE_Translocate					104	// implemented
 #define SE_AntiGate						105	// implemented - Translocational Anchor
-#define SE_SummonBSTPet					106	// implemented 
+#define SE_SummonBSTPet					106	// implemented
 //#define SE_Unknown107					107	// not used
-#define SE_Familiar						108	// implemented 
+#define SE_Familiar						108	// implemented
 #define SE_SummonItemIntoBag			109	// implemented - summons stuff into container
 //#define SE_Unknown110					110	// not used
-#define SE_ResistAll					111	// implemented 
-#define SE_CastingLevel					112	// implemented 
-#define	SE_SummonHorse					113	// implemented 
+#define SE_ResistAll					111	// implemented
+#define SE_CastingLevel					112	// implemented
+#define	SE_SummonHorse					113	// implemented
 #define SE_ChangeAggro					114	// implemented - Hate modifing buffs(ie horrifying visage)
 #define SE_Hunger						115	// implemented - Song of Sustenance
-#define SE_CurseCounter					116	// implemented 
+#define SE_CurseCounter					116	// implemented
 #define SE_MagicWeapon					117	// implemented - makes weapon magical
 #define SE_SingingSkill					118	// *implemented - needs AA conversion
 #define SE_AttackSpeed3					119	// implemented
@@ -288,7 +288,7 @@ typedef enum  {
 #define SE_LimitInstant					141 // implemented
 #define SE_LimitMinLevel				142 // implemented
 #define SE_LimitCastTime				143 // implemented
-//#define SE_Unknown144					144	// not used 
+//#define SE_Unknown144					144	// not used
 #define SE_Teleport2					145	// implemented - Banishment of the Pantheon
 //#define SE_Unknown146					146	// not used (Lightning Rod) Electrical Resist? (exp. VoA)
 #define SE_PercentalHeal				147 // implemented
@@ -383,7 +383,7 @@ typedef enum  {
 //#define SE_Unknown236					236	// not used
 #define SE_GivePetGroupTarget			237 // implemented[AA] - (Pet Affinity)
 #define SE_IllusionPersistence			238	// *not implemented - lends persistence to your illusionary disguises, causing them to last until you die or the illusion is forcibly removed.
-#define SE_FeignedCastOnChance			239	// *not implemented as bonus - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you. 
+#define SE_FeignedCastOnChance			239	// *not implemented as bonus - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
 //#define SE_Unknown240					240	// not used  [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
 #define SE_ImprovedReclaimEnergy		241	// not implemented as bonus - increase the amount of mana returned to you when reclaiming your pet.
 #define SE_ChanceWipeHateList			242	// *not implemented - increases the chance to wipe hate with memory blurr
@@ -433,7 +433,7 @@ typedef enum  {
 #define SE_SpellDamage					286	// implemented - adds direct spell damage
 #define SE_SpellDurationIncByTic		287 // implemented
 #define SE_SpecialAttackKBProc			288	// implemented[AA] - Chance to to do a knockback from special attacks [AA Dragon Punch].
-#define SE_ImprovedSpellEffect			289 // implemented 
+#define SE_ImprovedSpellEffect			289 // implemented
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
 #define SE_Purify						291 // implemented - Removes determental effects
 #define SE_StrikeThrough2				292	// implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
@@ -451,7 +451,7 @@ typedef enum  {
 #define SE_OffhandRiposteFail			304 // not implemented as bonus - enemy cannot riposte offhand attacks
 #define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
 #define SE_ArmyOfTheDead				306 // *not implemented  NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
-#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor. 
+#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
 #define SE_SuspendMinion				308 // not implemented as bonus
 #define SE_YetAnotherGate				309 // implemented
 #define SE_ReduceReuseTimer				310 // implemented
@@ -494,23 +494,23 @@ typedef enum  {
 #define SE_ExtraArcheryAttack			347	// not implemented - chance at an additional archery attack (consumes arrow)
 #define SE_LimitManaCost				348	// implemented
 #define SE_ShieldEquipHateMod			349	// *not implemented[AA] ie. used to increase melee hate when wearing a shield w/ Shield Specialist AA.
-#define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana. 
+#define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
 #define SE_PersistentEffect				351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
 #define SE_Unknown352					352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
 #define SE_AdditionalAura				353	// *not implemented - allows use of more than 1 aura, aa effect
 #define SE_Unknown354					354	// *not implemented - looks to be some type of invulnerability? Test DAT (8757)
 #define SE_Unknown355					355	// *not implemented - looks to be some type of invulnerability? Test LT (8758)
 //#define SE_Unknown356					356	// not used
-//#define SE_Unknown357					357	// *not implemented - (Stunted Growth) Something to do with negate effects? Focus? Chance?	
-#define SE_CurrentManaOnce				358	// implemented 
+//#define SE_Unknown357					357	// *not implemented - (Stunted Growth) Something to do with negate effects? Focus? Chance?
+#define SE_CurrentManaOnce				358	// implemented
 #define SE_Invulnerabilty				359	// *not implemented - Invulnerability (Brell's Blessing)
 #define SE_SpellOnKill					360	// implemented - a buff that has a base1 % to cast spell base2 when you kill a "challenging foe" base3 min level
-#define SE_SpellOnDeath					361	// implemented - casts spell on death of buffed 
+#define SE_SpellOnDeath					361	// implemented - casts spell on death of buffed
 #define SE_PotionBeltSlots				362	// *not implemented[AA] 'Quick Draw' expands the potion belt by one additional available item slot per rank.
 #define SE_BandolierSlots				363	// *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
 #define SE_TripleAttackChance			364	// implemented
 #define SE_SpellOnKill2					365	// implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
-#define SE_ShieldEquipDmgMod			366	// *not implemented - [AA Shield Specialist] - damage bonus to weapon if shield equiped. 
+#define SE_ShieldEquipDmgMod			366	// *not implemented - [AA Shield Specialist] - damage bonus to weapon if shield equiped.
 #define SE_SetBodyType					367	// implemented - set body type of base1 so it can be affected by spells that are limited to that type (Plant, Animal, Undead, etc)
 #define SE_FactionMod					368	// *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2
 #define SE_CorruptionCounter			369	// implemented
@@ -518,7 +518,7 @@ typedef enum  {
 #define SE_AttackSpeed4					371 // implemented - stackable slow effect 'Inhibit Melee'
 #define SE_ForageSkill					372	// *not implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
 #define SE_CastOnWearoff				373 // implemented
-#define SE_ApplyEffect					374 // implemented 
+#define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
 //#define SE_Unknown376					376	// *not implemented - used in 2 spells
 #define SE_BossSpellTrigger				377	// implemented - spell is cast on fade
@@ -572,14 +572,14 @@ typedef enum  {
 #define SE_Display						425 // *not implemented - Illusion: Flying Dragon(21626)
 #define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
 #define SE_SkillProc					427 // implemented - chance to proc when using a skill(ie taunt)
-#define SE_LimitToSkill					428 // implemented - limits what skills will effect a skill proc	
+#define SE_LimitToSkill					428 // implemented - limits what skills will effect a skill proc
 #define SE_SkillProc2					429 // implemented - chance to proc when using a skill (most have hit limits)
 //#define SE_Unknown430					430 // *not implemented - Fear of the Dark(27641)
 //#define SE_Unknown431					431 // *not implemented - Fear of the Dark(27641)
 //#define SE_Unknown432					432 // not used
 //#define SE_Uknonwn433					433 // not used
 #define SE_CriticalHealChance2			434 // implemented - increase critical heal chance
-#define SE_CriticalHealOverTime2		435 // implemented - increase critical heal over time chance	
+#define SE_CriticalHealOverTime2		435 // implemented - increase critical heal over time chance
 //#define SE_Unknown432					436 // not used
 #define SE_Anchor						437 // *not implemented - Teleport Guild Hall Anchor(33099)
 //#define SE_Unknown438					438 // not used
@@ -609,7 +609,7 @@ struct SPDat_Spell_Struct
 /* 003 */	char		teleport_zone[64];	// Teleport zone, pet name summoned, or item summoned
 /* 004 */	char		you_cast[64]; // Message when you cast
 /* 005 */	char		other_casts[64]; // Message when other casts
-/* 006 */	char		cast_on_you[64]; // Message when spell is cast on you 
+/* 006 */	char		cast_on_you[64]; // Message when spell is cast on you
 /* 007 */	char		cast_on_other[64]; // Message when spell is cast on someone else
 /* 008 */	char		spell_fades[64]; // Spell fades
 /* 009 */	float		range;
@@ -636,13 +636,13 @@ struct SPDat_Spell_Struct
 /* 070 */	uint16		formula[EFFECT_COUNT]; // Spell's value formula
 /* 082 */	//int LightType; // probaly another effecttype flag
 /* 083 */	int8 goodEffect; //0=detrimental, 1=Beneficial, 2=Beneficial, Group Only
-/* 084 */	int			Activated; // probaly another effecttype flag	
+/* 084 */	int			Activated; // probaly another effecttype flag
 /* 085 */	int			resisttype;
 /* 086 */	int			effectid[EFFECT_COUNT];	// Spell's effects
 /* 098 */	SpellTargetType	targettype;	// Spell's Target
 /* 099 */	int			basediff; // base difficulty fizzle adjustment
 /* 100 */	SkillType	skill;
-/* 101 */	int8 zonetype; // 01=Outdoors, 02=dungeons, ff=Any 
+/* 101 */	int8 zonetype; // 01=Outdoors, 02=dungeons, ff=Any
 /* 102 */	int8 EnvironmentType;
 /* 103 */	int8 TimeOfDay;
 /* 104 */	uint8		classes[PLAYER_CLASS_COUNT]; // Classes, and their min levels
@@ -659,32 +659,32 @@ struct SPDat_Spell_Struct
 /* 144 */	//int16 new_icon    // Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon
 /* 145 */	//int16 spellanim;  // Doesn't look like it's the same as #doanim, so not sure what this is
 /* 146 */	int8		uninterruptable;	// Looks like anything != 0 is uninterruptable. Values are mostly -1, 0, & 1 (Fetid Breath = 90?)
-/* 147 */	int16		ResistDiff; 
+/* 147 */	int16		ResistDiff;
 /* 148 */   //int dot_stacking_exempt;
 /* 149 */   //int deletable;
 /* 150 */	uint16 RecourseLink;
 /* 151 */                       // 151: -1, 0, or 1
 								// 152 & 153: all set to 0
-/* 154 */	int8		short_buff_box;	// != 0, goes to short buff box. 
+/* 154 */	int8		short_buff_box;	// != 0, goes to short buff box.
 /* 155 */   int			descnum; // eqstr of description of spell
 /* 156 */   //int typedescnum;   // eqstr of type description
 /* 157 */   int			effectdescnum; // eqstr of effect description
-/* 158 */ 
+/* 158 */
 /* 162 */   int			bonushate;
-/* 163 */ 
+/* 163 */
 /* 166 */   int			EndurCost;
 /* 167 */   int8 EndurTimerIndex;
 /* 168 */   //int IsDisciplineBuff; //Will goto the combat window when cast
-/* 169 */ 
+/* 169 */
 /* 173 */   int			HateAdded;
 /* 174 */   int			EndurUpkeep;
-/* 175 */ 
+/* 175 */
 /* 176 */ 	int 		numhits;
 /* 177 */ 	int 		pvpresistbase;
 /* 178 */ 	int 		pvpresistcalc;
 /* 179 */ 	int 		pvpresistcap;
 /* 180 */ 	int 		spell_category;
-/* 181 */ 
+/* 181 */
 /* 185 */ 	int8 can_mgb; // 0=no, -1 or 1 = yes
 /* 186 */ 	int 		dispel_flag;
 /* 189 */ 	int 		MinResist;
@@ -702,7 +702,7 @@ struct SPDat_Spell_Struct
 			uint8		DamageShieldType; // This field does not exist in spells_us.txt
 };
 
-extern const SPDat_Spell_Struct* spells; 
+extern const SPDat_Spell_Struct* spells;
 extern int32 SPDAT_RECORDS;
 
 bool IsTargetableAESpell(uint16 spell_id);

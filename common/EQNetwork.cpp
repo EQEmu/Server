@@ -15,7 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/* 
+/*
  * EQStream classes, by Quagmire
 */
 
@@ -61,17 +61,17 @@ using namespace std;
 //#define PRIORITYTEST
 
 template <typename type>                    // LO_BYTE
-type  LO_BYTE (type a) {return (a&=0xff);}  
-template <typename type>                    // HI_BYTE 
-type  HI_BYTE (type a) {return (a&=0xff00);} 
+type  LO_BYTE (type a) {return (a&=0xff);}
+template <typename type>                    // HI_BYTE
+type  HI_BYTE (type a) {return (a&=0xff00);}
 template <typename type>                    // LO_WORD
-type  LO_WORD (type a) {return (a&=0xffff);}  
-template <typename type>                    // HI_WORD 
-type  HI_WORD (type a) {return (a&=0xffff0000);} 
+type  LO_WORD (type a) {return (a&=0xffff);}
+template <typename type>                    // HI_WORD
+type  HI_WORD (type a) {return (a&=0xffff0000);}
 template <typename type>                    // HI_LOSWAPshort
-type  HI_LOSWAPshort (type a) {return (LO_BYTE(a)<<8) | (HI_BYTE(a)>>8);}  
+type  HI_LOSWAPshort (type a) {return (LO_BYTE(a)<<8) | (HI_BYTE(a)>>8);}
 template <typename type>                    // HI_LOSWAPlong
-type  HI_LOSWAPlong (type x) {return (LO_WORD(a)<<16) | (HIWORD(a)>>16);}  
+type  HI_LOSWAPlong (type x) {return (LO_WORD(a)<<16) | (HIWORD(a)>>16);}
 
 EQStreamServer::EQStreamServer(uint16 iPort) {
 	RunLoop = false;
@@ -125,7 +125,7 @@ bool EQStreamServer::Open(uint16 iPort) {
 		unsigned long nonblocking = 1;
 #endif
 
-	  /* Setup internet address information.  
+	  /* Setup internet address information.
 		 This is used with the bind() call */
 		memset((char *) &address, 0, sizeof(address));
 		address.sin_family = AF_INET;
@@ -207,7 +207,7 @@ void EQStreamServer::Process() {
 	}
 
     uchar		buffer[1518];
-	
+
     int			status;
     struct sockaddr_in	from;
     unsigned int	fromlen;
@@ -240,13 +240,13 @@ void EQStreamServer::Process() {
 			connection_list.erase(tmp);
 			continue;
 		}
-		EQStream* eqs_data = connection->second; 
-		if (eqs_data->IsFree() && (!eqs_data->CheckNetActive())) { 
+		EQStream* eqs_data = connection->second;
+		if (eqs_data->IsFree() && (!eqs_data->CheckNetActive())) {
 			map <string, EQStream*>::iterator tmp=connection;
 			connection++;
 			safe_delete(eqs_data);
 			connection_list.erase(tmp);
-		} 
+		}
 		else if(!eqs_data->RunLoop) {
 			eqs_data->Process(sock);
 			connection++;
@@ -291,7 +291,7 @@ void EQStreamServer::RecvData(uchar* data, uint32 size, uint32 irIP, uint16 irPo
 		return;
 	}
 
-	if (data[1]==0x01) { 
+	if (data[1]==0x01) {
 		cout << "New EQStream Connection." << endl;
 		EQStream* tmp = new EQStream(irIP, irPort);
 		tmp->RecvData(data, size);

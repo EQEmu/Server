@@ -32,12 +32,12 @@ public:
     virtual ~WorldServer();
 
 	virtual void Process();
-	
+
 	void SendStatus(const char *short_name, uint32 start_count, bool running);
-	
+
 private:
 	virtual void OnConnected();
-	
+
 	const char *const m_name;
 	const EQEmuConfig *const m_config;
 	std::map<std::string, ZoneLaunch *> &m_zones;

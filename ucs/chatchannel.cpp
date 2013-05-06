@@ -28,7 +28,7 @@
 extern Database database;
 extern uint32 ChatMessagesSent;
 
-ChatChannel::ChatChannel(string inName, string inOwner, string inPassword, bool inPermanent, int inMinimumStatus) : 
+ChatChannel::ChatChannel(string inName, string inOwner, string inPassword, bool inPermanent, int inMinimumStatus) :
 	DeleteTimer(0) {
 
 	Name = inName;
@@ -43,7 +43,7 @@ ChatChannel::ChatChannel(string inName, string inOwner, string inPassword, bool 
 
 	Moderated = false;
 
-	_log(UCS__TRACE, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i", 
+	_log(UCS__TRACE, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i",
 			      Name.c_str(), Owner.c_str(), Password.c_str(), MinimumStatus);
 
 }
@@ -301,7 +301,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 			return false;
 
 		_log(UCS__TRACE, "Starting delete timer for empty password protected channel %s", Name.c_str());
-			
+
 		DeleteTimer.Start(RuleI(Channels, DeleteTimer) * 60000);
 	}
 
@@ -455,7 +455,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 	if(!c) return nullptr;
 
 	if((ChannelName.length() > 0) && (isdigit(ChannelName[0]))) {
-		
+
 		c->GeneralChannelMessage("The channel name can not begin with a number.");
 
 		return nullptr;
@@ -465,7 +465,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 
 	string::size_type Colon = ChannelName.find_first_of(":");
 
-	if(Colon == string::npos) 
+	if(Colon == string::npos)
 		NormalisedName = CapitaliseName(ChannelName);
 	else {
 		NormalisedName = CapitaliseName(ChannelName.substr(0, Colon));

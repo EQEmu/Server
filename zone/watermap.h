@@ -58,7 +58,7 @@ public:
 
 private:
 	bool loadWaterMap(FILE *fp);
-	
+
 	ZBSP_Node* BSP_Root;
 };
 

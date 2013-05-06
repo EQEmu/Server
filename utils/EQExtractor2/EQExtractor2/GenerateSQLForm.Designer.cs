@@ -77,9 +77,9 @@
             this.groupBox2.SuspendLayout();
             this.MiscOptions.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // groupBox1
-            // 
+            //
             this.groupBox1.Controls.Add(this.MerchantTextBox);
             this.groupBox1.Controls.Add(this.MerchantLabel);
             this.groupBox1.Controls.Add(this.GroundSpawnTextBox);
@@ -108,9 +108,9 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Insert IDs";
-            // 
+            //
             // MerchantTextBox
-            // 
+            //
             this.MerchantTextBox.Enabled = false;
             this.MerchantTextBox.HidePromptOnLeave = true;
             this.MerchantTextBox.Location = new System.Drawing.Point(107, 302);
@@ -119,18 +119,18 @@
             this.MerchantTextBox.PromptChar = ' ';
             this.MerchantTextBox.Size = new System.Drawing.Size(61, 20);
             this.MerchantTextBox.TabIndex = 34;
-            // 
+            //
             // MerchantLabel
-            // 
+            //
             this.MerchantLabel.AutoSize = true;
             this.MerchantLabel.Location = new System.Drawing.Point(14, 306);
             this.MerchantLabel.Name = "MerchantLabel";
             this.MerchantLabel.Size = new System.Drawing.Size(76, 13);
             this.MerchantLabel.TabIndex = 33;
             this.MerchantLabel.Text = "Merchant Lists";
-            // 
+            //
             // GroundSpawnTextBox
-            // 
+            //
             this.GroundSpawnTextBox.Enabled = false;
             this.GroundSpawnTextBox.HidePromptOnLeave = true;
             this.GroundSpawnTextBox.Location = new System.Drawing.Point(107, 274);
@@ -139,18 +139,18 @@
             this.GroundSpawnTextBox.PromptChar = ' ';
             this.GroundSpawnTextBox.Size = new System.Drawing.Size(61, 20);
             this.GroundSpawnTextBox.TabIndex = 32;
-            // 
+            //
             // GroundSpawnLabel
-            // 
+            //
             this.GroundSpawnLabel.AutoSize = true;
             this.GroundSpawnLabel.Location = new System.Drawing.Point(7, 278);
             this.GroundSpawnLabel.Name = "GroundSpawnLabel";
             this.GroundSpawnLabel.Size = new System.Drawing.Size(83, 13);
             this.GroundSpawnLabel.TabIndex = 31;
             this.GroundSpawnLabel.Text = "Ground Spawns";
-            // 
+            //
             // ObjectTextBox
-            // 
+            //
             this.ObjectTextBox.Enabled = false;
             this.ObjectTextBox.HidePromptOnLeave = true;
             this.ObjectTextBox.Location = new System.Drawing.Point(107, 246);
@@ -159,18 +159,18 @@
             this.ObjectTextBox.PromptChar = ' ';
             this.ObjectTextBox.Size = new System.Drawing.Size(61, 20);
             this.ObjectTextBox.TabIndex = 30;
-            // 
+            //
             // label1
-            // 
+            //
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(47, 250);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(43, 13);
             this.label1.TabIndex = 29;
             this.label1.Text = "Objects";
-            // 
+            //
             // GridTextBox
-            // 
+            //
             this.GridTextBox.Enabled = false;
             this.GridTextBox.HidePromptOnLeave = true;
             this.GridTextBox.Location = new System.Drawing.Point(107, 218);
@@ -179,18 +179,18 @@
             this.GridTextBox.PromptChar = ' ';
             this.GridTextBox.Size = new System.Drawing.Size(61, 20);
             this.GridTextBox.TabIndex = 28;
-            // 
+            //
             // GridLabel
-            // 
+            //
             this.GridLabel.AutoSize = true;
             this.GridLabel.Location = new System.Drawing.Point(59, 222);
             this.GridLabel.Name = "GridLabel";
             this.GridLabel.Size = new System.Drawing.Size(31, 13);
             this.GridLabel.TabIndex = 27;
             this.GridLabel.Text = "Grids";
-            // 
+            //
             // Spawn2TextBox
-            // 
+            //
             this.Spawn2TextBox.Enabled = false;
             this.Spawn2TextBox.HidePromptOnLeave = true;
             this.Spawn2TextBox.Location = new System.Drawing.Point(107, 190);
@@ -199,18 +199,18 @@
             this.Spawn2TextBox.PromptChar = ' ';
             this.Spawn2TextBox.Size = new System.Drawing.Size(61, 20);
             this.Spawn2TextBox.TabIndex = 26;
-            // 
+            //
             // Spawn2Label
-            // 
+            //
             this.Spawn2Label.AutoSize = true;
             this.Spawn2Label.Location = new System.Drawing.Point(44, 194);
             this.Spawn2Label.Name = "Spawn2Label";
             this.Spawn2Label.Size = new System.Drawing.Size(46, 13);
             this.Spawn2Label.TabIndex = 25;
             this.Spawn2Label.Text = "Spawn2";
-            // 
+            //
             // SpawnEntryTextBox
-            // 
+            //
             this.SpawnEntryTextBox.Enabled = false;
             this.SpawnEntryTextBox.HidePromptOnLeave = true;
             this.SpawnEntryTextBox.Location = new System.Drawing.Point(107, 162);
@@ -219,18 +219,18 @@
             this.SpawnEntryTextBox.PromptChar = ' ';
             this.SpawnEntryTextBox.Size = new System.Drawing.Size(61, 20);
             this.SpawnEntryTextBox.TabIndex = 24;
-            // 
+            //
             // SpawnEntryLabel
-            // 
+            //
             this.SpawnEntryLabel.AutoSize = true;
             this.SpawnEntryLabel.Location = new System.Drawing.Point(26, 166);
             this.SpawnEntryLabel.Name = "SpawnEntryLabel";
             this.SpawnEntryLabel.Size = new System.Drawing.Size(64, 13);
             this.SpawnEntryLabel.TabIndex = 23;
             this.SpawnEntryLabel.Text = "SpawnEntry";
-            // 
+            //
             // SpawnGroupTextBox
-            // 
+            //
             this.SpawnGroupTextBox.Enabled = false;
             this.SpawnGroupTextBox.HidePromptOnLeave = true;
             this.SpawnGroupTextBox.Location = new System.Drawing.Point(107, 134);
@@ -239,18 +239,18 @@
             this.SpawnGroupTextBox.PromptChar = ' ';
             this.SpawnGroupTextBox.Size = new System.Drawing.Size(61, 20);
             this.SpawnGroupTextBox.TabIndex = 22;
-            // 
+            //
             // SpawnGroupLabel
-            // 
+            //
             this.SpawnGroupLabel.AutoSize = true;
             this.SpawnGroupLabel.Location = new System.Drawing.Point(21, 138);
             this.SpawnGroupLabel.Name = "SpawnGroupLabel";
             this.SpawnGroupLabel.Size = new System.Drawing.Size(69, 13);
             this.SpawnGroupLabel.TabIndex = 21;
             this.SpawnGroupLabel.Text = "SpawnGroup";
-            // 
+            //
             // NPCTypesTextBox
-            // 
+            //
             this.NPCTypesTextBox.Enabled = false;
             this.NPCTypesTextBox.HidePromptOnLeave = true;
             this.NPCTypesTextBox.Location = new System.Drawing.Point(107, 106);
@@ -259,18 +259,18 @@
             this.NPCTypesTextBox.PromptChar = ' ';
             this.NPCTypesTextBox.Size = new System.Drawing.Size(61, 20);
             this.NPCTypesTextBox.TabIndex = 20;
-            // 
+            //
             // label3
-            // 
+            //
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(32, 110);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(58, 13);
             this.label3.TabIndex = 19;
             this.label3.Text = "NPCTypes";
-            // 
+            //
             // DoorsTextBox
-            // 
+            //
             this.DoorsTextBox.Enabled = false;
             this.DoorsTextBox.HidePromptOnLeave = true;
             this.DoorsTextBox.Location = new System.Drawing.Point(107, 78);
@@ -279,18 +279,18 @@
             this.DoorsTextBox.PromptChar = ' ';
             this.DoorsTextBox.Size = new System.Drawing.Size(61, 20);
             this.DoorsTextBox.TabIndex = 18;
-            // 
+            //
             // DoorsLabel
-            // 
+            //
             this.DoorsLabel.AutoSize = true;
             this.DoorsLabel.Location = new System.Drawing.Point(55, 82);
             this.DoorsLabel.Name = "DoorsLabel";
             this.DoorsLabel.Size = new System.Drawing.Size(35, 13);
             this.DoorsLabel.TabIndex = 17;
             this.DoorsLabel.Text = "Doors";
-            // 
+            //
             // VersionSelector
-            // 
+            //
             this.VersionSelector.Enabled = false;
             this.VersionSelector.Location = new System.Drawing.Point(107, 50);
             this.VersionSelector.Maximum = new decimal(new int[] {
@@ -303,27 +303,27 @@
             this.VersionSelector.TabIndex = 16;
             this.VersionSelector.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.VersionSelector.ValueChanged += new System.EventHandler(this.VersionSelector_ValueChanged);
-            // 
+            //
             // VersionLabel
-            // 
+            //
             this.VersionLabel.AutoSize = true;
             this.VersionLabel.Location = new System.Drawing.Point(48, 54);
             this.VersionLabel.Name = "VersionLabel";
             this.VersionLabel.Size = new System.Drawing.Size(42, 13);
             this.VersionLabel.TabIndex = 15;
             this.VersionLabel.Text = "Version";
-            // 
+            //
             // label4
-            // 
+            //
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(44, 26);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(46, 13);
             this.label4.TabIndex = 14;
             this.label4.Text = "ZoneID:";
-            // 
+            //
             // ZoneIDTextBox
-            // 
+            //
             this.ZoneIDTextBox.Enabled = false;
             this.ZoneIDTextBox.HidePromptOnLeave = true;
             this.ZoneIDTextBox.Location = new System.Drawing.Point(107, 22);
@@ -333,9 +333,9 @@
             this.ZoneIDTextBox.Size = new System.Drawing.Size(100, 20);
             this.ZoneIDTextBox.TabIndex = 13;
             this.ZoneIDTextBox.Validated += new System.EventHandler(this.ZoneIDTextBox_Validated);
-            // 
+            //
             // groupBox2
-            // 
+            //
             this.groupBox2.Controls.Add(this.InvisibleMenCheckBox);
             this.groupBox2.Controls.Add(this.NPCTypesTintCheckBox);
             this.groupBox2.Controls.Add(this.UpdateExistingNPCTypesCheckbox);
@@ -353,9 +353,9 @@
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Include";
-            // 
+            //
             // NPCTypesTintCheckBox
-            // 
+            //
             this.NPCTypesTintCheckBox.AutoSize = true;
             this.NPCTypesTintCheckBox.Location = new System.Drawing.Point(24, 233);
             this.NPCTypesTintCheckBox.Name = "NPCTypesTintCheckBox";
@@ -365,9 +365,9 @@
             this.toolTip1.SetToolTip(this.NPCTypesTintCheckBox, "Uses the npc_types_tint table instead of the tint columns in the npc_types table." +
         "");
             this.NPCTypesTintCheckBox.UseVisualStyleBackColor = true;
-            // 
+            //
             // UpdateExistingNPCTypesCheckbox
-            // 
+            //
             this.UpdateExistingNPCTypesCheckbox.AutoSize = true;
             this.UpdateExistingNPCTypesCheckbox.Location = new System.Drawing.Point(24, 210);
             this.UpdateExistingNPCTypesCheckbox.Name = "UpdateExistingNPCTypesCheckbox";
@@ -376,9 +376,9 @@
             this.UpdateExistingNPCTypesCheckbox.Text = "Update existing NPC types";
             this.UpdateExistingNPCTypesCheckbox.UseVisualStyleBackColor = true;
             this.UpdateExistingNPCTypesCheckbox.CheckedChanged += new System.EventHandler(this.UpdateExistingNPCTypesCheckbox_CheckedChanged);
-            // 
+            //
             // ZonePointCheckBox
-            // 
+            //
             this.ZonePointCheckBox.AutoSize = true;
             this.ZonePointCheckBox.Checked = true;
             this.ZonePointCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -388,9 +388,9 @@
             this.ZonePointCheckBox.TabIndex = 40;
             this.ZonePointCheckBox.Text = "Zone Points";
             this.ZonePointCheckBox.UseVisualStyleBackColor = true;
-            // 
+            //
             // ZoneCheckBox
-            // 
+            //
             this.ZoneCheckBox.AutoSize = true;
             this.ZoneCheckBox.Checked = true;
             this.ZoneCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -400,9 +400,9 @@
             this.ZoneCheckBox.TabIndex = 39;
             this.ZoneCheckBox.Text = "Zone Config";
             this.ZoneCheckBox.UseVisualStyleBackColor = true;
-            // 
+            //
             // MerchantCheckBox
-            // 
+            //
             this.MerchantCheckBox.AutoSize = true;
             this.MerchantCheckBox.Checked = true;
             this.MerchantCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -412,9 +412,9 @@
             this.MerchantCheckBox.TabIndex = 38;
             this.MerchantCheckBox.Text = "Merchant Lists";
             this.MerchantCheckBox.UseVisualStyleBackColor = true;
-            // 
+            //
             // GroundSpawnCheckBox
-            // 
+            //
             this.GroundSpawnCheckBox.AutoSize = true;
             this.GroundSpawnCheckBox.Checked = true;
             this.GroundSpawnCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -424,9 +424,9 @@
             this.GroundSpawnCheckBox.TabIndex = 9;
             this.GroundSpawnCheckBox.Text = "Ground Spawns";
             this.GroundSpawnCheckBox.UseVisualStyleBackColor = true;
-            // 
+            //
             // ObjectCheckBox
-            // 
+            //
             this.ObjectCheckBox.AutoSize = true;
             this.ObjectCheckBox.Checked = true;
             this.ObjectCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -436,9 +436,9 @@
             this.ObjectCheckBox.TabIndex = 8;
             this.ObjectCheckBox.Text = "Objects";
             this.ObjectCheckBox.UseVisualStyleBackColor = true;
-            // 
+            //
             // GridCheckBox
-            // 
+            //
             this.GridCheckBox.AutoSize = true;
             this.GridCheckBox.Checked = true;
             this.GridCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -448,9 +448,9 @@
             this.GridCheckBox.TabIndex = 7;
             this.GridCheckBox.Text = "Grids";
             this.GridCheckBox.UseVisualStyleBackColor = true;
-            // 
+            //
             // SpawnCheckBox
-            // 
+            //
             this.SpawnCheckBox.AutoSize = true;
             this.SpawnCheckBox.Checked = true;
             this.SpawnCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -461,9 +461,9 @@
             this.SpawnCheckBox.Text = "Spawns";
             this.SpawnCheckBox.UseVisualStyleBackColor = true;
             this.SpawnCheckBox.CheckedChanged += new System.EventHandler(this.SpawnCheckBox_CheckedChanged);
-            // 
+            //
             // DoorCheckBox
-            // 
+            //
             this.DoorCheckBox.AutoSize = true;
             this.DoorCheckBox.Checked = true;
             this.DoorCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -473,14 +473,14 @@
             this.DoorCheckBox.TabIndex = 4;
             this.DoorCheckBox.Text = "Doors";
             this.DoorCheckBox.UseVisualStyleBackColor = true;
-            // 
+            //
             // SQLFileDialog
-            // 
+            //
             this.SQLFileDialog.Filter = "SQL Files (*.sql)|*.sql|Text Files (*.txt)|*.txt|All files (*.*)|*.*";
             this.SQLFileDialog.Title = "Generate SQL and Save As";
-            // 
+            //
             // GenerateSQLButton
-            // 
+            //
             this.GenerateSQLButton.Location = new System.Drawing.Point(126, 474);
             this.GenerateSQLButton.Name = "GenerateSQLButton";
             this.GenerateSQLButton.Size = new System.Drawing.Size(100, 27);
@@ -488,9 +488,9 @@
             this.GenerateSQLButton.Text = "Generate SQL";
             this.GenerateSQLButton.UseVisualStyleBackColor = true;
             this.GenerateSQLButton.Click += new System.EventHandler(this.GenerateSQLButton_Click);
-            // 
+            //
             // SQLCancelButton
-            // 
+            //
             this.SQLCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.SQLCancelButton.Location = new System.Drawing.Point(305, 474);
             this.SQLCancelButton.Name = "SQLCancelButton";
@@ -499,9 +499,9 @@
             this.SQLCancelButton.Text = "Cancel";
             this.SQLCancelButton.UseVisualStyleBackColor = true;
             this.SQLCancelButton.Click += new System.EventHandler(this.SQLCancelButton_Click);
-            // 
+            //
             // MiscOptions
-            // 
+            //
             this.MiscOptions.Controls.Add(this.SpawnNameFilter);
             this.MiscOptions.Controls.Add(this.label2);
             this.MiscOptions.Controls.Add(this.CoalesceWaypoints);
@@ -511,25 +511,25 @@
             this.MiscOptions.TabIndex = 2;
             this.MiscOptions.TabStop = false;
             this.MiscOptions.Text = "Misc. Options";
-            // 
+            //
             // SpawnNameFilter
-            // 
+            //
             this.SpawnNameFilter.Location = new System.Drawing.Point(229, 46);
             this.SpawnNameFilter.Name = "SpawnNameFilter";
             this.SpawnNameFilter.Size = new System.Drawing.Size(209, 20);
             this.SpawnNameFilter.TabIndex = 5;
-            // 
+            //
             // label2
-            // 
+            //
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(14, 49);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(209, 13);
             this.label2.TabIndex = 4;
             this.label2.Text = "Only include spawns that contain the string";
-            // 
+            //
             // CoalesceWaypoints
-            // 
+            //
             this.CoalesceWaypoints.AutoSize = true;
             this.CoalesceWaypoints.Checked = true;
             this.CoalesceWaypoints.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -540,9 +540,9 @@
             this.CoalesceWaypoints.Text = "Automatically coalesce waypoints";
             this.toolTip1.SetToolTip(this.CoalesceWaypoints, "Remove redundant waypoints from generated SQL");
             this.CoalesceWaypoints.UseVisualStyleBackColor = true;
-            // 
+            //
             // InvisibleMenCheckBox
-            // 
+            //
             this.InvisibleMenCheckBox.AutoSize = true;
             this.InvisibleMenCheckBox.Location = new System.Drawing.Point(24, 256);
             this.InvisibleMenCheckBox.Name = "InvisibleMenCheckBox";
@@ -551,9 +551,9 @@
             this.InvisibleMenCheckBox.Text = "Include Invisible Men";
             this.toolTip1.SetToolTip(this.InvisibleMenCheckBox, "Includes Race 127 NPCs");
             this.InvisibleMenCheckBox.UseVisualStyleBackColor = true;
-            // 
+            //
             // GenerateSQLForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.SQLCancelButton;

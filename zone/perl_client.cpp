@@ -2887,7 +2887,7 @@ XS(XS_Client_NukeItem)
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		
+
 		if(items < 3){
 			where_to_check = 0xFF;
 		}
@@ -4883,7 +4883,7 @@ XS(XS_Client_AddLevelBasedExp)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_IncrementAA); 
+XS(XS_Client_IncrementAA);
 XS(XS_Client_IncrementAA)
 {
 	dXSARGS;
@@ -4901,17 +4901,17 @@ XS(XS_Client_IncrementAA)
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-			
+
 		SendAA_Struct* aa2 = zone->FindAA(aaskillid);
-		
+
 		if(aa2 == nullptr)
-			Perl_croak(aTHX_ "Invalid AA."); 
-	
-		if(THIS->GetAA(aaskillid) == aa2->max_level) 
-			Perl_croak(aTHX_ "AA at Max already."); 
-		
+			Perl_croak(aTHX_ "Invalid AA.");
+
+		if(THIS->GetAA(aaskillid) == aa2->max_level)
+			Perl_croak(aTHX_ "AA at Max already.");
+
 		THIS->SetAA(aaskillid, THIS->GetAA(aaskillid)+1);
-				
+
 		THIS->Save();
 
 		THIS->SendAA(aaskillid);
@@ -4942,7 +4942,7 @@ XS(XS_Client_GetAALevel)
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		
+
 		RETVAL = THIS->GetAA(aaskillid);
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
@@ -5559,7 +5559,7 @@ XS(XS_Client_SignalClient)
 	{
 		Client *		THIS;
 		uint32		data = (uint32)SvUV(ST(1));
-	
+
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
 			THIS = INT2PTR(Client *,tmp);
@@ -5584,7 +5584,7 @@ XS(XS_Client_AddAlternateCurrencyValue)
 		Client *		THIS;
 		uint32		currency_id = (uint32)SvUV(ST(1));
 		int32		amount = (int32)SvUV(ST(2));
-	
+
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
 			THIS = INT2PTR(Client *,tmp);
@@ -5790,7 +5790,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetWeight"), XS_Client_GetWeight, file, "$");
 		newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
 		newXSproto(strcpy(buf, "GetAAExp"), XS_Client_GetAAExp, file, "$");
-		newXSproto(strcpy(buf, "GetTotalSecondsPlayed"), XS_Client_GetTotalSecondsPlayed, file, "$");		
+		newXSproto(strcpy(buf, "GetTotalSecondsPlayed"), XS_Client_GetTotalSecondsPlayed, file, "$");
 		newXSproto(strcpy(buf, "UpdateLDoNPoints"), XS_Client_UpdateLDoNPoints, file, "$$$");
 		newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
 		newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");

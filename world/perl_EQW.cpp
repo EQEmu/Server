@@ -876,7 +876,7 @@ XS(XS_EQW_ListBugs)
 			Perl_croak(aTHX_ "THIS is not of type EQW");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-        
+
 		RETVAL = THIS->ListBugs(id);
 		ST(0) = sv_newmortal();
 	{
@@ -963,7 +963,7 @@ XS(XS_EQW_ResolveBug)
 			Perl_croak(aTHX_ "THIS is not of type EQW");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-        
+
 		THIS->ResolveBug(id);
 	}
 	XSRETURN_EMPTY;

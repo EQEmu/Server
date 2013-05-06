@@ -75,15 +75,15 @@ protected:
 		TCPS_Closing = 250,
 		TCPS_Error = 255
 	} State_t;
-	
+
 public:
 	//socket created by a server (incoming)
 	TCPConnection(uint32 ID, SOCKET iSock, uint32 irIP, uint16 irPort);
 	//socket created to connect to a server (outgoing)
 	TCPConnection();	// for outgoing connections
-	
+
 	virtual ~TCPConnection();
-	
+
 	// Functions for outgoing connections
 	bool			Connect(const char* irAddress, uint16 irPort, char* errbuf = 0);
 	virtual bool	ConnectIP(uint32 irIP, uint16 irPort, char* errbuf = 0);
@@ -92,7 +92,7 @@ public:
 	virtual void	Disconnect();
 
 	bool			Send(const uchar* data, int32 size);
-	
+
 	char*			PopLine();		//returns ownership of allocated byte array
 	inline uint32	GetrIP()	const		{ return rIP; }
 	inline uint16	GetrPort()		const	{ return rPort; }
@@ -106,7 +106,7 @@ public:
 	bool			GetEcho();
 	void			SetEcho(bool iValue);
 	bool GetSockName(char *host, uint16 *port);
-	
+
 	//should only be used by TCPServer<T>:
 	bool			CheckNetActive();
 	inline bool		IsFree() const { return pFree; }
@@ -129,10 +129,10 @@ protected:
 	virtual bool ProcessReceivedData(char* errbuf = 0);
 	virtual bool SendData(bool &sent_something, char* errbuf = 0);
 	virtual bool RecvData(char* errbuf = 0);
-	
+
 	virtual void ClearBuffers();
 
-	
+
 	bool m_previousLineEnd;
 
 	eConnectionType	ConnectionType;
@@ -144,22 +144,22 @@ protected:
 	uint32	rIP;
 	uint16	rPort; // host byte order
 	bool	pFree;
-	
+
 	mutable Mutex	MState;
 	State_t	pState;
-	
+
 	//text based line out queue.
 	Mutex MLineOutQueue;
 	virtual bool	LineOutQueuePush(char* line);	//this is really kinda a hack for the transition to packet mode. Returns true to stop processing the output.
 	MyQueue<char> LineOutQueue;
-	
+
 	uchar*	recvbuf;
 	int32	recvbuf_size;
 	int32	recvbuf_used;
-	
+
 	int32	recvbuf_echo;
 	volatile bool	pEcho;
-	
+
 	Mutex	MSendQueue;
 	uchar*	sendbuf;
 	int32	sendbuf_size;
@@ -169,7 +169,7 @@ protected:
 	void	ServerSendQueuePushEnd(const uchar* data, int32 size);
 	void	ServerSendQueuePushEnd(uchar** data, int32 size);
 	void	ServerSendQueuePushFront(uchar* data, int32 size);
-	
+
 private:
 	void FinishDisconnect();
 };

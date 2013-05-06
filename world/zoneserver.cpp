@@ -48,7 +48,7 @@ extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
 void CatchSignal(int sig_num);
 
-ZoneServer::ZoneServer(EmuTCPConnection* itcpc) 
+ZoneServer::ZoneServer(EmuTCPConnection* itcpc)
 : WorldTCPConnection(), tcpc(itcpc), ls_zboot(5000) {
 	ID = zoneserver_list.GetNextID();
 	memset(zone_name, 0, sizeof(zone_name));
@@ -72,12 +72,12 @@ ZoneServer::~ZoneServer() {
 
 bool ZoneServer::SetZone(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	BootingUp = false;
-	
+
 	const char* zn = MakeLowerString(database.GetZoneName(iZoneID));
 	char*	longname;
 
 	if (iZoneID)
-		zlog(WORLD__ZONE,"Setting to '%s' (%d:%d)%s",(zn) ? zn : "",iZoneID, iInstanceID, 
+		zlog(WORLD__ZONE,"Setting to '%s' (%d:%d)%s",(zn) ? zn : "",iZoneID, iInstanceID,
 			iStaticZone ? " (Static)" : "");
 
 	zoneID = iZoneID;
@@ -107,7 +107,7 @@ bool ZoneServer::SetZone(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	{
 		strcpy(zone_name, "");
 		strcpy(long_name, "");
-	}	
+	}
 
 	client_list.ZoneBootup(this);
 	ls_zboot.Start();
@@ -497,7 +497,7 @@ bool ZoneServer::Process() {
 		case ServerOP_VoiceMacro: {
 
 			ServerVoiceMacro_Struct* svm = (ServerVoiceMacro_Struct*) pack->pBuffer;
-			
+
 			if(svm->Type == VoiceMacroTell) {
 
 				ClientListEntry* cle = client_list.FindCharacter(svm->To);
@@ -548,7 +548,7 @@ bool ZoneServer::Process() {
 			if(pack->size != sizeof(SetZone_Struct))
 				break;
 
-			SetZone_Struct* szs = (SetZone_Struct*) pack->pBuffer;	
+			SetZone_Struct* szs = (SetZone_Struct*) pack->pBuffer;
 			if (szs->zoneid != 0) {
 				if(database.GetZoneName(szs->zoneid))
 					SetZone(szs->zoneid, szs->instanceid, szs->staticzone);
@@ -661,7 +661,7 @@ bool ZoneServer::Process() {
 		// called, so it will be available when they ask to zone.
 		//
 
-			
+
 			if(pack->size != sizeof(ZoneToZone_Struct))
 				break;
 			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
@@ -783,7 +783,7 @@ bool ZoneServer::Process() {
 		case ServerOP_RequestOnlineGuildMembers:
 		{
 			ServerRequestOnlineGuildMembers_Struct *srogms = (ServerRequestOnlineGuildMembers_Struct*) pack->pBuffer;
-			zlog(GUILDS__IN_PACKETS, "ServerOP_RequestOnlineGuildMembers Recieved. FromID=%i GuildID=%i", srogms->FromID, srogms->GuildID);	
+			zlog(GUILDS__IN_PACKETS, "ServerOP_RequestOnlineGuildMembers Recieved. FromID=%i GuildID=%i", srogms->FromID, srogms->GuildID);
 			client_list.SendOnlineGuildMembers(srogms->FromID, srogms->GuildID);
 			break;
 		}
@@ -825,8 +825,8 @@ bool ZoneServer::Process() {
 			break;
 		}
 		case ServerOP_LFPUpdate: {
-			ServerLFPUpdate_Struct* sus = (ServerLFPUpdate_Struct*) pack->pBuffer;	
-			if(sus->Action) 
+			ServerLFPUpdate_Struct* sus = (ServerLFPUpdate_Struct*) pack->pBuffer;
+			if(sus->Action)
 				LFPGroupList.UpdateGroup(sus);
 			else
 				LFPGroupList.RemoveGroup(sus);
@@ -845,7 +845,7 @@ bool ZoneServer::Process() {
 			zoneserver_list.SendPacket(pack);
 			break;
 		}
-		
+
 		case ServerOP_GuildRankUpdate:
 		{
 			zoneserver_list.SendPacket(pack);
@@ -859,7 +859,7 @@ bool ZoneServer::Process() {
 			guild_mgr.ProcessZonePacket(pack);
 			break;
 		}
-		
+
 		case ServerOP_FlagUpdate: {
 			ClientListEntry* cle = client_list.FindCLEByAccountID(*((uint32*) pack->pBuffer));
 			if (cle)
@@ -893,7 +893,7 @@ bool ZoneServer::Process() {
 				break;
 			}
 			ServerLock_Struct* slock = (ServerLock_Struct*) pack->pBuffer;
-  			if (slock->mode >= 1) 
+  			if (slock->mode >= 1)
 				WorldConfig::LockWorld();
 			else
 				WorldConfig::UnlockWorld();
@@ -907,7 +907,7 @@ bool ZoneServer::Process() {
 			else {
 				if (slock->mode >= 1)
 					this->SendEmoteMessage(slock->myname, 0, 0, 13, "World locked, but login server not connected.");
-				else 
+				else
 					this->SendEmoteMessage(slock->myname, 0, 0, 13, "World unlocked, but login server not conencted.");
 			}
 			break;
@@ -946,7 +946,7 @@ bool ZoneServer::Process() {
 		case ServerOP_GetWorldTime: {
 			zlog(WORLD__ZONE,"Broadcasting a world time update");
 			ServerPacket* pack = new ServerPacket;
-			
+
 			pack->opcode = ServerOP_SyncWorldTime;
 			pack->size = sizeof(eqTimeOfDay);
 			pack->pBuffer = new uchar[pack->size];
@@ -1177,7 +1177,7 @@ bool ZoneServer::Process() {
 			}
 
 			zoneserver_list.SendPacket(pack);
-			break;		
+			break;
 		}
 
 		case ServerOP_QGlobalDelete:
@@ -1188,7 +1188,7 @@ bool ZoneServer::Process() {
 			}
 
 			zoneserver_list.SendPacket(pack);
-			break;		
+			break;
 		}
 
 		case ServerOP_AdventureRequest:
@@ -1260,7 +1260,7 @@ bool ZoneServer::Process() {
 			break;
 		}
 
-		case ServerOP_UCSMailMessage: 
+		case ServerOP_UCSMailMessage:
 		{
 			UCSLink.SendPacket(pack);
 			break;
@@ -1325,7 +1325,7 @@ bool ZoneServer::Process() {
 		}
 
 		delete pack;
-	} 
+	}
 	return true;
 }
 
@@ -1351,7 +1351,7 @@ void ZoneServer::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 
 	pack->pBuffer = new uchar[pack->size];
 	memset(pack->pBuffer, 0, pack->size);
 	ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*) pack->pBuffer;
-	
+
 	if (to != 0) {
 		strcpy((char *) sem->to, to);
 	}
@@ -1363,7 +1363,7 @@ void ZoneServer::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 
 	sem->minstatus = to_minstatus;
 	sem->type = type;
 	strcpy(&sem->message[0], message);
-	
+
 	pack->Deflate();
 	SendPacket(pack);
 	delete pack;
@@ -1397,7 +1397,7 @@ void ZoneServer::TriggerBootup(uint32 iZoneID, uint32 iInstanceID, const char* a
 	s->ZoneServerID = ID;
 	if (adminname != 0)
 		strcpy(s->adminname, adminname);
-	
+
 	if (iZoneID == 0)
 		s->zoneid = this->GetZoneID();
 	else

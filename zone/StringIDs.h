@@ -86,7 +86,7 @@
 #define INVIS_BEGIN_BREAK			275		//You feel yourself starting to appear.
 #define DISCIPLINE_CONLOST			278		//You lose the concentration to remain in your fighting discipline.
 #define REZ_REGAIN					289		//You regain some experience from resurrection.
-#define DUP_LORE					290		//Duplicate lore items are not allowed. 
+#define DUP_LORE					290		//Duplicate lore items are not allowed.
 #define TGB_ON						293		//Target other group buff is *ON*.
 #define TGB_OFF						294		//Target other group buff is *OFF*.
 #define LDON_SENSE_TRAP1			306		//You do not Sense any traps.
@@ -171,7 +171,7 @@
 #define DUEL_FINISHED				1088	//dont know text
 #define EATING_MESSAGE				1091	//Chomp, chomp, chomp...  %1 takes a bite from a %2.
 #define DRINKING_MESSAGE			1093	//Glug, glug, glug...  %1 takes a drink from a %2.
-#define SUCCESSFUL_TAUNT            1095    //I'll teach you to interfere with me %3. 
+#define SUCCESSFUL_TAUNT            1095    //I'll teach you to interfere with me %3.
 #define PET_SIT_STRING				1130	//Changing position, Master.
 #define PET_CALMING					1131	//Sorry, Master..calming down.
 #define PET_FOLLOWING				1132	//Following you, Master.
@@ -269,7 +269,7 @@
 #define MAX_RAID_LEADERSHIP_POINTS	8591	//
 #define LEADERSHIP_EXP_ON			8653	//
 #define LEADERSHIP_EXP_OFF			8654	//
-#define CURRENT_SPELL_EFFECTS		8757	//%1's current spell effects: 
+#define CURRENT_SPELL_EFFECTS		8757	//%1's current spell effects:
 #define GAIN_GROUP_LEADERSHIP_EXP	8788	//
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)

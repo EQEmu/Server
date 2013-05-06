@@ -36,19 +36,19 @@ public:
 
 	uint8	GetTriggerDoorID() { return trigger_door; }
 	uint8	GetTriggerType() { return trigger_type; }
- 
+
 	uint32	GetKeyItem() { return keyitem; }
 	void	SetKeyItem(uint32 in) { keyitem = in; }
 	uint8	GetNoKeyring() { return nokeyring; }
 	void	SetNoKeyring(uint8 in) { nokeyring = in; }
-	uint16	GetLockpick() { return lockpick; } 
-	void	SetLockpick(uint16 in) { lockpick = in; } 
+	uint16	GetLockpick() { return lockpick; }
+	void	SetLockpick(uint16 in) { lockpick = in; }
 	uint16	GetSize() { return size; }
 	void	SetGuildID(uint32 guild_id) { this->guild_id = guild_id; }
 
 	uint32	GetEntityID() { return entity_id; }
 	void	SetEntityID(uint32 entity) { entity_id = entity; }
-	
+
 	void	DumpDoor();
 	float	GetDestX() { return dest_x; }
 	float	GetDestY() { return dest_y; }
@@ -57,7 +57,7 @@ public:
 
 	uint8	IsLDoNDoor() { return is_ldon_door; }
 	uint32	GetClientVersionMask() { return client_version_mask; }
-	
+
 	void	NPCOpen(NPC* sender, bool alt_mode=false);
 	void	ForceOpen(Mob *sender, bool alt_mode=false);
 	void	ForceClose(Mob *sender, bool alt_mode=false);
@@ -75,7 +75,7 @@ public:
 	void	CreateDatabaseEntry();
 
 private:
-	
+
 	uint32	db_id;
 	uint8	door_id;
 	char	zone_name[32];

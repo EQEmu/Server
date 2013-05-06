@@ -140,7 +140,7 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 
     time_t aclock;
     struct tm *newtime;
-    
+
     time( &aclock );                 /* Get time in seconds */
     newtime = localtime( &aclock );  /* Convert time to struct */
 
@@ -210,7 +210,7 @@ bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list 
 
     time_t aclock;
     struct tm *newtime;
-    
+
     time( &aclock );                 /* Get time in seconds */
     newtime = localtime( &aclock );  /* Convert time to struct */
 
@@ -273,7 +273,7 @@ bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count) {
 
     time_t aclock;
     struct tm *newtime;
-    
+
     time( &aclock );                 /* Get time in seconds */
     newtime = localtime( &aclock );  /* Convert time to struct */
 
@@ -347,7 +347,7 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 	LockMutex lock(&MLog[id]);
 	if (!logFileValid)
 		return false;	//check again for threading race reasons (to avoid two mutexes)
-	
+
 	write(id, "Dumping Packet: %i", size);
 	// Output as HEX
 	int j = 0; char* ascii = new char[cols+1]; memset(ascii, 0, cols+1);
@@ -382,7 +382,7 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 	safe_delete_array(ascii);
 	return true;
 }
-	
+
 void EQEMuLog::SetCallback(LogIDs id, msgCallbackFmt proc) {
 	if (!logFileValid)
 		return;

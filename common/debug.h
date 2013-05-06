@@ -106,19 +106,19 @@ public:
         Crash,
 		MaxLogID
 	};
-	
+
 	//these are callbacks called for each
 	typedef void (* msgCallbackBuf)(LogIDs id, const char *buf, uint8 size, uint32 count);
 	typedef void (* msgCallbackFmt)(LogIDs id, const char *fmt, va_list ap);
 	typedef void (* msgCallbackPva)(LogIDs id, const char *prefix, const char *fmt, va_list ap);
-	
+
 	void SetAllCallbacks(msgCallbackFmt proc);
 	void SetAllCallbacks(msgCallbackBuf proc);
 	void SetAllCallbacks(msgCallbackPva proc);
 	void SetCallback(LogIDs id, msgCallbackFmt proc);
 	void SetCallback(LogIDs id, msgCallbackBuf proc);
 	void SetCallback(LogIDs id, msgCallbackPva proc);
-	
+
 	bool writebuf(LogIDs id, const char *buf, uint8 size, uint32 count);
 	bool write(LogIDs id, const char *fmt, ...);
 	bool writePVA(LogIDs id, const char *prefix, const char *fmt, va_list args);
@@ -137,7 +137,7 @@ private:
 	8 = use stderr instead (2 must be set)
 */
 	uint8	pLogStatus[MaxLogID];
-	
+
 	msgCallbackFmt logCallbackFmt[MaxLogID];
 	msgCallbackBuf logCallbackBuf[MaxLogID];
 	msgCallbackPva logCallbackPva[MaxLogID];

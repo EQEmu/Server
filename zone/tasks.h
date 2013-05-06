@@ -43,7 +43,7 @@ using namespace std;
 //
 #define RELOADTASKS		0
 #define RELOADTASKGOALLISTS	1
-#define RELOADTASKPROXIMITIES	2	
+#define RELOADTASKPROXIMITIES	2
 #define RELOADTASKSETS		3
 
 class Client;
@@ -113,7 +113,7 @@ struct ActivityInformation {
 typedef enum { ActivitiesSequential = 0, ActivitiesStepped = 1 } SequenceType;
 
 struct TaskInformation {
-	int	Duration; 
+	int	Duration;
 	char   *Title;
 	char   *Description;
 	char   *Reward;
@@ -165,7 +165,7 @@ public:
 	ClientTaskState();
 	~ClientTaskState();
 	void ShowClientTasks(Client *c);
-	inline int GetActiveTaskCount() { return ActiveTaskCount; } 
+	inline int GetActiveTaskCount() { return ActiveTaskCount; }
 	int GetActiveTaskID(int index);
 	bool IsTaskActivityCompleted(int index, int ActivityID);
 	int GetTaskActivityDoneCount(int index, int ActivityID);
@@ -215,7 +215,7 @@ private:
 	int LastCompletedTaskLoaded;
 	bool CheckedTouchActivities;
 };
-	
+
 
 class TaskManager {
 
@@ -237,9 +237,9 @@ public:
 	void SendActiveTasksToClient(Client *c, bool TaskComplete=false);
 	void SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool TaskComplete, bool BringUpTaskJournal=false);
 	void SendTaskActivityShort(Client *c, int TaskID, int ActivityID, int ClientTaskIndex);
-	void SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, 
+	void SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex,
 				  bool Optional, bool TaskComplete=false);
-	void SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, 
+	void SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int ClientTaskIndex,
 				  bool Optional, bool TaskComplete=false);
 	void SendCompletedTasksToClient(Client *c, ClientTaskState *state);
 	void ExplainTask(Client *c, int TaskID);

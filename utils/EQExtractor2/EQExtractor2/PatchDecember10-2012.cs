@@ -18,7 +18,7 @@ namespace EQExtractor2.Patches
             ExpectedPPLength = -1;
 
             PPZoneIDOffset = -1;
-                        
+
             PatchConfFileName = "patch_Dec10-2012.conf";
 
             PacketsToMatch = new PacketToMatch[] {
@@ -31,7 +31,7 @@ namespace EQExtractor2.Patches
         }
 
         override public IdentificationStatus Identify(int OpCode, int Size, PacketDirection Direction)
-        {           
+        {
             if ((OpCode == OpManager.OpCodeNameToNumber(PacketsToMatch[WaitingForPacket].OPCodeName)) &&
                 (Direction == PacketsToMatch[WaitingForPacket].Direction))
             {
@@ -42,7 +42,7 @@ namespace EQExtractor2.Patches
                     return IdentificationStatus.Yes;
 
                 WaitingForPacket++;
-                
+
                 return IdentificationStatus.Tentative;
             }
 
@@ -119,8 +119,8 @@ namespace EQExtractor2.Patches
 
             ByteStream Buffer = new ByteStream(PlayerProfilePacket[0]);
 
-            Buffer.SkipBytes(24);   
-            
+            Buffer.SkipBytes(24);
+
             UInt32 BindCount = Buffer.ReadUInt32();
 
             for (int i = 0; i < BindCount; ++i)
@@ -129,7 +129,7 @@ namespace EQExtractor2.Patches
             }
             Buffer.SkipBytes(8); // Deity, intoxication
 
-            UInt32 SpellRefreshCount = Buffer.ReadUInt32();            
+            UInt32 SpellRefreshCount = Buffer.ReadUInt32();
 
             for (int i = 0; i < SpellRefreshCount; ++i)
             {
@@ -137,20 +137,20 @@ namespace EQExtractor2.Patches
             }
 
             UInt32 EquipmentCount = Buffer.ReadUInt32();
-            
+
             for (int i = 0; i < EquipmentCount; ++i)
             {
                 Buffer.SkipBytes(20);
             }
 
-            UInt32 SomethingCount = Buffer.ReadUInt32();            
+            UInt32 SomethingCount = Buffer.ReadUInt32();
 
             for (int i = 0; i < SomethingCount; ++i)
             {
                 Buffer.SkipBytes(20);
             }
 
-            SomethingCount = Buffer.ReadUInt32();            
+            SomethingCount = Buffer.ReadUInt32();
 
             for (int i = 0; i < SomethingCount; ++i)
             {
@@ -158,7 +158,7 @@ namespace EQExtractor2.Patches
             }
 
             SomethingCount = Buffer.ReadUInt32();
-            
+
             for (int i = 0; i < SomethingCount; ++i)
             {
                 Buffer.SkipBytes(4);
@@ -169,25 +169,25 @@ namespace EQExtractor2.Patches
             UInt32 Points = Buffer.ReadUInt32();
             UInt32 Mana = Buffer.ReadUInt32();
             UInt32 CurHP = Buffer.ReadUInt32();
-                        
+
             Buffer.SkipBytes(28);
             Buffer.SkipBytes(28);
 
             UInt32 AACount = Buffer.ReadUInt32();
-            
+
             for (int i = 0; i < AACount; ++i)
             {
                 Buffer.SkipBytes(12);
             }
 
             SomethingCount = Buffer.ReadUInt32();
-                        
+
             for (int i = 0; i < SomethingCount; ++i)
             {
                 Buffer.SkipBytes(4);
             }
             SomethingCount = Buffer.ReadUInt32();
-            
+
             for (int i = 0; i < SomethingCount; ++i)
             {
                 Buffer.SkipBytes(4);
@@ -305,7 +305,7 @@ namespace EQExtractor2.Patches
             UInt16 ZoneID = Buffer.ReadUInt16();
 
             return ZoneID;
-            
+
         }
 
         override public List<ZoneEntryStruct> GetSpawns()
@@ -335,7 +335,7 @@ namespace EQExtractor2.Patches
                 UInt32 Bitfield = Buffer.ReadUInt32();
 
                 NewSpawn.Gender = (Bitfield  & 3);
-                
+
                 Byte OtherData = Buffer.ReadByte();
 
                 Buffer.SkipBytes(8);    // Skip 8 unknown bytes
@@ -367,7 +367,7 @@ namespace EQExtractor2.Patches
                     NewSpawn.BodyType = Buffer.ReadUInt32();
                 else
                     NewSpawn.BodyType = 0;
-                
+
 
                 for (int j = 1; j < NewSpawn.PropCount; ++j)
                         Buffer.SkipBytes(4);
@@ -399,9 +399,9 @@ namespace EQExtractor2.Patches
                 NewSpawn.WalkSpeed = Buffer.ReadSingle();
 
                 NewSpawn.RunSpeed = Buffer.ReadSingle();
-                
+
                 NewSpawn.Race = Buffer.ReadUInt32();
-               
+
                 Buffer.SkipBytes(1);   // Skip Holding
 
                 NewSpawn.Deity = Buffer.ReadUInt32();
@@ -411,9 +411,9 @@ namespace EQExtractor2.Patches
                 NewSpawn.Class = Buffer.ReadByte();
 
                 Buffer.SkipBytes(4);     // Skip PVP, Standstate, Light, Flymode
-                               
+
                 NewSpawn.LastName = Buffer.ReadString(true);
-                
+
                 Buffer.SkipBytes(6);
 
                 NewSpawn.PetOwnerID = Buffer.ReadUInt32();
@@ -421,7 +421,7 @@ namespace EQExtractor2.Patches
                 Buffer.SkipBytes(25);
 
                 NewSpawn.MeleeTexture1 = 0;
-                NewSpawn.MeleeTexture2 = 0;      
+                NewSpawn.MeleeTexture2 = 0;
 
                 if ( (NewSpawn.IsNPC == 0) || NPCType.IsPlayableRace(NewSpawn.Race))
                 {
@@ -501,7 +501,7 @@ namespace EQExtractor2.Patches
 
                 NewSpawn.Heading = Utils.EQ19ToFloat((Int32)(Position5) & 0x7FFFF);
 
-                
+
 
 
                 if ((OtherData & 16) > 0)
@@ -626,7 +626,7 @@ namespace EQExtractor2.Patches
                 DecodeItemPacket(OutputStream, Buffer, Direction);
             }
 
-            
+
         }
 
 
@@ -669,7 +669,7 @@ namespace EQExtractor2.Patches
 
             String Desc = Buffer.ReadString(false);
 
-            
+
             OutputStream.WriteLine("Duration: {0}, Unk4: {1:X}, StartTime: {2:X}", Duration, Unk4, StartTime);
 
             OutputStream.WriteLine("Desc: {0}", Desc);
@@ -765,7 +765,7 @@ namespace EQExtractor2.Patches
                 }
                 OutputStream.WriteLine("");
                 //OutputStream.WriteLine("Offset is now: {0}", Buffer.GetPosition());
-                
+
             }
         }
 
@@ -803,7 +803,7 @@ namespace EQExtractor2.Patches
                 //float DeltaHeading = Utils.EQ19ToFloat((int)(Word & 0x3FF));
             }
 
-            
+
 
 
         }
@@ -843,11 +843,11 @@ namespace EQExtractor2.Patches
             OutputStream.WriteLine("");
             UInt32 BindCount = Buffer.ReadUInt32();
             OutputStream.WriteLine("{0, -5}: BindCount = {1}", Buffer.GetPosition() - 4, BindCount);
-                        
+
             for (int i = 0; i < BindCount; ++i)
             {
                 OutputStream.WriteLine("{0, -5}:   Bind: {1} Zone: {2} XYZ: {3},{4},{5} Heading: {6}",
-                    Buffer.GetPosition(), i, Buffer.ReadUInt32(), Buffer.ReadSingle(), Buffer.ReadSingle(),Buffer.ReadSingle(),Buffer.ReadSingle());                
+                    Buffer.GetPosition(), i, Buffer.ReadUInt32(), Buffer.ReadSingle(), Buffer.ReadSingle(),Buffer.ReadSingle(),Buffer.ReadSingle());
             }
 
             OutputStream.WriteLine("");
@@ -858,10 +858,10 @@ namespace EQExtractor2.Patches
             //Buffer.SkipBytes(8); // Deity, intoxication
 
             UInt32 UnknownCount = Buffer.ReadUInt32();
-            
+
             OutputStream.WriteLine("{0, -5}: Unknown Count = {1}", Buffer.GetPosition() - 4, UnknownCount);
 
-            
+
 
             for (int i = 0; i < UnknownCount; ++i)
             {
@@ -872,7 +872,7 @@ namespace EQExtractor2.Patches
             UInt32 EquipmentCount = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("{0, -5}: EquipmentCount = {1}", Buffer.GetPosition() - 4, EquipmentCount);
-            
+
             for (int i = 0; i < EquipmentCount; ++i)
             {
                 OutputStream.Write("{0, -5}: Equip: {1} Values: ", Buffer.GetPosition(), i);
@@ -901,7 +901,7 @@ namespace EQExtractor2.Patches
 
             UInt32 TintCount = Buffer.ReadUInt32();
 
-            OutputStream.WriteLine("{0, -5}: TintCount = {1}", Buffer.GetPosition() - 4, TintCount);            
+            OutputStream.WriteLine("{0, -5}: TintCount = {1}", Buffer.GetPosition() - 4, TintCount);
 
             for (int i = 0; i < TintCount; ++i)
             {
@@ -976,8 +976,8 @@ namespace EQExtractor2.Patches
 
             UInt32 AACount = Buffer.ReadUInt32();
 
-            OutputStream.WriteLine("{0, -5}: AA Count = {1}", Buffer.GetPosition() - 4, AACount);            
-            
+            OutputStream.WriteLine("{0, -5}: AA Count = {1}", Buffer.GetPosition() - 4, AACount);
+
 
             for (int i = 0; i < AACount; ++i)
             {
@@ -988,25 +988,25 @@ namespace EQExtractor2.Patches
             UInt32 SkillCount = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("{0, -5}: Skill Count = {1}", Buffer.GetPosition() - 4, SkillCount);
-            
+
             for (int i = 0; i < SkillCount; ++i)
             {
                 Buffer.SkipBytes(4);
             }
-            
+
             UInt32 SomethingCount = Buffer.ReadUInt32();
 
-            OutputStream.WriteLine("{0, -5}: Something Count = {1}", Buffer.GetPosition() - 4, SomethingCount);            
-            
+            OutputStream.WriteLine("{0, -5}: Something Count = {1}", Buffer.GetPosition() - 4, SomethingCount);
+
 
             for (int i = 0; i < SomethingCount; ++i)
             {
                 Buffer.SkipBytes(4);
             }
-            
+
             UInt32 DisciplineCount = Buffer.ReadUInt32();
             OutputStream.WriteLine("{0, -5}: Discipline Count = {1}", Buffer.GetPosition() - 4, DisciplineCount);
-            
+
             for (int i = 0; i < DisciplineCount; ++i)
             {
                 Buffer.SkipBytes(4);
@@ -1014,12 +1014,12 @@ namespace EQExtractor2.Patches
 
             UInt32 TimeStampCount = Buffer.ReadUInt32();
             OutputStream.WriteLine("{0, -5}: TimeStamp Count = {1}", Buffer.GetPosition() - 4, TimeStampCount);
-            
+
             for (int i = 0; i < TimeStampCount; ++i)
             {
                 Buffer.SkipBytes(4);
             }
-            
+
             UInt32 RecastCount = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("{0, -5}: Recast Count = {1}", Buffer.GetPosition() - 4, RecastCount);
@@ -1037,11 +1037,11 @@ namespace EQExtractor2.Patches
                 Buffer.SkipBytes(4);
             }
 
-            
+
             UInt32 SpellBookSlots = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("{0, -5}: SpellBookSlot Count = {1}", Buffer.GetPosition() - 4, SpellBookSlots);
-            
+
             for (int i = 0; i < SpellBookSlots; ++i)
             {
                 Buffer.SkipBytes(4);
@@ -1050,7 +1050,7 @@ namespace EQExtractor2.Patches
             UInt32 SpellMemSlots = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("{0, -5}: Spell Mem Count = {1}", Buffer.GetPosition() - 4, SpellMemSlots);
-            
+
             for (int i = 0; i < SpellMemSlots; ++i)
             {
                 Buffer.SkipBytes(4);
@@ -1059,18 +1059,18 @@ namespace EQExtractor2.Patches
             SomethingCount = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("{0, -5}: Unknown Count = {1}", Buffer.GetPosition() - 4, SomethingCount);
-            
+
             for (int i = 0; i < SomethingCount; ++i)
             {
                 Buffer.SkipBytes(4);
             }
 
             OutputStream.WriteLine("{0, -5}: Unknown = {1}", Buffer.GetPosition(), Buffer.ReadByte());
-            
+
             UInt32 BuffCount = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("{0, -5}: Buff Count = {1}", Buffer.GetPosition() - 4, BuffCount);
-            
+
             for (int i = 0; i < BuffCount; ++i)
             {
                 Buffer.ReadByte();
@@ -1104,7 +1104,7 @@ namespace EQExtractor2.Patches
             OutputStream.WriteLine("{0, -5}: Unknown = {1}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: Thirst? = {1}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: Hunger? = {1}", Buffer.GetPosition(), Buffer.ReadUInt32());
-            
+
             //Buffer.SkipBytes(20);
 
             OutputStream.WriteLine("{0, -5}: AA Spent = {1}", Buffer.GetPosition(), Buffer.ReadUInt32());
@@ -1118,14 +1118,14 @@ namespace EQExtractor2.Patches
             OutputStream.WriteLine("{0, -5}: AA Spent Special = {1}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: AA Unspent = {1}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: Unknown", Buffer.GetPosition(), Buffer.ReadUInt16());
-            
+
 
             //Buffer.SkipBytes(30);
 
             UInt32 BandolierCount = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("{0, -5}: Bandolier Count = {1}", Buffer.GetPosition() - 4, BandolierCount);
-            
+
             for (int i = 0; i < BandolierCount; ++i)
             {
                 Buffer.ReadString(false);
@@ -1146,11 +1146,11 @@ namespace EQExtractor2.Patches
             UInt32 PotionCount = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("{0, -5}: Potion Count = {1}", Buffer.GetPosition() - 4, PotionCount);
-            
+
             for (int i = 0; i < PotionCount; ++i)
             {
                 Buffer.ReadString(false);
-                Buffer.SkipBytes(8);                
+                Buffer.SkipBytes(8);
             }
 
             OutputStream.WriteLine("{0, -5}: Unknown {1}", Buffer.GetPosition(), Buffer.ReadInt32());
@@ -1186,7 +1186,7 @@ namespace EQExtractor2.Patches
 
             int CurrentPosition = Buffer.GetPosition();
             OutputStream.WriteLine("{0, -5}: Name: {1}", Buffer.GetPosition(), Buffer.ReadString(false));
-            
+
             Buffer.SetPosition(CurrentPosition + (int)NameLength);
 
             UInt32 LastNameLength = Buffer.ReadUInt32();
@@ -1209,10 +1209,10 @@ namespace EQExtractor2.Patches
             OutputStream.WriteLine("{0, -5}: Language Count = {1}", Buffer.GetPosition() - 4, LanguageCount);
 
             for (int i = 0; i < LanguageCount; ++i)
-            {                
+            {
                 Buffer.SkipBytes(1);
             }
-            
+
             OutputStream.WriteLine("{0, -5}: Zone ID {1}", Buffer.GetPosition(), Buffer.ReadUInt16());
             OutputStream.WriteLine("{0, -5}: Zone Instance {1}", Buffer.GetPosition(), Buffer.ReadUInt16());
             OutputStream.WriteLine("{0, -5}: Y,X,Z {1},{2},{3} Heading: {4}",
@@ -1341,7 +1341,7 @@ namespace EQExtractor2.Patches
 
             for(int i = 0; i < Unknown6; ++i)
                 OutputStream.WriteLine("{0, -5}: Unknown LDON? {1}", Buffer.GetPosition(), Buffer.ReadUInt32());
-                
+
 
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
@@ -1358,7 +1358,7 @@ namespace EQExtractor2.Patches
             // Air remaining ?
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
 
-            // Next 7 could be PVP stats, 
+            // Next 7 could be PVP stats,
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
@@ -1426,16 +1426,16 @@ namespace EQExtractor2.Patches
             OutputStream.WriteLine("{0, -5}: Showhelm? {1}", Buffer.GetPosition(), Buffer.ReadByte());
 
             OutputStream.WriteLine("{0, -5}: RestTimer? {1}", Buffer.GetPosition(), Buffer.ReadUInt32());
-            
+
             OutputStream.WriteLine("Skipping 1028 bytes starting at offset {0}", Buffer.GetPosition());
             Buffer.SkipBytes(1028);
-            
+
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
 
             OutputStream.WriteLine("Pointer is {0} bytes from end.", Buffer.Length() - Buffer.GetPosition());
 
-            
+
 
         }
 
@@ -1490,12 +1490,12 @@ namespace EQExtractor2.Patches
             OutputStream.WriteLine("Properties = {0}, Offset now {1}", Properties, Buffer.GetPosition());
 
             UInt32 BodyType = 0;
-            
+
             if(Properties > 0)
                 BodyType = Buffer.ReadUInt32();
 
             OutputStream.WriteLine("Bodytype = {0}",  BodyType);
-            
+
             if (Properties != 1)
                 OutputStream.WriteLine("XXXX Properties is {0}", Properties);
 
@@ -1552,7 +1552,7 @@ namespace EQExtractor2.Patches
                 {
                     UInt32 Equip3 = Buffer.ReadUInt32();
 
-                    UInt32 Equipx = Buffer.ReadUInt32();                    
+                    UInt32 Equipx = Buffer.ReadUInt32();
 
                     UInt32 Equip2 = Buffer.ReadUInt32();
 
@@ -1560,13 +1560,13 @@ namespace EQExtractor2.Patches
 
                     UInt32 Equip0 = Buffer.ReadUInt32();
 
-                    OutputStream.WriteLine("Equip slot {0}: 0,1,2,x,3  is {1}, {2}, {3}, {4}, {5}", i, 
+                    OutputStream.WriteLine("Equip slot {0}: 0,1,2,x,3  is {1}, {2}, {3}, {4}, {5}", i,
                         Equip0, Equip1, Equip2, Equipx, Equip3);
                 }
 
-                
 
-                
+
+
 
             }
             else
@@ -1635,7 +1635,7 @@ namespace EQExtractor2.Patches
             if (Buffer.Length() != Buffer.GetPosition())
                 OutputStream.WriteLine("PARSE ERROR");
 
-            
+
 
 
 

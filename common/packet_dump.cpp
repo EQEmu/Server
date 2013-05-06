@@ -55,8 +55,8 @@ void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 		return;
 	// Output as HEX
 	char output[4];
-	int j = 0; 
-	char* ascii = new char[cols+1]; 
+	int j = 0;
+	char* ascii = new char[cols+1];
 	memset(ascii, 0, cols+1);
 	uint32 i;
     for(i=skip; i<size; i++)

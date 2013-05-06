@@ -17,30 +17,30 @@
 */
 
 /*
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
  * There are really two or three different objects shoe-hored into this
  * connection object. Sombody really needs to factor out the relay link
- * crap into its own subclass of this object, it will clean things up 
+ * crap into its own subclass of this object, it will clean things up
  * tremendously.
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  */
 
 #include "../common/debug.h"
@@ -92,7 +92,7 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, SOCKET in_s
 	RelayServer = false;
 	RelayCount = 0;
 	RemoteID = 0;
-	
+
 }
 
 //client outgoing connection case (and client side relay)
@@ -246,7 +246,7 @@ bool EmuTCPConnection::SendPacket(EmuTCPNetPacket_Struct* tnps) {
 		return false;
 	if (GetMode() != modePacket)
 		return false;
-	
+
 	LockMutex lock(&MState);
 	eTCPMode tmp = GetMode();
 	if (tmp == modeTransition) {
@@ -391,13 +391,13 @@ bool EmuTCPConnection::LineOutQueuePush(char* line) {
 		}
 
 	}
-	
+
 	return(TCPConnection::LineOutQueuePush(line));
 }
 
 void EmuTCPConnection::Disconnect(bool iSendRelayDisconnect) {
 	TCPConnection::Disconnect();
-	
+
 	if (RelayLink) {
 		RelayLink->RemoveRelay(this, iSendRelayDisconnect);
 		RelayLink = 0;
@@ -407,7 +407,7 @@ void EmuTCPConnection::Disconnect(bool iSendRelayDisconnect) {
 bool EmuTCPConnection::ConnectIP(uint32 irIP, uint16 irPort, char* errbuf) {
 	if(!TCPConnection::ConnectIP(irIP, irPort, errbuf))
 		return(false);
-	
+
 	MSendQueue.lock();
 	#ifdef MINILOGIN
 		TCPMode = modePacket;
@@ -453,22 +453,22 @@ bool EmuTCPConnection::ConnectIP(uint32 irIP, uint16 irPort, char* errbuf) {
 		}
 	#endif
 	MSendQueue.unlock();
-	
+
 	return(true);
 }
 
 void EmuTCPConnection::ClearBuffers() {
 	TCPConnection::ClearBuffers();
-	
+
 	LockMutex lock2(&MOutQueueLock);
 	ServerPacket* pack = 0;
 	while ((pack = OutQueue.pop()))
 		safe_delete(pack);
-	
+
 	EmuTCPNetPacket_Struct* tnps = 0;
 	while ((tnps = InModeQueue.pop()))
 		safe_delete(tnps);
-	
+
 	keepalive_timer.Start();
 	timeout_timer.Start();
 }
@@ -810,7 +810,7 @@ bool EmuTCPConnection::SendData(bool &sent_something, char* errbuf) {
 	sent_something = false;
 	if(!TCPConnection::SendData(sent_something, errbuf))
 		return(false);
-	
+
 	if(sent_something)
 		keepalive_timer.Start();
 	else if (TCPMode == modePacket && keepalive_timer.Check()) {
@@ -821,7 +821,7 @@ bool EmuTCPConnection::SendData(bool &sent_something, char* errbuf) {
 			cout << "Sending TCP keepalive packet. (timeout=" << timeout_timer.GetRemainingTime() << " remaining)" << endl;
 		#endif
     }
-    
+
     return(true);
 }
 
@@ -832,13 +832,13 @@ bool EmuTCPConnection::RecvData(char* errbuf) {
 		else
 			return(false);
 	}
-	
+
 	if ((TCPMode == modePacket || TCPMode == modeTransition) && timeout_timer.Check()) {
 		if (errbuf)
 			snprintf(errbuf, TCPConnection_ErrorBufferSize, "TCPConnection::RecvData(): Connection timeout");
 		return false;
 	}
-	
+
 	return(true);
 }
 

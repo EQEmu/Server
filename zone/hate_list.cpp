@@ -59,10 +59,10 @@ void HateList::Wipe()
 	LinkedListIterator<tHateEntry*> iterator(list);
 	iterator.Reset();
 
-	while(iterator.MoreElements()) 
+	while(iterator.MoreElements())
 	{
 		Mob* m = iterator.GetData()->ent;
-        parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), m, "0", 0); 
+        parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), m, "0", 0);
        	iterator.RemoveCurrent();
 
 		if(m->IsClient())
@@ -70,12 +70,12 @@ void HateList::Wipe()
 	}
 }
 
-bool HateList::IsOnHateList(Mob *mob)    
-{    
-	if (Find(mob))    
-		return true;    
-	return false;    
-} 
+bool HateList::IsOnHateList(Mob *mob)
+{
+	if (Find(mob))
+		return true;
+	return false;
+}
 
 tHateEntry *HateList::Find(Mob *ent)
 {
@@ -154,7 +154,7 @@ Mob* HateList::GetClosest(Mob *hater) {
 	Mob* close = nullptr;
 	float closedist = 99999.9f;
 	float thisdist;
-	
+
     LinkedListIterator<tHateEntry*> iterator(list);
     iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -165,10 +165,10 @@ Mob* HateList::GetClosest(Mob *hater) {
 		}
         iterator.Advance();
 	}
-	
+
 	if (close == 0 && hater->IsNPC())
 		close = hater->CastToNPC()->GetHateTop();
-	
+
 	return close;
 }
 
@@ -199,7 +199,7 @@ void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAd
         p->hate = in_hate;
         p->bFrenzy = bFrenzy;
         list.Append(p);
-		parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "1", 0); 
+		parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "1", 0);
 
 		if(ent->IsClient())
 			ent->CastToClient()->IncrementAggroCount();
@@ -216,7 +216,7 @@ bool HateList::RemoveEnt(Mob *ent)
 	{
 		if(iterator.GetData()->ent == ent)
 		{
-            parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "0", 0); 
+            parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "0", 0);
 			iterator.RemoveCurrent();
 			found = true;
 
@@ -256,7 +256,7 @@ Mob *HateList::GetTop(Mob *center)
 	_ZP(HateList_GetTop);
 	Mob* top = nullptr;
 	int32 hate = -1;
-	
+
 	if (RuleB(Aggro,SmartAggroList)){
 		Mob* topClientTypeInRange = nullptr;
 		int32 hateClientTypeInRange = -1;
@@ -272,7 +272,7 @@ Mob *HateList::GetTop(Mob *center)
 			if(!cur){
 				iterator.Advance();
 				continue;
-			}			
+			}
 
 			if(!cur->ent){
 				iterator.Advance();
@@ -300,7 +300,7 @@ Mob *HateList::GetTop(Mob *center)
 			int32 currentHate = cur->hate;
 
 			if(cur->ent->IsClient()){
-				
+
 				if(cur->ent->CastToClient()->IsSitting()){
 					aggroMod += RuleI(Aggro, SittingAggroMod);
 				}
@@ -457,7 +457,7 @@ int32 HateList::GetEntHate(Mob *ent, bool damage)
 	tHateEntry *p;
 
     p = Find(ent);
-	
+
 	if ( p && damage)
         return p->damage;
 	else if (p)
@@ -469,7 +469,7 @@ int32 HateList::GetEntHate(Mob *ent, bool damage)
 //looking for any mob with hate > -1
 bool HateList::IsEmpty() {
 	_ZP(HateList_IsEmpty);
-	
+
 	return(list.Count() == 0);
 }
 
@@ -501,7 +501,7 @@ int HateList::AreaRampage(Mob *caster, Mob *target)
 	while (iterator.MoreElements())
 	{
 		tHateEntry *h = iterator.GetData();
-		iterator.Advance();		
+		iterator.Advance();
 		if(h && h->ent && h->ent != caster)
 		{
 			if(caster->CombatRange(h->ent))
@@ -533,7 +533,7 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 		return;
 	}
 
-	//this is slower than just iterating through the list but avoids 
+	//this is slower than just iterating through the list but avoids
 	//crashes when people kick the bucket in the middle of this call
 	//that invalidates our iterator but there's no way to know sadly
 	//So keep a list of entity ids and look up after
@@ -555,7 +555,7 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 		{
 			id_list.push_back(h->ent->GetID());
 		}
-		iterator.Advance();		
+		iterator.Advance();
 	}
 
 	std::list<uint32>::iterator iter = id_list.begin();
@@ -574,9 +574,9 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 void HateList::GetHateList(std::list<tHateEntry*> &h_list)
 {
 	h_list.clear();
-	LinkedListIterator<tHateEntry*> iterator(list); 
+	LinkedListIterator<tHateEntry*> iterator(list);
 	iterator.Reset();
-	while(iterator.MoreElements()) 
+	while(iterator.MoreElements())
 	{
 		tHateEntry *ent = iterator.GetData();
 		h_list.push_back(ent);

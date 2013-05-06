@@ -29,7 +29,7 @@
 #include "ClientManager.h"
 
 /**
- * Login server struct, contains every variable for the server that needs to exist 
+ * Login server struct, contains every variable for the server that needs to exist
  * outside the scope of main().
  */
 struct LoginServer

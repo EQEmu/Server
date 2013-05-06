@@ -76,7 +76,7 @@ EventLogDetails_Struct eld[255];
 };
 
 
-// Added By Hogie 
+// Added By Hogie
 // INSERT into variables (varname,value) values('decaytime [minlevel] [maxlevel]','[number of seconds]');
 // IE: decaytime 1 54 = Levels 1 through 54
 //     decaytime 55 100 = Levels 55 through 100
@@ -106,7 +106,7 @@ public:
 	Database(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	bool Connect(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	~Database();
-	
+
 	/*
 	 * General Character Related Stuff
 	 */
@@ -175,7 +175,7 @@ public:
 	 * Adventure related.
 	 */
 	void UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win);
-	bool GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w, uint32 &tak_w, 
+	bool GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w, uint32 &tak_w,
 		uint32 &guk_l, uint32 &mir_l, uint32 &mmc_l, uint32 &ruj_l, uint32 &tak_l);
 
 	/*
@@ -194,7 +194,7 @@ public:
 	bool	GetLiveChar(uint32 account_id, char* cname);
 	uint8	GetAgreementFlag(uint32 acctid);
 	void	SetAgreementFlag(uint32 acctid);
-	
+
 	/*
 	 * Groups
 	 */
@@ -202,7 +202,7 @@ public:
 	void	SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc = false);
 	void	ClearGroup(uint32 gid = 0);
 	char*	GetGroupLeaderForLogin(const char* name,char* leaderbuf);
-	
+
 	void	SetGroupLeaderName(uint32 gid, const char* name);
 	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
 				       GroupLeadershipAA_Struct* GLAA = nullptr);
@@ -224,7 +224,7 @@ public:
 	bool	LoadVariables();
 	uint32	LoadVariables_MQ(char** query);
 	bool	LoadVariables_result(MYSQL_RES* result);
-	
+
 	/*
 	 * General Queries
 	 */
@@ -243,22 +243,22 @@ public:
 	bool	LoadPTimers(uint32 charid, PTimerList &into);
 	void	ClearPTimers(uint32 charid);
 	void	ClearMerchantTemp();
-	void	SetLFP(uint32 CharID, bool LFP); 
+	void	SetLFP(uint32 CharID, bool LFP);
 	void	SetLFG(uint32 CharID, bool LFG);
 	void	SetFirstLogon(uint32 CharID, uint8 firstlogon);
-	void	SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon); 
+	void	SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon);
 	void	AddReport(std::string who, std::string against, std::string lines);
-	
+
 
 protected:
 	void	HandleMysqlError(uint32 errnum);
-	
+
 private:
 	void DBInitVars();
-	
+
 	uint32				max_zonename;
 	char**				zonename_array;
-	
+
 	Mutex				Mvarcache;
 	uint32				varcache_max;
 	VarCache_Struct**	varcache_array;

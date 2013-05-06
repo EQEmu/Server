@@ -197,7 +197,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 #ifdef WIN32
 	e_buffer = server.eq_crypto->DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
-	
+
 	int buffer_len = strlen(e_buffer);
 	e_hash.assign(e_buffer, buffer_len);
 	e_user.assign((e_buffer + buffer_len + 1), strlen(e_buffer + buffer_len + 1));
@@ -353,7 +353,7 @@ void Client::Handle_Play(const char* data)
 void Client::SendServerListPacket()
 {
 	EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
-	
+
 	if(server.options.IsDumpOutPacketsOn())
 	{
 		DumpPacket(outapp);
@@ -380,12 +380,12 @@ void Client::GenerateKey()
 	int count = 0;
 	while(count < 10)
 	{
-		static const char key_selection[] = 
+		static const char key_selection[] =
 		{
-			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
-			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
-			'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
-			'Y', 'Z', '0', '1', '2', '3', '4', '5', 
+			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+			'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+			'Y', 'Z', '0', '1', '2', '3', '4', '5',
 			'6', '7', '8', '9'
 		};
 

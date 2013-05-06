@@ -45,7 +45,7 @@ enum {	//raid packet types:
 	raidChangeLootType		= 11,
 	raidStringID			= 12,
 	raidChangeGroupLeader = 13,	//136 raid leader, new group leader, group_id?
-	raidBecomeGroupLeader = 14,	//472 
+	raidBecomeGroupLeader = 14,	//472
 	raidUnknown2			= 15,
 	raidChangeGroup = 16,	//??   len 136 old leader, new leader, 0 (preceeded with a remove2)
 	raidLock = 17,		//len 136 leader?, leader, 0
@@ -133,7 +133,7 @@ public:
 	void	RemoveRaidLooter(const char* looter);
 
 	//util func
-	//keeps me from having to keep iterating through the list 
+	//keeps me from having to keep iterating through the list
 	//when I want lots of data from the same entry
 	uint32	GetPlayerIndex(const char *name);
 	//for perl interface

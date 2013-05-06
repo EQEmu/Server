@@ -3577,7 +3577,7 @@ void Bot::AI_Process() {
 
 	if(!IsEngaged()) {
 		if(GetFollowID()) {
-			if(BotOwner && BotOwner->GetTarget() && BotOwner->GetTarget()->IsNPC() && (BotOwner->GetTarget()->GetHateAmount(BotOwner) 
+			if(BotOwner && BotOwner->GetTarget() && BotOwner->GetTarget()->IsNPC() && (BotOwner->GetTarget()->GetHateAmount(BotOwner)
 				|| BotOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(BotOwner->GetTarget())) {
 					AddToHateList(BotOwner->GetTarget(), 1);
 
@@ -6361,8 +6361,8 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillType attack_skil
 
 	SendHPUpdate();
 
-	if(this == from) { 
-		return; 
+	if(this == from) {
+		return;
 	}
 
 	// Aggro the bot's group members

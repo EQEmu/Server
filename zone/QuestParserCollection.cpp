@@ -51,7 +51,7 @@ void QuestParserCollection::ReloadQuests(bool reset_timers) {
 
 bool QuestParserCollection::HasQuestSub(uint32 npcid, const char *subname) {
     std::map<uint32, uint32>::iterator iter = _npc_quest_status.find(npcid);
-	
+
     if(iter != _npc_quest_status.end()) {
         //loaded or failed to load
         if(iter->second != QuestFailedToLoad) {
@@ -97,7 +97,7 @@ bool QuestParserCollection::PlayerHasQuestSub(const char *subname) {
         if(qi) {
             _global_player_quest_status = qi->GetIdentifier();
         }
-        
+
         qi = GetQIByPlayerQuest();
         if(qi) {
             _player_quest_status = qi->GetIdentifier();
@@ -207,7 +207,7 @@ void QuestParserCollection::EventPlayer(QuestEventID evt, Client *client, std::s
             qi->EventPlayer(evt, client, data, extra_data);
         }
 
-    } else { 
+    } else {
         if(_global_player_quest_status != QuestFailedToLoad) {
             std::map<uint32, QuestInterface*>::iterator iter = _interfaces.find(_global_player_quest_status);
 			if(iter != _interfaces.end())
@@ -435,7 +435,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest() {
         }
 
         iter++;
-    }    
+    }
 
     //second look for /quests/zone/player.ext (precedence)
     filename = "quests/";
@@ -555,7 +555,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id) {
         }
 
         iter++;
-    }    
+    }
 
     return nullptr;
 }
@@ -580,7 +580,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script)
         }
 
         iter++;
-    }    
+    }
 
     return nullptr;
 }

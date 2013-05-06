@@ -71,7 +71,7 @@ public:
 	void SetUnavails(uint32 unavails_in) { unavailables = unavails_in; }
 	void SetSentTime() { time(&senttime); }
 	void SetSentTime2(time_t senttime_in) { senttime = senttime_in; }
-	
+
 protected:
 
 	uint32 petid;

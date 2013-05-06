@@ -24,7 +24,7 @@ enum direction{FORWARD,BACKWARD};
 
 template<class TYPE> class LinkedListIterator;
 
-template<class TYPE> 
+template<class TYPE>
 class ListElement
 {
 private:
@@ -56,17 +56,17 @@ public:
   inline const TYPE&	GetData () const	{ return  data ; }
 
   void		SetData ( const TYPE& d )		    { data = d ; } // Quagmire - this may look like a mem leak, but dont change it, this behavior is expected where it's called
-  void		SetLastNext ( ListElement<TYPE>* p )	
+  void		SetLastNext ( ListElement<TYPE>* p )
   {
 	GetLast()->SetNext(p);
-  } 
-  void		SetNext (ListElement<TYPE>* n)	{ next = n ; } 
-  void		SetPrev (ListElement<TYPE>* p)	{ prev = p ; } 
+  }
+  void		SetNext (ListElement<TYPE>* n)	{ next = n ; }
+  void		SetPrev (ListElement<TYPE>* p)	{ prev = p ; }
 
   void          ReplaceData(const TYPE&);
 };
 
-template<class TYPE> 
+template<class TYPE>
 class LinkedList
 {
 private:
@@ -94,20 +94,20 @@ public:
   friend class LinkedListIterator<TYPE>;
 };
 
-template<class TYPE> 
+template<class TYPE>
 class LinkedListIterator
 {
 private:
   LinkedList<TYPE>&   list;
   ListElement<TYPE>*	current_element;
   direction           dir;
- 
+
 public:
   LinkedListIterator(LinkedList<TYPE>& l,direction d = FORWARD) : list(l), dir(d) {};
 
   void Advance();
   const TYPE& GetData();
-	bool IsFirst() 
+	bool IsFirst()
 	{
 		if (current_element->GetPrev() == 0)
 			return true;
@@ -283,7 +283,7 @@ void LinkedListIterator<TYPE>::Reset()
 	  current_element=0;
 	  return;
 	}
-	
+
 	if (dir == FORWARD)
 	{
 		current_element = list.first;
@@ -389,7 +389,7 @@ template<class TYPE>
 void LinkedList<TYPE>::Append(const TYPE& data)
 {
   ListElement<TYPE>* new_element = new ListElement<TYPE>(data);
-  
+
   if (first == 0)
   {
     first = new_element;

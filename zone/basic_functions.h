@@ -113,7 +113,7 @@ int GetArgs(char * string)
   //strcpy(buffer,com_list);
   //#else
   //strncpy(buffer,com_list,sizeof(buffer)-1);
-  //#endif	
+  //#endif
 	int i=0;
 	while (*buffer)
 	{

@@ -190,7 +190,7 @@ bool DBcore::Open(uint32* errnum, char* errbuf) {
 	/*
 	Added CLIENT_FOUND_ROWS flag to the connect
 	otherwise DB update calls would say 0 rows affected when the value already equalled
-	what the function was tring to set it to, therefore the function would think it failed 
+	what the function was tring to set it to, therefore the function would think it failed
 	*/
 	uint32 flags = CLIENT_FOUND_ROWS;
 	if (pCompress)

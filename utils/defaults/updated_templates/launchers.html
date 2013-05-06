@@ -10,11 +10,11 @@
     function GetStatusIdx() {
         return idx++;
     }
-    
+
     function StatusTic() {
         $.getJSON("data/launcher_data.html?idx="+GetStatusIdx(),
         function(data) {
-            
+
             $("#launcher_table").empty();
             var app_html = "<tr>";
             app_html += "<th scope=\"col\">Launcher Name </th>";
@@ -22,7 +22,7 @@
             app_html += "<th scope=\"col\">Actions</th>";
             app_html += "</tr>";
             $("#launcher_table").append(app_html);
-            
+
             var i = 0;
             for(var i = 0; i < data.launcher_count; i++) {
                 app_html = "<tr>";
@@ -37,12 +37,12 @@
                 app_html += "<a href='javascript:void(0)' onclick='RemoveLauncher(\"" + data.launchers[i].name + "\")'>Remove</a>";
                 app_html += "</td>\n";
                 app_html += "</tr>\n";
-            
+
                 $("#launcher_table").append(app_html);
             }
-        });        
+        });
     }
-    
+
     function RemoveLauncher(name) {
         $.getJSON("actions/launcher_action.html?action=remove&launcher_name="+name+"&idx="+GetStatusIdx(),
         function(data) {
@@ -53,32 +53,32 @@
             }
         });
     }
-    
+
     function AddLauncher() {
         var elm = document.getElementById("al_add_button_img");
         elm.style.display = "inline";
-        
+
         elm = document.getElementById("al_add_button");
         elm.className = "styled_button_disabled";
         $('#al_add_button').unbind('click');
-        
-        elm = document.getElementById("al_name");            
+
+        elm = document.getElementById("al_name");
         var launcher_name = elm.value;
         elm.value = "";
-        
-        elm = document.getElementById("al_count"); 
+
+        elm = document.getElementById("al_count");
         var dynamic_count = elm.value;
         elm.value = "";
-        
+
         $.getJSON("actions/launcher_action.html?action=add&launcher_name="+launcher_name+"&dynamic_count="+dynamic_count+"&idx="+GetStatusIdx(),
         function(data) {
             $('#al_add_button').bind('click', AddLauncher);
             elm = document.getElementById("al_add_button");
             elm.className = "styled_button";
-            
+
             elm = document.getElementById("al_add_button_img");
             elm.style.display = "none";
-            
+
             if(data.status == 0) {
                 alert(data.message);
             } else {
@@ -86,19 +86,19 @@
             }
         });
     }
-    
-    function ShowAddLauncher() {       
+
+    function ShowAddLauncher() {
         $("#add_launcher_link").hide();
         $("#min_add_launcher_link").show();
         $("#add_launcher_table").fadeIn("slow");
     }
-    
+
     function HideAddLauncher() {
         $("#add_launcher_link").show();
         $("#min_add_launcher_link").hide();
         $("#add_launcher_table").fadeOut("slow");
     }
-    
+
     $(document).ready(function() {
         setInterval("StatusTic()", 4000);
         $('#al_add_button').bind('click', AddLauncher);
@@ -107,7 +107,7 @@
     </script>
 </head>
 <?
-    @list = sort $EQW->ListLaunchers(); 
+    @list = sort $EQW->ListLaunchers();
 ?>
 <body>
     <div class="container">
@@ -139,9 +139,9 @@
                     print "</td>\n";
                     print "</tr>\n";
               }
-?>              
+?>
             </table>
-            
+
             </br>
             <div align="center">
                 <span id="add_launcher_link"><a href='javascript:void(0)' onclick='ShowAddLauncher()'>Add Launcher</a></span>
@@ -150,7 +150,7 @@
             <table id="add_launcher_table" class='styled_table' width="40%" cellspacing="0" cellpadding="0" style="display:none;">
             <tr>
                 <td>
-                    <h2>Add Launcher:</h2> 
+                    <h2>Add Launcher:</h2>
                     Name: <input type='text' name='name' id='al_name'>
                     Dynamic Count: <input type='text' name='dynamics' size="3" id='al_count'>
                     <button id='al_add_button' class='styled_button'><img id="al_add_button_img" src="images/loading.gif" height="16" width="16" style='display: none;'>Add</button>

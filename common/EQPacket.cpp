@@ -1,4 +1,4 @@
-/* 
+/*
 	Copyright (C) 2005 Michael S. Finger
 
     This program is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ EQPacket::EQPacket(EmuOpcode op, const unsigned char *buf, uint32 len)
 void EQPacket::build_raw_header_dump(char *buffer, uint16 seq) const {
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
-	
+
 	buffer += sprintf(buffer, "[EmuOpCode 0x%04x Size=%u]\n", emu_opcode, size);
 }
 
@@ -68,7 +68,7 @@ void EQPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 	}
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
-	
+
 	fprintf(to, "[EmuOpCode 0x%04x Size=%lu]\n",emu_opcode,(unsigned long)size);
 }
 
@@ -76,7 +76,7 @@ void EQProtocolPacket::build_raw_header_dump(char *buffer, uint16 seq) const
 {
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
-	
+
 	buffer += sprintf(buffer, "[ProtoOpCode 0x%04x Size=%u]\n",opcode,size);
 }
 
@@ -102,7 +102,7 @@ void EQProtocolPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 	}
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
-	
+
 	fprintf(to, "[ProtoOpCode 0x%04x Size=%lu]\n",opcode,(unsigned long)size);
 }
 
@@ -110,7 +110,7 @@ void EQApplicationPacket::build_raw_header_dump(char *buffer, uint16 seq) const
 {
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
-	
+
 #ifdef STATIC_OPCODE
 	buffer += sprintf(buffer, "[OpCode 0x%04x Size=%u]\n", emu_opcode,size);
 #else
@@ -144,7 +144,7 @@ void EQApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 	}
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
-	
+
 #ifdef STATIC_OPCODE
 	fprintf(to, "[OpCode 0x%04x Size=%u]\n", emu_opcode,size);
 #else
@@ -156,7 +156,7 @@ void EQRawApplicationPacket::build_raw_header_dump(char *buffer, uint16 seq) con
 {
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
-	
+
 #ifdef STATIC_OPCODE
 	buffer += sprintf(buffer, "[OpCode 0x%04x (0x%04x) Size=%u]\n", emu_opcode, opcode,size);
 #else
@@ -190,7 +190,7 @@ void EQRawApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 	}
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
-	
+
 #ifdef STATIC_OPCODE
 	fprintf(to, "[OpCode 0x%04x (0x%04x) Size=%u]\n", emu_opcode, opcode,size);
 #else
@@ -421,7 +421,7 @@ void EQProtocolPacket::ChatDecode(unsigned char *buffer, int size, int DecodeKey
 		{
 			test[i]=buffer[i]^KC;
 		}
-		memcpy(buffer,test,size);	
+		memcpy(buffer,test,size);
 		free(test);
 	}
 }
@@ -445,7 +445,7 @@ void EQProtocolPacket::ChatEncode(unsigned char *buffer, int size, int EncodeKey
 		{
 			test[i]=buffer[i]^KC;
 		}
-		memcpy(buffer,test,size);	
+		memcpy(buffer,test,size);
 		free(test);
 	}
 }

@@ -145,7 +145,7 @@ bool EQTime::saveFile(const char *filename)
 		return false;
 	}
 	//Enable for debugging
-	//cout << "SAVE: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl; 
+	//cout << "SAVE: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl;
 	of << EQT_VERSION << endl;
 	of << (long)eqTime.start_eqtime.day << endl;
 	of << (long)eqTime.start_eqtime.hour << endl;
@@ -182,7 +182,7 @@ bool EQTime::loadFile(const char *filename)
 	//in >> eqTime.start_eqtime.hour;
 	in >> in_data;
 	eqTime.start_eqtime.hour = in_data;
-	in.ignore(80, '\n');	
+	in.ignore(80, '\n');
 	//in >> eqTime.start_eqtime.minute;
 	in >> in_data;
 	in.ignore(80, '\n');
@@ -195,7 +195,7 @@ bool EQTime::loadFile(const char *filename)
 	in.ignore(80, '\n');
 	in >> eqTime.start_realtime;
 	//Enable for debugging...
-	//cout << "LOAD: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl; 
+	//cout << "LOAD: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl;
 	in.close();
 	return true;
 }
@@ -228,7 +228,7 @@ bool EQTime::IsTimeBefore(TimeOfDay_Struct *base, TimeOfDay_Struct *test) {
 
 void EQTime::AddMinutes(uint32 minutes, TimeOfDay_Struct *to) {
 	uint32 cur;
-	
+
 	//minutes start at 0, everything else starts at 1
 	cur = to->minute;
 	cur += minutes;

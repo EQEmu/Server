@@ -19,7 +19,7 @@
 #define EQEMU_OPTIONS_H
 
 /**
- * Collects options on one object, because having a bunch of global variables floating around is 
+ * Collects options on one object, because having a bunch of global variables floating around is
  * really ugly and just a little dangerous.
  */
 class Options
@@ -28,13 +28,13 @@ public:
 	/**
 	 * Constructor, sets the default options.
 	 */
-	Options() : 
-	    allow_unregistered(true), 
-		trace(false), 
-		dump_in_packets(false), 
-		dump_out_packets(false), 
-		encryption_mode(5), 
-		local_network("127.0.0.1"), 
+	Options() :
+	    allow_unregistered(true),
+		trace(false),
+		dump_in_packets(false),
+		dump_out_packets(false),
+		encryption_mode(5),
+		local_network("127.0.0.1"),
 		reject_duplicate_servers(false) { }
 
 	/**

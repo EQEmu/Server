@@ -32,9 +32,9 @@ class NPC;
 class Spawn2
 {
 public:
-	Spawn2(uint32 spawn2_id, uint32 spawngroup_id, 
-		float x, float y, float z, float heading, 
-		uint32 respawn, uint32 variance, 
+	Spawn2(uint32 spawn2_id, uint32 spawngroup_id,
+		float x, float y, float z, float heading,
+		uint32 respawn, uint32 variance,
 		uint32 timeleft = 0, uint32 grid = 0,
 		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding);
 	~Spawn2();
@@ -107,9 +107,9 @@ public:
 							//a base for the signal ID sent. e.g.
 							// value 12 sends signal id 2
 	} OnChange;
-	
+
 	SpawnCondition();
-	
+
 	uint16		condition_id;
 	int16		value;
 	OnChange 	on_change;
@@ -124,17 +124,17 @@ public:
 		ActionMultiply = 3,
 		ActionDivide = 4
 	} Action;
-	
+
 	SpawnEvent();
-	
+
 	uint32	id;
 	uint16	condition_id;
 	string	zone_name;
-	
+
 	bool	enabled;
 	Action	action;
 	int16	argument;
-	
+
 	uint32	period;	//eq minutes (3 seconds) between events
 	TimeOfDay_Struct next;	//next time this event triggers
 };
@@ -142,26 +142,26 @@ public:
 class SpawnConditionManager {
 public:
 	SpawnConditionManager();
-	
+
 	void Process();
 	bool LoadSpawnConditions(const char* zone_name, uint32 instance_id);
-	
+
 	int16 GetCondition(const char *zone_short, uint32 instance_id, uint16 condition_id);
 	void SetCondition(const char *zone_short, uint32 instance_id, uint16 condition_id, int16 new_value, bool world_update = false);
 	void ToggleEvent(uint32 event_id, bool enabled, bool reset_base);
 	bool Check(uint16 condition, int16 min_value);
 	void ReloadEvent(uint32 event_id);
-	
+
 protected:
 	map<uint16, SpawnCondition> spawn_conditions;
 	vector<SpawnEvent> spawn_events;
-	
+
 	void ExecEvent(SpawnEvent &e, bool send_update);
 	void UpdateDBEvent(SpawnEvent &e);
 	bool LoadDBEvent(uint32 event_id, SpawnEvent &e, string &zone_name);
 	void UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value);
 	void FindNearestEvent();
-	
+
 	Timer minute_timer;
 	TimeOfDay_Struct next_event;
 };

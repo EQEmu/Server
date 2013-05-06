@@ -230,7 +230,7 @@ bool Console::Process() {
 		if(tcpc->GetMode() == EmuTCPConnection::modeConsole)
 			tcpc->Send((const uchar*) "Username: ", strlen("Username: "));
 	}
-	
+
 	if (timeout_timer.Check()) {
 		SendMessage(1, 0);
 		SendMessage(1, "Timeout, disconnecting...");
@@ -239,7 +239,7 @@ bool Console::Process() {
 		_log(WORLD__CONSOLE,"TCP connection timeout from %s:%d",inet_ntoa(in),GetPort());
 		return false;
 	}
-	
+
 	if (tcpc->GetMode() == EmuTCPConnection::modePacket) {
 		struct in_addr	in;
 		in.s_addr = GetIP();
@@ -498,7 +498,7 @@ void Console::ProcessCommand(const char* command) {
 					else if (database.SetLocalPassword(tmpid, sep.arg[2]))
 						SendMessage(1, "Password changed.");
 					else
-						SendMessage(1, "Error changing password."); 
+						SendMessage(1, "Error changing password.");
 				}
 			}
 			else if (strcasecmp(sep.arg[0], "uptime") == 0) {
@@ -612,7 +612,7 @@ void Console::ProcessCommand(const char* command) {
 // SCORPIOUS2K - reversed parameter order for flag
 				if(sep.arg[2][0]==0 || !sep.IsNumber(1))
 					SendMessage(1, "Usage: flag [status] [accountname]");
-				else 
+				else
 				{
 					if (atoi(sep.arg[1]) > this->Admin())
 						SendMessage(1, "You cannot set people's status to higher than your own");

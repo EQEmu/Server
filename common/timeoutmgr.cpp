@@ -54,7 +54,7 @@ void TimeoutManager::CheckTimeouts() {
 void TimeoutManager::AddMember(Timeoutable *who) {
 	if(who == nullptr)
 		return;
-	
+
 	DeleteMember(who);	//just in case... prolly not needed.
 	members.push_back(who);
 #ifdef TIMEOUT_DEBUG

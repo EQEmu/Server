@@ -667,7 +667,7 @@ void QuestManager::sfollow() {
 void QuestManager::changedeity(int diety_id) {
 	//Changes the deity.
 	if(initiator)
-	{	
+	{
 		if(initiator->IsClient())
 		{
 			initiator->SetDeity(diety_id);
@@ -820,7 +820,7 @@ void QuestManager::permagender(int gender_id) {
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	uint16 book_slot, count;
 	uint16 curspell;
-      
+
 	uint16 Char_ID = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
 	bool SpellGlobalCheckResult = 0;
@@ -861,11 +861,11 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	uint16 count;
 	uint16 curspell;
-	
+
 	uint16 Char_ID = initiator->CharacterID();
 	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
 	bool SpellGlobalCheckResult = 0;
-	
+
 	for(curspell = 0, count = 0; curspell < SPDAT_RECORDS; curspell++)
 	{
 		if
@@ -937,7 +937,7 @@ void QuestManager::givecash(int copper, int silver, int gold, int platinum) {
 				tmp = "You receive ";
 			else
 				tmp += ",";
-			
+
 			tmp += itoa(gold);
 			tmp += " gold";
 		}
@@ -957,7 +957,7 @@ void QuestManager::givecash(int copper, int silver, int gold, int platinum) {
 				tmp = "You receive ";
 			else
 				tmp += ",";
-			
+
 			tmp += itoa(copper);
 			tmp += " copper";
 		}
@@ -1122,7 +1122,7 @@ void QuestManager::setguild(uint32 new_guild_id, uint8 new_rank) {
 }
 
 void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
-	uint32 cid = database.GetCharacterID(leader); 
+	uint32 cid = database.GetCharacterID(leader);
 	char hString[250];
 			if (cid == 0) {
 				worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Guild Creation: Guild leader not found.");
@@ -1134,7 +1134,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 				sprintf(hString, "Guild Creation: Error: %s already is the leader of DB# %i '%s'.", leader, tmp, guild_mgr.GetGuildName(tmp));
 				worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
 			}
-			else {		
+			else {
 				uint32 gid = guild_mgr.CreateGuild(guild_name, cid);
 				if (gid == GUILD_NONE)
 					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Guild Creation: Guild creation failed");
@@ -1142,9 +1142,9 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 					sprintf(hString, "Guild Creation: Guild created: Leader: %i, number %i: %s", cid, gid, leader);
 					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
 					if(!guild_mgr.SetGuild(cid, gid, GUILD_LEADER))
-						worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Unable to set guild leader's guild in the database. Your going to have to run #guild set");				
+						worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Unable to set guild leader's guild in the database. Your going to have to run #guild set");
 				}
-				
+
 			}
 }
 
@@ -1671,11 +1671,11 @@ uint32 QuestManager::getplayerburriedcorpsecount(uint32 char_id) {
 	return Result;
 }
 
-bool QuestManager::buryplayercorpse(uint32 char_id) 
+bool QuestManager::buryplayercorpse(uint32 char_id)
 {
 	bool Result = false;
 
-	if(char_id > 0) 
+	if(char_id > 0)
 	{
 		uint32 PlayerCorpse = database.GetFirstCorpseID(char_id);
 		if(PlayerCorpse > 0)
@@ -2016,7 +2016,7 @@ int QuestManager::gettaskactivitydonecount(int task, int activity) {
 		return initiator->GetTaskActivityDoneCountFromTaskID(task, activity);
 
 	return 0; //improper args
-	
+
 }
 void QuestManager::updatetaskactivity(int task, int activity, int count) {
 

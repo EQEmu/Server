@@ -74,7 +74,7 @@ typedef const char Const_char;	//for perl XS
 	#define strncasecmp	_strnicmp
 	#define strcasecmp  _stricmp
 	typedef void ThreadReturnType;
-	#define THREAD_RETURN(x) _endthread(); return; 
+	#define THREAD_RETURN(x) _endthread(); return;
 #else
 	typedef void* ThreadReturnType;
 	#define THREAD_RETURN(x) return(x);

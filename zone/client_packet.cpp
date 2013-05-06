@@ -4824,7 +4824,7 @@ void Client::Handle_OP_InstillDoubt(const EQApplicationPacket *app)
 void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_RezzAnswer, app, Resurrect_Struct);
-	
+
 	const Resurrect_Struct* ra = (const Resurrect_Struct*) app->pBuffer;
 
 	_log(SPELLS__REZ, "Received OP_RezzAnswer from client. Pendingrezzexp is %i, action is %s",
@@ -6742,7 +6742,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 						memberToDisband->CastToMerc()->Suspend();
 					}
 				}
-				else {   
+				else {
 					// ...but other members can only remove themselves
 					group->DelMember(this,false);
 
@@ -13774,7 +13774,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 			std::list<MercStanceInfo> mercStanceList = zone->merc_stance_list[merc->GetMercTemplateID()];
 			list<MercStanceInfo>::iterator iter = mercStanceList.begin();
 			while(iter != mercStanceList.end()) {
-				numStances++;	
+				numStances++;
 				iter++;
 			}
 

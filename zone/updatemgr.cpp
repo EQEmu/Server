@@ -27,7 +27,7 @@
 //these values are pulled out of my ass, should be tuned some day
 const float UpdateManager::level_distances2[UPDATE_LEVELS]
 	= { 50*50, 250*250, 500*500, 800*800 };
-	
+
 //delay between sending packets in each level, in ms
 //its best if they are all multiples of UPDATE_RESOLUTION
 //these values are pulled out of my ass, should be tuned some day
@@ -45,14 +45,14 @@ const uint32 UpdateManager::level_timers[UPDATE_LEVELS+1]
 	opcodes contain the same info at different times, and will prefer
 	to send only the most recent packet. If this is bad, then this
 	thing needs a redesign.
-	
+
 */
 
 //build a unique ID based on opcode and mob id..
 #define MakeUpdateID(mob, app) (((mob->GetID())<<12) | (app->GetOpcode()&0xFFF))
 
 UpdateManager::UpdateManager(EQStream *c)
- : limiter(UPDATE_RESOLUTION)   
+ : limiter(UPDATE_RESOLUTION)
 {
 	net = c;
 	int r;
@@ -150,7 +150,7 @@ if(level > 0)
 	}
 	}
 }*/
-	
+
 	UMMap::iterator cur,end;
 	UMMap *curm;
 	UMMap *om = levels + level;
@@ -158,7 +158,7 @@ if(level > 0)
 	end = om->end();
 	uint32 key;
 	int r;
-	
+
 	while(cur != end) {
 		key = cur->first;
 		//relies on fast queue setting .app to null if it eats it
@@ -167,7 +167,7 @@ if(level > 0)
 //EQApplicationPacket::PacketUsed(&cur->second.app);
 		cur++;
 		om->erase(key);
-		
+
 		//need to clear our any updates in slower levels
 		//so mobs dont jump backwards from old updates
 		curm = om + 1;

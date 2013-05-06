@@ -37,7 +37,7 @@ typedef const char Const_char;
 #endif
 
 #ifdef THIS	 /* this macro seems to leak out on some systems */
-#undef THIS		
+#undef THIS
 #endif
 
 
@@ -413,12 +413,12 @@ XS(XS_EQLConfig_GetZoneDetails)
 		RETVAL = THIS->GetZoneDetails(zone_ref);
 		ST(0) = sv_newmortal();
 		if (RETVAL.begin()!=RETVAL.end())
-		{		
+		{
 				//NOTE: we are leaking the original ST(0) right now
 				HV *hv = newHV();
 				sv_2mortal((SV*)hv);
 				ST(0) = newRV((SV*)hv);
-				
+
 				map<string,string>::const_iterator cur, end;
 				cur = RETVAL.begin();
 				end = RETVAL.end();
@@ -464,7 +464,7 @@ XS(boot_EQLConfig)
 	char file[256];
 	strncpy(file, __FILE__, 256);
 	file[255] = 0;
-	
+
 	if(items != 1)
 		fprintf(stderr, "boot_quest does not take any arguments.");
 	char buf[128];

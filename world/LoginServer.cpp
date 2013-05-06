@@ -96,7 +96,7 @@ bool LoginServer::Process() {
 	if (statusupdate_timer.Check()) {
 		this->SendStatus();
 	}
-    
+
 	/************ Get all packets from packet manager out queue and process them ************/
 	ServerPacket *pack = 0;
 	while((pack = tcpc->PopPacket()))
@@ -112,7 +112,7 @@ bool LoginServer::Process() {
 			break;
 		}
 		case ServerOP_UsertoWorldReq: {
-			UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;	
+			UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;
 			uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
 			int16 status = database.CheckStatus(id);
 
@@ -154,9 +154,9 @@ bool LoginServer::Process() {
 			ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
 
 			if (RuleI(World, AccountSessionLimit) >= 0) {
-				// Enforce the limit on the number of characters on the same account that can be 
+				// Enforce the limit on the number of characters on the same account that can be
 				// online at the same time.
-				client_list.EnforceSessionLimit(slsca->lsaccount_id); 
+				client_list.EnforceSessionLimit(slsca->lsaccount_id);
 			}
 
 			client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);

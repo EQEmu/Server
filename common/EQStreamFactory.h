@@ -23,7 +23,7 @@ class EQStreamFactory : private Timeoutable {
 		Condition WriterWork;
 
 		EQStreamType StreamType;
-		
+
 		queue<EQStream *> NewStreams;
 		Mutex MNewStreams;
 

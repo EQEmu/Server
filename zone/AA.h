@@ -74,7 +74,7 @@ enum {	//leadership AA indexes
 	groupAAFindPathToPC,
 	groupAAHealthOfTargetsTarget,
 	groupAA15,
-	
+
 	raidAAMarkNPC,	//0x10, things assume this is the first raid ability
 	raidAANPCHealth,
 	raidAADelegateMainAssist,
@@ -91,13 +91,13 @@ enum {	//leadership AA indexes
 	raidAAHealthOfTargetsTarget,
 	raidAA14,
 	raidAA15,
-	
+
 	_maxLeaderAA	//=32
 };
 
 #define MAX_LEADERSHIP_TIERS 6
 //each progression should be 0 terminated to mark it as the end.
-static const uint8 LeadershipAACosts[_maxLeaderAA][MAX_LEADERSHIP_TIERS] = { 
+static const uint8 LeadershipAACosts[_maxLeaderAA][MAX_LEADERSHIP_TIERS] = {
 { 1, 2, 3, 0, 0, 0 },	//groupAAMarkNPC
 { 2, 0, 0, 0, 0, 0 },	//groupAANPCHealth
 { 4, 0, 0, 0, 0, 0 },	//groupAADelegateMainAssist - Have seen DelegateMainAssist come in with two different codes.
@@ -114,7 +114,7 @@ static const uint8 LeadershipAACosts[_maxLeaderAA][MAX_LEADERSHIP_TIERS] = {
 { 4, 0, 0, 0, 0, 0 },	//groupAAFindPathToPC
 { 7, 0, 0, 0, 0, 0 },	//groupAAHealthOfTargetsTarget
 { 0, 0, 0, 0, 0, 0 },	//groupAA15
-	
+
 { 5, 6, 7, 0, 0, 0 },	//raidAAMarkNPC	//0x10
 { 4, 0, 0, 0, 0, 0 },	//raidAANPCHealth
 { 6, 7, 8, 0, 0, 0 },	//raidAADelegateMainAssist
@@ -151,16 +151,16 @@ typedef enum {	//AA IDs
 	aaInnateDiseaseProtection = 57,		//works
 	aaInnateRunSpeed = 62,				//works
 	aaInnateRegeneration = 65,			//works
-	aaInnateMetabolism = 68,		
+	aaInnateMetabolism = 68,
 	aaInnateLungCapacity = 71,			//handled by client
 	aaFirstAid = 74,					//untested
 	aaHealingAdept = 77,				//untested
 	aaHealingGift = 80,					//untested
 	aaSpellCastingMastery = 83,			//untested
 	aaSpellCastingReinforcement = 86,	//untested
-	aaMentalClarity = 89,			
+	aaMentalClarity = 89,
 	aaSpellCastingFury = 92,			//untested
-	aaChanellingFocus = 95,			
+	aaChanellingFocus = 95,
 	aaSpellCastingSubtlety = 98,		//untested
 	aaSpellCastingExpertise = 101,		//untested
 	aaSpellCastingDeftness = 104,		//untested
@@ -181,18 +181,18 @@ typedef enum {	//AA IDs
 	aaQuickEvacuation = 137,			//untested
 	aaExodus = 140,						//untested
 	aaQuickDamage = 141,				//untested
-	aaEnhancedRoot = 144,			
+	aaEnhancedRoot = 144,
 	aaDireCharm = 145,					//untested
 	aaCannibalization = 146,			//DB
 	aaQuickBuff = 147,					//untested
-	aaAlchemyMastery = 150,			
+	aaAlchemyMastery = 150,
 	aaRabidBear = 153,					//DB
 	aaManaBurn = 154,					//DB
 	aaImprovedFamiliar = 155,			//untested, implemented?
 	aaNexusGate = 156,					//DB
-	aaUnknown54 = 157,			
-	aaPermanentIllusion = 158,		
-	aaJewelCraftMastery = 159,		
+	aaUnknown54 = 157,
+	aaPermanentIllusion = 158,
+	aaJewelCraftMastery = 159,
 	aaGatherMana = 162,					//DB
 	aaMendCompanion = 163,				//DB
 	aaQuickSummoning = 164,				//untested
@@ -210,11 +210,11 @@ typedef enum {	//AA IDs
 	aaFleshToBone = 186,				//DB
 	aaCallToCorpse = 187,				//DB
 	aaDivineStun = 188,					//DB
-	aaImprovedLayOnHands = 189,		
-	aaSlayUndead = 190,			
+	aaImprovedLayOnHands = 189,
+	aaSlayUndead = 190,
 	aaActOfValor = 193,					//DB
 	aaHolySteed = 194,					//DB
-	aaFearless = 195,			
+	aaFearless = 195,
 	aa2HandBash = 196,					//works. handled by client?
 	aaInnateCamouflage = 197,			//DB
 	aaAmbidexterity = 198,				//untested
@@ -224,24 +224,24 @@ typedef enum {	//AA IDs
 	aaUnholySteed = 206,				//DB
 	aaImprovedHarmTouch = 207,			//untested
 	aaLeechTouch = 208,					//DB
-	aaDeathPeace = 209,			
+	aaDeathPeace = 209,
 	aaSoulAbrasion = 210,				//untested
 	aaInstrumentMastery = 213,			//untested
 	aaUnknown91 = 216,					//not used
 	aaUnknown92 = 219,					//not used
 	aaUnknown93 = 222,					//not used
-	aaJamFest = 225,				
+	aaJamFest = 225,
 	aaUnknown95 = 228,
-	aaSonicCall = 229,			
+	aaSonicCall = 229,
 	aaCriticalMend = 230,				//untested
 	aaPurifyBody = 233,					//DB
-	aaChainCombo = 234,			
+	aaChainCombo = 234,
 	aaRapidFeign = 237,					//works
-	aaReturnKick = 240,			
+	aaReturnKick = 240,
 	aaEscape = 243,						//DB
-	aaPoisonMastery = 244,			
+	aaPoisonMastery = 244,
 	aaDoubleRiposte = 247,				//untested
-	aaQuickHide = 250,			
+	aaQuickHide = 250,
 	aaQuickThrow = 253,					//corrected from dbstr_us.txt
 	aaPurgePoison = 254,				//DB
 	aaFlurry = 255,						//untested
@@ -252,14 +252,14 @@ typedef enum {	//AA IDs
 	aaSpellCastingReinforcementMastery = 266,	//untested
 	aaSpellCastingFuryMastery = 267,	//untested
 	aaExtendedNotes = 270,				//untested
-	aaDragonPunch = 273,			
+	aaDragonPunch = 273,
 	aaStrongRoot = 274,					//DB
 	aaSingingMastery = 275,				//untested
 	aaBodyAndMindRejuvenation = 278,	//added
 	aaPhysicalEnhancement = 279,		//untested
 	aaAdvTrapNegotiation = 280,			//untested
 	aaAcrobatics = 283,					//untested
-	aaScribbleNotes = 286,			
+	aaScribbleNotes = 286,
 	aaChaoticStab = 287,				//untested
 	aaPetDiscipline = 288,				//added
 	aaHobbleofSpirits = 289,			//DB
@@ -315,45 +315,45 @@ typedef enum {	//AA IDs
 	aaSuspendedMinion = 526,			//untested
 	aaSpiritCall = 528,					//DB
 	aaCelestialRenewal = 531,			//DB
-	aaAllegiantFamiliar = 533,		
+	aaAllegiantFamiliar = 533,
 	aaHandofPiety = 534,				//DB
 	aaMithanielsBinding = 537,			//untested
-	aaMendingoftheTranquil = 539,		
-	aaRagingFlurry = 542,			
-	aaGuardianoftheForest = 545,		//DB	
+	aaMendingoftheTranquil = 539,
+	aaRagingFlurry = 542,
+	aaGuardianoftheForest = 545,		//DB
 	aaSpiritoftheWood = 548,			//DB
 	aaBestialFrenzy = 551,				//untested
 	aaHarmoniousAttack = 556,			//untested
-	aaKnightsAdvantage = 561,		
-	aaFerocity = 564,			
-	aaViscidRoots = 567,			
+	aaKnightsAdvantage = 561,
+	aaFerocity = 564,
+	aaViscidRoots = 567,
 	aaSionachiesCrescendo = 568,		//untested
-	aaAyonaesTutelage = 571,		
-	aaFeignedMinion = 574,			
-	aaUnfailingDivinity = 577,		
-	aaAnimationEmpathy = 580,			// Implemented	
-	aaRushtoJudgement = 583,		
-	aaLivingShield = 586,			
+	aaAyonaesTutelage = 571,
+	aaFeignedMinion = 574,
+	aaUnfailingDivinity = 577,
+	aaAnimationEmpathy = 580,			// Implemented
+	aaRushtoJudgement = 583,
+	aaLivingShield = 586,
 	aaConsumptionoftheSoul = 589,		//untested
 	aaBoastfulBellow = 592,				//DB
 	aaFervrentBlessing = 593,			//untested
 	aaTouchoftheWicked = 596,			//untested
-	aaPunishingBlade = 599,			
-	aaSpeedoftheKnight = 602,		
-	aaShroudofStealth = 605,		
-	aaNimbleEvasion = 606,			
-	aaTechniqueofMasterWu = 611,		
+	aaPunishingBlade = 599,
+	aaSpeedoftheKnight = 602,
+	aaShroudofStealth = 605,
+	aaNimbleEvasion = 606,
+	aaTechniqueofMasterWu = 611,
 	aaHostoftheElements = 616,			//DB
 	aaCallofXuzl = 619,					//DB
-	aaHastenedStealth = 622,		
-	aaIngenuity = 625,			
-	aaFleetofFoot = 628,			
-	aaFadingMemories = 630,			
-	aaTacticalMastery = 631,		
-	aaTheftofLife = 634,			
+	aaHastenedStealth = 622,
+	aaIngenuity = 625,
+	aaFleetofFoot = 628,
+	aaFadingMemories = 630,
+	aaTacticalMastery = 631,
+	aaTheftofLife = 634,
 	aaFuryofMagic = 637,
 	aaFuryofMagicMastery2 = 640,		//whats the difference?
-	aaProjectIllusion = 643,		
+	aaProjectIllusion = 643,
 	aaHeadshot = 644,					//added
 	aaEntrap = 645,						//DB
 	aaUnholyTouch = 646,				//untested
@@ -422,7 +422,7 @@ typedef enum {	//AA IDs
 	aaImmobilizingBash = 852,
 	aaViciousSmash = 855,
 	aaRadiantCure2 = 860,				//whats the difference?
-	aaPurification = 863,			
+	aaPurification = 863,
 	aaPrecisionofthePathfinder = 864,
 	aaCoatofThistles = 867,
 	aaFlamingArrows = 872,				//untested
@@ -578,7 +578,7 @@ typedef enum {	//AA IDs
 	aaCripplingStrike2 = 1352,			//whats the difference?
 	aaStunningKick2 = 1353,				//whats the difference?
 	aaEyeGouge2 = 1358,					//whats the difference?
-	
+
 	//Dragons of Norrath
 	//good info here: http://www.eqthieves.com/exp-don-progression.htm and here: http://everquest.allakhazam.com/db/guides.html?guide=811
 	aaGiftoftheDarkReign = 1361,		//from dbstr_us.txt
@@ -591,8 +591,8 @@ typedef enum {	//AA IDs
 	aaEmbraceoftheKeepers = 1368,		//from dbstr_us.txt
 	aaPoweroftheKeepers = 1369,			//from dbstr_us.txt
 	aaSanctityoftheKeepers = 1370,		//from dbstr_us.txt
-	
-	//Veteran AAs	
+
+	//Veteran AAs
 	aaLessonoftheDevoted = 1371,		//from dbstr_us.txt
 	aaInfusionoftheFaithful = 1372,		//from dbstr_us.txt
 	aaChaoticJester = 1373,				//from dbstr_us.txt
@@ -1076,7 +1076,7 @@ typedef enum {	//AA IDs
 	aaEchoingCries                         =1155,
 	aaViciousFrenzy                        =1158,
 	aaCrazedOnslaught                      =1163,
-	aaFrenziedDefense2					   =1166,//implemented as bonus		
+	aaFrenziedDefense2					   =1166,//implemented as bonus
 	aaOverwhelmingAttack                   =1172,
 	aaFuriousRage                          =1175,
 	aaBloodPact                            =1178,
@@ -1500,7 +1500,7 @@ typedef enum {	//AA IDs
 	aaMassEnchantTemporite                 =7740,
 
 	aaLayonHandsRank16                     =7866, //Duplicate ID with aaExtendedAstralProjection!
-	
+
 	aaHarmTouch                            =7800,//First 10 AA cost 0 per rank
 	aaHarmToch2							   =7810,//Next 6+ AA cost 3 +1inc per rank
 	aaLayonHands                           =7850,//First 10 AA cost 0 per rank

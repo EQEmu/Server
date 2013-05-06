@@ -116,7 +116,7 @@ extern "C"
 #endif
 
 XS(boot_HateEntry);
-XS(boot_HateEntry) 
+XS(boot_HateEntry)
 {
 	dXSARGS;
 	char file[256];

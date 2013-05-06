@@ -35,10 +35,10 @@ bool SetExtendedProfile(ExtendedProfile_Struct *to, char *old, unsigned int len)
 		memcpy(to, old, sizeof(ExtendedProfile_Struct));
 		return(true);
 	}
-	
+
 	//convert an old block of memory of size old to the new struct
 	//and store the new results in 'to'
-	
+
 	//generic converter that will work as long as the structre
 	//only grows, and nothign gets re-arranged
 	if(len < sizeof(ExtendedProfile_Struct)) {
@@ -46,7 +46,7 @@ bool SetExtendedProfile(ExtendedProfile_Struct *to, char *old, unsigned int len)
 		memcpy(to, old, len);
 		return(true);
 	}
-	
+
 	return(false);
 }
 

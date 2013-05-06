@@ -20,7 +20,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 /*
 
 	General outline of spell casting process
-	
+
 	1.
 		a)	Client clicks a spell bar gem, ability, or item.  client_process.cpp
 		gets the op and calls CastSpell() with all the relevant info including
@@ -117,7 +117,7 @@ void Mob::SpellProcess()
 	{
 		spellend_timer.Disable();
 		delaytimer = false;
-		CastedSpellFinished(casting_spell_id, casting_spell_targetid, casting_spell_slot, 
+		CastedSpellFinished(casting_spell_id, casting_spell_targetid, casting_spell_slot,
 			casting_spell_mana, casting_spell_inventory_slot, casting_spell_resist_adjust);
 	}
 
@@ -126,7 +126,7 @@ void Mob::SpellProcess()
 void NPC::SpellProcess()
 {
 	Mob::SpellProcess();
-	
+
 	if(GetSwarmInfo()){
 		Mob *swp_o = GetSwarmInfo()->GetOwner();
 		if(!swp_o)
@@ -162,17 +162,17 @@ void NPC::SpellProcess()
 // but things like SpellFinished() can run concurrent with a triggered cast
 // to allow procs to work
 bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
-	int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, 
+	int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot,
 	uint32 timer, uint32 timer_duration, uint32 type, int16 *resist_adjust)
 {
 	_ZP(Mob_CastSpell);
-	
+
 	mlog(SPELLS__CASTING, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 		spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
-	
+
 	if(casting_spell_id == spell_id)
 		ZeroCastingVars();
-	
+
 	if
 	(
 		!IsValidSpell(spell_id) ||
@@ -186,7 +186,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		(IsAmnesiad() && IsDiscipline(spell_id))
 	)
 	{
-		mlog(SPELLS__CASTING_ERR, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d, amnesiad? %d", 
+		mlog(SPELLS__CASTING_ERR, "Spell casting canceled: not able to cast now. Valid? %d, casting %d, waiting? %d, spellend? %d, stunned? %d, feared? %d, mezed? %d, silenced? %d, amnesiad? %d",
 			IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced(), IsAmnesiad() );
 		if(IsSilenced() && !IsDiscipline(spell_id))
 			Message_StringID(13, SILENCED_STRING);
@@ -198,7 +198,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
 		return(false);
 	}
-	
+
 	if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()){
 		Message_StringID(13, SPELL_WOULDNT_HOLD);
 		if(IsClient())
@@ -214,7 +214,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		InterruptSpell(173, 0x121, false);
 		return(false);
 	}
-	
+
 	if(IsClient() && GetTarget() && IsHarmonySpell(spell_id))
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++) {
@@ -227,7 +227,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			}
 		}
 	}
-	
+
 	// check for fizzle
 	// note that CheckFizzle itself doesn't let NPCs fizzle,
 	// but this code allows for it.
@@ -235,15 +235,15 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	{
 		int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
 		InterruptSpell(fizzle_msg, 0x121, spell_id);
-		
+
 		uint32 use_mana = ((spells[spell_id].mana) / 4);
 		mlog(SPELLS__CASTING_ERR, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
-		
+
 		// fizzle 1/4 the mana away
 		SetMana(GetMana() - use_mana);
 		return(false);
 	}
-	
+
     if (HasActiveSong() && IsBardSong(spell_id)) {
     	mlog(SPELLS__BARDS, "Casting a new song while singing a song. Killing old song %d.", bardsong);
     	//Note: this does NOT tell the client
@@ -314,12 +314,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 // to repeat a spell for bard songs
 //
 bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
-                    int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, 
+                    int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish,
 					uint32 item_slot, uint32 timer, uint32 timer_duration, uint32 type,
 					int16 resist_adjust)
 {
 	_ZP(Mob_DoCastSpell);
-	
+
 	Mob* pMob = nullptr;
 	int32 orgcasttime;
 	EQApplicationPacket *outapp = nullptr;
@@ -328,13 +328,13 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		InterruptSpell();
 		return(false);
 	}
-	
+
 	const SPDat_Spell_Struct &spell = spells[spell_id];
-	
+
 	mlog(SPELLS__CASTING, "DoCastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item %d",
 		spell.name, spell_id, target_id, slot, cast_time, mana_cost, item_slot==0xFFFFFFFF?999:item_slot);
-	
-	
+
+
 	casting_spell_id = spell_id;
 	casting_spell_slot = slot;
 	casting_spell_inventory_slot = item_slot;
@@ -351,7 +351,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	// if this spell doesn't require a target, or if it's an optional target
 	// and a target wasn't provided, then it's us; unless TGB is on and this
 	// is a TGB compatible spell.
-	if((IsGroupSpell(spell_id) || 
+	if((IsGroupSpell(spell_id) ||
 		spell.targettype == ST_Self ||
 		spell.targettype == ST_AECaster ||
 		spell.targettype == ST_TargetOptional) && target_id == 0)
@@ -365,7 +365,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		cast_time = orgcasttime = spell.cast_time;
 		// if there's a cast time, check if they have a modifier for it
 		if(cast_time) {
-			cast_time = GetActSpellCasttime(spell_id, cast_time);	
+			cast_time = GetActSpellCasttime(spell_id, cast_time);
 		}
 	}
 	else
@@ -394,7 +394,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	if(IsClient() && CastToClient()->CheckAAEffect(aaEffectMassGroupBuff) && spells[spell_id].can_mgb)
 		mana_cost *= 2;
-	
+
 	// mana is checked for clients on the frontend. we need to recheck it for NPCs though
 	// fix: items dont need mana :-/
 	// If you're at full mana, let it cast even if you dont have enough mana
@@ -431,7 +431,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	casting_spell_mana = mana_cost;
 
 	casting_spell_resist_adjust = resist_adjust;
-	
+
 	mlog(SPELLS__CASTING, "Spell %d: Casting time %d (orig %d), mana cost %d", orgcasttime, cast_time, mana_cost);
 
 	// cast time is 0, just finish it right now and be done with it
@@ -444,14 +444,14 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	// ok we know it has a cast time so we can start the timer now
 	spellend_timer.Start(cast_time);
-	
+
 	if (IsAIControlled())
 	{
 		SetRunAnimSpeed(0);
 		if(this != pMob)
 			this->FaceTarget(pMob);
 	}
-	
+
 	// if we got here we didn't fizzle, and are starting our cast
 	if (oSpellWillFinish)
 		*oSpellWillFinish = Timer::GetCurrentTime() + cast_time + 100;
@@ -577,7 +577,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 {
 	// GMs don't fizzle
 	if (GetGM()) return(true);
-	
+
 	uint8 no_fizzle_level = 0;
 
 	//Live AA - Spell Casting Expertise, Mastery of the Past
@@ -585,12 +585,12 @@ bool Client::CheckFizzle(uint16 spell_id)
 
 	if (spells[spell_id].classes[GetClass()-1] < no_fizzle_level)
 		return true;
-	
+
 	//is there any sort of focus that affects fizzling?
-	
+
 	int par_skill;
 	int act_skill;
-	
+
 	par_skill = spells[spell_id].classes[GetClass()-1] * 5 - 10;//IIRC even if you are lagging behind the skill levels you don't fizzle much
 	if (par_skill > 235)
 		par_skill = 235;
@@ -599,7 +599,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 
 	act_skill = GetSkill(spells[spell_id].skill);
 	act_skill += GetLevel(); // maximum of whatever the client can cheat
-	
+
 	//spell specialization
 	float specialize = GetSpecializeSkillValue(spell_id);
 	if(specialize > 0) {
@@ -620,7 +620,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 			specialize = 0.0f;
 		}
 	}
-	
+
 	// == 0 --> on par
 	// > 0  --> skill is lower, higher chance of fizzle
 	// < 0  --> skill is better, lower chance of fizzle
@@ -647,19 +647,19 @@ bool Client::CheckFizzle(uint16 spell_id)
 
 	// always at least 1% chance to fail or 5% to succeed
 	fizzlechance = fizzlechance < 1 ? 1 : (fizzlechance > 95 ? 95 : fizzlechance);
-	
+
 	/*
 	if(IsBardSong(spell_id))
 	{
 		//This was a channel chance modifier - no evidence for fizzle reduction
-		fizzlechance -= GetAA(aaInternalMetronome) * 1.5f; 
+		fizzlechance -= GetAA(aaInternalMetronome) * 1.5f;
 	}
 	*/
 
 	float fizzle_roll = MakeRandomFloat(0, 100);
 
 	mlog(SPELLS__CASTING, "Check Fizzle %s  spell %d  fizzlechance: %0.2f%%   diff: %0.2f  roll: %0.2f", GetName(), spell_id, fizzlechance, diff, fizzle_roll);
-	
+
 	if(fizzle_roll > fizzlechance)
 		return(true);
 	return(false);
@@ -708,7 +708,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	if(casting_spell_id && IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
 	}
-    
+
     if(casting_spell_type == 1 && IsClient()) { //Rest AA Timer on failed cast
         CastToClient()->SendAATimer(casting_spell_timer - pTimerAAStart, 0, 0xFFFFFF);
         CastToClient()->Message_StringID(15,ABILITY_FAILED);
@@ -785,13 +785,13 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 // NOTE: do not put range checking, etc into this function.  this should
 // just check timed spell specific things before passing off to SpellFinished
 // which figures out proper targets etc
-void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot, 
+void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 							  uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
 {
 	_ZP(Mob_CastedSpellFinished);
-	
+
 	bool IsFromItem = false;
-	
+
 	if(IsClient() && slot != USE_ITEM_SPELL_SLOT && slot != POTION_BELT_SPELL_SLOT && spells[spell_id].recast_time > 1000) { // 10 is item
 		if(!CastToClient()->GetPTimers().Expired(&database, pTimerSpellStart + spell_id, false)) {
 			//should we issue a  message or send them a spell gem packet?
@@ -816,7 +816,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			}
 		}
 	}
-	 
+
 	if(!IsValidSpell(spell_id))
 	{
 		mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: invalid spell id", spell_id);
@@ -884,7 +884,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			// modify the chance based on how many times they were hit
 			// but cap it so it's not that large a factor
 			if(attacked_count > 15) attacked_count = 15;
-			
+
 			float channelchance, distance_moved, d_x, d_y, distancemod;
 
 			if(IsClient())
@@ -899,9 +899,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 				// max 93% chance at 252 skill
 				channelchance = 30 + GetSkill(CHANNELING) / 400.0f * 100;
-				channelchance -= attacked_count * 2;			
+				channelchance -= attacked_count * 2;
 				channelchance +=  channelchance * channelbonuses / 100.0f;
-			} 
+			}
 #ifdef BOTS
 			else if(IsBot()) {
 				float channelbonuses = 0.0f;
@@ -913,7 +913,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 				// max 93% chance at 252 skill
 				channelchance = 30 + GetSkill(CHANNELING) / 400.0f * 100;
-				channelchance -= attacked_count * 2;			
+				channelchance -= attacked_count * 2;
 				channelchance +=  channelchance * channelbonuses / 100.0f;
 			}
 #endif //BOTS
@@ -943,7 +943,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 					channelchance = 0;
 				}
 			}
-			
+
 			mlog(SPELLS__CASTING, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(CHANNELING));
 
 			if(MakeRandomFloat(0, 100) > channelchance) {
@@ -985,7 +985,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 					switch (InstComponent) {
 						case -1:
 							continue;		// no instrument required, go to next component
-						
+
 						// percussion songs (13000 = hand drum)
 						case 13000:
 							if(itembonuses.percussionMod == 0) {			// check for the appropriate instrument type
@@ -993,7 +993,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 								c->Message_StringID(13, SONG_NEEDS_DRUM);	// send an error message if missing
 							}
 							break;
-												
+
 						// wind songs (13001 = wooden flute)
 						case 13001:
 							if(itembonuses.windMod == 0) {
@@ -1001,7 +1001,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 								c->Message_StringID(13, SONG_NEEDS_WIND);
 							}
 							break;
-						
+
 						// string songs (13011 = lute)
 						case 13011:
 							if(itembonuses.stringedMod == 0) {
@@ -1009,7 +1009,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 								c->Message_StringID(13, SONG_NEEDS_STRINGS);
 							}
 							break;
-						
+
 						// brass songs (13012 = horn)
 						case 13012:
 							if(itembonuses.brassMod == 0) {
@@ -1017,11 +1017,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 								c->Message_StringID(13, SONG_NEEDS_BRASS);
 							}
 							break;
-						
+
 						default:	// some non-instrument component.  Let it go, but record it in the log
 							mlog(SPELLS__CASTING_ERR, "Something odd happened: Song %d required component %s", spell_id, component);
 					}
-					
+
 					if(!HasInstrument) {	// if the instrument is missing, log it and interrupt the song
 						mlog(SPELLS__CASTING_ERR, "Song %d: Canceled. Missing required instrument %s", spell_id, component);
 						if(c->GetGM())
@@ -1168,7 +1168,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		for (int buffSlot = 0; buffSlot < buff_max; buffSlot++) {
 			if (buffs[buffSlot].spellid == 0 || buffs[buffSlot].spellid >= SPDAT_RECORDS)
 				continue;
-				
+
 			if(spells[buffs[buffSlot].spellid].numhits > 0)
 				CheckHitsRemaining(buffSlot, true);
 		}
@@ -1190,7 +1190,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 	if(DeleteChargeFromSlot >= 0)
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
-	
+
 	//
 	// at this point the spell has successfully been cast
 	//
@@ -1234,11 +1234,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			if(slot < MAX_PP_MEMSPELL)
 			{
 				c->CheckIncreaseSkill(spells[spell_id].skill, nullptr);
-				
+
 				// increased chance of gaining channel skill if you regained concentration
 				c->CheckIncreaseSkill(CHANNELING, nullptr, regain_conc ? 5 : 0);
-				
-				c->CheckSpecializeIncrease(spell_id);	
+
+				c->CheckSpecializeIncrease(spell_id);
 			}
 		}
     }
@@ -1249,25 +1249,25 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	// set the rapid recast timer for next time around
 	delaytimer = true;
 	spellend_timer.Start(400,true);
-	
+
 	mlog(SPELLS__CASTING, "Spell casting of %d is finished.", spell_id);
-	
+
 }
 
 bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction) {
-	
+
 /*
 	The basic types of spells:
-	
+
 	Single target - some might be undead only, self only, etc, but these
 	all affect the target of the caster.
 
 	AE around caster - these affect entities close to the caster, and have
 	no target.
-	
+
 	AE around target - these have a target, and affect the target as well as
 	entities close to the target.
-	
+
 	AE on location - this is a tricky one that is cast on a mob target but
 	has a special AE duration that keeps it recasting every 2.5 sec on the
 	same location.  These work the same as AE around target spells, except
@@ -1285,7 +1285,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 	// during this switch, this variable gets set to one of these things
 	// and that causes the spell to be executed differently
-	
+
 	bodyType target_bt = BT_Humanoid;
 	SpellTargetType targetType = spells[spell_id].targettype;
 	bodyType mob_body = spell_target ? spell_target->GetBodyType() : BT_Humanoid;
@@ -1322,7 +1322,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		// target required for these
 		case ST_Undead: {
 			if(!spell_target || (
-				spell_target->GetBodyType() != BT_SummonedUndead 
+				spell_target->GetBodyType() != BT_SummonedUndead
 				&& spell_target->GetBodyType() != BT_Undead
 				&& spell_target->GetBodyType() != BT_Vampire
 				)
@@ -1336,7 +1336,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			CastAction = SingleTarget;
 			break;
 		}
-		
+
 		case ST_Summoned: {
 			uint8 body_type = spell_target?spell_target->GetBodyType():0;
 			if(!spell_target || (body_type != BT_Summoned && body_type != BT_Summoned2 && body_type != BT_Summoned3))
@@ -1349,7 +1349,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			CastAction = SingleTarget;
 			break;
 		}
-		
+
 		case ST_SummonedPet:
 		{
 			uint8 body_type = spell_target ? spell_target->GetBodyType() : 0;
@@ -1372,7 +1372,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_Dragon: if(target_bt == BT_Humanoid) target_bt = BT_Dragon;
 		case ST_Giant: if(target_bt == BT_Humanoid) target_bt = BT_Giant;
 		case ST_Animal: if(target_bt == BT_Humanoid) target_bt = BT_Animal;
-		
+
 		// check for special case body types (Velious dragons/giants)
 		if(mob_body == BT_RaidGiant) mob_body = BT_Giant;
 		if(mob_body == BT_VeliousDragon) mob_body = BT_Dragon;
@@ -1391,7 +1391,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			CastAction = SingleTarget;
 			break;
 		}
-		
+
 		case ST_Tap:
 		case ST_LDoNChest_Cursed:
 		case ST_Target: {
@@ -1495,9 +1495,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_Group:
 		{
 			if(IsClient() && CastToClient()->TGB() && IsTGBCompatibleSpell(spell_id)) {
-				if( (!target) || 
+				if( (!target) ||
 					(target->IsNPC() && !(target->GetOwner() && target->GetOwner()->IsClient())) ||
-					(target->IsCorpse()) )	
+					(target->IsCorpse()) )
 					spell_target = this;
 				else
 					spell_target = target;
@@ -1641,7 +1641,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			Mob *spell_target_tot = spell_target ? spell_target->GetTarget() : nullptr;
 			if(!spell_target_tot)
 				return false;
-			//Verfied from live - Target's Target needs to be in combat range to recieve the effect 
+			//Verfied from live - Target's Target needs to be in combat range to recieve the effect
 			if (!this->CombatRange(spell_target))
 				return false;
 
@@ -1649,7 +1649,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			CastAction = SingleTarget;
 			break;
 		}
-		
+
 		default:
 		{
 			mlog(SPELLS__CASTING_ERR, "I dont know Target Type: %d   Spell: (%d) %s", spells[spell_id].targettype, spell_id, spells[spell_id].name);
@@ -1664,14 +1664,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // only used from CastedSpellFinished, and procs
 // we can't interrupt in this, or anything called from this!
 // if you need to abort the casting, return false
-bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 mana_used, 
+bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 mana_used,
 						uint32 inventory_slot, int16 resist_adjust, bool isproc)
 {
 	_ZP(Mob_SpellFinished);
-	
+
 	//EQApplicationPacket *outapp = nullptr;
 	Mob *ae_center = nullptr;
-	
+
 	if(!IsValidSpell(spell_id))
 		return false;
 
@@ -1705,13 +1705,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				Message(13, "You can't cast this spell here.");
 				return false;
 			}
-			
+
 		}
 	}
 
 	if
 	(
-		this->IsClient() && 
+		this->IsClient() &&
 		(zone->GetZoneID() == 183 || zone->GetZoneID() == 184) && 	// load
 		CastToClient()->Admin() < 80
 	)
@@ -1733,7 +1733,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	CastAction_type CastAction;
 	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction))
 		return(false);
-	
+
 	mlog(SPELLS__CASTING, "Spell %d: target type %d, target %s, AE center %s", spell_id, CastAction, spell_target?spell_target->GetName():"NONE", ae_center?ae_center->GetName():"NONE");
 
 	// if a spell has the AEDuration flag, it becomes an AE on target
@@ -1758,7 +1758,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		Message_StringID(13,CANT_SEE_TARGET);
 		return false;
 	}
-	
+
 	// check to see if target is a caster mob before performing a mana tap
 	if(spell_target && IsManaTapSpell(spell_id)) {
 		if(spell_target->GetCasterClass() == 'N') {
@@ -1766,7 +1766,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			return false;
 		}
 	}
-	
+
 	//range check our target, if we have one and it is not us
 	float range = spells[spell_id].range;
 	if(IsClient() && CastToClient()->TGB() && IsTGBCompatibleSpell(spell_id) && IsGroupSpell(spell_id))
@@ -1859,7 +1859,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				}
 				if(ae_center && ae_center == this && IsBeneficialSpell(spell_id))
 					SpellOnTarget(spell_id, this);
-				
+
 				bool affect_caster = !IsNPC();	//NPC AE spells do not affect the NPC caster
 				entity_list.AESpell(this, ae_center, spell_id, affect_caster, resist_adjust);
 			}
@@ -1921,7 +1921,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 						//pet too
 						if (GetPet() && HasPetAffinity() && !GetPet()->IsCharmed())
 							SpellOnTarget(spell_id, GetPet());
-	#endif					
+	#endif
 					}
 
 					SpellOnTarget(spell_id, spell_target);
@@ -1948,16 +1948,16 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		{
 			float angle_start = spells[spell_id].directional_start + (GetHeading() * 360.0f / 256.0f);
 			float angle_end = spells[spell_id].directional_end + (GetHeading() * 360.0f / 256.0f);
-			
+
 			while(angle_start > 360.0f)
 				angle_start -= 360.0f;
-			
+
 			while(angle_end > 360.0f)
 				angle_end -= 360.0f;
 
 			list<Mob*> targets_in_range;
 			list<Mob*>::iterator iter;
-			
+
 			entity_list.GetTargetsForConeArea(this, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
 			iter = targets_in_range.begin();
 			while(iter != targets_in_range.end())
@@ -1965,7 +1965,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				float heading_to_target = (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
 				while(heading_to_target < 0.0f)
 					heading_to_target += 360.0f;
-				
+
 				while(heading_to_target > 360.0f)
 					heading_to_target -= 360.0f;
 
@@ -1993,7 +1993,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	}
 
 	DoAnim(spells[spell_id].CastingAnim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
-	
+
 	// Set and send the nimbus effect if this spell has one
 	int NimbusEffect = GetNimbusEffect(spell_id);
 	if(NimbusEffect) {
@@ -2010,7 +2010,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		if (!DoHPToManaCovert(mana_used))
 			SetMana(GetMana() - mana_used);
 	}
-	
+
 	//set our reuse timer on long ass reuse_time spells...
 	if(IsClient())
 	{
@@ -2045,21 +2045,21 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			CastToClient()->GetPTimers().Start((pTimerItemStart + itm->GetItem()->RecastType), itm->GetItem()->RecastDelay);
 		}
 	}
-	
+
 	if(IsNPC())
 		CastToNPC()->AI_Event_SpellCastFinished(true, slot);
 
-	return true;	
+	return true;
 }
 
 /*
  * handle bard song pulses...
- * 
+ *
  * we make several assumptions that SpellFinished does not:
  *   - there are no AEDuration (beacon) bard songs
  *   - there are no recourse spells on bard songs
  *   - there is no long recast delay on bard songs
- * 
+ *
  * return false to stop the song
  */
 bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
@@ -2068,7 +2068,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		mlog(SPELLS__BARDS, "Bard Song Pulse %d: Supposidly cast from an item. Killing song.", spell_id);
 		return(false);
 	}
-	
+
 	//determine the type of spell target we have
 	Mob *ae_center = nullptr;
 	CastAction_type CastAction;
@@ -2076,12 +2076,12 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		mlog(SPELLS__BARDS, "Bard Song Pulse %d: was unable to determine target. Stopping.", spell_id);
 		return(false);
 	}
-	
+
 	if(ae_center != nullptr && ae_center->IsBeacon()) {
 		mlog(SPELLS__BARDS, "Bard Song Pulse %d: Unsupported Beacon NPC AE spell", spell_id);
 		return(false);
 	}
-	
+
 	//use mana, if this spell has a mana cost
 	int mana_used = spells[spell_id].mana;
 	if(mana_used > 0) {
@@ -2090,12 +2090,12 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 			mlog(SPELLS__BARDS, "Ran out of mana while singing song %d", spell_id);
 			return(false);
 		}
-		
+
 		mlog(SPELLS__CASTING, "Bard Song Pulse %d: consuming %d mana (have %d)", spell_id, mana_used, GetMana());
 		SetMana(GetMana() - mana_used);
 	}
-	
-	
+
+
 	// check line of sight to target if it's a detrimental spell
 	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target))
 	{
@@ -2103,7 +2103,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		Message_StringID(13, CANT_SEE_TARGET);
 		return(false);
 	}
-	
+
 	//range check our target, if we have one and it is not us
 	float range = 0.00f;
 
@@ -2119,7 +2119,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 			return(false);
 		}
 	}
-	
+
 	//
 	// Switch #2 - execute the spell
 	//
@@ -2142,10 +2142,10 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		{
 			if(IsBeneficialSpell(spell_id))
 				SpellOnTarget(spell_id, this);
-			
+
 			bool affect_caster = !IsNPC();	//NPC AE spells do not affect the NPC caster
 			entity_list.AEBardPulse(this, this, spell_id, affect_caster);
-			break;		
+			break;
 		}
 		case AETarget:
 		{
@@ -2204,7 +2204,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 			break;
 		}
 	}
-	
+
 	//do we need to do this???
 	DoAnim(spells[spell_id].CastingAnim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 	if(IsClient())
@@ -2228,7 +2228,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			buffs[buffs_i].ticsremaining += 3;
 			mlog(SPELLS__BARDS, "Bard Song Pulse %d: extending duration in slot %d to %d tics", spell_id, buffs_i, buffs[buffs_i].ticsremaining);
 		}
-			
+
 		//should we send this buff update to the client... seems like it would
 		//be a lot of traffic for no reason...
 //this may be the wrong packet...
@@ -2245,7 +2245,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			action->level = buffs[buffs_i].casterlevel;
 			action->type = SpellDamageType;
 			entity_list.QueueCloseClients(this, packet, false, 200, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
-			
+
 			action->buff_unknown = 4;
 
 			if(IsEffectInSpell(spell_id, SE_TossUp))
@@ -2263,7 +2263,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 						action->buff_unknown = 0;
 						EQApplicationPacket* outapp_push = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 						PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
-						
+
 						double look_heading = caster->CalculateHeadingToTarget(GetX(), GetY());
 						look_heading /= 256;
 						look_heading *= 360;
@@ -2304,7 +2304,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			{
 				CastToClient()->QueuePacket(packet);
 			}
-			
+
 			EQApplicationPacket *message_packet = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 			CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
 			cd->target = action->target;
@@ -2319,7 +2319,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			}
 			safe_delete(message_packet);
 			safe_delete(packet);
-			
+
 		}
 		//we are done...
 		return;
@@ -2345,10 +2345,10 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 
 	if(!IsValidSpell(spell_id) || (!caster && !target))
 		return 0;
-	
+
 	if(!caster && !target)
 		return 0;
-	
+
 	// if we have at least one, we can make do, we'll just pretend they're the same
 	if(!caster)
 		caster = target;
@@ -2365,9 +2365,9 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
 	// Only need this for clients, since the change was for bard songs, I assume we should keep non bard songs getting +1
 	// However if its bard or not and is mez, charm or fear, we need to add 1 so that client is in sync
-	if(!IsShortDurationBuff(spell_id) || 
-		IsFearSpell(spell_id) || 
-		IsCharmSpell(spell_id) || 
+	if(!IsShortDurationBuff(spell_id) ||
+		IsFearSpell(spell_id) ||
+		IsCharmSpell(spell_id) ||
 		IsMezSpell(spell_id) ||
 		IsBlindSpell(spell_id))
 		res += 1;
@@ -2376,7 +2376,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 
 	mlog(SPELLS__CASTING, "Spell %d: Casting level %d, formula %d, base_duration %d: result %d",
 		spell_id, castlevel, formula, duration, res);
-		
+
 	return(res);
 }
 
@@ -2463,7 +2463,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 {
 	const SPDat_Spell_Struct &sp1 = spells[spellid1];
 	const SPDat_Spell_Struct &sp2 = spells[spellid2];
-	
+
 	int i, effect1, effect2, sp1_value, sp2_value;
 	int blocked_effect, blocked_below_value, blocked_slot;
 	int overwrite_effect, overwrite_below_value, overwrite_slot;
@@ -2496,11 +2496,11 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	case 5249:
 		return (0);
 	}
-	
+
 	/*
 	One of these is a bard song and one isn't and they're both beneficial so they should stack.
 	*/
-	if(IsBardSong(spellid1) != IsBardSong(spellid2)) 
+	if(IsBardSong(spellid1) != IsBardSong(spellid2))
 	{
 		if(!IsDetrimentalSpell(spellid1) && !IsDetrimentalSpell(spellid2))
 		{
@@ -2526,11 +2526,11 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			blocked_effect = sp1.base[i];
 			blocked_slot = sp1.formula[i] - 201;	//they use base 1 for slots, we use base 0
 			blocked_below_value = sp1.max[i];
-			
+
 			if(sp2.effectid[blocked_slot] == blocked_effect)
 			{
 				sp2_value = CalcSpellEffectValue(spellid2, blocked_slot, caster_level2);
-				
+
 				mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d. New spell has value %d on that slot/effect. %s.",
 					sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value, sp2_value, (sp2_value < blocked_below_value)?"Blocked":"Not blocked");
 
@@ -2561,7 +2561,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 				mlog(SPELLS__STACKING, "%s (%d) overwrites existing spell if effect %d on slot %d is below %d. Old spell has value %d on that slot/effect. %s.",
 					sp2.name, spellid2, overwrite_effect, overwrite_slot, overwrite_below_value, sp1_value, (sp1_value < overwrite_below_value)?"Overwriting":"Not overwriting");
-				
+
 				if(sp1_value < overwrite_below_value)
 				{
 					mlog(SPELLS__STACKING, "Overwrite spell because sp1_value < overwrite_below_value");
@@ -2574,7 +2574,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			}
 		}
 	}
-	
+
 	bool sp1_detrimental = IsDetrimentalSpell(spellid1);
 	bool sp2_detrimental = IsDetrimentalSpell(spellid2);
 	bool sp_det_mismatch;
@@ -2583,7 +2583,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		sp_det_mismatch = false;
 	else
 		sp_det_mismatch = true;
-	
+
 	// now compare matching effects
 	// arbitration takes place if 2 spells have the same effect at the same
 	// effect slot, otherwise they're stackable, even if it's the same effect
@@ -2654,7 +2654,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			mlog(SPELLS__STACKING, "The effects are the same but the spell types are not, passing the effect");
 			continue;
 		}
-		
+
 		/*
 		If the spells aren't the same
 		and the effect is a dot we can go ahead and stack it
@@ -2666,7 +2666,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 		sp1_value = CalcSpellEffectValue(spellid1, i, caster_level1);
 		sp2_value = CalcSpellEffectValue(spellid2, i, caster_level2);
-		
+
 		// some spells are hard to compare just on value.  attack speed spells
 		// have a value that's a percentage for instance
 		if
@@ -2679,12 +2679,12 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			sp1_value -= 100;
 			sp2_value -= 100;
 		}
-		
+
 		if(sp1_value < 0)
 			sp1_value = 0 - sp1_value;
 		if(sp2_value < 0)
 			sp2_value = 0 - sp2_value;
-		
+
 		if(sp2_value < sp1_value) {
 			mlog(SPELLS__STACKING, "Spell %s (value %d) is not as good as %s (value %d). Rejecting %s.",
 				sp2.name, sp2_value, sp1.name, sp1_value, sp2.name);
@@ -2697,14 +2697,14 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			sp1.name, sp1_value, sp2.name, sp2_value, sp1.name);
 		will_overwrite = true;
 	}
-	
+
 	//if we get here, then none of the values on the new spell are "worse"
 	//so now we see if this new spell is any better, or if its not related at all
 	if(will_overwrite) {
 		mlog(SPELLS__STACKING, "Stacking code decided that %s should overwrite %s.", sp2.name, sp1.name);
 		return(1);
 	}
-	
+
 	mlog(SPELLS__STACKING, "Stacking code decided that %s is not affected by %s.", sp2.name, sp1.name);
 	return 0;
 }
@@ -2716,16 +2716,16 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 // the level of the mob
 int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_override)
 {
-	
+
 	int buffslot, ret, caster_level, emptyslot = -1;
 	bool will_overwrite = false;
 	vector<int> overwrite_slots;
-	
+
 	if(level_override > 0)
 		caster_level = level_override;
 	else
 		caster_level = caster ? caster->GetCasterLevel(spell_id) : GetCasterLevel(spell_id);
-    
+
 	if(duration == 0)
 	{
 		duration = CalcBuffDuration(caster, this, spell_id);
@@ -2738,7 +2738,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		mlog(SPELLS__BUFFS, "Buff %d failed to add because its duration came back as 0.", spell_id);
 		return -2;	// no duration? this isn't a buff
 	}
-	
+
 	mlog(SPELLS__BUFFS, "Trying to add buff %d cast by %s (cast level %d) with duration %d",
 		spell_id, caster?caster->GetName():"UNKNOWN", caster_level, duration);
 
@@ -2795,7 +2795,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 			}
 		}
 	}
-	
+
 	// we didn't find an empty slot to put it in, and it's not overwriting
 	// anything so there must not be any room left.
  	if(emptyslot == -1 && !will_overwrite)
@@ -2845,7 +2845,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	// now add buff at emptyslot
 	assert(buffs[emptyslot].spellid == SPELL_UNKNOWN);	// sanity check
-	
+
 	buffs[emptyslot].spellid = spell_id;
 	buffs[emptyslot].casterlevel = caster_level;
     if(caster && caster->IsClient()) {
@@ -2866,16 +2866,16 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	{
 		buffs[emptyslot].UpdateClient = true;
 	}
-	else{ 
+	else{
 		if(buffs[emptyslot].ticsremaining > (1+CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration)))
 			buffs[emptyslot].UpdateClient = true;
 	}
-		
+
 	mlog(SPELLS__BUFFS, "Buff %d added to slot %d with caster level %d", spell_id, emptyslot, caster_level);
 	if(IsPet() && GetOwner() && GetOwner()->IsClient()) {
 		SendPetBuffsToClient();
 	}
-	
+
 
 	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
 			   (IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
@@ -2883,7 +2883,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
 		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
- 
+
         if(GetTarget() == this) {
             CastToClient()->QueuePacket(outapp);
         }
@@ -2899,15 +2899,15 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 // used by some MobAI stuff
 // NOT USED BY SPELL CODE
-// note that this should not be used for determining which slot to place a 
+// note that this should not be used for determining which slot to place a
 // buff into
 // returns -1 on stack failure, -2 if all slots full, the slot number if the buff should overwrite another buff, or a free buff slot
 int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 {
 	int i, ret, firstfree = -2;
-	
+
 	mlog(AI__BUFFS, "Checking if buff %d cast at level %d can stack on me.%s", spellid, caster_level, iFailIfOverwrite?" failing if we would overwrite something":"");
-	
+
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++)
 	{
@@ -2935,13 +2935,13 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 			}
 			if(firstfree == -2)
 				firstfree = i;
-		}	
+		}
 		if(ret == -1) {
 			mlog(AI__BUFFS, "Buff %d would conflict with %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
 			return -1;	// stop the spell, can't stack it
 		}
 	}
-	
+
 	mlog(AI__BUFFS, "Reporting that buff %d could successfully be placed into slot %d", spellid, firstfree);
 
 	return firstfree;
@@ -3007,9 +3007,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		return false;
 
 	uint16 caster_level = GetCasterLevel(spell_id);
-	
+
 	mlog(SPELLS__CASTING, "Casting spell %d on %s with effective caster level %d", spell_id, spelltar->GetName(), caster_level);
-	
+
 	// Actual cast action - this causes the caster animation and the particles
 	// around the target
 	// we do this first, that way we get the particles even if the spell
@@ -3041,18 +3041,18 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	}
 
 	// select target
-	if	// Bind Sight line of spells 
+	if	// Bind Sight line of spells
 	(
 		spell_id == 500 || 	// bind sight
 		spell_id == 407 		// cast sight
 	)
-	{ 
-		action->target = GetID(); 
-	} 
+	{
+		action->target = GetID();
+	}
 	else
-	{ 
-		action->target = spelltar->GetID(); 
-	} 
+	{
+		action->target = spelltar->GetID();
+	}
 
 	action->level = caster_level;	// caster level, for animation only
 	action->type = 231;	// 231 means a spell
@@ -3060,7 +3060,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	action->sequence = (uint32) (GetHeading() * 2);	// just some random number
 	action->instrument_mod = GetInstrumentMod(spell_id);
 	action->buff_unknown = 0;
-	
+
 	if(spelltar != this && spelltar->IsClient())	// send to target
 		spelltar->CastToClient()->QueuePacket(action_packet);
 	if(IsClient())	// send to caster
@@ -3077,14 +3077,14 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
        }
 
 	// now check if the spell is allowed to land
-	
+
 	// invuln mobs can't be affected by any spells, good or bad
 	if(spelltar->GetInvul() || spelltar->DivineAura()) {
 		mlog(SPELLS__CASTING_ERR, "Casting spell %d on %s aborted: they are invulnerable.", spell_id, spelltar->GetName());
 		safe_delete(action_packet);
 		return false;
 	}
-	
+
 	//cannot hurt untargetable mobs
 	bodyType bt = spelltar->GetBodyType();
 	if(bt == BT_NoTarget || bt == BT_NoTarget2) {
@@ -3138,7 +3138,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			return false;
 		}
 	}
-	
+
 	if(!(IsClient() && CastToClient()->GetGM()) && !IsHarmonySpell(spell_id))	// GMs can cast on anything
 	{
 		// Beneficial spells check
@@ -3156,7 +3156,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				Client* pClientTarget = 0;
 				Raid* pRaidTarget = 0;
 				Group* pBasicGroupTarget = 0;
-				uint32 nGroupTarget = 0; //raid group 
+				uint32 nGroupTarget = 0; //raid group
 
 				Client* pClientTargetPet = 0;
 				Raid* pRaidTargetPet = 0;
@@ -3171,7 +3171,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				pBasicGroup = entity_list.GetGroupByMob(this);
 				if(pRaid)
 					nGroup = pRaid->GetGroup(pClient) + 1;
-					
+
 				//Target client pointers
 				if(spelltar->IsClient())
 				{
@@ -3245,8 +3245,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 	//check for AE_Undead
 	if(spells[spell_id].targettype == ST_UndeadAE){
-		if(spelltar->GetBodyType() != BT_SummonedUndead && 
-			spelltar->GetBodyType() != BT_Undead && 
+		if(spelltar->GetBodyType() != BT_SummonedUndead &&
+			spelltar->GetBodyType() != BT_Undead &&
 			spelltar->GetBodyType() != BT_Vampire)
 		{
 			return false;
@@ -3274,7 +3274,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		{
 			case 0:
 				break;
-			
+
 			case 1:
 			{
 				if(spells[spell_id].targettype == ST_Target) {
@@ -3295,14 +3295,14 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			}
 			case 3:
 			{
-				if(spells[spell_id].targettype == ST_Target) 
+				if(spells[spell_id].targettype == ST_Target)
 					reflect_chance = 1;
-				
+
 				break;
 			}
 			case 4:
 				reflect_chance = 1;
-			
+
 			default:
 				break;
 		}
@@ -3312,7 +3312,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			return false;
 		}
 	}
-	
+
 	// resist check - every spell can be resisted, beneficial or not
 	// add: ok this isn't true, eqlive's spell data is fucked up, buffs are
 	// not all unresistable, so changing this to only check certain spells
@@ -3443,7 +3443,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 					if (GetPet())
 						SpellOnTarget(recourse_spell, GetPet());
 #endif
-				}	
+				}
 
 			}
 			else
@@ -3456,10 +3456,10 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			spelltar->DamageShield(this, true);
 			spelltar->CheckHitsRemaining(0, false, false, SE_DamageShield);
 		}
-		
+
 	TrySpellTrigger(spelltar, spell_id);
 	TryApplyEffect(spelltar, spell_id);
-	
+
 
 	if(spell_id == 982)	// Cazic Touch, hehe =P
 	{
@@ -3581,9 +3581,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	}
 	safe_delete(action_packet);
 	safe_delete(message_packet);
-	
+
 	mlog(SPELLS__CASTING, "Cast of %d by %s on %s complete successfully.", spell_id, GetName(), spelltar->GetName());
-		
+
 	return true;
 }
 
@@ -3670,7 +3670,7 @@ void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
 		if(buffs[j].spellid != SPELL_UNKNOWN) {
 			if(IsDetrimentalSpell(buffs[j].spellid))
 			{
-				//this is a pretty terrible way to do this but 
+				//this is a pretty terrible way to do this but
 				//there really isn't another way till I rewrite the basics
 				Mob * c = entity_list.GetMob(buffs[j].casterid);
 				if(c && c == caster)
@@ -3684,7 +3684,7 @@ void Mob::BuffFadeBySitModifier()
 {
 	bool r_bonus = false;
 	uint32 buff_count = GetMaxTotalSlots();
-	for(uint32 j = 0; j < buff_count; ++j) 
+	for(uint32 j = 0; j < buff_count; ++j)
 	{
 		if(buffs[j].spellid != SPELL_UNKNOWN)
 		{
@@ -3743,19 +3743,19 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 	if(caster == nullptr)
 		return(false);
-	
-	//TODO: this function loops through the effect list for 
+
+	//TODO: this function loops through the effect list for
 	//this spell like 10 times, this could easily be consolidated
 	//into one loop through with a switch statement.
-	
+
 	mlog(SPELLS__RESISTS, "Checking to see if we are immune to spell %d cast by %s", spell_id, caster->GetName());
-	
+
 	if(!IsValidSpell(spell_id))
 		return true;
-	
+
 	if(IsBeneficialSpell(spell_id) && (caster->GetNPCTypeID()))  //then skip the rest, stop NPCs aggroing each other with buff spells. 2013-03-05
 		return false;
-		
+
 	if(IsMezSpell(spell_id))
 	{
 		if(SpecAttacks[UNMEZABLE]) {
@@ -3910,7 +3910,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	}
 
 	mlog(SPELLS__RESISTS, "No immunities to spell %d found.", spell_id);
-	
+
 	return false;
 }
 
@@ -3935,7 +3935,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	{
 		return 0;
 	}
-	
+
 	if(SpecAttacks[IMMUNE_CASTING_FROM_RANGE])
 	{
 		if(!caster->CombatRange(this))
@@ -3944,7 +3944,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 	}
 
-	if(SpecAttacks[IMMUNE_MAGIC]) 
+	if(SpecAttacks[IMMUNE_MAGIC])
 	{
 		mlog(SPELLS__RESISTS, "We are immune to magic, so we fully resist the spell %d", spell_id);
 		return(0);
@@ -4042,7 +4042,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			{
 				target_resist = temp;
 			}
-		
+
 			temp = GetPR();
 			if(temp < target_resist)
 			{
@@ -4190,7 +4190,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 					partial_modifier -= 5;
 				}
 			}
-			
+
 			if(caster->IsNPC())
 			{
 				if((GetLevel() - caster->GetLevel()) >= 20)
@@ -4217,13 +4217,13 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 int16 Mob::CalcResistChanceBonus()
 {
 	int resistchance = spellbonuses.ResistSpellChance + itembonuses.ResistSpellChance;
-	
-	if(IsClient()) 
+
+	if(IsClient())
 		resistchance += aabonuses.ResistSpellChance;
 
 	if (spellbonuses.ResistSpellChance)
 		CheckHitsRemaining(0, false, false, SE_ResistSpellChance);
-		
+
 	return resistchance;
 }
 
@@ -4237,19 +4237,19 @@ int16 Mob::CalcFearResistChance()
 	}
 	if(spellbonuses.Fearless == true || itembonuses.Fearless == true)
 		resistchance = 100;
-			
+
 	return resistchance;
 }
 
 float Mob::GetAOERange(uint16 spell_id) {
 	float range;
-	
+
 	range = spells[spell_id].aoerange;
 	if(range == 0)	//for TGB spells, they prolly do not have an aoe range
 		range = spells[spell_id].range;
 	if(range == 0)
 		range = 10;	//something....
-	
+
 	if (IsClient()) {
 
 		if(IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
@@ -4257,10 +4257,10 @@ float Mob::GetAOERange(uint16 spell_id) {
 			float song_bonus = aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange;
 			range += range*song_bonus /100.0f;
 		}
-			
+
 		range = CastToClient()->GetActSpellRange(spell_id, range);
 	}
-		
+
 	return(range);
 }
 
@@ -4306,7 +4306,7 @@ void Mob::SendSpellBarDisable()
 {
 	if (!IsClient())
 		return;
-	
+
 	CastToClient()->MemorizeSpell(0, SPELLBAR_UNLOCK, memSpellSpellbar);
 }
 
@@ -4331,12 +4331,12 @@ void Mob::Stun(int duration)
 	//make sure a shorter stun does not overwrite a longer one.
 	if(stunned && stunned_timer.GetRemainingTime() > uint32(duration))
 		return;
-	
+
 	if(casting_spell_id) {
 		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting;
 		if(IsClient())
 			persistent_casting += aabonuses.PersistantCasting;
-		
+
 		if(MakeRandomInt(1,99) > persistent_casting)
 			InterruptSpell();
 	}
@@ -4347,14 +4347,14 @@ void Mob::Stun(int duration)
 		stunned_timer.Start(duration);
 	}
 }
-		
+
 void Mob::UnStun() {
 	if(stunned && stunned_timer.Enabled()) {
 		stunned = false;
 		stunned_timer.Disable();
 	}
 }
-		
+
 // Stuns "this"
 void Client::Stun(int duration)
 {
@@ -4415,7 +4415,7 @@ void Mob::Mesmerize()
 void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 {
 	EQApplicationPacket* outapp;
-	
+
 	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffFade_Struct));
 	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*) outapp->pBuffer;
 
@@ -4446,7 +4446,7 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 #endif
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	
+
 	if(send_message)
 	{
 		const char *fadetext = spells[spell_id].spell_fades;
@@ -4497,7 +4497,7 @@ void Client::UnmemSpell(int slot, bool update_client)
 void Client::UnmemSpellAll(bool update_client)
 {
 	int i;
-	
+
 	for(i = 0; i < MAX_PP_MEMSPELL; i++)
 		if(m_pp.mem_spells[i] != 0xFFFFFFFF)
 			UnmemSpell(i, update_client);
@@ -4615,14 +4615,14 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 			Spell_Global_Name = row[0];
 			Spell_Global_Value = atoi(row[1]);
 
-			mysql_free_result(result); 
+			mysql_free_result(result);
 
 			if (Spell_Global_Name.empty()) {   // If the entry in the spell_globals table has nothing set for the qglobal name
 				return true;
 			}
 			else if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT value FROM quest_globals WHERE charid=%i AND name='%s'", Char_ID, Spell_Global_Name.c_str()), errbuf, &result)) {
 				safe_delete_array(query);
-			   
+
 				if (mysql_num_rows(result) == 1) {
 					row = mysql_fetch_row(result);
 
@@ -4650,7 +4650,7 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 		else {
 			return true;   // Spell ID isn't listed in the spells_global table, so it is not restricted from scribing
 		}
-		mysql_free_result(result); 
+		mysql_free_result(result);
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", Spell_ID, query,  errbuf);
@@ -4663,10 +4663,10 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 //this is one nasty function... FindType and FindSpell are rather complex operations...
 /*void Mob::CheckBuffs() {
 	if (!IsCasting()) {
-		
+
 		//try to summon a pet if we havent yet
 		CheckPet();
-		
+
 		uint8 newtype[15] = { SE_ArmorClass, SE_STR, SE_DEX, SE_AGI, SE_WIS,
                              SE_INT, SE_CHA, SE_AttackSpeed, SE_MovementSpeed,
                              SE_DamageShield, SE_ResistFire, SE_ResistCold,
@@ -5030,9 +5030,9 @@ int16 Mob::GetBuffSlotFromType(uint16 type) {
     return -1;
 }
 
-uint16 Mob::GetSpellIDFromSlot(uint8 slot) 
+uint16 Mob::GetSpellIDFromSlot(uint8 slot)
 {
-	if (buffs[slot].spellid != SPELL_UNKNOWN) 
+	if (buffs[slot].spellid != SPELL_UNKNOWN)
 		return buffs[slot].spellid;
     return 0;
 }
@@ -5047,12 +5047,12 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
                 // adjustments necessary for offensive npc casting behavior
                 if (bOffensive) {
 				    if (spells[buffs[i].spellid].effectid[j] == type) {
-                        int16 value = 
+                        int16 value =
                                 CalcSpellEffectValue_formula(spells[buffs[i].spellid].buffdurationformula,
                                                spells[buffs[i].spellid].base[j],
                                                spells[buffs[i].spellid].max[j],
                                                buffs[i].casterlevel, buffs[i].spellid);
-                        LogFile->write(EQEMuLog::Normal, 
+                        LogFile->write(EQEMuLog::Normal,
                                 "FindType: type = %d; value = %d; threshold = %d",
                                 type, value, threshold);
                         if (value < threshold)
@@ -5116,7 +5116,7 @@ bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id
 {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
-	
+
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
 		if (DefensiveProcs[i].spellID == SPELL_UNKNOWN) {
@@ -5148,7 +5148,7 @@ bool Mob::AddSkillProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
-	
+
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
 		if (SkillProcs[i].spellID == SPELL_UNKNOWN) {
@@ -5179,7 +5179,7 @@ bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
-	
+
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
 		if (RangedProcs[i].spellID == SPELL_UNKNOWN) {
@@ -5329,7 +5329,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	}
 
 	EQApplicationPacket* outapp = nullptr;
-	
+
 	//Create it for a targeting window, else create it for a create buff packet.
 	if(for_target)
 	{
@@ -5410,7 +5410,7 @@ void Mob::UpdateRuneFlags()
 
 					default:
 						break;
-				}					
+				}
 			}
 		}
 	}

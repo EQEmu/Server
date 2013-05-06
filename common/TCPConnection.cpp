@@ -490,7 +490,7 @@ bool TCPConnection::ConnectIP(uint32 in_ip, uint16 in_port, char* errbuf) {
 
 	SetEcho(false);
 	ClearBuffers();
-	
+
 	rIP = in_ip;
 	rPort = in_port;
 	SetState(TCPS_Connected);
@@ -504,7 +504,7 @@ void TCPConnection::ClearBuffers() {
 	LockMutex lock4(&MState);
 	safe_delete_array(recvbuf);
 	safe_delete_array(sendbuf);
-	
+
 	char* line = 0;
 	while ((line = LineOutQueue.pop()))
 		safe_delete_array(line);
@@ -520,7 +520,7 @@ bool TCPConnection::CheckNetActive() {
 	return false;
 }
 
-/* This is always called from an IO thread. Either the server socket's thread, or a 
+/* This is always called from an IO thread. Either the server socket's thread, or a
  * special thread we create when we make an outbound connection. */
 bool TCPConnection::Process() {
 	char errbuf[TCPConnection_ErrorBufferSize];
@@ -535,7 +535,7 @@ bool TCPConnection::Process() {
 			}
 		}
 		return(true);
-	
+
 	case TCPS_Connected:
 		// only receive data in the connected state, no others...
 		if (!RecvData(errbuf)) {
@@ -546,7 +546,7 @@ bool TCPConnection::Process() {
 		}
 		/* we break to do the send */
 		break;
-	
+
 	case TCPS_Disconnecting: {
 		//waiting for any sending data to go out...
 		MSendQueue.lock();
@@ -562,7 +562,7 @@ bool TCPConnection::Process() {
 		MSendQueue.unlock();
 	}
 		/* Fallthrough */
-	
+
 	case TCPS_Disconnected:
 		FinishDisconnect();
 		MRunLoop.lock();
@@ -570,19 +570,19 @@ bool TCPConnection::Process() {
 		MRunLoop.unlock();
 //		SetState(TCPS_Ready);	//reset the state in case they want to use it again...
 		return(false);
-	
+
 	case TCPS_Closing:
 		//I dont understand this state...
-	
+
 	case TCPS_Error:
 		MRunLoop.lock();
 		pRunLoop = false;
 		MRunLoop.unlock();
 		return(false);
 	}
-	
+
 	/* we get here in connected or disconnecting with more data to send */
-	
+
 	bool sent_something = false;
 	if (!SendData(sent_something, errbuf)) {
 	    struct in_addr	in;
@@ -590,7 +590,7 @@ bool TCPConnection::Process() {
 		cout << inet_ntoa(in) << ":" << GetrPort() << ": " << errbuf << endl;
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -770,15 +770,15 @@ bool TCPConnection::ProcessReceivedData(char* errbuf) {
 					i = -1;
 					m_previousLineEnd = true;
 				}
-				
-				
+
+
 				if(line != nullptr) {
 					bool finish_proc = false;
 					finish_proc = LineOutQueuePush(line);
 					if(finish_proc)
 						return(true);	//break early as requested by LineOutQueuePush
 				}
-				
+
 				break;
 			}
 			case 8: // backspace
@@ -877,13 +877,13 @@ bool TCPConnection::SendData(bool &sent_something, char* errbuf) {
 					snprintf(errbuf, TCPConnection_ErrorBufferSize, "TCPConnection::SendData(): send(): Errorcode: %s", strerror(errno));
 #endif
 				}
-				
+
 				//if we get an error while disconnecting, just jump to disconnected
 				MState.lock();
 				if(pState == TCPS_Disconnecting)
 					pState = TCPS_Disconnected;
 				MState.unlock();
-				
+
 				return false;
 			}
 		}
@@ -908,7 +908,7 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 		if (!tcpc->ConnectReady()) {
 			_CP(TCPConnectionLoop);
 			if (!tcpc->Process()) {
-				//the processing loop has detecting an error.. 
+				//the processing loop has detecting an error..
 				//we want to drop the link immediately, so we clear buffers too.
 				tcpc->ClearBuffers();
 				tcpc->Disconnect();
@@ -927,11 +927,11 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 			Sleep(10);	//nothing to do.
 	}
 	tcpc->MLoopRunning.unlock();
-	
+
 #ifndef WIN32
 	_log(COMMON__THREADS, "Ending TCPConnectionLoop with thread ID %d", pthread_self());
 #endif
-	
+
 	THREAD_RETURN(nullptr);
 }
 

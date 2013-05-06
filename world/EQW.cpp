@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -61,10 +61,10 @@ extern volatile bool	RunLoops;
 EQW EQW::s_EQW;
 
 //IO Capture routine
-XS(XS_EQWIO_PRINT); /* prototype to pass -Wmissing-prototypes */ 
-XS(XS_EQWIO_PRINT) 
+XS(XS_EQWIO_PRINT); /* prototype to pass -Wmissing-prototypes */
+XS(XS_EQWIO_PRINT)
 {
-    dXSARGS; 
+    dXSARGS;
     if (items < 2)
     	return;
 
@@ -73,8 +73,8 @@ XS(XS_EQWIO_PRINT)
 		char *str = SvPV_nolen(ST(r));
 		EQW::Singleton()->AppendOutput(str);
  	}
- 	
-    XSRETURN_EMPTY; 
+
+    XSRETURN_EMPTY;
 }
 
 EQW::EQW() {
@@ -120,29 +120,29 @@ int EQW::CountZones() {
 //returns an array of zone_refs (opaque)
 vector<string> EQW::ListBootedZones() {
 	vector<string> res;
-	
+
 	vector<uint32> zones;
 	zoneserver_list.GetZoneIDList(zones);
-	
+
 	vector<uint32>::iterator cur, end;
 	cur = zones.begin();
 	end = zones.end();
 	for(; cur != end; cur++) {
 		res.push_back(itoa(*cur));
 	}
-	
+
 	return(res);
 }
 
 map<string,string> EQW::GetZoneDetails(Const_char *zone_ref) {
 	map<string,string> res;
-	
+
 	ZoneServer *zs = zoneserver_list.FindByID(atoi(zone_ref));
 	if(zs == nullptr) {
 		res["error"] = "Invalid zone.";
 		return(res);
 	}
-	
+
 	res["type"] = zs->IsStaticZone()?"static":"dynamic";
 	res["zone_id"] = itoa(zs->GetZoneID());
 	res["launch_name"] = zs->GetLaunchName();
@@ -151,7 +151,7 @@ map<string,string> EQW::GetZoneDetails(Const_char *zone_ref) {
 	res["long_name"] = zs->GetZoneLongName();
 	res["port"] = itoa(zs->GetCPort());
 	res["player_count"] = itoa(zs->NumPlayers());
-	
+
 	//this isnt gunna work for dynamic zones...
 	res["launcher"] = "";
 	if(zs->GetZoneID() != 0) {
@@ -159,7 +159,7 @@ map<string,string> EQW::GetZoneDetails(Const_char *zone_ref) {
 		if(ll != nullptr)
 			res["launcher"] = ll->GetName();
 	}
-	
+
 	return(res);
 }
 
@@ -170,10 +170,10 @@ int EQW::CountPlayers() {
 //returns an array of character names in the zone (empty=all zones)
 vector<string> EQW::ListPlayers(Const_char *zone_name) {
 	vector<string> res;
-	
+
 	vector<ClientListEntry *> list;
 	client_list.GetClients(zone_name, list);
-	
+
 	vector<ClientListEntry *>::iterator cur, end;
 	cur = list.begin();
 	end = list.end();
@@ -185,13 +185,13 @@ vector<string> EQW::ListPlayers(Const_char *zone_name) {
 
 map<string,string> EQW::GetPlayerDetails(Const_char *char_name) {
 	map<string,string> res;
-	
+
 	ClientListEntry *cle = client_list.FindCharacter(char_name);
 	if(cle == nullptr) {
 		res["error"] = "1";
 		return(res);
 	}
-	
+
 	res["character"] = cle->name();
 	res["account"] = cle->AccountName();
 	res["account_id"] = itoa(cle->AccountID());
@@ -208,14 +208,14 @@ map<string,string> EQW::GetPlayerDetails(Const_char *char_name) {
 	res["guild"] = guild_mgr.GetGuildName(cle->GuildID());
 	res["status"] = itoa(cle->Admin());
 //	res["patch"] = cle->DescribePatch();
-	
+
 	return(res);
 }
 
 int EQW::CountLaunchers(bool active_only) {
 	if(active_only)
 		return(launcher_list.GetLauncherCount());
-	
+
 	vector<string> it(EQW::ListLaunchers());
 	return(it.size());
 }
@@ -232,13 +232,13 @@ vector<string> EQW::ListLaunchers() {
 	vector<string> launchers;
 	launcher_list.GetLauncherNameList(launchers);
 	return(launchers);
-	
+
 /*	if(list.empty()) {
 		return(launchers);
 	} else if(launchers.empty()) {
 		return(list);
 	}
-	
+
 	//union the two lists.
 	vector<string>::iterator curo, endo, curi, endi;
 	curo = list.begin();
@@ -286,7 +286,7 @@ void EQW::LSReconnect() {
 /*
 map<string,string> EQW::GetLaunchersDetails(Const_char *launcher_name) {
 	map<string,string> res;
-	
+
 	LauncherLink *ll = launcher_list.Get(launcher_name);
 	if(ll == nullptr) {
 		res["name"] = launcher_name;
@@ -302,7 +302,7 @@ map<string,string> EQW::GetLaunchersDetails(Const_char *launcher_name) {
 		res["zone_count"] = itoa(ll->CountZones());
 		res["connected"] = "yes";
 	}
-	
+
 	return(res);
 }
 

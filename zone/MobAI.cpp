@@ -64,16 +64,16 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 		if (MakeRandomInt(0, 100) >= iChance)
 			return false;
 	}
-		
+
 	float dist2;
 
 	if (iSpellTypes & SpellType_Escape) {
 	    dist2 = 0; //DistNoRoot(*this);	//WTF was up with this...
-    } else 
+    } else
 	    dist2 = DistNoRoot(*tar);
 
 	bool checked_los = false;	//we do not check LOS until we are absolutely sure we need to, and we only do it once.
-	
+
 	float manaR = GetManaRatio();
 	for (int i = static_cast<int>(AIspells.size()) - 1; i >= 0; i--) {
 		if (AIspells[i].spellid <= 0 || AIspells[i].spellid >= SPDAT_RECORDS) {
@@ -102,9 +102,9 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 #if MobAI_DEBUG_Spells >= 21
 				cout << "Mob::AICastSpell: Casting: spellid=" << AIspells[i].spellid
-                    << ", tar=" << tar->GetName() 
-                    << ", dist2[" << dist2 << "]<=" << spells[AIspells[i].spellid].range *spells[AIspells[i].spellid].range 
-                    << ", mana_cost[" << mana_cost << "]<=" << GetMana() 
+                    << ", tar=" << tar->GetName()
+                    << ", dist2[" << dist2 << "]<=" << spells[AIspells[i].spellid].range *spells[AIspells[i].spellid].range
+                    << ", mana_cost[" << mana_cost << "]<=" << GetMana()
                     << ", cancast[" << AIspells[i].time_cancast << "]<=" << Timer::GetCurrentTime()
                     << ", type=" << AIspells[i].type << endl;
 #endif
@@ -129,8 +129,8 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					}
 					case SpellType_Root: {
 						if (
-							!tar->IsRooted() 
-							&& dist2 >= 900 
+							!tar->IsRooted()
+							&& dist2 >= 900
 							&& MakeRandomInt(0, 99) < 50
 							&& tar->DontRootMeBefore() < Timer::GetCurrentTime()
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
@@ -154,13 +154,13 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 							&& !tar->IsImmuneToSpell(AIspells[i].spellid, this)
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
 							&& !(tar->IsPet() && tar->GetOwner()->IsClient() && this != tar)	//no buffing PC's pets, but they can buff themself
-							) 
+							)
                         {
                             if(!checked_los) {
-                                if(!CheckLosFN(tar)) 
-                                    return(false); 
-                                checked_los = true; 
-                            } 
+                                if(!CheckLosFN(tar))
+                                    return(false);
+                                checked_los = true;
+                            }
 							uint32 tempTime = 0;
 							AIDoSpellCast(i, tar, mana_cost, &tempTime);
 							tar->SetDontBuffMeBefore(tempTime);
@@ -179,7 +179,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					}
 
 					case SpellType_Escape: {
-                        if (GetHPRatio() <= 5 )	
+                        if (GetHPRatio() <= 5 )
                     	{
                             AIDoSpellCast(i, tar, mana_cost);
 							return true;
@@ -233,8 +233,8 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						}
 						break;
 					}
-					
-					case SpellType_Charm: 
+
+					case SpellType_Charm:
 					{
 						if(MakeRandomInt(0, 99) < 20)
 						{
@@ -329,14 +329,14 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	cout << "Mob::AIDoSpellCast: spellid=" << AIspells[i].spellid << ", tar=" << tar->GetName() << ", mana=" << mana_cost << ", Name: " << spells[AIspells[i].spellid].name << endl;
 #endif
 	casting_spell_AIindex = i;
-	
+
 	//stop moving if were casting a spell and were not a bard...
 	if(!IsBardSong(AIspells[i].spellid)) {
 		SetRunAnimSpeed(0);
 		SendPosition();
 		SetMoving(false);
 	}
-	
+
 	return CastSpell(AIspells[i].spellid, tar->GetID(), 1, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, 0, &(AIspells[i].resist_adjust));
 }
 
@@ -352,7 +352,7 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		_log(AI__ERROR, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return(false);
 	}
-	
+
 	if(!caster)
 		return false;
 
@@ -371,15 +371,15 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		return(false); // well, if we dont have a faction set, we're gonna be indiff to everybody
 
 	float iRange2 = iRange*iRange;
-	
+
 	float t1, t2, t3;
-	
+
 
 	//Only iterate through NPCs
     LinkedListIterator<NPC*> iterator(npc_list);
     for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
 		NPC* mob = iterator.GetData();
-		
+
 		//Since >90% of mobs will always be out of range, try to
 		//catch them with simple bounding box checks first. These
 		//checks are about 6X faster than DistNoRoot on my athlon 1Ghz
@@ -439,7 +439,7 @@ void Mob::AI_Init() {
 
 void NPC::AI_Init() {
 	Mob::AI_Init();
-	
+
 	AIautocastspell_timer = 0;
 	casting_spell_AIindex = static_cast<uint8>(AIspells.size());
 
@@ -500,7 +500,7 @@ void Client::AI_Start(uint32 iMoveDelay) {
 
 	if (!pAIControlled)
 		return;
-	
+
 	pClientSideTarget = GetTarget() ? GetTarget()->GetID() : 0;
 	SendAppearancePacket(AT_Anim, ANIM_FREEZE);	// this freezes the client
 	SendAppearancePacket(AT_Linkdead, 1); // Sending LD packet so *LD* appears by the player name when charmed/feared -Kasai
@@ -512,7 +512,7 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 	Mob::AI_Start(iMoveDelay);
 	if (!pAIControlled)
 		return;
-	
+
 	if (AIspells.size() == 0) {
 		AIautocastspell_timer = new Timer(1000);
 		AIautocastspell_timer->Disable();
@@ -520,12 +520,12 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 		AIautocastspell_timer = new Timer(750);
 		AIautocastspell_timer->Start(RandomTimer(0, 15000), false);
 	}
-	
+
 	if (NPCTypedata) {
 		AI_AddNPCSpells(NPCTypedata->npc_spells_id);
 		NPCSpecialAttacks(NPCTypedata->npc_attacks,0);
 	}
-	
+
 	SendTo(GetX(), GetY(), GetZ());
 	SetChanged();
 	SaveGuardSpot();
@@ -619,7 +619,7 @@ void Client::AI_SpellCast()
 			continue;
 		}
 
-		if(!GetPTimers().Expired(&database, pTimerSpellStart + current_spell, false)) 
+		if(!GetPTimers().Expired(&database, pTimerSpellStart + current_spell, false))
 		{
 			continue;
 		}
@@ -663,7 +663,7 @@ void Client::AI_SpellCast()
 			tar = GetTarget();
 			if(tar && IsFearSpell(spell_to_cast))
 			{
-				if(!IsBardSong(spell_to_cast)) 
+				if(!IsBardSong(spell_to_cast))
 				{
 					SetRunAnimSpeed(0);
 					SendPosition();
@@ -679,7 +679,7 @@ void Client::AI_SpellCast()
 		Mob *tar = GetTarget();
 		if(tar)
 		{
-			if(!IsBardSong(spell_to_cast)) 
+			if(!IsBardSong(spell_to_cast))
 			{
 				SetRunAnimSpeed(0);
 				SendPosition();
@@ -703,7 +703,7 @@ void Client::AI_Process()
 
 	if (IsCasting())
 		return;
-	
+
 	bool engaged = IsEngaged();
 
 	Mob *ow = GetOwner();
@@ -774,7 +774,7 @@ void Client::AI_Process()
 		}
 	}
 
-	if (engaged) 
+	if (engaged)
 	{
 		if (IsRooted())
 			SetTarget(hate_list.GetClosest(this));
@@ -793,12 +793,12 @@ void Client::AI_Process()
 			RemoveFromHateList(this);
 			return;
 		}
-      
+
 		if(DivineAura())
 			return;
-			
+
 		bool is_combat_range = CombatRange(GetTarget());
-		
+
 		if(is_combat_range) {
 			if(charm_class_attacks_timer.Check()) {
 				DoClassAttacks(GetTarget());
@@ -838,7 +838,7 @@ void Client::AI_Process()
 
 									if (flurrychance)
 									{
-										if(MakeRandomInt(0, 100) < flurrychance) 
+										if(MakeRandomInt(0, 100) < flurrychance)
 										{
 											Message_StringID(MT_NPCFlurry, 128);
 											Attack(GetTarget(), 13, false);
@@ -851,7 +851,7 @@ void Client::AI_Process()
 									if (ExtraAttackChanceBonus && GetTarget()) {
 										ItemInst *wpn = GetInv().GetItem(SLOT_PRIMARY);
 										if(wpn){
-											if(wpn->GetItem()->ItemType == ItemType2HS || 
+											if(wpn->GetItem()->ItemType == ItemType2HS ||
 												wpn->GetItem()->ItemType == ItemType2HB ||
 												wpn->GetItem()->ItemType == ItemType2HPierce )
 											{
@@ -863,14 +863,14 @@ void Client::AI_Process()
 										}
 									}
 
-									if (GetClass() == WARRIOR || GetClass() == BERSERKER) 
+									if (GetClass() == WARRIOR || GetClass() == BERSERKER)
 									{
-										if(!dead && !berserk && this->GetHPRatio() < 30) 
+										if(!dead && !berserk && this->GetHPRatio() < 30)
 										{
 											entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, GetName());
 											berserk = true;
 										}
-										else if (berserk && this->GetHPRatio() > 30) 
+										else if (berserk && this->GetHPRatio() > 30)
 										{
 											entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, GetName());
 											berserk = false;
@@ -888,11 +888,11 @@ void Client::AI_Process()
 				if(GetTarget())
 				{
 					float DualWieldProbability = 0.0f;
-					
+
 					int16 Ambidexterity = aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
 					DualWieldProbability = (GetSkill(DUAL_WIELD) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
 					int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
-					DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;		
+					DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
 					if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
 					{
@@ -923,7 +923,7 @@ void Client::AI_Process()
 						tar_ndx = 20;
 
 					CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
-				}				
+				}
 			}
 			else if(IsMoving())
 			{
@@ -931,7 +931,7 @@ void Client::AI_Process()
 				SetRunAnimSpeed(0);
 				SendPosition();
 				SetMoving(false);
-				moved=false;				
+				moved=false;
 			}
 		}
 		AI_SpellCast();
@@ -963,14 +963,14 @@ void Client::AI_Process()
 			}
 		}
 
-		if(IsPet()) 
-		{			
+		if(IsPet())
+		{
 			Mob* owner = GetOwner();
 			if(owner == nullptr)
 				return;
 
 			float dist = DistNoRoot(*owner);
-			if (dist >= 100) 
+			if (dist >= 100)
 			{
 				float speed = dist >= 225 ? GetRunspeed() : GetWalkspeed();
 				animation = 21 * speed;
@@ -1002,7 +1002,7 @@ void Mob::AI_Process() {
 
 	if (IsCasting())
 		return;
-	
+
 	bool engaged = IsEngaged();
     bool doranged = false;
 
@@ -1049,13 +1049,13 @@ void Mob::AI_Process() {
 			}
 		}
 	}
-	
+
 	// trigger EVENT_SIGNAL if required
 	if(IsNPC()) {
 		CastToNPC()->CheckSignal();
 	}
-	
-	if (engaged) 
+
+	if (engaged)
 	{
 		_ZP(Mob_AI_Process_engaged);
 		if (IsRooted())
@@ -1092,7 +1092,7 @@ void Mob::AI_Process() {
                 return;
         }
 #endif //BOTS
-      
+
 		if(DivineAura())
 			return;
 
@@ -1107,21 +1107,21 @@ void Mob::AI_Process() {
 				}
 			}
 		}
-			
-		if (GetHPRatio() < (RuleI(NPC, StartEnrageValue)+1) && 
-			(!RuleB(NPC, LiveLikeEnrage) || 
-			(RuleB(NPC, LiveLikeEnrage) && 
-			((IsPet() && !IsCharmed() && GetOwner() && GetOwner()->IsClient()) ||  
+
+		if (GetHPRatio() < (RuleI(NPC, StartEnrageValue)+1) &&
+			(!RuleB(NPC, LiveLikeEnrage) ||
+			(RuleB(NPC, LiveLikeEnrage) &&
+			((IsPet() && !IsCharmed() && GetOwner() && GetOwner()->IsClient()) ||
 			 (CastToNPC()->GetSwarmOwner() && entity_list.GetMob(CastToNPC()->GetSwarmOwner())->IsClient())))))
 		{
 			StartEnrage();
 		}
-		
+
 		bool is_combat_range = CombatRange(target);
-		
-        if (is_combat_range) 
+
+        if (is_combat_range)
         {
-			if (AImovement_timer->Check()) 
+			if (AImovement_timer->Check())
 			{
 				SetRunAnimSpeed(0);
 			}
@@ -1133,13 +1133,13 @@ void Mob::AI_Process() {
 				SendPosition();
 				tar_ndx =0;
 			}
-			
+
 			//casting checked above...
 			if(target && !IsStunned() && !IsMezzed() && GetAppearance() != eaDead && !IsMeleeDisabled()) {
-				
+
 				//we should check to see if they die mid-attacks, previous
 				//crap of checking target for null was not gunna cut it
-				
+
 				//try main hand first
 				if(attack_timer.Check()) {
                     if(IsNPC()) {
@@ -1154,8 +1154,8 @@ void Mob::AI_Process() {
                     } else {
                         Attack(target, 13);
                     }
-					
-					if (target) 
+
+					if (target)
 					{
 						//we use this random value in three comparisons with different
 						//thresholds, and if its truely random, then this should work
@@ -1163,19 +1163,19 @@ void Mob::AI_Process() {
 						int32 RandRoll = MakeRandomInt(0, 99);
 						if (CanThisClassDoubleAttack()
 							//check double attack, this is NOT the same rules that clients use...
-							&& RandRoll < (GetLevel() + NPCDualAttackModifier))  
+							&& RandRoll < (GetLevel() + NPCDualAttackModifier))
 						{
-							if (Attack(target, 13)) 
+							if (Attack(target, 13))
 							{
 								// lets see if we can do a triple attack with the main hand
 								//pets are excluded from triple and quads...
 								if (SpecAttacks[SPECATK_TRIPLE]
 									&& !IsPet() && RandRoll < (GetLevel()+NPCTripleAttackModifier))
 								{
-									if (Attack(target, 13)) 
+									if (Attack(target, 13))
 									{	// now lets check the quad attack
 										if (SpecAttacks[SPECATK_QUAD]
-											&& RandRoll < (GetLevel() + NPCQuadAttackModifier))  
+											&& RandRoll < (GetLevel() + NPCQuadAttackModifier))
 										{
 											Attack(target, 13);
 										}
@@ -1184,21 +1184,21 @@ void Mob::AI_Process() {
 							}
 						}
 					}
-	
+
 					if (SpecAttacks[SPECATK_FLURRY]) {
-					   
+
 						uint8 npc_flurry = RuleI(Combat, NPCFlurryChance);
 						if (GetFlurryChance())
-							npc_flurry = GetFlurryChance(); 
+							npc_flurry = GetFlurryChance();
 
 					    if (MakeRandomInt(0, 99) < npc_flurry)
 							Flurry();
 					}
 
 					if (IsPet()) {
-						
+
 						Mob *owner = GetOwner();
-						
+
 						if (owner){
 						int16 flurry_chance = owner->aabonuses.PetFlurry + owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
 
@@ -1206,15 +1206,15 @@ void Mob::AI_Process() {
 								Flurry();
 						}
 					}
-	
-					if (SpecAttacks[SPECATK_RAMPAGE]) 
+
+					if (SpecAttacks[SPECATK_RAMPAGE])
 					{
 					    //simply based off dex for now, probably a better calc
 					    if(MakeRandomInt(0, 100) < ((int)(GetDEX() / ((GetLevel() * 0.760) + 10.0)) + 5))
 							Rampage();
 					}
 
-					if (SpecAttacks[SPECATK_AREA_RAMPAGE]) 
+					if (SpecAttacks[SPECATK_AREA_RAMPAGE])
 					{
 
 						//simply based off dex for now, probably a better calc
@@ -1222,9 +1222,9 @@ void Mob::AI_Process() {
 							AreaRampage();
 					}
 				}
-				
+
 				//now off hand
-				if (attack_dw_timer.Check() && CanThisClassDualWield()) 
+				if (attack_dw_timer.Check() && CanThisClassDualWield())
 				{
 					int myclass = GetClass();
 					//can only dual wield without a weapon if your a monk
@@ -1233,10 +1233,10 @@ void Mob::AI_Process() {
 						if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
 						{
 							Attack(target, 14);
-							if (CanThisClassDoubleAttack()) 
+							if (CanThisClassDoubleAttack())
 							{
 								int32 RandRoll = MakeRandomInt(0, 99);
-								if (RandRoll < (GetLevel() + 20))  
+								if (RandRoll < (GetLevel() + 20))
 								{
 									if (Attack(target, 14));
 								}
@@ -1244,7 +1244,7 @@ void Mob::AI_Process() {
 						}
 					}
 				}
-				
+
 				//now special attacks (kick, etc)
 				if(IsNPC())
 					CastToNPC()->DoClassAttacks(target);
@@ -1272,7 +1272,7 @@ void Mob::AI_Process() {
             }
 
 			// See if we can summon the mob to us
-			if (!HateSummon()) 
+			if (!HateSummon())
 			{
 				//could not summon them, check ranged...
 				if(SpecAttacks[SPECATK_RANGED_ATK])
@@ -1283,7 +1283,7 @@ void Mob::AI_Process() {
 				if(AI_PursueCastCheck()){
 					//we did something, so do not process movement.
 				}
-				else if (AImovement_timer->Check()) 
+				else if (AImovement_timer->Check())
 				{
 					if(!IsRooted()) {
 						mlog(AI__WAYPOINTS, "Pursuing %s while engaged.", target->GetName());
@@ -1302,20 +1302,20 @@ void Mob::AI_Process() {
 							CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
 						}
 
-					} 
+					}
 					else if(IsMoving()) {
 						SetHeading(CalculateHeadingToTarget(target->GetX(), target->GetY()));
 						SetRunAnimSpeed(0);
 						SendPosition();
 						SetMoving(false);
 						moved=false;
-					
+
 					}
 				}
 			}
 		}
 	}
-	else 
+	else
 	{
 		if(AIfeignremember_timer->Check()) {
 			// EverHood - 6/14/06
@@ -1344,13 +1344,13 @@ void Mob::AI_Process() {
 				}
 			}
 		}
-		if (AI_IdleCastCheck()) 
+		if (AI_IdleCastCheck())
 		{
 			//we processed a spell action, so do nothing else.
 		}
-		else if (AIscanarea_timer->Check()) 
+		else if (AIscanarea_timer->Check())
 		{
-			/*                                                                              
+			/*
             * This is where NPCs look around to see if they want to attack anybody.
             *
             * if REVERSE_AGGRO is enabled, then this timer is disabled unless they
@@ -1359,33 +1359,33 @@ void Mob::AI_Process() {
             *
             */
 			_ZP(Mob_AI_Process_scanarea);
-			
+
 			Mob* tmptar = entity_list.AICheckCloseAggro(this, GetAggroRange(), GetAssistRange());
-			if (tmptar) 
+			if (tmptar)
 				AddToHateList(tmptar);
 		}
-		else if (AImovement_timer->Check() && !IsRooted()) 
+		else if (AImovement_timer->Check() && !IsRooted())
 		{
 			_ZP(Mob_AI_Process_move);
 			SetRunAnimSpeed(0);
-			if (IsPet()) 
+			if (IsPet())
 			{
 				_ZP(Mob_AI_Process_pet);
 				// we're a pet, do as we're told
-				switch (pStandingPetOrder) 
+				switch (pStandingPetOrder)
 				{
-					case SPO_Follow: 
+					case SPO_Follow:
 					{
-						
+
 						Mob* owner = GetOwner();
 						if(owner == nullptr)
 							break;
-						
+
 						//if(owner->IsClient())
 						//	printf("Pet start pos: (%f, %f, %f)\n", GetX(), GetY(), GetZ());
-						
+
 						float dist = DistNoRoot(*owner);
-						if (dist >= 400) 
+						if (dist >= 400)
 						{
 							float speed = GetWalkspeed();
 							if (dist >= 5625)
@@ -1401,7 +1401,7 @@ void Mob::AI_Process() {
 								SendPosition();
 							}
 						}
-					
+
 						/*
 						//fix up Z
 						float zdiff = GetZ() - owner->GetZ();
@@ -1411,19 +1411,19 @@ void Mob::AI_Process() {
 							SendTo(GetX(), GetY(), owner->GetZ());
 							SendPosition();
 						}
-						
+
 						if(owner->IsClient())
 							printf("Pet pos: (%f, %f, %f)\n", GetX(), GetY(), GetZ());
 						*/
-						
+
 						break;
 					}
-					case SPO_Sit: 
+					case SPO_Sit:
 					{
 						SetAppearance(eaSitting, false);
 						break;
 					}
-					case SPO_Guard: 
+					case SPO_Guard:
 					{
 						//only NPCs can guard stuff. (forced by where the guard movement code is in the AI)
 						if(IsNPC()) {
@@ -1433,11 +1433,11 @@ void Mob::AI_Process() {
 					}
 				}
 			}
-			else if (GetFollowID()) 
+			else if (GetFollowID())
 			{
 				Mob* follow = entity_list.GetMob(GetFollowID());
 				if (!follow) SetFollowID(0);
-				else 
+				else
 				{
 					float dist2 = DistNoRoot(*follow);
 					int followdist = GetFollowDistance();
@@ -1457,22 +1457,22 @@ void Mob::AI_Process() {
 							moved=false;
 							SetMoving(false);
 						}
-					}					
+					}
 				}
 			}
 			else //not a pet, and not following somebody...
 			{
 				// dont move till a bit after you last fought
-				if (pLastFightingDelayMoving < Timer::GetCurrentTime()) 
+				if (pLastFightingDelayMoving < Timer::GetCurrentTime())
 				{
-					if (this->IsClient()) 
+					if (this->IsClient())
 					{
 						// LD timer expired, drop out of world
 						if (this->CastToClient()->IsLD())
 							this->CastToClient()->Disconnect();
 						return;
 					}
-					
+
 					if(IsNPC())
 					{
 						if(RuleB(NPC, SmartLastFightingDelayMoving) && !feign_memory_list.empty())
@@ -1483,9 +1483,9 @@ void Mob::AI_Process() {
 						CastToNPC()->AI_DoMovement();
 					}
 				}
-				
-         } 
-      } // else if (AImovement_timer->Check()) 
+
+         }
+      } // else if (AImovement_timer->Check())
    }
 
    //Do Ranged attack here
@@ -1499,7 +1499,7 @@ void NPC::AI_DoMovement() {
 	float walksp = GetMovespeed();
 	if(walksp <= 0.0f)
 		return;	//this is idle movement at walk speed, and we are unable to walk right now.
-	
+
 	if (roambox_distance > 0) {
 		_ZP(Mob_AI_Process_roambox);
 		if (
@@ -1507,7 +1507,7 @@ void NPC::AI_DoMovement() {
 			|| roambox_movingto_x < roambox_min_x
 			|| roambox_movingto_y > roambox_max_y
 			|| roambox_movingto_y < roambox_min_y
-			) 
+			)
 		{
 			float movedist = roambox_distance*roambox_distance;
 			float movex = MakeRandomFloat(0, movedist);
@@ -1527,10 +1527,10 @@ void NPC::AI_DoMovement() {
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
 				roambox_movingto_y = roambox_max_y;
 		}
-		
-		mlog(AI__WAYPOINTS, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)", 
+
+		mlog(AI__WAYPOINTS, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
 			roambox_distance, roambox_min_x, roambox_max_x, roambox_min_y, roambox_max_y, roambox_movingto_x, roambox_movingto_y);
-		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, GetZ(), walksp, true)) 
+		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, GetZ(), walksp, true))
 		{
 			roambox_movingto_x = roambox_max_x + 1; // force update
 			pLastFightingDelayMoving = Timer::GetCurrentTime() + RandomTimer(roambox_delay, roambox_delay + 5000);
@@ -1538,7 +1538,7 @@ void NPC::AI_DoMovement() {
 			SendPosition();	// makes mobs stop clientside
 		}
 	}
-	else if (roamer) 
+	else if (roamer)
 	{
 		_ZP(Mob_AI_Process_roamer);
 		if (AIwalking_timer->Check())
@@ -1547,8 +1547,8 @@ void NPC::AI_DoMovement() {
 			AIwalking_timer->Disable();
 		}
 
-		
-		int16 gridno = CastToNPC()->GetGrid(); 
+
+		int16 gridno = CastToNPC()->GetGrid();
 
 		if (gridno > 0 || cur_wp==-2)  {
 			if (movetimercompleted==true) {  // time to pause at wp is over
@@ -1559,8 +1559,8 @@ void NPC::AI_DoMovement() {
 		           CastToNPC()->Depop(false);//depop without spawn timer
 				}
 				else {
-					movetimercompleted=false; 
-					
+					movetimercompleted=false;
+
 					mlog(QUESTS__PATHING, "We are departing waypoint %d.", cur_wp);
 
 					//if we were under quest control (with no grid), we are done now..
@@ -1569,18 +1569,18 @@ void NPC::AI_DoMovement() {
 						roamer = false;
 						cur_wp = 0;
 					}
-					
+
 					if(GetAppearance() != eaStanding)
 						SetAppearance(eaStanding, false);
-					
+
 					entity_list.OpenDoorsNear(CastToNPC());
 
 					if(!DistractedFromGrid) {
 						//kick off event_waypoint depart
-						char temp[16]; 
+						char temp[16];
 						sprintf(temp, "%d", cur_wp);
                         parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, temp, 0);
-					
+
 						//setup our next waypoint, if we are still on our normal grid
 						//remember that the quest event above could have done anything it wanted with our grid
 						if(gridno > 0) {
@@ -1590,11 +1590,11 @@ void NPC::AI_DoMovement() {
 					else {
 						DistractedFromGrid = false;
 					}
-                } 
-            }	// endif (movetimercompleted==true)     
+                }
+            }	// endif (movetimercompleted==true)
 			else if (!(AIwalking_timer->Enabled()))
 			{	// currently moving
-				if (cur_wp_x == GetX() && cur_wp_y == GetY()) 
+				if (cur_wp_x == GetX() && cur_wp_y == GetY())
 				{	// are we there yet? then stop
 					mlog(AI__WAYPOINTS, "We have reached waypoint %d (%.3f,%.3f,%.3f) on grid %d", cur_wp, GetX(), GetY(), GetZ(), GetGrid());
 					SetWaypointPause();
@@ -1605,20 +1605,20 @@ void NPC::AI_DoMovement() {
 						SetHeading(cur_wp_heading);
 					}
 					SendPosition();
-					
+
 					//kick off event_waypoint arrive
-					char temp[16]; 
+					char temp[16];
 					sprintf(temp, "%d", cur_wp);
 					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, temp, 0);
-					
+
 					// wipe feign memory since we reached our first waypoint
 					if(cur_wp == 1)
 						ClearFeignMemory();
-				} 
+				}
 				else
 				{	// not at waypoint yet, so keep moving
 					if(!RuleB(Pathing, AggroReturnToGrid) || !zone->pathing || (DistractedFromGrid == 0))
-						CalculateNewPosition2(cur_wp_x, cur_wp_y, cur_wp_z, walksp, true); 
+						CalculateNewPosition2(cur_wp_x, cur_wp_y, cur_wp_z, walksp, true);
 					else
 					{
 						bool WaypointChanged;
@@ -1628,18 +1628,18 @@ void NPC::AI_DoMovement() {
 							tar_ndx = 20;
 
 						if(NodeReached)
-							entity_list.OpenDoorsNear(CastToNPC()); 
+							entity_list.OpenDoorsNear(CastToNPC());
 
 						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, walksp, true);
 					}
 
 				}
-			} 
-		}		// endif (gridno > 0) 
+			}
+		}		// endif (gridno > 0)
 // handle new quest grid command processing
-		else if (gridno < 0) 
+		else if (gridno < 0)
 		{	// this mob is under quest control
-			if (movetimercompleted==true)    
+			if (movetimercompleted==true)
 			{ // time to pause has ended
 				SetGrid( 0 - GetGrid()); // revert to AI control
 				mlog(QUESTS__PATHING, "Quest pathing is finished. Resuming on grid %d", GetGrid());
@@ -1651,8 +1651,8 @@ void NPC::AI_DoMovement() {
 			}
 		}
 
-  } 
-  else if (IsGuarding()) 
+  }
+  else if (IsGuarding())
   {
 	_ZP(Mob_AI_Process_guard);
 
@@ -1669,7 +1669,7 @@ void NPC::AI_DoMovement() {
 				tar_ndx = 20;
 
 			if(NodeReached)
-				entity_list.OpenDoorsNear(CastToNPC()); 
+				entity_list.OpenDoorsNear(CastToNPC());
 
 			CP2Moved = CalculateNewPosition2(Goal.x, Goal.y, Goal.z, walksp);
 		}
@@ -1686,15 +1686,15 @@ void NPC::AI_DoMovement() {
 			SetMoving(false);
 			if (GetTarget() == nullptr || DistNoRoot(*GetTarget()) >= 5*5 )
 			{
-				SetHeading(guard_heading); 
-			} else { 
-				FaceTarget(GetTarget()); 
+				SetHeading(guard_heading);
+			} else {
+				FaceTarget(GetTarget());
 			}
-			SendPosition();	
+			SendPosition();
             SetAppearance(GetGuardPointAnim());
 		}
-	 } 
-  } 
+	 }
+  }
 }
 
 // Note: Mob that caused this may not get added to the hate list until after this function call completes
@@ -1805,9 +1805,9 @@ bool NPC::AI_EngagedCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		_ZP(Mob_AI_Process_engaged_cast);
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
-		
+
 		mlog(AI__SPELLS, "Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells.");
-		
+
 		// try casting a heal or gate
 		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
 			// try casting a heal on nearby
@@ -1817,11 +1817,11 @@ bool NPC::AI_EngagedCastCheck() {
 					//no spell to cast, try again soon.
 					AIautocastspell_timer->Start(RandomTimer(500, 1000), false);
 				}
-			}	
+			}
 		}
 		return(true);
 	}
-	
+
 	return(false);
 }
 
@@ -1829,7 +1829,7 @@ bool NPC::AI_PursueCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		_ZP(Mob_AI_Process_pursue_cast);
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
-		
+
 		mlog(AI__SPELLS, "Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
 		if(!AICastSpell(GetTarget(), 90, SpellType_Root | SpellType_Nuke | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff)) {
 			//no spell cast, try again soon.
@@ -1849,7 +1849,7 @@ bool NPC::AI_IdleCastCheck() {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Buff | SpellType_Pet)) {
 			if(!entity_list.AICheckCloseBeneficialSpells(this, 33, MobAISpellRange, SpellType_Heal | SpellType_Buff)) {
-				//if we didnt cast any spells, our autocast timer just resets to the 
+				//if we didnt cast any spells, our autocast timer just resets to the
 				//last duration it was set to... try to put up a more reasonable timer...
 				AIautocastspell_timer->Start(RandomTimer(1000, 5000), false);
 			}	//else, spell casting finishing will reset the timer.
@@ -1896,7 +1896,7 @@ void Mob::ProcessEnrage(){
 	}
 }
 
-bool Mob::IsEnraged() 
+bool Mob::IsEnraged()
 {
     return bEnraged;
 }
@@ -1951,7 +1951,7 @@ bool Mob::Rampage()
     for (int i = 0; i < RampageArray.size(); i++)
     {
 		if(index_hit >= RuleI(Combat, MaxRampageTargets))
-			break;	
+			break;
         // range is important
 		Mob *m_target = entity_list.GetMob(RampageArray[i].c_str());
         if(m_target)
@@ -1987,7 +1987,7 @@ void Mob::AreaRampage()
 uint32 Mob::GetLevelCon(uint8 mylevel, uint8 iOtherLevel) {
     int16 diff = iOtherLevel - mylevel;
 	uint32 conlevel=0;
-	
+
     if (diff == 0)
         return CON_WHITE;
     else if (diff >= 1 && diff <= 2)
@@ -2184,7 +2184,7 @@ create table npc_spells_entries (
 	priority smallint(5) not null default 0,
 	index npc_spells_id (npc_spells_id)
 	);
-*/ 
+*/
 
 bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID);
 bool Compare_AI_Spells(AISpells_Struct i, AISpells_Struct j);
@@ -2229,8 +2229,8 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 			if (GetLevel() >= parentlist->entries[i].minlevel && GetLevel() <= parentlist->entries[i].maxlevel && parentlist->entries[i].spellid > 0) {
 				if (!IsSpellInList(spell_list, parentlist->entries[i].spellid))
 				{
-					AddSpellToNPCList(parentlist->entries[i].priority, 
-						parentlist->entries[i].spellid, parentlist->entries[i].type, 
+					AddSpellToNPCList(parentlist->entries[i].priority,
+						parentlist->entries[i].spellid, parentlist->entries[i].type,
 						parentlist->entries[i].manacost, parentlist->entries[i].recast_delay,
 						parentlist->entries[i].resist_adjust);
 				}
@@ -2243,14 +2243,14 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	}
 	for (i=0; i<spell_list->numentries; i++) {
 		if (GetLevel() >= spell_list->entries[i].minlevel && GetLevel() <= spell_list->entries[i].maxlevel && spell_list->entries[i].spellid > 0) {
-			AddSpellToNPCList(spell_list->entries[i].priority, 
-				spell_list->entries[i].spellid, spell_list->entries[i].type, 
-				spell_list->entries[i].manacost, spell_list->entries[i].recast_delay, 
+			AddSpellToNPCList(spell_list->entries[i].priority,
+				spell_list->entries[i].spellid, spell_list->entries[i].type,
+				spell_list->entries[i].manacost, spell_list->entries[i].recast_delay,
 				spell_list->entries[i].resist_adjust);
 		}
 	}
 	std::sort(AIspells.begin(), AIspells.end(), Compare_AI_Spells);
-	
+
 	if (attack_proc_spell > 0)
 		AddProcToWeapon(attack_proc_spell, true, proc_chance);
 
@@ -2269,22 +2269,22 @@ bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID) {
 	return false;
 }
 
-bool Compare_AI_Spells(AISpells_Struct i, AISpells_Struct j) 
-{ 
-	return(i.priority > j.priority); 
+bool Compare_AI_Spells(AISpells_Struct i, AISpells_Struct j)
+{
+	return(i.priority > j.priority);
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
-void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint16 iType, 
-							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust) 
+void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint16 iType,
+							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust)
 {
-	
+
 	if(!IsValidSpell(iSpellID))
 		return;
 
 	HasAISpell = true;
 	AISpells_Struct t;
-	
+
 	t.priority = iPriority;
 	t.spellid = iSpellID;
 	t.type = iType;
@@ -2333,7 +2333,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 		char *query = 0;
 		MYSQL_RES *result;
 		MYSQL_ROW row;
-		
+
 		if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, parent_list, attack_proc, proc_chance from npc_spells where id=%d", iDBSpellsID), errbuf, &result)) {
 			safe_delete_array(query);
 			if (mysql_num_rows(result) == 1) {
@@ -2392,8 +2392,8 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 			safe_delete_array(query);
 			return 0;
 		}
-		
-		return 0;	
+
+		return 0;
 	}
 	return 0;
 }
@@ -2403,7 +2403,7 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
     char *query = 0;
     MYSQL_RES *result;
     MYSQL_ROW row;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT max(id) from npc_spells"), errbuf, &result)) {
 		safe_delete_array(query);
 		if (mysql_num_rows(result) == 1) {
@@ -2421,7 +2421,7 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
 		safe_delete_array(query);
 		return 0;
 	}
-	
-	return 0;	
+
+	return 0;
 }
 

@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -32,7 +32,7 @@ public:
 	//Singleton method
 	static ProcLauncher *get() { return(&s_launcher); }
 	static void ProcessInThisThread();
-	
+
 #ifdef WIN32
 	typedef DWORD ProcRef;
 	static const ProcRef ProcError;
@@ -47,7 +47,7 @@ public:
 		Spec();
 		Spec(const Spec &other);
 		Spec &operator=(const Spec &other);
-		
+
 		std::string program;
 		std::vector<std::string> args;
 		//std::map<std::string,std::string> environment;
@@ -64,18 +64,18 @@ public:
 		virtual ~EventHandler() {}
 		virtual void OnTerminate(const ProcRef &ref, const Spec *spec) = 0;
 	};
-	
+
 	/*
 	 * The main launch method, call to start a new background process.
 	 */
 	ProcRef Launch(Spec *&to_launch);	//takes ownership of the pointer
-	
+
 	/*
 	 * The terminate method
 	 */
 	bool Terminate(const ProcRef &proc, bool graceful = true);
 	void TerminateAll(bool final = true);
-	
+
 	/*
 	 * The main processing method. Call regularly to check for terminated
 	 * background processes.
@@ -85,9 +85,9 @@ public:
 protected:
 //	std::vector<Spec *> m_specs;
 	std::map<ProcRef, Spec *> m_running;	//we own the pointers in this map
-	
+
 	void ProcessTerminated(std::map<ProcRef, Spec *>::iterator &it);
-	
+
 private:
 	static ProcLauncher s_launcher;
 #ifndef WIN32

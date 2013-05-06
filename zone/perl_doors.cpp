@@ -37,7 +37,7 @@
 #include "doors.h"
 
 #ifdef THIS	 /* this macro seems to leak out on some systems */
-#undef THIS		
+#undef THIS
 #endif
 
 XS(XS_Doors_GetDoorDBID); /* prototype to pass -Wmissing-prototypes */
@@ -730,7 +730,7 @@ XS(boot_Doors)
 	char file[256];
 	strncpy(file, __FILE__, 256);
 	file[255] = 0;
-	
+
 	if(items != 1)
 		fprintf(stderr, "boot_quest does not take any arguments.");
 	char buf[128];
@@ -751,7 +751,7 @@ XS(boot_Doors)
 		newXSproto(strcpy(buf, "SetY"),XS_Doors_SetY, file, "$$");
 		newXSproto(strcpy(buf, "SetZ"),XS_Doors_SetZ, file, "$$");
 		newXSproto(strcpy(buf, "SetHeading"),XS_Doors_SetHeading, file, "$$");
-		newXSproto(strcpy(buf, "SetLocation"),XS_Doors_SetLocation, file, "$$$$");    
+		newXSproto(strcpy(buf, "SetLocation"),XS_Doors_SetLocation, file, "$$$$");
 		newXSproto(strcpy(buf, "GetDoorDBID"),XS_Doors_GetDoorDBID, file, "$");
 		newXSproto(strcpy(buf, "GetDoorID"),XS_Doors_GetDoorID, file, "$");
 		newXSproto(strcpy(buf, "SetSize"),XS_Doors_SetSize, file, "$$");

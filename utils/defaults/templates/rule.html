@@ -25,11 +25,11 @@
 			print "\t<tr>\n";
 			print "\t\t<td><a href=\"rules.html?ruleset_id=$row->{ruleset_id}\">$row->{name}</a></td>\n";
 			print "\t\t<td><a href=\"rules.html?ruleset_id=$row->{ruleset_id}\">$row->{ruleset_id}</a></td>\n";
-			
+
 			my $q2 = "SELECT COUNT(ruleset_id) AS num_rules FROM rule_values WHERE ruleset_id = '$row->{ruleset_id}'";
 			my $res2 = $EQDB->query($q2);
 			my $row2 = $res2->fetch_row_hash;
-			
+
 			print "\t\t<td>$row2->{num_rules}</td>\n";
 			#print "\t\t<td><input type=\"image\" src=\"delete.gif\" alt=\"Delete\"></td>\n";
 			print "\t</tr>\n";

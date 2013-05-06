@@ -20,7 +20,7 @@ void UCSConnection::SetConnection(EmuTCPConnection *inStream)
 		_log(UCS__ERROR, "Incoming UCS Connection while we were already connected to a UCS.");
 		Stream->Disconnect();
 	}
-	
+
 	Stream = inStream;
 
 	authenticated = false;
@@ -30,7 +30,7 @@ bool UCSConnection::Process()
 {
 	if (!Stream || !Stream->Connected())
 		return false;
-	
+
 	ServerPacket *pack = 0;
 
 	while((pack = Stream->PopPacket()))
@@ -44,7 +44,7 @@ bool UCSConnection::Process()
 					uint8 tmppass[16];
 
 					MD5::Generate((const uchar*) WorldConfig::get()->SharedKey.c_str(), WorldConfig::get()->SharedKey.length(), tmppass);
-		
+
 					if (memcmp(pack->pBuffer, tmppass, 16) == 0)
 						authenticated = true;
 					else

@@ -134,7 +134,7 @@ int main() {
 	CL = new Clientlist(Config->ChatPort);
 
 	ChannelList = new ChatChannelList();
-	
+
 	database.LoadChatChannels();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{

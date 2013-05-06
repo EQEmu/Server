@@ -94,7 +94,7 @@ public:
 	Doors*	CastToDoors();
 	Trap*	CastToTrap();
 	Beacon*	CastToBeacon();
-	
+
 	const Client* CastToClient() const;
 	const NPC*    CastToNPC() const;
 	const Mob*    CastToMob() const;
@@ -129,7 +129,7 @@ class EntityList
 public:
 	EntityList();
 	~EntityList();
-	
+
 	Entity* GetID(uint16 id);
 	Mob*	GetMob(uint16 id);
 	inline Mob*	GetMobID(uint16 id) { return(GetMob(id)); }	//for perl
@@ -139,7 +139,7 @@ public:
 	NPC*	GetNPCByID(uint16 id);
 	NPC*	GetNPCByNPCTypeID(uint32 npc_id);
 	Merc*	GetMercByID(uint16 id);
-	Client* GetClientByName(const char *name); 
+	Client* GetClientByName(const char *name);
 	Client* GetClientByAccID(uint32 accid);
 	Client* GetClientByID(uint16 id);
 	Client* GetClientByCharID(uint32 iCharID);
@@ -198,7 +198,7 @@ public:
 	Object*	FindNearbyObject(float x, float y, float z, float radius);
 	bool	MakeDoorSpawnPacket(EQApplicationPacket* app, Client *client);
 	bool    MakeTrackPacket(Client* client);
-	void	SendTraders(Client* client);	
+	void	SendTraders(Client* client);
 	void    AddClient(Client*);
 	void    AddNPC(NPC*, bool SendSpawnPacket = true, bool dontqueue = false);
 	void	AddMerc(Merc*, bool SendSpawnPacket = true, bool dontqueue = false);
@@ -250,7 +250,7 @@ public:
 //	Entity*	GetEntityGroup(uint32 id);
 	Entity*	GetEntityTrap(uint16 id);
 	Entity*	GetEntityBeacon(uint16 id);
-	
+
 	void DescribeAggro(Client *towho, NPC *from_who, float dist, bool verbose);
 
 	void	Message(uint32 to_guilddbid, uint32 type, const char* message, ...);
@@ -298,14 +298,14 @@ public:
 	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0);
 	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
-	
+
 	void 	RadialSetLogging(Mob *around, bool enabled, bool clients, bool non_clients, float range = 0);
 
 	//trap stuff
 	Mob*	GetTrapTrigger(Trap* trap);
 	void	SendAlarm(Trap* trap, Mob* currenttarget, uint8 kos);
 	Trap*	FindNearbyTrap(Mob* searcher, float max_dist);
-	
+
 	void	AddHealAggro(Mob* target, Mob* caster, uint16 thedam);
 	Mob*	FindDefenseNPC(uint32 npcid);
 	void	OpenDoorsNear(NPC* opener);
@@ -338,14 +338,14 @@ public:
 	void	ClearFeignAggro(Mob* targ);
 	void	ClearZoneFeignAggro(Client* targ);
 	void	AggroZone(Mob* who, int hate = 0);
-	
+
 	bool	Fighting(Mob* targ);
 	void    RemoveFromHateLists(Mob* mob, bool settoone = false);
 	void	RemoveDebuffs(Mob* caster);
 
 
 	void	MessageGroup(Mob* sender, bool skipclose, uint32 type, const char* message, ...);
-	
+
 	void	LimitAddNPC(NPC *npc);
 	void	LimitRemoveNPC(NPC *npc);
 	bool	LimitCheckType(uint32 npc_type, int count);
@@ -409,11 +409,11 @@ protected:
 private:
 	void	AddToSpawnQueue(uint16 entityid, NewSpawn_Struct** app);
 	void	CheckSpawnQueue();
-	
+
 	//used for limiting spawns
 	class SpawnLimitRecord { public: uint32 spawngroup_id; uint32 npc_type; };
 	map<uint16, SpawnLimitRecord> npc_limit_list;		//entity id -> npc type
-	
+
 	uint32	tsFirstSpawnOnQueue; // timestamp that the top spawn on the spawnqueue was added, should be 0xFFFFFFFF if queue is empty
 	uint32	NumSpawnsOnQueue;
 	LinkedList<NewSpawn_Struct*> SpawnQueue;
@@ -454,7 +454,7 @@ class BulkZoneSpawnPacket {
 public:
 	BulkZoneSpawnPacket(Client* iSendTo, uint32 iMaxSpawnsPerPacket);	// 0 = send zonewide
 	virtual ~BulkZoneSpawnPacket();
-	
+
 	bool	AddSpawn(NewSpawn_Struct* ns);
 	void	SendBuffer();	// Sends the buffer and cleans up everything - can safely re-use the object after this function call (no need to free and do another new)
 private:

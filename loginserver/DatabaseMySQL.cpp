@@ -40,7 +40,7 @@ DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port,
 	{
 		my_bool r = 1;
 		mysql_options(db, MYSQL_OPT_RECONNECT, &r);
-		if(!mysql_real_connect(db, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0)) 
+		if(!mysql_real_connect(db, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
 		{
 			mysql_close(db);
 			server_log->Log(log_database, "Failed to connect to MySQL database.");
@@ -73,7 +73,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable() << " WHERE AccountName = '";
 	query << name;
 	query << "'";
-	
+
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
 		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
@@ -97,7 +97,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 	return false;
 }
 
-bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id, 
+bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
 		unsigned int &trusted, string &list_desc, string &account, string &password)
 {
 	if(!db)
@@ -118,7 +118,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 	query << " WHERE WSR.ServerShortName = '";
 	query << escaped_short_name;
 	query << "'";
-	
+
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
 		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
@@ -155,7 +155,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 				{
 					if((row = mysql_fetch_row(res)) != nullptr)
 					{
-						account = row[0]; 
+						account = row[0];
 						password = row[1];
 						mysql_free_result(res);
 						return true;

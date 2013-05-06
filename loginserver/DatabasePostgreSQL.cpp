@@ -61,7 +61,7 @@ bool DatabasePostgreSQL::GetLoginDataFromAccountName(string name, string &passwo
 	}
 
 	/**
-	 * PostgreSQL doesn't have automatic reconnection option like mysql 
+	 * PostgreSQL doesn't have automatic reconnection option like mysql
 	 * but it's easy to check and reconnect
 	 */
 	if(PQstatus(db) != CONNECTION_OK)
@@ -100,7 +100,7 @@ bool DatabasePostgreSQL::GetLoginDataFromAccountName(string name, string &passwo
 	return false;
 }
 
-bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id, 
+bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
 		unsigned int &trusted, string &list_desc, string &account, string &password)
 {
 	if(!db)
@@ -109,7 +109,7 @@ bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_nam
 	}
 
 	/**
-	 * PostgreSQL doesn't have automatic reconnection option like mysql 
+	 * PostgreSQL doesn't have automatic reconnection option like mysql
 	 * but it's easy to check and reconnect
 	 */
 	if(PQstatus(db) != CONNECTION_OK)
@@ -147,7 +147,7 @@ bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_nam
 		trusted = atoi(PQgetvalue(res, 0, 2));
 		list_id = atoi(PQgetvalue(res, 0, 3));
 		list_desc = PQgetvalue(res, 0, 4);
-		account = PQgetvalue(res, 0, 5); 
+		account = PQgetvalue(res, 0, 5);
 		password = PQgetvalue(res, 0, 6);
 
 		PQclear(res);
@@ -166,7 +166,7 @@ void DatabasePostgreSQL::UpdateLSAccountData(unsigned int id, string ip_address)
 	}
 
 	/**
-	 * PostgreSQL doesn't have automatic reconnection option like mysql 
+	 * PostgreSQL doesn't have automatic reconnection option like mysql
 	 * but it's easy to check and reconnect
 	 */
 	if(PQstatus(db) != CONNECTION_OK)
@@ -201,7 +201,7 @@ void DatabasePostgreSQL::UpdateWorldRegistration(unsigned int id, string long_na
 	}
 
 	/**
-	 * PostgreSQL doesn't have automatic reconnection option like mysql 
+	 * PostgreSQL doesn't have automatic reconnection option like mysql
 	 * but it's easy to check and reconnect
 	 */
 	if(PQstatus(db) != CONNECTION_OK)

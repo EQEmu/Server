@@ -103,7 +103,7 @@ public:
     virtual void ThrowingAttack(Mob* other) { }
     uint16 GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg);
     // 13 = Primary (default), 14 = secondary
-    virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, 
+    virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false,
         bool IsFromSpell = false) = 0;
     int MonkSpecialAttack(Mob* other, uint8 skill_used);
     virtual void TryBackstab(Mob *other,int ReuseTime = 10);
@@ -121,20 +121,20 @@ public:
 
     //Appearance
     void SendLevelAppearance();
-    void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, 
+    void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5,
         Client *specific_target=nullptr);
     void SendTargetable(bool on, Client *specific_target = nullptr);
     virtual void SendWearChange(uint8 material_slot);
-    virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0, 
+    virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0,
         uint32 unknown06 = 0, uint32 unknown18 = 0);
     virtual void SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint);
     virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color);
     void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
-    void ProjectileAnimation(Mob* to, uint16 item_id, bool IsArrow = false, float speed = 0, 
+    void ProjectileAnimation(Mob* to, uint16 item_id, bool IsArrow = false, float speed = 0,
         float angle = 0, float tilt = 0, float arc = 0);
     void ChangeSize(float in_size, bool bNoRestriction = false);
-    inline uint8 SeeInvisible() const { return see_invis; }                
-    inline bool SeeInvisibleUndead() const { return see_invis_undead; } 
+    inline uint8 SeeInvisible() const { return see_invis; }
+    inline bool SeeInvisibleUndead() const { return see_invis_undead; }
     inline bool SeeHide() const { return see_hide; }
     inline bool SeeImprovedHide() const { return see_improved_hide; }
     bool IsInvisible(Mob* other = 0) const;
@@ -147,11 +147,11 @@ public:
     void BardPulse(uint16 spell_id, Mob *caster);
 
     //Spell
-    void SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay, bool zone_wide, 
+    void SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay, bool zone_wide,
         uint32 unk020, bool perm_effect = false, Client *c = nullptr);
     bool IsBeneficialAllowed(Mob *target);
     virtual int GetCasterLevel(uint16 spell_id);
-    void ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterID = 0, 
+    void ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterID = 0,
         bool item_bonus = false, uint32 ticsremaining = 0, int buffslot = -1);
     void NegateSpellsBonuses(uint16 spell_id);
     virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false) { return range;}
@@ -160,27 +160,27 @@ public:
     virtual int32 GetActSpellCost(uint16 spell_id, int32 cost){ return cost;}
     virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration){ return duration;}
     virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
-    float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false, 
+    float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
         int resist_override = 0, bool CharismaCheck = false);
     uint16 GetSpecializeSkillValue(uint16 spell_id) const;
     void SendSpellBarDisable();
     void SendSpellBarEnable(uint16 spellid);
     void ZeroCastingVars();
     virtual void SpellProcess();
-    virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1, 
-        int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, 
+    virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1,
+        int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
         uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 *resist_adjust = nullptr);
-    virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1, 
-        int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, 
+    virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1,
+        int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
         uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 resist_adjust = 0);
-    void CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot, uint16 mana_used, 
+    void CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot, uint16 mana_used,
         uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0);
-    bool SpellFinished(uint16 spell_id, Mob *target, uint16 slot = 10, uint16 mana_used = 0, 
+    bool SpellFinished(uint16 spell_id, Mob *target, uint16 slot = 10, uint16 mana_used = 0,
         uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false);
-    virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect = false, 
+    virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect = false,
         bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false);
     virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100);
-    virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, 
+    virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
         CastAction_type &CastAction);
     virtual bool CheckFizzle(uint16 spell_id);
     virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
@@ -234,7 +234,7 @@ public:
     uint16 GetSpellIDFromSlot(uint8 slot);
     int CountDispellableBuffs();
     bool HasBuffIcon(Mob* caster, Mob* target, uint16 spell_id);
-    bool CheckHitsRemaining(uint32 buff_slot, bool when_spell_done=false, bool negate=false,uint16 type=0, 
+    bool CheckHitsRemaining(uint32 buff_slot, bool when_spell_done=false, bool negate=false,uint16 type=0,
         uint16 spell_id=0, bool use_skill=false,uint16 skill=0);
     void SpreadVirus(uint16 spell_id, uint16 casterID);
     bool IsNimbusEffectActive(uint32 nimbus_effect);
@@ -256,7 +256,7 @@ public:
     virtual uint32 IsEliteMaterialItem(uint8 material_slot) const;
     bool AffectedBySpellExcludingSlot(int slot, int effect);
     virtual void Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill) = 0;
-    virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillType attack_skill, 
+    virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillType attack_skill,
         bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false) = 0;
     inline virtual void SetHP(int32 hp) { if (hp >= max_hp) cur_hp = max_hp; else cur_hp = hp;}
     bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
@@ -288,7 +288,7 @@ public:
     inline const char* GetOrigName() const { return orig_name; }
     inline const char* GetLastName() const { return lastname; }
     const char *GetCleanName();
-    virtual void SetName(const char *new_name = nullptr) { new_name ? strn0cpy(name, new_name, 64) : 
+    virtual void SetName(const char *new_name = nullptr) { new_name ? strn0cpy(name, new_name, 64) :
         strn0cpy(name, GetName(), 64); return; };
     inline Mob* GetTarget() const { return target; }
     virtual void SetTarget(Mob* mob);
@@ -333,7 +333,7 @@ public:
     int32 GetItemHPBonuses();
     int32 GetSpellHPBonuses();
     virtual const int32& SetMana(int32 amount);
-    inline float GetManaRatio()    const { return max_mana == 0 ? 100 : 
+    inline float GetManaRatio()    const { return max_mana == 0 ? 100 :
         ((static_cast<float>(cur_mana) / max_mana) * 100); }
     virtual int32 CalcMaxMana();
     uint32 GetNPCTypeID() const { return npctype_id; }
@@ -358,7 +358,7 @@ public:
     virtual bool HasGroup() = 0;
     virtual Raid* GetRaid() = 0;
     virtual Group* GetGroup() = 0;
-    
+
     //Faction
     virtual inline int32 GetPrimaryFaction() const { return 0; }
 
@@ -382,14 +382,14 @@ public:
     void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
     void SendPosition();
     void SetFlyMode(uint8 flymode);
-    inline void Teleport(VERTEX NewPosition) { x_pos = NewPosition.x; y_pos = NewPosition.y; 
+    inline void Teleport(VERTEX NewPosition) { x_pos = NewPosition.x; y_pos = NewPosition.y;
         z_pos = NewPosition.z; };
-       
+
     //AI
     static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
-    inline uint32 GetLevelCon(uint8 iOtherLevel) const { 
+    inline uint32 GetLevelCon(uint8 iOtherLevel) const {
         return this ? GetLevelCon(GetLevel(), iOtherLevel) : CON_GREEN; }
-    virtual void AddToHateList(Mob* other, int32 hate = 0, int32 damage = 0, bool iYellForHelp = true, 
+    virtual void AddToHateList(Mob* other, int32 hate = 0, int32 damage = 0, bool iYellForHelp = true,
         bool bFrenzy = false, bool iBuffTic = false);
     bool RemoveFromHateList(Mob* mob);
     void SetHate(Mob* other, int32 hate = 0, int32 damage = 0) { hate_list.Set(other,hate,damage);}
@@ -402,7 +402,7 @@ public:
     bool IsEngaged() { return(!hate_list.IsEmpty()); }
     bool HateSummon();
     void FaceTarget(Mob* MobToFace = 0);
-    void SetHeading(float iHeading) { if(heading != iHeading) { pLastChange = Timer::GetCurrentTime(); 
+    void SetHeading(float iHeading) { if(heading != iHeading) { pLastChange = Timer::GetCurrentTime();
         heading = iHeading; } }
     void WipeHateList();
     void AddFeignMemory(Client* attacker);
@@ -419,7 +419,7 @@ public:
     //Quest
     void QuestReward(Client *c = nullptr, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
     void CameraEffect(uint32 duration, uint32 intensity, Client *c = nullptr, bool global = false);
-    inline bool GetQglobal() const { return qglobal; } 
+    inline bool GetQglobal() const { return qglobal; }
 
     //Other Packet
     void CreateDespawnPacket(EQApplicationPacket* app, bool Decay);
@@ -450,7 +450,7 @@ public:
     float DistNoRootNoZ(float x, float y) const;
     float DistNoRootNoZ(const Mob &) const;
     static float GetReciprocalHeading(Mob* target);
-    bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, 
+    bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest,
         bool lookForAftArc = true);
 
     //Procs
@@ -472,9 +472,9 @@ public:
     void EnableLogging() { logging_enabled = true; }
     void DisableLogging() { logging_enabled = false; }
 
-    
+
     //More stuff to sort:
-    virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);  
+    virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);
     bool IsTargeted() const { return (targeted > 0); }
     inline void IsTargeted(int in_tar) { targeted += in_tar; if(targeted < 0) targeted = 0;}
     void    SetFollowID(uint32 id) { follow = id; }
@@ -488,18 +488,18 @@ public:
         const char* message3 = 0, const char* message4 = 0, const char* message5 = 0, const char* message6 = 0,
         const char* message7 = 0, const char* message8 = 0, const char* message9 = 0, uint32 distance = 0) { }
     void Say(const char *format, ...);
-    void Say_StringID(uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0, 
+    void Say_StringID(uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
         const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
-    void Say_StringID(uint32 type, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0, 
+    void Say_StringID(uint32 type, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
         const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
     void Shout(const char *format, ...);
     void Emote(const char *format, ...);
     void QuestJournalledSay(Client *QuestInitiator, const char *str);
     uint32 GetItemStat(uint32 itemid, const char *identifier);
-    
+
 
     int16 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false);
-    uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0); 
+    uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0);
     void SendIllusionPacket(uint16 in_race, uint8 in_gender = 0xFF, uint8 in_texture = 0xFF, uint8 in_helmtexture = 0xFF, uint8 in_haircolor = 0xFF, uint8 in_beardcolor = 0xFF, uint8 in_eyecolor1 = 0xFF, uint8 in_eyecolor2 = 0xFF, uint8 in_hairstyle = 0xFF, uint8 in_luclinface = 0xFF, uint8 in_beard = 0xFF, uint8 in_aa_title = 0xFF, uint32 in_drakkin_heritage = 0xFFFFFFFF, uint32 in_drakkin_tattoo = 0xFFFFFFFF, uint32 in_drakkin_details = 0xFFFFFFFF, float in_size = 0xFFFFFFFF);
     virtual void Stun(int duration);
     virtual void UnStun();
@@ -512,7 +512,7 @@ public:
     void Kill();
     bool PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id);
     bool TryDeathSave();
-    bool TryDivineSave();    
+    bool TryDivineSave();
     void DoBuffWearOffEffect(uint32 index);
     void TryTriggerOnCast(uint32 spell_id, bool aa_trigger);
     void TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger);
@@ -535,7 +535,7 @@ public:
     void CastOnCurer(uint32 spell_id);
     void CastOnCure(uint32 spell_id);
     void CastOnNumHitFade(uint32 spell_id);
-    int SlowMitigation(bool slow_msg=false, Mob *caster = nullptr,int slow_value = 0); 
+    int SlowMitigation(bool slow_msg=false, Mob *caster = nullptr,int slow_value = 0);
     int16 GetCritDmgMob(uint16 skill);
     int16 GetMeleeDamageMod_SE(uint16 skill);
     int16 GetMeleeMinDamageMod_SE(uint16 skill);
@@ -548,22 +548,22 @@ public:
     bool DoHPToManaCovert(uint16 mana_cost = 0);
     int32 ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard = false);
 
-    void  ModSkillDmgTaken(SkillType skill_num, int value); 
+    void  ModSkillDmgTaken(SkillType skill_num, int value);
     int16 GetModSkillDmgTaken(const SkillType skill_num);
-    void ModVulnerability(uint8 resist, int16 value); 
-    int16 GetModVulnerability(const uint8 resist);    
+    void ModVulnerability(uint8 resist, int16 value);
+    int16 GetModVulnerability(const uint8 resist);
 
     void SetAllowBeneficial(bool value) { m_AllowBeneficial = value; }
     bool GetAllowBeneficial() { return m_AllowBeneficial; }
     void SetDisableMelee(bool value) { m_DisableMelee = value; }
     bool IsMeleeDisabled() { return m_DisableMelee; }
-    
+
     bool IsOffHandAtk() const { return offhand; }
     inline void OffHandAtk(bool val) { offhand = val; }
 
     inline void SetFlurryChance(uint8 value) { NPC_FlurryChance = value;}
     uint8 GetFlurryChance() { return NPC_FlurryChance; }
-    
+
     static uint32 GetAppearanceValue(EmuAppearance iAppearance);
     void SendAppearancePacket(uint32 type, uint32 value, bool WholeZone = true, bool iIgnoreSelf = false, Client *specific_target=nullptr);
     void SetAppearance(EmuAppearance app, bool iIgnoreSelf = true);
@@ -581,7 +581,7 @@ public:
     void SetPetID(uint16 NewPetID);
     inline uint16 GetPetID()    const { return petid; }
     inline PetType GetPetType() const { return typeofpet; }
-    void SetPetType(PetType p) { typeofpet = p; } 
+    void SetPetType(PetType p) { typeofpet = p; }
     inline int16 GetPetPower() const { return (petpower < 0) ? 0 : petpower; }
     void SetPetPower(int16 p) { if (p < 0) petpower = 0; else petpower = p; }
     bool IsFamiliar() const { return(typeofpet == petFamiliar); }
@@ -602,8 +602,8 @@ public:
 
     uint8    invisible, see_invis;
     bool    invulnerable, invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
-    bool    see_invis_undead, see_hide, see_improved_hide;   
-    bool    qglobal;        
+    bool    see_invis_undead, see_hide, see_improved_hide;
+    bool    qglobal;
 
     virtual void SetAttackTimer();
     inline void    SetInvul(bool invul) { invulnerable=invul; }
@@ -769,7 +769,7 @@ public:
     inline int GetCWP() const { return(cur_wp); }
     void SetCurrentWP(uint16 waypoint) { cur_wp = waypoint; }
     virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther) { return FACTION_INDIFFERENT; }
-    
+
     inline bool IsTrackable() const { return(trackable); }
     Timer* GetAIThinkTimer() { return AIthink_timer; }
     Timer* GetAIMovementTimer() { return AImovement_timer; }
@@ -822,7 +822,7 @@ protected:
     virtual bool AI_EngagedCastCheck() { return(false); }
     virtual bool AI_PursueCastCheck() { return(false); }
     virtual bool AI_IdleCastCheck() { return(false); }
-    
+
 
     bool IsFullHP;
     bool moved;
@@ -831,7 +831,7 @@ protected:
     std::map<std::string, std::string> m_EntityVariables;
 
     int16 SkillDmgTaken_Mod[HIGHEST_SKILL+2];
-    int16 Vulnerability_Mod[HIGHEST_RESIST+2]; 
+    int16 Vulnerability_Mod[HIGHEST_RESIST+2];
     bool m_AllowBeneficial;
     bool m_DisableMelee;
     uint8 NPC_FlurryChance;
@@ -960,7 +960,7 @@ protected:
     uint8 pRunAnimSpeed;
     bool m_is_running;
 
-    
+
     Timer attack_timer;
     Timer attack_dw_timer;
     Timer ranged_timer;
@@ -972,7 +972,7 @@ protected:
     float rewind_x;
     float rewind_y;
     float rewind_z;
-    Timer rewind_timer; 
+    Timer rewind_timer;
 
     //spell casting vars
     Timer spellend_timer;
@@ -1002,7 +1002,7 @@ protected:
     uint8 eyecolor1; // the eyecolors always seem to be the same, maybe left and right eye?
     uint8 eyecolor2;
     uint8 hairstyle;
-    uint8 luclinface; // 
+    uint8 luclinface; //
     uint8 beard;
     uint32 drakkin_heritage;
     uint32 drakkin_tattoo;

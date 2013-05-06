@@ -224,7 +224,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			return;
 		}
 	}
-	
+
 	// guild doors
 	if(((keyneeded == 0) && (GetLockpick() == 0) && (guild_id == 0)) ||
 		(IsDoorOpen() && (opentype == 58)) ||
@@ -345,15 +345,15 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 				playerkey = keyneeded;
 				sender->Message(4, "You got it open!"); // more debug spam
 				if(!IsDoorOpen() || (opentype == 58))
-				{ 
+				{
 					md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;
-				} 
+				}
 				else
-				{ 
+				{
 					md->action = invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR;
-				} 
+				}
 			}
-			else 
+			else
 			{
 				sender->Message_StringID(4, DOORS_LOCKED);
 				safe_delete(outapp);
@@ -361,7 +361,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			}
 		}
 	}
-	
+
 	entity_list.QueueClients(sender, outapp, false);
 	if(!IsDoorOpen() || (opentype == 58))
 	{
@@ -414,13 +414,13 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	}
 
     if(((opentype == 57) || (opentype == 58)) && (strncmp(dest_zone, "NONE", strlen("NONE")) != 0))
-	{ // Teleport door! 
-		if (( strncmp(dest_zone,zone_name,strlen(zone_name)) == 0) && (!keyneeded)) 
+	{ // Teleport door!
+		if (( strncmp(dest_zone,zone_name,strlen(zone_name)) == 0) && (!keyneeded))
 		{
 			if(!keepoffkeyring)
 			{
 				sender->KeyRingAdd(playerkey);
-			}		
+			}
 			sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
 		}
 		else if (( !IsDoorOpen() || opentype == 58 ) && (keyneeded && ((keyneeded == playerkey) || sender->GetGM())))
@@ -428,7 +428,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			if(!keepoffkeyring)
 			{
 				sender->KeyRingAdd(playerkey);
-			}		
+			}
 			if(database.GetZoneID(dest_zone) == zone->GetZoneID())
 			{
 				sender->MovePC(zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
@@ -438,7 +438,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 				sender->MovePC(database.GetZoneID(dest_zone), dest_instance_id, dest_x, dest_y, dest_z, dest_heading);
 			}
 		}
-		if (( !IsDoorOpen() || opentype == 58 ) && (!keyneeded)) 
+		if (( !IsDoorOpen() || opentype == 58 ) && (!keyneeded))
 		{
 			if(database.GetZoneID(dest_zone) == zone->GetZoneID())
 			{
@@ -736,45 +736,45 @@ void Doors::SetLocation(float x, float y, float z)
 
 void Doors::SetX(float in) {
 	entity_list.DespawnAllDoors();
-	pos_x = in; 
+	pos_x = in;
 	entity_list.RespawnAllDoors();
 }
-void Doors::SetY(float in) { 
+void Doors::SetY(float in) {
 	entity_list.DespawnAllDoors();
-	pos_y = in; 
+	pos_y = in;
 	entity_list.RespawnAllDoors();
 }
-void Doors::SetZ(float in) { 
+void Doors::SetZ(float in) {
 	entity_list.DespawnAllDoors();
-	pos_z = in; 
+	pos_z = in;
 	entity_list.RespawnAllDoors();
 }
-void Doors::SetHeading(float in) { 
+void Doors::SetHeading(float in) {
 	entity_list.DespawnAllDoors();
-	heading = in; 
+	heading = in;
 	entity_list.RespawnAllDoors();
 }
 
-void Doors::SetIncline(int in) { 
+void Doors::SetIncline(int in) {
 	entity_list.DespawnAllDoors();
-	incline = in; 
+	incline = in;
 	entity_list.RespawnAllDoors();
 }
 
-void Doors::SetOpenType(uint8 in) { 
+void Doors::SetOpenType(uint8 in) {
 	entity_list.DespawnAllDoors();
-	opentype = in; 
+	opentype = in;
 	entity_list.RespawnAllDoors();
 }
 
-void Doors::SetDoorName(char* name) { 
+void Doors::SetDoorName(char* name) {
 	entity_list.DespawnAllDoors();
-	memset(door_name, 0, sizeof(door_name)); 
-	strncpy(door_name, name, sizeof(door_name)); 
+	memset(door_name, 0, sizeof(door_name));
+	strncpy(door_name, name, sizeof(door_name));
 	entity_list.RespawnAllDoors();
 }
 
-void Doors::SetSize(uint16 in) { 
+void Doors::SetSize(uint16 in) {
 	entity_list.DespawnAllDoors();
 	size = in;
 	entity_list.RespawnAllDoors();

@@ -57,7 +57,7 @@ extern volatile bool ZoneLoaded;
            ushort *array;
            struct seminfo *__buf;
            void *__pad;
-       };        
+       };
 #endif
     #endif
 #endif
@@ -106,7 +106,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 #error ifstreams seem to break BSD...
 #endif
 	ifstream in;in.open(SPELLS_FILE);
-	
+
 	if(!in.is_open()){
 		LogFile->write(EQEMuLog::Error, "File '%s' not found in same directory as zone.exe, spell loading FAILED!", SPELLS_FILE);
 		return;
@@ -122,7 +122,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		//	cout << "BLEH";
 		//	getch();
 		//}
-		
+
 		//in.getline(&temp, 624);
 		in.get(temp);
 		while(chrcmpI(&temp, &sep))
@@ -138,7 +138,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -163,7 +163,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -177,7 +177,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -190,7 +190,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -202,7 +202,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		//cout << spells[tempid].other_casts << '^';
 		a=0;
 		for(u=0;u<64;u++)
-			token[u]=(char)0;		
+			token[u]=(char)0;
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -215,7 +215,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -228,7 +228,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -241,7 +241,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -252,7 +252,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		//cout << spells[tempid].range << '^';
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -265,7 +265,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -279,7 +279,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -292,8 +292,8 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
-		in.get(temp); 
+
+		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
 			strncat(token,&temp,1);
@@ -301,12 +301,12 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			in.get(temp);
 		}
 		spells[tempid].cast_time=atoi(token);
-		
+
 		//cout << spells[tempid].cast_time << '^';
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -319,7 +319,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -332,7 +332,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -345,7 +345,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -359,7 +359,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -372,7 +372,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -385,7 +385,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		int y;
 		for(y=0; y< 12;y++)
 		{
@@ -401,8 +401,8 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a=0;
 			for(u=0;u<64;u++)
 				token[u]=(char)0;
-			
-			
+
+
 		}
 		for(y=0; y< 12;y++)
 		{
@@ -418,7 +418,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a=0;
 			for(u=0;u<64;u++)
 				token[u]=(char)0;
-			
+
 		}
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
@@ -427,12 +427,12 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a++;
 			in.get(temp);
 		}
-		spells[tempid].icon=atoi(token); 
+		spells[tempid].icon=atoi(token);
 		//cout << spells[tempid].icon << '^';
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -440,13 +440,13 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a++;
 			in.get(temp);
 		}
-		spells[tempid].memicon=atoi(token); 
+		spells[tempid].memicon=atoi(token);
 		//cout << spells[tempid].memicon << '^';
-		
+
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		for(y=0; y< 4;y++)
 		{
 			in.get(temp);
@@ -461,7 +461,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a=0;
 			for(u=0;u<64;u++)
 				token[u]=(char)0;
-			
+
 		}
 		for(y=0; y< 4;y++)
 		{
@@ -477,7 +477,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a=0;
 			for(u=0;u<64;u++)
 				token[u]=(char)0;
-		}	
+		}
 		for(y=0; y< 4;y++)
 		{
 			in.get(temp);
@@ -492,7 +492,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a=0;
 			for(u=0;u<64;u++)
 				token[u]=(char)0;
-			
+
 		}
 		for(y=0; y< 12;y++)
 		{
@@ -508,7 +508,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a=0;
 			for(u=0;u<64;u++)
 				token[u]=(char)0;
-			
+
 		}
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
@@ -522,7 +522,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		//cout << spells[tempid].LightType << '^';
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -535,7 +535,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -548,7 +548,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 
 		while(chrcmpI(&temp,&sep))
@@ -562,7 +562,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		for(y=0; y< 12;y++)
 		{
 			in.get(temp);
@@ -577,7 +577,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a=0;
 			for(u=0;u<64;u++)
 				token[u]=(char)0;
-			
+
 		}
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
@@ -591,7 +591,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -617,7 +617,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -630,7 +630,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -643,7 +643,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		in.get(temp);
 		while(chrcmpI(&temp,&sep))
 		{
@@ -657,7 +657,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		for(y=0; y< 15;y++)
 		{
 			in.get(temp);
@@ -672,7 +672,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			a=0;
 			for(u=0;u<64;u++)
 				token[u]=(char)0;
-			
+
 		} //cout << "end class";
 		  /*for(y=0; y< 3;y++)
 		  {
@@ -688,7 +688,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		  a=0;
 		  for(u=0;u<64;u++)
 		  token[u]=(char)0;
-		  
+
 			}
 			in.get(temp);
 			while(chrcmpI(&temp,&sep))
@@ -748,11 +748,11 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		}
 		spells[tempid].SpellAffectIndex=atoi(token);
 		//cout << spells[tempid].SpellAffectIndex << '^';
-		
+
 		a=0;
 		for(u=0;u<64;u++)
 			token[u]=(char)0;
-		
+
 		for(y=0; y< 23;y++)
         {
 			in.get(temp);
@@ -768,7 +768,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			for(u=0;u<64;u++)
 			    token[u]=(char)0;
 		}
-		
+
         in.get(temp);
 	    while(chrcmpI(&temp,&sep))
 			{
@@ -781,7 +781,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 		a=0;
 		for(u=0;u<64;u++)
 		    token[u]=(char)0;
-			
+
         in.get(temp);
 		for(y=0; y< 2;y++)
 			{
@@ -814,17 +814,17 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 
         while(temp!='\n')
 			in.get(temp);
-		
+
 		//cout << endl;
 		if(tempid==SPDAT_RECORDS-1) break;
-	} 
+	}
 	//for(u=0;u< SPDAT_RECORDS;u++)
 	// cout << u << ' ' << spells[u].name << '^';
-	
+
 	spells_loaded = true;
 	cout << "Spells loaded.\n";
 	in.close();
-	
+
 }
 #endif
 
@@ -842,7 +842,7 @@ void ZoneDatabase::UpdateAndDeleteAATimers(uint32 charid){
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 	char *query2 = 0;
-	
+
 	if (!RunQuery(query, MakeAnyLenString(&query, "delete from aa_timers where charid=%i and UNIX_TIMESTAMP(now())>=end",charid), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "UpdateAATimers query '%s' %s", query, errbuf);
 	}
@@ -867,7 +867,7 @@ void ZoneDatabase::GetAATimers(uint32 charid){
     char *query = 0;
     MYSQL_RES *result;
 	MYSQL_ROW row;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT ability,begin,end from aa_timers WHERE charid=%i", charid), errbuf, &result)) {
 		while( ( row = mysql_fetch_row(result) ) ){
 			UseAA_Struct* uaa=new UseAA_Struct();
@@ -881,7 +881,7 @@ void ZoneDatabase::GetAATimers(uint32 charid){
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, "Database::GetAATimers query '%s' %s", query, errbuf);
-	}	
+	}
 	safe_delete_array(query);
 }
 
@@ -899,7 +899,7 @@ uint32 ZoneDatabase::GetTimerRemaining(uint32 charid,uint32 ability){
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, "Database::GetTimerRemaining query '%s' %s", query, errbuf);
-	}	
+	}
 	safe_delete_array(query);
 	return remain;
 }
@@ -955,7 +955,7 @@ uint16 Client::GetCombinedAC_TEST() {
 		const ItemInst* inst = m_inv[i];
 		if (!inst || !inst->IsType(ItemTypeCommon))
 			continue;
-	    
+
 		const Item_Struct* item = inst->GetItem();
 		if (item->FocusId && (item->FocusId != 0xFFFF)) {
 			if (IsIncreaseDurationSpell(item->FocusId)) {
@@ -975,7 +975,7 @@ bool Client::GetReduceManaCostItem(uint16 &spell_id, char *itemname)
 		const ItemInst* inst = m_inv[i];
 		if (!inst || !inst->IsType(ItemTypeCommon))
 			continue;
-	    
+
 		const Item_Struct* item = inst->GetItem();
 		if (item->FocusId && (item->FocusId != 0xFFFF)) {
 			if (IsReduceManaSpell(item->FocusId)) {
@@ -995,7 +995,7 @@ bool Client::GetReduceCastTimeItem(uint16 &spell_id, char *itemname)
 		const ItemInst* inst = m_inv[i];
 		if (!inst || !inst->IsType(ItemTypeCommon))
 			continue;
-	    
+
 		const Item_Struct* item = inst->GetItem();
 		if (item->FocusId && (item->FocusId != 0xFFFF)) {
 			if (IsReduceCastTimeSpell(item->FocusId)) {
@@ -1015,7 +1015,7 @@ bool Client::GetExtendedRangeItem(uint16 &spell_id, char *itemname)
 		const ItemInst* inst = m_inv[i];
 		if (!inst || !inst->IsType(ItemTypeCommon))
 			continue;
-	    
+
 		const Item_Struct* item = inst->GetItem();
 		if (item->FocusId && (item->FocusId != 0xFFFF)) {
 			if (IsExtRangeSpell(item->FocusId)) {
@@ -1035,7 +1035,7 @@ bool Client::GetImprovedHealingItem(uint16 &spell_id, char *itemname)
 		const ItemInst* inst = m_inv[i];
 		if (!inst || !inst->IsType(ItemTypeCommon))
 			continue;
-	    
+
 		const Item_Struct* item = inst->GetItem();
 		if (item->FocusId && (item->FocusId != 0xFFFF)) {
 			if (IsImprovedHealingSpell(item->FocusId)) {
@@ -1055,7 +1055,7 @@ bool Client::GetImprovedDamageItem(uint16 &spell_id, char *itemname)
 		const ItemInst* inst = m_inv[i];
 		if (!inst || !inst->IsType(ItemTypeCommon))
 			continue;
-	    
+
 		const Item_Struct* item = inst->GetItem();
 		if (item->FocusId && (item->FocusId != 0xFFFF)) {
 			if (IsImprovedDamageSpell(item->FocusId)) {
@@ -1074,7 +1074,7 @@ int32 Client::GenericFocus(uint16 spell_id, uint16 modspellid)
 	int modifier = 100, i;
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 	const SPDat_Spell_Struct &modspell = spells[modspellid];
-    
+
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{
 		if(IsBlankSpellEffect(modspellid, i))
@@ -1202,22 +1202,22 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		//Message(0,"You can use a new discipline in %i minutes %i seconds.", (disc_timer.GetRemainingTime()/1000)/60,	disc_timer.GetRemainingTime()/1000%60);
 		return;
 	}
-	
+
 	//reuse times are a little messes up, they should scale down somehow
 	//as you gain in levels, but im not sure how, so its just a lvl 60 bonus right now
-	
+
 	//should change this to check classes better.
-	
+
 	//both in seconds, converted at the end.
 	uint32 duration = 0;
 	uint32 reuse = 0;
-	
+
     switch(disc_in->disc_id){
 	// Shared?
 	case discResistant: { // Resistant
 		// 1 minute duration
 		// 1 hour reuse
-		// +3 to +10 to resists 
+		// +3 to +10 to resists
 		if (GetLevel()<=29)
 			return;
 		duration = 60;
@@ -1517,11 +1517,11 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 	case 0:{ // Timer request
 		break;
 	}
-	default: 
+	default:
 	    LogFile->write(EQEMuLog::Error, "Unknown Discipline requested by client: %s class: %i Disciline:%i", GetName(), class_,disc_in->disc_id);
 	    return;
     }
-    
+
     if(reuse != 0) {
 		p_timers.Start(pTimerDisciplineReuse, reuse);
 		//nonpersistent timer for the 'discipline ready' message
@@ -1529,7 +1529,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 	}
 	if(duration != 0)
 		disc_elapse.Start(1000*duration);
-	
+
 	disc_inuse = disc_in->disc_id;
 }*/
 
@@ -1654,7 +1654,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 			}
 		}
 		iterator.Advance();
-	}	
+	}
 }*/
 #endif	// solar: old code
 
@@ -1669,7 +1669,7 @@ void ZoneDatabase::AddLootTableToNPC(uint32 loottable_id, ItemList* itemlist, ui
 	*silver = 0;
 	*gold = 0;
 	*plat = 0;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, mincash, maxcash, avgcoin FROM loottable WHERE id=%i", loottable_id), errbuf, &result)) {
 		safe_delete_array(query);
 		if (mysql_num_rows(result) == 1) {
@@ -1721,7 +1721,7 @@ void ZoneDatabase::AddLootTableToNPC(uint32 loottable_id, ItemList* itemlist, ui
 		safe_delete_array(query);
 		return;
 	}
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT loottable_id, lootdrop_id, multiplier, probability FROM loottable_entries WHERE loottable_id=%i", loottable_id), errbuf, &result)) {
 		safe_delete_array(query);
 		while ((row = mysql_fetch_row(result))) {
@@ -1739,7 +1739,7 @@ void ZoneDatabase::AddLootTableToNPC(uint32 loottable_id, ItemList* itemlist, ui
 		safe_delete_array(query);
 		return;
 	}
-	
+
 	return;
 }
 
@@ -1750,7 +1750,7 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
     char *query = 0;
     MYSQL_RES *result;
     MYSQL_ROW row;
-	
+
 // This is Wiz's updated Pool Looting functionality.  Eventually, the database format should be moved over to use this
 // or implemented to support both methods.  (A unique identifier in lootable_entries indicates to roll for a pool item
 // in another table.
@@ -1760,14 +1760,14 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
 	uint32 itemchance[50];
 	uint16 itemcharges[50];
 	uint8 i = 0;
-	
+
 	for (int m=0;m < 50;m++)
 	{
 		items[m]=0;
 		itemchance[m]=0;
 		itemcharges[m]=0;
 	}
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT lootdrop_id, item_id, item_charges, equip_item, chance FROM lootdrop_entries WHERE lootdrop_id=%i order by chance desc", lootdrop_id), errbuf, &result))
 	{
 		safe_delete_array(query);
@@ -1781,7 +1781,7 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
 		}
 		uint32 res;
 		i = 0;
-		
+
         if (chancepool!=0) //avoid divide by zero if some mobs have 0 for chancepool
         {
             res = rand()%chancepool;
@@ -1790,7 +1790,7 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
         {
             res = 0;
         }
-		
+
 		while (items[i] != 0)
 		{
 			if (res <= itemchance[i])
@@ -1839,7 +1839,7 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
 					item->equipSlot = 0;
 					(*itemlist).Append(item);
 				}
-				
+
 				//mysql_free_result(result);
 				//return;
 			}
@@ -1853,7 +1853,7 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
 		safe_delete_array(query);
 		return;
 	}
-	
+
 	return;
 }
 #endif*/

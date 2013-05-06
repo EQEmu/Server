@@ -63,17 +63,17 @@ public:
 	bool	GetInventory(uint32 char_id, Inventory* inv);
 	bool	GetInventory(uint32 account_id, char* name, Inventory* inv);
 	bool    SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
-	
-	
+
+
 	string	GetBook(const char *txtfile);
-	
+
 	/*
 	 * Item Methods
 	 */
 	ItemInst* CreateItem(uint32 item_id, int16 charges=0, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0);
 	ItemInst* CreateItem(const Item_Struct* item, int16 charges=0, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0);
 	ItemInst* CreateBaseItem(const Item_Struct* item, int16 charges=0);
-	
+
 	/*
 	 * Shared Memory crap
 	 */
@@ -85,7 +85,7 @@ public:
     const Item_Struct* IterateItems(uint32* id);
     const Item_Struct* GetItem(uint32 id);
     const EvolveInfo* GetEvolveInfo(uint32 loregroup);
-    
+
     //faction lists
     void GetFactionListInfo(uint32 &list_count, uint32 &max_lists);
 	const NPCFactionList* GetNPCFactionEntry(uint32 id);
@@ -111,7 +111,7 @@ public:
     void LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
 
 protected:
-	
+
     EQEmu::MemoryMappedFile *items_mmf;
     EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
     EQEmu::MemoryMappedFile *faction_mmf;

@@ -25,7 +25,7 @@ typedef enum {
 	BT_Giant			= 4,
 	BT_Construct		= 5,
 	BT_Extraplanar		= 6,
-	BT_Magical			= 7,	//this name might be a bit off, 
+	BT_Magical			= 7,	//this name might be a bit off,
 	BT_SummonedUndead	= 8,
 	BT_RaidGiant		= 9,
 	//					...

@@ -120,7 +120,7 @@ void Client::SendLogServer()
 
 	if(RuleB(Chat, EnableVoiceMacros))
 		l->enablevoicemacros = 1;
-	
+
 	l->enable_pvp = (RuleI(World, PVPSettings));
 
 	if(RuleB(World, IsGMPetitionWindowEnabled))
@@ -188,7 +188,7 @@ void Client::SendCharInfo() {
 void Client::SendMaxCharCreate(int max_chars) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
-	
+
 	mc->max_chars = max_chars;
 
 	QueuePacket(outapp);
@@ -219,7 +219,7 @@ void Client::SendMembership() {
 		15. In-Game Popup Advertising
 		That is 15 possible fields, and there are 15 unknowns in the struct...Coincidence?
 	*/
-	
+
 	mc->membership = 2;				//Hardcode to gold for now. We don't use anything else.
 	mc->races = 0x1ffff;			// Available Races (4110 for silver)
 	mc->classes = 0x1ffff;			// Available Classes (4614 for silver) - Was 0x101ffff
@@ -236,7 +236,7 @@ void Client::SendMembership() {
 	mc->entries[9] = 0xffffffff;	// Unknown - Maybe Loyalty Points every 12 hours? 60 per week for Silver
 	mc->entries[10] = 1;			// 1 for Silver
 	mc->entries[11] = 0xffffffff;	// Shared Bank Slots
-	mc->entries[12] = 0xffffffff;	// Unknown - Maybe Max Active Tasks? 
+	mc->entries[12] = 0xffffffff;	// Unknown - Maybe Max Active Tasks?
 	mc->entries[13] = 1;			// 1 for Silver
 	mc->entries[14] = 1;			// 0 for Silver
 	mc->entries[15] = 1;			// 0 for Silver
@@ -263,7 +263,7 @@ void Client::SendMembershipSettings() {
 	{
 		for (int setting_index=0; setting_index < 3; setting_index++)
 		{
-			
+
 			mds->settings[entry_count].setting_index = setting_index;
 			mds->settings[entry_count].setting_id = setting_id;
 			mds->settings[entry_count].setting_value = gold_settings[setting_id];
@@ -327,7 +327,7 @@ void Client::SendMembershipSettings() {
 	mds->exit_url_length = 0;	// Live uses 42
 	//strcpy(eq->exit_url, "http://www.everquest.com/free-to-play/exit");
 	mds->exit_url_length2 = 0;	// Live uses 49
-	//strcpy(eq->exit_url2, "http://www.everquest.com/free-to-play/exit-silver");	
+	//strcpy(eq->exit_url2, "http://www.everquest.com/free-to-play/exit-silver");
 
 	/*
 	Account Access Level Settings
@@ -658,7 +658,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 		DumpPacket(app);
 		// the previous behavior was essentially returning true here
 		// but that seems a bit odd to me.
-		return true; 
+		return true;
 	}
 
 	CharCreate_Struct *cc = (CharCreate_Struct*)app->pBuffer;
@@ -672,7 +672,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	}
     else
 		SendCharInfo();
-	
+
 	return true;
 }
 
@@ -947,7 +947,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 	switch(opcode)
 	{
 		case OP_World_Client_CRC1:
-		case OP_World_Client_CRC2: 
+		case OP_World_Client_CRC2:
 		{
 			// There is no obvious entry in the CC struct to indicate that the 'Start Tutorial button
 			// is selected when a character is created. I have observed that in this case, OP_EnterWorld is sent
@@ -968,7 +968,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleGenerateRandomNamePacket(app);
 		}
-		case OP_CharacterCreateRequest: 
+		case OP_CharacterCreateRequest:
 		{
 			// New OpCode in SoF
 			return HandleCharacterCreateRequestPacket(app);
@@ -981,11 +981,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleEnterWorldPacket(app);
 		}
-		case OP_DeleteCharacter: 
+		case OP_DeleteCharacter:
 		{
 			return HandleDeleteCharacterPacket(app);
 		}
-		case OP_WorldComplete: 
+		case OP_WorldComplete:
 		{
 			eqs->Close();
 			return true;
@@ -1002,12 +1002,12 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		case OP_LoginComplete:
 		case OP_ApproveWorld:
 		case OP_WorldClientReady:
-		{ 
+		{
 			// Essentially we are just 'eating' these packets, indicating
 			// they are handled.
 			return true;
 		}
-		default: 
+		default:
 		{
 			clog(WORLD__CLIENT_ERR,"Received unknown EQApplicationPacket");
 			_pkt(WORLD__CLIENT_ERR,app);
@@ -1492,7 +1492,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 				clog(WORLD__CLIENT_ERR,"Error getting zone id for '%s'", startzone);
 		}
 		else   // otherwise use normal starting zone logic
-		{	
+		{
 			bool ValidStartZone = false;
 
 			if(ClientVersionBit & BIT_TitaniumAndEarlier)
@@ -1561,9 +1561,9 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
     for(int i = 0; i < combos; ++i) {
         if(character_create_race_class_combos[i].Class == cc->class_ &&
             character_create_race_class_combos[i].Race == cc->race &&
-            character_create_race_class_combos[i].Deity == cc->deity) { 
-                if(RuleB(World, EnableTutorialButton) && 
-                    (RuleI(World, TutorialZoneID) == cc->start_zone || 
+            character_create_race_class_combos[i].Deity == cc->deity) {
+                if(RuleB(World, EnableTutorialButton) &&
+                    (RuleI(World, TutorialZoneID) == cc->start_zone ||
                     (character_create_race_class_combos[i].Zone == cc->start_zone))) {
                     class_combo = character_create_race_class_combos[i];
                     found = true;
@@ -1599,11 +1599,11 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
     }
 
     max_stats = allocation.DefaultPointAllocation[0] +
-        allocation.DefaultPointAllocation[1] + 
-        allocation.DefaultPointAllocation[2] + 
-        allocation.DefaultPointAllocation[3] + 
-        allocation.DefaultPointAllocation[4] + 
-        allocation.DefaultPointAllocation[5] + 
+        allocation.DefaultPointAllocation[1] +
+        allocation.DefaultPointAllocation[2] +
+        allocation.DefaultPointAllocation[3] +
+        allocation.DefaultPointAllocation[4] +
+        allocation.DefaultPointAllocation[5] +
         allocation.DefaultPointAllocation[6];
 
     if(cc->STR > allocation.BaseStats[0] + max_stats || cc->STR < allocation.BaseStats[0]) {
@@ -1845,11 +1845,11 @@ void Client::SetClassStartingSkills( PlayerProfile_Struct *pp )
                 i == RESEARCH ||
                 i == ALCHEMY ||
                 i == BAKING ||
-                i == TAILORING || 
+                i == TAILORING ||
                 i == BLACKSMITHING ||
                 i == FLETCHING ||
-                i == BREWING || 
-                i == POTTERY || 
+                i == BREWING ||
+                i == POTTERY ||
                 i == JEWELRY_MAKING ||
                 i == BEGGING) {
                 continue;

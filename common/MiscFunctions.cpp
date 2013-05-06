@@ -83,7 +83,7 @@ void CoutTimestamp(bool ms) {
 	time(&rawtime);
 	gmt_t = gmtime(&rawtime);
 
-    struct timeval read_time;	
+    struct timeval read_time;
     gettimeofday(&read_time,0);
 
 	cout << (gmt_t->tm_year + 1900) << "/" << setw(2) << setfill('0') << (gmt_t->tm_mon + 1) << "/" << setw(2) << setfill('0') << gmt_t->tm_mday << " " << setw(2) << setfill('0') << gmt_t->tm_hour << ":" << setw(2) << setfill('0') << gmt_t->tm_min << ":" << setw(2) << setfill('0') << gmt_t->tm_sec;
@@ -383,7 +383,7 @@ const char * itoa(int num, char* a,int b) {
 }
 #endif
 
-/* 
+/*
  * generate a random integer in the range low-high this
  * should be used instead of the rand()%limit method
  */
@@ -425,9 +425,9 @@ uint32 rnd_hash( time_t t, clock_t c )
         // Get a uint32 from t and c
         // Better than uint32(x) in case x is floating point in [0,1]
         // Based on code by Lawrence Kirby (fred@genesis.demon.co.uk)
-        
+
         static uint32 differ = 0;  // guarantee time-based seeds will change
-        
+
         uint32 h1 = 0;
         unsigned char *p = (unsigned char *) &t;
         for( size_t i = 0; i < sizeof(t); ++i )
@@ -553,7 +553,7 @@ static unsigned int case_6 (void){
 char *CleanMobName(const char *in, char *out)
 {
 	unsigned i, j;
-	
+
 	for(i = j = 0; i < strlen(in); i++)
 	{
 		// convert _ to space.. any other conversions like this?  I *think* this

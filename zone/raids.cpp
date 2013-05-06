@@ -416,7 +416,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 		return;
 
 	range = caster->GetAOERange(spellid);
-	
+
 	float range2 = range*range;
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
@@ -549,14 +549,14 @@ void Raid::BalanceMana(int32 penalty, uint32 gid)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				if((members[gi].member->GetMaxMana() - manataken) < 1){ 
-					members[gi].member->SetMana(1);		
-					if (members[gi].member->IsClient())		
-						members[gi].member->CastToClient()->SendManaUpdate();	 
+				if((members[gi].member->GetMaxMana() - manataken) < 1){
+					members[gi].member->SetMana(1);
+					if (members[gi].member->IsClient())
+						members[gi].member->CastToClient()->SendManaUpdate();
 				}
 				else{
 					members[gi].member->SetMana(members[gi].member->GetMaxMana() - manataken);
-					if (members[gi].member->IsClient())		
+					if (members[gi].member->IsClient())
 						members[gi].member->CastToClient()->SendManaUpdate();
 				}
 			}
@@ -569,19 +569,19 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
 	//avoid unneeded work
 	if(copper == 0 && silver == 0 && gold == 0 && platinum == 0)
 		return;
-	
+
   uint32 i;
   uint8 membercount = 0;
-  for (i = 0; i < MAX_RAID_MEMBERS; i++) { 
+  for (i = 0; i < MAX_RAID_MEMBERS; i++) {
 	  if (members[i].member != nullptr) {
 
-		  membercount++; 
-	  } 
-  } 
+		  membercount++;
+	  }
+  }
 
-  if (membercount == 0) 
+  if (membercount == 0)
 	  return;
-  
+
   uint32 mod;
   //try to handle round off error a little better
   if(membercount > 1) {
@@ -601,7 +601,7 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
   		copper += 10 * mod;
   	}
   }
-  
+
   //calculate the splits
   //We can still round off copper pieces, but I dont care
   uint32 sc;
@@ -615,7 +615,7 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
   buf[63] = '\0';
   string msg = "You receive";
   bool one = false;
-  
+
   if(ppsplit > 0) {
 	 snprintf(buf, 63, " %u platinum", ppsplit);
 	 msg += buf;
@@ -645,12 +645,12 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
 	 one = true;
   }
   msg += " as your split";
-  
-  for (i = 0; i < MAX_RAID_MEMBERS; i++) { 
+
+  for (i = 0; i < MAX_RAID_MEMBERS; i++) {
 	  if (members[i].member != nullptr) { // If Group Member is Client
 		//I could not get MoneyOnCorpse to work, so we use this
 		members[i].member->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
-		  
+
 		members[i].member->Message(2, msg.c_str());
 	  }
   }
@@ -664,7 +664,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 		return;
 
 	range = caster->GetAOERange(spellid);
-	
+
 	float range2 = range*range;
 
 	for(z=0; z < MAX_RAID_MEMBERS; z++) {
@@ -694,7 +694,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 
 void Raid::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading, uint32 gid)
 {
-	for(int i = 0; i < MAX_RAID_MEMBERS; i++) 
+	for(int i = 0; i < MAX_RAID_MEMBERS; i++)
 	{
 		if(members[i].member)
 		{
@@ -703,13 +703,13 @@ void Raid::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x
 				members[i].member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
 			}
 		}
-	
+
 	}
 }
 
 void Raid::TeleportRaid(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading)
 {
-	for(int i = 0; i < MAX_RAID_MEMBERS; i++) 
+	for(int i = 0; i < MAX_RAID_MEMBERS; i++)
 	{
 		if(members[i].member)
 		{
@@ -741,7 +741,7 @@ void Raid::AddRaidLooter(const char* looter)
 	}
 
 	safe_delete_array(query);
-	
+
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
 		if(strcmp(looter, members[x].membername) == 0)
@@ -778,7 +778,7 @@ void Raid::RemoveRaidLooter(const char* looter)
 	}
 
 	safe_delete_array(query);
-	
+
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
 		if(strcmp(looter, members[x].membername) == 0)
@@ -987,8 +987,8 @@ void Raid::SendRaidMove(const char* who, Client *to)
 	SendRaidAdd(who, to);
 	if(c && c == to){
 		SendBulkRaid(c);
-		if(IsLocked()) { 
-			SendRaidLockTo(c); 
+		if(IsLocked()) {
+			SendRaidLockTo(c);
 		}
 	}
 }
@@ -1080,7 +1080,7 @@ void Raid::SendGroupUpdate(Client *to)
 		return;
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate2_Struct));
-	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;	
+	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
 	int index = 0;
 	uint32 grp = GetGroup(to->GetName());
@@ -1365,7 +1365,7 @@ void Raid::SendHPPacketsTo(Client *c)
 {
 	if(!c)
 		return;
-	
+
 	uint32 gid = this->GetGroup(c);
 	EQApplicationPacket hpapp;
         EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));

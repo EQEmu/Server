@@ -18,7 +18,7 @@
 #ifndef DEITY_H
 #define DEITY_H
 
-/* 
+/*
 ** Diety List
 */
 #define DEITY_AGNOSTIC		396		//drop the high bit for 140
@@ -37,7 +37,7 @@
 #define DEITY_TUNARE		215
 
 //Guessed:
-#define DEITY_BERTOX		201	
+#define DEITY_BERTOX		201
 #define DEITY_RODCET		212
 #define DEITY_VEESHAN		216
 

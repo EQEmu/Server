@@ -41,7 +41,7 @@ typedef const char Const_char;
 #include "../common/spdat.h"
 
 #ifdef THIS	 /* this macro seems to leak out on some systems */
-#undef THIS		
+#undef THIS
 #endif
 
 
@@ -6571,7 +6571,7 @@ XS(XS_Mob_SignalClient)
 		Mob *		THIS;
 		Client*		client = nullptr;
 		uint32		data = (uint32)SvUV(ST(2));
-	
+
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
 			THIS = INT2PTR(Mob *,tmp);
@@ -6926,7 +6926,7 @@ XS(XS_Mob_QuestReward)
 		Client*		client = nullptr;
 		int32		silver = 0;
 		int32		gold = 0;
-		int32		platinum = 0;		
+		int32		platinum = 0;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -7162,7 +7162,7 @@ XS(XS_Mob_SpellEffect)
 		uint32		unk20 = 3000;
 		bool		perm_effect = false;
 		Client*		client = nullptr;
-		
+
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -7188,7 +7188,7 @@ XS(XS_Mob_SpellEffect)
 			if(client == nullptr)
 				Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 		}
-		
+
 
 		THIS->SendSpellEffect(effect, duration, finish_delay, zone_wide, unk20, perm_effect, client);
 	}
@@ -8079,7 +8079,7 @@ XS(boot_Mob)
 	char file[256];
 	strncpy(file, __FILE__, 256);
 	file[255] = 0;
-	
+
 	if(items != 1)
 		fprintf(stderr, "boot_quest does not take any arguments.");
 	char buf[128];
@@ -8368,7 +8368,7 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "IsMeleeDisabled"), XS_Mob_IsMeleeDisabled, file, "$$");
 		newXSproto(strcpy(buf, "SetFlurryChance"), XS_Mob_SetFlurryChance, file, "$$");
 		newXSproto(strcpy(buf, "GetFlurryChance"), XS_Mob_GetFlurryChance, file, "$");
-			
+
 	XSRETURN_YES;
 }
 

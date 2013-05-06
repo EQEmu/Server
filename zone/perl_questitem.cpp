@@ -58,7 +58,7 @@ XS(XS_QuestItem_GetName) {
 }
 
 XS(XS_QuestItem_SetScale);
-XS(XS_QuestItem_SetScale) 
+XS(XS_QuestItem_SetScale)
 {
 	dXSARGS;
 	if (items != 2)
@@ -66,7 +66,7 @@ XS(XS_QuestItem_SetScale)
 	{
 		ItemInst *	THIS;
 		float		Mult;
-		
+
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
 			THIS = INT2PTR(ItemInst *,tmp);
@@ -86,7 +86,7 @@ XS(XS_QuestItem_SetScale)
 }
 
 XS(XS_QuestItem_ItemSay);
-XS(XS_QuestItem_ItemSay) 
+XS(XS_QuestItem_ItemSay)
 {
 	dXSARGS;
 	if (items != 2 && items != 3)
@@ -251,7 +251,7 @@ extern "C"
 #endif
 
 XS(boot_QuestItem);
-XS(boot_QuestItem) 
+XS(boot_QuestItem)
 {
 	dXSARGS;
 	char file[256];

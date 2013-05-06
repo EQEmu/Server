@@ -66,7 +66,7 @@ void WorldGuildManager::SendGuildDelete(uint32 guild_id) {
 
 void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 	switch(pack->opcode) {
-	
+
 	case ServerOP_RefreshGuild: {
 		if(pack->size != sizeof(ServerGuildRefresh_Struct)) {
 			_log(GUILDS__ERROR, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildRefresh_Struct));
@@ -74,19 +74,19 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		}
 		ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
 		_log(GUILDS__REFRESH, "Received and broadcasting guild refresh for %d, changes: name=%d, motd=%d, rank=d, relation=%d", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
-		
+
 		//broadcast this packet to all zones.
 		zoneserver_list.SendPacket(pack);
-		
+
 		//preform a local refresh.
 		if(!RefreshGuild(s->guild_id)) {
 			_log(GUILDS__ERROR, "Unable to preform local refresh on guild %d", s->guild_id);
 			//can we do anything?
 		}
-		
+
 		break;
 	}
-	
+
 	case ServerOP_GuildCharRefresh: {
 		if(pack->size != sizeof(ServerGuildCharRefresh_Struct)) {
 			_log(GUILDS__ERROR, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildCharRefresh_Struct));
@@ -94,18 +94,18 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		}
 		ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
 		_log(GUILDS__REFRESH, "Received and broadcasting guild member refresh for char %d to all zones with members of guild %d", s->char_id, s->guild_id);
-		
+
 		//preform the local update
 		client_list.UpdateClientGuild(s->char_id, s->guild_id);
-		
+
 		//broadcast this update to any zone with a member in this guild.
 		//client_list.SendGuildPacket(s->guild_id, pack);
 		//because im sick of this not working, sending it to all zones, just spends a bit more bandwidth.
 		zoneserver_list.SendPacket(pack);
-		
+
 		break;
 	}
-	
+
 	case ServerOP_DeleteGuild: {
 		if(pack->size != sizeof(ServerGuildID_Struct)) {
 			_log(GUILDS__ERROR, "Received ServerOP_DeleteGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildID_Struct));
@@ -113,31 +113,31 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		}
 		ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
 		_log(GUILDS__REFRESH, "Received and broadcasting guild delete for guild %d", s->guild_id);
-		
+
 		//broadcast this packet to all zones.
 		zoneserver_list.SendPacket(pack);
-		
+
 		//preform a local refresh.
 		if(!LocalDeleteGuild(s->guild_id)) {
 			_log(GUILDS__ERROR, "Unable to preform local delete on guild %d", s->guild_id);
 			//can we do anything?
 		}
-		
+
 		break;
 	}
-	
+
 	case ServerOP_GuildMemberUpdate: {
 		if(pack->size != sizeof(ServerGuildMemberUpdate_Struct))
 		{
 			_log(GUILDS__ERROR, "Received ServerOP_GuildMemberUpdate of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildMemberUpdate_Struct));
 			return;
 		}
-		
+
 		zoneserver_list.SendPacket(pack);
 
 		break;
 	}
-	
+
 	default:
 		_log(GUILDS__ERROR, "Unknown packet 0x%x received from zone??", pack->opcode);
 		break;

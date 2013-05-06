@@ -36,7 +36,7 @@ public:
 
 	// Produce a const singleton
 	static const queryservconfig *get() {
-		if (_chat_config == nullptr) 
+		if (_chat_config == nullptr)
 			LoadConfig();
 		return(_chat_config);
 	}

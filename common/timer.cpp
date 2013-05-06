@@ -76,9 +76,9 @@ int gettimeofday (timeval *tp, ...)
 bool Timer::Check(bool iReset)
 {
 	_CP(Timer_Check);
-    if (this==0) { 
-		cerr << "Null timer during ->Check()!?\n"; 
-		return true; 
+    if (this==0) {
+		cerr << "Null timer during ->Check()!?\n";
+		return true;
 	}
 //	if (!current_time || !start_time || !timer_time) {cerr << "Timer::Check on a timer that does not have a vital member defined.";
 //	return true;}
@@ -92,7 +92,7 @@ bool Timer::Check(bool iReset)
 		}
 		return true;
     }
-	
+
     return false;
 }
 
@@ -106,11 +106,11 @@ void Timer::Enable() {
 }
 
 /* This function set the timer and restart it */
-void Timer::Start(uint32 set_timer_time, bool ChangeResetTimer) {	
+void Timer::Start(uint32 set_timer_time, bool ChangeResetTimer) {
     start_time = current_time;
 	enabled = true;
     if (set_timer_time != 0)
-    {	
+    {
 		timer_time = set_timer_time;
 		if (ChangeResetTimer)
 			set_at_trigger = set_timer_time;
@@ -158,7 +158,7 @@ void Timer::Trigger()
 }
 
 const uint32 Timer::GetCurrentTime()
-{	
+{
     return current_time;
 }
 
@@ -172,7 +172,7 @@ const uint32 Timer::GetTimeSeconds() {
 
 const uint32 Timer::SetCurrentTime()
 {
-    struct timeval read_time;	
+    struct timeval read_time;
     uint32 this_time;
 
     gettimeofday(&read_time,0);
@@ -186,7 +186,7 @@ const uint32 Timer::SetCurrentTime()
     {
 		current_time += this_time - last_time;
     }
-    
+
 	last_time = this_time;
 
 //	cerr << "Current time:" << current_time << endl;

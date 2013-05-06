@@ -114,9 +114,9 @@ if($act eq "Boot") {
 
 ?>
 <div align="center">
-<a href="?name=<? print $lname; ?>">Reload</a> - 
-<a href="?name=<? print $lname; ?>&action=rebootall">Reboot All Zones</a> - 
-<a href="?name=<? print $lname; ?>&action=stopall">Stop All Zones</a> - 
+<a href="?name=<? print $lname; ?>">Reload</a> -
+<a href="?name=<? print $lname; ?>&action=rebootall">Reboot All Zones</a> -
+<a href="?name=<? print $lname; ?>&action=stopall">Stop All Zones</a> -
 <a href="?name=<? print $lname; ?>&action=startall">Start All Zones</a>
 </div>
 <hr/>
@@ -153,7 +153,7 @@ if($act eq "Boot") {
   </tr>
 <?
   my @zones = $config->ListZones();
-  
+
   for my $zone (sort @zones) {
 		my $z = $config->GetZoneDetails($zone);
 		if(!$z) {
@@ -161,7 +161,7 @@ if($act eq "Boot") {
 		} elsif($z->{error}) {
 			$zone->{name} = "ERROR: $z->{error}";
 		}
-		
+
 		print "<tr>\n";
 		print "\t<td><a href='zone.html?zone=$z->{name}'>$z->{name}</a></td>";
 		if($z->{up}) {

@@ -18,7 +18,7 @@ namespace EQExtractor2.Patches
 
             ExpectedPPLength = 28536;
 
-            PPZoneIDOffset = 21204;            
-        }        
+            PPZoneIDOffset = 21204;
+        }
     }
 }

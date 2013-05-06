@@ -19,7 +19,7 @@ static OpcodeManager *opcodes = nullptr;
 static Strategy struct_strategy;
 
 char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
-	
+
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
 	if(opcodes == nullptr) {
@@ -35,35 +35,35 @@ void Register(EQStreamIdentifier &into) {
 			return;
 		}
 	}
-	
+
 	//ok, now we have what we need to register.
-	
+
 	EQStream::Signature signature;
 	string pname;
-	
+
 	//register our world signature.
 	pname = string(name) + "_world";
 	signature.ignore_eq_opcode = 0;
 	signature.first_length = sizeof(structs::LoginInfo_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_SendLoginInfo);
 	into.RegisterPatch(signature, pname.c_str(), &opcodes, &struct_strategy);
-	
+
 	//register our zone signature.
 	pname = string(name) + "_zone";
 	signature.ignore_eq_opcode = opcodes->EmuToEQ(OP_AckPacket);
 	signature.first_length = sizeof(structs::ClientZoneEntry_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_ZoneEntry);
 	into.RegisterPatch(signature, pname.c_str(), &opcodes, &struct_strategy);
-	
+
 	_log(NET__IDENTIFY, "Registered patch %s", name);
 }
 
 void Reload() {
-	
+
 	//we have a big problem to solve here when we switch back to shared memory
 	//opcode managers because we need to change the manager pointer, which means
 	//we need to go to every stream and replace it's manager.
-	
+
 	if(opcodes != nullptr) {
 		//TODO: get this file name from the config file
 		string opfile = "patch_";
@@ -138,10 +138,10 @@ ENCODE(OP_SendCharInfo) {
 
 ENCODE(OP_SendAATable) {
 	ENCODE_LENGTH_ATLEAST(SendAA_Struct);
-	
+
 	SETUP_VAR_ENCODE(SendAA_Struct);
 	ALLOC_VAR_ENCODE(structs::SendAA_Struct, sizeof(structs::SendAA_Struct) + emu->total_abilities*sizeof(structs::AA_Ability));
-	
+
 	// Check clientver field to verify this AA should be sent for SoF
 	// clientver 1 is for all clients and 2 is for 6.2
 	if (emu->clientver <= 2 )
@@ -178,7 +178,7 @@ ENCODE(OP_SendAATable) {
 			OUT(abilities[r].slot);
 		}
 	}
-	
+
 	FINISH_ENCODE();
 }
 
@@ -199,19 +199,19 @@ ENCODE(OP_DeleteSpawn) {
 
 ENCODE(OP_PlayerProfile) {
 	SETUP_DIRECT_ENCODE(PlayerProfile_Struct, structs::PlayerProfile_Struct);
-	
+
 	uint32 r;
-	
+
 	memset(eq->unknown3224, 0xff, 448);
 	memset(eq->unknown3704, 0xff, 32);
-	
+
 //	OUT(checksum);
 	OUT(gender);
 	OUT(race);
 	OUT(class_);
 	OUT(level);
 	eq->level2 = emu->level;
-	
+
 	eq->bind_zone_id = emu->binds[0].zoneId;
 	eq->bind_x[0] = emu->binds[0].x;
 	eq->bind_y[0] = emu->binds[0].y;
@@ -222,8 +222,8 @@ ENCODE(OP_PlayerProfile) {
 	eq->zone_safe_y = emu->binds[4].y;
 	eq->zone_safe_z = emu->binds[4].z;
 	eq->zone_safe_heading = emu->binds[4].heading;
-	
-	
+
+
 	OUT(deity);
 	OUT(intoxication);
 	OUT_array(spellSlotRefresh, structs::MAX_PP_MEMSPELL);
@@ -361,10 +361,10 @@ ENCODE(OP_PlayerProfile) {
 	OUT(raidAutoconsent);
 	OUT(guildAutoconsent);
 //	OUT(showhelm);
-	
+
 	//set the checksum...
 	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
-	
+
 	FINISH_ENCODE();
 }
 
@@ -408,11 +408,11 @@ ENCODE(OP_ZoneSpawns) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 	Spawn_Struct *emu = (Spawn_Struct *) __emu_buffer;
-	
+
 	//determine and verify length
 	int entrycount = in->size / sizeof(Spawn_Struct);
 	if(entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
@@ -420,16 +420,16 @@ ENCODE(OP_ZoneSpawns) {
 		delete in;
 		return;
 	}
-	
+
 	//make the EQ struct.
 	in->size = sizeof(structs::Spawn_Struct)*entrycount;
 	in->pBuffer = new unsigned char[in->size];
 	structs::Spawn_Struct *eq = (structs::Spawn_Struct *) in->pBuffer;
-	
+
 	//zero out the packet. We could avoid this memset by setting all fields (including unknowns)
 	//in the loop.
 	memset(in->pBuffer, 0, in->size);
-	
+
 	//do the transform...
 	int r;
 	int k;
@@ -492,7 +492,7 @@ ENCODE(OP_ZoneSpawns) {
 		eq->lfg = emu->lfg;
 		eq->flymode = emu->flymode;
 	}
-	
+
 	//kill off the emu structure and send the eq packet.
 	delete[] __emu_buffer;
 	dest->FastQueuePacket(&in, ack_req);
@@ -503,7 +503,7 @@ ENCODE(OP_ItemPacket) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 	ItemPacket_Struct *old_item_pkt=(ItemPacket_Struct *)__emu_buffer;
@@ -532,7 +532,7 @@ ENCODE(OP_CharInventory) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 
@@ -543,7 +543,7 @@ ENCODE(OP_CharInventory) {
 		return;
 	}
 	InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *) in->pBuffer;
-	
+
 	//do the transform...
 	int r;
 	string serial_string;
@@ -556,7 +556,7 @@ ENCODE(OP_CharInventory) {
 		} else {
 			_log(NET__STRUCTS, "Serialization failed on item slot %d during OP_CharInventory.  Item skipped.",eq->slot_id);
 		}
-	
+
 	}
 
 	in->size = serial_string.length();
@@ -571,39 +571,39 @@ ENCODE(OP_GuildMemberList) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 	Internal_GuildMembers_Struct *emu = (Internal_GuildMembers_Struct *) in->pBuffer;
-	
-	
-	
+
+
+
 	//make a new EQ buffer.
 	uint32 pnl = strlen(emu->player_name);
-	uint32 length = sizeof(structs::GuildMembers_Struct) + pnl + 
+	uint32 length = sizeof(structs::GuildMembers_Struct) + pnl +
 		emu->count*sizeof(structs::GuildMemberEntry_Struct)
 		+ emu->name_length + emu->note_length;
 	in->pBuffer = new uint8[length];
 	in->size = length;
 	//no memset since we fill every byte.
-	
+
 	uint8 *buffer;
 	buffer = in->pBuffer;
-	
+
 	//easier way to setup GuildMembers_Struct
 	//set prefix name
 	strcpy((char *)buffer, emu->player_name);
 	buffer += pnl;
 	*buffer = '\0';
 	buffer++;
-	
+
 	//add member count.
 	*((uint32 *) buffer) = htonl( emu->count );
 	buffer += sizeof(uint32);
-	
+
 	if(emu->count > 0) {
 		Internal_GuildMemberEntry_Struct *emu_e = emu->member;
-		const char *emu_name = (const char *) (__emu_buffer + 
+		const char *emu_name = (const char *) (__emu_buffer +
 				sizeof(Internal_GuildMembers_Struct) + //skip header
 				emu->count * sizeof(Internal_GuildMemberEntry_Struct)	//skip static length member data
 				);
@@ -611,14 +611,14 @@ ENCODE(OP_GuildMemberList) {
 				emu->name_length + //skip name contents
 				emu->count	//skip string terminators
 				);
-		
+
 		structs::GuildMemberEntry_Struct *e = (structs::GuildMemberEntry_Struct *) buffer;
-		
+
 		uint32 r;
 		for(r = 0; r < emu->count; r++, emu_e++) {
-			
+
 			//the order we set things here must match the struct
-	
+
 	//nice helper macro
 	/*#define SlideStructString(field, str) \
 			strcpy(e->field, str.c_str()); \
@@ -632,7 +632,7 @@ ENCODE(OP_GuildMemberList) {
 		}
 #define PutFieldN(field) \
 		e->field = htonl(emu_e->field)
-			
+
 			SlideStructString( name, emu_name );
 			PutFieldN(level);
 			PutFieldN(banker);
@@ -647,7 +647,7 @@ ENCODE(OP_GuildMemberList) {
 			e->zone_id = htons(emu_e->zone_id);
 #undef SlideStructString
 #undef PutFieldN
-			
+
 			e++;
 		}
 	}
@@ -661,9 +661,9 @@ ENCODE(OP_ReadBook) {
 
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	unsigned char *__emu_buffer = in->pBuffer;
-	
+
 	BookText_Struct *emu_BookText_Struct = (BookText_Struct *)__emu_buffer;
 
 	in->size = sizeof(structs::BookText_Struct) + strlen(emu_BookText_Struct->booktext);
@@ -857,14 +857,14 @@ DECODE(OP_ItemLinkClick) {
 	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);
 	SETUP_DIRECT_DECODE(ItemViewRequest_Struct, structs::ItemViewRequest_Struct);
 	MEMSET_IN(ItemViewRequest_Struct);
-	
+
 	IN(item_id);
 	int r;
 	for (r = 0; r < 5; r++) {
 		IN(augments[r]);
 	}
 	IN(link_hash);
-	
+
 	FINISH_DIRECT_DECODE();
 }
 
@@ -918,7 +918,7 @@ DECODE(OP_WhoAllRequest) {
 	IN(lvlhigh);
 	IN(gmlookup);
 	emu->type = 3;
-	
+
 	FINISH_DIRECT_DECODE();
 }
 
@@ -983,7 +983,7 @@ char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 d
 		}
 	}
 
-	
+
 	*length=MakeAnyLenString(&serialization,
 		"%.*s%s"	// For leading quotes (and protection) if a subitem;
 		"%s"		// Instance data

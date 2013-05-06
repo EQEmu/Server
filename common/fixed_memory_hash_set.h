@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -25,7 +25,7 @@
 
 namespace EQEmu {
 
-    /*! Simple HashSet designed to be used in fixed memory that may be difficult to use an 
+    /*! Simple HashSet designed to be used in fixed memory that may be difficult to use an
     allocator for (shared memory), we assume all keys are unsigned int
     */
     template<class T>
@@ -41,7 +41,7 @@ namespace EQEmu {
             Constructor which initializes the hash set
         \param data Raw data
         \param size Raw data size
-        \param element_count Max number of possible unique elements that can be inserted. 
+        \param element_count Max number of possible unique elements that can be inserted.
         \param max_element_id Number of offsets to store: eg highest "key" that will be used.
         */
         FixedMemoryHashSet(byte *data, size_type size, key_type element_count, key_type max_element_id) {
@@ -69,7 +69,7 @@ namespace EQEmu {
         }
 
         /*!
-            Constructor which does not initialize the hash set.  Builds the hash set from what data is 
+            Constructor which does not initialize the hash set.  Builds the hash set from what data is
             stored in the data pointer passed.
         \param data Raw data
         \param size Raw data size
@@ -136,7 +136,7 @@ namespace EQEmu {
             elements_ = other.elements_;
             return *this;
         }
-    
+
         //! Returns whether the set is empty (has 0 elements) or not
         bool empty() const {
             return current_elements_ == 0;
@@ -156,7 +156,7 @@ namespace EQEmu {
         key_type max_key() const {
             return offset_count_ > 0 ? (offset_count_ - 1) : 0;
         }
-        
+
         /*!
             Retrieve value operator
         \param i Index to retrieve the value from
@@ -229,7 +229,7 @@ namespace EQEmu {
             }
         }
 
-        //! Calculates how much memory we should allocate based on element size and count 
+        //! Calculates how much memory we should allocate based on element size and count
         static size_type estimated_size(key_type element_count, key_type max_elements) {
             size_type total_size = 3 * sizeof(key_type);
             total_size += sizeof(key_type) * (max_elements + 1);

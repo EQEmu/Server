@@ -37,7 +37,7 @@ class Client {
 public:
 	Client(EQStreamInterface* ieqs);
     ~Client();
-	
+
 	bool	Process();
 	void	ReceiveData(uchar* buf, int len);
 	void	SendCharInfo();
@@ -72,10 +72,10 @@ public:
 	inline ClientListEntry* GetCLE()		{ return cle; }
 	inline void			SetCLE(ClientListEntry* iCLE)			{ cle = iCLE; }
 private:
-	
+
 	uint32	ip;
 	uint16	port;
-	uint32	charid; 
+	uint32	charid;
 	char	char_name[64];
 	uint32	zoneID;
 	uint32	instanceID;

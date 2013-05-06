@@ -50,7 +50,7 @@ public:
 	UMType(EQApplicationPacket *_app, bool _ack) {
 		app = _app; ack = _ack;
 	}
-	
+
 	EQApplicationPacket *app;
 	bool ack;
 };
@@ -61,24 +61,24 @@ class UpdateManager {
 protected:
 	//squared distances for each level
 	static const float level_distances2[UPDATE_LEVELS];
-	
+
 	//delay between sending packets in each level, in ms
 	static const uint32 level_timers[UPDATE_LEVELS+1];
-	
+
 public:
 	UpdateManager(EQStream *c);
 	~UpdateManager();
-	
+
 	//range2 is the range of 'from' to this client, squared
 	void QueuePacket(EQApplicationPacket *app, bool ack_req, Mob *from, float range2);
 	void Process();
 	void FlushQueues();
-	
+
 protected:
 	void _SendLevel(int level);
-	
+
 	EQStream *net;
-	
+
 	UMMap levels[UPDATE_LEVELS+1];
 	Timer *timers[UPDATE_LEVELS+1];
 	Timer limiter;

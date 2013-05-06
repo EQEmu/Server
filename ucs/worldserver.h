@@ -27,7 +27,7 @@ public:
 	WorldServer();
 	virtual ~WorldServer();
 	virtual void Process();
-	
+
 private:
 	virtual void OnConnected();
 };

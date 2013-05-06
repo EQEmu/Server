@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -41,7 +41,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	Inventory *inv;
-	
+
 	for (int i=0; i<10; i++) {
 		strcpy(cs->name[i], "<none>");
 		cs->zone[i] = 0;
@@ -49,10 +49,10 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
             cs->tutorial[i] = 0;
 		cs->gohome[i] = 0;
 	}
-	
+
 	int char_num = 0;
 	unsigned long* lengths;
-	
+
 	// Populate character info
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name,profile,zonename,class,level FROM character_ WHERE account_id=%i order by name limit 10", account_id), errbuf, &result)) {
 		safe_delete_array(query);
@@ -66,7 +66,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				PlayerProfile_Struct* pp = (PlayerProfile_Struct*)row[1];
 				uint8 clas = atoi(row[3]);
 				uint8 lvl = atoi(row[4]);
-				
+
 				// Character information
 				if(lvl == 0)
 					cs->level[char_num]		= pp->level;	//no level in DB, trust PP
@@ -214,7 +214,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				{
 					printf("Error loading inventory for %s\n", cs->name[char_num]);
 				}
-				safe_delete(inv);	
+				safe_delete(inv);
 				if (++char_num > 10)
 					break;
 			}
@@ -233,7 +233,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		safe_delete_array(query);
 		return;
 	}
-	
+
 	return;
 }
 
@@ -268,15 +268,15 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 
 	if(!strcmp(BindZoneName, "UNKNWN")) return pp.zone_id;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=%f, y=%f, z=%f, instanceid=0 WHERE id='%i'", 
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=%f, y=%f, z=%f, instanceid=0 WHERE id='%i'",
 					      BindZoneName, pp.binds[bindnum].zoneId, pp.binds[bindnum].x, pp.binds[bindnum].y, pp.binds[bindnum].z,
 					      CharID), errbuf, 0,&affected_rows)) {
 
 		return pp.zone_id;
 	}
 	safe_delete_array(query);
-	
-	return pp.binds[bindnum].zoneId; 
+
+	return pp.binds[bindnum].zoneId;
 }
 
 bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc)
@@ -301,26 +301,26 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 			in_cc->race), errbuf, &result))
 	{
 		LogFile->write(EQEMuLog::Error, "Start zone query failed: %s : %s\n", query, errbuf);
-		safe_delete_array(query); 
+		safe_delete_array(query);
 		return false;
 	}
-		
+
 	LogFile->write(EQEMuLog::Status, "Start zone query: %s\n", query);
-	safe_delete_array(query); 
-	
+	safe_delete_array(query);
+
 	if((rows = mysql_num_rows(result)) > 0)
 		row = mysql_fetch_row(result);
-	
+
 	if(row)
-	{         
+	{
 		LogFile->write(EQEMuLog::Status, "Found starting location in start_zones");
-		in_pp->x = atof(row[0]); 
-		in_pp->y = atof(row[1]); 
-		in_pp->z = atof(row[2]); 
-		in_pp->heading = atof(row[3]); 
-		in_pp->zone_id = atoi(row[4]); 
-		in_pp->binds[0].zoneId = atoi(row[5]); 
-	} 
+		in_pp->x = atof(row[0]);
+		in_pp->y = atof(row[1]);
+		in_pp->z = atof(row[2]);
+		in_pp->heading = atof(row[3]);
+		in_pp->zone_id = atoi(row[4]);
+		in_pp->binds[0].zoneId = atoi(row[5]);
+	}
 	else
 	{
 		printf("No start_zones entry in database, using defaults\n");
@@ -387,19 +387,19 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 				break;
 			}
 			case 10:
-			{	
+			{
 				in_pp->zone_id =61;	// felwithea
 				in_pp->binds[0].zoneId = 54;	// gfaydark
 				break;
 			}
 			case 11:
-			{	
+			{
 				in_pp->zone_id =55;	// akanon
 				in_pp->binds[0].zoneId = 56;	// steamfont
 				break;
 			}
 			case 12:
-			{	
+			{
 				in_pp->zone_id =82;	// cabwest
 				in_pp->binds[0].zoneId = 78;	// fieldofbone
 				break;
@@ -418,8 +418,8 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 
 	if(in_pp->binds[0].x == 0 && in_pp->binds[0].y == 0 && in_pp->binds[0].z == 0)
 		database.GetSafePoints(in_pp->binds[0].zoneId, 0, &in_pp->binds[0].x, &in_pp->binds[0].y, &in_pp->binds[0].z);
-	if(result) 
-		mysql_free_result(result);	
+	if(result)
+		mysql_free_result(result);
 	return true;
 }
 
@@ -453,26 +453,26 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 			in_cc->race), errbuf, &result))
 	{
 		LogFile->write(EQEMuLog::Status, "SoF Start zone query failed: %s : %s\n", query, errbuf);
-		safe_delete_array(query); 
+		safe_delete_array(query);
 		return false;
 	}
 
 	LogFile->write(EQEMuLog::Status, "SoF Start zone query: %s\n", query);
-	safe_delete_array(query); 
-	
+	safe_delete_array(query);
+
 	if((rows = mysql_num_rows(result)) > 0)
 		row = mysql_fetch_row(result);
-	
+
 	if(row)
-	{         
+	{
 		LogFile->write(EQEMuLog::Status, "Found starting location in start_zones");
-		in_pp->x = atof(row[0]); 
-		in_pp->y = atof(row[1]); 
-		in_pp->z = atof(row[2]); 
-		in_pp->heading = atof(row[3]); 
+		in_pp->x = atof(row[0]);
+		in_pp->y = atof(row[1]);
+		in_pp->z = atof(row[2]);
+		in_pp->heading = atof(row[3]);
 		in_pp->zone_id = in_cc->start_zone;
-		in_pp->binds[0].zoneId = atoi(row[4]); 
-	} 
+		in_pp->binds[0].zoneId = atoi(row[4]);
+	}
 	else
 	{
 		printf("No start_zones entry in database, using defaults\n");
@@ -493,8 +493,8 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 
 	if(in_pp->binds[0].x == 0 && in_pp->binds[0].y == 0 && in_pp->binds[0].z == 0)
 		database.GetSafePoints(in_pp->binds[0].zoneId, 0, &in_pp->binds[0].x, &in_pp->binds[0].y, &in_pp->binds[0].z);
-	if(result) 
-		mysql_free_result(result);	
+	if(result)
+		mysql_free_result(result);
 	return true;
 }
 
@@ -503,9 +503,9 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
     char* query = 0;
 	MYSQL_RES *result;
     MYSQL_ROW row;
-	
+
 	rl.clear();
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query,
 			"SELECT name FROM launcher" )
 		, errbuf, &result))
@@ -530,14 +530,14 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 
 	if(RuleB(Chat, EnableMailKeyIPVerification) == true)
 		sprintf(MailKeyString, "%08X%08X", IPAddress, MailKey);
-	else	
+	else
 		sprintf(MailKeyString, "%08X", MailKey);
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET mailkey = '%s' WHERE id='%i'", 
-					      MailKeyString, CharID), errbuf)) 
+	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET mailkey = '%s' WHERE id='%i'",
+					      MailKeyString, CharID), errbuf))
 
 		LogFile->write(EQEMuLog::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, errbuf);
-	
+
 	safe_delete_array(query);
 
 }
@@ -548,7 +548,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
     char* query = 0;
 	MYSQL_RES *result;
     MYSQL_ROW row;
-	
+
 	if(RunQuery(query, MakeAnyLenString(&query, "SELECT level FROM character_ WHERE name='%s'", name), errbuf, &result))
 	{
 		if(row = mysql_fetch_row(result))
@@ -560,7 +560,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 		}
 		mysql_free_result(result);
 	}
-	else 
+	else
 	{
 		LogFile->write(EQEMuLog::Error, "WorldDatabase::GetCharacterLevel: %s", errbuf);
 	}

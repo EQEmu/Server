@@ -37,7 +37,7 @@ IF(MYSQL_ROOT)
       PATHS ${MYSQL_ROOT}/lib/debug /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64
       PATH_SUFFIXES mysql
     )
-    
+
     FIND_LIBRARY(MySQL_LIBRARY_RELEASE
       NAMES ${MySQL_NAMES}
       PATHS ${MYSQL_ROOT}/lib /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64
@@ -49,7 +49,7 @@ ELSE(MYSQL_ROOT)
       PATHS /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64
       PATH_SUFFIXES mysql
     )
-    
+
     FIND_LIBRARY(MySQL_LIBRARY_RELEASE
       NAMES ${MySQL_NAMES}
       PATHS /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64
@@ -82,4 +82,3 @@ MARK_AS_ADVANCED(
   MySQL_LIBRARY_RELEASE
   MySQL_INCLUDE_DIR
   )
-  

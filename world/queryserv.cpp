@@ -25,7 +25,7 @@ void QueryServConnection::SetConnection(EmuTCPConnection *inStream)
 		_log(QUERYSERV__ERROR, "Incoming QueryServ Connection while we were already connected to a QueryServ.");
 		Stream->Disconnect();
 	}
-	
+
 	Stream = inStream;
 
 	authenticated = false;
@@ -35,7 +35,7 @@ bool QueryServConnection::Process()
 {
 	if (!Stream || !Stream->Connected())
 		return false;
-	
+
 	ServerPacket *pack = 0;
 
 	while((pack = Stream->PopPacket()))
@@ -49,7 +49,7 @@ bool QueryServConnection::Process()
 					uint8 tmppass[16];
 
 					MD5::Generate((const uchar*) WorldConfig::get()->SharedKey.c_str(), WorldConfig::get()->SharedKey.length(), tmppass);
-		
+
 					if (memcmp(pack->pBuffer, tmppass, 16) == 0)
 						authenticated = true;
 					else

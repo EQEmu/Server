@@ -33,7 +33,7 @@
 #define MAX_JOINED_CHANNELS 10
 
 enum { CommandJoin = 0, CommandLeaveAll, CommandLeave, CommandListAll, CommandList, CommandSet, CommandAnnounce, CommandSetOwner,
-       CommandOPList, CommandInvite, CommandGrant, CommandModerate, CommandVoice, CommandKick, 
+       CommandOPList, CommandInvite, CommandGrant, CommandModerate, CommandVoice, CommandKick,
        CommandPassword, CommandToggleInvites, CommandAFK, CommandUptime,
        CommandGetHeaders, CommandGetBody, CommandMailTo, CommandSetMessageStatus, CommandSelectMailBox,
        CommandSetMailForwarding, CommandBuddy, CommandIgnorePlayer,
@@ -46,7 +46,7 @@ struct CommandEntry {
 
 typedef enum { ConnectionTypeUnknown, ConnectionTypeCombined, ConnectionTypeMail, ConnectionTypeChat } ConnectionType;
 
-static const CommandEntry Commands[] = { 
+static const CommandEntry Commands[] = {
 					 { "join", CommandJoin },
 					 { "leaveall", CommandLeaveAll },
 					 { "leave", CommandLeave },

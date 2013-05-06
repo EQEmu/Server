@@ -61,21 +61,21 @@ void PerlPacket::Resize(uint32 length) {
 void PerlPacket::SendTo(Client *who) {
 	if(!who || op == OP_Unknown || (len > 0 && packet == nullptr))
 		return;
-	
+
 	EQApplicationPacket *outapp = new EQApplicationPacket(op, len);
 	if(len > 0)
 		memcpy(outapp->pBuffer, packet, len);
-	
+
 	//	printf("Created this packet with PerlPacket: OP: %s\n", ZoneOpcodeManager->EmuToName(op));
 	DumpPacket(outapp);
-	
+
 	who->FastQueuePacket(&outapp);
 }
 
 void PerlPacket::SendToAll() {
 	if(op == OP_Unknown || (len > 0 && packet == nullptr))
 		return;
-	
+
 	EQApplicationPacket *outapp = new EQApplicationPacket(op, len);
 	if(len > 0)
 		memcpy(outapp->pBuffer, packet, len);
@@ -161,7 +161,7 @@ void PerlPacket::SetEQ1913(uint32 pos, float part19, float part13) {
 	p->part19 = FloatToEQ19(part19);
 	p->part13 = FloatToEQ13(part13);
 }
-	
+
 //reading
 uint8 PerlPacket::GetByte(uint32 pos) {
 	if(pos + sizeof(uint8) > len || packet == nullptr)

@@ -71,7 +71,7 @@ typedef struct _mapHeader {
  unsigned shorts are adequate because, worst case
  even in a zone that is 6000x6000 with a small node
  size of 30x30, there are only 40000 nodes.
- 
+
  quadrent definitions:
  quad 1 (nodes[0]):
  x>=0, y>=0
@@ -81,7 +81,7 @@ typedef struct _mapHeader {
  x<0, y<0
  quad 4 (nodes[3]):
  x>=0, y<0
- 
+
  */
 enum {  //node flags
 	nodeFinal = 0x01
@@ -97,7 +97,7 @@ typedef struct _nodeHeader {
 	float miny;
 	float maxx;
 	float maxy;
-	
+
 	uint8 flags;
 	union {
 		uint16 nodes[4];	//index 0 means nullptr, not root
@@ -126,27 +126,27 @@ typedef uint16 NodeRef;
 class Map {
 public:
 	static Map* LoadMapfile(const char* in_zonename, const char *directory = nullptr);
-	
+
 	Map();
 	~Map();
-	
+
 	bool loadMap(FILE *fp);
-	
+
 	//the result is always final, except special NODE_NONE
 	NodeRef SeekNode( NodeRef _node, float x, float y ) const;
-	
+
 	//these are untested since rewrite:
 	int *SeekFace( NodeRef _node, float x, float y );
 	float GetFaceHeight( int _idx, float x, float y ) const;
-	
+
 	bool LocWithinNode( NodeRef _node, float x, float y ) const;
-	
+
 	//nodes to these functions must be final
 	bool LineIntersectsNode( NodeRef _node, VERTEX start, VERTEX end, VERTEX *result, FACE **on = nullptr) const;
 	bool LineIntersectsFace( PFACE cface, VERTEX start, VERTEX end, VERTEX *result) const;
 	float FindBestZ( NodeRef _node, VERTEX start, VERTEX *result, FACE **on = nullptr) const;
 	bool LineIntersectsZone(VERTEX start, VERTEX end, float step, VERTEX *result, FACE **on = nullptr) const;
-		
+
 //	inline unsigned int		GetVertexNumber( ) {return m_Vertex; }
 	inline uint32		GetFacesNumber( ) const { return m_Faces; }
 //	inline PVERTEX	GetVertex( int _idx ) {return mFinalVertex + _idx;	}
@@ -154,7 +154,7 @@ public:
 	inline PFACE		GetFaceFromlist( int _idx) {return &mFinalFaces[ mFaceLists[_idx] ];	}
 	inline NodeRef		GetRoot( ) const { return MAP_ROOT_NODE; }
 	inline PNODE		GetNode( NodeRef r ) { return( mNodes + r ); }
-	
+
 	inline float GetMinX() const { return(_minx); }
 	inline float GetMaxX() const { return(_maxx); }
 	inline float GetMinY() const { return(_miny); }
@@ -173,13 +173,13 @@ private:
 	PFACE mFinalFaces;
 	PNODE mNodes;
 	uint32 *mFaceLists;
-	
-	
+
+
 	int mCandFaces[100];
-	
+
 	float _minz, _maxz;
 	float _minx, _miny, _maxx, _maxy;
-	
+
 	static void Normalize(VERTEX *p);
 
 //	void	RecLoadNode( PNODE	_node, FILE *l_f );

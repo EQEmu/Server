@@ -37,7 +37,7 @@
 #include "groups.h"
 
 #ifdef THIS	 /* this macro seems to leak out on some systems */
-#undef THIS		
+#undef THIS
 #endif
 
 
@@ -580,7 +580,7 @@ XS(XS_Group_GetID)
 }
 
 XS(XS_Group_GetMember);
-XS(XS_Group_GetMember) 
+XS(XS_Group_GetMember)
 {
 	dXSARGS;
 	if (items != 2)
@@ -601,7 +601,7 @@ XS(XS_Group_GetMember)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		int index = (int)SvUV(ST(1));
-		if (index < 0 || index > 5) 
+		if (index < 0 || index > 5)
 			RETVAL = nullptr;
 		else {
 			member = THIS->members[index];
@@ -625,7 +625,7 @@ XS(boot_Group)
 	char file[256];
 	strncpy(file, __FILE__, 256);
 	file[255] = 0;
-	
+
 	if(items != 1)
 		fprintf(stderr, "boot_quest does not take any arguments.");
 	char buf[128];

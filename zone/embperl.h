@@ -17,7 +17,7 @@ Eglin
 #include <string.h>
 
 //headers from the Perl distribution
-#include <EXTERN.h> 
+#include <EXTERN.h>
 #define WIN32IO_IS_STDIO
 
 #ifndef WIN32
@@ -69,30 +69,30 @@ private:
 		eval(buffer);
 		return get_sv("scratch::temp", false);
 	}
-	
+
 	//install a perl func
 	void init_eval_file(void);
-	
+
 	bool in_use;	//true if perl is executing
 protected:
 	//the embedded interpreter
 	PerlInterpreter * my_perl;
-	
+
 	void DoInit();
-	
+
 public:
 	Embperl(void); //This can throw errors!  Buyer beware
 	~Embperl(void);
-	
+
 	void Reinit();
-	
+
 	//return the last error msg
 	std::string lasterr(void) const { return errmsg;};
 	//evaluate an expression. throws string errors on fail
 	void eval(const char * code);
 	//execute a subroutine.  throws lasterr on failure
 	void dosub(const char * subname, const std::vector<std::string> * args = nullptr, int mode = G_SCALAR|G_DISCARD|G_EVAL);
-	
+
 	//Access to perl variables
 	//all varnames here should be of the form package::name
 	//returns the contents of the perl variable named in varname as a c int
@@ -104,7 +104,7 @@ public:
 		SV * temp = my_get_sv(varname);
 		return std::string(SvPV_nolen(temp),SvLEN(temp));
 	}
-	
+
 	//put an integer into a perl varable
 	void seti(const char *varname, int val) const {
 		SV *t = get_sv(varname, true);
@@ -134,24 +134,24 @@ public:
  		for (it = vals.begin(); it != vals.end(); it++)
  		{
  			int keylen = static_cast<int>(it->first.length());
- 
+
  			SV *val = newSVpv(it->second.c_str(), it->second.length());
- 
+
  			// If val was not added to hash, reset reference count
  			if (hv_store(hv, it->first.c_str(), keylen, val, 0) == nullptr)
  				val->sv_refcnt = 0;
  		}
 	}
-	
+
 	//loads a file and compiles it into our interpreter (assuming it hasn't already been read in)
 	//idea borrowed from perlembed
 	void eval_file(const char * packagename, const char * filename);
-	
+
 	inline bool InUse() const { return(in_use); }
-	
+
 	//check to see if a sub exists in package
 	bool SubExists(const char *package, const char *sub);
-	
+
 	//check to see if a variable exists in package
 	bool VarExists(const char *package, const char *var);
 };

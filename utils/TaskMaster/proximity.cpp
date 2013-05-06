@@ -32,7 +32,7 @@ void MainFrame::PopulateProximity()
 
 		prox->exploreid = eqt.exploreid;
 		prox->zoneid = eqt.zoneid;
-		
+
 		wxString zoneName;
 		zoneName.Printf("Unknown Zone");
 		vector<eqtask_zones>::iterator ZoneIter;
@@ -115,7 +115,7 @@ void MainFrame::NewProximity(wxCommandEvent& event)
 		mErrorLog->Log(eqEmuLogBoth, "New proximity failed, not connected to db");
 		return;
 	}
-	
+
 	int newID = wxGetNumberFromUser("", "Explore ID:", "Explore ID", 0, 0, 9999999);
 	int newZoneID = wxGetNumberFromUser("", "Zone ID:", "Zone ID", 0, 0, 9999999);
 
@@ -280,7 +280,7 @@ void MainFrame::SaveProximity(wxCommandEvent& event)
 
 	inStr.Clear();
 	inStr = mProxMinx->GetValue();
-	toSave.minx = atof(inStr.mb_str()); 
+	toSave.minx = atof(inStr.mb_str());
 
 	inStr.Clear();
 	inStr = mProxMaxx->GetValue();
@@ -368,9 +368,9 @@ void MainFrame::SaveProximity(wxCommandEvent& event)
 
 	if(canUpdate){
 		char * mQuery = 0;
-		MakeAnyLenString(&mQuery, "UPDATE proximities SET minx=%.4f, maxx=%.4f, miny=%.4f, maxy=%.4f, minz=%.4f, maxz=%.4f) WHERE zoneid=%u AND exploreid=%u", 
+		MakeAnyLenString(&mQuery, "UPDATE proximities SET minx=%.4f, maxx=%.4f, miny=%.4f, maxy=%.4f, minz=%.4f, maxz=%.4f) WHERE zoneid=%u AND exploreid=%u",
 			toSave.minx, toSave.maxx, toSave.miny, toSave.maxy, toSave.minz, toSave.maxz, toSave.zoneid, toSave.exploreid);
-		
+
 		mErrorLog->Log(eqEmuLogSQL, "%s", mQuery);
 		if (mysql_query(mMysql, mQuery)) {
 			mErrorLog->Log(eqEmuLogBoth, "MySQL Error: %s", mysql_error(mMysql));
@@ -389,7 +389,7 @@ void MainFrame::SaveProximity(wxCommandEvent& event)
 
 		MakeAnyLenString(&mQuery, "INSERT INTO `proximities` (`zoneid`,`exploreid`,`minx`,`maxx`,`miny`,`maxy`,`minz`,`maxz`) VALUES (%u,%u,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f)"
 			, toSave.zoneid, toSave.exploreid, toSave.minx, toSave.maxx, toSave.miny, toSave.maxy, toSave.minz, toSave.maxz);
-		
+
 		mErrorLog->Log(eqEmuLogSQL, "%s", mQuery);
 		if (mysql_query(mMysql, mQuery)) {
 			mErrorLog->Log(eqEmuLogBoth, "MySQL Error: %s", mysql_error(mMysql));

@@ -38,7 +38,7 @@
 class Map;
 class WaterMap;
 
-struct ZonePoint 
+struct ZonePoint
 {
 	float x;
 	float y;
@@ -67,7 +67,7 @@ struct ZoneClientAuth_Struct {
 
 struct ZoneEXPModInfo {
 	float ExpMod;
-	float AAExpMod; 
+	float AAExpMod;
 };
 
 struct item_tick_struct {
@@ -90,7 +90,7 @@ class Zone
 public:
 	static bool Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone = false);
 	static void Shutdown(bool quite = false);
-	
+
 	Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name);
 	~Zone();
 	bool	Init(bool iStaticZone);
@@ -128,7 +128,7 @@ public:
 	bool	LoadZoneObjects();
 	bool	LoadGroundSpawns();
 	void	ReloadStaticData();
-	
+
 	uint32	CountSpawn2();
 	ZonePoint* GetClosestZonePoint(float x, float y, float z, const char* to_name, Client *client, float max_distance = 40000.0f);
 	ZonePoint* GetClosestZonePoint(float x, float y, float z, uint32	to, Client *client, float max_distance = 40000.0f);
@@ -137,7 +137,7 @@ public:
 
 	bool RemoveSpawnEntry(uint32 spawnid);
 	bool RemoveSpawnGroup(uint32 in_id);
-	
+
 	bool	Process();
 	void	DumpAllSpawn2(ZSDump_Spawn2* spawn2dump, uint32* spawn2index);
 	uint32	DumpSpawn2(ZSDump_Spawn2* spawn2dump, uint32* spawn2index, Spawn2* spawn2);
@@ -165,9 +165,9 @@ public:
 	inline bool	IsStaticZone()			{ return staticzone; }
 	inline void	GotCurTime(bool time)	{ gottime = time; }
 	void DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw);
-	
+
 	void	SpawnConditionChanged(const SpawnCondition &c, int16 old_value);
-		
+
 	void	GetMerchantDataForZoneLoad();
 	void	LoadNewMerchantData(uint32 merchantid);
 	void	LoadTempMerchantData();
@@ -184,7 +184,7 @@ public:
 	void LoadLDoNTraps();
 	void LoadLDoNTrapEntries();
 	void LoadAdventureFlavor();
-	
+
 	map<uint32,NPCType *> npctable;
 	map<uint32,NPCType *> merctable;
 	map<uint32,std::list<MerchantList> > merchanttable;
@@ -216,7 +216,7 @@ public:
 	uint8	zone_weather;
 
 	SpawnConditionManager spawn_conditions;
-	
+
 	EQTime	zone_time;
 	void	GetTimeSync();
 	void	SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);
@@ -231,10 +231,10 @@ public:
 	bool	AllowMercs() const {return(allow_mercs);}
 	bool	IsHotzone() const { return(is_hotzone); }
 	inline	bool BuffTimersSuspended() const { return newzone_data.SuspendBuffs != 0; };
-	
+
 	time_t	weather_timer;
 	uint8	weather_type;
-	
+
 	uint8 loglevelvar;
 	uint8 merchantvar;
 	uint8 tradevar;
@@ -259,7 +259,7 @@ public:
 	LinkedList<Spawn2*> spawn2_list;
 	LinkedList<ZonePoint*> zone_point_list;
 	uint32	numzonepoints;
-	
+
 	LinkedList<NPC_Emote_Struct*> NPCEmoteList;
 
     void    LoadTickItems();
@@ -295,10 +295,10 @@ private:
 
 	int	totalBS;
 	ZoneSpellsBlocked *blocked_spells;
-	
+
 	int		totalAAs;
 	SendAA_Struct **aas;	//array of AA structs
-	
+
 	/*
 		Spawn related things
 	*/
@@ -308,7 +308,7 @@ private:
 
 	bool	staticzone;
 	bool	gottime;
-	
+
 	uint32 pQueuedMerchantsWorkID;
 	uint32 pQueuedTempMerchantsWorkID;
 

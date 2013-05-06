@@ -1786,7 +1786,7 @@ void Merc::AI_Process() {
 		SetHatedCount(0);
 		confidence_timer.Disable();
 		_check_confidence = false;
-		
+
 		if(!check_target_timer.Enabled())
 			check_target_timer.Start(2000, false);
 
@@ -2596,7 +2596,7 @@ void Merc::CheckHateList() {
 									}
 								}
 
-								
+
 								hateEntryIter++;
 							}*/
 						}
@@ -3923,12 +3923,12 @@ MercSpell Merc::GetBestMercSpellForAENuke(Merc* caster, Mob* tar) {
 
 			//check if we have a spell & allow for other AE nuke types
 			if(result.spellid == 0 && MakeRandomInt(1, 100) <= castChanceFalloff) {
-				
+
 				result = GetBestMercSpellForPBAENuke(caster, tar);
 
 				//check if we have a spell & allow for other AE nuke types
 				if(result.spellid == 0 && MakeRandomInt(1, 100) <= castChanceFalloff) {
-					
+
 					result = GetBestMercSpellForTargetedAENuke(caster, tar);
 				}
 			}
@@ -4106,7 +4106,7 @@ MercSpell Merc::GetBestMercSpellForNuke(Merc* caster) {
 
 		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsPureNukeSpell(mercSpellListItr->spellid) && !IsAENukeSpell(mercSpellListItr->spellid) 
+			if(IsPureNukeSpell(mercSpellListItr->spellid) && !IsAENukeSpell(mercSpellListItr->spellid)
 					&& MakeRandomInt(1, 100) <= castChance && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 				result.spellid = mercSpellListItr->spellid;
 				result.stance = mercSpellListItr->stance;
@@ -5250,7 +5250,7 @@ void Client::UpdateMercTimer()
 
 			GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 			SendMercTimerPacket(GetMercID(), 5, 0, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
-			GetMercTimer()->Start(RuleI(Mercs, UpkeepIntervalMS));			
+			GetMercTimer()->Start(RuleI(Mercs, UpkeepIntervalMS));
 			GetMercTimer()->SetTimer(GetMercInfo().MercTimerRemaining);
 
 			// Send upkeep charge message and reset the upkeep timer
@@ -5436,7 +5436,7 @@ bool Client::CheckCanUnsuspendMerc() {
 	{
 		SendMercMerchantResponsePacket(16);
 		Message(0, "You must wait %i seconds before unsuspending your mercenary.", GetPTimers().GetRemainingTime(pTimerMercSuspend)); //todo: find this packet response and tell them properly.
-		return false;	
+		return false;
 	}
 	return true;
 }
@@ -5608,7 +5608,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		mercOwner->SendMercenaryUnsuspendPacket(0);
 		mercOwner->SendMercenaryUnknownPacket(1);
 		mercOwner->GetMercInfo().SuspendedTime = 0;
-		mercOwner->GetMercTimer()->Start(RuleI(Mercs, UpkeepIntervalMS));			
+		mercOwner->GetMercTimer()->Start(RuleI(Mercs, UpkeepIntervalMS));
 		mercOwner->GetMercTimer()->SetTimer(mercOwner->GetMercInfo().MercTimerRemaining);
 		mercOwner->SendMercTimerPacket(GetID(), mercState, suspendedTime, mercOwner->GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
 		if(!mercOwner->GetPTimers().Expired(&database, pTimerMercSuspend, false))
@@ -5770,7 +5770,7 @@ bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 			Merc::RemoveMercFromGroup(merc, merc->GetGroup());
 		}
 		//Try and add the member, followed by checking if the merc owner exists.
-		if(group->AddMember(merc) && merc->GetMercOwner() != nullptr) { 
+		if(group->AddMember(merc) && merc->GetMercOwner() != nullptr) {
 				merc->SetFollowID(merc->GetMercOwner()->GetID());
 				Result = true;
 		}
@@ -5863,7 +5863,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().IsSuspended = newmerc->IsSuspended();
 		GetMercInfo().SuspendedTime = 0;
 		GetMercInfo().Gender = newmerc->GetGender();
-		//GetMercInfo().State = newmerc->GetStance(); 
+		//GetMercInfo().State = newmerc->GetStance();
 	}
 }
 

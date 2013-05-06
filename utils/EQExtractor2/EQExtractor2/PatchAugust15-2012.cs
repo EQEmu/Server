@@ -17,7 +17,7 @@ namespace EQExtractor2.Patches
             ExpectedPPLength = 33904;
 
             PPZoneIDOffset = 26572;
-                        
+
             PatchConfFileName = "patch_August15-2012.conf";
         }
 
@@ -28,10 +28,10 @@ namespace EQExtractor2.Patches
             Item NewItem = new Item();
 
             Buffer.SetPosition(30);
-            NewItem.MerchantSlot = Buffer.ReadByte();            
-            NewItem.Price = Buffer.ReadUInt32();                 
+            NewItem.MerchantSlot = Buffer.ReadByte();
+            NewItem.Price = Buffer.ReadUInt32();
             Buffer.SkipBytes(5);
-            NewItem.Quantity = Buffer.ReadInt32();               
+            NewItem.Quantity = Buffer.ReadInt32();
             Buffer.SetPosition(109);
             // 109
             NewItem.Name = Buffer.ReadString(true);

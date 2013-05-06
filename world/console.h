@@ -92,7 +92,7 @@ class ConsoleList
 public:
 	ConsoleList() {}
 	~ConsoleList() {}
-		
+
 	void Add(Console* con);
 	void Process();
 	void KillAll();

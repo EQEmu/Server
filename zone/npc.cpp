@@ -4,13 +4,13 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -121,12 +121,12 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 		entity_list.RemoveEntity(mob->GetID());
 
 	int moblevel=GetLevel();
-	
+
 	NPCTypedata = d;
 	NPCTypedata_ours = nullptr;
 	respawn2 = in_respawn;
 	swarm_timer.Disable();
-	
+
 	taunting = false;
 	proximity = nullptr;
 	copper = 0;
@@ -146,7 +146,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	healscale = d->healscale;
 
 	logging_enabled = NPC_DEFAULT_LOGGING_ENABLED;
-	
+
 	pAggroRange = d->aggroradius;
 	pAssistRange = GetAggroRange();
 	findable = d->findable;
@@ -186,12 +186,12 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	// Set Mana and HP Regen Rates if they are 0 in the DB
 	CalcNPCRegen();
-		
+
 	// Set Min and Max Damage if they are 0 in the DB
 	if(max_dmg == 0){
 		CalcNPCDamage();
-	}	
-	
+	}
+
 	accuracy_rating = d->accuracy_rating;
 	ATK = d->ATK;
 
@@ -217,9 +217,9 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	roambox_movingto_x = -2;
 	roambox_movingto_y = -2;
 	roambox_delay = 1000;
-	org_heading = heading;	
+	org_heading = heading;
 	p_depop = false;
-	loottable_id = d->loottable_id;	
+	loottable_id = d->loottable_id;
 
 	primary_faction = 0;
 	SetNPCFactionID(d->npc_faction_id);
@@ -234,10 +234,10 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	}
 
 	SpellFocusDMG = 0;
-	SpellFocusHeal = 0; 
-	
+	SpellFocusHeal = 0;
+
 	pet_spell_id = 0;
-	
+
 	delaytimer = false;
 	combat_event = false;
 	attack_speed = d->attack_speed;
@@ -262,7 +262,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 		prim_melee_type = 28;
 	if(!d_meele_texture2)
 		sec_melee_type = 28;
-	
+
 	//give NPCs skill values...
 	int r;
 	for(r = 0; r <= HIGHEST_SKILL; r++) {
@@ -271,7 +271,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	if(d->trap_template > 0)
 	{
-		std::map<uint32,std::list<LDoNTrapTemplate*> >::iterator trap_ent_iter; 
+		std::map<uint32,std::list<LDoNTrapTemplate*> >::iterator trap_ent_iter;
 		std::list<LDoNTrapTemplate*> trap_list;
 
 		trap_ent_iter = zone->ldon_trap_entry_list.find(d->trap_template);
@@ -354,7 +354,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	InitializeBuffSlots();
 	CalcBonuses();
 }
-	  
+
 NPC::~NPC()
 {
 	ClearQuestLists();
@@ -368,9 +368,9 @@ NPC::~NPC()
 
 	//clear our spawn limit record if we had one.
 	entity_list.LimitRemoveNPC(this);
-	
+
 	safe_delete(NPCTypedata_ours);
-	
+
 	{
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
@@ -381,7 +381,7 @@ NPC::~NPC()
 	}
 	itemlist.clear();
 	}
-	
+
 	{
 	list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list.begin();
@@ -402,7 +402,7 @@ NPC::~NPC()
 void NPC::SetTarget(Mob* mob) {
 	if(mob == GetTarget())		//dont bother if they are allready our target
 		return;
-	
+
 	//our target is already set, do not turn from the course, unless our current target is dead.
 	if(GetSwarmInfo() && GetTarget() && (GetTarget()->GetHP() > 0)) {
 		Mob *targ = entity_list.GetMob(GetSwarmInfo()->target);
@@ -433,7 +433,7 @@ ServerLootItem_Struct* NPC::GetItem(int slot_id) {
 	}
 	return(nullptr);
 }
-	  
+
 void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
@@ -480,7 +480,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 		}
 		cur++;
 	}
-	
+
 }
 
 void NPC::ClearItemList() {
@@ -493,7 +493,7 @@ void NPC::ClearItemList() {
 	}
 	itemlist.clear();
 }
-	  
+
 void NPC::QueryLoot(Client* to) {
 	int x = 0;
 	to->Message(0, "Coin: %ip %ig %is %ic", platinum, gold, silver, copper);
@@ -544,14 +544,14 @@ void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_
     else
         platinum = 0;
 }
-	  
+
 void NPC::AddCash() {
 	copper = MakeRandomInt(1, 100);
 	silver = MakeRandomInt(1, 50);
 	gold = MakeRandomInt(1, 10);
 	platinum = MakeRandomInt(1, 5);
 }
-	  
+
 void NPC::RemoveCash() {
 	copper = 0;
 	silver = 0;
@@ -562,7 +562,7 @@ void NPC::RemoveCash() {
 bool NPC::Process()
 {
 	_ZP(NPC_Process);
-	
+
     adverrorinfo = 1;
 	if (IsStunned() && stunned_timer.Check())
     {
@@ -585,21 +585,21 @@ bool NPC::Process()
     }
 
     adverrorinfo = 2;
-    
+
     SpellProcess();
-    
-    if(tic_timer.Check()) 
-	{	
+
+    if(tic_timer.Check())
+	{
 		BuffProcess();
-		
+
 		if(curfp)
 			ProcessFlee();
-		
+
 		uint32 bonus = 0;
-		
+
 		if(GetAppearance() == eaSitting)
 			bonus+=3;
-		
+
 		int32 OOCRegen = 0;
 		if(oocregen > 0){ //should pull from Mob class
 			OOCRegen += GetMaxHP() * oocregen / 100;
@@ -618,7 +618,7 @@ bool NPC::Process()
 				SetHP(GetHP()+hp_regen+bonus+(GetLevel()/5));
 			else
 				SetHP(GetHP()+hp_regen+bonus);
-		} else 
+		} else
 			SetHP(GetHP()+hp_regen);
 
 		if(GetMana() < GetMaxMana()) {
@@ -655,7 +655,7 @@ bool NPC::Process()
 			SendHPUpdate();
 		}
 	}
-	
+
 	if(HasVirus()) {
 		if(viral_timer.Check()) {
 			viral_timer_counter++;
@@ -670,7 +670,7 @@ bool NPC::Process()
 		if(viral_timer_counter > 999)
 			viral_timer_counter = 0;
 	}
-	
+
 	if(spellbonuses.GravityEffect == 1) {
 		if(gravity_timer.Check())
 			DoGravityEffect();
@@ -681,20 +681,20 @@ bool NPC::Process()
         SendPosition();
         reface_timer->Disable();
     }
-	
+
     if (IsMezzed())
 	    return true;
-	
+
 	if(IsStunned()) {
-		if(spun_timer.Check()) 
+		if(spun_timer.Check())
 			Spin();
 		return true;
 	}
-	
+
 	if (enraged_timer.Check()){
 		ProcessEnrage();
 	}
-	
+
 	//Handle assists...
 	if(assist_timer.Check() && IsEngaged() && !Charmed()) {
 		entity_list.AIYellForHelp(this, GetTarget());
@@ -709,7 +709,7 @@ bool NPC::Process()
 	}
 
 	AI_Process();
-	
+
     return true;
 }
 
@@ -764,7 +764,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 				return false;
 			break;
 						   }
-			
+
 		case SE_HealOverTime: {
 			if(this->GetHPRatio() < 100)
 				return true;
@@ -805,19 +805,19 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 	}
 	else {
 		Seperator sep(spawncommand);
-		//Lets see if someone didn't fill out the whole #spawn function properly 
+		//Lets see if someone didn't fill out the whole #spawn function properly
 		if (!sep.IsNumber(1))
-			sprintf(sep.arg[1],"1"); 
+			sprintf(sep.arg[1],"1");
 		if (!sep.IsNumber(2))
-			sprintf(sep.arg[2],"1"); 
+			sprintf(sep.arg[2],"1");
 		if (!sep.IsNumber(3))
 			sprintf(sep.arg[3],"0");
 		if (atoi(sep.arg[4]) > 2100000000 || atoi(sep.arg[4]) <= 0)
 			sprintf(sep.arg[4]," ");
 		if (!strcmp(sep.arg[5],"-"))
-			sprintf(sep.arg[5]," "); 
+			sprintf(sep.arg[5]," ");
 		if (!sep.IsNumber(5))
-			sprintf(sep.arg[5]," "); 
+			sprintf(sep.arg[5]," ");
 		if (!sep.IsNumber(6))
 			sprintf(sep.arg[6],"1");
 		if (!sep.IsNumber(8))
@@ -827,7 +827,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 		if (!sep.IsNumber(7))
 			sprintf(sep.arg[7],"0");
 		if (!strcmp(sep.arg[4],"-"))
-			sprintf(sep.arg[4]," "); 
+			sprintf(sep.arg[4]," ");
 		if (!sep.IsNumber(10))	// bodytype
 			sprintf(sep.arg[10], "0");
 		//Calc MaxHP if client neglected to enter it...
@@ -848,16 +848,16 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 					multiplier = 27;
 				else if (tmplevel < 57)
 					multiplier = 28;
-				else 
+				else
 					multiplier = 30;
 				break;
-				
+
 			case DRUID:
 			case CLERIC:
 			case SHAMAN:
 				multiplier = 15;
 				break;
-				
+
 			case PALADIN:
 			case SHADOWKNIGHT:
 				if (tmplevel < 35)
@@ -873,7 +873,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 				else
 					multiplier = 26;
 				break;
-				
+
 			case MONK:
 			case BARD:
 			case ROGUE:
@@ -883,23 +883,23 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 				else if (tmplevel < 58)
 					multiplier = 19;
 				else
-					multiplier = 20;				
+					multiplier = 20;
 				break;
-				
+
 			case RANGER:
 				if (tmplevel < 58)
 					multiplier = 20;
 				else
-					multiplier = 21;			
+					multiplier = 21;
 				break;
-				
+
 			case MAGICIAN:
 			case WIZARD:
 			case NECROMANCER:
 			case ENCHANTER:
 				multiplier = 12;
 				break;
-				
+
 			default:
 				if (tmplevel < 35)
 					multiplier = 21;
@@ -917,22 +917,22 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 			}
 			sprintf(sep.arg[4],"%i",5+multiplier*atoi(sep.arg[2])+multiplier*atoi(sep.arg[2])*75/300);
 		}
-		
+
 		// Autoselect NPC Gender
 		if (sep.arg[5][0] == 0) {
 			sprintf(sep.arg[5], "%i", (int) Mob::GetDefaultGender(atoi(sep.arg[1])));
 		}
-		
-		//Time to create the NPC!! 
+
+		//Time to create the NPC!!
 		NPCType* npc_type = new NPCType;
 		memset(npc_type, 0, sizeof(NPCType));
-		
+
 		strncpy(npc_type->name, sep.arg[0], 60);
-		npc_type->cur_hp = atoi(sep.arg[4]); 
-		npc_type->max_hp = atoi(sep.arg[4]); 
+		npc_type->cur_hp = atoi(sep.arg[4]);
+		npc_type->max_hp = atoi(sep.arg[4]);
 		npc_type->race = atoi(sep.arg[1]);
-		npc_type->gender = atoi(sep.arg[5]); 
-		npc_type->class_ = atoi(sep.arg[6]); 
+		npc_type->gender = atoi(sep.arg[5]);
+		npc_type->class_ = atoi(sep.arg[6]);
 		npc_type->deity = 1;
 		npc_type->level = atoi(sep.arg[2]);
 		npc_type->npc_id = 0;
@@ -942,9 +942,9 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 		npc_type->runspeed = 1.25;
 		npc_type->d_meele_texture1 = atoi(sep.arg[7]);
 		npc_type->d_meele_texture2 = atoi(sep.arg[8]);
-		npc_type->merchanttype = atoi(sep.arg[9]);	
+		npc_type->merchanttype = atoi(sep.arg[9]);
 		npc_type->bodytype = atoi(sep.arg[10]);
-		
+
 		npc_type->STR = 150;
 		npc_type->STA = 150;
 		npc_type->DEX = 150;
@@ -955,14 +955,14 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
-		
+
 		NPC* npc = new NPC(npc_type, 0, in_x, in_y, in_z, in_heading/8, FlyMode3);
 		npc->GiveNPCTypeData(npc_type);
-		
+
 		entity_list.AddNPC(npc);
 
 		if (client) {
-			// Notify client of spawn data 
+			// Notify client of spawn data
 			client->Message(0, "New spawn:");
 			client->Message(0, "Name: %s", npc->name);
 			client->Message(0, "Race: %u", npc->race);
@@ -995,7 +995,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			if (extra && c && c->GetZoneID())
 			{
 				// Set an npc_type ID within the standard range for the current zone if possible (zone_id * 1000)
-				int starting_npc_id = c->GetZoneID() * 1000;				
+				int starting_npc_id = c->GetZoneID() * 1000;
 				if (RunQuery(query, MakeAnyLenString(&query, "SELECT MAX(id) FROM npc_types WHERE id >= %i AND id < %i", starting_npc_id, (starting_npc_id + 1000)), errbuf, &result)) {
 					row = mysql_fetch_row(result);
 					if(row)
@@ -1015,7 +1015,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 							npc_type_id = starting_npc_id;
 						}
 					}
-					
+
 					safe_delete_array(query);
 					mysql_free_result(result);
 				}
@@ -1242,7 +1242,7 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 			return(0);
 		}
 	}
-	
+
 	//they have some loot item in this slot, pass it up to the default handler
 	return(Mob::GetEquipmentMaterial(material_slot));
 }
@@ -1262,9 +1262,9 @@ uint32 NPC::GetMaxDamage(uint8 tlevel)
 }
 
 void NPC::PickPocket(Client* thief) {
-	
+
 	thief->CheckIncreaseSkill(PICK_POCKETS, nullptr, 5);
-	
+
 	//make sure were allowed to targte them:
 	int olevel = GetLevel();
 	if(olevel > (thief->GetLevel() + THIEF_PICKPOCKET_OVER)) {
@@ -1273,7 +1273,7 @@ void NPC::PickPocket(Client* thief) {
 		//should we check aggro
 		return;
 	}
-	
+
 	if(MakeRandomInt(0, 100) > 95){
 		AddToHateList(thief, 50);
 		Say("Stop thief!");
@@ -1281,7 +1281,7 @@ void NPC::PickPocket(Client* thief) {
 		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		return;
 	}
-	
+
 	int steal_skill = thief->GetSkill(PICK_POCKETS);
 	int stealchance = steal_skill*100/(5*olevel+5);
 	ItemInst* inst = 0;
@@ -1318,7 +1318,7 @@ void NPC::PickPocket(Client* thief) {
 				bool is_arrow = (item->ItemType == ItemTypeArrow) ? true : false;
 				int slot_id = thief->GetInv().FindFreeSlot(false, true, inst->GetItem()->Size, is_arrow);
 				if (/*!Equipped(item->ID) &&*/
-					 !item->Magic && item->NoDrop != 0 && !inst->IsType(ItemClassContainer) && slot_id != SLOT_INVALID 
+					 !item->Magic && item->NoDrop != 0 && !inst->IsType(ItemClassContainer) && slot_id != SLOT_INVALID
 					/*&& steal_skill > item->StealSkill*/ )
 				{
 					slot[x] = slot_id;
@@ -2024,7 +2024,7 @@ void NPC::LevelScale() {
 	uint8 random_level = (MakeRandomInt(level, maxlevel));
 
 	float scaling = (((random_level / (float)level) - 1) * (scalerate / 100.0f));
-	
+
 	// Compensate for scale rates at low levels so they don't add too much
 	uint8 scale_adjust = 1;
 	if(level > 0 && level <= 5)
@@ -2047,7 +2047,7 @@ void NPC::LevelScale() {
 	WIS += (int)(WIS * scaling / scale_adjust);
 	CHA += (int)(CHA * scaling / scale_adjust);
 	if (MR)
-		MR += (int)(MR * scaling / scale_adjust); 
+		MR += (int)(MR * scaling / scale_adjust);
 	if (CR)
 		CR += (int)(CR * scaling / scale_adjust);
 	if (DR)
@@ -2094,29 +2094,29 @@ void NPC::CalcNPCRegen() {
 		mana_regen = 0;
 	else
 		mana_regen = mana_regen;
-	
+
 	// Gives low end monsters no regen if set to 0 in database. Should make low end monsters killable
 	// Might want to lower this to /5 rather than 10.
 	if(hp_regen == 0)
 	{
-		if(GetLevel() <= 6)  
-            hp_regen = 1;  
-       else if(GetLevel() > 6 && GetLevel() <= 10)  
-            hp_regen = 2;  
-       else if(GetLevel() > 10 && GetLevel() <= 15)  
-            hp_regen = 3;  
-       else if(GetLevel() > 15 && GetLevel() <= 20)  
-            hp_regen = 5;  
-       else if(GetLevel() > 20 && GetLevel() <= 30)  
-            hp_regen = 7;  
-       else if(GetLevel() > 30 && GetLevel() <= 35)  
-            hp_regen = 9;  
-       else if(GetLevel() > 35 && GetLevel() <= 40)  
-            hp_regen = 12;  
-       else if(GetLevel() > 40 && GetLevel() <= 45)  
-            hp_regen = 18;  
-       else if(GetLevel() > 45 && GetLevel() <= 50)  
-            hp_regen = 21;  
+		if(GetLevel() <= 6)
+            hp_regen = 1;
+       else if(GetLevel() > 6 && GetLevel() <= 10)
+            hp_regen = 2;
+       else if(GetLevel() > 10 && GetLevel() <= 15)
+            hp_regen = 3;
+       else if(GetLevel() > 15 && GetLevel() <= 20)
+            hp_regen = 5;
+       else if(GetLevel() > 20 && GetLevel() <= 30)
+            hp_regen = 7;
+       else if(GetLevel() > 30 && GetLevel() <= 35)
+            hp_regen = 9;
+       else if(GetLevel() > 35 && GetLevel() <= 40)
+            hp_regen = 12;
+       else if(GetLevel() > 40 && GetLevel() <= 45)
+            hp_regen = 18;
+       else if(GetLevel() > 45 && GetLevel() <= 50)
+            hp_regen = 21;
        else
             hp_regen = 30;
 	} else if(hp_regen < 0) {
@@ -2167,10 +2167,10 @@ void NPC::CalcNPCDamage() {
 	    if (max_dmg==0)
 			max_dmg = (GetLevel()*2)*AC_adjust/10;
 	}
-	
+
 	int clfact = GetClassLevelFactor();
 	min_dmg = (min_dmg * clfact) / 220;
-	max_dmg = (max_dmg * clfact) / 220;	
+	max_dmg = (max_dmg * clfact) / 220;
 
 	return;
 }
@@ -2243,7 +2243,7 @@ int32 NPC::CalcMaxMana() {
 	    if (max_mana < 0) {
 		    max_mana = 0;
 	    }
-	
+
 	    return max_mana;
     } else {
         switch (GetCasterClass()) {
@@ -2261,7 +2261,7 @@ int32 NPC::CalcMaxMana() {
 	    if (max_mana < 0) {
 		    max_mana = 0;
 	    }
-	
+
 	    return max_mana;
     }
 }
@@ -2284,7 +2284,7 @@ NPC_Emote_Struct* NPC::GetNPCEmote(uint16 emoteid, uint8 event_) {
 	}
 	return (nullptr);
 }
-	
+
 void NPC::DoNPCEmote(uint8 event_, uint16 emoteid)
 {
 	if(this == nullptr || emoteid == 0)
@@ -2338,7 +2338,7 @@ bool NPC::CanTalk()
 
 	if (TalkRace[GetRace() - 1] > 0)
 		return true;
-	
+
 	return false;
 }
 
@@ -2360,39 +2360,39 @@ void NPC::PrintOutQuestItems(Client* c){
 //this is called with 'this' as the mob being looked at, and
 //iOther the mob who is doing the looking. It should figure out
 //what iOther thinks about 'this'
-FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {	
+FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 	_ZP(NPC_GetReverseFactionCon);
 
 	iOther = iOther->GetOwnerOrSelf();
 	int primaryFaction= iOther->GetPrimaryFaction();
-	
+
 	//I am pretty sure that this special faction call is backwards
 	//and should be iOther->GetSpecialFactionCon(this)
 	if (primaryFaction < 0)
 		return GetSpecialFactionCon(iOther);
-	
+
 	if (primaryFaction == 0)
 		return FACTION_INDIFFERENT;
-	
+
 	//if we are a pet, use our owner's faction stuff
 	Mob *own = GetOwner();
 	if (own != nullptr)
 		return own->GetReverseFactionCon(iOther);
-	
+
 	//make sure iOther is an npc
 	//also, if we dont have a faction, then they arnt gunna think anything of us either
 	if(!iOther->IsNPC() || GetPrimaryFaction() == 0)
 		return(FACTION_INDIFFERENT);
-	
+
 	//if we get here, iOther is an NPC too
-	
+
 	//otherwise, employ the npc faction stuff
 	//so we need to look at iOther's faction table to see
 	//what iOther thinks about our primary faction
 	return(iOther->CastToNPC()->CheckNPCFactionAlly(GetPrimaryFaction()));
 }
 
-//Look through our faction list and return a faction con based 
+//Look through our faction list and return a faction con based
 //on the npc_value for the other person's primary faction in our list.
 FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 	list<struct NPCFaction*>::iterator cur,end;

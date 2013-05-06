@@ -61,7 +61,7 @@ MD5::operator const char* () {
 	snprintf(pMD5String, sizeof(pMD5String), "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", pMD5[0], pMD5[1], pMD5[2], pMD5[3], pMD5[4], pMD5[5], pMD5[6], pMD5[7], pMD5[8], pMD5[9], pMD5[10], pMD5[11], pMD5[12], pMD5[13], pMD5[14], pMD5[15]);
 	return pMD5String;
 }
-	
+
 bool MD5::operator== (const MD5& iMD5) {
 	if (memcmp(pMD5, iMD5.pMD5, 16) == 0)
 		return true;
@@ -268,4 +268,4 @@ void MD5::Transform(uint32 hash[4], const uint32 input[16]) {
    MD5STEP(F4, b, c, d, a, input[ 9]+0xeb86d391, 21);
 
    hash[0] += a;   hash[1] += b;   hash[2] += c;   hash[3] += d;
-} 
+}

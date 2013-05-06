@@ -38,7 +38,7 @@ public:
 	//this frequency should generally be a multiple of TIMEOUT_GRANULARITY
 	Timeoutable(uint32 check_frequency);
 	virtual ~Timeoutable();
-	
+
 	virtual void CheckTimeout() = 0;
 
 private:
@@ -50,15 +50,15 @@ class TimeoutManager {
 	friend class Timeoutable;
 public:
 	TimeoutManager();
-	
+
 	void CheckTimeouts();
-	
+
 protected:
-	
+
 	//methods called by Timeoutable objects:
 	void AddMember(Timeoutable *who);
 	void DeleteMember(Timeoutable *who);
-	
+
 	vector<Timeoutable *> members;
 };
 

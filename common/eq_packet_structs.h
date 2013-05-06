@@ -547,7 +547,7 @@ struct BuffRemoveRequest_Struct
 struct PetBuff_Struct {
 /*000*/ uint32 petid;
 /*004*/ uint32 spellid[BUFF_COUNT];
-/*104*/ uint32 unknown700;	
+/*104*/ uint32 unknown700;
 /*108*/ uint32 unknown701;
 /*112*/ uint32 unknown702;
 /*116*/ uint32 unknown703;
@@ -867,7 +867,7 @@ struct PlayerProfile_Struct
 /*0116*/	uint32				level;				// Level of player (might be one byte)
 /*0120*/	BindStruct			binds[5];			// Bind points (primary is first, home city is fifth)
 /*0220*/	uint32				deity;				// deity
-/*0224*/	uint32				guild_id;	
+/*0224*/	uint32				guild_id;
 /*0228*/	uint32				birthday;			// characters bday
 /*0232*/	uint32				lastlogin;			// last login or zone time
 /*0236*/	uint32				timePlayedMin;		// in minutes
@@ -1906,7 +1906,7 @@ struct AdventureFinish_Struct{
 };
 
 struct Weblink_Struct{
-/*000*/ char weblink[1]; 
+/*000*/ char weblink[1];
 /*004*/
 };
 
@@ -2040,22 +2040,22 @@ struct Illusion_Struct_Old {
 struct QuestReward_Struct
 {
 /*000*/ uint32	from_mob;	// ID of mob awarding the client
-/*004*/ uint32	unknown004;	
-/*008*/ uint32	unknown008;	
-/*012*/ uint32	unknown012;	
-/*016*/ uint32	unknown016;	
-/*020*/ uint32	unknown020;	
+/*004*/ uint32	unknown004;
+/*008*/ uint32	unknown008;
+/*012*/ uint32	unknown012;
+/*016*/ uint32	unknown016;
+/*020*/ uint32	unknown020;
 /*024*/ uint32	silver;		// Gives silver to the client
 /*028*/ uint32	gold;		// Gives gold to the client
 /*032*/ uint32	platinum;	// Gives platinum to the client
-/*036*/ uint32	unknown036;	
-/*040*/ uint32	unknown040;	
-/*044*/ uint32	unknown044;	
-/*048*/ uint32	unknown048;	
-/*052*/ uint32	unknown052;	
-/*056*/ uint32	unknown056;	
-/*060*/ uint32	unknown060;	
-/*064*/ uint32	unknown064;	
+/*036*/ uint32	unknown036;
+/*040*/ uint32	unknown040;
+/*044*/ uint32	unknown044;
+/*048*/ uint32	unknown048;
+/*052*/ uint32	unknown052;
+/*056*/ uint32	unknown056;
+/*060*/ uint32	unknown060;
+/*064*/ uint32	unknown064;
 /*068*/
 };
 
@@ -2760,7 +2760,7 @@ struct BarterSearchRequest_Struct {
 
 struct BuyerItemSearchLinkRequest_Struct {
 /*000*/	uint32	Action;	// 0x00000015
-/*004*/	uint32	ItemID;	
+/*004*/	uint32	ItemID;
 /*008*/	uint32	Unknown008;
 /*012*/	uint32	Unknown012;
 };
@@ -3435,7 +3435,7 @@ struct MerchantList{
 	uint32	item;
     int16  faction_required;
     int8   level_required;
-    uint16  alt_currency_cost;    
+    uint16  alt_currency_cost;
 };
 struct TempMerchantList{
 	uint32	npcid;
@@ -4195,7 +4195,7 @@ struct RespawnWindow_Struct {
 /**
  * Shroud spawn. For others shrouding, this has their spawnId and
  * spawnStruct.
- * 
+ *
  * Length: 586
  * OpCode: OP_Shroud
  */
@@ -4650,7 +4650,7 @@ struct GroupMakeLeader_Struct
 //any items come after in much the same way adventure merchant items do except there is no theme included
 #define ALT_CURRENCY_OP_POPULATE 8
 #define ALT_CURRENCY_OP_UPDATE 7
-    
+
 //Server -> Client
 //Populates the initial Alternate Currency Window
 struct AltCurrencyPopulateEntry_Struct
@@ -4681,7 +4681,7 @@ struct AltCurrencyUpdate_Struct {
 /*084*/ uint32 unknown084; //seen 0
 };
 
-//Client -> Server 
+//Client -> Server
 //When an item is selected while the alt currency merchant window is open
 struct AltCurrencySelectItem_Struct {
 /*000*/ uint32 merchant_entity_id;
@@ -4711,7 +4711,7 @@ struct AltCurrencySelectItem_Struct {
 //eg: "I will give you no doubloons for a cloth cap."
 //Probably also sends amounts somewhere
 struct AltCurrencySelectItemReply_Struct {
-/*000*/ uint32 unknown000; 
+/*000*/ uint32 unknown000;
 /*004*/ uint8  unknown004; //0xff
 /*005*/ uint8  unknown005; //0xff
 /*006*/ uint8  unknown006; //0xff
@@ -4839,7 +4839,7 @@ struct Membership_Entry_Struct
 {
 /*000*/ uint32 purchase_id;		// Seen 1, then increments 90287 to 90300
 /*004*/ uint32 bitwise_entry;	// Seen 16 to 65536 - Skips 4096
-/*008*/ 
+/*008*/
 };
 
 struct Membership_Setting_Struct
@@ -4847,7 +4847,7 @@ struct Membership_Setting_Struct
 /*000*/ uint32 setting_index;	// 0, 1, or 2
 /*004*/ uint32 setting_id;		// 0 to 21
 /*008*/ int32 setting_value;	// All can be 0, 1, or -1
-/*012*/ 
+/*012*/
 };
 
 struct Membership_Details_Struct
@@ -4891,7 +4891,7 @@ struct MercenaryList_Struct {
 /*0045*/	uint32	MercUnk02;			// Unknown (normally see 1, but sometimes 2 or 0)
 /*0049*/	uint32	StanceCount;		// Iterations of MercenaryStance_Struct - Normally 2 to 4 seen
 /*0053*/	int32	MercUnk03;			// Unknown (always 0 at merchant) - Seen on active merc: 93 a4 03 77, b8 ed 2f 26, 88 d5 8b c3, and 93 a4 ad 77
-/*0057*/	uint8	MercUnk04;			// Seen 1 
+/*0057*/	uint8	MercUnk04;			// Seen 1
 /*0058*/	char	MercName[1];		// Null Terminated Mercenary Name (00 at merchants)
 };
 
@@ -4913,7 +4913,7 @@ struct MercenaryListEntry_Struct {
 /*0045*/	uint32	MercUnk02;			// Unknown (normally see 1, but sometimes 2 or 0)
 /*0049*/	uint32	StanceCount;		// Iterations of MercenaryStance_Struct - Normally 2 to 4 seen
 /*0053*/	int32	MercUnk03;			// Unknown (always 0 at merchant) - Seen on active merc: 93 a4 03 77, b8 ed 2f 26, 88 d5 8b c3, and 93 a4 ad 77
-/*0057*/	uint8	MercUnk04;			// Seen 1 
+/*0057*/	uint8	MercUnk04;			// Seen 1
 /*0058*/	char	MercName[1];		// Null Terminated Mercenary Name (00 at merchants)
 /*0000*/	MercenaryStance_Struct Stances[MAX_MERC_STANCES];	// Count Varies, but hard set to 5 max for now - From dbstr_us.txt - 1^24^Passive^0, 2^24^Balanced^0, etc (1 to 9 as of April 2012)
 };
@@ -4953,7 +4953,7 @@ struct MercenaryData_Struct {
 /*0045*/	uint32	MercUnk02;			// Unknown (normally see 1, but sometimes 2 or 0)
 /*0049*/	uint32	StanceCount;		// Iterations of MercenaryStance_Struct - Normally 2 to 4 seen
 /*0053*/	int32	MercUnk03;			// Unknown (always 0 at merchant) - Seen on active merc: 93 a4 03 77, b8 ed 2f 26, 88 d5 8b c3, and 93 a4 ad 77
-/*0057*/	uint8	MercUnk04;			// Seen 1 
+/*0057*/	uint8	MercUnk04;			// Seen 1
 /*0058*/	char	MercName[64];		// Null Terminated Mercenary Name (00 at merchants)
 /*0000*/	MercenaryStance_Struct Stances[MAX_MERC_STANCES];	// Count Varies, but hard set to 2 for now - From dbstr_us.txt - 1^24^Passive^0, 2^24^Balanced^0, etc (1 to 9 as of April 2012)
 /*0000*/	uint32	MercUnk05;			// Seen 1 - Extra Merc Data field that differs from MercenaryListEntry_Struct
@@ -4963,7 +4963,7 @@ struct MercenaryData_Struct {
 // [OPCode: 0x6537] On Live as of April 2 2012 [Server->Client]
 // Should be named OP_MercenaryDataResponse, but the current opcode using that name should be renamed first
 // Size varies if mercenary is hired or if browsing Mercenary Merchant
-// This may also be the response for Client->Server 0x0327 (size 0) packet On Live as of April 2 2012 
+// This may also be the response for Client->Server 0x0327 (size 0) packet On Live as of April 2 2012
 struct MercenaryDataUpdate_Struct {
 /*0000*/	int32	MercStatus;					// Seen 0 with merc and -1 with no merc hired
 /*0004*/	uint32	MercCount;					// Seen 1 with 1 merc hired and 0 with no merc hired

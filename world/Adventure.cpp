@@ -125,7 +125,7 @@ bool Adventure::Process()
 			{
 				Finished(AWS_Lose);
 			}
-			
+
 			MoveCorpsesToGraveyard();
 			database.DeleteInstance(instance_id);
 			return false;
@@ -378,9 +378,9 @@ void Adventure::MoveCorpsesToGraveyard()
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, charid FROM player_corpses WHERE instanceid=%d", GetInstanceID()), errbuf, &result)) 
+	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, charid FROM player_corpses WHERE instanceid=%d", GetInstanceID()), errbuf, &result))
 	{
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
 			dbid_list.push_back(atoi(row[0]));
 			charid_list.push_back(atoi(row[1]));
@@ -400,8 +400,8 @@ void Adventure::MoveCorpsesToGraveyard()
 		float x = GetTemplate()->graveyard_x + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float y = GetTemplate()->graveyard_y + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float z = GetTemplate()->graveyard_z;
-		if(database.RunQuery(query,MakeAnyLenString(&query, "UPDATE player_corpses SET zoneid=%d, instanceid=0, x=%f, y=%f, z=%f WHERE instanceid=%d", 
-			GetTemplate()->graveyard_zone_id, x, y, z, GetInstanceID()), errbuf)) 
+		if(database.RunQuery(query,MakeAnyLenString(&query, "UPDATE player_corpses SET zoneid=%d, instanceid=0, x=%f, y=%f, z=%f WHERE instanceid=%d",
+			GetTemplate()->graveyard_zone_id, x, y, z, GetInstanceID()), errbuf))
 		{
 			safe_delete_array(query);
 		}

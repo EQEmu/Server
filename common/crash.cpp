@@ -9,7 +9,7 @@ class EQEmuStackWalker : public StackWalker
 public:
     EQEmuStackWalker() : StackWalker() { }
     EQEmuStackWalker(DWORD dwProcessId, HANDLE hProcess) : StackWalker(dwProcessId, hProcess) { }
-    virtual void OnOutput(LPCSTR szText) { 
+    virtual void OnOutput(LPCSTR szText) {
         char buffer[4096];
         for(int i = 0; i < 4096; ++i) {
             if(szText[i] == 0) {
@@ -24,8 +24,8 @@ public:
             }
         }
 
-        LogFile->write(EQEMuLog::Crash, buffer); 
-        StackWalker::OnOutput(szText); 
+        LogFile->write(EQEMuLog::Crash, buffer);
+        StackWalker::OnOutput(szText);
     }
 };
 
@@ -97,12 +97,12 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS *ExceptionInfo)
             LogFile->write(EQEMuLog::Crash, "Unknown Exception");
             break;
     }
-    
+
     if(EXCEPTION_STACK_OVERFLOW != ExceptionInfo->ExceptionRecord->ExceptionCode)
     {
         EQEmuStackWalker sw; sw.ShowCallstack(GetCurrentThread(), ExceptionInfo->ContextRecord);
-    }    
-    
+    }
+
     return EXCEPTION_EXECUTE_HANDLER;
 }
 

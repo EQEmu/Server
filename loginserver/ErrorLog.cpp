@@ -68,30 +68,30 @@ void ErrorLog::Log(eqLogType type, const char *message, ...)
 	m_time = localtime(&m_clock);
 
 	log_mutex->lock();
-	printf("[%s] [%02d.%02d.%02d - %02d:%02d:%02d] %s\n", 
-		eqLogTypes[type], 
-		m_time->tm_mon+1, 
-		m_time->tm_mday, 
-		m_time->tm_year%100, 
-		m_time->tm_hour, 
-		m_time->tm_min, 
-		m_time->tm_sec, 
+	printf("[%s] [%02d.%02d.%02d - %02d:%02d:%02d] %s\n",
+		eqLogTypes[type],
+		m_time->tm_mon+1,
+		m_time->tm_mday,
+		m_time->tm_year%100,
+		m_time->tm_hour,
+		m_time->tm_min,
+		m_time->tm_sec,
 		buffer);
 
 	if(error_log)
 	{
-		fprintf(error_log, "[%s] [%02d.%02d.%02d - %02d:%02d:%02d] %s\n", 
-			eqLogTypes[type], 
-			m_time->tm_mon+1, 
-			m_time->tm_mday, 
-			m_time->tm_year%100, 
-			m_time->tm_hour, 
-			m_time->tm_min, 
-			m_time->tm_sec, 
+		fprintf(error_log, "[%s] [%02d.%02d.%02d - %02d:%02d:%02d] %s\n",
+			eqLogTypes[type],
+			m_time->tm_mon+1,
+			m_time->tm_mday,
+			m_time->tm_year%100,
+			m_time->tm_hour,
+			m_time->tm_min,
+			m_time->tm_sec,
 			buffer);
 		fflush(error_log);
 	}
-	
+
 	log_mutex->unlock();
 	delete[] buffer;
 }
@@ -110,26 +110,26 @@ void ErrorLog::LogPacket(eqLogType type, const char *data, size_t size)
 	m_time = localtime(&m_clock);
 
 	log_mutex->lock();
-	printf("[%s] [%02d.%02d.%02d - %02d:%02d:%02d] dumping packet of size %u:\n", 
-		eqLogTypes[type], 
-		m_time->tm_mon+1, 
-		m_time->tm_mday, 
-		m_time->tm_year%100, 
-		m_time->tm_hour, 
-		m_time->tm_min, 
-		m_time->tm_sec, 
+	printf("[%s] [%02d.%02d.%02d - %02d:%02d:%02d] dumping packet of size %u:\n",
+		eqLogTypes[type],
+		m_time->tm_mon+1,
+		m_time->tm_mday,
+		m_time->tm_year%100,
+		m_time->tm_hour,
+		m_time->tm_min,
+		m_time->tm_sec,
 		(unsigned int)size);
 
 	if(error_log)
 	{
-		fprintf(error_log, "[%s] [%02d.%02d.%02d - %02d:%02d:%02d] dumping packet of size %u\n", 
-			eqLogTypes[type], 
-			m_time->tm_mon+1, 
-			m_time->tm_mday, 
-			m_time->tm_year%100, 
-			m_time->tm_hour, 
-			m_time->tm_min, 
-			m_time->tm_sec, 
+		fprintf(error_log, "[%s] [%02d.%02d.%02d - %02d:%02d:%02d] dumping packet of size %u\n",
+			eqLogTypes[type],
+			m_time->tm_mon+1,
+			m_time->tm_mday,
+			m_time->tm_year%100,
+			m_time->tm_hour,
+			m_time->tm_min,
+			m_time->tm_sec,
 			(unsigned int)size);
 	}
 
@@ -162,7 +162,7 @@ void ErrorLog::LogPacket(eqLogType type, const char *data, size_t size)
 				fprintf(error_log, "- ");
 			}
 		}
-		
+
 		printf("%02X ", (unsigned int)data[i]);
 		if(error_log)
 		{

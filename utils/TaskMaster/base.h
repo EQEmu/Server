@@ -223,7 +223,7 @@ public:
 
 enum
 {
-	TEXT_Main = wxID_HIGHEST + 1, 
+	TEXT_Main = wxID_HIGHEST + 1,
 	MENU_Connect,
 	MENU_Quit,
 	MENU_NewTask,
@@ -252,4 +252,4 @@ enum
 	LIST_Click_Proximity,
 };
 
-#endif 
+#endif

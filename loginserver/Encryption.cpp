@@ -96,15 +96,15 @@ bool Encryption::Load(const char *name)
 	h_dll = LoadLibrary(name);
 #endif
 
-	if(h_dll == NULL) 
+	if(h_dll == NULL)
 	{
 		return false;
 	}
-    else 
-	{ 
-		SetLastError(0); 
+    else
+	{
+		SetLastError(0);
 	}
-	
+
 	return true;
 }
 

@@ -129,7 +129,7 @@ enum {
 	HideCorpseNPC = 5
 };
 
-typedef enum 
+typedef enum
 {
 	Empty = 0,
 	Auto = 1,
@@ -167,8 +167,8 @@ struct XTarget_Struct
 	uint16 ID;
 	char Name[65];
 };
-	
-	
+
+
 const uint32 POPUPID_UPDATE_SHOWSTATSWINDOW = 1000000;
 
 struct ClientReward
@@ -389,7 +389,7 @@ public:
 	inline virtual int16	GetPR()	const { return PR; }
 	inline virtual int16	GetCR()	const { return CR; }
 	inline virtual int16	GetCorrup()	const { return Corrup; }
-	
+
 	int16	GetMaxStat() const;
 	int16	GetMaxResist() const;
 	int16  GetMaxSTR() const;
@@ -442,15 +442,15 @@ public:
 	inline virtual int16	GetSpellDmg()		const { return itembonuses.SpellDmg; }
 	inline virtual int16	GetClair()			const { return itembonuses.Clairvoyance; }
 	inline virtual int16	GetDSMit()			const { return itembonuses.DSMitigation; }
-	
+
 	inline virtual int16	GetSingMod()		const { return itembonuses.singingMod; }
 	inline virtual int16	GetBrassMod()		const { return itembonuses.brassMod; }
 	inline virtual int16	GetPercMod()		const { return itembonuses.percussionMod; }
 	inline virtual int16	GetStringMod()		const { return itembonuses.stringedMod; }
 	inline virtual int16	GetWindMod()		const { return itembonuses.windMod; }
-	
+
 	inline virtual int16	GetDelayDeath()		const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
-	
+
 	int32 Additional_SpellDmg(uint16 spell_id, bool bufftick = false);
 	int32 Additional_Heal(uint16 spell_id);
 	float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
@@ -489,7 +489,7 @@ public:
 	int32	CalcEnduranceRegen();	//Calculates endurance regen used in DoEnduranceRegen()
 	int32	GetEndurance()	const {return cur_end;}	//This gets our current endurance
 	int32	GetMaxEndurance() const {return max_end;}	//This gets our endurance from the last CalcMaxEndurance() call
-	int32	CalcEnduranceRegenCap();	
+	int32	CalcEnduranceRegenCap();
 	int32	CalcHPRegenCap();
 	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
 	void SetEndurance(int32 newEnd);	//This sets the current endurance to the new value
@@ -744,7 +744,7 @@ public:
 	int16 acmod();
 
 	// Item methods
-	uint32	NukeItem(uint32 itemnum, uint8 where_to_check = 
+	uint32	NukeItem(uint32 itemnum, uint8 where_to_check =
         (invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
 	void	SetTint(int16 slot_id, uint32 color);
 	void	SetTint(int16 slot_id, Color_Struct& color);
@@ -967,7 +967,7 @@ public:
 
 	inline int GetTaskActivityDoneCount(int ClientTaskIndex, int ActivityID)
 	 	   { return (taskstate ? taskstate->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) :0); }
-	
+
 	inline int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID)
 	 	   { return (taskstate ? taskstate->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID) :0); }
 
@@ -1170,12 +1170,12 @@ protected:
 	int  CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	void CalcEdibleBonuses(StatBonuses* newbon);
 	void CalcAABonuses(StatBonuses* newbon);
-	void ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon); 
+	void ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon);
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
 	bool client_data_loaded;
 
 	int16	GetFocusEffect(focusType type, uint16 spell_id);
-	int16	GetSympatheticFocusEffect(focusType type, uint16 spell_id); 
+	int16	GetSympatheticFocusEffect(focusType type, uint16 spell_id);
 
 	Mob*	bind_sight_target;
 
@@ -1298,7 +1298,7 @@ private:
 	uint16				CustomerID;
 	uint32              account_creation;
 	uint8				firstlogon;
-	uint32              mercid;				// current merc 
+	uint32              mercid;				// current merc
 	uint8				mercSlot;			// selected merc slot
 	bool	Trader;
 	bool	Buyer;

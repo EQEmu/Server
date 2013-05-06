@@ -4,13 +4,13 @@
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; version 2 of the License.
-  
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	  You should have received a copy of the GNU General Public License
 	  along with this program; if not, write to the Free Software
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -79,7 +79,7 @@ Trap::~Trap()
 
 bool Trap::Process()
 {
-	if (chkarea_timer.Enabled() && chkarea_timer.Check() 
+	if (chkarea_timer.Enabled() && chkarea_timer.Check()
 		/*&& zone->GetClientCount() > 0*/ )
 	{
 		Mob* trigger = entity_list.GetTrapTrigger(this);
@@ -127,7 +127,7 @@ void Trap::Trigger(Mob* trigger)
 				entity_list.MessageClose(trigger,false,effectvalue,13,"%s",message.c_str());
 			}
 
-			entity_list.SendAlarm(this,trigger,effectvalue);			
+			entity_list.SendAlarm(this,trigger,effectvalue);
 			break;
 		case trapTypeMysticSpawn:
 			if (message.empty())
@@ -206,7 +206,7 @@ Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist) {
 	iterator.Reset();
 	float dist = 999999;
 	Trap* current_trap = nullptr;
-	
+
 	float max_dist2 = max_dist*max_dist;
 	Trap *cur;
 	while(iterator.MoreElements())
@@ -220,7 +220,7 @@ Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist) {
 			curdist += tmp*tmp;
 			tmp = searcher->GetZ() - cur->z;
 			curdist += tmp*tmp;
-			
+
 			if (curdist < max_dist2 && curdist < dist)
 			{
 				dist = curdist;
@@ -237,17 +237,17 @@ Mob* EntityList::GetTrapTrigger(Trap* trap) {
 
 	Mob* savemob = 0;
 	iterator.Reset();
-	
+
 	float xdiff, ydiff, zdiff;
-	
+
 	float maxdist = trap->radius * trap->radius;
-	
+
 	while(iterator.MoreElements()) {
 		Client* cur = iterator.GetData();
 		zdiff = cur->GetZ() - trap->z;
 		if(zdiff < 0)
 			zdiff = 0 - zdiff;
-		
+
 		xdiff = cur->GetX() - trap->x;
 		ydiff = cur->GetY() - trap->y;
 		if ((xdiff*xdiff + ydiff*ydiff) <= maxdist

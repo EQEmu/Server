@@ -71,7 +71,7 @@ bool ZoneDatabase::OpenQuery(char* zonename) {
 				strcpy( Quest::m_pQuests[ l_cnt ].m_pQuestText, row[1] );
 				Quest::m_pQuests[ l_cnt ].m_pQuestEnd = new char[ strlen( row[2] )+1 ];
 				strcpy( Quest::m_pQuests[ l_cnt ].m_pQuestEnd, row[2] );
-				
+
 				Quest::m_pQuests[ l_cnt ].m_iNpcId		= atoi( row[3] );
 				Quest::m_pQuests[ l_cnt ].m_iQuestObject= atoi( row[4] );
 				Quest::m_pQuests[ l_cnt ].m_iQuestPrice	= atoi( row[5] );

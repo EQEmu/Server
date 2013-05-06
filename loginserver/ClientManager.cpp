@@ -30,7 +30,7 @@ ClientManager::ClientManager()
 	titanium_ops = new RegularOpcodeManager;
 	if(!titanium_ops->LoadOpcodes(server.config->GetVariable("Titanium", "opcodes").c_str()))
 	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for Titanium file %s.", 
+		server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for Titanium file %s.",
 			server.config->GetVariable("Titanium", "opcodes").c_str());
 		run_server = false;
 	}
@@ -50,7 +50,7 @@ ClientManager::ClientManager()
 	sod_ops = new RegularOpcodeManager;
 	if(!sod_ops->LoadOpcodes(server.config->GetVariable("SoD", "opcodes").c_str()))
 	{
-		server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for SoD file %s.", 
+		server_log->Log(log_error, "ClientManager fatal error: couldn't load opcodes for SoD file %s.",
 			server.config->GetVariable("SoD", "opcodes").c_str());
 		run_server = false;
 	}

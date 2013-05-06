@@ -468,7 +468,7 @@ void Client::HandleAAAction(aaID activate) {
 		case aaActionEscape:
 			Escape();
 			break;
-		
+
 		// Don't think this code is used any longer for Bestial Alignment as the AA has a spell_id and no nonspell_action.
 		case aaActionBeastialAlignment:
 			switch(GetBaseRace()) {
@@ -1961,21 +1961,21 @@ void Client::DurationRampage(uint32 duration)
 	}
 }
 
-AA_SwarmPetInfo::AA_SwarmPetInfo() 
-{ 
-    target = 0; 
-    owner_id = 0; 
+AA_SwarmPetInfo::AA_SwarmPetInfo()
+{
+    target = 0;
+    owner_id = 0;
     duration = nullptr;
 }
 
-AA_SwarmPetInfo::~AA_SwarmPetInfo() 
-{ 
-    target = 0; 
-    owner_id = 0; 
-    safe_delete(duration); 
+AA_SwarmPetInfo::~AA_SwarmPetInfo()
+{
+    target = 0;
+    owner_id = 0;
+    safe_delete(duration);
 }
 
-Mob *AA_SwarmPetInfo::GetOwner() 
-{ 
-    return entity_list.GetMobID(owner_id); 
+Mob *AA_SwarmPetInfo::GetOwner()
+{
+    return entity_list.GetMobID(owner_id);
 }

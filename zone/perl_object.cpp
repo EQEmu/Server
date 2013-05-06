@@ -37,7 +37,7 @@
 #include "object.h"
 
 #ifdef THIS	 /* this macro seems to leak out on some systems */
-#undef THIS		
+#undef THIS
 #endif
 
 XS(XS_Object_IsGroundSpawn); /* prototype to pass -Wmissing-prototypes */
@@ -920,7 +920,7 @@ XS(boot_Object)
 	char file[256];
 	strncpy(file, __FILE__, 256);
 	file[255] = 0;
-	
+
 	if(items != 1)
 		fprintf(stderr, "boot_quest does not take any arguments.");
 	char buf[128];

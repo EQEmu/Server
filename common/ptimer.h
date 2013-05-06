@@ -41,7 +41,7 @@ enum {	//values for pTimerType
 	pTimerDisciplineReuseEnd = 24,
 	pTimerCombatAbility = 25,
 	pTimerBeggingPickPocket = 26,
-	
+
 	pTimerLayHands = 87,		//these IDs are used by client too
 	pTimerHarmTouch = 89,		//so dont change them
 
@@ -54,7 +54,7 @@ enum {	//values for pTimerType
 	pTimerAAEnd = 2999,
 	pTimerAAEffectStart = 3001,	//AA effect timers
 	pTimerAAEffectEnd	= 4999,
-	
+
 	pTimerSpellStart = 5000		//Do not put any timer IDs above this one
 								//if needed, increase its starting ID
 };
@@ -66,13 +66,13 @@ typedef uint16 pTimerType;
 class PersistentTimer {
 public:
 	static PersistentTimer *LoadTimer(Database *db, uint32 char_id, pTimerType type);
-	
+
 	PersistentTimer(uint32 char_id, pTimerType type, uint32 duration);
 	PersistentTimer(uint32 char_id, pTimerType type, uint32 start_time, uint32 duration, bool enable);
-	
+
 	bool Expired(Database *db, bool iReset = true);
 	void Start(uint32 set_timer_time=0);
-	
+
 	void SetTimer(uint32 set_timer_time=0);
 	uint32 GetRemainingTime();
 	inline void Enable() { enabled = true; }
@@ -89,11 +89,11 @@ public:
 
 protected:
 	uint32 get_current_time();
-	
+
 	uint32	start_time;
 	uint32	timer_time;
 	bool	enabled;
-	
+
 	uint32 _char_id;
 	pTimerType _type;
 };
@@ -102,13 +102,13 @@ protected:
 class PTimerList {
 public:
 	PTimerList(uint32 char_id = 0);
-	
+
 	~PTimerList();
-	
+
 	bool Load(Database *db);
 	bool Store(Database *db);
 	bool Clear(Database *db);
-	
+
 	void Start(pTimerType type, uint32 duration);
 	bool Expired(Database *db, pTimerType type, bool reset = true);
 	void Clear(Database *db, pTimerType type);
@@ -117,24 +117,24 @@ public:
 	void Disable(pTimerType type);
 	uint32 GetRemainingTime(pTimerType type);
 	PersistentTimer *Get(pTimerType type);
-	
+
 	inline void SetCharID(uint32 char_id) { _char_id = char_id; }
-	
+
 	void ToVector(vector< pair<pTimerType, PersistentTimer *> > &out);
-	
+
 	//Clear a timer for a char not logged in
 	//this is not defined on a char which is logged in!
 	static bool ClearOffline(Database *db, uint32 char_id, pTimerType type);
-	
+
 	typedef map<pTimerType, PersistentTimer *>::iterator iterator;
 	iterator begin() { return(_list.begin()); }
 	iterator end() { return(_list.end()); }
-	
-	
+
+
 	void AddTimer(pTimerType type, uint32 start_time, uint32 duration, bool enable);
 protected:
 	uint32 _char_id;
-	
+
 	map<pTimerType, PersistentTimer *> _list;
 };
 

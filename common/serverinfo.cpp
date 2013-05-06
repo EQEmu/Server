@@ -33,21 +33,21 @@ int GetOS()	{
 
 	OSVERSIONINFO Ver_os;
 	Ver_os.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	
+
 	if(!(GetVersionEx(&Ver_os))) return 1;
-	
+
 	Ver_build = Ver_os.dwBuildNumber & 0xFFFF;
 	Ver_min = Ver_os.dwMinorVersion;
 	Ver_maj = Ver_os.dwMajorVersion;
 	Ver_pid = Ver_os.dwPlatformId;
-	
+
 	if ((Ver_pid == 1) && (Ver_maj == 4))
 	{
 		if ((Ver_min < 10) && (Ver_build == 950))
 		{
 			strcpy(Ver_name, "Microsoft Windows 95");
 		}
-		else if ((Ver_min < 10) && 
+		else if ((Ver_min < 10) &&
 				((Ver_build > 950) && (Ver_build <= 1080)))
 		{
 			strcpy(Ver_name, "Microsoft Windows 95 SP1");
@@ -60,7 +60,7 @@ int GetOS()	{
 		{
 			strcpy(Ver_name, "Microsoft Windows 98");
 		}
-		else if ((Ver_min == 10) && 
+		else if ((Ver_min == 10) &&
 				((Ver_build > 1998) && (Ver_build < 2183)))
 		{
 			strcpy(Ver_name, "Microsoft Windows 98, Service Pack 1");
@@ -99,21 +99,21 @@ int GetOS()	{
 	}
 
 	return 0;
-}	
+}
 
 #else
 
 #include <sys/utsname.h>
 #include <stdio.h>
 #include <string.h>
-	
+
 char* GetOS(char* os_string) {
 	utsname info;
 
 	if(uname(&info)==0) {
 		snprintf(os_string, 99, "%s %s %s %s %s", info.sysname, info.nodename, info.release, info.version, info.machine);
 	} else {
-		strncpy(os_string, "Error determining OS & version!", 25);  
+		strncpy(os_string, "Error determining OS & version!", 25);
 	}
 
 	return os_string;

@@ -32,7 +32,7 @@ public:
 	ZoneServer(EmuTCPConnection* itcpc);
     ~ZoneServer();
 	virtual inline bool IsZoneServer() { return true; }
-	
+
 	bool		Process();
 	bool		SendPacket(ServerPacket* pack) { return tcpc->SendPacket(pack); }
 	void		SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...);

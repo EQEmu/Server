@@ -30,9 +30,9 @@
         {
             this.ConsoleWindow = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
-            // 
+            //
             // ConsoleWindow
-            // 
+            //
             this.ConsoleWindow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
@@ -44,9 +44,9 @@
             this.ConsoleWindow.Name = "ConsoleWindow";
             this.ConsoleWindow.Size = new System.Drawing.Size(938, 326);
             this.ConsoleWindow.TabIndex = 35;
-            // 
+            //
             // LogForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(962, 355);

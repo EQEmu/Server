@@ -33,10 +33,10 @@ public:
 		int i;
 		argnum = 0;
 		int len = static_cast<int>(strlen(message_in));
-		
+
 		if(arglen > len)
 			arglen = len+1;
-		
+
 		//msg = strdup(message);
 		msg = new char[len+1];
 		strcpy(msg, message_in);
