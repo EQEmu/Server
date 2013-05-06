@@ -806,5 +806,6 @@ bool DetrimentalSpellAllowsRest(uint16 spell_id);
 uint32 GetNimbusEffect(uint16 spell_id);
 int32 GetFuriousBash(uint16 spell_id);
 bool IsShortDurationBuff(uint16 spell_id);
+const char *GetSpellName(int16 spell_id);
 
 #endif

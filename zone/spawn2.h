@@ -49,7 +49,7 @@ public:
 	void	Repop(uint32 delay = 0);
 	void	ForceDespawn();
 
-	void	DeathReset(); //resets the spawn in the case the npc dies, also updates db if needed
+	void	DeathReset(bool realdeath = 0); //resets the spawn in the case the npc dies, also updates db if needed
 
 	void	SpawnConditionChanged(const SpawnCondition &c, int16 old_value);
 	uint32	GetID()		{ return spawn2_id; }
@@ -71,6 +71,7 @@ public:
 	bool	NPCPointerValid() { return (npcthis!=nullptr); }
 	void	SetNPCPointer(NPC* n) { npcthis = n; }
 	void	SetTimer(uint32 duration) { timer.Start(duration); }
+	uint32  GetKillCount() { return killcount; }
 protected:
 	friend class Zone;
 	Timer	timer;
@@ -92,6 +93,7 @@ private:
 	bool enabled;
     EmuAppearance anim;
 	bool IsDespawned;
+	uint32  killcount;
 };
 
 class SpawnCondition {

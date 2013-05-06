@@ -645,6 +645,11 @@ bool Client::Process() {
 				--m_pp.intoxication;
 				CalcBonuses();
 			}
+
+			if(ItemTickTimer.Check())
+            {
+                TickItemCheck();
+            }
 		}
 	}
 	

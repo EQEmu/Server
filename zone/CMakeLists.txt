@@ -84,6 +84,7 @@ SET(zone_sources
     zonedb.cpp
     zonedbasync.cpp
     zoning.cpp
+	mod_functions.cpp
 )
 
 SET(zone_headers

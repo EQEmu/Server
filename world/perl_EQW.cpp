@@ -969,6 +969,57 @@ XS(XS_EQW_ResolveBug)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_EQW_SendMessage); /* prototype to pass -Wmissing-prototypes */
+XS(XS_EQW_SendMessage)
+{
+    dXSARGS;
+    if (items != 3)
+        Perl_croak(aTHX_ "Usage: EQW::SendMessage(THIS, type, message)");
+    {
+        EQW *       THIS;
+        dXSTARG;
+        uint32      msgtype = (uint32)SvUV(ST(1));
+        char*       msg = (char *)SvPV_nolen(ST(2));
+
+        if (sv_derived_from(ST(0), "EQW")) {
+            IV tmp = SvIV((SV*)SvRV(ST(0)));
+            THIS = INT2PTR(EQW *,tmp);
+        }
+        else
+            Perl_croak(aTHX_ "THIS is not of type EQW");
+        if(THIS == NULL)
+            Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+        THIS->SendMessage(msgtype, msg);
+    }
+    XSRETURN_EMPTY;
+}
+
+XS(XS_EQW_WorldShutDown); /* prototype to pass -Wmissing-prototypes */
+XS(XS_EQW_WorldShutDown)
+{
+    dXSARGS;
+    if (items != 3)
+        Perl_croak(aTHX_ "Usage: EQW::WorldShutDown(THIS, time, interval)");
+    {
+        EQW *       THIS;
+        dXSTARG;
+        uint32      time = (uint32)SvUV(ST(1));
+        uint32      interval = (uint32)SvUV(ST(2));
+
+        if (sv_derived_from(ST(0), "EQW")) {
+            IV tmp = SvIV((SV*)SvRV(ST(0)));
+            THIS = INT2PTR(EQW *,tmp);
+        }
+        else
+            Perl_croak(aTHX_ "THIS is not of type EQW");
+        if(THIS == NULL)
+            Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+        THIS->WorldShutDown(time, interval);
+    }
+    XSRETURN_EMPTY;
+}
 
 #ifdef __cplusplus
 extern "C"
@@ -1020,6 +1071,8 @@ XS(boot_EQW)
         newXSproto(strcpy(buf, "ListBugs"), XS_EQW_ListBugs, file, "$$");
 		newXSproto(strcpy(buf, "GetBugDetails"), XS_EQW_GetBugDetails, file, "$$");
         newXSproto(strcpy(buf, "ResolveBug"), XS_EQW_ResolveBug, file, "$$");
+		newXSproto(strcpy(buf, "SendMessage"), XS_EQW_SendMessage, file, "$$$");
+		newXSproto(strcpy(buf, "WorldShutDown"), XS_EQW_WorldShutDown, file, "$$$");
 	XSRETURN_YES;
 }
 

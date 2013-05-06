@@ -459,6 +459,13 @@ void EQW::ResolveBug(const char *id) {
     safe_delete_array(query);
 }
 
+void EQW::SendMessage(uint32 type, const char *msg) {
+    zoneserver_list.SendEmoteMessage(0, 0, 0, type, msg);
+}
+
+void EQW::WorldShutDown(uint32 time, uint32 interval) {
+	zoneserver_list.WorldShutDown(time, interval);
+}
 
 #endif //EMBPERL
 

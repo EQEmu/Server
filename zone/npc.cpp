@@ -1895,7 +1895,8 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "special_attacks")
 	{
-		NPCSpecialAttacks(val.c_str(), 0);
+		//Added reset flag.
+		NPCSpecialAttacks(val.c_str(), 0, 1);
 		return;
 	}
 
@@ -2413,4 +2414,74 @@ FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 
 bool NPC::IsFactionListAlly(uint32 other_faction) {
 	return(CheckNPCFactionAlly(other_faction) == FACTION_ALLY);
+}
+
+int NPC::GetScore()
+{
+    int lv = min(70, (int)GetLevel());
+    int basedmg = (lv*2)*(1+(lv / 100)) - (lv / 2);
+    int minx = 0;
+    int basehp = 0;
+    int hpcontrib = 0;
+    int dmgcontrib = 0;
+    int spccontrib = 0;
+    int hp = GetMaxHP();
+    int mindmg = min_dmg;
+    int maxdmg = max_dmg;
+    int final;
+
+    if(lv < 46)
+    {
+        minx = ceil( ((lv - (lv / 10)) - 1) );
+        basehp = (lv * 10) + (lv * lv);
+    }
+    else
+    {
+        minx = ceil( ((lv - (lv / 10)) - 1) - (( abs(45 - lv) ) / 2) );
+        basehp = (lv * 10) + ((lv * lv) * 4);
+    }
+
+    if(hp > basehp)
+    {
+        hpcontrib = (int)( (float)((float)hp / (float)basehp) * 1.5);
+        if(hpcontrib > 5) { hpcontrib = 5; }
+
+        if(maxdmg > basedmg)
+        {
+            dmgcontrib = ceil( ((maxdmg / basedmg) * 1.5) );
+        }
+
+        if(HasNPCSpecialAtk("E")) { spccontrib++; }    //Enrage
+        if(HasNPCSpecialAtk("F")) { spccontrib++; }    //Flurry
+        if(HasNPCSpecialAtk("R")) { spccontrib++; }    //Rampage
+        if(HasNPCSpecialAtk("r")) { spccontrib++; }    //Area Rampage
+        if(HasNPCSpecialAtk("S")) { spccontrib++; }    //Summon
+        if(HasNPCSpecialAtk("T")) { spccontrib += 2; } //Triple
+        if(HasNPCSpecialAtk("Q")) { spccontrib += 3; } //Quad
+        if(HasNPCSpecialAtk("U")) { spccontrib += 5; } //Unslowable
+        if(HasNPCSpecialAtk("L")) { spccontrib++; }    //Innate Dual Wield
+    }
+
+    if(npc_spells_id > 12)
+    {
+        if(lv < 16) { spccontrib++; }
+        else { spccontrib += (int)floor(lv/15); }
+    }
+
+    final = minx + hpcontrib + dmgcontrib + spccontrib;
+    final = max(1, final);
+    final = min(100, final);
+    return(final);
+}
+
+uint32 NPC::GetSpawnKillCount()
+{
+    uint32 sid = GetSpawnPointID();
+
+    if(sid > 0)
+    {
+        return(zone->GetSpawnKillCount(sid));
+    }
+
+    return(0);
 }

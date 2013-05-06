@@ -166,7 +166,8 @@ Client::Client(EQStreamInterface* ieqs)
 	qglobal_purge_timer(30000),
 	TrackingTimer(2000),
 	RespawnFromHoverTimer(0),
-	merc_timer(RuleI(Mercs, UpkeepIntervalMS))
+	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
+	ItemTickTimer(10000)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
 		ClientFilters[cf] = FilterShow;
@@ -325,6 +326,7 @@ Client::Client(EQStreamInterface* ieqs)
 	}
 	MaxXTargets = 5;	
 	XTargetAutoAddHaters = true;
+	LoadAccountFlags();
 }
 
 Client::~Client() {
@@ -841,6 +843,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
+
+	//Return true to proceed, false to return
+	if(!mod_client_message(message, chan_num)) { return; }
 
 	// Garble the message based on drunkness
 	if (m_pp.intoxication > 0) {
@@ -2334,10 +2339,11 @@ bool Client::CheckIncreaseSkill(SkillType skillid, Mob *against_who, int chancem
 
 	if(against_who)
 	{
-		if(against_who->SpecAttacks[IMMUNE_AGGRO] || against_who->IsClient() || 
-			GetLevelCon(against_who->GetLevel()) == CON_GREEN)
+		if( against_who->SpecAttacks[IMMUNE_AGGRO] || against_who->IsClient() ||
+			GetLevelCon(against_who->GetLevel()) == CON_GREEN )
 		{
-				return false;
+			//false by default
+			return mod_can_increase_skill(skillid, against_who);
 		}
 	}
 
@@ -2349,6 +2355,9 @@ bool Client::CheckIncreaseSkill(SkillType skillid, Mob *against_who, int chancem
 		if (Chance < 1)
 			Chance = 1; // Make it always possible
 		Chance = (Chance * RuleI(Character, SkillUpModifier) / 100);
+
+		Chance = mod_increase_skill_chance(Chance, against_who);
+
 		if(MakeRandomFloat(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
@@ -2717,6 +2726,8 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 						max_percent = 70 + 10 * maxHPBonus;
 					}
 
+					max_percent = mod_bindwound_percent(max_percent, bindmob);
+
 					int max_hp = bindmob->GetMaxHP()*max_percent/100;
 
 					// send bindmob new hp's
@@ -2735,7 +2746,9 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 						int bindBonus = spellbonuses.BindWound + itembonuses.BindWound + aabonuses.BindWound;
 
 						bindhps += bindhps*bindBonus / 100;
-							
+
+						bindhps = mod_bindwound_hp(bindhps, bindmob);
+
 						//if the bind takes them above the max bindable
 						//cap it at that value. Dont know if live does it this way
 						//but it makes sense to me.
@@ -7621,4 +7634,111 @@ some day.
 		return faction_message;
 	}
 	return 0;
+}
+
+void Client::LoadAccountFlags()
+{
+    char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+    MYSQL_RES *result;
+    MYSQL_ROW row;
+
+    accountflags.clear();
+    MakeAnyLenString(&query, "SELECT p_flag, p_value FROM account_flags WHERE p_accid = '%d'", account_id);
+    if(database.RunQuery(query, strlen(query), errbuf, &result))
+    {
+        while(row = mysql_fetch_row(result))
+        {
+            std::string fname(row[0]);
+            std::string fval(row[1]);
+            accountflags[fname] = fval;
+        }
+        mysql_free_result(result);
+    }
+    else
+    {
+        std::cerr << "Error in LoadAccountFlags query '" << query << "' " << errbuf << std::endl;
+    }
+    safe_delete_array(query);
+}
+
+void Client::SetAccountFlag(std::string flag, std::string val)
+{
+    char errbuf[MYSQL_ERRMSG_SIZE];
+    char *query = 0;
+
+    MakeAnyLenString(&query, "REPLACE INTO account_flags (p_accid, p_flag, p_value) VALUES( '%d', '%s', '%s')", account_id, flag.c_str(), val.c_str());
+    if(!database.RunQuery(query, strlen(query), errbuf))
+    {
+        std::cerr << "Error in SetAccountFlags query '" << query << "' " << errbuf << std::endl;
+    }
+    safe_delete_array(query);
+
+    accountflags[flag] = val;
+}
+
+std::string Client::GetAccountFlag(std::string flag)
+{
+    return(accountflags[flag]);
+}
+
+void Client::TickItemCheck()
+{
+    int i;
+
+	if(zone->tick_items.empty()) { return; }
+
+    //Scan equip slots for items
+    for(i = 0; i <= 21; i++)
+    {
+		TryItemTick(i);
+    }
+    //Scan main inventory + cursor
+    for(i = 22; i < 31; i++)
+    {
+		TryItemTick(i);
+    }
+    //Scan bags
+    for(i = 251; i < 340; i++)
+    {
+		TryItemTick(i);
+    }
+}
+
+void Client::TryItemTick(int slot)
+{
+	int iid = 0;
+    const ItemInst* inst = m_inv[slot];
+    if(inst == 0) { return; }
+
+    iid = inst->GetID();
+
+    if(zone->tick_items.count(iid) > 0)
+    {
+        if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot < 22) )
+        {
+            ItemInst* e_inst = (ItemInst*)inst;
+            parse->EventItem(EVENT_ITEM_TICK, this, e_inst, e_inst->GetID(), slot);
+        }
+    }
+
+	//Only look at augs in main inventory
+	if(slot > 21) { return; }
+
+    for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
+    {
+        ItemInst * a_inst = inst->GetAugment(x);
+        if(!a_inst) { continue; }
+
+        iid = a_inst->GetID();
+
+        if(zone->tick_items.count(iid) > 0)
+        {
+            if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) )
+            {
+                ItemInst* e_inst = (ItemInst*)a_inst;
+                parse->EventItem(EVENT_ITEM_TICK, this, e_inst, e_inst->GetID(), slot);
+            }
+        }
+    }
 }
