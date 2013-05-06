@@ -122,7 +122,7 @@ Mob::Mob(const char*   in_name,
  	rewind_z = 0;		//Stored z_pos for /rewind
 	move_tic_count = 0;
 	
-	_egnode = NULL;
+	_egnode = nullptr;
 	adverrorinfo = 0;
 	name[0]=0;
 	orig_name[0]=0;
@@ -196,7 +196,7 @@ Mob::Mob(const char*   in_name,
 	ExtraHaste = 0;
 	bEnraged = false;
 
-	shield_target = NULL;
+	shield_target = nullptr;
 	cur_mana = 0;
 	max_mana = 0;
 	hp_regen = in_hp_regen;
@@ -961,7 +961,7 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 			snprintf(buf, 9, "%i", GetNextHPEvent());
 			buf[9] = '\0';
 			SetNextHPEvent(-1);
-            parse->EventNPC(EVENT_HP, CastToNPC(), NULL, buf, 0); 
+            parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf, 0); 
 		}
 	}
 
@@ -973,7 +973,7 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 			snprintf(buf, 9, "%i", GetNextIncHPEvent());
 			buf[9] = '\0';
 			SetNextIncHPEvent(-1);
-            parse->EventNPC(EVENT_HP, CastToNPC(), NULL, buf, 1); 
+            parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf, 1); 
 		}
 	}
 } 
@@ -1117,7 +1117,7 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 		}
 		else
 		{
-			entity_list.QueueCloseClients(this, app, (iSendToSelf==0), 800, NULL, false);
+			entity_list.QueueCloseClients(this, app, (iSendToSelf==0), 800, nullptr, false);
 			move_tic_count++;
 		}
 #endif
@@ -1507,7 +1507,7 @@ void Mob::SendAppearancePacket(uint32 type, uint32 value, bool WholeZone, bool i
 	appearance->parameter = value;
 	if (WholeZone)
 		entity_list.QueueClients(this, outapp, iIgnoreSelf);
-	else if(specific_target != NULL)
+	else if(specific_target != nullptr)
 		specific_target->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	else if (this->IsClient())
 		this->CastToClient()->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
@@ -1555,7 +1555,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	la->value4b = 1;
 	la->value5a = 1;
 	la->value5b = 1;
-	if(specific_target == NULL) {
+	if(specific_target == nullptr) {
 		entity_list.QueueClients(this,outapp);
 	}
 	else if (specific_target->IsClient()) {
@@ -1570,7 +1570,7 @@ void Mob::SendTargetable(bool on, Client *specific_target) {
     ut->id = GetID();
     ut->targetable_flag = on == true ? 1 : 0;
 
-    if(specific_target == NULL) {
+    if(specific_target == nullptr) {
 		entity_list.QueueClients(this, outapp);
 	}
 	else if (specific_target->IsClient()) {
@@ -1858,8 +1858,8 @@ void Mob::SetAttackTimer() {
 	//an invalid weapon equipped:
 	attack_timer.SetAtTrigger(4000, true);
 	
-	Timer* TimerToUse = NULL;
-	const Item_Struct* PrimaryWeapon = NULL;
+	Timer* TimerToUse = nullptr;
+	const Item_Struct* PrimaryWeapon = nullptr;
 	
 	for (int i=SLOT_RANGE; i<=SLOT_SECONDARY; i++) {
 		
@@ -1873,7 +1873,7 @@ void Mob::SetAttackTimer() {
 		else	//invalid slot (hands will always hit this)
 			continue;
 		
-		const Item_Struct* ItemToUse = NULL;
+		const Item_Struct* ItemToUse = nullptr;
 		
 		//find our item
 		if (IsClient()) {
@@ -1885,13 +1885,13 @@ void Mob::SetAttackTimer() {
 			//The code before here was fundementally flawed because equipment[] 
 			//isn't the same as PC inventory and also:
 			//NPCs don't use weapon speed to dictate how fast they hit anyway.
-			ItemToUse = NULL;
+			ItemToUse = nullptr;
 		}
 		
 		//special offhand stuff
 		if(i == SLOT_SECONDARY) {
 			//if we have a 2H weapon in our main hand, no dual
-			if(PrimaryWeapon != NULL) {
+			if(PrimaryWeapon != nullptr) {
 				if(	PrimaryWeapon->ItemClass == ItemClassCommon
 					&& (PrimaryWeapon->ItemType == ItemType2HS
 					||	PrimaryWeapon->ItemType == ItemType2HB
@@ -1918,18 +1918,18 @@ void Mob::SetAttackTimer() {
 		}
 		
 		//see if we have a valid weapon
-		if(ItemToUse != NULL) {
+		if(ItemToUse != nullptr) {
 			//check type and damage/delay
 			if(ItemToUse->ItemClass != ItemClassCommon 
 				|| ItemToUse->Damage == 0 
 				|| ItemToUse->Delay == 0) {
 				//no weapon
-				ItemToUse = NULL;
+				ItemToUse = nullptr;
 			}
 			// Check to see if skill is valid
 			else if((ItemToUse->ItemType > ItemTypeThrowing) && (ItemToUse->ItemType != ItemTypeHand2Hand) && (ItemToUse->ItemType != ItemType2HPierce)) {
 				//no weapon
-				ItemToUse = NULL;
+				ItemToUse = nullptr;
 			}
 		}
 
@@ -1938,7 +1938,7 @@ void Mob::SetAttackTimer() {
 			DelayMod = -99;
 
 		//if we have no weapon..
-		if (ItemToUse == NULL) {
+		if (ItemToUse == nullptr) {
 			//above checks ensure ranged weapons do not fall into here
 			// Work out if we're a monk
 			if ((GetClass() == MONK) || (GetClass() == BEASTLORD)) {
@@ -2258,7 +2258,7 @@ bool Mob::HateSummon() {
     // check if mob has ability to summon
     // 97% is the offical % that summoning starts on live, not 94
 	// if the mob can summon and is charmed, it can only summon mobs it has LoS to
-	Mob* mob_owner = NULL;
+	Mob* mob_owner = nullptr;
 	if(GetOwnerID())
 		mob_owner = entity_list.GetMob(GetOwnerID());
 		
@@ -2819,7 +2819,7 @@ void Mob::SetTarget(Mob* mob) {
 	if(IsNPC())
 		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0); //parse->Event(EVENT_TARGET_CHANGE, this->GetNPCTypeID(), 0, this->CastToNPC(), mob);
 	else if (IsClient())
-        parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0); //parse->Event(EVENT_TARGET_CHANGE, 0, "", (NPC*)NULL, this->CastToClient());
+        parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0); //parse->Event(EVENT_TARGET_CHANGE, 0, "", (NPC*)nullptr, this->CastToClient());
 
 	if(IsPet() && GetOwner() && GetOwner()->IsClient())
 		GetOwner()->CastToClient()->UpdateXTargetType(MyPetTarget, mob);	
@@ -2959,7 +2959,7 @@ const char* Mob::GetEntityVariable(const char *id)
 	{
 		return iter->second.c_str();
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool Mob::EntityVariableExists(const char *id)
@@ -3059,7 +3059,7 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 
 void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
 {
-	if(target == NULL || !IsValidSpell(spell_id))
+	if(target == nullptr || !IsValidSpell(spell_id))
 	{
 		return;
 	}
@@ -3111,7 +3111,7 @@ void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
 
 void Mob::TryApplyEffect(Mob *target, uint32 spell_id)
 {
-	if(target == NULL || !IsValidSpell(spell_id))
+	if(target == nullptr || !IsValidSpell(spell_id))
 	{
 		return;
 	}
@@ -3309,7 +3309,7 @@ bool Mob::TryFadeEffect(int slot)
 
 void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 {
-	if(target == NULL || !IsValidSpell(spell_id))
+	if(target == nullptr || !IsValidSpell(spell_id))
 		return;
 	
 	int focus_spell = CastToClient()->GetSympatheticFocusEffect(focusSympatheticProc,spell_id);
@@ -3784,12 +3784,12 @@ void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varna
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
-	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
+	// Make duration string either "unix_timestamp(now()) + xxx" or "nullptr"
 	stringstream duration_ss;
 
 	if (duration == INT_MAX)
 	{
-		duration_ss << "NULL";
+		duration_ss << "nullptr";
 	}
 	else
 	{
@@ -4182,7 +4182,7 @@ bool Mob::TryReflectSpell(uint32 spell_id)
 
 void Mob::DoGravityEffect()
 {
-	Mob *caster = NULL;
+	Mob *caster = nullptr;
 	int away = -1;
 	float caster_x, caster_y, amount, value, cur_x, my_x, cur_y, my_y, x_vector, y_vector, hypot;
 	
@@ -4274,7 +4274,7 @@ void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
 	int num_targs = spells[spell_id].viral_targets;
 
 	Mob* caster = entity_list.GetMob(casterID);
-	Mob* target = NULL;
+	Mob* target = nullptr;
 	// Only spread in zones without perm buffs
 	if(!zone->BuffTimersSuspended()) {
 		for(int i = 0; i < num_targs; i++) {

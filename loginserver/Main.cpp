@@ -44,7 +44,7 @@ int main()
     set_exception_handler();
 
 	//Create our error log, is of format login_<number>.log
-	time_t current_time = time(NULL);
+	time_t current_time = time(nullptr);
 	stringstream log_name(stringstream::in | stringstream::out);
 #ifdef WIN32
 	log_name << ".\\logs\\login_" << (unsigned int)current_time << ".log";

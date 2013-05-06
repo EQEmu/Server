@@ -222,7 +222,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					case SpellType_Mez: {
 						if(MakeRandomInt(0, 99) < 20)
 						{
-							Mob * mezTar = NULL;
+							Mob * mezTar = nullptr;
 							mezTar = entity_list.GetTargetForMez(this);
 
 							if(mezTar && mezTar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0)
@@ -424,7 +424,7 @@ void Mob::AI_Init() {
 	AIwalking_timer = 0;
 	AImovement_timer = 0;
 	AItarget_check_timer = 0;
-	AIfeignremember_timer = NULL;
+	AIfeignremember_timer = nullptr;
 	AIscanarea_timer = 0;
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
@@ -944,7 +944,7 @@ void Client::AI_Process()
 			bool got_one = false;
 			while(RememberedCharID != feign_memory_list.end()) {
 				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-				if(remember_client == NULL) {
+				if(remember_client == nullptr) {
 					//they are gone now...
 					tmp = RememberedCharID;
 					RememberedCharID++;
@@ -966,7 +966,7 @@ void Client::AI_Process()
 		if(IsPet()) 
 		{			
 			Mob* owner = GetOwner();
-			if(owner == NULL)
+			if(owner == nullptr)
 				return;
 
 			float dist = DistNoRoot(*owner);
@@ -1264,7 +1264,7 @@ void Mob::AI_Process() {
                         AIwalking_timer->Start(100);
 	                    pLastFightingDelayMoving = Timer::GetCurrentTime();
                         return;
-                    } else if(tar != NULL) {
+                    } else if(tar != nullptr) {
                         SetTarget(tar);
                         return;
                     }
@@ -1326,7 +1326,7 @@ void Mob::AI_Process() {
 			bool got_one = false;
 			while(RememberedCharID != feign_memory_list.end()) {
 				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-				if(remember_client == NULL) {
+				if(remember_client == nullptr) {
 					//they are gone now...
 					tmp = RememberedCharID;
 					RememberedCharID++;
@@ -1378,7 +1378,7 @@ void Mob::AI_Process() {
 					{
 						
 						Mob* owner = GetOwner();
-						if(owner == NULL)
+						if(owner == nullptr)
 							break;
 						
 						//if(owner->IsClient())
@@ -1579,7 +1579,7 @@ void NPC::AI_DoMovement() {
 						//kick off event_waypoint depart
 						char temp[16]; 
 						sprintf(temp, "%d", cur_wp);
-                        parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), NULL, temp, 0);
+                        parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, temp, 0);
 					
 						//setup our next waypoint, if we are still on our normal grid
 						//remember that the quest event above could have done anything it wanted with our grid
@@ -1609,7 +1609,7 @@ void NPC::AI_DoMovement() {
 					//kick off event_waypoint arrive
 					char temp[16]; 
 					sprintf(temp, "%d", cur_wp);
-					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), NULL, temp, 0);
+					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, temp, 0);
 					
 					// wipe feign memory since we reached our first waypoint
 					if(cur_wp == 1)
@@ -1684,7 +1684,7 @@ void NPC::AI_DoMovement() {
 			ClearFeignMemory();
 			moved=false;
 			SetMoving(false);
-			if (GetTarget() == NULL || DistNoRoot(*GetTarget()) >= 5*5 )
+			if (GetTarget() == nullptr || DistNoRoot(*GetTarget()) >= 5*5 )
 			{
 				SetHeading(guard_heading); 
 			} else { 
@@ -1766,7 +1766,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 			if(entity_list.GetNPCByID(this->GetID()))
 			{
 			uint16 emoteid = CastToNPC()->GetEmoteID();
-            parse->EventNPC(EVENT_COMBAT, CastToNPC(), NULL, "0", 0);
+            parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
 			if(emoteid != 0)
 				CastToNPC()->DoNPCEmote(LEAVECOMBAT,emoteid);
 			CastToNPC()->SetCombatEvent(false);
@@ -1873,7 +1873,7 @@ void Mob::StartEnrage()
     if (SpecAttackTimers[SPECATK_ENRAGE])
     {
 		safe_delete(SpecAttackTimers[SPECATK_ENRAGE]);
-        SpecAttackTimers[SPECATK_ENRAGE] = NULL;
+        SpecAttackTimers[SPECATK_ENRAGE] = nullptr;
     }
 
     if (!SpecAttackTimers[SPECATK_ENRAGE])
@@ -2156,7 +2156,7 @@ void NPC::CheckSignal() {
 		char buf[32];
 		snprintf(buf, 31, "%d", signal_id);
 		buf[31] = '\0';
-		parse->EventNPC(EVENT_SIGNAL, this, NULL, buf, 0);
+		parse->EventNPC(EVENT_SIGNAL, this, nullptr, buf, 0);
 	}
 }
 

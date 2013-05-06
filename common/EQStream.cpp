@@ -65,7 +65,7 @@ void EQStream::init() {
 	LastAckSent=-1;
 	MaxSends=5;
 	LastPacket=0;
-	oversize_buffer=NULL;
+	oversize_buffer=nullptr;
 	oversize_length=0;
 	oversize_offset=0;
 	RateThreshold=RATEBASE/250;
@@ -77,7 +77,7 @@ void EQStream::init() {
 	retransmittimer = Timer::GetCurrentTime();
 	retransmittimeout = 500 * RuleR(EQStream, RetransmitTimeoutMult); //use 500ms as base before we have connection stats
 #endif
-	OpMgr = NULL;
+	OpMgr = nullptr;
 if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
 	_log(NET__ERROR, _L "init Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
 }
@@ -88,7 +88,7 @@ if(NextSequencedSend > SequencedQueue.size()) {
 
 EQRawApplicationPacket *EQStream::MakeApplicationPacket(EQProtocolPacket *p)
 {
-	EQRawApplicationPacket *ap=NULL;
+	EQRawApplicationPacket *ap=nullptr;
 	_log(NET__APP_CREATE, _L "Creating new application packet, length %d" __L, p->size);
 	_raw(NET__APP_CREATE_HEX, 0xFFFF, p);
 	ap = p->MakeAppPacket();
@@ -97,7 +97,7 @@ EQRawApplicationPacket *EQStream::MakeApplicationPacket(EQProtocolPacket *p)
 
 EQRawApplicationPacket *EQStream::MakeApplicationPacket(const unsigned char *buf, uint32 len)
 {
-	EQRawApplicationPacket *ap=NULL;
+	EQRawApplicationPacket *ap=nullptr;
 	_log(NET__APP_CREATE, _L "Creating new application packet, length %d" __L, len);
 	_hex(NET__APP_CREATE_HEX, buf, len);
 	ap = new EQRawApplicationPacket(buf, len);
@@ -117,7 +117,7 @@ EQProtocolPacket *EQStream::MakeProtocolPacket(const unsigned char *buf, uint32 
 void EQStream::ProcessPacket(EQProtocolPacket *p)
 {
 uint32 processed=0,subpacket_length=0;
-	if (p == NULL)
+	if (p == nullptr)
 		return;
 	// Raw Application packet
 	if (p->opcode > 0xff) {
@@ -153,7 +153,7 @@ uint32 processed=0,subpacket_length=0;
 		case OP_AppCombined: {
 			processed=0;
 			while(processed<p->size) {
-				EQRawApplicationPacket *ap=NULL;
+				EQRawApplicationPacket *ap=nullptr;
 				if ((subpacket_length=(unsigned char)*(p->pBuffer+processed))!=0xff) {
 					_log(NET__NET_CREATE, _L "Extracting combined app packet of length %d, short len" __L, subpacket_length);
 					ap=MakeApplicationPacket(p->pBuffer+processed+1,subpacket_length);
@@ -273,7 +273,7 @@ uint32 processed=0,subpacket_length=0;
 							}
 						}
 						delete[] oversize_buffer;
-						oversize_buffer=NULL;
+						oversize_buffer=nullptr;
 						oversize_offset=0;
 					}
 				} else {
@@ -500,24 +500,24 @@ if(NextSequencedSend > SequencedQueue.size()) {
 
 void EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req)
 {
-	if(p == NULL)
+	if(p == nullptr)
 		return;
 	
 	EQApplicationPacket *newp = p->Copy();
 
-	if (newp != NULL)
+	if (newp != nullptr)
 		FastQueuePacket(&newp, ack_req);
 }
 
 void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 {
 	EQApplicationPacket *pack=*p;
-	*p = NULL;		//clear caller's pointer.. effectively takes ownership
+	*p = nullptr;		//clear caller's pointer.. effectively takes ownership
 	
-	if(pack == NULL)
+	if(pack == nullptr)
 		return;
 	
-	if(OpMgr == NULL || *OpMgr == NULL) {
+	if(OpMgr == nullptr || *OpMgr == nullptr) {
 		_log(NET__DEBUG, _L "Packet enqueued into a stream with no opcode manager, dropping." __L);
 		delete pack;
 		return;
@@ -557,7 +557,7 @@ uint32 length;
 		unsigned char *tmpbuff=new unsigned char[p->size+3];
 		length=p->serialize(opcode, tmpbuff);
 		
-		EQProtocolPacket *out=new EQProtocolPacket(OP_Fragment,NULL,MaxLen-4);
+		EQProtocolPacket *out=new EQProtocolPacket(OP_Fragment,nullptr,MaxLen-4);
 		*(uint32 *)(out->pBuffer+2)=htonl(p->Size());
 		used=MaxLen-10;
 		memcpy(out->pBuffer+6,tmpbuff,used);
@@ -566,7 +566,7 @@ uint32 length;
 		
 		
 		while (used<length) {
-			out=new EQProtocolPacket(OP_Fragment,NULL,MaxLen-4);
+			out=new EQProtocolPacket(OP_Fragment,nullptr,MaxLen-4);
 			chunksize=min(length-used,MaxLen-6);
 			memcpy(out->pBuffer+2,tmpbuff+used,chunksize);
 			out->size=chunksize+2;
@@ -669,7 +669,7 @@ deque<EQProtocolPacket *>::iterator sitr;
 	MOutboundQueue.lock();
 
 	// Place to hold the base packet t combine into
-	EQProtocolPacket *p=NULL;
+	EQProtocolPacket *p=nullptr;
 
 #ifdef RETRANSMITS
 	// if we have a timeout defined and we have not received an ack recently enough, retransmit from beginning of queue
@@ -702,7 +702,7 @@ deque<EQProtocolPacket *>::iterator sitr;
 				_log(NET__NET_COMBINE, _L "Combined packet full at len %d, next non-seq packet is len %d" __L, p->size, (NonSequencedQueue.front())->size);
 				ReadyToSend.push(p);
 				BytesWritten+=p->size;
-				p=NULL;
+				p=nullptr;
 				
 				if (BytesWritten > threshold) {
 					// Sent enough this round, lets stop to be fair
@@ -761,7 +761,7 @@ continue;
 				_log(NET__NET_COMBINE, _L "Combined packet full at len %d, next seq packet %d is len %d" __L, p->size, seq_send, (*sitr)->size);
 				ReadyToSend.push(p);
 				BytesWritten+=p->size;
-				p=NULL;
+				p=nullptr;
 
 				if (BytesWritten > threshold) {
 					// Sent enough this round, lets stop to be fair
@@ -864,7 +864,7 @@ EQProtocolPacket *EQStream::Read(int eq_fd, sockaddr_in *from)
 {
 int socklen;
 int length=0;
-EQProtocolPacket *p=NULL;
+EQProtocolPacket *p=nullptr;
 char temp[15];
 
 	socklen=sizeof(sockaddr);
@@ -893,7 +893,7 @@ char temp[15];
 
 void EQStream::SendSessionResponse()
 {
-EQProtocolPacket *out=new EQProtocolPacket(OP_SessionResponse,NULL,sizeof(SessionResponse));
+EQProtocolPacket *out=new EQProtocolPacket(OP_SessionResponse,nullptr,sizeof(SessionResponse));
 	SessionResponse *Response=(SessionResponse *)out->pBuffer;
 	Response->Session=htonl(Session);
 	Response->MaxLength=htonl(MaxLen);
@@ -915,10 +915,10 @@ EQProtocolPacket *out=new EQProtocolPacket(OP_SessionResponse,NULL,sizeof(Sessio
 
 void EQStream::SendSessionRequest()
 {
-EQProtocolPacket *out=new EQProtocolPacket(OP_SessionRequest,NULL,sizeof(SessionRequest));
+EQProtocolPacket *out=new EQProtocolPacket(OP_SessionRequest,nullptr,sizeof(SessionRequest));
 	SessionRequest *Request=(SessionRequest *)out->pBuffer;
 	memset(Request,0,sizeof(SessionRequest));
-	Request->Session=htonl(time(NULL));
+	Request->Session=htonl(time(nullptr));
 	Request->MaxLength=htonl(512);
 	
 	_log(NET__NET_TRACE, _L "Sending OP_SessionRequest: session %lu, maxlen=%d" __L, (unsigned long)ntohl(Request->Session), ntohl(Request->MaxLength));
@@ -931,7 +931,7 @@ void EQStream::_SendDisconnect()
 	if(GetState() == CLOSED)
 		return;
 	
-	EQProtocolPacket *out=new EQProtocolPacket(OP_SessionDisconnect,NULL,sizeof(uint32));
+	EQProtocolPacket *out=new EQProtocolPacket(OP_SessionDisconnect,nullptr,sizeof(uint32));
 	*(uint32 *)out->pBuffer=htonl(Session);
 	NonSequencedPush(out);
 	
@@ -947,7 +947,7 @@ void EQStream::InboundQueuePush(EQRawApplicationPacket *p)
 
 EQApplicationPacket *EQStream::PopPacket()
 {
-EQRawApplicationPacket *p=NULL;
+EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (InboundQueue.size()) {
@@ -959,7 +959,7 @@ EQRawApplicationPacket *p=NULL;
 	
 	//resolve the opcode if we can.
 	if(p) {
-		if(OpMgr != NULL && *OpMgr != NULL) {
+		if(OpMgr != nullptr && *OpMgr != nullptr) {
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
 #if EQDEBUG >= 4
 			if(emu_op == OP_Unknown) {
@@ -975,7 +975,7 @@ EQRawApplicationPacket *p=NULL;
 
 EQRawApplicationPacket *EQStream::PopRawPacket()
 {
-EQRawApplicationPacket *p=NULL;
+EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (InboundQueue.size()) {
@@ -987,7 +987,7 @@ EQRawApplicationPacket *p=NULL;
 	
 	//resolve the opcode if we can.
 	if(p) {
-		if(OpMgr != NULL && *OpMgr != NULL) {
+		if(OpMgr != nullptr && *OpMgr != nullptr) {
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
 #if EQDEBUG >= 4
 			if(emu_op == OP_Unknown) {
@@ -1003,7 +1003,7 @@ EQRawApplicationPacket *p=NULL;
 
 EQRawApplicationPacket *EQStream::PeekPacket()
 {
-EQRawApplicationPacket *p=NULL;
+EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (InboundQueue.size()) {
@@ -1017,7 +1017,7 @@ EQRawApplicationPacket *p=NULL;
 
 void EQStream::InboundQueueClear()
 {
-EQApplicationPacket *p=NULL;
+EQApplicationPacket *p=nullptr;
 	
 	_log(NET__APP_TRACE, _L "Clearing inbound queue" __L);
 	
@@ -1060,7 +1060,7 @@ bool flag;
 
 void EQStream::OutboundQueueClear()
 {
-EQProtocolPacket *p=NULL;
+EQProtocolPacket *p=nullptr;
 
 	_log(NET__APP_TRACE, _L "Clearing outbound queue" __L);
 	
@@ -1090,7 +1090,7 @@ if(NextSequencedSend > SequencedQueue.size()) {
 
 void EQStream::PacketQueueClear()
 {
-EQProtocolPacket *p=NULL;
+EQProtocolPacket *p=nullptr;
 
 	_log(NET__APP_TRACE, _L "Clearing future packet queue" __L);
 	
@@ -1223,8 +1223,8 @@ void EQStream::ProcessQueue()
 		return;
 	}
 	
-	EQProtocolPacket *qp=NULL;
-	while((qp=RemoveQueue(NextInSeq))!=NULL) {
+	EQProtocolPacket *qp=nullptr;
+	while((qp=RemoveQueue(NextInSeq))!=nullptr) {
 		_log(NET__DEBUG, _L "Processing Queued Packet: Seq=%d" __L, NextInSeq);
 		ProcessPacket(qp);
 		delete qp;
@@ -1235,7 +1235,7 @@ void EQStream::ProcessQueue()
 EQProtocolPacket *EQStream::RemoveQueue(uint16 seq)
 {
 map<unsigned short,EQProtocolPacket *>::iterator itr;
-EQProtocolPacket *qp=NULL;
+EQProtocolPacket *qp=nullptr;
 	if ((itr=PacketQueue.find(seq))!=PacketQueue.end()) {
 		qp=itr->second;
 		PacketQueue.erase(itr);
@@ -1408,7 +1408,7 @@ void EQStream::Close() {
 //this could be expanded to check more than the fitst opcode if
 //we needed more complex matching
 EQStream::MatchState EQStream::CheckSignature(const Signature *sig) {
-	EQRawApplicationPacket *p = NULL;
+	EQRawApplicationPacket *p = nullptr;
 	MatchState res = MatchNotReady;
 	
 	MInboundQueue.lock();
@@ -1419,10 +1419,10 @@ EQStream::MatchState EQStream::CheckSignature(const Signature *sig) {
 			if(InboundQueue.size() > 1) {
 				p = InboundQueue[1];
 			} else {
-				p = NULL;
+				p = nullptr;
 			}
 		}
-		if(p == NULL) {
+		if(p == nullptr) {
 			//first opcode is ignored, and nothing else remains... keep waiting
 		} else if(p->opcode == sig->first_eq_opcode) {
 			//opcode matches, check length..

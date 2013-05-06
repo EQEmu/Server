@@ -59,7 +59,7 @@ void WorldServer::Reset()
 
 bool WorldServer::Process()
 {
-	ServerPacket *app = NULL;
+	ServerPacket *app = nullptr;
 	while(app = connection->PopPacket())
 	{
 		if(server.options.IsWorldTraceOn())
@@ -223,7 +223,7 @@ bool WorldServer::Process()
 		}
 
 		delete app;
-		app = NULL;
+		app = nullptr;
 	}
 	return true;
 }

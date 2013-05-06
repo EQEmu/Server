@@ -138,7 +138,7 @@ map<string,string> EQW::GetZoneDetails(Const_char *zone_ref) {
 	map<string,string> res;
 	
 	ZoneServer *zs = zoneserver_list.FindByID(atoi(zone_ref));
-	if(zs == NULL) {
+	if(zs == nullptr) {
 		res["error"] = "Invalid zone.";
 		return(res);
 	}
@@ -156,7 +156,7 @@ map<string,string> EQW::GetZoneDetails(Const_char *zone_ref) {
 	res["launcher"] = "";
 	if(zs->GetZoneID() != 0) {
 		LauncherLink *ll = launcher_list.FindByZone(zs->GetLaunchName());
-		if(ll != NULL)
+		if(ll != nullptr)
 			res["launcher"] = ll->GetName();
 	}
 	
@@ -187,7 +187,7 @@ map<string,string> EQW::GetPlayerDetails(Const_char *char_name) {
 	map<string,string> res;
 	
 	ClientListEntry *cle = client_list.FindCharacter(char_name);
-	if(cle == NULL) {
+	if(cle == nullptr) {
 		res["error"] = "1";
 		return(res);
 	}
@@ -270,17 +270,17 @@ void EQW::CreateLauncher(Const_char *launcher_name, int dynamic_count) {
 
 void EQW::LSReconnect() {
 	#ifdef _WINDOWS
-		_beginthread(AutoInitLoginServer, 0, NULL);
+		_beginthread(AutoInitLoginServer, 0, nullptr);
 	#else
 		pthread_t thread;
-		pthread_create(&thread, NULL, &AutoInitLoginServer, NULL);
+		pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
 	#endif
 	RunLoops = true;
 	_log(WORLD__CONSOLE,"Login Server Reconnect manually restarted by Web Tool");
 }
 
 /*EQLConfig * EQW::FindLauncher(Const_char *zone_ref) {
-	return(NULL);
+	return(nullptr);
 }*/
 
 /*
@@ -288,7 +288,7 @@ map<string,string> EQW::GetLaunchersDetails(Const_char *launcher_name) {
 	map<string,string> res;
 	
 	LauncherLink *ll = launcher_list.Get(launcher_name);
-	if(ll == NULL) {
+	if(ll == nullptr) {
 		res["name"] = launcher_name;
 		res["ip"] = "Not Connected";
 		res["id"] = "0";
@@ -309,7 +309,7 @@ map<string,string> EQW::GetLaunchersDetails(Const_char *launcher_name) {
 vector<string> EQW::ListLauncherZones(Const_char *launcher_name) {
 	vector<string> list;
 	LauncherLink *ll = launcher_list.Get(launcher_name);
-	if(ll != NULL) {
+	if(ll != nullptr) {
 		ll->GetZoneList(list);
 	}
 	return(list);
@@ -318,7 +318,7 @@ vector<string> EQW::ListLauncherZones(Const_char *launcher_name) {
 map<string,string> EQW::GetLauncherZoneDetails(Const_char *launcher_name, Const_char *zone_ref) {
 	map<string,string> res;
 	LauncherLink *ll = launcher_list.Get(launcher_name);
-	if(ll != NULL) {
+	if(ll != nullptr) {
 		ll->GetZoneDetails(zone_ref, res);
 	} else {
 		res["error"] = "Launcher Not Found";

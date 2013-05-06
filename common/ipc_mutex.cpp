@@ -44,7 +44,7 @@ namespace EQEmu {
         std::string final_name = "EQEmuMutex_";
         final_name += name;
 
-        imp_->mut_ = CreateMutex(NULL,
+        imp_->mut_ = CreateMutex(nullptr,
             FALSE,
             final_name.c_str());
 

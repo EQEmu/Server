@@ -769,14 +769,14 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 
 	// FriendsString is a comma delimited list of names.
 
-	char *Seperator = NULL;
+	char *Seperator = nullptr;
 
 	Seperator = strchr(FriendsPointer, ',');
 	if(!Seperator) Seperator = strchr(FriendsPointer, '\0');
 
 	uint32 TotalLength=0;
 
-	while(Seperator != NULL) {
+	while(Seperator != nullptr) {
 
 		if((Seperator - FriendsPointer) > 64) return;
 
@@ -1216,15 +1216,15 @@ bool ClientList::SendPacket(const char* to, ServerPacket* pack) {
 	}
 	else {
 		ClientListEntry* cle = FindCharacter(to);
-		if (cle != NULL) {
-			if (cle->Server() != NULL) {
+		if (cle != nullptr) {
+			if (cle->Server() != nullptr) {
 				cle->Server()->SendPacket(pack);
 				return true;
 			}
 			return false;
 		} else {
 			ZoneServer* zs = zoneserver_list.FindByName(to);
-			if (zs != NULL) {
+			if (zs != nullptr) {
 				zs->SendPacket(pack);
 				return true;
 			}

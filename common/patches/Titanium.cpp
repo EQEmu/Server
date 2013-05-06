@@ -16,14 +16,14 @@
 namespace Titanium {
 
 static const char *name = "Titanium";
-static OpcodeManager *opcodes = NULL;
+static OpcodeManager *opcodes = nullptr;
 static Strategy struct_strategy;
 
 char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
 	
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
-	if(opcodes == NULL) {
+	if(opcodes == nullptr) {
 		//TODO: get this file name from the config file
 		string opfile = "patch_";
 		opfile += name;
@@ -67,7 +67,7 @@ void Reload() {
 	//opcode managers because we need to change the manager pointer, which means
 	//we need to go to every stream and replace it's manager.
 	
-	if(opcodes != NULL) {
+	if(opcodes != nullptr) {
 		//TODO: get this file name from the config file
 		string opfile = "patch_";
 		opfile += name;
@@ -422,7 +422,7 @@ ENCODE(OP_Track)
 {
 
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	unsigned char *__emu_buffer = in->pBuffer;
 	Track_Struct *emu = (Track_Struct *) __emu_buffer;
@@ -457,7 +457,7 @@ ENCODE(OP_ZoneEntry){  ENCODE_FORWARD(OP_ZoneSpawns); }
 ENCODE(OP_ZoneSpawns) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
@@ -594,7 +594,7 @@ ENCODE(OP_ItemLinkResponse) {  ENCODE_FORWARD(OP_ItemPacket); }
 ENCODE(OP_ItemPacket) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
@@ -624,7 +624,7 @@ ENCODE(OP_ItemPacket) {
 ENCODE(OP_CharInventory) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
@@ -666,14 +666,14 @@ ENCODE(OP_BazaarSearch) {
 	if(((*p)->size == sizeof(BazaarReturnDone_Struct)) || ((*p)->size == sizeof(BazaarWelcome_Struct))) {
 
 		EQApplicationPacket *in = *p;
-		*p = NULL;
+		*p = nullptr;
 		dest->FastQueuePacket(&in, ack_req);
 		return;
 	}
 
 	//consume the packet
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
@@ -719,7 +719,7 @@ ENCODE(OP_Trader) {
 
 	if((*p)->size != sizeof(TraderBuy_Struct)) {
 		EQApplicationPacket *in = *p;
-		*p = NULL;
+		*p = nullptr;
 		dest->FastQueuePacket(&in, ack_req);
 		return;
 	}
@@ -745,7 +745,7 @@ ENCODE(OP_TraderBuy) {
 ENCODE(OP_GuildMemberList) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
@@ -839,7 +839,7 @@ ENCODE(OP_GuildMemberList) {
 ENCODE(OP_ReadBook) {
 
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 	
 	unsigned char *__emu_buffer = in->pBuffer;
 	
@@ -898,7 +898,7 @@ ENCODE(OP_VetRewardsAvaliable)
 	unsigned char * __emu_buffer = inapp->pBuffer;
 
 	uint32 count = ((*p)->Size() / sizeof(InternalVeteranReward));
-	*p = NULL;
+	*p = nullptr;
 
 	EQApplicationPacket *outapp_create = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(structs::VeteranReward)*count));
 	uchar *old_data = __emu_buffer;
@@ -1212,7 +1212,7 @@ DECODE(OP_InspectAnswer) {
 ENCODE(OP_LFGuild)
 {
 	EQApplicationPacket *in = *p;
-	*p = NULL;
+	*p = nullptr;
 
 	uint32 Command = in->ReadUInt32();
 
@@ -1367,10 +1367,10 @@ DECODE(OP_LFGuild)
 }
 
 char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth) {
-	char *serialization = NULL;
-	char *instance = NULL;
+	char *serialization = nullptr;
+	char *instance = nullptr;
 	const char *protection=(const char *)"\\\\\\\\\\";
-	char *sub_items[10] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+	char *sub_items[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 	bool stackable=inst->IsStackable();
 	uint32 merchant_slot=inst->GetMerchantSlot();
 	int16 charges=inst->GetCharges();

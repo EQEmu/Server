@@ -204,7 +204,7 @@ public:
 
 	// Produce a const singleton
 	static const EQEmuConfig *get() {
-		if (_config == NULL) 
+		if (_config == nullptr) 
 			LoadConfig();
 		return(_config);
 	}
@@ -214,7 +214,7 @@ public:
 
 	// Load the config
 	static bool LoadConfig() {
-		if (_config != NULL)
+		if (_config != nullptr)
 			delete _config;
 		_config=new EQEmuConfig;
 

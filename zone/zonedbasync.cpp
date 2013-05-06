@@ -32,7 +32,7 @@ void DispatchFinishedDBAsync(DBAsyncWork* dbaw) {
 			}
 		}*/
 		case DBA_b4_Zone: {
-			if(zone == NULL)
+			if(zone == nullptr)
 				break;
 			zone->DBAWComplete(workpt.b1(), dbaw);
 			break;

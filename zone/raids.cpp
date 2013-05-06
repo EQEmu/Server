@@ -29,7 +29,7 @@ Raid::Raid(uint32 raidID)
 : GroupIDConsumer(raidID)
 {
 	memset(members ,0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
-	leader = NULL;
+	leader = nullptr;
 	memset(leadername, 0, 64);
 	locked = false;
 	LootType = 4;
@@ -403,7 +403,7 @@ uint32 Raid::GetPlayerIndex(const char *name){
 Client *Raid::GetClientByIndex(uint16 index)
 {
 	if(index > MAX_RAID_MEMBERS)
-		return NULL;
+		return nullptr;
 
 	return members[index].member;
 }
@@ -428,7 +428,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 				caster->SpellOnTarget(spellid, caster->GetPet());
 #endif
 		}
-		else if(members[x].member != NULL)
+		else if(members[x].member != nullptr)
 		{
 			if(members[x].GroupNumber == gid){
 				distance = caster->DistNoRoot(*members[x].member);
@@ -573,7 +573,7 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
   uint32 i;
   uint8 membercount = 0;
   for (i = 0; i < MAX_RAID_MEMBERS; i++) { 
-	  if (members[i].member != NULL) {
+	  if (members[i].member != nullptr) {
 
 		  membercount++; 
 	  } 
@@ -647,7 +647,7 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
   msg += " as your split";
   
   for (i = 0; i < MAX_RAID_MEMBERS; i++) { 
-	  if (members[i].member != NULL) { // If Group Member is Client
+	  if (members[i].member != nullptr) { // If Group Member is Client
 		//I could not get MoneyOnCorpse to work, so we use this
 		members[i].member->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
 		  
@@ -675,7 +675,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 				caster->BardPulse(spellid, caster->GetPet());
 #endif
 		}
-		else if(members[z].member != NULL)
+		else if(members[z].member != nullptr)
 		{
 			if(members[z].GroupNumber == gid){
 				distance = caster->DistNoRoot(*members[z].member);
@@ -1303,7 +1303,7 @@ bool Raid::LearnMembers()
 		while((row = mysql_fetch_row(result))) {
 			if(!row[0])
 				continue;
-			members[i].member = NULL;
+			members[i].member = nullptr;
 			strn0cpy(members[i].membername, row[0], 64);
 			int GroupNum = atoi(row[1]);
 			if(GroupNum > 11)
@@ -1327,7 +1327,7 @@ void Raid::VerifyRaid()
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
 		if(strlen(members[x].membername) == 0){
-			members[x].member = NULL;
+			members[x].member = nullptr;
 		}
 		else{
 			Client *c = entity_list.GetClientByName(members[x].membername);
@@ -1335,7 +1335,7 @@ void Raid::VerifyRaid()
 				members[x].member = c;
 			}
 			else{
-				members[x].member = NULL;
+				members[x].member = nullptr;
 			}
 		}
 		if(members[x].IsRaidLeader){
@@ -1356,7 +1356,7 @@ void Raid::MemberZoned(Client *c)
 	{
 		if(members[x].member == c)
 		{
-			members[x].member = NULL;
+			members[x].member = nullptr;
 		}
 	}
 }

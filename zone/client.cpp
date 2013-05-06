@@ -189,8 +189,8 @@ Client::Client(EQStreamInterface* ieqs)
 	account_id = 0;
 	admin = 0;
 	lsaccountid = 0;
-	shield_target = NULL;
-	SQL_log = NULL;
+	shield_target = nullptr;
+	SQL_log = nullptr;
 	guild_id = GUILD_NONE;
 	guildrank = 0;
 	GuildBanker = false;
@@ -239,7 +239,7 @@ Client::Client(EQStreamInterface* ieqs)
 	pLastUpdateWZ = 0;
 	m_pp.autosplit = false;
 	// initialise haste variable
-	m_tradeskill_object = NULL;
+	m_tradeskill_object = nullptr;
 	delaytimer = false;
 	PendingRezzXP = -1;
 	PendingRezzDBID = 0;
@@ -251,10 +251,10 @@ Client::Client(EQStreamInterface* ieqs)
 	tgb = false;
 	tribute_master_id = 0xFFFFFFFF;
 	tribute_timer.Disable();
-	taskstate = NULL;
+	taskstate = nullptr;
 	TotalSecondsPlayed = 0;
 	keyring.clear();
-	bind_sight_target = NULL;
+	bind_sight_target = nullptr;
 	mercid = 0;
 	mercSlot = 0;
 	InitializeMercInfo();
@@ -296,9 +296,9 @@ Client::Client(EQStreamInterface* ieqs)
 	aa_los_them.x = 0;
 	aa_los_them.y = 0;
 	aa_los_them.z = 0;
-	aa_los_them_mob = NULL;
+	aa_los_them_mob = nullptr;
 	los_status = false;
-	qGlobals = NULL;
+	qGlobals = nullptr;
 	HideCorpseMode = HideCorpseNone;
 	PendingGuildInvitation = false;
 
@@ -306,14 +306,14 @@ Client::Client(EQStreamInterface* ieqs)
 
 	InitializeBuffSlots();
 
-	adventure_request_timer = NULL;
-	adventure_create_timer = NULL;
-	adventure_leave_timer = NULL;
-	adventure_door_timer = NULL;
-	adv_requested_data = NULL;
-	adventure_stats_timer = NULL;
-	adventure_leaderboard_timer = NULL;
-	adv_data = NULL;
+	adventure_request_timer = nullptr;
+	adventure_create_timer = nullptr;
+	adventure_leave_timer = nullptr;
+	adventure_door_timer = nullptr;
+	adv_requested_data = nullptr;
+	adventure_stats_timer = nullptr;
+	adventure_leaderboard_timer = nullptr;
+	adv_data = nullptr;
 	adv_requested_theme = 0;
 	adv_requested_id = 0;
 	adv_requested_member_count = 0;
@@ -334,7 +334,7 @@ Client::~Client() {
 	Bot::ProcessBotOwnerRefDelete(this);
 #endif
 	if(IsInAGuild())
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(NULL));
+		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
 
 	Mob* horse = entity_list.GetMob(this->CastToClient()->GetHorseId());
 	if (horse)
@@ -355,9 +355,9 @@ Client::~Client() {
 		ReportConnectingState();
 	}
 
-	if(m_tradeskill_object != NULL) {
+	if(m_tradeskill_object != nullptr) {
 		m_tradeskill_object->Close();
-		m_tradeskill_object = NULL;
+		m_tradeskill_object = nullptr;
 	}
 
 #ifdef CLIENT_LOGS
@@ -368,10 +368,10 @@ Client::~Client() {
 //	if(AbilityTimer || GetLevel()>=51)
 //		database.UpdateAndDeleteAATimers(CharacterID());
 
-	ChangeSQLLog(NULL);
+	ChangeSQLLog(nullptr);
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());
-		if(entity != NULL && entity->IsClient()) {
+		if(entity != nullptr && entity->IsClient()) {
 			entity->CastToClient()->SetDueling(false);
 			entity->CastToClient()->SetDuelTarget(0);
 			entity_list.DuelMessage(entity->CastToClient(),this,true);
@@ -385,7 +385,7 @@ Client::~Client() {
 				shield_target->shielder[y].shielder_bonus = 0;
 			}
 		}
-		shield_target = NULL;
+		shield_target = nullptr;
 	}
 
 	if(GetTarget())
@@ -558,7 +558,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveBuffs(this);
 
-	TotalSecondsPlayed += (time(NULL) - m_pp.lastlogin);
+	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
 	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
@@ -575,7 +575,7 @@ bool Client::Save(uint8 iCommitNow) {
 		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
 	}
 
-	m_pp.lastlogin = time(NULL);
+	m_pp.lastlogin = time(nullptr);
 	if (pQueuedSaveWorkID) {
 		dbasync->CancelWork(pQueuedSaveWorkID);
 		pQueuedSaveWorkID = 0;
@@ -646,7 +646,7 @@ void Client::SaveBackup() {
 
 CLIENTPACKET::CLIENTPACKET()
 {
-    app = NULL;
+    app = nullptr;
     ack_req = false;
 }
 
@@ -770,7 +770,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		LogFile->write(EQEMuLog::Debug,"Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
 	#endif
 
-	if (targetname == NULL) {
+	if (targetname == nullptr) {
 		targetname = (!GetTarget()) ? "" : GetTarget()->GetName();
 	}
 
@@ -872,7 +872,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 
 		Group* group = GetGroup();
-		if(group != NULL) {
+		if(group != nullptr) {
 			group->GroupMessage(this,language,lang_skill,(const char*) message);
 		}
 		break;
@@ -1888,8 +1888,8 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	// pp also hold this info; should we pull from there or inventory?
 	// (update: i think pp should do it, as this holds LoY dye - plus, this is ugly code with Inventory!)
-	const Item_Struct* item = NULL;
-	const ItemInst* inst = NULL;
+	const Item_Struct* item = nullptr;
+	const ItemInst* inst = nullptr;
 	if ((inst = m_inv[SLOT_HANDS]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
 		ns->spawn.equipment[MATERIAL_HANDS]	= item->Material;
@@ -2716,7 +2716,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					bind_out->type = 1; // Done
 					QueuePacket(outapp);
 					bind_out->type = 0;
-					CheckIncreaseSkill(BIND_WOUND, NULL, 5);
+					CheckIncreaseSkill(BIND_WOUND, nullptr, 5);
 
 					int maxHPBonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound + aabonuses.MaxBindWound;
 
@@ -3525,12 +3525,12 @@ void Client::Insight(uint32 t_id)
 }
 
 void Client::ChangeSQLLog(const char *file) {
-	if(SQL_log != NULL) {
+	if(SQL_log != nullptr) {
 		fclose(SQL_log);
-		SQL_log = NULL;
+		SQL_log = nullptr;
 	}
-	if(file != NULL) {
-		if(strstr(file, "..") != NULL) {
+	if(file != nullptr) {
+		if(strstr(file, "..") != nullptr) {
 			Message(13, ".. is forbibben in SQL log file names.");
 			return;
 		}
@@ -3538,14 +3538,14 @@ void Client::ChangeSQLLog(const char *file) {
 		snprintf(buf, 511, "%s%s", SQL_LOG_PATH, file);
 		buf[511] = '\0';
 		SQL_log = fopen(buf, "a");
-		if(SQL_log == NULL) {
+		if(SQL_log == nullptr) {
 			Message(13, "Unable to open SQL log file: %s\n", strerror(errno));
 		}
 	}
 }
 
 void Client::LogSQL(const char *fmt, ...) {
-	if(SQL_log == NULL)
+	if(SQL_log == nullptr)
 		return;
 
 	va_list argptr;
@@ -3588,11 +3588,11 @@ void Client::SendRules(Client* client)
 	database.GetVariable("Rules", rules, 4096);
 
 	ptr = strtok(rules, "\n");
-	while(ptr != NULL)
+	while(ptr != nullptr)
 	{
 
 		client->Message(0,"%s",ptr);
-		ptr = strtok(NULL, "\n");
+		ptr = strtok(nullptr, "\n");
 	}
 	safe_delete_array(rules);
 }
@@ -3724,7 +3724,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
 	PendingTranslocateData = *ts;
 	PendingTranslocate=true;
-	TranslocateTime = time(NULL);
+	TranslocateTime = time(nullptr);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -3922,7 +3922,7 @@ void Client::KeyRingList()
 		iter != keyring.end();
 		++iter)
 	{
-		if ((item = database.GetItem(*iter))!=NULL) {
+		if ((item = database.GetItem(*iter))!=nullptr) {
 			Message(4,item->Name);
 		}
 	}
@@ -4010,7 +4010,7 @@ void Client::UpdateLFP() {
 
 uint16 Client::GetPrimarySkillValue()
 {
-	SkillType skill = HIGHEST_SKILL;  //because NULL == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
+	SkillType skill = HIGHEST_SKILL;  //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
 	bool equiped = m_inv.GetItem(13);
 	
 	if (!equiped)
@@ -4715,7 +4715,7 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 	
 	// check to make sure the zone is valid
 	const char *target_zone_name = database.GetZoneName(zoneid);
-	if(target_zone_name == NULL)
+	if(target_zone_name == nullptr)
 		return;
 
 	m_pp.binds[4].zoneId = zoneid;
@@ -5556,8 +5556,8 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 		insr->TargetID = requester->GetID();
 		insr->playerid = requestee->GetID();
 
-		const Item_Struct* item = NULL;
-		const ItemInst* inst = NULL;
+		const Item_Struct* item = nullptr;
+		const ItemInst* inst = nullptr;
 
 		for(int16 L = 0; L <= 20; L++) {
 			inst = requestee->GetInv().GetItem(L);
@@ -5991,9 +5991,9 @@ void Client::SendTargetCommand(uint32 EntityID)
 
 void Client::LocateCorpse()
 {
-	Corpse *ClosestCorpse = NULL;
+	Corpse *ClosestCorpse = nullptr;
 	if(!GetTarget())
-		ClosestCorpse = entity_list.GetClosestCorpse(this, NULL);
+		ClosestCorpse = entity_list.GetClosestCorpse(this, nullptr);
 	else if(GetTarget()->IsCorpse())
 		ClosestCorpse = entity_list.GetClosestCorpse(this, GetTarget()->CastToCorpse()->GetOwnerName());
 	else
@@ -6093,10 +6093,10 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	pet.duration = pet_duration;
 	pet.npc_id = record.npc_type;
 
-	NPCType *made_npc = NULL;
+	NPCType *made_npc = nullptr;
 	
 	const NPCType *npc_type = database.GetNPCType(pet.npc_id);
-	if(npc_type == NULL) {
+	if(npc_type == nullptr) {
 		LogFile->write(EQEMuLog::Error, "Unknown npc type for doppelganger spell id: %d", spell_id);
 		Message(0,"Unable to find pet!");
 		return;
@@ -6154,14 +6154,14 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	TempPets(true);
 	
 	while(summon_count > 0) {
-		NPCType *npc_dup = NULL;
-		if(made_npc != NULL) {
+		NPCType *npc_dup = nullptr;
+		if(made_npc != nullptr) {
 			npc_dup = new NPCType;
 			memcpy(npc_dup, made_npc, sizeof(NPCType));
 		}
 		
 		NPC* npca = new NPC(
-				(npc_dup!=NULL)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
+				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0, 
 				GetX()+swarm_pet_x[summon_count], GetY()+swarm_pet_y[summon_count], 
 				GetZ(), GetHeading(), FlyMode3);
@@ -6183,7 +6183,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		npca->GetSwarmInfo()->target = target->GetID();
 		
 		//we allocated a new NPC type object, give the NPC ownership of that memory
-		if(npc_dup != NULL)
+		if(npc_dup != nullptr)
 			npca->GiveNPCTypeData(npc_dup);
 		
 		entity_list.AddNPC(npca);
@@ -6900,7 +6900,7 @@ void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 
 			XTargets[i].ID = 0;
 
-			SendXTargetPacket(i, NULL);
+			SendXTargetPacket(i, nullptr);
 		}
 		else
 		{
@@ -6998,7 +6998,23 @@ void Client::RemoveGroupXTargets()
 		{
 			XTargets[i].ID = 0;
 			XTargets[i].Name[0] = 0;
-			SendXTargetPacket(i, NULL);
+			SendXTargetPacket(i, nullptr);
+		}
+	}
+}
+
+void Client::RemoveAutoXTargets()
+{
+	if(!XTargettingAvailable())
+		return;
+
+	for(int i = 0; i < GetMaxXTargets(); ++i)
+	{
+		if(XTargets[i].Type == Auto)
+		{
+			XTargets[i].ID = 0;
+			XTargets[i].Name[0] = 0;
+			SendXTargetPacket(i, nullptr);
 		}
 	}
 }

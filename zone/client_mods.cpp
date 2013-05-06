@@ -1120,7 +1120,7 @@ int32 Client::CalcManaRegen()
 			this->medding = true;
 			regen = (((GetSkill(MEDITATE) / 10) + (clevel - (clevel / 4))) / 4) + 4;
 			regen += spellbonuses.ManaRegen + itembonuses.ManaRegen;
-			CheckIncreaseSkill(MEDITATE, NULL, -5);
+			CheckIncreaseSkill(MEDITATE, nullptr, -5);
 		}
 		else
 			regen = 2 + spellbonuses.ManaRegen + itembonuses.ManaRegen;

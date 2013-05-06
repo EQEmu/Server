@@ -410,12 +410,12 @@ public:
 			}
 			iterator.Advance();
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	bool DoesQuestItemExist(uint32 itmID, int charges, bool flagItemForDeletion=false) { 	
 		ItemInst* inst = FindQuestItemByID(itmID,charges,flagItemForDeletion);
-		if ( inst != NULL )
+		if ( inst != nullptr )
 		{
 			return true;
 		}

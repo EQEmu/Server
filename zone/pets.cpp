@@ -227,7 +227,7 @@ void Mob::MakePet(uint16 spell_id, const char* pettype, const char *petname) {
 // of a client is searched for and used instead.
 void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname) {
 	// Sanity and early out checking first.
-	if(HasPet() || pettype == NULL)
+	if(HasPet() || pettype == nullptr)
 		return;
 
 	int16 act_power = 0; // The actual pet power we'll use.
@@ -254,7 +254,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, c
 
 	//find the NPC data for the specified NPC type
 	const NPCType *base = database.GetNPCType(record.npc_type);
-	if(base == NULL) {
+	if(base == nullptr) {
 		Message(13, "Unable to load NPC data for pet %s", pettype);
 		LogFile->write(EQEMuLog::Error, "Unable to load NPC data for pet %s (NPC ID %d), check pets and npc_types tables.", pettype, record.npc_type);
 		return;
@@ -299,7 +299,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, c
 	// 4 - Keep DB name
 
 
-	if (petname != NULL) {
+	if (petname != nullptr) {
 		// Name was provided, use it.
 		strn0cpy(npc_type->name, petname, 64);
 	} else if (record.petnaming == 0) {
@@ -363,8 +363,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, c
 	if(record.monsterflag) {
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char* query = 0;
-		MYSQL_RES *result = NULL;
-		MYSQL_ROW row = NULL;
+		MYSQL_RES *result = nullptr;
+		MYSQL_ROW row = nullptr;
 		uint32 monsterid;
 		
 		// get a random npc id from the spawngroups assigned to this zone
@@ -488,17 +488,17 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 
 Mob* Mob::GetPet() {
 	if(GetPetID() == 0)
-		return(NULL);
+		return(nullptr);
 	
 	Mob* tmp = entity_list.GetMob(GetPetID());
-	if(tmp == NULL) {
+	if(tmp == nullptr) {
 		SetPetID(0);
-		return(NULL);
+		return(nullptr);
 	}
 	
 	if(tmp->GetOwnerID() != GetID()) {
 		SetPetID(0);
-		return(NULL);
+		return(nullptr);
 	}
 	
 	return(tmp);
@@ -509,7 +509,7 @@ void Mob::SetPet(Mob* newpet) {
 	if (oldpet) {
 		oldpet->SetOwnerID(0);
 	}
-	if (newpet == NULL) {
+	if (newpet == nullptr) {
 		SetPetID(0);
 	} else {
 		SetPetID(newpet->GetID());
@@ -641,7 +641,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 // shared memory at some point due to the number of queries needed to load a
 // nested set.
 bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
-	if (equipmentset < 0 || items == NULL)
+	if (equipmentset < 0 || items == nullptr)
 		return false;
 
 	// Equipment sets can be nested. We start with the top-most one and

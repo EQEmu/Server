@@ -22,7 +22,7 @@
 #include "../common/debug.h"
 #include "queryservconfig.h"
 
-queryservconfig *queryservconfig::_chat_config = NULL;
+queryservconfig *queryservconfig::_chat_config = nullptr;
 
 string queryservconfig::GetByName(const string &var_name) const {
 	return(EQEmuConfig::GetByName(var_name));

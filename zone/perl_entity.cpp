@@ -59,8 +59,8 @@ XS(XS_EntityList_GetMobID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMobID(id);
 		ST(0) = sv_newmortal();
@@ -86,8 +86,8 @@ XS(XS_EntityList_GetMob)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMob(name);
 		ST(0) = sv_newmortal();
@@ -113,8 +113,8 @@ XS(XS_EntityList_GetMobByID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMob(id);
 		ST(0) = sv_newmortal();
@@ -140,8 +140,8 @@ XS(XS_EntityList_GetMobByNpcTypeID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetMobByNpcTypeID(get_id);
 		ST(0) = sv_newmortal();
@@ -167,8 +167,8 @@ XS(XS_EntityList_GetNPCByID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetNPCByID(id);
 		ST(0) = sv_newmortal();
@@ -194,8 +194,8 @@ XS(XS_EntityList_GetNPCByNPCTypeID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetNPCByNPCTypeID(npc_id);
 		ST(0) = sv_newmortal();
@@ -221,8 +221,8 @@ XS(XS_EntityList_GetClientByName)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByName(name);
 		ST(0) = sv_newmortal();
@@ -248,8 +248,8 @@ XS(XS_EntityList_GetClientByAccID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByAccID(accid);
 		ST(0) = sv_newmortal();
@@ -275,8 +275,8 @@ XS(XS_EntityList_GetClientByID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByID(id);
 		ST(0) = sv_newmortal();
@@ -302,8 +302,8 @@ XS(XS_EntityList_GetClientByCharID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByCharID(iCharID);
 		ST(0) = sv_newmortal();
@@ -329,8 +329,8 @@ XS(XS_EntityList_GetClientByWID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetClientByWID(iWID);
 		ST(0) = sv_newmortal();
@@ -356,8 +356,8 @@ XS(XS_EntityList_GetObjectByDBID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetObjectByDBID(id);
 		ST(0) = sv_newmortal();
@@ -383,8 +383,8 @@ XS(XS_EntityList_GetObjectByID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetObjectByID(id);
 		ST(0) = sv_newmortal();
@@ -410,8 +410,8 @@ XS(XS_EntityList_GetDoorsByDBID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDoorsByDBID(id);
 		ST(0) = sv_newmortal();
@@ -437,8 +437,8 @@ XS(XS_EntityList_GetDoorsByDoorID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDoorsByDoorID(id);
 		ST(0) = sv_newmortal();
@@ -464,8 +464,8 @@ XS(XS_EntityList_GetDoorsByID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDoorsByID(id);
 		ST(0) = sv_newmortal();
@@ -491,8 +491,8 @@ XS(XS_EntityList_FindDoor)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->FindDoor(id);
 		ST(0) = sv_newmortal();
@@ -518,8 +518,8 @@ XS(XS_EntityList_GetGroupByMob)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -527,8 +527,8 @@ XS(XS_EntityList_GetGroupByMob)
 		}
 		else
 			Perl_croak(aTHX_ "mob is not of type Mob");
-		if(mob == NULL)
-			Perl_croak(aTHX_ "mob is NULL, avoiding crash.");
+		if(mob == nullptr)
+			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetGroupByMob(mob);
 		ST(0) = sv_newmortal();
@@ -554,8 +554,8 @@ XS(XS_EntityList_GetGroupByClient)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -563,8 +563,8 @@ XS(XS_EntityList_GetGroupByClient)
 		}
 		else
 			Perl_croak(aTHX_ "client is not of type Client");
-		if(client == NULL)
-			Perl_croak(aTHX_ "client is NULL, avoiding crash.");
+		if(client == nullptr)
+			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetGroupByClient(client);
 		ST(0) = sv_newmortal();
@@ -590,8 +590,8 @@ XS(XS_EntityList_GetGroupByID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetGroupByID(id);
 		ST(0) = sv_newmortal();
@@ -617,8 +617,8 @@ XS(XS_EntityList_GetGroupByLeaderName)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetGroupByLeaderName(leader);
 		ST(0) = sv_newmortal();
@@ -644,8 +644,8 @@ XS(XS_EntityList_GetRaidByID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetRaidByID(id);
 		ST(0) = sv_newmortal();
@@ -671,8 +671,8 @@ XS(XS_EntityList_GetRaidByClient)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -680,8 +680,8 @@ XS(XS_EntityList_GetRaidByClient)
 		}
 		else
 			Perl_croak(aTHX_ "client is not of type Client");
-		if(client == NULL)
-			Perl_croak(aTHX_ "client is NULL, avoiding crash.");
+		if(client == nullptr)
+			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetRaidByClient(client);
 		ST(0) = sv_newmortal();
@@ -707,8 +707,8 @@ XS(XS_EntityList_GetCorpseByOwner)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -716,8 +716,8 @@ XS(XS_EntityList_GetCorpseByOwner)
 		}
 		else
 			Perl_croak(aTHX_ "client is not of type Client");
-		if(client == NULL)
-			Perl_croak(aTHX_ "client is NULL, avoiding crash.");
+		if(client == nullptr)
+			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCorpseByOwner(client);
 		ST(0) = sv_newmortal();
@@ -743,8 +743,8 @@ XS(XS_EntityList_GetCorpseByID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCorpseByID(id);
 		ST(0) = sv_newmortal();
@@ -770,8 +770,8 @@ XS(XS_EntityList_GetCorpseByName)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetCorpseByName(name);
 		ST(0) = sv_newmortal();
@@ -795,8 +795,8 @@ XS(XS_EntityList_ClearClientPetitionQueue)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->ClearClientPetitionQueue();
 	}
@@ -820,8 +820,8 @@ XS(XS_EntityList_CanAddHateForMob)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -829,8 +829,8 @@ XS(XS_EntityList_CanAddHateForMob)
 		}
 		else
 			Perl_croak(aTHX_ "p is not of type Mob");
-		if(p == NULL)
-			Perl_croak(aTHX_ "p is NULL, avoiding crash.");
+		if(p == nullptr)
+			Perl_croak(aTHX_ "p is nullptr, avoiding crash.");
 
 		RETVAL = THIS->CanAddHateForMob(p);
 		ST(0) = boolSV(RETVAL);
@@ -854,8 +854,8 @@ XS(XS_EntityList_Clear)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Clear();
 	}
@@ -879,8 +879,8 @@ XS(XS_EntityList_RemoveMob)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveMob(delete_id);
 		ST(0) = boolSV(RETVAL);
@@ -906,8 +906,8 @@ XS(XS_EntityList_RemoveClient)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveClient(delete_id);
 		ST(0) = boolSV(RETVAL);
@@ -933,8 +933,8 @@ XS(XS_EntityList_RemoveNPC)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveNPC(delete_id);
 		ST(0) = boolSV(RETVAL);
@@ -960,8 +960,8 @@ XS(XS_EntityList_RemoveGroup)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveGroup(delete_id);
 		ST(0) = boolSV(RETVAL);
@@ -987,8 +987,8 @@ XS(XS_EntityList_RemoveCorpse)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveCorpse(delete_id);
 		ST(0) = boolSV(RETVAL);
@@ -1014,8 +1014,8 @@ XS(XS_EntityList_RemoveDoor)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveDoor(delete_id);
 		ST(0) = boolSV(RETVAL);
@@ -1041,8 +1041,8 @@ XS(XS_EntityList_RemoveTrap)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveTrap(delete_id);
 		ST(0) = boolSV(RETVAL);
@@ -1068,8 +1068,8 @@ XS(XS_EntityList_RemoveObject)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->RemoveObject(delete_id);
 		ST(0) = boolSV(RETVAL);
@@ -1093,8 +1093,8 @@ XS(XS_EntityList_RemoveAllMobs)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveAllMobs();
 	}
@@ -1116,8 +1116,8 @@ XS(XS_EntityList_RemoveAllClients)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveAllClients();
 	}
@@ -1139,8 +1139,8 @@ XS(XS_EntityList_RemoveAllNPCs)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveAllNPCs();
 	}
@@ -1162,8 +1162,8 @@ XS(XS_EntityList_RemoveAllGroups)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveAllGroups();
 	}
@@ -1185,8 +1185,8 @@ XS(XS_EntityList_RemoveAllCorpses)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveAllCorpses();
 	}
@@ -1208,8 +1208,8 @@ XS(XS_EntityList_RemoveAllDoors)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveAllDoors();
 	}
@@ -1231,8 +1231,8 @@ XS(XS_EntityList_RemoveAllTraps)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveAllTraps();
 	}
@@ -1254,8 +1254,8 @@ XS(XS_EntityList_RemoveAllObjects)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveAllObjects();
 	}
@@ -1280,8 +1280,8 @@ XS(XS_EntityList_Message)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Message(to_guilddbid, type, message);
 	}
@@ -1307,8 +1307,8 @@ XS(XS_EntityList_MessageStatus)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->MessageStatus(to_guilddbid, to_minstatus, type, message);
 	}
@@ -1335,8 +1335,8 @@ XS(XS_EntityList_MessageClose)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1344,8 +1344,8 @@ XS(XS_EntityList_MessageClose)
 		}
 		else
 			Perl_croak(aTHX_ "sender is not of type Mob");
-		if(sender == NULL)
-			Perl_croak(aTHX_ "sender is NULL, avoiding crash.");
+		if(sender == nullptr)
+			Perl_croak(aTHX_ "sender is nullptr, avoiding crash.");
 
 		THIS->MessageClose(sender, skipsender, dist, type, message);
 	}
@@ -1368,8 +1368,8 @@ XS(XS_EntityList_RemoveFromTargets)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1377,8 +1377,8 @@ XS(XS_EntityList_RemoveFromTargets)
 		}
 		else
 			Perl_croak(aTHX_ "mob is not of type Mob");
-		if(mob == NULL)
-			Perl_croak(aTHX_ "mob is NULL, avoiding crash.");
+		if(mob == nullptr)
+			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
 		THIS->RemoveFromTargets(mob);
 	}
@@ -1402,8 +1402,8 @@ XS(XS_EntityList_ReplaceWithTarget)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1411,8 +1411,8 @@ XS(XS_EntityList_ReplaceWithTarget)
 		}
 		else
 			Perl_croak(aTHX_ "pOldMob is not of type Mob");
-		if(pOldMob == NULL)
-			Perl_croak(aTHX_ "pOldMob is NULL, avoiding crash.");
+		if(pOldMob == nullptr)
+			Perl_croak(aTHX_ "pOldMob is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(2), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(2)));
@@ -1420,8 +1420,8 @@ XS(XS_EntityList_ReplaceWithTarget)
 		}
 		else
 			Perl_croak(aTHX_ "pNewTarget is not of type Mob");
-		if(pNewTarget == NULL)
-			Perl_croak(aTHX_ "pNewTarget is NULL, avoiding crash.");
+		if(pNewTarget == nullptr)
+			Perl_croak(aTHX_ "pNewTarget is nullptr, avoiding crash.");
 
 		THIS->ReplaceWithTarget(pOldMob, pNewTarget);
 	}
@@ -1444,8 +1444,8 @@ XS(XS_EntityList_OpenDoorsNear)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "NPC")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1453,8 +1453,8 @@ XS(XS_EntityList_OpenDoorsNear)
 		}
 		else
 			Perl_croak(aTHX_ "opener is not of type NPC");
-		if(opener == NULL)
-			Perl_croak(aTHX_ "opener is NULL, avoiding crash.");
+		if(opener == nullptr)
+			Perl_croak(aTHX_ "opener is nullptr, avoiding crash.");
 
 		THIS->OpenDoorsNear(opener);
 	}
@@ -1479,8 +1479,8 @@ XS(XS_EntityList_MakeNameUnique)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->MakeNameUnique(name);
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
@@ -1522,8 +1522,8 @@ XS(XS_EntityList_SignalMobsByNPCID)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SignalMobsByNPCID(npc_type, signal_id);
 	}
@@ -1546,8 +1546,8 @@ XS(XS_EntityList_RemoveEntity)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->RemoveEntity(id);
 	}
@@ -1571,8 +1571,8 @@ XS(XS_EntityList_DeleteNPCCorpses)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DeleteNPCCorpses();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -1597,8 +1597,8 @@ XS(XS_EntityList_DeletePlayerCorpses)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->DeletePlayerCorpses();
 		XSprePUSH; PUSHi((IV)RETVAL);
@@ -1622,8 +1622,8 @@ XS(XS_EntityList_HalveAggro)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1631,8 +1631,8 @@ XS(XS_EntityList_HalveAggro)
 		}
 		else
 			Perl_croak(aTHX_ "who is not of type Mob");
-		if(who == NULL)
-			Perl_croak(aTHX_ "who is NULL, avoiding crash.");
+		if(who == nullptr)
+			Perl_croak(aTHX_ "who is nullptr, avoiding crash.");
 
 		THIS->HalveAggro(who);
 	}
@@ -1655,8 +1655,8 @@ XS(XS_EntityList_DoubleAggro)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1664,8 +1664,8 @@ XS(XS_EntityList_DoubleAggro)
 		}
 		else
 			Perl_croak(aTHX_ "who is not of type Mob");
-		if(who == NULL)
-			Perl_croak(aTHX_ "who is NULL, avoiding crash.");
+		if(who == nullptr)
+			Perl_croak(aTHX_ "who is nullptr, avoiding crash.");
 
 		THIS->DoubleAggro(who);
 	}
@@ -1688,8 +1688,8 @@ XS(XS_EntityList_ClearFeignAggro)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1697,8 +1697,8 @@ XS(XS_EntityList_ClearFeignAggro)
 		}
 		else
 			Perl_croak(aTHX_ "targ is not of type Mob");
-		if(targ == NULL)
-			Perl_croak(aTHX_ "targ is NULL, avoiding crash.");
+		if(targ == nullptr)
+			Perl_croak(aTHX_ "targ is nullptr, avoiding crash.");
 
 		THIS->ClearFeignAggro(targ);
 	}
@@ -1722,8 +1722,8 @@ XS(XS_EntityList_Fighting)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1731,8 +1731,8 @@ XS(XS_EntityList_Fighting)
 		}
 		else
 			Perl_croak(aTHX_ "targ is not of type Mob");
-		if(targ == NULL)
-			Perl_croak(aTHX_ "targ is NULL, avoiding crash.");
+		if(targ == nullptr)
+			Perl_croak(aTHX_ "targ is nullptr, avoiding crash.");
 
 		RETVAL = THIS->Fighting(targ);
 		ST(0) = boolSV(RETVAL);
@@ -1758,8 +1758,8 @@ XS(XS_EntityList_RemoveFromHateLists)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1767,8 +1767,8 @@ XS(XS_EntityList_RemoveFromHateLists)
 		}
 		else
 			Perl_croak(aTHX_ "mob is not of type Mob");
-		if(mob == NULL)
-			Perl_croak(aTHX_ "mob is NULL, avoiding crash.");
+		if(mob == nullptr)
+			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
 		if (items < 3)
 			settoone = false;
@@ -1800,8 +1800,8 @@ XS(XS_EntityList_MessageGroup)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -1809,8 +1809,8 @@ XS(XS_EntityList_MessageGroup)
 		}
 		else
 			Perl_croak(aTHX_ "sender is not of type Mob");
-		if(sender == NULL)
-			Perl_croak(aTHX_ "sender is NULL, avoiding crash.");
+		if(sender == nullptr)
+			Perl_croak(aTHX_ "sender is nullptr, avoiding crash.");
 
 		THIS->MessageGroup(sender, skipclose, type, message);
 	}
@@ -1822,10 +1822,10 @@ XS(XS_EntityList_GetRandomClient)
 {
 	dXSARGS;
 	if ((items < 5) || (items > 6))
-		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, x, y, z, distance, excludeclient = NULL)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, x, y, z, distance, excludeclient = nullptr)");
 	{
 		EntityList *THIS;
-		Client *RETVAL, *c = NULL;
+		Client *RETVAL, *c = nullptr;
 		float x = (float)SvNV(ST(1));
 		float y = (float)SvNV(ST(2));
 		float z = (float)SvNV(ST(3));
@@ -1838,8 +1838,8 @@ XS(XS_EntityList_GetRandomClient)
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if(items == 6)
 		{
@@ -1872,8 +1872,8 @@ XS(XS_EntityList_GetMobList)
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		std::list<Mob*> mob_list;
 		entity_list.GetMobList(mob_list);
@@ -1909,8 +1909,8 @@ XS(XS_EntityList_GetClientList)
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		std::list<Client*> client_list;
 		entity_list.GetClientList(client_list);
@@ -1946,8 +1946,8 @@ XS(XS_EntityList_GetNPCList)
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		std::list<NPC*> npc_list;
 		entity_list.GetNPCList(npc_list);
@@ -1983,8 +1983,8 @@ XS(XS_EntityList_GetCorpseList)
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		std::list<Corpse*> corpse_list;
 		entity_list.GetCorpseList(corpse_list);
@@ -2020,8 +2020,8 @@ XS(XS_EntityList_GetObjectList)
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		std::list<Object*> object_list;
 		entity_list.GetObjectList(object_list);
@@ -2057,8 +2057,8 @@ XS(XS_EntityList_GetDoorsList)
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		std::list<Doors*> door_list;
 		entity_list.GetDoorsList(door_list);
@@ -2094,8 +2094,8 @@ XS(XS_EntityList_SignalAllClients)
 		else
 			Perl_croak(aTHX_ "THIS is not of type EntityList");
 
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		entity_list.SignalAllClients(data);
 	}

@@ -123,7 +123,7 @@ bool strn0cpyt(char* dest, const char* source, uint32 size) {
 const char *MakeUpperString(const char *source) {
     static char str[128];
     if (!source)
-	    return NULL;
+	    return nullptr;
     MakeUpperString(source, str);
     return str;
 }
@@ -144,7 +144,7 @@ void MakeUpperString(const char *source, char *target) {
 const char *MakeLowerString(const char *source) {
     static char str[128];
     if (!source)
-	    return NULL;
+	    return nullptr;
     MakeLowerString(source, str);
     return str;
 }
@@ -316,12 +316,12 @@ uint32 ResolveIP(const char* hostname, char* errbuf) {
 	}
     struct sockaddr_in	server_sin;
 #ifdef _WINDOWS
-	PHOSTENT phostent = NULL;
+	PHOSTENT phostent = nullptr;
 #else
-	struct hostent *phostent = NULL;
+	struct hostent *phostent = nullptr;
 #endif
 	server_sin.sin_family = AF_INET;
-	if ((phostent = gethostbyname(hostname)) == NULL) {
+	if ((phostent = gethostbyname(hostname)) == nullptr) {
 #ifdef _WINDOWS
 		if (errbuf)
 			snprintf(errbuf, ERRBUF_SIZE, "Unable to get the host name. Error: %i", WSAGetLastError());
@@ -396,7 +396,7 @@ int MakeRandomInt(int low, int high)
 	//return (rand()%(high-low+1) + (low));
         if(!WELLRNG_init) {
 		WELLRNG_init = true;
-		oneseed( rnd_hash( time(NULL), clock() ) );
+		oneseed( rnd_hash( time(nullptr), clock() ) );
 		WELLRNG19937 = case_1;
 	}
 	unsigned int randomnum = ((WELLRNG19937)());
@@ -414,7 +414,7 @@ double MakeRandomFloat(double low, double high)
 	//return (rand() / (double)RAND_MAX * (high - low) + low);
         if(!WELLRNG_init) {
 		WELLRNG_init = true;
-		oneseed( rnd_hash( time(NULL), clock() ) );
+		oneseed( rnd_hash( time(nullptr), clock() ) );
 		WELLRNG19937 = case_1;
 	}
 	return ((WELLRNG19937)() / (double)0xffffffffUL * (high - low) + low);

@@ -656,7 +656,7 @@ uint32 ZSList::TriggerBootup(uint32 iZoneID, uint32 iInstanceID) {
 	/*Old Random boot zones use this if your server is distributed across computers.
 	LinkedListIterator<ZoneServer*> iterator(list);
 
-	srand(time(NULL));
+	srand(time(nullptr));
 	uint32 x = 0;
 	iterator.Reset();
 	while(iterator.MoreElements()) {

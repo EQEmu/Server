@@ -102,7 +102,7 @@ public:
 	bool ListRules(const char *catname, std::vector<const char *> &into);
 	bool ListCategories(std::vector<const char *> &into);
 	bool GetRule(const char *rule_name, std::string &ret_val);
-	bool SetRule(const char *rule_name, const char *rule_value, Database *db = NULL, bool db_save = false);
+	bool SetRule(const char *rule_name, const char *rule_value, Database *db = nullptr, bool db_save = false);
 
 	int GetActiveRulesetID() const { return(m_activeRuleset); }
 	const char *GetActiveRuleset() const { return(m_activeName.c_str()); }
@@ -111,8 +111,8 @@ public:
 	static bool ListRulesets(Database *db, std::map<int, std::string> &into);
 	
 	void ResetRules();
-	bool LoadRules(Database *db, const char *ruleset = NULL);
-	void SaveRules(Database *db, const char *ruleset = NULL);
+	bool LoadRules(Database *db, const char *ruleset = nullptr);
+	void SaveRules(Database *db, const char *ruleset = nullptr);
 	
 private:
     RuleManager();

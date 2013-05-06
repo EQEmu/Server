@@ -86,8 +86,8 @@ XS(XS_PerlPacket_DESTROY)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not a reference");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		delete THIS;
 	}
@@ -111,8 +111,8 @@ XS(XS_PerlPacket_SetOpcode)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->SetOpcode(opcode);
 		ST(0) = boolSV(RETVAL);
@@ -137,8 +137,8 @@ XS(XS_PerlPacket_Resize)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Resize(len);
 	}
@@ -161,8 +161,8 @@ XS(XS_PerlPacket_SendTo)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
@@ -170,8 +170,8 @@ XS(XS_PerlPacket_SendTo)
 		}
 		else
 			Perl_croak(aTHX_ "who is not of type Client");
-		if(who == NULL)
-			Perl_croak(aTHX_ "who is NULL, avoiding crash.");
+		if(who == nullptr)
+			Perl_croak(aTHX_ "who is nullptr, avoiding crash.");
 
 		THIS->SendTo(who);
 	}
@@ -193,8 +193,8 @@ XS(XS_PerlPacket_SendToAll)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SendToAll();
 	}
@@ -216,8 +216,8 @@ XS(XS_PerlPacket_Zero)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->Zero();
 	}
@@ -241,8 +241,8 @@ XS(XS_PerlPacket_FromArray)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		AV *av_numbers;
 		if (SvROK(ST(1)) && SvTYPE(SvRV(ST(1)))==SVt_PVAV)
@@ -254,7 +254,7 @@ XS(XS_PerlPacket_FromArray)
 		numbers = new int[len_numbers];
 		for(ix_numbers = 0; ix_numbers < len_numbers; ix_numbers ++) {
 				SV **tmp = av_fetch(av_numbers, ix_numbers, 0);
-				if(tmp == NULL || *tmp == NULL) {
+				if(tmp == nullptr || *tmp == nullptr) {
 						numbers[ix_numbers] = 0;
 						continue;
 				}
@@ -283,8 +283,8 @@ XS(XS_PerlPacket_SetByte)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetByte(pos, val);
 	}
@@ -308,8 +308,8 @@ XS(XS_PerlPacket_SetShort)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetShort(pos, val);
 	}
@@ -333,8 +333,8 @@ XS(XS_PerlPacket_SetLong)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetLong(pos, val);
 	}
@@ -358,8 +358,8 @@ XS(XS_PerlPacket_SetFloat)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetFloat(pos, val);
 	}
@@ -383,8 +383,8 @@ XS(XS_PerlPacket_SetString)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetString(pos, str);
 	}
@@ -409,8 +409,8 @@ XS(XS_PerlPacket_SetEQ1319)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetEQ1319(pos, part13, part19);
 	}
@@ -435,8 +435,8 @@ XS(XS_PerlPacket_SetEQ1913)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetEQ1913(pos, part19, part13);
 	}
@@ -461,8 +461,8 @@ XS(XS_PerlPacket_GetByte)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetByte(pos);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -488,8 +488,8 @@ XS(XS_PerlPacket_GetShort)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetShort(pos);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -515,8 +515,8 @@ XS(XS_PerlPacket_GetLong)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetLong(pos);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -542,8 +542,8 @@ XS(XS_PerlPacket_GetFloat)
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetFloat(pos);
 		XSprePUSH; PUSHn((double)RETVAL);

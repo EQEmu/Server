@@ -91,7 +91,7 @@ public:
 	//evaluate an expression. throws string errors on fail
 	void eval(const char * code);
 	//execute a subroutine.  throws lasterr on failure
-	void dosub(const char * subname, const std::vector<std::string> * args = NULL, int mode = G_SCALAR|G_DISCARD|G_EVAL);
+	void dosub(const char * subname, const std::vector<std::string> * args = nullptr, int mode = G_SCALAR|G_DISCARD|G_EVAL);
 	
 	//Access to perl variables
 	//all varnames here should be of the form package::name
@@ -138,7 +138,7 @@ public:
  			SV *val = newSVpv(it->second.c_str(), it->second.length());
  
  			// If val was not added to hash, reset reference count
- 			if (hv_store(hv, it->first.c_str(), keylen, val, 0) == NULL)
+ 			if (hv_store(hv, it->first.c_str(), keylen, val, 0) == nullptr)
  				val->sv_refcnt = 0;
  		}
 	}

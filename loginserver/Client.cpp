@@ -191,7 +191,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	string e_user;
 	string e_hash;
-	char *e_buffer = NULL;
+	char *e_buffer = nullptr;
 	unsigned int d_account_id = 0;
 	string d_pass_hash;
 

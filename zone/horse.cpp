@@ -31,7 +31,7 @@ map<uint16, const NPCType *> Horse::horse_types;
 LinkedList<NPCType *> horses_auto_delete;
 
 Horse::Horse(Client *_owner, uint16 spell_id, float x, float y, float z, float heading) 
- : NPC(GetHorseType(spell_id), NULL, x, y, z, heading, FlyMode3)
+ : NPC(GetHorseType(spell_id), nullptr, x, y, z, heading, FlyMode3)
 {
 	//give the horse its proper name.
 	strn0cpy(name, _owner->GetCleanName(), 55);
@@ -55,13 +55,13 @@ bool Horse::IsHorseSpell(uint16 spell_id) {
 	//than we need to to figure out if this is a horse spell.
 	//the logic is that people calling this function will post
 	//likely immediately summon the horse, so we need the extra anyways.
-	return(GetHorseType(spell_id) != NULL);
+	return(GetHorseType(spell_id) != nullptr);
 }
 
 const NPCType *Horse::GetHorseType(uint16 spell_id) {
 	if(horse_types.count(spell_id) == 1)
 		return(horse_types[spell_id]);
-	//cache invalid spell IDs as NULL entries
+	//cache invalid spell IDs as nullptr entries
 	const NPCType *ret;
 	horse_types[spell_id] = ret = BuildHorseType(spell_id);
 	return(ret);
@@ -124,12 +124,12 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 			safe_delete_array(query);
 		}
 		mysql_free_result(result);
-		return NULL;
+		return nullptr;
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, "Error in Mount query '%s': %s", query,  errbuf);
 		safe_delete_array(query);
-		return NULL;
+		return nullptr;
 	}
 		
 }
@@ -183,7 +183,7 @@ void Client::SetHorseId(uint16 horseid_in) {
 	//if we have a horse, get rid of it no matter what.
 	if(horseId) {
 		Mob *horse = entity_list.GetMob(horseId);
-		if(horse != NULL)
+		if(horse != nullptr)
 			horse->Depop();
 	}
 	

@@ -162,13 +162,13 @@ ItemInst::ItemInst(const ItemInst& copy)
 	iter_contents it;
 	for (it=copy.m_contents.begin(); it!=copy.m_contents.end(); it++) {
 		ItemInst* inst_old = it->second;
-		ItemInst* inst_new = NULL;
+		ItemInst* inst_new = nullptr;
 		
 		if (inst_old) {
 			inst_new = inst_old->Clone();
 		}
 		
-		if (inst_new != NULL) {
+		if (inst_new != nullptr) {
 			m_contents[it->first] = inst_new;
 		}
 	}
@@ -293,7 +293,7 @@ uint32 ItemInst::GetItemID(uint8 slot) const
 {
 const ItemInst *item;
 uint32 id=0;
-	if ((item=GetItem(slot))!=NULL)
+	if ((item=GetItem(slot))!=nullptr)
 		id= item->GetItem()->ID;
 
 	return id;
@@ -330,7 +330,7 @@ ItemInst* ItemInst::GetAugment(uint8 slot) const
 	if (m_item->ItemClass == ItemClassCommon)
 		return GetItem(slot);
 	
-	return NULL;
+	return nullptr;
 }
 
 // Remove augment from item and destroy it
@@ -346,7 +346,7 @@ ItemInst* ItemInst::RemoveAugment(uint8 index)
 	if (m_item->ItemClass == ItemClassCommon)
 		return PopItem(index);
 
-	return NULL;
+	return nullptr;
 }
 
 // Add an augment to the item
@@ -377,7 +377,7 @@ ItemInst* ItemInst::GetItem(uint8 index) const
 		return inst;
 	}
 	
-	return NULL;
+	return nullptr;
 }
 
 void ItemInst::PutItem(uint8 index, const ItemInst& inst)
@@ -472,7 +472,7 @@ ItemInst* ItemInst::PopItem(uint8 index)
 	}
 	
 	// Return pointer that needs to be deleted (or otherwise managed)
-	return NULL;
+	return nullptr;
 }
 
 // Put item onto back of queue
@@ -491,7 +491,7 @@ void ItemInstQueue::push_front(ItemInst* inst)
 ItemInst* ItemInstQueue::pop()
 {
 	if (m_list.size() == 0)
-		return NULL;
+		return nullptr;
 	
 	ItemInst* inst = m_list.front();
 	m_list.pop_front();
@@ -501,14 +501,14 @@ ItemInst* ItemInstQueue::pop()
 // Look at item at front of queue
 ItemInst* ItemInstQueue::peek_front() const
 {
-	return (m_list.size()==0) ? NULL : m_list.front();
+	return (m_list.size()==0) ? nullptr : m_list.front();
 }
 
 // Retrieve item at specified slot; returns false if item not found
 ItemInst* Inventory::GetItem(int16 slot_id) const
 {
 	_CP(Inventory_GetItem);
-	ItemInst* result = NULL;
+	ItemInst* result = nullptr;
 	
 	// Cursor
 	if (slot_id == SLOT_CURSOR) {
@@ -979,7 +979,7 @@ bool Inventory::CheckNoDrop(int16 slot_id) {
 // Returns item pointer if full delete was successful
 ItemInst* Inventory::PopItem(int16 slot_id)
 {
-	ItemInst* p = NULL;
+	ItemInst* p = nullptr;
 	
 	if (slot_id==SLOT_CURSOR) { // Cursor
 		p = m_cursor.pop();
@@ -1007,7 +1007,7 @@ ItemInst* Inventory::PopItem(int16 slot_id)
 	else {
 		// Is slot inside bag?
 		ItemInst* baginst = GetItem(Inventory::CalcSlotId(slot_id));
-		if (baginst != NULL && baginst->IsType(ItemClassContainer)) {
+		if (baginst != nullptr && baginst->IsType(ItemClassContainer)) {
 			p = baginst->PopItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
@@ -1063,7 +1063,7 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 void Inventory::dumpInventory() {
 	iter_inst it;
 	iter_contents itb;
-	ItemInst* inst = NULL;
+	ItemInst* inst = nullptr;
 	
 	// Check item: After failed checks, check bag contents (if bag)
 	printf("Worn items:\n");
@@ -1168,15 +1168,15 @@ ItemInst* Inventory::_GetItem(const map<int16, ItemInst*>& bucket, int16 slot_id
 	}
 	
 	// Not found!
-	return NULL;
+	return nullptr;
 }
 
 // Internal Method: "put" item into bucket, without regard for what is currently in bucket
 // Assumes item has already been allocated
 int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 {
-	// If putting a NULL into slot, we need to remove slot without memory delete
-	if (inst == NULL) {
+	// If putting a nullptr into slot, we need to remove slot without memory delete
+	if (inst == nullptr) {
 		//Why do we not delete the poped item here????
 		PopItem(slot_id);
 		return slot_id;
@@ -1232,7 +1232,7 @@ int16 Inventory::_HasItem(map<int16, ItemInst*>& bucket, uint32 item_id, uint8 q
 {
 	iter_inst it;
 	iter_contents itb;
-	ItemInst* inst = NULL;
+	ItemInst* inst = nullptr;
 	uint8 quantity_found = 0;
 	
 	// Check item: After failed checks, check bag contents (if bag)
@@ -1322,7 +1322,7 @@ int16 Inventory::_HasItemByUse(map<int16, ItemInst*>& bucket, uint8 use, uint8 q
 {
 	iter_inst it;
 	iter_contents itb;
-	ItemInst* inst = NULL;
+	ItemInst* inst = nullptr;
 	uint8 quantity_found = 0;
 	
 	// Check item: After failed checks, check bag contents (if bag)
@@ -1390,7 +1390,7 @@ int16 Inventory::_HasItemByLoreGroup(map<int16, ItemInst*>& bucket, uint32 loreg
 {
 	iter_inst it;
 	iter_contents itb;
-	ItemInst* inst = NULL;
+	ItemInst* inst = nullptr;
 		
 	// Check item: After failed checks, check bag contents (if bag)
 	for (it=bucket.begin(); it!=bucket.end(); it++) {
@@ -1690,13 +1690,13 @@ EvoItemInst::EvoItemInst(const EvoItemInst &copy) {
 	iter_contents it;
 	for (it=copy.m_contents.begin(); it!=copy.m_contents.end(); it++) {
 		ItemInst* inst_old = it->second;
-		ItemInst* inst_new = NULL;
+		ItemInst* inst_new = nullptr;
 		
 		if (inst_old) {
 			inst_new = inst_old->Clone();
 		}
 		
-		if (inst_new != NULL) {
+		if (inst_new != nullptr) {
 			m_contents[it->first] = inst_new;
 		}
 	}
@@ -1708,11 +1708,11 @@ EvoItemInst::EvoItemInst(const EvoItemInst &copy) {
 	m_exp = copy.m_exp;
 	m_evolveLvl = copy.m_evolveLvl;
 	m_activated = copy.m_activated;
-	m_evolveInfo = NULL;
+	m_evolveInfo = nullptr;
 	if (copy.m_scaledItem)
 		m_scaledItem = new Item_Struct(*copy.m_scaledItem);
 	else
-		m_scaledItem = NULL;
+		m_scaledItem = nullptr;
 }
 
 EvoItemInst::EvoItemInst(const ItemInst &basecopy) {
@@ -1731,13 +1731,13 @@ EvoItemInst::EvoItemInst(const ItemInst &basecopy) {
 	iter_contents it;
 	for (it=copy->m_contents.begin(); it!=copy->m_contents.end(); it++) {
 		ItemInst* inst_old = it->second;
-		ItemInst* inst_new = NULL;
+		ItemInst* inst_new = nullptr;
 		
 		if (inst_old) {
 			inst_new = inst_old->Clone();
 		}
 		
-		if (inst_new != NULL) {
+		if (inst_new != nullptr) {
 			m_contents[it->first] = inst_new;
 		}
 	}
@@ -1750,8 +1750,8 @@ EvoItemInst::EvoItemInst(const ItemInst &basecopy) {
 	m_exp = 0;
 	m_evolveLvl = 0;
 	m_activated = false;
-	m_evolveInfo = NULL;
-	m_scaledItem = NULL;
+	m_evolveInfo = nullptr;
+	m_scaledItem = nullptr;
 }
 
 EvoItemInst::EvoItemInst(const Item_Struct* item, int16 charges) {
@@ -1770,8 +1770,8 @@ EvoItemInst::EvoItemInst(const Item_Struct* item, int16 charges) {
 	m_exp = 0;
 	m_evolveLvl = 0;
 	m_activated = false;
-	m_evolveInfo = NULL;
-	m_scaledItem = NULL;
+	m_evolveInfo = nullptr;
+	m_scaledItem = nullptr;
 }
 
 EvoItemInst::~EvoItemInst() {

@@ -37,7 +37,7 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 TaskManager::TaskManager() {
 
 	for(int i=0; i<MAXTASKS; i++)
-		Tasks[i] = NULL;
+		Tasks[i] = nullptr;
 
 
 }
@@ -45,7 +45,7 @@ TaskManager::TaskManager() {
 TaskManager::~TaskManager() {
 
 	for(int i=0; i<MAXTASKS; i++) {
-		if(Tasks[i] != NULL) {
+		if(Tasks[i] != nullptr) {
 			for(int j=0; j<Tasks[i]->ActivityCount; j++) {
 				safe_delete_array(Tasks[i]->Activity[j].Text1);
 				safe_delete_array(Tasks[i]->Activity[j].Text2);
@@ -247,7 +247,7 @@ bool TaskManager::LoadTasks(int SingleTask) {
 				LogFile->write(EQEMuLog::Error, ERR_TASK_OR_ACTIVITY_OOR, TaskID, ActivityID);
 				continue;
 			}
-			if(Tasks[TaskID]==NULL) {
+			if(Tasks[TaskID]==nullptr) {
 				LogFile->write(EQEMuLog::Error, ERR_NOTASK, TaskID, ActivityID);
 				continue;
 			}
@@ -259,12 +259,12 @@ bool TaskManager::LoadTasks(int SingleTask) {
 			if(Step >Tasks[TaskID]->LastStep) Tasks[TaskID]->LastStep = Step;
 			
 			// Task Activities MUST be numbered sequentially from 0. If not, log an error
-			// and set the task to NULL. Subsequent activities for this task will raise
+			// and set the task to nullptr. Subsequent activities for this task will raise
 			// ERR_NOTASK errors.
 			// Change to (ActivityID != (Tasks[TaskID]->ActivityCount + 1)) to index from 1
 			if(ActivityID != Tasks[TaskID]->ActivityCount) {
 				LogFile->write(EQEMuLog::Error, ERR_SEQERR, TaskID, ActivityID);
-				Tasks[TaskID] = NULL;
+				Tasks[TaskID] = nullptr;
 				continue;
 			}
 
@@ -438,7 +438,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 
 			_log(TASKS__CLIENTSAVE, "TaskManager::SaveClientState Saving Completed Task at slot %i", i);
 			int TaskID = state->CompletedTasks[i].TaskID;
-			if((TaskID<=0) || (TaskID>=MAXTASKS) || (Tasks[TaskID]==NULL)) continue;
+			if((TaskID<=0) || (TaskID>=MAXTASKS) || (Tasks[TaskID]==nullptr)) continue;
 
 	   		// First we save a record with an ActivityID of -1.
 			// This indicates this task was completed at the given time. We infer that all
@@ -716,7 +716,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 				// If ActivityID is -1, Mark all the non-optional tasks as completed.
 				if(ActivityID < 0) {
 					TaskInformation* Task = Tasks[TaskID];
-					if(Task == NULL) continue;
+					if(Task == nullptr) continue;
 
 					for(int i=0; i<Task->ActivityCount; i++)
 						if(!Task->Activity[i].Optional)
@@ -1050,7 +1050,7 @@ int TaskManager::NextTaskInSet(int TaskSetID, int TaskID) {
 
 bool TaskManager::AppropriateLevel(int TaskID, int PlayerLevel) {
 
-	if(Tasks[TaskID] == NULL) return false;
+	if(Tasks[TaskID] == nullptr) return false;
 
 	if(Tasks[TaskID]->MinLevel && (PlayerLevel < Tasks[TaskID]->MinLevel)) return false;
 
@@ -1155,10 +1155,10 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 	
 	for(int i=0; i<TaskCount; i++) {
 
-		if(Tasks[TaskList[i]] != NULL) break;
+		if(Tasks[TaskList[i]] != nullptr) break;
 	}
 
-	// FIXME: The 10 and 5 values in this calculation are to account for the string "NULL" we are putting in 3 times. 
+	// FIXME: The 10 and 5 values in this calculation are to account for the string "nullptr" we are putting in 3 times. 
 	//
 	// Calculate how big the packet needs to be pased on the number of tasks and the
 	// size of the variable length strings.
@@ -1236,9 +1236,9 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		// FIXME: In live packets, these two strings appear to be the same as the Text1 and Text2
 		// strings from the first activity in the task, however the task chooser/selector
 		// does not appear to make use of them.
-		sprintf(Ptr, "NULL");				
+		sprintf(Ptr, "nullptr");				
 		Ptr = Ptr + strlen(Ptr) + 1;
-		sprintf(Ptr, "NULL");	
+		sprintf(Ptr, "nullptr");	
 		Ptr = Ptr + strlen(Ptr) + 1;
 
 		AvailableTaskTrailer = (AvailableTaskTrailer_Struct*)Ptr;
@@ -1253,7 +1253,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		
 		// In some packets, this next string looks like a short task summary, however it doesn't
 		// appear anywhere in the client window.
-		sprintf(Ptr, "NULL"); 
+		sprintf(Ptr, "nullptr"); 
 		Ptr = Ptr + strlen(Ptr) + 1;
 	}
 
@@ -1273,7 +1273,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 	// Check if any of the  tasks exist
 	for(int i=0; i<TaskCount; i++)
 	{
-		if(Tasks[TaskList[i]] != NULL) break;
+		if(Tasks[TaskList[i]] != nullptr) break;
 	}
 	
 	int PacketLength = 12;	// Header
@@ -1389,7 +1389,7 @@ void TaskManager::ExplainTask(Client*c, int TaskID) {
 		return;
 	}
 
-	if(Tasks[TaskID] == NULL) {
+	if(Tasks[TaskID] == nullptr) {
 		c->Message(0, "Task does not exist.");
 		return;
 	}
@@ -1459,7 +1459,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 
 	TaskInformation* Task = taskmanager->Tasks[ActiveTasks[TaskIndex].TaskID];
 
-	if(Task==NULL) return true;
+	if(Task==nullptr) return true;
 
 	// On loading the client state, all activities that are not completed, are
 	// marked as hidden. For Sequential (non-stepped) mode,  we mark the first
@@ -1508,7 +1508,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 
 			CompletedTaskInformation cti;
 			cti.TaskID = ActiveTasks[TaskIndex].TaskID;
-			cti.CompletedTime = time(NULL);
+			cti.CompletedTime = time(nullptr);
 
 			for(int i=0; i<Task->ActivityCount; i++)
 				cti.ActivityDone[i] = (ActiveTasks[TaskIndex].Activity[i].State == ActivityCompleted);
@@ -1580,7 +1580,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 			}
 			CompletedTaskInformation cti;
 			cti.TaskID = ActiveTasks[TaskIndex].TaskID;
-			cti.CompletedTime = time(NULL);
+			cti.CompletedTime = time(nullptr);
 
 			for(int i=0; i<Task->ActivityCount; i++)
 				cti.ActivityDone[i] = (ActiveTasks[TaskIndex].Activity[i].State == ActivityCompleted);
@@ -1634,7 +1634,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeI
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
-		if(Task == NULL) return false;
+		if(Task == nullptr) return false;
 
 		for(int j=0; j<Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
@@ -1685,7 +1685,7 @@ int ClientTaskState::ActiveSpeakTask(int NPCTypeID) {
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
-		if(Task == NULL) continue;
+		if(Task == nullptr) continue;
 
 		for(int j=0; j<Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
@@ -1716,7 +1716,7 @@ int ClientTaskState::ActiveSpeakActivity(int NPCTypeID, int TaskID) {
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
-		if(Task == NULL) continue;
+		if(Task == nullptr) continue;
 
 		for(int j=0; j<Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
@@ -1754,7 +1754,7 @@ void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemI
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
-		if(Task == NULL) return;
+		if(Task == nullptr) return;
 
 		for(int j=0; j<Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
@@ -1806,7 +1806,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
-		if(Task == NULL) return;
+		if(Task == nullptr) return;
 
 		for(int j=0; j<Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
@@ -1861,7 +1861,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
-		if(Task == NULL) return false;
+		if(Task == nullptr) return false;
 
 		for(int j=0; j<Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
@@ -1929,7 +1929,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID) {
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
-		if(Task == NULL) return;
+		if(Task == nullptr) return;
 
 		for(int j=0; j<Task->ActivityCount; j++) {
 			// We are not interested in completed or hidden activities
@@ -2179,7 +2179,7 @@ bool ClientTaskState::IsTaskActivityActive(int TaskID, int ActivityID) {
 	TaskInformation* Task = taskmanager->Tasks[ActiveTasks[ActiveTaskIndex].TaskID];
 
 	// The task is invalid
-	if(Task==NULL) return false;
+	if(Task==nullptr) return false;
 
 	// The ActivityID is out of range
 	if(ActivityID >= Task->ActivityCount) return false;
@@ -2214,7 +2214,7 @@ void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, 
 	TaskInformation* Task = taskmanager->Tasks[ActiveTasks[ActiveTaskIndex].TaskID];
 
 	// The task is invalid
-	if(Task==NULL) return;
+	if(Task==nullptr) return;
 
 	// The ActivityID is out of range
 	if(ActivityID >= Task->ActivityCount) return;
@@ -2248,7 +2248,7 @@ void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID) {
 	TaskInformation* Task = taskmanager->Tasks[ActiveTasks[ActiveTaskIndex].TaskID];
 
 	// The task is invalid
-	if(Task==NULL) return;
+	if(Task==nullptr) return;
 
 	// The ActivityID is out of range
 	if(ActivityID >= Task->ActivityCount) return;
@@ -2295,11 +2295,11 @@ int ClientTaskState::TaskTimeLeft(int TaskID) {
 
 		if(ActiveTasks[i].TaskID != TaskID) continue;
 
-		int Now = time(NULL);
+		int Now = time(nullptr);
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
-		if(Task == NULL) return -1;
+		if(Task == nullptr) return -1;
 
 		if(!Task->Duration) return -1;
 
@@ -2335,7 +2335,7 @@ bool  TaskManager::IsTaskRepeatable(int TaskID) {
 
 	TaskInformation* Task = taskmanager->Tasks[TaskID];
 
-	if(Task == NULL) return false;
+	if(Task == nullptr) return false;
 
 	return Task->Repeatable;
 }
@@ -2348,11 +2348,11 @@ bool ClientTaskState::TaskOutOfTime(int Index) {
 
 	if((ActiveTasks[Index].TaskID <= 0) || (ActiveTasks[Index].TaskID >= MAXTASKS)) return false;
 
-	int Now = time(NULL);
+	int Now = time(nullptr);
 
 	TaskInformation* Task = taskmanager->Tasks[ActiveTasks[Index].TaskID];
 
-	if(Task == NULL) return false;
+	if(Task == nullptr) return false;
 
 	return (Task->Duration && (ActiveTasks[Index].AcceptedTime + Task->Duration <= Now));
 
@@ -2441,7 +2441,7 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 
 	TaskInformation* Task = taskmanager->Tasks[TaskID];
 
-	if(Task == NULL) return;
+	if(Task == nullptr) return;
 
 	TaskHistoryReplyHeader_Struct* ths;
 	TaskHistoryReplyData1_Struct* thd1;
@@ -2585,13 +2585,13 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 	/*
 	for(iterator=State->CompletedTasks.begin(); iterator!=State->CompletedTasks.end(); iterator++) {
 		int TaskID = (*iterator).TaskID;
-		if(Tasks[TaskID] == NULL) continue;
+		if(Tasks[TaskID] == nullptr) continue;
 		PacketLength = PacketLength + 8 + strlen(Tasks[TaskID]->Title) + 1;
 	}
 	*/
 	for(int i = FirstTaskToSend; i<LastTaskToSend; i++) {
 		int TaskID = State->CompletedTasks[i].TaskID;
-		if(Tasks[TaskID] == NULL) continue;
+		if(Tasks[TaskID] == nullptr) continue;
 		PacketLength = PacketLength + 8 + strlen(Tasks[TaskID]->Title) + 1;
 	}
 
@@ -2605,7 +2605,7 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 	//	int TaskID = (*iterator).TaskID;
 	for(int i = FirstTaskToSend; i<LastTaskToSend; i++) {
 		int TaskID = State->CompletedTasks[i].TaskID;
-		if(Tasks[TaskID] == NULL) continue;
+		if(Tasks[TaskID] == nullptr) continue;
 		*(uint32 *)buf = TaskID;
 		buf = buf + 4;
 
@@ -3184,7 +3184,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 
 	}
 
-	if(taskmanager->Tasks[TaskID] == NULL) {
+	if(taskmanager->Tasks[TaskID] == nullptr) {
 		c->Message(13, "Invalid TaskID %i", TaskID);
 		return;
 	}
@@ -3226,7 +3226,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 	
 
 	ActiveTasks[FreeSlot].TaskID = TaskID;
-	ActiveTasks[FreeSlot].AcceptedTime = time(NULL);
+	ActiveTasks[FreeSlot].AcceptedTime = time(nullptr);
 	ActiveTasks[FreeSlot].Updated = true;
 	ActiveTasks[FreeSlot].CurrentStep = -1;
 	
@@ -3280,7 +3280,7 @@ void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float 
 
 TaskGoalListManager::TaskGoalListManager() {
 
-	TaskGoalLists = NULL;
+	TaskGoalLists = nullptr;
 	NumberOfLists = 0;
 
 }

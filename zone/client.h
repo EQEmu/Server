@@ -238,7 +238,7 @@ public:
 	void	TradeRequestFailed(const EQApplicationPacket* app);
 	void	BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
 	void	TraderUpdate(uint16 slot_id,uint32 trader_id);
-	void	FinishTrade(Mob* with, ServerPacket* qspack = NULL, bool finalizer = false);
+	void	FinishTrade(Mob* with, ServerPacket* qspack = nullptr, bool finalizer = false);
 	void    SendZonePoints();
 
 	void	SendBuyerResults(char *SearchQuery, uint32 SearchID);
@@ -256,7 +256,7 @@ public:
 	void	SendPacketQueue(bool Block = true);
 	void	QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter=FilterNone);
 	void	FastQueuePacket(EQApplicationPacket** app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL);
-	void	ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname=NULL);
+	void	ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname=nullptr);
 	void	ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message, ...);
 	void	ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
 	void	Message(uint32 type, const char* message, ...);
@@ -355,7 +355,7 @@ public:
 
 	inline uint8	GetLanguageSkill(uint16 n)	const { return m_pp.languages[n]; }
 
-	void	SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_Struct* item = NULL);
+	void	SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_Struct* item = nullptr);
 
 	inline const char*	GetLastName() const	{ return lastname; }
 
@@ -879,7 +879,7 @@ public:
 	inline bool SaveTaskState()
 		    { return (taskmanager ? taskmanager->SaveClientState(this, taskstate) : false); }
 
-	inline bool IsTaskStateLoaded() { return taskstate != NULL; }
+	inline bool IsTaskStateLoaded() { return taskstate != nullptr; }
 
 	inline bool IsTaskActive(int TaskID)
 		    { return (taskstate ? taskstate->IsTaskActive(TaskID) : false); }
@@ -990,19 +990,19 @@ public:
 	void AdventureFinish(bool win, int theme, int points);
 	void SetAdventureData(char *data) { adv_data = data; }
 	void ClearAdventureData() { safe_delete(adv_data); }
-	bool HasAdventureData() { return adv_data != NULL; }
+	bool HasAdventureData() { return adv_data != nullptr; }
 	void ClearCurrentAdventure();
 	void PendingAdventureRequest() { adventure_request_timer = new Timer(8000); }
-	bool GetPendingAdventureRequest() const { return (adventure_request_timer != NULL); }
+	bool GetPendingAdventureRequest() const { return (adventure_request_timer != nullptr); }
 	void ClearPendingAdventureRequest() { safe_delete(adventure_request_timer); }
 	void PendingAdventureCreate() { adventure_create_timer = new Timer(8000); }
-	bool GetPendingAdventureCreate() const { return (adventure_create_timer != NULL); }
+	bool GetPendingAdventureCreate() const { return (adventure_create_timer != nullptr); }
 	void ClearPendingAdventureCreate() { safe_delete(adventure_create_timer); }
 	void PendingAdventureLeave() { adventure_leave_timer = new Timer(8000); }
-	bool GetPendingAdventureLeave() const { return (adventure_leave_timer != NULL); }
+	bool GetPendingAdventureLeave() const { return (adventure_leave_timer != nullptr); }
 	void ClearPendingAdventureLeave() { safe_delete(adventure_leave_timer); }
 	void PendingAdventureDoorClick() { adventure_door_timer = new Timer(8000); }
-	bool GetPendingAdventureDoorClick() const { return (adventure_door_timer != NULL); }
+	bool GetPendingAdventureDoorClick() const { return (adventure_door_timer != nullptr); }
 	void ClearPendingAdventureDoorClick() { safe_delete(adventure_door_timer); }
 	void ClearPendingAdventureData();
 
@@ -1090,11 +1090,12 @@ public:
 	bool IsXTarget(const Mob *m) const;
 	bool IsClientXTarget(const Client *c) const;
 	void UpdateClientXTarget(Client *c);
-	void UpdateXTargetType(XTargetType Type, Mob *m, const char *Name = NULL);
+	void UpdateXTargetType(XTargetType Type, Mob *m, const char *Name = nullptr);
 	void AddAutoXTarget(Mob *m);
 	void RemoveXTarget(Mob *m, bool OnlyAutoSlots);
 	void SendXTargetPacket(uint32 Slot, Mob *m);
 	void RemoveGroupXTargets();
+	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);
 	void InitializeMercInfo();
 	bool CheckCanHireMerc(Mob* merchant, uint32 template_id);

@@ -71,7 +71,7 @@ public:
 	}
 	
 	T * NewQueuePop() {
-		T * ret = NULL;
+		T * ret = nullptr;
 		MNewQueue.lock();
 		if(!m_NewQueue.empty()) {
 			ret = m_NewQueue.front();

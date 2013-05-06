@@ -54,7 +54,7 @@ ServerManager::~ServerManager()
 void ServerManager::Process()
 {
 	ProcessDisconnect();
-	EmuTCPConnection *tcp_c = NULL;
+	EmuTCPConnection *tcp_c = nullptr;
 	while(tcp_c = tcps->NewQueuePop())
 	{
 		in_addr tmp;
@@ -126,7 +126,7 @@ WorldServer* ServerManager::GetServerByAddress(unsigned int address)
 		iter++;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)

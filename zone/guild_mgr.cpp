@@ -26,49 +26,49 @@
 /*
 
 CREATE TABLE guilds (
-	id MEDIUMINT UNSIGNED NOT NULL,
-	name VARCHAR(32) NOT NULL,
-	leader int NOT NULL,
-	minstatus SMALLINT NOT NULL,
-	tribute INT UNSIGNED NOT NULL,
-	motd TEXT NOT NULL DEFAULT '',
+	id MEDIUMINT UNSIGNED NOT nullptr,
+	name VARCHAR(32) NOT nullptr,
+	leader int NOT nullptr,
+	minstatus SMALLINT NOT nullptr,
+	tribute INT UNSIGNED NOT nullptr,
+	motd TEXT NOT nullptr DEFAULT '',
 	PRIMARY KEY(id),
 	UNIQUE KEY(name),
 	UNIQUE KEY(leader)
 );
 
 CREATE TABLE guild_ranks (
-	guild_id MEDIUMINT UNSIGNED NOT NULL,
-	rank TINYINT UNSIGNED NOT NULL,
-	title VARCHAR(128) NOT NULL,
-	can_hear TINYINT UNSIGNED NOT NULL,
-	can_speak TINYINT UNSIGNED NOT NULL,
-	can_invite TINYINT UNSIGNED NOT NULL,
-	can_remove TINYINT UNSIGNED NOT NULL,
-	can_promote TINYINT UNSIGNED NOT NULL,
-	can_demote TINYINT UNSIGNED NOT NULL,
-	can_motd TINYINT UNSIGNED NOT NULL,
-	can_warpeace TINYINT UNSIGNED NOT NULL,
+	guild_id MEDIUMINT UNSIGNED NOT nullptr,
+	rank TINYINT UNSIGNED NOT nullptr,
+	title VARCHAR(128) NOT nullptr,
+	can_hear TINYINT UNSIGNED NOT nullptr,
+	can_speak TINYINT UNSIGNED NOT nullptr,
+	can_invite TINYINT UNSIGNED NOT nullptr,
+	can_remove TINYINT UNSIGNED NOT nullptr,
+	can_promote TINYINT UNSIGNED NOT nullptr,
+	can_demote TINYINT UNSIGNED NOT nullptr,
+	can_motd TINYINT UNSIGNED NOT nullptr,
+	can_warpeace TINYINT UNSIGNED NOT nullptr,
 	PRIMARY KEY(guild_id,rank)
 );
 
 # guild1 < guild2 by definition.
 CREATE TABLE guild_relations (
-	guild1 MEDIUMINT UNSIGNED NOT NULL,
-	guild2 MEDIUMINT UNSIGNED NOT NULL,
-	relation TINYINT NOT NULL,
+	guild1 MEDIUMINT UNSIGNED NOT nullptr,
+	guild2 MEDIUMINT UNSIGNED NOT nullptr,
+	relation TINYINT NOT nullptr,
 	PRIMARY KEY(guild1, guild1)
 );
 
 CREATE TABLE guild_members (
-	char_id INT NOT NULL,
-	guild_id MEDIUMINT UNSIGNED NOT NULL,
-	rank TINYINT UNSIGNED NOT NULL,
-	tribute_enable TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	total_tribute INT UNSIGNED NOT NULL DEFAULT 0,
-	last_tribute INT UNSIGNED NOT NULL DEFAULT 0,
-	banker TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	public_note TEXT NOT NULL DEFAULT '',
+	char_id INT NOT nullptr,
+	guild_id MEDIUMINT UNSIGNED NOT nullptr,
+	rank TINYINT UNSIGNED NOT nullptr,
+	tribute_enable TINYINT UNSIGNED NOT nullptr DEFAULT 0,
+	total_tribute INT UNSIGNED NOT nullptr DEFAULT 0,
+	last_tribute INT UNSIGNED NOT nullptr DEFAULT 0,
+	banker TINYINT UNSIGNED NOT nullptr DEFAULT 0,
+	public_note TEXT NOT nullptr DEFAULT '',
 	PRIMARY KEY(char_id)
 );
 
@@ -166,7 +166,7 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 	
 	vector<CharGuildInfo *> members;
 	if(!GetEntireGuild(guild_id, members))
-		return(NULL);
+		return(nullptr);
 	
 	//figure out the actual packet length.
 	uint32 fixed_length = sizeof(Internal_GuildMembers_Struct) + members.size()*sizeof(Internal_GuildMemberEntry_Struct);
@@ -357,14 +357,14 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		
 		Client *c = entity_list.GetClientByCharID(s->char_id);
 		
-		if(c != NULL) {
+		if(c != nullptr) {
 			//this reloads the char's guild info from the database and sends appearance updates
 			c->RefreshGuildInfo();
 		}
 		
 		//it would be nice if we had the packet to send just a one-person update
 		if(s->guild_id == GUILD_NONE) {
-			if(c != NULL)
+			if(c != nullptr)
 				c->SendGuildMembers();	//only need to update this player's list (trying to clear it)
 		} else {
 			entity_list.SendGuildMembers(s->guild_id);		//even send GUILD_NONE (empty)
@@ -372,7 +372,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		
 		if(s->old_guild_id != 0 && s->old_guild_id != GUILD_NONE && s->old_guild_id != s->guild_id)
 			entity_list.SendGuildMembers(s->old_guild_id);
-		else if(c != NULL && s->guild_id != GUILD_NONE) {
+		else if(c != nullptr && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
 		}
@@ -403,7 +403,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			strn0cpy(gsrs->MemberName, sgrus->MemberName, sizeof(gsrs->MemberName));
 			gsrs->Banker = sgrus->Banker;
 
-			entity_list.QueueClientsGuild(NULL, outapp, false, sgrus->GuildID);
+			entity_list.QueueClientsGuild(nullptr, outapp, false, sgrus->GuildID);
 
 			safe_delete(outapp);
 		}
@@ -449,7 +449,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			gmus->InstanceID = 0;	// I don't think we care what Instance they are in, for the Guild Management Window.
 			gmus->LastSeen = sgmus->LastSeen;
 
-			entity_list.QueueClientsGuild(NULL, outapp, false, sgmus->GuildID);
+			entity_list.QueueClientsGuild(nullptr, outapp, false, sgmus->GuildID);
 
 			safe_delete(outapp);
 		}
@@ -473,7 +473,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
 			GuildMemberUpdate_Struct *gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
 			char Name[64];
-			gmus->LastSeen = time(NULL);
+			gmus->LastSeen = time(nullptr);
 			gmus->InstanceID = 0;
 			gmus->GuildID = c->GuildID();
 			for (int i=0;i<Count;i++)
@@ -526,7 +526,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			gts->Toggle = Toggle;
 			gts->TimePosted = TimePosted;
 			gts->Name[0] = 0;
-			entity_list.QueueClientsGuild(NULL, outapp, false, GuildID);
+			entity_list.QueueClientsGuild(nullptr, outapp, false, GuildID);
 			safe_delete(outapp);
 			break;
 		}
@@ -850,7 +850,7 @@ bool GuildBankManager::IsAreaFull(uint32 GuildID, uint16 Area)
 	if(Iterator == Banks.end())
 		return true;
 
-	GuildBankItem* BankArea = NULL;
+	GuildBankItem* BankArea = nullptr;
 
 	int AreaSize = 0;
 
@@ -885,7 +885,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 		return false;
 	}
 
-	GuildBankItem* BankArea = NULL;
+	GuildBankItem* BankArea = nullptr;
 
 	int AreaSize = 0;
 
@@ -1131,21 +1131,21 @@ ItemInst*  GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID,
 	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
 
 	if(Iterator == Banks.end())
-		return NULL;
+		return nullptr;
 
-	GuildBankItem* BankArea = NULL;
+	GuildBankItem* BankArea = nullptr;
 
-	ItemInst* inst = NULL;
+	ItemInst* inst = nullptr;
 
 	if(Area == GuildBankDepositArea)
 	{
 		if((SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
-			return NULL;
+			return nullptr;
 
 		inst = database.CreateItem((*Iterator)->Items.DepositArea[SlotID].ItemID);
 
 		if(!inst)
-			return NULL;
+			return nullptr;
 
 		BankArea = &(*Iterator)->Items.DepositArea[0];
 	}
@@ -1153,12 +1153,12 @@ ItemInst*  GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID,
 	{
 
 		if((SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
-			return NULL;
+			return nullptr;
 
 		inst = database.CreateItem((*Iterator)->Items.MainArea[SlotID].ItemID);
 
 		if(!inst)
-			return NULL;
+			return nullptr;
 
 		BankArea = &(*Iterator)->Items.MainArea[0];
 	}
@@ -1220,7 +1220,7 @@ bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, ui
 
 	char* query = 0;
 
-	GuildBankItem* BankArea = NULL;
+	GuildBankItem* BankArea = nullptr;
 
 	if(Area == GuildBankMainArea)
 	{

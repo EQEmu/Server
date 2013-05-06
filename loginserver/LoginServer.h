@@ -40,9 +40,9 @@ public:
 	 * but it's the most trivial way to do this.
 	 */
 #ifdef WIN32
-	LoginServer() : config(NULL), db(NULL), eq_crypto(NULL), SM(NULL) { }
+	LoginServer() : config(nullptr), db(nullptr), eq_crypto(nullptr), SM(nullptr) { }
 #else
-	LoginServer() : config(NULL), db(NULL) { }
+	LoginServer() : config(nullptr), db(nullptr) { }
 #endif
 
 	Config *config;
