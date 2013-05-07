@@ -251,6 +251,9 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 	
 	//figure out what its worth
 	int32 pts = inst->GetItem()->Favor;
+
+	pts = mod_tribute_item_value(pts);
+
 	if(pts < 1) {
 		Message(13, "This item is worthless for favor.");
 		return(0);

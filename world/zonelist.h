@@ -56,7 +56,8 @@ public:
 
 	int GetZoneCount();
 	void GetZoneIDList(std::vector<uint32> &zones);
-	
+	void WorldShutDown(uint32 time, uint32 interval);
+
 protected:
 	uint32 NextID;
 	LinkedList<ZoneServer*> list;

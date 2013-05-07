@@ -1102,3 +1102,7 @@ bool IsShortDurationBuff(uint16 spell_id)
 	return false;
 }
 
+const char* GetSpellName(int16 spell_id)
+{
+    return( spells[spell_id].name );
+}

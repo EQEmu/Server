@@ -3909,8 +3909,8 @@ XS(XS_Mob_CastSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastSpell)
 {
 	dXSARGS;
-	if (items < 3 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::CastSpell(THIS, spell_id, target_id, slot= 10, casttime= -1, mana_cost= -1)");
+	if (items < 3 || items > 7)
+		Perl_croak(aTHX_ "Usage: Mob::CastSpell(THIS, spell_id, target_id, slot= 10, casttime= -1, mana_cost= -1, resist_adjust = 0)");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
@@ -3918,6 +3918,7 @@ XS(XS_Mob_CastSpell)
 		uint16		slot;
 		int32		casttime;
 		int32		mana_cost;
+		int16		resist_adjust;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -3946,7 +3947,16 @@ XS(XS_Mob_CastSpell)
 			mana_cost = (int32)SvIV(ST(5));
 		}
 
-		THIS->CastSpell(spell_id, target_id, slot, casttime, mana_cost);
+        if(items < 7)
+        {
+            resist_adjust = 0;
+        }
+        else
+        {
+            resist_adjust = (int16)SvIV(ST(6));
+        }
+
+		THIS->CastSpell(spell_id, target_id, slot, casttime, mana_cost, 0, 0xFFFFFFFF, 0xFFFFFFFF, 0, 0, &resist_adjust);
 	}
 	XSRETURN_EMPTY;
 }
@@ -3955,13 +3965,14 @@ XS(XS_Mob_SpellFinished); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SpellFinished)
 {
 	dXSARGS;
-	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SpellFinished(spell_id, spell_target = this, mana_cost = 0)");
+	if (items < 2 || items > 5)
+		Perl_croak(aTHX_ "Usage: Mob::SpellFinished(spell_id, spell_target = this, mana_cost = 0, resist_diff = 0)");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
 		Mob *		spell_target;
 		uint16		mana_cost = 0;
+		int16		resist_diff;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -3990,7 +4001,16 @@ XS(XS_Mob_SpellFinished)
 		if (items > 3)
 			mana_cost = (uint16)SvUV(ST(3));
 
-		THIS->SpellFinished(spell_id, spell_target, 10, mana_cost, -1, spells[spell_id].ResistDiff);
+        if (items > 4)
+        {
+            resist_diff = (int16)SvUV(ST(4));
+        }
+        else
+        {
+            resist_diff = spells[spell_id].ResistDiff;
+        }
+
+		THIS->SpellFinished(spell_id, spell_target, 10, mana_cost, -1, resist_diff);
 	}
 	XSRETURN_EMPTY;
 }

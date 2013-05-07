@@ -48,6 +48,8 @@ int Mob::GetKickDamage() {
 	int32 mindmg = 1;
 	ApplySpecialAttackMod(KICK, dmg,mindmg);
 
+	dmg = mod_kick_damage(dmg);
+
 	return(dmg);
 }
 
@@ -66,6 +68,8 @@ int Mob::GetBashDamage() {
 
 	int32 mindmg = 1;
 	ApplySpecialAttackMod(BASH, dmg, mindmg);
+
+	dmg = mod_bash_damage(dmg);
 
 	return(dmg);
 }
@@ -281,6 +285,8 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 		int32 min_dmg = 0;
 		DoAnim(anim2HSlashing); 
 
+		max_dmg = mod_frenzy_damage(max_dmg);
+
 		if (GetLevel() < 51)
 			min_dmg = 1;
 		else
@@ -490,7 +496,10 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 			ht = max_dmg;
 		}
 	}
-	
+
+	//This can potentially stack with changes to kick damage
+	ht = ndamage = mod_monk_special_damage(ndamage, skill_type);
+
 	DoSpecialAttackDamage(other, skill_type, ndamage, min_dmg, ht, reuse);
 
 	return(reuse);
@@ -662,6 +671,8 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	else{
 		ndamage = -5;
 	}
+
+	ndamage = mod_backstab_damage(ndamage);
 
 	DoSpecialAttackDamage(other, BACKSTAB, ndamage, min_hit, hate, ReuseTime);
 	DoAnim(animPiercing);
@@ -879,22 +890,34 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 				
 				mlog(COMBAT__RANGED, "Bow DMG %d, Arrow DMG %d, Max Damage %d.", WDmg, ADmg, MaxDmg);
 
+				bool dobonus = false;
 				if(GetClass() == RANGER && GetLevel() > 50)
 				{
-					if(RuleB(Combat, ArcheryBonusRequiresStationary))
+					int bonuschance = RuleI(Combat, ArcheryBonusChance);
+
+					bonuschance = mod_archery_bonus_chance(bonuschance, RangeWeapon);
+
+					if( !RuleB(Combat, UseArcheryBonusRoll) || (MakeRandomInt(1, 100) < bonuschance) )
 					{
-						if(other->IsNPC() && !other->IsMoving() && !other->IsRooted())
+						if(RuleB(Combat, ArcheryBonusRequiresStationary))
 						{
-							MaxDmg *= (float)2;
-							hate *= (float)2;
-							mlog(COMBAT__RANGED, "Ranger. Double damage success roll, doubling damage to %d", MaxDmg);
-							Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
+							if(other->IsNPC() && !other->IsMoving() && !other->IsRooted())
+							{
+								dobonus = true;
+							}
+						}
+						else
+						{
+							dobonus = true;
 						}
 					}
-					else
+
+					if(dobonus)
 					{
 						MaxDmg *= (float)2;
 						hate *= (float)2;
+						MaxDmg = mod_archery_bonus_damage(MaxDmg);
+
 						mlog(COMBAT__RANGED, "Ranger. Double damage success roll, doubling damage to %d", MaxDmg);
 						Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
 					}
@@ -925,6 +948,9 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					ApplyMeleeDamageBonus(ARCHERY, TotalDmg);
 					TotalDmg += other->GetAdditionalDamage(this, 0, true, ARCHERY);
 					TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(ARCHERY) / 100) + GetSkillDmgAmt(ARCHERY);
+
+					TotalDmg = mod_archery_damage(TotalDmg, dobonus);
+
 					TryCriticalHit(other, ARCHERY, TotalDmg);
 					other->AddToHateList(this, hate, 0, false);
 				}
@@ -941,6 +967,12 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 	{
 		TryWeaponProc(RangeWeapon, other, 11);
 	}
+
+	//Arrow procs because why not?
+    if((Ammo != NULL) && GetTarget() && other && (other->GetHP() > -10))
+    {
+        TryWeaponProc(Ammo, other, 11);
+    }
 }
 
 void NPC::RangedAttack(Mob* other) 
@@ -1087,6 +1119,8 @@ uint16 Mob::GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg)
 		
 	if(MaxDmg < minDmg)
 		MaxDmg = minDmg;
+
+	MaxDmg = mod_throwing_damage(MaxDmg);
 
 	return MaxDmg;
 }
