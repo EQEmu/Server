@@ -2432,12 +2432,20 @@ int NPC::GetScore()
 
     if(lv < 46)
     {
-        minx = ceil( ((lv - (lv / 10)) - 1) );
+#if _MSC_VER==1600
+		minx = ceil((float) ((lv - (lv / 10)) - 1) );
+#else
+		minx = ceil( ((lv - (lv / 10)) - 1) );
+#endif
         basehp = (lv * 10) + (lv * lv);
     }
     else
     {
-        minx = ceil( ((lv - (lv / 10)) - 1) - (( abs(45 - lv) ) / 2) );
+#if _MSC_VER==1600
+		minx = ceil((float) ((lv - (lv / 10)) - 1) - (( abs(45 - lv) ) / 2) );
+#else
+		minx = ceil( ((lv - (lv / 10)) - 1) - (( abs(45 - lv) ) / 2) );
+#endif
         basehp = (lv * 10) + ((lv * lv) * 4);
     }
 
@@ -2463,10 +2471,17 @@ int NPC::GetScore()
     }
 
     if(npc_spells_id > 12)
+#if _MSC_VER==1600
     {
+        if(lv < 16) { spccontrib++; }
+        else { spccontrib += (int)floor((float) lv/15); }
+    }
+#else
+	{
         if(lv < 16) { spccontrib++; }
         else { spccontrib += (int)floor(lv/15); }
     }
+#endif
 
     final = minx + hpcontrib + dmgcontrib + spccontrib;
     final = max(1, final);
