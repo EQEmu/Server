@@ -84,11 +84,11 @@ typedef enum {	//focus types
 
 /*
 Used:
-b,d,f,g,j,m,n,o,p,r,t
+b,d,e,f,g,j,m,n,o,p,r,t
 A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,Q,R,S,T,U,W,Y
 
 Unused:
-a,c,e,h,k,l,q,s,u,v,w,x,y,z
+a,c,h,k,l,q,s,u,v,w,x,y,z
 P,V,X
 */
 
@@ -96,6 +96,7 @@ enum {
 	SPECATK_NONE = 0,
 	SPECATK_SUMMON,				// S
 	SPECATK_ENRAGE,				// E
+	SPECATK_INFURIATE,			// e
 	SPECATK_RAMPAGE,			// R
 	SPECATK_AREA_RAMPAGE,		// r
 	SPECATK_FLURRY,				// F

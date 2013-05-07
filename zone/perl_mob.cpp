@@ -5010,6 +5010,32 @@ XS(XS_Mob_IsEnraged)
 	XSRETURN(1);
 }
 
+XS(XS_Mob_IsInfuriated); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_IsInfuriated)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::IsInfuriated(THIS)");
+	{
+		Mob *		THIS;
+		bool		RETVAL;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		RETVAL = THIS->IsInfuriated();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Mob_GetReverseFactionCon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetReverseFactionCon)
 {
@@ -8267,6 +8293,7 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "IsStunned"), XS_Mob_IsStunned, file, "$");
 		newXSproto(strcpy(buf, "StartEnrage"), XS_Mob_StartEnrage, file, "$");
 		newXSproto(strcpy(buf, "IsEnraged"), XS_Mob_IsEnraged, file, "$");
+		newXSproto(strcpy(buf, "IsInfuriated"), XS_Mob_IsInfuriated, file, "$");
 		newXSproto(strcpy(buf, "GetReverseFactionCon"), XS_Mob_GetReverseFactionCon, file, "$$");
 		newXSproto(strcpy(buf, "IsAIControlled"), XS_Mob_IsAIControlled, file, "$");
 		newXSproto(strcpy(buf, "GetAggroRange"), XS_Mob_GetAggroRange, file, "$");

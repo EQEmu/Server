@@ -1862,12 +1862,12 @@ bool NPC::AI_IdleCastCheck() {
 void Mob::StartEnrage()
 {
     // dont continue if already enraged
-    if (bEnraged)
+    if (bEnraged || bInfuriated)
         return;
     if (SpecAttackTimers[SPECATK_ENRAGE] && !SpecAttackTimers[SPECATK_ENRAGE]->Check())
         return;
     // see if NPC has possibility to enrage
-    if (!SpecAttacks[SPECATK_ENRAGE])
+    if (!SpecAttacks[SPECATK_ENRAGE] && !SpecAttacks[SPECATK_INFURIATE])
         return;
     // check if timer exists (should be true at all times)
     if (SpecAttackTimers[SPECATK_ENRAGE])
@@ -1882,16 +1882,25 @@ void Mob::StartEnrage()
     }
     // start the timer. need to call IsEnraged frequently since we dont have callback timers :-/
     SpecAttackTimers[SPECATK_ENRAGE]->Start();
-    bEnraged = true;
-	entity_list.MessageClose_StringID(this, true, 200, MT_NPCEnrage, NPC_ENRAGE_START, GetCleanName());
+	if (SpecAttacks[SPECATK_ENRAGE]) {
+	    bEnraged = true;
+		entity_list.MessageClose_StringID(this, true, 200, MT_NPCEnrage, NPC_ENRAGE_START, GetCleanName());
+	} else if (SpecAttacks[SPECATK_INFURIATE]) {
+		bInfuriated = true;
+		entity_list.MessageClose(this, true, 200, MT_NPCEnrage, "%1 is infuriated.", GetCleanName());
+	}
 }
 
 void Mob::ProcessEnrage(){
-	if(IsEnraged()){
+	if(IsEnraged() || IsInfuriated()){
 		if(SpecAttackTimers[SPECATK_ENRAGE] && SpecAttackTimers[SPECATK_ENRAGE]->Check()){
-			entity_list.MessageClose_StringID(this, true, 200, MT_NPCEnrage, NPC_ENRAGE_END, GetCleanName());
 			SpecAttackTimers[SPECATK_ENRAGE]->Start(EnragedTimer);
-			bEnraged = false;
+			if(IsEnraged()) {
+				entity_list.MessageClose_StringID(this, true, 200, MT_NPCEnrage, NPC_ENRAGE_END, GetCleanName());
+				bEnraged = false;
+			} else if(IsInfuriated()) {
+				entity_list.MessageClose(this, true, 200, MT_NPCEnrage,"%1 is no longer infuriated.", GetCleanName());
+				bInfuriated = false;			}
 		}
 	}
 }
@@ -1899,6 +1908,11 @@ void Mob::ProcessEnrage(){
 bool Mob::IsEnraged() 
 {
     return bEnraged;
+}
+
+bool Mob::IsInfuriated()
+{
+    return bInfuriated;
 }
 
 bool Mob::Flurry()
