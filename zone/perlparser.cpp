@@ -3500,6 +3500,38 @@ XS(XS__crosszonemessageplayerbyname)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__GetSpellName);
+XS(XS__GetSpellName)
+{
+    dXSARGS;
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: GetSpellName(spell_id)");
+
+	int32		spell_id = (int32)SvUV(ST(0));
+    dXSTARG;
+
+    Const_char * RETVAL = GetSpellName(spell_id);
+
+    sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
+    XSRETURN(1);
+}
+
+XS(XS__GetMana);
+XS(XS__GetMana)
+{
+    dXSARGS;
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: GetMana(spell_id)");
+
+    uint32 spell_id = (uint32)SvIV(ST(0));
+
+    uint16      manacost = 0;
+    dXSTARG;
+
+    manacost = quest_manager.GetMana(spell_id);
+    XSRETURN_UV(manacost);
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -3722,6 +3754,8 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 		newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
+		newXS(strcpy(buf, "GetSpellName"), XS__GetSpellName, file);
+        newXS(strcpy(buf, "GetMana"), XS__GetMana, file);
 	XSRETURN_YES;
 }
 

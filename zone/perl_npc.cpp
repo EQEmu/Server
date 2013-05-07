@@ -143,7 +143,17 @@ XS(XS_NPC_AddLootTable)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->AddLootTable();
+		uint32 loottable_id = 0;
+
+		if(items > 1)
+		{
+			loottable_id = (uint32)SvUV(ST(1));
+			THIS->AddLootTable(loottable_id);
+		}
+		else
+		{
+			THIS->AddLootTable();
+		}
 	}
 	XSRETURN_EMPTY;
 }
@@ -2075,6 +2085,57 @@ XS(XS_NPC_GetAccuracyRating)
 	XSRETURN(1);
 }
 
+XS(XS_NPC_GetSpawnKillCount); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_GetSpawnKillCount)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::GetSpawnKillCount(THIS)");
+	{
+		NPC *		THIS;
+		uint32		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		RETVAL = THIS->GetSpawnKillCount();
+		XSprePUSH; PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_NPC_GetScore); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_GetScore)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::GetScore(THIS)");
+	{
+		NPC *		THIS;
+		int	        RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		RETVAL = THIS->GetScore();
+		XSprePUSH; PUSHi((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
 
 #ifdef __cplusplus
 extern "C"
@@ -2174,6 +2235,8 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "GetSlowMitigation"), XS_NPC_GetAttackSpeed, file, "$");
 		newXSproto(strcpy(buf, "GetAttackSpeed"), XS_NPC_GetSlowMitigation, file, "$");
 		newXSproto(strcpy(buf, "GetAccuracyRating"), XS_NPC_GetAccuracyRating, file, "$");
+		newXSproto(strcpy(buf, "GetSpawnKillCount"), XS_NPC_GetSpawnKillCount, file, "$");
+		newXSproto(strcpy(buf, "GetScore"), XS_NPC_GetSpawnKillCount, file, "$");
 	XSRETURN_YES;
 }
 

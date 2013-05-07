@@ -1415,6 +1415,8 @@ int Client::CalcHaste() {
 	h += spellbonuses.hastetype3;
 	h += ExtraHaste;	//GM granted haste.
 
+	h = mod_client_haste(h);
+
 	if (spellbonuses.inhibitmelee){
 		if (h >= 0)
 			h -= spellbonuses.inhibitmelee; 

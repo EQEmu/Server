@@ -289,7 +289,15 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 	
 	if(check_level > maxlevel) {
 		check_level = maxlevel;
-		set_exp = GetEXPForLevel(maxlevel);
+
+		if(RuleB(Character, KeepLevelOverMax))
+		{
+			set_exp = GetEXPForLevel(GetLevel()+1);
+		}
+		else
+		{
+			set_exp = GetEXPForLevel(maxlevel);
+		}
 	}
 	
 	if(RuleB(Character, PerCharacterQglobalMaxLevel)){

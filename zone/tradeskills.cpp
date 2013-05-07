@@ -1016,6 +1016,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		}
 	}
 
+	chance = mod_tradeskill_chance(chance, spec);
+
 	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || MakeRandomInt(0, 99) < AAChance){
 		success_modifier = 1;
 		
@@ -1108,6 +1110,8 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 		}
 	}
 	   
+	chance_stage2 = mod_tradeskill_skillup(chance_stage2);
+
 	if (chance_stage2 > MakeRandomFloat(0, 99)) {
 		//Only if stage1 and stage2 succeeded you get a skillup.
 		SetSkill(tradeskill, current_raw_skill + 1);

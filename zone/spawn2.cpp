@@ -68,7 +68,7 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	float in_x, float in_y, float in_z, float in_heading, 
 	uint32 respawn, uint32 variance, uint32 timeleft, uint32 grid,
 	uint16 in_cond_id, int16 in_min_value, bool in_enabled, EmuAppearance anim)
-: timer(100000)
+: timer(100000), killcount(0)
 {
 	spawn2_id = in_spawn2_id;
 	spawngroup_id_ = spawngroup_id;
@@ -219,6 +219,9 @@ bool Spawn2::Process() {
 		
 		currentnpcid = npcid;
 		NPC* npc = new NPC(tmp, this, x, y, z, heading, FlyMode3);
+
+		npc->mod_prespawn(this);
+
 		npcthis = npc;
 		npc->AddLootTable();
 		npc->SetSp2(spawngroup_id_);
@@ -328,7 +331,7 @@ void Spawn2::ForceDespawn()
 }
 
 //resets our spawn as if we just died
-void Spawn2::DeathReset()
+void Spawn2::DeathReset(bool realdeath)
 {
 	//get our reset based on variance etc and store it locally
 	uint32 cur = resetTimer();
@@ -337,6 +340,8 @@ void Spawn2::DeathReset()
 
 	//zero out our NPC since he is now gone
 	npcthis = nullptr;
+
+	if(realdeath) { killcount++; }
 
 	//if we have a valid spawn id
 	if(spawn2_id)
