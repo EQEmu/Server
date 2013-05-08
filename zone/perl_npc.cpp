@@ -2236,7 +2236,7 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "GetAttackSpeed"), XS_NPC_GetSlowMitigation, file, "$");
 		newXSproto(strcpy(buf, "GetAccuracyRating"), XS_NPC_GetAccuracyRating, file, "$");
 		newXSproto(strcpy(buf, "GetSpawnKillCount"), XS_NPC_GetSpawnKillCount, file, "$");
-		newXSproto(strcpy(buf, "GetScore"), XS_NPC_GetSpawnKillCount, file, "$");
+		newXSproto(strcpy(buf, "GetScore"), XS_NPC_GetScore, file, "$");
 	XSRETURN_YES;
 }
 

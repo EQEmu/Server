@@ -2432,31 +2432,23 @@ int NPC::GetScore()
 
     if(lv < 46)
     {
-#if _MSC_VER==1600
-		minx = ceil((float) ((lv - (lv / 10)) - 1) );
-#else
-		minx = ceil( ((lv - (lv / 10)) - 1) );
-#endif
+		minx = static_cast<int> (ceil( ((lv - (lv / 10.0)) - 1.0) ));
         basehp = (lv * 10) + (lv * lv);
     }
     else
     {
-#if _MSC_VER==1600
-		minx = ceil((float) ((lv - (lv / 10)) - 1) - (( abs(45 - lv) ) / 2) );
-#else
-		minx = ceil( ((lv - (lv / 10)) - 1) - (( abs(45 - lv) ) / 2) );
-#endif
+		minx = static_cast<int> (ceil( ((lv - (lv / 10.0)) - 1.0) - (( lv - 45.0 ) / 2.0) ));
         basehp = (lv * 10) + ((lv * lv) * 4);
     }
 
     if(hp > basehp)
     {
-        hpcontrib = (int)( (float)((float)hp / (float)basehp) * 1.5);
+        hpcontrib = static_cast<int> (((hp / static_cast<float> (basehp)) * 1.5));
         if(hpcontrib > 5) { hpcontrib = 5; }
 
         if(maxdmg > basedmg)
         {
-            dmgcontrib = ceil( ((maxdmg / basedmg) * 1.5) );
+            dmgcontrib = static_cast<int> (ceil( ((maxdmg / basedmg) * 1.5) ));
         }
 
         if(HasNPCSpecialAtk("E")) { spccontrib++; }    //Enrage
@@ -2471,17 +2463,12 @@ int NPC::GetScore()
     }
 
     if(npc_spells_id > 12)
-#if _MSC_VER==1600
-    {
-        if(lv < 16) { spccontrib++; }
-        else { spccontrib += (int)floor((float) lv/15); }
-    }
-#else
 	{
-        if(lv < 16) { spccontrib++; }
-        else { spccontrib += (int)floor(lv/15); }
+        if(lv < 16)
+            spccontrib++;
+        else
+            spccontrib += static_cast<int> (floor(lv/15.0));
     }
-#endif
 
     final = minx + hpcontrib + dmgcontrib + spccontrib;
     final = max(1, final);
