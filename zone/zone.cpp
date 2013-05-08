@@ -2676,7 +2676,9 @@ void Zone::LoadTickItems()
     char* query = 0;
     MYSQL_RES *result;
     MYSQL_ROW row;
-
+#if _MSC_VER==1600
+	item_tick_struct ti_tmp;
+#endif
     tick_items.clear();
     //tick_globals.clear();
 
@@ -2689,9 +2691,20 @@ void Zone::LoadTickItems()
                 //tick_globals[std::string(row[0])] = { 0, atoi(row[1]), atoi(row[2]), (int16)atoi(row[4]), std::string(row[3]) };
             }
             else
-            {
+#if _MSC_VER==1600
+			{
+				ti_tmp.itemid = atoi(row[0]);
+				ti_tmp.chance = atoi(row[1]);
+				ti_tmp.level = atoi(row[2]);
+				ti_tmp.bagslot = (int16)atoi(row[4]);
+				ti_tmp.qglobal = std::string(row[3]);
+				tick_items[atoi(row[0])] = ti_tmp;
+			}
+#else
+			{
                 tick_items[atoi(row[0])] = { atoi(row[0]), atoi(row[1]), atoi(row[2]), (int16)atoi(row[4]), std::string(row[3]) };
             }
+#endif
         }
         mysql_free_result(result);
         safe_delete_array(query);
