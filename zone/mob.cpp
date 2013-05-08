@@ -3784,12 +3784,12 @@ void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varna
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
-	// Make duration string either "unix_timestamp(now()) + xxx" or "nullptr"
+	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
 	stringstream duration_ss;
 
 	if (duration == INT_MAX)
 	{
-		duration_ss << "nullptr";
+		duration_ss << "NULL";
 	}
 	else
 	{
