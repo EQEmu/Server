@@ -2676,23 +2676,15 @@ void Zone::LoadTickItems()
     char* query = 0;
     MYSQL_RES *result;
     MYSQL_ROW row;
-#if _MSC_VER==1600
-	item_tick_struct ti_tmp;
-#endif
     tick_items.clear();
-    //tick_globals.clear();
 
     if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick"), errbuf, &result))
     {
         while((row = mysql_fetch_row(result)))
         {
-            if(atoi(row[0]) < 1)
-            {
-                //tick_globals[std::string(row[0])] = { 0, atoi(row[1]), atoi(row[2]), (int16)atoi(row[4]), std::string(row[3]) };
-            }
-            else
-#if _MSC_VER==1600
+            if(atoi(row[0]) >= 1)
 			{
+				item_tick_struct ti_tmp;
 				ti_tmp.itemid = atoi(row[0]);
 				ti_tmp.chance = atoi(row[1]);
 				ti_tmp.level = atoi(row[2]);
@@ -2700,11 +2692,6 @@ void Zone::LoadTickItems()
 				ti_tmp.qglobal = std::string(row[3]);
 				tick_items[atoi(row[0])] = ti_tmp;
 			}
-#else
-			{
-                tick_items[atoi(row[0])] = { atoi(row[0]), atoi(row[1]), atoi(row[2]), (int16)atoi(row[4]), std::string(row[3]) };
-            }
-#endif
         }
         mysql_free_result(result);
         safe_delete_array(query);
@@ -2728,6 +2715,7 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
         }
         iterator.Advance();
     }
+	return 0;
 }
 
 void Zone::UpdateHotzone()
