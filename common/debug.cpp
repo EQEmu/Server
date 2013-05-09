@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <string>
-using namespace std;
 
 #include <time.h>
 
@@ -72,6 +71,7 @@ EQEMuLog::~EQEMuLog() {
 }
 
 bool EQEMuLog::open(LogIDs id) {
+    
 	if (!logFileValid) {
 		return false;
     }
@@ -87,7 +87,7 @@ bool EQEMuLog::open(LogIDs id) {
         return true;
     }
 
-	string filename = FileNames[id];
+	std::string filename = FileNames[id];
 
     const EQEmuExePlatform &platform = GetExecutablePlatform();
 
@@ -109,12 +109,12 @@ bool EQEMuLog::open(LogIDs id) {
 	// According to http://msdn.microsoft.com/en-us/library/vstudio/ee404875(v=vs.100).aspx
 	// Visual Studio 2010 doesn't have std::to_string(int) but it does have one for
 	// long long. Oh well, it works fine and formats perfectly acceptably.
-	filename.append(to_string((long long)getpid()));
+	filename.append(std::to_string((long long)getpid()));
 #endif
 	filename.append(".log");
 	fp[id] = fopen(filename.c_str(), "a");
     if (!fp[id]) {
-		cerr << "Failed to open log file: " << filename << endl;
+		std::cerr << "Failed to open log file: " << filename << std::endl;
 		pLogStatus[id] |= 4; // set file state to error
         return false;
     }
@@ -328,6 +328,7 @@ bool EQEMuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...) {
 };
 
 bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 skip) {
+    
 	if (!logFileValid) {
 #if EQDEBUG >= 10
     cerr << "Error: Dump() from null pointer"<<endl;
@@ -375,7 +376,7 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 			// According to http://msdn.microsoft.com/en-us/library/vstudio/ee404875(v=vs.100).aspx
 			// Visual Studio 2010 doesn't have std::to_string(int) but it does have the long long 
 			// version.
-			asciiOutput.append(to_string((long long)data[indexInData]));
+			asciiOutput.append(std::to_string((long long)data[indexInData]));
 		}
 		else
 		{
