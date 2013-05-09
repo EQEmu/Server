@@ -1470,5 +1470,4 @@ private:
 	std::map<std::string,std::string> accountflags;
 };
 
-#include "parser.h"
 #endif

@@ -29,7 +29,6 @@ using namespace std;
 #include "map.h"
 #include "watermap.h"
 #include "../common/moremath.h"
-#include "parser.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"
 #include "../common/rulesys.h"

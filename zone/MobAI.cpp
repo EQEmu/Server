@@ -28,7 +28,6 @@ using namespace std;
 #include "NpcAI.h"
 #include "map.h"
 #include "../common/moremath.h"
-#include "parser.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"
 #include "../common/rulesys.h"

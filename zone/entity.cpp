@@ -42,7 +42,6 @@ using namespace std;
 #include "../common/spdat.h"
 #include "../common/features.h"
 #include "StringIDs.h"
-#include "parser.h"
 #include "../common/dbasync.h"
 #include "guild_mgr.h"
 #include "raids.h"

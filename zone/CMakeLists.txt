@@ -39,7 +39,6 @@ SET(zone_sources
     npc.cpp
     NpcAI.cpp
     Object.cpp
-    parser.cpp
     pathing.cpp
     perl_client.cpp
     perl_doors.cpp
@@ -122,7 +121,6 @@ SET(zone_headers
     npc.h
     NpcAI.h
     object.h
-    parser.h
     pathing.h
     perlpacket.h
     perlparser.h

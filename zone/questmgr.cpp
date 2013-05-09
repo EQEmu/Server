@@ -71,7 +71,6 @@ using namespace std;
 #include "../common/MiscFunctions.h"
 #include "spawn2.h"
 #include "zone.h"
-#include "parser.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
 #include "../common/rulesys.h"

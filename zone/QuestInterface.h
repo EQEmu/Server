@@ -10,12 +10,12 @@ class NPC;
 
 class QuestInterface {
 public:
-    virtual void EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) { }
-	virtual void EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) { }
-    virtual void EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) { }
-    virtual void EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) { }
-    virtual void EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) { }
-    virtual void EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) { }
+    virtual double EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) { return 100.0; }
+	virtual double EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) { return 100.0; }
+    virtual double EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) { return 100.0; }
+    virtual double EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) { return 100.0; }
+    virtual double EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) { return 100.0; }
+    virtual double EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) { return 100.0; }
 
 	virtual bool HasQuestSub(uint32 npcid, const char *subname) { return false; }
 	virtual bool HasGlobalQuestSub(const char *subname) { return false; }

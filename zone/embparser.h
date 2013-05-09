@@ -20,16 +20,27 @@ typedef enum
 } PerlQuestStatus;
 
 class PerlembParser : public QuestInterface {
+	typedef struct {
+		QuestEventID event;
+		uint32 objid;
+		const char *data;
+		NPC* npcmob;
+		ItemInst* iteminst;
+		Mob* mob;
+		uint32 extradata;
+		bool global;
+	} EventRecord;
+
 public:
 	PerlembParser();
 	~PerlembParser();
 	
-	virtual void EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
-	virtual void EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
-    virtual void EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-    virtual void EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-    virtual void EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
-    virtual void EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
+	virtual double EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	virtual double EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+    virtual double EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
+    virtual double EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
+    virtual double EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
+    virtual double EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
 	virtual bool HasQuestSub(uint32 npcid, const char *subname);
 	virtual bool HasGlobalQuestSub(const char *subname);
@@ -70,6 +81,7 @@ private:
 	PerlQuestStatus global_player_quest_status_;
 	std::map<std::string, PerlQuestStatus> item_quest_status_;
 	std::map<uint32, PerlQuestStatus> spell_quest_status_;
+	std::queue<EventRecord> event_queue_;
 };
 
 #endif
