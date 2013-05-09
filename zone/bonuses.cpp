@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2004  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/spdat.h"
@@ -532,10 +532,10 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 
 void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 #if EQDEBUG >= 11
-    cout<<"Client::CalcEdibleBonuses(StatBonuses* newbon)"<<endl;
+	cout<<"Client::CalcEdibleBonuses(StatBonuses* newbon)"<<endl;
 #endif
-  // Search player slots for skill=14(food) and skill=15(drink)
-  	uint32 i;
+	// Search player slots for skill=14(food) and skill=15(drink)
+		uint32 i;
 
 	bool food = false;
 	bool drink = false;
@@ -835,12 +835,12 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_ConsumeProjectile:
 				newbon->ConsumeProjectile += base1;
 				break;
-            case SE_ForageAdditionalItems:
-                newbon->ForageAdditionalItems += base1;
-                break;
-            case SE_Salvage:
-                newbon->SalvageChance += base1;
-                break;
+			case SE_ForageAdditionalItems:
+				newbon->ForageAdditionalItems += base1;
+				break;
+			case SE_Salvage:
+				newbon->SalvageChance += base1;
+				break;
 			case SE_ArcheryDamageModifier:
 				newbon->ArcheryDamageModifier += base1;
 				break;
@@ -952,7 +952,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				{
 					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == base2) && (newbon->SpellOnKill[i+1] < base1)))
 					{
-						//base1 = chance, base2 = SpellID to be triggered,  base3 = min npc level
+						//base1 = chance, base2 = SpellID to be triggered, base3 = min npc level
 						newbon->SpellOnKill[i] = base2;
 						newbon->SpellOnKill[i+1] = base1;
 
@@ -1275,7 +1275,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
- 			case SE_AttackSpeed2:
+			case SE_AttackSpeed2:
 			{
 				if ((effect_value - 100) > 0) { // Haste V2 - Stacks with V1 but does not Overcap
 					if ((effect_value - 100) > newbon->hastetype2) {
@@ -1283,17 +1283,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					}
 				}
 				break;
- 			}
+			}
 
- 			case SE_AttackSpeed3:
- 			{
+			case SE_AttackSpeed3:
+			{
 				if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
 					if (effect_value > newbon->hastetype3) {
 						newbon->hastetype3 = effect_value;
 					}
 				}
 				break;
- 			}
+			}
 
 			case SE_AttackSpeed4:
 			{
@@ -1598,10 +1598,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
 					newbon->AvoidMeleeChance += effect_value;
 
-				else if((effect_value < 0) && (newbon->AvoidMeleeChance  > effect_value))
+				else if((effect_value < 0) && (newbon->AvoidMeleeChance > effect_value))
 					newbon->AvoidMeleeChance = effect_value;
 
-				else if(newbon->AvoidMeleeChance  < effect_value)
+				else if(newbon->AvoidMeleeChance < effect_value)
 					newbon->AvoidMeleeChance = effect_value;
 				break;
 			}
@@ -1625,7 +1625,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->DodgeChance += effect_value;
 
 				else if((effect_value < 0) && (newbon->DodgeChance > effect_value))
-					newbon->DodgeChance  = effect_value;
+					newbon->DodgeChance = effect_value;
 
 				if(newbon->DodgeChance < effect_value)
 					newbon->DodgeChance = effect_value;
@@ -1638,7 +1638,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->ParryChance += effect_value;
 
 				else if((effect_value < 0) && (newbon->ParryChance > effect_value))
-					newbon->ParryChance  = effect_value;
+					newbon->ParryChance = effect_value;
 
 				if(newbon->ParryChance < effect_value)
 					newbon->ParryChance = effect_value;
@@ -1651,7 +1651,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->DualWieldChance += effect_value;
 
 				else if((effect_value < 0) && (newbon->DualWieldChance > effect_value))
-					newbon->DualWieldChance  = effect_value;
+					newbon->DualWieldChance = effect_value;
 
 				if(newbon->DualWieldChance < effect_value)
 					newbon->DualWieldChance = effect_value;
@@ -1665,7 +1665,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->DoubleAttackChance += effect_value;
 
 				else if((effect_value < 0) && (newbon->DoubleAttackChance > effect_value))
-					newbon->DoubleAttackChance  = effect_value;
+					newbon->DoubleAttackChance = effect_value;
 
 				if(newbon->DoubleAttackChance < effect_value)
 					newbon->DoubleAttackChance = effect_value;
@@ -1676,9 +1676,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
-					newbon->TripleAttackChance  += effect_value;
+					newbon->TripleAttackChance += effect_value;
 
-				else if((effect_value < 0) && (newbon->TripleAttackChance  > effect_value))
+				else if((effect_value < 0) && (newbon->TripleAttackChance > effect_value))
 					newbon->TripleAttackChance = effect_value;
 
 				if(newbon->TripleAttackChance < effect_value)
@@ -1691,7 +1691,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
 					newbon->MeleeLifetap += spells[spell_id].base[i];
 
-				else if((effect_value < 0) && (newbon->MeleeLifetap  > effect_value))
+				else if((effect_value < 0) && (newbon->MeleeLifetap > effect_value))
 					newbon->MeleeLifetap = spells[spell_id].base[i];
 
 				if(newbon->MeleeLifetap < spells[spell_id].base[i])
@@ -1731,8 +1731,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->Fearless = true;
 				break;
 
- 			case SE_HundredHands:
- 			{
+			case SE_HundredHands:
+			{
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
 					newbon->HundredHands += spells[spell_id].base[i];
 
@@ -1741,7 +1741,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				else if (effect_value < 0 && effect_value < newbon->HundredHands)
 					newbon->HundredHands = effect_value; //Decrease Weapon Delay
 				break;
- 			}
+			}
 
 			case SE_MeleeSkillCheck:
 			{
@@ -1820,7 +1820,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->ProcChance += effect_value;
 
 				else if((effect_value < 0) && (newbon->DoubleAttackChance > effect_value))
-					newbon->ProcChance  = effect_value;
+					newbon->ProcChance = effect_value;
 
 				if(newbon->ProcChance < effect_value)
 					newbon->ProcChance = effect_value;
@@ -2198,13 +2198,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->ConsumeProjectile += effect_value;
 				break;
 
-            case SE_ForageAdditionalItems:
-                newbon->ForageAdditionalItems += effect_value;
-                break;
+			case SE_ForageAdditionalItems:
+				newbon->ForageAdditionalItems += effect_value;
+				break;
 
-            case SE_Salvage:
-                newbon->SalvageChance += effect_value;
-                break;
+			case SE_Salvage:
+				newbon->SalvageChance += effect_value;
+				break;
 
 			case SE_ArcheryDamageModifier:
 				newbon->ArcheryDamageModifier += effect_value;
@@ -2443,9 +2443,9 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
 			uint16 oldexp = e_inst->GetExp();
 
 			if(login) {
-                parse->EventItem(EVENT_ITEM_ENTERZONE, this, e_inst, e_inst->GetID(), 0);
-            }
-            parse->EventItem(EVENT_SCALE_CALC, this, e_inst, e_inst->GetID(), 0);
+				parse->EventItem(EVENT_ITEM_ENTERZONE, this, e_inst, e_inst->GetID(), 0);
+			}
+			parse->EventItem(EVENT_SCALE_CALC, this, e_inst, e_inst->GetID(), 0);
 
 			if (e_inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
 				e_inst->ScaleItem();
@@ -2466,10 +2466,10 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
 				EvoItemInst* e_inst = (EvoItemInst*)a_inst;
 				uint16 oldexp = e_inst->GetExp();
 
-                if(login) {
-                    parse->EventItem(EVENT_ITEM_ENTERZONE, this, e_inst, e_inst->GetID(), 0);
-                }
-                parse->EventItem(EVENT_SCALE_CALC, this, e_inst, e_inst->GetID(), 0);
+				if(login) {
+					parse->EventItem(EVENT_ITEM_ENTERZONE, this, e_inst, e_inst->GetID(), 0);
+				}
+				parse->EventItem(EVENT_SCALE_CALC, this, e_inst, e_inst->GetID(), 0);
 
 				if (e_inst->GetExp() != oldexp)
 				{
@@ -3345,17 +3345,17 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.ConsumeProjectile = effect_value;
 					break;
 
-                case SE_ForageAdditionalItems:
-                    spellbonuses.ForageAdditionalItems = effect_value;
-                    aabonuses.ForageAdditionalItems = effect_value;
-                    itembonuses.ForageAdditionalItems = effect_value;
-                    break;
+				case SE_ForageAdditionalItems:
+					spellbonuses.ForageAdditionalItems = effect_value;
+					aabonuses.ForageAdditionalItems = effect_value;
+					itembonuses.ForageAdditionalItems = effect_value;
+					break;
 
-                case SE_Salvage:
-                    spellbonuses.SalvageChance = effect_value;
-                    aabonuses.SalvageChance = effect_value;
-                    itembonuses.SalvageChance = effect_value;
-                    break;
+				case SE_Salvage:
+					spellbonuses.SalvageChance = effect_value;
+					aabonuses.SalvageChance = effect_value;
+					itembonuses.SalvageChance = effect_value;
+					break;
 
 				case SE_ArcheryDamageModifier:
 					spellbonuses.ArcheryDamageModifier = effect_value;
@@ -3500,3 +3500,4 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 		}
 	}
 }
+

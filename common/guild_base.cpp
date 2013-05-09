@@ -1,5 +1,5 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -9,11 +9,11 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "debug.h"
@@ -316,8 +316,8 @@ uint32 BaseGuildManager::_GetFreeGuildID() {
 	}
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char query[100];
-    MYSQL_RES *result;
+	char query[100];
+	MYSQL_RES *result;
 
 	//this has got to be one of the more retarded things I have seen.
 	//none the less, im too lazy to rewrite it right now.
@@ -953,22 +953,22 @@ bool BaseGuildManager::_RunQuery(char *&query, int len, const char *errmsg) {
 #endif
 static void ProcessGuildMember(MYSQL_ROW &row, CharGuildInfo &into) {
 	//fields from `characer_`
-	into.char_id 		= atoi(row[0]);
-	into.char_name 		= row[1];
-	into.class_ 		= atoi(row[2]);
-	into.level 			= atoi(row[3]);
-	into.time_last_on 	= atoul(row[4]);
-	into.zone_id 		= atoi(row[5]);
+	into.char_id		= atoi(row[0]);
+	into.char_name		= row[1];
+	into.class_			= atoi(row[2]);
+	into.level			= atoi(row[3]);
+	into.time_last_on	= atoul(row[4]);
+	into.zone_id		= atoi(row[5]);
 
 	//fields from `guild_members`, leave at defaults if missing
-	into.guild_id 		= row[6] ? atoi(row[6]) : GUILD_NONE;
-	into.rank 			= row[7] ? atoi(row[7]) : (GUILD_MAX_RANK+1);
+	into.guild_id		= row[6] ? atoi(row[6]) : GUILD_NONE;
+	into.rank			= row[7] ? atoi(row[7]) : (GUILD_MAX_RANK+1);
 	into.tribute_enable = row[8] ? (row[8][0] == '0'?false:true) : false;
 	into.total_tribute	= row[9] ? atoi(row[9]) : 0;
 	into.last_tribute	= row[10]? atoul(row[10]) : 0;		//timestamp
-	into.banker 		= row[11]? (row[11][0] == '0'?false:true) : false;
+	into.banker			= row[11]? (row[11][0] == '0'?false:true) : false;
 	into.public_note	= row[12]? row[12] : "";
-	into.alt 		= row[13]? (row[13][0] == '0'?false:true) : false;
+	into.alt		= row[13]? (row[13][0] == '0'?false:true) : false;
 
 	//a little sanity checking/cleanup
 	if(into.guild_id == 0)
@@ -1320,9 +1320,9 @@ uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)
 	MYSQL_RES *result;
 
 	if (!m_db->RunQuery(query,
-			    MakeAnyLenString(&query,
-			    		     "select guild_id from guild_members where char_id in (select id from character_ where account_id = %i) and rank = 2",
-				     	     AccountID), errbuf, &result))
+				MakeAnyLenString(&query,
+							"select guild_id from guild_members where char_id in (select id from character_ where account_id = %i) and rank = 2",
+							AccountID), errbuf, &result))
 	{
 		_log(GUILDS__ERROR, "Error executing query '%s': %s", query, errbuf);
 		safe_delete_array(query);
@@ -1341,10 +1341,10 @@ uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)
 
 bool Database::LoadGuilds(GuildRanks_Struct* guilds) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	//	int i;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	for (int a = 0; a < 512; a++) {
 		guilds[a].leader = 0;
@@ -1445,7 +1445,7 @@ bool Database::LoadGuilds(GuildRanks_Struct* guilds) {
 
 void Database::SetPublicNote(uint32 guild_id,char* charname, char* note){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	char* notebuf = new char[(strlen(note)*2)+3];
 	DoEscapeString(notebuf, note, strlen(note)) ;
 	if (!RunQuery(query, MakeAnyLenString(&query, "update character_ set publicnote='%s' where name='%s' and guild=%i", notebuf,charname,guild_id), errbuf)) {
@@ -1459,9 +1459,9 @@ void Database::SetPublicNote(uint32 guild_id,char* charname, char* note){
 
 bool Database::GetGuildRanks(uint32 guildeqid, GuildRanks_Struct* gr) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, eqid, name, leader, minstatus, rank0title, rank1, rank1title, rank2, rank2title, rank3, rank3title, rank4, rank4title, rank5, rank5title from guilds where eqid=%i;", guildeqid), errbuf, &result))
 	{

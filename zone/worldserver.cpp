@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -57,7 +57,7 @@ using namespace std;
 #include "QGlobals.h"
 
 
-extern EntityList    entity_list;
+extern EntityList entity_list;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern void CatchSignal(int);
@@ -126,7 +126,7 @@ void WorldServer::OnConnected() {
 		this->SetZone(zone->GetZoneID(), zone->GetInstanceID());
 		entity_list.UpdateWho(true);
 		this->SendEmoteMessage(0, 0, 15, "Zone connect: %s", zone->GetLongName());
-            zone->GetTimeSync();
+			zone->GetTimeSync();
 	} else {
 		this->SetZone(0);
 	}
@@ -389,8 +389,8 @@ void WorldServer::Process() {
 				}
 				else {
 					#ifdef _EQDEBUG
-					_log(ZONE__WORLD, "Error: WhoAllReturnStruct did not point to a valid client!  "
-						"id=%i, playerineqstring=%i, playersinzonestring=%i.  Dumping WhoAllReturnStruct:",
+					_log(ZONE__WORLD, "Error: WhoAllReturnStruct did not point to a valid client! "
+						"id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
 						wars->id, wars->playerineqstring, wars->playersinzonestring);
 					#endif
 				}
@@ -683,10 +683,10 @@ void WorldServer::Process() {
 					//pendingrezexp is the amount of XP on the corpse. Setting it to a value >= 0
 					//also serves to inform Client::OPRezzAnswer to expect a packet.
 					client->SetPendingRezzData(srs->exp, srs->dbid, srs->rez.spellid, srs->rez.corpse_name);
-                   			_log(SPELLS__REZ, "OP_RezzRequest in zone %s for %s, spellid:%i",
-					     zone->GetShortName(), client->GetName(), srs->rez.spellid);
+							_log(SPELLS__REZ, "OP_RezzRequest in zone %s for %s, spellid:%i",
+							zone->GetShortName(), client->GetName(), srs->rez.spellid);
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest,
-											      sizeof(Resurrect_Struct));
+												sizeof(Resurrect_Struct));
 					memcpy(outapp->pBuffer, &srs->rez, sizeof(Resurrect_Struct));
 					client->QueuePacket(outapp);
 					_pkt(SPELLS__REZ, outapp);
@@ -700,7 +700,7 @@ void WorldServer::Process() {
 				Corpse* corpse = entity_list.GetCorpseByName(srs->rez.corpse_name);
 				if (corpse && corpse->IsCorpse()) {
 					_log(SPELLS__REZ, "OP_RezzComplete received in zone %s for corpse %s",
-							  zone->GetShortName(), srs->rez.corpse_name);
+								zone->GetShortName(), srs->rez.corpse_name);
 
 					_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
 					// I don't know why Rezzed is not set to true in CompleteRezz().
@@ -829,7 +829,7 @@ void WorldServer::Process() {
 			}
 			break;
 		}
-        case ServerOP_GroupInvite: {
+		case ServerOP_GroupInvite: {
 			// A player in another zone invited a player in this zone to join their group.
 			//
 			GroupInvite_Struct* gis = (GroupInvite_Struct*)pack->pBuffer;
@@ -877,25 +877,25 @@ void WorldServer::Process() {
 
 					group->UpdateGroupAAs();
 
-                    if(Inviter->CastToClient()->GetClientVersion() < EQClientSoD)
-			        {
-			        	EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
-			        	GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
-			        	strcpy(outgj->membername, Inviter->GetName());
-			        	strcpy(outgj->yourname, Inviter->GetName());
-			        	outgj->action = groupActInviteInitial; // 'You have formed the group'.
-			        	group->GetGroupAAs(&outgj->leader_aas);
-			        	Inviter->CastToClient()->QueuePacket(outapp);
-			        	safe_delete(outapp);
-			        }
-			        else
-			        {
-			        	// SoD and later
-			        	//
-			        	Inviter->CastToClient()->SendGroupCreatePacket();
-			        	Inviter->CastToClient()->SendGroupLeaderChangePacket(Inviter->GetName());
-			        	Inviter->CastToClient()->SendGroupJoinAcknowledge();
-			        }
+					if(Inviter->CastToClient()->GetClientVersion() < EQClientSoD)
+					{
+						EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+						GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
+						strcpy(outgj->membername, Inviter->GetName());
+						strcpy(outgj->yourname, Inviter->GetName());
+						outgj->action = groupActInviteInitial; // 'You have formed the group'.
+						group->GetGroupAAs(&outgj->leader_aas);
+						Inviter->CastToClient()->QueuePacket(outapp);
+						safe_delete(outapp);
+					}
+					else
+					{
+						// SoD and later
+						//
+						Inviter->CastToClient()->SendGroupCreatePacket();
+						Inviter->CastToClient()->SendGroupLeaderChangePacket(Inviter->GetName());
+						Inviter->CastToClient()->SendGroupJoinAcknowledge();
+					}
 				}
 				if(!group)
 					break;
@@ -1040,7 +1040,7 @@ void WorldServer::Process() {
 				if(gj->zoneid == zone->GetZoneID() && gj->instance_id == zone->GetInstanceID())
 					break;
 
-   				Group* g = entity_list.GetGroupByID(gj->gid);
+				Group* g = entity_list.GetGroupByID(gj->gid);
 				if(g)
 					g->AddMember(gj->member_name);
 
@@ -1382,7 +1382,7 @@ void WorldServer::Process() {
 
 			break;
 		}
-	    case ServerOP_Consent: {
+		case ServerOP_Consent: {
 			ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
 			Client* client = entity_list.GetClientByName(s->grantname);
 			if(client) {
@@ -2053,7 +2053,7 @@ uint32 WorldServer::NextGroupID() {
 }
 
 void WorldServer::UpdateLFP(uint32 LeaderID, uint8 Action, uint8 MatchFilter, uint32 FromLevel, uint32 ToLevel, uint32 Classes,
-			    const char *Comments, GroupLFPMemberEntry *LFPMembers) {
+				const char *Comments, GroupLFPMemberEntry *LFPMembers) {
 
 	ServerPacket* pack = new ServerPacket(ServerOP_LFPUpdate, sizeof(ServerLFPUpdate_Struct));
 	ServerLFPUpdate_Struct* sus = (ServerLFPUpdate_Struct*) pack->pBuffer;

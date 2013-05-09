@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/eq_packet_structs.h"
@@ -36,7 +36,7 @@ using namespace std;
 	#define vsnprintf	_vsnprintf
 #endif
 #define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
+#define strcasecmp	_stricmp
 #else
 #include <stdarg.h>
 #include <sys/socket.h>
@@ -384,8 +384,8 @@ void Client::SendGuildTributes() {
 
 bool ZoneDatabase::LoadTributes() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	TributeData t;
 	memset(&t.tiers, 0, sizeof(t.tiers));

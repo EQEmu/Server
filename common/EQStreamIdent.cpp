@@ -1,4 +1,3 @@
-
 #include "debug.h"
 #include "EQStreamIdent.h"
 #include "EQStreamProxy.h"
@@ -158,42 +157,8 @@ EQStreamInterface *EQStreamIdentifier::PopIdentified() {
 }
 
 EQStreamIdentifier::Record::Record(EQStream *s)
-: stream(s),
-  expire(STREAM_IDENT_WAIT_MS)
+:	stream(s),
+	expire(STREAM_IDENT_WAIT_MS)
 {
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

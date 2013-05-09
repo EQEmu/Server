@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef ZONE_H
 #define ZONE_H
@@ -147,8 +147,8 @@ public:
 	void	Repop(uint32 delay = 0);
 	void	SpawnStatus(Mob* client);
 	void	ShowEnabledSpawnStatus(Mob* client);
-	void    ShowDisabledSpawnStatus(Mob* client);
-	void    ShowSpawnStatusByID(Mob* client, uint32 spawnid);
+	void	ShowDisabledSpawnStatus(Mob* client);
+	void	ShowSpawnStatusByID(Mob* client, uint32 spawnid);
 	void	StartShutdownTimer(uint32 set_time = (RuleI(Zone, AutoShutdownDelay)));
 	void	AddAuth(ServerZoneIncommingClient_Struct* szic);
 	void	RemoveAuth(const char* iCharName);
@@ -197,7 +197,7 @@ public:
 	map<uint32,std::list<MercSpellEntry> > merc_spells_list;
 	map<uint32, ZoneEXPModInfo> level_exp_mod;
 	list<InternalVeteranReward> VeteranRewards;
-    list<AltCurrencyDefinition_Struct> AlternateCurrencies;
+	list<AltCurrencyDefinition_Struct> AlternateCurrencies;
 	char *adv_data;
 	bool did_adventure_actions;
 
@@ -205,7 +205,7 @@ public:
 	void	DoAdventureAssassinationCountIncrease();
 	void	DoAdventureActions();
 	void	LoadVeteranRewards();
-    void    LoadAlternateCurrencies();
+	void	LoadAlternateCurrencies();
 	void	LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList);
 	void	ReloadWorld(uint32 Option);
 
@@ -227,7 +227,7 @@ public:
 	bool	IsCity() const { return(is_city); }
 	bool	CanDoCombat() const { return(can_combat); }
 	bool	CanLevitate() const {return(can_levitate); } // Magoth78
-	bool    CanCastOutdoor() const {return(can_castoutdoor);} //qadar
+	bool	CanCastOutdoor() const {return(can_castoutdoor);} //qadar
 	bool	AllowMercs() const {return(allow_mercs);}
 	bool	IsHotzone() const { return(is_hotzone); }
 	inline	bool BuffTimersSuspended() const { return newzone_data.SuspendBuffs != 0; };
@@ -285,13 +285,13 @@ private:
 	bool	can_bind;
 	bool	is_city;
 	bool	can_combat;
-	bool    can_castoutdoor;
+	bool	can_castoutdoor;
 	bool	can_levitate;
 	bool	is_hotzone;
 	bool	allow_mercs;
 	uint32	pgraveyard_id, pgraveyard_zoneid;
 	float	pgraveyard_x, pgraveyard_y, pgraveyard_z, pgraveyard_heading;
-	int     default_ruleset;
+	int		default_ruleset;
 
 	int	totalBS;
 	ZoneSpellsBlocked *blocked_spells;
@@ -316,10 +316,10 @@ private:
 	Timer	clientauth_timer;
 	Timer	spawn2_timer;
 	Timer	qglobal_purge_timer;
-	Timer*  Weather_Timer;
+	Timer*	Weather_Timer;
 	Timer*	Instance_Timer;
 	Timer*	Instance_Shutdown_Timer;
-	Timer*  Instance_Warning_timer;
+	Timer*	Instance_Warning_timer;
 	LinkedList<ZoneClientAuth_Struct*> client_auth_list;
 	QGlobalCache *qGlobals;
 	

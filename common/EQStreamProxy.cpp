@@ -6,9 +6,9 @@
 
 
 EQStreamProxy::EQStreamProxy(EQStream *&stream, const StructStrategy *structs, OpcodeManager **opcodes)
-: m_stream(stream),
-  m_structs(structs),
-  m_opcodes(opcodes)
+:	m_stream(stream),
+	m_structs(structs),
+	m_opcodes(opcodes)
 {
 	stream = nullptr;	//take the stream.
 	m_stream->SetOpcodeManager(m_opcodes);

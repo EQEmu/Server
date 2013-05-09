@@ -17,11 +17,11 @@ extern "C" {	//the perl headers dont do this for us...
 
 #ifdef WIN32
 #ifndef snprintf
-#define snprintf        _snprintf
+#define snprintf _snprintf
 #endif
 #endif
 
-//perl defines these macros and dosent clean them up, lazy bastards. --  I hate them too!
+//perl defines these macros and dosent clean them up, lazy bastards. -- I hate them too!
 #ifdef Copy
 #undef Copy
 #endif
@@ -42,9 +42,10 @@ extern "C" {	//the perl headers dont do this for us...
 #undef Zero
 #endif
 
-#ifdef THIS     /* this macro seems to leak out on some systems */
+#ifdef THIS /* this macro seems to leak out on some systems */
 #undef THIS
 #endif
 
 
 #endif /*EMU_PERL_H_*/
+

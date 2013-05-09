@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <stdio.h>
@@ -61,15 +61,15 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 				*copper = MakeRandomInt(mincoin, maxcoin);
 				*silver = MakeRandomInt(mincoin, maxcoin);
 				*gold = MakeRandomInt(mincoin, maxcoin);
-			if(*copper > cash) { *copper = cash; }
-				cash -= *copper;
-            if(*silver>(cash/10)) { *silver = (cash/10); }
-				cash -= *silver*10;
-            if(*gold > (cash/100)) { *gold = (cash/100); }
-				cash -= *gold*100;
-         }
-         if (cash < 0) {
-            cash = 0;
+				if(*copper > cash) { *copper = cash; }
+					cash -= *copper;
+				if(*silver>(cash/10)) { *silver = (cash/10); }
+					cash -= *silver*10;
+				if(*gold > (cash/100)) { *gold = (cash/100); }
+					cash -= *gold*100;
+			}
+			if (cash < 0) {
+				cash = 0;
 			}
 			*plat = cash / 1000;
 			cash -= *plat * 1000;
@@ -86,21 +86,21 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 	// Do items
 	for (uint32 i=0; i<lts->NumEntries; i++) {
 		for (uint32 k = 1; k <= lts->Entries[i].multiplier; k++) {
-		    uint8 droplimit = lts->Entries[i].droplimit;
-		    uint8 mindrop = lts->Entries[i].mindrop;
+			uint8 droplimit = lts->Entries[i].droplimit;
+			uint8 mindrop = lts->Entries[i].mindrop;
 
-            //LootTable Entry probability
-            float ltchance = 0.0f;
-            ltchance = lts->Entries[i].probability;
+			//LootTable Entry probability
+			float ltchance = 0.0f;
+			ltchance = lts->Entries[i].probability;
 
-            float drop_chance = 0.0f;
-            if(ltchance > 0.0 && ltchance < 100.0) {
-                drop_chance = MakeRandomFloat(0.0, 100.0);
-            }
+			float drop_chance = 0.0f;
+			if(ltchance > 0.0 && ltchance < 100.0) {
+				drop_chance = MakeRandomFloat(0.0, 100.0);
+			}
 
-            if (ltchance != 0.0 && (ltchance == 100.0 || drop_chance < ltchance)) {
-			    AddLootDropToNPC(npc,lts->Entries[i].lootdrop_id, itemlist, droplimit, mindrop);
-            }
+			if (ltchance != 0.0 && (ltchance == 100.0 || drop_chance < ltchance)) {
+				AddLootDropToNPC(npc,lts->Entries[i].lootdrop_id, itemlist, droplimit, mindrop);
+			}
 		}
 	}
 }
@@ -216,11 +216,11 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		// Equip rules are as follows:
 		// If the item has the NoPet flag set it will not be equipped.
 		// An empty slot takes priority. The first empty one that an item can
-		//  fit into will be the one picked for the item.
+		// fit into will be the one picked for the item.
 		// AC is the primary choice for which item gets picked for a slot.
 		// If AC is identical HP is considered next.
 		// If an item can fit into multiple slots we'll pick the last one where
-		//  it is an improvement.
+		// it is an improvement.
 
 		if (!item2->NoPet) {
 			for (int i=0; !found && i<MAX_WORN_INVENTORY; i++) {
@@ -297,7 +297,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		else if (foundslot == SLOT_HEAD) {
 			eslot = MATERIAL_HEAD;
 		}
-		else if (foundslot ==  SLOT_CHEST) {
+		else if (foundslot == SLOT_CHEST) {
 			eslot = MATERIAL_CHEST;
 		}
 		else if (foundslot == SLOT_ARMS) {
@@ -353,7 +353,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 
 	if(wearchange && outapp) {
 		entity_list.QueueClients(this, outapp);
-	 	safe_delete(outapp);
+		safe_delete(outapp);
 	}
 }
 
@@ -372,7 +372,7 @@ void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem) {
 
 void NPC::AddLootTable() {
 	if (npctype_id != 0) { // check if it's a GM spawn
-	  database.AddLootTableToNPC(this,loottable_id, &itemlist, &copper, &silver, &gold, &platinum);
+		database.AddLootTableToNPC(this,loottable_id, &itemlist, &copper, &silver, &gold, &platinum);
 	}
 }
 

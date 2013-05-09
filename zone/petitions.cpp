@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <stdlib.h>
@@ -219,7 +219,7 @@ void PetitionList::UpdatePetition(Petition* pet) {
 
 void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32 affected_rows = 0;
 	uint8 checkedout = 0;
 	if (wpet->CheckedOut()) checkedout = 0;
@@ -234,7 +234,7 @@ void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
 
 void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32 affected_rows = 0;
 	uint8 checkedout = 0;
 	if (wpet->CheckedOut()) checkedout = 1;
@@ -251,7 +251,7 @@ void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
 void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32 affected_rows = 0;
 	uint8 checkedout = 0;
 	if (wpet->CheckedOut())
@@ -278,9 +278,9 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 void ZoneDatabase::RefreshPetitionsFromDB()
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	Petition* newpet;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT petid, charname, accountname, lastgm, petitiontext, zone, urgency, charclass, charrace, charlevel, checkouts, unavailables, ischeckedout, senttime, gmtext from petitions order by petid"), errbuf, &result))
 	{

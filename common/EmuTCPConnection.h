@@ -49,7 +49,7 @@ public:
 	void SetPacketMode(ePacketMode mode) { PacketMode = mode; }
 
 	eTCPMode		GetMode()	const		{ return TCPMode; }
-	ePacketMode		GetPacketMode() const 	{ return(PacketMode); }
+	ePacketMode		GetPacketMode() const	{ return(PacketMode); }
 
 	//relay crap:
 	inline bool		IsRelayServer() const { return RelayServer; }

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "worlddb.h"
@@ -46,7 +46,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		strcpy(cs->name[i], "<none>");
 		cs->zone[i] = 0;
 		cs->level[i] = 0;
-            cs->tutorial[i] = 0;
+			cs->tutorial[i] = 0;
 		cs->gohome[i] = 0;
 	}
 
@@ -83,8 +83,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				cs->face[char_num]			= pp->face;
 				cs->haircolor[char_num]		= pp->haircolor;
 				cs->beardcolor[char_num]	= pp->beardcolor;
-				cs->eyecolor2[char_num] 	= pp->eyecolor2;
-				cs->eyecolor1[char_num] 	= pp->eyecolor1;
+				cs->eyecolor2[char_num]		= pp->eyecolor2;
+				cs->eyecolor1[char_num]		= pp->eyecolor1;
 				cs->hairstyle[char_num]		= pp->hairstyle;
 				cs->beard[char_num]			= pp->beard;
 				cs->drakkin_heritage[char_num]	= pp->drakkin_heritage;
@@ -102,7 +102,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 
 
 				// This part creates home city entries for characters created before the home bind point was tracked.
-				// Do it here because the player profile is already loaded and it's as good a spot as any.  This whole block should
+				// Do it here because the player profile is already loaded and it's as good a spot as any. This whole block should
 				// probably be removed at some point, when most accounts are safely converted.
 				if(pp->binds[4].zoneId == 0) {
 					bool altered = false;
@@ -177,7 +177,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 				// @merth: Haven't done bracer01/bracer02 yet.
 				// Also: this needs a second look after items are a little more solid
 				// NOTE: items don't have a color, players MAY have a tint, if the
-				// use_tint part is set.  otherwise use the regular color
+				// use_tint part is set. otherwise use the regular color
 				inv = new Inventory;
 				if(GetInventory(account_id, cs->name[char_num], inv))
 				{
@@ -269,8 +269,8 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 	if(!strcmp(BindZoneName, "UNKNWN")) return pp.zone_id;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=%f, y=%f, z=%f, instanceid=0 WHERE id='%i'",
-					      BindZoneName, pp.binds[bindnum].zoneId, pp.binds[bindnum].x, pp.binds[bindnum].y, pp.binds[bindnum].z,
-					      CharID), errbuf, 0,&affected_rows)) {
+							BindZoneName, pp.binds[bindnum].zoneId, pp.binds[bindnum].x, pp.binds[bindnum].y, pp.binds[bindnum].z,
+							CharID), errbuf, 0,&affected_rows)) {
 
 		return pp.zone_id;
 	}
@@ -500,9 +500,9 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 
 void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
-    MYSQL_ROW row;
+	MYSQL_ROW row;
 
 	rl.clear();
 
@@ -534,7 +534,7 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 		sprintf(MailKeyString, "%08X", MailKey);
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET mailkey = '%s' WHERE id='%i'",
-					      MailKeyString, CharID), errbuf))
+							MailKeyString, CharID), errbuf))
 
 		LogFile->write(EQEMuLog::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, errbuf);
 
@@ -545,9 +545,9 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
-    MYSQL_ROW row;
+	MYSQL_ROW row;
 
 	if(RunQuery(query, MakeAnyLenString(&query, "SELECT level FROM character_ WHERE name='%s'", name), errbuf, &result))
 	{
@@ -569,71 +569,69 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 }
 
 bool WorldDatabase::LoadCharacterCreateAllocations() {
-    character_create_allocations.clear();
+	character_create_allocations.clear();
 
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
 	MYSQL_RES *result;
-    MYSQL_ROW row;
-    if(RunQuery(query, MakeAnyLenString(&query, "SELECT * FROM char_create_point_allocations order by id"), errbuf, &result)) {
-        safe_delete_array(query);
-        while(row = mysql_fetch_row(result)) {
-            RaceClassAllocation allocate;
-            int r = 0;
-            allocate.Index = atoi(row[r++]);
-            allocate.BaseStats[0] = atoi(row[r++]);
-            allocate.BaseStats[3] = atoi(row[r++]);
-            allocate.BaseStats[1] = atoi(row[r++]);
-            allocate.BaseStats[2] = atoi(row[r++]);
-            allocate.BaseStats[4] = atoi(row[r++]);
-            allocate.BaseStats[5] = atoi(row[r++]);
-            allocate.BaseStats[6] = atoi(row[r++]);
-            allocate.DefaultPointAllocation[0] = atoi(row[r++]);
-            allocate.DefaultPointAllocation[3] = atoi(row[r++]);
-            allocate.DefaultPointAllocation[1] = atoi(row[r++]);
-            allocate.DefaultPointAllocation[2] = atoi(row[r++]);
-            allocate.DefaultPointAllocation[4] = atoi(row[r++]);
-            allocate.DefaultPointAllocation[5] = atoi(row[r++]);
-            allocate.DefaultPointAllocation[6] = atoi(row[r++]);
-            character_create_allocations.push_back(allocate);
-        }
-        mysql_free_result(result);
-    } else {
-        safe_delete_array(query);
-        return false;
-    }
+	MYSQL_ROW row;
+	if(RunQuery(query, MakeAnyLenString(&query, "SELECT * FROM char_create_point_allocations order by id"), errbuf, &result)) {
+		safe_delete_array(query);
+		while(row = mysql_fetch_row(result)) {
+			RaceClassAllocation allocate;
+			int r = 0;
+			allocate.Index = atoi(row[r++]);
+			allocate.BaseStats[0] = atoi(row[r++]);
+			allocate.BaseStats[3] = atoi(row[r++]);
+			allocate.BaseStats[1] = atoi(row[r++]);
+			allocate.BaseStats[2] = atoi(row[r++]);
+			allocate.BaseStats[4] = atoi(row[r++]);
+			allocate.BaseStats[5] = atoi(row[r++]);
+			allocate.BaseStats[6] = atoi(row[r++]);
+			allocate.DefaultPointAllocation[0] = atoi(row[r++]);
+			allocate.DefaultPointAllocation[3] = atoi(row[r++]);
+			allocate.DefaultPointAllocation[1] = atoi(row[r++]);
+			allocate.DefaultPointAllocation[2] = atoi(row[r++]);
+			allocate.DefaultPointAllocation[4] = atoi(row[r++]);
+			allocate.DefaultPointAllocation[5] = atoi(row[r++]);
+			allocate.DefaultPointAllocation[6] = atoi(row[r++]);
+			character_create_allocations.push_back(allocate);
+		}
+		mysql_free_result(result);
+	} else {
+		safe_delete_array(query);
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 bool WorldDatabase::LoadCharacterCreateCombos() {
-    character_create_race_class_combos.clear();
+	character_create_race_class_combos.clear();
 
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
 	MYSQL_RES *result;
-    MYSQL_ROW row;
-    if(RunQuery(query, MakeAnyLenString(&query, "select * from char_create_combinations order by race, class, deity, start_zone"), errbuf, &result)) {
-        safe_delete_array(query);
-        while(row = mysql_fetch_row(result)) {
-            RaceClassCombos combo;
-            int r = 0;
-            combo.AllocationIndex = atoi(row[r++]);
-            combo.Race = atoi(row[r++]);
-            combo.Class = atoi(row[r++]);
-            combo.Deity = atoi(row[r++]);
-            combo.Zone = atoi(row[r++]);
-            combo.ExpansionRequired = atoi(row[r++]);
-            character_create_race_class_combos.push_back(combo);
-        }
-        mysql_free_result(result);
-    } else {
-        safe_delete_array(query);
-        return false;
-    }
+	MYSQL_ROW row;
+	if(RunQuery(query, MakeAnyLenString(&query, "select * from char_create_combinations order by race, class, deity, start_zone"), errbuf, &result)) {
+		safe_delete_array(query);
+		while(row = mysql_fetch_row(result)) {
+			RaceClassCombos combo;
+			int r = 0;
+			combo.AllocationIndex = atoi(row[r++]);
+			combo.Race = atoi(row[r++]);
+			combo.Class = atoi(row[r++]);
+			combo.Deity = atoi(row[r++]);
+			combo.Zone = atoi(row[r++]);
+			combo.ExpansionRequired = atoi(row[r++]);
+			character_create_race_class_combos.push_back(combo);
+		}
+		mysql_free_result(result);
+	} else {
+		safe_delete_array(query);
+		return false;
+	}
 
-    return true;
+	return true;
 }
-
-
 

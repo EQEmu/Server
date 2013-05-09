@@ -643,9 +643,8 @@ uint8 MaxSkillTable(uint16 skillid, uint16 race, uint16 eqclass, uint16 level) {
 				// Melee
 				case MONK: case MONKGM:{
 				// 1 252 252
-					r_value = level*7;  // This can't be right can it?
-					break
-;
+					r_value = level*7; // This can't be right can it?
+					break;
 				}
 				case WARRIOR: case WARRIORGM:
 				case ROGUE: case ROGUEGM: {
@@ -1894,7 +1893,7 @@ uint8 MaxSkillTable(uint16 skillid, uint16 race, uint16 eqclass, uint16 level) {
 			break;
 		}
 	} // end switch (skillid)
-  // NO skill may go over 252
+// NO skill may go over 252
 	if (r_value > 252)
 		r_value = 252;
 	return r_value;

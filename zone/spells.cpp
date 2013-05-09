@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 
@@ -22,11 +22,11 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 	General outline of spell casting process
 
 	1.
-		a)	Client clicks a spell bar gem, ability, or item.  client_process.cpp
+		a)	Client clicks a spell bar gem, ability, or item. client_process.cpp
 		gets the op and calls CastSpell() with all the relevant info including
 		cast time.
 
-		b)  NPC does CastSpell() from AI
+		b) NPC does CastSpell() from AI
 
 	2.
 		a)	CastSpell() determines there is a cast time and sets some state keeping
@@ -41,7 +41,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 
 	4.
 		CastedSpellFinished() checks some timed spell specific things, like
-		wether to interrupt or not, due to movement or melee.  If successful
+		wether to interrupt or not, due to movement or melee. If successful
 		SpellFinished() is called.
 
 	5.
@@ -141,7 +141,7 @@ void NPC::SpellProcess()
 
 		Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
 		if(GetSwarmInfo()->target != 0)
-        {
+		{
 			if(!targMob || (targMob && targMob->IsCorpse()))
 				Depop();
 		}
@@ -154,9 +154,9 @@ void NPC::SpellProcess()
 //
 // only CastSpell and DoCastSpell should be setting casting_spell_id.
 // basically casting_spell_id is only set when casting a triggered spell from
-// the spell bar gems, an ability, or an item.  note that it's actually set
+// the spell bar gems, an ability, or an item. note that it's actually set
 // even if it's a 0 cast time, but then the spell is finished right after and
-// it's unset.  this is ok, since the 0 cast time spell is still a triggered
+// it's unset. this is ok, since the 0 cast time spell is still a triggered
 // one.
 // the rule is you can cast one triggered (usually timed) spell at a time
 // but things like SpellFinished() can run concurrent with a triggered cast
@@ -244,11 +244,11 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		return(false);
 	}
 
-    if (HasActiveSong() && IsBardSong(spell_id)) {
-    	mlog(SPELLS__BARDS, "Casting a new song while singing a song. Killing old song %d.", bardsong);
-    	//Note: this does NOT tell the client
-        _StopSong();
-    }
+	if (HasActiveSong() && IsBardSong(spell_id)) {
+		mlog(SPELLS__BARDS, "Casting a new song while singing a song. Killing old song %d.", bardsong);
+		//Note: this does NOT tell the client
+		_StopSong();
+	}
 
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
 	if(item_slot && IsClient() && ((slot == USE_ITEM_SPELL_SLOT) || (slot == POTION_BELT_SPELL_SLOT)))
@@ -306,7 +306,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 }
 
 //
-// the order of things here is intentional and important.  make sure you
+// the order of things here is intentional and important. make sure you
 // understand the whole spell casting process and the flags that are passed
 // around if you're gonna modify this
 //
@@ -314,7 +314,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 // to repeat a spell for bard songs
 //
 bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
-                    int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish,
+					int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish,
 					uint32 item_slot, uint32 timer, uint32 timer_duration, uint32 type,
 					int16 resist_adjust)
 {
@@ -622,8 +622,8 @@ bool Client::CheckFizzle(uint16 spell_id)
 	}
 
 	// == 0 --> on par
-	// > 0  --> skill is lower, higher chance of fizzle
-	// < 0  --> skill is better, lower chance of fizzle
+	// > 0 --> skill is lower, higher chance of fizzle
+	// < 0 --> skill is better, lower chance of fizzle
 	// the max that diff can be is +- 235
 	float diff = par_skill + spells[spell_id].basediff - act_skill;
 
@@ -695,25 +695,25 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 {
 	EQApplicationPacket *outapp;
 	uint16 message_other;
-    bool bard_song_mode = false; //has the bard song gone to auto repeat mode
+	bool bard_song_mode = false; //has the bard song gone to auto repeat mode
 	if (spellid == SPELL_UNKNOWN) {
 		if(bardsong) {
-            spellid = bardsong;
-            bard_song_mode = true;
-        } else {
-            spellid = casting_spell_id;
-        }
-    }
+			spellid = bardsong;
+			bard_song_mode = true;
+		} else {
+			spellid = casting_spell_id;
+		}
+	}
 
 	if(casting_spell_id && IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
 	}
 
-    if(casting_spell_type == 1 && IsClient()) { //Rest AA Timer on failed cast
-        CastToClient()->SendAATimer(casting_spell_timer - pTimerAAStart, 0, 0xFFFFFF);
-        CastToClient()->Message_StringID(15,ABILITY_FAILED);
-        CastToClient()->GetPTimers().Clear(&database, casting_spell_timer);
-    }
+	if(casting_spell_type == 1 && IsClient()) { //Rest AA Timer on failed cast
+		CastToClient()->SendAATimer(casting_spell_timer - pTimerAAStart, 0, 0xFFFFFF);
+		CastToClient()->Message_StringID(15,ABILITY_FAILED);
+		CastToClient()->GetPTimers().Clear(&database, casting_spell_timer);
+	}
 
 	ZeroCastingVars();	// resets all the state keeping stuff
 
@@ -725,9 +725,9 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	if (bardsong || IsBardSong(casting_spell_id))
 		_StopSong();
 
-    if(bard_song_mode) {
-        return;
-    }
+	if(bard_song_mode) {
+		return;
+	}
 
 	if(!message)
 		message = IsBardSong(spellid) ? SONG_ENDS_ABRUPTLY : INTERRUPT_SPELL;
@@ -780,13 +780,13 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 }
 
 // this is called after the timer is up and the spell is finished
-// casting.  everything goes through here, including items with zero cast time
+// casting. everything goes through here, including items with zero cast time
 // only to be used from SpellProcess
-// NOTE: do not put range checking, etc into this function.  this should
+// NOTE: do not put range checking, etc into this function. this should
 // just check timed spell specific things before passing off to SpellFinished
 // which figures out proper targets etc
 void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
-							  uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
+							uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
 {
 	_ZP(Mob_CastedSpellFinished);
 
@@ -794,7 +794,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 	if(IsClient() && slot != USE_ITEM_SPELL_SLOT && slot != POTION_BELT_SPELL_SLOT && spells[spell_id].recast_time > 1000) { // 10 is item
 		if(!CastToClient()->GetPTimers().Expired(&database, pTimerSpellStart + spell_id, false)) {
-			//should we issue a  message or send them a spell gem packet?
+			//should we issue a message or send them a spell gem packet?
 			Message_StringID(13, SPELL_RECAST);
 			mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: spell reuse timer not expired", spell_id);
 			InterruptSpell();
@@ -900,7 +900,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				// max 93% chance at 252 skill
 				channelchance = 30 + GetSkill(CHANNELING) / 400.0f * 100;
 				channelchance -= attacked_count * 2;
-				channelchance +=  channelchance * channelbonuses / 100.0f;
+				channelchance += channelchance * channelbonuses / 100.0f;
 			}
 #ifdef BOTS
 			else if(IsBot()) {
@@ -914,7 +914,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				// max 93% chance at 252 skill
 				channelchance = 30 + GetSkill(CHANNELING) / 400.0f * 100;
 				channelchance -= attacked_count * 2;
-				channelchance +=  channelchance * channelbonuses / 100.0f;
+				channelchance += channelchance * channelbonuses / 100.0f;
 			}
 #endif //BOTS
 			else {
@@ -1018,7 +1018,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 							}
 							break;
 
-						default:	// some non-instrument component.  Let it go, but record it in the log
+						default:	// some non-instrument component. Let it go, but record it in the log
 							mlog(SPELLS__CASTING_ERR, "Something odd happened: Song %d required component %s", spell_id, component);
 					}
 
@@ -1199,8 +1199,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	if(this->IsClient()) {
 		if(parse->PlayerHasQuestSub("EVENT_CAST") ) {
 			char temp[64];
-            sprintf(temp, "%d", spell_id);
-            parse->EventPlayer(EVENT_CAST, CastToClient(), temp, 0);
+			sprintf(temp, "%d", spell_id);
+			parse->EventPlayer(EVENT_CAST, CastToClient(), temp, 0);
 		}
 	}
 
@@ -1241,7 +1241,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				c->CheckSpecializeIncrease(spell_id);
 			}
 		}
-    }
+	}
 
 	// there should be no casting going on now
 	ZeroCastingVars();
@@ -1270,14 +1270,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 	AE on location - this is a tricky one that is cast on a mob target but
 	has a special AE duration that keeps it recasting every 2.5 sec on the
-	same location.  These work the same as AE around target spells, except
+	same location. These work the same as AE around target spells, except
 	the target is a special beacon that's created when the spell is cast
 
 	Group - the caster is always affected, but there's more
 		targetgroupbuffs on - these affect the target and the target's group.
 		targetgroupbuffs off - no target, affects the caster's group.
 
-	Group Teleport - the caster plus his group are affected.  these cannot
+	Group Teleport - the caster plus his group are affected. these cannot
 	be targeted.
 
 	I think the string ID SPELL_NEED_TAR is wrong, it dosent seem to show up.
@@ -1354,10 +1354,10 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		{
 			uint8 body_type = spell_target ? spell_target->GetBodyType() : 0;
 			if(!spell_target || (spell_target != GetPet()) ||
-			   (body_type != BT_Summoned && body_type != BT_Summoned2 && body_type != BT_Summoned3 && body_type != BT_Animal))
+				(body_type != BT_Summoned && body_type != BT_Summoned2 && body_type != BT_Summoned3 && body_type != BT_Animal))
 			{
 				mlog(SPELLS__CASTING_ERR, "Spell %d canceled: invalid target of body type %d (summoned pet)",
-							  spell_id, body_type);
+							spell_id, body_type);
 
 				Message_StringID(13, SPELL_NEED_TAR);
 
@@ -1712,7 +1712,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	if
 	(
 		this->IsClient() &&
-		(zone->GetZoneID() == 183 || zone->GetZoneID() == 184) && 	// load
+		(zone->GetZoneID() == 183 || zone->GetZoneID() == 184) &&	// load
 		CastToClient()->Admin() < 80
 	)
 	{
@@ -1737,12 +1737,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	mlog(SPELLS__CASTING, "Spell %d: target type %d, target %s, AE center %s", spell_id, CastAction, spell_target?spell_target->GetName():"NONE", ae_center?ae_center->GetName():"NONE");
 
 	// if a spell has the AEDuration flag, it becomes an AE on target
-	// spell that's recast every 2500 msec for AEDuration msec.  There are
+	// spell that's recast every 2500 msec for AEDuration msec. There are
 	// spells of all kinds of target types that do this, strangely enough
 	// TODO: finish this
 	if(IsAEDurationSpell(spell_id)) {
 		// the spells are AE target, but we aim them on a beacon
-		Mob *beacon_loc =  spell_target ? spell_target : this;
+		Mob *beacon_loc = spell_target ? spell_target : this;
 		Beacon *beacon = new Beacon(beacon_loc, spells[spell_id].AEDuration);
 		entity_list.AddBeacon(beacon);
 		mlog(SPELLS__CASTING, "Spell %d: AE duration beacon created, entity id %d", spell_id, beacon->GetName());
@@ -2004,7 +2004,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 	// if this was a spell slot or an ability use up the mana for it
 	// CastSpell already reduced the cost for it if we're a client with focus
-	if(slot != USE_ITEM_SPELL_SLOT  && slot != POTION_BELT_SPELL_SLOT && mana_used > 0)
+	if(slot != USE_ITEM_SPELL_SLOT && slot != POTION_BELT_SPELL_SLOT && mana_used > 0)
 	{
 		mlog(SPELLS__CASTING, "Spell %d: consuming %d mana", spell_id, mana_used);
 		if (!DoHPToManaCovert(mana_used))
@@ -2056,9 +2056,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
  * handle bard song pulses...
  *
  * we make several assumptions that SpellFinished does not:
- *   - there are no AEDuration (beacon) bard songs
- *   - there are no recourse spells on bard songs
- *   - there is no long recast delay on bard songs
+ *	- there are no AEDuration (beacon) bard songs
+ *	- there are no recourse spells on bard songs
+ *	- there is no long recast delay on bard songs
  *
  * return false to stop the song
  */
@@ -2611,21 +2611,21 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if(effect1 != effect2)
 			continue;
 
-        /*
-        Skip check if effect is SE_Limit*
-        skip checking effect2 since we know they are equal
-        */
-        if(effect1 == SE_LimitMaxLevel ||
-            effect1 == SE_LimitResist ||
-            effect1 == SE_LimitTarget ||
-            effect1 == SE_LimitEffect ||
-            effect1 == SE_LimitSpellType ||
-            effect1 == SE_LimitSpell ||
-            effect1 == SE_LimitMinDur ||
-            effect1 == SE_LimitInstant ||
-            effect1 == SE_LimitMinLevel ||
-            effect1 == SE_LimitCastTime)
-            continue;
+		/*
+		Skip check if effect is SE_Limit*
+		skip checking effect2 since we know they are equal
+		*/
+		if(effect1 == SE_LimitMaxLevel ||
+			effect1 == SE_LimitResist ||
+			effect1 == SE_LimitTarget ||
+			effect1 == SE_LimitEffect ||
+			effect1 == SE_LimitSpellType ||
+			effect1 == SE_LimitSpell ||
+			effect1 == SE_LimitMinDur ||
+			effect1 == SE_LimitInstant ||
+			effect1 == SE_LimitMinLevel ||
+			effect1 == SE_LimitCastTime)
+			continue;
 
 		/*
 		If target is a npc and caster1 and caster2 exist
@@ -2667,7 +2667,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		sp1_value = CalcSpellEffectValue(spellid1, i, caster_level1);
 		sp2_value = CalcSpellEffectValue(spellid2, i, caster_level2);
 
-		// some spells are hard to compare just on value.  attack speed spells
+		// some spells are hard to compare just on value. attack speed spells
 		// have a value that's a percentage for instance
 		if
 		(
@@ -2743,9 +2743,9 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		spell_id, caster?caster->GetName():"UNKNOWN", caster_level, duration);
 
 	// first we loop through everything checking that the spell
-	// can stack with everything.  this is to avoid stripping the spells
+	// can stack with everything. this is to avoid stripping the spells
 	// it would overwrite, and then hitting a buff we can't stack with.
-	// we also check if overwriting will occur.  this is so after this loop
+	// we also check if overwriting will occur. this is so after this loop
 	// we can determine if there will be room for this buff
 	uint32 buff_count = GetMaxTotalSlots();
 	uint32 start_slot = 0;
@@ -2798,32 +2798,32 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	// we didn't find an empty slot to put it in, and it's not overwriting
 	// anything so there must not be any room left.
- 	if(emptyslot == -1 && !will_overwrite)
- 	//	return -1;
- 	{
- 		if(IsDetrimentalSpell(spell_id)) //Sucks to be you, bye bye one of your buffs
- 		{
- 			for(buffslot = 0; buffslot < buff_count; buffslot++)
- 			{
- 				const Buffs_Struct &curbuf = buffs[buffslot];
- 				if(IsBeneficialSpell(curbuf.spellid))
- 				{
- 					mlog(SPELLS__BUFFS, "No slot for detrimental buff %d, so we are overwriting a beneficial buff %d in slot %d", spell_id, curbuf.spellid, buffslot);
- 					BuffFadeBySlot(buffslot,false);
- 					emptyslot = buffslot;
+	if(emptyslot == -1 && !will_overwrite)
+	//	return -1;
+	{
+		if(IsDetrimentalSpell(spell_id)) //Sucks to be you, bye bye one of your buffs
+		{
+			for(buffslot = 0; buffslot < buff_count; buffslot++)
+			{
+				const Buffs_Struct &curbuf = buffs[buffslot];
+				if(IsBeneficialSpell(curbuf.spellid))
+				{
+					mlog(SPELLS__BUFFS, "No slot for detrimental buff %d, so we are overwriting a beneficial buff %d in slot %d", spell_id, curbuf.spellid, buffslot);
+					BuffFadeBySlot(buffslot,false);
+					emptyslot = buffslot;
 					break;
- 				}
- 			}
- 			if(emptyslot == -1) {
-	 			mlog(SPELLS__BUFFS, "Unable to find a buff slot for detrimental buff %d", spell_id);
+				}
+			}
+			if(emptyslot == -1) {
+				mlog(SPELLS__BUFFS, "Unable to find a buff slot for detrimental buff %d", spell_id);
 				return(-1);
- 			}
- 		}
- 		else {
- 			mlog(SPELLS__BUFFS, "Unable to find a buff slot for beneficial buff %d", spell_id);
- 			return -1;
- 		}
- 	}
+			}
+		}
+		else {
+			mlog(SPELLS__BUFFS, "Unable to find a buff slot for beneficial buff %d", spell_id);
+			return -1;
+		}
+	}
 
 	// at this point we know that this buff will stick, but we have
 	// to remove some other buffs already worn if will_overwrite is true
@@ -2848,19 +2848,19 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	buffs[emptyslot].spellid = spell_id;
 	buffs[emptyslot].casterlevel = caster_level;
-    if(caster && caster->IsClient()) {
-        strcpy(buffs[emptyslot].caster_name, caster->GetName());
-    } else {
-        memset(buffs[emptyslot].caster_name, 0, 64);
-    }
+	if(caster && caster->IsClient()) {
+		strcpy(buffs[emptyslot].caster_name, caster->GetName());
+	} else {
+		memset(buffs[emptyslot].caster_name, 0, 64);
+	}
 	buffs[emptyslot].casterid = caster ? caster->GetID() : 0;
 	buffs[emptyslot].ticsremaining = duration;
-    buffs[emptyslot].counters = CalculateCounters(spell_id);
+	buffs[emptyslot].counters = CalculateCounters(spell_id);
 	buffs[emptyslot].numhits = spells[spell_id].numhits;
 	buffs[emptyslot].client = caster ? caster->IsClient() : 0;
-    buffs[emptyslot].persistant_buff = 0;
-    buffs[emptyslot].deathsaveCasterAARank = 0;
-    buffs[emptyslot].deathSaveSuccessChance = 0;
+	buffs[emptyslot].persistant_buff = 0;
+	buffs[emptyslot].deathsaveCasterAARank = 0;
+	buffs[emptyslot].deathSaveSuccessChance = 0;
 
 	if(level_override > 0)
 	{
@@ -2878,15 +2878,15 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 
 	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
-			   (IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
+				(IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
 		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
 
-        if(GetTarget() == this) {
-            CastToClient()->QueuePacket(outapp);
-        }
+		if(GetTarget() == this) {
+			CastToClient()->QueuePacket(outapp);
+		}
 
 		safe_delete(outapp);
 	}
@@ -2960,7 +2960,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 // Group::CastGroupSpell (called by Mob::SpellFinished)
 //
 // also note you can't interrupt the spell here. at this point it's going
-// and if you don't want effects just return false.  interrupting here will
+// and if you don't want effects just return false. interrupting here will
 // break stuff
 //
 bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust, bool isproc)
@@ -2977,12 +2977,12 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	if(spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn())
 		return false;
 
-    if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar) && !IsResurrectionEffects(spell_id)) {
-        if(!IsClient() || !CastToClient()->GetGM()) {
-            Message_StringID(MT_Shout, SPELL_NO_HOLD);
-            return false;
-        }
-    }
+	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar) && !IsResurrectionEffects(spell_id)) {
+		if(!IsClient() || !CastToClient()->GetGM()) {
+			Message_StringID(MT_Shout, SPELL_NO_HOLD);
+			return false;
+		}
+	}
 
 	if(RuleB(Spells, EnableBlockedBuffs))
 	{
@@ -2995,7 +2995,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		if(spelltar->IsPet() && spelltar->GetOwner() && spelltar->GetOwner()->IsBlockedPetBuff(spell_id))
 		{
 			mlog(SPELLS__BUFFS, "Spell %i not applied to %s (%s's pet) as it is a Pet Blocked Buff.", spell_id, spelltar->GetName(),
-					    spelltar->GetOwner()->GetName());
+						spelltar->GetOwner()->GetName());
 			return false;
 		}
 	}
@@ -3043,8 +3043,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	// select target
 	if	// Bind Sight line of spells
 	(
-		spell_id == 500 || 	// bind sight
-		spell_id == 407 		// cast sight
+		spell_id == 500 ||	// bind sight
+		spell_id == 407		// cast sight
 	)
 	{
 		action->target = GetID();
@@ -3069,12 +3069,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	entity_list.QueueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells);
 
 
-       /* Send the EVENT_CAST_ON event */
-       if(spelltar->IsNPC())
-       {       char temp1[100];
-               sprintf(temp1, "%d", spell_id);
-               parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, temp1, 0);
-       }
+	/* Send the EVENT_CAST_ON event */
+	if(spelltar->IsNPC())
+	{
+		char temp1[100];
+		sprintf(temp1, "%d", spell_id);
+		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, temp1, 0);
+	}
 
 	// now check if the spell is allowed to land
 
@@ -3489,7 +3490,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness))
 	{
 		// if SpellEffect returned false there's a problem applying the
-		// spell.  It's most likely a buff that can't stack.
+		// spell. It's most likely a buff that can't stack.
 		mlog(SPELLS__CASTING_ERR, "Spell %d could not apply its effects %s -> %s\n", spell_id, GetName(), spelltar->GetName());
 		Message_StringID(MT_Shout, SPELL_NO_HOLD);
 		safe_delete(action_packet);
@@ -3592,11 +3593,11 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	_log(SPELLS__REZ, "Corpse::CastRezz spellid %i, Rezzed() is %i, rezzexp is %i", spellid,Rezzed(),rezzexp);
 
 	if(Rezzed()){
- 		if(Caster && Caster->IsClient())
+		if(Caster && Caster->IsClient())
 			Caster->Message(13,"This character has already been resurrected.");
 
- 		return;
- 	}
+		return;
+	}
 	/*
 	if(!can_rez) {
 		if(Caster && Caster->IsClient())
@@ -3753,7 +3754,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	if(!IsValidSpell(spell_id))
 		return true;
 
-	if(IsBeneficialSpell(spell_id) && (caster->GetNPCTypeID()))  //then skip the rest, stop NPCs aggroing each other with buff spells. 2013-03-05
+	if(IsBeneficialSpell(spell_id) && (caster->GetNPCTypeID())) //then skip the rest, stop NPCs aggroing each other with buff spells. 2013-03-05
 		return false;
 
 	if(IsMezSpell(spell_id))
@@ -3916,7 +3917,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 //
 // Spell resists:
-// returns an effectiveness index from 0 to 100.  for most spells, 100 means
+// returns an effectiveness index from 0 to 100. for most spells, 100 means
 // it landed, and anything else means it was resisted; however there are some
 // spells that can be partially effective, and this value can be used there.
 // TODO: we need to figure out how the following pvp values work and implement them
@@ -4406,7 +4407,7 @@ void Mob::Mesmerize()
 		stunon->duration = 0xFFFF;
 		this->CastToClient()->QueuePacket(outapp);
 		safe_delete(outapp);
-    } else {
+	} else {
 		SetRunAnimSpeed(0);
 	}
 */
@@ -4617,7 +4618,7 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 
 			mysql_free_result(result);
 
-			if (Spell_Global_Name.empty()) {   // If the entry in the spell_globals table has nothing set for the qglobal name
+			if (Spell_Global_Name.empty()) { // If the entry in the spell_globals table has nothing set for the qglobal name
 				return true;
 			}
 			else if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT value FROM quest_globals WHERE charid=%i AND name='%s'", Char_ID, Spell_Global_Name.c_str()), errbuf, &result)) {
@@ -4628,13 +4629,13 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 
 					Global_Value = atoi(row[0]);
 					mysql_free_result(result);
-					if (Global_Value == Spell_Global_Value) {   // If the values match from both tables, allow the spell to be scribed
+					if (Global_Value == Spell_Global_Value) { // If the values match from both tables, allow the spell to be scribed
 						return true;
 					}
-					else if (Global_Value > Spell_Global_Value) {   // Check if the qglobal value is greater than the require spellglobal value
+					else if (Global_Value > Spell_Global_Value) { // Check if the qglobal value is greater than the require spellglobal value
 						return true;
 					}
-					else   // If no matching result found in qglobals, don't scribe this spell
+					else // If no matching result found in qglobals, don't scribe this spell
 					{
 						LogFile->write(EQEMuLog::Error, "Char ID: %i Spell_globals Name: '%s' Value: '%i' did not match QGlobal Value: '%i' for Spell ID %i", Char_ID, Spell_Global_Name.c_str(), Spell_Global_Value, Global_Value, Spell_ID);
 						return false;
@@ -4648,16 +4649,16 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 				LogFile->write(EQEMuLog::Error, "Spell ID %i query of spell_globals with Name: '%s' Value: '%i' failed", Spell_ID, Spell_Global_Name.c_str(), Spell_Global_Value);
 		}
 		else {
-			return true;   // Spell ID isn't listed in the spells_global table, so it is not restricted from scribing
+			return true; // Spell ID isn't listed in the spells_global table, so it is not restricted from scribing
 		}
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", Spell_ID, query,  errbuf);
+		LogFile->write(EQEMuLog::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", Spell_ID, query, errbuf);
 		safe_delete_array(query);
-		return false;   // Query failed, so prevent spell from scribing just in case
+		return false; // Query failed, so prevent spell from scribing just in case
 	}
-	return false;   // Default is false
+	return false; // Default is false
 }
 
 //this is one nasty function... FindType and FindSpell are rather complex operations...
@@ -4668,14 +4669,14 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 		CheckPet();
 
 		uint8 newtype[15] = { SE_ArmorClass, SE_STR, SE_DEX, SE_AGI, SE_WIS,
-                             SE_INT, SE_CHA, SE_AttackSpeed, SE_MovementSpeed,
-                             SE_DamageShield, SE_ResistFire, SE_ResistCold,
-                             SE_ResistMagic, SE_ResistPoison, SE_ResistDisease };
+							SE_INT, SE_CHA, SE_AttackSpeed, SE_MovementSpeed,
+							SE_DamageShield, SE_ResistFire, SE_ResistCold,
+							SE_ResistMagic, SE_ResistPoison, SE_ResistDisease };
 		for (int h=0; h<15; h++) {
 			if (!this->FindType(newtype[h])) {
 				uint16 buffid = FindSpell(this->class_, this->level,
-                                         newtype[h], SPELLTYPE_SELF, 0,
-                                         GetMana());
+										newtype[h], SPELLTYPE_SELF, 0,
+										GetMana());
 				if (buffid != 0) {
 					this->CastSpell(buffid, this->GetID());
 				}
@@ -4691,12 +4692,12 @@ void Mob::CheckPet() {
 	if ((GetClass() == NECROMANCER || GetClass() == MAGICIAN)) {
 		if (this->GetClass() == MAGICIAN) {
 			buffid = FindSpell(class_, level,
-                               SE_SummonPet, SPELLTYPE_OTHER, 0,
-                               GetMana());
-        } else if (GetClass() == NECROMANCER) {
+							SE_SummonPet, SPELLTYPE_OTHER, 0,
+							GetMana());
+		} else if (GetClass() == NECROMANCER) {
 			buffid = FindSpell(class_, level,
-                               SE_NecPet, SPELLTYPE_OTHER, 0,
-                               GetMana());
+							SE_NecPet, SPELLTYPE_OTHER, 0,
+							GetMana());
 		}
 		if (buffid != 0) {
 			CastSpell(buffid, GetID());
@@ -4705,154 +4706,154 @@ void Mob::CheckPet() {
 }
 
 uint16 Mob::FindSpell(uint16 classp, uint16 level, int type,
-                     FindSpellType spelltype, float distance,
-                     int32 mana_avail) {
-    int i,j;
+					FindSpellType spelltype, float distance,
+					int32 mana_avail) {
+	int i,j;
 
-    int bestvalue = -1;
-    int bestid = 0;
+	int bestvalue = -1;
+	int bestid = 0;
 
-    if (classp < 1)
-        return 0;
-    if (level < 1)
-        return 0;
+	if (classp < 1)
+		return 0;
+	if (level < 1)
+		return 0;
 	classp = GetEQArrayEQClass(classp);
 
-    // purpose: find a suited spell for a class and level and type
-    // the if's are here to filter out anything which isnt normal.
-    // its possible that we miss some valid spells, but who cares.
+	// purpose: find a suited spell for a class and level and type
+	// the if's are here to filter out anything which isnt normal.
+	// its possible that we miss some valid spells, but who cares.
 
 	for (i = 0; i < SPDAT_RECORDS; i++) {
 				if(!IsValidSpell(i))
 					continue;
-        // Filter all spells that should never be used
-        if (spells[i].effectid[0] == SE_NegateIfCombat)
-            continue;
-        if (spells[i].targettype == ST_Group)
-            continue;
-        if (i == 2632)  // fix for obsolete BST pet summon spell
-            continue;
-        if (i == 1576)  // fix for torpor
-            continue;
-        if (spells[i].cast_time < 11)
-            continue;
-        if (spells[i].mana == 0)
-            continue;
+		// Filter all spells that should never be used
+		if (spells[i].effectid[0] == SE_NegateIfCombat)
+			continue;
+		if (spells[i].targettype == ST_Group)
+			continue;
+		if (i == 2632) // fix for obsolete BST pet summon spell
+			continue;
+		if (i == 1576) // fix for torpor
+			continue;
+		if (spells[i].cast_time < 11)
+			continue;
+		if (spells[i].mana == 0)
+			continue;
 
-        // now for closer checks
-        if (spelltype == SPELLTYPE_SELF) {
-            if ( i == 357)  // fix for dark empathy
-                continue;
-            // check buffs 12 would be max, but 90% of all effects are in the first 4 slots
-            for (j = 0; j < 5; j++) {
-                // fix for pets
-                if ( spells[i].effectid[j] == SE_Illusion &&
-                     type != SE_Illusion)  // only let illusions thru if explicitly requested
-                    continue;
-                if ( spells[i].effectid[j] == type &&
-                     spells[i].goodEffect != 0 &&
-                     spells[i].classes[classp] <= level &&
-                     spells[i].classes[classp] <= 65 &&
-                     (spells[i].recast_time < 10000 ||
-                      type == SE_SummonPet ||
-                      type == SE_SummonBSTPet) && // fix for druid pets
-                     (type == SE_AbsorbMagicAtt || type == SE_Rune ||
-                      type == SE_NecPet || type == SE_SummonPet ||
-                      spells[i].components[0] == -1 ) &&
-                     spells[i].targettype != ST_Undead &&   // for  necro mend series
-                     spells[i].targettype != ST_Group &&    // fix for group spells
-                     spells[i].targettype != ST_Pet &&      // fix for beastlords casting pet heals on self
-                     spells[i].targettype != ST_Summoned && // fix for vs. summoned spells on normal npcs
-                     spells[i].targettype != ST_AETarget && // dont let em cast AEtarget spells
-                     spells[i].mana <= mana_avail &&
-                     spells[i].range >= distance) {
-                    int32 spellvalue;
+		// now for closer checks
+		if (spelltype == SPELLTYPE_SELF) {
+			if ( i == 357) // fix for dark empathy
+				continue;
+			// check buffs 12 would be max, but 90% of all effects are in the first 4 slots
+			for (j = 0; j < 5; j++) {
+				// fix for pets
+				if ( spells[i].effectid[j] == SE_Illusion &&
+					type != SE_Illusion) // only let illusions thru if explicitly requested
+					continue;
+				if (spells[i].effectid[j] == type &&
+						spells[i].goodEffect != 0 &&
+						spells[i].classes[classp] <= level &&
+						spells[i].classes[classp] <= 65 &&
+						(spells[i].recast_time < 10000 ||
+						type == SE_SummonPet ||
+						type == SE_SummonBSTPet) && // fix for druid pets
+						(type == SE_AbsorbMagicAtt || type == SE_Rune ||
+						type == SE_NecPet || type == SE_SummonPet ||
+						spells[i].components[0] == -1 ) &&
+						spells[i].targettype != ST_Undead &&	// for necro mend series
+						spells[i].targettype != ST_Group &&	// fix for group spells
+						spells[i].targettype != ST_Pet &&		// fix for beastlords casting pet heals on self
+						spells[i].targettype != ST_Summoned && // fix for vs. summoned spells on normal npcs
+						spells[i].targettype != ST_AETarget && // dont let em cast AEtarget spells
+						spells[i].mana <= mana_avail &&
+						spells[i].range >= distance) {
+					int32 spellvalue;
 
-                    // lets assume pet is always better if higher, so no formula needed
-                    if (type == SE_NecPet ||
-                        type == SE_SummonPet ||
-                        type == SE_SummonBSTPet) {
-                        spellvalue = spells[i].classes[classp];
-                    } else {
+					// lets assume pet is always better if higher, so no formula needed
+					if (type == SE_NecPet ||
+						type == SE_SummonPet ||
+						type == SE_SummonBSTPet) {
+						spellvalue = spells[i].classes[classp];
+					} else {
 											spellvalue = CalcSpellEffectValue_formula(spells[i].formula[j],
-                                                    spells[i].base[j],
-                                                    spells[i].max[j],
-                                                    level, i);
-                    }
+													spells[i].base[j],
+													spells[i].max[j],
+													level, i);
+					}
 
-                    if (abs(spellvalue) > bestvalue) {
-                        bestvalue = abs(spellvalue);
-                        bestid = i;
-                    }
-                }
-            }
-        } else if (spelltype == SPELLTYPE_OFFENSIVE) {
-            // check offensive spells
-            for (j = 0; j < 5; j++) {
-                if (spells[i].effectid[j] == SE_Illusion &&
-                    type != SE_Illusion)  // only let illusions thru if explicitly requested
-                    continue;
-                if (spells[i].effectid[j] == type &&
-                    spells[i].goodEffect == 0 &&
-                    spells[i].classes[classp] <= level &&
-                    spells[i].classes[classp] <= 65 &&
-                    spells[i].recast_time < 10000 &&
-                    spells[i].components[0] == -1 &&
-                    spells[i].mana <= mana_avail &&
-                    spells[i].targettype != ST_Undead &&   // thats for the necro mend series
-                    spells[i].targettype != ST_Group &&    // fix for group spells
-                    spells[i].targettype != ST_Pet &&      // fix for beastlords casting pet heals on self
-                    spells[i].targettype != ST_Summoned && // fix for vs. summoned spells on normal npcs
-                    spells[i].targettype != ST_AETarget && // dont let em cast AEtarget spells
-                    spells[i].range >= distance) {
-                    int32 spellvalue = CalcSpellEffectValue_formula(spells[i].formula[j],
-                                                       spells[i].base[j],
-                                                       spells[i].max[j],
-                                                       level, i);
-                    if ( abs(spellvalue) > bestvalue ) {
-                        bestvalue = abs(spellvalue);
-                        bestid = i;
-                    }
-                }
-            }
-        } else if (spelltype == SPELLTYPE_OTHER) {
-            if ( i == 357)  // fix for dark empathy
-                continue;
-            // healing and such
-            for (j = 0; j < 5; j++) {
-                if (spells[i].effectid[j] == SE_Illusion &&
-                    type != SE_Illusion)  // only let illusions thru if explicitly requested
-                    continue;
-                if (spells[i].effectid[j] == type &&
-                    spells[i].targettype != ST_Self &&
-                    spells[i].goodEffect != 0 &&
-                    spells[i].classes[classp] <= level &&
-                    spells[i].classes[classp] <= 65 &&
-                    spells[i].recast_time < 10000 &&
-                    spells[i].components[0] == -1 &&
-                    spells[i].targettype != ST_Undead &&   // thats for the necro mend series
-                    spells[i].targettype != ST_Group &&    // fix for group spells
-                    spells[i].targettype != ST_Pet &&      // fix for beastlords casting pet heals on self
-                    spells[i].targettype != ST_Summoned && // fix for vs. summoned spells on normal npcs
-                    spells[i].targettype != ST_AETarget && // dont let em cast AEtarget spells
-                    spells[i].mana <= mana_avail &&
-                    spells[i].range >= distance) {
-                    int32 spellvalue = CalcSpellEffectValue_formula(spells[i].formula[j],
-                                                       spells[i].base[j],
-                                                       spells[i].max[j],
-                                                       level, i);
-                    if ( abs(spellvalue) > bestvalue ) {
-                        bestvalue = abs(spellvalue);
-                        bestid = i;
-                    }
-                }
-            }
-        }
-    } // for i
+					if (abs(spellvalue) > bestvalue) {
+						bestvalue = abs(spellvalue);
+						bestid = i;
+					}
+				}
+			}
+		} else if (spelltype == SPELLTYPE_OFFENSIVE) {
+			// check offensive spells
+			for (j = 0; j < 5; j++) {
+				if (spells[i].effectid[j] == SE_Illusion &&
+					type != SE_Illusion) // only let illusions thru if explicitly requested
+					continue;
+				if (spells[i].effectid[j] == type &&
+						spells[i].goodEffect == 0 &&
+						spells[i].classes[classp] <= level &&
+						spells[i].classes[classp] <= 65 &&
+						spells[i].recast_time < 10000 &&
+						spells[i].components[0] == -1 &&
+						spells[i].mana <= mana_avail &&
+						spells[i].targettype != ST_Undead &&	// thats for the necro mend series
+						spells[i].targettype != ST_Group &&		// fix for group spells
+						spells[i].targettype != ST_Pet &&		// fix for beastlords casting pet heals on self
+						spells[i].targettype != ST_Summoned &&	// fix for vs. summoned spells on normal npcs
+						spells[i].targettype != ST_AETarget &&	// dont let em cast AEtarget spells
+						spells[i].range >= distance) {
+					int32 spellvalue = CalcSpellEffectValue_formula(spells[i].formula[j],
+													spells[i].base[j],
+													spells[i].max[j],
+													level, i);
+					if ( abs(spellvalue) > bestvalue ) {
+						bestvalue = abs(spellvalue);
+						bestid = i;
+					}
+				}
+			}
+		} else if (spelltype == SPELLTYPE_OTHER) {
+			if ( i == 357) // fix for dark empathy
+				continue;
+			// healing and such
+			for (j = 0; j < 5; j++) {
+				if (spells[i].effectid[j] == SE_Illusion &&
+					type != SE_Illusion) // only let illusions thru if explicitly requested
+					continue;
+				if (spells[i].effectid[j] == type &&
+						spells[i].targettype != ST_Self &&
+						spells[i].goodEffect != 0 &&
+						spells[i].classes[classp] <= level &&
+						spells[i].classes[classp] <= 65 &&
+						spells[i].recast_time < 10000 &&
+						spells[i].components[0] == -1 &&
+						spells[i].targettype != ST_Undead &&	// thats for the necro mend series
+						spells[i].targettype != ST_Group &&		// fix for group spells
+						spells[i].targettype != ST_Pet &&		// fix for beastlords casting pet heals on self
+						spells[i].targettype != ST_Summoned &&	// fix for vs. summoned spells on normal npcs
+						spells[i].targettype != ST_AETarget &&	// dont let em cast AEtarget spells
+						spells[i].mana <= mana_avail &&
+						spells[i].range >= distance) {
+					int32 spellvalue = CalcSpellEffectValue_formula(spells[i].formula[j],
+													spells[i].base[j],
+													spells[i].max[j],
+													level, i);
+					if ( abs(spellvalue) > bestvalue ) {
+						bestvalue = abs(spellvalue);
+						bestid = i;
+					}
+				}
+			}
+		}
+	} // for i
 
-//    g_LogFile.write("for combination [class %02d][level %02d][SE_type %02d][type %02d] i selected the spell: %s",
-//        classp, level, (uint16)type, uint16(spelltype), spells[bestid].name);
-    return bestid;
+//	g_LogFile.write("for combination [class %02d][level %02d][SE_type %02d][type %02d] i selected the spell: %s",
+//		classp, level, (uint16)type, uint16(spelltype), spells[bestid].name);
+	return bestid;
 }
 
 #if 0
@@ -5027,14 +5028,14 @@ int16 Mob::GetBuffSlotFromType(uint16 type) {
 			}
 		}
 	}
-    return -1;
+	return -1;
 }
 
 uint16 Mob::GetSpellIDFromSlot(uint8 slot)
 {
 	if (buffs[slot].spellid != SPELL_UNKNOWN)
 		return buffs[slot].spellid;
-    return 0;
+	return 0;
 }
 
 
@@ -5044,24 +5045,24 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 
 			for (int j = 0; j < EFFECT_COUNT; j++) {
-                // adjustments necessary for offensive npc casting behavior
-                if (bOffensive) {
-				    if (spells[buffs[i].spellid].effectid[j] == type) {
-                        int16 value =
-                                CalcSpellEffectValue_formula(spells[buffs[i].spellid].buffdurationformula,
-                                               spells[buffs[i].spellid].base[j],
-                                               spells[buffs[i].spellid].max[j],
-                                               buffs[i].casterlevel, buffs[i].spellid);
-                        LogFile->write(EQEMuLog::Normal,
-                                "FindType: type = %d; value = %d; threshold = %d",
-                                type, value, threshold);
-                        if (value < threshold)
-                            return true;
-                    }
-                } else {
-				    if (spells[buffs[i].spellid].effectid[j] == type )
-					    return true;
-                }
+				// adjustments necessary for offensive npc casting behavior
+				if (bOffensive) {
+					if (spells[buffs[i].spellid].effectid[j] == type) {
+						int16 value =
+								CalcSpellEffectValue_formula(spells[buffs[i].spellid].buffdurationformula,
+											spells[buffs[i].spellid].base[j],
+											spells[buffs[i].spellid].max[j],
+											buffs[i].casterlevel, buffs[i].spellid);
+						LogFile->write(EQEMuLog::Normal,
+								"FindType: type = %d; value = %d; threshold = %d",
+								type, value, threshold);
+						if (value < threshold)
+							return true;
+					}
+				} else {
+					if (spells[buffs[i].spellid].effectid[j] == type )
+						return true;
+				}
 			}
 		}
 	}
@@ -5074,7 +5075,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance) {
 
 	int i;
 	if (bPerma) {
- 		for (i = 0; i < MAX_PROCS; i++) {
+		for (i = 0; i < MAX_PROCS; i++) {
 			if (PermaProcs[i].spellID == SPELL_UNKNOWN) {
 				PermaProcs[i].spellID = spell_id;
 				PermaProcs[i].chance = iChance;
@@ -5085,7 +5086,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance) {
 			}
 		}
 		mlog(SPELLS__PROCS, "Too many perma procs for %s", GetName());
-    } else {
+	} else {
 		for (i = 0; i < MAX_PROCS; i++) {
 			if (SpellProcs[i].spellID == SPELL_UNKNOWN) {
 				SpellProcs[i].spellID = spell_id;
@@ -5097,7 +5098,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance) {
 		}
 		mlog(SPELLS__PROCS, "Too many procs for %s", GetName());
 	}
-    return false;
+	return false;
 }
 
 bool Mob::RemoveProcFromWeapon(uint16 spell_id, bool bAll) {
@@ -5109,7 +5110,7 @@ bool Mob::RemoveProcFromWeapon(uint16 spell_id, bool bAll) {
 			mlog(SPELLS__PROCS, "Removed proc %d from slot %d", spell_id, i);
 		}
 	}
-    return true;
+	return true;
 }
 
 bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
@@ -5128,7 +5129,7 @@ bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id
 		}
 	}
 
-    return false;
+	return false;
 }
 
 bool Mob::RemoveDefensiveProc(uint16 spell_id, bool bAll)
@@ -5141,7 +5142,7 @@ bool Mob::RemoveDefensiveProc(uint16 spell_id, bool bAll)
 			mlog(SPELLS__PROCS, "Removed defensive proc %d from slot %d", spell_id, i);
 		}
 	}
-    return true;
+	return true;
 }
 
 bool Mob::AddSkillProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
@@ -5159,7 +5160,7 @@ bool Mob::AddSkillProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 			return true;
 		}
 	}
-    return false;
+	return false;
 }
 
 bool Mob::RemoveSkillProc(uint16 spell_id, bool bAll)
@@ -5172,7 +5173,7 @@ bool Mob::RemoveSkillProc(uint16 spell_id, bool bAll)
 			mlog(SPELLS__PROCS, "Removed Skill proc %d from slot %d", spell_id, i);
 		}
 	}
-    return true;
+	return true;
 }
 
 bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
@@ -5191,7 +5192,7 @@ bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 		}
 	}
 
-    return false;
+	return false;
 }
 
 bool Mob::RemoveRangedProc(uint16 spell_id, bool bAll)
@@ -5204,7 +5205,7 @@ bool Mob::RemoveRangedProc(uint16 spell_id, bool bAll)
 			mlog(SPELLS__PROCS, "Removed ranged proc %d from slot %d", spell_id, i);
 		}
 	}
-    return true;
+	return true;
 }
 
 // this is checked in a few places to decide wether special bard
@@ -5467,3 +5468,4 @@ void NPC::UninitializeBuffSlots()
 {
 	safe_delete_array(buffs);
 }
+

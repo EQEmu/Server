@@ -38,7 +38,7 @@ DBcore::DBcore() {
 	pDatabase = 0;
 	pCompress = false;
 	pSSL = false;
-    pStatus = Closed;
+	pStatus = Closed;
 }
 
 DBcore::~DBcore() {
@@ -184,7 +184,7 @@ bool DBcore::Open(uint32* errnum, char* errbuf) {
 	if (GetStatus() == Error) {
 		mysql_close(&mysql);
 		mysql_init(&mysql);		// Initialize structure again
-    }
+	}
 	if (!pHost)
 		return false;
 	/*

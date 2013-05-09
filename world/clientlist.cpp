@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2005  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "clientlist.h"
@@ -57,7 +57,7 @@ void ClientList::Process() {
 	iterator.Reset();
 	while(iterator.MoreElements()) {
 		if (!iterator.GetData()->Process()) {
-			struct in_addr  in;
+			struct in_addr in;
 			in.s_addr = iterator.GetData()->GetIP();
 			_log(WORLD__CLIENTLIST,"Removing client from %s:%d", inet_ntoa(in), iterator.GetData()->GetPort());
 //the client destructor should take care of this.
@@ -113,7 +113,7 @@ void ClientList::EnforceSessionLimit(uint32 iLSAccountID) {
 		ClientEntry = iterator.GetData();
 
 		if ((ClientEntry->LSAccountID() == iLSAccountID) &&
-		    ((ClientEntry->Admin() <= (RuleI(World, ExemptAccountLimitStatus))) || (RuleI(World, ExemptAccountLimitStatus) < 0))) {
+			((ClientEntry->Admin() <= (RuleI(World, ExemptAccountLimitStatus))) || (RuleI(World, ExemptAccountLimitStatus) < 0))) {
 
 			CharacterCount++;
 
@@ -227,15 +227,15 @@ void ClientList::DisconnectByIP(uint32 iIP) {
 	while(iterator.MoreElements()) {
 		countCLEIPs = iterator.GetData();
 		if ((countCLEIPs->GetIP() == iIP)) {
-            if(strlen(countCLEIPs->name())) {
-                ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-                ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
-                strcpy(skp->adminname, "SessionLimit");
-                strcpy(skp->name, countCLEIPs->name());
-                skp->adminrank = 255;
-                zoneserver_list.SendPacket(pack);
-                safe_delete(pack);
-            }
+			if(strlen(countCLEIPs->name())) {
+				ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+				ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
+				strcpy(skp->adminname, "SessionLimit");
+				strcpy(skp->name, countCLEIPs->name());
+				skp->adminrank = 255;
+				zoneserver_list.SendPacket(pack);
+				safe_delete(pack);
+			}
 			countCLEIPs->SetOnline(CLE_Status_Offline);
 			iterator.RemoveCurrent();
 		}
@@ -301,7 +301,7 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 	while(iterator.MoreElements()) {
 		ClientListEntry* cle = iterator.GetData();
 		if (admin >= cle->Admin() && (iName == 0 || namestrlen == 0 || strncasecmp(cle->name(), iName, namestrlen) == 0 || strncasecmp(cle->AccountName(), iName, namestrlen) == 0 || strncasecmp(cle->LSName(), iName, namestrlen) == 0)) {
-			struct in_addr  in;
+			struct in_addr in;
 			in.s_addr = cle->GetIP();
 			if (addnewline) {
 				AppendAnyLenString(&output, &outsize, &outlen, newline);
@@ -395,7 +395,7 @@ void ClientList::CLEKeepAlive(uint32 numupdates, uint32* wid) {
 
 
 ClientListEntry* ClientList::CheckAuth(uint32 id, const char* iKey, uint32 ip ) {
-  LinkedListIterator<ClientListEntry*> iterator(clientlist);
+	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -406,7 +406,7 @@ ClientListEntry* ClientList::CheckAuth(uint32 id, const char* iKey, uint32 ip ) 
 	return 0;
 }
 ClientListEntry* ClientList::CheckAuth(uint32 iLSID, const char* iKey) {
-  LinkedListIterator<ClientListEntry*> iterator(clientlist);
+	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -880,7 +880,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 			WAPP3->ZoneMSGID = ZoneMSGID;
 			WAPP3->Zone = PlayerZone;
 			WAPP3->Class_ = PlayerClass;
-			WAPP3->Level =  PlayerLevel;
+			WAPP3->Level = PlayerLevel;
 			WAPP3->Race = PlayerRace;
 			WAPP3->Account[0] = 0;
 
@@ -920,16 +920,16 @@ void ClientList::SendLFGMatches(ServerLFGMatchesRequest_Struct *smrs) {
 			// First we check that the player meets the level and class criteria of the person
 			// doing the search.
 			if((CLE->level() >= smrs->FromLevel) && (CLE->level() <= smrs->ToLevel) &&
-			   (BitMask & smrs->Classes))
-			   	// Then we check if if the player doing the search meets the level criteria specified
+				(BitMask & smrs->Classes))
+				// Then we check if if the player doing the search meets the level criteria specified
 				// by the player who is LFG.
 				//
 				// GetLFGMatchFilter returns the setting of the 'Only players who match my posted filters
-				//						 can query me' checkbox.
+				//						can query me' checkbox.
 				//
 				// FromLevel and ToLevel are the settings of the 'Want group levels:' boxes.
-			   	if(!CLE->GetLFGMatchFilter() || ((smrs->QuerierLevel >= CLE->GetLFGFromLevel()) &&
-								 (smrs->QuerierLevel <= CLE->GetLFGToLevel())))
+				if(!CLE->GetLFGMatchFilter() || ((smrs->QuerierLevel >= CLE->GetLFGFromLevel()) &&
+								(smrs->QuerierLevel <= CLE->GetLFGToLevel())))
 					Matches++;
 		}
 		Iterator.Advance();
@@ -950,7 +950,7 @@ void ClientList::SendLFGMatches(ServerLFGMatchesRequest_Struct *smrs) {
 			if(CLE->LFG()) {
 				unsigned int BitMask = 1 << CLE->class_();
 				if((CLE->level() >= smrs->FromLevel) && (CLE->level() <= smrs->ToLevel) &&
-				   (BitMask & smrs->Classes)) {
+					(BitMask & smrs->Classes)) {
 					Matches--;
 					strcpy(Buffer->Name, CLE->name());
 					Buffer->Class_ = CLE->class_();
@@ -1358,5 +1358,6 @@ void ClientList::SendClientVersionSummary(const char *Name)
 	}
 
 	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i 6.2, %i Titanium, %i SoF, %i SoD, %i UF, %i RoF clients currently connected.",
-					  Client62Count, ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
+					Client62Count, ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
 }
+

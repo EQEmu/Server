@@ -54,7 +54,7 @@ bool QueryServConnection::Process()
 						authenticated = true;
 					else
 					{
-						struct in_addr  in;
+						struct in_addr in;
 						in.s_addr = GetIP();
 						_log(QUERYSERV__ERROR, "QueryServ authorization failed.");
 						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
@@ -66,7 +66,7 @@ bool QueryServConnection::Process()
 				}
 				else
 				{
-					struct in_addr  in;
+					struct in_addr in;
 					in.s_addr = GetIP();
 					_log(QUERYSERV__ERROR, "QueryServ authorization failed.");
 					ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
@@ -131,3 +131,4 @@ bool QueryServConnection::SendPacket(ServerPacket* pack)
 
 	return Stream->SendPacket(pack);
 }
+

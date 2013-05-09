@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 // @merth notes:
@@ -86,7 +86,7 @@ typedef enum {
 //FatherNitwit: location bits for searching specific
 //places with HasItem() and HasItemByUse()
 enum {
-	invWhereWorn 		= 0x01,
+	invWhereWorn		= 0x01,
 	invWherePersonal	= 0x02,	//in the character's inventory
 	invWhereBank		= 0x04,
 	invWhereSharedBank	= 0x08,
@@ -113,7 +113,7 @@ public:
 	void push_front(ItemInst* inst);
 	ItemInst* pop();
 	ItemInst* peek_front() const;
-	inline int size() 		{ return static_cast<int>(m_list.size()); }
+	inline int size()		{ return static_cast<int>(m_list.size()); }
 
 protected:
 	/////////////////////////
@@ -199,10 +199,10 @@ public:
 	void dumpInventory();
 
 	void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value);
-    void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, int value);
-    void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value);
-    void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value);
-    std::string GetCustomItemData(int16 slot_id, std::string identifier);
+	void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, int value);
+	void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value);
+	void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value);
+	std::string GetCustomItemData(int16 slot_id, std::string identifier);
 protected:
 	///////////////////////////////
 	// Protected Methods
@@ -339,7 +339,7 @@ public:
 	void SetMerchantCount(int32 count)		{ m_merchantcount = count; }
 
 	int16 GetCurrentSlot() const			{ return m_currentslot; }
-	void SetCurrentSlot(int16 curr_slot)   { m_currentslot = curr_slot; }
+	void SetCurrentSlot(int16 curr_slot)	{ m_currentslot = curr_slot; }
 
 
 
@@ -348,13 +348,13 @@ public:
 	bool IsInstNoDrop() const { return m_instnodrop; }
 	void SetInstNoDrop(bool flag) { m_instnodrop=flag; }
 
-    std::string GetCustomDataString() const;
-    void SetCustomData(std::string identifier, std::string value);
-    void SetCustomData(std::string identifier, int value);
-    void SetCustomData(std::string identifier, float value);
-    void SetCustomData(std::string identifier, bool value);
-    std::string GetCustomData(std::string identifier);
-    void DeleteCustomData(std::string identifier);
+	std::string GetCustomDataString() const;
+	void SetCustomData(std::string identifier, std::string value);
+	void SetCustomData(std::string identifier, int value);
+	void SetCustomData(std::string identifier, float value);
+	void SetCustomData(std::string identifier, bool value);
+	std::string GetCustomData(std::string identifier);
+	void DeleteCustomData(std::string identifier);
 
 	// Allows treatment of this object as though it were a pointer to m_item
 	operator bool() const { return (m_item != nullptr); }
@@ -379,8 +379,8 @@ protected:
 	//////////////////////////
 	// Protected Members
 	//////////////////////////
-	iter_contents _begin()               { return m_contents.begin(); }
-	iter_contents _end()                 { return m_contents.end(); }
+	iter_contents _begin()		{ return m_contents.begin(); }
+	iter_contents _end()		{ return m_contents.end(); }
 
 	friend class Inventory;
 
@@ -394,13 +394,13 @@ protected:
 	uint32				m_color;
 	uint32				m_merchantslot;
 	int16				m_currentslot;
-	bool 				m_instnodrop;
+	bool				m_instnodrop;
 	int32				m_merchantcount;		//number avaliable on the merchant, -1=unlimited
 	int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
 	//
 	// Items inside of this item (augs or contents);
 	map<uint8, ItemInst*> m_contents; // Zero-based index: min=0, max=9
-    map<std::string, std::string> m_custom_data;
+	map<std::string, std::string> m_custom_data;
 };
 
 class EvoItemInst: public ItemInst {

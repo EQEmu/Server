@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "masterentity.h"
@@ -1319,7 +1319,7 @@ int16 Client::CalcINT() {
 
 	if(m_pp.intoxication)
 	{
-		int16 AlcINT  = INT - (int16)((float)m_pp.intoxication / 200.0f * (float)INT) - 1;
+		int16 AlcINT = INT - (int16)((float)m_pp.intoxication / 200.0f * (float)INT) - 1;
 
 		if((AlcINT < (int)(0.2 * INT)))
 			INT = (int)(0.2f * (float)INT);
@@ -1348,7 +1348,7 @@ int16 Client::CalcWIS() {
 
 	if(m_pp.intoxication)
 	{
-		int16 AlcWIS  = WIS - (int16)((float)m_pp.intoxication / 200.0f * (float)WIS) - 1;
+		int16 AlcWIS = WIS - (int16)((float)m_pp.intoxication / 200.0f * (float)WIS) - 1;
 
 		if((AlcWIS < (int)(0.2 * WIS)))
 			WIS = (int)(0.2f * (float)WIS);

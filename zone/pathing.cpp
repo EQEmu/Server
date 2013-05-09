@@ -13,7 +13,7 @@
 #include "zone.h"
 
 #ifdef _WINDOWS
-#define snprintf        _snprintf
+#define snprintf _snprintf
 #endif
 
 //#define PATHDEBUG
@@ -114,7 +114,7 @@ bool PathManager::loadPaths(FILE *PathFile)
 	fread(&Head, sizeof(Head), 1, PathFile);
 
 	LogFile->write(EQEMuLog::Status, "Path File Header: Version %ld, PathNodes %ld",
-		       (long)Head.version, (long)Head.PathNodeCount);
+				(long)Head.version, (long)Head.PathNodeCount);
 
 	if(Head.version != 2)
 	{
@@ -163,7 +163,7 @@ void PathManager::PrintPathing()
 	for(uint32 i = 0; i < Head.PathNodeCount; ++i)
 	{
 		printf("PathNode: %2d id %2d. (%8.3f, %8.3f, %8.3f), BestZ: %8.3f\n",
-		       i, PathNodes[i].id, PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, PathNodes[i].bestz);
+				i, PathNodes[i].id, PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, PathNodes[i].bestz);
 
 
 		if(PathNodes[i].Neighbours[0].id == -1)
@@ -178,7 +178,7 @@ void PathManager::PrintPathing()
 				break;
 
 			printf("  Neighbour: %2d, Distance %8.3f", PathNodes[i].Neighbours[j].id,
-			       PathNodes[i].Neighbours[j].distance);
+					PathNodes[i].Neighbours[j].distance);
 
 			if(PathNodes[i].Neighbours[j].Teleport)
 				printf("    ***** TELEPORT *****");
@@ -294,7 +294,7 @@ list<int> PathManager::FindRoute(int startID, int endID)
 
 			AStarEntry.GCost = CurrentNode.GCost + PathNodes[CurrentNode.PathNodeID].Neighbours[i].distance;
 
-			float FCost = AStarEntry.HCost +  AStarEntry.GCost;
+			float FCost = AStarEntry.HCost + AStarEntry.GCost;
 #ifdef PATHDEBUG
 			printf("Node: %i, Open Neighbour %i has HCost %8.3f, GCost %8.3f (Total Cost: %8.3f)\n",
 					CurrentNode.PathNodeID,
@@ -314,7 +314,7 @@ list<int> PathManager::FindRoute(int startID, int endID)
 				{
 					AlreadyInOpenList = true;
 
-					float GCostToNode = CurrentNode.GCost +  PathNodes[CurrentNode.PathNodeID].Neighbours[i].distance;
+					float GCostToNode = CurrentNode.GCost + PathNodes[CurrentNode.PathNodeID].Neighbours[i].distance;
 
 					if(GCostToNode < (*OpenListIterator).GCost)
 					{
@@ -361,7 +361,7 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 
 	_ZP(Pathing_FindRoute_FromVertices);
 
-	_log(PATHING__DEBUG, "FindRoute(%8.3f, %8.3f, %8.3f,  %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
+	_log(PATHING__DEBUG, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
 
 	list<int> noderoute;
 
@@ -381,10 +381,10 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 	for(uint32 i = 0 ; i < Head.PathNodeCount; ++i)
 	{
 		if((ABS(Start.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
-		   (ABS(Start.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
-		   (ABS(Start.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
+			(ABS(Start.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
+			(ABS(Start.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
 		{
-		   	TempNode.id = i;
+			TempNode.id = i;
 			TempNode.Distance = VertexDistanceNoRoot(Start, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
 
@@ -420,10 +420,10 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 	for(uint32 i = 0 ; i < Head.PathNodeCount; ++i)
 	{
 		if((ABS(End.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
-		   (ABS(End.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
-		   (ABS(End.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
+			(ABS(End.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
+			(ABS(End.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
 		{
-		   	TempNode.id = i;
+			TempNode.id = i;
 			TempNode.Distance = VertexDistanceNoRoot(End, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
 		}
@@ -479,7 +479,7 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 				break;
 
 			if(!zone->zonemap->LineIntersectsZone(Start, PathNodes[(*Second)].v, 1.0f, nullptr, nullptr)
-			   && zone->pathing->NoHazards(Start, PathNodes[(*Second)].v))
+				&& zone->pathing->NoHazards(Start, PathNodes[(*Second)].v))
 			{
 				noderoute.erase(First);
 
@@ -512,7 +512,7 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 				break;
 
 			if(!zone->zonemap->LineIntersectsZone(End, PathNodes[(*Second)].v, 1.0f, nullptr, nullptr)
-			   && zone->pathing->NoHazards(End, PathNodes[(*Second)].v))
+				&& zone->pathing->NoHazards(End, PathNodes[(*Second)].v))
 			{
 				noderoute.erase(First);
 
@@ -673,7 +673,7 @@ VERTEX Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Waypo
 
 	VERTEX From(GetX(), GetY(), GetZ());
 
-	VERTEX HeadPosition(From.x, From.y,  From.z + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
+	VERTEX HeadPosition(From.x, From.y, From.z + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
 
 	VERTEX To(ToX, ToY, ToZ);
 
@@ -761,8 +761,8 @@ VERTEX Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Waypo
 
 				if((RouteSize == 2)
 					|| ((PathingTraversedNodes >= RuleI(Pathing, MinNodesTraversedForLOSCheck))
-				   && (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
-				   && PathingLOSCheckTimer->Check()))
+					&& (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
+					&& PathingLOSCheckTimer->Check()))
 				{
 					mlog(PATHING__DEBUG, "  Checking distance to target.");
 					float Distance = VertexDistanceNoRoot(From, To);
@@ -770,7 +770,7 @@ VERTEX Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Waypo
 					mlog(PATHING__DEBUG, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
 					if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
-					   && (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
+						&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
 					{
 						if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr, nullptr))
 							PathingLOSState = HaveLOS;
@@ -836,7 +836,7 @@ VERTEX Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Waypo
 
 					mlog(PATHING__DEBUG, "  Now moving to node %i", NextNode);
 
-					return  zone->pathing->GetPathNodeCoordinates(NextNode);
+					return zone->pathing->GetPathNodeCoordinates(NextNode);
 				}
 				else
 				{
@@ -853,8 +853,8 @@ VERTEX Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Waypo
 			int RouteSize = Route.size();
 
 			if((PathingTraversedNodes >= RuleI(Pathing, MinNodesTraversedForLOSCheck))
-			   && (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
-			   && PathingLOSCheckTimer->Check())
+				&& (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
+				&& PathingLOSCheckTimer->Check())
 			{
 				mlog(PATHING__DEBUG, "  Checking distance to target.");
 
@@ -863,7 +863,7 @@ VERTEX Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Waypo
 				mlog(PATHING__DEBUG, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
 				if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
-				   && (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
+					&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
 				{
 					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr, nullptr))
 						PathingLOSState = HaveLOS;
@@ -901,7 +901,7 @@ VERTEX Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Waypo
 				float Distance = VertexDistanceNoRoot(From, To);
 
 				if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort))
-				   && (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
+					&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
 				{
 					mlog(PATHING__DEBUG, "  Checking for short LOS at distance %8.3f.", Distance);
 					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr, nullptr))
@@ -1053,7 +1053,7 @@ VERTEX Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Waypo
 	float Distance = VertexDistanceNoRoot(From, To);
 
 	if((Distance <= RuleR(Pathing, MinDistanceForLOSCheckLong))
-	   && (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
+		&& (ABS(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold)))
 	{
 		mlog(PATHING__DEBUG, "  Checking for long LOS at distance %8.3f.", Distance);
 
@@ -1121,10 +1121,10 @@ int PathManager::FindNearestPathNode(VERTEX Position)
 	for(uint32 i = 0 ; i < Head.PathNodeCount; ++i)
 	{
 		if((ABS(Position.x - PathNodes[i].v.x) <= CandidateNodeRangeXY) &&
-		   (ABS(Position.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
-		   (ABS(Position.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
+			(ABS(Position.y - PathNodes[i].v.y) <= CandidateNodeRangeXY) &&
+			(ABS(Position.z - PathNodes[i].v.z) <= CandidateNodeRangeZ))
 		{
-		   	TempNode.id = i;
+			TempNode.id = i;
 			TempNode.Distance = VertexDistanceNoRoot(Position, PathNodes[i].v);
 			SortedByDistance.push_back(TempNode);
 
@@ -1193,7 +1193,7 @@ bool PathManager::NoHazardsAccurate(VERTEX From, VERTEX To)
 		stepx = (float)To.x - curx;
 		stepy = (float)To.y - cury;
 		stepz = (float)To.z - curz;
-		float factor =  sqrt(stepx*stepx + stepy*stepy + stepz*stepz);
+		float factor = sqrt(stepx*stepx + stepy*stepy + stepz*stepz);
 		stepx = (stepx/factor)*step_size;
 		stepy = (stepy/factor)*step_size;
 		stepz = (stepz/factor)*step_size;
@@ -1955,7 +1955,7 @@ void PathManager::DisconnectNodeToNode(int32 Node1, int32 Node2)
 
 	bool disconnect_a_from_b = false;
 	if(NodesConnected(a, b))
-		 disconnect_a_from_b = true;
+		disconnect_a_from_b = true;
 
 	bool disconnect_b_from_a = false;
 	if(NodesConnected(b, a))
@@ -2295,3 +2295,4 @@ void PathManager::SortNodes()
 	safe_delete_array(PathNodes);
 	PathNodes = t_PathNodes;
 }
+

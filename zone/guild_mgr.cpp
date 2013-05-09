@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "guild_mgr.h"
@@ -388,7 +388,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			if(pack->size != sizeof(ServerGuildRankUpdate_Struct))
 			{
 				_log(GUILDS__ERROR, "Received ServerOP_RankUpdate of incorrect size %d, expected %d",
-				     pack->size, sizeof(ServerGuildRankUpdate_Struct));
+					pack->size, sizeof(ServerGuildRankUpdate_Struct));
 
 				return;
 			}
@@ -461,7 +461,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			char *Buffer = (char *)pack->pBuffer;
 
 			uint32 FromID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-			uint32 Count  = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
+			uint32 Count = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
 			Client *c = entity_list.GetClientByCharID(FromID);
 
 			if (!c || !c->IsInAGuild())
@@ -647,7 +647,7 @@ GuildBankManager::~GuildBankManager()
 
 bool GuildBankManager::Load(uint32 GuildID)
 {
-	const char *LoadQuery = "SELECT `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `whofor`  from `guild_bank` "
+	const char *LoadQuery = "SELECT `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `whofor` from `guild_bank` "
 				"WHERE `guildid` = %i";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -784,15 +784,15 @@ void GuildBankManager::SendGuildBank(Client *c)
 
 			if(!Item->Stackable)
 				gbius->Init(GuildBankItemUpdate, 1, i, GuildBankDepositArea, 1, Item->ID, Item->Icon, 1,
-					    (*Iterator)->Items.DepositArea[i].Permissions, 0, 0);
+						(*Iterator)->Items.DepositArea[i].Permissions, 0, 0);
 			else
 			{
 				if((*Iterator)->Items.DepositArea[i].Quantity == Item->StackSize)
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankDepositArea, 1, Item->ID, Item->Icon,
-						    (*Iterator)->Items.DepositArea[i].Quantity, (*Iterator)->Items.DepositArea[i].Permissions, 0, 0);
+							(*Iterator)->Items.DepositArea[i].Quantity, (*Iterator)->Items.DepositArea[i].Permissions, 0, 0);
 				else
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankDepositArea, 1, Item->ID, Item->Icon,
-						    (*Iterator)->Items.DepositArea[i].Quantity, (*Iterator)->Items.DepositArea[i].Permissions, 1, 0);
+							(*Iterator)->Items.DepositArea[i].Quantity, (*Iterator)->Items.DepositArea[i].Permissions, 1, 0);
 			}
 
 			strn0cpy(gbius->ItemName, Item->Name, sizeof(gbius->ItemName));
@@ -822,15 +822,15 @@ void GuildBankManager::SendGuildBank(Client *c)
 
 			if(!Item->Stackable)
 				gbius->Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, Item->ID, Item->Icon, 1,
-					    (*Iterator)->Items.MainArea[i].Permissions, 0, Useable);
+						(*Iterator)->Items.MainArea[i].Permissions, 0, Useable);
 			else
 			{
 				if((*Iterator)->Items.MainArea[i].Quantity == Item->StackSize)
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, Item->ID, Item->Icon,
-						    (*Iterator)->Items.MainArea[i].Quantity, (*Iterator)->Items.MainArea[i].Permissions, 0, Useable);
+							(*Iterator)->Items.MainArea[i].Quantity, (*Iterator)->Items.MainArea[i].Permissions, 0, Useable);
 				else
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, Item->ID, Item->Icon,
-						    (*Iterator)->Items.MainArea[i].Quantity, (*Iterator)->Items.MainArea[i].Permissions, 1, Useable);
+							(*Iterator)->Items.MainArea[i].Quantity, (*Iterator)->Items.MainArea[i].Permissions, 1, Useable);
 			}
 
 			strn0cpy(gbius->ItemName, Item->Name, sizeof(gbius->ItemName));
@@ -932,7 +932,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 	}
 
 	const char *Query="INSERT INTO `guild_bank` (`guildid`, `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `WhoFor`) "
-			  "VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')";
+				"VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
@@ -1014,7 +1014,7 @@ int GuildBankManager::Promote(uint32 GuildID, int SlotID)
 
 	strn0cpy((*Iterator)->Items.MainArea[MainSlot].WhoFor, (*Iterator)->Items.DepositArea[SlotID].WhoFor, sizeof((*Iterator)->Items.MainArea[MainSlot].WhoFor));
 
-	const char *Query="UPDATE `guild_bank` SET `area` = 1, `slot` = %i  WHERE `guildid` = %i AND `area` = 0 AND `slot` = %i LIMIT 1";
+	const char *Query="UPDATE `guild_bank` SET `area` = 1, `slot` = %i WHERE `guildid` = %i AND `area` = 0 AND `slot` = %i LIMIT 1";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
@@ -1043,10 +1043,10 @@ int GuildBankManager::Promote(uint32 GuildID, int SlotID)
 	{
 		if((*Iterator)->Items.MainArea[MainSlot].Quantity == Item->StackSize)
 			gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
-				    (*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 0, 0);
+					(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 0, 0);
 		else
 			gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
-				    (*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 1, 0);
+					(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 1, 0);
 	}
 
 	strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
@@ -1077,7 +1077,7 @@ void GuildBankManager::SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Perm
 		return;
 	}
 
-	const char *Query="UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s'  WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1";
+	const char *Query="UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s' WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
@@ -1112,10 +1112,10 @@ void GuildBankManager::SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Perm
 	{
 		if((*Iterator)->Items.MainArea[SlotID].Quantity == Item->StackSize)
 			gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
-				   (*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 0, 0);
+					(*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 0, 0);
 		else
 			gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
-				   (*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 1, 0);
+					(*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 1, 0);
 	}
 
 
@@ -1126,7 +1126,7 @@ void GuildBankManager::SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Perm
 	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
 }
 
-ItemInst*  GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
+ItemInst* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
 {
 	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
 
@@ -1264,7 +1264,7 @@ bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, ui
 		const char *Query = "UPDATE `guild_bank` SET `qty` = %i where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
 
 		if(!database.RunQuery(query, MakeAnyLenString(&query, Query, BankArea[SlotID].Quantity - Quantity,
-		      GuildID, Area, SlotID), errbuf))
+				GuildID, Area, SlotID), errbuf))
 		{
 			_log(GUILDS__BANK_ERROR, "Update item failed. %s : %s", query, errbuf);
 
@@ -1481,7 +1481,7 @@ bool GuildApproval::ProcessApproval()
 {
 	if(owner && owner->GuildID() != 0)
 	{
-		owner->Message(10,"You are already in a guild!  Guild request deleted.");
+		owner->Message(10,"You are already in a guild! Guild request deleted.");
 		return false;
 	}
 	if(deletion_timer->Check() || !owner)
@@ -1611,3 +1611,4 @@ void GuildApproval::GuildApproved()
 	owner->Message(0, "Your guild was created.");
 	owner = 0;
 }
+

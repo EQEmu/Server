@@ -1,19 +1,19 @@
 /*
 	Copyright (C) 2005 Michael S. Finger
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef _EQPACKET_H
 #define _EQPACKET_H
@@ -103,13 +103,13 @@ class EQApplicationPacket : public EQPacket {
 	friend class EQStream;
 public:
 	EQApplicationPacket() : EQPacket(OP_Unknown,nullptr,0)
-        { app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
 	EQApplicationPacket(const EmuOpcode op) : EQPacket(op,nullptr,0)
-        { app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
 	EQApplicationPacket(const EmuOpcode op, const uint32 len) : EQPacket(op,nullptr,len)
-        { app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
 	EQApplicationPacket(const EmuOpcode op, const unsigned char *buf, const uint32 len) : EQPacket(op,buf,len)
-        { app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
+		{ app_opcode_size = GetExecutablePlatform() == ExePlatformUCS ? 1 : 2; }
 	bool combine(const EQApplicationPacket *rhs);
 	uint32 serialize (uint16 opcode, unsigned char *dest) const;
 	uint32 Size() const { return size+app_opcode_size; }

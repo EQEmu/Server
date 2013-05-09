@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 	client_process.cpp:
 	Handles client login sequence and packets sent from client to zone
@@ -36,7 +36,7 @@
 	#define vsnprintf	_vsnprintf
 #endif
 	#define strncasecmp	_strnicmp
-	#define strcasecmp  _stricmp
+	#define strcasecmp	_stricmp
 #else
 	#include <pthread.h>
 	#include <sys/socket.h>
@@ -83,7 +83,7 @@ bool Client::Process() {
 
 	if(Connected() || IsLD())
 	{
-        // try to send all packets that weren't sent before
+		// try to send all packets that weren't sent before
 		if(!IsLD() && zoneinpacket_timer.Check()){
 			SendAllPackets();
 		}
@@ -258,7 +258,7 @@ bool Client::Process() {
 			AI_Process();
 
 		if (bindwound_timer.Check() && bindwound_target != 0) {
-		    BindWound(bindwound_target, false);
+			BindWound(bindwound_target, false);
 		}
 
 		if(KarmaUpdateTimer)
@@ -409,7 +409,7 @@ bool Client::Process() {
 				{
 					entity_list.AEAttack(this, 30);
 				} else {
-					Attack(auto_attack_target, 13); 	// Kaiyodo - added attacking hand to arguments
+					Attack(auto_attack_target, 13); // Kaiyodo - added attacking hand to arguments
 				}
 				ItemInst *wpn = GetInv().GetItem(SLOT_PRIMARY);
 				TryWeaponProc(wpn, auto_attack_target, 13);
@@ -430,7 +430,7 @@ bool Client::Process() {
 					//triple attack: rangers, monks, warriors, berserkers over level 60
 					if((((GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER)
 						&& GetLevel() >= 60) || SpecAttacks[SPECATK_TRIPLE])
-					   && CheckDoubleAttack(true))
+						&& CheckDoubleAttack(true))
 					{
 						tripleAttackSuccess = true;
 						Attack(auto_attack_target, 13, false);
@@ -793,7 +793,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 			MyRaid->MemberZoned(this);
 
 		if(this->IsClient()){
-			if(parse->PlayerHasQuestSub("EVENT_DISCONNECT"))  {
+			if(parse->PlayerHasQuestSub("EVENT_DISCONNECT")) {
 				parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 			}
 		}
@@ -968,7 +968,7 @@ void Client::BulkSendInventoryItems()
 
 	// LINKDEAD TRADE ITEMS
 	// If player went LD during a trade, they have items in the trade inventory
-	// slots.  These items are now being put into their inventory (then queue up on cursor)
+	// slots. These items are now being put into their inventory (then queue up on cursor)
 	for (int16 trade_slot_id=3000; trade_slot_id<=3007; trade_slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst) {
@@ -982,7 +982,7 @@ void Client::BulkSendInventoryItems()
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const Item_Struct* handyitem = nullptr;
-	uint32 numItemSlots=80;  //The max number of items passed in the transaction.
+	uint32 numItemSlots=80; //The max number of items passed in the transaction.
 	const Item_Struct *item;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
@@ -1000,14 +1000,14 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	uint8 handychance = 0;
 	for(itr = merlist.begin();itr != merlist.end() && i<numItemSlots;itr++){
 		MerchantList ml = *itr;
-        if(GetLevel() < ml.level_required) {
-            continue;
-        }
+		if(GetLevel() < ml.level_required) {
+			continue;
+		}
 
-        int32 fac = merch ? merch->GetPrimaryFaction() : 0;
-        if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
-            continue;
-        }
+		int32 fac = merch ? merch->GetPrimaryFaction() : 0;
+		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+			continue;
+		}
 
 		handychance = MakeRandomInt(0, merlist.size() + tmp_merlist.size() - 1 );
 
@@ -1099,16 +1099,16 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				break;
 			default:
 				greet_id=MERCHANT_HANDY_ITEM4;
-        }
+		}
 		sprintf(handy_id,"%i",greet_id);
 
 		if(greet_id!=MERCHANT_GREETING)
 			Message_StringID(10,GENERIC_STRINGID_SAY,merch->GetCleanName(),handy_id,this->GetName(),handyitem->Name);
-        else
+		else
 			Message_StringID(10,GENERIC_STRINGID_SAY,merch->GetCleanName(),handy_id,this->GetName());
 
 		merch->CastToNPC()->FaceTarget(this->CastToMob());
-    }
+	}
 
 //		safe_delete_array(cpi);
 }
@@ -1153,8 +1153,8 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		// corpse is in has shutdown since the rez spell was cast.
 		database.MarkCorpseAsRezzed(PendingRezzDBID);
 		_log(SPELLS__REZ, "Player %s got a %i Rezz, spellid %i in zone%i, instance id %i",
-				  this->name, (uint16)spells[SpellID].base[0],
-				  SpellID, ZoneID, InstanceID);
+				this->name, (uint16)spells[SpellID].base[0],
+				SpellID, ZoneID, InstanceID);
 
 		this->BuffFadeAll();
 		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
@@ -1171,7 +1171,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		if(spells[SpellID].base[0] < 100 && spells[SpellID].base[0] > 0 && PendingRezzXP > 0)
 		{
 				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base[0])))),
-				       GetAAXP(),true);
+						GetAAXP(),true);
 		}
 		else if (spells[SpellID].base[0] == 100 && PendingRezzXP > 0) {
 			SetEXP((GetEXP() + PendingRezzXP), GetAAXP(), true);
@@ -1539,7 +1539,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	// now we should have a from_bucket, a to_bucket, an amount_to_take
 	// and an amount_to_add
 
-	// now we actually take it from the from bucket.  if there's an error
+	// now we actually take it from the from bucket. if there's an error
 	// with the destination slot, they lose their money
 	*from_bucket -= amount_to_take;
 	// why are intentionally inducing a crash here rather than letting the code attempt to stumble on?
@@ -1614,8 +1614,8 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	if(DistNoRoot(*pTrainer) > USE_NPC_RANGE2)
 		return;
 
- 	SkillType sk;
- 	for (sk = _1H_BLUNT; sk <= HIGHEST_SKILL; sk = (SkillType)(sk+1)) {
+	SkillType sk;
+	for (sk = _1H_BLUNT; sk <= HIGHEST_SKILL; sk = (SkillType)(sk+1)) {
 		if(sk == TINKERING && GetRace() != GNOME) {
 			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
 		} else {
@@ -2083,7 +2083,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 		if (corpse && corpse->IsCorpse()) {
 			_log(SPELLS__REZ, "Hover Rez in zone %s for corpse %s",
-					  zone->GetShortName(), PendingRezzCorpseName.c_str());
+					zone->GetShortName(), PendingRezzCorpseName.c_str());
 
 			_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
 

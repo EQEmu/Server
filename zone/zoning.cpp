@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2005  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 
@@ -72,10 +72,10 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		case ZoneToBindPoint:
 			target_zone_id = m_pp.binds[0].zoneId;
 			break;
-		case ZoneSolicited:  //we told the client to zone somewhere, so we know where they are going.
+		case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
 			target_zone_id = zonesummon_id;
 			break;
-		case ZoneUnsolicited:   //client came up with this on its own.
+		case ZoneUnsolicited: //client came up with this on its own.
 			zone_point = zone->GetClosestZonePointWithoutZone(GetX(), GetY(), GetZ(), this, ZONEPOINT_NOZONE_RANGE);
 			if(zone_point) {
 				//we found a zone point, which is a reasonable distance away
@@ -170,7 +170,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	char buf[10];
 	snprintf(buf, 9, "%d", target_zone_id);
 	buf[9] = '\0';
-    parse->EventPlayer(EVENT_ZONE, this, buf, 0);
+	parse->EventPlayer(EVENT_ZONE, this, buf, 0);
 
 
 	//handle circumvention of zone restrictions
@@ -205,13 +205,13 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		dest_z = m_pp.binds[0].z;
 		ignorerestrictions = 1;	//can always get to our bind point? seems exploitable
 		break;
-	case ZoneSolicited:  //we told the client to zone somewhere, so we know where they are going.
+	case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
 		//recycle zonesummon variables
 		dest_x = zonesummon_x;
 		dest_y = zonesummon_y;
 		dest_z = zonesummon_z;
 		break;
-	case ZoneUnsolicited:   //client came up with this on its own.
+	case ZoneUnsolicited: //client came up with this on its own.
 		//client requested a zoning... what are the cases when this could happen?
 
 		//Handle zone point case:
@@ -728,10 +728,10 @@ void Client::SetZoneFlag(uint32 zone_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-    // Retrieve all waypoints for this grid
-    if(!database.RunQuery(query,MakeAnyLenString(&query,
-    	"INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)",
-    	CharacterID(),zone_id),errbuf)) {
+	// Retrieve all waypoints for this grid
+	if(!database.RunQuery(query,MakeAnyLenString(&query,
+		"INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)",
+		CharacterID(),zone_id),errbuf)) {
 		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), errbuf);
 	}
 }
@@ -746,10 +746,10 @@ void Client::ClearZoneFlag(uint32 zone_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-    // Retrieve all waypoints for this grid
-    if(!database.RunQuery(query,MakeAnyLenString(&query,
-    	"DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d",
-    	CharacterID(),zone_id),errbuf)) {
+	// Retrieve all waypoints for this grid
+	if(!database.RunQuery(query,MakeAnyLenString(&query,
+		"DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d",
+		CharacterID(),zone_id),errbuf)) {
 		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), errbuf);
 	}
 }
@@ -760,21 +760,21 @@ void Client::LoadZoneFlags() {
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-    // Retrieve all waypoints for this grid
-    if(database.RunQuery(query,MakeAnyLenString(&query,
-    	"SELECT zoneID from zone_flags WHERE charID=%d",
-    	CharacterID()),errbuf,&result))
-    {
+	// Retrieve all waypoints for this grid
+	if(database.RunQuery(query,MakeAnyLenString(&query,
+		"SELECT zoneID from zone_flags WHERE charID=%d",
+		CharacterID()),errbuf,&result))
+	{
 		while((row = mysql_fetch_row(result))) {
 			zone_flags.insert(atoi(row[0]));
 		}
 		mysql_free_result(result);
-    }
-    else	// DB query error!
-    {
+	}
+	else	// DB query error!
+	{
 		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), errbuf);
-    }
-    safe_delete_array(query);
+	}
+	safe_delete_array(query);
 }
 
 bool Client::HasZoneFlag(uint32 zone_id) const {
@@ -820,8 +820,8 @@ void Client::SendZoneFlagInfo(Client *to) const {
 
 bool Client::CanBeInZone() {
 	//check some critial rules to see if this char needs to be booted from the zone
-    //only enforce rules here which are serious enough to warrant being kicked from
-    //the zone
+	//only enforce rules here which are serious enough to warrant being kicked from
+	//the zone
 
 	if(Admin() >= RuleI(GM, MinStatusToZoneAnywhere))
 		return(true);

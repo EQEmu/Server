@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2005  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef SPDAT_H
 #define SPDAT_H
@@ -67,7 +67,7 @@ enum SpellAffectIndex {
 	SAI_Calm			= 12, // Lull and Alliance Spells
 	SAI_Dispell_Sight	= 14, // Dispells and Spells like Bind Sight
 	SAI_Memory_Blur		= 27,
-	SAI_Calm_Song		= 43  // Lull and Alliance Songs
+	SAI_Calm_Song		= 43 // Lull and Alliance Songs
 };
 enum RESISTTYPE
 {
@@ -134,7 +134,7 @@ typedef enum {
 /* 47 */	//ST_PetMaster = 0x2e, // uses the master as target
 } SpellTargetType;
 
-typedef enum  {
+typedef enum {
 	DS_DECAY = 244,
 	DS_CHILLED = 245,
 	DS_FREEZING = 246,
@@ -293,7 +293,7 @@ typedef enum  {
 //#define SE_Unknown146					146	// not used (Lightning Rod) Electrical Resist? (exp. VoA)
 #define SE_PercentalHeal				147 // implemented
 #define SE_StackingCommand_Block		148 // implemented?
-#define SE_StackingCommand_Overwrite 	149 // implemented?
+#define SE_StackingCommand_Overwrite	149 // implemented?
 #define SE_DeathSave					150 // implemented
 #define SE_SuspendPet					151	// *not implemented as bonus
 #define SE_TemporaryPets				152	// implemented
@@ -358,7 +358,7 @@ typedef enum  {
 #define SE_AEMelee						211	// implemented
 #define SE_CastingSkills				212	// *not implemented -Include/Exclude Casting Skill type. (*no longer used on live)
 #define SE_PetMaxHP						213	// implemented[AA] - increases the maximum hit points of your pet
-#define SE_MaxHPChange 					214	// implemented
+#define SE_MaxHPChange					214	// implemented
 #define SE_PetAvoidance					215	// implemented[AA] - increases pet ability to avoid melee damage
 #define SE_Accuracy						216	// implemented
 #define SE_HeadShot						217	// not implemented as bonus - ability to head shot (base2 = damage)
@@ -384,7 +384,7 @@ typedef enum  {
 #define SE_GivePetGroupTarget			237 // implemented[AA] - (Pet Affinity)
 #define SE_IllusionPersistence			238	// *not implemented - lends persistence to your illusionary disguises, causing them to last until you die or the illusion is forcibly removed.
 #define SE_FeignedCastOnChance			239	// *not implemented as bonus - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
-//#define SE_Unknown240					240	// not used  [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
+//#define SE_Unknown240					240	// not used [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
 #define SE_ImprovedReclaimEnergy		241	// not implemented as bonus - increase the amount of mana returned to you when reclaiming your pet.
 #define SE_ChanceWipeHateList			242	// *not implemented - increases the chance to wipe hate with memory blurr
 #define SE_CharmBreakChance				243	// implemented - Total Domination
@@ -410,7 +410,7 @@ typedef enum  {
 #define	SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.
 #define SE_HastenedAASkill				264 // not implemented as bonus - Use redux field in aa_actions table for this effect
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
-#define SE_ExtraAttackChance			266 // implemented  - increase chance to score an extra attack with a 2-Handed Weapon.
+#define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
 #define SE_PetDiscipline2				267 // *not implemented - /pet focus, /pet no cast
 #define SE_ReduceTradeskillFail			268 // *not implemented? - reduces chance to fail with given tradeskill by a percent chance
 #define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
@@ -425,7 +425,7 @@ typedef enum  {
 #define	SE_FinishingBlow				278 // implemented[AA] - chance to do massive damage under 10% HP (base1 = chance, base2 = damage)
 #define SE_Flurry						279	// implemented
 #define SE_PetFlurry					280 // implemented[AA]
-#define SE_FeignedMinion				281	// *not implemented[AA] ability allows you to instruct your pet to feign death via the '/pet feign' command.  value = succeed chance
+#define SE_FeignedMinion				281	// *not implemented[AA] ability allows you to instruct your pet to feign death via the '/pet feign' command. value = succeed chance
 #define SE_ImprovedBindWound			282	// implemented[AA] - increase bind wound amount by percent.
 #define SE_DoubleSpecialAttack			283	// implemented[AA] - Chance to perform second special attack as monk
 //#define SE_Unknown284					284	// not used
@@ -450,7 +450,7 @@ typedef enum  {
 #define SE_FF_Damage_Amount				303	// implemented - adds direct spell damage
 #define SE_OffhandRiposteFail			304 // not implemented as bonus - enemy cannot riposte offhand attacks
 #define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
-#define SE_ArmyOfTheDead				306 // *not implemented  NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
+#define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
 #define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
 #define SE_SuspendMinion				308 // not implemented as bonus
 #define SE_YetAnotherGate				309 // implemented
@@ -484,7 +484,7 @@ typedef enum  {
 #define SE_PercentXPIncrease			337	// implemented
 #define SE_SummonAndResAllCorpses		338	// implemented
 #define SE_TriggerOnCast				339	// implemented
-#define SE_SpellTrigger     			340	// implemented - chance to trigger spell
+#define SE_SpellTrigger					340	// implemented - chance to trigger spell
 #define SE_ItemAttackCapIncrease		341	// implemented[AA] - increases the maximum amount of attack you can gain from items.
 #define SE_ImmuneFleeing				342	// implemented - stop mob from fleeing
 #define SE_InterruptCasting				343	// implemented - % chance to interrupt spells being cast every tic. Cacophony (8272)
@@ -597,8 +597,8 @@ typedef enum  {
 
 // solar: note this struct is historical, we don't actually need it to be
 // aligned to anything, but for maintaining it it is kept in the order that
-// the fields in the text file are.  the numbering is not offset, but field
-// number.  note that the id field is counted as 0, this way the numbers
+// the fields in the text file are. the numbering is not offset, but field
+// number. note that the id field is counted as 0, this way the numbers
 // here match the numbers given to sep in the loading function net.cpp
 //
 struct SPDat_Spell_Struct
@@ -623,14 +623,14 @@ struct SPDat_Spell_Struct
 /* 017 */	uint32		buffduration;
 /* 018 */	uint32		AEDuration;	// sentinel, rain of something
 /* 019 */	uint16		mana; // Mana Used
-/* 020 */	int         base[EFFECT_COUNT];	//various purposes
-/* 032 */	int         base2[EFFECT_COUNT]; //various purposes
+/* 020 */	int			base[EFFECT_COUNT];	//various purposes
+/* 032 */	int			base2[EFFECT_COUNT]; //various purposes
 /* 044 */	int16		max[EFFECT_COUNT];
 /* 056 */	//uint16 icon; // Spell icon
 /* 057 */	//uint16 memicon; // Icon on membarthing
 /* 058 */	int32		components[4]; // reagents
 /* 062 */	int			component_counts[4]; // amount of regents used
-/* 066 */	int         NoexpendReagent[4];	// focus items (Need but not used; Flame Lick has a Fire Beetle Eye focus.)
+/* 066 */	int			NoexpendReagent[4];	// focus items (Need but not used; Flame Lick has a Fire Beetle Eye focus.)
 											// If it is a number between 1-4 it means components[number] is a focus and not to expend it
 											// If it is a valid itemid it means this item is a focus as well
 /* 070 */	uint16		formula[EFFECT_COUNT]; // Spell's value formula
@@ -650,54 +650,54 @@ struct SPDat_Spell_Struct
 /* 121 */	//uint8 TargetAnim;
 /* 122 */	//uint32 TravelType;
 /* 123 */	uint16		SpellAffectIndex;
-/* 124 */   int8 disallow_sit; // 124: high-end Yaulp spells (V, VI, VII, VIII [Rk 1, 2, & 3], & Gallenite's Bark of Fury
-/* 125 */                               // 125: Words of the Skeptic
+/* 124 */	int8 disallow_sit; // 124: high-end Yaulp spells (V, VI, VII, VIII [Rk 1, 2, & 3], & Gallenite's Bark of Fury
+/* 125 */								// 125: Words of the Skeptic
 /* 126 */	int8		deities[16];	// Deity check. 201 - 216 per http://www.eqemulator.net/wiki/wikka.php?wakka=DeityList
 										// -1: Restrict to Deity; 1: Restrict to Deity, but only used on non-Live (Test Server "Blessing of ...") spells; 0: Don't restrict
-/* 142 */                       // 142: between 0 & 100
+/* 142 */						// 142: between 0 & 100
 								// 143: always set to 0
-/* 144 */	//int16 new_icon    // Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon
-/* 145 */	//int16 spellanim;  // Doesn't look like it's the same as #doanim, so not sure what this is
+/* 144 */	//int16 new_icon	// Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon
+/* 145 */	//int16 spellanim; // Doesn't look like it's the same as #doanim, so not sure what this is
 /* 146 */	int8		uninterruptable;	// Looks like anything != 0 is uninterruptable. Values are mostly -1, 0, & 1 (Fetid Breath = 90?)
 /* 147 */	int16		ResistDiff;
-/* 148 */   //int dot_stacking_exempt;
-/* 149 */   //int deletable;
+/* 148 */	//int dot_stacking_exempt;
+/* 149 */	//int deletable;
 /* 150 */	uint16 RecourseLink;
-/* 151 */                       // 151: -1, 0, or 1
+/* 151 */						// 151: -1, 0, or 1
 								// 152 & 153: all set to 0
 /* 154 */	int8		short_buff_box;	// != 0, goes to short buff box.
-/* 155 */   int			descnum; // eqstr of description of spell
-/* 156 */   //int typedescnum;   // eqstr of type description
-/* 157 */   int			effectdescnum; // eqstr of effect description
+/* 155 */	int			descnum; // eqstr of description of spell
+/* 156 */	//int typedescnum; // eqstr of type description
+/* 157 */	int			effectdescnum; // eqstr of effect description
 /* 158 */
-/* 162 */   int			bonushate;
+/* 162 */	int			bonushate;
 /* 163 */
-/* 166 */   int			EndurCost;
-/* 167 */   int8 EndurTimerIndex;
-/* 168 */   //int IsDisciplineBuff; //Will goto the combat window when cast
+/* 166 */	int			EndurCost;
+/* 167 */	int8 EndurTimerIndex;
+/* 168 */	//int IsDisciplineBuff; //Will goto the combat window when cast
 /* 169 */
-/* 173 */   int			HateAdded;
-/* 174 */   int			EndurUpkeep;
+/* 173 */	int			HateAdded;
+/* 174 */	int			EndurUpkeep;
 /* 175 */
-/* 176 */ 	int 		numhits;
-/* 177 */ 	int 		pvpresistbase;
-/* 178 */ 	int 		pvpresistcalc;
-/* 179 */ 	int 		pvpresistcap;
-/* 180 */ 	int 		spell_category;
+/* 176 */	int			numhits;
+/* 177 */	int			pvpresistbase;
+/* 178 */	int			pvpresistcalc;
+/* 179 */	int			pvpresistcap;
+/* 180 */	int			spell_category;
 /* 181 */
-/* 185 */ 	int8 can_mgb; // 0=no, -1 or 1 = yes
-/* 186 */ 	int 		dispel_flag;
-/* 189 */ 	int 		MinResist;
-/* 190 */ 	int 		MaxResist;
-/* 191 */ 	uint8 viral_targets;
-/* 192 */ 	uint8 viral_timer;
-/* 193 */ 	int 		NimbusEffect;
-/* 194 */ 	float 		directional_start;
-/* 195 */ 	float 		directional_end;
-/* 207 */ 	int 		spellgroup;
-/* 209 */ 	int 		powerful_flag; // Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
-/* 211 */   int         CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
-/* 212 */ 	bool 		AllowRest;
+/* 185 */	int8 can_mgb; // 0=no, -1 or 1 = yes
+/* 186 */	int			dispel_flag;
+/* 189 */	int			MinResist;
+/* 190 */	int			MaxResist;
+/* 191 */	uint8 viral_targets;
+/* 192 */	uint8 viral_timer;
+/* 193 */	int			NimbusEffect;
+/* 194 */	float		directional_start;
+/* 195 */	float		directional_end;
+/* 207 */	int			spellgroup;
+/* 209 */	int			powerful_flag; // Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
+/* 211 */	int			CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
+/* 212 */	bool		AllowRest;
 /* 219 */	//int maxtargets; // not in DB yet, is used for beam and ring spells for target # limits
 			uint8		DamageShieldType; // This field does not exist in spells_us.txt
 };

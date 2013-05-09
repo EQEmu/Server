@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/debug.h"
@@ -92,9 +92,9 @@ void Mob::CheckFlee() {
 	}
 	if(ratio < run_ratio)
 	{
-		if( RuleB(Combat, FleeIfNotAlone)
-		  || ( !RuleB(Combat, FleeIfNotAlone)
-		    && (entity_list.GetHatedCount(hate_top, this) == 0)))
+		if (RuleB(Combat, FleeIfNotAlone) ||
+			(!RuleB(Combat, FleeIfNotAlone) &&
+			(entity_list.GetHatedCount(hate_top, this) == 0)))
 			StartFleeing();
 
 	}
@@ -127,10 +127,10 @@ void Mob::ProcessFlee() {
 }
 
 float Mob::GetFearSpeed() {
-    if(flee_mode) {
-        //we know ratio < FLEE_HP_RATIO
-        float speed = GetRunspeed();
-        float ratio = GetHPRatio();
+	if(flee_mode) {
+		//we know ratio < FLEE_HP_RATIO
+		float speed = GetRunspeed();
+		float ratio = GetHPRatio();
 
 		// mob's movement will halt with a decent snare at HP specified by rule.
 		if (ratio <= RuleI(Combat, FleeSnareHPRatio) && GetSnaredAmount() > 40) {
@@ -140,11 +140,11 @@ float Mob::GetFearSpeed() {
 		if (ratio < FLEE_HP_MINSPEED)
 			ratio = FLEE_HP_MINSPEED;
 
-        speed = speed * 0.5 * ratio / 100;
+		speed = speed * 0.5 * ratio / 100;
 
-        return(speed);
-    }
-    return(GetRunspeed());
+		return(speed);
+	}
+	return(GetRunspeed());
 }
 
 void Mob::CalculateNewFearpoint()
@@ -251,7 +251,7 @@ void Mob::CalculateNewFearpoint()
 		fear_path_state = new MobFearState();
 		if(zone->pathing->FindNearestFear(fear_path_state, GetX(), GetY(), GetZ())) {
 #ifdef FEAR_PATHING_DEBUG
-		LogFile->write(EQEMuLog::Debug, "Fear Pathing Start: found path, moving from (%.2f, %.2f, %.2f) to path node  (%.2f, %.2f, %.2f)",
+		LogFile->write(EQEMuLog::Debug, "Fear Pathing Start: found path, moving from (%.2f, %.2f, %.2f) to path node (%.2f, %.2f, %.2f)",
 			GetX(), GetY(), GetZ(), fear_path_state->x, fear_path_state->y, fear_path_state->z);
 #endif
 			//we found a fear node... were on our way..
@@ -373,7 +373,7 @@ void Mob::CalculateFearPosition() {
 			return;
 		}
 #ifdef FEAR_PATHING_DEBUG
-		LogFile->write(EQEMuLog::Debug, "Fear Pathing: on path, moving from (%.2f, %.2f, %.2f) to path node  (%.2f, %.2f, %.2f)",
+		LogFile->write(EQEMuLog::Debug, "Fear Pathing: on path, moving from (%.2f, %.2f, %.2f) to path node (%.2f, %.2f, %.2f)",
 			GetX(), GetY(), GetZ(), fear_path_state->x, fear_path_state->y, fear_path_state->z);
 #endif
 		//we found a fear node... were on our way..
@@ -400,7 +400,7 @@ void Mob::CalculateFearPosition() {
 
 		if(zone->pathing->FindNearestFear(fear_path_state, GetX(), GetY(), GetZ())) {
 #ifdef FEAR_PATHING_DEBUG
-		LogFile->write(EQEMuLog::Debug, "Fear Pathing: ran to find path, moving from (%.2f, %.2f, %.2f) to path node  (%.2f, %.2f, %.2f)",
+		LogFile->write(EQEMuLog::Debug, "Fear Pathing: ran to find path, moving from (%.2f, %.2f, %.2f) to path node (%.2f, %.2f, %.2f)",
 			GetX(), GetY(), GetZ(), fear_path_state->x, fear_path_state->y, fear_path_state->z);
 #endif
 			//we found a fear node... were on our way..
@@ -422,7 +422,7 @@ void Mob::CalculateFearPosition() {
 		//do not force a path if we are fleeing
 		if(!flee_mode && zone->pathing->FindNearestFear(fear_path_state, GetX(), GetY(), GetZ(), false)) {
 #ifdef FEAR_PATHING_DEBUG
-		LogFile->write(EQEMuLog::Debug, "Fear Pathing: Bullshit Path from (%.2f, %.2f, %.2f) to path node  (%.2f, %.2f, %.2f)",
+		LogFile->write(EQEMuLog::Debug, "Fear Pathing: Bullshit Path from (%.2f, %.2f, %.2f) to path node (%.2f, %.2f, %.2f)",
 			GetX(), GetY(), GetZ(), fear_path_state->x, fear_path_state->y, fear_path_state->z);
 #endif
 			//we found a fear node... were on our way..

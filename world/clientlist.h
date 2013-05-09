@@ -40,7 +40,7 @@ public:
 	void	SendOnlineGuildMembers(uint32 FromID, uint32 GuildID);
 	void	SendClientVersionSummary(const char *Name);
 	void	SendLFGMatches(ServerLFGMatchesRequest_Struct *LFGMatchesRequest);
-	void    ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* whom, WorldTCPConnection* connection);
+	void	ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* whom, WorldTCPConnection* connection);
 	void	SendCLEList(const int16& admin, const char* to, WorldTCPConnection* connection, const char* iName = 0);
 
 	bool	SendPacket(const char* to, ServerPacket* pack);
@@ -79,7 +79,5 @@ protected:
 
 };
 
-
-
-
 #endif /*CLIENTLIST_H_*/
+

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 
@@ -22,11 +22,11 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 	solar:	General outline of spell casting process
 
 	1.
-		a)	Client clicks a spell bar gem, ability, or item.  client_process.cpp
+		a)	Client clicks a spell bar gem, ability, or item. client_process.cpp
 		gets the op and calls CastSpell() with all the relevant info including
 		cast time.
 
-		b)  NPC does CastSpell() from AI
+		b) NPC does CastSpell() from AI
 
 	2.
 		a)	CastSpell() determines there is a cast time and sets some state keeping
@@ -41,7 +41,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 
 	4.
 		CastedSpellFinished() checks some timed spell specific things, like
-		wether to interrupt or not, due to movement or melee.  If successful
+		wether to interrupt or not, due to movement or melee. If successful
 		SpellFinished() is called.
 
 	5.
@@ -383,7 +383,7 @@ bool IsPartialCapableSpell(uint16 spell_id)
 
 bool IsResistableSpell(uint16 spell_id)
 {
-	// solar: for now only detrimental spells are resistable.  later on i will
+	// solar: for now only detrimental spells are resistable. later on i will
 	// add specific exceptions for the beneficial spells that are resistable
 	if(IsDetrimentalSpell(spell_id))
 	{
@@ -475,7 +475,7 @@ bool IsValidSpell(uint32 spellid)
 {
 	return
 	(
-        SPDAT_RECORDS > 0 &&
+		SPDAT_RECORDS > 0 &&
 		spellid != 0 &&
 		spellid != 1 &&
 		spellid != 0xFFFFFFFF &&
@@ -503,15 +503,15 @@ int GetMinLevel(uint16 spell_id) {
 }
 
 int GetSpellLevel(uint16 spell_id, int classa) {
-    if(classa >= PLAYER_CLASS_COUNT) {
-        return 255;
-    }
+	if(classa >= PLAYER_CLASS_COUNT) {
+		return 255;
+	}
 
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 	return spell.classes[classa - 1];
 }
 
-// solar: this will find the first occurance of effect.  this is handy
+// solar: this will find the first occurance of effect. this is handy
 // for spells like mez and charm, but if the effect appears more than once
 // in a spell this will just give back the first one.
 int GetSpellEffectIndex(uint16 spell_id, int effect)
@@ -598,7 +598,7 @@ int32 CalculatePoisonCounters(uint16 spell_id){
 			Counters += spells[spell_id].base[i];
 		}
 	}
-    return Counters;
+	return Counters;
 }
 
 int32 CalculateDiseaseCounters(uint16 spell_id){
@@ -612,7 +612,7 @@ int32 CalculateDiseaseCounters(uint16 spell_id){
 			Counters += spells[spell_id].base[i];
 		}
 	}
-    return Counters;
+	return Counters;
 }
 
 int32 CalculateCurseCounters(uint16 spell_id){
@@ -626,7 +626,7 @@ int32 CalculateCurseCounters(uint16 spell_id){
 			Counters += spells[spell_id].base[i];
 		}
 	}
-    return Counters;
+	return Counters;
 }
 
 int32 CalculateCorruptionCounters(uint16 spell_id){
@@ -640,27 +640,27 @@ int32 CalculateCorruptionCounters(uint16 spell_id){
 			Counters += spells[spell_id].base[i];
 		}
 	}
-    return Counters;
+	return Counters;
 }
 
 int32 CalculateCounters(uint16 spell_id) {
-    int32 counter = CalculatePoisonCounters(spell_id);
-    if(counter != 0) {
-        return counter;
-    }
+	int32 counter = CalculatePoisonCounters(spell_id);
+	if(counter != 0) {
+		return counter;
+	}
 
-    counter = CalculateDiseaseCounters(spell_id);
-    if(counter != 0) {
-        return counter;
-    }
+	counter = CalculateDiseaseCounters(spell_id);
+	if(counter != 0) {
+		return counter;
+	}
 
-    counter = CalculateCurseCounters(spell_id);
-    if(counter != 0) {
-        return counter;
-    }
+	counter = CalculateCurseCounters(spell_id);
+	if(counter != 0) {
+		return counter;
+	}
 
-    counter = CalculateCorruptionCounters(spell_id);
-    return counter;
+	counter = CalculateCorruptionCounters(spell_id);
+	return counter;
 }
 
 bool IsDisciplineBuff(uint16 spell_id)
@@ -936,55 +936,55 @@ bool IsRegularSingleTargetHealSpell(uint16 spell_id) {
 
 bool IsRegularGroupHealSpell(uint16 spell_id) {
 
-        if(IsGroupSpell(spell_id) && !IsCompleteHealSpell(spell_id) && !IsHealOverTimeSpell(spell_id))
-                return true;
-        else
-                return false;
+	if(IsGroupSpell(spell_id) && !IsCompleteHealSpell(spell_id) && !IsHealOverTimeSpell(spell_id))
+		return true;
+	else
+		return false;
 }
 
 bool IsGroupCompleteHealSpell(uint16 spell_id) {
 
-        if(IsGroupSpell(spell_id) && IsCompleteHealSpell(spell_id))
-                return true;
-        else
-                return false;
+	if(IsGroupSpell(spell_id) && IsCompleteHealSpell(spell_id))
+		return true;
+	else
+		return false;
 }
 
 bool IsGroupHealOverTimeSpell(uint16 spell_id) {
 
-        if(IsGroupSpell(spell_id) && IsHealOverTimeSpell(spell_id) && spells[spell_id].buffduration < 10)
-                return true;
-        else
-                return false;
+	if(IsGroupSpell(spell_id) && IsHealOverTimeSpell(spell_id) && spells[spell_id].buffduration < 10)
+		return true;
+	else
+		return false;
 }
 
 bool IsDebuffSpell(uint16 spell_id) {
 
-        if(IsBeneficialSpell(spell_id) || IsEffectHitpointsSpell(spell_id) || IsStunSpell(spell_id) || IsMezSpell(spell_id)
-			|| IsCharmSpell(spell_id) || IsSlowSpell(spell_id) || IsEffectInSpell(spell_id, SE_Root) || IsEffectInSpell(spell_id, SE_CancelMagic)
-			|| IsEffectInSpell(spell_id, SE_MovementSpeed) || IsFearSpell(spell_id) || IsEffectInSpell(spell_id, SE_Calm))
-                return false;
-        else
-                return true;
+	if(IsBeneficialSpell(spell_id) || IsEffectHitpointsSpell(spell_id) || IsStunSpell(spell_id) || IsMezSpell(spell_id)
+		|| IsCharmSpell(spell_id) || IsSlowSpell(spell_id) || IsEffectInSpell(spell_id, SE_Root) || IsEffectInSpell(spell_id, SE_CancelMagic)
+		|| IsEffectInSpell(spell_id, SE_MovementSpeed) || IsFearSpell(spell_id) || IsEffectInSpell(spell_id, SE_Calm))
+		return false;
+	else
+		return true;
 }
 
 bool IsResistDebuffSpell(uint16 spell_id) {
 
-        if((IsEffectInSpell(spell_id, SE_ResistFire) || IsEffectInSpell(spell_id, SE_ResistCold) || IsEffectInSpell(spell_id, SE_ResistPoison)
-			 || IsEffectInSpell(spell_id, SE_ResistDisease) || IsEffectInSpell(spell_id, SE_ResistMagic) || IsEffectInSpell(spell_id, SE_ResistAll)
-			 || IsEffectInSpell(spell_id, SE_ResistCorruption)) && !IsBeneficialSpell(spell_id))
-                return true;
-        else
-                return false;
+	if((IsEffectInSpell(spell_id, SE_ResistFire) || IsEffectInSpell(spell_id, SE_ResistCold) || IsEffectInSpell(spell_id, SE_ResistPoison)
+			|| IsEffectInSpell(spell_id, SE_ResistDisease) || IsEffectInSpell(spell_id, SE_ResistMagic) || IsEffectInSpell(spell_id, SE_ResistAll)
+			|| IsEffectInSpell(spell_id, SE_ResistCorruption)) && !IsBeneficialSpell(spell_id))
+		return true;
+	else
+		return false;
 }
 
 bool IsSelfConversionSpell(uint16 spell_id) {
 
-        if(GetSpellTargetType(spell_id) == ST_Self && IsEffectInSpell(spell_id, SE_CurrentMana) && IsEffectInSpell(spell_id, SE_CurrentHP)
-			&& spells[spell_id].base[GetSpellEffectIndex(spell_id, SE_CurrentMana)] > 0 && spells[spell_id].base[GetSpellEffectIndex(spell_id, SE_CurrentHP)] < 0)
-                return true;
-        else
-                return false;
+	if(GetSpellTargetType(spell_id) == ST_Self && IsEffectInSpell(spell_id, SE_CurrentMana) && IsEffectInSpell(spell_id, SE_CurrentHP)
+		&& spells[spell_id].base[GetSpellEffectIndex(spell_id, SE_CurrentMana)] > 0 && spells[spell_id].base[GetSpellEffectIndex(spell_id, SE_CurrentHP)] < 0)
+		return true;
+	else
+		return false;
 }
 
 uint32 GetMorphTrigger(uint32 spell_id)

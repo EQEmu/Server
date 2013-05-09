@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef NPC_H
 #define NPC_H
@@ -34,7 +34,7 @@ using namespace std;
 #include "../common/rulesys.h"
 
 #ifdef _WINDOWS
-	#define  M_PI	3.141592
+	#define M_PI	3.141592
 #endif
 
 #define LEAVECOMBAT 0
@@ -64,7 +64,7 @@ struct AISpells_Struct {
 	uint32	time_cancast;	// when we can cast this spell next
 	int32	recast_delay;
 	int16	priority;
-	int16  resist_adjust;
+	int16	resist_adjust;
 };
 
 class AA_SwarmPetInfo;
@@ -134,7 +134,7 @@ public:
 
 	virtual void	RangedAttack(Mob* other);
 	virtual void	ThrowingAttack(Mob* other) { }
-    int32 GetNumberOfAttacks() const { return attack_count; }
+	int32 GetNumberOfAttacks() const { return attack_count; }
 
 	bool	DatabaseCastAccepted(int spell_id);
 	bool	IsFactionListAlly(uint32 other_faction);
@@ -156,7 +156,7 @@ public:
 	void	AddLootTable();
 	void	AddLootTable(uint32 ldid);
 	void	DescribeAggro(Client *towho, Mob *mob, bool verbose);
-	void    RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
+	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
 	void	CheckMinMaxLevel(Mob *them);
 	void	ClearItemList();
 	ServerLootItem_Struct*	GetItem(int slot_id);
@@ -179,7 +179,7 @@ public:
 	inline void	SetPlatinum(uint32 amt)		{ platinum = amt; }
 
 
-    virtual int32 CalcMaxMana();
+	virtual int32 CalcMaxMana();
 	void SetGrid(int32 grid_){ grid=grid_; }
 	void SetSp2(uint32 sg2){ spawn_group=sg2; }
 	void SetWaypointMax(uint16 wp_){ wp_m=wp_; }
@@ -197,9 +197,9 @@ public:
 	float GetGuardPointX()	const { return guard_x; }
 	float GetGuardPointY()	const { return guard_y; }
 	float GetGuardPointZ()	const { return guard_z; }
-    float GetGuardPointH()	const { return guard_heading; }
-    EmuAppearance GetGuardPointAnim() const { return guard_anim; }
-    void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }
+	float GetGuardPointH()	const { return guard_heading; }
+	EmuAppearance GetGuardPointAnim() const { return guard_anim; }
+	void SaveGuardPointAnim(EmuAppearance anim) { guard_anim = anim; }
 
 	void SetFlyMode(uint8 FlyMode){ flymode=FlyMode; }
 	uint32 GetFlyMode() const { return flymode; }
@@ -221,22 +221,22 @@ public:
 
 	inline int32	GetNPCFactionID()	const { return npc_faction_id; }
 	inline int32			GetPrimaryFaction()	const { return primary_faction; }
-	int32	GetNPCHate(Mob* in_ent)  {return hate_list.GetEntHate(in_ent);}
-    bool    IsOnHatelist(Mob*p) { return hate_list.IsOnHateList(p);}
+	int32	GetNPCHate(Mob* in_ent) {return hate_list.GetEntHate(in_ent);}
+	bool	IsOnHatelist(Mob*p) { return hate_list.IsOnHateList(p);}
 
 	void	SetNPCFactionID(int32 in) { npc_faction_id = in; database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction); }
 
-	float   org_x, org_y, org_z, org_heading;
+	float	org_x, org_y, org_z, org_heading;
 
 	uint32	GetMaxDMG() const {return max_dmg;}
 	uint32	GetMinDMG() const {return min_dmg;}
 	float	GetSlowMitigation() const {return slow_mitigation;}
 	float	GetAttackSpeed() const {return attack_speed;}
 	bool	IsAnimal() const { return(bodytype == BT_Animal); }
-	uint16   GetPetSpellID() const {return pet_spell_id;}
-	void    SetPetSpellID(uint16 amt) {pet_spell_id = amt;}
+	uint16	GetPetSpellID() const {return pet_spell_id;}
+	void	SetPetSpellID(uint16 amt) {pet_spell_id = amt;}
 	uint32	GetMaxDamage(uint8 tlevel);
-	void    SetTaunting(bool tog) {taunting = tog;}
+	void	SetTaunting(bool tog) {taunting = tog;}
 	void	PickPocket(Client* thief);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
 	void	AddLootDrop(const Item_Struct*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
@@ -244,7 +244,7 @@ public:
 	void	CheckSignal();
 
 	//waypoint crap
-	int                 GetMaxWp() const { return max_wp; }
+	int					GetMaxWp() const { return max_wp; }
 	void				DisplayWaypointInfo(Client *to);
 	void				CalculateNewWaypoint();
 	void				AssignWaypoints(int32 grid);
@@ -256,7 +256,7 @@ public:
 	void				ResumeWandering();
 	void				PauseWandering(int pausetime);
 	void				MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot);
-	void                GetClosestWaypoint(list<wplist> &wp_list, int count, float m_x, float m_y, float m_z);
+	void				GetClosestWaypoint(list<wplist> &wp_list, int count, float m_x, float m_y, float m_z);
 
 	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
@@ -286,7 +286,7 @@ public:
 	inline void GiveNPCTypeData(NPCType *ours) { NPCTypedata_ours = ours; }
 	inline const uint32 GetNPCSpellsID()	const { return npc_spells_id; }
 
-	ItemList	itemlist; //kathgar - why is this public?  Doing other things or I would check the code
+	ItemList	itemlist; //kathgar - why is this public? Doing other things or I would check the code
 
 	NPCProximity* proximity;
 	Spawn2*	respawn2;
@@ -326,7 +326,7 @@ public:
 
 	//The corpse we make can only be looted by people who got credit for the kill
 	const bool HasPrivateCorpse() const { return NPCTypedata->private_corpse; }
-    const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
+	const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata->name; }
 
 	bool GetDepop() { return p_depop; }
@@ -336,17 +336,17 @@ public:
 	uint32 GetAdventureTemplate() const { return adventure_template_id; }
 	void AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint16 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust);
 	void RemoveSpellFromNPCList(int16 spell_id);
-    Timer *GetRefaceTimer() const { return reface_timer; }
-    const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }
+	Timer *GetRefaceTimer() const { return reface_timer; }
+	const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }
 
 	NPC_Emote_Struct* GetNPCEmote(uint16 emoteid, uint8 event_);
 	void DoNPCEmote(uint8 event_, uint16 emoteid);
 	bool CanTalk();
 
-	inline void  SetSpellScale(float amt)		{ spellscale = amt; }
+	inline void SetSpellScale(float amt)		{ spellscale = amt; }
 	inline float GetSpellScale()				{ return spellscale; }
 
-	inline void  SetHealScale(float amt)		{ healscale = amt; }
+	inline void SetHealScale(float amt)		{ healscale = amt; }
 	inline float GetHealScale()					{ return healscale; }
 
 	void AddQuestItem(ItemInst* inst) { questItems.Insert(inst); }
@@ -472,24 +472,24 @@ protected:
 	uint32	silver;
 	uint32	gold;
 	uint32	platinum;
-	int32   grid;
-	uint32   spawn_group;
+	int32	grid;
+	uint32	spawn_group;
 	uint16	wp_m;
 
 	int32	npc_faction_id;
 	int32	primary_faction;
 
 	Timer	attacked_timer;		//running while we are being attacked (damaged)
-    Timer	swarm_timer;
-    Timer	classattack_timer;
+	Timer	swarm_timer;
+	Timer	classattack_timer;
 	Timer	knightattack_timer;
-    Timer	assist_timer;		//ask for help from nearby mobs
+	Timer	assist_timer;		//ask for help from nearby mobs
 	Timer	qglobal_purge_timer;
 
 	bool	combat_event;	//true if we are in combat, false otherwise
-    Timer	sendhpupdate_timer;
+	Timer	sendhpupdate_timer;
 	Timer	enraged_timer;
-    Timer *reface_timer;
+	Timer *reface_timer;
 
 	uint32	npc_spells_id;
 	uint8	casting_spell_AIindex;
@@ -504,15 +504,15 @@ protected:
 	uint32	max_dmg;
 	uint32	min_dmg;
 	int32	accuracy_rating;
-	int16  attack_count;
-    uint32  npc_mana;
-	float  spellscale;
-	float  healscale;
+	int16	attack_count;
+	uint32	npc_mana;
+	float	spellscale;
+	float	healscale;
 
 	//pet crap:
 	uint16	pet_spell_id;
 	bool	taunting;
-    Timer	taunt_timer;		//for pet taunting
+	Timer	taunt_timer;		//for pet taunting
 
 	bool npc_aggro;
 
@@ -523,9 +523,9 @@ protected:
 	void _ClearWaypints();
 	int max_wp;
 	int save_wp;
-    float guard_x, guard_y, guard_z, guard_heading;
+	float guard_x, guard_y, guard_z, guard_heading;
 	float guard_x_saved, guard_y_saved, guard_z_saved, guard_heading_saved;
-    EmuAppearance guard_anim;
+	EmuAppearance guard_anim;
 	float roambox_max_x;
 	float roambox_max_y;
 	float roambox_min_x;
@@ -535,8 +535,8 @@ protected:
 	float roambox_movingto_y;
 	uint32 roambox_delay;
 
-	uint16   skills[HIGHEST_SKILL+1];
-	uint32   equipment[MAX_WORN_INVENTORY];	//this is an array of item IDs
+	uint16	skills[HIGHEST_SKILL+1];
+	uint32	equipment[MAX_WORN_INVENTORY];	//this is an array of item IDs
 	uint16	d_meele_texture1;			//this is an item Material value
 	uint16	d_meele_texture2;			//this is an item Material value (offhand)
 	uint8	prim_melee_type;			//Sets the Primary Weapon attack message and animation

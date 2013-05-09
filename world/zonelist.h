@@ -52,7 +52,7 @@ public:
 	Timer*	reminder;
 	void	NextGroupIDs(uint32 &start, uint32 &end);
 	void	SendLSZones();
-	uint16  GetAvailableZonePort();
+	uint16 GetAvailableZonePort();
 
 	int GetZoneCount();
 	void GetZoneIDList(std::vector<uint32> &zones);
@@ -68,16 +68,5 @@ protected:
 
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
 #endif /*ZONELIST_H_*/
+

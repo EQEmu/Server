@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <stdlib.h>
@@ -125,48 +125,48 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 		t2 = 0 - t2;
 	if(t3 < 0)
 		t3 = 0 - t3;
-	if(   ( t1 > iAggroRange)
-	   || ( t2 > iAggroRange)
-	   || ( t3 > iAggroRange) ) {
-	   towho->Message(0, "...%s is out of range (fast). distances (%.3f,%.3f,%.3f), range %.3f", mob->GetName(),
-	   t1, t2, t3, iAggroRange);
-	   return;
+	if(( t1 > iAggroRange)
+		|| ( t2 > iAggroRange)
+		|| ( t3 > iAggroRange) ) {
+		towho->Message(0, "...%s is out of range (fast). distances (%.3f,%.3f,%.3f), range %.3f", mob->GetName(),
+		t1, t2, t3, iAggroRange);
+		return;
 	}
 
 	if(mob->IsInvisible(this)) {
-	   towho->Message(0, "...%s is invisible to me. ", mob->GetName());
-	   return;
+		towho->Message(0, "...%s is invisible to me. ", mob->GetName());
+		return;
 	}
 	if((mob->IsClient() &&
-	       (!mob->CastToClient()->Connected()
-	  	    || mob->CastToClient()->IsLD()
-	        || mob->CastToClient()->IsBecomeNPC()
-	        || mob->CastToClient()->GetGM()
-	       )
-	   ))
+		(!mob->CastToClient()->Connected()
+		|| mob->CastToClient()->IsLD()
+		|| mob->CastToClient()->IsBecomeNPC()
+		|| mob->CastToClient()->GetGM()
+		)
+		))
 	{
-	   towho->Message(0, "...%s is my owner. ", mob->GetName());
-	   return;
+		towho->Message(0, "...%s is my owner. ", mob->GetName());
+		return;
 	}
 
 
 	if(mob == GetOwner()) {
-	   towho->Message(0, "...%s a GM or is not connected. ", mob->GetName());
-	   return;
+		towho->Message(0, "...%s a GM or is not connected. ", mob->GetName());
+		return;
 	}
 
-	float dist2  = mob->DistNoRoot(*this);
+	float dist2 = mob->DistNoRoot(*this);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 	if( dist2 > iAggroRange2 ) {
-	   towho->Message(0, "...%s is out of range. %.3f > %.3f ", mob->GetName(),
-	   dist2, iAggroRange2);
-	   return;
+		towho->Message(0, "...%s is out of range. %.3f > %.3f ", mob->GetName(),
+		dist2, iAggroRange2);
+		return;
 	}
 
 	if(GetINT() > 75 && mob->GetLevelCon(GetLevel()) == CON_GREEN ) {
-	   towho->Message(0, "...%s is red to me (basically)", mob->GetName(),
-	   dist2, iAggroRange2);
-	   return;
+		towho->Message(0, "...%s is red to me (basically)", mob->GetName(),
+		dist2, iAggroRange2);
+		return;
 	}
 
 	if(verbose) {
@@ -224,15 +224,15 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 			||
 			fv == FACTION_THREATENLY
 		)) {
-	   towho->Message(0, "...%s faction not low enough. value='%s'", mob->GetName(), FactionValueToString(fv));
-	   return;
+		towho->Message(0, "...%s faction not low enough. value='%s'", mob->GetName(), FactionValueToString(fv));
+		return;
 	}
 	if(fv == FACTION_THREATENLY) {
-	   towho->Message(0, "...%s threatening to me, so they only have a %d chance per check of attacking.", mob->GetName());
+		towho->Message(0, "...%s threatening to me, so they only have a %d chance per check of attacking.", mob->GetName());
 	}
 
 	if(!CheckLosFN(mob)) {
-	   towho->Message(0, "...%s is out of sight.", mob->GetName());
+		towho->Message(0, "...%s is out of sight.", mob->GetName());
 	}
 
 	towho->Message(0, "...%s meets all conditions, I should be attacking them.", mob->GetName());
@@ -262,7 +262,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 
 	// Check If it's invisible and if we can see invis
 	// Check if it's a client, and that the client is connected and not linkdead,
-	//   and that the client isn't Playing an NPC, with thier gm flag on
+	// and that the client isn't Playing an NPC, with thier gm flag on
 	// Check if it's not a Interactive NPC
 	// Trumpcard: The 1st 3 checks are low cost calcs to filter out unnessecary distance checks. Leave them at the beginning, they are the most likely occurence.
 	// Image: I moved this up by itself above faction and distance checks because if one of these return true, theres no reason to go through the other information
@@ -278,17 +278,17 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		t2 = 0 - t2;
 	if(t3 < 0)
 		t3 = 0 - t3;
-	if(   ( t1 > iAggroRange)
-	   || ( t2 > iAggroRange)
-	   || ( t3 > iAggroRange)
-	   ||(mob->IsInvisible(this))
-	   || (mob->IsClient() &&
-	       (!mob->CastToClient()->Connected()
-	  	    || mob->CastToClient()->IsLD()
-	        || mob->CastToClient()->IsBecomeNPC()
-	        || mob->CastToClient()->GetGM()
-	       )
-	   ))
+	if(( t1 > iAggroRange)
+		|| ( t2 > iAggroRange)
+		|| ( t3 > iAggroRange)
+		||(mob->IsInvisible(this))
+		|| (mob->IsClient() &&
+			(!mob->CastToClient()->Connected()
+				|| mob->CastToClient()->IsLD()
+				|| mob->CastToClient()->IsBecomeNPC()
+				|| mob->CastToClient()->GetGM()
+			)
+		))
 	{
 		return(false);
 	}
@@ -301,7 +301,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return(false);
 	}
 
-	float dist2  = mob->DistNoRoot(*this);
+	float dist2 = mob->DistNoRoot(*this);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 
 	if( dist2 > iAggroRange2 ) {
@@ -354,14 +354,14 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			#endif
 			return(true);
 		}
-	  }
+	}
 #if EQDEBUG >= 6
-	  printf("Is In zone?:%d\n", mob->InZone());
-	  printf("Dist^2: %f\n", dist2);
-	  printf("Range^2: %f\n", iAggroRange2);
-	  printf("Faction: %d\n", fv);
-	  printf("Int: %d\n", GetINT());
-	  printf("Con: %d\n", GetLevelCon(mob->GetLevel()));
+	printf("Is In zone?:%d\n", mob->InZone());
+	printf("Dist^2: %f\n", dist2);
+	printf("Range^2: %f\n", iAggroRange2);
+	printf("Faction: %d\n", fv);
+	printf("Int: %d\n", GetINT());
+	printf("Con: %d\n", GetLevelCon(mob->GetLevel()));
 #endif
 	return(false);
 }
@@ -478,7 +478,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 				if(useprimfaction || sender->GetReverseFactionCon(mob) <= FACTION_AMIABLE )
 				{
 					//attacking someone on same faction, or a friend
-					//Father Nitwit:  make sure we can see them.
+					//Father Nitwit: make sure we can see them.
 					if(mob->CheckLosFN(sender)) {
 #if (EQDEBUG>=5)
 						LogFile->write(EQEMuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
@@ -495,7 +495,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 /*
 solar: returns false if attack should not be allowed
 I try to list every type of conflict that's possible here, so it's easy
-to see how the decision is made.  Yea, it could be condensed and made
+to see how the decision is made. Yea, it could be condensed and made
 faster, but I'm doing it this way to make it readable and easy to modify
 */
 
@@ -557,7 +557,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	// solar: the format here is a matrix of mob type vs mob type.
 	// redundant ones are omitted and the reverse is tried if it falls through.
 
-	// first figure out if we're pets.  we always look at the master's flags.
+	// first figure out if we're pets. we always look at the master's flags.
 	// no need to compare pets to anything
 	mob1 = our_owner ? our_owner : this;
 	mob2 = target_owner ? target_owner : target;
@@ -706,7 +706,7 @@ type', in which case, the answer is yes.
 
 
 // solar: this is to check if non detrimental things are allowed to be done
-// to the target.  clients cannot affect npcs and vice versa, and clients
+// to the target. clients cannot affect npcs and vice versa, and clients
 // cannot affect other clients that are not of the same pvp flag as them.
 // also goes for their pets
 bool Mob::IsBeneficialAllowed(Mob *target)
@@ -723,7 +723,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 
 	// solar: see IsAttackAllowed for notes
 
-	// first figure out if we're pets.  we always look at the master's flags.
+	// first figure out if we're pets. we always look at the master's flags.
 	// no need to compare pets to anything
 	mob1 = this->GetOwnerID() ? this->GetOwner() : this;
 	mob2 = target->GetOwnerID() ? target->GetOwner() : target;
@@ -757,7 +757,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 			}
 			else if(_NPC(mob2))				// client to npc
 			{
-                /* fall through and swap positions */
+				/* fall through and swap positions */
 			}
 			else if(_BECOMENPC(mob2))	// client to becomenpc
 			{
@@ -914,17 +914,17 @@ bool Mob::CheckLos(Mob* other) {
 	float dist_z = tmp_z - trg_z;
 	if (dist_z < 0)
 		dist_z *= -1;
-	if (dist_x  < dist_y && dist_z < dist_y)
+	if (dist_x < dist_y && dist_z < dist_y)
 	{
 		perwalk_x /= (dist_y/dist_x);
 		perwalk_z /= (dist_y/dist_z);
 	}
-	else if (dist_y  < dist_x && dist_z < dist_x)
+	else if (dist_y < dist_x && dist_z < dist_x)
 	{
 		perwalk_y /= (dist_x/dist_y);
 		perwalk_z /= (dist_x/dist_z);
 	}
-	else if (dist_x  < dist_z && dist_y < dist_z)
+	else if (dist_x < dist_z && dist_y < dist_z)
 	{
 		perwalk_x /= (dist_z/dist_x);
 		perwalk_y /= (dist_z/dist_y);
@@ -1003,7 +1003,7 @@ bool Mob::CheckLos(Mob* other) {
 				iface++;
 			}
 /*	solar: our aggro code isn't using this right now, just spells, so i'm
-    taking out the +-10 check for now to make it work right on hills
+	taking out the +-10 check for now to make it work right on hills
 			if (best_z - 10 > trg_z || best_z + 10 < trg_z)
 			{
 				return false;
@@ -1074,7 +1074,7 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 		}
 	}
 #if LOSDEBUG>=5
-	 else {
+	else {
 		LogFile->write(EQEMuLog::Debug, "WTF, I have no node, what am I standing on??? (%.2f, %.2f).", myloc.x, myloc.y);
 	}
 #endif
@@ -1096,7 +1096,7 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 			}
 		}
 #if LOSDEBUG>=5
-		 else if(onode == NODE_NONE) {
+		else if(onode == NODE_NONE) {
 			LogFile->write(EQEMuLog::Debug, "WTF, They have no node, what are they standing on??? (%.2f, %.2f).", myloc.x, myloc.y);
 		}
 #endif
@@ -1365,8 +1365,8 @@ int32 Mob::CheckHealAggroAmount(uint16 spellid, uint32 heal_possible) {
 				break;
 			}
 			default:{
- 				break;
- 			}
+				break;
+			}
 		}
 	}
 	if (IsBardSong(spell_id))
@@ -1413,7 +1413,7 @@ void Mob::AddFeignMemory(Client* attacker) {
 void Mob::RemoveFromFeignMemory(Client* attacker) {
 	feign_memory_list.erase(attacker->CharacterID());
 	if(feign_memory_list.empty() && AIfeignremember_timer != nullptr)
-	   AIfeignremember_timer->Disable();
+		AIfeignremember_timer->Disable();
 	if(feign_memory_list.empty())
 	{
 		minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
@@ -1424,14 +1424,14 @@ void Mob::RemoveFromFeignMemory(Client* attacker) {
 }
 
 void Mob::ClearFeignMemory() {
-    std::set<uint32>::iterator RememberedCharID = feign_memory_list.begin();
-    while (RememberedCharID != feign_memory_list.end())
-    {
-        Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-        if(remember_client != nullptr) //Still in zone
-            remember_client->RemoveXTarget(this, false);
-        ++RememberedCharID;
-    }
+	std::set<uint32>::iterator RememberedCharID = feign_memory_list.begin();
+	while (RememberedCharID != feign_memory_list.end())
+	{
+		Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
+		if(remember_client != nullptr) //Still in zone
+			remember_client->RemoveXTarget(this, false);
+		++RememberedCharID;
+	}
 
 	feign_memory_list.clear();
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
@@ -1486,6 +1486,4 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 
 	return false;
 }
-
-
 

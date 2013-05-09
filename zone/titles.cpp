@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2005  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/eq_packet_structs.h"
@@ -193,12 +193,10 @@ bool TitleManager::IsClientEligibleForTitle(Client *c, vector<TitleEntry>::itera
 
 		if(Title->SkillID >= 0)
 		{
-			if((Title->MinSkillValue >= 0)
-			   && (c->GetRawSkill(static_cast<SkillType>(Title->SkillID)) < static_cast<uint32>(Title->MinSkillValue)))
+			if((Title->MinSkillValue >= 0) && (c->GetRawSkill(static_cast<SkillType>(Title->SkillID)) < static_cast<uint32>(Title->MinSkillValue)))
 				return false;
 
-			if((Title->MaxSkillValue >= 0)
-			   && (c->GetRawSkill(static_cast<SkillType>(Title->SkillID)) > static_cast<uint32>(Title->MaxSkillValue)))
+			if((Title->MaxSkillValue >= 0) && (c->GetRawSkill(static_cast<SkillType>(Title->SkillID)) > static_cast<uint32>(Title->MaxSkillValue)))
 				return false;
 
 		}
@@ -206,8 +204,8 @@ bool TitleManager::IsClientEligibleForTitle(Client *c, vector<TitleEntry>::itera
 		if((Title->ItemID >= 1) && (c->GetInv().HasItem(Title->ItemID, 0, 0xFF) == SLOT_INVALID))
 			return false;
 
-      	if((Title->TitleSet > 0) && (!c->CheckTitle(Title->TitleSet)))
-         	return false;
+		if((Title->TitleSet > 0) && (!c->CheckTitle(Title->TitleSet)))
+			return false;
 
 		return true;
 }
@@ -277,7 +275,7 @@ void TitleManager::CreateNewPlayerTitle(Client *c, const char *Title)
 	safe_delete_array(query);
 
 	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT into titles (`char_id`, `prefix`) VALUES(%i, '%s')",
-						    c->CharacterID(), EscTitle), errbuf))
+							c->CharacterID(), EscTitle), errbuf))
 		LogFile->write(EQEMuLog::Error, "Error adding title: %s %s", query, errbuf);
 	else
 	{
@@ -321,7 +319,7 @@ void TitleManager::CreateNewPlayerSuffix(Client *c, const char *Suffix)
 	safe_delete_array(query);
 
 	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT into titles (`char_id`, `suffix`) VALUES(%i, '%s')",
-						    c->CharacterID(), EscSuffix), errbuf))
+							c->CharacterID(), EscSuffix), errbuf))
 		LogFile->write(EQEMuLog::Error, "Error adding title suffix: %s %s", query, errbuf);
 	else
 	{
@@ -372,65 +370,65 @@ void Client::SetTitleSuffix(const char *Suffix)
 
 void Client::EnableTitle(int titleset) {
 
-   if (CheckTitle(titleset)) {
-      return;
-   }
+	if (CheckTitle(titleset)) {
+		return;
+	}
 
-   char errbuf[MYSQL_ERRMSG_SIZE];
-   char *query = 0;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
 
-   if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO player_titlesets (char_id, title_set) VALUES (%i, %i)", CharacterID(), titleset), errbuf)) {
-      LogFile->write(EQEMuLog::Error, "Error in EnableTitle query for titleset %i and charid %i", titleset, CharacterID());
-      safe_delete_array(query);
-      return;
-   }
-   else {
-      safe_delete_array(query);
-      return;
-   }
+	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO player_titlesets (char_id, title_set) VALUES (%i, %i)", CharacterID(), titleset), errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error in EnableTitle query for titleset %i and charid %i", titleset, CharacterID());
+		safe_delete_array(query);
+		return;
+	}
+	else {
+		safe_delete_array(query);
+		return;
+	}
 }
 
 bool Client::CheckTitle(int titleset) {
 
-   char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
 
-   if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT `id` FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i LIMIT 1", titleset, CharacterID()), errbuf, &result)) {
-      safe_delete_array(query);
-      if (mysql_num_rows(result) >= 1) {
-         mysql_free_result(result);
-         return(true);
-      }
-         mysql_free_result(result);
-   }
+	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT `id` FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i LIMIT 1", titleset, CharacterID()), errbuf, &result)) {
+		safe_delete_array(query);
+		if (mysql_num_rows(result) >= 1) {
+			mysql_free_result(result);
+			return(true);
+		}
+		mysql_free_result(result);
+	}
 
-   else {
-      LogFile->write(EQEMuLog::Error, "Error in CheckTitle query '%s': %s", query,  errbuf);
-      safe_delete_array(query);
-   }
+	else {
+		LogFile->write(EQEMuLog::Error, "Error in CheckTitle query '%s': %s", query, errbuf);
+		safe_delete_array(query);
+	}
 
-   return(false);
+	return(false);
 }
 
 void Client::RemoveTitle(int titleset) {
 
-   if (!CheckTitle(titleset)) {
-      return;
-   }
+	if (!CheckTitle(titleset)) {
+		return;
+	}
 
-   char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
 
-   if (database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i", titleset, CharacterID()), errbuf)) {
-      safe_delete_array(query);
-   }
+	if (database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i", titleset, CharacterID()), errbuf)) {
+		safe_delete_array(query);
+	}
 
-   else {
-      LogFile->write(EQEMuLog::Error, "Error in RemoveTitle query '%s': %s", query,  errbuf);
-      safe_delete_array(query);
-   }
+	else {
+		LogFile->write(EQEMuLog::Error, "Error in RemoveTitle query '%s': %s", query, errbuf);
+		safe_delete_array(query);
+	}
 
-   return;
+	return;
 }
 

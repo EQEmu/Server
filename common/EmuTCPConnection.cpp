@@ -1,47 +1,27 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 /*
- *
- *
- *
- *
- * There are really two or three different objects shoe-hored into this
- * connection object. Sombody really needs to factor out the relay link
- * crap into its own subclass of this object, it will clean things up
- * tremendously.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
+There are really two or three different objects shoe-hored into this
+connection object. Sombody really needs to factor out the relay link
+crap into its own subclass of this object, it will clean things up
+tremendously.
+*/
 
 #include "../common/debug.h"
 
@@ -71,9 +51,9 @@ using namespace std;
 
 //server side case
 EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, SOCKET in_socket, uint32 irIP, uint16 irPort, bool iOldFormat)
-: TCPConnection(ID, in_socket, irIP, irPort),
-  keepalive_timer(SERVER_TIMEOUT),
-  timeout_timer(SERVER_TIMEOUT * 2)
+:	TCPConnection(ID, in_socket, irIP, irPort),
+	keepalive_timer(SERVER_TIMEOUT),
+	timeout_timer(SERVER_TIMEOUT * 2)
 {
 	id = 0;
 	Server = nullptr;
@@ -97,9 +77,9 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, SOCKET in_s
 
 //client outgoing connection case (and client side relay)
 EmuTCPConnection::EmuTCPConnection(bool iOldFormat, EmuTCPServer* iRelayServer, eTCPMode iMode)
-: TCPConnection(),
-  keepalive_timer(SERVER_TIMEOUT),
-  timeout_timer(SERVER_TIMEOUT * 2)
+:	TCPConnection(),
+	keepalive_timer(SERVER_TIMEOUT),
+	timeout_timer(SERVER_TIMEOUT * 2)
 {
 	Server = iRelayServer;
 	if (Server)
@@ -119,9 +99,9 @@ EmuTCPConnection::EmuTCPConnection(bool iOldFormat, EmuTCPServer* iRelayServer, 
 
 //server side relay case
 EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, EmuTCPConnection* iRelayLink, uint32 iRemoteID, uint32 irIP, uint16 irPort)
-: TCPConnection(ID, 0, irIP, irPort),
-  keepalive_timer(SERVER_TIMEOUT),
-  timeout_timer(SERVER_TIMEOUT * 2)
+:	TCPConnection(ID, 0, irIP, irPort),
+	keepalive_timer(SERVER_TIMEOUT),
+	timeout_timer(SERVER_TIMEOUT * 2)
 {
 	Server = iServer;
 	RelayLink = iRelayLink;
@@ -140,7 +120,6 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, EmuTCPConne
 EmuTCPConnection::~EmuTCPConnection() {
 	//the queues free their content right now I believe.
 }
-
 
 EmuTCPNetPacket_Struct* EmuTCPConnection::MakePacket(ServerPacket* pack, uint32 iDestination) {
 	int32 size = sizeof(EmuTCPNetPacket_Struct) + pack->size;
@@ -472,7 +451,6 @@ void EmuTCPConnection::ClearBuffers() {
 	keepalive_timer.Start();
 	timeout_timer.Start();
 }
-
 
 void EmuTCPConnection::SendNetErrorPacket(const char* reason) {
 	#if TCPC_DEBUG >= 1
@@ -820,9 +798,9 @@ bool EmuTCPConnection::SendData(bool &sent_something, char* errbuf) {
 		#if TCPN_DEBUG >= 5
 			cout << "Sending TCP keepalive packet. (timeout=" << timeout_timer.GetRemainingTime() << " remaining)" << endl;
 		#endif
-    }
+	}
 
-    return(true);
+	return(true);
 }
 
 bool EmuTCPConnection::RecvData(char* errbuf) {
@@ -841,15 +819,4 @@ bool EmuTCPConnection::RecvData(char* errbuf) {
 
 	return(true);
 }
-
-
-
-
-
-
-
-
-
-
-
 

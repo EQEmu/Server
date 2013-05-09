@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "debug.h"
 #include <stdio.h>
@@ -180,7 +180,6 @@ bool RegularOpcodeManager::ReloadOpcodes(const char *filename, bool report_error
 	return(ret);
 }
 
-
 uint16 RegularOpcodeManager::EmuToEQ(const EmuOpcode emu_op) {
 	//opcode is checked for validity in GetEQOpcode
 	uint16 res;
@@ -221,7 +220,6 @@ void RegularOpcodeManager::SetOpcode(EmuOpcode emu_op, uint16 eq_op) {
 	s.Set(emu_op, eq_op);
 }
 
-
 void RegularOpcodeManager::NormalMemStrategy::Set(EmuOpcode emu_op, uint16 eq_op) {
 	if(uint32(emu_op) >= it->EmuOpcodeCount || eq_op >= it->EQOpcodeCount)
 		return;
@@ -232,7 +230,6 @@ void RegularOpcodeManager::NormalMemStrategy::Set(EmuOpcode emu_op, uint16 eq_op
 NullOpcodeManager::NullOpcodeManager()
 : MutableOpcodeManager() {
 }
-
 
 bool NullOpcodeManager::LoadOpcodes(const char *filename, bool report_errors) {
 	return(true);
@@ -253,7 +250,6 @@ EmuOpcode NullOpcodeManager::EQToEmu(const uint16 eq_op) {
 EmptyOpcodeManager::EmptyOpcodeManager()
 : MutableOpcodeManager() {
 }
-
 
 bool EmptyOpcodeManager::LoadOpcodes(const char *filename, bool report_errors) {
 	return(true);
@@ -279,10 +275,4 @@ void EmptyOpcodeManager::SetOpcode(EmuOpcode emu_op, uint16 eq_op) {
 	emu_to_eq[emu_op] = eq_op;
 	eq_to_emu[eq_op] = emu_op;
 }
-
-
-
-
-
-
 

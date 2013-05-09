@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "masterentity.h"
@@ -41,145 +41,145 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	ItemInst *cur = nullptr;
 
 	int i;
-    if(where_to_check & invWhereWorn) {
-	    for (i=0; i<=21; i++) { // Equipped
-	    	if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-                cur = m_inv.GetItem(i);
-                if(cur && cur->GetItem()->Stackable) {
-                    x += cur->GetCharges();
-                } else {
-                    x++;
-                }
+	if(where_to_check & invWhereWorn) {
+		for (i=0; i<=21; i++) { // Equipped
+			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
+				cur = m_inv.GetItem(i);
+				if(cur && cur->GetItem()->Stackable) {
+					x += cur->GetCharges();
+				} else {
+					x++;
+				}
 
-	    		DeleteItemInInventory(i, 0, true);
-	    	}
-	    }
+				DeleteItemInInventory(i, 0, true);
+			}
+		}
 
-        // Power Source Slot
-	    if (GetItemIDAt(9999) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(9999) != INVALID_ID)) {
-            cur = m_inv.GetItem(9999);
-            if(cur && cur->GetItem()->Stackable) {
-                x += cur->GetCharges();
-            } else {
-                x++;
-            }
+		// Power Source Slot
+		if (GetItemIDAt(9999) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(9999) != INVALID_ID)) {
+			cur = m_inv.GetItem(9999);
+			if(cur && cur->GetItem()->Stackable) {
+				x += cur->GetCharges();
+			} else {
+				x++;
+			}
 
-	    	if (GetClientVersion() >= EQClientSoF)
-	    		DeleteItemInInventory(9999, 0, true);
-	    	else
-	    		DeleteItemInInventory(9999, 0, false);	// Prevents Titanium crash
-	    }
-    }
+			if (GetClientVersion() >= EQClientSoF)
+				DeleteItemInInventory(9999, 0, true);
+			else
+				DeleteItemInInventory(9999, 0, false);	// Prevents Titanium crash
+		}
+	}
 
-    if(where_to_check & invWhereCursor) {
-	    if (GetItemIDAt(30) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(30) != INVALID_ID)) {
-            cur = m_inv.GetItem(30);
-            if(cur && cur->GetItem()->Stackable) {
-                x += cur->GetCharges();
-            } else {
-                x++;
-            }
+	if(where_to_check & invWhereCursor) {
+		if (GetItemIDAt(30) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(30) != INVALID_ID)) {
+			cur = m_inv.GetItem(30);
+			if(cur && cur->GetItem()->Stackable) {
+				x += cur->GetCharges();
+			} else {
+				x++;
+			}
 
-	    	DeleteItemInInventory(30, 0, true);
-	    }
+			DeleteItemInInventory(30, 0, true);
+		}
 
-        for (i=331; i<=340; i++) { // cursor's containers
-	    	if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-                cur = m_inv.GetItem(i);
-                if(cur && cur->GetItem()->Stackable) {
-                    x += cur->GetCharges();
-                } else {
-                    x++;
-                }
+		for (i=331; i<=340; i++) { // cursor's containers
+			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
+				cur = m_inv.GetItem(i);
+				if(cur && cur->GetItem()->Stackable) {
+					x += cur->GetCharges();
+				} else {
+					x++;
+				}
 
-	    		DeleteItemInInventory(i, 0, true);
-	    	}
-	    }
-    }
+				DeleteItemInInventory(i, 0, true);
+			}
+		}
+	}
 
-    if(where_to_check & invWherePersonal) {
-        for (i=22; i<=29; i++) { // Equipped
-	    	if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-                cur = m_inv.GetItem(i);
-                if(cur && cur->GetItem()->Stackable) {
-                    x += cur->GetCharges();
-                } else {
-                    x++;
-                }
+	if(where_to_check & invWherePersonal) {
+		for (i=22; i<=29; i++) { // Equipped
+			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
+				cur = m_inv.GetItem(i);
+				if(cur && cur->GetItem()->Stackable) {
+					x += cur->GetCharges();
+				} else {
+					x++;
+				}
 
-	    		DeleteItemInInventory(i, 0, true);
-	    	}
-	    }
+				DeleteItemInInventory(i, 0, true);
+			}
+		}
 
-	    for (i=251; i<=330; i++) { // Main inventory's containers
-	    	if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-                cur = m_inv.GetItem(i);
-                if(cur && cur->GetItem()->Stackable) {
-                    x += cur->GetCharges();
-                } else {
-                    x++;
-                }
+		for (i=251; i<=330; i++) { // Main inventory's containers
+			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
+				cur = m_inv.GetItem(i);
+				if(cur && cur->GetItem()->Stackable) {
+					x += cur->GetCharges();
+				} else {
+					x++;
+				}
 
-	    		DeleteItemInInventory(i, 0, true);
-	    	}
-	    }
-    }
+				DeleteItemInInventory(i, 0, true);
+			}
+		}
+	}
 
-    if(where_to_check & invWhereBank) {
-	    for (i=2000; i<=2023; i++) { // Bank slots
-	    	if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-                cur = m_inv.GetItem(i);
-                if(cur && cur->GetItem()->Stackable) {
-                    x += cur->GetCharges();
-                } else {
-                    x++;
-                }
+	if(where_to_check & invWhereBank) {
+		for (i=2000; i<=2023; i++) { // Bank slots
+			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
+				cur = m_inv.GetItem(i);
+				if(cur && cur->GetItem()->Stackable) {
+					x += cur->GetCharges();
+				} else {
+					x++;
+				}
 
-	    		DeleteItemInInventory(i, 0, true);
-	    	}
-	    }
+				DeleteItemInInventory(i, 0, true);
+			}
+		}
 
-        for (i=2031; i<=2270; i++) { // Bank's containers
-	    	if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-                cur = m_inv.GetItem(i);
-                if(cur && cur->GetItem()->Stackable) {
-                    x += cur->GetCharges();
-                } else {
-                    x++;
-                }
+		for (i=2031; i<=2270; i++) { // Bank's containers
+			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
+				cur = m_inv.GetItem(i);
+				if(cur && cur->GetItem()->Stackable) {
+					x += cur->GetCharges();
+				} else {
+					x++;
+				}
 
-	    		DeleteItemInInventory(i, 0, true);
-	    	}
-	    }
-    }
+				DeleteItemInInventory(i, 0, true);
+			}
+		}
+	}
 
-    if(where_to_check & invWhereSharedBank) {
-	    for (i=2500; i<=2501; i++) { // Shared bank
-	    	if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-                cur = m_inv.GetItem(i);
-                if(cur && cur->GetItem()->Stackable) {
-                    x += cur->GetCharges();
-                } else {
-                    x++;
-                }
+	if(where_to_check & invWhereSharedBank) {
+		for (i=2500; i<=2501; i++) { // Shared bank
+			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
+				cur = m_inv.GetItem(i);
+				if(cur && cur->GetItem()->Stackable) {
+					x += cur->GetCharges();
+				} else {
+					x++;
+				}
 
-	    		DeleteItemInInventory(i, 0, true);
-	    	}
-	    }
+				DeleteItemInInventory(i, 0, true);
+			}
+		}
 
-	    for (i=2531; i<=2550; i++) { // Shared bank's containers
-	    	if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-                cur = m_inv.GetItem(i);
-                if(cur && cur->GetItem()->Stackable) {
-                    x += cur->GetCharges();
-                } else {
-                    x++;
-                }
+		for (i=2531; i<=2550; i++) { // Shared bank's containers
+			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
+				cur = m_inv.GetItem(i);
+				if(cur && cur->GetItem()->Stackable) {
+					x += cur->GetCharges();
+				} else {
+					x++;
+				}
 
-	    		DeleteItemInInventory(i, 0, true);
-	    	}
-	    }
-    }
+				DeleteItemInInventory(i, 0, true);
+			}
+		}
+	}
 
 	return x;
 }
@@ -305,7 +305,7 @@ void Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			}
 		}
 	}
-	else { // Item was already in inventory & is a LORE item or was a GM only item.  Give them a message about it.
+	else { // Item was already in inventory & is a LORE item or was a GM only item. Give them a message about it.
 		if (foundlore){
 			DuplicateLoreMessage(item_id);
 			//Message(0, "You already have a %s (%i) in your inventory!", item->Name, item_id);
@@ -447,14 +447,14 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 				if(bagitem) {
 					int16 bagslot_id = Inventory::CalcSlotId(slot_id, bag_idx);
 
-					qsaudit->items[++parent_offset].char_slot = bagslot_id;
-					qsaudit->items[parent_offset].item_id	  = bagitem->GetID();
-					qsaudit->items[parent_offset].charges	  = bagitem->GetCharges();
-					qsaudit->items[parent_offset].aug_1		  = bagitem->GetAugmentItemID(1);
-					qsaudit->items[parent_offset].aug_2		  = bagitem->GetAugmentItemID(2);
-					qsaudit->items[parent_offset].aug_3		  = bagitem->GetAugmentItemID(3);
-					qsaudit->items[parent_offset].aug_4		  = bagitem->GetAugmentItemID(4);
-					qsaudit->items[parent_offset].aug_5		  = bagitem->GetAugmentItemID(5);
+					qsaudit->items[++parent_offset].char_slot	= bagslot_id;
+					qsaudit->items[parent_offset].item_id		= bagitem->GetID();
+					qsaudit->items[parent_offset].charges		= bagitem->GetCharges();
+					qsaudit->items[parent_offset].aug_1			= bagitem->GetAugmentItemID(1);
+					qsaudit->items[parent_offset].aug_2			= bagitem->GetAugmentItemID(2);
+					qsaudit->items[parent_offset].aug_3			= bagitem->GetAugmentItemID(3);
+					qsaudit->items[parent_offset].aug_4			= bagitem->GetAugmentItemID(4);
+					qsaudit->items[parent_offset].aug_5			= bagitem->GetAugmentItemID(5);
 				}
 			}
 		}
@@ -470,14 +470,14 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 	const ItemInst* inst=nullptr;
 	if (slot_id==SLOT_CURSOR) {
 		list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
-        if(update_db)
-		    database.SaveCursor(character_id, s, e);
+		if(update_db)
+			database.SaveCursor(character_id, s, e);
 	}
 	else {
 		// Save change to database
 		inst = m_inv[slot_id];
-        if(update_db)
-		    database.SaveInventory(character_id, inst, slot_id);
+		if(update_db)
+			database.SaveInventory(character_id, inst, slot_id);
 	}
 
 	if(client_update && IsValidSlot(slot_id)) {
@@ -958,10 +958,10 @@ bool Client::IsValidSlot(uint32 slot)
 
 bool Client::IsBankSlot(uint32 slot)
 {
-	if((slot >= 2000 && slot <= 2023) || // Bank
-	   (slot >= 2031 && slot <= 2270) || // Bank bags
-	   (slot >= 2500 && slot <= 2501) || // Shared bank
-	   (slot >= 2531 && slot <= 2550))   // Shared bank bags
+	if ((slot >= 2000 && slot <= 2023) || // Bank
+		(slot >= 2031 && slot <= 2270) || // Bank bags
+		(slot >= 2500 && slot <= 2501) || // Shared bank
+		(slot >= 2531 && slot <= 2550))	// Shared bank bags
 	{
 		return true;
 	}
@@ -1464,30 +1464,30 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 	const ItemInst* from_inst = m_inv[postaction_call?to_slot_id:from_slot_id];
 
 	if(from_inst) {
-		qsaudit->items[move_count].from_slot = from_slot_id;
-		qsaudit->items[move_count].to_slot	 = to_slot_id;
-		qsaudit->items[move_count].item_id	 = from_inst->GetID();
-		qsaudit->items[move_count].charges	 = from_inst->GetCharges();
-		qsaudit->items[move_count].aug_1	 = from_inst->GetAugmentItemID(1);
-		qsaudit->items[move_count].aug_2	 = from_inst->GetAugmentItemID(2);
-		qsaudit->items[move_count].aug_3	 = from_inst->GetAugmentItemID(3);
-		qsaudit->items[move_count].aug_4	 = from_inst->GetAugmentItemID(4);
-		qsaudit->items[move_count++].aug_5	 = from_inst->GetAugmentItemID(5);
+		qsaudit->items[move_count].from_slot	= from_slot_id;
+		qsaudit->items[move_count].to_slot		= to_slot_id;
+		qsaudit->items[move_count].item_id		= from_inst->GetID();
+		qsaudit->items[move_count].charges		= from_inst->GetCharges();
+		qsaudit->items[move_count].aug_1		= from_inst->GetAugmentItemID(1);
+		qsaudit->items[move_count].aug_2		= from_inst->GetAugmentItemID(2);
+		qsaudit->items[move_count].aug_3		= from_inst->GetAugmentItemID(3);
+		qsaudit->items[move_count].aug_4		= from_inst->GetAugmentItemID(4);
+		qsaudit->items[move_count++].aug_5		= from_inst->GetAugmentItemID(5);
 
 		if(from_inst->IsType(ItemClassContainer)) {
 			for(uint8 bag_idx = 0; bag_idx < from_inst->GetItem()->BagSlots; bag_idx++) {
 				const ItemInst* from_baginst = from_inst->GetItem(bag_idx);
 
 				if(from_baginst) {
-					qsaudit->items[move_count].from_slot = Inventory::CalcSlotId(from_slot_id, bag_idx);
-					qsaudit->items[move_count].to_slot	 = Inventory::CalcSlotId(to_slot_id, bag_idx);
-					qsaudit->items[move_count].item_id	 = from_baginst->GetID();
-					qsaudit->items[move_count].charges	 = from_baginst->GetCharges();
-					qsaudit->items[move_count].aug_1	 = from_baginst->GetAugmentItemID(1);
-					qsaudit->items[move_count].aug_2	 = from_baginst->GetAugmentItemID(2);
-					qsaudit->items[move_count].aug_3	 = from_baginst->GetAugmentItemID(3);
-					qsaudit->items[move_count].aug_4	 = from_baginst->GetAugmentItemID(4);
-					qsaudit->items[move_count++].aug_5	 = from_baginst->GetAugmentItemID(5);
+					qsaudit->items[move_count].from_slot	= Inventory::CalcSlotId(from_slot_id, bag_idx);
+					qsaudit->items[move_count].to_slot		= Inventory::CalcSlotId(to_slot_id, bag_idx);
+					qsaudit->items[move_count].item_id		= from_baginst->GetID();
+					qsaudit->items[move_count].charges		= from_baginst->GetCharges();
+					qsaudit->items[move_count].aug_1		= from_baginst->GetAugmentItemID(1);
+					qsaudit->items[move_count].aug_2		= from_baginst->GetAugmentItemID(2);
+					qsaudit->items[move_count].aug_3		= from_baginst->GetAugmentItemID(3);
+					qsaudit->items[move_count].aug_4		= from_baginst->GetAugmentItemID(4);
+					qsaudit->items[move_count++].aug_5		= from_baginst->GetAugmentItemID(5);
 				}
 			}
 		}
@@ -1497,30 +1497,30 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 		const ItemInst* to_inst = m_inv[postaction_call?from_slot_id:to_slot_id];
 
 		if(to_inst) {
-			qsaudit->items[move_count].from_slot = to_slot_id;
-			qsaudit->items[move_count].to_slot	 = from_slot_id;
-			qsaudit->items[move_count].item_id	 = to_inst->GetID();
-			qsaudit->items[move_count].charges	 = to_inst->GetCharges();
-			qsaudit->items[move_count].aug_1	 = to_inst->GetAugmentItemID(1);
-			qsaudit->items[move_count].aug_2	 = to_inst->GetAugmentItemID(2);
-			qsaudit->items[move_count].aug_3	 = to_inst->GetAugmentItemID(3);
-			qsaudit->items[move_count].aug_4	 = to_inst->GetAugmentItemID(4);
-			qsaudit->items[move_count++].aug_5	 = to_inst->GetAugmentItemID(5);
+			qsaudit->items[move_count].from_slot	= to_slot_id;
+			qsaudit->items[move_count].to_slot		= from_slot_id;
+			qsaudit->items[move_count].item_id		= to_inst->GetID();
+			qsaudit->items[move_count].charges		= to_inst->GetCharges();
+			qsaudit->items[move_count].aug_1		= to_inst->GetAugmentItemID(1);
+			qsaudit->items[move_count].aug_2		= to_inst->GetAugmentItemID(2);
+			qsaudit->items[move_count].aug_3		= to_inst->GetAugmentItemID(3);
+			qsaudit->items[move_count].aug_4		= to_inst->GetAugmentItemID(4);
+			qsaudit->items[move_count++].aug_5		= to_inst->GetAugmentItemID(5);
 
 			if(to_inst->IsType(ItemClassContainer)) {
 				for(uint8 bag_idx = 0; bag_idx < to_inst->GetItem()->BagSlots; bag_idx++) {
 					const ItemInst* to_baginst = to_inst->GetItem(bag_idx);
 
 					if(to_baginst) {
-						qsaudit->items[move_count].from_slot = Inventory::CalcSlotId(to_slot_id, bag_idx);
-						qsaudit->items[move_count].to_slot	 = Inventory::CalcSlotId(from_slot_id, bag_idx);
-						qsaudit->items[move_count].item_id	 = to_baginst->GetID();
-						qsaudit->items[move_count].charges	 = to_baginst->GetCharges();
-						qsaudit->items[move_count].aug_1	 = to_baginst->GetAugmentItemID(1);
-						qsaudit->items[move_count].aug_2	 = to_baginst->GetAugmentItemID(2);
-						qsaudit->items[move_count].aug_3	 = to_baginst->GetAugmentItemID(3);
-						qsaudit->items[move_count].aug_4	 = to_baginst->GetAugmentItemID(4);
-						qsaudit->items[move_count++].aug_5	 = to_baginst->GetAugmentItemID(5);
+						qsaudit->items[move_count].from_slot	= Inventory::CalcSlotId(to_slot_id, bag_idx);
+						qsaudit->items[move_count].to_slot		= Inventory::CalcSlotId(from_slot_id, bag_idx);
+						qsaudit->items[move_count].item_id		= to_baginst->GetID();
+						qsaudit->items[move_count].charges		= to_baginst->GetCharges();
+						qsaudit->items[move_count].aug_1		= to_baginst->GetAugmentItemID(1);
+						qsaudit->items[move_count].aug_2		= to_baginst->GetAugmentItemID(2);
+						qsaudit->items[move_count].aug_3		= to_baginst->GetAugmentItemID(3);
+						qsaudit->items[move_count].aug_4		= to_baginst->GetAugmentItemID(4);
+						qsaudit->items[move_count++].aug_5		= to_baginst->GetAugmentItemID(5);
 					}
 				}
 			}
@@ -1913,7 +1913,7 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 	return 0;
 }
 
-bool Client::LootToStack(uint32 itemid) {  //Loots stackable items to existing stacks - Wiz
+bool Client::LootToStack(uint32 itemid) { //Loots stackable items to existing stacks - Wiz
 	// @merth: Need to do loot code with new inventory struct
 	/*
 	const Item_Struct* item;
@@ -2079,7 +2079,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 	_log(INVENTORY__BANDOLIER, "Char: %s activating set %i", GetName(), bss->number);
 	int16 slot;
 	int16 WeaponSlot;
-	ItemInst *BandolierItems[4];  // Temporary holding area for the weapons we pull out of their inventory
+	ItemInst *BandolierItems[4]; // Temporary holding area for the weapons we pull out of their inventory
 
 	// First we pull the items for this bandolier set out of their inventory, this makes space to put the
 	// currently equipped items back.
@@ -2091,7 +2091,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 			// Check if the player has the item specified in the bandolier set on them.
 			//
 			slot = m_inv.HasItem(m_pp.bandoliers[bss->number].items[BandolierSlot].item_id, 1,
-					     invWhereWorn|invWherePersonal);
+							invWhereWorn|invWherePersonal);
 
 			// removed 'invWhereCursor' argument from above and implemented slots 30, 331-340 checks here
 			if (slot == SLOT_INVALID) {
@@ -2121,7 +2121,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 				// the client does.
 
 				if(((BandolierSlot == bandolierAmmo) || (BandolierSlot == bandolierRange)) &&
-				   BandolierItems[BandolierSlot] && BandolierItems[BandolierSlot]->IsStackable()){
+					BandolierItems[BandolierSlot] && BandolierItems[BandolierSlot]->IsStackable()){
 					int Charges = BandolierItems[BandolierSlot]->GetCharges();
 					// If there is more than one charge
 					if(Charges > 1) {
@@ -2145,12 +2145,12 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 					if(InvItem) {
 						// If there was an item in that weapon slot, put it in the inventory
 						_log(INVENTORY__BANDOLIER, "returning item %s in weapon slot %i to inventory",
-									   InvItem->GetItem()->Name, WeaponSlot);
+										InvItem->GetItem()->Name, WeaponSlot);
 						if(MoveItemToInventory(InvItem))
 							database.SaveInventory(character_id, 0, WeaponSlot);
 						else
 							_log(INVENTORY__BANDOLIER, "Char: %s, ERROR returning %s to inventory", GetName(),
-							     InvItem->GetItem()->Name);
+								InvItem->GetItem()->Name);
 						safe_delete(InvItem);
 					}
 
@@ -2185,7 +2185,7 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 					// If there was already an item in that weapon slot that we replaced, find a place to put it
 					if(!MoveItemToInventory(InvItem))
 						_log(INVENTORY__BANDOLIER, "Char: %s, ERROR returning %s to inventory", GetName(),
-						     InvItem->GetItem()->Name);
+							InvItem->GetItem()->Name);
 					safe_delete(InvItem);
 				}
 			}
@@ -2196,13 +2196,13 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 			ItemInst *InvItem = m_inv.PopItem(WeaponSlot);
 			if(InvItem) {
 				_log(INVENTORY__BANDOLIER, "Bandolier has no item for slot %i, returning item %s to inventory",
-							   WeaponSlot, InvItem->GetItem()->Name);
+								WeaponSlot, InvItem->GetItem()->Name);
 				// If there was an item in that weapon slot, put it in the inventory
 				if(MoveItemToInventory(InvItem))
 					database.SaveInventory(character_id, 0, WeaponSlot);
 				else
 					_log(INVENTORY__BANDOLIER, "Char: %s, ERROR returning %s to inventory", GetName(),
-					     InvItem->GetItem()->Name);
+						InvItem->GetItem()->Name);
 				safe_delete(InvItem);
 			}
 		}
@@ -2249,7 +2249,7 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 				int ChargeSlotsLeft = InvItem->GetItem()->StackSize - InvItem->GetCharges();
 
 				int ChargesToMove = ItemToReturn->GetCharges() < ChargeSlotsLeft ? ItemToReturn->GetCharges() :
-												   ChargeSlotsLeft;
+													ChargeSlotsLeft;
 
 				InvItem->SetCharges(InvItem->GetCharges() + ChargesToMove);
 
@@ -2274,22 +2274,22 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 				uint8 BagSlot;
 				for (BagSlot=0; BagSlot<BagSize; BagSlot++) {
 					InvItem = m_inv.GetItem(BaseSlotID + BagSlot);
-					if(InvItem && (InvItem->GetItem()->ID == ItemID) &&
-					   (InvItem->GetCharges() < InvItem->GetItem()->StackSize)) {
+					if (InvItem && (InvItem->GetItem()->ID == ItemID) &&
+						(InvItem->GetCharges() < InvItem->GetItem()->StackSize)) {
 
 						int ChargeSlotsLeft = InvItem->GetItem()->StackSize - InvItem->GetCharges();
 
 						int ChargesToMove = ItemToReturn->GetCharges() < ChargeSlotsLeft
-								    ? ItemToReturn->GetCharges() : ChargeSlotsLeft;
+									? ItemToReturn->GetCharges() : ChargeSlotsLeft;
 
 						InvItem->SetCharges(InvItem->GetCharges() + ChargesToMove);
 
 						if(UpdateClient)
 							SendItemPacket(BaseSlotID + BagSlot, m_inv.GetItem(BaseSlotID + BagSlot),
-								       ItemPacketTrade);
+										ItemPacketTrade);
 
 						database.SaveInventory(character_id, m_inv.GetItem(BaseSlotID + BagSlot),
-								       BaseSlotID + BagSlot);
+										BaseSlotID + BagSlot);
 
 						ItemToReturn->SetCharges(ItemToReturn->GetCharges() - ChargesToMove);
 
@@ -2357,41 +2357,42 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 }
 
 void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value) {
-    ItemInst *inst = GetItem(slot_id);
-    if(inst) {
-        inst->SetCustomData(identifier, value);
-        database.SaveInventory(character_id, inst, slot_id);
-    }
+	ItemInst *inst = GetItem(slot_id);
+	if(inst) {
+		inst->SetCustomData(identifier, value);
+		database.SaveInventory(character_id, inst, slot_id);
+	}
 }
 
 void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, int value) {
-    ItemInst *inst = GetItem(slot_id);
-    if(inst) {
-        inst->SetCustomData(identifier, value);
-        database.SaveInventory(character_id, inst, slot_id);
-    }
+	ItemInst *inst = GetItem(slot_id);
+	if(inst) {
+		inst->SetCustomData(identifier, value);
+		database.SaveInventory(character_id, inst, slot_id);
+	}
 }
 
 void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value) {
-    ItemInst *inst = GetItem(slot_id);
-    if(inst) {
-        inst->SetCustomData(identifier, value);
-        database.SaveInventory(character_id, inst, slot_id);
-    }
+	ItemInst *inst = GetItem(slot_id);
+	if(inst) {
+		inst->SetCustomData(identifier, value);
+		database.SaveInventory(character_id, inst, slot_id);
+	}
 }
 
 void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value) {
-    ItemInst *inst = GetItem(slot_id);
-    if(inst) {
-        inst->SetCustomData(identifier, value);
-        database.SaveInventory(character_id, inst, slot_id);
-    }
+	ItemInst *inst = GetItem(slot_id);
+	if(inst) {
+		inst->SetCustomData(identifier, value);
+		database.SaveInventory(character_id, inst, slot_id);
+	}
 }
 
 std::string Inventory::GetCustomItemData(int16 slot_id, std::string identifier) {
-    ItemInst *inst = GetItem(slot_id);
-    if(inst) {
-        return inst->GetCustomData(identifier);
-    }
-    return "";
+	ItemInst *inst = GetItem(slot_id);
+	if(inst) {
+		return inst->GetCustomData(identifier);
+	}
+	return "";
 }
+

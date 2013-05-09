@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "EQLConfig.h"
@@ -39,7 +39,7 @@ void EQLConfig::LoadSettings() {
 	MYSQL_ROW row;
 	LauncherZone tmp;
 
-    char namebuf[128];
+	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
@@ -77,15 +77,15 @@ void EQLConfig::LoadSettings() {
 
 EQLConfig *EQLConfig::CreateLauncher(const char *name, uint8 dynamic_count) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
-    char namebuf[128];
+	char namebuf[128];
 	database.DoEscapeString(namebuf, name, strlen(name)&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
 	if (!database.RunQuery(query, MakeAnyLenString(&query,
 		"INSERT INTO launcher (name,dynamics) VALUES('%s', %d)",
-		 namebuf, dynamic_count), errbuf)) {
+		namebuf, dynamic_count), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in CreateLauncher query: %s", errbuf);
 		safe_delete_array(query);
 		return nullptr;
@@ -127,9 +127,9 @@ void EQLConfig::DeleteLauncher() {
 	launcher_list.Remove(m_name.c_str());
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
-    char namebuf[128];
+	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
@@ -185,18 +185,18 @@ bool EQLConfig::BootStaticZone(Const_char *short_name, uint16 port) {
 
 	//database update
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
-    char namebuf[128];
+	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
-    char zonebuf[32];
+	char zonebuf[32];
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
 
 	if (!database.RunQuery(query, MakeAnyLenString(&query,
 		"INSERT INTO launcher_zones (launcher,zone,port) VALUES('%s', '%s', %d)",
-		 namebuf, zonebuf, port), errbuf)) {
+		namebuf, zonebuf, port), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in BootStaticZone query: %s", errbuf);
 		safe_delete_array(query);
 		return false;
@@ -235,18 +235,18 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 
 	//database update
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
-    char namebuf[128];
+	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
-    char zonebuf[32];
+	char zonebuf[32];
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
 
 	if (!database.RunQuery(query, MakeAnyLenString(&query,
 		"UPDATE launcher_zones SET port=%d WHERE launcher='%s' AND zone='%s'",
-		 port, namebuf, zonebuf), errbuf)) {
+		port, namebuf, zonebuf), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in ChangeStaticZone query: %s", errbuf);
 		safe_delete_array(query);
 		return false;
@@ -278,12 +278,12 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 
 	//database update
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
-    char namebuf[128];
+	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
-    char zonebuf[32];
+	char zonebuf[32];
 	database.DoEscapeString(zonebuf, short_name, strlen(short_name)&0xF);	//limit len to 16
 	zonebuf[31] = '\0';
 
@@ -310,15 +310,15 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 
 bool EQLConfig::SetDynamicCount(int count) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
-    char namebuf[128];
+	char namebuf[128];
 	database.DoEscapeString(namebuf, m_name.c_str(), m_name.length()&0x3F);	//limit len to 64
 	namebuf[127] = '\0';
 
 	if (!database.RunQuery(query, MakeAnyLenString(&query,
 		"UPDATE launcher SET dynamics=%d WHERE name='%s'",
-		 count, namebuf), errbuf)) {
+		count, namebuf), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in SetDynamicCount query: %s", errbuf);
 		safe_delete_array(query);
 		return false;
@@ -356,29 +356,4 @@ map<string,string> EQLConfig::GetZoneDetails(Const_char *zone_ref) {
 
 	return(res);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

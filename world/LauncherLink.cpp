@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/debug.h"
@@ -37,10 +37,10 @@ extern LauncherList launcher_list;
 
 LauncherLink::LauncherLink(int id, EmuTCPConnection *c)
 : ID(id),
-  tcpc(c),
-  authenticated(false),
-  m_name(""),
-  m_bootTimer(2000)
+	tcpc(c),
+	authenticated(false),
+	m_name(""),
+	m_bootTimer(2000)
 {
 	m_dynamicCount = 0;
 	m_bootTimer.Disable();
@@ -78,7 +78,7 @@ bool LauncherLink::Process() {
 					if (memcmp(pack->pBuffer, tmppass, 16) == 0)
 						authenticated = true;
 					else {
-						struct in_addr  in;
+						struct in_addr in;
 						in.s_addr = GetIP();
 						_log(WORLD__LAUNCH_ERR, "Launcher authorization failed.");
 						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
@@ -89,7 +89,7 @@ bool LauncherLink::Process() {
 					}
 				}
 				else {
-					struct in_addr  in;
+					struct in_addr in;
 					in.s_addr = GetIP();
 					_log(WORLD__LAUNCH_ERR, "Launcher authorization failed.");
 					ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
@@ -188,7 +188,7 @@ bool LauncherLink::ContainsZone(const char *short_name) const {
 	return(m_states.find(short_name) != m_states.end());
 
 	/*
-	 * std::map<std::string, bool>::const_iterator cur, end;
+	* std::map<std::string, bool>::const_iterator cur, end;
 	cur = m_states.begin();
 	end = m_states.end();
 	for(; cur != end; cur++) {

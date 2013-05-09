@@ -1,19 +1,19 @@
 /*
 	Copyright (C) 2005 Michael S. Finger
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "debug.h"
 #include <string>
@@ -121,7 +121,7 @@ uint32 processed=0,subpacket_length=0;
 		return;
 	// Raw Application packet
 	if (p->opcode > 0xff) {
-		p->opcode = htons(p->opcode);  //byte order is backwards in the protocol packet
+		p->opcode = htons(p->opcode); //byte order is backwards in the protocol packet
 		EQRawApplicationPacket *ap=MakeApplicationPacket(p);
 		if (ap)
 			InboundQueuePush(ap);
@@ -192,7 +192,7 @@ uint32 processed=0,subpacket_length=0;
 			} else if (check == SeqPast) {
 				_log(NET__DEBUG, _L "Duplicate OP_Packet: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
 				_raw(NET__DEBUG, seq, p);
-				SendOutOfOrderAck(seq);  //we already got this packet but it was out of order
+				SendOutOfOrderAck(seq); //we already got this packet but it was out of order
 			} else {
 				// In case we did queue one before as well.
 				EQProtocolPacket *qp=RemoveQueue(seq);
@@ -418,7 +418,7 @@ if(NextSequencedSend > SequencedQueue.size()) {
 				_log(NET__NET_TRACE, _L "Received OP_OutOfOrderAck for sequence %d, starting retransmit at the start of our unacked buffer (seq %d, was %d)." __L,
 					seq, SequencedBase, SequencedBase+NextSequencedSend);
 #ifdef RETRANSMITS
-                        	if (!RuleB(EQStream, RetransmitAckedPackets)) {
+							if (!RuleB(EQStream, RetransmitAckedPackets)) {
 #endif
 					uint16 sqsize = SequencedQueue.size();
 					uint16 index = seq - SequencedBase;
@@ -431,7 +431,7 @@ if(NextSequencedSend > SequencedQueue.size()) {
 					}
 #ifdef RETRANSMITS
 				}
-                        	if (RuleR(EQStream, RetransmitTimeoutMult)) { // only choose new behavior if multiplier is set
+							if (RuleR(EQStream, RetransmitTimeoutMult)) { // only choose new behavior if multiplier is set
 					retransmittimer = Timer::GetCurrentTime();
 				}
 #endif
@@ -686,7 +686,7 @@ deque<EQProtocolPacket *>::iterator sitr;
 	sitr += NextSequencedSend;
 
 	// Loop until both are empty or MaxSends is reached
-	while(!SeqEmpty || !NonSeqEmpty)  {
+	while(!SeqEmpty || !NonSeqEmpty) {
 
 		// See if there are more non-sequenced packets left
 		if (!NonSequencedQueue.empty()) {
@@ -1308,7 +1308,7 @@ EQStream::SeqOrder EQStream::CompareSequence(uint16 expected_seq , uint16 seq)
 	if (expected_seq==seq) {
 		// Curent
 		return SeqInOrder;
-	}  else if ((seq > expected_seq && (uint32)seq < ((uint32)expected_seq + EQStream::MaxWindowSize)) || seq < (expected_seq - EQStream::MaxWindowSize)) {
+	} else if ((seq > expected_seq && (uint32)seq < ((uint32)expected_seq + EQStream::MaxWindowSize)) || seq < (expected_seq - EQStream::MaxWindowSize)) {
 		// Future
 		return SeqFuture;
 	} else {
@@ -1447,7 +1447,4 @@ EQStream::MatchState EQStream::CheckSignature(const Signature *sig) {
 
 	return(res);
 }
-
-
-
 

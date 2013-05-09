@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/debug.h"
@@ -33,14 +33,8 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemulator.net)
 int Mob::GetKickDamage() {
 	int multiple=(GetLevel()*100/5);
 	multiple += 100;
-	int32 dmg=(
-			    (
-				 (GetSkill(KICK) + GetSTR() + GetLevel())*100 / 9000
-				) * multiple
-			  )
-			  + 600;	//Set a base of 6 damage, 1 seemed too low at the sub level 30 level.
-	if(GetClass() == WARRIOR || GetClass() == WARRIORGM
-	 ||GetClass() == BERSERKER || GetClass() == BERSERKERGM) {
+	int32 dmg=(((GetSkill(KICK) + GetSTR() + GetLevel())*100 / 9000) * multiple) + 600;	//Set a base of 6 damage, 1 seemed too low at the sub level 30 level.
+	if(GetClass() == WARRIOR || GetClass() == WARRIORGM ||GetClass() == BERSERKER || GetClass() == BERSERKERGM) {
 		dmg*=12/10;//small increase for warriors
 	}
 	dmg /= 100;
@@ -58,12 +52,7 @@ int Mob::GetBashDamage() {
 	multiple += 100;
 
 	//this is complete shite
-	int32 dmg=(
-			    (
-				 ((GetSkill(BASH) + GetSTR())*100 + GetLevel()*100/2) / 10000
-				) * multiple
-			  )
-			  + 600;	//Set a base of 6 damage, 1 seemed too low at the sub level 30 level.
+	int32 dmg=((((GetSkill(BASH) + GetSTR())*100 + GetLevel()*100/2) / 10000) * multiple) + 600;	//Set a base of 6 damage, 1 seemed too low at the sub level 30 level.
 	dmg /= 100;
 
 	int32 mindmg = 1;
@@ -239,8 +228,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 
 	int32 skill_reduction = this->GetSkillReuseTime(ca_atk->m_skill);
 
-	if ((ca_atk->m_atk == 100)
-	  && (ca_atk->m_skill == BASH)) {    // SLAM - Bash without a shield equipped
+	if ((ca_atk->m_atk == 100) && (ca_atk->m_skill == BASH)) { // SLAM - Bash without a shield equipped
 		if (GetTarget() != this) {
 
 			CheckIncreaseSkill(BASH, GetTarget(), 10);
@@ -281,7 +269,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 		CheckIncreaseSkill(FRENZY, GetTarget(), 10);
 		int AtkRounds = 3;
 		int skillmod = 100*GetSkill(FRENZY)/MaxSkill(FRENZY);
-		int32 max_dmg = (26 +  ((((GetLevel()-6) * 2)*skillmod)/100))  * ((100+RuleI(Combat, FrenzyBonus))/100);
+		int32 max_dmg = (26 + ((((GetLevel()-6) * 2)*skillmod)/100)) * ((100+RuleI(Combat, FrenzyBonus))/100);
 		int32 min_dmg = 0;
 		DoAnim(anim2HSlashing);
 
@@ -412,64 +400,64 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 
 	switch(unchecked_type)
 	{
-	case FLYING_KICK:{
-		skill_type = FLYING_KICK;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, FlyingKickBonus) / 100) + 35;
-		min_dmg = ((level*8)/10);
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-		DoAnim(animFlyingKick);
-		reuse = FlyingKickReuseTime;
-		break;
+		case FLYING_KICK:{
+			skill_type = FLYING_KICK;
+			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, FlyingKickBonus) / 100) + 35;
+			min_dmg = ((level*8)/10);
+			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+			DoAnim(animFlyingKick);
+			reuse = FlyingKickReuseTime;
+			break;
 		}
-	case DRAGON_PUNCH:{
-		skill_type = DRAGON_PUNCH;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, DragonPunchBonus) / 100) + 26;
-		itemslot = SLOT_HANDS;
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-		DoAnim(animTailRake);
-		reuse = TailRakeReuseTime;
-		break;
-		}
-
-	case EAGLE_STRIKE:{
-		skill_type = EAGLE_STRIKE;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, EagleStrikeBonus) / 100) + 19;
-		itemslot = SLOT_HANDS;
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-		DoAnim(animEagleStrike);
-		reuse = EagleStrikeReuseTime;
-		break;
+		case DRAGON_PUNCH:{
+			skill_type = DRAGON_PUNCH;
+			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, DragonPunchBonus) / 100) + 26;
+			itemslot = SLOT_HANDS;
+			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+			DoAnim(animTailRake);
+			reuse = TailRakeReuseTime;
+			break;
 		}
 
-	case TIGER_CLAW:{
-		skill_type = TIGER_CLAW;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, TigerClawBonus) / 100) + 12;
-		itemslot = SLOT_HANDS;
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-		DoAnim(animTigerClaw);
-		reuse = TigerClawReuseTime;
-		break;
+		case EAGLE_STRIKE:{
+			skill_type = EAGLE_STRIKE;
+			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, EagleStrikeBonus) / 100) + 19;
+			itemslot = SLOT_HANDS;
+			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+			DoAnim(animEagleStrike);
+			reuse = EagleStrikeReuseTime;
+			break;
 		}
 
-	case ROUND_KICK:{
-		skill_type = ROUND_KICK;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, RoundKickBonus) / 100) + 10;
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-		DoAnim(animRoundKick);
-		reuse = RoundKickReuseTime;
-		break;
+		case TIGER_CLAW:{
+			skill_type = TIGER_CLAW;
+			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, TigerClawBonus) / 100) + 12;
+			itemslot = SLOT_HANDS;
+			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+			DoAnim(animTigerClaw);
+			reuse = TigerClawReuseTime;
+			break;
 		}
 
-	case KICK:{
-		skill_type = KICK;
-		max_dmg = GetKickDamage();
-		DoAnim(animKick);
-		reuse = KickReuseTime;
-		break;
-			  }
-	default:
-		mlog(CLIENT__ERROR, "Invalid special attack type %d attempted", unchecked_type);
-		return(1000); /* nice long delay for them, the caller depends on this! */
+		case ROUND_KICK:{
+			skill_type = ROUND_KICK;
+			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, RoundKickBonus) / 100) + 10;
+			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+			DoAnim(animRoundKick);
+			reuse = RoundKickReuseTime;
+			break;
+		}
+
+		case KICK:{
+			skill_type = KICK;
+			max_dmg = GetKickDamage();
+			DoAnim(animKick);
+			reuse = KickReuseTime;
+			break;
+		}
+		default:
+			mlog(CLIENT__ERROR, "Invalid special attack type %d attempted", unchecked_type);
+			return(1000); /* nice long delay for them, the caller depends on this! */
 	}
 
 	if(IsClient()){
@@ -629,7 +617,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 	if(primaryweapondamage > 0){
 		if(level > 25){
-			max_hit = (((2*backstab_dmg) * GetDamageTable(BACKSTAB) / 100) * 10 * GetSkill(BACKSTAB) / 355)  + ((level-25)/3) + 1;
+			max_hit = (((2*backstab_dmg) * GetDamageTable(BACKSTAB) / 100) * 10 * GetSkill(BACKSTAB) / 355) + ((level-25)/3) + 1;
 			hate = 20 * backstab_dmg * GetSkill(BACKSTAB) / 355;
 		}
 		else{
@@ -644,7 +632,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 		}
 		else
 		{
-			// Trumpcard:  Replaced switch statement with formula calc.  This will give minhit increases all the way to 65.
+			// Trumpcard: Replaced switch statement with formula calc. This will give minhit increases all the way to 65.
 			min_hit = (level * ( level*5 - 105)) / 100;
 		}
 
@@ -1340,10 +1328,10 @@ void Mob::ProjectileAnimation(Mob* to, uint16 item_id, bool IsArrow, float speed
 	uint8 item_type = 0;
 
 	if(!item_id) {
-		item = database.GetItem(8005);   // Arrow will be default
+		item = database.GetItem(8005); // Arrow will be default
 	}
 	else {
-		item = database.GetItem(item_id);   // Use the item input into the command
+		item = database.GetItem(item_id); // Use the item input into the command
 	}
 
 	if(!item) {
@@ -1431,7 +1419,7 @@ void NPC::DoClassAttacks(Mob *target) {
 	//general stuff, for all classes....
 	//only gets used when their primary ability get used too
 	if (taunting && HasOwner() && target->IsNPC() && target->GetBodyType() != BT_Undead && taunt_time) {
-        this->GetOwner()->Message_StringID(MT_PetResponse, PET_TAUNTING);
+		this->GetOwner()->Message_StringID(MT_PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), false);
 	}
 
@@ -1528,7 +1516,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		case BERSERKER: case BERSERKERGM:
 		{
 			int AtkRounds = 3;
-			int32 max_dmg = 26 +  ((GetLevel()-6) * 2);
+			int32 max_dmg = 26 + ((GetLevel()-6) * 2);
 			int32 min_dmg = 0;
 			DoAnim(anim2HSlashing);
 
@@ -1740,7 +1728,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		CheckIncreaseSkill(FRENZY, GetTarget(), 10);
 		int AtkRounds = 3;
 		int skillmod = 100*GetSkill(FRENZY)/MaxSkill(FRENZY);
-		int32 max_dmg = (26 +  ((((GetLevel()-6) * 2)*skillmod)/100))  * ((100+RuleI(Combat, FrenzyBonus))/100);
+		int32 max_dmg = (26 + ((((GetLevel()-6) * 2)*skillmod)/100)) * ((100+RuleI(Combat, FrenzyBonus))/100);
 		int32 min_dmg = 0;
 		DoAnim(anim2HSlashing);
 
@@ -2150,7 +2138,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillType skil
 			}
 		}
 
-		if (damage == -3)  {
+		if (damage == -3) {
 			DoRiposte(other);
 			if (HasDied())
 				return;

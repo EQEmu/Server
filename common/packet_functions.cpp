@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -43,13 +43,13 @@ void EncryptProfilePacket(uchar* pBuffer, uint32 size) {
 	data[0] = data[len/2];
 	data[len/2] = swap;
 
-    for(uint32 i=0; i<len;i++) {
+	for(uint32 i=0; i<len;i++) {
 		next_crypt = crypt+data[i]-0x422437A9;
 		data[i] = ((data[i]>>0x19)|(data[i]<<0x27))+0x422437A9;
-		data[i] =  (data[i]<<0x07)|(data[i]>>0x39);
+		data[i] = (data[i]<<0x07)|(data[i]>>0x39);
 		data[i] = data[i] - crypt;
 		crypt = next_crypt;
-    }
+	}
 }
 
 void EncryptZoneSpawnPacket(EQApplicationPacket* app) {
@@ -66,13 +66,13 @@ void EncryptZoneSpawnPacket(uchar* pBuffer, uint32 size) {
 	data[0] = data[len/2];
 	data[len/2] = swap;
 
-    for(uint32 i=0; i<len;i++) {
+	for(uint32 i=0; i<len;i++) {
 		next_crypt = crypt+data[i]-0x659365E7;
 		data[i] = ((data[i]<<0x1d)|(data[i]>>0x23))+0x659365E7;
-		data[i] =  (data[i]<<0x0e)|(data[i]>>0x32);
+		data[i] = (data[i]<<0x0e)|(data[i]>>0x32);
 		data[i] = data[i] - crypt;
 		crypt = next_crypt;
-    }
+	}
 }
 
 #define MEMORY_DEBUG
@@ -100,28 +100,28 @@ int DeflatePacket(const unsigned char* in_data, int in_length, unsigned char* ou
 #ifdef REUSE_ZLIB
 	static bool inited = false;
 	static z_stream zstream;
-    int zerror;
+	int zerror;
 
-    if(in_data == nullptr && out_data == nullptr && in_length == 0 && max_out_length == 0) {
-    	//special delete state
-    	deflateEnd(&zstream);
-    	return(0);
-    }
-    if(!inited) {
+	if(in_data == nullptr && out_data == nullptr && in_length == 0 && max_out_length == 0) {
+		//special delete state
+		deflateEnd(&zstream);
+		return(0);
+	}
+	if(!inited) {
 		memset(&zstream, 0, sizeof(zstream));
-		zstream.zalloc    = eqemu_alloc_func;
-		zstream.zfree     = eqemu_free_func;
-		zstream.opaque    = Z_NULL;
+		zstream.zalloc	= eqemu_alloc_func;
+		zstream.zfree	= eqemu_free_func;
+		zstream.opaque	= Z_NULL;
 		deflateInit(&zstream, Z_FINISH);
-    }
+	}
 
-	zstream.next_in   = const_cast<unsigned char *>(in_data);
-	zstream.avail_in  = in_length;
-/*	zstream.zalloc    = Z_NULL;
-	zstream.zfree     = Z_NULL;
-	zstream.opaque    = Z_NULL;
+	zstream.next_in		= const_cast<unsigned char *>(in_data);
+	zstream.avail_in	= in_length;
+/*	zstream.zalloc	= Z_NULL;
+	zstream.zfree	= Z_NULL;
+	zstream.opaque	= Z_NULL;
 	deflateInit(&zstream, Z_FINISH);*/
-	zstream.next_out  = out_data;
+	zstream.next_out = out_data;
 	zstream.avail_out = max_out_length;
 	zerror = deflate(&zstream, Z_FINISH);
 
@@ -144,15 +144,15 @@ int DeflatePacket(const unsigned char* in_data, int in_length, unsigned char* ou
 
 	z_stream zstream;
 	memset(&zstream, 0, sizeof(zstream));
-    int zerror;
+	int zerror;
 
-	zstream.next_in   = const_cast<unsigned char *>(in_data);
-	zstream.avail_in  = in_length;
-	zstream.zalloc    = eqemu_alloc_func;
-	zstream.zfree     = eqemu_free_func;
-	zstream.opaque    = Z_NULL;
+	zstream.next_in		= const_cast<unsigned char *>(in_data);
+	zstream.avail_in	= in_length;
+	zstream.zalloc	= eqemu_alloc_func;
+	zstream.zfree	= eqemu_free_func;
+	zstream.opaque	= Z_NULL;
 	deflateInit(&zstream, Z_FINISH);
-	zstream.next_out  = out_data;
+	zstream.next_out = out_data;
 	zstream.avail_out = max_out_length;
 	zerror = deflate(&zstream, Z_FINISH);
 
@@ -173,26 +173,26 @@ uint32 InflatePacket(const uchar* indata, uint32 indatalen, uchar* outdata, uint
 #ifdef REUSE_ZLIB
 	static bool inited = false;
 	static z_stream zstream;
-    int zerror;
+	int zerror;
 
-    if(indata == nullptr && outdata == nullptr && indatalen == 0 && outdatalen == 0) {
-    	//special delete state
-    	inflateEnd(&zstream);
-    	return(0);
-    }
-    if(!inited) {
-		zstream.zalloc    = eqemu_alloc_func;
-		zstream.zfree     = eqemu_free_func;
-		zstream.opaque    = Z_NULL;
+	if(indata == nullptr && outdata == nullptr && indatalen == 0 && outdatalen == 0) {
+		//special delete state
+		inflateEnd(&zstream);
+		return(0);
+	}
+	if(!inited) {
+		zstream.zalloc	= eqemu_alloc_func;
+		zstream.zfree	= eqemu_free_func;
+		zstream.opaque	= Z_NULL;
 		inflateInit2(&zstream, 15);
-    }
+	}
 
 	zstream.next_in		= const_cast<unsigned char *>(indata);
 	zstream.avail_in	= indatalen;
 	zstream.next_out	= outdata;
 	zstream.avail_out	= outdatalen;
-	zstream.zalloc    = eqemu_alloc_func;
-	zstream.zfree     = eqemu_free_func;
+	zstream.zalloc		= eqemu_alloc_func;
+	zstream.zfree		= eqemu_free_func;
 	zstream.opaque		= Z_NULL;
 
 	i = inflateInit2( &zstream, 15 );
@@ -237,8 +237,8 @@ uint32 InflatePacket(const uchar* indata, uint32 indatalen, uchar* outdata, uint
 	zstream.avail_in	= indatalen;
 	zstream.next_out	= outdata;
 	zstream.avail_out	= outdatalen;
-	zstream.zalloc    = eqemu_alloc_func;
-	zstream.zfree     = eqemu_free_func;
+	zstream.zalloc		= eqemu_alloc_func;
+	zstream.zfree		= eqemu_free_func;
 	zstream.opaque		= Z_NULL;
 
 	i = inflateInit2( &zstream, 15 );

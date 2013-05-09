@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #ifdef _WINDOWS
@@ -172,12 +172,12 @@ ItemInst::ItemInst(const ItemInst& copy)
 			m_contents[it->first] = inst_new;
 		}
 	}
-    std::map<std::string, std::string>::const_iterator iter;
-    for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); iter++) {
-        m_custom_data[iter->first] = iter->second;
-    }
+	std::map<std::string, std::string>::const_iterator iter;
+	for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); iter++) {
+		m_custom_data[iter->first] = iter->second;
+	}
 	m_SerialNumber = copy.m_SerialNumber;
-    m_custom_data = copy.m_custom_data;
+	m_custom_data = copy.m_custom_data;
 }
 
 // Clean up container contents
@@ -316,9 +316,9 @@ bool ItemInst::IsAmmo() const {
 	if(!m_item) return false;
 
 	if((m_item->ItemType == ItemTypeArrow) ||
-	   (m_item->ItemType == ItemTypeThrowing) ||
-	   (m_item->ItemType == ItemTypeThrowingv2))
-	   	return true;
+		(m_item->ItemType == ItemTypeThrowing) ||
+		(m_item->ItemType == ItemTypeThrowingv2))
+		return true;
 
 	return false;
 
@@ -579,64 +579,64 @@ ItemInst* Inventory::GetItem(int16 slot_id) const
 }
 
 std::string ItemInst::GetCustomDataString() const {
-    std::string ret_val;
-    map<std::string, std::string>::const_iterator iter = m_custom_data.begin();
-    while(iter != m_custom_data.end()) {
-        if(ret_val.length() > 0) {
-            ret_val += "^";
-        }
-        ret_val += iter->first;
-        ret_val += "^";
-        ret_val += iter->second;
-        iter++;
+	std::string ret_val;
+	map<std::string, std::string>::const_iterator iter = m_custom_data.begin();
+	while(iter != m_custom_data.end()) {
+		if(ret_val.length() > 0) {
+			ret_val += "^";
+		}
+		ret_val += iter->first;
+		ret_val += "^";
+		ret_val += iter->second;
+		iter++;
 
-        if(ret_val.length() > 0) {
-            ret_val += "^";
-        }
-    }
-    return ret_val;
+		if(ret_val.length() > 0) {
+			ret_val += "^";
+		}
+	}
+	return ret_val;
 }
 
 void ItemInst::SetCustomData(std::string identifier, std::string value) {
-    DeleteCustomData(identifier);
-    m_custom_data[identifier] = value;
+	DeleteCustomData(identifier);
+	m_custom_data[identifier] = value;
 }
 
 void ItemInst::SetCustomData(std::string identifier, int value) {
-    DeleteCustomData(identifier);
-    std::stringstream ss;
-    ss << value;
-    m_custom_data[identifier] = ss.str();
+	DeleteCustomData(identifier);
+	std::stringstream ss;
+	ss << value;
+	m_custom_data[identifier] = ss.str();
 }
 
 void ItemInst::SetCustomData(std::string identifier, float value) {
-    DeleteCustomData(identifier);
-    std::stringstream ss;
-    ss << value;
-    m_custom_data[identifier] = ss.str();
+	DeleteCustomData(identifier);
+	std::stringstream ss;
+	ss << value;
+	m_custom_data[identifier] = ss.str();
 }
 
 void ItemInst::SetCustomData(std::string identifier, bool value) {
-    DeleteCustomData(identifier);
-    std::stringstream ss;
-    ss << value;
-    m_custom_data[identifier] = ss.str();
+	DeleteCustomData(identifier);
+	std::stringstream ss;
+	ss << value;
+	m_custom_data[identifier] = ss.str();
 }
 
 void ItemInst::DeleteCustomData(std::string identifier) {
-    map<std::string, std::string>::iterator iter = m_custom_data.find(identifier);
-    if(iter != m_custom_data.end()) {
-        m_custom_data.erase(iter);
-    }
+	map<std::string, std::string>::iterator iter = m_custom_data.find(identifier);
+	if(iter != m_custom_data.end()) {
+		m_custom_data.erase(iter);
+	}
 }
 
 std::string ItemInst::GetCustomData(std::string identifier) {
-    map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
-    if(iter != m_custom_data.end()) {
-        return iter->second;
-    }
+	map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
+	if(iter != m_custom_data.end()) {
+		return iter->second;
+	}
 
-    return "";
+	return "";
 }
 
 // Retrieve item at specified position within bag
@@ -857,7 +857,7 @@ bool Inventory::HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity) {
 					InvItem = GetItem(BaseSlotID + BagSlot);
 
 					if(InvItem && (InvItem->GetItem()->ID == ItemToTry->ID) &&
-					   (InvItem->GetCharges() < InvItem->GetItem()->StackSize)) {
+						(InvItem->GetCharges() < InvItem->GetItem()->StackSize)) {
 
 						int ChargeSlotsLeft = InvItem->GetItem()->StackSize - InvItem->GetCharges();
 
@@ -940,17 +940,17 @@ bool Inventory::DeleteItem(int16 slot_id, uint8 quantity)
 		// If there are no charges left on the item,
 		if(item_to_delete->GetCharges() <= 0) {
 			// If the item is stackable (e.g arrows), or
-			//    the item is not stackable, and is not a charged item, or is expendable, delete it
+			// the item is not stackable, and is not a charged item, or is expendable, delete it
 			if(item_to_delete->IsStackable() ||
-			   (!item_to_delete->IsStackable() &&
-			    ((item_to_delete->GetItem()->MaxCharges == 0)  || item_to_delete->IsExpendable()))) {
+				(!item_to_delete->IsStackable() &&
+				((item_to_delete->GetItem()->MaxCharges == 0) || item_to_delete->IsExpendable()))) {
 				// Item can now be destroyed
 				safe_delete(item_to_delete);
 				return true;
 			}
 		}
 
-		// Charges still exist, or it is a charged item that is not expendable.  Put back into inventory
+		// Charges still exist, or it is a charged item that is not expendable. Put back into inventory
 		_PutItem(slot_id, item_to_delete);
 		return false;
 	}
@@ -963,7 +963,7 @@ bool Inventory::DeleteItem(int16 slot_id, uint8 quantity)
 
 // Checks All items in a bag for No Drop
 bool Inventory::CheckNoDrop(int16 slot_id) {
-    ItemInst* inst = GetItem(slot_id);
+	ItemInst* inst = GetItem(slot_id);
 	if (!inst) return false;
 	if (!inst->GetItem()->NoDrop) return true;
 	if (inst->GetItem()->ItemClass == 1) {
@@ -1700,10 +1700,10 @@ EvoItemInst::EvoItemInst(const EvoItemInst &copy) {
 			m_contents[it->first] = inst_new;
 		}
 	}
-    std::map<std::string, std::string>::const_iterator iter;
-    for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); iter++) {
-        m_custom_data[iter->first] = iter->second;
-    }
+	std::map<std::string, std::string>::const_iterator iter;
+	for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); iter++) {
+		m_custom_data[iter->first] = iter->second;
+	}
 	m_SerialNumber = copy.m_SerialNumber;
 	m_exp = copy.m_exp;
 	m_evolveLvl = copy.m_evolveLvl;
@@ -1742,10 +1742,10 @@ EvoItemInst::EvoItemInst(const ItemInst &basecopy) {
 		}
 	}
 
-    std::map<std::string, std::string>::const_iterator iter;
-    for (iter = copy->m_custom_data.begin(); iter != copy->m_custom_data.end(); iter++) {
-        m_custom_data[iter->first] = iter->second;
-    }
+	std::map<std::string, std::string>::const_iterator iter;
+	for (iter = copy->m_custom_data.begin(); iter != copy->m_custom_data.end(); iter++) {
+		m_custom_data[iter->first] = iter->second;
+	}
 	m_SerialNumber = copy->m_SerialNumber;
 	m_exp = 0;
 	m_evolveLvl = 0;
@@ -1924,9 +1924,9 @@ bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
 	{
 		if (Classes_ % 2 == 1)
 		{
-   	 		if (CurrentClass == Class_)
+			if (CurrentClass == Class_)
 			{
-    				IsClass = true;
+					IsClass = true;
 				break;
 			}
 		}
@@ -1939,11 +1939,11 @@ bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
 	{
 		if (Races_ % 2 == 1)
 		{
-	    		if (CurrentRace == Race_)
+				if (CurrentRace == Race_)
 			{
-    				IsRace = true;
+					IsRace = true;
 				break;
-   			}
+			}
 		}
 		Races_ >>= 1;
 	}

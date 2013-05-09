@@ -1,20 +1,20 @@
 #define DONT_SHARED_OPCODES
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/features.h"
@@ -40,7 +40,7 @@ using namespace std;
 	#define vsnprintf	_vsnprintf
 #endif
 #define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
+#define strcasecmp	_stricmp
 #endif
 
 volatile bool RunLoops = true;
@@ -115,8 +115,8 @@ void Shutdown();
 extern void MapOpcodes();
 
 int main(int argc, char** argv) {
-    RegisterExecutablePlatform(ExePlatformZone);
-    set_exception_handler();
+	RegisterExecutablePlatform(ExePlatformZone);
+	set_exception_handler();
 
 	const char *zone_name;
 
@@ -183,8 +183,8 @@ int main(int argc, char** argv) {
 	_log(ZONE__INIT, "CURRENT_VERSION: %s", CURRENT_VERSION);
 
 	/*
-	 * Setup nice signal handlers
-	 */
+	* Setup nice signal handlers
+	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(ZONE__INIT_ERR, "Could not set signal handler");
 		return 0;
@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 	_log(ZONE__INIT, "Loading items");
 	if (!database.LoadItems()) {
 		_log(ZONE__INIT_ERR, "Loading items FAILED!");
-		_log(ZONE__INIT, "Failed.  But ignoring error and going on...");
+		_log(ZONE__INIT, "Failed. But ignoring error and going on...");
 	}
 
 	_log(ZONE__INIT, "Loading npc faction lists");
@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
 		_log(ZONE__INIT_ERR, "Loading loot FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 0;
-    }
+	}
 	_log(ZONE__INIT, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
 		_log(ZONE__INIT_ERR, "Loading skill caps FAILED!");
@@ -237,8 +237,8 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-    _log(ZONE__INIT, "Loading spells");
-    EQEmu::MemoryMappedFile *mmf = nullptr;
+	_log(ZONE__INIT, "Loading spells");
+	EQEmu::MemoryMappedFile *mmf = nullptr;
 	LoadSpells(&mmf);
 
 	_log(ZONE__INIT, "Loading guilds");
@@ -283,13 +283,13 @@ int main(int argc, char** argv) {
 		taskmanager->LoadTasks();
 	}
 
-    parse = new QuestParserCollection();
+	parse = new QuestParserCollection();
 #ifdef EMBPERL
 	PerlXSParser *pxs = new PerlXSParser();
 	parse->RegisterQuestInterface(pxs, "pl");
 #endif
 	Parser *ps = new Parser();
-    //parse->RegisterQuestInterface(ps, "qst");
+	//parse->RegisterQuestInterface(ps, "qst");
 
 
 	//now we have our parser, load the quests
@@ -476,7 +476,7 @@ int main(int argc, char** argv) {
 
 	safe_delete(parse);
 #ifdef EMBPERL
- 	safe_delete(pxs);
+	safe_delete(pxs);
 #endif
 	safe_delete(ps);
 	safe_delete(mmf);
@@ -514,8 +514,8 @@ void Shutdown()
 
 uint32 NetConnection::GetIP()
 {
-	char     name[255+1];
-	size_t   len = 0;
+	char name[255+1];
+	size_t len = 0;
 	hostent* host = 0;
 
 	if (gethostname(name, len) < 0 || len <= 0)
@@ -584,25 +584,25 @@ NetConnection::~NetConnection() {
 }
 
 void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
-    int records = database.GetMaxSpellID() + 1;
+	int records = database.GetMaxSpellID() + 1;
 
-    try {
-        EQEmu::IPCMutex mutex("spells");
-        mutex.Lock();
-        *mmf = new EQEmu::MemoryMappedFile("shared/spells");
-        uint32 size = (*mmf)->Size();
-        if(size != (records * sizeof(SPDat_Spell_Struct))) {
-            EQ_EXCEPT("Zone", "Unable to load spells: (*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)");
-        }
+	try {
+		EQEmu::IPCMutex mutex("spells");
+		mutex.Lock();
+		*mmf = new EQEmu::MemoryMappedFile("shared/spells");
+		uint32 size = (*mmf)->Size();
+		if(size != (records * sizeof(SPDat_Spell_Struct))) {
+			EQ_EXCEPT("Zone", "Unable to load spells: (*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)");
+		}
 
-        spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
-        mutex.Unlock();
-    } catch(std::exception &ex) {
-        LogFile->write(EQEMuLog::Error, "Error loading spells: %s", ex.what());
-        return;
-    }
+		spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
+		mutex.Unlock();
+	} catch(std::exception &ex) {
+		LogFile->write(EQEMuLog::Error, "Error loading spells: %s", ex.what());
+		return;
+	}
 
-    SPDAT_RECORDS = records;
+	SPDAT_RECORDS = records;
 }
 
 

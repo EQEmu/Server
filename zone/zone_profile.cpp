@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/features.h"
@@ -32,7 +32,7 @@
 	#define snprintf	_snprintf
 	#define vsnprintf	_vsnprintf
 	#define strncasecmp	_strnicmp
-	#define strcasecmp  _stricmp
+	#define strcasecmp	_stricmp
 #else
 	#include <sys/types.h>
 	#include <unistd.h>
@@ -239,16 +239,16 @@ const char *__zp_names[ZoneProfiler::MaxZoneProfilerId] = {
 
 void DumpZoneProfile() {
 	__DZP_timer.stop();
-    time_t aclock;
-    struct tm *newtime;
+	time_t aclock;
+	struct tm *newtime;
 
-    time( &aclock );                 /* Get time in seconds */
-    newtime = localtime( &aclock );  /* Convert time to struct */
-    LogFile->write(EQEMuLog::Debug, "Profiling dump at: [%02d/%02d - %02d:%02d:%02d] (%.2f ms of data)",
-    	newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec,
-    	__DZP_timer.getTotalDuration());
+	time( &aclock ); /* Get time in seconds */
+	newtime = localtime( &aclock ); /* Convert time to struct */
+	LogFile->write(EQEMuLog::Debug, "Profiling dump at: [%02d/%02d - %02d:%02d:%02d] (%.2f ms of data)",
+		newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec,
+		__DZP_timer.getTotalDuration());
 
-    vector<_DZP_Data> data;
+	vector<_DZP_Data> data;
 
 
 	int r;
@@ -279,9 +279,9 @@ void DumpZoneProfile() {
 		LogFile->write(EQEMuLog::Debug, "..%s: %llu calls, %.4fms", cur->str, (unsigned long long)cur->count, cur->dur);
 	}
 
-    LogFile->write(EQEMuLog::Debug, "End Profiling dump at: [%02d/%02d - %02d:%02d:%02d] (%.2f ms of data)",
-    	newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec,
-    	__DZP_timer.getTotalDuration());
+	LogFile->write(EQEMuLog::Debug, "End Profiling dump at: [%02d/%02d - %02d:%02d:%02d] (%.2f ms of data)",
+		newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec,
+		__DZP_timer.getTotalDuration());
 
 	__DZP_timer.start();
 }
@@ -298,6 +298,4 @@ void ResetZoneProfile() {
 }
 
 #endif //EQPROFILE
-
-
 

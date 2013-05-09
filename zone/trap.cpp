@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/types.h"
@@ -26,21 +26,21 @@
 
 Schema:
 CREATE TABLE traps (
-  id int(11) NOT nullptr auto_increment,
-  zone varchar(16) NOT nullptr default '',
-  x int(11) NOT nullptr default '0',
-  y int(11) NOT nullptr default '0',
-  z int(11) NOT nullptr default '0',
-  chance tinyint NOT nullptr default '0',
-  maxzdiff float NOT nullptr default '0',
-  radius float NOT nullptr default '0',
-  effect int(11) NOT nullptr default '0',
-  effectvalue int(11) NOT nullptr default '0',
-  effectvalue2 int(11) NOT nullptr default '0',
-  message varcahr(200) NOT nullptr;
-  skill int(11) NOT nullptr default '0',
-  spawnchance int(11) NOT nullptr default '0',
-  PRIMARY KEY  (id)
+	id int(11) NOT nullptr auto_increment,
+	zone varchar(16) NOT nullptr default '',
+	x int(11) NOT nullptr default '0',
+	y int(11) NOT nullptr default '0',
+	z int(11) NOT nullptr default '0',
+	chance tinyint NOT nullptr default '0',
+	maxzdiff float NOT nullptr default '0',
+	radius float NOT nullptr default '0',
+	effect int(11) NOT nullptr default '0',
+	effectvalue int(11) NOT nullptr default '0',
+	effectvalue2 int(11) NOT nullptr default '0',
+	message varcahr(200) NOT nullptr;
+	skill int(11) NOT nullptr default '0',
+	spawnchance int(11) NOT nullptr default '0',
+	PRIMARY KEY (id)
 ) TYPE=MyISAM;
 
 
@@ -143,7 +143,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-5+MakeRandomInt(0, 10), y-5+MakeRandomInt(0, 10), z-5+MakeRandomInt(0, 10),  MakeRandomInt(0, 249), FlyMode3);
+					NPC* new_npc = new NPC(tmp, 0, x-5+MakeRandomInt(0, 10), y-5+MakeRandomInt(0, 10), z-5+MakeRandomInt(0, 10), MakeRandomInt(0, 249), FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -164,7 +164,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-2+MakeRandomInt(0, 5), y-2+MakeRandomInt(0, 5), z-2+MakeRandomInt(0, 5),  MakeRandomInt(0, 249), FlyMode3);
+					NPC* new_npc = new NPC(tmp, 0, x-2+MakeRandomInt(0, 5), y-2+MakeRandomInt(0, 5), z-2+MakeRandomInt(0, 5), MakeRandomInt(0, 249), FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -266,9 +266,9 @@ Mob* EntityList::GetTrapTrigger(Trap* trap) {
 //todo: rewrite this to not need direct access to trap members.
 bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	//	int char_num = 0;
 	unsigned long* lengths;
@@ -327,7 +327,7 @@ void Trap::CreateHiddenTrigger()
 	make_npc->npc_spells_id = 0;
 	make_npc->d_meele_texture1 = 0;
 	make_npc->d_meele_texture2 = 0;
-      make_npc->trackable = 0;
+	make_npc->trackable = 0;
 	make_npc->level = level;
 	strcpy(make_npc->npc_attacks, "ABHG");
 	NPC* npca = new NPC(make_npc, 0, x, y, z, 0, FlyMode3);

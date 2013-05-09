@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/MiscFunctions.h"
@@ -294,7 +294,7 @@ if(_node->node4 != nullptr) {
 					tmp = SeekNode( _node->nodes[1], x, y );
 			}
 		} else {
-			if(y < midy) {  //quad 4
+			if(y < midy) { //quad 4
 				if(_node->nodes[2] != NODE_NONE && _node->nodes[3] != node_r)
 					tmp = SeekNode( _node->nodes[3], x, y );
 			} else {	//quad 1
@@ -304,16 +304,16 @@ if(_node->node4 != nullptr) {
 		}
 		if( tmp != NODE_NONE ) return tmp;
 #else
-		if(_node->nodes[0] == node_r) return(NODE_NONE); 	//prevent infinite recursion
+		if(_node->nodes[0] == node_r) return(NODE_NONE);	//prevent infinite recursion
 		tmp = SeekNode( _node->nodes[0], x, y );
 		if( tmp != NODE_NONE ) return tmp;
-		if(_node->nodes[1] == node_r) return(NODE_NONE); 	//prevent infinite recursion
+		if(_node->nodes[1] == node_r) return(NODE_NONE);	//prevent infinite recursion
 		tmp = SeekNode( _node->nodes[1], x, y );
 		if( tmp != NODE_NONE ) return tmp;
-		if(_node->nodes[2] == node_r) return(NODE_NONE); 	//prevent infinite recursion
+		if(_node->nodes[2] == node_r) return(NODE_NONE);	//prevent infinite recursion
 		tmp = SeekNode( _node->nodes[2], x, y );
 		if( tmp != NODE_NONE ) return tmp;
-		if(_node->nodes[3] == node_r) return(NODE_NONE); 	//prevent infinite recursion
+		if(_node->nodes[3] == node_r) return(NODE_NONE);	//prevent infinite recursion
 		tmp = SeekNode( _node->nodes[3], x, y );
 		if( tmp != NODE_NONE ) return tmp;
 #endif
@@ -326,13 +326,13 @@ printf(" No node found.\n");
 }
 
 // maybe precalc edges.
-int* Map::SeekFace(  NodeRef node_r, float x, float y ) {
+int* Map::SeekFace( NodeRef node_r, float x, float y ) {
 	if( node_r == NODE_NONE || node_r >= m_Nodes) {
 		return(nullptr);
 	}
 	const PNODE _node = &mNodes[node_r];
 	if(!(_node->flags & nodeFinal)) {
-		return(nullptr);   //not a final node... could find the proper node...
+		return(nullptr); //not a final node... could find the proper node...
 	}
 
 
@@ -348,15 +348,15 @@ int* Map::SeekFace(  NodeRef node_r, float x, float y ) {
 		const VERTEX &v3 = cf.c;
 
 		dx = v2.x - v1.x; dy = v2.y - v1.y;
-		nx =    x - v1.x; ny =    y - v1.y;
+		nx = x - v1.x; ny = y - v1.y;
 		if( dx*ny - dy*nx >0.0f ) continue;
 
 		dx = v3.x - v2.x; dy = v3.y - v2.y;
-		nx =    x - v2.x; ny =    y - v2.y;
+		nx = x - v2.x; ny = y - v2.y;
 		if( dx*ny - dy*nx >0.0f ) continue;
 
 		dx = v1.x - v3.x; dy = v1.y - v3.y;
-		nx =    x - v3.x; ny =    y - v3.y;
+		nx = x - v3.x; ny = y - v3.y;
 		if( dx*ny - dy*nx >0.0f ) continue;
 
 		*face++ = mFaceLists[_node->faces.offset + i];
@@ -396,14 +396,14 @@ bool Map::LineIntersectsZone(VERTEX start, VERTEX end, float step_mag, VERTEX *r
 	if((stepx == 0) && (stepy == 0) && (stepz == 0))
 		return false;
 
-	float factor =  sqrt(stepx*stepx + stepy*stepy + stepz*stepz);
+	float factor = sqrt(stepx*stepx + stepy*stepy + stepz*stepz);
 
 	stepx = (stepx/factor)*step_mag;
 	stepy = (stepy/factor)*step_mag;
 	stepz = (stepz/factor)*step_mag;
 
 	NodeRef cnode, lnode, finalnode;
-	lnode = NODE_NONE;      //last node visited
+	lnode = NODE_NONE; //last node visited
 
 	cnode = SeekNode(GetRoot(), start.x, start.y);
 	finalnode = SeekNode(GetRoot(), end.x, end.y);
@@ -416,22 +416,22 @@ bool Map::LineIntersectsZone(VERTEX start, VERTEX end, float step_mag, VERTEX *r
 		stepy = (float)end.y - cury;
 		stepz = (float)end.z - curz;
 
-		factor =  sqrt(stepx*stepx + stepy*stepy + stepz*stepz);
+		factor = sqrt(stepx*stepx + stepy*stepy + stepz*stepz);
 
 		stepx = (stepx/factor)*step_mag;
 		stepy = (stepy/factor)*step_mag;
 		stepz = (stepz/factor)*step_mag;
 
-	    	cnode = SeekNode(GetRoot(), curx, cury);
+			cnode = SeekNode(GetRoot(), curx, cury);
 		if(cnode != lnode)
 		{
- 		    	lnode = cnode;
+				lnode = cnode;
 
 			if(cnode == NODE_NONE)
 				return false;
 
 			if(LineIntersectsNode(cnode, start, end, result, on))
-       				return(true);
+					return(true);
 
 			if(cnode == finalnode)
 				return false;
@@ -466,11 +466,11 @@ bool Map::LocWithinNode( NodeRef node_r, float x, float y ) const {
 bool Map::LineIntersectsNode( NodeRef node_r, VERTEX p1, VERTEX p2, VERTEX *result, FACE **on) const {
 	_ZP(Map_LineIntersectsNode);
 	if( node_r == NODE_NONE || node_r >= m_Nodes) {
-		return(true);   //can see through empty nodes, just allow LOS on error...
+		return(true); //can see through empty nodes, just allow LOS on error...
 	}
 	const PNODE _node = &mNodes[node_r];
 	if(!(_node->flags & nodeFinal)) {
-		return(true);   //not a final node... not sure best action
+		return(true); //not a final node... not sure best action
 	}
 
 	unsigned long i;
@@ -512,7 +512,7 @@ float Map::FindBestZ( NodeRef node_r, VERTEX p1, VERTEX *result, FACE **on) cons
 	}
 	const PNODE _node = &mNodes[node_r];
 	if(!(_node->flags & nodeFinal)) {
-		return(BEST_Z_INVALID);   //not a final node... could find the proper node...
+		return(BEST_Z_INVALID); //not a final node... could find the proper node...
 	}
 
 	VERTEX tmp_result;	//dummy placeholder if they do not ask for a result.
@@ -541,7 +541,7 @@ printf("Start finding best Z...\n");
 #endif
 		for(i = 0; i < _node->faces.count; i++) {
 			if(*cfl > m_Faces)
-		               continue;       //watch for invalid lists, they seem to happen, e.g. in eastwastes.map
+				continue; //watch for invalid lists, they seem to happen, e.g. in eastwastes.map
 
 			cur = &mFinalFaces[ *cfl ];
 //printf("Intersecting with face %lu\n", *cfl);
@@ -564,7 +564,7 @@ printf("Start finding best Z...\n");
 
 		if(best_z != BEST_Z_INVALID) return best_z;
 
-		 p1.z = p1.z + 10 ;   // If we can't find a best Z, the NPC is probably just under the world. Try again from 10 units higher up.
+		p1.z = p1.z + 10 ; // If we can't find a best Z, the NPC is probably just under the world. Try again from 10 units higher up.
 	}
 
 #ifdef DEBUG_BEST_Z
@@ -577,7 +577,7 @@ printf("Best Z found: %.2f\n", best_z);
 
 bool Map::LineIntersectsFace( PFACE cface, VERTEX p1, VERTEX p2, VERTEX *result) const {
 	if( cface == nullptr ) {
-		return(false);  //cant intersect a face we dont have... i guess
+		return(false); //cant intersect a face we dont have... i guess
 	}
 
 	const VERTEX &pa = cface->a;
@@ -608,7 +608,7 @@ bool Map::LineIntersectsFace( PFACE cface, VERTEX p1, VERTEX p2, VERTEX *result)
 		return(false);
 
 	//begin attempt 2
-//#define RTOD 57.2957795 	//radians to degrees constant.
+//#define RTOD 57.2957795	//radians to degrees constant.
 
 	float d;
 	float denom,mu;
@@ -645,11 +645,11 @@ bool Map::LineIntersectsFace( PFACE cface, VERTEX p1, VERTEX p2, VERTEX *result)
 
 	// Calculate the position on the line that intersects the plane
 	denom = n.x * (p2.x - p1.x) + n.y * (p2.y - p1.y) + n.z * (p2.z - p1.z);
-	if (ABS(denom) < EPS)         // Line and plane don't intersect
-	  return(false);
+	if (ABS(denom) < EPS) // Line and plane don't intersect
+		return(false);
 	mu = - (d + n.x * p1.x + n.y * p1.y + n.z * p1.z) / denom;
-	if (mu < 0 || mu > 1)   // Intersection not along line segment
-	  return(false);
+	if (mu < 0 || mu > 1) // Intersection not along line segment
+		return(false);
 	p->x = p1.x + mu * (p2.x - p1.x);
 	p->y = p1.y + mu * (p2.y - p1.y);
 	p->z = p1.z + mu * (p2.z - p1.z);
@@ -682,7 +682,7 @@ bool Map::LineIntersectsFace( PFACE cface, VERTEX p1, VERTEX p2, VERTEX *result)
 //	if (ABS(total - 2*M_PI) > EPS)
 	total = (acos(a1) + acos(a2) + acos(a3)) * 57.2957795;
 	if (ABS(total - 360) > EPS)
-	  return(false);
+		return(false);
 
 	return(true);
 */
@@ -737,13 +737,13 @@ bool Map::LineIntersectsFace( PFACE cface, VERTEX p1, VERTEX p2, VERTEX *result)
 	// Determine whether or not the intersection point is bounded by pa,pb,pc
 #define Sign(p1, p2, p3) \
 	((p1->x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1->y - p3.y))
-  bool b1, b2, b3;
+	bool b1, b2, b3;
 
-  b1 = Sign(p, pa2, pb2) < 0.0f;
-  b2 = Sign(p, pb2, pc2) < 0.0f;
-  b3 = Sign(p, pc2, pa2) < 0.0f;
+	b1 = Sign(p, pa2, pb2) < 0.0f;
+	b2 = Sign(p, pb2, pc2) < 0.0f;
+	b3 = Sign(p, pc2, pa2) < 0.0f;
 
-  return ((b1 == b2) && (b2 == b3));
+	return ((b1 == b2) && (b2 == b3));
 */
 
 /*	//not working well, seems to block LOS a lot
@@ -805,16 +805,16 @@ bool Map::LineIntersectsFace( PFACE cface, VERTEX p1, VERTEX p2, VERTEX *result)
 
 /*
 	Yet another method adapted from this code:
-  Vec3 pa1 = pa - p;
-  Vec3 pa2 = pb - p;
-  float d = pa1.cross(pa2).dot(n);
-  if (d < 0) return false;
-  Vec3 pa3 = pb - p;
-  d = pa2.cross(pa3).dot(n);
-  if (d < 0) return false;
-  d = pa3.cross(pa1).dot(n);
-  if (d < 0) return false;
-  return true;
+	Vec3 pa1 = pa - p;
+	Vec3 pa2 = pb - p;
+	float d = pa1.cross(pa2).dot(n);
+	if (d < 0) return false;
+	Vec3 pa3 = pb - p;
+	d = pa2.cross(pa3).dot(n);
+	if (d < 0) return false;
+	d = pa3.cross(pa1).dot(n);
+	if (d < 0) return false;
+	return true;
 */
 
 	//in practice, this seems to actually take longer

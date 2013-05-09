@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 
@@ -34,16 +34,16 @@ void ZoneLaunch::InitStartTimer() {
 }
 
 ZoneLaunch::ZoneLaunch(WorldServer *world, const char *launcher_name,
-	const char *zone_name, const EQEmuConfig *config)
+const char *zone_name, const EQEmuConfig *config)
 : m_state(StateStartPending),
-  m_world(world),
-  m_zone(zone_name),
-  m_launcherName(launcher_name),
-  m_config(config),
-  m_timer(config->RestartWait),
-  m_ref(ProcLauncher::ProcError),
-  m_startCount(0),
-  m_killFails(0)
+	m_world(world),
+	m_zone(zone_name),
+	m_launcherName(launcher_name),
+	m_config(config),
+	m_timer(config->RestartWait),
+	m_ref(ProcLauncher::ProcError),
+	m_startCount(0),
+	m_killFails(0)
 {
 	//trigger the startup timer initially so it boots the first time.
 	m_timer.Trigger();
@@ -249,39 +249,4 @@ void ZoneLaunch::OnTerminate(const ProcLauncher::ProcRef &ref, const ProcLaunche
 
 	SendStatus();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

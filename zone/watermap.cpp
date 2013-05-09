@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2008  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2008 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
-        are required to give you total support for your newly bought product;
-        without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-        A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/debug.h"
@@ -25,7 +25,7 @@
 #include "watermap.h"
 #include "../common/MiscFunctions.h"
 #ifdef _WINDOWS
-#define snprintf        _snprintf
+#define snprintf _snprintf
 #endif
 
 
@@ -49,8 +49,8 @@ WaterRegionType WaterMap::BSPReturnRegionType(int32 node_number, float y, float 
 
 	// Are we at a leaf
 
-	if((current_node->left==0)&&
-	   (current_node->right==0))  {
+	if ((current_node->left==0) &&
+		(current_node->right==0)) {
 		return (WaterRegionType) current_node->special;
 	}
 
@@ -59,30 +59,28 @@ WaterRegionType WaterMap::BSPReturnRegionType(int32 node_number, float y, float 
 	//
 
 	distance = (x * current_node->normal[0]) +
-				   (y * current_node->normal[1]) +
-				   (z * current_node->normal[2]) +
-				   current_node->splitdistance;
+					(y * current_node->normal[1]) +
+					(z * current_node->normal[2]) +
+					current_node->splitdistance;
 
 	// If we are exactly on the split plane, I don't know what should happen.
 	//
 	if(distance == 0.0f) {
-			return(RegionTypeNormal);
+		return(RegionTypeNormal);
 	}
 	if(distance >0.0f) {
-			if(current_node->left==0) {
-					// This shouldn't happen
-					return(RegionTypeNormal);
-			}
-			return BSPReturnRegionType( current_node->left,
-							   y, x, z);
+		if(current_node->left==0) {
+				// This shouldn't happen
+				return(RegionTypeNormal);
+		}
+		return BSPReturnRegionType(current_node->left, y, x, z);
 	}
 	if(current_node->right==0) {
-			// This should't happen
-			return(RegionTypeNormal);
+		// This should't happen
+		return(RegionTypeNormal);
 	}
 
-	return BSPReturnRegionType(current_node->right,
-					   y, x, z);
+	return BSPReturnRegionType(current_node->right, y, x, z);
 }
 
 bool WaterMap::InWater(float y, float x, float z) const {
@@ -158,7 +156,7 @@ bool WaterMap::loadWaterMap(FILE *fp) {
 		return(false);
 	}
 	if(strncmp(EQWMagic,"EQEMUWATER",10)) {
-		printf("Bad header in Water  region map.\n");
+		printf("Bad header in Water region map.\n");
 		return(false);
 	}
 	if(fread(&EQWVersion, sizeof(EQWVersion), 1, fp)!=1) {

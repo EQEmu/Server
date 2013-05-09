@@ -1,5 +1,3 @@
-
-
 #include "debug.h"
 #include "TCPServer.h"
 #include <stdio.h>
@@ -18,11 +16,7 @@
 	#define SOCKET_ERROR -1
 #endif
 
-
 #define SERVER_LOOP_GRANULARITY 3	//# of ms between checking our socket/queues
-
-
-
 
 BaseTCPServer::BaseTCPServer(uint16 in_port) {
 	NextID = 1;
@@ -95,14 +89,14 @@ void BaseTCPServer::Process() {
 }
 
 void BaseTCPServer::ListenNewConnections() {
-    SOCKET tmpsock;
-    struct sockaddr_in	from;
-    struct in_addr	in;
-    unsigned int	fromlen;
-    unsigned short	port;
+	SOCKET tmpsock;
+	struct sockaddr_in	from;
+	struct in_addr	in;
+	unsigned int	fromlen;
+	unsigned short	port;
 
-    from.sin_family = AF_INET;
-    fromlen = sizeof(from);
+	from.sin_family = AF_INET;
+	fromlen = sizeof(from);
 	LockMutex lock(&MSock);
 	if (!sock)
 		return;
@@ -229,5 +223,4 @@ bool BaseTCPServer::IsOpen() {
 	MSock.unlock();
 	return ret;
 }
-
 

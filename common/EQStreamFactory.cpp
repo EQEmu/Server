@@ -56,7 +56,7 @@ ThreadReturnType EQStreamFactoryWriterLoop(void *eqfs)
 }
 
 EQStreamFactory::EQStreamFactory(EQStreamType type, int port, uint32 timeout)
-    : Timeoutable(5000), stream_timeout(timeout)
+	: Timeoutable(5000), stream_timeout(timeout)
 {
 	StreamType=type;
 	Port=port;
@@ -314,7 +314,6 @@ Timer DecayTimer(20);
 			(*cur)->ReleaseFromUse();
 		}
 
-
 		Sleep(10);
 
 		MStreams.lock();
@@ -327,21 +326,4 @@ Timer DecayTimer(20);
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

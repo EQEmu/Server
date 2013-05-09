@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifdef EMBPERL
 
@@ -28,36 +28,36 @@
 
 const char *getItemName(unsigned itemid)
 {
-  const Item_Struct* item = nullptr;
-  item = database.GetItem(itemid);
+	const Item_Struct* item = nullptr;
+	item = database.GetItem(itemid);
 
-  if (item)
-    return item->Name;
-  else
-    return nullptr;
+	if (item)
+		return item->Name;
+	else
+		return nullptr;
 }
 
 XS(XS_qc_getItemName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_qc_getItemName)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: quest::getItemName(itemid)");
-    {
-        unsigned        itemid = (unsigned)SvUV(ST(0));
-        const char *    RETVAL;
-        dXSTARG;
-    RETVAL = getItemName(itemid);
-        sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
-    }
-    XSRETURN(1);
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getItemName(itemid)");
+	{
+		unsigned		itemid = (unsigned)SvUV(ST(0));
+		const char *	RETVAL;
+		dXSTARG;
+	RETVAL = getItemName(itemid);
+		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
+	}
+	XSRETURN(1);
 }
 
 
 EXTERN_C XS(boot_qc); /* prototype to pass -Wmissing-prototypes */
 EXTERN_C XS(boot_qc)
 {
-    dXSARGS;
+	dXSARGS;
 	char file[256];
 	strncpy(file, __FILE__, 256);
 	file[255] = '\0';
@@ -69,11 +69,11 @@ EXTERN_C XS(boot_qc)
 
 	//add the strcpy stuff to get rid of const warnings....
 
-    XS_VERSION_BOOTCHECK ;
+	XS_VERSION_BOOTCHECK ;
 
-        newXS(strcpy(buf, "quest::getItemName"), XS_qc_getItemName, file);
+	newXS(strcpy(buf, "quest::getItemName"), XS_qc_getItemName, file);
 
-    XSRETURN_YES;
+	XSRETURN_YES;
 }
 
 #ifdef EMBPERL_IO_CAPTURE
@@ -81,10 +81,10 @@ EXTERN_C XS(boot_qc)
 XS(XS_EQEmuIO_PRINT); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EQEmuIO_PRINT)
 {
-    dXSARGS;
-    if (items < 2)
-    	return;
-//        Perl_croak(aTHX_ "Usage: EQEmuIO::PRINT(@strings)");
+	dXSARGS;
+	if (items < 2)
+		return;
+	//Perl_croak(aTHX_ "Usage: EQEmuIO::PRINT(@strings)");
 
 	int r;
 	for(r = 1; r < items; r++) {
@@ -106,9 +106,9 @@ XS(XS_EQEmuIO_PRINT)
 		if(len > 0) {
 			LogFile->writebuf(EQEMuLog::Quest, str + pos, 1, len);
 		}
- 	}
+	}
 
-    XSRETURN_EMPTY;
+	XSRETURN_EMPTY;
 }
 #endif //EMBPERL_IO_CAPTURE
 
@@ -118,9 +118,9 @@ XS(XS_EQEmuIO_PRINT)
 XS(XS_command_add); /* prototype to pass -Wmissing-prototypes */
 XS(XS_command_add)
 {
-    dXSARGS;
-    if (items != 3)
-        Perl_croak(aTHX_ "Usage: commands::command_add(name, desc, access)");
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: commands::command_add(name, desc, access)");
 
 	char *name = SvPV_nolen(ST(0));
 	char *desc = SvPV_nolen(ST(1));
@@ -128,7 +128,7 @@ XS(XS_command_add)
 
 	command_add_perl(name, desc, access);
 
-    XSRETURN_EMPTY;
+	XSRETURN_EMPTY;
 }
 
 #endif //EMBPERL_COMMANDS

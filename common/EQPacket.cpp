@@ -1,19 +1,19 @@
 /*
 	Copyright (C) 2005 Michael S. Finger
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "debug.h"
 #include <stdio.h>
@@ -35,8 +35,8 @@
 using namespace std;
 
 EQPacket::EQPacket(EmuOpcode op, const unsigned char *buf, uint32 len)
-: BasePacket(buf, len),
-  emu_opcode(op)
+:	BasePacket(buf, len),
+	emu_opcode(op)
 {
 }
 
@@ -200,7 +200,7 @@ void EQRawApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 
 uint32 EQProtocolPacket::serialize(unsigned char *dest) const
 {
-	if (opcode>0xff)  {
+	if (opcode>0xff) {
 		*(uint16 *)dest=opcode;
 	} else {
 		*(dest)=0;
@@ -235,8 +235,8 @@ uint32 EQApplicationPacket::serialize(uint16 opcode, unsigned char *dest) const
 }
 
 /*EQProtocolPacket::EQProtocolPacket(uint16 op, const unsigned char *buf, uint32 len)
-: BasePacket(buf, len),
-  opcode(op)
+:	BasePacket(buf, len),
+	opcode(op)
 {
 
 uint32 offset;
@@ -364,7 +364,7 @@ uint32 flag_offset=0;
 	} else
 		flag_offset=1;
 
-	if (length>2 && buffer[flag_offset]==0x5a)  {
+	if (length>2 && buffer[flag_offset]==0x5a) {
 		newlen=InflatePacket(buffer+flag_offset+1,length-(flag_offset+1)-2,newbuf+flag_offset,newbufsize-flag_offset)+2;
 		newbuf[newlen++]=buffer[length-2];
 		newbuf[newlen++]=buffer[length-1];
@@ -409,7 +409,7 @@ void EQProtocolPacket::ChatDecode(unsigned char *buffer, int size, int DecodeKey
 		buffer+=2;
 		size-=2;
 
-        	int i;
+		int i;
 		for (i = 0 ; i+4 <= size ; i+=4)
 		{
 			int pt = (*(int*)&buffer[i])^(Key);
@@ -461,43 +461,43 @@ EQRawApplicationPacket *EQProtocolPacket::MakeAppPacket() const {
 }
 
 EQRawApplicationPacket::EQRawApplicationPacket(uint16 opcode, const unsigned char *buf, const uint32 len)
-: EQApplicationPacket(OP_Unknown, buf, len),
-  opcode(opcode)
+:	EQApplicationPacket(OP_Unknown, buf, len),
+	opcode(opcode)
 {
 }
 EQRawApplicationPacket::EQRawApplicationPacket(const unsigned char *buf, const uint32 len)
 : EQApplicationPacket(OP_Unknown, buf+sizeof(uint16), len-sizeof(uint16))
 {
-    if(GetExecutablePlatform() != ExePlatformUCS) {
-	    opcode = *((const uint16 *) buf);
-	    if(opcode == 0x0000)
-	    {
-	    	if(len >= 3)
-	    	{
-	    		opcode = *((const uint16 *) (buf + 1));
-	    		const unsigned char *packet_start = (buf + 3);
-	    		const int32 packet_length = len - 3;
-	    		safe_delete_array(pBuffer);
-	    		if(len >= 0)
-	    		{
-	    			size = packet_length;
-	    			pBuffer = new unsigned char[size];
-	    			memcpy(pBuffer, packet_start, size);
-	    		}
-	    		else
-	    		{
-	    			size = 0;
-	    		}
-	    	}
-	    	else
-	    	{
-	    		safe_delete_array(pBuffer);
-	    		size = 0;
-	    	}
-	    }
-    } else {
-	    opcode = *((const uint8 *) buf);
-    }
+	if(GetExecutablePlatform() != ExePlatformUCS) {
+		opcode = *((const uint16 *) buf);
+		if(opcode == 0x0000)
+		{
+			if(len >= 3)
+			{
+				opcode = *((const uint16 *) (buf + 1));
+				const unsigned char *packet_start = (buf + 3);
+				const int32 packet_length = len - 3;
+				safe_delete_array(pBuffer);
+				if(len >= 0)
+				{
+					size = packet_length;
+					pBuffer = new unsigned char[size];
+					memcpy(pBuffer, packet_start, size);
+				}
+				else
+				{
+					size = 0;
+				}
+			}
+			else
+			{
+				safe_delete_array(pBuffer);
+				size = 0;
+			}
+		}
+	} else {
+		opcode = *((const uint8 *) buf);
+	}
 }
 
 void DumpPacket(const EQApplicationPacket* app, bool iShowInfo) {

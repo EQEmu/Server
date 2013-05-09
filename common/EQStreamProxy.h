@@ -35,21 +35,12 @@ public:
 	virtual const uint32 GetBytesRecvPerSecond() const;
 
 protected:
-	EQStream *const 				m_stream;	//we own this stream object.
+	EQStream *const					m_stream;	//we own this stream object.
 	const StructStrategy *const		m_structs;	//we do not own this object.
 	//this is a pointer to a pointer to make it less likely that a packet will
 	//reference an invalid opcode manager when they are being reloaded.
 	OpcodeManager **const			m_opcodes;	//we do not own this object.
 };
 
-
-
-
-
-
-
-
-
 #endif /*EQSTREAMPROXY_H_*/
-
 

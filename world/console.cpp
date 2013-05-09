@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -53,7 +53,7 @@ using namespace std;
 	#define vsnprintf	_vsnprintf
 #endif
 	#define strncasecmp	_strnicmp
-	#define strcasecmp  _stricmp
+	#define strcasecmp	_stricmp
 #endif
 
 extern ZSList	zoneserver_list;
@@ -69,9 +69,9 @@ ConsoleList console_list;
 void CatchSignal(int sig_num);
 
 Console::Console(EmuTCPConnection* itcpc)
-: WorldTCPConnection(),
-  timeout_timer(RuleI(Console, SessionTimeOut)),
-  prompt_timer(1000)
+:	WorldTCPConnection(),
+	timeout_timer(RuleI(Console, SessionTimeOut)),
+	prompt_timer(1000)
 {
 	tcpc = itcpc;
 	tcpc->SetEcho(true);
@@ -89,7 +89,7 @@ Console::~Console() {
 
 void Console::Die() {
 	state = CONSOLE_STATE_CLOSED;
-	struct in_addr  in;
+	struct in_addr in;
 	in.s_addr = GetIP();
 	_log(WORLD__CONSOLE,"Removing console from %s:%d",inet_ntoa(in),GetPort());
 	tcpc->Disconnect();
@@ -100,17 +100,17 @@ bool Console::SendChannelMessage(const ServerChannelMessage_Struct* scm) {
 		return false;
 	switch (scm->chan_num) {
 		if(RuleB(Chat, ServerWideAuction)){
-		case 4: {
-			SendMessage(1, "%s auctions, '%s'", scm->from, scm->message);
-			break;
+			case 4: {
+				SendMessage(1, "%s auctions, '%s'", scm->from, scm->message);
+				break;
+			}
 		}
-	}
-        if(RuleB(Chat, ServerWideOOC)){
-		case 5: {
-			SendMessage(1, "%s says ooc, '%s'", scm->from, scm->message);
-			break;
+		if(RuleB(Chat, ServerWideOOC)){
+			case 5: {
+				SendMessage(1, "%s says ooc, '%s'", scm->from, scm->message);
+				break;
+			}
 		}
-	}
 		case 6: {
 			SendMessage(1, "%s BROADCASTS, '%s'", scm->from, scm->message);
 			break;
@@ -219,7 +219,7 @@ bool Console::Process() {
 		return false;
 
 	if (!tcpc->Connected()) {
-		struct in_addr  in;
+		struct in_addr in;
 		in.s_addr = GetIP();
 		_log(WORLD__CONSOLE,"Removing console (!tcpc->Connected) from %s:%d",inet_ntoa(in),GetPort());
 		return false;
@@ -234,7 +234,7 @@ bool Console::Process() {
 	if (timeout_timer.Check()) {
 		SendMessage(1, 0);
 		SendMessage(1, "Timeout, disconnecting...");
-		struct in_addr  in;
+		struct in_addr in;
 		in.s_addr = GetIP();
 		_log(WORLD__CONSOLE,"TCP connection timeout from %s:%d",inet_ntoa(in),GetPort());
 		return false;
@@ -307,7 +307,7 @@ void ConsoleList::KillAll() {
 void ConsoleList::SendConsoleWho(WorldTCPConnection* connection, const char* to, int16 admin, char** output, uint32* outsize, uint32* outlen) {
 	LinkedListIterator<Console*> iterator(list);
 	iterator.Reset();
-	struct in_addr  in;
+	struct in_addr in;
 	int x = 0;
 
 	while(iterator.MoreElements()) {
@@ -855,3 +855,4 @@ void Console::SendPrompt() {
 	if (tcpc->GetEcho())
 		SendMessage(0, "%s> ", paccountname);
 }
+

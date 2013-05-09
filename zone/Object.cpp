@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/debug.h"
@@ -345,7 +345,7 @@ void Object::Close() {
 	{
 		last_user = user;
 		// put any remaining items from the world container back into the player's inventory to avoid item loss
-		//  if they close the container without removing all items
+		// if they close the container without removing all items
 		ItemInst* container = this->m_inst;
 		if(container != nullptr)
 		{
@@ -447,7 +447,7 @@ void Object::RandomSpawn(bool send_packet) {
 bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 {
 	if(m_ground_spawn){//This is a Cool Groundspawn
-			respawn_timer.Start();
+		respawn_timer.Start();
 	}
 	if (m_type == OT_DROPPEDITEM) {
 		bool cursordelete = false;
@@ -456,7 +456,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			// the client updates itself and takes care of sending "duplicate lore item" messages
 			if(sender->CheckLoreConflict(m_inst->GetItem())) {
 				int16 loreslot = sender->GetInv().HasItem(m_inst->GetItem()->ID, 0, invWhereBank);
-				if(loreslot != SLOT_INVALID) 	// if the duplicate is in the bank, delete it.
+				if(loreslot != SLOT_INVALID) // if the duplicate is in the bank, delete it.
 					sender->DeleteItemInInventory(loreslot);
 				else
 					cursordelete = true;	// otherwise, we delete the new one
@@ -465,13 +465,13 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			char buf[10];
 			snprintf(buf, 9, "%u", m_inst->GetItem()->ID);
 			buf[9] = '\0';
-            parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, 0);
+			parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, 0);
 
 			// Transfer item to client
 			sender->PutItemInInventory(SLOT_CURSOR, *m_inst, false);
 			sender->SendItemPacket(SLOT_CURSOR, m_inst, ItemPacketTrade);
 
-			if(cursordelete)	// delete the item if it's a duplicate lore.  We have to do this because the client expects the item packet
+			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
 				sender->DeleteItemInInventory(SLOT_CURSOR);
 
 			if(!m_ground_spawn)
@@ -491,7 +491,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		// Remove object
 		database.DeleteObject(m_id);
 		if(!m_ground_spawn)
-		entity_list.RemoveEntity(this->GetID());
+			entity_list.RemoveEntity(this->GetID());
 	} else {
 		// Tradeskill item
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObjectAction, sizeof(ClickObjectAction_Struct));
@@ -559,7 +559,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& object, const ItemInst* inst)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 
 	uint32 database_id = 0;
 	uint32 item_id = 0;
@@ -602,7 +602,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const ItemInst* inst)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 
 	uint32 item_id = 0;
 	int16 charges = 0;
@@ -640,9 +640,9 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 }
 Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT max_x,max_y,max_z,min_x,min_y,heading,name,item,max_allowed,respawn_timer from ground_spawns where zoneid=%i and (version=%u OR version=-1) limit 50", zone_id, version), errbuf, &result))
 	{
@@ -672,7 +672,7 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
 void ZoneDatabase::DeleteObject(uint32 id)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 
 	// Construct query
 	uint32 len_query = MakeAnyLenString(&query,

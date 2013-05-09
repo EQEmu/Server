@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 
@@ -47,11 +47,11 @@ InitWinsock winsock;
 
 //client version
 TCPConnection::TCPConnection()
-: ConnectionType(Outgoing),
-  connection_socket(0),
-  id(0),
-  rIP(0),
-  rPort(0)
+:	ConnectionType(Outgoing),
+	connection_socket(0),
+	id(0),
+	rIP(0),
+	rPort(0)
 {
 	pState = TCPS_Ready;
 	pFree = false;
@@ -69,11 +69,11 @@ TCPConnection::TCPConnection()
 
 //server version
 TCPConnection::TCPConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 irPort)
-: ConnectionType(Incomming),
-  connection_socket(in_socket),
-  id(ID),
-  rIP(irIP),
-  rPort(irPort)
+:	ConnectionType(Incomming),
+	connection_socket(in_socket),
+	id(ID),
+	rIP(irIP),
+	rPort(irPort)
 {
 	pState = TCPS_Connected;
 	pFree = false;
@@ -438,8 +438,8 @@ bool TCPConnection::ConnectIP(uint32 in_ip, uint16 in_port, char* errbuf) {
 	}
 
 	connection_socket = INVALID_SOCKET;
-    struct sockaddr_in	server_sin;
-//    struct in_addr	in;
+	struct sockaddr_in	server_sin;
+	//struct in_addr	in;
 
 	if ((connection_socket = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET || connection_socket == 0) {
 #ifdef _WINDOWS
@@ -539,7 +539,7 @@ bool TCPConnection::Process() {
 	case TCPS_Connected:
 		// only receive data in the connected state, no others...
 		if (!RecvData(errbuf)) {
-		    struct in_addr	in;
+			struct in_addr	in;
 			in.s_addr = GetrIP();
 			//cout << inet_ntoa(in) << ":" << GetrPort() << ": " << errbuf << endl;
 			return false;
@@ -585,7 +585,7 @@ bool TCPConnection::Process() {
 
 	bool sent_something = false;
 	if (!SendData(sent_something, errbuf)) {
-	    struct in_addr	in;
+		struct in_addr	in;
 		in.s_addr = GetrIP();
 		cout << inet_ntoa(in) << ":" << GetrPort() << ": " << errbuf << endl;
 		return false;
@@ -621,9 +621,9 @@ bool TCPConnection::RecvData(char* errbuf) {
 		}
 	}
 
-    status = recv(connection_socket, (char *) &recvbuf[recvbuf_used], (recvbuf_size - recvbuf_used), 0);
+	status = recv(connection_socket, (char *) &recvbuf[recvbuf_used], (recvbuf_size - recvbuf_used), 0);
 
-    if (status >= 1) {
+	if (status >= 1) {
 #if TCPN_LOG_RAW_DATA_IN >= 1
 		struct in_addr	in;
 		in.s_addr = GetrIP();
@@ -642,7 +642,7 @@ bool TCPConnection::RecvData(char* errbuf) {
 		recvbuf_used += status;
 		if (!ProcessReceivedData(errbuf))
 			return false;
-    }
+	}
 	else if (status == SOCKET_ERROR) {
 #ifdef _WINDOWS
 		if (!(WSAGetLastError() == WSAEWOULDBLOCK)) {
@@ -942,8 +942,4 @@ bool TCPConnection::RunLoop() {
 	MRunLoop.unlock();
 	return ret;
 }
-
-
-
-
 

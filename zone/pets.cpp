@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2004  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/spdat.h"
@@ -445,10 +445,10 @@ bool ZoneDatabase::GetPetEntry(const char *pet_type, PetRecord *into) {
 
 bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32 querylen = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (petpower <= 0) {
 		querylen = MakeAnyLenString(&query,
@@ -480,7 +480,7 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetPoweredPetEntry query '%s': %s", query,  errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in GetPoweredPetEntry query '%s': %s", query, errbuf);
 		safe_delete_array(query);
 	}
 	return(false);
@@ -579,7 +579,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 			buffs[i].ticsremaining		= pet_buffs[i].duration;
 			buffs[i].casterlevel		= pet_buffs[i].level;
 			buffs[i].casterid			= 0;
-			buffs[i].counters           = pet_buffs[i].counters;
+			buffs[i].counters			= pet_buffs[i].counters;
 			buffs[i].numhits			= spells[pet_buffs[i].spellid].numhits;
 		}
 		else {
@@ -649,14 +649,14 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	// are loaded after that, up to a max depth of 5. (Arbitrary limit
 	// so we don't go into an endless loop if the DB data is cyclic for
 	// some reason.)
-	//   A slot will only get an item put in it if it is empty. That way
+	// A slot will only get an item put in it if it is empty. That way
 	// an equipmentset can overload a slot for the set(s) it includes.
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32 querylen = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	int depth = 0;
 	int32 curset = equipmentset;
 	int32 nextset = -1;
@@ -697,7 +697,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 					mysql_free_result(result);
 				}
 				else {
-					LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query,  errbuf);
+					LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query, errbuf);
 					safe_delete_array(query);
 				}
 				curset = nextset;
@@ -713,7 +713,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 		}
 		else
 		{
-			LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query,  errbuf);
+			LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query, errbuf);
 			safe_delete_array(query);
 			return false;
 		}

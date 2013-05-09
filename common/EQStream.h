@@ -89,7 +89,7 @@ class EQStream : public EQStreamInterface {
 
 		uint32 Session, Key;
 		uint16 NextInSeq;
-		uint32  MaxLen;
+		uint32 MaxLen;
 		uint16 MaxSends;
 
 		uint8 active_users;	//how many things are actively using this
@@ -167,7 +167,7 @@ class EQStream : public EQStreamInterface {
 //		virtual void DispatchPacket(EQApplicationPacket *p) { p->DumpRaw(); }
 
 
-		bool Stale(uint32 now, uint32 timeout=30) { return  (LastPacket && (now-LastPacket) > timeout); }
+		bool Stale(uint32 now, uint32 timeout=30) { return (LastPacket && (now-LastPacket) > timeout); }
 
 		void InboundQueuePush(EQRawApplicationPacket *p);
 		EQRawApplicationPacket *PeekPacket();	//for collector.
@@ -264,9 +264,9 @@ class EQStream : public EQStreamInterface {
 		class Signature {
 		public:
 			//this object could get more complicated if needed...
-			uint16 ignore_eq_opcode;        //0=dont ignore
+			uint16 ignore_eq_opcode;		//0=dont ignore
 			uint16 first_eq_opcode;
-			uint32 first_length;            //0=dont check length
+			uint32 first_length;			//0=dont check length
 		};
 		typedef enum {
 			MatchNotReady,
@@ -277,5 +277,5 @@ class EQStream : public EQStreamInterface {
 
 };
 
-
 #endif
+

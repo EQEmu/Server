@@ -68,8 +68,8 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	/**
-	 * This block checks to see if we actually have any adventures for the requested theme.
-	 */
+	* This block checks to see if we actually have any adventures for the requested theme.
+	*/
 	map<uint32, list<AdventureTemplate*> >::iterator adv_list_iter = adventure_entries.find(sar->template_id);
 	if(adv_list_iter == adventure_entries.end())
 	{
@@ -84,10 +84,10 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	/**
-	 * This block checks to see if our requested group has anyone with an "Active" adventure
-	 * Active being in progress, finished adventures that are still waiting to expire do not count
-	 * Though they will count against you for which new adventure you can get.
-	 */
+	* This block checks to see if our requested group has anyone with an "Active" adventure
+	* Active being in progress, finished adventures that are still waiting to expire do not count
+	* Though they will count against you for which new adventure you can get.
+	*/
 	list<Adventure*>::iterator iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
@@ -117,9 +117,9 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	/**
-	 * Now we need to get every available adventure for our selected theme and exclude ones we can't use.
-	 * ie. the ones that would cause overlap issues for new adventures with the old unexpired adventures.
-	 */
+	* Now we need to get every available adventure for our selected theme and exclude ones we can't use.
+	* ie. the ones that would cause overlap issues for new adventures with the old unexpired adventures.
+	*/
 	list<AdventureZones> excluded_zones;
 	list<AdventureZoneIn> excluded_zone_ins;
 	for(int i = 0; i < sar->member_count; ++i)
@@ -149,9 +149,9 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 
 	list<AdventureTemplate*> eligible_adventures = adventure_entries[sar->template_id];
 	/**
-	 * Remove zones from eligible zones based on their difficulty and type.
-	 * ie only use difficult zones for difficult, collect for collect, etc.
-	 */
+	* Remove zones from eligible zones based on their difficulty and type.
+	* ie only use difficult zones for difficult, collect for collect, etc.
+	*/
 	list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
 	while(ea_iter != eligible_adventures.end())
 	{
@@ -170,8 +170,8 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	/**
-	 * Get levels for this group.
-	 */
+	* Get levels for this group.
+	*/
 	int valid_count = 0;
 	int avg_level = 0;
 	int min_level = 40000;
@@ -263,8 +263,8 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	/**
-	 * Remove the zones from our eligible zones based on the exclusion above
-	 */
+	* Remove the zones from our eligible zones based on the exclusion above
+	*/
 	list<AdventureZones>::iterator ez_iter = excluded_zones.begin();
 	while(ez_iter != excluded_zones.end())
 	{
@@ -282,7 +282,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	list<AdventureZoneIn>::iterator ezi_iter = excluded_zone_ins.begin();
-	 while(ezi_iter != excluded_zone_ins.end())
+	while(ezi_iter != excluded_zone_ins.end())
 	{
 		list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
 		while(ea_iter != eligible_adventures.end())
@@ -297,9 +297,9 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		ezi_iter++;
 	}
 
-	 /**
-	 * Remove Zones based on level
-	 */
+	/**
+	* Remove Zones based on level
+	*/
 	ea_iter = eligible_adventures.begin();
 	while(ea_iter != eligible_adventures.end())
 	{

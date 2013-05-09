@@ -30,7 +30,7 @@ protected:
 	class Patch {
 	public:
 		std::string				name;
-		EQStream::Signature 	signature;
+		EQStream::Signature		signature;
 		OpcodeManager **		opcodes;
 		const StructStrategy *structs;
 	};

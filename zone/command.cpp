@@ -1,34 +1,34 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemulator.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemulator.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 /*
 
 	To add a new command 3 things must be done:
 
-	1.  At the bottom of command.h you must add a prototype for it.
-	2.  Add the function in this file.
-	3.  In the command_init function you must add a call to command_add
-	    for your function.  If you want an alias for your command, add
-	    a second call to command_add with the descriptin and access args
-	    set to nullptr and 0 respectively since they aren't used when adding
-	    an alias.  The function pointers being equal is makes it an alias.
-	    The access level you set with command_add is only a default if
-	    the command isn't listed in the addon.ini file.
+	1.	At the bottom of command.h you must add a prototype for it.
+	2.	Add the function in this file.
+	3.	In the command_init function you must add a call to command_add
+		for your function. If you want an alias for your command, add
+		a second call to command_add with the descriptin and access args
+		set to nullptr and 0 respectively since they aren't used when adding
+		an alias. The function pointers being equal is makes it an alias.
+		The access level you set with command_add is only a default if
+		the command isn't listed in the addon.ini file.
 
 */
 
@@ -96,7 +96,7 @@ LinkedList<CommandRecord *> cleanup_commandlist;
  * This is the default dispatch function when commands aren't loaded.
  *
  * Parameters:
- *	 not used
+ *	not used
  *
  */
 int command_notavail(Client *c, const char *message)
@@ -106,7 +106,7 @@ int command_notavail(Client *c, const char *message)
 }
 
 /*****************************************************************************/
-/*  the rest below here could be in a dynamically loaded module eventually   */
+/* the rest below here could be in a dynamically loaded module eventually */
 /*****************************************************************************/
 
 /*
@@ -137,10 +137,10 @@ Access Levels:
  * initializes the command list, call at startup
  *
  * Parameters:
- *	 none
+ *	none
  *
  * When adding a command, if it's the first time that function pointer is
- * used it is a new command.  If that function pointer is used for another
+ * used it is a new command. If that function pointer is used for another
  * command, the command is added as an alias; description and access level
  * are not used and can be nullptr.
  *
@@ -180,7 +180,7 @@ int command_init(void) {
 		command_add("summon","[charname] - Summons your player/npc/corpse target, or charname if specified",80,command_summon) ||
 		command_add("zone","[zonename] [x] [y] [z] - Go to specified zone (coords optional)",50,command_zone) ||
 		command_add("zoneinstance","[instanceid] [x] [y] [z] - Go to specified instance zone (coords optional)",50,command_zone_instance) ||
-        command_add("peqzone","[zonename] - Go to specified zone, if you have > 75% health",0,command_peqzone) ||
+		command_add("peqzone","[zonename] - Go to specified zone, if you have > 75% health",0,command_peqzone) ||
 		command_add("tgczone",nullptr,0,command_peqzone) ||
 		command_add("showbuffs","- List buffs active on your target or you if no target",50,command_showbuffs) ||
 		command_add("movechar","[charname] [zonename] - Move charname to zonename",50,command_movechar) ||
@@ -246,8 +246,8 @@ int command_init(void) {
 		command_add("setskillall","[value] - Set all of your target's skills to value",50,command_setskillall) ||
 		command_add("setallskill",nullptr,0,command_setskillall) ||
 		command_add("setallskills",nullptr,0,command_setskillall) ||
-		command_add("race","[racenum] - Change your or your target's race.  Use racenum 0 to return to normal",50,command_race) ||
-		command_add("gender","[0/1/2] - Change your or your target's  gender to male/female/neuter",50,command_gender) ||
+		command_add("race","[racenum] - Change your or your target's race. Use racenum 0 to return to normal",50,command_race) ||
+		command_add("gender","[0/1/2] - Change your or your target's gender to male/female/neuter",50,command_gender) ||
 		command_add("makepet","[level] [class] [race] [texture] - Make a pet",50,command_makepet) ||
 		command_add("level","[level] - Set your or your target's level",10,command_level) ||
 		command_add("spawn","[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC",10,command_spawn) ||
@@ -312,7 +312,7 @@ int command_init(void) {
 		command_add("setcrystals","[value] - Set your or your player target's available radiant or ebon crystals",100,command_setcrystals) ||
 		command_add("name","[newname] - Rename your player target",150,command_name) ||
 		command_add("tempname","[newname] - Temporarily renames your target. Leave name blank to restore the original name.",100,command_tempname) ||
-		command_add("npcspecialattk","[flagchar] [perm] - Set NPC special attack flags.  Flags are E(nrage) F(lurry) R(ampage) S(ummon).",80,command_npcspecialattk) ||
+		command_add("npcspecialattk","[flagchar] [perm] - Set NPC special attack flags. Flags are E(nrage) F(lurry) R(ampage) S(ummon).",80,command_npcspecialattk) ||
 		command_add("npcspecialattack",nullptr,0,command_npcspecialattk) ||
 		command_add("npcspecialatk",nullptr,0,command_npcspecialattk) ||
 		command_add("kill","- Kill your target",100,command_kill) ||
@@ -334,7 +334,7 @@ int command_init(void) {
 		command_add("iteminfo","- Get information about the item on your cursor",10,command_iteminfo) ||
 		command_add("uptime","[zone server id] - Get uptime of worldserver, or zone server if argument provided",10,command_uptime) ||
 		command_add("flag","[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided",0,command_flag) ||
-		command_add("guild","- Guild manipulation commands.  Use argument help for more info.",10,command_guild) ||
+		command_add("guild","- Guild manipulation commands. Use argument help for more info.",10,command_guild) ||
 		command_add("guilds",nullptr,0,command_guild) ||
 		command_add("zonestatus","- Show connected zoneservers, synonymous with /servers",150,command_zonestatus) ||
 		command_add("manaburn","- Use AA Wizard class skill manaburn on target",10,command_manaburn) ||
@@ -356,11 +356,11 @@ int command_init(void) {
 		command_add("unscribespells","- Clear out your or your player target's spell book.",180,command_unscribespells) ||
 		command_add("scribespell", "[spellid] - Scribe specified spell in your target's spell book.", 180, command_scribespell) ||
 		command_add("unscribespell", "[spellid] - Unscribe specified spell from your target's spell book.", 180, command_unscribespell) ||
-		command_add("interrupt","[message id] [color] - Interrupt your casting.  Arguments are optional.",50,command_interrupt) ||
+		command_add("interrupt","[message id] [color] - Interrupt your casting. Arguments are optional.",50,command_interrupt) ||
 		command_add("d1","[type] [spell] [damage] - Send an OP_Action packet with the specified values",200,command_d1) ||
-		command_add("summonitem","[itemid] [charges] - Summon an item onto your cursor.  Charges are optional.",200,command_summonitem) ||
+		command_add("summonitem","[itemid] [charges] - Summon an item onto your cursor. Charges are optional.",200,command_summonitem) ||
 		command_add("si",nullptr,200,command_summonitem) ||
-		command_add("giveitem","[itemid] [charges] - Summon an item onto your target's cursor.  Charges are optional.",200,command_giveitem) ||
+		command_add("giveitem","[itemid] [charges] - Summon an item onto your target's cursor. Charges are optional.",200,command_giveitem) ||
 		command_add("gi",nullptr,200,command_giveitem) ||
 		command_add("givemoney","[pp] [gp] [sp] [cp] - Gives specified amount of money to the target player.",200,command_givemoney) ||
 		command_add("itemsearch","[search criteria] - Search for an item",10,command_itemsearch) ||
@@ -430,7 +430,7 @@ int command_init(void) {
 		command_add("modifynpcstat","- Modifys a NPC's stats",150,command_modifynpcstat) ||
 		command_add("undyeme","- Remove dye from all of your armor slots",0,command_undyeme) ||
 		command_add("instance","- Modify Instances",200,command_instance) ||
-		command_add("setstartzone","[zoneid] - Set target's starting zone.  Set to zero to allow the player to use /setstartcity",80,command_setstartzone) ||
+		command_add("setstartzone","[zoneid] - Set target's starting zone. Set to zero to allow the player to use /setstartcity",80,command_setstartzone) ||
 		command_add("netstats","- Gets the network stats for a stream.",200,command_netstats) ||
 		command_add("object","List|Add|Edit|Move|Rotate|Copy|Save|Undo|Delete - Manipulate static and tradeskill objects within the zone",100,command_object) ||
 		command_add("raidloot","LEADER|GROUPLEADER|SELECTED|ALL - Sets your raid loot settings if you have permission to do so.",0,command_raidloot) ||
@@ -445,9 +445,9 @@ int command_init(void) {
 		command_add("reloadallrules","Executes a reload of all rules.",80, command_reloadallrules) ||
 		command_add("reloadrulesworld","Executes a reload of all rules in world specifically.",80, command_reloadworldrules) ||
 		command_add("camerashake", "Shakes the camera on everyone's screen globally.", 80, command_camerashake) ||
-        command_add("disarmtrap", "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 0, command_disarmtrap) ||
-        command_add("sensetrap", "Analog for ldon sense trap for the newer clients since we still don't have it working.", 0, command_sensetrap) ||
-        command_add("picklock", "Analog for ldon pick lock for the newer clients since we still don't have it working.", 0, command_picklock) ||
+		command_add("disarmtrap", "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 0, command_disarmtrap) ||
+		command_add("sensetrap", "Analog for ldon sense trap for the newer clients since we still don't have it working.", 0, command_sensetrap) ||
+		command_add("picklock", "Analog for ldon pick lock for the newer clients since we still don't have it working.", 0, command_picklock) ||
 		command_add("mysql", "Mysql CLI, see 'help' for options.", 250, command_mysql) ||
 		command_add("xtargets", "Show your targets Extended Targets and optionally set how many xtargets they can have.", 250, command_xtargets) ||
 		command_add("printquestitems","Returns available quest items for multiquesting currently on the target npc.",200,command_printquestitems) ||
@@ -493,7 +493,7 @@ int command_init(void) {
  * clears the command list, freeing resources
  *
  * Parameters:
- *	 none
+ *	none
  *
  */
 void command_deinit(void)
@@ -515,10 +515,10 @@ void command_deinit(void)
  * adds a command to the command list; used by command_init
  *
  * Parameters:
- *	 command_string	- the command ex: "spawn"
- *	 desc		- text description of command for #help
- *	 access		- default access level required to use command
- *	 function		- pointer to function that handles command
+ *	command_string	- the command ex: "spawn"
+ *	desc		- text description of command for #help
+ *	access		- default access level required to use command
+ *	function		- pointer to function that handles command
  *
  */
 int command_add(const char *command_string, const char *desc, int access, CmdFuncPtr function)
@@ -572,9 +572,9 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
  * adds a command to the command list, as a perl function
  *
  * Parameters:
- *	 command_string	- the command ex: "spawn"
- *	 desc		- text description of command for #help
- *	 access		- default access level required to use command
+ *	command_string	- the command ex: "spawn"
+ *	desc		- text description of command for #help
+ *	access		- default access level required to use command
  *
  */
 int command_add_perl(const char *command_string, const char *desc, int access) {
@@ -631,8 +631,8 @@ void command_clear_perl() {
  * command character (#).
  *
  * Parameters:
- *	 c			- pointer to the calling client object
- *	 message		- what the client typed
+ *	c			- pointer to the calling client object
+ *	message		- what the client typed
  *
  */
 int command_realdispatch(Client *c, const char *message)
@@ -640,7 +640,7 @@ int command_realdispatch(Client *c, const char *message)
 	_ZP(command_realdispatch);
 
 
-    Seperator sep(message, ' ', 10, 100, true); // "three word argument" should be considered 1 arg
+	Seperator sep(message, ' ', 10, 100, true); // "three word argument" should be considered 1 arg
 
 	command_logcommand(c, message);
 
@@ -665,7 +665,7 @@ int command_realdispatch(Client *c, const char *message)
 	if(cur->function == nullptr) {
 #ifdef EMBPERL_COMMANDS
 		//todo reimplement this stuff
-        //dispatch perl command
+		//dispatch perl command
 		//PerlembParser *embparse = (PerlembParser *) parse;
 		//embparse->ExecCommand(c, &sep);
 #else
@@ -813,7 +813,7 @@ void command_sendop(Client *c,const Seperator *sep){
 	*/
 
 
-      /*
+	/*
 	if(sep->arg[1][0] && sep->arg[2][0]){
 		EQApplicationPacket* outapp = new EQApplicationPacket((EmuOpcode)atoi(sep->arg[1]),sizeof(GMName_Struct));
 		GMName_Struct* gms=(GMName_Struct*)outapp->pBuffer;
@@ -826,7 +826,7 @@ void command_sendop(Client *c,const Seperator *sep){
 		c->QueuePacket(outapp);
 		safe_delete(outapp);
 	}
-      */
+	*/
 	/*
 		else{
 			EQApplicationPacket* outapp = new EQApplicationPacket(121,atoi(sep->arg[2]));
@@ -930,7 +930,7 @@ void command_help(Client *c, const Seperator *sep)
 
 		if(c->Admin() < cur->second->access)
 			continue;
-  		commands_shown++;
+		commands_shown++;
 		c->Message(0, "	%c%s %s", COMMAND_CHAR, cur->first.c_str(), cur->second->desc == nullptr?"":cur->second->desc);
 	}
 	c->Message(0, "%d command%s listed.", commands_shown, commands_shown!=1?"s":"");
@@ -1348,7 +1348,7 @@ void command_gm(Client *c, const Seperator *sep)
 
 //To whoever wrote the above: And what about /kill, /zone, /zoneserver, etc?
 //There is a reason for the # commands: so that admins can specifically enable certain
-//commands for their users.  Some might want users to #summon but not to /kill.  Cant do that if they are a GM
+//commands for their users. Some might want users to #summon but not to /kill. Cant do that if they are a GM
 void command_summon(Client *c, const Seperator *sep)
 {
 	Mob *t;
@@ -1423,13 +1423,13 @@ void command_summon(Client *c, const Seperator *sep)
 
 void command_zone(Client *c, const Seperator *sep)
 {
- 	if(c->Admin() < commandZoneToCoords &&
- 		(sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4))) {
- 		c->Message(0, "Your status is not high enough to zone to specific coordinates.");
- 		return;
- 	}
+	if(c->Admin() < commandZoneToCoords &&
+		(sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4))) {
+		c->Message(0, "Your status is not high enough to zone to specific coordinates.");
+		return;
+	}
 
- 	uint16 zoneid = 0;
+	uint16 zoneid = 0;
 
 	if (sep->IsNumber(1))
 	{
@@ -1479,11 +1479,11 @@ void command_zone(Client *c, const Seperator *sep)
 //todo: fix this so it checks if you're in the instance set
 void command_zone_instance(Client *c, const Seperator *sep)
 {
- 	if(c->Admin() < commandZoneToCoords &&
- 		(sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4))) {
- 		c->Message(0, "Your status is not high enough to zone to specific coordinates.");
- 		return;
- 	}
+	if(c->Admin() < commandZoneToCoords &&
+		(sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4))) {
+		c->Message(0, "Your status is not high enough to zone to specific coordinates.");
+		return;
+	}
 
 	if (sep->arg[1][0] == 0)
 	{
@@ -1492,7 +1492,7 @@ void command_zone_instance(Client *c, const Seperator *sep)
 		return;
 	}
 
- 	uint16 zoneid = 0;
+	uint16 zoneid = 0;
 	uint16 instanceid = 0;
 
 	if(sep->IsNumber(1))
@@ -1542,72 +1542,77 @@ void command_showbuffs(Client *c, const Seperator *sep)
 
 void command_peqzone(Client *c, const Seperator *sep)
 {
-       uint32 timeleft = c->GetPTimers().GetRemainingTime(pTimerPeqzoneReuse)/60;
+	uint32 timeleft = c->GetPTimers().GetRemainingTime(pTimerPeqzoneReuse)/60;
 
-       if(!c->GetPTimers().Expired(&database, pTimerPeqzoneReuse, false)) {
-               c->Message(13,"You must wait %i minute(s) before using this ability again.", timeleft);
-               return;
-       }
-       if(c->GetHPRatio() < 75) {
-               c->Message(0, "You cannot use this command with less than 75 percent health.");
-               return;
-       }
-       //this isnt perfect, but its better...
-       if(
-                  c->IsInvisible(c)
-               || c->IsRooted()
-               || c->IsStunned()
-               || c->IsMezzed()
-               || c->AutoAttackEnabled()
-			   || c->GetInvul()
-       ) {
-               c->Message(0, "You cannot use this command in your current state. Settle down and wait.");
-               return;
-       }
-	   uint16 zoneid = 0;
-       uint8 destzone = 0;
-       if (sep->IsNumber(1))
-	   {
-			zoneid = atoi(sep->arg[1]);
-			destzone = database.GetPEQZone(zoneid, 0);
-			if(destzone == 0){
-                       c->Message(13, "You cannot use this command to enter that zone!");
-                       return;
-               }
-               if(zoneid == zone->GetZoneID()) {
-                       c->Message(13, "You cannot use this command on the zone you are in!");
-                       return;
-               }
-	   }
-       else if (sep->arg[1][0] == 0 || sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4) || sep->IsNumber(5))
-       {
-               c->Message(0, "Usage: #peqzone [zonename]");
-               c->Message(0, "Optional Usage: #peqzone [zoneid]");
-               return;
-       } else {
-			   zoneid = database.GetZoneID(sep->arg[1]);
-			   destzone = database.GetPEQZone(zoneid, 0);
-               if(zoneid == 0) {
-                       c->Message(0, "Unable to locate zone '%s'", sep->arg[1]);
-                       return;
-               }
-               if(destzone == 0){
-                       c->Message(13, "You cannot use this command to enter that zone!");
-                       return;
-               }
-               if(zoneid == zone->GetZoneID()) {
-                       c->Message(13, "You cannot use this command on the zone you are in!");
-                       return;
-               }
-       }
-	   if(RuleB (Zone, UsePEQZoneDebuffs)){
-       c->SpellOnTarget(RuleI(Zone, PEQZoneDebuff1), c);
-       c->SpellOnTarget(RuleI(Zone, PEQZoneDebuff2), c);
-	   }
+	if(!c->GetPTimers().Expired(&database, pTimerPeqzoneReuse, false)) {
+		c->Message(13,"You must wait %i minute(s) before using this ability again.", timeleft);
+		return;
+	}
 
-       //zone to safe coords
-       c->GetPTimers().Start(pTimerPeqzoneReuse, RuleI(Zone, PEQZoneReuseTime));
-       c->MovePC(zoneid, 0.0f, 0.0f, 0.0f, 0.0f, 0, ZoneToSafeCoords);
+	if(c->GetHPRatio() < 75) {
+		c->Message(0, "You cannot use this command with less than 75 percent health.");
+		return;
+	}
+
+	//this isnt perfect, but its better...
+	if(
+		c->IsInvisible(c)
+		|| c->IsRooted()
+		|| c->IsStunned()
+		|| c->IsMezzed()
+		|| c->AutoAttackEnabled()
+		|| c->GetInvul()
+	) {
+		c->Message(0, "You cannot use this command in your current state. Settle down and wait.");
+		return;
+	}
+
+	uint16 zoneid = 0;
+	uint8 destzone = 0;
+	if (sep->IsNumber(1))
+	{
+		zoneid = atoi(sep->arg[1]);
+		destzone = database.GetPEQZone(zoneid, 0);
+		if(destzone == 0){
+			c->Message(13, "You cannot use this command to enter that zone!");
+			return;
+		}
+		if(zoneid == zone->GetZoneID()) {
+			c->Message(13, "You cannot use this command on the zone you are in!");
+			return;
+		}
+	}
+	else if (sep->arg[1][0] == 0 || sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4) || sep->IsNumber(5))
+	{
+		c->Message(0, "Usage: #peqzone [zonename]");
+		c->Message(0, "Optional Usage: #peqzone [zoneid]");
+		return;
+	}
+	else {
+		zoneid = database.GetZoneID(sep->arg[1]);
+		destzone = database.GetPEQZone(zoneid, 0);
+		if(zoneid == 0) {
+			c->Message(0, "Unable to locate zone '%s'", sep->arg[1]);
+			return;
+		}
+		if(destzone == 0){
+			c->Message(13, "You cannot use this command to enter that zone!");
+			return;
+		}
+		if(zoneid == zone->GetZoneID()) {
+			c->Message(13, "You cannot use this command on the zone you are in!");
+			return;
+		}
+	}
+
+	if(RuleB (Zone, UsePEQZoneDebuffs)){
+		c->SpellOnTarget(RuleI(Zone, PEQZoneDebuff1), c);
+		c->SpellOnTarget(RuleI(Zone, PEQZoneDebuff2), c);
+	}
+
+	//zone to safe coords
+	c->GetPTimers().Start(pTimerPeqzoneReuse, RuleI(Zone, PEQZoneReuseTime));
+	c->MovePC(zoneid, 0.0f, 0.0f, 0.0f, 0.0f, 0, ZoneToSafeCoords);
 }
 
 void command_movechar(Client *c, const Seperator *sep)
@@ -1798,9 +1803,9 @@ void command_invul(Client *c, const Seperator *sep)
 
 void command_hideme(Client *c, const Seperator *sep)
 {
-  bool state=atobool(sep->arg[1]);
+	bool state=atobool(sep->arg[1]);
 
-  if(sep->arg[1][0]==0)
+	if(sep->arg[1][0]==0)
 		c->Message(0, "Usage: #hideme [on/off]");
 	else
 	{
@@ -1933,15 +1938,15 @@ void command_zstats(Client *c, const Seperator *sep)
 
 void command_permaclass(Client *c, const Seperator *sep)
 {
-  Client *t=c;
+	Client *t=c;
 
-  if(c->GetTarget() && c->GetTarget()->IsClient())
-    t=c->GetTarget()->CastToClient();
+	if(c->GetTarget() && c->GetTarget()->IsClient())
+		t=c->GetTarget()->CastToClient();
 
 	if(sep->arg[1][0]==0) {
 		c->Message(0,"Usage: #permaclass <classnum>");
 	}
-  else if(!t->IsClient())
+	else if(!t->IsClient())
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's class...Sending to char select.", t->GetName());
@@ -1954,16 +1959,16 @@ void command_permaclass(Client *c, const Seperator *sep)
 
 void command_permarace(Client *c, const Seperator *sep)
 {
-  Client *t=c;
+	Client *t=c;
 
-  if(c->GetTarget() && c->GetTarget()->IsClient())
-    t=c->GetTarget()->CastToClient();
+	if(c->GetTarget() && c->GetTarget()->IsClient())
+		t=c->GetTarget()->CastToClient();
 
 	if(sep->arg[1][0]==0) {
 		c->Message(0,"Usage: #permarace <racenum>");
 		c->Message(0,"NOTE: Not all models are global. If a model is not global, it will appear as a human on character select and in zones without the model.");
 	}
-  else if(!t->IsClient())
+	else if(!t->IsClient())
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's race - zone to take effect",t->GetName());
@@ -1978,16 +1983,16 @@ void command_permarace(Client *c, const Seperator *sep)
 
 void command_permagender(Client *c, const Seperator *sep)
 {
-  Client *t=c;
+	Client *t=c;
 
-  if(c->GetTarget() && c->GetTarget()->IsClient())
-    t=c->GetTarget()->CastToClient();
+	if(c->GetTarget() && c->GetTarget()->IsClient())
+		t=c->GetTarget()->CastToClient();
 
 	if(sep->arg[1][0]==0) {
 		c->Message(0,"Usage: #permagender <gendernum>");
 		c->Message(0,"Gender Numbers: 0=Male, 1=Female, 2=Neuter");
 	}
-  else if(!t->IsClient())
+	else if(!t->IsClient())
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's gender - zone to take effect",t->GetName());
@@ -2512,7 +2517,7 @@ void command_mana(Client *c, const Seperator *sep)
 
 void command_flymode(Client *c, const Seperator *sep)
 {
-  Client *t=c;
+	Client *t=c;
 
 	if (strlen(sep->arg[1]) == 1 && !(sep->arg[1][0] == '0' || sep->arg[1][0] == '1' || sep->arg[1][0] == '2'))
 		c->Message(0, "#flymode [0/1/2]");
@@ -2727,7 +2732,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 
 void command_race(Client *c, const Seperator *sep)
 {
-  Mob *t=c->CastToMob();
+	Mob *t=c->CastToMob();
 
 	// Need to figure out max race for LoY/LDoN: going with upper bound of 500 now for testing
 	if (sep->IsNumber(1) && atoi(sep->arg[1]) >= 0 && atoi(sep->arg[1]) <= 724) {
@@ -2736,12 +2741,12 @@ void command_race(Client *c, const Seperator *sep)
 		t->SendIllusionPacket(atoi(sep->arg[1]));
 	}
 	else
-		c->Message(0, "Usage: #race [0-724]  (0 for back to normal)");
+		c->Message(0, "Usage: #race [0-724] (0 for back to normal)");
 }
 
 void command_gender(Client *c, const Seperator *sep)
 {
-  Mob *t=c->CastToMob();
+	Mob *t=c->CastToMob();
 
 	if (sep->IsNumber(1) && atoi(sep->arg[1]) >= 0 && atoi(sep->arg[1]) <= 500) {
 		if ((c->GetTarget()) && c->Admin() >= commandGenderOthers)
@@ -2841,7 +2846,7 @@ void command_texture(Client *c, const Seperator *sep)
 		}
 	}
 	else
-		c->Message(0, "Usage: #texture [texture] [helmtexture]  (0-255, 255 for show equipment)");
+		c->Message(0, "Usage: #texture [texture] [helmtexture] (0-255, 255 for show equipment)");
 }
 
 void command_npctypespawn(Client *c, const Seperator *sep)
@@ -3304,67 +3309,67 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 void command_findnpctype(Client *c, const Seperator *sep)
 {
-   if(sep->arg[1][0] == 0)
-      c->Message(0, "Usage: #findnpctype [search criteria]");
-   else
-   {
-      int id;
-      int count;
-      const int maxrows = 20;
-      char errbuf[MYSQL_ERRMSG_SIZE];
-	   char *query;
-	   MYSQL_RES *result;
-	   MYSQL_ROW row;
+	if(sep->arg[1][0] == 0)
+		c->Message(0, "Usage: #findnpctype [search criteria]");
+	else
+	{
+		int id;
+		int count;
+		const int maxrows = 20;
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query;
+		MYSQL_RES *result;
+		MYSQL_ROW row;
 
-      query = new char[256];
+		query = new char[256];
 
-      // If id evaluates to 0, then search as if user entered a string.
-      if ((id = atoi((const char *)sep->arg[1])) == 0)
-         MakeAnyLenString(&query,
-            "SELECT id,name"
-            " FROM npc_types WHERE name LIKE '%%%s%%'",
-            sep->arg[1]);
-      // Otherwise, look for just that npc id.
-      else
-         MakeAnyLenString(&query,
-            "SELECT id,name FROM npc_types WHERE id=%i", id);
+		// If id evaluates to 0, then search as if user entered a string.
+		if ((id = atoi((const char *)sep->arg[1])) == 0)
+			MakeAnyLenString(&query,
+				"SELECT id,name"
+				" FROM npc_types WHERE name LIKE '%%%s%%'",
+				sep->arg[1]);
+		// Otherwise, look for just that npc id.
+		else
+			MakeAnyLenString(&query,
+				"SELECT id,name FROM npc_types WHERE id=%i", id);
 
-      // If query runs successfully.
-      if (database.RunQuery(query, strlen(query), errbuf, &result))
-	   {
-         count = 0;
+		// If query runs successfully.
+		if (database.RunQuery(query, strlen(query), errbuf, &result))
+		{
+			count = 0;
 
-         // Process each row returned.
-		   while((row = mysql_fetch_row(result)))
-		   {
-            // Limit to returning maxrows rows.
-            if (++count > maxrows)
-            {
-               c->Message (0,
-                  "%i npc types shown. Too many results.", maxrows);
-               break;
-            }
-            c->Message (0, "  %s: %s", row[0], row[1]);
-         }
+			// Process each row returned.
+			while((row = mysql_fetch_row(result)))
+			{
+				// Limit to returning maxrows rows.
+				if (++count > maxrows)
+				{
+					c->Message (0,
+						"%i npc types shown. Too many results.", maxrows);
+					break;
+				}
+				c->Message (0, "  %s: %s", row[0], row[1]);
+			}
 
-         // If we did not hit the maxrows limit.
-         if (count <= maxrows)
-            c->Message (0, "Query complete. %i rows shown.", count);
-         // No matches found.
-         else if (count == 0)
-            c->Message (0, "No matches found for %s.", sep->arg[1]);
+			// If we did not hit the maxrows limit.
+			if (count <= maxrows)
+				c->Message (0, "Query complete. %i rows shown.", count);
+			// No matches found.
+			else if (count == 0)
+				c->Message (0, "No matches found for %s.", sep->arg[1]);
 
-         mysql_free_result(result);
-      }
-      // If query failed.
-      else
-      {
-         c->Message (0, "Error querying database.");
-         c->Message (0, query);
-      }
+			mysql_free_result(result);
+		}
+		// If query failed.
+		else
+		{
+			c->Message (0, "Error querying database.");
+			c->Message (0, query);
+		}
 
-	   safe_delete_array(query);
-   }
+		safe_delete_array(query);
+	}
 }
 
 void command_findzone(Client *c, const Seperator *sep)
@@ -3390,7 +3395,7 @@ void command_findzone(Client *c, const Seperator *sep)
 			database.DoEscapeString(EscName, sep->arg[1], strlen(sep->arg[1]));
 
 			MakeAnyLenString(&query, "SELECT zoneidnumber,short_name,long_name FROM zone WHERE long_name rLIKE '%s' AND version=0",
-						 EscName);
+						EscName);
 			safe_delete_array(EscName);
 		}
 		// Otherwise, look for just that zoneidnumber.
@@ -4362,7 +4367,7 @@ void command_bind(Client *c, const Seperator *sep)
 			c->GetTarget()->CastToClient()->SetBindPoint();
 		else
 			c->Message(0, "Error: target not a Player");
-	 } else
+	} else
 		c->SetBindPoint();
 }
 
@@ -4586,7 +4591,7 @@ void command_name(Client *c, const Seperator *sep)
 			target->Kick();
 		}
 		else
-			c->Message(13, "ERROR: Unable to rename %s.  Check that the new name '%s' isn't already taken.", oldname, sep->arg[2]);
+			c->Message(13, "ERROR: Unable to rename %s. Check that the new name '%s' isn't already taken.", oldname, sep->arg[2]);
 		free(oldname);
 	}
 }
@@ -4776,7 +4781,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
 			{
 				c->Message(13, "Update failed! MySQL gave the following error:");
 				c->Message(13, errbuf);
-		  	}
+			}
 			safe_delete_array(query);
 		}
 	}
@@ -4812,7 +4817,7 @@ void command_iteminfo(Client *c, const Seperator *sep)
 		c->Message(0, "  Lore: %s  ND: %i  NS: %i  Type: %i", (item->LoreFlag) ? "true":"false", item->NoDrop, item->NoRent, item->ItemClass);
 		c->Message(0, "  IDF: %s  Size: %i  Weight: %i  icon_id: %i  Price: %i", item->IDFile, item->Size, item->Weight, item->Icon, item->Price);
 		if (c->Admin() >= 200)
-            c->Message(0, "MinStatus: %i", item->MinStatus);
+			c->Message(0, "MinStatus: %i", item->MinStatus);
 		if (item->ItemClass==ItemClassBook)
 			c->Message(0, "  This item is a Book: %s", item->Filename);
 		else if (item->ItemClass==ItemClassContainer)
@@ -4822,7 +4827,7 @@ void command_iteminfo(Client *c, const Seperator *sep)
 			c->Message(0, "  Magic: %i  SpellID: %i  Proc Level: %i DBCharges: %i  CurCharges: %i", item->Magic, item->Click.Effect, item->Click.Level, item->MaxCharges, inst->GetCharges());
 			c->Message(0, "  EffectType: 0x%02x  CastTime: %.2f", (uint8) item->Click.Type, (double) item->CastTime/1000);
 			c->Message(0, "  Material: 0x%02x  Color: 0x%08x  Skill: %i", item->Material, item->Color, item->ItemType);
-			c->Message(0, " Required level: %i Required skill: %i Recommended level:%i", item->ReqLevel,  item->RecSkill, item->RecLevel);
+			c->Message(0, " Required level: %i Required skill: %i Recommended level:%i", item->ReqLevel, item->RecSkill, item->RecLevel);
 			c->Message(0, " Skill mod: %i percent: %i", item->SkillModType, item->SkillModValue);
 			c->Message(0, " BaneRace: %i BaneBody: %i BaneDMG: %i", item->BaneDmgRace, item->BaneDmgBody, item->BaneDmgAmt);
 		}
@@ -4922,7 +4927,7 @@ void command_guild(Client *c, const Seperator *sep)
 		c->Message(0, "  #guild remove [charname]");
 		c->Message(0, "  #guild promote rank [charname]");
 		c->Message(0, "  #guild demote rank [charname]");
-		c->Message(0, "  /guildmotd [newmotd]    (use 'none' to clear)");
+		c->Message(0, "  /guildmotd [newmotd] (use 'none' to clear)");
 		c->Message(0, "  #guild edit rank title newtitle");
 		c->Message(0, "  #guild edit rank permission 0/1");
 		c->Message(0, "  #guild leader newleader (they must be rank0)");
@@ -6128,10 +6133,10 @@ void command_wpadd(Client *c, const Seperator *sep)
 		if (tmp_grid)
 			t->CastToNPC()->SetGrid(tmp_grid);
 
- 		t->CastToNPC()->AssignWaypoints(t->CastToNPC()->GetGrid());
+		t->CastToNPC()->AssignWaypoints(t->CastToNPC()->GetGrid());
 		c->Message(0,"Waypoint added. Use #wpinfo to see waypoints for this NPC (may need to #repop first).");
- 	}
- 	else
+	}
+	else
 		c->Message(0,"You must target an NPC to use this.");
 }
 
@@ -6167,11 +6172,11 @@ void command_summonitem(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #summonitem [item id] [charges], charges are optional");
 	else {
 		uint32 itemid = atoi(sep->arg[1]);
-        int16 item_status = 0;
-        const Item_Struct* item = database.GetItem(itemid);
-        if(item) {
-            item_status = static_cast<int16>(item->MinStatus);
-        }
+		int16 item_status = 0;
+		const Item_Struct* item = database.GetItem(itemid);
+		if(item) {
+			item_status = static_cast<int16>(item->MinStatus);
+		}
 
 		if (item_status > c->Admin())
 			c->Message(13, "Error: Insufficient status to summon this item.");
@@ -6204,11 +6209,11 @@ void command_giveitem(Client *c, const Seperator *sep)
 	} else {
 		Client *t = c->GetTarget()->CastToClient();
 		uint32 itemid = atoi(sep->arg[1]);
-        int16 item_status = 0;
-        const Item_Struct* item = database.GetItem(itemid);
-        if(item) {
-            item_status = static_cast<int16>(item->MinStatus);
-        }
+		int16 item_status = 0;
+		const Item_Struct* item = database.GetItem(itemid);
+		if(item) {
+			item_status = static_cast<int16>(item->MinStatus);
+		}
 
 		if (item_status > c->Admin())
 			c->Message(13, "Error: Insufficient status to summon this item.");
@@ -6234,7 +6239,7 @@ void command_givemoney(Client *c, const Seperator *sep)
 {
 	if (!sep->IsNumber(1)) {	//as long as the first one is a number, we'll just let atoi convert the rest to 0 or a number
 		c->Message(13, "Usage: #Usage: #givemoney [pp] [gp] [sp] [cp]");
-    }
+	}
 	else if(c->GetTarget() == nullptr) {
 		c->Message(13, "You must target a player to give money to.");
 	}
@@ -6405,90 +6410,90 @@ void command_stun(Client *c, const Seperator *sep)
 
 void command_embperl_plugin(Client *c, const Seperator *sep)
 {
-       if(sep->arg[1][0] == 0)
-       {
-               c->Message(0, "Usage: #plugin (subname) [arguments]");
-               return;
-       }
+	if(sep->arg[1][0] == 0)
+	{
+		c->Message(0, "Usage: #plugin (subname) [arguments]");
+		return;
+	}
 
-       Embperl * perl;
-       if(!parse || !(perl = ((PerlembParser *)parse)->getperl()))
-       {
-               c->Message(0, "Error: Perl module not loaded");
-               return;
-       }
+	Embperl * perl;
+	if(!parse || !(perl = ((PerlembParser *)parse)->getperl()))
+	{
+		c->Message(0, "Error: Perl module not loaded");
+		return;
+	}
 
-       std::string exports = "$plugin::printbuff='';$plugin::ip='";
-               struct in_addr ip; ip.s_addr = c->GetIP();
-               exports += inet_ntoa(ip);
-               exports += "';$plugin::name=qq(";
-               exports += c->GetName();
-               exports += ");package plugin;";
-       perl->eval(exports.c_str());
+	std::string exports = "$plugin::printbuff='';$plugin::ip='";
+	struct in_addr ip; ip.s_addr = c->GetIP();
+	exports += inet_ntoa(ip);
+	exports += "';$plugin::name=qq(";
+	exports += c->GetName();
+	exports += ");package plugin;";
+	perl->eval(exports.c_str());
 
-       std::string fqsubname("plugin::");
-       fqsubname.append(sep->arg[1]);
+	std::string fqsubname("plugin::");
+	fqsubname.append(sep->arg[1]);
 
-       //convert args into a vector of strings.
-       std::vector<std::string> args;
-       for(int i = 2; i < sep->argnum; ++i)
-       {
-               args.push_back(sep->arg[i]);
-       }
+	//convert args into a vector of strings.
+	std::vector<std::string> args;
+	for(int i = 2; i < sep->argnum; ++i)
+	{
+		args.push_back(sep->arg[i]);
+	}
 
-       try
-       {
-               perl->dosub(fqsubname.c_str(), &args);
-               std::string output = perl->getstr("$plugin::printbuff");
-               if(output.length())
-                       c->Message(0, "%s", output.c_str());
-       }
-       catch(const char * err)
-       {
-               c->Message(0, "Error executing plugin: %s", perl->lasterr().c_str());
-       }
+	try
+	{
+		perl->dosub(fqsubname.c_str(), &args);
+		std::string output = perl->getstr("$plugin::printbuff");
+		if(output.length())
+			c->Message(0, "%s", output.c_str());
+	}
+	catch(const char * err)
+	{
+		c->Message(0, "Error executing plugin: %s", perl->lasterr().c_str());
+	}
 
-       perl->eval("package main;");
+	perl->eval("package main;");
 
 }
 
 void command_embperl_eval(Client *c, const Seperator *sep)
 {
-       if(sep->arg[1][0] == 0)
-       {
-               c->Message(0, "Usage: #peval (expr)");
-               return;
-       }
+	if(sep->arg[1][0] == 0)
+	{
+		c->Message(0, "Usage: #peval (expr)");
+		return;
+	}
 
-       Embperl * perl;
-       if(!parse || !(perl = ((PerlembParser *)parse)->getperl()))
-       {
-               c->Message(0, "Error: Perl module not loaded");
-               return;
-       }
+	Embperl * perl;
+	if(!parse || !(perl = ((PerlembParser *)parse)->getperl()))
+	{
+		c->Message(0, "Error: Perl module not loaded");
+		return;
+	}
 
-       std::string exports = "$plugin::printbuff='';$plugin::ip='";
-               struct in_addr ip; ip.s_addr = c->GetIP();
-               exports += inet_ntoa(ip);
-               exports += "';$plugin::name=qq(";
-               exports += c->GetName();
-               exports += ");";
-       perl->eval(exports.c_str());
+	std::string exports = "$plugin::printbuff='';$plugin::ip='";
+	struct in_addr ip; ip.s_addr = c->GetIP();
+	exports += inet_ntoa(ip);
+	exports += "';$plugin::name=qq(";
+	exports += c->GetName();
+	exports += ");";
+	perl->eval(exports.c_str());
 
-       try
-       {
-               std::string cmd = std::string("package plugin;") + std::string(sep->msg + sizeof("peval "));
-               perl->eval(cmd.c_str());
-               std::string output = perl->getstr("$plugin::printbuff");
-               if(output.length())
-                       c->Message(0, "%s", output.c_str());
-       }
-       catch(const char * err)
-       {
-               c->Message(0, "Error: %s", perl->lasterr().c_str());
-       }
+	try
+	{
+		std::string cmd = std::string("package plugin;") + std::string(sep->msg + sizeof("peval "));
+		perl->eval(cmd.c_str());
+		std::string output = perl->getstr("$plugin::printbuff");
+		if(output.length())
+			c->Message(0, "%s", output.c_str());
+	}
+	catch(const char * err)
+	{
+		c->Message(0, "Error: %s", perl->lasterr().c_str());
+	}
 
-       perl->eval("package main;");
+	perl->eval("package main;");
 
 }
 
@@ -6504,7 +6509,7 @@ void command_ban(Client *c, const Seperator *sep)
 
 	if(sep->arg[1][0] == 0)
 	{
-		c->Message(0, "Usage:  #ban [charname]");
+		c->Message(0, "Usage: #ban [charname]");
 	}
 	else
 	{
@@ -6562,7 +6567,7 @@ void command_suspend(Client *c, const Seperator *sep)
 	char *query = nullptr;
 
 	if((sep->arg[1][0] == 0) || (sep->arg[2][0] == 0))
-		c->Message(0, "Usage:  #suspend <charname> <days>  (Specify 0 days to lift the suspension immediately)");
+		c->Message(0, "Usage: #suspend <charname> <days> (Specify 0 days to lift the suspension immediately)");
 	else
 	{
 		int Duration = atoi(sep->arg[2]);
@@ -6579,11 +6584,11 @@ void command_suspend(Client *c, const Seperator *sep)
 		if((AccountID = database.GetAccountIDByChar(EscName)) > 0)
 		{
 			database.RunQuery(query, MakeAnyLenString(&query, "UPDATE `account` SET `suspendeduntil` = DATE_ADD(NOW(), INTERVAL %i DAY)"
-									  " WHERE `id` = %i", Duration, AccountID), errbuf, 0);
+									" WHERE `id` = %i", Duration, AccountID), errbuf, 0);
 
 			if(Duration)
 				c->Message(13,"Account number %i with the character %s has been temporarily suspended for %i day(s).", AccountID, sep->arg[1],
-					   Duration);
+					Duration);
 			else
 				c->Message(13,"Account number %i with the character %s is no longer suspended.", AccountID, sep->arg[1]);
 
@@ -6618,7 +6623,7 @@ void command_ipban(Client *c, const Seperator *sep)
 {
 	if(sep->arg[1] == 0)
 	{
-		c->Message(0, "Usage:  #ipban [xxx.xxx.xxx.xxx]");
+		c->Message(0, "Usage: #ipban [xxx.xxx.xxx.xxx]");
 	} else {
 		if(database.AddBannedIP(sep->arg[1], c->GetName())) {
 			c->Message(0, "%s has been successfully added to the Banned_IPs table by %s",sep->arg[1], c->GetName());
@@ -6635,7 +6640,7 @@ void command_revoke(Client *c, const Seperator *sep)
 
 	if(sep->arg[1][0] == 0 || sep->arg[2][0] == 0)
 	{
-		c->Message(0, "Usage:  #revoke [charname] [1/0]");
+		c->Message(0, "Usage: #revoke [charname] [1/0]");
 	}
 	else
 	{
@@ -6679,7 +6684,7 @@ void command_revoke(Client *c, const Seperator *sep)
 void command_oocmute(Client *c, const Seperator *sep)
 {
 	if(sep->arg[1][0] == 0 || !(sep->arg[1][0] == '1' || sep->arg[1][0] == '0'))
-		c->Message(0, "Usage:  #oocmute [1/0]");
+		c->Message(0, "Usage: #oocmute [1/0]");
 	else {
 	ServerPacket * outapp = new ServerPacket (ServerOP_OOCMute,1);
 	*(outapp->pBuffer)=atoi(sep->arg[1]);
@@ -8086,9 +8091,9 @@ void command_bestz(Client *c, const Seperator *sep) {
 		WaterRegionType RegionType;
 		float z;
 
-		if(c->GetTarget())  {
+		if(c->GetTarget()) {
 			z=c->GetTarget()->GetZ();
-			RegionType = zone->watermap->BSPReturnRegionType(1,  c->GetTarget()->GetX(), c->GetTarget()->GetY(), z);
+			RegionType = zone->watermap->BSPReturnRegionType(1, c->GetTarget()->GetX(), c->GetTarget()->GetY(), z);
 			c->Message(0,"InWater returns %d", zone->watermap->InWater(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z));
 			c->Message(0,"InLava returns %d", zone->watermap->InLava(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z));
 
@@ -8106,7 +8111,7 @@ void command_bestz(Client *c, const Seperator *sep) {
 			case RegionTypeWater:	{ c->Message(0,"You/your target are in Water."); break; }
 			case RegionTypeLava:	{ c->Message(0,"You/your target are in Lava."); break; }
 			case RegionTypeVWater:	{ c->Message(0,"You/your target are in VWater (Icy Water?)."); break; }
-			default:  c->Message(0,"You/your target are in an unknown region type.");
+			default: c->Message(0,"You/your target are in an unknown region type.");
 		}
 	}
 
@@ -8484,17 +8489,17 @@ void command_rules(Client *c, const Seperator *sep) {
 	//super-command for managing rules settings
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(0, "Syntax: #rules [subcommand].");
-		c->Message(0, "-- Rule Set Manipulation  --");
+		c->Message(0, "-- Rule Set Manipulation --");
 		c->Message(0, "...listsets - List avaliable rule sets");
 		c->Message(0, "...current - gives the name of the ruleset currently running in this zone");
 		c->Message(0, "...reload - Reload the selected ruleset in this zone");
 		c->Message(0, "...switch (ruleset name) - Change the selected ruleset and load it");
-		c->Message(0, "...load (ruleset name)  - Load a ruleset in just this zone without changing the selected set");
+		c->Message(0, "...load (ruleset name) - Load a ruleset in just this zone without changing the selected set");
 //too lazy to write this right now:
 //		c->Message(0, "...wload (ruleset name) - Load a ruleset in all zones without changing the selected set");
-		c->Message(0, "...store [ruleset name]  - Store the running ruleset as the specified name");
+		c->Message(0, "...store [ruleset name] - Store the running ruleset as the specified name");
 		c->Message(0, "---------------------");
-		c->Message(0, "-- Running Rule Manipulation  --");
+		c->Message(0, "-- Running Rule Manipulation --");
 		c->Message(0, "...reset - Reset all rules to their default values");
 		c->Message(0, "...get [rule] - Get the specified rule's local value");
 		c->Message(0, "...set (rule) (value) - Set the specified rule to the specified value locally only");
@@ -8506,7 +8511,7 @@ void command_rules(Client *c, const Seperator *sep) {
 
 	if(!strcasecmp(sep->arg[1], "current")) {
 		c->Message(0, "Currently running ruleset '%s' (%d)", RuleManager::Instance()->GetActiveRuleset(),
-            RuleManager::Instance()->GetActiveRulesetID());
+			RuleManager::Instance()->GetActiveRulesetID());
 	} else if(!strcasecmp(sep->arg[1], "listsets")) {
 		std::map<int, std::string> sets;
 		if(!RuleManager::Instance()->ListRulesets(&database, sets)) {
@@ -8524,7 +8529,7 @@ void command_rules(Client *c, const Seperator *sep) {
 	} else if(!strcasecmp(sep->arg[1], "reload")) {
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset());
 		c->Message(0, "The active ruleset (%s (%d)) has been reloaded", RuleManager::Instance()->GetActiveRuleset(),
-            RuleManager::Instance()->GetActiveRulesetID());
+			RuleManager::Instance()->GetActiveRulesetID());
 	} else if(!strcasecmp(sep->arg[1], "switch")) {
 		//make sure this is a valid rule set..
 		int rsid = RuleManager::Instance()->GetRulesetID(&database, sep->arg[2]);
@@ -8672,7 +8677,7 @@ void command_task(Client *c, const Seperator *sep) {
 	//super-command for managing tasks
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(0, "Syntax: #task [subcommand].");
-		c->Message(0, "-- Task System Commands  --");
+		c->Message(0, "-- Task System Commands --");
 		c->Message(0, "...show - List active tasks for a client");
 		c->Message(0, "...update <TaskID> <ActivityID> [Count]");
 		c->Message(0, "...reloadall - Reload all Task information from the database");
@@ -9052,163 +9057,163 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 }
 
 void command_advnpcspawn(Client *c, const Seperator *sep)
- {
- 	Mob *target=c->GetTarget();
- 	char errbuf[MYSQL_ERRMSG_SIZE];
- 	char *query = 0;
+{
+	Mob *target=c->GetTarget();
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
 	uint32 last_insert_id = 0;
 
- 		if (strcasecmp(sep->arg[1], "maketype") == 0){
- 			if(target && target->IsNPC())
- 			{
- 			database.NPCSpawnDB(6, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
- 			}
- 			else
- 			c->Message(0, "Target Required!");
- 		}
- 		else if (strcasecmp(sep->arg[1], "makegroup") == 0) {
- 			if(sep->arg[2])
- 			{
- 				if (!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (name,spawn_limit,dist,max_x,min_x,max_y,min_y,delay) VALUES (\"%s\",%i,%f,%f,%f,%f,%f,%i)", sep->arg[2], (sep->arg[3]?atoi(sep->arg[3]):0), (sep->arg[4]?atof(sep->arg[4]):0), (sep->arg[5]?atof(sep->arg[5]):0), (sep->arg[6]?atof(sep->arg[6]):0), (sep->arg[7]?atof(sep->arg[7]):0), (sep->arg[8]?atof(sep->arg[8]):0), (sep->arg[9]?atoi(sep->arg[9]):0)), errbuf, 0, 0, &last_insert_id))
- 				{
- 					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
- 					c->Message(13, errbuf);
- 				}
- 				else
- 				{
- 				c->LogSQL(query);
- 				c->Message(0, "Group ID %i created successfully!", last_insert_id);
- 				}
- 				safe_delete_array(query);
- 			}
- 			else
- 			{
- 				c->Message(0, "Format: #advnpdspawn makegroup <name> [spawn limit] [dist] [max x] [min x] [max y] [min y] [delay]");
- 			}
- 		}
- 		else if (strcasecmp(sep->arg[1], "addgroupentry") == 0) {
- 			if(atoi(sep->arg[2]) && atoi(sep->arg[3]) && atoi(sep->arg[4]))
- 			{
- 				if (!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawnentry (spawngroupID,npcID,chance) VALUES (%i,%i,%i)", atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), errbuf, 0, 0, &last_insert_id)))
- 				{
- 					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
- 					c->Message(13, errbuf);
- 				}
- 				else
- 				{
- 				c->LogSQL(query);
- 				c->Message(0, "NPC %i added to group %i with %i chance!", atoi(sep->arg[3]), atoi(sep->arg[2]), atoi(sep->arg[4]) );
- 				}
- 				safe_delete(query);
- 			}
- 			else
- 			{
- 				c->Message(0, "Format: #advnpdspawn addgroupentry <spawnggroupID> <npcID> <chance>");
- 			}
- 		}
- 		else if (strcasecmp(sep->arg[1], "editgroupbox") == 0) {
- 			if(atof(sep->arg[2]) && atof(sep->arg[3]) && atof(sep->arg[4]) && atof(sep->arg[5]) && atof(sep->arg[6]) && atof(sep->arg[7]) && atof(sep->arg[8]))
- 			{
- 				if (!database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawngroup SET dist='%f',max_x='%f',min_x='%f',max_y='%f',min_y='%f',delay='%i' WHERE id='%i'", atof(sep->arg[3]),atof(sep->arg[4]),atof(sep->arg[5]),atof(sep->arg[6]),atof(sep->arg[7]),atoi(sep->arg[8]),atoi(sep->arg[2]), errbuf, 0, 0, &last_insert_id)))
- 				{
- 					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
- 					c->Message(13, errbuf);
- 				}
- 				else
- 				{
- 				c->LogSQL(query);
- 				c->Message(0, "Group ID %i created successfully!", last_insert_id);
- 				}
- 				safe_delete_array(query);
- 			}
- 			else
- 			{
- 				c->Message(0, "Format: #advnpdspawn editgroupbox <spawngroupID> <dist> <max x> <min x> <max y> <min y> <delay>");
- 			}
- 		}
- 		else if (strcasecmp(sep->arg[1], "cleargroupbox") == 0) {
- 			if(atoi(sep->arg[2]))
- 			{
- 				if (!database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawngroup SET dist='0',max_x='0',min_x='0',max_y='0',min_y='0',delay='0' WHERE id='%i'",atoi(sep->arg[2])), errbuf, 0, 0, &last_insert_id))
- 				{
- 					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
- 					c->Message(13, errbuf);
- 				}
- 				else
- 				{
- 				c->LogSQL(query);
- 				c->Message(0, "Group ID %i created successfully!", last_insert_id);
- 				}
- 				safe_delete_array(query);
- 			}
- 			else
- 			{
- 				c->Message(0, "Format: #advnpdspawn cleargroupbox <spawngroupID>");
- 			}
- 		}
- 		else if (strcasecmp(sep->arg[1], "addgroupspawn") == 0 && atoi(sep->arg[2])!=0) {
- 			database.NPCSpawnDB(5, zone->GetShortName(), zone->GetInstanceVersion(), c, 0, atoi(sep->arg[2]));
- 			c->Message(0, "Mob of group %i added successfully!", atoi(sep->arg[2]));
- 		}
- 		else if (strcasecmp(sep->arg[1], "removegroupspawn") == 0) {
- 			if (!target || !target->IsNPC())
- 				c->Message(0, "Error: Need an NPC target.");
- 			else {
- 				Spawn2* s2 = target->CastToNPC()->respawn2;
+		if (strcasecmp(sep->arg[1], "maketype") == 0){
+			if(target && target->IsNPC())
+			{
+			database.NPCSpawnDB(6, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
+			}
+			else
+			c->Message(0, "Target Required!");
+		}
+		else if (strcasecmp(sep->arg[1], "makegroup") == 0) {
+			if(sep->arg[2])
+			{
+				if (!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (name,spawn_limit,dist,max_x,min_x,max_y,min_y,delay) VALUES (\"%s\",%i,%f,%f,%f,%f,%f,%i)", sep->arg[2], (sep->arg[3]?atoi(sep->arg[3]):0), (sep->arg[4]?atof(sep->arg[4]):0), (sep->arg[5]?atof(sep->arg[5]):0), (sep->arg[6]?atof(sep->arg[6]):0), (sep->arg[7]?atof(sep->arg[7]):0), (sep->arg[8]?atof(sep->arg[8]):0), (sep->arg[9]?atoi(sep->arg[9]):0)), errbuf, 0, 0, &last_insert_id))
+				{
+					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
+					c->Message(13, errbuf);
+				}
+				else
+				{
+				c->LogSQL(query);
+				c->Message(0, "Group ID %i created successfully!", last_insert_id);
+				}
+				safe_delete_array(query);
+			}
+			else
+			{
+				c->Message(0, "Format: #advnpdspawn makegroup <name> [spawn limit] [dist] [max x] [min x] [max y] [min y] [delay]");
+			}
+		}
+		else if (strcasecmp(sep->arg[1], "addgroupentry") == 0) {
+			if(atoi(sep->arg[2]) && atoi(sep->arg[3]) && atoi(sep->arg[4]))
+			{
+				if (!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawnentry (spawngroupID,npcID,chance) VALUES (%i,%i,%i)", atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), errbuf, 0, 0, &last_insert_id)))
+				{
+					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
+					c->Message(13, errbuf);
+				}
+				else
+				{
+				c->LogSQL(query);
+				c->Message(0, "NPC %i added to group %i with %i chance!", atoi(sep->arg[3]), atoi(sep->arg[2]), atoi(sep->arg[4]) );
+				}
+				safe_delete(query);
+			}
+			else
+			{
+				c->Message(0, "Format: #advnpdspawn addgroupentry <spawnggroupID> <npcID> <chance>");
+			}
+		}
+		else if (strcasecmp(sep->arg[1], "editgroupbox") == 0) {
+			if(atof(sep->arg[2]) && atof(sep->arg[3]) && atof(sep->arg[4]) && atof(sep->arg[5]) && atof(sep->arg[6]) && atof(sep->arg[7]) && atof(sep->arg[8]))
+			{
+				if (!database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawngroup SET dist='%f',max_x='%f',min_x='%f',max_y='%f',min_y='%f',delay='%i' WHERE id='%i'", atof(sep->arg[3]),atof(sep->arg[4]),atof(sep->arg[5]),atof(sep->arg[6]),atof(sep->arg[7]),atoi(sep->arg[8]),atoi(sep->arg[2]), errbuf, 0, 0, &last_insert_id)))
+				{
+					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
+					c->Message(13, errbuf);
+				}
+				else
+				{
+				c->LogSQL(query);
+				c->Message(0, "Group ID %i created successfully!", last_insert_id);
+				}
+				safe_delete_array(query);
+			}
+			else
+			{
+				c->Message(0, "Format: #advnpdspawn editgroupbox <spawngroupID> <dist> <max x> <min x> <max y> <min y> <delay>");
+			}
+		}
+		else if (strcasecmp(sep->arg[1], "cleargroupbox") == 0) {
+			if(atoi(sep->arg[2]))
+			{
+				if (!database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawngroup SET dist='0',max_x='0',min_x='0',max_y='0',min_y='0',delay='0' WHERE id='%i'",atoi(sep->arg[2])), errbuf, 0, 0, &last_insert_id))
+				{
+					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
+					c->Message(13, errbuf);
+				}
+				else
+				{
+				c->LogSQL(query);
+				c->Message(0, "Group ID %i created successfully!", last_insert_id);
+				}
+				safe_delete_array(query);
+			}
+			else
+			{
+				c->Message(0, "Format: #advnpdspawn cleargroupbox <spawngroupID>");
+			}
+		}
+		else if (strcasecmp(sep->arg[1], "addgroupspawn") == 0 && atoi(sep->arg[2])!=0) {
+			database.NPCSpawnDB(5, zone->GetShortName(), zone->GetInstanceVersion(), c, 0, atoi(sep->arg[2]));
+			c->Message(0, "Mob of group %i added successfully!", atoi(sep->arg[2]));
+		}
+		else if (strcasecmp(sep->arg[1], "removegroupspawn") == 0) {
+			if (!target || !target->IsNPC())
+				c->Message(0, "Error: Need an NPC target.");
+			else {
+				Spawn2* s2 = target->CastToNPC()->respawn2;
 
- 				if(!s2) {
- 					c->Message(0, "removegroupspawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
- 				}
- 				else
- 				{
- 					if(database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'",s2->GetID()), errbuf))
- 					{
- 						c->LogSQL(query);
- 						c->Message(0, "Spawnpoint Removed successfully.");
- 						target->Depop(false);
- 					}
- 					else
- 					{
- 						c->Message(13, "Update failed! MySQL gave the following error:");
- 						c->Message(13, errbuf);
- 	  				}
- 					safe_delete_array(query);
- 				}
- 			}
- 		}
- 		else if (strcasecmp(sep->arg[1], "movespawn") == 0) {
- 			if (!target || !target->IsNPC())
- 				c->Message(0, "Error: Need an NPC target.");
- 			else {
- 				Spawn2* s2 = target->CastToNPC()->respawn2;
+				if(!s2) {
+					c->Message(0, "removegroupspawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
+				}
+				else
+				{
+					if(database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'",s2->GetID()), errbuf))
+					{
+						c->LogSQL(query);
+						c->Message(0, "Spawnpoint Removed successfully.");
+						target->Depop(false);
+					}
+					else
+					{
+						c->Message(13, "Update failed! MySQL gave the following error:");
+						c->Message(13, errbuf);
+					}
+					safe_delete_array(query);
+				}
+			}
+		}
+		else if (strcasecmp(sep->arg[1], "movespawn") == 0) {
+			if (!target || !target->IsNPC())
+				c->Message(0, "Error: Need an NPC target.");
+			else {
+				Spawn2* s2 = target->CastToNPC()->respawn2;
 
- 				if(!s2) {
- 					c->Message(0, "movespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
- 				}
- 				else
- 				{
- 					if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET x='%f', y='%f', z='%f', heading='%f' WHERE id='%i'",c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID()), errbuf))
- 					{
- 						c->LogSQL(query);
- 						c->Message(0, "Updating coordinates successful.");
- 						target->CastToNPC()->GMMove(c->GetX(), c->GetY(), c->GetZ(), c->GetHeading());
- 						target->CastToNPC()->SaveGuardSpot(true);
- 						target->SendPosition();
- 					}
- 					else
- 					{
- 						c->Message(13, "Update failed! MySQL gave the following error:");
- 						c->Message(13, errbuf);
- 	  				}
- 					safe_delete_array(query);
- 				}
- 			}
- 		}
- 		else if (strcasecmp(sep->arg[1], "editrespawn") == 0) {
- 			if (!target || !target->IsNPC())
- 				c->Message(0, "Error: Need an NPC target.");
- 			else {
- 				Spawn2* s2 = target->CastToNPC()->respawn2;
+				if(!s2) {
+					c->Message(0, "movespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
+				}
+				else
+				{
+					if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET x='%f', y='%f', z='%f', heading='%f' WHERE id='%i'",c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID()), errbuf))
+					{
+						c->LogSQL(query);
+						c->Message(0, "Updating coordinates successful.");
+						target->CastToNPC()->GMMove(c->GetX(), c->GetY(), c->GetZ(), c->GetHeading());
+						target->CastToNPC()->SaveGuardSpot(true);
+						target->SendPosition();
+					}
+					else
+					{
+						c->Message(13, "Update failed! MySQL gave the following error:");
+						c->Message(13, errbuf);
+					}
+					safe_delete_array(query);
+				}
+			}
+		}
+		else if (strcasecmp(sep->arg[1], "editrespawn") == 0) {
+			if (!target || !target->IsNPC())
+				c->Message(0, "Error: Need an NPC target.");
+			else {
+				Spawn2* s2 = target->CastToNPC()->respawn2;
 
 				uint32 new_rs = 0;
 				uint32 new_var = s2->GetVariance();
@@ -9227,61 +9232,61 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 					new_var = atoi(sep->arg[3]);
 				}
 
- 				if(!s2) {
- 					c->Message(0, "editrespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
- 				}
- 				else
- 				{
- 					if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET respawntime=%u, variance=%u WHERE id='%i'", new_rs, new_var, s2->GetID()), errbuf))
- 					{
- 						c->LogSQL(query);
- 						c->Message(0, "Updating respawn timer successful.");
+				if(!s2) {
+					c->Message(0, "editrespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
+				}
+				else
+				{
+					if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET respawntime=%u, variance=%u WHERE id='%i'", new_rs, new_var, s2->GetID()), errbuf))
+					{
+						c->LogSQL(query);
+						c->Message(0, "Updating respawn timer successful.");
 						s2->SetRespawnTimer(new_rs);
 						s2->SetVariance(new_var);
- 					}
- 					else
- 					{
- 						c->Message(13, "Update failed! MySQL gave the following error:");
- 						c->Message(13, errbuf);
- 	  				}
- 					safe_delete_array(query);
- 				}
- 			}
- 		}
+					}
+					else
+					{
+						c->Message(13, "Update failed! MySQL gave the following error:");
+						c->Message(13, errbuf);
+					}
+					safe_delete_array(query);
+				}
+			}
+		}
 		else if (strcasecmp(sep->arg[1], "setversion") == 0) {
 			int16 Version = 0;
- 			if (!target || !target->IsNPC())
- 				c->Message(0, "Error: Need an NPC target.");
- 			else {
+			if (!target || !target->IsNPC())
+				c->Message(0, "Error: Need an NPC target.");
+			else {
 				if(sep->IsNumber(2)){
 					Version = atoi(sep->arg[2]);
- 					if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET version=%i WHERE spawngroupID='%i'", Version, c->GetTarget()->CastToNPC()->GetSp2()), errbuf)){
- 						c->LogSQL(query);
- 						c->Message(0, "Version change to %i was successful from SpawnGroupID %i", Version, c->GetTarget()->CastToNPC()->GetSp2());
+					if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE spawn2 SET version=%i WHERE spawngroupID='%i'", Version, c->GetTarget()->CastToNPC()->GetSp2()), errbuf)){
+						c->LogSQL(query);
+						c->Message(0, "Version change to %i was successful from SpawnGroupID %i", Version, c->GetTarget()->CastToNPC()->GetSp2());
 						c->GetTarget()->Depop(false);
- 					}
- 					else{
- 						c->Message(13, "Update failed! MySQL gave the following error:");
- 						c->Message(13, errbuf);
- 	  				}
- 					safe_delete_array(query);
+					}
+					else{
+						c->Message(13, "Update failed! MySQL gave the following error:");
+						c->Message(13, errbuf);
+					}
+					safe_delete_array(query);
 				}
 				else{
 					c->Message(0, "setversion FAILED -- You must set a version number");
 					return;
 				}
 			}
- 		}
- 		else if (strcasecmp(sep->arg[1], "testload") == 0 && atoi(sep->arg[2])!=0) {
- 			database.LoadSpawnGroupsByID(atoi(sep->arg[2]),&zone->spawn_group_list);
- 			c->Message(0, "Group %i loaded successfully!", atoi(sep->arg[2]));
- 		}
- 		else {
- 			c->Message(0, "Error: #advnpcspawn: Invalid command.");
- 			c->Message(0, "Usage: #advnpcspawn [maketype|makegroup|addgroupentry|addgroupspawn|setversion]");
- 			c->Message(0, "Usage: #advnpcspawn [removegroupspawn|movespawn|editrespawn|editgroupbox|cleargroupbox]");
- 		}
- }
+		}
+		else if (strcasecmp(sep->arg[1], "testload") == 0 && atoi(sep->arg[2])!=0) {
+			database.LoadSpawnGroupsByID(atoi(sep->arg[2]),&zone->spawn_group_list);
+			c->Message(0, "Group %i loaded successfully!", atoi(sep->arg[2]));
+		}
+		else {
+			c->Message(0, "Error: #advnpcspawn: Invalid command.");
+			c->Message(0, "Usage: #advnpcspawn [maketype|makegroup|addgroupentry|addgroupspawn|setversion]");
+			c->Message(0, "Usage: #advnpcspawn [removegroupspawn|movespawn|editrespawn|editgroupbox|cleargroupbox]");
+		}
+}
 
 void command_aggrozone(Client *c, const Seperator *sep) {
 	if(!c)
@@ -9513,7 +9518,7 @@ void command_setstartzone(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	else {
 		c->Message(0, "Usage: (needs PC target) #setstartzone zonename");
-		c->Message(0, "Optional Usage: Use '#setstartzone reset' or '#setstartzone 0' to clear a starting zone.  A player can select a starting zone using /setstartcity");
+		c->Message(0, "Optional Usage: Use '#setstartzone reset' or '#setstartzone 0' to clear a starting zone. Player can select a starting zone using /setstartcity");
 		return;
 	}
 
@@ -9654,8 +9659,8 @@ void command_object(Client *c, const Seperator *sep)
 					" ORDER BY id",
 					zone->GetZoneID(),
 					zone->GetInstanceVersion(),
-					c->GetX() - radius,				 // Yes, we're actually using a bounding box instead of a radius.
-					c->GetX() + radius,				 // Much less processing power used this way.
+					c->GetX() - radius,				// Yes, we're actually using a bounding box instead of a radius.
+					c->GetX() + radius,				// Much less processing power used this way.
 					c->GetY() - radius,
 					c->GetY() + radius,
 					c->GetZ() - radius,
@@ -9856,8 +9861,8 @@ void command_object(Client *c, const Seperator *sep)
 				"AND (posz BETWEEN %.1f AND %.1f)",
 				zone->GetZoneID(),
 				zone->GetInstanceVersion(),
-				od.x - 0.2f, od.x + 0.2f,		 // Yes, we're actually using a bounding box instead of a radius.
-				od.y - 0.2f, od.y + 0.2f,		 // Much less processing power used this way.
+				od.x - 0.2f, od.x + 0.2f,		// Yes, we're actually using a bounding box instead of a radius.
+				od.y - 0.2f, od.y + 0.2f,		// Much less processing power used this way.
 				od.z - 0.2f, od.z + 0.2f);		// It's pretty forgiving, though, allowing for close-proximity objects
 
 			iObjectsFound = 0;
@@ -10271,8 +10276,8 @@ void command_object(Client *c, const Seperator *sep)
 			if ((sep->argnum < 2) || // Not enough arguments
 					((id = atoi(sep->arg[2])) == 0) || // ID not specified
 					(((sep->arg[3][0] < '0') || (sep->arg[3][0] > '9')) &&
-					 ((sep->arg[3][0] & 0xDF) != 'T') &&
-					 (sep->arg[3][0] != '-') && (sep->arg[3][0] != '.'))) // Location argument not specified correctly
+					((sep->arg[3][0] & 0xDF) != 'T') &&
+					(sep->arg[3][0] != '-') && (sep->arg[3][0] != '.'))) // Location argument not specified correctly
 			{
 				c->Message(0, "Usage: #object Move (ObjectID) ToMe|(x y z [h])");
 
@@ -11038,7 +11043,7 @@ void command_emoteview(Client *c, const Seperator *sep)
 		while(iterator.MoreElements())
 		{
 			NPC_Emote_Struct* nes = iterator.GetData();
-			if(emoteid ==  nes->emoteid)
+			if(emoteid == nes->emoteid)
 			{
 				c->Message(0, "EmoteID: %i Event: %i Type: %i Text: %s", nes->emoteid, nes->event_, nes->type, nes->text);
 				count++;
@@ -11069,7 +11074,7 @@ void command_emotesearch(Client *c, const Seperator *sep)
 			while(iterator.MoreElements())
 			{
 			NPC_Emote_Struct* nes = iterator.GetData();
-				if(emoteid ==  nes->emoteid)
+				if(emoteid == nes->emoteid)
 				{
 					c->Message(0, "EmoteID: %i Event: %i Type: %i Text: %s", nes->emoteid, nes->event_, nes->type, nes->text);
 					count++;
@@ -11305,7 +11310,7 @@ void command_camerashake(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		if(sep->arg[1][0] &&  sep->arg[2][0])
+		if(sep->arg[1][0] && sep->arg[2][0])
 		{
 			ServerPacket *pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
 			memset(pack->pBuffer, 0, sizeof(pack->pBuffer));
@@ -11439,9 +11444,9 @@ void command_mysql(Client *c, const Seperator *sep)
 		int argnum = 3; bool Options = false, Optionh = false; bool Fail = false;
 		while(sep->arg[argnum] && strlen(sep->arg[argnum]) > 1){
 			switch(sep->arg[argnum][1]){
-			  case 's': Options = true; break;
-			  case 'h': Optionh = true; break;
-			  default: c->Message(15, "%s, there is no option '%c'", c->GetName(), sep->arg[argnum][1]); Fail = true;
+				case 's': Options = true; break;
+				case 'h': Optionh = true; break;
+				default: c->Message(15, "%s, there is no option '%c'", c->GetName(), sep->arg[argnum][1]); Fail = true;
 			}
 			++argnum;
 		}
@@ -11485,7 +11490,7 @@ void command_mysql(Client *c, const Seperator *sep)
 							LineVec.push_back(LineText.str());
 							LineText.str("");
 						}
-						LineText << fields[i].name << ":"  << "[" << (row[i] ? row[i] : "nullptr") << "] ";
+						LineText << fields[i].name << ":" << "[" << (row[i] ? row[i] : "nullptr") << "] ";
 					}
 					LineVec.push_back(LineText.str());
 
@@ -11595,11 +11600,11 @@ void command_zopp(Client *c, const Seperator *sep)
 			return;
 		}
 
-        int16 item_status = 0;
-        const Item_Struct* item = database.GetItem(itemid);
-        if(item) {
-            item_status = static_cast<int16>(item->MinStatus);
-        }
+		int16 item_status = 0;
+		const Item_Struct* item = database.GetItem(itemid);
+		if(item) {
+			item_status = static_cast<int16>(item->MinStatus);
+		}
 		if (item_status > c->Admin()) {
 			c->Message(13, "Error: Insufficient status to use this command.");
 			return;
@@ -11631,3 +11636,4 @@ void command_augmentitem(Client *c, const Seperator *sep)
 		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
 		safe_delete_array(in_augment);
 }
+

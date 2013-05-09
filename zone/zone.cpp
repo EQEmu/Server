@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -27,8 +27,8 @@ using namespace std;
 
 #ifdef _WINDOWS
 #include <process.h>
-#define	 snprintf	_snprintf
-#define  vsnprintf	_vsnprintf
+#define	snprintf	_snprintf
+#define	vsnprintf	_vsnprintf
 #else
 #include <pthread.h>
 #include "../common/unix.h"
@@ -64,7 +64,7 @@ using namespace std;
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
+#define strcasecmp	_stricmp
 #endif
 
 
@@ -136,7 +136,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 			LogFile->write(EQEMuLog::Status, "Loot logging level: %i", zone->lootvar);
 		}
 		else {
-        	zone->loglevelvar = uint8(atoi(tmp)); //continue supporting only command logging (for now)
+			zone->loglevelvar = uint8(atoi(tmp)); //continue supporting only command logging (for now)
 			zone->merchantvar = 0;
 			zone->tradevar = 0;
 			zone->lootvar = 0;
@@ -424,7 +424,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 
 uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 
- 	std::list<TempMerchantList> TmpMerchantList = tmpmerchanttable[NPCID];
+	std::list<TempMerchantList> TmpMerchantList = tmpmerchanttable[NPCID];
 	std::list<TempMerchantList>::const_iterator Iterator;
 
 	for(Iterator = TmpMerchantList.begin(); Iterator != TmpMerchantList.end(); Iterator++)
@@ -459,9 +459,9 @@ void Zone::LoadTempMerchantData(){
 		return;
 	}
 /*	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	std::list<TempMerchantList> merlist;
 	if (database.RunQuery(query, MakeAnyLenString(&query, "select ml.npcid,ml.slot,ml.itemid,ml.charges from merchantlist_temp ml, npc_types nt, spawnentry se, spawn2 s2 where nt.id=ml.npcid and nt.id=se.npcid and se.spawngroupid=s2.spawngroupid and s2.zone='%s' group by ml.npcid,slot order by npcid,slot asc", GetShortName()), errbuf, &result)) {
 		uint32 npcid = 0;
@@ -491,7 +491,7 @@ void Zone::LoadTempMerchantData(){
 }
 
 void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
-    MYSQL_ROW row;
+	MYSQL_ROW row;
 	std::map<uint32,std::list<TempMerchantList> >::iterator cur;
 	uint32 npcid = 0;
 	while((row = mysql_fetch_row(result))) {
@@ -519,9 +519,9 @@ void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
 //there should prolly be a temp counterpart of this...
 void Zone::LoadNewMerchantData(uint32 merchantid){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	std::list<MerchantList> merlist;
 	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT item, slot, faction_required, level_required, alt_currency_cost FROM merchantlist WHERE merchantid=%d", merchantid), errbuf, &result)) {
 		while((row = mysql_fetch_row(result))) {
@@ -529,9 +529,9 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 			ml.id = merchantid;
 			ml.item = atoul(row[0]);
 			ml.slot = atoul(row[1]);
-            ml.faction_required = atoul(row[2]);
-            ml.level_required = atoul(row[3]);
-            ml.alt_currency_cost = atoul(row[3]);
+			ml.faction_required = atoul(row[2]);
+			ml.level_required = atoul(row[3]);
+			ml.alt_currency_cost = atoul(row[3]);
 			merlist.push_back(ml);
 		}
 		merchanttable[merchantid] = merlist;
@@ -543,7 +543,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 }
 
 void Zone::LoadMerchantData_result(MYSQL_RES* result) {
-    MYSQL_ROW row;
+	MYSQL_ROW row;
 	std::map<uint32,std::list<MerchantList> >::iterator cur;
 	uint32 npcid = 0;
 	while((row = mysql_fetch_row(result))) {
@@ -559,25 +559,25 @@ void Zone::LoadMerchantData_result(MYSQL_RES* result) {
 			npcid = ml.id;
 		}
 
-        std::list<MerchantList>::iterator iter = cur->second.begin();
-        bool found = false;
-        while(iter != cur->second.end()) {
-            if((*iter).item == ml.id) {
-                found = true;
-                break;
-            }
-            iter++;
-        }
+		std::list<MerchantList>::iterator iter = cur->second.begin();
+		bool found = false;
+		while(iter != cur->second.end()) {
+			if((*iter).item == ml.id) {
+				found = true;
+				break;
+			}
+			iter++;
+		}
 
-        if(found) {
-            continue;
-        }
+		if(found) {
+			continue;
+		}
 
 		ml.slot = atoul(row[1]);
 		ml.item = atoul(row[2]);
-        ml.faction_required = atoul(row[3]);
-        ml.level_required = atoul(row[4]);
-        ml.alt_currency_cost = atoul(row[5]);
+		ml.faction_required = atoul(row[3]);
+		ml.level_required = atoul(row[4]);
+		ml.alt_currency_cost = atoul(row[5]);
 		cur->second.push_back(ml);
 	}
 }
@@ -603,9 +603,9 @@ void Zone::GetMerchantDataForZoneLoad(){
 		return;
 	}
 /*	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	std::list<MerchantList> merlist;
 	if (database.RunQuery(query, MakeAnyLenString(&query, "select ml.merchantid,ml.slot,ml.item from merchantlist ml, npc_types nt, spawnentry se, spawn2 s2 where nt.merchant_id=ml.merchantid and nt.id=se.npcid and se.spawngroupid=s2.spawngroupid and s2.zone='%s' group by ml.merchantid,slot order by merchantid,slot asc", GetShortName()), errbuf, &result)) {
 		uint32 npcid = 0;
@@ -880,7 +880,7 @@ void Zone::Shutdown(bool quite)
 	zone->ResetAuth();
 	safe_delete(zone);
 	dbasync->CommitWrites();
-    if(parse) { parse->ReloadQuests(true); }
+	if(parse) { parse->ReloadQuests(true); }
 	UpdateWindowTitle();
 }
 
@@ -976,7 +976,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	totalBS = 0;
 	aas = nullptr;
 	totalAAs = 0;
-    gottime = false;
+	gottime = false;
 
 	Instance_Shutdown_Timer = nullptr;
 	bool is_perma = false;
@@ -1120,7 +1120,7 @@ bool Zone::Init(bool iStaticZone) {
 	zone->LoadLDoNTraps();
 	zone->LoadLDoNTrapEntries();
 	zone->LoadVeteranRewards();
-    zone->LoadAlternateCurrencies();
+	zone->LoadAlternateCurrencies();
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
 	//Load AA information
@@ -1208,7 +1208,7 @@ void Zone::ReloadStaticData() {
 	entity_list.RespawnAllDoors();
 
 	zone->LoadVeteranRewards();
-    zone->LoadAlternateCurrencies();
+	zone->LoadAlternateCurrencies();
 	NPCEmoteList.Clear();
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
@@ -1490,7 +1490,7 @@ bool Zone::Process() {
 		}
 	}
 
-    if(hotzone_timer.Check()) { UpdateHotzone(); }
+	if(hotzone_timer.Check()) { UpdateHotzone(); }
 
 	return true;
 }
@@ -1511,12 +1511,12 @@ bool Zone::Depop(bool StartSpawnTimer) {
 std::map<uint32,NPCType *>::iterator itr;
 	entity_list.Depop(StartSpawnTimer);
 
-   // Refresh npctable, getting current info from database.
-   while(npctable.size()) {
+	// Refresh npctable, getting current info from database.
+	while(npctable.size()) {
 		itr=npctable.begin();
 		delete itr->second;
 		npctable.erase(itr);
-   }
+	}
 
 	return true;
 }
@@ -1626,7 +1626,7 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 		if(client)
 			client->CheatDetected(MQZoneUnknownDest, x, y, z); // Someone is trying to use /zone
 		LogFile->write(EQEMuLog::Status, "WARNING: Closest zone point for zone id %d is %f, you might need to update your zone_points table if you dont arrive at the right spot.", to, closest_dist);
-		LogFile->write(EQEMuLog::Status, "<Real Zone Points>.  %f x %f y %f z ", x, y, z);
+		LogFile->write(EQEMuLog::Status, "<Real Zone Points>. %f x %f y %f z ", x, y, z);
 	}
 
 	if(closest_dist > max_distance2)
@@ -1728,7 +1728,7 @@ return true;
 
 bool ZoneDatabase::DumpZoneState() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM zone_state_dump WHERE zonename='%s'", zone->GetShortName()), errbuf)) {
 		cerr << "Error in DumpZoneState query '" << query << "' " << errbuf << endl;
@@ -1775,46 +1775,46 @@ bool ZoneDatabase::DumpZoneState() {
 	}
 
 	entity_list.DoZoneDump(spawn2_dump, npc_dump, npcloot_dump, gmspawntype_dump);
-    query = new char[512 + ((sizeof(ZSDump_Spawn2) * spawn2_count + sizeof(ZSDump_NPC) * npc_count + sizeof(ZSDump_NPC_Loot) * npcloot_count + sizeof(NPCType) * gmspawntype_count) * 2)];
+	query = new char[512 + ((sizeof(ZSDump_Spawn2) * spawn2_count + sizeof(ZSDump_NPC) * npc_count + sizeof(ZSDump_NPC_Loot) * npcloot_count + sizeof(NPCType) * gmspawntype_count) * 2)];
 	char* end = query;
 
-    end += sprintf(end, "Insert Into zone_state_dump (zonename, spawn2_count, npc_count, npcloot_count, gmspawntype_count, spawn2, npcs, npc_loot, gmspawntype) values ('%s', %i, %i, %i, %i, ", zone->GetShortName(), spawn2_count, npc_count, npcloot_count, gmspawntype_count);
-    *end++ = '\'';
+	end += sprintf(end, "Insert Into zone_state_dump (zonename, spawn2_count, npc_count, npcloot_count, gmspawntype_count, spawn2, npcs, npc_loot, gmspawntype) values ('%s', %i, %i, %i, %i, ", zone->GetShortName(), spawn2_count, npc_count, npcloot_count, gmspawntype_count);
+	*end++ = '\'';
 	if (spawn2_dump != 0) {
 		end += DoEscapeString(end, (char*)spawn2_dump, sizeof(ZSDump_Spawn2) * spawn2_count);
 		safe_delete_array(spawn2_dump);
 	}
-    *end++ = '\'';
-    end += sprintf(end, ", ");
-    *end++ = '\'';
+	*end++ = '\'';
+	end += sprintf(end, ", ");
+	*end++ = '\'';
 	if (npc_dump != 0) {
 		end += DoEscapeString(end, (char*)npc_dump, sizeof(ZSDump_NPC) * npc_count);
 		safe_delete_array(npc_dump);
 	}
-    *end++ = '\'';
-    end += sprintf(end, ", ");
-    *end++ = '\'';
+	*end++ = '\'';
+	end += sprintf(end, ", ");
+	*end++ = '\'';
 	if (npcloot_dump != 0) {
 		end += DoEscapeString(end, (char*)npcloot_dump, sizeof(ZSDump_NPC_Loot) * npcloot_count);
 		safe_delete_array(npcloot_dump);
 	}
-    *end++ = '\'';
-    end += sprintf(end, ", ");
-    *end++ = '\'';
+	*end++ = '\'';
+	end += sprintf(end, ", ");
+	*end++ = '\'';
 	if (gmspawntype_dump != 0) {
 		end += DoEscapeString(end, (char*)gmspawntype_dump, sizeof(NPCType) * gmspawntype_count);
 		safe_delete_array(gmspawntype_dump);
 	}
-    *end++ = '\'';
-    end += sprintf(end, ")");
+	*end++ = '\'';
+	end += sprintf(end, ")");
 
 	uint32 affected_rows = 0;
 	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
-		//    if (DoEscapeString(query, (unsigned int) (end - query))) {
+		// if (DoEscapeString(query, (unsigned int) (end - query))) {
 		safe_delete_array(query);
-        cerr << "Error in ZoneDump query " << errbuf << endl;
+		cerr << "Error in ZoneDump query " << errbuf << endl;
 		return false;
-    }
+	}
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
@@ -1826,9 +1826,9 @@ bool ZoneDatabase::DumpZoneState() {
 
 int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spawn2_list) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	uint32 i;
 	unsigned long* lengths;
@@ -2026,9 +2026,9 @@ void Zone::SpawnStatus(Mob* client) {
 	while(iterator.MoreElements())
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-			client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 		else
-			client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 
 		x++;
 		iterator.Advance();
@@ -2048,7 +2048,7 @@ void Zone::ShowEnabledSpawnStatus(Mob* client)
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() != 0xFFFFFFFF)
 		{
-			client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 			iEnabledCount++;
 		}
 
@@ -2071,7 +2071,7 @@ void Zone::ShowDisabledSpawnStatus(Mob* client)
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
 		{
-			client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 			iDisabledCount++;
 		}
 
@@ -2095,9 +2095,9 @@ void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
 		if (iterator.GetData()->GetID() == spawnid)
 		{
 			if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-				client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+				client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 			else
-				client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+				client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 
 			iSpawnIDCount++;
 
@@ -2506,9 +2506,9 @@ void Zone::LoadAlternateCurrencies()
 	{
 		while((row = mysql_fetch_row(result)))
 		{
-            current_currency.id = atoi(row[0]);
-            current_currency.item_id = atoi(row[1]);
-            AlternateCurrencies.push_back(current_currency);
+			current_currency.id = atoi(row[0]);
+			current_currency.item_id = atoi(row[1]);
+			AlternateCurrencies.push_back(current_currency);
 		}
 
 		mysql_free_result(result);
@@ -2672,17 +2672,17 @@ void Zone::ReloadWorld(uint32 Option){
 
 void Zone::LoadTickItems()
 {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-    tick_items.clear();
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	tick_items.clear();
 
-    if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick"), errbuf, &result))
-    {
-        while((row = mysql_fetch_row(result)))
-        {
-            if(atoi(row[0]) >= 1)
+	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick"), errbuf, &result))
+	{
+		while((row = mysql_fetch_row(result)))
+		{
+			if(atoi(row[0]) >= 1)
 			{
 				item_tick_struct ti_tmp;
 				ti_tmp.itemid = atoi(row[0]);
@@ -2692,52 +2692,52 @@ void Zone::LoadTickItems()
 				ti_tmp.qglobal = std::string(row[3]);
 				tick_items[atoi(row[0])] = ti_tmp;
 			}
-        }
-        mysql_free_result(result);
-        safe_delete_array(query);
-    }
-    else
-    {
-        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query, errbuf);
-        safe_delete_array(query);
-    }
+		}
+		mysql_free_result(result);
+		safe_delete_array(query);
+	}
+	else
+	{
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query, errbuf);
+		safe_delete_array(query);
+	}
 }
 
 uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
-    LinkedListIterator<Spawn2*> iterator(spawn2_list);
+	LinkedListIterator<Spawn2*> iterator(spawn2_list);
 
-    iterator.Reset();
-    while(iterator.MoreElements())
-    {
-        if(iterator.GetData()->GetID() == in_spawnid)
-        {
-            return(iterator.GetData()->killcount);
-        }
-        iterator.Advance();
-    }
+	iterator.Reset();
+	while(iterator.MoreElements())
+	{
+		if(iterator.GetData()->GetID() == in_spawnid)
+		{
+			return(iterator.GetData()->killcount);
+		}
+		iterator.Advance();
+	}
 	return 0;
 }
 
 void Zone::UpdateHotzone()
 {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-    bool updh;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	bool updh;
 
-    if(database.RunQuery(query, MakeAnyLenString(&query,"SELECT  hotzone FROM zone WHERE short_name = '%s'", GetShortName()), errbuf, &result) )
-    {
-        if( (row = mysql_fetch_row(result)) )
-        {
-            updh = atoi(row[0]) == 0 ? false:true;
-            //Hotzone status has changed
-            if(is_hotzone != updh)
-            {
-                is_hotzone = updh;
-            }
-        }
-        mysql_free_result(result);
-    }
-    safe_delete_array(query);
+	if(database.RunQuery(query, MakeAnyLenString(&query,"SELECT  hotzone FROM zone WHERE short_name = '%s'", GetShortName()), errbuf, &result) )
+	{
+		if( (row = mysql_fetch_row(result)) )
+		{
+			updh = atoi(row[0]) == 0 ? false:true;
+			//Hotzone status has changed
+			if(is_hotzone != updh)
+			{
+				is_hotzone = updh;
+			}
+		}
+		mysql_free_result(result);
+	}
+	safe_delete_array(query);
 }

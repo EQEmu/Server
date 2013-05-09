@@ -39,7 +39,7 @@ bool LFGuildManager::LoadDatabase()
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (!database.RunQuery(query,MakeAnyLenString(&query, "SELECT `type`,`name`,`comment`, `fromlevel`, `tolevel`, `classes`, `aacount`, `timezone`, `timeposted`  FROM `lfguild`"),errbuf,&result)){
+	if (!database.RunQuery(query,MakeAnyLenString(&query, "SELECT `type`,`name`,`comment`, `fromlevel`, `tolevel`, `classes`, `aacount`, `timezone`, `timeposted` FROM `lfguild`"),errbuf,&result)){
 
 		_log(QUERYSERV__ERROR, "Failed to load LFGuild info from database. %s %s", query, errbuf);
 		safe_delete_array(query);
@@ -258,7 +258,7 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 	}
 
 	if(!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM `lfguild` WHERE `type` = 0 AND `name` = '%s'", From), errbuf, 0, 0))
-		_log(QUERYSERV__ERROR, "Error removing player from LFGuild table,  query was %s, %s", query, errbuf);
+		_log(QUERYSERV__ERROR, "Error removing player from LFGuild table, query was %s, %s", query, errbuf);
 
 	safe_delete_array(query);
 
@@ -433,3 +433,4 @@ void LFGuildManager::SendGuildStatus(uint32 FromZoneID, uint32 FromInstanceID, c
 		}
 	}
 }
+

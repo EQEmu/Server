@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/debug.h"
@@ -37,8 +37,8 @@ bool RunLoops = false;
 void CatchSignal(int sig_num);
 
 int main(int argc, char *argv[]) {
-    RegisterExecutablePlatform(ExePlatformLaunch);
-    set_exception_handler();
+	RegisterExecutablePlatform(ExePlatformLaunch);
+	set_exception_handler();
 
 	string launcher_name;
 	if(argc == 2) {
@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
 	const EQEmuConfig *Config = EQEmuConfig::get();
 
 	/*
-	 * Setup nice signal handlers
-	 */
+	* Setup nice signal handlers
+	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(LAUNCHER__ERROR, "Could not set signal handler");
 		return 1;
@@ -74,8 +74,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	/*
-	 * Add '.' to LD_LIBRARY_PATH
-	 */
+	* Add '.' to LD_LIBRARY_PATH
+	*/
 	//the storage passed to putenv must remain valid... crazy unix people
 	const char *pv = getenv("LD_LIBRARY_PATH");
 	if(pv == nullptr) {
@@ -109,18 +109,18 @@ int main(int argc, char *argv[]) {
 		Timer::SetCurrentTime();
 
 		/*
-		 * Process the world connection
-		 */
+		* Process the world connection
+		*/
 		world.Process();
 
 		/*
-		 * Let the process manager look for dead children
-		 */
+		* Let the process manager look for dead children
+		*/
 		launch->Process();
 
 		/*
-		 * Give all zones a chance to process.
-		 */
+		* Give all zones a chance to process.
+		*/
 		zone = zones.begin();
 		zend = zones.end();
 		for(; zone != zend; zone++) {
@@ -129,8 +129,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		/*
-		 * Kill off any zones which have stopped
-		 */
+		* Kill off any zones which have stopped
+		*/
 		while(!to_remove.empty()) {
 			string rem = *to_remove.begin();
 			to_remove.erase(rem);
@@ -150,8 +150,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		/*
-		 * Take a nice nap until next cycle
-		 */
+		* Take a nice nap until next cycle
+		*/
 		if(zones.empty())
 			Sleep(5000);
 		else

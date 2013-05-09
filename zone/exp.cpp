@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/features.h"
@@ -134,7 +134,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 			if(GetGroup())
 			{
 				if((m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel()))
-				   && (RuleI(Character, KillsPerGroupLeadershipAA) > 0))
+					&& (RuleI(Character, KillsPerGroupLeadershipAA) > 0))
 				{
 					AddLeadershipEXP(GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA), 0);
 					Message_StringID(MT_Leadership, GAIN_GROUP_LEADERSHIP_EXP);
@@ -145,7 +145,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 			else
 			{
 				if((m_pp.raid_leadership_points < MaxBankedRaidLeadershipPoints(GetLevel()))
-				   && (RuleI(Character, KillsPerRaidLeadershipAA) > 0))
+					&& (RuleI(Character, KillsPerRaidLeadershipAA) > 0))
 				{
 					AddLeadershipEXP(0, RAID_EXP_PER_POINT / RuleI(Character, KillsPerRaidLeadershipAA));
 					Message_StringID(MT_Leadership, GAIN_RAID_LEADERSHIP_EXP);
@@ -278,7 +278,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 
 		//Message(15, "You have gained %d skill points!!", m_pp.aapoints - last_unspentAA);
 		char val1[20]={0};
-		Message_StringID(MT_Experience, GAIN_ABILITY_POINT,ConvertArray(m_pp.aapoints, val1),m_pp.aapoints == 1 ? "" : "(s)");	//You have gained an ability point!  You now have %1 ability point%2.
+		Message_StringID(MT_Experience, GAIN_ABILITY_POINT,ConvertArray(m_pp.aapoints, val1),m_pp.aapoints == 1 ? "" : "(s)");	//You have gained an ability point! You now have %1 ability point%2.
 		//Message(15, "You now have %d skill points available to spend.", m_pp.aapoints);
 	}
 
@@ -307,7 +307,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 				uint32 expneeded = GetEXPForLevel(MaxLevel);
 				if(set_exp > expneeded)
 				{
-					set_exp =  expneeded;
+					set_exp = expneeded;
 				}
 			}
 		}
@@ -334,7 +334,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		uint32 expneeded = GetEXPForLevel(maxlevel);
 		if(set_exp > expneeded)
 		{
-			set_exp =  expneeded;
+			set_exp = expneeded;
 		}
 	}
 
@@ -370,77 +370,77 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 
 void Client::SetLevel(uint8 set_level, bool command)
 {
-        if (GetEXPForLevel(set_level) == 0xFFFFFFFF) {
-                LogFile->write(EQEMuLog::Error,"Client::SetLevel() GetEXPForLevel(%i) = 0xFFFFFFFF", set_level);
-                return;
-        }
+	if (GetEXPForLevel(set_level) == 0xFFFFFFFF) {
+		LogFile->write(EQEMuLog::Error,"Client::SetLevel() GetEXPForLevel(%i) = 0xFFFFFFFF", set_level);
+		return;
+	}
 
-        EQApplicationPacket* outapp = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
-        LevelUpdate_Struct* lu = (LevelUpdate_Struct*)outapp->pBuffer;
-        lu->level = set_level;
-        if(m_pp.level2 != 0)
-                lu->level_old = m_pp.level2;
-        else
-                lu->level_old = level;
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
+	LevelUpdate_Struct* lu = (LevelUpdate_Struct*)outapp->pBuffer;
+	lu->level = set_level;
+	if(m_pp.level2 != 0)
+		lu->level_old = m_pp.level2;
+	else
+		lu->level_old = level;
 
-        level = set_level;
+	level = set_level;
 
-        if(IsRaidGrouped())
-        {
-                Raid *r = this->GetRaid();
-                if(r){
-                        r->UpdateLevel(GetName(), set_level);
-                }
-        }
-        if(set_level > m_pp.level2)
-        {
-                if(m_pp.level2 == 0)
-                        m_pp.points += 5;
-                else
-                        m_pp.points += (5 * (set_level - m_pp.level2));
+	if(IsRaidGrouped())
+	{
+		Raid *r = this->GetRaid();
+		if(r){
+			r->UpdateLevel(GetName(), set_level);
+		}
+	}
+	if(set_level > m_pp.level2)
+	{
+		if(m_pp.level2 == 0)
+			m_pp.points += 5;
+		else
+			m_pp.points += (5 * (set_level - m_pp.level2));
 
-                m_pp.level2 = set_level;
-        }
-        if(set_level > m_pp.level) {
-            parse->EventPlayer(EVENT_LEVEL_UP, this, "", 0);
-        }
+		m_pp.level2 = set_level;
+	}
+	if(set_level > m_pp.level) {
+		parse->EventPlayer(EVENT_LEVEL_UP, this, "", 0);
+	}
 
-        m_pp.level = set_level;
-        if (command){
-                m_pp.exp = GetEXPForLevel(set_level);
-                Message(15, "Welcome to level %i!", set_level);
-                lu->exp = 0;
-        }
-        else {
-                float tmpxp = (float) ( (float) m_pp.exp - GetEXPForLevel( GetLevel() )) /
-                                                ( (float) GetEXPForLevel(GetLevel()+1) - GetEXPForLevel(GetLevel()));
-                lu->exp =  (uint32)(330.0f * tmpxp);
-    }
-        QueuePacket(outapp);
-        safe_delete(outapp);
-        this->SendAppearancePacket(AT_WhoLevel, set_level); // who level change
+	m_pp.level = set_level;
+	if (command){
+		m_pp.exp = GetEXPForLevel(set_level);
+		Message(15, "Welcome to level %i!", set_level);
+		lu->exp = 0;
+	}
+	else {
+		float tmpxp = (float) ( (float) m_pp.exp - GetEXPForLevel( GetLevel() )) /
+						( (float) GetEXPForLevel(GetLevel()+1) - GetEXPForLevel(GetLevel()));
+		lu->exp = (uint32)(330.0f * tmpxp);
+	}
+	QueuePacket(outapp);
+	safe_delete(outapp);
+	this->SendAppearancePacket(AT_WhoLevel, set_level); // who level change
 
 		LogFile->write(EQEMuLog::Normal,"Setting Level for %s to %i", GetName(), set_level);
 
-        CalcBonuses();
-        if(!RuleB(Character, HealOnLevel))
-        {
-                int mhp = CalcMaxHP();
-                if(GetHP() > mhp)
-                        SetHP(mhp);
-        }
-        else
-        {
-                SetHP(CalcMaxHP());             // Why not, lets give them a free heal
-        }
+	CalcBonuses();
+	if(!RuleB(Character, HealOnLevel))
+	{
+		int mhp = CalcMaxHP();
+		if(GetHP() > mhp)
+			SetHP(mhp);
+	}
+	else
+	{
+		SetHP(CalcMaxHP()); // Why not, lets give them a free heal
+	}
 
 		DoTributeUpdate();
-        SendHPUpdate();
-        SetMana(CalcMaxMana());
-        UpdateWho();
+	SendHPUpdate();
+	SetMana(CalcMaxMana());
+	UpdateWho();
 		if(GetMerc())
 			UpdateMercLevel();
-        Save();
+	Save();
 }
 
 // Note: The client calculates exp separately, we cant change this function
@@ -507,7 +507,7 @@ void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) {
 
 void Group::SplitExp(uint32 exp, Mob* other) {
 	if( other->CastToNPC()->MerchantType != 0 ) // Ensure NPC isn't a merchant
-	  return;
+		return;
 
 	if(other->GetOwner() && other->GetOwner()->IsClient()) // Ensure owner isn't pc
 		return;
@@ -549,7 +549,7 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 	if (membercount == 0)
 		return;
 
-	for (i = 0; i < MAX_GROUP_MEMBERS; i++)  {
+	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (members[i] != nullptr && members[i]->IsClient()) // If Group Member is Client
 		{
 			Client *cmember = members[i]->CastToClient();
@@ -596,7 +596,7 @@ void Raid::SplitExp(uint32 exp, Mob* other) {
 	if (membercount == 0)
 		return;
 
-	for (unsigned int x = 0; x < MAX_RAID_MEMBERS; x++)  {
+	for (unsigned int x = 0; x < MAX_RAID_MEMBERS; x++) {
 		if (members[x].member != nullptr) // If Group Member is Client
 		{
 			Client *cmember = members[x].member;
@@ -672,5 +672,5 @@ uint32 Client::GetCharMaxLevelFromQGlobal() {
 			++gcount;
 		}
 
-	return false;   // Default is false
+	return false; // Default is false
 }

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2004  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -36,30 +36,30 @@ using namespace std;
 #define snprintf	_snprintf
 #define vsnprintf	_vsnprintf
 #define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
+#define strcasecmp	_stricmp
 #endif
 
 bool spells_loaded = false;
 volatile bool RunLoops = true;
 extern volatile bool ZoneLoaded;
 #ifdef SHAREMEM
-       #include "../common/EMuShareMem.h"
-       extern LoadEMuShareMemDLL EMuShareMemDLL;
-    #ifndef WIN32
-       #include <sys/types.h>
-       #include <sys/ipc.h>
-       #include <sys/sem.h>
-       #include <sys/shm.h>
+	#include "../common/EMuShareMem.h"
+	extern LoadEMuShareMemDLL EMuShareMemDLL;
+	#ifndef WIN32
+		#include <sys/types.h>
+		#include <sys/ipc.h>
+		#include <sys/sem.h>
+		#include <sys/shm.h>
 #ifndef FREEBSD
-       union semun {
-           int val;
-           struct semid_ds *buf;
-           ushort *array;
-           struct seminfo *__buf;
-           void *__pad;
-       };
+	union semun {
+		int val;
+		struct semid_ds *buf;
+		ushort *array;
+		struct seminfo *__buf;
+		void *__pad;
+	};
 #endif
-    #endif
+	#endif
 #endif
 
 
@@ -674,20 +674,20 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 				token[u]=(char)0;
 
 		} //cout << "end class";
-		  /*for(y=0; y< 3;y++)
-		  {
-		  in.get(temp);
-		  while(chrcmpI(&temp,&sep))
-		  {
-		  strncat(token,&temp,1);
-		  a++;
-		  in.get(temp);
-		  }
-		  spells[tempid].unknown1[y]=atoi(token);
-		  cout << spells[tempid].unknown1[y] << '^';
-		  a=0;
-		  for(u=0;u<64;u++)
-		  token[u]=(char)0;
+			/*for(y=0; y< 3;y++)
+			{
+			in.get(temp);
+			while(chrcmpI(&temp,&sep))
+			{
+			strncat(token,&temp,1);
+			a++;
+			in.get(temp);
+			}
+			spells[tempid].unknown1[y]=atoi(token);
+			cout << spells[tempid].unknown1[y] << '^';
+			a=0;
+			for(u=0;u<64;u++)
+			token[u]=(char)0;
 
 			}
 			in.get(temp);
@@ -754,23 +754,23 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			token[u]=(char)0;
 
 		for(y=0; y< 23;y++)
-        {
+		{
 			in.get(temp);
 			while(chrcmpI(&temp,&sep))
 			{
 			strncat(token,&temp,1);
 			a++;
 			in.get(temp);
-		    }
+			}
 			spells[tempid].Spacing2[y]=atoi(token);
 			//cout << spells[tempid].base[y] << '^';
 			a=0;
 			for(u=0;u<64;u++)
-			    token[u]=(char)0;
+				token[u]=(char)0;
 		}
 
-        in.get(temp);
-	    while(chrcmpI(&temp,&sep))
+		in.get(temp);
+		while(chrcmpI(&temp,&sep))
 			{
 			strncat(token,&temp,1);
 			a++;
@@ -780,9 +780,9 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			//cout << spells[tempid].ResistDiff << '^';
 		a=0;
 		for(u=0;u<64;u++)
-		    token[u]=(char)0;
+			token[u]=(char)0;
 
-        in.get(temp);
+		in.get(temp);
 		for(y=0; y< 2;y++)
 			{
 			in.get(temp);
@@ -799,8 +799,8 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			token[u]=(char)0;
 			}
 
-        in.get(temp);
-	    while(chrcmpI(&temp,&sep))
+		in.get(temp);
+		while(chrcmpI(&temp,&sep))
 			{
 			strncat(token,&temp,1);
 			a++;
@@ -810,9 +810,9 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 			//cout << spells[tempid].RecourseLink << '^';
 		a=0;
 		for(u=0;u<64;u++)
-		    token[u]=(char)0;
+			token[u]=(char)0;
 
-        while(temp!='\n')
+		while(temp!='\n')
 			in.get(temp);
 
 		//cout << endl;
@@ -840,7 +840,7 @@ void LoadSPDat(SPDat_Spell_Struct** SpellsPointer) {
 
 void ZoneDatabase::UpdateAndDeleteAATimers(uint32 charid){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	char *query2 = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "delete from aa_timers where charid=%i and UNIX_TIMESTAMP(now())>=end",charid), errbuf)) {
@@ -855,7 +855,7 @@ void ZoneDatabase::UpdateAndDeleteAATimers(uint32 charid){
 
 void ZoneDatabase::UpdateTimersClientConnected(uint32 charid){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	if (!RunQuery(query, MakeAnyLenString(&query, "update aa_timers set end=(UNIX_TIMESTAMP(now())+(end-begin)),begin=UNIX_TIMESTAMP(now()) where charid=%i",charid), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "UpdateAATimers query '%s' %s", query, errbuf);
 	}
@@ -864,8 +864,8 @@ void ZoneDatabase::UpdateTimersClientConnected(uint32 charid){
 
 void ZoneDatabase::GetAATimers(uint32 charid){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char *query = 0;
+	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT ability,begin,end from aa_timers WHERE charid=%i", charid), errbuf, &result)) {
@@ -887,8 +887,8 @@ void ZoneDatabase::GetAATimers(uint32 charid){
 
 uint32 ZoneDatabase::GetTimerRemaining(uint32 charid,uint32 ability){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char *query = 0;
+	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 remain=0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT end-begin from aa_timers WHERE charid=%i and ability=%i", charid,ability), errbuf, &result)) {
@@ -906,7 +906,7 @@ uint32 ZoneDatabase::GetTimerRemaining(uint32 charid,uint32 ability){
 
 void ZoneDatabase::UpdateAATimers(uint32 charid,uint32 endtime,uint32 begintime,uint32 ability){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	if(begintime==0){
 		if (!RunQuery(query, MakeAnyLenString(&query, "replace into aa_timers (charid,end,begin,ability) values(%i,UNIX_TIMESTAMP(now())+%i,UNIX_TIMESTAMP(now()),%i)",charid,endtime,ability), errbuf)) {
 			LogFile->write(EQEMuLog::Error, "UpdateAATimers query '%s' %s", query, errbuf);
@@ -1148,7 +1148,7 @@ int32 Client::GenericFocus(uint16 spell_id, uint16 modspellid)
 							return 100;
 						break;
 					default:
-						LogFile->write(EQEMuLog::Normal, "GenericFocus:  unknown limit effect %d", spells[modspellid].base[i]);
+						LogFile->write(EQEMuLog::Normal, "GenericFocus: unknown limit effect %d", spells[modspellid].base[i]);
 				}
 				break;
 			case SE_LimitCastTime:
@@ -1167,7 +1167,7 @@ int32 Client::GenericFocus(uint16 spell_id, uint16 modspellid)
 							return 100;
 						break;
 					default:
-						LogFile->write(EQEMuLog::Normal, "GenericFocus:  unknown limit spelltype %d", spells[modspellid].base[i]);
+						LogFile->write(EQEMuLog::Normal, "GenericFocus: unknown limit spelltype %d", spells[modspellid].base[i]);
 				}
 				break;
 			case SE_LimitMinDur:
@@ -1182,7 +1182,7 @@ int32 Client::GenericFocus(uint16 spell_id, uint16 modspellid)
 				modifier -= modspell.base[i];
 				break;
 			default:
-				LogFile->write(EQEMuLog::Normal, "GenericFocus:  unknown effectid %d", modspell.effectid[i]);
+				LogFile->write(EQEMuLog::Normal, "GenericFocus: unknown effectid %d", modspell.effectid[i]);
 		}
 	}
 
@@ -1212,7 +1212,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 	uint32 duration = 0;
 	uint32 reuse = 0;
 
-    switch(disc_in->disc_id){
+	switch(disc_in->disc_id){
 	// Shared?
 	case discResistant: { // Resistant
 		// 1 minute duration
@@ -1223,7 +1223,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		duration = 60;
 		reuse = 60*60;
 		entity_list.MessageClose(this, false, 100, 0, "%s has become more resistant!", GetName());
-	    break;
+		break;
 	}
 	case discFearless: { // Fearless
 		// 11 second duration
@@ -1235,20 +1235,20 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		reuse = 60*60;
 		entity_list.MessageClose_StringID(this, false, 100, 0, DISCIPLINE_FEARLESS, GetName());
 		//entity_list.MessageClose(this, false, 100, 0, "%s becomes fearless!", GetName());
-	    break;
+		break;
 	}
 	case discWhirlwind: { // Counterattack/Whirlwind/Furious
 		// warrior level 56
 		// rogue/monk level 53
 		// 9 second duration
 		// 1 hour reuse
-		if (      (GetClass() == WARRIOR && GetLevel() <= 56)
+		if ((GetClass() == WARRIOR && GetLevel() <= 56)
 			||(GetLevel() <= 53)
 			) return;
 		duration = 9;
 		reuse = 60*60;
 		entity_list.MessageClose(this, false, 100, 0, "%s\'s face becomes twisted with fury!", GetName());
-	    break;
+		break;
 	}
 	case discFellstrike: { // Duelist/Innerflame/Fellstrike
 		// monk level 56
@@ -1257,21 +1257,21 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// 12 second duration
 		// 30 minute reuse
 		// min 4*base hand/weapon damage
-		if (      (GetClass() == MONK && GetLevel() <= 55)
+		if ((GetClass() == MONK && GetLevel() <= 55)
 			||(GetClass() == WARRIOR && GetLevel() <= 58)
 			||(GetClass() == ROGUE && GetLevel() <= 59)
 			) return;
 		duration = 12;
 		reuse = 60*30;
 		entity_list.MessageClose(this, false, 100, 0, "%s\'s muscles bulge with force of will!", GetName());
-	    break;
+		break;
 	}
 	case discBlindingSpeed: { // Blindingspeed/Hundredfist
 		// rogue level 58
 		// monk level 57
 		// 15 second duration
 		// 30 minute reuse
-		if (      (GetClass() == MONK && GetLevel() <= 58)
+		if ((GetClass() == MONK && GetLevel() <= 58)
 			||(GetClass() == ROGUE && GetLevel() <= 57)
 			) return;
 		//disc_timer.Start(1000*60*30);
@@ -1279,20 +1279,20 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		duration = 15;
 		reuse = 60*30;
 		Message(0, "This discipline not implemented..");
-	    break;
+		break;
 	}
 	case discDeadeye: { // Deadeye/Charge
 		// warrior level 53
 		// rogue level 54
 		// 14 second duration
 		// 30 minute reuse
-		if (      (GetClass() == WARRIOR && GetLevel() <= 53)
+		if ((GetClass() == WARRIOR && GetLevel() <= 53)
 			||(GetClass() == ROGUE && GetLevel() <= 54)
 			) return;
 		duration = 14;
 		reuse = 60*30;
 		entity_list.MessageClose(this, false, 100, 0, "%s feels unstopable!", GetName());
-	    break;
+		break;
 	}
 	// Warrior
 	case discEvasive: { // Evasive
@@ -1303,7 +1303,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// -15% out
 		duration = 3*60;
 		reuse = 15*60;
-	    break;
+		break;
 	}
 	case discMightystrike: { // Mightystrike
 		// level 54
@@ -1312,7 +1312,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// Auto crit
 		duration = 10;
 		reuse = 60*60;
-	    break;
+		break;
 	}
 	case discDefensive: { // Defensive
 		// level 55
@@ -1325,7 +1325,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 			reuse = 10*60;
 		else
 			reuse = 15*60;
-	    break;
+		break;
 	}
 	case discPrecise: { // Precise
 		// level 57
@@ -1335,7 +1335,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// +35% out
 		duration = 3*60;
 		reuse = 30*60;
-	    break;
+		break;
 	}
 	case discAggressive: { // Aggressive
 		// level 60
@@ -1345,7 +1345,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// +35% out
 		duration = 3*60;
 		reuse = 27*60;
-	    break;
+		break;
 	}
 	// Monk
 	case discStonestance: { // Stonestance
@@ -1355,7 +1355,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 			reuse = 3*60;
 		else
 			reuse = 12*60;
-	    break;
+		break;
 	}
 	case discThunderkick: { // Thunderkick
 		// level 52
@@ -1364,7 +1364,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		else
 			reuse = 7*60;
 		duration = 5*60;		//hack for now, checked in combat and expired once used.
-	    break;
+		break;
 	}
 	case discVoidance: { // Voidance
 		// level 54
@@ -1373,7 +1373,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		else
 			reuse = 60*60;
 		duration = 8;
-	    break;
+		break;
 	}
 	case discSilentfist: { // Silentfist
 		// level 59
@@ -1385,7 +1385,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		else
 			reuse = 7*60;
 		duration = 5*60;		//hack for now, checked in combat and expired once used.
-	    break;
+		break;
 	}
 	case discAshenhand: { // Ashenhand
 		// level 60
@@ -1394,7 +1394,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// Chance to slay
 		reuse = 72*60;
 		duration = 5*60;		//hack for now, checked in combat and expired once used.
-	    break;
+		break;
 	}
 	// Rogue
 	case discNimble: { // Nimble
@@ -1407,7 +1407,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		else
 			reuse = 30*60;
 		duration = 12;
-	    break;
+		break;
 	}
 	case discKinesthetics: { // Kinesthetics
 		// level 57
@@ -1420,7 +1420,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		else
 			reuse = 30*60;
 		duration = 18;
-	    break;
+		break;
 	}
 	// Paladin
 	case discHolyforge: { // Holyforge
@@ -1434,7 +1434,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		else
 			reuse = 72*60;
 		duration = 5*60;
-	    break;
+		break;
 	}
 	case discSanctification: { // Sanctification
 		// level 60
@@ -1443,7 +1443,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// Spell immunity
 		reuse = 72*60;
 		duration = 15;
-	    break;
+		break;
 	}
 	// Ranger
 	case discTrueshot: { // Trueshot
@@ -1457,7 +1457,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		else
 			reuse = 72*60;
 		duration = 2*60;
-	    break;
+		break;
 	}
 	case discWeaponshield: { // Weaponshield
 		// level 60
@@ -1466,7 +1466,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// auto parry
 		reuse = 72*60;
 		duration = 20;
-	    break;
+		break;
 	}
 	// Bard
 	case discDeftdance: { // Deftdance
@@ -1480,7 +1480,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		else
 			reuse = 72*60;
 		duration = 10;
-	    break;
+		break;
 	}
 	case discPuretone: { // Puretone
 		// level 60
@@ -1489,7 +1489,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// Auto instrument
 		reuse = 72*60;
 		duration = 4*60;
-	    break;
+		break;
 	}
 	// Shadow knight
 	case discUnholyAura: { // Unholy
@@ -1502,7 +1502,7 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		else
 			reuse = 72*60;
 		duration = 5*60;		//hack for now, checked in combat and expired once used.
-	    break;
+		break;
 	}
 	case discLeechCurse: { // Leech curse
 		// level 60
@@ -1511,18 +1511,18 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 		// Heal self for each point of melee damage done
 		reuse = 72*60;
 		duration = 15;
-	    break;
+		break;
 	}
 	// Default
 	case 0:{ // Timer request
 		break;
 	}
 	default:
-	    LogFile->write(EQEMuLog::Error, "Unknown Discipline requested by client: %s class: %i Disciline:%i", GetName(), class_,disc_in->disc_id);
-	    return;
-    }
+		LogFile->write(EQEMuLog::Error, "Unknown Discipline requested by client: %s class: %i Disciline:%i", GetName(), class_,disc_in->disc_id);
+		return;
+	}
 
-    if(reuse != 0) {
+	if(reuse != 0) {
 		p_timers.Start(pTimerDisciplineReuse, reuse);
 		//nonpersistent timer for the 'discipline ready' message
 		disc_timer.Start(1000*reuse);
@@ -1541,37 +1541,37 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 	while(iterator.MoreElements()) {
 		Mob* mob = iterator.GetData();
 		if (group){
-			    // Client casting group spell with out target group buffs enabled
-			    // Skip non group members
-                if (   caster->IsClient()
-                    && !caster->CastToClient()->TGB()
-                    && GetGroupByMob(mob) != 0
-                    && !GetGroupByMob(mob)->IsGroupMember(caster)
-                    ) {
-                    LogFile->write(EQEMuLog::Debug, "Group spell skipping %s", mob->GetName());
-                        iterator.Advance();
-                        continue;
-                }
-			    // Client casting group spell with target group buffs enabled
-                else if (  caster->IsClient()
-                        && caster->CastToClient()->TGB()
-                        && GetGroupByMob(mob) != 0
-                        && GetGroupByMob(mob)->IsGroupMember(caster)
-                        ){
-                        LogFile->write(EQEMuLog::Debug, "Group spell TGB on %s's Group", mob->GetName());
-                        GetGroupByMob(mob)->CastGroupSpell(caster, spell_id);
-                        iterator.Advance();
-                        continue;
-                }
-                else if (  caster->IsClient()
-                        && caster->CastToClient()->TGB()
-                        && GetGroupByMob(mob) == 0
-                        && mob == center
-                        ){
-                        LogFile->write(EQEMuLog::Debug, "Group spell TGB on %s", mob->GetName());
-                        caster->SpellOnTarget(spell_id, mob);
-                        return;
-                }
+				// Client casting group spell with out target group buffs enabled
+				// Skip non group members
+				if (caster->IsClient()
+					&& !caster->CastToClient()->TGB()
+					&& GetGroupByMob(mob) != 0
+					&& !GetGroupByMob(mob)->IsGroupMember(caster)
+					) {
+					LogFile->write(EQEMuLog::Debug, "Group spell skipping %s", mob->GetName());
+						iterator.Advance();
+						continue;
+				}
+				// Client casting group spell with target group buffs enabled
+				else if (caster->IsClient()
+						&& caster->CastToClient()->TGB()
+						&& GetGroupByMob(mob) != 0
+						&& GetGroupByMob(mob)->IsGroupMember(caster)
+						){
+						LogFile->write(EQEMuLog::Debug, "Group spell TGB on %s's Group", mob->GetName());
+						GetGroupByMob(mob)->CastGroupSpell(caster, spell_id);
+						iterator.Advance();
+						continue;
+				}
+				else if (caster->IsClient()
+						&& caster->CastToClient()->TGB()
+						&& GetGroupByMob(mob) == 0
+						&& mob == center
+						){
+						LogFile->write(EQEMuLog::Debug, "Group spell TGB on %s", mob->GetName());
+						caster->SpellOnTarget(spell_id, mob);
+						return;
+				}
 		}
 		if (
 			mob->DistNoZ(*center) <= dist
@@ -1586,66 +1586,66 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 			else if(caster->IsNPC() && !caster->CastToNPC()->IsInteractive()) {
 		#else
 			else if(caster->IsNPC()) {
-        #endif
-        	// Npc
+		#endif
+			// Npc
 				if (caster->IsAttackAllowed(mob) && spells[spell_id].targettype != ST_AEBard) {
-				//    printf("NPC Spell casted on %s\n", mob->GetName());
+					//printf("NPC Spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else if (mob->IsAIControlled() && spells[spell_id].targettype == ST_AEBard) {
-				//    printf("NPC mgb/aebard spell casted on %s\n", mob->GetName());
+					//printf("NPC mgb/aebard spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else {
-				//    printf("NPC AE, fall thru. spell_id:%i, Target type:%x\n", spell_id, spells[spell_id].targettype);
+					//printf("NPC AE, fall thru. spell_id:%i, Target type:%x\n", spell_id, spells[spell_id].targettype);
 				}
 			}
 		#ifdef IPC
-            else if(caster->IsNPC() && caster->CastToNPC()->IsInteractive()) {
-			  	// Interactive npc
+			else if(caster->IsNPC() && caster->CastToNPC()->IsInteractive()) {
+				// Interactive npc
 				if (caster->IsAttackAllowed(mob) && spells[spell_id].targettype != ST_AEBard && spells[spell_id].targettype != ST_GroupTeleport) {
-				//    printf("IPC Spell casted on %s\n", mob->GetName());
+					//printf("IPC Spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else if (!mob->IsAIControlled() && (spells[spell_id].targettype == ST_AEBard||group) && mob->CastToClient()->GetPVP() == caster->CastToClient()->GetPVP()) {
-					    if (group && GetGroupByMob(mob) != GetGroupByMob(caster)) {
-                                iterator.Advance();
-                                continue;
-                    }
-				//    printf("IPC mgb/aebard spell casted on %s\n", mob->GetName());
+						if (group && GetGroupByMob(mob) != GetGroupByMob(caster)) {
+								iterator.Advance();
+								continue;
+					}
+					//printf("IPC mgb/aebard spell casted on %s\n", mob->GetName());
 				caster->SpellOnTarget(spell_id, mob);
 				}
 				else {
-				//    printf("NPC AE, fall thru. spell_id:%i, Target type:%x\n", spell_id, spells[spell_id].targettype);
+					//printf("NPC AE, fall thru. spell_id:%i, Target type:%x\n", spell_id, spells[spell_id].targettype);
 				}
 			}
 		#endif
-            else if (caster->IsClient() && !(caster->CastToClient()->IsBecomeNPC())) {
+			else if (caster->IsClient() && !(caster->CastToClient()->IsBecomeNPC())) {
 				// Client
 				if (caster->IsAttackAllowed(mob) && spells[spell_id].targettype != ST_AEBard){
-				//    printf("Client Spell casted on %s\n", mob->GetName());
+					//printf("Client Spell casted on %s\n", mob->GetName());
 					caster->SpellOnTarget(spell_id, mob);
 				}
 				else if(spells[spell_id].targettype == ST_GroupTeleport && mob->IsClient() && mob->isgrouped && caster->isgrouped && entity_list.GetGroupByMob(caster))
 				{
 					Group* caster_group = entity_list.GetGroupByMob(caster);
-                    if(caster_group != 0 && caster_group->IsGroupMember(mob))
-					    caster->SpellOnTarget(spell_id,mob);
+					if(caster_group != 0 && caster_group->IsGroupMember(mob))
+						caster->SpellOnTarget(spell_id,mob);
 				}
 				else if (mob->IsClient() && (spells[spell_id].targettype == ST_AEBard||group) && mob->CastToClient()->GetPVP() == caster->CastToClient()->GetPVP()) {
 					if (group && GetGroupByMob(mob) != GetGroupByMob(caster)) {
-                                iterator.Advance();
-                                continue;
-                    }
+						iterator.Advance();
+						continue;
+					}
 					else if (mob->IsClient() && spells[spell_id].targettype == ST_AEBard && mob->CastToClient()->GetPVP() == caster->CastToClient()->GetPVP())
 						caster->SpellOnTarget(spell_id, mob);
 				#ifdef IPC
-                    else if (mob->IsNPC() && mob->CastToNPC()->IsInteractive()) {
-					    if (group && GetGroupByMob(mob) != GetGroupByMob(caster))
-					            continue;
-					    caster->SpellOnTarget(spell_id, mob);
+					else if (mob->IsNPC() && mob->CastToNPC()->IsInteractive()) {
+						if (group && GetGroupByMob(mob) != GetGroupByMob(caster))
+							continue;
+						caster->SpellOnTarget(spell_id, mob);
 					}
-			    #endif
+				#endif
 				}
 			}
 			else if (caster->IsClient()) {
@@ -1662,9 +1662,9 @@ Message(0, "Disc packet id=%d, %x,%x,%x", disc_in->disc_id, disc_in->unknown3[0]
 // Queries the loottable: adds item & coin to the npc
 void ZoneDatabase::AddLootTableToNPC(uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	*copper = 0;
 	*silver = 0;
 	*gold = 0;
@@ -1747,12 +1747,12 @@ void ZoneDatabase::AddLootTableToNPC(uint32 loottable_id, ItemList* itemlist, ui
 // maxdrops = size of the array npcd
 void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
-// This is Wiz's updated Pool Looting functionality.  Eventually, the database format should be moved over to use this
-// or implemented to support both methods.  (A unique identifier in lootable_entries indicates to roll for a pool item
+// This is Wiz's updated Pool Looting functionality. Eventually, the database format should be moved over to use this
+// or implemented to support both methods. (A unique identifier in lootable_entries indicates to roll for a pool item
 // in another table.
 #ifdef POOLLOOTING
 	uint32 chancepool = 0;
@@ -1782,14 +1782,14 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
 		uint32 res;
 		i = 0;
 
-        if (chancepool!=0) //avoid divide by zero if some mobs have 0 for chancepool
-        {
-            res = rand()%chancepool;
-        }
-        else
-        {
-            res = 0;
-        }
+		if (chancepool!=0) //avoid divide by zero if some mobs have 0 for chancepool
+		{
+			res = rand()%chancepool;
+		}
+		else
+		{
+			res = 0;
+		}
 
 		while (items[i] != 0)
 		{
@@ -1821,7 +1821,7 @@ void ZoneDatabase::AddLootDropToNPC(uint32 lootdrop_id, ItemList* itemlist) {
 		safe_delete_array(query);
 		while ((row = mysql_fetch_row(result)))
 		{
-			uint8 LootDropMod=1;  // place holder till I put it in a database variable to make it configurable.
+			uint8 LootDropMod=1; // place holder till I put it in a database variable to make it configurable.
 			if( (rand()%100) < ((atoi(row[4]) * LootDropMod)) )
 			{
 				uint32 itemid = atoi(row[1]);

@@ -1,6 +1,4 @@
-/*
-	EQEMu:  Everquest Server Emulator
-
+/*	EQEMu: Everquest Server Emulator
 	Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -11,11 +9,11 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 */
 
@@ -209,7 +207,7 @@ vector<string> ParseRecipients(string RecipientString) {
 
 			LastPeriod = (*Iterator).find_last_of(".");
 
-			if(LastPeriod != string::npos)  {
+			if(LastPeriod != string::npos) {
 
 				(*Iterator) = (*Iterator).substr(LastPeriod + 1);
 
@@ -309,7 +307,7 @@ static void ProcessMailTo(Client *c, string MailMessage) {
 		if(!database.SendMail(Recipients[i], c->MailBoxName(), Subject, Body, RecipientsString)) {
 
 			_log(UCS__ERROR, "Failed in SendMail(%s, %s, %s, %s)", Recipients[i].c_str(),
-					  c->MailBoxName().c_str(), Subject.c_str(), RecipientsString.c_str());
+						c->MailBoxName().c_str(), Subject.c_str(), RecipientsString.c_str());
 
 			int PacketLength = 10 + Recipients[i].length() + Subject.length();
 
@@ -561,16 +559,16 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
 
 		if(((*Iterator) != c) && ((c->GetName() == (*Iterator)->GetName())
-		   && (c->GetConnectionType() == (*Iterator)->GetConnectionType()))) {
+				&& (c->GetConnectionType() == (*Iterator)->GetConnectionType()))) {
 
 			_log(UCS__CLIENT, "Removing old connection for %s", c->GetName().c_str());
 
-			struct in_addr  in;
+			struct in_addr in;
 
 			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
 
 			_log(UCS__CLIENT, "Client connection from %s:%d closed.", inet_ntoa(in),
-										   ntohs((*Iterator)->ClientStream->GetRemotePort()));
+									ntohs((*Iterator)->ClientStream->GetRemotePort()));
 
 			safe_delete((*Iterator));
 
@@ -585,7 +583,7 @@ void Clientlist::Process() {
 
 	while((eqs = chatsf->Pop())) {
 
-		struct in_addr  in;
+		struct in_addr in;
 
 		in.s_addr = eqs->GetRemoteIP();
 
@@ -605,12 +603,12 @@ void Clientlist::Process() {
 		(*Iterator)->AccountUpdate();
 		if((*Iterator)->ClientStream->CheckClosed()) {
 
-			struct in_addr  in;
+			struct in_addr in;
 
 			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
 
 			_log(UCS__CLIENT, "Client connection from %s:%d closed.", inet_ntoa(in),
-										   ntohs((*Iterator)->ClientStream->GetRemotePort()));
+										ntohs((*Iterator)->ClientStream->GetRemotePort()));
 
 			safe_delete((*Iterator));
 
@@ -627,7 +625,7 @@ void Clientlist::Process() {
 		bool KeyValid = true;
 
 		while( KeyValid && !(*Iterator)->GetForceDisconnect() &&
-		       (app = (EQApplicationPacket *)(*Iterator)->ClientStream->PopPacket())) {
+				(app = (EQApplicationPacket *)(*Iterator)->ClientStream->PopPacket())) {
 
 			_pkt(UCS__PACKETS, app);
 
@@ -715,13 +713,13 @@ void Clientlist::Process() {
 		}
 		if(!KeyValid || (*Iterator)->GetForceDisconnect()) {
 
-			struct in_addr  in;
+			struct in_addr in;
 
 			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
 
 			_log(UCS__TRACE, "Force disconnecting client: %s:%d, KeyValid=%i, GetForceDisconnect()=%i",
-					      inet_ntoa(in), ntohs((*Iterator)->ClientStream->GetRemotePort()),
-					      KeyValid, (*Iterator)->GetForceDisconnect());
+						inet_ntoa(in), ntohs((*Iterator)->ClientStream->GetRemotePort()),
+						KeyValid, (*Iterator)->GetForceDisconnect());
 
 			(*Iterator)->ClientStream->Close();
 
@@ -870,7 +868,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, string CommandString)
 		case CommandSelectMailBox:
 		{
 			string::size_type NumStart = Parameters.find_first_of("0123456789");
-		 	c->ChangeMailBox(atoi(Parameters.substr(NumStart).c_str()));
+			c->ChangeMailBox(atoi(Parameters.substr(NumStart).c_str()));
 			break;
 		}
 		case CommandSetMailForwarding:
@@ -1311,7 +1309,7 @@ void Client::SendChannelMessage(string Message)
 
 	if(ChannelName.compare("Newplayers") != 0)
 	{
-		if(GetKarma() <  RuleI(Chat, KarmaGlobalChatLimit))
+		if(GetKarma() < RuleI(Chat, KarmaGlobalChatLimit))
 		{
 			CharacterEntry *char_ent = nullptr;
 			for(int x = 0; x < Characters.size(); ++x)
@@ -1424,7 +1422,7 @@ void Client::SendChannelMessageByNumber(string Message) {
 
 	if(RequiredChannel->GetName().compare("Newplayers") != 0)
 	{
-		if(GetKarma() <  RuleI(Chat, KarmaGlobalChatLimit))
+		if(GetKarma() < RuleI(Chat, KarmaGlobalChatLimit))
 		{
 			CharacterEntry *char_ent = nullptr;
 			for(int x = 0; x < Characters.size(); ++x)
@@ -1447,7 +1445,7 @@ void Client::SendChannelMessageByNumber(string Message) {
 	}
 
 	_log(UCS__TRACE, "%s tells %s, [%s]", GetName().c_str(), RequiredChannel->GetName().c_str(),
-						   Message.substr(MessageStart + 1).c_str());
+							Message.substr(MessageStart + 1).c_str());
 
 	if(RuleB(Chat, EnableAntiSpam))
 	{
@@ -2139,7 +2137,7 @@ void Client::ChannelKick(string CommandString) {
 		return;
 	}
 
-	if(RequiredChannel->IsModerator(Kickee))  {
+	if(RequiredChannel->IsModerator(Kickee)) {
 
 		RequiredChannel->RemoveModerator(Kickee);
 
@@ -2388,13 +2386,13 @@ string Client::MailBoxName() {
 	if((Characters.size() == 0) || (CurrentMailBox > (Characters.size() - 1)))
 	{
 		_log(UCS__ERROR, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
-		     CurrentMailBox, Characters.size());
+				CurrentMailBox, Characters.size());
 
 		return "";
 	}
 
 	_log(UCS__TRACE, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
-	     CurrentMailBox, Characters.size());
+			CurrentMailBox, Characters.size());
 
 	return Characters[CurrentMailBox].Name;
 
@@ -2407,3 +2405,4 @@ int Client::GetCharID() {
 
 	return Characters[0].CharID;
 }
+

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2010  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "WorldServer.h"
 #include "ErrorLog.h"
@@ -448,7 +448,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 				{
 					// this is the first of two cases where we should deny access even if unregistered is allowed
 					server_log->Log(log_world, "Server %s(%s) attempted to log in but account and password did not match the entry in the database.",
-						 long_name.c_str(), short_name.c_str());
+						long_name.c_str(), short_name.c_str());
 				}
 			}
 			else
@@ -457,7 +457,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 				{
 					// this is the second of two cases where we should deny access even if unregistered is allowed
 					server_log->Log(log_world, "Server %s(%s) did not attempt to log in but this server requires a password.",
-						 long_name.c_str(), short_name.c_str());
+						long_name.c_str(), short_name.c_str());
 				}
 				else
 				{

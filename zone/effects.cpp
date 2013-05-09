@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "masterentity.h"
@@ -43,8 +43,8 @@ float Client::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 int32 Client::Additional_SpellDmg(uint16 spell_id, bool bufftick)
 {
 	int32 spell_dmg = 0;
-	spell_dmg  += GetFocusEffect(focusFF_Damage_Amount, spell_id);
-	spell_dmg  += GetFocusEffect(focusSpellDamage, spell_id);
+	spell_dmg += GetFocusEffect(focusFF_Damage_Amount, spell_id);
+	spell_dmg += GetFocusEffect(focusSpellDamage, spell_id);
 
 	//For DOTs you need to apply the damage over the duration of the dot to each tick (this is how live did it)
 	if (bufftick){
@@ -89,8 +89,8 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value) {
 	if (tt == ST_UndeadAE || tt == ST_Undead || tt == ST_Summoned) {
 		//undead/summoned spells
 		modifier += GetFocusEffect(focusImprovedUndeadDamage, spell_id);
-    } else {
-    	//damage spells.
+	} else {
+		//damage spells.
 		modifier += GetFocusEffect(focusImprovedDamage, spell_id);
 		modifier += GetFocusEffect(focusSpellEffectiveness, spell_id);
 		modifier += GetFocusEffect(focusImprovedDamage2, spell_id);
@@ -103,12 +103,12 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value) {
 	}
 
 	//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm TOuch.
-	if (spell_id == SPELL_IMP_HARM_TOUCH) {  //Improved Harm Touch
+	if (spell_id == SPELL_IMP_HARM_TOUCH) { //Improved Harm Touch
 			value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
 	}
 
 	// This adds the extra damage for the AA's Consumption of the Soul and Improved Consumption of the Soul, 200 per level to the AA Leech Curse for Shadowknights.
-	if (spell_id == SPELL_LEECH_TOUCH) {   //Leech Touch
+	if (spell_id == SPELL_LEECH_TOUCH) { //Leech Touch
 		value -= GetAA(aaConsumptionoftheSoul) * 200; //Consumption of the Soul
 		value -= GetAA(aaImprovedConsumptionofSoul) * 200; //Improved Consumption of the Soul
 	}
@@ -138,7 +138,7 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value) {
 				ratio += RuleI(Spells, WizCritRatio);
 			}
 			if(aabonuses.SpellCritDmgIncrease > 0) // wizards get an additional bonus
-				ratio +=  aabonuses.SpellCritDmgIncrease * 1.5; //108%, 115%, 124%, close to Graffe's 207%, 215%, & 225%
+				ratio += aabonuses.SpellCritDmgIncrease * 1.5; //108%, 115%, 124%, close to Graffe's 207%, 215%, & 225%
 		}
 
 		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
@@ -235,8 +235,8 @@ int32 Client::Additional_Heal(uint16 spell_id)
 {
 	int32 heal_amt = 0;
 
-	heal_amt  += GetFocusEffect(focusAdditionalHeal, spell_id);
-	heal_amt  += GetFocusEffect(focusAdditionalHeal2, spell_id);
+	heal_amt += GetFocusEffect(focusAdditionalHeal, spell_id);
+	heal_amt += GetFocusEffect(focusAdditionalHeal2, spell_id);
 
 	if (heal_amt){
 		int duration = CalcBuffDuration(this, this, spell_id);

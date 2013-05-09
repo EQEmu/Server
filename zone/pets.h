@@ -44,21 +44,8 @@ protected:
 
 	eStandingPetOrder pStandingPetOrder;
 	bool	taunting;
-    Timer	taunt_timer;		//for pet taunting
+	Timer	taunt_timer;		//for pet taunting
 };*/
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
 

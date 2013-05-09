@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <stdlib.h>
@@ -76,7 +76,7 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	y = in_y;
 	z = in_z;
 	heading = in_heading;
-    respawn_ = respawn;
+	respawn_ = respawn;
 	variance_ = variance;
 	grid_ = grid;
 	condition_id = in_cond_id;
@@ -225,12 +225,12 @@ bool Spawn2::Process() {
 		npcthis = npc;
 		npc->AddLootTable();
 		npc->SetSp2(spawngroup_id_);
-        npc->SaveGuardPointAnim(anim);
-        npc->SetAppearance((EmuAppearance)anim);
+		npc->SaveGuardPointAnim(anim);
+		npc->SetAppearance((EmuAppearance)anim);
 		entity_list.AddNPC(npc);
 		//this limit add must be done after the AddNPC since we need the entity ID.
 		entity_list.LimitAddNPC(npc);
-            if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay)
+			if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay)
 		npc->AI_SetRoambox(sg->roamdist,sg->roambox[0],sg->roambox[1],sg->roambox[2],sg->roambox[3],sg->delay);
 		if(zone->InstantGrids()) {
 			_log(SPAWNS__MAIN, "Spawn2 %d: Group %d spawned %s (%d) at (%.3f, %.3f, %.3f).", spawn2_id, spawngroup_id_, npc->GetName(), npcid, x, y, z);
@@ -415,7 +415,7 @@ bool ZoneDatabase::CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, 
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
-    char *query = 0;
+	char *query = 0;
 	uint32 affected_rows = 0;
 
 	//	if(GetInverseXY()==1) {
@@ -683,12 +683,12 @@ void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
 
 	SpawnCondition cond;
 	len = MakeAnyLenString(&query,
-	"UPDATE spawn_events SET "
-	"next_minute=%d, next_hour=%d, next_day=%d, next_month=%d, "
-	"next_year=%d, enabled=%d "
-	"WHERE id=%d",
-	event.next.minute, event.next.hour, event.next.day, event.next.month,
-	event.next.year, event.enabled?1:0, event.id
+		"UPDATE spawn_events SET "
+		"next_minute=%d, next_hour=%d, next_day=%d, next_month=%d, "
+		"next_year=%d, enabled=%d "
+		"WHERE id=%d",
+		event.next.minute, event.next.hour, event.next.day, event.next.month,
+		event.next.year, event.enabled?1:0, event.id
 	);
 	if(!database.RunQuery(query, len, errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Unable to update spawn event '%s': %s\n", query, errbuf);
@@ -722,8 +722,8 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, stri
 	bool ret = false;
 
 	len = MakeAnyLenString(&query,
-	"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument,zone "
-	"FROM spawn_events WHERE id=%d", event_id);
+		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument,zone "
+		"FROM spawn_events WHERE id=%d", event_id);
 	if (database.RunQuery(query, len, errbuf, &result)) {
 		safe_delete_array(query);
 		if((row = mysql_fetch_row(result))) {
@@ -813,8 +813,8 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	//load spawn events
 	SpawnEvent event;
 	len = MakeAnyLenString(&query,
-	"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument "
-	"FROM spawn_events WHERE zone='%s'", zone_name);
+		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument "
+		"FROM spawn_events WHERE zone='%s'", zone_name);
 	if (database.RunQuery(query, len, errbuf, &result)) {
 		safe_delete_array(query);
 		while((row = mysql_fetch_row(result))) {
@@ -847,7 +847,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 		return false;
 	}
 
-	//now we need to catch up on events that happened  while we were away
+	//now we need to catch up on events that happened while we were away
 	//and use them to alter just the condition variables.
 
 	//each spawn2 will then use its correct condition value when
@@ -1121,7 +1121,7 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool rese
 		//advance the next time by our period
 		EQTime::AddMinutes(e.period, &e.next);
 	} else {
-		_log(SPAWNS__CONDITIONS, "Spawn event %d is in zone %s. State changed.  Notifying world.", event_id, zone_short_name.c_str(), e.period);
+		_log(SPAWNS__CONDITIONS, "Spawn event %d is in zone %s. State changed. Notifying world.", event_id, zone_short_name.c_str(), e.period);
 	}
 	//save the event in the DB
 	UpdateDBEvent(e);
@@ -1194,13 +1194,4 @@ bool SpawnConditionManager::Check(uint16 condition, int16 min_value) {
 
 	return(cond.value >= min_value);
 }
-
-
-
-
-
-
-
-
-
 

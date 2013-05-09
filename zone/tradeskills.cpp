@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/debug.h"
@@ -78,7 +78,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 				if (itemsFound != 2)
 				{
-					user->Message(13, "Error:  Too many/few items in augmentation container.");
+					user->Message(13, "Error: Too many/few items in augmentation container.");
 					return;
 				}
 			}
@@ -217,8 +217,8 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	PlayerProfile_Struct& user_pp = user->GetPP();
 	ItemInst* container = nullptr;
 	ItemInst* inst = nullptr;
- 	uint8 c_type = 0xE8;
- 	uint32 some_id = 0;
+	uint8 c_type = 0xE8;
+	uint32 some_id = 0;
 	bool worldcontainer=false;
 
 	if (in_combine->container_slot == SLOT_TRADESKILL) {
@@ -235,8 +235,8 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		if (inst) {
 			const Item_Struct* item = inst->GetItem();
 			if (item && inst->IsType(ItemClassContainer)) {
- 				c_type = item->BagType;
- 				some_id = item->ID;
+				c_type = item->BagType;
+				some_id = item->ID;
 			}
 		}
 	}
@@ -248,29 +248,29 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	container = inst;
 
- 	DBTradeskillRecipe_Struct spec;
- 	if (!database.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
- 		user->Message_StringID(MT_Emote,TRADESKILL_NOCOMBINE);
- 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
- 		user->QueuePacket(outapp);
- 		safe_delete(outapp);
- 		return;
- 	}
+	DBTradeskillRecipe_Struct spec;
+	if (!database.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
+		user->Message_StringID(MT_Emote,TRADESKILL_NOCOMBINE);
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
 
- 	// Character hasn't learnt the recipe yet.
- 	// must_learn:
- 	//  bit 1 (0x01): recipe can't be experimented
- 	//  bit 2 (0x02): can try to experiment but not useable for auto-combine until learnt
- 	//  bit 5 (0x10): no learn message, use unlisted flag to prevent it showing up on search
- 	//  bit 6 (0x20): unlisted recipe flag
- 	if ((spec.must_learn&0xF) == 1 && !spec.has_learnt) {
- 		// Made up message for the client. Just giving a DNC is the other option.
- 		user->Message(4, "You need to learn how to combine these first.");
- 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
- 		user->QueuePacket(outapp);
- 		safe_delete(outapp);
- 		return;
- 	}
+	// Character hasn't learnt the recipe yet.
+	// must_learn:
+	// bit 1 (0x01): recipe can't be experimented
+	// bit 2 (0x02): can try to experiment but not useable for auto-combine until learnt
+	// bit 5 (0x10): no learn message, use unlisted flag to prevent it showing up on search
+	// bit 6 (0x20): unlisted recipe flag
+	if ((spec.must_learn&0xF) == 1 && !spec.has_learnt) {
+		// Made up message for the client. Just giving a DNC is the other option.
+		user->Message(4, "You need to learn how to combine these first.");
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
 	// Character does not have the required skill.
 	if(spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed ) {
 		// Notify client.
@@ -283,7 +283,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	//changing from a switch to string of if's since we don't need to iterate through all of the skills in the SkillType enum
 	if (spec.tradeskill == ALCHEMY) {
- 		if (user_pp.class_ != SHAMAN) {
+		if (user_pp.class_ != SHAMAN) {
 			user->Message(13, "This tradeskill can only be performed by a shaman.");
 			return;
 		}
@@ -293,13 +293,13 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		}
 	}
 	else if (spec.tradeskill == TINKERING) {
- 		if (user_pp.race != GNOME) {
+		if (user_pp.race != GNOME) {
 			user->Message(13, "Only gnomes can tinker.");
 			return;
 		}
 	}
 	else if (spec.tradeskill == MAKE_POISON) {
- 		if (user_pp.class_ != ROGUE) {
+		if (user_pp.class_ != ROGUE) {
 			user->Message(13, "Only rogues can mix poisons.");
 			return;
 		}
@@ -390,9 +390,9 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-    char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	char *query = 0;
 
 	uint32 qlen = 0;
 	uint8 qcount = 0;
@@ -559,7 +559,7 @@ SkillType Object::TypeToSkill(uint32 type) {
 		case OT_OGGOKFORGE:
 		case OT_FIERDALFFORGE:
 		case OT_STORMGUARDF:
-            case OT_VALEFORGE: {
+			case OT_VALEFORGE: {
 			tradeskill = BLACKSMITHING;
 			break;
 		}
@@ -607,12 +607,11 @@ SkillType Object::TypeToSkill(uint32 type) {
 	return(tradeskill);
 }
 
-void Client::TradeskillSearchResults(const char *query, unsigned long qlen,
-  unsigned long objtype, unsigned long someid) {
+void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsigned long objtype, unsigned long someid) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (!database.RunQuery(query, qlen, errbuf, &result)) {
 		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': %s", query, errbuf);
@@ -671,9 +670,9 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen,
 void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-    char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	char *query = 0;
 
 	uint32 qlen = 0;
 	uint8 qcount = 0;
@@ -789,7 +788,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 //returns true on success
 bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
- 	if(spec == nullptr)
+	if(spec == nullptr)
 		return(false);
 
 	uint16 user_skill = GetSkill(spec->tradeskill);
@@ -804,13 +803,13 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// 09/10/2006 v0.1 (eq4me)
 	// 09/11/2006 v0.2 (eq4me)
 	// Todo:
-	//     Implementing AAs
-	//     Success modifiers based on recipes
-	//     Skillup modifiers based on the rarity of the ingredients
+	// Implementing AAs
+	// Success modifiers based on recipes
+	// Skillup modifiers based on the rarity of the ingredients
 
 	// Some tradeskills are more eqal then others. ;-)
 	// If you want to customize the stage1 success rate do it here.
-    // Remember: skillup_modifier is (float). Lower is better
+	// Remember: skillup_modifier is (float). Lower is better
 	switch(spec->tradeskill) {
 	case FLETCHING:
 	case ALCHEMY:
@@ -833,7 +832,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// Some tradeskills take the higher of one additional stat beside INT and WIS
 	// to determine the skillup rate. Additionally these tradeskills do not have an
 	// -15 modifier on their statbonus.
-	if (spec->tradeskill ==  FLETCHING || spec->tradeskill == MAKE_POISON) {
+	if (spec->tradeskill == FLETCHING || spec->tradeskill == MAKE_POISON) {
 		thirdstat = GetDEX();
 		stat_modifier = 0;
 	} else if (spec->tradeskill == BLACKSMITHING) {
@@ -847,9 +846,9 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	vector< pair<uint32,uint8> >::iterator itr;
 
 
-    //calculate the base success chance
+	//calculate the base success chance
 	// For trivials over 68 the chance is (skill - 0.75*trivial) +51.5
-    // For trivial up to 68 the chance is (skill - trivial) + 66
+	// For trivial up to 68 the chance is (skill - trivial) + 66
 	if (spec->trivial >= 68) {
 		chance = (user_skill - (0.75*spec->trivial)) + 51.5;
 	} else {
@@ -916,7 +915,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			break;
 		}
 	}
-      const Item_Struct* item = nullptr;
+	const Item_Struct* item = nullptr;
 
 	if (spec->tradeskill == BLACKSMITHING) {
 		switch(GetAA(aaBlacksmithingMastery)) {
@@ -1032,7 +1031,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		while(itr != spec->onsuccess.end() && !spec->quest) {
 			//should we check this crap?
 			SummonItem(itr->first, itr->second);
-                  item = database.GetItem(itr->first);
+			item = database.GetItem(itr->first);
 			if (this->GetGroup())
 			{
 				entity_list.MessageGroup(this,true,MT_Skills,"%s has successfully fashioned %s!",GetName(),item->Name);
@@ -1051,7 +1050,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		Message_StringID(MT_Emote,TRADESKILL_FAILED);
 
 		_log(TRADESKILLS__TRACE, "Tradeskill failed");
-            if (this->GetGroup())
+			if (this->GetGroup())
 		{
 			entity_list.MessageGroup(this,true,MT_Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
 		}
@@ -1063,19 +1062,19 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			itr++;
 		}
 
-        // Rolls on each item, is possible to return everything
-        int SalvageChance = aabonuses.SalvageChance + itembonuses.SalvageChance + spellbonuses.SalvageChance;
-        // Skip check if not a normal TS or if a quest recipe these should be nofail, but check amyways
-        if(SalvageChance && spec->tradeskill != 75 && !spec->quest) {
-            itr = spec->salvage.begin();
-            uint8 sc = 0;
-            while(itr != spec->salvage.end()) {
-                for(sc = 0; sc < itr->second; sc++)
-                    if(MakeRandomInt(0,99) < SalvageChance)
-                        SummonItem(itr->first, 1);
-                itr++;
-            }
-        }
+		// Rolls on each item, is possible to return everything
+		int SalvageChance = aabonuses.SalvageChance + itembonuses.SalvageChance + spellbonuses.SalvageChance;
+		// Skip check if not a normal TS or if a quest recipe these should be nofail, but check amyways
+		if(SalvageChance && spec->tradeskill != 75 && !spec->quest) {
+			itr = spec->salvage.begin();
+			uint8 sc = 0;
+			while(itr != spec->salvage.end()) {
+				for(sc = 0; sc < itr->second; sc++)
+					if(MakeRandomInt(0,99) < SalvageChance)
+						SummonItem(itr->first, 1);
+				itr++;
+			}
+		}
 
 	}
 	return(false);
@@ -1121,17 +1120,17 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 	}
 
 	_log(TRADESKILLS__TRACE, "...skillup_modifier: %f , success_modifier: %d , stat modifier: %d", skillup_modifier , success_modifier , stat_modifier);
-	_log(TRADESKILLS__TRACE, "...Stage1 chance was: %f percent",  chance_stage1);
-	_log(TRADESKILLS__TRACE, "...Stage2 chance was: %f percent. 0 percent means stage1 failed",  chance_stage2);
+	_log(TRADESKILLS__TRACE, "...Stage1 chance was: %f percent", chance_stage1);
+	_log(TRADESKILLS__TRACE, "...Stage2 chance was: %f percent. 0 percent means stage1 failed", chance_stage2);
 }
 
 bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint32 some_id,
 	uint32 char_id, DBTradeskillRecipe_Struct *spec)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-    char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	char *query = 0;
 	char buf2[4096];
 
 	uint32 sum = 0;
@@ -1139,14 +1138,14 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	uint32 qcount = 0;
 	uint32 qlen = 0;
 
- 	// make where clause segment for container(s)
- 	char containers[30];
- 	if (some_id == 0) {
- 		// world combiner so no item number
- 		snprintf(containers,29, "= %u", c_type);
- 	} else {
- 		// container in inventory
- 		snprintf(containers,29, "in (%u,%u)", c_type, some_id);
+	// make where clause segment for container(s)
+	char containers[30];
+	if (some_id == 0) {
+		// world combiner so no item number
+		snprintf(containers,29, "= %u", c_type);
+	} else {
+		// container in inventory
+		snprintf(containers,29, "in (%u,%u)", c_type, some_id);
 	}
 
 	buf2[0] = '\0';
@@ -1181,9 +1180,9 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	qlen = MakeAnyLenString(&query, "SELECT tre.recipe_id "
 	" FROM tradeskill_recipe_entries AS tre"
 	" WHERE ( tre.item_id IN(%s) AND tre.componentcount>0 )"
- 	"  OR ( tre.item_id %s AND tre.iscontainer=1 )"
- 	" GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u"
- 	"  AND sum(tre.item_id * tre.componentcount) = %u", buf2, containers, count, sum);
+	" OR ( tre.item_id %s AND tre.iscontainer=1 )"
+	" GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u"
+	" AND sum(tre.item_id * tre.componentcount) = %u", buf2, containers, count, sum);
 
 	if (!RunQuery(query, qlen, errbuf, &result)) {
 		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, query: %s", query);
@@ -1219,9 +1218,9 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 
 		qlen = MakeAnyLenString(&query, "SELECT tre.recipe_id"
 		" FROM tradeskill_recipe_entries AS tre"
- 		" WHERE tre.recipe_id IN (%s)"
- 		" GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u"
- 		"  AND sum(tre.item_id * tre.componentcount) = %u", buf2, count, sum);
+		" WHERE tre.recipe_id IN (%s)"
+		" GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u"
+		" AND sum(tre.item_id * tre.componentcount) = %u", buf2, count, sum);
 
 		if (!RunQuery(query, qlen, errbuf, &result)) {
 			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query);
@@ -1284,9 +1283,9 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	//This is here because something's up with the query above.. it needs to be rethought out
 	bool has_components = true;
 	char TSerrbuf[MYSQL_ERRMSG_SIZE];
-    char *TSquery = 0;
-    MYSQL_RES *TSresult;
-    MYSQL_ROW TSrow;
+	char *TSquery = 0;
+	MYSQL_RES *TSresult;
+	MYSQL_ROW TSrow;
 	if (RunQuery(TSquery, MakeAnyLenString(&TSquery, "SELECT item_id, componentcount from tradeskill_recipe_entries where recipe_id=%i AND componentcount > 0", recipe_id), TSerrbuf, &TSresult)) {
 		while((TSrow = mysql_fetch_row(TSresult))!=nullptr) {
 			int ccnt = 0;
@@ -1321,31 +1320,31 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	uint32 char_id, DBTradeskillRecipe_Struct *spec)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-    char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	char *query = 0;
 
 	uint32 qcount = 0;
 	uint32 qlen;
 
- 	// make where clause segment for container(s)
- 	char containers[30];
- 	if (some_id == 0) {
- 		// world combiner so no item number
- 		snprintf(containers,29, "= %u", c_type);
- 	} else {
- 		// container in inventory
- 		snprintf(containers,29, "in (%u,%u)", c_type, some_id);
- 	}
+	// make where clause segment for container(s)
+	char containers[30];
+	if (some_id == 0) {
+		// world combiner so no item number
+		snprintf(containers,29, "= %u", c_type);
+	} else {
+		// container in inventory
+		snprintf(containers,29, "in (%u,%u)", c_type, some_id);
+	}
 
- 	qlen = MakeAnyLenString(&query, "SELECT tr.id, tr.tradeskill, tr.skillneeded,"
- 	" tr.trivial, tr.nofail, tr.replace_container, tr.name, tr.must_learn, tr.quest, crl.madecount"
- 	" FROM tradeskill_recipe AS tr inner join tradeskill_recipe_entries as tre"
- 	" ON tr.id = tre.recipe_id"
- 	" LEFT JOIN (SELECT recipe_id, madecount from char_recipe_list WHERE char_id = %u) AS crl "
- 	"   ON tr.id = crl.recipe_id "
- 	" WHERE tr.id = %lu AND tre.item_id %s"
- 	" GROUP BY tr.id", char_id, (unsigned long)recipe_id, containers);
+	qlen = MakeAnyLenString(&query, "SELECT tr.id, tr.tradeskill, tr.skillneeded,"
+	" tr.trivial, tr.nofail, tr.replace_container, tr.name, tr.must_learn, tr.quest, crl.madecount"
+	" FROM tradeskill_recipe AS tr inner join tradeskill_recipe_entries as tre"
+	" ON tr.id = tre.recipe_id"
+	" LEFT JOIN (SELECT recipe_id, madecount from char_recipe_list WHERE char_id = %u) AS crl "
+	" ON tr.id = crl.recipe_id "
+	" WHERE tr.id = %lu AND tre.item_id %s"
+	" GROUP BY tr.id", char_id, (unsigned long)recipe_id, containers);
 
 	if (!RunQuery(query, qlen, errbuf, &result)) {
 		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, query: %s", query);
@@ -1362,11 +1361,11 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	}
 
 	row = mysql_fetch_row(result);
- 	spec->tradeskill			= (SkillType)atoi(row[1]);
- 	spec->skill_needed		= (int16)atoi(row[2]);
- 	spec->trivial			= (uint16)atoi(row[3]);
- 	spec->nofail			= atoi(row[4]) ? true : false;
- 	spec->replace_container	= atoi(row[5]) ? true : false;
+	spec->tradeskill			= (SkillType)atoi(row[1]);
+	spec->skill_needed		= (int16)atoi(row[2]);
+	spec->trivial			= (uint16)atoi(row[3]);
+	spec->nofail			= atoi(row[4]) ? true : false;
+	spec->replace_container	= atoi(row[5]) ? true : false;
 	spec->name = row[6];
 	spec->must_learn = (uint8)atoi(row[7]);
 	spec->quest = atoi(row[8]) ? true : false;
@@ -1424,25 +1423,24 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 		mysql_free_result(result);
 	}
 
-    // Pull the salvage list
-    qlen = MakeAnyLenString(&query, "SELECT item_id,salvagecount FROM tradeskill_recipe_entries"
-     " WHERE salvagecount>0 AND recipe_id=%u", recipe_id);
+	// Pull the salvage list
+	qlen = MakeAnyLenString(&query, "SELECT item_id,salvagecount FROM tradeskill_recipe_entries WHERE salvagecount>0 AND recipe_id=%u", recipe_id);
 
-    spec->salvage.clear();
-    // Don't bother with the query if TS is nofail
-    if (!spec->nofail && RunQuery(query, qlen, errbuf, &result)) {
-        qcount = mysql_num_rows(result);
-        uint8 r;
-        for(r = 0; r < qcount; r++) {
-            row = mysql_fetch_row(result);
-            uint32 item = (uint32)atoi(row[0]);
-            uint8 num = (uint8)atoi(row[1]);
-            spec->salvage.push_back(pair<uint32,uint8>(item, num));
-        }
-        mysql_free_result(result);
-    }
+	spec->salvage.clear();
+	// Don't bother with the query if TS is nofail
+	if (!spec->nofail && RunQuery(query, qlen, errbuf, &result)) {
+		qcount = mysql_num_rows(result);
+		uint8 r;
+		for(r = 0; r < qcount; r++) {
+			row = mysql_fetch_row(result);
+			uint32 item = (uint32)atoi(row[0]);
+			uint8 num = (uint8)atoi(row[1]);
+			spec->salvage.push_back(pair<uint32,uint8>(item, num));
+		}
+		mysql_free_result(result);
+	}
 
-    safe_delete_array(query);
+	safe_delete_array(query);
 
 	return(true);
 }
@@ -1476,7 +1474,7 @@ void Client::LearnRecipe(uint32 recipeID)
 	qlen = MakeAnyLenString(&query, "SELECT tr.name, crl.madecount "
 		" FROM tradeskill_recipe as tr "
 		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl "
-		"  ON tr.id = crl.recipe_id "
+		" ON tr.id = crl.recipe_id "
 		" WHERE tr.id = %u ;", CharacterID(), recipeID);
 
 	if (!database.RunQuery(query, qlen, errbuf, &result)) {
@@ -1524,15 +1522,15 @@ bool Client::CanIncreaseTradeskill(SkillType tradeskill) {
 	if (rawskill >= maxskill) //Max skill sanity check
 		return false;
 
-	uint8 Baking    = (GetRawSkill(BAKING) > 200) ? 1 : 0;
-	uint8 Smithing  = (GetRawSkill(BLACKSMITHING) > 200) ? 1 : 0;
-	uint8 Brewing   = (GetRawSkill(BREWING) > 200) ? 1 : 0;
-	uint8 Fletching = (GetRawSkill(FLETCHING) > 200) ? 1 : 0;
-	uint8 Jewelry   = (GetRawSkill(JEWELRY_MAKING) > 200) ? 1 : 0;
-	uint8 Pottery   = (GetRawSkill(POTTERY) > 200) ? 1 : 0;
-	uint8 Tailoring = (GetRawSkill(TAILORING) > 200) ? 1 : 0;
+	uint8 Baking	= (GetRawSkill(BAKING) > 200) ? 1 : 0;
+	uint8 Smithing	= (GetRawSkill(BLACKSMITHING) > 200) ? 1 : 0;
+	uint8 Brewing	= (GetRawSkill(BREWING) > 200) ? 1 : 0;
+	uint8 Fletching	= (GetRawSkill(FLETCHING) > 200) ? 1 : 0;
+	uint8 Jewelry	= (GetRawSkill(JEWELRY_MAKING) > 200) ? 1 : 0;
+	uint8 Pottery	= (GetRawSkill(POTTERY) > 200) ? 1 : 0;
+	uint8 Tailoring	= (GetRawSkill(TAILORING) > 200) ? 1 : 0;
 	uint8 SkillTotal = Baking + Smithing + Brewing + Fletching + Jewelry + Pottery + Tailoring; //Tradeskills above 200
-	uint32 aaLevel  = GetAA(aaNewTanaanCraftingMastery); //New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
+	uint32 aaLevel	= GetAA(aaNewTanaanCraftingMastery); //New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
 
 	switch (tradeskill) {
 		case BAKING:
