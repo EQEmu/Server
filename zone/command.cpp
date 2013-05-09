@@ -559,64 +559,6 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
 	return 0;
 }
 
-
-#ifdef EMBPERL_COMMANDS
-/*
- * command_add_perl
- * adds a command to the command list, as a perl function
- *
- * Parameters:
- *	 command_string	- the command ex: "spawn"
- *	 desc		- text description of command for #help
- *	 access		- default access level required to use command
- *
- */
-int command_add_perl(const char *command_string, const char *desc, int access) {
-	string cstr(command_string);
-
-	if(commandlist.count(cstr) != 0) {
-#ifdef COMMANDS_PERL_OVERRIDE
-		//print a warning so people dont get too confused when this happens
-		LogFile->write(EQEMuLog::Status, "command_add_perl() - Perl Command '%s' is overriding the compiled command." , command_string);	
-		CommandRecord *tmp = commandlist[cstr];
-		safe_delete(tmp);
-#else
-		LogFile->write(EQEMuLog::Error, "command_add_perl() - Command '%s' is a duplicate - check commands.pl." , command_string);
-		return(-1);
-#endif
-	}
-	
-	CommandRecord *c = new CommandRecord;
-	c->desc = desc;
-	c->access = access;
-	c->function = nullptr;
-	
-	commandlist[cstr] = c;
-	
-	commandcount++;
-	return 0;
-
-}
-
-//clear out any perl commands.
-//should restore any overridden C++ commands, but thats a lot of work.
-void command_clear_perl() {
-	map<string, CommandRecord *>::iterator cur,end,del;
-	cur = commandlist.begin();
-	end = commandlist.end();
-	for(; cur != end;) {
-		del = cur;
-		cur++;
-		if(del->second->function == nullptr) {
-			safe_delete(del->second);
-			commandlist.erase(del);
-		}
-	}
-}
-
-#endif //EMBPERL_COMMANDS
-
-
 /*
  *
  * command_realdispatch
@@ -657,15 +599,8 @@ int command_realdispatch(Client *c, const char *message)
 #endif
 	
 	if(cur->function == nullptr) {
-#ifdef EMBPERL_COMMANDS
-		//todo reimplement this stuff
-        //dispatch perl command
-		//PerlembParser *embparse = (PerlembParser *) parse;
-		//embparse->ExecCommand(c, &sep);
-#else
-		LogFile->write(EQEMuLog::Error, "Command '%s' has a null function, but perl commands are diabled!\n", cstr.c_str());
+		LogFile->write(EQEMuLog::Error, "Command '%s' has a null function\n", cstr.c_str());
 		return(-1);
-#endif
 	} else {
 		//dispatch C++ command
 		cur->function(c, &sep);	// dispatch command

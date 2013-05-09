@@ -51,9 +51,6 @@ Core Zone features
 //this seems to make perl very unhappy on reload, and crashes
 #define EMBPERL_IO_CAPTURE
 
-//enable perl-based in-game command, pretty useless without EMBPERL_XS_CLASSES
-#define EMBPERL_COMMANDS
-
 #endif
 
 /*

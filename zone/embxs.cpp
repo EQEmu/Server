@@ -112,25 +112,4 @@ XS(XS_EQEmuIO_PRINT)
 }
 #endif //EMBPERL_IO_CAPTURE
 
-
-#ifdef EMBPERL_COMMANDS
-
-XS(XS_command_add); /* prototype to pass -Wmissing-prototypes */ 
-XS(XS_command_add) 
-{ 
-    dXSARGS; 
-    if (items != 3)
-        Perl_croak(aTHX_ "Usage: commands::command_add(name, desc, access)"); 
-
-	char *name = SvPV_nolen(ST(0));
-	char *desc = SvPV_nolen(ST(1));
-	int	access = (int)SvIV(ST(2));
-	
-	command_add_perl(name, desc, access);
- 	
-    XSRETURN_EMPTY; 
-}
-
-#endif //EMBPERL_COMMANDS
-
 #endif // EMBPERL

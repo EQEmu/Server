@@ -60,8 +60,6 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
 int command_notavail(Client *c, const char *message);
 int command_realdispatch(Client *c, char const *message);
 void command_logcommand(Client *c, const char *message);
-int command_add_perl(const char *command_string, const char *desc, int access);
-void command_clear_perl();
 
 //commands
 void command_resetaa(Client* c,const Seperator *sep);

@@ -123,7 +123,6 @@ SET(zone_headers
     object.h
     pathing.h
     perlpacket.h
-    perlparser.h
     petitions.h
     pets.h
     PlayerCorpse.h

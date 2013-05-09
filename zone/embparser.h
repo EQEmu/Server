@@ -23,7 +23,7 @@ class PerlembParser : public QuestInterface {
 	typedef struct {
 		QuestEventID event;
 		uint32 objid;
-		const char *data;
+		std::string data;
 		NPC* npcmob;
 		ItemInst* iteminst;
 		Mob* mob;
@@ -75,13 +75,37 @@ private:
 	void SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst* iteminst);
 	void MapFunctions();
 
+	void HandleQueue();
+	void AddQueueEvent(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
+		uint32 extradata, bool global);
+
+	void GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 
+		bool &isSpellQuest, QuestEventID event, NPC* npcmob, ItemInst* iteminst, Mob* mob, bool global);
+	void GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 
+		bool &isSpellQuest, std::string &package_name, QuestEventID event, uint32 objid, const char * data, 
+		NPC* npcmob, ItemInst* iteminst, bool global);
+	void ExportCharID(const std::string &package_name, int &char_id, NPC *npcmob, Mob *mob);
+	void ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest, bool isGlobalNPC, bool isItemQuest, 
+		bool isSpellQuest, std::string &package_name, NPC *npcmob, Mob *mob, int char_id);
+	void ExportMobVariables(bool isPlayerQuest, bool isGlobalPlayerQuest, bool isGlobalNPC, bool isItemQuest, 
+		bool isSpellQuest, std::string &package_name, Mob *mob, NPC *npcmob);
+	void ExportZoneVariables(std::string &package_name);
+	void ExportItemVariables(std::string &package_name, Mob *mob);
+	void ExportEventVariables(std::string &package_name, QuestEventID event, uint32 objid, const char * data, 
+		NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata);
+	
 	std::map<uint32, PerlQuestStatus> npc_quest_status_;
 	PerlQuestStatus global_npc_quest_status_;
 	PerlQuestStatus player_quest_status_;
 	PerlQuestStatus global_player_quest_status_;
 	std::map<std::string, PerlQuestStatus> item_quest_status_;
 	std::map<uint32, PerlQuestStatus> spell_quest_status_;
+
+	bool event_queue_in_use_;
 	std::queue<EventRecord> event_queue_;
+
+	std::map<std::string, std::string> vars_;
+	SV *_empty_sv;
 };
 
 #endif
@@ -245,9 +269,6 @@ private:
 //	
 //	int	HasQuestFile(uint32 npcid);
 //
-//#ifdef EMBPERL_COMMANDS
-//	void ExecCommand(Client *c, Seperator *sep);
-//#endif
 //	
 //};
 //
