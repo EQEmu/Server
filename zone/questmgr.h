@@ -77,10 +77,6 @@ public:
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
-//	void cumflag();
-//	void flagnpc(uint32 flag_num, uint8 flag_value);
-//	void flagcheck(uint32 flag_to_check, uint32 flag_to_set);
-//  bool isflagset(int flag_num);
 	void changedeity(int diety_id);
 	void exp(int amt);
 	void level(int newlevel);

@@ -21,29 +21,24 @@ Eglin
 #define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
 #endif
 
-#ifdef EMBPERL_XS
-EXTERN_C XS(boot_quest);
-#ifdef EMBPERL_XS_CLASSES
-EXTERN_C XS(boot_Mob);
-EXTERN_C XS(boot_NPC);
-EXTERN_C XS(boot_Client);
-EXTERN_C XS(boot_Corpse);
-EXTERN_C XS(boot_EntityList);
-EXTERN_C XS(boot_Group);
-EXTERN_C XS(boot_Raid);
-EXTERN_C XS(boot_QuestItem);
-EXTERN_C XS(boot_HateEntry);
-EXTERN_C XS(boot_Object);
-EXTERN_C XS(boot_Doors);
-EXTERN_C XS(boot_PerlPacket);
-/*XS(XS_Client_new);
-//XS(XS_Mob_new);
-XS(XS_NPC_new);
-//XS(XS_Corpse_new);
-XS(XS_EntityList_new);
-//XS(XS_Group_new);*/
-#endif
-#endif
+//PERL_TODO:
+//#ifdef EMBPERL_XS
+//EXTERN_C XS(boot_quest);
+//#ifdef EMBPERL_XS_CLASSES
+//EXTERN_C XS(boot_Mob);
+//EXTERN_C XS(boot_NPC);
+//EXTERN_C XS(boot_Client);
+//EXTERN_C XS(boot_Corpse);
+//EXTERN_C XS(boot_EntityList);
+//EXTERN_C XS(boot_Group);
+//EXTERN_C XS(boot_Raid);
+//EXTERN_C XS(boot_QuestItem);
+//EXTERN_C XS(boot_HateEntry);
+//EXTERN_C XS(boot_Object);
+//EXTERN_C XS(boot_Doors);
+//EXTERN_C XS(boot_PerlPacket);
+//#endif
+//#endif
 #ifdef EMBPERL_COMMANDS
 XS(XS_command_add);
 #endif
@@ -66,30 +61,31 @@ EXTERN_C void xs_init(pTHX)
 
 	newXS(strcpy(buf, "DynaLoader::boot_DynaLoader"), boot_DynaLoader, file);
 	newXS(strcpy(buf, "quest::boot_qc"), boot_qc, file);
-#ifdef EMBPERL_XS
-	newXS(strcpy(buf, "quest::boot_quest"), boot_quest, file);
-#ifdef EMBPERL_XS_CLASSES
-	newXS(strcpy(buf, "Mob::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "NPC::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "NPC::boot_NPC"), boot_NPC, file);
-///	newXS(strcpy(buf, "NPC::new"), XS_NPC_new, file);
-	newXS(strcpy(buf, "Corpse::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "Corpse::boot_Corpse"), boot_Corpse, file);
-	newXS(strcpy(buf, "Client::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "Client::boot_Client"), boot_Client, file);
-//	newXS(strcpy(buf, "Client::new"), XS_Client_new, file);
-	newXS(strcpy(buf, "EntityList::boot_EntityList"), boot_EntityList, file);
-//	newXS(strcpy(buf, "EntityList::new"), XS_EntityList_new, file);
-	newXS(strcpy(buf, "PerlPacket::boot_PerlPacket"), boot_PerlPacket, file);
-	newXS(strcpy(buf, "Group::boot_Group"), boot_Group, file);
-	newXS(strcpy(buf, "Raid::boot_Raid"), boot_Raid, file);
-	newXS(strcpy(buf, "QuestItem::boot_QuestItem"), boot_QuestItem, file);
-	newXS(strcpy(buf, "HateEntry::boot_HateEntry"), boot_HateEntry, file);
-	newXS(strcpy(buf, "Object::boot_Object"), boot_Object, file);
-	newXS(strcpy(buf, "Doors::boot_Doors"), boot_Doors, file);
-;
-#endif
-#endif
+	//PERL_TODO:
+//#ifdef EMBPERL_XS
+//	newXS(strcpy(buf, "quest::boot_quest"), boot_quest, file);
+//#ifdef EMBPERL_XS_CLASSES
+//	newXS(strcpy(buf, "Mob::boot_Mob"), boot_Mob, file);
+//	newXS(strcpy(buf, "NPC::boot_Mob"), boot_Mob, file);
+//	newXS(strcpy(buf, "NPC::boot_NPC"), boot_NPC, file);
+/////	newXS(strcpy(buf, "NPC::new"), XS_NPC_new, file);
+//	newXS(strcpy(buf, "Corpse::boot_Mob"), boot_Mob, file);
+//	newXS(strcpy(buf, "Corpse::boot_Corpse"), boot_Corpse, file);
+//	newXS(strcpy(buf, "Client::boot_Mob"), boot_Mob, file);
+//	newXS(strcpy(buf, "Client::boot_Client"), boot_Client, file);
+////	newXS(strcpy(buf, "Client::new"), XS_Client_new, file);
+//	newXS(strcpy(buf, "EntityList::boot_EntityList"), boot_EntityList, file);
+////	newXS(strcpy(buf, "EntityList::new"), XS_EntityList_new, file);
+//	newXS(strcpy(buf, "PerlPacket::boot_PerlPacket"), boot_PerlPacket, file);
+//	newXS(strcpy(buf, "Group::boot_Group"), boot_Group, file);
+//	newXS(strcpy(buf, "Raid::boot_Raid"), boot_Raid, file);
+//	newXS(strcpy(buf, "QuestItem::boot_QuestItem"), boot_QuestItem, file);
+//	newXS(strcpy(buf, "HateEntry::boot_HateEntry"), boot_HateEntry, file);
+//	newXS(strcpy(buf, "Object::boot_Object"), boot_Object, file);
+//	newXS(strcpy(buf, "Doors::boot_Doors"), boot_Doors, file);
+//;
+//#endif
+//#endif
 #ifdef EMBPERL_COMMANDS
 	newXS(strcpy(buf, "commands::command_add"), XS_command_add, file);
 #endif
@@ -186,18 +182,6 @@ void Embperl::DoInit() {
 		"package plugin; "
 		,FALSE
 	);
-#ifdef EMBPERL_EVAL_COMMANDS
-	try {
-		eval_pv(
-			"use IO::Scalar;"
-			"$plugin::printbuff='';"
-			"tie *PLUGIN,'IO::Scalar',\\$plugin::printbuff;"
-		,FALSE);
-	}
-	catch(const char *err) {
-		throw "failed to install plugin printhook, do you lack IO::Scalar?";
-	}
-#endif
 
 	LogFile->write(EQEMuLog::Quest, "Loading perlemb plugins.");
 	try

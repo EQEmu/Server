@@ -74,7 +74,6 @@ extern volatile bool ZoneLoaded;
 #include "../common/spdat.h"
 #include "zone.h"
 #include "command.h"
-#include "parser.h"
 #include "embparser.h"
 #include "perlparser.h"
 #include "lua_parser.h"
@@ -286,18 +285,15 @@ int main(int argc, char** argv) {
 
     parse = new QuestParserCollection();
 #ifdef EMBPERL
-	PerlXSParser *pxs = new PerlXSParser();
-	parse->RegisterQuestInterface(pxs, "pl");
+	//PerlXSParser *pxs = new PerlXSParser();
+	PerlembParser *perl_parser = new PerlembParser();
+	parse->RegisterQuestInterface(perl_parser, "pl");
 #endif
 
 #ifdef LUA_EQEMU
 	LuaParser *lua_parser = new LuaParser();
 	parse->RegisterQuestInterface(lua_parser, "lua");
 #endif
-
-	Parser *ps = new Parser();
-    //parse->RegisterQuestInterface(ps, "qst");
-
 
 	//now we have our parser, load the quests
 	_log(ZONE__INIT, "Loading quests");
@@ -481,16 +477,14 @@ int main(int argc, char** argv) {
 
 	entity_list.Clear();
 
-	safe_delete(parse);
 #ifdef EMBPERL
- 	safe_delete(pxs);
+ 	safe_delete(perl_parser);
 #endif
 
 #ifdef LUA_EQEMU
 	safe_delete(lua_parser);
 #endif
 
-	safe_delete(ps);
 	safe_delete(mmf);
 	
 	if (zone != 0)

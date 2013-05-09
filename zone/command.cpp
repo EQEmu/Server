@@ -325,12 +325,6 @@ int command_init(void) {
 		command_add("qglobal","[on/off/view] - Toggles qglobal functionality on an NPC",100,command_qglobal) ||
 		command_add("loc","- Print out your or your target's current location and heading",0,command_loc) ||
 		command_add("goto","[x] [y] [z] - Teleport to the provided coordinates or to your target",10,command_goto) ||
-#ifdef EMBPERL_PLUGIN
-#ifdef EMBPERL_EVAL_COMMANDS
-		command_add("plugin","(sub) [args] - execute a plugin",PERL_PRIVS,command_embperl_plugin) ||
-		command_add("peval","(expression) - execute some perl",PERL_PRIVS,command_embperl_eval) ||
-#endif //EMBPERL_EVAL_COMMANDS
-#endif //EMBPERL_PLUGIN
 		command_add("iteminfo","- Get information about the item on your cursor",10,command_iteminfo) ||
 		command_add("uptime","[zone server id] - Get uptime of worldserver, or zone server if argument provided",10,command_uptime) ||
 		command_add("flag","[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided",0,command_flag) ||
@@ -6399,101 +6393,6 @@ void command_stun(Client *c, const Seperator *sep)
 	else
 		c->Message(0, "Usage: #stun [duration]");
 }
-
-#ifdef EMBPERL_PLUGIN
-#ifdef EMBPERL_EVAL_COMMANDS
-
-void command_embperl_plugin(Client *c, const Seperator *sep)
-{
-       if(sep->arg[1][0] == 0)
-       {
-               c->Message(0, "Usage: #plugin (subname) [arguments]");
-               return;
-       }
-
-       Embperl * perl;
-       if(!parse || !(perl = ((PerlembParser *)parse)->getperl()))
-       {
-               c->Message(0, "Error: Perl module not loaded");
-               return;
-       }
-
-       std::string exports = "$plugin::printbuff='';$plugin::ip='";
-               struct in_addr ip; ip.s_addr = c->GetIP();
-               exports += inet_ntoa(ip);
-               exports += "';$plugin::name=qq(";
-               exports += c->GetName();
-               exports += ");package plugin;";
-       perl->eval(exports.c_str());
-
-       std::string fqsubname("plugin::");
-       fqsubname.append(sep->arg[1]);
-
-       //convert args into a vector of strings.
-       std::vector<std::string> args;
-       for(int i = 2; i < sep->argnum; ++i)
-       {
-               args.push_back(sep->arg[i]);
-       }
-
-       try
-       {
-               perl->dosub(fqsubname.c_str(), &args);
-               std::string output = perl->getstr("$plugin::printbuff");
-               if(output.length())
-                       c->Message(0, "%s", output.c_str());
-       }
-       catch(const char * err)
-       {
-               c->Message(0, "Error executing plugin: %s", perl->lasterr().c_str());
-       }
-
-       perl->eval("package main;");
-
-}
-
-void command_embperl_eval(Client *c, const Seperator *sep)
-{
-       if(sep->arg[1][0] == 0)
-       {
-               c->Message(0, "Usage: #peval (expr)");
-               return;
-       }
-
-       Embperl * perl;
-       if(!parse || !(perl = ((PerlembParser *)parse)->getperl()))
-       {
-               c->Message(0, "Error: Perl module not loaded");
-               return;
-       }
-
-       std::string exports = "$plugin::printbuff='';$plugin::ip='";
-               struct in_addr ip; ip.s_addr = c->GetIP();
-               exports += inet_ntoa(ip);
-               exports += "';$plugin::name=qq(";
-               exports += c->GetName();
-               exports += ");";
-       perl->eval(exports.c_str());
-
-       try
-       {
-               std::string cmd = std::string("package plugin;") + std::string(sep->msg + sizeof("peval "));
-               perl->eval(cmd.c_str());
-               std::string output = perl->getstr("$plugin::printbuff");
-               if(output.length())
-                       c->Message(0, "%s", output.c_str());
-       }
-       catch(const char * err)
-       {
-               c->Message(0, "Error: %s", perl->lasterr().c_str());
-       }
-
-       perl->eval("package main;");
-
-}
-
-#endif //EMBPERL_PLUGIN
-#endif //EMBPERL_EVAL_COMMANDS
 
 void command_ban(Client *c, const Seperator *sep)
 {

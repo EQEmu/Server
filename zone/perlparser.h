@@ -19,28 +19,28 @@
 //extends the perl parser to use C methods
 //instead of the command queue.
 
-#ifndef PERLPARSER_H
-#define PERLPARSER_H
-
-#ifdef EMBPERL
-#ifdef EMBPERL_XS
-
-#include "embparser.h"
-
-class PerlXSParser : public PerlembParser {
-public:
-	PerlXSParser();
-//	~PerlXSParser();
-
-	virtual void SendCommands(const char * pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst* iteminst);
-protected:
-	void map_funs();
-
-	SV *_empty_sv;
-};
-
-
-#endif //EMBPERL_XS
-#endif //EMBPERL
-
-#endif //PERLPARSER_H
+//#ifndef PERLPARSER_H
+//#define PERLPARSER_H
+//
+//#ifdef EMBPERL
+//#ifdef EMBPERL_XS
+//
+//#include "embparser.h"
+//
+//class PerlXSParser : public PerlembParser {
+//public:
+//	PerlXSParser();
+////	~PerlXSParser();
+//
+//	virtual void SendCommands(const char * pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst* iteminst);
+//protected:
+//	void map_funs();
+//
+//	SV *_empty_sv;
+//};
+//
+//
+//#endif //EMBPERL_XS
+//#endif //EMBPERL
+//
+//#endif //PERLPARSER_H

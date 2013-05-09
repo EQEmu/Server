@@ -54,9 +54,6 @@ Core Zone features
 //enable perl-based in-game command, pretty useless without EMBPERL_XS_CLASSES
 #define EMBPERL_COMMANDS
 
-//enable #plugin and #peval, which requires IO::Stringy
-//#define EMBPERL_EVAL_COMMANDS
-
 #endif
 
 /*

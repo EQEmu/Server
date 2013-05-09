@@ -35,6 +35,16 @@ public:
     void EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
 private:
+	bool HasQuestSubLocal(uint32 npcid, const char *subname);
+	bool HasQuestSubGlobal(const char *subname);
+	bool PlayerHasQuestSubLocal(const char *subname);
+	bool PlayerHasQuestSubGlobal(const char *subname);
+
+	void EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	void EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	void EventPlayerLocal(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
+	void EventPlayerGlobal(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
+
     QuestInterface *GetQIByNPCQuest(uint32 npcid, std::string &filename);
     QuestInterface *GetQIByGlobalNPCQuest(std::string &filename);
     QuestInterface *GetQIByPlayerQuest(std::string &filename);

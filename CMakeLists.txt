@@ -118,11 +118,6 @@ OPTION(EQEMU_BUILD_LUA "Build Lua parser." OFF)
 #C++11 stuff
 IF(NOT MSVC)
     ADD_DEFINITIONS(-std=c++0x)
-    #Rvalue-Move - todo: auto set this based on gcc version
-    OPTION(EQEMU_ENABLE_RVALUE_MOVE "Enable EQEmu RValue References (Enable if GCC 4.3 or higher)" OFF)
-ELSE(NOT MSVC)
-    #Rvalue-Move - todo: auto set this based on msvc version
-    OPTION(EQEMU_ENABLE_RVALUE_MOVE "Enable EQEmu RValue References (Enable if Visual Studio 2010 or higher)" OFF)
 ENDIF(NOT MSVC)
 
 IF(EQEMU_ENABLE_RVALUE_MOVE)
