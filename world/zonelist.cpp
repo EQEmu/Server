@@ -716,14 +716,29 @@ void ZSList::GetZoneIDList(vector<uint32> &zones) {
 	
 }
 
+void ZSList::WorldShutDown(uint32 time, uint32 interval)
+{
+   	if( time > 0 ) {
+		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i seconds, everyone log out before this time.",time);
 
+		time *= 1000;
+		interval *= 1000;
+		if(interval < 5000) { interval = 5000; }
 
-
-
-
-
-
-
-
-
-
+		shutdowntimer->SetTimer(time);
+		reminder->SetTimer(interval-1000);
+		reminder->SetAtTrigger(interval);
+		shutdowntimer->Start();
+		reminder->Start();
+    }
+    else {
+        SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.");
+        ServerPacket* pack = new ServerPacket;
+        pack->opcode = ServerOP_ShutdownAll;
+        pack->size=0;
+        SendPacket(pack);
+        safe_delete(pack);
+		Process();
+		CatchSignal(2);
+    }
+}

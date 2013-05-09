@@ -318,6 +318,8 @@ bool Mob::CheckHitChance(Mob* other, SkillType skillinuse, int Hand, int16 chanc
 	if(skillinuse == ARCHERY)
 		chancetohit -= (chancetohit * RuleR(Combat, ArcheryHitPenalty)) / 100.0f;
 
+	chancetohit = mod_hit_chance(chancetohit, skillinuse, attacker);
+
 	// Chance to hit;   Max 95%, Min 30%
 	if(chancetohit > 1000) {
 		//if chance to hit is crazy high, that means a discipline is in use, and let it stay there
@@ -396,6 +398,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		if (!ghit) {	//if they are not using a garunteed hit discipline
 			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
 			bonus *= riposte_chance;
+			bonus = mod_riposte_chance(bonus, attacker);
 			RollTable[0] = bonus + (itembonuses.HeroicDEX / 25); // 25 heroic = 1%, applies to ripo, parry, block
 		}
 	}
@@ -434,6 +437,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		
 		if (!ghit) {	//if they are not using a garunteed hit discipline
 			bonus = 2.0 + skill/35.0 + (GetDEX()/200);
+			bonus = mod_block_chance(bonus, attacker);
 			RollTable[1] = RollTable[0] + (bonus * block_chance);
 		}
 	}
@@ -485,6 +489,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		if (!ghit) {	//if they are not using a garunteed hit discipline
 			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
 			bonus *= parry_chance;
+			bonus = mod_parry_chance(bonus, attacker);
 			RollTable[2] = RollTable[1] + bonus;
 		}
 	}
@@ -507,6 +512,8 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		if (!ghit) {	//if they are not using a garunteed hit discipline
 			bonus = 2.0 + skill/60.0 + (GetAGI()/200);
 			bonus *= dodge_chance;
+			//DCBOOMKAR
+			bonus = mod_dodge_chance(bonus, attacker);
 			RollTable[3] = RollTable[2] + bonus - (itembonuses.HeroicDEX / 25) + (itembonuses.HeroicAGI / 25);
 		}
 	}
@@ -555,6 +562,10 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 		int shield_ac = 0;
 		int armor = 0;
 		float weight = 0.0;
+
+		float monkweight = RuleI(Combat, MonkACBonusWeight);
+		monkweight = mod_monk_weight(monkweight, attacker);
+
 		if(IsClient())
 		{
 			armor = CastToClient()->GetRawACNoShield(shield_ac);
@@ -576,7 +587,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 		{
 			softcap = RuleI(Combat, ClothACSoftcap);
 		}
-		else if(GetClass() == MONK && weight <= 15.0)
+		else if(GetClass() == MONK && weight <= monkweight)
 		{
 			softcap = RuleI(Combat, MonkACSoftcap);
 		}
@@ -603,7 +614,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 			{
 				softcap_armor = softcap_armor * RuleR(Combat, WarriorACSoftcapReturn);
 			}
-			else if(GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || (GetClass() == MONK && weight <= 15.0))
+			else if(GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || (GetClass() == MONK && weight <= monkweight))
 			{
 				softcap_armor = softcap_armor * RuleR(Combat, KnightACSoftcapReturn);
 			}
@@ -637,6 +648,8 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 		}
 		mitigation_rating *= 0.847;
 
+		mitigation_rating = mod_mitigation_rating(mitigation_rating, attacker);
+
 		if(attacker->IsClient())
 		{
 			attack_rating = (attacker->CastToClient()->CalcATK() + ((attacker->GetSTR()-66) * 0.9) + (attacker->GetSkill(OFFENSE)*1.345));
@@ -645,6 +658,8 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 		{
 			attack_rating = (attacker->GetATK() + (attacker->GetSkill(OFFENSE)*1.345) + ((attacker->GetSTR()-66) * 0.9));
 		}
+
+		attack_rating = attacker->mod_attack_rating(attack_rating, this);
 
 		float d = 10.0;
 		float mit_roll = MakeRandomFloat(0, mitigation_rating);
@@ -669,6 +684,9 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 			if(thac20 > thac20cap)
 			{
 				thac20 = thac20cap;
+
+
+
 			}
             d += 10 * (m_diff / thac20);
 		}
@@ -1221,6 +1239,8 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		else
 			damage = MakeRandomInt(min_hit, max_hit);
 
+		damage = mod_client_damage(damage, skillinuse, Hand, weapon, other);
+
 		mlog(COMBAT__DAMAGE, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, mylevel);
 
@@ -1458,6 +1478,9 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	{
 		if (killerMob->IsNPC()) {
             parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
+
+			mod_client_death_npc(killerMob);
+
 			uint16 emoteid = killerMob->GetEmoteID();
 			if(emoteid != 0)
 				killerMob->CastToNPC()->DoNPCEmote(KILLEDPC,emoteid);
@@ -1473,6 +1496,9 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 				killerMob->CastToClient()->SetDueling(false);
 				killerMob->CastToClient()->SetDuelTarget(0);
 				entity_list.DuelMessage(killerMob,this,false);
+
+				mod_client_death_duel(killerMob);
+
 			} else {
 				//otherwise, we just died, end the duel.
 				Mob* who = entity_list.GetMob(GetDuelTarget());
@@ -1845,6 +1871,8 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		    damage = (max_dmg+eleBane);
 		}
 		
+		damage = mod_npc_damage(damage, skillinuse, Hand, &weapon_inst, other);
+
 		int32 hate = damage;
 		if(IsPet())
 		{
@@ -2043,7 +2071,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	entity_list.QueueClients(killerMob, app, false);
 	
 	if(respawn2) {
-		respawn2->DeathReset();
+		respawn2->DeathReset(1);
 	}
 
 	if (killerMob) {
@@ -2098,6 +2126,9 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 			for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
 				if (kr->members[i].member != nullptr) { // If Group Member is Client
                     parse->EventNPC(EVENT_KILLED_MERIT, this, kr->members[i].member, "killed", 0);
+
+					mod_npc_killed_merit(kr->members[i].member);
+
 					if(RuleB(TaskSystem, EnableTaskSystem))
 						kr->members[i].member->UpdateTasksOnKill(GetNPCTypeID());
 					PlayerCount++;
@@ -2138,6 +2169,9 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 				if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
 					Client *c = kg->members[i]->CastToClient();
                     parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
+
+					mod_npc_killed_merit(c);
+
 					if(RuleB(TaskSystem, EnableTaskSystem))
 						c->UpdateTasksOnKill(GetNPCTypeID());
 
@@ -2182,6 +2216,9 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 			}
 			 /* Send the EVENT_KILLED_MERIT event */
             parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
+
+			mod_npc_killed_merit(give_exp_client);
+
 			if(RuleB(TaskSystem, EnableTaskSystem))
 				give_exp_client->UpdateTasksOnKill(GetNPCTypeID());
 
@@ -2312,6 +2349,9 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	if(killerMob) {
 		Mob *oos = killerMob->GetOwnerOrSelf();
         parse->EventNPC(EVENT_DEATH, this, oos, "", 0);
+
+		mod_npc_killed(oos);
+
 		uint16 emoteid = this->GetEmoteID();
 		if(emoteid != 0)
 			this->DoNPCEmote(ONDEATH,emoteid);
@@ -3404,7 +3444,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		{
 			// NPCs can stun with their bash/kick as soon as they recieve it.
 			// Clients can stun mobs under level 56 with their bash/kick when they get level 55 or greater.
-			if((attacker->IsNPC()) || (attacker->IsClient() && attacker->GetLevel() >= 55 && GetLevel() < 56))
+			if( attacker->IsNPC() || (attacker->IsClient() && attacker->GetLevel() >= RuleI(Combat, ClientStunLevel) && GetLevel() < RuleI(Spells, BaseImmunityLevel)) )
 			{
 				if (MakeRandomInt(0,99) < (RuleI(Character, NPCBashKickStunChance)) || attacker->IsClient())
 				{

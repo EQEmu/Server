@@ -627,7 +627,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				// EverHood
 				if(caster && GetPrimaryFaction()>0) {
-					caster->AddFactionBonus(GetPrimaryFaction(),spell.base[0]);
+					caster->AddFactionBonus(GetPrimaryFaction(),effect_value);
 				}
 				break;
 			}
@@ -2809,6 +2809,8 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		mlog(SPELLS__BARDS, "Effect value %d altered with bard modifier of %d to yeild %d", oval, mod, effect_value);
 	}
 
+	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster);
+
 	return(effect_value);
 }
 
@@ -2816,6 +2818,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 int Mob::CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int ticsremaining)
 {
 /*
+neotokyo: i need those formulas checked!!!!
 
 0 = base
 1 - 99 = base + level * formulaID
@@ -2844,9 +2847,6 @@ int Mob::CalcSpellEffectValue_formula(int formula, int base, int max, int caster
 	int result = 0, updownsign = 1, ubase = base;
 	if(ubase < 0)
 		ubase = 0 - ubase;
-	int level_diff = caster_level - GetMinLevel(spell_id);
-	if (level_diff < 0)
-		level_diff = 0;
 
 	// this updown thing might look messed up but if you look at the
 	// spells it actually looks like some have a positive base and max where
@@ -2903,23 +2903,23 @@ snare has both of them negative, yet their range should work the same:
 			result = ubase + (caster_level / 5); break;
 
 		case 111:
-            result = updownsign * (ubase + 6 * level_diff); break;
+            result = updownsign * (ubase + 6 * (caster_level - GetMinLevel(spell_id))); break;
 		case 112:
-            result = updownsign * (ubase + 8 * level_diff); break;
+            result = updownsign * (ubase + 8 * (caster_level - GetMinLevel(spell_id))); break;
 		case 113:
-            result = updownsign * (ubase + 10 * level_diff); break;
+            result = updownsign * (ubase + 10 * (caster_level - GetMinLevel(spell_id))); break;
 		case 114:
-            result = updownsign * (ubase + 15 * level_diff); break;
+            result = updownsign * (ubase + 15 * (caster_level - GetMinLevel(spell_id))); break;
 
         //these formula were updated according to lucy 10/16/04
 		case 115:	// this is only in symbol of transal
-			result = ubase + 6 * level_diff; break;
+			result = ubase + 6 * (caster_level - GetMinLevel(spell_id)); break;
 		case 116:	// this is only in symbol of ryltan
-            result = ubase + 8 * level_diff; break;
+            result = ubase + 8 * (caster_level - GetMinLevel(spell_id)); break;
 		case 117:	// this is only in symbol of pinzarn
-            result = ubase + 12 * level_diff; break;
+            result = ubase + 12 * (caster_level - GetMinLevel(spell_id)); break;
 		case 118:	// used in naltron and a few others
-            result = ubase + 20 * level_diff; break;
+            result = ubase + 20 * (caster_level - GetMinLevel(spell_id)); break;
 
 		case 119:	// confirmed 2/6/04
 			result = ubase + (caster_level / 8); break;
@@ -5319,7 +5319,7 @@ int32 Mob::GetAdditionalDamage(Mob *caster, uint32 spell_id, bool use_skill, uin
 
 int32 Mob::ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard) {
 
-	//9-17-12: This is likely causing crashes, disabled till can resolve.
+	// 9-17-12: This is likely causing crashes, disabled till can resolve.
 	if (IsBard)
 		return value;
 

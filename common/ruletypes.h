@@ -95,7 +95,7 @@ RULE_BOOL ( Character, CheckCursorEmptyWhenLooting, true ) // If true, a player 
 RULE_BOOL ( Character, MaintainIntoxicationAcrossZones, true ) // If true, alcohol effects are maintained across zoning and logging out/in.
 RULE_BOOL ( Character, EnableDiscoveredItems, true ) // If enabled, it enables EVENT_DISCOVER_ITEM and also saves character names and timestamps for the first time an item is discovered.
 RULE_BOOL ( Character, EnableXTargetting, true) // Enable Extended Targetting Window, for users with UF and later clients.
-
+RULE_BOOL ( Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )
@@ -291,7 +291,8 @@ RULE_INT ( Spells, MaxCastTimeReduction, 50) //Max percent your spell cast time 
 RULE_INT ( Spells, RootBreakFromSpells, 20) //Chance for root to break when cast on.
 RULE_INT ( Spells, DeathSaveCharismaMod, 3) //Determines how much charisma effects chance of death save firing.
 RULE_INT ( Spells, DivineInterventionHeal, 8000) //Divine intervention heal amount.
-RULE_BOOL( Spells, AdditiveBonusValues, false) //Allow certain bonuses to be calculated by adding together the value from each item, instead of taking the highest value. (ie Add together all Cleave Effects)
+RULE_BOOL ( Spells, AdditiveBonusValues, false) //Allow certain bonuses to be calculated by adding together the value from each item, instead of taking the highest value. (ie Add together all Cleave Effects)
+RULE_BOOL ( Spells, UseCHAScribeHack, false) //ScribeSpells and TrainDiscs quest functions will ignore entries where field 12 is CHA.  What's the best way to do this?
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
@@ -361,6 +362,11 @@ RULE_INT ( Combat, NPCFlurryChance, 20) // Chance for NPC to flurry.
 RULE_BOOL (Combat,TauntOverLevel, 1) //Allows you to taunt NPC's over warriors level.
 RULE_REAL (Combat,TauntSkillFalloff, 0.33)//For every taunt skill point that's not maxed you lose this % chance to taunt.
 RULE_BOOL (Combat,EXPFromDmgShield, false) //Determine if damage from a damage shield counts for EXP gain.
+RULE_INT ( Combat, MonkACBonusWeight, 15)
+RULE_INT ( Combat, ClientStunLevel, 55) //This is the level where client kicks and bashes can stun the target
+RULE_INT ( Combat, QuiverWRHasteDiv, 3) //Weight Reduction is divided by this to get haste contribution for quivers
+RULE_BOOL ( Combat, UseArcheryBonusRoll, false) //Make the 51+ archery bonus require an actual roll
+RULE_INT ( Combat, ArcheryBonusChance, 50)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( NPC )

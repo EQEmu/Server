@@ -1158,7 +1158,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		if(Tasks[TaskList[i]] != nullptr) break;
 	}
 
-	// FIXME: The 10 and 5 values in this calculation are to account for the string "nullptr" we are putting in 3 times. 
+	// FIXME: The 10 and 5 values in this calculation are to account for the string "ABCD" we are putting in 3 times. 
 	//
 	// Calculate how big the packet needs to be pased on the number of tasks and the
 	// size of the variable length strings.
@@ -1236,9 +1236,9 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		// FIXME: In live packets, these two strings appear to be the same as the Text1 and Text2
 		// strings from the first activity in the task, however the task chooser/selector
 		// does not appear to make use of them.
-		sprintf(Ptr, "nullptr");				
+		sprintf(Ptr, "ABCD");				
 		Ptr = Ptr + strlen(Ptr) + 1;
-		sprintf(Ptr, "nullptr");	
+		sprintf(Ptr, "ABCD");	
 		Ptr = Ptr + strlen(Ptr) + 1;
 
 		AvailableTaskTrailer = (AvailableTaskTrailer_Struct*)Ptr;
@@ -1253,7 +1253,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		
 		// In some packets, this next string looks like a short task summary, however it doesn't
 		// appear anywhere in the client window.
-		sprintf(Ptr, "nullptr"); 
+		sprintf(Ptr, "ABCD"); 
 		Ptr = Ptr + strlen(Ptr) + 1;
 	}
 

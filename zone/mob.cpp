@@ -1975,7 +1975,7 @@ void Mob::SetAttackTimer() {
 							continue;
 						if(pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == bagTypeQuiver)
 						{
-							float temp_wr = (pi->GetItem()->BagWR / 3);
+							float temp_wr = ( pi->GetItem()->BagWR / RuleI(Combat, QuiverWRHasteDiv) );
 							if(temp_wr > max_quiver)
 							{
 								max_quiver = temp_wr;
@@ -3784,12 +3784,12 @@ void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varna
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
-	// Make duration string either "unix_timestamp(now()) + xxx" or "nullptr"
+	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
 	stringstream duration_ss;
 
 	if (duration == INT_MAX)
 	{
-		duration_ss << "nullptr";
+		duration_ss << "NULL";
 	}
 	else
 	{
@@ -4673,5 +4673,22 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 		default:
 			return FACTION_INDIFFERENT;
 	}
+}
+
+bool Mob::HasSpellEffect(int effectid)
+{
+    int i;
+
+    uint32 buff_count = GetMaxTotalSlots();
+    for(i = 0; i < buff_count; i++)
+    {
+        if(buffs[i].spellid == SPELL_UNKNOWN) { continue; }
+
+        if(IsEffectInSpell(buffs[i].spellid, effectid))
+        {
+            return(1);
+        }
+    }
+    return(0);
 }
 

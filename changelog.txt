@@ -1,5 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 05/05/2013 ==
+Tabasco: Added EVENT_ITEM_TICK for interactive item quest scripts.  (See https://github.com/josheb/quests_dc/blob/master/items/12204.pl)
+	Added simple account flags.  Would this work better as an additional qglobal category?
+	Added SendMessage to EQW, useful for using CURL to broadcast to the server.
+	Added WorldShutDown to EQW for timed world shutdowns, also updated console worldshutdown command to optionally use timed behavior.
+	Added numerous modding hooks and mod_functions.cpp for easy custom formulas or future lua integration.
+	Added various rules for monk AC bonus weight, archery bonuses, kick/bash stuns and mob stun levels.
+required SQL: 2013_05_05_Account_Flags.sql
+required SQL: 2013_05_05_Item_Tick.sql
+
 == 04/28/2013 ==
 PiB: Implement CRC16 using CRC32.
 

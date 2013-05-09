@@ -154,7 +154,7 @@ public:
 	void	AddItem(const Item_Struct* item, uint16 charges, bool equipitem = true);
 	void	AddItem(uint32 itemid, uint16 charges, bool equipitem = true);
 	void	AddLootTable();
-
+	void	AddLootTable(uint32 ldid);
 	void	DescribeAggro(Client *towho, Mob *mob, bool verbose);
 	void    RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
 	void	CheckMinMaxLevel(Mob *them);
@@ -453,6 +453,13 @@ public:
 	}
 
 	void PrintOutQuestItems(Client* c);
+
+    uint32 	GetSpawnKillCount();
+    int 	GetScore();
+    void 	mod_prespawn(Spawn2 *sp);
+	int 	mod_npc_damage(int damage, SkillType skillinuse, int hand, ItemInst* weapon, Mob* other);
+	void	mod_npc_killed_merit(Mob* c);
+	void	mod_npc_killed(Mob* oos);
 
 protected:
 	

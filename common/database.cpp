@@ -428,7 +428,7 @@ bool Database::ReserveName(uint32 account_id, char* name)
 	char errbuf[MYSQL_ERRMSG_SIZE];
     char *query = 0;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into character_ SET account_id=%i, name='%s', profile=nullptr", account_id, name), errbuf)) {
+	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into character_ SET account_id=%i, name='%s', profile=NULL", account_id, name), errbuf)) {
 		cerr << "Error in ReserveName query '" << query << "' " << errbuf << endl;
 		safe_delete_array(query);
 		return false;
@@ -1196,9 +1196,9 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 	{
 		cerr << "Error in GetSafePoint query '" << query << "' " << errbuf << endl;
 		cerr << "If it errors, run the following querys:\n";
-		cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT nullptr;\n";
-		cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT nullptr;\n";
-		cerr << "ALTER TABLE `zone` ADD flag_needed VARCHAR(128) NOT nullptr DEFAULT '';\n";
+		cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
+		cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
+		cerr << "ALTER TABLE `zone` ADD flag_needed VARCHAR(128) NOT NULL DEFAULT '';\n";
 
 		safe_delete_array(query);
 	}

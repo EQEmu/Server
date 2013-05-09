@@ -830,10 +830,11 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	{
 		if
 		(
-		spells[curspell].classes[WARRIOR] != 0 &&       //check if spell exists
-		spells[curspell].classes[initiator->GetPP().class_-1] <= max_level &&   //maximum level
-		spells[curspell].classes[initiator->GetPP().class_-1] >= min_level &&   //minimum level
-		spells[curspell].skill != 52
+			spells[curspell].classes[WARRIOR] != 0 &&       //check if spell exists
+			spells[curspell].classes[initiator->GetPP().class_-1] <= max_level &&   //maximum level
+			spells[curspell].classes[initiator->GetPP().class_-1] >= min_level &&   //minimum level
+			spells[curspell].skill != 52 &&
+			( RuleB(Spells, UseCHAScribeHack) && spells[curspell].effectid[EFFECT_COUNT - 1] != 10 )
 		)
 		{
 			if (book_slot == -1)    //no more book slots
@@ -872,7 +873,8 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 			spells[curspell].classes[WARRIOR] != 0 &&	//check if spell exists
 			spells[curspell].classes[initiator->GetPP().class_-1] <= max_level &&	//maximum level
 			spells[curspell].classes[initiator->GetPP().class_-1] >= min_level &&	//minimum level
-			spells[curspell].skill != 52
+			spells[curspell].skill != 52 &&
+			( RuleB(Spells, UseCHAScribeHack) && spells[curspell].effectid[EFFECT_COUNT - 1] != 10 )
 		)
 		{
 			if(IsDiscipline(curspell)){
@@ -1239,11 +1241,11 @@ int QuestManager::InsertQuestGlobal(
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
-	// Make duration string either "unix_timestamp(now()) + xxx" or "nullptr"
+	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
 	stringstream duration_ss;
 	if (duration == INT_MAX)
 	{
-		duration_ss << "nullptr";
+		duration_ss << "NULL";
 	}
 	else
 	{

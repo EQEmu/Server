@@ -376,3 +376,8 @@ void NPC::AddLootTable() {
 	}
 }
 
+void NPC::AddLootTable(uint32 ldid) {
+	if (npctype_id != 0) { // check if it's a GM spawn
+	  database.AddLootTableToNPC(this,ldid, &itemlist, &copper, &silver, &gold, &platinum);
+	}
+}

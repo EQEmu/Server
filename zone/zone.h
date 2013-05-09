@@ -33,6 +33,7 @@
 #include "tasks.h"
 #include "pathing.h"
 #include "QGlobals.h"
+#include <unordered_map>
 
 class Map;
 class WaterMap;
@@ -67,6 +68,14 @@ struct ZoneClientAuth_Struct {
 struct ZoneEXPModInfo {
 	float ExpMod;
 	float AAExpMod; 
+};
+
+struct item_tick_struct {
+    uint32       itemid;
+    uint32       chance;
+    uint32       level;
+    int16        bagslot;
+    std::string qglobal;
 };
 
 extern EntityList entity_list;
@@ -253,6 +262,15 @@ public:
 	
 	LinkedList<NPC_Emote_Struct*> NPCEmoteList;
 
+    void    LoadTickItems();
+    uint32  GetSpawnKillCount(uint32 in_spawnid);
+    void    UpdateHotzone();
+    unordered_map<int, item_tick_struct> tick_items;
+
+	//MODDING HOOKS
+	void mod_init();
+	void mod_repop();
+
 private:
 	uint32	zoneid;
 	uint32	instanceid;
@@ -305,6 +323,7 @@ private:
 	LinkedList<ZoneClientAuth_Struct*> client_auth_list;
 	QGlobalCache *qGlobals;
 	
+	Timer	hotzone_timer;
 	Mutex	MZoneLock;
 };
 

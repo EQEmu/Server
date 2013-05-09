@@ -88,7 +88,10 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_CLICK_OBJECT",
 	"EVENT_DISCOVER_ITEM",
 	"EVENT_DISCONNECT",
-	"EVENT_CONNECT"
+	"EVENT_CONNECT",
+	"EVENT_ITEM_TICK",
+	"EVENT_DUEL_WIN",
+	"EVENT_DUEL_LOSE"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr) {
