@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2010  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "WorldServer.h"
 #include "ErrorLog.h"
@@ -141,11 +141,11 @@ bool WorldServer::Process()
 				}
 
 				UsertoWorldResponse_Struct *utwr = (UsertoWorldResponse_Struct*)app->pBuffer;
-				server_log->Log(log_client, "Trying to find client with user id of %u.", utwr->lsaccountid); 
+				server_log->Log(log_client, "Trying to find client with user id of %u.", utwr->lsaccountid);
 				Client *c = server.CM->GetClient(utwr->lsaccountid);
 				if(c)
 				{
-					server_log->Log(log_client, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str()); 
+					server_log->Log(log_client, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());
 					EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayEverquestResponse, sizeof(PlayEverquestResponse_Struct));
 					PlayEverquestResponse_Struct *per = (PlayEverquestResponse_Struct*)outapp->pBuffer;
 					per->Sequence = c->GetPlaySequence();
@@ -180,7 +180,7 @@ bool WorldServer::Process()
 
 					if(server.options.IsTraceOn())
 					{
-						server_log->Log(log_network_trace, "Sending play response with following data, allowed %u, sequence %u, server number %u, message %u", 
+						server_log->Log(log_network_trace, "Sending play response with following data, allowed %u, sequence %u, server number %u, message %u",
 							per->Allowed, per->Sequence, per->ServerNumber, per->Message);
 						server_log->LogPacket(log_network_trace, (const char*)outapp->pBuffer, outapp->size);
 					}
@@ -371,7 +371,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 			{
 				if(s_acct_name.size() == 0 || s_acct_pass.size() == 0)
 				{
-					server_log->Log(log_world, "Server %s(%s) successfully logged into account that had no user/password requirement.", 
+					server_log->Log(log_world, "Server %s(%s) successfully logged into account that had no user/password requirement.",
 						long_name.c_str(), short_name.c_str());
 					authorized = true;
 					SetRuntimeID(s_id);
@@ -380,7 +380,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 				}
 				else if(s_acct_name.compare(account_name) == 0 && s_acct_pass.compare(account_password) == 0)
 				{
-					server_log->Log(log_world, "Server %s(%s) successfully logged in.", 
+					server_log->Log(log_world, "Server %s(%s) successfully logged in.",
 						long_name.c_str(), short_name.c_str());
 					authorized = true;
 					SetRuntimeID(s_id);
@@ -403,14 +403,14 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 			}
 			else
 			{
-				server_log->Log(log_world, "Server %s(%s) attempted to log in but database couldn't find an entry and only registered servers are allowed.", 
+				server_log->Log(log_world, "Server %s(%s) attempted to log in but database couldn't find an entry and only registered servers are allowed.",
 					long_name.c_str(), short_name.c_str());
 				return;
 			}
 		}
 		else
 		{
-			server_log->Log(log_world, "Server %s(%s) did not attempt to log in but only registered servers are allowed.", 
+			server_log->Log(log_world, "Server %s(%s) did not attempt to log in but only registered servers are allowed.",
 				long_name.c_str(), short_name.c_str());
 			return;
 		}
@@ -430,7 +430,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 			{
 				if(s_acct_name.compare(account_name) == 0 && s_acct_pass.compare(account_password) == 0)
 				{
-					server_log->Log(log_world, "Server %s(%s) successfully logged in.", 
+					server_log->Log(log_world, "Server %s(%s) successfully logged in.",
 						long_name.c_str(), short_name.c_str());
 					authorized = true;
 					SetRuntimeID(s_id);
@@ -448,7 +448,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 				{
 					// this is the first of two cases where we should deny access even if unregistered is allowed
 					server_log->Log(log_world, "Server %s(%s) attempted to log in but account and password did not match the entry in the database.",
-						 long_name.c_str(), short_name.c_str());
+						long_name.c_str(), short_name.c_str());
 				}
 			}
 			else
@@ -457,11 +457,11 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 				{
 					// this is the second of two cases where we should deny access even if unregistered is allowed
 					server_log->Log(log_world, "Server %s(%s) did not attempt to log in but this server requires a password.",
-						 long_name.c_str(), short_name.c_str());
+						long_name.c_str(), short_name.c_str());
 				}
 				else
 				{
-					server_log->Log(log_world, "Server %s(%s) did not attempt to log in but unregistered servers are allowed.", 
+					server_log->Log(log_world, "Server %s(%s) did not attempt to log in but unregistered servers are allowed.",
 						long_name.c_str(), short_name.c_str());
 					authorized = true;
 					SetRuntimeID(s_id);
@@ -471,7 +471,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 		}
 		else
 		{
-			server_log->Log(log_world, "Server %s(%s) attempted to log in but database couldn't find an entry but unregistered servers are allowed.", 
+			server_log->Log(log_world, "Server %s(%s) attempted to log in but database couldn't find an entry but unregistered servers are allowed.",
 				long_name.c_str(), short_name.c_str());
 			if(server.db->CreateWorldRegistration(long_name, short_name, s_id))
 			{
@@ -485,7 +485,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 	in_addr in;
 	in.s_addr = connection->GetrIP();
 	server.db->UpdateWorldRegistration(GetRuntimeID(), long_name, string(inet_ntoa(in)));
-	
+
 	if(authorized)
 	{
 		server.CM->UpdateServerList();
@@ -503,7 +503,7 @@ void WorldServer::SendClientAuth(unsigned int ip, string account, string key, un
 {
 	ServerPacket *outapp = new ServerPacket(ServerOP_LSClientAuth, sizeof(ServerLSClientAuth));
 	ServerLSClientAuth* slsca = (ServerLSClientAuth*)outapp->pBuffer;
-			
+
 	slsca->lsaccount_id = account_id;
 	strncpy(slsca->name, account.c_str(), account.size() > 30 ? 30 : account.size());
 	strncpy(slsca->key, key.c_str(), 10);

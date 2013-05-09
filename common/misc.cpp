@@ -36,20 +36,20 @@ int print_stacktrace()
 #include <execinfo.h>
 int print_stacktrace()
 {
-  void *ba[20];
-  int n = backtrace (ba, 20);
-  if (n != 0)
-    {
-      char **names = backtrace_symbols (ba, n);
-      if (names != nullptr)
-        {
-          int i;
-          cerr <<  "called from " << (char*)names[0] << endl;
-          for (i = 1; i < n; ++i)
-            cerr << "            " << (char*)names[i] << endl;
-          free (names);
-        }
-    }
+	void *ba[20];
+	int n = backtrace (ba, 20);
+	if (n != 0)
+	{
+		char **names = backtrace_symbols (ba, n);
+		if (names != nullptr)
+		{
+			int i;
+			cerr << "called from " << (char*)names[0] << endl;
+			for (i = 1; i < n; ++i)
+				cerr << "            " << (char*)names[i] << endl;
+			free (names);
+		}
+	}
 	return(0);
 }
 #endif //!FREEBSD
@@ -387,9 +387,9 @@ void encode_chunk(char *in, int len, char *out)
 
 void decode_chunk(char *in, char *out)
 {
-        *out = DEC(*in) << 2 | DEC(in[1]) >> 4;
-        *(out+1) = DEC(in[1]) << 4 | DEC(in[2]) >> 2;
-        *(out+2) = DEC(in[2]) << 6 | DEC(in[3]);
+	*out = DEC(*in) << 2 | DEC(in[1]) >> 4;
+	*(out+1) = DEC(in[1]) << 4 | DEC(in[2]) >> 2;
+	*(out+2) = DEC(in[2]) << 6 | DEC(in[3]);
 }
 
 void dump_message_column(unsigned char *buffer, unsigned long length, string leader, FILE *to)

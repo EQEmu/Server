@@ -34,7 +34,7 @@ sub check_mq_handin {
      return 1;
 }
 
-sub return_items {    
+sub return_items {
 	my $hashref = plugin::var('$itemcount');
 	my $client = plugin::val('$client');
 	my $items_returned = 0;
@@ -45,7 +45,7 @@ sub return_items {
 		2 => [ plugin::val('$item3'), plugin::val('$item3_charges'), plugin::val('$item3_attuned') ],
 		3 => [ plugin::val('$item4'), plugin::val('$item4_charges'), plugin::val('$item4_attuned') ],
 	);
-	
+
 	foreach my $k (keys(%{$hashref}))
 	{
 		next if($k == 0);

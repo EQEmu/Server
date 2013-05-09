@@ -21,7 +21,7 @@ class LoginServerList{
 public:
 	LoginServerList();
 	~LoginServerList();
-	
+
 	void	Add(const char*, uint16, const char*, const char*);
 	void	InitLoginServer();
 
@@ -31,13 +31,13 @@ public:
 	bool	SendNewInfo();
 	bool	SendStatus();
 
-	bool	SendPacket(ServerPacket *pack);	
-	bool	SendAccountUpdate(ServerPacket *pack);	
+	bool	SendPacket(ServerPacket *pack);
+	bool	SendAccountUpdate(ServerPacket *pack);
 	bool	Connected();
 	bool	AllConnected();
 	bool	MiniLogin();
 	bool	CanUpdate();
-	
+
 protected:
 	LinkedList<LoginServer*> list;
 };

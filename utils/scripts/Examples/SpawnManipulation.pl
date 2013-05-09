@@ -1,4 +1,4 @@
-sub EVENT_SAY { 
+sub EVENT_SAY {
 	if($text=~/despawn/i)
 	{
 		quest::disable_spawn2(10842);

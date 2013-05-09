@@ -35,14 +35,14 @@
 	if ($ruleset_id !~ m/^[0-9]+$/) {$ruleset_id = 1;}	#this should default any non-numeric values (particularly blank ones), also making it free from injections
 	my $rule_type = $request->get("rule_type", "All");	#not safe from injection as-is
 	if ($rule_type !~ m/^\w+$/i) {$rule_type = "All";}	#this should make it safe from injection, but may cause issues if we start using non-alphanumeric characters in the first part of the rule_name
-	
+
 	#now, we'll put together a list of the rule categories that we can filter by
 	print "<center>\n\t";
-	
+
 	if ($rule_type eq "All") {print "<b>";}
 	print "<a href=\"rules.html?ruleset_id=$ruleset_id&rule_type=All\">All</a>";
 	if ($rule_type eq "All") {print "</b>";}
-	
+
 	my $q = "SELECT DISTINCT(SUBSTRING(rule_name, 1, LOCATE(':', rule_name) - 1)) AS rule_type FROM rule_values WHERE ruleset_id = '$ruleset_id' ORDER BY rule_type ASC";
 	my $res = $EQDB->query($q);
 	if ($res) {
@@ -73,7 +73,7 @@
 	#print "\t\t<td></td>\n";
 	#print "\t\t<td colspan=\"2\"><button>Add</button></td>\n";
 	#print "\t<tr>\n";
-	
+
 	#lastly, output any matching rules
 	my $w2 = "WHERE ruleset_id = '$ruleset_id'";
 	if ($rule_type ne "All") {

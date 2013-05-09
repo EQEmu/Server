@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "MiscFunctions.h"
@@ -42,7 +42,7 @@ using namespace std;
 	#define vsnprintf	_vsnprintf
 #endif
 	#define strncasecmp	_strnicmp
-	#define strcasecmp  _stricmp
+	#define strcasecmp	_stricmp
 #else
 	#include <stdlib.h>
 	#include <ctype.h>
@@ -50,9 +50,9 @@ using namespace std;
 	#include <sys/types.h>
 	#include <sys/time.h>
 #ifdef FREEBSD //Timothy Whitman - January 7, 2003
-       #include <sys/socket.h>
-       #include <netinet/in.h>
- #endif
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+#endif
 	#include <sys/stat.h>
 	#include <unistd.h>
 	#include <netdb.h>
@@ -83,8 +83,8 @@ void CoutTimestamp(bool ms) {
 	time(&rawtime);
 	gmt_t = gmtime(&rawtime);
 
-    struct timeval read_time;	
-    gettimeofday(&read_time,0);
+	struct timeval read_time;
+	gettimeofday(&read_time,0);
 
 	cout << (gmt_t->tm_year + 1900) << "/" << setw(2) << setfill('0') << (gmt_t->tm_mon + 1) << "/" << setw(2) << setfill('0') << gmt_t->tm_mday << " " << setw(2) << setfill('0') << gmt_t->tm_hour << ":" << setw(2) << setfill('0') << gmt_t->tm_min << ":" << setw(2) << setfill('0') << gmt_t->tm_sec;
 	if (ms)
@@ -121,50 +121,50 @@ bool strn0cpyt(char* dest, const char* source, uint32 size) {
 }
 
 const char *MakeUpperString(const char *source) {
-    static char str[128];
-    if (!source)
-	    return nullptr;
-    MakeUpperString(source, str);
-    return str;
+	static char str[128];
+	if (!source)
+		return nullptr;
+	MakeUpperString(source, str);
+	return str;
 }
 
 void MakeUpperString(const char *source, char *target) {
-    if (!source || !target) {
+	if (!source || !target) {
 	*target=0;
-        return;
-    }
-    while (*source)
-    {
-        *target = toupper(*source);
-        target++;source++;
-    }
-    *target = 0;
+		return;
+	}
+	while (*source)
+	{
+		*target = toupper(*source);
+		target++;source++;
+	}
+	*target = 0;
 }
 
 const char *MakeLowerString(const char *source) {
-    static char str[128];
-    if (!source)
-	    return nullptr;
-    MakeLowerString(source, str);
-    return str;
+	static char str[128];
+	if (!source)
+		return nullptr;
+	MakeLowerString(source, str);
+	return str;
 }
 
 void MakeLowerString(const char *source, char *target) {
-    if (!source || !target) {
+	if (!source || !target) {
 	*target=0;
-        return;
-    }
-    while (*source)
-    {
-        *target = tolower(*source);
-        target++;source++;
-    }
-    *target = 0;
+		return;
+	}
+	while (*source)
+	{
+		*target = tolower(*source);
+		target++;source++;
+	}
+	*target = 0;
 }
 
 int MakeAnyLenString(char** ret, const char* format, ...) {
 	int buf_len = 128;
-    int chars = -1;
+	int chars = -1;
 	va_list argptr, tmpargptr;
 	va_start(argptr, format);
 	while (chars == -1 || chars >= buf_len) {
@@ -186,7 +186,7 @@ uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const cha
 		*bufsize = 256;
 	if (*ret == 0)
 		*strlen = 0;
-    int chars = -1;
+	int chars = -1;
 	char* oldret = 0;
 	va_list argptr, tmpargptr;
 	va_start(argptr, format);
@@ -314,7 +314,7 @@ uint32 ResolveIP(const char* hostname, char* errbuf) {
 			snprintf(errbuf, ERRBUF_SIZE, "ResolveIP(): hostname == 0");
 		return 0;
 	}
-    struct sockaddr_in	server_sin;
+	struct sockaddr_in	server_sin;
 #ifdef _WINDOWS
 	PHOSTENT phostent = nullptr;
 #else
@@ -383,7 +383,7 @@ const char * itoa(int num, char* a,int b) {
 }
 #endif
 
-/* 
+/*
  * generate a random integer in the range low-high this
  * should be used instead of the rand()%limit method
  */
@@ -394,7 +394,7 @@ int MakeRandomInt(int low, int high)
 		return(low);
 
 	//return (rand()%(high-low+1) + (low));
-        if(!WELLRNG_init) {
+		if(!WELLRNG_init) {
 		WELLRNG_init = true;
 		oneseed( rnd_hash( time(nullptr), clock() ) );
 		WELLRNG19937 = case_1;
@@ -412,7 +412,7 @@ double MakeRandomFloat(double low, double high)
 		return(low);
 
 	//return (rand() / (double)RAND_MAX * (high - low) + low);
-        if(!WELLRNG_init) {
+		if(!WELLRNG_init) {
 		WELLRNG_init = true;
 		oneseed( rnd_hash( time(nullptr), clock() ) );
 		WELLRNG19937 = case_1;
@@ -422,41 +422,41 @@ double MakeRandomFloat(double low, double high)
 
 uint32 rnd_hash( time_t t, clock_t c )
 {
-        // Get a uint32 from t and c
-        // Better than uint32(x) in case x is floating point in [0,1]
-        // Based on code by Lawrence Kirby (fred@genesis.demon.co.uk)
-        
-        static uint32 differ = 0;  // guarantee time-based seeds will change
-        
-        uint32 h1 = 0;
-        unsigned char *p = (unsigned char *) &t;
-        for( size_t i = 0; i < sizeof(t); ++i )
-        {
-                h1 *= 255 + 2U;
-                h1 += p[i];
-        }
-        uint32 h2 = 0;
-        p = (unsigned char *) &c;
-        for( size_t j = 0; j < sizeof(c); ++j )
-        {
-                h2 *= 255 + 2U;
-                h2 += p[j];
-        }
-        return ( h1 + differ++ ) ^ h2;
+	// Get a uint32 from t and c
+	// Better than uint32(x) in case x is floating point in [0,1]
+	// Based on code by Lawrence Kirby (fred@genesis.demon.co.uk)
+
+	static uint32 differ = 0; // guarantee time-based seeds will change
+
+	uint32 h1 = 0;
+	unsigned char *p = (unsigned char *) &t;
+	for( size_t i = 0; i < sizeof(t); ++i )
+	{
+		h1 *= 255 + 2U;
+		h1 += p[i];
+	}
+	uint32 h2 = 0;
+	p = (unsigned char *) &c;
+	for( size_t j = 0; j < sizeof(c); ++j )
+	{
+		h2 *= 255 + 2U;
+		h2 += p[j];
+	}
+	return ( h1 + differ++ ) ^ h2;
 }
 
 void oneseed( const uint32 seed )
 {
-        // Initialize generator state with seed
-        // See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
-        // In previous versions, most significant bits (MSBs) of the seed affect
-        // only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto.
-        register int j = 0;
-        STATE[j] = seed & 0xffffffffUL;
+	// Initialize generator state with seed
+	// See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
+	// In previous versions, most significant bits (MSBs) of the seed affect
+	// only MSBs of the state array. Modified 9 Jan 2002 by Makoto Matsumoto.
+	register int j = 0;
+	STATE[j] = seed & 0xffffffffUL;
 	for (j = 1; j < R; j++)
-        {
-                STATE[j] = ( 1812433253UL * ( STATE[j-1] ^ (STATE[j-1] >> 30) ) + j ) & 0xffffffffUL;
-        }
+	{
+		STATE[j] = ( 1812433253UL * ( STATE[j-1] ^ (STATE[j-1] >> 30) ) + j ) & 0xffffffffUL;
+	}
 }
 
 // WELL RNG code
@@ -472,79 +472,79 @@ void oneseed( const uint32 seed )
 /* ***************************************************************************** */
 
 unsigned int case_1 (void){
-   // state_i == 0
-   z0 = (VRm1Under & MASKL) | (VRm2Under & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
-   newV1      = z1 ^ z2;
-   newV0Under = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i = R - 1;
-   WELLRNG19937 = case_3;
-   return (STATE[state_i] ^ (newVM2Over & BITMASK));
+	// state_i == 0
+	z0 = (VRm1Under & MASKL) | (VRm2Under & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
+	newV1 = z1 ^ z2;
+	newV0Under = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i = R - 1;
+	WELLRNG19937 = case_3;
+	return (STATE[state_i] ^ (newVM2Over & BITMASK));
 }
 
 static unsigned int case_2 (void){
-   // state_i == 1
-   z0 = (VRm1 & MASKL) | (VRm2Under & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i = 0;
-   WELLRNG19937 = case_1;
-   return (STATE[state_i] ^ (newVM2 & BITMASK));
+	// state_i == 1
+	z0 = (VRm1 & MASKL) | (VRm2Under & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i = 0;
+	WELLRNG19937 = case_1;
+	return (STATE[state_i] ^ (newVM2 & BITMASK));
 }
 
 static unsigned int case_3 (void){
-   // state_i+M1 >= R
-   z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1Over);
-   z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i--;
-   if (state_i + M1 < R)
-      WELLRNG19937 = case_5;
-   return (STATE[state_i] ^ (newVM2Over & BITMASK));
+	// state_i+M1 >= R
+	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1Over);
+	z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i--;
+	if (state_i + M1 < R)
+		WELLRNG19937 = case_5;
+	return (STATE[state_i] ^ (newVM2Over & BITMASK));
 }
 
 static unsigned int case_4 (void){
-   // state_i+M3 >= R
-   z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3Over);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i--;
-   if (state_i + M3 < R)
-      WELLRNG19937 = case_6;
-   return (STATE[state_i] ^ (newVM2 & BITMASK));
+	// state_i+M3 >= R
+	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3Over);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i--;
+	if (state_i + M3 < R)
+		WELLRNG19937 = case_6;
+	return (STATE[state_i] ^ (newVM2 & BITMASK));
 }
 
 static unsigned int case_5 (void){
-   // state_i+M2 >= R
-   z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i--;
-   if (state_i + M2 < R)
-      WELLRNG19937 = case_4;
-	  return (STATE[state_i] ^ (newVM2Over & BITMASK));
+	// state_i+M2 >= R
+	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i--;
+	if (state_i + M2 < R)
+		WELLRNG19937 = case_4;
+	return (STATE[state_i] ^ (newVM2Over & BITMASK));
 }
 
 static unsigned int case_6 (void){
-   // 2 <= state_i <= (R - M3 - 1)
-   z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i--;
-   if (state_i == 1)
-      WELLRNG19937 = case_2;
-   return (STATE[state_i] ^ (newVM2 & BITMASK));
+	// 2 <= state_i <= (R - M3 - 1)
+	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i--;
+	if (state_i == 1)
+		WELLRNG19937 = case_2;
+	return (STATE[state_i] ^ (newVM2 & BITMASK));
 }
 
 // end WELL RNG code
@@ -553,10 +553,10 @@ static unsigned int case_6 (void){
 char *CleanMobName(const char *in, char *out)
 {
 	unsigned i, j;
-	
+
 	for(i = j = 0; i < strlen(in); i++)
 	{
-		// convert _ to space.. any other conversions like this?  I *think* this
+		// convert _ to space.. any other conversions like this? I *think* this
 		// is the only non alpha char that's not stripped but converted.
 		if(in[i] == '_')
 		{
@@ -632,7 +632,7 @@ void RemoveApostrophes(std::string &s)
 {
 	for(unsigned int i = 0; i < s.length(); ++i)
 		if(s[i] == '\'')
-			 s[i] = '_';
+			s[i] = '_';
 }
 
 char *RemoveApostrophes(const char *s)
@@ -643,7 +643,7 @@ char *RemoveApostrophes(const char *s)
 
 	for(unsigned int i = 0 ; i < strlen(NewString); ++i)
 		if(NewString[i] == '\'')
-			 NewString[i] = '_';
+			NewString[i] = '_';
 
 	return NewString;
 }

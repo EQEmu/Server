@@ -45,26 +45,26 @@ table {
 	border-collapse:collapse;
 }
 th {
-	margin:2px; 
+	margin:2px;
 	padding: 2px;
 	border:1px solid #2b6874;
-	background-color:#2b6874;		
-	color:#dddddd;	
+	background-color:#2b6874;
+	color:#dddddd;
 	font-weight:bold;
 }
 
 td {
-	margin:2px; 	
+	margin:2px;
 	padding: 2px;
-	border:1px solid #2b6874;	
-	background-color:#12282F;	
-	color:#aaaaaa;	
+	border:1px solid #2b6874;
+	background-color:#12282F;
+	color:#aaaaaa;
 }
 
 .headtbl {
 	border: 0px;
-	margin: 0px; 	
-	padding: 0px;	
+	margin: 0px;
+	padding: 0px;
 	background-color: #091315;
 }
 

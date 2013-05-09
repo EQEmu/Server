@@ -18,7 +18,7 @@ namespace EQExtractor2.Patches
 
             ExpectedPPLength = 28536;
 
-            PPZoneIDOffset = 21204;            
+            PPZoneIDOffset = 21204;
         }
 
         override public PositionUpdate Decode_OP_NPCMoveUpdate(byte[] UpdatePacket)
@@ -42,7 +42,7 @@ namespace EQExtractor2.Patches
             PosUpdate.p.heading = (float)bs.readInt(12) / (float)(1 << 3);
 
             PosUpdate.HighRes = true;
-                    
+
             return PosUpdate;
         }
 
@@ -245,20 +245,20 @@ namespace EQExtractor2.Patches
             //base.RegisterExplorers();
 
             //OpManager.RegisterExplorer("OP_SpawnDoor", ExploreSpawnDoor);
-            
+
         }
 
         public void ExploreSpawnDoor(StreamWriter OutputStream, ByteStream Buffer, PacketDirection Direction)
-        {            
+        {
             uint DoorCount = Buffer.Length() / 96;
 
             OutputStream.WriteLine("Door Count: {0}", DoorCount);
-            
+
             for (int d = 0; d < DoorCount; ++d)
             {
                 string DoorName = Buffer.ReadFixedLengthString(32, false);
 
-                
+
                 float YPos = Buffer.ReadSingle();
 
                 float XPos = Buffer.ReadSingle();
@@ -288,9 +288,9 @@ namespace EQExtractor2.Patches
 
                 // Skip past the trailing unknowns in the door struct, moving to the next door in the packet.
 
-                Buffer.SkipBytes(28);             
+                Buffer.SkipBytes(28);
             }
-            
+
         }
     }
 }

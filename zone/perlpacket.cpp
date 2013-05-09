@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2005  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <stdlib.h>
@@ -61,21 +61,21 @@ void PerlPacket::Resize(uint32 length) {
 void PerlPacket::SendTo(Client *who) {
 	if(!who || op == OP_Unknown || (len > 0 && packet == nullptr))
 		return;
-	
+
 	EQApplicationPacket *outapp = new EQApplicationPacket(op, len);
 	if(len > 0)
 		memcpy(outapp->pBuffer, packet, len);
-	
+
 	//	printf("Created this packet with PerlPacket: OP: %s\n", ZoneOpcodeManager->EmuToName(op));
 	DumpPacket(outapp);
-	
+
 	who->FastQueuePacket(&outapp);
 }
 
 void PerlPacket::SendToAll() {
 	if(op == OP_Unknown || (len > 0 && packet == nullptr))
 		return;
-	
+
 	EQApplicationPacket *outapp = new EQApplicationPacket(op, len);
 	if(len > 0)
 		memcpy(outapp->pBuffer, packet, len);
@@ -137,12 +137,10 @@ void PerlPacket::SetString(uint32 pos, char *str) {
 
 #pragma pack(1)
 struct EQ1319 {
-	int32 part13:13,
-		   part19:19;
+	int32 part13:13, part19:19;
 };
 struct EQ1913 {
-	int32 part19:19,
-		   part13:13;
+	int32 part19:19, part13:13;
 };
 #pragma pack()
 
@@ -161,7 +159,7 @@ void PerlPacket::SetEQ1913(uint32 pos, float part19, float part13) {
 	p->part19 = FloatToEQ19(part19);
 	p->part13 = FloatToEQ13(part13);
 }
-	
+
 //reading
 uint8 PerlPacket::GetByte(uint32 pos) {
 	if(pos + sizeof(uint8) > len || packet == nullptr)
@@ -190,6 +188,4 @@ float PerlPacket::GetFloat(uint32 pos) {
 	float *p = (float *) (packet + pos);
 	return(*p);
 }
-
-
 

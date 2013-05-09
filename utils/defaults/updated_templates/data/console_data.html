@@ -4,7 +4,7 @@
     print "\"message_count\" : $message_count,";
     print "\"messages\" : ";
     print "[";
-    for(my $i = 0; $i < $message_count; $i++) 
+    for(my $i = 0; $i < $message_count; $i++)
     {
         print "{";
         my $msg = $EQW->GetConsoleMessage($i);
@@ -19,7 +19,7 @@
         $message =~ s/\x0C/\\b/g;
         $message =~ s/[\x00-\x1F]/\./g;
         $message =~ s/[\x7F-\xFF]/\./g;
-        
+
         print "\"message\" : \"$message\"";
         print "}";
         if($i != $message_count - 1) {

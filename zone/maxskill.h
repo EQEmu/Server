@@ -1272,7 +1272,7 @@ uint16 Mob::MaxSkill_defensive(uint16 skillid, uint16 class_, uint16 level) cons
         case BARD: case BARDGM:
         default:  break;
       }
-    break; 
+    break;
     }
     case DISARM:{
       switch (class_) {
@@ -1500,7 +1500,7 @@ uint16 Mob::MaxSkill_arcane(uint16 skillid, uint16 class_, uint16 level) const{
             r_value = 0;
             break;
           }
-          
+
         // Int caster
         case ENCHANTER: case ENCHANTERGM:
         case MAGICIAN: case MAGICIANGM:
@@ -1510,7 +1510,7 @@ uint16 Mob::MaxSkill_arcane(uint16 skillid, uint16 class_, uint16 level) const{
             r_value = 0;
             break;
           }
-          
+
           //make sure only 1 skill can be over 50
           uint16 hskill = 0;
           uint16 high = 0;
@@ -1544,7 +1544,7 @@ uint16 Mob::MaxSkill_arcane(uint16 skillid, uint16 class_, uint16 level) const{
             r_value = 50;
             break;
           }
-          
+
           if (r_value > 200)
             r_value = 200;
           break;
@@ -1802,7 +1802,7 @@ uint16 Mob::MaxSkill_class(uint16 skillid, uint16 class_, uint16 level) const{
       }// Class Switch
     break;
     }
-	
+
 	//Berzerkers
 	case BERSERKING: {
       switch(class_){
@@ -1817,7 +1817,7 @@ uint16 Mob::MaxSkill_class(uint16 skillid, uint16 class_, uint16 level) const{
 	  }
 	  break;
 	}
-	
+
       // Shaman
     case ALCHEMY:{
       switch(class_){
@@ -1875,7 +1875,7 @@ uint16 Mob::MaxSkill_class(uint16 skillid, uint16 class_, uint16 level) const{
 	 }// Class Switch
 	break;
 	}
- 
+
 	case SNEAK:{
 	 switch(class_){
 		// True class
@@ -1924,7 +1924,7 @@ uint16 Mob::MaxSkill_class(uint16 skillid, uint16 class_, uint16 level) const{
 	 }// Class Switch
 	break;
 	}
- 
+
 	case SENSE_TRAPS:
 	case PICK_LOCK:
 	case DISARM_TRAPS:{
@@ -2204,25 +2204,25 @@ uint16 Mob::MaxSkill(uint16 skillid, uint16 class_, uint16 level) const {
 		 }
 		 break;
 		}
-		case CLERIC: case CLERICGM:{ 
-		 r_value = ((level*5)+5);			
+		case CLERIC: case CLERICGM:{
+		 r_value = ((level*5)+5);
 		 if(level >= 50) {
 			if(r_value > 201)
-				r_value = 201; 
+				r_value = 201;
 		 } else {
 			if(r_value > 200)
 				r_value = 200;
 		 }
 		 break;
 		}
- 
+
 		case DRUID: case DRUIDGM:
 		case SHAMAN: case SHAMANGM:{
 		 r_value = ((level*5) + 5);
 		 if(r_value > 200)
-			r_value = 200;			 
+			r_value = 200;
 		 break;
-		}	 
+		}
 		case MAGICIAN: case MAGICIANGM:
 		case ENCHANTER: case ENCHANTERGM:
 		case NECROMANCER: case NECROMANCERGM:
@@ -2234,23 +2234,23 @@ uint16 Mob::MaxSkill(uint16 skillid, uint16 class_, uint16 level) const {
 		}
 		case BEASTLORD: case BEASTLORDGM:
 		case BERSERKER: case BERSERKERGM:
-		case MONK: case MONKGM: { 
-		 r_value = ((level*5)+5);			
+		case MONK: case MONKGM: {
+		 r_value = ((level*5)+5);
 		 if(level >= 50) {
 			if(r_value > 210)
-				r_value = 210; 
+				r_value = 210;
 		 } else {
 			if(r_value > 200)
 				r_value = 200;
 		 }
 		 break;
 		}
-		case PALADIN: case PALADINGM: { 
+		case PALADIN: case PALADINGM: {
 		  if (level > 10) {
-			r_value = (((level-10)*5)+5);			
+			r_value = (((level-10)*5)+5);
 			if(level >= 50) {
 				if(r_value > 210)
-					r_value = 210; 
+					r_value = 210;
 			} else {
 				if(r_value > 200)
 					r_value = 200;
@@ -2258,12 +2258,12 @@ uint16 Mob::MaxSkill(uint16 skillid, uint16 class_, uint16 level) const {
 		  }
 		  break;
 		}
-		case RANGER: case RANGERGM: { 
+		case RANGER: case RANGERGM: {
 		  if (level > 15) {
-			r_value = (((level-15)*5)+5);			
+			r_value = (((level-15)*5)+5);
 			if(level >= 50) {
 				if(r_value > 200)
-					r_value = 200; 
+					r_value = 200;
 			} else {
 				if(r_value > 150)
 					r_value = 150;
@@ -2271,35 +2271,35 @@ uint16 Mob::MaxSkill(uint16 skillid, uint16 class_, uint16 level) const {
 		  }
 		  break;
 		}
- 
-		case ROGUE: case ROGUEGM: { 
-		 r_value = ((level*5)+5);			
+
+		case ROGUE: case ROGUEGM: {
+		 r_value = ((level*5)+5);
 		 if(level >= 50) {
 			if(r_value > 210)
-				r_value = 210; 
+				r_value = 210;
 		 } else {
 			if(r_value > 176)
 				r_value = 176;
 		 }
 		 break;
 		}
-		case SHADOWKNIGHT: case SHADOWKNIGHTGM: { 
-		 r_value = ((level*5)+5);			
-		 if(level >= 50) {		
+		case SHADOWKNIGHT: case SHADOWKNIGHTGM: {
+		 r_value = ((level*5)+5);
+		 if(level >= 50) {
 			if(r_value > 200)
-				r_value = 200; 
+				r_value = 200;
 		 } else {
 			if(r_value > 150)
 				r_value = 150;
 		 }
 		 break;
 		}
-		case WARRIOR: case WARRIORGM: { 
+		case WARRIOR: case WARRIORGM: {
 		 if (level > 5) {
-			r_value = (((level-5)*5)+5);			 
+			r_value = (((level-5)*5)+5);
 			if(level >= 50) {
 				if(r_value > 210)
-					r_value = 210; 
+					r_value = 210;
 			} else {
 				if(r_value > 175)
 					r_value = 175;
@@ -2307,7 +2307,7 @@ uint16 Mob::MaxSkill(uint16 skillid, uint16 class_, uint16 level) const {
 		 }
 		 break;
 		}
- 
+
 		default: r_value = 0;
 		break;
 	 }

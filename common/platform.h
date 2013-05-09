@@ -3,14 +3,14 @@
 
 enum EQEmuExePlatform
 {
-    ExePlatformNone = 0,
-    ExePlatformZone,
-    ExePlatformWorld,
-    ExePlatformLogin,
-    ExePlatformQueryServ,
-    ExePlatformUCS,
-    ExePlatformLaunch,
-    ExePlatformSharedMemory
+	ExePlatformNone = 0,
+	ExePlatformZone,
+	ExePlatformWorld,
+	ExePlatformLogin,
+	ExePlatformQueryServ,
+	ExePlatformUCS,
+	ExePlatformLaunch,
+	ExePlatformSharedMemory
 };
 
 void RegisterExecutablePlatform(EQEmuExePlatform p);

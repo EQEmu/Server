@@ -1,22 +1,22 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef EQ_CONSTANTS_H
-#define EQ_CONSTANTS_H 
+#define EQ_CONSTANTS_H
 
 #include "skills.h"
 
@@ -53,49 +53,49 @@ enum ItemClass
 */
 enum ItemTypes
 {
-	ItemType1HS			= 0,
-	ItemType2HS			= 1,
-	ItemTypePierce		= 2,
-	ItemType1HB			= 3,
-	ItemType2HB			= 4,
-	ItemTypeBow			= 5,
+	ItemType1HS				= 0,
+	ItemType2HS				= 1,
+	ItemTypePierce			= 2,
+	ItemType1HB				= 3,
+	ItemType2HB				= 4,
+	ItemTypeBow				= 5,
 	//6
 	ItemTypeThrowing		= 7,
-	ItemTypeShield		= 8,
+	ItemTypeShield			= 8,
 	//9
-	ItemTypeArmor		= 10,
-	ItemTypeUnknon		= 11,	//A lot of random crap has this item use.
+	ItemTypeArmor			= 10,
+	ItemTypeUnknon			= 11,	//A lot of random crap has this item use.
 	ItemTypeLockPick		= 12,
 	ItemTypeFood			= 14,
-	ItemTypeDrink		= 15,
-	ItemTypeLightSource	= 16,
-	ItemTypeStackable	= 17,	//Not all stackable items are this use...
-	ItemTypeBandage		= 18,
-	ItemTypeThrowingv2	= 19,
-	ItemTypeSpell		= 20,	//spells and tomes
-	ItemTypePotion		= 21,
-	ItemTypeWindInstr	= 23,
-	ItemTypeStringInstr	= 24,
-	ItemTypeBrassInstr	= 25,
-	ItemTypeDrumInstr	= 26,
-	ItemTypeArrow		= 27,
-	ItemTypeJewlery		= 29,
-	ItemTypeSkull		= 30,
+	ItemTypeDrink			= 15,
+	ItemTypeLightSource		= 16,
+	ItemTypeStackable		= 17,	//Not all stackable items are this use...
+	ItemTypeBandage			= 18,
+	ItemTypeThrowingv2		= 19,
+	ItemTypeSpell			= 20,	//spells and tomes
+	ItemTypePotion			= 21,
+	ItemTypeWindInstr		= 23,
+	ItemTypeStringInstr		= 24,
+	ItemTypeBrassInstr		= 25,
+	ItemTypeDrumInstr		= 26,
+	ItemTypeArrow			= 27,
+	ItemTypeJewlery			= 29,
+	ItemTypeSkull			= 30,
 	ItemTypeTome			= 31,
 	ItemTypeNote			= 32,
-	ItemTypeKey			= 33,
+	ItemTypeKey				= 33,
 	ItemTypeCoin			= 34,
 	ItemType2HPierce		= 35,
-	ItemTypeFishingPole	= 36,
-	ItemTypeFishingBait	= 37,
-	ItemTypeAlcohol		= 38,
-	ItemTypeCompass		= 40,
-	ItemTypePoison		= 42,	//might be wrong, but includes poisons
-	ItemTypeHand2Hand	= 45,
-	ItemUseSinging		= 50,
+	ItemTypeFishingPole		= 36,
+	ItemTypeFishingBait		= 37,
+	ItemTypeAlcohol			= 38,
+	ItemTypeCompass			= 40,
+	ItemTypePoison			= 42,	//might be wrong, but includes poisons
+	ItemTypeHand2Hand		= 45,
+	ItemUseSinging			= 50,
 	ItemUseAllInstruments	= 51,
-	ItemTypeCharm		= 52,
-	ItemTypeAugment		= 54,
+	ItemTypeCharm			= 52,
+	ItemTypeAugment			= 54,
 	ItemTypeAugmentSolvent	= 55,
 	ItemTypeAugmentDistill	= 56
 };
@@ -170,7 +170,7 @@ typedef enum {
 	_eaMaxAppearance
 } EmuAppearance;
 
-/* 
+/*
 ** Diety List
 */
 #define DEITY_UNKNOWN			0
@@ -190,11 +190,11 @@ typedef enum {
 #define DEITY_TUNARE			215
 
 //Guessed:
-#define DEITY_BERT				201	
+#define DEITY_BERT				201
 #define DEITY_RODCET			212
 #define DEITY_VEESHAN			216
 
-// msg_type's for custom usercolors 
+// msg_type's for custom usercolors
 #define MT_Say					256
 #define MT_Tell					257
 #define MT_Group				258
@@ -284,84 +284,84 @@ typedef enum {
 //from showeq
 enum ChatColor
 {
-  CC_Default               = 0,
-  CC_DarkGrey              = 1,
-  CC_DarkGreen             = 2,
-  CC_DarkBlue              = 3,
-  CC_Purple                = 5,
-  CC_LightGrey             = 6,
-  CC_User_Say              = 256,
-  CC_User_Tell             = 257,
-  CC_User_Group            = 258,
-  CC_User_Guild            = 259,
-  CC_User_OOC              = 260,
-  CC_User_Auction          = 261,
-  CC_User_Shout            = 262,
-  CC_User_Emote            = 263,
-  CC_User_Spells           = 264,
-  CC_User_YouHitOther      = 265,
-  CC_User_OtherHitYou      = 266,
-  CC_User_YouMissOther     = 267,
-  CC_User_OtherMissYou     = 268,
-  CC_User_Duels            = 269,
-  CC_User_Skills           = 270,
-  CC_User_Disciplines      = 271,
-  CC_User_Default          = 273,
-  CC_User_MerchantOffer    = 275,
-  CC_User_MerchantExchange = 276,
-  CC_User_YourDeath        = 277,
-  CC_User_OtherDeath       = 278,
-  CC_User_OtherHitOther    = 279,
-  CC_User_OtherMissOther   = 280,
-  CC_User_Who              = 281,
-  CC_User_Yell             = 282,
-  CC_User_NonMelee         = 283,
-  CC_User_SpellWornOff     = 284,
-  CC_User_MoneySplit       = 285,
-  CC_User_Loot             = 286,
-  CC_User_Random           = 287,
-  CC_User_OtherSpells      = 288,
-  CC_User_SpellFailure     = 289,
-  CC_User_ChatChannel      = 290,
-  CC_User_Chat1            = 291,
-  CC_User_Chat2            = 292,
-  CC_User_Chat3            = 293,
-  CC_User_Chat4            = 294,
-  CC_User_Chat5            = 295,
-  CC_User_Chat6            = 296,
-  CC_User_Chat7            = 297,
-  CC_User_Chat8            = 298,
-  CC_User_Chat9            = 299,
-  CC_User_Chat10           = 300,
-  CC_User_MeleeCrit        = 301,
-  CC_User_SpellCrit        = 302,
-  CC_User_TooFarAway       = 303,
-  CC_User_NPCRampage       = 304,
-  CC_User_NPCFurry         = 305,
-  CC_User_NPCEnrage        = 306,
-  CC_User_EchoSay          = 307,
-  CC_User_EchoTell         = 308,
-  CC_User_EchoGroup        = 309,
-  CC_User_EchoGuild        = 310,
-  CC_User_EchoOOC          = 311,
-  CC_User_EchoAuction      = 312,
-  CC_User_EchoShout        = 313,
-  CC_User_EchoEmote        = 314,
-  CC_User_EchoChat1        = 315,
-  CC_User_EchoChat2        = 316,
-  CC_User_EchoChat3        = 317,
-  CC_User_EchoChat4        = 318,
-  CC_User_EchoChat5        = 319,
-  CC_User_EchoChat6        = 320,
-  CC_User_EchoChat7        = 321,
-  CC_User_EchoChat8        = 322,
-  CC_User_EchoChat9        = 323,
-  CC_User_EchoChat10       = 324,
-  CC_User_UnusedAtThisTime = 325,
-  CC_User_ItemTags         = 326,
-  CC_User_RaidSay          = 327,
-  CC_User_MyPet            = 328,
-  CC_User_DamageShield     = 329,
+	CC_Default					= 0,
+	CC_DarkGrey					= 1,
+	CC_DarkGreen				= 2,
+	CC_DarkBlue					= 3,
+	CC_Purple					= 5,
+	CC_LightGrey				= 6,
+	CC_User_Say					= 256,
+	CC_User_Tell				= 257,
+	CC_User_Group				= 258,
+	CC_User_Guild				= 259,
+	CC_User_OOC					= 260,
+	CC_User_Auction				= 261,
+	CC_User_Shout				= 262,
+	CC_User_Emote				= 263,
+	CC_User_Spells				= 264,
+	CC_User_YouHitOther			= 265,
+	CC_User_OtherHitYou			= 266,
+	CC_User_YouMissOther		= 267,
+	CC_User_OtherMissYou		= 268,
+	CC_User_Duels				= 269,
+	CC_User_Skills				= 270,
+	CC_User_Disciplines			= 271,
+	CC_User_Default				= 273,
+	CC_User_MerchantOffer		= 275,
+	CC_User_MerchantExchange	= 276,
+	CC_User_YourDeath			= 277,
+	CC_User_OtherDeath			= 278,
+	CC_User_OtherHitOther		= 279,
+	CC_User_OtherMissOther		= 280,
+	CC_User_Who					= 281,
+	CC_User_Yell				= 282,
+	CC_User_NonMelee			= 283,
+	CC_User_SpellWornOff		= 284,
+	CC_User_MoneySplit			= 285,
+	CC_User_Loot				= 286,
+	CC_User_Random				= 287,
+	CC_User_OtherSpells			= 288,
+	CC_User_SpellFailure		= 289,
+	CC_User_ChatChannel			= 290,
+	CC_User_Chat1				= 291,
+	CC_User_Chat2				= 292,
+	CC_User_Chat3				= 293,
+	CC_User_Chat4				= 294,
+	CC_User_Chat5				= 295,
+	CC_User_Chat6				= 296,
+	CC_User_Chat7				= 297,
+	CC_User_Chat8				= 298,
+	CC_User_Chat9				= 299,
+	CC_User_Chat10				= 300,
+	CC_User_MeleeCrit			= 301,
+	CC_User_SpellCrit			= 302,
+	CC_User_TooFarAway			= 303,
+	CC_User_NPCRampage			= 304,
+	CC_User_NPCFurry			= 305,
+	CC_User_NPCEnrage			= 306,
+	CC_User_EchoSay				= 307,
+	CC_User_EchoTell			= 308,
+	CC_User_EchoGroup			= 309,
+	CC_User_EchoGuild			= 310,
+	CC_User_EchoOOC				= 311,
+	CC_User_EchoAuction			= 312,
+	CC_User_EchoShout			= 313,
+	CC_User_EchoEmote			= 314,
+	CC_User_EchoChat1			= 315,
+	CC_User_EchoChat2			= 316,
+	CC_User_EchoChat3			= 317,
+	CC_User_EchoChat4			= 318,
+	CC_User_EchoChat5			= 319,
+	CC_User_EchoChat6			= 320,
+	CC_User_EchoChat7			= 321,
+	CC_User_EchoChat8			= 322,
+	CC_User_EchoChat9			= 323,
+	CC_User_EchoChat10			= 324,
+	CC_User_UnusedAtThisTime	= 325,
+	CC_User_ItemTags			= 326,
+	CC_User_RaidSay				= 327,
+	CC_User_MyPet				= 328,
+	CC_User_DamageShield		= 329,
 };
 
 //ZoneChange_Struct->success values
@@ -435,41 +435,41 @@ typedef enum {
 #define STAT_HASTE		19
 #define STAT_DAMAGE_SHIELD	20
 
-  /** 
-    * Recast timer types. Used as an off set to charProfileStruct timers. 
-    */ 
-   enum RecastTypes 
-   { 
-     RecastTimer0 = 0, 
-     RecastTimer1, 
-     WeaponHealClickTimer, // 2 
-     MuramiteBaneNukeClickTimer, // 3 
-     RecastTimer4, 
-     DispellClickTimer, // 5 (also click heal orbs?) 
-     EpicTimer, // 6 
-     OoWBPClickTimer, // 7 
-     VishQuestClassItemTimer, // 8 
-     HealPotionTimer, // 9 
-     RecastTimer10, 
-     RecastTimer11, 
-     RecastTimer12, 
-     RecastTimer13, 
-     RecastTimer14, 
-     RecastTimer15, 
-     RecastTimer16, 
-     RecastTimer17, 
-     RecastTimer18, 
-     ModRodTimer // 19 
-   };
-   
-   enum GroupUpdateAction
+/**
+* Recast timer types. Used as an off set to charProfileStruct timers.
+*/
+enum RecastTypes
 {
-  GUA_Joined = 0,
-  GUA_Left = 1,
-  GUA_LastLeft = 6,
-  GUA_FullGroupInfo = 7,
-  GUA_MakeLeader = 8,
-  GUA_Started = 9
+	RecastTimer0 = 0,
+	RecastTimer1,
+	WeaponHealClickTimer, // 2
+	MuramiteBaneNukeClickTimer, // 3
+	RecastTimer4,
+	DispellClickTimer, // 5 (also click heal orbs?)
+	EpicTimer, // 6
+	OoWBPClickTimer, // 7
+	VishQuestClassItemTimer, // 8
+	HealPotionTimer, // 9
+	RecastTimer10,
+	RecastTimer11,
+	RecastTimer12,
+	RecastTimer13,
+	RecastTimer14,
+	RecastTimer15,
+	RecastTimer16,
+	RecastTimer17,
+	RecastTimer18,
+	ModRodTimer // 19
+};
+
+enum GroupUpdateAction
+{
+	GUA_Joined = 0,
+	GUA_Left = 1,
+	GUA_LastLeft = 6,
+	GUA_FullGroupInfo = 7,
+	GUA_MakeLeader = 8,
+	GUA_Started = 9
 };
 
 //0x1c is something...
@@ -479,81 +479,81 @@ static const uint8 DamageTypeUnknown = 0xFF;
 
 //indexed by 'SkillType'
 static const uint8 SkillDamageTypes[HIGHEST_SKILL+1] = {
- /*  _1H_BLUNT */  0,
- /*  _1H_SLASHING */  1,
- /*  _2H_BLUNT */  0,
- /*  _2H_SLASHING */  1,
- /*  ABJURE */  SpellDamageType,
- /*  ALTERATION */  SpellDamageType,
- /*  APPLY_POISON */  DamageTypeUnknown,
- /*  ARCHERY */  7,
- /*  BACKSTAB */  8,
- /*  BIND_WOUND */  DamageTypeUnknown,
- /*  BASH */  10,
- /*  BLOCKSKILL */  DamageTypeUnknown,
- /*  BRASS_INSTRUMENTS */  SpellDamageType,
- /*  CHANNELING */  DamageTypeUnknown,
- /*  CONJURATION */  SpellDamageType,
- /*  DEFENSE */  DamageTypeUnknown,
- /*  DISARM */  DamageTypeUnknown,
- /*  DISARM_TRAPS */  DamageTypeUnknown,
- /*  DIVINATION */  SpellDamageType,
- /*  DODGE */  DamageTypeUnknown,
- /*  DOUBLE_ATTACK */  DamageTypeUnknown,
- /*  DRAGON_PUNCH */  21,
- /*  DUAL_WIELD */  DamageTypeUnknown,
- /*  EAGLE_STRIKE */  23,
- /*  EVOCATION */  SpellDamageType,
- /*  FEIGN_DEATH */  4,
- /*  FLYING_KICK */  30,
- /*  FORAGE */  DamageTypeUnknown,
- /*  HAND_TO_HAND */  4,
- /*  HIDE */  DamageTypeUnknown,
- /*  KICK */  30,
- /*  MEDITATE */  DamageTypeUnknown,
- /*  MEND */  DamageTypeUnknown,
- /*  OFFENSE */  DamageTypeUnknown,
- /*  PARRY */  DamageTypeUnknown,
- /*  PICK_LOCK */  DamageTypeUnknown,
- /*  PIERCING */  36,
- /*  RIPOSTE */  DamageTypeUnknown,
- /*  ROUND_KICK */  30,
- /*  SAFE_FALL */  DamageTypeUnknown,
- /*  SENSE_HEADING */  DamageTypeUnknown,
- /*  SINGING */  SpellDamageType,
- /*  SNEAK */  DamageTypeUnknown,
- /*  SPECIALIZE_ABJURE */  DamageTypeUnknown,
- /*  SPECIALIZE_ALTERATION */  DamageTypeUnknown,
- /*  SPECIALIZE_CONJURATION */  DamageTypeUnknown,
- /*  SPECIALIZE_DIVINATION */  DamageTypeUnknown,
- /*  SPECIALIZE_EVOCATION */  DamageTypeUnknown,
- /*  PICK_POCKETS */  DamageTypeUnknown,
- /*  STRINGED_INSTRUMENTS */  SpellDamageType,
- /*  SWIMMING */  DamageTypeUnknown,
- /*  THROWING */  51,
- /*  TIGER_CLAW */  23,
- /*  TRACKING */  DamageTypeUnknown,
- /*  WIND_INSTRUMENTS */  SpellDamageType,
- /*  FISHING */  DamageTypeUnknown,
- /*  MAKE_POISON */  DamageTypeUnknown,
- /*  TINKERING */  DamageTypeUnknown,
- /*  RESEARCH */  DamageTypeUnknown,
- /*  ALCHEMY */  DamageTypeUnknown,
- /*  BAKING */  DamageTypeUnknown,
- /*  TAILORING */  DamageTypeUnknown,
- /*  SENSE_TRAPS */  DamageTypeUnknown,
- /*  BLACKSMITHING */  DamageTypeUnknown,
- /*  FLETCHING */  DamageTypeUnknown,
- /*  BREWING */  DamageTypeUnknown,
- /*  ALCOHOL_TOLERANCE */  DamageTypeUnknown,
- /*  BEGGING */  DamageTypeUnknown,
- /*  JEWELRY_MAKING */  DamageTypeUnknown,
- /*  POTTERY */  DamageTypeUnknown,
- /*  PERCUSSION_INSTRUMENTS */  SpellDamageType,
- /*  INTIMIDATION */  DamageTypeUnknown,
- /*  BERSERKING */  DamageTypeUnknown,
- /*  TAUNT */  DamageTypeUnknown,
- /*  FRENZY */  74
+	/* _1H_BLUNT */ 0,
+	/* _1H_SLASHING */ 1,
+	/* _2H_BLUNT */ 0,
+	/* _2H_SLASHING */ 1,
+	/* ABJURE */ SpellDamageType,
+	/* ALTERATION */ SpellDamageType,
+	/* APPLY_POISON */ DamageTypeUnknown,
+	/* ARCHERY */ 7,
+	/* BACKSTAB */ 8,
+	/* BIND_WOUND */ DamageTypeUnknown,
+	/* BASH */ 10,
+	/* BLOCKSKILL */ DamageTypeUnknown,
+	/* BRASS_INSTRUMENTS */ SpellDamageType,
+	/* CHANNELING */ DamageTypeUnknown,
+	/* CONJURATION */ SpellDamageType,
+	/* DEFENSE */ DamageTypeUnknown,
+	/* DISARM */ DamageTypeUnknown,
+	/* DISARM_TRAPS */ DamageTypeUnknown,
+	/* DIVINATION */ SpellDamageType,
+	/* DODGE */ DamageTypeUnknown,
+	/* DOUBLE_ATTACK */ DamageTypeUnknown,
+	/* DRAGON_PUNCH */ 21,
+	/* DUAL_WIELD */ DamageTypeUnknown,
+	/* EAGLE_STRIKE */ 23,
+	/* EVOCATION */ SpellDamageType,
+	/* FEIGN_DEATH */ 4,
+	/* FLYING_KICK */ 30,
+	/* FORAGE */ DamageTypeUnknown,
+	/* HAND_TO_HAND */ 4,
+	/* HIDE */ DamageTypeUnknown,
+	/* KICK */ 30,
+	/* MEDITATE */ DamageTypeUnknown,
+	/* MEND */ DamageTypeUnknown,
+	/* OFFENSE */ DamageTypeUnknown,
+	/* PARRY */ DamageTypeUnknown,
+	/* PICK_LOCK */ DamageTypeUnknown,
+	/* PIERCING */ 36,
+	/* RIPOSTE */ DamageTypeUnknown,
+	/* ROUND_KICK */ 30,
+	/* SAFE_FALL */ DamageTypeUnknown,
+	/* SENSE_HEADING */ DamageTypeUnknown,
+	/* SINGING */ SpellDamageType,
+	/* SNEAK */ DamageTypeUnknown,
+	/* SPECIALIZE_ABJURE */ DamageTypeUnknown,
+	/* SPECIALIZE_ALTERATION */ DamageTypeUnknown,
+	/* SPECIALIZE_CONJURATION */ DamageTypeUnknown,
+	/* SPECIALIZE_DIVINATION */ DamageTypeUnknown,
+	/* SPECIALIZE_EVOCATION */ DamageTypeUnknown,
+	/* PICK_POCKETS */ DamageTypeUnknown,
+	/* STRINGED_INSTRUMENTS */ SpellDamageType,
+	/* SWIMMING */ DamageTypeUnknown,
+	/* THROWING */ 51,
+	/* TIGER_CLAW */ 23,
+	/* TRACKING */ DamageTypeUnknown,
+	/* WIND_INSTRUMENTS */ SpellDamageType,
+	/* FISHING */ DamageTypeUnknown,
+	/* MAKE_POISON */ DamageTypeUnknown,
+	/* TINKERING */ DamageTypeUnknown,
+	/* RESEARCH */ DamageTypeUnknown,
+	/* ALCHEMY */ DamageTypeUnknown,
+	/* BAKING */ DamageTypeUnknown,
+	/* TAILORING */ DamageTypeUnknown,
+	/* SENSE_TRAPS */ DamageTypeUnknown,
+	/* BLACKSMITHING */ DamageTypeUnknown,
+	/* FLETCHING */ DamageTypeUnknown,
+	/* BREWING */ DamageTypeUnknown,
+	/* ALCOHOL_TOLERANCE */ DamageTypeUnknown,
+	/* BEGGING */ DamageTypeUnknown,
+	/* JEWELRY_MAKING */ DamageTypeUnknown,
+	/* POTTERY */ DamageTypeUnknown,
+	/* PERCUSSION_INSTRUMENTS */ SpellDamageType,
+	/* INTIMIDATION */ DamageTypeUnknown,
+	/* BERSERKING */ DamageTypeUnknown,
+	/* TAUNT */ DamageTypeUnknown,
+	/* FRENZY */ 74
 };
 
 // Indexing positions into item material arrays
@@ -593,7 +593,7 @@ enum InventorySlot
 	////////////////////////
 	// Equip slots
 	////////////////////////
-	
+
 	SLOT_CHARM		= 0,
 	SLOT_EAR01		= 1,
 	SLOT_HEAD		= 2,
@@ -616,38 +616,38 @@ enum InventorySlot
 	SLOT_FEET		= 19,
 	SLOT_WAIST		= 20,
 	SLOT_AMMO		= 21,
-	
+
 	////////////////////////
 	// All other slots
 	////////////////////////
 	SLOT_PERSONAL_BEGIN = 22,
 	SLOT_PERSONAL_END = 29,
-	
+
 	SLOT_CURSOR		= 30,
-	
+
 	SLOT_CURSOR_END	= (int16)0xFFFE,	// Last item on cursor queue
 	// Cursor bag slots are 331->340 (10 slots)
-	
+
 	// Personal Inventory Slots
 	// Slots 1 through 8 are slots 22->29
 	// Inventory bag slots are 251->330 (10 slots per bag)
-	
+
 	// Tribute slots are 400-404? (upper bound unknown)
 	// storing these in worn item's map
-	
+
 	// Bank slots
 	// Bank slots 1 through 16 are slots 2000->2015
 	// Bank bag slots are 2031->2190
-	
+
 	// Shared bank slots
 	// Shared bank slots 1 through 2 are slots 2500->2501
 	// Shared bank bag slots are 2531->2550
-	
+
 	// Trade session slots
 	// Trade slots 1 through 8 are slots 3000->3007
 	// Trade bag slots are technically 0->79 when passed to client,
 	// but in our code, we treat them as slots 3100->3179
-	
+
 	// Slot used in OP_TradeSkillCombine for world tradeskill containers
 	SLOT_TRADESKILL = 1000,
 	SLOT_AUGMENT = 1001,

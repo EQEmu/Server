@@ -67,9 +67,9 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		return;
 	}
 
-	/** 
-	 * This block checks to see if we actually have any adventures for the requested theme.
-	 */
+	/**
+	* This block checks to see if we actually have any adventures for the requested theme.
+	*/
 	map<uint32, list<AdventureTemplate*> >::iterator adv_list_iter = adventure_entries.find(sar->template_id);
 	if(adv_list_iter == adventure_entries.end())
 	{
@@ -84,10 +84,10 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	/**
-	 * This block checks to see if our requested group has anyone with an "Active" adventure
-	 * Active being in progress, finished adventures that are still waiting to expire do not count
-	 * Though they will count against you for which new adventure you can get.
-	 */
+	* This block checks to see if our requested group has anyone with an "Active" adventure
+	* Active being in progress, finished adventures that are still waiting to expire do not count
+	* Though they will count against you for which new adventure you can get.
+	*/
 	list<Adventure*>::iterator iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
@@ -117,9 +117,9 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	/**
-	 * Now we need to get every available adventure for our selected theme and exclude ones we can't use.
-	 * ie. the ones that would cause overlap issues for new adventures with the old unexpired adventures.
-	 */
+	* Now we need to get every available adventure for our selected theme and exclude ones we can't use.
+	* ie. the ones that would cause overlap issues for new adventures with the old unexpired adventures.
+	*/
 	list<AdventureZones> excluded_zones;
 	list<AdventureZoneIn> excluded_zone_ins;
 	for(int i = 0; i < sar->member_count; ++i)
@@ -135,7 +135,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 				adv.version = finished_adventures[i]->GetTemplate()->zone_version;
 				excluded_zones.push_back(adv);
 			}
-			if(!IsInExcludedZoneInList(excluded_zone_ins, finished_adventures[i]->GetTemplate()->zone_in_zone_id, 
+			if(!IsInExcludedZoneInList(excluded_zone_ins, finished_adventures[i]->GetTemplate()->zone_in_zone_id,
 				finished_adventures[i]->GetTemplate()->zone_in_object_id))
 			{
 				AdventureZoneIn adv;
@@ -149,9 +149,9 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 
 	list<AdventureTemplate*> eligible_adventures = adventure_entries[sar->template_id];
 	/**
-	 * Remove zones from eligible zones based on their difficulty and type.
-	 * ie only use difficult zones for difficult, collect for collect, etc.
-	 */
+	* Remove zones from eligible zones based on their difficulty and type.
+	* ie only use difficult zones for difficult, collect for collect, etc.
+	*/
 	list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
 	while(ea_iter != eligible_adventures.end())
 	{
@@ -170,8 +170,8 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	/**
-	 * Get levels for this group.
-	 */
+	* Get levels for this group.
+	*/
 	int valid_count = 0;
 	int avg_level = 0;
 	int min_level = 40000;
@@ -253,7 +253,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		strcpy(deny->leader, sar->leader);
 
 		stringstream ss(stringstream::out | stringstream::in);
-		ss << "The maximum level range for this adventure is " << RuleI(Adventure, MaxLevelRange); 
+		ss << "The maximum level range for this adventure is " << RuleI(Adventure, MaxLevelRange);
 		ss << " but the level range calculated was " << (max_level - min_level) << ".";
 		strcpy(deny->reason, ss.str().c_str());
 		pack->Deflate();
@@ -263,8 +263,8 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	/**
-	 * Remove the zones from our eligible zones based on the exclusion above
-	 */
+	* Remove the zones from our eligible zones based on the exclusion above
+	*/
 	list<AdventureZones>::iterator ez_iter = excluded_zones.begin();
 	while(ez_iter != excluded_zones.end())
 	{
@@ -282,7 +282,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	}
 
 	list<AdventureZoneIn>::iterator ezi_iter = excluded_zone_ins.begin();
-	 while(ezi_iter != excluded_zone_ins.end())
+	while(ezi_iter != excluded_zone_ins.end())
 	{
 		list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
 		while(ea_iter != eligible_adventures.end())
@@ -297,9 +297,9 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		ezi_iter++;
 	}
 
-	 /**
-	 * Remove Zones based on level
-	 */
+	/**
+	* Remove Zones based on level
+	*/
 	ea_iter = eligible_adventures.begin();
 	while(ea_iter != eligible_adventures.end())
 	{
@@ -396,7 +396,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 			delete adv;
 			return;
 		}
-		
+
 		adv->AddPlayer((data + sizeof(ServerAdventureRequestCreate_Struct) + (64 * i)));
 	}
 
@@ -409,7 +409,7 @@ void AdventureManager::TryAdventureCreate(const char *data)
 		{
 			int f_count = 0;
 			Adventure** finished_adventures = GetFinishedAdventures((data + sizeof(ServerAdventureRequestCreate_Struct) + (64 * i)), f_count);
-			ServerPacket *pack = new ServerPacket(ServerOP_AdventureData, sizeof(ServerSendAdventureData_Struct) 
+			ServerPacket *pack = new ServerPacket(ServerOP_AdventureData, sizeof(ServerSendAdventureData_Struct)
 				+ (sizeof(ServerFinishedAdventures_Struct) * f_count));
 			ServerSendAdventureData_Struct *sca = (ServerSendAdventureData_Struct*)pack->pBuffer;
 
@@ -428,8 +428,8 @@ void AdventureManager::TryAdventureCreate(const char *data)
 			sca->finished_adventures = f_count;
 			for(int f = 0; f < f_count; ++f)
 			{
-				ServerFinishedAdventures_Struct *sfa = (ServerFinishedAdventures_Struct*)(pack->pBuffer 
-					+ sizeof(ServerSendAdventureData_Struct) 
+				ServerFinishedAdventures_Struct *sfa = (ServerFinishedAdventures_Struct*)(pack->pBuffer
+					+ sizeof(ServerSendAdventureData_Struct)
 					+ (sizeof(ServerFinishedAdventures_Struct) * f));
 				sfa->zone_in_id = finished_adventures[f]->GetTemplate()->zone_in_zone_id;
 				sfa->zone_in_object = finished_adventures[f]->GetTemplate()->zone_in_object_id;
@@ -464,7 +464,7 @@ void AdventureManager::GetAdventureData(const char *name)
 		int f_count = 0;
 		Adventure** finished_adventures = GetFinishedAdventures(name, f_count);
 		Adventure *current = GetActiveAdventure(name);
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureData, sizeof(ServerSendAdventureData_Struct) 
+		ServerPacket *pack = new ServerPacket(ServerOP_AdventureData, sizeof(ServerSendAdventureData_Struct)
 			+ (sizeof(ServerFinishedAdventures_Struct) * f_count));
 		ServerSendAdventureData_Struct *sca = (ServerSendAdventureData_Struct*)pack->pBuffer;
 
@@ -508,8 +508,8 @@ void AdventureManager::GetAdventureData(const char *name)
 		sca->finished_adventures = f_count;
 		for(int i = 0; i < f_count; ++i)
 		{
-			ServerFinishedAdventures_Struct *sfa = (ServerFinishedAdventures_Struct*)(pack->pBuffer 
-				+ sizeof(ServerSendAdventureData_Struct) 
+			ServerFinishedAdventures_Struct *sfa = (ServerFinishedAdventures_Struct*)(pack->pBuffer
+				+ sizeof(ServerSendAdventureData_Struct)
 				+ (sizeof(ServerFinishedAdventures_Struct) * i));
 			sfa->zone_in_id = finished_adventures[i]->GetTemplate()->zone_in_zone_id;
 			sfa->zone_in_object = finished_adventures[i]->GetTemplate()->zone_in_object_id;
@@ -644,9 +644,9 @@ bool AdventureManager::LoadAdventureTemplates()
 		"assa_y, assa_z, assa_h, text, duration, zone_in_time, win_points, lose_points, "
 		"theme, zone_in_zone_id, zone_in_x, zone_in_y, zone_in_object_id, dest_x, dest_y,"
 		" dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
-		"graveyard_radius FROM adventure_template"), errbuf, &result)) 
+		"graveyard_radius FROM adventure_template"), errbuf, &result))
 	{
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
 			uint8 x = 0;
 			AdventureTemplate *t = new AdventureTemplate;
@@ -704,9 +704,9 @@ bool AdventureManager::LoadAdventureEntries()
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, template_id FROM adventure_template_entry"), errbuf, &result)) 
+	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, template_id FROM adventure_template_entry"), errbuf, &result))
 	{
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
 			int id = atoi(row[0]);
 			int template_id = atoi(row[1]);
@@ -862,7 +862,7 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 		ServerAdventureCountUpdate_Struct *ac = (ServerAdventureCountUpdate_Struct*)pack->pBuffer;
 		ac->count = current->GetCount();
 		ac->total = current->GetTemplate()->type_count;
-		
+
 		while(siter != slist.end())
 		{
 			ClientListEntry *pc = client_list.FindCharacter((*siter).c_str());
@@ -1097,9 +1097,9 @@ void AdventureManager::LoadLeaderboardInfo()
 	MYSQL_ROW row;
 
 	if(database.RunQuery(query,MakeAnyLenString(&query,"select ch.name, ch.id, adv_stats.* from adventure_stats "
-		"AS adv_stats ""left join character_ AS ch on adv_stats.player_id = ch.id;"), errbuf, &result)) 
+		"AS adv_stats ""left join character_ AS ch on adv_stats.player_id = ch.id;"), errbuf, &result))
 	{
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
 			if(row[0])
 			{
@@ -1329,7 +1329,7 @@ void AdventureManager::DoLeaderboardRequestWins(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1396,7 +1396,7 @@ void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1463,7 +1463,7 @@ void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1530,7 +1530,7 @@ void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1597,7 +1597,7 @@ void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1664,7 +1664,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1731,7 +1731,7 @@ void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1798,7 +1798,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1865,7 +1865,7 @@ void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1932,7 +1932,7 @@ void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -1999,7 +1999,7 @@ void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -2066,7 +2066,7 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 			al->success = our_successes;
 			al->failure = our_failures;
 		}
-		
+
 		pack->Deflate();
 		zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 		delete pack;
@@ -2119,7 +2119,7 @@ void AdventureManager::Save()
 
 	int number_of_elements = adventure_list.size();
 	ss.write((const char*)&number_of_elements, sizeof(int));
-	
+
 	char null_term = 0;
 	list<Adventure*>::iterator a_iter = adventure_list.begin();
 	while(a_iter != adventure_list.end())
