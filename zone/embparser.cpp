@@ -211,7 +211,29 @@ void PerlembParser::LoadNPCScript(std::string filename, int npc_id) {
 	package_name << "qst_" << npc_id;
 
 	printf("%s = %s\n", package_name.str().c_str(), filename.c_str());
-	
+	if(!perl)
+		return;
+
+	if(perl->InUse())
+	{
+		return;
+	}
+
+	if(npc_quest_status_.find(npc_id) != npc_quest_status_.end()) {
+		return;
+	}
+
+	try {
+		perl->eval_file(package_name.str().c_str(), filename.c_str());
+	}
+	catch(const char *err)
+	{
+		LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
+		npc_quest_status_[npc_id] = questFailedToLoad;
+		return;
+	}
+
+	npc_quest_status_[npc_id] = questLoaded;
 }
 
 void PerlembParser::LoadGlobalNPCScript(std::string filename) {
