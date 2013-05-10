@@ -706,6 +706,12 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			if(!center->CheckLosFN(curmob))
 				continue;
 		}
+		else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
+			if(caster->IsAttackAllowed(curmob, true))
+				continue;
+			if(caster->CheckAggro(curmob))
+				continue;
+		}
 
 		//if we get here... cast the spell.
 		if(IsTargetableAESpell(spell_id) && bad) 
@@ -812,6 +818,13 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 			if(!center->CheckLosFN(curmob))
 				continue;
 		}
+		else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
+			if(caster->IsAttackAllowed(curmob, true))
+				continue;
+			if(caster->CheckAggro(curmob))
+				continue;
+		}
+
 		//if we get here... cast the spell.
 		curmob->BardPulse(spell_id, caster);
 	}

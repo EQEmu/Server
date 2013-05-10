@@ -3745,6 +3745,7 @@ void Bot::AI_Process() {
 
 			if(IsBotArcher() && ranged_timer.Check(false)) {
 				if(GetTarget()->GetHPRatio() <= 99.0f)
+					// Mob::DoArcheryAttackDmg() takes care of Bot Range and Ammo procs
 					BotRangedAttack(GetTarget());
 			}
 			else if(!IsBotArcher() && (!(IsBotCaster() && GetLevel() > 12)) && GetTarget() && !IsStunned() && !IsMezzed() && (GetAppearance() != eaDead)) {
@@ -3762,6 +3763,9 @@ void Bot::AI_Process() {
 				//try main hand first
 				if(attack_timer.Check()) {
 					Attack(GetTarget(), SLOT_PRIMARY);
+
+					ItemInst *wpn = GetBotItem(SLOT_PRIMARY);
+					TryWeaponProc(wpn, GetTarget(), SLOT_PRIMARY);
 
 					bool tripleSuccess = false;
 
@@ -5374,7 +5378,7 @@ std::string Bot::RaceIdToString(uint16 raceId) {
 				Result = std::string("Iksar");
 				break;
 			case 130:
-				Result == std::string("Vah Shir");
+				Result = std::string("Vah Shir");
 				break;
 			case 330:
 				Result = std::string("Froglok");
@@ -11767,6 +11771,25 @@ void Bot::CalcItemBonuses()
 					if(itemtmp->Haste != 0)
 						if(itembonuses.haste < itemtmp->Haste)
 							itembonuses.haste = itemtmp->Haste;
+					if(GetClass() == BARD && itemtmp->BardValue != 0) {
+						if(itemtmp->BardType == ItemTypeBrassInstr)
+							itembonuses.brassMod += itemtmp->BardValue;
+						else if(itemtmp->BardType == ItemTypeDrumInstr)
+							itembonuses.percussionMod += itemtmp->BardValue;
+						else if(itemtmp->BardType == ItemUseSinging)
+							itembonuses.singingMod += itemtmp->BardValue;
+						else if(itemtmp->BardType == ItemTypeStringInstr)
+							itembonuses.stringedMod += itemtmp->BardValue;
+						else if(itemtmp->BardType == ItemTypeWindInstr)
+							itembonuses.windMod += itemtmp->BardValue;
+						else if(itemtmp->BardType == ItemUseAllInstruments) {
+							itembonuses.brassMod += itemtmp->BardValue;
+							itembonuses.percussionMod += itemtmp->BardValue;
+							itembonuses.singingMod += itemtmp->BardValue;
+							itembonuses.stringedMod += itemtmp->BardValue;
+							itembonuses.windMod += itemtmp->BardValue;
+						}
+					}
 					if ((itemtmp->Worn.Effect != 0) && (itemtmp->Worn.Type == ET_WornEffect)) { // latent effects
 						ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses);
 					}
@@ -11832,6 +11855,25 @@ void Bot::CalcItemBonuses()
 			if(itemtmp->Haste != 0)
 				if(itembonuses.haste < itemtmp->Haste)
 					itembonuses.haste = itemtmp->Haste;
+			if(GetClass() == BARD && itemtmp->BardValue != 0) {
+				if(itemtmp->BardType == ItemTypeBrassInstr)
+					itembonuses.brassMod += itemtmp->BardValue;
+				else if(itemtmp->BardType == ItemTypeDrumInstr)
+					itembonuses.percussionMod += itemtmp->BardValue;
+				else if(itemtmp->BardType == ItemUseSinging)
+					itembonuses.singingMod += itemtmp->BardValue;
+				else if(itemtmp->BardType == ItemTypeStringInstr)
+					itembonuses.stringedMod += itemtmp->BardValue;
+				else if(itemtmp->BardType == ItemTypeWindInstr)
+					itembonuses.windMod += itemtmp->BardValue;
+				else if(itemtmp->BardType == ItemUseAllInstruments) {
+					itembonuses.brassMod += itemtmp->BardValue;
+					itembonuses.percussionMod += itemtmp->BardValue;
+					itembonuses.singingMod += itemtmp->BardValue;
+					itembonuses.stringedMod += itemtmp->BardValue;
+					itembonuses.windMod += itemtmp->BardValue;
+				}
+			}
 			if ((itemtmp->Worn.Effect != 0) && (itemtmp->Worn.Type == ET_WornEffect)) { // latent effects
 				ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses);
 			}
@@ -11869,6 +11911,10 @@ void Bot::CalcBotStats(bool showtext) {
 		GetBotOwner()->Message(15, "Base stats:");
 		GetBotOwner()->Message(15, "Level: %i HP: %i AC: %i Mana: %i STR: %i STA: %i DEX: %i AGI: %i INT: %i WIS: %i CHA: %i", GetLevel(), base_hp, AC, max_mana, STR, STA, DEX, AGI, INT, WIS, CHA);
 		GetBotOwner()->Message(15, "Resists-- Magic: %i, Poison: %i, Fire: %i, Cold: %i, Disease: %i, Corruption: %i.",MR,PR,FR,CR,DR,Corrup);
+		// Test Code
+		if(GetClass() == BARD)
+			GetBotOwner()->Message(15, "Bard Skills-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i",
+				GetSkill(BRASS_INSTRUMENTS), GetSkill(PERCUSSION_INSTRUMENTS), GetSkill(SINGING), GetSkill(STRINGED_INSTRUMENTS), GetSkill(WIND_INSTRUMENTS));
 	}
 
 	/*if(this->Save())
@@ -11884,6 +11930,15 @@ void Bot::CalcBotStats(bool showtext) {
 		GetBotOwner()->Message(15, "I'm updated.");
 		GetBotOwner()->Message(15, "Level: %i HP: %i AC: %i Mana: %i STR: %i STA: %i DEX: %i AGI: %i INT: %i WIS: %i CHA: %i", GetLevel(), max_hp, GetAC(), max_mana, GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
 		GetBotOwner()->Message(15, "Resists-- Magic: %i, Poison: %i, Fire: %i, Cold: %i, Disease: %i, Corruption: %i.",GetMR(),GetPR(),GetFR(),GetCR(),GetDR(),GetCorrup());
+		// Test Code
+		if(GetClass() == BARD)
+			GetBotOwner()->Message(15, "Bard Skills-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i",
+				GetSkill(BRASS_INSTRUMENTS) + GetBrassMod(),
+				GetSkill(PERCUSSION_INSTRUMENTS) + GetPercMod(),
+				GetSkill(SINGING) + GetSingMod(),
+				GetSkill(STRINGED_INSTRUMENTS) + GetStringMod(),
+				GetSkill(WIND_INSTRUMENTS) + GetWindMod());
+			GetBotOwner()->Message(15, "Bard Skill Mods-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i", GetBrassMod(), GetPercMod(), GetSingMod(), GetStringMod(), GetWindMod());
 	}
 }
 
