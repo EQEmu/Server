@@ -54,7 +54,6 @@ extern volatile bool ZoneLoaded;
 #include "../common/Mutex.h"
 #include "../common/version.h"
 #include "../common/EQEMuError.h"
-#include "ZoneConfig.h"
 #include "../common/packet_dump_file.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
@@ -67,22 +66,23 @@ extern volatile bool ZoneLoaded;
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
+#include "../common/spdat.h"
 
 #include "masterentity.h"
 #include "worldserver.h"
 #include "net.h"
-#include "../common/spdat.h"
 #include "zone.h"
 #include "command.h"
-#include "embparser.h"
-#include "perlparser.h"
-#include "lua_parser.h"
-#include "client_logs.h"
-#include "questmgr.h"
+#include "ZoneConfig.h"
 #include "titles.h"
 #include "guild_mgr.h"
 #include "tasks.h"
+
 #include "QuestParserCollection.h"
+#include "embparser.h"
+#include "lua_parser.h"
+#include "client_logs.h"
+#include "questmgr.h"
 
 TimeoutManager timeout_manager;
 NetConnection net;

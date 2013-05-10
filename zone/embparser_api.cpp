@@ -1,19 +1,19 @@
 /*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include "../common/features.h"
@@ -22,12 +22,13 @@
 #ifdef EMBPERL_XS
 
 #include "../common/debug.h"
+#include "../common/MiscFunctions.h"
 #include "embparser.h"
 #include "questmgr.h"
 #include "embxs.h"
 #include "entity.h"
-#include "../common/MiscFunctions.h"
 #include "zone.h"
+
 extern Zone* zone;
 
 /*
@@ -141,7 +142,7 @@ XS(XS__echo) {
 	dXSARGS;
 
    if (items != 2)
-      Perl_croak(aTHX_ "Usage: echo(id#, str)");
+	  Perl_croak(aTHX_ "Usage: echo(id#, str)");
 
 	quest_manager.echo(SvUV(ST(0)), SvPV_nolen(ST(1)));
 
@@ -1741,79 +1742,79 @@ XS(XS__clear_zone_flag)
 XS(XS__summonburriedplayercorpse);
 XS(XS__summonburriedplayercorpse)
 {
-    dXSARGS;
-    if (items != 5)
-        Perl_croak(aTHX_ "Usage: summonburriedplayercorpse(char_id,dest_x,dest_y,dest_z,dest_heading)");
+	dXSARGS;
+	if (items != 5)
+		Perl_croak(aTHX_ "Usage: summonburriedplayercorpse(char_id,dest_x,dest_y,dest_z,dest_heading)");
 
-    bool RETVAL;
-    uint32    char_id = (int)SvIV(ST(0));
-    float    dest_x = (float)SvIV(ST(1));
-    float    dest_y = (float)SvIV(ST(2));
-    float    dest_z = (float)SvIV(ST(3));
-    float    dest_heading = (float)SvIV(ST(4));
+	bool RETVAL;
+	uint32	char_id = (int)SvIV(ST(0));
+	float	dest_x = (float)SvIV(ST(1));
+	float	dest_y = (float)SvIV(ST(2));
+	float	dest_z = (float)SvIV(ST(3));
+	float	dest_heading = (float)SvIV(ST(4));
 
-    RETVAL = quest_manager.summonburriedplayercorpse(char_id, dest_x, dest_y, dest_z, dest_heading);
+	RETVAL = quest_manager.summonburriedplayercorpse(char_id, dest_x, dest_y, dest_z, dest_heading);
 
-    ST(0) = boolSV(RETVAL);
-    sv_2mortal(ST(0));
-    XSRETURN(1);
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
+	XSRETURN(1);
 }
 
 XS(XS__summonallplayercorpses);
 XS(XS__summonallplayercorpses)
 {
-    dXSARGS;
-    if (items != 5)
-        Perl_croak(aTHX_ "Usage: summonallplayercorpses(char_id,dest_x,dest_y,dest_z,dest_heading)");
+	dXSARGS;
+	if (items != 5)
+		Perl_croak(aTHX_ "Usage: summonallplayercorpses(char_id,dest_x,dest_y,dest_z,dest_heading)");
 
-    bool RETVAL;
-    uint32    char_id = (int)SvIV(ST(0));
-    float    dest_x = (float)SvIV(ST(1));
-    float    dest_y = (float)SvIV(ST(2));
-    float    dest_z = (float)SvIV(ST(3));
-    float    dest_heading = (float)SvIV(ST(4));
+	bool RETVAL;
+	uint32	char_id = (int)SvIV(ST(0));
+	float	dest_x = (float)SvIV(ST(1));
+	float	dest_y = (float)SvIV(ST(2));
+	float	dest_z = (float)SvIV(ST(3));
+	float	dest_heading = (float)SvIV(ST(4));
 
-    RETVAL = quest_manager.summonallplayercorpses(char_id, dest_x, dest_y, dest_z, dest_heading);
+	RETVAL = quest_manager.summonallplayercorpses(char_id, dest_x, dest_y, dest_z, dest_heading);
 
-    ST(0) = boolSV(RETVAL);
-    sv_2mortal(ST(0));
-    XSRETURN(1);
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
+	XSRETURN(1);
 }
 
 XS(XS__getplayerburriedcorpsecount);
 XS(XS__getplayerburriedcorpsecount)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: getplayerburriedcorpsecount(char_id)");
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: getplayerburriedcorpsecount(char_id)");
 
-    uint32        RETVAL;
-    dXSTARG;
+	uint32		RETVAL;
+	dXSTARG;
 
-    uint32    char_id = (int)SvIV(ST(0));
+	uint32	char_id = (int)SvIV(ST(0));
 
-    RETVAL = quest_manager.getplayerburriedcorpsecount(char_id);
-    XSprePUSH; PUSHu((IV)RETVAL);
+	RETVAL = quest_manager.getplayerburriedcorpsecount(char_id);
+	XSprePUSH; PUSHu((IV)RETVAL);
 
-    XSRETURN(1);
+	XSRETURN(1);
 }
 
 XS(XS__buryplayercorpse);
 XS(XS__buryplayercorpse)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: buryplayercorpse(char_id)");
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: buryplayercorpse(char_id)");
 
-    uint32        RETVAL;
-    dXSTARG;
+	uint32		RETVAL;
+	dXSTARG;
 
-    uint32    char_id = (int)SvIV(ST(0));
+	uint32	char_id = (int)SvIV(ST(0));
 
-    RETVAL = quest_manager.buryplayercorpse(char_id);
-    XSprePUSH; PUSHu((IV)RETVAL);
+	RETVAL = quest_manager.buryplayercorpse(char_id);
+	XSprePUSH; PUSHu((IV)RETVAL);
 
-    XSRETURN(1);
+	XSRETURN(1);
 }
 
 XS(XS__forcedooropen);
@@ -1885,14 +1886,14 @@ XS(XS__toggledoorstate)
 XS(XS__isdooropen);
 XS(XS__isdooropen)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: isdooropen(doorid)");
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: isdooropen(doorid)");
 
-    bool        RETVAL;
-    dXSTARG;
+	bool		RETVAL;
+	dXSTARG;
 
-    uint32    doorid = (int)SvIV(ST(0));
+	uint32	doorid = (int)SvIV(ST(0));
 
 	RETVAL = quest_manager.isdooropen(doorid);
 	XSprePUSH; PUSHu((IV)RETVAL);
@@ -2073,9 +2074,9 @@ XS(XS__npcfeature)
 XS(XS__createbotcount);
 XS(XS__createbotcount)
 {
-    dXSARGS;
-	int        RETVAL;
-    dXSTARG;
+	dXSARGS;
+	int		RETVAL;
+	dXSTARG;
 
 	RETVAL = quest_manager.createbotcount();
 	XSprePUSH; PUSHi((IV)RETVAL);
@@ -2086,9 +2087,9 @@ XS(XS__createbotcount)
 XS(XS__spawnbotcount);
 XS(XS__spawnbotcount)
 {
-    dXSARGS;
-	int        RETVAL;
-    dXSTARG;
+	dXSARGS;
+	int		RETVAL;
+	dXSTARG;
 
 	RETVAL = quest_manager.spawnbotcount();
 	XSprePUSH; PUSHi((IV)RETVAL);
@@ -2099,9 +2100,9 @@ XS(XS__spawnbotcount)
 XS(XS__botquest);
 XS(XS__botquest)
 {
-    dXSARGS;
-    bool        RETVAL;
-    dXSTARG;
+	dXSARGS;
+	bool		RETVAL;
+	dXSTARG;
 
 	RETVAL = quest_manager.botquest();
 	XSprePUSH; PUSHu((IV)RETVAL);
@@ -2201,7 +2202,7 @@ XS(XS__istaskenabled);
 XS(XS__istaskenabled)
 {
 	dXSARGS;
-	bool        RETVAL;
+	bool		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2219,7 +2220,7 @@ XS(XS__istaskactive);
 XS(XS__istaskactive)
 {
 	dXSARGS;
-	bool        RETVAL;
+	bool		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2237,7 +2238,7 @@ XS(XS__istaskactivityactive);
 XS(XS__istaskactivityactive)
 {
 	dXSARGS;
-	bool        RETVAL;
+	bool		RETVAL;
 	dXSTARG;
 
 	if(items == 2) {
@@ -2256,7 +2257,7 @@ XS(XS__gettaskactivitydonecount);
 XS(XS__gettaskactivitydonecount)
 {
 	dXSARGS;
-	uint32        RETVAL;
+	uint32		RETVAL;
 	dXSTARG;
 
 	if(items == 2) {
@@ -2358,7 +2359,7 @@ XS(XS__tasktimeleft);
 XS(XS__tasktimeleft)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2377,7 +2378,7 @@ XS(XS__istaskcompleted);
 XS(XS__istaskcompleted)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2396,7 +2397,7 @@ XS(XS__enabledtaskcount);
 XS(XS__enabledtaskcount)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2415,7 +2416,7 @@ XS(XS__firsttaskinset);
 XS(XS__firsttaskinset)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2434,7 +2435,7 @@ XS(XS__lasttaskinset);
 XS(XS__lasttaskinset)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2453,7 +2454,7 @@ XS(XS__nexttaskinset);
 XS(XS__nexttaskinset)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 2) {
@@ -2472,7 +2473,7 @@ XS(XS__activespeaktask);
 XS(XS__activespeaktask)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 0) {
@@ -2490,7 +2491,7 @@ XS(XS__activespeakactivity);
 XS(XS__activespeakactivity)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2509,7 +2510,7 @@ XS(XS__activetasksinset);
 XS(XS__activetasksinset)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2528,7 +2529,7 @@ XS(XS__completedtasksinset);
 XS(XS__completedtasksinset)
 {
 	dXSARGS;
-	int        RETVAL;
+	int		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2548,7 +2549,7 @@ XS(XS__istaskappropriate);
 XS(XS__istaskappropriate)
 {
 	dXSARGS;
-	bool        RETVAL;
+	bool		RETVAL;
 	dXSTARG;
 
 	if(items == 1) {
@@ -2565,13 +2566,13 @@ XS(XS__istaskappropriate)
 
  XS(XS__popup); // prototype to pass -Wmissing-prototypes
  XS(XS__popup) {
-        dXSARGS;
+		dXSARGS;
 	int popupid = 0;
 	int buttons = 0;
 	int duration = 0;
 
 	if((items < 2) || (items > 5))
-                Perl_croak(aTHX_ "Usage: popup(windowtitle, text, popupid, buttons, duration)");
+				Perl_croak(aTHX_ "Usage: popup(windowtitle, text, popupid, buttons, duration)");
 
 	if(items >= 3)
 		popupid = (int)SvIV(ST(2));
@@ -2582,9 +2583,9 @@ XS(XS__istaskappropriate)
 	if(items == 5)
 		duration = (int)SvIV(ST(4));
 
-        quest_manager.popup(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)), popupid, buttons, duration);
+		quest_manager.popup(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)), popupid, buttons, duration);
 
-        XSRETURN_EMPTY;
+		XSRETURN_EMPTY;
  }
 XS(XS__clearspawntimers);
 XS(XS__clearspawntimers)
@@ -2952,11 +2953,11 @@ XS(XS__saylink) {
 	Const_char * RETVAL;
 	char text[250];
 	char text2[250];
-    bool silent = false;
+	bool silent = false;
 	strcpy(text,(char *)SvPV_nolen(ST(0)));
-    if(items >= 2) {
-	    silent = ((int)SvIV(ST(1))) == 0 ? false : true;
-    }
+	if(items >= 2) {
+		silent = ((int)SvIV(ST(1))) == 0 ? false : true;
+	}
 	if (items == 3)
 		strcpy(text2,(char *)SvPV_nolen(ST(2)));
 	else
@@ -3000,12 +3001,12 @@ XS(XS__SetRunning)
 XS(XS__IsRunning);
 XS(XS__IsRunning)
 {
-    dXSARGS;
-    if (items >= 1)
-        Perl_croak(aTHX_ "Usage: IsRunning()");
+	dXSARGS;
+	if (items >= 1)
+		Perl_croak(aTHX_ "Usage: IsRunning()");
 
-    bool        RETVAL;
-    dXSTARG;
+	bool		RETVAL;
+	dXSTARG;
 
 
 	RETVAL = quest_manager.IsRunning();
@@ -3017,14 +3018,14 @@ XS(XS__IsRunning)
 XS(XS__IsEffectInSpell);
 XS(XS__IsEffectInSpell)
 {
-    dXSARGS;
-    if (items != 2)
-        Perl_croak(aTHX_ "Usage: IsEffectInSpell(spell_id, effect_id)");
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: IsEffectInSpell(spell_id, effect_id)");
 
 	uint32		spell_id = (uint32)SvUV(ST(0));
 	uint32		effect_id = (uint32)SvUV(ST(1));
-    bool        RETVAL;
-    dXSTARG;
+	bool		RETVAL;
+	dXSTARG;
 
 
 	RETVAL = IsEffectInSpell(spell_id, effect_id);
@@ -3036,13 +3037,13 @@ XS(XS__IsEffectInSpell)
 XS(XS__IsBeneficialSpell);
 XS(XS__IsBeneficialSpell)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: IsBeneficialSpell(spell_id)");
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: IsBeneficialSpell(spell_id)");
 
 	uint32		spell_id = (uint32)SvUV(ST(0));
-    bool        RETVAL;
-    dXSTARG;
+	bool		RETVAL;
+	dXSTARG;
 
 
 	RETVAL = BeneficialSpell(spell_id);
@@ -3054,13 +3055,13 @@ XS(XS__IsBeneficialSpell)
 XS(XS__GetSpellResistType);
 XS(XS__GetSpellResistType)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: GetSpellResistType(spell_id)");
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: GetSpellResistType(spell_id)");
 
 	uint32		spell_id = (uint32)SvUV(ST(0));
 	int32		spell_val = 0;
-    dXSTARG;
+	dXSTARG;
 
 	spell_val = GetSpellResistType(spell_id);
 	XSRETURN_UV(spell_val);
@@ -3069,13 +3070,13 @@ XS(XS__GetSpellResistType)
 XS(XS__GetSpellTargetType);
 XS(XS__GetSpellTargetType)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: GetSpellTargetType(spell_id)");
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: GetSpellTargetType(spell_id)");
 
 	uint32		spell_id = (uint32)SvUV(ST(0));
 	int32		spell_val = 0;
-    dXSTARG;
+	dXSTARG;
 
 	spell_val = GetSpellTargetType(spell_id);
 	XSRETURN_UV(spell_val);
@@ -3108,7 +3109,7 @@ XS(XS__enabletitle)
 {
    dXSARGS;
    if (items != 1)
-      Perl_croak(aTHX_ "Usage: enabletitle(titleset)");
+	  Perl_croak(aTHX_ "Usage: enabletitle(titleset)");
 
    int   titleset = (int)SvIV(ST(0));
 
@@ -3122,16 +3123,16 @@ XS(XS__checktitle)
 {
    dXSARGS;
    if (items != 1)
-      Perl_croak(aTHX_ "Usage: checktitle(titleset)");
+	  Perl_croak(aTHX_ "Usage: checktitle(titleset)");
 
    bool RETVAL;
    int   titleset = (int)SvIV(ST(0));
 
    RETVAL = quest_manager.checktitle(titleset);
 
-    ST(0) = boolSV(RETVAL);
-    sv_2mortal(ST(0));
-    XSRETURN(1);
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
+	XSRETURN(1);
 }
 
 XS(XS__removetitle);
@@ -3139,7 +3140,7 @@ XS(XS__removetitle)
 {
    dXSARGS;
    if (items != 1)
-      Perl_croak(aTHX_ "Usage: removetitle(titleset)");
+	  Perl_croak(aTHX_ "Usage: removetitle(titleset)");
 
    int   titleset = (int)SvIV(ST(0));
 
@@ -3151,9 +3152,9 @@ XS(XS__removetitle)
 XS(XS__wearchange);
 XS(XS__wearchange)
 {
-    dXSARGS;
-    if (items != 2)
-        Perl_croak(aTHX_ "Usage: wearchange(slot, texture)");
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: wearchange(slot, texture)");
 
 	uint8		slot = (int)SvUV(ST(0));
 	uint16		texture = (int)SvUV(ST(1));
@@ -3183,72 +3184,72 @@ XS(XS__voicetell)
 XS(XS__LearnRecipe);
 XS(XS__LearnRecipe)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: LearnRecipe(recipe_id)");
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: LearnRecipe(recipe_id)");
 
-    uint32 recipe_id = (uint32)SvIV(ST(0));
+	uint32 recipe_id = (uint32)SvIV(ST(0));
 
-    quest_manager.LearnRecipe(recipe_id);
+	quest_manager.LearnRecipe(recipe_id);
 
-    XSRETURN_EMPTY;
+	XSRETURN_EMPTY;
 }
 
 XS(XS__SendMail);
 XS(XS__SendMail)
 {
-    dXSARGS;
-    if (items != 4)
-        Perl_croak(aTHX_ "Usage: SendMail(to, from, subject, message)");
+	dXSARGS;
+	if (items != 4)
+		Perl_croak(aTHX_ "Usage: SendMail(to, from, subject, message)");
 
-    char *to = (char *)SvPV_nolen(ST(0));
-    char *from = (char *)SvPV_nolen(ST(1));
-    char *subject = (char *)SvPV_nolen(ST(2));
-    char *message = (char *)SvPV_nolen(ST(3));
+	char *to = (char *)SvPV_nolen(ST(0));
+	char *from = (char *)SvPV_nolen(ST(1));
+	char *subject = (char *)SvPV_nolen(ST(2));
+	char *message = (char *)SvPV_nolen(ST(3));
 
-    quest_manager.SendMail(to, from, subject, message);
+	quest_manager.SendMail(to, from, subject, message);
 
-    XSRETURN_EMPTY;
+	XSRETURN_EMPTY;
 }
 
 XS(XS__GetZoneID);
 XS(XS__GetZoneID)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: GetZoneID(zone)");
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: GetZoneID(zone)");
 
-    char *zone = (char *)SvPV_nolen(ST(0));
-    int32 id = quest_manager.GetZoneID(zone);
-    
-    XSRETURN_IV(id);
+	char *zone = (char *)SvPV_nolen(ST(0));
+	int32 id = quest_manager.GetZoneID(zone);
+	
+	XSRETURN_IV(id);
 }
 
 XS(XS__GetZoneLongName);
 XS(XS__GetZoneLongName)
 {
-    dXSARGS;
-    if (items != 1)
-        Perl_croak(aTHX_ "Usage: GetZoneLongName(zone)");
-    dXSTARG;
-    char *zone = (char *)SvPV_nolen(ST(0));
-    Const_char* RETVAL = quest_manager.GetZoneLongName(zone);
-    
-    sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: GetZoneLongName(zone)");
+	dXSTARG;
+	char *zone = (char *)SvPV_nolen(ST(0));
+	Const_char* RETVAL = quest_manager.GetZoneLongName(zone);
+	
+	sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	XSRETURN(1);
 }
 
 XS(XS__GetTimeSeconds);
 XS(XS__GetTimeSeconds)
 {
-    dXSARGS;
-    if (items != 0)
-        Perl_croak(aTHX_ "Usage: GetTimeSeconds()");
+	dXSARGS;
+	if (items != 0)
+		Perl_croak(aTHX_ "Usage: GetTimeSeconds()");
 
 	uint32		seconds = 0;
-    dXSTARG;
+	dXSTARG;
 
-    seconds = Timer::GetTimeSeconds();
+	seconds = Timer::GetTimeSeconds();
 	XSRETURN_UV(seconds);
 }
 
@@ -3401,7 +3402,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "addloot"), XS__addloot, file);
 		newXS(strcpy(buf, "zone"), XS__zone, file);
 		newXS(strcpy(buf, "settimer"), XS__settimer, file);
-        newXS(strcpy(buf, "settimerMS"), XS__settimerMS, file);
+		newXS(strcpy(buf, "settimerMS"), XS__settimerMS, file);
 		newXS(strcpy(buf, "stoptimer"), XS__stoptimer, file);
 		newXS(strcpy(buf, "stopalltimers"), XS__stopalltimers, file);
 		newXS(strcpy(buf, "emote"), XS__emote, file);
@@ -3573,14 +3574,14 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
 		newXS(strcpy(buf, "wearchange"), XS__wearchange, file);
 		newXS(strcpy(buf, "voicetell"), XS__voicetell, file);
-        newXS(strcpy(buf, "LearnRecipe"), XS__LearnRecipe, file);
-        newXS(strcpy(buf, "SendMail"), XS__SendMail, file);
-        newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
-        newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
-        newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
+		newXS(strcpy(buf, "LearnRecipe"), XS__LearnRecipe, file);
+		newXS(strcpy(buf, "SendMail"), XS__SendMail, file);
+		newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
+		newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
+		newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
 		newXS(strcpy(buf, "handleturnin"), XS__handleturnin, file);
-        newXS(strcpy(buf, "completehandin"), XS__completehandin, file);
-        newXS(strcpy(buf, "resethandin"), XS__resethandin, file);
+		newXS(strcpy(buf, "completehandin"), XS__completehandin, file);
+		newXS(strcpy(buf, "resethandin"), XS__resethandin, file);
 		newXS(strcpy(buf, "clearhandin"), XS__clearhandin, file);
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);

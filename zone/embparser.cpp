@@ -1,31 +1,30 @@
 /*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2013  EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-
 
 #ifdef EMBPERL
 
 #include "../common/debug.h"
+#include "../common/seperator.h"
+#include "../common/MiscFunctions.h"
+#include "../common/features.h"
 #include "masterentity.h"
 #include "embparser.h"
 #include "questmgr.h"
-#include "command.h"
-#include "../common/seperator.h"
-#include "../common/MiscFunctions.h"
 #include "QGlobals.h"
 #include "zone.h"
 #include <algorithm>
@@ -184,11 +183,11 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	}
 	else if(isSpellQuest)
 	{
-        if(mob) {
-            SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
-        } else {
-            SendCommands(package_name.c_str(), sub_name, 0, npcmob, mob, nullptr);
-        }
+		if(mob) {
+			SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
+		} else {
+			SendCommands(package_name.c_str(), sub_name, 0, npcmob, mob, nullptr);
+		}
 	}
 	else {
 		SendCommands(package_name.c_str(), sub_name, objid, npcmob, mob, nullptr);
@@ -645,7 +644,7 @@ void PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint3
 		perl->dosub(std::string(pkgprefix).append("::").append(event).c_str());
 
 #ifdef EMBPERL_XS_CLASSES
-	    std::string eval_str = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client = undef;";
+		std::string eval_str = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client = undef;";
 		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::npc = undef;";
 		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::questitem = undef;";
 		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::entity_list = undef;";
@@ -765,12 +764,12 @@ void PerlembParser::GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest
 	{
 		if(!npcmob && mob) {
 			if(!iteminst) {
-                if(global) {
-                    isGlobalPlayerQuest = true;
-                } else {
-				    isPlayerQuest = true;
-                }
-            }
+				if(global) {
+					isGlobalPlayerQuest = true;
+				} else {
+					isPlayerQuest = true;
+				}
+			}
 			else 
 				isItemQuest = true;
 		}
@@ -811,7 +810,7 @@ void PerlembParser::GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlaye
 	}
 	else if(isGlobalPlayerQuest) {
 		package_name = "qst_global_player";
-    }
+	}
 	else
 	{
 		package_name = "qst_spell_";
@@ -1221,7 +1220,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 
 		case EVENT_SCALE_CALC:
-        case EVENT_ITEM_ENTERZONE: {
+		case EVENT_ITEM_ENTERZONE: {
 			ExportVar(package_name.c_str(), "itemid", objid);
 			ExportVar(package_name.c_str(), "itemname", iteminst->GetItem()->Name);
 			break;

@@ -17,6 +17,7 @@ SET(zone_sources
     doors.cpp
     effects.cpp
     embparser.cpp
+	embparser_api.cpp
     embperl.cpp
     embxs.cpp
     entity.cpp
@@ -53,7 +54,6 @@ SET(zone_sources
     perl_questitem.cpp
     perl_raids.cpp
     perlpacket.cpp
-    perlparser.cpp
     petitions.cpp
     pets.cpp
     PlayerCorpse.cpp
