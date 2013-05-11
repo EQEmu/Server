@@ -3,6 +3,8 @@
 #include "masterentity.h"
 #include "lua_entity.h"
 #include "lua_mob.h"
+#include "lua_client.h"
+#include "lua_npc.h"
 
 bool Lua_Entity::IsClient() {
 	Entity *ent = reinterpret_cast<Entity*>(d_);
@@ -62,6 +64,16 @@ bool Lua_Entity::IsBeacon() {
 int Lua_Entity::GetID() {
 	Entity *ent = reinterpret_cast<Entity*>(d_);
 	return ent->GetID();
+}
+
+Lua_Client Lua_Entity::CastToClient() {
+	Client *m = reinterpret_cast<Client*>(d_);
+	return Lua_Client(m);
+}
+
+Lua_NPC Lua_Entity::CastToNPC() {
+	NPC *m = reinterpret_cast<NPC*>(d_);
+	return Lua_NPC(m);
 }
 
 Lua_Mob Lua_Entity::CastToMob() {

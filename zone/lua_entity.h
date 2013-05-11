@@ -3,8 +3,8 @@
 #ifdef LUA_EQEMU
 
 class Entity;
-//class Lua_Client;
-//class Lua_NPC;
+class Lua_Client;
+class Lua_NPC;
 class Lua_Mob;
 //class Lua_Merc;
 //class Lua_Corpse;
@@ -16,7 +16,7 @@ class Lua_Mob;
 class Lua_Entity
 {
 public:
-	Lua_Entity() { }
+	Lua_Entity() { d_ = nullptr; }
 	Lua_Entity(Entity *d) : d_(d) { }
 	virtual ~Lua_Entity() { }
 
@@ -33,8 +33,8 @@ public:
 	bool IsBeacon();
 	int GetID();
 
-	//Lua_Client CastToClient();
-	//Lua_NPC CastToNPC();
+	Lua_Client CastToClient();
+	Lua_NPC CastToNPC();
 	Lua_Mob CastToMob();
 	//Lua_Merc CastToMerc();
 	//Lua_Corpse CastToCorpse();

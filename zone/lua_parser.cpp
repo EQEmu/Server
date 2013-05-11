@@ -4,14 +4,15 @@
 #include <ctype.h>
 #include <sstream>
 
-#include <lua.hpp>
+#include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <boost/any.hpp>
-//#include <LuaBridge.h>
 
 #include "masterentity.h"
 #include "lua_entity.h"
 #include "lua_mob.h"
+#include "lua_client.h"
+#include "lua_npc.h"
 
 const char *LuaEvents[_LargestEventID] = {
 	"event_say",
@@ -101,12 +102,13 @@ double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string da
 	}
 	L = iter->second;
 	
-	Lua_Entity ent(npc);
+	Lua_NPC l_npc(npc);
 
 	try {
-		double val = luabind::call_function<double>(L, LuaEvents[evt], ent);
+		double val = luabind::call_function<double>(L, LuaEvents[evt], l_npc);
 		return val;
-	} catch(std::exception) {
+	} catch(std::exception &ex) {
+		printf("%s\n", ex.what());
 		return 100.0;
 	}
 
@@ -303,6 +305,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 		luabind::module(L)
 		[
 			luabind::class_<Lua_Entity>("Entity")
+				.def(luabind::constructor<>())
 				.def("IsClient", &Lua_Entity::IsClient)
 				.def("IsNPC", &Lua_Entity::IsNPC)
 				.def("IsMob", &Lua_Entity::IsMob)
@@ -315,11 +318,48 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("IsTrap", &Lua_Entity::IsTrap)
 				.def("IsBeacon", &Lua_Entity::IsBeacon)
 				.def("GetID", &Lua_Entity::GetID)
+				.def("CastToClient", &Lua_Entity::CastToClient)
+				.def("CastToNPC", &Lua_Entity::CastToNPC)
 				.def("CastToMob", &Lua_Entity::CastToMob),
-			luabind::class_<Lua_Mob>("Mob")
+
+			luabind::class_<Lua_Mob, Lua_Entity>("Mob")
+				.def(luabind::constructor<>())
 				.def("GetName", &Lua_Mob::GetName)
 				.def("Depop", (void(Lua_Mob::*)(void))&Lua_Mob::Depop)
 				.def("Depop", (void(Lua_Mob::*)(bool))&Lua_Mob::Depop)
+				.def("RogueAssassinate", &Lua_Mob::RogueAssassinate)
+				.def("BehindMob", (bool(Lua_Mob::*)(void))&Lua_Mob::BehindMob)
+				.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::BehindMob)
+				.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float))&Lua_Mob::BehindMob)
+				.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float,float))&Lua_Mob::BehindMob)
+				.def("SetLevel", (void(Lua_Mob::*)(int))&Lua_Mob::SetLevel)
+				.def("SetLevel", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetLevel)
+				.def("GetEquipment", &Lua_Mob::GetEquipment)
+				.def("GetEquipmentMaterial", &Lua_Mob::GetEquipmentMaterial)
+				.def("GetEquipmentColor", &Lua_Mob::GetEquipmentColor)
+				.def("GetArmorTint", &Lua_Mob::GetArmorTint)
+				.def("IsMoving", &Lua_Mob::IsMoving)
+				.def("GotoBind", &Lua_Mob::GotoBind)
+				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::Attack)
+				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::Attack)
+				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool))&Lua_Mob::Attack)
+				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool,bool))&Lua_Mob::Attack)
+				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool,bool,bool))&Lua_Mob::Attack)
+				.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int))&Lua_Mob::Damage)
+				.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool))&Lua_Mob::Damage)
+				.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool,int))&Lua_Mob::Damage)
+				.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool,int,bool))&Lua_Mob::Damage)
+				.def("RangedAttack", &Lua_Mob::RangedAttack)
+				.def("ThrowingAttack", &Lua_Mob::ThrowingAttack)
+				.def("Heal", &Lua_Mob::Heal)
+				.def("HealDamage", (void(Lua_Mob::*)(uint32))&Lua_Mob::HealDamage)
+				.def("HealDamage", (void(Lua_Mob::*)(uint32,Lua_Mob))&Lua_Mob::HealDamage),
+
+			luabind::class_<Lua_Client, Lua_Mob>("Client")
+				.def(luabind::constructor<>()),
+
+			luabind::class_<Lua_NPC, Lua_Mob>("NPC")
+				.def(luabind::constructor<>())
 		];
 	
 	} catch(std::exception &ex) {
