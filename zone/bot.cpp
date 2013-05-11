@@ -11931,7 +11931,7 @@ void Bot::CalcBotStats(bool showtext) {
 		GetBotOwner()->Message(15, "Level: %i HP: %i AC: %i Mana: %i STR: %i STA: %i DEX: %i AGI: %i INT: %i WIS: %i CHA: %i", GetLevel(), max_hp, GetAC(), max_mana, GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
 		GetBotOwner()->Message(15, "Resists-- Magic: %i, Poison: %i, Fire: %i, Cold: %i, Disease: %i, Corruption: %i.",GetMR(),GetPR(),GetFR(),GetCR(),GetDR(),GetCorrup());
 		// Test Code
-		if(GetClass() == BARD)
+		if(GetClass() == BARD) {
 			GetBotOwner()->Message(15, "Bard Skills-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i",
 				GetSkill(BRASS_INSTRUMENTS) + GetBrassMod(),
 				GetSkill(PERCUSSION_INSTRUMENTS) + GetPercMod(),
@@ -11939,6 +11939,7 @@ void Bot::CalcBotStats(bool showtext) {
 				GetSkill(STRINGED_INSTRUMENTS) + GetStringMod(),
 				GetSkill(WIND_INSTRUMENTS) + GetWindMod());
 			GetBotOwner()->Message(15, "Bard Skill Mods-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i", GetBrassMod(), GetPercMod(), GetSingMod(), GetStringMod(), GetWindMod());
+		}
 	}
 }
 
