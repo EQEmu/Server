@@ -18,7 +18,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 #include "../common/debug.h"
 #include "masterentity.h"
 #include "StringIDs.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/rulesys.h"
 #include "QuestParserCollection.h"
 #include "worldserver.h"

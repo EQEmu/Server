@@ -20,7 +20,7 @@
 #include "worlddb.h"
 #include "LauncherLink.h"
 #include "LauncherList.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include <cstdlib>
 #include <cstring>
 

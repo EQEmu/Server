@@ -45,7 +45,7 @@ using namespace std;
 #include "../common/languages.h"
 #include "../common/skills.h"
 #include "../common/extprofile.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "WorldConfig.h"
 #include "LoginServer.h"
 #include "LoginServerList.h"

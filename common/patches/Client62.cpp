@@ -8,6 +8,7 @@
 
 #include "../eq_packet_structs.h"
 #include "../MiscFunctions.h"
+#include "../StringUtil.h"
 #include "../Item.h"
 #include "../clientversions.h"
 #include "Client62_structs.h"

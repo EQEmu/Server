@@ -58,7 +58,7 @@ using namespace std;
 #include "LoginServerList.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "zoneserver.h"
 #include "worlddb.h"
 #include "zonelist.h"

@@ -23,7 +23,7 @@
 #include "console.h"
 #include "WorldConfig.h"
 #include "../common/servertalk.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 
 extern uint32			numzones;
 extern bool holdzones;

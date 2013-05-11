@@ -3,7 +3,7 @@
 using namespace std;
 #include "entity.h"
 #include "masterentity.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/breakdowns.h"
 #include <stdlib.h>
 

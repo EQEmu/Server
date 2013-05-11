@@ -16,6 +16,8 @@
 	#include <unistd.h>
 	#include <stdarg.h>
 #endif
+
+#include "../common/StringUtil.h"
 #include "../common/MiscFunctions.h"
 #include "../common/platform.h"
 
@@ -155,39 +157,49 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 
 	va_list argptr, tmpargptr;
 	va_start(argptr, fmt);
+	
 	if (dofile) {
 		va_copy(tmpargptr, argptr);
 		vfprintf( fp[id], fmt, tmpargptr );
 	}
+	
 	if(logCallbackFmt[id]) {
 		msgCallbackFmt p = logCallbackFmt[id];
 		va_copy(tmpargptr, argptr);
 		p(id, fmt, tmpargptr );
 	}
+	
+	std::string outputMessage;
+	StringFormat(outputMessage, fmt, argptr);
+	
     if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
-			fprintf(stderr, "[%s] ", LogNames[id]);
-			vfprintf( stderr, fmt, argptr );
+		    
+			std::cerr << "[" << LogNames[id] << "] ";
+			std::cerr << outputMessage;
 		}
 		else {
-			fprintf(stdout, "[%s] ", LogNames[id]);
-			vfprintf( stdout, fmt, argptr );
+		    std::cout << "[" << LogNames[id] << "] ";
+			std::cout << outputMessage;
 		}
 	}
+	
 	va_end(argptr);
+	
     if (dofile)
 		fprintf(fp[id], "\n");
+		
     if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
-			fprintf(stderr, "\n");
-			fflush(stderr);
+		    std::cerr << std::endl;
 		} else {
-			fprintf(stdout, "\n");
-			fflush(stdout);
+		    std::cout << std::endl;
 		}
 	}
+	
     if(dofile)
       fflush(fp[id]);
+      
     return true;
 }
 

@@ -16,6 +16,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "../common/debug.h"
+#include "../common/StringUtil.h"
 #include <stdlib.h>
 #include "spawn2.h"
 #include "entity.h"

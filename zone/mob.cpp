@@ -21,6 +21,7 @@ Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
 #include "StringIDs.h"
 #include "worldserver.h"
 #include "QuestParserCollection.h"
+#include "../common/StringUtil.h"
 
 #include <sstream>
 #include <math.h>

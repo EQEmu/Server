@@ -45,7 +45,7 @@
 #include "worldserver.h"
 #include "../common/rdtsc.h"
 #include "../common/packet_dump_file.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/breakdowns.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"

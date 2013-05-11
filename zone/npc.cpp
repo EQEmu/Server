@@ -41,7 +41,7 @@ using namespace std;
 #include "../common/spdat.h"
 #include "../common/bodytypes.h"
 #include "spawngroup.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/rulesys.h"
 #include "StringIDs.h"
 

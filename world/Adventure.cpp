@@ -3,6 +3,7 @@
 #include "../common/extprofile.h"
 #include "../common/rulesys.h"
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "Adventure.h"
 #include "AdventureManager.h"
 #include "worlddb.h"

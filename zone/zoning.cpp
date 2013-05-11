@@ -22,6 +22,7 @@
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/rulesys.h"
+#include "../common/StringUtil.h"
 #include "StringIDs.h"
 #include "QuestParserCollection.h"
 

@@ -35,6 +35,7 @@ using namespace std;
 
 #include "masterentity.h"
 #include "../common/packet_functions.h"
+#include "../common/StringUtil.h"
 #include "../common/crc32.h"
 #include "StringIDs.h"
 #include "worldserver.h"

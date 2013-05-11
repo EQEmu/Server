@@ -8,7 +8,7 @@
 #include "../races.h"
 
 #include "../eq_packet_structs.h"
-#include "../MiscFunctions.h"
+#include "../StringUtil.h"
 #include "../Item.h"
 #include "Titanium_structs.h"
 #include <sstream>
