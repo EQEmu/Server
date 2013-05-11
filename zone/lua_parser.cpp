@@ -131,17 +131,6 @@ double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string da
 		return 100.0;
 	}
 
-
-	//try {
-	//	double val = luabind::call_function<double>(L, LuaEvents[evt], l_npc);
-	//	return val;
-	//} catch(std::exception &ex) {
-	//	if(strcmp(ex.what(), "unable to make cast") != 0) {
-	//		printf("%s\n", ex.what());
-	//	}
-	//	return 100.0;
-	//}
-
 	return 100.0;
 }
 
