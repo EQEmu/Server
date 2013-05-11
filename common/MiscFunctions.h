@@ -96,8 +96,7 @@ void	CoutTimestamp(bool ms = true);
 int	MakeRandomInt(int low, int high);
 double	MakeRandomFloat(double low, double high);
 
-const char *ConvertArray(int input, char *returnchar);
-const char *ConvertArrayF(float input, char *returnchar);
+
 float EQ13toFloat(int d);
 float NewEQ13toFloat(int d);
 float EQ19toFloat(int d);

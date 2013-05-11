@@ -49,6 +49,9 @@ bool	strn0cpyt(char* dest, const char* source, uint32 size);
 
 char *CleanMobName(const char *in, char *out);
 
+const char *ConvertArray(int input, char *returnchar);
+const char *ConvertArrayF(float input, char *returnchar);
+
 void RemoveApostrophes(std::string &s);
 char *RemoveApostrophes(const char *s);
 

@@ -353,18 +353,6 @@ static unsigned int case_6 (void){
 // end WELL RNG code
 
 
-const char *ConvertArray(int input, char *returnchar)
-{
-	sprintf(returnchar, "%i" ,input);
-	return returnchar;
-}
-
-const char *ConvertArrayF(float input, char *returnchar)
-{
-	sprintf(returnchar, "%0.2f", input);
-	return returnchar;
-}
-
 float EQ13toFloat(int d)
 {
 	return ( float(d)/float(1<<2));

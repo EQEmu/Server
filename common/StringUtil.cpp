@@ -320,3 +320,15 @@ char *RemoveApostrophes(const char *s)
 
 	return NewString;
 }
+
+const char *ConvertArray(int input, char *returnchar)
+{
+	sprintf(returnchar, "%i" ,input);
+	return returnchar;
+}
+
+const char *ConvertArrayF(float input, char *returnchar)
+{
+	sprintf(returnchar, "%0.2f", input);
+	return returnchar;
+}
