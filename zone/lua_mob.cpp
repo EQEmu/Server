@@ -8,4 +8,13 @@ const char *Lua_Mob::GetName() {
 	return m->GetName();
 }
 
+void Lua_Mob::Depop() {
+	Depop(true);
+}
+
+void Lua_Mob::Depop(bool start_spawn_timer) {
+	Mob *m = reinterpret_cast<Mob*>(d_);
+	return m->Depop(start_spawn_timer);
+}
+
 #endif

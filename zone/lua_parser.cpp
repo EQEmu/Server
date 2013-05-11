@@ -5,7 +5,9 @@
 #include <sstream>
 
 #include <lua.hpp>
-#include <LuaBridge.h>
+#include <luabind/luabind.hpp>
+#include <boost/any.hpp>
+//#include <LuaBridge.h>
 
 #include "masterentity.h"
 #include "lua_entity.h"
@@ -99,15 +101,13 @@ double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string da
 	}
 	L = iter->second;
 	
-	lua_getfield(L, LUA_GLOBALSINDEX, LuaEvents[evt]);
-	int arg_count = 1;
-	int ret_count = 0;
-	
 	Lua_Entity ent(npc);
-	
-	luabridge::Stack<Lua_Entity>::push(L, ent);
-	if(lua_pcall(L, arg_count, ret_count, 0)) {
-		printf("Error: %s\n", lua_tostring(L, -1));
+
+	try {
+		double val = luabind::call_function<double>(L, LuaEvents[evt], ent);
+		return val;
+	} catch(std::exception) {
+		return 100.0;
 	}
 
 	return 100.0;
@@ -296,25 +296,35 @@ void LuaParser::ClearStates() {
 }
 
 void LuaParser::MapFunctions(lua_State *L) {
-	luabridge::getGlobalNamespace(L)
-		.beginClass<Lua_Entity>("Entity")
-			.addFunction("IsClient", &Lua_Entity::IsClient)
-			.addFunction("IsNPC", &Lua_Entity::IsNPC)
-			.addFunction("IsMob", &Lua_Entity::IsMob)
-			.addFunction("IsMerc", &Lua_Entity::IsMerc)
-			.addFunction("IsCorpse", &Lua_Entity::IsCorpse)
-			.addFunction("IsPlayerCorpse", &Lua_Entity::IsPlayerCorpse)
-			.addFunction("IsNPCCorpse", &Lua_Entity::IsNPCCorpse)
-			.addFunction("IsObject", &Lua_Entity::IsObject)
-			.addFunction("IsDoor", &Lua_Entity::IsDoor)
-			.addFunction("IsTrap", &Lua_Entity::IsTrap)
-			.addFunction("IsBeacon", &Lua_Entity::IsBeacon)
-			.addFunction("GetID", &Lua_Entity::GetID)
-			.addFunction("CastToMob", &Lua_Entity::CastToMob)
-		.endClass()
-		.deriveClass<Lua_Mob, Lua_Entity>("Mob")
-			.addFunction("GetName", &Lua_Mob::GetName)
-		.endClass();
+
+	try {
+		luabind::open(L);
+
+		luabind::module(L)
+		[
+			luabind::class_<Lua_Entity>("Entity")
+				.def("IsClient", &Lua_Entity::IsClient)
+				.def("IsNPC", &Lua_Entity::IsNPC)
+				.def("IsMob", &Lua_Entity::IsMob)
+				.def("IsMerc", &Lua_Entity::IsMerc)
+				.def("IsCorpse", &Lua_Entity::IsCorpse)
+				.def("IsPlayerCorpse", &Lua_Entity::IsPlayerCorpse)
+				.def("IsNPCCorpse", &Lua_Entity::IsNPCCorpse)
+				.def("IsObject", &Lua_Entity::IsObject)
+				.def("IsDoor", &Lua_Entity::IsDoor)
+				.def("IsTrap", &Lua_Entity::IsTrap)
+				.def("IsBeacon", &Lua_Entity::IsBeacon)
+				.def("GetID", &Lua_Entity::GetID)
+				.def("CastToMob", &Lua_Entity::CastToMob),
+			luabind::class_<Lua_Mob>("Mob")
+				.def("GetName", &Lua_Mob::GetName)
+				.def("Depop", (void(Lua_Mob::*)(void))&Lua_Mob::Depop)
+				.def("Depop", (void(Lua_Mob::*)(bool))&Lua_Mob::Depop)
+		];
+	
+	} catch(std::exception &ex) {
+		printf("Error: %s\n", ex.what());
+	}
 }
 
 #endif

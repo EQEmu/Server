@@ -14,6 +14,9 @@ public:
 	virtual ~Lua_Mob() { }
 
 	const char *GetName();
+
+	void Depop();
+	void Depop(bool start_spawn_timer);
 };
 
 #endif

@@ -69,15 +69,4 @@ Lua_Mob Lua_Entity::CastToMob() {
 	return Lua_Mob(m);
 }
 
-
-//Lua_Client* CastToClient();
-//Lua_NPC* CastToNPC();
-//Lua_Mob* CastToMob();
-//Lua_Merc* CastToMerc();
-//Lua_Corpse* CastToCorpse();
-//Lua_Object* CastToObject();
-//Lua_Doors* CastToDoors();
-//Lua_Trap* CastToTrap();
-//Lua_Beacon* CastToBeacon();
-
 #endif
