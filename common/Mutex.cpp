@@ -74,7 +74,7 @@ Mutex::Mutex() {
 #else
 	pthread_mutexattr_t attr;
 	pthread_mutexattr_init(&attr);
-#if defined(__CYGWIN__) || defined(__APPLE__)
+#if defined(__CYGWIN__) || defined(__APPLE__) || defined(FREEBSD)
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 #else
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);

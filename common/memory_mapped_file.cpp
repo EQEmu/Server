@@ -29,6 +29,9 @@
 #include <stdio.h>
 #endif
 #include "eqemu_exception.h"
+#ifdef FREEBSD
+#include <sys/stat.h>
+#endif
 
 namespace EQEmu {
 
