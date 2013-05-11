@@ -92,6 +92,11 @@ double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string da
 		return 100.0;
 	}
 
+	const char *sub_name = LuaEvents[evt];
+	if(!HasQuestSub(npc->GetNPCTypeID(), sub_name)) {
+		return 100.0;
+	}
+
 	std::stringstream package_name;
 	package_name << "npc_" << npc->GetNPCTypeID();
 	
@@ -101,16 +106,41 @@ double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string da
 		return 100.0;
 	}
 	L = iter->second;
-	
+
 	Lua_NPC l_npc(npc);
 
 	try {
-		double val = luabind::call_function<double>(L, LuaEvents[evt], l_npc);
-		return val;
+		luabind::object l_npc_o = luabind::object(L, l_npc);
+		lua_getfield(L, LUA_GLOBALSINDEX, sub_name);
+		int arg_count = 1;
+		int ret_count = 1;
+
+		l_npc_o.push(L);
+		if(lua_pcall(L, arg_count, ret_count, 0)) {
+			printf("Error: %s\n", lua_tostring(L, -1));
+			return 100.0;
+		}
+
+		if(lua_isnumber(L, -1)) {
+			double ret = lua_tonumber(L, -1);
+			return ret;
+		}
+
 	} catch(std::exception &ex) {
 		printf("%s\n", ex.what());
 		return 100.0;
 	}
+
+
+	//try {
+	//	double val = luabind::call_function<double>(L, LuaEvents[evt], l_npc);
+	//	return val;
+	//} catch(std::exception &ex) {
+	//	if(strcmp(ex.what(), "unable to make cast") != 0) {
+	//		printf("%s\n", ex.what());
+	//	}
+	//	return 100.0;
+	//}
 
 	return 100.0;
 }

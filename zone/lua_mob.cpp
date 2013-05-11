@@ -19,12 +19,12 @@ void Lua_Mob::Depop(bool start_spawn_timer) {
 
 void Lua_Mob::RogueAssassinate(Lua_Mob other) {
 	Mob *m = reinterpret_cast<Mob*>(d_);
-	Mob *o = reinterpret_cast<Mob*>(other.d_);
+	Lua_Safe_Cast(Mob, o, other);
 	m->RogueAssassinate(o);
 }
 
 bool Lua_Mob::BehindMob() {
-	return BehindMob(Lua_Mob(nullptr), 0.0f, 0.0f);
+	return BehindMob(nullptr, 0.0f, 0.0f);
 }
 
 bool Lua_Mob::BehindMob(Lua_Mob other) {
@@ -37,7 +37,7 @@ bool Lua_Mob::BehindMob(Lua_Mob other, float x) {
 
 bool Lua_Mob::BehindMob(Lua_Mob other, float x, float y) {
 	Mob *m = reinterpret_cast<Mob*>(d_);
-	Mob *o = reinterpret_cast<Mob*>(other.d_);
+	Lua_Safe_Cast(Mob, o, other);
 	return m->BehindMob(o, x, y);
 }
 
@@ -108,7 +108,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 
 bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell) {
 	Mob *m = reinterpret_cast<Mob*>(d_);
-	Mob *o = reinterpret_cast<Mob*>(other.d_);
+	Lua_Safe_Cast(Mob, o, other);
 	return m->Attack(o, hand, from_riposte, is_strikethrough, is_from_spell);
 }
 
@@ -126,19 +126,19 @@ void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, b
 
 void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot, bool buff_tic) {
 	Mob *m = reinterpret_cast<Mob*>(d_);
-	Mob *f = reinterpret_cast<Mob*>(from.d_);
+	Lua_Safe_Cast(Mob, f, from);
 	m->Damage(f, damage, spell_id, static_cast<SkillType>(attack_skill), avoidable, buffslot, buff_tic);
 }
 
 void Lua_Mob::RangedAttack(Lua_Mob other) {
 	Mob *m = reinterpret_cast<Mob*>(d_);
-	Mob *o = reinterpret_cast<Mob*>(other.d_);
+	Lua_Safe_Cast(Mob, o, other);
 	m->RangedAttack(o);
 }
 
 void Lua_Mob::ThrowingAttack(Lua_Mob other) {
 	Mob *m = reinterpret_cast<Mob*>(d_);
-	Mob *o = reinterpret_cast<Mob*>(other.d_);
+	Lua_Safe_Cast(Mob, o, other);
 	m->ThrowingAttack(o);
 }
 
@@ -149,12 +149,12 @@ void Lua_Mob::Heal() {
 
 void Lua_Mob::HealDamage(uint32 amount) {
 	Mob *m = reinterpret_cast<Mob*>(d_);
-	HealDamage(amount, Lua_Mob(nullptr));
+	HealDamage(amount, nullptr);
 }
 
 void Lua_Mob::HealDamage(uint32 amount, Lua_Mob other) {
 	Mob *m = reinterpret_cast<Mob*>(d_);
-	Mob *o = reinterpret_cast<Mob*>(other.d_);
+	Lua_Safe_Cast(Mob, o, other);
 	m->HealDamage(amount, o);
 }
 

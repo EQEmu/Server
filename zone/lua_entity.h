@@ -13,6 +13,10 @@ class Lua_Mob;
 //class Lua_Trap;
 //class Lua_Beacon;
 
+#define Lua_Safe_Cast(type, m, other) \
+	type *m = nullptr; \
+	m = reinterpret_cast<type*>(other.d_);
+
 class Lua_Entity
 {
 public:
