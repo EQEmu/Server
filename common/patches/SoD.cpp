@@ -1003,7 +1003,7 @@ ENCODE(OP_ZoneSpawns) {
 			}
 
 			float SpawnSize = emu->size;
-			if(!((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu ->race == 130) || (emu->race == 330) || (emu->race == 522)))
+			if(!((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
 			{
 				PacketSize -= (sizeof(structs::EquipStruct) * 9);
 
@@ -1200,7 +1200,7 @@ ENCODE(OP_ZoneSpawns) {
 
 			Buffer += sizeof(structs::Spawn_Struct_Position);
 		
-			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu ->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
 			{
 				for(k = 0; k < 9; ++k)
 				{
@@ -1225,7 +1225,7 @@ ENCODE(OP_ZoneSpawns) {
 			}
 
 
-			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu ->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
 			{
 				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
 
