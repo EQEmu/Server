@@ -31,6 +31,8 @@ SET(zone_sources
     horse.cpp
     inventory.cpp
     loottables.cpp
+	lua_entity.cpp
+	lua_mob.cpp
 	lua_parser.cpp
     Map.cpp
     merc.cpp
@@ -110,6 +112,8 @@ SET(zone_headers
     guild_mgr.h
     hate_list.h
     horse.h
+	lua_entity.h
+	lua_mob.h
 	lua_parser.h
     map.h
     masterentity.h

@@ -10665,11 +10665,11 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 	char *buf = 0;
 	MakeAnyLenString(&buf, "%d", prs->popupid);
 
-	parse->EventPlayer(EVENT_POPUPRESPONSE, this, buf, 0);
+	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
 
 	Mob* Target = GetTarget();
 	if(Target && Target->IsNPC()) {
-        parse->EventNPC(EVENT_POPUPRESPONSE, Target->CastToNPC(), this, buf, 0);
+        parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
 	}
 
 	safe_delete_array(buf);

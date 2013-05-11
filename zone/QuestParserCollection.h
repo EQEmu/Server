@@ -48,10 +48,10 @@ public:
 	bool SpellHasQuestSub(uint32 spell_id, const char *subname);
 	bool ItemHasQuestSub(ItemInst *itm, const char *subname);
 
-	void EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
-	void EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-	void EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
-	void EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
+	double EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	double EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
+	double EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
+	double EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
 private:
 	bool HasQuestSubLocal(uint32 npcid, const char *subname);
@@ -59,9 +59,9 @@ private:
 	bool PlayerHasQuestSubLocal(const char *subname);
 	bool PlayerHasQuestSubGlobal(const char *subname);
 
-	void EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	double EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
 	void EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
-	void EventPlayerLocal(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
+	double EventPlayerLocal(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 	void EventPlayerGlobal(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 
 	QuestInterface *GetQIByNPCQuest(uint32 npcid, std::string &filename);

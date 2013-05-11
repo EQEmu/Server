@@ -106,7 +106,8 @@ public:
 	const Trap*	CastToTrap() const;
 	const Beacon*	CastToBeacon() const;
 
-	inline const uint16& GetID() const{ return id; }
+	inline const uint16& GetID() const { return id; }
+
 	virtual const char* GetName() { return ""; }
 	virtual void DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) { pDBAsyncWorkID = 0; }
 	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);

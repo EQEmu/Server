@@ -1425,6 +1425,10 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	if(dead)
 		return;	//cant die more than once...
 
+	if(parse->EventPlayer(EVENT_DEATH, this, "", 0) <= 0.0) {
+		return;
+	}
+
 	int exploss;
 	
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob ? killerMob->GetName() : "Unknown", damage, spell, attack_skill);
@@ -1471,8 +1475,6 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	if(GetMerc()) {
 		GetMerc()->Suspend();
 	}
-
-    parse->EventPlayer(EVENT_DEATH, this, "", 0);
 
 	if (killerMob != nullptr)
 	{
