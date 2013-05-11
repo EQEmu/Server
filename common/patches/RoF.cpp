@@ -1859,7 +1859,7 @@ ENCODE(OP_ZoneSpawns)
 			}
 
 			float SpawnSize = emu->size;
-			if(!((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu ->race == 130) || (emu->race == 330) || (emu->race == 522)))
+			if(!((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
 			{
 				PacketSize += 60;
 
@@ -1985,7 +1985,7 @@ ENCODE(OP_ZoneSpawns)
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown18
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown19
 
-			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu ->race == 130) || (emu->race == 330) || (emu->race == 522))
+			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
 			{
 				for(k = 0; k < 9; ++k)
 				{
