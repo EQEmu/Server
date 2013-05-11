@@ -33,14 +33,12 @@ using namespace std;
 		#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 	#endif
 using namespace std;
+
 #ifdef _WINDOWS
-#include <conio.h>
-#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
-#define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
+	#include <conio.h>
+	#define snprintf	_snprintf
+	#define strncasecmp	_strnicmp
+	#define strcasecmp  _stricmp
 #endif
 
 volatile bool RunLoops = true;

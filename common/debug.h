@@ -1,5 +1,5 @@
 /*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+    Copyright (C) 2001-2013  EQEMu Development Team (http://eqemu.org)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,20 +45,7 @@
 	#ifndef _CRTDBG_MAP_ALLOC
 		#include <stdlib.h>
 		#include <crtdbg.h>
-		#if (_MSC_VER < 1300)
-			#include <new>
-			#include <memory>
-			#define _CRTDBG_MAP_ALLOC
-			#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
-			#define malloc(s) _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
-		#endif
 	#endif
-#endif
-
-#ifdef _WINDOWS
-	// VS6 doesn't like the length of STL generated names: disabling
-	#pragma warning(disable:4786)
-	#pragma warning(disable:4996)
 #endif
 
 #ifndef EQDEBUG_H
@@ -82,6 +69,7 @@
 
 #include "logsys.h"
 #include "common_profile.h"
+
 #ifdef ZONE
 #include "../zone/zone_profile.h"
 #endif
@@ -160,5 +148,7 @@ public:
 	LARGE_INTEGER tmp;
 	int64* p;
 };
+
 #endif
+
 #endif
