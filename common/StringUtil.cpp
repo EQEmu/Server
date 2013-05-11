@@ -30,6 +30,9 @@
 	#include <stdlib.h>
 #endif
 
+#ifndef va_copy
+	#define va_copy(d,s) ((d) = (s))
+#endif
 
 // original source: 
 // https://github.com/facebook/folly/blob/master/folly/String.cpp
@@ -110,50 +113,50 @@ bool strn0cpyt(char* dest, const char* source, uint32 size) {
 }
 
 const char *MakeUpperString(const char *source) {
-    static char str[128];
-    if (!source)
-	    return nullptr;
-    MakeUpperString(source, str);
-    return str;
+	static char str[128];
+	if (!source)
+		return nullptr;
+	MakeUpperString(source, str);
+	return str;
 }
 
 void MakeUpperString(const char *source, char *target) {
-    if (!source || !target) {
+	if (!source || !target) {
 	*target=0;
-        return;
-    }
-    while (*source)
-    {
-        *target = toupper(*source);
-        target++;source++;
-    }
-    *target = 0;
+		return;
+	}
+	while (*source)
+	{
+		*target = toupper(*source);
+		target++;source++;
+	}
+	*target = 0;
 }
 
 const char *MakeLowerString(const char *source) {
-    static char str[128];
-    if (!source)
-	    return nullptr;
-    MakeLowerString(source, str);
-    return str;
+	static char str[128];
+	if (!source)
+		return nullptr;
+	MakeLowerString(source, str);
+	return str;
 }
 
 void MakeLowerString(const char *source, char *target) {
-    if (!source || !target) {
+	if (!source || !target) {
 	*target=0;
-        return;
-    }
-    while (*source)
-    {
-        *target = tolower(*source);
-        target++;source++;
-    }
-    *target = 0;
+		return;
+	}
+	while (*source)
+	{
+		*target = tolower(*source);
+		target++;source++;
+	}
+	*target = 0;
 }
 
 int MakeAnyLenString(char** ret, const char* format, ...) {
 	int buf_len = 128;
-    int chars = -1;
+	int chars = -1;
 	va_list argptr, tmpargptr;
 	va_start(argptr, format);
 	while (chars == -1 || chars >= buf_len) {
@@ -175,7 +178,7 @@ uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const cha
 		*bufsize = 256;
 	if (*ret == 0)
 		*strlen = 0;
-    int chars = -1;
+	int chars = -1;
 	char* oldret = 0;
 	va_list argptr, tmpargptr;
 	va_start(argptr, format);
