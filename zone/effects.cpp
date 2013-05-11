@@ -706,6 +706,15 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			if(!center->CheckLosFN(curmob))
 				continue;
 		}
+		else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
+			// This does not check faction for beneficial AE buffs..only agro and attackable.
+			// I've tested for spells that I can find without problem, but a faction-based
+			// check may still be needed. Any changes here should also reflect in BardAEPulse() -U
+			if(caster->IsAttackAllowed(curmob, true))
+				continue;
+			if(caster->CheckAggro(curmob))
+				continue;
+		}
 
 		//if we get here... cast the spell.
 		if(IsTargetableAESpell(spell_id) && bad) 
@@ -812,6 +821,14 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 			if(!center->CheckLosFN(curmob))
 				continue;
 		}
+		else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
+			// See notes in AESpell() above for more info. 
+			if(caster->IsAttackAllowed(curmob, true))
+				continue;
+			if(caster->CheckAggro(curmob))
+				continue;
+		}
+
 		//if we get here... cast the spell.
 		curmob->BardPulse(spell_id, caster);
 	}
