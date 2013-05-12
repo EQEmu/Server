@@ -24,6 +24,7 @@ public:
 	Lua_Entity(Entity *d) : d_(d) { }
 	virtual ~Lua_Entity() { }
 
+	bool NullPtr();
 	bool IsClient();
 	bool IsNPC();
 	bool IsMob();

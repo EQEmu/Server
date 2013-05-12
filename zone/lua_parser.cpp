@@ -92,6 +92,11 @@ double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string da
 		return 100.0;
 	}
 
+	if(evt != EVENT_SPAWN && evt != EVENT_SAY) {
+		return 100.0;
+	}
+
+
 	const char *sub_name = LuaEvents[evt];
 	if(!HasQuestSub(npc->GetNPCTypeID(), sub_name)) {
 		return 100.0;
@@ -107,15 +112,28 @@ double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string da
 	}
 	L = iter->second;
 
-	Lua_NPC l_npc(npc);
-
 	try {
-		luabind::object l_npc_o = luabind::object(L, l_npc);
 		lua_getfield(L, LUA_GLOBALSINDEX, sub_name);
+
+		Lua_NPC l_npc(npc);
+		Lua_Client l_client;
+		luabind::object l_npc_o = luabind::object(L, l_npc);
+		l_npc_o.push(L);
+
 		int arg_count = 1;
 		int ret_count = 1;
 
-		l_npc_o.push(L);
+		if(evt == EVENT_SAY) {
+			l_client.d_ = init;
+			luabind::object l_client_o = luabind::object(L, l_client);
+			l_client_o.push(L);
+
+			lua_pushstring(L, data.c_str());
+			lua_pushinteger(L, extra_data);
+
+			arg_count += 3;
+		}
+
 		if(lua_pcall(L, arg_count, ret_count, 0)) {
 			printf("Error: %s\n", lua_tostring(L, -1));
 			return 100.0;
@@ -325,6 +343,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 		[
 			luabind::class_<Lua_Entity>("Entity")
 				.def(luabind::constructor<>())
+				.def("NullPtr", &Lua_Entity::NullPtr)
 				.def("IsClient", &Lua_Entity::IsClient)
 				.def("IsNPC", &Lua_Entity::IsNPC)
 				.def("IsMob", &Lua_Entity::IsMob)
@@ -372,7 +391,128 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("ThrowingAttack", &Lua_Mob::ThrowingAttack)
 				.def("Heal", &Lua_Mob::Heal)
 				.def("HealDamage", (void(Lua_Mob::*)(uint32))&Lua_Mob::HealDamage)
-				.def("HealDamage", (void(Lua_Mob::*)(uint32,Lua_Mob))&Lua_Mob::HealDamage),
+				.def("HealDamage", (void(Lua_Mob::*)(uint32,Lua_Mob))&Lua_Mob::HealDamage)
+				.def("GetLevelCon", (uint32(Lua_Mob::*)(int))&Lua_Mob::GetLevelCon)
+				.def("GetLevelCon", (uint32(Lua_Mob::*)(int,int))&Lua_Mob::GetLevelCon)
+				.def("SetHP", &Lua_Mob::SetHP)
+				.def("DoAnim", (void(Lua_Mob::*)(int))&Lua_Mob::DoAnim)
+				.def("DoAnim", (void(Lua_Mob::*)(int,int))&Lua_Mob::DoAnim)
+				.def("DoAnim", (void(Lua_Mob::*)(int,int,bool))&Lua_Mob::DoAnim)
+				.def("DoAnim", (void(Lua_Mob::*)(int,int,bool,int))&Lua_Mob::DoAnim)
+				.def("ChangeSize", (void(Lua_Mob::*)(double))&Lua_Mob::ChangeSize)
+				.def("ChangeSize", (void(Lua_Mob::*)(double,bool))&Lua_Mob::ChangeSize)
+				.def("GMMove", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::GMMove)
+				.def("GMMove", (void(Lua_Mob::*)(double,double,double,double))&Lua_Mob::GMMove)
+				.def("GMMove", (void(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::GMMove)
+				.def("SendPosUpdate", (void(Lua_Mob::*)(void))&Lua_Mob::SendPosUpdate)
+				.def("SendPosUpdate", (void(Lua_Mob::*)(bool))&Lua_Mob::SendPosUpdate)
+				.def("SendPosition", &Lua_Mob::SendPosition)
+				.def("HasProcs", &Lua_Mob::HasProcs)
+				.def("IsInvisible", (bool(Lua_Mob::*)(void))&Lua_Mob::IsInvisible)
+				.def("IsInvisible", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsInvisible)
+				.def("SetInvisible", &Lua_Mob::SetInvisible)
+				.def("FindBuff", &Lua_Mob::FindBuff)
+				.def("FindType", (bool(Lua_Mob::*)(int))&Lua_Mob::FindType)
+				.def("FindType", (bool(Lua_Mob::*)(int,bool))&Lua_Mob::FindType)
+				.def("FindType", (bool(Lua_Mob::*)(int,bool,int))&Lua_Mob::FindType)
+				.def("GetBuffSlotFromType", &Lua_Mob::GetBuffSlotFromType)
+				.def("MakePet", (void(Lua_Mob::*)(int,const char*))&Lua_Mob::MakePet)
+				.def("MakePet", (void(Lua_Mob::*)(int,const char*,const char*))&Lua_Mob::MakePet)
+				.def("MakePoweredPet", (void(Lua_Mob::*)(int,const char*,int))&Lua_Mob::MakePoweredPet)
+				.def("MakePoweredPet", (void(Lua_Mob::*)(int,const char*,int,const char*))&Lua_Mob::MakePoweredPet)
+				.def("GetBaseRace", &Lua_Mob::GetBaseRace)
+				.def("GetBaseGender", &Lua_Mob::GetBaseGender)
+				.def("GetDeity", &Lua_Mob::GetDeity)
+				.def("GetRace", &Lua_Mob::GetRace)
+				.def("GetGender", &Lua_Mob::GetGender)
+				.def("GetTexture", &Lua_Mob::GetTexture)
+				.def("GetHelmTexture", &Lua_Mob::GetHelmTexture)
+				.def("GetHairColor", &Lua_Mob::GetHairColor)
+				.def("GetBeardColor", &Lua_Mob::GetBeardColor)
+				.def("GetEyeColor1", &Lua_Mob::GetEyeColor1)
+				.def("GetEyeColor2", &Lua_Mob::GetEyeColor2)
+				.def("GetHairStyle", &Lua_Mob::GetHairStyle)
+				.def("GetLuclinFace", &Lua_Mob::GetLuclinFace)
+				.def("GetBeard", &Lua_Mob::GetBeard)
+				.def("GetDrakkinHeritage", &Lua_Mob::GetDrakkinHeritage)
+				.def("GetDrakkinTattoo", &Lua_Mob::GetDrakkinTattoo)
+				.def("GetDrakkinDetails", &Lua_Mob::GetDrakkinDetails)
+				.def("GetClass", &Lua_Mob::GetClass)
+				.def("GetLevel", &Lua_Mob::GetLevel)
+				.def("GetCleanName", &Lua_Mob::GetCleanName)
+				.def("GetTarget", &Lua_Mob::GetTarget)
+				.def("SetTarget", &Lua_Mob::SetTarget)
+				.def("GetHPRatio", &Lua_Mob::GetHPRatio)
+				.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)
+				.def("GetHP", &Lua_Mob::GetHP)
+				.def("GetMaxHP", &Lua_Mob::GetMaxHP)
+				.def("GetItemHPBonuses", &Lua_Mob::GetItemHPBonuses)
+				.def("GetSpellHPBonuses", &Lua_Mob::GetSpellHPBonuses)
+				.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)
+				.def("GetRunspeed", &Lua_Mob::GetRunspeed)
+				.def("GetCasterLevel", &Lua_Mob::GetCasterLevel)
+				.def("GetMaxMana", &Lua_Mob::GetMaxMana)
+				.def("GetMana", &Lua_Mob::GetMana)
+				.def("SetMana", &Lua_Mob::SetMana)
+				.def("GetManaRatio", &Lua_Mob::GetManaRatio)
+				.def("GetAC", &Lua_Mob::GetAC)
+				.def("GetATK", &Lua_Mob::GetATK)
+				.def("GetSTR", &Lua_Mob::GetSTR)
+				.def("GetSTA", &Lua_Mob::GetSTA)
+				.def("GetDEX", &Lua_Mob::GetDEX)
+				.def("GetAGI", &Lua_Mob::GetAGI)
+				.def("GetINT", &Lua_Mob::GetINT)
+				.def("GetWIS", &Lua_Mob::GetWIS)
+				.def("GetCHA", &Lua_Mob::GetCHA)
+				.def("GetMR", &Lua_Mob::GetMR)
+				.def("GetFR", &Lua_Mob::GetFR)
+				.def("GetDR", &Lua_Mob::GetDR)
+				.def("GetPR", &Lua_Mob::GetPR)
+				.def("GetCR", &Lua_Mob::GetCR)
+				.def("GetCorruption", &Lua_Mob::GetCorruption)
+				.def("GetMaxSTR", &Lua_Mob::GetMaxSTR)
+				.def("GetMaxSTA", &Lua_Mob::GetMaxSTA)
+				.def("GetMaxDEX", &Lua_Mob::GetMaxDEX)
+				.def("GetMaxAGI", &Lua_Mob::GetMaxAGI)
+				.def("GetMaxINT", &Lua_Mob::GetMaxINT)
+				.def("GetMaxWIS", &Lua_Mob::GetMaxWIS)
+				.def("GetMaxCHA", &Lua_Mob::GetMaxCHA)
+				.def("GetActSpellRange", (double(Lua_Mob::*)(int,double))&Lua_Mob::GetActSpellRange)
+				.def("GetActSpellRange", (double(Lua_Mob::*)(int,double,bool))&Lua_Mob::GetActSpellRange)
+				.def("GetActSpellDamage", &Lua_Mob::GetActSpellDamage)
+				.def("GetActSpellHealing", &Lua_Mob::GetActSpellHealing)
+				.def("GetActSpellCost", &Lua_Mob::GetActSpellCost)
+				.def("GetActSpellDuration", &Lua_Mob::GetActSpellDuration)
+				.def("GetActSpellCasttime", &Lua_Mob::GetActSpellCasttime)
+				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob))&Lua_Mob::ResistSpell)
+				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool))&Lua_Mob::ResistSpell)
+				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool,int))&Lua_Mob::ResistSpell)
+				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool,int,bool))&Lua_Mob::ResistSpell)
+				.def("GetSpecializeSkillValue", &Lua_Mob::GetSpecializeSkillValue)
+				.def("GetNPCTypeID", &Lua_Mob::GetNPCTypeID)
+				.def("IsTargeted", &Lua_Mob::IsTargeted)
+				.def("GetX", &Lua_Mob::GetX)
+				.def("GetY", &Lua_Mob::GetY)
+				.def("GetZ", &Lua_Mob::GetZ)
+				.def("GetHeading", &Lua_Mob::GetHeading)
+				.def("GetWaypointX", &Lua_Mob::GetWaypointX)
+				.def("GetWaypointY", &Lua_Mob::GetWaypointY)
+				.def("GetWaypointZ", &Lua_Mob::GetWaypointZ)
+				.def("GetWaypointH", &Lua_Mob::GetWaypointH)
+				.def("GetWaypointPause", &Lua_Mob::GetWaypointPause)
+				.def("GetWaypointID", &Lua_Mob::GetWaypointID)
+				.def("SetCurrentWP", &Lua_Mob::SetCurrentWP)
+				.def("GetSize", &Lua_Mob::GetSize)
+				.def("SetFollowID", &Lua_Mob::SetFollowID)
+				.def("GetFollowID", &Lua_Mob::GetFollowID)
+				.def("Message", &Lua_Mob::Message)
+				.def("Message_StringID", &Lua_Mob::Message_StringID)
+				.def("Say", &Lua_Mob::Say)
+				.def("Shout", &Lua_Mob::Shout)
+				.def("Emote", &Lua_Mob::Emote)
+				.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
+				.def("InterruptSpell", (void(Lua_Mob::*)(int))&Lua_Mob::InterruptSpell)
+				,
 
 			luabind::class_<Lua_Client, Lua_Mob>("Client")
 				.def(luabind::constructor<>()),

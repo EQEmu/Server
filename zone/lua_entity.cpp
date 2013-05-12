@@ -6,6 +6,10 @@
 #include "lua_client.h"
 #include "lua_npc.h"
 
+bool Lua_Entity::NullPtr() {
+	return d_ == nullptr;
+}
+
 bool Lua_Entity::IsClient() {
 	Entity *ent = reinterpret_cast<Entity*>(d_);
 	return ent->IsClient();
