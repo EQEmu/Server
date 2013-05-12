@@ -12549,11 +12549,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 	//
 
 	char *GuildName = (char *)app->pBuffer;
-#ifdef FREEBSD
-	if(strlen(GuildName) > 60)
-#else
 	if(strnlen(GuildName, 64) > 60)
-#endif
 	{
 		Message(clientMessageError, "Guild name too long.");
 		return;
