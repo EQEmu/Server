@@ -196,34 +196,34 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	HandleQueue();
 }
 
-double PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+int PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
 	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false);
-	return 100.0;
+	return 0;
 }
 
-double PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+int PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
 	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true);
-	return 100.0;
+	return 0;
 }
 
-double PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
+int PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
 	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false);
-	return 100.0;
+	return 0;
 }
 
-double PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
+int PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
 	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true);
-	return 100.0;
+	return 0;
 }
 
-double PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+int PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
 	EventCommon(evt, objid, nullptr, nullptr, item, client, extra_data, false);
-	return 100.0;
+	return 0;
 }
 
-double PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
+int PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
 	EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false);
-	return 100.0;
+	return 0;
 }
 
 bool PerlembParser::HasQuestSub(uint32 npcid, const char *subname) {

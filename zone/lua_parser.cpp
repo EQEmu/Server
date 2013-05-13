@@ -83,23 +83,23 @@ LuaParser::~LuaParser() {
 	ClearStates();
 }
 
-double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+int LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
 	if(evt >= _LargestEventID) {
-		return 100.0;
+		return 0;
 	}
 
 	if(!npc) {
-		return 100.0;
+		return 0;
 	}
 
 	if(evt != EVENT_SPAWN && evt != EVENT_SAY) {
-		return 100.0;
+		return 0;
 	}
 
 
 	const char *sub_name = LuaEvents[evt];
 	if(!HasQuestSub(npc->GetNPCTypeID(), sub_name)) {
-		return 100.0;
+		return 0;
 	}
 
 	std::stringstream package_name;
@@ -108,7 +108,7 @@ double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string da
 	lua_State *L = nullptr;
 	auto iter = states_.find(package_name.str());
 	if(iter == states_.end()) {
-		return 100.0;
+		return 0;
 	}
 	L = iter->second;
 
@@ -136,40 +136,40 @@ double LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string da
 
 		if(lua_pcall(L, arg_count, ret_count, 0)) {
 			printf("Error: %s\n", lua_tostring(L, -1));
-			return 100.0;
+			return 0;
 		}
 
 		if(lua_isnumber(L, -1)) {
-			double ret = lua_tonumber(L, -1);
+			int ret = static_cast<int>(lua_tointeger(L, -1));
 			return ret;
 		}
 
 	} catch(std::exception &ex) {
 		printf("%s\n", ex.what());
-		return 100.0;
+		return 0;
 	}
 
-	return 100.0;
+	return 0;
 }
 
-double LuaParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
-	return 100.0;
+int LuaParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+	return 0;
 }
 
-double LuaParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-	return 100.0;
+int LuaParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
+	return 0;
 }
 
-double LuaParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-	return 100.0;
+int LuaParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
+	return 0;
 }
 
-double LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
-	return 100.0;
+int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+	return 0;
 }
 
-double LuaParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
-	return 100.0;
+int LuaParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
+	return 00;
 }
 
 bool LuaParser::HasQuestSub(uint32 npc_id, const char *subname) {
@@ -343,7 +343,8 @@ void LuaParser::MapFunctions(lua_State *L) {
 		[
 			luabind::class_<Lua_Entity>("Entity")
 				.def(luabind::constructor<>())
-				.def("NullPtr", &Lua_Entity::NullPtr)
+				.property("null", &Lua_Entity::Null)
+				.property("valid", &Lua_Entity::Valid)
 				.def("IsClient", &Lua_Entity::IsClient)
 				.def("IsNPC", &Lua_Entity::IsNPC)
 				.def("IsMob", &Lua_Entity::IsMob)

@@ -17,12 +17,12 @@ public:
 	LuaParser();
 	~LuaParser();
 
-	virtual double EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
-	virtual double EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
-	virtual double EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-	virtual double EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-	virtual double EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
-	virtual double EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
+	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	virtual int EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	virtual int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
+	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
+	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
+	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
 	virtual bool HasQuestSub(uint32 npc_id, const char *subname);
 	virtual bool HasGlobalQuestSub(const char *subname);

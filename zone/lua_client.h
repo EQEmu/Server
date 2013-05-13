@@ -12,6 +12,14 @@ public:
 	Lua_Client() { d_ = nullptr; }
 	Lua_Client(Client *d) { d_ = d; }
 	virtual ~Lua_Client() { }
+
+	operator Client* () {
+		if(d_) {
+			return reinterpret_cast<Client*>(d_);
+		}
+
+		return nullptr;
+	}
 };
 
 #endif

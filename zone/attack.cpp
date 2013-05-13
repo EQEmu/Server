@@ -1425,7 +1425,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	if(dead)
 		return;	//cant die more than once...
 
-	if(parse->EventPlayer(EVENT_DEATH, this, "", 0) <= 0.0) {
+	if(parse->EventPlayer(EVENT_DEATH, this, "", 0) == 1) {
 		return;
 	}
 
@@ -2041,6 +2041,15 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	_ZP(NPC_Death);
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob->GetName(), damage, spell, attack_skill);
 	
+	Mob *oos = nullptr;
+	if(killerMob) {
+		Mob *oos = killerMob->GetOwnerOrSelf();
+		if(parse->EventNPC(EVENT_DEATH, this, oos, "", 0) != 0)
+		{
+			return;
+		}
+	}
+
 	if (this->IsEngaged())
 	{
 		zone->DelAggroMob();
@@ -2064,7 +2073,6 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	Death_Struct* d = (Death_Struct*)app->pBuffer;
 	d->spawn_id = GetID();
 	d->killer_id = killerMob ? killerMob->GetID() : 0;
-//	d->unknown12 = 1;
 	d->bindzoneid = 0;
 	d->spell_id = spell == SPELL_UNKNOWN ? 0xffffffff : spell;
 	d->attack_skill = SkillDamageTypes[attack_skill];
@@ -2348,22 +2356,19 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 		entity_list.RemoveFromXTargets(this);
 	
 	// Parse quests even if we're killed by an NPC
-	if(killerMob) {
-		Mob *oos = killerMob->GetOwnerOrSelf();
-        parse->EventNPC(EVENT_DEATH, this, oos, "", 0);
-
+	if(oos) {
 		mod_npc_killed(oos);
 
 		uint16 emoteid = this->GetEmoteID();
 		if(emoteid != 0)
-			this->DoNPCEmote(ONDEATH,emoteid);
+			this->DoNPCEmote(ONDEATH, emoteid);
 		if(oos->IsNPC())
 		{
             parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
 			uint16 emoteid = oos->GetEmoteID();
 			if(emoteid != 0)
-				oos->CastToNPC()->DoNPCEmote(KILLEDNPC,emoteid);
-			killerMob->TrySpellOnKill(killed_level,spell);
+				oos->CastToNPC()->DoNPCEmote(KILLEDNPC, emoteid);
+			killerMob->TrySpellOnKill(killed_level, spell);
 		}
 	}
 	

@@ -11,11 +11,18 @@ class Lua_Mob;
 //class Lua_Object;
 //class Lua_Doors;
 //class Lua_Trap;
-//class Lua_Beacon;
+//class Lua_Item;
 
-#define Lua_Safe_Cast(type, m, other) \
-	type *m = nullptr; \
-	m = reinterpret_cast<type*>(other.d_);
+//TODO: Remove the error checking by a flag since this adds significant overhead to each c call
+#define Lua_Safe_Call_Void(Type) if(!d_) { return; } Type *self = reinterpret_cast<Type*>(d_);
+#define Lua_Safe_Call_Bool(Type) if(!d_) { return false; } Type *self = reinterpret_cast<Type*>(d_);
+#define Lua_Safe_Call_Int(Type) if(!d_) { return 0; } Type *self = reinterpret_cast<Type*>(d_);
+#define Lua_Safe_Call_Real(Type) if(!d_) { return 0.0; } Type *self = reinterpret_cast<Type*>(d_);
+#define Lua_Safe_Call_String(Type) if(!d_) { return ""; } Type *self = reinterpret_cast<Type*>(d_);
+#define Lua_Safe_Call_Entity(Type) if(!d_) { return Lua_Entity(); } Type *self = reinterpret_cast<Type*>(d_);
+#define Lua_Safe_Call_Mob(Type) if(!d_) { return Lua_Mob(); } Type *self = reinterpret_cast<Type*>(d_);
+#define Lua_Safe_Call_NPC(Type) if(!d_) { return Lua_NPC(); } Type *self = reinterpret_cast<Type*>(d_);
+#define Lua_Safe_Call_Client(Type) if(!d_) { return Lua_Client(); } Type *self = reinterpret_cast<Type*>(d_);
 
 class Lua_Entity
 {
@@ -24,7 +31,16 @@ public:
 	Lua_Entity(Entity *d) : d_(d) { }
 	virtual ~Lua_Entity() { }
 
-	bool NullPtr();
+	operator Entity* () {
+		if(d_) {
+			return reinterpret_cast<Entity*>(d_);
+		}
+
+		return nullptr;
+	}
+
+	bool Null();
+	bool Valid();
 	bool IsClient();
 	bool IsNPC();
 	bool IsMob();

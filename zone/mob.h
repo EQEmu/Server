@@ -693,38 +693,38 @@ public:
     void ProcessFlee();
     void CheckFlee();
 
-    inline bool            CheckAggro(Mob* other) {return hate_list.IsOnHateList(other);}
-    float                CalculateHeadingToTarget(float in_x, float in_y);
-    bool                CalculateNewPosition(float x, float y, float z, float speed, bool checkZ = false);
-    virtual bool        CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ = true);
-    float                CalculateDistance(float x, float y, float z);
-    float                GetGroundZ(float new_x, float new_y, float z_offset=0.0);
-    void                SendTo(float new_x, float new_y, float new_z);
-    void                SendToFixZ(float new_x, float new_y, float new_z);
-    void                NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
-    inline uint32        DontHealMeBefore() const { return pDontHealMeBefore; }
-    inline uint32        DontBuffMeBefore() const { return pDontBuffMeBefore; }
-    inline uint32        DontDotMeBefore() const { return pDontDotMeBefore; }
-    inline uint32        DontRootMeBefore() const { return pDontRootMeBefore; }
-    inline uint32        DontSnareMeBefore() const { return pDontSnareMeBefore; }
-    inline uint32        DontCureMeBefore() const { return pDontCureMeBefore; }
-    void                SetDontRootMeBefore(uint32 time) { pDontRootMeBefore = time; }
-    void                SetDontHealMeBefore(uint32 time) { pDontHealMeBefore = time; }
-    void                SetDontBuffMeBefore(uint32 time) { pDontBuffMeBefore = time; }
-    void                SetDontDotMeBefore(uint32 time) { pDontDotMeBefore = time; }
-    void                SetDontSnareMeBefore(uint32 time) { pDontSnareMeBefore = time; }
-    void                SetDontCureMeBefore(uint32 time) { pDontCureMeBefore = time; }
+    inline bool CheckAggro(Mob* other) {return hate_list.IsOnHateList(other);}
+    float CalculateHeadingToTarget(float in_x, float in_y);
+    bool CalculateNewPosition(float x, float y, float z, float speed, bool checkZ = false);
+    virtual bool CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ = true);
+    float CalculateDistance(float x, float y, float z);
+    float GetGroundZ(float new_x, float new_y, float z_offset=0.0);
+    void SendTo(float new_x, float new_y, float new_z);
+    void SendToFixZ(float new_x, float new_y, float new_z);
+    void NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
+    inline uint32 DontHealMeBefore() const { return pDontHealMeBefore; }
+    inline uint32 DontBuffMeBefore() const { return pDontBuffMeBefore; }
+    inline uint32 DontDotMeBefore() const { return pDontDotMeBefore; }
+    inline uint32 DontRootMeBefore() const { return pDontRootMeBefore; }
+    inline uint32 DontSnareMeBefore() const { return pDontSnareMeBefore; }
+    inline uint32 DontCureMeBefore() const { return pDontCureMeBefore; }
+    void SetDontRootMeBefore(uint32 time) { pDontRootMeBefore = time; }
+    void SetDontHealMeBefore(uint32 time) { pDontHealMeBefore = time; }
+    void SetDontBuffMeBefore(uint32 time) { pDontBuffMeBefore = time; }
+    void SetDontDotMeBefore(uint32 time) { pDontDotMeBefore = time; }
+    void SetDontSnareMeBefore(uint32 time) { pDontSnareMeBefore = time; }
+    void SetDontCureMeBefore(uint32 time) { pDontCureMeBefore = time; }
 
     // calculate interruption of spell via movement of mob
     void SaveSpellLoc() {spell_x = x_pos; spell_y = y_pos; spell_z = z_pos; }
     inline float GetSpellX() const {return spell_x;}
     inline float GetSpellY() const {return spell_y;}
     inline float GetSpellZ() const {return spell_z;}
-    inline bool    IsGrouped()     const { return isgrouped; }
+    inline bool IsGrouped() const { return isgrouped; }
     void SetGrouped(bool v);
     inline bool IsRaidGrouped() const { return israidgrouped; }
     void SetRaidGrouped(bool v);
-    inline bool    IsLooting()     const { return islooting; }
+    inline bool IsLooting() const { return islooting; }
     void SetLooting(bool val) { islooting = val; }
 
     bool CheckWillAggro(Mob *mob);

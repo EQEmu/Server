@@ -25,27 +25,6 @@
 		Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power);
 		
 	};
-/*
- * I dont have the patience to take on this project today....
-class Pet : public NPC {
-public:
-	enum eStandingPetOrder { SPO_Follow, SPO_Sit, SPO_Guard };
-	
-
-	const uint16	pet_spell_id;
-	
-	inline void	SetPetOrder(eStandingPetOrder i) { pStandingPetOrder = i; }
-	inline eStandingPetOrder GetPetOrder() const { return pStandingPetOrder; }
-//	void	SetPetType(uint16 in_type)	{ typeofpet = in_type; } // put this here because only NPCs can be anything but charmed pets
-	void	GetPetState(SpellBuff_Struct *buffs, uint32 *items, char *name);
-	void	SetPetState(SpellBuff_Struct *buffs, uint32 *items);
-protected:
-//	uint16			typeofpet; // 0xFF = charmed
-	
-	eStandingPetOrder pStandingPetOrder;
-	bool	taunting;
-    Timer	taunt_timer;		//for pet taunting
-};*/
 
 #endif
 

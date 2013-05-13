@@ -6,68 +6,72 @@
 #include "lua_client.h"
 #include "lua_npc.h"
 
-bool Lua_Entity::NullPtr() {
+bool Lua_Entity::Null() {
 	return d_ == nullptr;
 }
 
+bool Lua_Entity::Valid() {
+	return d_ != nullptr;
+}
+
 bool Lua_Entity::IsClient() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsClient();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsClient();
 }
 
 bool Lua_Entity::IsNPC() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsNPC();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsNPC();
 }
 
 bool Lua_Entity::IsMob() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsMob();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsMob();
 }
 
 bool Lua_Entity::IsMerc() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsMerc();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsMerc();
 }
 
 bool Lua_Entity::IsCorpse() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsCorpse();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsCorpse();
 }
 
 bool Lua_Entity::IsPlayerCorpse() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsPlayerCorpse();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsPlayerCorpse();
 }
 
 bool Lua_Entity::IsNPCCorpse() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsNPCCorpse();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsNPCCorpse();
 }
 
 bool Lua_Entity::IsObject() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsObject();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsObject();
 }
 
 bool Lua_Entity::IsDoor() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsDoor();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsDoor();
 }
 
 bool Lua_Entity::IsTrap() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsTrap();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsTrap();
 }
 
 bool Lua_Entity::IsBeacon() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->IsBeacon();
+	Lua_Safe_Call_Bool(Entity);
+	return self->IsBeacon();
 }
 
 int Lua_Entity::GetID() {
-	Entity *ent = reinterpret_cast<Entity*>(d_);
-	return ent->GetID();
+	Lua_Safe_Call_Bool(Entity);
+	return self->GetID();
 }
 
 Lua_Client Lua_Entity::CastToClient() {
