@@ -8,14 +8,15 @@ class Client;
 
 class Lua_Client : public Lua_Mob
 {
+	typedef Client NativeType;
 public:
 	Lua_Client() { d_ = nullptr; }
-	Lua_Client(Client *d) { d_ = d; }
+	Lua_Client(NativeType *d) { d_ = d; }
 	virtual ~Lua_Client() { }
 
-	operator Client* () {
+	operator NativeType* () {
 		if(d_) {
-			return reinterpret_cast<Client*>(d_);
+			return reinterpret_cast<NativeType*>(d_);
 		}
 
 		return nullptr;

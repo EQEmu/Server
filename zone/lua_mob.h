@@ -8,14 +8,15 @@ class Mob;
 
 class Lua_Mob : public Lua_Entity
 {
+	typedef Mob NativeType;
 public:
 	Lua_Mob() { d_ = nullptr; }
-	Lua_Mob(Mob *d) { d_ = d; }
+	Lua_Mob(NativeType *d) { d_ = d; }
 	virtual ~Lua_Mob() { }
 
-	operator Mob* () {
+	operator NativeType* () {
 		if(d_) {
-			return reinterpret_cast<Mob*>(d_);
+			return reinterpret_cast<NativeType*>(d_);
 		}
 
 		return nullptr;

@@ -14,26 +14,27 @@ class Lua_Mob;
 //class Lua_Item;
 
 //TODO: Remove the error checking by a flag since this adds significant overhead to each c call
-#define Lua_Safe_Call_Void(Type) if(!d_) { return; } Type *self = reinterpret_cast<Type*>(d_);
-#define Lua_Safe_Call_Bool(Type) if(!d_) { return false; } Type *self = reinterpret_cast<Type*>(d_);
-#define Lua_Safe_Call_Int(Type) if(!d_) { return 0; } Type *self = reinterpret_cast<Type*>(d_);
-#define Lua_Safe_Call_Real(Type) if(!d_) { return 0.0; } Type *self = reinterpret_cast<Type*>(d_);
-#define Lua_Safe_Call_String(Type) if(!d_) { return ""; } Type *self = reinterpret_cast<Type*>(d_);
-#define Lua_Safe_Call_Entity(Type) if(!d_) { return Lua_Entity(); } Type *self = reinterpret_cast<Type*>(d_);
-#define Lua_Safe_Call_Mob(Type) if(!d_) { return Lua_Mob(); } Type *self = reinterpret_cast<Type*>(d_);
-#define Lua_Safe_Call_NPC(Type) if(!d_) { return Lua_NPC(); } Type *self = reinterpret_cast<Type*>(d_);
-#define Lua_Safe_Call_Client(Type) if(!d_) { return Lua_Client(); } Type *self = reinterpret_cast<Type*>(d_);
+#define Lua_Safe_Call_Void() if(!d_) { return; } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_Bool() if(!d_) { return false; } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_Int() if(!d_) { return 0; } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_Real() if(!d_) { return 0.0; } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_String() if(!d_) { return ""; } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_Entity() if(!d_) { return Lua_Entity(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_Mob() if(!d_) { return Lua_Mob(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_NPC() if(!d_) { return Lua_NPC(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_Client() if(!d_) { return Lua_Client(); } NativeType *self = reinterpret_cast<Type*>(d_)
 
 class Lua_Entity
 {
+	typedef Entity NativeType;
 public:
 	Lua_Entity() { d_ = nullptr; }
-	Lua_Entity(Entity *d) : d_(d) { }
+	Lua_Entity(NativeType *d) : d_(d) { }
 	virtual ~Lua_Entity() { }
 
-	operator Entity* () {
+	operator NativeType* () {
 		if(d_) {
-			return reinterpret_cast<Entity*>(d_);
+			return reinterpret_cast<NativeType*>(d_);
 		}
 
 		return nullptr;
