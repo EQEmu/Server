@@ -119,6 +119,7 @@ SET(zone_headers
 	lua_mob.h
 	lua_npc.h
 	lua_parser.h
+	lua_trade.h
     map.h
     masterentity.h
     maxskill.h

@@ -44,6 +44,7 @@ public:
     virtual uint32 GetIdentifier() { return 0xb0712acc; }
 
 private:
+	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
 	void LoadScript(std::string filename, std::string package_name);
 	bool HasFunction(std::string function, std::string package_name);
 	void ClearStates();

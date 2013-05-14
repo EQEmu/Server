@@ -639,39 +639,25 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 				snprintf(temp1, 100, "item%d.%d", z+1,tradingWith->GetNPCTypeID());
 				snprintf(temp2, 100, "%d",items[z]);
 				parse->AddVar(temp1,temp2);
-				//					  memset(temp1,0x0,100);
-				//					  memset(temp2,0x0,100);
 				snprintf(temp1, 100, "item%d.charges.%d", z+1,tradingWith->GetNPCTypeID());
 				snprintf(temp2, 100, "%d",charges[z]);
 				parse->AddVar(temp1,temp2);
-				//					  memset(temp1,0x0,100);
-				//					  memset(temp2,0x0,100);
 				snprintf(temp1, 100, "item%d.attuned.%d", z+1,tradingWith->GetNPCTypeID());
 				snprintf(temp2, 100, "%d",attuned[z]);
 				parse->AddVar(temp1,temp2);
-				//					  memset(temp1,0x0,100);
-				//					  memset(temp2,0x0,100);
 			}
 			snprintf(temp1, 100, "copper.%d",tradingWith->GetNPCTypeID());
 			snprintf(temp2, 100, "%i",trade->cp);
 			parse->AddVar(temp1,temp2);
-			//			  memset(temp1,0x0,100);
-			//			  memset(temp2,0x0,100);
 			snprintf(temp1, 100, "silver.%d",tradingWith->GetNPCTypeID());
 			snprintf(temp2, 100, "%i",trade->sp);
 			parse->AddVar(temp1,temp2);
-			//			  memset(temp1,0x0,100);
-			//			  memset(temp2,0x0,100);
-			snprintf(temp1, 100, "gold.%d",tradingWith->GetNPCTypeID());
+			snprintf(temp1, 100, "gold.%d", tradingWith->GetNPCTypeID());
 			snprintf(temp2, 100, "%i",trade->gp);
-			parse->AddVar(temp1,temp2);
-			//			  memset(temp1,0x0,100);
-			//			  memset(temp2,0x0,100);
-			snprintf(temp1, 100, "platinum.%d",tradingWith->GetNPCTypeID());
+			parse->AddVar(temp1, temp2);
+			snprintf(temp1, 100, "platinum.%d", tradingWith->GetNPCTypeID());
 			snprintf(temp2, 100, "%i",trade->pp);
 			parse->AddVar(temp1,temp2);
-			//			  memset(temp1,0x0,100);
-			//			  memset(temp2,0x0,100);
             parse->EventNPC(EVENT_ITEM, tradingWith->CastToNPC(), this, "", 0);
 		}
 	}

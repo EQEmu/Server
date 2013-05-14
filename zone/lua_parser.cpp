@@ -13,6 +13,7 @@
 #include "lua_mob.h"
 #include "lua_client.h"
 #include "lua_npc.h"
+#include "lua_trade.h"
 
 const char *LuaEvents[_LargestEventID] = {
 	"event_say",
@@ -92,21 +93,37 @@ int LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data,
 		return 0;
 	}
 
-	if(evt != EVENT_SPAWN && evt != EVENT_SAY) {
-		return 0;
-	}
-
-
-	const char *sub_name = LuaEvents[evt];
-	if(!HasQuestSub(npc->GetNPCTypeID(), sub_name)) {
+	if(!HasQuestSub(npc->GetNPCTypeID(), LuaEvents[evt])) {
 		return 0;
 	}
 
 	std::stringstream package_name;
 	package_name << "npc_" << npc->GetNPCTypeID();
 	
+	return _EventNPC(package_name.str(), evt, npc, init, data, extra_data);
+}
+
+int LuaParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+	if(evt >= _LargestEventID) {
+		return 0;
+	}
+
+	if(!npc) {
+		return 0;
+	}
+
+	if(!HasGlobalQuestSub(LuaEvents[evt])) {
+		return 0;
+	}
+
+	return _EventNPC("global_npc", evt, npc, init, data, extra_data);
+}
+
+int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+	const char *sub_name = LuaEvents[evt];
+	
 	lua_State *L = nullptr;
-	auto iter = states_.find(package_name.str());
+	auto iter = states_.find(package_name);
 	if(iter == states_.end()) {
 		return 0;
 	}
@@ -115,23 +132,101 @@ int LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data,
 	try {
 		lua_getfield(L, LUA_GLOBALSINDEX, sub_name);
 
+		//push self
 		Lua_NPC l_npc(npc);
-		Lua_Client l_client;
 		luabind::object l_npc_o = luabind::object(L, l_npc);
 		l_npc_o.push(L);
 
 		int arg_count = 1;
 		int ret_count = 1;
 
-		if(evt == EVENT_SAY) {
-			l_client.d_ = init;
-			luabind::object l_client_o = luabind::object(L, l_client);
-			l_client_o.push(L);
+		if(init) {
+			Lua_Mob l_mob(init);
+			luabind::object l_mob_o = luabind::object(L, l_mob);
+			l_mob_o.push(L);
+			++arg_count;
+		}
 
+		switch(evt) {
+		case EVENT_SAY:
+		case EVENT_AGGRO_SAY: 
+		case EVENT_PROXIMITY_SAY: {
+			//text
 			lua_pushstring(L, data.c_str());
+
+			//language
 			lua_pushinteger(L, extra_data);
 
-			arg_count += 3;
+			arg_count += 2;
+			break;
+		}
+
+		case EVENT_ITEM: {
+			Lua_Trade trade;
+			std::stringstream ident;
+			ident << npc->GetNPCTypeID();
+			//std::string identifier = std::string(itoa(npc->GetNPCTypeID()));
+			trade.item1_ = std::stoul(GetVar("item1." + ident.str()));
+			trade.item2_ = std::stoul(GetVar("item2." + ident.str()));
+			trade.item3_ = std::stoul(GetVar("item3." + ident.str()));
+			trade.item4_ = std::stoul(GetVar("item4." + ident.str()));
+			trade.item1_charges_ = std::stoul(GetVar("item1.charges." + ident.str()));
+			trade.item1_charges_ = std::stoul(GetVar("item2.charges." + ident.str()));
+			trade.item1_charges_ = std::stoul(GetVar("item3.charges." + ident.str()));
+			trade.item1_charges_ = std::stoul(GetVar("item4.charges." + ident.str()));
+			trade.item1_attuned_ = std::stoi(GetVar("item1.attuned." + ident.str())) != 0 ? true : false;
+			trade.item2_attuned_ = std::stoi(GetVar("item2.attuned." + ident.str())) != 0 ? true : false;
+			trade.item3_attuned_ = std::stoi(GetVar("item3.attuned." + ident.str())) != 0 ? true : false;
+			trade.item4_attuned_ = std::stoi(GetVar("item4.attuned." + ident.str())) != 0 ? true : false;
+			trade.platinum_ = std::stoul(GetVar("platinum." + ident.str()));
+			trade.gold_ = std::stoul(GetVar("gold." + ident.str()));
+			trade.silver_ = std::stoul(GetVar("silver." + ident.str()));
+			trade.copper_ = std::stoul(GetVar("copper." + ident.str()));
+			
+			luabind::object l_trade_o = luabind::object(L, trade);
+			l_trade_o.push(L);
+
+			arg_count += 1;
+			break;
+		}
+
+		case EVENT_HP: {
+			if(extra_data == 1) {
+				lua_pushstring(L, "-1");
+				lua_pushstring(L, data.c_str());
+			}
+			else
+			{
+				lua_pushstring(L, data.c_str());
+				lua_pushstring(L, "-1");
+			}
+
+			arg_count += 2;
+			break;
+		}
+
+		case EVENT_WAYPOINT_ARRIVE:
+		case EVENT_WAYPOINT_DEPART:
+		case EVENT_TIMER:
+		case EVENT_SIGNAL:
+		case EVENT_COMBAT:
+		case EVENT_CAST_ON:
+		case EVENT_TASKACCEPTED:
+		case EVENT_POPUP_RESPONSE:
+		case EVENT_HATE_LIST: {
+			lua_pushstring(L, data.c_str());
+
+			arg_count += 1;
+			break;
+		}
+
+		case EVENT_NPC_SLAY: {
+			lua_pushinteger(L, init->GetNPCTypeID());
+
+			arg_count += 1;
+			break;
+		}
+
 		}
 
 		if(lua_pcall(L, arg_count, ret_count, 0)) {
@@ -149,10 +244,6 @@ int LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data,
 		return 0;
 	}
 
-	return 0;
-}
-
-int LuaParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
 	return 0;
 }
 
@@ -366,17 +457,12 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("GetName", &Lua_Mob::GetName)
 				.def("Depop", (void(Lua_Mob::*)(void))&Lua_Mob::Depop)
 				.def("Depop", (void(Lua_Mob::*)(bool))&Lua_Mob::Depop)
-				.def("RogueAssassinate", &Lua_Mob::RogueAssassinate)
 				.def("BehindMob", (bool(Lua_Mob::*)(void))&Lua_Mob::BehindMob)
 				.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::BehindMob)
 				.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float))&Lua_Mob::BehindMob)
 				.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float,float))&Lua_Mob::BehindMob)
 				.def("SetLevel", (void(Lua_Mob::*)(int))&Lua_Mob::SetLevel)
 				.def("SetLevel", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetLevel)
-				.def("GetEquipment", &Lua_Mob::GetEquipment)
-				.def("GetEquipmentMaterial", &Lua_Mob::GetEquipmentMaterial)
-				.def("GetEquipmentColor", &Lua_Mob::GetEquipmentColor)
-				.def("GetArmorTint", &Lua_Mob::GetArmorTint)
 				.def("IsMoving", &Lua_Mob::IsMoving)
 				.def("GotoBind", &Lua_Mob::GotoBind)
 				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::Attack)
@@ -405,9 +491,6 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("GMMove", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::GMMove)
 				.def("GMMove", (void(Lua_Mob::*)(double,double,double,double))&Lua_Mob::GMMove)
 				.def("GMMove", (void(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::GMMove)
-				.def("SendPosUpdate", (void(Lua_Mob::*)(void))&Lua_Mob::SendPosUpdate)
-				.def("SendPosUpdate", (void(Lua_Mob::*)(bool))&Lua_Mob::SendPosUpdate)
-				.def("SendPosition", &Lua_Mob::SendPosition)
 				.def("HasProcs", &Lua_Mob::HasProcs)
 				.def("IsInvisible", (bool(Lua_Mob::*)(void))&Lua_Mob::IsInvisible)
 				.def("IsInvisible", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsInvisible)
@@ -417,10 +500,6 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("FindType", (bool(Lua_Mob::*)(int,bool))&Lua_Mob::FindType)
 				.def("FindType", (bool(Lua_Mob::*)(int,bool,int))&Lua_Mob::FindType)
 				.def("GetBuffSlotFromType", &Lua_Mob::GetBuffSlotFromType)
-				.def("MakePet", (void(Lua_Mob::*)(int,const char*))&Lua_Mob::MakePet)
-				.def("MakePet", (void(Lua_Mob::*)(int,const char*,const char*))&Lua_Mob::MakePet)
-				.def("MakePoweredPet", (void(Lua_Mob::*)(int,const char*,int))&Lua_Mob::MakePoweredPet)
-				.def("MakePoweredPet", (void(Lua_Mob::*)(int,const char*,int,const char*))&Lua_Mob::MakePoweredPet)
 				.def("GetBaseRace", &Lua_Mob::GetBaseRace)
 				.def("GetBaseGender", &Lua_Mob::GetBaseGender)
 				.def("GetDeity", &Lua_Mob::GetDeity)
@@ -478,13 +557,6 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("GetMaxINT", &Lua_Mob::GetMaxINT)
 				.def("GetMaxWIS", &Lua_Mob::GetMaxWIS)
 				.def("GetMaxCHA", &Lua_Mob::GetMaxCHA)
-				.def("GetActSpellRange", (double(Lua_Mob::*)(int,double))&Lua_Mob::GetActSpellRange)
-				.def("GetActSpellRange", (double(Lua_Mob::*)(int,double,bool))&Lua_Mob::GetActSpellRange)
-				.def("GetActSpellDamage", &Lua_Mob::GetActSpellDamage)
-				.def("GetActSpellHealing", &Lua_Mob::GetActSpellHealing)
-				.def("GetActSpellCost", &Lua_Mob::GetActSpellCost)
-				.def("GetActSpellDuration", &Lua_Mob::GetActSpellDuration)
-				.def("GetActSpellCasttime", &Lua_Mob::GetActSpellCasttime)
 				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob))&Lua_Mob::ResistSpell)
 				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool))&Lua_Mob::ResistSpell)
 				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool,int))&Lua_Mob::ResistSpell)
@@ -504,8 +576,6 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("GetWaypointID", &Lua_Mob::GetWaypointID)
 				.def("SetCurrentWP", &Lua_Mob::SetCurrentWP)
 				.def("GetSize", &Lua_Mob::GetSize)
-				.def("SetFollowID", &Lua_Mob::SetFollowID)
-				.def("GetFollowID", &Lua_Mob::GetFollowID)
 				.def("Message", &Lua_Mob::Message)
 				.def("Message_StringID", &Lua_Mob::Message_StringID)
 				.def("Say", &Lua_Mob::Say)
@@ -513,13 +583,46 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("Emote", &Lua_Mob::Emote)
 				.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
 				.def("InterruptSpell", (void(Lua_Mob::*)(int))&Lua_Mob::InterruptSpell)
+				.def("CastSpell", (bool(Lua_Mob::*)(int,int))&Lua_Mob::CastSpell)
+				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int))&Lua_Mob::CastSpell)
+				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int))&Lua_Mob::CastSpell)
+				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int,int))&Lua_Mob::CastSpell)
+				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int,int,int))&Lua_Mob::CastSpell)
+				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int,int,int,int,int))&Lua_Mob::CastSpell)
+				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int,int,int,int,int,int))&Lua_Mob::CastSpell)
+				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob))&Lua_Mob::SpellFinished)
+				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int))&Lua_Mob::SpellFinished)
+				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int))&Lua_Mob::SpellFinished)
+				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32))&Lua_Mob::SpellFinished)
+				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int))&Lua_Mob::SpellFinished)
+				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int,bool))&Lua_Mob::SpellFinished)
+				.def("SpellEffect", &Lua_Mob::SpellEffect)
 				,
 
 			luabind::class_<Lua_Client, Lua_Mob>("Client")
 				.def(luabind::constructor<>()),
 
 			luabind::class_<Lua_NPC, Lua_Mob>("NPC")
+				.def(luabind::constructor<>()),
+
+			luabind::class_<Lua_Trade>("Trade")
 				.def(luabind::constructor<>())
+				.def_readwrite("item1", &Lua_Trade::item1_)
+				.def_readwrite("item2", &Lua_Trade::item2_)
+				.def_readwrite("item3", &Lua_Trade::item3_)
+				.def_readwrite("item4", &Lua_Trade::item4_)
+				.def_readwrite("item1_charges", &Lua_Trade::item1_charges_)
+				.def_readwrite("item2_charges", &Lua_Trade::item2_charges_)
+				.def_readwrite("item3_charges", &Lua_Trade::item3_charges_)
+				.def_readwrite("item4_charges", &Lua_Trade::item4_charges_)
+				.def_readwrite("item1_attuned", &Lua_Trade::item1_attuned_)
+				.def_readwrite("item2_attuned", &Lua_Trade::item2_attuned_)
+				.def_readwrite("item3_attuned", &Lua_Trade::item3_attuned_)
+				.def_readwrite("item4_attuned", &Lua_Trade::item4_attuned_)
+				.def_readwrite("platinum", &Lua_Trade::platinum_)
+				.def_readwrite("gold", &Lua_Trade::gold_)
+				.def_readwrite("silver", &Lua_Trade::silver_)
+				.def_readwrite("copper", &Lua_Trade::copper_)
 		];
 	
 	} catch(std::exception &ex) {

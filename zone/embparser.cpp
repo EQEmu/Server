@@ -1064,8 +1064,6 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 {
 	switch (event) {
 		case EVENT_SAY: {
-			if (npcmob && npcmob->GetAppearance() != eaDead)
-			  npcmob->FaceTarget(mob);
 			ExportVar(package_name.c_str(), "data", objid);
 			ExportVar(package_name.c_str(), "text", data);
 			ExportVar(package_name.c_str(), "langid", extradata);

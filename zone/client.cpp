@@ -1073,7 +1073,11 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					if (DistNoRootNoZ(*GetTarget()) <= 200) {
 						if(GetTarget()->CastToNPC()->IsMoving() && !GetTarget()->CastToNPC()->IsOnHatelist(GetTarget()))
 							GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-                        parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, message, language);
+
+						Mob *targ = GetTarget();
+						if(targ->GetAppearance() != eaDead)
+							targ->FaceTarget(targ);
+                        parse->EventNPC(EVENT_SAY, targ->CastToNPC(), this, message, language);
 					}
 				}	
 

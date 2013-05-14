@@ -3264,6 +3264,9 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 				{
 					if(silentsaylink)
 					{
+						Mob *targ = GetTarget();
+						if(targ->GetAppearance() != eaDead)
+							targ->FaceTarget(targ);
                         parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
                         parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
 					}
