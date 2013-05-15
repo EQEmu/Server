@@ -1,6 +1,4 @@
-/*
-	EQEMu:  Everquest Server Emulator
-
+/*	EQEMu: Everquest Server Emulator
 	Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -11,11 +9,11 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 */
 
@@ -112,7 +110,7 @@ void Database::GetAccountStatus(Client *c) {
 	MYSQL_ROW row;
 
 	if (!RunQuery(query,MakeAnyLenString(&query, "select `status`, `hideme`, `karma`, `revoked` from `account` where `id`='%i' limit 1",
-					   c->GetAccountID()),errbuf,&result)){
+						c->GetAccountID()),errbuf,&result)){
 
 		_log(UCS__ERROR, "Unable to get account status for character %s, error %s", c->GetName().c_str(), errbuf);
 
@@ -153,7 +151,7 @@ int Database::FindAccount(const char *CharacterName, Client *c) {
 	c->ClearCharacters();
 
 	if (!RunQuery(query,MakeAnyLenString(&query, "select `id`, `account_id`, `level` from `character_` where `name`='%s' limit 1",
-					   CharacterName),errbuf,&result))
+						CharacterName),errbuf,&result))
 	{
 		_log(UCS__ERROR, "FindAccount query failed: %s", query);
 		safe_delete_array(query);
@@ -161,7 +159,7 @@ int Database::FindAccount(const char *CharacterName, Client *c) {
 	}
 	safe_delete_array(query);
 
-	if (mysql_num_rows(result) != 1) 
+	if (mysql_num_rows(result) != 1)
 	{
 		_log(UCS__ERROR, "Bad result from query");
 		mysql_free_result(result);
@@ -176,14 +174,14 @@ int Database::FindAccount(const char *CharacterName, Client *c) {
 	_log(UCS__TRACE, "Account ID for %s is %i", CharacterName, AccountID);
 
 	if (!RunQuery(query,MakeAnyLenString(&query, "select `id`, `name`, `level` from `character_` where `account_id`=%i and `name` !='%s'",
-					   AccountID, CharacterName),errbuf,&result))
+						AccountID, CharacterName),errbuf,&result))
 	{
 		safe_delete_array(query);
 		return AccountID;
 	}
 	safe_delete_array(query);
 
-	for(unsigned int i = 0; i < mysql_num_rows(result); i++) 
+	for(unsigned int i = 0; i < mysql_num_rows(result); i++)
 	{
 		row = mysql_fetch_row(result);
 		c->AddCharacter(atoi(row[0]), row[1], atoi(row[2]));
@@ -200,7 +198,7 @@ bool Database::VerifyMailKey(string CharacterName, int IPAddress, string MailKey
 	MYSQL_ROW row;
 
 	if (!RunQuery(query,MakeAnyLenString(&query, "select `mailkey` from `character_` where `name`='%s' limit 1",
-					   CharacterName.c_str()),errbuf,&result)){
+						CharacterName.c_str()),errbuf,&result)){
 
 		safe_delete_array(query);
 
@@ -214,7 +212,7 @@ bool Database::VerifyMailKey(string CharacterName, int IPAddress, string MailKey
 	row = mysql_fetch_row(result);
 
 	// The key is the client's IP address (expressed as 8 hex digits) and an 8 hex digit random string generated
-	// by world. 
+	// by world.
 	//
 	char CombinedKey[17];
 
@@ -222,7 +220,7 @@ bool Database::VerifyMailKey(string CharacterName, int IPAddress, string MailKey
 		sprintf(CombinedKey, "%08X%s", IPAddress, MailKey.c_str());
 	else
 		sprintf(CombinedKey, "%s", MailKey.c_str());
-	
+
 	_log(UCS__TRACE, "DB key is [%s], Client key is [%s]", row[0], CombinedKey);
 
 	bool Valid = !strcmp(row[0], CombinedKey);
@@ -243,7 +241,7 @@ int Database::FindCharacter(const char *CharacterName) {
 	char *SafeCharName = RemoveApostrophes(CharacterName);
 
 	if (!RunQuery(query,MakeAnyLenString(&query, "select `id` from `character_` where `name`='%s' limit 1",
-					   SafeCharName),errbuf,&result)){
+						SafeCharName),errbuf,&result)){
 
 		_log(UCS__ERROR, "FindCharacter failed. %s %s", query, errbuf);
 
@@ -350,7 +348,7 @@ void Database::SetChannelPassword(string ChannelName, string Password) {
 	char *query = 0;
 
 	if(!RunQuery(query, MakeAnyLenString(&query, "UPDATE `chatchannels` set `password`='%s' where `name`='%s'", Password.c_str(),
-					     ChannelName.c_str()), errbuf)) {
+						ChannelName.c_str()), errbuf)) {
 
 		_log(UCS__ERROR, "Error updating password in database: %s, %s", query, errbuf);
 
@@ -367,7 +365,7 @@ void Database::SetChannelOwner(string ChannelName, string Owner) {
 	char *query = 0;
 
 	if(!RunQuery(query, MakeAnyLenString(&query, "UPDATE `chatchannels` set `owner`='%s' where `name`='%s'", Owner.c_str(),
-					     ChannelName.c_str()), errbuf)) {
+						ChannelName.c_str()), errbuf)) {
 
 		_log(UCS__ERROR, "Error updating Owner in database: %s, %s", query, errbuf);
 
@@ -393,7 +391,7 @@ void Database::SendHeaders(Client *c) {
 	MYSQL_ROW row;
 
 	if (!RunQuery(query,MakeAnyLenString(&query, "select `msgid`,`timestamp`,`from`,`subject`, `status` from `mail` "
-						     "where `charid`=%i", CharacterID),errbuf,&result)){
+							"where `charid`=%i", CharacterID),errbuf,&result)){
 
 		safe_delete_array(query);
 
@@ -407,7 +405,7 @@ void Database::SendHeaders(Client *c) {
 	my_ulonglong NumRows = mysql_num_rows(result);
 
 	int HeaderCountPacketLength = 0;
-	
+
 	sprintf(Buf, "%i", c->GetMailBoxNumber());
 	HeaderCountPacketLength += (strlen(Buf) + 1);
 
@@ -497,7 +495,7 @@ void Database::SendBody(Client *c, int MessageNumber) {
 	MYSQL_ROW row;
 
 	if (!RunQuery(query,MakeAnyLenString(&query, "select `msgid`, `body`, `to` from `mail` "
-						     "where `charid`=%i and `msgid`=%i", CharacterID, MessageNumber), errbuf, &result)){
+							"where `charid`=%i and `msgid`=%i", CharacterID, MessageNumber), errbuf, &result)){
 		safe_delete_array(query);
 
 		return ;
@@ -552,7 +550,7 @@ bool Database::SendMail(string Recipient, string From, string Subject, string Bo
 	//printf("Database::SendMail(%s, %s, %s)\n", Recipient.c_str(), From.c_str(), Subject.c_str());
 
 	string::size_type LastPeriod = Recipient.find_last_of(".");
-	
+
 	if(LastPeriod == string::npos)
 		CharacterName = Recipient;
 	else
@@ -560,7 +558,7 @@ bool Database::SendMail(string Recipient, string From, string Subject, string Bo
 
 	CharacterName[0] = toupper(CharacterName[0]);
 
-	for(unsigned int i = 1; i < CharacterName.length(); i++) 
+	for(unsigned int i = 1; i < CharacterName.length(); i++)
 		CharacterName[i] = tolower(CharacterName[i]);
 
 	CharacterID = FindCharacter(CharacterName.c_str());
@@ -579,14 +577,14 @@ bool Database::SendMail(string Recipient, string From, string Subject, string Bo
 	DoEscapeString(EscBody, Body.c_str(), Body.length());
 
 	const char *MailQuery="INSERT INTO `mail` (`charid`, `timestamp`, `from`, `subject`, `body`, `to`, `status`) "
-			      "VALUES ('%i', %i, '%s', '%s', '%s', '%s', %i)";
+				"VALUES ('%i', %i, '%s', '%s', '%s', '%s', %i)";
 
 	uint32 LastMsgID;
 
 	int Now = time(nullptr); // time returns a 64 bit int on Windows at least, which vsnprintf doesn't like.
 
-	if(!RunQuery(query, MakeAnyLenString(&query, MailQuery, CharacterID, Now, From.c_str(), EscSubject, EscBody, 
-					     RecipientsString.c_str(), 1), errbuf, 0, 0, &LastMsgID)) {
+	if(!RunQuery(query, MakeAnyLenString(&query, MailQuery, CharacterID, Now, From.c_str(), EscSubject, EscBody,
+						RecipientsString.c_str(), 1), errbuf, 0, 0, &LastMsgID)) {
 
 		_log(UCS__ERROR, "SendMail: Query %s failed with error %s", query, errbuf);
 
@@ -601,7 +599,7 @@ bool Database::SendMail(string Recipient, string From, string Subject, string Bo
 
 	safe_delete_array(EscSubject);
 	safe_delete_array(EscBody);
-       	safe_delete_array(query);
+	safe_delete_array(query);
 
 	Client *c = CL->IsCharacterOnline(CharacterName);
 
@@ -610,7 +608,7 @@ bool Database::SendMail(string Recipient, string From, string Subject, string Bo
 
 		c->SendNotification(c->GetMailBoxNumber(CharacterName), Subject, FQN, LastMsgID);
 	}
-	
+
 	MailMessagesSent++;
 
 	return true;
@@ -624,7 +622,7 @@ void Database::SetMessageStatus(int MessageNumber, int Status) {
 	char *query = 0;
 
 	if(Status == 0)
-		RunQuery(query, MakeAnyLenString(&query, "delete from  `mail` where `msgid`=%i", MessageNumber), errbuf);
+		RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `msgid`=%i", MessageNumber), errbuf);
 	else if (!RunQuery(query, MakeAnyLenString(&query, "update `mail` set `status`=%i where `msgid`=%i", Status, MessageNumber), errbuf)) {
 
 		_log(UCS__ERROR, "Error updating status %s, %s", query, errbuf);
@@ -660,9 +658,9 @@ void Database::ExpireMail() {
 
 	// Expire Trash
 	if(RuleI(Mail, ExpireTrash) >= 0) {
-		if(RunQuery(query, MakeAnyLenString(&query, "delete from  `mail` where `status`=4 and `timestamp` < %i", 
-			    time(nullptr) - RuleI(Mail, ExpireTrash)), errbuf, 0, &AffectedRows)) {
-			    _log(UCS__INIT, "Expired %i trash messages.", AffectedRows);
+		if(RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `status`=4 and `timestamp` < %i",
+				time(nullptr) - RuleI(Mail, ExpireTrash)), errbuf, 0, &AffectedRows)) {
+				_log(UCS__INIT, "Expired %i trash messages.", AffectedRows);
 		}
 		else {
 			_log(UCS__ERROR, "Error expiring trash messages, %s %s", query, errbuf);
@@ -671,9 +669,9 @@ void Database::ExpireMail() {
 	}
 	// Expire Read
 	if(RuleI(Mail, ExpireRead) >= 0) {
-		if(RunQuery(query, MakeAnyLenString(&query, "delete from  `mail` where `status`=3 and `timestamp` < %i", 
-			    time(nullptr) - RuleI(Mail, ExpireRead)), errbuf, 0, &AffectedRows)) {
-			    _log(UCS__INIT, "Expired %i read messages.", AffectedRows);
+		if(RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `status`=3 and `timestamp` < %i",
+				time(nullptr) - RuleI(Mail, ExpireRead)), errbuf, 0, &AffectedRows)) {
+				_log(UCS__INIT, "Expired %i read messages.", AffectedRows);
 		}
 		else {
 			_log(UCS__ERROR, "Error expiring read messages, %s %s", query, errbuf);
@@ -682,9 +680,9 @@ void Database::ExpireMail() {
 	}
 	// Expire Unread
 	if(RuleI(Mail, ExpireUnread) >= 0) {
-		if(RunQuery(query, MakeAnyLenString(&query, "delete from  `mail` where `status`=1 and `timestamp` < %i", 
-			    time(nullptr) - RuleI(Mail, ExpireUnread)), errbuf, 0, &AffectedRows)) {
-			    _log(UCS__INIT, "Expired %i unread messages.", AffectedRows);
+		if(RunQuery(query, MakeAnyLenString(&query, "delete from `mail` where `status`=1 and `timestamp` < %i",
+				time(nullptr) - RuleI(Mail, ExpireUnread)), errbuf, 0, &AffectedRows)) {
+				_log(UCS__INIT, "Expired %i unread messages.", AffectedRows);
 		}
 		else {
 			_log(UCS__ERROR, "Error expiring unread messages, %s %s", query, errbuf);
@@ -705,9 +703,9 @@ void Database::AddFriendOrIgnore(int CharID, int Type, string Name) {
 		_log(UCS__ERROR, "Error adding friend/ignore, query was %s : %s", query, errbuf);
 	else
 		_log(UCS__TRACE, "Wrote Friend/Ignore entry for charid %i, type %i, name %s to database.",
-		     CharID, Type, Name.c_str());
+			CharID, Type, Name.c_str());
 
-	
+
 	safe_delete_array(query);
 }
 
@@ -722,9 +720,9 @@ void Database::RemoveFriendOrIgnore(int CharID, int Type, string Name) {
 		_log(UCS__ERROR, "Error removing friend/ignore, query was %s", query);
 	else
 		_log(UCS__TRACE, "Removed Friend/Ignore entry for charid %i, type %i, name %s from database.",
-		     CharID, Type, Name.c_str());
+			CharID, Type, Name.c_str());
 
-	
+
 	safe_delete_array(query);
 }
 
@@ -768,3 +766,4 @@ void Database::GetFriendsAndIgnore(int CharID, vector<string> &Friends, vector<s
 
 	return;
 }
+

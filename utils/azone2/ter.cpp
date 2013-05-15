@@ -105,17 +105,17 @@ int TERLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 
   this->model_data.zone_model = new Zone_Model;
   zm = this->model_data.zone_model;
-  
+
   zm->vert_count = thdr->vert_count;
   zm->poly_count = thdr->tri_count;
-  
+
   zm->verts = new Vertex *[zm->vert_count];
   zm->polys = new Polygon *[zm->poly_count];
 
   this->model_data.plac_count = 0;
   this->model_data.model_count = 0;
-  
-  buffer = ter_orig + thdr->list_len + sizeof(ter_header); 
+
+  buffer = ter_orig + thdr->list_len + sizeof(ter_header);
   if(thdr->magic[3] == 'M') buffer = buffer + 4;
 #ifdef DEBUGTER
   printf("Starting offset is %8X\n", buffer-ter_orig);
@@ -158,7 +158,7 @@ int TERLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 
 
   }
-  
+
   j = 0;
   for(i = 0; i < (unsigned int)zm->poly_count; ++i) {
     ttri = (ter_triangle *) buffer;
@@ -167,7 +167,7 @@ int TERLoader::Open(char *base_path, char *zone_name, Archive *archive) {
       continue;
     }
     zm->polys[j] = new Polygon;
-/*    
+/*
     zm->polys[j]->v1 = ttri->v1;
     zm->polys[j]->v2 = ttri->v2;
     zm->polys[j]->v3 = ttri->v3;
@@ -201,15 +201,15 @@ int TERLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 #endif
       zm->polys[j]->tex = ttri->group;
     }
-    
+
     ++j;
     buffer += sizeof(ter_triangle);
   }
-  
+
   zm->poly_count = j;
-  
+
   zm->tex_count = 0;
-  
+
   delete[] mlist;
 
   delete [] ter_orig;

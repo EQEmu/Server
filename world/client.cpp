@@ -24,7 +24,7 @@ using namespace std;
 	#define vsnprintf	_vsnprintf
 #endif
 	#define strncasecmp	_strnicmp
-	#define strcasecmp  _stricmp
+	#define strcasecmp	_stricmp
 #else
 	#include <sys/socket.h>
 #ifdef FREEBSD //Timothy Whitman - January 7, 2003
@@ -72,10 +72,10 @@ extern volatile bool RunLoops;
 
 
 Client::Client(EQStreamInterface* ieqs)
-: autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
-  CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
-  connect(1000),
-  eqs(ieqs)
+:	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
+	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
+	connect(1000),
+	eqs(ieqs)
 {
 	// Live does not send datarate as of 3/11/2005
 	//eqs->SetDataRate(7);
@@ -120,7 +120,7 @@ void Client::SendLogServer()
 
 	if(RuleB(Chat, EnableVoiceMacros))
 		l->enablevoicemacros = 1;
-	
+
 	l->enable_pvp = (RuleI(World, PVPSettings));
 
 	if(RuleB(World, IsGMPetitionWindowEnabled))
@@ -188,7 +188,7 @@ void Client::SendCharInfo() {
 void Client::SendMaxCharCreate(int max_chars) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
-	
+
 	mc->max_chars = max_chars;
 
 	QueuePacket(outapp);
@@ -219,7 +219,7 @@ void Client::SendMembership() {
 		15. In-Game Popup Advertising
 		That is 15 possible fields, and there are 15 unknowns in the struct...Coincidence?
 	*/
-	
+
 	mc->membership = 2;				//Hardcode to gold for now. We don't use anything else.
 	mc->races = 0x1ffff;			// Available Races (4110 for silver)
 	mc->classes = 0x1ffff;			// Available Classes (4614 for silver) - Was 0x101ffff
@@ -236,7 +236,7 @@ void Client::SendMembership() {
 	mc->entries[9] = 0xffffffff;	// Unknown - Maybe Loyalty Points every 12 hours? 60 per week for Silver
 	mc->entries[10] = 1;			// 1 for Silver
 	mc->entries[11] = 0xffffffff;	// Shared Bank Slots
-	mc->entries[12] = 0xffffffff;	// Unknown - Maybe Max Active Tasks? 
+	mc->entries[12] = 0xffffffff;	// Unknown - Maybe Max Active Tasks?
 	mc->entries[13] = 1;			// 1 for Silver
 	mc->entries[14] = 1;			// 0 for Silver
 	mc->entries[15] = 1;			// 0 for Silver
@@ -263,7 +263,7 @@ void Client::SendMembershipSettings() {
 	{
 		for (int setting_index=0; setting_index < 3; setting_index++)
 		{
-			
+
 			mds->settings[entry_count].setting_index = setting_index;
 			mds->settings[entry_count].setting_id = setting_id;
 			mds->settings[entry_count].setting_value = gold_settings[setting_id];
@@ -327,7 +327,7 @@ void Client::SendMembershipSettings() {
 	mds->exit_url_length = 0;	// Live uses 42
 	//strcpy(eq->exit_url, "http://www.everquest.com/free-to-play/exit");
 	mds->exit_url_length2 = 0;	// Live uses 49
-	//strcpy(eq->exit_url2, "http://www.everquest.com/free-to-play/exit-silver");	
+	//strcpy(eq->exit_url2, "http://www.everquest.com/free-to-play/exit-silver");
 
 	/*
 	Account Access Level Settings
@@ -415,7 +415,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 #endif
 	{
 		if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {
-			clog(WORLD__CLIENT_ERR,"ID is 0.  Is this server connected to minilogin?");
+			clog(WORLD__CLIENT_ERR,"ID is 0. Is this server connected to minilogin?");
 			if(!minilogin)
 				clog(WORLD__CLIENT_ERR,"If so you forget the minilogin variable...");
 			else
@@ -487,7 +487,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 	uchar race = app->pBuffer[64];
 	uchar clas = app->pBuffer[68];
 
-	clog(WORLD__CLIENT,"Name approval request.  Name=%s, race=%s, class=%s",char_name,GetRaceName(race),GetEQClassName(clas));
+	clog(WORLD__CLIENT,"Name approval request. Name=%s, race=%s, class=%s",char_name,GetRaceName(race),GetEQClassName(clas));
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket;
@@ -513,9 +513,9 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-    if(!valid) {
-        memset(char_name, 0, sizeof(char_name));
-    }
+	if(!valid) {
+		memset(char_name, 0, sizeof(char_name));
+	}
 
 	return true;
 }
@@ -601,45 +601,45 @@ bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
 
 bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) {
 	// New OpCode in SoF
-    uint32 allocs = character_create_allocations.size();
-    uint32 combos = character_create_race_class_combos.size();
-    uint32 len = sizeof(RaceClassAllocation) * allocs;
-    len += sizeof(RaceClassCombos) * combos;
-    len += sizeof(uint8);
-    len += sizeof(uint32);
-    len += sizeof(uint32);
+	uint32 allocs = character_create_allocations.size();
+	uint32 combos = character_create_race_class_combos.size();
+	uint32 len = sizeof(RaceClassAllocation) * allocs;
+	len += sizeof(RaceClassCombos) * combos;
+	len += sizeof(uint8);
+	len += sizeof(uint32);
+	len += sizeof(uint32);
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_CharacterCreateRequest, len);
-    unsigned char *ptr = outapp->pBuffer;
-    *((uint8*)ptr) = 0;
-    ptr += sizeof(uint8);
+	unsigned char *ptr = outapp->pBuffer;
+	*((uint8*)ptr) = 0;
+	ptr += sizeof(uint8);
 
-    *((uint32*)ptr) = allocs;
-    ptr += sizeof(uint32);
+	*((uint32*)ptr) = allocs;
+	ptr += sizeof(uint32);
 
-    for(int i = 0; i < allocs; ++i) {
-        RaceClassAllocation *alc = (RaceClassAllocation*)ptr;
+	for(int i = 0; i < allocs; ++i) {
+		RaceClassAllocation *alc = (RaceClassAllocation*)ptr;
 
-        alc->Index = character_create_allocations[i].Index;
-        for(int j = 0; j < 7; ++j) {
-            alc->BaseStats[j] = character_create_allocations[i].BaseStats[j];
-            alc->DefaultPointAllocation[j] = character_create_allocations[i].DefaultPointAllocation[j];
-        }
-        ptr += sizeof(RaceClassAllocation);
-    }
+		alc->Index = character_create_allocations[i].Index;
+		for(int j = 0; j < 7; ++j) {
+			alc->BaseStats[j] = character_create_allocations[i].BaseStats[j];
+			alc->DefaultPointAllocation[j] = character_create_allocations[i].DefaultPointAllocation[j];
+		}
+		ptr += sizeof(RaceClassAllocation);
+	}
 
-    *((uint32*)ptr) = combos;
-    ptr += sizeof(uint32);
-    for(int i = 0; i < combos; ++i) {
-        RaceClassCombos *cmb = (RaceClassCombos*)ptr;
-        cmb->ExpansionRequired = character_create_race_class_combos[i].ExpansionRequired;
-        cmb->Race = character_create_race_class_combos[i].Race;
-        cmb->Class = character_create_race_class_combos[i].Class;
-        cmb->Deity = character_create_race_class_combos[i].Deity;
-        cmb->AllocationIndex = character_create_race_class_combos[i].AllocationIndex;
-        cmb->Zone = character_create_race_class_combos[i].Zone;
-        ptr += sizeof(RaceClassCombos);
-    }
+	*((uint32*)ptr) = combos;
+	ptr += sizeof(uint32);
+	for(int i = 0; i < combos; ++i) {
+		RaceClassCombos *cmb = (RaceClassCombos*)ptr;
+		cmb->ExpansionRequired = character_create_race_class_combos[i].ExpansionRequired;
+		cmb->Race = character_create_race_class_combos[i].Race;
+		cmb->Class = character_create_race_class_combos[i].Class;
+		cmb->Deity = character_create_race_class_combos[i].Deity;
+		cmb->AllocationIndex = character_create_race_class_combos[i].AllocationIndex;
+		cmb->Zone = character_create_race_class_combos[i].Zone;
+		ptr += sizeof(RaceClassCombos);
+	}
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -658,7 +658,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 		DumpPacket(app);
 		// the previous behavior was essentially returning true here
 		// but that seems a bit odd to me.
-		return true; 
+		return true;
 	}
 
 	CharCreate_Struct *cc = (CharCreate_Struct*)app->pBuffer;
@@ -670,9 +670,9 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
-    else
+	else
 		SendCharInfo();
-	
+
 	return true;
 }
 
@@ -692,8 +692,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 
 	if (RuleI(World, MaxClientsPerIP) >= 0) {
-	    client_list.GetCLEIP(this->GetIP());  //Check current CLE Entry IPs against incoming connection
-    }
+		client_list.GetCLEIP(this->GetIP()); //Check current CLE Entry IPs against incoming connection
+	}
 
 	EnterWorld_Struct *ew=(EnterWorld_Struct *)app->pBuffer;
 	strn0cpy(char_name, ew->name, 64);
@@ -947,7 +947,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 	switch(opcode)
 	{
 		case OP_World_Client_CRC1:
-		case OP_World_Client_CRC2: 
+		case OP_World_Client_CRC2:
 		{
 			// There is no obvious entry in the CC struct to indicate that the 'Start Tutorial button
 			// is selected when a character is created. I have observed that in this case, OP_EnterWorld is sent
@@ -968,7 +968,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleGenerateRandomNamePacket(app);
 		}
-		case OP_CharacterCreateRequest: 
+		case OP_CharacterCreateRequest:
 		{
 			// New OpCode in SoF
 			return HandleCharacterCreateRequestPacket(app);
@@ -981,11 +981,11 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		{
 			return HandleEnterWorldPacket(app);
 		}
-		case OP_DeleteCharacter: 
+		case OP_DeleteCharacter:
 		{
 			return HandleDeleteCharacterPacket(app);
 		}
-		case OP_WorldComplete: 
+		case OP_WorldComplete:
 		{
 			eqs->Close();
 			return true;
@@ -1002,12 +1002,12 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		case OP_LoginComplete:
 		case OP_ApproveWorld:
 		case OP_WorldClientReady:
-		{ 
+		{
 			// Essentially we are just 'eating' these packets, indicating
 			// they are handled.
 			return true;
 		}
-		default: 
+		default:
 		{
 			clog(WORLD__CLIENT_ERR,"Received unknown EQApplicationPacket");
 			_pkt(WORLD__CLIENT_ERR,app);
@@ -1020,12 +1020,12 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 bool Client::Process() {
 	bool ret = true;
 	//bool sendguilds = true;
-    sockaddr_in to;
+	sockaddr_in to;
 
 	memset((char *) &to, 0, sizeof(to));
-    to.sin_family = AF_INET;
-    to.sin_port = port;
-    to.sin_addr.s_addr = ip;
+	to.sin_family = AF_INET;
+	to.sin_port = port;
+	to.sin_addr.s_addr = ip;
 
 	if (autobootup_timeout.Check()) {
 		clog(WORLD__CLIENT_ERR, "Zone bootup timer expired, bootup failed or too slow.");
@@ -1135,7 +1135,7 @@ void Client::EnterWorld(bool TryBootup) {
 
 	if (seencharsel) {
 		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zoneID)) {
-			clog(WORLD__CLIENT_ERR,"Enter world failed.  Zone is locked.");
+			clog(WORLD__CLIENT_ERR,"Enter world failed. Zone is locked.");
 			ZoneUnavail();
 			return;
 		}
@@ -1169,39 +1169,39 @@ void Client::Clearance(int8 response)
 		zs = zoneserver_list.FindByZoneID(zoneID);
 	}
 
-    if(zs == 0 || response == -1 || response == 0)
-    {
-        if (zs == 0)
-        {
-            clog(WORLD__CLIENT_ERR,"Unable to find zoneserver in Client::Clearance!!");
-        } else {
-        	clog(WORLD__CLIENT_ERR, "Invalid response %d in Client::Clearance", response);
-        }
+	if(zs == 0 || response == -1 || response == 0)
+	{
+		if (zs == 0)
+		{
+			clog(WORLD__CLIENT_ERR,"Unable to find zoneserver in Client::Clearance!!");
+		} else {
+			clog(WORLD__CLIENT_ERR, "Invalid response %d in Client::Clearance", response);
+		}
 
-        ZoneUnavail();
-        return;
-    }
+		ZoneUnavail();
+		return;
+	}
 
 	EQApplicationPacket* outapp;
 
-    if (zs->GetCAddress() == nullptr) {
-        clog(WORLD__CLIENT_ERR, "Unable to do zs->GetCAddress() in Client::Clearance!!");
-        ZoneUnavail();
-        return;
-    }
+	if (zs->GetCAddress() == nullptr) {
+		clog(WORLD__CLIENT_ERR, "Unable to do zs->GetCAddress() in Client::Clearance!!");
+		ZoneUnavail();
+		return;
+	}
 
-    if (zoneID == 0) {
-        clog(WORLD__CLIENT_ERR, "zoneID is nullptr in Client::Clearance!!");
-        ZoneUnavail();
-        return;
-    }
+	if (zoneID == 0) {
+		clog(WORLD__CLIENT_ERR, "zoneID is nullptr in Client::Clearance!!");
+		ZoneUnavail();
+		return;
+	}
 
 	const char* zonename = database.GetZoneName(zoneID);
-    if (zonename == 0) {
-        clog(WORLD__CLIENT_ERR, "zonename is nullptr in Client::Clearance!!");
-        ZoneUnavail();
-        return;
-    }
+	if (zonename == 0) {
+		clog(WORLD__CLIENT_ERR, "zonename is nullptr in Client::Clearance!!");
+		ZoneUnavail();
+		return;
+	}
 
 	// @bp This is the chat server
 	/*
@@ -1218,7 +1218,7 @@ void Client::Clearance(int8 response)
 	const char *zs_addr=zs->GetCAddress();
 	if (!zs_addr[0]) {
 		if (cle->IsLocalClient()) {
-			struct in_addr  in;
+			struct in_addr in;
 			in.s_addr = zs->GetIP();
 			zs_addr=inet_ntoa(in);
 			if (!strcmp(zs_addr,"127.0.0.1"))
@@ -1376,19 +1376,19 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	clog(WORLD__CLIENT,"Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
 
 	// validate the char creation struct
-    if(ClientVersionBit & BIT_SoFAndLater) {
-	    if(!CheckCharCreateInfoSoF(cc))
-	    {
-	    	clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
-	    	return false;
-	    }
-    } else {
-        if(!CheckCharCreateInfoTitanium(cc))
-	    {
-	    	clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
-	    	return false;
-	    }
-    }
+	if(ClientVersionBit & BIT_SoFAndLater) {
+		if(!CheckCharCreateInfoSoF(cc))
+		{
+			clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
+			return false;
+		}
+	} else {
+		if(!CheckCharCreateInfoTitanium(cc))
+		{
+			clog(WORLD__CLIENT_ERR,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
+			return false;
+		}
+	}
 
 	// Convert incoming cc_s to the new PlayerProfile_Struct
 	memset(&pp, 0, sizeof(PlayerProfile_Struct));	// start building the profile
@@ -1424,7 +1424,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.eyecolor2		= cc->eyecolor2;
 	pp.hairstyle		= cc->hairstyle;
 	pp.haircolor		= cc->haircolor;
-	pp.beard		 	= cc->beard;
+	pp.beard			= cc->beard;
 	pp.beardcolor		= cc->beardcolor;
 	pp.drakkin_heritage		= cc->drakkin_heritage;
 	pp.drakkin_tattoo		= cc->drakkin_tattoo;
@@ -1471,7 +1471,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
 
 	//If it is an SoF Client and the SoF Start Zone rule is set, send new chars there
-	if((ClientVersionBit & BIT_SoFAndLater)  && (RuleI(World, SoFStartZoneID) > 0)) {
+	if((ClientVersionBit & BIT_SoFAndLater) && (RuleI(World, SoFStartZoneID) > 0)) {
 		clog(WORLD__CLIENT,"Found 'SoFStartZoneID' rule setting: %i", (RuleI(World, SoFStartZoneID)));
 		pp.zone_id = (RuleI(World, SoFStartZoneID));
 		if(pp.zone_id)
@@ -1491,8 +1491,8 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 			else
 				clog(WORLD__CLIENT_ERR,"Error getting zone id for '%s'", startzone);
 		}
-		else   // otherwise use normal starting zone logic
-		{	
+		else	// otherwise use normal starting zone logic
+		{
 			bool ValidStartZone = false;
 
 			if(ClientVersionBit & BIT_TitaniumAndEarlier)
@@ -1518,7 +1518,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		pp.binds[0].y = pp.y;
 		pp.binds[0].z = pp.z;
 		pp.binds[0].heading = pp.heading;
- 	}
+	}
 
 	// set starting city location to the initial bind point
 	pp.binds[4] = pp.binds[0];
@@ -1555,482 +1555,483 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 
 	_log(WORLD__CLIENT, "Validating char creation info...");
 
-    RaceClassCombos class_combo;
-    bool found = false;
-    int combos = character_create_race_class_combos.size();
-    for(int i = 0; i < combos; ++i) {
-        if(character_create_race_class_combos[i].Class == cc->class_ &&
-            character_create_race_class_combos[i].Race == cc->race &&
-            character_create_race_class_combos[i].Deity == cc->deity) { 
-                if(RuleB(World, EnableTutorialButton) && 
-                    (RuleI(World, TutorialZoneID) == cc->start_zone || 
-                    (character_create_race_class_combos[i].Zone == cc->start_zone))) {
-                    class_combo = character_create_race_class_combos[i];
-                    found = true;
-                    break;
-                } else if(character_create_race_class_combos[i].Zone == cc->start_zone) {
-                    class_combo = character_create_race_class_combos[i];
-                    found = true;
-                    break;
-                }
-        }
-    }
+	RaceClassCombos class_combo;
+	bool found = false;
+	int combos = character_create_race_class_combos.size();
+	for(int i = 0; i < combos; ++i) {
+		if(character_create_race_class_combos[i].Class == cc->class_ &&
+			character_create_race_class_combos[i].Race == cc->race &&
+			character_create_race_class_combos[i].Deity == cc->deity) {
+				if(RuleB(World, EnableTutorialButton) &&
+					(RuleI(World, TutorialZoneID) == cc->start_zone ||
+					(character_create_race_class_combos[i].Zone == cc->start_zone))) {
+					class_combo = character_create_race_class_combos[i];
+					found = true;
+					break;
+				} else if(character_create_race_class_combos[i].Zone == cc->start_zone) {
+					class_combo = character_create_race_class_combos[i];
+					found = true;
+					break;
+				}
+		}
+	}
 
-    if(!found) {
-        _log(WORLD__CLIENT_ERR, "Could not find class/race/deity/start_zone combination");
-        return false;
-    }
+	if(!found) {
+		_log(WORLD__CLIENT_ERR, "Could not find class/race/deity/start_zone combination");
+		return false;
+	}
 
-    uint32 max_stats = 0;
-    uint32 allocs = character_create_allocations.size();
-    RaceClassAllocation allocation;
-    found = false;
-    for(int i = 0; i < combos; ++i) {
-        if(character_create_allocations[i].Index == class_combo.AllocationIndex) {
-            allocation = character_create_allocations[i];
-            found = true;
-            break;
-        }
-    }
+	uint32 max_stats = 0;
+	uint32 allocs = character_create_allocations.size();
+	RaceClassAllocation allocation;
+	found = false;
+	for(int i = 0; i < combos; ++i) {
+		if(character_create_allocations[i].Index == class_combo.AllocationIndex) {
+			allocation = character_create_allocations[i];
+			found = true;
+			break;
+		}
+	}
 
-    if(!found) {
-        _log(WORLD__CLIENT_ERR, "Could not find starting stats for selected character combo, cannot verify stats");
-        return false;
-    }
+	if(!found) {
+		_log(WORLD__CLIENT_ERR, "Could not find starting stats for selected character combo, cannot verify stats");
+		return false;
+	}
 
-    max_stats = allocation.DefaultPointAllocation[0] +
-        allocation.DefaultPointAllocation[1] + 
-        allocation.DefaultPointAllocation[2] + 
-        allocation.DefaultPointAllocation[3] + 
-        allocation.DefaultPointAllocation[4] + 
-        allocation.DefaultPointAllocation[5] + 
-        allocation.DefaultPointAllocation[6];
+	max_stats = allocation.DefaultPointAllocation[0] +
+		allocation.DefaultPointAllocation[1] +
+		allocation.DefaultPointAllocation[2] +
+		allocation.DefaultPointAllocation[3] +
+		allocation.DefaultPointAllocation[4] +
+		allocation.DefaultPointAllocation[5] +
+		allocation.DefaultPointAllocation[6];
 
-    if(cc->STR > allocation.BaseStats[0] + max_stats || cc->STR < allocation.BaseStats[0]) {
-        _log(WORLD__CLIENT_ERR, "Strength out of range");
-        return false;
-    }
+	if(cc->STR > allocation.BaseStats[0] + max_stats || cc->STR < allocation.BaseStats[0]) {
+		_log(WORLD__CLIENT_ERR, "Strength out of range");
+		return false;
+	}
 
-    if(cc->DEX > allocation.BaseStats[1] + max_stats || cc->DEX < allocation.BaseStats[1]) {
-        _log(WORLD__CLIENT_ERR, "Dexterity out of range");
-        return false;
-    }
+	if(cc->DEX > allocation.BaseStats[1] + max_stats || cc->DEX < allocation.BaseStats[1]) {
+		_log(WORLD__CLIENT_ERR, "Dexterity out of range");
+		return false;
+	}
 
-    if(cc->AGI > allocation.BaseStats[2] + max_stats || cc->AGI < allocation.BaseStats[2]) {
-        _log(WORLD__CLIENT_ERR, "Agility out of range");
-        return false;
-    }
+	if(cc->AGI > allocation.BaseStats[2] + max_stats || cc->AGI < allocation.BaseStats[2]) {
+		_log(WORLD__CLIENT_ERR, "Agility out of range");
+		return false;
+	}
 
-    if(cc->STA > allocation.BaseStats[3] + max_stats || cc->STA < allocation.BaseStats[3]) {
-        _log(WORLD__CLIENT_ERR, "Stamina out of range");
-        return false;
-    }
+	if(cc->STA > allocation.BaseStats[3] + max_stats || cc->STA < allocation.BaseStats[3]) {
+		_log(WORLD__CLIENT_ERR, "Stamina out of range");
+		return false;
+	}
 
-    if(cc->INT > allocation.BaseStats[4] + max_stats || cc->INT < allocation.BaseStats[4]) {
-        _log(WORLD__CLIENT_ERR, "Intelligence out of range");
-        return false;
-    }
+	if(cc->INT > allocation.BaseStats[4] + max_stats || cc->INT < allocation.BaseStats[4]) {
+		_log(WORLD__CLIENT_ERR, "Intelligence out of range");
+		return false;
+	}
 
-    if(cc->WIS > allocation.BaseStats[5] + max_stats || cc->WIS < allocation.BaseStats[5]) {
-        _log(WORLD__CLIENT_ERR, "Wisdom out of range");
-        return false;
-    }
+	if(cc->WIS > allocation.BaseStats[5] + max_stats || cc->WIS < allocation.BaseStats[5]) {
+		_log(WORLD__CLIENT_ERR, "Wisdom out of range");
+		return false;
+	}
 
-    if(cc->CHA > allocation.BaseStats[6] + max_stats || cc->CHA < allocation.BaseStats[6]) {
-        _log(WORLD__CLIENT_ERR, "Charisma out of range");
-        return false;
-    }
+	if(cc->CHA > allocation.BaseStats[6] + max_stats || cc->CHA < allocation.BaseStats[6]) {
+		_log(WORLD__CLIENT_ERR, "Charisma out of range");
+		return false;
+	}
 
-    uint32 current_stats = 0;
-    current_stats += cc->STR - allocation.BaseStats[0];
-    current_stats += cc->DEX - allocation.BaseStats[1];
-    current_stats += cc->AGI - allocation.BaseStats[2];
-    current_stats += cc->STA - allocation.BaseStats[3];
-    current_stats += cc->INT - allocation.BaseStats[4];
-    current_stats += cc->WIS - allocation.BaseStats[5];
-    current_stats += cc->CHA - allocation.BaseStats[6];
-    if(current_stats > max_stats) {
-        _log(WORLD__CLIENT_ERR, "Current Stats > Maximum Stats");
-        return false;
-    }
+	uint32 current_stats = 0;
+	current_stats += cc->STR - allocation.BaseStats[0];
+	current_stats += cc->DEX - allocation.BaseStats[1];
+	current_stats += cc->AGI - allocation.BaseStats[2];
+	current_stats += cc->STA - allocation.BaseStats[3];
+	current_stats += cc->INT - allocation.BaseStats[4];
+	current_stats += cc->WIS - allocation.BaseStats[5];
+	current_stats += cc->CHA - allocation.BaseStats[6];
+	if(current_stats > max_stats) {
+		_log(WORLD__CLIENT_ERR, "Current Stats > Maximum Stats");
+		return false;
+	}
 
 	return true;
 }
 
 bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 {
-        uint32 bSTR, bSTA, bAGI, bDEX, bWIS, bINT, bCHA, bTOTAL, cTOTAL, stat_points;    //these are all uint32 in CharCreate_Struct, so we'll make them uint32 here to make the compiler shut up
-        int classtemp, racetemp;
-        int Charerrors = 0;
+	uint32 bSTR, bSTA, bAGI, bDEX, bWIS, bINT, bCHA, bTOTAL, cTOTAL, stat_points; //these are all uint32 in CharCreate_Struct, so we'll make them uint32 here to make the compiler shut up
+	int classtemp, racetemp;
+	int Charerrors = 0;
 
 
 // solar: if this is increased you'll have to add a column to the classrace
 // table below
-#define _TABLE_RACES    16
+#define _TABLE_RACES 16
 
-        static const int BaseRace[_TABLE_RACES][7] =
-        {            /* STR  STA  AGI  DEX  WIS  INT  CHR */
-        { /*Human*/      75,  75,  75,  75,  75,  75,  75},
-        { /*Barbarian*/ 103,  95,  82,  70,  70,  60,  55},
-        { /*Erudite*/    60,  70,  70,  70,  83, 107,  70},
-        { /*Wood Elf*/   65,  65,  95,  80,  80,  75,  75},
-        { /*High Elf*/   55,  65,  85,  70,  95,  92,  80},
-        { /*Dark Elf*/   60,  65,  90,  75,  83,  99,  60},
-        { /*Half Elf*/   70,  70,  90,  85,  60,  75,  75},
-        { /*Dwarf*/      90,  90,  70,  90,  83,  60,  45},
-        { /*Troll*/     108, 109,  83,  75,  60,  52,  40},
-        { /*Ogre*/      130, 122,  70,  70,  67,  60,  37},
-        { /*Halfling*/   70,  75,  95,  90,  80,  67,  50},
-        { /*Gnome*/      60,  70,  85,  85,  67,  98,  60},
-        { /*Iksar*/      70,  70,  90,  85,  80,  75,  55},
-        { /*Vah Shir*/   90,  75,  90,  70,  70,  65,  65},
-        { /*Froglok*/    70,  80, 100, 100,  75,  75,  50},
-        { /*Drakkin*/    70,  80,  85,  75,  80,  85,  75}
-        };
+	static const int BaseRace[_TABLE_RACES][7] =
+	{            /* STR  STA  AGI  DEX  WIS  INT  CHR */
+	{ /*Human*/      75,  75,  75,  75,  75,  75,  75},
+	{ /*Barbarian*/ 103,  95,  82,  70,  70,  60,  55},
+	{ /*Erudite*/    60,  70,  70,  70,  83, 107,  70},
+	{ /*Wood Elf*/   65,  65,  95,  80,  80,  75,  75},
+	{ /*High Elf*/   55,  65,  85,  70,  95,  92,  80},
+	{ /*Dark Elf*/   60,  65,  90,  75,  83,  99,  60},
+	{ /*Half Elf*/   70,  70,  90,  85,  60,  75,  75},
+	{ /*Dwarf*/      90,  90,  70,  90,  83,  60,  45},
+	{ /*Troll*/     108, 109,  83,  75,  60,  52,  40},
+	{ /*Ogre*/      130, 122,  70,  70,  67,  60,  37},
+	{ /*Halfling*/   70,  75,  95,  90,  80,  67,  50},
+	{ /*Gnome*/      60,  70,  85,  85,  67,  98,  60},
+	{ /*Iksar*/      70,  70,  90,  85,  80,  75,  55},
+	{ /*Vah Shir*/   90,  75,  90,  70,  70,  65,  65},
+	{ /*Froglok*/    70,  80, 100, 100,  75,  75,  50},
+	{ /*Drakkin*/    70,  80,  85,  75,  80,  85,  75}
+	};
 
-        static const int BaseClass[PLAYER_CLASS_COUNT][8] =
-        {              /* STR  STA  AGI  DEX  WIS  INT  CHR  ADD*/
-        { /*Warrior*/      10,  10,   5,   0,   0,   0,   0,  25},
-        { /*Cleric*/        5,   5,   0,   0,  10,   0,   0,  30},
-        { /*Paladin*/      10,   5,   0,   0,   5,   0,  10,  20},
-        { /*Ranger*/        5,  10,  10,   0,   5,   0,   0,  20},
-        { /*ShadowKnight*/ 10,   5,   0,   0,   0,   10,  5,  20},
-        { /*Druid*/         0,  10,   0,   0,  10,   0,   0,  30},
-        { /*Monk*/          5,   5,  10,  10,   0,   0,   0,  20},
-        { /*Bard*/          5,   0,   0,  10,   0,   0,  10,  25},
-        { /*Rouge*/         0,   0,  10,  10,   0,   0,   0,  30},
-        { /*Shaman*/        0,   5,   0,   0,  10,   0,   5,  30},
-        { /*Necromancer*/   0,   0,   0,  10,   0,  10,   0,  30},
-        { /*Wizard*/        0,  10,   0,   0,   0,  10,   0,  30},
-        { /*Magician*/      0,  10,   0,   0,   0,  10,   0,  30},
-        { /*Enchanter*/     0,   0,   0,   0,   0,  10,  10,  30},
-        { /*Beastlord*/     0,  10,   5,   0,  10,   0,   5,  20},
-        { /*Berserker*/    10,   5,   0,  10,   0,   0,   0,  25}
-        };
+	static const int BaseClass[PLAYER_CLASS_COUNT][8] =
+	{              /* STR  STA  AGI  DEX  WIS  INT  CHR  ADD*/
+	{ /*Warrior*/      10,  10,   5,   0,   0,   0,   0,  25},
+	{ /*Cleric*/        5,   5,   0,   0,  10,   0,   0,  30},
+	{ /*Paladin*/      10,   5,   0,   0,   5,   0,  10,  20},
+	{ /*Ranger*/        5,  10,  10,   0,   5,   0,   0,  20},
+	{ /*ShadowKnight*/ 10,   5,   0,   0,   0,   10,  5,  20},
+	{ /*Druid*/         0,  10,   0,   0,  10,   0,   0,  30},
+	{ /*Monk*/          5,   5,  10,  10,   0,   0,   0,  20},
+	{ /*Bard*/          5,   0,   0,  10,   0,   0,  10,  25},
+	{ /*Rouge*/         0,   0,  10,  10,   0,   0,   0,  30},
+	{ /*Shaman*/        0,   5,   0,   0,  10,   0,   5,  30},
+	{ /*Necromancer*/   0,   0,   0,  10,   0,  10,   0,  30},
+	{ /*Wizard*/        0,  10,   0,   0,   0,  10,   0,  30},
+	{ /*Magician*/      0,  10,   0,   0,   0,  10,   0,  30},
+	{ /*Enchanter*/     0,   0,   0,   0,   0,  10,  10,  30},
+	{ /*Beastlord*/     0,  10,   5,   0,  10,   0,   5,  20},
+	{ /*Berserker*/    10,   5,   0,  10,   0,   0,   0,  25}
+	};
 
-        static const bool ClassRaceLookupTable[PLAYER_CLASS_COUNT][_TABLE_RACES]=
-        {                   /*Human  Barbarian Erudite Woodelf Highelf Darkelf Halfelf Dwarf  Troll  Ogre   Halfling Gnome  Iksar  Vahshir Froglok Drakkin*/
-        { /*Warrior*/         true,  true,     false,  true,   false,  true,   true,   true,  true,  true,  true,    true,  true,  true,   true,   true},
-        { /*Cleric*/          true,  false,    true,   false,  true,   true,   true,   true,  false, false, true,    true,  false, false,  true,   true},
-        { /*Paladin*/         true,  false,    true,   false,  true,   false,  true,   true,  false, false, true,    true,  false, false,  true,   true},
-        { /*Ranger*/          true,  false,    false,  true,   false,  false,  true,   false, false, false, true,    false, false, false,  false,  true},
-        { /*ShadowKnight*/    true,  false,    true,   false,  false,  true,   false,  false, true,  true,  false,   true,  true,  false,  true,   true},
-        { /*Druid*/           true,  false,    false,  true,   false,  false,  true,   false, false, false, true,    false, false, false,  false,  true},
-        { /*Monk*/            true,  false,    false,  false,  false,  false,  false,  false, false, false, false,   false, true,  false,  false,  true},
-        { /*Bard*/            true,  false,    false,  true,   false,  false,  true,   false, false, false, false,   false, false, true,   false,  true},
-        { /*Rogue*/           true,  true,     false,  true,   false,  true,   true,   true,  false, false, true,    true,  false, true,   true,   true},
-        { /*Shaman*/          false, true,     false,  false,  false,  false,  false,  false, true,  true,  false,   false, true,  true,   true,   false},
-        { /*Necromancer*/     true,  false,    true,   false,  false,  true,   false,  false, false, false, false,   true,  true,  false,  true,   true},
-        { /*Wizard*/          true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  true,   true},
-        { /*Magician*/        true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  false,  true},
-        { /*Enchanter*/       true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  false,  true},
-        { /*Beastlord*/       false, true,     false,  false,  false,  false,  false,  false, true,  true,  false,   false, true,  true,   false,  false},
-        { /*Berserker*/       false, true,     false,  false,  false,  false,  false,  true,  true,  true,  false,   false, false, true,   false,  false}
-        };//Initial table by kathgar, editted by Wiz for accuracy, solar too
+	static const bool ClassRaceLookupTable[PLAYER_CLASS_COUNT][_TABLE_RACES]=
+	{                   /*Human  Barbarian Erudite Woodelf Highelf Darkelf Halfelf Dwarf  Troll  Ogre   Halfling Gnome  Iksar  Vahshir Froglok Drakkin*/
+	{ /*Warrior*/         true,  true,     false,  true,   false,  true,   true,   true,  true,  true,  true,    true,  true,  true,   true,   true},
+	{ /*Cleric*/          true,  false,    true,   false,  true,   true,   true,   true,  false, false, true,    true,  false, false,  true,   true},
+	{ /*Paladin*/         true,  false,    true,   false,  true,   false,  true,   true,  false, false, true,    true,  false, false,  true,   true},
+	{ /*Ranger*/          true,  false,    false,  true,   false,  false,  true,   false, false, false, true,    false, false, false,  false,  true},
+	{ /*ShadowKnight*/    true,  false,    true,   false,  false,  true,   false,  false, true,  true,  false,   true,  true,  false,  true,   true},
+	{ /*Druid*/           true,  false,    false,  true,   false,  false,  true,   false, false, false, true,    false, false, false,  false,  true},
+	{ /*Monk*/            true,  false,    false,  false,  false,  false,  false,  false, false, false, false,   false, true,  false,  false,  true},
+	{ /*Bard*/            true,  false,    false,  true,   false,  false,  true,   false, false, false, false,   false, false, true,   false,  true},
+	{ /*Rogue*/           true,  true,     false,  true,   false,  true,   true,   true,  false, false, true,    true,  false, true,   true,   true},
+	{ /*Shaman*/          false, true,     false,  false,  false,  false,  false,  false, true,  true,  false,   false, true,  true,   true,   false},
+	{ /*Necromancer*/     true,  false,    true,   false,  false,  true,   false,  false, false, false, false,   true,  true,  false,  true,   true},
+	{ /*Wizard*/          true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  true,   true},
+	{ /*Magician*/        true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  false,  true},
+	{ /*Enchanter*/       true,  false,    true,   false,  true,   true,   false,  false, false, false, false,   true,  false, false,  false,  true},
+	{ /*Beastlord*/       false, true,     false,  false,  false,  false,  false,  false, true,  true,  false,   false, true,  true,   false,  false},
+	{ /*Berserker*/       false, true,     false,  false,  false,  false,  false,  true,  true,  true,  false,   false, false, true,   false,  false}
+	};//Initial table by kathgar, editted by Wiz for accuracy, solar too
 
-        if(!cc) return false;
+	if(!cc) return false;
 
-        _log(WORLD__CLIENT,"Validating char creation info...");
+	_log(WORLD__CLIENT,"Validating char creation info...");
 
-        classtemp = cc->class_ - 1;
-        racetemp = cc->race - 1;
-        // these have non sequential race numbers so they need to be mapped
-        if (cc->race == FROGLOK) racetemp = 14;
-        if (cc->race == VAHSHIR) racetemp = 13;
-        if (cc->race == IKSAR) racetemp = 12;
-        if (cc->race == DRAKKIN) racetemp = 15;
+	classtemp = cc->class_ - 1;
+	racetemp = cc->race - 1;
+	// these have non sequential race numbers so they need to be mapped
+	if (cc->race == FROGLOK) racetemp = 14;
+	if (cc->race == VAHSHIR) racetemp = 13;
+	if (cc->race == IKSAR) racetemp = 12;
+	if (cc->race == DRAKKIN) racetemp = 15;
 
-        // if out of range looking it up in the table would crash stuff
-        // so we return from these
-        if(classtemp >= PLAYER_CLASS_COUNT)
-        {
-                _log(WORLD__CLIENT_ERR,"  class is out of range");
-                return false;
-        }
-        if(racetemp >= _TABLE_RACES)
-        {
-                _log(WORLD__CLIENT_ERR,"  race is out of range");
-                return false;
-        }
+	// if out of range looking it up in the table would crash stuff
+	// so we return from these
+	if(classtemp >= PLAYER_CLASS_COUNT)
+	{
+		_log(WORLD__CLIENT_ERR,"  class is out of range");
+		return false;
+	}
+	if(racetemp >= _TABLE_RACES)
+	{
+		_log(WORLD__CLIENT_ERR,"  race is out of range");
+		return false;
+	}
 
-        if(!ClassRaceLookupTable[classtemp][racetemp]) //Lookup table better than a bunch of ifs?
-        {
-                _log(WORLD__CLIENT_ERR,"  invalid race/class combination");
-                // we return from this one, since if it's an invalid combination our table
-                // doesn't have meaningful values for the stats
-                return false;
-        }
+	if(!ClassRaceLookupTable[classtemp][racetemp]) //Lookup table better than a bunch of ifs?
+	{
+		_log(WORLD__CLIENT_ERR,"  invalid race/class combination");
+		// we return from this one, since if it's an invalid combination our table
+		// doesn't have meaningful values for the stats
+		return false;
+	}
 
-        // solar: add up the base values for this class/race
-        // this is what they start with, and they have stat_points more
-        // that can distributed
-        bSTR = BaseClass[classtemp][0] + BaseRace[racetemp][0];
-        bSTA = BaseClass[classtemp][1] + BaseRace[racetemp][1];
-        bAGI = BaseClass[classtemp][2] + BaseRace[racetemp][2];
-        bDEX = BaseClass[classtemp][3] + BaseRace[racetemp][3];
-        bWIS = BaseClass[classtemp][4] + BaseRace[racetemp][4];
-        bINT = BaseClass[classtemp][5] + BaseRace[racetemp][5];
-        bCHA = BaseClass[classtemp][6] + BaseRace[racetemp][6];
-        stat_points = BaseClass[classtemp][7];
-        bTOTAL = bSTR + bSTA + bAGI + bDEX + bWIS + bINT + bCHA;
-        cTOTAL = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
+	// solar: add up the base values for this class/race
+	// this is what they start with, and they have stat_points more
+	// that can distributed
+	bSTR = BaseClass[classtemp][0] + BaseRace[racetemp][0];
+	bSTA = BaseClass[classtemp][1] + BaseRace[racetemp][1];
+	bAGI = BaseClass[classtemp][2] + BaseRace[racetemp][2];
+	bDEX = BaseClass[classtemp][3] + BaseRace[racetemp][3];
+	bWIS = BaseClass[classtemp][4] + BaseRace[racetemp][4];
+	bINT = BaseClass[classtemp][5] + BaseRace[racetemp][5];
+	bCHA = BaseClass[classtemp][6] + BaseRace[racetemp][6];
+	stat_points = BaseClass[classtemp][7];
+	bTOTAL = bSTR + bSTA + bAGI + bDEX + bWIS + bINT + bCHA;
+	cTOTAL = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
 
-        // solar: the first check makes sure the total is exactly what was expected.
-        // this will catch all the stat cheating, but there's still the issue
-        // of reducing CHA or INT or something, to use for STR, so we check
-        // that none are lower than the base or higher than base + stat_points
-        // NOTE: these could just be else if, but i want to see all the stats
-        // that are messed up not just the first hit
+	// solar: the first check makes sure the total is exactly what was expected.
+	// this will catch all the stat cheating, but there's still the issue
+	// of reducing CHA or INT or something, to use for STR, so we check
+	// that none are lower than the base or higher than base + stat_points
+	// NOTE: these could just be else if, but i want to see all the stats
+	// that are messed up not just the first hit
 
-        if(bTOTAL + stat_points != cTOTAL)
-        {
-                _log(WORLD__CLIENT_ERR,"  stat points total doesn't match expected value: expecting %d got %d", bTOTAL + stat_points, cTOTAL);
-                Charerrors++;
-        }
+	if(bTOTAL + stat_points != cTOTAL)
+	{
+		_log(WORLD__CLIENT_ERR,"  stat points total doesn't match expected value: expecting %d got %d", bTOTAL + stat_points, cTOTAL);
+		Charerrors++;
+	}
 
-        if(cc->STR > bSTR + stat_points || cc->STR < bSTR)
-        {
-                _log(WORLD__CLIENT_ERR,"  stat STR is out of range");
-                Charerrors++;
-        }
-        if(cc->STA > bSTA + stat_points || cc->STA < bSTA)
-        {
-                _log(WORLD__CLIENT_ERR,"  stat STA is out of range");
-                Charerrors++;
-        }
-        if(cc->AGI > bAGI + stat_points || cc->AGI < bAGI)
-        {
-                _log(WORLD__CLIENT_ERR,"  stat AGI is out of range");
-                Charerrors++;
-        }
-        if(cc->DEX > bDEX + stat_points || cc->DEX < bDEX)
-        {
-                _log(WORLD__CLIENT_ERR,"  stat DEX is out of range");
-                Charerrors++;
-        }
-        if(cc->WIS > bWIS + stat_points || cc->WIS < bWIS)
-        {
-                _log(WORLD__CLIENT_ERR,"  stat WIS is out of range");
-                Charerrors++;
-        }
-        if(cc->INT > bINT + stat_points || cc->INT < bINT)
-        {
-                _log(WORLD__CLIENT_ERR,"  stat INT is out of range");
-                Charerrors++;
-        }
-        if(cc->CHA > bCHA + stat_points || cc->CHA < bCHA)
-        {
-                _log(WORLD__CLIENT_ERR,"  stat CHA is out of range");
-                Charerrors++;
-        }
+	if(cc->STR > bSTR + stat_points || cc->STR < bSTR)
+	{
+		_log(WORLD__CLIENT_ERR,"  stat STR is out of range");
+		Charerrors++;
+	}
+	if(cc->STA > bSTA + stat_points || cc->STA < bSTA)
+	{
+		_log(WORLD__CLIENT_ERR,"  stat STA is out of range");
+		Charerrors++;
+	}
+	if(cc->AGI > bAGI + stat_points || cc->AGI < bAGI)
+	{
+		_log(WORLD__CLIENT_ERR,"  stat AGI is out of range");
+		Charerrors++;
+	}
+	if(cc->DEX > bDEX + stat_points || cc->DEX < bDEX)
+	{
+		_log(WORLD__CLIENT_ERR,"  stat DEX is out of range");
+		Charerrors++;
+	}
+	if(cc->WIS > bWIS + stat_points || cc->WIS < bWIS)
+	{
+		_log(WORLD__CLIENT_ERR,"  stat WIS is out of range");
+		Charerrors++;
+	}
+	if(cc->INT > bINT + stat_points || cc->INT < bINT)
+	{
+		_log(WORLD__CLIENT_ERR,"  stat INT is out of range");
+		Charerrors++;
+	}
+	if(cc->CHA > bCHA + stat_points || cc->CHA < bCHA)
+	{
+		_log(WORLD__CLIENT_ERR,"  stat CHA is out of range");
+		Charerrors++;
+	}
 
-        /*TODO: Check for deity/class/race.. it'd be nice, but probably of any real use to hack(faction, deity based items are all I can think of)
-        I am NOT writing those tables - kathgar*/
+	/*TODO: Check for deity/class/race.. it'd be nice, but probably of any real use to hack(faction, deity based items are all I can think of)
+	I am NOT writing those tables - kathgar*/
 
-        _log(WORLD__CLIENT,"Found %d errors in character creation request", Charerrors);
+	_log(WORLD__CLIENT,"Found %d errors in character creation request", Charerrors);
 
-        return Charerrors == 0;
+	return Charerrors == 0;
 }
 
 void Client::SetClassStartingSkills( PlayerProfile_Struct *pp )
 {
-    for(uint32 i = 0; i <= HIGHEST_SKILL; ++i) {
-        if(pp->skills[i] == 0) {
-            if(i >= SPECIALIZE_ABJURE && i <= SPECIALIZE_EVOCATION) {
-                continue;
-            }
+	for(uint32 i = 0; i <= HIGHEST_SKILL; ++i) {
+		if(pp->skills[i] == 0) {
+			if(i >= SPECIALIZE_ABJURE && i <= SPECIALIZE_EVOCATION) {
+				continue;
+			}
 
-            if(i == MAKE_POISON ||
-                i == TINKERING ||
-                i == RESEARCH ||
-                i == ALCHEMY ||
-                i == BAKING ||
-                i == TAILORING || 
-                i == BLACKSMITHING ||
-                i == FLETCHING ||
-                i == BREWING || 
-                i == POTTERY || 
-                i == JEWELRY_MAKING ||
-                i == BEGGING) {
-                continue;
-            }
+			if(i == MAKE_POISON ||
+				i == TINKERING ||
+				i == RESEARCH ||
+				i == ALCHEMY ||
+				i == BAKING ||
+				i == TAILORING ||
+				i == BLACKSMITHING ||
+				i == FLETCHING ||
+				i == BREWING ||
+				i == POTTERY ||
+				i == JEWELRY_MAKING ||
+				i == BEGGING) {
+				continue;
+			}
 
-            pp->skills[i] = database.GetSkillCap(pp->class_, (SkillType)i, 1);
-        }
-    }
+			pp->skills[i] = database.GetSkillCap(pp->class_, (SkillType)i, 1);
+		}
+	}
 }
 
 void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 {
-   switch( pp->race )
-   {
-   case BARBARIAN:
-   case DWARF:
-   case ERUDITE:
-   case HALF_ELF:
-   case HIGH_ELF:
-   case HUMAN:
-   case OGRE:
-   case TROLL:
-   case DRAKKIN:	//Drakkin are supposed to get a starting AA Skill
-      {
-         // No Race Specific Skills
-         break;
-      }
-   case DARK_ELF:
-      {
-         pp->skills[HIDE] = 50;
-         break;
-      }
-   case FROGLOK:
-      {
-         pp->skills[SWIMMING] = 125;
-         break;
-      }
-   case GNOME:
-      {
-         pp->skills[TINKERING] = 50;
-         break;
-      }
-   case HALFLING:
-      {
-         pp->skills[HIDE] = 50;
-         pp->skills[SNEAK] = 50;
-         break;
-      }
-   case IKSAR:
-      {
-         pp->skills[FORAGE] = 50;
-         pp->skills[SWIMMING] = 100;
-         break;
-      }
-   case WOOD_ELF:
-      {
-         pp->skills[FORAGE] = 50;
-         pp->skills[HIDE] = 50;
-         break;
-      }
-   case VAHSHIR:
-      {
-         pp->skills[SAFE_FALL] = 50;
-         pp->skills[SNEAK] = 50;
-         break;
-      }
-   }
+	switch( pp->race )
+	{
+	case BARBARIAN:
+	case DWARF:
+	case ERUDITE:
+	case HALF_ELF:
+	case HIGH_ELF:
+	case HUMAN:
+	case OGRE:
+	case TROLL:
+	case DRAKKIN:	//Drakkin are supposed to get a starting AA Skill
+		{
+			// No Race Specific Skills
+			break;
+		}
+	case DARK_ELF:
+		{
+			pp->skills[HIDE] = 50;
+			break;
+		}
+	case FROGLOK:
+		{
+			pp->skills[SWIMMING] = 125;
+			break;
+		}
+	case GNOME:
+		{
+			pp->skills[TINKERING] = 50;
+			break;
+		}
+	case HALFLING:
+		{
+			pp->skills[HIDE] = 50;
+			pp->skills[SNEAK] = 50;
+			break;
+		}
+	case IKSAR:
+		{
+			pp->skills[FORAGE] = 50;
+			pp->skills[SWIMMING] = 100;
+			break;
+		}
+	case WOOD_ELF:
+		{
+			pp->skills[FORAGE] = 50;
+			pp->skills[HIDE] = 50;
+			break;
+		}
+	case VAHSHIR:
+		{
+			pp->skills[SAFE_FALL] = 50;
+			pp->skills[SNEAK] = 50;
+			break;
+		}
+	}
 }
 
 void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 {
-   switch( pp->race )
-   {
-   case BARBARIAN:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_BARBARIAN] = 100;
-         break;
-      }
-   case DARK_ELF:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_DARK_ELVISH] = 100;
-         pp->languages[LANG_DARK_SPEECH] = 100;
-         pp->languages[LANG_ELDER_ELVISH] = 100;
-         pp->languages[LANG_ELVISH] = 25;
-         break;
-      }
-   case DWARF:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_DWARVISH] = 100;
-         pp->languages[LANG_GNOMISH] = 25;
-         break;
-      }
-   case ERUDITE:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_ERUDIAN] = 100;
-         break;
-      }
-   case FROGLOK:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_FROGLOK] = 100;
-         pp->languages[LANG_TROLL] = 25;
-         break;
-      }
-   case GNOME:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_DWARVISH] = 25;
-         pp->languages[LANG_GNOMISH] = 100;
-         break;
-      }
-   case HALF_ELF:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_ELVISH] = 100;
-         break;
-      }
-   case HALFLING:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_HALFLING] = 100;
-         break;
-      }
-   case HIGH_ELF:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_DARK_ELVISH] = 25;
-         pp->languages[LANG_ELDER_ELVISH] = 25;
-         pp->languages[LANG_ELVISH] = 100;
-         break;
-      }
-   case HUMAN:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         break;
-      }
-   case IKSAR:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 95;
-         pp->languages[LANG_DARK_SPEECH] = 100;
-         pp->languages[LANG_LIZARDMAN] = 100;
-         break;
-      }
-   case OGRE:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 95;
-         pp->languages[LANG_DARK_SPEECH] = 100;
-         pp->languages[LANG_OGRE] = 100;
-         break;
-      }
-   case TROLL:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 95;
-         pp->languages[LANG_DARK_SPEECH] = 100;
-         pp->languages[LANG_TROLL] = 100;
-         break;
-      }
-   case WOOD_ELF:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_ELVISH] = 100;
-         break;
-      }
-   case VAHSHIR:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_COMBINE_TONGUE] = 100;
-         pp->languages[LANG_ERUDIAN] = 25;
-         pp->languages[LANG_VAH_SHIR] = 100;
-         break;
-      }
-   case DRAKKIN:
-      {
-         pp->languages[LANG_COMMON_TONGUE] = 100;
-         pp->languages[LANG_ELDER_DRAGON] = 100;
-         pp->languages[LANG_DRAGON] = 100;
-         break;
-      }
-   }
+	switch( pp->race )
+	{
+	case BARBARIAN:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_BARBARIAN] = 100;
+			break;
+		}
+	case DARK_ELF:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_DARK_ELVISH] = 100;
+			pp->languages[LANG_DARK_SPEECH] = 100;
+			pp->languages[LANG_ELDER_ELVISH] = 100;
+			pp->languages[LANG_ELVISH] = 25;
+			break;
+		}
+	case DWARF:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_DWARVISH] = 100;
+			pp->languages[LANG_GNOMISH] = 25;
+			break;
+		}
+	case ERUDITE:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_ERUDIAN] = 100;
+			break;
+		}
+	case FROGLOK:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_FROGLOK] = 100;
+			pp->languages[LANG_TROLL] = 25;
+			break;
+		}
+	case GNOME:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_DWARVISH] = 25;
+			pp->languages[LANG_GNOMISH] = 100;
+			break;
+		}
+	case HALF_ELF:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_ELVISH] = 100;
+			break;
+		}
+	case HALFLING:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_HALFLING] = 100;
+			break;
+		}
+	case HIGH_ELF:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_DARK_ELVISH] = 25;
+			pp->languages[LANG_ELDER_ELVISH] = 25;
+			pp->languages[LANG_ELVISH] = 100;
+			break;
+		}
+	case HUMAN:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			break;
+		}
+	case IKSAR:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 95;
+			pp->languages[LANG_DARK_SPEECH] = 100;
+			pp->languages[LANG_LIZARDMAN] = 100;
+			break;
+		}
+	case OGRE:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 95;
+			pp->languages[LANG_DARK_SPEECH] = 100;
+			pp->languages[LANG_OGRE] = 100;
+			break;
+		}
+	case TROLL:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 95;
+			pp->languages[LANG_DARK_SPEECH] = 100;
+			pp->languages[LANG_TROLL] = 100;
+			break;
+		}
+	case WOOD_ELF:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_ELVISH] = 100;
+			break;
+		}
+	case VAHSHIR:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_COMBINE_TONGUE] = 100;
+			pp->languages[LANG_ERUDIAN] = 25;
+			pp->languages[LANG_VAH_SHIR] = 100;
+			break;
+		}
+	case DRAKKIN:
+		{
+			pp->languages[LANG_COMMON_TONGUE] = 100;
+			pp->languages[LANG_ELDER_DRAGON] = 100;
+			pp->languages[LANG_DRAGON] = 100;
+			break;
+		}
+	}
 }
+

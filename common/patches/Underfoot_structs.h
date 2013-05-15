@@ -331,7 +331,7 @@ struct Spawn_Struct
 /*0000*/ //char suffix[0]; // only read if(hasTitleOrSuffix & 8)
 	 char unknown20[8];
 	 uint8 IsMercenary;	// If NPC == 1 and this == 1, then the NPC name is Orange.
-/*0000*/ char unknown21[28]; 
+/*0000*/ char unknown21[28];
 };
 
 
@@ -561,7 +561,7 @@ struct SpellBuffFade_Struct_Underfoot {
 /*012*/	uint32 spellid;
 /*016*/	uint32 duration;
 /*020*/	uint32 unknown016;
-/*024*/ uint32 playerId;	// Global player ID?		
+/*024*/ uint32 playerId;	// Global player ID?
 /*028*/	uint32 unknown020;
 /*032*/ uint8 unknown0028[48];
 /*080*/	uint32 slotid;
@@ -645,7 +645,7 @@ struct CharCreate_Struct
 {
 /*0000*/	uint32	class_;
 /*0004*/	uint32	haircolor;
-/*0008*/	uint32	beard;	
+/*0008*/	uint32	beard;
 /*0012*/	uint32	beardcolor;
 /*0016*/	uint32	gender;
 /*0020*/	uint32	race;
@@ -871,7 +871,7 @@ struct PlayerProfile_Struct
 /*04176*/ uint32  INT;					// Intelligence - 3c 00 00 00 - 60
 /*04180*/ uint32  AGI;					// Agility - 5f 00 00 00 - 95
 /*04184*/ uint32  WIS;					// Wisdom - 46 00 00 00 - 70
-/*04188*/ uint8   unknown04188[28];		// 
+/*04188*/ uint8   unknown04188[28];		//
 /*04216*/ uint8   face;					// Player face - Actually uint32?
 /*04217*/ uint8   unknown04217[147];		// was [175]
 /*04364*/ uint32   spell_book[MAX_PP_SPELLBOOK];	// List of the Spells in spellbook 720 = 90 pages [2880] was [1920]
@@ -906,7 +906,7 @@ struct PlayerProfile_Struct
 /*18008*/ uint8 unknown18008[8];
 /*18016*/ uint32 available_slots;
 /*18020*/ uint8 unknown18020[80];		//
-//END SUB-STRUCT used for shrouding. 
+//END SUB-STRUCT used for shrouding.
 /*18100*/ char    name[64];				// Name of player
 /*18164*/ char    last_name[32];		// Last name of player
 /*18196*/ uint8   unknown18196[8];  //#### Not In Titanium #### new to SoF[12]
@@ -1000,7 +1000,7 @@ struct PlayerProfile_Struct
 /*25584*/ uint32 level3;		// SoF looks at the level here to determine how many leadership AA you can bank.
 /*25588*/ uint32 showhelm;            // 0=no, 1=yes
 /*25592*/ uint32 RestTimer;
-/*25596*/ uint8   unknown25596[1036]; // ***Placeholder (2/13/2007) was[1028]or[940]or[1380] - END of Struct 
+/*25596*/ uint8   unknown25596[1036]; // ***Placeholder (2/13/2007) was[1028]or[940]or[1380] - END of Struct
 /*26632*/
 };
 
@@ -1247,7 +1247,7 @@ struct CombatDamage_Struct
 /* 19 */	uint8	unknown19[9];	// was [9]
 /* 28 */
 };
-    
+
 
 /*
 ** Consider Struct
@@ -1260,7 +1260,7 @@ struct Consider_Struct{
 /*012*/ uint32	level;					// Level
 /*016*/ uint8	pvpcon;					// Pvp con flag 0/1
 /*017*/ uint8	unknown017[3];			//
-/*020*/ 
+/*020*/
 };
 
 /*
@@ -1383,14 +1383,14 @@ struct PlayerPositionUpdateClient_Struct
 /*0012*/ float		y_pos;				// y coord (1st loc value)
 /*0016*/ signed		delta_heading:10;	// change in heading
          unsigned	padding0036:10;		// animation
-         unsigned	padding0016:12;		// ***Placeholder 
+         unsigned	padding0016:12;		// ***Placeholder
 /*0020*/ float		delta_x;			// Change in x
 /*0024*/ float		delta_y;			// Change in y
 /*0028*/ float		z_pos;				// z coord (3rd loc value)
 /*0032*/ float		delta_z;			// Change in z
-/*0036*/ unsigned	animation:10;		// ***Placeholder 
+/*0036*/ unsigned	animation:10;		// ***Placeholder
          unsigned	heading:12;			// Directional heading
-         unsigned	padding0037:10;		// ***Placeholder 
+         unsigned	padding0037:10;		// ***Placeholder
 /*0040*/
 };
 
@@ -1937,7 +1937,7 @@ struct AdventureLeaderboard_Struct
 /*008*/ uint32 success;
 /*012*/ uint32 failure;
 /*016*/ uint32 our_rank;
-/*020*/	
+/*020*/
 };
 
 /*struct Item_Shop_Struct {
@@ -1962,15 +1962,15 @@ struct Illusion_Struct {  //size: 256
 /*079*/	uint8	unknown079;		//
 /*080*/	uint32	face;			//
 /*084*/	uint8	hairstyle;		// Some Races don't change Hair Style Properly in SoF
-/*085*/	uint8	haircolor;		// 
-/*086*/	uint8	beard;			// 
-/*087*/	uint8	beardcolor;		// 
-/*088*/ float	size;			// 
+/*085*/	uint8	haircolor;		//
+/*086*/	uint8	beard;			//
+/*087*/	uint8	beardcolor;		//
+/*088*/ float	size;			//
 /*092*/	uint8	unknown092[148];
 /*240*/ uint32	unknown240;		// Removes armor?
-/*244*/ uint32	drakkin_heritage;	// 
-/*248*/ uint32	drakkin_tattoo;		// 
-/*252*/ uint32	drakkin_details;	// 
+/*244*/ uint32	drakkin_heritage;	//
+/*248*/ uint32	drakkin_tattoo;		//
+/*252*/ uint32	drakkin_details;	//
 /*256*/
 };
 
@@ -2330,7 +2330,7 @@ struct BookRequest_Struct {
 /*0000*/	uint32 window;		// where to display the text (0xFFFFFFFF means new window).
 /*0004*/	uint32 invslot;		// The inventory slot the book is in. Not used, but echoed in the response packet.
 /*0008*/	uint32 type;		// 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
-/*0012*/	uint32 unknown0012;	
+/*0012*/	uint32 unknown0012;
 /*0016*/	uint16 unknown0016;
 /*0018*/	char txtfile[8194];
 };
@@ -2431,7 +2431,7 @@ struct Door_Struct
 /*0054*/ uint8    unknown0054[4]; // 00 00 00 00
 /*0060*/ uint8   doorId;             // door's id #
 /*0061*/ uint8   opentype;
-/*0062*/ uint8  state_at_spawn;  
+/*0062*/ uint8  state_at_spawn;
 /*0063*/ uint8  invert_state;	// if this is 1, the door is normally open
 /*0064*/ uint32  door_param; // normally ff ff ff ff (-1)
 /*0068*/ uint32	unknown0068; // 00 00 00 00
@@ -2735,7 +2735,7 @@ struct Tracking_Struct_New {
 struct Track_Struct_New {
 	uint16 entityid;				// Entity ID
 	uint16 unknown002;			// 00 00
-	uint32 unknown004;			// 
+	uint32 unknown004;			//
 	uint8  level;				// level of mob
 	uint8  unknown009;			// 01 maybe type of mob? player/npc?
 	char  name[1];				// name of mob
@@ -3942,7 +3942,7 @@ struct ItemBodyStruct
 	uint32 icon;
 	uint8 unknown1;
 	uint8 unknown2;
-	uint32 BenefitFlag; 
+	uint32 BenefitFlag;
 	uint8 tradeskills;
 	int8 CR;
 	int8 DR;
@@ -4045,9 +4045,9 @@ struct ItemTertiaryBodyStruct
 	uint8 no_transfer;
 	uint16 expendablearrow;
 
-	uint32 unknown8; 
-	uint32 unknown9; 
-	uint32 unknown10; 
+	uint32 unknown8;
+	uint32 unknown9;
+	uint32 unknown10;
 	uint32 unknown11;
 	uint8 unknown12;
 	uint8 unknown13;
@@ -4148,7 +4148,7 @@ struct ItemQuaternaryBodyStruct
 	int32 clairvoyance;
 	uint8 unknown18;	//Power Source Capacity or evolve filename?
 	uint32 evolve_string; // Some String, but being evolution related is just a guess
-	uint8 unknown19;	
+	uint8 unknown19;
 	uint32 unknown20;	// Bard Stuff?
 	uint32 unknown21;
 	uint32 unknown22;
@@ -4295,7 +4295,7 @@ struct MercenaryListEntry_Struct {
 /*0041*/	uint32	MercUnk02;			// Unknown (normally see 1, but sometimes 2 or 0)
 /*0045*/	uint32	StanceCount;		// Iterations of MercenaryStance_Struct - Normally 2 to 4 seen
 /*0049*/	int32	MercUnk03;			// Unknown (always 0 at merchant) - Seen on active merc: 93 a4 03 77, b8 ed 2f 26, 88 d5 8b c3, and 93 a4 ad 77
-/*0053*/	uint8	MercUnk04;			// Seen 1 
+/*0053*/	uint8	MercUnk04;			// Seen 1
 /*0054*/	MercenaryStance_Struct Stances[1];	// Count Varies, but hard set to 2 for now - From dbstr_us.txt - 1^24^Passive^0, 2^24^Balanced^0, etc (1 to 9 as of April 2012)
 };
 
@@ -4342,7 +4342,7 @@ struct MercenaryData_Struct {
 // [OPCode: 0x6537] On Live as of April 2 2012 [Server->Client]
 // Should be named OP_MercenaryDataResponse, but the current opcode using that name should be renamed first
 // Size varies if mercenary is hired or if browsing Mercenary Merchant
-// This may also be the response for Client->Server 0x0327 (size 0) packet On Live as of April 2 2012 
+// This may also be the response for Client->Server 0x0327 (size 0) packet On Live as of April 2 2012
 struct MercenaryDataUpdate_Struct {
 /*0000*/	int32	MercStatus;					// Seen 0 with merc and -1 with no merc hired
 /*0004*/	uint32	MercCount;					// Seen 1 with 1 merc hired and 0 with no merc hired

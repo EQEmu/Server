@@ -18,7 +18,7 @@ $type = $request->get("type", "");
 ?>
 <form method="get" action="accounts.html">
 <b>Account Search:</b><br>
-<input name="type" type="radio" value="account" <?if($type ne "char") { print "checked"; } ?> > Account Name &nbsp; 
+<input name="type" type="radio" value="account" <?if($type ne "char") { print "checked"; } ?> > Account Name &nbsp;
 <input name="type" type="radio" value="char" <?if($type eq "char") { print "checked"; } ?> > Character Name
 <br>
 <input name="name" type="text" value="<?print $query;?>">
@@ -41,8 +41,8 @@ if ($query) {
 	}
 
 	my $res=$EQDB->query($q);
-	if ($res) { 
-		
+	if ($res) {
+
 		print "<table border=\"1\" cellspacing=\"2\" cellpadding=\"3\" class=\"zonelist\">\n";
 		print "\t<tr>\n";
 		if ($type eq "char") {

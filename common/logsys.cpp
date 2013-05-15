@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "logsys.h"
@@ -33,7 +33,7 @@ const char *log_category_names[NUMBER_OF_LOG_CATEGORIES] = {
 
 //this array is private to this file, only a const version of it is exposed
 #define LOG_TYPE(category, type, enabled) { enabled, LOG_ ##category, #category "__" #type },
-static LogTypeStatus real_log_type_info[NUMBER_OF_LOG_TYPES+1] = 
+static LogTypeStatus real_log_type_info[NUMBER_OF_LOG_TYPES+1] =
 {
 	#include "logtypes.h"
 	{ false, NUMBER_OF_LOG_CATEGORIES, "BAD TYPE" }	/* dummy trailing record */
@@ -97,25 +97,25 @@ bool load_log_settings(const char *filename) {
 #ifdef _WINDOWS
 		if (sscanf(linebuf, "%[^=]=%[^\n]\n", type_name, value) != 2)
 			continue;
-#else	
+#else
 		if (sscanf(linebuf, "%[^=]=%[^\r\n]\n", type_name, value) != 2)
 			continue;
 #endif
-		
+
 		if(type_name[0] == '\0' || type_name[0] == '#')
 			continue;
-		
+
 		//first make sure we understand the value
 		bool enabled;
 		if(!strcasecmp(value, "on") || !strcasecmp(value, "true") || !strcasecmp(value, "yes") || !strcasecmp(value, "enabled") || !strcmp(value, "1"))
 			enabled = true;
-		else if(!strcasecmp(value, "off") || !strcasecmp(value, "false")  || !strcasecmp(value, "no") || !strcasecmp(value, "disabled") || !strcmp(value, "0"))
+		else if(!strcasecmp(value, "off") || !strcasecmp(value, "false") || !strcasecmp(value, "no") || !strcasecmp(value, "disabled") || !strcmp(value, "0"))
 			enabled = false;
 		else {
 			printf("Unable to parse value '%s' from %s. Skipping line.", value, filename);
 			continue;
 		}
-		
+
 		int r;
 		//first see if it is a category name
 		for(r = 0; r < NUMBER_OF_LOG_CATEGORIES; r++) {
@@ -135,7 +135,7 @@ bool load_log_settings(const char *filename) {
 			}
 			continue;
 		}
-		
+
 		for(r = 0; r < NUMBER_OF_LOG_TYPES; r++) {
 			if(!strcasecmp(log_type_info[r].name, type_name))
 				break;
@@ -144,7 +144,7 @@ bool load_log_settings(const char *filename) {
 			printf("Unable to locate log type %s from file %s. Skipping line.", type_name, filename);
 			continue;
 		}
-		
+
 		//got it all figured out, do something now...
 		if(enabled)
 			log_enable(LogType(r));
@@ -154,7 +154,4 @@ bool load_log_settings(const char *filename) {
 	fclose(f);
 	return(true);
 }
-
-
-
 

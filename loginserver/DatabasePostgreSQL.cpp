@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2010  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "Database.h"
@@ -61,9 +61,9 @@ bool DatabasePostgreSQL::GetLoginDataFromAccountName(string name, string &passwo
 	}
 
 	/**
-	 * PostgreSQL doesn't have automatic reconnection option like mysql 
-	 * but it's easy to check and reconnect
-	 */
+	* PostgreSQL doesn't have automatic reconnection option like mysql
+	* but it's easy to check and reconnect
+	*/
 	if(PQstatus(db) != CONNECTION_OK)
 	{
 		PQreset(db);
@@ -100,7 +100,7 @@ bool DatabasePostgreSQL::GetLoginDataFromAccountName(string name, string &passwo
 	return false;
 }
 
-bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id, 
+bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
 		unsigned int &trusted, string &list_desc, string &account, string &password)
 {
 	if(!db)
@@ -109,9 +109,9 @@ bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_nam
 	}
 
 	/**
-	 * PostgreSQL doesn't have automatic reconnection option like mysql 
-	 * but it's easy to check and reconnect
-	 */
+	* PostgreSQL doesn't have automatic reconnection option like mysql
+	* but it's easy to check and reconnect
+	*/
 	if(PQstatus(db) != CONNECTION_OK)
 	{
 		PQreset(db);
@@ -147,7 +147,7 @@ bool DatabasePostgreSQL::GetWorldRegistration(string long_name, string short_nam
 		trusted = atoi(PQgetvalue(res, 0, 2));
 		list_id = atoi(PQgetvalue(res, 0, 3));
 		list_desc = PQgetvalue(res, 0, 4);
-		account = PQgetvalue(res, 0, 5); 
+		account = PQgetvalue(res, 0, 5);
 		password = PQgetvalue(res, 0, 6);
 
 		PQclear(res);
@@ -166,9 +166,9 @@ void DatabasePostgreSQL::UpdateLSAccountData(unsigned int id, string ip_address)
 	}
 
 	/**
-	 * PostgreSQL doesn't have automatic reconnection option like mysql 
-	 * but it's easy to check and reconnect
-	 */
+	* PostgreSQL doesn't have automatic reconnection option like mysql
+	* but it's easy to check and reconnect
+	*/
 	if(PQstatus(db) != CONNECTION_OK)
 	{
 		PQreset(db);
@@ -201,9 +201,9 @@ void DatabasePostgreSQL::UpdateWorldRegistration(unsigned int id, string long_na
 	}
 
 	/**
-	 * PostgreSQL doesn't have automatic reconnection option like mysql 
-	 * but it's easy to check and reconnect
-	 */
+	* PostgreSQL doesn't have automatic reconnection option like mysql
+	* but it's easy to check and reconnect
+	*/
 	if(PQstatus(db) != CONNECTION_OK)
 	{
 		PQreset(db);

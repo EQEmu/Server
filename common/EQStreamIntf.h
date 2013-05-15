@@ -19,7 +19,7 @@ class EQApplicationPacket;
 class EQStreamInterface {
 public:
 	virtual ~EQStreamInterface() {}
-	
+
 	virtual void QueuePacket(const EQApplicationPacket *p, bool ack_req=true) = 0;
 	virtual void FastQueuePacket(EQApplicationPacket **p, bool ack_req=true) = 0;
 	virtual EQApplicationPacket *PopPacket() = 0;

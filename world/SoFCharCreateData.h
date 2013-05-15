@@ -17,7 +17,7 @@ struct RaceClassCombos {
 	unsigned int AllocationIndex;
 	unsigned int Zone;
 };
-	
+
 /*struct SoFCCData {
 	unsigned char Unknown;
 	unsigned int RaceClassStatEntryCount;

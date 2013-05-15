@@ -10,13 +10,13 @@
     function GetStatusIdx() {
         return idx++;
     }
-    
+
     function StatusTic() {
         $.getJSON("data/zone_data.html?idx="+GetStatusIdx(),
             function(data) {
                 var elm = document.getElementById('zone_count');
                 elm.innerHTML = data.zone_count;
-                
+
                 $("#zone_table").empty();
                 var app_html = "<tr>";
                 app_html += "<th scope=\"col\">Zone Name </th>";
@@ -26,7 +26,7 @@
                 app_html += "<th scope=\"col\">Actions</th>";
                 app_html += "</tr>";
                 $("#zone_table").append(app_html);
-                
+
                 var i = 0;
                 for(var i = 0; i < data.zone_count; i++) {
                     app_html = "<tr>";
@@ -39,7 +39,7 @@
                     } else {
                         app_html += "<td><a href='zone.html?zone=" + data.zones[i].short_name + "&instance=" + data.zones[i].instance_id + "'>" + data.zones[i].long_name + "</a> (" + data.zones[i].short_name + ")</td>";
                     }
-                    
+
                     app_html += "<td>" + data.zones[i].port + "</td>";
                     app_html += "<td>" + data.zones[i].instance_id + "</td>";
                     app_html += "<td><a href='players.html?zone=" + data.zones[i].short_name + "&instance=" + data.zones[i].instance_id + "'>Players</a></td>";
@@ -47,19 +47,19 @@
                     app_html += "<a href='javascript:void(0)' onclick='Kill(" + data.zones[i].short_name + ", " + data.zones[i].instance_id +")'>Kill</a>";
                     app_html += "</td>";
                     app_html += "</tr>";
-                
+
                     $("#zone_table").append(app_html);
                 }
             });
     }
-    
-    
+
+
     function Kill(short_name, instance_id) {
         $.getJSON("actions/zone_action.html?action=kill&short_name="+short_name+"&instance_id="+instance_id+"&idx="+GetStatusIdx(),
             function(data) {
             });
     }
-    
+
     $(document).ready(function() {
         setInterval("StatusTic()", 4000);
     });
@@ -120,7 +120,7 @@
                     print "</tr>\n";
               }
             ?>
-            </table>        
+            </table>
         </div>
     </div>
     <div class="footer">

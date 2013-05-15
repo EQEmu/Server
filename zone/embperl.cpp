@@ -18,7 +18,7 @@ Eglin
 #include "embxs.h"
 #include "../common/features.h"
 #ifndef GvCV_set
-#define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
+#define GvCV_set(gv,cv) (GvCV(gv) = (cv))
 #endif
 
 #ifdef EMBPERL_XS
@@ -166,19 +166,19 @@ void Embperl::DoInit() {
 	eval_pv(
 		"package EQEmuIO; "
 //			"&boot_EQEmuIO;"
- 			"sub TIEHANDLE { my $me = bless {}, $_[0]; $me->PRINT('Creating '.$me); return($me); } "
-  			"sub WRITE {  } "
-  			//dunno why I need to shift off fmt here, but it dosent like without it
-  			"sub PRINTF { my $me = shift; my $fmt = shift; $me->PRINT(sprintf($fmt, @_)); } "
-  			"sub CLOSE { my $me = shift; $me->PRINT('Closing '.$me); } "
-  			"sub DESTROY { my $me = shift; $me->PRINT('Destroying '.$me); } "
+			"sub TIEHANDLE { my $me = bless {}, $_[0]; $me->PRINT('Creating '.$me); return($me); } "
+			"sub WRITE { } "
+			//dunno why I need to shift off fmt here, but it dosent like without it
+			"sub PRINTF { my $me = shift; my $fmt = shift; $me->PRINT(sprintf($fmt, @_)); } "
+			"sub CLOSE { my $me = shift; $me->PRINT('Closing '.$me); } "
+			"sub DESTROY { my $me = shift; $me->PRINT('Destroying '.$me); } "
 //this ties us for all packages, just do it in quest since thats kinda 'our' package
-  		"package quest;"
-  		"	if(tied *STDOUT) { untie(*STDOUT); }"
-  		"	if(tied *STDERR) { untie(*STDERR); }"
-  		"	tie *STDOUT, 'EQEmuIO';"
-  		"	tie *STDERR, 'EQEmuIO';"
-  		,FALSE);
+		"package quest;"
+		"	if(tied *STDOUT) { untie(*STDOUT); }"
+		"	if(tied *STDERR) { untie(*STDERR); }"
+		"	tie *STDOUT, 'EQEmuIO';"
+		"	tie *STDERR, 'EQEmuIO';"
+		,FALSE);
 #endif //EMBPERL_IO_CAPTURE
 
 #ifdef EMBPERL_PLUGIN
@@ -310,26 +310,26 @@ void Embperl::dosub(const char * subname, const std::vector<std::string> * args,
 #endif
 	in_use = true;
 	bool err = false;
-	dSP;                            /* initialize stack pointer      */
-	ENTER;                          /* everything created after here */
-	SAVETMPS;                       /* ...is a temporary variable.   */
-	PUSHMARK(SP);                   /* remember the stack pointer    */
+	dSP;							/* initialize stack pointer */
+	ENTER;							/* everything created after here */
+	SAVETMPS;						/* ...is a temporary variable. */
+	PUSHMARK(SP);					/* remember the stack pointer */
 	if(args && args->size())
 	{
 		for(std::vector<std::string>::const_iterator i = args->begin(); i != args->end(); ++i)
-		{/* push the arguments onto the perl stack  */
+		{/* push the arguments onto the perl stack */
 			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length())));
 		}
 	}
-	PUTBACK;                      /* make local stack pointer global */
+	PUTBACK;				/* make local stack pointer global */
 	call_pv(subname, mode); /*eval our code*/
-	SPAGAIN;                        /* refresh stack pointer         */
+	SPAGAIN;				/* refresh stack pointer */
 	if(SvTRUE(ERRSV))
 	{
 		err = true;
 	}
-	FREETMPS;                       /* free temp values        */
-	LEAVE;                       /* ...and the XPUSHed "mortal" args.*/
+	FREETMPS;			/* free temp values */
+	LEAVE;				/* ...and the XPUSHed "mortal" args.*/
 
 	in_use = false;
 	if(err)

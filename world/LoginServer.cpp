@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -96,7 +96,7 @@ bool LoginServer::Process() {
 	if (statusupdate_timer.Check()) {
 		this->SendStatus();
 	}
-    
+
 	/************ Get all packets from packet manager out queue and process them ************/
 	ServerPacket *pack = 0;
 	while((pack = tcpc->PopPacket()))
@@ -105,100 +105,99 @@ bool LoginServer::Process() {
 		_hex(WORLD__LS_TRACE,pack->pBuffer,pack->size);
 
 		switch(pack->opcode) {
-		case 0:
-			break;
-		case ServerOP_KeepAlive: {
-			// ignore this
-			break;
-		}
-		case ServerOP_UsertoWorldReq: {
-			UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;	
-			uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
-			int16 status = database.CheckStatus(id);
+			case 0:
+				break;
+			case ServerOP_KeepAlive: {
+				// ignore this
+				break;
+			}
+			case ServerOP_UsertoWorldReq: {
+				UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;
+				uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
+				int16 status = database.CheckStatus(id);
 
-			ServerPacket* outpack = new ServerPacket;
-			outpack->opcode = ServerOP_UsertoWorldResp;
-			outpack->size = sizeof(UsertoWorldResponse_Struct);
-			outpack->pBuffer = new uchar[outpack->size];
-			memset(outpack->pBuffer, 0, outpack->size);
-			UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*) outpack->pBuffer;
-			utwrs->lsaccountid = utwr->lsaccountid;
-			utwrs->ToID = utwr->FromID;
+				ServerPacket* outpack = new ServerPacket;
+				outpack->opcode = ServerOP_UsertoWorldResp;
+				outpack->size = sizeof(UsertoWorldResponse_Struct);
+				outpack->pBuffer = new uchar[outpack->size];
+				memset(outpack->pBuffer, 0, outpack->size);
+				UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*) outpack->pBuffer;
+				utwrs->lsaccountid = utwr->lsaccountid;
+				utwrs->ToID = utwr->FromID;
 
-			if(Config->Locked == true)
-			{
-				if((status == 0 || status < 100) && (status != -2 || status != -1))
-					utwrs->response = 0;
-				if(status >= 100)
+				if(Config->Locked == true)
+				{
+					if((status == 0 || status < 100) && (status != -2 || status != -1))
+						utwrs->response = 0;
+					if(status >= 100)
+						utwrs->response = 1;
+				}
+				else {
 					utwrs->response = 1;
+				}
+
+				int32 x = Config->MaxClients;
+				if( (int32)numplayers >= x && x != -1 && x != 255 && status < 80)
+					utwrs->response = -3;
+
+				if(status == -1)
+					utwrs->response = -1;
+				if(status == -2)
+					utwrs->response = -2;
+
+				utwrs->worldid = utwr->worldid;
+				SendPacket(outpack);
+				delete outpack;
+				break;
 			}
-			else {
-				utwrs->response = 1;
+			case ServerOP_LSClientAuth: {
+				ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
+
+				if (RuleI(World, AccountSessionLimit) >= 0) {
+					// Enforce the limit on the number of characters on the same account that can be
+					// online at the same time.
+					client_list.EnforceSessionLimit(slsca->lsaccount_id);
+				}
+
+				client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
+				break;
 			}
-
-			int32 x = Config->MaxClients;
-			if( (int32)numplayers >= x && x != -1 && x != 255 && status < 80)
-				utwrs->response = -3;
-
-			if(status == -1)
-				utwrs->response = -1;
-			if(status == -2)
-				utwrs->response = -2;
-
-			utwrs->worldid = utwr->worldid;
-			SendPacket(outpack);
-			delete outpack;
-			break;
-		}
-		case ServerOP_LSClientAuth: {
-			ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
-
-			if (RuleI(World, AccountSessionLimit) >= 0) {
-				// Enforce the limit on the number of characters on the same account that can be 
-				// online at the same time.
-				client_list.EnforceSessionLimit(slsca->lsaccount_id); 
+			case ServerOP_LSFatalError: {
+	#ifndef IGNORE_LS_FATAL_ERROR
+				WorldConfig::DisableLoginserver();
+				_log(WORLD__LS_ERR, "Login server responded with FatalError. Disabling reconnect.");
+	#else
+			_log(WORLD__LS_ERR, "Login server responded with FatalError.");
+	#endif
+				if (pack->size > 1) {
+					_log(WORLD__LS_ERR, "     %s",pack->pBuffer);
+				}
+				break;
 			}
-
-			client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
-			break;
-		}
-		case ServerOP_LSFatalError: {
-#ifndef IGNORE_LS_FATAL_ERROR
-			WorldConfig::DisableLoginserver();
-			_log(WORLD__LS_ERR, "Login server responded with FatalError. Disabling reconnect.");
-#else
-		_log(WORLD__LS_ERR, "Login server responded with FatalError.");
-#endif
-			if (pack->size > 1) {
-				_log(WORLD__LS_ERR, "     %s",pack->pBuffer);
+			case ServerOP_SystemwideMessage: {
+				ServerSystemwideMessage* swm = (ServerSystemwideMessage*) pack->pBuffer;
+				zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
+				break;
 			}
-			break;
-		}
-		case ServerOP_SystemwideMessage: {
-			ServerSystemwideMessage* swm = (ServerSystemwideMessage*) pack->pBuffer;
-			zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
-			break;
-		}
-		case ServerOP_LSRemoteAddr: {
-			if (!Config->WorldAddress.length()) {
-				WorldConfig::SetWorldAddress((char *)pack->pBuffer);
-				_log(WORLD__LS, "Loginserver provided %s as world address",pack->pBuffer);
+			case ServerOP_LSRemoteAddr: {
+				if (!Config->WorldAddress.length()) {
+					WorldConfig::SetWorldAddress((char *)pack->pBuffer);
+					_log(WORLD__LS, "Loginserver provided %s as world address",pack->pBuffer);
+				}
+				break;
 			}
-			break;
+			case ServerOP_LSAccountUpdate: {
+				_log(WORLD__LS, "Received ServerOP_LSAccountUpdate packet from loginserver");
+				CanAccountUpdate = true;
+				break;
+			}
+			default:
+			{
+				_log(WORLD__LS_ERR, "Unknown LSOpCode: 0x%04x size=%d",(int)pack->opcode,pack->size);
+	DumpPacket(pack->pBuffer, pack->size);
+				break;
+			}
 		}
-		case ServerOP_LSAccountUpdate: {
-			_log(WORLD__LS, "Received ServerOP_LSAccountUpdate packet from loginserver");
-			CanAccountUpdate = true;
-			break;
-		}
-		default:
-		{
-			_log(WORLD__LS_ERR, "Unknown LSOpCode: 0x%04x size=%d",(int)pack->opcode,pack->size);
-DumpPacket(pack->pBuffer, pack->size);
-			break;
-		}
-		}
-
 		delete pack;
 	}
 

@@ -25,7 +25,7 @@ char com_list[512];
 int calc(char * stuff) {
 	int result = 0;
 	int i = 0;
-	int a  = 0;
+	int a = 0;
 	static char temp[100];
 	int op = 0;
 	memset(temp,0x0,100);
@@ -105,15 +105,15 @@ int GetArgs(char * string)
 	char temp[255];
 	char c_name[255];
 	int params = 0;
-	 //char *buffer = new char[512];   // this is never deleted, causes zone to crash
-  char *buffer = com_list;
-  memset(temp,0x0,255);
-  //memset(buffer,0x0,512);
-  //#ifdef WIN32
-  //strcpy(buffer,com_list);
-  //#else
-  //strncpy(buffer,com_list,sizeof(buffer)-1);
-  //#endif	
+	//char *buffer = new char[512]; // this is never deleted, causes zone to crash
+	char *buffer = com_list;
+	memset(temp,0x0,255);
+	//memset(buffer,0x0,512);
+	//#ifdef WIN32
+	//strcpy(buffer,com_list);
+	//#else
+	//strncpy(buffer,com_list,sizeof(buffer)-1);
+	//#endif
 	int i=0;
 	while (*buffer)
 	{
@@ -136,39 +136,39 @@ int GetArgs(char * string)
 	}
 	return 0;
 #else
-    if (strstr(string,"if"))			{	return 0;    }
-    if (strstr(string,"sfollow"))		{	return 0;    }
-    if (strstr(string,"save"))			{	return 0;    }
-    if (strstr(string,"while"))			{	return 0;    }
-    if (strstr(string,"break"))			{	return 1;    }
-    if (strstr(string,"follow"))		{	return 1;    }
-    if (strstr(string,"setallskill"))		{	return 1;    }
-    if (strstr(string,"me"))			{	return 1;    }
-    if (strstr(string,"flagcheck"))		{	return 1;    }
-    if (strstr(string,"echo"))			{	return 1;    }
-    if (strstr(string,"summonitem"))		{	return 1;    }
-    if (strstr(string,"say"))			{	return 1;    }
-    if (strstr(string,"emote"))			{	return 1;    }
-    if (strstr(string,"shout"))			{	return 1;    }
-    if (strstr(string,"depop"))			{	return 1;    }
-    if (strstr(string,"cumflag"))		{	return 1;    }
-    if (strstr(string,"exp"))			{	return 1;    }
-    if (strstr(string,"level"))			{	return 1;    }
-    if (strstr(string,"safemove"))		{	return 1;    }
-    if (strstr(string,"rain"))			{	return 1;    }
-    if (strstr(string,"snow"))			{	return 1;    }
-    if (strstr(string,"pvp"))			{	return 1;    }
-    if (strstr(string,"doanim"))		{	return 1;    }
-    if (strstr(string,"dbspawnadd"))		{	return 2;    }
-    if (strstr(string,"castspell"))		{	return 2;    }
-    if (strstr(string,"flagcheck"))		{	return 2;    }
-    if (strstr(string,"addskill"))		{	return 2;    }
-    if (strstr(string,"write"))			{	return 2;    }
-    if (strstr(string,"settarget"))		{	return 2;    }
-    if (strstr(string,"givecash"))		{	return 4;    }
-	if (strstr(string,"movepc"))        {   return 4;    }
-    if (strstr(string,"spawn"))			{	return 6;    }
-    return 0;
+	if (strstr(string,"if"))			{ return 0; }
+	if (strstr(string,"sfollow"))		{ return 0; }
+	if (strstr(string,"save"))			{ return 0; }
+	if (strstr(string,"while"))			{ return 0; }
+	if (strstr(string,"break"))			{ return 1; }
+	if (strstr(string,"follow"))		{ return 1; }
+	if (strstr(string,"setallskill"))	{ return 1; }
+	if (strstr(string,"me"))			{ return 1; }
+	if (strstr(string,"flagcheck"))		{ return 1; }
+	if (strstr(string,"echo"))			{ return 1; }
+	if (strstr(string,"summonitem"))	{ return 1; }
+	if (strstr(string,"say"))			{ return 1; }
+	if (strstr(string,"emote"))			{ return 1; }
+	if (strstr(string,"shout"))			{ return 1; }
+	if (strstr(string,"depop"))			{ return 1; }
+	if (strstr(string,"cumflag"))		{ return 1; }
+	if (strstr(string,"exp"))			{ return 1; }
+	if (strstr(string,"level"))			{ return 1; }
+	if (strstr(string,"safemove"))		{ return 1; }
+	if (strstr(string,"rain"))			{ return 1; }
+	if (strstr(string,"snow"))			{ return 1; }
+	if (strstr(string,"pvp"))			{ return 1; }
+	if (strstr(string,"doanim"))		{ return 1; }
+	if (strstr(string,"dbspawnadd"))	{ return 2; }
+	if (strstr(string,"castspell"))		{ return 2; }
+	if (strstr(string,"flagcheck"))		{ return 2; }
+	if (strstr(string,"addskill"))		{ return 2; }
+	if (strstr(string,"write"))			{ return 2; }
+	if (strstr(string,"settarget"))		{ return 2; }
+	if (strstr(string,"givecash"))		{ return 4; }
+	if (strstr(string,"movepc"))		{ return 4; }
+	if (strstr(string,"spawn"))			{ return 6; }
+	return 0;
 #endif // 0
 }
 

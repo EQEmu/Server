@@ -23,7 +23,7 @@ class EQStreamFactory : private Timeoutable {
 		Condition WriterWork;
 
 		EQStreamType StreamType;
-		
+
 		queue<EQStream *> NewStreams;
 		Mutex MNewStreams;
 
@@ -34,7 +34,7 @@ class EQStreamFactory : private Timeoutable {
 
 		Timer *DecayTimer;
 
-        uint32 stream_timeout;
+		uint32 stream_timeout;
 
 	public:
 		EQStreamFactory(EQStreamType type, uint32 timeout = 135000) : Timeoutable(5000), stream_timeout(timeout) { ReaderRunning=false; WriterRunning=false; StreamType=type; sock=-1; }

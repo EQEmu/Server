@@ -18,12 +18,12 @@
     <!--
     var zone = <?print "\"$zone\"";?>;
     var instance_id = <?print "\"$instance_id\"";?>;
-    
+
     var idx = Math.floor((Math.random()*100000000));
     function GetStatusIdx() {
         return idx++;
     }
-    
+
     function StatusTic() {
         $.getJSON("data/player_data.html?zone="+zone+"&instance_id="+instance_id+"&idx="+GetStatusIdx(),
         function(data) {
@@ -32,14 +32,14 @@
             app_html += "<th scope=\"col\">Character</th>";
             app_html += "<th scope=\"col\">Location</th>";
             app_html += "</tr>";
-            
+
             var elm = document.getElementById("player_count");
             elm.innerHTML = data.player_count;
-            
+
             $("#player_table").append(app_html);
             for(var i = 0; i < data.player_count; i++) {
                 app_html = "<tr>";
-                
+
                 app_html +=  "<tr id=\"row_$char->{character}\">";
                 if(data.players[i].character == "") {
                     app_html +=  "<td>Not Selected</td>";
@@ -52,17 +52,17 @@
                     app_html +=  data.players[i].level + " " + data.players[i].race + " " + data.players[i].class;
                     app_html +=  "</td>";
                 }
-                app_html +=  "<td>"+data.players[i].location_long+" ("+data.players[i].location_short+")</td>";                    
+                app_html +=  "<td>"+data.players[i].location_long+" ("+data.players[i].location_short+")</td>";
                 app_html += "</tr>";
-                $("#player_table").append(app_html);                    
+                $("#player_table").append(app_html);
             }
-        });        
+        });
     }
-       
+
     $(document).ready(function() {
         setInterval("StatusTic()", 4000);
     });
-    
+
     -->
     </script>
 </head>
@@ -81,7 +81,7 @@
             ?>
             </div>
             </br>
-            
+
             <table id="player_table" width="70%" cellspacing="0" cellpadding="0" class="styled_table">
             <tr>
                 <th scope="col">Character</th>

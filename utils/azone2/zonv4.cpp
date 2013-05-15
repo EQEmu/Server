@@ -26,7 +26,7 @@ Zonv4Loader::~Zonv4Loader()
 
 int Zonv4Loader::Open(char *base_path, char *zone_name, Archive *archive)
 {
-	
+
 	uchar *buffer;
 	int position;
 	int buf_len;

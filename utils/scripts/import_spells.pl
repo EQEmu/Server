@@ -107,7 +107,7 @@ while(<SPELLS>) {
 	}
 
 	my $insert1 = join("`,`", @t_col_names);
-	my $insert2 = join("','", @s); #put everything in quotes & separate w/ commas for the query, plus the beginning & ending quotes. this doesn't print out to the console correctly (for me), but hopefully the query will be fine	
+	my $insert2 = join("','", @s); #put everything in quotes & separate w/ commas for the query, plus the beginning & ending quotes. this doesn't print out to the console correctly (for me), but hopefully the query will be fine
 	my $insert = sprintf("REPLACE INTO %s (`%s`) VALUES ('%s')", $table, $insert1, $insert2);
 
 	printf("Loading \"%s\" (%d)                     \r", $s[1], $s[0]); # name (id)
@@ -118,7 +118,7 @@ while(<SPELLS>) {
 	} else {
 		$loadedspells++; #to compare db inserts to total spells
 	}
-	
+
 	$highid = $s[0]; #set to current id
 }
 

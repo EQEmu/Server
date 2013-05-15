@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef __QUEST_MANAGER_H__
 #define __QUEST_MANAGER_H__
@@ -62,7 +62,7 @@ public:
 	void addloot(int item_id, int charges = 0, bool equipitem = true);
 	void Zone(const char *zone_name);
 	void settimer(const char *timer_name, int seconds);
-    void settimerMS(const char *timer_name, int milliseconds);
+	void settimerMS(const char *timer_name, int milliseconds);
 	void stoptimer(const char *timer_name);
 	void stopalltimers();
 	void emote(const char *str);
@@ -80,7 +80,7 @@ public:
 //	void cumflag();
 //	void flagnpc(uint32 flag_num, uint8 flag_value);
 //	void flagcheck(uint32 flag_to_check, uint32 flag_to_set);
-//  bool isflagset(int flag_num);
+//	bool isflagset(int flag_num);
 	void changedeity(int diety_id);
 	void exp(int amt);
 	void level(int newlevel);
@@ -190,15 +190,15 @@ public:
 	int activetasksinset(int taskset);
 	int completedtasksinset(int taskset);
 	bool istaskappropriate(int task);
-    void clearspawntimers();
+	void clearspawntimers();
 	void ze(int type, const char *str);
 	void we(int type, const char *str);
-    int getlevel(uint8 type);
-    int collectitems(uint32 item_id, bool remove);
-    int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
-    void enabletitle(int titleset);
-   	bool checktitle(int titlecheck);
-   	void removetitle(int titlecheck);
+	int getlevel(uint8 type);
+	int collectitems(uint32 item_id, bool remove);
+	int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
+	void enabletitle(int titleset);
+	bool checktitle(int titlecheck);
+	void removetitle(int titlecheck);
 
 	uint16 CreateGroundObject(uint32 itemid, float x, float y, float z, float heading, uint32 decay_time = 300000);
 	uint16 CreateGroundObjectFromModel(const char* model, float x, float y, float z, float heading, uint8 type = 0x00, uint32 decay_time = 0);
@@ -227,11 +227,11 @@ public:
 	uint8 FactionValue();
 	void wearchange(uint8 slot, uint16 texture);
 	void voicetell(char *str, int macronum, int racenum, int gendernum);
-    void LearnRecipe(uint32 recipe_id);
-    void SendMail(const char *to, const char *from, const char *subject, const char *message);
+	void LearnRecipe(uint32 recipe_id);
+	void SendMail(const char *to, const char *from, const char *subject, const char *message);
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
-    int32 GetZoneID(const char *zone);
-    const char *GetZoneLongName(const char *zone);
+	int32 GetZoneID(const char *zone);
+	const char *GetZoneLongName(const char *zone);
 
 	//not in here because it retains perl types
 	//thing ChooseRandom(array_of_things)
@@ -275,7 +275,7 @@ protected:
 	class QuestTimer {
 	public:
 		inline QuestTimer(int duration, Mob *_mob, string _name) : mob(_mob), name(_name), Timer_(duration) { Timer_.Start(duration, false); }
-		Mob*   mob;
+		Mob* mob;
 		string name;
 		Timer Timer_;
 	};

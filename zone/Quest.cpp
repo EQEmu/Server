@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream.h>
@@ -71,7 +71,7 @@ bool ZoneDatabase::OpenQuery(char* zonename) {
 				strcpy( Quest::m_pQuests[ l_cnt ].m_pQuestText, row[1] );
 				Quest::m_pQuests[ l_cnt ].m_pQuestEnd = new char[ strlen( row[2] )+1 ];
 				strcpy( Quest::m_pQuests[ l_cnt ].m_pQuestEnd, row[2] );
-				
+
 				Quest::m_pQuests[ l_cnt ].m_iNpcId		= atoi( row[3] );
 				Quest::m_pQuests[ l_cnt ].m_iQuestObject= atoi( row[4] );
 				Quest::m_pQuests[ l_cnt ].m_iQuestPrice	= atoi( row[5] );
@@ -94,7 +94,7 @@ return false;
 pquest_entry	Quest::Test( int NpcId, int QuestObject )
 {
 	for( int i=0;i<m_nQuests;i++ )
-		if( m_pQuests[ i ].m_iNpcId == NpcId &&  m_pQuests[ i ].m_iQuestObject	== QuestObject )
+		if( m_pQuests[ i ].m_iNpcId == NpcId && m_pQuests[ i ].m_iQuestObject	== QuestObject )
 			return &m_pQuests[ i ];
 return NULL;
 }

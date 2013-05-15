@@ -5,13 +5,13 @@
 #define GENERIC_9_STRINGS			1		//%1 %2 %3 %4 %5 %6 %7 %8 %9
 #define TARGET_OUT_OF_RANGE			100		//Your target is out of range, get closer!
 #define TARGET_NOT_FOUND			101		//Target player not found.
-#define CANNOT_BIND					105		//You cannot form an affinity with this area.  Try a city.
+#define CANNOT_BIND					105		//You cannot form an affinity with this area. Try a city.
 #define SPELL_DOES_NOT_WORK_HERE	106		//This spell does not work here.
 #define SPELL_DOES_NOT_WORK_PLANE	107		//This spell does not work on this plane.
 #define CANT_SEE_TARGET				108		//You cannot see your target.
 #define MGB_STRING					113		//The next group buff you cast will hit all targets in range.
-#define ABILITY_FAILED              116     //Your ability failed. Timer has been reset.
-#define ESCAPE                      114     //You escape from combat, hiding yourself from view.
+#define ABILITY_FAILED				116		//Your ability failed. Timer has been reset.
+#define ESCAPE						114		//You escape from combat, hiding yourself from view.
 #define TARGET_TOO_FAR				124		//Your target is too far away, get closer!
 #define PROC_TOOLOW					126		//Your will is not sufficient to command this weapon.
 #define PROC_PETTOOLOW				127		//Your pet's will is not sufficient to command its weapon.
@@ -86,7 +86,7 @@
 #define INVIS_BEGIN_BREAK			275		//You feel yourself starting to appear.
 #define DISCIPLINE_CONLOST			278		//You lose the concentration to remain in your fighting discipline.
 #define REZ_REGAIN					289		//You regain some experience from resurrection.
-#define DUP_LORE					290		//Duplicate lore items are not allowed. 
+#define DUP_LORE					290		//Duplicate lore items are not allowed.
 #define TGB_ON						293		//Target other group buff is *ON*.
 #define TGB_OFF						294		//Target other group buff is *OFF*.
 #define LDON_SENSE_TRAP1			306		//You do not Sense any traps.
@@ -99,7 +99,7 @@
 #define MEND_WORSEN					351		//You have worsened your wounds!
 #define MEND_FAIL					352		//You have failed to mend your wounds.
 #define LDON_SENSE_TRAP2			367		//You have not detected any traps.
-#define LOOT_LORE_ERROR				371		//You cannot loot this Lore Item.  You already have one.
+#define LOOT_LORE_ERROR				371		//You cannot loot this Lore Item. You already have one.
 #define PICK_LORE					379		//You cannot pick up a lore item you already possess.
 #define CONSENT_DENIED				390		//You do not have consent to summon that corpse.
 #define DISCIPLINE_RDY				393		//You are ready to use a new discipline now.
@@ -126,10 +126,10 @@
 #define OTHER_HIT_NONMELEE			434		//%1 was hit by non-melee for %2 points of damage.
 #define SPELL_WORN_OFF_OF			436		//Your %1 spell has worn off of %2.
 #define SPELL_WORN_OFF				437		//Your %1 spell has worn off.
-#define PET_TAUNTING                438     //Taunting attacker, Master.
+#define PET_TAUNTING				438		//Taunting attacker, Master.
 #define INTERRUPT_SPELL				439		//Your spell is interrupted.
 #define LOSE_LEVEL					442		//You LOST a level! You are now level %1!
-#define GAIN_ABILITY_POINT			446		//You have gained an ability point!  You now have %1 ability point%2.
+#define GAIN_ABILITY_POINT			446		//You have gained an ability point! You now have %1 ability point%2.
 #define GAIN_LEVEL					447		//You have gained a level! Welcome to level %1!
 #define LANG_SKILL_IMPROVED			449		//Your language skills have improved.
 #define OTHER_LOOTED_MESSAGE		466		//--%1 has looted a %2--
@@ -139,15 +139,15 @@
 #define FACTION_BEST				471		//Your faction standing with %1 could not possibly get any better.
 #define FACTION_BETTER				472		//Your faction standing with %1 got better.
 #define PET_REPORT_HP				488		//I have %1 percent of my hit points left.
-#define PET_NO_TAUNT                489     //No longer taunting attackers, Master.
-#define PET_DO_TAUNT                490     //Taunting attackers as normal, Master.
+#define PET_NO_TAUNT				489		//No longer taunting attackers, Master.
+#define PET_DO_TAUNT				490		//Taunting attackers as normal, Master.
 #define CORPSE_DECAY1				495		//This corpse will decay in %1 minute(s) %2 seconds.
 #define DISC_LEVEL_ERROR			503		//You must be a level %1 ... to use this discipline.
 #define DISCIPLINE_CANUSEIN			504		//You can use a new discipline in %1 minutes %2 seconds.
 #define PVP_ON						552		//You are now player kill and follow the ways of Discord.
 #define GENERIC_STRINGID_SAY		554		//%1 says '%T2'
 #define CANNOT_WAKE					555		//%1 tells you, 'I am unable to wake %2, master.'
-#define GUILD_NAME_IN_USE			711	//You cannot create a guild with that name, that guild already exists on this server.
+#define GUILD_NAME_IN_USE			711		//You cannot create a guild with that name, that guild already exists on this server.
 #define GM_GAINXP					1002	//[GM] You have gained %1 AXP and %2 EXP (%3).
 #define FINISHING_BLOW				1009	//%1 scores a Finishing Blow!!
 #define ASSASSINATES				1016	//%1 ASSASSINATES their victim!!
@@ -169,9 +169,9 @@
 #define NPC_FLURRY					1045	//%1 executes a FLURRY of attacks on %2!
 #define DISCIPLINE_FEARLESS			1076	//%1 becomes fearless.
 #define DUEL_FINISHED				1088	//dont know text
-#define EATING_MESSAGE				1091	//Chomp, chomp, chomp...  %1 takes a bite from a %2.
-#define DRINKING_MESSAGE			1093	//Glug, glug, glug...  %1 takes a drink from a %2.
-#define SUCCESSFUL_TAUNT            1095    //I'll teach you to interfere with me %3. 
+#define EATING_MESSAGE				1091	//Chomp, chomp, chomp... %1 takes a bite from a %2.
+#define DRINKING_MESSAGE			1093	//Glug, glug, glug... %1 takes a drink from a %2.
+#define SUCCESSFUL_TAUNT			1095	//I'll teach you to interfere with me %3.
 #define PET_SIT_STRING				1130	//Changing position, Master.
 #define PET_CALMING					1131	//Sorry, Master..calming down.
 #define PET_FOLLOWING				1132	//Following you, Master.
@@ -180,26 +180,26 @@
 #define PET_GETLOST_STRING			1135	//As you wish, oh great one.
 #define PET_LEADERIS				1136	//My leader is %3.
 #define I_FOLLOW_NOONE				1137	//I follow no one.
-#define PET_ON_HOLD                 1138    //Waiting for your order to attack, Master.
-#define NOT_LEGAL_TARGET            1139    //I beg forgiveness, Master.  That is not a legal target.
+#define PET_ON_HOLD					1138	//Waiting for your order to attack, Master.
+#define NOT_LEGAL_TARGET			1139	//I beg forgiveness, Master. That is not a legal target.
 #define MERCHANT_BUSY				1143	//I'm sorry, I am busy right now.
 #define MERCHANT_GREETING			1144	//Welcome to my shop, %3.
 #define MERCHANT_HANDY_ITEM1		1145	//Hello there, %3. How about a nice %4?
 #define MERCHANT_HANDY_ITEM2		1146	//Greetings, %3. You look like you could use a %4.
-#define MERCHANT_HANDY_ITEM3		1147	//Hi there %3, just browsing?  Have you seen the %4 I just got in?
+#define MERCHANT_HANDY_ITEM3		1147	//Hi there %3, just browsing? Have you seen the %4 I just got in?
 #define MERCHANT_HANDY_ITEM4		1148	//Welcome to my shop, %3. You would probably find a %4 handy.
 #define AA_POINT					1197	//point
 #define AA_POINTS					1215	//points
 #define SPELL_FIZZLE_OTHER			1218	//%1's spell fizzles!
 #define MISSED_NOTE_OTHER			1219	//A missed note brings %1's song to a close!
 #define CORPSE_DECAY_NOW			1227	//This corpse is waiting to expire.
-#define SURNAME_REJECTED			1374	//Your new surname was rejected.  Please try a different name.
+#define SURNAME_REJECTED			1374	//Your new surname was rejected. Please try a different name.
 #define DUEL_DECLINE				1383	//%1 has declined your challenge to duel to the death.
 #define DUEL_ACCEPTED				1384	//%1 has already accepted a duel with someone else.
 #define DUEL_CONSIDERING			1385	//%1 is considering a duel with someone else.
 #define PLAYER_REGAIN				1394	//You have control of yourself again.
 #define REZZ_ALREADY_PENDING		1379	//You were unable to restore the corpse to life, but you may have success with a later attempt.
-#define IN_USE						1406	//Someone else is using that.  Try again later.
+#define IN_USE						1406	//Someone else is using that. Try again later.
 #define DUEL_FLED					1408	//%1 has defeated %2 in a duel to the death! %3 has fled like a cowardly dog!
 #define MEMBER_OF_YOUR_GUILD		1429
 #define OFFICER_OF_YOUR_GUILD		1430
@@ -216,7 +216,7 @@
 #define SUSPEND_MINION_UNSUSPEND	3267	//%1 tells you, 'I live again...'
 #define SUSPEND_MINION_SUSPEND		3268	//%1 tells you, 'By your command, master.'
 #define ONLY_SUMMONED_PETS			3269	//3269 This effect only works with summoned pets.
-#define SUSPEND_MINION_FIGHTING		3270    //Your pet must be at peace, first.
+#define SUSPEND_MINION_FIGHTING		3270	//Your pet must be at peace, first.
 #define TRADESKILL_MISSING_ITEM		3455	//You are missing a %1.
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
@@ -236,14 +236,14 @@
 #define MELEE_SILENCE				5806	//You *CANNOT* use this melee ability, you are suffering from amnesia!
 #define DISCIPLINE_REUSE_MSG		5807	//You can use the ability %1 again in %2 hour(s) %3 minute(s) %4 seconds.
 #define DISCIPLINE_REUSE_MSG2		5808	//You can use the ability %1 again in %2 minute(s) %3 seconds.
-#define FAILED_TAUNT                5811    //You have failed to taunt your target.
+#define FAILED_TAUNT				5811	//You have failed to taunt your target.
 #define AA_NO_TARGET				5825	//You must first select a target for this ability!
-#define FORAGE_MASTERY              6012    //Your forage mastery has enabled you to find something else!
-#define GUILD_BANK_CANNOT_DEPOSIT	6097	// Cannot deposit this item.  Containers must be empty, and only one of each LORE and no NO TRADE or TEMPORARY items may be deposited.
+#define FORAGE_MASTERY				6012	//Your forage mastery has enabled you to find something else!
+#define GUILD_BANK_CANNOT_DEPOSIT	6097	// Cannot deposit this item. Containers must be empty, and only one of each LORE and no NO TRADE or TEMPORARY items may be deposited.
 #define GUILD_BANK_FULL				6098	// There is no more room in the Guild Bank.
 #define GUILD_BANK_TRANSFERRED		6100	// '%1' transferred to Guild Bank from Deposits.
 #define GUILD_BANK_EMPTY_HANDS		6108	// You must empty your hands to withdraw from the Guild Bank.
-#define GENERIC_STRING				6688	//%1  (used to any basic message)
+#define GENERIC_STRING				6688	//%1 (used to any basic message)
 #define SENTINEL_TRIG_YOU			6724	//You have triggered your sentinel.
 #define SENTINEL_TRIG_OTHER			6725	//%1 has triggered your sentinel.
 #define IDENTIFY_SPELL				6765	//Item Lore: %1.
@@ -269,7 +269,7 @@
 #define MAX_RAID_LEADERSHIP_POINTS	8591	//
 #define LEADERSHIP_EXP_ON			8653	//
 #define LEADERSHIP_EXP_OFF			8654	//
-#define CURRENT_SPELL_EFFECTS		8757	//%1's current spell effects: 
+#define CURRENT_SPELL_EFFECTS		8757	//%1's current spell effects:
 #define GAIN_GROUP_LEADERSHIP_EXP	8788	//
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
@@ -279,11 +279,11 @@
 #define SHAKE_OFF_STUN				9077
 #define STRIKETHROUGH_STRING		9078	//You strike through your opponent's defenses!
 #define SPELL_REFLECT				9082	//%1's spell has been reflected by %2.
-#define NEW_SPELLS_AVAIL			9149	//You have new spells available to you.  Check the merchants near your guild master.
-#define PET_NOW_FOCUSING            9254    //Focusing on one target, Master.
-#define PET_NOT_FOCUSING            9263    //No longer focusing on one target, Master.
-#define PET_NOT_CASTING             9264    //Not casting spells, Master.
-#define PET_CASTING                 9291    //Casting spells normally, Master.
+#define NEW_SPELLS_AVAIL			9149	//You have new spells available to you. Check the merchants near your guild master.
+#define PET_NOW_FOCUSING			9254	//Focusing on one target, Master.
+#define PET_NOT_FOCUSING			9263	//No longer focusing on one target, Master.
+#define PET_NOT_CASTING				9264	//Not casting spells, Master.
+#define PET_CASTING					9291	//Casting spells normally, Master.
 #define AE_RAMPAGE					11015	//%1 goes on a WILD RAMPAGE!
 #define FACE_ACCEPTED				12028	//Facial features accepted.
 #define SPELL_LEVEL_TO_LOW			12048	//You will have to achieve level %1 before you can scribe the %2.
@@ -329,9 +329,9 @@
 #define DIVINE_AURA_NO_ATK			12695	//You can't attack while invulnerable!
 #define TRY_ATTACKING_SOMEONE		12696	//Try attacking someone other than yourself, it's more productive.
 #define BACKSTAB_WEAPON				12874	//You need a piercing weapon as your primary weapon in order to backstab
-#define MORE_SKILLED_THAN_I			12931	//%1 tells you, 'You are more skilled than I!  What could I possibly teach you?'
-#define SURNAME_EXISTS				12939	//You already have a surname.  Operation failed.
-#define SURNAME_LEVEL				12940	//You can only submit a surname upon reaching the 20th level.  Operation failed.
+#define MORE_SKILLED_THAN_I			12931	//%1 tells you, 'You are more skilled than I! What could I possibly teach you?'
+#define SURNAME_EXISTS				12939	//You already have a surname. Operation failed.
+#define SURNAME_LEVEL				12940	//You can only submit a surname upon reaching the 20th level. Operation failed.
 #define SURNAME_TOO_LONG			12942	//Surname must be less than 20 characters in length.
 #define REPORT_ONCE					12945	//You may only submit a report once per time that you zone. Thank you.
 #define NOW_INVISIBLE				12950	//%1 is now Invisible.
@@ -344,3 +344,4 @@
 #define GENERIC_MISS				15041	//%1 missed %2
 
 #endif
+

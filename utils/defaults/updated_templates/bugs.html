@@ -10,13 +10,13 @@
     function GetStatusIdx() {
         return idx++;
     }
-    
+
     var offset = 0;
     function StatusTic() {
         $.getJSON("data/bug_data.html?offset="+offset+"&idx="+GetStatusIdx(),
         function(data) {
             var elm = document.getElementById("open_bugs_count");
-            
+
             var cur_offset = offset / 50;
             var sep = (data.total_bug_count / 50);
             var app = "";
@@ -31,7 +31,7 @@
                 }
             }
             elm.innerHTML = app;
-            
+
             $("#bug_table").empty();
             var app_html = "<tr>";
             app_html += "<th scope=\"col\">Actions</th>";
@@ -41,7 +41,7 @@
             app_html += "<th scope=\"col\">Descripton</th>";
             app_html += "</tr>";
             $("#bug_table").append(app_html);
-            for(var i = 0; i < data.bug_count; i++) { 
+            for(var i = 0; i < data.bug_count; i++) {
                 app_html = "";
                 var mod = i % 2;
                 if(mod == 1) {
@@ -49,7 +49,7 @@
                 } else {
                     app_html += "<tr>";
                 }
-                
+
                 var bug_text = data.bugs[i].bug;
                 bug_text = bug_text.replace("\r", "");
                 bug_text = bug_text.replace("\n", "</br>");
@@ -59,16 +59,16 @@
                 app_html += "<td>"+data.bugs[i].target+"</td>";
                 app_html += "<td style=\"text-align:left;\">"+bug_text+"</td>";
                 app_html += "</tr>";
-                $("#bug_table").append(app_html); 
+                $("#bug_table").append(app_html);
             }
         });
     }
-    
+
     function OpenBugs(off) {
         offset = off;
         StatusTic();
     }
-    
+
     function ResolveBug(id) {
         $.getJSON("actions/bug_action.html?action=resolve&bug_id="+id+"&idx="+GetStatusIdx(),
         function(data) {
@@ -76,11 +76,11 @@
                 alert(data.message);
                 return;
             }
-            
+
             StatusTic();
         });
     }
-    
+
     $(document).ready(function() {
         setInterval("StatusTic()", 15000);
     });
@@ -103,7 +103,7 @@
                 for(my $i = 0; $i < $sep; ++$i) {
                     my $cur = 50 * $i;
                     my $name = $i + 1;
-                    
+
                     if($i == $cur_offset) {
                         print "<b>$name</b> ";
                     }
@@ -128,13 +128,13 @@
                     if(!$bug) {
                         next;
                     }
-                    
+
                     if($i % 2 == 1) {
                         print "<tr class=\"odd\">";
                     } else {
                         print "<tr>";
                     }
-                    
+
                     my $bug_val = $bug->{bug};
                     $bug_val =~ s/\r//g;
                     $bug_val =~ s/\n/<br>/g;

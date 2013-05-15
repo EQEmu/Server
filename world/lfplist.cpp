@@ -1,19 +1,19 @@
-/*	EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2008  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; version 2 of the License.
-  
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "lfplist.h"
@@ -58,7 +58,7 @@ void GroupLFP::SetDetails(ServerLFPUpdate_Struct *Update) {
 	}
 
 	for(unsigned int i=0; i<MAX_GROUP_MEMBERS; i++) {
-		strcpy(Members[i].Name,Update->Members[i].Name); 
+		strcpy(Members[i].Name,Update->Members[i].Name);
 		// If we were passed the class/level and zone information, use that.
 		if(Update->Members[i].Class && Update->Members[i].Level && Update->Members[i].Zone) {
 			Members[i].Class = Update->Members[i].Class;
@@ -99,7 +99,7 @@ void GroupLFPList::Process() {
 	// Once a minute, check for clients in a LFP group who are no longer connected, and remove them.
 	// If the client that posted the LFP group has gone, remove the entire LFP entry.
 	//
-	// We also update the level, class and zone for each member of the group. Their class will usually 
+	// We also update the level, class and zone for each member of the group. Their class will usually
 	// never change, but if the LFP group is posted while a member is zoning, it will initially be
 	// 'Unknown Class', so we will fill it in here.
 
@@ -115,7 +115,7 @@ void GroupLFPList::Process() {
 		Group = Iterator.GetData();
 		int MemberCount = 0;
 		if(Group) {
-		 	GroupLFPMemberEntry* GroupMembers = Group->Members;
+			GroupLFPMemberEntry* GroupMembers = Group->Members;
 			if(!GroupMembers) {
 				Iterator.Advance();
 				continue;
@@ -129,7 +129,7 @@ void GroupLFPList::Process() {
 					// The first member entry is always the person who posted the LFP group, either
 					// a single ungrouped player, or the leader of the group. If (s)he is gone, remove
 					// the group from LFP.
-					if(i==0) break; 
+					if(i==0) break;
 					Group->RemoveMember(i);
 				}
 				else {
@@ -193,7 +193,7 @@ void GroupLFPList::UpdateGroup(ServerLFPUpdate_Struct *Update) {
 
 	Group = new GroupLFP(Update->LeaderID);
 
-	if(Group)  {
+	if(Group) {
 		Group->SetDetails(Update);
 		LFPGroupList.Append(Group);
 	}
@@ -266,12 +266,12 @@ void GroupLFPList::SendLFPMatches(ServerLFPMatchesRequest_Struct* smrs) {
 
 	ClientListEntry* CLE = client_list.FindCharacter(smrs->FromName);
 	if (CLE != nullptr) {
-		if (CLE->Server() != nullptr) 
+		if (CLE->Server() != nullptr)
 			CLE->Server()->SendPacket(Pack);
 	}
 	else {
 		ZoneServer* zs = zoneserver_list.FindByName(smrs->FromName);
-		if (zs != nullptr) 
+		if (zs != nullptr)
 			zs->SendPacket(Pack);
 	}
 	safe_delete(Pack);

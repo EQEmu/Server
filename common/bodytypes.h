@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef BODYTYPES_H
 #define BODYTYPES_H
@@ -25,7 +25,7 @@ typedef enum {
 	BT_Giant			= 4,
 	BT_Construct		= 5,
 	BT_Extraplanar		= 6,
-	BT_Magical			= 7,	//this name might be a bit off, 
+	BT_Magical			= 7,	//this name might be a bit off,
 	BT_SummonedUndead	= 8,
 	BT_RaidGiant		= 9,
 	//					...
@@ -45,7 +45,7 @@ typedef enum {
 	BT_Dragon			= 26,
 	BT_Summoned2		= 27,
 	BT_Summoned3		= 28,
-	//					  29
+						//29
 	BT_VeliousDragon	= 30,	//might not be a tight set
 	//					...
 	BT_Dragon3			= 32,

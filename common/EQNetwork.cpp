@@ -1,21 +1,21 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-/* 
+/*
  * EQStream classes, by Quagmire
 */
 
@@ -60,18 +60,18 @@ using namespace std;
 #define LOG_RAW_PACKETS_IN	0
 //#define PRIORITYTEST
 
-template <typename type>                    // LO_BYTE
-type  LO_BYTE (type a) {return (a&=0xff);}  
-template <typename type>                    // HI_BYTE 
-type  HI_BYTE (type a) {return (a&=0xff00);} 
-template <typename type>                    // LO_WORD
-type  LO_WORD (type a) {return (a&=0xffff);}  
-template <typename type>                    // HI_WORD 
-type  HI_WORD (type a) {return (a&=0xffff0000);} 
-template <typename type>                    // HI_LOSWAPshort
-type  HI_LOSWAPshort (type a) {return (LO_BYTE(a)<<8) | (HI_BYTE(a)>>8);}  
-template <typename type>                    // HI_LOSWAPlong
-type  HI_LOSWAPlong (type x) {return (LO_WORD(a)<<16) | (HIWORD(a)>>16);}  
+template <typename type>					// LO_BYTE
+type LO_BYTE (type a) {return (a&=0xff);}
+template <typename type>					// HI_BYTE
+type HI_BYTE (type a) {return (a&=0xff00);}
+template <typename type>					// LO_WORD
+type LO_WORD (type a) {return (a&=0xffff);}
+template <typename type>					// HI_WORD
+type HI_WORD (type a) {return (a&=0xffff0000);}
+template <typename type>					// HI_LOSWAPshort
+type HI_LOSWAPshort (type a) {return (LO_BYTE(a)<<8) | (HI_BYTE(a)>>8);}
+template <typename type>					// HI_LOSWAPlong
+type HI_LOSWAPlong (type x) {return (LO_WORD(a)<<16) | (HIWORD(a)>>16);}
 
 EQStreamServer::EQStreamServer(uint16 iPort) {
 	RunLoop = false;
@@ -125,8 +125,8 @@ bool EQStreamServer::Open(uint16 iPort) {
 		unsigned long nonblocking = 1;
 #endif
 
-	  /* Setup internet address information.  
-		 This is used with the bind() call */
+		/* Setup internet address information.
+		This is used with the bind() call */
 		memset((char *) &address, 0, sizeof(address));
 		address.sin_family = AF_INET;
 		address.sin_port = htons(pPort);
@@ -206,14 +206,14 @@ void EQStreamServer::Process() {
 		return;
 	}
 
-    uchar		buffer[1518];
-	
-    int			status;
-    struct sockaddr_in	from;
-    unsigned int	fromlen;
+	uchar		buffer[1518];
 
-    from.sin_family = AF_INET;
-    fromlen = sizeof(from);
+	int			status;
+	struct sockaddr_in	from;
+	unsigned int	fromlen;
+
+	from.sin_family = AF_INET;
+	fromlen = sizeof(from);
 
 	while (1) {
 #ifdef WIN32
@@ -240,13 +240,13 @@ void EQStreamServer::Process() {
 			connection_list.erase(tmp);
 			continue;
 		}
-		EQStream* eqs_data = connection->second; 
-		if (eqs_data->IsFree() && (!eqs_data->CheckNetActive())) { 
+		EQStream* eqs_data = connection->second;
+		if (eqs_data->IsFree() && (!eqs_data->CheckNetActive())) {
 			map <string, EQStream*>::iterator tmp=connection;
 			connection++;
 			safe_delete(eqs_data);
 			connection_list.erase(tmp);
-		} 
+		}
 		else if(!eqs_data->RunLoop) {
 			eqs_data->Process(sock);
 			connection++;
@@ -285,13 +285,13 @@ void EQStreamServer::RecvData(uchar* data, uint32 size, uint32 irIP, uint16 irPo
 		tmp->RecvData(data, size);
 		return;
 	}
-	else if(tmp != NULL  && tmp->GetrPort() != irPort)
+	else if(tmp != NULL && tmp->GetrPort() != irPort)
 	{
 		printf("Conflicting IPs & Ports: IP %i and Port %i is conflicting with IP %i and Port %i\n",irIP,irPort,tmp->GetrIP(),tmp->GetrPort());
 		return;
 	}
 
-	if (data[1]==0x01) { 
+	if (data[1]==0x01) {
 		cout << "New EQStream Connection." << endl;
 		EQStream* tmp = new EQStream(irIP, irPort);
 		tmp->RecvData(data, size);
