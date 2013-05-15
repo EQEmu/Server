@@ -3266,7 +3266,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 					{
 						Mob *targ = GetTarget();
 						if(targ->GetAppearance() != eaDead)
-							targ->FaceTarget(targ);
+							targ->FaceTarget(this);
                         parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
                         parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
 					}
@@ -6301,7 +6301,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	}
 
 	char buf[20];
-	snprintf(buf, 19, "%u %u", cd->doorid, zone->GetInstanceVersion());
+	snprintf(buf, 19, "%u", cd->doorid);
 	buf[19] = '\0';
     parse->EventPlayer(EVENT_CLICKDOOR, this, buf, 0);
 
@@ -9629,8 +9629,9 @@ void Client::CompleteConnect()
 
 	parse->EventPlayer(EVENT_ENTERZONE, this, "", 0);
 
+	//This sub event is for if a player logs in for the first time since entering world.
 	if(firstlogon == 1)
-		parse->EventPlayer(EVENT_CONNECT, this, "", 0); //This sub event is for if a player logs in for the first time since entering world.
+		parse->EventPlayer(EVENT_CONNECT, this, "", 0);
 
 	if(zone)
 	{
@@ -10665,8 +10666,8 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 			break;
 	}
 
-	char *buf = 0;
-	MakeAnyLenString(&buf, "%d", prs->popupid);
+	char buf[16];
+	sprintf(buf, "%d\0", prs->popupid);
 
 	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
 
@@ -10674,8 +10675,6 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 	if(Target && Target->IsNPC()) {
         parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
 	}
-
-	safe_delete_array(buf);
 }
 
 void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {

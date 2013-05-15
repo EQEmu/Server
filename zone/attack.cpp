@@ -1425,7 +1425,12 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	if(dead)
 		return;	//cant die more than once...
 
-	if(parse->EventPlayer(EVENT_DEATH, this, "", 0) == 1) {
+	if(!spell) 
+		spell = SPELL_UNKNOWN;
+
+	char buffer[48] = { 0 };
+	snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
+	if(parse->EventPlayer(EVENT_DEATH, this, buffer, 0) != 0) {
 		return;
 	}
 
@@ -1437,7 +1442,6 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	// #1: Send death packet to everyone
 	//
 	uint8 killed_level = GetLevel();
-	if(!spell) spell = SPELL_UNKNOWN;
 	
 	SendLogoutPackets();
 	
@@ -2044,7 +2048,10 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	Mob *oos = nullptr;
 	if(killerMob) {
 		Mob *oos = killerMob->GetOwnerOrSelf();
-		if(parse->EventNPC(EVENT_DEATH, this, oos, "", 0) != 0)
+
+		char buffer[32] = { 0 };
+		snprintf(buffer, 31, "%d %d %d", damage, spell, static_cast<int>(attack_skill));
+		if(parse->EventNPC(EVENT_DEATH, this, oos, buffer, 0) != 0)
 		{
 			return;
 		}

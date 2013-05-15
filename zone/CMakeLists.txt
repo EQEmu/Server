@@ -33,6 +33,7 @@ SET(zone_sources
     loottables.cpp
 	lua_client.cpp
 	lua_entity.cpp
+	lua_item.cpp
 	lua_mob.cpp
 	lua_npc.cpp
 	lua_parser.cpp
@@ -116,6 +117,7 @@ SET(zone_headers
     horse.h
 	lua_client.h
 	lua_entity.h
+	lua_item.h
 	lua_mob.h
 	lua_npc.h
 	lua_parser.h

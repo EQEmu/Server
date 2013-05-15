@@ -1141,9 +1141,8 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 
 		case EVENT_CLICKDOOR: {
-			Seperator sep(data);
-			ExportVar(package_name.c_str(), "doorid", sep.arg[0]);
-			ExportVar(package_name.c_str(), "version", sep.arg[1]);
+			ExportVar(package_name.c_str(), "doorid", data);
+			ExportVar(package_name.c_str(), "version", zone->GetInstanceVersion());
 			break;
 		}
 

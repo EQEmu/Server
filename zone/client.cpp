@@ -1076,7 +1076,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 
 						Mob *targ = GetTarget();
 						if(targ->GetAppearance() != eaDead)
-							targ->FaceTarget(targ);
+							targ->FaceTarget(this);
                         parse->EventNPC(EVENT_SAY, targ->CastToNPC(), this, message, language);
 					}
 				}	

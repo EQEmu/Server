@@ -2817,9 +2817,9 @@ void Mob::SetTarget(Mob* mob) {
 	target = mob;
 	entity_list.UpdateHoTT(this);
 	if(IsNPC())
-		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0); //parse->Event(EVENT_TARGET_CHANGE, this->GetNPCTypeID(), 0, this->CastToNPC(), mob);
+		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0);
 	else if (IsClient())
-        parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0); //parse->Event(EVENT_TARGET_CHANGE, 0, "", (NPC*)nullptr, this->CastToClient());
+        parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
 
 	if(IsPet() && GetOwner() && GetOwner()->IsClient())
 		GetOwner()->CastToClient()->UpdateXTargetType(MyPetTarget, mob);	

@@ -1211,10 +1211,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			this->CastToClient()->CheckSongSkillIncrease(spell_id);
 			this->CastToClient()->MemorizeSpell(slot, spell_id, memSpellSpellbar);
 		}
-		// go again in 6 seconds
-		//this is handled with bardsong_timer
-		//		DoCastSpell(casting_spell_id, casting_spell_targetid, casting_spell_slot, 6000, casting_spell_mana);
-
 		mlog(SPELLS__CASTING, "Bard song %d should be started", spell_id);
 	}
 	else

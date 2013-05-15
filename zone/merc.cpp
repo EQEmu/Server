@@ -4805,37 +4805,6 @@ void Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_sk
 
 	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
 
-	//if (give_exp_client && !IsCorpse() && MerchantType == 0)
-	//{
-	//	Group *kg = entity_list.GetGroupByClient(give_exp_client);
-	//	Raid *kr = entity_list.GetRaidByClient(give_exp_client);
-
-	//	if(!kr && give_exp_client->IsClient() && give_exp_client->GetBotRaidID() > 0) {
-	//		BotRaids *br = entity_list.GetBotRaidByMob(give_exp_client->CastToMob());
-	//		if(br) {
-	//			if(!IsLdonTreasure)
-	//				br->SplitExp((EXP_FORMULA), this);
-
-	//			if(br->GetBotMainTarget() == this)
-	//				br->SetBotMainTarget(nullptr);
-
-	//			/* Send the EVENT_KILLED_MERIT event for all raid members */
-	//			if(br->BotRaidGroups[0]) {
-	//				for(int j=0; j<MAX_GROUP_MEMBERS; j++) {
-	//					if(br->BotRaidGroups[0]->members[j] && br->BotRaidGroups[0]->members[j]->IsClient()) {
-	//						parse->Event(EVENT_KILLED_MERIT, GetNPCTypeID(), "killed", this, br->BotRaidGroups[0]->members[j]);
-	//						if(RuleB(TaskSystem, EnableTaskSystem)) {
-	//							br->BotRaidGroups[0]->members[j]->CastToClient()->UpdateTasksOnKill(GetNPCTypeID());
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
-
-	//corpse->Depop();
-
 	//no corpse, no exp if we're a merc. We'll suspend instead, since that's what live does. I'm not actually sure live supports 'depopping' merc corpses.
 	if(entity_list.GetCorpseByID(GetID()))
 		entity_list.GetCorpseByID(GetID())->Depop();
