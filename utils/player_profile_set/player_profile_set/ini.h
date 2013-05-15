@@ -19,7 +19,7 @@ public:
 	~INIParser();
 	void Parse();
 	void ReadLine(FILE *fp, char *Option, char *Param);
-	
+
 	void AddOption(std::string option, std::string param);
 	std::string GetOption(std::string option);
 

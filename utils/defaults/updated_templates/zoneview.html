@@ -10,13 +10,13 @@
     function GetStatusIdx() {
         return idx++;
     }
-    
+
     function StatusTic() {
         $.getJSON("data/zone_data.html?idx="+GetStatusIdx(),
             function(data) {
                 var elm = document.getElementById('zone_count');
                 elm.innerHTML = data.zone_count;
-                
+
                 $("#zone_table").empty();
                 var app_html = "<tr>";
                 app_html += "<th scope=\"col\">Zone Name </th>";
@@ -24,7 +24,7 @@
                 app_html += "<th scope=\"col\">Players</th>";
                 app_html += "</tr>";
                 $("#zone_table").append(app_html);
-                
+
                 var i = 0;
                 for(var i = 0; i < data.zone_count; i++) {
                     app_html = "<tr>";
@@ -37,16 +37,16 @@
                     } else {
                         app_html += "<td>" + data.zones[i].long_name + " (" + data.zones[i].short_name + ")</td>";
                     }
-                    
+
                     app_html += "<td>" + data.zones[i].instance_id + "</td>";
                     app_html += "<td><a href='playerview.html?zone=" + data.zones[i].short_name + "&instance=" + data.zones[i].instance_id + "'>Players</a></td>";
                     app_html += "</tr>";
-                
+
                     $("#zone_table").append(app_html);
                 }
             });
     }
-        
+
     $(document).ready(function() {
         setInterval("StatusTic()", 4000);
     });
@@ -101,7 +101,7 @@
                     print "</tr>\n";
               }
             ?>
-            </table>        
+            </table>
         </div>
     </div>
     <div class="footer">

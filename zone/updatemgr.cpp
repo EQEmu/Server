@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/features.h"
@@ -27,17 +27,16 @@
 //these values are pulled out of my ass, should be tuned some day
 const float UpdateManager::level_distances2[UPDATE_LEVELS]
 	= { 50*50, 250*250, 500*500, 800*800 };
-	
+
 //delay between sending packets in each level, in ms
 //its best if they are all multiples of UPDATE_RESOLUTION
 //these values are pulled out of my ass, should be tuned some day
-const uint32 UpdateManager::level_timers[UPDATE_LEVELS+1]
-	= { UPDATE_RESOLUTION,		//.3s
-		2*UPDATE_RESOLUTION, 	//.6s
+const uint32 UpdateManager::level_timers[UPDATE_LEVELS+1] = { UPDATE_RESOLUTION, //.3s
+		2*UPDATE_RESOLUTION,	//.6s
 		3*UPDATE_RESOLUTION,	//.9s
 		9*UPDATE_RESOLUTION,	//~2s
 		34*UPDATE_RESOLUTION	//~10s
-	  };
+	};
 
 
 /*
@@ -45,14 +44,14 @@ const uint32 UpdateManager::level_timers[UPDATE_LEVELS+1]
 	opcodes contain the same info at different times, and will prefer
 	to send only the most recent packet. If this is bad, then this
 	thing needs a redesign.
-	
+
 */
 
 //build a unique ID based on opcode and mob id..
 #define MakeUpdateID(mob, app) (((mob->GetID())<<12) | (app->GetOpcode()&0xFFF))
 
 UpdateManager::UpdateManager(EQStream *c)
- : limiter(UPDATE_RESOLUTION)   
+ : limiter(UPDATE_RESOLUTION)
 {
 	net = c;
 	int r;
@@ -150,7 +149,7 @@ if(level > 0)
 	}
 	}
 }*/
-	
+
 	UMMap::iterator cur,end;
 	UMMap *curm;
 	UMMap *om = levels + level;
@@ -158,7 +157,7 @@ if(level > 0)
 	end = om->end();
 	uint32 key;
 	int r;
-	
+
 	while(cur != end) {
 		key = cur->first;
 		//relies on fast queue setting .app to null if it eats it
@@ -167,7 +166,7 @@ if(level > 0)
 //EQApplicationPacket::PacketUsed(&cur->second.app);
 		cur++;
 		om->erase(key);
-		
+
 		//need to clear our any updates in slower levels
 		//so mobs dont jump backwards from old updates
 		curm = om + 1;
@@ -185,10 +184,4 @@ if(level > 0)
 
 
 #endif	//PACKET_UPDATE_MANAGER
-
-
-
-
-
-
 

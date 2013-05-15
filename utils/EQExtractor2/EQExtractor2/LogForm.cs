@@ -21,6 +21,6 @@ namespace EQExtractor2
             e.Cancel = true;
             this.Hide();
         }
-              
+
     }
 }

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/rulesys.h"
@@ -56,7 +56,7 @@ server after the world server, or inbetween zones when that is finished
 /*
 Establish a connection to a mysql database with the supplied parameters
 
-  Added a very simple .ini file parser - Bounce
+	Added a very simple .ini file parser - Bounce
 
 	Modify to use for win32 & linux - misanthropicfiend
 */
@@ -158,9 +158,9 @@ Zero will also be returned if there is a database error.
 */
 uint32 Database::CheckLogin(const char* name, const char* password, int16* oStatus) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if(strlen(name) >= 50 || strlen(password) >= 50)
 		return(0);
@@ -202,53 +202,53 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 }
 
 
-//Lieka:  Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
+//Lieka: Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
 bool Database::CheckBannedIPs(const char* loginIP)
 {
- 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
- 	//cout << "Checking against Banned IPs table."<< endl; //Lieka:  Debugging
- 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP), errbuf, &result)) {
- 		safe_delete_array(query);
- 		if (mysql_num_rows(result) != 0)
- 		{
- 			//cout << loginIP << " was present in the banned IPs table" << endl; //Lieka:  Debugging
- 			mysql_free_result(result);
- 			return true;
- 		}
- 		else
- 		{
- 			//cout << loginIP << " was not present in the banned IPs table." << endl; //Lieka:  Debugging
- 			mysql_free_result(result);
- 			return false;
- 		}
- 		mysql_free_result(result);
- 	}
- 	else
- 	{
- 		cerr << "Error in CheckBannedIPs query '" << query << "' " << errbuf << endl;
- 		safe_delete_array(query);
- 		return true;
- 	}
- 	return true;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	//cout << "Checking against Banned IPs table."<< endl; //Lieka: Debugging
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP), errbuf, &result)) {
+		safe_delete_array(query);
+		if (mysql_num_rows(result) != 0)
+		{
+			//cout << loginIP << " was present in the banned IPs table" << endl; //Lieka: Debugging
+			mysql_free_result(result);
+			return true;
+		}
+		else
+		{
+			//cout << loginIP << " was not present in the banned IPs table." << endl; //Lieka: Debugging
+			mysql_free_result(result);
+			return false;
+		}
+		mysql_free_result(result);
+	}
+	else
+	{
+		cerr << "Error in CheckBannedIPs query '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+		return true;
+	}
+	return true;
 }
 
 bool Database::AddBannedIP(char* bannedIP, const char* notes)
 {
- 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
 
- 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes), errbuf)) {
- 		cerr << "Error in ReserveName query '" << query << "' " << errbuf << endl;
- 		safe_delete_array(query);
- 		return false;
- 	}
- 	safe_delete_array(query);
- 	return true;
+	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes), errbuf)) {
+		cerr << "Error in ReserveName query '" << query << "' " << errbuf << endl;
+		safe_delete_array(query);
+		return false;
+	}
+	safe_delete_array(query);
+	return true;
 }
  //End Lieka Edit
- 
+
  bool Database::CheckGMIPs(const char* ip_address, uint32 account_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -268,7 +268,7 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
 		safe_delete_array(query);
 		return false;
 	}
-	
+
 	return false;
 }
 
@@ -287,12 +287,12 @@ bool Database::AddGMIP(char* ip_address, char* name) {
 void Database::LoginIP(uint32 AccountID, const char* LoginIP)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP), errbuf)) {
- 		cerr << "Error in Log IP query '" << query << "' " << errbuf << endl;
- 	}
- 	safe_delete_array(query);
+		cerr << "Error in Log IP query '" << query << "' " << errbuf << endl;
+	}
+	safe_delete_array(query);
 }
 
 int16 Database::CheckStatus(uint32 account_id)
@@ -303,7 +303,7 @@ int16 Database::CheckStatus(uint32 account_id)
 	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
-						     " FROM `account` WHERE `id` = %i", account_id), errbuf, &result))
+							" FROM `account` WHERE `id` = %i", account_id), errbuf, &result))
 	{
 		safe_delete_array(query);
 
@@ -343,7 +343,7 @@ int16 Database::CheckStatus(uint32 account_id)
 
 uint32 Database::CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32 querylen;
 	uint32 last_insert_id;
 
@@ -370,7 +370,7 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 
 bool Database::DeleteAccount(const char* name) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32 affected_rows = 0;
 
 	cerr << "Account Attempting to be deleted:" << name << endl;
@@ -391,7 +391,7 @@ bool Database::DeleteAccount(const char* name) {
 
 bool Database::SetLocalPassword(uint32 accid, const char* password) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET password=MD5('%s') where id=%i;", password, accid), errbuf)) {
 		cerr << "Error in SetLocalPassword query '" << query << "' " << errbuf << endl;
@@ -426,7 +426,7 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 bool Database::ReserveName(uint32 account_id, char* name)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into character_ SET account_id=%i, name='%s', profile=NULL", account_id, name), errbuf)) {
 		cerr << "Error in ReserveName query '" << query << "' " << errbuf << endl;
@@ -651,34 +651,34 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-    printf(" keyring");
+	printf(" keyring");
 #endif
-    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM keyring WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
-    if(query)
-    {
-        safe_delete_array(query);
-        query = nullptr;
-    }
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM keyring WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
+	if(query)
+	{
+		safe_delete_array(query);
+		query = nullptr;
+	}
 
 #if DEBUG >= 5
-    printf(" factions");
+	printf(" factions");
 #endif
-    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM faction_values WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
-    if(query)
-    {
-        safe_delete_array(query);
-        query = nullptr;
-    }
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM faction_values WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
+	if(query)
+	{
+		safe_delete_array(query);
+		query = nullptr;
+	}
 
 #if DEBUG >= 5
-    printf(" instances");
+	printf(" instances");
 #endif
-    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_lockout_player WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
-    if(query)
-    {
-        safe_delete_array(query);
-        query = nullptr;
-    }
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_lockout_player WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
+	if(query)
+	{
+		safe_delete_array(query);
+		query = nullptr;
+	}
 
 #if DEBUG >= 5
 	printf(" _character");
@@ -696,14 +696,14 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-    printf(" alternate currency");
+	printf(" alternate currency");
 #endif
-    RunQuery(query, MakeAnyLenString(&query, "DELETE FROM character_alt_currency WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
-    if(query)
-    {
-        safe_delete_array(query);
-        query = nullptr;
-    }
+	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM character_alt_currency WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
+	if(query)
+	{
+		safe_delete_array(query);
+		query = nullptr;
+	}
 
 #if DEBUG >= 5
 	printf("\n");
@@ -744,7 +744,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 		errbuf,
 		&result
 	)) {
-        safe_delete_array(charidquery);
+		safe_delete_array(charidquery);
 		LogFile->write(EQEMuLog::Error, "Error in char store id query: %s: %s", charidquery, errbuf);
 		return(false);
 	}
@@ -816,15 +816,15 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 			RunQuery(invquery, strlen(invquery), errbuf, 0, &affected_rows);
 			if(!affected_rows)
 			{
-				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed.  Query '%s' %s", invquery, errbuf);
+				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery, errbuf);
 			}
 #if EQDEBUG >= 9
 			else
 			{
-				LogFile->write(EQEMuLog::Debug, "StoreCharacter inventory succeeded.  Query '%s' %s", invquery, errbuf);
+				LogFile->write(EQEMuLog::Debug, "StoreCharacter inventory succeeded. Query '%s' %s", invquery, errbuf);
 			}
 #endif
-            safe_delete_array(invquery);
+			safe_delete_array(invquery);
 		}
 
 		if(i==30){ //end of standard inventory/cursor, jump to internals of bags/cursor
@@ -859,9 +859,9 @@ Zero will also be returned if there is a database error.
 */
 uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT account_id, id FROM character_ WHERE name='%s'", charname), errbuf, &result)) {
 		safe_delete_array(query);
@@ -887,9 +887,9 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 // Retrieve account_id for a given char_id
 uint32 Database::GetAccountIDByChar(uint32 char_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char* query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	uint32 ret = 0;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT account_id FROM character_ WHERE id=%i", char_id), errbuf, &result)) {
@@ -909,9 +909,9 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 
 uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* lsid) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 
 	for (unsigned int i=0; i<strlen(accname); i++) {
@@ -949,9 +949,9 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 
 void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name, lsaccount_id FROM account WHERE id='%i'", accountid), errbuf, &result)) {
 		safe_delete_array(query);
@@ -974,9 +974,9 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 
 void Database::GetCharName(uint32 char_id, char* name) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name FROM character_ WHERE id='%i'", char_id), errbuf, &result)) {
 		safe_delete_array(query);
@@ -997,8 +997,8 @@ void Database::GetCharName(uint32 char_id, char* name) {
 
 bool Database::LoadVariables() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char *query = 0;
+	MYSQL_RES *result;
 
 	if (RunQuery(query, LoadVariables_MQ(&query), errbuf, &result)) {
 		safe_delete_array(query);
@@ -1021,7 +1021,7 @@ uint32 Database::LoadVariables_MQ(char** query) {
 
 bool Database::LoadVariables_result(MYSQL_RES* result) {
 	uint32 i;
-    MYSQL_ROW row;
+	MYSQL_ROW row;
 	LockMutex lock(&Mvarcache);
 	if (mysql_num_rows(result) > 0) {
 		if (!varcache_array) {
@@ -1099,7 +1099,7 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 
 bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32 affected_rows = 0;
 
 	char *varname,*varvalue;
@@ -1140,8 +1140,8 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 
 uint32 Database::GetMiniLoginAccount(char* ip){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char *query = 0;
+	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 retid = 0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM account WHERE minilogin_ip='%s'", ip), errbuf, &result)) {
@@ -1161,11 +1161,11 @@ uint32 Database::GetMiniLoginAccount(char* ip){
 // Pyro: Get zone starting points from DB
 bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, char *flag_needed) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	//	int buf_len = 256;
-	//    int chars = -1;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	//	int chars = -1;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query,
 		"SELECT safe_x, safe_y, safe_z, min_status, min_level, "
@@ -1208,9 +1208,9 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 
 bool Database::GetZoneLongName(const char* short_name, char** long_name, char* file_name, float* safe_x, float* safe_y, float* safe_z, uint32* graveyard_id, uint32* maxclients) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT long_name, file_name, safe_x, safe_y, safe_z, graveyard_id, maxclients FROM zone WHERE short_name='%s' AND version=0", short_name), errbuf, &result))
 	{
@@ -1252,10 +1252,10 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 }
 uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-    uint32 GraveyardID = 0;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	uint32 GraveyardID = 0;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT graveyard_id FROM zone WHERE zoneidnumber='%u' AND (version=%i OR version=0) ORDER BY version DESC", zone_id, version), errbuf, &result))
 	{
@@ -1277,9 +1277,9 @@ uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 
 bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid, float* graveyard_x, float* graveyard_y, float* graveyard_z, float* graveyard_heading) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT zone_id, x, y, z, heading FROM graveyard WHERE id=%i", graveyard_id), errbuf, &result))
 	{
@@ -1313,9 +1313,9 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 
 bool Database::LoadZoneNames() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	query = new char[256];
 	strcpy(query, "SELECT MAX(zoneidnumber) FROM zone");
 
@@ -1379,17 +1379,17 @@ const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
 		else
 			return 0;
 	}
-	
+
 	if (zoneID <= max_zonename) {
-  		if (zonename_array[zoneID])
-  			return zonename_array[zoneID];
-  		else {
-  			if (ErrorUnknown)
-  				return "UNKNOWN";
-  			else
-  				return 0;
-  		}
-  	}
+		if (zonename_array[zoneID])
+			return zonename_array[zoneID];
+		else {
+			if (ErrorUnknown)
+				return "UNKNOWN";
+			else
+				return 0;
+		}
+	}
 	else {
 		if (ErrorUnknown)
 			return "UNKNOWN";
@@ -1401,14 +1401,14 @@ const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
 
 uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char *query = 0;
+	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int peqzone = 0;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version), errbuf, &result)) 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version), errbuf, &result))
 	{
-		if (mysql_num_rows(result) > 0) 
+		if (mysql_num_rows(result) > 0)
 		{
 			row = mysql_fetch_row(result);
 			peqzone = atoi(row[0]);
@@ -1425,7 +1425,7 @@ uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 	return peqzone;
 }
 
-bool Database::CheckNameFilter(const char* name, bool surname) 
+bool Database::CheckNameFilter(const char* name, bool surname)
 {
 	std::string str_name = name;
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -1512,7 +1512,7 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 
 bool Database::AddToNameFilter(const char* name) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32 affected_rows = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO name_filter (name) values ('%s')", name), errbuf, 0, &affected_rows)) {
@@ -1532,9 +1532,9 @@ bool Database::AddToNameFilter(const char* name) {
 
 uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* oStatus) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, name, status FROM account WHERE lsaccount_id=%i", iLSID), errbuf, &result))
 	{
@@ -1567,9 +1567,9 @@ uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* o
 
 void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name, status FROM account WHERE id=%i", id), errbuf, &result))
 	{
@@ -1589,7 +1589,7 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 
 void Database::ClearMerchantTemp(){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "delete from merchantlist_temp"), errbuf)) {
 		cerr << "Error in ClearMerchantTemp query '" << query << "' " << errbuf << endl;
@@ -1599,7 +1599,7 @@ void Database::ClearMerchantTemp(){
 
 bool Database::UpdateName(const char* oldname, const char* newname) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	uint32	affected_rows = 0;
 
 	cout << "Renaming " << oldname << " to " << newname << "..." << endl;
@@ -1622,7 +1622,7 @@ bool Database::CheckUsedName(const char* name)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-    MYSQL_RES *result;
+	MYSQL_RES *result;
 	//if (strlen(name) > 15)
 	//	return false;
 	if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM character_ where name='%s'", name), errbuf, &result)) {
@@ -1634,7 +1634,7 @@ bool Database::CheckUsedName(const char* name)
 		safe_delete_array(query);
 		uint32 tmp = mysql_num_rows(result);
 		mysql_free_result(result);
-		if (tmp > 0) // There is a Name!  No change (Return False)
+		if (tmp > 0) // There is a Name! No change (Return False)
 			return false;
 		else // Everything is okay, so we go and do this.
 			return true;
@@ -1749,15 +1749,15 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 	char* end=query2;
 
 	end += sprintf(end, "INSERT INTO character_ SET zonename=\'%s\', x = %f, y = %f, z = %f, profile=\'", GetZoneName(pp->zone_id), pp->x, pp->y, pp->z);
-    end += DoEscapeString(end, (char*) pp, sizeof(PlayerProfile_Struct));
+	end += DoEscapeString(end, (char*) pp, sizeof(PlayerProfile_Struct));
 	end += sprintf(end,"\', extprofile=\'");
 	end += DoEscapeString(end, (char*) ext, sizeof(ExtendedProfile_Struct));
-    end += sprintf(end, "\', account_id=%d, name='%s'", acctid, newname);
+	end += sprintf(end, "\', account_id=%d, name='%s'", acctid, newname);
 
 	if (!RunQuery(query2, (uint32) (end - query2), errbuf, 0, &affected_rows)) {
-        cerr << "Error in CopyCharacter query '" << query << "' " << errbuf << endl;
+		cerr << "Error in CopyCharacter query '" << query << "' " << errbuf << endl;
 		return 0;
-    }
+	}
 
 	// @merth: Need to copy inventory as well (and shared bank?)
 	if (affected_rows == 0) {
@@ -1884,9 +1884,9 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 
 uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZoneID, uint32* oInstanceID, float* oX, float* oY, float* oZ) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, account_id, zonename, instanceid, x, y, z FROM character_ WHERE name='%s'", iName), errbuf, &result)) {
 		safe_delete_array(query);
@@ -1919,7 +1919,7 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 
 bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET charname='%s' WHERE id=%i;",charname, lsaccount_id), errbuf)) {
 		cerr << "Error in UpdateLiveChar query '" << query << "' " << errbuf << endl;
 		safe_delete_array(query);
@@ -1932,9 +1932,9 @@ bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
 
 bool Database::GetLiveChar(uint32 account_id, char* cname) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charname FROM account WHERE id=%i", account_id), errbuf, &result)) {
 		safe_delete_array(query);
 		if (mysql_num_rows(result) == 1) {
@@ -2015,9 +2015,9 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 	safe_delete_array(escape_str);
 }
 
-void  Database::SetGroupID(const char* name,uint32 id, uint32 charid, uint32 ismerc){
+void Database::SetGroupID(const char* name,uint32 id, uint32 charid, uint32 ismerc){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 	if(id == 0){ //removing you from table
 	if (!RunQuery(query, MakeAnyLenString(&query, "delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc), errbuf))
 		LogFile->write(EQEMuLog::Error, "Error deleting character from group id: %s", errbuf);
@@ -2032,8 +2032,8 @@ void  Database::SetGroupID(const char* name,uint32 id, uint32 charid, uint32 ism
 void Database::ClearGroup(uint32 gid) {
 	ClearGroupLeader(gid);
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-	if(gid == 0) {  //clear all groups
+	char *query = 0;
+	if(gid == 0) { //clear all groups
 		//if (!RunQuery(query, MakeAnyLenString(&query, "update group_id set groupid=0 where groupid!=0"), errbuf))
 		if (!RunQuery(query, MakeAnyLenString(&query, "delete from group_id"), errbuf))
 			printf("Unable to clear groups: %s\n",errbuf);
@@ -2047,8 +2047,8 @@ void Database::ClearGroup(uint32 gid) {
 
 uint32 Database::GetGroupID(const char* name){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char *query = 0;
+	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 groupid=0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT groupid from group_id where name='%s'", name), errbuf, &result)) {
@@ -2069,8 +2069,8 @@ uint32 Database::GetGroupID(const char* name){
 
 char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char *query = 0;
+	MYSQL_RES *result;
 	MYSQL_ROW row;
 	PlayerProfile_Struct pp;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT profile from character_ where name='%s'", name), errbuf, &result)) {
@@ -2091,7 +2091,7 @@ char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
 
 void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "Replace into group_leaders set gid=%lu, leadername='%s'",(unsigned long)gid,name), errbuf))
 		printf("Unable to set group leader: %s\n",errbuf);
@@ -2106,7 +2106,7 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT leadername, maintank, assist, puller, marknpc, leadershipaa FROM group_leaders WHERE gid=%lu",(unsigned long)gid),
-		     errbuf, &result)) {
+			errbuf, &result)) {
 
 		safe_delete_array(query);
 
@@ -2160,8 +2160,8 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 
 void Database::ClearGroupLeader(uint32 gid){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-	if(gid == 0) {  //clear all group leaders
+	char *query = 0;
+	if(gid == 0) { //clear all group leaders
 		if (!RunQuery(query, MakeAnyLenString(&query, "DELETE from group_leaders"), errbuf))
 			printf("Unable to clear group leaders: %s\n",errbuf);
 	} else {	//clear a specific group leader
@@ -2176,7 +2176,7 @@ bool FetchRowMap(MYSQL_RES *result, map<string,string> &rowmap)
 MYSQL_FIELD *fields;
 MYSQL_ROW row;
 unsigned long num_fields,i;
-bool  retval=false;
+bool retval=false;
 	rowmap.clear();
 	if (result && (num_fields=mysql_num_fields(result)) && (row = mysql_fetch_row(result))!=nullptr && (fields = mysql_fetch_fields(result))!=nullptr) {
 		retval=true;
@@ -2227,8 +2227,8 @@ void Database::SetAgreementFlag(uint32 acctid)
 
 void Database::ClearRaid(uint32 rid) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-	if(rid == 0) {  //clear all raids
+	char *query = 0;
+	if(rid == 0) { //clear all raids
 		if (!RunQuery(query, MakeAnyLenString(&query, "delete from raid_members"), errbuf))
 			printf("Unable to clear raids: %s\n",errbuf);
 	} else {	//clear a specific group
@@ -2240,8 +2240,8 @@ void Database::ClearRaid(uint32 rid) {
 
 void Database::ClearRaidDetails(uint32 rid) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-	if(rid == 0) {  //clear all raids
+	char *query = 0;
+	if(rid == 0) { //clear all raids
 		if (!RunQuery(query, MakeAnyLenString(&query, "delete from raid_details"), errbuf))
 			printf("Unable to clear raid details: %s\n",errbuf);
 	} else {	//clear a specific group
@@ -2253,11 +2253,11 @@ void Database::ClearRaidDetails(uint32 rid) {
 
 uint32 Database::GetRaidID(const char* name){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char *query = 0;
+	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 raidid=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT raidid from raid_members where name='%s'", name), 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT raidid from raid_members where name='%s'", name),
 		errbuf, &result)) {
 		if((row = mysql_fetch_row(result)))
 		{
@@ -2279,11 +2279,11 @@ const char *Database::GetRaidLeaderName(uint32 rid)
 	static char name[128];
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
+	char *query = 0;
+	MYSQL_RES *result;
 	MYSQL_ROW row;
-	
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1", 
+
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1",
 		rid), errbuf, &result)) {
 		if((row = mysql_fetch_row(result)) != nullptr)
 		{
@@ -2326,11 +2326,11 @@ bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 	char *query = 0;
 	MYSQL_RES *result;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_lockout where id=%u AND zone=%u", 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_lockout where id=%u AND zone=%u",
 		instance_id, zone_id), errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			mysql_free_result(result);
 			return true;
@@ -2341,7 +2341,7 @@ bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 			return false;
 		}
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return false;
@@ -2356,17 +2356,17 @@ bool Database::CharacterInInstanceGroup(uint16 instance_id, uint32 char_id)
 	MYSQL_RES *result;
 	bool lockout_instance_player = false;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charid FROM instance_lockout_player where id=%u AND charid=%u", 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charid FROM instance_lockout_player where id=%u AND charid=%u",
 		instance_id, char_id), errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) 
+		if (mysql_num_rows(result) == 1)
 		{
 			lockout_instance_player = true;
 		}
 		mysql_free_result(result);
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 	}
@@ -2402,11 +2402,11 @@ bool Database::CheckInstanceExpired(uint16 instance_id)
 	int32 start_time = 0;
 	int32 duration = 0;
 	uint32 never_expires = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_lockout WHERE id=%u", 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_lockout WHERE id=%u",
 		instance_id), errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
 			start_time = atoi(row[0]);
@@ -2420,7 +2420,7 @@ bool Database::CheckInstanceExpired(uint16 instance_id)
 		}
 		mysql_free_result(result);
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return true;
@@ -2448,16 +2448,16 @@ uint32 Database::ZoneIDFromInstanceID(uint16 instance_id)
 	MYSQL_ROW row;
 	uint32 ret;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT zone FROM instance_lockout where id=%u", instance_id), 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT zone FROM instance_lockout where id=%u", instance_id),
 		errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
 			ret = atoi(row[0]);
 			mysql_free_result(result);
-			return ret;			
+			return ret;
 		}
 		else
 		{
@@ -2465,7 +2465,7 @@ uint32 Database::ZoneIDFromInstanceID(uint16 instance_id)
 			return 0;
 		}
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return 0;
@@ -2481,16 +2481,16 @@ uint32 Database::VersionFromInstanceID(uint16 instance_id)
 	MYSQL_ROW row;
 	uint32 ret;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT version FROM instance_lockout where id=%u", instance_id), 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT version FROM instance_lockout where id=%u", instance_id),
 		errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
 			ret = atoi(row[0]);
 			mysql_free_result(result);
-			return ret;			
+			return ret;
 		}
 		else
 		{
@@ -2498,7 +2498,7 @@ uint32 Database::VersionFromInstanceID(uint16 instance_id)
 			return 0;
 		}
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return 0;
@@ -2516,11 +2516,11 @@ uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 	uint32 duration = 0;
 	uint32 never_expires = 0;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_lockout WHERE id=%u", 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_lockout WHERE id=%u",
 		instance_id), errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
 			start_time = atoi(row[0]);
@@ -2535,7 +2535,7 @@ uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 		}
 		mysql_free_result(result);
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		is_perma = false;
@@ -2567,7 +2567,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT COUNT(*) FROM instance_lockout"), errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
 			int count = atoi(row[0]);
@@ -2584,7 +2584,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		}
 		mysql_free_result(result);
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		instance_id = 0;
@@ -2597,7 +2597,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_lockout where id >= %i ORDER BY id", count), errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			while((row = mysql_fetch_row(result)))
 			{
@@ -2624,7 +2624,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 			mysql_free_result(result);
 		}
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 	}
@@ -2638,13 +2638,13 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "INSERT INTO instance_lockout (id, zone, version, start_time, duration)" 
+	if(RunQuery(query, MakeAnyLenString(&query, "INSERT INTO instance_lockout (id, zone, version, start_time, duration)"
 		" values(%lu, %lu, %lu, UNIX_TIMESTAMP(), %lu)", (unsigned long)instance_id, (unsigned long)zone_id, (unsigned long)version, (unsigned long)duration), errbuf))
 	{
 		safe_delete_array(query);
 		return true;
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return false;
@@ -2663,7 +2663,7 @@ void Database::PurgeExpiredInstances()
 			"(start_time+duration) <= UNIX_TIMESTAMP() and never_expires = 0"), errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) > 0) 
+		if (mysql_num_rows(result) > 0)
 		{
 			row = mysql_fetch_row(result);
 			while(row != nullptr)
@@ -2675,7 +2675,7 @@ void Database::PurgeExpiredInstances()
 		}
 		mysql_free_result(result);
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 	}
@@ -2692,7 +2692,7 @@ bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 		safe_delete_array(query);
 		return true;
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return false;
@@ -2704,13 +2704,13 @@ bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_lockout_player WHERE id=%lu AND charid=%lu", 
+	if(RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_lockout_player WHERE id=%lu AND charid=%lu",
 		(unsigned long)instance_id, (unsigned long)char_id), errbuf))
 	{
 		safe_delete_array(query);
 		return true;
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return false;
@@ -2722,13 +2722,13 @@ bool Database::RemoveClientsFromInstance(uint16 instance_id)
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_lockout_player WHERE id=%lu", 
+	if(RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_lockout_player WHERE id=%lu",
 		(unsigned long)instance_id), errbuf))
 	{
 		safe_delete_array(query);
 		return true;
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return false;
@@ -2741,11 +2741,11 @@ bool Database::CheckInstanceExists(uint16 instance_id)
 	char *query = 0;
 	MYSQL_RES *result;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT * FROM instance_lockout where id=%u", instance_id), 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT * FROM instance_lockout where id=%u", instance_id),
 		errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			mysql_free_result(result);
 			return true;
@@ -2753,7 +2753,7 @@ bool Database::CheckInstanceExists(uint16 instance_id)
 		mysql_free_result(result);
 		return false;
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return false;
@@ -2767,7 +2767,7 @@ void Database::BuryCorpsesInInstance(uint16 instance_id)
 	char *query = 0;
 	MYSQL_RES *result;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u", 
+	if(RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u",
 		instance_id), errbuf, &result))
 	{
 		mysql_free_result(result);
@@ -2786,16 +2786,16 @@ uint16 Database::GetInstanceVersion(uint16 instance_id)
 	MYSQL_ROW row;
 	uint32 ret;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT version FROM instance_lockout where id=%u", instance_id), 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT version FROM instance_lockout where id=%u", instance_id),
 		errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
 			ret = atoi(row[0]);
 			mysql_free_result(result);
-			return ret;			
+			return ret;
 		}
 		else
 		{
@@ -2803,7 +2803,7 @@ uint16 Database::GetInstanceVersion(uint16 instance_id)
 			return 0;
 		}
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return 0;
@@ -2824,12 +2824,12 @@ uint16 Database::GetInstanceID(const char* zone, uint32 charid, int16 version)
 		"instance_lockout_player.charid=%u LIMIT 1;", GetZoneID(zone), version, charid, charid), errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
 			ret = atoi(row[0]);
 			mysql_free_result(result);
-			return ret;		
+			return ret;
 		}
 		else
 		{
@@ -2837,7 +2837,7 @@ uint16 Database::GetInstanceID(const char* zone, uint32 charid, int16 version)
 			return 0;
 		}
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return 0;
@@ -2861,12 +2861,12 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 		"instance_lockout_player.charid=%u LIMIT 1;", zone, version, charid), errbuf, &result))
 	{
 		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) 
+		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
 			ret = atoi(row[0]);
 			mysql_free_result(result);
-			return ret;		
+			return ret;
 		}
 		else
 		{
@@ -2874,7 +2874,7 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 			return 0;
 		}
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return 0;
@@ -2891,7 +2891,7 @@ void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 	uint32 zone_id = ZoneIDFromInstanceID(instance_id);
 	uint16 version = VersionFromInstanceID(instance_id);
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charid FROM group_id WHERE groupid=%u", gid), 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charid FROM group_id WHERE groupid=%u", gid),
 		errbuf, &result))
 	{
 		safe_delete_array(query);
@@ -2905,7 +2905,7 @@ void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 		}
 		mysql_free_result(result);
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 	}
@@ -2920,7 +2920,7 @@ void Database::AssignRaidToInstance(uint32 rid, uint32 instance_id)
 	uint32 zone_id = ZoneIDFromInstanceID(instance_id);
 	uint16 version = VersionFromInstanceID(instance_id);
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charid FROM raid_members WHERE raidid=%u", rid), 
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charid FROM raid_members WHERE raidid=%u", rid),
 		errbuf, &result))
 	{
 		safe_delete_array(query);
@@ -2934,7 +2934,7 @@ void Database::AssignRaidToInstance(uint32 rid, uint32 instance_id)
 		}
 		mysql_free_result(result);
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 	}
@@ -3012,7 +3012,7 @@ bool Database::GlobalInstance(uint16 instance_id)
 			return false;
 		}
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return false;
@@ -3125,8 +3125,8 @@ void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 	}
 }
 
-bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w, 
-								 uint32 &tak_w, uint32 &guk_l, uint32 &mir_l, uint32 &mmc_l, uint32 &ruj_l, uint32 &tak_l)
+bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w,
+								uint32 &tak_w, uint32 &guk_l, uint32 &mir_l, uint32 &mmc_l, uint32 &ruj_l, uint32 &tak_l)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -3134,7 +3134,7 @@ bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, u
 	MYSQL_ROW row;
 
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT `guk_wins`, `mir_wins`, `mmc_wins`, `ruj_wins`, `tak_wins`, "
-		"`guk_losses`, `mir_losses`, `mmc_losses`, `ruj_losses`, `tak_losses` FROM `adventure_stats` WHERE player_id=%u", 
+		"`guk_losses`, `mir_losses`, `mmc_losses`, `ruj_losses`, `tak_losses` FROM `adventure_stats` WHERE player_id=%u",
 		char_id), errbuf, &result))
 	{
 		safe_delete_array(query);
@@ -3154,7 +3154,7 @@ bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, u
 		mysql_free_result(result);
 		return true;
 	}
-	else 
+	else
 	{
 		safe_delete_array(query);
 		return false;
@@ -3175,7 +3175,7 @@ uint32 Database::GetGuildDBIDByCharID(uint32 char_id) {
 		mysql_free_result(result);
 	}
 	else {
-		   cerr << "Error in GetAccountIDByChar query '" << query << "' " << errbuf << endl;
+			cerr << "Error in GetAccountIDByChar query '" << query << "' " << errbuf << endl;
 	}
 	safe_delete_array(query);
 	return retVal;

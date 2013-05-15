@@ -150,11 +150,11 @@ FRAG_CONSTRUCTOR(Data21) {
   }
 
 
- 
+
 }
 
 FRAG_CONSTRUCTOR(Data22) {
-  
+
   int pos;
 
   uchar *data6area ;
@@ -190,7 +190,7 @@ FRAG_CONSTRUCTOR(Data22) {
 	  Frag36Ref = *((long *) (data6area+20));
 	  //printf("Frag 36 reference?: %ld\n", *((long *) (data6area+20)));
   }
-	  
+
 
 
 
@@ -198,7 +198,7 @@ FRAG_CONSTRUCTOR(Data22) {
 }
 
 FRAG_CONSTRUCTOR(Data29) {
- 
+
         long  a,flags, numregions, lenstr;
 
 	struct_Data29 *data29 = (struct_Data29 *) malloc(sizeof(struct_Data29));
@@ -213,7 +213,7 @@ FRAG_CONSTRUCTOR(Data29) {
 	else if(!strncmp((char *) &wld->sHash[-frag_name], "VWA", 3)) data29->region_type = 7; // VWater ?
 
 	this->frag = (void *) data29;
-  
+
         flags = *buf;
         numregions = *((long *)(buf+4));
         data29->region_count = numregions ;
@@ -277,7 +277,7 @@ FRAG_CONSTRUCTOR(Data30) {
     this->frag = (void *) tex;
     return;
   }
-  
+
   tex = (Texture *) wld->frags[ref - 1]->frag;
 
   if(data->params1 & (1 << 1) || data->params1 & (1 << 2) || data->params1 & (1 << 3) || data->params1 & (1 << 4))
@@ -313,7 +313,7 @@ FRAG_CONSTRUCTOR(Data36) {
   VertexNormal *vn;
   Vert *v;
 
-  
+
 
   TexRef *tr;
 
@@ -393,7 +393,7 @@ FRAG_CONSTRUCTOR(Data36) {
 
 
   for(i = 0; i < header->normalsCount; ++i) {
- 
+
     if(i<header->vertexCount) {
       vn = (VertexNormal *) buf;
       vert = model->verts[i];
@@ -419,7 +419,7 @@ FRAG_CONSTRUCTOR(Data36) {
     // in the WLD loader in the stock azone, and has the effect of screwing up the normals,
     // Changed to keep things consistent with prior versions.
     poly->v1 = p->v1;
-    poly->v2 = p->v2; 
+    poly->v2 = p->v2;
     poly->v3 = p->v3;
 #ifdef DEBUGWLD2
     printf("Frag36: Polygon: %5d Vertices: %5d, %5d, %5d\n", i, poly->v1, poly->v2, poly->v3);
@@ -502,7 +502,7 @@ int WLDLoader::Open(char *base_path, char *zone_name, Archive *archive) {
     return 0;
 
   buffer += sizeof(struct_wld_header);
-  
+
   this->sHash = buffer;
   decode(this->sHash, header->stringHashSize);
   buffer += header->stringHashSize;
@@ -535,7 +535,7 @@ int WLDLoader::Open(char *base_path, char *zone_name, Archive *archive) {
     case 0x30: FRAGMENT(Data30); break;
     case 0x31: FRAGMENT(Data31); break;
     case 0x36: FRAGMENT(Data36); break;
-			   
+
     default: this->frags[i] = new Fragment; break;
     }
 
@@ -545,7 +545,7 @@ int WLDLoader::Open(char *base_path, char *zone_name, Archive *archive) {
     buffer += frag->size - 4;
   }
 
-  
+
 
 
   if(!strcmp(&zone_name[strlen(zone_name) - 4], "_obj")) {
@@ -585,12 +585,12 @@ int WLDLoader::Open(char *base_path, char *zone_name, Archive *archive) {
     }
 
 
-    
+
     zm->verts = new Vertex *[zm->vert_count];
     zm->polys = new Polygon *[zm->poly_count];
-    
+
     vc = pc = 0;
-    
+
     for(i = 0; i < this->fragcount; ++i) {
       if(this->frags[i]->type != 0x36)
         continue;
@@ -714,7 +714,7 @@ int WLDLoader::Close() {
     for(j = 0; j < zm->tex_count; ++j)
       delete zm->tex[j];
     delete[] zm->tex;
-    
+
     delete[] zm->verts;
     delete[] zm->polys;
   }

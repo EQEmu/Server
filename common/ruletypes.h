@@ -40,11 +40,11 @@ RULE_REAL( Character, AAExpMultiplier, 0.5 )
 RULE_REAL( Character, GroupExpMultiplier, 0.5 )
 RULE_REAL( Character, RaidExpMultiplier, 0.2 )
 RULE_BOOL( Character, UseXPConScaling, true )
-RULE_INT ( Character, LightBlueModifier, 40 ) 
+RULE_INT ( Character, LightBlueModifier, 40 )
 RULE_INT ( Character, BlueModifier, 90 )
 RULE_INT ( Character, WhiteModifier, 100 )
 RULE_INT ( Character, YellowModifier, 125 )
-RULE_INT ( Character, RedModifier, 150 ) 
+RULE_INT ( Character, RedModifier, 150 )
 RULE_INT ( Character, AutosaveIntervalS, 300 )	//0=disabled
 RULE_INT ( Character, HPRegenMultiplier, 100)
 RULE_INT ( Character, ManaRegenMultiplier, 100)
@@ -86,10 +86,10 @@ RULE_BOOL ( Character, SoDClientUseSoDHPManaEnd, false)	// Setting this to true 
 RULE_BOOL ( Character, UseRaceClassExpBonuses, true)	// Setting this to true will enable Class and Racial experience rate bonuses
 RULE_BOOL ( Character, RespawnFromHover, false)		// Use Respawn window, or not.
 RULE_INT ( Character, RespawnFromHoverTimer, 300)	// Respawn Window countdown timer, in SECONDS
-RULE_BOOL ( Character, UseNewStatsWindow, true) 	// New stats window shows everything
+RULE_BOOL ( Character, UseNewStatsWindow, true)		// New stats window shows everything
 RULE_BOOL ( Character, ItemCastsUseFocus, false) // If true, this allows item clickies to use focuses that have limited max levels on them
 RULE_INT ( Character, MinStatusForNoDropExemptions, 80) // This allows status x and higher to trade no drop items.
-RULE_INT ( Character, SkillCapMaxLevel, 75 )	// Sets the Max Level used for Skill Caps (from skill_caps table).  -1 makes it use MaxLevel rule value. It is set to 75 because PEQ only has skillcaps up to that level, and grabbing the players' skill past 75 will return 0, breaking all skills past that level. This helps servers with obsurd level caps (75+ level cap) function without any modifications.
+RULE_INT ( Character, SkillCapMaxLevel, 75 )	// Sets the Max Level used for Skill Caps (from skill_caps table). -1 makes it use MaxLevel rule value. It is set to 75 because PEQ only has skillcaps up to that level, and grabbing the players' skill past 75 will return 0, breaking all skills past that level. This helps servers with obsurd level caps (75+ level cap) function without any modifications.
 RULE_INT ( Character, StatCap, 0 )
 RULE_BOOL ( Character, CheckCursorEmptyWhenLooting, true ) // If true, a player cannot loot a corpse (player or NPC) with an item on their cursor
 RULE_BOOL ( Character, MaintainIntoxicationAcrossZones, true ) // If true, alcohol effects are maintained across zoning and logging out/in.
@@ -100,7 +100,7 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )
 RULE_INT (Mercs, SuspendIntervalMS, 10000)
-RULE_INT (Mercs, UpkeepIntervalMS,  180000)
+RULE_INT (Mercs, UpkeepIntervalMS, 180000)
 RULE_INT (Mercs, SuspendIntervalS, 10)
 RULE_INT (Mercs, UpkeepIntervalS, 180)
 RULE_BOOL (Mercs, AllowMercs, false)
@@ -144,19 +144,19 @@ RULE_INT ( World, ClientKeepaliveTimeoutMS, 65000 )
 RULE_BOOL ( World, UseBannedIPsTable, false ) // Toggle whether or not to check incoming client connections against the Banned_IPs table. Set this value to false to disable this feature.
 RULE_BOOL ( World, EnableTutorialButton, true)
 RULE_BOOL ( World, EnableReturnHomeButton, true)
-RULE_INT  ( World, MaxLevelForTutorial, 10)
-RULE_INT  ( World, TutorialZoneID, 189)
-RULE_INT  ( World, GuildBankZoneID, 345)
-RULE_INT  ( World, MinOfflineTimeToReturnHome, 21600) // 21600 seconds is 6 Hours
-RULE_INT ( World, MaxClientsPerIP, -1 ) // Maximum number of clients allowed to connect per IP address if account status is < AddMaxClientsStatus.  Default value: -1 (feature disabled)
-RULE_INT ( World, ExemptMaxClientsStatus, -1 ) // Exempt accounts from the MaxClientsPerIP and AddMaxClientsStatus rules, if their status is >= this value.  Default value: -1 (feature disabled)
-RULE_INT ( World, AddMaxClientsPerIP, -1 ) // Maximum number of clients allowed to connect per IP address if account status is < ExemptMaxClientsStatus.  Default value: -1 (feature disabled)
-RULE_INT ( World, AddMaxClientsStatus, -1 ) // Accounts with status >= this rule will be allowed to use the amount of accounts defined in the AddMaxClientsPerIP.  Default value: -1 (feature disabled)
+RULE_INT ( World, MaxLevelForTutorial, 10)
+RULE_INT ( World, TutorialZoneID, 189)
+RULE_INT ( World, GuildBankZoneID, 345)
+RULE_INT ( World, MinOfflineTimeToReturnHome, 21600) // 21600 seconds is 6 Hours
+RULE_INT ( World, MaxClientsPerIP, -1 ) // Maximum number of clients allowed to connect per IP address if account status is < AddMaxClientsStatus. Default value: -1 (feature disabled)
+RULE_INT ( World, ExemptMaxClientsStatus, -1 ) // Exempt accounts from the MaxClientsPerIP and AddMaxClientsStatus rules, if their status is >= this value. Default value: -1 (feature disabled)
+RULE_INT ( World, AddMaxClientsPerIP, -1 ) // Maximum number of clients allowed to connect per IP address if account status is < ExemptMaxClientsStatus. Default value: -1 (feature disabled)
+RULE_INT ( World, AddMaxClientsStatus, -1 ) // Accounts with status >= this rule will be allowed to use the amount of accounts defined in the AddMaxClientsPerIP. Default value: -1 (feature disabled)
 RULE_BOOL ( World, MaxClientsSetByStatus, false) // If True, IP Limiting will be set to the status on the account as long as the status is > MaxClientsPerIP
 RULE_BOOL ( World, ClearTempMerchantlist, true) // Clears temp merchant items when world boots.
 RULE_BOOL ( World, DeleteStaleCorpeBackups, true) // Deletes stale corpse backups older than 2 weeks.
-RULE_INT ( World, AccountSessionLimit, -1 )  //Max number of characters allowed on at once from a single account (-1 is disabled)
-RULE_INT ( World, ExemptAccountLimitStatus, -1 )  //Min status required to be exempt from multi-session per account limiting (-1 is disabled)
+RULE_INT ( World, AccountSessionLimit, -1 ) //Max number of characters allowed on at once from a single account (-1 is disabled)
+RULE_INT ( World, ExemptAccountLimitStatus, -1 ) //Min status required to be exempt from multi-session per account limiting (-1 is disabled)
 RULE_BOOL ( World, GMAccountIPList, false) // Check ip list against GM Accounts, AntiHack GM Accounts.
 RULE_INT ( World, MinGMAntiHackStatus, 1 ) //Minimum GM status to check against AntiHack list
 RULE_INT ( World, SoFStartZoneID, -1 ) //Sets the Starting Zone for SoF Clients separate from Titanium Clients (-1 is disabled)
@@ -168,25 +168,25 @@ RULE_BOOL (World, IPLimitDisconnectAll, false)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Zone )
-RULE_INT ( Zone,  NPCPositonUpdateTicCount, 32 ) //ms between intervals of sending a position update to the entire zone.
-RULE_INT ( Zone,  ClientLinkdeadMS, 180000) //the time a client remains link dead on the server after a sudden disconnection
-RULE_INT ( Zone,  GraveyardTimeMS, 1200000) //ms time until a player corpse is moved to a zone's graveyard, if one is specified for the zone
+RULE_INT ( Zone, NPCPositonUpdateTicCount, 32 ) //ms between intervals of sending a position update to the entire zone.
+RULE_INT ( Zone, ClientLinkdeadMS, 180000) //the time a client remains link dead on the server after a sudden disconnection
+RULE_INT ( Zone, GraveyardTimeMS, 1200000) //ms time until a player corpse is moved to a zone's graveyard, if one is specified for the zone
 RULE_BOOL ( Zone, EnableShadowrest, 1 ) // enables or disables the shadowrest zone feature for player corpses. Default is turned on.
 RULE_BOOL ( Zone, UsePlayerCorpseBackups, true) // Keeps backups of player corpses.
-RULE_INT ( Zone, MQWarpExemptStatus, -1 ) // Required status level to exempt the MQWarpDetector.  Set to -1 to disable this feature.
-RULE_INT ( Zone, MQZoneExemptStatus, -1 ) // Required status level to exempt the MQZoneDetector.  Set to -1 to disable this feature.
-RULE_INT ( Zone, MQGateExemptStatus, -1 ) // Required status level to exempt the MQGateDetector.  Set to -1 to disable this feature.
-RULE_INT ( Zone, MQGhostExemptStatus, -1 ) // Required status level to exempt the MGhostDetector.  Set to -1 to disable this feature.
-RULE_BOOL ( Zone, EnableMQWarpDetector, true ) // Enable the MQWarp Detector.  Set to False to disable this feature.
-RULE_BOOL ( Zone, EnableMQZoneDetector, true ) // Enable the MQZone Detector.  Set to False to disable this feature.
-RULE_BOOL ( Zone, EnableMQGateDetector, true ) // Enable the MQGate Detector.  Set to False to disable this feature.
-RULE_BOOL ( Zone, EnableMQGhostDetector, true ) // Enable the MQGhost Detector.  Set to False to disable this feature.
+RULE_INT ( Zone, MQWarpExemptStatus, -1 ) // Required status level to exempt the MQWarpDetector. Set to -1 to disable this feature.
+RULE_INT ( Zone, MQZoneExemptStatus, -1 ) // Required status level to exempt the MQZoneDetector. Set to -1 to disable this feature.
+RULE_INT ( Zone, MQGateExemptStatus, -1 ) // Required status level to exempt the MQGateDetector. Set to -1 to disable this feature.
+RULE_INT ( Zone, MQGhostExemptStatus, -1 ) // Required status level to exempt the MGhostDetector. Set to -1 to disable this feature.
+RULE_BOOL ( Zone, EnableMQWarpDetector, true ) // Enable the MQWarp Detector. Set to False to disable this feature.
+RULE_BOOL ( Zone, EnableMQZoneDetector, true ) // Enable the MQZone Detector. Set to False to disable this feature.
+RULE_BOOL ( Zone, EnableMQGateDetector, true ) // Enable the MQGate Detector. Set to False to disable this feature.
+RULE_BOOL ( Zone, EnableMQGhostDetector, true ) // Enable the MQGhost Detector. Set to False to disable this feature.
 RULE_REAL ( Zone, MQWarpDetectionDistanceFactor, 9.0) //clients move at 4.4 about if in a straight line but with movement and to acct for lag we raise it a bit
 RULE_BOOL ( Zone, MarkMQWarpLT, false )
 RULE_INT ( Zone, AutoShutdownDelay, 5000 ) //How long a dynamic zone stays loaded while empty
 RULE_INT ( Zone, PEQZoneReuseTime, 900 )	//How long, in seconds, until you can reuse the #peqzone command.
-RULE_INT ( Zone, PEQZoneDebuff1, 4454 )	    //First debuff casted by #peqzone Default is Cursed Keeper's Blight.
-RULE_INT ( Zone, PEQZoneDebuff2, 2209  )	//Second debuff casted by #peqzone Default is Tendrils of Apathy.
+RULE_INT ( Zone, PEQZoneDebuff1, 4454 )		//First debuff casted by #peqzone Default is Cursed Keeper's Blight.
+RULE_INT ( Zone, PEQZoneDebuff2, 2209 )		//Second debuff casted by #peqzone Default is Tendrils of Apathy.
 RULE_BOOL ( Zone, UsePEQZoneDebuffs, true )	//Will determine if #peqzone will debuff players or not when used.
 RULE_REAL ( Zone, HotZoneBonus, 0.75 )
 RULE_INT ( Zone, ReservedInstances, 30 ) //Will reserve this many instance ids for globals... probably not a good idea to change this while a server is running.
@@ -209,7 +209,7 @@ RULE_BOOL ( Map, UseClosestZ, false)			// Move mobs to the nearest Z above or be
 							// Only set UseClosestZ true if all your .map files generated from EQGs were created
 							// with azone2.
 							//
-RULE_INT  ( Map, FindBestZHeightAdjust, 1)		// Adds this to the current Z before seeking the best Z position
+RULE_INT ( Map, FindBestZHeightAdjust, 1)		// Adds this to the current Z before seeking the best Z position
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Pathing )
@@ -221,24 +221,24 @@ RULE_BOOL ( Pathing, Guard, true )		// Enable pathing for mobs moving to their g
 RULE_BOOL ( Pathing, Find, true )		// Enable pathing for FindPerson requests from the client.
 RULE_BOOL ( Pathing, Fear, true )		// Enable pathing for fear
 RULE_REAL ( Pathing, ZDiffThreshold, 10)	// If a mob las LOS to it's target, it will run to it if the Z difference is < this.
-RULE_INT  ( Pathing, LOSCheckFrequency, 1000)	// A mob will check for LOS to it's target this often (milliseconds).
-RULE_INT  ( Pathing, RouteUpdateFrequencyShort, 1000)	// How often a new route will be calculated if the target has moved.
-RULE_INT  ( Pathing, RouteUpdateFrequencyLong, 5000)	// How often a new route will be calculated if the target has moved.
+RULE_INT ( Pathing, LOSCheckFrequency, 1000)	// A mob will check for LOS to it's target this often (milliseconds).
+RULE_INT ( Pathing, RouteUpdateFrequencyShort, 1000)	// How often a new route will be calculated if the target has moved.
+RULE_INT ( Pathing, RouteUpdateFrequencyLong, 5000)	// How often a new route will be calculated if the target has moved.
 // When a path has a path node route and it's target changes position, if it has RouteUpdateFrequencyNodeCount or less nodes to go on it's
 // current path, it will recalculate it's path based on the RouteUpdateFrequencyShort timer, otherwise it will use the
 // RouteUpdateFrequencyLong timer.
-RULE_INT  ( Pathing, RouteUpdateFrequencyNodeCount, 5) 
+RULE_INT ( Pathing, RouteUpdateFrequencyNodeCount, 5)
 RULE_REAL ( Pathing, MinDistanceForLOSCheckShort, 40000) // (NoRoot). While following a path, only check for LOS to target within this distance.
 RULE_REAL ( Pathing, MinDistanceForLOSCheckLong, 1000000) // (NoRoot). Min distance when initially attempting to acquire the target.
-RULE_INT  ( Pathing, MinNodesLeftForLOSCheck, 4)	// Only check for LOS when we are down to this many path nodes left to run.
+RULE_INT ( Pathing, MinNodesLeftForLOSCheck, 4)	// Only check for LOS when we are down to this many path nodes left to run.
 // This next rule was put in for situations where the mob and it's target may be on different sides of a 'hazard', e.g. a pit
 // If the mob has LOS to it's target, even though there is a hazard in it's way, it may break off from the node path and run at
 // the target, only to later detect the hazard and re-acquire a node path. Depending upon the placement of the path nodes, this
 // can lead to the mob looping. The rule is intended to allow the mob to at least get closer to it's target each time before
 // checking LOS and trying to head straight for it.
-RULE_INT  ( Pathing, MinNodesTraversedForLOSCheck, 3)	// Only check for LOS after we have traversed this many path nodes.
-RULE_INT  ( Pathing, CullNodesFromStart, 1)		// Checks LOS from Start point to second node for this many nodes and removes first node if there is LOS
-RULE_INT  ( Pathing, CullNodesFromEnd, 1)		// Checks LOS from End point to second to last node for this many nodes and removes last node if there is LOS
+RULE_INT ( Pathing, MinNodesTraversedForLOSCheck, 3)	// Only check for LOS after we have traversed this many path nodes.
+RULE_INT ( Pathing, CullNodesFromStart, 1)		// Checks LOS from Start point to second node for this many nodes and removes first node if there is LOS
+RULE_INT ( Pathing, CullNodesFromEnd, 1)		// Checks LOS from End point to second to last node for this many nodes and removes last node if there is LOS
 RULE_REAL ( Pathing, CandidateNodeRangeXY, 400)		// When searching for path start/end nodes, only nodes within this range will be considered.
 RULE_REAL ( Pathing, CandidateNodeRangeZ, 10)		// When searching for path start/end nodes, only nodes within this range will be considered.
 
@@ -247,7 +247,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY( Watermap )
 // enable these to use the water detection code. Requires Water Maps generated by awater utility
 RULE_BOOL ( Watermap, CheckWaypointsInWaterWhenLoading, false ) // Does not apply BestZ as waypoints are loaded if they are in water
-RULE_BOOL ( Watermap, CheckForWaterAtWaypoints, false) 		// Check if a mob has moved into/out of water when at waypoints and sets flymode
+RULE_BOOL ( Watermap, CheckForWaterAtWaypoints, false)		// Check if a mob has moved into/out of water when at waypoints and sets flymode
 RULE_BOOL ( Watermap, CheckForWaterWhenMoving, false)		// Checks if a mob has moved into/out of water each time it's loc is recalculated
 RULE_BOOL ( Watermap, CheckForWaterOnSendTo, false)		// Checks if a mob has moved into/out of water on SendTo
 RULE_BOOL ( Watermap, CheckForWaterWhenFishing, false)		// Only lets a player fish near water (if a water map exists for the zone)
@@ -321,12 +321,12 @@ RULE_REAL ( Combat, HitFalloffMajor, 50.0) //hit will fall off sharply if we're 
 RULE_REAL ( Combat, HitBonusPerLevel, 1.2) //You gain this % of hit for every level you are above your target
 RULE_REAL ( Combat, WeaponSkillFalloff, 0.33) //For every weapon skill point that's not maxed you lose this % of hit
 RULE_REAL ( Combat, ArcheryHitPenalty, 0.25) //Archery has a hit penalty to try to help balance it with the plethora of long term +hit modifiers for it
-RULE_REAL ( Combat, AgiHitFactor, 0.01) 
+RULE_REAL ( Combat, AgiHitFactor, 0.01)
 RULE_INT ( Combat, MinRangedAttackDist, 25) //Minimum Distance to use Ranged Attacks
 RULE_BOOL ( Combat, ArcheryBonusRequiresStationary, true) //does the 2x archery bonus chance require a stationary npc
 RULE_REAL ( Combat, ArcheryBaseDamageBonus, 1) // % Modifier to Base Archery Damage (.5 = 50% base damage, 1 = 100%, 2 = 200%)
 RULE_REAL ( Combat, ArcheryNPCMultiplier, 1.0) // this is multiplied by the regular dmg to get the archery dmg
-RULE_BOOL ( Combat, AssistNoTargetSelf, true)  //when assisting a target that does not have a target: true = target self, false = leave target as was before assist (false = live like)
+RULE_BOOL ( Combat, AssistNoTargetSelf, true) //when assisting a target that does not have a target: true = target self, false = leave target as was before assist (false = live like)
 RULE_INT ( Combat, MaxRampageTargets, 3) //max number of people hit with rampage
 RULE_INT ( Combat, MaxFlurryHits, 2) //max number of extra hits from flurry
 RULE_INT ( Combat, MonkDamageTableBonus, 5) //% bonus monks get to their damage table calcs
@@ -413,7 +413,7 @@ RULE_CATEGORY_END()
 #ifdef BOTS
 RULE_CATEGORY ( Bots )
 RULE_REAL ( Bots, BotManaRegen, 2.0 ) // Adjust mana regen for bots, 1 is fast and higher numbers slow it down 3 is about the same as players.
-RULE_BOOL ( Bots, BotFinishBuffing, false ) // Allow for buffs to complete even if the bot caster is out of mana.  Only affects buffing out of combat.
+RULE_BOOL ( Bots, BotFinishBuffing, false ) // Allow for buffs to complete even if the bot caster is out of mana. Only affects buffing out of combat.
 RULE_INT ( Bots, CreateBotCount, 150 ) // Number of bots that each account can create
 RULE_INT ( Bots, SpawnBotCount, 71 ) // Number of bots a character can have spawned at one time, You + 71 bots is a 12 group raid
 RULE_BOOL ( Bots, BotQuest, false ) // Optional quest method to manage bot spawn limits using the quest_globals name bot_spawn_limit, see: /bazaar/Aediles_Thrall.pl

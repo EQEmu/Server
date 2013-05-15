@@ -107,6 +107,6 @@ private:
 	int *ClosedListFlag;
 };
 
-	
+
 #endif
 

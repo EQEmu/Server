@@ -1,19 +1,19 @@
-/* 
+/*
 	Copyright (C) 2005 EQEmulator Team
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef _EQSTREAM_LOCATOR_H
 #define _EQSTREAM_LOCATOR_H
@@ -66,7 +66,7 @@ if(res)
 else
 	printf(": False\n");*/
 
-	
+
 	if(l.src_ip != r.src_ip)
 		return(l.src_ip < r.src_ip);
 	if(l.dst_ip != r.dst_ip)
@@ -74,7 +74,7 @@ else
 	if(l.src_port != r.src_port)
 		return(l.src_port < r.src_port);
 	return(l.dst_port < r.dst_port);
-	
+
 /*	//so, this turned out uglier than I had hoped
 	if(l.src_ip < r.src_ip)
 		return(true);
@@ -105,35 +105,35 @@ class EQStreamLocator {
 protected:
 	typedef typename map<const EQStreamInfo, T *>::iterator iterator;
 public:
-	
+
 	void Clear() {
 		streams.clear();
 	}
-	
+
 	void AddStream(const EQStreamInfo &i, T *o) {
 		//do we care to check if it exists?
-		
+
 		//add this stream, and its inverse
 		streams[i] = o;
 		EQStreamInfo inv;
 		i.invert(inv);
 		streams[inv] = o;
 	}
-	
+
 	//deletes this stream, and its inverse
 	void RemoveStream(const EQStreamInfo &i) {
 		iterator res;
 		res = streams.find(i);
 		if(res != streams.end())
 			streams.erase(res);
-		
+
 		EQStreamInfo inv;
 		i.invert(inv);
 		res = streams.find(inv);
 		if(res != streams.end())
 			streams.erase(res);
 	}
-	
+
 	//removes every occurance of this stream from the list
 	void RemoveStream(T *it) {
 		iterator cur, end;
@@ -142,14 +142,14 @@ public:
 		for(; cur != end; cur++) {
 			if(cur->second == it) {
 				streams.erase(cur);
-				//lazy recursive delete for now, since we have to redo 
+				//lazy recursive delete for now, since we have to redo
 				//our iterators anyways
 				RemoveStream(it);
 				return;
 			}
 		}
 	}
-	
+
 	T *GetStream(const EQStreamInfo &i) {
 		iterator res;
 		res = streams.find(i);
@@ -160,16 +160,14 @@ public:
 			return(nullptr);
 		return(res->second);
 	}
-	
+
 	//allow people to iterate over the const struct
 //	typedef map<const EQStreamInfo, T *>::const_iterator iterator;
 //	inline iterator begin() const { return(streams.begin()); }
 //	inline iterator end() const { return(streams.end()); }
-	
+
 protected:
 	map<const EQStreamInfo, T *> streams;
 };
-
-
 
 #endif

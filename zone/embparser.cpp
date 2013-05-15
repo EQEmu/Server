@@ -63,7 +63,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_TASK_FAIL",
 	"EVENT_AGGRO_SAY",
 	"EVENT_PLAYER_PICKUP",
-	"EVENT_POPUP_RESPONSE",
+	"EVENT_POPUPRESPONSE",
 	"EVENT_PROXIMITY_SAY",
 	"EVENT_CAST",
 	"EVENT_SCALE_CALC",
@@ -1204,7 +1204,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_POPUP_RESPONSE:{
+		case EVENT_POPUPRESPONSE:{
 			ExportVar(package_name.c_str(), "popupid", data);
 			break;
 		}

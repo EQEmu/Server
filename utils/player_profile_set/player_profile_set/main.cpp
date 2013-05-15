@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 	std::string player_name = argv[4];
 	program_action = EQEmuString::ToUpper(program_action);
 	program_field = EQEmuString::ToUpper(program_field);
-	
+
 	emu_db = new EQEmuDatabase(host.c_str(), datab.c_str(), user.c_str(), pass.c_str());
 	if(!emu_db->Connected())
 	{
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 	{
 		player_entry pe = (*iter);
 		PlayerProfile_Struct *m_pp = (PlayerProfile_Struct*)pe.data;
-		
+
 		if(program_action == "SET")
 		{
 			m_pp->ldon_points_available = 0;

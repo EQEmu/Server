@@ -1,7 +1,7 @@
 ﻿//
 // Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net). Distributed under GPL version 2.
 //
-// 
+//
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -25,15 +25,15 @@ namespace EQExtractor2.Patches
         {
             if((OpCode == OpManager.OpCodeNameToNumber("OP_ZoneEntry")) && (Direction == PacketDirection.ClientToServer))
                 return IdentificationStatus.Yes;
-            
+
             return IdentificationStatus.No;
-        }                
+        }
 
         override public Item DecodeItemPacket(byte[] PacketBuffer)
         {
             ByteStream Buffer = new ByteStream(PacketBuffer);
 
-            Item NewItem = new Item();                      
+            Item NewItem = new Item();
 
             NewItem.StackSize = Buffer.ReadUInt32();             // 00
             Buffer.SkipBytes(4);
@@ -55,12 +55,12 @@ namespace EQExtractor2.Patches
         public override void RegisterExplorers()
         {
             base.RegisterExplorers();
-            
+
             //OpManager.RegisterExplorer("OP_CharInventory", ExploreCharInventoryPacket);
             //OpManager.RegisterExplorer("OP_ItemPacket", ExploreItemPacket);
             //OpManager.RegisterExplorer("OP_MercenaryPurchaseWindow", ExploreMercenaryPurchaseWindow);
         }
-         
+
         public void ExploreCharInventoryPacket(StreamWriter OutputStream, ByteStream Buffer, PacketDirection Direction)
         {
             UInt32 ItemCount = Buffer.ReadUInt32();
@@ -69,7 +69,7 @@ namespace EQExtractor2.Patches
 
             for (int i = 0; i < ItemCount; ++i)
             {
-                ExploreSubItem(OutputStream, ref Buffer);             
+                ExploreSubItem(OutputStream, ref Buffer);
             }
 
             OutputStream.WriteLine("");
@@ -85,7 +85,7 @@ namespace EQExtractor2.Patches
         }
 
         void  ExploreSubItem(StreamWriter OutputStream, ref ByteStream Buffer)
-        {            
+        {
             Buffer.SkipBytes(8);
 
             byte Area = Buffer.ReadByte();
@@ -118,14 +118,14 @@ namespace EQExtractor2.Patches
                     break;
                 case 8:
                     AreaName = "Merchant";
-                    break;                
+                    break;
             }
 
             OutputStream.WriteLine("Area: {0} {1} Main Slot {2,2} Sub Slot {3,3} Name {4}", Area, AreaName.PadRight(20), MainSlot, SubSlot, Name);
 
             Buffer.ReadString(true);    // Lore
             Buffer.ReadString(true);    // IDFile
-            
+
             //Buffer.SkipBytes(236);  // Item Body Struct
 
             UInt32 ID = Buffer.ReadUInt32();
@@ -229,7 +229,7 @@ namespace EQExtractor2.Patches
             Buffer.SkipBytes(4);    // clickunk7
             Buffer.SkipBytes(30);   // Proc Effect Struct
             Buffer.ReadString(true);    // Proc Name
-            Buffer.SkipBytes(4);    // unknown5            
+            Buffer.SkipBytes(4);    // unknown5
             Buffer.SkipBytes(30);   // Worn Effect Struct
             Buffer.ReadString(true);    // Worn Name
             Buffer.SkipBytes(4);    // unknown6
@@ -241,15 +241,15 @@ namespace EQExtractor2.Patches
             Buffer.SkipBytes(4);    // unknown6
             Buffer.SkipBytes(30);   // Worn Effect Struct
             Buffer.ReadString(true);    // Worn Name
-            Buffer.SkipBytes(4);    // unknown6            
+            Buffer.SkipBytes(4);    // unknown6
             Buffer.SkipBytes(103);   // Item Quaternary Body Struct - 4 (we want to read the SubLength field at the end)
 
             UInt32 SubLengths = Buffer.ReadUInt32();
-                        
+
             for (int i = 0; i < SubLengths; ++i)
             {
                 Buffer.SkipBytes(4);
-                ExploreSubItem(OutputStream, ref Buffer);               
+                ExploreSubItem(OutputStream, ref Buffer);
             }
         }
 
@@ -291,7 +291,7 @@ namespace EQExtractor2.Patches
                 OutputStream.WriteLine("VARSTRUCT_ENCODE_TYPE(uint32, Buffer, {0}); // Unknown", Unknown3);
                 UInt32 Unknown4 = Buffer.ReadUInt32();
                 OutputStream.WriteLine("VARSTRUCT_ENCODE_TYPE(uint32, Buffer, {0}); // Unknown", Unknown4);
-                
+
                 byte Unknown5 = Buffer.ReadByte();
                 //OutputStream.WriteLine("VARSTRUCT_ENCODE_TYPE(uint8, Buffer, {0}); // Unknown", Unknown5);
 
@@ -303,7 +303,7 @@ namespace EQExtractor2.Patches
                 //OutputStream.WriteLine("VARSTRUCT_ENCODE_TYPE(uint32, Buffer, {0}); // Unknown", Unknown8);
 
                 UInt32 StanceCount = Buffer.ReadUInt32();
-                
+
                 OutputStream.WriteLine("VARSTRUCT_ENCODE_TYPE(uint32, Buffer, {0}); // Number of Stances for this Merc", StanceCount);
 
                 UInt32 Unknown10 = Buffer.ReadUInt32();
@@ -311,8 +311,8 @@ namespace EQExtractor2.Patches
 
                 byte Unknown11 = Buffer.ReadByte();
                 //OutputStream.WriteLine("VARSTRUCT_ENCODE_TYPE(uint8, Buffer, {0}); // Unknown", Unknown11);
-                
-                
+
+
                 //OutputStream.WriteLine("   Offset: {5} Unknown1: {0} DBStrings: {1} {2} Purchase: {3} Upkeep: {4}\r\n", Unknown1, DBStringID1, DBStringID2,
                 //                PurchaseCost, UpkeepCost, Offset);
                 //OutputStream.WriteLine("   Unknowns: {0} {1} {2} {3} {4} {5} {6} {7} {8}\r\n",
@@ -336,6 +336,6 @@ namespace EQExtractor2.Patches
             OutputStream.WriteLine("");
         }
 
-        
+
     }
 }

@@ -8,9 +8,9 @@ using namespace std;
 #define MAXMERCS 1
 #define MERC_DEBUG 0
 #define TANK		1
-#define HEALER      2
+#define HEALER		2
 #define MELEEDPS	9
-#define CASTERDPS   12
+#define CASTERDPS	12
 const int MercAISpellRange = 100; // TODO: Write a method that calcs what the merc's spell range is based on spell, equipment, AA, whatever and replace this
 
 enum MercStanceType {
@@ -30,7 +30,7 @@ struct MercSpell {
 	uint32	type;			// 0 = never, must be one (and only one) of the defined values
 	int16	stance;			// 0 = all, + = only this stance, - = all except this stance
 	int16	slot;
-	uint16  proc_chance;
+	uint16	proc_chance;
 	uint32	time_cancast;	// when we can cast this spell next
 };
 
@@ -156,12 +156,12 @@ public:
 	uint32 GetMercTemplateID() { return _MercTemplateID; }
 	uint32 GetMercType() { return _MercType; }
 	uint32 GetMercSubType() { return _MercSubType; }
-	uint8  GetProficiencyID() { return _ProficiencyID; }
-	uint8  GetTierID() { return _TierID; }
+	uint8 GetProficiencyID() { return _ProficiencyID; }
+	uint8 GetTierID() { return _TierID; }
 	uint32 GetCostFormula() { return _CostFormula; }
 	uint32 GetMercNameType() { return _NameType; }
 	uint32 GetStance() { return _currentStance; }
-	int    GetHatedCount() { return _hatedCount; }
+	int GetHatedCount() { return _hatedCount; }
 
 	inline const uint8 GetClientVersion() const { return _OwnerClientVersion; }
 
@@ -174,8 +174,8 @@ public:
 	void	CheckHateList();
 	bool	CheckTaunt();
 	bool	CheckAETaunt();
-	bool    CheckConfidence();
-	bool    TryHide();
+	bool	CheckConfidence();
+	bool	TryHide();
 
 	// stat functions
 	virtual void CalcBonuses();
@@ -267,15 +267,15 @@ public:
 protected:
 	void CalcItemBonuses(StatBonuses* newbon);
 	void AddItemBonuses(const Item_Struct *item, StatBonuses* newbon);
-	int  CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
+	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
 	int16	GetFocusEffect(focusType type, uint16 spell_id);
 
 	std::vector<MercSpell> merc_spells;
 	std::map<uint32,MercTimer> timers;
 
-	uint16   skills[HIGHEST_SKILL+1];
-	uint32   equipment[MAX_WORN_INVENTORY];	//this is an array of item IDs
+	uint16	skills[HIGHEST_SKILL+1];
+	uint32	equipment[MAX_WORN_INVENTORY];	//this is an array of item IDs
 	uint16	d_meele_texture1;			//this is an item Material value
 	uint16	d_meele_texture2;			//this is an item Material value (offhand)
 	uint8	prim_melee_type;			//Sets the Primary Weapon attack message and animation
@@ -283,22 +283,22 @@ protected:
 
 private:
 
-	int16    CalcAC();
-	int16    GetACMit();
-	int16    GetACAvoid();
-	int16	  acmod();
-	int16    CalcATK();
-	//int      CalcHaste();
+	int16	CalcAC();
+	int16	GetACMit();
+	int16	GetACAvoid();
+	int16	acmod();
+	int16	CalcATK();
+	//int	CalcHaste();
 
-	int16   CalcSTR();
-	int16   CalcSTA();
-	int16   CalcDEX();
-	int16   CalcAGI();
-	int16   CalcINT();
-	int16   CalcWIS();
-	int16   CalcCHA();
+	int16	CalcSTR();
+	int16	CalcSTA();
+	int16	CalcDEX();
+	int16	CalcAGI();
+	int16	CalcINT();
+	int16	CalcWIS();
+	int16	CalcCHA();
 
-    int16	CalcMR();
+	int16	CalcMR();
 	int16	CalcFR();
 	int16	CalcDR();
 	int16	CalcPR();
@@ -323,10 +323,10 @@ private:
 	void	DoEnduranceUpkeep();	//does the endurance upkeep
 	void	CalcRestState();
 
-	int 	GroupLeadershipAAHealthEnhancement();
-	int 	GroupLeadershipAAManaEnhancement();
+	int		GroupLeadershipAAHealthEnhancement();
+	int		GroupLeadershipAAManaEnhancement();
 	int		GroupLeadershipAAHealthRegeneration();
-	int 	GroupLeadershipAAOffenseEnhancement();
+	int		GroupLeadershipAAOffenseEnhancement();
 
 	void GetMercSize();
 	void GenerateAppearance();
@@ -362,8 +362,8 @@ private:
 	uint32 _MercTemplateID;
 	uint32 _MercType;
 	uint32 _MercSubType;
-	uint8  _ProficiencyID;
-	uint8  _TierID;
+	uint8 _ProficiencyID;
+	uint8 _TierID;
 	uint8 _CostFormula;
 	uint8 _NameType;
 	uint8 _OwnerClientVersion;
@@ -375,9 +375,9 @@ private:
 	bool	_medding;
 	bool	_suspended;
 	bool	p_depop;
-	bool    _check_confidence;
-	bool    _lost_confidence;
-	int     _hatedCount;
+	bool	_check_confidence;
+	bool	_lost_confidence;
+	int		_hatedCount;
 	uint32	owner_char_id;
 	Timer	endupkeep_timer;
 	Timer	rest_timer;

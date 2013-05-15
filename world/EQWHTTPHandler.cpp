@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "EQWHTTPHandler.h"
@@ -34,13 +34,13 @@ EQWParser *EQWHTTPHandler::s_parser = nullptr;
 const int EQWHTTPHandler::READ_BUFFER_LEN = 1024;	//for page IO, was a static const member, but VC6 got mad.
 
 EQWHTTPHandler::EQWHTTPHandler(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 irPort)
-: HttpdSocket(ID,in_socket,irIP,irPort),
-  m_closeOnFinish(false)
+:	HttpdSocket(ID,in_socket,irIP,irPort),
+	m_closeOnFinish(false)
 {
 }
 
 EQWHTTPHandler::~EQWHTTPHandler() {
-	
+
 }
 
 #ifdef EMBPERL
@@ -71,16 +71,16 @@ void EQWHTTPHandler::Exec() {
 	m_sentHeaders = false;
 	m_responseCode = "200";
 //	printf("Request: %s, %s, %s, %s.\n", GetMethod().c_str(), GetUrl().c_str(), GetUri().c_str(), GetQueryString().c_str());
-	
+
 	SetHttpVersion("HTTP/1.0");
 	AddResponseHeader("Connection", "close");
-	
+
 	if(GetUri().find("..") != string::npos) {
 		SendResponse("403", "Forbidden");
 		printf("%s is forbidden.\n", GetUri().c_str());
 		return;
 	}
-	
+
 	if(!CheckAuth()) {
 		AddResponseHeader("Content-type", "text/plain");
 		AddResponseHeader("WWW-Authenticate", "Basic realm=\"EQEmulator\"");
@@ -110,23 +110,23 @@ void EQWHTTPHandler::Exec() {
 
 void EQWHTTPHandler::OnHeader(const std::string& key,const std::string& value) {
 	HttpdSocket::OnHeader(key, value);
-	
+
 	if (!strcasecmp(key.c_str(),"Authorization")) {
 		if(strncasecmp(value.c_str(), "Basic ", 6)) {
 			printf("Invalid auth type. Expected Basic: %s\n", value.c_str());
 			return;
 		}
-		
+
 		std::string dec;
 		Base64::decode(value.c_str() + 6, dec);
-		
+
 		std::string::size_type cpos;
 		cpos = dec.find_first_of(':');
 		if(cpos == string::npos) {
 			printf("Invalid auth string: %s\n", dec.c_str());
 			return;
 		}
-		
+
 		m_username = dec.substr(0, cpos);
 		m_password = dec.substr(cpos+1);
 	}
@@ -137,7 +137,7 @@ void EQWHTTPHandler::OnHeader(const std::string& key,const std::string& value) {
 bool EQWHTTPHandler::CheckAuth() const {
 	if(m_username.length() < 1)
 		return(false);
-	
+
 	int16 status = 0;
 	uint32 acctid = database.CheckLogin(m_username.c_str(), m_password.c_str(), &status);
 	if(acctid == 0) {
@@ -148,15 +148,15 @@ bool EQWHTTPHandler::CheckAuth() const {
 		_log(WORLD__HTTP_ERR, "Login of %s failed: status too low.", m_username.c_str());
 		return(false);
 	}
-	
+
 	return(true);
 }
 
 void EQWHTTPHandler::SendPage(const std::string &file) {
-	
+
 	string path = "templates/";
 	path += file;
-	
+
 	FILE *f = fopen(path.c_str(), "rb");
 	if(f == nullptr) {
 		SendResponse("404", "Not Found");
@@ -164,10 +164,10 @@ void EQWHTTPHandler::SendPage(const std::string &file) {
 		printf("%s not found.\n", file.c_str());
 		return;
 	}
-	
+
 	string type = s_mime.GetMimeFromFilename(file);
 	AddResponseHeader("Content-type", type);
-	
+
 	bool process = false;
 #ifdef EMBPERL
 	if(type == "text/html")
@@ -180,7 +180,7 @@ void EQWHTTPHandler::SendPage(const std::string &file) {
 	}
 #endif
 
-	
+
 	char *buffer = new char[READ_BUFFER_LEN+1];
 	size_t len;
 	string to_process;
@@ -192,16 +192,16 @@ void EQWHTTPHandler::SendPage(const std::string &file) {
 			SendBuf(buffer, len);
 	}
 	delete[] buffer;
-    fclose(f);
+	fclose(f);
 #ifdef EMBPERL
 	if(process) {
 		//convert the base form into a useful perl exportable form
 		HTTPRequest req(this, GetHttpForm());
 		GetParser()->SetHTTPRequest("testing", &req);
-		
+
 		//parse out the page and potentially pass some stuff on to perl.
 		ProcessAndSend(to_process);
-		
+
 		//clear out the form, just in case (since it gets destroyed next)
 		GetParser()->SetHTTPRequest("testing", nullptr);
 	}
@@ -217,7 +217,7 @@ void EQWHTTPHandler::ProcessAndSend(const string &str) {
 	string::size_type len = str.length();
 	string::size_type start = 0;
 	string::size_type pos, end;
-	
+
 	while((pos = str.find("<?", start)) != string::npos) {
 		//send all the crap leading up to the script block
 		if(pos != start) {
@@ -239,7 +239,7 @@ void EQWHTTPHandler::ProcessAndSend(const string &str) {
 			start = end + 2;
 		}
 	}
-	
+
 	//send whatever is left over
 	if(start != len)
 		ProcessText(str.c_str() + start, len-start);
@@ -249,9 +249,9 @@ void EQWHTTPHandler::ProcessScript(const std::string &script_body) {
 	const char *script = script_body.c_str();
 	if(strcmp("perl", script) == 0)
 		script += 4;	//allow <?perl
-	
+
 //	printf("Script: ''''%s''''\n\n", script_body.c_str());
-	
+
 	GetParser()->EQW_eval("testing", script_body.c_str());
 	const string &res = EQW::Singleton()->GetOutput();
 	if(!res.empty()) {
@@ -291,7 +291,7 @@ bool EQWHTTPServer::Start(uint16 port, const char *mime_file) {
 		_log(WORLD__HTTP_ERR, "HTTP Service is already running on port %d", m_port);
 		return(false);
 	}
-	
+
 	//load up our nice mime types
 	if(!EQWHTTPHandler::LoadMimeTypes(mime_file)) {
 		_log(WORLD__HTTP_ERR, "Failed to load mime types from '%s'", mime_file);
@@ -299,25 +299,25 @@ bool EQWHTTPServer::Start(uint16 port, const char *mime_file) {
 	} else {
 		_log(WORLD__HTTP, "Loaded mime types from %s", mime_file);
 	}
-	
+
 	//fire up the server thread
 	char errbuf[TCPServer_ErrorBufferSize];
 	if(!Open(port, errbuf)) {
 		_log(WORLD__HTTP_ERR, "Unable to bind to port %d for HTTP service: %s", port, errbuf);
 		return(false);
 	}
-	
+
 	m_running = true;
 	m_port = port;
-	
+
 	/*
-	
+
 #ifdef _WINDOWS
 	_beginthread(ThreadProc, 0, this);
 #else
 	pthread_create(&m_thread, nullptr, ThreadProc, this);
 #endif*/
-	
+
 	return(true);
 }
 
@@ -335,6 +335,4 @@ ThreadReturnType EQWHTTPServer::ThreadProc(void *data) {
 	((EQWHTTPServer *) data)->Run();
 	THREAD_RETURN(nullptr);
 }*/
-
-
 

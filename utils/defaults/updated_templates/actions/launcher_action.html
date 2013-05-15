@@ -7,8 +7,8 @@
         print "\"message\" : \"Missing launcher name in Remove action\"";
         print "}";
         return;
-    } 
-    
+    }
+
     if($action eq "add") {
         my $dynamic_count = $request->get("dynamic_count", "0");
         if($dynamic_count < 0 || $dynamic_count > 254) {
@@ -40,7 +40,7 @@
             print "}";
             return;
         }
-        
+
         if($port < 0 || $port > 65535) {
             print "{";
             print "\"status\" : 0, ";
@@ -48,14 +48,14 @@
             print "}";
             return;
         }
-        
+
         if(!$config->BootStaticZone($zone, $port)) {
             print "{";
             print "\"status\" : 0, ";
             print "\"message\" : \"Failed to boot '$zone' on launcher $launcher_name with port $port. Invalid zone?\"";
             print "}";
             return;
-		}       
+		}
     } elsif($action eq "change_dynamic_count") {
         my $dynamic_count = $request->get("dynamic_count", "0");
 		$config->SetDynamicCount($dynamic_count);
@@ -73,7 +73,7 @@
                 print "\"status\" : 0, ";
                 print "\"message\" : \"Failed to remove '$zone' on launcher $launcher_name. Invalid zone?\"";
                 print "}";
-                return;            
+                return;
             }
         }
     } elsif($action eq "reboot_all") {
@@ -98,7 +98,7 @@
             return;
         } else {
             $config->RestartZone($zone);
-        }    
+        }
     } elsif($action eq "start_zone") {
         my $zone = $request->get("zone", "none");
         if($zone eq "none" || $zone eq "") {
@@ -122,7 +122,7 @@
             $config->StopZone($zone);
         }
     }
-    
+
     print "{";
     print "\"status\" : 1";
     print "}";

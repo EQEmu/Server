@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 
@@ -51,7 +51,7 @@ using namespace std;
 	#define vsnprintf	_vsnprintf
 #endif
 	#define strncasecmp	_strnicmp
-	#define strcasecmp  _stricmp
+	#define strcasecmp	_stricmp
 	#include <conio.h>
 #else
 	#include <pthread.h>
@@ -62,12 +62,12 @@ using namespace std;
 	#include <sys/shm.h>
 	#ifndef FREEBSD
 		union semun {
-		    int val;
-		    struct semid_ds *buf;
-		    ushort *array;
-		    struct seminfo *__buf;
-		    void *__pad;
-		};	  
+			int val;
+			struct semid_ds *buf;
+			ushort *array;
+			struct seminfo *__buf;
+			void *__pad;
+		};
 	#endif
 
 #endif
@@ -123,8 +123,8 @@ extern ConsoleList console_list;
 void CatchSignal(int sig_num);
 
 int main(int argc, char** argv) {
-    RegisterExecutablePlatform(ExePlatformWorld);
-    set_exception_handler();
+	RegisterExecutablePlatform(ExePlatformWorld);
+	set_exception_handler();
 
 	// Load server configuration
 	_log(WORLD__INIT, "Loading server configuration..");
@@ -141,11 +141,11 @@ int main(int argc, char** argv) {
 
 
 	_log(WORLD__INIT, "CURRENT_VERSION: %s", CURRENT_VERSION);
-	
+
 	#ifdef _DEBUG
 		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	#endif
-	
+
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(WORLD__INIT_ERR, "Could not set signal handler");
 		return 0;
@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
 			iterator.Advance();
 		}
 	}
-	
+
 	_log(WORLD__INIT, "Connecting to MySQL...");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
 	}
 	dbasync = new DBAsync(&database);
 	guild_mgr.SetDatabase(&database);
-	
+
 	if (argc >= 2) {
 		char tmp[2];
 		if (strcasecmp(argv[1], "help") == 0 || strcasecmp(argv[1], "?") == 0 || strcasecmp(argv[1], "/?") == 0 || strcasecmp(argv[1], "-?") == 0 || strcasecmp(argv[1], "-h") == 0 || strcasecmp(argv[1], "-help") == 0) {
@@ -270,14 +270,14 @@ int main(int argc, char** argv) {
 			return 0;
 		}
 	}
-	
+
 	if(Config->WorldHTTPEnabled) {
 		_log(WORLD__INIT, "Starting HTTP world service...");
 		http_server.Start(Config->WorldHTTPPort, Config->WorldHTTPMimeFile.c_str());
 	} else {
 		_log(WORLD__INIT, "HTTP world service disabled.");
 	}
-	
+
 	_log(WORLD__INIT, "Loading variables..");
 	database.LoadVariables();
 	_log(WORLD__INIT, "Loading zones..");
@@ -289,7 +289,7 @@ int main(int argc, char** argv) {
 	database.ClearRaidDetails();
 	_log(WORLD__INIT, "Loading items..");
 	if (!database.LoadItems()) {
-		_log(WORLD__INIT_ERR, "Error: Could not load item data.  But ignoring");
+		_log(WORLD__INIT_ERR, "Error: Could not load item data. But ignoring");
 	}
 	_log(WORLD__INIT, "Loading guilds..");
 	guild_mgr.LoadGuilds();
@@ -310,23 +310,23 @@ int main(int argc, char** argv) {
 		}
 	}
 	if(RuleB(World, ClearTempMerchantlist)){
-        _log(WORLD__INIT, "Clearing temporary merchant lists..");
+		_log(WORLD__INIT, "Clearing temporary merchant lists..");
 		database.ClearMerchantTemp();
-      }
+	}
 	_log(WORLD__INIT, "Loading EQ time of day..");
 	if (!zoneserver_list.worldclock.loadFile(Config->EQTimeFile.c_str()))
 		_log(WORLD__INIT_ERR, "Unable to load %s", Config->EQTimeFile.c_str());
 	_log(WORLD__INIT, "Loading launcher list..");
 	launcher_list.LoadList();
-	
+
 	char tmp[20];
 	tmp[0] = '\0';
-	database.GetVariable("holdzones",tmp, 20);	
+	database.GetVariable("holdzones",tmp, 20);
 	if ((strcasecmp(tmp, "1") == 0)) {
 		holdzones = true;
 	}
 	_log(WORLD__INIT, "Reboot zone modes %s",holdzones ? "ON" : "OFF");
-	
+
 	_log(WORLD__INIT, "Deleted %i stale player corpses from database", database.DeleteStalePlayerCorpses());
 	if (RuleB(World, DeleteStaleCorpeBackups) == true) {
 	_log(WORLD__INIT, "Deleted %i stale player backups from database", database.DeleteStalePlayerBackups());
@@ -351,9 +351,9 @@ int main(int argc, char** argv) {
 	Timer PurgeInstanceTimer(450000);
 	PurgeInstanceTimer.Start(450000);
 
-    _log(WORLD__INIT, "Loading char create info...");
-    database.LoadCharacterCreateAllocations();
-    database.LoadCharacterCreateCombos();
+	_log(WORLD__INIT, "Loading char create info...");
+	database.LoadCharacterCreateAllocations();
+	database.LoadCharacterCreateCombos();
 
 	char errbuf[TCPConnection_ErrorBufferSize];
 	if (tcps.Open(Config->WorldTCPPort, errbuf)) {
@@ -383,10 +383,10 @@ int main(int argc, char** argv) {
 	EQStream* eqs;
 	EmuTCPConnection* tcpc;
 	EQStreamInterface *eqsi;
-	
+
 	while(RunLoops) {
 		Timer::SetCurrentTime();
-		
+
 		//check the factory for any new incoming streams.
 		while ((eqs = eqsf.Pop())) {
 			//pull the stream out of the factory and give it to the stream identifier
@@ -397,37 +397,37 @@ int main(int argc, char** argv) {
 			_log(WORLD__CLIENT, "New connection from %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
 			stream_identifier.AddStream(eqs);	//takes the stream
 		}
-		
+
 		//give the stream identifier a chance to do its work....
 		stream_identifier.Process();
-		
+
 		//check the stream identifier for any now-identified streams
 		while((eqsi = stream_identifier.PopIdentified())) {
 			//now that we know what patch they are running, start up their client object
 			struct in_addr	in;
 			in.s_addr = eqsi->GetRemoteIP();
- 			if (RuleB(World, UseBannedIPsTable)){ //Lieka:  Check to see if we have the responsibility for blocking IPs.
+			if (RuleB(World, UseBannedIPsTable)){ //Lieka: Check to see if we have the responsibility for blocking IPs.
 				_log(WORLD__CLIENT, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
- 				if (!database.CheckBannedIPs(inet_ntoa(in))){ //Lieka:  Check inbound IP against banned IP table.
- 					_log(WORLD__CLIENT, "Connection %s PASSED banned IPs check.  Processing connection.", inet_ntoa(in));
- 					Client* client = new Client(eqsi);
- 					// @merth: client->zoneattempt=0;
- 					client_list.Add(client);
- 				} else {
- 					_log(WORLD__CLIENT, "Connection from %s FAILED banned IPs check.  Closing connection.", inet_ntoa(in));
- 					eqsi->Close(); //Lieka:  If the inbound IP is on the banned table, close the EQStream.
- 				}
- 			}
- 			if (!RuleB(World, UseBannedIPsTable)){
- 					_log(WORLD__CLIENT, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
- 					Client* client = new Client(eqsi);
- 					// @merth: client->zoneattempt=0;
- 					client_list.Add(client);
- 			}
+				if (!database.CheckBannedIPs(inet_ntoa(in))){ //Lieka: Check inbound IP against banned IP table.
+					_log(WORLD__CLIENT, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
+					Client* client = new Client(eqsi);
+					// @merth: client->zoneattempt=0;
+					client_list.Add(client);
+				} else {
+					_log(WORLD__CLIENT, "Connection from %s FAILED banned IPs check. Closing connection.", inet_ntoa(in));
+					eqsi->Close(); //Lieka: If the inbound IP is on the banned table, close the EQStream.
+				}
+			}
+			if (!RuleB(World, UseBannedIPsTable)){
+					_log(WORLD__CLIENT, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
+					Client* client = new Client(eqsi);
+					// @merth: client->zoneattempt=0;
+					client_list.Add(client);
+			}
 		}
-		
+
 		client_list.Process();
-		
+
 		while ((tcpc = tcps.NewQueuePop())) {
 			struct in_addr in;
 			in.s_addr = tcpc->GetrIP();
@@ -439,26 +439,26 @@ int main(int argc, char** argv) {
 		{
 			database.PurgeExpiredInstances();
 		}
-		
+
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
-		
+
 		loginserverlist.Process();
-		
+
 		console_list.Process();
-		
+
 		zoneserver_list.Process();
-		
+
 		launcher_list.Process();
 
 		UCSLink.Process();
-	
+
 		QSLink.Process();
 
 		LFPGroupList.Process();
 
 		adventure_manager.Process();
-		
+
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();

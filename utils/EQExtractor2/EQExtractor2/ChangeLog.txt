@@ -142,7 +142,7 @@ Derision: Redesigned the UI. Use the menu bar, or the following shortcuts:
 			Ctrl-V	View Packets
 			Ctrl-A	Dump AA
 			Ctrl-D	Show Debug Window (hidden by default. Change in Options).
-			Ctrl-O	Set Options (these settings persist across sessions).			
+			Ctrl-O	Set Options (these settings persist across sessions).
 
 Derision: Added the ability to disable removal of redundant waypoints.
 Derision: Added an option to only generate SQL for spawns whose name contains a given string.
@@ -153,7 +153,7 @@ Derision: Fixed crash when Debug log was closed rather than just hidden.
 Derision: Replaced HexDump method with a considerably faster version.
 
 ==07/14/2010==
-Derision: Renamed PatchTestJune242010Decoder to PatchJuly132010Decoder. 
+Derision: Renamed PatchTestJune242010Decoder to PatchJuly132010Decoder.
 Derision: Updated patch_May12-2010.conf with current EQEmu patch_Live.conf. Updated version number to 2.0.5
 
 ==06/26/2010==

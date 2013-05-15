@@ -36,7 +36,7 @@ namespace Test
 	Source::Source()
 	:	_line(0)
 	{}
-	
+
 	/// Constructs a source object.
 	///
 	/// \param file Name of the file containing the failing function.
@@ -48,15 +48,15 @@ namespace Test
 		_file(file ? file : ""),
 		_msg(msg ? msg : "")
 	{}
-	
+
 	/// \return Name of the file containing the failing function.
 	///
 	const string&
-	Source::file() const 	
+	Source::file() const
 	{
 		return _file;
 	}
-	
+
 	/// \return Line where the function starts.
 	///
 	unsigned int
@@ -64,7 +64,7 @@ namespace Test
 	{
 		return _line;
 	}
-	
+
 	/// \return Descriptive message.
 	///
 	const string&
@@ -72,7 +72,7 @@ namespace Test
 	{
 		return _msg;
 	}
-	
+
 	/// \return Name of the suite, which the test belongs to.
 	///
 	const string&

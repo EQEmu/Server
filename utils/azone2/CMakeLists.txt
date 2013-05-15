@@ -106,14 +106,14 @@ IF(MSVC)
     SET(glmodelviewer_sources
         GLModelViewer.cpp
     )
-    
+
     SET(glmodelviewer_headers
         GLModelViewer.h
     )
-    
+
     ADD_EXECUTABLE(glmodelviewer WIN32 ${glmodelviewer_sources} ${glmodelviewer_headers})
     TARGET_LINK_LIBRARIES(glmodelviewer azone_common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} "opengl32.lib" "GLU32.lib" "Ws2_32.lib")
     SET_TARGET_PROPERTIES(glmodelviewer PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
-    
+
     SET(EXECUTABLE_OUTPUT_PATH ../../Bin)
 ENDIF(MSVC)

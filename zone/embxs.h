@@ -1,8 +1,8 @@
-#ifndef EMBXS_H 
-#define EMBXS_H 
+#ifndef EMBXS_H
+#define EMBXS_H
 
 //headers from the Perl distribution
-#include <EXTERN.h> 
+#include <EXTERN.h>
 #define WIN32IO_IS_STDIO
 
 #ifndef WIN32
@@ -14,7 +14,7 @@ extern "C" {	//the perl headers dont do this for us...
 };
 #endif
 
-const char *getItemName(unsigned itemid); 
-XS(XS_qc_getItemName); /* prototype to pass -Wmissing-prototypes */ 
-EXTERN_C XS(boot_qc); /* prototype to pass -Wmissing-prototypes */ 
+const char *getItemName(unsigned itemid);
+XS(XS_qc_getItemName); /* prototype to pass -Wmissing-prototypes */
+EXTERN_C XS(boot_qc); /* prototype to pass -Wmissing-prototypes */
 #endif // EMBXS_H

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "spawngroup.h"
@@ -28,7 +28,7 @@ using namespace std;
 
 extern EntityList entity_list;
 
-SpawnEntry::SpawnEntry( uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit ) 
+SpawnEntry::SpawnEntry( uint32 in_NPCType, int in_chance, uint8 in_npc_spawn_limit )
 {
 	NPCType = in_NPCType;
 	chance = in_chance;
@@ -55,32 +55,32 @@ uint32 SpawnGroup::GetNPCType() {
 #endif
 	int npcType = 0;
 	int totalchance = 0;
-	
+
 	//check limits on this spawn group and npc type
 	if(!entity_list.LimitCheckGroup(id, group_spawn_limit))
 		return(0);
-		
+
 	list<SpawnEntry*>::iterator cur,end;
 	list<SpawnEntry*> possible;
 	cur = list_.begin();
 	end = list_.end();
 	for(; cur != end; cur++) {
 		SpawnEntry *se = *cur;
-		
+
 		//check limits on this spawn group and npc type
 		if(!entity_list.LimitCheckType(se->NPCType, se->npc_spawn_limit))
 			continue;
-		
+
 		totalchance += se->chance;
 		possible.push_back(se);
 	}
 	if(totalchance == 0)
 		return 0;
-	
-	
+
+
 	int32 roll = 0;
 	roll = MakeRandomInt(0, totalchance-1);
-	
+
 	cur = possible.begin();
 	end = possible.end();
 	for(; cur != end; cur++) {
@@ -92,7 +92,7 @@ uint32 SpawnGroup::GetNPCType() {
 			roll -= se->chance;
 		}
 	}
-	//CODER  implement random table
+	//CODER implement random table
 	return npcType;
 }
 
@@ -137,7 +137,7 @@ SpawnGroup* SpawnGroupList::GetSpawnGroup(uint32 in_id) {
 bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id) {
 	if(groups.count(in_id) != 1)
 		return(false);
-	
+
 	groups.erase(in_id);
 	return(true);
 }
@@ -147,7 +147,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-		
+
 	// CODER new spawn code
 	query = 0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT DISTINCT(spawngroupID), spawngroup.name, spawngroup.spawn_limit, spawngroup.dist, spawngroup.max_x, spawngroup.min_x, spawngroup.max_y, spawngroup.min_y, spawngroup.delay, spawngroup.despawn, spawngroup.despawn_timer FROM spawn2,spawngroup WHERE spawn2.spawngroupID=spawngroup.ID and spawn2.version=%u and zone='%s'", version, zone_name), errbuf, &result))
@@ -167,7 +167,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 	}
 
 	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, 
+	if (RunQuery(query, MakeAnyLenString(&query,
 		"SELECT DISTINCT spawnentry.spawngroupID, npcid, chance, "
 		"npc_types.spawn_limit AS sl "
 		"FROM spawnentry, spawn2, npc_types "
@@ -201,7 +201,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	
+
 
 	// CODER new spawn code
 	query = 0;
@@ -222,7 +222,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 	}
 
 	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, 
+	if (RunQuery(query, MakeAnyLenString(&query,
 		"SELECT DISTINCT spawnentry.spawngroupID, spawnentry.npcid, spawnentry.chance, spawngroup.spawn_limit FROM spawnentry,spawngroup WHERE spawnentry.spawngroupID='%i' AND spawngroup.spawn_limit='0' ORDER by chance", spawngroupid), errbuf, &result)) {
 		safe_delete_array(query);
 		while((row = mysql_fetch_row(result)))

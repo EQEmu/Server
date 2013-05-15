@@ -96,8 +96,8 @@ namespace EQExtractor2
             this.DialogResult = DialogResult.Cancel;
         }
 
-        
+
     }
 
-    
+
 }

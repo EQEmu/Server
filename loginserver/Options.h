@@ -1,160 +1,160 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2010  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef EQEMU_OPTIONS_H
 #define EQEMU_OPTIONS_H
 
 /**
- * Collects options on one object, because having a bunch of global variables floating around is 
+ * Collects options on one object, because having a bunch of global variables floating around is
  * really ugly and just a little dangerous.
  */
 class Options
 {
 public:
 	/**
-	 * Constructor, sets the default options.
-	 */
-	Options() : 
-	    allow_unregistered(true), 
-		trace(false), 
-		dump_in_packets(false), 
-		dump_out_packets(false), 
-		encryption_mode(5), 
-		local_network("127.0.0.1"), 
+	* Constructor, sets the default options.
+	*/
+	Options() :
+		allow_unregistered(true),
+		trace(false),
+		dump_in_packets(false),
+		dump_out_packets(false),
+		encryption_mode(5),
+		local_network("127.0.0.1"),
 		reject_duplicate_servers(false) { }
 
 	/**
-	 * Sets allow_unregistered.
-	 */
+	* Sets allow_unregistered.
+	*/
 	inline void AllowUnregistered(bool b) { allow_unregistered = b; }
 
 	/**
-	 * Returns the value of allow_unregistered.
-	 */
+	* Returns the value of allow_unregistered.
+	*/
 	inline bool IsUnregisteredAllowed() const { return allow_unregistered; }
 
 	/**
-	 * Sets trace.
-	 */
+	* Sets trace.
+	*/
 	inline void Trace(bool b) { trace = b; }
 
 	/**
-	 * Returns the value of trace.
-	 */
+	* Returns the value of trace.
+	*/
 	inline bool IsTraceOn() const { return trace; }
 
 	/**
-	 * Sets trace.
-	 */
+	* Sets trace.
+	*/
 	inline void WorldTrace(bool b) { world_trace = b; }
 
 	/**
-	 * Returns the value of trace.
-	 */
+	* Returns the value of trace.
+	*/
 	inline bool IsWorldTraceOn() const { return world_trace; }
 
 	/**
-	 * Sets dump_in_packets.
-	 */
+	* Sets dump_in_packets.
+	*/
 	inline void DumpInPackets(bool b) { dump_in_packets = b; }
 
 	/**
-	 * Returns the value of dump_in_packets.
-	 */
+	* Returns the value of dump_in_packets.
+	*/
 	inline bool IsDumpInPacketsOn() const { return dump_in_packets; }
 
 	/**
-	 * Sets dump_out_packets.
-	 */
+	* Sets dump_out_packets.
+	*/
 	inline void DumpOutPackets(bool b) { dump_out_packets = b; }
 
 	/**
-	 * Returns the value of dump_out_packets.
-	 */
+	* Returns the value of dump_out_packets.
+	*/
 	inline bool IsDumpOutPacketsOn() const { return dump_out_packets; }
 
 	/**
-	 * Sets encryption_mode.
-	 */
+	* Sets encryption_mode.
+	*/
 	inline void EncryptionMode(int m) { encryption_mode = m; }
 
 	/**
-	 * Returns the value of encryption_mode.
-	 */
+	* Returns the value of encryption_mode.
+	*/
 	inline int GetEncryptionMode() const { return encryption_mode; }
 
 	/**
-	 * Sets local_network.
-	 */
+	* Sets local_network.
+	*/
 	inline void LocalNetwork(string n) { local_network = n; }
 
 	/**
-	 * Return the value of local_network.
-	 */
+	* Return the value of local_network.
+	*/
 	inline string GetLocalNetwork() const { return local_network; }
 
 	/**
-	 * Sets account table.
-	 */
+	* Sets account table.
+	*/
 	inline void AccountTable(string t) { account_table = t; }
 
 	/**
-	 * Return the value of local_network.
-	 */
+	* Return the value of local_network.
+	*/
 	inline string GetAccountTable() const { return account_table; }
 
 	/**
-	 * Sets world account table.
-	 */
+	* Sets world account table.
+	*/
 	inline void WorldRegistrationTable(string t) { world_registration_table = t; }
 
 	/**
-	 * Return the value of world account table.
-	 */
+	* Return the value of world account table.
+	*/
 	inline string GetWorldRegistrationTable() const { return world_registration_table; }
 
 	/**
-	 * Sets world admin account table.
-	 */
+	* Sets world admin account table.
+	*/
 	inline void WorldAdminRegistrationTable(string t) { world_admin_registration_table = t; }
 
 	/**
-	 * Return the value of world admin account table.
-	 */
+	* Return the value of world admin account table.
+	*/
 	inline string GetWorldAdminRegistrationTable() const { return world_admin_registration_table; }
 
 	/**
-	 * Sets world server type table.
-	 */
+	* Sets world server type table.
+	*/
 	inline void WorldServerTypeTable(string t) { world_server_type_table = t; }
 
 	/**
-	 * Return the value of world admin account table.
-	 */
+	* Return the value of world admin account table.
+	*/
 	inline string GetWorldServerTypeTable() const { return world_server_type_table; }
 
 	/**
-	 * Sets whether we are rejecting duplicate servers or not.
-	 */
+	* Sets whether we are rejecting duplicate servers or not.
+	*/
 	inline void RejectDuplicateServers(bool b) { reject_duplicate_servers = b; }
 
 	/**
-	 * Returns whether we are rejecting duplicate servers or not.
-	 */
+	* Returns whether we are rejecting duplicate servers or not.
+	*/
 	inline bool IsRejectingDuplicateServers() { return reject_duplicate_servers; }
 
 private:

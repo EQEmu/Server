@@ -50,7 +50,7 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_task_fail",
 	"event_aggro_say",
 	"event_player_pickup",
-	"event_popup_response",
+	"event_popupresponse",
 	"event_proximity_say",
 	"event_cast",
 	"event_scale_calc",
@@ -251,7 +251,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 			break;
 		}
 		
-		case EVENT_POPUP_RESPONSE:
+		case EVENT_POPUPRESPONSE:
 		case EVENT_WAYPOINT_ARRIVE:
 		case EVENT_WAYPOINT_DEPART: {
 			//client
@@ -419,7 +419,7 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		case EVENT_CLICK_OBJECT:
 		case EVENT_CLICKDOOR:
 		case EVENT_SIGNAL:
-		case EVENT_POPUP_RESPONSE:
+		case EVENT_POPUPRESPONSE:
 		case EVENT_PLAYER_PICKUP: 
 		case EVENT_CAST: 
 		case EVENT_TASK_FAIL:

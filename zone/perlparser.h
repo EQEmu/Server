@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -15,21 +15,32 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#ifndef WORLDSERVER_H
-#define WORLDSERVER_H
 
-#include "../common/worldconn.h"
-#include "../common/eq_packet_structs.h"
+//extends the perl parser to use C methods
+//instead of the command queue.
 
-class WorldServer : public WorldConnection
-{
+#ifndef PERLPARSER_H
+#define PERLPARSER_H
+
+#ifdef EMBPERL
+#ifdef EMBPERL_XS
+
+#include "embparser.h"
+
+class PerlXSParser : public PerlembParser {
 public:
-	WorldServer();
-	virtual ~WorldServer();
-	virtual void Process();
+	PerlXSParser();
+//	~PerlXSParser();
 
-private:
-	virtual void OnConnected();
+	virtual void SendCommands(const char * pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst* iteminst);
+protected:
+	void map_funs();
+
+	SV *_empty_sv;
 };
-#endif
 
+
+#endif //EMBPERL_XS
+#endif //EMBPERL
+
+#endif //PERLPARSER_H

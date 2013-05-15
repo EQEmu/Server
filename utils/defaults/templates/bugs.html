@@ -12,7 +12,7 @@
         my $id = $request->get("id", "0");
         $EQW->ResolveBug($id);
     }
-    
+
     $offset = $request->get("offset", "0");
     $count = $EQW->CountBugs();
     @bugs = $EQW->ListBugs($offset);

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 
@@ -33,17 +33,17 @@ void ZoneLaunch::InitStartTimer() {
 	s_startTimer.Trigger();
 }
 
-ZoneLaunch::ZoneLaunch(WorldServer *world, const char *launcher_name, 
-	const char *zone_name, const EQEmuConfig *config)
+ZoneLaunch::ZoneLaunch(WorldServer *world, const char *launcher_name,
+const char *zone_name, const EQEmuConfig *config)
 : m_state(StateStartPending),
-  m_world(world),
-  m_zone(zone_name),
-  m_launcherName(launcher_name),
-  m_config(config),
-  m_timer(config->RestartWait),
-  m_ref(ProcLauncher::ProcError),
-  m_startCount(0),
-  m_killFails(0)
+	m_world(world),
+	m_zone(zone_name),
+	m_launcherName(launcher_name),
+	m_config(config),
+	m_timer(config->RestartWait),
+	m_ref(ProcLauncher::ProcError),
+	m_startCount(0),
+	m_killFails(0)
 {
 	//trigger the startup timer initially so it boots the first time.
 	m_timer.Trigger();
@@ -68,7 +68,7 @@ void ZoneLaunch::Start() {
 	spec->args.push_back(m_launcherName);
 	spec->handler = this;
 	spec->logFile = m_config->LogPrefix + m_zone + m_config->LogSuffix;
-	
+
 	//spec is consumed, even on failure
 	m_ref = ProcLauncher::get()->Launch(spec);
 	if(m_ref == ProcLauncher::ProcError) {
@@ -76,14 +76,14 @@ void ZoneLaunch::Start() {
 		m_timer.Start(m_config->RestartWait);
 		return;
 	}
-	
+
 	m_startCount++;
 	m_state = StateStarted;
 	s_running++;
 	m_killFails = 0;
-	
+
 	SendStatus();
-	
+
 	_log(LAUNCHER__STATUS, "Zone %s has been started.", m_zone.c_str());
 }
 
@@ -158,15 +158,15 @@ bool ZoneLaunch::Process() {
 				//we have to wait on the shared timer now..
 				break;
 			}
-			
+
 			//ok, both timers say we can start.
 			//disable our internal timer, will get started again if it is needed.
 			m_timer.Disable();
-			
+
 			//actually start up the program
 			_log(LAUNCHER__STATUS, "Starting zone %s", m_zone.c_str());
 			Start();
-			
+
 			//now update the shared timer to reflect the proper start interval.
 			if(s_running == 1) {
 				//we are the first zone started. wait that interval.
@@ -177,7 +177,7 @@ bool ZoneLaunch::Process() {
 				_log(LAUNCHER__STATUS, "Waiting %d milliseconds before booting the next zone.", m_config->ZoneBootInterval);
 				s_startTimer.Start(m_config->ZoneBootInterval);
 			}
-			
+
 		}	//else, timer still ticking, keep waiting
 		break;
 	case StateStarted:
@@ -218,7 +218,7 @@ bool ZoneLaunch::Process() {
 //called when the process actually dies off...
 void ZoneLaunch::OnTerminate(const ProcLauncher::ProcRef &ref, const ProcLauncher::Spec *spec) {
 	s_running--;
-	
+
 	switch(m_state) {
 	case StateStartPending:
 		_log(LAUNCHER__STATUS, "Zone %s has gone down before we started it..?? Restart timer started.", m_zone.c_str());
@@ -246,42 +246,7 @@ void ZoneLaunch::OnTerminate(const ProcLauncher::ProcRef &ref, const ProcLaunche
 		_log(LAUNCHER__STATUS, "Notified of zone %s terminating when we thought it was stopped.", m_zone.c_str());
 		break;
 	}
-	
+
 	SendStatus();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

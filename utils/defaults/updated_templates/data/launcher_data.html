@@ -2,7 +2,7 @@
     $launcher_name = $request->get("launcher", "none");
 
     if($launcher_name eq "none") {
-        @launchers = sort $EQW->ListLaunchers(); 
+        @launchers = sort $EQW->ListLaunchers();
         my $launcher_count = @launchers;
         print "{";
         print "\"launcher_count\" : $launcher_count,";
@@ -22,14 +22,14 @@
             }
             print "\"connected\" : ". $conn;
             print "}";
-            
+
             if($i != $launcher_count - 1) {
                 print ",";
             }
             $i++;
         }
 
-        print "]";    
+        print "]";
         print "}";
     } else {
         my $l = $EQW->GetLauncher($lname);
@@ -56,13 +56,13 @@
                 print "\"starts\" : $z->{starts},";
                 print "\"port\" : $z->{port}";
             print "}";
-            
+
             if($i != $zone_count - 1) {
                 print ", ";
             }
             $i++;
         }
-        
+
         print "]";
         print "}";
     }

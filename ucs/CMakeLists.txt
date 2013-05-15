@@ -1,20 +1,20 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(ucs_sources
-    chatchannel.cpp
-    clientlist.cpp
-    database.cpp
-    ucs.cpp
-    ucsconfig.cpp
-    worldserver.cpp
+	chatchannel.cpp
+	clientlist.cpp
+	database.cpp
+	ucs.cpp
+	ucsconfig.cpp
+	worldserver.cpp
 )
 
 SET(ucs_headers
-    chatchannel.h
-    clientlist.h
-    database.h
-    ucsconfig.h
-    worldserver.h
+	chatchannel.h
+	clientlist.h
+	database.h
+	ucsconfig.h
+	worldserver.h
 )
 
 ADD_EXECUTABLE(ucs ${ucs_sources} ${ucs_headers})
@@ -24,24 +24,25 @@ ADD_DEFINITIONS(-DUCS)
 TARGET_LINK_LIBRARIES(ucs Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
 IF(MSVC)
-	
-    SET_TARGET_PROPERTIES(ucs PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
-    TARGET_LINK_LIBRARIES(ucs "Ws2_32.lib")
+
+	SET_TARGET_PROPERTIES(ucs PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
+	TARGET_LINK_LIBRARIES(ucs "Ws2_32.lib")
 ENDIF(MSVC)
 
 IF(MINGW)
-    TARGET_LINK_LIBRARIES(ucs "WS2_32")
+	TARGET_LINK_LIBRARIES(ucs "WS2_32")
 ENDIF(MINGW)
 
 IF(UNIX)
+
 	IF(NOT FREEBSD)
 		TARGET_LINK_LIBRARIES(ucs "dl")
 	ENDIF(NOT FREEBSD)
-    TARGET_LINK_LIBRARIES(ucs "z")
-    TARGET_LINK_LIBRARIES(ucs "m")
-    TARGET_LINK_LIBRARIES(ucs "rt")
-    TARGET_LINK_LIBRARIES(ucs "pthread")
-    ADD_DEFINITIONS(-fPIC)
+	TARGET_LINK_LIBRARIES(ucs "z")
+	TARGET_LINK_LIBRARIES(ucs "m")
+	TARGET_LINK_LIBRARIES(ucs "rt")
+	TARGET_LINK_LIBRARIES(ucs "pthread")
+	ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)
 
 SET(EXECUTABLE_OUTPUT_PATH ../Bin)

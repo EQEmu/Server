@@ -154,7 +154,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 	// Derision: 23/06/08
 	// dranikcatacombsa.eqg has a couple of model names with a left parenthesis where there should
 	// be an underscore. E.g. OBP_DZ_Lbanner0)_00.MOD instead of OBP_DZ_Lbanner0__00.MOD
-	// This is the only zone I have seen this in, but is the reason for the follow code to replace 
+	// This is the only zone I have seen this in, but is the reason for the follow code to replace
 	// the parenthesis with an underscore.
 	//
 	for(unsigned int i=0; i<strlen(model_names[ModelNumber]); i++)
@@ -173,7 +173,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 
 
 
-  // Skip over the 
+  // Skip over the
   buffer = zon_orig + hdr->list_len + hdr->NumberOfModels * 4;
 
   this->model_data.plac_count = hdr->obj_count - 1;
@@ -187,8 +187,8 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 #ifdef DEBUGPLAC
   printf(" Placeable count is %d\n", this->model_data.plac_count);
 #endif
-   this->model_data.placeable = new Placeable *[this->model_data.plac_count]; 
-  
+   this->model_data.placeable = new Placeable *[this->model_data.plac_count];
+
   plac = (zon_placeable *) buffer;
   base[0] = plac->x;
   base[1] = plac->y;
@@ -250,7 +250,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
   	long UnknownSize = *((long *)(buffer));
 	buffer = buffer + 4 + (UnknownSize * 4);
     }
-    	
+
 
   }
 
@@ -272,7 +272,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
     }
 //    printf("Attempting to open MOD file %s\n", model_names[j]); fflush(stdout);
     if(model_loaders[j].Open(nullptr, model_names[j], archive)) {
-    
+
         this->model_data.models[j] = new Model;
         this->model_data.models[j]->vert_count = model_loaders[j].model_data.zone_model->vert_count;
         this->model_data.models[j]->poly_count = model_loaders[j].model_data.zone_model->poly_count;
@@ -282,10 +282,10 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
         this->model_data.models[j]->tex = model_loaders[j].model_data.zone_model->tex;
 	this->model_data.models[j]->name = new char[strlen(model_names[j])+1];
 	strcpy(this->model_data.models[j]->name, model_names[j]);
-    
+
         tex_tmp = 1;
 	//    I think this is looking to see if the placeable model textures already exist in the zone model.
-	//       
+	//
         for(i = 0; i < this->model_data.models[j]->tex_count; ++i) {
 	  tex_tmp = 1;  // Derision
           for(k = 0; k < this->model_data.zone_model->tex_count; ++k) {
@@ -310,7 +310,7 @@ int ZonLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 	          continue;
 	      }
               for(l = 0; l < this->model_data.models[k]->tex_count; ++l) {
-                if(this->model_data.models[k]->tex[l]->filenames[0] == this->model_data.models[j]->tex[i]->filenames[0] || 
+                if(this->model_data.models[k]->tex[l]->filenames[0] == this->model_data.models[j]->tex[i]->filenames[0] ||
                    (this->model_data.models[k]->tex[l]->filenames[0] &&
                     this->model_data.models[j]->tex[i]->filenames[0] &&
                     !strcmp(this->model_data.models[k]->tex[l]->filenames[0], this->model_data.models[j]->tex[i]->filenames[0]))) {

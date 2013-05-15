@@ -14,30 +14,17 @@
 	#define PET_HOLD			12
 	#define PET_NOTAUNT			14
 	#define PET_LEADER			16
-	#define	PET_SLUMBER			17	
-	#define	PET_NOCAST			18	
-	#define	PET_FOCUS			19	
-	#define	PET_FOCUS_ON		25	
-	#define	PET_FOCUS_OFF		26	
-	
+	#define	PET_SLUMBER			17
+	#define	PET_NOCAST			18
+	#define	PET_FOCUS			19
+	#define	PET_FOCUS_ON		25
+	#define	PET_FOCUS_OFF		26
+
 	class Pet : public NPC {
 	public:
 		Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power);
-		
+
 	};
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
 
