@@ -434,7 +434,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 
 	//third look for /quests/templates/npcid.ext (precedence)
 	filename = "quests/";
-	filename += QUEST_TEMPLATES_DIRECTORY;
+	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += itoa(npcid);
 	iter = _load_precedence.begin();
@@ -455,7 +455,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 
 	//fourth look for /quests/templates/npcname.ext (precedence)
 	filename = "quests/";
-	filename += QUEST_TEMPLATES_DIRECTORY;
+	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += npc_name;
 	iter = _load_precedence.begin();
@@ -497,7 +497,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 
 	//last look for /quests/templates/default.ext (precedence)
 	filename = "quests/";
-	filename += QUEST_TEMPLATES_DIRECTORY;
+	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += "default";
 	iter = _load_precedence.begin();
@@ -573,7 +573,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 
 	//third look for /quests/templates/player.ext (precedence)
 	filename = "quests/";
-	filename += QUEST_TEMPLATES_DIRECTORY;
+	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += "player";
 	iter = _load_precedence.begin();
@@ -598,7 +598,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filename) {
 	// simply look for templates/global_npc.pl
 	filename = "quests/";
-	filename += QUEST_TEMPLATES_DIRECTORY;
+	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += "global_npc";
 	std::string tmp;
@@ -626,7 +626,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filena
 QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &filename) {
 	//first look for /quests/templates/player.ext (precedence)
 	filename = "quests/";
-	filename += QUEST_TEMPLATES_DIRECTORY;
+	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += "global_player";
 	std::string tmp;

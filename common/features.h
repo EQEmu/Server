@@ -83,8 +83,8 @@ Zone extensions and features
 #ifdef QUEST_SCRIPTS_BYNAME
 //extends byname system to look in a templates directory
 //independant of zone name
-#define QUEST_TEMPLATES_BYNAME
-#define QUEST_TEMPLATES_DIRECTORY "templates"
+#define QUEST_GLOBAL_BYNAME
+#define QUEST_GLOBAL_DIRECTORY "global"
 #endif
 
 //the min ratio at which a mob's speed is reduced

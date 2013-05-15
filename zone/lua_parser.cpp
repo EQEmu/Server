@@ -1,11 +1,11 @@
 #ifdef LUA_EQEMU
 
+#include "lua.hpp"
 #include "lua_parser.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <sstream>
 
-#include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <boost/any.hpp>
 
@@ -84,10 +84,13 @@ const char *LuaEvents[_LargestEventID] = {
 extern Zone *zone;
 
 LuaParser::LuaParser() {
+	L = nullptr;
 }
 
 LuaParser::~LuaParser() {
-	ClearStates();
+	if(L) {
+		lua_close(L);
+	}
 }
 
 int LuaParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
@@ -127,25 +130,21 @@ int LuaParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string
 
 int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
 	const char *sub_name = LuaEvents[evt];
-	
-	lua_State *L = nullptr;
-	auto iter = states_.find(package_name);
-	if(iter == states_.end()) {
-		return 0;
-	}
-	L = iter->second;
+
+	int start = lua_gettop(L);
 
 	try {
-		lua_getfield(L, LUA_GLOBALSINDEX, sub_name);
-
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+		lua_getfield(L, -1, sub_name);
+		
 		//always push self
 		Lua_NPC l_npc(npc);
 		luabind::object l_npc_o = luabind::object(L, l_npc);
 		l_npc_o.push(L);
-
+		
 		int arg_count = 1;
 		int ret_count = 1;
-
+		
 		//push arguments based on event
 		switch(evt) {
 		case EVENT_SAY:
@@ -155,7 +154,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 			Lua_Client l_client(reinterpret_cast<Client*>(init));
 			luabind::object l_client_o = luabind::object(L, l_client);
 			l_client_o.push(L);
-
+		
 			//text
 			lua_pushstring(L, data.c_str());
 		
@@ -171,7 +170,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 			Lua_Client l_client(reinterpret_cast<Client*>(init));
 			luabind::object l_client_o = luabind::object(L, l_client);
 			l_client_o.push(L);
-
+		
 			//trade
 			Lua_Trade trade;
 			std::stringstream ident;
@@ -214,7 +213,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 			arg_count += 2;
 			break;
 		}
-
+		
 		case EVENT_ATTACK:
 		case EVENT_AGGRO:
 		case EVENT_TARGET_CHANGE:
@@ -223,11 +222,11 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 			Lua_Mob l_mob(init);
 			luabind::object l_mob_o = luabind::object(L, l_mob);
 			l_mob_o.push(L);
-
+		
 			arg_count += 1;
 			break;
 		}
-
+		
 		case EVENT_KILLED_MERIT:
 		case EVENT_SLAY:
 		case EVENT_ENTER:
@@ -237,21 +236,21 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 			Lua_Client l_client(reinterpret_cast<Client*>(init));
 			luabind::object l_client_o = luabind::object(L, l_client);
 			l_client_o.push(L);
-
+		
 			arg_count += 1;
 			break;
 		}
-
+		
 		case EVENT_NPC_SLAY: {
 			//npc
 			Lua_NPC l_npc(reinterpret_cast<NPC*>(init));
 			luabind::object l_npc_o = luabind::object(L, l_npc);
 			l_npc_o.push(L);
-
+		
 			arg_count += 1;
 			break;
 		}
-
+		
 		case EVENT_POPUP_RESPONSE:
 		case EVENT_WAYPOINT_ARRIVE:
 		case EVENT_WAYPOINT_DEPART: {
@@ -259,24 +258,24 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 			Lua_Client l_client(reinterpret_cast<Client*>(init));
 			luabind::object l_client_o = luabind::object(L, l_client);
 			l_client_o.push(L);
-
+		
 			//id
 			lua_pushinteger(L, std::stoi(data));
-
+		
 			arg_count += 2;
 			break;
 		}
-
+		
 		case EVENT_HATE_LIST:
 		case EVENT_COMBAT: {
 			//mob
 			Lua_Mob l_mob(init);
 			luabind::object l_mob_o = luabind::object(L, l_mob);
 			l_mob_o.push(L);
-
+		
 			//joined
 			lua_pushboolean(L, std::stoi(data) == 0 ? false : true);
-
+		
 			arg_count += 2;
 			break;
 		}
@@ -284,49 +283,57 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		case EVENT_SIGNAL: {
 			//id
 			lua_pushinteger(L, std::stoi(data));
-
+		
 			arg_count += 1;
 			break;
 		}
-
+		
 		case EVENT_TIMER: {
 			//id
 			lua_pushstring(L, data.c_str());
-
+		
 			arg_count += 1;
 			break;
 		}
-
+		
 		case EVENT_DEATH: {
 			//mob
 			Lua_Mob l_mob(init);
 			luabind::object l_mob_o = luabind::object(L, l_mob);
 			l_mob_o.push(L);
-
+		
 			Seperator sep(data.c_str());
 			lua_pushinteger(L, std::stoi(sep.arg[0]));
 			lua_pushinteger(L, std::stoi(sep.arg[1]));
 			lua_pushinteger(L, std::stoi(sep.arg[2]));
-
+		
 			arg_count += 4;
 			break;
 		}
-
+		
 		}
-
+		
 		if(lua_pcall(L, arg_count, ret_count, 0)) {
 			printf("Error: %s\n", lua_tostring(L, -1));
 			return 0;
 		}
-
+		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
+			lua_pop(L, 2);
 			return ret;
 		}
-
+		
+		lua_pop(L, 2);
 	} catch(std::exception &ex) {
-		printf("%s\n", ex.what());
-		return 0;
+		printf("Lua call exception: %s\n", ex.what());
+
+		//Restore our stack to the best of our ability
+		int end = lua_gettop(L);
+		int n = end - start;
+		if(n > 0) {
+			lua_pop(L, n);
+		}
 	}
 
 	return 0;
@@ -366,17 +373,13 @@ int LuaParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string d
 
 int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
 	const char *sub_name = LuaEvents[evt];
-	
-	lua_State *L = nullptr;
-	auto iter = states_.find(package_name);
-	if(iter == states_.end()) {
-		return 0;
-	}
-	L = iter->second;
+
+	int start = lua_gettop(L);
 
 	try {
-		lua_getfield(L, LUA_GLOBALSINDEX, sub_name);
-
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+		lua_getfield(L, -1, sub_name);
+	
 		//push self
 		Lua_Client l_client(client);
 		luabind::object l_client_o = luabind::object(L, l_client);
@@ -391,28 +394,28 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 			lua_pushinteger(L, std::stoi(sep.arg[1]));
 			lua_pushinteger(L, std::stoi(sep.arg[2]));
 			lua_pushinteger(L, std::stoi(sep.arg[3]));
-
+	
 			arg_count += 4;
 			break;
 		}
-
+	
 		case EVENT_SAY: {
 			lua_pushstring(L, data.c_str());
 			lua_pushinteger(L, extra_data);
-
+	
 			arg_count += 2;
 			break;
 		}
-
+	
 		case EVENT_DISCOVER_ITEM: 
 		case EVENT_FISH_SUCCESS:
 		case EVENT_FORAGE_SUCCESS: {
 			lua_pushinteger(L, extra_data);
-
+	
 			arg_count += 1;
 			break;
 		}
-
+	
 		case EVENT_CLICK_OBJECT:
 		case EVENT_CLICKDOOR:
 		case EVENT_SIGNAL:
@@ -422,18 +425,18 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		case EVENT_TASK_FAIL:
 		case EVENT_ZONE: {
 			lua_pushinteger(L, std::stoi(data));
-
+	
 			arg_count += 1;
 			break;
 		}
-
+	
 		case EVENT_TIMER: {
 			lua_pushstring(L, data.c_str());
-
+	
 			arg_count += 1;
 			break;
 		}
-
+	
 		case EVENT_DUEL_WIN:
 		case EVENT_DUEL_LOSE: {
 			lua_pushstring(L, data.c_str());
@@ -441,36 +444,36 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 			arg_count += 2;
 			break;
 		}
-
+	
 		case EVENT_LOOT: {
 			Seperator sep(data.c_str());
 			lua_pushinteger(L, std::stoi(sep.arg[0]));
 			lua_pushinteger(L, std::stoi(sep.arg[1]));
 			lua_pushstring(L, sep.arg[2]);
-
+	
 			arg_count += 3;
 			break;
 		}
-
+	
 		case EVENT_TASK_STAGE_COMPLETE: {
 			Seperator sep(data.c_str());
 			lua_pushinteger(L, std::stoi(sep.arg[0]));
 			lua_pushinteger(L, std::stoi(sep.arg[1]));
-
+	
 			arg_count += 2;
 			break;
 		}
-
+	
 		case EVENT_TASK_COMPLETE: {
 			Seperator sep(data.c_str());
 			lua_pushinteger(L, std::stoi(sep.arg[0]));
 			lua_pushinteger(L, std::stoi(sep.arg[1]));
 			lua_pushinteger(L, std::stoi(sep.arg[2]));
-
+	
 			arg_count += 3;
 			break;
 		}
-
+	
 		}
 		
 		if(lua_pcall(L, arg_count, ret_count, 0)) {
@@ -480,12 +483,20 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
+			lua_pop(L, 2);
 			return ret;
 		}
-
+		
+		lua_pop(L, 2);
 	} catch(std::exception &ex) {
-		printf("%s\n", ex.what());
-		return 0;
+		printf("Lua call exception: %s\n", ex.what());
+
+		//Restore our stack to the best of our ability
+		int end = lua_gettop(L);
+		int n = end - start;
+		if(n > 0) {
+			lua_pop(L, n);
+		}
 	}
 
 	return 0;
@@ -597,28 +608,22 @@ std::string LuaParser::GetVar(std::string name) {
 }
 
 void LuaParser::ReloadQuests() {
-	ClearStates();
-}
-
-void LuaParser::LoadScript(std::string filename, std::string package_name) {
-	auto iter = states_.find(package_name);
-	if(iter != states_.end()) {
-		return;
+	if(L) {
+		lua_close(L);
 	}
 
-	lua_State *L = luaL_newstate();
+	loaded_.clear();
+
+	L = luaL_newstate();
 	luaL_openlibs(L);
 
 	lua_pushnil(L);
 	lua_setglobal(L, "os");
-	
-	//lua_pushnil(L);
-	//lua_setglobal(L, "io");
 
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
-	char module_path[1024];
-	snprintf(module_path, 1024, "%s;%s", lua_tostring(L,-1), "quests/plugins/?.lua");
+	char module_path[1024] = { 0 };
+	snprintf(module_path, 1023, "%s;%s", lua_tostring(L,-1), "quests/plugins/?.lua");
 	lua_pop(L, 1);
 	lua_pushstring(L, module_path);
 	lua_setfield(L, -2, "path");
@@ -628,37 +633,64 @@ void LuaParser::LoadScript(std::string filename, std::string package_name) {
 	FILE *f = fopen("quests/templates/script_init.lua", "r");
 	if(f) {
 		fclose(f);
-
+	
 		if(luaL_dofile(L, "quests/templates/script_init.lua")) {
 			printf("Lua Error in Global Init: %s\n", lua_tostring(L, -1));
 			lua_close(L);
 			return;
 		}
 	}
-
+	
 	//zone init - always loads after global
-	std::string zone_script = "quests/" + std::string(zone->GetShortName());
-	zone_script += "/script_init.lua";
-	f = fopen(zone_script.c_str(), "r");
-	if(f) {
-		fclose(f);
-
-		if(luaL_dofile(L, zone_script.c_str())) {
-			printf("Lua Error in Zone Init: %s\n", lua_tostring(L, -1));
-			lua_close(L);
-			return;
+	if(zone) {
+		std::string zone_script = "quests/" + std::string(zone->GetShortName());
+		zone_script += "/script_init.lua";
+		f = fopen(zone_script.c_str(), "r");
+		if(f) {
+			fclose(f);
+		
+			if(luaL_dofile(L, zone_script.c_str())) {
+				printf("Lua Error in Zone Init: %s\n", lua_tostring(L, -1));
+				lua_close(L);
+				return;
+			}
 		}
 	}
-
+	
 	MapFunctions(L);
+}
 
-	if(luaL_dofile(L, filename.c_str())) {
-		printf("Lua Error: %s\n", lua_tostring(L, -1));
-		lua_close(L);
+void LuaParser::LoadScript(std::string filename, std::string package_name) {
+	auto iter = loaded_.find(package_name);
+	if(iter != loaded_.end()) {
+		return;
+	}
+	
+	if(luaL_loadfile(L, filename.c_str())) {
+		printf("Lua Load Error: %s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
 		return;
 	}
 
-	states_[package_name] = L;
+	lua_createtable(L, 0, 0); // anon table
+	lua_getglobal(L, "_G"); // get _G
+	lua_setfield(L, -2, "__index"); //anon table.__index = _G
+
+	lua_pushvalue(L, -1); //copy table to top of stack
+	lua_setmetatable(L, -2); //setmetatable(anon_table, copied table)
+
+	lua_pushvalue(L, -1); //put the table we made into the registry
+	lua_setfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+
+	lua_setfenv(L, -2); //set the env to the table we made
+
+	if(lua_pcall(L, 0, 0, 0)) {
+		printf("Lua Load Error: %s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
+		return;
+	}
+
+	loaded_[package_name] = true;
 }
 
 bool LuaParser::HasFunction(std::string subname, std::string package_name) {
@@ -671,29 +703,21 @@ bool LuaParser::HasFunction(std::string subname, std::string package_name) {
 		subname[i] = c;
 	}
 
-	auto iter = states_.find(package_name);
-	if(iter == states_.end()) {
+	auto iter = loaded_.find(package_name);
+	if(iter == loaded_.end()) {
 		return false;
 	}
 
-	lua_getfield(iter->second, LUA_GLOBALSINDEX, subname.c_str());
-	if(lua_isfunction(iter->second, -1)) {
+	lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+	lua_getfield(L, -1, subname.c_str());
+
+	if(lua_isfunction(L, -1)) {
+		lua_pop(L, 2);
 		return true;
 	}
 
+	lua_pop(L, 2);
 	return false;
-}
-
-void LuaParser::ClearStates() {
-	auto iter = states_.begin();
-	while(iter != states_.end()) {
-		if(iter->second) {
-			lua_close(iter->second);
-		}
-		++iter;
-	}
-
-	states_.clear();
 }
 
 void LuaParser::MapFunctions(lua_State *L) {

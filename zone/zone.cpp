@@ -169,6 +169,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 
 	LogFile->write(EQEMuLog::Normal, "---- Zone server %s, listening on port:%i ----", zonename, ZoneConfig::get()->ZonePort);
 	LogFile->write(EQEMuLog::Status, "Zone Bootup: %s (%i: %i)", zonename, iZoneID, iInstanceID);
+	parse->ReloadQuests(true);
 	UpdateWindowTitle();
 	zone->GetTimeSync();
 
@@ -879,7 +880,7 @@ void Zone::Shutdown(bool quite)
 	zone->ResetAuth();
 	safe_delete(zone);
 	dbasync->CommitWrites();
-    if(parse) { parse->ReloadQuests(true); }
+    parse->ReloadQuests(true);
 	UpdateWindowTitle();
 }
 

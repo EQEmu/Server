@@ -52,7 +52,8 @@ private:
 	void MapFunctions(lua_State *L);
 
 	std::map<std::string, std::string> vars_;
-	std::map<std::string, lua_State*> states_;
+	std::map<std::string, bool> loaded_;
+	lua_State *L;
 };
 
 #endif
