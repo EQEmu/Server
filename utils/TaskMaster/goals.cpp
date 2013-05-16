@@ -67,7 +67,7 @@ void MainFrame::PopulateGoalValues(unsigned int goalid)
 			if((*Iter).id == goalid){
 				int *i = new int;
 				*i = (*Iter).value;
-				
+
 				wxString curStr;
 				curStr.Clear();
 				curStr.Printf("%u", (*Iter).value);
@@ -333,7 +333,7 @@ void MainFrame::ChangeGoalValue(wxCommandEvent& event)
 		mErrorLog->Log(eqEmuLogBoth, "Modify goal value failed, goal values not active");
 		return;
 	}
-	
+
 	if(GoalsValuesList->GetSelection() == wxNOT_FOUND)
 	{
 		mErrorLog->Log(eqEmuLogBoth, "Modify goal value failed, no selection found");

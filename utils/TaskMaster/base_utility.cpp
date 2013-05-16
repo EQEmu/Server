@@ -12,7 +12,7 @@ using namespace std;
 bool MainFrame::GetDatabaseSettings(){
 	FILE *mFile = NULL;
 	mFile = fopen("db.txt", "r");
-	
+
 	//very little error checking
 	//we don't make sure the values in the file are valid
 	//or all there just that the file exists so:
@@ -81,7 +81,7 @@ bool MainFrame::LoadItems(){
 			itemsLoaded++;
 		}
 		mErrorLog->Log(eqEmuLogBoth, "%u Successfully Loaded Items", itemsLoaded);
-		mysql_free_result(res);	
+		mysql_free_result(res);
 	}
 	else{
 		mErrorLog->Log(eqEmuLogBoth, "Mysql connection did not exist for item load.");
@@ -143,7 +143,7 @@ bool MainFrame::LoadZones()
 			zonesLoaded++;
 		}
 		mErrorLog->Log(eqEmuLogBoth, "%u Successfully Loaded Zones", zonesLoaded);
-		mysql_free_result(res);	
+		mysql_free_result(res);
 	}
 	else{
 		mErrorLog->Log(eqEmuLogBoth, "Mysql connection did not exist for zone load.");
@@ -181,7 +181,7 @@ bool MainFrame::LoadTasks()
 			wxString str;
 			str.Printf("%d:%s", newT.id, newT.title);
 			ItemSelectionList->Append(str);
-	
+
 			if(newT.id > highestIndex)
 				highestIndex = newT.id;
 
@@ -200,7 +200,7 @@ bool MainFrame::LoadTasks()
 			tasksLoaded++;
 		}
 		mErrorLog->Log(eqEmuLogBoth, "%u Successfully Loaded Tasks", tasksLoaded);
-		mysql_free_result(res);	
+		mysql_free_result(res);
 	}
 	else{
 		mErrorLog->Log(eqEmuLogBoth, "Mysql connection did not exist for task load.");
@@ -232,7 +232,7 @@ bool MainFrame::LoadGoals()
 			goalsLoaded++;
 		}
 		mErrorLog->Log(eqEmuLogBoth, "%u Successfully Loaded Goals", goalsLoaded);
-		mysql_free_result(res);	
+		mysql_free_result(res);
 	}
 	else{
 		mErrorLog->Log(eqEmuLogBoth, "Mysql connection did not exist for goal load.");
@@ -276,7 +276,7 @@ bool MainFrame::LoadActivities()
 			activitiesLoaded++;
 		}
 		mErrorLog->Log(eqEmuLogBoth, "%u Successfully Loaded Activities", activitiesLoaded);
-		mysql_free_result(res);	
+		mysql_free_result(res);
 	}
 	else{
 		mErrorLog->Log(eqEmuLogBoth, "Mysql connection did not exist for activity load.");
@@ -315,7 +315,7 @@ bool MainFrame::LoadProximity()
 			proximitiesLoaded++;
 		}
 		mErrorLog->Log(eqEmuLogBoth, "%u Successfully Loaded Proximities", proximitiesLoaded);
-		mysql_free_result(res);	
+		mysql_free_result(res);
 	}
 	else{
 		mErrorLog->Log(eqEmuLogBoth, "Mysql connection did not exist for proximity load.");

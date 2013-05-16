@@ -21,7 +21,7 @@ void LoadItemDBFieldNames();
 
 void encode_length(unsigned long length, char *out);
 unsigned long decode_length(char *in);
-unsigned long  encode(char *in, unsigned long length, char *out);
+unsigned long encode(char *in, unsigned long length, char *out);
 void decode(char *in, char *out);
 void encode_chunk(char *in, int len, char *out);
 void decode_chunk(char *in, char *out);
@@ -41,3 +41,4 @@ void build_hex_line(const char *buffer, unsigned long length, unsigned long offs
 void print_hex(const char *buffer, unsigned long length);
 
 #endif
+

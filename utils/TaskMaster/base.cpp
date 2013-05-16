@@ -113,7 +113,7 @@ MainFrame::MainFrame(const wxString& title,
 	BoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
 
 	mErrorLog->Log(eqEmuLogBoth, "Creating Item List Box.");
-	ItemSelectionList = new wxListBox(this, LIST_Click, wxDefaultPosition, wxSize( -1,-1 ), 0, NULL, 0); 
+	ItemSelectionList = new wxListBox(this, LIST_Click, wxDefaultPosition, wxSize( -1,-1 ), 0, NULL, 0);
 
 	mErrorLog->Log(eqEmuLogBoth, "Adding Item List Box to Sizer.");
 	BoxSizer1->Add(ItemSelectionList, 0, wxALIGN_TOP|wxALL|wxEXPAND, 5);
@@ -228,7 +228,7 @@ MainFrame::MainFrame(const wxString& title,
 	mActText1 = new wxTextCtrl(MainPanel2, -1, wxT(""), wxPoint(185,0), wxSize(180,20), wxTE_DONTWRAP);
 	mActText1->SetMaxLength(64);
 	mActText1->Disable();
-	
+
 	mActText2Label = new wxStaticText(MainPanel2, -1, "Text 2:",  wxPoint(105,22), wxDefaultSize);
 	mActText2 = new wxTextCtrl(MainPanel2, -1, wxT(""), wxPoint(185,20), wxSize(180,20), wxTE_DONTWRAP);
 	mActText2->SetMaxLength(64);
@@ -392,7 +392,7 @@ MainFrame::MainFrame(const wxString& title,
 
 	mErrorLog->Log(eqEmuLogBoth, "Adding Notebook to Sizer.");
 	BoxSizer1->Add(MainNotebookBack, 1, wxALIGN_TOP|wxEXPAND, 5);
-	
+
 	mErrorLog->Log(eqEmuLogBoth, "Setting Frame Sizer.");
 	this->SetSizer(BoxSizer1);
 	mErrorLog->Log(eqEmuLogBoth, "Calculating Frame Layout.");
@@ -444,22 +444,22 @@ void MainFrame::Connect(wxCommandEvent& WXUNUSED(event))
 			mErrorLog->Log(eqEmuLogBoth, "Failed to load tasks, exiting.");
 			Close(TRUE);
 			return;
-		}	
+		}
 
 		if(!LoadGoals()){
 			mysql_close(mMysql);
 			mErrorLog->Log(eqEmuLogBoth, "Failed to load goals, exiting.");
 			Close(TRUE);
 			return;
-		}	
+		}
 
 		if(!LoadActivities()){
 			mysql_close(mMysql);
 			mErrorLog->Log(eqEmuLogBoth, "Failed to load activities, exiting.");
 			Close(TRUE);
 			return;
-		}	
-		
+		}
+
 		if(!LoadItems()){
 			mysql_close(mMysql);
 			mErrorLog->Log(eqEmuLogBoth, "Failed to load items, exiting.");
@@ -510,7 +510,7 @@ void MainFrame::ListBoxDoubleClick(wxCommandEvent& event)
 	Iter = taskList.begin();
 	Iter += openedIndex;
 	eqtask mTask = *Iter;
-	
+
 	wxString mStr;
 	mStr.Printf("%s", mTask.title);
 	mTaskName->Clear();

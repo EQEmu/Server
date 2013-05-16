@@ -31,7 +31,7 @@
 # include "winconfig.h"
 #else
 # include "config.h"
-#endif 
+#endif
 
 #include "cpptest-htmloutput.h"
 #include "utils.h"
@@ -52,7 +52,7 @@ namespace Test
 				idx += replace.size();
 			}
 		}
-		
+
 		string
 		escape(string value)
 		{
@@ -63,7 +63,7 @@ namespace Test
 			strreplace(value, '\'', "&#39;");
 			return value;
 		}
-		
+
 		void
 		header(ostream& os, string name)
 		{
@@ -149,7 +149,7 @@ namespace Test
 				"<hr />\n"
 				"\n";
 		}
-		
+
 		void
 		footer(ostream& os)
 		{
@@ -162,15 +162,15 @@ namespace Test
 				"</p>\n"
 				"</body>\n</html>\n";
 		}
-				
+
 		void
 		back_ref(ostream& os, const string& ref, bool prepend_newline = true)
 		{
-			
+
 			os	<< "<p class=\"" << (prepend_newline ? "spaced" : "unspaced") << "\"><a href=\"#" << ref
 				<< "\">Back to " << escape(ref) << "</a>\n</p>\n";
 		}
-		
+
 		void
 		sub_title(ostream& os, const string& title, int size)
 		{
@@ -186,43 +186,43 @@ namespace Test
 			h << "h" << size;
 			os << "<" << h.str() << "><a name=\"" << mark << "\"></a>" << escape(title) << "</" << h.str() << ">\n";
 		}
-			
+
 		enum ClassTableType { TableClass_Summary, TableClass_Suites, TableClass_Suite, TableClass_Result };
-		
+
 		void
 		table_header(ostream& os, ClassTableType type, const string &summary = "")
 		{
 			static const char* class_tabletypes[] = { "summary", "suites", "suite", "result" };
-			
+
 			os << "<table summary=\"" << escape(summary) << "\" class=\"table_" << class_tabletypes[type] << "\">\n";
 		}
-		
+
 		void
 		table_footer(ostream& os)
 		{
 			os << "</table>\n";
 		}
-		
+
 		void
 		table_tr_header(ostream& os)
 		{
 			os << "  <tr>\n";
 		}
-		
+
 		void
 		table_tr_footer(ostream& os)
 		{
 			os << "  </tr>\n";
 		}
-		
+
 		enum ClassType { Title, Success, Error };
-		
+
 		void
 		table_entry(ostream& os, ClassType type, const string& s,
 					int width = 0, const string& link = "")
 		{
 			static const char* class_types[] = { "title", "success", "error" };
-			
+
 			os << "    <td";
 			if (width)
 				os << " style=\"width:" << width << "%\"";
@@ -230,11 +230,11 @@ namespace Test
 				os << " class=\"tablecell_" << class_types[type] << "\"><a href=\"#" << link << "\">" << escape(s) << "</a>";
 			else
 				os << " class=\"tablecell_" << class_types[type] << "\">" << escape(s);
-			os << "</td>\n";	
+			os << "</td>\n";
 		}
-						
+
 	} // anonymous namespace
-	
+
 	// Test suite table
 	//
 	struct HtmlOutput::SuiteRow
@@ -259,7 +259,7 @@ namespace Test
 			table_tr_footer(_os);
 		}
 	};
-	
+
 	// Individual tests tables, tests
 	//
 	struct HtmlOutput::TestRow
@@ -276,7 +276,7 @@ namespace Test
 									   ti._sources.front().suite() + "_" + ti._name;
 				ClassType 		type(ti._success ? Success : Error);
 				ostringstream 	ss;
-				
+
 				table_tr_header(_os);
 				  table_entry(_os, type, ti._name, 0, link);
 				  ss.str(""),  ss << ti._sources.size();
@@ -288,19 +288,19 @@ namespace Test
 			}
 		}
 	};
-	
+
 	// Individual tests tables, header
 	//
 	struct HtmlOutput::TestSuiteRow
 	{
 		bool		_incl_ok_tests;
 		ostream& 	_os;
-		TestSuiteRow(ostream& os, bool incl_ok_tests) 
+		TestSuiteRow(ostream& os, bool incl_ok_tests)
 			: _incl_ok_tests(incl_ok_tests), _os(os) {}
 		void operator()(const SuiteInfo& si)
 		{
 			ostringstream ss;
-			
+
 			sub_title(_os, "Suite: " + si._name, 3, si._name);
 			table_header(_os, TableClass_Suite, "Details for suite " + si._name);
 			  table_tr_header(_os);
@@ -309,13 +309,13 @@ namespace Test
 			    table_entry(_os, Title, "Success", 10);
 			    table_entry(_os, Title, "Time (s)", 10);
 			  table_tr_footer(_os);
-			  for_each(si._tests.begin(), si._tests.end(), 
+			  for_each(si._tests.begin(), si._tests.end(),
 					   TestRow(_os, _incl_ok_tests));
 			table_footer(_os);
 			back_ref(_os, "top");
 		}
 	};
-	
+
 	// Individual tests result tables
 	//
 	struct HtmlOutput::TestResult
@@ -325,9 +325,9 @@ namespace Test
 		void operator()(const Source& s)
 		{
 			const int TitleSize = 15;
-			
+
 			ostringstream ss;
-			
+
 			table_header(_os, TableClass_Result, "Test Failure");
 			  table_tr_header(_os);
 				table_entry(_os, Title, "Test", TitleSize);
@@ -345,7 +345,7 @@ namespace Test
 			table_footer(_os);
 		}
 	};
-	
+
 	// All tests result tables
 	//
 	struct HtmlOutput::TestResultAll
@@ -357,14 +357,14 @@ namespace Test
 			if (!ti._success)
 			{
 				const string& suite = ti._sources.front().suite();
-				
+
 				sub_title(_os, suite + "::" + ti._name, 3, suite + "_" + ti._name);
 				for_each(ti._sources.begin(), ti._sources.end(), TestResult(_os));
 				back_ref(_os, suite, false);
 			}
 		}
 	};
-	
+
 	// Individual tests result tables, iterator
 	//
 	struct HtmlOutput::SuiteTestResult
@@ -376,12 +376,12 @@ namespace Test
 			for_each(si._tests.begin(), si._tests.end(), TestResultAll(_os));
 		}
 	};
-	
+
 	/// Generates the HTML table. This function should only be called after
 	/// run(), when all tests have been executed.
 	///
 	/// \param os            Output stream.
-	/// \param incl_ok_tests Set if successful tests should be shown; 
+	/// \param incl_ok_tests Set if successful tests should be shown;
 	///                      false otherwise.
 	/// \param name          Name of generated report.
 	///
@@ -390,9 +390,9 @@ namespace Test
 	{
 		ClassType 		type(_total_errors > 0 ? Error : Success);
 		ostringstream 	ss;
-		
+
 		header(os, name);
-		
+
 		// Table: Summary
 		//
 		sub_title(os, "Summary", 2);
@@ -415,7 +415,7 @@ namespace Test
 		  table_tr_footer(os);
 		table_footer(os);
 		os << "<hr />\n\n";
-		
+
 		// Table: Test suites
 		//
 		sub_title(os, "Test suites", 2);
@@ -430,12 +430,12 @@ namespace Test
 		  for_each(_suites.begin(), _suites.end(), SuiteRow(os));
 		table_footer(os);
 		os << "<hr />\n\n";
-		
+
 		// Individual tests tables
 		//
 		for_each(_suites.begin(), _suites.end(), TestSuiteRow(os, incl_ok_tests));
 		os << "<hr />\n\n";
-		
+
 		// Individual tests result tables
 		//
 		if(_total_errors != 0)
@@ -443,11 +443,11 @@ namespace Test
 			sub_title(os, "Test results", 2);
 			for_each(_suites.begin(), _suites.end(), SuiteTestResult(os));
 			os << "<hr />\n\n";
-		}		
+		}
 		// EOF
 		//
 		footer(os);
 	}
-	
+
 } // namespace Test
 

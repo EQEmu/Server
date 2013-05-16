@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 //extends the parser to include perl
@@ -72,7 +72,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_PROXIMITY_SAY",
 	"EVENT_CAST",
 	"EVENT_SCALE_CALC",
-    "EVENT_ITEM_ENTERZONE",
+	"EVENT_ITEM_ENTERZONE",
 	"EVENT_TARGET_CHANGE",
 	"EVENT_HATE_LIST",
 	"EVENT_SPELL_EFFECT_CLIENT",
@@ -105,7 +105,7 @@ PerlembParser::PerlembParser(void) : Parser()
 {
 	perl = nullptr;
 	eventQueueProcessing = false;
-    globalPlayerQuestLoaded = pQuestReadyToLoad;
+	globalPlayerQuestLoaded = pQuestReadyToLoad;
 	globalNPCQuestLoaded = nQuestReadyToLoad;
 }
 
@@ -244,12 +244,12 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	}
 
 	bool isPlayerQuest = false;
-    bool isGlobalPlayerQuest = false;
+	bool isGlobalPlayerQuest = false;
 	bool isGlobalNPC = false;
 	bool isItemQuest = false;
 	bool isSpellQuest = false;
-	if(event == EVENT_SPELL_EFFECT_CLIENT || 
-		event == EVENT_SPELL_EFFECT_NPC || 
+	if(event == EVENT_SPELL_EFFECT_CLIENT ||
+		event == EVENT_SPELL_EFFECT_NPC ||
 		event == EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT ||
 		event == EVENT_SPELL_EFFECT_BUFF_TIC_NPC ||
 		event == EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)
@@ -260,13 +260,13 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	{
 		if(!npcmob && mob) {
 			if(!iteminst) {
-                if(global) {
-                    isGlobalPlayerQuest = true;
-                } else {
-				    isPlayerQuest = true;
-                }
-            }
-			else 
+				if(global) {
+					isGlobalPlayerQuest = true;
+				} else {
+					isPlayerQuest = true;
+				}
+			}
+			else
 				isItemQuest = true;
 		}
 	}
@@ -281,7 +281,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		}else{
 
 			packagename = GetPkgPrefix(objid);
-	
+
 			if(!isloaded(packagename.c_str()))
 			{
 				LoadScript(objid, zone->GetShortName());
@@ -324,14 +324,14 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 			LoadPlayerScript(zone->GetShortName());
 		}
 	}
-    else if(isGlobalPlayerQuest) {
-        packagename = "global_player";
+	else if(isGlobalPlayerQuest) {
+		packagename = "global_player";
 
 		if(!isloaded(packagename.c_str()))
 		{
 			LoadGlobalPlayerScript();
 		}
-    }
+	}
 	else
 	{
 		packagename = "spell_effect_";
@@ -350,16 +350,16 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	}
 
 	int charid = 0;
-	if (mob && mob->IsClient()) {  // some events like waypoint and spawn don't have a player involved
+	if (mob && mob->IsClient()) { // some events like waypoint and spawn don't have a player involved
 		charid = mob->CastToClient()->CharacterID();
 	} else {
 		if(npcmob)
 		{
-			charid = -npcmob->GetNPCTypeID();  // make char id negative npc id as a fudge
+			charid = -npcmob->GetNPCTypeID(); // make char id negative npc id as a fudge
 		}
 		else if(mob && mob->IsNPC())
 		{
-			charid = -mob->CastToNPC()->GetNPCTypeID();  // make char id negative npc id as a fudge
+			charid = -mob->CastToNPC()->GetNPCTypeID(); // make char id negative npc id as a fudge
 		}
 	}
 	ExportVar(packagename.c_str(), "charid", charid);
@@ -418,7 +418,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 			{
 				QGlobalCache::Combine(globalMap, zone_c->GetBucket(), npcmob->GetNPCTypeID(), charid, zone->GetZoneID());
 			}
-			
+
 			std::list<QGlobal>::iterator iter = globalMap.begin();
 			while(iter != globalMap.end())
 			{
@@ -593,7 +593,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	switch (event) {
 		case EVENT_SAY: {
 			if (npcmob && npcmob->GetAppearance() != eaDead)
-			  npcmob->FaceTarget(mob);
+				npcmob->FaceTarget(mob);
 			ExportVar(packagename.c_str(), "data", objid);
 			ExportVar(packagename.c_str(), "text", data);
 			ExportVar(packagename.c_str(), "langid", extradata);
@@ -601,7 +601,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		}
 		case EVENT_ITEM: {
 			if (npcmob->GetAppearance() != eaDead)
-			  npcmob->FaceTarget(mob);
+				npcmob->FaceTarget(mob);
 			//this is such a hack... why aren't these just set directly..
 			ExportVar(packagename.c_str(), "item1", GetVar("item1", objid).c_str());
 			ExportVar(packagename.c_str(), "item2", GetVar("item2", objid).c_str());
@@ -681,7 +681,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 			ExportVar(packagename.c_str(), "target_zone_id", data);
 			break;
 		}
-		
+
 		case EVENT_CAST_ON:
 		case EVENT_CAST:{
 			ExportVar(packagename.c_str(), "spell_id", data);
@@ -717,7 +717,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		}
 		case EVENT_PLAYER_PICKUP:{
 			ExportVar(packagename.c_str(), "picked_up_id", data);
-			break;		
+			break;
 		}
 
 		case EVENT_AGGRO_SAY: {
@@ -737,7 +737,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 			break;
 		}
 		case EVENT_SCALE_CALC:
-        case EVENT_ITEM_ENTERZONE: {
+		case EVENT_ITEM_ENTERZONE: {
 			ExportVar(packagename.c_str(), "itemid", objid);
 			ExportVar(packagename.c_str(), "itemname", iteminst->GetItem()->Name);
 			break;
@@ -788,12 +788,12 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 
 		case EVENT_FORAGE_SUCCESS: {
 			ExportVar(packagename.c_str(), "foraged_item", extradata);
-			break; 
+			break;
 		}
 
 		case EVENT_FISH_SUCCESS: {
 			ExportVar(packagename.c_str(), "fished_item", extradata);
-			break; 
+			break;
 		}
 
 		case EVENT_CLICK_OBJECT: {
@@ -842,11 +842,11 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	}
 	else if(isSpellQuest)
 	{
-        if(mob) {
-            SendCommands(packagename.c_str(), sub_name, 0, mob, mob, nullptr);
-        } else {
-            SendCommands(packagename.c_str(), sub_name, 0, npcmob, mob, nullptr);
-        }
+		if(mob) {
+			SendCommands(packagename.c_str(), sub_name, 0, mob, mob, nullptr);
+		} else {
+			SendCommands(packagename.c_str(), sub_name, 0, npcmob, mob, nullptr);
+		}
 	}
 	else {
 		SendCommands(packagename.c_str(), sub_name, objid, npcmob, mob, nullptr);
@@ -857,27 +857,27 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 }
 
 void PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
-    EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true);
+	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true);
 }
 
 void PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
-    EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data);
+	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data);
 }
 
 void PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-    EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data);
+	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data);
 }
 
 void PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-    EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true);
+	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true);
 }
 
 void PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
-    EventCommon(evt, objid, nullptr, nullptr, item, client, extra_data);
+	EventCommon(evt, objid, nullptr, nullptr, item, client, extra_data);
 }
 
 void PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
-    EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data);
+	EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data);
 }
 
 void PerlembParser::ReloadQuests(bool with_timers) {
@@ -915,7 +915,7 @@ void PerlembParser::ReloadQuests(bool with_timers) {
 	hasQuests.clear();
 	playerQuestLoaded.clear();
 	globalPlayerQuestLoaded = pQuestReadyToLoad;
-    globalNPCQuestLoaded = nQuestReadyToLoad;
+	globalNPCQuestLoaded = nQuestReadyToLoad;
 	itemQuestLoaded.clear();
 	spellQuestLoaded.clear();
 }
@@ -1075,7 +1075,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 				curmode = questTemplateByID;
 			}
 		}
-		
+
 #endif	//QUEST_TEMPLATES_BYNAME
 
 #endif //QUEST_SCRIPTS_BYNAME
@@ -1086,7 +1086,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 			fclose(tmpf);
 			filefound = true;
 		}
-		
+
 		// If by ID, Name or Template wasn't found, load /quests/zone/default.pl
 		if(!filefound)
 		{
@@ -1103,7 +1103,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 			fclose(tmpf);
 			filefound = true;
 		}
-		
+
 		// If zone template isn't found look for it globally /quests/template/default.pl
 		if(!filefound)
 		{
@@ -1142,8 +1142,8 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 	//LogFile->write(EQEMuLog::Debug, "	finally settling on '%s'", filename.c_str());
 	//	LogFile->write(EQEMuLog::Status, "Looking for quest file: '%s'", filename.c_str());
 
-	//  todo: decide whether or not to delete the package to allow for script refreshes w/o restarting the server
-	//  remember to guard against deleting the default package, on a similar note... consider deleting packages upon zone change
+	//	todo: decide whether or not to delete the package to allow for script refreshes w/o restarting the server
+	//	remember to guard against deleting the default package, on a similar note... consider deleting packages upon zone change
 	//	try { perl->eval(std::string("delete_package(\"").append(packagename).append("\");").c_str()); }
 	//	catch(...) {/*perl balked at us trynig to delete a non-existant package... no big deal.*/}
 
@@ -1192,7 +1192,7 @@ int PerlembParser::LoadGlobalNPCScript()
 
 	string filename = "quests/";
 	filename += QUEST_TEMPLATES_DIRECTORY;
-    filename += "/global_npc.pl";
+	filename += "/global_npc.pl";
 	string packagename = "global_npc";
 
 	try {
@@ -1225,8 +1225,8 @@ int PerlembParser::LoadPlayerScript(const char *zone_name)
 	string filename= "quests/";
 	filename += zone_name;
 	filename += "/player_v";
-    filename += itoa(zone->GetInstanceVersion());
-    filename += ".pl";
+	filename += itoa(zone->GetInstanceVersion());
+	filename += ".pl";
 	string packagename = "player";
 	packagename += "_";
 	packagename += zone_name;
@@ -1239,11 +1239,11 @@ int PerlembParser::LoadPlayerScript(const char *zone_name)
 			LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
 	}
 
-    if(!isloaded(packagename.c_str()))
+	if(!isloaded(packagename.c_str()))
 	{
 		filename= "quests/";
-	    filename += zone_name;
-	    filename += "/player.pl";
+		filename += zone_name;
+		filename += "/player.pl";
 		try {
 			perl->eval_file(packagename.c_str(), filename.c_str());
 		}
@@ -1253,7 +1253,7 @@ int PerlembParser::LoadPlayerScript(const char *zone_name)
 		}
 	}
 
-    //todo: change this to just read eval_file's %cache - duh!
+	//todo: change this to just read eval_file's %cache - duh!
 	if(!isloaded(packagename.c_str()))
 	{
 		filename = "quests/";
@@ -1273,9 +1273,9 @@ int PerlembParser::LoadPlayerScript(const char *zone_name)
 		}
 	}
 
-	if(perl->SubExists(packagename.c_str(), "EVENT_CAST")) 
+	if(perl->SubExists(packagename.c_str(), "EVENT_CAST"))
 		playerQuestLoaded[zone_name] = pQuestEventCast;
-	else 
+	else
 		playerQuestLoaded[zone_name] = pQuestLoaded;
 	return 1;
 }
@@ -1296,7 +1296,7 @@ int PerlembParser::LoadGlobalPlayerScript()
 
 	string filename = "quests/";
 	filename += QUEST_TEMPLATES_DIRECTORY;
-    filename += "/global_player.pl";
+	filename += "/global_player.pl";
 	string packagename = "global_player";
 
 	try {
@@ -1307,9 +1307,9 @@ int PerlembParser::LoadGlobalPlayerScript()
 			LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
 	}
 
-	if(perl->SubExists(packagename.c_str(), "EVENT_CAST")) 
+	if(perl->SubExists(packagename.c_str(), "EVENT_CAST"))
 		globalPlayerQuestLoaded = pQuestEventCast;
-	else 
+	else
 		globalPlayerQuestLoaded = pQuestLoaded;
 	return 1;
 }
@@ -1359,7 +1359,7 @@ int PerlembParser::LoadItemScript(ItemInst* iteminst, string packagename, itemQu
 	return 1;
 }
 
-int PerlembParser::LoadSpellScript(uint32 id) 
+int PerlembParser::LoadSpellScript(uint32 id)
 {
 	if(!perl)
 		return 0;
@@ -1463,10 +1463,10 @@ bool PerlembParser::PlayerHasQuestSub(const char *subname) {
 
 	if(playerQuestLoaded.count(zone->GetShortName()) == 0)
 		LoadPlayerScript(zone->GetShortName());
-		
+
 	if(subname == "EVENT_CAST")
 		return (playerQuestLoaded[zone->GetShortName()] == pQuestEventCast);
-	
+
 	return(perl->SubExists(packagename.c_str(), subname));
 }
 
@@ -1476,21 +1476,21 @@ bool PerlembParser::GlobalPlayerHasQuestSub(const char *subname) {
 
 	if(globalPlayerQuestLoaded == pQuestReadyToLoad)
 		LoadGlobalPlayerScript();
-		
+
 	if(subname == "EVENT_CAST")
 		return (globalPlayerQuestLoaded == pQuestEventCast);
-	
+
 	return(perl->SubExists(packagename.c_str(), subname));
 }
 
-bool PerlembParser::SpellHasQuestSub(uint32 id, const char *subname) 
+bool PerlembParser::SpellHasQuestSub(uint32 id, const char *subname)
 {
 	string packagename = "spell_effect_";
 	packagename += itoa(id);
 
 	if(spellQuestLoaded.count(id) == 0)
 		LoadSpellScript(id);
-	
+
 	return(perl->SubExists(packagename.c_str(), subname));
 }
 
@@ -1577,7 +1577,7 @@ void PerlembParser::SendCommands(const char * pkgprefix, const char *event, uint
 		sprintf(var,"$quest::cmd_queue[%d]{args}",c);
 		std::string args = perl->getstr(var);
 		size_t num_args = std::count(args.begin(), args.end(), ',') + 1;
-	
+
 		ExCommands(cmd, args, num_args, npcid, other, mob);
 	}
 

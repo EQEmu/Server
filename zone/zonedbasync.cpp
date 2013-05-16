@@ -108,7 +108,7 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 				needtoinsert = true;
 		}
 		if (needtoinsert) {
-			if (!database.RunQuery(query, MakeAnyLenString(&query, 
+			if (!database.RunQuery(query, MakeAnyLenString(&query,
 				"Insert Delayed into character_backup (charid, account_id, name, profile, level, class, x, y, z, zoneid) "
 				"select id, account_id, name, profile, level, class, x, y, z, zoneid "
 				"from character_ where id=%u", iWork->WPT()), errbuf)) {

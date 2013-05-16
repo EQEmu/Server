@@ -26,7 +26,7 @@ public:
 	uint32	DoEscapeString(char* tobuf, const char* frombuf, uint32 fromlen);
 	void	ping();
 	MYSQL*	getMySQL(){ return &mysql; }
-	
+
 protected:
 	bool	Open(const char* iHost, const char* iUser, const char* iPassword, const char* iDatabase, uint32 iPort, uint32* errnum = 0, char* errbuf = 0, bool iCompress = false, bool iSSL = false);
 private:

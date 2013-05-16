@@ -66,7 +66,7 @@ typedef enum {	//focus types
 	focusTwincast,
 	focusSympatheticProc,
 	focusSpellDamage,
-	focusFF_Damage_Amount, 
+	focusFF_Damage_Amount,
 	focusSpellDurByTic,
 	focusSwarmPetDuration,
 	focusReduceRecastTime,
@@ -156,16 +156,16 @@ struct Buffs_Struct {
 	uint16	spellid;
 	uint8	casterlevel;
 	uint16	casterid;		// Maybe change this to a pointer sometime, but gotta make sure it's 0'd when it no longer points to anything
-	char    caster_name[64];
-    int32	ticsremaining;
-	uint32  counters;
+	char	caster_name[64];
+	int32	ticsremaining;
+	uint32	counters;
 	uint32	numhits; //the number of physical hits this buff can take before it fades away, lots of druid armor spells take advantage of this mixed with powerful effects
 	uint32	melee_rune;
 	uint32	magic_rune;
 	uint8	deathSaveSuccessChance;
 	uint8	deathsaveCasterAARank;
-    bool	persistant_buff;
-    bool	client;  //True if the caster is a client
+	bool	persistant_buff;
+	bool	client; //True if the caster is a client
 	bool	UpdateClient;
 };
 
@@ -224,14 +224,14 @@ struct StatBonuses {
 	DmgShieldType	DamageShieldType;
 	int		SpellDamageShield;
 	int		SpellShield;
-	int		ReverseDamageShield; 				// this is damage done to the mob when it attacks
+	int		ReverseDamageShield;				// this is damage done to the mob when it attacks
 	uint16	ReverseDamageShieldSpellID;
 	DmgShieldType	ReverseDamageShieldType;
 	int		movementspeed;
 	int16	haste;
 	int16	hastetype2;
 	int16	hastetype3;
-	int16  inhibitmelee;
+	int16	inhibitmelee;
 	float	AggroRange;							// when calculate just replace original value with this
 	float	AssistRange;
 	int16	skillmod[HIGHEST_SKILL+1];
@@ -245,65 +245,65 @@ struct StatBonuses {
 	int8	hatemod;
 	int32	EnduranceReduction;
 
-	int16  StrikeThrough;						// PoP: Strike Through %
-	int16 	MeleeMitigation;					//i = Shielding
-	int16 	CriticalHitChance[HIGHEST_SKILL+2];	//i
-	int16 	CriticalSpellChance;				//i
-	int16 	SpellCritDmgIncrease;				//i
-	int16 	DotCritDmgIncrease;					//i
-	int16 	CriticalHealChance;					//i
-	int16 	CriticalHealOverTime;				//i
-	int16 	CriticalDoTChance;					//i
-	int16 	CrippBlowChance;					//
-	int16 	AvoidMeleeChance;					//AvoidMeleeChance/10 == % chance i = Avoidance
-	int16 	RiposteChance;						//i
-	int16 	DodgeChance;						//i
-	int16 	ParryChance;						//i
-	int16 	DualWieldChance;					//i
-	int16 	DoubleAttackChance;					//i
-	int16 	TripleAttackChance;					//i
-	int16 	ResistSpellChance;					//i
-	int16 	ResistFearChance;					//i
-	bool   	Fearless;							//i
-	bool   	IsFeared;							//i
-	int16 	StunResist;							//i
-	int16 	MeleeSkillCheck;					//i
-	uint8  	MeleeSkillCheckSkill;
-	int16 	HitChance;							//HitChance/15 == % increase i = Accuracy (Item: Accuracy)
-	int16 	HitChanceEffect[HIGHEST_SKILL+2];	//Spell effect Chance to Hit, straight percent increase
-	int16 	DamageModifier[HIGHEST_SKILL+2];	//i
-	int16 	MinDamageModifier[HIGHEST_SKILL+2]; //i
-	int16 	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
-	int16 	ExtraAttackChance;
+	int16	StrikeThrough;						// PoP: Strike Through %
+	int16	MeleeMitigation;					//i = Shielding
+	int16	CriticalHitChance[HIGHEST_SKILL+2];	//i
+	int16	CriticalSpellChance;				//i
+	int16	SpellCritDmgIncrease;				//i
+	int16	DotCritDmgIncrease;					//i
+	int16	CriticalHealChance;					//i
+	int16	CriticalHealOverTime;				//i
+	int16	CriticalDoTChance;					//i
+	int16	CrippBlowChance;					//
+	int16	AvoidMeleeChance;					//AvoidMeleeChance/10 == % chance i = Avoidance
+	int16	RiposteChance;						//i
+	int16	DodgeChance;						//i
+	int16	ParryChance;						//i
+	int16	DualWieldChance;					//i
+	int16	DoubleAttackChance;					//i
+	int16	TripleAttackChance;					//i
+	int16	ResistSpellChance;					//i
+	int16	ResistFearChance;					//i
+	bool	Fearless;							//i
+	bool	IsFeared;							//i
+	int16	StunResist;							//i
+	int16	MeleeSkillCheck;					//i
+	uint8	MeleeSkillCheckSkill;
+	int16	HitChance;							//HitChance/15 == % increase i = Accuracy (Item: Accuracy)
+	int16	HitChanceEffect[HIGHEST_SKILL+2];	//Spell effect Chance to Hit, straight percent increase
+	int16	DamageModifier[HIGHEST_SKILL+2];	//i
+	int16	MinDamageModifier[HIGHEST_SKILL+2]; //i
+	int16	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
+	int16	ExtraAttackChance;
 	int16	DoTShielding;
-	int16 	DivineSaveChance[2];				// Second Chance (base1 = chance, base2 = spell on trigger)
-	uint16	DeathSave[4];						// Death Pact [0](value = 1 partial 2 = full) [1]=slot [2]=LvLimit [3]=HealAmt 
-	int16 	FlurryChance;
+	int16	DivineSaveChance[2];				// Second Chance (base1 = chance, base2 = spell on trigger)
+	uint16	DeathSave[4];						// Death Pact [0](value = 1 partial 2 = full) [1]=slot [2]=LvLimit [3]=HealAmt
+	int16	FlurryChance;
 	int16	Accuracy[HIGHEST_SKILL+2];			//Accuracy/15 == % increase	[Spell Effect: Accuracy)
-	int16	HundredHands;						//extra haste, stacks with all other haste  i
+	int16	HundredHands;						//extra haste, stacks with all other haste	i
 	int8	MeleeLifetap;						//i
-	int16 	HealRate;							// Spell effect that influences effectiveness of heals
-	int16 	MaxHPChange;						// Spell Effect
-	int16 	SkillDmgTaken[HIGHEST_SKILL+2];		// All Skills + -1
-	int32 	HealAmt;							// Item Effect
-	int32 	SpellDmg;							// Item Effect
-	int32 	Clairvoyance;						// Item Effect
-	int16 	DSMitigation;						// Item Effect
-	int16  DSMitigationOffHand;				// Lowers damage shield from off hand attacks.
-	uint32 	SpellTriggers[MAX_SPELL_TRIGGER];	// Innate/Spell/Item Spells that trigger when you cast
-	uint32 	SpellOnKill[MAX_SPELL_TRIGGER*3];	// Chance to proc after killing a mob
-	uint32 	SpellOnDeath[MAX_SPELL_TRIGGER*2];	// Chance to have effect cast when you die
-	int16 	CritDmgMob[HIGHEST_SKILL+2];		// All Skills + -1
-	int16 	SkillReuseTime[HIGHEST_SKILL+1];	// Reduces skill timers
-	int16 	SkillDamageAmount[HIGHEST_SKILL+2];	// All Skills + -1
-	int16 	TwoHandBluntBlock;					// chance to block when wielding two hand blunt weapon
-	uint16 	ItemManaRegenCap;					// Increases the amount of mana you have can over the cap(aa effect)
-	int16 	GravityEffect;						// Indictor of spell effect
+	int16	HealRate;							// Spell effect that influences effectiveness of heals
+	int16	MaxHPChange;						// Spell Effect
+	int16	SkillDmgTaken[HIGHEST_SKILL+2];		// All Skills + -1
+	int32	HealAmt;							// Item Effect
+	int32	SpellDmg;							// Item Effect
+	int32	Clairvoyance;						// Item Effect
+	int16	DSMitigation;						// Item Effect
+	int16	DSMitigationOffHand;				// Lowers damage shield from off hand attacks.
+	uint32	SpellTriggers[MAX_SPELL_TRIGGER];	// Innate/Spell/Item Spells that trigger when you cast
+	uint32	SpellOnKill[MAX_SPELL_TRIGGER*3];	// Chance to proc after killing a mob
+	uint32	SpellOnDeath[MAX_SPELL_TRIGGER*2];	// Chance to have effect cast when you die
+	int16	CritDmgMob[HIGHEST_SKILL+2];		// All Skills + -1
+	int16	SkillReuseTime[HIGHEST_SKILL+1];	// Reduces skill timers
+	int16	SkillDamageAmount[HIGHEST_SKILL+2];	// All Skills + -1
+	int16	TwoHandBluntBlock;					// chance to block when wielding two hand blunt weapon
+	uint16	ItemManaRegenCap;					// Increases the amount of mana you have can over the cap(aa effect)
+	int16	GravityEffect;						// Indictor of spell effect
 	bool	AntiGate;							// spell effect that prevents gating
 	bool	MagicWeapon;						// spell effect that makes weapon magical
 	int16	IncreaseBlockChance;				// overall block chance modifier
 	uint16	PersistantCasting;					// chance to continue casting through a stun
-	int 	XPRateMod;							//i
+	int	XPRateMod;							//i
 	int		HPPercCap;							//Spell effect that limits you to being healed/regening beyond a % of your max
 	int		ManaPercCap;						// ^^
 	int		EndPercCap;							// ^^
@@ -311,22 +311,22 @@ struct StatBonuses {
 	//uint16	BlockSpellEffect[EFFECT_COUNT];		// Prevents spells with certain effects from landing on you *no longer used
 	bool	ImmuneToFlee;						// Bypass the fleeing flag
 	uint16	VoiceGraft;							// Stores the ID of the mob with which to talk through
-	uint16   SpellProcChance;					// chance to proc from sympathetic spell effects
+	uint16	SpellProcChance;					// chance to proc from sympathetic spell effects
 	uint16	CharmBreakChance;					// chance to break charm
-	int16  SongRange;							// increases range of beneficial bard songs
-	uint16  HPToManaConvert;					// Uses HP to cast spells at specific conversion
-	uint16 	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have. 
+	int16	SongRange;							// increases range of beneficial bard songs
+	uint16	HPToManaConvert;					// Uses HP to cast spells at specific conversion
+	uint16	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
 	bool	NegateEffects;						// Check if you contain a buff with negate effect. (only spellbonuses)
-	int16  SkillDamageAmount2[HIGHEST_SKILL+2];	// Adds skill specific damage
-	uint16	NegateAttacks[2];					// 0 = bool HasEffect   1 = Buff Slot
+	int16	SkillDamageAmount2[HIGHEST_SKILL+2];	// Adds skill specific damage
+	uint16	NegateAttacks[2];					// 0 = bool HasEffect 1 = Buff Slot
 	uint16	MitigateMeleeRune[2];				// 0 = Mitigation value 1 = Buff Slot
 	uint16	MitigateSpellRune[2];				// 0 = Mitigation value 1 = Buff Slot
 	uint16	ManaAbsorbPercentDamage[2];			// 0 = Mitigation value 1 = Buff Slot
-	int16  ShieldBlock;						// Chance to Shield Block
-	int16  BlockBehind;						// Chance to Block Behind (with our without shield)
+	int16	ShieldBlock;						// Chance to Shield Block
+	int16	BlockBehind;						// Chance to Block Behind (with our without shield)
 	//bool	AbsorbMagicAtt;						// Magic Rune *Need to be implemented for NegateEffect
 	//bool	MeleeRune;							// Melee Rune *Need to be implemented for NegateEffect
-	
+
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
 	uint8	BuffSlotIncrease;					// Increases number of available buff slots
@@ -336,51 +336,51 @@ struct StatBonuses {
 	int16	DoubleSpecialAttack;				// Chance to to perform a double special attack (ie flying kick 2x)
 	int16	SpecialAttackKBProc[2];				// Chance to to do a knockback from special attacks. (0 = chance 1 = Skill)
 	uint8	FrontalStunResist;					// Chance to resist a frontal stun
-	int16  BindWound;							// Increase amount of HP by percent.
-	int16  MaxBindWound;						// Increase max amount of HP you can bind wound.
-	int16  ChannelChanceSpells;				// Modify chance to channel a spell.
-	int16  ChannelChanceItems;					// Modify chance to channel a items.
-	uint8	SeeInvis;							// See Invs. 
+	int16	BindWound;							// Increase amount of HP by percent.
+	int16	MaxBindWound;						// Increase max amount of HP you can bind wound.
+	int16	ChannelChanceSpells;				// Modify chance to channel a spell.
+	int16	ChannelChanceItems;					// Modify chance to channel a items.
+	uint8	SeeInvis;							// See Invs.
 	uint8	TripleBackstab;						// Chance to triple backstab
 	bool	FrontalBackstabMinDmg;				// Allow frontal backstabs for min damage
-	uint8   FrontalBackstabChance;				// Chance to backstab from the front for full damage
+	uint8	FrontalBackstabChance;				// Chance to backstab from the front for full damage
 	uint8	ConsumeProjectile;					// Chance to not consume arrow.
-    uint8   ForageAdditionalItems;              // Chance to forage another item.
-    uint8   SalvageChance;                      // Chance to salvage a tradeskill components on fail.
-	uint16 	ArcheryDamageModifier;				// Increase Archery Damage by percent
+	uint8	ForageAdditionalItems;				// Chance to forage another item.
+	uint8	SalvageChance;						// Chance to salvage a tradeskill components on fail.
+	uint16	ArcheryDamageModifier;				// Increase Archery Damage by percent
 	bool	SecondaryDmgInc;					// Allow off hand weapon to recieve damage bonus.
 	uint16	GiveDoubleAttack;					// Allow classes to double attack with a specified chance.
 	int16	SlayUndead[2];						// Allow classes to do extra damage verse undead.(base1 = rate, base2 = damage mod)
-	int16  PetCriticalHit;						// Allow pets to critical hit with % value.
+	int16	PetCriticalHit;						// Allow pets to critical hit with % value.
 	int16	PetAvoidance;						// Pet avoidance chance.
-	int16  CombatStability;					// Melee damage mitigation.
-	int16  GiveDoubleRiposte[3];				// 0=Regular Chance, 1=Skill Attack Chance, 2=Skill
+	int16	CombatStability;					// Melee damage mitigation.
+	int16	GiveDoubleRiposte[3];				// 0=Regular Chance, 1=Skill Attack Chance, 2=Skill
 	uint16	RaiseSkillCap[2];					// Raise a specific skill cap (1 = value, 2=skill)
-	int16  Ambidexterity;						// Increase chance to duel wield by adding bonus 'skill'.
-	int16  PetMaxHP;							// Increase the max hp of your pet.
-	int16  PetFlurry;							// Chance for pet to flurry.
+	int16	Ambidexterity;						// Increase chance to duel wield by adding bonus 'skill'.
+	int16	PetMaxHP;							// Increase the max hp of your pet.
+	int16	PetFlurry;							// Chance for pet to flurry.
 	uint8	MasteryofPast;						// Can not fizzle spells below this level specified in value.
 	bool	GivePetGroupTarget;					// All pets to recieve group buffs. (Pet Affinity)
 	int16	RootBreakChance;					// Chance root will break;
-	int16  UnfailingDivinity;					// Improves chance that DI will fire + increase partial heal.
-	int16  ItemHPRegenCap;						// Increase item regen cap.	
-	int16  SEResist[MAX_RESISTABLE_EFFECTS*2];	// Resist chance by specific spell effects.
-	int16  OffhandRiposteFail;					// chance for opponent to fail riposte with offhand attack.
+	int16	UnfailingDivinity;					// Improves chance that DI will fire + increase partial heal.
+	int16	ItemHPRegenCap;						// Increase item regen cap.
+	int16	SEResist[MAX_RESISTABLE_EFFECTS*2];	// Resist chance by specific spell effects.
+	int16	OffhandRiposteFail;					// chance for opponent to fail riposte with offhand attack.
 	int16	ItemATKCap;							// Raise item attack cap
-	int32  FinishingBlow[2];					// Chance to do a finishing blow for specified damage amount.
+	int32	FinishingBlow[2];					// Chance to do a finishing blow for specified damage amount.
 	uint16	FinishingBlowLvl[2];				// Sets max level an NPC can be affected by FB. (base1 = lv, base2= ???)
 };
 
 typedef struct
 {
-    uint16 spellID;
-    uint16 chance;
-    uint16 base_spellID;
+	uint16 spellID;
+	uint16 chance;
+	uint16 base_spellID;
 } tProc;
 
 struct Shielders_Struct {
-	uint32   shielder_id;
-	uint16   shielder_bonus;
+	uint32 shielder_id;
+	uint16 shielder_bonus;
 };
 
 //eventually turn this into a typedef and
@@ -426,7 +426,7 @@ typedef enum {
 
 struct MercType {
 	uint32	Type;
-	uint32	ClientVersion;	
+	uint32	ClientVersion;
 };
 
 struct MercData {
@@ -444,44 +444,44 @@ class Mob;
 class Trade
 {
 public:
-    Trade(Mob* in_owner);
-    virtual ~Trade();
+	Trade(Mob* in_owner);
+	virtual ~Trade();
 
-    void Reset();
-    void SetTradeCash(uint32 in_pp, uint32 in_gp, uint32 in_sp, uint32 in_cp);
+	void Reset();
+	void SetTradeCash(uint32 in_pp, uint32 in_gp, uint32 in_sp, uint32 in_cp);
 
-    // Initiate a trade with another mob
-    // Also puts other mob into trader mode with this mob
-    void Start(uint32 mob_id, bool initiate_with=true);
+	// Initiate a trade with another mob
+	// Also puts other mob into trader mode with this mob
+	void Start(uint32 mob_id, bool initiate_with=true);
 
-    // Mob the owner is trading with
-    Mob* With();
+	// Mob the owner is trading with
+	Mob* With();
 
-    // Add item from cursor slot to trade bucket (automatically does bag data too)
-    void AddEntity(uint16 from_slot_id, uint16 trade_slot_id);
+	// Add item from cursor slot to trade bucket (automatically does bag data too)
+	void AddEntity(uint16 from_slot_id, uint16 trade_slot_id);
 
-    // Audit trade
-    void LogTrade();
+	// Audit trade
+	void LogTrade();
 
-    // Debug only method
-    #if (EQDEBUG >= 9)
-        void DumpTrade();
-    #endif
+	// Debug only method
+	#if (EQDEBUG >= 9)
+		void DumpTrade();
+	#endif
 
 public:
-    // Object state
-    TradeState state;
-    int32 pp;
-    int32 gp;
-    int32 sp;
-    int32 cp;
+	// Object state
+	TradeState state;
+	int32 pp;
+	int32 gp;
+	int32 sp;
+	int32 cp;
 
 private:
-    // Send item data for trade item to other person involved in trade
-    void SendItemData(const ItemInst* inst, int16 dest_slot_id);
+	// Send item data for trade item to other person involved in trade
+	void SendItemData(const ItemInst* inst, int16 dest_slot_id);
 
-    uint32 with_id;
-    Mob* owner;
+	uint32 with_id;
+	Mob* owner;
 };
 
 #endif

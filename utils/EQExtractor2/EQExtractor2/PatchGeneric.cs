@@ -36,7 +36,7 @@ namespace EQExtractor2.Patches
         {
             return Version;
         }
-        
+
         virtual public bool UnsupportedVersion()
         {
             return ExpectedPPLength == 0;
@@ -70,7 +70,7 @@ namespace EQExtractor2.Patches
         {
             return 0;
         }
-        
+
         virtual public MerchantManager GetMerchantData(NPCSpawnList NPCSL)
         {
             return null;
@@ -128,7 +128,7 @@ namespace EQExtractor2.Patches
 
         virtual public  PositionUpdate Decode_OP_NPCMoveUpdate(byte[] UpdatePacket)
         {
-            PositionUpdate PosUpdate = new PositionUpdate();            
+            PositionUpdate PosUpdate = new PositionUpdate();
 
             return PosUpdate;
         }
@@ -165,12 +165,12 @@ namespace EQExtractor2.Patches
         {
             return "";
         }
-        
+
         virtual public bool DumpAAs(string FileName)
         {
             return false;
         }
-        
+
         public void GivePackets(PacketManager pm)
         {
             Packets = pm;
@@ -281,7 +281,7 @@ namespace EQExtractor2.Patches
 
             return "";
         }
-        
+
         protected PacketManager Packets;
 
         public OpCodeManager OpManager;

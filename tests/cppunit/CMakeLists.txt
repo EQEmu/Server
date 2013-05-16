@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(cppunit_sources
-    collectoroutput.cpp
+	collectoroutput.cpp
 	compileroutput.cpp
 	htmloutput.cpp
 	missing.cpp
@@ -13,7 +13,7 @@ SET(cppunit_sources
 )
 
 SET(cppunit_headers
-    cpptest-assert.h
+	cpptest-assert.h
 	cpptest-collectoroutput.h
 	cpptest-compileroutput.h
 	cpptest-htmloutput.h
@@ -23,16 +23,16 @@ SET(cppunit_headers
 	cpptest-textoutput.h
 	cpptest-time.h
 	cpptest.h
-    missing.h
+	missing.h
 	utils.h
-    winconfig.h
+	winconfig.h
 )
 
 ADD_LIBRARY(cppunit ${cppunit_sources} ${cppunit_headers})
 
 
 IF(UNIX)
-    ADD_DEFINITIONS(-fPIC)
+	ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)
 
 SET(LIBRARY_OUTPUT_PATH ../../Bin)

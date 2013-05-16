@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef PETITIONS_H
 #define PETITIONS_H
@@ -40,14 +40,14 @@ public:
 	uint32 GetCharRace()		{ return charrace; }
 	uint32 GetCharClass()	{ return charclass; }
 	uint32 GetUrgency()		{ return urgency; }
-	//char*  GetZone()		{ return this->zone; }
+	//char* GetZone()		{ return this->zone; }
 	uint32	GetZone()		{ return this->zone; }
-	char*  GetCharName()	{ return charname; }
-	char*  GetAccountName()	{ return accountname; }
-	char*  GetLastGM()		{ return lastgm; }
+	char* GetCharName()	{ return charname; }
+	char* GetAccountName()	{ return accountname; }
+	char* GetLastGM()		{ return lastgm; }
 	time_t GetSentTime()	{ return senttime; }
-	char*  GetPetitionText() { return petitiontext; }
-	char*	GetGMText()		{ return gmtext; }
+	char* GetPetitionText() { return petitiontext; }
+	char* GetGMText()		{ return gmtext; }
 	bool CheckedOut()				{ return ischeckedout; }
 
 
@@ -71,16 +71,16 @@ public:
 	void SetUnavails(uint32 unavails_in) { unavailables = unavails_in; }
 	void SetSentTime() { time(&senttime); }
 	void SetSentTime2(time_t senttime_in) { senttime = senttime_in; }
-	
+
 protected:
 
 	uint32 petid;
-	char  charname[64];
-	char  accountname[32];
-	char  lastgm[64];
-	char  petitiontext[1024];
-	char	gmtext[1024];
-	//char  zone[32];
+	char charname[64];
+	char accountname[32];
+	char lastgm[64];
+	char petitiontext[1024];
+	char gmtext[1024];
+	//char zone[32];
 	uint32 zone;
 	uint32 urgency; // 0 = green, 1 = yellow, 2 = red
 	uint32 charclass;
@@ -112,7 +112,7 @@ public:
 private:
 	LinkedList<Petition*> list;
 	uint32 last_insert_id;
-	Mutex    PList_Mutex;
+	Mutex PList_Mutex;
 };
 
 #endif

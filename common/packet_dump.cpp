@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -55,12 +55,12 @@ void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 		return;
 	// Output as HEX
 	char output[4];
-	int j = 0; 
-	char* ascii = new char[cols+1]; 
+	int j = 0;
+	char* ascii = new char[cols+1];
 	memset(ascii, 0, cols+1);
 	uint32 i;
-    for(i=skip; i<size; i++)
-    {
+	for(i=skip; i<size; i++)
+	{
 		if ((i-skip)%cols==0) {
 			if (i != skip)
 				cout << " | " << ascii << endl;
@@ -81,7 +81,7 @@ void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 			ascii[j++] = '.';
 		}
 //		cout << setfill(0) << setw(2) << hex << (int)buf[i] << " ";
-    }
+	}
 	uint32 k = ((i-skip)-1)%cols;
 	if (k < 8)
 		cout << "  ";
@@ -193,3 +193,4 @@ void DumpPacketBin(const void* iData, uint32 len) {
 		cout << " " << hex << setw(2) << setfill('0') << (int) data[k-1] << dec;
 	cout << endl;
 }
+

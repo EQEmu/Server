@@ -22,7 +22,7 @@ static OpcodeManager *opcodes = nullptr;
 static Strategy struct_strategy;
 
 char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
-	
+
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
 	if(opcodes == nullptr) {
@@ -38,37 +38,37 @@ void Register(EQStreamIdentifier &into) {
 			return;
 		}
 	}
-	
+
 	//ok, now we have what we need to register.
-	
+
 	EQStream::Signature signature;
 	string pname;
-	
+
 	//register our world signature.
 	pname = string(name) + "_world";
 	signature.ignore_eq_opcode = 0;
 	signature.first_length = sizeof(structs::LoginInfo_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_SendLoginInfo);
 	into.RegisterPatch(signature, pname.c_str(), &opcodes, &struct_strategy);
-	
+
 	//register our zone signature.
 	pname = string(name) + "_zone";
 	signature.ignore_eq_opcode = opcodes->EmuToEQ(OP_AckPacket);
 	signature.first_length = sizeof(structs::ClientZoneEntry_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_ZoneEntry);
 	into.RegisterPatch(signature, pname.c_str(), &opcodes, &struct_strategy);
-	
-	
-	
+
+
+
 	_log(NET__IDENTIFY, "Registered patch %s", name);
 }
 
 void Reload() {
-	
+
 	//we have a big problem to solve here when we switch back to shared memory
 	//opcode managers because we need to change the manager pointer, which means
 	//we need to go to every stream and replace it's manager.
-	
+
 	if(opcodes != nullptr) {
 		//TODO: get this file name from the config file
 		string opfile = "patch_";
@@ -98,7 +98,7 @@ std::string Strategy::Describe() const {
 	r += name;
 	return(r);
 }
- 
+
 const EQClientVersion Strategy::ClientVersion() const
 {
 	return EQClientSoD;
@@ -115,7 +115,7 @@ static inline uint32 TitaniumToSoDSlot(uint32 TitaniumSlot) {
 	{
 		SoDSlot = TitaniumSlot + 1;
 	}
-	else if(TitaniumSlot >= 251 && TitaniumSlot <= 340)		// Bag Slots for Normal Inventory and Cursor 
+	else if(TitaniumSlot >= 251 && TitaniumSlot <= 340)		// Bag Slots for Normal Inventory and Cursor
 	{
 		SoDSlot = TitaniumSlot + 11;
 	}
@@ -134,20 +134,20 @@ static inline uint32 TitaniumToSoDSlot(uint32 TitaniumSlot) {
 	else
 	{
 		SoDSlot = TitaniumSlot;
-	}	
-	
+	}
+
 	return SoDSlot;
 }
 
 // Converts SoD Slot IDs to Titanium Slot IDs for use in Decodes
 static inline uint32 SoDToTitaniumSlot(uint32 SoDSlot) {
 	uint32 TitaniumSlot = 0;
-	
+
 	if(SoDSlot >= 22 && SoDSlot <= 54)	// Cursor/Ammo/Power Source and Normal Inventory Slots
 	{
 		TitaniumSlot = SoDSlot - 1;
 	}
-	else if(SoDSlot >= 262 && SoDSlot <= 351)	// Bag Slots for Normal Inventory and Cursor 
+	else if(SoDSlot >= 262 && SoDSlot <= 351)	// Bag Slots for Normal Inventory and Cursor
 	{
 		TitaniumSlot = SoDSlot - 11;
 	}
@@ -186,7 +186,7 @@ ENCODE(OP_OpenNewTasksWindow) {
 
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	unsigned char *__emu_buffer = in->pBuffer;
 
 	__emu_AvailableTaskHeader = (AvailableTaskHeader_Struct*)__emu_buffer;
@@ -222,7 +222,7 @@ ENCODE(OP_OpenNewTasksWindow) {
 		__eq_AvailableTaskData1->TaskID = __emu_AvailableTaskData1->TaskID;
 		// This next unknown seems to affect the colour of the task title. 0x3f80000 is what I have seen
 		// in Live packets. Changing it to 0x3f000000 makes the title red.
-		__eq_AvailableTaskData1->unknown1 = 0x3f800000; 
+		__eq_AvailableTaskData1->unknown1 = 0x3f800000;
 		__eq_AvailableTaskData1->TimeLimit = __emu_AvailableTaskData1->TimeLimit;
 		__eq_AvailableTaskData1->unknown2 = __emu_AvailableTaskData1->unknown2;
 
@@ -281,7 +281,7 @@ ENCODE(OP_OpenNewTasksWindow) {
 	}
 
 	delete[] __emu_buffer;
-	
+
 	dest->FastQueuePacket(&in, ack_req);
 }
 
@@ -289,8 +289,8 @@ ENCODE(OP_OpenNewTasksWindow) {
 ENCODE(OP_SendCharInfo) {
 	ENCODE_LENGTH_EXACT(CharacterSelect_Struct);
 	SETUP_VAR_ENCODE(CharacterSelect_Struct);
-	
-	
+
+
 	//EQApplicationPacket *packet = *p;
 	//const CharacterSelect_Struct *emu = (CharacterSelect_Struct *) packet->pBuffer;
 
@@ -309,10 +309,10 @@ ENCODE(OP_SendCharInfo) {
 		+ namelen;
 
 	ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, total_length);
-	
+
 	//unsigned char *eq_buffer = new unsigned char[total_length];
 	//structs::CharacterSelect_Struct *eq_head = (structs::CharacterSelect_Struct *) eq_buffer;
-	
+
 	eq->char_count = char_count;
 	eq->total_chars = 10;
 
@@ -359,9 +359,9 @@ ENCODE(OP_SendCharInfo) {
 		}
 		bufptr += sizeof(structs::CharacterSelectEntry_Struct);
 	}
-	
+
 	FINISH_ENCODE();
-	
+
 }
 
 ENCODE(OP_ZoneServerInfo) {
@@ -369,8 +369,8 @@ ENCODE(OP_ZoneServerInfo) {
 	OUT_str(ip);
 	OUT(port);
 	FINISH_ENCODE();
-	
-	//this is SUCH bullshit to be doing from down here. but the 
+
+	//this is SUCH bullshit to be doing from down here. but the
 	// new client requires us to close immediately following this
 	// packet, so do it.
 	//dest->Close();
@@ -379,17 +379,17 @@ ENCODE(OP_ZoneServerInfo) {
 //hack hack hack
 ENCODE(OP_SendZonepoints) {
 	ENCODE_LENGTH_ATLEAST(ZonePoints);
-	
+
 	SETUP_VAR_ENCODE(ZonePoints);
 	ALLOC_VAR_ENCODE(structs::ZonePoints, __packet->size);
-	
+
 	memcpy(eq, emu, __packet->size);
-	
+
 	FINISH_ENCODE();
 //	unknown0xxx[24];
 	//this is utter crap... the client is waiting for this
 	//certain 0 length opcode to come after the reqclientspawn
-	//stuff... so this is a dirty way to put it in there. 
+	//stuff... so this is a dirty way to put it in there.
 	// this needs to be done better
 
 	//EQApplicationPacket hack_test(OP_PetitionUnCheckout, 0);
@@ -399,10 +399,10 @@ ENCODE(OP_SendZonepoints) {
 
 ENCODE(OP_SendAATable) {
 	ENCODE_LENGTH_ATLEAST(SendAA_Struct);
-	
+
 	SETUP_VAR_ENCODE(SendAA_Struct);
 	ALLOC_VAR_ENCODE(structs::SendAA_Struct, sizeof(structs::SendAA_Struct) + emu->total_abilities*sizeof(structs::AA_Ability));
-	
+
 	// Check clientver field to verify this AA should be sent for SoF
 	// clientver 1 is for all clients and 5 is for SoD
 	if (emu->clientver <= 5 )
@@ -459,13 +459,13 @@ ENCODE(OP_LeadershipExpUpdate) {
 
 ENCODE(OP_PlayerProfile) {
 	SETUP_DIRECT_ENCODE(PlayerProfile_Struct, structs::PlayerProfile_Struct);
-	
+
 	uint32 r;
-	
+
 	eq->available_slots=0xffffffff;
 	memset(eq->unknown4184, 0xff, sizeof(eq->unknown4184));
 	memset(eq->unknown04396, 0xff, sizeof(eq->unknown04396));
-	
+
 //	OUT(checksum);
 	OUT(gender);
 	OUT(race);
@@ -558,7 +558,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT(aapoints_spent);
 	OUT(aapoints);
 //	OUT(unknown06160[4]);
-	//NOTE: new client supports 20 bandoliers, our internal rep 
+	//NOTE: new client supports 20 bandoliers, our internal rep
 	//only supports 4..
 	for(r = 0; r < 4; r++) {
 		OUT_str(bandoliers[r].name);
@@ -681,12 +681,12 @@ const uint8 bytes[] = {
 };
 
 	memcpy(eq->unknown12864, bytes, sizeof(bytes));
-		
 
-	
+
+
 	//set the checksum...
 	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
-	
+
 	FINISH_ENCODE();
 }
 
@@ -721,7 +721,7 @@ ENCODE(OP_NewZone) {
 	OUT_str(zone_short_name2);
 	OUT(zone_id);
 	OUT(zone_instance);
-	OUT(SuspendBuffs);	
+	OUT(SuspendBuffs);
     /*fill in some unknowns with observed values, hopefully it will help */
 	eq->unknown800 = -1;
 	eq->unknown844 = 600;
@@ -867,7 +867,7 @@ ENCODE(OP_Barter)
 	delete[] __emu_buffer;
 
 	dest->FastQueuePacket(&in, ack_req);
-	
+
 }
 
 ENCODE(OP_InspectRequest) {
@@ -946,11 +946,11 @@ ENCODE(OP_ZoneSpawns) {
 		//consume the packet
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
-		
+
 		//store away the emu struct
 		unsigned char *__emu_buffer = in->pBuffer;
 		Spawn_Struct *emu = (Spawn_Struct *) __emu_buffer;
-		
+
 		//determine and verify length
 		int entrycount = in->size / sizeof(Spawn_Struct);
 		if(entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
@@ -959,7 +959,7 @@ ENCODE(OP_ZoneSpawns) {
 			return;
 		}
 
-		
+
 		//_log(NET__STRUCTS, "Spawn name is [%s]", emu->name);
 
 		emu = (Spawn_Struct *) __emu_buffer;
@@ -968,7 +968,7 @@ ENCODE(OP_ZoneSpawns) {
 
 		char *Buffer = (char *) in->pBuffer;
 
-		
+
 		int r;
 		int k;
 		for(r = 0; r < entrycount; r++, emu++) {
@@ -1141,7 +1141,7 @@ ENCODE(OP_ZoneSpawns) {
 			{
 				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
 			}
-		
+
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->curHp);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->haircolor);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->beardcolor);
@@ -1199,8 +1199,8 @@ ENCODE(OP_ZoneSpawns) {
 			Position->deltaZ = emu->deltaZ;
 
 			Buffer += sizeof(structs::Spawn_Struct_Position);
-		
-			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
+
+			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu ->race == 130) || (emu->race == 330) || (emu->race == 522))
 			{
 				for(k = 0; k < 9; ++k)
 				{
@@ -1254,7 +1254,7 @@ ENCODE(OP_ZoneSpawns) {
 
 			dest->FastQueuePacket(&outapp, ack_req);
 	}
-	
+
 	delete in;
 }
 
@@ -1262,7 +1262,7 @@ ENCODE(OP_MercenaryDataResponse) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 	MercenaryMerchantList_Struct *emu = (MercenaryMerchantList_Struct *) __emu_buffer;
@@ -1329,7 +1329,7 @@ ENCODE(OP_MercenaryDataUpdate) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 	MercenaryDataUpdate_Struct *emu = (MercenaryDataUpdate_Struct *) __emu_buffer;
@@ -1400,7 +1400,7 @@ ENCODE(OP_ItemPacket) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	unsigned char *__emu_buffer = in->pBuffer;
 	ItemPacket_Struct *old_item_pkt=(ItemPacket_Struct *)__emu_buffer;
 	InternalSerializedItem_Struct *int_struct=(InternalSerializedItem_Struct *)(old_item_pkt->SerializedItem);
@@ -1442,7 +1442,7 @@ ENCODE(OP_CharInventory) {
 
 		return;
 	}
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 
@@ -1450,7 +1450,7 @@ ENCODE(OP_CharInventory) {
 
 	if(ItemCount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
 
-		_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", 
+		_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d",
 				   opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
 
 		delete in;
@@ -1463,7 +1463,7 @@ ENCODE(OP_CharInventory) {
 	in->pBuffer = new uchar[4];
 
 	*(uint32 *)in->pBuffer = ItemCount;
-	
+
 	in->size = 4;
 
 	for(int r = 0; r < ItemCount; r++, eq++) {
@@ -1507,39 +1507,39 @@ ENCODE(OP_GuildMemberList) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 	Internal_GuildMembers_Struct *emu = (Internal_GuildMembers_Struct *) in->pBuffer;
-	
-	
-	
+
+
+
 	//make a new EQ buffer.
 	uint32 pnl = strlen(emu->player_name);
-	uint32 length = sizeof(structs::GuildMembers_Struct) + pnl + 
+	uint32 length = sizeof(structs::GuildMembers_Struct) + pnl +
 		emu->count*sizeof(structs::GuildMemberEntry_Struct)
 		+ emu->name_length + emu->note_length;
 	in->pBuffer = new uint8[length];
 	in->size = length;
 	//no memset since we fill every byte.
-	
+
 	uint8 *buffer;
 	buffer = in->pBuffer;
-	
+
 	//easier way to setup GuildMembers_Struct
 	//set prefix name
 	strcpy((char *)buffer, emu->player_name);
 	buffer += pnl;
 	*buffer = '\0';
 	buffer++;
-	
+
 	//add member count.
 	*((uint32 *) buffer) = htonl( emu->count );
 	buffer += sizeof(uint32);
-	
+
 	if(emu->count > 0) {
 		Internal_GuildMemberEntry_Struct *emu_e = emu->member;
-		const char *emu_name = (const char *) (__emu_buffer + 
+		const char *emu_name = (const char *) (__emu_buffer +
 				sizeof(Internal_GuildMembers_Struct) + //skip header
 				emu->count * sizeof(Internal_GuildMemberEntry_Struct)	//skip static length member data
 				);
@@ -1547,12 +1547,12 @@ ENCODE(OP_GuildMemberList) {
 				emu->name_length + //skip name contents
 				emu->count	//skip string terminators
 				);
-		
+
 		structs::GuildMemberEntry_Struct *e = (structs::GuildMemberEntry_Struct *) buffer;
-		
+
 		uint32 r;
 		for(r = 0; r < emu->count; r++, emu_e++) {
-			
+
 			//the order we set things here must match the struct
 
 //nice helper macro
@@ -1568,7 +1568,7 @@ ENCODE(OP_GuildMemberList) {
 		}
 #define PutFieldN(field) \
 		e->field = htonl(emu_e->field)
-			
+
 			SlideStructString( name, emu_name );
 			PutFieldN(level);
 			PutFieldN(banker);
@@ -1582,15 +1582,15 @@ ENCODE(OP_GuildMemberList) {
 			SlideStructString( public_note, emu_note );
 			e->zoneinstance = 0;
 			e->zone_id = htons(emu_e->zone_id);
-			
-			
+
+
 #undef SlideStructString
 #undef PutFieldN
-			
+
 			e++;
 		}
 	}
-	
+
 
 	delete[] __emu_buffer;
 
@@ -1741,16 +1741,16 @@ ENCODE(OP_LogServer) {
 	ENCODE_LENGTH_EXACT(LogServer_Struct);
  	SETUP_DIRECT_ENCODE(LogServer_Struct, structs::LogServer_Struct);
  	strcpy(eq->worldshortname, emu->worldshortname);
- 
+
  	OUT(enablevoicemacros);
  	OUT(enablemail);
 	OUT(enable_pvp);
 	OUT(enable_FV);
- 
+
  	// These next two need to be set like this for the Tutorial Button to work.
  	eq->unknown263[0] = 0;
  	eq->unknown263[2] = 1;
- 
+
  	FINISH_ENCODE();
 }
 
@@ -1977,7 +1977,7 @@ ENCODE(OP_Stun) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_ZonePlayerToBind) 
+ENCODE(OP_ZonePlayerToBind)
 {
 	ENCODE_LENGTH_ATLEAST(ZonePlayerToBind_Struct);
 	ZonePlayerToBind_Struct *zps = (ZonePlayerToBind_Struct*)(*p)->pBuffer;
@@ -2030,7 +2030,7 @@ ENCODE(OP_AdventureMerchantSell) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_RaidUpdate) 
+ENCODE(OP_RaidUpdate)
 {
 	EQApplicationPacket *inapp = *p;
 	*p = nullptr;
@@ -2043,7 +2043,7 @@ ENCODE(OP_RaidUpdate)
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(structs::RaidAddMember_Struct));
 		structs::RaidAddMember_Struct *add_member = (structs::RaidAddMember_Struct*)outapp->pBuffer;
-		
+
 		add_member->raidGen.action = in_add_member->raidGen.action;
 		add_member->raidGen.parameter = in_add_member->raidGen.parameter;
 		strn0cpy(add_member->raidGen.leader_name, in_add_member->raidGen.leader_name, 64);
@@ -2120,7 +2120,7 @@ ENCODE(OP_VetRewardsAvaliable)
 		old_data += sizeof(InternalVeteranReward);
 		data += sizeof(structs::VeteranReward);
 	}
-	
+
 	dest->FastQueuePacket(&outapp_create);
 	delete inapp;
 }
@@ -2273,7 +2273,7 @@ ENCODE(OP_DzMemberList)
 		ss.write((const char*)&null_term, sizeof(char));
 		ss.write((const char*)&emu->entries[i].status, sizeof(char));
 	}
-	
+
 	__packet->size = ss.str().length();
 	__packet->pBuffer = new unsigned char[__packet->size];
 	memcpy(__packet->pBuffer, ss.str().c_str(), __packet->size);
@@ -2330,7 +2330,7 @@ ENCODE(OP_DzLeaderStatus)
 	ss.write((const char*)&client_id, sizeof(uint32));
 	ss.write((const char*)&client_id, sizeof(uint32));//1
 	ss.write((const char*)&client_id, sizeof(uint32));
-	
+
 	__packet->size = ss.str().length();
 	__packet->pBuffer = new unsigned char[__packet->size];
 	memcpy(__packet->pBuffer, ss.str().c_str(), __packet->size);
@@ -2359,7 +2359,7 @@ ENCODE(OP_TargetBuffs)
 	uchar *ptr = __packet->pBuffer;
 	*((uint32*)ptr) = emu->entity_id;
 	ptr += sizeof(uint32);
-	
+
 	*((uint16*)ptr) = emu->count;
 	ptr += sizeof(uint16);
 
@@ -2401,7 +2401,7 @@ ENCODE(OP_GroupUpdate)
 	EQApplicationPacket *in = *p;
 
 	GroupJoin_Struct *gjs = (GroupJoin_Struct*)in->pBuffer;
-	
+
 	//_log(NET__ERROR, "Received outgoing OP_GroupUpdate with action code %i", gjs->action);
 	if((gjs->action == groupActLeave) || (gjs->action == groupActDisband))
 	{
@@ -2447,10 +2447,10 @@ ENCODE(OP_GroupUpdate)
 	{
 		// Group Update2
 		//_log(NET__ERROR, "Struct is GroupUpdate2");
-		
+
 		unsigned char *__emu_buffer = in->pBuffer;
 		GroupUpdate2_Struct *gu2 = (GroupUpdate2_Struct*) __emu_buffer;
-	
+
 		//_log(NET__ERROR, "Yourname is %s", gu2->yourname);
 
 		int MemberCount = 1;
@@ -2472,7 +2472,7 @@ ENCODE(OP_GroupUpdate)
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupUpdateB, PacketLength);
 
 		char *Buffer = (char *)outapp->pBuffer;
-	
+
 		// Header
 		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Think this should be SpawnID, but it doesn't seem to matter
 		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberCount);
@@ -2480,7 +2480,7 @@ ENCODE(OP_GroupUpdate)
 
 		// Leader
 		//
-		
+
 		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 		VARSTRUCT_ENCODE_STRING(Buffer, gu2->yourname);
 		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
@@ -2522,7 +2522,7 @@ ENCODE(OP_GroupUpdate)
 
 		GLAAus->NPCMarkerID = gu2->NPCMarkerID;
 		memcpy(&GLAAus->LeaderAAs, &gu2->leader_aas, sizeof(GLAAus->LeaderAAs));
-		
+
 		dest->FastQueuePacket(&outapp);
 		delete in;
 
@@ -2548,7 +2548,7 @@ ENCODE(OP_GroupUpdate)
 	dest->FastQueuePacket(&outapp);
 }
 
-ENCODE(OP_AltCurrencySell) 
+ENCODE(OP_AltCurrencySell)
 {
     ENCODE_LENGTH_EXACT(AltCurrencySellItem_Struct);
 	SETUP_DIRECT_ENCODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);
@@ -2689,7 +2689,7 @@ DECODE(OP_ItemLinkClick) {
 	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);
 	SETUP_DIRECT_DECODE(ItemViewRequest_Struct, structs::ItemViewRequest_Struct);
 	MEMSET_IN(ItemViewRequest_Struct);
-	
+
 	IN(item_id);
 	int r;
 	for (r = 0; r < 5; r++) {
@@ -2697,7 +2697,7 @@ DECODE(OP_ItemLinkClick) {
 	}
 	IN(link_hash);
 	IN(icon);
-	
+
 	FINISH_DIRECT_DECODE();
 }
 
@@ -2740,7 +2740,7 @@ DECODE(OP_ShopPlayerBuy)
 }
 
 DECODE(OP_ClientUpdate) {
-    // for some odd reason, there is an extra byte on the end of this on occasion.. 
+    // for some odd reason, there is an extra byte on the end of this on occasion..
 	DECODE_LENGTH_ATLEAST(structs::PlayerPositionUpdateClient_Struct);
 	SETUP_DIRECT_DECODE(PlayerPositionUpdateClient_Struct, structs::PlayerPositionUpdateClient_Struct);
 	IN(spawn_id);
@@ -2771,7 +2771,7 @@ DECODE(OP_CharacterCreate) {
 		emu->start_zone = RuleI(World, TutorialZoneID);
 	else
 		emu->start_zone = eq->start_zone;
-		
+
 	IN(haircolor);
 	IN(deity);
 	IN(STR);
@@ -2803,7 +2803,7 @@ DECODE(OP_WhoAllRequest) {
 	IN(gmlookup);
 	IN(guildid);
 	IN(type);
-	
+
 	FINISH_DIRECT_DECODE();
 }
 
@@ -3277,7 +3277,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 
 	SoD::structs::ItemTertiaryBodyStruct itbs;
 	memset(&itbs, 0, sizeof(SoD::structs::ItemTertiaryBodyStruct));
-	
+
 	itbs.loregroup = item->LoreGroup;
 	itbs.artifact = item->ArtifactFlag;
 	itbs.summonedflag = item->SummonedFlag;
@@ -3452,7 +3452,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 	uint32 SubLengths[10];
 
 	for(int x = 0; x < 10; ++x) {
-	
+
 		SubSerializations[x] = nullptr;
 
 		const ItemInst* subitem = ((const ItemInst*)inst)->GetItem(x);
@@ -3512,11 +3512,11 @@ DECODE(OP_Bug)
     strn0cpy(emu->target_name, eq->target_name, sizeof(emu->target_name));
     strn0cpy(emu->bug, eq->bug, sizeof(emu->bug));
     strn0cpy(emu->system_info, eq->system_info, sizeof(emu->system_info));
-    
+
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_AltCurrencySellSelection) 
+DECODE(OP_AltCurrencySellSelection)
 {
     DECODE_LENGTH_EXACT(structs::AltCurrencySelectItem_Struct);
 	SETUP_DIRECT_DECODE(AltCurrencySelectItem_Struct, structs::AltCurrencySelectItem_Struct);
@@ -3525,7 +3525,7 @@ DECODE(OP_AltCurrencySellSelection)
     FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_AltCurrencySell) 
+DECODE(OP_AltCurrencySell)
 {
     DECODE_LENGTH_EXACT(structs::AltCurrencySellItem_Struct);
 	SETUP_DIRECT_DECODE(AltCurrencySellItem_Struct, structs::AltCurrencySellItem_Struct);

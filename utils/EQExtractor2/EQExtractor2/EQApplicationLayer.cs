@@ -60,9 +60,9 @@ namespace EQApplicationLayer
             // Put our supported patch version decoders into the list.
 
             PatchList = new List<PatchSpecficDecoder>();
-            
+
             PatchList.Add(new PatchMay122010Decoder());
-                        
+
             PatchList.Add(new PatchJuly132010Decoder());
 
             PatchList.Add(new PatchTestSep012010Decoder());
@@ -92,7 +92,7 @@ namespace EQApplicationLayer
             PatchList.Add(new PatchJuly132012Decoder());
 
             PatchList.Add(new PatchAugust152012Decoder());
-            
+
             PatchList.Add(new PatchDecember102012Decoder());
 
             PatchList.Add(new PatchJanuary162013Decoder());
@@ -106,10 +106,10 @@ namespace EQApplicationLayer
             PatchList.Add(new PatchMarch132013Decoder());
 
             PatchList.Add(new PatchApril152013Decoder());
-            
+
             PatchList.Add(new PatchSoD());
 
-        }        
+        }
 
         // This is called from the main form to tell us where the application was launched from (where to look for the .conf files)
         // and also gives us the LogHandler method so we can send debug messages to the main form.
@@ -143,7 +143,7 @@ namespace EQApplicationLayer
         }
 
         public string GetDecoderVersion()
-        {            
+        {
             // We don't need to check if PatchDecoder is null, because it is always initialised to an instance of the base
             // PatchSpecficDecoder class
             return PatchDecoder.GetVersion();
@@ -156,7 +156,7 @@ namespace EQApplicationLayer
         }
 
         public bool DumpPackets(string FileName, bool ShowTimeStamps)
-        {            
+        {
             return PatchDecoder.DumpPackets(FileName, ShowTimeStamps);
         }
 
@@ -187,7 +187,7 @@ namespace EQApplicationLayer
                 else if (TempStatus > Status)
                     Status = TempStatus;
             }
-            return Status;                
+            return Status;
         }
 
         // This is called by the main form when all the packets have been processed. It prompts us to pass the packets down
@@ -214,7 +214,7 @@ namespace EQApplicationLayer
         {
             return PatchDecoder.GetCaptureStartTime();
         }
-               
+
         public string GetZoneName()
         {
             return PatchDecoder.GetZoneName();
@@ -255,13 +255,13 @@ namespace EQApplicationLayer
             SQLOut("DELETE from doors where zone = '" + ZoneName + "' and doorid >= @BaseDoorID and doorid <= @BaseDoorID + " + UpperBound + " and version = " + SpawnVersion + ";");
 
             foreach(Door d in DoorList)
-            {                                
+            {
                 if ((d.OpenType == 57) || (d.OpenType == 58))
-                {                    
+                {
                     ZonePoint? zp = GetZonePointNumber(d.DoorParam);
-                                    
+
                     if (zp != null)
-                    {                        
+                    {
                         d.DestZone = ZoneNumberToName(zp.Value.TargetZoneID);
                         d.DestX = zp.Value.TargetX;
                         d.DestY = zp.Value.TargetY;
@@ -276,7 +276,7 @@ namespace EQApplicationLayer
 
                 SQLOut(DoorQuery);
             }
-        }        
+        }
 
         public void GenerateSpawnSQL(bool GenerateSpawns, bool GenerateGrids, bool GenerateMerchants,
                                             string ZoneName, UInt32 ZoneID, UInt32 SpawnVersion,
@@ -325,18 +325,18 @@ namespace EQApplicationLayer
             NPCSpawnList NPCSL = new NPCSpawnList();
 
             foreach(ZoneEntryStruct Spawn in ZoneSpawns)
-            {                
+            {
                 if (NPCType.IsMount(Spawn.SpawnName))
                     continue;
 
                 if (!IncludeInvisibleMen && (Spawn.Race == 127))
                     continue;
-                                
+
                 Spawn.Findable = (FindableEntities.IndexOf(Spawn.SpawnID) >= 0);
-                                
+
                 if (Spawn.IsNPC != 1)
                     continue;
-                                
+
                 if (Spawn.PetOwnerID > 0)
                     continue;
 
@@ -346,9 +346,9 @@ namespace EQApplicationLayer
                 bool ColoursInUse = false;
 
                 for (int ColourSlot = 0; ColourSlot < 9; ++ColourSlot)
-                {                
+                {
                     if (((Spawn.SlotColour[ColourSlot] & 0x00ffffff) != 0) && UseNPCTypesTint)
-                        ColoursInUse = true;                                        
+                        ColoursInUse = true;
                 }
 
                 if (Spawn.IsMercenary > 0)
@@ -358,7 +358,7 @@ namespace EQApplicationLayer
                        Spawn.BodyType, Spawn.HairColor, Spawn.BeardColor, Spawn.EyeColor1, Spawn.EyeColor2, Spawn.HairStyle, Spawn.Beard,
                        Spawn.DrakkinHeritage, Spawn.DrakkinTattoo, Spawn.DrakkinDetails, Spawn.Deity, Spawn.Class, Spawn.EquipChest2,
                        Spawn.Helm, Spawn.LastName);
-                
+
 
                 if (ExistingDBID == 0)
                 {
@@ -368,7 +368,7 @@ namespace EQApplicationLayer
                        Spawn.Helm, Spawn.LastName, Spawn.Findable, Spawn.MeleeTexture1, Spawn.MeleeTexture2, Spawn.ArmorTintRed, Spawn.ArmorTintGreen, Spawn.ArmorTintBlue, Spawn.SlotColour);
 
                     NPCTL.AddNPCType(NewNPCType);
-                
+
                     ExistingDBID = NPCTypeDBID++;
 
                     UInt32 ArmorTintID = 0;
@@ -435,17 +435,17 @@ namespace EQApplicationLayer
                 string Spawn2EntryQuery = "INSERT INTO spawn2(`id`, `spawngroupID`, `zone`, `version`, `x`, `y`, `z`, `heading`, `respawntime`, `variance`, `pathgrid`, `_condition`, `cond_value`, `enabled`) VALUES(";
                 Spawn2EntryQuery += "@StartingSpawn2ID + " + Spawn2ID + ", @StartingSpawnGroupID + " + SpawnGroupID + ", '" + ZoneName + "', " + SpawnVersion + ", " + Spawn.XPos + ", " + Spawn.YPos + ", " + Spawn.ZPos + ", ";
                 Spawn2EntryQuery += Spawn.Heading + ", 640, 0, 0, 0, 1, 1);";
-                                
+
                 SpawnGroupID++;
                 SpawnEntryID++;
                 Spawn2ID++;
-                
+
                 if (GenerateSpawns)
                 {
                     SQLOut(SpawnGroupQuery);
                     SQLOut(SpawnEntryQuery);
                     SQLOut(Spawn2EntryQuery);
-                }               
+                }
             }
 
             if (UpdateExistingNPCTypes)
@@ -472,7 +472,7 @@ namespace EQApplicationLayer
                     for (int ColourSlot = 0; ColourSlot < 9; ++ColourSlot)
                     {
                         if (((n.SlotColour[ColourSlot] & 0x00ffffff) != 0) && UseNPCTypesTint)
-                            ColoursInUse = true;                
+                            ColoursInUse = true;
                     }
 
                     if (ColoursInUse)
@@ -505,11 +505,11 @@ namespace EQApplicationLayer
             }
 
             if (GenerateGrids)
-            {             
+            {
                 List<PositionUpdate> AllMovementUpdates = PatchDecoder.GetAllMovementUpdates();
-                
-                foreach (PositionUpdate Update in AllMovementUpdates)                
-                    NPCSL.AddWaypoint(Update.SpawnID, Update.p, Update.HighRes);             
+
+                foreach (PositionUpdate Update in AllMovementUpdates)
+                    NPCSL.AddWaypoint(Update.SpawnID, Update.p, Update.HighRes);
 
                 SQLOut("--");
                 SQLOut("-- Grids");
@@ -520,24 +520,24 @@ namespace EQApplicationLayer
                 foreach (NPCSpawn ns in NPCSL._NPCSpawnList)
                 {
                     if (ns.Waypoints.Count > 1)
-                    {                    
+                    {
                         bool AllWaypointsTheSame = true;
 
                         for (int WPNumber = 0; WPNumber < ns.Waypoints.Count; ++WPNumber)
-                        {                     
+                        {
                             if (WPNumber == 0)
                                 continue;
                             if ((ns.Waypoints[WPNumber].x != ns.Waypoints[WPNumber - 1].x) ||
                                (ns.Waypoints[WPNumber].y != ns.Waypoints[WPNumber - 1].y) ||
                                (ns.Waypoints[WPNumber].z != ns.Waypoints[WPNumber - 1].z))
                             {
-                                AllWaypointsTheSame = false;                                
+                                AllWaypointsTheSame = false;
                             }
                         }
 
                         if (AllWaypointsTheSame)
                             continue;
-                        
+
                         int WaypointsInserted = 0;
 
                         int WPNum = 1;
@@ -551,10 +551,10 @@ namespace EQApplicationLayer
 
                         for (int WPNumber = FirstUsableWaypoint; WPNumber < ns.Waypoints.Count; ++WPNumber)
                         {
-                            Position p = ns.Waypoints[WPNumber];                                                      
+                            Position p = ns.Waypoints[WPNumber];
 
                             if (CoalesceWaypoints)
-                            {                            
+                            {
                                 if ((WPNumber > FirstUsableWaypoint) && (WPNumber < (ns.Waypoints.Count - 2)))
                                 {
                                     Position np = ns.Waypoints[WPNumber + 1];
@@ -579,14 +579,14 @@ namespace EQApplicationLayer
                                 }
                             }
 
-                            // If this is the last waypoint, and we haven't inserted any of the previous ones, then don't bother 
+                            // If this is the last waypoint, and we haven't inserted any of the previous ones, then don't bother
                             // with this one either.
                             if ((WPNumber == (ns.Waypoints.Count - 1)) && (WaypointsInserted == 0))
                                 continue;
 
                             SQLOut("INSERT into grid_entries (`gridid`, `zoneid`, `number`, `x`, `y`, `z`, `heading`, `pause`) VALUES(@StartingGridID + " + GridDBID + ", " + ZoneID + ", " + (WPNum++) + ", " + p.x + ", " + p.y + ", " + p.z + ", " + p.heading + ", " + Pause + ");");
 
-                            ++WaypointsInserted;                            
+                            ++WaypointsInserted;
                         }
                         if (WaypointsInserted > 1)
                         {
@@ -598,7 +598,7 @@ namespace EQApplicationLayer
                                 SQLOut("UPDATE spawn2 set x = " + ns.Waypoints[1].x + ", y = " + ns.Waypoints[1].y + ", z = " + ns.Waypoints[1].z + ", heading = " + ns.Waypoints[1].heading + " WHERE id = @StartingSpawn2ID + " + ns.Spawn2DBID + ";");
 
                             ++GridDBID;
-                        }                        
+                        }
                     }
                 }
             }
@@ -627,7 +627,7 @@ namespace EQApplicationLayer
                     continue;
 
                 UInt32 MerchantNPCTypeID = npc.NPCTypeID;
-                
+
                 SQLOut("--");
                 SQLOut("-- " + npc.Name);
                 SQLOut("-- ");
@@ -639,7 +639,7 @@ namespace EQApplicationLayer
                     string Insert = "";
 
                     if (mi.Quantity >= 0)
-                    {                        
+                    {
                         if (!StartOfPlayerSoldItems)
                         {
                             StartOfPlayerSoldItems = true;
@@ -662,7 +662,7 @@ namespace EQApplicationLayer
                     SQLOut("UPDATE npc_types SET merchant_id = @StartingMerchantID + " + MerchantDBID + " WHERE id = @StartingNPCTypeID + " + MerchantNPCTypeID + ";");
 
                 ++MerchantDBID;
-            }                        
+            }
         }
 
         public void GenerateZonePointSQL(string ZoneName, SQLDestination SQLOut)
@@ -671,13 +671,13 @@ namespace EQApplicationLayer
             {
                 string Insert = String.Format("REPLACE into zone_points(`zone`, `number`, `y`, `x`, `z`, `heading`, `target_y`, `target_x`, `target_z`, `target_heading`, `zoneinst`, `target_zone_id`, `buffer`) VALUES('{0}', {1}, 0, 0, 0, 0, {2}, {3}, {4}, {5}, {6}, {7}, 0);", ZoneName, zp.Number, zp.y, zp.x, zp.z, zp.Heading, zp.Instance, zp.ZoneID);
 
-                SQLOut(Insert);                
+                SQLOut(Insert);
             }
         }
 
         public void GenerateZonePointList()
         {
-            ZonePointList = PatchDecoder.GetZonePointList();                      
+            ZonePointList = PatchDecoder.GetZonePointList();
         }
 
         public ZonePoint? GetZonePointNumber(Int32 Number)
@@ -697,7 +697,7 @@ namespace EQApplicationLayer
         {
             UInt16 ZoneID = PatchDecoder.GetZoneNumber();
 
-            NewZoneStruct NewZone = PatchDecoder.GetZoneData();                   
+            NewZoneStruct NewZone = PatchDecoder.GetZoneData();
 
             SQLOut("--");
             SQLOut("-- Zone Config");
@@ -725,7 +725,7 @@ namespace EQApplicationLayer
         public bool DumpAAs(string FileName)
         {
             return PatchDecoder.DumpAAs(FileName);
-        }       
+        }
 
         public void GenerateObjectSQL(bool DoGroundSpawns, bool DoObjects, UInt32 SpawnVersion, SQLDestination SQLOut)
         {
@@ -794,7 +794,7 @@ namespace EQApplicationLayer
                 case "IT10802_ACTORDEF":
                     return 16;
                 case "IT10803_ACTORDEF":
-                    return 15;                
+                    return 15;
                 case "IT10865_ACTORDEF":
                     return 15;
                 case "IT128_ACTORDEF":

@@ -80,15 +80,15 @@ public:
 	uint32	GetFreeID() { return id+1; }
 	//called by worldserver when it receives a message from world.
 	void ProcessWorldPacket(ServerPacket *pack);
-	
+
 	void ListGuilds(Client *c) const;
 	void DescribeGuild(Client *c, uint32 guild_id) const;
-	
-	
+
+
 //	bool	DonateTribute(uint32 charid, uint32 guild_id, uint32 tribute_amount);
-	
+
 	uint8 *MakeGuildMembers(uint32 guild_id, const char *prefix_name, uint32 &length);	//make a guild member list packet, returns ownership of the buffer.
-	
+
 	void RecordInvite(uint32 char_id, uint32 guild_id, uint8 rank);
 	bool VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uint8 rank);
 	void SendGuildMemberUpdateToWorld(const char *MemberName, uint32 GuildID, uint16 ZoneID, uint32 LastSeen);

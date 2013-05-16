@@ -15,7 +15,7 @@ class ZSList
 {
 public:
 	enum { MaxLockedZones = 10 };
-	
+
 	static void ShowUpTime(WorldTCPConnection* con, const char* adminname = 0);
 
 	ZSList();
@@ -25,7 +25,7 @@ public:
 	ZoneServer* FindByZoneID(uint32 ZoneID);
 	ZoneServer*	FindByPort(uint16 port);
 	ZoneServer* FindByInstanceID(uint32 InstanceID);
-	
+
 	void	SendChannelMessage(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message, ...);
 	void	SendChannelMessageRaw(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message);
 	void	SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...);
@@ -33,7 +33,7 @@ public:
 
 	void	SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* connection);
 
-	void	SendTimeSync();	
+	void	SendTimeSync();
 	void	Add(ZoneServer* zoneserver);
 	void	Process();
 	void	KillAll();
@@ -52,7 +52,7 @@ public:
 	Timer*	reminder;
 	void	NextGroupIDs(uint32 &start, uint32 &end);
 	void	SendLSZones();
-	uint16  GetAvailableZonePort();
+	uint16 GetAvailableZonePort();
 
 	int GetZoneCount();
 	void GetZoneIDList(std::vector<uint32> &zones);
@@ -64,20 +64,9 @@ protected:
 	uint16	pLockedZones[MaxLockedZones];
 	uint32 CurGroupID;
 	uint16 LastAllocatedPort;
-	
-	
+
+
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
 #endif /*ZONELIST_H_*/
+

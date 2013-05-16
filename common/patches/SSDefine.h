@@ -1,5 +1,5 @@
 
-#define ENCODE(x) void Strategy::Encode_##x(EQApplicationPacket **p, EQStream *dest, bool ack_req) 
+#define ENCODE(x) void Strategy::Encode_##x(EQApplicationPacket **p, EQStream *dest, bool ack_req)
 #define DECODE(x) void Strategy::Decode_##x(EQApplicationPacket *__packet)
 
 #define StructDist(in, f1, f2) (uint32(&in->f2)-uint32(&in->f1))
@@ -10,9 +10,9 @@
 
 
 /*
- * 
+ *
  * for encoders
- * 
+ *
  */
 //more complex operations and variable length packets
 #define FASTQUEUE(packet) dest->FastQueuePacket(&packet, ack_req);
@@ -55,7 +55,7 @@
 #define FAIL_ENCODE() \
 	delete[] __emu_buffer; \
 	delete __packet;
-	
+
 //call to finish an encoder using SETUP_DIRECT_ENCODE
 #define FINISH_ENCODE() \
 	delete[] __emu_buffer; \
@@ -93,9 +93,9 @@
 
 
 /*
- * 
+ *
  * for decoders:
- * 
+ *
  */
 
 //simple buffer-to-buffer movement for fixed length packets
@@ -118,10 +118,10 @@
 #define FAIL_DIRECT_DECODE() \
 	delete[] __eq_buffer; \
 	p->SetOpcode(OP_Unknown);
-	
+
 //call to finish an encoder using SETUP_DIRECT_DECODE
 #define FINISH_DIRECT_DECODE() \
-	delete[] __eq_buffer; 
+	delete[] __eq_buffer;
 
 //check length of packet before decoding. Call before setup.
 #define DECODE_LENGTH_EXACT(struct_) \

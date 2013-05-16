@@ -3,7 +3,7 @@
 #else
 #include <winsock2.h>
 #endif
- 
+
 #include <errno.h>
 #include <string.h>
 #include <time.h>
@@ -32,15 +32,15 @@ bool PacketFileWriter::SetPacketStamp(const char *name, uint32 stamp) {
 		fprintf(stderr, "Error opening packet file '%s': %s\n", name, strerror(errno));
 		return(false);
 	}
-	
+
 	unsigned long magic = 0;
-	
+
 	if(fread(&magic, sizeof(magic), 1, in) != 1) {
 		fprintf(stderr, "Error reading header from packet file: %s\n", strerror(errno));
 		fclose(in);
 		return(false);
 	}
-	
+
 	PacketFileReader *ret = NULL;
 	if(magic == OLD_PACKET_FILE_MAGIC) {
 		OldPacketFileHeader *pos = 0;
@@ -69,33 +69,33 @@ bool PacketFileWriter::SetPacketStamp(const char *name, uint32 stamp) {
 		fclose(in);
 		return(false);
 	}
-	
+
 	fclose(in);
 	return(true);
 }
-	
+
 bool PacketFileWriter::OpenFile(const char *name) {
 	CloseFile();
-	
+
 	printf("Opening packet file: %s\n", name);
-	
+
 	out = fopen(name, "wb");
 	if(out == NULL) {
 		fprintf(stderr, "Error opening packet file '%s': %s\n", name, strerror(errno));
 		return(false);
 	}
-	
+
 	PacketFileHeader head;
 	head.packet_file_magic = PACKET_FILE_MAGIC;
 	head.packet_file_version = PACKET_FILE_CURRENT_VERSION;
 	head.packet_file_stamp = time(NULL);
-	
+
 	if(fwrite(&head, sizeof(head), 1, out) != 1) {
 		fprintf(stderr, "Error writting header to packet file: %s\n", strerror(errno));
 		fclose(out);
 		return(false);
 	}
-	
+
 	return(true);
 }
 
@@ -110,13 +110,13 @@ void PacketFileWriter::CloseFile() {
 void PacketFileWriter::WritePacket(uint16 eq_op, uint32 packlen, const unsigned char *packet, bool to_server, const struct timeval &tv) {
 	if(out == NULL)
 		return;
-	
+
 	_WriteBlock(eq_op, packet, packlen, to_server, tv);
-	
+
 /*
 	Could log only the packets we care about, but this is most of the stream,
 	so just log them all...
-	
+
 	switch(eq_op) {
 	case OP_NewZone:
 	case OP_ZoneSpawns:
@@ -139,23 +139,23 @@ void PacketFileWriter::WritePacket(uint16 eq_op, uint32 packlen, const unsigned 
 bool PacketFileWriter::_WriteBlock(uint16 eq_op, const void *d, uint16 len, bool to_server, const struct timeval &tv) {
 	if(out == NULL)
 		return(false);
-	
+
 	PacketFileSection s;
 	s.opcode = eq_op;
 	s.len = len;
 	s.tv_sec = tv.tv_sec;
 	s.tv_msec = tv.tv_usec/1000;
-	
+
 	if(to_server)
 		SetToServer(s);
 	else
 		SetToClient(s);
-	
+
 	if(fwrite(&s, sizeof(s), 1, out) != 1) {
 		fprintf(stderr, "Error writting block header: %s\n", strerror(errno));
 		return(false);
 	}
-	
+
 	if(fwrite(d, 1, len, out) != len) {
 		fprintf(stderr, "Error writting block body: %s\n", strerror(errno));
 		return(false);
@@ -163,7 +163,7 @@ bool PacketFileWriter::_WriteBlock(uint16 eq_op, const void *d, uint16 len, bool
 
 	if(force_flush)
 		fflush(out);
-	
+
 	return(true);
 }
 
@@ -179,15 +179,15 @@ PacketFileReader *PacketFileReader::OpenPacketFile(const char *name) {
 		fprintf(stderr, "Error opening packet file '%s': %s\n", name, strerror(errno));
 		return(NULL);
 	}
-	
+
 	unsigned long magic = 0;
-	
+
 	if(fread(&magic, sizeof(magic), 1, in) != 1) {
 		fprintf(stderr, "Error reading header to packet file: %s\n", strerror(errno));
 		fclose(in);
 		return(NULL);
 	}
-	
+
 	PacketFileReader *ret = NULL;
 	if(magic == OLD_PACKET_FILE_MAGIC) {
 		ret = new OldPacketFileReader();
@@ -198,12 +198,12 @@ PacketFileReader *PacketFileReader::OpenPacketFile(const char *name) {
 		fclose(in);
 		return(NULL);
 	}
-	
+
 	if(!ret->OpenFile(name)) {
 		safe_delete(ret);
 		return(NULL);
 	}
-	
+
 	return(ret);
 }
 
@@ -220,26 +220,26 @@ OldPacketFileReader::OldPacketFileReader()
 OldPacketFileReader::~OldPacketFileReader() {
 	CloseFile();
 }
-	
+
 bool OldPacketFileReader::OpenFile(const char *name) {
 	CloseFile();
-	
+
 	//printf("Opening packet file: %s\n", name);
-	
+
 	in = fopen(name, "rb");
 	if(in == NULL) {
 		fprintf(stderr, "Error opening packet file '%s': %s\n", name, strerror(errno));
 		return(false);
 	}
-	
+
 	OldPacketFileHeader head;
-	
+
 	if(fread(&head, sizeof(head), 1, in) != 1) {
 		fprintf(stderr, "Error reading header to packet file: %s\n", strerror(errno));
 		fclose(in);
 		return(false);
 	}
-	
+
 	if(head.packet_file_magic != OLD_PACKET_FILE_MAGIC) {
 		fclose(in);
 		if(head.packet_file_magic > (OLD_PACKET_FILE_MAGIC)) {
@@ -249,16 +249,16 @@ bool OldPacketFileReader::OpenFile(const char *name) {
 		}
 		return(false);
 	}
-	
+
 	uint32 now = time(NULL);
 	if(head.packet_file_stamp > now) {
 		fprintf(stderr, "Error: invalid timestamp in file. Your clock or the collector's is wrong (%d sec ahead).\n", head.packet_file_stamp-now);
 		fclose(in);
 		return(false);
 	}
-	
+
 	packet_file_stamp = head.packet_file_stamp;
-	
+
 	return(true);
 }
 
@@ -274,14 +274,14 @@ bool OldPacketFileReader::ResetFile() {
 	if(in == NULL)
 		return(false);
 	rewind(in);
-	
+
 	//gotta read past the header again
 	OldPacketFileHeader head;
-	
+
 	if(fread(&head, sizeof(head), 1, in) != 1) {
 		return(false);
 	}
-	
+
 	return(true);
 }
 
@@ -290,23 +290,23 @@ bool OldPacketFileReader::ReadPacket(uint16 &eq_op, uint32 &packlen, unsigned ch
 		return(false);
 	if(feof(in))
 		return(false);
-	
+
 	OldPacketFileSection s;
-	
+
 	if(fread(&s, sizeof(s), 1, in) != 1) {
 		if(!feof(in))
 			fprintf(stderr, "Error reading section header: %s\n", strerror(errno));
 		return(false);
 	}
-	
+
 	eq_op = s.opcode;
-	
+
 	if(packlen < s.len) {
 		fprintf(stderr, "Packet buffer is too small! %d < %d, skipping\n", packlen, s.len);
 		fseek(in, s.len, SEEK_CUR);
 		return(false);
 	}
-	
+
 	if(fread(packet, 1, s.len, in) != s.len) {
 		if(feof(in))
 			fprintf(stderr, "Error: EOF encountered when expecting packet data.\n");
@@ -314,12 +314,12 @@ bool OldPacketFileReader::ReadPacket(uint16 &eq_op, uint32 &packlen, unsigned ch
 			fprintf(stderr, "Error reading packet body: %s\n", strerror(errno));
 		return(false);
 	}
-	
+
 	packlen = s.len;
 	to_server = false;
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
-	
+
 	return(true);
 }
 
@@ -333,26 +333,26 @@ NewPacketFileReader::NewPacketFileReader()
 NewPacketFileReader::~NewPacketFileReader() {
 	CloseFile();
 }
-	
+
 bool NewPacketFileReader::OpenFile(const char *name) {
 	CloseFile();
-	
+
 	//printf("Opening packet file: %s\n", name);
-	
+
 	in = fopen(name, "rb");
 	if(in == NULL) {
 		fprintf(stderr, "Error opening packet file '%s': %s\n", name, strerror(errno));
 		return(false);
 	}
-	
+
 	PacketFileHeader head;
-	
+
 	if(fread(&head, sizeof(head), 1, in) != 1) {
 		fprintf(stderr, "Error reading header to packet file: %s\n", strerror(errno));
 		fclose(in);
 		return(false);
 	}
-	
+
 	if(head.packet_file_magic != PACKET_FILE_MAGIC) {
 		fclose(in);
 		if(head.packet_file_magic == (PACKET_FILE_MAGIC+1)) {
@@ -362,16 +362,16 @@ bool NewPacketFileReader::OpenFile(const char *name) {
 		}
 		return(false);
 	}
-	
+
 	uint32 now = time(NULL);
 	if(head.packet_file_stamp > now) {
 		fprintf(stderr, "Error: invalid timestamp in file. Your clock or the collector's is wrong (%d sec ahead).\n", head.packet_file_stamp-now);
 		fclose(in);
 		return(false);
 	}
-	
+
 	packet_file_stamp = head.packet_file_stamp;
-	
+
 	return(true);
 }
 
@@ -387,14 +387,14 @@ bool NewPacketFileReader::ResetFile() {
 	if(in == NULL)
 		return(false);
 	rewind(in);
-	
+
 	//gotta read past the header again
 	PacketFileHeader head;
-	
+
 	if(fread(&head, sizeof(head), 1, in) != 1) {
 		return(false);
 	}
-	
+
 	return(true);
 }
 
@@ -403,23 +403,23 @@ bool NewPacketFileReader::ReadPacket(uint16 &eq_op, uint32 &packlen, unsigned ch
 		return(false);
 	if(feof(in))
 		return(false);
-	
+
 	PacketFileSection s;
-	
+
 	if(fread(&s, sizeof(s), 1, in) != 1) {
 		if(!feof(in))
 			fprintf(stderr, "Error reading section header: %s\n", strerror(errno));
 		return(false);
 	}
-	
+
 	eq_op = s.opcode;
-	
+
 	if(packlen < s.len) {
 		fprintf(stderr, "Packet buffer is too small! %d < %d, skipping\n", packlen, s.len);
 		fseek(in, s.len, SEEK_CUR);
 		return(false);
 	}
-	
+
 	if(fread(packet, 1, s.len, in) != s.len) {
 		if(feof(in))
 			fprintf(stderr, "Error: EOF encountered when expecting packet data.\n");
@@ -427,12 +427,12 @@ bool NewPacketFileReader::ReadPacket(uint16 &eq_op, uint32 &packlen, unsigned ch
 			fprintf(stderr, "Error reading packet body: %s\n", strerror(errno));
 		return(false);
 	}
-	
+
 	packlen = s.len;
 	to_server = IsToServer(s);
 	tv.tv_sec = s.tv_sec;
 	tv.tv_usec = 1000*s.tv_msec;
-	
+
 	return(true);
 }
 

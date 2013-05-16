@@ -1,5 +1,5 @@
-sub EVENT_SAY 
-{ 
+sub EVENT_SAY
+{
 	if($text=~/mob/i)
 	{
 		my @moblist = $entity_list->GetMobList();
@@ -8,7 +8,7 @@ sub EVENT_SAY
 			$ent->Shout("I'm a mob!");
 		}
 	}
-	
+
 	if($text=~/npc/i)
 	{
 		my @npclist = $entity_list->GetNPCList();
@@ -17,7 +17,7 @@ sub EVENT_SAY
 			$ent->Shout("I'm a npc!");
 		}
 	}
-	
+
 	if($text=~/client/i)
 	{
 		my @clientlist = $entity_list->GetClientList();
@@ -26,7 +26,7 @@ sub EVENT_SAY
 			$ent->Shout("I'm a client!");
 		}
 	}
-	
+
 	if($text=~/corpse/i)
 	{
 		my @corpselist = $entity_list->GetCorpseList();
@@ -42,7 +42,7 @@ sub EVENT_SAY
 		}
 		quest::say("There are $index corpses in the zone and $index_two of them belong to you.");
 	}
-	
+
 	if($text=~/summon/i)
 	{
 		my @corpselist = $entity_list->GetCorpseList();
@@ -54,7 +54,7 @@ sub EVENT_SAY
 			}
 		}
 	}
-	
+
 	if($text=~/rez/i)
 	{
 		my @corpselist = $entity_list->GetCorpseList();
@@ -66,7 +66,7 @@ sub EVENT_SAY
 				return;
 			}
 		}
-	}	
+	}
 }
 
 sub EVENT_AGGRO_SAY
@@ -83,7 +83,7 @@ sub EVENT_AGGRO_SAY
 			{
 				my $h_ent_name = $h_ent->GetName();
 				quest::say("$h_ent_name is on my hate list with $h_hate hate and $h_dmg damage.");
-			}			
+			}
 		}
 	}
 }

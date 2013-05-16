@@ -41,11 +41,11 @@ void AsyncLoadVariables(DBAsync *dba, Database *db) {
 //which will get signaled when somebody puts something on the queue
 ThreadReturnType DBAsyncLoop(void* tmp) {
 	DBAsync* dba = (DBAsync*) tmp;
-	
+
 #ifndef WIN32
 	_log(COMMON__THREADS, "Starting DBAsyncLoop with thread ID %d", pthread_self());
 #endif
-	
+
 	dba->MLoopRunning.lock();
 	while (dba->RunLoop()) {
 		//wait before working so we check the loop condition
@@ -60,11 +60,11 @@ ThreadReturnType DBAsyncLoop(void* tmp) {
 //		Sleep(ASYNC_LOOP_GRANULARITY);
 	}
 	dba->MLoopRunning.unlock();
-	
+
 #ifndef WIN32
 	_log(COMMON__THREADS, "Ending DBAsyncLoop with thread ID %d", pthread_self());
 #endif
-	
+
 	THREAD_RETURN(nullptr);
 }
 
@@ -92,14 +92,14 @@ bool DBAsync::StopThread() {
 	ret = pRunLoop;
 	pRunLoop = false;
 	MRunLoop.unlock();
-	
+
 	//signal the condition so we exit the loop if were waiting
 	CInList.Signal();
-	
+
 	//this effectively waits for the processing thread to finish
 	MLoopRunning.lock();
 	MLoopRunning.unlock();
-	
+
 	return ret;
 }
 
@@ -120,10 +120,10 @@ uint32 DBAsync::AddWork(DBAsyncWork** iWork, uint32 iDelay) {
 #endif
 	*iWork = 0;
 	MInList.unlock();
-	
+
 	//wake up the processing thread and tell it to get to work.
 	CInList.Signal();
-	
+
 	return ret;
 }
 
@@ -268,7 +268,7 @@ void DBAsync::CheckTimeout() {
 		MFQList.unlock();
 	}
 	catch(...){
-		
+
 	}
 }
 

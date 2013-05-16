@@ -1,28 +1,28 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef RULESYS_H_
 #define RULESYS_H_
 
 /*
 * Access to the rules system in normal code is done with three calls:
-*  - RuleI(category, rule) -> fetch an integer rule's value
-*  - RuleR(category, rule) -> fetch a  real (float) rule's value
-*  - RuleB(category, rule) -> fetch a boolean/flag rule's value
+* - RuleI(category, rule) -> fetch an integer rule's value
+* - RuleR(category, rule) -> fetch a real (float) rule's value
+* - RuleB(category, rule) -> fetch a boolean/flag rule's value
 *
 */
 
@@ -30,7 +30,7 @@
 //which makes it a global for now, but with instancing we will do exactly
 //what we do with the zone global and just make it a member of core classes
 #define RuleI(cat, rule) \
-    RuleManager::Instance()->GetIntRule( RuleManager::Int__##rule )
+	RuleManager::Instance()->GetIntRule( RuleManager::Int__##rule )
 #define RuleR(cat, rule) \
 	RuleManager::Instance()->GetRealRule( RuleManager::Real__##rule )
 #define RuleB(cat, rule) \
@@ -54,14 +54,14 @@ public:
 	#include "ruletypes.h"
 		_IntRuleCount
 	} IntType;
-	
+
 	typedef enum {
 	#define RULE_REAL(cat, rule, default_value) \
 		Real__##rule,
 	#include "ruletypes.h"
 		_RealRuleCount
 	} RealType;
-	
+
 	typedef enum {
 	#define RULE_BOOL(cat, rule, default_value) \
 		Bool__##rule,
@@ -76,25 +76,25 @@ public:
 		_CatCount
 	} CategoryType;
 
-    static RuleManager* Instance() {
-        static RuleManager rules;
-        return &rules;
-    }
+	static RuleManager* Instance() {
+		static RuleManager rules;
+		return &rules;
+	}
 
-	static const IntType  InvalidInt  = _IntRuleCount;
+	static const IntType InvalidInt = _IntRuleCount;
 	static const RealType InvalidReal = _RealRuleCount;
 	static const BoolType InvalidBool = _BoolRuleCount;
 	static const CategoryType InvalidCategory = _CatCount;
-	
+
 	static const uint32 _RulesCount = _IntRuleCount+_RealRuleCount+_BoolRuleCount;
-	
+
 	//fetch routines, you should generally use the Rule* macros instead of this
-	int32 GetIntRule (IntType  t) const;
+	int32 GetIntRule (IntType t) const;
 	float GetRealRule(RealType t) const;
 	bool GetBoolRule(BoolType t) const;
 
 	//management routines
-	static const char *GetRuleName(IntType  t) { return(s_RuleInfo[t].name); }
+	static const char *GetRuleName(IntType t) { return(s_RuleInfo[t].name); }
 	static const char *GetRuleName(RealType t) { return(s_RuleInfo[t+_IntRuleCount].name); }
 	static const char *GetRuleName(BoolType t) { return(s_RuleInfo[t+_IntRuleCount+_RealRuleCount].name); }
 	static uint32 CountRules() { return(_RulesCount); }
@@ -109,20 +109,20 @@ public:
 	static int GetRulesetID(Database *db, const char *rulesetname);
 	static std::string GetRulesetName(Database *db, int id);
 	static bool ListRulesets(Database *db, std::map<int, std::string> &into);
-	
+
 	void ResetRules();
 	bool LoadRules(Database *db, const char *ruleset = nullptr);
 	void SaveRules(Database *db, const char *ruleset = nullptr);
-	
+
 private:
-    RuleManager();
-    RuleManager(const RuleManager&);
-    const RuleManager& operator=(const RuleManager&);
+	RuleManager();
+	RuleManager(const RuleManager&);
+	const RuleManager& operator=(const RuleManager&);
 
 	int	m_activeRuleset;
 	std::string m_activeName;
 #ifdef WIN64
-	uint32 	m_RuleIntValues [_IntRuleCount ];
+	uint32	m_RuleIntValues [_IntRuleCount ];
 #else
 	int m_RuleIntValues [_IntRuleCount ];
 #endif
@@ -134,7 +134,7 @@ private:
 		RealRule,
 		BoolRule
 	} RuleType;
-	
+
 	static bool _FindRule(const char *rule_name, RuleType &type_into, uint16 &index_into);
 	static const char *_GetRuleName(RuleType type, uint16 index);
 	static int _FindOrCreateRuleset(Database *db, const char *ruleset);
@@ -148,7 +148,8 @@ private:
 		uint16 rule_index;	//index into its 'type' array
 	} RuleInfo;
 	static const RuleInfo s_RuleInfo[];
-	
+
 };
 
 #endif /*RULESYS_H_*/
+

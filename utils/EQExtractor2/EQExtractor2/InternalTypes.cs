@@ -1,7 +1,7 @@
 ﻿//
 // Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net). Distributed under GPL version 2.
 //
-// 
+//
 
 using System;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ namespace EQExtractor2.InternalTypes
         public UInt32 DropID;
         public string Name;
         public UInt16 ZoneID;
-        public UInt16 InstanceID;                
+        public UInt16 InstanceID;
         public float Heading;
         public float y;
         public float x;
@@ -64,7 +64,7 @@ namespace EQExtractor2.InternalTypes
         public UInt16 ZoneID;
         public UInt16 InstanceID;
         public byte FallDamage;
-        public float FogDensity;            
+        public float FogDensity;
     }
 
     public class ZoneEntryStruct
@@ -76,16 +76,16 @@ namespace EQExtractor2.InternalTypes
         }
 
         public string SpawnName;
-        public UInt32 SpawnID;                
+        public UInt32 SpawnID;
         public bool Findable;
         public Byte Level;
-        public Byte IsNPC;                     
+        public Byte IsNPC;
         public uint Showname;
         public uint TargetableWithHotkey;
-        public uint Targetable;                
+        public uint Targetable;
         public uint ShowHelm;
         public uint Gender;
-        public byte OtherData;                                               
+        public byte OtherData;
         public string DestructableString1;
         public string DestructableString2;
         public string DestructableString3;
@@ -120,21 +120,21 @@ namespace EQExtractor2.InternalTypes
         public UInt32 DrakkinTattoo;
         public UInt32 DrakkinDetails;
         public UInt32 Deity;
-        public byte Class;                
-        public byte EquipChest2;        
+        public byte Class;
+        public byte EquipChest2;
         public byte Helm;
         public string LastName;
         public UInt32 PetOwnerID;
         public float YPos;
-        public float Heading;                                
-        public float XPos;                                
-        public float ZPos;                
+        public float Heading;
+        public float XPos;
+        public float ZPos;
         public UInt32[] SlotColour;
         public byte ArmorTintRed;
         public byte ArmorTintGreen;
-        public byte ArmorTintBlue;                                
+        public byte ArmorTintBlue;
         public UInt32 MeleeTexture1;
-        public UInt32 MeleeTexture2;                
+        public UInt32 MeleeTexture2;
         public UInt32[] Equipment;
         public string Title;
         public string Suffix;
@@ -383,7 +383,7 @@ namespace EQExtractor2.InternalTypes
         public UInt16 Instance;
         public float x;
         public float y;
-        public float z;        
+        public float z;
         public float TargetX;
         public float TargetY;
         public float TargetZ;
@@ -575,7 +575,7 @@ namespace EQExtractor2.InternalTypes
 
         public Position p;
 
-        public bool HighRes;        
+        public bool HighRes;
     }
 
     public class ExplorerSpawnRecord
@@ -632,7 +632,7 @@ namespace EQExtractor2.InternalTypes
         public float DestY;
         public float DestZ;
         public float DestHeading;
-        
+
     }
     class MerchantManager
     {

@@ -14,8 +14,8 @@ EQEmuDatabase::EQEmuDatabase(std::string ServerName, std::string DatabaseName, s
 	_mysql = mysql_init(NULL);
 	if(_mysql)
 	{
-		if (!mysql_real_connect(_mysql, GetServerName().c_str(), GetDBUsername().c_str(), 
-			GetDBPassword().c_str(), GetDatabaseName().c_str(), 0, NULL, 0)) 
+		if (!mysql_real_connect(_mysql, GetServerName().c_str(), GetDBUsername().c_str(),
+			GetDBPassword().c_str(), GetDatabaseName().c_str(), 0, NULL, 0))
 		{
 			cout << "MYSQL CONNECT FAILED: " << endl;
 			cout << GetServerName() << endl;
@@ -48,7 +48,7 @@ void EQEmuDatabase::GetPlayer(std::string name)
 	MYSQL_RES *res;
 	MYSQL_ROW row;
 	char * mQuery = 0;
-	MakeAnyLenString(&mQuery, "SELECT profile, id FROM character_ WHERE name='%s'", name.c_str()); 
+	MakeAnyLenString(&mQuery, "SELECT profile, id FROM character_ WHERE name='%s'", name.c_str());
 	if (mysql_query(_mysql, mQuery)) {
 		cout << "Query failed: " << mQuery << endl;
 		return;
@@ -85,7 +85,7 @@ void EQEmuDatabase::GetPlayers()
 	MYSQL_RES *res;
 	MYSQL_ROW row;
 	char * mQuery = 0;
-	MakeAnyLenString(&mQuery, "SELECT profile, id FROM character_"); 
+	MakeAnyLenString(&mQuery, "SELECT profile, id FROM character_");
 	if (mysql_query(_mysql, mQuery)) {
 		cout << "Query failed: " << mQuery << endl;
 		return;

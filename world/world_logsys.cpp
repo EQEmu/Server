@@ -11,7 +11,7 @@ void log_message_clientVA(LogType type, Client *who, const char *fmt, va_list ar
 	char prefix_buffer[256];
 	snprintf(prefix_buffer, 255, "[%s] %s: ", log_type_info[type].name, who->GetAccountName());
 	prefix_buffer[255] = '\0';
-	
+
 	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer, fmt, args);
 }
 
@@ -34,7 +34,7 @@ void log_message_zoneVA(LogType type, ZoneServer *who, const char *fmt, va_list 
 
 	snprintf(prefix_buffer, 255, "[%s] %s ", log_type_info[type].name, zone_tag);
 	prefix_buffer[255] = '\0';
-	
+
 	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer, fmt, args);
 }
 

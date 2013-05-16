@@ -54,12 +54,12 @@ if($mode eq "-r") {
 		usage();
 	}
 	my $old_struct = $ARGV[1];
-	
+
 	print STDERR "Reading old player profile...\n";
 	(my $old_order, my $old_fields, my $old_offsets) = readpp($old_struct, "../common/eq_old_structs.h");
 	print STDERR "Reading new player profile...\n";
 	(my $order, my $fields, my $offsets) = readpp("PlayerProfile_Struct", "../common/eq_packet_structs.h");
-	
+
 	compare_pps($old_order, $old_fields, $old_offsets,
 		$order, $fields, $offsets);
 } elsif($mode eq "-c") {
@@ -68,12 +68,12 @@ if($mode eq "-r") {
 	}
 	my $old_struct = $ARGV[1];
 	my $old2_struct = $ARGV[2];
-	
+
 	print STDERR "Reading old player profile...\n";
 	(my $old_order, my $old_fields, my $old_offsets) = readpp($old_struct, "../common/eq_old_structs.h");
 	print STDERR "Reading old2 player profile...\n";
 	(my $order, my $fields, my $offsets) = readpp($old2_struct, "../common/eq_old_structs.h");
-	
+
 	compare_pps($old_order, $old_fields, $old_offsets,
 		$order, $fields, $offsets);
 } else {
@@ -84,9 +84,9 @@ if($mode eq "-r") {
 
 sub compare_pps {
 	(my $old_order, my $old_fields, my $old_offsets, my $order, my $fields, my $offsets) = @_;
-	
+
 	#will not catch order changes very well for now
-	
+
 	my $last_diff = 0;
 	my $first = $old_order->[0];
 	my $taildrop = 0;
@@ -101,9 +101,9 @@ sub compare_pps {
 #			print STDERR "field $f was lost in new profile, it could be at $guess.\n";
 			next;
 		}
-		
+
 		my $diff = $offsets->{$f} - $old_offsets->{$f};
-		
+
 		if($last_diff != $diff) {
 			#a change in deltas... print a rule for last block
 			my $tail = $f;
@@ -112,11 +112,11 @@ sub compare_pps {
 			}
 # print "// delta change from $last_diff to $diff at field $f ($tail)\n";
 			print "\t\tmemcpy(\&pp->$first, \&ops->$first, StructDist(ops, $first, $tail));\n";
-			
+
 			$first = $f;
 			$last_diff = $diff;
 			$taildrop = "";
-			
+
 		} else {
 			#another field with the same delta...
 			$final = $f;
@@ -130,7 +130,7 @@ sub compare_pps {
 		$tail = $taildrop;
 	}
 	print "\t\tmemcpy(\&pp->$first, \&ops->$first, StructDist(ops, $first, $tail));\n";
-	
+
 }
 
 
@@ -148,7 +148,7 @@ sub readpp {
 			$in = 1;
 		}
 		next if(!$in);
-		
+
 		if($_ =~ /\}\s*;/) {
 			$in = 0;
 			last;
@@ -170,7 +170,7 @@ sub readpp {
 		push(@order, $field);
 	}
 	close(F);
-	
+
 	open(F, ">$temp.cpp") || die("Unable to open $temp.cpp");
 	print F <<"EOC";
 #include "../common/types.h"
@@ -190,11 +190,11 @@ EOC
 	}
 	print F "\n\treturn(0);\n}\n\n";
 	close(F);
-	
+
 	if(system("g++ $temp.cpp -I. -o $temp") != 0) {
 		die("Error compiling $temp.cpp\n");
 	}
-	
+
 	system("./$temp >$temp.out");
 	open(F, "<$temp.out");
 	while(<F>) {
@@ -210,11 +210,11 @@ EOC
 		$offsets{$1} = $2;
 	}
 	close(F);
-	
+
 #	unlink("$temp.cpp");
 #	unlink("$temp.out");
 #	unlink("$temp");
-	
+
 	return(\@order, \%fields, \%offsets);
 }
 

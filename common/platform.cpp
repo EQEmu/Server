@@ -3,9 +3,10 @@
 EQEmuExePlatform exe_platform = ExePlatformNone;
 
 void RegisterExecutablePlatform(EQEmuExePlatform p) {
-    exe_platform = p;
+	exe_platform = p;
 }
 
 const EQEmuExePlatform& GetExecutablePlatform() {
-    return exe_platform;
+	return exe_platform;
 }
+

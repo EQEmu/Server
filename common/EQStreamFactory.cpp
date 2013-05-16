@@ -24,28 +24,28 @@ using namespace std;
 ThreadReturnType EQStreamFactoryReaderLoop(void *eqfs)
 {
 EQStreamFactory *fs=(EQStreamFactory *)eqfs;
-	
+
 #ifndef WIN32
 	_log(COMMON__THREADS, "Starting EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
 #endif
-	
+
 	fs->ReaderLoop();
 
 #ifndef WIN32
 	_log(COMMON__THREADS, "Ending EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
 #endif
-	
+
 	THREAD_RETURN(nullptr);
 }
 
 ThreadReturnType EQStreamFactoryWriterLoop(void *eqfs)
 {
 	EQStreamFactory *fs=(EQStreamFactory *)eqfs;
-	
+
 #ifndef WIN32
 	_log(COMMON__THREADS, "Starting EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
 #endif
-	
+
 	fs->WriterLoop();
 
 #ifndef WIN32
@@ -55,8 +55,8 @@ ThreadReturnType EQStreamFactoryWriterLoop(void *eqfs)
 	THREAD_RETURN(nullptr);
 }
 
-EQStreamFactory::EQStreamFactory(EQStreamType type, int port, uint32 timeout) 
-    : Timeoutable(5000), stream_timeout(timeout)
+EQStreamFactory::EQStreamFactory(EQStreamType type, int port, uint32 timeout)
+	: Timeoutable(5000), stream_timeout(timeout)
 {
 	StreamType=type;
 	Port=port;
@@ -81,7 +81,7 @@ struct sockaddr_in address;
 #ifndef WIN32
 	pthread_t t1,t2;
 #endif
-	/* Setup internet address information.  
+	/* Setup internet address information.
 	This is used with the bind() call */
 	memset((char *) &address, 0, sizeof(address));
 	address.sin_family = AF_INET;
@@ -172,10 +172,10 @@ timeval sleep_time;
 			continue;
 		} else if (num==0)
 			continue;
-		
+
 		if(sock == -1)
 			break;		//somebody closed us while we were sleeping.
-		
+
 		if (FD_ISSET(sock,&readset)) {
 #ifdef _WINDOWS
 			if ((length=recvfrom(sock,(char*)buffer,sizeof(buffer),0,(struct sockaddr*)&from,(int *)&socklen)) < 2)
@@ -208,7 +208,7 @@ timeval sleep_time;
 					else
 						curstream->PutInUse();
 					MStreams.unlock();	//the in use flag prevents the stream from being deleted while we are using it.
-					
+
 					if(curstream) {
 						curstream->AddBytesRecv(length);
 						curstream->Process(buffer,length);
@@ -225,17 +225,17 @@ void EQStreamFactory::CheckTimeout()
 {
 	//lock streams the entire time were checking timeouts, it should be fast.
 	MStreams.lock();
-	
+
 	unsigned long now=Timer::GetCurrentTime();
 	map<string,EQStream *>::iterator stream_itr;
-	
+
 	for(stream_itr=Streams.begin();stream_itr!=Streams.end();) {
 		EQStream *s = stream_itr->second;
-		
+
 		s->CheckTimeout(now, stream_timeout);
-		
+
 		EQStreamState state = s->GetState();
-		
+
 		//not part of the else so we check it right away on state change
 		if (state==CLOSED) {
 			if (s->IsInUse()) {
@@ -267,7 +267,7 @@ bool decay=false;
 uint32 stream_count;
 
 Timer DecayTimer(20);
-	
+
 	WriterRunning=true;
 	DecayTimer.Enable();
 	while(sock!=-1) {
@@ -278,12 +278,12 @@ Timer DecayTimer(20);
 		if (!WriterRunning)
 			break;
 		MWriterRunning.unlock();
-		
+
 		havework = false;
 		wants_write.clear();
 
 		decay=DecayTimer.Check();
-		
+
 		//copy streams into a seperate list so we dont have to keep
 		//MStreams locked while we are writting
 		MStreams.lock();
@@ -291,13 +291,13 @@ Timer DecayTimer(20);
 			// If it's time to decay the bytes sent, then let's do it before we try to write
 			if (decay)
 				stream_itr->second->Decay();
-			
+
 			//bullshit checking, to see if this is really happening, GDB seems to think so...
 			if(stream_itr->second == nullptr) {
 				fprintf(stderr, "ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %s", stream_itr->first.c_str());
 				continue;
 			}
-			
+
 			if (stream_itr->second->HasOutgoingData()) {
 				havework=true;
 				stream_itr->second->PutInUse();
@@ -305,7 +305,7 @@ Timer DecayTimer(20);
 			}
 		}
 		MStreams.unlock();
-		
+
 		//do the actual writes
 		cur = wants_write.begin();
 		end = wants_write.end();
@@ -313,7 +313,6 @@ Timer DecayTimer(20);
 			(*cur)->Write(sock);
 			(*cur)->ReleaseFromUse();
 		}
-		
 
 		Sleep(10);
 
@@ -327,21 +326,4 @@ Timer DecayTimer(20);
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
