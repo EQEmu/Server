@@ -12,6 +12,8 @@ class ItemInst;
 class Client;
 class NPC;
 
+#include "lua_parser_events.h"
+
 class LuaParser : public QuestInterface {
 public:
 	LuaParser();
@@ -46,6 +48,8 @@ public:
 private:
 	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data);
+	int _EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
+	int _EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 	void LoadScript(std::string filename, std::string package_name);
 	bool HasFunction(std::string function, std::string package_name);
 	void ClearStates();
@@ -54,6 +58,11 @@ private:
 	std::map<std::string, std::string> vars_;
 	std::map<std::string, bool> loaded_;
 	lua_State *L;
+
+	NPCArgumentHandler NPCArgumentDispatch[_LargestEventID];
+	PlayerArgumentHandler PlayerArgumentDispatch[_LargestEventID];
+	ItemArgumentHandler ItemArgumentDispatch[_LargestEventID];
+	SpellArgumentHandler SpellArgumentDispatch[_LargestEventID];
 };
 
 #endif

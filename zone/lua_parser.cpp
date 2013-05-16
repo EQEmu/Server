@@ -1,23 +1,22 @@
 #ifdef LUA_EQEMU
 
 #include "lua.hpp"
-#include "lua_parser.h"
-#include <ctype.h>
-#include <stdio.h>
-#include <sstream>
-
 #include <luabind/luabind.hpp>
 #include <boost/any.hpp>
 
-#include "../common/seperator.h"
 #include "masterentity.h"
+#include "../common/seperator.h"
 #include "lua_entity.h"
 #include "lua_mob.h"
 #include "lua_client.h"
 #include "lua_npc.h"
-#include "lua_trade.h"
 #include "lua_item.h"
 #include "zone.h"
+
+#include <ctype.h>
+#include <stdio.h>
+#include <sstream>
+#include "lua_parser.h"
 
 const char *LuaEvents[_LargestEventID] = {
 	"event_say",
@@ -84,6 +83,37 @@ const char *LuaEvents[_LargestEventID] = {
 extern Zone *zone;
 
 LuaParser::LuaParser() {
+	for(int i = 0; i < _LargestEventID; ++i) {
+		NPCArgumentDispatch[i] = handle_npc_null;
+		PlayerArgumentDispatch[i] = handle_player_null;
+		ItemArgumentDispatch[i] = handle_item_null;
+		SpellArgumentDispatch[i] = handle_spell_null;
+	}
+
+	NPCArgumentDispatch[EVENT_SAY] = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_AGGRO_SAY] = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_PROXIMITY_SAY] = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_TRADE] = handle_npc_event_trade;
+	NPCArgumentDispatch[EVENT_HP] = handle_npc_event_hp;
+	NPCArgumentDispatch[EVENT_ATTACK] = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_AGGRO] = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_TARGET_CHANGE] = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_CAST_ON] = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_KILLED_MERIT] = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_SLAY] = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_ENTER] = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_EXIT] = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_TASK_ACCEPTED] = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_NPC_SLAY] = handle_npc_single_npc;
+	NPCArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_npc_popup;
+	NPCArgumentDispatch[EVENT_WAYPOINT_ARRIVE] = handle_npc_waypoint;
+	NPCArgumentDispatch[EVENT_WAYPOINT_DEPART] = handle_npc_waypoint;
+	NPCArgumentDispatch[EVENT_HATE_LIST] = handle_npc_hate;
+	NPCArgumentDispatch[EVENT_COMBAT] = handle_npc_hate;
+	NPCArgumentDispatch[EVENT_SIGNAL] = handle_npc_signal;
+	NPCArgumentDispatch[EVENT_TIMER] = handle_npc_timer;
+	NPCArgumentDispatch[EVENT_DEATH] = handle_npc_death;
+
 	L = nullptr;
 }
 
@@ -137,183 +167,17 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 		lua_getfield(L, -1, sub_name);
 		
+		lua_createtable(L, 0, 0);
 		//always push self
 		Lua_NPC l_npc(npc);
 		luabind::object l_npc_o = luabind::object(L, l_npc);
 		l_npc_o.push(L);
+		lua_setfield(L, -2, "self");
+
+		auto arg_function = NPCArgumentDispatch[evt];
+		arg_function(this, L, npc, init, data, extra_data);
 		
-		int arg_count = 1;
-		int ret_count = 1;
-		
-		//push arguments based on event
-		switch(evt) {
-		case EVENT_SAY:
-		case EVENT_AGGRO_SAY: 
-		case EVENT_PROXIMITY_SAY: {
-			//client
-			Lua_Client l_client(reinterpret_cast<Client*>(init));
-			luabind::object l_client_o = luabind::object(L, l_client);
-			l_client_o.push(L);
-		
-			//text
-			lua_pushstring(L, data.c_str());
-		
-			//language
-			lua_pushinteger(L, extra_data);
-		
-			arg_count += 3;
-			break;
-		}
-		
-		case EVENT_TRADE: {
-			//client
-			Lua_Client l_client(reinterpret_cast<Client*>(init));
-			luabind::object l_client_o = luabind::object(L, l_client);
-			l_client_o.push(L);
-		
-			//trade
-			Lua_Trade trade;
-			std::stringstream ident;
-			ident << npc->GetNPCTypeID();
-			trade.item1_ = std::stoul(GetVar("item1." + ident.str()));
-			trade.item2_ = std::stoul(GetVar("item2." + ident.str()));
-			trade.item3_ = std::stoul(GetVar("item3." + ident.str()));
-			trade.item4_ = std::stoul(GetVar("item4." + ident.str()));
-			trade.item1_charges_ = std::stoul(GetVar("item1.charges." + ident.str()));
-			trade.item1_charges_ = std::stoul(GetVar("item2.charges." + ident.str()));
-			trade.item1_charges_ = std::stoul(GetVar("item3.charges." + ident.str()));
-			trade.item1_charges_ = std::stoul(GetVar("item4.charges." + ident.str()));
-			trade.item1_attuned_ = std::stoi(GetVar("item1.attuned." + ident.str())) != 0 ? true : false;
-			trade.item2_attuned_ = std::stoi(GetVar("item2.attuned." + ident.str())) != 0 ? true : false;
-			trade.item3_attuned_ = std::stoi(GetVar("item3.attuned." + ident.str())) != 0 ? true : false;
-			trade.item4_attuned_ = std::stoi(GetVar("item4.attuned." + ident.str())) != 0 ? true : false;
-			trade.platinum_ = std::stoul(GetVar("platinum." + ident.str()));
-			trade.gold_ = std::stoul(GetVar("gold." + ident.str()));
-			trade.silver_ = std::stoul(GetVar("silver." + ident.str()));
-			trade.copper_ = std::stoul(GetVar("copper." + ident.str()));
-			
-			luabind::object l_trade_o = luabind::object(L, trade);
-			l_trade_o.push(L);
-		
-			arg_count += 2;
-			break;
-		}
-		
-		case EVENT_HP: {
-			if(extra_data == 1) {
-				lua_pushinteger(L, -1);
-				lua_pushinteger(L, std::stoi(data));
-			}
-			else
-			{
-				lua_pushinteger(L, std::stoi(data));
-				lua_pushinteger(L, -1);
-			}
-		
-			arg_count += 2;
-			break;
-		}
-		
-		case EVENT_ATTACK:
-		case EVENT_AGGRO:
-		case EVENT_TARGET_CHANGE:
-		case EVENT_CAST_ON: {
-			//mob
-			Lua_Mob l_mob(init);
-			luabind::object l_mob_o = luabind::object(L, l_mob);
-			l_mob_o.push(L);
-		
-			arg_count += 1;
-			break;
-		}
-		
-		case EVENT_KILLED_MERIT:
-		case EVENT_SLAY:
-		case EVENT_ENTER:
-		case EVENT_EXIT:
-		case EVENT_TASK_ACCEPTED: {
-			//client
-			Lua_Client l_client(reinterpret_cast<Client*>(init));
-			luabind::object l_client_o = luabind::object(L, l_client);
-			l_client_o.push(L);
-		
-			arg_count += 1;
-			break;
-		}
-		
-		case EVENT_NPC_SLAY: {
-			//npc
-			Lua_NPC l_npc(reinterpret_cast<NPC*>(init));
-			luabind::object l_npc_o = luabind::object(L, l_npc);
-			l_npc_o.push(L);
-		
-			arg_count += 1;
-			break;
-		}
-		
-		case EVENT_POPUP_RESPONSE:
-		case EVENT_WAYPOINT_ARRIVE:
-		case EVENT_WAYPOINT_DEPART: {
-			//client
-			Lua_Client l_client(reinterpret_cast<Client*>(init));
-			luabind::object l_client_o = luabind::object(L, l_client);
-			l_client_o.push(L);
-		
-			//id
-			lua_pushinteger(L, std::stoi(data));
-		
-			arg_count += 2;
-			break;
-		}
-		
-		case EVENT_HATE_LIST:
-		case EVENT_COMBAT: {
-			//mob
-			Lua_Mob l_mob(init);
-			luabind::object l_mob_o = luabind::object(L, l_mob);
-			l_mob_o.push(L);
-		
-			//joined
-			lua_pushboolean(L, std::stoi(data) == 0 ? false : true);
-		
-			arg_count += 2;
-			break;
-		}
-		
-		case EVENT_SIGNAL: {
-			//id
-			lua_pushinteger(L, std::stoi(data));
-		
-			arg_count += 1;
-			break;
-		}
-		
-		case EVENT_TIMER: {
-			//id
-			lua_pushstring(L, data.c_str());
-		
-			arg_count += 1;
-			break;
-		}
-		
-		case EVENT_DEATH: {
-			//mob
-			Lua_Mob l_mob(init);
-			luabind::object l_mob_o = luabind::object(L, l_mob);
-			l_mob_o.push(L);
-		
-			Seperator sep(data.c_str());
-			lua_pushinteger(L, std::stoi(sep.arg[0]));
-			lua_pushinteger(L, std::stoi(sep.arg[1]));
-			lua_pushinteger(L, std::stoi(sep.arg[2]));
-		
-			arg_count += 4;
-			break;
-		}
-		
-		}
-		
-		if(lua_pcall(L, arg_count, ret_count, 0)) {
+		if(lua_pcall(L, 1, 1, 0)) {
 			printf("Error: %s\n", lua_tostring(L, -1));
 			return 0;
 		}
@@ -373,21 +237,23 @@ int LuaParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string d
 
 int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
 	const char *sub_name = LuaEvents[evt];
-
 	int start = lua_gettop(L);
 
 	try {
 		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 		lua_getfield(L, -1, sub_name);
 	
+		lua_createtable(L, 0, 0);
 		//push self
 		Lua_Client l_client(client);
 		luabind::object l_client_o = luabind::object(L, l_client);
 		l_client_o.push(L);
-		int arg_count = 1;
-		int ret_count = 1;
+		lua_setfield(L, -2, "self");
 		
-		switch(evt) {
+		auto arg_function = PlayerArgumentDispatch[evt];
+		arg_function(this, L, client, data, extra_data);
+
+		/*switch(evt) {
 		case EVENT_DEATH: {
 			Seperator sep(data.c_str());
 			lua_pushinteger(L, std::stoi(sep.arg[0]));
@@ -474,9 +340,9 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 			break;
 		}
 	
-		}
+		}*/
 		
-		if(lua_pcall(L, arg_count, ret_count, 0)) {
+		if(lua_pcall(L, 1, 1, 0)) {
 			printf("Error: %s\n", lua_tostring(L, -1));
 			return 0;
 		}
@@ -503,11 +369,140 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 }
 
 int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+	if(evt >= _LargestEventID) {
+		return 0;
+	}
+
+	if(!item) {
+		return 0;
+	}
+
+	if(!ItemHasQuestSub(item, LuaEvents[evt])) {
+		return 0;
+	}
+
+	std::stringstream package_name;
+	package_name << "item_";
+
+	std::stringstream item_name;
+	const Item_Struct* itm = item->GetItem();
+	if(evt == EVENT_SCALE_CALC || evt == EVENT_ITEM_ENTER_ZONE)
+	{
+		item_name << itm->CharmFile;
+	}
+	else if(evt == EVENT_ITEM_CLICK || evt == EVENT_ITEM_CLICK_CAST)
+	{
+		item_name << "script_";
+		item_name << itm->ScriptFileID;
+	}
+	else
+	{
+		item_name << "item_";
+		item_name << itm->ID;
+	}
+	package_name << item_name;
+
+	return _EventItem(package_name.str(), evt, client, item, objid, extra_data);
+}
+
+int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+	const char *sub_name = LuaEvents[evt];
+
+	int start = lua_gettop(L);
+
+	try {
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+		lua_getfield(L, -1, sub_name);
+		
+		lua_createtable(L, 0, 0);
+		//always push self
+		Lua_Item l_item(item);
+		luabind::object l_item_o = luabind::object(L, l_item);
+		l_item_o.push(L);
+		lua_setfield(L, -2, "item");
+
+		auto arg_function = ItemArgumentDispatch[evt];
+		arg_function(this, L, client, item, objid, extra_data);
+		
+		if(lua_pcall(L, 1, 1, 0)) {
+			printf("Error: %s\n", lua_tostring(L, -1));
+			return 0;
+		}
+		
+		if(lua_isnumber(L, -1)) {
+			int ret = static_cast<int>(lua_tointeger(L, -1));
+			lua_pop(L, 2);
+			return ret;
+		}
+		
+		lua_pop(L, 2);
+	} catch(std::exception &ex) {
+		printf("Lua call exception: %s\n", ex.what());
+
+		//Restore our stack to the best of our ability
+		int end = lua_gettop(L);
+		int n = end - start;
+		if(n > 0) {
+			lua_pop(L, n);
+		}
+	}
+
 	return 0;
 }
 
 int LuaParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
-	return 00;
+	if(evt >= _LargestEventID) {
+		return 0;
+	}
+
+	std::stringstream package_name;
+	package_name << "spell_" << spell_id;
+
+	if(!SpellHasQuestSub(spell_id, LuaEvents[evt])) {
+		return 0;
+	}
+	
+	return _EventSpell(package_name.str(), evt, npc, client, spell_id, extra_data);
+}
+
+int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
+	const char *sub_name = LuaEvents[evt];
+	
+	int start = lua_gettop(L);
+
+	try {
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+		lua_getfield(L, -1, sub_name);
+		
+		lua_createtable(L, 0, 0);
+		
+		auto arg_function = SpellArgumentDispatch[evt];
+		arg_function(this, L, npc, client, spell_id, extra_data);
+		
+		if(lua_pcall(L, 1, 1, 0)) {
+			printf("Error: %s\n", lua_tostring(L, -1));
+			return 0;
+		}
+		
+		if(lua_isnumber(L, -1)) {
+			int ret = static_cast<int>(lua_tointeger(L, -1));
+			lua_pop(L, 2);
+			return ret;
+		}
+		
+		lua_pop(L, 2);
+	} catch(std::exception &ex) {
+		printf("Lua call exception: %s\n", ex.what());
+
+		//Restore our stack to the best of our ability
+		int end = lua_gettop(L);
+		int n = end - start;
+		if(n > 0) {
+			lua_pop(L, n);
+		}
+	}
+
+	return 0;
 }
 
 bool LuaParser::HasQuestSub(uint32 npc_id, const char *subname) {
@@ -900,24 +895,24 @@ void LuaParser::MapFunctions(lua_State *L) {
 			luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 				.def(luabind::constructor<>()),
 
-			luabind::class_<Lua_Trade>("Trade")
-				.def(luabind::constructor<>())
-				.def_readwrite("item1", &Lua_Trade::item1_)
-				.def_readwrite("item2", &Lua_Trade::item2_)
-				.def_readwrite("item3", &Lua_Trade::item3_)
-				.def_readwrite("item4", &Lua_Trade::item4_)
-				.def_readwrite("item1_charges", &Lua_Trade::item1_charges_)
-				.def_readwrite("item2_charges", &Lua_Trade::item2_charges_)
-				.def_readwrite("item3_charges", &Lua_Trade::item3_charges_)
-				.def_readwrite("item4_charges", &Lua_Trade::item4_charges_)
-				.def_readwrite("item1_attuned", &Lua_Trade::item1_attuned_)
-				.def_readwrite("item2_attuned", &Lua_Trade::item2_attuned_)
-				.def_readwrite("item3_attuned", &Lua_Trade::item3_attuned_)
-				.def_readwrite("item4_attuned", &Lua_Trade::item4_attuned_)
-				.def_readwrite("platinum", &Lua_Trade::platinum_)
-				.def_readwrite("gold", &Lua_Trade::gold_)
-				.def_readwrite("silver", &Lua_Trade::silver_)
-				.def_readwrite("copper", &Lua_Trade::copper_),
+			//luabind::class_<Lua_Trade>("Trade")
+			//	.def(luabind::constructor<>())
+			//	.def_readwrite("item1", &Lua_Trade::item1_)
+			//	.def_readwrite("item2", &Lua_Trade::item2_)
+			//	.def_readwrite("item3", &Lua_Trade::item3_)
+			//	.def_readwrite("item4", &Lua_Trade::item4_)
+			//	.def_readwrite("item1_charges", &Lua_Trade::item1_charges_)
+			//	.def_readwrite("item2_charges", &Lua_Trade::item2_charges_)
+			//	.def_readwrite("item3_charges", &Lua_Trade::item3_charges_)
+			//	.def_readwrite("item4_charges", &Lua_Trade::item4_charges_)
+			//	.def_readwrite("item1_attuned", &Lua_Trade::item1_attuned_)
+			//	.def_readwrite("item2_attuned", &Lua_Trade::item2_attuned_)
+			//	.def_readwrite("item3_attuned", &Lua_Trade::item3_attuned_)
+			//	.def_readwrite("item4_attuned", &Lua_Trade::item4_attuned_)
+			//	.def_readwrite("platinum", &Lua_Trade::platinum_)
+			//	.def_readwrite("gold", &Lua_Trade::gold_)
+			//	.def_readwrite("silver", &Lua_Trade::silver_)
+			//	.def_readwrite("copper", &Lua_Trade::copper_),
 
 			luabind::class_<Lua_Item>("Item")
 				.def(luabind::constructor<>())

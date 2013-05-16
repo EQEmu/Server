@@ -37,6 +37,7 @@ SET(zone_sources
 	lua_mob.cpp
 	lua_npc.cpp
 	lua_parser.cpp
+	lua_parser_events.cpp
 	embperl.cpp
 	embxs.cpp
 	entity.cpp
@@ -134,7 +135,7 @@ SET(zone_headers
 	lua_mob.h
 	lua_npc.h
 	lua_parser.h
-	lua_trade.h
+	lua_parser_events.h
 	map.h
 	masterentity.h
 	maxskill.h
