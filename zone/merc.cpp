@@ -4792,9 +4792,11 @@ Mob* Merc::GetOwnerOrSelf() {
 	return Result;
 }
 
-void Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill)
+bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill)
 {
-	NPC::Death(killerMob, damage, spell, attack_skill);
+	if(!NPC::Death(killerMob, damage, spell, attack_skill))
+		return false;
+
 	Save();
 
 	Mob *give_exp = hate_list.GetDamageTop(this);
@@ -4809,9 +4811,7 @@ void Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_sk
 	if(entity_list.GetCorpseByID(GetID()))
 		entity_list.GetCorpseByID(GetID())->Depop();
 
-	if(Suspend())
-	{
-	}
+	return true;
 }
 
 Client* Merc::GetMercOwner() {

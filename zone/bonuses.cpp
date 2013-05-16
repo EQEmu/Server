@@ -2443,7 +2443,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
 			uint16 oldexp = e_inst->GetExp();
 
 			if(login) {
-				parse->EventItem(EVENT_ITEM_ENTERZONE, this, e_inst, e_inst->GetID(), 0);
+				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, e_inst->GetID(), 0);
 			}
 			parse->EventItem(EVENT_SCALE_CALC, this, e_inst, e_inst->GetID(), 0);
 
@@ -2467,7 +2467,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
 				uint16 oldexp = e_inst->GetExp();
 
 				if(login) {
-					parse->EventItem(EVENT_ITEM_ENTERZONE, this, e_inst, e_inst->GetID(), 0);
+					parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, e_inst->GetID(), 0);
 				}
 				parse->EventItem(EVENT_SCALE_CALC, this, e_inst, e_inst->GetID(), 0);
 

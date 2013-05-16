@@ -569,7 +569,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		}
 
 		bool quest_npc = false;
-		if(parse->HasQuestSub(tradingWith->GetNPCTypeID(), "EVENT_ITEM")) {
+		if(parse->HasQuestSub(tradingWith->GetNPCTypeID(), "EVENT_TRADE")) {
 			// This is a quest NPC
 			quest_npc = true;
 			if(RuleB(NPC, UseMultiQuest)){
@@ -630,12 +630,11 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		//dont bother with this crap unless we have a quest...
 		//pets can have quests! (especially charmed NPCs)
 		if (quest_npc) {
-
 			char temp1[100];
 			memset(temp1,0x0,100);
 			char temp2[100];
 			memset(temp2,0x0,100);
-			for ( int z=0; z < 4; z++ ) {
+			for(int z = 0; z < 4; z++) {
 				snprintf(temp1, 100, "item%d.%d", z+1,tradingWith->GetNPCTypeID());
 				snprintf(temp2, 100, "%d",items[z]);
 				parse->AddVar(temp1,temp2);
@@ -658,7 +657,12 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			snprintf(temp1, 100, "platinum.%d", tradingWith->GetNPCTypeID());
 			snprintf(temp2, 100, "%i",trade->pp);
 			parse->AddVar(temp1,temp2);
-			parse->EventNPC(EVENT_ITEM, tradingWith->CastToNPC(), this, "", 0);
+
+			if(tradingWith->GetAppearance() != eaDead) {
+				tradingWith->FaceTarget(this);
+			}
+
+			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0);
 		}
 	}
 }

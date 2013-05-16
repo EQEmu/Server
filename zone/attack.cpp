@@ -1417,13 +1417,13 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_
 	}
 }
 
-void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill)
+bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill)
 {
 	if(!ClientFinishedLoading())
-		return;
+		return false;
 
 	if(dead)
-		return;	//cant die more than once...
+		return false;	//cant die more than once...
 
 	if(!spell) 
 		spell = SPELL_UNKNOWN;
@@ -1431,11 +1431,19 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	char buffer[48] = { 0 };
 	snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
 	if(parse->EventPlayer(EVENT_DEATH, this, buffer, 0) != 0) {
-		return;
+		if(GetHP() < 0) {
+			SetHP(0);
+		}
+		return false;
+	}
+
+	if(killerMob && killerMob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
+		char val1[20]={0};
+		entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
+			killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 	}
 
 	int exploss;
-
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob ? killerMob->GetName() : "Unknown", damage, spell, attack_skill);
 
 	//
@@ -1649,42 +1657,6 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 		BuffFadeDetrimental();
 	}
 
-
-
-#if 0	// solar: commenting this out for now TODO reimplement becomenpc stuff
-	if (IsBecomeNPC() == true)
-	{
-		if (killerMob != nullptr && killerMob->IsClient()) {
-			if (killerMob->CastToClient()->isgrouped && entity_list.GetGroupByMob(killerMob) != 0)
-				entity_list.GetGroupByMob(killerMob->CastToClient())->SplitExp((uint32)(level*level*75*3.5f), this);
-
-			else
-				killerMob->CastToClient()->AddEXP((uint32)(level*level*75*3.5f)); // Pyro: Comment this if NPC death crashes zone
-			//hate_list.DoFactionHits(GetNPCFactionID());
-		}
-
-		Corpse* corpse = new Corpse(this->CastToClient(), 0);
-		entity_list.AddCorpse(corpse, this->GetID());
-		this->SetID(0);
-		if(killerMob->GetOwner() != 0 && killerMob->GetOwner()->IsClient())
-			killerMob = killerMob->GetOwner();
-		if(killerMob != 0 && killerMob->IsClient()) {
-			corpse->AllowMobLoot(killerMob, 0);
-			if(killerMob->CastToClient()->isgrouped) {
-				Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
-				if(group != 0) {
-					for(int i=0; i < MAX_GROUP_MEMBERS; i++) { // Doesnt work right, needs work
-						if(group->members[i] != nullptr) {
-							corpse->AllowMobLoot(group->members[i],i);
-						}
-					}
-				}
-			}
-		}
-	}
-#endif
-
-
 	//
 	// Finally, send em home
 	//
@@ -1725,6 +1697,8 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 
 		GoToDeath();
 	}
+
+	return true;
 }
 
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell) // Kaiyodo - base function has changed prototype, need to update overloaded version
@@ -2041,7 +2015,7 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_ski
 	}
 }
 
-void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill) {
+bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill) {
 	_ZP(NPC_Death);
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob->GetName(), damage, spell, attack_skill);
 	
@@ -2053,11 +2027,20 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 		snprintf(buffer, 31, "%d %d %d", damage, spell, static_cast<int>(attack_skill));
 		if(parse->EventNPC(EVENT_DEATH, this, oos, buffer, 0) != 0)
 		{
-			return;
+			if(GetHP() < 0) {
+				SetHP(0);
+			}
+			return false;
+		}
+
+		if(killerMob && killerMob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
+			char val1[20]={0};
+			entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
+				killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 		}
 	}
 
-	if (this->IsEngaged())
+	if (IsEngaged())
 	{
 		zone->DelAggroMob();
 #if EQDEBUG >= 11
@@ -2071,7 +2054,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	entity_list.RemoveFromTargets(this, p_depop);
 
 	if(p_depop == true)
-		return;
+		return false;
 
 	BuffFadeAll();
 	uint8 killed_level = GetLevel();
@@ -2379,12 +2362,14 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 		}
 	}
 
-	this->WipeHateList();
+	WipeHateList();
 	p_depop = true;
 	if(killerMob && killerMob->GetTarget() == this) //we can kill things without having them targeted
 		killerMob->SetTarget(nullptr); //via AE effects and such..
 
 	entity_list.UpdateFindableNPCState(this, true);
+
+	return true;
 }
 
 void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic) {
@@ -3404,23 +3389,6 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 	}
 		//final damage has been determined.
 
-		/*
-		//check for death conditions
-		if(IsClient()) {
-			if((GetHP()) <= -10) {
-				Death(attacker, damage, spell_id, skill_used);
-				return;
-			}
-		} else {
-			if (damage >= GetHP()) {
-				//killed...
-				SetHP(-100);
-				Death(attacker, damage, spell_id, skill_used);
-				return;
-			}
-		}
-		*/
-
 		SetHP(GetHP() - damage);
 
 		if(HasDied()) {
@@ -3432,16 +3400,11 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			if(!IsSaved && !TrySpellOnDeath()) {
 				SetHP(-500);
 
-				if(attacker && attacker->IsClient() && (spell_id != SPELL_UNKNOWN) && damage>0) {
-					char val1[20]={0};
-					entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE, attacker->GetCleanName(), GetCleanName(),ConvertArray(damage,val1));
+				if(Death(attacker, damage, spell_id, skill_used)) {
+					return;
 				}
-
-				Death(attacker, damage, spell_id, skill_used);
-				return;
 			}
 		}
-
 		else{
 			if(GetHPRatio() < 16)
 				TryDeathSave();
@@ -3548,10 +3511,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			a->source = attacker->GetID();
 		a->type = SkillDamageTypes[skill_used]; // was 0x1c
 		a->damage = damage;
-//		if (attack_skill != 231)
-//			a->spellid = SPELL_UNKNOWN;
-//		else
-			a->spellid = spell_id;
+		a->spellid = spell_id;
 
 		//Note: if players can become pets, they will not receive damage messages of their own
 		//this was done to simplify the code here (since we can only effectively skip one mob on queue)
@@ -3627,8 +3587,6 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			filter = FilterOthersMiss;
 		//make attacker (the attacker) send the packet so we can skip them and the owner
 		//this call will send the packet to `this` as well (using the wrong filter) (will not happen until PC charm works)
-//LogFile->write(EQEMuLog::Debug, "Queue damage to all except %s with filter %d (%d), type %d", skip->GetName(), filter, IsClient()?CastToClient()->GetFilter(filter):-1, a->type);
-		//
 		// If this is Damage Shield damage, the correct OP_Damage packets will be sent from Mob::DamageShield, so
 		// we don't send them here.
 		if(!FromDamageShield) {

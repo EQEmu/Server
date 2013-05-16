@@ -136,7 +136,7 @@ public:
 	Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType npcTypeData);
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual void Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill);
+	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
 	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }

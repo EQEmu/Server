@@ -255,7 +255,7 @@ public:
 	virtual uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual uint32 IsEliteMaterialItem(uint8 material_slot) const;
 	bool AffectedBySpellExcludingSlot(int slot, int effect);
-	virtual void Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill) = 0;
+	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill) = 0;
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillType attack_skill,
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false) = 0;
 	inline virtual void SetHP(int32 hp) { if (hp >= max_hp) cur_hp = max_hp; else cur_hp = hp;}

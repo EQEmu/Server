@@ -382,7 +382,7 @@ RULE_BOOL ( NPC, EnableNPCQuestJournal, false)
 RULE_INT ( NPC, LastFightingDelayMovingMin, 10000)
 RULE_INT ( NPC, LastFightingDelayMovingMax, 20000)
 RULE_BOOL ( NPC, SmartLastFightingDelayMoving, true)
-RULE_BOOL ( NPC, ReturnNonQuestNoDropItems, false)	// Returns NO DROP items on NPCs that don't have an EVENT_ITEM sub in their script
+RULE_BOOL ( NPC, ReturnNonQuestNoDropItems, false)	// Returns NO DROP items on NPCs that don't have an EVENT_TRADE sub in their script
 RULE_INT ( NPC, StartEnrageValue, 9) // % HP that an NPC will begin to enrage
 RULE_BOOL ( NPC, LiveLikeEnrage, false) // If set to true then only player controlled pets will enrage
 RULE_BOOL (NPC, UseMultiQuest, false) // If true, NPC will remember items handed to them for classic multiquest support.

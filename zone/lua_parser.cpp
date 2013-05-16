@@ -21,7 +21,7 @@
 
 const char *LuaEvents[_LargestEventID] = {
 	"event_say",
-	"event_item",
+	"event_trade",
 	"event_death",
 	"event_spawn",
 	"event_attack",
@@ -36,25 +36,25 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_hp",
 	"event_enter",
 	"event_exit",
-	"event_enterzone",
-	"event_clickdoor",
+	"event_enter_zone",
+	"event_click_door",
 	"event_loot",
 	"event_zone",
 	"event_level_up",
 	"event_killed_merit",
 	"event_cast_on",
-	"event_taskaccepted",
+	"event_task_accepted",
 	"event_task_stage_complete",
 	"event_task_update",
 	"event_task_complete",
 	"event_task_fail",
 	"event_aggro_say",
 	"event_player_pickup",
-	"event_popupresponse",
+	"event_popup_response",
 	"event_proximity_say",
 	"event_cast",
 	"event_scale_calc",
-	"event_item_enterzone",
+	"event_item_enter_zone",
 	"event_target_change",
 	"event_hate_list",
 	"event_spell_effect_client",
@@ -165,7 +165,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 			break;
 		}
 		
-		case EVENT_ITEM: {
+		case EVENT_TRADE: {
 			//client
 			Lua_Client l_client(reinterpret_cast<Client*>(init));
 			luabind::object l_client_o = luabind::object(L, l_client);
@@ -231,7 +231,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		case EVENT_SLAY:
 		case EVENT_ENTER:
 		case EVENT_EXIT:
-		case EVENT_TASKACCEPTED: {
+		case EVENT_TASK_ACCEPTED: {
 			//client
 			Lua_Client l_client(reinterpret_cast<Client*>(init));
 			luabind::object l_client_o = luabind::object(L, l_client);
@@ -251,7 +251,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 			break;
 		}
 		
-		case EVENT_POPUPRESPONSE:
+		case EVENT_POPUP_RESPONSE:
 		case EVENT_WAYPOINT_ARRIVE:
 		case EVENT_WAYPOINT_DEPART: {
 			//client
@@ -417,9 +417,9 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		}
 	
 		case EVENT_CLICK_OBJECT:
-		case EVENT_CLICKDOOR:
+		case EVENT_CLICK_DOOR:
 		case EVENT_SIGNAL:
-		case EVENT_POPUPRESPONSE:
+		case EVENT_POPUP_RESPONSE:
 		case EVENT_PLAYER_PICKUP: 
 		case EVENT_CAST: 
 		case EVENT_TASK_FAIL:
@@ -542,7 +542,7 @@ bool LuaParser::ItemHasQuestSub(ItemInst *itm, const char *subname) {
 
 	std::stringstream item_name;
 	const Item_Struct* item = itm->GetItem();
-	if(strcmp("EVENT_SCALE_CALC", subname) == 0 || strcmp("EVENT_ITEM_ENTERZONE", subname) == 0)
+	if(strcmp("EVENT_SCALE_CALC", subname) == 0 || strcmp("EVENT_ITEM_ENTER_ZONE", subname) == 0)
 	{
 		item_name << item->CharmFile;
 	}

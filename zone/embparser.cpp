@@ -34,7 +34,7 @@ extern Zone* zone;
 
 const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_SAY",
-	"EVENT_ITEM",
+	"EVENT_TRADE",
 	"EVENT_DEATH",
 	"EVENT_SPAWN",
 	"EVENT_ATTACK",
@@ -49,25 +49,25 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_HP",
 	"EVENT_ENTER",
 	"EVENT_EXIT",
-	"EVENT_ENTERZONE",
-	"EVENT_CLICKDOOR",
+	"EVENT_ENTER_ZONE",
+	"EVENT_CLICK_DOOR",
 	"EVENT_LOOT",
 	"EVENT_ZONE",
 	"EVENT_LEVEL_UP",
 	"EVENT_KILLED_MERIT",
 	"EVENT_CAST_ON",
-	"EVENT_TASKACCEPTED",
+	"EVENT_TASK_ACCEPTED",
 	"EVENT_TASK_STAGE_COMPLETE",
 	"EVENT_TASK_UPDATE",
 	"EVENT_TASK_COMPLETE",
 	"EVENT_TASK_FAIL",
 	"EVENT_AGGRO_SAY",
 	"EVENT_PLAYER_PICKUP",
-	"EVENT_POPUPRESPONSE",
+	"EVENT_POPUP_RESPONSE",
 	"EVENT_PROXIMITY_SAY",
 	"EVENT_CAST",
 	"EVENT_SCALE_CALC",
-	"EVENT_ITEM_ENTERZONE",
+	"EVENT_ITEM_ENTER_ZONE",
 	"EVENT_TARGET_CHANGE",
 	"EVENT_HATE_LIST",
 	"EVENT_SPELL_EFFECT_CLIENT",
@@ -295,7 +295,7 @@ bool PerlembParser::ItemHasQuestSub(ItemInst *itm, const char *subname) {
 
 	std::string item_name;
 	const Item_Struct* item = itm->GetItem();
-	if(strcmp("EVENT_SCALE_CALC", subname) == 0 || strcmp("EVENT_ITEM_ENTERZONE", subname) == 0)
+	if(strcmp("EVENT_SCALE_CALC", subname) == 0 || strcmp("EVENT_ITEM_ENTER_ZONE", subname) == 0)
 	{
 		item_name = item->CharmFile;
 	}
@@ -793,7 +793,7 @@ void PerlembParser::GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlaye
 		const Item_Struct* item = iteminst->GetItem();
 		package_name = "qst_item_";
 
-		if (event == EVENT_SCALE_CALC || event == EVENT_ITEM_ENTERZONE) {
+		if (event == EVENT_SCALE_CALC || event == EVENT_ITEM_ENTER_ZONE) {
 			package_name += item->CharmFile;
 		}
 		else if (event == EVENT_ITEM_CLICK || event == EVENT_ITEM_CLICK_CAST) {
@@ -1070,11 +1070,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_ITEM: {
-			if (npcmob->GetAppearance() != eaDead) {
-			  npcmob->FaceTarget(mob);
-			}
-
+		case EVENT_TRADE: {
 			//this is such a hack... why aren't these just set directly..
 			ExportVar(package_name.c_str(), "item1", GetVar("item1." + std::string(itoa(objid))).c_str());
 			ExportVar(package_name.c_str(), "item2", GetVar("item2." + std::string(itoa(objid))).c_str());
@@ -1140,7 +1136,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_CLICKDOOR: {
+		case EVENT_CLICK_DOOR: {
 			ExportVar(package_name.c_str(), "doorid", data);
 			ExportVar(package_name.c_str(), "version", zone->GetInstanceVersion());
 			break;
@@ -1165,7 +1161,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_TASKACCEPTED:{
+		case EVENT_TASK_ACCEPTED:{
 			ExportVar(package_name.c_str(), "task_id", data);
 			break;
 		}
@@ -1204,7 +1200,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_POPUPRESPONSE:{
+		case EVENT_POPUP_RESPONSE:{
 			ExportVar(package_name.c_str(), "popupid", data);
 			break;
 		}
@@ -1217,7 +1213,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 
 		case EVENT_SCALE_CALC:
-		case EVENT_ITEM_ENTERZONE: {
+		case EVENT_ITEM_ENTER_ZONE: {
 			ExportVar(package_name.c_str(), "itemid", objid);
 			ExportVar(package_name.c_str(), "itemname", iteminst->GetItem()->Name);
 			break;

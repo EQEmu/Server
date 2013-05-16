@@ -6199,8 +6199,9 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	}
 }
 
-void Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillType attack_skill) {
-	NPC::Death(killerMob, damage, spell_id, attack_skill);
+bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillType attack_skill) {
+	if(!NPC::Death(killerMob, damage, spell_id, attack_skill))
+		return false;
 
 	Save();
 
@@ -6299,6 +6300,8 @@ void Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillType attack_
 	}
 
 	entity_list.RemoveBot(this->GetID());
+
+	return true;
 }
 
 void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic) {

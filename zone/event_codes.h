@@ -3,7 +3,7 @@
 
 typedef enum {
 	EVENT_SAY = 0,
-	EVENT_ITEM,			//being given an item
+	EVENT_TRADE,		//being given an item or money
 	EVENT_DEATH,		//being killed
 	EVENT_SPAWN,		//triggered when we first spawn
 	EVENT_ATTACK,		//being attacked (resets after an interval of not being attacked)
@@ -18,25 +18,25 @@ typedef enum {
 	EVENT_HP,
 	EVENT_ENTER,		//PC entering your set proximity
 	EVENT_EXIT,			//PC leaving your set proximity
-	EVENT_ENTERZONE,		//PC only, you enter zone
-	EVENT_CLICKDOOR,		//pc only, you click a door
+	EVENT_ENTER_ZONE,		//PC only, you enter zone
+	EVENT_CLICK_DOOR,		//pc only, you click a door
 	EVENT_LOOT,			//pc only
 	EVENT_ZONE,			//pc only
 	EVENT_LEVEL_UP,		//pc only
 	EVENT_KILLED_MERIT, //killed by a PC or group, gave experience; will repeat several times for groups
 	EVENT_CAST_ON,		//pc casted a spell on npc
-	EVENT_TASKACCEPTED,	//pc accepted a task
+	EVENT_TASK_ACCEPTED,	//pc accepted a task
 	EVENT_TASK_STAGE_COMPLETE,
 	EVENT_TASK_UPDATE,
 	EVENT_TASK_COMPLETE,
 	EVENT_TASK_FAIL,
 	EVENT_AGGRO_SAY,
 	EVENT_PLAYER_PICKUP,
-	EVENT_POPUPRESPONSE,
+	EVENT_POPUP_RESPONSE,
 	EVENT_PROXIMITY_SAY,
 	EVENT_CAST,
 	EVENT_SCALE_CALC,
-	EVENT_ITEM_ENTERZONE,
+	EVENT_ITEM_ENTER_ZONE,
 	EVENT_TARGET_CHANGE,	//target selected, target changed, or target removed
 	EVENT_HATE_LIST,
 	EVENT_SPELL_EFFECT_CLIENT,

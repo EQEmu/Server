@@ -6303,7 +6303,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	char buf[20];
 	snprintf(buf, 19, "%u", cd->doorid);
 	buf[19] = '\0';
-	parse->EventPlayer(EVENT_CLICKDOOR, this, buf, 0);
+	parse->EventPlayer(EVENT_CLICK_DOOR, this, buf, 0);
 
 	currentdoor->HandleClick(this,0);
 	return;
@@ -9627,7 +9627,7 @@ void Client::CompleteConnect()
 
 	SendDisciplineTimers();
 
-	parse->EventPlayer(EVENT_ENTERZONE, this, "", 0);
+	parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 
 	//This sub event is for if a player logs in for the first time since entering world.
 	if(firstlogon == 1)
@@ -10670,11 +10670,11 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 	char buf[16];
 	sprintf(buf, "%d\0", prs->popupid);
 
-	parse->EventPlayer(EVENT_POPUPRESPONSE, this, buf, 0);
+	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
 
 	Mob* Target = GetTarget();
 	if(Target && Target->IsNPC()) {
-		parse->EventNPC(EVENT_POPUPRESPONSE, Target->CastToNPC(), this, buf, 0);
+		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
 	}
 }
 

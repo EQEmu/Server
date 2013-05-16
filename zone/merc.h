@@ -47,7 +47,7 @@ public:
 	virtual ~Merc();
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual void Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill);
+	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
 	virtual bool Attack(Mob* other, int Hand = SLOT_PRIMARY, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false);
 	virtual bool HasRaid() { return false; }

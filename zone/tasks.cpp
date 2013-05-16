@@ -3252,7 +3252,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 		return;
 	}
 	taskmanager->SaveClientState(c, this);
-	parse->EventNPC(EVENT_TASKACCEPTED, npc, c, buf, 0);
+	parse->EventNPC(EVENT_TASK_ACCEPTED, npc, c, buf, 0);
 	safe_delete_array(buf);
 
 }
