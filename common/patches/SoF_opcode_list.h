@@ -3,7 +3,7 @@
 // This File is not used in the build, but here as a reference for SoF.
 // This should be a complete list of all opcodes for SoF.
 // The list was generated from IDA using a script from the ShowEQ project.
-// This file can be removed at any time.  
+// This file can be removed at any time.
 // It is only a reference the project to upgrade the emulator to use SoF.
 
 0x10ff, OP_SenseTraps

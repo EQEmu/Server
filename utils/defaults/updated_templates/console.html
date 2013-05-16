@@ -8,38 +8,38 @@
     <!--
     var hidden_text = true;
     var timeout = null;
-    
+
     var idx = Math.floor((Math.random()*100000000));
     function GetStatusIdx() {
         return idx++;
     }
-    
+
     function StatusTic() {
         $.getJSON("data/console_data.html?idx="+GetStatusIdx(),
         function(data) {
             var elm = document.getElementById("console_output");
             var message = "";
             var cout = $('#console_output');
-            
+
             for(var i = 0; i < data.message_count; i++) {
                 message += data.messages[i].message;
                 message += "\n";
             }
-            
+
             var cur_value = elm.value;
             if(cur_value != message) {
                 elm.value = message;
                 cout.scrollTop(99999);
-            }            
+            }
         });
     }
-        
+
     function ConsoleKey(event) {
         if(hidden_text == true) {
             return;
         }
-    
-        var keycode = ('which' in event) ? event.which : event.keyCode;       
+
+        var keycode = ('which' in event) ? event.which : event.keyCode;
         if(keycode == 13) {
             var cinp = document.getElementById("console_input");
             var cinp_value = cinp.value;
@@ -47,7 +47,7 @@
             cinp.disabled = true;
             HideError();
             timeout = setTimeout("CommandTimeout()", 10000);
-            
+
             $.getJSON("actions/console_action.html?action=input&text="+cinp_value+"&idx="+GetStatusIdx(),
             function(data) {
                 cinp.value = "";
@@ -60,61 +60,61 @@
             });
         }
     }
-    
+
     function BodyKey(event) {
-        var keycode = ('which' in event) ? event.which : event.keyCode; 
+        var keycode = ('which' in event) ? event.which : event.keyCode;
          if (keycode == 27 && hidden_text == false) {
             HideInput();
         } else if(hidden_text == false) {
             return;
         }
-        
+
         if(keycode == 13) {
             ShowInput();
-        }    
+        }
     }
-    
+
     function ShowInput() {
         hidden_text = false;
         document.getElementById("console_input").value="";
         $("#console_input").fadeIn("slow");
         document.getElementById('console_input').focus();
     }
-    
+
     function HideInput() {
         hidden_text = true;
         document.getElementById("console_input").value="";
         $("#console_input").fadeOut("slow");
         HideError();
     }
-    
+
     function ShowError(msg) {
         $("#console_error").html("Error: " + msg);
         $("#console_error").show();
         $("#console_error").css("display", "block");
     }
-    
+
     function HideError() {
         $("#console_error").html("");
         $("#console_error").hide();
     }
-    
+
     function CommandTimeout() {
         var cinp = document.getElementById("console_input");
         cinp.disabled = false;
         alert("Timed out sending command to server.");
     }
-    
+
     $(document).ready(function() {
         StatusTic();
         setInterval("StatusTic()", 5000);
         var elm = document.getElementById("console_output");
         elm.value = "";
-        
+
         elm = document.getElementById("console_input");
         elm.value = "";
         elm.disabled = false;
-        
+
         $('#console_output').scrollTop(99999);
     });
     -->

@@ -231,7 +231,7 @@
 /// \param a     First expression to test.
 /// \param b     Second expression to test.
 /// \param delta Constant.
-/// \param msg   User message.	
+/// \param msg   User message.
 ///
 /// \see TEST_ASSERT_DELTA(a, b, delta)
 ///
@@ -245,7 +245,7 @@
 			if (!continue_after_failure()) return;					\
 		}															\
 	}
-	
+
 /// Verify an expression and expects an exception in return.
 /// An assertment is issued if the exception is not thrown.
 ///
@@ -343,7 +343,7 @@
 			if (!continue_after_failure()) return;					\
 		}															\
 	}
-	
+
 /// Verify an expression and expects no exception in return.
 /// An assertment is issued if any exception is thrown.
 ///

@@ -34,13 +34,13 @@ public:
 	//Set functions
 	int setEQTimeOfDay(TimeOfDay_Struct start_eq, time_t start_real);
 	void setEQTimeZone(int32 in_timezone) { timezone=in_timezone; }
-	
+
 	//Time math/logic functions
 	static bool IsTimeBefore(TimeOfDay_Struct *base, TimeOfDay_Struct *test);	//is test before base
 	static void AddMinutes(uint32 minutes, TimeOfDay_Struct *to);
-	
+
 	static void ToString(TimeOfDay_Struct *t, string &str);
-	
+
 	//Database functions
 	//bool loadDB(Database q);
 	//bool setDB(Database q);

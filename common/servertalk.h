@@ -22,8 +22,8 @@
 #define ServerOP_EmoteMessage		0x0009	// Worldfarts
 #define ServerOP_ClientList			0x000A	// Update worldserver's client list, for #whos
 #define ServerOP_Who				0x000B	// #who
-#define ServerOP_ZonePlayer			0x000C  // #zone, or #summon
-#define ServerOP_KickPlayer			0x000D  // #kick
+#define ServerOP_ZonePlayer			0x000C	// #zone, or #summon
+#define ServerOP_KickPlayer			0x000D	// #kick
 
 #define ServerOP_RefreshGuild		0x000E	// Notice to all zoneservers to refresh their guild cache for ID# in packet (ServerGuildRefresh_Struct)
 #define ServerOP_VoiceMacro		0x000F
@@ -39,8 +39,8 @@
 #define ServerOP_FlagUpdate			0x0018	// GM Flag updated for character, refresh the memory cache
 #define ServerOP_GMGoto				0x0019
 #define ServerOP_MultiLineMsg		0x001A
-#define ServerOP_Lock				0x001B  // For #lock/#unlock inside server
-#define ServerOP_Motd				0x001C  // For changing MoTD inside server.
+#define ServerOP_Lock				0x001B	// For #lock/#unlock inside server
+#define ServerOP_Motd				0x001C	// For changing MoTD inside server.
 #define ServerOP_Uptime				0x001D
 #define ServerOP_Petition			0x001E
 #define	ServerOP_KillPlayer			0x001F
@@ -59,7 +59,7 @@
 #define ServerOP_ItemStatus			0x002C
 #define ServerOP_OOCMute			0x002D
 #define ServerOP_Revoke				0x002E
-//#define 			0x002F
+//#define			0x002F
 #define ServerOP_GroupIDReq			0x0030
 #define ServerOP_GroupIDReply		0x0031
 #define ServerOP_GroupLeave			0x0032	// for disbanding out of zone folks
@@ -104,26 +104,26 @@
 #define ServerOP_GroupFollowAck		0x0111
 #define ServerOP_GroupCancelInvite	0x0112
 
-#define ServerOP_InstanceUpdateTime       0x014F
-#define ServerOP_AdventureRequest         0x0150 
-#define ServerOP_AdventureRequestAccept   0x0151
-#define ServerOP_AdventureRequestDeny     0x0152
-#define ServerOP_AdventureRequestCreate   0x0153 
-#define ServerOP_AdventureData            0x0154 
-#define ServerOP_AdventureDataClear       0x0155 
-#define ServerOP_AdventureCreateDeny      0x0156
-#define ServerOP_AdventureDataRequest     0x0157
-#define ServerOP_AdventureClickDoor       0x0158
-#define ServerOP_AdventureClickDoorReply  0x0159
-#define ServerOP_AdventureClickDoorError  0x015a
-#define ServerOP_AdventureLeave           0x015b
-#define ServerOP_AdventureLeaveReply      0x015c
-#define ServerOP_AdventureLeaveDeny       0x015d
-#define ServerOP_AdventureCountUpdate     0x015e
-#define ServerOP_AdventureZoneData        0x015f
-#define ServerOP_AdventureAssaCountUpdate 0x0160
-#define ServerOP_AdventureFinish          0x0161
-#define ServerOP_AdventureLeaderboard     0x0162
+#define ServerOP_InstanceUpdateTime			0x014F
+#define ServerOP_AdventureRequest			0x0150
+#define ServerOP_AdventureRequestAccept		0x0151
+#define ServerOP_AdventureRequestDeny		0x0152
+#define ServerOP_AdventureRequestCreate		0x0153
+#define ServerOP_AdventureData				0x0154
+#define ServerOP_AdventureDataClear			0x0155
+#define ServerOP_AdventureCreateDeny		0x0156
+#define ServerOP_AdventureDataRequest		0x0157
+#define ServerOP_AdventureClickDoor			0x0158
+#define ServerOP_AdventureClickDoorReply	0x0159
+#define ServerOP_AdventureClickDoorError	0x015a
+#define ServerOP_AdventureLeave				0x015b
+#define ServerOP_AdventureLeaveReply		0x015c
+#define ServerOP_AdventureLeaveDeny			0x015d
+#define ServerOP_AdventureCountUpdate		0x015e
+#define ServerOP_AdventureZoneData			0x015f
+#define ServerOP_AdventureAssaCountUpdate	0x0160
+#define ServerOP_AdventureFinish			0x0161
+#define ServerOP_AdventureLeaderboard		0x0162
 
 #define ServerOP_WhoAll				0x0210
 #define ServerOP_FriendsWho			0x0211
@@ -179,12 +179,12 @@
 #define ServerOP_CZMessagePlayer 0x4008
 #define ServerOP_ReloadWorld 0x4009
 
-#define ServerOP_QSPlayerLogTrades		   0x4010
-#define ServerOP_QSPlayerLogHandins		   0x4011
-#define ServerOP_QSPlayerLogNPCKills	   0x4012
-#define ServerOP_QSPlayerLogDeletes		   0x4013
-#define ServerOP_QSPlayerLogMoves		   0x4014
-#define ServerOP_QSMerchantLogTransactions 0x4015
+#define ServerOP_QSPlayerLogTrades			0x4010
+#define ServerOP_QSPlayerLogHandins			0x4011
+#define ServerOP_QSPlayerLogNPCKills		0x4012
+#define ServerOP_QSPlayerLogDeletes			0x4013
+#define ServerOP_QSPlayerLogMoves			0x4014
+#define ServerOP_QSMerchantLogTransactions	0x4015
 
 enum { QSG_LFGuild = 0 };
 enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_RequestPlayerInfo, QSG_LFGuild_UpdateGuildInfo, QSG_LFGuild_GuildMatches,
@@ -197,7 +197,7 @@ class ServerPacket
 {
 public:
 	~ServerPacket() { safe_delete_array(pBuffer); }
-    ServerPacket(uint16 in_opcode = 0, uint32 in_size = 0) {
+	ServerPacket(uint16 in_opcode = 0, uint32 in_size = 0) {
 		this->compressed = false;
 		size = in_size;
 		opcode = in_opcode;
@@ -267,7 +267,7 @@ public:
 	uint8 ReadUInt8() { uint8 value = *(uint8 *)(pBuffer + _rpos); _rpos += sizeof(uint8); return value; }
 	uint32 ReadUInt32() { uint32 value = *(uint32 *)(pBuffer + _rpos); _rpos += sizeof(uint32); return value; }
 	void ReadString(char *str) { uint32 len = static_cast<uint32>(strlen((char *)(pBuffer + _rpos))) + 1; memcpy(str, pBuffer + _rpos, len); _rpos += len; }
-	
+
 	uint32 GetWritePosition() { return _wpos; }
 	uint32 GetReadPosition() { return _rpos; }
 	void SetWritePosition(uint32 Newwpos) { _wpos = Newwpos; }
@@ -336,15 +336,15 @@ struct ServerGroupFollowAck_Struct {
 
 
 struct ServerChannelMessage_Struct {
-	char  deliverto[64];
-	char  to[64];
-	char  from[64];
+	char deliverto[64];
+	char to[64];
+	char from[64];
 	uint8 fromadmin;
-	bool  noreply;
+	bool noreply;
 	uint16 chan_num;
 	uint32 guilddbid;
-	uint16  language;
-	char  message[0];
+	uint16 language;
+	char message[0];
 };
 
 struct ServerEmoteMessage_Struct {
@@ -407,9 +407,9 @@ struct ServerZonePlayer_Struct {
 	char	name[64];
 	char	zone[25];
 	uint32	instance_id;
-    float	x_pos;
-    float	y_pos;
-    float	z_pos;
+	float	x_pos;
+	float	y_pos;
+	float	z_pos;
 };
 
 struct RezzPlayer_Struct {
@@ -500,18 +500,18 @@ struct ServerLSZoneSleep_Struct {
 
 struct ServerLSPlayerJoinWorld_Struct {
 	uint32 lsaccount_id;
- 	char key[30];
+	char key[30];
 };
 
 struct ServerLSPlayerLeftWorld_Struct {
 	uint32 lsaccount_id;
- 	char key[30];
+	char key[30];
 };
 
 struct ServerLSPlayerZoneChange_Struct {
 	uint32 lsaccount_id;
 	uint32 from; // 0 = world
-	uint32 to;  // 0 = world
+	uint32 to; // 0 = world
 };
 struct ServerLSClientAuth {
 	uint32	lsaccount_id;	// ID# in login server's db
@@ -567,8 +567,8 @@ struct ServerUptime_Struct {
 };
 
 struct ServerPetitionUpdate_Struct {
-	uint32 petid;  // Petition Number
-	uint8  status; // 0x00 = ReRead DB -- 0x01 = Checkout -- More?  Dunno... lol
+	uint32 petid; // Petition Number
+	uint8 status; // 0x00 = ReRead DB -- 0x01 = Checkout -- More? Dunno... lol
 };
 
 struct ServerWhoAll_Struct {
@@ -584,9 +584,9 @@ struct ServerWhoAll_Struct {
 };
 
 struct ServerFriendsWho_Struct {
-	uint32 FromID; 
-	char  FromName[64];
-	char  FriendsString[1];
+	uint32 FromID;
+	char FromName[64];
+	char FriendsString[1];
 };
 
 struct ServerKillPlayer_Struct {
@@ -640,8 +640,8 @@ struct ServerSyncWorldList_Struct {
 	uint32	adminid;
 	uint8	greenname;
 	uint8	showdown;
-	int32  num_players;
-	int32  num_zones;
+	int32	num_players;
+	int32	num_zones;
 	bool	placeholder;
 };
 
@@ -708,8 +708,8 @@ struct ServerGroupChannelMessage_Struct {
 	uint32 zoneid;
 	uint16 instanceid;
 	uint32 groupid;
-    char  from[64];
-	char  message[0];
+	char from[64];
+	char message[0];
 };
 
 struct ServerDisbandGroup_Struct {
@@ -838,7 +838,7 @@ struct ServerRaidGeneralAction_Struct {
 struct ServerRaidGroupAction_Struct { //add / remove depends on opcode.
 	char membername[64]; //member who's adding / leaving
 	uint32 gid; //group id to send to.
-	uint32 rid; //raid id to send to. 
+	uint32 rid; //raid id to send to.
 };
 
 struct ServerRaidMessage_Struct {
@@ -1070,10 +1070,10 @@ struct ServerCameraShake_Struct
 };
 
 struct ServerMailMessageHeader_Struct {
-    char from[64];
-    char to[64];
-    char subject[128];
-    char message[0];
+	char from[64];
+	char to[64];
+	char subject[128];
+	char message[0];
 };
 
 struct Server_Speech_Struct {
@@ -1111,7 +1111,7 @@ struct QSTradeItems_Struct {
 
 struct QSPlayerLogTrade_Struct {
 	uint32				char1_id;
-	MoneyUpdate_Struct  char1_money;
+	MoneyUpdate_Struct	char1_money;
 	uint16				char1_count;
 	uint32				char2_id;
 	MoneyUpdate_Struct	char2_money;
@@ -1132,20 +1132,20 @@ struct QSHandinItems_Struct {
 };
 
 struct QSPlayerLogHandin_Struct {
-	uint32				 quest_id;
-	uint32				 char_id;
-	MoneyUpdate_Struct	 char_money;
-	uint16				 char_count;
-	uint32				 npc_id;
-	MoneyUpdate_Struct	 npc_money;
-	uint16				 npc_count;
+	uint32				quest_id;
+	uint32				char_id;
+	MoneyUpdate_Struct	char_money;
+	uint16				char_count;
+	uint32				npc_id;
+	MoneyUpdate_Struct	npc_money;
+	uint16				npc_count;
 	QSHandinItems_Struct items[0];
 };
 
 struct QSPlayerLogNPCKillSub_Struct{
 	uint32 NPCID;
 	uint32 ZoneID;
-    uint32 Type;
+	uint32 Type;
 };
 
 struct QSPlayerLogNPCKillsPlayers_Struct{
@@ -1169,10 +1169,10 @@ struct QSDeleteItems_Struct {
 };
 
 struct QSPlayerLogDelete_Struct {
-	uint32				 char_id;
-	uint16				 stack_size; // '0' indicates full stack or non-stackable item move
-	uint16				 char_count;
-	QSDeleteItems_Struct items[0];
+	uint32					char_id;
+	uint16					stack_size; // '0' indicates full stack or non-stackable item move
+	uint16					char_count;
+	QSDeleteItems_Struct	items[0];
 };
 
 struct QSMoveItems_Struct {
@@ -1188,12 +1188,12 @@ struct QSMoveItems_Struct {
 };
 
 struct QSPlayerLogMove_Struct {
-	uint32			   char_id;
-	uint16			   from_slot;
-	uint16			   to_slot;
-	uint16			   stack_size; // '0' indicates full stack or non-stackable item move
-	uint16			   char_count;
-	bool			   postaction;
+	uint32			char_id;
+	uint16			from_slot;
+	uint16			to_slot;
+	uint16			stack_size; // '0' indicates full stack or non-stackable item move
+	uint16			char_count;
+	bool			postaction;
 	QSMoveItems_Struct items[0];
 };
 
@@ -1209,18 +1209,18 @@ struct QSTransactionItems_Struct {
 };
 
 struct QSMerchantLogTransaction_Struct {
-	uint32					  zone_id;
-	uint32					  merchant_id;
-	MoneyUpdate_Struct		  merchant_money;
-	uint16					  merchant_count;
-	uint32					  char_id;
-	MoneyUpdate_Struct		  char_money;
-	uint16					  char_count;
+	uint32					zone_id;
+	uint32					merchant_id;
+	MoneyUpdate_Struct		merchant_money;
+	uint16					merchant_count;
+	uint32					char_id;
+	MoneyUpdate_Struct		char_money;
+	uint16					char_count;
 	QSTransactionItems_Struct items[0];
 };
 
 struct CZMessagePlayer_Struct {
-	uint32   Type;
+	uint32	Type;
 	char	CharName[64];
 	char	Message[512];
 };

@@ -34,11 +34,11 @@ public:
 	void	SetOnline(int8 iOnline = CLE_Status_Online);
 	void	SetChar(uint32 iCharID, const char* iCharName);
 	inline int8		Online()		{ return pOnline; }
-	inline const uint32	GetID()	 const	{ return id; }
-	inline const uint32	GetIP()	 const	{ return pIP; }
+	inline const uint32	GetID() const	{ return id; }
+	inline const uint32	GetIP() const	{ return pIP; }
 	inline void			SetIP(const uint32& iIP) { pIP = iIP; }
 	inline void			KeepAlive()		{ stale = 0; }
-	inline uint8			GetStaleCounter()  const { return stale; }
+	inline uint8			GetStaleCounter() const { return stale; }
 	void	LeavingZone(ZoneServer* iZS = 0, int8 iOnline = CLE_Status_Offline);
 	void	Camp(ZoneServer* iZS = 0);
 
@@ -122,5 +122,5 @@ private:
 	char	pLFGComments[64];
 };
 
-
 #endif /*CLIENTENTRY_H_*/
+

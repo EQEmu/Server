@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include <fstream>
@@ -69,58 +69,58 @@ EQTime::~EQTime()
 
 int EQTime::getEQTimeOfDay( time_t timeConvert, struct TimeOfDay_Struct *eqTimeOfDay )
 {
-   /* check to see if we have a reference time to go by. */
-   if( eqTime.start_realtime == 0 )
-      return 0;
+	/* check to see if we have a reference time to go by. */
+	if( eqTime.start_realtime == 0 )
+		return 0;
 
-   unsigned long diff = timeConvert - eqTime.start_realtime;
+	unsigned long diff = timeConvert - eqTime.start_realtime;
 
-   /* There are 3 seconds per 1 EQ Minute */
-   diff /= 3;
+	/* There are 3 seconds per 1 EQ Minute */
+	diff /= 3;
 
-   /* Start off timezone offset */
+	/* Start off timezone offset */
 
-   int32 ntz = timezone;
+	int32 ntz = timezone;
 
-   /* The minutes range from 0 - 59 */
-   diff += eqTime.start_eqtime.minute + (ntz%60);
-   eqTimeOfDay->minute = diff % 60;
-   diff /= 60;
-   ntz /= 60;
+	/* The minutes range from 0 - 59 */
+	diff += eqTime.start_eqtime.minute + (ntz%60);
+	eqTimeOfDay->minute = diff % 60;
+	diff /= 60;
+	ntz /= 60;
 
-   // The hours range from 1-24
-   // 1 = 1am
-   // 2 = 2am
-   // ...
-   // 23 = 11 pm
-   // 24 = 12 am
-   //
-   // Modify it so that it works from
-   // 0-23 for our calculations
-   diff += ( eqTime.start_eqtime.hour - 1) + (ntz%24);
-   eqTimeOfDay->hour = (diff%24) + 1;
-   diff /= 24;
-   ntz /= 24;
+	// The hours range from 1-24
+	// 1 = 1am
+	// 2 = 2am
+	// ...
+	// 23 = 11 pm
+	// 24 = 12 am
+	//
+	// Modify it so that it works from
+	// 0-23 for our calculations
+	diff += ( eqTime.start_eqtime.hour - 1) + (ntz%24);
+	eqTimeOfDay->hour = (diff%24) + 1;
+	diff /= 24;
+	ntz /= 24;
 
-   // The days range from 1-28
-   // Modify it so that it works from
-   // 0-27 for our calculations
-   diff += ( eqTime.start_eqtime.day - 1 ) + (ntz%28);
-   eqTimeOfDay->day = (diff%28) + 1;
-   diff /= 28;
-   ntz /= 28;
+	// The days range from 1-28
+	// Modify it so that it works from
+	// 0-27 for our calculations
+	diff += ( eqTime.start_eqtime.day - 1 ) + (ntz%28);
+	eqTimeOfDay->day = (diff%28) + 1;
+	diff /= 28;
+	ntz /= 28;
 
-   // The months range from 1-12
-   // Modify it so that it works from
-   // 0-11 for our calculations
-   diff += ( eqTime.start_eqtime.month - 1 ) + (ntz%12);
-   eqTimeOfDay->month = (diff%12) + 1;
-   diff /= 12;
-   ntz /= 12;
+	// The months range from 1-12
+	// Modify it so that it works from
+	// 0-11 for our calculations
+	diff += ( eqTime.start_eqtime.month - 1 ) + (ntz%12);
+	eqTimeOfDay->month = (diff%12) + 1;
+	diff /= 12;
+	ntz /= 12;
 
-   eqTimeOfDay->year = eqTime.start_eqtime.year + diff + ntz;
+	eqTimeOfDay->year = eqTime.start_eqtime.year + diff + ntz;
 
-	 return 1;
+	return 1;
 }
 
 //setEQTimeOfDay
@@ -145,7 +145,7 @@ bool EQTime::saveFile(const char *filename)
 		return false;
 	}
 	//Enable for debugging
-	//cout << "SAVE: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl; 
+	//cout << "SAVE: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl;
 	of << EQT_VERSION << endl;
 	of << (long)eqTime.start_eqtime.day << endl;
 	of << (long)eqTime.start_eqtime.hour << endl;
@@ -172,7 +172,7 @@ bool EQTime::loadFile(const char *filename)
 	in.ignore(80, '\n');
 	if(version != EQT_VERSION)
 	{
-		LogFile->write(EQEMuLog::Error, "'%s' is NOT a valid EQTime file.  File version is %i, EQTime version is %i", filename, version, EQT_VERSION);
+		LogFile->write(EQEMuLog::Error, "'%s' is NOT a valid EQTime file. File version is %i, EQTime version is %i", filename, version, EQT_VERSION);
 		return false;
 	}
 	//in >> eqTime.start_eqtime.day;
@@ -182,7 +182,7 @@ bool EQTime::loadFile(const char *filename)
 	//in >> eqTime.start_eqtime.hour;
 	in >> in_data;
 	eqTime.start_eqtime.hour = in_data;
-	in.ignore(80, '\n');	
+	in.ignore(80, '\n');
 	//in >> eqTime.start_eqtime.minute;
 	in >> in_data;
 	in.ignore(80, '\n');
@@ -195,7 +195,7 @@ bool EQTime::loadFile(const char *filename)
 	in.ignore(80, '\n');
 	in >> eqTime.start_realtime;
 	//Enable for debugging...
-	//cout << "LOAD: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl; 
+	//cout << "LOAD: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl;
 	in.close();
 	return true;
 }
@@ -228,7 +228,7 @@ bool EQTime::IsTimeBefore(TimeOfDay_Struct *base, TimeOfDay_Struct *test) {
 
 void EQTime::AddMinutes(uint32 minutes, TimeOfDay_Struct *to) {
 	uint32 cur;
-	
+
 	//minutes start at 0, everything else starts at 1
 	cur = to->minute;
 	cur += minutes;
@@ -272,9 +272,4 @@ void EQTime::ToString(TimeOfDay_Struct *t, string &str) {
 	buf[127] = '\0';
 	str = buf;
 }
-
-
-
-
-
 

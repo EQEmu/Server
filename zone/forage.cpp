@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -86,32 +86,32 @@ CREATE TABLE fishing (
 // This allows EqEmu to have zone specific foraging - BoB
 uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-	
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
 	uint8 index = 0;
 	uint32 item[FORAGE_ITEM_LIMIT];
 	uint32 chance[FORAGE_ITEM_LIMIT];
 	uint32 ret;
-	
-	for (int c=0; c < FORAGE_ITEM_LIMIT; c++) 	{
+
+	for (int c=0; c < FORAGE_ITEM_LIMIT; c++) {
 		item[c] = 0;
 	}
-	
+
 	uint32 chancepool = 0;
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT itemid,chance FROM forage WHERE zoneid= '%i' and level <= '%i' LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT), errbuf, &result))
 	{
 		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result)) && (index < FORAGE_ITEM_LIMIT)) 	{
+		while ((row = mysql_fetch_row(result)) && (index < FORAGE_ITEM_LIMIT)) {
 			item[index] = atoi(row[0]);
 			chance[index] = atoi(row[1])+chancepool;
 LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[index], chance[index]);
 			chancepool = chance[index];
 			index++;
 		}
-		
+
 		mysql_free_result(result);
 	}
 	else {
@@ -119,14 +119,14 @@ LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[ind
 		safe_delete_array(query);
 		return 0;
 	}
-	
+
 	if(chancepool == 0 || index < 1)
 		return(0);
-	
+
 	if(index == 1) {
 		return(item[0]);
 	}
-	
+
 	ret = 0;
 
 	uint32 rindex = MakeRandomInt(1, chancepool);
@@ -137,17 +137,17 @@ LogFile->write(EQEMuLog::Error, "Possible Forage: %d with a %d chance", item[ind
 			break;
 		}
 	}
-	
+
 	return ret;
 }
 
 uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-	
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
 	uint8 index = 0;
 	uint32 item[50];
 	uint32 chance[50];
@@ -155,25 +155,25 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 	uint32 npc_chances[50];
 	uint32 chancepool = 0;
 	uint32 ret = 0;
-	
-	for (int c=0; c<50; c++) 	{
+
+	for (int c=0; c<50; c++) {
 		item[c]=0;
 		chance[c]=0;
 	}
-	
+
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT itemid,chance,npc_id,npc_chance FROM fishing WHERE (zoneid= '%i' || zoneid = 0) and skill_level <= '%i'",ZoneID, skill ), errbuf, &result))
 	{
 		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result))&&(index<50)) 	{
+		while ((row = mysql_fetch_row(result))&&(index<50)) {
 			item[index] = atoi(row[0]);
 			chance[index] = atoi(row[1])+chancepool;
 			chancepool = chance[index];
-			
+
 			npc_ids[index] = atoi(row[2]);
 			npc_chances[index] = atoi(row[3]);
 			index++;
 		}
-		
+
 		mysql_free_result(result);
 	}
 	else {
@@ -181,7 +181,7 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 		safe_delete_array(query);
 		return 0;
 	}
-	
+
 	npc_id = 0;
 	npc_chance = 0;
 	if (index>0) {
@@ -199,7 +199,7 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 	} else {
 		ret = 0;
 	}
-	
+
 	return ret;
 }
 
@@ -234,10 +234,10 @@ bool Client::CanFish() {
 
 		HeadingDegrees = (int) ((GetHeading()*360)/256);
 		HeadingDegrees = HeadingDegrees % 360;
-		
+
 		RodX = x_pos + RodLength * sin(HeadingDegrees * M_PI/180.0f);
 		RodY = y_pos + RodLength * cos(HeadingDegrees * M_PI/180.0f);
-		
+
 		// Do BestZ to find where the line hanging from the rod intersects the water (if it is water).
 		// and go 1 unit into the water.
 		VERTEX dest;
@@ -286,16 +286,16 @@ void Client::GoFish()
 		13019, // Fresh Fish
 		13076, // Fish Scales
 		13076, // Fish Scales
-        7007, // Rusty Dagger
 		7007, // Rusty Dagger
-        7007 // Rusty Dagger
-		
+		7007, // Rusty Dagger
+		7007 // Rusty Dagger
+
 	};
-	
+
 	//success formula is not researched at all
-	
+
 	int fishing_skill = GetSkill(FISHING);	//will take into account skill bonuses on pole & bait
-	
+
 	//make sure we still have a fishing pole on:
 	int32 bslot = m_inv.HasItemByUse(ItemTypeFishingBait, 1, invWhereWorn|invWherePersonal);
 	const ItemInst* Bait = nullptr;
@@ -306,21 +306,21 @@ void Client::GoFish()
 	if(bslot >= IDX_INV && Bait->GetItem()->SkillModType == FISHING) {
 		fishing_skill += Bait->GetItem()->SkillModValue;
 	}
-	
+
 	if (fishing_skill > 100)
 	{
 		fishing_skill = 100+((fishing_skill-100)/2);
 	}
-	
+
 	if (MakeRandomInt(0,175) < fishing_skill) {
 		uint32 food_id = 0;
-		
+
 		//25% chance to fish an item.
-        if (MakeRandomInt(0, 399) <= fishing_skill ) {
+		if (MakeRandomInt(0, 399) <= fishing_skill ) {
 			uint32 npc_id = 0;
 			uint8 npc_chance = 0;
 			food_id = database.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
-			
+
 			//check for add NPC
 			if(npc_chance > 0 && npc_id) {
 				if(npc_chance < MakeRandomInt(0, 99)) {
@@ -328,31 +328,31 @@ void Client::GoFish()
 					if(tmp != nullptr) {
 						NPC* npc = new NPC(tmp, nullptr, GetX()+3, GetY(), GetZ(), GetHeading(), FlyMode3);
 						npc->AddLootTable();
-						
+
 						npc->AddToHateList(this, 1, 0, false);	//no help yelling
-						
+
 						entity_list.AddNPC(npc);
-						
+
 						Message(MT_Emote, "You fish up a little more than you bargained for...");
 					}
 				}
 			}
 		}
-		
+
 		//consume bait, should we always consume bait on success?
 		DeleteItemInInventory(bslot, 1, true);	//do we need client update?
-		
+
 		if(food_id == 0) {
 			int index = MakeRandomInt(0, MAX_COMMON_FISH_IDS-1);
 			food_id = common_fish_ids[index];
 		}
-		
+
 		const Item_Struct* food_item = database.GetItem(food_id);
-		
+
 		Message_StringID(MT_Skills, FISHING_SUCCESS);
 		const ItemInst* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
-			if(CheckLoreConflict(inst->GetItem())) 
+			if(CheckLoreConflict(inst->GetItem()))
 			{
 				this->Message_StringID(0,DUP_LORE);
 			}
@@ -366,7 +366,7 @@ void Client::GoFish()
 			safe_delete(inst);
 		}
 
-        parse->EventPlayer(EVENT_FISH_SUCCESS, this, "",  inst != nullptr ? inst->GetItem()->ID : 0);
+		parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst != nullptr ? inst->GetItem()->ID : 0);
 	}
 	else
 	{
@@ -382,9 +382,9 @@ void Client::GoFish()
 				Message_StringID(MT_Skills, FISHING_FAILED);	//You didn't catch anything.
 		}
 
-        parse->EventPlayer(EVENT_FISH_FAILURE, this, "",  0);
+		parse->EventPlayer(EVENT_FISH_FAILURE, this, "", 0);
 	}
-	
+
 	//chance to break fishing pole...
 	//this is potentially exploitable in that they can fish
 	//and then swap out items in primary slot... too lazy to fix right now
@@ -401,9 +401,9 @@ void Client::GoFish()
 }
 
 void Client::ForageItem(bool guarantee) {
-	
+
 	int skill_level = GetSkill(FORAGE);
-	
+
 	//be wary of the string ids in switch below when changing this.
 	uint32 common_food_ids[MAX_COMMON_FOOD_IDS] = {
 		13046, // Fruit
@@ -415,23 +415,23 @@ void Client::ForageItem(bool guarantee) {
 		14905, // mushroom
 		13106 // Fishing Grubs
 	};
-	
+
 	// these may need to be fine tuned, I am just guessing here
 	if (guarantee || MakeRandomInt(0,199) < skill_level) {
 		uint32 foragedfood = 0;
 		uint32 stringid = FORAGE_NOEAT;
-		
+
 		if (MakeRandomInt(0,99) <= 25) {
 			foragedfood = database.GetZoneForage(m_pp.zone_id, skill_level);
 		}
-		
+
 		//not an else in case theres no DB food
 		if(foragedfood == 0) {
 			uint8 index = 0;
 			index = MakeRandomInt(0, MAX_COMMON_FOOD_IDS-1);
 			foragedfood = common_food_ids[index];
 		}
-		
+
 		const Item_Struct* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
@@ -439,17 +439,17 @@ void Client::ForageItem(bool guarantee) {
 			return;
 		}
 
-		if(foragedfood == 13106) 
+		if(foragedfood == 13106)
 			stringid = FORAGE_GRUBS;
 		else
 			switch(food_item->ItemType) {
 
-				case ItemTypeFood: 
+				case ItemTypeFood:
 					stringid = FORAGE_FOOD;
 					break;
-					
-				case ItemTypeDrink: 
-					if(strstr(food_item->Name, "ater")) 
+
+				case ItemTypeDrink:
+					if(strstr(food_item->Name, "ater"))
 						stringid = FORAGE_WATER;
 					else
 						stringid = FORAGE_DRINK;
@@ -457,12 +457,12 @@ void Client::ForageItem(bool guarantee) {
 				default:
 					break;
 				}
-		
+
 		Message_StringID(MT_Skills, stringid);
 		const ItemInst* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
-			if(CheckLoreConflict(inst->GetItem())) 
+			if(CheckLoreConflict(inst->GetItem()))
 			{
 				this->Message_StringID(0,DUP_LORE);
 			}
@@ -474,20 +474,21 @@ void Client::ForageItem(bool guarantee) {
 			}
 			safe_delete(inst);
 		}
-		
-        parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "",  inst != nullptr ? inst->GetItem()->ID : 0);
-        
-        int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
-        if(!guarantee && MakeRandomInt(0,99) < ChanceSecondForage) {
-            this->Message_StringID(MT_Skills, FORAGE_MASTERY);
-            this->ForageItem(true);
-        }
+
+		parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst != nullptr ? inst->GetItem()->ID : 0);
+
+		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
+		if(!guarantee && MakeRandomInt(0,99) < ChanceSecondForage) {
+			this->Message_StringID(MT_Skills, FORAGE_MASTERY);
+			this->ForageItem(true);
+		}
 
 	} else {
 		Message_StringID(MT_Skills, FORAGE_FAILED);
-        parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
-    }
-	
+		parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
+	}
+
 	CheckIncreaseSkill(FORAGE, nullptr, 5);
-	
+
 }
+

@@ -1,7 +1,7 @@
 ﻿//
 // Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net). Distributed under GPL version 2.
 //
-// 
+//
 
 using System;
 using System.IO;
@@ -124,8 +124,8 @@ namespace EQExtractor2.OpCodes
 
         public void ResetCounts()
         {
-            foreach (OpCode oc in OpCodeList)            
-                oc.Count = 0;                    
+            foreach (OpCode oc in OpCodeList)
+                oc.Count = 0;
         }
 
         public void RegisterExplorer(string Name, ExplorerMethod Explorer)
@@ -137,7 +137,7 @@ namespace EQExtractor2.OpCodes
                     oc.Explorer = Explorer;
                     return;
                 }
-            }            
+            }
         }
 
         public void UnRegisterExplorer(string Name)

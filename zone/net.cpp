@@ -1,20 +1,20 @@
 #define DONT_SHARED_OPCODES
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/features.h"
@@ -40,7 +40,7 @@ using namespace std;
 	#define vsnprintf	_vsnprintf
 #endif
 #define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
+#define strcasecmp	_stricmp
 #endif
 
 volatile bool RunLoops = true;
@@ -100,7 +100,7 @@ DBAsync *dbasync = nullptr;
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 
-const SPDat_Spell_Struct* spells; 
+const SPDat_Spell_Struct* spells;
 void LoadSpells(EQEmu::MemoryMappedFile **mmf);
 int32 SPDAT_RECORDS = -1;
 
@@ -115,11 +115,11 @@ void Shutdown();
 extern void MapOpcodes();
 
 int main(int argc, char** argv) {
-    RegisterExecutablePlatform(ExePlatformZone);
-    set_exception_handler();
+	RegisterExecutablePlatform(ExePlatformZone);
+	set_exception_handler();
 
 	const char *zone_name;
-	
+
 	if(argc == 3) {
 		worldserver.SetLauncherName(argv[2]);
 		worldserver.SetLaunchedName(argv[1]);
@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
 		_log(ZONE__INIT, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
 	else
 		_log(ZONE__INIT, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
-	
+
 	worldserver.SetPassword(Config->SharedKey.c_str());
 
 	_log(ZONE__INIT, "Connecting to MySQL...");
@@ -179,12 +179,12 @@ int main(int argc, char** argv) {
 #ifdef _EQDEBUG
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-	
+
 	_log(ZONE__INIT, "CURRENT_VERSION: %s", CURRENT_VERSION);
-	
+
 	/*
-	 * Setup nice signal handlers
-	 */
+	* Setup nice signal handlers
+	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(ZONE__INIT_ERR, "Could not set signal handler");
 		return 0;
@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
 		_log(ZONE__INIT, "Warning: Unable to read %s", log_ini_file);
 	else
 		_log(ZONE__INIT, "Log settings loaded from %s", log_ini_file);
-	
+
 	_log(ZONE__INIT, "Mapping Incoming Opcodes");
 	MapOpcodes();
 	_log(ZONE__INIT, "Loading Variables");
@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 	_log(ZONE__INIT, "Loading items");
 	if (!database.LoadItems()) {
 		_log(ZONE__INIT_ERR, "Loading items FAILED!");
-		_log(ZONE__INIT, "Failed.  But ignoring error and going on...");
+		_log(ZONE__INIT, "Failed. But ignoring error and going on...");
 	}
 
 	_log(ZONE__INIT, "Loading npc faction lists");
@@ -229,16 +229,16 @@ int main(int argc, char** argv) {
 		_log(ZONE__INIT_ERR, "Loading loot FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 0;
-    }
+	}
 	_log(ZONE__INIT, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
 		_log(ZONE__INIT_ERR, "Loading skill caps FAILED!");
 		CheckEQEMuErrorAndPause();
 		return 0;
 	}
-	
-    _log(ZONE__INIT, "Loading spells");
-    EQEmu::MemoryMappedFile *mmf = nullptr;
+
+	_log(ZONE__INIT, "Loading spells");
+	EQEmu::MemoryMappedFile *mmf = nullptr;
 	LoadSpells(&mmf);
 
 	_log(ZONE__INIT, "Loading guilds");
@@ -283,19 +283,19 @@ int main(int argc, char** argv) {
 		taskmanager->LoadTasks();
 	}
 
-    parse = new QuestParserCollection();
+	parse = new QuestParserCollection();
 #ifdef EMBPERL
 	PerlXSParser *pxs = new PerlXSParser();
 	parse->RegisterQuestInterface(pxs, "pl");
 #endif
 	Parser *ps = new Parser();
-    //parse->RegisterQuestInterface(ps, "qst");
+	//parse->RegisterQuestInterface(ps, "qst");
 
 
 	//now we have our parser, load the quests
 	_log(ZONE__INIT, "Loading quests");
 	parse->ReloadQuests();
-	
+
 
 #ifdef CLIENT_LOGS
 	LogFile->SetAllCallbacks(ClientLogs::EQEmuIO_buf);
@@ -305,7 +305,7 @@ int main(int argc, char** argv) {
 	if (!worldserver.Connect()) {
 		_log(ZONE__INIT_ERR, "worldserver.Connect() FAILED!");
 	}
-	
+
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
 #ifdef EQPROFILE
 #ifdef PROFILE_DUMP_TIME
@@ -319,15 +319,15 @@ int main(int argc, char** argv) {
 		_log(ZONE__INIT_ERR, "Zone bootup FAILED!");
 		zone = 0;
 	}
-	
+
 	//register all the patches we have avaliable with the stream identifier.
 	EQStreamIdentifier stream_identifier;
 	RegisterAllPatches(stream_identifier);
-	
+
 #ifndef WIN32
 	_log(COMMON__THREADS, "Main thread running with thread id %d", pthread_self());
 #endif
-	
+
 	Timer quest_timers(100);
 	UpdateWindowTitle();
 	bool worldwasconnected = worldserver.Connected();
@@ -338,10 +338,10 @@ int main(int argc, char** argv) {
 	while(RunLoops) {
 		{	//profiler block to omit the sleep from times
 		_ZP(net_main);
-		
+
 		//Advance the timer to our current point in time
 		Timer::SetCurrentTime();
-		
+
 		//process stuff from world
 		worldserver.Process();
 
@@ -354,7 +354,7 @@ int main(int argc, char** argv) {
 				worldwasconnected = false;
 			}
 		}
-		
+
 		//check the factory for any new incoming streams.
 		while ((eqss = eqsf.Pop())) {
 			//pull the stream out of the factory and give it to the stream identifier
@@ -365,10 +365,10 @@ int main(int argc, char** argv) {
 			_log(WORLD__CLIENT, "New connection from %s:%d", inet_ntoa(in),ntohs(eqss->GetRemotePort()));
 			stream_identifier.AddStream(eqss);	//takes the stream
 		}
-		
+
 		//give the stream identifier a chance to do its work....
 		stream_identifier.Process();
-		
+
 		//check the stream identifier for any now-identified streams
 		while((eqsi = stream_identifier.PopIdentified())) {
 			//now that we know what patch they are running, start up their client object
@@ -378,11 +378,11 @@ int main(int argc, char** argv) {
 			Client* client = new Client(eqsi);
 			entity_list.AddClient(client);
 		}
-		
-		
+
+
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
-		
+
 		if (worldserver.Connected()) {
 			worldwasconnected = true;
 		}
@@ -476,11 +476,11 @@ int main(int argc, char** argv) {
 
 	safe_delete(parse);
 #ifdef EMBPERL
- 	safe_delete(pxs);
+	safe_delete(pxs);
 #endif
 	safe_delete(ps);
 	safe_delete(mmf);
-	
+
 	if (zone != 0)
 		Zone::Shutdown(true);
 	//Fix for Linux world server problem.
@@ -490,7 +490,7 @@ int main(int argc, char** argv) {
 	dbasync->StopThread();
 	safe_delete(taskmanager);
 	command_deinit();
-	
+
 	CheckEQEMuErrorAndPause();
 	_log(ZONE__INIT, "Proper zone shutdown complete.");
 	return 0;
@@ -514,36 +514,36 @@ void Shutdown()
 
 uint32 NetConnection::GetIP()
 {
-	char     name[255+1];
-	size_t   len = 0;
+	char name[255+1];
+	size_t len = 0;
 	hostent* host = 0;
-	
+
 	if (gethostname(name, len) < 0 || len <= 0)
 	{
 		return 0;
 	}
-	
+
 	host = (hostent*)gethostbyname(name);
 	if (host == 0)
 	{
 		return 0;
 	}
-	
+
 	return inet_addr(host->h_addr);
 }
 
 uint32 NetConnection::GetIP(char* name)
 {
 	hostent* host = 0;
-	
+
 	host = (hostent*)gethostbyname(name);
 	if (host == 0)
 	{
 		return 0;
 	}
-	
+
 	return inet_addr(host->h_addr);
-	
+
 }
 
 void NetConnection::SaveInfo(char* address, uint32 port, char* waddress, char* filename) {
@@ -556,8 +556,8 @@ void NetConnection::SaveInfo(char* address, uint32 port, char* waddress, char* f
 	strn0cpy(ZoneFileName, filename, sizeof(ZoneFileName));
 }
 
-NetConnection::NetConnection() 
-: 
+NetConnection::NetConnection()
+:
 	object_timer(5000),
 	door_timer(5000),
 	corpse_timer(2000),
@@ -584,25 +584,25 @@ NetConnection::~NetConnection() {
 }
 
 void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
-    int records = database.GetMaxSpellID() + 1;
+	int records = database.GetMaxSpellID() + 1;
 
-    try {
-        EQEmu::IPCMutex mutex("spells");
-        mutex.Lock();
-        *mmf = new EQEmu::MemoryMappedFile("shared/spells");
-        uint32 size = (*mmf)->Size();
-        if(size != (records * sizeof(SPDat_Spell_Struct))) {
-            EQ_EXCEPT("Zone", "Unable to load spells: (*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)");
-        }
+	try {
+		EQEmu::IPCMutex mutex("spells");
+		mutex.Lock();
+		*mmf = new EQEmu::MemoryMappedFile("shared/spells");
+		uint32 size = (*mmf)->Size();
+		if(size != (records * sizeof(SPDat_Spell_Struct))) {
+			EQ_EXCEPT("Zone", "Unable to load spells: (*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)");
+		}
 
-        spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
-        mutex.Unlock();
-    } catch(std::exception &ex) {
-        LogFile->write(EQEMuLog::Error, "Error loading spells: %s", ex.what());
-        return;
-    }
+		spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
+		mutex.Unlock();
+	} catch(std::exception &ex) {
+		LogFile->write(EQEMuLog::Error, "Error loading spells: %s", ex.what());
+		return;
+	}
 
-    SPDAT_RECORDS = records;
+	SPDAT_RECORDS = records;
 }
 
 

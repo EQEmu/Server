@@ -31,7 +31,7 @@
 # include "winconfig.h"
 #else
 # include "config.h"
-#endif 
+#endif
 
 namespace Test
 {
@@ -42,15 +42,15 @@ namespace Test
 		long tv_sec;
 		long tv_usec;
 	};
-		
+
 	extern int gettimeofday(timeval* tv, void*);
-		
+
 #endif // #ifndef HAVE_GETTIMEOFDAY
-		
+
 #ifndef HAVE_ROUND
 	extern double round(double d);
-#endif	
-	
+#endif
+
 } // namespace Test
 
 #endif // #ifndef CPPTEST_MISSING_H

@@ -1,12 +1,10 @@
-
-
 // Doors
 #ifdef SHAREMEM
 int32 Database::GetDoorsCount(uint32* oMaxID) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	query = new char[256];
 	strcpy(query, "SELECT MAX(id), count(*) FROM doors");
 	if (RunQuery(query, strlen(query), errbuf, &result)) {
@@ -29,7 +27,7 @@ int32 Database::GetDoorsCount(uint32* oMaxID) {
 		delete[] query;
 		return -1;
 	}
-	
+
 	return -1;
 }
 
@@ -65,9 +63,9 @@ bool Database::LoadDoors() {
 bool Database::DBLoadDoors(uint32 iDoorCount, uint32 iMaxDoorID) {
 	cout << "Loading Doors from database..." << endl;
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	query = new char[256];
 	strcpy(query, "SELECT MAX(id), Count(*) FROM doors");
 	if (RunQuery(query, strlen(query), errbuf, &result))

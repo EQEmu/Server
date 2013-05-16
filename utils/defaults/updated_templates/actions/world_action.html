@@ -7,7 +7,7 @@
     } elsif($act eq "lsreconnect") {
         $EQW->LSReconnect();
     }
-    
+
     print "{";
     if($EQW->LSConnected()) {
         print "\"connected\" : \"1\",";

@@ -1,7 +1,7 @@
 ﻿//
 // Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net). Distributed under GPL version 2.
 //
-// 
+//
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -45,7 +45,7 @@ namespace EQExtractor2.Patches
             OutputStream.WriteLine("Item: {0} at Slot: {1}", Name, Slot);
 
         }
-        
+
 
         public void ExploreCastSpell(StreamWriter OutputStream, ByteStream Buffer, PacketDirection Direction)
         {
@@ -138,6 +138,6 @@ namespace EQExtractor2.Patches
             OutputStream.WriteLine("\r\nBuffer position at end is {0}", Buffer.GetPosition());
             OutputStream.WriteLine("");
         }
-        
+
     }
 }

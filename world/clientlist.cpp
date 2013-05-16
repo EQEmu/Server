@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2005  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "clientlist.h"
@@ -47,17 +47,17 @@ ClientList::~ClientList() {
 
 
 void ClientList::Process() {
-	
+
 	if (CLStale_timer.Check())
 		CLCheckStale();
-	
-	
+
+
 	LinkedListIterator<Client*> iterator(list);
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
 		if (!iterator.GetData()->Process()) {
-			struct in_addr  in;
+			struct in_addr in;
 			in.s_addr = iterator.GetData()->GetIP();
 			_log(WORLD__CLIENTLIST,"Removing client from %s:%d", inet_ntoa(in), iterator.GetData()->GetPort());
 //the client destructor should take care of this.
@@ -113,7 +113,7 @@ void ClientList::EnforceSessionLimit(uint32 iLSAccountID) {
 		ClientEntry = iterator.GetData();
 
 		if ((ClientEntry->LSAccountID() == iLSAccountID) &&
-		    ((ClientEntry->Admin() <= (RuleI(World, ExemptAccountLimitStatus))) || (RuleI(World, ExemptAccountLimitStatus) < 0))) {
+			((ClientEntry->Admin() <= (RuleI(World, ExemptAccountLimitStatus))) || (RuleI(World, ExemptAccountLimitStatus) < 0))) {
 
 			CharacterCount++;
 
@@ -167,13 +167,13 @@ void ClientList::GetCLEIP(uint32 iIP) {
 
 			// If the number of connections exceeds the lower limit
 			if (IPInstances > (RuleI(World, MaxClientsPerIP))) {
-						
+
 				// If MaxClientsSetByStatus is set to True, override other IP Limit Rules
 				if (RuleB(World, MaxClientsSetByStatus)) {
 
 					// The IP Limit is set by the status of the account if status > MaxClientsPerIP
 					if (IPInstances > countCLEIPs->Admin()) {
-						
+
 						if(RuleB(World, IPLimitDisconnectAll)) {
 							DisconnectByIP(iIP);
 							return;
@@ -227,15 +227,15 @@ void ClientList::DisconnectByIP(uint32 iIP) {
 	while(iterator.MoreElements()) {
 		countCLEIPs = iterator.GetData();
 		if ((countCLEIPs->GetIP() == iIP)) {
-            if(strlen(countCLEIPs->name())) {
-                ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-                ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
-                strcpy(skp->adminname, "SessionLimit");
-                strcpy(skp->name, countCLEIPs->name());
-                skp->adminrank = 255;
-                zoneserver_list.SendPacket(pack);
-                safe_delete(pack);
-            }
+			if(strlen(countCLEIPs->name())) {
+				ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+				ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
+				strcpy(skp->adminname, "SessionLimit");
+				strcpy(skp->name, countCLEIPs->name());
+				skp->adminrank = 255;
+				zoneserver_list.SendPacket(pack);
+				safe_delete(pack);
+			}
 			countCLEIPs->SetOnline(CLE_Status_Offline);
 			iterator.RemoveCurrent();
 		}
@@ -273,7 +273,7 @@ ClientListEntry* ClientList::FindCLEByAccountID(uint32 iAccID) {
 
 ClientListEntry* ClientList::FindCLEByCharacterID(uint32 iCharID) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
- 
+
 	iterator.Reset();
 	while(iterator.MoreElements()) {
 		if (iterator.GetData()->CharID() == iCharID) {
@@ -301,7 +301,7 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 	while(iterator.MoreElements()) {
 		ClientListEntry* cle = iterator.GetData();
 		if (admin >= cle->Admin() && (iName == 0 || namestrlen == 0 || strncasecmp(cle->name(), iName, namestrlen) == 0 || strncasecmp(cle->AccountName(), iName, namestrlen) == 0 || strncasecmp(cle->LSName(), iName, namestrlen) == 0)) {
-			struct in_addr  in;
+			struct in_addr in;
 			in.s_addr = cle->GetIP();
 			if (addnewline) {
 				AppendAnyLenString(&output, &outsize, &outlen, newline);
@@ -395,7 +395,7 @@ void ClientList::CLEKeepAlive(uint32 numupdates, uint32* wid) {
 
 
 ClientListEntry* ClientList::CheckAuth(uint32 id, const char* iKey, uint32 ip ) {
-  LinkedListIterator<ClientListEntry*> iterator(clientlist);
+	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -406,7 +406,7 @@ ClientListEntry* ClientList::CheckAuth(uint32 id, const char* iKey, uint32 ip ) 
 	return 0;
 }
 ClientListEntry* ClientList::CheckAuth(uint32 iLSID, const char* iKey) {
-  LinkedListIterator<ClientListEntry*> iterator(clientlist);
+	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -428,9 +428,9 @@ ClientListEntry* ClientList::CheckAuth(const char* iName, const char* iPassword)
 		iterator.Advance();
 	}
 	int16 tmpadmin;
-	
+
 	_log(WORLD__ZONELIST,"Login with '%s' and '%s'", iName, iPassword);
-	
+
 	uint32 accid = database.CheckLogin(iName, iPassword, &tmpadmin);
 	if (accid) {
 		ClientListEntry* tmp = new ClientListEntry(GetNextCLEID(), accid, iName, tmpMD5, tmpadmin);
@@ -531,16 +531,16 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 		const char* tmpZone = database.GetZoneName(countcle->zone());
 		if (
 	(countcle->Online() >= CLE_Status_Zoning) &&
-	(!countcle->GetGM() || countcle->Anon() != 1 || admin >= countcle->Admin()) && 
+	(!countcle->GetGM() || countcle->Anon() != 1 || admin >= countcle->Admin()) &&
 	(whom == 0 || (
-		((countcle->Admin() >= 80 && countcle->GetGM()) || whom->gmlookup == 0xFFFF) && 
-		(whom->lvllow == 0xFFFF || (countcle->level() >= whom->lvllow && countcle->level() <= whom->lvlhigh && (countcle->Anon()==0 || admin > countcle->Admin()))) && 
-		(whom->wclass == 0xFFFF || (countcle->class_() == whom->wclass && (countcle->Anon()==0 || admin > countcle->Admin()))) && 
+		((countcle->Admin() >= 80 && countcle->GetGM()) || whom->gmlookup == 0xFFFF) &&
+		(whom->lvllow == 0xFFFF || (countcle->level() >= whom->lvllow && countcle->level() <= whom->lvlhigh && (countcle->Anon()==0 || admin > countcle->Admin()))) &&
+		(whom->wclass == 0xFFFF || (countcle->class_() == whom->wclass && (countcle->Anon()==0 || admin > countcle->Admin()))) &&
 		(whom->wrace == 0xFFFF || (countcle->race() == whom->wrace && (countcle->Anon()==0 || admin > countcle->Admin()))) &&
 		(whomlen == 0 || (
-			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) || 
-			strncasecmp(countcle->name(),whom->whom, whomlen) == 0 || 
-			(strncasecmp(guild_mgr.GetGuildName(countcle->GuildID()), whom->whom, whomlen) == 0) || 
+			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
+			strncasecmp(countcle->name(),whom->whom, whomlen) == 0 ||
+			(strncasecmp(guild_mgr.GetGuildName(countcle->GuildID()), whom->whom, whomlen) == 0) ||
 			(admin >= 100 && strncasecmp(countcle->AccountName(), whom->whom, whomlen) == 0)
 		))
 	))
@@ -607,20 +607,20 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	int idx=-1;
 	while(iterator.MoreElements()) {
 		cle = iterator.GetData();
-		
+
 		const char* tmpZone = database.GetZoneName(cle->zone());
 		if (
 	(cle->Online() >= CLE_Status_Zoning) &&
-	(!cle->GetGM() || cle->Anon() != 1 || admin >= cle->Admin()) && 
+	(!cle->GetGM() || cle->Anon() != 1 || admin >= cle->Admin()) &&
 	(whom == 0 || (
-		((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) && 
-		(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh && (cle->Anon()==0 || admin>cle->Admin()))) && 
-		(whom->wclass == 0xFFFF || (cle->class_() == whom->wclass && (cle->Anon()==0 || admin>cle->Admin()))) && 
+		((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
+		(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh && (cle->Anon()==0 || admin>cle->Admin()))) &&
+		(whom->wclass == 0xFFFF || (cle->class_() == whom->wclass && (cle->Anon()==0 || admin>cle->Admin()))) &&
 		(whom->wrace == 0xFFFF || (cle->race() == whom->wrace && (cle->Anon()==0 || admin>cle->Admin()))) &&
 		(whomlen == 0 || (
-			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) || 
-			strncasecmp(cle->name(),whom->whom, whomlen) == 0 || 
-			(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) || 
+			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
+			strncasecmp(cle->name(),whom->whom, whomlen) == 0 ||
+			(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
 			(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
 		))
 	))
@@ -676,7 +676,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 				formatstring=5023;//display guild
 			else if(cle->Anon()==2 && admin>=cle->Admin() && admin>0)
 				formatstring=5022;//display everything
-	
+
 	//war* wars2 = (war*)pack2->pBuffer;
 
 	uint32 plclass_=0;
@@ -695,20 +695,20 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 		zonestring=5006;
 		plzone=cle->zone();
 	}
-	
-	
+
+
 	if(admin>=cle->Admin() && admin>0)
 		unknown80[0]=cle->Admin();
 	else
 		unknown80[0]=0xFFFFFFFF;
 	unknown80[1]=0xFFFFFFFF;//1035
-	
+
 
 	//char plstatus[20]={0};
 	//sprintf(plstatus, "Status %i",cle->Admin());
 	char plname[64]={0};
 	strcpy(plname,cle->name());
-	
+
 	char placcount[30]={0};
 	if(admin>=cle->Admin() && admin>0)
 		strcpy(placcount,cle->AccountName());
@@ -803,7 +803,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 	try{
 		ClientListEntry* cle;
 		int FriendsOnline = FriendsCLEs.size();
-		int PacketLength = sizeof(WhoAllReturnStruct) + (47 * FriendsOnline) + TotalLength; 
+		int PacketLength = sizeof(WhoAllReturnStruct) + (47 * FriendsOnline) + TotalLength;
 		ServerPacket* pack2 = new ServerPacket(ServerOP_WhoAllReply, PacketLength);
 		memset(pack2->pBuffer,0,pack2->size);
 		uchar *buffer=pack2->pBuffer;
@@ -833,7 +833,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 		for(int CLEEntry = 0; CLEEntry < FriendsOnline; CLEEntry++) {
 
 			cle = FriendsCLEs[CLEEntry];
-		
+
 			char GuildName[67]={0};
 			if (cle->GuildID() != GUILD_NONE && cle->GuildID()>0)
 				sprintf(GuildName,"<%s>", guild_mgr.GetGuildName(cle->GuildID()));
@@ -855,11 +855,11 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 				PlayerRace=cle->race();
 				ZoneMSGID=5006; // 5006 ZONE: %1
 				PlayerZone=cle->zone();
-			}				
+			}
 
 			char PlayerName[64]={0};
 			strcpy(PlayerName,cle->name());
-	
+
 			WhoAllPlayerPart1* WAPP1 = (WhoAllPlayerPart1*)bufptr;
 
 			WAPP1->FormatMSGID = FormatMSGID;
@@ -880,7 +880,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 			WAPP3->ZoneMSGID = ZoneMSGID;
 			WAPP3->Zone = PlayerZone;
 			WAPP3->Class_ = PlayerClass;
-			WAPP3->Level =  PlayerLevel;
+			WAPP3->Level = PlayerLevel;
 			WAPP3->Race = PlayerRace;
 			WAPP3->Account[0] = 0;
 
@@ -895,7 +895,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 		pack2->Deflate();
 		SendPacket(FriendsWho->FromName,pack2);
 		safe_delete(pack2);
-	}	
+	}
 	catch(...){
 		_log(WORLD__ZONELIST_ERR,"Unknown error in world's SendFriendsWho (probably mem error), ignoring...");
 		return;
@@ -920,16 +920,16 @@ void ClientList::SendLFGMatches(ServerLFGMatchesRequest_Struct *smrs) {
 			// First we check that the player meets the level and class criteria of the person
 			// doing the search.
 			if((CLE->level() >= smrs->FromLevel) && (CLE->level() <= smrs->ToLevel) &&
-			   (BitMask & smrs->Classes))
-			   	// Then we check if if the player doing the search meets the level criteria specified
+				(BitMask & smrs->Classes))
+				// Then we check if if the player doing the search meets the level criteria specified
 				// by the player who is LFG.
 				//
 				// GetLFGMatchFilter returns the setting of the 'Only players who match my posted filters
-				//						 can query me' checkbox.
+				//						can query me' checkbox.
 				//
 				// FromLevel and ToLevel are the settings of the 'Want group levels:' boxes.
-			   	if(!CLE->GetLFGMatchFilter() || ((smrs->QuerierLevel >= CLE->GetLFGFromLevel()) &&
-								 (smrs->QuerierLevel <= CLE->GetLFGToLevel())))
+				if(!CLE->GetLFGMatchFilter() || ((smrs->QuerierLevel >= CLE->GetLFGFromLevel()) &&
+								(smrs->QuerierLevel <= CLE->GetLFGToLevel())))
 					Matches++;
 		}
 		Iterator.Advance();
@@ -950,7 +950,7 @@ void ClientList::SendLFGMatches(ServerLFGMatchesRequest_Struct *smrs) {
 			if(CLE->LFG()) {
 				unsigned int BitMask = 1 << CLE->class_();
 				if((CLE->level() >= smrs->FromLevel) && (CLE->level() <= smrs->ToLevel) &&
-				   (BitMask & smrs->Classes)) {
+					(BitMask & smrs->Classes)) {
 					Matches--;
 					strcpy(Buffer->Name, CLE->name());
 					Buffer->Class_ = CLE->class_();
@@ -1000,20 +1000,20 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 		if (
 	(cle->Online() >= CLE_Status_Zoning)
 	&& (whom == 0 || (
-		((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) && 
-		(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh)) && 
-		(whom->wclass == 0xFFFF || cle->class_() == whom->wclass) && 
-		(whom->wrace == 0xFFFF || cle->race() == whom->wrace) && 
+		((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
+		(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh)) &&
+		(whom->wclass == 0xFFFF || cle->class_() == whom->wclass) &&
+		(whom->wrace == 0xFFFF || cle->race() == whom->wrace) &&
 		(whomlen == 0 || (
-			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) || 
-			strncasecmp(cle->name(),whom->whom, whomlen) == 0 || 
-			(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) || 
+			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
+			strncasecmp(cle->name(),whom->whom, whomlen) == 0 ||
+			(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
 			(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
 		))
 	))
 ) {
 			line[0] = 0;
-// MYRA - use new (5.x) Status labels in who for telnet connection			
+// MYRA - use new (5.x) Status labels in who for telnet connection
 			if (cle->Admin() >=250)
 				strcpy(tmpgm, "* GM-Impossible * ");
 			else if (cle->Admin() >= 200)
@@ -1046,7 +1046,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 				strcpy(tmpgm, "* Steward * ");
 			else
 				tmpgm[0] = 0;
-// end Myra		
+// end Myra
 
 			if (guild_mgr.GuildExists(cle->GuildID())) {
 				snprintf(tmpguild, 36, " <%s>", guild_mgr.GetGuildName(cle->GuildID()));
@@ -1180,7 +1180,7 @@ void ClientList::ZoneBootup(ZoneServer* zs) {
 	while(iterator.MoreElements())
 	{
 		if (iterator.GetData()->WaitingForBootup()) {
-			if (iterator.GetData()->GetZoneID() == zs->GetZoneID() 
+			if (iterator.GetData()->GetZoneID() == zs->GetZoneID()
 				&& iterator.GetData()->GetInstanceID() == zs->GetInstanceID()) {
 				iterator.GetData()->EnterWorld(false);
 			}
@@ -1236,7 +1236,7 @@ bool ClientList::SendPacket(const char* to, ServerPacket* pack) {
 
 void ClientList::SendGuildPacket(uint32 guild_id, ServerPacket* pack) {
 	set<uint32> zone_ids;
-	
+
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	iterator.Reset();
@@ -1246,7 +1246,7 @@ void ClientList::SendGuildPacket(uint32 guild_id, ServerPacket* pack) {
 		}
 		iterator.Advance();
 	}
-	
+
 	//now we know all the zones, send it to each one... this is kinda a shitty way to do this
 	//since its basically O(n^2)
 	set<uint32>::iterator cur, end;
@@ -1279,7 +1279,7 @@ int ClientList::GetClientCount() {
 void ClientList::GetClients(const char *zone_name, vector<ClientListEntry *> &res) {
 	LinkedListIterator<ClientListEntry *> iterator(clientlist);
 	iterator.Reset();
-	
+
 	if(zone_name[0] == '\0') {
 		while(iterator.MoreElements()) {
 			ClientListEntry* tmp = iterator.GetData();
@@ -1358,5 +1358,6 @@ void ClientList::SendClientVersionSummary(const char *Name)
 	}
 
 	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i 6.2, %i Titanium, %i SoF, %i SoD, %i UF, %i RoF clients currently connected.",
-					  Client62Count, ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
+					Client62Count, ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
 }
+

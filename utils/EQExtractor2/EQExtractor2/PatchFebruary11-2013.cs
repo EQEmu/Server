@@ -14,10 +14,10 @@ namespace EQExtractor2.Patches
         public PatchFebruary112013Decoder()
         {
             Version = "EQ Client Build Date February 11 2013.";
-                                   
+
             PatchConfFileName = "patch_Feb11-2013.conf";
 
-            PacketsToMatch = new PacketToMatch[] {              
+            PacketsToMatch = new PacketToMatch[] {
                 new PacketToMatch { OPCodeName = "OP_ZoneEntry", Direction = PacketDirection.ClientToServer, RequiredSize = 76, VersionMatched = false },
                 new PacketToMatch { OPCodeName = "OP_PlayerProfile", Direction = PacketDirection.ServerToClient, RequiredSize = -1, VersionMatched = true },
             };
@@ -691,7 +691,7 @@ namespace EQExtractor2.Patches
             // Air remaining ?
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
 
-            // Next 7 could be PVP stats, 
+            // Next 7 could be PVP stats,
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());
             OutputStream.WriteLine("{0, -5}: Unknown {1:X}", Buffer.GetPosition(), Buffer.ReadUInt32());

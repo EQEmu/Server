@@ -49,17 +49,17 @@ class PacketFileWriter {
 public:
 	PacketFileWriter(bool force_flush);
 	~PacketFileWriter();
-	
+
 	bool OpenFile(const char *name);
 	void CloseFile();
-	
+
 	void WritePacket(uint16 eq_op, uint32 packlen, const unsigned char *packet, bool to_server, const struct timeval &tv);
-	
+
 	static bool SetPacketStamp(const char *file, uint32 stamp);
-	
+
 protected:
 	bool _WriteBlock(uint16 eq_op, const void *d, uint16 len, bool to_server, const struct timeval &tv);
-	
+
 	//gzFile out;
 	FILE *out;
 	bool force_flush;
@@ -69,20 +69,20 @@ protected:
 class PacketFileReader {
 public:
 	PacketFileReader();
-	
+
 	virtual bool OpenFile(const char *name) = 0;
 	virtual void CloseFile() = 0;
 	virtual bool ResetFile() = 0;	//aka rewind
-	
+
 	virtual bool ReadPacket(uint16 &eq_op, uint32 &packlen, unsigned char *packet, bool &to_server, struct timeval &tv) = 0;
-	
+
 	time_t GetStamp() { return(time_t(packet_file_stamp)); }
-	
+
 	//factory method to open the right packet file.
 	static PacketFileReader *OpenPacketFile(const char *name);
-	
+
 protected:
-	
+
 	uint32 packet_file_stamp;
 };
 
@@ -90,38 +90,38 @@ class OldPacketFileReader : public PacketFileReader {
 public:
 	OldPacketFileReader();
 	virtual ~OldPacketFileReader();
-	
+
 	bool OpenFile(const char *name);
 	void CloseFile();
 	bool ResetFile();	//aka rewind
-	
+
 	bool ReadPacket(uint16 &eq_op, uint32 &packlen, unsigned char *packet, bool &to_server, struct timeval &tv);
-	
+
 	time_t GetStamp() { return(time_t(packet_file_stamp)); }
-	
+
 protected:
-	
+
 	//gzFile in;
-	FILE *in;	
+	FILE *in;
 };
 
 class NewPacketFileReader: public PacketFileReader {
 public:
 	NewPacketFileReader();
 	virtual ~NewPacketFileReader();
-	
+
 	bool OpenFile(const char *name);
 	void CloseFile();
 	bool ResetFile();	//aka rewind
-	
+
 	bool ReadPacket(uint16 &eq_op, uint32 &packlen, unsigned char *packet, bool &to_server, struct timeval &tv);
-	
+
 	time_t GetStamp() { return(time_t(packet_file_stamp)); }
-	
+
 protected:
-	
+
 	//gzFile in;
-	FILE *in;	
+	FILE *in;
 };
 
 

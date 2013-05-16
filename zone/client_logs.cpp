@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/features.h"
@@ -32,9 +32,9 @@ void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 		return;
 	if(c == nullptr)
 		return;
-	
+
 	//make sure they arnt allready subscribed.
-	
+
 	vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
@@ -44,7 +44,7 @@ void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 			return;
 		}
 	}
-	
+
 	printf("%s has been subscribed to %d\n", c->GetName(), id);
 	entries[id].push_back(c);
 }
@@ -54,7 +54,7 @@ void ClientLogs::unsubscribe(EQEMuLog::LogIDs id, Client *c) {
 		return;
 	if(c == nullptr)
 		return;
-	
+
 	vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();

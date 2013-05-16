@@ -82,7 +82,7 @@ HTML
 				my $q;
 				$q = "SELECT name FROM account WHERE id=$accountid";
 				my $res2=$EQDB->query($q);
-				if ($res2) { 
+				if ($res2) {
 					my $row5=$res2->fetch_row_hash;
 					print <<"CHAR";
 						<tr>
@@ -95,7 +95,7 @@ CHAR
 					print "Account Name query error.";
 				}
 			}
-			print "</table>";	
+			print "</table>";
 		} else {
 			print "IP Address query error.";
 		}
@@ -104,9 +104,9 @@ CHAR
 	my $acctE = $EQDB->escape_string($acct);
 	my $q;
 	$q="select id,charname,sharedplat,status,revoked from account where name='$acctE'";
-	
+
 	my $res=$EQDB->query($q);
-	if ($res) { 
+	if ($res) {
 		my $row=$res->fetch_row_hash;
 		print <<"HTML";
 		<table border="1">
@@ -139,17 +139,17 @@ HTML
 					<td align="center">$row2->{zonename}</td>
 					<td align="center">
 						delete,
-						<a href="?name=$acct&action=move&charid=$row2->{id}&charname=$row2->{name}">move acct</a>, 
+						<a href="?name=$acct&action=move&charid=$row2->{id}&charname=$row2->{name}">move acct</a>,
 						move zone
 						</td>
 					</tr>
 CHAR
 			}
-			print "</table>";	
+			print "</table>";
 		} else {
 			print "Char query error.";
 		}
-		
+
 		$q="SELECT ip,count FROM account_ip WHERE accid=$row->{id}";
 		my $res3=$EQDB->query($q);
 		if($res3) {
@@ -166,7 +166,7 @@ HTML
 					<tr>
 					<td align="center"><a href="?name=$acct&action=listips&ipaddress=$row3->{ip}">$row3->{ip}</a></td>
 					<td align="center">$row3->{count}</td>
-					</tr>				
+					</tr>
 CHAR
 			}
 			print "</table>";
@@ -185,7 +185,7 @@ HTML
 	} else {
 		print "Query error.";
 	}
-	
+
 	print "Actions: ban/unban, set status, set world password, delete chars, move chars, delete account and chars";
 }
 

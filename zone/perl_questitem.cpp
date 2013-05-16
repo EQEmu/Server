@@ -1,5 +1,5 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -7,13 +7,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
-		are required to give you total support for your newly bought product;
-		without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-		A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/features.h"
@@ -58,7 +58,7 @@ XS(XS_QuestItem_GetName) {
 }
 
 XS(XS_QuestItem_SetScale);
-XS(XS_QuestItem_SetScale) 
+XS(XS_QuestItem_SetScale)
 {
 	dXSARGS;
 	if (items != 2)
@@ -66,7 +66,7 @@ XS(XS_QuestItem_SetScale)
 	{
 		ItemInst *	THIS;
 		float		Mult;
-		
+
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
 			THIS = INT2PTR(ItemInst *,tmp);
@@ -86,7 +86,7 @@ XS(XS_QuestItem_SetScale)
 }
 
 XS(XS_QuestItem_ItemSay);
-XS(XS_QuestItem_ItemSay) 
+XS(XS_QuestItem_ItemSay)
 {
 	dXSARGS;
 	if (items != 2 && items != 3)
@@ -201,7 +201,7 @@ XS(XS_QuestItem_GetAugment)
 		Perl_croak(aTHX_ "Usage: QuestItem::GetAugment(THIS, augment_id)");
 	{
 		ItemInst*	THIS;
-        int16      slot_id = (int16)SvIV(ST(1));
+		int16		slot_id = (int16)SvIV(ST(1));
 		ItemInst*	RETVAL;
 
 		if (sv_derived_from(ST(0), "QuestItem")) {
@@ -213,8 +213,8 @@ XS(XS_QuestItem_GetAugment)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-        RETVAL = THIS->GetAugment(slot_id);
-        ST(0) = sv_newmortal();
+		RETVAL = THIS->GetAugment(slot_id);
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "QuestItem", (void*)RETVAL);
 	}
 	XSRETURN(1);
@@ -240,7 +240,7 @@ XS(XS_QuestItem_GetID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-        RETVAL = THIS->GetItem()->ID;
+		RETVAL = THIS->GetItem()->ID;
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
@@ -251,7 +251,7 @@ extern "C"
 #endif
 
 XS(boot_QuestItem);
-XS(boot_QuestItem) 
+XS(boot_QuestItem)
 {
 	dXSARGS;
 	char file[256];
@@ -272,8 +272,8 @@ XS(boot_QuestItem)
 		newXSproto(strcpy(buf, "IsType"), XS_QuestItem_IsType, file, "$$");
 		newXSproto(strcpy(buf, "IsAttuned"), XS_QuestItem_IsAttuned, file, "$");
 		newXSproto(strcpy(buf, "GetCharges"), XS_QuestItem_GetCharges, file, "$");
-        newXSproto(strcpy(buf, "GetAugment"), XS_QuestItem_GetAugment, file, "$$");
-        newXSproto(strcpy(buf, "GetID"), XS_QuestItem_GetID, file, "$");
+		newXSproto(strcpy(buf, "GetAugment"), XS_QuestItem_GetAugment, file, "$$");
+		newXSproto(strcpy(buf, "GetID"), XS_QuestItem_GetID, file, "$");
 
 	XSRETURN_YES;
 }

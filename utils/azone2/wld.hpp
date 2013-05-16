@@ -33,7 +33,7 @@ class WLDLoader : public FileLoader {
 public:
   WLDLoader();
   ~WLDLoader();
-  
+
   virtual int Open(char *base_path, char *zone_name, Archive *archive);
   virtual int Close();
 

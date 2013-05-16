@@ -98,7 +98,7 @@ enum AdventureObjective
 	Adventure_Rescue = 4
 };
 
-struct AdventureInfo 
+struct AdventureInfo
 {
 	uint32 id;
 	std::string zone_name;
@@ -522,7 +522,7 @@ struct SpellBuffFade_Struct {
 struct PetBuff_Struct {
 /*000*/ uint32 petid;
 /*004*/ uint32 spellid[BUFF_COUNT];
-/*104*/ uint32 unknown700;	
+/*104*/ uint32 unknown700;
 /*108*/ uint32 unknown701;
 /*112*/ uint32 unknown702;
 /*116*/ uint32 unknown703;
@@ -1818,7 +1818,7 @@ struct AdventureLeaderboard_Struct
 /*008*/ int32 success;
 /*012*/ int32 failure;
 /*016*/ int32 our_rank;
-/*020*/	
+/*020*/
 };
 
 /*struct Item_Shop_Struct {
@@ -2513,7 +2513,7 @@ struct BarterSearchRequest_Struct {
 
 struct BuyerItemSearchLinkRequest_Struct {
 /*000*/	uint32	Action;	// 0x00000015
-/*004*/	uint32	ItemID;	
+/*004*/	uint32	ItemID;
 /*008*/	uint32	Unknown008;
 /*012*/	uint32	Unknown012;
 };
@@ -3849,7 +3849,7 @@ struct RespawnWindow_Struct {
 /**
  * Shroud spawn. For others shrouding, this has their spawnId and
  * spawnStruct.
- * 
+ *
  * Length: 586
  * OpCode: OP_Shroud
  */

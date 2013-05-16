@@ -1,5 +1,3 @@
-
-
 #include "debug.h"
 #include "TCPServer.h"
 #include <stdio.h>
@@ -18,11 +16,7 @@
 	#define SOCKET_ERROR -1
 #endif
 
-
 #define SERVER_LOOP_GRANULARITY 3	//# of ms between checking our socket/queues
-
-
-
 
 BaseTCPServer::BaseTCPServer(uint16 in_port) {
 	NextID = 1;
@@ -70,11 +64,11 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 		THREAD_RETURN(nullptr);
 	}
 	BaseTCPServer* tcps = (BaseTCPServer*) tmp;
-	
+
 #ifndef WIN32
 	_log(COMMON__THREADS, "Starting TCPServerLoop with thread ID %d", pthread_self());
 #endif
-	
+
 	tcps->MLoopRunning.lock();
 	while (tcps->RunLoop()) {
 		_CP(BaseTCPServerLoop);
@@ -82,11 +76,11 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 		tcps->Process();
 	}
 	tcps->MLoopRunning.unlock();
-	
+
 #ifndef WIN32
 	_log(COMMON__THREADS, "Ending TCPServerLoop with thread ID %d", pthread_self());
 #endif
-	
+
 	THREAD_RETURN(nullptr);
 }
 
@@ -95,14 +89,14 @@ void BaseTCPServer::Process() {
 }
 
 void BaseTCPServer::ListenNewConnections() {
-    SOCKET tmpsock;
-    struct sockaddr_in	from;
-    struct in_addr	in;
-    unsigned int	fromlen;
-    unsigned short	port;
-    
-    from.sin_family = AF_INET;
-    fromlen = sizeof(from);
+	SOCKET tmpsock;
+	struct sockaddr_in	from;
+	struct in_addr	in;
+	unsigned int	fromlen;
+	unsigned short	port;
+
+	from.sin_family = AF_INET;
+	fromlen = sizeof(from);
 	LockMutex lock(&MSock);
 	if (!sock)
 		return;
@@ -124,7 +118,7 @@ void BaseTCPServer::ListenNewConnections() {
 		setsockopt(tmpsock, SOL_SOCKET, SO_RCVBUF, (char*) &bufsize, sizeof(bufsize));
 		port = from.sin_port;
 		in.s_addr = from.sin_addr.s_addr;
-		
+
 		// New TCP connection, this must consume the socket.
 		CreateNewConnection(GetNextID(), tmpsock, in.s_addr, ntohs(from.sin_port));
 	}
@@ -151,7 +145,7 @@ bool BaseTCPServer::Open(uint16 in_port, char* errbuf) {
 #endif
 	int reuse_addr = 1;
 
-//	Setup internet address information.  
+//	Setup internet address information.
 //	This is used with the bind() call
 	memset((char *) &address, 0, sizeof(address));
 	address.sin_family = AF_INET;
@@ -211,7 +205,7 @@ bool BaseTCPServer::Open(uint16 in_port, char* errbuf) {
 
 void BaseTCPServer::Close() {
 	StopLoopAndWait();
-	
+
 	LockMutex lock(&MSock);
 	if (sock) {
 #ifdef _WINDOWS
@@ -229,5 +223,4 @@ bool BaseTCPServer::IsOpen() {
 	MSock.unlock();
 	return ret;
 }
-
 

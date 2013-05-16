@@ -14,8 +14,8 @@ namespace EQExtractor2.Patches
         public PatchJanuary162013Decoder()
         {
             Version = "EQ Client Build Date January 16 2013.";
-                                   
-            PatchConfFileName = "patch_Jan16-2013.conf";                       
+
+            PatchConfFileName = "patch_Jan16-2013.conf";
         }
 
         override public List<ZoneEntryStruct> GetSpawns()
@@ -240,7 +240,7 @@ namespace EQExtractor2.Patches
         {
             //OpManager.RegisterExplorer("OP_ZoneEntry", ExploreZoneEntry);
             //OpManager.RegisterExplorer("OP_NPCMoveUpdate", ExploreNPCMoveUpdate);
-            //OpManager.RegisterExplorer("OP_MobUpdate", ExploreMobUpdate);        
+            //OpManager.RegisterExplorer("OP_MobUpdate", ExploreMobUpdate);
         }
 
         public void ExploreNPCMoveUpdate(StreamWriter OutputStream, ByteStream Buffer, PacketDirection Direction)

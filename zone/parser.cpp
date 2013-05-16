@@ -91,10 +91,10 @@ int calc(string calc)
 	string integer1;
 	char op = 0;
 	int returnvalue = 0;
-	
+
 	while (*iterator) {
 		char ch = *iterator;
-	    
+
 		if(ch >= '0' && ch <= '9') { //If this character is numeric add it to the buffer
 			buffer += ch;
 		}
@@ -108,7 +108,7 @@ int calc(string calc)
 					printf("Parser::calc() Error in syntax: '%s'.\n", calc.c_str());
 					return 0;
 				}
-				
+
 				//what was the previous op
 				switch(op)
 				{
@@ -134,7 +134,7 @@ int calc(string calc)
 					break;
 				}
 				};
-				
+
 				op = ch; //save current operator and continue parsing
 			}
 			buffer=""; //clear buffer now that we're starting on a new number
@@ -293,7 +293,7 @@ int Parser::HasQuestFile(uint32 npcid)
 	int success=1;
 	if (qstID==-1)
 		success = LoadScript(npcid, zone->GetShortName());
-	if (!success) 
+	if (!success)
 		return false;
 
 return true;
@@ -308,7 +308,7 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 	int success=1;
 	if (qstID==-1)
 		success = LoadScript(npcid, zone->GetShortName(),mob);
-	if (!success) 
+	if (!success)
 		return;
 	else
 		qstID = GetNPCqstID(npcid);
@@ -323,7 +323,7 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 		MYSQL_ROW row;
 		char tmpname[65];
 		int charid=0;
-		
+
 			if (mob && mob->IsClient())  // some events like waypoint and spawn don't have a player involved
 			{
 					charid=mob->CastToClient()->CharacterID();
@@ -336,8 +336,8 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 
 		AddVar("charid.g",itoa(charid));
 
-		database.RunQuery(query, MakeAnyLenString(&query, 
-		  "SELECT name,value FROM quest_globals WHERE (npcid=%i || npcid=0) && (charid=%i || charid=0) && (zoneid=%i || zoneid=0) && expdate >= unix_timestamp(now())", 
+		database.RunQuery(query, MakeAnyLenString(&query,
+		  "SELECT name,value FROM quest_globals WHERE (npcid=%i || npcid=0) && (charid=%i || charid=0) && (zoneid=%i || zoneid=0) && expdate >= unix_timestamp(now())",
 		     npcmob->GetNPCTypeID(),charid,zone->GetZoneID()), errbuf, &result);
 		printf("%s\n",query);
 		printf("%s\n",errbuf);
@@ -349,7 +349,7 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 				sprintf(tmpname,"%s.g",row[0]);
 				AddVar(tmpname, row[1]);
 			}
-			mysql_free_result(result);		
+			mysql_free_result(result);
 		}
 		if (query)
 		{
@@ -367,7 +367,7 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 		AddVar("signal.g",data);
 	}
 	uint8 fac = 0;
-	if (mob && mob->IsClient()) {		
+	if (mob && mob->IsClient()) {
 		AddVar("uguild_id.g", itoa(mob->CastToClient()->GuildID()));
 		AddVar("uguildrank.g", itoa(mob->CastToClient()->GuildRank()));
 	}
@@ -375,7 +375,7 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 	if (mob && npcmob && mob->IsClient() && npcmob->IsNPC()) {
 		Client* client = mob->CastToClient();
 		NPC* npc = npcmob->CastToNPC();
-		
+
 		// Need to figure out why one of these casts would fail..
 		if (client && npc) {
 			fac = client->GetFactionLevel(client->GetID(), npcmob->GetID(), client->GetRace(), client->GetClass(), DEITY_AGNOSTIC, npc->GetPrimaryFaction(), npcmob);
@@ -495,7 +495,7 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 	DelChatAndItemVars(npcid);
 
 }
-	
+
 Parser::Parser() : DEFAULT_QUEST_PREFIX("default") {
 	MainList.clear();
 	pNPCqstID = new int32[1];
@@ -756,7 +756,7 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 #if Parser_DEBUG>10
 		printf("After: %s\n", arglist[0]);
 #endif
-	
+
 	char command[256];
 	strncpy(command, o_command.c_str(), 255);
 	command[255] = 0;
@@ -766,8 +766,8 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 			*cptr = *cptr + ('a' - 'A');
 		 *cptr++;
 	}
-	
-	
+
+
 	if (!strcmp(command,"write")) {
 		quest_manager.write(arglist[0], arglist[1]);
 	}
@@ -776,11 +776,11 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 		quest_manager.me(parms.c_str());
 //end Myra
 	}
-	else if (!strcmp(command,"spawn") || !strcmp(command,"spawn2")) 
+	else if (!strcmp(command,"spawn") || !strcmp(command,"spawn2"))
 	{
-		
+
 		float hdng;
-		if (!strcmp(command,"spawn")) 
+		if (!strcmp(command,"spawn"))
 		{
 			hdng=mob->CastToClient()->GetHeading();
 		}
@@ -791,9 +791,9 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 		quest_manager.spawn2(atoi(arglist[0]), atoi(arglist[1]), 0,
 			atof(arglist[3]), atof(arglist[4]), atof(arglist[5]), hdng);
 	}
-	else if (!strcmp(command,"unique_spawn")) 
+	else if (!strcmp(command,"unique_spawn"))
 	{
-		
+
 		float hdng;
 		hdng=mob->CastToClient()->GetHeading();
 		quest_manager.unique_spawn(atoi(arglist[0]), atoi(arglist[1]), 0,
@@ -877,18 +877,18 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 	else if (!strcmp(command,"snow")) {
 		quest_manager.snow(atoi(arglist[0]));
 	}
-	else if (!strcmp(command,"surname")) { 
+	else if (!strcmp(command,"surname")) {
 		quest_manager.surname(arglist[0]);
-	} 
-	else if (!strcmp(command,"permaclass")) { 
+	}
+	else if (!strcmp(command,"permaclass")) {
 		quest_manager.permaclass(atoi(arglist[0]));
-	} 
+	}
 	else if (!strcmp(command,"permarace")) {
 		quest_manager.permarace(atoi(arglist[0]));
-	} 
+	}
 	else if (!strcmp(command,"permagender")) {
 		quest_manager.permagender(atoi(arglist[0]));
-	} 
+	}
 	else if (!strcmp(command,"scribespells")) {
 		quest_manager.scribespells(atoi(arglist[0]));
 	}
@@ -904,8 +904,8 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 	else if (!strcmp(command,"movepc")) {
 		quest_manager.movepc((atoi(arglist[0])),(atof(arglist[1])),(atof(arglist[2])),(atof(arglist[3])),(atof(arglist[4])));
 	}
-	else if (!strcmp(command,"gmmove")) { 
-		quest_manager.gmmove(atof(arglist[0]), atof(arglist[1]), atof(arglist[2])); 
+	else if (!strcmp(command,"gmmove")) {
+		quest_manager.gmmove(atof(arglist[0]), atof(arglist[1]), atof(arglist[2]));
 	}
 	else if (!strcmp(command,"movegrp")) {
 		quest_manager.movegrp((atoi(arglist[0])),(atof(arglist[1])),(atof(arglist[2])),(atof(arglist[3])));
@@ -946,7 +946,7 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 	else if (!strcmp(command,"settime")) {
 		quest_manager.settime(atoi(arglist[0]), atoi(arglist[1]));
 	}
-	else if (!strcmp(command,"itemlink")) { 
+	else if (!strcmp(command,"itemlink")) {
 		quest_manager.itemlink(atoi(arglist[0]));
 	}
 	else if (!strcmp(command,"signal")) {
@@ -1023,7 +1023,7 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 	else if (!strcmp(command,"clear_proximity")) {
 		quest_manager.clear_proximity();
 	}
-	else if (!strcmp(command,"respawn")) 
+	else if (!strcmp(command,"respawn"))
 	{
 		quest_manager.respawn(atoi(arglist[0]), atoi(arglist[1]));
 	}
@@ -1102,7 +1102,7 @@ int Parser::LoadScript(int npcid, const char * zone, Mob* activater)
 				NewEventList->Event.push_back(event1);
 				}
 				if (bracket==-1)
-				{	
+				{
 					if(activater && activater->IsClient())
 					activater->CastToClient()->Message(10,"Line: %d,File: %s | error C0006: syntax error : too many ')'s",line_num,filename.c_str());
 					return 0;
@@ -1328,13 +1328,13 @@ void Parser::HandleVars(string varname, string varparms, string& origstring, str
 		temp[0] = atoi(varparms.c_str());
 		Replace(origstring,format,temp);
 	}
-	//used_pawn - random implementation. 
-	else if (!strcmp(strlwr((const char*)varname.c_str()),"random")) { 
-		Replace(origstring,format,itoa(MakeRandomInt(0, varparms[0]-1))); 
-	}  
-   else if (!strcmp(strlwr((const char*)varname.c_str()),"asc")) { 
-      Replace(origstring,format,itoa(varparms[0])); 
-   } 
+	//used_pawn - random implementation.
+	else if (!strcmp(strlwr((const char*)varname.c_str()),"random")) {
+		Replace(origstring,format,itoa(MakeRandomInt(0, varparms[0]-1)));
+	}
+   else if (!strcmp(strlwr((const char*)varname.c_str()),"asc")) {
+      Replace(origstring,format,itoa(varparms[0]));
+   }
 	else if (!strcmp(strlwr((const char*)varname.c_str()),"gettok")) {
 		Replace(origstring,format,gettok(arglist[0],arglist[1][0],atoi(arglist[2])));
 	}
@@ -1385,7 +1385,7 @@ void Parser::ParseVars(string& text, uint32 npcid, Mob* mob)
 				if (*iterator != '(' && *iterator != ')')
 					buffer+=*iterator;
 			}
-			else 
+			else
 			{
 					buffer.replace(0,1,"",0);
 					HandleVars(buffer,"",text,buffer2,npcid,mob);
@@ -1423,7 +1423,7 @@ void Parser::ParseVars(string& text, uint32 npcid, Mob* mob)
 		}
 	}
 }
-	
+
 /*
 char * fixstring(char * string)
 {
@@ -1567,14 +1567,14 @@ int Parser::ParseCommands(string text, int line, int justcheck, uint32 npcid, Mo
 		if (*iterator == '"' && !escape && !ignore)
 			if (quote)quote--;
 			else quote++;
-		
+
 		if (*iterator == ',' && !ignore && !quote && !escape && paren)
 			argit++;
 
 		if (*iterator == '(' && !ignore && !quote && !escape)
 		{
 			paren++;
-			if (paren == 1)	
+			if (paren == 1)
 			{
 				if (last_finished)
 				{
@@ -1598,7 +1598,7 @@ int Parser::ParseCommands(string text, int line, int justcheck, uint32 npcid, Mo
 					return 0;
 				}
 			}
-		}	
+		}
 		else if (*iterator == ')' && !ignore && !quote && !escape)
 		{
 			paren--;
@@ -1618,7 +1618,7 @@ int Parser::ParseCommands(string text, int line, int justcheck, uint32 npcid, Mo
 					mob->CastToClient()->Message(10,"Line: %d,File: %s | error C0006: syntax error : too many ')'s",line,filename.c_str() );
 				return 0;
 			}
-		}			
+		}
 		else if (*iterator == '{' && !escape)
 		{
 			bracket++;
@@ -1655,7 +1655,7 @@ int Parser::ParseCommands(string text, int line, int justcheck, uint32 npcid, Mo
 				else		 lastif=0;
 				lastif=0,last_finished=0,quote=0,escape=0,ignore=0,argnums=0,argit=1;
 			}
-		}		
+		}
 		else if (*iterator == ';' && !escape && !ignore && !quote)
 		{
 			if (last_finished)

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef OBJECT_H
 #define OBJECT_H
@@ -91,10 +91,10 @@ IT10725_ACTORDEF=Shuriken
 #define OT_TEIRDALFORGE	0x20	//dark elf
 #define OT_OGGOKFORGE	0x21	//ogre
 #define OT_STORMGUARDF	0x22	//dwarven
-#define OT_VALEFORGE    0x31  //halfling
+#define OT_VALEFORGE	0x31	//halfling
 // gnome forge 0x23 (ak'anon forge)
 // barbarian forge 0x24 (northman forge)
-// 
+//
 // iksar forge 0x26	(cabilis forge)
 // human forge 0x27 (qeynos or freeport?) (royal qeynos forge or freeport forge)
 // human forge 0x28 (qeynos or freeport?)
@@ -136,7 +136,7 @@ public:
 	Object(Client* client, const ItemInst* inst);
 	Object(const ItemInst *inst, float x, float y, float z, float heading, uint32 decay_time = 300000);
 	Object(const char *model, float x, float y, float z, float heading, uint8 type, uint32 decay_time = 0);
-	
+
 	// Destructor
 	~Object();
 	bool Process();
@@ -148,39 +148,39 @@ public:
 	static void HandleCombine(Client* user, const NewCombine_Struct* in_combine, Object *worldo);
 	static void HandleAugmentation(Client* user, const AugmentItem_Struct* in_augment, Object *worldo);
 	static void HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac);
-	
+
 	static SkillType TypeToSkill(uint32 type);
-	
+
 	// Packet functions
 	void CreateSpawnPacket(EQApplicationPacket* app);
 	void CreateDeSpawnPacket(EQApplicationPacket* app);
 	void Depop();
 	void Repop();
-	
+
 	//Decay functions
 	void StartDecay() {decay_timer.Start();}
-	
+
 	// Container functions
 	void PutItem(uint8 index, const ItemInst* inst);
 	void DeleteItem(uint8 index); // Item inside container
 	ItemInst* PopItem(uint8 index); // Pop item out of container
-	
+
 	// Override base class implementations
 	virtual bool IsObject()	const { return true; }
 	virtual bool Save();
 	virtual uint16 VarSave();
 	virtual void SetID(uint16 set_id);
-	
+
 	void ClearUser() { user = nullptr; }
 
 	uint32 GetDBID();
 	uint32 GetType();
-	void  SetType(uint32 type);
-	void  SetDBID(uint32 dbid);
+	void SetType(uint32 type);
+	void SetDBID(uint32 dbid);
 	uint32 GetIcon();
-	void  SetIcon(uint32 icon);
+	void SetIcon(uint32 icon);
 	uint32 GetItemID();
-	void  SetItemID(uint32 itemid);
+	void SetItemID(uint32 itemid);
 	void GetObjectData(Object_Struct* Data);
 	void SetObjectData(Object_Struct* Data);
 	void GetLocation(float* x, float* y, float* z);
@@ -204,7 +204,7 @@ public:
 protected:
 	void	ResetState();	// Set state back to original
 	void	RandomSpawn(bool send_packet = false);		//spawn this ground spawn at a random place
-	
+
 	Object_Struct	m_data;		// Packet data
 	ItemInst*		m_inst;		// Item representing object
 	bool			m_inuse;	// Currently in use by a client?
@@ -220,10 +220,10 @@ protected:
 	bool			m_ground_spawn;
 
 	std::map<std::string, std::string> o_EntityVariables;
-	
+
 	Client *user;
 	Client *last_user;
-	
+
 	Timer respawn_timer;
 	Timer decay_timer;
 };

@@ -44,7 +44,7 @@ namespace EQExtractor2.Patches
             ByteStream Buffer = new ByteStream(PacketBuffer);
 
             Item NewItem = new Item();
-         
+
             Buffer.SetPosition(30);
             NewItem.MerchantSlot = Buffer.ReadByte();            // 13
             NewItem.Price = Buffer.ReadUInt32();                 // 14

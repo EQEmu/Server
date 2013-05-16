@@ -13,7 +13,7 @@ namespace EQExtractor2.Patches
         public PatchAug042011Decoder()
         {
             Version = "EQ Client Build Date August 04 2011.";
-                        
+
             ExpectedPPLength = 28496;
 
             PPZoneIDOffset = 21164;

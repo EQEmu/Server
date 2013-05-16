@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 // Test 1
@@ -195,21 +195,21 @@ void Client::ActivateAA(aaID activate){
 		uint32 aaremain_min = (aaremain / 60) % 60;
 		uint32 aaremain_sec = aaremain % 60;
 
-        if(aa2) {
-            if (aaremain_hr >= 1)	//1 hour or more
-		    	Message(13, "You can use the ability %s again in %u hour(s) %u minute(s) %u seconds",
-                aa2->name, aaremain_hr, aaremain_min, aaremain_sec);
-	    	else	//less than an hour
-	    		Message(13, "You can use the ability %s again in %u minute(s) %u seconds",
-                aa2->name, aaremain_min, aaremain_sec);
-        } else {
-            if (aaremain_hr >= 1)	//1 hour or more
-		    	Message(13, "You can use this ability again in %u hour(s) %u minute(s) %u seconds",
-                aaremain_hr, aaremain_min, aaremain_sec);
-	    	else	//less than an hour
-	    		Message(13, "You can use this ability again in %u minute(s) %u seconds",
-                aaremain_min, aaremain_sec);
-        }
+		if(aa2) {
+			if (aaremain_hr >= 1)	//1 hour or more
+				Message(13, "You can use the ability %s again in %u hour(s) %u minute(s) %u seconds",
+				aa2->name, aaremain_hr, aaremain_min, aaremain_sec);
+			else	//less than an hour
+				Message(13, "You can use the ability %s again in %u minute(s) %u seconds",
+				aa2->name, aaremain_min, aaremain_sec);
+		} else {
+			if (aaremain_hr >= 1)	//1 hour or more
+				Message(13, "You can use this ability again in %u hour(s) %u minute(s) %u seconds",
+				aaremain_hr, aaremain_min, aaremain_sec);
+			else	//less than an hour
+				Message(13, "You can use this ability again in %u minute(s) %u seconds",
+				aaremain_min, aaremain_sec);
+		}
 		return;
 	}
 
@@ -281,30 +281,30 @@ void Client::ActivateAA(aaID activate){
 		if(caa->reuse_time > 0)
 		{
 			uint32 timer_base = CalcAAReuseTimer(caa);
-            SendAATimer(AATimerID, 0, 0);
-            p_timers.Start(AATimerID + pTimerAAStart, timer_base);
+			SendAATimer(AATimerID, 0, 0);
+			p_timers.Start(AATimerID + pTimerAAStart, timer_base);
 			if(activate == aaImprovedHarmTouch || activate == aaLeechTouch)
 			{
 				p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
 			}
-            // Bards can cast instant cast AAs while they are casting another song
-            if (spells[caa->spell_id].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
-                if(!SpellFinished(caa->spell_id, entity_list.GetMob(target_id), 10, -1, -1, spells[caa->spell_id].ResistDiff, false)) {
-                    //Reset on failed cast
-                    SendAATimer(AATimerID, 0, 0xFFFFFF);
-                    Message_StringID(15,ABILITY_FAILED);
-                    p_timers.Clear(&database, AATimerID + pTimerAAStart);
-                    return;
-                }
-            } else {
-                if(!CastSpell(caa->spell_id, target_id, 10, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
-                    //Reset on failed cast
-                    SendAATimer(AATimerID, 0, 0xFFFFFF);
-                    Message_StringID(15,ABILITY_FAILED);
-                    p_timers.Clear(&database, AATimerID + pTimerAAStart);
-                    return;
-                }
-            }
+			// Bards can cast instant cast AAs while they are casting another song
+			if (spells[caa->spell_id].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
+				if(!SpellFinished(caa->spell_id, entity_list.GetMob(target_id), 10, -1, -1, spells[caa->spell_id].ResistDiff, false)) {
+					//Reset on failed cast
+					SendAATimer(AATimerID, 0, 0xFFFFFF);
+					Message_StringID(15,ABILITY_FAILED);
+					p_timers.Clear(&database, AATimerID + pTimerAAStart);
+					return;
+				}
+			} else {
+				if(!CastSpell(caa->spell_id, target_id, 10, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
+					//Reset on failed cast
+					SendAATimer(AATimerID, 0, 0xFFFFFF);
+					Message_StringID(15,ABILITY_FAILED);
+					p_timers.Clear(&database, AATimerID + pTimerAAStart);
+					return;
+				}
+			}
 		}
 		else
 		{
@@ -405,7 +405,7 @@ void Client::HandleAAAction(aaID activate) {
 			switch (GetClass())
 			{
 				case DRUID:
-					spell_id = 2760; 	//2644?
+					spell_id = 2760;	//2644?
 					break;
 				case NECROMANCER:
 					spell_id = 2759;	//2643?
@@ -468,7 +468,7 @@ void Client::HandleAAAction(aaID activate) {
 		case aaActionEscape:
 			Escape();
 			break;
-		
+
 		// Don't think this code is used any longer for Bestial Alignment as the AA has a spell_id and no nonspell_action.
 		case aaActionBeastialAlignment:
 			switch(GetBaseRace()) {
@@ -496,7 +496,7 @@ void Client::HandleAAAction(aaID activate) {
 			break;
 
 		case aaActionFadingMemories:
-            // Do nothing since spell effect works correctly, but mana isn't used.
+			// Do nothing since spell effect works correctly, but mana isn't used.
 			break;
 
 		default:
@@ -602,10 +602,10 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	if(summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
 
-	static const float swarm_pet_x[MAX_SWARM_PETS] = { 	5, -5, 5, -5,
+	static const float swarm_pet_x[MAX_SWARM_PETS] = {	5, -5, 5, -5,
 														10, -10, 10, -10,
 														8, -8, 8, -8 };
-	static const float swarm_pet_y[MAX_SWARM_PETS] = { 	5, 5, -5, -5,
+	static const float swarm_pet_y[MAX_SWARM_PETS] = {	5, 5, -5, -5,
 														10, 10, -10, -10,
 														8, 8, -8, -8 };
 	TempPets(true);
@@ -695,10 +695,10 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 	if(summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
 
-	static const float swarm_pet_x[MAX_SWARM_PETS] = { 	5, -5, 5, -5,
+	static const float swarm_pet_x[MAX_SWARM_PETS] = {	5, -5, 5, -5,
 														10, -10, 10, -10,
 														8, -8, 8, -8 };
-	static const float swarm_pet_y[MAX_SWARM_PETS] = { 	5, 5, -5, -5,
+	static const float swarm_pet_y[MAX_SWARM_PETS] = {	5, 5, -5, -5,
 														10, 10, -10, -10,
 														8, 8, -8, -8 };
 	TempPets(true);
@@ -1113,19 +1113,19 @@ void Client::SendAATimers() {
 }
 
 void Client::SendAATable() {
-    EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
 
-    AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
+	AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
 	aa2->aa_spent = GetAAPointsSpent();
 
-    uint32 i;
+	uint32 i;
 	for(i=0;i < MAX_PP_AA_ARRAY;i++){
 		aa2->aa_list[i].aa_skill = aa[i]->AA;
 		aa2->aa_list[i].aa_value = aa[i]->value;
 		aa2->aa_list[i].unknown08 = 0;
 	}
-    QueuePacket(outapp);
-    safe_delete(outapp);
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 void Client::SendPreviousAA(uint32 id, int seq){
@@ -1251,7 +1251,7 @@ void Client::SendAA(uint32 id, int seq) {
 	Utilizes two new fields: sof_next_id (which is the next id in the series), sof_current_level (ranks the AA's as the current level)
 	1) If no AA's purchased only display the base levels of each AA series.
 	2) When you purchase an AA and its rank is maxed it sends the packet for the completed AA, and the packet
-	   for the next aa in the series. The previous tier is removed from your window, and the new AA is displayed.
+	for the next aa in the series. The previous tier is removed from your window, and the new AA is displayed.
 	3) When you zone/buy your player profile will be checked and determine what AA can be displayed base on what you have already.
 	*/
 
@@ -1279,9 +1279,9 @@ void Client::SendAA(uint32 id, int seq) {
 
 							if (saa_pp->id == saa2->id)
 								break; //You already have this in the player profile.
-							else if ((saa_pp->sof_current_level <  saa2->sof_current_level) && (aa_value < saa_pp->max_level))
+							else if ((saa_pp->sof_current_level < saa2->sof_current_level) && (aa_value < saa_pp->max_level))
 								return; //DISABLE DISPLAY HIGHER - You have not reached max level yet of your current AA.
-							else if ((saa_pp->sof_current_level <  saa2->sof_current_level) && (aa_value == saa_pp->max_level) && (saa_pp->sof_next_id == saa2->id))
+							else if ((saa_pp->sof_current_level < saa2->sof_current_level) && (aa_value == saa_pp->max_level) && (saa_pp->sof_next_id == saa2->id))
 								IsBaseLevel = false; //ALLOW DISPLAY HIGHER
 						}
 					}
@@ -1321,9 +1321,9 @@ void Client::SendAA(uint32 id, int seq) {
 			SendAA_Struct* saa_next = nullptr;
 			saa_next = zone->FindAA(saa->sof_next_id);
 			if (saa_next &&
-			   (((GetClientVersionBit() == 4) && (saa_next->clientver > 4))
-			   || ((GetClientVersionBit() == 8) && (saa_next->clientver > 5))
-			   || ((GetClientVersionBit() == 16) && (saa_next->clientver > 6)))){
+				(((GetClientVersionBit() == 4) && (saa_next->clientver > 4))
+				|| ((GetClientVersionBit() == 8) && (saa_next->clientver > 5))
+				|| ((GetClientVersionBit() == 16) && (saa_next->clientver > 6)))){
 				saa->next_id=0xFFFFFFFF;
 			}
 		}
@@ -1359,7 +1359,7 @@ void Client::SendAA(uint32 id, int seq) {
 
 	if(value > 0)
 	{
-        // AA_Action stores the base ID
+		// AA_Action stores the base ID
 		const AA_DBAction *caa = &AA_Actions[saa->id - value + 1][value - 1];
 
 		if(caa && caa->reuse_time > 0)
@@ -1385,7 +1385,7 @@ void Client::SendAA(uint32 id, int seq) {
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	//will outapp delete the buffer for us even though it didnt make it?  --- Yes, it should
+	//will outapp delete the buffer for us even though it didnt make it? --- Yes, it should
 }
 
 void Client::SendAAList(){
@@ -1504,7 +1504,7 @@ void Client::ResetAA(){
 	for(itr=aa_points.begin();itr!=aa_points.end();itr++)
 		aa_points[itr->first] = 0;
 
-        for(int i = 0; i < _maxLeaderAA; ++i)
+		for(int i = 0; i < _maxLeaderAA; ++i)
 		m_pp.leader_abilities.ranks[i] = 0;
 
 	m_pp.group_leadership_points = 0;
@@ -1634,13 +1634,13 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 //this really need to be renamed to LoadAAActions()
 bool ZoneDatabase::LoadAAEffects() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	memset(AA_Actions, 0, sizeof(AA_Actions));	//I hope the compiler is smart about this size...
 
 	const char *query = "SELECT aaid,rank,reuse_time,spell_id,target,nonspell_action,nonspell_mana,nonspell_duration,"
-			    "       redux_aa,redux_rate,redux_aa2,redux_rate2 FROM aa_actions";
+					"redux_aa,redux_rate,redux_aa2,redux_rate2 FROM aa_actions";
 
 	if(RunQuery(query, static_cast<uint32>(strlen(query)), errbuf, &result)) {
 		//safe_delete_array(query);
@@ -1684,9 +1684,9 @@ bool ZoneDatabase::LoadAAEffects() {
 //AndMetal: this may now be obsolete since we have Zone::GetTotalAALevels()
 uint8 ZoneDatabase::GetTotalAALevels(uint32 skill_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	int total=0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(slot) from aa_effects where aaid=%i", skill_id), errbuf, &result)) {
 		safe_delete_array(query);
@@ -1704,8 +1704,8 @@ uint8 ZoneDatabase::GetTotalAALevels(uint32 skill_id) {
 
 //this will allow us to count the number of effects for an AA by pulling the info from memory instead of the database. hopefully this will same some CPU cycles
 uint8 Zone::GetTotalAALevels(uint32 skill_id) {
-    size_t sz = aa_effects[skill_id].size();
-    return sz >= 255 ? 255 : static_cast<uint8>(sz);
+	size_t sz = aa_effects[skill_id].size();
+	return sz >= 255 ? 255 : static_cast<uint8>(sz);
 }
 
 /*
@@ -1728,9 +1728,9 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
 		return;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT effectid, base1, base2, slot from aa_effects where aaid=%i order by slot asc", aa_struct->id), errbuf, &result)) {
 		int ndx=0;
 		while((row = mysql_fetch_row(result))!=nullptr) {
@@ -1749,9 +1749,9 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
 
 uint32 ZoneDatabase::CountAAs(){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	int count=0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(title_sid) from altadv_vars"), errbuf, &result)) {
 		if((row = mysql_fetch_row(result))!=nullptr)
@@ -1766,9 +1766,9 @@ uint32 ZoneDatabase::CountAAs(){
 
 uint32 ZoneDatabase::CountAAEffects(){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	int count=0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(id) from aa_effects"), errbuf, &result)) {
 		if((row = mysql_fetch_row(result))!=nullptr){
@@ -1864,7 +1864,7 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 					"WHERE "
 						"p.skill_id = a.prereq_skill"
 					"), "
-					"0)  AS prereq_skill_index, "
+					"0) AS prereq_skill_index, "
 				"a.prereq_minpoints, "
 				"a.spell_type, "
 				"a.spell_refresh, "
@@ -1961,21 +1961,21 @@ void Client::DurationRampage(uint32 duration)
 	}
 }
 
-AA_SwarmPetInfo::AA_SwarmPetInfo() 
-{ 
-    target = 0; 
-    owner_id = 0; 
-    duration = nullptr;
+AA_SwarmPetInfo::AA_SwarmPetInfo()
+{
+	target = 0;
+	owner_id = 0;
+	duration = nullptr;
 }
 
-AA_SwarmPetInfo::~AA_SwarmPetInfo() 
-{ 
-    target = 0; 
-    owner_id = 0; 
-    safe_delete(duration); 
+AA_SwarmPetInfo::~AA_SwarmPetInfo()
+{
+	target = 0;
+	owner_id = 0;
+	safe_delete(duration);
 }
 
-Mob *AA_SwarmPetInfo::GetOwner() 
-{ 
-    return entity_list.GetMobID(owner_id); 
+Mob *AA_SwarmPetInfo::GetOwner()
+{
+	return entity_list.GetMobID(owner_id);
 }

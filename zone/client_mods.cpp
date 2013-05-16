@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "masterentity.h"
@@ -39,9 +39,9 @@ int16 Client::GetMaxStat() const {
 		return (RuleI(Character, StatCap));
 
 	int level = GetLevel();
-	
+
 	int16 base = 0;
-	
+
 	if (level < 61) {
 		base = 255;
 	}
@@ -54,16 +54,16 @@ int16 Client::GetMaxStat() const {
 	else {
 		base = 330;
 	}
-	
+
 	return(base);
 }
 
-int16 Client::GetMaxResist() const 
+int16 Client::GetMaxResist() const
 {
 	int level = GetLevel();
 
 	int16 base = 500;
-	
+
 	if(level > 60)
 		base += ((level - 60) * 5);
 
@@ -229,7 +229,7 @@ int32 Client::CalcHPRegenCap()
 	int cap = RuleI(Character, ItemHealthRegenCap) + itembonuses.HeroicSTA/25;
 
 	cap += aabonuses.ItemHPRegenCap + spellbonuses.ItemHPRegenCap + itembonuses.ItemHPRegenCap;
-	
+
 	return (cap * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
@@ -247,19 +247,19 @@ int32 Client::CalcMaxHP() {
 	max_hp += spellbonuses.HP + aabonuses.HP;
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
-	
+
 	max_hp += max_hp * (spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000;
-	
+
 	if (cur_hp > max_hp)
 		cur_hp = max_hp;
-	
+
 	int hp_perc_cap = spellbonuses.HPPercCap;
 	if(hp_perc_cap) {
 		int curHP_cap = (max_hp * hp_perc_cap) / 100;
 		if (cur_hp > curHP_cap)
 			cur_hp = curHP_cap;
 	}
-	
+
 	return max_hp;
 }
 
@@ -283,7 +283,7 @@ uint16 Mob::GetClassLevelFactor(){
 				multiplier = 290;
 			else if (mlevel < 70)
 				multiplier = 300;
-			else 
+			else
 				multiplier = 311;
 			break;
 		}
@@ -379,19 +379,19 @@ int32 Client::CalcBaseHP()
 			SoDPost255 = 0;
 
 		int hp_factor = GetClassHPFactor();
-		
+
 		if (level < 41) {
-			base_hp = (5 + (GetLevel() * hp_factor / 12) + 
+			base_hp = (5 + (GetLevel() * hp_factor / 12) +
 				((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
 		}
 		else if (level < 81) {
-			base_hp = (5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) + 
-				((NormalSTA - SoDPost255) * hp_factor / 90) + 
+			base_hp = (5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
+				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * (GetLevel() - 40) * hp_factor / 1800));
 		}
-		else { 
-			base_hp = (5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) + 
-				((NormalSTA - SoDPost255) * hp_factor / 90) + 
+		else {
+			base_hp = (5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
+				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * hp_factor / 45));
 		}
 
@@ -405,7 +405,7 @@ int32 Client::CalcBaseHP()
 			Post255 = (GetSTA()-255)/2;
 		else
 			Post255 = 0;
-			
+
 		base_hp = (5)+(GetLevel()*lm/10) + (((GetSTA()-Post255)*GetLevel()*lm/3000)) + ((Post255*GetLevel())*lm/6000);
 	}
 	return base_hp;
@@ -420,7 +420,7 @@ uint32 Client::GetClassHPFactor() {
 	// Base HP over level 80 is factor / 10
 	// HP per STA point per level is factor / 30 for level 80+
 	// HP per STA under level 40 is the level 80 HP Per STA / 120, and for over 40 it is / 60.
-	
+
 	switch(GetClass())
 	{
 		case DRUID:
@@ -461,14 +461,14 @@ uint32 Client::GetClassHPFactor() {
 // This should return the combined AC of all the items the player is wearing.
 int16 Client::GetRawItemAC() {
 	int16 Total = 0;
-	
+
 	for (int16 slot_id=0; slot_id<21; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst && inst->IsType(ItemClassCommon)) {
 			Total += inst->GetItem()->AC;
 		}
 	}
-	
+
 	return Total;
 }
 
@@ -477,7 +477,7 @@ int16 Client::acmod() {
 	int level = GetLevel();
 	if(agility < 1 || level < 1)
 		return(0);
-	
+
 	if (agility <=74){
 		if (agility == 1)
 			return -24;
@@ -602,7 +602,7 @@ int16 Client::acmod() {
 				return 27;
 			else if (level <= 39)
 				return 37;
-			else 
+			else
 				return 44;
 		}
 		else if (agility == 100 && level >= 7){
@@ -872,7 +872,7 @@ int16 Client::CalcAC() {
 	}
 	int displayed = 0;
 	displayed += ((avoidance+mitigation)*1000)/847;	//natural AC
-	
+
 	//Iksar AC, untested
 	if (GetRace() == IKSAR) {
 		displayed += 12;
@@ -883,20 +883,20 @@ int16 Client::CalcAC() {
 		if (iksarlevel > 0)
 			displayed += iksarlevel * 12 / 10;
 	}
-	
+
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
 		bool equiped = CastToClient()->m_inv.GetItem(14);
 		if(equiped) {
 			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
-			if(shield == ItemTypeShield) 
+			if(shield == ItemTypeShield)
 				displayed += itembonuses.HeroicSTR/2;
 		}
 	}
-	
+
 	//spell AC bonuses are added directly to natural total
 	displayed += spellbonuses.AC;
-	
+
 	AC = displayed;
 	return(AC);
 }
@@ -907,19 +907,19 @@ int16 Client::GetACMit() {
 	if (m_pp.class_ == WIZARD || m_pp.class_ == MAGICIAN || m_pp.class_ == NECROMANCER || m_pp.class_ == ENCHANTER) {
 		mitigation = (GetSkill(DEFENSE) + itembonuses.HeroicAGI/10)/4 + (itembonuses.AC+1);
 		mitigation -= 4;
-	} 
+	}
 	else {
 		mitigation = (GetSkill(DEFENSE) + itembonuses.HeroicAGI/10)/3 + ((itembonuses.AC*4)/3);
 		if(m_pp.class_ == MONK)
 			mitigation += GetLevel() * 13/10;	//the 13/10 might be wrong, but it is close...
 	}
-	
+
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
 		bool equiped = CastToClient()->m_inv.GetItem(14);
 		if(equiped) {
 			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
-			if(shield == ItemTypeShield) 
+			if(shield == ItemTypeShield)
 				mitigation += itembonuses.HeroicSTR/2;
 		}
 	}
@@ -932,7 +932,7 @@ int16 Client::GetACAvoid() {
 	int avoidance = (acmod() + ((GetSkill(DEFENSE) + itembonuses.HeroicAGI/10)*16)/9);
 	if (avoidance < 0)
 		avoidance = 0;
-		
+
 	return(avoidance*1000/847);
 }
 
@@ -940,7 +940,7 @@ int32 Client::CalcMaxMana()
 {
 	switch(GetCasterClass())
 	{
-		case 'I': 
+		case 'I':
 		case 'W': {
 			max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
 			break;
@@ -958,18 +958,18 @@ int32 Client::CalcMaxMana()
 	if (max_mana < 0) {
 		max_mana = 0;
 	}
-	
+
 	if (cur_mana > max_mana) {
 		cur_mana = max_mana;
 	}
-	
+
 	int mana_perc_cap = spellbonuses.ManaPercCap;
 	if(mana_perc_cap) {
 		int curMana_cap = (max_mana * mana_perc_cap) / 100;
 		if (cur_mana > curMana_cap)
 			cur_mana = curMana_cap;
 	}
-	
+
 #if EQDEBUG >= 11
 	LogFile->write(EQEMuLog::Debug, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 #endif
@@ -986,11 +986,11 @@ int32 Client::CalcBaseMana()
 	int ConvertedWisInt = 0;
 	switch(GetCasterClass())
 	{
-		case 'I': 
+		case 'I':
 			WisInt = GetINT();
 
 			if (GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-				
+
 				if (WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if (WisInt > 201) {
@@ -1001,7 +1001,7 @@ int32 Client::CalcBaseMana()
 					ConvertedWisInt = WisInt;
 				}
 
-				if (GetLevel() < 41) { 
+				if (GetLevel() < 41) {
 					wisint_mana = (GetLevel() * 75 * ConvertedWisInt / 1000);
 					base_mana = (GetLevel() * 15);
 				}
@@ -1045,7 +1045,7 @@ int32 Client::CalcBaseMana()
 					ConvertedWisInt = WisInt;
 				}
 
-				if (GetLevel() < 41) { 
+				if (GetLevel() < 41) {
 					wisint_mana = (GetLevel() * 75 * ConvertedWisInt / 1000);
 					base_mana = (GetLevel() * 15);
 				}
@@ -1073,7 +1073,7 @@ int32 Client::CalcBaseMana()
 					max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
 			}
 			break;
-				
+
 		case 'N': {
 			max_m = 0;
 			break;
@@ -1091,11 +1091,11 @@ int32 Client::CalcBaseMana()
 	return max_m;
 }
 
-int32 Client::CalcBaseManaRegen() 
+int32 Client::CalcBaseManaRegen()
 {
 	uint8 clevel = GetLevel();
 	int32 regen = 0;
-	if (IsSitting() || (GetHorseId() != 0)) 
+	if (IsSitting() || (GetHorseId() != 0))
 	{
 		if(HasSkill(MEDITATE))
 			regen = (((GetSkill(MEDITATE) / 10) + (clevel - (clevel / 4))) / 4) + 4;
@@ -1108,12 +1108,12 @@ int32 Client::CalcBaseManaRegen()
 	return regen;
 }
 
-int32 Client::CalcManaRegen() 
+int32 Client::CalcManaRegen()
 {
 	uint8 clevel = GetLevel();
 	int32 regen = 0;
 	//this should be changed so we dont med while camping, etc...
-	if (IsSitting() || (GetHorseId() != 0)) 
+	if (IsSitting() || (GetHorseId() != 0))
 	{
 		BuffFadeBySitModifier();
 		if(HasSkill(MEDITATE)) {
@@ -1129,7 +1129,7 @@ int32 Client::CalcManaRegen()
 		this->medding = false;
 		regen = 2 + spellbonuses.ManaRegen + itembonuses.ManaRegen;
 	}
-	
+
 	//AAs
 	regen += aabonuses.ManaRegen;
 
@@ -1141,10 +1141,10 @@ int32 Client::CalcManaRegenCap()
 	int32 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
 	switch(GetCasterClass())
 	{
-		case 'I': 
+		case 'I':
 			cap += (itembonuses.HeroicINT / 25);
 			break;
-		case 'W': 
+		case 'W':
 			cap += (itembonuses.HeroicWIS / 25);
 			break;
 	}
@@ -1225,39 +1225,39 @@ int16 Client::CalcAlcoholPhysicalEffect()
 
 int16 Client::CalcSTR() {
 	int16 val = m_pp.STR + itembonuses.STR + spellbonuses.STR + CalcAlcoholPhysicalEffect();
-	
+
 	int16 mod = aabonuses.STR;
-	
+
 	if(val>255 && GetLevel() <= 60)
 		val = 255;
 	STR = val + mod;
-	
+
 	if(STR < 1)
 		STR = 1;
 
 	int m = GetMaxSTR();
 	if(STR > m)
 		STR = m;
-	
+
 	return(STR);
 }
 
 int16 Client::CalcSTA() {
 	int16 val = m_pp.STA + itembonuses.STA + spellbonuses.STA + CalcAlcoholPhysicalEffect();;
-	
+
 	int16 mod = aabonuses.STA;
-	
+
 	if(val>255 && GetLevel() <= 60)
 		val = 255;
 	STA = val + mod;
-	
+
 	if(STA < 1)
 		STA = 1;
 
 	int m = GetMaxSTA();
 	if(STA > m)
 		STA = m;
-	
+
 	return(STA);
 }
 
@@ -1269,7 +1269,7 @@ int16 Client::CalcAGI() {
 		val = 255;
 
 	int16 str = GetSTR();
-	
+
 	//Encumbered penalty
 	if(weight > (str * 10)) {
 		//AGI is halved when we double our weight, zeroed (defaults to 1) when we triple it. this includes AGI from AAs
@@ -1285,26 +1285,26 @@ int16 Client::CalcAGI() {
 	int m = GetMaxAGI();
 	if(AGI > m)
 		AGI = m;
-	
+
 	return(AGI);
 }
 
 int16 Client::CalcDEX() {
 	int16 val = m_pp.DEX + itembonuses.DEX + spellbonuses.DEX - CalcAlcoholPhysicalEffect();;
-	
+
 	int16 mod = aabonuses.DEX;
-	
+
 	if(val>255 && GetLevel() <= 60)
 		val = 255;
 	DEX = val + mod;
-	
+
 	if(DEX < 1)
 		DEX = 1;
 
 	int m = GetMaxDEX();
 	if(DEX > m)
 		DEX = m;
-	
+
 	return(DEX);
 }
 
@@ -1312,14 +1312,14 @@ int16 Client::CalcINT() {
 	int16 val = m_pp.INT + itembonuses.INT + spellbonuses.INT;
 
 	int16 mod = aabonuses.INT;
-	
+
 	if(val>255 && GetLevel() <= 60)
 		val = 255;
 	INT = val + mod;
-	
+
 	if(m_pp.intoxication)
 	{
-		int16 AlcINT  = INT - (int16)((float)m_pp.intoxication / 200.0f * (float)INT) - 1;
+		int16 AlcINT = INT - (int16)((float)m_pp.intoxication / 200.0f * (float)INT) - 1;
 
 		if((AlcINT < (int)(0.2 * INT)))
 			INT = (int)(0.2f * (float)INT);
@@ -1333,22 +1333,22 @@ int16 Client::CalcINT() {
 	int m = GetMaxINT();
 	if(INT > m)
 		INT = m;
-	
+
 	return(INT);
 }
 
 int16 Client::CalcWIS() {
 	int16 val = m_pp.WIS + itembonuses.WIS + spellbonuses.WIS;
-	
+
 	int16 mod = aabonuses.WIS;
-	
+
 	if(val>255 && GetLevel() <= 60)
 		val = 255;
 	WIS = val + mod;
 
 	if(m_pp.intoxication)
 	{
-		int16 AlcWIS  = WIS - (int16)((float)m_pp.intoxication / 200.0f * (float)WIS) - 1;
+		int16 AlcWIS = WIS - (int16)((float)m_pp.intoxication / 200.0f * (float)WIS) - 1;
 
 		if((AlcWIS < (int)(0.2 * WIS)))
 			WIS = (int)(0.2f * (float)WIS);
@@ -1362,26 +1362,26 @@ int16 Client::CalcWIS() {
 	int m = GetMaxWIS();
 	if(WIS > m)
 		WIS = m;
-	
+
 	return(WIS);
 }
 
 int16 Client::CalcCHA() {
 	int16 val = m_pp.CHA + itembonuses.CHA + spellbonuses.CHA;
-	
+
 	int16 mod = aabonuses.CHA;
-	
+
 	if(val>255 && GetLevel() <= 60)
 		val = 255;
 	CHA = val + mod;
-	
+
 	if(CHA < 1)
 		CHA = 1;
 
 	int m = GetMaxCHA();
 	if(CHA > m)
 		CHA = m;
-	
+
 	return(CHA);
 }
 
@@ -1409,7 +1409,7 @@ int Client::CalcHaste() {
 	} else {
 		cap = RuleI(Character, HasteCap);
 	}
-	
+
 	if(h > cap) h = cap;
 
 	h += spellbonuses.hastetype3;
@@ -1419,14 +1419,14 @@ int Client::CalcHaste() {
 
 	if (spellbonuses.inhibitmelee){
 		if (h >= 0)
-			h -= spellbonuses.inhibitmelee; 
-	
-		else 
+			h -= spellbonuses.inhibitmelee;
+
+		else
 			h -=((100+h)*spellbonuses.inhibitmelee/100);
 	}
-	
+
 	Haste = h;
-	return(Haste); 
+	return(Haste);
 }
 
 //The AA multipliers are set to be 5, but were 2 on WR
@@ -1487,12 +1487,12 @@ int16	Client::CalcMR()
 		default:
 			MR = 20;
 	}
-	
+
 	MR += itembonuses.MR + spellbonuses.MR + aabonuses.MR;
-	
+
 	if(GetClass() == WARRIOR)
 		MR += GetLevel() / 2;
-	
+
 	if(MR < 1)
 		MR = 1;
 
@@ -1557,21 +1557,21 @@ int16	Client::CalcFR()
 		default:
 			FR = 20;
 	}
-	
+
 	int c = GetClass();
 	if(c == RANGER) {
 		FR += 4;
-		
+
 		int l = GetLevel();
 		if(l > 49)
 			FR += l - 49;
 	}
-	
+
 	FR += itembonuses.FR + spellbonuses.FR + aabonuses.FR;
-	
+
 	if(FR < 1)
 		FR = 1;
-	
+
 	if(FR > GetMaxFR())
 		FR = GetMaxFR();
 
@@ -1633,25 +1633,25 @@ int16	Client::CalcDR()
 		default:
 			DR = 15;
 	}
-	
+
 	int c = GetClass();
 	if(c == PALADIN) {
 		DR += 8;
-		
+
 		int l = GetLevel();
 		if(l > 49)
 			DR += l - 49;
 
 	} else if(c == SHADOWKNIGHT) {
 		DR += 4;
-		
+
 		int l = GetLevel();
 		if(l > 49)
 			DR += l - 49;
 	}
-	
+
 	DR += itembonuses.DR + spellbonuses.DR + aabonuses.DR;
-	
+
 	if(DR < 1)
 		DR = 1;
 
@@ -1716,25 +1716,25 @@ int16	Client::CalcPR()
 		default:
 			PR = 15;
 	}
-	
+
 	int c = GetClass();
 	if(c == ROGUE) {
 		PR += 8;
-		
+
 		int l = GetLevel();
 		if(l > 49)
 			PR += l - 49;
 
 	} else if(c == SHADOWKNIGHT) {
 		PR += 4;
-		
+
 		int l = GetLevel();
 		if(l > 49)
 			PR += l - 49;
 	}
-	
+
 	PR += itembonuses.PR + spellbonuses.PR + aabonuses.PR;
-	
+
 	if(PR < 1)
 		PR = 1;
 
@@ -1799,18 +1799,18 @@ int16	Client::CalcCR()
 		default:
 			CR = 25;
 	}
-	
+
 	int c = GetClass();
 	if(c == RANGER) {
 		CR += 4;
-		
+
 		int l = GetLevel();
 		if(l > 49)
 			CR += l - 49;
 	}
-	
+
 	CR += itembonuses.CR + spellbonuses.CR + aabonuses.CR;
-	
+
 	if(CR < 1)
 		CR = 1;
 
@@ -1823,7 +1823,7 @@ int16	Client::CalcCR()
 int16	Client::CalcCorrup()
 {
 	Corrup = GetBaseCorrup() + itembonuses.Corrup + spellbonuses.Corrup + aabonuses.Corrup;
-	
+
 	if(Corrup > GetMaxCorrup())
 		Corrup = GetMaxCorrup();
 
@@ -1838,13 +1838,13 @@ int16 Client::CalcATK() {
 uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 	if(GetClass() != BARD)
 		return(10);
-	
+
 	uint16 effectmod = 10;
-	
+
 	//this should never use spell modifiers...
 	//if a spell grants better modifers, they are copied into the item mods
 	//because the spells are supposed to act just like having the intrument.
-	
+
 	//item mods are in 10ths of percent increases
 	switch(spells[spell_id].skill) {
 		case PERCUSSION_INSTRUMENTS:
@@ -1899,7 +1899,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 			effectmod = 10;
 			break;
 	}
-	
+
 	if(spells[spell_id].skill == SINGING)
 	{
 		effectmod += 2*GetAA(aaSingingMastery);
@@ -1916,24 +1916,24 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 
 	if(effectmod < 10)
 		effectmod = 10;
-	
+
 	_log(SPELLS__BARDS, "%s::GetInstrumentMod() spell=%d mod=%d\n", GetName(), spell_id, effectmod);
-	
+
 	return(effectmod);
 }
 
 void Client::CalcMaxEndurance()
 {
 	max_end = CalcBaseEndurance() + spellbonuses.Endurance + itembonuses.Endurance;
-	
+
 	if (max_end < 0) {
 		max_end = 0;
 	}
-		
+
 	if (cur_end > max_end) {
 		cur_end = max_end;
 	}
-	
+
 	int end_perc_cap = spellbonuses.EndPercCap;
 	if(end_perc_cap) {
 		int curEnd_cap = (max_end * end_perc_cap) / 100;
@@ -1966,7 +1966,7 @@ int32 Client::CalcBaseEndurance()
 			ConvertedStats = Stats;
 		}
 
-		if (GetLevel() < 41) { 
+		if (GetLevel() < 41) {
 			sta_end = (GetLevel() * 75 * ConvertedStats / 1000);
 			base_endurance = (GetLevel() * 15);
 		}
@@ -1988,24 +1988,24 @@ int32 Client::CalcBaseEndurance()
 		int at_most_800 = Stats;
 		if(at_most_800 > 800)
 			at_most_800 = 800;
-		
+
 		int Bonus400to800 = 0;
 		int HalfBonus400to800 = 0;
 		int Bonus800plus = 0;
 		int HalfBonus800plus = 0;
-		
+
 		int BonusUpto800 = int( at_most_800 / 4 ) ;
 		if(Stats > 400) {
 			Bonus400to800 = int( (at_most_800 - 400) / 4 );
 			HalfBonus400to800 = int( max( ( at_most_800 - 400 ), 0 ) / 8 );
-			
+
 			if(Stats > 800) {
 				Bonus800plus = int( (Stats - 800) / 8 ) * 2;
 				HalfBonus800plus = int( (Stats - 800) / 16 );
 			}
 		}
 		int bonus_sum = BonusUpto800 + Bonus400to800 + HalfBonus400to800 + Bonus800plus + HalfBonus800plus;
-		
+
 		base_end = LevelBase;
 
 		//take all of the sums from above, then multiply by level*0.075
@@ -2023,7 +2023,7 @@ int32 Client::CalcEnduranceRegen() {
 
 int32 Client::CalcEnduranceRegenCap() {
 	int cap = (RuleI(Character, ItemEnduranceRegenCap) + itembonuses.HeroicSTR/25 + itembonuses.HeroicDEX/25 + itembonuses.HeroicAGI/25 + itembonuses.HeroicSTA/25);
-		
+
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 

@@ -9,7 +9,7 @@ EQEmuErrorLog::EQEmuErrorLog()
 	mErrorLog = NULL;
 	mErrorLog = fopen(LOG_FILE_NAME, "w");
 	if(!mErrorLog) {
-		Log(eqEmuLogConsole,"Opening of %s for writing failed, debug output will be tied to console only.", LOG_FILE_NAME); 
+		Log(eqEmuLogConsole,"Opening of %s for writing failed, debug output will be tied to console only.", LOG_FILE_NAME);
 	}
 	else
 		Log(eqEmuLogBoth, "EQEmuErrorLog Init Successful.");
@@ -26,11 +26,11 @@ EQEmuErrorLog::EQEmuErrorLog()
 
 }
 EQEmuErrorLog::~EQEmuErrorLog()
-{ 
+{
 	Log(eqEmuLogBoth, "EQEmuErrorLog Shutdown.");
-	if(mErrorLog) { 
-		fclose(mErrorLog); 
-		mErrorLog = NULL; 
+	if(mErrorLog) {
+		fclose(mErrorLog);
+		mErrorLog = NULL;
 	}
 }
 
@@ -47,7 +47,7 @@ void EQEmuErrorLog::Log(unsigned int mOutputType, const char *msg, ...)
     struct tm *mTime;
     time(&mClock);
     mTime = localtime(&mClock);
-	
+
 	if(mOutputType & eqEmuLogConsole){
 		printf("[Debug] [%02d.%02d.%02d - %02d:%02d:%02d] %s\n", mTime->tm_mon+1, mTime->tm_mday, mTime->tm_year%100, mTime->tm_hour, mTime->tm_min, mTime->tm_sec, buffer);
 	}
@@ -65,7 +65,7 @@ void EQEmuErrorLog::Log(unsigned int mOutputType, const char *msg, ...)
 			fprintf(mErrorLogSQL, "%s;\n\n", buffer);
 		}
 	}
-	
+
 	if(buffer)
 		delete[] buffer;
 }

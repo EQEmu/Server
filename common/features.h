@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2004  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef FEATURES_H
 #define FEATURES_H
@@ -22,7 +22,7 @@
 
 	This file defines many optional features for the emu
 	as well as various parameters used by the emu.
-	
+
 	If ambitious, most of these could prolly be turned into
 	database variables, but the really frequently run pieces
 	of code, should not be done that way for speed reasons IMO
@@ -185,7 +185,7 @@ enum {	//timer settings, all in milliseconds
 };
 
 enum {	//some random constants
-	//each of these attack modifiers are added to the NPC's level to determine their 
+	//each of these attack modifiers are added to the NPC's level to determine their
 	//probability of executing such an attack (which may or may not hit)
 	NPCDualAttackModifier = 20,
 	NPCTripleAttackModifier = 0,
@@ -200,7 +200,7 @@ enum {	//some random constants
 //an npc can be and still let the theif PP them
 #define THIEF_PICKPOCKET_OVER 5
 
-//this is the % chance that an NPC will dual wield a 2nd weapon 
+//this is the % chance that an NPC will dual wield a 2nd weapon
 //in its loot table, if it is able to.
 //Aug 2007: was 5% chance.. changed to 100% by default since that seems more normal
 //Kept it intact codewise incase someone wants to or is already using it.
@@ -221,14 +221,14 @@ enum {	//some random constants
 //minimum level to do alchemy
 #define MIN_LEVEL_ALCHEMY 25
 
-//chance ratio that a 
+//chance ratio that a
 #define THREATENLY_ARRGO_CHANCE 32 // 32/128 (25%) chance that a mob will arrgo on con Threatenly
 
 // max factions per npc faction list
 #define MAX_NPC_FACTIONS 20
 
 //value caps
-#define MAX_FACTION	 1500
+#define MAX_FACTION 1500
 #define MIN_FACTION -1500
 
 //The Level Cap:

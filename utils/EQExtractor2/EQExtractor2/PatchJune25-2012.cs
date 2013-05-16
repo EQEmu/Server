@@ -13,8 +13,8 @@ namespace EQExtractor2.Patches
         public PatchJune252012Decoder()
         {
             Version = "EQ Client Build Date June 25 2012.";
-                        
+
             PatchConfFileName = "patch_June25-2012.conf";
-        }        
+        }
     }
 }

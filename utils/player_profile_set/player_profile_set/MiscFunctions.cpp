@@ -231,8 +231,8 @@ bool atobool(char* iBool) {
 	return false;
 }
 
-/* 
- * solar: generate a random integer in the range low-high 
+/*
+ * solar: generate a random integer in the range low-high
  * this should be used instead of the rand()%limit method
  */
 int MakeRandomInt(int low, int high)
@@ -255,7 +255,7 @@ double MakeRandomFloat(double low, double high)
 char *CleanMobName(const char *in, char *out)
 {
 	unsigned i, j;
-	
+
 	for(i = j = 0; i < strlen(in); i++)
 	{
 		// convert _ to space.. any other conversions like this?  I *think* this

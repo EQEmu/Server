@@ -15,27 +15,27 @@ class StructStrategy;
 class EQStreamIdentifier {
 public:
 	~EQStreamIdentifier();
-	
+
 	//registration interface.
 	void RegisterPatch(const EQStream::Signature &sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs);
-	
+
 	//main processing interface
 	void Process();
 	void AddStream(EQStream *& eqs);
 	EQStreamInterface *PopIdentified();
-	
+
 protected:
-	
+
 	//registered patches..
 	class Patch {
 	public:
 		std::string				name;
-		EQStream::Signature 	signature;
+		EQStream::Signature		signature;
 		OpcodeManager **		opcodes;
 		const StructStrategy *structs;
 	};
 	std::vector<Patch *> m_patches;	//we own these objects.
-	
+
 	//pending streams..
 	class Record {
 	public:
