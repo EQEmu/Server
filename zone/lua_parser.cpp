@@ -5,6 +5,7 @@
 #include <boost/any.hpp>
 
 #include "masterentity.h"
+#include "../common/spdat.h"
 #include "../common/seperator.h"
 #include "lua_entity.h"
 #include "lua_mob.h"

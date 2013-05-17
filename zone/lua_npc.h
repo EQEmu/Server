@@ -10,13 +10,14 @@ class Lua_NPC : public Lua_Mob
 {
 	typedef NPC NativeType;
 public:
-	Lua_NPC() { d_ = nullptr; }
-	Lua_NPC(NativeType *d) { d_ = d; }
+	Lua_NPC() { }
+	Lua_NPC(NPC *d) { SetLuaPtrData(d); }
 	virtual ~Lua_NPC() { }
 
-	operator NativeType* () {
-		if(d_) {
-			return reinterpret_cast<NativeType*>(d_);
+	operator NPC*() {
+		void *d = GetLuaPtrData();
+		if(d) {
+			return reinterpret_cast<NPC*>(d);
 		}
 
 		return nullptr;

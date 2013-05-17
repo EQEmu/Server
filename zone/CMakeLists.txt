@@ -38,6 +38,7 @@ SET(zone_sources
 	lua_npc.cpp
 	lua_parser.cpp
 	lua_parser_events.cpp
+	lua_spell.cpp
 	embperl.cpp
 	embxs.cpp
 	entity.cpp
@@ -136,6 +137,8 @@ SET(zone_headers
 	lua_npc.h
 	lua_parser.h
 	lua_parser_events.h
+	lua_ptr.h
+	lua_spell.h
 	map.h
 	masterentity.h
 	maxskill.h

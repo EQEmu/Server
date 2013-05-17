@@ -2,6 +2,8 @@
 #define EQEMU_LUA_ENTITY_H
 #ifdef LUA_EQEMU
 
+#include "lua_ptr.h"
+
 class Entity;
 class Lua_Client;
 class Lua_NPC;
@@ -24,24 +26,23 @@ class Lua_Mob;
 #define Lua_Safe_Call_NPC() if(!d_) { return Lua_NPC(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
 #define Lua_Safe_Call_Client() if(!d_) { return Lua_Client(); } NativeType *self = reinterpret_cast<Type*>(d_)
 
-class Lua_Entity
+class Lua_Entity : public Lua_Ptr
 {
 	typedef Entity NativeType;
 public:
-	Lua_Entity() { d_ = nullptr; }
-	Lua_Entity(NativeType *d) : d_(d) { }
+	Lua_Entity() { }
+	Lua_Entity(Entity *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Entity() { }
 
-	operator NativeType* () {
-		if(d_) {
-			return reinterpret_cast<NativeType*>(d_);
+	operator Entity*() {
+		void *d = GetLuaPtrData();
+		if(d) {
+			return reinterpret_cast<Entity*>(d);
 		}
 
 		return nullptr;
 	}
 
-	bool Null();
-	bool Valid();
 	bool IsClient();
 	bool IsNPC();
 	bool IsMob();
@@ -64,8 +65,6 @@ public:
 	//Lua_Doors CastToDoors();
 	//Lua_Trap CastToTrap();
 	//Lua_Beacon CastToBeacon();
-
-	void *d_;
 };
 
 #endif

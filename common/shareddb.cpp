@@ -1636,6 +1636,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			}
 
 			++counter;
+			sp[tempid].id = tempid;
 			strn0cpy(sp[tempid].name, row[1], sizeof(sp[tempid].name));
 			strn0cpy(sp[tempid].player_1, row[2], sizeof(sp[tempid].player_1));
 			strn0cpy(sp[tempid].teleport_zone, row[3], sizeof(sp[tempid].teleport_zone));

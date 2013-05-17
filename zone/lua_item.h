@@ -2,27 +2,26 @@
 #define EQEMU_LUA_ITEM_H
 #ifdef LUA_EQEMU
 
+#include "lua_ptr.h"
+
 class ItemInst;
 
-class Lua_Item
+class Lua_Item : public Lua_Ptr
 {
+	typedef ItemInst NativeType;
 public:
-	Lua_Item() { d_ = nullptr; }
-	Lua_Item(ItemInst *d) { d_ = d; }
+	Lua_Item() { }
+	Lua_Item(ItemInst *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Item() { }
 
-	operator ItemInst* () {
-		if(d_) {
-			return reinterpret_cast<ItemInst*>(d_);
+	operator ItemInst*() {
+		void *d = GetLuaPtrData();
+		if(d) {
+			return reinterpret_cast<ItemInst*>(d);
 		}
 
 		return nullptr;
 	}
-
-	bool Null();
-	bool Valid();
-
-	void *d_;
 };
 
 #endif

@@ -10,13 +10,14 @@ class Lua_Client : public Lua_Mob
 {
 	typedef Client NativeType;
 public:
-	Lua_Client() { d_ = nullptr; }
-	Lua_Client(NativeType *d) { d_ = d; }
+	Lua_Client() { }
+	Lua_Client(Client *d) { SetLuaPtrData(d); }
 	virtual ~Lua_Client() { }
 
-	operator NativeType* () {
-		if(d_) {
-			return reinterpret_cast<NativeType*>(d_);
+	operator Client*() {
+		void *d = GetLuaPtrData();
+		if(d) {
+			return reinterpret_cast<Client*>(d);
 		}
 
 		return nullptr;

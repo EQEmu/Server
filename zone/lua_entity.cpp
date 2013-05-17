@@ -6,14 +6,6 @@
 #include "lua_client.h"
 #include "lua_npc.h"
 
-bool Lua_Entity::Null() {
-	return d_ == nullptr;
-}
-
-bool Lua_Entity::Valid() {
-	return d_ != nullptr;
-}
-
 bool Lua_Entity::IsClient() {
 	Lua_Safe_Call_Bool();
 	return self->IsClient();
@@ -75,17 +67,20 @@ int Lua_Entity::GetID() {
 }
 
 Lua_Client Lua_Entity::CastToClient() {
-	Client *m = reinterpret_cast<Client*>(d_);
+	void *d = GetLuaPtrData();
+	Client *m = reinterpret_cast<Client*>(d);
 	return Lua_Client(m);
 }
 
 Lua_NPC Lua_Entity::CastToNPC() {
-	NPC *m = reinterpret_cast<NPC*>(d_);
+	void *d = GetLuaPtrData();
+	NPC *m = reinterpret_cast<NPC*>(d);
 	return Lua_NPC(m);
 }
 
 Lua_Mob Lua_Entity::CastToMob() {
-	Mob *m = reinterpret_cast<Mob*>(d_);
+	void *d = GetLuaPtrData();
+	Mob *m = reinterpret_cast<Mob*>(d);
 	return Lua_Mob(m);
 }
 

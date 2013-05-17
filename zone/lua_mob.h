@@ -10,13 +10,14 @@ class Lua_Mob : public Lua_Entity
 {
 	typedef Mob NativeType;
 public:
-	Lua_Mob() { d_ = nullptr; }
-	Lua_Mob(NativeType *d) { d_ = d; }
+	Lua_Mob() { }
+	Lua_Mob(Mob *d) { SetLuaPtrData(d); }
 	virtual ~Lua_Mob() { }
 
-	operator NativeType* () {
-		if(d_) {
-			return reinterpret_cast<NativeType*>(d_);
+	operator Mob*() {
+		void *d = GetLuaPtrData();
+		if(d) {
+			return reinterpret_cast<Mob*>(d);
 		}
 
 		return nullptr;
