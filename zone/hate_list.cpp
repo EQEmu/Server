@@ -20,8 +20,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
+#include <list>
 #include "masterentity.h"
-#include "../common/linked_list.h"
 #include "../common/rulesys.h"
 #include "../common/MiscFunctions.h"
 #include "hate_list.h"
@@ -44,26 +44,27 @@ HateList::~HateList()
 // checks if target still is in frenzy mode
 void HateList::CheckFrenzyHate()
 {
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while(iterator.MoreElements())
+	auto iterator = list.begin();
+	while(iterator != list.end())
 	{
-		if (iterator.GetData()->ent->GetHPRatio() >= 20)
-			iterator.GetData()->bFrenzy = false;
-		iterator.Advance();
+		if ((*iterator)->ent->GetHPRatio() >= 20)
+			(*iterator)->bFrenzy = false;
+		++iterator;
 	}
 }
 
 void HateList::Wipe()
 {
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
+	auto iterator = list.begin();
 
-	while(iterator.MoreElements())
+	while(iterator != list.end())
 	{
-		Mob* m = iterator.GetData()->ent;
+		Mob* m = (*iterator)->ent;
 		parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), m, "0", 0);
-		iterator.RemoveCurrent();
+		//iterator
+
+		delete (*iterator);
+		iterator = list.erase(iterator);
 
 		if(m->IsClient())
 			m->CastToClient()->DecrementAggroCount();
@@ -72,7 +73,7 @@ void HateList::Wipe()
 
 bool HateList::IsOnHateList(Mob *mob)
 {
-	if (Find(mob))
+	if(Find(mob))
 		return true;
 	return false;
 }
@@ -80,13 +81,12 @@ bool HateList::IsOnHateList(Mob *mob)
 tHateEntry *HateList::Find(Mob *ent)
 {
 	_ZP(HateList_Find);
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while(iterator.MoreElements())
+	auto iterator = list.begin();
+	while(iterator != list.end())
 	{
-		if(iterator.GetData()->ent == ent)
-			return iterator.GetData();
-		iterator.Advance();
+		if((*iterator)->ent == ent)
+			return (*iterator);
+		++iterator;
 	}
 	return nullptr;
 }
@@ -111,40 +111,39 @@ Mob* HateList::GetDamageTop(Mob* hater)
 	Raid* r = nullptr;
 	uint32 dmg_amt = 0;
 
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while(iterator.MoreElements())
+	auto iterator = list.begin();
+	while(iterator != list.end())
 	{
 		grp = nullptr;
 		r = nullptr;
 
-		if(iterator.GetData()->ent && iterator.GetData()->ent->IsClient()){
-			r = entity_list.GetRaidByClient(iterator.GetData()->ent->CastToClient());
+		if((*iterator)->ent && (*iterator)->ent->IsClient()){
+			r = entity_list.GetRaidByClient((*iterator)->ent->CastToClient());
 		}
 
-		grp = entity_list.GetGroupByMob(iterator.GetData()->ent);
+		grp = entity_list.GetGroupByMob((*iterator)->ent);
 
-		if(iterator.GetData()->ent && r){
+		if((*iterator)->ent && r){
 			if(r->GetTotalRaidDamage(hater) >= dmg_amt)
 			{
-				current = iterator.GetData()->ent;
+				current = (*iterator)->ent;
 				dmg_amt = r->GetTotalRaidDamage(hater);
 			}
 		}
-		else if (iterator.GetData()->ent != nullptr && grp != nullptr)
+		else if ((*iterator)->ent != nullptr && grp != nullptr)
 		{
 			if (grp->GetTotalGroupDamage(hater) >= dmg_amt)
 			{
-				current = iterator.GetData()->ent;
+				current = (*iterator)->ent;
 				dmg_amt = grp->GetTotalGroupDamage(hater);
 			}
 		}
-		else if (iterator.GetData()->ent != nullptr && (uint32)iterator.GetData()->damage >= dmg_amt)
+		else if ((*iterator)->ent != nullptr && (uint32)(*iterator)->damage >= dmg_amt)
 		{
-			current = iterator.GetData()->ent;
-			dmg_amt = iterator.GetData()->damage;
+			current = (*iterator)->ent;
+			dmg_amt = (*iterator)->damage;
 		}
-		iterator.Advance();
+		++iterator;
 	}
 	return current;
 }
@@ -155,15 +154,14 @@ Mob* HateList::GetClosest(Mob *hater) {
 	float closedist = 99999.9f;
 	float thisdist;
 
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		thisdist = iterator.GetData()->ent->DistNoRootNoZ(*hater);
-		if(iterator.GetData()->ent != nullptr && thisdist <= closedist) {
+	auto iterator = list.begin();
+	while(iterator != list.end()) {
+		thisdist = (*iterator)->ent->DistNoRootNoZ(*hater);
+		if((*iterator)->ent != nullptr && thisdist <= closedist) {
 			closedist = thisdist;
-			close = iterator.GetData()->ent;
+			close = (*iterator)->ent;
 		}
-		iterator.Advance();
+		++iterator;
 	}
 
 	if (close == 0 && hater->IsNPC())
@@ -198,7 +196,7 @@ void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAd
 		p->damage = (in_dam>=0)?in_dam:0;
 		p->hate = in_hate;
 		p->bFrenzy = bFrenzy;
-		list.Append(p);
+		list.push_back(p);
 		parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "1", 0);
 
 		if(ent->IsClient())
@@ -209,15 +207,15 @@ void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAd
 bool HateList::RemoveEnt(Mob *ent)
 {
 	bool found = false;
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
+	auto iterator = list.begin();
 
-	while(iterator.MoreElements())
+	while(iterator != list.end())
 	{
-		if(iterator.GetData()->ent == ent)
+		if((*iterator)->ent == ent)
 		{
 			parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "0", 0);
-			iterator.RemoveCurrent();
+			delete (*iterator);
+			iterator = list.erase(iterator);
 			found = true;
 
 			if(ent->IsClient())
@@ -225,7 +223,7 @@ bool HateList::RemoveEnt(Mob *ent)
 
 			}
 		else
-			iterator.Advance();
+			++iterator;
 	}
 	return found;
 }
@@ -234,20 +232,19 @@ void HateList::DoFactionHits(int32 nfl_id) {
 	_ZP(HateList_DoFactionHits);
 	if (nfl_id <= 0)
 		return;
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while(iterator.MoreElements())
+	auto iterator = list.begin();
+	while(iterator != list.end())
 	{
 		Client *p;
 
-		if (iterator.GetData()->ent && iterator.GetData()->ent->IsClient())
-			p = iterator.GetData()->ent->CastToClient();
+		if ((*iterator)->ent && (*iterator)->ent->IsClient())
+			p = (*iterator)->ent->CastToClient();
 		else
 			p = nullptr;
 
 		if (p)
 			p->SetFactionLevel(p->CharacterID(), nfl_id, p->GetBaseClass(), p->GetBaseRace(), p->GetDeity());
-		iterator.Advance();
+		++iterator;
 	}
 }
 
@@ -262,27 +259,26 @@ Mob *HateList::GetTop(Mob *center)
 		int32 hateClientTypeInRange = -1;
 		int skipped_count = 0;
 
-		LinkedListIterator<tHateEntry*> iterator(list);
-		iterator.Reset();
-		while(iterator.MoreElements())
+		auto iterator = list.begin();
+		while(iterator != list.end())
 		{
-			tHateEntry *cur = iterator.GetData();
+			tHateEntry *cur = (*iterator);
 			int16 aggroMod = 0;
 
 			if(!cur){
-				iterator.Advance();
+				++iterator;
 				continue;
 			}
 
 			if(!cur->ent){
-				iterator.Advance();
+				++iterator;
 				continue;
 			}
 
 			if(center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
 				if(!zone->watermap->InLiquid(cur->ent->GetX(), cur->ent->GetY(), cur->ent->GetZ())) {
 					skipped_count++;
-					iterator.Advance();
+					++iterator;
 					continue;
 				}
 			}
@@ -293,7 +289,7 @@ Mob *HateList::GetTop(Mob *center)
 					top = cur->ent;
 					hate = 0;
 				}
-				iterator.Advance();
+				++iterator;
 				continue;
 			}
 
@@ -348,7 +344,7 @@ Mob *HateList::GetTop(Mob *center)
 				top = cur->ent;
 			}
 
-			iterator.Advance();
+			++iterator;
 		}
 
 		if(topClientTypeInRange != nullptr && top != nullptr) {
@@ -382,16 +378,15 @@ Mob *HateList::GetTop(Mob *center)
 		}
 	}
 	else{
-		LinkedListIterator<tHateEntry*> iterator(list);
-		iterator.Reset();
+		auto iterator = list.begin();
 		int skipped_count = 0;
-		while(iterator.MoreElements())
+		while(iterator != list.end())
 		{
-			tHateEntry *cur = iterator.GetData();
+			tHateEntry *cur = (*iterator);
 			if(center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
 				if(!zone->watermap->InLiquid(cur->ent->GetX(), cur->ent->GetY(), cur->ent->GetZ())) {
 					skipped_count++;
-					iterator.Advance();
+					++iterator;
 					continue;
 				}
 			}
@@ -401,7 +396,7 @@ Mob *HateList::GetTop(Mob *center)
 				top = cur->ent;
 				hate = cur->hate;
 			}
-			iterator.Advance();
+			++iterator;
 		}
 		if(top == nullptr && skipped_count > 0) {
 			return center->GetTarget();
@@ -416,17 +411,16 @@ Mob *HateList::GetMostHate(){
 	Mob* top = nullptr;
 	int32 hate = -1;
 
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while(iterator.MoreElements())
+	auto iterator = list.begin();
+	while(iterator != list.end())
 	{
-		tHateEntry *cur = iterator.GetData();
+		tHateEntry *cur = (*iterator);
 		if(cur->ent != nullptr && (cur->hate > hate))
 		{
 			top = cur->ent;
 			hate = cur->hate;
 		}
-		iterator.Advance();
+		++iterator;
 	}
 	return top;
 }
@@ -434,22 +428,13 @@ Mob *HateList::GetMostHate(){
 
 Mob *HateList::GetRandom()
 {
-	int count = 0;
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		iterator.Advance();
-		count++;
-	}
-	if(!count)
-		return nullptr;
-
-	int random = MakeRandomInt(0, count-1);
-	iterator.Reset();
+	int count = list.size();
+	auto iterator = list.begin();
+	int random = MakeRandomInt(0, count - 1);
 	for (int i = 0; i < random; i++)
-		iterator.Advance();
-	return iterator.GetData()->ent;
+		++iterator;
+	
+	return (*iterator)->ent;
 }
 
 int32 HateList::GetEntHate(Mob *ent, bool damage)
@@ -470,22 +455,21 @@ int32 HateList::GetEntHate(Mob *ent, bool damage)
 bool HateList::IsEmpty() {
 	_ZP(HateList_IsEmpty);
 
-	return(list.Count() == 0);
+	return(list.size() == 0);
 }
 
 // Prints hate list to a client
 void HateList::PrintToClient(Client *c)
 {
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while (iterator.MoreElements())
+	auto iterator = list.begin();
+	while (iterator != list.end())
 	{
-		tHateEntry *e = iterator.GetData();
+		tHateEntry *e = (*iterator);
 		c->Message(0, "- name: %s, damage: %d, hate: %d",
 			(e->ent && e->ent->GetName()) ? e->ent->GetName() : "(null)",
 			e->damage, e->hate);
 
-		iterator.Advance();
+		++iterator;
 	}
 }
 
@@ -496,12 +480,11 @@ int HateList::AreaRampage(Mob *caster, Mob *target)
 
 	int ret = 0;
 	std::list<uint32> id_list;
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while (iterator.MoreElements())
+	auto iterator = list.begin();
+	while (iterator != list.end())
 	{
-		tHateEntry *h = iterator.GetData();
-		iterator.Advance();
+		tHateEntry *h = (*iterator);
+		++iterator;
 		if(h && h->ent && h->ent != caster)
 		{
 			if(caster->CombatRange(h->ent))
@@ -539,11 +522,10 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 	//So keep a list of entity ids and look up after
 	std::list<uint32> id_list;
 	range = range * range;
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while (iterator.MoreElements())
+	auto iterator = list.begin();
+	while (iterator != list.end())
 	{
-		tHateEntry *h = iterator.GetData();
+		tHateEntry *h = (*iterator);
 		if(range > 0)
 		{
 			if(caster->DistNoRoot(*h->ent) <= range)
@@ -555,7 +537,7 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 		{
 			id_list.push_back(h->ent->GetID());
 		}
-		iterator.Advance();
+		++iterator;
 	}
 
 	std::list<uint32>::iterator iter = id_list.begin();
@@ -570,16 +552,3 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 	}
 }
 
-
-void HateList::GetHateList(std::list<tHateEntry*> &h_list)
-{
-	h_list.clear();
-	LinkedListIterator<tHateEntry*> iterator(list);
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		tHateEntry *ent = iterator.GetData();
-		h_list.push_back(ent);
-		iterator.Advance();
-	}
-}

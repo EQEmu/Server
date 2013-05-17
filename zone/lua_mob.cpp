@@ -757,8 +757,7 @@ Lua_HateList Lua_Mob::GetHateList() {
 	Lua_Safe_Call_HateList();
 	Lua_HateList ret;
 	
-	std::list<tHateEntry*> h_list;
-	self->GetHateList(h_list);
+	auto h_list = self->GetHateList();
 	auto iter = h_list.begin();
 	while(iter != h_list.end()) {
 		tHateEntry *ent = (*iter);

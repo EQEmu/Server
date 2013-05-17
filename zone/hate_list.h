@@ -68,15 +68,15 @@ public:
 	void PrintToClient(Client *c);
 
 	//For accessing the hate list via perl; don't use for anything else
-	void GetHateList(std::list<tHateEntry*> &h_list);
+	std::list<tHateEntry*>& GetHateList() { return list; }
 
 	//setting owner
 	void SetOwner(Mob *newOwner) { owner = newOwner; }
 
 protected:
-	tHateEntry *Find(Mob *ent);
+	tHateEntry* Find(Mob *ent);
 private:
-	LinkedList<tHateEntry*> list;
+	std::list<tHateEntry*> list;
 	Mob *owner;
 };
 

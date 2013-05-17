@@ -409,7 +409,7 @@ public:
 	void RemoveFromFeignMemory(Client* attacker);
 	void ClearFeignMemory();
 	void PrintHateListToClient(Client *who) { hate_list.PrintToClient(who); }
-	void GetHateList(std::list<tHateEntry*> &h_list) { return hate_list.GetHateList(h_list); }
+	std::list<tHateEntry*>& GetHateList() { return hate_list.GetHateList(); }
 	bool CheckLos(Mob* other);
 	bool CheckLosFN(Mob* other);
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
