@@ -314,7 +314,7 @@ float Client::mod_tradeskill_skillup(float chance_stage2) {
 }
 
 //Tribute value override
-int32 Client::mod_tribute_item_value(int32 pts) {
+int32 Client::mod_tribute_item_value(int32 pts, const ItemInst* item) {
 	return(0);
 }
 
