@@ -2,6 +2,8 @@
 
 #include "masterentity.h"
 #include "lua_mob.h"
+#include "lua_hate_entry.h"
+#include "lua_hate_list.h"
 #include "lua_client.h"
 
 const char *Lua_Mob::GetName() {
@@ -751,5 +753,25 @@ Lua_Mob Lua_Mob::GetOwner() {
 	return Lua_Mob(self->GetOwner());
 }
 
+Lua_HateList Lua_Mob::GetHateList() {
+	Lua_Safe_Call_HateList();
+	Lua_HateList ret;
+	
+	std::list<tHateEntry*> h_list;
+	self->GetHateList(h_list);
+	auto iter = h_list.begin();
+	while(iter != h_list.end()) {
+		tHateEntry *ent = (*iter);
+		Lua_HateEntry e;
+		e.ent = Lua_Mob(ent->ent);
+		e.damage = ent->damage;
+		e.hate = ent->hate;
+		e.frenzy = ent->bFrenzy;
+		ret.entries.push_back(e);
+		++iter;
+	}
+
+	return ret;
+}
 
 #endif

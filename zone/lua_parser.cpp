@@ -2,21 +2,26 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
+#include <luabind/iterator_policy.hpp>
 #include <boost/any.hpp>
+#include <ctype.h>
+#include <stdio.h>
+#include <sstream>
+#include <vector>
 
 #include "masterentity.h"
 #include "../common/spdat.h"
 #include "../common/seperator.h"
 #include "lua_entity.h"
 #include "lua_mob.h"
+#include "lua_hate_entry.h"
+#include "lua_hate_list.h"
 #include "lua_client.h"
 #include "lua_npc.h"
 #include "lua_item.h"
+#include "lua_spell.h"
 #include "zone.h"
 
-#include <ctype.h>
-#include <stdio.h>
-#include <sstream>
 #include "lua_parser.h"
 
 const char *LuaEvents[_LargestEventID] = {
@@ -888,6 +893,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int))&Lua_Mob::SpellFinished)
 				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int,bool))&Lua_Mob::SpellFinished)
 				.def("SpellEffect", &Lua_Mob::SpellEffect)
+				.def("GetHateList", &Lua_Mob::GetHateList)
 				,
 
 			luabind::class_<Lua_Client, Lua_Mob>("Client")
@@ -896,29 +902,19 @@ void LuaParser::MapFunctions(lua_State *L) {
 			luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 				.def(luabind::constructor<>()),
 
-			//luabind::class_<Lua_Trade>("Trade")
-			//	.def(luabind::constructor<>())
-			//	.def_readwrite("item1", &Lua_Trade::item1_)
-			//	.def_readwrite("item2", &Lua_Trade::item2_)
-			//	.def_readwrite("item3", &Lua_Trade::item3_)
-			//	.def_readwrite("item4", &Lua_Trade::item4_)
-			//	.def_readwrite("item1_charges", &Lua_Trade::item1_charges_)
-			//	.def_readwrite("item2_charges", &Lua_Trade::item2_charges_)
-			//	.def_readwrite("item3_charges", &Lua_Trade::item3_charges_)
-			//	.def_readwrite("item4_charges", &Lua_Trade::item4_charges_)
-			//	.def_readwrite("item1_attuned", &Lua_Trade::item1_attuned_)
-			//	.def_readwrite("item2_attuned", &Lua_Trade::item2_attuned_)
-			//	.def_readwrite("item3_attuned", &Lua_Trade::item3_attuned_)
-			//	.def_readwrite("item4_attuned", &Lua_Trade::item4_attuned_)
-			//	.def_readwrite("platinum", &Lua_Trade::platinum_)
-			//	.def_readwrite("gold", &Lua_Trade::gold_)
-			//	.def_readwrite("silver", &Lua_Trade::silver_)
-			//	.def_readwrite("copper", &Lua_Trade::copper_),
-
 			luabind::class_<Lua_Item>("Item")
 				.def(luabind::constructor<>())
 				.property("null", &Lua_Entity::Null)
-				.property("valid", &Lua_Entity::Valid)
+				.property("valid", &Lua_Entity::Valid),
+
+			luabind::class_<Lua_HateEntry>("HateEntry")
+				.def_readwrite("ent", &Lua_HateEntry::ent)
+				.def_readwrite("damage", &Lua_HateEntry::damage)
+				.def_readwrite("hate", &Lua_HateEntry::hate)
+				.def_readwrite("frenzy", &Lua_HateEntry::frenzy),
+
+			luabind::class_<Lua_HateList>("HateList")
+				.def_readwrite("entries", &Lua_HateList::entries, luabind::return_stl_iterator)
 		];
 	
 	} catch(std::exception &ex) {

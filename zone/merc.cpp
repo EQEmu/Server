@@ -2576,29 +2576,6 @@ void Merc::CheckHateList() {
 									}
 								}
 							}
-
-
-							/*std::list<tHateEntry*> their_hate_list;
-							npc->GetHateList(their_hate_list);
-							std::list<tHateEntry*>::iterator hateEntryIter = their_hate_list.begin();
-
-							while(hateEntryIter != their_hate_list.end())
-							{
-								tHateEntry *entry = (*hateEntryIter);
-
-								if(g->IsGroupMember(entry->ent)) {
-									if(!hate_list.IsOnHateList(npc)) {
-										float range = g->HasRole(entry->ent, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
-										range *= range;
-										if(entry->ent->DistNoRootNoZ(*this) < range) {
-											hate_list.Add(entry->ent, 1);
-										}
-									}
-								}
-
-
-								hateEntryIter++;
-							}*/
 						}
 					}
 				}

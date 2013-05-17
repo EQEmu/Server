@@ -5,6 +5,7 @@
 #include "lua_entity.h"
 
 class Mob;
+struct Lua_HateList;
 
 class Lua_Mob : public Lua_Entity
 {
@@ -172,6 +173,7 @@ public:
 	void SpellEffect(Lua_Mob caster, int spell_id, double partial);
 	Lua_Mob GetPet();
 	Lua_Mob GetOwner();
+	Lua_HateList GetHateList();
 };
 
 #endif

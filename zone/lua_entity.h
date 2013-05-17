@@ -8,6 +8,7 @@ class Entity;
 class Lua_Client;
 class Lua_NPC;
 class Lua_Mob;
+struct Lua_HateList;
 //class Lua_Merc;
 //class Lua_Corpse;
 //class Lua_Object;
@@ -24,7 +25,8 @@ class Lua_Mob;
 #define Lua_Safe_Call_Entity() if(!d_) { return Lua_Entity(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
 #define Lua_Safe_Call_Mob() if(!d_) { return Lua_Mob(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
 #define Lua_Safe_Call_NPC() if(!d_) { return Lua_NPC(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
-#define Lua_Safe_Call_Client() if(!d_) { return Lua_Client(); } NativeType *self = reinterpret_cast<Type*>(d_)
+#define Lua_Safe_Call_Client() if(!d_) { return Lua_Client(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_HateList() if(!d_) { return Lua_HateList(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
 
 class Lua_Entity : public Lua_Ptr
 {
