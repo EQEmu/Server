@@ -1871,7 +1871,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			damage = (max_dmg+eleBane);
 		}
 		
-		damage = mod_npc_damage(damage, skillinuse, Hand, &weapon_inst, other);
+		damage = mod_npc_damage(damage, skillinuse, Hand, weapon, other);
 
 		int32 hate = damage;
 		if(IsPet())
@@ -2115,10 +2115,13 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 		Group *kg = entity_list.GetGroupByClient(give_exp_client);
 		Raid *kr = entity_list.GetRaidByClient(give_exp_client);
 
+        int32 finalxp = EXP_FORMULA;
+        finalxp = give_exp_client->mod_client_xp(finalxp, this);
+
 		if(kr)
 		{
 			if(!IsLdonTreasure) {
-				kr->SplitExp((EXP_FORMULA), this);
+				kr->SplitExp((finalxp), this);
 				if(killerMob && (kr->IsRaidMember(killerMob->GetName()) || kr->IsRaidMember(killerMob->GetUltimateOwner()->GetName())))
 					killerMob->TrySpellOnKill(killed_level,spell);
 			}
@@ -2159,7 +2162,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 		else if (give_exp_client->IsGrouped() && kg != nullptr)
 		{
 			if(!IsLdonTreasure) {
-				kg->SplitExp((EXP_FORMULA), this);
+				kg->SplitExp((finalxp), this);
 				if(killerMob && (kg->IsGroupMember(killerMob->GetName()) || kg->IsGroupMember(killerMob->GetUltimateOwner()->GetName())))
 					killerMob->TrySpellOnKill(killed_level,spell);
 			}
@@ -2208,7 +2211,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 					if(GetOwner() && GetOwner()->IsClient()){
 					}
 					else {
-						give_exp_client->AddEXP((EXP_FORMULA), conlevel); // Pyro: Comment this if NPC death crashes zone
+						give_exp_client->AddEXP((finalxp), conlevel); // Pyro: Comment this if NPC death crashes zone
 						if(killerMob && (killerMob->GetID() == give_exp_client->GetID() || killerMob->GetUltimateOwner()->GetID() == give_exp_client->GetID()))
 							killerMob->TrySpellOnKill(killed_level,spell);
 					}

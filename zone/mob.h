@@ -805,8 +805,8 @@ public:
 	int32	mod_monk_special_damage(int32 ndamage, SkillType skill_type);
 	int32	mod_backstab_damage(int32 ndamage);
 	int		mod_archery_bonus_chance(int bonuschance, const ItemInst* RangeWeapon);
-	uint32	mod_archery_bonus_damage(uint32 MaxDmg);
-	int32	mod_archery_damage(int32 TotalDmg, bool hasbonus);
+	uint32	mod_archery_bonus_damage(uint32 MaxDmg, const ItemInst* RangeWeapon);
+	int32	mod_archery_damage(int32 TotalDmg, bool hasbonus, const ItemInst* RangeWeapon);
 	uint16	mod_throwing_damage(uint16 MaxDmg);
 	int32	mod_cast_time(int32 cast_time);
 	int		mod_buff_duration(int res, Mob* caster, Mob* target, uint16 spell_id);
