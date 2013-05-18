@@ -6796,7 +6796,7 @@ XS(XS_Mob_ProjectileAnim)
 	{
 		Mob *		THIS;
 		Mob*		mob;
-		uint16		item_id = (uint16)SvUV(ST(2));
+		int         item_id = SvUV(ST(2));
 		bool		IsArrow = false;
 		float		speed = 0;
 		float		angle = 0;

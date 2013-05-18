@@ -129,29 +129,16 @@ void QuestManager::Process() {
 			cur++;
 	}
 
-	list<SignalTimer>::iterator curS, endS, tmpS;
-
-	curS = STimerList.begin();
-	endS = STimerList.end();
-	while (curS != endS) {
-		if(!curS->Timer_.Enabled()) {
-			//remove the timer
-			tmpS = curS;
-			tmpS++;
-			STimerList.erase(curS);
-			curS = tmpS;
-		} else if(curS->Timer_.Check()) {
-			//disable the timer so it gets deleted.
-			curS->Timer_.Disable();
-
-			//signal the event...
-			entity_list.SignalMobsByNPCID(curS->npc_id, curS->signal_id);
-
-			//restart for the same reasons as above.
-			curS = STimerList.begin();
-			endS = STimerList.end();
-		} else
-			curS++;
+	auto cur_iter = STimerList.begin();
+	while(cur_iter != STimerList.end()) {
+		if(!cur_iter->Timer_.Enabled()) {
+			cur_iter = STimerList.erase(cur_iter);
+		} else if(cur_iter->Timer_.Check()) {
+			entity_list.SignalMobsByNPCID(cur_iter->npc_id, cur_iter->signal_id);
+			cur_iter = STimerList.erase(cur_iter);
+		} else {
+			++cur_iter;
+		}
 	}
 }
 

@@ -130,7 +130,7 @@ public:
 	virtual void SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint);
 	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color);
 	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
-	void ProjectileAnimation(Mob* to, uint16 item_id, bool IsArrow = false, float speed = 0,
+	void ProjectileAnimation(Mob* to, int item_id, bool IsArrow = false, float speed = 0,
 		float angle = 0, float tilt = 0, float arc = 0);
 	void ChangeSize(float in_size, bool bNoRestriction = false);
 	inline uint8 SeeInvisible() const { return see_invis; }
@@ -497,10 +497,13 @@ public:
 	void QuestJournalledSay(Client *QuestInitiator, const char *str);
 	uint32 GetItemStat(uint32 itemid, const char *identifier);
 
-
 	int16 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false);
 	uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0);
-	void SendIllusionPacket(uint16 in_race, uint8 in_gender = 0xFF, uint8 in_texture = 0xFF, uint8 in_helmtexture = 0xFF, uint8 in_haircolor = 0xFF, uint8 in_beardcolor = 0xFF, uint8 in_eyecolor1 = 0xFF, uint8 in_eyecolor2 = 0xFF, uint8 in_hairstyle = 0xFF, uint8 in_luclinface = 0xFF, uint8 in_beard = 0xFF, uint8 in_aa_title = 0xFF, uint32 in_drakkin_heritage = 0xFFFFFFFF, uint32 in_drakkin_tattoo = 0xFFFFFFFF, uint32 in_drakkin_details = 0xFFFFFFFF, float in_size = 0xFFFFFFFF);
+	void SendIllusionPacket(uint16 in_race, uint8 in_gender = 0xFF, uint8 in_texture = 0xFF, uint8 in_helmtexture = 0xFF, 
+		uint8 in_haircolor = 0xFF, uint8 in_beardcolor = 0xFF, uint8 in_eyecolor1 = 0xFF, uint8 in_eyecolor2 = 0xFF, 
+		uint8 in_hairstyle = 0xFF, uint8 in_luclinface = 0xFF, uint8 in_beard = 0xFF, uint8 in_aa_title = 0xFF, 
+		uint32 in_drakkin_heritage = 0xFFFFFFFF, uint32 in_drakkin_tattoo = 0xFFFFFFFF, 
+		uint32 in_drakkin_details = 0xFFFFFFFF, float in_size = 0xFFFFFFFF);
 	virtual void Stun(int duration);
 	virtual void UnStun();
 	inline void Silence(bool newval) { silenced = newval; }

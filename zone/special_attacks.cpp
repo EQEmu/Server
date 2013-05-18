@@ -1322,7 +1322,7 @@ void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillType skillInU
 	safe_delete(outapp);
 }
 
-void Mob::ProjectileAnimation(Mob* to, uint16 item_id, bool IsArrow, float speed, float angle, float tilt, float arc) {
+void Mob::ProjectileAnimation(Mob* to, int item_id, bool IsArrow, float speed, float angle, float tilt, float arc) {
 
 	const Item_Struct* item = nullptr;
 	uint8 item_type = 0;
