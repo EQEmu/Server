@@ -357,7 +357,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 NPC::~NPC()
 {
-	ClearQuestLists();
 	entity_list.RemoveNPC(GetID());
 	AI_Stop();
 
@@ -2340,21 +2339,6 @@ bool NPC::CanTalk()
 		return true;
 
 	return false;
-}
-
-void NPC::PrintOutQuestItems(Client* c){
-		c->Message(4,"Quest Items currently awaiting completion on %s",GetName());
-
-		LinkedListIterator<ItemInst*> iterator(questItems);
-		iterator.Reset();
-
-		while(iterator.MoreElements())
-		{
-			c->Message(5,"ItemName: %s (%d) | Charges: %i",iterator.GetData()->GetItem()->Name,iterator.GetData()->GetItem()->ID,iterator.GetData()->GetCharges());
-			iterator.Advance();
-		}
-
-		c->Message(4,"End of quest items list.");
 }
 
 //this is called with 'this' as the mob being looked at, and

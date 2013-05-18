@@ -317,8 +317,6 @@ void command_picklock(Client *c, const Seperator *sep);
 void command_qtest(Client *c, const Seperator *sep);
 void command_mysql(Client *c, const Seperator *sep);
 void command_xtargets(Client *c, const Seperator *sep);
-void command_printquestitems(Client *c, const Seperator *sep);
-void command_clearquestitems(Client *c, const Seperator *sep);
 void command_zopp(Client *c, const Seperator *sep);
 void command_augmentitem(Client *c, const Seperator *sep);
 

@@ -760,12 +760,7 @@ Lua_HateList Lua_Mob::GetHateList() {
 	auto h_list = self->GetHateList();
 	auto iter = h_list.begin();
 	while(iter != h_list.end()) {
-		tHateEntry *ent = (*iter);
-		Lua_HateEntry e;
-		e.ent = Lua_Mob(ent->ent);
-		e.damage = ent->damage;
-		e.hate = ent->hate;
-		e.frenzy = ent->bFrenzy;
+		Lua_HateEntry e(*iter);
 		ret.entries.push_back(e);
 		++iter;
 	}

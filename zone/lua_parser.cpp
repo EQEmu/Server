@@ -19,6 +19,7 @@
 #include "lua_client.h"
 #include "lua_npc.h"
 #include "lua_item.h"
+#include "lua_iteminst.h"
 #include "lua_spell.h"
 #include "zone.h"
 
@@ -258,96 +259,7 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		
 		auto arg_function = PlayerArgumentDispatch[evt];
 		arg_function(this, L, client, data, extra_data);
-
-		/*switch(evt) {
-		case EVENT_DEATH: {
-			Seperator sep(data.c_str());
-			lua_pushinteger(L, std::stoi(sep.arg[0]));
-			lua_pushinteger(L, std::stoi(sep.arg[1]));
-			lua_pushinteger(L, std::stoi(sep.arg[2]));
-			lua_pushinteger(L, std::stoi(sep.arg[3]));
 	
-			arg_count += 4;
-			break;
-		}
-	
-		case EVENT_SAY: {
-			lua_pushstring(L, data.c_str());
-			lua_pushinteger(L, extra_data);
-	
-			arg_count += 2;
-			break;
-		}
-	
-		case EVENT_DISCOVER_ITEM: 
-		case EVENT_FISH_SUCCESS:
-		case EVENT_FORAGE_SUCCESS: {
-			lua_pushinteger(L, extra_data);
-	
-			arg_count += 1;
-			break;
-		}
-	
-		case EVENT_CLICK_OBJECT:
-		case EVENT_CLICK_DOOR:
-		case EVENT_SIGNAL:
-		case EVENT_POPUP_RESPONSE:
-		case EVENT_PLAYER_PICKUP: 
-		case EVENT_CAST: 
-		case EVENT_TASK_FAIL:
-		case EVENT_ZONE: {
-			lua_pushinteger(L, std::stoi(data));
-	
-			arg_count += 1;
-			break;
-		}
-	
-		case EVENT_TIMER: {
-			lua_pushstring(L, data.c_str());
-	
-			arg_count += 1;
-			break;
-		}
-	
-		case EVENT_DUEL_WIN:
-		case EVENT_DUEL_LOSE: {
-			lua_pushstring(L, data.c_str());
-			lua_pushinteger(L, extra_data);
-			arg_count += 2;
-			break;
-		}
-	
-		case EVENT_LOOT: {
-			Seperator sep(data.c_str());
-			lua_pushinteger(L, std::stoi(sep.arg[0]));
-			lua_pushinteger(L, std::stoi(sep.arg[1]));
-			lua_pushstring(L, sep.arg[2]);
-	
-			arg_count += 3;
-			break;
-		}
-	
-		case EVENT_TASK_STAGE_COMPLETE: {
-			Seperator sep(data.c_str());
-			lua_pushinteger(L, std::stoi(sep.arg[0]));
-			lua_pushinteger(L, std::stoi(sep.arg[1]));
-	
-			arg_count += 2;
-			break;
-		}
-	
-		case EVENT_TASK_COMPLETE: {
-			Seperator sep(data.c_str());
-			lua_pushinteger(L, std::stoi(sep.arg[0]));
-			lua_pushinteger(L, std::stoi(sep.arg[1]));
-			lua_pushinteger(L, std::stoi(sep.arg[2]));
-	
-			arg_count += 3;
-			break;
-		}
-	
-		}*/
-		
 		if(lua_pcall(L, 1, 1, 0)) {
 			printf("Error: %s\n", lua_tostring(L, -1));
 			return 0;
@@ -422,10 +334,10 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		
 		lua_createtable(L, 0, 0);
 		//always push self
-		Lua_Item l_item(item);
+		Lua_ItemInst l_item(item);
 		luabind::object l_item_o = luabind::object(L, l_item);
 		l_item_o.push(L);
-		lua_setfield(L, -2, "item");
+		lua_setfield(L, -2, "self");
 
 		auto arg_function = ItemArgumentDispatch[evt];
 		arg_function(this, L, client, item, objid, extra_data);
@@ -481,6 +393,12 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 		lua_getfield(L, -1, sub_name);
 		
 		lua_createtable(L, 0, 0);
+
+		//always push self
+		Lua_Spell l_spell(&spells[spell_id]);
+		luabind::object l_spell_o = luabind::object(L, l_spell);
+		l_spell_o.push(L);
+		lua_setfield(L, -2, "self");
 		
 		auto arg_function = SpellArgumentDispatch[evt];
 		arg_function(this, L, npc, client, spell_id, extra_data);
@@ -631,11 +549,11 @@ void LuaParser::ReloadQuests() {
 	lua_pop(L, 1);
 
 	//load init
-	FILE *f = fopen("quests/templates/script_init.lua", "r");
+	FILE *f = fopen("quests/global/script_init.lua", "r");
 	if(f) {
 		fclose(f);
 	
-		if(luaL_dofile(L, "quests/templates/script_init.lua")) {
+		if(luaL_dofile(L, "quests/global/script_init.lua")) {
 			printf("Lua Error in Global Init: %s\n", lua_tostring(L, -1));
 			lua_close(L);
 			return;
@@ -672,6 +590,10 @@ void LuaParser::LoadScript(std::string filename, std::string package_name) {
 		lua_pop(L, 1);
 		return;
 	}
+
+	//This makes an env table named: package_name
+	//And makes it so we can see the global table _G from it
+	//Then sets it so this script is called from that table as an env
 
 	lua_createtable(L, 0, 0); // anon table
 	lua_getglobal(L, "_G"); // get _G
@@ -893,8 +815,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int))&Lua_Mob::SpellFinished)
 				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int,bool))&Lua_Mob::SpellFinished)
 				.def("SpellEffect", &Lua_Mob::SpellEffect)
-				.def("GetHateList", &Lua_Mob::GetHateList)
-				,
+				.def("GetHateList", &Lua_Mob::GetHateList),
 
 			luabind::class_<Lua_Client, Lua_Mob>("Client")
 				.def(luabind::constructor<>()),
@@ -902,16 +823,28 @@ void LuaParser::MapFunctions(lua_State *L) {
 			luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 				.def(luabind::constructor<>()),
 
+			luabind::class_<Lua_ItemInst>("ItemInst")
+				.def(luabind::constructor<>())
+				.property("null", &Lua_ItemInst::Null)
+				.property("valid", &Lua_ItemInst::Valid),
+
 			luabind::class_<Lua_Item>("Item")
 				.def(luabind::constructor<>())
-				.property("null", &Lua_Entity::Null)
-				.property("valid", &Lua_Entity::Valid),
+				.property("null", &Lua_Item::Null)
+				.property("valid", &Lua_Item::Valid),
+
+			luabind::class_<Lua_Spell>("Spell")
+				.def(luabind::constructor<>())
+				.property("null", &Lua_Spell::Null)
+				.property("valid", &Lua_Spell::Valid),
 
 			luabind::class_<Lua_HateEntry>("HateEntry")
-				.def_readwrite("ent", &Lua_HateEntry::ent)
-				.def_readwrite("damage", &Lua_HateEntry::damage)
-				.def_readwrite("hate", &Lua_HateEntry::hate)
-				.def_readwrite("frenzy", &Lua_HateEntry::frenzy),
+				.property("null", &Lua_HateEntry::Null)
+				.property("valid", &Lua_HateEntry::Valid)
+				.property("ent", &Lua_HateEntry::GetEnt, &Lua_HateEntry::SetEnt)
+				.property("damage", &Lua_HateEntry::GetDamage, &Lua_HateEntry::SetDamage)
+				.property("hate", &Lua_HateEntry::GetHate, &Lua_HateEntry::SetHate)
+				.property("frenzy", &Lua_HateEntry::GetFrenzy, &Lua_HateEntry::SetFrenzy),
 
 			luabind::class_<Lua_HateList>("HateList")
 				.def_readwrite("entries", &Lua_HateList::entries, luabind::return_stl_iterator)

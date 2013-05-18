@@ -432,7 +432,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 		iter++;
 	}
 
-	//third look for /quests/templates/npcid.ext (precedence)
+	//third look for /quests/global/npcid.ext (precedence)
 	filename = "quests/";
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
@@ -453,7 +453,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 		iter++;
 	}
 
-	//fourth look for /quests/templates/npcname.ext (precedence)
+	//fourth look for /quests/global/npcname.ext (precedence)
 	filename = "quests/";
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
@@ -495,7 +495,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 		iter++;
 	}
 
-	//last look for /quests/templates/default.ext (precedence)
+	//last look for /quests/global/default.ext (precedence)
 	filename = "quests/";
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
@@ -571,7 +571,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 		iter++;
 	}
 
-	//third look for /quests/templates/player.ext (precedence)
+	//third look for /quests/global/player.ext (precedence)
 	filename = "quests/";
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
@@ -596,7 +596,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 }
 
 QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filename) {
-	// simply look for templates/global_npc.pl
+	// simply look for quests/global/global_npc.pl
 	filename = "quests/";
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
@@ -624,7 +624,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filena
 }
 
 QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &filename) {
-	//first look for /quests/templates/player.ext (precedence)
+	//first look for /quests/global/player.ext (precedence)
 	filename = "quests/";
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
@@ -652,13 +652,35 @@ QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &fil
 }
 
 QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::string &filename) {
-	//first look for /quests/spells/spell_id.ext (precedence)
-	filename = "quests/spells/";
+	//first look for /quests/zone/spells/spell_id.ext (precedence)
+	filename = "quests/";
+	filename += zone->GetShortName();
+	filename += "/spells/";
 	filename += itoa(spell_id);
 	std::string tmp;
 	FILE *f = nullptr;
 
 	std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		tmp = filename;
+		std::map<uint32, std::string>::iterator ext = _extensions.find((*iter)->GetIdentifier());
+		tmp += ".";
+		tmp += ext->second;
+		f = fopen(tmp.c_str(), "r");
+		if(f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		iter++;
+	}
+
+	//second look for /quests/spells/spell_id.ext (precedence)
+	filename = "quests/spells/";
+	filename += itoa(spell_id);
+
+	iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
 		tmp = filename;
 		std::map<uint32, std::string>::iterator ext = _extensions.find((*iter)->GetIdentifier());
@@ -678,13 +700,35 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 }
 
 QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script, std::string &filename) {
-	//first look for /quests/items/item_script.ext (precedence)
-	filename = "quests/items/";
+	//first look for /quests/zone/items/item_script.ext (precedence)
+	filename = "quests/";
+	filename += zone->GetShortName();
+	filename += "/items/";
 	filename += item_script;
 	std::string tmp;
 	FILE *f = nullptr;
 
 	std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		tmp = filename;
+		std::map<uint32, std::string>::iterator ext = _extensions.find((*iter)->GetIdentifier());
+		tmp += ".";
+		tmp += ext->second;
+		f = fopen(tmp.c_str(), "r");
+		if(f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		iter++;
+	}
+	
+	//second look for /quests/items/item_script.ext (precedence)
+	filename = "quests/items/";
+	filename += item_script;
+
+	iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
 		tmp = filename;
 		std::map<uint32, std::string>::iterator ext = _extensions.find((*iter)->GetIdentifier());

@@ -28,7 +28,7 @@ struct Lua_HateList;
 #define Lua_Safe_Call_Client() if(!d_) { return Lua_Client(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
 #define Lua_Safe_Call_HateList() if(!d_) { return Lua_HateList(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
 
-class Lua_Entity : public Lua_Ptr
+class Lua_Entity : public Lua_Ptr<void>
 {
 	typedef Entity NativeType;
 public:

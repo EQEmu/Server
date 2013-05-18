@@ -238,10 +238,6 @@ public:
 	inline ItemInst *GetQuestItem() const {return questitem; }
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 
-	bool TurnInItem(uint32 itm, int charges);
-	void CompleteHandIn();
-	void ResetHandIn();
-	void ClearHandIn();
 	void CrossZoneSignalPlayerByCharID(int charid, uint32 data);
 	void CrossZoneSignalPlayerByName(const char *CharName, uint32 data);
 	void CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message);

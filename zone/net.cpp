@@ -284,15 +284,14 @@ int main(int argc, char** argv) {
 	}
 
 	parse = new QuestParserCollection();
-#ifdef EMBPERL
-	//PerlXSParser *pxs = new PerlXSParser();
-	PerlembParser *perl_parser = new PerlembParser();
-	parse->RegisterQuestInterface(perl_parser, "pl");
-#endif
-
 #ifdef LUA_EQEMU
 	LuaParser *lua_parser = new LuaParser();
 	parse->RegisterQuestInterface(lua_parser, "lua");
+#endif
+
+#ifdef EMBPERL
+	PerlembParser *perl_parser = new PerlembParser();
+	parse->RegisterQuestInterface(perl_parser, "pl");
 #endif
 
 	//now we have our parser, load the quests

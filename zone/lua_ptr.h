@@ -2,23 +2,24 @@
 #define EQEMU_LUA_PTR_H
 #ifdef LUA_EQEMU
 
+template<typename T>
 class Lua_Ptr
 {
 public:
 	Lua_Ptr() {
 	}
 	
-	Lua_Ptr(void *d) : d_(d) {
+	Lua_Ptr(T *d) : d_(d) {
 	}
 	
 	~Lua_Ptr() {
 	}
 	
-	void *GetLuaPtrData() {
+	T *GetLuaPtrData() {
 		return d_;
 	}
 	
-	void SetLuaPtrData(void *d) {
+	void SetLuaPtrData(T *d) {
 		d_ = d;
 	}
 	
@@ -31,7 +32,7 @@ public:
 	}
 	
 protected:
-	void *d_;
+	T *d_;
 };
 
 #endif

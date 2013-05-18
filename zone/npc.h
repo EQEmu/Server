@@ -349,111 +349,6 @@ public:
 	inline void SetHealScale(float amt)		{ healscale = amt; }
 	inline float GetHealScale()					{ return healscale; }
 
-	void AddQuestItem(ItemInst* inst) { questItems.Insert(inst); }
-
-	void ClearQuestLists()
-	{
-		ClearQuestItems(true);
-		ClearQuestDeleteItems(true);
-	}
-
-	void ResetQuestDeleteList()
-	{
-		ClearQuestDeleteItems(true);
-	}
-
-
-	void ClearQuestItems(bool delete_=false)
-	{
-		LinkedListIterator<ItemInst*> iterator(questItems);
-		iterator.Reset();
-		while(iterator.MoreElements())
-		{
-			iterator.RemoveCurrent(delete_);
-		}
-
-		questItems.Clear();
-	}
-
-	void ClearQuestDeleteItems(bool delete_=false)
-	{
-		LinkedListIterator<ItemInst*> iterator(questDeletionItems);
-		iterator.Reset();
-		while(iterator.MoreElements())
-		{
-			iterator.RemoveCurrent(delete_);
-		}
-
-		questDeletionItems.Clear();
-	}
-
-	ItemInst* FindQuestItemByID(uint32 itmID, int charges, bool flagItemForDeletion=false)
-	{
-		LinkedListIterator<ItemInst*> iterator(questItems);
-		iterator.Reset();
-		int totalCharges = 0;
-		while(iterator.MoreElements())
-		{
-			if ( iterator.GetData()->GetItem()->ID == itmID )
-			{
-				totalCharges += 1;
-
-				if ( flagItemForDeletion )
-					questDeletionItems.Insert(iterator.GetData()->Clone());
-				if ( charges > totalCharges )
-				{
-					iterator.Advance();
-					continue;
-				}
-
-				return iterator.GetData();
-			}
-			iterator.Advance();
-		}
-		return nullptr;
-	}
-
-	bool DoesQuestItemExist(uint32 itmID, int charges, bool flagItemForDeletion=false) {
-		ItemInst* inst = FindQuestItemByID(itmID,charges,flagItemForDeletion);
-		if ( inst != nullptr )
-		{
-			return true;
-		}
-		else
-			return false;
-	}
-
-	void ClearQuestItem(ItemInst* inst, bool delete_=true)
-	{
-		LinkedListIterator<ItemInst*> iterator(questItems);
-		iterator.Reset();
-
-		while(iterator.MoreElements())
-		{
-			if ( iterator.GetData ()->GetItem()->ID == inst->GetItem()->ID )
-			{
-				iterator.RemoveCurrent(delete_);
-				break;
-			}
-			iterator.Advance();
-		}
-	}
-
-	void RemoveQuestDeleteItems()
-	{
-		LinkedListIterator<ItemInst*> iterator(questDeletionItems);
-		iterator.Reset();
-		while(iterator.MoreElements())
-		{
-			ClearQuestItem(iterator.GetData(),true);
-			iterator.RemoveCurrent(true);
-		}
-
-		questDeletionItems.Clear();
-	}
-
-	void PrintOutQuestItems(Client* c);
-
     uint32 	GetSpawnKillCount();
     int 	GetScore();
     void 	mod_prespawn(Spawn2 *sp);
@@ -551,9 +446,6 @@ protected:
 	bool ldon_trap_detected;
 	QGlobalCache *qGlobals;
 	uint32 adventure_template_id;
-
-	LinkedList<ItemInst*> questItems;
-	LinkedList<ItemInst*> questDeletionItems;
 
 	//mercenary stuff
 	std::list<MercType> mercTypeList;

@@ -3253,58 +3253,6 @@ XS(XS__GetTimeSeconds)
 	XSRETURN_UV(seconds);
 }
 
-XS(XS__handleturnin); // prototype to pass -Wmissing-prototypes
-XS(XS__handleturnin) {
-	dXSARGS;
-	
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: handleturnin(itemid, itemcharges)");
-	int	itemid = (int)SvIV(ST(0));
-	int	charges = (int)SvIV(ST(1));
-
-	bool returnVal = quest_manager.TurnInItem(itemid,charges);
-	
-	ST(0) = boolSV(returnVal);
-	sv_2mortal(ST(0));
-	XSRETURN(1);
-}
-
-XS(XS__completehandin); // prototype to pass -Wmissing-prototypes
-XS(XS__completehandin) {
-	dXSARGS;
-	
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: completehandin()");
-
-	quest_manager.CompleteHandIn();
-	
-	XSRETURN_EMPTY;
-}
-
-XS(XS__resethandin); // prototype to pass -Wmissing-prototypes
-XS(XS__resethandin) {
-	dXSARGS;
-	
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: resethandin()");
-
-	quest_manager.ResetHandIn();
-	
-	XSRETURN_EMPTY;
-}
-
-XS(XS__clearhandin); // prototype to pass -Wmissing-prototypes
-XS(XS__clearhandin) {
-	dXSARGS;
-	
-	if (items != 0)
-		Perl_croak(aTHX_ "Usage: clearhandin()");
-
-	quest_manager.ClearHandIn();
-	
-	XSRETURN_EMPTY;
-}
-
 XS(XS__crosszonesignalclientbycharid);
 XS(XS__crosszonesignalclientbycharid)
 {
@@ -3579,10 +3527,6 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
 		newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
 		newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
-		newXS(strcpy(buf, "handleturnin"), XS__handleturnin, file);
-		newXS(strcpy(buf, "completehandin"), XS__completehandin, file);
-		newXS(strcpy(buf, "resethandin"), XS__resethandin, file);
-		newXS(strcpy(buf, "clearhandin"), XS__clearhandin, file);
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 		newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);

@@ -19,9 +19,8 @@
 #ifndef HATELIST_H
 #define HATELIST_H
 
-class tHateEntry
+struct tHateEntry
 {
-public:
 	Mob *ent;
 	int32 damage, hate;
 	bool bFrenzy;

@@ -1097,7 +1097,6 @@ public:
 	const char* GetClassPlural(Client* client);
 	void SendWebLink(const char* website);
 
-	bool StoreTurnInItems(Mob* with);
 	void DuplicateLoreMessage(uint32 ItemID);
 	void GarbleMessage(char *, uint8);
 

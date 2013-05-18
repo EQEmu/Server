@@ -2,17 +2,27 @@
 #define EQEMU_LUA_HATE_ENTRY_H
 #ifdef LUA_EQEMU
 
-class Lua_Mob;
+#include "lua_ptr.h"
 
-struct Lua_HateEntry
+class Lua_Mob;
+struct tHateEntry;
+
+class Lua_HateEntry : public Lua_Ptr<void>
 {
+	typedef tHateEntry NativeType;
+public:
 	Lua_HateEntry() { }
+	Lua_HateEntry(tHateEntry *d) : Lua_Ptr(d) { }
 	virtual ~Lua_HateEntry() { }
 	
-	Lua_Mob ent;
-	int damage;
-	int hate;
-	bool frenzy;
+	Lua_Mob GetEnt();
+	void SetEnt(Lua_Mob e);
+	int GetDamage();
+	void SetDamage(int value);
+	int GetHate();
+	void SetHate(int value);
+	int GetFrenzy();
+	void SetFrenzy(bool value);
 };
 
 #endif

@@ -572,22 +572,25 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		if(parse->HasQuestSub(tradingWith->GetNPCTypeID(), "EVENT_TRADE")) {
 			// This is a quest NPC
 			quest_npc = true;
-			if(RuleB(NPC, UseMultiQuest)){
-				StoreTurnInItems(tradingWith);
-			}
 		}
 
-		uint32 items[4]={0};
-		uint8 charges[4]={0};
-		bool attuned[4]={0};
+		uint32 items[4] = { 0 };
+		uint8 charges[4] = { 0 };
+		bool attuned[4] = { 0 };
+		uint32 augments[4][5] = { 0 };
 
-		for (int16 i=3000; i<=3003; i++) {
+		for (int i = 3000; i < 3004; i++) {
 			const ItemInst* inst = m_inv[i];
 			if (inst) {
-				items[i-3000]=inst->GetItem()->ID;
-				charges[i-3000]=inst->GetCharges();
-				attuned[i-3000]=inst->IsInstNoDrop();
-				const Item_Struct* item2 = database.GetItem(items[i-3000]);
+				items[i - 3000] = inst->GetItem()->ID;
+				charges[i - 3000] = inst->GetCharges();
+				attuned[i - 3000] = inst->IsInstNoDrop();
+
+				for(int j = 0; j < 5; j++) {
+					augments[i][j] = inst->GetAugmentItemID(j);
+				}
+
+				const Item_Struct* item2 = database.GetItem(items[i - 3000]);
 				// Handle non-quest NPC trading
 				if (item2 && quest_npc == false) {
 					// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
@@ -630,33 +633,37 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		//dont bother with this crap unless we have a quest...
 		//pets can have quests! (especially charmed NPCs)
 		if (quest_npc) {
-			char temp1[100];
-			memset(temp1,0x0,100);
-			char temp2[100];
-			memset(temp2,0x0,100);
+			char temp1[100] = { 0 };
+			char temp2[100] = { 0 };
 			for(int z = 0; z < 4; z++) {
-				snprintf(temp1, 100, "item%d.%d", z+1,tradingWith->GetNPCTypeID());
-				snprintf(temp2, 100, "%d",items[z]);
-				parse->AddVar(temp1,temp2);
-				snprintf(temp1, 100, "item%d.charges.%d", z+1,tradingWith->GetNPCTypeID());
-				snprintf(temp2, 100, "%d",charges[z]);
-				parse->AddVar(temp1,temp2);
-				snprintf(temp1, 100, "item%d.attuned.%d", z+1,tradingWith->GetNPCTypeID());
-				snprintf(temp2, 100, "%d",attuned[z]);
-				parse->AddVar(temp1,temp2);
+				snprintf(temp1, 100, "item%d.%d", z + 1, tradingWith->GetNPCTypeID());
+				snprintf(temp2, 100, "%d", items[z]);
+				parse->AddVar(temp1, temp2);
+				snprintf(temp1, 100, "item%d.charges.%d", z + 1, tradingWith->GetNPCTypeID());
+				snprintf(temp2, 100, "%d", charges[z]);
+				parse->AddVar(temp1, temp2);
+				snprintf(temp1, 100, "item%d.attuned.%d", z + 1, tradingWith->GetNPCTypeID());
+				snprintf(temp2, 100, "%d", attuned[z]);
+				parse->AddVar(temp1, temp2);
+
+				for(int y = 0; y < 5; y++) {
+					snprintf(temp1, 100, "item%d.augment.%d", z + 1, tradingWith->GetNPCTypeID());
+					snprintf(temp2, 100, "%d", augments[z][y]);
+					parse->AddVar(temp1, temp2);
+				}
 			}
-			snprintf(temp1, 100, "copper.%d",tradingWith->GetNPCTypeID());
-			snprintf(temp2, 100, "%i",trade->cp);
-			parse->AddVar(temp1,temp2);
-			snprintf(temp1, 100, "silver.%d",tradingWith->GetNPCTypeID());
-			snprintf(temp2, 100, "%i",trade->sp);
-			parse->AddVar(temp1,temp2);
+			snprintf(temp1, 100, "copper.%d", tradingWith->GetNPCTypeID());
+			snprintf(temp2, 100, "%u", trade->cp);
+			parse->AddVar(temp1, temp2);
+			snprintf(temp1, 100, "silver.%d", tradingWith->GetNPCTypeID());
+			snprintf(temp2, 100, "%u", trade->sp);
+			parse->AddVar(temp1, temp2);
 			snprintf(temp1, 100, "gold.%d", tradingWith->GetNPCTypeID());
-			snprintf(temp2, 100, "%i",trade->gp);
+			snprintf(temp2, 100, "%u", trade->gp);
 			parse->AddVar(temp1, temp2);
 			snprintf(temp1, 100, "platinum.%d", tradingWith->GetNPCTypeID());
-			snprintf(temp2, 100, "%i",trade->pp);
-			parse->AddVar(temp1,temp2);
+			snprintf(temp2, 100, "%u", trade->pp);
+			parse->AddVar(temp1, temp2);
 
 			if(tradingWith->GetAppearance() != eaDead) {
 				tradingWith->FaceTarget(this);
@@ -2720,21 +2727,3 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
-
-bool Client::StoreTurnInItems(Mob* tradingWith) {
-
-	if ( !tradingWith || !tradingWith->IsNPC() )
-		return false;
-
-				for (int16 i=3000; i<=3003; i++) {
-					const ItemInst* inst = m_inv[i];
-					if (inst) {
-						database.logevents(AccountName(),AccountID(),admin,GetName(),tradingWith->GetName(),"Quest Turn In Attempt",inst->GetItem()->Name,22);
-
-						tradingWith->CastToNPC()->AddQuestItem(inst->Clone());
-					}
-				}
-
-	return true;
-}
-
