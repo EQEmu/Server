@@ -13,6 +13,8 @@
 #include "client.h"
 #include "worldserver.h"
 #include "QuestParserCollection.h"
+#include "event_codes.h"
+#include "embparser.h"
 #include <string>
 #include <iostream>
 
@@ -25,8 +27,29 @@ using namespace std;
 
 #define DW_STATBASE 70
 
-void Zone::mod_init() { return; }
-void Zone::mod_repop() { return; }
+void Zone::mod_init() {
+    const NPCType* tmp = 0;
+    if((tmp = database.GetNPCType(999999)))
+    {
+        NPC* npc = new NPC(tmp, 0, 0, 0, 0, 0, FlyMode3);
+        if(npc)
+        {
+            entity_list.AddNPC(npc);
+        }
+    }
+}
+
+void Zone::mod_repop() {
+    const NPCType* tmp = 0;
+    if((tmp = database.GetNPCType(999999)))
+    {
+        NPC* npc = new NPC(tmp, 0, 0, 0, 0, 0, FlyMode3);
+        if(npc)
+        {
+            entity_list.AddNPC(npc);
+        }
+    }
+}
 
 void NPC::mod_prespawn(Spawn2 *sp) {
     //The spawn has to have 1 kill to qualify
@@ -85,8 +108,23 @@ int NPC::mod_npc_damage(int damage, SkillType skillinuse, int hand, const Item_S
 	return(damage);
 }
 
-void NPC::mod_npc_killed_merit(Mob* c) { return; }
-void NPC::mod_npc_killed(Mob* oos) { return; }
+//Mob c has been given credit for a kill.  This is called after the regular EVENT_KILLED_MERIT event.
+void NPC::mod_npc_killed_merit(Mob* c) {
+	Mob *tmpmob = entity_list.GetMobByNpcTypeID(999999);
+	if(tmpmob)
+	{
+		parse->EventNPC(EVENT_KILLED_MERIT, tmpmob->CastToNPC(), c, this->GetCleanName(), this->GetNPCTypeID());
+	}
+}
+
+//Mob oos has been given credit for a kill.  This is called after the regular EVENT_DEATH event.
+void NPC::mod_npc_killed(Mob* oos) {
+	Mob *tmpmob = entity_list.GetMobByNpcTypeID(999999);
+	if(tmpmob)
+	{
+		parse->EventNPC(EVENT_DEATH, tmpmob->CastToNPC(), oos, this->GetCleanName(), this->GetNPCTypeID());
+	}
+}
 
 //Base damage from Client::Attack - can cover myriad skill types
 int Client::mod_client_damage(int damage, SkillType skillinuse, int hand, const ItemInst* weapon, Mob* other) {
@@ -204,8 +242,23 @@ int Client::mod_client_damage(int damage, SkillType skillinuse, int hand, const 
 }
 
 
-//message is char[4096], don't screw it up.
-bool Client::mod_client_message(char* message, uint8 chan_num) { return(true); } //Potentially dangerous string handling here
+//message is char[4096], don't screw it up. Return true for normal behavior, false to return immediately.
+bool Client::mod_client_message(char* message, uint8 chan_num) {
+	//!commands for serverman
+	if(message[0] == '!' && chan_num == 8)
+	{
+		Mob *tmpmob = entity_list.GetMobByNpcTypeID(999999);
+		if(tmpmob)
+		{
+			parse->EventNPC(EVENT_SAY, tmpmob->CastToNPC(), this, message, 0);
+			return(false);
+		}
+		Message(315, "Your pants are on sideways.");
+		return(false);
+	}
+
+	return(true);
+} //Potentially dangerous string handling here
 
 //Skillup override.  When this is called the regular skillup check has failed.  Return false to proceed with default behavior.
 //This will NOT allow a client to increase skill past a cap.
@@ -287,8 +340,29 @@ int Client::mod_client_haste(int h) {
 	return(h);
 }
 
-void Client::mod_consider(Mob* tmob, Consider_Struct* con) { return; }
-bool Client::mod_saylink(const std::string&, bool silentsaylink) { return(true); }
+//This is called when a client cons a mob
+void Client::mod_consider(Mob* tmob, Consider_Struct* con) {
+	if(tmob->GetLastName()[0] == '[')
+	{
+		Message(14, "%s", tmob->GetLastName());
+	}
+}
+
+//Return true to continue with normal behavior
+bool Client::mod_saylink(const std::string& response, bool silentsaylink) {
+	if(silentsaylink && strlen(response.c_str()) > 1 && response[0] == '%' && response[1] == '!')
+	{
+		Mob *tmpmob = entity_list.GetMobByNpcTypeID(999999);
+		if(tmpmob)
+		{
+			parse->EventNPC(EVENT_SAY, tmpmob->CastToNPC(), this, response, 0);
+			return(false);
+		}
+		Message(315, "Your pants are on sideways.");
+		return(false);
+	}
+	return(true);
+}
 
 //Client pet power as calculated by default formulas and bonuses
 int16 Client::mod_pet_power(int16 act_power, uint16 spell_id) {
@@ -319,9 +393,30 @@ int32 Client::mod_tribute_item_value(int32 pts, const ItemInst* item) {
 }
 
 //Death reporting
-void Client::mod_client_death_npc(Mob* killerMob) { return; }
-void Client::mod_client_death_duel(Mob* killerMob) { return; }
-void Client::mod_client_death_env() { return; }
+void Client::mod_client_death_npc(Mob* killerMob) {
+	Mob *tmpmob = entity_list.GetMobByNpcTypeID(999999);
+	if(tmpmob)
+	{
+		parse->EventNPC(EVENT_SLAY, tmpmob->CastToNPC(), this, killerMob->GetCleanName(), killerMob->GetLevel());
+	}
+}
+
+void Client::mod_client_death_duel(Mob* killerMob) {
+	Mob *tmpmob = entity_list.GetMobByNpcTypeID(999999);
+	if(tmpmob)
+	{
+		std::string pname = std::string("PLAYER|") + killerMob->GetCleanName();
+		parse->EventNPC(EVENT_SLAY, tmpmob->CastToNPC(), this, pname.c_str(), killerMob->GetLevel());
+	}
+}
+
+void Client::mod_client_death_env() {
+	Mob *tmpmob = entity_list.GetMobByNpcTypeID(999999);
+	if(tmpmob)
+	{
+		parse->EventNPC(EVENT_SLAY, tmpmob->CastToNPC(), this, "ENVIRONMENT", 0);
+	}
+}
 
 //Calculated xp before consider modifier
 int32 Client::mod_client_xp(int32 in_xp, NPC *npc) {
@@ -790,4 +885,33 @@ int Mob::mod_spell_resist(int resist_chance, int level_mod, int resist_modifier,
 	}
 
 	return(final);
+}
+
+//This is called right before regular event processing (the switch block)
+void PerlembParser::mod_quest_event(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, bool global, std::string packagename) {
+	NPC *tnpc = 0;
+
+	if(event == EVENT_KILLED_MERIT || event == EVENT_CAST_ON || event == EVENT_SLAY)
+	{
+		const NPCType* tmp = 0;
+		if((tmp = database.GetNPCType(extradata)))
+		{
+			tnpc = new NPC(tmp, 0, 0, 0, 0, 0, FlyMode3);
+		}
+		else
+		{
+			tnpc = npcmob;
+		}
+
+		if(tnpc)
+		{
+			ExportVar(packagename.c_str(), "npcname", tnpc->GetCleanName());
+			ExportVar(packagename.c_str(), "npclastname", tnpc->GetLastName());
+			ExportVar(packagename.c_str(), "npclevel", tnpc->GetLevel());
+			ExportVar(packagename.c_str(), "bodytype", tnpc->GetBodyType());
+			ExportVar(packagename.c_str(), "npcid", tnpc->GetNPCTypeID());
+			ExportVar(packagename.c_str(), "npcrace", tnpc->GetRace());
+			ExportVar(packagename.c_str(), "npcclass", tnpc->GetClass());
+		}
+	}
 }
