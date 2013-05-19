@@ -28,13 +28,13 @@ void StructStrategy::Decode(EQApplicationPacket *p) const {
 	proc(p);
 }
 
-	
+
 void StructStrategy::ErrorEncoder(EQApplicationPacket **in_p, EQStream *dest, bool ack_req) {
 	EQApplicationPacket *p = *in_p;
 	*in_p = nullptr;
-	
+
 	_log(NET__STRUCTS, "Error encoding opcode %s: no encoder provided. Dropping.", OpcodeManager::EmuToName(p->GetOpcode()));
-	
+
 	delete p;
 }
 
@@ -56,13 +56,13 @@ void StructStrategy::PassDecoder(EQApplicationPacket *p) {
 
 //effectively a singleton, but I decided to do it this way for no apparent reason.
 namespace StructStrategyFactory {
-	
+
 	static map<EmuOpcode, const StructStrategy *> strategies;
-	
+
 	void RegisterPatch(EmuOpcode first_opcode, const StructStrategy *structs) {
 		strategies[first_opcode] = structs;
 	}
-	
+
 	const StructStrategy *FindPatch(EmuOpcode first_opcode) {
 		map<EmuOpcode, const StructStrategy *>::const_iterator res;
 		res = strategies.find(first_opcode);
@@ -70,7 +70,7 @@ namespace StructStrategyFactory {
 			return(nullptr);
 		return(res->second);
 	}
-	
+
 };
 
 

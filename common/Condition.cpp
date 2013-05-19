@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "debug.h"
@@ -29,16 +29,16 @@
 #ifdef _WINDOWS
 
 
-Condition::Condition() 
+Condition::Condition()
 {
-	m_events[SignalEvent] = CreateEvent (nullptr,  // security
-                                     FALSE, // is auto-reset event?
-                                     FALSE, // is signaled initially?
-                                     nullptr); // name
-	m_events[BroadcastEvent] = CreateEvent (nullptr,  // security
-                                     TRUE, // is auto-reset event?
-                                     FALSE, // is signaled initially?
-                                     nullptr); // name
+	m_events[SignalEvent] = CreateEvent (nullptr, // security
+									FALSE, // is auto-reset event?
+									FALSE, // is signaled initially?
+									nullptr); // name
+	m_events[BroadcastEvent] = CreateEvent (nullptr, // security
+									TRUE, // is auto-reset event?
+									FALSE, // is signaled initially?
+									nullptr); // name
 	m_waiters = 0;
 	InitializeCriticalSection(&CSMutex);
 }
@@ -69,28 +69,28 @@ void Condition::SignalAll()
 void Condition::Wait()
 {
 	EnterCriticalSection(&CSMutex);
-	
+
 	m_waiters++;
-	
-	
+
+
 	LeaveCriticalSection(&CSMutex);
 	int result = WaitForMultipleObjects (_eventCount, m_events, FALSE, INFINITE);
 	EnterCriticalSection(&CSMutex);
-	
+
 	m_waiters--;
-	
+
 	//see if we are the last person waiting on the condition, and there was a broadcast
 	//if so, we need to reset the broadcast event.
 	if(m_waiters == 0 && result == (WAIT_OBJECT_0+BroadcastEvent))
 		ResetEvent(m_events[BroadcastEvent]);
-	
+
 	LeaveCriticalSection(&CSMutex);
 }
 
 
 #else	//!WIN32
 
-Condition::Condition() 
+Condition::Condition()
 {
 	pthread_cond_init(&cond,nullptr);
 	pthread_mutex_init(&mutex,nullptr);

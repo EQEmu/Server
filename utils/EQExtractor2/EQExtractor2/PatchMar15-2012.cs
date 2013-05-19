@@ -22,7 +22,7 @@ namespace EQExtractor2.Patches
         }
 
         public override void RegisterExplorers()
-        {        
+        {
             //OpManager.RegisterExplorer("OP_ZoneEntry", ExploreZoneEntry);
         }
 
@@ -32,7 +32,7 @@ namespace EQExtractor2.Patches
                 return;
 
             string SpawnName = Buffer.ReadString(true);
-                        
+
             UInt32 SpawnID = Buffer.ReadUInt32();
 
             byte Level = Buffer.ReadByte();
@@ -102,7 +102,7 @@ namespace EQExtractor2.Patches
 
                 Buffer.ReadByte();
 
-                
+
             }
             OutputStream.WriteLine("Size starts at offset {0}", Buffer.GetPosition());
 
@@ -372,7 +372,7 @@ namespace EQExtractor2.Patches
                 NewSpawn.XPos = Utils.EQ19ToFloat((Int32)(Position4 >> 12) & 0x7FFFF);
 
                 NewSpawn.ZPos = Utils.EQ19ToFloat((Int32)(Position5 & 0x7FFFF));
-                                
+
                 NewSpawn.MeleeTexture1 = 0;
                 NewSpawn.MeleeTexture2 = 0;
 

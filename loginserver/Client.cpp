@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2010  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "Client.h"
 #include "ErrorLog.h"
@@ -137,8 +137,8 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 	status = cs_waiting_for_login;
 
 	/**
-	 * The packets are mostly the same but slightly different between the two versions.
-	 */
+	* The packets are mostly the same but slightly different between the two versions.
+	*/
 	if(version == cv_sod)
 	{
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChatMessage, 17);
@@ -197,7 +197,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 #ifdef WIN32
 	e_buffer = server.eq_crypto->DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
-	
+
 	int buffer_len = strlen(e_buffer);
 	e_hash.assign(e_buffer, buffer_len);
 	e_user.assign((e_buffer + buffer_len + 1), strlen(e_buffer + buffer_len + 1));
@@ -353,7 +353,7 @@ void Client::Handle_Play(const char* data)
 void Client::SendServerListPacket()
 {
 	EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
-	
+
 	if(server.options.IsDumpOutPacketsOn())
 	{
 		DumpPacket(outapp);
@@ -380,12 +380,12 @@ void Client::GenerateKey()
 	int count = 0;
 	while(count < 10)
 	{
-		static const char key_selection[] = 
+		static const char key_selection[] =
 		{
-			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
-			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
-			'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
-			'Y', 'Z', '0', '1', '2', '3', '4', '5', 
+			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+			'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+			'Y', 'Z', '0', '1', '2', '3', '4', '5',
 			'6', '7', '8', '9'
 		};
 

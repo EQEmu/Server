@@ -8,34 +8,34 @@
     <!--
     var locked = 0;
     var connected = 0;
-    
+
     var idx = Math.floor((Math.random()*100000000));
     function GetStatusIdx() {
         return idx++;
     }
-    
+
     function StatusTic() {
         $.getJSON("data/player_count.html"+"?idx="+GetStatusIdx(),
         function(data) {
             var elm = document.getElementById('pcount');
             elm.innerHTML = data.player_count;
         });
-        
+
         $.getJSON("data/zone_count.html"+"?idx="+GetStatusIdx(),
         function(data) {
             var elm = document.getElementById('zcount');
             elm.innerHTML = data.zone_count;
         });
-        
+
         $.getJSON("data/launcher_count.html"+"?idx="+GetStatusIdx(),
         function(data) {
             var elm = document.getElementById('lcount');
             elm.innerHTML = data.launcher_count;
         });
-        
+
         $.getJSON("data/world_status.html"+"?idx="+GetStatusIdx(),
         function(data) {
-            
+
             var elm = document.getElementById('lock_status');
             if(data.locked == 1) {
                 elm.innerHTML = "locked";
@@ -46,7 +46,7 @@
                 elm = document.getElementById('lock_link');
                 elm.innerHTML = "Lock World";
             }
-            
+
             elm = document.getElementById('conn_status');
             if(data.connected == 1) {
                 elm.innerHTML = "connected";
@@ -57,21 +57,21 @@
                 elm = document.getElementById('restart_id');
                 elm.style.display = 'inline';
             }
-            
+
             locked = data.locked;
             connected = data.connected;
         });
     }
-    
+
     function ToggleLock() {
         var action = "lock";
         if(locked == 1) {
             action = "unlock";
         }
-        
+
         $.getJSON("actions/world_action.html?action=" + action+"&idx="+GetStatusIdx(),
         function(data) {
-            
+
             var elm = document.getElementById('lock_status');
             if(data.locked == 1) {
                 elm.innerHTML = "locked";
@@ -82,7 +82,7 @@
                 elm = document.getElementById('lock_link');
                 elm.innerHTML = "Lock World";
             }
-            
+
             elm = document.getElementById('conn_status');
             if(data.connected == 1) {
                 elm.innerHTML = "connected";
@@ -93,16 +93,16 @@
                 elm = document.getElementById('restart_id');
                 elm.style.display = 'inline';
             }
-            
+
             locked = data.locked;
             connected = data.connected;
         });
     }
-    
+
     function Reconnect() {
         $.getJSON("actions/world_action.html?action=lsreconnect"+"&idx="+GetStatusIdx(),
         function(data) {
-            
+
             var elm = document.getElementById('lock_status');
             if(data.locked == 1) {
                 elm.innerHTML = "locked";
@@ -113,7 +113,7 @@
                 elm = document.getElementById('lock_link');
                 elm.innerHTML = "Lock World";
             }
-            
+
             elm = document.getElementById('conn_status');
             if(data.connected == 1) {
                 elm.innerHTML = "connected";
@@ -126,9 +126,9 @@
             }
             locked = data.locked;
             connected = data.connected;
-        });        
+        });
     }
-    
+
     $(document).ready(function() {
         setInterval("StatusTic()", 4000);
     });
@@ -142,13 +142,13 @@
         <?
         my $zcount = $EQW->CountZones();
         my $lcount = $EQW->CountLaunchers(1);
-        my $pcount = $EQW->CountPlayers();    
-        
+        my $pcount = $EQW->CountPlayers();
+
         print "<table width='38%' class='styled_table' cellpadding='0' cellspacing='0' align='center'>";
         print "<tr>";
         print "<th>Zones Booted<th>";
         print "<th>Launchers Connected<th>";
-        print "<th>Players Online<th>";    
+        print "<th>Players Online<th>";
         print "</tr>";
         print "<tr>";
         print "<td><a href='zones.html' id='zcount'>$zcount</a><td>";
@@ -156,7 +156,7 @@
         print "<td><a href='players.html' id='pcount'>$pcount</a><td>";
         print "</tr>";
         print "</table></br>";
-        
+
         if($EQW->LSConnected()) {
             my $ls = $EQW->GetConfig("LoginHost");
             my $lsp = $EQW->GetConfig("LoginPort");
@@ -170,17 +170,17 @@
         print "<div width='38%' align='center'>";
         print "$ls_str";
         print "</div></br>";
-        
+
         if($EQW->GetConfig("Locked") eq "true") {
             $locked_str =  "World is <span id='lock_status'>locked</span>. <a href='javascript:void(0)' id='lock_link' onclick='ToggleLock()'>Unlock World</a>.<br>";
             print "<script><!--locked = 1;--></script>";
         } else {
             $locked_str =  "World is <span id='lock_status'><b>NOT</b> locked</span>. <a href='javascript:void(0)' id='lock_link' onclick='ToggleLock()'>Lock World</a>.<br>";
         }
-        
+
         print "<div width='38%' align='center'>";
         print "$locked_str";
-        print "</div>";        
+        print "</div>";
         ?>
         </div>
     </div>

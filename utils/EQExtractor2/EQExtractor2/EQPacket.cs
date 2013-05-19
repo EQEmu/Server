@@ -1,7 +1,7 @@
 ﻿//
 // Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net). Distributed under GPL version 2.
 //
-// 
+//
 // This is the netcode for turning SOE protocol packets into EQ Application Packets
 //
 using System;
@@ -45,20 +45,20 @@ namespace EQPacket
         public DateTime PacketTime;
         public bool Locked = false;
     }
-    
+
     public class PacketManager
     {
         bool DEBUG = false;
         bool DUMPPACKETS = false;
-    
+
 	    private void Debug(string Message)
         {
             if (DebugLogger != null)
-                DebugLogger(Message);    	    
+                DebugLogger(Message);
         }
 
         public bool ErrorsInStream = false;
-        	
+
     	const UInt32 OP_SessionRequest = 0x0001;
     	const UInt32 OP_SessionResponse = 0x0002;
     	const UInt32 OP_Combined = 0x0003;
@@ -74,7 +74,7 @@ namespace EQPacket
         private int[] FragmentedPacketSize = {0, 0};
         private int[] FragmentedBytesCollected = {0, 0};
         private byte[][] Fragments = new byte [2][];
-        
+
 
         private System.Net.IPAddress ServerIP;
         private ushort ServerPort = 0;
@@ -136,7 +136,7 @@ namespace EQPacket
 
             PacketList.Add(Packet);
         }
-        
+
         private struct CacheEntry
         {
             public int Seq;
@@ -152,7 +152,7 @@ namespace EQPacket
                 Payload = inPayload;
                 PacketTime = inPacketTime;
                 SubPacket = inSubPacket;
-            }            
+            }
         }
 
         private List<CacheEntry> Cache = new List<CacheEntry>();
@@ -212,7 +212,7 @@ namespace EQPacket
             int CacheElement;
 
             CacheElement = FindCacheEntry(GetExpectedSeq(PacketDirection.ServerToClient), PacketDirection.ServerToClient);
-            
+
             while ( CacheElement >= 0)
             {
                 if (DEBUG)
@@ -267,8 +267,8 @@ namespace EQPacket
                 ++ExpectedClientSEQ;
             else if (Direction == PacketDirection.ServerToClient)
                 ++ExpectedServerSEQ;
-        } 
-        
+        }
+
         public void ProcessPacket(System.Net.IPAddress srcIp, System.Net.IPAddress dstIp, ushort srcPort, ushort dstPort, byte[] Payload, DateTime PacketTime, bool SubPacket, bool Cached)
         {
             byte Flags = 0x00;
@@ -313,7 +313,7 @@ namespace EQPacket
                     ServerIP = dstIp;
 
                     ServerPort = dstPort;
-                    
+
         		    Log("-- Locked onto EQ Stream. Client IP " + srcIp + ":" + srcPort + " Server IP " + dstIp + ":" + dstPort);
 
                     ExpectedClientSEQ = 0;
@@ -321,7 +321,7 @@ namespace EQPacket
                     ExpectedServerSEQ = 0;
 
                     CryptoFlag = 0;
-                    
+
                     break;
                 }
 
@@ -395,7 +395,7 @@ namespace EQPacket
                     {
                         if (DEBUG)
                             Debug("0xa5");
-                 
+
                         Uncompressed = new byte[Payload.Length - 5];
 
 			            Array.Copy(Payload, 3, Uncompressed, 0, Payload.Length - 5);
@@ -436,12 +436,12 @@ namespace EQPacket
                                 AdvanceSeq(Direction);
                             }
                         }
-                        
+
                         break;
                     }
                     else
                         AdvanceSeq(Direction);
-                    
+
 
                     bool Multi = ((Uncompressed[2] == 0x00) && (Uncompressed[3] == 0x19));
 
@@ -473,11 +473,11 @@ namespace EQPacket
                                 ++BufferPosition;
                                 OpCodeBytes = 3;
                             }
-                            
+
                             AppOpCode += (Uncompressed[BufferPosition++] * 256);
-                            
+
                             ProcessAppPacket(srcIp, dstIp, srcPort, dstPort, AppOpCode, Size - OpCodeBytes, Uncompressed, BufferPosition, Direction, PacketTime);
-                            
+
                             BufferPosition = BufferPosition + (Size - OpCodeBytes);
                         }
                     }
@@ -494,7 +494,7 @@ namespace EQPacket
                             OpCodeBytes = 3;
                         }
 
-                        AppOpCode += (Uncompressed[BufferPosition++] * 256);                        
+                        AppOpCode += (Uncompressed[BufferPosition++] * 256);
 
                         ProcessAppPacket(srcIp, dstIp, srcPort, dstPort, AppOpCode, Uncompressed.Length - (2 + OpCodeBytes), Uncompressed, BufferPosition, Direction, PacketTime);
                     }
@@ -539,7 +539,7 @@ namespace EQPacket
                     {
                         Debug("Uncompressed data.");
                         Debug(Utils.HexDump(Uncompressed));
-                    }                    
+                    }
 
                     if (FragmentSeq[(int)Direction] == -1)
                     {
@@ -552,7 +552,7 @@ namespace EQPacket
                             Debug("FragmentSeq is " + FragmentSeq[(int)Direction] + " Expecting " + GetExpectedSeq(Direction));
 
                         if (FragmentSeq[(int)Direction] != GetExpectedSeq(Direction))
-                        {			                
+                        {
                             if (FragmentSeq[(int)Direction] > GetExpectedSeq(Direction))
                             {
                                 if((FragmentSeq[(int)Direction] - GetExpectedSeq(Direction)) < 1000)
@@ -569,7 +569,7 @@ namespace EQPacket
                                 }
                             }
                             FragmentSeq[(int)Direction] = -1;
-                                                        
+
                             break;
                         }
                         else
@@ -636,7 +636,7 @@ namespace EQPacket
 
                                     FragmentSeq[(int)Direction] = -1;
 				                }
-                            }                            
+                            }
                             break;
                         }
                         else
@@ -700,7 +700,7 @@ namespace EQPacket
                                     AppOpCode += (Fragments[(int)Direction][BufferPosition++] * 256);
 
                                     ProcessAppPacket(srcIp, dstIp, srcPort, dstPort, AppOpCode, Size - OpCodeBytes, Fragments[(int)Direction], BufferPosition, Direction, PacketTime);
-                                    
+
                                     BufferPosition = BufferPosition + (Size - OpCodeBytes);
                                 }
                             }
@@ -721,7 +721,7 @@ namespace EQPacket
                                 byte[] NewPacket = new byte[Fragments[(int)Direction].Length - OpCodeBytes];
 
                                 Array.Copy(Fragments[(int)Direction], BufferPosition, NewPacket, 0, Fragments[(int)Direction].Length - OpCodeBytes);
-                                
+
                                 ProcessAppPacket(srcIp, dstIp, srcPort, dstPort, AppOpCode, NewPacket.Length, NewPacket, 0, Direction, PacketTime);
                             }
                             if (DEBUG)
@@ -730,7 +730,7 @@ namespace EQPacket
                             FragmentSeq[(int)Direction] = -1;
                         }
                     }
-                
+
                     break;
                 }
                 case OP_OutOfOrderAck:
@@ -750,7 +750,7 @@ namespace EQPacket
                         Seq = Payload[3] * 256 + Payload[4];
                     else
                         Seq = Payload[2] * 256 + Payload[3];
-                   
+
                     string DirectionString;
 
 		            if(Direction == PacketDirection.ClientToServer)
@@ -763,7 +763,7 @@ namespace EQPacket
                         Debug("OP_Ack, Seq " + Seq + " " + DirectionString);
                         Debug(Utils.HexDump(Payload));
                     }
-                    
+
                     break;
                 }
                 default:
@@ -776,7 +776,7 @@ namespace EQPacket
                             Debug(Utils.HexDump(Payload));
                             Debug("-------------------");
                         }
-                                                
+
                         int AppOpCode;
                         byte[] NewPacket;
 
@@ -791,7 +791,7 @@ namespace EQPacket
                         else
                         {
                             // This packet has a flag byte between the first and second bytes of the opcode, and also a CRC
-                            
+
                             Flags = Payload[1];
 
                             if (Flags == 0x5a)
@@ -837,7 +837,7 @@ namespace EQPacket
             }
 
             if (!Cached && !CacheEmpty())
-                ProcessCache();        
+                ProcessCache();
         }
 
         public void ProcessAppPacket(System.Net.IPAddress srcIp, System.Net.IPAddress dstIp, ushort srcPort, ushort dstPort, int InOpCode, int BufferSize, byte[] Source, int Offset, PacketDirection Direction, DateTime PacketTime)
@@ -854,7 +854,7 @@ namespace EQPacket
                     PermaLocked = true;
                 }
                 Identified = (TempStatus == IdentificationStatus.Yes);
-            }                                               
+            }
             AddPacket(app);
         }
 
@@ -885,7 +885,7 @@ namespace EQPacket
 
                 UncompressedSize = Payload.Length - (Offset - 1);
             }
-                        
+
             zs.Close();
 
             zs.Dispose();
@@ -897,6 +897,6 @@ namespace EQPacket
             Array.Resize(ref Uncompressed, UncompressedSize);
 
             return Uncompressed;
-        }        
+        }
     }
 }

@@ -41,7 +41,7 @@ namespace Test
 {
 	class Source;
 	class Time;
-	
+
 	/// \brief %Test suite output handler.
 	///
 	/// Abstract base class for all suite output handlers. Derive from this
@@ -58,7 +58,7 @@ namespace Test
 		/// Empty destructor.
 		///
 		virtual ~Output() {}
-		
+
 		/// Called when testing is started.
 		///
 		/// \param tests Total number of tests in all suites.
@@ -67,7 +67,7 @@ namespace Test
 		{
 			CPPTEST_UNUSED(tests);
 		}
-		
+
 		/// Called when testing is finished.
 		///
 		/// \param tests Total number of tests in all suites.
@@ -89,7 +89,7 @@ namespace Test
 			CPPTEST_UNUSED(tests);
 			CPPTEST_UNUSED(name);
 		}
-		
+
 		/// Called when a suite is finished.
 		///
 		/// \param tests Number of tests in this suite.
@@ -103,7 +103,7 @@ namespace Test
 			CPPTEST_UNUSED(name);
 			CPPTEST_UNUSED(time);
 		}
-		
+
 		/// Called when a tests is executed.
 		///
 		/// \param name Name of the test function.
@@ -112,7 +112,7 @@ namespace Test
 		{
 			CPPTEST_UNUSED(name);
 		}
-		
+
 		/// Called when a test if finished, regardless if an assertment was
 		/// issued.
 		///
@@ -127,7 +127,7 @@ namespace Test
 			CPPTEST_UNUSED(ok);
 			CPPTEST_UNUSED(time);
 		}
-		
+
 		/// Called when an assertment is issued.
 		///
 		/// \param s Assert point information.
@@ -141,12 +141,12 @@ namespace Test
 		/// Empty constructor.
 		///
 		Output() {}
-		
+
 	private:
 		Output(const Output&);
 		Output& operator=(const Output&);
 	};
-	
+
 } // namespace Test
-	
+
 #endif // #ifndef CPPTEST_OUTPUT_H

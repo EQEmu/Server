@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/debug.h"
@@ -37,10 +37,10 @@ extern LauncherList launcher_list;
 
 LauncherLink::LauncherLink(int id, EmuTCPConnection *c)
 : ID(id),
-  tcpc(c),
-  authenticated(false),
-  m_name(""),
-  m_bootTimer(2000)
+	tcpc(c),
+	authenticated(false),
+	m_name(""),
+	m_bootTimer(2000)
 {
 	m_dynamicCount = 0;
 	m_bootTimer.Disable();
@@ -53,7 +53,7 @@ LauncherLink::~LauncherLink() {
 bool LauncherLink::Process() {
 	if (!tcpc->Connected())
 		return false;
-	
+
 	if(m_bootTimer.Check(false)) {
 		//force a boot on any zone which isnt running.
 		std::map<std::string, ZoneState>::iterator cur, end;
@@ -66,7 +66,7 @@ bool LauncherLink::Process() {
 		}
 		m_bootTimer.Disable();
 	}
-	
+
 	ServerPacket *pack = 0;
 	while((pack = tcpc->PopPacket())) {
 		_hex(WORLD__ZONE_TRACE,pack->pBuffer,pack->size);
@@ -78,7 +78,7 @@ bool LauncherLink::Process() {
 					if (memcmp(pack->pBuffer, tmppass, 16) == 0)
 						authenticated = true;
 					else {
-						struct in_addr  in;
+						struct in_addr in;
 						in.s_addr = GetIP();
 						_log(WORLD__LAUNCH_ERR, "Launcher authorization failed.");
 						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
@@ -89,7 +89,7 @@ bool LauncherLink::Process() {
 					}
 				}
 				else {
-					struct in_addr  in;
+					struct in_addr in;
 					in.s_addr = GetIP();
 					_log(WORLD__LAUNCH_ERR, "Launcher authorization failed.");
 					ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
@@ -125,20 +125,20 @@ bool LauncherLink::Process() {
 				break;
 			}
 			m_name = it->name;
-			
+
 			EQLConfig *config = launcher_list.GetConfig(m_name.c_str());
 			if(config == nullptr) {
 				_log(WORLD__LAUNCH, "Unknown launcher '%s' connected. Disconnecting.", it->name);
 				Disconnect();
 				break;
 			}
-			
+
 			_log(WORLD__LAUNCH, "Launcher Identified itself as '%s'. Loading zone list.", it->name);
-			
+
 			std::vector<LauncherZone> result;
 			//database.GetLauncherZones(it->name, result);
 			config->GetZones(result);
-			
+
 			std::vector<LauncherZone>::iterator cur, end;
 			cur = result.begin();
 			end = result.end();
@@ -150,12 +150,12 @@ bool LauncherLink::Process() {
 				_log(WORLD__LAUNCH_TRACE, "%s: Loaded zone '%s' on port %d", m_name.c_str(), cur->name.c_str(), zs.port);
 				m_states[cur->name] = zs;
 			}
-			
+
 			//now we add all the dynamics.
 			BootDynamics(config->GetDynamicCount());
-			
+
 			m_bootTimer.Start();
-			
+
 			break;
 		}
 		case ServerOP_LauncherZoneStatus: {
@@ -186,9 +186,9 @@ bool LauncherLink::Process() {
 
 bool LauncherLink::ContainsZone(const char *short_name) const {
 	return(m_states.find(short_name) != m_states.end());
-	
+
 	/*
-	 * std::map<std::string, bool>::const_iterator cur, end;
+	* std::map<std::string, bool>::const_iterator cur, end;
 	cur = m_states.begin();
 	end = m_states.end();
 	for(; cur != end; cur++) {
@@ -203,17 +203,17 @@ void LauncherLink::BootZone(const char *short_name, uint16 port) {
 	zs.starts = 0;
 	_log(WORLD__LAUNCH_TRACE, "%s: Loaded zone '%s' on port %d", m_name.c_str(), short_name, zs.port);
 	m_states[short_name] = zs;
-	
+
 	StartZone(short_name);
 }
 
 void LauncherLink::StartZone(const char *short_name) {
 	ServerPacket* pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
 	LauncherZoneRequest* s = (LauncherZoneRequest *) pack->pBuffer;
-	
+
 	strn0cpy(s->short_name, short_name, 32);
 	s->command = ZR_Start;
-	
+
 	SendPacket(pack);
 	delete pack;
 }
@@ -221,10 +221,10 @@ void LauncherLink::StartZone(const char *short_name) {
 void LauncherLink::RestartZone(const char *short_name) {
 	ServerPacket* pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
 	LauncherZoneRequest* s = (LauncherZoneRequest *) pack->pBuffer;
-	
+
 	strn0cpy(s->short_name, short_name, 32);
 	s->command = ZR_Restart;
-	
+
 	SendPacket(pack);
 	delete pack;
 }
@@ -232,10 +232,10 @@ void LauncherLink::RestartZone(const char *short_name) {
 void LauncherLink::StopZone(const char *short_name) {
 	ServerPacket* pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
 	LauncherZoneRequest* s = (LauncherZoneRequest *) pack->pBuffer;
-	
+
 	strn0cpy(s->short_name, short_name, 32);
 	s->command = ZR_Stop;
-	
+
 	SendPacket(pack);
 	delete pack;
 }
@@ -243,15 +243,15 @@ void LauncherLink::StopZone(const char *short_name) {
 void LauncherLink::BootDynamics(uint8 new_count) {
 	if(m_dynamicCount == new_count)
 		return;
-	
+
 	ZoneState zs;
 	if(m_dynamicCount < new_count) {
 		//we are booting more dynamics.
-		
+
 		zs.port = 0;
 		zs.up = false;
 		zs.starts = 0;
-		
+
 		int r;
 		char nbuf[20];
 		uint8 index;
@@ -278,7 +278,7 @@ void LauncherLink::BootDynamics(uint8 new_count) {
 		}
 	} else {
 		//need to get rid of some zones...
-		
+
 		//quick and dirty way to do this.. should do better (like looking for idle zones)
 		int found = 0;
 		std::map<std::string, ZoneState>::iterator cur, end;
@@ -294,10 +294,10 @@ void LauncherLink::BootDynamics(uint8 new_count) {
 				}
 			}
 		}
-		
+
 		m_dynamicCount = new_count;
 	}
-	
+
 }
 
 
@@ -312,7 +312,7 @@ void LauncherLink::GetZoneList(std::vector<std::string> &l) {
 
 void LauncherLink::GetZoneDetails(const char *short_name, std::map<std::string,std::string> &res) {
 	res.clear();
-	
+
 	std::map<std::string, ZoneState>::iterator r;
 	r = m_states.find(short_name);
 	if(r == m_states.end()) {

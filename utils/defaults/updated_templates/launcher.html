@@ -13,7 +13,7 @@
     function GetStatusIdx() {
         return idx++;
     }
-    
+
     function StatusTic() {
         $.getJSON("data/launcher_data.html?launcher="+<?print "\"$lname\"";?>+"&idx="+GetStatusIdx(),
         function(data) {
@@ -57,23 +57,23 @@
                 }
                 app_html += "</td>";
                 app_html += "</tr>";
-                $("#launcher_table").append(app_html);                    
+                $("#launcher_table").append(app_html);
             }
-        });        
+        });
     }
-    
+
     function ShowAddLauncher() {
         $("#add_launcher_link").hide();
         $("#min_add_launcher_link").show();
         $("#add_launcher_table").fadeIn("slow");
     }
-    
+
     function HideAddLauncher() {
         $("#add_launcher_link").show();
         $("#min_add_launcher_link").hide();
         $("#add_launcher_table").fadeOut("slow");
     }
-    
+
     function BootZone() {
         var elm = document.getElementById("short_name_field");
         var bzone = elm.value;
@@ -81,23 +81,23 @@
         elm = document.getElementById("port_field");
         var bport = elm.value;
         elm.value = "0";
-        
+
         elm = document.getElementById("boot_button_img");
         elm.style.display = "inline";
-        
+
         elm = document.getElementById("boot_button");
         elm.className = "styled_button_disabled";
         $('#boot_button').unbind('click');
-        
+
         $.getJSON("actions/launcher_action.html?action=boot&launcher_name="+<?print "\"$lname\"";?>+"&zone="+bzone+"&port="+bport+"&idx="+GetStatusIdx(),
         function(data) {
             $('#boot_button').bind('click', BootZone);
             elm = document.getElementById("boot_button");
             elm.className = "styled_button";
-            
+
             elm = document.getElementById("boot_button_img");
             elm.style.display = "none";
-        
+
             if(data.status == 0) {
                 alert(data.message);
             } else {
@@ -105,38 +105,38 @@
             }
         });
     }
-    
+
     function ChangeDynamicCount() {
         var elm = document.getElementById("dynamic_count_field");
         var dcount = elm.value;
-        
+
         elm = document.getElementById("dynamic_count_button_img");
         elm.style.display = "inline";
-        
+
         elm = document.getElementById("dynamic_count_button");
         elm.className = "styled_button_disabled";
         $('#dynamic_count_button').unbind('click');
-        
+
         $.getJSON("actions/launcher_action.html?action=change_dynamic_count&launcher_name="+<?print "\"$lname\"";?>+"&dynamic_count="+dcount+"&idx="+GetStatusIdx(),
         function(data) {
             $('#dynamic_count_button').bind('click', ChangeDynamicCount);
             elm = document.getElementById("dynamic_count_button");
             elm.className = "styled_button";
-            
+
             elm = document.getElementById("dynamic_count_button_img");
             elm.style.display = "none";
-        
+
             if(data.status == 0) {
                 alert(data.message);
             } else {
                 StatusTic();
             }
-        });        
+        });
     }
-    
+
     function RemoveZone(zone_name) {
         $.getJSON("actions/launcher_action.html?action=remove_zone&launcher_name="+<?print "\"$lname\"";?>+"&zone="+zone_name+"&idx="+GetStatusIdx(),
-        function(data) {            
+        function(data) {
             if(data.status == 0) {
                 alert(data.message);
             } else {
@@ -144,10 +144,10 @@
             }
         });
     }
-    
+
     function RebootAll() {
         $.getJSON("actions/launcher_action.html?action=reboot_all&launcher_name="+<?print "\"$lname\"";?>+"&idx="+GetStatusIdx(),
-        function(data) {            
+        function(data) {
             if(data.status == 0) {
                 alert(data.message);
             } else {
@@ -155,10 +155,10 @@
             }
         });
     }
-    
+
     function StopAll() {
         $.getJSON("actions/launcher_action.html?action=stop_all&launcher_name="+<?print "\"$lname\"";?>+"&idx="+GetStatusIdx(),
-        function(data) {            
+        function(data) {
             if(data.status == 0) {
                 alert(data.message);
             } else {
@@ -166,10 +166,10 @@
             }
         });
     }
-    
+
     function StartAll() {
         $.getJSON("actions/launcher_action.html?action=start_all&launcher_name="+<?print "\"$lname\"";?>+"&idx="+GetStatusIdx(),
-        function(data) {            
+        function(data) {
             if(data.status == 0) {
                 alert(data.message);
             } else {
@@ -177,21 +177,21 @@
             }
         });
     }
-    
+
     function RestartZone(zone) {
         $.getJSON("actions/launcher_action.html?action=restart_zone&launcher_name="+<?print "\"$lname\"";?>+"&zone="+zone+"&idx="+GetStatusIdx(),
-        function(data) {            
+        function(data) {
             if(data.status == 0) {
                 alert(data.message);
             } else {
                 StatusTic();
             }
-        });        
+        });
     }
-    
+
     function StartZone(zone) {
         $.getJSON("actions/launcher_action.html?action=start_zone&launcher_name="+<?print "\"$lname\"";?>+"&zone="+zone+"&idx="+GetStatusIdx(),
-        function(data) {            
+        function(data) {
             if(data.status == 0) {
                 alert(data.message);
             } else {
@@ -199,10 +199,10 @@
             }
         });
     }
-    
+
     function StopZone(zone) {
         $.getJSON("actions/launcher_action.html?action=stop_zone&launcher_name="+<?print "\"$lname\"";?>+"&zone="+zone+"&idx="+GetStatusIdx(),
-        function(data) {            
+        function(data) {
             if(data.status == 0) {
                 alert(data.message);
             } else {
@@ -210,14 +210,14 @@
             }
         });
     }
-        
+
     $(document).ready(function() {
         setInterval("StatusTic()", 4000);
         $('#boot_button').bind('click', BootZone);
         $('#dynamic_count_button').bind('click', ChangeDynamicCount);
     });
     -->
-    </script>    
+    </script>
 </head>
 <body>
     <div class="container">
@@ -230,8 +230,8 @@
             }
             ?>
             <div align="center">
-                <a href="#" onclick='RebootAll()'>Reboot All Zones</a> - 
-                <a href="#" onclick='StopAll()'>Stop All Zones</a> - 
+                <a href="#" onclick='RebootAll()'>Reboot All Zones</a> -
+                <a href="#" onclick='StopAll()'>Stop All Zones</a> -
                 <a href="#" onclick='StartAll()'>Start All Zones</a>
             </div>
             </br>
@@ -255,7 +255,7 @@
                     </td>
                 </tr>
             </table>
-            
+
             <table id='launcher_table' class='styled_table' width="70%" cellspacing="0" cellpadding="0">
               <tr>
                 <th scope="col">Zone Name</th>
@@ -266,7 +266,7 @@
               </tr>
             <?
               my @zones = $config->ListZones();
-              
+
               for my $zone (sort @zones) {
                     my $z = $config->GetZoneDetails($zone);
                     if(!$z) {
@@ -274,7 +274,7 @@
                     } elsif($z->{error}) {
                         $zone->{name} = "ERROR: $z->{error}";
                     }
-                    
+
                     print "<tr>\n";
                     print "\t<td><a href='zone.html?zone=$z->{name}'>$z->{name}</a></td>";
                     if($z->{up}) {
@@ -307,7 +307,7 @@
                     print "</tr>\n";
               }
             ?>
-            </table>        
+            </table>
         </div>
     </div>
     <div class="footer">

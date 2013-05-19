@@ -14,12 +14,12 @@ namespace EQExtractor2.Patches
         public PatchMarch132013Decoder()
         {
             Version = "EQ Client Build Date March 13 2013.";
-                                   
-            PatchConfFileName = "patch_Mar13-2013.conf";            
+
+            PatchConfFileName = "patch_Mar13-2013.conf";
 
             SupportsSQLGeneration = true;
         }
-        
+
         override public List<Door> GetDoors()
         {
             List<Door> DoorList = new List<Door>();

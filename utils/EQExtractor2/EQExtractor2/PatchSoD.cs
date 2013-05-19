@@ -1,7 +1,7 @@
 ﻿//
 // Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net). Distributed under GPL version 2.
 //
-// 
+//
 //
 // IMPORTANT NOTE: This decoder for SoD was developed purely as a cursory test of the multi-patch support and is not guaranteed
 // to be 100% correct.
@@ -721,7 +721,7 @@ namespace EQExtractor2.Patches
 
                 GroundSpawn.Name = Buffer.ReadFixedLengthString(16, false);
 
-                Buffer.SkipBytes(20);                              
+                Buffer.SkipBytes(20);
 
                 GroundSpawn.ObjectType = Buffer.ReadUInt32();
 
@@ -760,11 +760,11 @@ namespace EQExtractor2.Patches
 
         public override void RegisterExplorers()
         {
-            OpManager.RegisterExplorer("OP_ZoneEntry", ExploreZoneEntry);         
+            OpManager.RegisterExplorer("OP_ZoneEntry", ExploreZoneEntry);
             //OpManager.RegisterExplorer("OP_RespawnWindow", ExploreRespawnWindow);
             //OpManager.RegisterExplorer("OP_ZonePlayerToBind", ExploreZonePlayerToBind);
             //OpManager.RegisterExplorer("OP_RequestClientZoneChange", ExploreRequestClientZoneChange);
-            //OpManager.RegisterExplorer("OP_DeleteSpawn", ExploreDeleteSpawn);            
+            //OpManager.RegisterExplorer("OP_DeleteSpawn", ExploreDeleteSpawn);
             OpManager.RegisterExplorer("OP_HPUpdate", ExploreHPUpdate);
 
         }

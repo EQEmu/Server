@@ -314,7 +314,7 @@ namespace EQExtractor2.Patches
             Buffer.SkipBytes(4);    // clickunk7
             Buffer.SkipBytes(30);   // Proc Effect Struct
             Buffer.ReadString(true);    // Proc Name
-            Buffer.SkipBytes(4);    // unknown5            
+            Buffer.SkipBytes(4);    // unknown5
             Buffer.SkipBytes(30);   // Worn Effect Struct
             Buffer.ReadString(true);    // Worn Name
             Buffer.SkipBytes(4);    // unknown6
@@ -326,15 +326,15 @@ namespace EQExtractor2.Patches
             Buffer.SkipBytes(4);    // unknown6
             Buffer.SkipBytes(30);   // Worn Effect Struct
             Buffer.ReadString(true);    // Worn Name
-            Buffer.SkipBytes(4);    // unknown6            
+            Buffer.SkipBytes(4);    // unknown6
             Buffer.SkipBytes(103);   // Item Quaternary Body Struct - 4 (we want to read the SubLength field at the end)
-            
+
             Buffer.SkipBytes(57);   // HoT
 
             OutputStream.WriteLine("    Reading sublengths from offset {0}", Buffer.GetPosition());
             UInt32 SubLengths = Buffer.ReadUInt32();
 
-            
+
 
             for (int i = 0; i < SubLengths; ++i)
             {

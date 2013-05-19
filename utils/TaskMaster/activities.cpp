@@ -5,7 +5,7 @@
 #include "utility.h"
 #include "base.h"
 #include "ErrorLog.h"
- 
+
 using namespace std;
 
 void MainFrame::ActivitiesListBoxSimpleSelect(wxCommandEvent& event)
@@ -129,7 +129,7 @@ void MainFrame::NewActivity(wxCommandEvent& event)
 		char * mActQuery = 0;
 		MakeAnyLenString(&mActQuery, "INSERT INTO `activities` (`taskid`,`activityid`,`step`,`activitytype`,`text1`,`text2`,`text3`,`goalid`,`goalmethod`,`goalcount`,`delivertonpc`,`zoneid`,`optional`) VALUES (%u,%u,%u,%u,'%s','%s','%s',%u,%u,%u,%u,%u,%u)",
 				newAct.id, newAct.activityId, newAct.step, newAct.activityType, newAct.text1, newAct.text2, newAct.text3, newAct.goalid, newAct.goalmethod, newAct.goalcount, newAct.deliverToNpc, newAct.zoneid, newAct.optional	);
-	
+
 		mErrorLog->Log(eqEmuLogSQL, "%s", mActQuery);
 		if (mysql_query(mMysql, mActQuery)) {
 			mErrorLog->Log(eqEmuLogBoth, "MySQL Error: %s", mysql_error(mMysql));
@@ -161,7 +161,7 @@ void MainFrame::DeleteActivity(wxCommandEvent& event)
 
 	eqtask_activity_id *selAct = (eqtask_activity_id*)ActivitiesSelectionList->GetClientData(ActivitiesSelectionList->GetSelection());
 	unsigned int aid = selAct->activityid;
-	unsigned int tid = selAct->id; 
+	unsigned int tid = selAct->id;
 
 	if(selAct)
 	{

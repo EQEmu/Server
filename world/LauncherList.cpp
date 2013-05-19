@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 
@@ -37,14 +37,14 @@ LauncherList::~LauncherList() {
 	for(; cur != end; cur++) {
 		delete *cur;
 	}
-	
+
 	map<string, EQLConfig *>::iterator curc, endc;
 	curc = m_configs.begin();
 	endc = m_configs.end();
 	for(; curc != endc; curc++) {
 		delete curc->second;
 	}
-	
+
 	map<string, LauncherLink *>::iterator curl, endl;
 	curl = m_launchers.begin();
 	endl = m_launchers.end();
@@ -52,7 +52,7 @@ LauncherList::~LauncherList() {
 		delete curl->second;
 	}
 }
-	
+
 void LauncherList::Process() {
 	//process pending launchers..
 	vector<LauncherLink *>::iterator cur, end;
@@ -84,7 +84,7 @@ void LauncherList::Process() {
 			cur++;
 		}
 	}
-	
+
 	//process active launchers.
 	map<string, LauncherLink *>::iterator curl, tmp;
 	curl = m_launchers.begin();
@@ -111,7 +111,7 @@ LauncherLink *LauncherList::Get(const char *name) {
 		return(nullptr);
 	return(res->second);
 /*	string goal(name);
-	
+
 	vector<LauncherLink *>::iterator cur, end;
 	cur = m_launchers.begin();
 	end = m_launchers.end();
@@ -155,9 +155,9 @@ void LauncherList::GetLauncherNameList(std::vector<string> &res) {
 
 void LauncherList::LoadList() {
 	vector<string> launchers;
-	
+
 	database.GetLauncherList(launchers);
-	
+
 	vector<string>::iterator cur, end;
 	cur = launchers.begin();
 	end = launchers.end();
@@ -186,37 +186,11 @@ void LauncherList::Remove(const char *name) {
 		delete resc->second;
 		m_configs.erase(resc);
 	}
-	
+
 	map<string, LauncherLink *>::iterator resl;
 	resl = m_launchers.find(name);
 	if(resl != m_launchers.end()) {
 		resl->second->Disconnect();
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

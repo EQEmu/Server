@@ -28,7 +28,7 @@
 # include "winconfig.h"
 #else
 # include "config.h"
-#endif 
+#endif
 
 #include "missing.h"
 
@@ -40,7 +40,7 @@
 	#include <cmath>
 #else
 	#include <math.h>
-#endif 
+#endif
 
 #include <cassert>
 #include <ctime>
@@ -53,7 +53,7 @@ namespace Test
 	gettimeofday(timeval* tv, void*)
 	{
 		assert(tv);
-		
+
 	#ifdef HAVE_GETTICKCOUNT
 		long now = GetTickCount();
 		tv->tv_sec  = now / 1000;
@@ -62,10 +62,10 @@ namespace Test
 		tv->tv_sec  = time(0);
 		tv->tv_usec = 0;
 	#endif // #ifdef HAVE_GETTICKCOUNT
-	
+
 		return 0;
 	}
-		
+
 #endif // #ifndef HAVE_GETTIMEOFDAY
 
 #ifndef HAVE_ROUND
@@ -74,7 +74,7 @@ namespace Test
 	{
 		return d > 0.0 ? floor(d + 0.5) : ceil(d - 0.5);
 	}
-#endif	
+#endif
 
 } // namespace Test
 

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef ENTITY_H
 #define ENTITY_H
@@ -81,29 +81,29 @@ public:
 	virtual bool IsTrap()			const { return false; }
 	virtual bool IsBeacon()			const { return false; }
 
-	virtual bool Process()  { return false; }
+	virtual bool Process() { return false; }
 	virtual bool Save() { return true; }
 	virtual void Depop(bool StartSpawnTimer = false) {}
 
 	Client* CastToClient();
-	NPC*    CastToNPC();
-	Mob*    CastToMob();
-	Merc*   CastToMerc();
+	NPC*	CastToNPC();
+	Mob*	CastToMob();
+	Merc*	CastToMerc();
 	Corpse*	CastToCorpse();
 	Object* CastToObject();
 	Doors*	CastToDoors();
 	Trap*	CastToTrap();
 	Beacon*	CastToBeacon();
-	
+
 	const Client* CastToClient() const;
-	const NPC*    CastToNPC() const;
-	const Mob*    CastToMob() const;
-	const Merc*    CastToMerc() const;
+	const NPC*		CastToNPC() const;
+	const Mob*		CastToMob() const;
+	const Merc*		CastToMerc() const;
 	const Corpse*	CastToCorpse() const;
-	const Object* CastToObject() const;
+	const Object*	CastToObject() const;
 //	const Group*	CastToGroup() const;
 	const Doors*	CastToDoors() const;
-	const Trap*	CastToTrap() const;
+	const Trap*		CastToTrap() const;
 	const Beacon*	CastToBeacon() const;
 
 	inline const uint16& GetID() const{ return id; }
@@ -129,7 +129,7 @@ class EntityList
 public:
 	EntityList();
 	~EntityList();
-	
+
 	Entity* GetID(uint16 id);
 	Mob*	GetMob(uint16 id);
 	inline Mob*	GetMobID(uint16 id) { return(GetMob(id)); }	//for perl
@@ -139,7 +139,7 @@ public:
 	NPC*	GetNPCByID(uint16 id);
 	NPC*	GetNPCByNPCTypeID(uint32 npc_id);
 	Merc*	GetMercByID(uint16 id);
-	Client* GetClientByName(const char *name); 
+	Client* GetClientByName(const char *name);
 	Client* GetClientByAccID(uint32 accid);
 	Client* GetClientByID(uint16 id);
 	Client* GetClientByCharID(uint32 iCharID);
@@ -148,8 +148,8 @@ public:
 	Client* GetRandomClient(float x, float y, float z, float Distance, Client *ExcludeClient = nullptr);
 	Group*	GetGroupByMob(Mob* mob);
 	Group*	GetGroupByClient(Client* client);
-	Group*  GetGroupByID(uint32 id);
-	Group*  GetGroupByLeaderName(char* leader);
+	Group*	GetGroupByID(uint32 id);
+	Group*	GetGroupByLeaderName(char* leader);
 	Raid*	GetRaidByMob(Mob* mob);
 	Raid*	GetRaidByClient(Client* client);
 	Raid*	GetRaidByID(uint32 id);
@@ -173,12 +173,12 @@ public:
 	int RezzAllCorpsesByCharID(uint32 charid);
 	bool IsMobInZone(Mob *who);
 	void ClearClientPetitionQueue();
-    bool CanAddHateForMob(Mob *p);
-    void	SendGuildMOTD(uint32 guild_id);
-    void	SendGuildSpawnAppearance(uint32 guild_id);
-    void	SendGuildMembers(uint32 guild_id);
-    void	RefreshAllGuildInfo(uint32 guild_id);
-    void	SendGuildList();
+	bool CanAddHateForMob(Mob *p);
+	void	SendGuildMOTD(uint32 guild_id);
+	void	SendGuildSpawnAppearance(uint32 guild_id);
+	void	SendGuildMembers(uint32 guild_id);
+	void	RefreshAllGuildInfo(uint32 guild_id);
+	void	SendGuildList();
 //	void	SendGuildJoin(GuildJoin_Struct* gj);
 	// Check group list for nullptr entries
 	void	CheckGroupList (const char *fname, const int fline);
@@ -197,17 +197,17 @@ public:
 	Object*	FindObject(uint32 object_id);
 	Object*	FindNearbyObject(float x, float y, float z, float radius);
 	bool	MakeDoorSpawnPacket(EQApplicationPacket* app, Client *client);
-	bool    MakeTrackPacket(Client* client);
-	void	SendTraders(Client* client);	
-	void    AddClient(Client*);
-	void    AddNPC(NPC*, bool SendSpawnPacket = true, bool dontqueue = false);
+	bool	MakeTrackPacket(Client* client);
+	void	SendTraders(Client* client);
+	void	AddClient(Client*);
+	void	AddNPC(NPC*, bool SendSpawnPacket = true, bool dontqueue = false);
 	void	AddMerc(Merc*, bool SendSpawnPacket = true, bool dontqueue = false);
 	void	AddCorpse(Corpse* pc, uint32 in_id = 0xFFFFFFFF);
-	void    AddObject(Object*, bool SendSpawnPacket = true);
-	void    AddGroup(Group*);
-	void    AddGroup(Group*, uint32 id);
+	void	AddObject(Object*, bool SendSpawnPacket = true);
+	void	AddGroup(Group*);
+	void	AddGroup(Group*, uint32 id);
 	void	AddRaid(Raid *raid);
-	void    AddRaid(Raid*, uint32 id);
+	void	AddRaid(Raid*, uint32 id);
 	void	AddDoor(Doors* door);
 	void	AddTrap(Trap* trap);
 	void	AddBeacon(Beacon *beacon);
@@ -250,7 +250,7 @@ public:
 //	Entity*	GetEntityGroup(uint32 id);
 	Entity*	GetEntityTrap(uint16 id);
 	Entity*	GetEntityBeacon(uint16 id);
-	
+
 	void DescribeAggro(Client *towho, NPC *from_who, float dist, bool verbose);
 
 	void	Message(uint32 to_guilddbid, uint32 type, const char* message, ...);
@@ -259,53 +259,53 @@ public:
 	void	Message_StringID(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
 	void	MessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
 	void	ChannelMessageFromWorld(const char* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, const char* message);
-	void    ChannelMessage(Mob* from, uint8 chan_num, uint8 language, const char* message, ...);
-	void    ChannelMessage(Mob* from, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
+	void	ChannelMessage(Mob* from, uint8 chan_num, uint8 language, const char* message, ...);
+	void	ChannelMessage(Mob* from, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
 	void	ChannelMessageSend(Mob* to, uint8 chan_num, uint8 language, const char* message, ...);
-	void    SendZoneSpawns(Client*);
+	void	SendZoneSpawns(Client*);
 	void	SendZonePVPUpdates(Client *);
 	void	SendZoneSpawnsBulk(Client* client);
-	void    Save();
-	void    SendZoneCorpses(Client*);
-	void    SendZoneCorpsesBulk(Client*);
-	void    SendZoneObjects(Client* client);
+	void	Save();
+	void	SendZoneCorpses(Client*);
+	void	SendZoneCorpsesBulk(Client*);
+	void	SendZoneObjects(Client* client);
 	void	SendZoneAppearance(Client *c);
 	void	SendNimbusEffects(Client *c);
-    void    SendUntargetable(Client *c);
+	void	SendUntargetable(Client *c);
 	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
-	void    QuestJournalledSayClose(Mob *sender, Client *QuestIntiator, float dist, const char* mobname, const char* message);
+	void	QuestJournalledSayClose(Mob *sender, Client *QuestIntiator, float dist, const char* mobname, const char* message);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
 	void	ExpeditionWarning(uint32 minutes_left);
 
-	void    RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
-	void    RemoveFromXTargets(Mob* mob);
-	void    RemoveFromAutoXTargets(Mob* mob);
-    void    ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);
+	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
+	void	RemoveFromXTargets(Mob* mob);
+	void	RemoveFromAutoXTargets(Mob* mob);
+	void	ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);
 	void	QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, float dist=200, Mob* SkipThisMob = 0, bool ackreq = true,eqFilterType filter=FilterNone);
-	void    QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
+	void	QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 	void	QueueClientsStatus(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint8 minstatus = 0, uint8 maxstatus = 0);
 	void	QueueClientsGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint32 guildeqid = 0);
 	void	QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID);
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true,
-				     bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF);
+						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF);
 
 	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true);
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
-	void    QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
+	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
 	void	AEAttack(Mob *attacker, float dist, int Hand = 13, int count = 0, bool IsFromSpell = false);
 	void	AETaunt(Client *caster, float range = 0);
 	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0);
 	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
-	
-	void 	RadialSetLogging(Mob *around, bool enabled, bool clients, bool non_clients, float range = 0);
+
+	void	RadialSetLogging(Mob *around, bool enabled, bool clients, bool non_clients, float range = 0);
 
 	//trap stuff
 	Mob*	GetTrapTrigger(Trap* trap);
 	void	SendAlarm(Trap* trap, Mob* currenttarget, uint8 kos);
 	Trap*	FindNearbyTrap(Mob* searcher, float max_dist);
-	
+
 	void	AddHealAggro(Mob* target, Mob* caster, uint16 thedam);
 	Mob*	FindDefenseNPC(uint32 npcid);
 	void	OpenDoorsNear(NPC* opener);
@@ -316,7 +316,7 @@ public:
 	void	SignalMobsByNPCID(uint32 npc_type, int signal_id);
 	void	CountNPC(uint32* NPCCount, uint32* NPCLootCount, uint32* gmspawntype_count);
 	void	DoZoneDump(ZSDump_Spawn2* spawn2dump, ZSDump_NPC* npcdump, ZSDump_NPC_Loot* npclootdump, NPCType* gmspawntype_dump);
-	void    RemoveEntity(uint16 id);
+	void	RemoveEntity(uint16 id);
 	void	SendPetitionToAdmins(Petition* pet);
 	void	SendPetitionToAdmins();
 	void	AddLootToNPCS(uint32 item_id, uint32 count);
@@ -333,19 +333,19 @@ public:
 	void	Evade(Mob *who);
 	void	UpdateHoTT(Mob* target);
 
-    void    Process();
+	void	Process();
 	void	ClearAggro(Mob* targ);
 	void	ClearFeignAggro(Mob* targ);
 	void	ClearZoneFeignAggro(Client* targ);
 	void	AggroZone(Mob* who, int hate = 0);
-	
+
 	bool	Fighting(Mob* targ);
-	void    RemoveFromHateLists(Mob* mob, bool settoone = false);
+	void	RemoveFromHateLists(Mob* mob, bool settoone = false);
 	void	RemoveDebuffs(Mob* caster);
 
 
 	void	MessageGroup(Mob* sender, bool skipclose, uint32 type, const char* message, ...);
-	
+
 	void	LimitAddNPC(NPC *npc);
 	void	LimitRemoveNPC(NPC *npc);
 	bool	LimitCheckType(uint32 npc_type, int count);
@@ -370,8 +370,8 @@ public:
 	void	SendGroupLeave(uint32 gid, const char *name);
 	void	SendGroupJoin(uint32 gid, const char *name);
 
-	void    SaveAllClientsTaskState();
-	void    ReloadAllClientsTaskState(int TaskID=0);
+	void	SaveAllClientsTaskState();
+	void	ReloadAllClientsTaskState(int TaskID=0);
 
 	uint16	CreateGroundObject(uint32 itemid, float x, float y, float z, float heading, uint32 decay_time = 300000);
 	uint16	CreateGroundObjectFromModel(const char *model, float x, float y, float z, float heading, uint8 type = 0x00, uint32 decay_time = 0);
@@ -398,7 +398,7 @@ public:
 
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
-	uint16   GetFreeID();
+	uint16 GetFreeID();
 	void RefreshAutoXTargets(Client *c);
 	void RefreshClientXTargets(Client *c);
 
@@ -409,11 +409,11 @@ protected:
 private:
 	void	AddToSpawnQueue(uint16 entityid, NewSpawn_Struct** app);
 	void	CheckSpawnQueue();
-	
+
 	//used for limiting spawns
 	class SpawnLimitRecord { public: uint32 spawngroup_id; uint32 npc_type; };
 	map<uint16, SpawnLimitRecord> npc_limit_list;		//entity id -> npc type
-	
+
 	uint32	tsFirstSpawnOnQueue; // timestamp that the top spawn on the spawnqueue was added, should be 0xFFFFFFFF if queue is empty
 	uint32	NumSpawnsOnQueue;
 	LinkedList<NewSpawn_Struct*> SpawnQueue;
@@ -443,8 +443,8 @@ private:
 		Bot* GetBotByBotName(std::string botName);
 		list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
 
-		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 iSpellTypes);  // TODO: Evaluate this closesly in hopes to eliminate
-		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly);  // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
+		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
+		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
 	private:
 		std::list<Bot*> bot_list;
 #endif
@@ -454,7 +454,7 @@ class BulkZoneSpawnPacket {
 public:
 	BulkZoneSpawnPacket(Client* iSendTo, uint32 iMaxSpawnsPerPacket);	// 0 = send zonewide
 	virtual ~BulkZoneSpawnPacket();
-	
+
 	bool	AddSpawn(NewSpawn_Struct* ns);
 	void	SendBuffer();	// Sends the buffer and cleans up everything - can safely re-use the object after this function call (no need to free and do another new)
 private:

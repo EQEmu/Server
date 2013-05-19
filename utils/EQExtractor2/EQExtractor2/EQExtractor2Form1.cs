@@ -1,7 +1,7 @@
 ﻿//
 // Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net). Distributed under GPL version 2.
 //
-// 
+//
 
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using SharpPcap;    
+using SharpPcap;
 using EQApplicationLayer;
 
 namespace EQExtractor2
@@ -46,16 +46,16 @@ namespace EQExtractor2
             Options.ShowTimeStamps.Checked = Properties.Settings.Default.DumpTimeStamps;
 
         }
-                
+
         public void Log(string Message)
         {
             DebugLog.ConsoleWindow.Items.Add(Message);
             DebugLog.ConsoleWindow.SelectedIndex = DebugLog.ConsoleWindow.Items.Count - 1;
             Application.DoEvents();
         }
-                
+
         private void device_OnPacketArrival(object sender, SharpPcap.CaptureEventArgs e)
-        {            
+        {
             if (e.Packet.LinkLayerType == PacketDotNet.LinkLayers.Ethernet)
             {
                 PacketDotNet.Packet packet;
@@ -65,11 +65,11 @@ namespace EQExtractor2
                 ++PacketsSeen;
 
                 if ((PacketsSeen > 0) && ((PacketsSeen % 10000) == 0))
-                {         
+                {
                     DebugLog.ConsoleWindow.SelectedIndex = DebugLog.ConsoleWindow.Items.Count - 1;
                     int Progress = (int)((float)BytesRead / (float)CaptureFileSize * 100);
                     ProgressBar.Value = Progress;
-                 
+
                     Application.DoEvents();
                 }
 
@@ -91,7 +91,7 @@ namespace EQExtractor2
                     var ipPacket = (PacketDotNet.IpPacket)udpPacket.ParentPacket;
                     System.Net.IPAddress srcIp = ipPacket.SourceAddress;
                     System.Net.IPAddress dstIp = ipPacket.DestinationAddress;
-                    
+
                     byte[] Payload = udpPacket.PayloadData;
 
                     Int32 l = udpPacket.Length - udpPacket.Header.GetLength(0);
@@ -105,7 +105,7 @@ namespace EQExtractor2
                 }
             }
         }
-        
+
         public void WriteSQL(string Message)
         {
             SQLStream.WriteLine(Message);
@@ -121,7 +121,7 @@ namespace EQExtractor2
             foreach (Control c in this.Controls)
             {
                 if ((c is Button) || (c is TextBox) || (c is MaskedTextBox) || (c is CheckBox))
-                    c.Enabled = false;               
+                    c.Enabled = false;
             }
 
         }
@@ -132,17 +132,17 @@ namespace EQExtractor2
                 c.Enabled = true;
 
             menuGenerateSQL.Enabled = StreamProcessor.StreamRecognised() && StreamProcessor.SupportsSQLGeneration();
-            menuDumpAAs.Enabled = StreamProcessor.StreamRecognised();            
+            menuDumpAAs.Enabled = StreamProcessor.StreamRecognised();
         }
-        
+
         private void menuLoadPCAP_Click(object sender, EventArgs e)
         {
             if (InputFileOpenDialog.ShowDialog() != DialogResult.OK)
                 return;
 
-            menuGenerateSQL.Enabled = false;           
+            menuGenerateSQL.Enabled = false;
             menuPacketDump.Enabled = false;
-            menuViewPackets.Enabled = false;            
+            menuViewPackets.Enabled = false;
             menuDumpAAs.Enabled = false;
 
             SharpPcap.OfflinePcapDevice device;
@@ -183,7 +183,7 @@ namespace EQExtractor2
                     Log("Failed to open netcode debug file for writing.");
                     Options.EQPacketDebugFilename.Text = "";
                     StreamProcessor.Packets.SetDebugLogHandler(null);
-                }                
+                }
             }
             else
                 StreamProcessor.Packets.SetDebugLogHandler(null);
@@ -228,13 +228,13 @@ namespace EQExtractor2
             menuPacketDump.Enabled = true;
 
             menuViewPackets.Enabled = true;
-                        
+
             Log("Stream recognised as " + StreamProcessor.GetDecoderVersion());
 
             int PPLength = StreamProcessor.VerifyPlayerProfile();
-            
+
             ClientVersionLabel.Text = StreamProcessor.GetDecoderVersion();
-            
+
             if (PPLength == 0)
             {
                 Log("Unable to find player profile packet, or packet not of correct size.");
@@ -252,9 +252,9 @@ namespace EQExtractor2
                 Log("Found player profile packet of the expected length (" + PPLength + ").");
 
                 if(StreamProcessor.SupportsSQLGeneration())
-                    StatusBar.Text = "Client version recognised. Press Ctrl-S to Generate SQL";                
+                    StatusBar.Text = "Client version recognised. Press Ctrl-S to Generate SQL";
                 else
-                    StatusBar.Text = "Client version recognised. *SQL GENERATION NOT SUPPORTED FOR THIS CLIENT*";                
+                    StatusBar.Text = "Client version recognised. *SQL GENERATION NOT SUPPORTED FOR THIS CLIENT*";
             }
 
             ZoneName = StreamProcessor.GetZoneName();
@@ -266,7 +266,7 @@ namespace EQExtractor2
             Log("Zone number is " + ZoneNumber);
 
             ZoneLabel.Text = StreamProcessor.GetZoneLongName() + " [" + StreamProcessor.GetZoneName() + "] (" + ZoneNumber.ToString() + ")";
-            
+
             SQLForm.ZoneIDTextBox.Text = ZoneNumber.ToString();
             SQLForm.ZoneIDTextBox.Enabled = true;
             SQLForm.DoorsTextBox.Enabled = true;
@@ -283,14 +283,14 @@ namespace EQExtractor2
             menuPacketDump.Enabled = true;
             menuViewPackets.Enabled = true;
             menuDumpAAs.Enabled = true;
-            
+
             SQLForm.RecalculateBaseInsertIDs();
 
             StreamProcessor.GenerateZonePointList();
         }
 
         private void menuGenerateSQL_Click(object sender, EventArgs e)
-        {            
+        {
             if (SQLForm.ShowDialog() != DialogResult.OK)
                 return;
 
@@ -325,7 +325,7 @@ namespace EQExtractor2
             WriteSQL("-- SQL created by " + Version);
             WriteSQL("--");
             WriteSQL("-- Using Decoder: " + StreamProcessor.GetDecoderVersion());
-            WriteSQL("--");           
+            WriteSQL("--");
             WriteSQL("-- Packets captured on " + StreamProcessor.GetCaptureStartTime().ToString());
             WriteSQL("--");
             WriteSQL("-- Change these variables if required");
@@ -437,7 +437,7 @@ namespace EQExtractor2
             {
                 menuViewDebugLog.Checked = true;
                 ShowDebugLog();
-                
+
             }
             else
             {
@@ -453,7 +453,7 @@ namespace EQExtractor2
             Application.DoEvents();
 
             string TextFileViewer = Properties.Settings.Default.TextFileViewer;
-                        
+
             string TempFileName = Path.GetTempFileName();
 
             if (StreamProcessor.DumpPackets(TempFileName, Properties.Settings.Default.DumpTimeStamps))
@@ -479,7 +479,7 @@ namespace EQExtractor2
             if (Properties.Settings.Default.ShowDebugWindowOnStartup)
             {
                 ShowDebugLog();
-            
+
             }
         }
 
@@ -505,7 +505,7 @@ namespace EQExtractor2
             Log("To generate SQL, press Ctrl-S and select the check boxes and set the starting SQL INSERT IDs as required.");
             Log("Review the generated SQL before sourcing as DELETEs are auto-generated.");
             Log("Press Ctrl-V to view packets, or Ctrl-D to dump them to a text file.");
-            Log("");            
+            Log("");
         }
 
         private void menuOptions_Click(object sender, EventArgs e)
@@ -554,6 +554,6 @@ namespace EQExtractor2
         {
             menuViewDebugLog.Checked = DebugLog.Visible;
         }
-    }    
+    }
 }
 

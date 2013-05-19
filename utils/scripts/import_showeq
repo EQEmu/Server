@@ -24,7 +24,7 @@ while(<F>) {
 }
 close(F);
 
-my %fixes = ( 
+my %fixes = (
 'OP_TributeInfo' => 'OP_SendTributes',
 'OP_CancelInvite' => 'OP_GroupCancelInvite',
 'OP_GMFind' => 'OP_FindPersonRequest',

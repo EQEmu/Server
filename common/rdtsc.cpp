@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "debug.h"
 #include "rdtsc.h"
@@ -91,35 +91,35 @@ int64 RDTSC_Timer::rdtsc() {
 void RDTSC_Timer::init() {
 #ifdef USE_RDTSC
 	int64 before, after, sum;
-	
+
 	int r;
 	sum = 0;
 	// run an average to increase accuracy of clock rate
 	for(r = 0; r < CALIBRATE_LOOPS; r++) {
 		before = rdtsc();
-		
+
 		//sleep a know duration to figure out clock rate
 #ifdef _WINDOWS
 		Sleep(SLEEP_TIME);
 #else
 		usleep(SLEEP_TIME * 1000);	//ms * 1000
 #endif
-		
+
 		after = rdtsc();
-		
+
 		sum += after - before;
 	}
-	
+
 	//ticks per sleep / ms per sleep
 	_ticsperms = (sum / CALIBRATE_LOOPS) / SLEEP_TIME;
-	
+
 #else
 	//if using gettimeofday, this is fixed at 1000
 	_ticsperms = 1000;
 #endif
 //	printf("Tics per milisecond: %llu \n", _ticsperms);
-	
-	_inited = true;	//only want to do this once	
+
+	_inited = true;	//only want to do this once
 }
 
 //start the timer
@@ -145,7 +145,7 @@ RDTSC_Collector::RDTSC_Collector() : RDTSC_Timer() {
 RDTSC_Collector::RDTSC_Collector(bool start_it) : RDTSC_Timer(start_it) {
 	reset();
 }
-	
+
 void RDTSC_Collector::stop() {
 	RDTSC_Timer::stop();
 	_sum += RDTSC_Timer::getTicks();
@@ -160,13 +160,9 @@ double RDTSC_Collector::getTotalDuration() {
 double RDTSC_Collector::getAverage() {
 	return(((double)(getTotalTicks())) / double(_ticsperms * _count));
 }
-	
+
 void RDTSC_Collector::reset() {
 	_sum = 0;
 	_count = 0;
 }
-
-
-
-
 

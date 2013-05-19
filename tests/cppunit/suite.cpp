@@ -34,7 +34,7 @@
 # include "winconfig.h"
 #else
 # include "config.h"
-#endif 
+#endif
 
 #include "cpptest-output.h"
 #include "cpptest-source.h"
@@ -55,9 +55,9 @@ namespace Test
 			while (first != last)
 				delete *first++;
 		}
-		
+
 	} // anonymous namespace
-	
+
 	/// Constructs an empty test suite.
 	///
 	Suite::Suite()
@@ -65,14 +65,14 @@ namespace Test
 		_output(0),
 		_success(true)
 	{}
-	
+
 	/// Destroys this suite object.
 	///
 	Suite::~Suite()
 	{
 		destroy_range(_suites.begin(), _suites.end());
 	}
-	
+
 	/// Starts the testing. All tests in this suite and embedded suites will
 	/// be executed.
 	///
@@ -90,7 +90,7 @@ namespace Test
 		output.finished(ntests, total_time(true));
 		return _success;
 	}
-		
+
 	/// \fn void Suite::setup()
 	///
 	/// Setups a test fixture. This function is called before each test,
@@ -100,7 +100,7 @@ namespace Test
 	/// specialized behavior.
 	///
 	/// \see tear_down()
-	
+
 	/// \fn void Suite::tear_down()
 	///
 	/// Tears down a test fixture. This function is called after each test,
@@ -110,7 +110,7 @@ namespace Test
 	/// specialized behavior.
 	///
 	/// \see setup()
-	
+
 	/// Adds a suite to this suite. Tests in added suites will be executed
 	/// when run() of the top-level suite is called.
 	///
@@ -121,7 +121,7 @@ namespace Test
 	{
 		_suites.push_back(suite);
 	}
-	
+
 	/// Registers a test function.
 	///
 	/// \b Note: Do not call this function directly, use the TEST_ADD(func)
@@ -136,11 +136,11 @@ namespace Test
 	{
 		string::size_type pos = name.find_first_of(':');
 		assert(!name.empty() && name[pos + 1] == ':' && name[pos + 2] != '\0');
-		
+
 		_name.assign(name, 0, pos);
 		_tests.push_back(Data(func, name.substr(pos + 2)));
 	}
-	
+
 	/// Issues an assertment to the output handler.
 	///
 	/// Do not call this function directly, use one of the available assertment
@@ -156,21 +156,21 @@ namespace Test
 		_output->assertment(s);
 		_result = _success = false;
 	}
-	
+
 	// Functor to execute tests for the given suite.
 	//
 	struct Suite::ExecTests
 	{
 		Suite& _suite;
-		
+
 		ExecTests(Suite& s) : _suite(s) {}
-		
+
 		void operator()(Data& data)
 		{
 			_suite._cur_test = &data._name;
 			_suite._result = true; // assume success, assert will set to false
 			_suite._output->test_start(data._name);
-			
+
 			_suite.setup();
 			Time start(Time::current());
 			// FIXME Also feedback exception to user
@@ -182,7 +182,7 @@ namespace Test
 			}
 			Time end(Time::current());
 			_suite.tear_down();
-			
+
 			data._time = end - start;
 			_suite._output->test_end(data._name, _suite._result, data._time);
 		}
@@ -194,7 +194,7 @@ namespace Test
 	{
 		bool	_continue;
 		Output* _output;
-		
+
 		DoRun(Output* output, bool cont) : _continue(cont), _output(output) {}
 		void operator()(Suite* suite) { suite->do_run(_output, _continue); }
 	};
@@ -206,7 +206,7 @@ namespace Test
 	{
 		_continue = cont_after_fail;
 		_output = os;
-		
+
 		_output->suite_start(_tests.size(), _name);
 		for_each(_tests.begin(), _tests.end(), ExecTests(*this));
 		_output->suite_end(_tests.size(), _name, total_time(false));
@@ -235,7 +235,7 @@ namespace Test
 			return value + s->total_tests();
 		}
 	};
-	
+
 	// Counts all tests in this and all its embedded suites.
 	//
 	int
@@ -244,7 +244,7 @@ namespace Test
 		return accumulate(_suites.begin(), _suites.end(),
 						  _tests.size(), SubSuiteTests());
 	}
-	
+
 	// Functor to accumulate execution time for tests.
 	//
 	struct Suite::SuiteTime
@@ -254,7 +254,7 @@ namespace Test
 			return time + data._time;
 		}
 	};
-	
+
 	// Functor to accumulate execution time for suites.
 	//
 	struct Suite::SubSuiteTime
@@ -264,7 +264,7 @@ namespace Test
 			return time + s->total_time(true);
 		}
 	};
-	
+
 	// Counts time accumulated execution time for all tests in this and all
 	// its embedded suites.
 	//
@@ -273,9 +273,9 @@ namespace Test
 	{
 		Time time = accumulate(_tests.begin(), _tests.end(),
 							   Time(), SuiteTime());
-		
+
 		return !recursive ? time : accumulate(_suites.begin(), _suites.end(),
 											  time, SubSuiteTime());
 	}
-	
+
 } // namespace Test

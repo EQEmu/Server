@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2004  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 
@@ -43,7 +43,7 @@ using namespace std;
 //
 #define RELOADTASKS		0
 #define RELOADTASKGOALLISTS	1
-#define RELOADTASKPROXIMITIES	2	
+#define RELOADTASKPROXIMITIES	2
 #define RELOADTASKSETS		3
 
 class Client;
@@ -97,26 +97,26 @@ private:
 typedef enum { METHODSINGLEID = 0, METHODLIST = 1, METHODQUEST = 2 } TaskMethodType;
 
 struct ActivityInformation {
-	int 	StepNumber;
-	int	Type;
-	char   *Text1;
-	char   *Text2;
-	char   *Text3;
-	int 	GoalID;
+	int		StepNumber;
+	int		Type;
+	char	*Text1;
+	char	*Text2;
+	char	*Text3;
+	int		GoalID;
 	TaskMethodType GoalMethod;
-	int 	GoalCount;
-	int	DeliverToNPC;
-	int 	ZoneID;
-	bool 	Optional;
+	int		GoalCount;
+	int		DeliverToNPC;
+	int		ZoneID;
+	bool	Optional;
 };
 
 typedef enum { ActivitiesSequential = 0, ActivitiesStepped = 1 } SequenceType;
 
 struct TaskInformation {
-	int	Duration; 
-	char   *Title;
-	char   *Description;
-	char   *Reward;
+	int	Duration;
+	char	*Title;
+	char	*Description;
+	char	*Reward;
 	int	RewardID;
 	int	CashReward; // Expressed in copper
 	int	XPReward;
@@ -126,7 +126,7 @@ struct TaskInformation {
 	SequenceType SequenceMode;
 	int	LastStep;
 	short	MinLevel;
-	short 	MaxLevel;
+	short	MaxLevel;
 	bool	Repeatable;
 	ActivityInformation Activity[MAXACTIVITIESPERTASK];
 };
@@ -134,8 +134,8 @@ struct TaskInformation {
 typedef enum { ActivityHidden = 0, ActivityActive = 1, ActivityCompleted = 2 } ActivityState;
 
 typedef enum { ActivityDeliver = 1, ActivityKill = 2, ActivityLoot = 3, ActivitySpeakWith = 4, ActivityExplore = 5,
-	       ActivityTradeSkill = 6, ActivityFish = 7, ActivityForage = 8, ActivityUse1 = 9, ActivityUse2 = 10,
-	       ActivityTouch = 11, ActivityGiveCash = 100 } ActivityType;
+			ActivityTradeSkill = 6, ActivityFish = 7, ActivityForage = 8, ActivityUse1 = 9, ActivityUse2 = 10,
+			ActivityTouch = 11, ActivityGiveCash = 100 } ActivityType;
 
 
 struct ClientActivityInformation {
@@ -147,7 +147,7 @@ struct ClientActivityInformation {
 
 struct ClientTaskInformation {
 	int TaskID;
-	int    CurrentStep;
+	int CurrentStep;
 	int AcceptedTime;
 	bool Updated;
 	ClientActivityInformation Activity[MAXACTIVITIESPERTASK];
@@ -165,7 +165,7 @@ public:
 	ClientTaskState();
 	~ClientTaskState();
 	void ShowClientTasks(Client *c);
-	inline int GetActiveTaskCount() { return ActiveTaskCount; } 
+	inline int GetActiveTaskCount() { return ActiveTaskCount; }
 	int GetActiveTaskID(int index);
 	bool IsTaskActivityCompleted(int index, int ActivityID);
 	int GetTaskActivityDoneCount(int index, int ActivityID);
@@ -215,14 +215,14 @@ private:
 	int LastCompletedTaskLoaded;
 	bool CheckedTouchActivities;
 };
-	
+
 
 class TaskManager {
 
 public:
 	TaskManager();
 	~TaskManager();
-	int  GetActivityCount(int TaskID);
+	int GetActivityCount(int TaskID);
 	bool LoadSingleTask(int TaskID);
 	bool LoadTasks(int SingleTask=0);
 	void ReloadGoalLists();
@@ -237,10 +237,10 @@ public:
 	void SendActiveTasksToClient(Client *c, bool TaskComplete=false);
 	void SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool TaskComplete, bool BringUpTaskJournal=false);
 	void SendTaskActivityShort(Client *c, int TaskID, int ActivityID, int ClientTaskIndex);
-	void SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, 
-				  bool Optional, bool TaskComplete=false);
-	void SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, 
-				  bool Optional, bool TaskComplete=false);
+	void SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex,
+				bool Optional, bool TaskComplete=false);
+	void SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int ClientTaskIndex,
+				bool Optional, bool TaskComplete=false);
 	void SendCompletedTasksToClient(Client *c, ClientTaskState *state);
 	void ExplainTask(Client *c, int TaskID);
 	int FirstTaskInSet(int TaskSet);

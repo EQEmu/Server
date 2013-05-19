@@ -1,6 +1,4 @@
-/*
-	EQEMu:  Everquest Server Emulator
-
+/*	EQEMu: Everquest Server Emulator
 	Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -11,11 +9,11 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 */
 
@@ -28,7 +26,7 @@
 extern Database database;
 extern uint32 ChatMessagesSent;
 
-ChatChannel::ChatChannel(string inName, string inOwner, string inPassword, bool inPermanent, int inMinimumStatus) : 
+ChatChannel::ChatChannel(string inName, string inOwner, string inPassword, bool inPermanent, int inMinimumStatus) :
 	DeleteTimer(0) {
 
 	Name = inName;
@@ -43,8 +41,8 @@ ChatChannel::ChatChannel(string inName, string inOwner, string inPassword, bool 
 
 	Moderated = false;
 
-	_log(UCS__TRACE, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i", 
-			      Name.c_str(), Owner.c_str(), Password.c_str(), MinimumStatus);
+	_log(UCS__TRACE, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i",
+					Name.c_str(), Owner.c_str(), Password.c_str(), MinimumStatus);
 
 }
 
@@ -301,7 +299,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 			return false;
 
 		_log(UCS__TRACE, "Starting delete timer for empty password protected channel %s", Name.c_str());
-			
+
 		DeleteTimer.Start(RuleI(Channels, DeleteTimer) * 60000);
 	}
 
@@ -399,7 +397,7 @@ void ChatChannel::SendMessageToChannel(string Message, Client* Sender) {
 		if(ChannelClient)
 		{
 			_log(UCS__TRACE, "Sending message to %s from %s",
-			     ChannelClient->GetName().c_str(), Sender->GetName().c_str());
+					ChannelClient->GetName().c_str(), Sender->GetName().c_str());
 			ChannelClient->SendChannelMessage(Name, Message, Sender);
 		}
 
@@ -455,7 +453,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 	if(!c) return nullptr;
 
 	if((ChannelName.length() > 0) && (isdigit(ChannelName[0]))) {
-		
+
 		c->GeneralChannelMessage("The channel name can not begin with a number.");
 
 		return nullptr;
@@ -465,7 +463,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 
 	string::size_type Colon = ChannelName.find_first_of(":");
 
-	if(Colon == string::npos) 
+	if(Colon == string::npos)
 		NormalisedName = CapitaliseName(ChannelName);
 	else {
 		NormalisedName = CapitaliseName(ChannelName.substr(0, Colon));
@@ -509,7 +507,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 	}
 
 	if(RequiredChannel->CheckPassword(Password) || RequiredChannel->IsOwner(c->GetName()) || RequiredChannel->IsModerator(c->GetName()) ||
-	   c->IsChannelAdmin()) {
+			c->IsChannelAdmin()) {
 
 		RequiredChannel->AddClient(c);
 
@@ -704,3 +702,4 @@ string CapitaliseName(string inString) {
 
 	return NormalisedName;
 }
+

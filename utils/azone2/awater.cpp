@@ -10,22 +10,22 @@
 
 	Father Nitwit's Zone to map conversion program.
 	Copyright (C) 2004 Father Nitwit (eqemu@8ass.com)
-	
+
 	This thing uses code from freaku, so whatever license that comes under
 	is relavent, if you care.
-	
+
 	the rest of it is GPL, even though I hate the GPL.
 
   	This program is free software; you can redistribute it and/or modify
   	it under the terms of the GNU General Public License as published by
   	the Free Software Foundation; version 2 of the License.
-  
+
   	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -76,7 +76,7 @@ long BSPCountNodes(BSP_Node *tree, long node_number);
 int main(int argc, char *argv[]) {
 
 	long DefaultRegionType=RegionTypeWater;
-	
+
 	if((argc < 2) ||
 	   (argc > 3) ||
 #ifndef WIN32
@@ -90,9 +90,9 @@ int main(int argc, char *argv[]) {
 		printf("\nIf -dl is omitted, untagged special regions will be marked as water\n");
 		return(1);
 	}
-	
+
 	char bufm[250];
-	
+
 	if(argc==3)
 		DefaultRegionType=RegionTypeLava;
 	sprintf(bufm, "%s.wtr", argv[argc-1]);
@@ -110,15 +110,15 @@ bool BuildWaterMap(const char *shortname, long DefaultRegionType) {
 	char bufs[96];
 	Archive *archive;
 	WLDLoader *fileloader;
-	long WaterOrLavaCount = 0; 
-	
+	long WaterOrLavaCount = 0;
+
 	//TODO: clean up a LOT of memory that the freaku code does not
-	
+
 
 	sprintf(bufs, "%s.s3d", shortname);
 
 	archive = new PFSLoader();
-  
+
 	FILE *s3df = fopen(bufs, "rb");
 	if(s3df == nullptr) {
 		// One day we may try EQG, but not today.
@@ -131,8 +131,8 @@ bool BuildWaterMap(const char *shortname, long DefaultRegionType) {
 	}
 	printf("Loading %s...\n", bufs);
 
-	fileloader = new WLDLoader(); 
-	
+	fileloader = new WLDLoader();
+
 	if(fileloader->Open(nullptr, (char *) shortname, archive) == 0) {
         	printf("Error reading WLD from %s\n", bufs);
 	        return(false);
@@ -152,7 +152,7 @@ bool BuildWaterMap(const char *shortname, long DefaultRegionType) {
 				case RegionTypeUnsupported: { printf("Unsupported\n"); break; }
 				case RegionTypeUntagged: {
 					printf("Untagged. We will set it to ");
-					if(DefaultRegionType==RegionTypeWater) { 
+					if(DefaultRegionType==RegionTypeWater) {
 						printf("Water\n");
 					} else printf("Lava\n");
 					data29->region_type = DefaultRegionType;
@@ -172,7 +172,7 @@ bool BuildWaterMap(const char *shortname, long DefaultRegionType) {
 
 	}
 
-	
+
 	if(tree==nullptr) {
 		printf("No BSP Tree. Bailing out\n");
 		return(false);
@@ -184,12 +184,12 @@ bool BuildWaterMap(const char *shortname, long DefaultRegionType) {
 
 	// Now we mark each leaf in the BSP tree that is in a 'special area' with what type the area is
 	// Water, Lava, Zoneline etc
-	
+
 	for(int i=0; i<fileloader->fragcount; i++) {
 		if(fileloader->frags[i]->type == 0x29) {
 			data29 = (struct_Data29 *) fileloader->frags[i]->frag;
 			for(long j=0; j<data29->region_count; j++) {
-				BSPMarkRegion(tree, 1,data29->region_array[j]+1, data29->region_type); 
+				BSPMarkRegion(tree, 1,data29->region_array[j]+1, data29->region_type);
 			}
 		}
 	}
@@ -268,7 +268,7 @@ long BSPCountNodes(BSP_Node *tree, long node_number) {
 	return(NodesInRightBranch + NodesInLeftBranch + 1);
 
 }
-	
+
 
 long BSPFindRegion(BSP_Node *tree, long node_number, long region) {
 	//printf("Find Region %ld in node %ld\n", region, node_number);
@@ -281,7 +281,7 @@ long BSPFindRegion(BSP_Node *tree, long node_number, long region) {
 	   	if(tree[node_number-1].region==region) return node_number;
 	}
 
-	
+
 	long retnode ;
 	if(tree[node_number-1].left!=0) {
 		retnode = BSPFindRegion(tree, tree[node_number-1].left, region);
@@ -303,15 +303,15 @@ long BSPFindNode(BSP_Node *tree, long node_number, float x, float y, float z) {
 
 	printf("BSP Find Node, currently in Node %ld\n", node_number);
 	// Are we at a leaf
-	
+
 	if((tree[node_number-1].left==0)&&
 	   (tree[node_number-1].right==0))  {
 	   	return tree[node_number-1].region;
 	}
-	
+
 	// No, so determine which side of the split plane we are on
 	//
-	
+
 	distance = (x * tree[node_number-1].normal[0]) +
 	               (y * tree[node_number-1].normal[1]) +
 		       (z * tree[node_number-1].normal[2]) +
@@ -341,7 +341,7 @@ long BSPFindNode(BSP_Node *tree, long node_number, float x, float y, float z) {
 
 }
 
-	
+
 long BSPMarkRegion(BSP_Node *tree, long node_number, long region, int region_type) {
         //printf("Find Region %ld in node %ld\n", region, node_number);
         if(node_number<1) {
@@ -369,7 +369,7 @@ long BSPMarkRegion(BSP_Node *tree, long node_number, long region, int region_typ
         return 0;
 
 }
-	
+
 
 
 

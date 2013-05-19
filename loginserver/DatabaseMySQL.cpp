@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2010  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "Database.h"
@@ -40,7 +40,7 @@ DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port,
 	{
 		my_bool r = 1;
 		mysql_options(db, MYSQL_OPT_RECONNECT, &r);
-		if(!mysql_real_connect(db, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0)) 
+		if(!mysql_real_connect(db, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
 		{
 			mysql_close(db);
 			server_log->Log(log_database, "Failed to connect to MySQL database.");
@@ -73,7 +73,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable() << " WHERE AccountName = '";
 	query << name;
 	query << "'";
-	
+
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
 		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
@@ -97,7 +97,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 	return false;
 }
 
-bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id, 
+bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
 		unsigned int &trusted, string &list_desc, string &account, string &password)
 {
 	if(!db)
@@ -118,7 +118,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 	query << " WHERE WSR.ServerShortName = '";
 	query << escaped_short_name;
 	query << "'";
-	
+
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
 		server_log->Log(log_database, "Mysql query failed: %s", query.str().c_str());
@@ -155,7 +155,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 				{
 					if((row = mysql_fetch_row(res)) != nullptr)
 					{
-						account = row[0]; 
+						account = row[0];
 						password = row[1];
 						mysql_free_result(res);
 						return true;

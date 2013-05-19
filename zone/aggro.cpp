@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <stdlib.h>
@@ -41,7 +41,7 @@ void EntityList::CheckClientAggro(Client *around) {
 		Mob* mob = iterator.GetData();
 		if(mob->IsClient())	//also ensures that mob != around
 			continue;
-		
+
 		if(mob->CheckWillAggro(around)) {
 			if(mob->IsEngaged())
 			{
@@ -57,24 +57,24 @@ void EntityList::CheckClientAggro(Client *around) {
 
 void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbose) {
 	float d2 = d*d;
-	
+
 	towho->Message(0, "Describing aggro for %s", from_who->GetName());
-	
+
 	bool engaged = from_who->IsEngaged();
 	if(engaged) {
 		Mob *top = from_who->GetHateTop();
 		towho->Message(0, ".. I am currently fighting with %s", top == nullptr?"(nullptr)":top->GetName());
 	}
 	bool check_npcs = from_who->WillAggroNPCs();
-	
+
 	if(verbose) {
 		char namebuf[256];
-		
+
 		int my_primary = from_who->GetPrimaryFaction();
 		Mob *own = from_who->GetOwner();
 		if(own != nullptr)
 			my_primary = own->GetPrimaryFaction();
-		
+
 		if(my_primary == 0) {
 			strcpy(namebuf, "(No faction)");
 		} else if(my_primary < 0) {
@@ -85,16 +85,16 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		}
 		towho->Message(0, ".. I am on faction %s (%d)\n", namebuf, my_primary);
 	}
-	
+
 	LinkedListIterator<Mob*> iterator(mob_list);
 	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
 		Mob* mob = iterator.GetData();
 		if(mob->IsClient())	//also ensures that mob != around
 			continue;
-		
+
 		if(mob->DistNoRoot(*from_who) > d2)
 			continue;
-		
+
 		if(engaged) {
 			uint32 amm = from_who->GetHateAmount(mob);
 			if(amm == 0) {
@@ -113,7 +113,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 	//this logic is duplicated from below, try to keep it up to date.
 	float iAggroRange = GetAggroRange();
-	
+
 	float t1, t2, t3;
 	t1 = mob->GetX() - GetX();
 	t2 = mob->GetY() - GetY();
@@ -125,50 +125,50 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 		t2 = 0 - t2;
 	if(t3 < 0)
 		t3 = 0 - t3;
-	if(   ( t1 > iAggroRange)
-	   || ( t2 > iAggroRange)
-	   || ( t3 > iAggroRange) ) {
-	   towho->Message(0, "...%s is out of range (fast). distances (%.3f,%.3f,%.3f), range %.3f", mob->GetName(),
-	   t1, t2, t3, iAggroRange);
-	   return;
-	}
-	
-	if(mob->IsInvisible(this)) {
-	   towho->Message(0, "...%s is invisible to me. ", mob->GetName());
-	   return;
-	}
-	if((mob->IsClient() &&
-	       (!mob->CastToClient()->Connected()
-	  	    || mob->CastToClient()->IsLD()
-	        || mob->CastToClient()->IsBecomeNPC()
-	        || mob->CastToClient()->GetGM()
-	       )   
-	   ))
-	{
-	   towho->Message(0, "...%s is my owner. ", mob->GetName());
-	   return;
-	}
-	
-	
-	if(mob == GetOwner()) {
-	   towho->Message(0, "...%s a GM or is not connected. ", mob->GetName());
-	   return;
+	if(( t1 > iAggroRange)
+		|| ( t2 > iAggroRange)
+		|| ( t3 > iAggroRange) ) {
+		towho->Message(0, "...%s is out of range (fast). distances (%.3f,%.3f,%.3f), range %.3f", mob->GetName(),
+		t1, t2, t3, iAggroRange);
+		return;
 	}
 
-	float dist2  = mob->DistNoRoot(*this);
+	if(mob->IsInvisible(this)) {
+		towho->Message(0, "...%s is invisible to me. ", mob->GetName());
+		return;
+	}
+	if((mob->IsClient() &&
+		(!mob->CastToClient()->Connected()
+		|| mob->CastToClient()->IsLD()
+		|| mob->CastToClient()->IsBecomeNPC()
+		|| mob->CastToClient()->GetGM()
+		)
+		))
+	{
+		towho->Message(0, "...%s is my owner. ", mob->GetName());
+		return;
+	}
+
+
+	if(mob == GetOwner()) {
+		towho->Message(0, "...%s a GM or is not connected. ", mob->GetName());
+		return;
+	}
+
+	float dist2 = mob->DistNoRoot(*this);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 	if( dist2 > iAggroRange2 ) {
-	   towho->Message(0, "...%s is out of range. %.3f > %.3f ", mob->GetName(),
-	   dist2, iAggroRange2);
-	   return;
+		towho->Message(0, "...%s is out of range. %.3f > %.3f ", mob->GetName(),
+		dist2, iAggroRange2);
+		return;
 	}
-	
+
 	if(GetINT() > 75 && mob->GetLevelCon(GetLevel()) == CON_GREEN ) {
-	   towho->Message(0, "...%s is red to me (basically)", mob->GetName(),
-	   dist2, iAggroRange2);
-	   return;
+		towho->Message(0, "...%s is red to me (basically)", mob->GetName(),
+		dist2, iAggroRange2);
+		return;
 	}
-	
+
 	if(verbose) {
 		int my_primary = GetPrimaryFaction();
 		int mob_primary = mob->GetPrimaryFaction();
@@ -178,7 +178,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 		own = mob->GetOwner();
 		if(mob_primary > 0 && own != nullptr)
 			mob_primary = own->GetPrimaryFaction();
-		
+
 		if(mob_primary == 0) {
 			towho->Message(0, "...%s has no primary faction", mob->GetName());
 		} else if(mob_primary < 0) {
@@ -214,9 +214,9 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 			}
 		}
 	}
-	
+
 	FACTION_VALUE fv = mob->GetReverseFactionCon(this);
-	
+
 	if(!(
 			fv == FACTION_SCOWLS
 			||
@@ -224,18 +224,18 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 			||
 			fv == FACTION_THREATENLY
 		)) {
-	   towho->Message(0, "...%s faction not low enough. value='%s'", mob->GetName(), FactionValueToString(fv));
-	   return;
+		towho->Message(0, "...%s faction not low enough. value='%s'", mob->GetName(), FactionValueToString(fv));
+		return;
 	}
 	if(fv == FACTION_THREATENLY) {
-	   towho->Message(0, "...%s threatening to me, so they only have a %d chance per check of attacking.", mob->GetName());
+		towho->Message(0, "...%s threatening to me, so they only have a %d chance per check of attacking.", mob->GetName());
 	}
-	
+
 	if(!CheckLosFN(mob)) {
-	   towho->Message(0, "...%s is out of sight.", mob->GetName());		
+		towho->Message(0, "...%s is out of sight.", mob->GetName());
 	}
-	
-	towho->Message(0, "...%s meets all conditions, I should be attacking them.", mob->GetName());	
+
+	towho->Message(0, "...%s meets all conditions, I should be attacking them.", mob->GetName());
 }
 
 /*
@@ -249,24 +249,24 @@ bool Mob::CheckWillAggro(Mob *mob) {
 
 	//sometimes if a client has some lag while zoning into a dangerous place while either invis or a GM
 	//they will aggro mobs even though it's supposed to be impossible, to lets make sure we've finished connecting
-	if (mob->IsClient()) { 
+	if (mob->IsClient()) {
 		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn())
 			return false;
 	}
-	
+
 	Mob *ownr = mob->GetOwner();
 	if(ownr && ownr->IsClient() && !ownr->CastToClient()->ClientFinishedLoading())
 		return false;
 
 	float iAggroRange = GetAggroRange();
-	
+
 	// Check If it's invisible and if we can see invis
 	// Check if it's a client, and that the client is connected and not linkdead,
-	//   and that the client isn't Playing an NPC, with thier gm flag on
+	// and that the client isn't Playing an NPC, with thier gm flag on
 	// Check if it's not a Interactive NPC
 	// Trumpcard: The 1st 3 checks are low cost calcs to filter out unnessecary distance checks. Leave them at the beginning, they are the most likely occurence.
 	// Image: I moved this up by itself above faction and distance checks because if one of these return true, theres no reason to go through the other information
-	
+
 	float t1, t2, t3;
 	t1 = mob->GetX() - GetX();
 	t2 = mob->GetY() - GetY();
@@ -278,17 +278,17 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		t2 = 0 - t2;
 	if(t3 < 0)
 		t3 = 0 - t3;
-	if(   ( t1 > iAggroRange)
-	   || ( t2 > iAggroRange)
-	   || ( t3 > iAggroRange)
-	   ||(mob->IsInvisible(this))
-	   || (mob->IsClient() &&
-	       (!mob->CastToClient()->Connected()
-	  	    || mob->CastToClient()->IsLD()
-	        || mob->CastToClient()->IsBecomeNPC()
-	        || mob->CastToClient()->GetGM()
-	       )   
-	   ))
+	if(( t1 > iAggroRange)
+		|| ( t2 > iAggroRange)
+		|| ( t3 > iAggroRange)
+		||(mob->IsInvisible(this))
+		|| (mob->IsClient() &&
+			(!mob->CastToClient()->Connected()
+				|| mob->CastToClient()->IsLD()
+				|| mob->CastToClient()->IsBecomeNPC()
+				|| mob->CastToClient()->GetGM()
+			)
+		))
 	{
 		return(false);
 	}
@@ -301,18 +301,18 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return(false);
 	}
 
-	float dist2  = mob->DistNoRoot(*this);
+	float dist2 = mob->DistNoRoot(*this);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 
 	if( dist2 > iAggroRange2 ) {
 		// Skip it, out of range
 		return(false);
 	}
-	
+
 	//Image: Get their current target and faction value now that its required
 	//this function call should seem backwards
 	FACTION_VALUE fv = mob->GetReverseFactionCon(this);
-	
+
 	// Make sure they're still in the zone
 	// Are they in range?
 	// Are they kos?
@@ -354,15 +354,15 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			#endif
 			return(true);
 		}
-	  }
+	}
 #if EQDEBUG >= 6
-	  printf("Is In zone?:%d\n", mob->InZone());
-	  printf("Dist^2: %f\n", dist2);
-	  printf("Range^2: %f\n", iAggroRange2);
-	  printf("Faction: %d\n", fv);
-	  printf("Int: %d\n", GetINT());
-	  printf("Con: %d\n", GetLevelCon(mob->GetLevel()));
-#endif		
+	printf("Is In zone?:%d\n", mob->InZone());
+	printf("Dist^2: %f\n", dist2);
+	printf("Range^2: %f\n", iAggroRange2);
+	printf("Faction: %d\n", fv);
+	printf("Int: %d\n", GetINT());
+	printf("Con: %d\n", GetLevelCon(mob->GetLevel()));
+#endif
 	return(false);
 }
 
@@ -381,11 +381,11 @@ Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssist
 	//float distZ;
 	while(iterator.MoreElements()) {
 		Mob* mob = iterator.GetData();
-		
+
 		if(sender->CheckWillAggro(mob)) {
 			return(mob);
 		}
-		
+
 		iterator.Advance();
 	}
 	//LogFile->write(EQEMuLog::Debug, "Check aggro for %s no target.", sender->GetName());
@@ -407,7 +407,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude) {
 		NPC* mob = iterator.GetData();
 
 		if(!mob || (mob == exclude)) continue;
-		
+
 		if(!mob->IsEngaged()) continue;
 
 		if(mob->IsFeared() || mob->IsMezzed()) continue;
@@ -419,7 +419,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude) {
 		float AggroRange = mob->GetAggroRange();
 
 		// Square it because we will be using DistNoRoot
-			
+
 		AggroRange = AggroRange * AggroRange;
 
 		if(mob->DistNoRoot(*attacker) > AggroRange) continue;
@@ -438,9 +438,9 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 		return;
 	if (sender->GetPrimaryFaction() == 0 )
 		return; // well, if we dont have a faction set, we're gonna be indiff to everybody
-	
+
 	LinkedListIterator<NPC*> iterator(npc_list);
-	
+
 	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
 		NPC* mob = iterator.GetData();
 		if(!mob){
@@ -478,10 +478,10 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 				if(useprimfaction || sender->GetReverseFactionCon(mob) <= FACTION_AMIABLE )
 				{
 					//attacking someone on same faction, or a friend
-					//Father Nitwit:  make sure we can see them.
+					//Father Nitwit: make sure we can see them.
 					if(mob->CheckLosFN(sender)) {
-#if (EQDEBUG>=5) 
-						LogFile->write(EQEMuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f", 
+#if (EQDEBUG>=5)
+						LogFile->write(EQEMuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
 						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), mob->DistNoRoot(*sender), fabs(sender->GetZ()+mob->GetZ()));
 #endif
 						mob->AddToHateList(attacker, 1, 0, false);
@@ -495,7 +495,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 /*
 solar: returns false if attack should not be allowed
 I try to list every type of conflict that's possible here, so it's easy
-to see how the decision is made.  Yea, it could be condensed and made
+to see how the decision is made. Yea, it could be condensed and made
 faster, but I'm doing it this way to make it readable and easy to modify
 */
 
@@ -528,7 +528,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		return false;
 	else if(our_owner && our_owner == target)
 		return false;
-	
+
 	//cannot hurt untargetable mobs
 	bodyType bt = target->GetBodyType();
 
@@ -553,11 +553,11 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 			return false;
 		}
 	}
-	
+
 	// solar: the format here is a matrix of mob type vs mob type.
 	// redundant ones are omitted and the reverse is tried if it falls through.
-	
-	// first figure out if we're pets.  we always look at the master's flags.
+
+	// first figure out if we're pets. we always look at the master's flags.
 	// no need to compare pets to anything
 	mob1 = our_owner ? our_owner : this;
 	mob2 = target_owner ? target_owner : target;
@@ -571,7 +571,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 			{
 				c1 = mob1->CastToClient();
 				c2 = mob2->CastToClient();
-	
+
 				if	// if both are pvp they can fight
 				(
 					c1->GetPVP() &&
@@ -590,19 +590,19 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 					return false;
 			}
 			else if(_NPC(mob2))				// client vs npc
-			{	
+			{
 				return true;
 			}
 			else if(_BECOMENPC(mob2))	// client vs becomenpc
 			{
 				c1 = mob1->CastToClient();
 				becomenpc = mob2->CastToClient();
-	
+
 				if(c1->GetLevel() > becomenpc->GetBecomeNPCLevel())
 					return false;
 				else
 					return true;
-			}	
+			}
 			else if(_CLIENTCORPSE(mob2))	// client vs client corpse
 			{
 				return false;
@@ -706,7 +706,7 @@ type', in which case, the answer is yes.
 
 
 // solar: this is to check if non detrimental things are allowed to be done
-// to the target.  clients cannot affect npcs and vice versa, and clients
+// to the target. clients cannot affect npcs and vice versa, and clients
 // cannot affect other clients that are not of the same pvp flag as them.
 // also goes for their pets
 bool Mob::IsBeneficialAllowed(Mob *target)
@@ -722,8 +722,8 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 		return true;
 
 	// solar: see IsAttackAllowed for notes
-	
-	// first figure out if we're pets.  we always look at the master's flags.
+
+	// first figure out if we're pets. we always look at the master's flags.
 	// no need to compare pets to anything
 	mob1 = this->GetOwnerID() ? this->GetOwner() : this;
 	mob2 = target->GetOwnerID() ? target->GetOwner() : target;
@@ -757,7 +757,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 			}
 			else if(_NPC(mob2))				// client to npc
 			{
-                /* fall through and swap positions */
+				/* fall through and swap positions */
 			}
 			else if(_BECOMENPC(mob2))	// client to becomenpc
 			{
@@ -880,7 +880,7 @@ bool Mob::CombatRange(Mob* other)
 	// prevention of ridiculously sized hit boxes
 	if (size_mod > 10000)
 		size_mod = size_mod / 7;
-	
+
 	if (DistNoRoot(*other) <= size_mod)
 	{
 		return true;
@@ -914,17 +914,17 @@ bool Mob::CheckLos(Mob* other) {
 	float dist_z = tmp_z - trg_z;
 	if (dist_z < 0)
 		dist_z *= -1;
-	if (dist_x  < dist_y && dist_z < dist_y)
+	if (dist_x < dist_y && dist_z < dist_y)
 	{
 		perwalk_x /= (dist_y/dist_x);
 		perwalk_z /= (dist_y/dist_z);
 	}
-	else if (dist_y  < dist_x && dist_z < dist_x)
+	else if (dist_y < dist_x && dist_z < dist_x)
 	{
 		perwalk_y /= (dist_x/dist_y);
 		perwalk_z /= (dist_x/dist_z);
 	}
-	else if (dist_x  < dist_z && dist_y < dist_z)
+	else if (dist_x < dist_z && dist_y < dist_z)
 	{
 		perwalk_x /= (dist_z/dist_x);
 		perwalk_y /= (dist_z/dist_y);
@@ -1003,7 +1003,7 @@ bool Mob::CheckLos(Mob* other) {
 				iface++;
 			}
 /*	solar: our aggro code isn't using this right now, just spells, so i'm
-    taking out the +-10 check for now to make it work right on hills
+	taking out the +-10 check for now to make it work right on hills
 			if (best_z - 10 > trg_z || best_z + 10 < trg_z)
 			{
 				return false;
@@ -1036,16 +1036,16 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 #endif
 	}
 	_ZP(Mob_CheckLosFN);
-	
+
 	VERTEX myloc;
 	VERTEX oloc;
-	
+
 #define LOS_DEFAULT_HEIGHT 6.0f
-	
+
 	myloc.x = GetX();
 	myloc.y = GetY();
 	myloc.z = GetZ() + (GetSize()==0.0?LOS_DEFAULT_HEIGHT:GetSize())/2 * HEAD_POSITION;
-	
+
 	oloc.x = posX;
 	oloc.y = posY;
 	oloc.z = posZ + (mobSize==0.0?LOS_DEFAULT_HEIGHT:mobSize)/2 * SEE_POSITION;
@@ -1053,11 +1053,11 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 #if LOSDEBUG>=5
 	LogFile->write(EQEMuLog::Debug, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
 #endif
-	
+
 	FACE *onhit;
 	NodeRef mynode;
 	NodeRef onode;
-	
+
 	VERTEX hit;
 	//see if anything in our node is in the way
 	mynode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), myloc.x, myloc.y);
@@ -1067,18 +1067,18 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 			LogFile->write(EQEMuLog::Debug, "Check LOS for %s target position, cannot see.", GetName());
 			LogFile->write(EQEMuLog::Debug, "\tPoly: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n",
 				onhit->a.x, onhit->a.y, onhit->a.z,
-				onhit->b.x, onhit->b.y, onhit->b.z, 
+				onhit->b.x, onhit->b.y, onhit->b.z,
 				onhit->c.x, onhit->c.y, onhit->c.z);
 #endif
 			return(false);
 		}
 	}
 #if LOSDEBUG>=5
-	 else {
+	else {
 		LogFile->write(EQEMuLog::Debug, "WTF, I have no node, what am I standing on??? (%.2f, %.2f).", myloc.x, myloc.y);
 	}
 #endif
-	
+
 	//see if they are in a different node.
 	//if so, see if anything in their node is blocking me.
 	if(! zone->zonemap->LocWithinNode(mynode, oloc.x, oloc.y)) {
@@ -1089,35 +1089,35 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 			LogFile->write(EQEMuLog::Debug, "Check LOS for %s target position, cannot see (2).", GetName());
 			LogFile->write(EQEMuLog::Debug, "\tPoly: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n",
 				onhit->a.x, onhit->a.y, onhit->a.z,
-				onhit->b.x, onhit->b.y, onhit->b.z, 
+				onhit->b.x, onhit->b.y, onhit->b.z,
 				onhit->c.x, onhit->c.y, onhit->c.z);
 #endif
 				return(false);
 			}
 		}
 #if LOSDEBUG>=5
-		 else if(onode == NODE_NONE) {
+		else if(onode == NODE_NONE) {
 			LogFile->write(EQEMuLog::Debug, "WTF, They have no node, what are they standing on??? (%.2f, %.2f).", myloc.x, myloc.y);
 		}
 #endif
 	}
-	
+
 	/*
 	if(zone->zonemap->LineIntersectsZone(myloc, oloc, CHECK_LOS_STEP, &onhit)) {
 #if LOSDEBUG>=5
 		LogFile->write(EQEMuLog::Debug, "Check LOS for %s target %s, cannot see.", GetName(), other->GetName() );
 		LogFile->write(EQEMuLog::Debug, "\tPoly: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n",
 			onhit->a.x, onhit->a.y, onhit->a.z,
-			onhit->b.x, onhit->b.y, onhit->b.z, 
+			onhit->b.x, onhit->b.y, onhit->b.z,
 			onhit->c.x, onhit->c.y, onhit->c.z);
 #endif
 		return(false);
 	}*/
-	
+
 #if LOSDEBUG>=5
 			LogFile->write(EQEMuLog::Debug, "Check LOS for %s target position, CAN SEE.", GetName());
 #endif
-	
+
 	return(true);
 }
 
@@ -1189,8 +1189,8 @@ int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
 				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
 				if (val < 0)
 				{
-					AggroAmount -= val*2;			
-				}				
+					AggroAmount -= val*2;
+				}
 				break;
 			}
 			case SE_ResistMagic:
@@ -1245,7 +1245,7 @@ int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
 			}
 			case SE_Amnesia:
 			case SE_Silence:{
-				AggroAmount += slevel*2;			
+				AggroAmount += slevel*2;
 				break;
 			}
 			case SE_Destroy:{
@@ -1287,7 +1287,7 @@ int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
 			}
 			case SE_CancelMagic:
 			case SE_DispelDetrimental:{
-				AggroAmount += slevel;			
+				AggroAmount += slevel;
 				break;
 			}
 			case SE_ReduceHate:
@@ -1313,7 +1313,7 @@ int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
 		AggroAmount = AggroAmount * RuleI(Aggro, SongAggroMod) / 100;
 	if (GetOwner() && IsPet())
 		AggroAmount = AggroAmount * RuleI(Aggro, PetSpellAggroMod) / 100;
-	
+
 	if(AggroAmount > 0)
 	{
 
@@ -1333,8 +1333,8 @@ int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
 		//every time you cast on live you get a certain amount of "this is a spell" aggro
 		//confirmed by EQ devs to be 100 exactly at level 85. From their wording it doesn't seem like it's affected
 		//by hate modifiers either.
-		//AggroAmount += (slevel*slevel/72); 
-		// Saved so I can reimplement it; 
+		//AggroAmount += (slevel*slevel/72);
+		// Saved so I can reimplement it;
 		// this should only be on the spell to aggro the npc not every spell
 
 	}
@@ -1365,8 +1365,8 @@ int32 Mob::CheckHealAggroAmount(uint16 spellid, uint32 heal_possible) {
 				break;
 			}
 			default:{
- 				break;
- 			}
+				break;
+			}
 		}
 	}
 	if (IsBardSong(spell_id))
@@ -1385,7 +1385,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spellid, uint32 heal_possible) {
 
 		//Live AA - Spell casting subtlety
 		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;
-		
+
 		AggroAmount = (AggroAmount * HateMod) / 100;
 
 		//made up number probably scales a bit differently on live but it seems like it will be close enough
@@ -1413,7 +1413,7 @@ void Mob::AddFeignMemory(Client* attacker) {
 void Mob::RemoveFromFeignMemory(Client* attacker) {
 	feign_memory_list.erase(attacker->CharacterID());
 	if(feign_memory_list.empty() && AIfeignremember_timer != nullptr)
-	   AIfeignremember_timer->Disable();
+		AIfeignremember_timer->Disable();
 	if(feign_memory_list.empty())
 	{
 		minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
@@ -1424,14 +1424,14 @@ void Mob::RemoveFromFeignMemory(Client* attacker) {
 }
 
 void Mob::ClearFeignMemory() {
-    std::set<uint32>::iterator RememberedCharID = feign_memory_list.begin();
-    while (RememberedCharID != feign_memory_list.end()) 
-    {
-        Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-        if(remember_client != nullptr) //Still in zone
-            remember_client->RemoveXTarget(this, false);
-        ++RememberedCharID;
-    }
+	std::set<uint32>::iterator RememberedCharID = feign_memory_list.begin();
+	while (RememberedCharID != feign_memory_list.end())
+	{
+		Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
+		if(remember_client != nullptr) //Still in zone
+			remember_client->RemoveXTarget(this, false);
+		++RememberedCharID;
+	}
 
 	feign_memory_list.clear();
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
@@ -1461,15 +1461,15 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 
 		//2: The mob makes a resistance check against the charm
 		if (resist_check == 100)
-			return true; 
-						
+			return true;
+
 		else
 		{
 			if (caster->IsClient())
 			{
-				//3: At maxed ability, Total Domination has a 50% chance of preventing the charm break that otherwise would have occurred. 
+				//3: At maxed ability, Total Domination has a 50% chance of preventing the charm break that otherwise would have occurred.
 				uint16 TotalDominationBonus = caster->aabonuses.CharmBreakChance + caster->spellbonuses.CharmBreakChance + caster->itembonuses.CharmBreakChance;
-									
+
 				if (MakeRandomInt(0, 100) < TotalDominationBonus)
 					return true;
 
@@ -1481,11 +1481,9 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 	{
 		// Assume this is a harmony/pacify spell
 		if (resist_check == 100)
-			return true; 
+			return true;
 	}
 
 	return false;
 }
-
-
 

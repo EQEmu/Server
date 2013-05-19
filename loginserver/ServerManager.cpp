@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2010  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "ServerManager.h"
 #include "LoginServer.h"
@@ -25,7 +25,7 @@ extern ErrorLog *server_log;
 extern LoginServer server;
 extern bool run_server;
 
-ServerManager::ServerManager() 
+ServerManager::ServerManager()
 {
 	char error_buffer[TCPConnection_ErrorBufferSize];
 
@@ -60,7 +60,7 @@ void ServerManager::Process()
 		in_addr tmp;
 		tmp.s_addr = tcp_c->GetrIP();
 		server_log->Log(log_network, "New world server connection from %s:%d", inet_ntoa(tmp), tcp_c->GetrPort());
-		
+
 		WorldServer *cur = GetServerByAddress(tcp_c->GetrIP());
 		if(cur)
 		{
@@ -172,13 +172,13 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 	sl->Unknown2 = 0x00000000;
 	sl->Unknown3 = 0x01650000;
 	/**
-	 * Not sure what this is but it should be noted setting it to
-	 * 0xFFFFFFFF crashes the client so: don't do that.
-	 */
+	* Not sure what this is but it should be noted setting it to
+	* 0xFFFFFFFF crashes the client so: don't do that.
+	*/
 	sl->Unknown4 = 0x00000000;
 	sl->NumberOfServers = server_count;
 
-	unsigned char *data_ptr = outapp->pBuffer;	
+	unsigned char *data_ptr = outapp->pBuffer;
 	data_ptr += sizeof(ServerListHeader_Struct);
 
 	iter = world_servers.begin();
@@ -280,7 +280,7 @@ void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int 
 			utwr->lsaccountid = client_account_id;
 			(*iter)->GetConnection()->SendPacket(outapp);
 			found = true;
-			
+
 			if(server.options.IsDumpInPacketsOn())
 			{
 				DumpPacket(outapp);
@@ -342,3 +342,4 @@ void ServerManager::DestroyServerByName(string l_name, string s_name, WorldServe
 		iter++;
 	}
 }
+

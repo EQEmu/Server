@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "EQEmuConfig.h"
@@ -63,7 +63,7 @@ void EQEmuConfig::do_world(TiXmlElement *ele) {
 		text=ParseTextBlock(sub_ele,"port",true);
 		if (text)
 			LoginPort=atoi(text);
-		
+
 		text=ParseTextBlock(sub_ele,"account",true);
 		if (text)
 			LoginAccount=text;
@@ -97,7 +97,7 @@ void EQEmuConfig::do_world(TiXmlElement *ele) {
 			}
 		} while(sub_ele);
 	}
-	
+
 	// Check for locked
 	sub_ele = ele->FirstChildElement("locked");
 	if (sub_ele != nullptr)
@@ -140,7 +140,7 @@ void EQEmuConfig::do_world(TiXmlElement *ele) {
 		text = sub_ele->Attribute("enabled");
 		if (text && !strcasecmp(text,"true"))
 			WorldHTTPEnabled=true;
-		
+
 	}
 }
 
@@ -155,7 +155,7 @@ void EQEmuConfig::do_chatserver(TiXmlElement *ele) {
 	if (text)
 		ChatPort=atoi(text);
 }
-		
+
 void EQEmuConfig::do_mailserver(TiXmlElement *ele) {
 	const char *text;
 
@@ -167,7 +167,7 @@ void EQEmuConfig::do_mailserver(TiXmlElement *ele) {
 	if (text)
 		MailPort=atoi(text);
 }
-		
+
 void EQEmuConfig::do_database(TiXmlElement *ele) {
 	const char *text;
 
@@ -192,7 +192,7 @@ void EQEmuConfig::do_database(TiXmlElement *ele) {
 		DatabaseDB=text;
 }
 
-		
+
 void EQEmuConfig::do_qsdatabase(TiXmlElement *ele) {
 	const char *text;
 
@@ -445,28 +445,4 @@ void EQEmuConfig::Dump() const
 	cout << "DefaultStatus = " << (int)DefaultStatus << endl;
 //	cout << "DynamicCount = " << DynamicCount << endl;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

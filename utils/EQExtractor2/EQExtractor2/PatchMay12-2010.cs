@@ -1,7 +1,7 @@
 ﻿//
 // Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net). Distributed under GPL version 2.
 //
-// 
+//
 
 using System;
 using System.IO;
@@ -26,14 +26,14 @@ namespace EQExtractor2.Patches
         public PatchMay122010Decoder()
         {
             Version = "EQ Client Build Date May 12 2010. (Valid up to and including Build Date June 8 2010)";
-         
+
             PatchConfFileName = "patch_May12-2010.conf";
-        
+
             ExpectedPPLength = 26632;
-        
+
             PPZoneIDOffset = 19396;
         }
-                        
+
         override public bool Init(string ConfDirectory, ref string ErrorMessage)
         {
             OpManager = new OpCodeManager();
@@ -94,7 +94,7 @@ namespace EQExtractor2.Patches
             List<byte[]> PlayerProfilePacket = GetPacketsOfType("OP_PlayerProfile", PacketDirection.ServerToClient);
 
             if (PlayerProfilePacket.Count == 0)
-            {             
+            {
                 return 0;
             }
             else
@@ -107,7 +107,7 @@ namespace EQExtractor2.Patches
 
             return BitConverter.ToUInt16(PlayerProfilePacket[0], PPZoneIDOffset);
         }
-                
+
         override public List<Door> GetDoors()
         {
             List<Door> DoorList = new List<Door>();
@@ -159,7 +159,7 @@ namespace EQExtractor2.Patches
                                         DoorParam, DestZone, 0, 0, 0, 0);
 
                 DoorList.Add(NewDoor);
-                
+
             }
             return DoorList;
         }
@@ -221,7 +221,7 @@ namespace EQExtractor2.Patches
         {
             ByteStream Buffer = new ByteStream(PacketBuffer);
 
-            Item NewItem = new Item();                        
+            Item NewItem = new Item();
 
             NewItem.StackSize = Buffer.ReadUInt32();
             Buffer.SkipBytes(4);
@@ -233,7 +233,7 @@ namespace EQExtractor2.Patches
             NewItem.Name = Buffer.ReadString(true);
             NewItem.Lore = Buffer.ReadString(true);
             NewItem.IDFile = Buffer.ReadString(true);
-            NewItem.ID = Buffer.ReadUInt32();         
+            NewItem.ID = Buffer.ReadUInt32();
 
             return NewItem;
         }
@@ -245,7 +245,7 @@ namespace EQExtractor2.Patches
             List<byte[]> ZonePointPackets = GetPacketsOfType("OP_SendZonepoints", PacketDirection.ServerToClient);
 
             if (ZonePointPackets.Count < 1)
-            {                
+            {
                 return ZonePointList;
             }
 
@@ -257,7 +257,7 @@ namespace EQExtractor2.Patches
 
             if (Entries == 0)
                 return ZonePointList;
-                        
+
             float x, y, z, Heading;
 
             UInt32 Number;
@@ -284,14 +284,14 @@ namespace EQExtractor2.Patches
                 ZoneID = Buffer.ReadUInt16();
 
                 Instance = Buffer.ReadUInt16();
-                
+
                 Buffer.SkipBytes(4);    // Skip the last UInt32
 
                 ZonePoint NewZonePoint = new ZonePoint(Number, ZoneID, Instance, x, y, z,  x, y, z, Heading, ZoneID);
 
-                ZonePointList.Add(NewZonePoint);                                
+                ZonePointList.Add(NewZonePoint);
             }
-        
+
             return ZonePointList;
         }
 
@@ -300,7 +300,7 @@ namespace EQExtractor2.Patches
             NewZoneStruct NewZone = new NewZoneStruct();
 
             List<byte[]> ZonePackets = GetPacketsOfType("OP_NewZone", PacketDirection.ServerToClient);
-                        
+
             if (ZonePackets.Count < 1)
                 return NewZone;
 
@@ -316,7 +316,7 @@ namespace EQExtractor2.Patches
 
             NewZone.LongName = Buffer.ReadFixedLengthString(278, true);
 
-            NewZone.Type = Buffer.ReadByte();                     
+            NewZone.Type = Buffer.ReadByte();
 
             NewZone.FogRed = Buffer.ReadBytes(4);
 
@@ -325,7 +325,7 @@ namespace EQExtractor2.Patches
             NewZone.FogBlue = Buffer.ReadBytes(4);
 
             Buffer.SkipBytes(1);   // Unknown
-                        
+
             for (int i = 0; i < 4; ++i)
                 NewZone.FogMinClip[i] = Buffer.ReadSingle();
 
@@ -379,7 +379,7 @@ namespace EQExtractor2.Patches
             NewZone.FogDensity = Buffer.ReadSingle();
 
             // Everything else after this point in the packet is unknown.
-            
+
             return NewZone;
         }
 
@@ -433,7 +433,7 @@ namespace EQExtractor2.Patches
                     // Destructable Objects. Not handled yet
                     //
                     //SQLOut(String.Format("-- OBJECT FOUND SpawnID {0}", SpawnID.ToString("x")));
-                    
+
                     NewSpawn.DestructableString1 = Buffer.ReadString(false);
 
                     NewSpawn.DestructableString2 = Buffer.ReadString(false);
@@ -524,7 +524,7 @@ namespace EQExtractor2.Patches
                 NewSpawn.EquipChest2 = Buffer.ReadByte();
 
                 bool UseWorn = (NewSpawn.EquipChest2 == 255);
-                
+
                 Buffer.SkipBytes(2);    // 2 Unknown bytes;
 
                 NewSpawn.Helm = Buffer.ReadByte();
@@ -554,7 +554,7 @@ namespace EQExtractor2.Patches
                 NewSpawn.XPos = Utils.EQ19ToFloat((Int32)(Position4 >> 12) & 0x7FFFF);
 
                 NewSpawn.ZPos = Utils.EQ19ToFloat((Int32)(Position5 & 0x7FFFF));
-                
+
                 for (int ColourSlot = 0; ColourSlot < 9; ++ColourSlot)
                     NewSpawn.SlotColour[ColourSlot] = Buffer.ReadUInt32();
 
@@ -636,9 +636,9 @@ namespace EQExtractor2.Patches
 
             List<byte[]> UpdatePackets = GetPacketsOfType("OP_NPCMoveUpdate", PacketDirection.ServerToClient);
 
-            foreach (byte[] UpdatePacket in UpdatePackets)                            
+            foreach (byte[] UpdatePacket in UpdatePackets)
                 Updates.Add(Decode_OP_NPCMoveUpdate(UpdatePacket));
-            
+
             return Updates;
         }
 
@@ -671,9 +671,9 @@ namespace EQExtractor2.Patches
 
             List<byte[]> UpdatePackets = GetPacketsOfType("OP_MobUpdate", PacketDirection.ServerToClient);
 
-            foreach (byte[] MobUpdatePacket in UpdatePackets)            
+            foreach (byte[] MobUpdatePacket in UpdatePackets)
                 Updates.Add(Decode_OP_MobUpdate(MobUpdatePacket));
-            
+
             return Updates;
         }
 
@@ -754,7 +754,7 @@ namespace EQExtractor2.Patches
             List<EQApplicationPacket> PacketList = Packets.PacketList;
 
             UInt32 OP_ClientUpdate = OpManager.OpCodeNameToNumber("OP_ClientUpdate");
-            
+
             foreach (EQApplicationPacket UpdatePacket in PacketList)
             {
                 if ((UpdatePacket.OpCode != OP_ClientUpdate) || (UpdatePacket.Direction != PacketDirection.ClientToServer))
@@ -779,7 +779,7 @@ namespace EQExtractor2.Patches
 
 
                 Updates.Add(PosUpdate);
-            }                           
+            }
 
             return Updates;
         }
@@ -828,7 +828,7 @@ namespace EQExtractor2.Patches
             List<UInt32> FindableSpawnList = new List<UInt32>();
 
             List<byte[]> FindablePackets = GetPacketsOfType("OP_SendFindableNPCs", PacketDirection.ServerToClient);
-                        
+
             if (FindablePackets.Count < 1)
                 return FindableSpawnList;
 
@@ -837,7 +837,7 @@ namespace EQExtractor2.Patches
                 if (BitConverter.ToUInt32(Packet, 0) == 0)
                     FindableSpawnList.Add(BitConverter.ToUInt32(Packet, 4));
             }
-                        
+
             return FindableSpawnList;
         }
 
@@ -864,7 +864,7 @@ namespace EQExtractor2.Patches
             //OpManager.RegisterExplorer("OP_HPUpdate", ExploreHPUpdate);
             //OpManager.RegisterExplorer("OP_Animation", ExploreAnimation);
             //OpManager.RegisterExplorer("OP_CharInventory", ExploreCharInventoryPacket);
-            
+
         }
 
         public void ExploreZoneEntry(StreamWriter OutputStream, ByteStream Buffer, PacketDirection Direction)
@@ -910,7 +910,7 @@ namespace EQExtractor2.Patches
             if ((OtherData & 1) > 0)
             {
                 // Destructable Objects.
-                
+
                 DestructableString1 = Buffer.ReadString(false);
 
                 DestructableString2 = Buffer.ReadString(false);
@@ -956,9 +956,9 @@ namespace EQExtractor2.Patches
                           DestructableUnk9, DestructableByte);
             }
 
-            Buffer.SkipBytes(17);            
+            Buffer.SkipBytes(17);
 
-            byte PropCount = Buffer.ReadByte();                        
+            byte PropCount = Buffer.ReadByte();
 
             if (PropCount >= 1)
             {
@@ -991,8 +991,8 @@ namespace EQExtractor2.Patches
         {
             UInt32 CurrentHP = Buffer.ReadUInt32();
             Int32 MaxHP = Buffer.ReadInt32();
-            UInt16 SpawnID = Buffer.ReadUInt16();            
-            
+            UInt16 SpawnID = Buffer.ReadUInt16();
+
             string SpawnName = FindExplorerSpawn(SpawnID);
 
             OutputStream.WriteLine("Spawn {0} {1} Current HP: {2} Max HP: {3}", SpawnID, SpawnName, CurrentHP, MaxHP);
@@ -1001,7 +1001,7 @@ namespace EQExtractor2.Patches
         }
 
         public void ExploreAnimation(StreamWriter OutputStream, ByteStream Buffer, PacketDirection Direction)
-        {            
+        {
             UInt16 SpawnID = Buffer.ReadUInt16();
             byte Action = Buffer.ReadByte();
             byte Value = Buffer.ReadByte();
@@ -1324,7 +1324,7 @@ namespace EQExtractor2.Patches
             Buffer.SkipBytes(4);    // clickunk7
             Buffer.SkipBytes(30);   // Proc Effect Struct
             Buffer.ReadString(true);    // Proc Name
-            Buffer.SkipBytes(4);    // unknown5            
+            Buffer.SkipBytes(4);    // unknown5
             Buffer.SkipBytes(30);   // Worn Effect Struct
             Buffer.ReadString(true);    // Worn Name
             Buffer.SkipBytes(4);    // unknown6
@@ -1336,7 +1336,7 @@ namespace EQExtractor2.Patches
             Buffer.SkipBytes(4);    // unknown6
             Buffer.SkipBytes(30);   // Worn Effect Struct
             Buffer.ReadString(true);    // Worn Name
-            Buffer.SkipBytes(4);    // unknown6            
+            Buffer.SkipBytes(4);    // unknown6
             Buffer.SkipBytes(103);   // Item Quaternary Body Struct - 4 (we want to read the SubLength field at the end)
 
             //UInt32 SubLengths = Buffer.ReadUInt32();

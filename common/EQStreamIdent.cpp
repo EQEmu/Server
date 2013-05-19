@@ -1,4 +1,3 @@
-
 #include "debug.h"
 #include "EQStreamIdent.h"
 #include "EQStreamProxy.h"
@@ -39,12 +38,12 @@ void EQStreamIdentifier::RegisterPatch(const EQStream::Signature &sig, const cha
 void EQStreamIdentifier::Process() {
 	vector<Record *>::iterator cur;
 	vector<Patch *>::iterator curp, endp;
-	
+
 	//foreach pending stream.
 	cur = m_streams.begin();
 	while(cur != m_streams.end()) {
 		Record *r = *cur;
-		
+
 		//first see if this stream has expired
 		if(r->expire.Check(false)) {
 			//this stream has failed to match any pattern in our timeframe.
@@ -54,7 +53,7 @@ void EQStreamIdentifier::Process() {
 			cur = m_streams.erase(cur);
 			continue;
 		}
-		
+
 		//then make sure the stream is still active
 		//if stream hasn't finished initializing then continue;
 		if(r->stream->GetState() == UNESTABLISHED)
@@ -87,18 +86,18 @@ void EQStreamIdentifier::Process() {
 			cur = m_streams.erase(cur);
 			continue;
 		}
-		
+
 		//not expired, check against all patch signatures
-		
+
 		bool found_one = false;		//"we found a matching patch for this stream"
 		bool all_ready = true;		//"all signatures were ready to check the stream"
-		
+
 		//foreach possbile patch...
 		curp = m_patches.begin();
 		endp = m_patches.end();
 		for(; !found_one && curp != endp; curp++) {
 			Patch *p = *curp;
-			
+
 			//ask the stream to see if it matches the supplied signature
 			EQStream::MatchState res = r->stream->CheckSignature(&p->signature);
 			switch(res) {
@@ -109,13 +108,13 @@ void EQStreamIdentifier::Process() {
 				break;
 			case EQStream::MatchSuccessful: {
 				//yay, a match.
-				
+
 				_log(NET__IDENTIFY, "Identified stream %s:%d with signature %s", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()), p->name.c_str());
-				
+
 				//might want to do something less-specific here... some day..
 				EQStreamInterface *s = new EQStreamProxy(r->stream, p->structs, p->opcodes);
 				m_identified.push(s);
-				
+
 				found_one = true;
 				break;
 			}
@@ -125,14 +124,14 @@ void EQStreamIdentifier::Process() {
 				break;
 			}
 		}
-		
+
 		//if we checked all patches and did not find a match.
 		if(all_ready && !found_one) {
 			//the stream cannot be identified.
 			_log(NET__IDENTIFY, "Unable to identify stream from %s:%d, no match found.", long2ip(r->stream->GetRemoteIP()).c_str(), ntohs(r->stream->GetRemotePort()));
 			r->stream->ReleaseFromUse();
 		}
-		
+
 		//if we found a match, or were not able to identify it
 		if(found_one || all_ready) {
 			//cannot print ip/port here. r->stream is invalid.
@@ -156,44 +155,10 @@ EQStreamInterface *EQStreamIdentifier::PopIdentified() {
 	m_identified.pop();
 	return(res);
 }
-	
+
 EQStreamIdentifier::Record::Record(EQStream *s)
-: stream(s),
-  expire(STREAM_IDENT_WAIT_MS)
+:	stream(s),
+	expire(STREAM_IDENT_WAIT_MS)
 {
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

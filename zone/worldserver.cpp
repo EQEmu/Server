@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -54,7 +54,7 @@ using namespace std;
 #include "QGlobals.h"
 
 
-extern EntityList    entity_list;
+extern EntityList entity_list;
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern void CatchSignal(int);
@@ -102,9 +102,9 @@ void WorldServer::SetZone(uint32 iZoneID, uint32 iInstanceID) {
 
 void WorldServer::OnConnected() {
 	WorldConnection::OnConnected();
-	
+
 	ServerPacket* pack;
-	
+
 	//tell the launcher what name we were started with.
 	pack = new ServerPacket(ServerOP_SetLaunchName,sizeof(LaunchName_Struct));
 	LaunchName_Struct* ln = (LaunchName_Struct*)pack->pBuffer;
@@ -118,16 +118,16 @@ void WorldServer::OnConnected() {
 	sci->port = ZoneConfig::get()->ZonePort;
 	SendPacket(pack);
 	safe_delete(pack);
-	
+
 	if (ZoneLoaded) {
 		this->SetZone(zone->GetZoneID(), zone->GetInstanceID());
 		entity_list.UpdateWho(true);
 		this->SendEmoteMessage(0, 0, 15, "Zone connect: %s", zone->GetLongName());
-            zone->GetTimeSync();
+			zone->GetTimeSync();
 	} else {
 		this->SetZone(0);
 	}
-	
+
 	pack = new ServerPacket(ServerOP_LSZoneBoot,sizeof(ZoneBoot_Struct));
 	ZoneBoot_Struct* zbs = (ZoneBoot_Struct*)pack->pBuffer;
 	strcpy(zbs->compile_time,LAST_MODIFIED);
@@ -137,9 +137,9 @@ void WorldServer::OnConnected() {
 
 void WorldServer::Process() {
 	_ZP(WorldServer_Process);
-	
+
 	WorldConnection::Process();
-	
+
 	if (!Connected())
 		return;
 
@@ -158,7 +158,7 @@ void WorldServer::Process() {
 		// World is tellins us what port to use.
 		case ServerOP_SetConnectInfo: {
 			if (pack->size != sizeof(ServerConnectInfo))
-				break; 
+				break;
 			ServerConnectInfo* sci = (ServerConnectInfo*) pack->pBuffer;
 			_log(ZONE__WORLD,"World indicated port %d for this zone.",sci->port);
 			ZoneConfig::SetZonePort(sci->port);
@@ -198,7 +198,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_VoiceMacro: {
 
-			if (!ZoneLoaded) 
+			if (!ZoneLoaded)
 				break;
 
 			ServerVoiceMacro_Struct* svm = (ServerVoiceMacro_Struct*) pack->pBuffer;
@@ -214,7 +214,7 @@ void WorldServer::Process() {
 			switch(svm->Type) {
 				case VoiceMacroTell: {
 					Client* c = entity_list.GetClientByName(svm->To);
-					if(!c) 
+					if(!c)
 						break;
 
 					c->QueuePacket(outapp);
@@ -224,7 +224,7 @@ void WorldServer::Process() {
 				case VoiceMacroGroup: {
 					Group* g = entity_list.GetGroupByID(svm->GroupID);
 
-					if(!g) 
+					if(!g)
 						break;
 
 					for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -238,7 +238,7 @@ void WorldServer::Process() {
 				case VoiceMacroRaid: {
 					Raid *r = entity_list.GetRaidByID(svm->RaidID);
 
-					if(!r) 
+					if(!r)
 						break;
 
 					for(int i = 0; i < MAX_RAID_MEMBERS; i++)
@@ -258,9 +258,9 @@ void WorldServer::Process() {
 			if (!ZoneLoaded)
 				break;
 			ServerSpawnCondition_Struct* ssc = (ServerSpawnCondition_Struct*) pack->pBuffer;
-			
+
 			zone->spawn_conditions.SetCondition(zone->GetShortName(), zone->GetInstanceID(), ssc->condition_id, ssc->value, true);
-			break;		
+			break;
 		}
 		case ServerOP_SpawnEvent: {
 			if(pack->size != sizeof(ServerSpawnEvent_Struct))
@@ -268,10 +268,10 @@ void WorldServer::Process() {
 			if (!ZoneLoaded)
 				break;
 			ServerSpawnEvent_Struct* sse = (ServerSpawnEvent_Struct*) pack->pBuffer;
-			
+
 			zone->spawn_conditions.ReloadEvent(sse->event_id);
-			
-			break;		
+
+			break;
 		}
 		case ServerOP_AcceptWorldEntrance: {
 			if(pack->size != sizeof(WorldToZone_Struct))
@@ -286,7 +286,7 @@ void WorldServer::Process() {
 				wtz->response = 1;
 
 			SendPacket(pack);
-			break;		
+			break;
 		}
 		case ServerOP_ZoneToZoneRequest: {
 			if(pack->size != sizeof(ZoneToZone_Struct))
@@ -294,8 +294,8 @@ void WorldServer::Process() {
 			if (!ZoneLoaded)
 				break;
 			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
-			
-			if(ztz->current_zone_id == zone->GetZoneID() 
+
+			if(ztz->current_zone_id == zone->GetZoneID()
 				&& ztz->current_instance_id == zone->GetInstanceID()) {
 				// it's a response
 				Entity* entity = entity_list.GetClientByName(ztz->name);
@@ -369,8 +369,8 @@ void WorldServer::Process() {
 		case ServerOP_WhoAllReply:{
 			if(!ZoneLoaded)
 				break;
-			
-			
+
+
 			WhoAllReturnStruct* wars= (WhoAllReturnStruct*)pack->pBuffer;
 			if (wars && wars->id!=0 && wars->id<0xFFFFFFFF){
 				Client* client = entity_list.GetClientByID(wars->id);
@@ -386,8 +386,8 @@ void WorldServer::Process() {
 				}
 				else {
 					#ifdef _EQDEBUG
-					_log(ZONE__WORLD, "Error: WhoAllReturnStruct did not point to a valid client!  "
-						"id=%i, playerineqstring=%i, playersinzonestring=%i.  Dumping WhoAllReturnStruct:",
+					_log(ZONE__WORLD, "Error: WhoAllReturnStruct did not point to a valid client! "
+						"id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
 						wars->id, wars->playerineqstring, wars->playersinzonestring);
 					#endif
 				}
@@ -460,7 +460,7 @@ void WorldServer::Process() {
 			}
 			else {
 				SendEmoteMessage(0, 0, 15, "Zone shutdown: %s", zone->GetLongName());
-				
+
 				ServerZoneStateChange_struct* zst = (ServerZoneStateChange_struct *) pack->pBuffer;
 				cout << "Zone shutdown by " << zst->adminname << endl;
 				Zone::Shutdown();
@@ -484,10 +484,10 @@ void WorldServer::Process() {
 				}
 				break;
 			}
-			
+
 			if (zst->adminname[0] != 0)
 				cout << "Zone bootup by " << zst->adminname << endl;
-			
+
 			if (!(Zone::Bootup(zst->zoneid, zst->instanceid, zst->makestatic))) {
 				SendChannelMessage(0, 0, 10, 0, 0, "%s:%i Zone::Bootup failed: %s", net.GetZoneAddress(), net.GetZonePort(), database.GetZoneName(zst->zoneid));
 			}
@@ -567,7 +567,7 @@ void WorldServer::Process() {
 			}
 			break;
 		}
-		
+
 		//hand all the guild related packets to the guild manager for processing.
 		case ServerOP_OnlineGuildMembersResponse:
 		case ServerOP_RefreshGuild:
@@ -680,15 +680,15 @@ void WorldServer::Process() {
 					//pendingrezexp is the amount of XP on the corpse. Setting it to a value >= 0
 					//also serves to inform Client::OPRezzAnswer to expect a packet.
 					client->SetPendingRezzData(srs->exp, srs->dbid, srs->rez.spellid, srs->rez.corpse_name);
-                   			_log(SPELLS__REZ, "OP_RezzRequest in zone %s for %s, spellid:%i", 
-					     zone->GetShortName(), client->GetName(), srs->rez.spellid);
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest, 
-											      sizeof(Resurrect_Struct));
+							_log(SPELLS__REZ, "OP_RezzRequest in zone %s for %s, spellid:%i",
+							zone->GetShortName(), client->GetName(), srs->rez.spellid);
+					EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest,
+												sizeof(Resurrect_Struct));
 					memcpy(outapp->pBuffer, &srs->rez, sizeof(Resurrect_Struct));
 					client->QueuePacket(outapp);
 					_pkt(SPELLS__REZ, outapp);
 					safe_delete(outapp);
-					break;	
+					break;
 				}
 			}
 			if (srs->rezzopcode == OP_RezzComplete){
@@ -697,7 +697,7 @@ void WorldServer::Process() {
 				Corpse* corpse = entity_list.GetCorpseByName(srs->rez.corpse_name);
 				if (corpse && corpse->IsCorpse()) {
 					_log(SPELLS__REZ, "OP_RezzComplete received in zone %s for corpse %s",
-							  zone->GetShortName(), srs->rez.corpse_name);
+								zone->GetShortName(), srs->rez.corpse_name);
 
 					_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
 					// I don't know why Rezzed is not set to true in CompleteRezz().
@@ -705,7 +705,7 @@ void WorldServer::Process() {
 					corpse->CompleteRezz();
 				}
 			}
-			
+
 			break;
 		}
 		case ServerOP_RezzPlayerReject:
@@ -730,17 +730,17 @@ void WorldServer::Process() {
 			snprintf(buffer,200,". %s %i %s",zb->ip2, zb->port, inet_ntoa(in));
 			if(zb->zoneid != 0) {
 				snprintf(buffer,200,"%s %s %i %s",database.GetZoneName(zb->zoneid),zb->ip2, zb->port ,inet_ntoa(in));
-				cout << "executing: " << buffer; 
+				cout << "executing: " << buffer;
 				ShellExecute(0,"Open",net.GetZoneFileName(), buffer, 0, SW_SHOWDEFAULT);
 			}
 			else
 			{
-				cout << "executing: " << net.GetZoneFileName() << " " << buffer; 
+				cout << "executing: " << net.GetZoneFileName() << " " << buffer;
 				ShellExecute(0,"Open",net.GetZoneFileName(), buffer, 0, SW_SHOWDEFAULT);
 			}
 #else
 			char buffer[5];
-			snprintf(buffer,5,"%i",zb->port); //just to be sure that it will work on linux	
+			snprintf(buffer,5,"%i",zb->port); //just to be sure that it will work on linux
 			if(zb->zoneid != 0)
 				execl(net.GetZoneFileName(),net.GetZoneFileName(),database.GetZoneName(zb->zoneid),zb->ip2, buffer,inet_ntoa(in), nullptr);
 			else
@@ -793,7 +793,7 @@ void WorldServer::Process() {
 			oocmuted = *(pack->pBuffer);
 			break;
 		}
-		case ServerOP_Revoke: {					
+		case ServerOP_Revoke: {
 			RevokeStruct* rev = (RevokeStruct*) pack->pBuffer;
 			Client* client = entity_list.GetClientByName(rev->name);
 			if (client)
@@ -826,7 +826,7 @@ void WorldServer::Process() {
 			}
 			break;
 		}
-        case ServerOP_GroupInvite: {
+		case ServerOP_GroupInvite: {
 			// A player in another zone invited a player in this zone to join their group.
 			//
 			GroupInvite_Struct* gis = (GroupInvite_Struct*)pack->pBuffer;
@@ -855,7 +855,7 @@ void WorldServer::Process() {
 				Group* group = entity_list.GetGroupByClient(Inviter->CastToClient());
 
 				if(!group){
-			
+
 					group = new Group(Inviter);
 
 					if(!group)
@@ -874,25 +874,25 @@ void WorldServer::Process() {
 
 					group->UpdateGroupAAs();
 
-                    if(Inviter->CastToClient()->GetClientVersion() < EQClientSoD)
-			        {
-			        	EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
-			        	GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
-			        	strcpy(outgj->membername, Inviter->GetName());
-			        	strcpy(outgj->yourname, Inviter->GetName());
-			        	outgj->action = groupActInviteInitial; // 'You have formed the group'.
-			        	group->GetGroupAAs(&outgj->leader_aas);
-			        	Inviter->CastToClient()->QueuePacket(outapp);
-			        	safe_delete(outapp);
-			        }
-			        else
-			        {
-			        	// SoD and later
-			        	//
-			        	Inviter->CastToClient()->SendGroupCreatePacket();				
-			        	Inviter->CastToClient()->SendGroupLeaderChangePacket(Inviter->GetName());
-			        	Inviter->CastToClient()->SendGroupJoinAcknowledge();	
-			        }
+					if(Inviter->CastToClient()->GetClientVersion() < EQClientSoD)
+					{
+						EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+						GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
+						strcpy(outgj->membername, Inviter->GetName());
+						strcpy(outgj->yourname, Inviter->GetName());
+						outgj->action = groupActInviteInitial; // 'You have formed the group'.
+						group->GetGroupAAs(&outgj->leader_aas);
+						Inviter->CastToClient()->QueuePacket(outapp);
+						safe_delete(outapp);
+					}
+					else
+					{
+						// SoD and later
+						//
+						Inviter->CastToClient()->SendGroupCreatePacket();
+						Inviter->CastToClient()->SendGroupLeaderChangePacket(Inviter->GetName());
+						Inviter->CastToClient()->SendGroupJoinAcknowledge();
+					}
 				}
 				if(!group)
 					break;
@@ -904,7 +904,7 @@ void WorldServer::Process() {
 				strn0cpy(gg->name1, sgfs->gf.name1, sizeof(gg->name1));
 
 				strn0cpy(gg->name2, sgfs->gf.name2, sizeof(gg->name2));
-				
+
 				Inviter->CastToClient()->QueuePacket(outapp);
 
 				safe_delete(outapp);
@@ -954,7 +954,7 @@ void WorldServer::Process() {
 
 			if(!c)
 				break;
-			
+
 			uint32 groupid = database.GetGroupID(c->GetName());
 
 			Group* group = nullptr;
@@ -1004,7 +1004,7 @@ void WorldServer::Process() {
 					Client *lc = entity_list.GetClientByName(ln);
 					if(lc)
 						group->SetLeader(lc);
-	
+
 					group->SetMainTank(MainTankName);
 					group->SetMainAssist(AssistName);
 					group->SetPuller(PullerName);
@@ -1037,7 +1037,7 @@ void WorldServer::Process() {
 				if(gj->zoneid == zone->GetZoneID() && gj->instance_id == zone->GetInstanceID())
 					break;
 
-   				Group* g = entity_list.GetGroupByID(gj->gid);
+				Group* g = entity_list.GetGroupByID(gj->gid);
 				if(g)
 					g->AddMember(gj->member_name);
 
@@ -1065,7 +1065,7 @@ void WorldServer::Process() {
 
 				entity_list.GroupMessage(gcm->groupid, gcm->from, gcm->message);
 			}
-			break;							   
+			break;
 		}
 		case ServerOP_DisbandGroup: {
 			ServerDisbandGroup_Struct* sd = (ServerDisbandGroup_Struct*)pack->pBuffer;
@@ -1084,7 +1084,7 @@ void WorldServer::Process() {
 			if(zone){
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
-				
+
 				Raid *r = entity_list.GetRaidByID(rga->rid);
 				if(r){
 					r->LearnMembers();
@@ -1100,7 +1100,7 @@ void WorldServer::Process() {
 			if(zone){
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
-				
+
 				Raid *r = entity_list.GetRaidByID(rga->rid);
 				if(r){
 					r->SendRaidRemoveAll(rga->playername);
@@ -1109,7 +1109,7 @@ void WorldServer::Process() {
 						r->SendRaidDisband(rem);
 					}
 					r->LearnMembers();
-					r->VerifyRaid();					
+					r->VerifyRaid();
 				}
 			}
 			break;
@@ -1120,7 +1120,7 @@ void WorldServer::Process() {
 			if(zone){
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
-				
+
 				Raid *r = entity_list.GetRaidByID(rga->rid);
 				if(r){
 					r->SendRaidDisbandAll();
@@ -1136,7 +1136,7 @@ void WorldServer::Process() {
 			if(zone){
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
-				
+
 				Raid *r = entity_list.GetRaidByID(rga->rid);
 				if(r){
 					r->GetRaidDetails(); //update our details
@@ -1154,7 +1154,7 @@ void WorldServer::Process() {
 			if(zone){
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
-				
+
 				Raid *r = entity_list.GetRaidByID(rga->rid);
 				if(r){
 					r->LearnMembers();
@@ -1183,7 +1183,7 @@ void WorldServer::Process() {
 			if(zone){
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
-				
+
 				Raid *r = entity_list.GetRaidByID(rga->rid);
 				if(r){
 					r->GroupUpdate(rga->gid, false);
@@ -1206,7 +1206,7 @@ void WorldServer::Process() {
 			if(zone){
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
-				
+
 				Raid *r = entity_list.GetRaidByID(rga->rid);
 				if(r){
 					Client *c = entity_list.GetClientByName(rga->playername);
@@ -1227,7 +1227,7 @@ void WorldServer::Process() {
 			if(zone){
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
-				
+
 				Raid *r = entity_list.GetRaidByID(rga->rid);
 				if(r){
 					r->GetRaidDetails();
@@ -1243,7 +1243,7 @@ void WorldServer::Process() {
 			if(zone){
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
-				
+
 				Client *c = entity_list.GetClientByName(rga->playername);
 				if(c)
 				{
@@ -1259,14 +1259,14 @@ void WorldServer::Process() {
 		}
 
 		case ServerOP_RaidGroupAdd:{
-			ServerRaidGroupAction_Struct* rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;	
+			ServerRaidGroupAction_Struct* rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;
 			if(zone){
 				Raid *r = entity_list.GetRaidByID(rga->rid);
 				if(r){
 					r->LearnMembers();
 					r->VerifyRaid();
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
-					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;	
+					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
 					strn0cpy(gj->membername, rga->membername, 64);
 					gj->action = groupActJoin;
 
@@ -1297,7 +1297,7 @@ void WorldServer::Process() {
 					r->LearnMembers();
 					r->VerifyRaid();
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
-					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;	
+					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
 					strn0cpy(gj->membername, rga->membername, 64);
 					gj->action = groupActLeave;
 
@@ -1321,7 +1321,7 @@ void WorldServer::Process() {
 		}
 
 		case ServerOP_RaidGroupSay:{
-			ServerRaidMessage_Struct* rmsg = (ServerRaidMessage_Struct*)pack->pBuffer;	
+			ServerRaidMessage_Struct* rmsg = (ServerRaidMessage_Struct*)pack->pBuffer;
 			if(zone){
 				Raid *r = entity_list.GetRaidByID(rmsg->rid);
 				if(r)
@@ -1374,12 +1374,12 @@ void WorldServer::Process() {
 			Corpse* NewCorpse = database.LoadPlayerCorpse(s->player_corpse_id);
 			if(NewCorpse)
 				NewCorpse->Spawn();
-			else 
+			else
 				LogFile->write(EQEMuLog::Error,"Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
 
 			break;
 		}
-	    case ServerOP_Consent: {
+		case ServerOP_Consent: {
 			ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
 			Client* client = entity_list.GetClientByName(s->grantname);
 			if(client) {
@@ -1448,7 +1448,7 @@ void WorldServer::Process() {
 				UpdateSpawnTimer_Struct *ust = (UpdateSpawnTimer_Struct*)pack->pBuffer;
 				LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
 				iterator.Reset();
-				while (iterator.MoreElements()) 
+				while (iterator.MoreElements())
 				{
 					if(iterator.GetData()->GetID() == ust->id)
 					{
@@ -1545,7 +1545,7 @@ void WorldServer::Process() {
 			{
 				break;
 			}
-			
+
 			if(zone)
 			{
 				ServerQGlobalUpdate_Struct *qgu = (ServerQGlobalUpdate_Struct*)pack->pBuffer;
@@ -1571,7 +1571,7 @@ void WorldServer::Process() {
 			{
 				break;
 			}
-			
+
 			if(zone)
 			{
 				ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct*)pack->pBuffer;
@@ -1671,7 +1671,7 @@ void WorldServer::Process() {
 			}
 			break;
 		}
-		
+
 		case ServerOP_AdventureLeaveReply:
 		{
 			Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
@@ -1777,7 +1777,7 @@ void WorldServer::Process() {
 				default:
 					break;
 			}
-			
+
 			break;
 		}
 		case ServerOP_CZSignalClient:
@@ -1823,7 +1823,7 @@ void WorldServer::Process() {
 		}
 		safe_delete(pack);
 	}
-	
+
 	return;
 }
 
@@ -1832,15 +1832,15 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 		return false;
 	va_list argptr;
 	char buffer[512];
-	
+
 	va_start(argptr, message);
 	vsnprintf(buffer, 512, message, argptr);
 	va_end(argptr);
 	buffer[511] = '\0';
-	
+
 	ServerPacket* pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen(buffer) + 1);
 	ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
-	
+
 	if (from == 0) {
 		strcpy(scm->from, "ZServer");
 		scm->fromadmin = 0;
@@ -1860,7 +1860,7 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 	scm->guilddbid = guilddbid;
 	scm->language = language;
 	strcpy(scm->message, buffer);
-	
+
 	pack->Deflate();
 	bool ret = SendPacket(pack);
 	safe_delete(pack);
@@ -1870,18 +1870,18 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 type, const char* message, ...) {
 	va_list argptr;
 	char buffer[256];
-	
+
 	va_start(argptr, message);
 	vsnprintf(buffer, 256, message, argptr);
 	va_end(argptr);
-	
+
 	return SendEmoteMessage(to, to_guilddbid, 0, type, buffer);
 }
 
 bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...) {
 	va_list argptr;
 	char buffer[256];
-	
+
 	va_start(argptr, message);
 	vsnprintf(buffer, 256, message, argptr);
 	va_end(argptr);
@@ -1890,7 +1890,7 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to
 		entity_list.MessageStatus(to_guilddbid, to_minstatus, type, buffer);
 		return false;
 	}
-	
+
 	ServerPacket* pack = new ServerPacket(ServerOP_EmoteMessage, sizeof(ServerEmoteMessage_Struct)+strlen(buffer)+1);
 	ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*) pack->pBuffer;
 	sem->type = type;
@@ -1910,11 +1910,11 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 	if(!worldserver.Connected() || !From)
 		return false;
-	
+
 	ServerPacket* pack = new ServerPacket(ServerOP_VoiceMacro, sizeof(ServerVoiceMacro_Struct));
 
 	ServerVoiceMacro_Struct* svm = (ServerVoiceMacro_Struct*) pack->pBuffer;
-	
+
 	strcpy(svm->From, From->GetName());
 
 	switch(Type) {
@@ -1976,8 +1976,8 @@ void WorldServer::SendReloadTasks(int Command, int TaskID) {
 	SendPacket(pack);
 }
 
-void WorldServer::HandleReloadTasks(ServerPacket *pack) 
-{	
+void WorldServer::HandleReloadTasks(ServerPacket *pack)
+{
 	ReloadTasks_Struct* rts = (ReloadTasks_Struct*) pack->pBuffer;
 
 	_log(TASKS__GLOBALLOAD, "Zone received ServerOP_ReloadTasks from World, Command %i", rts->Command);
@@ -1991,7 +1991,7 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 				safe_delete(taskmanager);
 				taskmanager = new TaskManager;
 				taskmanager->LoadTasks();
-				if(zone) 
+				if(zone)
 					taskmanager->LoadProximities(zone->GetZoneID());
 				entity_list.ReloadAllClientsTaskState();
 			}
@@ -2049,8 +2049,8 @@ uint32 WorldServer::NextGroupID() {
 	return(cur_groupid++);
 }
 
-void WorldServer::UpdateLFP(uint32 LeaderID, uint8 Action, uint8 MatchFilter, uint32 FromLevel, uint32 ToLevel, uint32 Classes, 
-			    const char *Comments, GroupLFPMemberEntry *LFPMembers) {
+void WorldServer::UpdateLFP(uint32 LeaderID, uint8 Action, uint8 MatchFilter, uint32 FromLevel, uint32 ToLevel, uint32 Classes,
+				const char *Comments, GroupLFPMemberEntry *LFPMembers) {
 
 	ServerPacket* pack = new ServerPacket(ServerOP_LFPUpdate, sizeof(ServerLFPUpdate_Struct));
 	ServerLFPUpdate_Struct* sus = (ServerLFPUpdate_Struct*) pack->pBuffer;
@@ -2120,7 +2120,7 @@ void WorldServer::HandleLFGMatches(ServerPacket *pack) {
 		client->QueuePacket(outapp);
 		safe_delete(outapp);
 	}
-}				
+}
 
 void WorldServer::HandleLFPMatches(ServerPacket *pack) {
 
@@ -2131,7 +2131,7 @@ void WorldServer::HandleLFPMatches(ServerPacket *pack) {
 	int Entries = (pack->size - 4) / sizeof(ServerLFPMatchesResponse_Struct);
 
 	uint32 EntityID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-			
+
 	ServerLFPMatchesResponse_Struct* smrs = (ServerLFPMatchesResponse_Struct*)Buffer;
 
 	Client* client = entity_list.GetClientByID(EntityID);
@@ -2141,7 +2141,7 @@ void WorldServer::HandleLFPMatches(ServerPacket *pack) {
 			PacketLength += strlen(smrs->Comments) + 11;
 			for(unsigned int j=0; j<MAX_GROUP_MEMBERS; j++) {
 
-				if(smrs->Members[j].Name[0] != '\0') 
+				if(smrs->Members[j].Name[0] != '\0')
 					PacketLength += strlen(smrs->Members[j].Name) + 9;
 			}
 			smrs++;
@@ -2158,7 +2158,7 @@ void WorldServer::HandleLFPMatches(ServerPacket *pack) {
 
 			int MemberCount = 0;
 
-			for(unsigned int j=0; j<MAX_GROUP_MEMBERS; j++) 
+			for(unsigned int j=0; j<MAX_GROUP_MEMBERS; j++)
 				if(smrs->Members[j].Name[0] != '\0')
 					MemberCount++;
 

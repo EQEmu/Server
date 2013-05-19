@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef __EQEmuConfig_H
 #define __EQEmuConfig_H
@@ -52,11 +52,11 @@ public:
 	uint16 WorldHTTPPort;
 	string WorldHTTPMimeFile;
 	string SharedKey;
-	
+
 	// From <chatserver/>
 	string ChatHost;
 	uint16 ChatPort;
-	
+
 	// From <mailserver/>
 	string MailHost;
 	uint16 MailPort;
@@ -85,7 +85,7 @@ public:
 	string MapDir;
 	string QuestDir;
 	string PluginDir;
-	
+
 	// From <launcher/>
 	string LogPrefix;
 	string LogSuffix;
@@ -103,7 +103,7 @@ public:
 //	uint16 DynamicCount;
 
 //	map<string,uint16> StaticZones;
-	
+
 protected:
 
 	static EQEmuConfig *_config;
@@ -168,7 +168,7 @@ protected:
 		MapDir="Maps";
 		QuestDir="quests";
 		PluginDir="plugins";
-		
+
 		// Launcher
 		LogPrefix = "logs/zone-";
 		LogSuffix = ".log";
@@ -181,22 +181,22 @@ protected:
 #else
 		ZoneExe = "./zone";
 #endif
-		
+
 		// Zones
 		ZonePortLow=7000;
 		ZonePortHigh=7999;
 		DefaultStatus=0;
-		
+
 		// For where zones need to connect to.
 		WorldIP="127.0.0.1";
-		
+
 		// Dynamics to start
 		//DynamicCount=5;
-		
+
 		MaxClients=-1;
-		
+
 		LoginCount=0;
-		
+
 	}
 	virtual ~EQEmuConfig() {}
 
@@ -204,7 +204,7 @@ public:
 
 	// Produce a const singleton
 	static const EQEmuConfig *get() {
-		if (_config == nullptr) 
+		if (_config == nullptr)
 			LoadConfig();
 		return(_config);
 	}

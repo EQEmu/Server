@@ -1,7 +1,7 @@
 <?
     my $action = $request->get("action", "none");
     my $bug_id = $request->get("bug_id", "-1");
-    
+
     if($action eq "resolve") {
         if($bug_id != -1) {
             $EQW->ResolveBug($bug_id);
