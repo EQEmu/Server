@@ -9,6 +9,12 @@ struct Lua_HateList;
 class Lua_Item;
 class Lua_ItemInst;
 
+namespace luabind {
+	struct scope;
+}
+
+luabind::scope lua_register_mob();
+
 class Lua_Mob : public Lua_Entity
 {
 	typedef Mob NativeType;

@@ -9,12 +9,8 @@ class Lua_Client;
 class Lua_NPC;
 class Lua_Mob;
 struct Lua_HateList;
-//class Lua_Merc;
-//class Lua_Corpse;
-//class Lua_Object;
-//class Lua_Doors;
-//class Lua_Trap;
-//class Lua_Item;
+class Lua_Item;
+class Lua_ItemInst;
 
 //TODO: Remove the error checking by a flag since this adds significant overhead to each c call
 #define Lua_Safe_Call_Void() if(!d_) { return; } NativeType *self = reinterpret_cast<NativeType*>(d_)
@@ -27,6 +23,14 @@ struct Lua_HateList;
 #define Lua_Safe_Call_NPC() if(!d_) { return Lua_NPC(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
 #define Lua_Safe_Call_Client() if(!d_) { return Lua_Client(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
 #define Lua_Safe_Call_HateList() if(!d_) { return Lua_HateList(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_Item() if(!d_) { return Lua_Item(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_ItemInst() if(!d_) { return Lua_ItemInst(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
+
+namespace luabind {
+	struct scope;
+}
+
+luabind::scope lua_register_entity();
 
 class Lua_Entity : public Lua_Ptr<void>
 {

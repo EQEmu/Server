@@ -21,6 +21,8 @@
 
 //NPC
 void handle_npc_event_say(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+	npc->DoQuestPause(init);
+
 	Lua_Client l_client(reinterpret_cast<Client*>(init));
 	luabind::object l_client_o = luabind::object(L, l_client);
 	l_client_o.push(L);

@@ -429,7 +429,6 @@ RULE_BOOL ( Chat, ServerWideAuction, true)
 RULE_BOOL ( Chat, EnableVoiceMacros, true)
 RULE_BOOL ( Chat, EnableMailKeyIPVerification, true)
 RULE_BOOL ( Chat, EnableAntiSpam, true)
-RULE_BOOL ( Chat, FlowCommandstoPerl_EVENT_SAY, false) // Allows you to parse #commands into EVENT_SAY (Useful in global_player.pl) that aren't found in the source - should probably be individual scripts per command sometime
 RULE_INT ( Chat, MinStatusToBypassAntiSpam, 100)
 RULE_INT ( Chat, MinimumMessagesPerInterval, 4)
 RULE_INT ( Chat, MaximumMessagesPerInterval, 12)

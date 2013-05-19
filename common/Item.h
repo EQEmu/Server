@@ -341,9 +341,6 @@ public:
 	int16 GetCurrentSlot() const			{ return m_currentslot; }
 	void SetCurrentSlot(int16 curr_slot)	{ m_currentslot = curr_slot; }
 
-
-
-
 	// Is this item already attuned?
 	bool IsInstNoDrop() const { return m_instnodrop; }
 	void SetInstNoDrop(bool flag) { m_instnodrop=flag; }

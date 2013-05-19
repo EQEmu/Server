@@ -91,7 +91,9 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_CONNECT",
 	"EVENT_ITEM_TICK",
 	"EVENT_DUEL_WIN",
-	"EVENT_DUEL_LOSE"
+	"EVENT_DUEL_LOSE",
+	"EVENT_ENCOUNTER_LOAD",
+	"EVENT_ENCOUNTER_UNLOAD"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr), event_queue_in_use_(false) {
@@ -1064,6 +1066,10 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 {
 	switch (event) {
 		case EVENT_SAY: {
+			if(npc && mob) {
+				npc->DoQuestPause(mob);
+			}
+
 			ExportVar(package_name.c_str(), "data", objid);
 			ExportVar(package_name.c_str(), "text", data);
 			ExportVar(package_name.c_str(), "langid", extradata);

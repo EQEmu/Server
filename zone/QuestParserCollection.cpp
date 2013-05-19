@@ -64,6 +64,7 @@ void QuestParserCollection::ReloadQuests(bool reset_timers) {
 	_global_npc_quest_status = QuestUnloaded;
 	_spell_quest_status.clear();
 	_item_quest_status.clear();
+	_encounter_quest_status.clear();
 	std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
 		(*iter)->ReloadQuests();
@@ -218,7 +219,8 @@ bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, const char *subname) 
 int QuestParserCollection::EventNPC(QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data) {
 	int rl = EventNPCLocal(evt, npc, init, data, extra_data);
 	int rg = EventNPCGlobal(evt, npc, init, data, extra_data);
-
+	DispatchEventNPC(evt, npc, init, data, extra_data);
+	
 	//Local quests returning non-default values have priority over global quests
 	if(rl != 0) {
 		return rl;
@@ -272,6 +274,7 @@ int QuestParserCollection::EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init,
 int QuestParserCollection::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
 	int rl = EventPlayerLocal(evt, client, data, extra_data);
 	int rg = EventPlayerGlobal(evt, client, data, extra_data);
+	DispatchEventPlayer(evt, client, data, extra_data);
 	
 	//Local quests returning non-default values have priority over global quests
 	if(rl != 0) {
@@ -335,17 +338,23 @@ int QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst 
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			return qiter->second->EventItem(evt, client, item, objid, extra_data);
+			auto ret = qiter->second->EventItem(evt, client, item, objid, extra_data);
+			DispatchEventItem(evt, client, item, objid, extra_data);
+			return ret;
 		}
+		DispatchEventItem(evt, client, item, objid, extra_data);
 	} else {
 		std::string filename;
 		QuestInterface *qi = GetQIByItemQuest(item_script, filename);
 		if(qi) {
 			_item_quest_status[item_script] = qi->GetIdentifier();
 			qi->LoadItemScript(filename, item_script);
-			return qi->EventItem(evt, client, item, objid, extra_data);
+			auto ret = qi->EventItem(evt, client, item, objid, extra_data);
+			DispatchEventItem(evt, client, item, objid, extra_data);
+			return ret;
 		} else {
 			_item_quest_status[item_script] = QuestFailedToLoad;
+			DispatchEventItem(evt, client, item, objid, extra_data);
 		}
 	}
 	return 0;
@@ -357,17 +366,45 @@ int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			return qiter->second->EventSpell(evt, npc, client, spell_id, extra_data);
+			auto ret = qiter->second->EventSpell(evt, npc, client, spell_id, extra_data);
+			DispatchEventSpell(evt, npc, client, spell_id, extra_data);
+			return ret;
 		}
+		DispatchEventSpell(evt, npc, client, spell_id, extra_data);
 	} else {
 		std::string filename;
 		QuestInterface *qi = GetQIBySpellQuest(spell_id, filename);
 		if(qi) {
 			_spell_quest_status[spell_id] = qi->GetIdentifier();
 			qi->LoadSpellScript(filename, spell_id);
-			return qi->EventSpell(evt, npc, client, spell_id, extra_data);
+			auto ret = qi->EventSpell(evt, npc, client, spell_id, extra_data);
+			DispatchEventSpell(evt, npc, client, spell_id, extra_data);
+			return ret;
 		} else {
 			_spell_quest_status[spell_id] = QuestFailedToLoad;
+			DispatchEventSpell(evt, npc, client, spell_id, extra_data);
+		}
+	}
+	return 0;
+}
+
+int QuestParserCollection::EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data) {
+	auto iter = _encounter_quest_status.find(encounter_name);
+	if(iter != _encounter_quest_status.end()) {
+		//loaded or failed to load
+		if(iter->second != QuestFailedToLoad) {
+			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
+			return qiter->second->EventEncounter(evt, encounter_name, extra_data);
+		}
+	} else {
+		std::string filename;
+		QuestInterface *qi = GetQIByEncounterQuest(encounter_name, filename);
+		if(qi) {
+			_encounter_quest_status[encounter_name] = qi->GetIdentifier();
+			qi->LoadEncounterScript(filename, encounter_name);
+			return qi->EventEncounter(evt, encounter_name, extra_data);
+		} else {
+			_encounter_quest_status[encounter_name] = QuestFailedToLoad;
 		}
 	}
 	return 0;
@@ -746,3 +783,93 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 
 	return nullptr;
 }
+
+QuestInterface *QuestParserCollection::GetQIByEncounterQuest(std::string encounter_name, std::string &filename) {
+	//first look for /quests/zone/encounters/encounter_name.ext (precedence)
+	filename = "quests/";
+	filename += zone->GetShortName();
+	filename += "/encounters/";
+	filename += encounter_name;
+	std::string tmp;
+	FILE *f = nullptr;
+
+	auto iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		tmp = filename;
+		auto ext = _extensions.find((*iter)->GetIdentifier());
+		tmp += ".";
+		tmp += ext->second;
+		f = fopen(tmp.c_str(), "r");
+		if(f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		++iter;
+	}
+	
+	//second look for /quests/encounters/encounter_name.ext (precedence)
+	filename = "quests/encounters/";
+	filename += encounter_name;
+
+	iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		tmp = filename;
+		auto ext = _extensions.find((*iter)->GetIdentifier());
+		tmp += ".";
+		tmp += ext->second;
+		f = fopen(tmp.c_str(), "r");
+		if(f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		++iter;
+	}
+
+	return nullptr;
+}
+
+void QuestParserCollection::GetErrors(std::list<std::string> &err) {
+	err.clear();
+	auto iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		(*iter)->GetErrors(err);
+		++iter;
+	}
+}
+
+void QuestParserCollection::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+	auto iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		(*iter)->DispatchEventNPC(evt, npc, init, data, extra_data);
+		++iter;
+	}
+}
+
+void QuestParserCollection::DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
+	auto iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		(*iter)->DispatchEventPlayer(evt, client, data, extra_data);
+		++iter;
+	}
+}
+
+void QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+	auto iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		(*iter)->DispatchEventItem(evt, client, item, objid, extra_data);
+		++iter;
+	}
+}
+
+void QuestParserCollection::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
+	auto iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		(*iter)->DispatchEventSpell(evt, npc, client, spell_id, extra_data);
+		++iter;
+	}
+}
+

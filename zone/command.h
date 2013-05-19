@@ -319,12 +319,7 @@ void command_mysql(Client *c, const Seperator *sep);
 void command_xtargets(Client *c, const Seperator *sep);
 void command_zopp(Client *c, const Seperator *sep);
 void command_augmentitem(Client *c, const Seperator *sep);
-
-#ifdef EMBPERL
-void command_embperl_plugin(Client *c, const Seperator *sep);
-void command_embperl_eval(Client *c, const Seperator *sep);
-void command_reloadpl(Client *c, const Seperator *sep);
-#endif
+void command_questerrors(Client *c, const Seperator *sep);
 
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);

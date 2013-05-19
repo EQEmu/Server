@@ -21,6 +21,7 @@
 #include "lua_client.h"
 #include "lua_npc.h"
 #include "lua_spell.h"
+#include "lua_general.h"
 #include "zone.h"
 
 #include "lua_parser.h"
@@ -84,10 +85,20 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_connect",
 	"event_item_tick",
 	"event_duel_win",
-	"event_duel_lose"
+	"event_duel_lose",
+	"event_encounter_load",
+	"event_encounter_unload"
 };
 
 extern Zone *zone;
+
+struct lua_registered_event {
+	std::string encounter_name;
+	luabind::object lua_reference;
+	QuestEventID event_id;
+};
+
+std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_registered;
 
 LuaParser::LuaParser() {
 	for(int i = 0; i < _LargestEventID; ++i) {
@@ -165,14 +176,21 @@ int LuaParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string
 	return _EventNPC("global_npc", evt, npc, init, data, extra_data);
 }
 
-int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+						 luabind::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 
 	int start = lua_gettop(L);
 
 	try {
-		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
-		lua_getfield(L, -1, sub_name);
+		int npop = 1;
+		if(l_func != nullptr) {
+			l_func->push(L);
+		} else {
+			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+			lua_getfield(L, -1, sub_name);
+			npop = 2;
+		}
 		
 		lua_createtable(L, 0, 0);
 		//always push self
@@ -185,19 +203,22 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		arg_function(this, L, npc, init, data, extra_data);
 		
 		if(lua_pcall(L, 1, 1, 0)) {
-			printf("Error: %s\n", lua_tostring(L, -1));
+			std::string error = lua_tostring(L, -1);
+			AddError(error);
 			return 0;
 		}
 		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
-			lua_pop(L, 2);
+			lua_pop(L, npop);
 			return ret;
 		}
 		
-		lua_pop(L, 2);
+		lua_pop(L, npop);
 	} catch(std::exception &ex) {
-		printf("Lua call exception: %s\n", ex.what());
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);
@@ -242,13 +263,20 @@ int LuaParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string d
 	return _EventPlayer("global_player", evt, client, data, extra_data);
 }
 
-int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
+int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+							luabind::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 	int start = lua_gettop(L);
 
 	try {
-		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
-		lua_getfield(L, -1, sub_name);
+		int npop = 1;
+		if(l_func != nullptr) {
+			l_func->push(L);
+		} else {
+			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+			lua_getfield(L, -1, sub_name);
+			npop = 2;
+		}
 	
 		lua_createtable(L, 0, 0);
 		//push self
@@ -261,19 +289,22 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		arg_function(this, L, client, data, extra_data);
 	
 		if(lua_pcall(L, 1, 1, 0)) {
-			printf("Error: %s\n", lua_tostring(L, -1));
+			std::string error = lua_tostring(L, -1);
+			AddError(error);
 			return 0;
 		}
 		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
-			lua_pop(L, 2);
+			lua_pop(L, npop);
 			return ret;
 		}
 		
-		lua_pop(L, 2);
+		lua_pop(L, npop);
 	} catch(std::exception &ex) {
-		printf("Lua call exception: %s\n", ex.what());
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);
@@ -323,14 +354,20 @@ int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint3
 	return _EventItem(package_name.str(), evt, client, item, objid, extra_data);
 }
 
-int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data,
+						  luabind::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 
 	int start = lua_gettop(L);
 
 	try {
-		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
-		lua_getfield(L, -1, sub_name);
+		int npop = 1;
+		if(l_func != nullptr) {
+			l_func->push(L);
+		} else {
+			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+			lua_getfield(L, -1, sub_name);
+		}
 		
 		lua_createtable(L, 0, 0);
 		//always push self
@@ -343,19 +380,22 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		arg_function(this, L, client, item, objid, extra_data);
 		
 		if(lua_pcall(L, 1, 1, 0)) {
-			printf("Error: %s\n", lua_tostring(L, -1));
+			std::string error = lua_tostring(L, -1);
+			AddError(error);
 			return 0;
 		}
 		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
-			lua_pop(L, 2);
+			lua_pop(L, npop);
 			return ret;
 		}
 		
-		lua_pop(L, 2);
+		lua_pop(L, npop);
 	} catch(std::exception &ex) {
-		printf("Lua call exception: %s\n", ex.what());
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);
@@ -383,14 +423,21 @@ int LuaParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spe
 	return _EventSpell(package_name.str(), evt, npc, client, spell_id, extra_data);
 }
 
-int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
+int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+						   luabind::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 	
 	int start = lua_gettop(L);
 
 	try {
-		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
-		lua_getfield(L, -1, sub_name);
+		int npop = 1;
+		if(l_func != nullptr) {
+			l_func->push(L);
+		} else {
+			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+			lua_getfield(L, -1, sub_name);
+			npop = 2;
+		}
 		
 		lua_createtable(L, 0, 0);
 
@@ -404,7 +451,63 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 		arg_function(this, L, npc, client, spell_id, extra_data);
 		
 		if(lua_pcall(L, 1, 1, 0)) {
-			printf("Error: %s\n", lua_tostring(L, -1));
+			std::string error = lua_tostring(L, -1);
+			AddError(error);
+			return 0;
+		}
+		
+		if(lua_isnumber(L, -1)) {
+			int ret = static_cast<int>(lua_tointeger(L, -1));
+			lua_pop(L, npop);
+			return ret;
+		}
+		
+		lua_pop(L, npop);
+	} catch(std::exception &ex) {
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
+
+		//Restore our stack to the best of our ability
+		int end = lua_gettop(L);
+		int n = end - start;
+		if(n > 0) {
+			lua_pop(L, n);
+		}
+	}
+
+	return 0;
+}
+
+int LuaParser::EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data) {
+	if(evt >= _LargestEventID) {
+		return 0;
+	}
+
+	std::string package_name = "encounter_" + encounter_name;
+
+	if(!EncounterHasQuestSub(encounter_name, LuaEvents[evt])) {
+		return 0;
+	}
+	
+	return _EventEncounter(package_name, evt, encounter_name, extra_data);
+}
+
+int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, uint32 extra_data) {
+	const char *sub_name = LuaEvents[evt];
+	
+	int start = lua_gettop(L);
+
+	try {
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
+		lua_getfield(L, -1, sub_name);
+	
+		//For now encounters just call event_encounter_load/event_encounter_unload with no arguments
+		//So we dont pass anything
+
+		if(lua_pcall(L, 0, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			AddError(error);
 			return 0;
 		}
 		
@@ -416,7 +519,9 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 		
 		lua_pop(L, 2);
 	} catch(std::exception &ex) {
-		printf("Lua call exception: %s\n", ex.what());
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);
@@ -480,6 +585,12 @@ bool LuaParser::ItemHasQuestSub(ItemInst *itm, const char *subname) {
 	return HasFunction(subname, package_name.str());
 }
 
+bool LuaParser::EncounterHasQuestSub(std::string encounter_name, const char *subname) {
+	std::string package_name = "encounter_" + encounter_name;
+
+	return HasFunction(subname, package_name);
+}
+
 void LuaParser::LoadNPCScript(std::string filename, int npc_id) {
 	std::stringstream package_name;
 	package_name << "npc_" << npc_id;
@@ -513,6 +624,12 @@ void LuaParser::LoadSpellScript(std::string filename, uint32 spell_id) {
 	LoadScript(filename, package_name.str());
 }
 
+void LuaParser::LoadEncounterScript(std::string filename, std::string encounter_name) {
+	std::string package_name = "encounter_" + encounter_name;
+
+	LoadScript(filename, package_name);
+}
+
 void LuaParser::AddVar(std::string name, std::string val) {
 	vars_[name] = val;
 }
@@ -527,11 +644,13 @@ std::string LuaParser::GetVar(std::string name) {
 }
 
 void LuaParser::ReloadQuests() {
+	loaded_.clear();
+	errors_.clear();
+	lua_encounter_events_registered.clear();
+
 	if(L) {
 		lua_close(L);
 	}
-
-	loaded_.clear();
 
 	L = luaL_newstate();
 	luaL_openlibs(L);
@@ -541,12 +660,14 @@ void LuaParser::ReloadQuests() {
 
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
-	char module_path[1024] = { 0 };
-	snprintf(module_path, 1023, "%s;%s", lua_tostring(L,-1), "quests/plugins/?.lua");
+	std::string module_path = lua_tostring(L,-1);
+	module_path += "quests/plugins/?.lua";
 	lua_pop(L, 1);
-	lua_pushstring(L, module_path);
+	lua_pushstring(L, module_path.c_str());
 	lua_setfield(L, -2, "path");
 	lua_pop(L, 1);
+
+	MapFunctions(L);
 
 	//load init
 	FILE *f = fopen("quests/global/script_init.lua", "r");
@@ -554,9 +675,8 @@ void LuaParser::ReloadQuests() {
 		fclose(f);
 	
 		if(luaL_dofile(L, "quests/global/script_init.lua")) {
-			printf("Lua Error in Global Init: %s\n", lua_tostring(L, -1));
-			lua_close(L);
-			return;
+			std::string error = lua_tostring(L, -1);
+			AddError(error);
 		}
 	}
 	
@@ -569,14 +689,11 @@ void LuaParser::ReloadQuests() {
 			fclose(f);
 		
 			if(luaL_dofile(L, zone_script.c_str())) {
-				printf("Lua Error in Zone Init: %s\n", lua_tostring(L, -1));
-				lua_close(L);
-				return;
+				std::string error = lua_tostring(L, -1);
+				AddError(error);
 			}
 		}
 	}
-	
-	MapFunctions(L);
 }
 
 void LuaParser::LoadScript(std::string filename, std::string package_name) {
@@ -586,7 +703,8 @@ void LuaParser::LoadScript(std::string filename, std::string package_name) {
 	}
 	
 	if(luaL_loadfile(L, filename.c_str())) {
-		printf("Lua Load Error: %s\n", lua_tostring(L, -1));
+		std::string error = lua_tostring(L, -1);
+		AddError(error);
 		lua_pop(L, 1);
 		return;
 	}
@@ -608,7 +726,8 @@ void LuaParser::LoadScript(std::string filename, std::string package_name) {
 	lua_setfenv(L, -2); //set the env to the table we made
 
 	if(lua_pcall(L, 0, 0, 0)) {
-		printf("Lua Load Error: %s\n", lua_tostring(L, -1));
+		std::string error = lua_tostring(L, -1);
+		AddError(error);
 		lua_pop(L, 1);
 		return;
 	}
@@ -650,342 +769,15 @@ void LuaParser::MapFunctions(lua_State *L) {
 
 		luabind::module(L)
 		[
-			luabind::class_<Lua_Entity>("Entity")
-				.def(luabind::constructor<>())
-				.property("null", &Lua_Entity::Null)
-				.property("valid", &Lua_Entity::Valid)
-				.def("IsClient", &Lua_Entity::IsClient)
-				.def("IsNPC", &Lua_Entity::IsNPC)
-				.def("IsMob", &Lua_Entity::IsMob)
-				.def("IsMerc", &Lua_Entity::IsMerc)
-				.def("IsCorpse", &Lua_Entity::IsCorpse)
-				.def("IsPlayerCorpse", &Lua_Entity::IsPlayerCorpse)
-				.def("IsNPCCorpse", &Lua_Entity::IsNPCCorpse)
-				.def("IsObject", &Lua_Entity::IsObject)
-				.def("IsDoor", &Lua_Entity::IsDoor)
-				.def("IsTrap", &Lua_Entity::IsTrap)
-				.def("IsBeacon", &Lua_Entity::IsBeacon)
-				.def("GetID", &Lua_Entity::GetID)
-				.def("CastToClient", &Lua_Entity::CastToClient)
-				.def("CastToNPC", &Lua_Entity::CastToNPC)
-				.def("CastToMob", &Lua_Entity::CastToMob),
-
-			luabind::class_<Lua_Mob, Lua_Entity>("Mob")
-				.def(luabind::constructor<>())
-				.def("GetName", &Lua_Mob::GetName)
-				.def("Depop", (void(Lua_Mob::*)(void))&Lua_Mob::Depop)
-				.def("Depop", (void(Lua_Mob::*)(bool))&Lua_Mob::Depop)
-				.def("BehindMob", (bool(Lua_Mob::*)(void))&Lua_Mob::BehindMob)
-				.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::BehindMob)
-				.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float))&Lua_Mob::BehindMob)
-				.def("BehindMob", (bool(Lua_Mob::*)(Lua_Mob,float,float))&Lua_Mob::BehindMob)
-				.def("SetLevel", (void(Lua_Mob::*)(int))&Lua_Mob::SetLevel)
-				.def("SetLevel", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetLevel)
-				.def("IsMoving", &Lua_Mob::IsMoving)
-				.def("GotoBind", &Lua_Mob::GotoBind)
-				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::Attack)
-				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::Attack)
-				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool))&Lua_Mob::Attack)
-				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool,bool))&Lua_Mob::Attack)
-				.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool,bool,bool))&Lua_Mob::Attack)
-				.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int))&Lua_Mob::Damage)
-				.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool))&Lua_Mob::Damage)
-				.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool,int))&Lua_Mob::Damage)
-				.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool,int,bool))&Lua_Mob::Damage)
-				.def("RangedAttack", &Lua_Mob::RangedAttack)
-				.def("ThrowingAttack", &Lua_Mob::ThrowingAttack)
-				.def("Heal", &Lua_Mob::Heal)
-				.def("HealDamage", (void(Lua_Mob::*)(uint32))&Lua_Mob::HealDamage)
-				.def("HealDamage", (void(Lua_Mob::*)(uint32,Lua_Mob))&Lua_Mob::HealDamage)
-				.def("GetLevelCon", (uint32(Lua_Mob::*)(int))&Lua_Mob::GetLevelCon)
-				.def("GetLevelCon", (uint32(Lua_Mob::*)(int,int))&Lua_Mob::GetLevelCon)
-				.def("SetHP", &Lua_Mob::SetHP)
-				.def("DoAnim", (void(Lua_Mob::*)(int))&Lua_Mob::DoAnim)
-				.def("DoAnim", (void(Lua_Mob::*)(int,int))&Lua_Mob::DoAnim)
-				.def("DoAnim", (void(Lua_Mob::*)(int,int,bool))&Lua_Mob::DoAnim)
-				.def("DoAnim", (void(Lua_Mob::*)(int,int,bool,int))&Lua_Mob::DoAnim)
-				.def("ChangeSize", (void(Lua_Mob::*)(double))&Lua_Mob::ChangeSize)
-				.def("ChangeSize", (void(Lua_Mob::*)(double,bool))&Lua_Mob::ChangeSize)
-				.def("GMMove", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::GMMove)
-				.def("GMMove", (void(Lua_Mob::*)(double,double,double,double))&Lua_Mob::GMMove)
-				.def("GMMove", (void(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::GMMove)
-				.def("HasProcs", &Lua_Mob::HasProcs)
-				.def("IsInvisible", (bool(Lua_Mob::*)(void))&Lua_Mob::IsInvisible)
-				.def("IsInvisible", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsInvisible)
-				.def("SetInvisible", &Lua_Mob::SetInvisible)
-				.def("FindBuff", &Lua_Mob::FindBuff)
-				.def("FindType", (bool(Lua_Mob::*)(int))&Lua_Mob::FindType)
-				.def("FindType", (bool(Lua_Mob::*)(int,bool))&Lua_Mob::FindType)
-				.def("FindType", (bool(Lua_Mob::*)(int,bool,int))&Lua_Mob::FindType)
-				.def("GetBuffSlotFromType", &Lua_Mob::GetBuffSlotFromType)
-				.def("GetBaseRace", &Lua_Mob::GetBaseRace)
-				.def("GetBaseGender", &Lua_Mob::GetBaseGender)
-				.def("GetDeity", &Lua_Mob::GetDeity)
-				.def("GetRace", &Lua_Mob::GetRace)
-				.def("GetGender", &Lua_Mob::GetGender)
-				.def("GetTexture", &Lua_Mob::GetTexture)
-				.def("GetHelmTexture", &Lua_Mob::GetHelmTexture)
-				.def("GetHairColor", &Lua_Mob::GetHairColor)
-				.def("GetBeardColor", &Lua_Mob::GetBeardColor)
-				.def("GetEyeColor1", &Lua_Mob::GetEyeColor1)
-				.def("GetEyeColor2", &Lua_Mob::GetEyeColor2)
-				.def("GetHairStyle", &Lua_Mob::GetHairStyle)
-				.def("GetLuclinFace", &Lua_Mob::GetLuclinFace)
-				.def("GetBeard", &Lua_Mob::GetBeard)
-				.def("GetDrakkinHeritage", &Lua_Mob::GetDrakkinHeritage)
-				.def("GetDrakkinTattoo", &Lua_Mob::GetDrakkinTattoo)
-				.def("GetDrakkinDetails", &Lua_Mob::GetDrakkinDetails)
-				.def("GetClass", &Lua_Mob::GetClass)
-				.def("GetLevel", &Lua_Mob::GetLevel)
-				.def("GetCleanName", &Lua_Mob::GetCleanName)
-				.def("GetTarget", &Lua_Mob::GetTarget)
-				.def("SetTarget", &Lua_Mob::SetTarget)
-				.def("GetHPRatio", &Lua_Mob::GetHPRatio)
-				.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)
-				.def("GetHP", &Lua_Mob::GetHP)
-				.def("GetMaxHP", &Lua_Mob::GetMaxHP)
-				.def("GetItemHPBonuses", &Lua_Mob::GetItemHPBonuses)
-				.def("GetSpellHPBonuses", &Lua_Mob::GetSpellHPBonuses)
-				.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)
-				.def("GetRunspeed", &Lua_Mob::GetRunspeed)
-				.def("GetCasterLevel", &Lua_Mob::GetCasterLevel)
-				.def("GetMaxMana", &Lua_Mob::GetMaxMana)
-				.def("GetMana", &Lua_Mob::GetMana)
-				.def("SetMana", &Lua_Mob::SetMana)
-				.def("GetManaRatio", &Lua_Mob::GetManaRatio)
-				.def("GetAC", &Lua_Mob::GetAC)
-				.def("GetATK", &Lua_Mob::GetATK)
-				.def("GetSTR", &Lua_Mob::GetSTR)
-				.def("GetSTA", &Lua_Mob::GetSTA)
-				.def("GetDEX", &Lua_Mob::GetDEX)
-				.def("GetAGI", &Lua_Mob::GetAGI)
-				.def("GetINT", &Lua_Mob::GetINT)
-				.def("GetWIS", &Lua_Mob::GetWIS)
-				.def("GetCHA", &Lua_Mob::GetCHA)
-				.def("GetMR", &Lua_Mob::GetMR)
-				.def("GetFR", &Lua_Mob::GetFR)
-				.def("GetDR", &Lua_Mob::GetDR)
-				.def("GetPR", &Lua_Mob::GetPR)
-				.def("GetCR", &Lua_Mob::GetCR)
-				.def("GetCorruption", &Lua_Mob::GetCorruption)
-				.def("GetMaxSTR", &Lua_Mob::GetMaxSTR)
-				.def("GetMaxSTA", &Lua_Mob::GetMaxSTA)
-				.def("GetMaxDEX", &Lua_Mob::GetMaxDEX)
-				.def("GetMaxAGI", &Lua_Mob::GetMaxAGI)
-				.def("GetMaxINT", &Lua_Mob::GetMaxINT)
-				.def("GetMaxWIS", &Lua_Mob::GetMaxWIS)
-				.def("GetMaxCHA", &Lua_Mob::GetMaxCHA)
-				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob))&Lua_Mob::ResistSpell)
-				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool))&Lua_Mob::ResistSpell)
-				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool,int))&Lua_Mob::ResistSpell)
-				.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool,int,bool))&Lua_Mob::ResistSpell)
-				.def("GetSpecializeSkillValue", &Lua_Mob::GetSpecializeSkillValue)
-				.def("GetNPCTypeID", &Lua_Mob::GetNPCTypeID)
-				.def("IsTargeted", &Lua_Mob::IsTargeted)
-				.def("GetX", &Lua_Mob::GetX)
-				.def("GetY", &Lua_Mob::GetY)
-				.def("GetZ", &Lua_Mob::GetZ)
-				.def("GetHeading", &Lua_Mob::GetHeading)
-				.def("GetWaypointX", &Lua_Mob::GetWaypointX)
-				.def("GetWaypointY", &Lua_Mob::GetWaypointY)
-				.def("GetWaypointZ", &Lua_Mob::GetWaypointZ)
-				.def("GetWaypointH", &Lua_Mob::GetWaypointH)
-				.def("GetWaypointPause", &Lua_Mob::GetWaypointPause)
-				.def("GetWaypointID", &Lua_Mob::GetWaypointID)
-				.def("SetCurrentWP", &Lua_Mob::SetCurrentWP)
-				.def("GetSize", &Lua_Mob::GetSize)
-				.def("Message", &Lua_Mob::Message)
-				.def("Message_StringID", &Lua_Mob::Message_StringID)
-				.def("Say", &Lua_Mob::Say)
-				.def("Shout", &Lua_Mob::Shout)
-				.def("Emote", &Lua_Mob::Emote)
-				.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
-				.def("InterruptSpell", (void(Lua_Mob::*)(int))&Lua_Mob::InterruptSpell)
-				.def("CastSpell", (bool(Lua_Mob::*)(int,int))&Lua_Mob::CastSpell)
-				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int))&Lua_Mob::CastSpell)
-				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int))&Lua_Mob::CastSpell)
-				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int,int))&Lua_Mob::CastSpell)
-				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int,int,int))&Lua_Mob::CastSpell)
-				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int,int,int,int,int))&Lua_Mob::CastSpell)
-				.def("CastSpell", (bool(Lua_Mob::*)(int,int,int,int,int,int,int,int,int))&Lua_Mob::CastSpell)
-				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob))&Lua_Mob::SpellFinished)
-				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int))&Lua_Mob::SpellFinished)
-				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int))&Lua_Mob::SpellFinished)
-				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32))&Lua_Mob::SpellFinished)
-				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int))&Lua_Mob::SpellFinished)
-				.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int,bool))&Lua_Mob::SpellFinished)
-				.def("SpellEffect", &Lua_Mob::SpellEffect)
-				.def("GetHateList", &Lua_Mob::GetHateList)
-				.def("GetHateTop", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateTop)
-				.def("GetHateDamageTop", (Lua_Mob(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateDamageTop)
-				.def("GetHateRandom", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateRandom)
-				.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::AddToHateList)
-				.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::AddToHateList)
-				.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int))&Lua_Mob::AddToHateList)
-				.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int,bool))&Lua_Mob::AddToHateList)
-				.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int,bool,bool))&Lua_Mob::AddToHateList)
-				.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int,bool,bool,bool))&Lua_Mob::AddToHateList)
-				.def("SetHate", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::SetHate)
-				.def("SetHate", (void(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::SetHate)
-				.def("SetHate", (void(Lua_Mob::*)(Lua_Mob,int,int))&Lua_Mob::SetHate)
-				.def("GetHateAmount", (uint32(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateAmount)
-				.def("GetHateAmount", (uint32(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::GetHateAmount)
-				.def("GetDamageAmount", (uint32(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetDamageAmount)
-				.def("WipeHateList", (void(Lua_Mob::*)(void))&Lua_Mob::WipeHateList)
-				.def("CheckAggro", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CheckAggro)
-				.def("Stun", (void(Lua_Mob::*)(int))&Lua_Mob::Stun)
-				.def("UnStun", (void(Lua_Mob::*)(void))&Lua_Mob::UnStun)
-				.def("IsStunned", (bool(Lua_Mob::*)(void))&Lua_Mob::IsStunned)
-				.def("Spin", (void(Lua_Mob::*)(void))&Lua_Mob::Spin)
-				.def("Kill", (void(Lua_Mob::*)(void))&Lua_Mob::Kill)
-				.def("CanThisClassDoubleAttack", (bool(Lua_Mob::*)(void))&Lua_Mob::CanThisClassDoubleAttack)
-				.def("CanThisClassDualWield", (bool(Lua_Mob::*)(void))&Lua_Mob::CanThisClassDualWield)
-				.def("CanThisClassRiposte", (bool(Lua_Mob::*)(void))&Lua_Mob::CanThisClassRiposte)
-				.def("CanThisClassDodge", (bool(Lua_Mob::*)(void))&Lua_Mob::CanThisClassDodge)
-				.def("CanThisClassParry", (bool(Lua_Mob::*)(void))&Lua_Mob::CanThisClassParry)
-				.def("CanThisClassBlock", (bool(Lua_Mob::*)(void))&Lua_Mob::CanThisClassBlock)
-				.def("SetInvul", (void(Lua_Mob::*)(bool))&Lua_Mob::SetInvul)
-				.def("GetInvul", (bool(Lua_Mob::*)(void))&Lua_Mob::GetInvul)
-				.def("SetExtraHaste", (void(Lua_Mob::*)(int))&Lua_Mob::SetExtraHaste)
-				.def("GetHaste", (int(Lua_Mob::*)(void))&Lua_Mob::GetHaste)
-				.def("GetMonkHandToHandDamage", (int(Lua_Mob::*)(void))&Lua_Mob::GetMonkHandToHandDamage)
-				.def("GetMonkHandToHandDelay", (int(Lua_Mob::*)(void))&Lua_Mob::GetMonkHandToHandDelay)
-				.def("Mesmerize", (void(Lua_Mob::*)(void))&Lua_Mob::Mesmerize)
-				.def("IsMezzed", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMezzed)
-				.def("IsEnraged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEnraged)
-				.def("GetReverseFactionCon", (int(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetReverseFactionCon)
-				.def("IsAIControlled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAIControlled)
-				.def("GetAggroRange", (float(Lua_Mob::*)(void))&Lua_Mob::GetAggroRange)
-				.def("GetAssistRange", (float(Lua_Mob::*)(void))&Lua_Mob::GetAssistRange)
-				.def("SetPetOrder", (void(Lua_Mob::*)(int))&Lua_Mob::SetPetOrder)
-				.def("GetPetOrder", (int(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
-				.def("IsRoamer", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRoamer)
-				.def("IsRooted", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRooted)
-				.def("IsEngaged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEngaged)
-				.def("FaceTarget", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::FaceTarget)
-				.def("SetHeading", (void(Lua_Mob::*)(double))&Lua_Mob::SetHeading)
-				.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)
-				.def("CalculateNewPosition", (bool(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CalculateNewPosition)
-				.def("CalculateNewPosition", (bool(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::CalculateNewPosition)
-				.def("CalculateNewPosition2", (bool(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CalculateNewPosition2)
-				.def("CalculateNewPosition2", (bool(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::CalculateNewPosition2)
-				.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
-				.def("SendTo", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::SendTo)
-				.def("SendToFixZ", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::SendToFixZ)
-				.def("NPCSpecialAttacks", (void(Lua_Mob::*)(const char*,int))&Lua_Mob::NPCSpecialAttacks)
-				.def("NPCSpecialAttacks", (void(Lua_Mob::*)(const char*,int,bool))&Lua_Mob::NPCSpecialAttacks)
-				.def("NPCSpecialAttacks", (void(Lua_Mob::*)(const char*,int,bool,bool))&Lua_Mob::NPCSpecialAttacks)
-				.def("GetResist", (int(Lua_Mob::*)(int))&Lua_Mob::GetResist)
-				.def("Charmed", (bool(Lua_Mob::*)(void))&Lua_Mob::Charmed)
-				.def("CheckAggroAmount", (int(Lua_Mob::*)(int))&Lua_Mob::CheckAggroAmount)
-				.def("CheckAggroAmount", (int(Lua_Mob::*)(int,bool))&Lua_Mob::CheckAggroAmount)
-				.def("CheckHealAggroAmount", (int(Lua_Mob::*)(int))&Lua_Mob::CheckHealAggroAmount)
-				.def("CheckHealAggroAmount", (int(Lua_Mob::*)(int,uint32))&Lua_Mob::CheckHealAggroAmount)
-				.def("GetAA", (int(Lua_Mob::*)(int))&Lua_Mob::GetAA)
-				.def("DivineAura", (bool(Lua_Mob::*)(void))&Lua_Mob::DivineAura)
-				.def("SetOOCRegen", (void(Lua_Mob::*)(int))&Lua_Mob::SetOOCRegen)
-				.def("GetEntityVariable", (const char*(Lua_Mob::*)(const char*))&Lua_Mob::GetEntityVariable)
-				.def("SetEntityVariable", (void(Lua_Mob::*)(const char*,const char*))&Lua_Mob::SetEntityVariable)
-				.def("EntityVariableExists", (bool(Lua_Mob::*)(const char*))&Lua_Mob::EntityVariableExists)
-				.def("Signal", (void(Lua_Mob::*)(uint32))&Lua_Mob::Signal)
-				.def("CombatRange", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CombatRange)
-				.def("DoSpecialAttackDamage", (void(Lua_Mob::*)(Lua_Mob,int,int))&Lua_Mob::DoSpecialAttackDamage)
-				.def("DoSpecialAttackDamage", (void(Lua_Mob::*)(Lua_Mob,int,int,int))&Lua_Mob::DoSpecialAttackDamage)
-				.def("DoSpecialAttackDamage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,int))&Lua_Mob::DoSpecialAttackDamage)
-				.def("DoSpecialAttackDamage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,int,int))&Lua_Mob::DoSpecialAttackDamage)
-				.def("DoSpecialAttackDamage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,int,int,bool))&Lua_Mob::DoSpecialAttackDamage)
-				.def("DoThrowingAttackDmg", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::DoThrowingAttackDmg)
-				.def("DoThrowingAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst))&Lua_Mob::DoThrowingAttackDmg)
-				.def("DoThrowingAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_Item))&Lua_Mob::DoThrowingAttackDmg)
-				.def("DoThrowingAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_Item,int))&Lua_Mob::DoThrowingAttackDmg)
-				.def("DoThrowingAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_Item,int,int))&Lua_Mob::DoThrowingAttackDmg)
-				.def("DoThrowingAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_Item,int,int,int))&Lua_Mob::DoThrowingAttackDmg)
-				.def("DoMeleeSkillAttackDmg", (void(Lua_Mob::*)(Lua_Mob,int,int))&Lua_Mob::DoMeleeSkillAttackDmg)
-				.def("DoMeleeSkillAttackDmg", (void(Lua_Mob::*)(Lua_Mob,int,int,int))&Lua_Mob::DoMeleeSkillAttackDmg)
-				.def("DoMeleeSkillAttackDmg", (void(Lua_Mob::*)(Lua_Mob,int,int,int,int))&Lua_Mob::DoMeleeSkillAttackDmg)
-				.def("DoMeleeSkillAttackDmg", (void(Lua_Mob::*)(Lua_Mob,int,int,int,int,bool))&Lua_Mob::DoMeleeSkillAttackDmg)
-				.def("DoArcheryAttackDmg", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::DoArcheryAttackDmg)
-				.def("DoArcheryAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst))&Lua_Mob::DoArcheryAttackDmg)
-				.def("DoArcheryAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_ItemInst))&Lua_Mob::DoArcheryAttackDmg)
-				.def("DoArcheryAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_ItemInst,int))&Lua_Mob::DoArcheryAttackDmg)
-				.def("DoArcheryAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_ItemInst,int,int))&Lua_Mob::DoArcheryAttackDmg)
-				.def("DoArcheryAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_ItemInst,int,int,int))&Lua_Mob::DoArcheryAttackDmg)
-				.def("CheckLoS", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CheckLoS)
-				.def("CheckLoSToLoc", (bool(Lua_Mob::*)(double,double,double))&Lua_Mob::CheckLoSToLoc)
-				.def("CheckLoSToLoc", (bool(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CheckLoSToLoc)
-				.def("FindGroundZ", (double(Lua_Mob::*)(double,double))&Lua_Mob::FindGroundZ)
-				.def("FindGroundZ", (double(Lua_Mob::*)(double,double,double))&Lua_Mob::FindGroundZ)
-				.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::ProjectileAnimation)
-				.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool))&Lua_Mob::ProjectileAnimation)
-				.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool,double))&Lua_Mob::ProjectileAnimation)
-				.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool,double,double))&Lua_Mob::ProjectileAnimation)
-				.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool,double,double,double))&Lua_Mob::ProjectileAnimation)
-				.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool,double,double,double,double))&Lua_Mob::ProjectileAnimation)
-				.def("HasNPCSpecialAtk", (bool(Lua_Mob::*)(const char*))&Lua_Mob::HasNPCSpecialAtk)
-				.def("SendAppearanceEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,uint32,uint32))&Lua_Mob::SendAppearanceEffect)
-				.def("SendAppearanceEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,uint32,uint32,Lua_Client))&Lua_Mob::SendAppearanceEffect)
-				.def("SetFlyMode", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlyMode)
-				.def("SetTexture", (void(Lua_Mob::*)(int))&Lua_Mob::SetTexture)
-				.def("SetRace", (void(Lua_Mob::*)(int))&Lua_Mob::SetRace)
-				.def("SetGender", (void(Lua_Mob::*)(int))&Lua_Mob::SetGender)
-				.def("SendIllusionPacket", (void(Lua_Mob::*)(Lua_Mob::Lua_Illusion))&Lua_Mob::SendIllusionPacket)
-				.def("QuestReward", (void(Lua_Mob::*)(Lua_Client))&Lua_Mob::QuestReward)
-				.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32))&Lua_Mob::QuestReward)
-				.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32,uint32))&Lua_Mob::QuestReward)
-				.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32,uint32,uint32))&Lua_Mob::QuestReward)
-				.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32))&Lua_Mob::CameraEffect)
-				.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client))&Lua_Mob::CameraEffect)
-				.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client,bool))&Lua_Mob::CameraEffect)
-				.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32))&Lua_Mob::SendSpellEffect)
-				.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool))&Lua_Mob::SendSpellEffect)
-				.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool,Lua_Client))&Lua_Mob::SendSpellEffect)
-				.def("TempName", (void(Lua_Mob::*)(void))&Lua_Mob::TempName)
-				.def("TempName", (void(Lua_Mob::*)(const char*))&Lua_Mob::TempName)
-				.def("SetGlobal", (void(Lua_Mob::*)(const char*,const char*,int,const char*))&Lua_Mob::SetGlobal)
-				.def("SetGlobal", (void(Lua_Mob::*)(const char*,const char*,int,const char*,Lua_Mob))&Lua_Mob::SetGlobal)
-				.def("TarGlobal", (void(Lua_Mob::*)(const char*,const char*,const char*,int,int,int))&Lua_Mob::TarGlobal)
-				.def("DelGlobal", (void(Lua_Mob::*)(const char*))&Lua_Mob::DelGlobal)
-				.def("SetSlotTint", (void(Lua_Mob::*)(int,int,int,int))&Lua_Mob::SetSlotTint)
-				.def("WearChange", (void(Lua_Mob::*)(int,int,uint32))&Lua_Mob::WearChange)
-				.def("DoKnockback", (void(Lua_Mob::*)(Lua_Mob,uint32,uint32))&Lua_Mob::DoKnockback)
-				.def("RemoveNimbusEffect", (void(Lua_Mob::*)(int))&Lua_Mob::RemoveNimbusEffect)
-				.def("IsRunning", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRunning)
-				.def("SetRunning", (void(Lua_Mob::*)(bool))&Lua_Mob::SetRunning)
-				.def("SetBodyType", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetBodyType)
-				.def("SetTargetable", (void(Lua_Mob::*)(bool))&Lua_Mob::SetTargetable)
-				.def("ModSkillDmgTaken", (void(Lua_Mob::*)(int,int))&Lua_Mob::ModSkillDmgTaken)
-				.def("GetModSkillDmgTaken", (int(Lua_Mob::*)(int))&Lua_Mob::GetModSkillDmgTaken)
-				.def("GetSkillDmgTaken", (int(Lua_Mob::*)(int))&Lua_Mob::GetSkillDmgTaken)
-				.def("SetAllowBeneficial", (void(Lua_Mob::*)(bool))&Lua_Mob::SetAllowBeneficial)
-				.def("GetAllowBeneficial", (bool(Lua_Mob::*)(void))&Lua_Mob::GetAllowBeneficial)
-				.def("IsBeneficialAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsBeneficialAllowed)
-				.def("ModVulnerability", (void(Lua_Mob::*)(int,int))&Lua_Mob::ModVulnerability)
-				.def("GetModVulnerability", (int(Lua_Mob::*)(int))&Lua_Mob::GetModVulnerability)
-				.def("SetDisableMelee", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDisableMelee)
-				.def("IsMeleeDisabled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMeleeDisabled)
-				.def("SetFlurryChance", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlurryChance)
-				.def("GetFlurryChance", (int(Lua_Mob::*)(void))&Lua_Mob::GetFlurryChance),
-
-			luabind::class_<Lua_Client, Lua_Mob>("Client")
-				.def(luabind::constructor<>()),
-
-			luabind::class_<Lua_NPC, Lua_Mob>("NPC")
-				.def(luabind::constructor<>()),
-
-			luabind::class_<Lua_ItemInst>("ItemInst")
-				.def(luabind::constructor<>())
-				.property("null", &Lua_ItemInst::Null)
-				.property("valid", &Lua_ItemInst::Valid),
-
-			luabind::class_<Lua_Item>("Item")
-				.def(luabind::constructor<>())
-				.property("null", &Lua_Item::Null)
-				.property("valid", &Lua_Item::Valid),
-
-			luabind::class_<Lua_Spell>("Spell")
-				.def(luabind::constructor<>())
-				.property("null", &Lua_Spell::Null)
-				.property("valid", &Lua_Spell::Valid),
+			lua_register_general(),
+			lua_register_events(),
+			lua_register_entity(),
+			lua_register_mob(),
+			lua_register_npc(),
+			lua_register_client(),
+			lua_register_iteminst(),
+			lua_register_item(),
+			lua_register_spell(),
 
 			luabind::class_<Lua_HateEntry>("HateEntry")
 				.property("null", &Lua_HateEntry::Null)
@@ -1019,7 +811,118 @@ void LuaParser::MapFunctions(lua_State *L) {
 		];
 	
 	} catch(std::exception &ex) {
-		printf("Error: %s\n", ex.what());
+		std::string error = ex.what();
+		AddError(error);
+	}
+}
+
+void LuaParser::GetErrors(std::list<std::string> &err) {
+	err.insert(err.end(), errors_.begin(), errors_.end());
+}
+
+void LuaParser::AddError(std::string error) {
+	errors_.push_back(error);
+	if(errors_.size() > 30) {
+		errors_.pop_front();
+	}
+}
+
+void LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+	if(!npc)
+		return;
+
+	std::stringstream package_name;
+	package_name << "npc_" << npc->GetNPCTypeID();
+
+	auto iter = lua_encounter_events_registered.find(package_name.str());
+	if(iter == lua_encounter_events_registered.end()) {
+		return;
+	}
+
+	auto riter = iter->second.begin();
+	while(riter != iter->second.end()) {
+		if(riter->event_id == evt) {
+			std::string package_name = "encounter_" + riter->encounter_name;
+			_EventNPC(package_name, evt, npc, init, data, extra_data, &riter->lua_reference);
+		}
+		++riter;
+	}
+}
+
+void LuaParser::DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
+	std::string package_name = "player";
+
+	auto iter = lua_encounter_events_registered.find(package_name);
+	if(iter == lua_encounter_events_registered.end()) {
+		return;
+	}
+
+	auto riter = iter->second.begin();
+	while(riter != iter->second.end()) {
+		if(riter->event_id == evt) {
+			std::string package_name = "encounter_" + riter->encounter_name;
+			_EventPlayer(package_name, evt, client, data, extra_data, &riter->lua_reference);
+		}
+		++riter;
+	}
+}
+
+void LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+	if(!item)
+		return;
+
+	std::stringstream package_name;
+	package_name << "item_";
+
+	std::stringstream item_name;
+	const Item_Struct* itm = item->GetItem();
+	if(evt == EVENT_SCALE_CALC || evt == EVENT_ITEM_ENTER_ZONE)
+	{
+		item_name << itm->CharmFile;
+	}
+	else if(evt == EVENT_ITEM_CLICK || evt == EVENT_ITEM_CLICK_CAST)
+	{
+		item_name << "script_";
+		item_name << itm->ScriptFileID;
+	}
+	else
+	{
+		item_name << "item_";
+		item_name << itm->ID;
+	}
+	package_name << item_name;
+
+	auto iter = lua_encounter_events_registered.find(package_name.str());
+	if(iter == lua_encounter_events_registered.end()) {
+		return;
+	}
+
+	auto riter = iter->second.begin();
+	while(riter != iter->second.end()) {
+		if(riter->event_id == evt) {
+			std::string package_name = "encounter_" + riter->encounter_name;
+			_EventItem(package_name, evt, client, item, objid, extra_data, &riter->lua_reference);
+		}
+		++riter;
+	}
+}
+
+void LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
+	std::stringstream package_name;
+	package_name << "spell_" << spell_id;
+
+	auto iter = lua_encounter_events_registered.find(package_name.str());
+	if(iter == lua_encounter_events_registered.end()) {
+		return;
+	}
+
+	auto riter = iter->second.begin();
+	while(riter != iter->second.end()) {
+		if(riter->event_id == evt) {
+			std::string package_name = "encounter_" + riter->encounter_name;
+			_EventSpell(package_name, evt, npc, client, spell_id, extra_data, &riter->lua_reference);
+		}
+		++riter;
 	}
 }
 

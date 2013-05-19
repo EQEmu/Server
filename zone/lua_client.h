@@ -6,6 +6,12 @@
 
 class Client;
 
+namespace luabind {
+	struct scope;
+}
+
+luabind::scope lua_register_client();
+
 class Lua_Client : public Lua_Mob
 {
 	typedef Client NativeType;

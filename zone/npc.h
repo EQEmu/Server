@@ -342,6 +342,7 @@ public:
 	NPC_Emote_Struct* GetNPCEmote(uint16 emoteid, uint8 event_);
 	void DoNPCEmote(uint8 event_, uint16 emoteid);
 	bool CanTalk();
+	void DoQuestPause(Mob *other);
 
 	inline void SetSpellScale(float amt)		{ spellscale = amt; }
 	inline float GetSpellScale()				{ return spellscale; }

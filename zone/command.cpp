@@ -265,8 +265,7 @@ int command_init(void) {
 		command_add("viewnpctype","[npctype id] - Show info about an npctype",100,command_viewnpctype) ||
 		command_add("reloadstatic","- Reload Static Zone Data",150,command_reloadstatic) ||
 		command_add("reloadquest"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
-		command_add("reloadqst",nullptr,0,command_reloadqst) ||
-		command_add("reloadpl",nullptr,0,command_reloadqst) ||
+		command_add("reloadqst"," - Clear quest cache (any argument causes it to also stop all timers)",150,command_reloadqst) ||
 		command_add("reloadworld",nullptr,255,command_reloadworld) ||
 		command_add("reloadlevelmods",nullptr,255,command_reloadlevelmods) ||
 		command_add("rq",nullptr,0,command_reloadqst) ||
@@ -445,7 +444,8 @@ int command_init(void) {
 		command_add("mysql", "Mysql CLI, see 'help' for options.", 250, command_mysql) ||
 		command_add("xtargets", "Show your targets Extended Targets and optionally set how many xtargets they can have.", 250, command_xtargets) ||
 		command_add("zopp", "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", 250, command_zopp) ||
-		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", 250, command_augmentitem)
+		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", 250, command_augmentitem) ||
+		command_add("questerrors", "Shows quest errors.", 100, command_questerrors)
 		)
 	{
 		command_deinit();
@@ -11440,3 +11440,22 @@ void command_augmentitem(Client *c, const Seperator *sep)
 		safe_delete_array(in_augment);
 }
 
+void command_questerrors(Client *c, const Seperator *sep)
+{
+	std::list<std::string> err;
+	parse->GetErrors(err);
+	c->Message(0, "Current Quest Errors:");
+
+	auto iter = err.begin();
+	int i = 0;
+	while(iter != err.end()) {
+		if(i >= 30) {
+			c->Message(0, "Maximum of 30 Errors shown...");
+			break;
+		}
+
+		c->Message(0, iter->c_str());
+		++i;
+		++iter;
+	}
+}

@@ -1037,13 +1037,14 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	case 8: { // /say
 		if(message[0] == COMMAND_CHAR) {
 			if(command_dispatch(this, message) == -2) {
-				if(RuleB(Chat, FlowCommandstoPerl_EVENT_SAY)) {
-					if(parse->PlayerHasQuestSub("EVENT_SAY")) {
-						parse->EventPlayer(EVENT_SAY, this, message, language);
-					}
-				} else {
+				//LUA_TODO: fix this with something like event_command
+				//if(RuleB(Chat, FlowCommandstoPerl_EVENT_SAY)) {
+				//	if(parse->PlayerHasQuestSub("EVENT_SAY")) {
+				//		parse->EventPlayer(EVENT_SAY, this, message, language);
+				//	}
+				//} else {
 					this->Message(13, "Command '%s' not recognized.", message);
-				}
+				//}
 			}
 			break;
 		}
@@ -1051,12 +1052,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
 
-		printf("Message: %s\n",message);
 		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
-		if(parse->PlayerHasQuestSub("EVENT_SAY"))
-		{
-			parse->EventPlayer(EVENT_SAY, this, message, language);
-		}
+		parse->EventPlayer(EVENT_SAY, this, message, language);
 
 		if (sender != this)
 			break;
@@ -1069,36 +1066,21 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				CheckLDoNHail(GetTarget());
 				CheckEmoteHail(GetTarget(), message);
 
-				if(parse->HasQuestSub(GetTarget()->GetNPCTypeID(), "EVENT_SAY")){
-					if (DistNoRootNoZ(*GetTarget()) <= 200) {
-						if(GetTarget()->CastToNPC()->IsMoving() && !GetTarget()->CastToNPC()->IsOnHatelist(GetTarget()))
-							GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
 
-						Mob *targ = GetTarget();
-						if(targ->GetAppearance() != eaDead)
-							targ->FaceTarget(this);
-						parse->EventNPC(EVENT_SAY, targ->CastToNPC(), this, message, language);
-					}
-				}
+				if(DistNoRootNoZ(*GetTarget()) <= 200) {
+					NPC *tar = GetTarget()->CastToNPC();
+					parse->EventNPC(EVENT_SAY, tar->CastToNPC(), this, message, language);
 
-				if (RuleB(TaskSystem, EnableTaskSystem) && DistNoRootNoZ(*GetTarget()) <= 200) {
-
-					if(GetTarget()->CastToNPC()->IsMoving() && !GetTarget()->CastToNPC()->IsOnHatelist(GetTarget()))
-						GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-
-					if(UpdateTasksOnSpeakWith(GetTarget()->GetNPCTypeID())) {
-						// If the client had an activity to talk to this NPC, make the NPC turn to face him if
-						// he isn't moving. Makes things look better.
-						if(!GetTarget()->CastToNPC()->IsMoving())
-							GetTarget()->FaceTarget(this);
+					if(RuleB(TaskSystem, EnableTaskSystem)) {
+						if(UpdateTasksOnSpeakWith(tar->GetNPCTypeID())) {
+							tar->DoQuestPause(this);
+						}
 					}
 				}
 			}
 			else {
-				if(parse->HasQuestSub(GetTarget()->GetNPCTypeID(), "EVENT_AGGRO_SAY")) {
-					if (DistNoRootNoZ(*GetTarget()) <= 200) {
-						parse->EventNPC(EVENT_AGGRO_SAY, GetTarget()->CastToNPC(), this, message, language);
-					}
+				if (DistNoRootNoZ(*GetTarget()) <= 200) {
+					parse->EventNPC(EVENT_AGGRO_SAY, GetTarget()->CastToNPC(), this, message, language);
 				}
 			}
 
