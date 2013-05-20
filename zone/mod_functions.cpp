@@ -243,6 +243,19 @@ int Client::mod_client_damage(int damage, SkillType skillinuse, int hand, const 
 
 
 //message is char[4096], don't screw it up. Return true for normal behavior, false to return immediately.
+// Channels:
+// 0  - Guild Chat
+// 2  - Group Chat
+// 3  - Shout
+// 4  - Auction
+// 5  - Out of Character
+// 6  - Broadcast
+// 7  - Tell
+// 8  - Say
+// 11 - GMSay
+// 15 - Raid Chat
+// 20 - UCS Relay for UF client and later
+// 22 - Emotes for UF and later
 bool Client::mod_client_message(char* message, uint8 chan_num) {
 	//!commands for serverman
 	if(message[0] == '!' && chan_num == 8)
@@ -257,6 +270,50 @@ bool Client::mod_client_message(char* message, uint8 chan_num) {
 		return(false);
 	}
 
+/*
+	//Parse out link notation
+	Seperator ms(message, ' ', 20);
+
+	std::string finalmsg("");
+	bool modded = false;
+	for(int i = 0; i < ms.GetMaxArgNum(); i++)
+	{
+		if(i > 0) { finalmsg += " "; }
+		if(strlen(ms.arg[i]) < 5) { finalmsg += ms.arg[i]; continue; }
+
+		if( ms.arg[i][0] == '$' && ms.arg[i][1] == 'N' && ms.arg[i][2] == 'P' && ms.arg[i][3] == 'C')
+		{
+			std::string npclink("%!!dbnav NPC ");
+			std::string npctext("NPC:");
+			for(int x = 4; x < strlen(ms.arg[i]); x++)
+			{
+				npclink += ms.arg[i][x];
+				npctext += ms.arg[i][x];
+			}
+			modded = true;
+			char text[250];
+			sprintf(text, "%S", npclink.c_str());
+			finalmsg += quest_manager.saylink( text, true, const_cast<char*>(npctext.c_str()) );
+		}
+		else if( ms.arg[i][0] == '$' && ms.arg[i][1] == 'T' && ms.arg[i][2] == 'E' && ms.arg[i][3] == 'S' && ms.arg[i][4] == 'T')
+		{
+			modded = true;
+			char text[250];
+			sprintf(text, "%%!!help");
+			finalmsg += quest_manager.saylink( text, true, text );
+			finalmsg += "DBLINK TEST";
+		}
+		else
+		{
+			finalmsg += ms.arg[i];
+		}
+	}
+
+	if(modded)
+	{
+	    strn0cpy(message, finalmsg.c_str(), 4096);
+	}
+*/
 	return(true);
 } //Potentially dangerous string handling here
 
@@ -616,13 +673,88 @@ float Mob::mod_hit_chance(float chancetohit, SkillType skillinuse, Mob* attacker
 	return(chancetohit + hitmod);
 }
 
-float Mob::mod_riposte_chance(float ripostechance, Mob* attacker) { return(ripostechance); }
-float Mob::mod_block_chance(float blockchance, Mob* attacker) { return(blockchance); }
-float Mob::mod_parry_chance(float parrychance, Mob* attacker) { return(parrychance); }
-float Mob::mod_dodge_chance(float dodgechance, Mob* attacker) { return(dodgechance); }
-float Mob::mod_monk_weight(float monkweight, Mob* attacker) { return(monkweight); }
-float Mob::mod_mitigation_rating(float mitigation_rating, Mob* attacker) { return(mitigation_rating); }
-float Mob::mod_attack_rating(float attack_rating, Mob* defender) { return(attack_rating); }
+//Final riposte chance
+float Mob::mod_riposte_chance(float ripostechance, Mob* attacker) {
+	if(!IsClient()) { return(ripostechance); }
+	return(ripostechance + CastToClient()->GetActSTA()/200);
+}
+
+//Final block chance
+float Mob::mod_block_chance(float blockchance, Mob* attacker) {
+	if(!IsClient()) { return(blockchance); }
+	return(blockchance + CastToClient()->GetActSTA()/200);
+}
+
+//Final parry chance
+float Mob::mod_parry_chance(float parrychance, Mob* attacker) {
+	if(!IsClient()) { return(parrychance); }
+	return(parrychance + CastToClient()->GetActDEX()/200);
+}
+
+//Final dodge chance
+float Mob::mod_dodge_chance(float dodgechance, Mob* attacker) {
+	if(!IsClient()) { return(dodgechance); }
+	return(dodgechance + CastToClient()->GetActAGI()/200);
+}
+
+//Monk AC Bonus weight cap.  Defined in Combat:MonkACBonusWeight
+//Usually 15, a monk under this weight threshold gets an AC bonus
+float Mob::mod_monk_weight(float monkweight, Mob* attacker) {
+	if(!IsClient()) { return(monkweight); }
+
+	monkweight += (CastToClient()->GetActAGI()/100) + (CastToClient()->GetActSTR()/50);
+	return(monkweight);
+}
+
+//Mitigation rating is compared to incoming attack rating.  Higher is better.
+float Mob::mod_mitigation_rating(float mitigation_rating, Mob* attacker) {
+	if(!IsClient()) { return(mitigation_rating); }
+
+	int shield_ac = 0;
+	float armor = (float)CastToClient()->GetRawACNoShield(shield_ac);
+
+	switch(GetClass())
+	{
+		case WARRIOR:
+			return(mitigation_rating + (armor/2));
+
+		case SHADOWKNIGHT:
+		case PALADIN:
+			return(mitigation_rating + (armor/3));
+
+		case RANGER:
+		case ROGUE:
+		case BARD:
+			return(mitigation_rating + (armor/5));
+
+		default:
+			return(mitigation_rating);
+	}
+
+	//Shouldn't ever get here
+	return(mitigation_rating);
+}
+
+float Mob::mod_attack_rating(float attack_rating, Mob* defender) {
+	if(!IsClient()) { return(attack_rating); }
+
+	float hprmult = 1 + (1 - (GetHP()/GetMaxHP()));
+
+	switch(GetClass())
+	{
+		case BERSERKER:
+			return(attack_rating * hprmult);
+
+		case ROGUE:
+			if( BehindMob(defender, GetX(), GetY()) ) { return(attack_rating * 2); }
+			else { return(attack_rating); }
+
+		default:
+			return(attack_rating);
+	}
+
+	return(attack_rating);
+}
 
 //Kick damage after all other bonuses are applied
 int32 Mob::mod_kick_damage(int32 dmg) {
