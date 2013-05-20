@@ -1066,8 +1066,8 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 {
 	switch (event) {
 		case EVENT_SAY: {
-			if(npc && mob) {
-				npc->DoQuestPause(mob);
+			if(npcmob && mob) {
+				npcmob->DoQuestPause(mob);
 			}
 
 			ExportVar(package_name.c_str(), "data", objid);

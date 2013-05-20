@@ -18,18 +18,24 @@
 #ifndef __QUEST_MANAGER_H__
 #define __QUEST_MANAGER_H__
 
-#include "../common/Mutex.h"
 #include "../common/timer.h"
 #include "tasks.h"
 
 #include <string>
 #include <list>
+#include <stack>
 using namespace std;
 
 class NPC;
 class Client;
 
 class QuestManager {
+	struct running_quest {
+		Mob *owner;
+		Client *initiator;
+		ItemInst* questitem;
+		bool depop_npc;
+	};
 public:
 	QuestManager();
 	virtual ~QuestManager();
@@ -42,21 +48,20 @@ public:
 	void ClearTimers(Mob *who);
 	void ClearAllTimers();
 
-	//quest perl functions
+	//quest functions
 	void echo(int colour, const char *str);
 	void say(const char *str);
 	void say(const char *str, uint8 language);
 	void me(const char *str);
 	void summonitem(uint32 itemid, int16 charges = 0);
-	//getZoneID(const char *short_name)
 	void write(const char *file, const char *str);
-	uint16 spawn2(int npc_type, int grid, int unused, float x, float y, float z, float heading);
-	uint16 unique_spawn(int npc_type, int grid, int unused, float x, float y, float z, float heading = 0);
-	uint16 spawn_from_spawn2(uint32 spawn2_id);
+	Mob* spawn2(int npc_type, int grid, int unused, float x, float y, float z, float heading);
+	Mob* unique_spawn(int npc_type, int grid, int unused, float x, float y, float z, float heading = 0);
+	Mob* spawn_from_spawn2(uint32 spawn2_id);
 	void enable_spawn2(uint32 spawn2_id);
 	void disable_spawn2(uint32 spawn2_id);
 	void setstat(int stat, int value);
-	void incstat(int stat, int value); //old setstat command
+	void incstat(int stat, int value);
 	void castspell(int spell_id, int target_id);
 	void selfcast(int spell_id);
 	void addloot(int item_id, int charges = 0, bool equipitem = true);
@@ -133,10 +138,10 @@ public:
 	void respawn(int npc_type, int grid);
 	void set_proximity(float minx, float maxx, float miny, float maxy, float minz=-999999, float maxz=999999);
 	void clear_proximity();
+	void enable_proximity_say();
+	void disable_proximity_say();
 	void setanim(int npc_type, int animnum);
 	void showgrid(int gridid);
-	void showpath(float x, float y, float z);
-	void pathto(float x, float y, float z);
 	void spawn_condition(const char *zone_short, uint32 instance_id, uint16 condition_id, short new_value);
 	short get_spawn_condition(const char *zone_short, uint32 instance_id, uint16 condition_id);
 	void toggle_spawn_event(int event_id, bool enable, bool reset_base);
@@ -195,15 +200,12 @@ public:
     void enabletitle(int titleset);
    	bool checktitle(int titlecheck);
    	void removetitle(int titlecheck);
-
 	uint16 CreateGroundObject(uint32 itemid, float x, float y, float z, float heading, uint32 decay_time = 300000);
 	uint16 CreateGroundObjectFromModel(const char* model, float x, float y, float z, float heading, uint8 type = 0x00, uint32 decay_time = 0);
 	void ModifyNPCStat(const char *identifier, const char *newValue);
 	void UpdateSpawnTimer(uint32 id, uint32 newTime);
-
 	void MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity = 0);
 	uint32 MerchantCountItem(uint32 NPCid, uint32 itemid);
-
 	uint16 CreateInstance(const char *zone, int16 version, uint32 duration);
 	void DestroyInstance(uint16 instance_id);
 	uint16 GetInstanceID(const char *zone, int16 version);
@@ -213,7 +215,6 @@ public:
 	void MovePCInstance(int zone_id, int instance_id, float x, float y, float z, float heading);
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version);
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);
-
 	const char* varlink(char* perltext, int item_id);
 	const char* saylink(char* Phrase, bool silent, char* LinkName);
 	const char* getguildnamebyid(int guild_id);
@@ -228,19 +229,15 @@ public:
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
     int32 GetZoneID(const char *zone);
     const char *GetZoneLongName(const char *zone);
-
-	//not in here because it retains perl types
-	//thing ChooseRandom(array_of_things)
-
-	inline Client *GetInitiator() const { return(initiator); }
-	inline NPC *GetNPC() const { return(owner->IsNPC()?owner->CastToNPC():nullptr); }
-	inline Mob *GetOwner() const { return(owner); }
-	inline ItemInst *GetQuestItem() const {return questitem; }
-	inline bool ProximitySayInUse() { return HaveProximitySays; }
-
 	void CrossZoneSignalPlayerByCharID(int charid, uint32 data);
 	void CrossZoneSignalPlayerByName(const char *CharName, uint32 data);
 	void CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message);
+
+	Client *GetInitiator() const;
+	NPC *GetNPC() const;
+	Mob *GetOwner() const;
+	ItemInst *GetQuestItem() const;
+	inline bool ProximitySayInUse() { return HaveProximitySays; }
 
 #ifdef BOTS
 	int createbotcount();
@@ -251,14 +248,9 @@ public:
 
 	inline uint16 GetMana(uint32 spell_id) { return( spells[spell_id].mana); }
 
-protected:
-	Mob *owner;	//NPC is never nullptr when functions are called.
-	Client *initiator;	//this can be null.
-	ItemInst* questitem;	// this is usually nullptr.
+private:
+	std::stack<running_quest> quests_running_;
 
-	bool depop_npc;	//true if EndQuest should depop the NPC
-
-	Mutex quest_mutex;
 	bool HaveProximitySays;
 
 	int QGVarDuration(const char *fmt);

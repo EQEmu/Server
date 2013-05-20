@@ -2473,10 +2473,11 @@ uint32 NPC::GetSpawnKillCount()
 }
 
 void NPC::DoQuestPause(Mob *other) {
-	if(IsMoving() && !IsOnHatelist(other))
+	if(IsMoving() && !IsOnHatelist(other)) {
 		PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-
-	if(!IsMoving())
 		FaceTarget(other);
+	} else if(!IsMoving()) {
+		FaceTarget(other);
+	}
 
 }

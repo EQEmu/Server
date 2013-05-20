@@ -220,7 +220,8 @@ XS(XS__spawn)
 	float	y = (float)SvNV(ST(4));
 	float	z = (float)SvNV(ST(5));
 
-	RETVAL = quest_manager.spawn2(npc_type, grid, unused, x, y, z, 0);
+	Mob *r = quest_manager.spawn2(npc_type, grid, unused, x, y, z, 0);
+	RETVAL = (r != nullptr) ? r->GetID() : 0;
 	XSprePUSH; PUSHu((UV)RETVAL);
 
 	XSRETURN(1);
@@ -244,7 +245,8 @@ XS(XS__spawn2)
 	float	z = (float)SvNV(ST(5));
 	float	heading = (float)SvNV(ST(6));
 
-	RETVAL = quest_manager.spawn2(npc_type, grid, unused, x, y, z, heading);
+	Mob *r = quest_manager.spawn2(npc_type, grid, unused, x, y, z, heading);
+	RETVAL = (r != nullptr) ? r->GetID() : 0;
 	XSprePUSH; PUSHu((UV)RETVAL);
 
 	XSRETURN(1);
@@ -270,7 +272,9 @@ XS(XS__unique_spawn)
 	if(items == 7)
 		heading = (float)SvNV(ST(6));
 
-	RETVAL = quest_manager.unique_spawn(npc_type, grid, unused, x, y, z, heading);
+	Mob *r =  quest_manager.unique_spawn(npc_type, grid, unused, x, y, z, heading);
+	RETVAL = (r != nullptr) ? r->GetID() : 0;
+
 	XSprePUSH; PUSHu((UV)RETVAL);
 
 	XSRETURN(1);
@@ -288,7 +292,9 @@ XS(XS__spawn_from_spawn2)
 
 	int	spawn2_id = (int)SvIV(ST(0));
 
-	RETVAL = quest_manager.spawn_from_spawn2(spawn2_id);
+	Mob *r =  quest_manager.spawn_from_spawn2(spawn2_id);
+	RETVAL = (r != nullptr) ? r->GetID() : 0;
+
 	XSprePUSH; PUSHu((UV)RETVAL);
 
 	XSRETURN(1);
@@ -1557,6 +1563,30 @@ XS(XS__clear_proximity)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__enable_proximity_say);
+XS(XS__enable_proximity_say)
+{
+	dXSARGS;
+	if (items != 0)
+		Perl_croak(aTHX_ "Usage: enable_proximity_say()");
+
+	quest_manager.enable_proximity_say();
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__disable_proximity_say);
+XS(XS__disable_proximity_say)
+{
+	dXSARGS;
+	if (items != 0)
+		Perl_croak(aTHX_ "Usage: disable_proximity_say()");
+
+	quest_manager.disable_proximity_say();
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__setanim);
 XS(XS__setanim) //Cisyouc: mob->setappearance() addition
 {
@@ -1577,38 +1607,6 @@ XS(XS__showgrid)
 		Perl_croak(aTHX_ "Usage: quest::showgrid(grid_id);");
 
 	quest_manager.showgrid(SvUV(ST(0)));
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__showpath);
-XS(XS__showpath)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: showpath(x, y, z)");
-
-	float	x = (float)SvNV(ST(0));
-	float	y = (float)SvNV(ST(1));
-	float	z = (float)SvNV(ST(2));
-
-	quest_manager.showpath(x, y, z);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__pathto);
-XS(XS__pathto)
-{
-	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: pathto(x, y, z)");
-
-	float	x = (float)SvNV(ST(0));
-	float	y = (float)SvNV(ST(1));
-	float	z = (float)SvNV(ST(2));
-
-	quest_manager.pathto(x, y, z);
 
 	XSRETURN_EMPTY;
 }
@@ -3421,10 +3419,10 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "ChooseRandom"), XS__ChooseRandom, file);
 		newXS(strcpy(buf, "set_proximity"), XS__set_proximity, file);
 		newXS(strcpy(buf, "clear_proximity"), XS__clear_proximity, file);
+		newXS(strcpy(buf, "enable_proximity_say"), XS__enable_proximity_say, file);
+		newXS(strcpy(buf, "disable_proximity_say"), XS__disable_proximity_say, file);
 		newXS(strcpy(buf, "setanim"), XS__setanim, file);
 		newXS(strcpy(buf, "showgrid"), XS__showgrid, file);
-		newXS(strcpy(buf, "showpath"), XS__showpath, file);
-		newXS(strcpy(buf, "pathto"), XS__pathto, file);
 		newXS(strcpy(buf, "spawn_condition"), XS__spawn_condition, file);
 		newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 		newXS(strcpy(buf, "toggle_spawn_event"), XS__toggle_spawn_event, file);

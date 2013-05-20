@@ -24,6 +24,7 @@
 #include "lua_general.h"
 #include "zone.h"
 
+#include "questmgr.h"
 #include "lua_parser.h"
 
 const char *LuaEvents[_LargestEventID] = {
@@ -202,11 +203,15 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		auto arg_function = NPCArgumentDispatch[evt];
 		arg_function(this, L, npc, init, data, extra_data);
 		
+		Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
+		quest_manager.StartQuest(npc, c, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
+			quest_manager.EndQuest();
 			return 0;
 		}
+		quest_manager.EndQuest();
 		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
@@ -288,11 +293,14 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		auto arg_function = PlayerArgumentDispatch[evt];
 		arg_function(this, L, client, data, extra_data);
 	
+		quest_manager.StartQuest(nullptr, client, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
+			quest_manager.EndQuest();
 			return 0;
 		}
+		quest_manager.EndQuest();
 		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
@@ -379,11 +387,14 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		auto arg_function = ItemArgumentDispatch[evt];
 		arg_function(this, L, client, item, objid, extra_data);
 		
+		quest_manager.StartQuest(nullptr, client, item);
 		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
+			quest_manager.EndQuest();
 			return 0;
 		}
+		quest_manager.EndQuest();
 		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
@@ -450,11 +461,14 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 		auto arg_function = SpellArgumentDispatch[evt];
 		arg_function(this, L, npc, client, spell_id, extra_data);
 		
+		quest_manager.StartQuest(npc, client, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
+			quest_manager.EndQuest();
 			return 0;
 		}
+		quest_manager.EndQuest();
 		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
@@ -502,14 +516,18 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 		lua_getfield(L, -1, sub_name);
 	
-		//For now encounters just call event_encounter_load/event_encounter_unload with no arguments
-		//So we dont pass anything
+		lua_createtable(L, 0, 0);
+		lua_pushstring(L, encounter_name.c_str());
+		lua_setfield(L, -2, "name");
 
-		if(lua_pcall(L, 0, 1, 0)) {
+		quest_manager.StartQuest(nullptr, nullptr, nullptr);
+		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
+			quest_manager.EndQuest();
 			return 0;
 		}
+		quest_manager.EndQuest();
 		
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
