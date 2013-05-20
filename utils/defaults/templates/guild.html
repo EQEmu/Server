@@ -14,7 +14,7 @@
 my $gid = $request->getInt("id", 0);
 if($gid > 0) {
 	my $act = $request->get("action", "");
-	
+
 	#note: delete action should be done on the actions.html page, so we can redirect elsewhere.
 	if($act eq "makeleader") {
 		my $char = $request->getInt("char", 0);
@@ -39,9 +39,9 @@ if($gid > 0) {
 			print "Invalid char in remove member.<hr/>";
 		}
 	}
-	
-	
-	
+
+
+
 	my $q = "SELECT g.id,g.name,g.leader,g.motd,g.motd_setter,g.tribute,c.name AS lname FROM guilds AS g LEFT JOIN character_ AS c ON g.leader=c.id WHERE g.id=$gid";
 	my $res=$EQDB->query($q);
 	my $row;
@@ -61,7 +61,7 @@ HTML
 			."LEFT JOIN character_  AS c ON g.char_id=c.id "
 			."LEFT JOIN guild_ranks AS gr ON g.rank=gr.rank AND g.guild_id=gr.guild_id "
 			."WHERE g.guild_id=$gid";
-		
+
 		my $res2 = $EQDB->query($q);
 		if($res2) {
 			print <<"HTML";
@@ -93,7 +93,7 @@ HTML
 					<td align="center">$tline/$row2->{total_tribute}</td>
 					<td align="center">$row2->{public_note}</td>
 					<td align="center">
-						<a href="guild.html?id=$gid&action=remove&char=$row2->{char_id}">Remove</a> - 
+						<a href="guild.html?id=$gid&action=remove&char=$row2->{char_id}">Remove</a> -
 						<a href="guild.html?id=$gid&action=makeleader&char=$row2->{char_id}">Make Leader</a></td>
 					</tr>
 CHAR

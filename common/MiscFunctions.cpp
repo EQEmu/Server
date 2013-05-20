@@ -1,5 +1,5 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -9,11 +9,11 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "MiscFunctions.h"
@@ -39,7 +39,7 @@ using namespace std;
 
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
-	#define strcasecmp  _stricmp
+	#define strcasecmp	_stricmp
 #else
 	#include <stdlib.h>
 	#include <ctype.h>
@@ -47,9 +47,9 @@ using namespace std;
 	#include <sys/types.h>
 	#include <sys/time.h>
 #ifdef FREEBSD //Timothy Whitman - January 7, 2003
-	   #include <sys/socket.h>
-	   #include <netinet/in.h>
- #endif
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+#endif
 	#include <sys/stat.h>
 	#include <unistd.h>
 	#include <netdb.h>
@@ -76,7 +76,7 @@ void CoutTimestamp(bool ms) {
 	time(&rawtime);
 	gmt_t = gmtime(&rawtime);
 
-	struct timeval read_time;	
+	struct timeval read_time;
 	gettimeofday(&read_time,0);
 
 	cout << (gmt_t->tm_year + 1900) << "/" << setw(2) << setfill('0') << (gmt_t->tm_mon + 1) << "/" << setw(2) << setfill('0') << gmt_t->tm_mday << " " << setw(2) << setfill('0') << gmt_t->tm_hour << ":" << setw(2) << setfill('0') << gmt_t->tm_min << ":" << setw(2) << setfill('0') << gmt_t->tm_sec;
@@ -84,7 +84,6 @@ void CoutTimestamp(bool ms) {
 		cout << "." << setw(3) << setfill('0') << (read_time.tv_usec / 1000);
 	cout << " GMT";
 }
-
 
 
 int32 filesize(FILE* fp) {
@@ -182,7 +181,7 @@ const char * itoa(int num, char* a,int b) {
 }
 #endif
 
-/* 
+/*
  * generate a random integer in the range low-high this
  * should be used instead of the rand()%limit method
  */
@@ -221,41 +220,41 @@ double MakeRandomFloat(double low, double high)
 
 uint32 rnd_hash( time_t t, clock_t c )
 {
-		// Get a uint32 from t and c
-		// Better than uint32(x) in case x is floating point in [0,1]
-		// Based on code by Lawrence Kirby (fred@genesis.demon.co.uk)
-		
-		static uint32 differ = 0;  // guarantee time-based seeds will change
-		
-		uint32 h1 = 0;
-		unsigned char *p = (unsigned char *) &t;
-		for( size_t i = 0; i < sizeof(t); ++i )
-		{
-				h1 *= 255 + 2U;
-				h1 += p[i];
-		}
-		uint32 h2 = 0;
-		p = (unsigned char *) &c;
-		for( size_t j = 0; j < sizeof(c); ++j )
-		{
-				h2 *= 255 + 2U;
-				h2 += p[j];
-		}
-		return ( h1 + differ++ ) ^ h2;
+	// Get a uint32 from t and c
+	// Better than uint32(x) in case x is floating point in [0,1]
+	// Based on code by Lawrence Kirby (fred@genesis.demon.co.uk)
+
+	static uint32 differ = 0; // guarantee time-based seeds will change
+
+	uint32 h1 = 0;
+	unsigned char *p = (unsigned char *) &t;
+	for( size_t i = 0; i < sizeof(t); ++i )
+	{
+		h1 *= 255 + 2U;
+		h1 += p[i];
+	}
+	uint32 h2 = 0;
+	p = (unsigned char *) &c;
+	for( size_t j = 0; j < sizeof(c); ++j )
+	{
+		h2 *= 255 + 2U;
+		h2 += p[j];
+	}
+	return ( h1 + differ++ ) ^ h2;
 }
 
 void oneseed( const uint32 seed )
 {
-		// Initialize generator state with seed
-		// See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
-		// In previous versions, most significant bits (MSBs) of the seed affect
-		// only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto.
-		register int j = 0;
-		STATE[j] = seed & 0xffffffffUL;
+	// Initialize generator state with seed
+	// See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
+	// In previous versions, most significant bits (MSBs) of the seed affect
+	// only MSBs of the state array. Modified 9 Jan 2002 by Makoto Matsumoto.
+	register int j = 0;
+	STATE[j] = seed & 0xffffffffUL;
 	for (j = 1; j < R; j++)
-		{
-				STATE[j] = ( 1812433253UL * ( STATE[j-1] ^ (STATE[j-1] >> 30) ) + j ) & 0xffffffffUL;
-		}
+	{
+		STATE[j] = ( 1812433253UL * ( STATE[j-1] ^ (STATE[j-1] >> 30) ) + j ) & 0xffffffffUL;
+	}
 }
 
 // WELL RNG code
@@ -271,79 +270,79 @@ void oneseed( const uint32 seed )
 /* ***************************************************************************** */
 
 unsigned int case_1 (void){
-   // state_i == 0
-   z0 = (VRm1Under & MASKL) | (VRm2Under & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
-   newV1      = z1 ^ z2;
-   newV0Under = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i = R - 1;
-   WELLRNG19937 = case_3;
-   return (STATE[state_i] ^ (newVM2Over & BITMASK));
+	// state_i == 0
+	z0 = (VRm1Under & MASKL) | (VRm2Under & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
+	newV1 = z1 ^ z2;
+	newV0Under = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i = R - 1;
+	WELLRNG19937 = case_3;
+	return (STATE[state_i] ^ (newVM2Over & BITMASK));
 }
 
 static unsigned int case_2 (void){
-   // state_i == 1
-   z0 = (VRm1 & MASKL) | (VRm2Under & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i = 0;
-   WELLRNG19937 = case_1;
-   return (STATE[state_i] ^ (newVM2 & BITMASK));
+	// state_i == 1
+	z0 = (VRm1 & MASKL) | (VRm2Under & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i = 0;
+	WELLRNG19937 = case_1;
+	return (STATE[state_i] ^ (newVM2 & BITMASK));
 }
 
 static unsigned int case_3 (void){
-   // state_i+M1 >= R
-   z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1Over);
-   z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i--;
-   if (state_i + M1 < R)
-	  WELLRNG19937 = case_5;
-   return (STATE[state_i] ^ (newVM2Over & BITMASK));
+	// state_i+M1 >= R
+	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1Over);
+	z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i--;
+	if (state_i + M1 < R)
+		WELLRNG19937 = case_5;
+	return (STATE[state_i] ^ (newVM2Over & BITMASK));
 }
 
 static unsigned int case_4 (void){
-   // state_i+M3 >= R
-   z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3Over);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i--;
-   if (state_i + M3 < R)
-	  WELLRNG19937 = case_6;
-   return (STATE[state_i] ^ (newVM2 & BITMASK));
+	// state_i+M3 >= R
+	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3Over);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i--;
+	if (state_i + M3 < R)
+		WELLRNG19937 = case_6;
+	return (STATE[state_i] ^ (newVM2 & BITMASK));
 }
 
 static unsigned int case_5 (void){
-   // state_i+M2 >= R
-   z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i--;
-   if (state_i + M2 < R)
-	  WELLRNG19937 = case_4;
-	  return (STATE[state_i] ^ (newVM2Over & BITMASK));
+	// state_i+M2 >= R
+	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2Over) ^ MAT0POS (1, VM3Over);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i--;
+	if (state_i + M2 < R)
+		WELLRNG19937 = case_4;
+	return (STATE[state_i] ^ (newVM2Over & BITMASK));
 }
 
 static unsigned int case_6 (void){
-   // 2 <= state_i <= (R - M3 - 1)
-   z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
-   z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
-   z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
-   newV1 = z1 ^ z2;
-   newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
-   state_i--;
-   if (state_i == 1)
-	  WELLRNG19937 = case_2;
-   return (STATE[state_i] ^ (newVM2 & BITMASK));
+	// 2 <= state_i <= (R - M3 - 1)
+	z0 = (VRm1 & MASKL) | (VRm2 & MASKU);
+	z1 = MAT0NEG (-25, V0) ^ MAT0POS (27, VM1);
+	z2 = MAT3POS (9, VM2) ^ MAT0POS (1, VM3);
+	newV1 = z1 ^ z2;
+	newV0 = MAT1 (z0) ^ MAT0NEG (-9, z1) ^ MAT0NEG (-21, z2) ^ MAT0POS (21, newV1);
+	state_i--;
+	if (state_i == 1)
+		WELLRNG19937 = case_2;
+	return (STATE[state_i] ^ (newVM2 & BITMASK));
 }
 
 // end WELL RNG code
@@ -392,4 +391,3 @@ float EQHtoFloat(int d)
 {
 	return(360.0f - float((d * 360) >> 11));
 }
-

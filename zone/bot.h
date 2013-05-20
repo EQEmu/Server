@@ -139,7 +139,7 @@ public:
 	virtual void Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
 	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false);
-	virtual bool HasRaid() { return (GetRaid() ? true : false);  }
+	virtual bool HasRaid() { return (GetRaid() ? true : false); }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
 	virtual Raid* GetRaid() { return entity_list.GetRaidByMob(this); }
 	virtual Group* GetGroup() { return entity_list.GetGroupByMob(this); }
@@ -166,7 +166,7 @@ public:
 	void CalcBotStats(bool showtext = true);
 	uint16 BotGetSpells(int spellslot) { return AIspells[spellslot].spellid; }
 	uint16 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
-    uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
+	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
 	virtual float GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand);
 	virtual bool AvoidDamage(Mob* other, int32 &damage, bool CanRiposte);
 	virtual int GetMonkHandToHandDamage(void);
@@ -240,45 +240,45 @@ public:
 	void ClearHealRotationLeader() { _healRotationLeader = 0; }
 	void ClearHealRotationMembers();
 	void ClearHealRotationTargets();
-	inline virtual int16  GetMaxStat();
-	inline virtual int16  GetMaxResist();
-	inline virtual int16  GetMaxSTR();
-	inline virtual int16  GetMaxSTA();
-	inline virtual int16  GetMaxDEX();
-	inline virtual int16  GetMaxAGI();
-	inline virtual int16  GetMaxINT();
-	inline virtual int16  GetMaxWIS();
-	inline virtual int16  GetMaxCHA();
-	inline virtual int16  GetMaxMR();
-	inline virtual int16  GetMaxPR();
-	inline virtual int16  GetMaxDR();
-	inline virtual int16  GetMaxCR();
-	inline virtual int16  GetMaxFR();
-	inline virtual int16  GetMaxCorrup();
-	int16  CalcATK();
-	int16  CalcSTR();
-	int16  CalcSTA();
-	int16  CalcDEX();
-	int16  CalcAGI();
-	int16  CalcINT();
-	int16  CalcWIS();
-	int16  CalcCHA();
+	inline virtual int16	GetMaxStat();
+	inline virtual int16	GetMaxResist();
+	inline virtual int16	GetMaxSTR();
+	inline virtual int16	GetMaxSTA();
+	inline virtual int16	GetMaxDEX();
+	inline virtual int16	GetMaxAGI();
+	inline virtual int16	GetMaxINT();
+	inline virtual int16	GetMaxWIS();
+	inline virtual int16	GetMaxCHA();
+	inline virtual int16	GetMaxMR();
+	inline virtual int16	GetMaxPR();
+	inline virtual int16	GetMaxDR();
+	inline virtual int16	GetMaxCR();
+	inline virtual int16	GetMaxFR();
+	inline virtual int16	GetMaxCorrup();
+	int16	CalcATK();
+	int16	CalcSTR();
+	int16	CalcSTA();
+	int16	CalcDEX();
+	int16	CalcAGI();
+	int16	CalcINT();
+	int16	CalcWIS();
+	int16	CalcCHA();
 	int16	CalcMR();
 	int16	CalcFR();
 	int16	CalcDR();
 	int16	CalcPR();
 	int16	CalcCR();
 	int16	CalcCorrup();
-	int32  CalcHPRegenCap();
-	int32 	CalcManaRegenCap();
+	int32	CalcHPRegenCap();
+	int32	CalcManaRegenCap();
 	int32	LevelRegen();
 	int32	CalcHPRegen();
 	int32	CalcManaRegen();
 	uint32	CalcCurrentWeight();
-	int 	GroupLeadershipAAHealthEnhancement();
-	int 	GroupLeadershipAAManaEnhancement();
+	int		GroupLeadershipAAHealthEnhancement();
+	int		GroupLeadershipAAManaEnhancement();
 	int	GroupLeadershipAAHealthRegeneration();
-	int 	GroupLeadershipAAOffenseEnhancement();
+	int		GroupLeadershipAAOffenseEnhancement();
 	void CalcRestState();
 	int32	CalcMaxEndurance();	//This calculates the maximum endurance we can have
 	int32	CalcBaseEndurance();	//Calculates Base End
@@ -519,7 +519,7 @@ public:
 
 	inline virtual int16	GetDelayDeath()		const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath; }
 
-	inline InspectMessage_Struct& GetInspectMessage()			  { return _botInspectMessage; }
+	inline InspectMessage_Struct& GetInspectMessage() { return _botInspectMessage; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return _botInspectMessage; }
 
 	// "SET" Class Methods

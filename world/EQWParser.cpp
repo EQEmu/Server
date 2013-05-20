@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2006  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 //a lot of this is copied from embperl.cpp, but I didnt feel like factoring the common stuff out
@@ -30,7 +30,7 @@
 using namespace std;
 
 #ifndef GvCV_set
-#define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
+#define GvCV_set(gv,cv) (GvCV(gv) = (cv))
 #endif
 
 
@@ -44,16 +44,16 @@ EXTERN_C XS(boot_EQDBRes);
 EXTERN_C XS(boot_HTTPRequest);
 EXTERN_C XS(boot_EQLConfig);
 
-EXTERN_C void xs_init(pTHX) 
+EXTERN_C void xs_init(pTHX)
 {
 	char file[256];
 	strncpy(file, __FILE__, 256);
 	file[255] = '\0';
-	
+
 	char buf[128];	//shouldent have any function names longer than this.
-	
+
 	//add the strcpy stuff to get rid of const warnings....
-	
+
 	newXS(strcpy(buf, "DynaLoader::boot_DynaLoader"), boot_DynaLoader, file);
 	newXS(strcpy(buf, "EQW::boot_EQW"), boot_EQW, file);
 	newXS(strcpy(buf, "EQDB::boot_EQDB"), boot_EQDB, file);
@@ -92,10 +92,10 @@ void EQWParser::DoInit() {
 	perl_parse(my_perl, xs_init, argc, argv, env);
 
 	perl_run(my_perl);
-	
+
 	//a little routine we use a lot.
 	eval_pv("sub my_eval {eval $_[0];}", TRUE);	//dies on error
-	
+
 	//ruin the perl exit and command:
 	eval_pv("sub my_exit {}",TRUE);
 	eval_pv("sub my_sleep {}",TRUE);
@@ -107,7 +107,7 @@ void EQWParser::DoInit() {
 		GvCV_set(sleepgp, perl_get_cv("my_sleep", TRUE));	//dies on error
 		GvIMPORTED_CV_on(sleepgp);
 	}
-	
+
 	//setup eval_file
 	eval_pv(
 	"our %Cache;"
@@ -125,29 +125,29 @@ void EQWParser::DoInit() {
 		"}"
 	"}"
 	,FALSE);
-	
+
 	//make a tie-able class to capture IO and get it where it needs to go
 	eval_pv(
 		"package EQWIO; "
 //			"&boot_EQEmuIO;"
- 			"sub TIEHANDLE { my $me = bless {}, $_[0]; $me->PRINT('Creating '.$me); return($me); } "
-  			"sub WRITE {  } "
-  			"sub PRINTF { my $me = shift; my $fmt = shift; $me->PRINT(sprintf($fmt, @_)); } "
-  			"sub CLOSE { my $me = shift; $me->PRINT('Closing '.$me); } "
-  			"sub DESTROY { my $me = shift; $me->PRINT('Destroying '.$me); } "
+			"sub TIEHANDLE { my $me = bless {}, $_[0]; $me->PRINT('Creating '.$me); return($me); } "
+			"sub WRITE { } "
+			"sub PRINTF { my $me = shift; my $fmt = shift; $me->PRINT(sprintf($fmt, @_)); } "
+			"sub CLOSE { my $me = shift; $me->PRINT('Closing '.$me); } "
+			"sub DESTROY { my $me = shift; $me->PRINT('Destroying '.$me); } "
 //this ties us for all packages
-  		"package MAIN;"
-  		"	if(tied *STDOUT) { untie(*STDOUT); }"
-  		"	if(tied *STDERR) { untie(*STDERR); }"
-  		"	tie *STDOUT, 'EQWIO';"
-  		"	tie *STDERR, 'EQWIO';"
-  		,FALSE);
-	
+		"package MAIN;"
+		"	if(tied *STDOUT) { untie(*STDOUT); }"
+		"	if(tied *STDERR) { untie(*STDERR); }"
+		"	tie *STDOUT, 'EQWIO';"
+		"	tie *STDERR, 'EQWIO';"
+		,FALSE);
+
 	eval_pv(
 		"package world; "
 		,FALSE
 	);
-	
+
 	//make sure the EQW pointer is set up in this package
 	EQW *curc = EQW::Singleton();
 	SV *l = get_sv("world::EQW", true);
@@ -157,7 +157,7 @@ void EQWParser::DoInit() {
 		//clear out the value, mainly to get rid of blessedness
 		sv_setsv(l, _empty_sv);
 	}
-	
+
 	//make sure the EQDB pointer is set up in this package
 	EQDB::SetMySQL(database.getMySQL());
 	EQDB *curc_db = EQDB::Singleton();
@@ -168,29 +168,29 @@ void EQWParser::DoInit() {
 		//clear out the value, mainly to get rid of blessedness
 		sv_setsv(l_db, _empty_sv);
 	}
-	
+
 	//load up EQW
 	eval_pv(
-	"package EQW;"
-	"&boot_EQW;"			//load our EQW XS
-	"package EQDB;"
-	"&boot_EQDB;"			//load our EQW XS
-	"package EQDBRes;"
-	"&boot_EQDBRes;"			//load our EQW XS
-	"package HTTPRequest;"
-	"&boot_HTTPRequest;"			//load our HTTPRequest XS
-	"package EQLConfig;"
-	"&boot_EQLConfig;"			//load our EQLConfig XS
+		"package EQW;"
+		"&boot_EQW;"			//load our EQW XS
+		"package EQDB;"
+		"&boot_EQDB;"			//load our EQW XS
+		"package EQDBRes;"
+		"&boot_EQDBRes;"			//load our EQW XS
+		"package HTTPRequest;"
+		"&boot_HTTPRequest;"			//load our HTTPRequest XS
+		"package EQLConfig;"
+		"&boot_EQLConfig;"			//load our EQLConfig XS
 	, FALSE );
-	
-	
+
+
 #ifdef EMBPERL_PLUGIN
 	_log(WORLD__PERL, "Loading worldui perl plugins.");
 	string err;
 	if(!eval_file("world", "worldui.pl", err)) {
 		_log(WORLD__PERL_ERR, "Warning - world.pl: %s", err.c_str());
 	}
-	
+
 	eval_pv(
 		"package world; "
 		"if(opendir(D,'worldui')) { "
@@ -211,7 +211,7 @@ EQWParser::~EQWParser() {
 		"package quest;"
 		"	untie *STDOUT;"
 		"	untie *STDERR;"
-  	,FALSE);
+	,FALSE);
 */
 	perl_free(my_perl);
 }
@@ -226,26 +226,26 @@ bool EQWParser::eval_file(const char * packagename, const char * filename, std::
 
 bool EQWParser::dosub(const char * subname, const std::vector<std::string> &args, string &error, int mode) {
 	bool err = false;
-	dSP;                            /* initialize stack pointer      */
-	ENTER;                          /* everything created after here */
-	SAVETMPS;                       /* ...is a temporary variable.   */
-	PUSHMARK(SP);                   /* remember the stack pointer    */
+	dSP;				// initialize stack pointer
+	ENTER;				// everything created after here
+	SAVETMPS;			// ...is a temporary variable
+	PUSHMARK(SP);		// remember the stack pointer
 	if(args.size() > 0)
 	{
 		for(std::vector<std::string>::const_iterator i = args.begin(); i != args.end(); ++i)
-		{/* push the arguments onto the perl stack  */
-			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length()))); 
+		{/* push the arguments onto the perl stack */
+			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length())));
 		}
 	}
-	PUTBACK;                      /* make local stack pointer global */
-	call_pv(subname, mode); /*eval our code*/
-	SPAGAIN;                        /* refresh stack pointer         */
+	PUTBACK;					// make local stack pointer global
+	call_pv(subname, mode);		/*eval our code*/
+	SPAGAIN;					// refresh stack pointer
 	if(SvTRUE(ERRSV)) {
 		err = true;
 	}
-	FREETMPS;                       /* free temp values        */
-	LEAVE;                       /* ...and the XPUSHed "mortal" args.*/
-	
+	FREETMPS;		// free temp values
+	LEAVE;			// ...and the XPUSHed "mortal" args.
+
 	if(err) {
 		error = "Perl runtime error: ";
 		error += SvPVX(ERRSV);
@@ -260,13 +260,12 @@ bool EQWParser::eval(const char * code, string &error) {
 	return(dosub("my_eval", arg, error, G_SCALAR|G_DISCARD|G_EVAL|G_KEEPERR));
 }
 
-
 void EQWParser::EQW_eval(const char *pkg, const char *code) {
 	char namebuf[64];
-	
+
 	snprintf(namebuf, 64, "package %s;", pkg);
 	eval_pv(namebuf, FALSE);
-	
+
 	//make sure the EQW pointer is set up
 	EQW *curc = EQW::Singleton();
 	snprintf(namebuf, 64, "EQW");
@@ -289,7 +288,7 @@ void EQWParser::EQW_eval(const char *pkg, const char *code) {
 		//clear out the value, mainly to get rid of blessedness
 		sv_setsv(l_db, _empty_sv);
 	}
-	
+
 	string err;
 	if(!eval(code, err)) {
 		EQW::Singleton()->AppendOutput(err.c_str());
@@ -298,10 +297,10 @@ void EQWParser::EQW_eval(const char *pkg, const char *code) {
 
 void EQWParser::SetHTTPRequest(const char *pkg, HTTPRequest *it) {
 	char namebuf[64];
-	
+
 	snprintf(namebuf, 64, "package %s;", pkg);
 	eval_pv(namebuf, FALSE);
-	
+
 	snprintf(namebuf, 64, "request");
 //	snprintf(namebuf, 64, "%s::EQW", pkg);
 	SV *l = get_sv(namebuf, true);
@@ -330,7 +329,6 @@ class MerchantEditor extends BaseEditor {
 	}
 }
 
-
 function dispatch() {
 	my $dispatcher = $this->_dispatchers[$action];
 	$body = new Template($dispatcher["template"]);
@@ -348,5 +346,5 @@ function dispatch() {
 
 */
 
-
 #endif //EMBPERL
+

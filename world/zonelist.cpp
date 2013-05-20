@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2005  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "zonelist.h"
@@ -75,7 +75,7 @@ void ZSList::KillAll() {
 }
 
 void ZSList::Process() {
-	
+
 	if(shutdowntimer && shutdowntimer->Check()){
 		_log(WORLD__ZONELIST, "Shutdown timer has expired. Telling all zones to shut down and exiting. (fake sigint)");
 		ServerPacket* pack2 = new ServerPacket;
@@ -87,7 +87,7 @@ void ZSList::Process() {
 		CatchSignal(2);
 	}
 	if(reminder && reminder->Check()){
-		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.  World will shut down in %i seconds...",shutdowntimer->GetRemainingTime()/1000);
+		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now. World will shut down in %i seconds...",shutdowntimer->GetRemainingTime()/1000);
 	}
 	LinkedListIterator<ZoneServer*> iterator(list);
 
@@ -95,7 +95,7 @@ void ZSList::Process() {
 	while(iterator.MoreElements()) {
 		if (!iterator.GetData()->Process()) {
 			ZoneServer* zs = iterator.GetData();
-			struct in_addr  in;
+			struct in_addr in;
 			in.s_addr = zs->GetIP();
 			_log(WORLD__ZONELIST,"Removing zoneserver #%d at %s:%d",zs->GetID(),zs->GetCAddress(),zs->GetCPort());
 			zs->LSShutDownUpdate(zs->GetZoneID());
@@ -118,7 +118,7 @@ void ZSList::Process() {
 
 bool ZSList::SendPacket(ServerPacket* pack) {
 	LinkedListIterator<ZoneServer*> iterator(list);
-	
+
 	iterator.Reset();
 	while(iterator.MoreElements()) {
 		iterator.GetData()->SendPacket(pack);
@@ -158,7 +158,7 @@ bool ZSList::SendPacket(uint32 ZoneID, uint16 instanceID, ServerPacket* pack) {
 	else
 	{
 		while(iterator.MoreElements()) {
-			if (iterator.GetData()->GetZoneID() == ZoneID 
+			if (iterator.GetData()->GetZoneID() == ZoneID
 				&& iterator.GetData()->GetInstanceID() == 0) {
 				ZoneServer* tmp = iterator.GetData();
 				return(tmp->SendPacket(pack));
@@ -204,7 +204,7 @@ ZoneServer* ZSList::FindByZoneID(uint32 ZoneID) {
 	while(iterator.MoreElements())
 	{
 		ZoneServer* tmp = iterator.GetData();
-		if (tmp->GetZoneID() == ZoneID  && tmp->GetInstanceID() == 0) {
+		if (tmp->GetZoneID() == ZoneID && tmp->GetInstanceID() == 0) {
 			return tmp;
 		}
 		iterator.Advance();
@@ -282,8 +282,8 @@ void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
 
 void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* connection) {
 	LinkedListIterator<ZoneServer*> iterator(list);
-	struct in_addr  in;
-	
+	struct in_addr in;
+
 	iterator.Reset();
 	char locked[4];
 	if (WorldConfig::get()->Locked == true)
@@ -458,7 +458,7 @@ void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_m
 	pack->pBuffer = new uchar[pack->size];
 	memset(pack->pBuffer, 0, pack->size);
 	ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*) pack->pBuffer;
-	
+
 	if (to) {
 		if (to[0] == '*') {
 			Console* con = console_list.FindByAccountName(&to[1]);
@@ -566,7 +566,7 @@ void ZSList::RebootZone(const char* ip1,uint16 port,const char* ip2, uint32 skip
 		return;
 	}
 	uint32 z = MakeRandomInt(0, y-1);
-	
+
 	ServerPacket* pack = new ServerPacket(ServerOP_ZoneReboot, sizeof(ServerZoneReboot_Struct));
 	ServerZoneReboot_Struct* s = (ServerZoneReboot_Struct*) pack->pBuffer;
 //	strcpy(s->ip1,ip1);
@@ -592,7 +592,7 @@ uint16	ZSList::GetAvailableZonePort()
 		i=LastAllocatedPort+1;
 
 	while(i!=LastAllocatedPort && port==0) {
-		if (i>Config->ZonePortHigh) 
+		if (i>Config->ZonePortHigh)
 			i=Config->ZonePortLow;
 
 		if (!FindByPort(i)) {
@@ -683,7 +683,7 @@ uint32 ZSList::TriggerBootup(uint32 iZoneID, uint32 iInstanceID) {
 	}
 
 	uint32 z = rand() % y;
-	
+
 	tmp[z]->TriggerBootup(iZoneID);
 	uint32 ret = tmp[z]->GetID();
 	safe_delete(tmp);
@@ -713,12 +713,11 @@ void ZSList::GetZoneIDList(vector<uint32> &zones) {
 		zones.push_back(zs->GetID());
 		iterator.Advance();
 	}
-	
 }
 
 void ZSList::WorldShutDown(uint32 time, uint32 interval)
 {
-   	if( time > 0 ) {
+	if( time > 0 ) {
 		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i seconds, everyone log out before this time.",time);
 
 		time *= 1000;
@@ -730,15 +729,15 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 		reminder->SetAtTrigger(interval);
 		shutdowntimer->Start();
 		reminder->Start();
-    }
-    else {
-        SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.");
-        ServerPacket* pack = new ServerPacket;
-        pack->opcode = ServerOP_ShutdownAll;
-        pack->size=0;
-        SendPacket(pack);
-        safe_delete(pack);
+	}
+	else {
+		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.");
+		ServerPacket* pack = new ServerPacket;
+		pack->opcode = ServerOP_ShutdownAll;
+		pack->size=0;
+		SendPacket(pack);
+		safe_delete(pack);
 		Process();
 		CatchSignal(2);
-    }
+	}
 }

@@ -20,7 +20,7 @@ static OpcodeManager *opcodes = nullptr;
 static Strategy struct_strategy;
 
 char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth);
-	
+
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
 	if(opcodes == nullptr) {
@@ -36,37 +36,37 @@ void Register(EQStreamIdentifier &into) {
 			return;
 		}
 	}
-	
+
 	//ok, now we have what we need to register.
-	
+
 	EQStream::Signature signature;
 	string pname;
-	
+
 	//register our world signature.
 	pname = string(name) + "_world";
 	signature.ignore_eq_opcode = 0;
 	signature.first_length = sizeof(structs::LoginInfo_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_SendLoginInfo);
 	into.RegisterPatch(signature, pname.c_str(), &opcodes, &struct_strategy);
-	
+
 	//register our zone signature.
 	pname = string(name) + "_zone";
 	signature.ignore_eq_opcode = opcodes->EmuToEQ(OP_AckPacket);
 	signature.first_length = sizeof(structs::ClientZoneEntry_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_ZoneEntry);
 	into.RegisterPatch(signature, pname.c_str(), &opcodes, &struct_strategy);
-	
-	
-	
+
+
+
 	_log(NET__IDENTIFY, "Registered patch %s", name);
 }
 
 void Reload() {
-	
+
 	//we have a big problem to solve here when we switch back to shared memory
 	//opcode managers because we need to change the manager pointer, which means
 	//we need to go to every stream and replace it's manager.
-	
+
 	if(opcodes != nullptr) {
 		//TODO: get this file name from the config file
 		string opfile = "patch_";
@@ -96,7 +96,7 @@ std::string Strategy::Describe() const {
 	r += name;
 	return(r);
 }
- 
+
 const EQClientVersion Strategy::ClientVersion() const
 {
 	return EQClientTitanium;
@@ -147,10 +147,10 @@ ENCODE(OP_SendCharInfo) {
 
 ENCODE(OP_SendAATable) {
 	ENCODE_LENGTH_ATLEAST(SendAA_Struct);
-	
+
 	SETUP_VAR_ENCODE(SendAA_Struct);
 	ALLOC_VAR_ENCODE(structs::SendAA_Struct, sizeof(structs::SendAA_Struct) + emu->total_abilities*sizeof(structs::AA_Ability));
-	
+
 	// Check clientver field to verify this AA should be sent for Titanium
 	// clientver 1 is for all clients and 3 is for Titanium
 	if (emu->clientver <= 3 )
@@ -202,13 +202,13 @@ ENCODE(OP_LeadershipExpUpdate) {
 
 ENCODE(OP_PlayerProfile) {
 	SETUP_DIRECT_ENCODE(PlayerProfile_Struct, structs::PlayerProfile_Struct);
-	
+
 	uint32 r;
-	
+
 	eq->available_slots=0xffffffff;
 	memset(eq->unknown4184, 0xff, sizeof(eq->unknown4184));
 	memset(eq->unknown04396, 0xff, sizeof(eq->unknown04396));
-	
+
 //	OUT(checksum);
 	OUT(gender);
 	OUT(race);
@@ -409,12 +409,12 @@ const uint8 bytes[] = {
 0x02,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x14
 };
 	memcpy(eq->unknown12864, bytes, sizeof(bytes));
-		
 
-	
+
+
 	//set the checksum...
 	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
-	
+
 	FINISH_ENCODE();
 }
 
@@ -458,11 +458,11 @@ ENCODE(OP_ZoneSpawns) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 	Spawn_Struct *emu = (Spawn_Struct *) __emu_buffer;
-	
+
 	//determine and verify length
 	int entrycount = in->size / sizeof(Spawn_Struct);
 	if(entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
@@ -470,16 +470,16 @@ ENCODE(OP_ZoneSpawns) {
 		delete in;
 		return;
 	}
-	
+
 	//make the EQ struct.
 	in->size = sizeof(structs::Spawn_Struct)*entrycount;
 	in->pBuffer = new unsigned char[in->size];
 	structs::Spawn_Struct *eq = (structs::Spawn_Struct *) in->pBuffer;
-	
+
 	//zero out the packet. We could avoid this memset by setting all fields (including unknowns)
 	//in the loop.
 	memset(in->pBuffer, 0, in->size);
-	
+
 	//do the transform...
 	int r;
 	int k;
@@ -571,7 +571,7 @@ ENCODE(OP_ZoneSpawns) {
 		eq->spawnId = emu->spawnId;
 //		eq->unknown0344[4] = emu->unknown0344[4];
 		eq->lfg = emu->lfg;
-        
+
 		/*
 		if (emu->face == 99)	      {eq->face = 0;}
 		if (emu->eyecolor1 == 99)  {eq->eyecolor1 = 0;}
@@ -583,8 +583,8 @@ ENCODE(OP_ZoneSpawns) {
 		*/
 
 	}
-	
-	
+
+
 	//kill off the emu structure and send the eq packet.
 	delete[] __emu_buffer;
 	dest->FastQueuePacket(&in, ack_req);
@@ -595,7 +595,7 @@ ENCODE(OP_ItemPacket) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 	ItemPacket_Struct *old_item_pkt=(ItemPacket_Struct *)__emu_buffer;
@@ -625,7 +625,7 @@ ENCODE(OP_CharInventory) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 
@@ -636,7 +636,7 @@ ENCODE(OP_CharInventory) {
 		return;
 	}
 	InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *) in->pBuffer;
-	
+
 	//do the transform...
 	int r;
 	string serial_string;
@@ -649,7 +649,7 @@ ENCODE(OP_CharInventory) {
 		} else {
 			_log(NET__STRUCTS, "Serialization failed on item slot %d during OP_CharInventory.  Item skipped.",eq->slot_id);
 		}
-	
+
 	}
 
 	in->size = serial_string.length();
@@ -682,7 +682,7 @@ ENCODE(OP_BazaarSearch) {
 	//determine and verify length
 	int entrycount = in->size / sizeof(BazaarSearchResults_Struct);
 	if(entrycount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0) {
-		_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", 
+		_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d",
 				   opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
 		delete in;
 		return;
@@ -746,39 +746,39 @@ ENCODE(OP_GuildMemberList) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	//store away the emu struct
 	unsigned char *__emu_buffer = in->pBuffer;
 	Internal_GuildMembers_Struct *emu = (Internal_GuildMembers_Struct *) in->pBuffer;
-	
-	
-	
+
+
+
 	//make a new EQ buffer.
 	uint32 pnl = strlen(emu->player_name);
-	uint32 length = sizeof(structs::GuildMembers_Struct) + pnl + 
+	uint32 length = sizeof(structs::GuildMembers_Struct) + pnl +
 		emu->count*sizeof(structs::GuildMemberEntry_Struct)
 		+ emu->name_length + emu->note_length;
 	in->pBuffer = new uint8[length];
 	in->size = length;
 	//no memset since we fill every byte.
-	
+
 	uint8 *buffer;
 	buffer = in->pBuffer;
-	
+
 	//easier way to setup GuildMembers_Struct
 	//set prefix name
 	strcpy((char *)buffer, emu->player_name);
 	buffer += pnl;
 	*buffer = '\0';
 	buffer++;
-	
+
 	//add member count.
 	*((uint32 *) buffer) = htonl( emu->count );
 	buffer += sizeof(uint32);
-	
+
 	if(emu->count > 0) {
 		Internal_GuildMemberEntry_Struct *emu_e = emu->member;
-		const char *emu_name = (const char *) (__emu_buffer + 
+		const char *emu_name = (const char *) (__emu_buffer +
 				sizeof(Internal_GuildMembers_Struct) + //skip header
 				emu->count * sizeof(Internal_GuildMemberEntry_Struct)	//skip static length member data
 				);
@@ -786,12 +786,12 @@ ENCODE(OP_GuildMemberList) {
 				emu->name_length + //skip name contents
 				emu->count	//skip string terminators
 				);
-		
+
 		structs::GuildMemberEntry_Struct *e = (structs::GuildMemberEntry_Struct *) buffer;
-		
+
 		uint32 r;
 		for(r = 0; r < emu->count; r++, emu_e++) {
-			
+
 			//the order we set things here must match the struct
 
 //nice helper macro
@@ -807,7 +807,7 @@ ENCODE(OP_GuildMemberList) {
 		}
 #define PutFieldN(field) \
 		e->field = htonl(emu_e->field)
-			
+
 			SlideStructString( name, emu_name );
 			PutFieldN(level);
 			PutFieldN(banker);
@@ -821,15 +821,15 @@ ENCODE(OP_GuildMemberList) {
 			SlideStructString( public_note, emu_note );
 			e->zoneinstance = 0;
 			e->zone_id = htons(emu_e->zone_id);
-			
-			
+
+
 #undef SlideStructString
 #undef PutFieldN
-			
+
 			e++;
 		}
 	}
-	
+
 
 	delete[] __emu_buffer;
 
@@ -840,9 +840,9 @@ ENCODE(OP_ReadBook) {
 
 	EQApplicationPacket *in = *p;
 	*p = nullptr;
-	
+
 	unsigned char *__emu_buffer = in->pBuffer;
-	
+
 	BookText_Struct *emu_BookText_Struct = (BookText_Struct *)__emu_buffer;
 
 	in->size = sizeof(structs::BookText_Struct) + strlen(emu_BookText_Struct->booktext);
@@ -915,7 +915,7 @@ ENCODE(OP_VetRewardsAvaliable)
 		old_data += sizeof(InternalVeteranReward);
 		data += sizeof(structs::VeteranReward);
 	}
-	
+
 	dest->FastQueuePacket(&outapp_create);
 	delete inapp;
 }
@@ -1027,7 +1027,7 @@ ENCODE(OP_DzMemberList)
 		ss.write((const char*)&null_term, sizeof(char));
 		ss.write((const char*)&emu->entries[i].status, sizeof(char));
 	}
-	
+
 	__packet->size = ss.str().length();
 	__packet->pBuffer = new unsigned char[__packet->size];
 	memcpy(__packet->pBuffer, ss.str().c_str(), __packet->size);
@@ -1084,7 +1084,7 @@ ENCODE(OP_DzLeaderStatus)
 	ss.write((const char*)&client_id, sizeof(uint32));
 	ss.write((const char*)&client_id, sizeof(uint32));//1
 	ss.write((const char*)&client_id, sizeof(uint32));
-	
+
 	__packet->size = ss.str().length();
 	__packet->pBuffer = new unsigned char[__packet->size];
 	memcpy(__packet->pBuffer, ss.str().c_str(), __packet->size);
@@ -1182,7 +1182,7 @@ DECODE(OP_InspectRequest) {
 DECODE(OP_InspectAnswer) {
 	DECODE_LENGTH_EXACT(structs::InspectResponse_Struct);
 	SETUP_DIRECT_DECODE(InspectResponse_Struct, structs::InspectResponse_Struct);
-	
+
 	IN(TargetID);
 	IN(playerid);
 
@@ -1194,7 +1194,7 @@ DECODE(OP_InspectAnswer) {
 	// move arrow item up to last element in server array
 	strn0cpy(emu->itemnames[21], "", sizeof(emu->itemnames[21]));
 	strn0cpy(emu->itemnames[22], eq->itemnames[21], sizeof(emu->itemnames[22]));
-	
+
 	int k;
 	for (k = 0; k <= 20; k++) {
 		IN(itemicons[k]);
@@ -1221,13 +1221,13 @@ ENCODE(OP_LFGuild)
 		dest->FastQueuePacket(&in, ack_req);
 		return;
 	}
-	
+
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, sizeof(structs::LFGuild_PlayerToggle_Struct));
 
 	memcpy(outapp->pBuffer, in->pBuffer, sizeof(structs::LFGuild_PlayerToggle_Struct));
 
 	dest->FastQueuePacket(&outapp, ack_req);
-	
+
 	delete in;
 }
 
@@ -1264,14 +1264,14 @@ DECODE(OP_ItemLinkClick) {
 	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);
 	SETUP_DIRECT_DECODE(ItemViewRequest_Struct, structs::ItemViewRequest_Struct);
 	MEMSET_IN(ItemViewRequest_Struct);
-	
+
 	IN(item_id);
 	int r;
 	for (r = 0; r < 5; r++) {
 		IN(augments[r]);
 	}
 	IN(link_hash);
-	
+
 	FINISH_DIRECT_DECODE();
 }
 
@@ -1322,7 +1322,7 @@ DECODE(OP_WhoAllRequest) {
 	IN(lvlhigh);
 	IN(gmlookup);
 	emu->type = 3;
-	
+
 	FINISH_DIRECT_DECODE();
 }
 
@@ -1401,7 +1401,7 @@ char *SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 d
 		}
 	}
 
-	
+
 	*length=MakeAnyLenString(&serialization,
 		"%.*s%s"	// For leading quotes (and protection) if a subitem;
 		"%s"		// Instance data

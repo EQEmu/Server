@@ -29,13 +29,13 @@
 # include "winconfig.h"
 #else
 # include "config.h"
-#endif 
+#endif
 
 #include "missing.h"
 #include "utils.h"
 
 namespace Test
-{	
+{
 	// Computes the procentage of correct tests.
 	//
 	int

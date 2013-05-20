@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2013  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 // Debug Levels
@@ -23,11 +23,11 @@
 ////// File/Console options
 // 0 <= Quiet mode Errors to file Status and Normal ignored
 // 1 >= Status and Normal to console, Errors to file
-// 2 >= Status, Normal, and Error  to console and logfile
+// 2 >= Status, Normal, and Error to console and logfile
 // 3 >= Lite debug
 // 4 >= Medium debug
 // 5 >= Debug release (Anything higher is not recommended for regular use)
-// 6 == (Reserved for special builds) Login  opcode debug All packets dumped
+// 6 == (Reserved for special builds) Login opcode debug All packets dumped
 // 7 == (Reserved for special builds) Chat Opcode debug All packets dumped
 // 8 == (Reserved for special builds) World opcode debug All packets dumped
 // 9 == (Reserved for special builds) Zone Opcode debug All packets dumped
@@ -45,7 +45,20 @@
 	#ifndef _CRTDBG_MAP_ALLOC
 		#include <stdlib.h>
 		#include <crtdbg.h>
+		#if (_MSC_VER < 1300)
+			#include <new>
+			#include <memory>
+			#define _CRTDBG_MAP_ALLOC
+			#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
+			#define malloc(s) _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
+		#endif
 	#endif
+#endif
+
+#ifdef _WINDOWS
+	// VS6 doesn't like the length of STL generated names: disabling
+	#pragma warning(disable:4786)
+	#pragma warning(disable:4996)
 #endif
 
 #ifndef EQDEBUG_H
@@ -69,7 +82,6 @@
 
 #include "logsys.h"
 #include "common_profile.h"
-
 #ifdef ZONE
 #include "../zone/zone_profile.h"
 #endif
@@ -91,22 +103,22 @@ public:
 		Debug,
 		Quest,
 		Commands,
-        Crash,
+		Crash,
 		MaxLogID
 	};
-	
+
 	//these are callbacks called for each
 	typedef void (* msgCallbackBuf)(LogIDs id, const char *buf, uint8 size, uint32 count);
 	typedef void (* msgCallbackFmt)(LogIDs id, const char *fmt, va_list ap);
 	typedef void (* msgCallbackPva)(LogIDs id, const char *prefix, const char *fmt, va_list ap);
-	
+
 	void SetAllCallbacks(msgCallbackFmt proc);
 	void SetAllCallbacks(msgCallbackBuf proc);
 	void SetAllCallbacks(msgCallbackPva proc);
 	void SetCallback(LogIDs id, msgCallbackFmt proc);
 	void SetCallback(LogIDs id, msgCallbackBuf proc);
 	void SetCallback(LogIDs id, msgCallbackPva proc);
-	
+
 	bool writebuf(LogIDs id, const char *buf, uint8 size, uint32 count);
 	bool write(LogIDs id, const char *fmt, ...);
 	bool writePVA(LogIDs id, const char *prefix, const char *fmt, va_list args);
@@ -125,7 +137,7 @@ private:
 	8 = use stderr instead (2 must be set)
 */
 	uint8	pLogStatus[MaxLogID];
-	
+
 	msgCallbackFmt logCallbackFmt[MaxLogID];
 	msgCallbackBuf logCallbackBuf[MaxLogID];
 	msgCallbackPva logCallbackPva[MaxLogID];
@@ -148,7 +160,5 @@ public:
 	LARGE_INTEGER tmp;
 	int64* p;
 };
-
 #endif
-
 #endif

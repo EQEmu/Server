@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2005  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "masterentity.h"
@@ -75,7 +75,7 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 		return;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO raid_members SET raidid=%lu, charid=%lu, groupid=%lu, _class=%d, level=%d, name='%s', isgroupleader=%d, israidleader=%d, islooter=%d", (unsigned long)GetID(), (unsigned long)c->CharacterID(), (unsigned long)group, c->GetClass(), c->GetLevel(), c->GetName(), groupleader, rleader, looter ),errbuf,&result)){
 		mysql_free_result(result);
@@ -103,7 +103,7 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 void Raid::RemoveMember(const char *c)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "DELETE FROM raid_members where name='%s'", c ),errbuf,&result)){
 		mysql_free_result(result);
@@ -134,7 +134,7 @@ void Raid::RemoveMember(const char *c)
 void Raid::DisbandRaid()
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "DELETE FROM raid_members WHERE raidid=%lu", (unsigned long)GetID()),errbuf,&result)){
 		mysql_free_result(result);
@@ -160,7 +160,7 @@ void Raid::DisbandRaid()
 void Raid::MoveMember(const char *name, uint32 newGroup)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET groupid=%lu WHERE name='%s'", (unsigned long)newGroup, name),errbuf,&result)){
 		mysql_free_result(result);
@@ -184,7 +184,7 @@ void Raid::MoveMember(const char *name, uint32 newGroup)
 void Raid::SetGroupLeader(const char *who, bool glFlag)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET isgroupleader=%lu WHERE name='%s'", (unsigned long)glFlag, who),errbuf,&result)){
 		mysql_free_result(result);
@@ -211,7 +211,7 @@ void Raid::SetGroupLeader(const char *who, bool glFlag)
 void Raid::SetRaidLeader(const char *wasLead, const char *name)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (!database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET israidleader=0 WHERE name='%s'", wasLead),errbuf,&result)){
 		printf("Set Raid Leader error: %s\n", errbuf);
@@ -265,7 +265,7 @@ bool Raid::IsGroupLeader(const char *who)
 void Raid::UpdateLevel(const char *name, int newLevel)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET level=%lu WHERE name='%s'", (unsigned long)newLevel, name),errbuf,&result)){
 		mysql_free_result(result);
@@ -416,7 +416,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 		return;
 
 	range = caster->GetAOERange(spellid);
-	
+
 	float range2 = range*range;
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
@@ -514,8 +514,8 @@ void Raid::BalanceHP(int32 penalty, uint32 gid)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				if((members[gi].member->GetMaxHP() - dmgtaken) < 1){ //this way the ability will never kill someone
-					members[gi].member->SetHP(1);					 //but it will come darn close
+				if((members[gi].member->GetMaxHP() - dmgtaken) < 1){//this way the ability will never kill someone
+					members[gi].member->SetHP(1);					//but it will come darn close
 					members[gi].member->SendHPUpdate();
 				}
 				else{
@@ -549,14 +549,14 @@ void Raid::BalanceMana(int32 penalty, uint32 gid)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				if((members[gi].member->GetMaxMana() - manataken) < 1){ 
-					members[gi].member->SetMana(1);		
-					if (members[gi].member->IsClient())		
-						members[gi].member->CastToClient()->SendManaUpdate();	 
+				if((members[gi].member->GetMaxMana() - manataken) < 1){
+					members[gi].member->SetMana(1);
+					if (members[gi].member->IsClient())
+						members[gi].member->CastToClient()->SendManaUpdate();
 				}
 				else{
 					members[gi].member->SetMana(members[gi].member->GetMaxMana() - manataken);
-					if (members[gi].member->IsClient())		
+					if (members[gi].member->IsClient())
 						members[gi].member->CastToClient()->SendManaUpdate();
 				}
 			}
@@ -569,91 +569,90 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
 	//avoid unneeded work
 	if(copper == 0 && silver == 0 && gold == 0 && platinum == 0)
 		return;
-	
-  uint32 i;
-  uint8 membercount = 0;
-  for (i = 0; i < MAX_RAID_MEMBERS; i++) { 
-	  if (members[i].member != nullptr) {
 
-		  membercount++; 
-	  } 
-  } 
+	uint32 i;
+	uint8 membercount = 0;
+	for (i = 0; i < MAX_RAID_MEMBERS; i++) {
+		if (members[i].member != nullptr) {
+			membercount++;
+		}
+	}
 
-  if (membercount == 0) 
-	  return;
-  
-  uint32 mod;
-  //try to handle round off error a little better
-  if(membercount > 1) {
-	mod = platinum % membercount;
-  	if((mod) > 0) {
-  		platinum -= mod;
-  		gold += 10 * mod;
-  	}
-	mod = gold % membercount;
-  	if((mod) > 0) {
-  		gold -= mod;
-  		silver += 10 * mod;
-  	}
-	mod = silver % membercount;
-  	if((mod) > 0) {
-  		silver -= mod;
-  		copper += 10 * mod;
-  	}
-  }
-  
-  //calculate the splits
-  //We can still round off copper pieces, but I dont care
-  uint32 sc;
-  uint32 cpsplit = copper / membercount;
-  sc = copper   % membercount;
-  uint32 spsplit = silver / membercount;
-  uint32 gpsplit = gold / membercount;
-  uint32 ppsplit = platinum / membercount;
+	if (membercount == 0)
+		return;
 
-  char buf[128];
-  buf[63] = '\0';
-  string msg = "You receive";
-  bool one = false;
-  
-  if(ppsplit > 0) {
-	 snprintf(buf, 63, " %u platinum", ppsplit);
-	 msg += buf;
-	 one = true;
-  }
-  if(gpsplit > 0) {
-	 if(one)
-	 	msg += ",";
-	 snprintf(buf, 63, " %u gold", gpsplit);
-	 msg += buf;
-	 one = true;
-  }
-  if(spsplit > 0) {
-	 if(one)
-	 	msg += ",";
-	 snprintf(buf, 63, " %u silver", spsplit);
-	 msg += buf;
-	 one = true;
-  }
-  if(cpsplit > 0) {
-	 if(one)
-	 	msg += ",";
-	 //this message is not 100% accurate for the splitter
-	 //if they are receiving any roundoff
-	 snprintf(buf, 63, " %u copper", cpsplit);
-	 msg += buf;
-	 one = true;
-  }
-  msg += " as your split";
-  
-  for (i = 0; i < MAX_RAID_MEMBERS; i++) { 
-	  if (members[i].member != nullptr) { // If Group Member is Client
+	uint32 mod;
+	//try to handle round off error a little better
+	if(membercount > 1) {
+		mod = platinum % membercount;
+		if((mod) > 0) {
+			platinum -= mod;
+			gold += 10 * mod;
+		}
+		mod = gold % membercount;
+		if((mod) > 0) {
+			gold -= mod;
+			silver += 10 * mod;
+		}
+		mod = silver % membercount;
+		if((mod) > 0) {
+			silver -= mod;
+			copper += 10 * mod;
+		}
+	}
+
+	//calculate the splits
+	//We can still round off copper pieces, but I dont care
+	uint32 sc;
+	uint32 cpsplit = copper / membercount;
+	sc = copper % membercount;
+	uint32 spsplit = silver / membercount;
+	uint32 gpsplit = gold / membercount;
+	uint32 ppsplit = platinum / membercount;
+
+	char buf[128];
+	buf[63] = '\0';
+	string msg = "You receive";
+	bool one = false;
+
+	if(ppsplit > 0) {
+		snprintf(buf, 63, " %u platinum", ppsplit);
+		msg += buf;
+		one = true;
+	}
+	if(gpsplit > 0) {
+		if(one)
+			msg += ",";
+		snprintf(buf, 63, " %u gold", gpsplit);
+		msg += buf;
+		one = true;
+	}
+	if(spsplit > 0) {
+		if(one)
+			msg += ",";
+		snprintf(buf, 63, " %u silver", spsplit);
+		msg += buf;
+		one = true;
+	}
+	if(cpsplit > 0) {
+		if(one)
+			msg += ",";
+		//this message is not 100% accurate for the splitter
+		//if they are receiving any roundoff
+		snprintf(buf, 63, " %u copper", cpsplit);
+		msg += buf;
+		one = true;
+	}
+	msg += " as your split";
+
+	for (i = 0; i < MAX_RAID_MEMBERS; i++) {
+		if (members[i].member != nullptr) { // If Group Member is Client
 		//I could not get MoneyOnCorpse to work, so we use this
 		members[i].member->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
-		  
+
 		members[i].member->Message(2, msg.c_str());
-	  }
-  }
+		}
+	}
 }
 
 void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
@@ -664,7 +663,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 		return;
 
 	range = caster->GetAOERange(spellid);
-	
+
 	float range2 = range*range;
 
 	for(z=0; z < MAX_RAID_MEMBERS; z++) {
@@ -694,7 +693,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 
 void Raid::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading, uint32 gid)
 {
-	for(int i = 0; i < MAX_RAID_MEMBERS; i++) 
+	for(int i = 0; i < MAX_RAID_MEMBERS; i++)
 	{
 		if(members[i].member)
 		{
@@ -703,13 +702,13 @@ void Raid::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x
 				members[i].member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
 			}
 		}
-	
+
 	}
 }
 
 void Raid::TeleportRaid(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading)
 {
-	for(int i = 0; i < MAX_RAID_MEMBERS; i++) 
+	for(int i = 0; i < MAX_RAID_MEMBERS; i++)
 	{
 		if(members[i].member)
 		{
@@ -721,7 +720,7 @@ void Raid::TeleportRaid(Mob* sender, uint32 zoneID, uint16 instance_id, float x,
 void Raid::ChangeLootType(uint32 type)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_details SET loottype=%lu WHERE raidid=%lu", (unsigned long)type, (unsigned long)GetID()),errbuf,&result)){
 		mysql_free_result(result);
@@ -734,14 +733,14 @@ void Raid::ChangeLootType(uint32 type)
 void Raid::AddRaidLooter(const char* looter)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET islooter=1 WHERE name='%s'", looter),errbuf,&result)){
 		mysql_free_result(result);
 	}
 
 	safe_delete_array(query);
-	
+
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
 		if(strcmp(looter, members[x].membername) == 0)
@@ -771,14 +770,14 @@ void Raid::AddRaidLooter(const char* looter)
 void Raid::RemoveRaidLooter(const char* looter)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_members SET islooter=0 WHERE name='%s'", looter),errbuf,&result)){
 		mysql_free_result(result);
 	}
 
 	safe_delete_array(query);
-	
+
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
 		if(strcmp(looter, members[x].membername) == 0)
@@ -987,8 +986,8 @@ void Raid::SendRaidMove(const char* who, Client *to)
 	SendRaidAdd(who, to);
 	if(c && c == to){
 		SendBulkRaid(c);
-		if(IsLocked()) { 
-			SendRaidLockTo(c); 
+		if(IsLocked()) {
+			SendRaidLockTo(c);
 		}
 	}
 }
@@ -1080,7 +1079,7 @@ void Raid::SendGroupUpdate(Client *to)
 		return;
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate2_Struct));
-	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;	
+	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
 	int index = 0;
 	uint32 grp = GetGroup(to->GetName());
@@ -1227,7 +1226,7 @@ void Raid::SendRaidGroupRemove(const char *who, uint32 gid)
 void Raid::LockRaid(bool lockFlag)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "UPDATE raid_details SET locked=%d WHERE raidid=%lu", lockFlag, (unsigned long)GetID()),errbuf,&result)){
 		mysql_free_result(result);
@@ -1253,7 +1252,7 @@ void Raid::LockRaid(bool lockFlag)
 void Raid::SetRaidDetails()
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO raid_details SET raidid=%lu, loottype=4, locked=0", (unsigned long)GetID()),errbuf,&result)){
 		mysql_free_result(result);
@@ -1265,7 +1264,7 @@ void Raid::SetRaidDetails()
 void Raid::GetRaidDetails()
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT locked, loottype FROM raid_details WHERE raidid=%lu", (unsigned long)GetID()),errbuf,&result)){
@@ -1288,7 +1287,7 @@ bool Raid::LearnMembers()
 {
 	memset(members, 0, (sizeof(RaidMember)*MAX_RAID_MEMBERS));
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
+	char* query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT name, groupid, _class, level, isgroupleader, israidleader, islooter FROM raid_members WHERE raidid=%lu", (unsigned long)GetID()),errbuf,&result)){
@@ -1365,10 +1364,10 @@ void Raid::SendHPPacketsTo(Client *c)
 {
 	if(!c)
 		return;
-	
+
 	uint32 gid = this->GetGroup(c);
 	EQApplicationPacket hpapp;
-        EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
+	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
 		if(members[x].member)
@@ -1377,18 +1376,18 @@ void Raid::SendHPPacketsTo(Client *c)
 			{
 				members[x].member->CreateHPPacket(&hpapp);
 				c->QueuePacket(&hpapp, false);
-                                if(c->GetClientVersion() >= EQClientSoD)
-                                {
-                                        outapp.SetOpcode(OP_MobManaUpdate);
-                                        MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
-                                        mmus->spawn_id = members[x].member->GetID();
-                                        mmus->mana = members[x].member->GetManaPercent();
-                                        c->QueuePacket(&outapp, false);
-                                        outapp.SetOpcode(OP_MobEnduranceUpdate);
-                                        MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
-                                        meus->endurance = members[x].member->GetEndurancePercent();
-                                        c->QueuePacket(&outapp, false);
-                                }
+				if(c->GetClientVersion() >= EQClientSoD)
+				{
+					outapp.SetOpcode(OP_MobManaUpdate);
+					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
+					mmus->spawn_id = members[x].member->GetID();
+					mmus->mana = members[x].member->GetManaPercent();
+					c->QueuePacket(&outapp, false);
+					outapp.SetOpcode(OP_MobEnduranceUpdate);
+					MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
+					meus->endurance = members[x].member->GetEndurancePercent();
+					c->QueuePacket(&outapp, false);
+				}
 			}
 		}
 	}
@@ -1403,7 +1402,7 @@ void Raid::SendHPPacketsFrom(Mob *m)
 	if(m->IsClient())
 		gid = this->GetGroup(m->CastToClient());
 	EQApplicationPacket hpapp;
-        EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
+	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
 	m->CreateHPPacket(&hpapp);
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
@@ -1413,18 +1412,18 @@ void Raid::SendHPPacketsFrom(Mob *m)
 			if(!m->IsClient() || ((members[x].member != m->CastToClient()) && (members[x].GroupNumber == gid)))
 			{
 				members[x].member->QueuePacket(&hpapp, false);
-                                if(members[x].member->GetClientVersion() >= EQClientSoD)
-                                {
-                                        outapp.SetOpcode(OP_MobManaUpdate);
-                                        MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
-                                        mmus->spawn_id = m->GetID();
-                                        mmus->mana = m->GetManaPercent();
-                                        members[x].member->QueuePacket(&outapp, false);
-                                        outapp.SetOpcode(OP_MobEnduranceUpdate);
-                                        MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
-                                        meus->endurance = m->GetEndurancePercent();
-                                        members[x].member->QueuePacket(&outapp, false);
-                                }
+				if(members[x].member->GetClientVersion() >= EQClientSoD)
+				{
+					outapp.SetOpcode(OP_MobManaUpdate);
+					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
+					mmus->spawn_id = m->GetID();
+					mmus->mana = m->GetManaPercent();
+					members[x].member->QueuePacket(&outapp, false);
+					outapp.SetOpcode(OP_MobEnduranceUpdate);
+					MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
+					meus->endurance = m->GetEndurancePercent();
+					members[x].member->QueuePacket(&outapp, false);
+				}
 			}
 		}
 	}

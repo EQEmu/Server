@@ -274,7 +274,7 @@ namespace EQExtractor2.Patches
 
             //OpManager.RegisterExplorer("OP_NPCMoveUpdate", ExploreNPCMoveUpdate);
             //OpManager.RegisterExplorer("OP_MobUpdate", ExploreMobUpdate);
-            
+
         }
 
         public void ExploreNPCMoveUpdate(StreamWriter OutputStream, ByteStream Buffer, PacketDirection Direction)
@@ -365,7 +365,7 @@ namespace EQExtractor2.Patches
                 UInt32 Cost = Buffer.ReadUInt32();
                 UInt32 Seq = Buffer.ReadUInt32();
                 UInt32 CurrentLevel = Buffer.ReadUInt32();
-                
+
                 UInt32 PreReqSkillCount = Buffer.ReadUInt32();
                 UInt32 [] PreReqSkills = new UInt32[PreReqSkillCount];
 
@@ -416,7 +416,7 @@ namespace EQExtractor2.Patches
                     OutputFile.Write("{0} ", PreReqMinPoints[i]);
 
                 OutputFile.WriteLine("");
-                
+
                 OutputFile.WriteLine(" Type:\t\t" + Type);
                 OutputFile.WriteLine(" SpellID:\t" + SpellID);
                 OutputFile.WriteLine(" Unknown057:\t" + Unknown057);

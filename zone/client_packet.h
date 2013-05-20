@@ -223,12 +223,12 @@
 	void Handle_OP_AutoFire(const EQApplicationPacket *app);
 	void Handle_OP_Rewind(const EQApplicationPacket *app);
 	void Handle_OP_RaidCommand(const EQApplicationPacket *app);
- 	void Handle_OP_Translocate(const EQApplicationPacket *app);
- 	void Handle_OP_Sacrifice(const EQApplicationPacket *app);
+	void Handle_OP_Translocate(const EQApplicationPacket *app);
+	void Handle_OP_Sacrifice(const EQApplicationPacket *app);
 	void Handle_OP_AcceptNewTask(const EQApplicationPacket *app);
 	void Handle_OP_CancelTask(const EQApplicationPacket *app);
 	void Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app);
-	void Handle_OP_KeyRing(const EQApplicationPacket *app); 
+	void Handle_OP_KeyRing(const EQApplicationPacket *app);
 	void Handle_OP_FriendsWho(const EQApplicationPacket *app);
 	void Handle_OP_Bandolier(const EQApplicationPacket *app);
 	void Handle_OP_PopupResponse(const EQApplicationPacket *app);
@@ -247,7 +247,7 @@
 	void Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app);
 	void Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app);
 	void Handle_OP_AdventureStatsRequest(const EQApplicationPacket *app);
-	void Handle_OP_AdventureLeaderboardRequest(const EQApplicationPacket *app);	
+	void Handle_OP_AdventureLeaderboardRequest(const EQApplicationPacket *app);
 	void Handle_OP_RespawnWindow(const EQApplicationPacket *app);
 	void Handle_OP_GroupUpdate(const EQApplicationPacket *app);
 	void Handle_OP_SetStartCity(const EQApplicationPacket *app);

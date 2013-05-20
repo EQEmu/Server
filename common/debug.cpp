@@ -9,8 +9,9 @@
 	#include <process.h>
 
 	#define snprintf	_snprintf
+	#define vsnprintf	_vsnprintf
 	#define strncasecmp	_strnicmp
-	#define strcasecmp  _stricmp
+	#define strcasecmp	_stricmp
 #else
 	#include <sys/types.h>
 	#include <unistd.h>
@@ -73,39 +74,40 @@ EQEMuLog::~EQEMuLog() {
 }
 
 bool EQEMuLog::open(LogIDs id) {
-    
+
 	if (!logFileValid) {
 		return false;
-    }
+	}
 	if (id >= MaxLogID) {
 		return false;
-    }
+	}
 	LockMutex lock(&MOpen);
 	if (pLogStatus[id] & 4) {
 		return false;
-    }
-    if (fp[id]) {
-        //cerr<<"Warning: LogFile already open"<<endl;
-        return true;
-    }
+	}
+	if (fp[id]) {
+		//cerr<<"Warning: LogFile already open"<<endl;
+		return true;
+	}
 
 	std::string filename = FileNames[id];
 
-    const EQEmuExePlatform &platform = GetExecutablePlatform();
+	const EQEmuExePlatform &platform = GetExecutablePlatform();
 
-    if(platform == ExePlatformWorld) {
+	if(platform == ExePlatformWorld) {
 		filename.append("_world");
-    } else if(platform == ExePlatformZone) {
+	} else if(platform == ExePlatformZone) {
 		filename.append("_zone");
-    } else if(platform == ExePlatformLaunch) {
+	} else if(platform == ExePlatformLaunch) {
 		filename.append("_launch");
-    } else if(platform == ExePlatformUCS) {
+	} else if(platform == ExePlatformUCS) {
 		filename.append("_ucs");
-    } else if(platform == ExePlatformQueryServ) {
+	} else if(platform == ExePlatformQueryServ) {
 		filename.append("_queryserv");
-    } else if(platform == ExePlatformSharedMemory) {
+	} else if(platform == ExePlatformSharedMemory) {
 		filename.append("_shared_memory");
-    }
+	}
+
 
 #ifndef NO_PIDLOG
 	// According to http://msdn.microsoft.com/en-us/library/vstudio/ee404875(v=vs.100).aspx
@@ -115,23 +117,23 @@ bool EQEMuLog::open(LogIDs id) {
 #endif
 	filename.append(".log");
 	fp[id] = fopen(filename.c_str(), "a");
-    if (!fp[id]) {
+	if (!fp[id]) {
 		std::cerr << "Failed to open log file: " << filename << std::endl;
 		pLogStatus[id] |= 4; // set file state to error
-        return false;
-    }
-    fputs("---------------------------------------------\n",fp[id]);
-    write(id, "Starting Log: %s", filename.c_str());
-    return true;
+		return false;
+	}
+	fputs("---------------------------------------------\n",fp[id]);
+	write(id, "Starting Log: %s", filename.c_str());
+	return true;
 }
 
 bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 	if (!logFileValid) {
 		return false;
-    }
+	}
 	if (id >= MaxLogID) {
 		return false;
-    }
+	}
 	bool dofile = false;
 	if (pLogStatus[id] & 1) {
 		dofile = open(id);
@@ -142,13 +144,13 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 	if (!logFileValid)
 		return false;	//check again for threading race reasons (to avoid two mutexes)
 
-    time_t aclock;
-    struct tm *newtime;
-    
-    time( &aclock );                 /* Get time in seconds */
-    newtime = localtime( &aclock );  /* Convert time to struct */
+	time_t aclock;
+	struct tm *newtime;
 
-    if (dofile)
+	time( &aclock ); /* Get time in seconds */
+	newtime = localtime( &aclock ); /* Convert time to struct */
+
+	if (dofile)
 #ifndef NO_PIDLOG
 		fprintf(fp[id], "[%02d.%02d. - %02d:%02d:%02d] ", newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
 #else
@@ -157,12 +159,10 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 
 	va_list argptr, tmpargptr;
 	va_start(argptr, fmt);
-	
 	if (dofile) {
 		va_copy(tmpargptr, argptr);
 		vfprintf( fp[id], fmt, tmpargptr );
 	}
-	
 	if(logCallbackFmt[id]) {
 		msgCallbackFmt p = logCallbackFmt[id];
 		va_copy(tmpargptr, argptr);
@@ -172,45 +172,40 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 	std::string outputMessage;
 	StringFormat(outputMessage, fmt, argptr);
 	
-    if (pLogStatus[id] & 2) {
+	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
-		    
+			
 			std::cerr << "[" << LogNames[id] << "] ";
 			std::cerr << outputMessage;
 		}
 		else {
-		    std::cout << "[" << LogNames[id] << "] ";
+			std::cout << "[" << LogNames[id] << "] ";
 			std::cout << outputMessage;
 		}
 	}
-	
 	va_end(argptr);
-	
-    if (dofile)
+	if (dofile)
 		fprintf(fp[id], "\n");
-		
-    if (pLogStatus[id] & 2) {
+	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
-		    std::cerr << std::endl;
+			std::cerr << std::endl;
 		} else {
-		    std::cout << std::endl;
+			std::cout << std::endl;
 		}
 	}
-	
-    if(dofile)
-      fflush(fp[id]);
-      
-    return true;
+	if(dofile)
+		fflush(fp[id]);
+	return true;
 }
 
 //write with Prefix and a VA_list
 bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list argptr) {
 	if (!logFileValid) {
 		return false;
-    }
+	}
 	if (id >= MaxLogID) {
 		return false;
-    }
+	}
 	bool dofile = false;
 	if (pLogStatus[id] & 1) {
 		dofile = open(id);
@@ -222,15 +217,15 @@ bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list 
 	if (!logFileValid)
 		return false;	//check again for threading race reasons (to avoid two mutexes)
 
-    time_t aclock;
-    struct tm *newtime;
-    
-    time( &aclock );                 /* Get time in seconds */
-    newtime = localtime( &aclock );  /* Convert time to struct */
+	time_t aclock;
+	struct tm *newtime;
+
+	time( &aclock ); /* Get time in seconds */
+	newtime = localtime( &aclock ); /* Convert time to struct */
 
 	va_list tmpargptr;
 
-    if (dofile) {
+	if (dofile) {
 #ifndef NO_PIDLOG
 		fprintf(fp[id], "[%02d.%02d. - %02d:%02d:%02d] %s", newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec, prefix);
 #else
@@ -238,13 +233,13 @@ bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list 
 #endif
 		va_copy(tmpargptr, argptr);
 		vfprintf( fp[id], fmt, tmpargptr );
-    }
+	}
 	if(logCallbackPva[id]) {
 		msgCallbackPva p = logCallbackPva[id];
 		va_copy(tmpargptr, argptr);
 		p(id, prefix, fmt, tmpargptr );
 	}
-    if (pLogStatus[id] & 2) {
+	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
 			fprintf(stderr, "[%s] %s", LogNames[id], prefix);
 			vfprintf( stderr, fmt, argptr );
@@ -255,26 +250,26 @@ bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list 
 		}
 	}
 	va_end(argptr);
-    if (dofile)
+	if (dofile)
 		fprintf(fp[id], "\n");
-    if (pLogStatus[id] & 2) {
+	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8)
 			fprintf(stderr, "\n");
 		else
 			fprintf(stdout, "\n");
 	}
-    if(dofile)
-      fflush(fp[id]);
-    return true;
+	if(dofile)
+		fflush(fp[id]);
+	return true;
 }
 
 bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count) {
 	if (!logFileValid) {
 		return false;
-    }
+	}
 	if (id >= MaxLogID) {
 		return false;
-    }
+	}
 	bool dofile = false;
 	if (pLogStatus[id] & 1) {
 		dofile = open(id);
@@ -285,13 +280,13 @@ bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count) {
 	if (!logFileValid)
 		return false;	//check again for threading race reasons (to avoid two mutexes)
 
-    time_t aclock;
-    struct tm *newtime;
-    
-    time( &aclock );                 /* Get time in seconds */
-    newtime = localtime( &aclock );  /* Convert time to struct */
+	time_t aclock;
+	struct tm *newtime;
 
-    if (dofile)
+	time( &aclock ); /* Get time in seconds */
+	newtime = localtime( &aclock ); /* Convert time to struct */
+
+	if (dofile)
 #ifndef NO_PIDLOG
 		fprintf(fp[id], "[%02d.%02d. - %02d:%02d:%02d] ", newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
 #else
@@ -306,7 +301,7 @@ bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count) {
 		msgCallbackBuf p = logCallbackBuf[id];
 		p(id, buf, size, count);
 	}
-    if (pLogStatus[id] & 2) {
+	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
 			fprintf(stderr, "[%s] ", LogNames[id]);
 			fwrite(buf, size, count, stderr);
@@ -317,9 +312,9 @@ bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count) {
 			fprintf(stdout, "\n");
 		}
 	}
-    if(dofile)
-      fflush(fp[id]);
-    return true;
+	if(dofile)
+		fflush(fp[id]);
+	return true;
 }
 
 bool EQEMuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...) {
@@ -329,24 +324,23 @@ bool EQEMuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...) {
 		va_copy(tmpargptr, argptr);
 		vfprintf( fp[id], fmt, tmpargptr );
 	}
-    if (pLogStatus[id] & 2) {
+	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8)
 			vfprintf( stderr, fmt, argptr );
 		else
 			vfprintf( stdout, fmt, argptr );
 	}
 	va_end(argptr);
-    return true;
+	return true;
 };
 
 bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 skip) {
-    
 	if (!logFileValid) {
 #if EQDEBUG >= 10
-    cerr << "Error: Dump() from null pointer"<<endl;
+	cerr << "Error: Dump() from null pointer"<<endl;
 #endif
 		return false;
-    }
+	}
 	if (size == 0)
 		return true;
 	if (!LogFile)
@@ -362,7 +356,7 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 	LockMutex lock(&MLog[id]);
 	if (!logFileValid)
 		return false;	//check again for threading race reasons (to avoid two mutexes)
-	
+
 	write(id, "Dumping Packet: %i", size);
 	// Output as HEX
 	
@@ -370,7 +364,7 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 	uint32 indexInData;
 	std::string asciiOutput;
 
-    for(indexInData=skip; indexInData<size; indexInData++) {
+	for(indexInData=skip; indexInData<size; indexInData++) {
 		if ((indexInData-skip)%cols==0) {
 			if (indexInData != skip)
 				writeNTS(id, dofile, " | %s\n", asciiOutput.c_str());
@@ -394,7 +388,7 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 		{
 			asciiOutput.append(".");
 		}
-    }
+	}
 	uint32 k = ((indexInData-skip)-1)%cols;
 	if (k < 8)
 		writeNTS(id, dofile, "  ");
@@ -406,14 +400,14 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 		fflush(fp[id]);
 	return true;
 }
-	
+
 void EQEMuLog::SetCallback(LogIDs id, msgCallbackFmt proc) {
 	if (!logFileValid)
 		return;
 	if (id >= MaxLogID) {
 		return;
-    }
-    logCallbackFmt[id] = proc;
+	}
+	logCallbackFmt[id] = proc;
 }
 
 void EQEMuLog::SetCallback(LogIDs id, msgCallbackBuf proc) {
@@ -421,8 +415,8 @@ void EQEMuLog::SetCallback(LogIDs id, msgCallbackBuf proc) {
 		return;
 	if (id >= MaxLogID) {
 		return;
-    }
-    logCallbackBuf[id] = proc;
+	}
+	logCallbackBuf[id] = proc;
 }
 
 void EQEMuLog::SetCallback(LogIDs id, msgCallbackPva proc) {
@@ -430,8 +424,8 @@ void EQEMuLog::SetCallback(LogIDs id, msgCallbackPva proc) {
 		return;
 	if (id >= MaxLogID) {
 		return;
-    }
-    logCallbackPva[id] = proc;
+	}
+	logCallbackPva[id] = proc;
 }
 
 void EQEMuLog::SetAllCallbacks(msgCallbackFmt proc) {

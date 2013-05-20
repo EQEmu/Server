@@ -28,7 +28,7 @@
 # include "winconfig.h"
 #else
 # include "config.h"
-#endif 
+#endif
 
 #include "missing.h"
 #include "cpptest-time.h"
@@ -48,16 +48,16 @@ namespace Test
 	namespace
 	{
 		const unsigned int UsecPerSec = 1000000;
-		
+
 	} // anonymous namespace
-	
+
 	/// Constructs a time object with zeroed time.
 	///
 	Time::Time()
 	:	_sec(0),
 		_usec(0)
 	{}
-	
+
 	/// Constructs a time object.
 	///
 	/// \param sec  Seconds.
@@ -67,7 +67,7 @@ namespace Test
 	:	_sec(sec),
 		_usec(usec)
 	{}
-	
+
 	/// \return Seconds.
 	///
 	unsigned int
@@ -75,7 +75,7 @@ namespace Test
 	{
 		return _sec;
 	}
-	
+
 	/// \return Micro-seconds.
 	///
 	unsigned int
@@ -83,7 +83,7 @@ namespace Test
 	{
 		return _usec;
 	}
-	
+
 	/// \return The current time.
 	///
 	Time
@@ -93,7 +93,7 @@ namespace Test
 		gettimeofday(&tv, 0);
 		return Time(tv.tv_sec, tv.tv_usec);
 	}
-	
+
 	/// \relates Time
 	///
 	/// Computes the time elapsed between two time values.
@@ -108,10 +108,10 @@ namespace Test
 	{
 		if (t2._sec > t1._sec || (t2._sec == t1._sec && t2._usec > t1._usec))
 			return Time();
-		
+
 		unsigned int sec = t1._sec - t2._sec;
 		unsigned int usec;
-		
+
 		if (t2._usec > t1._usec)
 		{
 			--sec;
@@ -119,10 +119,10 @@ namespace Test
 		}
 		else
 			usec = t1._usec - t2._usec;
-		
+
 		return Time(sec, usec);
 	}
-	
+
 	/// \relates Time
 	///
 	/// Adds two time values.
@@ -137,7 +137,7 @@ namespace Test
 	{
 		unsigned int sec  = t1._sec + t2._sec;
 		unsigned int usec = t1._usec + t2._usec;
-		
+
 		if (usec > UsecPerSec)
 		{
 			++sec;
@@ -145,7 +145,7 @@ namespace Test
 		}
 		return Time(sec, usec);
 	}
-	
+
 	/// \relates Time
 	///
 	/// Outputs a time to an output stream.
@@ -171,6 +171,6 @@ namespace Test
 
 		return os;
 	}
-	
+
 } // namespace Test
 

@@ -14,8 +14,8 @@ namespace EQExtractor2.Patches
         public PatchApril152013Decoder()
         {
             Version = "EQ Client Build Date April 15 2013.";
-                                   
-            PatchConfFileName = "patch_April15-2013.conf";            
+
+            PatchConfFileName = "patch_April15-2013.conf";
 
             SupportsSQLGeneration = true;
         }
@@ -204,7 +204,7 @@ namespace EQExtractor2.Patches
                 UInt32 Position4 = Buffer.ReadUInt32();
 
                 UInt32 Position5 = Buffer.ReadUInt32();
-                
+
                 NewSpawn.YPos = Utils.EQ19ToFloat((Int32)((Position1 >> 12) & 0x7FFFF));
 
                 NewSpawn.ZPos = Utils.EQ19ToFloat((Int32)(Position2) & 0x7FFFF);

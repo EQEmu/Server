@@ -12,7 +12,7 @@ namespace TEMPLATE {
 static const char *name = "CHANGEME";
 static OpcodeManager *opcodes = NULL;
 static Strategy struct_strategy;
-	
+
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
 	if(opcodes == NULL) {
@@ -27,16 +27,16 @@ void Register(EQStreamIdentifier &into) {
 			return;
 		}
 	}
-	
+
 	//ok, now we have what we need to register.
-	
+
 	EQStream::Signature signature;
-	
+
 	//register our world signature.
 	signature.first_length = sizeof(structs::LoginInfo_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_SendLoginInfo);
 	into.RegisterPatch(signature, name, &opcodes, &struct_strategy);
-	
+
 	//register our zone signature.
 	signature.first_length = sizeof(structs::ClientZoneEntry_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_ZoneEntry);
@@ -44,11 +44,11 @@ void Register(EQStreamIdentifier &into) {
 }
 
 void Reload() {
-	
+
 	//we have a big problem to solve here when we switch back to shared memory
 	//opcode managers because we need to change the manager pointer, which means
 	//we need to go to every stream and replace it's manager.
-	
+
 	if(opcodes != NULL) {
 		//TODO: get this file name from the config file
 		string opfile = "patch_";
@@ -85,17 +85,17 @@ std::string Strategy::Describe() const {
 
 /*ENCODE(OP_PlayerProfile) {
 	SETUP_DIRECT(PlayerProfile_Struct, structs::PlayerProfile_Struct);
-	
-	
-	
+
+
+
 	FINISH_DIRECT();
 }
 
 ENCODE(OP_NewZone) {
 	SETUP_DIRECT(PlayerProfile_Struct, structs::PlayerProfile_Struct);
-	
-	
-	
+
+
+
 	FINISH_DIRECT();
 }*/
 

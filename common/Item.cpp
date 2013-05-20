@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #ifdef _WINDOWS
@@ -42,7 +42,7 @@ int32 NextItemInstSerialNumber = 1;
 
 static inline int32 GetNextItemInstSerialNumber() {
 
-	// The Bazaar relies on each item a client has up for Trade having a unique 
+	// The Bazaar relies on each item a client has up for Trade having a unique
 	// identifier. This 'SerialNumber' is sent in Serialized item packets and
 	// is used in Bazaar packets to identify the item a player is buying or inspecting.
 	//
@@ -103,8 +103,8 @@ ItemInstQueue::~ItemInstQueue() {
 
 Inventory::~Inventory() {
 	map<int16, ItemInst*>::iterator cur,end;
-	
-	
+
+
 	cur = m_worn.begin();
 	end = m_worn.end();
 	for(; cur != end; cur++) {
@@ -112,7 +112,7 @@ Inventory::~Inventory() {
 		safe_delete(tmp);
 	}
 	m_worn.clear();
-	
+
 	cur = m_inv.begin();
 	end = m_inv.end();
 	for(; cur != end; cur++) {
@@ -120,7 +120,7 @@ Inventory::~Inventory() {
 		safe_delete(tmp);
 	}
 	m_inv.clear();
-	
+
 	cur = m_bank.begin();
 	end = m_bank.end();
 	for(; cur != end; cur++) {
@@ -128,7 +128,7 @@ Inventory::~Inventory() {
 		safe_delete(tmp);
 	}
 	m_bank.clear();
-	
+
 	cur = m_shbank.begin();
 	end = m_shbank.end();
 	for(; cur != end; cur++) {
@@ -136,7 +136,7 @@ Inventory::~Inventory() {
 		safe_delete(tmp);
 	}
 	m_shbank.clear();
-	
+
 	cur = m_trade.begin();
 	end = m_trade.end();
 	for(; cur != end; cur++) {
@@ -163,21 +163,21 @@ ItemInst::ItemInst(const ItemInst& copy)
 	for (it=copy.m_contents.begin(); it!=copy.m_contents.end(); it++) {
 		ItemInst* inst_old = it->second;
 		ItemInst* inst_new = nullptr;
-		
+
 		if (inst_old) {
 			inst_new = inst_old->Clone();
 		}
-		
+
 		if (inst_new != nullptr) {
 			m_contents[it->first] = inst_new;
 		}
 	}
-    std::map<std::string, std::string>::const_iterator iter;
-    for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); iter++) {
-        m_custom_data[iter->first] = iter->second;
-    }
+	std::map<std::string, std::string>::const_iterator iter;
+	for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); iter++) {
+		m_custom_data[iter->first] = iter->second;
+	}
 	m_SerialNumber = copy.m_SerialNumber;
-    m_custom_data = copy.m_custom_data;
+	m_custom_data = copy.m_custom_data;
 }
 
 // Clean up container contents
@@ -200,11 +200,11 @@ bool ItemInst::IsType(ItemClass item_class) const
 {
 	// Check usage type
 	if ((m_use_type == ItemUseWorldContainer) && (item_class == ItemClassContainer))
-		
+
 		return true;
 	if (!m_item)
 		return false;
-	
+
 	return (m_item->ItemClass == item_class);
 }
 
@@ -229,14 +229,14 @@ bool ItemInst::IsEquipable(int16 slot_id) const
 {
 	if (!m_item)
 		return false;
-	
+
 	if(slot_id == 9999) {
 		slot_id = 22;
 		uint32 slot_mask = (1 << slot_id);
 		if (slot_mask & m_item->Slots)
 			return true;
 	}
-	
+
 	if (slot_id < 22) {
 		uint32 slot_mask = (1 << slot_id);
 		if (slot_mask & m_item->Slots)
@@ -316,12 +316,12 @@ bool ItemInst::IsAmmo() const {
 	if(!m_item) return false;
 
 	if((m_item->ItemType == ItemTypeArrow) ||
-	   (m_item->ItemType == ItemTypeThrowing) ||
-	   (m_item->ItemType == ItemTypeThrowingv2))
-	   	return true;
+		(m_item->ItemType == ItemTypeThrowing) ||
+		(m_item->ItemType == ItemTypeThrowingv2))
+		return true;
 
 	return false;
-	
+
 }
 
 // Retrieve augment inside item
@@ -329,7 +329,7 @@ ItemInst* ItemInst::GetAugment(uint8 slot) const
 {
 	if (m_item->ItemClass == ItemClassCommon)
 		return GetItem(slot);
-	
+
 	return nullptr;
 }
 
@@ -376,7 +376,7 @@ ItemInst* ItemInst::GetItem(uint8 index) const
 		ItemInst* inst = it->second;
 		return inst;
 	}
-	
+
 	return nullptr;
 }
 
@@ -384,8 +384,8 @@ void ItemInst::PutItem(uint8 index, const ItemInst& inst)
 {
 	// Clean up item already in slot (if exists)
 	DeleteItem(index);
-	
-	
+
+
 	// Delegate to internal method
 	_PutItem(index, inst.Clone());
 }
@@ -423,7 +423,7 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 		const Item_Struct* item = inst->GetItem();
 		del = cur;
 		cur++;
-		
+
 		switch(is_nodrop) {
 		case byFlagSet:
 			if (item->NoDrop == 0) {
@@ -440,7 +440,7 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 		default:
 			break;
 		}
-		
+
 		switch(is_norent) {
 		case byFlagSet:
 			if (item->NoRent == 0) {
@@ -470,7 +470,7 @@ ItemInst* ItemInst::PopItem(uint8 index)
 		m_contents.erase(index);
 		return inst;
 	}
-	
+
 	// Return pointer that needs to be deleted (or otherwise managed)
 	return nullptr;
 }
@@ -492,7 +492,7 @@ ItemInst* ItemInstQueue::pop()
 {
 	if (m_list.size() == 0)
 		return nullptr;
-	
+
 	ItemInst* inst = m_list.front();
 	m_list.pop_front();
 	return inst;
@@ -509,13 +509,13 @@ ItemInst* Inventory::GetItem(int16 slot_id) const
 {
 	_CP(Inventory_GetItem);
 	ItemInst* result = nullptr;
-	
+
 	// Cursor
 	if (slot_id == SLOT_CURSOR) {
 		// Cursor slot
 		result = m_cursor.peek_front();
 	}
-	
+
 	// Non bag slots
 	else if (slot_id>=3000 && slot_id<=3007) {
 		// Trade slots
@@ -537,7 +537,7 @@ ItemInst* Inventory::GetItem(int16 slot_id) const
 		// Equippable slots (on body)
 		result = _GetItem(m_worn, slot_id);
 	}
-	
+
 	// Inner bag slots
 	else if (slot_id>=3031 && slot_id<=3110) {
 		// Trade bag slots
@@ -574,69 +574,69 @@ ItemInst* Inventory::GetItem(int16 slot_id) const
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	
+
 	return result;
 }
 
 std::string ItemInst::GetCustomDataString() const {
-    std::string ret_val;
-    map<std::string, std::string>::const_iterator iter = m_custom_data.begin();
-    while(iter != m_custom_data.end()) {
-        if(ret_val.length() > 0) {
-            ret_val += "^";
-        }
-        ret_val += iter->first;
-        ret_val += "^";
-        ret_val += iter->second;
-        iter++;
+	std::string ret_val;
+	map<std::string, std::string>::const_iterator iter = m_custom_data.begin();
+	while(iter != m_custom_data.end()) {
+		if(ret_val.length() > 0) {
+			ret_val += "^";
+		}
+		ret_val += iter->first;
+		ret_val += "^";
+		ret_val += iter->second;
+		iter++;
 
-        if(ret_val.length() > 0) {
-            ret_val += "^";
-        }
-    }
-    return ret_val;
+		if(ret_val.length() > 0) {
+			ret_val += "^";
+		}
+	}
+	return ret_val;
 }
 
 void ItemInst::SetCustomData(std::string identifier, std::string value) {
-    DeleteCustomData(identifier);
-    m_custom_data[identifier] = value;
+	DeleteCustomData(identifier);
+	m_custom_data[identifier] = value;
 }
 
 void ItemInst::SetCustomData(std::string identifier, int value) {
-    DeleteCustomData(identifier);
-    std::stringstream ss;
-    ss << value;
-    m_custom_data[identifier] = ss.str();
+	DeleteCustomData(identifier);
+	std::stringstream ss;
+	ss << value;
+	m_custom_data[identifier] = ss.str();
 }
 
 void ItemInst::SetCustomData(std::string identifier, float value) {
-    DeleteCustomData(identifier);
-    std::stringstream ss;
-    ss << value;
-    m_custom_data[identifier] = ss.str();
+	DeleteCustomData(identifier);
+	std::stringstream ss;
+	ss << value;
+	m_custom_data[identifier] = ss.str();
 }
 
 void ItemInst::SetCustomData(std::string identifier, bool value) {
-    DeleteCustomData(identifier);
-    std::stringstream ss;
-    ss << value;
-    m_custom_data[identifier] = ss.str();
+	DeleteCustomData(identifier);
+	std::stringstream ss;
+	ss << value;
+	m_custom_data[identifier] = ss.str();
 }
 
 void ItemInst::DeleteCustomData(std::string identifier) {
-    map<std::string, std::string>::iterator iter = m_custom_data.find(identifier);
-    if(iter != m_custom_data.end()) {
-        m_custom_data.erase(iter);
-    }
+	map<std::string, std::string>::iterator iter = m_custom_data.find(identifier);
+	if(iter != m_custom_data.end()) {
+		m_custom_data.erase(iter);
+	}
 }
 
 std::string ItemInst::GetCustomData(std::string identifier) {
-    map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
-    if(iter != m_custom_data.end()) {
-        return iter->second;
-    }
+	map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
+	if(iter != m_custom_data.end()) {
+		return iter->second;
+	}
 
-    return "";
+	return "";
 }
 
 // Retrieve item at specified position within bag
@@ -656,13 +656,13 @@ int16 Inventory::PutItem(int16 slot_id, const ItemInst& inst)
 {
 	// Clean up item already in slot (if exists)
 	DeleteItem(slot_id);
-	
+
 	if (!inst) {
 		// User is effectively deleting the item
 		// in the slot, why hold a null ptr in map<>?
 		return slot_id;
 	}
-	
+
 	// Delegate to internal method
 	return _PutItem(slot_id, inst.Clone());
 }
@@ -693,48 +693,48 @@ int16 Inventory::HasItem(uint32 item_id, uint8 quantity, uint8 where)
 {
 	_CP(Inventory_HasItem);
 	int16 slot_id = SLOT_INVALID;
-	
+
 	//Altered by Father Nitwit to support a specification of
 	//where to search, with a default value to maintain compatibility
-	
+
 	// Check each inventory bucket
 	if(where & invWhereWorn) {
 		slot_id = _HasItem(m_worn, item_id, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-	
+
 	if(where & invWherePersonal) {
 		slot_id = _HasItem(m_inv, item_id, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereBank) {
 		slot_id = _HasItem(m_bank, item_id, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereSharedBank) {
 		slot_id = _HasItem(m_shbank, item_id, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereTrading) {
 		slot_id = _HasItem(m_trade, item_id, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereCursor) {
 		// Check cursor queue
 		slot_id = _HasItem(m_cursor, item_id, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-	
+
 	return slot_id;
 }
 
@@ -743,90 +743,90 @@ int16 Inventory::HasItem(uint32 item_id, uint8 quantity, uint8 where)
 int16 Inventory::HasItemByUse(uint8 use, uint8 quantity, uint8 where)
 {
 	int16 slot_id = SLOT_INVALID;
-	
+
 	// Check each inventory bucket
 	if(where & invWhereWorn) {
 		slot_id = _HasItemByUse(m_worn, use, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-	
+
 	if(where & invWherePersonal) {
 		slot_id = _HasItemByUse(m_inv, use, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereBank) {
 		slot_id = _HasItemByUse(m_bank, use, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereSharedBank) {
 		slot_id = _HasItemByUse(m_shbank, use, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereTrading) {
 		slot_id = _HasItemByUse(m_trade, use, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereCursor) {
 		// Check cursor queue
 		slot_id = _HasItemByUse(m_cursor, use, quantity);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-	
+
 	return slot_id;
 }
 
-int16 Inventory::HasItemByLoreGroup(uint32 loregroup, uint8 where) 
+int16 Inventory::HasItemByLoreGroup(uint32 loregroup, uint8 where)
 {
 	int16 slot_id = SLOT_INVALID;
-	
+
 	// Check each inventory bucket
 	if(where & invWhereWorn) {
 		slot_id = _HasItemByLoreGroup(m_worn, loregroup);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-	
+
 	if(where & invWherePersonal) {
 		slot_id = _HasItemByLoreGroup(m_inv, loregroup);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereBank) {
 		slot_id = _HasItemByLoreGroup(m_bank, loregroup);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereSharedBank) {
 		slot_id = _HasItemByLoreGroup(m_shbank, loregroup);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereTrading) {
 		slot_id = _HasItemByLoreGroup(m_trade, loregroup);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-		
+
 	if(where & invWhereCursor) {
 		// Check cursor queue
 		slot_id = _HasItemByLoreGroup(m_cursor, loregroup);
 		if (slot_id != SLOT_INVALID)
 			return slot_id;
 	}
-	
+
 	return slot_id;
 }
 
@@ -835,13 +835,13 @@ bool Inventory::HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity) {
 	if(ItemToTry->Stackable) {
 
 		for(int16 i = 22; i <= 29; i++) {
-	
+
 			ItemInst* InvItem = GetItem(i);
 
 			if(InvItem && (InvItem->GetItem()->ID == ItemToTry->ID) && (InvItem->GetCharges() < InvItem->GetItem()->StackSize)) {
 
 				int ChargeSlotsLeft = InvItem->GetItem()->StackSize - InvItem->GetCharges();
-		
+
 				if(Quantity <= ChargeSlotsLeft)
 					return true;
 
@@ -857,10 +857,10 @@ bool Inventory::HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity) {
 					InvItem = GetItem(BaseSlotID + BagSlot);
 
 					if(InvItem && (InvItem->GetItem()->ID == ItemToTry->ID) &&
-					   (InvItem->GetCharges() < InvItem->GetItem()->StackSize)) {
+						(InvItem->GetCharges() < InvItem->GetItem()->StackSize)) {
 
 						int ChargeSlotsLeft = InvItem->GetItem()->StackSize - InvItem->GetCharges();
-			
+
 						if(Quantity <= ChargeSlotsLeft)
 							return true;
 
@@ -930,7 +930,7 @@ bool Inventory::DeleteItem(int16 slot_id, uint8 quantity)
 {
 	// Pop item out of inventory map (or queue)
 	ItemInst* item_to_delete = PopItem(slot_id);
-	
+
 	// Determine if object should be fully deleted, or
 	// just a quantity of charges of the item can be deleted
 	if (item_to_delete && (quantity > 0)) {
@@ -940,30 +940,30 @@ bool Inventory::DeleteItem(int16 slot_id, uint8 quantity)
 		// If there are no charges left on the item,
 		if(item_to_delete->GetCharges() <= 0) {
 			// If the item is stackable (e.g arrows), or
-			//    the item is not stackable, and is not a charged item, or is expendable, delete it
+			// the item is not stackable, and is not a charged item, or is expendable, delete it
 			if(item_to_delete->IsStackable() ||
-			   (!item_to_delete->IsStackable() && 
-			    ((item_to_delete->GetItem()->MaxCharges == 0)  || item_to_delete->IsExpendable()))) {
+				(!item_to_delete->IsStackable() &&
+				((item_to_delete->GetItem()->MaxCharges == 0) || item_to_delete->IsExpendable()))) {
 				// Item can now be destroyed
 				safe_delete(item_to_delete);
 				return true;
 			}
 		}
 
-		// Charges still exist, or it is a charged item that is not expendable.  Put back into inventory
+		// Charges still exist, or it is a charged item that is not expendable. Put back into inventory
 		_PutItem(slot_id, item_to_delete);
 		return false;
 	}
-	
+
 	safe_delete(item_to_delete);
 
 	return true;
-	
+
 }
 
 // Checks All items in a bag for No Drop
 bool Inventory::CheckNoDrop(int16 slot_id) {
-    ItemInst* inst = GetItem(slot_id);
+	ItemInst* inst = GetItem(slot_id);
 	if (!inst) return false;
 	if (!inst->GetItem()->NoDrop) return true;
 	if (inst->GetItem()->ItemClass == 1) {
@@ -980,7 +980,7 @@ bool Inventory::CheckNoDrop(int16 slot_id) {
 ItemInst* Inventory::PopItem(int16 slot_id)
 {
 	ItemInst* p = nullptr;
-	
+
 	if (slot_id==SLOT_CURSOR) { // Cursor
 		p = m_cursor.pop();
 	}
@@ -1011,7 +1011,7 @@ ItemInst* Inventory::PopItem(int16 slot_id)
 			p = baginst->PopItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	
+
 	// Return pointer that needs to be deleted (or otherwise managed)
 	return p;
 }
@@ -1026,12 +1026,12 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 			// Found available slot in personal inventory
 			return i;
 	}
-	
+
 	if (!for_bag) {
 		for (int16 i=22; i<=29; i++) {
 			const ItemInst* inst = GetItem(i);
-			if (inst && inst->IsType(ItemClassContainer) 
-				&& inst->GetItem()->BagSize >= min_size) 
+			if (inst && inst->IsType(ItemClassContainer)
+				&& inst->GetItem()->BagSize >= min_size)
 			{
 				if(inst->GetItem()->BagType == bagTypeQuiver && inst->GetItem()->ItemType != ItemTypeArrow)
 				{
@@ -1050,12 +1050,12 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 			}
 		}
 	}
-	
+
 	if (try_cursor)
 		// Always room on cursor (it's a queue)
 		// (we may wish to cap this in the future)
 		return SLOT_CURSOR;
-	
+
 	// No available slots
 	return SLOT_INVALID;
 }
@@ -1064,7 +1064,7 @@ void Inventory::dumpInventory() {
 	iter_inst it;
 	iter_contents itb;
 	ItemInst* inst = nullptr;
-	
+
 	// Check item: After failed checks, check bag contents (if bag)
 	printf("Worn items:\n");
 	for (it=m_worn.begin(); it!=m_worn.end(); it++) {
@@ -1072,9 +1072,9 @@ void Inventory::dumpInventory() {
 		it->first;
 		if(!inst || !inst->GetItem())
 			continue;
-		
+
 		printf("Slot %d: %s (%d)\n", it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
-		
+
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
@@ -1086,16 +1086,16 @@ void Inventory::dumpInventory() {
 			}
 		}
 	}
-	
+
 	printf("Inventory items:\n");
 	for (it=m_inv.begin(); it!=m_inv.end(); it++) {
 		inst = it->second;
 		it->first;
 		if(!inst || !inst->GetItem())
 			continue;
-		
+
 		printf("Slot %d: %s (%d)\n", it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
-		
+
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
@@ -1104,57 +1104,57 @@ void Inventory::dumpInventory() {
 					continue;
 				printf("	Slot %d: %s (%d)\n", Inventory::CalcSlotId(it->first, itb->first),
 							baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
-				
+
 			}
 		}
 	}
-	
+
 	printf("Bank items:\n");
 	for (it=m_bank.begin(); it!=m_bank.end(); it++) {
 		inst = it->second;
 		it->first;
 		if(!inst || !inst->GetItem())
 			continue;
-		
+
 		printf("Slot %d: %s (%d)\n", it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
-		
+
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
-			
+
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
 				ItemInst* baginst = itb->second;
 				if(!baginst || !baginst->GetItem())
 					continue;
 				printf("	Slot %d: %s (%d)\n", Inventory::CalcSlotId(it->first, itb->first),
 						baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
-				
+
 			}
 		}
 	}
-	
+
 	printf("Shared Bank items:\n");
 	for (it=m_shbank.begin(); it!=m_shbank.end(); it++) {
 		inst = it->second;
 		it->first;
 		if(!inst || !inst->GetItem())
 			continue;
-		
+
 		printf("Slot %d: %s (%d)\n", it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
-		
+
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
-			
+
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
 				ItemInst* baginst = itb->second;
 				if(!baginst || !baginst->GetItem())
 					continue;
 				printf("	Slot %d: %s (%d)\n", Inventory::CalcSlotId(it->first, itb->first),
 						baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
-				
+
 			}
 		}
 	}
-	
+
 	printf("\n");
 	fflush(stdout);
 }
@@ -1166,7 +1166,7 @@ ItemInst* Inventory::_GetItem(const map<int16, ItemInst*>& bucket, int16 slot_id
 	if (it != bucket.end()) {
 		return it->second;
 	}
-	
+
 	// Not found!
 	return nullptr;
 }
@@ -1181,9 +1181,9 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 		PopItem(slot_id);
 		return slot_id;
 	}
-	
+
 	int16 result = SLOT_INVALID;
-	
+
 	if (slot_id==SLOT_CURSOR) { // Cursor
 		// Replace current item on cursor, if exists
 		m_cursor.pop(); // no memory delete, clients of this function know what they are doing
@@ -1218,12 +1218,12 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 			result = slot_id;
 		}
 	}
-	
+
 	if (result == SLOT_INVALID) {
 		LogFile->write(EQEMuLog::Error, "Inventory::_PutItem: Invalid slot_id specified (%i)", slot_id);
 		safe_delete(inst); // Slot not found, clean up
 	}
-	
+
 	return result;
 }
 
@@ -1234,7 +1234,7 @@ int16 Inventory::_HasItem(map<int16, ItemInst*>& bucket, uint32 item_id, uint8 q
 	iter_contents itb;
 	ItemInst* inst = nullptr;
 	uint8 quantity_found = 0;
-	
+
 	// Check item: After failed checks, check bag contents (if bag)
 	for (it=bucket.begin(); it!=bucket.end(); it++) {
 		inst = it->second;
@@ -1244,15 +1244,15 @@ int16 Inventory::_HasItem(map<int16, ItemInst*>& bucket, uint32 item_id, uint8 q
 				if (quantity_found >= quantity)
 					return it->first;
 			}
-		 
+
 			for(int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-				if (inst->GetAugmentItemID(i) == item_id && quantity <= 1) 
+				if (inst->GetAugmentItemID(i) == item_id && quantity <= 1)
 					return SLOT_AUGMENT; // Only one augment per slot.
 			}
 		}
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
-			
+
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
 				ItemInst* baginst = itb->second;
 				if (baginst->GetID() == item_id) {
@@ -1261,13 +1261,13 @@ int16 Inventory::_HasItem(map<int16, ItemInst*>& bucket, uint32 item_id, uint8 q
 						return Inventory::CalcSlotId(it->first, itb->first);
 				}
 				for(int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-					if (baginst->GetAugmentItemID(i) == item_id && quantity <= 1) 
+					if (baginst->GetAugmentItemID(i) == item_id && quantity <= 1)
 						return SLOT_AUGMENT; // Only one augment per slot.
 				}
 			}
 		}
 	}
-	
+
 	// Not found
 	return SLOT_INVALID;
 }
@@ -1278,7 +1278,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 	iter_queue it;
 	iter_contents itb;
 	uint8 quantity_found = 0;
-	
+
 	// Read-only iteration of queue
 	for (it=iqueue.begin(); it!=iqueue.end(); it++) {
 		ItemInst* inst = *it;
@@ -1290,13 +1290,13 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 					return SLOT_CURSOR;
 			}
 			for(int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-				if (inst->GetAugmentItemID(i) == item_id && quantity <= 1) 
+				if (inst->GetAugmentItemID(i) == item_id && quantity <= 1)
 					return SLOT_AUGMENT; // Only one augment per slot.
 			}
 		}
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
-			
+
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
 				ItemInst* baginst = itb->second;
 				if (baginst->GetID() == item_id) {
@@ -1305,14 +1305,14 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 						return Inventory::CalcSlotId(SLOT_CURSOR, itb->first);
 				}
 				for(int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
-					if (baginst->GetAugmentItemID(i) == item_id && quantity <= 1) 
+					if (baginst->GetAugmentItemID(i) == item_id && quantity <= 1)
 						return SLOT_AUGMENT; // Only one augment per slot.
 				}
 
 			}
 		}
 	}
-	
+
 	// Not found
 	return SLOT_INVALID;
 }
@@ -1324,7 +1324,7 @@ int16 Inventory::_HasItemByUse(map<int16, ItemInst*>& bucket, uint8 use, uint8 q
 	iter_contents itb;
 	ItemInst* inst = nullptr;
 	uint8 quantity_found = 0;
-	
+
 	// Check item: After failed checks, check bag contents (if bag)
 	for (it=bucket.begin(); it!=bucket.end(); it++) {
 		inst = it->second;
@@ -1333,10 +1333,10 @@ int16 Inventory::_HasItemByUse(map<int16, ItemInst*>& bucket, uint8 use, uint8 q
 			if (quantity_found >= quantity)
 				return it->first;
 		}
-		
+
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
-			
+
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
 				ItemInst* baginst = itb->second;
 				if (baginst && baginst->IsType(ItemClassCommon) && baginst->GetItem()->ItemType == use) {
@@ -1347,7 +1347,7 @@ int16 Inventory::_HasItemByUse(map<int16, ItemInst*>& bucket, uint8 use, uint8 q
 			}
 		}
 	}
-	
+
 	// Not found
 	return SLOT_INVALID;
 }
@@ -1358,7 +1358,7 @@ int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 	iter_queue it;
 	iter_contents itb;
 	uint8 quantity_found = 0;
-	
+
 	// Read-only iteration of queue
 	for (it=iqueue.begin(); it!=iqueue.end(); it++) {
 		ItemInst* inst = *it;
@@ -1367,10 +1367,10 @@ int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 			if (quantity_found >= quantity)
 				return SLOT_CURSOR;
 		}
-		
+
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
-			
+
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
 				ItemInst* baginst = itb->second;
 				if (baginst && baginst->IsType(ItemClassCommon) && baginst->GetItem()->ItemType == use) {
@@ -1381,24 +1381,24 @@ int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 			}
 		}
 	}
-	
+
 	// Not found
 	return SLOT_INVALID;
 }
 
-int16 Inventory::_HasItemByLoreGroup(map<int16, ItemInst*>& bucket, uint32 loregroup) 
+int16 Inventory::_HasItemByLoreGroup(map<int16, ItemInst*>& bucket, uint32 loregroup)
 {
 	iter_inst it;
 	iter_contents itb;
 	ItemInst* inst = nullptr;
-		
+
 	// Check item: After failed checks, check bag contents (if bag)
 	for (it=bucket.begin(); it!=bucket.end(); it++) {
 		inst = it->second;
 		if (inst) {
-			if (inst->GetItem()->LoreGroup == loregroup) 
+			if (inst->GetItem()->LoreGroup == loregroup)
 				return it->first;
-				
+
 			ItemInst* Aug;
 			for(int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
 				Aug = inst->GetAugment(i);
@@ -1408,12 +1408,12 @@ int16 Inventory::_HasItemByLoreGroup(map<int16, ItemInst*>& bucket, uint32 loreg
 		}
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
-			
+
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
 				ItemInst* baginst = itb->second;
-				if (baginst && baginst->IsType(ItemClassCommon)&& baginst->GetItem()->LoreGroup == loregroup) 
+				if (baginst && baginst->IsType(ItemClassCommon)&& baginst->GetItem()->LoreGroup == loregroup)
 					return Inventory::CalcSlotId(it->first, itb->first);
-				
+
 				ItemInst* Aug2;
 				for(int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
 					Aug2 = baginst->GetAugment(i);
@@ -1423,7 +1423,7 @@ int16 Inventory::_HasItemByLoreGroup(map<int16, ItemInst*>& bucket, uint32 loreg
 			}
 		}
 	}
-	
+
 	// Not found
 	return SLOT_INVALID;
 }
@@ -1433,15 +1433,15 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 {
 	iter_queue it;
 	iter_contents itb;
-	
+
 	// Read-only iteration of queue
 	for (it=iqueue.begin(); it!=iqueue.end(); it++) {
 		ItemInst* inst = *it;
 		if (inst)
 		{
-			if (inst->GetItem()->LoreGroup == loregroup) 
+			if (inst->GetItem()->LoreGroup == loregroup)
 				return SLOT_CURSOR;
-			
+
 			ItemInst* Aug;
 			for(int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
 				Aug = inst->GetAugment(i);
@@ -1451,13 +1451,13 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 		}
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
-			
+
 			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
 				ItemInst* baginst = itb->second;
-				if (baginst && baginst->IsType(ItemClassCommon)&& baginst->GetItem()->LoreGroup == loregroup) 
+				if (baginst && baginst->IsType(ItemClassCommon)&& baginst->GetItem()->LoreGroup == loregroup)
 					return Inventory::CalcSlotId(SLOT_CURSOR, itb->first);
-				
-				
+
+
 				ItemInst* Aug2;
 				for(int i = 0; i < MAX_AUGMENT_SLOTS; i++) {
 					Aug2 = baginst->GetAugment(i);
@@ -1468,7 +1468,7 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 			}
 		}
 	}
-	
+
 	// Not found
 	return SLOT_INVALID;
 }
@@ -1513,7 +1513,7 @@ bool ItemInst::IsNoneEmptyContainer()
 	for(int i = 0; i < m_item->BagSlots; ++i)
 		if(GetItem(i))
 			return true;
-	
+
 	return false;
 }
 
@@ -1522,7 +1522,7 @@ bool ItemInst::IsAugmented()
 	for(int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
 		if (GetAugmentItemID(i))
 			return true;
-	
+
 	return false;
 }
 
@@ -1532,9 +1532,9 @@ int16 Inventory::CalcSlotId(int16 bagslot_id, uint8 bagidx)
 	if (!Inventory::SupportsContainers(bagslot_id)) {
 		return SLOT_INVALID;
 	}
-	
+
 	int16 slot_id = SLOT_INVALID;
-	
+
 	if (bagslot_id==SLOT_CURSOR || bagslot_id==8000) // Cursor
 		slot_id = IDX_CURSOR_BAG + bagidx;
 	else if (bagslot_id>=22 && bagslot_id<=29) // Inventory slots
@@ -1545,7 +1545,7 @@ int16 Inventory::CalcSlotId(int16 bagslot_id, uint8 bagidx)
 		slot_id = IDX_SHBANK_BAG + (bagslot_id-2500)*MAX_ITEMS_PER_BAG + bagidx;
 	else if (bagslot_id>=3000 && bagslot_id<=3007) // Trade window slots
 		slot_id = IDX_TRADE_BAG + (bagslot_id-3000)*MAX_ITEMS_PER_BAG + bagidx;
-	
+
 	return slot_id;
 }
 
@@ -1553,7 +1553,7 @@ int16 Inventory::CalcSlotId(int16 bagslot_id, uint8 bagidx)
 int16 Inventory::CalcSlotId(int16 slot_id)
 {
 	int16 parent_slot_id = SLOT_INVALID;
-	
+
 	if (slot_id>=251 && slot_id<=330)
 		parent_slot_id = IDX_INV + (slot_id-251) / MAX_ITEMS_PER_BAG;
 	else if (slot_id>=331 && slot_id<=340)
@@ -1566,14 +1566,14 @@ int16 Inventory::CalcSlotId(int16 slot_id)
 		parent_slot_id = IDX_SHBANK + (slot_id-2531) / MAX_ITEMS_PER_BAG;
 	else if (slot_id>=3100 && slot_id<=3179)
 		parent_slot_id = IDX_TRADE + (slot_id-3100) / MAX_ITEMS_PER_BAG;
-	
+
 	return parent_slot_id;
 }
 
 uint8 Inventory::CalcBagIdx(int16 slot_id)
 {
 	uint8 index = 0;
-	
+
 	if (slot_id>=251 && slot_id<=330)
 		index = (slot_id-251) % MAX_ITEMS_PER_BAG;
 	else if (slot_id>=331 && slot_id<=340)
@@ -1588,7 +1588,7 @@ uint8 Inventory::CalcBagIdx(int16 slot_id)
 		index = (slot_id-3100) % MAX_ITEMS_PER_BAG;
 	else if (slot_id>=4000 && slot_id<=4009)
 		index = (slot_id-4000) % MAX_ITEMS_PER_BAG;
-	
+
 	return index;
 }
 
@@ -1691,19 +1691,19 @@ EvoItemInst::EvoItemInst(const EvoItemInst &copy) {
 	for (it=copy.m_contents.begin(); it!=copy.m_contents.end(); it++) {
 		ItemInst* inst_old = it->second;
 		ItemInst* inst_new = nullptr;
-		
+
 		if (inst_old) {
 			inst_new = inst_old->Clone();
 		}
-		
+
 		if (inst_new != nullptr) {
 			m_contents[it->first] = inst_new;
 		}
 	}
-    std::map<std::string, std::string>::const_iterator iter;
-    for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); iter++) {
-        m_custom_data[iter->first] = iter->second;
-    }
+	std::map<std::string, std::string>::const_iterator iter;
+	for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); iter++) {
+		m_custom_data[iter->first] = iter->second;
+	}
 	m_SerialNumber = copy.m_SerialNumber;
 	m_exp = copy.m_exp;
 	m_evolveLvl = copy.m_evolveLvl;
@@ -1717,7 +1717,7 @@ EvoItemInst::EvoItemInst(const EvoItemInst &copy) {
 
 EvoItemInst::EvoItemInst(const ItemInst &basecopy) {
 	EvoItemInst* copy = (EvoItemInst*)&basecopy;
-	
+
 	m_use_type=copy->m_use_type;
 	m_item=copy->m_item;
 	m_charges=copy->m_charges;
@@ -1732,20 +1732,20 @@ EvoItemInst::EvoItemInst(const ItemInst &basecopy) {
 	for (it=copy->m_contents.begin(); it!=copy->m_contents.end(); it++) {
 		ItemInst* inst_old = it->second;
 		ItemInst* inst_new = nullptr;
-		
+
 		if (inst_old) {
 			inst_new = inst_old->Clone();
 		}
-		
+
 		if (inst_new != nullptr) {
 			m_contents[it->first] = inst_new;
 		}
 	}
 
-    std::map<std::string, std::string>::const_iterator iter;
-    for (iter = copy->m_custom_data.begin(); iter != copy->m_custom_data.end(); iter++) {
-        m_custom_data[iter->first] = iter->second;
-    }
+	std::map<std::string, std::string>::const_iterator iter;
+	for (iter = copy->m_custom_data.begin(); iter != copy->m_custom_data.end(); iter++) {
+		m_custom_data[iter->first] = iter->second;
+	}
 	m_SerialNumber = copy->m_SerialNumber;
 	m_exp = 0;
 	m_evolveLvl = 0;
@@ -1775,7 +1775,7 @@ EvoItemInst::EvoItemInst(const Item_Struct* item, int16 charges) {
 }
 
 EvoItemInst::~EvoItemInst() {
-	safe_delete(m_scaledItem); 
+	safe_delete(m_scaledItem);
 }
 
 EvoItemInst* EvoItemInst::Clone() const {
@@ -1812,7 +1812,7 @@ void EvoItemInst::Initialize(SharedDatabase *db) {
 void EvoItemInst::ScaleItem() {
 	// free memory from any previously scaled item data
 	safe_delete(m_scaledItem);
-	
+
 	m_scaledItem = new Item_Struct(*m_item);
 	float Mult = (float)(GetExp())/10000;	// scaling is determined by exp, with 10,000 being full stats
 
@@ -1829,7 +1829,7 @@ void EvoItemInst::ScaleItem() {
 	m_scaledItem->DR = (int8)((float)m_item->DR*Mult);
 	m_scaledItem->CR = (int8)((float)m_item->CR*Mult);
 	m_scaledItem->FR = (int8)((float)m_item->FR*Mult);
-	
+
 	m_scaledItem->HP = (int32)((float)m_item->HP*Mult);
 	m_scaledItem->Mana = (int32)((float)m_item->Mana*Mult);
 	m_scaledItem->AC = (int32)((float)m_item->AC*Mult);
@@ -1862,8 +1862,8 @@ void EvoItemInst::ScaleItem() {
 	m_scaledItem->EnduranceRegen = (uint32)((float)m_item->EnduranceRegen*Mult);
 	m_scaledItem->Haste = (uint32)((float)m_item->Haste*Mult);
 	m_scaledItem->DamageShield = (uint32)((float)m_item->DamageShield*Mult);
-	
-	
+
+
 	m_scaledItem->CharmFileID = 0;	// this stops the client from trying to scale the item itself.
 }
 
@@ -1874,14 +1874,14 @@ bool EvoItemInst::EvolveOnAllKills() const {
 int8 EvoItemInst::GetMaxEvolveLvl() const {
 	if(m_evolveInfo)
 		return m_evolveInfo->MaxLvl;
-	else 
+	else
 		return 0;
 }
 
 uint32 EvoItemInst::GetKillsNeeded(uint8 currentlevel) {
 	uint32 kills = -1;	// default to -1 (max uint32 value) because this value is usually divided by, so we don't want to ever return zero.
-	if (m_evolveInfo) 
-		if (currentlevel != m_evolveInfo->MaxLvl) 
+	if (m_evolveInfo)
+		if (currentlevel != m_evolveInfo->MaxLvl)
 			kills = m_evolveInfo->LvlKills[currentlevel-1];
 
 	if (kills == 0)
@@ -1913,7 +1913,7 @@ bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
 {
 	bool IsRace = false;
 	bool IsClass = false;
-	
+
 	uint32 Classes_ = Classes;
 
 	uint32 Races_ = Races;
@@ -1924,9 +1924,9 @@ bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
 	{
 		if (Classes_ % 2 == 1)
 		{
-   	 		if (CurrentClass == Class_)
+			if (CurrentClass == Class_)
 			{
-    				IsClass = true;
+					IsClass = true;
 				break;
 			}
 		}
@@ -1939,11 +1939,11 @@ bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
 	{
 		if (Races_ % 2 == 1)
 		{
-	    		if (CurrentRace == Race_)
+				if (CurrentRace == Race_)
 			{
-    				IsRace = true;
+					IsRace = true;
 				break;
-   			}
+			}
 		}
 		Races_ >>= 1;
 	}

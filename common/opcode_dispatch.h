@@ -16,7 +16,7 @@ There are currently eight (times two) dispatch modes possible, the different
 modes for a given state differ only in the arguments which
 are passed to the dispatch function.
 
-The variable length versions ensure that the packet is 
+The variable length versions ensure that the packet is
 AT LEAST as long as the supplied structure.
 
 The variable length versions should only be used when the packet
@@ -76,7 +76,7 @@ IN_Cz(OP_ReqNewZone);
 IN_Cz(OP_SendExpZonein);
 //IN_Cr(OP_ZoneComplete);
 
-//these three should stay raw, since we ignore their contents and 
+//these three should stay raw, since we ignore their contents and
 //they overlap with the connected opcodes
 IN_Cr(OP_SpawnAppearance);
 IN_Cr(OP_WearChange);
@@ -477,14 +477,14 @@ OUT(OP_ZoneEntry, ServerZoneEntry_Struct);
 	void Handle_##op ();
 #define INr(op) \
 	void Handle_##op (const EQApplicationPacket *app);
-#define OUT_C(op, s) 
-#define OUT_Cv(op, s) 
-#define OUT_Cz(op) 
-#define OUT_Cr(op) 
-#define OUT(op, s) 
-#define OUTv(op, s) 
-#define OUTz(op) 
-#define OUTr(op) 
+#define OUT_C(op, s)
+#define OUT_Cv(op, s)
+#define OUT_Cz(op)
+#define OUT_Cr(op)
+#define OUT(op, s)
+#define OUTv(op, s)
+#define OUTz(op)
+#define OUTr(op)
 #include "opcode_dispatch.h"
 #undef IN_C
 #undef IN_Cr
@@ -514,7 +514,7 @@ public:
 	RawOpcodeDispatcher(proc p) {
 		d = p;
 	}
-	
+
 	virtual void dispatch(Client *on, const EQApplicationPacket *app) {
 		(on->*d)(app);
 	}
@@ -528,7 +528,7 @@ public:
 	ZeroOpcodeDispatcher(proc p) {
 		d = p;
 	}
-	
+
 	virtual void dispatch(Client *on, const EQApplicationPacket *app) {
 		if(app->size != 0) {
 			//error..
@@ -548,7 +548,7 @@ public:
 		d = p;
 		struct_name = sn;
 	}
-	
+
 	virtual void dispatch(Client *on, const EQApplicationPacket *app) {
 		if(app->size != sizeof(T)) {
 			//error..
@@ -557,7 +557,7 @@ public:
 		T * tmp = (T *) app->pBuffer;
 		(on->*d)(tmp);
 	}
-	
+
 protected:
 	proc d;
 	const char *struct_name;
@@ -571,7 +571,7 @@ public:
 		d = p;
 		struct_name = sn;
 	}
-	
+
 	virtual void dispatch(Client *on, const EQApplicationPacket *app) {
 		if(app->size < sizeof(T)) {
 			//error..
@@ -580,13 +580,13 @@ public:
 		T * tmp = (T *) app->pBuffer;
 		(on->*d)(tmp, app->size);
 	}
-	
+
 protected:
 	proc d;
 	const char *struct_name;
 };
 
-	
+
 
 //... client_packet.cpp
 void MapOpcodes() {
@@ -607,14 +607,14 @@ void MapOpcodes() {
 	ConnectedOpcodes[op] = new ZeroOpcodeDispatcher(&Client::Handle_##op);
 #define INr(op) \
 	ConnectedOpcodes[op] = new RawOpcodeDispatcher(&Client::Handle_##op);
-#define OUT_C(op, s) 
-#define OUT_Cv(op, s) 
-#define OUT_Cz(op) 
-#define OUT_Cr(op) 
-#define OUT(op, s) 
-#define OUTv(op, s) 
-#define OUTz(op) 
-#define OUTr(op) 
+#define OUT_C(op, s)
+#define OUT_Cv(op, s)
+#define OUT_Cz(op)
+#define OUT_Cr(op)
+#define OUT(op, s)
+#define OUTv(op, s)
+#define OUTz(op)
+#define OUTr(op)
 #include "opcode_dispatch.h"
 #undef IN_C
 #undef IN_Cr

@@ -98,14 +98,14 @@ string GetToken(uchar *&Buffer, int &Position)
 		++Position;
 	}
 	++Position;
-	//printf("Returning %s\n", Token.c_str());	
+	//printf("Returning %s\n", Token.c_str());
 	return Token;
 }
 
 int AddModelName(Content_3D *C3D, string ModelName)
 {
 	vector<string>::iterator Iterator;
-	
+
 	for(unsigned int i = 0; i < C3D->ModelNames.size(); ++i)
 	{
 #ifndef WIN32
@@ -116,8 +116,8 @@ int AddModelName(Content_3D *C3D, string ModelName)
 			return i;
 	}
 
-	
-	
+
+
 	C3D->ModelNames.push_back(ModelName);
 
 	return C3D->ModelNames.size() - 1;
@@ -171,7 +171,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 	if(filename != zone_name)
 		delete[] filename;
 
-  
+
 	buf_start = buffer;
 
 	//TODO: Find out what these three unknowns are
@@ -341,10 +341,10 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 
 	this->model_data.zone_model = new Zone_Model;
 	zm = this->model_data.zone_model;
-	
+
 	zm->vert_count = QuadCount * TileCount * 4;
 	zm->poly_count = QuadCount * 2 * TileCount;
-	
+
 	zm->verts = new Vertex *[zm->vert_count];
 	zm->polys = new Polygon *[zm->poly_count];
 
@@ -360,7 +360,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 
 	for(int TileNumber = 0; TileNumber < TileCount; ++TileNumber)
 	{
-		
+
 		int TileLNG = VARSTRUCT_DECODE_TYPE(uint32, buffer);
 		int TileLAT = VARSTRUCT_DECODE_TYPE(uint32, buffer);
 		int TileUNK = VARSTRUCT_DECODE_TYPE(uint32, buffer);
@@ -449,7 +449,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 		int LayerCount = VARSTRUCT_DECODE_TYPE(uint32, buffer);
 
 		VARSTRUCT_DECODE_STRING(s, buffer);
-		
+
 		int OverlayCount = 0;
 
 		for(int Layer = 1; Layer < LayerCount; ++Layer)
@@ -462,10 +462,10 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 			{
 				uint8 Byte = VARSTRUCT_DECODE_TYPE(uint8, buffer);
 			}
-				
+
 			++OverlayCount;
 
-		}	
+		}
 
 		int Count1 = VARSTRUCT_DECODE_TYPE(uint32, buffer);
 #ifdef DEBUGDAT
@@ -517,7 +517,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 			printf("Model: %s LOC: %8.3f, %8.3f, %8.3f, ROT: %8.3f, %8.3f, %8.3f\n", ModelName, x, y, z, RotX, RotY, RotZ);
 #endif
 			ObjectGroupEntry NewObjectGroup;
-			
+
 			NewObjectGroup.FromTOG = false;
 
 			NewObjectGroup.y = y;
@@ -534,18 +534,18 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 			// of another tile, which means based on the data for the tile we are processing, we should be unable to
 			// calculate the Z value for that object.
 			//
-			// By hand editing an .EQG, it was discovered that what the client appears to do is calculate the Z value 
+			// By hand editing an .EQG, it was discovered that what the client appears to do is calculate the Z value
 			// for these objects by adjusting the x/y offsets by +/- (QuadsPerTile * UnitsPerVert) until the offsets
 			// are within this tiles boundaries and using the corresponding height values.
 			//
-			// For example, if a model has an offset of -157.5, -157.5 and QPT * UPV = 160, then the height value used 
+			// For example, if a model has an offset of -157.5, -157.5 and QPT * UPV = 160, then the height value used
 			// would be the height at +2.5, +2.5 in this tile.
 			//
 			// This doesn't make a great deal of sense, but it is how the EQ graphics engine appears to do things.
 			//
 			// These 'Adjusted' x/y offsets are used only for determing the ground Z for the object. The actual placement
 			// of the object relative to the terrain uses the unadjusted offsets.
-			// 
+			//
 			// For the record, as of SoF, this applies to the following zones and objects:
 			//
 			//	arcstone: Model translations adjusted from  -14.000,  219.000 to  146.000,   59.000
@@ -737,7 +737,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 
 			float ZAdjust = VARSTRUCT_DECODE_TYPE(float, buffer);
 #ifdef DEBUGDAT
-			printf("ZAdjust %8.3f\n", ZAdjust);	
+			printf("ZAdjust %8.3f\n", ZAdjust);
 #endif
 			char TogFileName[255];
 
@@ -764,7 +764,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 				NewObjectGroup.TileY = TileXStart;
 
 				NewObjectGroup.TileZ = 0;
-	
+
 				NewObjectGroup.RotX = RotX;
 				NewObjectGroup.RotY = RotY;
 				NewObjectGroup.RotZ = RotZ;
@@ -821,7 +821,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 						NewObjectGroup.SubObjects.push_back(model_data.PlaceableList.size()-1);
 					}
 					if(Token == "*END_OBJECTGROUP")
-					{	
+					{
 #ifdef DEBUGDAT
 						printf("Pushing back new ObjectGroup\n");
 						printf(" Position  : %8.3f, %8.3f, %8.3f\n", NewObjectGroup.x, NewObjectGroup.y, NewObjectGroup.z);
@@ -867,7 +867,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 			float QuadVertex2X = QuadVertex1X + (QuadsPerTile * UnitsPerVertX);
 			float QuadVertex2Y = QuadVertex1Y;
 			float QuadVertex2Z = QuadVertex1Z;
-			
+
 			float QuadVertex3X = QuadVertex2X;
 			float QuadVertex3Y = QuadVertex1Y + (QuadsPerTile * UnitsPerVertY);
 			float QuadVertex3Z = QuadVertex1Z;
@@ -875,7 +875,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 			float QuadVertex4X = QuadVertex1X;
 			float QuadVertex4Y = QuadVertex3Y;
 			float QuadVertex4Z = QuadVertex1Z;
-			
+
 
 			++VertexNumber;
 
@@ -903,7 +903,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 			zm->polys[PolyNumber]->v1 = VertexNumber;
 			zm->polys[PolyNumber]->v2 = VertexNumber - 3;
 			zm->polys[PolyNumber]->v3 = VertexNumber - 2;
-			zm->polys[PolyNumber]->tex = -1; 
+			zm->polys[PolyNumber]->tex = -1;
 		}
 		else
 		{
@@ -915,7 +915,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 			{
 				if((Quad % QuadsPerTile) == 0)
 					++RowNumber;
-	
+
 				// Other common values for this Byte are 0x80, 0x82. Setting them all to zero has no obvious visual
 				// effect.
 				if(Bytes[Quad] & 0x01) // Indicates Quad should not be included because an object will overlay it.
@@ -924,47 +924,47 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 				float QuadVertex1X = TileXStart + (RowNumber * UnitsPerVertX);
 				float QuadVertex1Y = TileYStart + (Quad % QuadsPerTile) * UnitsPerVertY;
 				float QuadVertex1Z = Floats[Quad + RowNumber];
-	
+
 				float QuadVertex2X = QuadVertex1X + UnitsPerVertX;
 				float QuadVertex2Y = QuadVertex1Y;
 				float QuadVertex2Z = Floats[Quad + RowNumber + QuadsPerTile + 1];
-				
+
 				float QuadVertex3X = QuadVertex1X + UnitsPerVertX;
 				float QuadVertex3Y = QuadVertex1Y + UnitsPerVertY;
 				float QuadVertex3Z = Floats[Quad + RowNumber + QuadsPerTile + 2];
-	
+
 				float QuadVertex4X = QuadVertex1X;
 				float QuadVertex4Y = QuadVertex1Y + UnitsPerVertY;
 				float QuadVertex4Z = Floats[Quad + RowNumber + 1];
-				
+
 				++VertexNumber;
-	
+
 				zm->verts[VertexNumber++] = new Vertex(QuadVertex1Y, QuadVertex1X, QuadVertex1Z);
-	
+
 				zm->verts[VertexNumber++] = new Vertex(QuadVertex2Y, QuadVertex2X, QuadVertex2Z);
-	
+
 				zm->verts[VertexNumber++] = new Vertex(QuadVertex3Y, QuadVertex3X, QuadVertex3Z);
-	
+
 				zm->verts[VertexNumber] = new Vertex(QuadVertex4Y, QuadVertex4X, QuadVertex4Z);
-	
+
 				PolyNumber++;
-	
+
 				zm->polys[PolyNumber] = new Polygon;
-	
+
 				zm->polys[PolyNumber]->v1 = VertexNumber;
 				zm->polys[PolyNumber]->v2 = VertexNumber - 2;
 				zm->polys[PolyNumber]->v3 = VertexNumber - 1;
 				zm->polys[PolyNumber]->tex = -1;
-	
+
 				PolyNumber++;
-	
+
 				zm->polys[PolyNumber] = new Polygon;
-	
+
 				zm->polys[PolyNumber]->v1 = VertexNumber;
 				zm->polys[PolyNumber]->v2 = VertexNumber - 3;
 				zm->polys[PolyNumber]->v3 = VertexNumber - 2;
-				zm->polys[PolyNumber]->tex = -1; 
-	
+				zm->polys[PolyNumber]->tex = -1;
+
 			}
 		}
 		zm->vert_count = VertexNumber + 1;
@@ -995,7 +995,7 @@ int DATLoader::Close() {
 
 	for(i = 0; i < zm->poly_count; ++i)
 		delete zm->polys[i];
-	
+
 	delete[] zm->verts;
 
 	delete[] zm->polys;

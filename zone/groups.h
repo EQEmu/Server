@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifndef GROUPS_H
 #define GROUPS_H
@@ -36,7 +36,7 @@ public:
 	GroupIDConsumer() { id = 0; }
 	GroupIDConsumer(uint32 gid) { id = gid; }
 	inline const uint32 GetID()	const { return id; }
-	
+
 protected:
 	friend class EntityList;
 	//use of this function is highly discouraged
@@ -50,7 +50,7 @@ public:
 	Group(Mob* leader);
 	Group(uint32 gid);
 	~Group();
-	
+
 	bool	AddMember(Mob* newmember, const char* NewMemberName = nullptr, uint32 CharacterID = 0);
 	void	AddMember(const char* NewMemberName);
 	void	SendUpdate(uint32 type,Mob* member);
@@ -125,13 +125,13 @@ public:
 	void	SetNPCMarker(const char *NewNPCMarkerName);
 	void	UnMarkNPC(uint16 ID);
 	void	SendMarkedNPCsToMember(Client *c, bool Clear = false);
-	inline  int GetLeadershipAA(int AAID) { return  LeaderAbilities.ranks[AAID]; }
+	inline int GetLeadershipAA(int AAID) { return LeaderAbilities.ranks[AAID]; }
 	void	ClearAllNPCMarks();
 	void	QueueHPPacketsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	ChangeLeader(Mob* newleader);
 	const char *GetClientNameByIndex(uint8 index);
 	void UpdateXTargetMarkedNPC(uint32 Number, Mob *m);
-	
+
 	Mob* members[MAX_GROUP_MEMBERS];
 	char	membername[MAX_GROUP_MEMBERS][64];
 	uint8	MemberRoles[MAX_GROUP_MEMBERS];

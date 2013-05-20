@@ -22,10 +22,10 @@ INIParser::~INIParser()
 void INIParser::Parse()
 {
 	FILE *fp;
-	if(fp = fopen(file, "r")) 
+	if(fp = fopen(file, "r"))
 	{
 		char Option[255], Param[255];
-		while(!feof(fp)) 
+		while(!feof(fp))
 		{
 			ReadLine(fp, Option, Param);
 			AddOption(std::string(Option), std::string(Param));
@@ -34,12 +34,12 @@ void INIParser::Parse()
 	}
 }
 
-void INIParser::ReadLine(FILE *fp, char *Option, char *Param) 
+void INIParser::ReadLine(FILE *fp, char *Option, char *Param)
 {
 	typedef enum ReadingState	{ ReadingOption, ReadingParameter };
 
 	ReadingState State = ReadingOption;
-	
+
 	int StrIndex = 0;
 	char ch;
 

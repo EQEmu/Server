@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2010  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "../common/types.h"
@@ -40,8 +40,8 @@ void CatchSignal(int sig_num)
 
 int main()
 {
-    RegisterExecutablePlatform(ExePlatformLogin);
-    set_exception_handler();
+	RegisterExecutablePlatform(ExePlatformLogin);
+	set_exception_handler();
 
 	//Create our error log, is of format login_<number>.log
 	time_t current_time = time(nullptr);
@@ -58,7 +58,7 @@ int main()
 	server.config = new Config();
 	server_log->Log(log_debug, "Config System Init.");
 	server.config->Parse("login.ini");
-	
+
 	//Parse unregistered allowed option.
 	if(server.config->GetVariable("options", "unregistered_allowed").compare("FALSE") == 0)
 	{
@@ -143,10 +143,10 @@ int main()
 #ifdef EQEMU_MYSQL_ENABLED
 		server_log->Log(log_debug, "MySQL Database Init.");
 		server.db = (Database*)new DatabaseMySQL(
-			server.config->GetVariable("database", "user"), 
-			server.config->GetVariable("database", "password"), 
-			server.config->GetVariable("database", "host"), 
-			server.config->GetVariable("database", "port"), 
+			server.config->GetVariable("database", "user"),
+			server.config->GetVariable("database", "password"),
+			server.config->GetVariable("database", "host"),
+			server.config->GetVariable("database", "port"),
 			server.config->GetVariable("database", "db"));
 #endif
 	}
@@ -155,10 +155,10 @@ int main()
 #ifdef EQEMU_POSTGRESQL_ENABLED
 		server_log->Log(log_debug, "PostgreSQL Database Init.");
 		server.db = (Database*)new DatabasePostgreSQL(
-			server.config->GetVariable("database", "user"), 
-			server.config->GetVariable("database", "password"), 
-			server.config->GetVariable("database", "host"), 
-			server.config->GetVariable("database", "port"), 
+			server.config->GetVariable("database", "user"),
+			server.config->GetVariable("database", "password"),
+			server.config->GetVariable("database", "host"),
+			server.config->GetVariable("database", "port"),
 			server.config->GetVariable("database", "db"));
 #endif
 	}

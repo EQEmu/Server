@@ -1289,7 +1289,7 @@ void Bot::GenerateArmorClass()
 
 uint16 Bot::GetPrimarySkillValue()
 {
-	SkillType skill = HIGHEST_SKILL;  //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
+	SkillType skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
 	bool equiped = m_inv.GetItem(SLOT_PRIMARY);
 
 	if(!equiped)
@@ -1298,7 +1298,7 @@ uint16 Bot::GetPrimarySkillValue()
 	}
 	else
 	{
-		uint8 type = m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType;  //is this the best way to do this?
+		uint8 type = m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType; //is this the best way to do this?
 		switch(type)
 		{
 			case ItemType1HS: // 1H Slashing
@@ -1472,7 +1472,7 @@ void Bot::LoadAAs() {
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
-	int maxAAExpansion = RuleI(Bots, BotAAExpansion); 	//get expansion to get AAs up to
+	int maxAAExpansion = RuleI(Bots, BotAAExpansion); //get expansion to get AAs up to
 	botAAs.clear();	//start fresh
 
 	if(GetClass() == BERSERKER)
@@ -1503,7 +1503,7 @@ void Bot::LoadAAs() {
 
 						//Get level required for AA
 						if(RequiredLevel != AARequiredLevelAndCost.end())
-							req_level =  RequiredLevel->second.Level;
+							req_level = RequiredLevel->second.Level;
 						else
 							req_level = (sendAA->class_type + i * sendAA->level_inc);
 
@@ -1904,7 +1904,7 @@ void Bot::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				{
 					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == base2) && (newbon->SpellOnKill[i+1] < base1)))
 					{
-						//base1 = chance, base2 = SpellID to be triggered,  base3 = min npc level
+						//base1 = chance, base2 = SpellID to be triggered, base3 = min npc level
 						newbon->SpellOnKill[i] = base2;
 						newbon->SpellOnKill[i+1] = base1;
 
@@ -2474,17 +2474,17 @@ void Bot::SaveBuffs() {
 				IsPersistent = 0;
 
 			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO botbuffs (BotId, SpellId, CasterLevel, DurationFormula, "
-                "TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, "
-                "DeathSaveSuccessChance, CasterAARank, Persistent) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
-                GetBotID(), buffs[BuffCount].spellid, buffs[BuffCount].casterlevel, spells[buffs[BuffCount].spellid].buffdurationformula,
-                buffs[BuffCount].ticsremaining,
-                CalculatePoisonCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-                CalculateDiseaseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-                CalculateCurseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-                CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
-                buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
-                buffs[BuffCount].deathSaveSuccessChance,
-                buffs[BuffCount].deathsaveCasterAARank, IsPersistent), TempErrorMessageBuffer)) {
+				"TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, "
+				"DeathSaveSuccessChance, CasterAARank, Persistent) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
+				GetBotID(), buffs[BuffCount].spellid, buffs[BuffCount].casterlevel, spells[buffs[BuffCount].spellid].buffdurationformula,
+				buffs[BuffCount].ticsremaining,
+				CalculatePoisonCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
+				CalculateDiseaseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
+				CalculateCurseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
+				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
+				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
+				buffs[BuffCount].deathSaveSuccessChance,
+				buffs[BuffCount].deathsaveCasterAARank, IsPersistent), TempErrorMessageBuffer)) {
 				errorMessage = std::string(TempErrorMessageBuffer);
 				safe_delete(Query);
 				Query = 0;
@@ -2528,15 +2528,15 @@ void Bot::LoadBuffs() {
 			buffs[BuffCount].casterlevel = atoi(DataRow[1]);
 			buffs[BuffCount].ticsremaining = atoi(DataRow[3]);
 
-            if(CalculatePoisonCounters(buffs[BuffCount].spellid) > 0) {
-                buffs[BuffCount].counters = atoi(DataRow[4]);
-            } else if(CalculateDiseaseCounters(buffs[BuffCount].spellid) > 0) {
-                buffs[BuffCount].counters = atoi(DataRow[5]);
-            } else if(CalculateCurseCounters(buffs[BuffCount].spellid) > 0) {
-                buffs[BuffCount].counters = atoi(DataRow[6]);
-            } else if(CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0) {
-                buffs[BuffCount].counters = atoi(DataRow[7]);
-            }
+			if(CalculatePoisonCounters(buffs[BuffCount].spellid) > 0) {
+				buffs[BuffCount].counters = atoi(DataRow[4]);
+			} else if(CalculateDiseaseCounters(buffs[BuffCount].spellid) > 0) {
+				buffs[BuffCount].counters = atoi(DataRow[5]);
+			} else if(CalculateCurseCounters(buffs[BuffCount].spellid) > 0) {
+				buffs[BuffCount].counters = atoi(DataRow[6]);
+			} else if(CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0) {
+				buffs[BuffCount].counters = atoi(DataRow[7]);
+			}
 			buffs[BuffCount].numhits = atoi(DataRow[8]);
 			buffs[BuffCount].melee_rune = atoi(DataRow[9]);
 			buffs[BuffCount].magic_rune = atoi(DataRow[10]);
@@ -3341,7 +3341,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillType skil
 			}
 		}
 
-		if (damage == -3)  {
+		if (damage == -3) {
 			DoRiposte(other);
 			if (HasDied())
 				return;
@@ -3578,7 +3578,7 @@ void Bot::AI_Process() {
 
 	if(!IsEngaged()) {
 		if(GetFollowID()) {
-			if(BotOwner && BotOwner->GetTarget() && BotOwner->GetTarget()->IsNPC() && (BotOwner->GetTarget()->GetHateAmount(BotOwner) 
+			if(BotOwner && BotOwner->GetTarget() && BotOwner->GetTarget()->IsNPC() && (BotOwner->GetTarget()->GetHateAmount(BotOwner)
 				|| BotOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(BotOwner->GetTarget())) {
 					AddToHateList(BotOwner->GetTarget(), 1);
 
@@ -3592,7 +3592,7 @@ void Bot::AI_Process() {
 					for(int counter = 0; counter < g->GroupCount(); counter++) {
 						if(g->members[counter]) {
 							Mob* tar = g->members[counter]->GetTarget();
-							if(tar && tar->IsNPC() && tar->GetHateAmount(g->members[counter])  && IsAttackAllowed(g->members[counter]->GetTarget())) {
+							if(tar && tar->IsNPC() && tar->GetHateAmount(g->members[counter]) && IsAttackAllowed(g->members[counter]->GetTarget())) {
 								AddToHateList(tar, 1);
 
 								if(HasPet())
@@ -6190,7 +6190,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			item2 = database.GetItem(items[y]);
 			if(item2) {
 				if(botCanWear[y]) {
-					Say("Thank you for the %s, %s.", item2->Name,  client->GetName());
+					Say("Thank you for the %s, %s.", item2->Name, client->GetName());
 				}
 				else {
 					Say("I can't use this %s!", item2->Name);
@@ -6366,8 +6366,8 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillType attack_skil
 
 	SendHPUpdate();
 
-	if(this == from) { 
-		return; 
+	if(this == from) {
+		return;
 	}
 
 	// Aggro the bot's group members
@@ -6570,7 +6570,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 		//riposte
 		bool slippery_attack = false; // Part of hack to allow riposte to become a miss, but still allow a Strikethrough chance (like on Live)
-		if (damage == -3)  {
+		if (damage == -3) {
 			if (FromRiposte) return false;
 			else {
 				if (Hand == SLOT_SECONDARY) {// Do we even have it & was attack with mainhand? If not, don't bother with other calculations
@@ -6614,7 +6614,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	}
 
 	///////////////////////////////////////////////////////////
-	//////    Send Attack Damage
+	////// Send Attack Damage
 	///////////////////////////////////////////////////////////
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
 
@@ -7223,8 +7223,8 @@ int16 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 
 		int buff_tracker = -1;
 		int buff_slot = 0;
-		uint16 focusspellid  = 0;
-		uint16 focusspell_tracker  = 0;
+		uint16 focusspellid = 0;
+		uint16 focusspell_tracker = 0;
 		uint32 buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 			focusspellid = buffs[buff_slot].spellid;
@@ -7424,7 +7424,7 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 						return 0;
 					break;
 				default:
-					LogFile->write(EQEMuLog::Normal, "CalcFocusEffect:  unknown limit spelltype %d", focus_spell.base[i]);
+					LogFile->write(EQEMuLog::Normal, "CalcFocusEffect: unknown limit spelltype %d", focus_spell.base[i]);
 			}
 			break;
 
@@ -7756,7 +7756,7 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 		//this spits up a lot of garbage when calculating spell focuses
 		//since they have all kinds of extra effects on them.
 		default:
-			LogFile->write(EQEMuLog::Normal, "CalcFocusEffect:  unknown effectid %d", focus_spell.effectid[i]);
+			LogFile->write(EQEMuLog::Normal, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
 #endif
 		}
 	}
@@ -7816,13 +7816,13 @@ float Bot::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_spe
 bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 {
 	/* solar: called when a mob is attacked, does the checks to see if it's a hit
-	*  and does other mitigation checks.  'this' is the mob being attacked.
+	* and does other mitigation checks. 'this' is the mob being attacked.
 	*
 	* special return values:
-	*    -1 - block
-	*    -2 - parry
-	*    -3 - riposte
-	*    -4 - dodge
+	* -1 - block
+	* -2 - parry
+	* -3 - riposte
+	* -4 - dodge
 	*
 	*/
 	if(GetAppearance() == eaDead)
@@ -7855,7 +7855,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	if (CanRiposte && damage > 0 && CanThisClassRiposte() && !other->BehindMob(this, other->GetX(), other->GetY()))
 	{
 		riposte_chance = (100.0f + (float)defender->GetAABonuses().RiposteChance + (float)defender->GetSpellBonuses().RiposteChance + (float)defender->GetItemBonuses().RiposteChance) / 100.0f;
-        skill = GetSkill(RIPOSTE);
+		skill = GetSkill(RIPOSTE);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
 			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
@@ -7958,7 +7958,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	if (damage > 0 && CanThisClassDodge() && !other->BehindMob(this, other->GetX(), other->GetY()))
 	{
 		dodge_chance = (100.0f + (float)defender->GetSpellBonuses().DodgeChance + (float)defender->GetItemBonuses().DodgeChance) / 100.0f;
-        skill = GetSkill(DODGE);
+		skill = GetSkill(DODGE);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
 			bonus = 2.0 + skill/60.0 + (GetAGI()/200);
@@ -7999,7 +7999,7 @@ int Bot::GetMonkHandToHandDamage(void)
 	// Kaiyodo - Determine a monk's fist damage. Table data from www.monkly-business.com
 	// saved as static array - this should speed this function up considerably
 	static int damage[66] = {
-		//   0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19
+		// 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 		99, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7,
 		8, 8, 8, 8, 8, 9, 9, 9, 9, 9,10,10,10,10,10,11,11,11,11,11,
 		12,12,12,12,12,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,
@@ -8158,7 +8158,7 @@ bool Bot::TryFinishingBlow(Mob *defender, SkillType skillinuse)
 		}
 		else
 		{
-			mlog(COMBAT__ATTACKS, "FAILED a finishing blow: levelreq  at %d, other level %d", levelreq , defender->GetLevel());
+			mlog(COMBAT__ATTACKS, "FAILED a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
 			return false;
 		}
 	}
@@ -8175,8 +8175,8 @@ void Bot::DoRiposte(Mob* defender) {
 
 	//double riposte
 	int16 DoubleRipChance = defender->GetAABonuses().GiveDoubleRiposte[0] +
-							 defender->GetSpellBonuses().GiveDoubleRiposte[0] +
-							 defender->GetItemBonuses().GiveDoubleRiposte[0];
+							defender->GetSpellBonuses().GiveDoubleRiposte[0] +
+							defender->GetItemBonuses().GiveDoubleRiposte[0];
 
 	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
 		mlog(COMBAT__ATTACKS, "Preforming a double riposte (%d percent chance)", DoubleRipChance);
@@ -8311,7 +8311,7 @@ void Bot::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 			{
 				thac0 = thac0cap;
 			}
-            d -= 10.0 * (a_diff / thac0);
+			d -= 10.0 * (a_diff / thac0);
 		}
 		else if(mit_roll > atk_roll)
 		{
@@ -8322,7 +8322,7 @@ void Bot::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 			{
 				thac20 = thac20cap;
 			}
-            d += 10 * (m_diff / thac20);
+			d += 10 * (m_diff / thac20);
 		}
 
 		if(d < 0.0)
@@ -8581,7 +8581,7 @@ void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 	if(primaryweapondamage > 0){
 		if(level > 25){
-			max_hit = (((2*backstab_dmg) * GetDamageTable(BACKSTAB) / 100) * 10 * GetSkill(BACKSTAB) / 355)  + ((level-25)/3) + 1;
+			max_hit = (((2*backstab_dmg) * GetDamageTable(BACKSTAB) / 100) * 10 * GetSkill(BACKSTAB) / 355) + ((level-25)/3) + 1;
 			hate = 20 * backstab_dmg * GetSkill(BACKSTAB) / 355;
 		}
 		else{
@@ -8596,7 +8596,7 @@ void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 		}
 		else
 		{
-			// Trumpcard:  Replaced switch statement with formula calc.  This will give minhit increases all the way to 65.
+			// Trumpcard: Replaced switch statement with formula calc. This will give minhit increases all the way to 65.
 			min_hit = (level * ( level*5 - 105)) / 100;
 		}
 
@@ -8720,11 +8720,11 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		if(level >= RuleI(Combat, NPCBashKickLevel)){
 			bool canBash = false;
 			if((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) // Racial Slam
-						|| (m_inv.GetItem(SLOT_SECONDARY) && m_inv.GetItem(SLOT_SECONDARY)->GetItem()->ItemType == ItemTypeShield)  //Using Shield
+						|| (m_inv.GetItem(SLOT_SECONDARY) && m_inv.GetItem(SLOT_SECONDARY)->GetItem()->ItemType == ItemTypeShield) //Using Shield
 						|| (m_inv.GetItem(SLOT_PRIMARY) && (m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HS
 							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HB
 							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HPierce)
-							&& GetAA(aa2HandBash) >= 1)) {   //Using 2 hand weapon, but has AA 2 Hand Bash
+							&& GetAA(aa2HandBash) >= 1)) { //Using 2 hand weapon, but has AA 2 Hand Bash
 				canBash = true;
 			}
 
@@ -8747,11 +8747,11 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	case PALADIN:
 		if(level >= RuleI(Combat, NPCBashKickLevel)){
 			if((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) // Racial Slam
-						|| (m_inv.GetItem(SLOT_SECONDARY) && m_inv.GetItem(SLOT_SECONDARY)->GetItem()->ItemType == ItemTypeShield)  //Using Shield
+						|| (m_inv.GetItem(SLOT_SECONDARY) && m_inv.GetItem(SLOT_SECONDARY)->GetItem()->ItemType == ItemTypeShield) //Using Shield
 						|| (m_inv.GetItem(SLOT_PRIMARY) && (m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HS
 							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HB
 							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HPierce)
-							&& GetAA(aa2HandBash) >= 1)) {   //Using 2 hand weapon, but has AA 2 Hand Bash
+							&& GetAA(aa2HandBash) >= 1)) { //Using 2 hand weapon, but has AA 2 Hand Bash
 				skill_to_use = BASH;
 			}
 		}
@@ -8833,10 +8833,10 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		int AtkRounds = 3;
 		int skillmod = 0;
 
-        if(MaxSkill(FRENZY) > 0)
-                skillmod = 100*GetSkill(FRENZY)/MaxSkill(FRENZY);
+		if(MaxSkill(FRENZY) > 0)
+			skillmod = 100*GetSkill(FRENZY)/MaxSkill(FRENZY);
 
-		int32 max_dmg = (26 +  ((((GetLevel()-6) * 2)*skillmod)/100))  * ((100+RuleI(Combat, FrenzyBonus))/100);
+		int32 max_dmg = (26 + ((((GetLevel()-6) * 2)*skillmod)/100)) * ((100+RuleI(Combat, FrenzyBonus))/100);
 		int32 min_dmg = 0;
 		DoAnim(anim2HSlashing);
 
@@ -9420,7 +9420,7 @@ void Bot::SetAttackTimer() {
 				int speed = (int)((36 *(100+DelayMod)/100)*(100.0f+attack_speed)*PermaHaste);
 				//if(speed < RuleI(Combat, MinHastedDelay) && IsClient())	//lower bound
 				//	speed = RuleI(Combat, MinHastedDelay);
-				TimerToUse->SetAtTrigger(speed, true); 	// Hand to hand, non-monk 2/36
+				TimerToUse->SetAtTrigger(speed, true); // Hand to hand, non-monk 2/36
 			}
 		} else {
 			//we have a weapon, use its delay
@@ -9467,8 +9467,8 @@ void Bot::SetAttackTimer() {
 int32 Bot::Additional_SpellDmg(uint16 spell_id, bool bufftick)
 {
 	int32 spell_dmg = 0;
-	spell_dmg  += GetBotFocusEffect(BotfocusFF_Damage_Amount, spell_id);
-	spell_dmg  += GetBotFocusEffect(BotfocusSpellDamage, spell_id);
+	spell_dmg += GetBotFocusEffect(BotfocusFF_Damage_Amount, spell_id);
+	spell_dmg += GetBotFocusEffect(BotfocusSpellDamage, spell_id);
 
 	//For DOTs you need to apply the damage over the duration of the dot to each tick (this is how live did it)
 	if (bufftick){
@@ -9500,8 +9500,8 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value) {
 	if (tt == ST_UndeadAE || tt == ST_Undead || tt == ST_Summoned) {
 		//undead/summoned spells
 		modifier += GetBotFocusEffect(BotfocusImprovedUndeadDamage, spell_id);
-    } else {
-    	//damage spells.
+	} else {
+		//damage spells.
 		modifier += GetBotFocusEffect(BotfocusImprovedDamage, spell_id);
 		modifier += GetBotFocusEffect(BotfocusSpellEffectiveness, spell_id);
 		modifier += GetBotFocusEffect(BotfocusImprovedDamage2, spell_id);
@@ -9514,7 +9514,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value) {
 	}
 
 	//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm TOuch.
-	if (spell_id == SPELL_IMP_HARM_TOUCH) {  //Improved Harm Touch
+	if (spell_id == SPELL_IMP_HARM_TOUCH) { //Improved Harm Touch
 			value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
 	}
 
@@ -9549,7 +9549,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value) {
 				ratio += RuleI(Spells, WizCritRatio);
 			}
 			if(aabonuses.SpellCritDmgIncrease > 0) // wizards get an additional bonus
-				ratio +=  aabonuses.SpellCritDmgIncrease * 1.5; //108%, 115%, 124%, close to Graffe's 207%, 215%, & 225%
+				ratio += aabonuses.SpellCritDmgIncrease * 1.5; //108%, 115%, 124%, close to Graffe's 207%, 215%, & 225%
 		}
 
 		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
@@ -9603,8 +9603,8 @@ int32 Bot::Additional_Heal(uint16 spell_id)
 {
 	int32 heal_amt = 0;
 
-	heal_amt  += GetBotFocusEffect(BotfocusAdditionalHeal, spell_id);
-	heal_amt  += GetBotFocusEffect(BotfocusAdditionalHeal2, spell_id);
+	heal_amt += GetBotFocusEffect(BotfocusAdditionalHeal, spell_id);
+	heal_amt += GetBotFocusEffect(BotfocusAdditionalHeal2, spell_id);
 
 	if (heal_amt){
 		int duration = CalcBuffDuration(this, this, spell_id);
@@ -9906,7 +9906,7 @@ bool Bot::SpellEffect(Mob* caster, uint16 spell_id, float partial) {
 
 	Result = Mob::SpellEffect(caster, spell_id, partial);
 
-    // Franck-add: If healed/doted, a bot must show its new HP to its leader
+	// Franck-add: If healed/doted, a bot must show its new HP to its leader
 	if(IsGrouped()) {
 		Group *g = GetGroup();
 		if(g) {
@@ -11305,7 +11305,7 @@ bool Bot::IsGroupPrimaryHealer() {
 			case RANGER:
 			case BEASTLORD:
 			{
-				result = GroupHasPriestClass(g)  ? false : true;
+				result = GroupHasPriestClass(g) ? false : true;
 				break;
 			}
 			default:
@@ -11340,7 +11340,7 @@ bool Bot::IsGroupPrimarySlower() {
 			}
 			case BEASTLORD:
 			{
-				result = (GroupHasShamanClass(g) || GroupHasEnchanterClass(g))  ? false : true;
+				result = (GroupHasShamanClass(g) || GroupHasEnchanterClass(g)) ? false : true;
 				break;
 			}
 			default:
@@ -12029,7 +12029,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		c->Message(0, "#bot taunt [on|off] - Turns taunt on/off for targeted bot");
 		c->Message(0, "#bot stance [name] [stance (id)|list] - Sets/lists stance for named bot (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
 		c->Message(0, "#bot groupmessages [on|off] [bot name|all] - Turns group messages on/off for named bot/all bots.");
-		c->Message(0, "#bot defensive  [bot name] - Causes warrior or knight bot to use defensive discipline / buff.");
+		c->Message(0, "#bot defensive [bot name] - Causes warrior or knight bot to use defensive discipline / buff.");
 		c->Message(0, "#bot healrotation help - Displays the commands available to manage BOT heal rotations.");
 		// TODO:
 		// c->Message(0, "#bot illusion <bot/client name or target> - Enchanter Bot cast an illusion buff spell on you or your target.");
@@ -12125,9 +12125,9 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		MYSQL_ROW DataRow;
 
 		c->Message(0, "-----------------#bot armorcolor help-----------------------------");
-		c->Message(0, "Armor:  17(Chest/Robe), 7(Arms), 9(Bracer), 12(Hands), 18(Legs), 19(Boots), 2(Helm)");
+		c->Message(0, "Armor: 17(Chest/Robe), 7(Arms), 9(Bracer), 12(Hands), 18(Legs), 19(Boots), 2(Helm)");
 		c->Message(0, "------------------------------------------------------------------");
-		c->Message(0, "Color: [red] [green] [blue]  (enter a number from 0-255 for each");
+		c->Message(0, "Color: [red] [green] [blue] (enter a number from 0-255 for each");
 		c->Message(0, "------------------------------------------------------------------");
 		c->Message(0, "Example: #bot armorcolor 17 0 255 0 - this would make the chest bright green");
 		return;
@@ -12248,7 +12248,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "help") && !strcasecmp(sep->arg[2], "create") ){
-		c->Message(0, "Classes:  1(Warrior), 2(Cleric), 3(Paladin), 4(Ranger), 5(Sk), 6(Druid), 7(Monk), 8(Bard), 9(Rogue), 10(Shaman), 11(Necro), 12(Wiz), 13(Mag), 14(Ench), 15(Beast), 16(Bersek)");
+		c->Message(0, "Classes: 1(Warrior), 2(Cleric), 3(Paladin), 4(Ranger), 5(Sk), 6(Druid), 7(Monk), 8(Bard), 9(Rogue), 10(Shaman), 11(Necro), 12(Wiz), 13(Mag), 14(Ench), 15(Beast), 16(Bersek)");
 		c->Message(0, "------------------------------------------------------------------");
 		c->Message(0, "Races: 1(Human), 2(Barb), 3(Erudit), 4(Wood elf), 5(High elf), 6(Dark elf), 7(Half elf), 8(Dwarf), 9(Troll), 10(Ogre), 11(Halfling), 12(Gnome), 128(Iksar), 130(Vah shir), 330(Froglok), 522(Drakkin)");
 		c->Message(0, "------------------------------------------------------------------");
@@ -12338,7 +12338,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 		if(bot && !listAll) {
 			// Specific bot only
-			if(bot->GetClass() !=  WARRIOR && bot->GetClass() !=  MONK && bot->GetClass() !=  BARD && bot->GetClass() !=  BERSERKER && bot->GetClass() !=  ROGUE)
+			if(bot->GetClass() != WARRIOR && bot->GetClass() != MONK && bot->GetClass() != BARD && bot->GetClass() != BERSERKER && bot->GetClass() != ROGUE)
 				c->Message(0, "Name: %s -- Class: %s -- Mana: %3.1f%%", bot->GetCleanName(), ClassIdToString(bot->GetClass()).c_str(), bot->GetManaRatio());
 		}
 		else {
@@ -12349,7 +12349,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				for(std::list<Bot*>::iterator botsListItr = spawnedBots.begin(); botsListItr != spawnedBots.end(); botsListItr++) {
 					Bot* tempBot = *botsListItr;
 					if(tempBot) {
-						if(tempBot->GetClass() !=  WARRIOR && tempBot->GetClass() !=  MONK && tempBot->GetClass() !=  BARD && tempBot->GetClass() !=  BERSERKER && tempBot->GetClass() !=  ROGUE)
+						if(tempBot->GetClass() != WARRIOR && tempBot->GetClass() != MONK && tempBot->GetClass() != BARD && tempBot->GetClass() != BERSERKER && tempBot->GetClass() != ROGUE)
 							c->Message(0, "Name: %s -- Class: %s -- Mana: %3.1f%%", tempBot->GetCleanName(), ClassIdToString(tempBot->GetClass()).c_str(), tempBot->GetManaRatio());
 					}
 				}
@@ -12892,7 +12892,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 		}
 		if(hasruneer) {
-			if      (c->GetLevel() <= 12) {
+			if (c->GetLevel() <= 12) {
 				runeer->Say("I need to be level 13 or higher for this...");
 			}
 			else if ((c->GetLevel() >= 13) && (c->GetLevel() <= 21)) {
@@ -13033,7 +13033,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 			switch(CurerClass) {
 				case CLERIC:
-					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 1))  {
+					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 1)) {
 						Curer->Say("Trying to cure us of %s.", sep->arg[2]);
 						Curer->CastToBot()->Bot_Command_Cure(1, Curer->GetLevel());
 					}
@@ -13061,7 +13061,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					break;
 
 				case SHAMAN:
-					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 2))  {
+					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 2)) {
 						Curer->Say("Trying to cure us of %s.", sep->arg[2]);
 						Curer->CastToBot()->Bot_Command_Cure(1, Curer->GetLevel());
 					}
@@ -13637,11 +13637,11 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				}
 			}
 		}
-		if((hasevac)  && (c->GetLevel() >= 18)) {
+		if((hasevac) && (c->GetLevel() >= 18)) {
 			evac->Say("Attempting to Evac you %s.", c->GetName());
 			evac->CastToClient()->CastSpell(2183, c->GetID(), 1, -1, -1);
 		}
-		else if((hasevac)  && (c->GetLevel() <= 17)) {
+		else if((hasevac) && (c->GetLevel() <= 17)) {
 			evac->Say("I'm not level 18 yet.", c->GetName());
 		}
 		return;
@@ -13685,11 +13685,11 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 			switch(SowerClass) {
 				case DRUID:
-					if      ((!strcasecmp(sep->arg[2], "regular")) && (zone->CanCastOutdoor())  && (c->GetLevel() >= 10) ) {
+					if ((!strcasecmp(sep->arg[2], "regular")) && (zone->CanCastOutdoor()) && (c->GetLevel() >= 10) ) {
 						Sower->Say("Casting sow...");
 						Sower->CastSpell(278, c->GetID(), 1, -1, -1);
 					}
-					else if ((!strcasecmp(sep->arg[2], "regular")) && (zone->CanCastOutdoor())  && (c->GetLevel() <= 10) ) {
+					else if ((!strcasecmp(sep->arg[2], "regular")) && (zone->CanCastOutdoor()) && (c->GetLevel() <= 10) ) {
 						Sower->Say("I'm not level 10 yet.");
 					}
 					else if ((!strcasecmp(sep->arg[2], "wolf")) && zone->CanCastOutdoor() && (c->GetLevel() >= 20)) {
@@ -13772,7 +13772,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 
 				default:
-					c->Message(15, "You must have a Druid, Shaman, Ranger,  or Beastlord in your group.");
+					c->Message(15, "You must have a Druid, Shaman, Ranger, or Beastlord in your group.");
 					break;
 			}
 		}
@@ -13863,7 +13863,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 			switch(GaterClass) {
 				case DRUID:
-					if      ((!strcasecmp(sep->arg[2], "karana")) && (c->GetLevel() >= 25) ) {
+					if ((!strcasecmp(sep->arg[2], "karana")) && (c->GetLevel() >= 25) ) {
 						Gater->Say("Casting Circle of Karana...");
 						Gater->CastSpell(550, c->GetID(), 1, -1, -1);
 					}
@@ -13997,7 +13997,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 				case WIZARD:
 
-					if      ((!strcasecmp(sep->arg[2], "commons")) && (c->GetLevel() >= 35) ) {
+					if ((!strcasecmp(sep->arg[2], "commons")) && (c->GetLevel() >= 35) ) {
 						Gater->Say("Casting Common Portal...");
 						Gater->CastSpell(566, c->GetID(), 1, -1, -1);
 					}
@@ -14174,7 +14174,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 			switch(EndurerClass) {
 				case DRUID:
-					if  (c->GetLevel() < 6) {
+					if (c->GetLevel() < 6) {
 						Endurer->Say("I'm not level 6 yet.");
 					}
 					else {
@@ -14184,7 +14184,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 					break;
 				case SHAMAN:
-					if  (c->GetLevel() < 12) {
+					if (c->GetLevel() < 12) {
 						Endurer->Say("I'm not level 12 yet.");
 					}
 					else {
@@ -14193,7 +14193,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 					break;
 				case RANGER:
-					if  (c->GetLevel() < 20) {
+					if (c->GetLevel() < 20) {
 						Endurer->Say("I'm not level 20 yet.");
 					}
 					else {
@@ -14202,7 +14202,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 					break;
 				case ENCHANTER:
-					if  (c->GetLevel() < 12) {
+					if (c->GetLevel() < 12) {
 						Endurer->Say("I'm not level 12 yet.");
 					}
 					else {
@@ -14211,14 +14211,14 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 					break;
 				case BEASTLORD:
-					if  (c->GetLevel() < 25) {
+					if (c->GetLevel() < 25) {
 						Endurer->Say("I'm not level 25 yet.");
- 					}
+					}
 					else {
 						Endurer->Say("Casting Enduring Breath...");
 						Endurer->CastSpell(86, c->GetID(), 1, -1, -1);
 					}
- 					break;
+					break;
 				default:
 					c->Message(15, "You must have a Druid, Shaman, Ranger, Enchanter, or Beastlord in your group.");
 					break;
@@ -14271,21 +14271,21 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 			switch(InviserClass) {
 				case ENCHANTER:
-					if  ((c->GetLevel() <= 14) && (!strcasecmp(sep->arg[2], "undead"))) {
+					if ((c->GetLevel() <= 14) && (!strcasecmp(sep->arg[2], "undead"))) {
 						Inviser->Say("I'm not level 14 yet.");
 					}
 					else if ((!c->IsInvisible(c)) && (!c->invisible_undead) && (c->GetLevel() >= 14) && (!strcasecmp(sep->arg[2], "undead"))) {
 						Inviser->Say("Casting invis undead...");
 						Inviser->CastSpell(235, c->GetID(), 1, -1, -1);
 					}
-					else if  ((c->GetLevel() <= 4) && (!strcasecmp(sep->arg[2], "live"))) {
+					else if ((c->GetLevel() <= 4) && (!strcasecmp(sep->arg[2], "live"))) {
 						Inviser->Say("I'm not level 4 yet.");
 					}
 					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 4) && (!strcasecmp(sep->arg[2], "live"))) {
 						Inviser->Say("Casting invisibilty...");
 						Inviser->CastSpell(42, c->GetID(), 1, -1, -1);
 					}
-					else if  ((c->GetLevel() <= 6) && (!strcasecmp(sep->arg[2], "see"))) {
+					else if ((c->GetLevel() <= 6) && (!strcasecmp(sep->arg[2], "see"))) {
 						Inviser->Say("I'm not level 6 yet.");
 					}
 					else if ((c->GetLevel() >= 6) && (!strcasecmp(sep->arg[2], "see"))) {
@@ -14300,17 +14300,17 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 					break;
 				case MAGICIAN:
-					if  (!strcasecmp(sep->arg[2], "undead")) {
+					if (!strcasecmp(sep->arg[2], "undead")) {
 						Inviser->Say("I don't have that spell.");
 					}
-					else if  ((c->GetLevel() <= 8) && (!strcasecmp(sep->arg[2], "live"))) {
+					else if ((c->GetLevel() <= 8) && (!strcasecmp(sep->arg[2], "live"))) {
 						Inviser->Say("I'm not level 8 yet.");
 					}
 					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 8) && (!strcasecmp(sep->arg[2], "live"))) {
 						Inviser->Say("Casting invisibilty...");
 						Inviser->CastSpell(42, c->GetID(), 1, -1, -1);
 					}
-					else if  ((c->GetLevel() <= 16) && (!strcasecmp(sep->arg[2], "see"))) {
+					else if ((c->GetLevel() <= 16) && (!strcasecmp(sep->arg[2], "see"))) {
 						Inviser->Say("I'm not level 16 yet.");
 					}
 					else if ((c->GetLevel() >= 16) && (!strcasecmp(sep->arg[2], "see"))) {
@@ -14325,21 +14325,21 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 					break;
 				case WIZARD:
-					if  ((c->GetLevel() <= 39) && (!strcasecmp(sep->arg[2], "undead"))) {
+					if ((c->GetLevel() <= 39) && (!strcasecmp(sep->arg[2], "undead"))) {
 						Inviser->Say("I'm not level 39 yet.");
 					}
 					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 39) && (!strcasecmp(sep->arg[2], "undead"))) {
 						Inviser->Say("Casting invis undead...");
 						Inviser->CastSpell(235, c->GetID(), 1, -1, -1);
 					}
-					else if  ((c->GetLevel() <= 16) && (!strcasecmp(sep->arg[2], "live"))) {
+					else if ((c->GetLevel() <= 16) && (!strcasecmp(sep->arg[2], "live"))) {
 						Inviser->Say("I'm not level 16 yet.");
 					}
 					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 16) && (!strcasecmp(sep->arg[2], "live"))) {
 						Inviser->Say("Casting invisibilty...");
 						Inviser->CastSpell(42, c->GetID(), 1, -1, -1);
 					}
-					else if  ((c->GetLevel() <= 4) && (!strcasecmp(sep->arg[2], "see"))) {
+					else if ((c->GetLevel() <= 4) && (!strcasecmp(sep->arg[2], "see"))) {
 						Inviser->Say("I'm not level 6 yet.");
 					}
 					else if ((c->GetLevel() >= 4) && (!strcasecmp(sep->arg[2], "see"))) {
@@ -14372,10 +14372,10 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 					break;
 				case DRUID:
-					if  (!strcasecmp(sep->arg[2], "undead")) {
+					if (!strcasecmp(sep->arg[2], "undead")) {
 						Inviser->Say("I don't have that spell...");
 					}
-					else if  ((c->GetLevel() <= 4) && (!strcasecmp(sep->arg[2], "live"))) {
+					else if ((c->GetLevel() <= 4) && (!strcasecmp(sep->arg[2], "live"))) {
 						Inviser->Say("I'm not level 4 yet.");
 					}
 					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 18) && (!strcasecmp(sep->arg[2], "live"))) {
@@ -14389,7 +14389,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					else if ((c->GetLevel() >= 4) && (!strcasecmp(sep->arg[2], "live")) && (!zone->CanCastOutdoor())) {
 						Inviser->Say("I can't cast this spell indoors...");
 					}
-					else if  ((c->GetLevel() <= 13) && (!strcasecmp(sep->arg[2], "see"))) {
+					else if ((c->GetLevel() <= 13) && (!strcasecmp(sep->arg[2], "see"))) {
 						Inviser->Say("I'm not level 13 yet.");
 					}
 					else if ((c->GetLevel() >= 13) && (!strcasecmp(sep->arg[2], "see"))) {
@@ -14448,7 +14448,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 			switch(LeverClass) {
 				case DRUID:
-					if  (c->GetLevel() <= 14) {
+					if (c->GetLevel() <= 14) {
 						Lever->Say("I'm not level 14 yet.");
 					}
 					else if (zone->CanCastOutdoor()) {
@@ -14543,7 +14543,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 			switch(ResisterClass) {
 				case CLERIC:
-					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 6))  {
+					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 6)) {
 						Resister->Say("Casting poison protection...", sep->arg[2]);
 						Resister->CastToBot()->Bot_Command_Resist(1, Resister->GetLevel());
 					}
@@ -14576,7 +14576,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					break;
 
 				case SHAMAN:
-					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 20))  {
+					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 20)) {
 						Resister->Say("Casting poison protection...", sep->arg[2]);
 						Resister->CastToBot()->Bot_Command_Resist(12, Resister->GetLevel());
 					}
@@ -15072,7 +15072,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		return;
 	}
 
-    if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "load")) {
+	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "load")) {
 
 		// If client is grouped, check for aggro on each group member.
 		Group *g = c->GetGroup();
@@ -15084,7 +15084,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				// Fail if current group member is client and has aggro
 				// OR has a popuplated hate list (assume bot).
 				if((g->members[i]->IsClient() && g->members[i]->CastToClient()->GetAggroCount())
-				||  g->members[i]->IsEngaged()) {
+				|| g->members[i]->IsEngaged()) {
 					c->Message(0, "You can't spawn bots while your group is engaged.");
 					return;
 				}
@@ -15295,7 +15295,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "haircolor") || !strcasecmp(sep->arg[1], "hair") || !strcasecmp(sep->arg[1], "beard") || !strcasecmp(sep->arg[1], "beardcolor") || !strcasecmp(sep->arg[1], "face")
 		|| !strcasecmp(sep->arg[1], "eyes") || !strcasecmp(sep->arg[1], "heritage") || !strcasecmp(sep->arg[1], "tattoo") || !strcasecmp(sep->arg[1], "details")) {
 		if(c->GetTarget() && c->GetTarget()->IsBot()) {
-			if  (sep->IsNumber(2)) {
+			if (sep->IsNumber(2)) {
 				if (c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID()) {
 					Bot *target = c->GetTarget()->CastToBot();
 					uint16 Race = target->GetRace();
@@ -15459,7 +15459,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					int stance = atoi(sep->arg[3]);
 
 					if(stance >= MaxStances || stance < 0){
-						c->Message(0, "Usage #bot stance [name] [stance (id)]  (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
+						c->Message(0, "Usage #bot stance [name] [stance (id)] (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
 						return;
 					}
 					else {
@@ -15513,7 +15513,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 		}
 		else {
-			c->Message(0, "Usage #bot stance [name] [stance (id)]  (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
+			c->Message(0, "Usage #bot stance [name] [stance (id)] (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
 		}
 		return;
 	}
@@ -16131,7 +16131,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						Bot* tempBot = *botListItr;
 						if(tempBot->GetInHealRotation() && tempBot->GetHealRotationLeader() == tempBot) {
 							//list leaders and number of bots per rotation
-							c->Message(0, "Bot Heal Rotation- Leader: %s, Number of Members: %i, Timer:  %1.1f", tempBot->GetCleanName(), tempBot->GetNumHealRotationMembers(), (float)(tempBot->GetHealRotationTimer()/1000));
+							c->Message(0, "Bot Heal Rotation- Leader: %s, Number of Members: %i, Timer: %1.1f", tempBot->GetCleanName(), tempBot->GetNumHealRotationMembers(), (float)(tempBot->GetHealRotationTimer()/1000));
 						}
 					}
 				}
@@ -16156,7 +16156,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 						//list leader and number of members
 						c->Message(0, "Bot Heal Rotation- Leader: %s", leaderBot->GetCleanName());
-						c->Message(0, "Bot Heal Rotation- Timer:  %1.1f", ((float)leaderBot->GetHealRotationTimer()/1000.0f));
+						c->Message(0, "Bot Heal Rotation- Timer: %1.1f", ((float)leaderBot->GetHealRotationTimer()/1000.0f));
 
 						for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 							Bot* tempBot = *botListItr;
@@ -16372,11 +16372,11 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 								if(caster->AICastSpell(g->members[i], 100, SpellType_Heal))
 									return true;
 							}
-							else if((g->members[i]->GetClass() ==  WARRIOR || g->members[i]->GetClass() == PALADIN || g->members[i]->GetClass() == SHADOWKNIGHT) && g->members[i]->GetHPRatio() < 95) {
+							else if((g->members[i]->GetClass() == WARRIOR || g->members[i]->GetClass() == PALADIN || g->members[i]->GetClass() == SHADOWKNIGHT) && g->members[i]->GetHPRatio() < 95) {
 								if(caster->AICastSpell(g->members[i], 100, SpellType_Heal))
 									return true;
 							}
-							else if(g->members[i]->GetClass() ==  ENCHANTER && g->members[i]->GetHPRatio() < 80) {
+							else if(g->members[i]->GetClass() == ENCHANTER && g->members[i]->GetHPRatio() < 80) {
 								if(caster->AICastSpell(g->members[i], 100, SpellType_Heal))
 									return true;
 							}
@@ -16436,11 +16436,11 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 								if(caster->AICastSpell(g->members[i], 100, SpellType_Heal))
 									return true;
 							}
-							else if((g->members[i]->GetClass() ==  WARRIOR || g->members[i]->GetClass() == PALADIN || g->members[i]->GetClass() == SHADOWKNIGHT) && g->members[i]->GetHPRatio() < hpRatioToHeal) {
+							else if((g->members[i]->GetClass() == WARRIOR || g->members[i]->GetClass() == PALADIN || g->members[i]->GetClass() == SHADOWKNIGHT) && g->members[i]->GetHPRatio() < hpRatioToHeal) {
 								if(caster->AICastSpell(g->members[i], 100, SpellType_Heal))
 									return true;
 							}
-							else if(g->members[i]->GetClass() ==  ENCHANTER && g->members[i]->GetHPRatio() < hpRatioToHeal) {
+							else if(g->members[i]->GetClass() == ENCHANTER && g->members[i]->GetHPRatio() < hpRatioToHeal) {
 								if(caster->AICastSpell(g->members[i], 100, SpellType_Heal))
 									return true;
 							}
@@ -16600,7 +16600,7 @@ void EntityList::AddBot(Bot *newBot, bool SendSpawnPacket, bool dontqueue) {
 				safe_delete(ns);
 			}
 
-            parse->EventNPC(EVENT_SPAWN, newBot, nullptr, "", 0);
+			parse->EventNPC(EVENT_SPAWN, newBot, nullptr, "", 0);
 		}
 
 		bot_list.push_back(newBot);
@@ -16710,7 +16710,7 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 		{
 			if(iterator.GetData()->IsTrackable()) {
 				Mob* cur_entity = iterator.GetData();
-				int  Extras = (cur_entity->IsBot() || cur_entity->IsPet() || cur_entity->IsFamiliar() || cur_entity->IsClient());
+				int Extras = (cur_entity->IsBot() || cur_entity->IsPet() || cur_entity->IsFamiliar() || cur_entity->IsClient());
 				const char *const MyArray[] = {
 					"a_","an_","Innkeep_","Barkeep_",
 					"Guard_","Merchant_","Lieutenant_",
@@ -16743,20 +16743,20 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 					"stone_","lava_","_",""
 				};
 				unsigned int MyArraySize;
-				 for ( MyArraySize = 0; true; MyArraySize++) {   //Find empty string & get size
-				   if (!(*(MyArray[MyArraySize]))) break;   //Checks for null char in 1st pos
+				for ( MyArraySize = 0; true; MyArraySize++) { //Find empty string & get size
+					if (!(*(MyArray[MyArraySize]))) break; //Checks for null char in 1st pos
 				};
 				if (NamedOnly) {
-				   bool ContinueFlag = false;
-				   const char *CurEntityName = cur_entity->GetName();  //Call function once
-				   for (int Index = 0; Index < MyArraySize; Index++) {
-				      if (!strncasecmp(CurEntityName, MyArray[Index], strlen(MyArray[Index])) || (Extras)) {
-				         iterator.Advance();
-				         ContinueFlag = true;
-				         break;   //From Index for
-				       };
-				   };
-				  if (ContinueFlag) continue; //Moved here or would apply to Index for
+					bool ContinueFlag = false;
+					const char *CurEntityName = cur_entity->GetName(); //Call function once
+					for (int Index = 0; Index < MyArraySize; Index++) {
+						if (!strncasecmp(CurEntityName, MyArray[Index], strlen(MyArray[Index])) || (Extras)) {
+							iterator.Advance();
+							ContinueFlag = true;
+							break; //From Index for
+						};
+					};
+					if (ContinueFlag) continue; //Moved here or would apply to Index for
 				};
 
 				CurrentCon = client->GetLevelCon(cur_entity->GetLevel());
@@ -17049,12 +17049,12 @@ bool Bot::HasOrMayGetAggro() {
 		Mob *topHate = GetTarget()->GetHateTop();
 
 		if(topHate == this)
-			mayGetAggro = true;  //I currently have aggro
+			mayGetAggro = true; //I currently have aggro
 		else {
 			uint32 myHateAmt = GetTarget()->GetHateAmount(this);
 			uint32 topHateAmt = GetTarget()->GetHateAmount(topHate);
 
-			if(myHateAmt > 0 && topHateAmt > 0 && (uint8)((myHateAmt/topHateAmt)*100) > 90)  //I have 90% as much hate as top, next action may give me aggro
+			if(myHateAmt > 0 && topHateAmt > 0 && (uint8)((myHateAmt/topHateAmt)*100) > 90) //I have 90% as much hate as top, next action may give me aggro
 				mayGetAggro = true;
 		}
 	}
@@ -17143,7 +17143,7 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	//make sure we can use it..
 	if(!IsValidSpell(spell_id)) {
-	    Say("Not a valid spell");
+		Say("Not a valid spell");
 		return(false);
 	}
 
@@ -17212,7 +17212,7 @@ bool Bot::AddHealRotationMember( Bot* healer ) {
 				for(int i=0; i<3; i++){
 					healer->ClearHealRotationMembers();
 					healer->ClearHealRotationTargets();
-					healer->AddHealRotationTarget(entity_list.GetMob(_healRotationTargets[i]));   // add all targets..
+					healer->AddHealRotationTarget(entity_list.GetMob(_healRotationTargets[i])); // add all targets..
 				}
 				healer->SetHealRotationTimer(tempBot->GetHealRotationTimer());
 				healer->SetHealRotationLeader(this);
@@ -17246,10 +17246,10 @@ bool Bot::AddHealRotationMember( Bot* healer ) {
 }
 
 bool Bot::RemoveHealRotationMember( Bot* healer ) {
-    if(healer && GetNumHealRotationMembers() > 0) {
+	if(healer && GetNumHealRotationMembers() > 0) {
 		Bot* leader = healer->GetHealRotationLeader();
-	    Bot* prevBot = healer->GetPrevHealRotationMember();
-	    Bot* nextBot = healer->GetNextHealRotationMember();
+		Bot* prevBot = healer->GetPrevHealRotationMember();
+		Bot* nextBot = healer->GetNextHealRotationMember();
 
 		if(healer == this) {
 			if(nextBot != this) {
@@ -17259,21 +17259,21 @@ bool Bot::RemoveHealRotationMember( Bot* healer ) {
 		}
 
 		//remove healer from list
-        healer->SetHealRotationTimer(0);
-        healer->ClearHealRotationMembers();
+		healer->SetHealRotationTimer(0);
+		healer->ClearHealRotationMembers();
 		healer->ClearHealRotationTargets();
 		healer->ClearHealRotationLeader();
 		healer->SetHasHealedThisCycle(false);
 		healer->SetHealRotationActive(false);
-        healer->SetInHealRotation(false);
+		healer->SetInHealRotation(false);
 
-	    if(prevBot && nextBot && GetNumHealRotationMembers() > 1) {
-	        //set previous rotation member's next member to new member
-	        prevBot->SetNextHealRotationMember(nextBot);
+		if(prevBot && nextBot && GetNumHealRotationMembers() > 1) {
+			//set previous rotation member's next member to new member
+			prevBot->SetNextHealRotationMember(nextBot);
 
-	        //set previous rotation member's next member to new member
-	        nextBot->SetPrevHealRotationMember(prevBot);
-	    }
+			//set previous rotation member's next member to new member
+			nextBot->SetPrevHealRotationMember(prevBot);
+		}
 
 		//update rotation data
 		list<Bot*> botList = GetBotsInHealRotation(leader);
@@ -17382,7 +17382,7 @@ bool Bot::AddHealRotationTarget( Mob *target, int index ) {
 bool Bot::RemoveHealRotationTarget( Mob* target ) {
 	int index = 0;
 	bool removed = false;
-    if(target) {
+	if(target) {
 		//notify all heal rotation members to remove target
 		for(int i=0; i<MaxHealRotationTargets; i++){
 			if(_healRotationTargets[i] == target->GetID()) {
@@ -17423,17 +17423,17 @@ bool Bot::RemoveHealRotationTarget( int index ) {
 
 void Bot::ClearHealRotationMembers() {
 	_healRotationMemberPrev = 0; // No previous member
-    _healRotationMemberNext = 0; // No next member
+	_healRotationMemberNext = 0; // No next member
 }
 
 void Bot::ClearHealRotationTargets() {
-    for(int i=0; i<MaxHealRotationTargets; i++){
-        _healRotationTargets[i] = 0;
-    }
+	for(int i=0; i<MaxHealRotationTargets; i++){
+		_healRotationTargets[i] = 0;
+	}
 }
 
 Mob* Bot::GetHealRotationTarget( ) {
-    Mob* tank = nullptr;
+	Mob* tank = nullptr;
 	Mob* first = nullptr;
 	Mob* target = nullptr;
 	int removeIndex = 0;
@@ -17485,18 +17485,18 @@ Mob* Bot::GetHealRotationTarget( ) {
 	if(tank)
 		return tank;
 
-    return first;
+	return first;
 }
 
 Mob* Bot::GetHealRotationTarget( uint8 index ) {
-    Mob* target = nullptr;
+	Mob* target = nullptr;
 
 	if(_healRotationTargets[index] > 0) {
 		//get target at specified index
 		target = entity_list.GetMob(_healRotationTargets[index]);
 	}
 
-    return target;
+	return target;
 }
 
 list<Bot*> Bot::GetBotsInHealRotation(Bot* rotationLeader) {

@@ -17,8 +17,8 @@ namespace EQExtractor2.Patches
             ExpectedPPLength = 33784;
 
             PPZoneIDOffset = 26452;
-                        
+
             PatchConfFileName = "patch_July13-2012.conf";
-        }        
+        }
     }
 }

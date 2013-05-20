@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include "masterentity.h"
@@ -53,7 +53,7 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 	GuildMOTD_Struct *motd = (GuildMOTD_Struct *) outapp->pBuffer;
 	motd->unknown0 = 0;
 	strn0cpy(motd->name, m_pp.name, 64);
-	
+
 	if(IsInAGuild()) {
 		if(!guild_mgr.GetGuildMOTD(GuildID(), motd->motd, motd->setby_name)) {
 			motd->setby_name[0] = '\0';
@@ -63,12 +63,12 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 		//we have to send them an empty MOTD anywyas.
 		motd->motd[0] = '\0';	//just to be sure
 		motd->setby_name[0] = '\0';	//just to be sure
-		
+
 	}
-		
+
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildMOTD of length %d", outapp->size);
 	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
-	
+
 	FastQueuePacket(&outapp);
 }
 
@@ -126,7 +126,7 @@ void Client::SendGuildSpawnAppearance() {
 		SendAppearancePacket(AT_GuildID, GuildID());
 		SendAppearancePacket(AT_GuildRank, rank);
 	}
-	
+
 	UpdateWho();
 }
 
@@ -134,17 +134,17 @@ void Client::SendGuildList() {
 	EQApplicationPacket *outapp;
 //	outapp = new EQApplicationPacket(OP_ZoneGuildList);
 	outapp = new EQApplicationPacket(OP_GuildsList);
-	
+
 	//ask the guild manager to build us a nice guild list packet
 	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
 	if(outapp->pBuffer == nullptr) {
 		mlog(GUILDS__ERROR, "Unable to make guild list!");
 		return;
 	}
-	
+
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_ZoneGuildList of length %d", outapp->size);
 //	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
-	
+
 	FastQueuePacket(&outapp);
 }
 
@@ -154,15 +154,15 @@ void Client::SendGuildMembers() {
 	uint8 *data = guild_mgr.MakeGuildMembers(GuildID(), GetName(), len);
 	if(data == nullptr)
 		return;	//invalid guild, shouldent happen.
-	
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildMemberList);
 	outapp->size = len;
 	outapp->pBuffer = data;
 	data = nullptr;
-	
+
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildMemberList of length %d", outapp->size);
 	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
-	
+
 	FastQueuePacket(&outapp);
 
 	ServerPacket* pack = new ServerPacket(ServerOP_RequestOnlineGuildMembers, sizeof(ServerRequestOnlineGuildMembers_Struct));
@@ -189,13 +189,13 @@ void Client::RefreshGuildInfo()
 	guild_id = GUILD_NONE;
 
 	bool WasBanker = GuildBanker;
-	
+
 	CharGuildInfo info;
 	if(!guild_mgr.GetCharInfo(CharacterID(), info)) {
 		mlog(GUILDS__ERROR, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
 		return;
 	}
-	
+
 	guildrank = info.rank;
 	guild_id = info.guild_id;
 	GuildBanker = info.banker || guild_mgr.IsGuildLeader(GuildID(), CharacterID());
@@ -223,7 +223,7 @@ void Client::RefreshGuildInfo()
 				GuildBanks->SendGuildBank(this);
 		}
 	}
-	
+
 	SendGuildSpawnAppearance();
 }
 
@@ -274,10 +274,10 @@ void EntityList::RefreshAllGuildInfo(uint32 guild_id) {
 void EntityList::SendGuildMembers(uint32 guild_id) {
 	if(guild_id == GUILD_NONE)
 		return;
-	
+
 	//this could be optimized a bit to only build the member's packet once
 	//and then keep swapping out the name in the packet on each send.
-	
+
 	LinkedListIterator<Client*> iterator(client_list);
 	iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -308,19 +308,19 @@ void Client::SendGuildJoin(GuildJoin_Struct* gj){
 	strcpy(outgj->name, gj->name);
 	outgj->rank = gj->rank;
 	outgj->zoneid = gj->zoneid;
-	
+
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_GuildManageAdd for join of length %d", outapp->size);
 	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
-	
+
 	FastQueuePacket(&outapp);
-	
+
 //	SendGuildMembers(gj->guild_id, true);
 }
 
 /*
 void EntityList::SendGuildJoin(GuildJoin_Struct* gj){
 	LinkedListIterator<Client*> iterator(client_list);
-	
+
 	iterator.Reset();
 	while(iterator.MoreElements())
 	{
@@ -382,15 +382,15 @@ bool ZoneDatabase::CheckGuildDoor(uint8 doorid,uint16 guild_id,const char* zone)
 	MYSQL_ROW row;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-    MYSQL_RES *result;
-	if (!RunQuery(query, MakeAnyLenString(&query, 
-		"SELECT guild FROM doors where doorid=%i AND zone='%s'", 
+	MYSQL_RES *result;
+	if (!RunQuery(query, MakeAnyLenString(&query,
+		"SELECT guild FROM doors where doorid=%i AND zone='%s'",
 		doorid-128, zone), errbuf, &result))
 	{
 		LogFile->write(EQEMuLog::Error, "Error in CheckGuildDoor query '%s': %s", query, errbuf);
 		safe_delete_array(query);
 		return false;
-	} else { 
+	} else {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			if (atoi(row[0]) == guild_id)
@@ -403,7 +403,7 @@ bool ZoneDatabase::CheckGuildDoor(uint8 doorid,uint16 guild_id,const char* zone)
 				mysql_free_result(result);
 				return false;
 			}
-			
+
 			// code below will never be reached
 			mysql_free_result(result);
 			return false;
@@ -418,7 +418,7 @@ bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) 
 	uint32	affected_rows = 0;
 	if (doorid > 127)
 		doorid = doorid - 128;
-	if (!RunQuery(query, MakeAnyLenString(&query, 
+	if (!RunQuery(query, MakeAnyLenString(&query,
 		"UPDATE doors SET guild = %i WHERE (doorid=%i) AND (zone='%s')",
 		guild_id, doorid, zone), errbuf, 0,&affected_rows))
 	{
@@ -426,9 +426,9 @@ bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) 
 		safe_delete_array(query);
 		return false;
 	}
-	
+
 	safe_delete_array(query);
-	
+
 	return(affected_rows > 0);
 }
 

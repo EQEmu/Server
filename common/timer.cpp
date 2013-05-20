@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-    Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 // Disgrace: for windows compile
@@ -65,7 +65,7 @@ int gettimeofday (timeval *tp, ...)
 
 	ftime (&tb);
 
-	tp->tv_sec  = tb.time;
+	tp->tv_sec = tb.time;
 	tp->tv_usec = tb.millitm * 1000;
 
 	return 0;
@@ -76,13 +76,13 @@ int gettimeofday (timeval *tp, ...)
 bool Timer::Check(bool iReset)
 {
 	_CP(Timer_Check);
-    if (this==0) { 
-		cerr << "Null timer during ->Check()!?\n"; 
-		return true; 
+	if (this==0) {
+		cerr << "Null timer during ->Check()!?\n";
+		return true;
 	}
 //	if (!current_time || !start_time || !timer_time) {cerr << "Timer::Check on a timer that does not have a vital member defined.";
 //	return true;}
-    if (enabled && current_time-start_time > timer_time) {
+	if (enabled && current_time-start_time > timer_time) {
 		if (iReset) {
 			if (pUseAcurateTiming)
 				start_time += timer_time;
@@ -91,9 +91,9 @@ bool Timer::Check(bool iReset)
 			timer_time = set_at_trigger;
 		}
 		return true;
-    }
-	
-    return false;
+	}
+
+	return false;
 }
 
 /* This function disables the timer */
@@ -106,37 +106,37 @@ void Timer::Enable() {
 }
 
 /* This function set the timer and restart it */
-void Timer::Start(uint32 set_timer_time, bool ChangeResetTimer) {	
-    start_time = current_time;
+void Timer::Start(uint32 set_timer_time, bool ChangeResetTimer) {
+	start_time = current_time;
 	enabled = true;
-    if (set_timer_time != 0)
-    {	
+	if (set_timer_time != 0)
+	{
 		timer_time = set_timer_time;
 		if (ChangeResetTimer)
 			set_at_trigger = set_timer_time;
-    }
+	}
 }
 
 /* This timer updates the timer without restarting it */
 void Timer::SetTimer(uint32 set_timer_time) {
-    /* If we were disabled before => restart the timer */
-    if (!enabled) {
+	/* If we were disabled before => restart the timer */
+	if (!enabled) {
 		start_time = current_time;
 		enabled = true;
-    }
-    if (set_timer_time != 0) {
+	}
+	if (set_timer_time != 0) {
 		timer_time = set_timer_time;
 		set_at_trigger = set_timer_time;
-    }
+	}
 }
 
 uint32 Timer::GetRemainingTime() {
-    if (enabled) {
-	    if (current_time-start_time > timer_time)
+	if (enabled) {
+		if (current_time-start_time > timer_time)
 			return 0;
 		else
 			return (start_time + timer_time) - current_time;
-    }
+	}
 	else {
 		return 0xFFFFFFFF;
 	}
@@ -158,37 +158,38 @@ void Timer::Trigger()
 }
 
 const uint32 Timer::GetCurrentTime()
-{	
-    return current_time;
+{
+	return current_time;
 }
 
 //just to keep all time related crap in one place... not really related to timers.
 const uint32 Timer::GetTimeSeconds() {
-    struct timeval read_time;
+	struct timeval read_time;
 
-    gettimeofday(&read_time,0);
-    return(read_time.tv_sec);
+	gettimeofday(&read_time,0);
+	return(read_time.tv_sec);
 }
 
 const uint32 Timer::SetCurrentTime()
 {
-    struct timeval read_time;	
-    uint32 this_time;
+	struct timeval read_time;
+	uint32 this_time;
 
-    gettimeofday(&read_time,0);
-    this_time = read_time.tv_sec * 1000 + read_time.tv_usec / 1000;
+	gettimeofday(&read_time,0);
+	this_time = read_time.tv_sec * 1000 + read_time.tv_usec / 1000;
 
-    if (last_time == 0)
-    {
+	if (last_time == 0)
+	{
 		current_time = 0;
-    }
-    else
-    {
+	}
+	else
+	{
 		current_time += this_time - last_time;
-    }
-    
+	}
+
 	last_time = this_time;
 
 //	cerr << "Current time:" << current_time << endl;
 	return current_time;
 }
+

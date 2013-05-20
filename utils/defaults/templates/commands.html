@@ -37,7 +37,7 @@ if (defined($gets->{"update.x"})) {
 	my $i=0;
 	$q="select * from commands order by command";
 	my $res=$EQDB->query($q);
-	if ($res) { 
+	if ($res) {
 		print "<table id=\"cmd_tab\" border=\"1\" cellspacing=\"2\" cellpadding=\"3\" class=\"zonelist\"><tr>\n";
 		printf "\t\t<th scope=\"col\" width=\"150\">Command</th>\n";
 		printf "\t\t<th scope=\"col\" width=\"70\">Access</th>\n";

@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <iostream>
@@ -27,8 +27,8 @@ using namespace std;
 
 #ifdef _WINDOWS
 #include <process.h>
-#define	 snprintf	_snprintf
-#define  vsnprintf	_vsnprintf
+#define	snprintf	_snprintf
+#define	vsnprintf	_vsnprintf
 #else
 #include <pthread.h>
 #include "../common/unix.h"
@@ -64,7 +64,7 @@ using namespace std;
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
+#define strcasecmp	_stricmp
 #endif
 
 
@@ -88,7 +88,7 @@ void CleanupLoadZoneState(uint32 spawn2_count, ZSDump_Spawn2** spawn2_dump, ZSDu
 bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	_ZP(Zone_Bootup);
 	const char* zonename = database.GetZoneName(iZoneID);
-	
+
 	if (iZoneID == 0 || zonename == 0)
 		return false;
 	if (zone != 0 || ZoneLoaded) {
@@ -96,12 +96,12 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 		worldserver.SetZone(0);
 		return false;
 	}
-	
+
 	LogFile->write(EQEMuLog::Status, "Booting %s (%d:%d)", zonename, iZoneID, iInstanceID);
-	
+
 	numclients = 0;
 	zone = new Zone(iZoneID, iInstanceID, zonename);
-	
+
 	//init the zone, loads all the data, etc
 	if (!zone->Init(iStaticZone)) {
 		safe_delete(zone);
@@ -112,7 +112,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	zone->zonemap = Map::LoadMapfile(zone->map_name);
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
 	zone->pathing = PathManager::LoadPathFile(zone->map_name);
-	
+
 	char tmp[10];
 	//PlayerProfile_Struct* pp;
 	//int char_num = 0;
@@ -136,7 +136,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 			LogFile->write(EQEMuLog::Status, "Loot logging level: %i", zone->lootvar);
 		}
 		else {
-        	zone->loglevelvar = uint8(atoi(tmp)); //continue supporting only command logging (for now)
+			zone->loglevelvar = uint8(atoi(tmp)); //continue supporting only command logging (for now)
 			zone->merchantvar = 0;
 			zone->tradevar = 0;
 			zone->lootvar = 0;
@@ -146,7 +146,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	zone->weather_type = database.GetZoneWeather(iZoneID, zone->GetInstanceVersion());
 
 	LogFile->write(EQEMuLog::Debug, "Zone: %s has weather of type %i.", zonename, zone->weather_type);
-		
+
 	if(zone->weather_type > 3 || zone->weather_type == 0) {
 		zone->zone_weather = 0;
 		zone->Weather_Timer->Disable();
@@ -182,12 +182,12 @@ bool Zone::LoadZoneObjects() {
 	char* query = nullptr;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	
+
 	uint32 len_query = MakeAnyLenString(&query, "SELECT "
 		"id,zoneid,xpos,ypos,zpos,heading,itemid,charges,objectname,type,icon,"
 		"unknown08,unknown10,unknown20,unknown24,unknown76"
 		" from object where zoneid=%i and (version=%u or version=-1)", zoneid, instanceversion);
-	
+
 	if (database.RunQuery(query, len_query, errbuf, &result)) {
 		safe_delete_array(query);
 		LogFile->write(EQEMuLog::Status, "Loading Objects from DB...");
@@ -217,9 +217,9 @@ bool Zone::LoadZoneObjects() {
 					{
 						d.door_name[len - 9] = '\0';
 					}
-					  
+
 					memcpy(d.dest_zone, "NONE", 5);
-					  
+
 					if ((d.size = atoi(row[11])) == 0) // unknown08 = optional size percentage
 					{
 						d.size = 100;
@@ -251,7 +251,7 @@ bool Zone::LoadZoneObjects() {
 			uint32 itemid = 0;
 			uint32 idx = 0;
 			int16 charges = 0;
-			
+
 			id							= (uint32)atoi(row[idx++]);
 			data.zone_id				= atoi(row[idx++]);
 			data.x						= atof(row[idx++]);
@@ -272,7 +272,7 @@ bool Zone::LoadZoneObjects() {
 			data.unknown024				= (uint32)atoi(row[idx++]);
 			data.unknown076				= (uint32)atoi(row[idx++]);
 			data.unknown084				= 0;
-			
+
 			ItemInst* inst = nullptr;
 			//FatherNitwit: this dosent seem to work...
 			//tradeskill containers do not have an itemid of 0... at least what I am seeing
@@ -284,17 +284,17 @@ bool Zone::LoadZoneObjects() {
 				// Groundspawn object
 				inst = database.CreateItem(itemid);
 			}
-			
+
 			//Father Nitwit's fix... not perfect...
 			if(inst == nullptr && type != OT_DROPPEDITEM) {
 				inst = new ItemInst(ItemUseWorldContainer);
 			}
-			
+
 			// Load child objects if container
 			if (inst && inst->IsType(ItemClassContainer)) {
 				database.LoadWorldContainer(id, inst);
 			}
-			
+
 			Object* object = new Object(id, type, icon, data, inst);
 			entity_list.AddObject(object, false);
 			if(type == OT_DROPPEDITEM && itemid != 0)
@@ -403,7 +403,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 
 		if(sold)
 			return ml.slot;
-		
+
 	}
 	if(freeslot){
 		if(charges<0) //sanity check only, shouldnt happen
@@ -424,10 +424,10 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 
 uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 
- 	std::list<TempMerchantList> TmpMerchantList = tmpmerchanttable[NPCID]; 
+	std::list<TempMerchantList> TmpMerchantList = tmpmerchanttable[NPCID];
 	std::list<TempMerchantList>::const_iterator Iterator;
 
-	for(Iterator = TmpMerchantList.begin(); Iterator != TmpMerchantList.end(); Iterator++) 
+	for(Iterator = TmpMerchantList.begin(); Iterator != TmpMerchantList.end(); Iterator++)
 		if((*Iterator).slot == Slot)
 			return (*Iterator).charges;
 
@@ -443,7 +443,7 @@ void Zone::LoadTempMerchantData(){
 	workpt.w2_3() = 0;
 	workpt.b1() = DBA_b1_Zone_MerchantListsTemp;
 	DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Read);
-	dbaw->AddQuery(1, &query, MakeAnyLenString(&query, 
+	dbaw->AddQuery(1, &query, MakeAnyLenString(&query,
 		"select ml.npcid,ml.slot,ml.itemid,ml.charges "
 		"from "
 		"	merchantlist_temp ml, "
@@ -459,14 +459,14 @@ void Zone::LoadTempMerchantData(){
 		return;
 	}
 /*	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	std::list<TempMerchantList> merlist;
 	if (database.RunQuery(query, MakeAnyLenString(&query, "select ml.npcid,ml.slot,ml.itemid,ml.charges from merchantlist_temp ml, npc_types nt, spawnentry se, spawn2 s2 where nt.id=ml.npcid and nt.id=se.npcid and se.spawngroupid=s2.spawngroupid and s2.zone='%s' group by ml.npcid,slot order by npcid,slot asc", GetShortName()), errbuf, &result)) {
 		uint32 npcid = 0;
 		while((row = mysql_fetch_row(result))) {
-			if(npcid != atoul(row[0])){		
+			if(npcid != atoul(row[0])){
 				if(npcid > 0)
 					tmpmerchanttable[npcid] = merlist;
 				npcid = atoul(row[0]);
@@ -491,7 +491,7 @@ void Zone::LoadTempMerchantData(){
 }
 
 void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
-    MYSQL_ROW row;
+	MYSQL_ROW row;
 	std::map<uint32,std::list<TempMerchantList> >::iterator cur;
 	uint32 npcid = 0;
 	while((row = mysql_fetch_row(result))) {
@@ -519,9 +519,9 @@ void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
 //there should prolly be a temp counterpart of this...
 void Zone::LoadNewMerchantData(uint32 merchantid){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	std::list<MerchantList> merlist;
 	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT item, slot, faction_required, level_required, alt_currency_cost FROM merchantlist WHERE merchantid=%d", merchantid), errbuf, &result)) {
 		while((row = mysql_fetch_row(result))) {
@@ -529,9 +529,9 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 			ml.id = merchantid;
 			ml.item = atoul(row[0]);
 			ml.slot = atoul(row[1]);
-            ml.faction_required = atoul(row[2]);
-            ml.level_required = atoul(row[3]);
-            ml.alt_currency_cost = atoul(row[3]);            
+			ml.faction_required = atoul(row[2]);
+			ml.level_required = atoul(row[3]);
+			ml.alt_currency_cost = atoul(row[3]);
 			merlist.push_back(ml);
 		}
 		merchanttable[merchantid] = merlist;
@@ -543,7 +543,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 }
 
 void Zone::LoadMerchantData_result(MYSQL_RES* result) {
-    MYSQL_ROW row;
+	MYSQL_ROW row;
 	std::map<uint32,std::list<MerchantList> >::iterator cur;
 	uint32 npcid = 0;
 	while((row = mysql_fetch_row(result))) {
@@ -559,25 +559,25 @@ void Zone::LoadMerchantData_result(MYSQL_RES* result) {
 			npcid = ml.id;
 		}
 
-        std::list<MerchantList>::iterator iter = cur->second.begin();
-        bool found = false;
-        while(iter != cur->second.end()) {
-            if((*iter).item == ml.id) {
-                found = true;
-                break;
-            }
-            iter++;
-        }
+		std::list<MerchantList>::iterator iter = cur->second.begin();
+		bool found = false;
+		while(iter != cur->second.end()) {
+			if((*iter).item == ml.id) {
+				found = true;
+				break;
+			}
+			iter++;
+		}
 
-        if(found) {
-            continue;
-        }
+		if(found) {
+			continue;
+		}
 
 		ml.slot = atoul(row[1]);
 		ml.item = atoul(row[2]);
-        ml.faction_required = atoul(row[3]);
-        ml.level_required = atoul(row[4]);
-        ml.alt_currency_cost = atoul(row[5]);        
+		ml.faction_required = atoul(row[3]);
+		ml.level_required = atoul(row[4]);
+		ml.alt_currency_cost = atoul(row[5]);
 		cur->second.push_back(ml);
 	}
 }
@@ -590,7 +590,7 @@ void Zone::GetMerchantDataForZoneLoad(){
 	workpt.w2_3() = 0;
 	workpt.b1() = DBA_b1_Zone_MerchantLists;
 	DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Read);
-	dbaw->AddQuery(1, &query, MakeAnyLenString(&query, 
+	dbaw->AddQuery(1, &query, MakeAnyLenString(&query,
 		"select ml.merchantid,ml.slot,ml.item,ml.faction_required,ml.level_required,ml.alt_currency_cost "
 		"from merchantlist ml, npc_types nt, spawnentry se, spawn2 s2 "
 		"where nt.merchant_id=ml.merchantid and nt.id=se.npcid "
@@ -603,14 +603,14 @@ void Zone::GetMerchantDataForZoneLoad(){
 		return;
 	}
 /*	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 	std::list<MerchantList> merlist;
 	if (database.RunQuery(query, MakeAnyLenString(&query, "select ml.merchantid,ml.slot,ml.item from merchantlist ml, npc_types nt, spawnentry se, spawn2 s2 where nt.merchant_id=ml.merchantid and nt.id=se.npcid and se.spawngroupid=s2.spawngroupid and s2.zone='%s' group by ml.merchantid,slot order by merchantid,slot asc", GetShortName()), errbuf, &result)) {
 		uint32 npcid = 0;
 		while((row = mysql_fetch_row(result))) {
-			if(npcid != atoul(row[0])){		
+			if(npcid != atoul(row[0])){
 				if(npcid > 0)
 					merchanttable[npcid] = merlist;
 				npcid = atoul(row[0]);
@@ -762,7 +762,7 @@ void Zone::LoadMercSpells(){
 			tempMercSpellEntry.slot = atoi(DataRow[7]);
 			tempMercSpellEntry.proc_chance = atoi(DataRow[8]);
 
-			merc_spells_list[classid].push_back(tempMercSpellEntry);	
+			merc_spells_list[classid].push_back(tempMercSpellEntry);
 		}
 
 		mysql_free_result(DatasetResult);
@@ -798,9 +798,9 @@ void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 				LogFile->write(EQEMuLog::Error, "Zone::DBAWComplete(): Invalid query part for merchant lists");
 				break;
 			}
-			
+
 			LoadMerchantData_result(result);
-			
+
 			pQueuedMerchantsWorkID = 0;
 			break;
 		}
@@ -820,9 +820,9 @@ void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 				LogFile->write(EQEMuLog::Error, "Zone::DBAWComplete(): Invalid query part for temp merchant lists");
 				break;
 			}
-			
+
 			LoadTempMerchantData_result(result);
-			
+
 			pQueuedMerchantsWorkID = 0;
 			break;
 		}
@@ -834,7 +834,7 @@ void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 	}
 }
 
-void Zone::Shutdown(bool quite) 
+void Zone::Shutdown(bool quite)
 {
 	if (!ZoneLoaded)
 		return;
@@ -855,8 +855,8 @@ void Zone::Shutdown(bool quite)
 	zone->adventure_entry_list_flavor.clear();
 
 	std::map<uint32,LDoNTrapTemplate*>::iterator itr4;
-	while(zone->ldon_trap_list.size()) 
-	{	
+	while(zone->ldon_trap_list.size())
+	{
 		itr4 = zone->ldon_trap_list.begin();
 		delete itr4->second;
 		zone->ldon_trap_list.erase(itr4);
@@ -880,29 +880,29 @@ void Zone::Shutdown(bool quite)
 	zone->ResetAuth();
 	safe_delete(zone);
 	dbasync->CommitWrites();
-    if(parse) { parse->ReloadQuests(true); }
+	if(parse) { parse->ReloadQuests(true); }
 	UpdateWindowTitle();
 }
 
 void Zone::LoadZoneDoors(const char* zone, int16 version)
 {
 	LogFile->write(EQEMuLog::Status, "Loading doors for %s ...", zone);
-	
+
 	uint32 maxid;
 	int32 count = database.GetDoorsCount(&maxid, zone, version);
 	if(count < 1) {
 		LogFile->write(EQEMuLog::Status, "... No doors loaded.");
 		return;
 	}
-	
+
 	Door *dlist = new Door[count];
-	
+
 	if(!database.LoadDoors(count, dlist, zone, version)) {
 		LogFile->write(EQEMuLog::Error, "... Failed to load doors.");
 		delete[] dlist;
 		return;
 	}
-	
+
 	int r;
 	Door *d = dlist;
 	for(r = 0; r < count; r++, d++) {
@@ -923,9 +923,9 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	zoneid = in_zoneid;
 	instanceid = in_instanceid;
 	instanceversion = database.GetInstanceVersion(instanceid);
-	zonemap = nullptr; 
-	watermap = nullptr; 
-	pathing = nullptr; 
+	zonemap = nullptr;
+	watermap = nullptr;
+	pathing = nullptr;
 	qGlobals = nullptr;
 	default_ruleset = 0;
 
@@ -976,8 +976,8 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	totalBS = 0;
 	aas = nullptr;
 	totalAAs = 0;
-    gottime = false;
-	
+	gottime = false;
+
 	Instance_Shutdown_Timer = nullptr;
 	bool is_perma = false;
 	if(instanceid > 0)
@@ -1028,7 +1028,7 @@ Zone::~Zone() {
 	zone_point_list.Clear();
 	entity_list.Clear();
 	ClearBlockedSpells();
-	
+
 	safe_delete(Instance_Timer);
 	safe_delete(Instance_Shutdown_Timer);
 	safe_delete(Instance_Warning_timer);
@@ -1054,37 +1054,37 @@ Zone::~Zone() {
 //Modified for timezones.
 bool Zone::Init(bool iStaticZone) {
 	SetStaticZone(iStaticZone);
-	
+
 	LogFile->write(EQEMuLog::Status, "Loading spawn conditions...");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
 		LogFile->write(EQEMuLog::Error, "Loading spawn conditions failed, continuing without them.");
 	}
-	
+
 	LogFile->write(EQEMuLog::Status, "Loading static zone points...");
 	if (!database.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion())) {
 		LogFile->write(EQEMuLog::Error, "Loading static zone points failed.");
 		return false;
 	}
-	
+
 	LogFile->write(EQEMuLog::Status, "Loading spawn groups...");
 	if (!database.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
 		LogFile->write(EQEMuLog::Error, "Loading spawn groups failed.");
 		return false;
 	}
-	
+
 	LogFile->write(EQEMuLog::Status, "Loading spawn2 points...");
 	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion()))
 	{
 		LogFile->write(EQEMuLog::Error, "Loading spawn2 points failed.");
 		return false;
 	}
-	
+
 	LogFile->write(EQEMuLog::Status, "Loading player corpses...");
 	if (!database.LoadPlayerCorpses(zoneid, instanceid)) {
 		LogFile->write(EQEMuLog::Error, "Loading player corpses failed.");
 		return false;
 	}
-	
+
 	LogFile->write(EQEMuLog::Status, "Loading traps...");
 	if (!database.LoadTraps(short_name, GetInstanceVersion()))
 	{
@@ -1094,23 +1094,23 @@ bool Zone::Init(bool iStaticZone) {
 
 	LogFile->write(EQEMuLog::Status, "Loading adventure flavor text...");
 	LoadAdventureFlavor();
-	
+
 	LogFile->write(EQEMuLog::Status, "Loading ground spawns...");
 	if (!LoadGroundSpawns())
 	{
 		LogFile->write(EQEMuLog::Error, "Loading ground spawns failed. continuing.");
 	}
-	
+
 	LogFile->write(EQEMuLog::Status, "Loading World Objects from DB...");
 	if (!LoadZoneObjects())
 	{
 		LogFile->write(EQEMuLog::Error, "Loading World Objects failed. continuing.");
 	}
-	
+
 	//load up the zone's doors (prints inside)
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
 	zone->LoadBlockedSpells(zone->GetZoneID());
-	
+
 	//clear trader items if we are loading the bazaar
 	if(strncasecmp(short_name,"bazaar",6)==0) {
 		database.DeleteTraderItem(0);
@@ -1120,17 +1120,17 @@ bool Zone::Init(bool iStaticZone) {
 	zone->LoadLDoNTraps();
 	zone->LoadLDoNTrapEntries();
 	zone->LoadVeteranRewards();
-    zone->LoadAlternateCurrencies();
+	zone->LoadAlternateCurrencies();
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
 	//Load AA information
 	adverrornum = 500;
 	LoadAAs();
-	
+
 	//Load merchant data
 	adverrornum = 501;
 	zone->GetMerchantDataForZoneLoad();
-	
+
 	//Load temporary merchant data
 	adverrornum = 502;
 	zone->LoadTempMerchantData();
@@ -1147,7 +1147,7 @@ bool Zone::Init(bool iStaticZone) {
 	adverrornum = 503;
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
-	
+
 	//load the zone config file.
 	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion(), true)) // try loading the zone name...
 		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
@@ -1160,10 +1160,10 @@ bool Zone::Init(bool iStaticZone) {
 			RuleManager::Instance()->LoadRules(&database, r_name.c_str());
 		}
 	}
-		
+
 	LogFile->write(EQEMuLog::Status, "Loading timezone data...");
 	zone->zone_time.setEQTimeZone(database.GetZoneTZ(zoneid, GetInstanceVersion()));
-	
+
 	LogFile->write(EQEMuLog::Status, "Init Finished: ZoneID = %d, Time Offset = %d", zoneid, zone->zone_time.getEQTimeZone());
 
 	LoadTickItems();
@@ -1176,59 +1176,59 @@ bool Zone::Init(bool iStaticZone) {
 
 void Zone::ReloadStaticData() {
 	LogFile->write(EQEMuLog::Status, "Reloading Zone Static Data...");
-	
+
 	LogFile->write(EQEMuLog::Status, "Reloading static zone points...");
 	zone_point_list.Clear();
 	if (!database.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
 		LogFile->write(EQEMuLog::Error, "Loading static zone points failed.");
 	}
-	
+
 	LogFile->write(EQEMuLog::Status, "Reloading traps...");
 	entity_list.RemoveAllTraps();
 	if (!database.LoadTraps(GetShortName(), GetInstanceVersion()))
 	{
 		LogFile->write(EQEMuLog::Error, "Reloading traps failed.");
 	}
-	
+
 	LogFile->write(EQEMuLog::Status, "Reloading ground spawns...");
 	if (!LoadGroundSpawns())
 	{
 		LogFile->write(EQEMuLog::Error, "Reloading ground spawns failed. continuing.");
 	}
-	
+
 	entity_list.RemoveAllObjects();
 	LogFile->write(EQEMuLog::Status, "Reloading World Objects from DB...");
 	if (!LoadZoneObjects())
 	{
 		LogFile->write(EQEMuLog::Error, "Reloading World Objects failed. continuing.");
 	}
-	
+
 	entity_list.RemoveAllDoors();
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
 	entity_list.RespawnAllDoors();
 
 	zone->LoadVeteranRewards();
-    zone->LoadAlternateCurrencies();
+	zone->LoadAlternateCurrencies();
 	NPCEmoteList.Clear();
 	zone->LoadNPCEmotes(&NPCEmoteList);
-	
+
 	//load the zone config file.
 	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion(), true)) // try loading the zone name...
 		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
-	
+
 	LogFile->write(EQEMuLog::Status, "Zone Static Data Reloaded.");
 }
 
-bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDefault) 
+bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDefault)
 {
 	memset(&newzone_data, 0, sizeof(NewZone_Struct));
 	if(instance_id == 0)
 	{
 		map_name = nullptr;
-		if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, 
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name)) 
+		if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind,
+			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name))
 		{
-			LogFile->write(EQEMuLog::Error, "Error loading the Zone Config."); 
+			LogFile->write(EQEMuLog::Error, "Error loading the Zone Config.");
 			return false;
 		}
 	}
@@ -1236,24 +1236,24 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDe
 	{
 		//Fall back to base zone if we don't find the instance version.
 		map_name = nullptr;
-		if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind, 
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name)) 
+		if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind,
+			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name))
 		{
 			safe_delete_array(map_name);
-			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind, 
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name)) 
+			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind,
+			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, default_ruleset, &map_name))
 			{
-				LogFile->write(EQEMuLog::Error, "Error loading the Zone Config."); 
+				LogFile->write(EQEMuLog::Error, "Error loading the Zone Config.");
 				return false;
 			}
 		}
 	}
-	
+
 	//overwrite with our internal variables
 	strcpy(newzone_data.zone_short_name, GetShortName());
 	strcpy(newzone_data.zone_long_name, GetLongName());
 	strcpy(newzone_data.zone_short_name2, GetShortName());
-	
+
 	LogFile->write(EQEMuLog::Status, "Successfully loaded Zone Config.");
 	return true;
 }
@@ -1464,7 +1464,7 @@ bool Zone::Process() {
 
 			Weather_Timer->Start(weatherTime);
 
-			LogFile->write(EQEMuLog::Debug, "The next weather check for zone: %s will be in %i seconds.", zone->GetShortName(), Weather_Timer->GetRemainingTime()/1000); 
+			LogFile->write(EQEMuLog::Debug, "The next weather check for zone: %s will be in %i seconds.", zone->GetShortName(), Weather_Timer->GetRemainingTime()/1000);
 		}
 	}
 
@@ -1490,7 +1490,7 @@ bool Zone::Process() {
 		}
 	}
 
-    if(hotzone_timer.Check()) { UpdateHotzone(); }
+	if(hotzone_timer.Check()) { UpdateHotzone(); }
 
 	return true;
 }
@@ -1511,21 +1511,21 @@ bool Zone::Depop(bool StartSpawnTimer) {
 std::map<uint32,NPCType *>::iterator itr;
 	entity_list.Depop(StartSpawnTimer);
 
-   // Refresh npctable, getting current info from database.
-   while(npctable.size()) {
+	// Refresh npctable, getting current info from database.
+	while(npctable.size()) {
 		itr=npctable.begin();
 		delete itr->second;
 		npctable.erase(itr);
-   }
+	}
 
 	return true;
 }
 
 void Zone::Repop(uint32 delay) {
-	
+
 	if(!Depop())
 		return;
-	
+
 	LinkedListIterator<Spawn2*> iterator(spawn2_list);
 
 	MZoneLock.lock();
@@ -1538,7 +1538,7 @@ void Zone::Repop(uint32 delay) {
 		LogFile->write(EQEMuLog::Debug, "Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 
 	MZoneLock.unlock();
-	
+
 	initgrids_timer.Start();
 
 	//MODDING HOOK FOR REPOP
@@ -1620,18 +1620,18 @@ ZonePoint* Zone::GetClosestZonePoint(float x, float y, float z, uint32 to, Clien
 		}
 		iterator.Advance();
 	}
-	
+
 	if(closest_dist > 400.0f && closest_dist < max_distance2)
 	{
 		if(client)
 			client->CheatDetected(MQZoneUnknownDest, x, y, z); // Someone is trying to use /zone
 		LogFile->write(EQEMuLog::Status, "WARNING: Closest zone point for zone id %d is %f, you might need to update your zone_points table if you dont arrive at the right spot.", to, closest_dist);
-		LogFile->write(EQEMuLog::Status, "<Real Zone Points>.  %f x %f y %f z ", x, y, z);
+		LogFile->write(EQEMuLog::Status, "<Real Zone Points>. %f x %f y %f z ", x, y, z);
 	}
-	
+
 	if(closest_dist > max_distance2)
 		closest_zp = nullptr;
-	
+
 	if(!closest_zp)
 		closest_zp = GetClosestZonePointWithoutZone(x, y, z, client);
 
@@ -1728,7 +1728,7 @@ return true;
 
 bool ZoneDatabase::DumpZoneState() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM zone_state_dump WHERE zonename='%s'", zone->GetShortName()), errbuf)) {
 		cerr << "Error in DumpZoneState query '" << query << "' " << errbuf << endl;
@@ -1775,46 +1775,46 @@ bool ZoneDatabase::DumpZoneState() {
 	}
 
 	entity_list.DoZoneDump(spawn2_dump, npc_dump, npcloot_dump, gmspawntype_dump);
-    query = new char[512 + ((sizeof(ZSDump_Spawn2) * spawn2_count + sizeof(ZSDump_NPC) * npc_count + sizeof(ZSDump_NPC_Loot) * npcloot_count + sizeof(NPCType) * gmspawntype_count) * 2)];
+	query = new char[512 + ((sizeof(ZSDump_Spawn2) * spawn2_count + sizeof(ZSDump_NPC) * npc_count + sizeof(ZSDump_NPC_Loot) * npcloot_count + sizeof(NPCType) * gmspawntype_count) * 2)];
 	char* end = query;
 
-    end += sprintf(end, "Insert Into zone_state_dump (zonename, spawn2_count, npc_count, npcloot_count, gmspawntype_count, spawn2, npcs, npc_loot, gmspawntype) values ('%s', %i, %i, %i, %i, ", zone->GetShortName(), spawn2_count, npc_count, npcloot_count, gmspawntype_count);
-    *end++ = '\'';
+	end += sprintf(end, "Insert Into zone_state_dump (zonename, spawn2_count, npc_count, npcloot_count, gmspawntype_count, spawn2, npcs, npc_loot, gmspawntype) values ('%s', %i, %i, %i, %i, ", zone->GetShortName(), spawn2_count, npc_count, npcloot_count, gmspawntype_count);
+	*end++ = '\'';
 	if (spawn2_dump != 0) {
 		end += DoEscapeString(end, (char*)spawn2_dump, sizeof(ZSDump_Spawn2) * spawn2_count);
 		safe_delete_array(spawn2_dump);
 	}
-    *end++ = '\'';
-    end += sprintf(end, ", ");
-    *end++ = '\'';
+	*end++ = '\'';
+	end += sprintf(end, ", ");
+	*end++ = '\'';
 	if (npc_dump != 0) {
 		end += DoEscapeString(end, (char*)npc_dump, sizeof(ZSDump_NPC) * npc_count);
 		safe_delete_array(npc_dump);
 	}
-    *end++ = '\'';
-    end += sprintf(end, ", ");
-    *end++ = '\'';
+	*end++ = '\'';
+	end += sprintf(end, ", ");
+	*end++ = '\'';
 	if (npcloot_dump != 0) {
 		end += DoEscapeString(end, (char*)npcloot_dump, sizeof(ZSDump_NPC_Loot) * npcloot_count);
 		safe_delete_array(npcloot_dump);
 	}
-    *end++ = '\'';
-    end += sprintf(end, ", ");
-    *end++ = '\'';
+	*end++ = '\'';
+	end += sprintf(end, ", ");
+	*end++ = '\'';
 	if (gmspawntype_dump != 0) {
 		end += DoEscapeString(end, (char*)gmspawntype_dump, sizeof(NPCType) * gmspawntype_count);
 		safe_delete_array(gmspawntype_dump);
 	}
-    *end++ = '\'';
-    end += sprintf(end, ")");
+	*end++ = '\'';
+	end += sprintf(end, ")");
 
 	uint32 affected_rows = 0;
 	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
-		//    if (DoEscapeString(query, (unsigned int) (end - query))) {
+		// if (DoEscapeString(query, (unsigned int) (end - query))) {
 		safe_delete_array(query);
-        cerr << "Error in ZoneDump query " << errbuf << endl;
+		cerr << "Error in ZoneDump query " << errbuf << endl;
 		return false;
-    }
+	}
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
@@ -1826,9 +1826,9 @@ bool ZoneDatabase::DumpZoneState() {
 
 int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spawn2_list) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
 	uint32 i;
 	unsigned long* lengths;
@@ -2026,9 +2026,9 @@ void Zone::SpawnStatus(Mob* client) {
 	while(iterator.MoreElements())
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-			client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 		else
-			client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 
 		x++;
 		iterator.Advance();
@@ -2048,7 +2048,7 @@ void Zone::ShowEnabledSpawnStatus(Mob* client)
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() != 0xFFFFFFFF)
 		{
-			client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 			iEnabledCount++;
 		}
 
@@ -2071,7 +2071,7 @@ void Zone::ShowDisabledSpawnStatus(Mob* client)
 	{
 		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
 		{
-			client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+			client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 			iDisabledCount++;
 		}
 
@@ -2095,9 +2095,9 @@ void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
 		if (iterator.GetData()->GetID() == spawnid)
 		{
 			if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-				client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
+				client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
 			else
-				client->Message(0, "  %d:  %1.1f, %1.1f, %1.1f:  %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+				client->Message(0, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
 
 			iSpawnIDCount++;
 
@@ -2250,11 +2250,11 @@ bool Zone::IsSpellBlocked(uint32 spell_id, float nx, float ny, float nz)
 			{
 				exception = true;
 			}
-				
+
 			if (blocked_spells[x].spellid == 0)
 			{
 				block_all = true;
-			}	
+			}
 		}
 
 		for (int x = 0; x < totalBS; x++)
@@ -2361,9 +2361,9 @@ void Zone::LoadLDoNTraps()
 	MYSQL_ROW row;
 
 	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, type, spell_id, "
-		"skill, locked FROM ldon_trap_templates"), errbuf, &result)) 
+		"skill, locked FROM ldon_trap_templates"), errbuf, &result))
 	{
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
 			uint8 x = 0;
 			LDoNTrapTemplate *lt = new LDoNTrapTemplate;
@@ -2393,7 +2393,7 @@ void Zone::LoadLDoNTrapEntries()
 	MYSQL_ROW row;
 
 	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, trap_id FROM ldon_trap_entries"),errbuf,&result)) {
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
 			uint32 id = atoi(row[0]);
 			uint32 trap_id = atoi(row[1]);
@@ -2448,13 +2448,13 @@ void Zone::LoadVeteranRewards()
 	uint8 idx = 0;
 
 	current_reward.claim_id = 0;
-	
+
 
 	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT claim_id, name, item_id, charges FROM"
 		" veteran_reward_templates WHERE reward_slot < 8 and claim_id > 0 ORDER by claim_id, reward_slot"),
-		errbuf,&result)) 
+		errbuf,&result))
 	{
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
 			uint32 claim = atoi(row[0]);
 			if(claim != current_reward.claim_id)
@@ -2502,13 +2502,13 @@ void Zone::LoadAlternateCurrencies()
 	AltCurrencyDefinition_Struct current_currency;
 
 	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, item_id from alternate_currency"),
-		errbuf,&result)) 
+		errbuf,&result))
 	{
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
-            current_currency.id = atoi(row[0]);
-            current_currency.item_id = atoi(row[1]);
-            AlternateCurrencies.push_back(current_currency);
+			current_currency.id = atoi(row[0]);
+			current_currency.item_id = atoi(row[1]);
+			AlternateCurrencies.push_back(current_currency);
 		}
 
 		mysql_free_result(result);
@@ -2558,9 +2558,9 @@ void Zone::LoadAdventureFlavor()
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, text FROM adventure_template_entry_flavor"), errbuf, &result)) 
+	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, text FROM adventure_template_entry_flavor"), errbuf, &result))
 	{
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
 			uint32 id = atoi(row[0]);
 			std::string in_str = row[1];
@@ -2642,9 +2642,9 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 	MYSQL_ROW row;
 	NPCEmoteList->Clear();
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT emoteid, event_, type, text FROM npc_emotes"), errbuf, &result)) 
+	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT emoteid, event_, type, text FROM npc_emotes"), errbuf, &result))
 	{
-		while((row = mysql_fetch_row(result))) 
+		while((row = mysql_fetch_row(result)))
 		{
 			NPC_Emote_Struct* nes = new NPC_Emote_Struct;
 			nes->emoteid = atoi(row[0]);
@@ -2672,17 +2672,17 @@ void Zone::ReloadWorld(uint32 Option){
 
 void Zone::LoadTickItems()
 {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-    tick_items.clear();
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	tick_items.clear();
 
-    if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick"), errbuf, &result))
-    {
-        while((row = mysql_fetch_row(result)))
-        {
-            if(atoi(row[0]) >= 1)
+	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick"), errbuf, &result))
+	{
+		while((row = mysql_fetch_row(result)))
+		{
+			if(atoi(row[0]) >= 1)
 			{
 				item_tick_struct ti_tmp;
 				ti_tmp.itemid = atoi(row[0]);
@@ -2692,52 +2692,52 @@ void Zone::LoadTickItems()
 				ti_tmp.qglobal = std::string(row[3]);
 				tick_items[atoi(row[0])] = ti_tmp;
 			}
-        }
-        mysql_free_result(result);
-        safe_delete_array(query);
-    }
-    else
-    {
-        LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query, errbuf);
-        safe_delete_array(query);
-    }
+		}
+		mysql_free_result(result);
+		safe_delete_array(query);
+	}
+	else
+	{
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query, errbuf);
+		safe_delete_array(query);
+	}
 }
 
 uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
-    LinkedListIterator<Spawn2*> iterator(spawn2_list);
+	LinkedListIterator<Spawn2*> iterator(spawn2_list);
 
-    iterator.Reset();
-    while(iterator.MoreElements())
-    {
-        if(iterator.GetData()->GetID() == in_spawnid)
-        {
-            return(iterator.GetData()->killcount);
-        }
-        iterator.Advance();
-    }
+	iterator.Reset();
+	while(iterator.MoreElements())
+	{
+		if(iterator.GetData()->GetID() == in_spawnid)
+		{
+			return(iterator.GetData()->killcount);
+		}
+		iterator.Advance();
+	}
 	return 0;
 }
 
 void Zone::UpdateHotzone()
 {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char* query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
-    bool updh;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	bool updh;
 
-    if(database.RunQuery(query, MakeAnyLenString(&query,"SELECT  hotzone FROM zone WHERE short_name = '%s'", GetShortName()), errbuf, &result) )
-    {
-        if( (row = mysql_fetch_row(result)) )
-        {
-            updh = atoi(row[0]) == 0 ? false:true;
-            //Hotzone status has changed
-            if(is_hotzone != updh)
-            {
-                is_hotzone = updh;
-            }
-        }
-        mysql_free_result(result);
-    }
-    safe_delete_array(query);
+	if(database.RunQuery(query, MakeAnyLenString(&query,"SELECT  hotzone FROM zone WHERE short_name = '%s'", GetShortName()), errbuf, &result) )
+	{
+		if( (row = mysql_fetch_row(result)) )
+		{
+			updh = atoi(row[0]) == 0 ? false:true;
+			//Hotzone status has changed
+			if(is_hotzone != updh)
+			{
+				is_hotzone = updh;
+			}
+		}
+		mysql_free_result(result);
+	}
+	safe_delete_array(query);
 }

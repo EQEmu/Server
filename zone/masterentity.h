@@ -1,5 +1,5 @@
-//Trumpcard:  EntityLists are composed of multiple list types.  This is the 
-//master that includes all types.  When entity.h is required, many of these are as well.
+//Trumpcard: EntityLists are composed of multiple list types. This is the
+//master that includes all types. When entity.h is required, many of these are as well.
 
 #include "entity.h"
 #include "groups.h"

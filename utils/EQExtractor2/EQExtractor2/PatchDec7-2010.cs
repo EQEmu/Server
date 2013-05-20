@@ -15,7 +15,7 @@ namespace EQExtractor2.Patches
             Version = "EQ Client Build Date December 7 2010.";
 
             PatchConfFileName = "patch_Dec7-2010.conf";
-            
+
         }
         override public IdentificationStatus Identify(int OpCode, int Size, PacketDirection Direction)
         {
@@ -31,7 +31,7 @@ namespace EQExtractor2.Patches
 
         public override void RegisterExplorers()
         {
-            //OpManager.RegisterExplorer("OP_ClientUpdate", ExploreClientUpdate);        
+            //OpManager.RegisterExplorer("OP_ClientUpdate", ExploreClientUpdate);
         }
 
         public void ExploreClientUpdate(StreamWriter OutputStream, ByteStream Buffer, PacketDirection Direction)
@@ -42,7 +42,7 @@ namespace EQExtractor2.Patches
             float y = Buffer.ReadSingle();
             Buffer.SkipBytes(12);
             float z = Buffer.ReadSingle();
-            
+
             Buffer.SkipBytes(4);
             UInt32 Temp = Buffer.ReadUInt32();
             Temp = Temp & 0x3FFFFF;

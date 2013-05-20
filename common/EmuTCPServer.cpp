@@ -1,14 +1,10 @@
-
-
-
-
 #include "debug.h"
 #include "EmuTCPServer.h"
 #include "EmuTCPConnection.h"
 
 EmuTCPServer::EmuTCPServer(uint16 iPort, bool iOldFormat)
-: TCPServer<EmuTCPConnection>(iPort),
-  pOldFormat(iOldFormat)
+:	TCPServer<EmuTCPConnection>(iPort),
+	pOldFormat(iOldFormat)
 {
 }
 
@@ -82,15 +78,4 @@ EmuTCPConnection *EmuTCPServer::FindConnection(uint32 iID) {
 	}
 	return(nullptr);
 }
-
-
-
-
-
-
-
-
-
-
-
 

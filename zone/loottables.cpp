@@ -1,19 +1,19 @@
-/*  EQEMu:  Everquest Server Emulator
-Copyright (C) 2001-2002  EQEMu Development Team (http://eqemu.org)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
 #include <stdio.h>
@@ -61,15 +61,15 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 				*copper = MakeRandomInt(mincoin, maxcoin);
 				*silver = MakeRandomInt(mincoin, maxcoin);
 				*gold = MakeRandomInt(mincoin, maxcoin);
-			if(*copper > cash) { *copper = cash; }
-				cash -= *copper;
-            if(*silver>(cash/10)) { *silver = (cash/10); }
-				cash -= *silver*10;
-            if(*gold > (cash/100)) { *gold = (cash/100); }
-				cash -= *gold*100;
-         }
-         if (cash < 0) {
-            cash = 0;
+				if(*copper > cash) { *copper = cash; }
+					cash -= *copper;
+				if(*silver>(cash/10)) { *silver = (cash/10); }
+					cash -= *silver*10;
+				if(*gold > (cash/100)) { *gold = (cash/100); }
+					cash -= *gold*100;
+			}
+			if (cash < 0) {
+				cash = 0;
 			}
 			*plat = cash / 1000;
 			cash -= *plat * 1000;
@@ -86,21 +86,21 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 	// Do items
 	for (uint32 i=0; i<lts->NumEntries; i++) {
 		for (uint32 k = 1; k <= lts->Entries[i].multiplier; k++) {
-		    uint8 droplimit = lts->Entries[i].droplimit;
-		    uint8 mindrop = lts->Entries[i].mindrop;
+			uint8 droplimit = lts->Entries[i].droplimit;
+			uint8 mindrop = lts->Entries[i].mindrop;
 
-            //LootTable Entry probability
-            float ltchance = 0.0f;
-            ltchance = lts->Entries[i].probability;
+			//LootTable Entry probability
+			float ltchance = 0.0f;
+			ltchance = lts->Entries[i].probability;
 
-            float drop_chance = 0.0f;
-            if(ltchance > 0.0 && ltchance < 100.0) {
-                drop_chance = MakeRandomFloat(0.0, 100.0);
-            }
+			float drop_chance = 0.0f;
+			if(ltchance > 0.0 && ltchance < 100.0) {
+				drop_chance = MakeRandomFloat(0.0, 100.0);
+			}
 
-            if (ltchance != 0.0 && (ltchance == 100.0 || drop_chance < ltchance)) {
-			    AddLootDropToNPC(npc,lts->Entries[i].lootdrop_id, itemlist, droplimit, mindrop);
-            }
+			if (ltchance != 0.0 && (ltchance == 100.0 || drop_chance < ltchance)) {
+				AddLootDropToNPC(npc,lts->Entries[i].lootdrop_id, itemlist, droplimit, mindrop);
+			}
 		}
 	}
 }
@@ -117,13 +117,13 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 
 	// Too long a list needs to be limited.
 	if(lds->NumEntries > 99 && droplimit < 1)
-		droplimit = lds->NumEntries/100; 
+		droplimit = lds->NumEntries/100;
 
 	uint8 limit = 0;
 	// Start at a random point in itemlist.
 	uint32 item = MakeRandomInt(0, lds->NumEntries-1);
 	// Main loop.
-	for (uint32 i=0; i<lds->NumEntries;) 
+	for (uint32 i=0; i<lds->NumEntries;)
 	{
 		//Force the itemlist back to beginning.
 		if (item > (lds->NumEntries-1))
@@ -132,7 +132,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 		uint8 charges = lds->Entries[item].multiplier;
 		uint8 pickedcharges = 0;
 		// Loop to check multipliers.
-		for (uint32 x=1; x<=charges; x++)  
+		for (uint32 x=1; x<=charges; x++)
 		{
 			// Actual roll.
 			float thischance = 0.0;
@@ -145,10 +145,10 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 #if EQDEBUG>=11
 			LogFile->write(EQEMuLog::Debug, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
 #endif
-			if (thischance == 100.0 || drop_chance < thischance) 
+			if (thischance == 100.0 || drop_chance < thischance)
 			{
 				uint32 itemid = lds->Entries[item].item_id;
-			
+
 				const Item_Struct* dbitem = GetItem(itemid);
 				npc->AddLootDrop(dbitem, itemlist, lds->Entries[item].item_charges, lds->Entries[item].minlevel, lds->Entries[item].maxlevel, lds->Entries[item].equip_item, false);
 				pickedcharges++;
@@ -156,11 +156,11 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 		}
 		// Items with multipliers only count as 1 towards the limit.
 		if(pickedcharges > 0)
-			limit++;		
+			limit++;
 
 		// If true, limit reached.
 		if(limit >= droplimit && droplimit > 0)
-			break; 
+			break;
 
 		item++;
 		i++;
@@ -178,16 +178,16 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange) {
 	if(item2 == nullptr)
 		return;
-	
+
 	//make sure we are doing something...
 	if(!itemlist && !wearchange)
 		return;
-	
+
 	ServerLootItem_Struct* item = new ServerLootItem_Struct;
 #if EQDEBUG>=11
 		LogFile->write(EQEMuLog::Debug, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
 #endif
-	
+
 	EQApplicationPacket* outapp = nullptr;
 	WearChange_Struct* wc = nullptr;
 	if(wearchange) {
@@ -196,7 +196,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		wc->spawn_id = GetID();
 		wc->material=0;
 	}
-	 			
+
 	item->item_id = item2->ID;
 	item->charges = charges;
 	item->aug1 = 0;
@@ -212,15 +212,15 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		const Item_Struct* compitem = nullptr;
 		bool found = false; // track if we found an empty slot we fit into
 		int32 foundslot = -1; // for multi-slot items
-		
+
 		// Equip rules are as follows:
 		// If the item has the NoPet flag set it will not be equipped.
 		// An empty slot takes priority. The first empty one that an item can
-		//  fit into will be the one picked for the item.
+		// fit into will be the one picked for the item.
 		// AC is the primary choice for which item gets picked for a slot.
 		// If AC is identical HP is considered next.
 		// If an item can fit into multiple slots we'll pick the last one where
-		//  it is an improvement.
+		// it is an improvement.
 
 		if (!item2->NoPet) {
 			for (int i=0; !found && i<MAX_WORN_INVENTORY; i++) {
@@ -229,7 +229,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 					if(equipment[i])
 					{
 						compitem = database.GetItem(equipment[i]);
-						if (item2->AC > compitem->AC || 
+						if (item2->AC > compitem->AC ||
 							(item2->AC == compitem->AC && item2->HP > compitem->HP))
 						{
 							// item would be an upgrade
@@ -244,7 +244,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 								found = true;
 							}
 						} // end if ac
-					} 
+					}
 					else
 					{
 						equipment[i] = item2->ID;
@@ -281,23 +281,23 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		if (foundslot == SLOT_PRIMARY) {
 			if (item2->Proc.Effect != 0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
-			
+
 			eslot = MATERIAL_PRIMARY;
 		}
-		else if (foundslot == SLOT_SECONDARY 
+		else if (foundslot == SLOT_SECONDARY
 			&& (GetOwner() != nullptr || (GetLevel() >= 13 && MakeRandomInt(0,99) < NPC_DW_CHANCE) || (item2->Damage==0)) &&
 			(item2->ItemType == ItemType1HS || item2->ItemType == ItemType1HB || item2->ItemType == ItemTypeShield ||
 			item2->ItemType == ItemTypePierce))
 		{
 			if (item2->Proc.Effect!=0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
-			
+
 			eslot = MATERIAL_SECONDARY;
 		}
 		else if (foundslot == SLOT_HEAD) {
 			eslot = MATERIAL_HEAD;
 		}
-		else if (foundslot ==  SLOT_CHEST) {
+		else if (foundslot == SLOT_CHEST) {
 			eslot = MATERIAL_CHEST;
 		}
 		else if (foundslot == SLOT_ARMS) {
@@ -315,10 +315,10 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		else if (foundslot == SLOT_FEET) {
 			eslot = MATERIAL_FEET;
 		}
-		
+
 		/*
 		what was this about???
-		
+
 		if (((npc->GetRace()==127) && (npc->CastToMob()->GetOwnerID()!=0)) && (item2->Slots==24576) || (item2->Slots==8192) || (item2->Slots==16384)){
 			npc->d_meele_texture2=atoi(newid);
 			wc->wear_slot_id=8;
@@ -331,32 +331,32 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			npc->INT+=item2->INT;
 		}
 		*/
-		
+
 		//if we found an open slot it goes in...
 		if(eslot != 0xFF) {
 			if(wearchange) {
 				wc->wear_slot_id = eslot;
 				wc->material = emat;
 			}
-			
+
 		}
 		if (found) {
 			CalcBonuses(); // This is less than ideal for bulk adding of items
 		}
 		item->equipSlot = item2->Slots;
 	}
-	
+
 	if(itemlist != nullptr)
 		itemlist->push_back(item);
 	else
 		safe_delete(item);
-	
+
 	if(wearchange && outapp) {
 		entity_list.QueueClients(this, outapp);
-	 	safe_delete(outapp);
+		safe_delete(outapp);
 	}
 }
-	  
+
 void NPC::AddItem(const Item_Struct* item, uint16 charges, bool equipitem) {
 	//slot isnt needed, its determined from the item.
 	AddLootDrop(item, &itemlist, charges, 1, 127, equipitem, equipitem);
@@ -369,10 +369,10 @@ void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem) {
 		return;
 	AddLootDrop(i, &itemlist, charges, 1, 127, equipitem, equipitem);
 }
-	  
+
 void NPC::AddLootTable() {
 	if (npctype_id != 0) { // check if it's a GM spawn
-	  database.AddLootTableToNPC(this,loottable_id, &itemlist, &copper, &silver, &gold, &platinum);
+		database.AddLootTableToNPC(this,loottable_id, &itemlist, &copper, &silver, &gold, &platinum);
 	}
 }
 

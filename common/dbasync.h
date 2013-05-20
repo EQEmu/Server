@@ -31,10 +31,10 @@ protected:
 	Condition CInList;
 	bool	RunLoop();
 	void	Process();
-	
+
 private:
 	virtual void CheckTimeout();
-	
+
 	void	ProcessWork(DBAsyncWork* iWork, bool iSleep = true);
 	void	DispatchWork(DBAsyncWork* iWork);
 	inline	uint32	GetNextID()		{ return pNextID++; }
@@ -64,7 +64,7 @@ private:
 
 /*
 	DB Work Complete Callback:
-		This will be called under the DBAsync thread! Never access any non-threadsafe 
+		This will be called under the DBAsync thread! Never access any non-threadsafe
 		data/functions/classes. (ie: zone, entitylist, client, etc are not threadsafe)
 	Function prototype:
 		return value:	true if we should delete the data, false if we should keep it
@@ -103,7 +103,7 @@ public:
 	// Pops finished queries off the work
 	DBAsyncQuery*	PopAnswer();
 	uint32			QueryCount();
-	
+
 	Database *GetDB() const { return(m_db); }
 
 	bool			CheckTimeout(uint32 iFQTimeout);
