@@ -28,19 +28,17 @@ using namespace std;
 
 // for windows compile
 #ifdef _WINDOWS
-#define abs64 _abs64
-#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
+    #define abs64 _abs64
+    #define snprintf	_snprintf
 	#define vsnprintf	_vsnprintf
-#endif
-#define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
+    #define strncasecmp	_strnicmp
+    #define strcasecmp  _stricmp
 #else
-#include <stdarg.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include "../common/unix.h"
-#define abs64 abs
+    #include <stdarg.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include "../common/unix.h"
+    #define abs64 abs
 #endif
 
 extern volatile bool RunLoops;

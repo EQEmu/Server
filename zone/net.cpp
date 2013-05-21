@@ -76,10 +76,8 @@
 #ifdef _WINDOWS
     #include <conio.h>
     #include <process.h>
-    #if (_MSC_VER < 1500)
-        #define vsnprintf	_vsnprintf
-    #endif
     
+    #define vsnprintf	_vsnprintf
     #define snprintf	_snprintf
     #define strncasecmp	_strnicmp
     #define strcasecmp	_stricmp
