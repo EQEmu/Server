@@ -1,4 +1,3 @@
-#define DONT_SHARED_OPCODES
 /*	EQEMu: Everquest Server Emulator
 	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
@@ -16,6 +15,9 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
+#define DONT_SHARED_OPCODES
+
 #include "../common/debug.h"
 #include "../common/features.h"
 #include "../common/queue.h"
@@ -68,15 +70,12 @@
 
 #ifdef _CRTDBG_MAP_ALLOC
 	#undef new
-#endif
-	
-#ifdef _CRTDBG_MAP_ALLOC
 	#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
 	
 #ifdef _WINDOWS
     #include <conio.h>
-    
+    #include <process.h>
     #if (_MSC_VER < 1500)
         #define vsnprintf	_vsnprintf
     #endif
@@ -84,10 +83,6 @@
     #define snprintf	_snprintf
     #define strncasecmp	_strnicmp
     #define strcasecmp	_stricmp
-#endif
-
-#ifdef _WINDOWS
-    #include <process.h>
 #else
     #include <pthread.h>
     #include "../common/unix.h"
