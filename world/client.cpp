@@ -19,9 +19,6 @@ using namespace std;
 #ifdef _WINDOWS
 	#include <windows.h>
 	#include <winsock.h>
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
 #else
 	#include <sys/socket.h>
 #ifdef FREEBSD //Timothy Whitman - January 7, 2003
