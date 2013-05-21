@@ -20,7 +20,7 @@
 #include "../common/features.h"
 #include <iostream>
 using namespace std;
-#include <string.h>
+#include <string>
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
@@ -62,6 +62,7 @@ extern volatile bool ZoneLoaded;
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/ipc_mutex.h"
@@ -608,27 +609,27 @@ void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
 
 void UpdateWindowTitle(char* iNewTitle) {
 #ifdef _WINDOWS
-	char tmp[500];
+	std::string newTitle;
 	if (iNewTitle) {
-		snprintf(tmp, sizeof(tmp), "%i: %s", ZoneConfig::get()->ZonePort, iNewTitle);
+		StringFormat(&newTitle,  "%i: %s", ZoneConfig::get()->ZonePort, iNewTitle);
 	}
 	else {
 		if (zone) {
 			#if defined(GOTFRAGS) || defined(_EQDEBUG)
-				snprintf(tmp, sizeof(tmp), "%i: %s, %i clients, %i", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients, getpid());
+				StringFormat(&newTitle, "%i: %s, %i clients, %i", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients, getpid());
 			#else
-				snprintf(tmp, sizeof(tmp), "%i: %s, %i clients", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients);
+				StringFormat(&newTitle, "%i: %s, %i clients", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients);
 			#endif
 		}
 		else {
 			#if defined(GOTFRAGS) || defined(_EQDEBUG)
-				snprintf(tmp, sizeof(tmp), "%i: sleeping, %i", ZoneConfig::get()->ZonePort, getpid());
+				StringFormat(&newTitle, "%i: sleeping, %i", ZoneConfig::get()->ZonePort, getpid());
 			#else
-				snprintf(tmp, sizeof(tmp), "%i: sleeping", ZoneConfig::get()->ZonePort);
+				StringFormat(&newTitle, "%i: sleeping", ZoneConfig::get()->ZonePort);
 			#endif
 		}
 	}
-	SetConsoleTitle(tmp);
+	SetConsoleTitle(newTitle.c_str());
 #endif
 }
 
