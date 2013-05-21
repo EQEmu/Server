@@ -15,9 +15,10 @@
  */
 
 #include "StringUtil.h"
+
 #include <string>
-#include <cstring> // for strncpy
 #include <cstdarg>
+#include <cstring> // for strncpy
 #include <stdexcept>
 
 #ifdef _WINDOWS
@@ -26,8 +27,10 @@
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp  _stricmp
+
 #else
 	#include <stdlib.h>
+	#include <stdio.h>
 #endif
 
 #ifndef va_copy
@@ -37,51 +40,62 @@
 // original source: 
 // https://github.com/facebook/folly/blob/master/folly/String.cpp
 //
-void StringFormat(std::string& output, const char* format, ...) 
+void vStringFormat(std::string& output, const char* format, va_list args)
 {
-	va_list args;
-	// Tru to the space at the end of output for our output buffer.
-	// Find out write point then inflate its size temporarily to its
-	// capacity; we will later shrink it to the size needed to represent
-	// the formatted string.  If this buffer isn't large enough, we do a
-	// resize and try again.
+	va_list tmpargs;
 
-	const auto write_point = output.size();
-	auto remaining = output.capacity() - write_point;
-	output.resize(output.capacity());
+	va_copy(tmpargs,args);
+	int characters_used = vsnprintf(nullptr, 0, format, tmpargs);
+	va_end(tmpargs);
 
-	va_start(args, format);
-	int bytes_used = vsnprintf(&output[write_point], remaining, format,args);
-	va_end(args);
-	if (bytes_used < 0) {
-		
+	if (characters_used < 0) {
+		// Looks like we have an invalid format string.
+		// error out.
 		std::string errorMessage("Invalid format string; snprintf returned negative with format string: ");
 		errorMessage.append(format);
 		
 		throw std::runtime_error(errorMessage);
-	} 
-	else if ((unsigned int)bytes_used < remaining) {
-		// There was enough room, just shrink and return.
-		output.resize(write_point + bytes_used);
+	}
+	else if ((unsigned int)characters_used > output.capacity()) {
+		output.resize(characters_used+1);
+		va_copy(tmpargs,args);
+		characters_used = vsnprintf(&output[0], output.capacity(), format, tmpargs);
+		va_end(tmpargs);
+
+		if (characters_used < 0) {
+			// We shouldn't have a format error by this point, but I can't imagine what error we
+			// could have by this point. Still, error out and report it.
+			std::string errorMessage("Invalid format string or unknown vsnprintf error; vsnprintf returned negative with format string: ");
+			errorMessage.append(format);
+		
+			throw std::runtime_error(errorMessage);
+		}
 	} 
 	else {
-		output.resize(write_point + bytes_used + 1);
-		remaining = bytes_used + 1;
+		output.resize(characters_used + 1);
 
-		va_start(args, format);
-		bytes_used = vsnprintf(&output[write_point], remaining, format, args);
-		va_end(args);
-		
-		if ((unsigned int)(bytes_used + 1) != remaining) {
-			
-			std::string errorMessage("vsnprint retry did not manage to work with format string: ");
+		va_copy(tmpargs,args);
+		characters_used = vsnprintf(&output[0], output.capacity(), format, tmpargs);
+		va_end(tmpargs);
+
+		if (characters_used < 0) {
+			// We shouldn't have a format error by this point, but I can't imagine what error we
+			// could have by this point. still error out and report it.
+			std::string errorMessage("Invalid format string or unknown vsnprintf error; vsnprintf returned negative with format string: ");
 			errorMessage.append(format);
 		
 			throw std::runtime_error(errorMessage);
 		}
 		
-		output.resize(write_point + bytes_used);
 	}
+}
+
+void StringFormat(std::string& output, const char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	vStringFormat(output,format,args);
+	va_end(args);
 }
 
 // normal strncpy doesnt put a null term on copied strings, this one does

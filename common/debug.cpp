@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstdarg>
 
 #include <time.h>
 
@@ -12,10 +13,11 @@
 	#define vsnprintf	_vsnprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
+	
 #else
+	
 	#include <sys/types.h>
 	#include <unistd.h>
-	#include <stdarg.h>
 #endif
 
 #include "../common/StringUtil.h"
@@ -150,28 +152,36 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 	time( &aclock ); /* Get time in seconds */
 	newtime = localtime( &aclock ); /* Convert time to struct */
 
-	if (dofile)
+	if (dofile) {
 #ifndef NO_PIDLOG
 		fprintf(fp[id], "[%02d.%02d. - %02d:%02d:%02d] ", newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
 #else
 		fprintf(fp[id], "%04i [%02d.%02d. - %02d:%02d:%02d] ", getpid(), newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
 #endif
+	}
 
-	va_list argptr, tmpargptr;
-	va_start(argptr, fmt);
+	va_list argptr,tmpargptr;
+	
 	if (dofile) {
-		va_copy(tmpargptr, argptr);
+		va_start(argptr, fmt);
+		va_copy(tmpargptr,argptr);
 		vfprintf( fp[id], fmt, tmpargptr );
+		va_end(tmpargptr);
 	}
 	if(logCallbackFmt[id]) {
 		msgCallbackFmt p = logCallbackFmt[id];
-		va_copy(tmpargptr, argptr);
+		va_start(argptr, fmt);
+		va_copy(tmpargptr,argptr);
 		p(id, fmt, tmpargptr );
+		va_end(tmpargptr);
 	}
-	
+
 	std::string outputMessage;
-	StringFormat(outputMessage, fmt, argptr);
-	
+	va_start(argptr, fmt);
+	va_copy(tmpargptr,argptr);
+	vStringFormat(outputMessage, fmt, tmpargptr);
+	va_end(tmpargptr);
+
 	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
 			
@@ -183,7 +193,6 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 			std::cout << outputMessage;
 		}
 	}
-	va_end(argptr);
 	if (dofile)
 		fprintf(fp[id], "\n");
 	if (pLogStatus[id] & 2) {

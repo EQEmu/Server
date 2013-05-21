@@ -17,8 +17,11 @@
 #define _STRINGUTIL_H_
 
 #include <string>
+#include <cstdarg>
 #include "types.h"
 
+
+void vStringFormat(std::string& output, const char* format, va_list args);
 void StringFormat(std::string& output, const char* format, ...);
 //////////////////////////////////////////////////////////////////////
 //
