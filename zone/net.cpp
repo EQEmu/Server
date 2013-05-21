@@ -76,11 +76,6 @@
 #ifdef _WINDOWS
 	#include <conio.h>
 	#include <process.h>
-	
-	#define vsnprintf	_vsnprintf
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
 #else
 	#include <pthread.h>
 	#include "../common/unix.h"
