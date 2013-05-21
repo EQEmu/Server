@@ -74,16 +74,16 @@
 #endif
 	
 #ifdef _WINDOWS
-    #include <conio.h>
-    #include <process.h>
-    
-    #define vsnprintf	_vsnprintf
-    #define snprintf	_snprintf
-    #define strncasecmp	_strnicmp
-    #define strcasecmp	_stricmp
+	#include <conio.h>
+	#include <process.h>
+	
+	#define vsnprintf	_vsnprintf
+	#define snprintf	_snprintf
+	#define strncasecmp	_strnicmp
+	#define strcasecmp	_stricmp
 #else
-    #include <pthread.h>
-    #include "../common/unix.h"
+	#include <pthread.h>
+	#include "../common/unix.h"
 #endif
 
 volatile bool RunLoops = true;
@@ -613,21 +613,21 @@ void UpdateWindowTitle(char* iNewTitle) {
 #ifdef _WINDOWS
 	std::string newTitle;
 	if (iNewTitle) {
-		StringFormat(&newTitle,  "%i: %s", ZoneConfig::get()->ZonePort, iNewTitle);
+		StringFormat(newTitle,  "%i: %s", ZoneConfig::get()->ZonePort, iNewTitle);
 	}
 	else {
 		if (zone) {
 			#if defined(GOTFRAGS) || defined(_EQDEBUG)
-				StringFormat(&newTitle, "%i: %s, %i clients, %i", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients, getpid());
+				StringFormat(newTitle, "%i: %s, %i clients, %i", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients, getpid());
 			#else
-				StringFormat(&newTitle, "%i: %s, %i clients", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients);
+				StringFormat(newTitle, "%i: %s, %i clients", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients);
 			#endif
 		}
 		else {
 			#if defined(GOTFRAGS) || defined(_EQDEBUG)
-				StringFormat(&newTitle, "%i: sleeping, %i", ZoneConfig::get()->ZonePort, getpid());
+				StringFormat(newTitle, "%i: sleeping, %i", ZoneConfig::get()->ZonePort, getpid());
 			#else
-				StringFormat(&newTitle, "%i: sleeping", ZoneConfig::get()->ZonePort);
+				StringFormat(newTitle, "%i: sleeping", ZoneConfig::get()->ZonePort);
 			#endif
 		}
 	}

@@ -29,10 +29,6 @@ using namespace std;
 // for windows compile
 #ifdef _WINDOWS
     #define abs64 _abs64
-    #define snprintf	_snprintf
-	#define vsnprintf	_vsnprintf
-    #define strncasecmp	_strnicmp
-    #define strcasecmp  _stricmp
 #else
     #include <stdarg.h>
     #include <sys/socket.h>
