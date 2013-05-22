@@ -18,7 +18,6 @@
 #include "../common/debug.h"
 
 #include <iostream>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -194,21 +193,21 @@ int main(int argc, char** argv) {
 	if (argc >= 2) {
 		char tmp[2];
 		if (strcasecmp(argv[1], "help") == 0 || strcasecmp(argv[1], "?") == 0 || strcasecmp(argv[1], "/?") == 0 || strcasecmp(argv[1], "-?") == 0 || strcasecmp(argv[1], "-h") == 0 || strcasecmp(argv[1], "-help") == 0) {
-			cout << "Worldserver command line commands:" << endl;
-			cout << "adduser username password flag    - adds a user account" << endl;
-			cout << "flag username flag    - sets GM flag on the account" << endl;
-			cout << "startzone zoneshortname    - sets the starting zone" << endl;
-			cout << "-holdzones    - reboots lost zones" << endl;
+			std::cout << "Worldserver command line commands:" << std::endl;
+			std::cout << "adduser username password flag    - adds a user account" << std::endl;
+			std::cout << "flag username flag    - sets GM flag on the account" << std::endl;
+			std::cout << "startzone zoneshortname    - sets the starting zone" << std::endl;
+			std::cout << "-holdzones    - reboots lost zones" << std::endl;
 			return 0;
 		}
 		else if (strcasecmp(argv[1], "-holdzones") == 0) {
-			cout << "Reboot Zones mode ON" << endl;
+			std::cout << "Reboot Zones mode ON" << std::endl;
 			holdzones = true;
 		}
 		else if (database.GetVariable("disablecommandline", tmp, 2)) {
 			if (strlen(tmp) == 1) {
 				if (tmp[0] == '1') {
-					cout << "Command line disabled in database... exiting" << endl;
+					std::cout << "Command line disabled in database... exiting" << std::endl;
 					return 0;
 				}
 			}
@@ -218,15 +217,15 @@ int main(int argc, char** argv) {
 				if (Seperator::IsNumber(argv[4])) {
 					if (atoi(argv[4]) >= 0 && atoi(argv[4]) <= 255) {
 						if (database.CreateAccount(argv[2], argv[3], atoi(argv[4])) == 0)
-							cout << "database.CreateAccount failed." << endl;
+							std::cout << "database.CreateAccount failed." << std::endl;
 						else
-							cout << "Account created: Username='" << argv[2] << "', Password='" << argv[3] << "', status=" << argv[4] << endl;
+							std::cout << "Account created: Username='" << argv[2] << "', Password='" << argv[3] << "', status=" << argv[4] << std::endl;
 						return 0;
 					}
 				}
 			}
-			cout << "Usage: world adduser username password flag" << endl;
-			cout << "flag = 0, 1 or 2" << endl;
+			std::cout << "Usage: world adduser username password flag" << std::endl;
+			std::cout << "flag = 0, 1 or 2" << std::endl;
 			return 0;
 		}
 		else if (strcasecmp(argv[1], "flag") == 0) {
@@ -235,38 +234,38 @@ int main(int argc, char** argv) {
 
 					if (atoi(argv[3]) >= 0 && atoi(argv[3]) <= 255) {
 						if (database.SetAccountStatus(argv[2], atoi(argv[3])))
-							cout << "Account flagged: Username='" << argv[2] << "', status=" << argv[3] << endl;
+							std::cout << "Account flagged: Username='" << argv[2] << "', status=" << argv[3] << std::endl;
 						else
-							cout << "database.SetAccountStatus failed." << endl;
+							std::cout << "database.SetAccountStatus failed." << std::endl;
 						return 0;
 					}
 				}
 			}
-			cout << "Usage: world flag username flag" << endl;
-			cout << "flag = 0-200" << endl;
+			std::cout << "Usage: world flag username flag" << std::endl;
+			std::cout << "flag = 0-200" << std::endl;
 			return 0;
 		}
 		else if (strcasecmp(argv[1], "startzone") == 0) {
 			if (argc == 3) {
 				if (strlen(argv[2]) < 3) {
-					cout << "Error: zone name too short" << endl;
+					std::cout << "Error: zone name too short" << std::endl;
 				}
 				else if (strlen(argv[2]) > 15) {
-					cout << "Error: zone name too long" << endl;
+					std::cout << "Error: zone name too long" << std::endl;
 				}
 				else {
 					if (database.SetVariable("startzone", argv[2]))
-						cout << "Starting zone changed: '" << argv[2] << "'" << endl;
+						std::cout << "Starting zone changed: '" << argv[2] << "'" << std::endl;
 					else
-						cout << "database.SetVariable failed." << endl;
+						std::cout << "database.SetVariable failed." << std::endl;
 				}
 				return 0;
 			}
-			cout << "Usage: world startzone zoneshortname" << endl;
+			std::cout << "Usage: world startzone zoneshortname" << std::endl;
 			return 0;
 		}
 		else {
-			cout << "Error, unknown command line option" << endl;
+			std::cout << "Error, unknown command line option" << std::endl;
 			return 0;
 		}
 	}

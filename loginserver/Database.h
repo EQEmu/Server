@@ -20,8 +20,6 @@
 
 #include <string>
 
-using namespace std;
-
 #define EQEMU_MYSQL_ENABLED
 //#define EQEMU_POSTGRESQL_ENABLED
 
@@ -44,37 +42,37 @@ public:
 	* Needed for client login procedure.
 	* Returns true if the record was found, false otherwise.
 	*/
-	virtual bool GetLoginDataFromAccountName(string name, string &password, unsigned int &id) { return false; }
+	virtual bool GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id) { return false; }
 
 	/**
 	* Retrieves the world registration from the long and short names provided.
 	* Needed for world login procedure.
 	* Returns true if the record was found, false otherwise.
 	*/
-	virtual bool GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
-		unsigned int &trusted, string &list_desc, string &account, string &password) { return false; }
+	virtual bool GetWorldRegistration(std::string long_name, std::string short_name, unsigned int &id, std::string &desc, unsigned int &list_id,
+		unsigned int &trusted, std::string &list_desc, std::string &account, std::string &password) { return false; }
 
 	/**
 	* Updates the ip address of the client with account id = id
 	*/
-	virtual void UpdateLSAccountData(unsigned int id, string ip_address) { }
+	virtual void UpdateLSAccountData(unsigned int id, std::string ip_address) { }
 
 	/**
 	* Updates or creates the login server account with info from world server
 	*/
-	virtual void UpdateLSAccountInfo(unsigned int id, string name, string password, string email) { }
+	virtual void UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email) { }
 
 	/**
 	* Updates the ip address of the world with account id = id
 	*/
-	virtual void UpdateWorldRegistration(unsigned int id, string long_name, string ip_address) { }
+	virtual void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address) { }
 
 	/**
 	* Creates new world registration for unregistered servers and returns new id
 	*/
-	virtual bool CreateWorldRegistration(string long_name, string short_name, unsigned int &id) { return false; }
+	virtual bool CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id) { return false; }
 protected:
-	string user, pass, host, port, name;
+	std::string user, pass, host, port, name;
 };
 
 #endif

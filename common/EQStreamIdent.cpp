@@ -3,14 +3,12 @@
 #include "EQStreamProxy.h"
 #include "logsys.h"
 
-using namespace std;
-
 EQStreamIdentifier::~EQStreamIdentifier() {
 	while(!m_identified.empty()) {
 		m_identified.front()->ReleaseFromUse();
 		m_identified.pop();
 	}
-	vector<Record *>::iterator cur, end;
+	std::vector<Record *>::iterator cur, end;
 	cur = m_streams.begin();
 	end = m_streams.end();
 	for(; cur != end; cur++) {
@@ -18,7 +16,7 @@ EQStreamIdentifier::~EQStreamIdentifier() {
 		r->stream->ReleaseFromUse();
 		delete r;
 	}
-	vector<Patch *>::iterator curp, endp;
+	std::vector<Patch *>::iterator curp, endp;
 	curp = m_patches.begin();
 	endp = m_patches.end();
 	for(; curp != endp; curp++) {
@@ -36,8 +34,8 @@ void EQStreamIdentifier::RegisterPatch(const EQStream::Signature &sig, const cha
 }
 
 void EQStreamIdentifier::Process() {
-	vector<Record *>::iterator cur;
-	vector<Patch *>::iterator curp, endp;
+	std::vector<Record *>::iterator cur;
+	std::vector<Patch *>::iterator curp, endp;
 
 	//foreach pending stream.
 	cur = m_streams.begin();

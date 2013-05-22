@@ -30,8 +30,6 @@
 #include <signal.h>
 #include <time.h>
 
-using namespace std;
-
 bool RunLoops = false;
 
 void CatchSignal(int sig_num);
@@ -40,7 +38,7 @@ int main(int argc, char *argv[]) {
 	RegisterExecutablePlatform(ExePlatformLaunch);
 	set_exception_handler();
 
-	string launcher_name;
+	std::string launcher_name;
 	if(argc == 2) {
 		launcher_name = argv[1];
 	}
@@ -87,14 +85,14 @@ int main(int argc, char *argv[]) {
 	}
 	#endif
 
-	map<string, ZoneLaunch *> zones;
+	std::map<std::string, ZoneLaunch *> zones;
 	WorldServer world(zones, launcher_name.c_str(), Config);
 	if (!world.Connect()) {
 		_log(LAUNCHER__ERROR, "worldserver.Connect() FAILED! Will retry.");
 	}
 
-	map<string, ZoneLaunch *>::iterator zone, zend;
-	set<string> to_remove;
+	std::map<std::string, ZoneLaunch *>::iterator zone, zend;
+	std::set<std::string> to_remove;
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
@@ -132,7 +130,7 @@ int main(int argc, char *argv[]) {
 		* Kill off any zones which have stopped
 		*/
 		while(!to_remove.empty()) {
-			string rem = *to_remove.begin();
+			std::string rem = *to_remove.begin();
 			to_remove.erase(rem);
 			zone = zones.find(rem);
 			if(zone == zones.end()) {

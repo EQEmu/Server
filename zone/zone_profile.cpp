@@ -42,8 +42,6 @@
 #include <vector>
 #include <algorithm>
 
-using namespace std;
-
 #ifdef COMMON_PROFILE
 CommonProfiler _cp;
 #endif
@@ -248,7 +246,7 @@ void DumpZoneProfile() {
 		newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec,
 		__DZP_timer.getTotalDuration());
 
-	vector<_DZP_Data> data;
+	std::vector<_DZP_Data> data;
 
 
 	int r;
@@ -268,7 +266,7 @@ void DumpZoneProfile() {
 
 	sort(data.begin(), data.end());
 
-	vector<_DZP_Data>::iterator cur,end;
+	std::vector<_DZP_Data>::iterator cur,end;
 	cur = data.begin();
 	end = data.end();
 

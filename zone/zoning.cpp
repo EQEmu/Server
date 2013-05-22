@@ -787,7 +787,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		return;
 	}
 
-	set<uint32>::const_iterator cur, end;
+	std::set<uint32>::const_iterator cur, end;
 	cur = zone_flags.begin();
 	end = zone_flags.end();
 	char empty[1] = { '\0' };

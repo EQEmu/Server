@@ -19,7 +19,6 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
-using namespace std;
 #include "masterentity.h"
 #include "worldserver.h"
 #include "StringIDs.h"
@@ -243,7 +242,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	{	// guild doors
 		if((guild_id > 0) && !sender->GetGM())
 		{
-			string tmp;
+			std::string tmp;
 			char tmpmsg[240]; // guild doors msgs
 			if(guild_mgr.GetGuildNameByID(guild_id, tmp))
 			{
@@ -594,7 +593,7 @@ int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 v
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetDoorsCount query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetDoorsCount query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return -1;
 	}
@@ -625,7 +624,7 @@ int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetDoorsCountPlusOne query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetDoorsCountPlusOne query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return -1;
 	}
@@ -656,7 +655,7 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetDoorsCountPlusOne query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetDoorsCountPlusOne query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return -1;
 	}
@@ -681,7 +680,7 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 		int32 r;
 		for(r = 0; (row = mysql_fetch_row(result)); r++) {
 			if(r >= iDoorCount) {
-				cerr << "Error, Door Count of " << iDoorCount << " exceeded." << endl;
+				std::cerr << "Error, Door Count of " << iDoorCount << " exceeded." << std::endl;
 				break;
 			}
 			memset(&into[r], 0, sizeof(Door));
@@ -717,7 +716,7 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 	}
 	else
 	{
-		cerr << "Error in DBLoadDoors query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in DBLoadDoors query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}

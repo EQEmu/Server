@@ -3,7 +3,6 @@
 #include "mob.h"
 #include "zonedb.h"
 #include "npc.h"
-using namespace std;
 
 #define MAXMERCS 1
 #define MERC_DEBUG 0

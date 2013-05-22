@@ -33,11 +33,9 @@
 #include <cstdlib>
 #include <algorithm>
 
-using namespace std;
-
 extern Database database;
-extern string WorldShortName;
-extern string GetMailPrefix();
+extern std::string WorldShortName;
+extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
 extern Clientlist *CL;
 extern uint32 ChatMessagesSent;
@@ -77,7 +75,7 @@ void Client::SendUptime() {
 	safe_delete_array(Buffer);
 }
 
-vector<string> ParseRecipients(string RecipientString) {
+std::vector<std::string> ParseRecipients(std::string RecipientString) {
 
 	// This method parses the Recipient List in the mailto command, which can look like this example:
 	//
@@ -111,19 +109,19 @@ vector<string> ParseRecipients(string RecipientString) {
 	//
 	// The '-' prefix indicates 'Secret To' (like BCC:)
 	//
-	vector<string> RecipientList;
+	std::vector<std::string> RecipientList;
 
-	string Secret;
+	std::string Secret;
 
-	string::size_type CurrentPos, Comma, FirstLT, LastGT, Space, LastPeriod;
+	std::string::size_type CurrentPos, Comma, FirstLT, LastGT, Space, LastPeriod;
 
 	CurrentPos = 0;
 
-	while(CurrentPos != string::npos) {
+	while(CurrentPos != std::string::npos) {
 
 		Comma = RecipientString.find_first_of(",", CurrentPos);
 
-		if(Comma == string::npos) {
+		if(Comma == std::string::npos) {
 
 			RecipientList.push_back(RecipientString.substr(CurrentPos));
 
@@ -134,7 +132,7 @@ vector<string> ParseRecipients(string RecipientString) {
 		CurrentPos = Comma + 2;
 	}
 
-	vector<string>::iterator Iterator;
+	std::vector<std::string>::iterator Iterator;
 
 	Iterator = RecipientList.begin();
 
@@ -152,27 +150,27 @@ vector<string> ParseRecipients(string RecipientString) {
 
 		FirstLT = (*Iterator).find_first_of("<");
 
-		if(FirstLT != string::npos) {
+		if(FirstLT != std::string::npos) {
 
 			LastGT = (*Iterator).find_last_of(">");
 
-			if(LastGT != string::npos) {
+			if(LastGT != std::string::npos) {
 
 				(*Iterator) = (*Iterator).substr(FirstLT + 1, LastGT - FirstLT - 1);
 
-				if((*Iterator).find_first_of(" ") != string::npos) {
+				if((*Iterator).find_first_of(" ") != std::string::npos) {
 
-					string Recips = (*Iterator);
+					std::string Recips = (*Iterator);
 
 					RecipientList.erase(Iterator);
 
 					CurrentPos = 0;
 
-					while(CurrentPos != string::npos) {
+					while(CurrentPos != std::string::npos) {
 
 						Space = Recips.find_first_of(" ", CurrentPos);
 
-						if(Space == string::npos) {
+						if(Space == std::string::npos) {
 
 							RecipientList.push_back(Secret + Recips.substr(CurrentPos));
 
@@ -207,7 +205,7 @@ vector<string> ParseRecipients(string RecipientString) {
 
 			LastPeriod = (*Iterator).find_last_of(".");
 
-			if(LastPeriod != string::npos) {
+			if(LastPeriod != std::string::npos) {
 
 				(*Iterator) = (*Iterator).substr(LastPeriod + 1);
 
@@ -227,7 +225,7 @@ vector<string> ParseRecipients(string RecipientString) {
 
 	sort(RecipientList.begin(), RecipientList.end());
 
-	vector<string>::iterator new_end_pos = unique(RecipientList.begin(), RecipientList.end());
+	std::vector<std::string>::iterator new_end_pos = unique(RecipientList.begin(), RecipientList.end());
 
 	RecipientList.erase(new_end_pos, RecipientList.end());
 
@@ -235,27 +233,27 @@ vector<string> ParseRecipients(string RecipientString) {
 
 }
 
-static void ProcessMailTo(Client *c, string MailMessage) {
+static void ProcessMailTo(Client *c, std::string MailMessage) {
 
 	_log(UCS__TRACE, "MAILTO: From %s, %s", c->MailBoxName().c_str(), MailMessage.c_str());
 
-	vector<string> Recipients;
+	std::vector<std::string> Recipients;
 
-	string::size_type FirstQuote = MailMessage.find_first_of("\"", 0);
+	std::string::size_type FirstQuote = MailMessage.find_first_of("\"", 0);
 
-	string::size_type NextQuote = MailMessage.find_first_of("\"", FirstQuote + 1);
+	std::string::size_type NextQuote = MailMessage.find_first_of("\"", FirstQuote + 1);
 
-	string RecipientsString = MailMessage.substr(FirstQuote+1, NextQuote-FirstQuote - 1);
+	std::string RecipientsString = MailMessage.substr(FirstQuote+1, NextQuote-FirstQuote - 1);
 
 	Recipients = ParseRecipients(RecipientsString);
 
 	// Now extract the subject field. This is in quotes if it is more than one word
 	//
-	string Subject;
+	std::string Subject;
 
-	string::size_type SubjectStart = NextQuote + 2;
+	std::string::size_type SubjectStart = NextQuote + 2;
 
-	string::size_type SubjectEnd;
+	std::string::size_type SubjectEnd;
 
 	if(MailMessage.substr(SubjectStart, 1) == "\"") {
 
@@ -274,7 +272,7 @@ static void ProcessMailTo(Client *c, string MailMessage) {
 		SubjectEnd++;
 
 	}
-	string Body = MailMessage.substr(SubjectEnd);
+	std::string Body = MailMessage.substr(SubjectEnd);
 
 	bool Success = true;
 
@@ -353,10 +351,10 @@ static void ProcessMailTo(Client *c, string MailMessage) {
 	}
 }
 
-static void ProcessMailTo(Client *c, string from, string subject, string message) {
+static void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message) {
 }
 
-static void ProcessSetMessageStatus(string SetMessageCommand) {
+static void ProcessSetMessageStatus(std::string SetMessageCommand) {
 
 	int MessageNumber;
 
@@ -376,13 +374,13 @@ static void ProcessSetMessageStatus(string SetMessageCommand) {
 			Status = 0;
 
 	}
-	string::size_type NumStart = SetMessageCommand.find_first_of("123456789");
+	std::string::size_type NumStart = SetMessageCommand.find_first_of("123456789");
 
-	while(NumStart != string::npos) {
+	while(NumStart != std::string::npos) {
 
-		string::size_type NumEnd = SetMessageCommand.find_first_of(" ", NumStart);
+		std::string::size_type NumEnd = SetMessageCommand.find_first_of(" ", NumStart);
 
-		if(NumEnd == string::npos) {
+		if(NumEnd == std::string::npos) {
 
 			MessageNumber = atoi(SetMessageCommand.substr(NumStart).c_str());
 
@@ -399,7 +397,7 @@ static void ProcessSetMessageStatus(string SetMessageCommand) {
 	}
 }
 
-static void ProcessCommandBuddy(Client *c, string Buddy) {
+static void ProcessCommandBuddy(Client *c, std::string Buddy) {
 
 	_log(UCS__TRACE, "Received buddy command with parameters %s", Buddy.c_str());
 	c->GeneralChannelMessage("Buddy list modified");
@@ -429,7 +427,7 @@ static void ProcessCommandBuddy(Client *c, string Buddy) {
 
 }
 
-static void ProcessCommandIgnore(Client *c, string Ignoree) {
+static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 
 	_log(UCS__TRACE, "Received ignore command with parameters %s", Ignoree.c_str());
 	c->GeneralChannelMessage("Ignore list modified");
@@ -442,11 +440,11 @@ static void ProcessCommandIgnore(Client *c, string Ignoree) {
 
 		// Strip off the SOE.EQ.<shortname>.
 		//
-		string CharacterName;
+		std::string CharacterName;
 
-		string::size_type LastPeriod = Ignoree.find_last_of(".");
+		std::string::size_type LastPeriod = Ignoree.find_last_of(".");
 
-		if(LastPeriod == string::npos)
+		if(LastPeriod == std::string::npos)
 			CharacterName = Ignoree;
 		else
 			CharacterName = Ignoree.substr(LastPeriod + 1);
@@ -554,7 +552,7 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 
 	if(!c) return;
 
-	list<Client*>::iterator Iterator;
+	std::list<Client*>::iterator Iterator;
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
 
@@ -596,7 +594,7 @@ void Clientlist::Process() {
 		ClientChatConnections.push_back(c);
 	}
 
-	list<Client*>::iterator Iterator;
+	std::list<Client*>::iterator Iterator;
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
 
@@ -657,13 +655,13 @@ void Clientlist::Process() {
 
 					VARSTRUCT_DECODE_STRING(Key, PacketBuffer);
 
-					string MailBoxString = MailBox, CharacterName;
+					std::string MailBoxString = MailBox, CharacterName;
 
 					// Strip off the SOE.EQ.<shortname>.
 					//
-					string::size_type LastPeriod = MailBoxString.find_last_of(".");
+					std::string::size_type LastPeriod = MailBoxString.find_last_of(".");
 
-					if(LastPeriod == string::npos)
+					if(LastPeriod == std::string::npos)
 						CharacterName = MailBoxString;
 					else
 						CharacterName = MailBoxString.substr(LastPeriod + 1);
@@ -695,7 +693,7 @@ void Clientlist::Process() {
 
 				case OP_Mail: {
 
-					string CommandString = (const char*)app->pBuffer;
+					std::string CommandString = (const char*)app->pBuffer;
 
 					ProcessOPMailCommand((*Iterator), CommandString);
 
@@ -735,7 +733,7 @@ void Clientlist::Process() {
 
 }
 
-void Clientlist::ProcessOPMailCommand(Client *c, string CommandString)
+void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 {
 
 	if(CommandString.length() == 0)
@@ -756,17 +754,17 @@ void Clientlist::ProcessOPMailCommand(Client *c, string CommandString)
 		return;
 	}
 
-	string Command, Parameters;
+	std::string Command, Parameters;
 
-	string::size_type Space = CommandString.find_first_of(" ");
+	std::string::size_type Space = CommandString.find_first_of(" ");
 
-	if(Space != string::npos) {
+	if(Space != std::string::npos) {
 
 		Command = CommandString.substr(0, Space);
 
-		string::size_type ParametersStart = CommandString.find_first_not_of(" ", Space);
+		std::string::size_type ParametersStart = CommandString.find_first_not_of(" ", Space);
 
-		if(ParametersStart != string::npos)
+		if(ParametersStart != std::string::npos)
 			Parameters = CommandString.substr(ParametersStart);
 	}
 	else
@@ -867,7 +865,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, string CommandString)
 
 		case CommandSelectMailBox:
 		{
-			string::size_type NumStart = Parameters.find_first_of("0123456789");
+			std::string::size_type NumStart = Parameters.find_first_of("0123456789");
 			c->ChangeMailBox(atoi(Parameters.substr(NumStart).c_str()));
 			break;
 		}
@@ -893,7 +891,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, string CommandString)
 void Clientlist::CloseAllConnections() {
 
 
-	list<Client*>::iterator Iterator;
+	std::list<Client*>::iterator Iterator;
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
 
@@ -921,7 +919,7 @@ void Client::SendMailBoxes() {
 
 	int PacketLength = 10;
 
-	string s;
+	std::string s;
 
 	for(int i = 0; i < Count; i++) {
 
@@ -951,9 +949,9 @@ void Client::SendMailBoxes() {
 	safe_delete(outapp);
 }
 
-Client *Clientlist::FindCharacter(string CharacterName) {
+Client *Clientlist::FindCharacter(std::string CharacterName) {
 
-	list<Client*>::iterator Iterator;
+	std::list<Client*>::iterator Iterator;
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
 
@@ -1005,7 +1003,7 @@ int Client::ChannelCount() {
 
 }
 
-void Client::JoinChannels(string ChannelNameList) {
+void Client::JoinChannels(std::string ChannelNameList) {
 
 	for(int x = 0; x < ChannelNameList.size(); ++x)
 	{
@@ -1019,9 +1017,9 @@ void Client::JoinChannels(string ChannelNameList) {
 
 	int NumberOfChannels = ChannelCount();
 
-	string::size_type CurrentPos = ChannelNameList.find_first_not_of(" ");
+	std::string::size_type CurrentPos = ChannelNameList.find_first_not_of(" ");
 
-	while(CurrentPos != string::npos) {
+	while(CurrentPos != std::string::npos) {
 
 		if(NumberOfChannels == MAX_JOINED_CHANNELS) {
 
@@ -1030,9 +1028,9 @@ void Client::JoinChannels(string ChannelNameList) {
 			break;
 		}
 
-		string::size_type Comma = ChannelNameList.find_first_of(", ", CurrentPos);
+		std::string::size_type Comma = ChannelNameList.find_first_of(", ", CurrentPos);
 
-		if(Comma == string::npos) {
+		if(Comma == std::string::npos) {
 
 			ChatChannel* JoinedChannel = ChannelList->AddClientToChannel(ChannelNameList.substr(CurrentPos), this);
 
@@ -1054,7 +1052,7 @@ void Client::JoinChannels(string ChannelNameList) {
 		CurrentPos = ChannelNameList.find_first_not_of(", ", Comma);
 	}
 
-	string JoinedChannelsList, ChannelMessage;
+	std::string JoinedChannelsList, ChannelMessage;
 
 	ChannelMessage = "Channels: ";
 
@@ -1115,17 +1113,17 @@ void Client::JoinChannels(string ChannelNameList) {
 	safe_delete(outapp);
 }
 
-void Client::LeaveChannels(string ChannelNameList) {
+void Client::LeaveChannels(std::string ChannelNameList) {
 
 	_log(UCS__TRACE, "Client: %s leaving channels %s", GetName().c_str(), ChannelNameList.c_str());
 
-	string::size_type CurrentPos = 0;
+	std::string::size_type CurrentPos = 0;
 
-	while(CurrentPos != string::npos) {
+	while(CurrentPos != std::string::npos) {
 
-		string::size_type Comma = ChannelNameList.find_first_of(", ", CurrentPos);
+		std::string::size_type Comma = ChannelNameList.find_first_of(", ", CurrentPos);
 
-		if(Comma == string::npos) {
+		if(Comma == std::string::npos) {
 
 			ChatChannel* JoinedChannel = ChannelList->RemoveClientFromChannel(ChannelNameList.substr(CurrentPos), this);
 
@@ -1143,7 +1141,7 @@ void Client::LeaveChannels(string ChannelNameList) {
 		CurrentPos = ChannelNameList.find_first_not_of(", ", Comma);
 	}
 
-	string JoinedChannelsList, ChannelMessage;
+	std::string JoinedChannelsList, ChannelMessage;
 
 	ChannelMessage = "Channels: ";
 
@@ -1220,7 +1218,7 @@ void Client::LeaveAllChannels(bool SendUpdatedChannelList) {
 }
 
 
-void Client::ProcessChannelList(string Input) {
+void Client::ProcessChannelList(std::string Input) {
 
 	if(Input.length() == 0) {
 
@@ -1229,7 +1227,7 @@ void Client::ProcessChannelList(string Input) {
 		return;
 	}
 
-	string ChannelName = Input;
+	std::string ChannelName = Input;
 
 	if(isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
@@ -1246,7 +1244,7 @@ void Client::ProcessChannelList(string Input) {
 
 void Client::SendChannelList() {
 
-	string ChannelMessage;
+	std::string ChannelMessage;
 
 	ChannelMessage = "Channels: ";
 
@@ -1287,15 +1285,15 @@ void Client::SendChannelList() {
 	safe_delete(outapp);
 }
 
-void Client::SendChannelMessage(string Message)
+void Client::SendChannelMessage(std::string Message)
 {
 
-	string::size_type MessageStart = Message.find_first_of(" ");
+	std::string::size_type MessageStart = Message.find_first_of(" ");
 
-	if(MessageStart == string::npos)
+	if(MessageStart == std::string::npos)
 		return;
 
-	string ChannelName = Message.substr(1, MessageStart-1);
+	std::string ChannelName = Message.substr(1, MessageStart-1);
 
 	_log(UCS__TRACE, "%s tells %s, [%s]", GetName().c_str(), ChannelName.c_str(), Message.substr(MessageStart + 1).c_str());
 
@@ -1389,11 +1387,11 @@ void Client::SendChannelMessage(string Message)
 
 }
 
-void Client::SendChannelMessageByNumber(string Message) {
+void Client::SendChannelMessageByNumber(std::string Message) {
 
-	string::size_type MessageStart = Message.find_first_of(" ");
+	std::string::size_type MessageStart = Message.find_first_of(" ");
 
-	if(MessageStart == string::npos)
+	if(MessageStart == std::string::npos)
 		return;
 
 	int ChannelNumber = atoi(Message.substr(0, MessageStart).c_str());
@@ -1503,11 +1501,11 @@ void Client::SendChannelMessageByNumber(string Message) {
 
 }
 
-void Client::SendChannelMessage(string ChannelName, string Message, Client *Sender) {
+void Client::SendChannelMessage(std::string ChannelName, std::string Message, Client *Sender) {
 
 	if(!Sender) return;
 
-	string FQSenderName = WorldShortName + "." + Sender->GetName();
+	std::string FQSenderName = WorldShortName + "." + Sender->GetName();
 
 	int PacketLength = ChannelName.length() + Message.length() + FQSenderName.length() + 3;
 
@@ -1531,7 +1529,7 @@ void Client::SendChannelMessage(string ChannelName, string Message, Client *Send
 	safe_delete(outapp);
 }
 
-void Client::ToggleAnnounce(string State)
+void Client::ToggleAnnounce(std::string State)
 {
 	if(State == "")
 		Announce = !Announce;
@@ -1540,7 +1538,7 @@ void Client::ToggleAnnounce(string State)
 	else
 		Announce = false;
 
-	string Message = "Announcing now ";
+	std::string Message = "Announcing now ";
 
 	if(Announce)
 		Message += "on";
@@ -1594,13 +1592,13 @@ void Client::GeneralChannelMessage(const char *Characters) {
 
 	if(!Characters) return;
 
-	string Message = Characters;
+	std::string Message = Characters;
 
 	GeneralChannelMessage(Message);
 
 }
 
-void Client::GeneralChannelMessage(string Message) {
+void Client::GeneralChannelMessage(std::string Message) {
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChannelMessage, Message.length() + 3);
 	char *PacketBuffer = (char *)outapp->pBuffer;
@@ -1614,40 +1612,40 @@ void Client::GeneralChannelMessage(string Message) {
 	safe_delete(outapp);
 }
 
-void Client::SetChannelPassword(string ChannelPassword) {
+void Client::SetChannelPassword(std::string ChannelPassword) {
 
-	string::size_type PasswordStart = ChannelPassword.find_first_not_of(" ");
+	std::string::size_type PasswordStart = ChannelPassword.find_first_not_of(" ");
 
-	if(PasswordStart == string::npos) {
-		string Message = "Incorrect syntax: /chat password <new password> <channel name>";
+	if(PasswordStart == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat password <new password> <channel name>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string::size_type Space = ChannelPassword.find_first_of(" ", PasswordStart);
+	std::string::size_type Space = ChannelPassword.find_first_of(" ", PasswordStart);
 
-	if(Space == string::npos) {
-		string Message = "Incorrect syntax: /chat password <new password> <channel name>";
+	if(Space == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat password <new password> <channel name>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string Password = ChannelPassword.substr(PasswordStart, Space - PasswordStart);
+	std::string Password = ChannelPassword.substr(PasswordStart, Space - PasswordStart);
 
-	string::size_type ChannelStart = ChannelPassword.find_first_not_of(" ", Space);
+	std::string::size_type ChannelStart = ChannelPassword.find_first_not_of(" ", Space);
 
-	if(ChannelStart == string::npos) {
-		string Message = "Incorrect syntax: /chat password <new password> <channel name>";
+	if(ChannelStart == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat password <new password> <channel name>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string ChannelName = ChannelPassword.substr(ChannelStart);
+	std::string ChannelName = ChannelPassword.substr(ChannelStart);
 
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	string Message;
+	std::string Message;
 
 	if(!strcasecmp(Password.c_str(), "remove")) {
 		Password.clear();
@@ -1661,13 +1659,13 @@ void Client::SetChannelPassword(string ChannelPassword) {
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
 	if(!RequiredChannel) {
-		string Message = "Channel not found.";
+		std::string Message = "Channel not found.";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
 	if(!RequiredChannel->IsOwner(GetName()) && !RequiredChannel->IsModerator(GetName()) && !IsChannelAdmin()) {
-		string Message = "You do not own or have moderator rights on channel " + ChannelName;
+		std::string Message = "You do not own or have moderator rights on channel " + ChannelName;
 		GeneralChannelMessage(Message);
 		return;
 	}
@@ -1678,35 +1676,35 @@ void Client::SetChannelPassword(string ChannelPassword) {
 
 }
 
-void Client::SetChannelOwner(string CommandString) {
+void Client::SetChannelOwner(std::string CommandString) {
 
-	string::size_type PlayerStart = CommandString.find_first_not_of(" ");
+	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
-	if(PlayerStart == string::npos) {
-		string Message = "Incorrect syntax: /chat setowner <player> <channel>";
+	if(PlayerStart == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat setowner <player> <channel>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
+	std::string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
 
-	if(Space == string::npos) {
-		string Message = "Incorrect syntax: /chat setowner <player> <channel>";
+	if(Space == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat setowner <player> <channel>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string NewOwner = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
+	std::string NewOwner = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
 
-	string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
+	std::string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
 
-	if(ChannelStart == string::npos) {
-		string Message = "Incorrect syntax: /chat setowner <player> <channel>";
+	if(ChannelStart == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat setowner <player> <channel>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
+	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
@@ -1721,7 +1719,7 @@ void Client::SetChannelOwner(string CommandString) {
 	}
 
 	if(!RequiredChannel->IsOwner(GetName()) && !IsChannelAdmin()) {
-		string Message = "You do not own channel " + ChannelName;
+		std::string Message = "You do not own channel " + ChannelName;
 		GeneralChannelMessage(Message);
 		return;
 	}
@@ -1741,17 +1739,17 @@ void Client::SetChannelOwner(string CommandString) {
 
 }
 
-void Client::OPList(string CommandString) {
+void Client::OPList(std::string CommandString) {
 
-	string::size_type ChannelStart = CommandString.find_first_not_of(" ");
+	std::string::size_type ChannelStart = CommandString.find_first_not_of(" ");
 
-	if(ChannelStart == string::npos) {
-		string Message = "Incorrect syntax: /chat oplist <channel>";
+	if(ChannelStart == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat oplist <channel>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
+	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
@@ -1766,35 +1764,35 @@ void Client::OPList(string CommandString) {
 	RequiredChannel->SendOPList(this);
 }
 
-void Client::ChannelInvite(string CommandString) {
+void Client::ChannelInvite(std::string CommandString) {
 
-	string::size_type PlayerStart = CommandString.find_first_not_of(" ");
+	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
-	if(PlayerStart == string::npos) {
-		string Message = "Incorrect syntax: /chat invite <player> <channel>";
+	if(PlayerStart == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat invite <player> <channel>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
+	std::string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
 
-	if(Space == string::npos) {
-		string Message = "Incorrect syntax: /chat invite <player> <channel>";
+	if(Space == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat invite <player> <channel>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string Invitee = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
+	std::string Invitee = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
 
-	string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
+	std::string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
 
-	if(ChannelStart == string::npos) {
-		string Message = "Incorrect syntax: /chat invite <player> <channel>";
+	if(ChannelStart == std::string::npos) {
+		std::string Message = "Incorrect syntax: /chat invite <player> <channel>";
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
+	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
@@ -1831,7 +1829,7 @@ void Client::ChannelInvite(string CommandString) {
 
 	if(!RequiredChannel->IsOwner(GetName()) && !RequiredChannel->IsModerator(GetName())) {
 
-		string Message = "You do not own or have moderator rights to channel " + ChannelName;
+		std::string Message = "You do not own or have moderator rights to channel " + ChannelName;
 
 		GeneralChannelMessage(Message);
 		return;
@@ -1852,19 +1850,19 @@ void Client::ChannelInvite(string CommandString) {
 
 }
 
-void Client::ChannelModerate(string CommandString) {
+void Client::ChannelModerate(std::string CommandString) {
 
-	string::size_type ChannelStart = CommandString.find_first_not_of(" ");
+	std::string::size_type ChannelStart = CommandString.find_first_not_of(" ");
 
-	if(ChannelStart == string::npos) {
+	if(ChannelStart == std::string::npos) {
 
-		string Message = "Incorrect syntax: /chat moderate <channel>";
+		std::string Message = "Incorrect syntax: /chat moderate <channel>";
 
 		GeneralChannelMessage(Message);
 		return;
 	}
 
-	string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
+	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
@@ -1893,35 +1891,35 @@ void Client::ChannelModerate(string CommandString) {
 
 }
 
-void Client::ChannelGrantModerator(string CommandString) {
+void Client::ChannelGrantModerator(std::string CommandString) {
 
-	string::size_type PlayerStart = CommandString.find_first_not_of(" ");
+	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
-	if(PlayerStart == string::npos) {
-
-		GeneralChannelMessage("Incorrect syntax: /chat grant <player> <channel>");
-		return;
-	}
-
-	string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
-
-	if(Space == string::npos) {
+	if(PlayerStart == std::string::npos) {
 
 		GeneralChannelMessage("Incorrect syntax: /chat grant <player> <channel>");
 		return;
 	}
 
-	string Moderator = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
+	std::string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
 
-	string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
-
-	if(ChannelStart == string::npos) {
+	if(Space == std::string::npos) {
 
 		GeneralChannelMessage("Incorrect syntax: /chat grant <player> <channel>");
 		return;
 	}
 
-	string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
+	std::string Moderator = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
+
+	std::string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
+
+	if(ChannelStart == std::string::npos) {
+
+		GeneralChannelMessage("Incorrect syntax: /chat grant <player> <channel>");
+		return;
+	}
+
+	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
@@ -1976,33 +1974,33 @@ void Client::ChannelGrantModerator(string CommandString) {
 
 }
 
-void Client::ChannelGrantVoice(string CommandString) {
+void Client::ChannelGrantVoice(std::string CommandString) {
 
-	string::size_type PlayerStart = CommandString.find_first_not_of(" ");
+	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
-	if(PlayerStart == string::npos) {
+	if(PlayerStart == std::string::npos) {
 
 		GeneralChannelMessage("Incorrect syntax: /chat voice <player> <channel>");
 		return;
 	}
 
-	string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
+	std::string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
 
-	if(Space == string::npos) {
+	if(Space == std::string::npos) {
 		GeneralChannelMessage("Incorrect syntax: /chat voice <player> <channel>");
 		return;
 	}
 
-	string Voicee = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
+	std::string Voicee = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
 
-	string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
+	std::string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
 
-	if(ChannelStart == string::npos) {
+	if(ChannelStart == std::string::npos) {
 		GeneralChannelMessage("Incorrect syntax: /chat voice <player> <channel>");
 		return;
 	}
 
-	string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
+	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
@@ -2063,34 +2061,34 @@ void Client::ChannelGrantVoice(string CommandString) {
 
 }
 
-void Client::ChannelKick(string CommandString) {
+void Client::ChannelKick(std::string CommandString) {
 
-	string::size_type PlayerStart = CommandString.find_first_not_of(" ");
+	std::string::size_type PlayerStart = CommandString.find_first_not_of(" ");
 
-	if(PlayerStart == string::npos) {
-
-		GeneralChannelMessage("Incorrect syntax: /chat kick <player> <channel>");
-		return;
-	}
-
-	string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
-
-	if(Space == string::npos) {
+	if(PlayerStart == std::string::npos) {
 
 		GeneralChannelMessage("Incorrect syntax: /chat kick <player> <channel>");
 		return;
 	}
 
-	string Kickee = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
+	std::string::size_type Space = CommandString.find_first_of(" ", PlayerStart);
 
-	string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
-
-	if(ChannelStart == string::npos) {
+	if(Space == std::string::npos) {
 
 		GeneralChannelMessage("Incorrect syntax: /chat kick <player> <channel>");
 		return;
 	}
-	string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
+
+	std::string Kickee = CapitaliseName(CommandString.substr(PlayerStart, Space - PlayerStart));
+
+	std::string::size_type ChannelStart = CommandString.find_first_not_of(" ", Space);
+
+	if(ChannelStart == std::string::npos) {
+
+		GeneralChannelMessage("Incorrect syntax: /chat kick <player> <channel>");
+		return;
+	}
+	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
@@ -2164,7 +2162,7 @@ void Client::ToggleInvites() {
 
 }
 
-string Client::ChannelSlotName(int SlotNumber) {
+std::string Client::ChannelSlotName(int SlotNumber) {
 
 	if((SlotNumber < 1 ) || (SlotNumber > MAX_JOINED_CHANNELS))
 		return "";
@@ -2234,7 +2232,7 @@ void Client::SetConnectionType(char c) {
 	}
 }
 
-Client *Clientlist::IsCharacterOnline(string CharacterName) {
+Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
 
 	// This method is used to determine if the character we are a sending an email to is connected to the mailserver,
 	// so we can send them a new email notification.
@@ -2243,7 +2241,7 @@ Client *Clientlist::IsCharacterOnline(string CharacterName) {
 	// i.e. for the character they are logged in as, or for the character whose mailbox they have selected in the
 	// mail window.
 	//
-	list<Client*>::iterator Iterator;
+	std::list<Client*>::iterator Iterator;
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
 
@@ -2262,7 +2260,7 @@ Client *Clientlist::IsCharacterOnline(string CharacterName) {
 	return nullptr;
 }
 
-int Client::GetMailBoxNumber(string CharacterName) {
+int Client::GetMailBoxNumber(std::string CharacterName) {
 
 	for(unsigned int i = 0; i < Characters.size(); i++)
 		if(Characters[i].Name == CharacterName)
@@ -2271,7 +2269,7 @@ int Client::GetMailBoxNumber(string CharacterName) {
 	return -1;
 }
 
-void Client::SendNotification(int MailBoxNumber, string Subject, string From, int MessageID) {
+void Client::SendNotification(int MailBoxNumber, std::string Subject, std::string From, int MessageID) {
 
 	char TimeStamp[100];
 
@@ -2328,13 +2326,13 @@ void Client::ChangeMailBox(int NewMailBox) {
 
 void Client::SendFriends() {
 
-	vector<string> Friends, Ignorees;
+	std::vector<std::string> Friends, Ignorees;
 
 	database.GetFriendsAndIgnore(GetCharID(), Friends, Ignorees);
 
 	EQApplicationPacket *outapp;
 
-	vector<string>::iterator Iterator;
+	std::vector<std::string>::iterator Iterator;
 
 	Iterator = Friends.begin();
 
@@ -2361,7 +2359,7 @@ void Client::SendFriends() {
 
 	while(Iterator != Ignorees.end()) {
 
-		string Ignoree = "SOE.EQ." + WorldShortName + "." + (*Iterator);
+		std::string Ignoree = "SOE.EQ." + WorldShortName + "." + (*Iterator);
 
 		outapp = new EQApplicationPacket(OP_Ignore, Ignoree.length() + 2);
 
@@ -2381,7 +2379,7 @@ void Client::SendFriends() {
 	}
 }
 
-string Client::MailBoxName() {
+std::string Client::MailBoxName() {
 
 	if((Characters.size() == 0) || (CurrentMailBox > (Characters.size() - 1)))
 	{

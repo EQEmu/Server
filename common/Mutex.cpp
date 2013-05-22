@@ -19,7 +19,6 @@
 #include "../common/Mutex.h"
 
 #include <iostream>
-using namespace std;
 
 #define DEBUG_MUTEX_CLASS 0
 #if DEBUG_MUTEX_CLASS >= 1
@@ -43,7 +42,7 @@ bool IsTryLockSupported() {
 		osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
 		if (! GetVersionEx ( (OSVERSIONINFO *) &osvi) ) {
 #if DEBUG_MUTEX_CLASS >= 1
-			cout << "Mutex::trylock() NOT supported" << endl;
+			std::cout << "Mutex::trylock() NOT supported" << std::endl;
 #endif
 			return false;
 		}
@@ -52,13 +51,13 @@ bool IsTryLockSupported() {
 	// Tests for Windows NT product family.
 	if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion >= 4) {
 #if DEBUG_MUTEX_CLASS >= 1
-			cout << "Mutex::trylock() SUPPORTED" << endl;
+		std::cout << "Mutex::trylock() SUPPORTED" << std::endl;
 #endif
 		return true;
 	}
 	else {
 #if DEBUG_MUTEX_CLASS >= 1
-			cout << "Mutex::trylock() NOT supported" << endl;
+		std::cout << "Mutex::trylock() NOT supported" << std::endl;
 #endif
 		return false;
 	}
@@ -67,7 +66,7 @@ bool IsTryLockSupported() {
 
 Mutex::Mutex() {
 #if DEBUG_MUTEX_CLASS >= 7
-	cout << "Constructing Mutex" << endl;
+	std::cout << "Constructing Mutex" << std::endl;
 #endif
 #ifdef _WINDOWS
 	InitializeCriticalSection(&CSMutex);
@@ -86,7 +85,7 @@ Mutex::Mutex() {
 
 Mutex::~Mutex() {
 #if DEBUG_MUTEX_CLASS >= 7
-	cout << "Deconstructing Mutex" << endl;
+	std::cout << "Deconstructing Mutex" << std::endl;
 #endif
 #ifdef _WINDOWS
 	DeleteCriticalSection(&CSMutex);
@@ -98,11 +97,11 @@ Mutex::~Mutex() {
 void Mutex::lock() {
 	_CP(Mutex_lock);
 #if DEBUG_MUTEX_CLASS >= 9
-	cout << "Locking Mutex" << endl;
+	std::cout << "Locking Mutex" << std::endl;
 #endif
 #if DEBUG_MUTEX_CLASS >= 5
 	if (!trylock()) {
-		cout << "Locking Mutex: Having to wait" << endl;
+		std::cout << "Locking Mutex: Having to wait" << std::endl;
 		#ifdef _WINDOWS
 			EnterCriticalSection(&CSMutex);
 		#else
@@ -120,7 +119,7 @@ void Mutex::lock() {
 
 bool Mutex::trylock() {
 #if DEBUG_MUTEX_CLASS >= 9
-	cout << "TryLocking Mutex" << endl;
+	std::cout << "TryLocking Mutex" << std::endl;
 #endif
 #ifdef _WINDOWS
 	#if(_WIN32_WINNT >= 0x0400)
@@ -141,7 +140,7 @@ bool Mutex::trylock() {
 
 void Mutex::unlock() {
 #if DEBUG_MUTEX_CLASS >= 9
-	cout << "Unlocking Mutex" << endl;
+	std::cout << "Unlocking Mutex" << std::endl;
 #endif
 #ifdef _WINDOWS
 	LeaveCriticalSection(&CSMutex);
@@ -187,7 +186,7 @@ MRMutex::MRMutex() {
 MRMutex::~MRMutex() {
 #ifdef _EQDEBUG
 	if (wl || rl) {
-		cout << "MRMutex::~MRMutex: poor cleanup detected: rl=" << rl << ", wl=" << wl << endl;
+		std::cout << "MRMutex::~MRMutex: poor cleanup detected: rl=" << rl << ", wl=" << wl << std::endl;
 	}
 #endif
 }

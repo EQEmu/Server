@@ -49,7 +49,7 @@ Adventure::~Adventure()
 	safe_delete(current_timer);
 }
 
-void Adventure::AddPlayer(string character_name, bool add_client_to_instance)
+void Adventure::AddPlayer(std::string character_name, bool add_client_to_instance)
 {
 	if(!PlayerExists(character_name))
 	{
@@ -62,9 +62,9 @@ void Adventure::AddPlayer(string character_name, bool add_client_to_instance)
 	}
 }
 
-void Adventure::RemovePlayer(string character_name)
+void Adventure::RemovePlayer(std::string character_name)
 {
-	list<string>::iterator iter = players.begin();
+	std::list<std::string>::iterator iter = players.begin();
 	while(iter != players.end())
 	{
 		if((*iter).compare(character_name) == 0)
@@ -77,9 +77,9 @@ void Adventure::RemovePlayer(string character_name)
 	}
 }
 
-bool Adventure::PlayerExists(string character_name)
+bool Adventure::PlayerExists(std::string character_name)
 {
-	list<string>::iterator iter = players.begin();
+	std::list<std::string>::iterator iter = players.begin();
 	while(iter != players.end())
 	{
 		if(character_name.compare((*iter)) == 0)
@@ -209,7 +209,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		return;
 	}
 
-	list<string>::iterator iter = players.begin();
+	std::list<std::string>::iterator iter = players.begin();
 	while(iter != players.end())
 	{
 		adventure_manager.GetAdventureData((*iter).c_str());
@@ -223,7 +223,7 @@ void Adventure::SendAdventureMessage(uint32 type, const char *msg)
 	ServerEmoteMessage_Struct *sms = (ServerEmoteMessage_Struct*)pack->pBuffer;
 	sms->type = type;
 	strcpy(sms->message, msg);
-	list<string>::iterator iter = players.begin();
+	std::list<std::string>::iterator iter = players.begin();
 	while(iter != players.end())
 	{
 		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
@@ -277,7 +277,7 @@ void Adventure::IncrementAssassinationCount()
 
 void Adventure::Finished(AdventureWinStatus ws)
 {
-	list<string>::iterator iter = players.begin();
+	std::list<std::string>::iterator iter = players.begin();
 	while(iter != players.end())
 	{
 		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
@@ -371,8 +371,8 @@ void Adventure::MoveCorpsesToGraveyard()
 		return;
 	}
 
-	list<uint32> dbid_list;
-	list<uint32> charid_list;
+	std::list<uint32> dbid_list;
+	std::list<uint32> charid_list;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	MYSQL_RES *result;
@@ -394,7 +394,7 @@ void Adventure::MoveCorpsesToGraveyard()
 		safe_delete_array(query);
 	}
 
-	list<uint32>::iterator iter = dbid_list.begin();
+	std::list<uint32>::iterator iter = dbid_list.begin();
 	while(iter != dbid_list.end())
 	{
 		float x = GetTemplate()->graveyard_x + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
@@ -414,7 +414,7 @@ void Adventure::MoveCorpsesToGraveyard()
 	}
 
 	iter = dbid_list.begin();
-	list<uint32>::iterator c_iter = charid_list.begin();
+	std::list<uint32>::iterator c_iter = charid_list.begin();
 	while(iter != dbid_list.end())
 	{
 		ServerPacket* pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));

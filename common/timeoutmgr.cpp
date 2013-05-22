@@ -36,7 +36,7 @@ TimeoutManager::TimeoutManager() {
 }
 
 void TimeoutManager::CheckTimeouts() {
-	vector<Timeoutable *>::iterator cur,end;
+	std::vector<Timeoutable *>::iterator cur,end;
 	cur = members.begin();
 	end = members.end();
 	for(; cur != end; cur++) {
@@ -66,7 +66,7 @@ void TimeoutManager::DeleteMember(Timeoutable *who) {
 #ifdef TIMEOUT_DEBUG
 	LogFile->write(EQEMuLog::Debug, "Removing timeoutable 0x%x\n", who);
 #endif
-	vector<Timeoutable *>::iterator cur,end;
+	std::vector<Timeoutable *>::iterator cur,end;
 	cur = members.begin();
 	end = members.end();
 	for(; cur != end; cur++) {

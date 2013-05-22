@@ -21,7 +21,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <iostream>
-using namespace std;
 #include "../common/types.h"
 #include "zonedb.h"
 #include "../common/MiscFunctions.h"
@@ -60,8 +59,8 @@ uint32 SpawnGroup::GetNPCType() {
 	if(!entity_list.LimitCheckGroup(id, group_spawn_limit))
 		return(0);
 
-	list<SpawnEntry*>::iterator cur,end;
-	list<SpawnEntry*> possible;
+	std::list<SpawnEntry*>::iterator cur,end;
+	std::list<SpawnEntry*> possible;
 	cur = list_.begin();
 	end = list_.end();
 	for(; cur != end; cur++) {
@@ -101,7 +100,7 @@ void SpawnGroup::AddSpawnEntry( SpawnEntry* newEntry ) {
 }
 
 SpawnGroup::~SpawnGroup() {
-	list<SpawnEntry*>::iterator cur,end;
+	std::list<SpawnEntry*>::iterator cur,end;
 	cur = list_.begin();
 	end = list_.end();
 	for(; cur != end; cur++) {
@@ -112,7 +111,7 @@ SpawnGroup::~SpawnGroup() {
 }
 
 SpawnGroupList::~SpawnGroupList() {
-	map<uint32, SpawnGroup*>::iterator cur,end;
+	std::map<uint32, SpawnGroup*>::iterator cur,end;
 	cur = groups.begin();
 	end = groups.end();
 	for(; cur != end; cur++) {
@@ -161,7 +160,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 	}
 	else
 	{
-		cerr << "Error2 in PopulateZoneLists query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error2 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -181,13 +180,13 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 			if (sg)
 				sg->AddSpawnEntry(newSpawnEntry);
 			else
-				cout << "Error in SpawngroupID: " << row[0] << endl;
+				std::cout << "Error in SpawngroupID: " << row[0] << std::endl;
 		}
 		mysql_free_result(result);
 	}
 	else
 	{
-		cerr << "Error3 in PopulateZoneLists query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error3 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -216,7 +215,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 	}
 	else
 	{
-		cerr << "Error2 in PopulateZoneLists query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error2 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -232,13 +231,13 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 			if (sg)
 				sg->AddSpawnEntry(newSpawnEntry);
 			else
-				cout << "Error in SpawngroupID: " << row[0] << endl;
+				std::cout << "Error in SpawngroupID: " << row[0] << std::endl;
 		}
 		mysql_free_result(result);
 	}
 	else
 	{
-		cerr << "Error3 in PopulateZoneLists query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error3 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}

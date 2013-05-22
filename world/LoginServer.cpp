@@ -17,11 +17,9 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <iomanip>
-using namespace std;
 #include <stdlib.h>
 #include "../common/version.h"
 

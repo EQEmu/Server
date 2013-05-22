@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
-using namespace std;
 #include <assert.h>
 
 #include "masterentity.h"

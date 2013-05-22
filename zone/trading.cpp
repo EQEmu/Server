@@ -859,7 +859,7 @@ void Client::Trader_EndTrader() {
 
 void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
 
-	string Packet;
+	std::string Packet;
 	int16 FreeSlotID=0;
 
 	const Item_Struct* item = database.GetItem(ItemID);
@@ -1384,7 +1384,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* Query = 0;
-	string Search, Values;
+	std::string Search, Values;
 	MYSQL_RES *Result;
 	MYSQL_ROW Row;
 	char Tmp[100] = {0};
@@ -1402,7 +1402,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 		}
 
 	}
-	string SearchrResults;
+	std::string SearchrResults;
 
 	if(MinPrice != 0){
 		sprintf(Tmp, " and trader.item_cost>=%i", MinPrice);
@@ -2020,7 +2020,7 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* Query = 0;
 	char ItemName[64];
-	string Search, Values;
+	std::string Search, Values;
 	MYSQL_RES *Result;
 	MYSQL_ROW Row;
 
@@ -2153,7 +2153,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* Query = 0;
 	char ItemName[64];
-	string Search, Values;
+	std::string Search, Values;
 	MYSQL_RES *Result;
 	MYSQL_ROW Row;
 

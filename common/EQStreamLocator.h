@@ -24,7 +24,6 @@ This did not turn out nearly as nice as I hoped.
 
 #include <map>
 #include <string>
-using namespace std;
 
 class EQStreamInfo {
 public:
@@ -103,7 +102,7 @@ inline bool operator==(const EQStreamInfo &l, const EQStreamInfo &r) {
 template <class T>
 class EQStreamLocator {
 protected:
-	typedef typename map<const EQStreamInfo, T *>::iterator iterator;
+	typedef typename std::map<const EQStreamInfo, T *>::iterator iterator;
 public:
 
 	void Clear() {
@@ -167,7 +166,7 @@ public:
 //	inline iterator end() const { return(streams.end()); }
 
 protected:
-	map<const EQStreamInfo, T *> streams;
+	std::map<const EQStreamInfo, T *> streams;
 };
 
 #endif

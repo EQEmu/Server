@@ -45,7 +45,7 @@ ChatChannelList *ChannelList;
 
 Database database;
 
-string WorldShortName;
+std::string WorldShortName;
 
 const ucsconfig *Config;
 
@@ -60,7 +60,7 @@ void CatchSignal(int sig_num) {
 		worldserver->Disconnect();
 }
 
-string GetMailPrefix() {
+std::string GetMailPrefix() {
 
 	return "SOE.EQ." + WorldShortName + ".";
 

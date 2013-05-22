@@ -18,7 +18,6 @@
 #include "../common/debug.h"
 #include "../common/rulesys.h"
 #include <iostream>
-using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -193,7 +192,7 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 	}
 	else
 	{
-		cerr << "Error in CheckLogin query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in CheckLogin query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -227,7 +226,7 @@ bool Database::CheckBannedIPs(const char* loginIP)
 	}
 	else
 	{
-		cerr << "Error in CheckBannedIPs query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in CheckBannedIPs query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return true;
 	}
@@ -240,7 +239,7 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes), errbuf)) {
-		cerr << "Error in ReserveName query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in ReserveName query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -290,7 +289,7 @@ void Database::LoginIP(uint32 AccountID, const char* LoginIP)
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP), errbuf)) {
-		cerr << "Error in Log IP query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in Log IP query '" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 }
@@ -333,7 +332,7 @@ int16 Database::CheckStatus(uint32 account_id)
 	}
 	else
 	{
-		cerr << "Error in CheckStatus query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in CheckStatus query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -352,16 +351,16 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 	else
 		querylen = MakeAnyLenString(&query, "INSERT INTO account SET name='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name, status, lsaccount_id);
 
-	cerr << "Account Attempting to be created:" << name << " " << (int16) status << endl;
+	std::cerr << "Account Attempting to be created:" << name << " " << (int16) status << std::endl;
 	if (!RunQuery(query, querylen, errbuf, 0, 0, &last_insert_id)) {
-		cerr << "Error in CreateAccount query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in CreateAccount query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}
 	safe_delete_array(query);
 
 	if (last_insert_id == 0) {
-		cerr << "Error in CreateAccount query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in CreateAccount query '" << query << "' " << errbuf << std::endl;
 		return 0;
 	}
 
@@ -373,7 +372,7 @@ bool Database::DeleteAccount(const char* name) {
 	char *query = 0;
 	uint32 affected_rows = 0;
 
-	cerr << "Account Attempting to be deleted:" << name << endl;
+	std::cerr << "Account Attempting to be deleted:" << name << std::endl;
 	if (RunQuery(query, MakeAnyLenString(&query, "DELETE FROM account WHERE name='%s';",name), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
 		if (affected_rows == 1) {
@@ -382,7 +381,7 @@ bool Database::DeleteAccount(const char* name) {
 	}
 	else {
 
-		cerr << "Error in DeleteAccount query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in DeleteAccount query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 
@@ -394,7 +393,7 @@ bool Database::SetLocalPassword(uint32 accid, const char* password) {
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET password=MD5('%s') where id=%i;", password, accid), errbuf)) {
-		cerr << "Error in SetLocalPassword query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetLocalPassword query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -408,7 +407,7 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 	char *query = 0;
 	uint32	affected_rows = 0;
 
-	cout << "Account being GM Flagged:" << name << ", Level: " << (int16) status << endl;
+	std::cout << "Account being GM Flagged:" << name << ", Level: " << (int16) status << std::endl;
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET status=%i WHERE name='%s';", status, name), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
 		return false;
@@ -416,7 +415,7 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
-		cout << "Account: " << name << " does not exist, therefore it cannot be flagged\n";
+		std::cout << "Account: " << name << " does not exist, therefore it cannot be flagged\n";
 		return false;
 	}
 
@@ -429,7 +428,7 @@ bool Database::ReserveName(uint32 account_id, char* name)
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into character_ SET account_id=%i, name='%s', profile=NULL", account_id, name), errbuf)) {
-		cerr << "Error in ReserveName query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in ReserveName query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -877,7 +876,7 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetAccountIDByChar query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetAccountIDByChar query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 
@@ -940,7 +939,7 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetAccountIDByAcc query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetAccountIDByAcc query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 
@@ -968,7 +967,7 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 	}
 	else {
 		safe_delete_array(query);
-		cerr << "Error in GetAccountName query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetAccountName query '" << query << "' " << errbuf << std::endl;
 	}
 }
 
@@ -990,7 +989,7 @@ void Database::GetCharName(uint32 char_id, char* name) {
 	}
 	else {
 		safe_delete_array(query);
-		cerr << "Error in GetCharName query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetCharName query '" << query << "' " << errbuf << std::endl;
 	}
 
 }
@@ -1007,7 +1006,7 @@ bool Database::LoadVariables() {
 		return ret;
 	}
 	else {
-		cerr << "Error in LoadVariables query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in LoadVariables query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	return false;
@@ -1130,7 +1129,7 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 		}
 	}
 	else {
-		cerr << "Error in SetVariable query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetVariable query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	free(varname);
@@ -1152,7 +1151,7 @@ uint32 Database::GetMiniLoginAccount(char* ip){
 	}
 	else
 	{
-		cerr << "Error in GetMiniLoginAccount query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetMiniLoginAccount query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	return retid;
@@ -1194,11 +1193,11 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 	}
 	else
 	{
-		cerr << "Error in GetSafePoint query '" << query << "' " << errbuf << endl;
-		cerr << "If it errors, run the following querys:\n";
-		cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
-		cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
-		cerr << "ALTER TABLE `zone` ADD flag_needed VARCHAR(128) NOT NULL DEFAULT '';\n";
+		std::cerr << "Error in GetSafePoint query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "If it errors, run the following querys:\n";
+		std::cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
+		std::cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
+		std::cerr << "ALTER TABLE `zone` ADD flag_needed VARCHAR(128) NOT NULL DEFAULT '';\n";
 
 		safe_delete_array(query);
 	}
@@ -1243,7 +1242,7 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 	}
 	else
 	{
-		cerr << "Error in GetZoneLongName query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetZoneLongName query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1269,7 +1268,7 @@ uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 	}
 	else
 	{
-		cerr << "Error in GetZoneGraveyardID query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetZoneGraveyardID query '" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 	return GraveyardID;
@@ -1303,7 +1302,7 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 	}
 	else
 	{
-		cerr << "Error in GetZoneGraveyard query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetZoneGraveyard query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1342,7 +1341,7 @@ bool Database::LoadZoneNames() {
 				mysql_free_result(result);
 			}
 			else {
-				cerr << "Error in LoadZoneNames query '" << query << "' " << errbuf << endl;
+				std::cerr << "Error in LoadZoneNames query '" << query << "' " << errbuf << std::endl;
 				safe_delete_array(query);
 				return false;
 			}
@@ -1352,7 +1351,7 @@ bool Database::LoadZoneNames() {
 		}
 	}
 	else {
-		cerr << "Error in LoadZoneNames query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in LoadZoneNames query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1419,7 +1418,7 @@ uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 	}
 	else
 	{
-			cerr << "Error in GetPEQZone query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetPEQZone query '" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 	return peqzone;
@@ -1503,7 +1502,7 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 	}
 	else
 	{
-		cerr << "Error in CheckNameFilter query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in CheckNameFilter query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 
@@ -1516,7 +1515,7 @@ bool Database::AddToNameFilter(const char* name) {
 	uint32 affected_rows = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO name_filter (name) values ('%s')", name), errbuf, 0, &affected_rows)) {
-		cerr << "Error in AddToNameFilter query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in AddToNameFilter query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1557,7 +1556,7 @@ uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* o
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetAccountIDFromLSID query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetAccountIDFromLSID query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}
@@ -1583,7 +1582,7 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 		mysql_free_result(result);
 	}
 	else
-		cerr << "Error in GetAccountFromID query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetAccountFromID query '" << query << "' " << errbuf << std::endl;
 	safe_delete_array(query);
 }
 
@@ -1592,7 +1591,7 @@ void Database::ClearMerchantTemp(){
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "delete from merchantlist_temp"), errbuf)) {
-		cerr << "Error in ClearMerchantTemp query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in ClearMerchantTemp query '" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 }
@@ -1602,7 +1601,7 @@ bool Database::UpdateName(const char* oldname, const char* newname) {
 	char *query = 0;
 	uint32	affected_rows = 0;
 
-	cout << "Renaming " << oldname << " to " << newname << "..." << endl;
+	std::cout << "Renaming " << oldname << " to " << newname << "..." << std::endl;
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET name='%s' WHERE name='%s';", newname, oldname), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
 		return false;
@@ -1626,7 +1625,7 @@ bool Database::CheckUsedName(const char* name)
 	//if (strlen(name) > 15)
 	//	return false;
 	if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM character_ where name='%s'", name), errbuf, &result)) {
-		cerr << "Error in CheckUsedName query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in CheckUsedName query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1664,15 +1663,11 @@ uint8 Database::GetServerType()
 		mysql_free_result(result);
 	}
 	else
-
 	{
-
-
-		cerr << "Error in GetServerType query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetServerType query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
-
 	return 0;
 
 }
@@ -1686,7 +1681,7 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename,ui
 		return(false);
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=-1, y=-1, z=-1 WHERE name='%s'", zonename,zoneid, charname), errbuf, 0,&affected_rows)) {
-		cerr << "Error in MoveCharacterToZone(name) query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in MoveCharacterToZone(name) query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
 	safe_delete_array(query);
@@ -1706,7 +1701,7 @@ bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
 	char *query = 0;
 	uint32	affected_rows = 0;
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s', zoneid=%i, x=-1, y=-1, z=-1 WHERE id=%i", iZonename, GetZoneID(iZonename), iCharID), errbuf, 0,&affected_rows)) {
-		cerr << "Error in MoveCharacterToZone(id) query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in MoveCharacterToZone(id) query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
 	safe_delete_array(query);
@@ -1739,7 +1734,7 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 	}
 
 	else {
-		cerr << "Error in CopyCharacter read query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in CopyCharacter read query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}
@@ -1755,7 +1750,7 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 	end += sprintf(end, "\', account_id=%d, name='%s'", acctid, newname);
 
 	if (!RunQuery(query2, (uint32) (end - query2), errbuf, 0, &affected_rows)) {
-		cerr << "Error in CopyCharacter query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in CopyCharacter query '" << query << "' " << errbuf << std::endl;
 		return 0;
 	}
 
@@ -1772,7 +1767,7 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 	char *query = 0;
 	uint32	affected_rows = 0;
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO hackers(account,name,hacked) values('%s','%s','%s')", accountname, charactername, hacked), errbuf, 0,&affected_rows)) {
-		cerr << "Error in SetHackerFlag query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetHackerFlag query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
 	safe_delete_array(query);
@@ -1792,7 +1787,7 @@ bool Database::SetMQDetectionFlag(const char* accountname, const char* character
 	uint32	affected_rows = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, hacked, zone), errbuf, 0,&affected_rows)) {
-		cerr << "Error in SetMQDetectionFlag query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetMQDetectionFlag query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
 
@@ -1911,7 +1906,7 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetCharacterInfo query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetCharacterInfo query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	return 0;
@@ -1921,7 +1916,7 @@ bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET charname='%s' WHERE id=%i;",charname, lsaccount_id), errbuf)) {
-		cerr << "Error in UpdateLiveChar query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in UpdateLiveChar query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1946,7 +1941,7 @@ bool Database::GetLiveChar(uint32 account_id, char* cname) {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetLiveChar query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetLiveChar query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 
@@ -2171,7 +2166,7 @@ void Database::ClearGroupLeader(uint32 gid){
 	safe_delete_array(query);
 }
 
-bool FetchRowMap(MYSQL_RES *result, map<string,string> &rowmap)
+bool FetchRowMap(MYSQL_RES *result, std::map<std::string,std::string> &rowmap)
 {
 MYSQL_FIELD *fields;
 MYSQL_ROW row;
@@ -3175,7 +3170,7 @@ uint32 Database::GetGuildDBIDByCharID(uint32 char_id) {
 		mysql_free_result(result);
 	}
 	else {
-			cerr << "Error in GetAccountIDByChar query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetAccountIDByChar query '" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 	return retVal;

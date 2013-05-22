@@ -31,7 +31,6 @@
 #include <string>
 #include <vector>
 #include <map>
-using namespace std;
 
 //atoi is not uint32 or uint32 safe!!!!
 #define atoul(str) strtoul(str, nullptr, 10)
@@ -45,20 +44,20 @@ public:
 
 	int FindAccount(const char *CharacterName, Client *c);
 	int FindCharacter(const char *CharacterName);
-	bool VerifyMailKey(string CharacterName, int IPAddress, string MailKey);
+	bool VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey);
 	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	bool LoadChatChannels();
 	void GetAccountStatus(Client *c);
-	void SetChannelPassword(string ChannelName, string Password);
-	void SetChannelOwner(string ChannelName, string Owner);
+	void SetChannelPassword(std::string ChannelName, std::string Password);
+	void SetChannelOwner(std::string ChannelName, std::string Owner);
 	void SendHeaders(Client *c);
 	void SendBody(Client *c, int MessageNumber);
-	bool SendMail(string Recipient, string From, string Subject, string Body, string RecipientsString);
+	bool SendMail(std::string Recipient, std::string From, std::string Subject, std::string Body, std::string RecipientsString);
 	void SetMessageStatus(int MessageNumber, int Status);
 	void ExpireMail();
-	void AddFriendOrIgnore(int CharID, int Type, string Name);
-	void RemoveFriendOrIgnore(int CharID, int Type, string Name);
-	void GetFriendsAndIgnore(int CharID, vector<string> &Friends, vector<string> &Ignorees);
+	void AddFriendOrIgnore(int CharID, int Type, std::string Name);
+	void RemoveFriendOrIgnore(int CharID, int Type, std::string Name);
+	void GetFriendsAndIgnore(int CharID, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees);
 
 
 protected:

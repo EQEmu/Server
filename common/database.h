@@ -35,7 +35,6 @@
 #include <string>
 #include <vector>
 #include <map>
-using namespace std;
 
 //atoi is not uint32 or uint32 safe!!!!
 #define atoul(str) strtoul(str, nullptr, 10)
@@ -265,5 +264,5 @@ private:
 	uint32				varcache_lastupdate;
 };
 
-bool	FetchRowMap(MYSQL_RES *result, map<string,string> &rowmap);
+bool	FetchRowMap(MYSQL_RES *result, std::map<std::string,std::string> &rowmap);
 #endif

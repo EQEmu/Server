@@ -27,7 +27,6 @@
 #include "../common/MiscFunctions.h"
 #include "../common/features.h"
 #include "StringIDs.h"
-using namespace std;
 
 #include "QuestParserCollection.h"
 
@@ -664,7 +663,7 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in LoadGroundSpawns query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in LoadGroundSpawns query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	return gs;

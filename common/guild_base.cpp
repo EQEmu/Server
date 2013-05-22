@@ -52,7 +52,7 @@ bool BaseGuildManager::LoadGuilds() {
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	map<uint32, GuildInfo *>::iterator res;
+	std::map<uint32, GuildInfo *>::iterator res;
 
 	// load up all the guilds
 	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
@@ -116,7 +116,7 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id) {
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	map<uint32, GuildInfo *>::iterator res;
+	std::map<uint32, GuildInfo *>::iterator res;
 	GuildInfo *info;
 
 	// load up all the guilds
@@ -173,7 +173,7 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id) {
 
 BaseGuildManager::GuildInfo *BaseGuildManager::_CreateGuild(uint32 guild_id, const char *guild_name, uint32 leader_char_id, uint8 minstatus, const char *guild_motd, const char *motd_setter, const char *Channel, const char *URL)
 {
-	map<uint32, GuildInfo *>::iterator res;
+	std::map<uint32, GuildInfo *>::iterator res;
 
 	//remove any old entry.
 	res = m_guilds.find(guild_id);
@@ -222,7 +222,7 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 		return(false);
 	}
 
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end()) {
 		_log(GUILDS__DB, "Requested to store non-existent guild %d", guild_id);
@@ -376,7 +376,7 @@ bool BaseGuildManager::RenameGuild(uint32 guild_id, const char* name) {
 
 bool BaseGuildManager::SetGuildLeader(uint32 guild_id, uint32 leader_char_id) {
 	//get old leader first.
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return(false);
@@ -516,7 +516,7 @@ uint32 BaseGuildManager::DBCreateGuild(const char* name, uint32 leader) {
 bool BaseGuildManager::DBDeleteGuild(uint32 guild_id) {
 
 	//remove the local entry
-	map<uint32, GuildInfo *>::iterator res;
+	std::map<uint32, GuildInfo *>::iterator res;
 	res = m_guilds.find(guild_id);
 	if(res != m_guilds.end()) {
 		delete res->second;
@@ -557,7 +557,7 @@ bool BaseGuildManager::DBRenameGuild(uint32 guild_id, const char* name) {
 		return(false);
 	}
 
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return(false);
@@ -597,7 +597,7 @@ bool BaseGuildManager::DBSetGuildLeader(uint32 guild_id, uint32 leader) {
 		return(false);
 	}
 
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return(false);
@@ -637,7 +637,7 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 		return(false);
 	}
 
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return(false);
@@ -682,7 +682,7 @@ bool BaseGuildManager::DBSetGuildURL(uint32 GuildID, const char* URL)
 	if(m_db == nullptr)
 		return(false);
 
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 
 	res = m_guilds.find(GuildID);
 
@@ -723,7 +723,7 @@ bool BaseGuildManager::DBSetGuildChannel(uint32 GuildID, const char* Channel)
 	if(m_db == nullptr)
 		return(false);
 
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 
 	res = m_guilds.find(GuildID);
 
@@ -978,7 +978,7 @@ static void ProcessGuildMember(MYSQL_ROW &row, CharGuildInfo &into) {
 }
 
 
-bool BaseGuildManager::GetEntireGuild(uint32 guild_id, vector<CharGuildInfo *> &members) {
+bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo *> &members) {
 	members.clear();
 
 	if(m_db == nullptr)
@@ -1109,7 +1109,7 @@ uint8 *BaseGuildManager::MakeGuildList(const char *head_name, uint32 &length) co
 
 	strn0cpy((char *) buffer, head_name, 64);
 
-	map<uint32, GuildInfo *>::const_iterator cur, end;
+	std::map<uint32, GuildInfo *>::const_iterator cur, end;
 	cur = m_guilds.begin();
 	end = m_guilds.end();
 	for(; cur != end; cur++) {
@@ -1122,7 +1122,7 @@ uint8 *BaseGuildManager::MakeGuildList(const char *head_name, uint32 &length) co
 const char *BaseGuildManager::GetRankName(uint32 guild_id, uint8 rank) const {
 	if(rank > GUILD_MAX_RANK)
 		return("Invalid Rank");
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return("Invalid Guild Rank");
@@ -1132,7 +1132,7 @@ const char *BaseGuildManager::GetRankName(uint32 guild_id, uint8 rank) const {
 const char *BaseGuildManager::GetGuildName(uint32 guild_id) const {
 	if(guild_id == GUILD_NONE)
 		return("");
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return("Invalid Guild");
@@ -1140,7 +1140,7 @@ const char *BaseGuildManager::GetGuildName(uint32 guild_id) const {
 }
 
 bool BaseGuildManager::GetGuildNameByID(uint32 guild_id, std::string &into) const {
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return(false);
@@ -1150,7 +1150,7 @@ bool BaseGuildManager::GetGuildNameByID(uint32 guild_id, std::string &into) cons
 
 uint32 BaseGuildManager::GetGuildIDByName(const char *GuildName)
 {
-	map<uint32, GuildInfo *>::iterator Iterator;
+	std::map<uint32, GuildInfo *>::iterator Iterator;
 
 	for(Iterator = m_guilds.begin(); Iterator != m_guilds.end(); ++Iterator)
 	{
@@ -1162,7 +1162,7 @@ uint32 BaseGuildManager::GetGuildIDByName(const char *GuildName)
 }
 
 bool BaseGuildManager::GetGuildMOTD(uint32 guild_id, char *motd_buffer, char *setter_buffer) const {
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return(false);
@@ -1173,7 +1173,7 @@ bool BaseGuildManager::GetGuildMOTD(uint32 guild_id, char *motd_buffer, char *se
 
 bool BaseGuildManager::GetGuildURL(uint32 GuildID, char *URLBuffer) const
 {
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(GuildID);
 	if(res == m_guilds.end())
 		return(false);
@@ -1184,7 +1184,7 @@ bool BaseGuildManager::GetGuildURL(uint32 GuildID, char *URLBuffer) const
 
 bool BaseGuildManager::GetGuildChannel(uint32 GuildID, char *ChannelBuffer) const
 {
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(GuildID);
 	if(res == m_guilds.end())
 		return(false);
@@ -1203,7 +1203,7 @@ bool BaseGuildManager::IsGuildLeader(uint32 guild_id, uint32 char_id) const {
 		_log(GUILDS__PERMISSIONS, "Check leader for char %d: not a guild.", char_id);
 		return(false);
 	}
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end()) {
 		_log(GUILDS__PERMISSIONS, "Check leader for char %d: invalid guild.", char_id);
@@ -1214,7 +1214,7 @@ bool BaseGuildManager::IsGuildLeader(uint32 guild_id, uint32 char_id) const {
 }
 
 uint32 BaseGuildManager::FindGuildByLeader(uint32 leader) const {
-	map<uint32, GuildInfo *>::const_iterator cur, end;
+	std::map<uint32, GuildInfo *>::const_iterator cur, end;
 	cur = m_guilds.begin();
 	end = m_guilds.end();
 	for(; cur != end; cur++) {
@@ -1226,7 +1226,7 @@ uint32 BaseGuildManager::FindGuildByLeader(uint32 leader) const {
 
 //returns the rank to be sent to the client for display purposes, given their eqemu rank.
 uint8 BaseGuildManager::GetDisplayedRank(uint32 guild_id, uint8 rank, uint32 char_id) const {
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return(3);	//invalid guild rank
@@ -1243,7 +1243,7 @@ bool BaseGuildManager::CheckGMStatus(uint32 guild_id, uint8 status) const {
 		return(true);	//250+ as allowed anything
 	}
 
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end()) {
 		_log(GUILDS__PERMISSIONS, "Check permission on guild %d with user status %d, no such guild, denied.", guild_id, status);
@@ -1264,7 +1264,7 @@ bool BaseGuildManager::CheckPermission(uint32 guild_id, uint8 rank, GuildAction 
 			guild_id, rank, GuildActionNames[act], act);
 		return(false);	//invalid rank
 	}
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end()) {
 		_log(GUILDS__PERMISSIONS, "Check permission on guild %d and rank %d for action %s (%d): Invalid guild, denied.",
@@ -1284,7 +1284,7 @@ bool BaseGuildManager::CheckPermission(uint32 guild_id, uint8 rank, GuildAction 
 }
 
 bool BaseGuildManager::LocalDeleteGuild(uint32 guild_id) {
-	map<uint32, GuildInfo *>::iterator res;
+	std::map<uint32, GuildInfo *>::iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end())
 		return(false);	//invalid guild
@@ -1293,7 +1293,7 @@ bool BaseGuildManager::LocalDeleteGuild(uint32 guild_id) {
 }
 
 void BaseGuildManager::ClearGuilds() {
-	map<uint32, GuildInfo *>::iterator cur, end;
+	std::map<uint32, GuildInfo *>::iterator cur, end;
 	cur = m_guilds.begin();
 	end = m_guilds.end();
 	for(; cur != end; cur++) {

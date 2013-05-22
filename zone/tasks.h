@@ -25,9 +25,6 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include <vector>
 #include <queue>
 
-using namespace std;
-
-
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
 // The Client has a hard cap of 19 active tasks
@@ -68,7 +65,7 @@ public:
 	int GetListByID(int ListID);
 	bool IsInList(int ListID, int Entry);
 	int GetFirstEntry(int ListID);
-	vector<int> GetListContents(int ListIndex);
+	std::vector<int> GetListContents(int ListIndex);
 
 private:
 
@@ -91,7 +88,7 @@ public:
 	int CheckProximities(float X, float Y, float Z);
 
 private:
-	vector<TaskProximity> TaskProximities;
+	std::vector<TaskProximity> TaskProximities;
 };
 
 typedef enum { METHODSINGLEID = 0, METHODLIST = 1, METHODQUEST = 2 } TaskMethodType;
@@ -210,8 +207,8 @@ private:
 	void IncrementDoneCount(Client *c, TaskInformation *Task, int TaskIndex, int ActivityID, int Count=1);
 	int ActiveTaskCount;
 	ClientTaskInformation ActiveTasks[MAXACTIVETASKS];
-	vector<int>EnabledTasks;
-	vector<CompletedTaskInformation> CompletedTasks;
+	std::vector<int>EnabledTasks;
+	std::vector<CompletedTaskInformation> CompletedTasks;
 	int LastCompletedTaskLoaded;
 	bool CheckedTouchActivities;
 };
@@ -254,7 +251,7 @@ private:
 	TaskGoalListManager GoalListManager;
 	TaskProximityManager ProximityManager;
 	TaskInformation* Tasks[MAXTASKS];
-	vector<int> TaskSets[MAXTASKSETS];
+	std::vector<int> TaskSets[MAXTASKSETS];
 	void SendActiveTaskDescription(Client *c, int TaskID, int SequenceNumber, int StartTime, int Duration, bool BringUpTaskJournal=false);
 
 };

@@ -164,13 +164,13 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 		return(retbuffer);
 	}
 
-	vector<CharGuildInfo *> members;
+	std::vector<CharGuildInfo *> members;
 	if(!GetEntireGuild(guild_id, members))
 		return(nullptr);
 
 	//figure out the actual packet length.
 	uint32 fixed_length = sizeof(Internal_GuildMembers_Struct) + members.size()*sizeof(Internal_GuildMemberEntry_Struct);
-	vector<CharGuildInfo *>::iterator cur, end;
+	std::vector<CharGuildInfo *>::iterator cur, end;
 	CharGuildInfo *ci;
 	cur = members.begin();
 	end = members.end();
@@ -242,7 +242,7 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 void ZoneGuildManager::ListGuilds(Client *c) const {
 	c->Message(0, "Listing guilds on the server:");
 	char leadername[64];
-	map<uint32, GuildInfo *>::const_iterator cur, end;
+	std::map<uint32, GuildInfo *>::const_iterator cur, end;
 	cur = m_guilds.begin();
 	end = m_guilds.end();
 	int r = 0;
@@ -260,7 +260,7 @@ void ZoneGuildManager::ListGuilds(Client *c) const {
 
 
 void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
-	map<uint32, GuildInfo *>::const_iterator res;
+	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if(res == m_guilds.end()) {
 		c->Message(0, "Guild %d not found.", guild_id);
@@ -292,11 +292,11 @@ void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 //in theory, we could get a pile of unused entries in this array, but only if
 //we had a malicious client sending controlled packets, plus its like 10 bytes per entry.
 void ZoneGuildManager::RecordInvite(uint32 char_id, uint32 guild_id, uint8 rank) {
-	m_inviteQueue[char_id] = pair<uint32, uint8>(guild_id, rank);
+	m_inviteQueue[char_id] = std::pair<uint32, uint8>(guild_id, rank);
 }
 
 bool ZoneGuildManager::VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uint8 rank) {
-	map<uint32, pair<uint32, uint8> >::iterator res;
+	std::map<uint32, std::pair<uint32, uint8> >::iterator res;
 	res = m_inviteQueue.find(char_id);
 	if(res == m_inviteQueue.end())
 		return(false);	//no entry...
@@ -307,8 +307,6 @@ bool ZoneGuildManager::VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uin
 	m_inviteQueue.erase(res);
 	return(valid);
 }
-
-
 
 void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 	switch(pack->opcode) {
