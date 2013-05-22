@@ -22,8 +22,6 @@
 #include <windows.h>
 #include <string>
 
-using namespace std;
-
 typedef char*(*DLLFUNC_DecryptUsernamePassword)(const char*, unsigned int, int);
 typedef char*(*DLLFUNC_Encrypt)(const char*, unsigned int, unsigned int&);
 typedef void(*DLLFUNC_HeapDelete)(char*);
@@ -54,7 +52,7 @@ public:
 	* Loads the plugin.
 	* True if there are no errors, false if there was an error.
 	*/
-	bool LoadCrypto(string name);
+	bool LoadCrypto(std::string name);
 
 	/**
 	* Wrapper around the plugin's decrypt function.

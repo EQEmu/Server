@@ -23,7 +23,7 @@ XMLParser::XMLParser() {
 }
 
 bool XMLParser::ParseFile(const char *file, const char *root_ele) {
-	map<string,ElementHandler>::iterator handler;
+	std::map<std::string,ElementHandler>::iterator handler;
 	TiXmlDocument doc( file );
 	if(!doc.LoadFile()) {
 		printf("Unable to load '%s': %s\n", file, doc.ErrorDesc());

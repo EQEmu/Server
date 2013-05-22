@@ -18,7 +18,6 @@
 #include "../common/debug.h"
 #include <stdio.h>
 #include <iostream>
-using namespace std;
 #include <stdlib.h>
 #include "npc.h"
 #include "masterentity.h"
@@ -45,7 +44,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 
 	// do coin
 	if (lts->mincash > lts->maxcash) {
-		cerr << "Error in loottable #" << loottable_id << ": mincash > maxcash" << endl;
+		std::cerr << "Error in loottable #" << loottable_id << ": mincash > maxcash" << std::endl;
 	}
 	else if (lts->maxcash != 0) {
 		uint32 cash = 0;

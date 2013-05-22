@@ -424,7 +424,7 @@ if(NextSequencedSend > SequencedQueue.size()) {
 					uint16 index = seq - SequencedBase;
 					_log(NET__NET_TRACE, _L "         OP_OutOfOrderAck marking packet acked in queue (queue index = %d, queue size = %d)." __L, index, sqsize);
 					if (index < sqsize) {
-						deque<EQProtocolPacket *>::iterator sitr;
+						std::deque<EQProtocolPacket *>::iterator sitr;
 						sitr = SequencedQueue.begin();
 						sitr += index;
 						(*sitr)->acked = true;
@@ -567,7 +567,7 @@ uint32 length;
 
 		while (used<length) {
 			out=new EQProtocolPacket(OP_Fragment,nullptr,MaxLen-4);
-			chunksize=min(length-used,MaxLen-6);
+			chunksize=std::min(length-used,MaxLen-6);
 			memcpy(out->pBuffer+2,tmpbuff+used,chunksize);
 			out->size=chunksize+2;
 			SequencedPush(out);
@@ -646,9 +646,9 @@ uint16 Seq=htons(seq);
 
 void EQStream::Write(int eq_fd)
 {
-queue<EQProtocolPacket *> ReadyToSend;
+std::queue<EQProtocolPacket *> ReadyToSend;
 bool SeqEmpty=false,NonSeqEmpty=false;
-deque<EQProtocolPacket *>::iterator sitr;
+std::deque<EQProtocolPacket *>::iterator sitr;
 
 	// Check our rate to make sure we can send more
 	MRate.lock();
@@ -951,7 +951,7 @@ EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (InboundQueue.size()) {
-		vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
+		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
 		p=*itr;
 		InboundQueue.erase(itr);
 	}
@@ -979,7 +979,7 @@ EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (InboundQueue.size()) {
-		vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
+		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
 		p=*itr;
 		InboundQueue.erase(itr);
 	}
@@ -1007,7 +1007,7 @@ EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (InboundQueue.size()) {
-		vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
+		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
 		p=*itr;
 	}
 	MInboundQueue.unlock();
@@ -1023,7 +1023,7 @@ EQApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (!InboundQueue.empty()) {
-		vector<EQRawApplicationPacket *>::iterator itr;
+		std::vector<EQRawApplicationPacket *>::iterator itr;
 		for(itr=InboundQueue.begin();itr!=InboundQueue.end();itr++) {
 			p=*itr;
 			delete p;
@@ -1070,7 +1070,7 @@ EQProtocolPacket *p=nullptr;
 		NonSequencedQueue.pop();
 	}
 	if(!SequencedQueue.empty()) {
-		deque<EQProtocolPacket *>::iterator itr;
+		std::deque<EQProtocolPacket *>::iterator itr;
 		for(itr=SequencedQueue.begin();itr!=SequencedQueue.end();itr++) {
 			p=*itr;
 			delete p;
@@ -1095,7 +1095,7 @@ EQProtocolPacket *p=nullptr;
 	_log(NET__APP_TRACE, _L "Clearing future packet queue" __L);
 
 	if(!PacketQueue.empty()) {
-		map<unsigned short,EQProtocolPacket *>::iterator itr;
+		std::map<unsigned short,EQProtocolPacket *>::iterator itr;
 		for(itr=PacketQueue.begin();itr!=PacketQueue.end();itr++) {
 			p=itr->second;
 			delete p;
@@ -1149,7 +1149,7 @@ long EQStream::GetLastAckSent()
 
 void EQStream::AckPackets(uint16 seq)
 {
-deque<EQProtocolPacket *>::iterator itr, tmp;
+std::deque<EQProtocolPacket *>::iterator itr, tmp;
 
 	MOutboundQueue.lock();
 //do a bit of sanity checking.
@@ -1234,7 +1234,7 @@ void EQStream::ProcessQueue()
 
 EQProtocolPacket *EQStream::RemoveQueue(uint16 seq)
 {
-map<unsigned short,EQProtocolPacket *>::iterator itr;
+std::map<unsigned short,EQProtocolPacket *>::iterator itr;
 EQProtocolPacket *qp=nullptr;
 	if ((itr=PacketQueue.find(seq))!=PacketQueue.end()) {
 		qp=itr->second;

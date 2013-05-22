@@ -21,7 +21,6 @@
 #include "types.h"
 #include <map>
 #include <vector>
-using namespace std;
 
 enum {	//values for pTimerType
 	pTimerStartAdventureTimer = 1,
@@ -120,13 +119,13 @@ public:
 
 	inline void SetCharID(uint32 char_id) { _char_id = char_id; }
 
-	void ToVector(vector< pair<pTimerType, PersistentTimer *> > &out);
+	void ToVector(std::vector< std::pair<pTimerType, PersistentTimer *> > &out);
 
 	//Clear a timer for a char not logged in
 	//this is not defined on a char which is logged in!
 	static bool ClearOffline(Database *db, uint32 char_id, pTimerType type);
 
-	typedef map<pTimerType, PersistentTimer *>::iterator iterator;
+	typedef std::map<pTimerType, PersistentTimer *>::iterator iterator;
 	iterator begin() { return(_list.begin()); }
 	iterator end() { return(_list.end()); }
 
@@ -135,7 +134,7 @@ public:
 protected:
 	uint32 _char_id;
 
-	map<pTimerType, PersistentTimer *> _list;
+	std::map<pTimerType, PersistentTimer *> _list;
 };
 
 //code prettying macros

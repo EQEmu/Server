@@ -185,19 +185,19 @@ public:
 	void LoadLDoNTrapEntries();
 	void LoadAdventureFlavor();
 
-	map<uint32,NPCType *> npctable;
-	map<uint32,NPCType *> merctable;
-	map<uint32,std::list<MerchantList> > merchanttable;
-	map<uint32,std::list<TempMerchantList> > tmpmerchanttable;
-	map<uint32,std::string> adventure_entry_list_flavor;
-	map<uint32,LDoNTrapTemplate*> ldon_trap_list;
-	map<uint32,std::list<LDoNTrapTemplate*> > ldon_trap_entry_list;
-	map<uint32,std::list<MercStanceInfo> > merc_stance_list;
-	map<uint32, MercTemplate> merc_templates;
-	map<uint32,std::list<MercSpellEntry> > merc_spells_list;
-	map<uint32, ZoneEXPModInfo> level_exp_mod;
-	list<InternalVeteranReward> VeteranRewards;
-	list<AltCurrencyDefinition_Struct> AlternateCurrencies;
+	std::map<uint32,NPCType *> npctable;
+	std::map<uint32,NPCType *> merctable;
+	std::map<uint32,std::list<MerchantList> > merchanttable;
+	std::map<uint32,std::list<TempMerchantList> > tmpmerchanttable;
+	std::map<uint32,std::string> adventure_entry_list_flavor;
+	std::map<uint32,LDoNTrapTemplate*> ldon_trap_list;
+	std::map<uint32,std::list<LDoNTrapTemplate*> > ldon_trap_entry_list;
+	std::map<uint32,std::list<MercStanceInfo> > merc_stance_list;
+	std::map<uint32, MercTemplate> merc_templates;
+	std::map<uint32,std::list<MercSpellEntry> > merc_spells_list;
+	std::map<uint32, ZoneEXPModInfo> level_exp_mod;
+	std::list<InternalVeteranReward> VeteranRewards;
+	std::list<AltCurrencyDefinition_Struct> AlternateCurrencies;
 	char *adv_data;
 	bool did_adventure_actions;
 
@@ -265,7 +265,7 @@ public:
     void    LoadTickItems();
     uint32  GetSpawnKillCount(uint32 in_spawnid);
     void    UpdateHotzone();
-    unordered_map<int, item_tick_struct> tick_items;
+	std::unordered_map<int, item_tick_struct> tick_items;
 
 	//MODDING HOOKS
 	void mod_init();

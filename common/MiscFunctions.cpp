@@ -32,8 +32,6 @@
 #include "../common/timer.h"
 #include "../common/seperator.h"
 
-using namespace std;
-
 #ifdef _WINDOWS
 	#include <windows.h>
 
@@ -86,10 +84,10 @@ void CoutTimestamp(bool ms) {
 	struct timeval read_time;
 	gettimeofday(&read_time,0);
 
-	cout << (gmt_t->tm_year + 1900) << "/" << setw(2) << setfill('0') << (gmt_t->tm_mon + 1) << "/" << setw(2) << setfill('0') << gmt_t->tm_mday << " " << setw(2) << setfill('0') << gmt_t->tm_hour << ":" << setw(2) << setfill('0') << gmt_t->tm_min << ":" << setw(2) << setfill('0') << gmt_t->tm_sec;
+	std::cout << (gmt_t->tm_year + 1900) << "/" << std::setw(2) << std::setfill('0') << (gmt_t->tm_mon + 1) << "/" << std::setw(2) << std::setfill('0') << gmt_t->tm_mday << " " << std::setw(2) << std::setfill('0') << gmt_t->tm_hour << ":" << std::setw(2) << std::setfill('0') << gmt_t->tm_min << ":" << std::setw(2) << std::setfill('0') << gmt_t->tm_sec;
 	if (ms)
-		cout << "." << setw(3) << setfill('0') << (read_time.tv_usec / 1000);
-	cout << " GMT";
+		std::cout << "." << std::setw(3) << std::setfill('0') << (read_time.tv_usec / 1000);
+	std::cout << " GMT";
 }
 
 // normal strncpy doesnt put a null term on copied strings, this one does

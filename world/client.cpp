@@ -3,9 +3,7 @@
 #include "../common/EQStreamIntf.h"
 #include "../common/misc.h"
 #include <iostream>
-using namespace std;
 #include <iomanip>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,7 +131,7 @@ void Client::SendLogServer()
 	safe_delete(outapp);
 }
 
-void Client::SendEnterWorld(string name)
+void Client::SendEnterWorld(std::string name)
 {
 char char_name[32]= { 0 };
 	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {

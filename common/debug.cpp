@@ -1,7 +1,6 @@
 #include "debug.h"
 
 #include <iostream>
-using namespace std;
 #include <time.h>
 #include <string.h>
 #ifdef _WINDOWS
@@ -112,7 +111,7 @@ bool EQEMuLog::open(LogIDs id) {
 #endif
 	fp[id] = fopen(filename, "a");
 	if (!fp[id]) {
-		cerr << "Failed to open log file: " << filename << endl;
+		std::cerr << "Failed to open log file: " << filename << std::endl;
 		pLogStatus[id] |= 4; // set file state to error
 		return false;
 	}
@@ -328,7 +327,7 @@ bool EQEMuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...) {
 bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 skip) {
 	if (!logFileValid) {
 #if EQDEBUG >= 10
-	cerr << "Error: Dump() from null pointer"<<endl;
+	std::cerr << "Error: Dump() from null pointer" << std::endl;
 #endif
 		return false;
 	}

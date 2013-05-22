@@ -29,8 +29,6 @@
 class HttpdForm;
 class EQWHTTPHandler;
 
-using namespace std;
-
 class HTTPRequest {
 public:
 	HTTPRequest(EQWHTTPHandler *h, HttpdForm *form);
@@ -44,7 +42,7 @@ public:
 	//returns a database-safe string
 	Const_char * getEscaped(Const_char *name, Const_char *default_value = "") const;
 
-	map<string,string> get_all() const;
+	std::map<std::string,std::string> get_all() const;
 
 	void redirect(Const_char *URL);
 	void SetResponseCode(Const_char *code);

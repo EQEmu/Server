@@ -25,19 +25,19 @@ extern ErrorLog *server_log;
 * First gets the map from the title
 * Then gets the argument from the map we got from title
 */
-string Config::GetVariable(string title, string parameter)
+std::string Config::GetVariable(std::string title, std::string parameter)
 {
-	map<string, map<string, string> >::iterator iter = vars.find(title);
+	std::map<std::string, std::map<std::string, std::string> >::iterator iter = vars.find(title);
 	if(iter != vars.end())
 	{
-		map<string, string>::iterator arg_iter = iter->second.find(parameter);
+		std::map<std::string, std::string>::iterator arg_iter = iter->second.find(parameter);
 		if(arg_iter != iter->second.end())
 		{
 			return arg_iter->second;
 		}
 	}
 
-	return string("");
+	return std::string("");
 }
 
 /**
@@ -56,12 +56,12 @@ void Config::Parse(const char *file_name)
 	FILE *input = fopen(file_name, "r");
 	if(input)
 	{
-		list<string> tokens;
+		std::list<std::string> tokens;
 		Tokenize(input, tokens);
 
 		char mode = 0;
-		string title, param, arg;
-		list<string>::iterator iter = tokens.begin();
+		std::string title, param, arg;
+		std::list<std::string>::iterator iter = tokens.begin();
 		while(iter != tokens.end())
 		{
 			if((*iter).compare("[") == 0)
@@ -114,7 +114,7 @@ void Config::Parse(const char *file_name)
 			{
 				arg = (*iter);
 				mode = 0;
-				map<string, map<string, string> >::iterator map_iter = vars.find(title);
+				std::map<std::string, std::map<std::string, std::string> >::iterator map_iter = vars.find(title);
 				if(map_iter != vars.end())
 				{
 					map_iter->second[param] = arg;
@@ -122,7 +122,7 @@ void Config::Parse(const char *file_name)
 				}
 				else
 				{
-					map<string, string> var_map;
+					std::map<std::string, std::string> var_map;
 					var_map[param] = arg;
 					vars[title] = var_map;
 				}
@@ -142,10 +142,10 @@ void Config::Parse(const char *file_name)
 * Breaks up the input character stream into tokens and puts them into the list provided.
 * Ignores # as a line comment
 */
-void Config::Tokenize(FILE *input, list<string> &tokens)
+void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 {
 	char c = fgetc(input);
-	string lexeme;
+	std::string lexeme;
 
 	while(c != EOF)
 	{

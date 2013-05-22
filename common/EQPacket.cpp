@@ -32,8 +32,6 @@
 #include <cstdlib>
 #include <cstring>
 
-using namespace std;
-
 EQPacket::EQPacket(EmuOpcode op, const unsigned char *buf, uint32 len)
 :	BasePacket(buf, len),
 	emu_opcode(op)
@@ -61,7 +59,7 @@ void EQPacket::build_header_dump(char *buffer) const {
 void EQPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
 	if (src_ip) {
-		string sIP,dIP;;
+		std::string sIP,dIP;;
 		sIP=long2ip(src_ip);
 		dIP=long2ip(dst_ip);
 		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),src_port,dIP.c_str(),dst_port);
@@ -95,7 +93,7 @@ void EQProtocolPacket::build_header_dump(char *buffer) const
 void EQProtocolPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
 	if (src_ip) {
-		string sIP,dIP;;
+		std::string sIP,dIP;;
 		sIP=long2ip(src_ip);
 		dIP=long2ip(dst_ip);
 		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),src_port,dIP.c_str(),dst_port);
@@ -137,7 +135,7 @@ void EQApplicationPacket::build_header_dump(char *buffer) const
 void EQApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
 	if (src_ip) {
-		string sIP,dIP;;
+		std::string sIP,dIP;;
 		sIP=long2ip(src_ip);
 		dIP=long2ip(dst_ip);
 		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),src_port,dIP.c_str(),dst_port);
@@ -183,7 +181,7 @@ void EQRawApplicationPacket::build_header_dump(char *buffer) const
 void EQRawApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
 	if (src_ip) {
-		string sIP,dIP;;
+		std::string sIP,dIP;;
 		sIP=long2ip(src_ip);
 		dIP=long2ip(dst_ip);
 		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),src_port,dIP.c_str(),dst_port);
@@ -502,8 +500,8 @@ EQRawApplicationPacket::EQRawApplicationPacket(const unsigned char *buf, const u
 
 void DumpPacket(const EQApplicationPacket* app, bool iShowInfo) {
 	if (iShowInfo) {
-		cout << "Dumping Applayer: 0x" << hex << setfill('0') << setw(4) << app->GetOpcode() << dec;
-		cout << " size:" << app->size << endl;
+		std::cout << "Dumping Applayer: 0x" << std::hex << std::setfill('0') << std::setw(4) << app->GetOpcode() << std::dec;
+		std::cout << " size:" << app->size << std::endl;
 	}
 	DumpPacketHex(app->pBuffer, app->size);
 //	DumpPacketAscii(app->pBuffer, app->size);

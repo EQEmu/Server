@@ -17,7 +17,6 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <iomanip>
@@ -168,7 +167,7 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_ZAAuthFailed: {
-			cout << "World server responded 'Not Authorized', disabling reconnect" << endl;
+			std::cout << "World server responded 'Not Authorized', disabling reconnect" << std::endl;
 			pTryReconnect = false;
 			Disconnect();
 			break;
@@ -454,7 +453,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_ZoneShutdown: {
 			if (pack->size != sizeof(ServerZoneStateChange_struct)) {
-				cout << "Wrong size on ServerOP_ZoneShutdown. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneStateChange_struct) << endl;
+				std::cout << "Wrong size on ServerOP_ZoneShutdown. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneStateChange_struct) << std::endl;
 				break;
 			}
 			// Annouce the change to the world
@@ -465,14 +464,14 @@ void WorldServer::Process() {
 				SendEmoteMessage(0, 0, 15, "Zone shutdown: %s", zone->GetLongName());
 
 				ServerZoneStateChange_struct* zst = (ServerZoneStateChange_struct *) pack->pBuffer;
-				cout << "Zone shutdown by " << zst->adminname << endl;
+				std::cout << "Zone shutdown by " << zst->adminname << std::endl;
 				Zone::Shutdown();
 			}
 			break;
 		}
 		case ServerOP_ZoneBootup: {
 			if (pack->size != sizeof(ServerZoneStateChange_struct)) {
-				cout << "Wrong size on ServerOP_ZoneBootup. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneStateChange_struct) << endl;
+				std::cout << "Wrong size on ServerOP_ZoneBootup. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneStateChange_struct) << std::endl;
 				break;
 			}
 			ServerZoneStateChange_struct* zst = (ServerZoneStateChange_struct *) pack->pBuffer;
@@ -489,7 +488,7 @@ void WorldServer::Process() {
 			}
 
 			if (zst->adminname[0] != 0)
-				cout << "Zone bootup by " << zst->adminname << endl;
+				std::cout << "Zone bootup by " << zst->adminname << std::endl;
 
 			if (!(Zone::Bootup(zst->zoneid, zst->instanceid, zst->makestatic))) {
 				SendChannelMessage(0, 0, 10, 0, 0, "%s:%i Zone::Bootup failed: %s", net.GetZoneAddress(), net.GetZonePort(), database.GetZoneName(zst->zoneid));
@@ -501,7 +500,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_ZoneIncClient: {
 			if (pack->size != sizeof(ServerZoneIncommingClient_Struct)) {
-				cout << "Wrong size on ServerOP_ZoneIncClient. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneIncommingClient_Struct) << endl;
+				std::cout << "Wrong size on ServerOP_ZoneIncClient. Got: " << pack->size << ", Expected: " << sizeof(ServerZoneIncommingClient_Struct) << std::endl;
 				break;
 			}
 			ServerZoneIncommingClient_Struct* szic = (ServerZoneIncommingClient_Struct*) pack->pBuffer;
@@ -595,7 +594,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_GMGoto: {
 			if (pack->size != sizeof(ServerGMGoto_Struct)) {
-				cout << "Wrong size on ServerOP_GMGoto. Got: " << pack->size << ", Expected: " << sizeof(ServerGMGoto_Struct) << endl;
+				std::cout << "Wrong size on ServerOP_GMGoto. Got: " << pack->size << ", Expected: " << sizeof(ServerGMGoto_Struct) << std::endl;
 				break;
 			}
 			if (!ZoneLoaded)
@@ -634,7 +633,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_Uptime: {
 			if (pack->size != sizeof(ServerUptime_Struct)) {
-				cout << "Wrong size on ServerOP_Uptime. Got: " << pack->size << ", Expected: " << sizeof(ServerUptime_Struct) << endl;
+				std::cout << "Wrong size on ServerOP_Uptime. Got: " << pack->size << ", Expected: " << sizeof(ServerUptime_Struct) << std::endl;
 				break;
 			}
 			ServerUptime_Struct* sus = (ServerUptime_Struct*) pack->pBuffer;
@@ -654,7 +653,7 @@ void WorldServer::Process() {
 				this->SendEmoteMessage(sus->adminname, 0, 0, "Zone #%i Uptime: %02im %02is", sus->zoneserverid, m, s);
 		}
 		case ServerOP_Petition: {
-			cout << "Got Server Requested Petition List Refresh" << endl;
+			std::cout << "Got Server Requested Petition List Refresh" << std::endl;
 			ServerPetitionUpdate_Struct* sus = (ServerPetitionUpdate_Struct*) pack->pBuffer;
 			// solar: this was typoed to = instead of ==, not that it acts any different now though..
 			if (sus->status == 0) petition_list.ReadDatabase();
@@ -723,7 +722,7 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_ZoneReboot: {
-			cout << "Got Server Requested Zone reboot" << endl;
+			std::cout << "Got Server Requested Zone reboot" << std::endl;
 			ServerZoneReboot_Struct* zb = (ServerZoneReboot_Struct*) pack->pBuffer;
 		//	printf("%i\n",zb->zoneid);
 			struct in_addr	in;
@@ -733,12 +732,12 @@ void WorldServer::Process() {
 			snprintf(buffer,200,". %s %i %s",zb->ip2, zb->port, inet_ntoa(in));
 			if(zb->zoneid != 0) {
 				snprintf(buffer,200,"%s %s %i %s",database.GetZoneName(zb->zoneid),zb->ip2, zb->port ,inet_ntoa(in));
-				cout << "executing: " << buffer;
+				std::cout << "executing: " << buffer;
 				ShellExecute(0,"Open",net.GetZoneFileName(), buffer, 0, SW_SHOWDEFAULT);
 			}
 			else
 			{
-				cout << "executing: " << net.GetZoneFileName() << " " << buffer;
+				std::cout << "executing: " << net.GetZoneFileName() << " " << buffer;
 				ShellExecute(0,"Open",net.GetZoneFileName(), buffer, 0, SW_SHOWDEFAULT);
 			}
 #else
@@ -753,7 +752,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_SyncWorldTime: {
 			if(zone!=0) {
-				cout << "Received Message SyncWorldTime" << endl;
+				std::cout << "Received Message SyncWorldTime" << std::endl;
 				eqTimeOfDay* newtime = (eqTimeOfDay*) pack->pBuffer;
 				zone->zone_time.setEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
@@ -774,7 +773,7 @@ void WorldServer::Process() {
 						eqTime.minute,
 						(eqTime.hour >= 13) ? "pm" : "am"
 						);
-					cout << "Time Broadcast Packet: " << timeMessage << endl;
+					std::cout << "Time Broadcast Packet: " << timeMessage << std::endl;
 					zone->GotCurTime(true);
 				//}
 				//Test
@@ -783,7 +782,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_ChangeWID: {
 			if (pack->size != sizeof(ServerChangeWID_Struct)) {
-				cout << "Wrong size on ServerChangeWID_Struct. Got: " << pack->size << ", Expected: " << sizeof(ServerChangeWID_Struct) << endl;
+				std::cout << "Wrong size on ServerChangeWID_Struct. Got: " << pack->size << ", Expected: " << sizeof(ServerChangeWID_Struct) << std::endl;
 				break;
 			}
 			ServerChangeWID_Struct* scw = (ServerChangeWID_Struct*) pack->pBuffer;
@@ -1819,8 +1818,8 @@ void WorldServer::Process() {
 			break;
 		}
 		default: {
-			cout << " Unknown ZSopcode:" << (int)pack->opcode;
-			cout << " size:" << pack->size << endl;
+			std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
+			std::cout << " size:" << pack->size << std::endl;
 			break;
 		}
 		}

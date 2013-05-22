@@ -22,7 +22,6 @@
 #include <ctype.h>
 #include <string.h>
 #include <iostream>
-using namespace std;
 
 #ifdef _WINDOWS
 #include <process.h>
@@ -83,13 +82,13 @@ void Entity::SetID(uint16 set_id) {
 
 Client* Entity::CastToClient() {
 	if(this==0x00){
-		cout << "CastToClient error (nullptr)" << endl;
+		std::cout << "CastToClient error (nullptr)" << std::endl;
 		DebugBreak();
 		return 0;
 	}
 #ifdef _EQDEBUG
 	if(!IsClient()) {
-		cout << "CastToClient error (not client?)" << endl;
+		std::cout << "CastToClient error (not client?)" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -100,7 +99,7 @@ Client* Entity::CastToClient() {
 NPC* Entity::CastToNPC() {
 #ifdef _EQDEBUG
 	if(!IsNPC()) {
-		cout << "CastToNPC error" << endl;
+		std::cout << "CastToNPC error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -111,7 +110,7 @@ NPC* Entity::CastToNPC() {
 Mob* Entity::CastToMob() {
 #ifdef _EQDEBUG
 	if(!IsMob()) {
-		cout << "CastToMob error" << endl;
+		std::cout << "CastToMob error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -122,7 +121,7 @@ Mob* Entity::CastToMob() {
 Merc* Entity::CastToMerc() {
 #ifdef _EQDEBUG
 	if(!IsMerc()) {
-		cout << "CastToMerc error" << endl;
+		std::cout << "CastToMerc error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -146,7 +145,7 @@ Trap* Entity::CastToTrap()
 Corpse* Entity::CastToCorpse() {
 #ifdef _EQDEBUG
 	if(!IsCorpse()) {
-		cout << "CastToCorpse error" << endl;
+		std::cout << "CastToCorpse error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -156,7 +155,7 @@ Corpse* Entity::CastToCorpse() {
 Object* Entity::CastToObject() {
 #ifdef _EQDEBUG
 	if(!IsObject()) {
-		cout << "CastToObject error" << endl;
+		std::cout << "CastToObject error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -183,18 +182,15 @@ Beacon* Entity::CastToBeacon() {
 	return static_cast<Beacon*>(this);
 }
 
-
-
-
 const Client* Entity::CastToClient() const {
 	if(this==0x00){
-		cout << "CastToClient error (nullptr)" << endl;
+		std::cout << "CastToClient error (nullptr)" << std::endl;
 		DebugBreak();
 		return 0;
 	}
 #ifdef _EQDEBUG
 	if(!IsClient()) {
-		cout << "CastToClient error (not client?)" << endl;
+		std::cout << "CastToClient error (not client?)" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -205,7 +201,7 @@ const Client* Entity::CastToClient() const {
 const NPC* Entity::CastToNPC() const {
 #ifdef _EQDEBUG
 	if(!IsNPC()) {
-		cout << "CastToNPC error" << endl;
+		std::cout << "CastToNPC error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -216,7 +212,7 @@ const NPC* Entity::CastToNPC() const {
 const Mob* Entity::CastToMob() const {
 #ifdef _EQDEBUG
 	if(!IsMob()) {
-		cout << "CastToMob error" << endl;
+		std::cout << "CastToMob error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -227,7 +223,7 @@ const Mob* Entity::CastToMob() const {
 const Merc* Entity::CastToMerc() const {
 #ifdef _EQDEBUG
 	if(!IsMerc()) {
-		cout << "CastToMerc error" << endl;
+		std::cout << "CastToMerc error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -249,7 +245,7 @@ const Trap* Entity::CastToTrap() const {
 const Corpse* Entity::CastToCorpse() const {
 #ifdef _EQDEBUG
 	if(!IsCorpse()) {
-		cout << "CastToCorpse error" << endl;
+		std::cout << "CastToCorpse error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -260,7 +256,7 @@ const Corpse* Entity::CastToCorpse() const {
 const Object* Entity::CastToObject() const {
 #ifdef _EQDEBUG
 	if(!IsObject()) {
-		cout << "CastToObject error" << endl;
+		std::cout << "CastToObject error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -280,7 +276,7 @@ const Beacon* Entity::CastToBeacon() const {
 Bot* Entity::CastToBot() {
 #ifdef _EQDEBUG
 	if(!IsBot()) {
-		cout << "CastToBot error" << endl;
+		std::cout << "CastToBot error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -355,7 +351,7 @@ void EntityList::TrapProcess() {
 // to track down bugs.
 void EntityList::CheckGroupList (const char *fname, const int fline)
 {
-	list<Group *>::iterator it;
+	std::list<Group *>::iterator it;
 
 	for (it = group_list.begin(); it != group_list.end(); it++)
 	{
@@ -367,7 +363,7 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 }
 
 void EntityList::GroupProcess() {
-	list<Group *>::iterator iterator;
+	std::list<Group *>::iterator iterator;
 	uint32 count = 0;
 
 	if(numclients < 1)
@@ -399,7 +395,7 @@ void EntityList::GroupProcess() {
 void EntityList::QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app)
 {
 
-	list<Group *>::iterator iterator = group_list.begin();
+	std::list<Group *>::iterator iterator = group_list.begin();
 
 	_ZP(EntityList_QueueToGroupsForNPCHealthAA);
 
@@ -411,7 +407,7 @@ void EntityList::QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPac
 }
 
 void EntityList::RaidProcess() {
-	list<Raid *>::iterator iterator;
+	std::list<Raid *>::iterator iterator;
 	uint32 count = 0;
 
 	if(numclients < 1)
@@ -518,7 +514,7 @@ void EntityList::MobProcess() {
 #ifdef _WINDOWS
 					struct in_addr	in;
 					in.s_addr = mob->CastToClient()->GetIP();
-					cout << "Dropping client: Process=false, ip=" << inet_ntoa(in) << ", port=" << mob->CastToClient()->GetPort() << endl;
+					std::cout << "Dropping client: Process=false, ip=" << inet_ntoa(in) << ", port=" << mob->CastToClient()->GetPort() << std::endl;
 #endif
 					zone->StartShutdownTimer();
 					Group *g = GetGroupByMob(mob);
@@ -1952,7 +1948,7 @@ Client* EntityList::GetClientByWID(uint32 iWID) {
 
 Client* EntityList::GetRandomClient(float x, float y, float z, float Distance, Client* ExcludeClient)
 {
-	vector<Client*> ClientsInRange;
+	std::vector<Client*> ClientsInRange;
 
 	LinkedListIterator<Client*> iterator(client_list);
 
@@ -2093,7 +2089,7 @@ int EntityList::RezzAllCorpsesByCharID(uint32 charid)
 
 Group* EntityList::GetGroupByMob(Mob* mob)
 {
-	list<Group *>::iterator iterator;
+	std::list<Group *>::iterator iterator;
 
 	iterator = group_list.begin();
 
@@ -2111,7 +2107,7 @@ Group* EntityList::GetGroupByMob(Mob* mob)
 }
 
 Group* EntityList::GetGroupByLeaderName(char* leader){
-	list<Group *>::iterator iterator;
+	std::list<Group *>::iterator iterator;
 
 	iterator = group_list.begin();
 
@@ -2128,7 +2124,7 @@ Group* EntityList::GetGroupByLeaderName(char* leader){
 	return 0;
 }
 Group* EntityList::GetGroupByID(uint32 group_id){
-	list<Group *>::iterator iterator;
+	std::list<Group *>::iterator iterator;
 
 	iterator = group_list.begin();
 
@@ -2146,7 +2142,7 @@ Group* EntityList::GetGroupByID(uint32 group_id){
 }
 Group* EntityList::GetGroupByClient(Client* client)
 {
-	list <Group *>::iterator iterator;
+	std::list <Group *>::iterator iterator;
 
 	iterator = group_list.begin();
 
@@ -2164,7 +2160,7 @@ Group* EntityList::GetGroupByClient(Client* client)
 }
 
 Raid* EntityList::GetRaidByLeaderName(const char *leader){
-	list<Raid *>::iterator iterator;
+	std::list<Raid *>::iterator iterator;
 
 	iterator = raid_list.begin();
 
@@ -2180,7 +2176,7 @@ Raid* EntityList::GetRaidByLeaderName(const char *leader){
 	return 0;
 }
 Raid* EntityList::GetRaidByID(uint32 id){
-	list<Raid *>::iterator iterator;
+	std::list<Raid *>::iterator iterator;
 
 	iterator = raid_list.begin();
 
@@ -2196,7 +2192,7 @@ Raid* EntityList::GetRaidByID(uint32 id){
 
 Raid* EntityList::GetRaidByClient(Client* client)
 {
-	list<Raid *>::iterator iterator;
+	std::list<Raid *>::iterator iterator;
 
 	iterator = raid_list.begin();
 
@@ -2215,7 +2211,7 @@ Raid* EntityList::GetRaidByClient(Client* client)
 }
 
 Raid* EntityList::GetRaidByMob(Mob* mob) {
-	list<Raid *>::iterator iterator;
+	std::list<Raid *>::iterator iterator;
 
 	iterator = raid_list.begin();
 
@@ -2658,7 +2654,7 @@ bool EntityList::RemoveCorpse(uint16 delete_id){
 	return false;
 }
 bool EntityList::RemoveGroup(uint32 delete_id){
-	list<Group *>::iterator iterator;
+	std::list<Group *>::iterator iterator;
 
 	iterator = group_list.begin();
 
@@ -2680,7 +2676,7 @@ bool EntityList::RemoveGroup(uint32 delete_id){
 }
 
 bool EntityList::RemoveRaid(uint32 delete_id){
-	list<Raid *>::iterator iterator;
+	std::list<Raid *>::iterator iterator;
 
 	iterator = raid_list.begin();
 
@@ -3124,7 +3120,7 @@ void EntityList::FindPathsToAllNPCs()
 	{
 		VERTEX Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
 		VERTEX Dest(Iterator.GetData()->GetX(), Iterator.GetData()->GetY(), Iterator.GetData()->GetZ());
-		list<int> Route = zone->pathing->FindRoute(Node0, Dest);
+		std::list<int> Route = zone->pathing->FindRoute(Node0, Dest);
 		if(Route.size() == 0)
 			printf("Unable to find a route to %s\n", Iterator.GetData()->GetName());
 		else
@@ -3254,7 +3250,7 @@ void EntityList::WriteEntityIDs() {
 	iterator.Reset();
 	while(iterator.MoreElements())
 	{
-		cout << "ID: " << iterator.GetData()->GetID() << "  Name: " << iterator.GetData()->GetName() << endl;
+		std::cout << "ID: " << iterator.GetData()->GetID() << "  Name: " << iterator.GetData()->GetName() << std::endl;
 		iterator.Advance();
 	}
 }
@@ -3892,7 +3888,7 @@ bool EntityList::LimitCheckType(uint32 npc_type, int count) {
 	if(count < 1)
 		return(true);
 
-	map<uint16, SpawnLimitRecord>::iterator cur,end;
+	std::map<uint16, SpawnLimitRecord>::iterator cur,end;
 	cur = npc_limit_list.begin();
 	end = npc_limit_list.end();
 
@@ -3913,7 +3909,7 @@ bool EntityList::LimitCheckGroup(uint32 spawngroup_id, int count) {
 	if(count < 1)
 		return(true);
 
-	map<uint16, SpawnLimitRecord>::iterator cur,end;
+	std::map<uint16, SpawnLimitRecord>::iterator cur,end;
 	cur = npc_limit_list.begin();
 	end = npc_limit_list.end();
 
@@ -3935,7 +3931,7 @@ bool EntityList::LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group
 	if(group_count < 1 && type_count < 1)
 		return(true);
 
-	map<uint16, SpawnLimitRecord>::iterator cur,end;
+	std::map<uint16, SpawnLimitRecord>::iterator cur,end;
 	cur = npc_limit_list.begin();
 	end = npc_limit_list.end();
 
@@ -4543,7 +4539,7 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct* Who) {
 					strncasecmp(guild_mgr.GetGuildName(ClientEntry->GuildID()), Who->whom, WhomLength))
 				continue;
 
-			string GuildName;
+			std::string GuildName;
 
 			if((ClientEntry->GuildID() != GUILD_NONE) && (ClientEntry->GuildID() > 0)) {
 
@@ -4749,7 +4745,7 @@ void EntityList::SignalAllClients(uint32 data)
 	}
 }
 
-void EntityList::GetMobList(list<Mob*> &m_list)
+void EntityList::GetMobList(std::list<Mob*> &m_list)
 {
 	m_list.clear();
 	LinkedListIterator<Mob*> iterator(mob_list);
@@ -4762,7 +4758,7 @@ void EntityList::GetMobList(list<Mob*> &m_list)
 	}
 }
 
-void EntityList::GetNPCList(list<NPC*> &n_list)
+void EntityList::GetNPCList(std::list<NPC*> &n_list)
 {
 	n_list.clear();
 	LinkedListIterator<NPC*> iterator(npc_list);
@@ -4775,7 +4771,7 @@ void EntityList::GetNPCList(list<NPC*> &n_list)
 	}
 }
 
-void EntityList::GetClientList(list<Client*> &c_list)
+void EntityList::GetClientList(std::list<Client*> &c_list)
 {
 	c_list.clear();
 	LinkedListIterator<Client*> iterator(client_list);
@@ -4788,7 +4784,7 @@ void EntityList::GetClientList(list<Client*> &c_list)
 	}
 }
 
-void EntityList::GetCorpseList(list<Corpse*> &c_list)
+void EntityList::GetCorpseList(std::list<Corpse*> &c_list)
 {
 	c_list.clear();
 	LinkedListIterator<Corpse*> iterator(corpse_list);
@@ -4801,7 +4797,7 @@ void EntityList::GetCorpseList(list<Corpse*> &c_list)
 	}
 }
 
-void EntityList::GetObjectList(list<Object*> &o_list)
+void EntityList::GetObjectList(std::list<Object*> &o_list)
 {
 	o_list.clear();
 	LinkedListIterator<Object*> iterator(object_list);
@@ -4814,7 +4810,7 @@ void EntityList::GetObjectList(list<Object*> &o_list)
 	}
 }
 
-void EntityList::GetDoorsList(list<Doors*> &o_list)
+void EntityList::GetDoorsList(std::list<Doors*> &o_list)
 {
 	o_list.clear();
 	LinkedListIterator<Doors*> iterator(door_list);
@@ -5083,7 +5079,7 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 
 	while(count > 0)
 	{
-		vector<int> selection;
+		std::vector<int> selection;
 		selection.reserve(npc_count);
 		for(int j = 0; j < npc_count; ++j)
 		{
@@ -5206,7 +5202,7 @@ Mob* EntityList::GetClosestMobByBodyType(Mob* sender, bodyType BodyType)
 	return ClosestMob;
 }
 
-void EntityList::GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height, list<Mob*> &m_list)
+void EntityList::GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height, std::list<Mob*> &m_list)
 {
 	LinkedListIterator<Mob*> iterator(mob_list);
 	iterator.Reset();
@@ -5259,7 +5255,7 @@ Mob* EntityList::GetTargetForVirus(Mob* spreader)
 {
 	int max_spread_range = RuleI(Spells, VirusSpreadDistance);
 
-	vector<Mob*> TargetsInRange;
+	std::vector<Mob*> TargetsInRange;
 	LinkedListIterator<Mob*> iterator(mob_list);
 
 	iterator.Reset();

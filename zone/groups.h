@@ -141,10 +141,10 @@ public:
 private:
 	Mob*	leader;
 	GroupLeadershipAA_Struct LeaderAbilities;
-	string	MainTankName;
-	string	MainAssistName;
-	string	PullerName;
-	string	NPCMarkerName;
+	std::string	MainTankName;
+	std::string	MainAssistName;
+	std::string	PullerName;
+	std::string	NPCMarkerName;
 	uint16	NPCMarkerID;
 	uint16	AssistTargetID;
 	uint16	TankTargetID;

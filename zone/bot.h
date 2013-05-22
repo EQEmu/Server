@@ -18,8 +18,6 @@
 
 #include <sstream>
 
-using namespace std;
-
 extern WorldServer worldserver;
 
 const int BotAISpellRange = 100; // TODO: Write a method that calcs what the bot's spell range is based on spell, equipment, AA, whatever and replace this

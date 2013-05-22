@@ -1,6 +1,5 @@
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include "entity.h"
 #include "masterentity.h"
 #include "../common/MiscFunctions.h"
@@ -45,7 +44,7 @@ void DispatchFinishedDBAsync(DBAsyncWork* dbaw) {
 			break;
 		}
 		default: {
-			cout << "Error: DispatchFinishedDBAsync(): Unknown workpt.b4: " << (int) workpt.b4() << ", workpt=" << workpt << endl;
+			std::cout << "Error: DispatchFinishedDBAsync(): Unknown workpt.b4: " << (int) workpt.b4() << ", workpt=" << workpt << std::endl;
 			break;
 		}
 	}
@@ -112,7 +111,7 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 				"Insert Delayed into character_backup (charid, account_id, name, profile, level, class, x, y, z, zoneid) "
 				"select id, account_id, name, profile, level, class, x, y, z, zoneid "
 				"from character_ where id=%u", iWork->WPT()), errbuf)) {
-				cout << "Error in DBAsyncCB_CharacterBackup query3 '" << query << "' " << errbuf << endl;
+				std::cout << "Error in DBAsyncCB_CharacterBackup query3 '" << query << "' " << errbuf << std::endl;
 				safe_delete_array(query);
 				return true;
 			}

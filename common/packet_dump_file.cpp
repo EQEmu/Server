@@ -41,16 +41,14 @@
 #include "EQStream.h"
 #include "packet_dump_file.h"
 
-using namespace std;
-
 void FileDumpPacketAscii(const char* filename, const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
-	ofstream logfile(filename, ios::app);
+	std::ofstream logfile(filename, std::ios::app);
 	// Output as ASCII
 	for(uint32 i=skip; i<size; i++)
 	{
 		if ((i-skip)%cols==0)
 		{
-			logfile << endl << setw(3) << setfill(' ') << i-skip << ":";
+			logfile << std::endl << std::setw(3) << std::setfill(' ') << i-skip << ":";
 		}
 		else if ((i-skip)%(cols/2)==0)
 		{
@@ -65,19 +63,19 @@ void FileDumpPacketAscii(const char* filename, const uchar* buf, uint32 size, ui
 			logfile << '.';
 		}
 	}
-	logfile << endl << endl;
+	logfile << std::endl << std::endl;
 }
 
 void oldFileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, uint32 cols, uint32 skip)
 {
-	ofstream logfile(filename, ios::app);
+	std::ofstream logfile(filename, std::ios::app);
 	// Output as HEX
 	char output[4];
 	for(uint32 i=skip; i<size; i++)
 	{
 		if ((i-skip)%cols==0)
 		{
-			logfile << endl << setw(3) << setfill(' ') << i-skip << ": ";
+			logfile << std::endl << std::setw(3) << std::setfill(' ') << i-skip << ": ";
 		}
 		else if ((i-skip)%(cols/2) == 0)
 		{
@@ -87,14 +85,14 @@ void oldFileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, u
 		logfile << output;
 //		logfile << setfill(0) << setw(2) << hex << (int)buf[i] << " ";
 	}
-	logfile << endl << endl;
+	logfile << std::endl << std::endl;
 }
 
 void FileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, uint32 cols, uint32 skip)
 {
 	if (size == 0)
 		return;
-	ofstream logfile(filename, ios::app);
+	std::ofstream logfile(filename, std::ios::app);
 	// Output as HEX
 	char output[4];
 	int j = 0; char* ascii = new char[cols+1]; memset(ascii, 0, cols+1);
@@ -103,8 +101,8 @@ void FileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, uint
 	{
 		if ((i-skip)%cols==0) {
 			if (i != skip)
-				logfile << " | " << ascii << endl;
-			logfile << setw(4) << setfill(' ') << i-skip << ": ";
+				logfile << " | " << ascii << std::endl;
+			logfile << std::setw(4) << std::setfill(' ') << i-skip << ": ";
 			memset(ascii, 0, cols+1);
 			j = 0;
 		}
@@ -128,7 +126,7 @@ void FileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, uint
 	for (uint32 h = k+1; h < cols; h++) {
 		logfile << "   ";
 	}
-	logfile << " | " << ascii << endl;
+	logfile << " | " << ascii << std::endl;
 	delete[] ascii;
 }
 
@@ -161,13 +159,13 @@ void FileDumpPacket(const char* filename, const EQApplicationPacket* app)
 	if prefix_timestamp specified, prints the current date/time to the file + ": " + text
 */
 void FilePrintLine(const char* filename, bool prefix_timestamp, const char* text, ...) {
-	ofstream logfile(filename, ios::app);
+	std::ofstream logfile(filename, std::ios::app);
 	if (prefix_timestamp) {
 		time_t rawtime;
 		struct tm* gmt_t;
 		time(&rawtime);
 		gmt_t = gmtime(&rawtime);
-		logfile << (gmt_t->tm_year + 1900) << "/" << setw(2) << setfill('0') << (gmt_t->tm_mon + 1) << "/" << setw(2) << setfill('0') << gmt_t->tm_mday << " " << setw(2) << setfill('0') << gmt_t->tm_hour << ":" << setw(2) << setfill('0') << gmt_t->tm_min << ":" << setw(2) << setfill('0') << gmt_t->tm_sec << " GMT";
+		logfile << (gmt_t->tm_year + 1900) << "/" << std::setw(2) << std::setfill('0') << (gmt_t->tm_mon + 1) << "/" << std::setw(2) << std::setfill('0') << gmt_t->tm_mday << " " << std::setw(2) << std::setfill('0') << gmt_t->tm_hour << ":" << std::setw(2) << std::setfill('0') << gmt_t->tm_min << ":" << std::setw(2) << std::setfill('0') << gmt_t->tm_sec << " GMT";
 	}
 
 	if (text != 0) {
@@ -181,17 +179,17 @@ void FilePrintLine(const char* filename, bool prefix_timestamp, const char* text
 			logfile << ": ";
 		logfile << buffer;
 	}
-	logfile << endl;
+	logfile << std::endl;
 }
 
 void FilePrint(const char* filename, bool newline, bool prefix_timestamp, const char* text, ...) {
-	ofstream logfile(filename, ios::app);
+	std::ofstream logfile(filename, std::ios::app);
 	if (prefix_timestamp) {
 		time_t rawtime;
 		struct tm* gmt_t;
 		time(&rawtime);
 		gmt_t = gmtime(&rawtime);
-		logfile << (gmt_t->tm_year + 1900) << "/" << setw(2) << setfill('0') << (gmt_t->tm_mon + 1) << "/" << setw(2) << setfill('0') << gmt_t->tm_mday << " " << setw(2) << setfill('0') << gmt_t->tm_hour << ":" << setw(2) << setfill('0') << gmt_t->tm_min << ":" << setw(2) << setfill('0') << gmt_t->tm_sec << " GMT";
+		logfile << (gmt_t->tm_year + 1900) << "/" << std::setw(2) << std::setfill('0') << (gmt_t->tm_mon + 1) << "/" << std::setw(2) << std::setfill('0') << gmt_t->tm_mday << " " << std::setw(2) << std::setfill('0') << gmt_t->tm_hour << ":" << std::setw(2) << std::setfill('0') << gmt_t->tm_min << ":" << std::setw(2) << std::setfill('0') << gmt_t->tm_sec << " GMT";
 	}
 
 	if (text != 0) {
@@ -207,6 +205,6 @@ void FilePrint(const char* filename, bool newline, bool prefix_timestamp, const 
 	}
 
 	if (newline)
-		logfile << endl;
+		logfile << std::endl;
 }
 

@@ -1955,8 +1955,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			while(angle_end > 360.0f)
 				angle_end -= 360.0f;
 
-			list<Mob*> targets_in_range;
-			list<Mob*>::iterator iter;
+			std::list<Mob*> targets_in_range;
+			std::list<Mob*>::iterator iter;
 
 			entity_list.GetTargetsForConeArea(this, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
 			iter = targets_in_range.begin();
@@ -2719,7 +2719,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	int buffslot, ret, caster_level, emptyslot = -1;
 	bool will_overwrite = false;
-	vector<int> overwrite_slots;
+	std::vector<int> overwrite_slots;
 
 	if(level_override > 0)
 		caster_level = level_override;
@@ -2829,7 +2829,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	// to remove some other buffs already worn if will_overwrite is true
 	if(will_overwrite)
 	{
-		vector<int>::iterator cur, end;
+		std::vector<int>::iterator cur, end;
 		cur = overwrite_slots.begin();
 		end = overwrite_slots.end();
 		for(; cur != end; cur++) {

@@ -17,9 +17,7 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <iomanip>
-using namespace std;
 #include <stdlib.h>
 #include <math.h>
 #include <algorithm>
@@ -102,12 +100,12 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				) {
 
 #if MobAI_DEBUG_Spells >= 21
-				cout << "Mob::AICastSpell: Casting: spellid=" << AIspells[i].spellid
+				std::cout << "Mob::AICastSpell: Casting: spellid=" << AIspells[i].spellid
 					<< ", tar=" << tar->GetName()
 					<< ", dist2[" << dist2 << "]<=" << spells[AIspells[i].spellid].range *spells[AIspells[i].spellid].range
 					<< ", mana_cost[" << mana_cost << "]<=" << GetMana()
 					<< ", cancast[" << AIspells[i].time_cancast << "]<=" << Timer::GetCurrentTime()
-					<< ", type=" << AIspells[i].type << endl;
+					<< ", type=" << AIspells[i].type << std::endl;
 #endif
 
 				switch (AIspells[i].type) {
@@ -310,14 +308,14 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						break;
 					}
 					default: {
-						cout<<"Error: Unknown spell type in AICastSpell. caster:"<<this->GetName()<<" type:"<<AIspells[i].type<<" slot:"<<i<<endl;
+						std::cout << "Error: Unknown spell type in AICastSpell. caster:" << this->GetName() << " type:" << AIspells[i].type << " slot:" << i << std::endl;
 						break;
 					}
 				}
 			}
 #if MobAI_DEBUG_Spells >= 21
 			else {
-				cout << "Mob::AICastSpell: NotCasting: spellid=" << AIspells[i].spellid << ", tar=" << tar->GetName() << ", dist2[" << dist2 << "]<=" << spells[AIspells[i].spellid].range*spells[AIspells[i].spellid].range << ", mana_cost[" << mana_cost << "]<=" << GetMana() << ", cancast[" << AIspells[i].time_cancast << "]<=" << Timer::GetCurrentTime() << endl;
+				std::cout << "Mob::AICastSpell: NotCasting: spellid=" << AIspells[i].spellid << ", tar=" << tar->GetName() << ", dist2[" << dist2 << "]<=" << spells[AIspells[i].spellid].range*spells[AIspells[i].spellid].range << ", mana_cost[" << mana_cost << "]<=" << GetMana() << ", cancast[" << AIspells[i].time_cancast << "]<=" << Timer::GetCurrentTime() << std::endl;
 			}
 #endif
 		}
@@ -327,7 +325,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore) {
 #if MobAI_DEBUG_Spells >= 1
-	cout << "Mob::AIDoSpellCast: spellid=" << AIspells[i].spellid << ", tar=" << tar->GetName() << ", mana=" << mana_cost << ", Name: " << spells[AIspells[i].spellid].name << endl;
+	std::cout << "Mob::AIDoSpellCast: spellid=" << AIspells[i].spellid << ", tar=" << tar->GetName() << ", mana=" << mana_cost << ", Name: " << spells[AIspells[i].spellid].name << std::endl;
 #endif
 	casting_spell_AIindex = i;
 
@@ -1845,7 +1843,7 @@ bool NPC::AI_IdleCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		_ZP(Mob_AI_Process_autocast);
 #if MobAI_DEBUG_Spells >= 25
-		cout << "Non-Engaged autocast check triggered: " << this->GetName() << endl;
+		std::cout << "Non-Engaged autocast check triggered: " << this->GetName() << std::endl;
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Buff | SpellType_Pet)) {
@@ -2206,20 +2204,20 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	DBnpcspells_Struct* parentlist = database.GetNPCSpells(spell_list->parent_list);
 	uint32 i;
 #if MobAI_DEBUG_Spells >= 10
-	cout << "Loading NPCSpells onto " << this->GetName() << ": dbspellsid=" << iDBSpellsID;
+	std::cout << "Loading NPCSpells onto " << this->GetName() << ": dbspellsid=" << iDBSpellsID;
 	if (spell_list) {
-		cout << " (found, " << spell_list->numentries << "), parentlist=" << spell_list->parent_list;
+		std::cout << " (found, " << spell_list->numentries << "), parentlist=" << spell_list->parent_list;
 		if (spell_list->parent_list) {
 			if (parentlist) {
-				cout << " (found, " << parentlist->numentries << ")";
+				std::cout << " (found, " << parentlist->numentries << ")";
 			}
 			else
-				cout << " (not found)";
+				std::cout << " (not found)";
 		}
 	}
 	else
-		cout << " (not found)";
-	cout << endl;
+		std::cout << " (not found)";
+	std::cout << std::endl;
 #endif
 	int16 attack_proc_spell = -1;
 	int8 proc_chance = 3;
@@ -2379,7 +2377,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 					return npc_spells_cache[iDBSpellsID];
 				}
 				else {
-					cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << endl;
+					std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << std::endl;
 					safe_delete_array(query);
 					return 0;
 				}
@@ -2389,7 +2387,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 			}
 		}
 		else {
-			cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << endl;
+			std::cerr << "Error in AddNPCSpells query1 '" << query << "' " << errbuf << std::endl;
 			safe_delete_array(query);
 			return 0;
 		}
@@ -2418,7 +2416,7 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetMaxNPCSpellsID query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetMaxNPCSpellsID query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}

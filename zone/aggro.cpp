@@ -187,7 +187,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 			char namebuf[256];
 			if(!database.GetFactionName(mob_primary, namebuf, sizeof(namebuf)))
 				strcpy(namebuf, "(Unknown)");
-			list<struct NPCFaction*>::iterator cur,end;
+			std::list<struct NPCFaction*>::iterator cur,end;
 			cur = faction_list.begin();
 			end = faction_list.end();
 			bool res = false;

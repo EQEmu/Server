@@ -32,8 +32,6 @@
 #include <string.h>
 #endif
 
-using namespace std;
-
 ProcLauncher ProcLauncher::s_launcher;
 
 #ifdef _WINDOWS
@@ -51,10 +49,9 @@ ProcLauncher::ProcLauncher()
 #endif
 }
 
-
 void ProcLauncher::Process() {
 #ifdef _WINDOWS
-	map<ProcRef, Spec *>::iterator cur, end, tmp;
+	std::map<ProcRef, Spec *>::iterator cur, end, tmp;
 	cur = m_running.begin();
 	end = m_running.end();
 	while(cur != end) {
@@ -91,7 +88,7 @@ void ProcLauncher::Process() {
 			break;
 		} else {
 			//one died...
-			map<ProcRef, Spec *>::iterator ref;
+			std::map<ProcRef, Spec *>::iterator ref;
 			ref = m_running.find(died);
 			if(ref == m_running.end()) {
 				//unable to find this process in our list...

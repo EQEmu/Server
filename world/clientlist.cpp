@@ -29,12 +29,10 @@
 #include "wguild_mgr.h"
 
 #include <set>
-using namespace std;
 
 extern ConsoleList		console_list;
 extern ZSList			zoneserver_list;
 uint32 numplayers = 0;	//this really wants to be a member variable of ClientList...
-
 
 ClientList::ClientList()
 : CLStale_timer(45000)
@@ -45,12 +43,10 @@ ClientList::ClientList()
 ClientList::~ClientList() {
 }
 
-
 void ClientList::Process() {
 
 	if (CLStale_timer.Check())
 		CLCheckStale();
-
 
 	LinkedListIterator<Client*> iterator(list);
 
@@ -69,7 +65,6 @@ void ClientList::Process() {
 	}
 }
 
-
 void ClientList::CLERemoveZSRef(ZoneServer* iZS) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
@@ -85,7 +80,6 @@ void ClientList::CLERemoveZSRef(ZoneServer* iZS) {
 
 ClientListEntry* ClientList::GetCLE(uint32 iID) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -760,7 +754,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 
 void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPConnection* connection) {
 
-	vector<ClientListEntry*> FriendsCLEs;
+	std::vector<ClientListEntry*> FriendsCLEs;
 	FriendsCLEs.reserve(100);
 
 	char Friend_[65];
@@ -1235,7 +1229,7 @@ bool ClientList::SendPacket(const char* to, ServerPacket* pack) {
 }
 
 void ClientList::SendGuildPacket(uint32 guild_id, ServerPacket* pack) {
-	set<uint32> zone_ids;
+	std::set<uint32> zone_ids;
 
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
@@ -1249,7 +1243,7 @@ void ClientList::SendGuildPacket(uint32 guild_id, ServerPacket* pack) {
 
 	//now we know all the zones, send it to each one... this is kinda a shitty way to do this
 	//since its basically O(n^2)
-	set<uint32>::iterator cur, end;
+	std::set<uint32>::iterator cur, end;
 	cur = zone_ids.begin();
 	end = zone_ids.end();
 	for(; cur != end; cur++) {
@@ -1276,7 +1270,7 @@ int ClientList::GetClientCount() {
 	return(numplayers);
 }
 
-void ClientList::GetClients(const char *zone_name, vector<ClientListEntry *> &res) {
+void ClientList::GetClients(const char *zone_name, std::vector<ClientListEntry *> &res) {
 	LinkedListIterator<ClientListEntry *> iterator(clientlist);
 	iterator.Reset();
 

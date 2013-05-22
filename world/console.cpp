@@ -17,7 +17,6 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
