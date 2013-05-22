@@ -1,7 +1,9 @@
-#include "shareddb.h"
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+
+#include "shareddb.h"
+#include "mysql.h"
 #include "Item.h"
 #include "classes.h"
 #include "rulesys.h"
