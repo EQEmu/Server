@@ -196,8 +196,6 @@ public:
 	// Test whether a given slot can support a container item
 	static bool SupportsContainers(int16 slot_id);
 
-	void dumpItemCollection(const map<int16, ItemInst*> &collection);
-	void dumpBagContents(ItemInst *inst);
 	void dumpEntireInventory();
 	void dumpWornItems();
 	void dumpInventory();
@@ -213,6 +211,9 @@ protected:
 	///////////////////////////////
 	// Protected Methods
 	///////////////////////////////
+
+	void dumpItemCollection(const map<int16, ItemInst*> &collection);
+	void dumpBagContents(ItemInst *inst, iter_inst *it);
 
 	// Retrieves item within an inventory bucket
 	ItemInst* _GetItem(const map<int16, ItemInst*>& bucket, int16 slot_id) const;

@@ -1053,8 +1053,7 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 	return SLOT_INVALID;
 }
 
-void Inventory::dumpBagContents(ItemInst *inst) {
-	iter_inst it;
+void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
 	iter_contents itb;
 
 	if (!inst || !inst->IsType(ItemClassContainer)) 
@@ -1067,7 +1066,7 @@ void Inventory::dumpBagContents(ItemInst *inst) {
 			continue;
 			
 		std::string subSlot;
-		StringFormat(subSlot,"	Slot %d: %s (%d)", Inventory::CalcSlotId(it->first, itb->first),
+		StringFormat(subSlot,"	Slot %d: %s (%d)", Inventory::CalcSlotId((*it)->first, itb->first),
 			baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
 		std::cout << subSlot << std::endl;
 	}
@@ -1089,7 +1088,7 @@ void Inventory::dumpItemCollection(const map<int16, ItemInst*> &collection) {
 		StringFormat(slot, "Slot %d: %s (%d)",it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
 		std::cout << slot << std::endl;		
 
-		dumpBagContents(inst);
+		dumpBagContents(inst, &it);
 	}
 }
 
