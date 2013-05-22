@@ -597,7 +597,7 @@ bool Client::Save(uint8 iCommitNow) {
 	p_timers.Store(&database);
 
 //	printf("Dumping inventory on save:\n");
-//	m_inv.dumpInventory();
+//	m_inv.dumpEntireInventory();
 
 	SaveTaskState();
 	if (iCommitNow <= 1) {
