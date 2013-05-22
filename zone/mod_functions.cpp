@@ -96,7 +96,7 @@ int NPC::mod_npc_damage(int damage, SkillType skillinuse, int hand, const Item_S
 
 		if(weapon)
 		{
-			damage += (int)ceil(((float)weapon->Damage / (float)weapon->Delay) * (float)GetLevel());
+			damage += (int)ceil(((float)weapon->Damage / (float)weapon->Delay) * (float)GetOwner()->GetLevel());
 		}
 
 		damage = (int)ceil( (float)damage * chbonus );
@@ -495,9 +495,22 @@ int32 Client::mod_client_xp(int32 in_xp, NPC *npc) {
 	return( (int32)((float)in_xp * xpmult) );
 }
 
+//Client XP formula.  Changes here will cause clients to change level after gaining or losing xp.
+//Either modify this before your server goes live, or be prepared to write a quest script that fixes levels.
+uint32 Client::mod_client_xp_for_level(uint32 xp, uint16 check_level) {
+	uint16 check_levelm1 = check_level-1;
+	float mod;
+
+	mod = 4;
+	float base = (check_levelm1)*(check_levelm1)*(check_levelm1);
+	mod *= 1000;
+
+	return(uint32(base * mod));
+}
+
 //effect_vallue - Spell effect value as calculated by default formulas.  You will want to ignore effects that don't lend themselves to scaling - pet ID's, gate coords, etc.
 int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster) {
-	if(IsClient()) { return(effect_value); }
+//	if(IsClient()) { return(effect_value); }
 	if(!caster) { return(effect_value); }
 	if(!caster->IsClient()) { return(effect_value); }
 
@@ -505,24 +518,31 @@ int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mo
 	float spbonus = 0.0f;
 	float spadd = 0.0f;
 
-    if(caster->GetClass() == BARD)
-    {
-        spbonus = (float)(caster->CastToClient()->GetActCHA() - DW_STATBASE) / 150;
-        spbonus += (float)(caster->CastToClient()->GetActINT() - DW_STATBASE) / 150;
-    }
-    else if(caster->GetCasterClass() == 'W')
+	int adval = caster->CastToClient()->Admin();
+//	adval = 0;
+
+    if(caster->GetCasterClass() == 'W')
     {
         spbonus = (float)(caster->CastToClient()->GetActWIS() - DW_STATBASE) / 400;
         spbonus += (float)(caster->CastToClient()->GetActSTA() - DW_STATBASE) / 400;
     }
     else if(caster->GetCasterClass() == 'I')
     {
-        spbonus = (float)(caster->CastToClient()->GetActINT() - DW_STATBASE) / 400;
-        spbonus += (float)(caster->CastToClient()->GetActDEX() - DW_STATBASE) / 400;
+	    if(caster->GetClass() == BARD)
+    	{
+        	spbonus = (float)(caster->CastToClient()->GetActCHA() - DW_STATBASE) / 150;
+        	spbonus += (float)(caster->CastToClient()->GetActINT() - DW_STATBASE) / 150;
+    	}
+		else
+		{
+        	spbonus = (float)(caster->CastToClient()->GetActINT() - DW_STATBASE) / 400;
+        	spbonus += (float)(caster->CastToClient()->GetActDEX() - DW_STATBASE) / 400;
+		}
     }
 	else
 	{
 		//No proc/click bonuses for non casters
+		if(adval > 80) { caster->Message(315, "CASTER CLASS NOT FOUND"); }
 		return(effect_value);
 	}
 
@@ -625,6 +645,7 @@ int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mo
             break;
 
         default:
+			if(adval > 80) { caster->Message(315, "Generic effect - ignored"); }
 			return(effect_value);
             break;
     }
@@ -632,6 +653,7 @@ int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mo
 	//Shroud of the bear
 	if(caster->FindBuff(5045))
 	{
+		if(adval > 80) { caster->Message(315, "Shroud of bear nerf"); }
 		spadd = spadd * -1;
 		mult = 1.0f;
 	}
@@ -640,6 +662,8 @@ int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mo
     else { effect_value -= (int)ceil(spadd); }
 
     effect_value *= mult;
+
+	if(adval > 80) { caster->Message(315, "Spell Bonus: %d, %d, %d", effect_value, spadd, effect_type); }
 
     return( (int)(ceil(effect_value)) );
 }
@@ -966,41 +990,44 @@ int Mob::mod_spell_stack(uint16 spellid1, int caster_level1, Mob* caster1, uint1
 int Mob::mod_spell_resist(int resist_chance, int level_mod, int resist_modifier, int target_resist, uint8 resist_type, uint16 spell_id, Mob* caster) {
 	int final = resist_chance + level_mod + resist_modifier + target_resist;
 
-	int temp_level_diff = GetLevel() - caster->GetLevel();
-    if(temp_level_diff > 15 && caster->GetLevel() < 46)
-    {
-        if(caster->IsClient())
-        {
-            if(caster->CastToClient()->GetAAXP() < 100)
-            {
-                return(0);
-            }
-        }
-    }
-
 	if(final > 185) { final = 185; } // Cap resist so it's always possible to land a spell (unless we hit the client level diff max).
-	if(!IsClient()) { return(final); }
+
+	if(!caster) { return(final); }
+
+	int temp_level_diff = GetLevel() - caster->GetLevel();
+   	if(temp_level_diff > 15 && caster->GetLevel() < 46)
+   	{
+       	if(caster->IsClient())
+       	{
+           	if(caster->CastToClient()->GetAAXP() < 100)
+           	{
+               	return(0);
+           	}
+       	}
+   	}
+
+	if(!caster->IsClient()) { return(final); }
 
 	float resistmod = 1.0f;
 
 	//Make charisma a part of all resists
-	resistmod += ((float)CastToClient()->GetActCHA() - DW_STATBASE) / 20;
+	resistmod += ((float)caster->CastToClient()->GetActCHA() - DW_STATBASE) / 20;
 
 	//The other half is the casting stat
-	if(GetClass() == BARD)
+	if(caster->GetClass() == BARD)
 	{
-		resistmod += ((float)CastToClient()->GetActCHA() - DW_STATBASE) / 20;
+		resistmod += ((float)caster->CastToClient()->GetActCHA() - DW_STATBASE) / 20;
 	}
-	else if(GetCasterClass() == 'W')
+	else if(caster->GetCasterClass() == 'W')
 	{
-	resistmod += ((float)CastToClient()->GetActWIS() - DW_STATBASE) / 20;
+	resistmod += ((float)caster->CastToClient()->GetActWIS() - DW_STATBASE) / 20;
 	}
-	else if(GetCasterClass() == 'I')
+	else if(caster->GetCasterClass() == 'I')
 	{
-		resistmod += ((float)CastToClient()->GetActINT() - DW_STATBASE) / 20;
+		resistmod += ((float)caster->CastToClient()->GetActINT() - DW_STATBASE) / 20;
 	}
 
-	final += resistmod;
+	final -= resistmod;
 
 	if(caster->GetLevel() > 50)
 	{

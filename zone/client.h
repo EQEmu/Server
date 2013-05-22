@@ -1130,6 +1130,7 @@ public:
 	void mod_client_death_duel(Mob* killerMob);
 	void mod_client_death_env();
 	int32 mod_client_xp(int32 in_exp, NPC *npc);
+	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
 
 protected:
 	friend class Mob;
