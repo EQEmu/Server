@@ -25,8 +25,6 @@
 
 #include "../common/Mutex.h"
 
-using namespace std;
-
 /**
  * Dictates the log type specified in ErrorLog for Log(...)
  */

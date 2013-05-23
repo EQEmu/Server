@@ -22,7 +22,7 @@
 
 class WorldConfig : public EQEmuConfig {
 public:
-	virtual string GetByName(const string &var_name) const;
+	virtual std::string GetByName(const std::string &var_name) const;
 
 	bool UpdateStats;
 	bool LoginDisabled;
@@ -65,8 +65,8 @@ public:
 	static void DisableLoginserver() { if (_world_config) _world_config->LoginDisabled=true; }
 	static void EnableLoginserver() { if (_world_config) _world_config->LoginDisabled=false; }
 
-	static void SetWorldAddress(string addr) { if (_world_config) _world_config->WorldAddress=addr; }
-	static void SetLocalAddress(string addr) { if (_world_config) _world_config->LocalAddress=addr; }
+	static void SetWorldAddress(std::string addr) { if (_world_config) _world_config->WorldAddress=addr; }
+	static void SetLocalAddress(std::string addr) { if (_world_config) _world_config->LocalAddress=addr; }
 
 	void Dump() const;
 };

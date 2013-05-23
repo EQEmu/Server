@@ -9,8 +9,6 @@
 #include <map>
 #include <list>
 
-using namespace std;
-
 class AdventureManager
 {
 public:
@@ -44,8 +42,8 @@ public:
 	AdventureTemplate *GetAdventureTemplate(int id);
 	void GetZoneData(uint16 instance_id);
 protected:
-	bool IsInExcludedZoneList(list<AdventureZones> excluded_zones, string zone_name, int version);
-	bool IsInExcludedZoneInList(list<AdventureZoneIn> excluded_zone_ins, int zone_id, int door_object);
+	bool IsInExcludedZoneList(std::list<AdventureZones> excluded_zones, std::string zone_name, int version);
+	bool IsInExcludedZoneInList(std::list<AdventureZoneIn> excluded_zone_ins, int zone_id, int door_object);
 	void DoLeaderboardRequestWins(const char* player);
 	void DoLeaderboardRequestPercentage(const char* player);
 	void DoLeaderboardRequestWinsGuk(const char* player);
@@ -59,22 +57,22 @@ protected:
 	void DoLeaderboardRequestWinsTak(const char* player);
 	void DoLeaderboardRequestPercentageTak(const char* player);
 
-	map<uint32, AdventureTemplate*> adventure_templates;
-	map<uint32, list<AdventureTemplate*> > adventure_entries;
-	list<Adventure*> adventure_list;
-	list<AdventureFinishEvent> finished_list;
-	list<LeaderboardInfo> leaderboard_info_wins;
-	list<LeaderboardInfo> leaderboard_info_percentage;
-	list<LeaderboardInfo> leaderboard_info_wins_guk;
-	list<LeaderboardInfo> leaderboard_info_percentage_guk;
-	list<LeaderboardInfo> leaderboard_info_wins_mir;
-	list<LeaderboardInfo> leaderboard_info_percentage_mir;
-	list<LeaderboardInfo> leaderboard_info_wins_mmc;
-	list<LeaderboardInfo> leaderboard_info_percentage_mmc;
-	list<LeaderboardInfo> leaderboard_info_wins_ruj;
-	list<LeaderboardInfo> leaderboard_info_percentage_ruj;
-	list<LeaderboardInfo> leaderboard_info_wins_tak;
-	list<LeaderboardInfo> leaderboard_info_percentage_tak;
+	std::map<uint32, AdventureTemplate*> adventure_templates;
+	std::map<uint32, std::list<AdventureTemplate*> > adventure_entries;
+	std::list<Adventure*> adventure_list;
+	std::list<AdventureFinishEvent> finished_list;
+	std::list<LeaderboardInfo> leaderboard_info_wins;
+	std::list<LeaderboardInfo> leaderboard_info_percentage;
+	std::list<LeaderboardInfo> leaderboard_info_wins_guk;
+	std::list<LeaderboardInfo> leaderboard_info_percentage_guk;
+	std::list<LeaderboardInfo> leaderboard_info_wins_mir;
+	std::list<LeaderboardInfo> leaderboard_info_percentage_mir;
+	std::list<LeaderboardInfo> leaderboard_info_wins_mmc;
+	std::list<LeaderboardInfo> leaderboard_info_percentage_mmc;
+	std::list<LeaderboardInfo> leaderboard_info_wins_ruj;
+	std::list<LeaderboardInfo> leaderboard_info_percentage_ruj;
+	std::list<LeaderboardInfo> leaderboard_info_wins_tak;
+	std::list<LeaderboardInfo> leaderboard_info_percentage_tak;
 	bool leaderboard_sorted_wins;
 	bool leaderboard_sorted_percentage;
 	bool leaderboard_sorted_wins_guk;

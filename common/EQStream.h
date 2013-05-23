@@ -18,8 +18,6 @@
 #include "../common/Condition.h"
 #include "../common/timer.h"
 
-using namespace std;
-
 #define FLAG_COMPRESSED	0x01
 #define FLAG_ENCODED	0x04
 
@@ -113,8 +111,8 @@ class EQStream : public EQStreamInterface {
 		Mutex MAcks;
 
 		// Packets waiting to be sent (all protected by MOutboundQueue)
-		queue<EQProtocolPacket *> NonSequencedQueue;
-		deque<EQProtocolPacket *> SequencedQueue;
+		std::queue<EQProtocolPacket *> NonSequencedQueue;
+		std::deque<EQProtocolPacket *> SequencedQueue;
 		uint16 NextOutSeq;
 		uint16 SequencedBase;	//the sequence number of SequencedQueue[0]
 		long NextSequencedSend;	//index into SequencedQueue
@@ -124,8 +122,8 @@ class EQStream : public EQStreamInterface {
 		unsigned char _tempBuffer[2048];
 
 		// Packets waiting to be processed
-		vector<EQRawApplicationPacket *> InboundQueue;
-		map<unsigned short,EQProtocolPacket *> PacketQueue;		//not mutex protected, only accessed by caller of Process()
+		std::vector<EQRawApplicationPacket *> InboundQueue;
+		std::map<unsigned short,EQProtocolPacket *> PacketQueue;		//not mutex protected, only accessed by caller of Process()
 		Mutex MInboundQueue;
 
 		static uint16 MaxWindowSize;

@@ -44,10 +44,10 @@ struct DBTradeskillRecipe_Struct {
 	uint16 trivial;
 	bool nofail;
 	bool replace_container;
-	vector< pair<uint32,uint8> > onsuccess;
-	vector< pair<uint32,uint8> > onfail;
-	vector< pair<uint32,uint8> > salvage;
-	string name;
+	std::vector< std::pair<uint32,uint8> > onsuccess;
+	std::vector< std::pair<uint32,uint8> > onfail;
+	std::vector< std::pair<uint32,uint8> > salvage;
+	std::string name;
 	uint8 must_learn;
 	bool has_learnt;
 	uint32 madecount;
@@ -172,7 +172,7 @@ struct LootTable_Struct;
 
 
 class ZoneDatabase : public SharedDatabase {
-	typedef list<ServerLootItem_Struct*> ItemList;
+	typedef std::list<ServerLootItem_Struct*> ItemList;
 public:
 	ZoneDatabase();
 	ZoneDatabase(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
@@ -272,7 +272,7 @@ public:
 	bool	GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);
 	bool	GetFactionData(FactionMods* fd, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id); //rembrant, needed for factions Dec, 16 2001
 	bool	GetFactionName(int32 faction_id, char* name, uint32 buflen); // rembrant, needed for factions Dec, 16 2001
-	bool	GetFactionIdsForNPC(uint32 nfl_id, list<struct NPCFaction*> *faction_list, int32* primary_faction = 0); // neotokyo: improve faction handling
+	bool	GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction = 0); // neotokyo: improve faction handling
 	bool	SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list); // rembrant, needed for factions Dec, 16 2001
 	bool	LoadFactionData();
 	bool	LoadFactionValues(uint32 char_id, faction_map & val_list);

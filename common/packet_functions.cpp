@@ -27,8 +27,6 @@
 	#include <netinet/in.h>
 #endif
 
-using namespace std;
-
 void EncryptProfilePacket(EQApplicationPacket* app) {
 	//EncryptProfilePacket(app->pBuffer, app->size);
 }
@@ -209,10 +207,10 @@ uint32 InflatePacket(const uchar* indata, uint32 indatalen, uchar* outdata, uint
 	}
 	else {
 		if (!iQuiet) {
-			cout << "Error: InflatePacket: inflate() returned " << zerror << " '";
+			std::cout << "Error: InflatePacket: inflate() returned " << zerror << " '";
 			if (zstream.msg)
-				cout << zstream.msg;
-			cout << "'" << endl;
+				std::cout << zstream.msg;
+			std::cout << "'" << std::endl;
 #ifdef EQDEBUG
 			DumpPacket(indata-16, indatalen+16);
 #endif
@@ -254,10 +252,10 @@ uint32 InflatePacket(const uchar* indata, uint32 indatalen, uchar* outdata, uint
 	}
 	else {
 		if (!iQuiet) {
-			cout << "Error: InflatePacket: inflate() returned " << zerror << " '";
+			std::cout << "Error: InflatePacket: inflate() returned " << zerror << " '";
 			if (zstream.msg)
-				cout << zstream.msg;
-			cout << "'" << endl;
+				std::cout << zstream.msg;
+			std::cout << "'" << std::endl;
 #ifdef EQDEBUG
 			DumpPacket(indata-16, indatalen+16);
 #endif

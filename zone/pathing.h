@@ -7,8 +7,6 @@
 #include <vector>
 #include <algorithm>
 
-using namespace std;
-
 class Client;
 
 #define PATHNODENEIGHBOURS 50
@@ -63,8 +61,8 @@ public:
 	static PathManager *LoadPathFile(const char *ZoneName);
 	bool loadPaths(FILE *fp);
 	void PrintPathing();
-	list<int> FindRoute(VERTEX Start, VERTEX End);
-	list<int> FindRoute(int startID, int endID);
+	std::list<int> FindRoute(VERTEX Start, VERTEX End);
+	std::list<int> FindRoute(int startID, int endID);
 
 	VERTEX GetPathNodeCoordinates(int NodeNumber, bool BestZ = true);
 	bool CheckLosFN(VERTEX a, VERTEX b);
@@ -93,8 +91,8 @@ public:
 	void MoveNode(Client *c);
 	void DisconnectAll(Client *c);
 	bool NodesConnected(PathNode *a, PathNode *b);
-	void DumpPath(string filename);
-	void ProcessNodesAndSave(string filename);
+	void DumpPath(std::string filename);
+	void ProcessNodesAndSave(std::string filename);
 	void ResortConnections();
 	void QuickConnect(Client *c, bool set = false);
 	void SortNodes();

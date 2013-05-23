@@ -4,8 +4,6 @@
 #include "../common/eq_packet_structs.h"
 #include <string>
 
-using namespace std;
-
 //Struct
 struct eqTimeOfDay
 {
@@ -39,7 +37,7 @@ public:
 	static bool IsTimeBefore(TimeOfDay_Struct *base, TimeOfDay_Struct *test);	//is test before base
 	static void AddMinutes(uint32 minutes, TimeOfDay_Struct *to);
 
-	static void ToString(TimeOfDay_Struct *t, string &str);
+	static void ToString(TimeOfDay_Struct *t, std::string &str);
 
 	//Database functions
 	//bool loadDB(Database q);

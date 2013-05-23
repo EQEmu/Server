@@ -24,9 +24,6 @@
 
 #include <string>
 #include <map>
-using namespace std;
-
-
 
 /*
 * See note in XMLParser::ParseFile() before inheriting this class.
@@ -45,12 +42,11 @@ protected:
 	const char *ParseTextBlock(TiXmlNode *within, const char *name, bool optional = false);
 	const char *GetText(TiXmlNode *within, bool optional = false);
 
-	map<string,ElementHandler> Handlers;
+	std::map<std::string,ElementHandler> Handlers;
 
 	bool ParseOkay;
 
 };
-
 
 #endif
 

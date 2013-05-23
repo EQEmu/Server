@@ -17,7 +17,6 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -92,7 +91,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	if (iZoneID == 0 || zonename == 0)
 		return false;
 	if (zone != 0 || ZoneLoaded) {
-		cerr << "Error: Zone::Bootup call when zone already booted!" << endl;
+		std::cerr << "Error: Zone::Bootup call when zone already booted!" << std::endl;
 		worldserver.SetZone(0);
 		return false;
 	}
@@ -105,7 +104,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	//init the zone, loads all the data, etc
 	if (!zone->Init(iStaticZone)) {
 		safe_delete(zone);
-		cerr << "Zone->Init failed" << endl;
+		std::cerr << "Zone->Init failed" << std::endl;
 		worldserver.SetZone(0);
 		return false;
 	}
@@ -1154,7 +1153,7 @@ bool Zone::Init(bool iStaticZone) {
 
 	if(RuleManager::Instance()->GetActiveRulesetID() != default_ruleset)
 	{
-		string r_name = RuleManager::Instance()->GetRulesetName(&database, default_ruleset);
+		std::string r_name = RuleManager::Instance()->GetRulesetName(&database, default_ruleset);
 		if(r_name.size() > 0)
 		{
 			RuleManager::Instance()->LoadRules(&database, r_name.c_str());
@@ -1719,7 +1718,7 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 	}
 	else
 	{
-		cerr << "Error1 in LoadStaticZonePoints query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error1 in LoadStaticZonePoints query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1731,7 +1730,7 @@ bool ZoneDatabase::DumpZoneState() {
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM zone_state_dump WHERE zonename='%s'", zone->GetShortName()), errbuf)) {
-		cerr << "Error in DumpZoneState query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in DumpZoneState query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1745,7 +1744,7 @@ bool ZoneDatabase::DumpZoneState() {
 	uint32	gmspawntype_count = 0;
 	entity_list.CountNPC(&npc_count, &npcloot_count, &gmspawntype_count);
 
-	cout << "DEBUG: spawn2count=" << spawn2_count << ", npc_count=" << npc_count << ", npcloot_count=" << npcloot_count << ", gmspawntype_count=" << gmspawntype_count << endl;
+	std::cout << "DEBUG: spawn2count=" << spawn2_count << ", npc_count=" << npc_count << ", npcloot_count=" << npcloot_count << ", gmspawntype_count=" << gmspawntype_count << std::endl;
 
 	ZSDump_Spawn2* spawn2_dump = 0;
 	ZSDump_NPC*	npc_dump = 0;
@@ -1812,13 +1811,13 @@ bool ZoneDatabase::DumpZoneState() {
 	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
 		// if (DoEscapeString(query, (unsigned int) (end - query))) {
 		safe_delete_array(query);
-		cerr << "Error in ZoneDump query " << errbuf << endl;
+		std::cerr << "Error in ZoneDump query " << errbuf << std::endl;
 		return false;
 	}
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
-		cerr << "Zone dump failed. (affected rows = 0)" << endl;
+		std::cerr << "Zone dump failed. (affected rows = 0)" << std::endl;
 		return false;
 	}
 	return true;
@@ -1848,13 +1847,13 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 		safe_delete_array(query);
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
-			cout << "Elapsed time: " << row[8] << endl;
+			std::cout << "Elapsed time: " << row[8] << std::endl;
 			elapsedtime = atoi(row[8]) * 1000;
 			lengths = mysql_fetch_lengths(result);
 			spawn2_count = atoi(row[0]);
-			cout << "Spawn2count: " << spawn2_count << endl;
+			std::cout << "Spawn2count: " << spawn2_count << std::endl;
 			if (lengths[4] != (sizeof(ZSDump_Spawn2) * spawn2_count)) {
-				cerr << "Error in LoadZoneState: spawn2_dump length mismatch l=" << lengths[4] << ", e=" << (sizeof(ZSDump_Spawn2) * spawn2_count) << endl;
+				std::cerr << "Error in LoadZoneState: spawn2_dump length mismatch l=" << lengths[4] << ", e=" << (sizeof(ZSDump_Spawn2) * spawn2_count) << std::endl;
 				CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 				return -1;
 			}
@@ -1870,7 +1869,7 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 					else
 						spawn2_loaded[i] = LoadSpawn2(spawn2_list, spawn2_dump[i].spawn2_id, spawn2_dump[i].time_left - elapsedtime);
 					if (spawn2_loaded[i] == 0) {
-						cerr << "Error in LoadZoneState: spawn2_loaded[" << i << "] == 0" << endl;
+						std::cerr << "Error in LoadZoneState: spawn2_loaded[" << i << "] == 0" << std::endl;
 						CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 						return -1;
 
@@ -1879,9 +1878,9 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 			}
 
 			gmspawntype_count = atoi(row[3]);
-			cout << "gmspawntype_count: " << gmspawntype_count << endl;
+			std::cout << "gmspawntype_count: " << gmspawntype_count << std::endl;
 			if (lengths[7] != (sizeof(NPCType) * gmspawntype_count)) {
-				cerr << "Error in LoadZoneState: gmspawntype_dump length mismatch l=" << lengths[7] << ", e=" << (sizeof(NPCType) * gmspawntype_count) << endl;
+				std::cerr << "Error in LoadZoneState: gmspawntype_dump length mismatch l=" << lengths[7] << ", e=" << (sizeof(NPCType) * gmspawntype_count) << std::endl;
 				CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 				return -1;
 			}
@@ -1891,9 +1890,9 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 			}
 
 			npc_count = atoi(row[1]);
-			cout << "npc_count: " << npc_count << endl;
+			std::cout << "npc_count: " << npc_count << std::endl;
 			if (lengths[5] != (sizeof(ZSDump_NPC) * npc_count)) {
-				cerr << "Error in LoadZoneState: npc_dump length mismatch l=" << lengths[5] << ", e=" << (sizeof(ZSDump_NPC) * npc_count) << endl;
+				std::cerr << "Error in LoadZoneState: npc_dump length mismatch l=" << lengths[5] << ", e=" << (sizeof(ZSDump_NPC) * npc_count) << std::endl;
 				CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 				return -1;
 			}
@@ -1906,14 +1905,14 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 				memcpy(npc_dump, row[5], lengths[5]);
 				for (i=0; i < npc_count; i++) {
 					if (npc_loaded[i] != 0) {
-						cerr << "Error in LoadZoneState: npc_loaded[" << i << "] != 0" << endl;
+						std::cerr << "Error in LoadZoneState: npc_loaded[" << i << "] != 0" << std::endl;
 						CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 						return -1;
 					}
 					Spawn2* tmp = 0;
 					if (!npc_dump[i].corpse && npc_dump[i].spawn2_dump_index != 0xFFFFFFFF) {
 						if (spawn2_loaded == 0 || npc_dump[i].spawn2_dump_index >= spawn2_count) {
-							cerr << "Error in LoadZoneState: (spawn2_loaded == 0 || index >= count) && npc_dump[" << i << "].spawn2_dump_index != 0xFFFFFFFF" << endl;
+							std::cerr << "Error in LoadZoneState: (spawn2_loaded == 0 || index >= count) && npc_dump[" << i << "].spawn2_dump_index != 0xFFFFFFFF" << std::endl;
 							CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 							return -1;
 						}
@@ -1922,7 +1921,7 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 					}
 					if (npc_dump[i].npctype_id == 0) {
 						if (npc_dump[i].gmspawntype_index == 0xFFFFFFFF) {
-							cerr << "Error in LoadZoneState: gmspawntype index invalid" << endl;
+							std::cerr << "Error in LoadZoneState: gmspawntype index invalid" << std::endl;
 							safe_delete(tmp);
 
 							CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
@@ -1930,7 +1929,7 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 						}
 						else {
 							if (gmspawntype_dump == 0 || npc_dump[i].gmspawntype_index >= gmspawntype_count) {
-								cerr << "Error in LoadZoneState: (gmspawntype_dump == 0 || index >= count) && npc_dump[" << i << "].npctype_id == 0" << endl;
+								std::cerr << "Error in LoadZoneState: (gmspawntype_dump == 0 || index >= count) && npc_dump[" << i << "].npctype_id == 0" << std::endl;
 								safe_delete(tmp);
 
 								CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
@@ -1944,7 +1943,7 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 						if (crap != 0)
 							npc_loaded[i] = new NPC(crap, tmp, npc_dump[i].x, npc_dump[i].y, npc_dump[i].z, npc_dump[i].heading, FlyMode3, npc_dump[i].corpse);
 						else {
-							cerr << "Error in LoadZoneState: Unknown npctype_id: " << npc_dump[i].npctype_id << endl;
+							std::cerr << "Error in LoadZoneState: Unknown npctype_id: " << npc_dump[i].npctype_id << std::endl;
 							safe_delete(tmp);
 						}
 					}
@@ -1962,15 +1961,15 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 			}
 
 			npcloot_count = atoi(row[2]);
-			cout << "npcloot_count: " << npcloot_count << endl;
+			std::cout << "npcloot_count: " << npcloot_count << std::endl;
 			if (lengths[6] != (sizeof(ZSDump_NPC_Loot) * npcloot_count)) {
-				cerr << "Error in LoadZoneState: npcloot_dump length mismatch l=" << lengths[6] << ", e=" << (sizeof(ZSDump_NPC_Loot) * npcloot_count) << endl;
+				std::cerr << "Error in LoadZoneState: npcloot_dump length mismatch l=" << lengths[6] << ", e=" << (sizeof(ZSDump_NPC_Loot) * npcloot_count) << std::endl;
 				CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 				return -1;
 			}
 			else if (npcloot_count > 0) {
 				if (npc_loaded == 0) {
-					cerr << "Error in LoadZoneState: npcloot_count > 0 && npc_loaded == 0" << endl;
+					std::cerr << "Error in LoadZoneState: npcloot_count > 0 && npc_loaded == 0" << std::endl;
 					CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 					return -1;
 				}
@@ -1978,7 +1977,7 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 				memcpy(npcloot_dump, row[6], lengths[6]);
 				for (i=0; i < npcloot_count; i++) {
 					if (npcloot_dump[i].npc_dump_index >= npc_count) {
-						cerr << "Error in LoadZoneState: npcloot_dump[" << i << "].npc_dump_index >= npc_count" << endl;
+						std::cerr << "Error in LoadZoneState: npcloot_dump[" << i << "].npc_dump_index >= npc_count" << std::endl;
 						CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 						return -1;
 					}
@@ -1996,7 +1995,7 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 		CleanupLoadZoneState(spawn2_count, &spawn2_dump, &npc_dump, &npcloot_dump, &gmspawntype_dump, &spawn2_loaded, &npc_loaded, &result);
 	}
 	else {
-		cerr << "Error in LoadZoneState query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in LoadZoneState query '" << query << "' " << errbuf << std::endl;
 
 		safe_delete_array(query);
 		return -1;

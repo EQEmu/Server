@@ -18,11 +18,9 @@
 #include "../common/debug.h"
 
 #include <iostream>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <iomanip>
-using namespace std;
 
 #include "TCPConnection.h"
 #include "../common/servertalk.h"
@@ -63,7 +61,7 @@ TCPConnection::TCPConnection()
 	pAsyncConnect = false;
 	m_previousLineEnd = false;
 #if TCPN_DEBUG_Memory >= 7
-	cout << "Constructor #2 on outgoing TCP# " << GetID() << endl;
+	std::cout << "Constructor #2 on outgoing TCP# " << GetID() << std::endl;
 #endif
 }
 
@@ -85,7 +83,7 @@ TCPConnection::TCPConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 ir
 	pAsyncConnect = false;
 	m_previousLineEnd = false;
 #if TCPN_DEBUG_Memory >= 7
-	cout << "Constructor #2 on incoming TCP# " << GetID() << endl;
+	std::cout << "Constructor #2 on incoming TCP# " << GetID() << std::endl;
 #endif
 }
 
@@ -99,12 +97,12 @@ TCPConnection::~TCPConnection() {
 		MLoopRunning.lock();
 		MLoopRunning.unlock();
 #if TCPN_DEBUG_Memory >= 6
-		cout << "Deconstructor on outgoing TCP# " << GetID() << endl;
+		std::cout << "Deconstructor on outgoing TCP# " << GetID() << std::endl;
 #endif
 	}
 #if TCPN_DEBUG_Memory >= 5
 	else {
-		cout << "Deconstructor on incomming TCP# " << GetID() << endl;
+		std::cout << "Deconstructor on incomming TCP# " << GetID() << std::endl;
 	}
 #endif
 	safe_delete_array(recvbuf);
@@ -587,7 +585,7 @@ bool TCPConnection::Process() {
 	if (!SendData(sent_something, errbuf)) {
 		struct in_addr	in;
 		in.s_addr = GetrIP();
-		cout << inet_ntoa(in) << ":" << GetrPort() << ": " << errbuf << endl;
+		std::cout << inet_ntoa(in) << ":" << GetrPort() << ": " << errbuf << std::endl;
 		return false;
 	}
 
@@ -628,8 +626,8 @@ bool TCPConnection::RecvData(char* errbuf) {
 		struct in_addr	in;
 		in.s_addr = GetrIP();
 		CoutTimestamp(true);
-		cout << ": Read " << status << " bytes from network. (recvbuf_used = " << recvbuf_used << ") " << inet_ntoa(in) << ":" << GetrPort();
-		cout << endl;
+		std::cout << ": Read " << status << " bytes from network. (recvbuf_used = " << recvbuf_used << ") " << inet_ntoa(in) << ":" << GetrPort();
+		std::cout << std::endl;
 	#if TCPN_LOG_RAW_DATA_IN == 2
 		int32 tmp = status;
 		if (tmp > 32)
@@ -683,7 +681,7 @@ bool TCPConnection::ProcessReceivedData(char* errbuf) {
 		return true;
 #if TCPN_DEBUG_Console >= 4
 	if (recvbuf_used) {
-		cout << "Starting Processing: recvbuf=" << recvbuf_used << endl;
+		std::cout << "Starting Processing: recvbuf=" << recvbuf_used << std::endl;
 		DumpPacket(recvbuf, recvbuf_used);
 	}
 #endif
@@ -715,13 +713,13 @@ bool TCPConnection::ProcessReceivedData(char* errbuf) {
 					}
 				}
 #if TCPN_DEBUG_Console >= 5
-				cout << "Removed 0x00" << endl;
+				std::cout << "Removed 0x00" << std::endl;
 				if (recvbuf_used) {
-					cout << "recvbuf left: " << recvbuf_used << endl;
+					std::cout << "recvbuf left: " << recvbuf_used << std::endl;
 					DumpPacket(recvbuf, recvbuf_used);
 				}
 				else
-					cout << "recbuf left: None" << endl;
+					std::cout << "recbuf left: None" << std::endl;
 #endif
 				m_previousLineEnd = false;
 				break;
@@ -748,7 +746,7 @@ bool TCPConnection::ProcessReceivedData(char* errbuf) {
 					memset(line, 0, i+1);
 					memcpy(line, recvbuf, i);
 #if TCPN_DEBUG_Console >= 3
-					cout << "Line Out: " << endl;
+					std::cout << "Line Out: " << std::endl;
 					DumpPacket((uchar*) line, i);
 #endif
 					//line[i] = 0;
@@ -758,13 +756,13 @@ bool TCPConnection::ProcessReceivedData(char* errbuf) {
 					recvbuf_echo -= i+1;
 					memcpy(recvbuf, &tmpdel[i+1], recvbuf_used);
 #if TCPN_DEBUG_Console >= 5
-					cout << "i+1=" << i+1 << endl;
+					std::cout << "i+1=" << i+1 << std::endl;
 					if (recvbuf_used) {
-						cout << "recvbuf left: " << recvbuf_used << endl;
+						std::cout << "recvbuf left: " << recvbuf_used << std::endl;
 						DumpPacket(recvbuf, recvbuf_used);
 					}
 					else
-						cout << "recbuf left: None" << endl;
+						std::cout << "recbuf left: None" << std::endl;
 #endif
 					safe_delete_array(tmpdel);
 					i = -1;
@@ -829,8 +827,8 @@ bool TCPConnection::SendData(bool &sent_something, char* errbuf) {
 			struct in_addr	in;
 			in.s_addr = GetrIP();
 			CoutTimestamp(true);
-			cout << ": Wrote " << status << " bytes to network. " << inet_ntoa(in) << ":" << GetrPort();
-			cout << endl;
+			std::cout << ": Wrote " << status << " bytes to network. " << inet_ntoa(in) << ":" << GetrPort();
+			std::cout << std::endl;
 	#if TCPN_LOG_RAW_DATA_OUT == 2
 			int32 tmp = status;
 			if (tmp > 32)
@@ -846,8 +844,8 @@ bool TCPConnection::SendData(bool &sent_something, char* errbuf) {
 				struct in_addr	in;
 				in.s_addr = GetrIP();
 				CoutTimestamp(true);
-				cout << ": Pushed " << (size - status) << " bytes back onto the send queue. " << inet_ntoa(in) << ":" << GetrPort();
-				cout << endl;
+				std::cout << ": Pushed " << (size - status) << " bytes back onto the send queue. " << inet_ntoa(in) << ":" << GetrPort();
+				std::cout << std::endl;
 #endif
 				// If there's network congestion, the number of bytes sent can be less than
 				// what we tried to give it... Push the extra back on the queue for later

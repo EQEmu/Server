@@ -16,9 +16,19 @@
 #include "../common/StringUtil.h"
 #include "../common/clientversions.h"
 
+#include "client.h"
+#include "worlddb.h"
+#include "WorldConfig.h"
+#include "LoginServer.h"
+#include "LoginServerList.h"
+#include "zoneserver.h"
+#include "zonelist.h"
+#include "clientlist.h"
+#include "wguild_mgr.h"
+#include "SoFCharCreateData.h"
+
 #include <iostream>
 #include <iomanip>
-using namespace std;
 
 #include <string.h>
 #include <stdio.h>
@@ -44,18 +54,6 @@ using namespace std;
 	#include <arpa/inet.h>
 	#include <unistd.h>
 #endif
-
-#include "client.h"
-#include "worlddb.h"
-#include "WorldConfig.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
-#include "zoneserver.h"
-#include "zonelist.h"
-#include "clientlist.h"
-#include "wguild_mgr.h"
-#include "SoFCharCreateData.h"
-
 
 std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
@@ -130,7 +128,7 @@ void Client::SendLogServer()
 	safe_delete(outapp);
 }
 
-void Client::SendEnterWorld(string name)
+void Client::SendEnterWorld(std::string name)
 {
 char char_name[32]= { 0 };
 	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {

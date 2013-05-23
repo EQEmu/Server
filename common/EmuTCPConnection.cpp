@@ -26,11 +26,9 @@ tremendously.
 #include "../common/debug.h"
 
 #include <iostream>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <iomanip>
-using namespace std;
 
 #include "EmuTCPConnection.h"
 #include "EmuTCPServer.h"
@@ -93,7 +91,7 @@ EmuTCPConnection::EmuTCPConnection(bool iOldFormat, EmuTCPServer* iRelayServer, 
 	TCPMode = iMode;
 	PacketMode = packetModeZone;
 #if TCPN_DEBUG_Memory >= 7
-	cout << "Constructor #1 on outgoing TCP# " << GetID() << endl;
+	std::cout << "Constructor #1 on outgoing TCP# " << GetID() << std::endl;
 #endif
 }
 
@@ -113,7 +111,7 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, EmuTCPConne
 	TCPMode = modePacket;
 	PacketMode = packetModeZone;
 #if TCPN_DEBUG_Memory >= 7
-	cout << "Constructor #3 on outgoing TCP# " << GetID() << endl;
+	std::cout << "Constructor #3 on outgoing TCP# " << GetID() << std::endl;
 #endif
 }
 
@@ -173,7 +171,7 @@ bool EmuTCPConnection::SendPacket(ServerPacket* pack, uint32 iDestination) {
 				struct in_addr	in;
 				in.s_addr = GetrIP();
 				CoutTimestamp(true);
-				cout << ": Logging outgoing TCP OldPacket. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << endl;
+				std::cout << ": Logging outgoing TCP OldPacket. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
 				#if TCPN_LOG_PACKETS == 2
 					if (pack->size >= 32)
 						DumpPacket(pack->pBuffer, 32);
@@ -200,7 +198,7 @@ bool EmuTCPConnection::SendPacket(ServerPacket* pack, uint32 iDestination) {
 					struct in_addr	in;
 					in.s_addr = GetrIP();
 					CoutTimestamp(true);
-					cout << ": Logging outgoing TCP packet. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << endl;
+					std::cout << ": Logging outgoing TCP packet. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
 					#if TCPN_LOG_PACKETS == 2
 						if (pack->size >= 32)
 							DumpPacket(pack->pBuffer, 32);
@@ -239,10 +237,10 @@ bool EmuTCPConnection::SendPacket(EmuTCPNetPacket_Struct* tnps) {
 			struct in_addr	in;
 			in.s_addr = GetrIP();
 			CoutTimestamp(true);
-			cout << ": Logging outgoing TCP NetPacket. OPCode: 0x" << hex << setw(4) << setfill('0') << tnps->opcode << dec << ", size: " << setw(5) << setfill(' ') << tnps->size << " " << inet_ntoa(in) << ":" << GetrPort();
+			std::cout << ": Logging outgoing TCP NetPacket. OPCode: 0x" << hex << setw(4) << setfill('0') << tnps->opcode << dec << ", size: " << setw(5) << setfill(' ') << tnps->size << " " << inet_ntoa(in) << ":" << GetrPort();
 			if (pOldFormat)
-				cout << " (OldFormat)";
-			cout << endl;
+				std::cout << " (OldFormat)";
+			std::cout << std::endl;
 			#if TCPN_LOG_PACKETS == 2
 				if (tnps->size >= 32)
 					DumpPacket((uchar*) tnps, 32);
@@ -284,7 +282,7 @@ bool EmuTCPConnection::LineOutQueuePush(char* line) {
 	#if defined(GOTFRAGS) && 0
 		if (strcmp(line, "**CRASHME**") == 0) {
 			int i = 0;
-			cout << (5 / i) << endl;
+			std::cout << (5 / i) << std::endl;
 		}
 	#endif
 	if(line[0] == '*') {
@@ -456,10 +454,10 @@ void EmuTCPConnection::SendNetErrorPacket(const char* reason) {
 	#if TCPC_DEBUG >= 1
 		struct in_addr	in;
 		in.s_addr = GetrIP();
-		cout "NetError: '";
+		std::cout "NetError: '";
 		if (reason)
-			cout << reason;
-		cout << "': " << inet_ntoa(in) << ":" << GetPort() << endl;
+			std::cout << reason;
+		std::cout << "': " << inet_ntoa(in) << ":" << GetPort() << std::endl;
 	#endif
 	ServerPacket* pack = new ServerPacket(0);
 	pack->size = 1;
@@ -522,7 +520,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsPackets(char* errbuf) {
 		size = tnps->size;
 		if (size >= MaxTCPReceiveBuffferSize) {
 #if TCPN_DEBUG_Memory >= 1
-			cout << "TCPConnection[" << GetID() << "]::ProcessReceivedDataAsPackets(): size[" << size << "] >= MaxTCPReceiveBuffferSize" << endl;
+			std::cout << "TCPConnection[" << GetID() << "]::ProcessReceivedDataAsPackets(): size[" << size << "] >= MaxTCPReceiveBuffferSize" << std::endl;
 			DumpPacket(&recvbuf[base], 16);
 #endif
 			if (errbuf)
@@ -562,13 +560,13 @@ bool EmuTCPConnection::ProcessReceivedDataAsPackets(char* errbuf) {
 			if (pack->opcode == 0) {
 				if (pack->size) {
 					#if TCPN_DEBUG >= 2
-						cout << "Received TCP Network layer packet" << endl;
+						std::cout << "Received TCP Network layer packet" << std::endl;
 					#endif
 					ProcessNetworkLayerPacket(pack);
 				}
 				#if TCPN_DEBUG >= 5
 					else {
-						cout << "Received TCP keepalive packet. (opcode=0)" << endl;
+						std::cout << "Received TCP keepalive packet. (opcode=0)" << std::endl;
 					}
 				#endif
 				// keepalive, no need to process
@@ -580,7 +578,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsPackets(char* errbuf) {
 						struct in_addr	in;
 						in.s_addr = GetrIP();
 						CoutTimestamp(true);
-						cout << ": Logging incoming TCP packet. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << endl;
+						std::cout << ": Logging incoming TCP packet. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
 						#if TCPN_LOG_PACKETS == 2
 							if (pack->size >= 32)
 								DumpPacket(pack->pBuffer, 32);
@@ -596,7 +594,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsPackets(char* errbuf) {
 					EmuTCPConnection* con = Server->FindConnection(pack->destination);
 					if (!con) {
 						#if TCPN_DEBUG >= 1
-							cout << "Error relaying packet: con = 0" << endl;
+							std::cout << "Error relaying packet: con = 0" << std::endl;
 						#endif
 						safe_delete(pack);
 					}
@@ -635,7 +633,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsOldPackets(char* errbuf) {
 		memcpy(&size, &buffer[2], 2);
 		if (size >= MaxTCPReceiveBuffferSize) {
 #if TCPN_DEBUG_Memory >= 1
-			cout << "TCPConnection[" << GetID() << "]::ProcessReceivedDataAsPackets(): size[" << size << "] >= MaxTCPReceiveBuffferSize" << endl;
+			std::cout << "TCPConnection[" << GetID() << "]::ProcessReceivedDataAsPackets(): size[" << size << "] >= MaxTCPReceiveBuffferSize" << std::endl;
 #endif
 			if (errbuf)
 				snprintf(errbuf, TCPConnection_ErrorBufferSize, "EmuTCPConnection::ProcessReceivedDataAsPackets(): size >= MaxTCPReceiveBuffferSize");
@@ -665,7 +663,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsOldPackets(char* errbuf) {
 						struct in_addr	in;
 						in.s_addr = GetrIP();
 						CoutTimestamp(true);
-						cout << ": Logging incoming TCP OldPacket. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << endl;
+						std::cout << ": Logging incoming TCP OldPacket. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
 						#if TCPN_LOG_PACKETS == 2
 							if (pack->size >= 32)
 								DumpPacket(pack->pBuffer, 32);
@@ -726,7 +724,7 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 			#if TCPC_DEBUG >= 3
 				struct in_addr	in;
 				in.s_addr = GetrIP();
-				cout << "Switching to RelayServer mode: " << inet_ntoa(in) << ":" << GetPort() << endl;
+				std::cout << "Switching to RelayServer mode: " << inet_ntoa(in) << ":" << GetPort() << std::endl;
 			#endif
 			RelayServer = true;
 			break;
@@ -774,10 +772,10 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 			#if TCPC_DEBUG >= 1
 				struct in_addr	in;
 				in.s_addr = GetrIP();
-				cout "Received NetError: '";
+				std::cout "Received NetError: '";
 				if (pack->size > 1)
-					cout << (char*) data;
-				cout << "': " << inet_ntoa(in) << ":" << GetPort() << endl;
+					std::cout << (char*) data;
+				std::cout << "': " << inet_ntoa(in) << ":" << GetPort() << std::endl;
 			#endif
 			break;
 		}
@@ -796,7 +794,7 @@ bool EmuTCPConnection::SendData(bool &sent_something, char* errbuf) {
 		SendPacket(pack);
 		safe_delete(pack);
 		#if TCPN_DEBUG >= 5
-			cout << "Sending TCP keepalive packet. (timeout=" << timeout_timer.GetRemainingTime() << " remaining)" << endl;
+		std::cout << "Sending TCP keepalive packet. (timeout=" << timeout_timer.GetRemainingTime() << " remaining)" << std::endl;
 		#endif
 	}
 

@@ -22,7 +22,6 @@
 #include "../common/eq_packet_structs.h"
 #include <memory.h>
 #include <iostream>
-using namespace std;
 	/*#ifdef _CRTDBG_MAP_ALLOC
 		#undef new
 	#endif*/
@@ -137,7 +136,7 @@ int EQTime::setEQTimeOfDay(TimeOfDay_Struct start_eq, time_t start_real)
 //For some reason, ifstream/ofstream have problems with EQEmu datatypes in files.
 bool EQTime::saveFile(const char *filename)
 {
-	ofstream of;
+	std::ofstream of;
 	of.open(filename);
 	if(!of)
 	{
@@ -146,13 +145,13 @@ bool EQTime::saveFile(const char *filename)
 	}
 	//Enable for debugging
 	//cout << "SAVE: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl;
-	of << EQT_VERSION << endl;
-	of << (long)eqTime.start_eqtime.day << endl;
-	of << (long)eqTime.start_eqtime.hour << endl;
-	of << (long)eqTime.start_eqtime.minute << endl;
-	of << (long)eqTime.start_eqtime.month << endl;
-	of << eqTime.start_eqtime.year << endl;
-	of << eqTime.start_realtime << endl;
+	of << EQT_VERSION << std::endl;
+	of << (long)eqTime.start_eqtime.day << std::endl;
+	of << (long)eqTime.start_eqtime.hour << std::endl;
+	of << (long)eqTime.start_eqtime.minute << std::endl;
+	of << (long)eqTime.start_eqtime.month << std::endl;
+	of << eqTime.start_eqtime.year << std::endl;
+	of << eqTime.start_realtime << std::endl;
 	of.close();
 	return true;
 }
@@ -161,7 +160,7 @@ bool EQTime::loadFile(const char *filename)
 {
 	int version=0;
 	long in_data=0;
-	ifstream in;
+	std::ifstream in;
 	in.open(filename);
 	if(!in)
 	{
@@ -265,7 +264,7 @@ void EQTime::AddMinutes(uint32 minutes, TimeOfDay_Struct *to) {
 	to->year += (cur-1) / 12;
 }
 
-void EQTime::ToString(TimeOfDay_Struct *t, string &str) {
+void EQTime::ToString(TimeOfDay_Struct *t, std::string &str) {
 	char buf[128];
 	snprintf(buf, 128, "%.2d/%.2d/%.4d %.2d:%.2d",
 		t->month, t->day, t->year, t->hour, t->minute);

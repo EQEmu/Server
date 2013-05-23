@@ -5,7 +5,6 @@
 #endif
 
 #include <iostream>
-using namespace std;
 #include <errmsg.h>
 #include <mysqld_error.h>
 #include <limits.h>
@@ -72,17 +71,17 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 #if DEBUG_MYSQL_QUERIES >= 1
 	char tmp[120];
 	strn0cpy(tmp, query, sizeof(tmp));
-	cout << "QUERY: " << tmp << endl;
+	std::cout << "QUERY: " << tmp << std::endl;
 #endif
 	if (mysql_real_query(&mysql, query, querylen)) {
 		if (mysql_errno(&mysql) == CR_SERVER_GONE_ERROR)
 			pStatus = Error;
 		if (mysql_errno(&mysql) == CR_SERVER_LOST || mysql_errno(&mysql) == CR_SERVER_GONE_ERROR) {
 			if (retry) {
-				cout << "Database Error: Lost connection, attempting to recover...." << endl;
+				std::cout << "Database Error: Lost connection, attempting to recover...." << std::endl;
 				ret = RunQuery(query, querylen, errbuf, result, affected_rows, last_insert_id, errnum, false);
 				if (ret)
-					cout << "Reconnection to database successful." << endl;
+					std::cout << "Reconnection to database successful." << std::endl;
 			}
 			else {
 				pStatus = Error;
@@ -90,7 +89,7 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 					*errnum = mysql_errno(&mysql);
 				if (errbuf)
 					snprintf(errbuf, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
-				cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << endl;
+				std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
 				ret = false;
 			}
 		}
@@ -100,7 +99,7 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 			if (errbuf)
 				snprintf(errbuf, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 #ifdef _EQDEBUG
-			cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << endl;
+			std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
 #endif
 			ret = false;
 		}
@@ -124,7 +123,7 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 			}
 			else {
 #ifdef _EQDEBUG
-				cout << "DB Query Error: No Result" << endl;
+				std::cout << "DB Query Error: No Result" << std::endl;
 #endif
 				if (errnum)
 					*errnum = UINT_MAX;
@@ -139,15 +138,15 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 	}
 #if DEBUG_MYSQL_QUERIES >= 1
 	if (ret) {
-		cout << "query successful";
+		std::cout << "query successful";
 		if (result && (*result))
-			cout << ", " << (int) mysql_num_rows(*result) << " rows returned";
+			std::cout << ", " << (int) mysql_num_rows(*result) << " rows returned";
 		if (affected_rows)
-			cout << ", " << (*affected_rows) << " rows affected";
-		cout<< endl;
+			std::cout << ", " << (*affected_rows) << " rows affected";
+		std::cout<< std::endl;
 	}
 	else {
-		cout << "QUERY: query FAILED" << endl;
+		std::cout << "QUERY: query FAILED" << std::endl;
 	}
 #endif
 	return ret;

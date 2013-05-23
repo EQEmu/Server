@@ -1,5 +1,3 @@
-#include "debug.h"
-
 #include <iostream>
 #include <string>
 #include <cstdarg>
@@ -13,16 +11,18 @@
 	#define vsnprintf	_vsnprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
-	
+
 #else
 	
 	#include <sys/types.h>
 	#include <unistd.h>
+
 #endif
 
-#include "../common/StringUtil.h"
-#include "../common/MiscFunctions.h"
-#include "../common/platform.h"
+#include "debug.h"
+#include "StringUtil.h"
+#include "MiscFunctions.h"
+#include "platform.h"
 
 #ifndef va_copy
 	#define va_copy(d,s) ((d) = (s))
@@ -76,7 +76,6 @@ EQEMuLog::~EQEMuLog() {
 }
 
 bool EQEMuLog::open(LogIDs id) {
-
 	if (!logFileValid) {
 		return false;
 	}
@@ -92,40 +91,36 @@ bool EQEMuLog::open(LogIDs id) {
 		return true;
 	}
 
-	std::string filename = FileNames[id];
-
+	char exename[200] = "";
 	const EQEmuExePlatform &platform = GetExecutablePlatform();
-
 	if(platform == ExePlatformWorld) {
-		filename.append("_world");
+		snprintf(exename, sizeof(exename), "_world");
 	} else if(platform == ExePlatformZone) {
-		filename.append("_zone");
+		snprintf(exename, sizeof(exename), "_zone");
 	} else if(platform == ExePlatformLaunch) {
-		filename.append("_launch");
+		snprintf(exename, sizeof(exename), "_launch");
 	} else if(platform == ExePlatformUCS) {
-		filename.append("_ucs");
+		snprintf(exename, sizeof(exename), "_ucs");
 	} else if(platform == ExePlatformQueryServ) {
-		filename.append("_queryserv");
+		snprintf(exename, sizeof(exename), "_queryserv");
 	} else if(platform == ExePlatformSharedMemory) {
-		filename.append("_shared_memory");
+		snprintf(exename, sizeof(exename), "_shared_memory");
 	}
 
-
+	char filename[200];
 #ifndef NO_PIDLOG
-	// According to http://msdn.microsoft.com/en-us/library/vstudio/ee404875(v=vs.100).aspx
-	// Visual Studio 2010 doesn't have std::to_string(int) but it does have one for
-	// long long. Oh well, it works fine and formats perfectly acceptably.
-	filename.append(std::to_string((long long)getpid()));
+	snprintf(filename, sizeof(filename), "%s%s_%04i.log", FileNames[id], exename, getpid());
+#else
+	snprintf(filename, sizeof(filename), "%s%s.log", FileNames[id], exename);
 #endif
-	filename.append(".log");
-	fp[id] = fopen(filename.c_str(), "a");
+	fp[id] = fopen(filename, "a");
 	if (!fp[id]) {
 		std::cerr << "Failed to open log file: " << filename << std::endl;
 		pLogStatus[id] |= 4; // set file state to error
 		return false;
 	}
 	fputs("---------------------------------------------\n",fp[id]);
-	write(id, "Starting Log: %s", filename.c_str());
+	write(id, "Starting Log: %s", filename);
 	return true;
 }
 
@@ -152,54 +147,44 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 	time( &aclock ); /* Get time in seconds */
 	newtime = localtime( &aclock ); /* Convert time to struct */
 
-	if (dofile) {
+	if (dofile)
 #ifndef NO_PIDLOG
 		fprintf(fp[id], "[%02d.%02d. - %02d:%02d:%02d] ", newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
 #else
 		fprintf(fp[id], "%04i [%02d.%02d. - %02d:%02d:%02d] ", getpid(), newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
 #endif
-	}
 
-	va_list argptr,tmpargptr;
-	
+	va_list argptr, tmpargptr;
+	va_start(argptr, fmt);
 	if (dofile) {
-		va_start(argptr, fmt);
-		va_copy(tmpargptr,argptr);
+		va_copy(tmpargptr, argptr);
 		vfprintf( fp[id], fmt, tmpargptr );
-		va_end(tmpargptr);
 	}
 	if(logCallbackFmt[id]) {
 		msgCallbackFmt p = logCallbackFmt[id];
-		va_start(argptr, fmt);
-		va_copy(tmpargptr,argptr);
+		va_copy(tmpargptr, argptr);
 		p(id, fmt, tmpargptr );
-		va_end(tmpargptr);
 	}
-
-	std::string outputMessage;
-	va_start(argptr, fmt);
-	va_copy(tmpargptr,argptr);
-	vStringFormat(outputMessage, fmt, tmpargptr);
-	va_end(tmpargptr);
-
 	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
-			
-			std::cerr << "[" << LogNames[id] << "] ";
-			std::cerr << outputMessage;
+			fprintf(stderr, "[%s] ", LogNames[id]);
+			vfprintf( stderr, fmt, argptr );
 		}
 		else {
-			std::cout << "[" << LogNames[id] << "] ";
-			std::cout << outputMessage;
+			fprintf(stdout, "[%s] ", LogNames[id]);
+			vfprintf( stdout, fmt, argptr );
 		}
 	}
+	va_end(argptr);
 	if (dofile)
 		fprintf(fp[id], "\n");
 	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
-			std::cerr << std::endl;
+			fprintf(stderr, "\n");
+			fflush(stderr);
 		} else {
-			std::cout << std::endl;
+			fprintf(stdout, "\n");
+			fflush(stdout);
 		}
 	}
 	if(dofile)
@@ -346,7 +331,7 @@ bool EQEMuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...) {
 bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 skip) {
 	if (!logFileValid) {
 #if EQDEBUG >= 10
-	cerr << "Error: Dump() from null pointer"<<endl;
+	std::cerr << "Error: Dump() from null pointer" << std::endl;
 #endif
 		return false;
 	}
@@ -463,3 +448,4 @@ void EQEMuLog::SetAllCallbacks(msgCallbackPva proc) {
 		SetCallback((LogIDs)r, proc);
 	}
 }
+

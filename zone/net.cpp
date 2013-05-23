@@ -86,7 +86,6 @@ extern volatile bool ZoneLoaded;
 
 
 
-
 TimeoutManager timeout_manager;
 NetConnection net;
 EntityList entity_list;
@@ -106,8 +105,6 @@ QuestParserCollection *parse = 0;
 const SPDat_Spell_Struct* spells;
 void LoadSpells(EQEmu::MemoryMappedFile **mmf);
 int32 SPDAT_RECORDS = -1;
-
-
 
 void Shutdown();
 extern void MapOpcodes();
@@ -606,27 +603,27 @@ void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
 
 void UpdateWindowTitle(char* iNewTitle) {
 #ifdef _WINDOWS
-	std::string newTitle;
+	char tmp[500];
 	if (iNewTitle) {
-		StringFormat(newTitle,  "%i: %s", ZoneConfig::get()->ZonePort, iNewTitle);
+		snprintf(tmp, sizeof(tmp), "%i: %s", ZoneConfig::get()->ZonePort, iNewTitle);
 	}
 	else {
 		if (zone) {
 			#if defined(GOTFRAGS) || defined(_EQDEBUG)
-				StringFormat(newTitle, "%i: %s, %i clients, %i", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients, getpid());
+				snprintf(tmp, sizeof(tmp), "%i: %s, %i clients, %i", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients, getpid());
 			#else
-				StringFormat(newTitle, "%i: %s, %i clients", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients);
+				snprintf(tmp, sizeof(tmp), "%i: %s, %i clients", ZoneConfig::get()->ZonePort, zone->GetShortName(), numclients);
 			#endif
 		}
 		else {
 			#if defined(GOTFRAGS) || defined(_EQDEBUG)
-				StringFormat(newTitle, "%i: sleeping, %i", ZoneConfig::get()->ZonePort, getpid());
+				snprintf(tmp, sizeof(tmp), "%i: sleeping, %i", ZoneConfig::get()->ZonePort, getpid());
 			#else
-				StringFormat(newTitle, "%i: sleeping", ZoneConfig::get()->ZonePort);
+				snprintf(tmp, sizeof(tmp), "%i: sleeping", ZoneConfig::get()->ZonePort);
 			#endif
 		}
 	}
-	SetConsoleTitle(newTitle.c_str());
+	SetConsoleTitle(tmp);
 #endif
 }
 

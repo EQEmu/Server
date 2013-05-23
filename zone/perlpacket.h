@@ -20,7 +20,6 @@
 
 #include <string>
 #include <vector>
-using namespace std;
 
 #include "../common/emu_opcodes.h"
 

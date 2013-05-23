@@ -32,7 +32,6 @@ TimeoutManager timeout_manager;
 LoginServer server;
 ErrorLog *server_log;
 bool run_server = true;
-using namespace std;
 
 void CatchSignal(int sig_num)
 {
@@ -45,7 +44,7 @@ int main()
 
 	//Create our error log, is of format login_<number>.log
 	time_t current_time = time(nullptr);
-	stringstream log_name(stringstream::in | stringstream::out);
+	std::stringstream log_name(std::stringstream::in | std::stringstream::out);
 #ifdef WIN32
 	log_name << ".\\logs\\login_" << (unsigned int)current_time << ".log";
 #else
@@ -90,14 +89,14 @@ int main()
 	}
 
 	//Parse encryption mode option.
-	string mode = server.config->GetVariable("security", "mode");
+	std::string mode = server.config->GetVariable("security", "mode");
 	if(mode.size() > 0)
 	{
 		server.options.EncryptionMode(atoi(mode.c_str()));
 	}
 
 	//Parse local network option.
-	string ln = server.config->GetVariable("options", "local_network");
+	std::string ln = server.config->GetVariable("options", "local_network");
 	if(ln.size() > 0)
 	{
 		server.options.LocalNetwork(ln);

@@ -15,21 +15,19 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include "../common/StringUtil.h"
 
 #include <sstream>
 #include <iostream>
+#include <limits>
 
-#include <limits.h>
+#include "debug.h"
+#include "StringUtil.h"
 #include "Item.h"
 #include "database.h"
 #include "misc.h"
 #include "races.h"
 #include "shareddb.h"
 #include "classes.h"
-
-using namespace std;
 
 int32 NextItemInstSerialNumber = 1;
 
@@ -45,7 +43,7 @@ static inline int32 GetNextItemInstSerialNumber() {
 	// NextItemInstSerialNumber is the next one to hand out.
 	//
 	// It is very unlikely to reach 2,147,483,647. Maybe we should call abort(), rather than wrapping back to 1.
-	if(NextItemInstSerialNumber >= INT_MAX)
+	if(NextItemInstSerialNumber >= std::numeric_limits<uint32>::max())
 		NextItemInstSerialNumber = 1;
 	else
 		NextItemInstSerialNumber++;
@@ -95,7 +93,7 @@ ItemInstQueue::~ItemInstQueue() {
 }
 
 Inventory::~Inventory() {
-	map<int16, ItemInst*>::iterator cur,end;
+	std::map<int16, ItemInst*>::iterator cur,end;
 
 
 	cur = m_worn.begin();
@@ -573,7 +571,7 @@ ItemInst* Inventory::GetItem(int16 slot_id) const
 
 std::string ItemInst::GetCustomDataString() const {
 	std::string ret_val;
-	map<std::string, std::string>::const_iterator iter = m_custom_data.begin();
+	std::map<std::string, std::string>::const_iterator iter = m_custom_data.begin();
 	while(iter != m_custom_data.end()) {
 		if(ret_val.length() > 0) {
 			ret_val += "^";
@@ -617,14 +615,14 @@ void ItemInst::SetCustomData(std::string identifier, bool value) {
 }
 
 void ItemInst::DeleteCustomData(std::string identifier) {
-	map<std::string, std::string>::iterator iter = m_custom_data.find(identifier);
+	std::map<std::string, std::string>::iterator iter = m_custom_data.find(identifier);
 	if(iter != m_custom_data.end()) {
 		m_custom_data.erase(iter);
 	}
 }
 
 std::string ItemInst::GetCustomData(std::string identifier) {
-	map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
+	std::map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
 	if(iter != m_custom_data.end()) {
 		return iter->second;
 	}
@@ -1053,27 +1051,7 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 	return SLOT_INVALID;
 }
 
-void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
-	iter_contents itb;
-
-	if (!inst || !inst->IsType(ItemClassContainer)) 
-		return;
-
-	// Go through bag, if bag
-	for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
-		ItemInst* baginst = itb->second;
-		if(!baginst || !baginst->GetItem())
-			continue;
-			
-		std::string subSlot;
-		StringFormat(subSlot,"	Slot %d: %s (%d)", Inventory::CalcSlotId((*it)->first, itb->first),
-			baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
-		std::cout << subSlot << std::endl;
-	}
-	
-}
-
-void Inventory::dumpItemCollection(const map<int16, ItemInst*> &collection) {
+void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection) {
 	iter_inst it;
 	iter_contents itb;
 	ItemInst* inst = nullptr;
@@ -1084,7 +1062,7 @@ void Inventory::dumpItemCollection(const map<int16, ItemInst*> &collection) {
 		if(!inst || !inst->GetItem())
 			continue;
 		
-		std:string slot;
+		std::string slot;
 		StringFormat(slot, "Slot %d: %s (%d)",it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
 		std::cout << slot << std::endl;		
 
@@ -1125,7 +1103,7 @@ void Inventory::dumpEntireInventory() {
 }
 
 // Internal Method: Retrieves item within an inventory bucket
-ItemInst* Inventory::_GetItem(const map<int16, ItemInst*>& bucket, int16 slot_id) const
+ItemInst* Inventory::_GetItem(const std::map<int16, ItemInst*>& bucket, int16 slot_id) const
 {
 	iter_inst it = bucket.find(slot_id);
 	if (it != bucket.end()) {
@@ -1193,7 +1171,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 }
 
 // Internal Method: Checks an inventory bucket for a particular item
-int16 Inventory::_HasItem(map<int16, ItemInst*>& bucket, uint32 item_id, uint8 quantity)
+int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, uint8 quantity)
 {
 	iter_inst it;
 	iter_contents itb;
@@ -1283,7 +1261,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 }
 
 // Internal Method: Checks an inventory bucket for a particular item
-int16 Inventory::_HasItemByUse(map<int16, ItemInst*>& bucket, uint8 use, uint8 quantity)
+int16 Inventory::_HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, uint8 quantity)
 {
 	iter_inst it;
 	iter_contents itb;
@@ -1351,7 +1329,7 @@ int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 	return SLOT_INVALID;
 }
 
-int16 Inventory::_HasItemByLoreGroup(map<int16, ItemInst*>& bucket, uint32 loregroup)
+int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 loregroup)
 {
 	iter_inst it;
 	iter_contents itb;

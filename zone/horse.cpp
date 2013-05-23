@@ -25,7 +25,7 @@
 #include <assert.h>
 #include "worldserver.h"
 
-map<uint16, const NPCType *> Horse::horse_types;
+std::map<uint16, const NPCType *> Horse::horse_types;
 LinkedList<NPCType *> horses_auto_delete;
 
 Horse::Horse(Client *_owner, uint16 spell_id, float x, float y, float z, float heading)

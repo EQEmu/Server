@@ -73,9 +73,9 @@ bool TitleManager::LoadTitles()
 
 EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *c)
 {
-	vector<TitleEntry>::iterator Iterator;
+	std::vector<TitleEntry>::iterator Iterator;
 
-	vector<TitleEntry> AvailableTitles;
+	std::vector<TitleEntry> AvailableTitles;
 
 	uint32 Length = 4;
 
@@ -122,7 +122,7 @@ int TitleManager::NumberOfAvailableTitles(Client *c)
 {
 	int Count = 0;
 
-	vector<TitleEntry>::iterator Iterator;
+	std::vector<TitleEntry>::iterator Iterator;
 
 	Iterator = Titles.begin();
 
@@ -137,9 +137,9 @@ int TitleManager::NumberOfAvailableTitles(Client *c)
 	return Count;
 }
 
-string TitleManager::GetPrefix(int TitleID)
+std::string TitleManager::GetPrefix(int TitleID)
 {
-	vector<TitleEntry>::iterator Iterator;
+	std::vector<TitleEntry>::iterator Iterator;
 
 	Iterator = Titles.begin();
 
@@ -154,9 +154,9 @@ string TitleManager::GetPrefix(int TitleID)
 	return "";
 }
 
-string TitleManager::GetSuffix(int TitleID)
+std::string TitleManager::GetSuffix(int TitleID)
 {
-	vector<TitleEntry>::iterator Iterator;
+	std::vector<TitleEntry>::iterator Iterator;
 
 	Iterator = Titles.begin();
 
@@ -171,7 +171,7 @@ string TitleManager::GetSuffix(int TitleID)
 	return "";
 }
 
-bool TitleManager::IsClientEligibleForTitle(Client *c, vector<TitleEntry>::iterator Title)
+bool TitleManager::IsClientEligibleForTitle(Client *c, std::vector<TitleEntry>::iterator Title)
 {
 		if((Title->CharID >= 0) && (c->CharacterID() != static_cast<uint32>(Title->CharID)))
 			return false;
@@ -212,7 +212,7 @@ bool TitleManager::IsClientEligibleForTitle(Client *c, vector<TitleEntry>::itera
 
 bool TitleManager::IsNewAATitleAvailable(int AAPoints, int Class)
 {
-	vector<TitleEntry>::iterator Iterator;
+	std::vector<TitleEntry>::iterator Iterator;
 
 	Iterator = Titles.begin();
 
@@ -229,7 +229,7 @@ bool TitleManager::IsNewAATitleAvailable(int AAPoints, int Class)
 
 bool TitleManager::IsNewTradeSkillTitleAvailable(int SkillID, int SkillValue)
 {
-	vector<TitleEntry>::iterator Iterator;
+	std::vector<TitleEntry>::iterator Iterator;
 
 	Iterator = Titles.begin();
 

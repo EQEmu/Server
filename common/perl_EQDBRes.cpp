@@ -139,7 +139,7 @@ XS(XS_EQDBRes_fetch_row_array)
 		Perl_croak(aTHX_ "Usage: EQDBRes::fetch_row_array(THIS)");
 	{
 		EQDBRes *		THIS;
-		vector<string>		RETVAL;
+		std::vector<std::string>		RETVAL;
 
 		if (sv_derived_from(ST(0), "EQDBRes")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -160,7 +160,7 @@ XS(XS_EQDBRes_fetch_row_array)
 			/* grow the stack to the number of elements being returned */
 			EXTEND(SP, RETVAL.size());
 			for (ix_RETVAL = 0; ix_RETVAL < RETVAL.size(); ix_RETVAL++) {
-					const string &it = RETVAL[ix_RETVAL];
+					const std::string &it = RETVAL[ix_RETVAL];
 					ST(ix_RETVAL) = sv_newmortal();
 					sv_setpvn(ST(ix_RETVAL), it.c_str(), it.length());
 			}
@@ -179,7 +179,7 @@ XS(XS_EQDBRes_fetch_row_hash)
 		Perl_croak(aTHX_ "Usage: EQDBRes::fetch_row_hash(THIS)");
 	{
 		EQDBRes *		THIS;
-		map<string,string>		RETVAL;
+		std::map<std::string,std::string>		RETVAL;
 
 		if (sv_derived_from(ST(0), "EQDBRes")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -199,7 +199,7 @@ XS(XS_EQDBRes_fetch_row_hash)
 				sv_2mortal((SV*)hv);
 				ST(0) = newRV((SV*)hv);
 
-				map<string,string>::const_iterator cur, end;
+				std::map<std::string,std::string>::const_iterator cur, end;
 				cur = RETVAL.begin();
 				end = RETVAL.end();
 				for(; cur != end; cur++) {

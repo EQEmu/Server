@@ -38,15 +38,11 @@
 #include "LauncherLink.h"
 #include "wguild_mgr.h"
 
-
 #ifdef seed
 #undef seed
 #endif
 
-
 #include <algorithm>
-
-using namespace std;
 
 extern ZSList	zoneserver_list;
 extern ClientList	client_list;
@@ -115,13 +111,13 @@ int EQW::CountZones() {
 }
 
 //returns an array of zone_refs (opaque)
-vector<string> EQW::ListBootedZones() {
-	vector<string> res;
+std::vector<std::string> EQW::ListBootedZones() {
+	std::vector<std::string> res;
 
-	vector<uint32> zones;
+	std::vector<uint32> zones;
 	zoneserver_list.GetZoneIDList(zones);
 
-	vector<uint32>::iterator cur, end;
+	std::vector<uint32>::iterator cur, end;
 	cur = zones.begin();
 	end = zones.end();
 	for(; cur != end; cur++) {
@@ -131,8 +127,8 @@ vector<string> EQW::ListBootedZones() {
 	return(res);
 }
 
-map<string,string> EQW::GetZoneDetails(Const_char *zone_ref) {
-	map<string,string> res;
+std::map<std::string,std::string> EQW::GetZoneDetails(Const_char *zone_ref) {
+	std::map<std::string,std::string> res;
 
 	ZoneServer *zs = zoneserver_list.FindByID(atoi(zone_ref));
 	if(zs == nullptr) {
@@ -165,13 +161,13 @@ int EQW::CountPlayers() {
 }
 
 //returns an array of character names in the zone (empty=all zones)
-vector<string> EQW::ListPlayers(Const_char *zone_name) {
-	vector<string> res;
+std::vector<std::string> EQW::ListPlayers(Const_char *zone_name) {
+	std::vector<std::string> res;
 
-	vector<ClientListEntry *> list;
+	std::vector<ClientListEntry *> list;
 	client_list.GetClients(zone_name, list);
 
-	vector<ClientListEntry *>::iterator cur, end;
+	std::vector<ClientListEntry *>::iterator cur, end;
 	cur = list.begin();
 	end = list.end();
 	for(; cur != end; cur++) {
@@ -180,8 +176,8 @@ vector<string> EQW::ListPlayers(Const_char *zone_name) {
 	return(res);
 }
 
-map<string,string> EQW::GetPlayerDetails(Const_char *char_name) {
-	map<string,string> res;
+std::map<std::string,std::string> EQW::GetPlayerDetails(Const_char *char_name) {
+	std::map<std::string,std::string> res;
 
 	ClientListEntry *cle = client_list.FindCharacter(char_name);
 	if(cle == nullptr) {
@@ -213,7 +209,7 @@ int EQW::CountLaunchers(bool active_only) {
 	if(active_only)
 		return(launcher_list.GetLauncherCount());
 
-	vector<string> it(EQW::ListLaunchers());
+	std::vector<std::string> it(EQW::ListLaunchers());
 	return(it.size());
 }
 /*
@@ -223,10 +219,10 @@ vector<string> EQW::ListActiveLaunchers() {
 	return(launchers);
 }*/
 
-vector<string> EQW::ListLaunchers() {
+std::vector<std::string> EQW::ListLaunchers() {
 //	vector<string> list;
 //	database.GetLauncherList(list);
-	vector<string> launchers;
+	std::vector<std::string> launchers;
 	launcher_list.GetLauncherNameList(launchers);
 	return(launchers);
 
@@ -405,8 +401,8 @@ int EQW::CountBugs() {
 	return 0;
 }
 
-vector<string> EQW::ListBugs(uint32 offset) {
-	vector<string> res;
+std::vector<std::string> EQW::ListBugs(uint32 offset) {
+	std::vector<std::string> res;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	MYSQL_RES *result;
@@ -422,8 +418,8 @@ vector<string> EQW::ListBugs(uint32 offset) {
 	return res;
 }
 
-map<string,string> EQW::GetBugDetails(Const_char *id) {
-	map<string,string> res;
+std::map<std::string,std::string> EQW::GetBugDetails(Const_char *id) {
+	std::map<std::string,std::string> res;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	MYSQL_RES *result;
@@ -447,7 +443,7 @@ map<string,string> EQW::GetBugDetails(Const_char *id) {
 }
 
 void EQW::ResolveBug(const char *id) {
-	vector<string> res;
+	std::vector<std::string> res;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	if(database.RunQuery(query, MakeAnyLenString(&query, "UPDATE bugs SET status=1 WHERE id=%s", id), errbuf)) {

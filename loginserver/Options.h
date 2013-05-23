@@ -100,52 +100,52 @@ public:
 	/**
 	* Sets local_network.
 	*/
-	inline void LocalNetwork(string n) { local_network = n; }
+	inline void LocalNetwork(std::string n) { local_network = n; }
 
 	/**
 	* Return the value of local_network.
 	*/
-	inline string GetLocalNetwork() const { return local_network; }
+	inline std::string GetLocalNetwork() const { return local_network; }
 
 	/**
 	* Sets account table.
 	*/
-	inline void AccountTable(string t) { account_table = t; }
+	inline void AccountTable(std::string t) { account_table = t; }
 
 	/**
 	* Return the value of local_network.
 	*/
-	inline string GetAccountTable() const { return account_table; }
+	inline std::string GetAccountTable() const { return account_table; }
 
 	/**
 	* Sets world account table.
 	*/
-	inline void WorldRegistrationTable(string t) { world_registration_table = t; }
+	inline void WorldRegistrationTable(std::string t) { world_registration_table = t; }
 
 	/**
 	* Return the value of world account table.
 	*/
-	inline string GetWorldRegistrationTable() const { return world_registration_table; }
+	inline std::string GetWorldRegistrationTable() const { return world_registration_table; }
 
 	/**
 	* Sets world admin account table.
 	*/
-	inline void WorldAdminRegistrationTable(string t) { world_admin_registration_table = t; }
+	inline void WorldAdminRegistrationTable(std::string t) { world_admin_registration_table = t; }
 
 	/**
 	* Return the value of world admin account table.
 	*/
-	inline string GetWorldAdminRegistrationTable() const { return world_admin_registration_table; }
+	inline std::string GetWorldAdminRegistrationTable() const { return world_admin_registration_table; }
 
 	/**
 	* Sets world server type table.
 	*/
-	inline void WorldServerTypeTable(string t) { world_server_type_table = t; }
+	inline void WorldServerTypeTable(std::string t) { world_server_type_table = t; }
 
 	/**
 	* Return the value of world admin account table.
 	*/
-	inline string GetWorldServerTypeTable() const { return world_server_type_table; }
+	inline std::string GetWorldServerTypeTable() const { return world_server_type_table; }
 
 	/**
 	* Sets whether we are rejecting duplicate servers or not.
@@ -165,11 +165,11 @@ private:
 	bool dump_out_packets;
 	bool reject_duplicate_servers;
 	int encryption_mode;
-	string local_network;
-	string account_table;
-	string world_registration_table;
-	string world_admin_registration_table;
-	string world_server_type_table;
+	std::string local_network;
+	std::string account_table;
+	std::string world_registration_table;
+	std::string world_admin_registration_table;
+	std::string world_server_type_table;
 };
 
 #endif

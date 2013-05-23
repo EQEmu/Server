@@ -58,7 +58,6 @@ And then at then end of embparser.cpp, add:
 #include <sstream>
 #include <iostream>
 #include <list>
-using namespace std;
 
 #include "worldserver.h"
 #include "net.h"
@@ -101,7 +100,7 @@ QuestManager::~QuestManager() {
 }
 
 void QuestManager::Process() {
-	list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
 
 	end = QTimerList.end();
 	while (cur != end) {
@@ -130,7 +129,7 @@ void QuestManager::Process() {
 			cur++;
 	}
 
-	list<SignalTimer>::iterator curS, endS, tmpS;
+	std::list<SignalTimer>::iterator curS, endS, tmpS;
 
 	curS = STimerList.begin();
 	endS = STimerList.end();
@@ -169,7 +168,7 @@ void QuestManager::EndQuest() {
 
 	if(depop_npc && owner->IsNPC()) {
 		//clear out any timers for them...
-		list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+		std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
 
 		end = QTimerList.end();
 		while (cur != end) {
@@ -190,7 +189,7 @@ void QuestManager::EndQuest() {
 
 void QuestManager::ClearAllTimers() {
 
-	list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
 
 	end = QTimerList.end();
 	while (cur != end)
@@ -453,7 +452,7 @@ void QuestManager::Zone(const char *zone_name) {
 
 void QuestManager::settimer(const char *timer_name, int seconds) {
 
-	list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 	end = QTimerList.end();
 	while (cur != end) {
@@ -472,7 +471,7 @@ void QuestManager::settimer(const char *timer_name, int seconds) {
 
 void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 
-	list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 	end = QTimerList.end();
 	while (cur != end) {
@@ -491,7 +490,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 
 void QuestManager::stoptimer(const char *timer_name) {
 
-	list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 	end = QTimerList.end();
 	while (cur != end)
@@ -507,7 +506,7 @@ void QuestManager::stoptimer(const char *timer_name) {
 
 void QuestManager::stopalltimers() {
 
-	list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
 
 	end = QTimerList.end();
 	while (cur != end)
@@ -924,7 +923,7 @@ void QuestManager::givecash(int copper, int silver, int gold, int platinum) {
 	{
 		initiator->AddMoneyToPP(copper, silver, gold, platinum, true);
 
-		string tmp;
+		std::string tmp;
 		if (platinum > 0)
 		{
 			tmp = "You receive ";
@@ -1220,7 +1219,7 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 	}
 	if (options < 0 || options > 7)
 	{
-		cerr << "Invalid options for global var " << varname << " using defaults" << endl;
+		std::cerr << "Invalid options for global var " << varname << " using defaults" << std::endl;
 	}	// default = 0 (only this npcid,player and zone)
 	else
 	{
@@ -1245,7 +1244,7 @@ int QuestManager::InsertQuestGlobal(
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
-	stringstream duration_ss;
+	std::stringstream duration_ss;
 	if (duration == INT_MAX)
 	{
 		duration_ss << "NULL";
@@ -1264,7 +1263,7 @@ int QuestManager::InsertQuestGlobal(
 		charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str()
 		), errbuf, nullptr, nullptr, &last_id))
 	{
-		cerr << "setglobal error inserting " << varname << " : " << errbuf << endl;
+		std::cerr << "setglobal error inserting " << varname << " : " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 
@@ -1350,7 +1349,7 @@ void QuestManager::delglobal(const char *varname) {
 		" && (npcid=0 || npcid=%i) && (charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
 		varname,qgNpcid,qgCharid,qgZoneid),errbuf))
 	{
-		cerr << "delglobal error deleting " << varname << " : " << errbuf << endl;
+		std::cerr << "delglobal error deleting " << varname << " : " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 
@@ -1569,7 +1568,7 @@ void QuestManager::showgrid(int grid) {
 	MYSQL_ROW row;
 
 	FindPerson_Point pt;
-	vector<FindPerson_Point> pts;
+	std::vector<FindPerson_Point> pts;
 
 	pt.x = initiator->GetX();
 	pt.y = initiator->GetY();
