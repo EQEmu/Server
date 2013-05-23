@@ -19,7 +19,6 @@
 #include <iostream>
 #include <string>
 #include <cctype>
-using namespace std;
 #include <math.h>
 #include "../common/moremath.h"
 #include <stdio.h>
@@ -383,7 +382,7 @@ NPC::~NPC()
 	}
 
 	{
-	list<struct NPCFaction*>::iterator cur,end;
+	std::list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list.begin();
 	end = faction_list.end();
 	for(; cur != end; cur++) {
@@ -463,7 +462,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 	uint16 themlevel = them->GetLevel();
 	uint8 material;
 
-	list<ServerLootItem_Struct*>::iterator cur = itemlist.begin();
+	std::list<ServerLootItem_Struct*>::iterator cur = itemlist.begin();
 	while(cur != itemlist.end())
 	{
 		if(!(*cur))
@@ -2395,7 +2394,7 @@ FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 //Look through our faction list and return a faction con based
 //on the npc_value for the other person's primary faction in our list.
 FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
-	list<struct NPCFaction*>::iterator cur,end;
+	std::list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list.begin();
 	end = faction_list.end();
 	for(; cur != end; cur++) {
@@ -2418,7 +2417,7 @@ bool NPC::IsFactionListAlly(uint32 other_faction) {
 
 int NPC::GetScore()
 {
-    int lv = min(70, (int)GetLevel());
+    int lv = std::min(70, (int)GetLevel());
     int basedmg = (lv*2)*(1+(lv / 100)) - (lv / 2);
     int minx = 0;
     int basehp = 0;
@@ -2471,8 +2470,8 @@ int NPC::GetScore()
     }
 
     final = minx + hpcontrib + dmgcontrib + spccontrib;
-    final = max(1, final);
-    final = min(100, final);
+    final = std::max(1, final);
+    final = std::min(100, final);
     return(final);
 }
 

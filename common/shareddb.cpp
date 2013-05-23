@@ -17,8 +17,6 @@
 #include "faction.h"
 #include "features.h"
 
-using namespace std;
-
 SharedDatabase::SharedDatabase()
 : Database(), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), faction_mmf(nullptr), faction_hash(nullptr),
 	loot_table_mmf(nullptr), loot_drop_mmf(nullptr), loot_table_hash(nullptr), loot_drop_hash(nullptr)
@@ -50,7 +48,7 @@ bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET hideme = %i where id = %i", hideme, account_id), errbuf)) {
-		cerr << "Error in SetGMSpeed query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetGMSpeed query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -85,7 +83,7 @@ uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
 	else
 	{
 
-		cerr << "Error in GetGMSpeed query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetGMSpeed query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -101,7 +99,7 @@ bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET gmspeed = %i where id = %i", gmspeed, account_id), errbuf)) {
-		cerr << "Error in SetGMSpeed query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetGMSpeed query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -140,7 +138,7 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 	return EntitledTime;
 }
 
-bool SharedDatabase::SaveCursor(uint32 char_id, list<ItemInst*>::const_iterator &start, list<ItemInst*>::const_iterator &end)
+bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iterator &start, std::list<ItemInst*>::const_iterator &end)
 {
 iter_queue it;
 int i;
@@ -155,7 +153,7 @@ bool ret=true;
 				break;
 		}
 	} else {
-		cout << "Clearing cursor failed: " << errbuf << endl;
+		std::cout << "Clearing cursor failed: " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 
@@ -337,8 +335,7 @@ int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 	}
 	else
 	{
-
-		cerr << "Error in GetSharedPlatinum query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetSharedPlatinum query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -352,7 +349,7 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add)
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id), errbuf)) {
-		cerr << "Error in SetSharedPlatinum query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetSharedPlatinum query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1049,17 +1046,17 @@ const Item_Struct* SharedDatabase::IterateItems(uint32* id) {
 	return nullptr;
 }
 
-string SharedDatabase::GetBook(const char *txtfile)
+std::string SharedDatabase::GetBook(const char *txtfile)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	char txtfile2[20];
-	string txtout;
+	std::string txtout;
 	strcpy(txtfile2,txtfile);
 	if (!RunQuery(query, MakeAnyLenString(&query, "SELECT txtfile FROM books where name='%s'", txtfile2), errbuf, &result)) {
-		cerr << "Error in GetBook query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetBook query '" << query << "' " << errbuf << std::endl;
 		if (query != 0)
 			safe_delete_array(query);
 		txtout.assign(" ",1);
@@ -1399,7 +1396,7 @@ int32 SharedDatabase::DeleteStalePlayerBackups() {
 	return affected_rows;
 }
 
-bool SharedDatabase::GetCommandSettings(map<string,uint8> &commands) {
+bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;
@@ -1415,7 +1412,7 @@ bool SharedDatabase::GetCommandSettings(map<string,uint8> &commands) {
 		mysql_free_result(result);
 		return true;
 	} else {
-		cerr << "Error in GetCommands query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetCommands query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1973,7 +1970,7 @@ void SharedDatabase::GetPlayerInspectMessage(char* playername, InspectMessage_St
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetPlayerInspectMessage query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetPlayerInspectMessage query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 }
@@ -1984,7 +1981,7 @@ void SharedDatabase::SetPlayerInspectMessage(char* playername, const InspectMess
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET inspectmessage='%s' WHERE name='%s'", message->text, playername), errbuf)) {
-		cerr << "Error in SetPlayerInspectMessage query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetPlayerInspectMessage query '" << query << "' " << errbuf << std::endl;
 	}
 
 	safe_delete_array(query);
@@ -2008,7 +2005,7 @@ void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* m
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetBotInspectMessage query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetBotInspectMessage query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 }
@@ -2019,7 +2016,7 @@ void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Str
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE bots SET BotInspectMessage='%s' WHERE BotID=%i", message->text, botid), errbuf)) {
-		cerr << "Error in SetBotInspectMessage query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetBotInspectMessage query '" << query << "' " << errbuf << std::endl;
 	}
 
 	safe_delete_array(query);

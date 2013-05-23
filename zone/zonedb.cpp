@@ -14,8 +14,6 @@
 #include <string>
 #include <sstream>
 
-using namespace std;
-
 extern Zone* zone;
 
 ZoneDatabase database;
@@ -272,7 +270,7 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 	DoEscapeString(descriptiontext, description, len);
 	DoEscapeString(targetarr, target, len2);
 	if (!RunQuery(query, MakeAnyLenString(&query, "Insert into eventlog (accountname,accountid,status,charname,target,descriptiontype,description,event_nid) values('%s',%i,%i,'%s','%s','%s','%s','%i')", accountname,accountid,status,charname,targetarr,descriptiontype,descriptiontext,event_nid), errbuf))	{
-		cerr << "Error in logevents" << query << "' " << errbuf << endl;
+		std::cerr << "Error in logevents" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -320,7 +318,7 @@ void ZoneDatabase::UpdateBug(BugStruct* bug){
 		"values('%s', '%s', '%s', '%.2f', '%.2f', '%.2f', '%s', %d, '%s', '%s', CURDATE())", zone->GetShortName(), bug->name,
 		uitext==nullptr?"":uitext, bug->y, bug->x, bug->z, bug->chartype, bug->type, targettext==nullptr?"Unknown Target":targettext,
 		bugtext==nullptr?"":bugtext), errbuf)) {
-		cerr << "Error in UpdateBug" << query << "' " << errbuf << endl;
+		std::cerr << "Error in UpdateBug" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 	safe_delete_array(bugtext);
@@ -336,7 +334,7 @@ void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
 	memset(bugtext, 0, 2*len+1);
 	DoEscapeString(bugtext, bug->text, len);
 	if (!RunQuery(query, MakeAnyLenString(&query, "Insert into bugs (type,name,bugtext,flag) values('%s','%s','%s',%i)","Petition",bug->name,bugtext,25), errbuf))	{
-		cerr << "Error in UpdateBug" << query << "' " << errbuf << endl;
+		std::cerr << "Error in UpdateBug" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 	safe_delete_array(bugtext);
@@ -988,7 +986,7 @@ bool ZoneDatabase::NoRentExpired(const char* name){
  */
 const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 	const NPCType *npc=nullptr;
-	map<uint32,NPCType *>::iterator itr;
+	std::map<uint32,NPCType *>::iterator itr;
 
 	// If NPC is already in tree, return it.
 	if((itr = zone->npctable.find(id)) != zone->npctable.end())
@@ -1267,7 +1265,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				// free item we attempted to add.
 				if (zone->npctable.find(tmpNPCType->npc_id) != zone->npctable.end())
 				{
-					cerr << "Error loading duplicate NPC " << tmpNPCType->npc_id << endl;
+					std::cerr << "Error loading duplicate NPC " << tmpNPCType->npc_id << std::endl;
 					delete tmpNPCType;
 					npc = nullptr;
 				} else {
@@ -1282,7 +1280,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				mysql_free_result(result);
 			}
 		} else
-			cerr << "Error loading NPCs from database. Bad query: " << errbuf << endl;
+			std::cerr << "Error loading NPCs from database. Bad query: " << errbuf << std::endl;
 		safe_delete_array(query);
 
 	return npc;
@@ -1291,7 +1289,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 
 const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 clientlevel) {
 	const NPCType *npc=nullptr;
-	map<uint32,NPCType *>::iterator itr;
+	std::map<uint32,NPCType *>::iterator itr;
 
 	//need to save based on merc_npc_type & client level
 	uint32 merc_type_id = id * 100 + clientlevel;
@@ -1592,7 +1590,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				mysql_free_result(result);
 			}
 		} else
-			cerr << "Error loading NPCs from database. Bad query: " << errbuf << endl;
+			std::cerr << "Error loading NPCs from database. Bad query: " << errbuf << std::endl;
 		safe_delete_array(query);
 
 	return npc;
@@ -1985,7 +1983,7 @@ uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
 		}
 			mysql_free_result(result);
 	} else {
-		cerr << "Error in GetGridType query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetGridType query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	return type;
@@ -1998,7 +1996,7 @@ void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "replace into merchantlist_temp (npcid,slot,itemid,charges) values(%d,%d,%d,%d)", npcid, slot, item, charges), errbuf)) {
-		cerr << "Error in SaveMerchantTemp query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SaveMerchantTemp query '" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 }
@@ -2007,7 +2005,7 @@ void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "delete from merchantlist_temp where npcid=%d and slot=%d", npcid, slot), errbuf)) {
-		cerr << "Error in DeleteMerchantTemp query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in DeleteMerchantTemp query '" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 }
@@ -2059,7 +2057,7 @@ uint8 ZoneDatabase::GetUseCFGSafeCoords()
 	else
 	{
 
-		cerr << "Error in GetUseCFGSafeCoords query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetUseCFGSafeCoords query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -2088,7 +2086,7 @@ uint32 ZoneDatabase::GetServerFilters(char* name, ServerSideFilters_Struct *ssfs
 				memcpy(ssfs, row[0], sizeof(ServerSideFilters_Struct));
 			}
 			else {
-				cerr << "Player profile length mismatch in ServerSideFilters" << endl;
+				std::cerr << "Player profile length mismatch in ServerSideFilters" << std::endl;
 				mysql_free_result(result);
 				return 0;
 			}
@@ -2103,7 +2101,7 @@ uint32 ZoneDatabase::GetServerFilters(char* name, ServerSideFilters_Struct *ssfs
 		return len;
 	}
 	else {
-		cerr << "Error in ServerSideFilters query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in ServerSideFilters query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}
@@ -2136,7 +2134,7 @@ bool ZoneDatabase::SetServerFilters(char* name, ServerSideFilters_Struct *ssfs) 
 
 	uint32 affected_rows = 0;
 	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
-		cerr << "Error in SetServerSideFilters query " << errbuf << endl;
+		std::cerr << "Error in SetServerSideFilters query " << errbuf << std::endl;
 		return false;
 	}
 
@@ -2167,7 +2165,7 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetZoneTZ query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetZoneTZ query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	return 0;
@@ -2187,7 +2185,7 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
 			return false;
 	}
 	else {
-		cerr << "Error in SetZoneTZ query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetZoneTZ query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -2217,7 +2215,7 @@ uint8 ZoneDatabase::GetZoneWeather(uint32 zoneid, uint32 version) {
 	}
 
 	else {
-		cerr << "Error in GetZoneWeather query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetZoneWeather query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	return 0;
@@ -2236,7 +2234,7 @@ bool ZoneDatabase::SetZoneWeather(uint32 zoneid, uint32 version, uint8 w) {
 			return false;
 	}
 	else {
-		cerr << "Error in SetZoneWeather query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetZoneWeather query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -2262,7 +2260,7 @@ bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char*
 	}
 	else
 	{
-		cerr << "Error in GetAccountInfoForLogin query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetAccountInfoForLogin query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -2384,7 +2382,7 @@ int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetBlockedSpellsCount query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetBlockedSpellsCount query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return -1;
 	}
@@ -2408,7 +2406,7 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 		int32 r;
 		for(r = 0; (row = mysql_fetch_row(result)); r++) {
 			if(r >= blockedSpellsCount) {
-				cerr << "Error, Blocked Spells Count of " << blockedSpellsCount << " exceeded." << endl;
+				std::cerr << "Error, Blocked Spells Count of " << blockedSpellsCount << " exceeded." << std::endl;
 				break;
 			}
 			memset(&into[r], 0, sizeof(ZoneSpellsBlocked));
@@ -2428,7 +2426,7 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 	}
 	else
 	{
-		cerr << "Error in LoadBlockedSpells query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in LoadBlockedSpells query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -2453,14 +2451,14 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 			return (retVal);
 		}
 		else {
-			cerr << "Error in getZoneShutDownDelay no result '" << query << "' " << errbuf << endl;
+			std::cerr << "Error in getZoneShutDownDelay no result '" << query << "' " << errbuf << std::endl;
 			mysql_free_result(result);
 			safe_delete_array(query);
 			return (RuleI(Zone, AutoShutdownDelay));
 		}
 	}
 	else {
-		cerr << "Error in getZoneShutDownDelay query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in getZoneShutDownDelay query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	return (RuleI(Zone, AutoShutdownDelay));
@@ -2500,7 +2498,7 @@ void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
 	if (RunQuery(query, MakeAnyLenString(&query, "UPDATE account set karma=%i where id=%i", amount, acct_id), errbuf, 0, &affected_rows)){
 		safe_delete_array(query);}
 	else {
-		cerr << "Error in UpdateKarma query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in UpdateKarma query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 }
@@ -2552,7 +2550,7 @@ void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoo
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	if (!RunQuery(query, MakeAnyLenString(&query, "replace into doors (id, doorid,zone,version,name,pos_x,pos_y,pos_z,heading,opentype,guild,lockpick,keyitem,door_param,invert_state,incline,size) values('%i','%i','%s','%i', '%s','%f','%f','%f','%f','%i','%i','%i', '%i','%i','%i','%i','%i')", ddoordbid ,ddoorid ,zone->GetShortName(), zone->GetInstanceVersion(), ddoor_name, dxpos, dypos, dzpos, dheading, dopentype, dguildid, dlockpick, dkeyitem, ddoor_param, dinvert, dincline, dsize), errbuf))	{
-		cerr << "Error in InsertDoor" << query << "' " << errbuf << endl;
+		std::cerr << "Error in InsertDoor" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 }
@@ -2820,7 +2818,7 @@ void ZoneDatabase::RemoveTempFactions(Client *c){
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM faction_values WHERE temp = 1 AND char_id=%u", c->CharacterID()), errbuf)) {
-		cerr << "Error in RemoveTempFactions query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in RemoveTempFactions query '" << query << "' " << errbuf << std::endl;
 	}
 	safe_delete_array(query);
 }
@@ -3015,7 +3013,7 @@ bool ZoneDatabase::LoadFactionValues(uint32 char_id, faction_map & val_list) {
 		return ret;
 	}
 	else {
-		cerr << "Error in LoadFactionValues query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in LoadFactionValues query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 	}
 	return false;
@@ -3083,7 +3081,7 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 	if (!RunQuery(query, MakeAnyLenString(&query,
 		"DELETE FROM faction_values WHERE char_id=%i AND faction_id = %i",
 		char_id, faction_id), errbuf)) {
-		cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -3103,7 +3101,7 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 	if (!RunQuery(query, MakeAnyLenString(&query,
 		"INSERT INTO faction_values (char_id,faction_id,current_value,temp) VALUES (%i,%i,%i,%i)",
 		char_id, faction_id,value,temp), errbuf, 0, &affected_rows)) {
-		cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -3169,7 +3167,7 @@ bool ZoneDatabase::LoadFactionData()
 				mysql_free_result(result);
 			}
 			else {
-				cerr << "Error in LoadFactionData '" << query << "' " << errbuf << endl;
+				std::cerr << "Error in LoadFactionData '" << query << "' " << errbuf << std::endl;
 				safe_delete_array(query);
 				return false;
 			}
@@ -3179,16 +3177,16 @@ bool ZoneDatabase::LoadFactionData()
 		}
 	}
 	else {
-		cerr << "Error in LoadFactionData '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in LoadFactionData '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
 	return true;
 }
 
-bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, list<struct NPCFaction*> *faction_list, int32* primary_faction) {
+bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction) {
 	if (nfl_id <= 0) {
-		list<struct NPCFaction*>::iterator cur,end;
+		std::list<struct NPCFaction*>::iterator cur,end;
 		cur = faction_list->begin();
 		end = faction_list->end();
 		for(; cur != end; cur++) {
@@ -3207,7 +3205,7 @@ bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, list<struct NPCFaction*> *
 	if (primary_faction)
 		*primary_faction = nfl->primaryfaction;
 
-	list<struct NPCFaction*>::iterator cur,end;
+	std::list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list->begin();
 	end = faction_list->end();
 	for(; cur != end; cur++) {

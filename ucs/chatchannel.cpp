@@ -26,7 +26,7 @@
 extern Database database;
 extern uint32 ChatMessagesSent;
 
-ChatChannel::ChatChannel(string inName, string inOwner, string inPassword, bool inPermanent, int inMinimumStatus) :
+ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string inPassword, bool inPermanent, int inMinimumStatus) :
 	DeleteTimer(0) {
 
 	Name = inName;
@@ -56,7 +56,7 @@ ChatChannel::~ChatChannel() {
 		iterator.RemoveCurrent(false);
 }
 
-ChatChannel* ChatChannelList::CreateChannel(string Name, string Owner, string Password, bool Permanent, int MinimumStatus) {
+ChatChannel* ChatChannelList::CreateChannel(std::string Name, std::string Owner, std::string Password, bool Permanent, int MinimumStatus) {
 
 	ChatChannel *NewChannel = new ChatChannel(CapitaliseName(Name), Owner, Password, Permanent, MinimumStatus);
 
@@ -65,9 +65,9 @@ ChatChannel* ChatChannelList::CreateChannel(string Name, string Owner, string Pa
 	return NewChannel;
 }
 
-ChatChannel* ChatChannelList::FindChannel(string Name) {
+ChatChannel* ChatChannelList::FindChannel(std::string Name) {
 
-	string NormalisedName = CapitaliseName(Name);
+	std::string NormalisedName = CapitaliseName(Name);
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
 
@@ -103,7 +103,7 @@ void ChatChannelList::SendAllChannels(Client *c) {
 
 	iterator.Reset();
 
-	string Message;
+	std::string Message;
 
 	char CountString[10];
 
@@ -200,7 +200,7 @@ int ChatChannel::MemberCount(int Status) {
 	return Count;
 }
 
-void ChatChannel::SetPassword(string inPassword) {
+void ChatChannel::SetPassword(std::string inPassword) {
 
 	Password = inPassword;
 
@@ -211,7 +211,7 @@ void ChatChannel::SetPassword(string inPassword) {
 	}
 }
 
-void ChatChannel::SetOwner(string inOwner) {
+void ChatChannel::SetOwner(std::string inOwner) {
 
 	Owner = inOwner;
 
@@ -312,7 +312,7 @@ void ChatChannel::SendOPList(Client *c) {
 
 	c->GeneralChannelMessage("Channel " + Name + " op-list: (Owner=" + Owner + ")");
 
-	list<string>::iterator Iterator;
+	std::list<std::string>::iterator Iterator;
 
 	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); Iterator++)
 		c->GeneralChannelMessage((*Iterator));
@@ -327,7 +327,7 @@ void ChatChannel::SendChannelMembers(Client *c) {
 
 	sprintf(CountString, "(%i)", MemberCount(c->GetAccountStatus()));
 
-	string Message = "Channel " + GetName();
+	std::string Message = "Channel " + GetName();
 
 	Message += CountString;
 
@@ -380,7 +380,7 @@ void ChatChannel::SendChannelMembers(Client *c) {
 
 }
 
-void ChatChannel::SendMessageToChannel(string Message, Client* Sender) {
+void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 
 	if(!Sender) return;
 
@@ -448,7 +448,7 @@ bool ChatChannel::IsClientInChannel(Client *c) {
 	return false;
 }
 
-ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) {
+ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client *c) {
 
 	if(!c) return nullptr;
 
@@ -459,11 +459,11 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 		return nullptr;
 	}
 
-	string NormalisedName, Password;
+	std::string NormalisedName, Password;
 
-	string::size_type Colon = ChannelName.find_first_of(":");
+	std::string::size_type Colon = ChannelName.find_first_of(":");
 
-	if(Colon == string::npos)
+	if(Colon == std::string::npos)
 		NormalisedName = CapitaliseName(ChannelName);
 	else {
 		NormalisedName = CapitaliseName(ChannelName.substr(0, Colon));
@@ -487,7 +487,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 
 	if(RequiredChannel->GetMinStatus() > c->GetAccountStatus()) {
 
-		string Message = "You do not have the required account status to join channel " + NormalisedName;
+		std::string Message = "You do not have the required account status to join channel " + NormalisedName;
 
 		c->GeneralChannelMessage(Message);
 
@@ -519,11 +519,11 @@ ChatChannel *ChatChannelList::AddClientToChannel(string ChannelName, Client *c) 
 	return nullptr;
 }
 
-ChatChannel *ChatChannelList::RemoveClientFromChannel(string inChannelName, Client *c) {
+ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string inChannelName, Client *c) {
 
 	if(!c) return nullptr;
 
-	string ChannelName = inChannelName;
+	std::string ChannelName = inChannelName;
 
 	if((inChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = c->ChannelSlotName(atoi(inChannelName.c_str()));
@@ -565,7 +565,7 @@ void ChatChannelList::Process() {
 	}
 }
 
-void ChatChannel::AddInvitee(string Invitee) {
+void ChatChannel::AddInvitee(std::string Invitee) {
 
 	if(!IsInvitee(Invitee)) {
 
@@ -576,9 +576,9 @@ void ChatChannel::AddInvitee(string Invitee) {
 
 }
 
-void ChatChannel::RemoveInvitee(string Invitee) {
+void ChatChannel::RemoveInvitee(std::string Invitee) {
 
-	list<string>::iterator Iterator;
+	std::list<std::string>::iterator Iterator;
 
 	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); Iterator++) {
 
@@ -593,9 +593,9 @@ void ChatChannel::RemoveInvitee(string Invitee) {
 	}
 }
 
-bool ChatChannel::IsInvitee(string Invitee) {
+bool ChatChannel::IsInvitee(std::string Invitee) {
 
-	list<string>::iterator Iterator;
+	std::list<std::string>::iterator Iterator;
 
 	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); Iterator++) {
 
@@ -606,7 +606,7 @@ bool ChatChannel::IsInvitee(string Invitee) {
 	return false;
 }
 
-void ChatChannel::AddModerator(string Moderator) {
+void ChatChannel::AddModerator(std::string Moderator) {
 
 	if(!IsModerator(Moderator)) {
 
@@ -617,9 +617,9 @@ void ChatChannel::AddModerator(string Moderator) {
 
 }
 
-void ChatChannel::RemoveModerator(string Moderator) {
+void ChatChannel::RemoveModerator(std::string Moderator) {
 
-	list<string>::iterator Iterator;
+	std::list<std::string>::iterator Iterator;
 
 	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); Iterator++) {
 
@@ -634,9 +634,9 @@ void ChatChannel::RemoveModerator(string Moderator) {
 	}
 }
 
-bool ChatChannel::IsModerator(string Moderator) {
+bool ChatChannel::IsModerator(std::string Moderator) {
 
-	list<string>::iterator Iterator;
+	std::list<std::string>::iterator Iterator;
 
 	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); Iterator++) {
 
@@ -647,7 +647,7 @@ bool ChatChannel::IsModerator(string Moderator) {
 	return false;
 }
 
-void ChatChannel::AddVoice(string inVoiced) {
+void ChatChannel::AddVoice(std::string inVoiced) {
 
 	if(!HasVoice(inVoiced)) {
 
@@ -658,9 +658,9 @@ void ChatChannel::AddVoice(string inVoiced) {
 
 }
 
-void ChatChannel::RemoveVoice(string inVoiced) {
+void ChatChannel::RemoveVoice(std::string inVoiced) {
 
-	list<string>::iterator Iterator;
+	std::list<std::string>::iterator Iterator;
 
 	for(Iterator = Voiced.begin(); Iterator != Voiced.end(); Iterator++) {
 
@@ -675,9 +675,9 @@ void ChatChannel::RemoveVoice(string inVoiced) {
 	}
 }
 
-bool ChatChannel::HasVoice(string inVoiced) {
+bool ChatChannel::HasVoice(std::string inVoiced) {
 
-	list<string>::iterator Iterator;
+	std::list<std::string>::iterator Iterator;
 
 	for(Iterator = Voiced.begin(); Iterator != Voiced.end(); Iterator++) {
 
@@ -688,9 +688,9 @@ bool ChatChannel::HasVoice(string inVoiced) {
 	return false;
 }
 
-string CapitaliseName(string inString) {
+std::string CapitaliseName(std::string inString) {
 
-	string NormalisedName = inString;
+	std::string NormalisedName = inString;
 
 	for(unsigned int i = 0; i < NormalisedName.length(); i++) {
 

@@ -31,10 +31,8 @@
 
 #include <vector>
 #include <string>
-using namespace std;
 
 extern LauncherList launcher_list;
-
 
 LauncherLink::LauncherLink(int id, EmuTCPConnection *c)
 : ID(id),

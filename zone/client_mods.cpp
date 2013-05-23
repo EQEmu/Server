@@ -1997,7 +1997,7 @@ int32 Client::CalcBaseEndurance()
 		int BonusUpto800 = int( at_most_800 / 4 ) ;
 		if(Stats > 400) {
 			Bonus400to800 = int( (at_most_800 - 400) / 4 );
-			HalfBonus400to800 = int( max( ( at_most_800 - 400 ), 0 ) / 8 );
+			HalfBonus400to800 = int( std::max( ( at_most_800 - 400 ), 0 ) / 8 );
 
 			if(Stats > 800) {
 				Bonus800plus = int( (Stats - 800) / 8 ) * 2;

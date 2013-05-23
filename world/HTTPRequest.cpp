@@ -22,12 +22,10 @@
 #include "../common/SocketLib/HttpdForm.h"
 #include <cstdlib>
 
-using namespace std;
-
 HTTPRequest::HTTPRequest(EQWHTTPHandler *h, HttpdForm *form)
 : m_handler(h)
 {
-	string name, value;
+	std::string name, value;
 	if(form->getfirst(name, value)) {
 		m_values[name] = value;
 		while(form->getnext(name, value))
@@ -47,7 +45,7 @@ const char *HTTPRequest::get(const char *name, const char *default_value) const 
 	return(res->second.c_str());
 }
 
-map<string,string> HTTPRequest::get_all() const {
+std::map<std::string,std::string> HTTPRequest::get_all() const {
 	return m_values;
 }
 

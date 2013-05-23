@@ -46,7 +46,7 @@ public:
 //END PERL EXPORT
 
 private:
-	string m_escapeBuffer;
+	std::string m_escapeBuffer;
 	static EQDB s_EQDB;
 	MYSQL *mysql_ref;
 };

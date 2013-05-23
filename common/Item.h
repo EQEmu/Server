@@ -34,15 +34,14 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include <vector>
 #include <map>
 #include <list>
-using namespace std;
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/item_struct.h"
 
 // Helper typedefs
-typedef list<ItemInst*>::const_iterator					iter_queue;
-typedef map<int16, ItemInst*>::const_iterator			iter_inst;
-typedef map<uint8, ItemInst*>::const_iterator			iter_contents;
+typedef std::list<ItemInst*>::const_iterator					iter_queue;
+typedef std::map<int16, ItemInst*>::const_iterator			iter_inst;
+typedef std::map<uint8, ItemInst*>::const_iterator			iter_contents;
 
 namespace ItemField {
 	enum {
@@ -120,7 +119,7 @@ protected:
 	// Protected Members
 	/////////////////////////
 
-	list<ItemInst*> m_list;
+	std::list<ItemInst*> m_list;
 
 };
 
@@ -209,26 +208,26 @@ protected:
 	///////////////////////////////
 
 	// Retrieves item within an inventory bucket
-	ItemInst* _GetItem(const map<int16, ItemInst*>& bucket, int16 slot_id) const;
+	ItemInst* _GetItem(const std::map<int16, ItemInst*>& bucket, int16 slot_id) const;
 
 	// Private "put" item into bucket, without regard for what is currently in bucket
 	int16 _PutItem(int16 slot_id, ItemInst* inst);
 
 	// Checks an inventory bucket for a particular item
-	int16 _HasItem(map<int16, ItemInst*>& bucket, uint32 item_id, uint8 quantity);
+	int16 _HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, uint8 quantity);
 	int16 _HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity);
-	int16 _HasItemByUse(map<int16, ItemInst*>& bucket, uint8 use, uint8 quantity);
+	int16 _HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, uint8 quantity);
 	int16 _HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity);
-	int16 _HasItemByLoreGroup(map<int16, ItemInst*>& bucket, uint32 loregroup);
+	int16 _HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 loregroup);
 	int16 _HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup);
 
 
 	// Player inventory
-	map<int16, ItemInst*>	m_worn;		// Items worn by character
-	map<int16, ItemInst*>	m_inv;		// Items in character personal inventory
-	map<int16, ItemInst*>	m_bank;		// Items in character bank
-	map<int16, ItemInst*>	m_shbank;	// Items in character shared bank
-	map<int16, ItemInst*>	m_trade;	// Items in a trade session
+	std::map<int16, ItemInst*>	m_worn;		// Items worn by character
+	std::map<int16, ItemInst*>	m_inv;		// Items in character personal inventory
+	std::map<int16, ItemInst*>	m_bank;		// Items in character bank
+	std::map<int16, ItemInst*>	m_shbank;	// Items in character shared bank
+	std::map<int16, ItemInst*>	m_trade;	// Items in a trade session
 	ItemInstQueue			m_cursor;	// Items on cursor: FIFO
 };
 
@@ -300,7 +299,7 @@ public:
 	uint8 FirstOpenSlot() const;
 	uint8 GetTotalItemCount() const;
 	bool IsNoneEmptyContainer();
-	map<uint8, ItemInst*>* GetContents() { return &m_contents; }
+	std::map<uint8, ItemInst*>* GetContents() { return &m_contents; }
 
 	//
 	// Augments
@@ -371,7 +370,7 @@ public:
 	virtual bool IsScaling() const		{ return false; }
 	virtual bool IsEvolving() const		{ return false; }
 
-	string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id=slot_id; s.inst=(const void *)this; string ser; ser.assign((char *)&s,sizeof(InternalSerializedItem_Struct)); return ser; }
+	std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id=slot_id; s.inst=(const void *)this; std::string ser; ser.assign((char *)&s,sizeof(InternalSerializedItem_Struct)); return ser; }
 	inline int32 GetSerialNumber() const { return m_SerialNumber; }
 	inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
 
@@ -399,8 +398,8 @@ protected:
 	int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
 	//
 	// Items inside of this item (augs or contents);
-	map<uint8, ItemInst*> m_contents; // Zero-based index: min=0, max=9
-	map<std::string, std::string> m_custom_data;
+	std::map<uint8, ItemInst*> m_contents; // Zero-based index: min=0, max=9
+	std::map<std::string, std::string> m_custom_data;
 };
 
 class EvoItemInst: public ItemInst {

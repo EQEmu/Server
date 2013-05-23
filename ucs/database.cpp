@@ -20,7 +20,6 @@
 
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,7 +48,7 @@ using namespace std;
 #include "chatchannel.h"
 
 extern Clientlist *CL;
-extern string GetMailPrefix();
+extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
 extern uint32 MailMessagesSent;
 
@@ -191,7 +190,7 @@ int Database::FindAccount(const char *CharacterName, Client *c) {
 	return AccountID;
 }
 
-bool Database::VerifyMailKey(string CharacterName, int IPAddress, string MailKey) {
+bool Database::VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
@@ -329,9 +328,9 @@ bool Database::LoadChatChannels() {
 
 	while((row = mysql_fetch_row(result))) {
 
-		string ChannelName = row[0];
-		string ChannelOwner = row[1];
-		string ChannelPassword = row[2];
+		std::string ChannelName = row[0];
+		std::string ChannelOwner = row[1];
+		std::string ChannelPassword = row[2];
 
 		ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
 	}
@@ -341,7 +340,7 @@ bool Database::LoadChatChannels() {
 	return true;
 }
 
-void Database::SetChannelPassword(string ChannelName, string Password) {
+void Database::SetChannelPassword(std::string ChannelName, std::string Password) {
 
 	_log(UCS__TRACE, "Database::SetChannelPassword(%s, %s)", ChannelName.c_str(), Password.c_str());
 
@@ -358,7 +357,7 @@ void Database::SetChannelPassword(string ChannelName, string Password) {
 	safe_delete_array(query);
 }
 
-void Database::SetChannelOwner(string ChannelName, string Owner) {
+void Database::SetChannelOwner(std::string ChannelName, std::string Owner) {
 
 	_log(UCS__TRACE, "Database::SetChannelOwner(%s, %s)", ChannelName.c_str(), Owner.c_str());
 
@@ -542,17 +541,17 @@ void Database::SendBody(Client *c, int MessageNumber) {
 
 }
 
-bool Database::SendMail(string Recipient, string From, string Subject, string Body, string RecipientsString) {
+bool Database::SendMail(std::string Recipient, std::string From, std::string Subject, std::string Body, std::string RecipientsString) {
 
 	int CharacterID;
 
-	string CharacterName;
+	std::string CharacterName;
 
 	//printf("Database::SendMail(%s, %s, %s)\n", Recipient.c_str(), From.c_str(), Subject.c_str());
 
-	string::size_type LastPeriod = Recipient.find_last_of(".");
+	std::string::size_type LastPeriod = Recipient.find_last_of(".");
 
-	if(LastPeriod == string::npos)
+	if(LastPeriod == std::string::npos)
 		CharacterName = Recipient;
 	else
 		CharacterName = Recipient.substr(LastPeriod+1);
@@ -605,7 +604,7 @@ bool Database::SendMail(string Recipient, string From, string Subject, string Bo
 	Client *c = CL->IsCharacterOnline(CharacterName);
 
 	if(c) {
-		string FQN = GetMailPrefix() + From;
+		std::string FQN = GetMailPrefix() + From;
 
 		c->SendNotification(c->GetMailBoxNumber(CharacterName), Subject, FQN, LastMsgID);
 	}
@@ -692,7 +691,7 @@ void Database::ExpireMail() {
 	}
 }
 
-void Database::AddFriendOrIgnore(int CharID, int Type, string Name) {
+void Database::AddFriendOrIgnore(int CharID, int Type, std::string Name) {
 
 	const char *FriendsQuery="INSERT INTO `friends` (`charid`, `type`, `name`) VALUES ('%i', %i, '%s')";
 
@@ -710,7 +709,7 @@ void Database::AddFriendOrIgnore(int CharID, int Type, string Name) {
 	safe_delete_array(query);
 }
 
-void Database::RemoveFriendOrIgnore(int CharID, int Type, string Name) {
+void Database::RemoveFriendOrIgnore(int CharID, int Type, std::string Name) {
 
 	const char *FriendsQuery="DELETE FROM `friends` WHERE `charid`=%i AND `type`=%i and `name`='%s'";
 
@@ -727,7 +726,7 @@ void Database::RemoveFriendOrIgnore(int CharID, int Type, string Name) {
 	safe_delete_array(query);
 }
 
-void Database::GetFriendsAndIgnore(int CharID, vector<string> &Friends, vector<string> &Ignorees) {
+void Database::GetFriendsAndIgnore(int CharID, std::vector<std::string> &Friends, std::vector<std::string> &Ignorees) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
@@ -749,7 +748,7 @@ void Database::GetFriendsAndIgnore(int CharID, vector<string> &Friends, vector<s
 
 	while((row = mysql_fetch_row(result))) {
 
-		string Name = row[1];
+		std::string Name = row[1];
 
 		if(atoi(row[0]) == 0)
 		{

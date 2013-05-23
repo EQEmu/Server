@@ -708,7 +708,7 @@ public:
 	void	ChangeTributeSettings(TributeInfo_Struct *t);
 	void	SendTributeTimer();
 	void	ToggleTribute(bool enabled);
-	void	SendPathPacket(vector<FindPerson_Point> &path);
+	void	SendPathPacket(std::vector<FindPerson_Point> &path);
 
 	inline PTimerList &GetPTimers() { return(p_timers); }
 
@@ -863,7 +863,7 @@ public:
 	bool	PendingTranslocate;
 	time_t	TranslocateTime;
 	bool	PendingSacrifice;
-	string	SacrificeCaster;
+	std::string	SacrificeCaster;
 	struct	Translocate_Struct PendingTranslocateData;
 	void	SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
@@ -1103,13 +1103,13 @@ public:
 
     void TickItemCheck();
 	void TryItemTick(int slot);
-	int16 GetActSTR() { return( min(GetMaxSTR(), GetSTR()) ); }
-	int16 GetActSTA() { return( min(GetMaxSTA(), GetSTA()) ); }
-	int16 GetActDEX() { return( min(GetMaxDEX(), GetDEX()) ); }
-	int16 GetActAGI() { return( min(GetMaxAGI(), GetAGI()) ); }
-	int16 GetActINT() { return( min(GetMaxINT(), GetINT()) ); }
-	int16 GetActWIS() { return( min(GetMaxWIS(), GetWIS()) ); }
-	int16 GetActCHA() { return( min(GetMaxCHA(), GetCHA()) ); }
+	int16 GetActSTR() { return( std::min(GetMaxSTR(), GetSTR()) ); }
+	int16 GetActSTA() { return( std::min(GetMaxSTA(), GetSTA()) ); }
+	int16 GetActDEX() { return( std::min(GetMaxDEX(), GetDEX()) ); }
+	int16 GetActAGI() { return( std::min(GetMaxAGI(), GetAGI()) ); }
+	int16 GetActINT() { return( std::min(GetMaxINT(), GetINT()) ); }
+	int16 GetActWIS() { return( std::min(GetMaxWIS(), GetWIS()) ); }
+	int16 GetActCHA() { return( std::min(GetMaxCHA(), GetCHA()) ); }
     void LoadAccountFlags();
     void SetAccountFlag(std::string flag, std::string val);
     std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillType);
@@ -1269,7 +1269,7 @@ private:
 	uint8				mercSlot; // selected merc slot
 	bool	Trader;
 	bool	Buyer;
-	string	BuyerWelcomeMessage;
+	std::string	BuyerWelcomeMessage;
 	bool	AbilityTimer;
 	int Haste; //precalced value
 
@@ -1361,7 +1361,7 @@ private:
 	uint32		max_AAXP;
 	uint32		staminacount;
 	AA_Array* aa[MAX_PP_AA_ARRAY];		//this list contains pointers into our player profile
-	map<uint32,uint8> aa_points;
+	std::map<uint32,uint8> aa_points;
 	bool npcflag;
 	uint8 npclevel;
 	bool feigned;
@@ -1377,7 +1377,7 @@ private:
 	unsigned int	RestRegenMana;
 	unsigned int	RestRegenEndurance;
 
-	set<uint32> zone_flags;
+	std::set<uint32> zone_flags;
 
 	ClientTaskState *taskstate;
 	int TotalSecondsPlayed;
@@ -1426,7 +1426,7 @@ private:
 
 	std::set<uint32> PlayerBlockedBuffs;
 	std::set<uint32> PetBlockedBuffs;
-	std::list<string> DraggedCorpses;
+	std::list<std::string> DraggedCorpses;
 
 	uint8 MaxXTargets;
 	bool XTargetAutoAddHaters;

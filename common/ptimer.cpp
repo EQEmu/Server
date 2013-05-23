@@ -289,7 +289,7 @@ PTimerList::PTimerList(uint32 char_id) {
 }
 
 PTimerList::~PTimerList() {
-	map<pTimerType, PersistentTimer *>::iterator s;
+	std::map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	while(s != _list.end()) {
 		if(s->second != nullptr)
@@ -300,7 +300,7 @@ PTimerList::~PTimerList() {
 
 
 bool PTimerList::Load(Database *db) {
-	map<pTimerType, PersistentTimer *>::iterator s;
+	std::map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	while(s != _list.end()) {
 		if(s->second != nullptr)
@@ -362,7 +362,7 @@ bool PTimerList::Store(Database *db) {
 	printf("Storing all timers for char %lu\n", (unsigned long)_char_id);
 #endif
 
-	map<pTimerType, PersistentTimer *>::iterator s;
+	std::map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	bool res = true;
 	while(s != _list.end()) {
@@ -462,11 +462,11 @@ PersistentTimer *PTimerList::Get(pTimerType type) {
 	return(_list[type]);
 }
 
-void PTimerList::ToVector(vector< pair<pTimerType, PersistentTimer *> > &out) {
+void PTimerList::ToVector(std::vector< std::pair<pTimerType, PersistentTimer *> > &out) {
 
-	pair<pTimerType, PersistentTimer *> p;
+	std::pair<pTimerType, PersistentTimer *> p;
 
-	map<pTimerType, PersistentTimer *>::iterator s;
+	std::map<pTimerType, PersistentTimer *>::iterator s;
 	s = _list.begin();
 	while(s != _list.end()) {
 		if(s->second != nullptr) {

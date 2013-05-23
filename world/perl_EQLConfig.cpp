@@ -358,7 +358,7 @@ XS(XS_EQLConfig_ListZones)
 		Perl_croak(aTHX_ "Usage: EQLConfig::ListZones(THIS)");
 	{
 		EQLConfig *		THIS;
-		vector<string>		RETVAL;
+		std::vector<std::string>		RETVAL;
 
 		if (sv_derived_from(ST(0), "EQLConfig")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -379,7 +379,7 @@ XS(XS_EQLConfig_ListZones)
 			/* grow the stack to the number of elements being returned */
 			EXTEND(SP, RETVAL.size());
 			for (ix_RETVAL = 0; ix_RETVAL < RETVAL.size(); ix_RETVAL++) {
-					const string &it = RETVAL[ix_RETVAL];
+					const std::string &it = RETVAL[ix_RETVAL];
 					ST(ix_RETVAL) = sv_newmortal();
 					sv_setpvn(ST(ix_RETVAL), it.c_str(), it.length());
 			}
@@ -398,7 +398,7 @@ XS(XS_EQLConfig_GetZoneDetails)
 		Perl_croak(aTHX_ "Usage: EQLConfig::GetZoneDetails(THIS, zone_ref)");
 	{
 		EQLConfig *		THIS;
-		map<string,string>		RETVAL;
+		std::map<std::string,std::string>		RETVAL;
 		Const_char *		zone_ref = (Const_char *)SvPV_nolen(ST(1));
 
 		if (sv_derived_from(ST(0), "EQLConfig")) {
@@ -419,7 +419,7 @@ XS(XS_EQLConfig_GetZoneDetails)
 				sv_2mortal((SV*)hv);
 				ST(0) = newRV((SV*)hv);
 
-				map<string,string>::const_iterator cur, end;
+				std::map<std::string,std::string>::const_iterator cur, end;
 				cur = RETVAL.begin();
 				end = RETVAL.end();
 				for(; cur != end; cur++) {

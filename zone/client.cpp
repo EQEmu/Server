@@ -17,9 +17,7 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <iomanip>
-using namespace std;
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -628,7 +626,7 @@ bool Client::Save(uint8 iCommitNow) {
 		SaveBackup();
 	}
 	else {
-		cerr << "Failed to update player profile" << endl;
+		std::cerr << "Failed to update player profile" << std::endl;
 		return false;
 	}
 
@@ -2043,7 +2041,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		return;
 	}
 
-	string booktxt2 = database.GetBook(txtfile);
+	std::string booktxt2 = database.GetBook(txtfile);
 	int length = booktxt2.length();
 
 	if (booktxt2[0] != '\0') {
@@ -2075,7 +2073,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 }
 
 void Client::QuestReadBook(const char* text, uint8 type) {
-	string booktxt2 = text;
+	std::string booktxt2 = text;
 	int length = booktxt2.length();
 	if (booktxt2[0] != '\0') {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
@@ -2576,7 +2574,7 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 	if(!player || !merchant || !item)
 		return;
 
-	string LogText = "Qty: ";
+	std::string LogText = "Qty: ";
 
 	char Buffer[255];
 	memset(Buffer, 0, sizeof(Buffer));
@@ -3871,7 +3869,7 @@ void Client::KeyRingLoad()
 		}
 		mysql_free_result(result);
 	}else {
-		cerr << "Error in Client::KeyRingLoad query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in Client::KeyRingLoad query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return;
 	}
@@ -3894,7 +3892,7 @@ void Client::KeyRingAdd(uint32 item_id)
 		}
 		else
 		{
-			cerr << "Error in Doors::HandleClick query '" << query << "' " << errbuf << endl;
+			std::cerr << "Error in Doors::HandleClick query '" << query << "' " << errbuf << std::endl;
 			safe_delete_array(query);
 			return;
 		}
@@ -3947,7 +3945,7 @@ bool Client::IsDiscovered(uint32 itemid) {
 	}
 	else
 	{
-		cerr << "Error in IsDiscovered query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in IsDiscovered query '" << query << "' " << errbuf << std::endl;
 	}
 	mysql_free_result(result);
 	safe_delete_array(query);
@@ -4736,10 +4734,10 @@ uint32 Client::GetStartZone()
 void Client::ShowSkillsWindow()
 {
 	const char *WindowTitle = "Skills";
-	string WindowText;
+	std::string WindowText;
 	// using a map for easy alphabetizing of the skills list
-	map<string, SkillType> Skills;
-	map<string, SkillType>::iterator it;
+	std::map<std::string, SkillType> Skills;
+	std::map<std::string, SkillType>::iterator it;
 
 	// this list of names must keep the same order as that in common/skills.h
 	const char* SkillName[] = {"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration","Alteration","Apply Poison","Archery",
@@ -5141,7 +5139,7 @@ void Client::SendRewards()
 			InternalVeteranReward *ivr = (InternalVeteranReward*)data;
 			ivr->claim_id = rewards[i].id;
 			ivr->number_available = rewards[i].amount;
-			list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
+			std::list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
 			while(iter != zone->VeteranRewards.end())
 			{
 				if((*iter).claim_id == rewards[i].id)
@@ -5231,7 +5229,7 @@ bool Client::TryReward(uint32 claim_id)
 		return false;
 	}
 
-	list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
+	std::list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
 	while(iter != zone->VeteranRewards.end())
 	{
 		if((*iter).claim_id == claim_id)
@@ -6050,7 +6048,7 @@ void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 
 bool Client::IsDraggingCorpse(const char *CorpseName)
 {
-	for(std::list<string>::iterator Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
+	for(std::list<std::string>::iterator Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
 	{
 		if(!strcasecmp((*Iterator).c_str(), CorpseName))
 			return true;
@@ -6061,7 +6059,7 @@ bool Client::IsDraggingCorpse(const char *CorpseName)
 
 void Client::DragCorpses()
 {
-	for(std::list<string>::iterator Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
+	for(std::list<std::string>::iterator Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
 	{
 		Mob* corpse = entity_list.GetMob((*Iterator).c_str());
 
@@ -6716,7 +6714,7 @@ void Client::SendAltCurrencies() {
 		altc->count = count;
 
 		uint32 i = 0;
-		list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
+		std::list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
 		while(iter != zone->AlternateCurrencies.end()) {
 			const Item_Struct* item = database.GetItem((*iter).item_id);
 			altc->entries[i].currency_number = (*iter).id;
@@ -6771,7 +6769,7 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount)
 
 void Client::SendAlternateCurrencyValues()
 {
-	list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
+	std::list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
 	while(iter != zone->AlternateCurrencies.end()) {
 		SendAlternateCurrencyValue((*iter).id, false);
 		iter++;
@@ -7138,23 +7136,23 @@ void Client::SendWebLink(const char *website)
 {
 	if(website != 0)
 	{
-				string str = website;
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weblink, sizeof(Weblink_Struct) + str.length() + 1);
-				Weblink_Struct *wl = (Weblink_Struct*)outapp->pBuffer;
-				memcpy(wl->weblink, str.c_str(), str.length() + 1);
-				wl->weblink[str.length() + 1] = '\0';
+		std::string str = website;
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weblink, sizeof(Weblink_Struct) + str.length() + 1);
+		Weblink_Struct *wl = (Weblink_Struct*)outapp->pBuffer;
+		memcpy(wl->weblink, str.c_str(), str.length() + 1);
+		wl->weblink[str.length() + 1] = '\0';
 
-				FastQueuePacket(&outapp);
+		FastQueuePacket(&outapp);
 	}
 }
 
 void Client::SendMercPersonalInfo()
 {
-	uint32 mercTypeCount = 1;
-	uint32 mercCount = 1; //TODO: Un-hardcode this and support multiple mercs like in later clients than SoD.
-	//uint32 packetSize = 0;
-	uint32 i=0;
-	uint32 altCurrentType = 19; //TODO: Implement alternate currency purchases involving mercs!
+uint32 mercTypeCount = 1;
+uint32 mercCount = 1; //TODO: Un-hardcode this and support multiple mercs like in later clients than SoD.
+//uint32 packetSize = 0;
+uint32 i=0;
+uint32 altCurrentType = 19; //TODO: Implement alternate currency purchases involving mercs!
 
 	if (GetClientVersion() >= EQClientRoF)
 	{
@@ -7197,7 +7195,7 @@ void Client::SendMercPersonalInfo()
 				uint32 stanceindex = 0;
 				if (mdus->MercData[i].StanceCount != 0)
 				{
-					list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
+					std::list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
 					while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
 					{
 						mdus->MercData[i].Stances[stanceindex].StanceIndex = stanceindex;
@@ -7263,7 +7261,7 @@ void Client::SendMercPersonalInfo()
 				int stanceindex = 0;
 				if(mml->Mercs[i].StanceCount != 0)
 				{
-					list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
+					std::list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
 					while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
 					{
 						mml->Mercs[i].Stances[stanceindex].StanceIndex = stanceindex;

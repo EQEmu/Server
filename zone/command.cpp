@@ -85,7 +85,7 @@ int (*command_dispatch)(Client *,char const *)=command_notavail;
 void command_bestz(Client *c, const Seperator *message);
 void command_pf(Client *c, const Seperator *message);
 
-map<string, CommandRecord *> commandlist;
+std::map<std::string, CommandRecord *> commandlist;
 
 //All allocated CommandRecords get put in here so they get deleted on shutdown
 LinkedList<CommandRecord *> cleanup_commandlist;
@@ -460,11 +460,11 @@ int command_init(void) {
 		return -1;
 	}
 
-	map<string, CommandRecord *>::iterator cur,end;
+	std::map<std::string, CommandRecord *>::iterator cur,end;
 	cur = commandlist.begin();
 	end = commandlist.end();
-	map<string,uint8> command_settings;
-	map<string,uint8>::iterator itr;
+	std::map<std::string,uint8> command_settings;
+	std::map<std::string,uint8>::iterator itr;
 	database.GetCommandSettings(command_settings);
 	for(; cur != end; cur++) {
 		if ((itr=command_settings.find(cur->first))!=command_settings.end())
@@ -526,7 +526,7 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
 	if(function == nullptr)
 		return(-1);
 
-	string cstr(command_string);
+	std::string cstr(command_string);
 
 	if(commandlist.count(cstr) != 0) {
 		LogFile->write(EQEMuLog::Error, "command_add() - Command '%s' is a duplicate - check command.cpp." , command_string);
@@ -534,7 +534,7 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
 	}
 
 	//look for aliases...
-	map<string, CommandRecord *>::iterator cur,end,del;
+	std::map<std::string, CommandRecord *>::iterator cur,end,del;
 	cur = commandlist.begin();
 	end = commandlist.end();
 	for(; cur != end; cur++) {
@@ -578,7 +578,7 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
  *
  */
 int command_add_perl(const char *command_string, const char *desc, int access) {
-	string cstr(command_string);
+	std::string cstr(command_string);
 
 	if(commandlist.count(cstr) != 0) {
 #ifdef COMMANDS_PERL_OVERRIDE
@@ -607,7 +607,7 @@ int command_add_perl(const char *command_string, const char *desc, int access) {
 //clear out any perl commands.
 //should restore any overridden C++ commands, but thats a lot of work.
 void command_clear_perl() {
-	map<string, CommandRecord *>::iterator cur,end,del;
+	std::map<std::string, CommandRecord *>::iterator cur,end,del;
 	cur = commandlist.begin();
 	end = commandlist.end();
 	for(; cur != end;) {
@@ -644,7 +644,7 @@ int command_realdispatch(Client *c, const char *message)
 
 	command_logcommand(c, message);
 
-	string cstr(sep.arg[0]+1);
+	std::string cstr(sep.arg[0]+1);
 
 	if(commandlist.count(cstr) != 1) {
 		return(-2);
@@ -917,13 +917,13 @@ void command_help(Client *c, const Seperator *sep)
 
 	c->Message(0, "Available EQEMu commands:");
 
-	map<string, CommandRecord *>::iterator cur,end;
+	std::map<std::string, CommandRecord *>::iterator cur,end;
 	cur = commandlist.begin();
 	end = commandlist.end();
 
 	for(; cur != end; cur++) {
 		if(sep->arg[1][0]) {
-			if(cur->first.find(sep->arg[1]) == string::npos) {
+			if(cur->first.find(sep->arg[1]) == std::string::npos) {
 				continue;
 			}
 		}
@@ -6763,7 +6763,7 @@ void command_timers(Client *c, const Seperator *sep) {
 	}
 	Client *them = c->GetTarget()->CastToClient();
 
-	vector< pair<pTimerType, PersistentTimer *> > res;
+	std::vector< std::pair<pTimerType, PersistentTimer *> > res;
 	them->GetPTimers().ToVector(res);
 
 	c->Message(0,"Timers for target:");
@@ -8286,8 +8286,8 @@ void command_mlog(Client *c, const Seperator *sep) {
 		return;
 	}
 	bool onoff;
-	string on("on");
-	string off("off");
+	std::string on("on");
+	std::string off("off");
 
 	if(!strcasecmp(sep->arg[1], "target")) {
 		if(on == sep->arg[2]) onoff = true;

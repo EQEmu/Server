@@ -19,7 +19,6 @@
 #define PACKET_DUMP_FILE_H
 
 #include <iostream>
-using namespace std;
 
 #include "../common/types.h"
 

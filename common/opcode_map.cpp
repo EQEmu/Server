@@ -2,13 +2,11 @@
 #include <map>
 #include <string>
 
-using namespace std;
+std::map<unsigned long, std::string> opcode_map;
 
-map<unsigned long, string> opcode_map;
-
-string get_opcode_name(unsigned long opcode)
+std::string get_opcode_name(unsigned long opcode)
 {
-map<unsigned long, string>::iterator itr;;
+std::map<unsigned long, std::string>::iterator itr;;
 
 	return (itr=opcode_map.find(opcode))!=opcode_map.end() ? itr->second : "OP_Unknown";
 }

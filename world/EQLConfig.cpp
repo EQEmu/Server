@@ -96,7 +96,7 @@ EQLConfig *EQLConfig::CreateLauncher(const char *name, uint8 dynamic_count) {
 }
 
 void EQLConfig::GetZones(std::vector<LauncherZone> &result) {
-	map<string, LauncherZone>::iterator cur, end;
+	std::map<std::string, LauncherZone>::iterator cur, end;
 	cur = m_zones.begin();
 	end = m_zones.end();
 	for(; cur != end; cur++) {
@@ -104,12 +104,12 @@ void EQLConfig::GetZones(std::vector<LauncherZone> &result) {
 	}
 }
 
-vector<string> EQLConfig::ListZones() {
+std::vector<std::string> EQLConfig::ListZones() {
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
-	vector<string> res;
+	std::vector<std::string> res;
 	if(ll == nullptr) {
 		//if the launcher isnt connected, use the list from the database.
-		map<string, LauncherZone>::iterator cur, end;
+		std::map<std::string, LauncherZone>::iterator cur, end;
 		cur = m_zones.begin();
 		end = m_zones.end();
 		for(; cur != end; cur++) {
@@ -224,7 +224,7 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 		return(false);
 
 	//check internal state
-	map<string, LauncherZone>::iterator res;
+	std::map<std::string, LauncherZone>::iterator res;
 	res = m_zones.find(short_name);
 	if(res == m_zones.end()) {
 		//not found.
@@ -268,7 +268,7 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 
 bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 	//check internal state
-	map<string, LauncherZone>::iterator res;
+	std::map<std::string, LauncherZone>::iterator res;
 	res = m_zones.find(short_name);
 	if(res == m_zones.end()) {
 		//not found.
@@ -341,8 +341,8 @@ int EQLConfig::GetDynamicCount() const {
 	return(m_dynamics);
 }
 
-map<string,string> EQLConfig::GetZoneDetails(Const_char *zone_ref) {
-	map<string,string> res;
+std::map<std::string,std::string> EQLConfig::GetZoneDetails(Const_char *zone_ref) {
+	std::map<std::string,std::string> res;
 
 	LauncherLink *ll = launcher_list.Get(m_name.c_str());
 	if(ll == nullptr) {

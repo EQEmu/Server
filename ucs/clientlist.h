@@ -78,7 +78,7 @@ static const CommandEntry Commands[] = {
 struct CharacterEntry {
 	int CharID;
 	int Level;
-	string Name;
+	std::string Name;
 };
 
 class Client {
@@ -92,25 +92,25 @@ public:
 	void ClearCharacters() { Characters.clear(); }
 	void SendMailBoxes();
 	inline void QueuePacket(const EQApplicationPacket *p, bool ack_req=true) { ClientStream->QueuePacket(p, ack_req); }
-	string GetName() { if(Characters.size()) return Characters[0].Name; else return ""; }
-	void JoinChannels(string ChannelList);
-	void LeaveChannels(string ChannelList);
+	std::string GetName() { if(Characters.size()) return Characters[0].Name; else return ""; }
+	void JoinChannels(std::string ChannelList);
+	void LeaveChannels(std::string ChannelList);
 	void LeaveAllChannels(bool SendUpdatedChannelList = true);
 	void AddToChannelList(ChatChannel *JoinedChannel);
 	void RemoveFromChannelList(ChatChannel *JoinedChannel);
-	void SendChannelMessage(string Message);
-	void SendChannelMessage(string ChannelName, string Message, Client *Sender);
-	void SendChannelMessageByNumber(string Message);
+	void SendChannelMessage(std::string Message);
+	void SendChannelMessage(std::string ChannelName, std::string Message, Client *Sender);
+	void SendChannelMessageByNumber(std::string Message);
 	void SendChannelList();
 	void CloseConnection();
-	void ToggleAnnounce(string State);
+	void ToggleAnnounce(std::string State);
 	bool IsAnnounceOn() { return (Announce == true); }
 	void AnnounceJoin(ChatChannel *Channel, Client *c);
 	void AnnounceLeave(ChatChannel *Channel, Client *c);
-	void GeneralChannelMessage(string Message);
+	void GeneralChannelMessage(std::string Message);
 	void GeneralChannelMessage(const char *Characters);
-	void SetChannelPassword(string ChannelPassword);
-	void ProcessChannelList(string CommandString);
+	void SetChannelPassword(std::string ChannelPassword);
+	void ProcessChannelList(std::string CommandString);
 	void AccountUpdate();
 	int ChannelCount();
 	inline void SetAccountID(int inAccountID) { AccountID = inAccountID; }
@@ -121,14 +121,14 @@ public:
 	inline int GetAccountStatus() { return Status; }
 	inline bool GetHideMe() { return HideMe; }
 	inline uint32 GetKarma() { return TotalKarma; }
-	void SetChannelOwner(string CommandString);
-	void OPList(string CommandString);
-	void ChannelInvite(string CommandString);
-	void ChannelGrantModerator(string CommandString);
-	void ChannelGrantVoice(string CommandString);
-	void ChannelKick(string CommandString);
-	void ChannelModerate(string CommandString);
-	string ChannelSlotName(int ChannelNumber);
+	void SetChannelOwner(std::string CommandString);
+	void OPList(std::string CommandString);
+	void ChannelInvite(std::string CommandString);
+	void ChannelGrantModerator(std::string CommandString);
+	void ChannelGrantVoice(std::string CommandString);
+	void ChannelKick(std::string CommandString);
+	void ChannelModerate(std::string CommandString);
+	std::string ChannelSlotName(int ChannelNumber);
 	void ToggleInvites();
 	bool InvitesAllowed() { return AllowInvites; }
 	bool IsRevoked() { return Revoked; }
@@ -137,13 +137,13 @@ public:
 	inline bool CanListAllChannels() { return (Status >= RuleI(Channels, RequiredStatusListAll)); }
 	void SendHelp();
 	inline bool GetForceDisconnect() { return ForceDisconnect; }
-	string MailBoxName();
+	std::string MailBoxName();
 	int GetMailBoxNumber() { return CurrentMailBox; }
-	int GetMailBoxNumber(string CharacterName);
+	int GetMailBoxNumber(std::string CharacterName);
 	void SetConnectionType(char c);
 	ConnectionType GetConnectionType() { return TypeOfConnection; }
 	inline bool IsMailConnection() { return (TypeOfConnection == ConnectionTypeMail) || (TypeOfConnection == ConnectionTypeCombined); }
-	void SendNotification(int MailBoxNumber, string From, string Subject, int MessageID);
+	void SendNotification(int MailBoxNumber, std::string From, std::string Subject, int MessageID);
 	void ChangeMailBox(int NewMailBox);
 	inline void SetMailBox(int NewMailBox) { CurrentMailBox = NewMailBox; }
 	void SendFriends();
@@ -152,7 +152,7 @@ public:
 
 private:
 	unsigned int CurrentMailBox;
-	vector<CharacterEntry> Characters;
+	std::vector<CharacterEntry> Characters;
 	ChatChannel *JoinedChannels[MAX_JOINED_CHANNELS];
 	bool Announce;
 	int AccountID;
@@ -178,16 +178,16 @@ public:
 	Clientlist(int MailPort);
 	void	Process();
 	void	CloseAllConnections();
-	Client *FindCharacter(string CharacterName);
+	Client *FindCharacter(std::string CharacterName);
 	void	CheckForStaleConnections(Client *c);
-	Client *IsCharacterOnline(string CharacterName);
-	void ProcessOPMailCommand(Client *c, string CommandString);
+	Client *IsCharacterOnline(std::string CharacterName);
+	void ProcessOPMailCommand(Client *c, std::string CommandString);
 
 private:
 
 	EQStreamFactory *chatsf;
 
-	list<Client*> ClientChatConnections;
+	std::list<Client*> ClientChatConnections;
 
 	OpcodeManager *ChatOpMgr;
 };
