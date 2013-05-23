@@ -39,10 +39,6 @@
 
 #ifdef _WINDOWS
 	#include <time.h>
-	// have to undefine these since a macro version 
-	// is defined in windef.h (which windows includes)
-	#undef min 
-	#undef max
 #else
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -573,7 +569,7 @@ uint32 length;
 
 		while (used<length) {
 			out=new EQProtocolPacket(OP_Fragment,nullptr,MaxLen-4);
-			chunksize= std::min(length-used,MaxLen-6);
+			chunksize=std::min(length-used,MaxLen-6);
 			memcpy(out->pBuffer+2,tmpbuff+used,chunksize);
 			out->size=chunksize+2;
 			SequencedPush(out);

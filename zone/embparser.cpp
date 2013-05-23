@@ -30,6 +30,7 @@
 #include "questmgr.h"
 #include "command.h"
 #include "../common/seperator.h"
+#include "../common/MiscFunctions.h"
 #include "../common/StringUtil.h"
 #include "QGlobals.h"
 #include "zone.h"

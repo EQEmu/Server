@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <cstdarg>
-
 #include <time.h>
 
 #ifdef _WINDOWS

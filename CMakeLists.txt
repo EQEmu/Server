@@ -79,6 +79,8 @@ IF(MSVC)
 			STRING(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
 		ENDIF(${flag_var} MATCHES "/MD")
 	ENDFOREACH(flag_var)
+	
+	ADD_DEFINITIONS(-DNOMINMAX)
 ELSE(MSVC)
 	#Normally set by perl but we don't use the perl flags anymore so we set it.
 	ADD_DEFINITIONS(-DHAS_UNION_SEMUN)
@@ -125,16 +127,7 @@ OPTION(EQEMU_BUILD_PERL "Build Perl parser." ON)
 #C++11 stuff
 IF(NOT MSVC)
 	ADD_DEFINITIONS(-std=c++0x)
-	#Rvalue-Move - todo: auto set this based on gcc version
-	OPTION(EQEMU_ENABLE_RVALUE_MOVE "Enable EQEmu RValue References (Enable if GCC 4.3 or higher)" OFF)
-ELSE(NOT MSVC)
-	#Rvalue-Move - todo: auto set this based on msvc version
-	OPTION(EQEMU_ENABLE_RVALUE_MOVE "Enable EQEmu RValue References (Enable if Visual Studio 2010 or higher)" OFF)
 ENDIF(NOT MSVC)
-
-IF(EQEMU_ENABLE_RVALUE_MOVE)
-	ADD_DEFINITIONS(-DEQEMU_RVALUE_MOVE)
-ENDIF(EQEMU_ENABLE_RVALUE_MOVE)
 
 #Various definitions
 IF(EQEMU_BUILD_PERL)

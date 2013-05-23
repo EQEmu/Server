@@ -29,16 +29,16 @@ const char *MakeLowerString(const char *source);
 void MakeLowerString(const char *source, char *target);
 
 
-int		MakeAnyLenString(char** ret, const char* format, ...);
-uint32	AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...);
+int MakeAnyLenString(char** ret, const char* format, ...);
+uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...);
 
-uint32	hextoi(char* num);
-uint64	hextoi64(char* num);
-bool	atobool(char* iBool);
+uint32 hextoi(char* num);
+uint64 hextoi64(char* num);
+bool atobool(char* iBool);
 
-char*	strn0cpy(char* dest, const char* source, uint32 size);
+char* strn0cpy(char* dest, const char* source, uint32 size);
 		// return value =true if entire string(source) fit, false if it was truncated
-bool	strn0cpyt(char* dest, const char* source, uint32 size);
+bool strn0cpyt(char* dest, const char* source, uint32 size);
 
 char *CleanMobName(const char *in, char *out);
 
