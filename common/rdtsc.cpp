@@ -58,7 +58,7 @@ RDTSC_Timer::RDTSC_Timer(bool start_it) {
 }
 
 int64 RDTSC_Timer::rdtsc() {
-	int64 res;
+	int64 res = 0;
 #ifdef USE_RDTSC
 #ifndef WIN64
 #ifdef WIN32

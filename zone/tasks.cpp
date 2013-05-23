@@ -27,6 +27,7 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #define strcasecmp _stricmp
 #endif
 
+#include "../common/MiscFunctions.h"
 #include "../common/StringUtil.h"
 #include "../common/rulesys.h"
 #include "masterentity.h"

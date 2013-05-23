@@ -20,7 +20,6 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include <time.h>
 #include <sys/types.h>
 #ifdef _WINDOWS
 	#include <time.h>

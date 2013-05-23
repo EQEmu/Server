@@ -13,6 +13,7 @@ SET(eqlogin_sources
 )
 
 IF(MSVC OR MINGW)
+	ADD_DEFINITIONS(-DNOMINMAX)
 	SET(eqlogin_sources ${eqlogin_sources} Encryption.cpp)
 ENDIF(MSVC OR MINGW)
 
@@ -43,7 +44,6 @@ ADD_EXECUTABLE(loginserver ${eqlogin_sources} ${eqlogin_headers})
 TARGET_LINK_LIBRARIES(loginserver Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE})
 
 IF(MSVC)
-
 	SET_TARGET_PROPERTIES(loginserver PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
 	TARGET_LINK_LIBRARIES(loginserver "Ws2_32.lib")
 ENDIF(MSVC)
