@@ -6,7 +6,7 @@
 #include "classes.h"
 #include "rulesys.h"
 #include "seperator.h"
-#include "MiscFunctions.h"
+#include "StringUtil.h"
 #include "eq_packet_structs.h"
 #include "guilds.h"
 #include "extprofile.h"

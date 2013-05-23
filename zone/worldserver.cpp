@@ -28,9 +28,6 @@
 	#include <process.h>
 
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 #endif

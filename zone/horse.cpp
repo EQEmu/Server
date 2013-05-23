@@ -20,7 +20,7 @@
 #include "masterentity.h"
 #include "../common/Item.h"
 #include "../common/linked_list.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include <math.h>
 #include <assert.h>
 #include "worldserver.h"

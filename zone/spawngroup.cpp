@@ -24,6 +24,7 @@
 #include "../common/types.h"
 #include "zonedb.h"
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 
 extern EntityList entity_list;
 

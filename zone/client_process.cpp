@@ -32,9 +32,6 @@
 	#include <windows.h>
 	#include <winsock.h>
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 #else
@@ -50,7 +47,7 @@
 #include "../common/packet_dump.h"
 #include "worldserver.h"
 #include "../common/packet_dump_file.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/spdat.h"
 #include "petitions.h"
 #include "NpcAI.h"

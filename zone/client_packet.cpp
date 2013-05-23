@@ -29,9 +29,6 @@
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 #else
@@ -48,7 +45,7 @@
 #include "worldserver.h"
 #include "../common/rdtsc.h"
 #include "../common/packet_dump_file.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/breakdowns.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"

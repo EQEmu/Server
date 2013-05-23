@@ -55,6 +55,7 @@ SET(common_sources
 	serverinfo.cpp
 	shareddb.cpp
 	spdat.cpp
+    StringUtil.cpp
 	StructStrategy.cpp
 	TCPConnection.cpp
 	TCPServer.cpp
@@ -170,6 +171,7 @@ SET(common_headers
 	shareddb.h
 	skills.h
 	spdat.h
+    StringUtil.h
 	StructStrategy.h
 	TCPBasicServer.h
 	TCPConnection.h

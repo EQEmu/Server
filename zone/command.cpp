@@ -50,7 +50,7 @@
 #include "../common/EQPacket.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 //#include "../common/servertalk.h" // for oocmute and revoke
 #include "worldserver.h"
 #include "masterentity.h"

@@ -83,13 +83,15 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
 #include "../common/rulesys.h"
+#include "../common/StringUtil.h"
 #include <math.h>
 #include <assert.h>
+
 #ifndef WIN32
-//	#include <pthread.h>
-#include <stdlib.h>
-#include "../common/unix.h"
+    #include <stdlib.h>
+    #include "../common/unix.h"
 #endif
+
 #ifdef _GOTFRAGS
 	#include "../common/packet_dump_file.h"
 #endif

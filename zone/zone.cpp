@@ -45,7 +45,7 @@
 #include "../common/packet_dump_file.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStream.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "ZoneConfig.h"
 #include "../common/breakdowns.h"
 #include "map.h"

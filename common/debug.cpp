@@ -1,22 +1,25 @@
 #include "debug.h"
 
 #include <iostream>
+#include <string>
+#include <cstdarg>
 #include <time.h>
-#include <string.h>
+
 #ifdef _WINDOWS
 	#include <process.h>
 
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
 	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
+	
 #else
+	
 	#include <sys/types.h>
 	#include <unistd.h>
-	#include <stdarg.h>
 #endif
+
+#include "../common/StringUtil.h"
 #include "../common/MiscFunctions.h"
 #include "../common/platform.h"
 
@@ -72,6 +75,7 @@ EQEMuLog::~EQEMuLog() {
 }
 
 bool EQEMuLog::open(LogIDs id) {
+
 	if (!logFileValid) {
 		return false;
 	}
@@ -87,36 +91,40 @@ bool EQEMuLog::open(LogIDs id) {
 		return true;
 	}
 
-	char exename[200] = "";
+	std::string filename = FileNames[id];
+
 	const EQEmuExePlatform &platform = GetExecutablePlatform();
+
 	if(platform == ExePlatformWorld) {
-		snprintf(exename, sizeof(exename), "_world");
+		filename.append("_world");
 	} else if(platform == ExePlatformZone) {
-		snprintf(exename, sizeof(exename), "_zone");
+		filename.append("_zone");
 	} else if(platform == ExePlatformLaunch) {
-		snprintf(exename, sizeof(exename), "_launch");
+		filename.append("_launch");
 	} else if(platform == ExePlatformUCS) {
-		snprintf(exename, sizeof(exename), "_ucs");
+		filename.append("_ucs");
 	} else if(platform == ExePlatformQueryServ) {
-		snprintf(exename, sizeof(exename), "_queryserv");
+		filename.append("_queryserv");
 	} else if(platform == ExePlatformSharedMemory) {
-		snprintf(exename, sizeof(exename), "_shared_memory");
+		filename.append("_shared_memory");
 	}
 
-	char filename[200];
+
 #ifndef NO_PIDLOG
-	snprintf(filename, sizeof(filename), "%s%s_%04i.log", FileNames[id], exename, getpid());
-#else
-	snprintf(filename, sizeof(filename), "%s%s.log", FileNames[id], exename);
+	// According to http://msdn.microsoft.com/en-us/library/vstudio/ee404875(v=vs.100).aspx
+	// Visual Studio 2010 doesn't have std::to_string(int) but it does have one for
+	// long long. Oh well, it works fine and formats perfectly acceptably.
+	filename.append(std::to_string((long long)getpid()));
 #endif
-	fp[id] = fopen(filename, "a");
+	filename.append(".log");
+	fp[id] = fopen(filename.c_str(), "a");
 	if (!fp[id]) {
 		std::cerr << "Failed to open log file: " << filename << std::endl;
 		pLogStatus[id] |= 4; // set file state to error
 		return false;
 	}
 	fputs("---------------------------------------------\n",fp[id]);
-	write(id, "Starting Log: %s", filename);
+	write(id, "Starting Log: %s", filename.c_str());
 	return true;
 }
 
@@ -143,44 +151,54 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 	time( &aclock ); /* Get time in seconds */
 	newtime = localtime( &aclock ); /* Convert time to struct */
 
-	if (dofile)
+	if (dofile) {
 #ifndef NO_PIDLOG
 		fprintf(fp[id], "[%02d.%02d. - %02d:%02d:%02d] ", newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
 #else
 		fprintf(fp[id], "%04i [%02d.%02d. - %02d:%02d:%02d] ", getpid(), newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec);
 #endif
+	}
 
-	va_list argptr, tmpargptr;
-	va_start(argptr, fmt);
+	va_list argptr,tmpargptr;
+	
 	if (dofile) {
-		va_copy(tmpargptr, argptr);
+		va_start(argptr, fmt);
+		va_copy(tmpargptr,argptr);
 		vfprintf( fp[id], fmt, tmpargptr );
+		va_end(tmpargptr);
 	}
 	if(logCallbackFmt[id]) {
 		msgCallbackFmt p = logCallbackFmt[id];
-		va_copy(tmpargptr, argptr);
+		va_start(argptr, fmt);
+		va_copy(tmpargptr,argptr);
 		p(id, fmt, tmpargptr );
+		va_end(tmpargptr);
 	}
+
+	std::string outputMessage;
+	va_start(argptr, fmt);
+	va_copy(tmpargptr,argptr);
+	vStringFormat(outputMessage, fmt, tmpargptr);
+	va_end(tmpargptr);
+
 	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
-			fprintf(stderr, "[%s] ", LogNames[id]);
-			vfprintf( stderr, fmt, argptr );
+			
+			std::cerr << "[" << LogNames[id] << "] ";
+			std::cerr << outputMessage;
 		}
 		else {
-			fprintf(stdout, "[%s] ", LogNames[id]);
-			vfprintf( stdout, fmt, argptr );
+			std::cout << "[" << LogNames[id] << "] ";
+			std::cout << outputMessage;
 		}
 	}
-	va_end(argptr);
 	if (dofile)
 		fprintf(fp[id], "\n");
 	if (pLogStatus[id] & 2) {
 		if (pLogStatus[id] & 8) {
-			fprintf(stderr, "\n");
-			fflush(stderr);
+			std::cerr << std::endl;
 		} else {
-			fprintf(stdout, "\n");
-			fflush(stdout);
+			std::cout << std::endl;
 		}
 	}
 	if(dofile)
@@ -349,36 +367,45 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 
 	write(id, "Dumping Packet: %i", size);
 	// Output as HEX
-	int j = 0; char* ascii = new char[cols+1]; memset(ascii, 0, cols+1);
-	uint32 i;
-	for(i=skip; i<size; i++) {
-		if ((i-skip)%cols==0) {
-			if (i != skip)
-				writeNTS(id, dofile, " | %s\n", ascii);
-			writeNTS(id, dofile, "%4i: ", i-skip);
-			memset(ascii, 0, cols+1);
-			j = 0;
+	
+	int beginningOfLineOffset = 0; 
+	uint32 indexInData;
+	std::string asciiOutput;
+
+	for(indexInData=skip; indexInData<size; indexInData++) {
+		if ((indexInData-skip)%cols==0) {
+			if (indexInData != skip)
+				writeNTS(id, dofile, " | %s\n", asciiOutput.c_str());
+			writeNTS(id, dofile, "%4i: ", indexInData-skip);
+			asciiOutput.clear();
+			beginningOfLineOffset = 0;
 		}
-		else if ((i-skip)%(cols/2) == 0) {
+		else if ((indexInData-skip)%(cols/2) == 0) {
 			writeNTS(id, dofile, "- ");
 		}
-		writeNTS(id, dofile, "%02X ", (unsigned char)data[i]);
+		writeNTS(id, dofile, "%02X ", (unsigned char)data[indexInData]);
 
-		if (data[i] >= 32 && data[i] < 127)
-			ascii[j++] = data[i];
+		if (data[indexInData] >= 32 && data[indexInData] < 127)
+		{
+			// According to http://msdn.microsoft.com/en-us/library/vstudio/ee404875(v=vs.100).aspx
+			// Visual Studio 2010 doesn't have std::to_string(int) but it does have the long long 
+			// version.
+			asciiOutput.append(std::to_string((long long)data[indexInData]));
+		}
 		else
-			ascii[j++] = '.';
+		{
+			asciiOutput.append(".");
+		}
 	}
-	uint32 k = ((i-skip)-1)%cols;
+	uint32 k = ((indexInData-skip)-1)%cols;
 	if (k < 8)
 		writeNTS(id, dofile, "  ");
 	for (uint32 h = k+1; h < cols; h++) {
 		writeNTS(id, dofile, "   ");
 	}
-	writeNTS(id, dofile, " | %s\n", ascii);
+	writeNTS(id, dofile, " | %s\n", asciiOutput.c_str());
 	if (dofile)
 		fflush(fp[id]);
-	safe_delete_array(ascii);
 	return true;
 }
 
@@ -435,4 +462,3 @@ void EQEMuLog::SetAllCallbacks(msgCallbackPva proc) {
 		SetCallback((LogIDs)r, proc);
 	}
 }
-

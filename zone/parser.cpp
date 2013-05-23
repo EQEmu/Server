@@ -21,6 +21,7 @@
 #include "zonedb.h"
 #include "../common/spdat.h"
 #include "../common/packet_functions.h"
+#include "../common/StringUtil.h"
 #include "spawn2.h"
 #include "zone.h"
 #include "event_codes.h"
