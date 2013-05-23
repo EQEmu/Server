@@ -22,7 +22,7 @@
 #include "../common/EQEmuConfig.h"
 
 
-WorldServer::WorldServer(map<string, ZoneLaunch *> &zones, const char *name, const EQEmuConfig *config)
+WorldServer::WorldServer(std::map<std::string, ZoneLaunch *> &zones, const char *name, const EQEmuConfig *config)
 : WorldConnection(EmuTCPConnection::packetModeLauncher, config->SharedKey.c_str()),
 	m_name(name),
 	m_config(config),
@@ -97,7 +97,7 @@ void WorldServer::Process() {
 				break;
 			}
 			case ZR_Restart: {
-				map<string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
+				std::map<std::string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
 				if(res == m_zones.end()) {
 					_log(LAUNCHER__ERROR, "World told us to restart zone %s, but it is not running.", lzr->short_name);
 				} else {
@@ -107,7 +107,7 @@ void WorldServer::Process() {
 				break;
 			}
 			case ZR_Stop: {
-				map<string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
+				std::map<std::string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
 				if(res == m_zones.end()) {
 					_log(LAUNCHER__ERROR, "World told us to stop zone %s, but it is not running.", lzr->short_name);
 				} else {

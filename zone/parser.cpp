@@ -4,14 +4,11 @@
 
 #include <iostream>
 #include <ctype.h>
-using namespace std;
 #include <fstream>
-using namespace std;
 #include <string>
 #include <list>
 #include <algorithm>
 
-using namespace std;
 #include "../common/debug.h"
 #include "entity.h"
 #include "masterentity.h"
@@ -45,18 +42,18 @@ int mindex1 = 0;
 const char * charIn3 = "`~1234567890-=!@#$%^&*_+qwertyuiop[]asdfghjkl'zxcvbnm,./QWERTYUIOP|ASDFGHJKL:ZXCVBNM<>?\"\\";
 
 // MYRA - restore missing commands for qst type files & add itemlink
-string cmds("if 0|break 1|spawn 6|spawn2 7|settimer 2|stoptimer 1|rebind 4|echo 1|summonitem 1|selfcast 1|zone 1|castspell 2|say 1|emote 1|shout 1|shout2 1|depop 1|exp 1|level 1|safemove 1|rain 1|snow 1|givecash 4|pvp 1|doanim 1|addskill 2|flagcheck 1|me 1|write 2|settarget 2|follow 1|sfollow 1|save 1|setallskill 1|faction 2|settime 2|setguild 2|setsky 1|setstat 2|movepc 5|gmmove 3|movegrp 4|signal 1|attack 1|itemlink 1|setglobal 4|delglobal 1|targlobal 6|setskill 2|setlanguage 2|stop 0|resume 0|start 1|moveto 3|pause 1|addldonpoints 2|");
+std::string cmds("if 0|break 1|spawn 6|spawn2 7|settimer 2|stoptimer 1|rebind 4|echo 1|summonitem 1|selfcast 1|zone 1|castspell 2|say 1|emote 1|shout 1|shout2 1|depop 1|exp 1|level 1|safemove 1|rain 1|snow 1|givecash 4|pvp 1|doanim 1|addskill 2|flagcheck 1|me 1|write 2|settarget 2|follow 1|sfollow 1|save 1|setallskill 1|faction 2|settime 2|setguild 2|setsky 1|setstat 2|movepc 5|gmmove 3|movegrp 4|signal 1|attack 1|itemlink 1|setglobal 4|delglobal 1|targlobal 6|setskill 2|setlanguage 2|stop 0|resume 0|start 1|moveto 3|pause 1|addldonpoints 2|");
 
 
 //end Myra
 
 
-int GetArgs(string command)
+int GetArgs(std::string command)
 {
-	string::iterator iterator = cmds.begin();
-	string buffer;
-	string cmd;
-	string argnum;
+	std::string::iterator iterator = cmds.begin();
+	std::string buffer;
+	std::string cmd;
+	std::string argnum;
 	while (*iterator) {
 		if (*iterator == ' ')
 		{
@@ -84,11 +81,11 @@ int GetArgs(string command)
 	return -1;
 }
 
-int calc(string calc)
+int calc(std::string calc)
 {
-	string::iterator iterator = calc.begin();
-	string buffer;
-	string integer1;
+	std::string::iterator iterator = calc.begin();
+	std::string buffer;
+	std::string integer1;
 	char op = 0;
 	int returnvalue = 0;
 
@@ -156,19 +153,19 @@ int Parser::numtok(const char *text, char character) {
 	return returnvalue;
 }
 
-string strlwr(string tmp) {
-	string res;
+std::string strlwr(std::string tmp) {
+	std::string res;
 	transform(tmp.begin(), tmp.end(), res.begin(), (int(*)(int))tolower);
 	return(res);
 }
 
-int strcmp(const string &com, const string &com2) {
+int strcmp(const std::string &com, const std::string &com2) {
 	return strcmp(com.c_str(),com2.c_str());
 }
 
-string gettok(const char *text, char character, int index)
+std::string gettok(const char *text, char character, int index)
 {
-	string buffer;
+	std::string buffer;
 	int find=0;
 	for(; *text != '\0'; *text++)
 	{
@@ -184,20 +181,20 @@ string gettok(const char *text, char character, int index)
 	return buffer;
 }
 
-void Parser::MakeVars(string text, uint32 npcid) {
-	string buffer;
-	string temp;
+void Parser::MakeVars(std::string text, uint32 npcid) {
+	std::string buffer;
+	std::string temp;
 	int pos = numtok(text.c_str(),' ')+1;
 	for(int i=0;i<pos;i++)
 	{
 			buffer = gettok(text.c_str(),' ',i).c_str();
-			temp = (string)itoa(i+1); temp += "."; temp += (string)itoa(npcid);
+			temp = (std::string)itoa(i+1); temp += "."; temp += (std::string)itoa(npcid);
 #if Parser_DEBUG>10
 				printf("Buffer: %s, temp: %s\n",buffer.c_str(),temp.c_str());
 #endif
 AddVar(temp,buffer);
 			temp="";
-			temp=(string)itoa(i+1) + "-." + (string)itoa(npcid);
+			temp=(std::string)itoa(i+1) + "-." + (std::string)itoa(npcid);
 			AddVar(temp,strstr(text.c_str(),buffer.c_str()));
 			buffer="";
 	}
@@ -273,13 +270,13 @@ void Parser::MakeParms(const char * str, uint32 npcid) {
 	}
 }
 
-int Parser::GetItemCount(string itemid, uint32 npcid)
+int Parser::GetItemCount(std::string itemid, uint32 npcid)
 {
-	string temp;
+	std::string temp;
 	int a=0;
 	for (int i=1;i<5;i++)
 	{
-		temp = (string)"item" + (string)itoa(i);
+		temp = (std::string)"item" + (std::string)itoa(i);
 		if (!GetVar(temp,npcid).compare(itemid))
 			a++;
 		temp="";
@@ -381,10 +378,10 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 			fac = client->GetFactionLevel(client->GetID(), npcmob->GetID(), client->GetRace(), client->GetClass(), DEITY_AGNOSTIC, npc->GetPrimaryFaction(), npcmob);
 		}
 		else if (!client) {
-			cerr << "WARNING: cast failure on mob->CastToClient()" << endl;
+			std::cerr << "WARNING: cast failure on mob->CastToClient()" << std::endl;
 		}
 		else if (!npc) {
-			cerr << "WARNING: cast failure on npcmob->CastToNPC()" << endl;
+			std::cerr << "WARNING: cast failure on npcmob->CastToNPC()" << std::endl;
 		}
 	}
 	if (mob) {
@@ -410,7 +407,7 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 		AddVar("zonesn.g",zone->GetShortName());
 	}
 
-	string temp;
+	std::string temp;
 #if Parser_DEBUG>10
 		printf("Data: %s,Id: %i\n",data,npcid);
 #endif
@@ -455,13 +452,13 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 			break;
 		}
 		case EVENT_WAYPOINT_ARRIVE: {
-			temp = "wp." + (string)itoa(npcid);
+			temp = "wp." + (std::string)itoa(npcid);
 			AddVar(temp,data);
 			SendCommands("event_waypoint_arrive", qstID, npcmob, mob);
 			break;
 		}
 		case EVENT_WAYPOINT_DEPART: {
-			temp = "wp." + (string)itoa(npcid);
+			temp = "wp." + (std::string)itoa(npcid);
 			AddVar(temp,data);
 			SendCommands("event_waypoint_depart", qstID, npcmob, mob);
 			break;
@@ -559,7 +556,7 @@ int32 Parser::GetNPCqstID(uint32 iNPCID) {
 
 void Parser::ClearCache() {
 #if Parser_DEBUG >= 2
-	cout << "Parser::ClearCache" << endl;
+	std::cout << "Parser::ClearCache" << std::endl;
 #endif
 	//for (uint32 i=0; i<pMaxNPCID+1; i++)
 	//	pNPCqstID[i] = -1;
@@ -667,7 +664,7 @@ void Parser::scanformat(char *string, const char *format, char arg[10][1024])
 }
 
 void Parser::ClearEventsByNPCID(uint32 iNPCID) {
-	list<Events*>::iterator iterator = MainList.begin();
+	std::list<Events*>::iterator iterator = MainList.begin();
 	Events* p;
 	while (iterator != MainList.end())
 	{
@@ -692,7 +689,7 @@ void Parser::ClearAliasesByNPCID(uint32 iNPCID) {
 	}*/
 }
 
-void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npcid, Mob* other, Mob* mob )
+void Parser::ExCommands(std::string o_command, std::string parms, int argnums, uint32 npcid, Mob* other, Mob* mob )
 {
 	char arglist[10][1024];
 	//Work out the argument list, if there needs to be one
@@ -700,8 +697,8 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 		printf("Parms: %s\n", parms.c_str());
 #endif
 	if (argnums > 1) {
-		string buffer;
-		string::iterator iterator = parms.begin();
+		std::string buffer;
+		std::string::iterator iterator = parms.begin();
 		int quote=0,alist=0,ignore=0;
 		while (1) {
 			if (*iterator == '"') {
@@ -727,11 +724,11 @@ void Parser::ExCommands(string o_command, string parms, int argnums, uint32 npci
 		}
 	}
 	else {
-		string::iterator iterator = parms.begin();
+		std::string::iterator iterator = parms.begin();
 		if (*iterator == '"')
 		{
 			int quote=0,ignore=0;	//once=0
-			string tmp;
+			std::string tmp;
 			while (iterator != parms.end())
 			{
 				if (*iterator == '"')
@@ -1040,14 +1037,14 @@ int Parser::LoadScript(int npcid, const char * zone, Mob* activater)
 	ClearAliasesByNPCID(npcid);
 
 	//string strnpcid = ("default");
-	string strnpcid = (DEFAULT_QUEST_PREFIX);
+	std::string strnpcid = (DEFAULT_QUEST_PREFIX);
 
 	if (npcid)
 		strnpcid = itoa(npcid);
-	string filename;
-	filename = "./quests/" + (string)zone + "/" + (string)strnpcid + ".qst";
-	string line,buffer,temp;
-	ifstream file( filename.c_str() );
+	std::string filename;
+	filename = "./quests/" + (std::string)zone + "/" + (std::string)strnpcid + ".qst";
+	std::string line,buffer,temp;
+	std::ifstream file( filename.c_str() );
 	if (!file)
 	{
 		if (npcid) {
@@ -1063,8 +1060,8 @@ int Parser::LoadScript(int npcid, const char * zone, Mob* activater)
 	Events * NewEventList = new Events;
 	while (file && !file.eof())
 	{
-		getline(file,line);
-		string::iterator iterator = line.begin();
+		std::getline(file,line);
+		std::string::iterator iterator = line.begin();
         while (*iterator)
 		{
 			if (iterator[0] == '/' && iterator[1] == '/') break;
@@ -1122,22 +1119,22 @@ int Parser::LoadScript(int npcid, const char * zone, Mob* activater)
 }
 
 
-void Parser::Replace(string& string1, string repstr, string rep, int all) {
-	while (string1.find(repstr.c_str()) != string::npos) {
+void Parser::Replace(std::string& string1, std::string repstr, std::string rep, int all) {
+	while (string1.find(repstr.c_str()) != std::string::npos) {
 		string1.replace(string1.find(repstr.c_str()),repstr.length(),rep.c_str());
 		if (!all)
 			break;
 	}
 }
 
-string Parser::GetVar(string varname, uint32 npcid)
+std::string Parser::GetVar(std::string varname, uint32 npcid)
 {
-	list<vars*>::iterator iterator = varlist.begin();
+	std::list<vars*>::iterator iterator = varlist.begin();
 	vars * p;
-	string checkfirst;
-	string checksecond;
-	checkfirst = varname + (string)"." + (string)itoa(npcid);
-	checksecond = varname + (string)".g";
+	std::string checkfirst;
+	std::string checksecond;
+	checkfirst = varname + (std::string)"." + (std::string)itoa(npcid);
+	checksecond = varname + (std::string)".g";
 
 	while(iterator != varlist.end())
 	{
@@ -1154,9 +1151,9 @@ printf("GetVar(%s) = '%s'\n", varname.c_str(), p->value.c_str());
 	return checkfirst;
 }
 
-void Parser::DeleteVar(string name)
+void Parser::DeleteVar(std::string name)
 {
-	list<vars*>::iterator iterator = varlist.begin();
+	std::list<vars*>::iterator iterator = varlist.begin();
 	vars* p;
 	while(iterator != varlist.end())
 	{
@@ -1173,27 +1170,27 @@ void Parser::DeleteVar(string name)
 void Parser::DelChatAndItemVars(uint32 npcid)
 {
 //	MyListItem <vars> * Ptr;
-	string temp;
+	std::string temp;
 	int i=0;
 	for (i=0;i<10;i++)
 	{
-		temp = (string)itoa(i) + "." + (string)itoa(npcid);
+		temp = (std::string)itoa(i) + "." + (std::string)itoa(npcid);
 		DeleteVar(temp);
-		temp = (string)itoa(i) + "-." + (string)itoa(npcid);
+		temp = (std::string)itoa(i) + "-." + (std::string)itoa(npcid);
 		DeleteVar(temp);
 	}
 	for (i=1;i<5;i++)
 	{
-		temp = "item"+(string)itoa(i) + "." + (string)itoa(npcid);
+		temp = "item"+(std::string)itoa(i) + "." + (std::string)itoa(npcid);
 		DeleteVar(temp);
-		temp = "item"+(string)itoa(i) + ".stack." + (string)itoa(npcid);
+		temp = "item"+(std::string)itoa(i) + ".stack." + (std::string)itoa(npcid);
 		DeleteVar(temp);
 	}
 }
 
-void Parser::AddVar(string varname, string varval)
+void Parser::AddVar(std::string varname, std::string varval)
 {
-	list<vars*>::iterator iterator = varlist.begin();
+	std::list<vars*>::iterator iterator = varlist.begin();
 	vars* p;
 	while(iterator != varlist.end())
 	{
@@ -1212,13 +1209,13 @@ void Parser::AddVar(string varname, string varval)
 	varlist.push_back(newvar);
 }
 
-void Parser::HandleVars(string varname, string varparms, string& origstring, string format, uint32 npcid, Mob* mob)
+void Parser::HandleVars(std::string varname, std::string varparms, std::string& origstring, std::string format, uint32 npcid, Mob* mob)
 {
-	string tempvar;
+	std::string tempvar;
 	tempvar = GetVar(varname,npcid);
 	char arglist[10][1024];
-	string::iterator iterator = varparms.begin();
-	string buffer;
+	std::string::iterator iterator = varparms.begin();
+	std::string buffer;
 	int quote=0;
 	int alist=0;
 	while (*iterator)
@@ -1243,9 +1240,9 @@ void Parser::HandleVars(string varname, string varparms, string& origstring, str
 		int pos=0;
 		int one = atoi(arglist[1]);
 		int two = atoi(arglist[2]);
-		string buffer2;
-		string find = arglist[0];
-		string::iterator iterator = find.begin();
+		std::string buffer2;
+		std::string find = arglist[0];
+		std::string::iterator iterator = find.begin();
 		while (*iterator)
 		{
 			pos++;
@@ -1258,21 +1255,21 @@ void Parser::HandleVars(string varname, string varparms, string& origstring, str
 		Replace(origstring,format,buffer2.c_str());
 	}
 	else if (!strcmp(strlwr((const char*)varname.c_str()),"+")) {
-		string temp;
-		temp = (string)" "+format+(string)" ";
+		std::string temp;
+		temp = (std::string)" "+format+(std::string)" ";
 		Replace(origstring, temp, " REPLACETHISSHIT ",1);
 	}
 	else if (!strcmp(strlwr((const char*)varname.c_str()),"replace")) {
-		string temp;
-		temp = (string)arglist[0];
+		std::string temp;
+		temp = (std::string)arglist[0];
 		Replace(temp, arglist[1], arglist[2],1);
 		Replace(origstring, format, temp);
 	}
 	else if (!strcmp(strlwr(varname.c_str()),"itemcount")) {
-		string temp;
+		std::string temp;
 		int o=0;
 		o = GetItemCount(varparms,npcid);
-		temp = (string)itoa(o);
+		temp = (std::string)itoa(o);
 		Replace(origstring,format,temp,1);
 	}
 	else if (!strcmp(strlwr(varname.c_str()),"calc")) {
@@ -1294,10 +1291,10 @@ void Parser::HandleVars(string varname, string varparms, string& origstring, str
 			Replace(origstring,format,"false");
 	}
 	else if (!strcmp(strlwr((const char*)varname.c_str()),"read")) {
-		ifstream file(arglist[0]);
+		std::ifstream file(arglist[0]);
 		if (file)
 		{
-			string line;
+			std::string line;
 			int index=0,stop=atoi(arglist[1]);
 			while (!file.eof())
 			{
@@ -1344,19 +1341,19 @@ void Parser::HandleVars(string varname, string varparms, string& origstring, str
 	gClient = 0;
 }
 
-void Parser::ParseVars(string& text, uint32 npcid, Mob* mob)
+void Parser::ParseVars(std::string& text, uint32 npcid, Mob* mob)
 {
-	if (text.find("$") == string::npos && text.find("%") == string::npos)
+	if (text.find("$") == std::string::npos && text.find("%") == std::string::npos)
 		return;
-	string buffer2;
-	string fname;
-	string parms;
-	while (text.find("%") != string::npos)
+	std::string buffer2;
+	std::string fname;
+	std::string parms;
+	while (text.find("%") != std::string::npos)
 	{
-		string temp;
-		temp = (string)text.substr(text.find("%")).c_str();
-		string::iterator iterator = temp.begin();
-		string buffer;
+		std::string temp;
+		temp = (std::string)text.substr(text.find("%")).c_str();
+		std::string::iterator iterator = temp.begin();
+		std::string buffer;
 		while (*iterator)
 		{
 			if (!strrchr(notin,*iterator))
@@ -1370,14 +1367,14 @@ void Parser::ParseVars(string& text, uint32 npcid, Mob* mob)
 			iterator++;
 		}
 	}
-	while (text.find("$") != string::npos)
+	while (text.find("$") != std::string::npos)
 	{
-		string temp;
-		temp = (string)text.substr(text.rfind("$")).c_str();
-		string::iterator iterator = temp.begin();
+		std::string temp;
+		temp = (std::string)text.substr(text.rfind("$")).c_str();
+		std::string::iterator iterator = temp.begin();
 		int paren=0;
 		int fin=0;
-		string buffer;
+		std::string buffer;
 		while (iterator != temp.end())
 		{
 			if (!strrchr(notin,*iterator) || paren)
@@ -1449,7 +1446,7 @@ char * fixstring(char * string)
 	return tmp2;
 }*/
 
-int DoCompare(string compare1, string sign, string compare2)
+int DoCompare(std::string compare1, std::string sign, std::string compare2)
 {
 #if Parser_DEBUG>10
 		printf("compare1: %s,sign: %s, compare2: %s\n",compare1.c_str(),sign.c_str(),compare2.c_str());
@@ -1489,10 +1486,10 @@ int DoCompare(string compare1, string sign, string compare2)
 	return 1;
 }
 
-int Parser::ParseIf(string text)
+int Parser::ParseIf(std::string text)
 {
-	string::iterator iterator = text.begin();
-	string com1,com2,sign,next,buffer;
+	std::string::iterator iterator = text.begin();
+	std::string com1,com2,sign,next,buffer;
 	while (*iterator)
 	{
 		if (!strchr(notin,*iterator))
@@ -1547,13 +1544,13 @@ int Parser::ParseIf(string text)
 	return 1;
 }
 
-int Parser::ParseCommands(string text, int line, int justcheck, uint32 npcid, Mob* other, Mob* mob,  std::string filename)
+int Parser::ParseCommands(std::string text, int line, int justcheck, uint32 npcid, Mob* other, Mob* mob,  std::string filename)
 {
-	string buffer,command,parms,temp,temp2;
+	std::string buffer,command,parms,temp,temp2;
 	temp2 = text;
 	ParseVars(temp2,npcid,mob);
 	int bracket=0,paren=0,lastif=0,last_finished=0,quote=0,escape=0,ignore=0,argnums=0,argit=1;
-	string::iterator iterator = temp2.begin();
+	std::string::iterator iterator = temp2.begin();
 	while (iterator != temp2.end())
 	{
 		if (*iterator == '\\' && !escape) {
@@ -1681,8 +1678,8 @@ int Parser::ParseCommands(string text, int line, int justcheck, uint32 npcid, Mo
 	}
 	if (last_finished)
 	{
-					if(mob && mob->IsClient())
-					mob->CastToClient()->Message(10,"Line: %d,File: %s | error C0008: syntax error : missing ';' before '}'", line, filename.c_str() );
+		if(mob && mob->IsClient())
+			mob->CastToClient()->Message(10,"Line: %d,File: %s | error C0008: syntax error : missing ';' before '}'", line, filename.c_str() );
 		return 0;
 	}
 	return 1;

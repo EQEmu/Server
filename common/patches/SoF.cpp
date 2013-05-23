@@ -27,7 +27,7 @@ void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
 	if(opcodes == nullptr) {
 		//TODO: get this file name from the config file
-		string opfile = "patch_";
+		std::string opfile = "patch_";
 		opfile += name;
 		opfile += ".conf";
 		//load up the opcode manager.
@@ -42,17 +42,17 @@ void Register(EQStreamIdentifier &into) {
 	//ok, now we have what we need to register.
 
 	EQStream::Signature signature;
-	string pname;
+	std::string pname;
 
 	//register our world signature.
-	pname = string(name) + "_world";
+	pname = std::string(name) + "_world";
 	signature.ignore_eq_opcode = 0;
 	signature.first_length = sizeof(structs::LoginInfo_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_SendLoginInfo);
 	into.RegisterPatch(signature, pname.c_str(), &opcodes, &struct_strategy);
 
 	//register our zone signature.
-	pname = string(name) + "_zone";
+	pname = std::string(name) + "_zone";
 	signature.ignore_eq_opcode = opcodes->EmuToEQ(OP_AckPacket);
 	signature.first_length = sizeof(structs::ClientZoneEntry_Struct);
 	signature.first_eq_opcode = opcodes->EmuToEQ(OP_ZoneEntry);
@@ -71,7 +71,7 @@ void Reload() {
 
 	if(opcodes != nullptr) {
 		//TODO: get this file name from the config file
-		string opfile = "patch_";
+		std::string opfile = "patch_";
 		opfile += name;
 		opfile += ".conf";
 		if(!opcodes->ReloadOpcodes(opfile.c_str())) {

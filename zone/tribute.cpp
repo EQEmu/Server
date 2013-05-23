@@ -24,8 +24,6 @@
 #include <string>
 #include <map>
 
-using namespace std;
-
 #ifdef _WINDOWS
 #include <windows.h>
 #include <winsock.h>
@@ -58,12 +56,12 @@ public:
 	TributeLevel_Struct tiers[MAX_TRIBUTE_TIERS];
 	uint8 tier_count;
 	uint32 unknown;
-	string name;
-	string description;
+	std::string name;
+	std::string description;
 	bool is_guild;	//is a guild tribute item
 };
 
-map<uint32, TributeData> tribute_list;
+std::map<uint32, TributeData> tribute_list;
 
 void Client::ToggleTribute(bool enabled) {
 	if(enabled) {
@@ -309,7 +307,7 @@ void Client::AddTributePoints(int32 ammount) {
 
 void Client::SendTributes() {
 
-	map<uint32, TributeData>::iterator cur,end;
+	std::map<uint32, TributeData>::iterator cur,end;
 	cur = tribute_list.begin();
 	end = tribute_list.end();
 
@@ -343,7 +341,7 @@ void Client::SendTributes() {
 
 void Client::SendGuildTributes() {
 
-	map<uint32, TributeData>::iterator cur,end;
+	std::map<uint32, TributeData>::iterator cur,end;
 	cur = tribute_list.begin();
 	end = tribute_list.end();
 

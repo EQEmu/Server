@@ -1018,7 +1018,7 @@ float Map::FindClosestZ(VERTEX p ) const
 
 	float ClosestZ = -999999;
 
-	for(list<float>::iterator Iterator = ZSet.begin(); Iterator != ZSet.end(); ++Iterator)
+	for(std::list<float>::iterator Iterator = ZSet.begin(); Iterator != ZSet.end(); ++Iterator)
 	{
 		if(ABS(p.z - (*Iterator)) < ABS(p.z - ClosestZ))
 				ClosestZ = (*Iterator);

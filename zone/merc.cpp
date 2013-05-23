@@ -1122,7 +1122,7 @@ int32 Merc::CalcBaseEndurance()
 		int BonusUpto800 = int( at_most_800 / 4 ) ;
 		if(Stats > 400) {
 			Bonus400to800 = int( (at_most_800 - 400) / 4 );
-			HalfBonus400to800 = int( max( ( at_most_800 - 400 ), 0 ) / 8 );
+			HalfBonus400to800 = int( std::max( ( at_most_800 - 400 ), 0 ) / 8 );
 
 			if(Stats > 800) {
 				Bonus800plus = int( (Stats - 800) / 8 ) * 2;
@@ -1928,7 +1928,7 @@ bool Merc::AI_IdleCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
 		_ZP(Merc_AI_IdleCastCheck);
 #if MobAI_DEBUG_Spells >= 25
-		cout << "Non-Engaged autocast check triggered: " << this->GetCleanName() << endl;
+		std::cout << "Non-Engaged autocast check triggered: " << this->GetCleanName() << std::endl;
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -3774,7 +3774,7 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 
 		//Check for group cure first
 		if(countNeedsCured > 2) {
-			for(list<MercSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
+			for(std::list<MercSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
 				MercSpell selectedMercSpell = *itr;
 
 				if(IsGroupSpell(itr->spellid) && CheckSpellRecastTimers(caster, itr->spellid)) {
@@ -3814,7 +3814,7 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 
 		//no group cure for target- try to find single target spell
 		if(!spellSelected) {
-			for(list<MercSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
+			for(std::list<MercSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
 				MercSpell selectedMercSpell = *itr;
 
 				if(CheckSpellRecastTimers(caster, itr->spellid)) {

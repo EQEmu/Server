@@ -41,7 +41,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 //static data arrays, really not big enough to warrant shared mem.
 AA_DBAction AA_Actions[aaHighestID][MAX_AA_ACTION_RANKS];	//[aaid][rank]
-map<uint32,SendAA_Struct*>aas_send;
+std::map<uint32,SendAA_Struct*>aas_send;
 std::map<uint32, std::map<uint32, AA_Ability> > aa_effects;	//stores the effects from the aa_effects table in memory
 std::map<uint32, AALevelCost_Struct> AARequiredLevelAndCost;
 
@@ -1396,7 +1396,7 @@ void Client::SendAAList(){
 }
 
 uint32 Client::GetAA(uint32 aa_id) const {
-	map<uint32,uint8>::const_iterator res;
+	std::map<uint32,uint8>::const_iterator res;
 	res = aa_points.find(aa_id);
 	if(res != aa_points.end()) {
 		return(res->second);
@@ -1500,7 +1500,7 @@ void Client::ResetAA(){
 		aa[i]->AA = 0;
 		aa[i]->value = 0;
 	}
-	map<uint32,uint8>::iterator itr;
+	std::map<uint32,uint8>::iterator itr;
 	for(itr=aa_points.begin();itr!=aa_points.end();itr++)
 		aa_points[itr->first] = 0;
 

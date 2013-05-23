@@ -22,7 +22,6 @@
 #include <vector>
 #include <map>
 #include "../common/types.h"
-using namespace std;
 
 class EQLConfig;
 
@@ -46,16 +45,16 @@ public:
 	void LSReconnect();
 
 	int CountZones();
-	vector<string> ListBootedZones();	//returns an array of zone_refs (opaque)
-	map<string,string> GetZoneDetails(Const_char *zone_ref);	//returns a hash ref of details
+	std::vector<std::string> ListBootedZones();	//returns an array of zone_refs (opaque)
+	std::map<std::string,std::string> GetZoneDetails(Const_char *zone_ref);	//returns a hash ref of details
 
 	int CountPlayers();
-	vector<string> ListPlayers(Const_char *zone_name = "");	//returns an array of player refs (opaque)
-	map<string,string> GetPlayerDetails(Const_char *player_ref);	//returns a hash ref of details
+	std::vector<std::string> ListPlayers(Const_char *zone_name = "");	//returns an array of player refs (opaque)
+	std::map<std::string,std::string> GetPlayerDetails(Const_char *player_ref);	//returns a hash ref of details
 
 	int CountLaunchers(bool active_only);
 //	vector<string> ListActiveLaunchers();	//returns an array of launcher names
-	vector<string> ListLaunchers();	//returns an array of launcher names
+	std::vector<std::string> ListLaunchers();	//returns an array of launcher names
 	EQLConfig * GetLauncher(Const_char *launcher_name);	//returns the EQLConfig object for the specified launcher.
 	void CreateLauncher(Const_char *launcher_name, int dynamic_count);
 //	EQLConfig * FindLauncher(Const_char *zone_ref);
@@ -74,8 +73,8 @@ public:
 
 	//bugs
 	int CountBugs();
-	vector<string> ListBugs(uint32 offset);	//returns an array of zone_refs (opaque)
-	map<string,string> GetBugDetails(const char *id);
+	std::vector<std::string> ListBugs(uint32 offset);	//returns an array of zone_refs (opaque)
+	std::map<std::string,std::string> GetBugDetails(const char *id);
     void ResolveBug(const char *id);
 	
 	void SendMessage(uint32 type, const char *msg);

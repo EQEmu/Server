@@ -17,7 +17,6 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <stdlib.h>
 #include <math.h>
 
@@ -177,7 +176,7 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in Fishing query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in Fishing query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}

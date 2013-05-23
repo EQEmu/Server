@@ -28,7 +28,6 @@
 #include <vector>
 #include "SoFCharCreateData.h"
 
-using namespace std;
 WorldDatabase database;
 extern std::vector<RaceClassAllocation> character_create_allocations;
 extern std::vector<RaceClassCombos> character_create_race_class_combos;
@@ -220,8 +219,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 			}
 			else
 			{
-				cout << "Got a bogus character (" << row[0] << ") Ignoring!!!" << endl;
-				cout << "PP length ="<<lengths[1]<<" but PP should be "<<sizeof(PlayerProfile_Struct)<<endl;
+				std::cout << "Got a bogus character (" << row[0] << ") Ignoring!!!" << std::endl;
+				std::cout << "PP length ="<<lengths[1]<<" but PP should be "<<sizeof(PlayerProfile_Struct) << std::endl;
 				//DeleteCharacter(row[0]);
 			}
 		}
@@ -229,7 +228,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 	}
 	else
 	{
-		cerr << "Error in GetCharSelectInfo query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetCharSelectInfo query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return;
 	}

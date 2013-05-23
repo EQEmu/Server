@@ -30,7 +30,6 @@
 #include <map>
 #include <list>
 #include <queue>
-using namespace std;
 
 #include "../common/types.h"
 #include "../common/timer.h"
@@ -114,8 +113,8 @@ private:
 	Mutex	MNewQueue;
 	Mutex	MOpen;
 
-	map<string,EQStream*> connection_list;
-	queue<EQStream *>		NewQueue;
+	std::map<std::string,EQStream*> connection_list;
+	std::queue<EQStream *>		NewQueue;
 };
 
 #endif

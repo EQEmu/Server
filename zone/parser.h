@@ -45,8 +45,8 @@ public:
 	int mindex;
 	const std::string DEFAULT_QUEST_PREFIX;
 
-	typedef list<Events*>::iterator iter_events;
-	typedef list<EventList*>::iterator iter_eventlist;
+	typedef std::list<Events*>::iterator iter_events;
+	typedef std::list<EventList*>::iterator iter_eventlist;
 	std::list<Events*> MainList;
 	std::list<vars*> varlist;
 	std::list<Alias*> AliasList;
@@ -81,7 +81,7 @@ public:
 
 	int		numtok(const char *text, char character);
 
-	int		ParseCommands(std::string text, int line, int justcheck, uint32 npcid, Mob* other, Mob* mob, std::string filename=string("none"));
+	int		ParseCommands(std::string text, int line, int justcheck, uint32 npcid, Mob* other, Mob* mob, std::string filename=std::string("none"));
 	int		ParseIf(std::string text);
 	int		pcalc(const char * string);
 	void	ParseVars(std::string& text, uint32 npcid, Mob* mob);

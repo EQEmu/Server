@@ -705,7 +705,7 @@ int ZSList::GetZoneCount() {
 	return(numzones);
 }
 
-void ZSList::GetZoneIDList(vector<uint32> &zones) {
+void ZSList::GetZoneIDList(std::vector<uint32> &zones) {
 	LinkedListIterator<ZoneServer*> iterator(list);
 	iterator.Reset();
 	while(iterator.MoreElements()) {

@@ -28,8 +28,6 @@
 class Client;
 class EQApplicationPacket;
 
-using namespace std;
-
 enum {	//raid packet types:
 	raidAdd = 0,
 	raidRemove2 = 1,	//parameter=0

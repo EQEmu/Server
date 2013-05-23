@@ -5,7 +5,6 @@
 	#include <winsock2.h>
 #endif
 #include <iostream>
-using namespace std;
 #include "dbasync.h"
 #include "database.h"
 #include <errmsg.h>
@@ -24,7 +23,7 @@ bool DBAsyncCB_LoadVariables(DBAsyncWork* iWork) {
 	if (dbaq->GetAnswer(errbuf, &result))
 		iWork->GetDB()->LoadVariables_result(result);
 	else
-		cout << "Error: DBAsyncCB_LoadVariables failed: !GetAnswer: '" << errbuf << "'" << endl;
+		std::cout << "Error: DBAsyncCB_LoadVariables failed: !GetAnswer: '" << errbuf << "'" << std::endl;
 	return true;
 }
 
@@ -115,8 +114,8 @@ uint32 DBAsync::AddWork(DBAsyncWork** iWork, uint32 iDelay) {
 	if (iDelay)
 		(*iWork)->pExecuteAfter = Timer::GetCurrentTime() + iDelay;
 #if DEBUG_MYSQL_QUERIES >= 2
-	cout << "Adding AsyncWork #" << (*iWork)->GetWorkID() << endl;
-	cout << "ExecuteAfter = " << (*iWork)->pExecuteAfter << " (" << Timer::GetCurrentTime() << " + " << iDelay << ")" << endl;
+	std::cout << "Adding AsyncWork #" << (*iWork)->GetWorkID() << std::endl;
+	std::cout << "ExecuteAfter = " << (*iWork)->pExecuteAfter << " (" << Timer::GetCurrentTime() << " + " << iDelay << ")" << std::endl;
 #endif
 	*iWork = 0;
 	MInList.unlock();
@@ -131,7 +130,7 @@ bool DBAsync::CancelWork(uint32 iWorkID) {
 	if (iWorkID == 0)
 		return false;
 #if DEBUG_MYSQL_QUERIES >= 2
-	cout << "DBAsync::CancelWork: " << iWorkID << endl;
+	std::cout << "DBAsync::CancelWork: " << iWorkID << std::endl;
 #endif
 	MCurrentWork.lock();
 	if (CurrentWork && CurrentWork->GetWorkID() == iWorkID) {
@@ -174,8 +173,8 @@ DBAsyncWork* DBAsync::InListPop() {
 		if (iterator.GetData()->pExecuteAfter <= Timer::GetCurrentTime()) {
 			ret = iterator.GetData();
 #if DEBUG_MYSQL_QUERIES >= 2
-			cout << "Poping AsyncWork #" << ret->GetWorkID() << endl;
-			cout << ret->pExecuteAfter << " <= " << Timer::GetCurrentTime() << endl;
+			std::cout << "Poping AsyncWork #" << ret->GetWorkID() << std::endl;
+			std::cout << ret->pExecuteAfter << " <= " << Timer::GetCurrentTime() << std::endl;
 #endif
 			iterator.RemoveCurrent(false);
 			break;
@@ -232,7 +231,7 @@ void DBAsync::Process() {
 			tmpStatus = tmpWork->SetStatus(DBAsync::Finished);
 			if (tmpStatus != Executing) {
 				if (tmpStatus != Canceled) {
-					cout << "Error: Unexpected DBAsyncWork->Status in DBAsync::Process #1" << endl;
+					std::cout << "Error: Unexpected DBAsyncWork->Status in DBAsync::Process #1" << std::endl;
 				}
 				MCurrentWork.lock();
 				safe_delete(tmpWork);
@@ -246,7 +245,7 @@ void DBAsync::Process() {
 		}
 		else {
 			if (tmpStatus != Canceled) {
-				cout << "Error: Unexpected DBAsyncWork->Status in DBAsync::Process #2" << endl;
+				std::cout << "Error: Unexpected DBAsyncWork->Status in DBAsync::Process #2" << std::endl;
 			}
 			MCurrentWork.lock();
 			safe_delete(CurrentWork);
@@ -274,7 +273,7 @@ void DBAsync::CheckTimeout() {
 
 void DBAsync::CommitWrites() {
 #if DEBUG_MYSQL_QUERIES >= 2
-	cout << "DBAsync::CommitWrites() called." << endl;
+	std::cout << "DBAsync::CommitWrites() called." << std::endl;
 #endif
 	DBAsyncWork* tmpWork;
 	while ((tmpWork = InListPopWrite())) {
@@ -284,7 +283,7 @@ void DBAsync::CommitWrites() {
 			tmpStatus = tmpWork->SetStatus(DBAsync::Finished);
 			if (tmpStatus != Executing) {
 				if (tmpStatus != Canceled) {
-					cout << "Error: Unexpected DBAsyncWork->Status in DBAsync::CommitWrites #1" << endl;
+					std::cout << "Error: Unexpected DBAsyncWork->Status in DBAsync::CommitWrites #1" << std::endl;
 				}
 				safe_delete(tmpWork);
 			}
@@ -294,7 +293,7 @@ void DBAsync::CommitWrites() {
 		}
 		else {
 			if (tmpStatus != Canceled) {
-				cout << "Error: Unexpected DBAsyncWork->Status in DBAsync::CommitWrites #2" << endl;
+				std::cout << "Error: Unexpected DBAsyncWork->Status in DBAsync::CommitWrites #2" << std::endl;
 			}
 			safe_delete(tmpWork);
 		}
@@ -305,7 +304,7 @@ void DBAsync::ProcessWork(DBAsyncWork* iWork, bool iSleep) {
 	_CP(DBAsync_ProcessWork);
 	DBAsyncQuery* CurrentQuery;
 #if DEBUG_MYSQL_QUERIES >= 2
-	cout << "Processing AsyncWork #" << iWork->GetWorkID() << endl;
+	std::cout << "Processing AsyncWork #" << iWork->GetWorkID() << std::endl;
 #endif
 	while ((CurrentQuery = iWork->PopQuery())) {
 		CurrentQuery->Process(pDBC);

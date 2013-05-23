@@ -3782,7 +3782,7 @@ void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varna
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
-	stringstream duration_ss;
+	std::stringstream duration_ss;
 
 	if (duration == INT_MAX)
 	{
@@ -4487,7 +4487,7 @@ bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
 
 // Faction Mods for Alliance type spells
 void Mob::AddFactionBonus(uint32 pFactionID,int32 bonus) {
-	map <uint32, int32> :: const_iterator faction_bonus;
+	std::map <uint32, int32> :: const_iterator faction_bonus;
 	typedef std::pair <uint32, int32> NewFactionBonus;
 
 	faction_bonus = faction_bonuses.find(pFactionID);
@@ -4507,7 +4507,7 @@ void Mob::AddFactionBonus(uint32 pFactionID,int32 bonus) {
 
 // Faction Mods from items
 void Mob::AddItemFactionBonus(uint32 pFactionID,int32 bonus) {
-	map <uint32, int32> :: const_iterator faction_bonus;
+	std::map <uint32, int32> :: const_iterator faction_bonus;
 	typedef std::pair <uint32, int32> NewFactionBonus;
 
 	faction_bonus = item_faction_bonuses.find(pFactionID);
@@ -4526,7 +4526,7 @@ void Mob::AddItemFactionBonus(uint32 pFactionID,int32 bonus) {
 }
 
 int32 Mob::GetFactionBonus(uint32 pFactionID) {
-	map <uint32, int32> :: const_iterator faction_bonus;
+	std::map <uint32, int32> :: const_iterator faction_bonus;
 	faction_bonus = faction_bonuses.find(pFactionID);
 	if(faction_bonus != faction_bonuses.end())
 	{
@@ -4536,7 +4536,7 @@ int32 Mob::GetFactionBonus(uint32 pFactionID) {
 }
 
 int32 Mob::GetItemFactionBonus(uint32 pFactionID) {
-	map <uint32, int32> :: const_iterator faction_bonus;
+	std::map <uint32, int32> :: const_iterator faction_bonus;
 	faction_bonus = item_faction_bonuses.find(pFactionID);
 	if(faction_bonus != item_faction_bonuses.end())
 	{
@@ -4546,7 +4546,7 @@ int32 Mob::GetItemFactionBonus(uint32 pFactionID) {
 }
 
 void Mob::ClearItemFactionBonuses() {
-	map <uint32, int32> :: iterator itr;
+	std::map <uint32, int32> :: iterator itr;
 	for(itr = item_faction_bonuses.begin(); itr != item_faction_bonuses.end(); itr++)
 	{
 		item_faction_bonuses.erase(itr->first);

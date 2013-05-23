@@ -26,7 +26,6 @@ Child of the Mob class.
 #include <math.h>
 #include <iostream>
 #include <sstream>
-using namespace std;
 #ifdef _WINDOWS
 #define snprintf	_snprintf
 #if (_MSC_VER < 1500)
@@ -617,7 +616,7 @@ bool Corpse::Save() {
 		dbid = database.UpdatePlayerCorpse(dbid, charid, orgname, zone->GetZoneID(), zone->GetInstanceID(), (uchar*) dbpc, tmpsize, x_pos, y_pos, z_pos, heading,Rezzed());
 	safe_delete_array(dbpc);
 	if (dbid == 0) {
-		cout << "Error: Failed to save player corpse '" << this->GetName() << "'" << endl;
+		std::cout << "Error: Failed to save player corpse '" << this->GetName() << "'" << std::endl;
 		return false;
 	}
 	return true;
@@ -890,7 +889,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	if(IsPlayerCorpse() && dbid == 0) {
 		// SendLootReqErrorPacket(client, 0);
 		client->Message(13, "Warning: Corpse's dbid = 0! Corpse will not survive zone shutdown!");
-		cout << "Error: PlayerCorpse::MakeLootRequestPackets: dbid = 0!" << endl;
+		std::cout << "Error: PlayerCorpse::MakeLootRequestPackets: dbid = 0!" << std::endl;
 		// return;
 	}
 
@@ -1456,12 +1455,12 @@ bool ZoneDatabase::DeleteGraveyard(uint32 zone_id, uint32 graveyard_id) {
 
 	if (!RunQuery(query, query_length, errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
-		cerr << "Error1 in DeleteGraveyard query " << errbuf << endl;
+		std::cerr << "Error1 in DeleteGraveyard query " << errbuf << std::endl;
 		return false;
 	}
 
 	if (affected_rows == 0) {
-		cerr << "Error2 in DeleteGraveyard query: affected_rows = 0" << endl;
+		std::cerr << "Error2 in DeleteGraveyard query: affected_rows = 0" << std::endl;
 		return false;
 	}
 
@@ -1469,13 +1468,13 @@ bool ZoneDatabase::DeleteGraveyard(uint32 zone_id, uint32 graveyard_id) {
 
 	if (!RunQuery(query, query_length, errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
-		cerr << "Error3 in DeleteGraveyard query " << errbuf << endl;
+		std::cerr << "Error3 in DeleteGraveyard query " << errbuf << std::endl;
 		return false;
 	}
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
-		cerr << "Error4 in DeleteGraveyard query: affected_rows = 0" << endl;
+		std::cerr << "Error4 in DeleteGraveyard query: affected_rows = 0" << std::endl;
 		return false;
 	}
 
@@ -1491,13 +1490,13 @@ uint32 ZoneDatabase::AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id) {
 
 	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
-		cerr << "Error1 in AddGraveyardIDToZone query " << errbuf << endl;
+		std::cerr << "Error1 in AddGraveyardIDToZone query " << errbuf << std::endl;
 		return 0;
 	}
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
-		cerr << "Error2 in AddGraveyardIDToZone query: affected_rows = 0" << endl;
+		std::cerr << "Error2 in AddGraveyardIDToZone query: affected_rows = 0" << std::endl;
 		return 0;
 	}
 
@@ -1514,18 +1513,18 @@ uint32 ZoneDatabase::NewGraveyardRecord(uint32 graveyard_zoneid, float graveyard
 
 	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows, &new_graveyard_id)) {
 		safe_delete_array(query);
-		cerr << "Error1 in NewGraveyardRecord query " << errbuf << endl;
+		std::cerr << "Error1 in NewGraveyardRecord query " << errbuf << std::endl;
 		return 0;
 	}
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
-		cerr << "Error2 in NewGraveyardRecord query: affected_rows = 0" << endl;
+		std::cerr << "Error2 in NewGraveyardRecord query: affected_rows = 0" << std::endl;
 		return 0;
 	}
 
 	if(new_graveyard_id <= 0) {
-		cerr << "Error3 in NewGraveyardRecord query: new_graveyard_id <= 0" << endl;
+		std::cerr << "Error3 in NewGraveyardRecord query: new_graveyard_id <= 0" << std::endl;
 		return 0;
 	}
 
@@ -1542,13 +1541,13 @@ uint32 ZoneDatabase::GraveyardPlayerCorpse(uint32 dbid, uint32 zoneid, uint16 in
 
 	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
-		cerr << "Error1 in GraveyardPlayerCorpse query " << errbuf << endl;
+		std::cerr << "Error1 in GraveyardPlayerCorpse query " << errbuf << std::endl;
 		return 0;
 	}
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
-		cerr << "Error2 in GraveyardPlayerCorpse query: affected_rows = 0" << endl;
+		std::cerr << "Error2 in GraveyardPlayerCorpse query: affected_rows = 0" << std::endl;
 		return 0;
 	}
 	return dbid;
@@ -1567,18 +1566,18 @@ uint32 ZoneDatabase::UpdatePlayerCorpse(uint32 dbid, uint32 charid, const char* 
 
 	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
 		safe_delete_array(query);
-		cerr << "Error1 in UpdatePlayerCorpse query " << errbuf << endl;
+		std::cerr << "Error1 in UpdatePlayerCorpse query " << errbuf << std::endl;
 		return 0;
 	}
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
-		cerr << "Error2 in UpdatePlayerCorpse query: affected_rows = 0" << endl;
+		std::cerr << "Error2 in UpdatePlayerCorpse query: affected_rows = 0" << std::endl;
 		return 0;
 	}
 	if(rezzed){
 		if (!RunQuery(query, MakeAnyLenString(&query, "update player_corpses set rezzed = 1 WHERE id=%d",dbid), errbuf)) {
-			cerr << "Error in UpdatePlayerCorpse/Rezzed query: " << errbuf << endl;
+			std::cerr << "Error in UpdatePlayerCorpse/Rezzed query: " << errbuf << std::endl;
 		}
 		safe_delete_array(query);
 	}
@@ -1614,18 +1613,18 @@ uint32 ZoneDatabase::CreatePlayerCorpse(uint32 charid, const char* charname, uin
 
 	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows, &last_insert_id)) {
 		safe_delete_array(query);
-		cerr << "Error1 in CreatePlayerCorpse query " << errbuf << endl;
+		std::cerr << "Error1 in CreatePlayerCorpse query " << errbuf << std::endl;
 		return 0;
 	}
 	safe_delete_array(query);
 
 	if (affected_rows == 0) {
-		cerr << "Error2 in CreatePlayerCorpse query: affected_rows = 0" << endl;
+		std::cerr << "Error2 in CreatePlayerCorpse query: affected_rows = 0" << std::endl;
 		return 0;
 	}
 
 	if (last_insert_id == 0) {
-		cerr << "Error3 in CreatePlayerCorpse query: last_insert_id = 0" << endl;
+		std::cerr << "Error3 in CreatePlayerCorpse query: last_insert_id = 0" << std::endl;
 		return 0;
 	}
 
@@ -1653,15 +1652,15 @@ bool ZoneDatabase::CreatePlayerCorpseBackup(uint32 dbid, uint32 charid, const ch
 				if (affected_rows == 1)
 					result = true;
 				else
-					cerr << "Error in CreatePlayerCorpseBackup query: affected_rows != 1" << endl;
+					std::cerr << "Error in CreatePlayerCorpseBackup query: affected_rows != 1" << std::endl;
 			}
 			else
-				cerr << "Error in CreatePlayerCorpseBackup query " << errbuf << endl;
+				std::cerr << "Error in CreatePlayerCorpseBackup query " << errbuf << std::endl;
 		}
 		safe_delete_array(query);
 	}
 	else {
-		cerr << "Error in CreatePlayerCorpseBackup: dbid = 0" << endl;
+		std::cerr << "Error in CreatePlayerCorpseBackup: dbid = 0" << std::endl;
 	}
 	return result;
 }
@@ -1679,7 +1678,7 @@ uint32 ZoneDatabase::GetPlayerBurriedCorpseCount(uint32 char_id) {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetPlayerBurriedCorpseCount query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetPlayerBurriedCorpseCount query '" << query << "' " << errbuf << std::endl;
 	}
 
 	safe_delete_array(query);
@@ -1700,7 +1699,7 @@ uint32 ZoneDatabase::GetPlayerCorpseCount(uint32 char_id) {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetPlayerCorpseCount query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetPlayerCorpseCount query '" << query << "' " << errbuf << std::endl;
 	}
 
 	safe_delete_array(query);
@@ -1723,7 +1722,7 @@ uint32 ZoneDatabase::GetPlayerCorpseID(uint32 char_id, uint8 corpse) {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in GetPlayerCorpseID query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetPlayerCorpseID query '" << query << "' " << errbuf << std::endl;
 	}
 
 	safe_delete_array(query);
@@ -1769,7 +1768,7 @@ Corpse* ZoneDatabase::SummonBurriedPlayerCorpse(uint32 char_id, uint32 dest_zone
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in SummonBurriedPlayerCorpse query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in SummonBurriedPlayerCorpse query '" << query << "' " << errbuf << std::endl;
 	}
 
 	safe_delete_array(query);
@@ -1836,10 +1835,10 @@ bool ZoneDatabase::UnburyPlayerCorpse(uint32 dbid, uint32 new_zoneid, uint16 new
 		if (affected_rows == 1)
 			Result = true;
 		else
-			cerr << "Error2 in UnburyPlayerCorpse query: affected_rows NOT EQUAL to 1, as expected." << endl;
+			std::cerr << "Error2 in UnburyPlayerCorpse query: affected_rows NOT EQUAL to 1, as expected." << std::endl;
 	}
 	else
-		cerr << "Error1 in UnburyPlayerCorpse query " << errbuf << endl;
+		std::cerr << "Error1 in UnburyPlayerCorpse query " << errbuf << std::endl;
 
 	safe_delete_array(query);
 
@@ -1865,8 +1864,8 @@ Corpse* ZoneDatabase::LoadPlayerCorpse(uint32 player_corpse_id) {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in LoadPlayerCorpse query '" << query << "' " << errbuf << endl;
-		cerr << "Note that if your missing the 'rezzed' field you can add it with:\nALTER TABLE `player_corpses` ADD `rezzed` TINYINT UNSIGNED DEFAULT \"0\";\n";
+		std::cerr << "Error in LoadPlayerCorpse query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Note that if your missing the 'rezzed' field you can add it with:\nALTER TABLE `player_corpses` ADD `rezzed` TINYINT UNSIGNED DEFAULT \"0\";\n";
 	}
 
 	safe_delete_array(query);
@@ -1897,8 +1896,8 @@ bool ZoneDatabase::LoadPlayerCorpses(uint32 iZoneID, uint16 iInstanceID) {
 		mysql_free_result(result);
 	}
 	else {
-		cerr << "Error in LoadPlayerCorpses query '" << query << "' " << errbuf << endl;
-		cerr << "Note that if your missing the 'rezzed' field you can add it with:\nALTER TABLE `player_corpses` ADD `rezzed` TINYINT UNSIGNED DEFAULT \"0\";\n";
+		std::cerr << "Error in LoadPlayerCorpses query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Note that if your missing the 'rezzed' field you can add it with:\nALTER TABLE `player_corpses` ADD `rezzed` TINYINT UNSIGNED DEFAULT \"0\";\n";
 		safe_delete_array(query);
 		return false;
 	}
@@ -1922,7 +1921,7 @@ uint32 ZoneDatabase::GetFirstCorpseID(uint32 char_id) {
 	}
 		}
 	else {
-		cerr << "Error in GetFirstCorpseID query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in GetFirstCorpseID query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}
@@ -1936,7 +1935,7 @@ bool ZoneDatabase::BuryPlayerCorpse(uint32 dbid) {
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried = 1 WHERE id=%d", dbid), errbuf)) {
-		cerr << "Error in BuryPlayerCorpse query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in BuryPlayerCorpse query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1950,7 +1949,7 @@ bool ZoneDatabase::BuryAllPlayerCorpses(uint32 charid) {
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried = 1 WHERE charid=%d", charid), errbuf)) {
-		cerr << "Error in BuryPlayerCorpse query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in BuryPlayerCorpse query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1964,7 +1963,7 @@ bool ZoneDatabase::DeletePlayerCorpse(uint32 dbid) {
 	char *query = 0;
 
 	if (!RunQuery(query, MakeAnyLenString(&query, "Delete from player_corpses where id=%d", dbid), errbuf)) {
-		cerr << "Error in DeletePlayerCorpse query '" << query << "' " << errbuf << endl;
+		std::cerr << "Error in DeletePlayerCorpse query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}

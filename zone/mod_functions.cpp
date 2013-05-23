@@ -21,8 +21,6 @@ extern Zone* zone;
 
 extern WorldServer worldserver;
 
-using namespace std;
-
 void Zone::mod_init() { return; }
 void Zone::mod_repop() { return; }
 

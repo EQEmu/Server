@@ -209,7 +209,7 @@ VERTEX PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 
 }
 
-list<int> PathManager::FindRoute(int startID, int endID)
+std::list<int> PathManager::FindRoute(int startID, int endID)
 {
 	_ZP(Pathing_FindRoute_FromNodes);
 
@@ -217,9 +217,9 @@ list<int> PathManager::FindRoute(int startID, int endID)
 
 	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount);
 
-	list<AStarNode> OpenList, ClosedList;
+	std::list<AStarNode> OpenList, ClosedList;
 
-	list<int>Route;
+	std::list<int>Route;
 
 	AStarNode AStarEntry, CurrentNode;
 
@@ -257,7 +257,7 @@ list<int> PathManager::FindRoute(int startID, int endID)
 
 				Route.push_back(endID);
 
-				list<AStarNode>::iterator RouteIterator;
+				std::list<AStarNode>::iterator RouteIterator;
 
 				while(CurrentNode.PathNodeID != startID)
 				{
@@ -306,7 +306,7 @@ list<int> PathManager::FindRoute(int startID, int endID)
 
 			bool AlreadyInOpenList = false;
 
-			list<AStarNode>::iterator OpenListIterator, InsertionPoint = OpenList.end();
+			std::list<AStarNode>::iterator OpenListIterator, InsertionPoint = OpenList.end();
 
 			for(OpenListIterator = OpenList.begin(); OpenListIterator != OpenList.end(); ++OpenListIterator)
 			{
@@ -356,14 +356,14 @@ bool SortPathNodesByDistance(PathNodeSortStruct n1, PathNodeSortStruct n2)
 	return n1.Distance < n2.Distance;
 }
 
-list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
+std::list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 {
 
 	_ZP(Pathing_FindRoute_FromVertices);
 
 	_log(PATHING__DEBUG, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
 
-	list<int> noderoute;
+	std::list<int> noderoute;
 
 	float CandidateNodeRangeXY = RuleR(Pathing, CandidateNodeRangeXY);
 
@@ -374,7 +374,7 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 	//
 	int ClosestPathNodeToStart = -1;
 
-	list<PathNodeSortStruct> SortedByDistance;
+	std::list<PathNodeSortStruct> SortedByDistance;
 
 	PathNodeSortStruct TempNode;
 
@@ -393,7 +393,7 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 
 	SortedByDistance.sort(SortPathNodesByDistance);
 
-	for(list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
+	for(std::list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
 		_log(PATHING__DEBUG, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
 
@@ -431,7 +431,7 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 
 	SortedByDistance.sort(SortPathNodesByDistance);
 
-	for(list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
+	for(std::list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
 		_log(PATHING__DEBUG, "Checking Reachability of Node %i from End Position.", PathNodes[(*Iterator).id].id);
 		_log(PATHING__DEBUG, " (%8.3f, %8.3f, %8.3f) to (%8.3f, %8.3f, %8.3f)",
@@ -465,7 +465,7 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 	{
 		int CulledNodes = 0;
 
-		list<int>::iterator First, Second;
+		std::list<int>::iterator First, Second;
 
 		while((noderoute.size() >= 2) && (CulledNodes < NodesToAttemptToCull))
 		{
@@ -496,7 +496,7 @@ list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 	{
 		int CulledNodes = 0;
 
-		list<int>::iterator First, Second;
+		std::list<int>::iterator First, Second;
 
 		while((noderoute.size() >= 2) && (CulledNodes < NodesToAttemptToCull))
 		{
@@ -620,7 +620,7 @@ void PathManager::MeshTest()
 			if(j == i)
 				continue;
 
-			list<int> Route = FindRoute(PathNodes[i].id, PathNodes[j].id);
+			std::list<int> Route = FindRoute(PathNodes[i].id, PathNodes[j].id);
 
 			if(Route.size() == 0)
 			{
@@ -647,7 +647,7 @@ void PathManager::SimpleMeshTest()
 
 	for(uint32 j = 1; j < Head.PathNodeCount; ++j)
 	{
-		list<int> Route = FindRoute(PathNodes[0].id, PathNodes[j].id);
+		std::list<int> Route = FindRoute(PathNodes[0].id, PathNodes[j].id);
 
 		if(Route.size() == 0)
 		{
@@ -1114,7 +1114,7 @@ int PathManager::FindNearestPathNode(VERTEX Position)
 
 	int ClosestPathNodeToStart = -1;
 
-	list<PathNodeSortStruct> SortedByDistance;
+	std::list<PathNodeSortStruct> SortedByDistance;
 
 	PathNodeSortStruct TempNode;
 
@@ -1133,7 +1133,7 @@ int PathManager::FindNearestPathNode(VERTEX Position)
 
 	SortedByDistance.sort(SortPathNodesByDistance);
 
-	for(list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
+	for(std::list<PathNodeSortStruct>::iterator Iterator = SortedByDistance.begin(); Iterator != SortedByDistance.end(); ++Iterator)
 	{
 		_log(PATHING__DEBUG, "Checking Reachability of Node %i from Start Position.", PathNodes[(*Iterator).id].id);
 
@@ -1280,7 +1280,7 @@ void Mob::PrintRoute()
 
 	printf("Route is : ");
 
-	list<int>::iterator Iterator;
+	std::list<int>::iterator Iterator;
 
 	for(Iterator = Route.begin(); Iterator !=Route.end(); ++Iterator)
 	{
@@ -1324,7 +1324,7 @@ void PathManager::OpenDoors(int Node1, int Node2, Mob *ForWho)
 
 //this assumes that the first point in the list is the player's
 //current position, I dont know how well it works if its not.
-void Client::SendPathPacket(vector<FindPerson_Point> &points) {
+void Client::SendPathPacket(std::vector<FindPerson_Point> &points) {
 	if(points.size() < 2) {
 		//empty length packet == not found.
 		EQApplicationPacket outapp(OP_FindPersonReply, 0);
@@ -1336,7 +1336,7 @@ void Client::SendPathPacket(vector<FindPerson_Point> &points) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FindPersonReply, len);
 	FindPersonResult_Struct* fpr=(FindPersonResult_Struct*)outapp->pBuffer;
 
-	vector<FindPerson_Point>::iterator cur, end;
+	std::vector<FindPerson_Point>::iterator cur, end;
 	cur = points.begin();
 	end = points.end();
 	unsigned int r;
@@ -1473,10 +1473,10 @@ void PathManager::NodeInfo(Client *c)
 	return;
 }
 
-void PathManager::DumpPath(string filename)
+void PathManager::DumpPath(std::string filename)
 {
-	ofstream o_file;
-	o_file.open(filename.c_str(), ios_base::binary | ios_base::trunc | ios_base::out);
+	std::ofstream o_file;
+	o_file.open(filename.c_str(), std::ios_base::binary | std::ios_base::trunc | std::ios_base::out);
 	o_file.write("EQEMUPATH", 9);
 	o_file.write((const char*)&Head, sizeof(Head));
 	o_file.write((const char*)PathNodes, (sizeof(PathNode)*Head.PathNodeCount));
@@ -2114,7 +2114,7 @@ bool PathManager::CheckLosFN(VERTEX a, VERTEX b)
 	return true;
 }
 
-void PathManager::ProcessNodesAndSave(string filename)
+void PathManager::ProcessNodesAndSave(std::string filename)
 {
 	if(zone->zonemap)
 	{

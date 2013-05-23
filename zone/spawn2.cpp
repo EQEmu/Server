@@ -599,7 +599,7 @@ void SpawnConditionManager::Process() {
 			return;
 
 		//at least one event should get triggered,
-		vector<SpawnEvent>::iterator cur,end;
+		std::vector<SpawnEvent>::iterator cur,end;
 		cur = spawn_events.begin();
 		end = spawn_events.end();
 		for(; cur != end; cur++) {
@@ -614,7 +614,7 @@ void SpawnConditionManager::Process() {
 				ExecEvent(cevent, true);
 				//add the period of the event to the trigger time
 				EQTime::AddMinutes(cevent.period, &cevent.next);
-				string t;
+				std::string t;
 				EQTime::ToString(&cevent.next, t);
 				_log(SPAWNS__CONDITIONS, "Event %d: Will trigger again in %d EQ minutes at %s.", cevent.id, cevent.period, t.c_str());
 				//save the next event time in the DB
@@ -631,7 +631,7 @@ void SpawnConditionManager::Process() {
 }
 
 void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
-	map<uint16, SpawnCondition>::iterator condi;
+	std::map<uint16, SpawnCondition>::iterator condi;
 	condi = spawn_conditions.find(event.condition_id);
 	if(condi == spawn_conditions.end()) {
 		_log(SPAWNS__CONDITIONS, "Event %d: Unable to find condition %d to execute on.", event.id, event.condition_id);
@@ -712,7 +712,7 @@ void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 inst
 	safe_delete_array(query);
 }
 
-bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, string &zone_name) {
+bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std::string &zone_name) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	MYSQL_RES *result;
@@ -742,7 +742,7 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, stri
 			event.argument = atoi(row[10]);
 			zone_name = row[11];
 
-			string t;
+			std::string t;
 			EQTime::ToString(&event.next, t);
 			_log(SPAWNS__CONDITIONS, "Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d. Will trigger at %s",
 				event.enabled?"enabled":"disabled", event.id, event.condition_id, event.period, event.action, event.argument, t.c_str());
@@ -859,7 +859,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	TimeOfDay_Struct tod;
 	zone->zone_time.getEQTimeOfDay(&tod);
 
-	vector<SpawnEvent>::iterator cur,end;
+	std::vector<SpawnEvent>::iterator cur,end;
 	cur = spawn_events.begin();
 	end = spawn_events.end();
 	bool ran;
@@ -907,7 +907,7 @@ void SpawnConditionManager::FindNearestEvent() {
 	//set a huge year which should never get reached normally
 	next_event.year = 0xFFFFFF;
 
-	vector<SpawnEvent>::iterator cur,end;
+	std::vector<SpawnEvent>::iterator cur,end;
 	cur = spawn_events.begin();
 	end = spawn_events.end();
 	int next_id = -1;
@@ -935,7 +935,7 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 		//this is an update coming from another zone, they
 		//have allready updated the DB, just need to update our
 		//memory, and check for condition changes
-		map<uint16, SpawnCondition>::iterator condi;
+		std::map<uint16, SpawnCondition>::iterator condi;
 		condi = spawn_conditions.find(condition_id);
 		if(condi == spawn_conditions.end()) {
 			_log(SPAWNS__CONDITIONS, "Condition update received from world for %d, but we do not have that conditon.", condition_id);
@@ -962,7 +962,7 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 	{
 		//this is a local spawn condition, we need to update the DB,
 		//our memory, then notify spawn points of the change.
-		map<uint16, SpawnCondition>::iterator condi;
+		std::map<uint16, SpawnCondition>::iterator condi;
 		condi = spawn_conditions.find(condition_id);
 		if(condi == spawn_conditions.end()) {
 			_log(SPAWNS__CONDITIONS, "Local Condition update requested for %d, but we do not have that conditon.", condition_id);
@@ -1011,12 +1011,12 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 }
 
 void SpawnConditionManager::ReloadEvent(uint32 event_id) {
-	string zone_short_name;
+	std::string zone_short_name;
 
 	_log(SPAWNS__CONDITIONS, "Requested to reload event %d from the database.", event_id);
 
 	//first look for the event in our local event list
-	vector<SpawnEvent>::iterator cur,end;
+	std::vector<SpawnEvent>::iterator cur,end;
 	cur = spawn_events.begin();
 	end = spawn_events.end();
 	for(; cur != end; cur++) {
@@ -1059,7 +1059,7 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool rese
 	_log(SPAWNS__CONDITIONS, "Request to %s spawn event %d %sresetting trigger time", enabled?"enable":"disable", event_id, reset_base?"":"without ");
 
 	//first look for the event in our local event list
-	vector<SpawnEvent>::iterator cur,end;
+	std::vector<SpawnEvent>::iterator cur,end;
 	cur = spawn_events.begin();
 	end = spawn_events.end();
 	for(; cur != end; cur++) {
@@ -1102,7 +1102,7 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool rese
 	//is up or not. The message to the zone will just tell it to
 	//update its in-memory event list
 	SpawnEvent e;
-	string zone_short_name;
+	std::string zone_short_name;
 	if(!LoadDBEvent(event_id, e, zone_short_name)) {
 		_log(SPAWNS__CONDITIONS, "Unable to find spawn event %d in the database.", event_id);
 		//unable to find the event in the database...
@@ -1142,7 +1142,7 @@ int16 SpawnConditionManager::GetCondition(const char *zone_short, uint32 instanc
 	if(!strcasecmp(zone_short, zone->GetShortName()) && instance_id == zone->GetInstanceID())
 	{
 		//this is a local spawn condition
-		map<uint16, SpawnCondition>::iterator condi;
+		std::map<uint16, SpawnCondition>::iterator condi;
 		condi = spawn_conditions.find(condition_id);
 		if(condi == spawn_conditions.end())
 		{
@@ -1185,7 +1185,7 @@ int16 SpawnConditionManager::GetCondition(const char *zone_short, uint32 instanc
 }
 
 bool SpawnConditionManager::Check(uint16 condition, int16 min_value) {
-	map<uint16, SpawnCondition>::iterator condi;
+	std::map<uint16, SpawnCondition>::iterator condi;
 	condi = spawn_conditions.find(condition);
 	if(condi == spawn_conditions.end())
 		return(false);	//unable to find the spawn condition

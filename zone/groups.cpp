@@ -158,7 +158,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 
 	char buf[128];
 	buf[63] = '\0';
-	string msg = "You receive";
+	std::string msg = "You receive";
 	bool one = false;
 
 	if(ppsplit > 0) {

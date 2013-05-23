@@ -32,7 +32,7 @@ void AdventureManager::Process()
 {
 	if(process_timer->Check())
 	{
-		list<Adventure*>::iterator iter = adventure_list.begin();
+		std::list<Adventure*>::iterator iter = adventure_list.begin();
 		while(iter != adventure_list.end())
 		{
 			if(!(*iter)->Process())
@@ -70,7 +70,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	/**
 	* This block checks to see if we actually have any adventures for the requested theme.
 	*/
-	map<uint32, list<AdventureTemplate*> >::iterator adv_list_iter = adventure_entries.find(sar->template_id);
+	std::map<uint32, std::list<AdventureTemplate*> >::iterator adv_list_iter = adventure_entries.find(sar->template_id);
 	if(adv_list_iter == adventure_entries.end())
 	{
 		ServerPacket *pack = new ServerPacket(ServerOP_AdventureRequestDeny, sizeof(ServerAdventureRequestDeny_Struct));
@@ -88,7 +88,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	* Active being in progress, finished adventures that are still waiting to expire do not count
 	* Though they will count against you for which new adventure you can get.
 	*/
-	list<Adventure*>::iterator iter = adventure_list.begin();
+	std::list<Adventure*>::iterator iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
 		Adventure* current = (*iter);
@@ -102,7 +102,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 					ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 					strcpy(deny->leader, sar->leader);
 
-					stringstream ss(stringstream::out | stringstream::in);
+					std::stringstream ss(std::stringstream::out | std::stringstream::in);
 					ss << (data + sizeof(ServerAdventureRequest_Struct) + (64 * i)) << " is already apart of an active adventure.";
 
 					strcpy(deny->reason, ss.str().c_str());
@@ -120,8 +120,8 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	* Now we need to get every available adventure for our selected theme and exclude ones we can't use.
 	* ie. the ones that would cause overlap issues for new adventures with the old unexpired adventures.
 	*/
-	list<AdventureZones> excluded_zones;
-	list<AdventureZoneIn> excluded_zone_ins;
+	std::list<AdventureZones> excluded_zones;
+	std::list<AdventureZoneIn> excluded_zone_ins;
 	for(int i = 0; i < sar->member_count; ++i)
 	{
 		int finished_adventures_count;
@@ -147,12 +147,12 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		safe_delete_array(finished_adventures);
 	}
 
-	list<AdventureTemplate*> eligible_adventures = adventure_entries[sar->template_id];
+	std::list<AdventureTemplate*> eligible_adventures = adventure_entries[sar->template_id];
 	/**
 	* Remove zones from eligible zones based on their difficulty and type.
 	* ie only use difficult zones for difficult, collect for collect, etc.
 	*/
-	list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
+	std::list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
 	while(ea_iter != eligible_adventures.end())
 	{
 		if((*ea_iter)->is_hard != ((sar->risk == 2) ? true : false))
@@ -252,7 +252,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		ServerAdventureRequestDeny_Struct *deny = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
 		strcpy(deny->leader, sar->leader);
 
-		stringstream ss(stringstream::out | stringstream::in);
+		std::stringstream ss(std::stringstream::out | std::stringstream::in);
 		ss << "The maximum level range for this adventure is " << RuleI(Adventure, MaxLevelRange);
 		ss << " but the level range calculated was " << (max_level - min_level) << ".";
 		strcpy(deny->reason, ss.str().c_str());
@@ -265,10 +265,10 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 	/**
 	* Remove the zones from our eligible zones based on the exclusion above
 	*/
-	list<AdventureZones>::iterator ez_iter = excluded_zones.begin();
+	std::list<AdventureZones>::iterator ez_iter = excluded_zones.begin();
 	while(ez_iter != excluded_zones.end())
 	{
-		list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
+		std::list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
 		while(ea_iter != eligible_adventures.end())
 		{
 			if((*ez_iter).zone.compare((*ea_iter)->zone) == 0 && (*ez_iter).version == (*ea_iter)->zone_version)
@@ -281,10 +281,10 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		ez_iter++;
 	}
 
-	list<AdventureZoneIn>::iterator ezi_iter = excluded_zone_ins.begin();
+	std::list<AdventureZoneIn>::iterator ezi_iter = excluded_zone_ins.begin();
 	while(ezi_iter != excluded_zone_ins.end())
 	{
-		list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
+		std::list<AdventureTemplate*>::iterator ea_iter = eligible_adventures.begin();
 		while(ea_iter != eligible_adventures.end())
 		{
 			if((*ezi_iter).zone_id == (*ea_iter)->zone_in_zone_id && (*ezi_iter).door_id == (*ea_iter)->zone_in_object_id)
@@ -447,8 +447,8 @@ void AdventureManager::TryAdventureCreate(const char *data)
 
 void AdventureManager::GetAdventureData(Adventure *adv)
 {
-	list<string> player_list = adv->GetPlayers();
-	list<string>::iterator iter = player_list.begin();
+	std::list<std::string> player_list = adv->GetPlayers();
+	std::list<std::string>::iterator iter = player_list.begin();
 	while(iter != player_list.end())
 	{
 		GetAdventureData((*iter).c_str());
@@ -523,9 +523,9 @@ void AdventureManager::GetAdventureData(const char *name)
 	}
 }
 
-bool AdventureManager::IsInExcludedZoneList(list<AdventureZones> excluded_zones, string zone_name, int version)
+bool AdventureManager::IsInExcludedZoneList(std::list<AdventureZones> excluded_zones, std::string zone_name, int version)
 {
-	list<AdventureZones>::iterator iter = excluded_zones.begin();
+	std::list<AdventureZones>::iterator iter = excluded_zones.begin();
 	while(iter != excluded_zones.end())
 	{
 		if(((*iter).zone.compare(zone_name) == 0) && ((*iter).version == version))
@@ -537,9 +537,9 @@ bool AdventureManager::IsInExcludedZoneList(list<AdventureZones> excluded_zones,
 	return false;
 }
 
-bool AdventureManager::IsInExcludedZoneInList(list<AdventureZoneIn> excluded_zone_ins, int zone_id, int door_object)
+bool AdventureManager::IsInExcludedZoneInList(std::list<AdventureZoneIn> excluded_zone_ins, int zone_id, int door_object)
 {
-	list<AdventureZoneIn>::iterator iter = excluded_zone_ins.begin();
+	std::list<AdventureZoneIn>::iterator iter = excluded_zone_ins.begin();
 	while(iter != excluded_zone_ins.end())
 	{
 		if(((*iter).zone_id == zone_id) && ((*iter).door_id == door_object))
@@ -556,7 +556,7 @@ Adventure **AdventureManager::GetFinishedAdventures(const char *player, int &cou
 	Adventure **ret = nullptr;
 	count = 0;
 
-	list<Adventure*>::iterator iter = adventure_list.begin();
+	std::list<Adventure*>::iterator iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
 		if((*iter)->PlayerExists(player))
@@ -589,7 +589,7 @@ Adventure **AdventureManager::GetFinishedAdventures(const char *player, int &cou
 
 Adventure *AdventureManager::GetActiveAdventure(const char *player)
 {
-	list<Adventure*>::iterator iter = adventure_list.begin();
+	std::list<Adventure*>::iterator iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
 		if((*iter)->PlayerExists(player) && (*iter)->IsActive())
@@ -603,13 +603,13 @@ Adventure *AdventureManager::GetActiveAdventure(const char *player)
 
 AdventureTemplate *AdventureManager::GetAdventureTemplate(int theme, int id)
 {
-	map<uint32, list<AdventureTemplate*> >::iterator iter = adventure_entries.find(theme);
+	std::map<uint32, std::list<AdventureTemplate*> >::iterator iter = adventure_entries.find(theme);
 	if(iter == adventure_entries.end())
 	{
 		return nullptr;
 	}
 
-	list<AdventureTemplate*>::iterator l_iter = (*iter).second.begin();
+	std::list<AdventureTemplate*>::iterator l_iter = (*iter).second.begin();
 	while(l_iter != (*iter).second.end())
 	{
 		if((*l_iter)->id == id)
@@ -623,7 +623,7 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int theme, int id)
 
 AdventureTemplate *AdventureManager::GetAdventureTemplate(int id)
 {
-	map<uint32, AdventureTemplate*>::iterator iter = adventure_templates.find(id);
+	std::map<uint32, AdventureTemplate*>::iterator iter = adventure_templates.find(id);
 	if(iter == adventure_templates.end())
 	{
 		return nullptr;
@@ -712,7 +712,7 @@ bool AdventureManager::LoadAdventureEntries()
 			int template_id = atoi(row[1]);
 			AdventureTemplate* tid = nullptr;
 
-			map<uint32, AdventureTemplate*>::iterator t_iter = adventure_templates.find(template_id);
+			std::map<uint32, AdventureTemplate*>::iterator t_iter = adventure_templates.find(template_id);
 			if(t_iter == adventure_templates.end())
 			{
 				continue;
@@ -722,8 +722,8 @@ bool AdventureManager::LoadAdventureEntries()
 				tid = adventure_templates[template_id];
 			}
 
-			list<AdventureTemplate*> temp;
-			map<uint32, list<AdventureTemplate*> >::iterator iter = adventure_entries.find(id);
+			std::list<AdventureTemplate*> temp;
+			std::map<uint32, std::list<AdventureTemplate*> >::iterator iter = adventure_entries.find(id);
 			if(iter == adventure_entries.end())
 			{
 				temp.push_back(tid);
@@ -751,7 +751,7 @@ bool AdventureManager::LoadAdventureEntries()
 
 void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int door_id)
 {
-	list<Adventure*>::iterator iter = adventure_list.begin();
+	std::list<Adventure*>::iterator iter = adventure_list.begin();
 	while(iter != adventure_list.end())
 	{
 		const AdventureTemplate *t = (*iter)->GetTemplate();
@@ -841,7 +841,7 @@ void AdventureManager::LeaveAdventure(const char *name)
 
 void AdventureManager::IncrementCount(uint16 instance_id)
 {
-	list<Adventure*>::iterator iter = adventure_list.begin();
+	std::list<Adventure*>::iterator iter = adventure_list.begin();
 	Adventure *current = nullptr;
 	while(iter != adventure_list.end())
 	{
@@ -856,8 +856,8 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 	if(current)
 	{
 		current->IncrementCount();
-		list<string> slist = current->GetPlayers();
-		list<string>::iterator siter = slist.begin();
+		std::list<std::string> slist = current->GetPlayers();
+		std::list<std::string>::iterator siter = slist.begin();
 		ServerPacket *pack = new ServerPacket(ServerOP_AdventureCountUpdate, sizeof(ServerAdventureCountUpdate_Struct));
 		ServerAdventureCountUpdate_Struct *ac = (ServerAdventureCountUpdate_Struct*)pack->pBuffer;
 		ac->count = current->GetCount();
@@ -881,7 +881,7 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 
 void AdventureManager::IncrementAssassinationCount(uint16 instance_id)
 {
-	list<Adventure*>::iterator iter = adventure_list.begin();
+	std::list<Adventure*>::iterator iter = adventure_list.begin();
 	Adventure *current = nullptr;
 	while(iter != adventure_list.end())
 	{
@@ -902,7 +902,7 @@ void AdventureManager::IncrementAssassinationCount(uint16 instance_id)
 
 void AdventureManager::GetZoneData(uint16 instance_id)
 {
-	list<Adventure*>::iterator iter = adventure_list.begin();
+	std::list<Adventure*>::iterator iter = adventure_list.begin();
 	Adventure *current = nullptr;
 	while(iter != adventure_list.end())
 	{
@@ -1282,7 +1282,7 @@ void AdventureManager::DoLeaderboardRequestWins(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_wins.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins.begin();
 		while(i < 100 && iter != leaderboard_info_wins.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1349,7 +1349,7 @@ void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage.begin();
 		while(i < 100 && iter != leaderboard_info_percentage.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1416,7 +1416,7 @@ void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_guk.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_guk.begin();
 		while(i < 100 && iter != leaderboard_info_wins_guk.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1483,7 +1483,7 @@ void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_guk.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_guk.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_guk.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1550,7 +1550,7 @@ void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_mir.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_mir.begin();
 		while(i < 100 && iter != leaderboard_info_wins_mir.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1617,7 +1617,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_mir.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_mir.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_mir.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1684,7 +1684,7 @@ void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_mmc.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_mmc.begin();
 		while(i < 100 && iter != leaderboard_info_wins_mmc.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1751,7 +1751,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_mmc.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_mmc.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_mmc.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1818,7 +1818,7 @@ void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_ruj.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_ruj.begin();
 		while(i < 100 && iter != leaderboard_info_wins_ruj.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1885,7 +1885,7 @@ void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_ruj.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_ruj.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_ruj.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -1952,7 +1952,7 @@ void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_ruj.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_ruj.begin();
 		while(i < 100 && iter != leaderboard_info_wins_ruj.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -2019,7 +2019,7 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 		int our_successes;
 		int our_failures;
 		int i = 0;
-		list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_tak.begin();
+		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_tak.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_tak.end())
 		{
 			LeaderboardInfo li = (*iter);
@@ -2075,7 +2075,7 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 
 bool AdventureManager::PopFinishedEvent(const char *name, AdventureFinishEvent &fe)
 {
-	list<AdventureFinishEvent>::iterator iter = finished_list.begin();
+	std::list<AdventureFinishEvent>::iterator iter = finished_list.begin();
 	while(iter != finished_list.end())
 	{
 		if((*iter).name.compare(name) == 0)
@@ -2115,13 +2115,13 @@ void AdventureManager::Save()
 	//disabled for now
 	return;
 
-	stringstream ss(stringstream::in | stringstream::out);
+	std::stringstream ss(std::stringstream::in | std::stringstream::out);
 
 	int number_of_elements = adventure_list.size();
 	ss.write((const char*)&number_of_elements, sizeof(int));
 
 	char null_term = 0;
-	list<Adventure*>::iterator a_iter = adventure_list.begin();
+	std::list<Adventure*>::iterator a_iter = adventure_list.begin();
 	while(a_iter != adventure_list.end())
 	{
 		int cur = (*a_iter)->GetCount();
@@ -2142,11 +2142,11 @@ void AdventureManager::Save()
 		cur = (*a_iter)->GetRemainingTime();
 		ss.write((const char*)&cur, sizeof(int));
 
-		list<string> players = (*a_iter)->GetPlayers();
+		std::list<std::string> players = (*a_iter)->GetPlayers();
 		cur = players.size();
 		ss.write((const char*)&cur, sizeof(int));
 
-		list<string>::iterator s_iter = players.begin();
+		std::list<std::string>::iterator s_iter = players.begin();
 		while(s_iter != players.end())
 		{
 			ss.write((const char*)(*s_iter).c_str(), (*s_iter).size());
@@ -2159,7 +2159,7 @@ void AdventureManager::Save()
 
 	number_of_elements = finished_list.size();
 	ss.write((const char*)&number_of_elements, sizeof(int));
-	list<AdventureFinishEvent>::iterator f_iter = finished_list.begin();
+	std::list<AdventureFinishEvent>::iterator f_iter = finished_list.begin();
 	while(f_iter != finished_list.end())
 	{
 		ss.write((const char*)&(*f_iter).win, sizeof(bool));

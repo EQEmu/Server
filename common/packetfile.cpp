@@ -13,9 +13,6 @@
 #include "../common/misc.h"
 #include <map>
 
-using namespace std;
-
-
 PacketFileWriter::PacketFileWriter(bool _force_flush) {
 	out = NULL;
 	force_flush = _force_flush;
