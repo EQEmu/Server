@@ -23,19 +23,9 @@
 
 void vStringFormat(std::string& output, const char* format, va_list args);
 void StringFormat(std::string& output, const char* format, ...);
-//////////////////////////////////////////////////////////////////////
-//
-//  MakeUpperString
-//   i     : source - allocated null-terminated string
-//   return: pointer to static buffer with the target string
-const char *MakeUpperString(const char *source);
+
 const char *MakeLowerString(const char *source);
-//////////////////////////////////////////////////////////////////////
-//
-//  MakeUpperString
-//   i : source - allocated null-terminated string
-//   io: target - allocated buffer, at least of size strlen(source)+1
-void MakeUpperString(const char *source, char *target);
+
 void MakeLowerString(const char *source, char *target);
 
 
