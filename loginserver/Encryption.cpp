@@ -21,7 +21,7 @@
 
 extern ErrorLog *server_log;
 
-bool Encryption::LoadCrypto(string name)
+bool Encryption::LoadCrypto(std::string name)
 {
 	if(!Load(name.c_str()))
 	{
