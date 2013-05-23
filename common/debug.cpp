@@ -1,24 +1,28 @@
-#include "debug.h"
-
 #include <iostream>
+#include <string>
+#include <cstdarg>
+
 #include <time.h>
-#include <string.h>
+
 #ifdef _WINDOWS
 	#include <process.h>
 
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
 	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
+
 #else
+	
 	#include <sys/types.h>
 	#include <unistd.h>
-	#include <stdarg.h>
+
 #endif
-#include "../common/MiscFunctions.h"
-#include "../common/platform.h"
+
+#include "debug.h"
+#include "StringUtil.h"
+#include "MiscFunctions.h"
+#include "platform.h"
 
 #ifndef va_copy
 	#define va_copy(d,s) ((d) = (s))
@@ -349,36 +353,45 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 
 	write(id, "Dumping Packet: %i", size);
 	// Output as HEX
-	int j = 0; char* ascii = new char[cols+1]; memset(ascii, 0, cols+1);
-	uint32 i;
-	for(i=skip; i<size; i++) {
-		if ((i-skip)%cols==0) {
-			if (i != skip)
-				writeNTS(id, dofile, " | %s\n", ascii);
-			writeNTS(id, dofile, "%4i: ", i-skip);
-			memset(ascii, 0, cols+1);
-			j = 0;
+	
+	int beginningOfLineOffset = 0; 
+	uint32 indexInData;
+	std::string asciiOutput;
+
+	for(indexInData=skip; indexInData<size; indexInData++) {
+		if ((indexInData-skip)%cols==0) {
+			if (indexInData != skip)
+				writeNTS(id, dofile, " | %s\n", asciiOutput.c_str());
+			writeNTS(id, dofile, "%4i: ", indexInData-skip);
+			asciiOutput.clear();
+			beginningOfLineOffset = 0;
 		}
-		else if ((i-skip)%(cols/2) == 0) {
+		else if ((indexInData-skip)%(cols/2) == 0) {
 			writeNTS(id, dofile, "- ");
 		}
-		writeNTS(id, dofile, "%02X ", (unsigned char)data[i]);
+		writeNTS(id, dofile, "%02X ", (unsigned char)data[indexInData]);
 
-		if (data[i] >= 32 && data[i] < 127)
-			ascii[j++] = data[i];
+		if (data[indexInData] >= 32 && data[indexInData] < 127)
+		{
+			// According to http://msdn.microsoft.com/en-us/library/vstudio/ee404875(v=vs.100).aspx
+			// Visual Studio 2010 doesn't have std::to_string(int) but it does have the long long 
+			// version.
+			asciiOutput.append(std::to_string((long long)data[indexInData]));
+		}
 		else
-			ascii[j++] = '.';
+		{
+			asciiOutput.append(".");
+		}
 	}
-	uint32 k = ((i-skip)-1)%cols;
+	uint32 k = ((indexInData-skip)-1)%cols;
 	if (k < 8)
 		writeNTS(id, dofile, "  ");
 	for (uint32 h = k+1; h < cols; h++) {
 		writeNTS(id, dofile, "   ");
 	}
-	writeNTS(id, dofile, " | %s\n", ascii);
+	writeNTS(id, dofile, " | %s\n", asciiOutput.c_str());
 	if (dofile)
 		fflush(fp[id]);
-	safe_delete_array(ascii);
 	return true;
 }
 

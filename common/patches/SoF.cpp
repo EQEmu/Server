@@ -7,7 +7,7 @@
 #include "../crc32.h"
 
 #include "../eq_packet_structs.h"
-#include "../MiscFunctions.h"
+#include "../StringUtil.h"
 #include "../Item.h"
 #include "SoF_structs.h"
 #include "../rulesys.h"

@@ -67,7 +67,7 @@ And then at then end of embparser.cpp, add:
 #include "zonedb.h"
 #include "../common/spdat.h"
 #include "../common/packet_functions.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "spawn2.h"
 #include "zone.h"
 #include "parser.h"

@@ -38,6 +38,7 @@
 #include "../common/opcodemgr.h"
 #include "../common/rulesys.h"
 #include "../common/ruletypes.h"
+#include "../common/StringUtil.h"
 #include "WorldConfig.h"
 #include "zoneserver.h"
 #include "zonelist.h"
@@ -48,9 +49,6 @@
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 #endif

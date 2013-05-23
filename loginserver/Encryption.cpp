@@ -18,6 +18,7 @@
 #include "../common/debug.h"
 #include "Encryption.h"
 #include "ErrorLog.h"
+#include <string>
 
 extern ErrorLog *server_log;
 

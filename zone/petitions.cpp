@@ -28,13 +28,11 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #endif
 
 #ifdef _WINDOWS
-#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
+	#define snprintf	_snprintf
+	#define strncasecmp	_strnicmp
+	#define strcasecmp	_stricmp
 #endif
-#define strncasecmp	_strnicmp
-#define strcasecmp	_stricmp
-#endif
+#include "../common/StringUtil.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "../common/packet_dump_file.h"

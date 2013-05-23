@@ -43,7 +43,7 @@
 
 #include "database.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/servertalk.h"
 
 Database::Database ()

@@ -13,7 +13,8 @@
 #include "dbcore.h"
 #include "common_profile.h"
 #include <string.h>
-#include "../common/MiscFunctions.h"
+//#include "../common/MiscFunctions.h"
+#include "StringUtil.h"
 #define ASYNC_LOOP_GRANULARITY 4 //# of ms between checking our work
 
 bool DBAsyncCB_LoadVariables(DBAsyncWork* iWork) {

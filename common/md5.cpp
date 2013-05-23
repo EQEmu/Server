@@ -9,7 +9,7 @@
 */
 #include <string.h> /* for memcpy() */
 #include "../common/md5.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/seperator.h"
 
 MD5::MD5() {

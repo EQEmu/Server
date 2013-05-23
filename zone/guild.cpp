@@ -28,7 +28,7 @@
 #include "../common/ZoneNumbers.h"
 #include "../common/moremath.h"
 #include "../common/guilds.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "guild_mgr.h"
 #include "StringIDs.h"
 #include "NpcAI.h"

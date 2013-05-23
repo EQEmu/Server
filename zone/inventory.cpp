@@ -29,6 +29,7 @@
 #include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "../common/logsys.h"
+#include "../common/StringUtil.h"
 #include "StringIDs.h"
 #include "NpcAI.h"
 extern WorldServer worldserver;

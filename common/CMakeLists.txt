@@ -55,6 +55,7 @@ SET(common_sources
 	serverinfo.cpp
 	shareddb.cpp
 	spdat.cpp
+    StringUtil.cpp
 	StructStrategy.cpp
 	TCPConnection.cpp
 	TCPServer.cpp
@@ -170,6 +171,7 @@ SET(common_headers
 	shareddb.h
 	skills.h
 	spdat.h
+    StringUtil.h
 	StructStrategy.h
 	TCPBasicServer.h
 	TCPConnection.h
@@ -313,6 +315,9 @@ INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
 ADD_LIBRARY(Common ${common_sources} ${common_headers})
 
+IF(MSVC)
+	ADD_DEFINITIONS(-DNOMINMAX)
+ENDIF(MSVC)
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)

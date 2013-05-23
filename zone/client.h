@@ -19,6 +19,8 @@
 #define CLIENT_H
 class Client;
 
+
+
 #include "../common/timer.h"
 #include "../common/ptimer.h"
 #include "../common/emu_opcodes.h"
@@ -49,6 +51,7 @@ class Client;
 #include "../common/item_struct.h"
 #include "../common/clientversions.h"
 #include "QGlobals.h"
+#include <algorithm>
 
 #define CLIENT_TIMEOUT		90000
 #define CLIENT_LD_TIMEOUT	30000 // length of time client stays in zone after LDing
@@ -1101,7 +1104,7 @@ public:
 	void DuplicateLoreMessage(uint32 ItemID);
 	void GarbleMessage(char *, uint8);
 
-    void TickItemCheck();
+	void TickItemCheck();
 	void TryItemTick(int slot);
 	int16 GetActSTR() { return( std::min(GetMaxSTR(), GetSTR()) ); }
 	int16 GetActSTA() { return( std::min(GetMaxSTA(), GetSTA()) ); }
@@ -1110,9 +1113,9 @@ public:
 	int16 GetActINT() { return( std::min(GetMaxINT(), GetINT()) ); }
 	int16 GetActWIS() { return( std::min(GetMaxWIS(), GetWIS()) ); }
 	int16 GetActCHA() { return( std::min(GetMaxCHA(), GetCHA()) ); }
-    void LoadAccountFlags();
-    void SetAccountFlag(std::string flag, std::string val);
-    std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillType);
+	void LoadAccountFlags();
+	void SetAccountFlag(std::string flag, std::string val);
+	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillType);
 	int mod_client_damage(int damage, SkillType skillinuse, int hand, ItemInst* weapon, Mob* other);
 	bool mod_client_message(char* message, uint8 chan_num);
 	bool mod_can_increase_skill(SkillType skillid, Mob* against_who);
@@ -1431,9 +1434,9 @@ private:
 	uint8 MaxXTargets;
 	bool XTargetAutoAddHaters;
 
-    struct XTarget_Struct XTargets[XTARGET_HARDCAP];
+	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
 
-    Timer   ItemTickTimer;
+	Timer   ItemTickTimer;
 	std::map<std::string,std::string> accountflags;
 };
 

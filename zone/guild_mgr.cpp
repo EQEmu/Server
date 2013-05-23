@@ -20,6 +20,7 @@
 #include "zonedb.h"
 #include "worldserver.h"
 #include "../common/servertalk.h"
+#include "../common/StringUtil.h"
 #include "client.h"
 #include "entity.h"
 

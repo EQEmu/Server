@@ -32,7 +32,7 @@
 	#define vsnprintf	_vsnprintf
 #endif
 #define strncasecmp	_strnicmp
-#define strcasecmp	_stricmp
+#define strcasecmp  _stricmp
 #else
 #include <stdarg.h>
 #include <sys/socket.h>
@@ -59,7 +59,7 @@ extern volatile bool RunLoops;
 #include "../common/guilds.h"
 #include "../common/breakdowns.h"
 #include "../common/rulesys.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "forage.h"
 #include "command.h"
 #include "StringIDs.h"
