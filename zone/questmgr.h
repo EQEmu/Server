@@ -24,7 +24,6 @@
 #include <string>
 #include <list>
 #include <stack>
-using namespace std;
 
 class NPC;
 class Client;
@@ -258,9 +257,9 @@ private:
 
 	class QuestTimer {
 	public:
-		inline QuestTimer(int duration, Mob *_mob, string _name) : mob(_mob), name(_name), Timer_(duration) { Timer_.Start(duration, false); }
+		inline QuestTimer(int duration, Mob *_mob, std::string _name) : mob(_mob), name(_name), Timer_(duration) { Timer_.Start(duration, false); }
 		Mob*   mob;
-		string name;
+		std::string name;
 		Timer Timer_;
 	};
 	class SignalTimer {
@@ -270,8 +269,8 @@ private:
 		int signal_id;
 		Timer Timer_;
 	};
-	list<QuestTimer>	QTimerList;
-	list<SignalTimer>	STimerList;
+	std::list<QuestTimer>	QTimerList;
+	std::list<SignalTimer>	STimerList;
 
 };
 

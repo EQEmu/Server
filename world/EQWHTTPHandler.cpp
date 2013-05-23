@@ -25,8 +25,6 @@
 #include "worlddb.h"
 #include "console.h"
 
-using namespace std;
-
 Mime EQWHTTPHandler::s_mime;
 #ifdef EMBPERL
 EQWParser *EQWHTTPHandler::s_parser = nullptr;
@@ -48,7 +46,7 @@ EQWParser *EQWHTTPHandler::GetParser() {
 	if(s_parser == nullptr) {
 		EQW::Singleton()->ClearOutput();
 		s_parser = new EQWParser();
-		const string &res = EQW::Singleton()->GetOutput();
+		const std::string &res = EQW::Singleton()->GetOutput();
 		if(!res.empty()) {
 			printf("EQWParser Init output:\n%s\n\n", res.c_str());
 			EQW::Singleton()->ClearOutput();
@@ -75,7 +73,7 @@ void EQWHTTPHandler::Exec() {
 	SetHttpVersion("HTTP/1.0");
 	AddResponseHeader("Connection", "close");
 
-	if(GetUri().find("..") != string::npos) {
+	if(GetUri().find("..") != std::string::npos) {
 		SendResponse("403", "Forbidden");
 		printf("%s is forbidden.\n", GetUri().c_str());
 		return;
@@ -87,9 +85,9 @@ void EQWHTTPHandler::Exec() {
 		SendResponse("401", "Authorization Required");
 		SendString("Gotta Authenticate.");
 	} else {
-		string::size_type start = GetUri().find_first_not_of('/');
-		string page;
-		if(start != string::npos)
+		std::string::size_type start = GetUri().find_first_not_of('/');
+		std::string page;
+		if(start != std::string::npos)
 			page = GetUri().substr(start);
 		else
 			page = "index.html";
@@ -122,7 +120,7 @@ void EQWHTTPHandler::OnHeader(const std::string& key,const std::string& value) {
 
 		std::string::size_type cpos;
 		cpos = dec.find_first_of(':');
-		if(cpos == string::npos) {
+		if(cpos == std::string::npos) {
 			printf("Invalid auth string: %s\n", dec.c_str());
 			return;
 		}
@@ -154,7 +152,7 @@ bool EQWHTTPHandler::CheckAuth() const {
 
 void EQWHTTPHandler::SendPage(const std::string &file) {
 
-	string path = "templates/";
+	std::string path = "templates/";
 	path += file;
 
 	FILE *f = fopen(path.c_str(), "rb");
@@ -165,7 +163,7 @@ void EQWHTTPHandler::SendPage(const std::string &file) {
 		return;
 	}
 
-	string type = s_mime.GetMimeFromFilename(file);
+	std::string type = s_mime.GetMimeFromFilename(file);
 	AddResponseHeader("Content-type", type);
 
 	bool process = false;
@@ -183,7 +181,7 @@ void EQWHTTPHandler::SendPage(const std::string &file) {
 
 	char *buffer = new char[READ_BUFFER_LEN+1];
 	size_t len;
-	string to_process;
+	std::string to_process;
 	while((len = fread(buffer, 1, READ_BUFFER_LEN, f)) > 0) {
 		buffer[len] = '\0';
 		if(process)
@@ -213,12 +211,12 @@ bool EQWHTTPHandler::LoadMimeTypes(const char *filename) {
 }
 
 #ifdef EMBPERL
-void EQWHTTPHandler::ProcessAndSend(const string &str) {
-	string::size_type len = str.length();
-	string::size_type start = 0;
-	string::size_type pos, end;
+void EQWHTTPHandler::ProcessAndSend(const std::string &str) {
+	std::string::size_type len = str.length();
+	std::string::size_type start = 0;
+	std::string::size_type pos, end;
 
-	while((pos = str.find("<?", start)) != string::npos) {
+	while((pos = str.find("<?", start)) != std::string::npos) {
 		//send all the crap leading up to the script block
 		if(pos != start) {
 			ProcessText(str.c_str() + start, pos-start);
@@ -226,15 +224,15 @@ void EQWHTTPHandler::ProcessAndSend(const string &str) {
 
 		//look for the end of this script block...
 		end = str.find("?>", pos+2);
-		if(end == string::npos) {
+		if(end == std::string::npos) {
 			//terminal ?> not found... should issue a warning or something...
-			string scriptBody = str.substr(pos+2);
+			std::string scriptBody = str.substr(pos+2);
 			ProcessScript(scriptBody);
 			start = len;
 			break;
 		} else {
 			//script only consumes some of this buffer...
-			string scriptBody = str.substr(pos+2, end-pos-2);
+			std::string scriptBody = str.substr(pos+2, end-pos-2);
 			ProcessScript(scriptBody);
 			start = end + 2;
 		}
@@ -253,7 +251,7 @@ void EQWHTTPHandler::ProcessScript(const std::string &script_body) {
 //	printf("Script: ''''%s''''\n\n", script_body.c_str());
 
 	GetParser()->EQW_eval("testing", script_body.c_str());
-	const string &res = EQW::Singleton()->GetOutput();
+	const std::string &res = EQW::Singleton()->GetOutput();
 	if(!res.empty()) {
 		ProcessText(res.c_str(), res.length());
 		EQW::Singleton()->ClearOutput();

@@ -1,4 +1,4 @@
-The server code and utilities are released under GPL.
+The server code and utilities are released under GPLv3.
 
 We also include some small libraries for convienence that may be under different licensing:
 
@@ -9,3 +9,4 @@ ZLib - ZLib License
 MySQL - GPL
 Perl - GPL / ActiveState (under the assumption that this is a free project).
 CPPUnit - GLP
+StringUtilities - Apache

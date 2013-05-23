@@ -18,12 +18,10 @@
 #include <cstdlib>
 #include <cstring>
 
-using namespace std;
-
 #define ENC(c) (((c) & 0x3f) + ' ')
 #define DEC(c)	(((c) - ' ') & 0x3f)
 
-map<int,string> DBFieldNames;
+std::map<int,std::string> DBFieldNames;
 
 #ifndef WIN32
 #if defined(FREEBSD) || defined(__CYGWIN__)
@@ -44,9 +42,9 @@ int print_stacktrace()
 		if (names != nullptr)
 		{
 			int i;
-			cerr << "called from " << (char*)names[0] << endl;
+			std::cerr << "called from " << (char*)names[0] << std::endl;
 			for (i = 1; i < n; ++i)
-				cerr << "            " << (char*)names[i] << endl;
+				std::cerr << "            " << (char*)names[i] << std::endl;
 			free (names);
 		}
 	}
@@ -55,19 +53,19 @@ int print_stacktrace()
 #endif //!FREEBSD
 #endif //!WIN32
 
-void Unprotect(string &s, char what)
+void Unprotect(std::string &s, char what)
 {
 	if (s.length()) {
-		for(string::size_type i=0;i<s.length()-1;i++) {
+		for(std::string::size_type i=0;i<s.length()-1;i++) {
 			if (s[i]=='\\' && s[i+1]==what)
 				s.erase(i,1);
 		}
 	}
 }
 
-void Protect(string &s, char what)
+void Protect(std::string &s, char what)
 {
-	for(string::size_type i=0;i<s.length();i++) {
+	for(std::string::size_type i=0;i<s.length();i++) {
 		if (s[i]==what)
 			s.insert(i++,"\\");
 	}
@@ -77,11 +75,11 @@ void Protect(string &s, char what)
 	item id -> fields_list
 		each fields_list is a map of field index -> value
 */
-bool ItemParse(const char *data, int length, map<int,map<int,string> > &items, int id_pos, int name_pos, int max_field, int level)
+bool ItemParse(const char *data, int length, std::map<int,std::map<int,std::string> > &items, int id_pos, int name_pos, int max_field, int level)
 {
 int i;
 char *end,*ptr;
-map<int,string> field;
+std::map<int,std::string> field;
 static char *buffer=nullptr;
 static int buffsize=0;
 static char *temp=nullptr;
@@ -102,7 +100,7 @@ static char *temp=nullptr;
 				break;
 		}
 		if (!end) {
-			cerr << "ItemParse: Level " << level << ": (1) Expected '|' not found near '" << ptr << "'" << endl;
+			std::cerr << "ItemParse: Level " << level << ": (1) Expected '|' not found near '" << ptr << "'" << std::endl;
 			return false;
 		} else {
 			*end=0;
@@ -114,7 +112,7 @@ static char *temp=nullptr;
 	}
 
 	if (*ptr!='"') {
-		cerr << "ItemParse: Level " << level << ": (2) Expected '\"' not found near '" << ptr << "'" << endl;
+		std::cerr << "ItemParse: Level " << level << ": (2) Expected '\"' not found near '" << ptr << "'" << std::endl;
 		return false;
 	}
 	ptr++;
@@ -126,7 +124,7 @@ static char *temp=nullptr;
 				break;
 		}
 		if (!end) {
-			cerr << "ItemParse: Level " << level << ": (1) Expected '|' not found near '" << ptr << "'" << endl;
+			std::cerr << "ItemParse: Level " << level << ": (1) Expected '|' not found near '" << ptr << "'" << std::endl;
 			return false;
 		} else {
 			*end=0;
@@ -145,12 +143,12 @@ static char *temp=nullptr;
 		Unprotect(field[i],'|');
 		ptr+=length;
 	} else {
-		cerr << "ItemParse: Level " << level << ": (4) Expected '\"' not found near '" << ptr << "'" << endl;
+		std::cerr << "ItemParse: Level " << level << ": (4) Expected '\"' not found near '" << ptr << "'" << std::endl;
 		return false;
 	}
 
 	if (*ptr!='|') {
-		cerr << "ItemParse: Level " << level << ": (5) Expected '|' not found near '" << ptr << "'" << endl;
+		std::cerr << "ItemParse: Level " << level << ": (5) Expected '|' not found near '" << ptr << "'" << std::endl;
 		return false;
 	}
 	ptr++;
@@ -162,7 +160,7 @@ static char *temp=nullptr;
 			end=ptr;
 			while((end=strchr(end+1,'"'))!=nullptr && *(end-1)=='\\');
 			if (end) {
-				string sub;
+				std::string sub;
 				sub.assign(ptr+1,end-ptr-1);
 				Unprotect(sub,'"');
 				if (!ItemParse(sub.c_str(),sub.length(),items,id_pos,name_pos,max_field,level+1)) {
@@ -170,14 +168,14 @@ static char *temp=nullptr;
 				}
 				ptr=end+1;
 			} else {
-				cerr << "ItemParse: Level " << level << ": (6) Expected closing '\"' not found near '" << (ptr+1) << "'" << endl;
+				std::cerr << "ItemParse: Level " << level << ": (6) Expected closing '\"' not found near '" << (ptr+1) << "'" << std::endl;
 				return false;
 			}
 		}
 		if (*ptr=='|') {
 			ptr++;
 		} else if (i<9) {
-			cerr << "ItemParse: Level " << level << ": (7) Expected '|' (#" << i << ") not found near '" << ptr << "'" << endl;
+			std::cerr << "ItemParse: Level " << level << ": (7) Expected '|' (#" << i << ") not found near '" << ptr << "'" << std::endl;
 			return false;
 		}
 
@@ -185,12 +183,12 @@ static char *temp=nullptr;
 	return true;
 }
 
-int Tokenize(string s,map<int,string> & tokens, char delim)
+int Tokenize(std::string s,std::map<int,std::string> & tokens, char delim)
 {
 int i,len;
-string::size_type end;
+std::string::size_type end;
 //char temp[1024];
-string x;
+std::string x;
 	tokens.clear();
 	i=0;
 	while(s.length()) {
@@ -199,10 +197,10 @@ string x;
 			tokens[i++]="";
 		} else {
 			end=0;
-			while((end=s.find(delim,end+1))!=string::npos && s[end-1]=='\\');
-			if (end!=string::npos) {
+			while((end=s.find(delim,end+1))!=std::string::npos && s[end-1]=='\\');
+			if (end!=std::string::npos) {
 				x=s;
-				x.erase(end,string::npos);
+				x.erase(end,std::string::npos);
 				s.erase(0,end+1);
 				Unprotect(x,'|');
 				tokens[i++]=x;
@@ -392,7 +390,7 @@ void decode_chunk(char *in, char *out)
 	*(out+2) = DEC(in[2]) << 6 | DEC(in[3]);
 }
 
-void dump_message_column(unsigned char *buffer, unsigned long length, string leader, FILE *to)
+void dump_message_column(unsigned char *buffer, unsigned long length, std::string leader, FILE *to)
 {
 unsigned long i,j;
 unsigned long rows,offset=0;
@@ -418,7 +416,7 @@ unsigned long rows,offset=0;
 	}
 }
 
-string long2ip(unsigned long ip)
+std::string long2ip(unsigned long ip)
 {
 char temp[16];
 union { unsigned long ip; struct { unsigned char a,b,c,d; } octet;} ipoctet;
@@ -426,10 +424,10 @@ union { unsigned long ip; struct { unsigned char a,b,c,d; } octet;} ipoctet;
 	ipoctet.ip=ip;
 	sprintf(temp,"%d.%d.%d.%d",ipoctet.octet.a,ipoctet.octet.b,ipoctet.octet.c,ipoctet.octet.d);
 
-	return string(temp);
+	return std::string(temp);
 }
 
-string string_from_time(string pattern, time_t now)
+std::string string_from_time(std::string pattern, time_t now)
 {
 struct tm *now_tm;
 char time_string[51];
@@ -440,18 +438,18 @@ char time_string[51];
 
 	strftime(time_string,51,pattern.c_str(),now_tm);
 
-	return string(time_string);
+	return std::string(time_string);
 }
 
-string timestamp(time_t now)
+std::string timestamp(time_t now)
 {
 	return string_from_time("[%Y%m%d.%H%M%S] ",now);
 }
 
 
-string pop_arg(string &s, string seps, bool obey_quotes)
+std::string pop_arg(std::string &s, std::string seps, bool obey_quotes)
 {
-string ret;
+std::string ret;
 unsigned long i;
 bool in_quote=false;
 
@@ -463,7 +461,7 @@ bool in_quote=false;
 		}
 		if (in_quote)
 			continue;
-		if (seps.find(c)!=string::npos) {
+		if (seps.find(c)!=std::string::npos) {
 			break;
 		}
 	}
@@ -523,9 +521,9 @@ char *bptr;
 	return (bptr-buffer);
 }
 
-string generate_key(int length)
+std::string generate_key(int length)
 {
-string key;
+std::string key;
 //TODO: write this for win32...
 #ifndef WIN32
 int i;

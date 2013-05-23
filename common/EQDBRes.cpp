@@ -19,8 +19,8 @@
 #include "EQDBRes.h"
 #include <mysql.h>
 
-vector<string> EQDBRes::fetch_row_array() {
-	vector<string> array;
+std::vector<std::string> EQDBRes::fetch_row_array() {
+	std::vector<std::string> array;
 	if(res == nullptr)
 		return(array);
 
@@ -32,8 +32,8 @@ vector<string> EQDBRes::fetch_row_array() {
 	return array;
 }
 
-map<string,string> EQDBRes::fetch_row_hash() {
-	map<string,string> rowhash;
+std::map<std::string,std::string> EQDBRes::fetch_row_hash() {
+	std::map<std::string,std::string> rowhash;
 	if(res == nullptr)
 		return(rowhash);
 

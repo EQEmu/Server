@@ -31,6 +31,7 @@
 #include "titles.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/rulesys.h"
 #include "QuestParserCollection.h"
 
@@ -843,7 +844,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	int16 higher_from_int_wis = (GetINT() > GetWIS()) ? GetINT() : GetWIS();
 	int16 bonusstat = (higher_from_int_wis > thirdstat) ? higher_from_int_wis : thirdstat;
 
-	vector< pair<uint32,uint8> >::iterator itr;
+	std::vector< std::pair<uint32,uint8> >::iterator itr;
 
 
 	//calculate the base success chance
@@ -1401,7 +1402,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 		row = mysql_fetch_row(result);
 		uint32 item = (uint32)atoi(row[0]);
 		uint8 num = (uint8) atoi(row[1]);
-		spec->onsuccess.push_back(pair<uint32,uint8>(item, num));
+		spec->onsuccess.push_back(std::pair<uint32,uint8>(item, num));
 	}
 	mysql_free_result(result);
 
@@ -1418,7 +1419,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 			row = mysql_fetch_row(result);
 			uint32 item = (uint32)atoi(row[0]);
 			uint8 num = (uint8) atoi(row[1]);
-			spec->onfail.push_back(pair<uint32,uint8>(item, num));
+			spec->onfail.push_back(std::pair<uint32,uint8>(item, num));
 		}
 		mysql_free_result(result);
 	}
@@ -1435,7 +1436,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 			row = mysql_fetch_row(result);
 			uint32 item = (uint32)atoi(row[0]);
 			uint8 num = (uint8)atoi(row[1]);
-			spec->salvage.push_back(pair<uint32,uint8>(item, num));
+			spec->salvage.push_back(std::pair<uint32,uint8>(item, num));
 		}
 		mysql_free_result(result);
 	}

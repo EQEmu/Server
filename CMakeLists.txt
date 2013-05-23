@@ -79,6 +79,8 @@ IF(MSVC)
 			STRING(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
 		ENDIF(${flag_var} MATCHES "/MD")
 	ENDFOREACH(flag_var)
+	
+	ADD_DEFINITIONS(-DNOMINMAX)
 ELSE(MSVC)
 	#Normally set by perl but we don't use the perl flags anymore so we set it.
 	ADD_DEFINITIONS(-DHAS_UNION_SEMUN)

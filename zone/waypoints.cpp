@@ -18,7 +18,6 @@
 #include "../common/debug.h"
 #ifdef _EQDEBUG
 #include <iostream>
-using namespace std;
 #endif
 //#include <iomanip>
 #include <stdlib.h>
@@ -31,6 +30,7 @@ using namespace std;
 #include "../common/moremath.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/rulesys.h"
 #include "../common/features.h"
 #include "QuestParserCollection.h"
@@ -70,7 +70,7 @@ void NPC::DisplayWaypointInfo(Client *c) {
 		GetMaxWp() );
 
 
-	vector<wplist>::iterator cur, end;
+	std::vector<wplist>::iterator cur, end;
 	cur = Waypoints.begin();
 	end = Waypoints.end();
 	for(; cur != end; cur++) {
@@ -216,7 +216,7 @@ void NPC::UpdateWaypoint(int wp_index)
 		mlog(AI__WAYPOINTS, "Update to waypoint %d failed. Not found.", wp_index);
 		return;
 	}
-	vector<wplist>::iterator cur;
+	std::vector<wplist>::iterator cur;
 	cur = Waypoints.begin();
 	cur += wp_index;
 
@@ -267,9 +267,9 @@ void NPC::CalculateNewWaypoint()
 	}
 	case 1: //10 closest
 	{
-		list<wplist> closest;
+		std::list<wplist> closest;
 		GetClosestWaypoint(closest, 10, GetX(), GetY(), GetZ());
-		list<wplist>::iterator iter = closest.begin();
+		std::list<wplist>::iterator iter = closest.begin();
 		if(closest.size() != 0)
 		{
 			int idx = MakeRandomInt(0, closest.size() - 1);
@@ -327,10 +327,10 @@ void NPC::CalculateNewWaypoint()
 	}
 	case 5: //pick random closest 5 and pick one that's in sight
 	{
-		list<wplist> closest;
+		std::list<wplist> closest;
 		GetClosestWaypoint(closest, 5, GetX(), GetY(), GetZ());
 
-		list<wplist>::iterator iter = closest.begin();
+		std::list<wplist>::iterator iter = closest.begin();
 		while(iter != closest.end())
 		{
 			if(CheckLosFN((*iter).x, (*iter).y, (*iter).z, GetSize()))
@@ -373,7 +373,7 @@ bool wp_distance_pred(const wp_distance& left, const wp_distance& right)
 	return left.dist < right.dist;
 }
 
-void NPC::GetClosestWaypoint(list<wplist> &wp_list, int count, float m_x, float m_y, float m_z)
+void NPC::GetClosestWaypoint(std::list<wplist> &wp_list, int count, float m_x, float m_y, float m_z)
 {
 	wp_list.clear();
 	if(Waypoints.size() <= count)
@@ -385,7 +385,7 @@ void NPC::GetClosestWaypoint(list<wplist> &wp_list, int count, float m_x, float 
 		return;
 	}
 
-	list<wp_distance> distances;
+	std::list<wp_distance> distances;
 	for(int i = 0; i < Waypoints.size(); ++i)
 	{
 		float cur_x = (Waypoints[i].x - m_x);
@@ -402,7 +402,7 @@ void NPC::GetClosestWaypoint(list<wplist> &wp_list, int count, float m_x, float 
 	}
 	distances.sort(wp_distance_pred);
 
-	list<wp_distance>::iterator iter = distances.begin();
+	std::list<wp_distance>::iterator iter = distances.begin();
 	for(int i = 0; i < count; ++i)
 	{
 		wp_list.push_back(Waypoints[(*iter).index]);

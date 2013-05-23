@@ -17,11 +17,9 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <iomanip>
-using namespace std;
 #include <stdlib.h>
 #include "../common/version.h"
 
@@ -31,9 +29,6 @@ using namespace std;
 	#include <winsock.h>
 
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 #else // Pyro: fix for linux
@@ -61,7 +56,7 @@ using namespace std;
 #include "LoginServerList.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "zoneserver.h"
 #include "worlddb.h"
 #include "zonelist.h"

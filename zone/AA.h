@@ -6,10 +6,7 @@
 
 #define MANA_BURN 664
 
-
 #include <map>
-using namespace std;
-
 
 #define MAX_SWARM_PETS 12	//this can change as long as you make more coords (swarm_pet_x/swarm_pet_y)
 
@@ -2140,11 +2137,11 @@ struct AALevelCost_Struct
 //assumes that no activatable AA has more than 5 ranks
 #define MAX_AA_ACTION_RANKS 20
 extern AA_DBAction AA_Actions[aaHighestID][MAX_AA_ACTION_RANKS];	//[aaid][rank]
-extern map<uint16, AA_SwarmPet> AA_SwarmPets;	//key=spell_id
+extern std::map<uint16, AA_SwarmPet> AA_SwarmPets;	//key=spell_id
 
 #define AA_Choose3(val, v1, v2, v3) (val==1?v1:(val==2?v2:v3))
 
-extern map<uint32,SendAA_Struct*>aas_send;
+extern std::map<uint32,SendAA_Struct*>aas_send;
 extern std::map<uint32, std::map<uint32, AA_Ability> > aa_effects;
 extern std::map<uint32, AALevelCost_Struct> AARequiredLevelAndCost;
 

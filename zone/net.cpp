@@ -19,7 +19,6 @@
 #include "../common/debug.h"
 #include "../common/features.h"
 #include <iostream>
-using namespace std;
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,7 +31,6 @@ using namespace std;
 	#ifdef _CRTDBG_MAP_ALLOC
 		#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 	#endif
-using namespace std;
 #ifdef _WINDOWS
 #include <conio.h>
 #define snprintf	_snprintf

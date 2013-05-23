@@ -22,74 +22,74 @@
 #include "linked_list.h"
 
 struct LoginConfig {
-	string LoginHost;
-	string LoginAccount;
-	string LoginPassword;
+	std::string LoginHost;
+	std::string LoginAccount;
+	std::string LoginPassword;
 	uint16 LoginPort;
 };
 
 class EQEmuConfig : public XMLParser {
 public:
-	virtual string GetByName(const string &var_name) const;
+	virtual std::string GetByName(const std::string &var_name) const;
 
 	// From <world/>
-	string ShortName;
-	string LongName;
-	string WorldAddress;
-	string LocalAddress;
-	string LoginHost;
-	string LoginAccount;
-	string LoginPassword;
+	std::string ShortName;
+	std::string LongName;
+	std::string WorldAddress;
+	std::string LocalAddress;
+	std::string LoginHost;
+	std::string LoginAccount;
+	std::string LoginPassword;
 	uint16 LoginPort;
 	uint32 LoginCount;
 	LinkedList<LoginConfig*> loginlist;
 	bool Locked;
 	uint16 WorldTCPPort;
-	string WorldIP;
+	std::string WorldIP;
 	bool TelnetEnabled;
 	int32 MaxClients;
 	bool WorldHTTPEnabled;
 	uint16 WorldHTTPPort;
-	string WorldHTTPMimeFile;
-	string SharedKey;
+	std::string WorldHTTPMimeFile;
+	std::string SharedKey;
 
 	// From <chatserver/>
-	string ChatHost;
+	std::string ChatHost;
 	uint16 ChatPort;
 
 	// From <mailserver/>
-	string MailHost;
+	std::string MailHost;
 	uint16 MailPort;
 
 	// From <database/>
-	string DatabaseHost;
-	string DatabaseUsername;
-	string DatabasePassword;
-	string DatabaseDB;
+	std::string DatabaseHost;
+	std::string DatabaseUsername;
+	std::string DatabasePassword;
+	std::string DatabaseDB;
 	uint16 DatabasePort;
 
 	// From <qsdatabase> // QueryServ
-	string QSDatabaseHost;
-	string QSDatabaseUsername;
-	string QSDatabasePassword;
-	string QSDatabaseDB;
+	std::string QSDatabaseHost;
+	std::string QSDatabaseUsername;
+	std::string QSDatabasePassword;
+	std::string QSDatabaseDB;
 	uint16 QSDatabasePort;
 
 	// From <files/>
-	string SpellsFile;
-	string OpCodesFile;
-	string EQTimeFile;
-	string LogSettingsFile;
+	std::string SpellsFile;
+	std::string OpCodesFile;
+	std::string EQTimeFile;
+	std::string LogSettingsFile;
 
 	// From <directories/>
-	string MapDir;
-	string QuestDir;
-	string PluginDir;
+	std::string MapDir;
+	std::string QuestDir;
+	std::string PluginDir;
 
 	// From <launcher/>
-	string LogPrefix;
-	string LogSuffix;
-	string ZoneExe;
+	std::string LogPrefix;
+	std::string LogSuffix;
+	std::string ZoneExe;
 	uint32 RestartWait;
 	uint32 TerminateWait;
 	uint32 InitialBootWait;
@@ -108,7 +108,7 @@ protected:
 
 	static EQEmuConfig *_config;
 
-	static string ConfigFile;
+	static std::string ConfigFile;
 
 #define ELEMENT(name) \
 	void do_##name(TiXmlElement *ele);
@@ -210,7 +210,7 @@ public:
 	}
 
 	// Allow the use to set the conf file to be used.
-	static void SetConfigFile(string file) { EQEmuConfig::ConfigFile = file; }
+	static void SetConfigFile(std::string file) { EQEmuConfig::ConfigFile = file; }
 
 	// Load the config
 	static bool LoadConfig() {

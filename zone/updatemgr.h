@@ -23,7 +23,6 @@
 
 #include "../common/timer.h"
 #include <map>
-using namespace std;
 
 /*typedef enum {
 	updateMobPOS = 1,
@@ -55,7 +54,7 @@ public:
 	bool ack;
 };
 
-typedef map<uint32, UMType > UMMap;
+typedef std::map<uint32, UMType > UMMap;
 
 class UpdateManager {
 protected:

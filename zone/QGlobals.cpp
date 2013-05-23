@@ -1,5 +1,5 @@
 #include "../common/debug.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "QGlobals.h"
 #include "zonedb.h"
 

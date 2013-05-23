@@ -7,8 +7,6 @@
 
 #include <sstream>
 
-using namespace std;
-
 struct BotsAvailableList {
 	uint32 BotID;
 	char BotName[64];

@@ -615,7 +615,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 		return;
 	}
 
-	for (map<uint32, AA_Ability>::const_iterator iter = aa_effects[aaid].begin(); iter != aa_effects[aaid].end(); ++iter) {
+	for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aaid].begin(); iter != aa_effects[aaid].end(); ++iter) {
 		effect = iter->second.skill_id;
 		base1 = iter->second.base1;
 		base2 = iter->second.base2;

@@ -20,8 +20,6 @@
 #include <iomanip>
 #include <stdio.h>
 
-using namespace std;
-
 #include "packet_dump.h"
 #include "EQPacket.h"
 #include "../common/servertalk.h"
@@ -32,22 +30,22 @@ void DumpPacketAscii(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 	{
 		if ((i-skip)%cols==0)
 		{
-			cout << endl << setw(3) << setfill(' ') << i-skip << ":";
+			std::cout << std::endl << std::setw(3) << std::setfill(' ') << i-skip << ":";
 		}
 		else if ((i-skip)%(cols/2)==0)
 		{
-			cout << " - ";
+			std::cout << " - ";
 		}
 		if (buf[i] > 32 && buf[i] < 127)
 		{
-			cout << buf[i];
+			std::cout << buf[i];
 		}
 		else
 		{
-			cout << '.';
+			std::cout << '.';
 		}
 	}
-	cout << endl << endl;
+	std::cout << std::endl << std::endl;
 }
 
 void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
@@ -63,16 +61,16 @@ void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 	{
 		if ((i-skip)%cols==0) {
 			if (i != skip)
-				cout << " | " << ascii << endl;
-			cout << setw(4) << setfill(' ') << i-skip << ": ";
+				std::cout << " | " << ascii << std::endl;
+			std::cout << std::setw(4) << std::setfill(' ') << i-skip << ": ";
 			memset(ascii, 0, cols+1);
 			j = 0;
 		}
 		else if ((i-skip)%(cols/2) == 0) {
-			cout << "- ";
+			std::cout << "- ";
 		}
 		sprintf(output, "%02X ", (unsigned char)buf[i]);
-		cout << output;
+		std::cout << output;
 
 		if (buf[i] >= 32 && buf[i] < 127) {
 			ascii[j++] = buf[i];
@@ -84,11 +82,11 @@ void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 	}
 	uint32 k = ((i-skip)-1)%cols;
 	if (k < 8)
-		cout << "  ";
+		std::cout << "  ";
 	for (uint32 h = k+1; h < cols; h++) {
-		cout << "   ";
+		std::cout << "   ";
 	}
-	cout << " | " << ascii << endl;
+	std::cout << " | " << ascii << std::endl;
 	safe_delete_array(ascii);
 }
 
@@ -100,8 +98,8 @@ void DumpPacket(const uchar* buf, uint32 size)
 
 void DumpPacket(const ServerPacket* pack, bool iShowInfo) {
 	if (iShowInfo) {
-		cout << "Dumping ServerPacket: 0x" << hex << setfill('0') << setw(4) << pack->opcode << dec;
-		cout << " size:" << pack->size << endl;
+		std::cout << "Dumping ServerPacket: 0x" << std::hex << std::setfill('0') << std::setw(4) << pack->opcode << std::dec;
+		std::cout << " size:" << pack->size << std::endl;
 	}
 	DumpPacketHex(pack->pBuffer, pack->size);
 }
@@ -131,66 +129,66 @@ void DumpPacketBin(const void* iData, uint32 len) {
 	for (k=0; k<len; k++) {
 		if (k % 4 == 0) {
 			if (k != 0) {
-				cout << " | " << hex << setw(2) << setfill('0') << (int) data[k-4] << dec;
-				cout << " " << hex << setw(2) << setfill('0') << (int) data[k-3] << dec;
-				cout << " " << hex << setw(2) << setfill('0') << (int) data[k-2] << dec;
-				cout << " " << hex << setw(2) << setfill('0') << (int) data[k-1] << dec;
-				cout << endl;
+				std::cout << " | " << std::hex << std::setw(2) << std::setfill('0') << (int) data[k-4] << std::dec;
+				std::cout << " " << std::hex << std::setw(2) << std::setfill('0') << (int) data[k-3] << std::dec;
+				std::cout << " " << std::hex << std::setw(2) << std::setfill('0') << (int) data[k-2] << std::dec;
+				std::cout << " " << std::hex << std::setw(2) << std::setfill('0') << (int) data[k-1] << std::dec;
+				std::cout << std::endl;
 			}
-			cout << setw(4) << setfill('0') << k << ":";
+			std::cout << std::setw(4) << std::setfill('0') << k << ":";
 		}
 		else if (k % 2 == 0)
-			cout << " ";
-		cout << " ";
+			std::cout << " ";
+		std::cout << " ";
 		if (data[k] & 1)
-			cout << "1";
+			std::cout << "1";
 		else
-			cout << "0";
+			std::cout << "0";
 		if (data[k] & 2)
-			cout << "1";
+			std::cout << "1";
 		else
-			cout << "0";
+			std::cout << "0";
 		if (data[k] & 4)
-			cout << "1";
+			std::cout << "1";
 		else
-			cout << "0";
+			std::cout << "0";
 		if (data[k] & 8)
-			cout << "1";
+			std::cout << "1";
 		else
-			cout << "0";
+			std::cout << "0";
 		if (data[k] & 16)
-			cout << "1";
+			std::cout << "1";
 		else
-			cout << "0";
+			std::cout << "0";
 		if (data[k] & 32)
-			cout << "1";
+			std::cout << "1";
 		else
-			cout << "0";
+			std::cout << "0";
 		if (data[k] & 64)
-			cout << "1";
+			std::cout << "1";
 		else
-			cout << "0";
+			std::cout << "0";
 		if (data[k] & 128)
-			cout << "1";
+			std::cout << "1";
 		else
-			cout << "0";
+			std::cout << "0";
 	}
 	uint8 tmp = (k % 4);
 	if (!tmp)
 		tmp = 4;
 	if (tmp <= 3)
-		cout << "         ";
+		std::cout << "         ";
 	if (tmp <= 2)
-		cout << "          ";
+		std::cout << "          ";
 	if (tmp <= 1)
-		cout << "         ";
-	cout << " | " << hex << setw(2) << setfill('0') << (int) data[k-4] << dec;
+		std::cout << "         ";
+	std::cout << " | " << std::hex << std::setw(2) << std::setfill('0') << (int) data[k-4] << std::dec;
 	if (tmp > 1)
-		cout << " " << hex << setw(2) << setfill('0') << (int) data[k-3] << dec;
+		std::cout << " " << std::hex << std::setw(2) << std::setfill('0') << (int) data[k-3] << std::dec;
 	if (tmp > 2)
-		cout << " " << hex << setw(2) << setfill('0') << (int) data[k-2] << dec;
+		std::cout << " " << std::hex << std::setw(2) << std::setfill('0') << (int) data[k-2] << std::dec;
 	if (tmp > 3)
-		cout << " " << hex << setw(2) << setfill('0') << (int) data[k-1] << dec;
-	cout << endl;
+		std::cout << " " << std::hex << std::setw(2) << std::setfill('0') << (int) data[k-1] << std::dec;
+	std::cout << std::endl;
 }
 

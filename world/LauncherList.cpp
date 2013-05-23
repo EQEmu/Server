@@ -23,29 +23,27 @@
 #include "../common/logsys.h"
 #include "EQLConfig.h"
 
-using namespace std;
-
 LauncherList::LauncherList()
 : nextID(1)
 {
 }
 
 LauncherList::~LauncherList() {
-	vector<LauncherLink *>::iterator cur, end;
+	std::vector<LauncherLink *>::iterator cur, end;
 	cur = m_pendingLaunchers.begin();
 	end = m_pendingLaunchers.end();
 	for(; cur != end; cur++) {
 		delete *cur;
 	}
 
-	map<string, EQLConfig *>::iterator curc, endc;
+	std::map<std::string, EQLConfig *>::iterator curc, endc;
 	curc = m_configs.begin();
 	endc = m_configs.end();
 	for(; curc != endc; curc++) {
 		delete curc->second;
 	}
 
-	map<string, LauncherLink *>::iterator curl, endl;
+	std::map<std::string, LauncherLink *>::iterator curl, endl;
 	curl = m_launchers.begin();
 	endl = m_launchers.end();
 	for(; curl != endl; curl++) {
@@ -55,7 +53,7 @@ LauncherList::~LauncherList() {
 
 void LauncherList::Process() {
 	//process pending launchers..
-	vector<LauncherLink *>::iterator cur, end;
+	std::vector<LauncherLink *>::iterator cur, end;
 	cur = m_pendingLaunchers.begin();
 	while(cur != m_pendingLaunchers.end()) {
 		LauncherLink *l = *cur;
@@ -69,9 +67,9 @@ void LauncherList::Process() {
 			//launcher has identified itself now.
 			//remove ourself from the pending list
 			cur = m_pendingLaunchers.erase(cur);
-			string name = l->GetName();
+			std::string name = l->GetName();
 			//kill off anybody else using our name.
-			map<string, LauncherLink *>::iterator res;
+			std::map<std::string, LauncherLink *>::iterator res;
 			res = m_launchers.find(name);
 			if(res != m_launchers.end()) {
 				_log(WORLD__LAUNCH, "Ghosting launcher %s", name.c_str());
@@ -86,7 +84,7 @@ void LauncherList::Process() {
 	}
 
 	//process active launchers.
-	map<string, LauncherLink *>::iterator curl, tmp;
+	std::map<std::string, LauncherLink *>::iterator curl, tmp;
 	curl = m_launchers.begin();
 	while(curl != m_launchers.end()) {
 		LauncherLink *l = curl->second;
@@ -105,14 +103,14 @@ void LauncherList::Process() {
 }
 
 LauncherLink *LauncherList::Get(const char *name) {
-	map<string, LauncherLink *>::iterator res;
+	std::map<std::string, LauncherLink *>::iterator res;
 	res = m_launchers.find(name);
 	if(res == m_launchers.end())
 		return(nullptr);
 	return(res->second);
-/*	string goal(name);
+/*	std::string goal(name);
 
-	vector<LauncherLink *>::iterator cur, end;
+	std::vector<LauncherLink *>::iterator cur, end;
 	cur = m_launchers.begin();
 	end = m_launchers.end();
 	for(; cur != end; cur++) {
@@ -123,7 +121,7 @@ LauncherLink *LauncherList::Get(const char *name) {
 }
 
 LauncherLink *LauncherList::FindByZone(const char *short_name) {
-	map<string, LauncherLink *>::iterator cur, end;
+	std::map<std::string, LauncherLink *>::iterator cur, end;
 	cur = m_launchers.begin();
 	end = m_launchers.end();
 	for(; cur != end; cur++) {
@@ -144,8 +142,8 @@ int LauncherList::GetLauncherCount() {
 	return(m_launchers.size());
 }
 
-void LauncherList::GetLauncherNameList(std::vector<string> &res) {
-	map<string, EQLConfig *>::iterator cur, end;
+void LauncherList::GetLauncherNameList(std::vector<std::string> &res) {
+	std::map<std::string, EQLConfig *>::iterator cur, end;
 	cur = m_configs.begin();
 	end = m_configs.end();
 	for(; cur != end; cur++) {
@@ -154,11 +152,11 @@ void LauncherList::GetLauncherNameList(std::vector<string> &res) {
 }
 
 void LauncherList::LoadList() {
-	vector<string> launchers;
+	std::vector<std::string> launchers;
 
 	database.GetLauncherList(launchers);
 
-	vector<string>::iterator cur, end;
+	std::vector<std::string>::iterator cur, end;
 	cur = launchers.begin();
 	end = launchers.end();
 	for(; cur != end; cur++) {
@@ -167,7 +165,7 @@ void LauncherList::LoadList() {
 }
 
 EQLConfig *LauncherList::GetConfig(const char *name) {
-	map<string, EQLConfig *>::iterator res;
+	std::map<std::string, EQLConfig *>::iterator res;
 	res = m_configs.find(name);
 	if(res == m_configs.end()) {
 		return(nullptr);
@@ -180,14 +178,14 @@ void LauncherList::CreateLauncher(const char *name, uint8 dynamic_count) {
 }
 
 void LauncherList::Remove(const char *name) {
-	map<string, EQLConfig *>::iterator resc;
+	std::map<std::string, EQLConfig *>::iterator resc;
 	resc = m_configs.find(name);
 	if(resc != m_configs.end()) {
 		delete resc->second;
 		m_configs.erase(resc);
 	}
 
-	map<string, LauncherLink *>::iterator resl;
+	std::map<std::string, LauncherLink *>::iterator resl;
 	resl = m_launchers.find(name);
 	if(resl != m_launchers.end()) {
 		resl->second->Disconnect();

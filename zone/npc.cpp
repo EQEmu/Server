@@ -19,7 +19,6 @@
 #include <iostream>
 #include <string>
 #include <cctype>
-using namespace std;
 #include <math.h>
 #include "../common/moremath.h"
 #include <stdio.h>
@@ -42,6 +41,7 @@ using namespace std;
 #include "../common/bodytypes.h"
 #include "spawngroup.h"
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/rulesys.h"
 #include "StringIDs.h"
 
@@ -382,7 +382,7 @@ NPC::~NPC()
 	}
 
 	{
-	list<struct NPCFaction*>::iterator cur,end;
+	std::list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list.begin();
 	end = faction_list.end();
 	for(; cur != end; cur++) {
@@ -462,7 +462,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 	uint16 themlevel = them->GetLevel();
 	uint8 material;
 
-	list<ServerLootItem_Struct*>::iterator cur = itemlist.begin();
+	std::list<ServerLootItem_Struct*>::iterator cur = itemlist.begin();
 	while(cur != itemlist.end())
 	{
 		if(!(*cur))
@@ -2379,7 +2379,7 @@ FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 //Look through our faction list and return a faction con based
 //on the npc_value for the other person's primary faction in our list.
 FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
-	list<struct NPCFaction*>::iterator cur,end;
+	std::list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list.begin();
 	end = faction_list.end();
 	for(; cur != end; cur++) {
@@ -2402,62 +2402,62 @@ bool NPC::IsFactionListAlly(uint32 other_faction) {
 
 int NPC::GetScore()
 {
-	int lv = min(70, (int)GetLevel());
-	int basedmg = (lv*2)*(1+(lv / 100)) - (lv / 2);
-	int minx = 0;
-	int basehp = 0;
-	int hpcontrib = 0;
-	int dmgcontrib = 0;
-	int spccontrib = 0;
-	int hp = GetMaxHP();
-	int mindmg = min_dmg;
-	int maxdmg = max_dmg;
-	int final;
+    int lv = std::min(70, (int)GetLevel());
+    int basedmg = (lv*2)*(1+(lv / 100)) - (lv / 2);
+    int minx = 0;
+    int basehp = 0;
+    int hpcontrib = 0;
+    int dmgcontrib = 0;
+    int spccontrib = 0;
+    int hp = GetMaxHP();
+    int mindmg = min_dmg;
+    int maxdmg = max_dmg;
+    int final;
 
-	if(lv < 46)
-	{
+    if(lv < 46)
+    {
 		minx = static_cast<int> (ceil( ((lv - (lv / 10.0)) - 1.0) ));
 		basehp = (lv * 10) + (lv * lv);
 	}
 	else
 	{
 		minx = static_cast<int> (ceil( ((lv - (lv / 10.0)) - 1.0) - (( lv - 45.0 ) / 2.0) ));
-		basehp = (lv * 10) + ((lv * lv) * 4);
-	}
+        basehp = (lv * 10) + ((lv * lv) * 4);
+    }
 
-	if(hp > basehp)
+    if(hp > basehp)
+    {
+        hpcontrib = static_cast<int> (((hp / static_cast<float> (basehp)) * 1.5));
+        if(hpcontrib > 5) { hpcontrib = 5; }
+
+        if(maxdmg > basedmg)
+        {
+            dmgcontrib = static_cast<int> (ceil( ((maxdmg / basedmg) * 1.5) ));
+        }
+
+        if(HasNPCSpecialAtk("E")) { spccontrib++; }    //Enrage
+        if(HasNPCSpecialAtk("F")) { spccontrib++; }    //Flurry
+        if(HasNPCSpecialAtk("R")) { spccontrib++; }    //Rampage
+        if(HasNPCSpecialAtk("r")) { spccontrib++; }    //Area Rampage
+        if(HasNPCSpecialAtk("S")) { spccontrib++; }    //Summon
+        if(HasNPCSpecialAtk("T")) { spccontrib += 2; } //Triple
+        if(HasNPCSpecialAtk("Q")) { spccontrib += 3; } //Quad
+        if(HasNPCSpecialAtk("U")) { spccontrib += 5; } //Unslowable
+        if(HasNPCSpecialAtk("L")) { spccontrib++; }    //Innate Dual Wield
+    }
+
+    if(npc_spells_id > 12)
 	{
-		hpcontrib = static_cast<int> (((hp / static_cast<float> (basehp)) * 1.5));
-		if(hpcontrib > 5) { hpcontrib = 5; }
+        if(lv < 16)
+            spccontrib++;
+        else
+            spccontrib += static_cast<int> (floor(lv/15.0));
+    }
 
-		if(maxdmg > basedmg)
-		{
-			dmgcontrib = static_cast<int> (ceil( ((maxdmg / basedmg) * 1.5) ));
-		}
-
-		if(HasNPCSpecialAtk("E")) { spccontrib++; }	//Enrage
-		if(HasNPCSpecialAtk("F")) { spccontrib++; }	//Flurry
-		if(HasNPCSpecialAtk("R")) { spccontrib++; }	//Rampage
-		if(HasNPCSpecialAtk("r")) { spccontrib++; }	//Area Rampage
-		if(HasNPCSpecialAtk("S")) { spccontrib++; }	//Summon
-		if(HasNPCSpecialAtk("T")) { spccontrib += 2; } //Triple
-		if(HasNPCSpecialAtk("Q")) { spccontrib += 3; } //Quad
-		if(HasNPCSpecialAtk("U")) { spccontrib += 5; } //Unslowable
-		if(HasNPCSpecialAtk("L")) { spccontrib++; }	//Innate Dual Wield
-	}
-
-	if(npc_spells_id > 12)
-	{
-		if(lv < 16)
-			spccontrib++;
-		else
-			spccontrib += static_cast<int> (floor(lv/15.0));
-	}
-
-	final = minx + hpcontrib + dmgcontrib + spccontrib;
-	final = max(1, final);
-	final = min(100, final);
-	return(final);
+    final = minx + hpcontrib + dmgcontrib + spccontrib;
+    final = std::max(1, final);
+    final = std::min(100, final);
+    return(final);
 }
 
 uint32 NPC::GetSpawnKillCount()

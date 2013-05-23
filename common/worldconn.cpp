@@ -21,7 +21,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <iomanip>
-using namespace std;
 #include <time.h>
 #include <stdlib.h>
 #include <stdarg.h>

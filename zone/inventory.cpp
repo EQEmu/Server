@@ -29,6 +29,7 @@
 #include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "../common/logsys.h"
+#include "../common/StringUtil.h"
 #include "StringIDs.h"
 #include "NpcAI.h"
 extern WorldServer worldserver;
@@ -337,7 +338,7 @@ void Client::DropItem(int16 slot_id)
 
 	// Save client inventory change to database
 	if (slot_id==SLOT_CURSOR) {
-		list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(CharacterID(), s, e);
 	} else
 		database.SaveInventory(CharacterID(), nullptr, slot_id);
@@ -469,7 +470,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 
 	const ItemInst* inst=nullptr;
 	if (slot_id==SLOT_CURSOR) {
-		list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		if(update_db)
 			database.SaveCursor(character_id, s, e);
 	}
@@ -523,7 +524,7 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 		SendItemPacket(SLOT_CURSOR, &inst, ItemPacketSummonItem);
 	}
 
-	list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+	std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 	return database.SaveCursor(CharacterID(), s, e);
 }
 
@@ -542,7 +543,7 @@ bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client
 	}
 
 	if (slot_id==SLOT_CURSOR) {
-		list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		return database.SaveCursor(this->CharacterID(), s, e);
 	} else
 		return database.SaveInventory(this->CharacterID(), &inst, slot_id);
@@ -558,7 +559,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 	SendLootItemInPacket(&inst, slot_id);
 
 	if (slot_id==SLOT_CURSOR) {
-		list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(this->CharacterID(), s, e);
 	} else
 		database.SaveInventory(this->CharacterID(), &inst, slot_id);
@@ -712,7 +713,7 @@ void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 		from.SetCharges(from.GetCharges() - charges_to_move);
 		SendLootItemInPacket(tmp_inst, to_slot);
 		if (to_slot==SLOT_CURSOR){
-			list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+			std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 			database.SaveCursor(this->CharacterID(), s, e);
 		} else
 			database.SaveInventory(this->CharacterID(), tmp_inst, to_slot);
@@ -1207,7 +1208,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 			safe_delete(world_inst);
 			if (src_slot_id==SLOT_CURSOR) {
-				list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+				std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 				database.SaveCursor(character_id, s, e);
 			} else
 				database.SaveInventory(character_id, m_inv[src_slot_id], src_slot_id);
@@ -1332,12 +1333,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Step 7: Save change to the database
 	if (src_slot_id==SLOT_CURSOR){
-		list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(character_id, s, e);
 	} else
 		database.SaveInventory(character_id, m_inv.GetItem(src_slot_id), src_slot_id);
 	if (dst_slot_id==SLOT_CURSOR) {
-		list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
+		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(character_id, s, e);
 	} else
 		database.SaveInventory(character_id, m_inv.GetItem(dst_slot_id), dst_slot_id);
@@ -1964,7 +1965,7 @@ void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType 
 		return;
 
 	// Serialize item into |-delimited string
-	string packet = inst->Serialize(slot_id);
+	std::string packet = inst->Serialize(slot_id);
 
 	EmuOpcode opcode = OP_Unknown;
 	EQApplicationPacket* outapp = nullptr;
@@ -1989,7 +1990,7 @@ EQApplicationPacket* Client::ReturnItemPacket(int16 slot_id, const ItemInst* ins
 		return 0;
 
 	// Serialize item into |-delimited string
-	string packet = inst->Serialize(slot_id);
+	std::string packet = inst->Serialize(slot_id);
 
 	EmuOpcode opcode = OP_Unknown;
 	EQApplicationPacket* outapp = nullptr;

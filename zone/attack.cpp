@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
-using namespace std;
 #include <assert.h>
 
 #include "masterentity.h"
@@ -38,7 +37,7 @@ using namespace std;
 #include "../common/spdat.h"
 #include "zone.h"
 #include "StringIDs.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/rulesys.h"
 #include "QuestParserCollection.h"
 #include "watermap.h"

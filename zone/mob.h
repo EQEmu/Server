@@ -1096,7 +1096,7 @@ protected:
 	VERTEX PathingLastPosition;
 	int PathingLoopCount;
 	int PathingLastNodeVisited;
-	list<int> Route;
+	std::list<int> Route;
 	LOSType PathingLOSState;
 	Timer *PathingLOSCheckTimer;
 	Timer *PathingRouteUpdateTimerShort;
