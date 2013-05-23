@@ -315,6 +315,9 @@ INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
 ADD_LIBRARY(Common ${common_sources} ${common_headers})
 
+IF(MSVC)
+	ADD_DEFINITIONS(-DNOMINMAX)
+ENDIF(MSVC)
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)

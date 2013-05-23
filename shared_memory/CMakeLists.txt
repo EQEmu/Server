@@ -22,6 +22,7 @@ ADD_EXECUTABLE(shared_memory ${shared_memory_sources} ${shared_memory_headers})
 TARGET_LINK_LIBRARIES(shared_memory Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
 IF(MSVC)
+	ADD_DEFINITIONS(-DNOMINMAX)
 	SET_TARGET_PROPERTIES(shared_memory PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
 	TARGET_LINK_LIBRARIES(shared_memory "Ws2_32.lib")
 ENDIF(MSVC)

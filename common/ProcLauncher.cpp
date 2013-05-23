@@ -165,8 +165,8 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 	// Create the child process.
 
 	//glue together all the nice command line arguments
-	string args(it->program);
-	vector<string>::iterator cur, end;
+	std::string args(it->program);
+	std::vector<std::string>::iterator cur, end;
 	cur = it->args.begin();
 	end = it->args.end();
 	for(; cur != end; cur++) {
