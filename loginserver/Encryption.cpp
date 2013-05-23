@@ -19,9 +19,11 @@
 #include "Encryption.h"
 #include "ErrorLog.h"
 
+#include <string>
+
 extern ErrorLog *server_log;
 
-bool Encryption::LoadCrypto(string name)
+bool Encryption::LoadCrypto(std::string name)
 {
 	if(!Load(name.c_str()))
 	{

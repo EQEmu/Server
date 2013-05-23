@@ -20,12 +20,13 @@
 
 #include "../common/types.h"
 #include "../common/linked_list.h"
-#include "zonedb.h"
-#include "../common/eq_constants.h"
-#include "zonedump.h"
-#include "zonedbasync.h"
 #include "../common/servertalk.h"
 #include "../common/bodytypes.h"
+#include "../common/eq_constants.h"
+
+#include "zonedb.h"
+#include "zonedump.h"
+#include "zonedbasync.h"
 #include "QGlobals.h"
 
 // max number of newspawns to send per bulk packet
@@ -441,7 +442,7 @@ private:
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);
 		Bot* GetBotByBotName(std::string botName);
-		list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
+		std::list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
 
 		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff

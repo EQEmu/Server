@@ -16,10 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include <sstream>
-#include <iostream>
-#include <limits>
-
 #include "debug.h"
 #include "StringUtil.h"
 #include "Item.h"
@@ -28,6 +24,11 @@
 #include "races.h"
 #include "shareddb.h"
 #include "classes.h"
+
+#include <limits.h>
+
+#include <sstream>
+#include <iostream>
 
 int32 NextItemInstSerialNumber = 1;
 
@@ -43,7 +44,7 @@ static inline int32 GetNextItemInstSerialNumber() {
 	// NextItemInstSerialNumber is the next one to hand out.
 	//
 	// It is very unlikely to reach 2,147,483,647. Maybe we should call abort(), rather than wrapping back to 1.
-	if(NextItemInstSerialNumber >= std::numeric_limits<uint32>::max())
+	if(NextItemInstSerialNumber >= INT_MAX)
 		NextItemInstSerialNumber = 1;
 	else
 		NextItemInstSerialNumber++;
@@ -1049,6 +1050,26 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 
 	// No available slots
 	return SLOT_INVALID;
+}
+
+void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
+	iter_contents itb;
+
+	if (!inst || !inst->IsType(ItemClassContainer)) 
+		return;
+
+	// Go through bag, if bag
+	for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
+		ItemInst* baginst = itb->second;
+		if(!baginst || !baginst->GetItem())
+			continue;
+
+		std::string subSlot;
+		StringFormat(subSlot,"	Slot %d: %s (%d)", Inventory::CalcSlotId((*it)->first, itb->first),
+			baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
+		std::cout << subSlot << std::endl;
+	}
+
 }
 
 void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection) {

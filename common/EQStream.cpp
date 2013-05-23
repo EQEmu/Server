@@ -15,16 +15,36 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "debug.h"
+#include "EQPacket.h"
+#include "EQStream.h"
+#include "misc.h"
+#include "Mutex.h"
+#include "op_codes.h"
+#include "CRC16.h"
+
 #include <string>
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include <time.h>
-#include <sys/types.h>
+#include <algorithm>
+
+#if defined(ZONE) || defined(WORLD)
+	#define RETRANSMITS
+#endif
+#ifdef RETRANSMITS
+	#include "rulesys.h"
+#endif
+
 #ifdef _WINDOWS
 	#include <time.h>
+	// have to undefine these since a macro version 
+	// is defined in windef.h (which windows includes)
+	#undef min 
+	#undef max
 #else
+	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <sys/time.h>
@@ -32,20 +52,6 @@
 	#include <netdb.h>
 	#include <fcntl.h>
 	#include <arpa/inet.h>
-#endif
-#include "EQPacket.h"
-#include "EQStream.h"
-//#include "EQStreamFactory.h"
-#include "misc.h"
-#include "Mutex.h"
-#include "op_codes.h"
-#include "CRC16.h"
-
-#if defined(ZONE) || defined(WORLD)
-	#define RETRANSMITS
-#endif
-#ifdef RETRANSMITS
-	#include "rulesys.h"
 #endif
 
 //for logsys
@@ -567,7 +573,7 @@ uint32 length;
 
 		while (used<length) {
 			out=new EQProtocolPacket(OP_Fragment,nullptr,MaxLen-4);
-			chunksize=std::min(length-used,MaxLen-6);
+			chunksize= std::min(length-used,MaxLen-6);
 			memcpy(out->pBuffer+2,tmpbuff+used,chunksize);
 			out->size=chunksize+2;
 			SequencedPush(out);
