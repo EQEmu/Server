@@ -2,6 +2,8 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
+#include <luabind/object.hpp>
+
 #include <sstream>
 #include <list>
 #include <map>

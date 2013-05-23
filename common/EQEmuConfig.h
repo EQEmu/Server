@@ -167,7 +167,7 @@ protected:
 		// Dirs
 		MapDir="Maps";
 		QuestDir="quests";
-		PluginDir="quests/plugins";
+		PluginDir="plugins";
 
 		// Launcher
 		LogPrefix = "logs/zone-";

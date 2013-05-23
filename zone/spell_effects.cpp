@@ -141,18 +141,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 	if(IsNPC())
 	{
-		if(parse->SpellHasQuestSub(spell_id, "EVENT_SPELL_EFFECT_NPC"))
-		{
-			parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
+		int i = parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
+		if(i != 0){
 			CalcBonuses();
 			return true;
 		}
 	}
 	else if(IsClient())
 	{
-		if(parse->SpellHasQuestSub(spell_id, "EVENT_SPELL_EFFECT_CLIENT"))
-		{
-			parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
+		int i = parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
+		if(i != 0){
 			CalcBonuses();
 			return true;
 		}
@@ -3068,17 +3066,15 @@ void Mob::DoBuffTic(uint16 spell_id, uint32 ticsremaining, uint8 caster_level, M
 
 	if(IsNPC())
 	{
-		if(parse->SpellHasQuestSub(spell_id, "EVENT_SPELL_EFFECT_BUFF_TIC_NPC"))
-		{
-			parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
+		int i = parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
+		if(i != 0) {
 			return;
 		}
 	}
 	else
 	{
-		if(parse->SpellHasQuestSub(spell_id, "EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT"))
-		{
-			parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
+		int i = parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
+		if(i != 0) {
 			return;
 		}
 	}
@@ -3088,7 +3084,7 @@ void Mob::DoBuffTic(uint16 spell_id, uint32 ticsremaining, uint8 caster_level, M
 	if(IsClient())
 		CastToClient()->CheckAAEffect(aaEffectRampage);
 
-	for (int i=0; i < EFFECT_COUNT; i++)
+	for (int i = 0; i < EFFECT_COUNT; i++)
 	{
 		if(IsBlankSpellEffect(spell_id, i))
 			continue;

@@ -76,6 +76,8 @@ private:
 	void ClearStates();
 	void MapFunctions(lua_State *L);
 	void AddError(std::string error);
+	void ExportQGlobals(NPC *n, Client *c);
+	void ExportZoneVariables();
 
 	std::map<std::string, std::string> vars_;
 	std::map<std::string, bool> loaded_;

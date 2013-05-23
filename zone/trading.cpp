@@ -587,7 +587,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 				attuned[i - 3000] = inst->IsInstNoDrop();
 
 				for(int j = 0; j < 5; j++) {
-					augments[i][j] = inst->GetAugmentItemID(j);
+					augments[i - 3000][j] = inst->GetAugmentItemID(j);
 				}
 
 				const Item_Struct* item2 = database.GetItem(items[i - 3000]);

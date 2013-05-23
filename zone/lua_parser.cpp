@@ -2,8 +2,10 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
+#include <luabind/object.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <boost/any.hpp>
+
 #include <ctype.h>
 #include <stdio.h>
 #include <sstream>
@@ -22,9 +24,9 @@
 #include "lua_npc.h"
 #include "lua_spell.h"
 #include "lua_general.h"
-#include "zone.h"
-
+#include "QGlobals.h"
 #include "questmgr.h"
+#include "zone.h"
 #include "lua_parser.h"
 
 const char *LuaEvents[_LargestEventID] = {
@@ -202,8 +204,10 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 
 		auto arg_function = NPCArgumentDispatch[evt];
 		arg_function(this, L, npc, init, data, extra_data);
-		
+		ExportZoneVariables();
 		Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
+		ExportQGlobals(npc, c);
+		
 		quest_manager.StartQuest(npc, c, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
@@ -292,6 +296,8 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		
 		auto arg_function = PlayerArgumentDispatch[evt];
 		arg_function(this, L, client, data, extra_data);
+		ExportZoneVariables();
+		ExportQGlobals(nullptr, client);
 	
 		quest_manager.StartQuest(nullptr, client, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -386,6 +392,8 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 
 		auto arg_function = ItemArgumentDispatch[evt];
 		arg_function(this, L, client, item, objid, extra_data);
+		ExportZoneVariables();
+		ExportQGlobals(nullptr, nullptr);
 		
 		quest_manager.StartQuest(nullptr, client, item);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -460,6 +468,8 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 		
 		auto arg_function = SpellArgumentDispatch[evt];
 		arg_function(this, L, npc, client, spell_id, extra_data);
+		ExportZoneVariables();
+		ExportQGlobals(npc, client);
 		
 		quest_manager.StartQuest(npc, client, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -519,6 +529,9 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		lua_createtable(L, 0, 0);
 		lua_pushstring(L, encounter_name.c_str());
 		lua_setfield(L, -2, "name");
+
+		ExportZoneVariables();
+		ExportQGlobals(nullptr, nullptr);
 
 		quest_manager.StartQuest(nullptr, nullptr, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -679,7 +692,7 @@ void LuaParser::ReloadQuests() {
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
 	std::string module_path = lua_tostring(L,-1);
-	module_path += "quests/plugins/?.lua";
+	module_path += "lua_modules/?.lua";
 	lua_pop(L, 1);
 	lua_pushstring(L, module_path.c_str());
 	lua_setfield(L, -2, "path");
@@ -806,26 +819,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 				.property("frenzy", &Lua_HateEntry::GetFrenzy, &Lua_HateEntry::SetFrenzy),
 
 			luabind::class_<Lua_HateList>("HateList")
-				.def_readwrite("entries", &Lua_HateList::entries, luabind::return_stl_iterator),
-
-			luabind::class_<Lua_Mob::Lua_Illusion>("Illusion")
-				.def(luabind::constructor<>())
-				.def_readwrite("race", &Lua_Mob::Lua_Illusion::in_race)
-				.def_readwrite("gender", &Lua_Mob::Lua_Illusion::in_gender)
-				.def_readwrite("texture", &Lua_Mob::Lua_Illusion::in_texture)
-				.def_readwrite("helmtexture", &Lua_Mob::Lua_Illusion::in_helmtexture)
-				.def_readwrite("haircolor", &Lua_Mob::Lua_Illusion::in_haircolor)
-				.def_readwrite("beardcolor", &Lua_Mob::Lua_Illusion::in_beardcolor)
-				.def_readwrite("eyecolor1", &Lua_Mob::Lua_Illusion::in_eyecolor1)
-				.def_readwrite("eyecolor2", &Lua_Mob::Lua_Illusion::in_eyecolor2)
-				.def_readwrite("hairstyle", &Lua_Mob::Lua_Illusion::in_hairstyle)
-				.def_readwrite("luclinface", &Lua_Mob::Lua_Illusion::in_luclinface)
-				.def_readwrite("beard", &Lua_Mob::Lua_Illusion::in_beard)
-				.def_readwrite("aa_title", &Lua_Mob::Lua_Illusion::in_aa_title)
-				.def_readwrite("drakkin_heritage", &Lua_Mob::Lua_Illusion::in_drakkin_heritage)
-				.def_readwrite("drakkin_tattoo", &Lua_Mob::Lua_Illusion::in_drakkin_tattoo)
-				.def_readwrite("drakkin_details", &Lua_Mob::Lua_Illusion::in_drakkin_details)
-				.def_readwrite("size", &Lua_Mob::Lua_Illusion::in_size)
+				.def_readwrite("entries", &Lua_HateList::entries, luabind::return_stl_iterator)
 		];
 	
 	} catch(std::exception &ex) {
@@ -942,6 +936,111 @@ void LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, u
 		}
 		++riter;
 	}
+}
+
+void LuaParser::ExportQGlobals(NPC *n, Client *c) {
+	lua_createtable(L, 0, 0);
+
+	if(n && !n->GetQglobal()) {
+		lua_setfield(L, -2, "qglobals");
+		return;
+	}
+
+	QGlobalCache *npc_c = nullptr;
+	QGlobalCache *char_c = nullptr;
+	QGlobalCache *zone_c = nullptr;
+	uint32 npc_id = 0;
+	uint32 char_id = 0;
+	uint32 zone_id = 0;
+
+	if(n) {
+		npc_id = n->GetNPCTypeID();
+		npc_c = n->GetQGlobals();
+	}
+
+	if(c) {
+		char_id = c->CharacterID();
+		char_c = c->GetQGlobals();
+	}
+
+	if(zone) {
+		zone_id = zone->GetZoneID();
+		zone_c = zone->GetQGlobals();
+	}
+
+	if(!npc_c && n) {
+		npc_c = n->CreateQGlobals();
+		npc_c->LoadByNPCID(npc_id);
+	}
+
+	if(!char_c && c) {
+		char_c = c->CreateQGlobals();
+		char_c->LoadByCharID(char_id);
+	}
+
+	if(!zone_c && zone) {
+		zone_c = zone->CreateQGlobals();
+		zone_c->LoadByZoneID(zone_id);
+		zone_c->LoadByGlobalContext();
+	}
+
+	std::list<QGlobal> global_map;
+	if(npc_c) {
+		QGlobalCache::Combine(global_map, npc_c->GetBucket(), npc_id, char_id, zone_id);
+	}
+
+	if(char_c) {
+		QGlobalCache::Combine(global_map, char_c->GetBucket(), npc_id, char_id, zone_id);
+	}
+
+	if(zone_c) {
+		QGlobalCache::Combine(global_map, zone_c->GetBucket(), npc_id, char_id, zone_id);
+	}
+
+	auto iter = global_map.begin();
+	while(iter != global_map.end()) {
+		lua_pushstring(L, (*iter).value.c_str());
+		lua_setfield(L, -2, (*iter).name.c_str());
+		++iter;
+	}
+
+	lua_setfield(L, -2, "qglobals");
+}
+
+void LuaParser::ExportZoneVariables() {
+	if(zone == nullptr) {
+		return;
+	}
+
+	lua_pushinteger(L, zone->GetZoneID());
+	lua_setfield(L, -2, "zone_id");
+
+	lua_pushstring(L, zone->GetLongName());
+	lua_setfield(L, -2, "zone_ln");
+
+	lua_pushstring(L, zone->GetShortName());
+	lua_setfield(L, -2, "zone_sn");
+
+	lua_pushinteger(L, zone->GetInstanceID());
+	lua_setfield(L, -2, "instance_id");
+
+	lua_pushinteger(L, zone->GetInstanceVersion());
+	lua_setfield(L, -2, "instance_version");
+
+	TimeOfDay_Struct eqTime;
+	zone->zone_time.getEQTimeOfDay(time(0), &eqTime);
+
+	lua_pushinteger(L, eqTime.hour - 1);
+	lua_setfield(L, -2, "zone_hour");
+
+	lua_pushinteger(L, eqTime.minute);
+	lua_setfield(L, -2, "zone_minute");
+
+	lua_pushinteger(L, (eqTime.hour - 1) * 100 + eqTime.minute);
+	lua_setfield(L, -2, "zone_time");
+
+	lua_pushinteger(L, zone->zone_weather);
+	lua_setfield(L, -2, "zone_weather");
 }
 
 #endif

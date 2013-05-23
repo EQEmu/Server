@@ -1,13 +1,14 @@
 #ifdef LUA_EQEMU
 
+#include "lua.hpp"
+#include <luabind/luabind.hpp>
+#include <luabind/object.hpp>
+
 #include "masterentity.h"
 #include "lua_entity.h"
 #include "lua_mob.h"
 #include "lua_client.h"
 #include "lua_npc.h"
-
-#include "lua.hpp"
-#include <luabind/luabind.hpp>
 
 bool Lua_Entity::IsClient() {
 	Lua_Safe_Call_Bool();

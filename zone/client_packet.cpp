@@ -2065,15 +2065,11 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	{
 		ItemInst* p_inst = (ItemInst*)inst;
 
-		if(parse->ItemHasQuestSub(p_inst, "EVENT_ITEM_CLICK"))
+		int i = parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, p_inst->GetID(), slot_id);
+		inst = m_inv[slot_id];
+		if(!inst)
 		{
-			parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, p_inst->GetID(), slot_id);
-			inst = m_inv[slot_id];
-			if (!inst)
-			{
-				// Item was deleted by the perl event
-				return;
-			}
+			return;
 		}
 
         int r;
@@ -2124,19 +2120,14 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				}
 				if(GetLevel() >= item->Click.Level2)
 				{
-					if(parse->ItemHasQuestSub(p_inst, "EVENT_ITEM_CLICK_CAST"))
+					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, p_inst->GetID(), slot_id);
+					inst = m_inv[slot_id];
+					if(!inst)
 					{
-						//TODO: need to enforce and set recast timers here because the spell may not be cast.
-						parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, p_inst->GetID(), slot_id);
-						inst = m_inv[slot_id];
-						if (!inst)
-						{
-							// Item was deleted by the perl event
-							return;
-						}
+						return;
 					}
-					else
-					{
+
+					if(i != 0) {
 						CastSpell(item->Click.Effect, target_id, 10, item->CastTime, 0, 0, slot_id);
 					}
 				}
@@ -2156,22 +2147,16 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
                 }
                 if(GetLevel() >= augitem->Click.Level2)
                 {
-                    if(parse->ItemHasQuestSub(clickaug, "EVENT_ITEM_CLICK_CAST"))
-                    {
-                        //TODO: need to enforce and set recast timers here because the spell may not be cast.
-                        parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, clickaug->GetID(), slot_id);
-                        inst = m_inv[slot_id];
-                        if (!inst)
-                        {
-                            // Item was deleted by the perl event
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        //We assume augs aren't consumable
-                        CastSpell(augitem->Click.Effect, target_id, 10, augitem->CastTime, 0, 0, slot_id);
-                    }
+					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, clickaug->GetID(), slot_id);
+					inst = m_inv[slot_id];
+					if(!inst)
+					{
+						return;
+					}
+
+					if(i != 0) {
+						CastSpell(augitem->Click.Effect, target_id, 10, augitem->CastTime, 0, 0, slot_id);
+					}
                 }
                 else
                 {
@@ -4616,15 +4601,13 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 						if(GetLevel() >= item->Click.Level2)
 						{
 							ItemInst* p_inst = (ItemInst*)inst;
-							if(parse->ItemHasQuestSub(p_inst, "EVENT_ITEM_CLICK_CAST"))
-							{
-								parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, p_inst->GetID(), castspell->inventoryslot);
+							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, p_inst->GetID(), castspell->inventoryslot);
+
+							if(i != 0) {
+								CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
+							} else {
 								SendSpellBarEnable(castspell->spell_id);
 								return;
-							}
-							else
-							{
-								CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
 							}
 						}
 						else
@@ -4637,15 +4620,13 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 					else
 					{
 						ItemInst* p_inst = (ItemInst*)inst;
-						if(parse->ItemHasQuestSub(p_inst, "EVENT_ITEM_CLICK_CAST"))
-						{
-							parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, p_inst->GetID(), castspell->inventoryslot);
+						int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, p_inst->GetID(), castspell->inventoryslot);
+
+						if(i != 0) {
+							CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
+						} else {
 							SendSpellBarEnable(castspell->spell_id);
 							return;
-						}
-						else
-						{
-							CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
 						}
 					}
 				}
@@ -10515,11 +10496,9 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app) {
 	if(its->Complete == 1) {
 
 		int SpellID = PendingTranslocateData.SpellID;
-		if(parse->SpellHasQuestSub(SpellID, "EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE"))
-		{
-			parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, SpellID, 0);
-		}
-		else
+		int i = parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, SpellID, 0);
+
+		if(i != 0)
 		{
 			// If the spell has a translocate to bind effect, AND we are already in the zone the client
 			// is bound in, use the GoToBind method. If we send OP_Translocate in this case, the client moves itself

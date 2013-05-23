@@ -2,7 +2,7 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
-#include <boost/any.hpp>
+#include <luabind/object.hpp>
 
 #include "QuestParserCollection.h"
 #include "QuestInterface.h"

@@ -1,12 +1,12 @@
 #ifdef LUA_EQEMU
 
+#include "lua.hpp"
+#include <luabind/luabind.hpp>
+#include <luabind/object.hpp>
+
 #include "masterentity.h"
 #include "lua_entity.h"
 #include "lua_item.h"
-
-#include "lua.hpp"
-#include <luabind/luabind.hpp>
-
 
 Lua_Item::Lua_Item(uint32 item_id) {
 	const Item_Struct *t = database.GetItem(item_id);

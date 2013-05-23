@@ -11,6 +11,7 @@ class Lua_ItemInst;
 
 namespace luabind {
 	struct scope;
+	class object;
 }
 
 luabind::scope lua_register_mob();
@@ -19,26 +20,6 @@ class Lua_Mob : public Lua_Entity
 {
 	typedef Mob NativeType;
 public:
-	struct Lua_Illusion {
-		Lua_Illusion();
-		int in_race;
-		int in_gender;
-		int in_texture;
-		int in_helmtexture;
-		int in_haircolor;
-		int in_beardcolor;
-		int in_eyecolor1;
-		int in_eyecolor2;
-		int in_hairstyle;
-		int in_luclinface;
-		int in_beard;
-		int in_aa_title;
-		uint32 in_drakkin_heritage;
-		uint32 in_drakkin_tattoo;
-		uint32 in_drakkin_details;
-		double in_size;
-	};
-
 	Lua_Mob() { }
 	Lua_Mob(Mob *d) { SetLuaPtrData(d); }
 	virtual ~Lua_Mob() { }
@@ -315,7 +296,7 @@ public:
 	void SetTexture(int in);
 	void SetRace(int in);
 	void SetGender(int in);
-	void SendIllusionPacket(Lua_Illusion illusion);
+	void SendIllusionPacket(luabind::object illusion);
 	void QuestReward(Lua_Client c);
 	void QuestReward(Lua_Client c, uint32 silver);
 	void QuestReward(Lua_Client c, uint32 silver, uint32 gold);
