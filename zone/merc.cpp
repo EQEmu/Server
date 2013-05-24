@@ -5063,7 +5063,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 				snprintf(c->GetEPP().merc_name, 64, "%s", c->GetMercInfo().merc_name);
 				snprintf(npc_type->name, 64, "%s", c->GetMercInfo().merc_name);
 			}
-			uint8 gender;
+			uint8 gender = 0;
 			if(merchant_id > 0) {
 				NPC* tar = entity_list.GetNPCByID(merchant_id);
 				if(tar) {
@@ -5587,7 +5587,7 @@ bool Merc::Suspend() {
 }
 
 bool Merc::Unsuspend(bool setMaxStats) {
-	Client* mercOwner;
+	Client* mercOwner = nullptr;
 	bool loaded = false;
 
 	if(GetMercOwner()) {

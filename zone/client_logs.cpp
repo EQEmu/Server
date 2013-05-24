@@ -128,7 +128,7 @@ void ClientLogs::EQEmuIO_pva(EQEMuLog::LogIDs id, const char *prefix, const char
 	if(fmt[0] == '\n' || fmt[0] == '\r')
 		return;	//skip new lines...
 	char *buf = _buffer;
-	int plen = snprintf(buf, MAX_CLIENT_LOG_MESSAGE_LENGTH, prefix);
+	int plen = snprintf(buf, MAX_CLIENT_LOG_MESSAGE_LENGTH, "%s", prefix);
 	buf += plen;
 	vsnprintf(buf, MAX_CLIENT_LOG_MESSAGE_LENGTH-plen, fmt, ap);
 	_buffer[MAX_CLIENT_LOG_MESSAGE_LENGTH] = '\0';

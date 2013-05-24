@@ -17,6 +17,8 @@ SET(qserv_headers
 
 ADD_EXECUTABLE(queryserv ${qserv_sources} ${qserv_headers})
 
+INSTALL(TARGETS queryserv RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+
 ADD_DEFINITIONS(-DQSERV)
 
 TARGET_LINK_LIBRARIES(queryserv Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
