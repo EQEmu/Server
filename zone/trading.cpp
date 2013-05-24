@@ -2144,7 +2144,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 	// This packet produces the SoandSo is browsing your Buy Lines message
 	bb->Action = Barter_SellerBrowsing;
 
-	sprintf(bb->PlayerName, GetName());
+	sprintf(bb->PlayerName, "%s", GetName());
 
 	Buyer->QueuePacket(outapp);
 
@@ -2710,7 +2710,7 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 		pdest = strstr(Name, Criteria);
 
 		if (pdest != nullptr) {
-			sprintf(bisr->Results[Count].ItemName, item->Name);
+			sprintf(bisr->Results[Count].ItemName, "%s", item->Name);
 			bisr->Results[Count].ItemID = item->ID;
 			bisr->Results[Count].Unknown068 = item->Icon;
 			bisr->Results[Count].Unknown072 = 0x00000000;

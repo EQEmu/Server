@@ -92,13 +92,13 @@ Mob::Mob(const char* in_name,
 		mana_timer(2000),
 		spellend_timer(0),
 		rewind_timer(30000), //Timer used for determining amount of time between actual player position updates for /rewind.
+		bindwound_timer(10000),
 		stunned_timer(0),
 		spun_timer(0),
 		bardsong_timer(6000),
-		flee_timer(FLEE_CHECK_TIMER),
-		bindwound_timer(10000),
 		gravity_timer(1000),
-		viral_timer(0)
+		viral_timer(0),
+		flee_timer(FLEE_CHECK_TIMER)
 
 {
 	targeted = 0;
@@ -879,7 +879,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 		// Changing the first string made it vanish, so it has some significance.
 		if(lastname)
-			sprintf(ns->spawn.DestructibleModel, lastname);
+			sprintf(ns->spawn.DestructibleModel, "%s", lastname);
 		// Changing the second string made no visible difference
 		sprintf(ns->spawn.DestructibleName2, "%s", ns->spawn.name);
 		// Putting a string in the final one that was previously empty had no visible effect.

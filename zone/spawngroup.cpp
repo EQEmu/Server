@@ -130,7 +130,7 @@ void SpawnGroupList::AddSpawnGroup(SpawnGroup* newGroup) {
 
 SpawnGroup* SpawnGroupList::GetSpawnGroup(uint32 in_id) {
 	if(groups.count(in_id) != 1)
-		return(false);
+		return nullptr;
 	return(groups[in_id]);
 }
 

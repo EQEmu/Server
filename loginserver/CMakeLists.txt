@@ -41,6 +41,8 @@ ENDIF(UNIX)
 
 ADD_EXECUTABLE(loginserver ${eqlogin_sources} ${eqlogin_headers})
 
+INSTALL(TARGETS loginserver RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+
 TARGET_LINK_LIBRARIES(loginserver Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE})
 
 IF(MSVC)

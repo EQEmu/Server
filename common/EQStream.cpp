@@ -1358,6 +1358,9 @@ void EQStream::CheckTimeout(uint32 now, uint32 timeout) {
 			_log(NET__DEBUG, _L "Timeout expired in established state. Closing connection." __L);
 			_SendDisconnect();
 			SetState(DISCONNECTING);
+			break;
+		default:
+			break;
 		}
 	}
 }

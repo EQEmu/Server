@@ -1424,7 +1424,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	if(dead)
 		return;	//cant die more than once...
 
-	int exploss;
+	int exploss = 0;
 
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob ? killerMob->GetName() : "Unknown", damage, spell, attack_skill);
 
