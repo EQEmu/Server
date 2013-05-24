@@ -257,7 +257,7 @@ void Client::SendMembershipSettings() {
 	Membership_Details_Struct* mds = (Membership_Details_Struct*)outapp->pBuffer;
 
 	mds->membership_setting_count = 66;
-	uint32 gold_settings[22] = {-1,-1,-1,-1,-1,-1,1,1,1,-1,1,-1,-1,1,1,1,1,1,1,-1,-1,0};
+	int32 gold_settings[22] = {-1,-1,-1,-1,-1,-1,1,1,1,-1,1,-1,-1,1,1,1,1,1,1,-1,-1,0};
 	uint32 entry_count = 0;
 	for (int setting_id=0; setting_id < 22; setting_id++)
 	{
@@ -1583,7 +1583,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 
 	uint32 max_stats = 0;
 	uint32 allocs = character_create_allocations.size();
-	RaceClassAllocation allocation;
+	RaceClassAllocation allocation = {0};
 	found = false;
 	for(int i = 0; i < combos; ++i) {
 		if(character_create_allocations[i].Index == class_combo.AllocationIndex) {

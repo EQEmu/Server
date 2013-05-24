@@ -969,11 +969,6 @@ protected:
 	Timer tic_timer;
 	Timer mana_timer;
 
-	float rewind_x;
-	float rewind_y;
-	float rewind_z;
-	Timer rewind_timer;
-
 	//spell casting vars
 	Timer spellend_timer;
 	uint16 casting_spell_id;
@@ -991,6 +986,11 @@ protected:
 	uint16 bardsong;
 	uint8 bardsong_slot;
 	uint32 bardsong_target_id;
+
+	float rewind_x;
+	float rewind_y;
+	float rewind_z;
+	Timer rewind_timer;
 
 	// Currently 3 max nimbus particle effects at a time
 	uint32 nimbus_effect1;
@@ -1025,6 +1025,10 @@ protected:
 	uint16 viral_spells[MAX_SPELL_TRIGGER*2]; // Stores the spell ids of the viruses on target and caster ids
 	int16 rooted_mod; //Modifier to root break chance, defined when root is cast on a target.
 	bool offhand;
+
+	// Bind wound
+	Timer bindwound_timer;
+	Mob* bindwound_target;
 
 	Timer stunned_timer;
 	Timer spun_timer;
@@ -1108,9 +1112,6 @@ protected:
 	uint32 pDontSnareMeBefore;
 	uint32 pDontCureMeBefore;
 
-	// Bind wound
-	Timer bindwound_timer;
-	Mob* bindwound_target;
 	// hp event
 	int nexthpevent;
 	int nextinchpevent;

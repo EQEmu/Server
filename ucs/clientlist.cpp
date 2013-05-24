@@ -353,9 +353,6 @@ static void ProcessMailTo(Client *c, string MailMessage) {
 	}
 }
 
-static void ProcessMailTo(Client *c, string from, string subject, string message) {
-}
-
 static void ProcessSetMessageStatus(string SetMessageCommand) {
 
 	int MessageNumber;
@@ -1332,6 +1329,7 @@ void Client::SendChannelMessage(string Message)
 	}
 
 	if(RequiredChannel)
+	{
 		if(RuleB(Chat, EnableAntiSpam))
 		{
 			if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(GetName()) || RequiredChannel->IsOwner(GetName()) ||
@@ -1386,6 +1384,7 @@ void Client::SendChannelMessage(string Message)
 			else
 				GeneralChannelMessage("Channel " + ChannelName + " is moderated and you have not been granted a voice.");
 		}
+	}
 
 }
 
@@ -1885,11 +1884,12 @@ void Client::ChannelModerate(string CommandString) {
 
 	RequiredChannel->SetModerated(!RequiredChannel->IsModerated());
 
-	if(!RequiredChannel->IsClientInChannel(this))
+	if(!RequiredChannel->IsClientInChannel(this)) {
 		if(RequiredChannel->IsModerated())
 			GeneralChannelMessage("Channel " + ChannelName + " is now moderated.");
 		else
 			GeneralChannelMessage("Channel " + ChannelName + " is no longer moderated.");
+	}
 
 }
 

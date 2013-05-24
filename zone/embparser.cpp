@@ -1464,7 +1464,7 @@ bool PerlembParser::PlayerHasQuestSub(const char *subname) {
 	if(playerQuestLoaded.count(zone->GetShortName()) == 0)
 		LoadPlayerScript(zone->GetShortName());
 
-	if(subname == "EVENT_CAST")
+	if(strcmp("EVENT_CAST",subname) == 0)
 		return (playerQuestLoaded[zone->GetShortName()] == pQuestEventCast);
 
 	return(perl->SubExists(packagename.c_str(), subname));
@@ -1477,7 +1477,7 @@ bool PerlembParser::GlobalPlayerHasQuestSub(const char *subname) {
 	if(globalPlayerQuestLoaded == pQuestReadyToLoad)
 		LoadGlobalPlayerScript();
 
-	if(subname == "EVENT_CAST")
+	if(strcmp("EVENT_CAST",subname) == 0)
 		return (globalPlayerQuestLoaded == pQuestEventCast);
 
 	return(perl->SubExists(packagename.c_str(), subname));

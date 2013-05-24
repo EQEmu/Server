@@ -1120,7 +1120,7 @@ struct QSPlayerLogTrade_Struct {
 };
 
 struct QSHandinItems_Struct {
-	char action_type[6]; // handin, return or reward
+	char action_type[7]; // handin, return or reward
 	uint16 char_slot;
 	uint32 item_id;
 	uint16 charges;

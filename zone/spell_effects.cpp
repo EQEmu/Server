@@ -4488,12 +4488,13 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		case SE_TriggerOnCast:
 		{
 			if(type == focusTriggerOnCast)
-
+			{
 				if(MakeRandomInt(0, 100) <= focus_spell.base[i])
 					value = focus_spell.base2[i];
 
 				else
 					value = 0;
+			}
 
 			break;
 		}
@@ -5106,7 +5107,7 @@ bool Mob::TryDivineSave()
 	{
 		SetHP(1);
 
-		uint16 EffectsToTry[] =
+		int16 EffectsToTry[] =
 		{
 			aabonuses.DivineSaveChance[1],
 			itembonuses.DivineSaveChance[1],

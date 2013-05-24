@@ -110,10 +110,10 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	classattack_timer(1000),
 	knightattack_timer(1000),
 	assist_timer(AIassistcheck_delay),
+	qglobal_purge_timer(30000),
 	sendhpupdate_timer(1000),
 	enraged_timer(1000),
-	taunt_timer(TauntReuseTime * 1000),
-	qglobal_purge_timer(30000)
+	taunt_timer(TauntReuseTime * 1000)
 {
 	//What is the point of this, since the names get mangled..
 	Mob* mob = entity_list.GetMob(name);

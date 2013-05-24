@@ -1759,10 +1759,12 @@ void command_timezone(Client *c, const Seperator *sep)
 		c->Message(13, "Current timezone is: %ih %im", zone->zone_time.getEQTimeZoneHr(), zone->zone_time.getEQTimeZoneMin());
 	}
 	else {
-		if(sep->arg[2]=="")
-			strcpy(sep->arg[2], "0");
-		c->Message(13, "Setting timezone to %s h %s m", sep->arg[1], sep->arg[2]);
-		uint32 ntz=(atoi(sep->arg[1])*60)+atoi(sep->arg[2]);
+		uint8 hours = atoi(sep->arg[1]);
+		uint8 minutes = atoi(sep->arg[2]);
+		if(!sep->IsNumber(2))
+			minutes = 0;
+		c->Message(13, "Setting timezone to %i h %i m", hours, minutes);
+		uint32 ntz=(hours*60)+minutes;
 		zone->zone_time.setEQTimeZone(ntz);
 		database.SetZoneTZ(zone->GetZoneID(), zone->GetInstanceVersion(), ntz);
 
@@ -3897,7 +3899,7 @@ void command_fixmob(Client *c, const Seperator *sep)
 	{
 
 		uint32 Adjustment = 1;	// Previous or Next
-		char codeMove;
+		char codeMove = 0;
 
 		if (sep->arg[2])
 		{
