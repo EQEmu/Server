@@ -21,6 +21,7 @@
 #include "../common/debug.h"
 #include "../common/seperator.h"
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/features.h"
 #include "masterentity.h"
 #include "embparser.h"
@@ -844,7 +845,7 @@ void PerlembParser::ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest,
 		//only export for npcs that are global enabled.
 		if(npcmob && npcmob->GetQglobal())
 		{
-			map<string, string> globhash;
+			std::map<std::string, std::string> globhash;
 			QGlobalCache *npc_c = nullptr;
 			QGlobalCache *char_c = nullptr;
 			QGlobalCache *zone_c = nullptr;
@@ -905,7 +906,7 @@ void PerlembParser::ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest,
 	}
 	else
 	{
-		map<string, string> globhash;
+		std::map<std::string, std::string> globhash;
 		QGlobalCache *char_c = nullptr;
 		QGlobalCache *zone_c = nullptr;
 
@@ -1026,7 +1027,7 @@ void PerlembParser::ExportZoneVariables(std::string &package_name) {
 void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 	if(mob && mob->IsClient())
 	{
-		string hashname = package_name + std::string("::hasitem");
+		std::string hashname = package_name + std::string("::hasitem");
 
 		//start with an empty hash
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
@@ -1045,7 +1046,7 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 	}
 
 	if(mob && mob->IsClient()) {
-		string hashname = package_name + std::string("::oncursor");
+		std::string hashname = package_name + std::string("::oncursor");
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 		char *hi_decl = nullptr;
 		int itemid = mob->CastToClient()->GetItemIDAt(30);
@@ -1094,7 +1095,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "silver", GetVar("silver." + std::string(itoa(objid))).c_str());
 			ExportVar(package_name.c_str(), "gold", GetVar("gold." + std::string(itoa(objid))).c_str());
 			ExportVar(package_name.c_str(), "platinum", GetVar("platinum." + std::string(itoa(objid))).c_str());
-			string hashname = package_name + std::string("::itemcount");
+			std::string hashname = package_name + std::string("::itemcount");
 			perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 			perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item1};").c_str());
 			perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item2};").c_str());
