@@ -35,7 +35,7 @@ void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 
 	//make sure they arnt allready subscribed.
 
-	vector<Client *>::iterator cur,end;
+	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
 	for(; cur != end; cur++) {
@@ -55,7 +55,7 @@ void ClientLogs::unsubscribe(EQEMuLog::LogIDs id, Client *c) {
 	if(c == nullptr)
 		return;
 
-	vector<Client *>::iterator cur,end;
+	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
 	for(; cur != end; cur++) {
@@ -94,7 +94,7 @@ void ClientLogs::clear() {
 void ClientLogs::msg(EQEMuLog::LogIDs id, const char *buf) {
 	if(id >= EQEMuLog::MaxLogID)
 		return;
-	vector<Client *>::iterator cur,end;
+	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
 	for(; cur != end; cur++) {

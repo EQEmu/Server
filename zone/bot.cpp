@@ -4,6 +4,7 @@
 #include "object.h"
 #include "doors.h"
 #include "QuestParserCollection.h"
+#include "../common/StringUtil.h"
 
 extern volatile bool ZoneLoaded;
 
@@ -1575,7 +1576,7 @@ void Bot::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 		return;
 	}
 
-	for (map<uint32, AA_Ability>::const_iterator iter = aa_effects[aaid].begin(); iter != aa_effects[aaid].end(); ++iter) {
+	for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aaid].begin(); iter != aa_effects[aaid].end(); ++iter) {
 		effect = iter->second.skill_id;
 		base1 = iter->second.base1;
 		base2 = iter->second.base2;
@@ -4778,7 +4779,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* botOwner) {
 				std::list<uint32> ActiveBots = Bot::GetGroupedBotsByGroupId(botOwner->GetGroup()->GetID(), &errorMessage);
 
 				if(errorMessage.empty() && !ActiveBots.empty()) {
-					for(list<uint32>::iterator itr = ActiveBots.begin(); itr != ActiveBots.end(); itr++) {
+					for(std::list<uint32>::iterator itr = ActiveBots.begin(); itr != ActiveBots.end(); itr++) {
 						Bot* activeBot = Bot::LoadBot(*itr, &errorMessage);
 
 						if(!errorMessage.empty()) {
@@ -6700,7 +6701,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 		return 0;
 	}
 
-	for (map<uint32, AA_Ability>::const_iterator iter = aa_effects[aa_ID].begin(); iter != aa_effects[aa_ID].end(); ++iter)
+	for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aa_ID].begin(); iter != aa_effects[aa_ID].end(); ++iter)
 	{
 		effect = iter->second.skill_id;
 		base1 = iter->second.base1;
@@ -11135,7 +11136,7 @@ int32 Bot::CalcBaseEndurance()
 		int BonusUpto800 = int( at_most_800 / 4 ) ;
 		if(Stats > 400) {
 			Bonus400to800 = int( (at_most_800 - 400) / 4 );
-			HalfBonus400to800 = int( max( ( at_most_800 - 400 ), 0 ) / 8 );
+			HalfBonus400to800 = int( std::max( ( at_most_800 - 400 ), 0 ) / 8 );
 
 			if(Stats > 800) {
 				Bonus800plus = int( (Stats - 800) / 8 ) * 2;
@@ -11597,7 +11598,7 @@ void Bot::ProcessClientZoneChange(Client* botOwner) {
 	if(botOwner) {
 		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(botOwner->CharacterID());
 
-		for(list<Bot*>::iterator itr = BotList.begin(); itr != BotList.end(); itr++) {
+		for(std::list<Bot*>::iterator itr = BotList.begin(); itr != BotList.end(); itr++) {
 			Bot* tempBot = *itr;
 
 			if(tempBot) {
@@ -12321,7 +12322,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			if(std::string(sep->arg[2]).compare("all") == 0)
 				listAll = true;
 			else {
-				string botName = std::string(sep->arg[2]);
+				std::string botName = std::string(sep->arg[2]);
 
 				Bot* tempBot = entity_list.GetBotByBotName(botName);
 
@@ -15980,12 +15981,12 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						Bot* leaderBot = *botListItr;
 						if(leaderBot->GetInHealRotation() && leaderBot->GetHealRotationLeader() == leaderBot) {
 							//start all heal rotations
-							list<Bot*> rotationMemberList;
+							std::list<Bot*> rotationMemberList;
 							int index = 0;
 
 							rotationMemberList = GetBotsInHealRotation(leaderBot);
 
-							for(list<Bot*>::iterator rotationMemberItr = rotationMemberList.begin(); rotationMemberItr != rotationMemberList.end(); rotationMemberItr++) {
+							for(std::list<Bot*>::iterator rotationMemberItr = rotationMemberList.begin(); rotationMemberItr != rotationMemberList.end(); rotationMemberItr++) {
 								Bot* tempBot = *rotationMemberItr;
 
 								if(tempBot) {
@@ -16013,7 +16014,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 
 					if(leaderBot) {
-						list<Bot*> botList;
+						std::list<Bot*> botList;
 						int index = 0;
 						if (leaderBot->GetBotOwner() != c) {
 							c->Message(13, "You must target a bot that you own.");
@@ -16022,7 +16023,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 						botList = GetBotsInHealRotation(leaderBot);
 
-						for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
+						for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 							Bot* tempBot = *botListItr;
 
 							if(tempBot) {
@@ -16057,11 +16058,11 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						Bot* leaderBot = *botListItr;
 						if(leaderBot->GetInHealRotation() && leaderBot->GetHealRotationLeader() == leaderBot) {
 							//start all heal rotations
-							list<Bot*> rotationMemberList;
+							std::list<Bot*> rotationMemberList;
 
 							rotationMemberList = GetBotsInHealRotation(leaderBot);
 
-							for(list<Bot*>::iterator rotationMemberItr = rotationMemberList.begin(); rotationMemberItr != rotationMemberList.end(); rotationMemberItr++) {
+							for(std::list<Bot*>::iterator rotationMemberItr = rotationMemberList.begin(); rotationMemberItr != rotationMemberList.end(); rotationMemberItr++) {
 								Bot* tempBot = *rotationMemberItr;
 
 								if(tempBot) {
@@ -16086,7 +16087,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 
 					if(leaderBot) {
-						list<Bot*> botList;
+						std::list<Bot*> botList;
 						if (leaderBot->GetBotOwner() != c) {
 							c->Message(13, "You must target a bot that you own.");
 							return;
@@ -16094,7 +16095,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 						botList = GetBotsInHealRotation(leaderBot);
 
-						for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
+						for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 							Bot* tempBot = *botListItr;
 
 							if(tempBot && tempBot->GetBotOwnerCharacterID() == c->CharacterID()) {
@@ -16145,7 +16146,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 
 					if(leaderBot) {
-						list<Bot*> botList;
+						std::list<Bot*> botList;
 						if (leaderBot->GetBotOwner() != c) {
 							c->Message(13, "You must target a bot that you own.");
 							return;
@@ -16157,7 +16158,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						c->Message(0, "Bot Heal Rotation- Leader: %s", leaderBot->GetCleanName());
 						c->Message(0, "Bot Heal Rotation- Timer: %1.1f", ((float)leaderBot->GetHealRotationTimer()/1000.0f));
 
-						for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
+						for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 							Bot* tempBot = *botListItr;
 
 							if(tempBot && tempBot->GetBotOwnerCharacterID() == c->CharacterID()) {
@@ -16207,7 +16208,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				}
 
 				if(leaderBot) {
-					list<Bot*> botList;
+					std::list<Bot*> botList;
 					if (leaderBot->GetBotOwner() != c) {
 						c->Message(13, "You must target a bot that you own.");
 						return;
@@ -16215,7 +16216,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 					botList = GetBotsInHealRotation(leaderBot);
 
-					for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
+					for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 						Bot* tempBot = *botListItr;
 
 						if(tempBot && tempBot->GetBotOwnerCharacterID() == c->CharacterID())
@@ -16247,7 +16248,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 				if(leaderBot) {
 					bool fastHeals = false;
-					list<Bot*> botList;
+					std::list<Bot*> botList;
 					if (leaderBot->GetBotOwner() != c) {
 						c->Message(13, "You must target a bot that you own.");
 						return;
@@ -16263,7 +16264,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 					botList = GetBotsInHealRotation(leaderBot);
 
-					for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
+					for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 						Bot* tempBot = *botListItr;
 
 						if(tempBot && tempBot->GetBotOwnerCharacterID() == c->CharacterID())
@@ -16547,7 +16548,7 @@ Bot* EntityList::GetBotByBotID(uint32 botID) {
 	Bot* Result = 0;
 
 	if(botID > 0) {
-		for(list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); botListItr++) {
+		for(std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); botListItr++) {
 			Bot* tempBot = *botListItr;
 
 			if(tempBot && tempBot->GetBotID() == botID) {
@@ -16564,7 +16565,7 @@ Bot* EntityList::GetBotByBotName(std::string botName) {
 	Bot* Result = 0;
 
 	if(!botName.empty()) {
-		for(list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); botListItr++) {
+		for(std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); botListItr++) {
 			Bot* tempBot = *botListItr;
 
 			if(tempBot && std::string(tempBot->GetName()) == botName) {
@@ -16608,11 +16609,11 @@ void EntityList::AddBot(Bot *newBot, bool SendSpawnPacket, bool dontqueue) {
 	}
 }
 
-list<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID) {
-	list<Bot*> Result;
+std::list<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID) {
+	std::list<Bot*> Result;
 
 	if(botOwnerCharacterID > 0) {
-		for(list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); botListItr++) {
+		for(std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); botListItr++) {
 			Bot* tempBot = *botListItr;
 
 			if(tempBot && tempBot->GetBotOwnerCharacterID() == botOwnerCharacterID)
@@ -16675,7 +16676,7 @@ bool EntityList::RemoveBot(uint16 entityID) {
 	bool Result = false;
 
 	if(entityID > 0) {
-		for(list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); botListItr++)
+		for(std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); botListItr++)
 		{
 			Bot* tempBot = *botListItr;
 
@@ -16694,7 +16695,7 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 
 	const char *WindowTitle = "Bot Tracking Window";
 
-	string WindowText;
+	std::string WindowText;
 	int LastCon = -1;
 	int CurrentCon = 0;
 
@@ -17227,9 +17228,9 @@ bool Bot::AddHealRotationMember( Bot* healer ) {
 				//update leader's previous member (end of list) to new member and update rotation data
 				SetPrevHealRotationMember(healer);
 
-				list<Bot*> botList = GetBotsInHealRotation(this);
+				std::list<Bot*> botList = GetBotsInHealRotation(this);
 
-				for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
+				for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 					Bot* tempBot = *botListItr;
 
 					if(tempBot)
@@ -17275,9 +17276,9 @@ bool Bot::RemoveHealRotationMember( Bot* healer ) {
 		}
 
 		//update rotation data
-		list<Bot*> botList = GetBotsInHealRotation(leader);
+		std::list<Bot*> botList = GetBotsInHealRotation(leader);
 
-		for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
+		for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 			Bot* tempBot = *botListItr;
 
 			if(tempBot) {
@@ -17348,11 +17349,11 @@ bool Bot::AddHealRotationTarget( Mob* target ) {
 
 			if (_healRotationTargets[i] == 0)
 			{
-				list<Bot*> botList = GetBotsInHealRotation(this);
+				std::list<Bot*> botList = GetBotsInHealRotation(this);
 
 				_healRotationTargets[i] = target->GetID();
 
-				for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
+				for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 					Bot* tempBot = *botListItr;
 
 					if(tempBot && tempBot != this) {
@@ -17385,12 +17386,12 @@ bool Bot::RemoveHealRotationTarget( Mob* target ) {
 		//notify all heal rotation members to remove target
 		for(int i=0; i<MaxHealRotationTargets; i++){
 			if(_healRotationTargets[i] == target->GetID()) {
-				list<Bot*> botList = GetBotsInHealRotation(this);
+				std::list<Bot*> botList = GetBotsInHealRotation(this);
 				_healRotationTargets[i] = 0;
 				index = i;
 				removed = true;
 
-				for(list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
+				for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); botListItr++) {
 					Bot* tempBot = *botListItr;
 
 					if(tempBot)
@@ -17498,8 +17499,8 @@ Mob* Bot::GetHealRotationTarget( uint8 index ) {
 	return target;
 }
 
-list<Bot*> Bot::GetBotsInHealRotation(Bot* rotationLeader) {
-	list<Bot*> Result;
+std::list<Bot*> Bot::GetBotsInHealRotation(Bot* rotationLeader) {
+	std::list<Bot*> Result;
 
 	if(rotationLeader != nullptr) {
 		Result.push_back(rotationLeader);

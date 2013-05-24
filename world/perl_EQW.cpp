@@ -197,7 +197,7 @@ XS(XS_EQW_ListBootedZones)
 		Perl_croak(aTHX_ "Usage: EQW::ListBootedZones(THIS)");
 	{
 		EQW *		THIS;
-		vector<string>		RETVAL;
+		std::vector<std::string>		RETVAL;
 
 		if (sv_derived_from(ST(0), "EQW")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -218,7 +218,7 @@ XS(XS_EQW_ListBootedZones)
 			/* grow the stack to the number of elements being returned */
 			EXTEND(SP, RETVAL.size());
 			for (ix_RETVAL = 0; ix_RETVAL < RETVAL.size(); ix_RETVAL++) {
-					const string &it = RETVAL[ix_RETVAL];
+					const std::string &it = RETVAL[ix_RETVAL];
 					ST(ix_RETVAL) = sv_newmortal();
 					sv_setpvn(ST(ix_RETVAL), it.c_str(), it.length());
 			}
@@ -237,7 +237,7 @@ XS(XS_EQW_GetZoneDetails)
 		Perl_croak(aTHX_ "Usage: EQW::GetZoneDetails(THIS, zone_ref)");
 	{
 		EQW *		THIS;
-		map<string,string>		RETVAL;
+		std::map<std::string,std::string>		RETVAL;
 		Const_char *		zone_ref = (Const_char *)SvPV_nolen(ST(1));
 
 		if (sv_derived_from(ST(0), "EQW")) {
@@ -258,7 +258,7 @@ XS(XS_EQW_GetZoneDetails)
 				sv_2mortal((SV*)hv);
 				ST(0) = newRV((SV*)hv);
 
-				map<string,string>::const_iterator cur, end;
+				std::map<std::string,std::string>::const_iterator cur, end;
 				cur = RETVAL.begin();
 				end = RETVAL.end();
 				for(; cur != end; cur++) {
@@ -310,7 +310,7 @@ XS(XS_EQW_ListPlayers)
 		Perl_croak(aTHX_ "Usage: EQW::ListPlayers(THIS, zone_name= \"\")");
 	{
 		EQW *		THIS;
-		vector<string>		RETVAL;
+		std::vector<std::string>		RETVAL;
 		Const_char *		zone_name;
 
 		if (sv_derived_from(ST(0), "EQW")) {
@@ -338,7 +338,7 @@ XS(XS_EQW_ListPlayers)
 			/* grow the stack to the number of elements being returned */
 			EXTEND(SP, RETVAL.size());
 			for (ix_RETVAL = 0; ix_RETVAL < RETVAL.size(); ix_RETVAL++) {
-					const string &it = RETVAL[ix_RETVAL];
+					const std::string &it = RETVAL[ix_RETVAL];
 					ST(ix_RETVAL) = sv_newmortal();
 					sv_setpvn(ST(ix_RETVAL), it.c_str(), it.length());
 			}
@@ -357,7 +357,7 @@ XS(XS_EQW_GetPlayerDetails)
 		Perl_croak(aTHX_ "Usage: EQW::GetPlayerDetails(THIS, player_ref)");
 	{
 		EQW *		THIS;
-		map<string,string>		RETVAL;
+		std::map<std::string,std::string>		RETVAL;
 		Const_char *		player_ref = (Const_char *)SvPV_nolen(ST(1));
 
 		if (sv_derived_from(ST(0), "EQW")) {
@@ -378,7 +378,7 @@ XS(XS_EQW_GetPlayerDetails)
 				sv_2mortal((SV*)hv);
 				ST(0) = newRV((SV*)hv);
 
-				map<string,string>::const_iterator cur, end;
+				std::map<std::string,std::string>::const_iterator cur, end;
 				cur = RETVAL.begin();
 				end = RETVAL.end();
 				for(; cur != end; cur++) {
@@ -431,7 +431,7 @@ XS(XS_EQW_ListLaunchers)
 		Perl_croak(aTHX_ "Usage: EQW::ListLaunchers(THIS)");
 	{
 		EQW *		THIS;
-		vector<string>		RETVAL;
+		std::vector<std::string>		RETVAL;
 
 		if (sv_derived_from(ST(0), "EQW")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -452,7 +452,7 @@ XS(XS_EQW_ListLaunchers)
 			/* grow the stack to the number of elements being returned */
 			EXTEND(SP, RETVAL.size());
 			for (ix_RETVAL = 0; ix_RETVAL < RETVAL.size(); ix_RETVAL++) {
-					const string &it = RETVAL[ix_RETVAL];
+					const std::string &it = RETVAL[ix_RETVAL];
 					ST(ix_RETVAL) = sv_newmortal();
 					sv_setpvn(ST(ix_RETVAL), it.c_str(), it.length());
 			}
@@ -831,7 +831,7 @@ XS(XS_EQW_ListBugs)
 	{
 		EQW *		THIS;
 		uint32 id = (uint32)SvUV(ST(1));
-		vector<string>		RETVAL;
+		std::vector<std::string>		RETVAL;
 
 
 		if (sv_derived_from(ST(0), "EQW")) {
@@ -853,7 +853,7 @@ XS(XS_EQW_ListBugs)
 			/* grow the stack to the number of elements being returned */
 			EXTEND(SP, RETVAL.size());
 			for (ix_RETVAL = 0; ix_RETVAL < RETVAL.size(); ix_RETVAL++) {
-					const string &it = RETVAL[ix_RETVAL];
+					const std::string &it = RETVAL[ix_RETVAL];
 					ST(ix_RETVAL) = sv_newmortal();
 					sv_setpvn(ST(ix_RETVAL), it.c_str(), it.length());
 			}
@@ -872,7 +872,7 @@ XS(XS_EQW_GetBugDetails)
 		Perl_croak(aTHX_ "Usage: EQW::GetBugDetails(THIS, bug_ref)");
 	{
 		EQW *		THIS;
-		map<string,string>		RETVAL;
+		std::map<std::string,std::string>		RETVAL;
 		Const_char *		bug_ref = (Const_char *)SvPV_nolen(ST(1));
 
 		if (sv_derived_from(ST(0), "EQW")) {
@@ -893,7 +893,7 @@ XS(XS_EQW_GetBugDetails)
 				sv_2mortal((SV*)hv);
 				ST(0) = newRV((SV*)hv);
 
-				map<string,string>::const_iterator cur, end;
+				std::map<std::string,std::string>::const_iterator cur, end;
 				cur = RETVAL.begin();
 				end = RETVAL.end();
 				for(; cur != end; cur++) {

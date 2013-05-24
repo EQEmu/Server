@@ -21,7 +21,7 @@
 WorldConfig *WorldConfig::_world_config = nullptr;
 
 
-string WorldConfig::GetByName(const string &var_name) const {
+std::string WorldConfig::GetByName(const std::string &var_name) const {
 	if(var_name == "UpdateStats")
 		return(UpdateStats?"true":"false");
 	if(var_name == "LoginDisabled")

@@ -25,7 +25,6 @@
 
 #include <map>
 #include <string>
-using namespace std;
 
 OpcodeManager::OpcodeManager() {
 	loaded = false;
@@ -38,7 +37,7 @@ bool OpcodeManager::LoadOpcodesFile(const char *filename, OpcodeSetStrategy *s, 
 		return(false);
 	}
 
-	map<string, uint16> eq;
+	std::map<std::string, uint16> eq;
 
 	//load the opcode file into eq, could swap in a nice XML parser here
 	char line[2048];
@@ -82,7 +81,7 @@ bool OpcodeManager::LoadOpcodesFile(const char *filename, OpcodeSetStrategy *s, 
 	//do the mapping and store them in the shared memory array
 	bool ret = true;
 	EmuOpcode emu_op;
-	map<string, uint16>::iterator res;
+	std::map<std::string, uint16>::iterator res;
 	//stupid enum wont let me ++ on it...
 	for(emu_op = OP_Unknown; emu_op < _maxEmuOpcode; emu_op=(EmuOpcode)(emu_op+1)) {
 		//get the name of this emu opcode
@@ -260,13 +259,13 @@ bool EmptyOpcodeManager::ReloadOpcodes(const char *filename, bool report_errors)
 }
 
 uint16 EmptyOpcodeManager::EmuToEQ(const EmuOpcode emu_op) {
-	map<EmuOpcode, uint16>::iterator f;
+	std::map<EmuOpcode, uint16>::iterator f;
 	f = emu_to_eq.find(emu_op);
 	return(f == emu_to_eq.end()? 0 : f->second);
 }
 
 EmuOpcode EmptyOpcodeManager::EQToEmu(const uint16 eq_op) {
-	map<uint16, EmuOpcode>::iterator f;
+	std::map<uint16, EmuOpcode>::iterator f;
 	f = eq_to_emu.find(eq_op);
 	return(f == eq_to_emu.end()?OP_Unknown:f->second);
 }

@@ -24,7 +24,6 @@
 #include "emu_opcodes.h"
 
 #include <map>
-using namespace std;
 
 //enable the use of shared mem opcodes for world and zone only
 #ifdef ZONE
@@ -156,8 +155,8 @@ public:
 	//fake it, just used for testing anyways
 	virtual void SetOpcode(EmuOpcode emu_op, uint16 eq_op);
 protected:
-	map<EmuOpcode, uint16> emu_to_eq;
-	map<uint16, EmuOpcode> eq_to_emu;
+	std::map<EmuOpcode, uint16> emu_to_eq;
+	std::map<uint16, EmuOpcode> eq_to_emu;
 };
 
 #endif

@@ -40,7 +40,7 @@ TimeoutManager timeout_manager;
 
 Database database;
 LFGuildManager lfguildmanager;
-string WorldShortName;
+std::string WorldShortName;
 
 const queryservconfig *Config;
 

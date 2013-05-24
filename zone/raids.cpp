@@ -20,7 +20,7 @@
 #include "NpcAI.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "worldserver.h"
 extern EntityList entity_list;
 extern WorldServer worldserver;
@@ -612,7 +612,7 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
 
 	char buf[128];
 	buf[63] = '\0';
-	string msg = "You receive";
+	std::string msg = "You receive";
 	bool one = false;
 
 	if(ppsplit > 0) {

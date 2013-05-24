@@ -25,15 +25,14 @@
 #include "../common/packet_dump.h"
 #include "../common/servertalk.h"
 #include "../common/EmuTCPConnection.h"
+#include "../common/StringUtil.h"
 #include "worlddb.h"
 #include "EQLConfig.h"
 
 #include <vector>
 #include <string>
-using namespace std;
 
 extern LauncherList launcher_list;
-
 
 LauncherLink::LauncherLink(int id, EmuTCPConnection *c)
 : ID(id),

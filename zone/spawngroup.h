@@ -23,7 +23,6 @@
 
 #include <map>
 #include <list>
-using namespace std;
 
 class SpawnEntry
 {
@@ -52,7 +51,7 @@ public:
 	uint32 despawn_timer;
 private:
 	char name_[120];
-	list<SpawnEntry*> list_;
+	std::list<SpawnEntry*> list_;
 	uint8 group_spawn_limit; //max # of this entry which can be spawned by this group
 };
 
@@ -67,7 +66,7 @@ public:
 	bool RemoveSpawnGroup(uint32 in_id);
 private:
 	//LinkedList<SpawnGroup*> list_;
-	map<uint32, SpawnGroup*> groups;
+	std::map<uint32, SpawnGroup*> groups;
 };
 
 #endif

@@ -23,7 +23,8 @@
 #include <float.h>
 
 #include "watermap.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
+
 #ifdef _WINDOWS
 #define snprintf _snprintf
 #endif

@@ -57,14 +57,14 @@ void StructStrategy::PassDecoder(EQApplicationPacket *p) {
 //effectively a singleton, but I decided to do it this way for no apparent reason.
 namespace StructStrategyFactory {
 
-	static map<EmuOpcode, const StructStrategy *> strategies;
+	static std::map<EmuOpcode, const StructStrategy *> strategies;
 
 	void RegisterPatch(EmuOpcode first_opcode, const StructStrategy *structs) {
 		strategies[first_opcode] = structs;
 	}
 
 	const StructStrategy *FindPatch(EmuOpcode first_opcode) {
-		map<EmuOpcode, const StructStrategy *>::const_iterator res;
+		std::map<EmuOpcode, const StructStrategy *>::const_iterator res;
 		res = strategies.find(first_opcode);
 		if(res == strategies.end())
 			return(nullptr);

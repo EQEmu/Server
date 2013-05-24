@@ -20,12 +20,12 @@
 #include "masterentity.h"
 #include "../common/Item.h"
 #include "../common/linked_list.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include <math.h>
 #include <assert.h>
 #include "worldserver.h"
 
-map<uint16, const NPCType *> Horse::horse_types;
+std::map<uint16, const NPCType *> Horse::horse_types;
 LinkedList<NPCType *> horses_auto_delete;
 
 Horse::Horse(Client *_owner, uint16 spell_id, float x, float y, float z, float heading)

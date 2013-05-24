@@ -7,15 +7,13 @@
 #include <string>
 #include <list>
 
-using namespace std;
-
 class Client;
 
 class ChatChannel {
 
 public:
 
-	ChatChannel(string inName, string inOwner, string inPassword, bool inPermanent, int inMinimumStatus = 0);
+	ChatChannel(std::string inName, std::string inOwner, std::string inPassword, bool inPermanent, int inMinimumStatus = 0);
 	~ChatChannel();
 
 	void AddClient(Client *c);
@@ -23,25 +21,25 @@ public:
 	bool IsClientInChannel(Client *c);
 
 	int MemberCount(int Status);
-	string GetName() { return Name; }
-	void SendMessageToChannel(string Message, Client* Sender);
-	bool CheckPassword(string inPassword) { return ((Password.length() == 0) || (Password == inPassword)); }
-	void SetPassword(string inPassword);
-	bool IsOwner(string Name) { return (Owner == Name); }
-	void SetOwner(string inOwner);
+	std::string GetName() { return Name; }
+	void SendMessageToChannel(std::string Message, Client* Sender);
+	bool CheckPassword(std::string inPassword) { return ((Password.length() == 0) || (Password == inPassword)); }
+	void SetPassword(std::string inPassword);
+	bool IsOwner(std::string Name) { return (Owner == Name); }
+	void SetOwner(std::string inOwner);
 	void SendChannelMembers(Client *c);
 	int GetMinStatus() { return MinimumStatus; }
 	bool ReadyToDelete() { return DeleteTimer.Check(); }
 	void SendOPList(Client *c);
-	void AddInvitee(string Invitee);
-	void RemoveInvitee(string Invitee);
-	bool IsInvitee(string Invitee);
-	void AddModerator(string Moderator);
-	void RemoveModerator(string Modeerator);
-	bool IsModerator(string Moderator);
-	void AddVoice(string Voiced);
-	void RemoveVoice(string Voiced);
-	bool HasVoice(string Voiced);
+	void AddInvitee(std::string Invitee);
+	void RemoveInvitee(std::string Invitee);
+	bool IsInvitee(std::string Invitee);
+	void AddModerator(std::string Moderator);
+	void RemoveModerator(std::string Modeerator);
+	bool IsModerator(std::string Moderator);
+	void AddVoice(std::string Voiced);
+	void RemoveVoice(std::string Voiced);
+	bool HasVoice(std::string Voiced);
 	inline bool IsModerated() { return Moderated; }
 	void SetModerated(bool inModerated);
 
@@ -49,9 +47,9 @@ public:
 
 private:
 
-	string Name;
-	string Owner;
-	string Password;
+	std::string Name;
+	std::string Owner;
+	std::string Password;
 
 	bool Permanent;
 	bool Moderated;
@@ -62,19 +60,19 @@ private:
 
 	LinkedList<Client*> ClientsInChannel;
 
-	list<string> Moderators;
-	list<string> Invitees;
-	list<string> Voiced;
+	std::list<std::string> Moderators;
+	std::list<std::string> Invitees;
+	std::list<std::string> Voiced;
 
 };
 
 class ChatChannelList {
 
 public:
-	ChatChannel* CreateChannel(string Name, string Owner, string Passwordi, bool Permanent, int MinimumStatus = 0);
-	ChatChannel* FindChannel(string Name);
-	ChatChannel* AddClientToChannel(string Channel, Client *c);
-	ChatChannel* RemoveClientFromChannel(string Channel, Client *c);
+	ChatChannel* CreateChannel(std::string Name, std::string Owner, std::string Passwordi, bool Permanent, int MinimumStatus = 0);
+	ChatChannel* FindChannel(std::string Name);
+	ChatChannel* AddClientToChannel(std::string Channel, Client *c);
+	ChatChannel* RemoveClientFromChannel(std::string Channel, Client *c);
 	void RemoveClientFromAllChannels(Client *c);
 	void RemoveChannel(ChatChannel *Channel);
 	void RemoveAllChannels();
@@ -87,6 +85,6 @@ private:
 
 };
 
-string CapitaliseName(string inString);
+std::string CapitaliseName(std::string inString);
 
 #endif

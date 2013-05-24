@@ -3,9 +3,7 @@
 #include "../common/EQStreamIntf.h"
 #include "../common/misc.h"
 #include <iostream>
-using namespace std;
 #include <iomanip>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,9 +18,6 @@ using namespace std;
 	#include <windows.h>
 	#include <winsock.h>
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 #else
@@ -48,7 +43,7 @@ using namespace std;
 #include "../common/languages.h"
 #include "../common/skills.h"
 #include "../common/extprofile.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "WorldConfig.h"
 #include "LoginServer.h"
 #include "LoginServerList.h"
@@ -133,7 +128,7 @@ void Client::SendLogServer()
 	safe_delete(outapp);
 }
 
-void Client::SendEnterWorld(string name)
+void Client::SendEnterWorld(std::string name)
 {
 char char_name[32]= { 0 };
 	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {

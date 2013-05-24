@@ -68,9 +68,6 @@ typedef const char Const_char;	//for perl XS
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 	typedef void ThreadReturnType;
@@ -80,8 +77,8 @@ typedef const char Const_char;	//for perl XS
 	#define THREAD_RETURN(x) return(x);
 #endif
 
-#define safe_delete(d) if(d) { delete d; d=0; }
-#define safe_delete_array(d) if(d) { delete[] d; d=0; }
+#define safe_delete(d) if(d) { delete d; d=nullptr; }
+#define safe_delete_array(d) if(d) { delete[] d; d=nullptr; }
 #define L32(i)	((uint32) i)
 #define H32(i)	((uint32) (i >> 32))
 #define L16(i)	((uint16) i)

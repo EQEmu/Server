@@ -25,8 +25,6 @@
 class Client;
 class EQApplicationPacket;
 
-using namespace std;
-
 struct TitleEntry
 {
 	int TitleID;
@@ -40,8 +38,8 @@ struct TitleEntry
 	int CharID;
 	int Status;
 	int ItemID;
-	string Prefix;
-	string Suffix;
+	std::string Prefix;
+	std::string Suffix;
 	int TitleSet;
 };
 
@@ -53,17 +51,17 @@ public:
 	bool LoadTitles();
 
 	EQApplicationPacket *MakeTitlesPacket(Client *c);
-	string GetPrefix(int TitleID);
-	string GetSuffix(int TitleID);
+	std::string GetPrefix(int TitleID);
+	std::string GetSuffix(int TitleID);
 	int NumberOfAvailableTitles(Client *c);
-	bool IsClientEligibleForTitle(Client *c, vector<TitleEntry>::iterator Title);
+	bool IsClientEligibleForTitle(Client *c, std::vector<TitleEntry>::iterator Title);
 	bool IsNewAATitleAvailable(int AAPoints, int Class);
 	bool IsNewTradeSkillTitleAvailable(int SkillID, int SkillValue);
 	void CreateNewPlayerTitle(Client *c, const char *Title);
 	void CreateNewPlayerSuffix(Client *c, const char *Suffix);
 
 protected:
-	vector<TitleEntry> Titles;
+	std::vector<TitleEntry> Titles;
 };
 
 extern TitleManager title_manager;

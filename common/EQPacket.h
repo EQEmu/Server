@@ -30,8 +30,6 @@
 #include "emu_opcodes.h"
 #endif
 
-using namespace std;
-
 class EQStream;
 class EQStreamPair;
 

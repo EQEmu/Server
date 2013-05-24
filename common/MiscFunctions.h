@@ -86,39 +86,14 @@
 
 #define BITMASK 0x41180000
 
-//////////////////////////////////////////////////////////////////////
-//
-// MakeUpperString
-//	i: source - allocated null-terminated string
-//	return: pointer to static buffer with the target string
-const char *MakeUpperString(const char *source);
-const char *MakeLowerString(const char *source);
-//////////////////////////////////////////////////////////////////////
-//
-// MakeUpperString
-//	i : source - allocated null-terminated string
-//	io: target - allocated buffer, at least of size strlen(source)+1
-void MakeUpperString(const char *source, char *target);
-void MakeLowerString(const char *source, char *target);
 
 
-int		MakeAnyLenString(char** ret, const char* format, ...);
-uint32	AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...);
-uint32	hextoi(char* num);
-uint64	hextoi64(char* num);
-bool	atobool(char* iBool);
 int32	filesize(FILE* fp);
 uint32	ResolveIP(const char* hostname, char* errbuf = 0);
 bool	ParseAddress(const char* iAddress, uint32* oIP, uint16* oPort, char* errbuf = 0);
 void	CoutTimestamp(bool ms = true);
-char*	strn0cpy(char* dest, const char* source, uint32 size);
-		// return value =true if entire string(source) fit, false if it was truncated
-bool	strn0cpyt(char* dest, const char* source, uint32 size);
 int	MakeRandomInt(int low, int high);
 double	MakeRandomFloat(double low, double high);
-char *CleanMobName(const char *in, char *out);
-const char *ConvertArray(int input, char *returnchar);
-const char *ConvertArrayF(float input, char *returnchar);
 float EQ13toFloat(int d);
 float NewEQ13toFloat(int d);
 float EQ19toFloat(int d);
@@ -127,8 +102,6 @@ int FloatToEQ13(float d);
 int NewFloatToEQ13(float d);
 int FloatToEQ19(float d);
 int FloatToEQH(float d);
-void RemoveApostrophes(std::string &s);
-char *RemoveApostrophes(const char *s);
 
 
 
