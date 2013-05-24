@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include "../common/timer.h"
 
+class NPC;
+class Client;
+class Zone;
+
 struct QGlobal
 {
 	QGlobal() { }
@@ -29,6 +33,8 @@ public:
 
 	//assumes cacheA is already a valid or empty list and doesn't check for valid items.
 	static void Combine(std::list<QGlobal> &cacheA, std::list<QGlobal> cacheB, uint32 npcID, uint32 charID, uint32 zoneID);
+	static void GetQGlobals(std::list<QGlobal> &globals, NPC *n, Client *c, Zone *z);
+	static bool GetQGlobal(QGlobal &g, std::string name, NPC *n, Client *c, Zone *z);
 
 	void PurgeExpiredGlobals();
 	void LoadByNPCID(uint32 npcID); //npc
