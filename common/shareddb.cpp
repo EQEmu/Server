@@ -1,7 +1,9 @@
-#include "shareddb.h"
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+
+#include "shareddb.h"
+#include "mysql.h"
 #include "Item.h"
 #include "classes.h"
 #include "rulesys.h"
@@ -19,13 +21,13 @@
 
 SharedDatabase::SharedDatabase()
 : Database(), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), faction_mmf(nullptr), faction_hash(nullptr),
-	loot_table_mmf(nullptr), loot_drop_mmf(nullptr), loot_table_hash(nullptr), loot_drop_hash(nullptr)
+	loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr), loot_drop_hash(nullptr)
 {
 }
 
 SharedDatabase::SharedDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 : Database(host, user, passwd, database, port), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr),
-	faction_mmf(nullptr), faction_hash(nullptr), loot_table_mmf(nullptr), loot_drop_mmf(nullptr), loot_table_hash(nullptr),
+	faction_mmf(nullptr), faction_hash(nullptr), loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr),
 	loot_drop_hash(nullptr)
 {
 }

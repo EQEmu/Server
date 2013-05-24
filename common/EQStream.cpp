@@ -15,15 +15,32 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "debug.h"
+#include "EQPacket.h"
+#include "EQStream.h"
+#include "misc.h"
+#include "Mutex.h"
+#include "op_codes.h"
+#include "CRC16.h"
+
 #include <string>
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include <sys/types.h>
+#include <algorithm>
+
+#if defined(ZONE) || defined(WORLD)
+	#define RETRANSMITS
+#endif
+#ifdef RETRANSMITS
+	#include "rulesys.h"
+#endif
+
 #ifdef _WINDOWS
 	#include <time.h>
 #else
+	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <sys/time.h>
@@ -31,20 +48,6 @@
 	#include <netdb.h>
 	#include <fcntl.h>
 	#include <arpa/inet.h>
-#endif
-#include "EQPacket.h"
-#include "EQStream.h"
-//#include "EQStreamFactory.h"
-#include "misc.h"
-#include "Mutex.h"
-#include "op_codes.h"
-#include "CRC16.h"
-
-#if defined(ZONE) || defined(WORLD)
-	#define RETRANSMITS
-#endif
-#ifdef RETRANSMITS
-	#include "rulesys.h"
 #endif
 
 //for logsys
@@ -1355,6 +1358,9 @@ void EQStream::CheckTimeout(uint32 now, uint32 timeout) {
 			_log(NET__DEBUG, _L "Timeout expired in established state. Closing connection." __L);
 			_SendDisconnect();
 			SetState(DISCONNECTING);
+			break;
+		default:
+			break;
 		}
 	}
 }

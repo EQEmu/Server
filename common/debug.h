@@ -45,20 +45,7 @@
 	#ifndef _CRTDBG_MAP_ALLOC
 		#include <stdlib.h>
 		#include <crtdbg.h>
-		#if (_MSC_VER < 1300)
-			#include <new>
-			#include <memory>
-			#define _CRTDBG_MAP_ALLOC
-			#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
-			#define malloc(s) _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
-		#endif
 	#endif
-#endif
-
-#ifdef _WINDOWS
-	// VS6 doesn't like the length of STL generated names: disabling
-	#pragma warning(disable:4786)
-	#pragma warning(disable:4996)
 #endif
 
 #ifndef EQDEBUG_H

@@ -2483,10 +2483,8 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 			thd1 = (TaskHistoryReplyData1_Struct*)Ptr;
 			thd1->ActivityType = Task->Activity[i].Type;
 			Ptr = (char *)thd1 + sizeof(TaskHistoryReplyData1_Struct);
-			sprintf(Ptr, Task->Activity[i].Text1);
-			Ptr = Ptr + strlen(Ptr) + 1;
-			sprintf(Ptr, Task->Activity[i].Text2);
-			Ptr = Ptr + strlen(Ptr) + 1;
+			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].Text1);
+			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].Text2);
 			thd2 = (TaskHistoryReplyData2_Struct*)Ptr;
 			thd2->GoalCount = Task->Activity[i].GoalCount;
 			thd2->unknown04 = 0xffffffff;
@@ -2494,8 +2492,7 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 			thd2->ZoneID = Task->Activity[i].ZoneID;
 			thd2->unknown16 = 0x00000000;
 			Ptr = (char *)thd2 + sizeof(TaskHistoryReplyData2_Struct);
-			sprintf(Ptr, Task->Activity[i].Text3);
-			Ptr = Ptr + strlen(Ptr) + 1;
+			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].Text3);
 		}
 	}
 

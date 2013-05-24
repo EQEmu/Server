@@ -112,6 +112,7 @@ public:
 
 protected:
 
+	EQEmu::MemoryMappedFile *skill_caps_mmf;
 	EQEmu::MemoryMappedFile *items_mmf;
 	EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
 	EQEmu::MemoryMappedFile *faction_mmf;
@@ -120,7 +121,6 @@ protected:
 	EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> *loot_table_hash;
 	EQEmu::MemoryMappedFile *loot_drop_mmf;
 	EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> *loot_drop_hash;
-	EQEmu::MemoryMappedFile *skill_caps_mmf;
 };
 
 #endif /*SHAREDDB_H_*/
