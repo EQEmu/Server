@@ -9192,7 +9192,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 #ifdef _EQDEBUG
 	printf("Dumping inventory on load:\n");
-	m_inv.dumpInventory();
+	m_inv.dumpEntireInventory();
 #endif
 
 //lost in current PP

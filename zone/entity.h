@@ -20,12 +20,13 @@
 
 #include "../common/types.h"
 #include "../common/linked_list.h"
-#include "zonedb.h"
-#include "../common/eq_constants.h"
-#include "zonedump.h"
-#include "zonedbasync.h"
 #include "../common/servertalk.h"
 #include "../common/bodytypes.h"
+#include "../common/eq_constants.h"
+
+#include "zonedb.h"
+#include "zonedump.h"
+#include "zonedbasync.h"
 #include "QGlobals.h"
 
 // max number of newspawns to send per bulk packet

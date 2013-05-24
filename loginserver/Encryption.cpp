@@ -20,6 +20,8 @@
 #include "ErrorLog.h"
 #include <string>
 
+#include <string>
+
 extern ErrorLog *server_log;
 
 bool Encryption::LoadCrypto(std::string name)

@@ -16,26 +16,19 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef _WINDOWS
-	// VS6 doesn't like the length of STL generated names: disabling
-	#pragma warning(disable:4786)
-	// Quagmire: Dont know why the one in debug.h doesnt work, but it doesnt.
-#endif
-#include "../common/debug.h"
-/*#ifdef _CRTDBG_MAP_ALLOC
-	#undef new
-	#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
-*/
-#include <sstream>
-#include <iostream>
-#include <limits.h>
+#include "debug.h"
+#include "StringUtil.h"
 #include "Item.h"
 #include "database.h"
 #include "misc.h"
 #include "races.h"
 #include "shareddb.h"
 #include "classes.h"
+
+#include <limits.h>
+
+#include <sstream>
+#include <iostream>
 
 int32 NextItemInstSerialNumber = 1;
 
@@ -1059,103 +1052,75 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 	return SLOT_INVALID;
 }
 
-void Inventory::dumpInventory() {
+void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
+	iter_contents itb;
+
+	if (!inst || !inst->IsType(ItemClassContainer)) 
+		return;
+
+	// Go through bag, if bag
+	for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
+		ItemInst* baginst = itb->second;
+		if(!baginst || !baginst->GetItem())
+			continue;
+
+		std::string subSlot;
+		StringFormat(subSlot,"	Slot %d: %s (%d)", Inventory::CalcSlotId((*it)->first, itb->first),
+			baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
+		std::cout << subSlot << std::endl;
+	}
+
+}
+
+void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection) {
 	iter_inst it;
 	iter_contents itb;
 	ItemInst* inst = nullptr;
-
-	// Check item: After failed checks, check bag contents (if bag)
-	printf("Worn items:\n");
-	for (it=m_worn.begin(); it!=m_worn.end(); it++) {
+	
+	for (it=collection.begin(); it!=collection.end(); it++) {
 		inst = it->second;
 		it->first;
 		if(!inst || !inst->GetItem())
 			continue;
+		
+		std::string slot;
+		StringFormat(slot, "Slot %d: %s (%d)",it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
+		std::cout << slot << std::endl;		
 
-		printf("Slot %d: %s (%d)\n", it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
-
-		// Go through bag, if bag
-		if (inst && inst->IsType(ItemClassContainer)) {
-			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
-				ItemInst* baginst = itb->second;
-				if(!baginst || !baginst->GetItem())
-					continue;
-				printf("	Slot %d: %s (%d)\n", Inventory::CalcSlotId(it->first, itb->first),
-						baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
-			}
-		}
+		dumpBagContents(inst, &it);
 	}
+}
 
-	printf("Inventory items:\n");
-	for (it=m_inv.begin(); it!=m_inv.end(); it++) {
-		inst = it->second;
-		it->first;
-		if(!inst || !inst->GetItem())
-			continue;
+void Inventory::dumpWornItems() {
+	std::cout << "Worn items:" << std::endl;
+	dumpItemCollection(m_worn);
+}
 
-		printf("Slot %d: %s (%d)\n", it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
+void Inventory::dumpInventory() {
+	std::cout << "Inventory items:" << std::endl;
+	dumpItemCollection(m_inv);
+}
 
-		// Go through bag, if bag
-		if (inst && inst->IsType(ItemClassContainer)) {
-			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
-				ItemInst* baginst = itb->second;
-				if(!baginst || !baginst->GetItem())
-					continue;
-				printf("	Slot %d: %s (%d)\n", Inventory::CalcSlotId(it->first, itb->first),
-							baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
+void Inventory::dumpBankItems() {
+	
+	std::cout << "Bank items:" << std::endl;
+	dumpItemCollection(m_bank);
+}
 
-			}
-		}
-	}
+void Inventory::dumpSharedBankItems() {
+	
+	std::cout << "Shared Bank items:" << std::endl;
+	dumpItemCollection(m_shbank);
+}
 
-	printf("Bank items:\n");
-	for (it=m_bank.begin(); it!=m_bank.end(); it++) {
-		inst = it->second;
-		it->first;
-		if(!inst || !inst->GetItem())
-			continue;
+void Inventory::dumpEntireInventory() {
 
-		printf("Slot %d: %s (%d)\n", it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
-
-		// Go through bag, if bag
-		if (inst && inst->IsType(ItemClassContainer)) {
-
-			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
-				ItemInst* baginst = itb->second;
-				if(!baginst || !baginst->GetItem())
-					continue;
-				printf("	Slot %d: %s (%d)\n", Inventory::CalcSlotId(it->first, itb->first),
-						baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
-
-			}
-		}
-	}
-
-	printf("Shared Bank items:\n");
-	for (it=m_shbank.begin(); it!=m_shbank.end(); it++) {
-		inst = it->second;
-		it->first;
-		if(!inst || !inst->GetItem())
-			continue;
-
-		printf("Slot %d: %s (%d)\n", it->first, it->second->GetItem()->Name, (inst->GetCharges()<=0) ? 1 : inst->GetCharges());
-
-		// Go through bag, if bag
-		if (inst && inst->IsType(ItemClassContainer)) {
-
-			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
-				ItemInst* baginst = itb->second;
-				if(!baginst || !baginst->GetItem())
-					continue;
-				printf("	Slot %d: %s (%d)\n", Inventory::CalcSlotId(it->first, itb->first),
-						baginst->GetItem()->Name, (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges());
-
-			}
-		}
-	}
-
-	printf("\n");
-	fflush(stdout);
+	dumpWornItems();
+	dumpInventory();
+	dumpBankItems();
+	dumpSharedBankItems();
+	
+	std::cout << std::endl;
 }
 
 // Internal Method: Retrieves item within an inventory bucket

@@ -10,7 +10,6 @@ SET(common_sources
 	database.cpp
 	dbasync.cpp
 	dbcore.cpp
-	DBMemLeak.cpp
 	debug.cpp
 	emu_opcodes.cpp
 	EmuTCPConnection.cpp
@@ -103,7 +102,6 @@ SET(common_headers
 	database.h
 	dbasync.h
 	dbcore.h
-	DBMemLeak.h
 	debug.h
 	deity.h
 	emu_opcodes.h

@@ -2,8 +2,34 @@
 #include "../common/EQPacket.h"
 #include "../common/EQStreamIntf.h"
 #include "../common/misc.h"
+#include "../common/rulesys.h"
+#include "../common/emu_opcodes.h"
+#include "../common/eq_packet_structs.h"
+#include "../common/packet_dump.h"
+#include "../common/EQStreamIntf.h"
+#include "../common/Item.h"
+#include "../common/races.h"
+#include "../common/classes.h"
+#include "../common/languages.h"
+#include "../common/skills.h"
+#include "../common/extprofile.h"
+#include "../common/StringUtil.h"
+#include "../common/clientversions.h"
+
+#include "client.h"
+#include "worlddb.h"
+#include "WorldConfig.h"
+#include "LoginServer.h"
+#include "LoginServerList.h"
+#include "zoneserver.h"
+#include "zonelist.h"
+#include "clientlist.h"
+#include "wguild_mgr.h"
+#include "SoFCharCreateData.h"
+
 #include <iostream>
 #include <iomanip>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,43 +43,17 @@
 #ifdef _WINDOWS
 	#include <windows.h>
 	#include <winsock.h>
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
 #else
+	
+	#ifdef FREEBSD //Timothy Whitman - January 7, 2003
+		#include <sys/types.h>
+	#endif
+
 	#include <sys/socket.h>
-#ifdef FREEBSD //Timothy Whitman - January 7, 2003
-	#include <sys/types.h>
-#endif
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
 	#include <unistd.h>
 #endif
-
-
-#include "client.h"
-#include "../common/emu_opcodes.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/packet_dump.h"
-#include "../common/EQStreamIntf.h"
-#include "worlddb.h"
-#include "../common/Item.h"
-#include "../common/races.h"
-#include "../common/classes.h"
-#include "../common/languages.h"
-#include "../common/skills.h"
-#include "../common/extprofile.h"
-#include "../common/StringUtil.h"
-#include "WorldConfig.h"
-#include "LoginServer.h"
-#include "LoginServerList.h"
-#include "zoneserver.h"
-#include "zonelist.h"
-#include "clientlist.h"
-#include "wguild_mgr.h"
-#include "../common/rulesys.h"
-#include "SoFCharCreateData.h"
-#include "../common/clientversions.h"
 
 std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
