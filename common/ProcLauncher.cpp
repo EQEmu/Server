@@ -15,21 +15,25 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
+#include <string>
+#include <vector>
+
 #include "debug.h"
 #include "ProcLauncher.h"
 #ifdef _WINDOWS
-#include <windows.h>
+	#include <windows.h>
 #else
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
+	#include <sys/types.h>
+	#include <sys/wait.h>
+	#include <signal.h>
+	#include <stdio.h>
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <fcntl.h>
+	#include <unistd.h>
+	#include <errno.h>
+	#include <string.h>
 #endif
 
 ProcLauncher ProcLauncher::s_launcher;

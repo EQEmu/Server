@@ -1,18 +1,21 @@
 
 #include "../common/debug.h"
 #include "../common/logsys.h"
+#include "../common/StringUtil.h"
+
 #include "zoneserver.h"
 #include "client.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 
 
 void log_message_clientVA(LogType type, Client *who, const char *fmt, va_list args) {
-	char prefix_buffer[256];
-	snprintf(prefix_buffer, 255, "[%s] %s: ", log_type_info[type].name, who->GetAccountName());
-	prefix_buffer[255] = '\0';
 
-	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer, fmt, args);
+	std::string prefix_buffer;
+	StringFormat(prefix_buffer,"[%s] %s: ", log_type_info[type].name, who->GetAccountName());
+
+	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer.c_str(), fmt, args);
 }
 
 void log_message_client(LogType type, Client *who, const char *fmt, ...) {
@@ -24,18 +27,17 @@ void log_message_client(LogType type, Client *who, const char *fmt, ...) {
 
 void log_message_zoneVA(LogType type, ZoneServer *who, const char *fmt, va_list args) {
 
-	char prefix_buffer[256];
-	char zone_tag[65];
+	std::string prefix_buffer, zone_tag;
 	const char *zone_name=who->GetZoneName();
-	if (*zone_name==0)
-		snprintf(zone_tag,64,"[%d]", who->GetID());
+	
+	if (zone_name == nullptr)
+        StringFormat(zone_tag,"[%d]", who->GetID());
 	else
-		snprintf(zone_tag,64,"[%d] [%s]",who->GetID(),zone_name);
+		StringFormat(zone_tag,"[%d] [%s]",who->GetID(),zone_name);
 
-	snprintf(prefix_buffer, 255, "[%s] %s ", log_type_info[type].name, zone_tag);
-	prefix_buffer[255] = '\0';
+	StringFormat(prefix_buffer, "[%s] %s ", log_type_info[type].name, zone_tag.c_str());
 
-	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer, fmt, args);
+	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer.c_str(), fmt, args);
 }
 
 void log_message_zone(LogType type, ZoneServer *who, const char *fmt, ...) {

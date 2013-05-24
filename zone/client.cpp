@@ -26,19 +26,13 @@
 
 // for windows compile
 #ifdef _WINDOWS
-#define abs64 _abs64
-#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
-#define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
+    #define abs64 _abs64
 #else
-#include <stdarg.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include "../common/unix.h"
-#define abs64 abs
+    #include <stdarg.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include "../common/unix.h"
+    #define abs64 abs
 #endif
 
 extern volatile bool RunLoops;
@@ -601,7 +595,7 @@ bool Client::Save(uint8 iCommitNow) {
 	p_timers.Store(&database);
 
 //	printf("Dumping inventory on save:\n");
-//	m_inv.dumpInventory();
+//	m_inv.dumpEntireInventory();
 
 	SaveTaskState();
 	if (iCommitNow <= 1) {

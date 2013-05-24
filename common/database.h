@@ -216,7 +216,7 @@ public:
 	const char *GetRaidLeaderName(uint32 rid);
 
 	/*
-	* Database Varaibles
+	* Database Variables
 	*/
 	bool	GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	bool	SetVariable(const char* varname, const char* varvalue);

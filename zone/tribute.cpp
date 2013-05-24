@@ -25,21 +25,18 @@
 #include <map>
 
 #ifdef _WINDOWS
-#include <windows.h>
-#include <winsock.h>
-#include <process.h>
-
-#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
+    #include <windows.h>
+    #include <winsock.h>
+    #include <process.h>
+    #define snprintf	_snprintf
 	#define vsnprintf	_vsnprintf
-#endif
-#define strncasecmp	_strnicmp
-#define strcasecmp	_stricmp
+    #define strncasecmp	_strnicmp
+    #define strcasecmp	_stricmp
 #else
-#include <stdarg.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include "../common/unix.h"
+    #include <stdarg.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include "../common/unix.h"
 #endif
 
 /*

@@ -27,12 +27,10 @@ Child of the Mob class.
 #include <iostream>
 #include <sstream>
 #ifdef _WINDOWS
-#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
+    #define snprintf	_snprintf
 	#define vsnprintf	_vsnprintf
-#endif
-#define strncasecmp	_strnicmp
-#define strcasecmp	_stricmp
+    #define strncasecmp	_strnicmp
+    #define strcasecmp	_stricmp
 #endif
 
 #include "masterentity.h"
