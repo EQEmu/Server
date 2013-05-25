@@ -1682,6 +1682,11 @@ int Lua_Mob::GetFlurryChance() {
 	return self->GetFlurryChance();
 }
 
+int Lua_Mob::GetSkill(int skill) {
+	Lua_Safe_Call_Int();
+	return self->GetSkill(static_cast<SkillType>(skill));
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -1977,7 +1982,8 @@ luabind::scope lua_register_mob() {
 		.def("SetDisableMelee", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDisableMelee)
 		.def("IsMeleeDisabled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMeleeDisabled)
 		.def("SetFlurryChance", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlurryChance)
-		.def("GetFlurryChance", (int(Lua_Mob::*)(void))&Lua_Mob::GetFlurryChance);
+		.def("GetFlurryChance", (int(Lua_Mob::*)(void))&Lua_Mob::GetFlurryChance)
+		.def("GetSkill", (int(Lua_Mob::*)(int))&Lua_Mob::GetSkill);
 }
 
 #endif

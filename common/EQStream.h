@@ -24,6 +24,11 @@
 #define RATEBASE	1048576 // 1 MB
 #define DECAYBASE	78642	// RATEBASE/10
 
+#define RETRANSMIT_TIMEOUT_MULT 3.0
+#define RETRANSMIT_TIMEOUT_MAX 5000
+#define AVERAGE_DELTA_MAX 2500
+#define RETRANSMIT_ACKED_PACKETS true
+
 #pragma pack(1)
 struct SessionRequest {
 	uint32 UnknownA;

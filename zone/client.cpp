@@ -7114,13 +7114,13 @@ const char* Client::GetClassPlural(Client* client) {
 
 void Client::SendWebLink(const char *website)
 {
-	if(website != 0)
+	size_t len = strlen(website) + 1;
+	if(website != 0 && len > 1)
 	{
-		std::string str = website;
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weblink, sizeof(Weblink_Struct) + str.length() + 1);
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weblink, sizeof(Weblink_Struct) + len);
 		Weblink_Struct *wl = (Weblink_Struct*)outapp->pBuffer;
-		memcpy(wl->weblink, str.c_str(), str.length() + 1);
-		wl->weblink[str.length() + 1] = '\0';
+		memcpy(wl->weblink, website, len);
+		wl->weblink[len] = '\0';
 
 		FastQueuePacket(&outapp);
 	}

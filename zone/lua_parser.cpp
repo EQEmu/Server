@@ -806,6 +806,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_mob(),
 			lua_register_npc(),
 			lua_register_client(),
+			lua_register_inventory_where(),
 			lua_register_iteminst(),
 			lua_register_item(),
 			lua_register_spell(),
@@ -946,56 +947,8 @@ void LuaParser::ExportQGlobals(NPC *n, Client *c) {
 		return;
 	}
 
-	QGlobalCache *npc_c = nullptr;
-	QGlobalCache *char_c = nullptr;
-	QGlobalCache *zone_c = nullptr;
-	uint32 npc_id = 0;
-	uint32 char_id = 0;
-	uint32 zone_id = 0;
-
-	if(n) {
-		npc_id = n->GetNPCTypeID();
-		npc_c = n->GetQGlobals();
-	}
-
-	if(c) {
-		char_id = c->CharacterID();
-		char_c = c->GetQGlobals();
-	}
-
-	if(zone) {
-		zone_id = zone->GetZoneID();
-		zone_c = zone->GetQGlobals();
-	}
-
-	if(!npc_c && n) {
-		npc_c = n->CreateQGlobals();
-		npc_c->LoadByNPCID(npc_id);
-	}
-
-	if(!char_c && c) {
-		char_c = c->CreateQGlobals();
-		char_c->LoadByCharID(char_id);
-	}
-
-	if(!zone_c && zone) {
-		zone_c = zone->CreateQGlobals();
-		zone_c->LoadByZoneID(zone_id);
-		zone_c->LoadByGlobalContext();
-	}
-
 	std::list<QGlobal> global_map;
-	if(npc_c) {
-		QGlobalCache::Combine(global_map, npc_c->GetBucket(), npc_id, char_id, zone_id);
-	}
-
-	if(char_c) {
-		QGlobalCache::Combine(global_map, char_c->GetBucket(), npc_id, char_id, zone_id);
-	}
-
-	if(zone_c) {
-		QGlobalCache::Combine(global_map, zone_c->GetBucket(), npc_id, char_id, zone_id);
-	}
+	QGlobalCache::GetQGlobals(global_map, n, c, zone);
 
 	auto iter = global_map.begin();
 	while(iter != global_map.end()) {

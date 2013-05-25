@@ -499,13 +499,6 @@ RULE_CATEGORY( Console )
 RULE_INT ( Console, SessionTimeOut, 600000 )	// Amount of time in ms for the console session to time out
 RULE_CATEGORY_END()
 
-RULE_CATEGORY( EQStream )
-RULE_INT ( EQStream, RetransmitTimeoutMax, 5000 ) // maximum retransmit timeout before retransmitting unacked packets
-RULE_INT ( EQStream, AverageDeltaMax, 2500 ) // maximum average rtt where we will still recalculate transmit rates
-RULE_REAL ( EQStream, RetransmitTimeoutMult, 3.0 ) // multiplier applied to rtt stats to generate a retransmit timeout value
-RULE_BOOL ( EQStream, RetransmitAckedPackets, true ) // should we restransmit packets that were already acked?
-RULE_CATEGORY_END()
-
 RULE_CATEGORY( QueryServ )
 RULE_BOOL( QueryServ, PlayerChatLogging, false) // Logs Player Chat
 RULE_BOOL( QueryServ, PlayerLogTrades, false) // Logs Player Trades

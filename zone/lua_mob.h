@@ -336,6 +336,7 @@ public:
 	bool IsMeleeDisabled();
 	void SetFlurryChance(int value);
 	int GetFlurryChance();
+	int GetSkill(int skill_id);
 };
 
 #endif

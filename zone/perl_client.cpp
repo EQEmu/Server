@@ -2713,33 +2713,6 @@ XS(XS_Client_SetBecomeNPCLevel)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_LootToStack); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_LootToStack)
-{
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::LootToStack(THIS, itemid)");
-	{
-		Client *		THIS;
-		bool		RETVAL;
-		uint32		itemid = (uint32)SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->LootToStack(itemid);
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
-	}
-	XSRETURN(1);
-}
-
 XS(XS_Client_SetFeigned); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetFeigned)
 {
@@ -5854,7 +5827,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetBecomeNPCLevel"), XS_Client_GetBecomeNPCLevel, file, "$");
 		newXSproto(strcpy(buf, "SetBecomeNPC"), XS_Client_SetBecomeNPC, file, "$$");
 		newXSproto(strcpy(buf, "SetBecomeNPCLevel"), XS_Client_SetBecomeNPCLevel, file, "$$");
-		newXSproto(strcpy(buf, "LootToStack"), XS_Client_LootToStack, file, "$$");
 		newXSproto(strcpy(buf, "SetFeigned"), XS_Client_SetFeigned, file, "$$");
 		newXSproto(strcpy(buf, "GetFeigned"), XS_Client_GetFeigned, file, "$");
 		newXSproto(strcpy(buf, "AutoSplitEnabled"), XS_Client_AutoSplitEnabled, file, "$");

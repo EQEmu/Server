@@ -7,7 +7,6 @@
 #include "masterentity.h"
 #include "lua_iteminst.h"
 #include "lua_item.h"
-#include "lua_entity.h"
 
 bool Lua_ItemInst::IsType(int item_class) {
 	Lua_Safe_Call_Bool();

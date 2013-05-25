@@ -1914,50 +1914,6 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 	return 0;
 }
 
-bool Client::LootToStack(uint32 itemid) { //Loots stackable items to existing stacks - Wiz
-	// @merth: Need to do loot code with new inventory struct
-	/*
-	const Item_Struct* item;
-	int i;
-	for (i=22; i<=29; i++) {
-		item = GetItemAt(i);
-		if (item) {
-			if (m_pp.invitemproperties[i].charges < 20 && item->ID == itemid)
-			{
-				m_pp.invitemproperties[i].charges += 1;
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_PlaceItem, sizeof(Item_Struct));
-				memcpy(outapp->pBuffer, item, outapp->size);
-				Item_Struct* outitem = (Item_Struct*) outapp->pBuffer;
-				outitem->equipSlot = i;
-				outitem->charges = m_pp.invitemproperties[i].charges;
-				QueuePacket(outapp);
-				safe_delete(outapp);
-				return true;
-			}
-		}
-	}
-	for (i=0; i<=pp_containerinv_size; i++) {
-		if (m_pp.containerinv[i] != 0xFFFF) {
-			item = database.GetItem(m_pp.containerinv[i]);
-			if (m_pp.bagitemproperties[i].charges < 20 && item->ID == itemid)
-			{
-				m_pp.bagitemproperties[i].charges += 1;
-
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_PlaceItem, sizeof(Item_Struct));
-				memcpy(outapp->pBuffer, item, outapp->size);
-				Item_Struct* outitem = (Item_Struct*) outapp->pBuffer;
-				outitem->equipSlot = 250+i;
-				outitem->charges = m_pp.bagitemproperties[i].charges;
-				QueuePacket(outapp);
-				safe_delete(outapp);
-				return true;
-			}
-		}
-	}
-	*/
-	return false;
-}
-
 // Send an item packet (including all subitems of the item)
 void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type)
 {

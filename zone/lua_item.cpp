@@ -5,7 +5,6 @@
 #include <luabind/object.hpp>
 
 #include "masterentity.h"
-#include "lua_entity.h"
 #include "lua_item.h"
 
 Lua_Item::Lua_Item(uint32 item_id) {

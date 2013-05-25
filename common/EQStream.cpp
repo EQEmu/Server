@@ -23,19 +23,13 @@
 #include "Mutex.h"
 #include "op_codes.h"
 #include "CRC16.h"
+#include "platform.h"
 
 #include <string>
 #include <iomanip>
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
-#if defined(ZONE) || defined(WORLD)
-	#define RETRANSMITS
-#endif
-#ifdef RETRANSMITS
-	#include "rulesys.h"
-#endif
 
 #ifdef _WINDOWS
 	#include <time.h>
@@ -75,17 +69,20 @@ void EQStream::init() {
 	BytesWritten=0;
 	SequencedBase = 0;
 	NextSequencedSend = 0;
-#ifdef RETRANSMITS
-	retransmittimer = Timer::GetCurrentTime();
-	retransmittimeout = 500 * RuleR(EQStream, RetransmitTimeoutMult); //use 500ms as base before we have connection stats
-#endif
+
+	if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
+		retransmittimer = Timer::GetCurrentTime();
+		retransmittimeout = 500 * RETRANSMIT_TIMEOUT_MULT;
+	}
+
 	OpMgr = nullptr;
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	_log(NET__ERROR, _L "init Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	_log(NET__ERROR, _L "init Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}
+	if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+		_log(NET__ERROR, _L "init Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
+	}
+	
+	if(NextSequencedSend > SequencedQueue.size()) {
+		_log(NET__ERROR, _L "init Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
+	}
 }
 
 EQRawApplicationPacket *EQStream::MakeApplicationPacket(EQProtocolPacket *p)
@@ -118,7 +115,7 @@ EQProtocolPacket *EQStream::MakeProtocolPacket(const unsigned char *buf, uint32 
 
 void EQStream::ProcessPacket(EQProtocolPacket *p)
 {
-uint32 processed=0,subpacket_length=0;
+	uint32 processed=0, subpacket_length=0;
 	if (p == nullptr)
 		return;
 	// Raw Application packet
@@ -304,9 +301,10 @@ uint32 processed=0,subpacket_length=0;
 #ifndef COLLECTOR
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			AckPackets(seq);
-#ifdef RETRANSMITS
-			retransmittimer = Timer::GetCurrentTime();
-#endif
+
+			if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
+				retransmittimer = Timer::GetCurrentTime();
+			}
 #endif
 		}
 		break;
@@ -409,19 +407,24 @@ uint32 processed=0,subpacket_length=0;
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			MOutboundQueue.lock();
 
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	_log(NET__ERROR, _L "Pre-OOA Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	_log(NET__ERROR, _L "Pre-OOA Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}
+			if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+				_log(NET__ERROR, _L "Pre-OOA Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
+			}
+			
+			if(NextSequencedSend > SequencedQueue.size()) {
+				_log(NET__ERROR, _L "Pre-OOA Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
+			}
 			//if the packet they got out of order is between our last acked packet and the last sent packet, then its valid.
 			if (CompareSequence(SequencedBase,seq) != SeqPast && CompareSequence(NextOutSeq,seq) == SeqPast) {
 				_log(NET__NET_TRACE, _L "Received OP_OutOfOrderAck for sequence %d, starting retransmit at the start of our unacked buffer (seq %d, was %d)." __L,
 					seq, SequencedBase, SequencedBase+NextSequencedSend);
-#ifdef RETRANSMITS
-							if (!RuleB(EQStream, RetransmitAckedPackets)) {
-#endif
+
+				bool retransmit_acked_packets = false;
+				if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
+					retransmit_acked_packets = RETRANSMIT_ACKED_PACKETS;
+				}
+
+				if(!retransmit_acked_packets) {
 					uint16 sqsize = SequencedQueue.size();
 					uint16 index = seq - SequencedBase;
 					_log(NET__NET_TRACE, _L "OP_OutOfOrderAck marking packet acked in queue (queue index = %d, queue size = %d)." __L, index, sqsize);
@@ -431,22 +434,24 @@ if(NextSequencedSend > SequencedQueue.size()) {
 						sitr += index;
 						(*sitr)->acked = true;
 					}
-#ifdef RETRANSMITS
 				}
-							if (RuleR(EQStream, RetransmitTimeoutMult)) { // only choose new behavior if multiplier is set
+
+				if(RETRANSMIT_TIMEOUT_MULT) {
 					retransmittimer = Timer::GetCurrentTime();
 				}
-#endif
+
 				NextSequencedSend = 0;
 			} else {
 				_log(NET__NET_TRACE, _L "Received OP_OutOfOrderAck for out-of-window %d. Window (%d->%d)." __L, seq, SequencedBase, NextOutSeq);
 			}
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	_log(NET__ERROR, _L "Post-OOA Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	_log(NET__ERROR, _L "Post-OOA Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}
+
+			if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+				_log(NET__ERROR, _L "Post-OOA Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
+			}
+
+			if(NextSequencedSend > SequencedQueue.size()) {
+				_log(NET__ERROR, _L "Post-OOA Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
+			}
 			MOutboundQueue.unlock();
 #endif
 		}
@@ -468,19 +473,21 @@ if(NextSequencedSend > SequencedQueue.size()) {
 			Stats->packets_sent=x;
 			NonSequencedPush(new EQProtocolPacket(OP_SessionStatResponse,p->pBuffer,p->size));
 			AdjustRates(ntohl(Stats->average_delta));
-#ifdef RETRANSMITS
-			if (RuleR(EQStream, RetransmitTimeoutMult) && ntohl(Stats->average_delta)) {
-				//recalculate retransmittimeout using the larger of the last rtt or average rtt, which is multiplied by the rule value
-				if((ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) > (ntohl(Stats->average_delta) * 2)) {
-					retransmittimeout = (ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) * RuleR(EQStream, RetransmitTimeoutMult);
-				} else {
-					retransmittimeout = ntohl(Stats->average_delta) * 2 * RuleR(EQStream, RetransmitTimeoutMult);
+
+			if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
+				if(RETRANSMIT_TIMEOUT_MULT && ntohl(Stats->average_delta)) {
+					//recalculate retransmittimeout using the larger of the last rtt or average rtt, which is multiplied by the rule value
+					if((ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) > (ntohl(Stats->average_delta) * 2)) {
+						retransmittimeout = (ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) 
+							* RETRANSMIT_TIMEOUT_MULT;
+					} else {
+						retransmittimeout = ntohl(Stats->average_delta) * 2 * RETRANSMIT_TIMEOUT_MULT;
+					}
+					if(retransmittimeout > RETRANSMIT_TIMEOUT_MAX)
+						retransmittimeout = RETRANSMIT_TIMEOUT_MAX;
+					_log(NET__NET_TRACE, _L "Retransmit timeout recalculated to %dms" __L, retransmittimeout);
 				}
-				if(retransmittimeout > RuleI(EQStream, RetransmitTimeoutMax))
-					retransmittimeout = RuleI(EQStream, RetransmitTimeoutMax);
-				_log(NET__NET_TRACE, _L "Retransmit timeout recalculated to %dms" __L, retransmittimeout);
 			}
-#endif
 #endif
 		}
 		break;
@@ -527,16 +534,6 @@ void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 
 	uint16 opcode = (*OpMgr)->EmuToEQ(pack->emu_opcode);
 
-	//make sure this packet is compatible with this stream
-/*	if(StreamType == UnknownStream || StreamType == ChatOrMailStream) {
-		_log(NET__DEBUG, _L "Stream type undetermined (%s), packet ignored" __L, StreamTypeString(StreamType));
-		return;
-	}
-	if(pack->GetPacketType() != StreamType) {
-		_log(NET__ERROR, _L "Trying to queue a packet of type %s into a stream of type %s, dropping it." __L, StreamTypeString(pack->GetPacketType()), StreamTypeString(StreamType));
-		return;
-	}*/
-
 	_log(NET__APP_TRACE, "Queueing %sacked packet with opcode 0x%x (%s) and length %d", ack_req?"":"non-", opcode, OpcodeManager::EmuToName(pack->emu_opcode), pack->size);
 
 	if (!ack_req) {
@@ -549,8 +546,8 @@ void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 
 void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 {
-uint32 chunksize,used;
-uint32 length;
+	uint32 chunksize,used;
+	uint32 length;
 
 	// Convert the EQApplicationPacket to 1 or more EQProtocolPackets
 	if (p->size>(MaxLen-8)) { // proto-op(2), seq(2), app-op(2) ... data ... crc(2)
@@ -648,9 +645,9 @@ uint16 Seq=htons(seq);
 
 void EQStream::Write(int eq_fd)
 {
-std::queue<EQProtocolPacket *> ReadyToSend;
-bool SeqEmpty=false,NonSeqEmpty=false;
-std::deque<EQProtocolPacket *>::iterator sitr;
+	std::queue<EQProtocolPacket *> ReadyToSend;
+	bool SeqEmpty=false, NonSeqEmpty=false;
+	std::deque<EQProtocolPacket *>::iterator sitr;
 
 	// Check our rate to make sure we can send more
 	MRate.lock();
@@ -673,14 +670,16 @@ std::deque<EQProtocolPacket *>::iterator sitr;
 	// Place to hold the base packet t combine into
 	EQProtocolPacket *p=nullptr;
 
-#ifdef RETRANSMITS
-	// if we have a timeout defined and we have not received an ack recently enough, retransmit from beginning of queue
-	if (RuleR(EQStream, RetransmitTimeoutMult) && !SequencedQueue.empty() && NextSequencedSend && (GetState()==ESTABLISHED) && ((retransmittimer+retransmittimeout) < Timer::GetCurrentTime())) {
-		_log(NET__NET_TRACE, _L "Timeout since last ack received, starting retransmit at the start of our unacked buffer (seq %d, was %d)." __L, SequencedBase, SequencedBase+NextSequencedSend);
-		NextSequencedSend = 0;
-		retransmittimer = Timer::GetCurrentTime(); // don't want to endlessly retransmit the first packet
+	if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
+		// if we have a timeout defined and we have not received an ack recently enough, retransmit from beginning of queue
+		if (RETRANSMIT_TIMEOUT_MULT && !SequencedQueue.empty() && NextSequencedSend &&
+			(GetState()==ESTABLISHED) && ((retransmittimer+retransmittimeout) < Timer::GetCurrentTime())) {
+			_log(NET__NET_TRACE, _L "Timeout since last ack received, starting retransmit at the start of our unacked "
+				"buffer (seq %d, was %d)." __L, SequencedBase, SequencedBase+NextSequencedSend);
+			NextSequencedSend = 0;
+			retransmittimer = Timer::GetCurrentTime(); // don't want to endlessly retransmit the first packet
+		}
 	}
-#endif
 
 	// Find the next sequenced packet to send from the "queue"
 	sitr = SequencedQueue.begin();
@@ -723,65 +722,87 @@ std::deque<EQProtocolPacket *>::iterator sitr;
 		}
 
 		if (sitr!=SequencedQueue.end()) {
-//_log(NET__NET_COMBINE, _L "Send Seq with %d seq packets starting at seq %d, next send %d, and %d non-seq packets." __L,
-//	SequencedQueue.size(), SequencedBase, NextSequencedSend, NonSequencedQueue.size());
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	_log(NET__ERROR, _L "Pre-Send Seq NSS=%d Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, NextSequencedSend, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	_log(NET__ERROR, _L "Pre-Send Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}
-			uint16 seq_send = SequencedBase + NextSequencedSend;	//just for logging...
-if(SequencedQueue.empty()) {
-_log(NET__ERROR, _L "Tried to write a packet with an empty queue (%d is past next out %d)" __L, seq_send, NextOutSeq);
-SeqEmpty=true;
-continue;
-}
-/*if(CompareSequence(NextOutSeq, seq_send) == SeqFuture) {
-_log(NET__ERROR, _L "Tried to write a packet beyond the end of the queue! (%d is past next out %d)" __L, seq_send, NextOutSeq);
-sitr=SequencedQueue.end();
-continue;
-}*/
-#ifdef RETRANSMITS
-			if (!RuleB(EQStream, RetransmitAckedPackets) && (*sitr)->acked) {
-				_log(NET__NET_TRACE, _L "Not retransmitting seq packet %d because already marked as acked" __L, seq_send);
-				sitr++;
-				NextSequencedSend++;
-			} else if (!p) {
-#else
-			if (!p) {
-#endif
-				// If we don't have a packet to try to combine into, use this one as the base
-				// Copy it first as it will still live until it is acked
-				p=(*sitr)->Copy();
-				_log(NET__NET_COMBINE, _L "Starting combined packet with seq packet %d of len %d" __L, seq_send, p->size);
-				sitr++;
-				NextSequencedSend++;
-			} else if (!p->combine(*sitr)) {
-				// Trying to combine this packet with the base didn't work (too big maybe)
-				// So just send the base packet (we'll try this packet again later)
-				_log(NET__NET_COMBINE, _L "Combined packet full at len %d, next seq packet %d is len %d" __L, p->size, seq_send, (*sitr)->size);
-				ReadyToSend.push(p);
-				BytesWritten+=p->size;
-				p=nullptr;
+			if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+				_log(NET__ERROR, _L "Pre-Send Seq NSS=%d Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, NextSequencedSend, SequencedBase, SequencedQueue.size(), NextOutSeq);
+			}
 
-				if (BytesWritten > threshold) {
-					// Sent enough this round, lets stop to be fair
-					_log(NET__RATES, _L "Exceeded write threshold in seq (%d > %d)" __L, BytesWritten, threshold);
-					break;
+			if(NextSequencedSend > SequencedQueue.size()) {
+				_log(NET__ERROR, _L "Pre-Send Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
+			}
+			uint16 seq_send = SequencedBase + NextSequencedSend;	//just for logging...
+			
+			if(SequencedQueue.empty()) {
+				_log(NET__ERROR, _L "Tried to write a packet with an empty queue (%d is past next out %d)" __L, seq_send, NextOutSeq);
+				SeqEmpty=true;
+				continue;
+			}
+
+			if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
+				if (!RETRANSMIT_ACKED_PACKETS && (*sitr)->acked) {
+					_log(NET__NET_TRACE, _L "Not retransmitting seq packet %d because already marked as acked" __L, seq_send);
+					sitr++;
+					NextSequencedSend++;
+				} else if (!p) {
+					// If we don't have a packet to try to combine into, use this one as the base
+					// Copy it first as it will still live until it is acked
+					p=(*sitr)->Copy();
+					_log(NET__NET_COMBINE, _L "Starting combined packet with seq packet %d of len %d" __L, seq_send, p->size);
+					sitr++;
+					NextSequencedSend++;
+				} else if (!p->combine(*sitr)) {
+					// Trying to combine this packet with the base didn't work (too big maybe)
+					// So just send the base packet (we'll try this packet again later)
+					_log(NET__NET_COMBINE, _L "Combined packet full at len %d, next seq packet %d is len %d" __L, p->size, seq_send, (*sitr)->size);
+					ReadyToSend.push(p);
+					BytesWritten+=p->size;
+					p=nullptr;
+
+					if (BytesWritten > threshold) {
+						// Sent enough this round, lets stop to be fair
+						_log(NET__RATES, _L "Exceeded write threshold in seq (%d > %d)" __L, BytesWritten, threshold);
+						break;
+					}
+				} else {
+					// Combine worked
+					_log(NET__NET_COMBINE, _L "Combined seq packet %d of len %d, yeilding %d combined." __L, seq_send, (*sitr)->size, p->size);
+					sitr++;
+					NextSequencedSend++;
 				}
 			} else {
-				// Combine worked
-				_log(NET__NET_COMBINE, _L "Combined seq packet %d of len %d, yeilding %d combined." __L, seq_send, (*sitr)->size, p->size);
-				sitr++;
-				NextSequencedSend++;
+				if (!p) {
+					// If we don't have a packet to try to combine into, use this one as the base
+					// Copy it first as it will still live until it is acked
+					p=(*sitr)->Copy();
+					_log(NET__NET_COMBINE, _L "Starting combined packet with seq packet %d of len %d" __L, seq_send, p->size);
+					sitr++;
+					NextSequencedSend++;
+				} else if (!p->combine(*sitr)) {
+					// Trying to combine this packet with the base didn't work (too big maybe)
+					// So just send the base packet (we'll try this packet again later)
+					_log(NET__NET_COMBINE, _L "Combined packet full at len %d, next seq packet %d is len %d" __L, p->size, seq_send, (*sitr)->size);
+					ReadyToSend.push(p);
+					BytesWritten+=p->size;
+					p=nullptr;
+
+					if (BytesWritten > threshold) {
+						// Sent enough this round, lets stop to be fair
+						_log(NET__RATES, _L "Exceeded write threshold in seq (%d > %d)" __L, BytesWritten, threshold);
+						break;
+					}
+				} else {
+					// Combine worked
+					_log(NET__NET_COMBINE, _L "Combined seq packet %d of len %d, yeilding %d combined." __L, seq_send, (*sitr)->size, p->size);
+					sitr++;
+					NextSequencedSend++;
+				}
 			}
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	_log(NET__ERROR, _L "Post send Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	_log(NET__ERROR, _L "Post send Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}
+
+			if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+				_log(NET__ERROR, _L "Post send Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
+			}
+			if(NextSequencedSend > SequencedQueue.size()) {
+				_log(NET__ERROR, _L "Post send Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
+			}
 		} else {
 			// No more sequenced packets
 			SeqEmpty=true;
@@ -1379,20 +1400,27 @@ void EQStream::Decay()
 
 void EQStream::AdjustRates(uint32 average_delta)
 {
-#ifdef RETRANSMITS
-	if (average_delta && (average_delta <= RuleI(EQStream, AverageDeltaMax))) {
-#else
-	if (average_delta) {
-#endif
-		MRate.lock();
-		RateThreshold=RATEBASE/average_delta;
-		DecayRate=DECAYBASE/average_delta;
-		_log(NET__RATES, _L "Adjusting data rate to thresh %d, decay %d based on avg delta %d" __L, RateThreshold, DecayRate, average_delta);
-		MRate.unlock();
-#ifdef RETRANSMITS
+	if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
+		if (average_delta && (average_delta <= AVERAGE_DELTA_MAX)) {
+			MRate.lock();
+			RateThreshold=RATEBASE/average_delta;
+			DecayRate=DECAYBASE/average_delta;
+			_log(NET__RATES, _L "Adjusting data rate to thresh %d, decay %d based on avg delta %d" __L, 
+				RateThreshold, DecayRate, average_delta);
+			MRate.unlock();
+		} else {
+			_log(NET__RATES, _L "Not adjusting data rate because avg delta over max (%d > %d)" __L, 
+				average_delta, AVERAGE_DELTA_MAX);
+		}
 	} else {
-		_log(NET__RATES, _L "Not adjusting data rate because avg delta over max (%d > %d)" __L, average_delta, RuleI(EQStream, AverageDeltaMax));
-#endif
+		if (average_delta) {
+			MRate.lock();
+			RateThreshold=RATEBASE/average_delta;
+			DecayRate=DECAYBASE/average_delta;
+			_log(NET__RATES, _L "Adjusting data rate to thresh %d, decay %d based on avg delta %d" __L, 
+				RateThreshold, DecayRate, average_delta);
+			MRate.unlock();
+		}
 	}
 }
 

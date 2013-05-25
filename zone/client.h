@@ -687,7 +687,6 @@ public:
 	inline uint8	GetBecomeNPCLevel() const { return npclevel; }
 	inline void	SetBecomeNPC(bool flag) { npcflag = flag; }
 	inline void	SetBecomeNPCLevel(uint8 level) { npclevel = level; }
-	bool LootToStack(uint32 itemid);
 	void SetFeigned(bool in_feigned);
 	/// this cures timing issues cuz dead animation isn't done but server side feigning is?
 	inline bool GetFeigned() const { return(feigned); }
