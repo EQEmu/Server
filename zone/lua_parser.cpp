@@ -822,17 +822,6 @@ void LuaParser::MapFunctions(lua_State *L) {
 	}
 }
 
-void LuaParser::GetErrors(std::list<std::string> &err) {
-	err.insert(err.end(), errors_.begin(), errors_.end());
-}
-
-void LuaParser::AddError(std::string error) {
-	errors_.push_back(error);
-	if(errors_.size() > 30) {
-		errors_.pop_front();
-	}
-}
-
 void LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
 	if(!npc)
 		return;

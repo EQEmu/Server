@@ -53,7 +53,6 @@ public:
 	virtual std::string GetVar(std::string name);
 	virtual void ReloadQuests();
     virtual uint32 GetIdentifier() { return 0xb0712acc; }
-	virtual void GetErrors(std::list<std::string> &err);
 
 	virtual void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
 	virtual void DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
@@ -75,13 +74,11 @@ private:
 	bool HasFunction(std::string function, std::string package_name);
 	void ClearStates();
 	void MapFunctions(lua_State *L);
-	void AddError(std::string error);
 	void ExportQGlobals(NPC *n, Client *c);
 	void ExportZoneVariables();
 
 	std::map<std::string, std::string> vars_;
 	std::map<std::string, bool> loaded_;
-	std::list<std::string> errors_;
 	lua_State *L;
 
 	NPCArgumentHandler NPCArgumentDispatch[_LargestEventID];

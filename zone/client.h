@@ -211,7 +211,6 @@ public:
 	virtual Raid* GetRaid() { return entity_list.GetRaidByClient(this); }
 	virtual Group* GetGroup() { return entity_list.GetGroupByClient(this); }
 
-//	void	Discipline(ClientDiscipline_Struct* disc_in, Mob* tar);
 	void	AI_Init();
 	void	AI_Start(uint32 iMoveDelay = 0);
 	void	AI_Stop();

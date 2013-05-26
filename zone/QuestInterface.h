@@ -61,7 +61,20 @@ public:
 	virtual void ReloadQuests() { }
 	virtual uint32 GetIdentifier() = 0;
 	
-	virtual void GetErrors(std::list<std::string> &err) { }
+	//TODO: Set maximum quest errors instead of hard coding it
+	virtual void GetErrors(std::list<std::string> &err) {
+		err.insert(err.end(), errors_.begin(), errors_.end());
+	}
+
+	virtual void AddError(std::string error) { 
+		errors_.push_back(error);
+		if(errors_.size() > 30) {
+			errors_.pop_front();
+		}
+	}
+	
+protected:
+	std::list<std::string> errors_;
 };
 
 #endif

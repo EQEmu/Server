@@ -73,13 +73,73 @@ void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *
 	lua_setfield(L, -2, "item1_attuned");
 
 	lua_pushboolean(L, std::stoul(parse->GetVar("item2.attuned." + ident.str())) != 0 ? true : false);
-	lua_setfield(L, -2, "item1_attuned");
+	lua_setfield(L, -2, "item2_attuned");
 
 	lua_pushboolean(L, std::stoul(parse->GetVar("item3.attuned." + ident.str())) != 0 ? true : false);
 	lua_setfield(L, -2, "item3_attuned");
 
 	lua_pushboolean(L, std::stoul(parse->GetVar("item4.attuned." + ident.str())) != 0 ? true : false);
 	lua_setfield(L, -2, "item4_attuned");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item1.augment1." + ident.str())));
+	lua_setfield(L, -2, "item1_augment1");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item1.augment2." + ident.str())));
+	lua_setfield(L, -2, "item1_augment2");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item1.augment3." + ident.str())));
+	lua_setfield(L, -2, "item1_augment3");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item1.augment4." + ident.str())));
+	lua_setfield(L, -2, "item1_augment4");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item1.augment5." + ident.str())));
+	lua_setfield(L, -2, "item1_augment5");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item2.augment1." + ident.str())));
+	lua_setfield(L, -2, "item2_augment1");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item2.augment2." + ident.str())));
+	lua_setfield(L, -2, "item2_augment2");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item2.augment3." + ident.str())));
+	lua_setfield(L, -2, "item2_augment3");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item2.augment4." + ident.str())));
+	lua_setfield(L, -2, "item2_augment4");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item2.augment5." + ident.str())));
+	lua_setfield(L, -2, "item2_augment5");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item3.augment1." + ident.str())));
+	lua_setfield(L, -2, "item3_augment1");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item3.augment2." + ident.str())));
+	lua_setfield(L, -2, "item3_augment2");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item3.augment3." + ident.str())));
+	lua_setfield(L, -2, "item3_augment3");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item3.augment4." + ident.str())));
+	lua_setfield(L, -2, "item3_augment4");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item3.augment5." + ident.str())));
+	lua_setfield(L, -2, "item3_augment5");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item4.augment1." + ident.str())));
+	lua_setfield(L, -2, "item4_augment1");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item4.augment2." + ident.str())));
+	lua_setfield(L, -2, "item4_augment2");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item4.augment3." + ident.str())));
+	lua_setfield(L, -2, "item4_augment3");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item4.augment4." + ident.str())));
+	lua_setfield(L, -2, "item4_augment4");
+
+	lua_pushinteger(L, std::stoul(parse->GetVar("item4.augment5." + ident.str())));
+	lua_setfield(L, -2, "item4_augment5");
 
 	lua_pushinteger(L, std::stoul(parse->GetVar("platinum." + ident.str())));
 	lua_setfield(L, -2, "platinum");

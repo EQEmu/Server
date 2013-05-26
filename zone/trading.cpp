@@ -647,7 +647,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 				parse->AddVar(temp1, temp2);
 
 				for(int y = 0; y < 5; y++) {
-					snprintf(temp1, 100, "item%d.augment.%d", z + 1, tradingWith->GetNPCTypeID());
+					snprintf(temp1, 100, "item%d.augment%d.%d", z + 1, y + 1, tradingWith->GetNPCTypeID());
 					snprintf(temp2, 100, "%d", augments[z][y]);
 					parse->AddVar(temp1, temp2);
 				}
