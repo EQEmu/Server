@@ -651,7 +651,7 @@ public:
 	inline	uint16	MaxSkill(SkillType skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	uint8	SkillTrainLevel(SkillType skillid, uint16 class_);
 
-	void TradeskillSearchResults(const char *query, unsigned long qlen, unsigned long objtype, unsigned long someid);
+	void TradeskillSearchResults(const std::string query, unsigned long qlen, unsigned long objtype, unsigned long someid);
 	void SendTradeskillDetails(uint32 recipe_id);
 	bool TradeskillExecute(DBTradeskillRecipe_Struct *spec);
 	void CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, SkillType tradeskill);

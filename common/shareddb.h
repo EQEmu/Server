@@ -41,7 +41,7 @@ public:
 	bool	SetHideMe(uint32 account_id, uint8 hideme);
 	bool	GetPlayerProfile(uint32 account_id, char* name, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, char* current_zone = 0, uint32 *current_instance = 0);
 	bool	SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets);
-	uint32	SetPlayerProfile_MQ(char** query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets);
+	uint32	SetPlayerProfile_MQ(std::string& query, uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets);
 	int32	DeleteStalePlayerCorpses();
 	int32	DeleteStalePlayerBackups();
 	void	GetPlayerInspectMessage(char* playername, InspectMessage_Struct* message);

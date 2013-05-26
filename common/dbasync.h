@@ -96,7 +96,7 @@ public:
 	~DBAsyncWork();
 
 	bool			AddQuery(DBAsyncQuery** iDBAQ);
-	bool			AddQuery(uint32 iQPT, char** iQuery, uint32 iQueryLen = 0xFFFFFFFF, bool iGetResultSet = true, bool iGetErrbuf = true);
+	bool			AddQuery(uint32 iQPT, std::string iQuery, bool iGetResultSet = true, bool iGetErrbuf = true);
 	uint32			WPT();
 	DBAsync::Type	Type();
 
@@ -140,8 +140,7 @@ private:
 // Container class for the query information
 class DBAsyncQuery {
 public:
-	DBAsyncQuery(uint32 iQPT, char** iQuery, uint32 iQueryLen = 0xFFFFFFFF, bool iGetResultSet = true, bool iGetErrbuf = true);
-	DBAsyncQuery(uint32 iQPT, const char* iQuery, uint32 iQueryLen = 0xFFFFFFFF, bool iGetResultSet = true, bool iGetErrbuf = true);
+	DBAsyncQuery(uint32 iQPT, std::string iQuery, bool iGetResultSet = true, bool iGetErrbuf = true);
 	~DBAsyncQuery();
 
 	bool	GetAnswer(char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0);
@@ -155,8 +154,7 @@ protected:
 
 	void		Init(uint32 iQPT, bool iGetResultSet, bool iGetErrbuf);
 	DBAsync::Status pstatus;
-	char*		pQuery;
-	uint32		pQueryLen;
+	std::string		pQuery;
 	bool		pGetResultSet;
 	bool		pGetErrbuf;
 

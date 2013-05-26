@@ -7,6 +7,8 @@
 	//#include <winsock.h>
 #endif
 #include <mysql.h>
+#include <string>
+
 #include "../common/DBMemLeak.h"
 #include "../common/types.h"
 #include "../common/Mutex.h"
@@ -22,8 +24,8 @@ public:
 	DBcore();
 	~DBcore();
 	eStatus	GetStatus() { return pStatus; }
-	bool	RunQuery(const char* query, uint32 querylen, char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0, bool retry = true);
-	uint32	DoEscapeString(char* tobuf, const char* frombuf, uint32 fromlen);
+	bool	RunQuery(const std::string query, char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0, bool retry = true);
+	void	DoEscapeString(std::string& outString, const char* frombuf, uint32 fromlen);
 	void	ping();
 	MYSQL*	getMySQL(){ return &mysql; }
 

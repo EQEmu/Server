@@ -216,12 +216,12 @@ public:
 	const char *GetRaidLeaderName(uint32 rid);
 
 	/*
-	* Database Varaibles
+	* Database Variables
 	*/
 	bool	GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	bool	SetVariable(const char* varname, const char* varvalue);
 	bool	LoadVariables();
-	uint32	LoadVariables_MQ(char** query);
+	void	LoadVariables_MQ(std::string& query);
 	bool	LoadVariables_result(MYSQL_RES* result);
 
 	/*
@@ -256,7 +256,7 @@ private:
 	void DBInitVars();
 
 	uint32				max_zonename;
-	char**				zonename_array;
+	public: char**				zonename_array;
 
 	Mutex				Mvarcache;
 	uint32				varcache_max;

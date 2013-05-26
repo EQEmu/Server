@@ -1188,19 +1188,21 @@ static void BazaarAuditTrail(const char *Seller, const char *Buyer, const char *
 				"VALUES (NOW(), '%s', '%s', '%s', %i, %i, %i)";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, AuditQuery, Seller, Buyer, ItemName, Quantity, TotalCost, TranType), errbuf))
-		_log(TRADING__CLIENT, "Audit write error: %s : %s", query, errbuf);
+	StringFormat(query, AuditQuery, Seller, Buyer, ItemName, Quantity, TotalCost, TranType);
 
-	safe_delete_array(query);
+	if(!database.RunQuery(query, errbuf))
+		_log(TRADING__CLIENT, "Audit write error: %s : %s", query.c_str(), errbuf);
+
 }
 
 
 
 void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicationPacket* app){
 
-	if(!Trader) return;
+	if(!Trader) 
+		return;
 
 	if(!Trader->IsTrader()) {
 		TradeRequestFailed(app);
@@ -1334,14 +1336,12 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 void Client::SendBazaarWelcome(){
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
 	MYSQL_RES *result;
-
 	MYSQL_ROW row;
 
-	if (database.RunQuery(query,MakeAnyLenString(&query, "select count(distinct char_id),count(char_id) from trader"),errbuf,&result)){
+	std::string query = "select count(distinct char_id),count(char_id) from trader";
+
+	if (database.RunQuery(query,errbuf,&result)){
 		if(mysql_num_rows(result)==1){
 
 			row = mysql_fetch_row(result);
@@ -1364,9 +1364,10 @@ void Client::SendBazaarWelcome(){
 		}
 		mysql_free_result(result);
 	}
-	safe_delete_array(query);
+	
+	query = "select count(distinct charid) from buyer";
 
-	if (database.RunQuery(query,MakeAnyLenString(&query, "select count(distinct charid) from buyer"),errbuf,&result)){
+	if (database.RunQuery(query,errbuf,&result)){
 		if(mysql_num_rows(result)==1) {
 
 			row = mysql_fetch_row(result);
@@ -1376,14 +1377,13 @@ void Client::SendBazaarWelcome(){
 		}
 		mysql_free_result(result);
 	}
-	safe_delete_array(query);
 }
 
 void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint32 ItemStat, uint32 Slot, uint32 Type,
 					char Name[64], uint32 MinPrice, uint32 MaxPrice) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
+	std::string query;
 	std::string Search, Values;
 	MYSQL_RES *Result;
 	MYSQL_ROW Row;
@@ -1573,11 +1573,13 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 
 	Values.append(",sum(charges), items.stackable ");
 
-	if (database.RunQuery(Query,MakeAnyLenString(&Query, "select %s from trader,items %s group by items.id,charges,char_id limit %i",
-							Values.c_str(),Search.c_str(), RuleI(Bazaar, MaxSearchResults)),errbuf,&Result)){
+	StringFormat(query, "select %s from trader,items %s group by "
+						"items.id,charges,char_id limit %i",
+						Values.c_str(),Search.c_str(), RuleI(Bazaar, MaxSearchResults));
 
-		_log(TRADING__CLIENT, "SRCH: %s", Query);
-		safe_delete_array(Query);
+	if (database.RunQuery(query,errbuf,&Result)){
+
+		_log(TRADING__CLIENT, "SRCH: %s", query.c_str());
 
 		int Size = 0;
 		uint32 ID = 0;
@@ -1686,8 +1688,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 
 	}
 	else{
-		_log(TRADING__CLIENT, "Failed to retrieve Bazaar Search!! %s %s\n", Query, errbuf);
-		safe_delete_array(Query);
+		_log(TRADING__CLIENT, "Failed to retrieve Bazaar Search!! %s %s\n", query.c_str(), errbuf);
 		return;
 	}
 }
@@ -2018,17 +2019,19 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 	_log(TRADING__BARTER, "Client::SendBuyerResults %s\n", SearchString);
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
+	std::string query;
 	char ItemName[64];
 	std::string Search, Values;
 	MYSQL_RES *Result;
 	MYSQL_ROW Row;
 
-	char*EscSearchString = new char[strlen(SearchString) * 2 + 1];
-	database.DoEscapeString(EscSearchString, SearchString, strlen(SearchString));
+	std::string escSearchString;
+	database.DoEscapeString(escSearchString, SearchString, strlen(SearchString));
 
-	if (database.RunQuery(Query,MakeAnyLenString(&Query, "select * from buyer where itemname like '%%%s%%' order by charid limit %i",
-							EscSearchString, RuleI(Bazaar, MaxBarterSearchResults)), errbuf, &Result)) {
+	StringFormat(query, "select * from buyer where itemname like '%%%s%%' order by charid limit %i",
+						escSearchString.c_str(), RuleI(Bazaar, MaxBarterSearchResults));
+
+	if (database.RunQuery(query,errbuf, &Result)) {
 
 		int NumberOfRows = mysql_num_rows(Result);
 
@@ -2044,7 +2047,6 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 
 		if(NumberOfRows == 0) {
 			mysql_free_result(Result);
-			safe_delete_array(Query);
 			return;
 		}
 
@@ -2104,10 +2106,8 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 		mysql_free_result(Result);
 	}
 	else{
-		_log(TRADING__CLIENT, "Failed to retrieve Barter Search!! %s %s\n", Query, errbuf);
+		_log(TRADING__CLIENT, "Failed to retrieve Barter Search!! %s %s\n", query.c_str(), errbuf);
 	}
-	safe_delete_array(Query);
-	safe_delete_array(EscSearchString);
 }
 
 void Client::ShowBuyLines(const EQApplicationPacket *app) {
@@ -2151,19 +2151,18 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 	safe_delete(outapp);
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
+	std::string query;
 	char ItemName[64];
 	std::string Search, Values;
 	MYSQL_RES *Result;
 	MYSQL_ROW Row;
 
-	if (database.RunQuery(Query,MakeAnyLenString(&Query, "select * from buyer where charid = %i",
-							Buyer->CharacterID()),errbuf,&Result)){
+	StringFormat(query, "select * from buyer where charid = %i",
+						Buyer->CharacterID());
+
+	if (database.RunQuery(query,errbuf,&Result)){
 
 		if(mysql_num_rows(Result) == 0) {
-
-			safe_delete_array(Query);
-
 			mysql_free_result(Result);
 
 			return;
@@ -2203,7 +2202,6 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 		}
 		mysql_free_result(Result);
 	}
-	safe_delete_array(Query);
 }
 
 void Client::SellToBuyer(const EQApplicationPacket *app) {

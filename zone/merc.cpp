@@ -5928,12 +5928,20 @@ void Client::SendMercAssignPacket(uint32 entityID, uint32 unk01, uint32 unk02) {
 
 void NPC::LoadMercTypes(){
 	std::string errorMessage;
-	char* Query = 0;
+	std::string query;
 	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
-
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTyp.dbstring, MTyp.clientversion FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, merc_types MTyp, merc_templates MTem WHERE MME.merchant_id = %i AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id AND MMTE.merc_template_id = MTem.merc_template_id AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID()), TempErrorMessageBuffer, &DatasetResult)) {
+	
+	StringFormat(query,"SELECT DISTINCT MTyp.dbstring, MTyp.clientversion FROM "
+						"merc_merchant_entries MME, merc_merchant_template_entries MMTE, "
+						"merc_types MTyp, merc_templates MTem WHERE MME.merchant_id = %i "
+						"AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id "
+						"AND MMTE.merc_template_id = MTem.merc_template_id AND "
+						"MTem.merc_type_id = MTyp.merc_type_id;", 
+						GetNPCTypeID());
+	
+	if(!database.RunQuery(query,TempErrorMessageBuffer, &DatasetResult)) {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
@@ -5949,9 +5957,6 @@ void NPC::LoadMercTypes(){
 		mysql_free_result(DatasetResult);
 	}
 
-	safe_delete_array(Query);
-	Query = 0;
-
 	if(!errorMessage.empty()) {
 		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
 	}
@@ -5960,12 +5965,24 @@ void NPC::LoadMercTypes(){
 void NPC::LoadMercs(){
 
 	std::string errorMessage;
-	char* Query = 0;
+	std::string query;
 	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, MTem.dbstring AS merc_subtype_id, 0 AS CostFormula, CASE WHEN MTem.clientversion > MTyp.clientversion then MTem.clientversion ELSE MTyp.clientversion END AS clientversion, MTem.merc_npc_type_id FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, merc_types MTyp, merc_templates MTem WHERE MME.merchant_id = %i AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id AND MMTE.merc_template_id = MTem.merc_template_id AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID()), TempErrorMessageBuffer, &DatasetResult)) {
+	StringFormat(query,"SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring "
+				"AS merc_type_id, MTem.dbstring AS merc_subtype_id, 0 AS CostFormula, "
+				"CASE WHEN MTem.clientversion > MTyp.clientversion then "
+				"MTem.clientversion ELSE MTyp.clientversion END AS "
+				"clientversion, MTem.merc_npc_type_id FROM "
+				"merc_merchant_entries MME, merc_merchant_template_entries MMTE, "
+				"merc_types MTyp, merc_templates MTem WHERE MME.merchant_id = %i "
+				"AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id "
+				"AND MMTE.merc_template_id = MTem.merc_template_id AND "
+				"MTem.merc_type_id = MTyp.merc_type_id;", 
+				GetNPCTypeID());
+				
+	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
@@ -5985,8 +6002,6 @@ void NPC::LoadMercs(){
 		mysql_free_result(DatasetResult);
 	}
 
-	safe_delete_array(Query);
-	Query = 0;
 
 	if(!errorMessage.empty()) {
 		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");

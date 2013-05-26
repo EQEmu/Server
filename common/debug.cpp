@@ -1,16 +1,11 @@
 #include <iostream>
 #include <string>
 #include <cstdarg>
+#include <string>
 #include <time.h>
 
 #ifdef _WINDOWS
 	#include <process.h>
-
-	#define snprintf	_snprintf
-	#define vsnprintf	_vsnprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
-
 #else
 	
 	#include <sys/types.h>

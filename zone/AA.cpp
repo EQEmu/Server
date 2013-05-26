@@ -1465,12 +1465,13 @@ void Zone::LoadAAs() {
 
 bool ZoneDatabase::LoadAAEffects2() {
 	aa_effects.clear();	//start fresh
-
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT aaid, slot, effectid, base1, base2 FROM aa_effects ORDER BY aaid ASC, slot ASC"), errbuf, &result)) {
+
+	std::string query = "SELECT aaid, slot, effectid, base1, base2 FROM aa_effects ORDER BY aaid ASC, slot ASC";
+
+	if (RunQuery(query, errbuf, &result)) {
 		int count = 0;
 		while((row = mysql_fetch_row(result))!= nullptr) {
 			int aaid = atoi(row[0]);
@@ -1488,10 +1489,9 @@ bool ZoneDatabase::LoadAAEffects2() {
 		if (count < 1)	//no results
 			LogFile->write(EQEMuLog::Error, "Error loading AA Effects, none found in the database.");
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAEffects2 query: '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAEffects2 query: '%s': %s", query.c_str(), errbuf);
 		return false;
 	}
-	safe_delete_array(query);
 	return true;
 }
 void Client::ResetAA(){
@@ -1639,11 +1639,10 @@ bool ZoneDatabase::LoadAAEffects() {
 
 	memset(AA_Actions, 0, sizeof(AA_Actions));	//I hope the compiler is smart about this size...
 
-	const char *query = "SELECT aaid,rank,reuse_time,spell_id,target,nonspell_action,nonspell_mana,nonspell_duration,"
-					"redux_aa,redux_rate,redux_aa2,redux_rate2 FROM aa_actions";
+	std::string query = "SELECT aaid,rank,reuse_time,spell_id,target,nonspell_action,nonspell_mana,nonspell_duration,"
+						"redux_aa,redux_rate,redux_aa2,redux_rate2 FROM aa_actions";
 
-	if(RunQuery(query, static_cast<uint32>(strlen(query)), errbuf, &result)) {
-		//safe_delete_array(query);
+	if(RunQuery(query, errbuf, &result)) {
 		int r;
 		while ((row = mysql_fetch_row(result))) {
 			r = 0;
@@ -1668,8 +1667,7 @@ bool ZoneDatabase::LoadAAEffects() {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadAAEffects query '%s': %s", query, errbuf);;
-		//safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in LoadAAEffects query '%s': %s", query.c_str(), errbuf);
 		return false;
 	}
 
@@ -1684,20 +1682,21 @@ bool ZoneDatabase::LoadAAEffects() {
 //AndMetal: this may now be obsolete since we have Zone::GetTotalAALevels()
 uint8 ZoneDatabase::GetTotalAALevels(uint32 skill_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int total=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(slot) from aa_effects where aaid=%i", skill_id), errbuf, &result)) {
-		safe_delete_array(query);
+
+	StringFormat(query,"SELECT count(slot) from aa_effects where aaid=%i", skill_id);
+
+	if (RunQuery(query,  errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			total=atoi(row[0]);
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetTotalAALevels '%s: %s", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in GetTotalAALevels '%s: %s", query.c_str(), errbuf);
 	}
 	return total;
 }
@@ -1728,10 +1727,14 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
 		return;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT effectid, base1, base2, slot from aa_effects where aaid=%i order by slot asc", aa_struct->id), errbuf, &result)) {
+
+	StringFormat(query,"SELECT effectid, base1, base2, slot from aa_effects "
+						"where aaid=%i order by slot asc", aa_struct->id);
+
+	if (RunQuery(query, errbuf, &result)) {
 		int ndx=0;
 		while((row = mysql_fetch_row(result))!=nullptr) {
 			aa_struct->abilities[ndx].skill_id=atoi(row[0]);
@@ -1742,43 +1745,44 @@ void ZoneDatabase::FillAAEffects(SendAA_Struct* aa_struct){
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in Client::FillAAEffects query: '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Client::FillAAEffects query: '%s': %s", query.c_str(), errbuf);
 	}
-	safe_delete_array(query);
 }
 
 uint32 ZoneDatabase::CountAAs(){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int count=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(title_sid) from altadv_vars"), errbuf, &result)) {
+
+	std::string query = "SELECT count(title_sid) from altadv_vars";
+
+	if (RunQuery(query, errbuf, &result)) {
 		if((row = mysql_fetch_row(result))!=nullptr)
 			count = atoi(row[0]);
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::CountAAs query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::CountAAs query '%s': %s", query.c_str(), errbuf);
 	}
-	safe_delete_array(query);
 	return count;
 }
 
 uint32 ZoneDatabase::CountAAEffects(){
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int count=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT count(id) from aa_effects"), errbuf, &result)) {
+
+	std::string query = "SELECT count(id) from aa_effects";
+
+	if (RunQuery(query,  errbuf, &result)) {
 		if((row = mysql_fetch_row(result))!=nullptr){
 			count = atoi(row[0]);
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::CountAALevels query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::CountAALevels query '%s': %s", query.c_str(), errbuf);
 	}
-	safe_delete_array(query);
 	return count;
 }
 
@@ -1793,10 +1797,12 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 	if(!load)
 		return;
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id from altadv_vars order by skill_id"), errbuf, &result)) {
+
+	std::string query = "SELECT skill_id from altadv_vars order by skill_id";
+
+	if (RunQuery(query, errbuf, &result)) {
 		int skill=0,ndx=0;
 		while((row = mysql_fetch_row(result))!=nullptr) {
 			skill=atoi(row[0]);
@@ -1806,13 +1812,14 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), errbuf);
 	}
-	safe_delete_array(query);
 
 	AARequiredLevelAndCost.clear();
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id"), errbuf, &result))
+	query = "SELECT skill_id, level, cost from aa_required_level_cost order by skill_id";
+
+	if (RunQuery(query, errbuf, &result))
 	{
 		AALevelCost_Struct aalcs;
 		while((row = mysql_fetch_row(result))!=nullptr)
@@ -1824,69 +1831,56 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 		mysql_free_result(result);
 	}
 	else
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query, errbuf);
-
-	safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadAAs query '%s': %s", query.c_str(), errbuf);
 }
 
 SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
 	SendAA_Struct* sendaa = nullptr;
 	uchar* buffer;
-	if (RunQuery(query, MakeAnyLenString(&query, "SET @row = 0"), errbuf)) {	//initialize "row" variable in database for next query
-		safe_delete_array(query);
+
+	std::string query = "SET @row = 0";
+
+	if (RunQuery(query, errbuf)) {	//initialize "row" variable in database for next query
 		MYSQL_RES *result;	//we don't really need these unless we get to this point, so why bother?
 		MYSQL_ROW row;
 
-		if (RunQuery(query, MakeAnyLenString(&query,
-			"SELECT "
-				"a.cost, "
-				"a.max_level, "
-				"a.hotkey_sid, "
-				"a.hotkey_sid2, "
-				"a.title_sid, "
-				"a.desc_sid, "
-				"a.type, "
-				"COALESCE("	//so we can return 0 if it's null
-					"("	//this is our derived table that has the row # that we can SELECT from, because the client is stupid
-					"SELECT "
-						"p.prereq_index_num "
-					"FROM "
-						"("
-						"SELECT "
-							"a2.skill_id, "
-							"@row := @row + 1 AS prereq_index_num "
-						"FROM "
-							"altadv_vars a2"
-						") AS p "
-					"WHERE "
-						"p.skill_id = a.prereq_skill"
-					"), "
-					"0) AS prereq_skill_index, "
-				"a.prereq_minpoints, "
-				"a.spell_type, "
-				"a.spell_refresh, "
-				"a.classes, "
-				"a.berserker, "
-				"a.spellid, "
-				"a.class_type, "
-				"a.name, "
-				"a.cost_inc, "
-				"a.aa_expansion, "
-				"a.special_category, "
-				"a.sof_type, "
-				"a.sof_cost_inc, "
-				"a.sof_max_level, "
-				"a.sof_next_skill, "
-				"a.clientver, "	// Client Version 0 = None, 1 = All, 2 = Titanium/6.2, 4 = SoF 5 = SOD 6 = UF
-				"a.account_time_required, "
-				"a.sof_current_level,"
-				"a.sof_next_id, "
-				"a.level_inc "
-			" FROM altadv_vars a WHERE skill_id=%i", skill_id), errbuf, &result)) {
-			safe_delete_array(query);
+		StringFormat(query, "SELECT "
+							"a.cost, a.max_level, a.hotkey_sid, a.hotkey_sid2, "
+							"a.title_sid, a.desc_sid, a.type, "
+							"COALESCE("	//so we can return 0 if it's null
+							// This is our derived table that has the row # that we can SELECT from, 
+							// because the client is stupid.
+								"("	
+									"SELECT "
+									"p.prereq_index_num "
+									"FROM "
+									"("
+										"SELECT "
+										"a2.skill_id, "
+										"@row := @row + 1 AS prereq_index_num "
+										"FROM "
+										"altadv_vars a2"
+									") AS p "
+									"WHERE "
+									"p.skill_id = a.prereq_skill"
+								"), "
+							"0) AS prereq_skill_index, "
+							"a.prereq_minpoints, a.spell_type, "
+							"a.spell_refresh, a.classes, "
+							"a.berserker, a.spellid, "
+							"a.class_type, a.name, "
+							"a.cost_inc, a.aa_expansion, "
+							"a.special_category, a.sof_type, "
+							"a.sof_cost_inc, a.sof_max_level, "
+							// Client Version 0 = None, 1 = All, 2 = Titanium/6.2, 4 = SoF 5 = SOD 6 = UF
+							"a.sof_next_skill, a.clientver, "	
+							"a.account_time_required, a.sof_current_level,"
+							"a.sof_next_id, a.level_inc "
+							" FROM altadv_vars a WHERE skill_id=%i", skill_id);
+
+		if (RunQuery(query, errbuf, &result)) {
 			if (mysql_num_rows(result) == 1) {
 				int total_abilities = GetTotalAALevels(skill_id);	//eventually we'll want to use zone->GetTotalAALevels(skill_id) since it should save queries to the DB
 				int totalsize = total_abilities * sizeof(AA_Ability) + sizeof(SendAA_Struct);
@@ -1943,12 +1937,10 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 			}
 			mysql_free_result(result);
 		} else {
-			LogFile->write(EQEMuLog::Error, "Error in GetAASkillVars '%s': %s", query, errbuf);
-			safe_delete_array(query);
+			LogFile->write(EQEMuLog::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), errbuf);
 		}
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetAASkillVars '%s': %s", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in GetAASkillVars '%s': %s", query.c_str(), errbuf);
 	}
 	return sendaa;
 }

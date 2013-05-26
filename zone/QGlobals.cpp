@@ -65,12 +65,14 @@ void QGlobalCache::PurgeExpiredGlobals()
 void QGlobalCache::LoadByNPCID(uint32 npcID)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate"
-		" from quest_globals where npcid = %d", npcID), errbuf, &result))
+	StringFormat(query,"select name, charid, npcid, zoneid, value, expdate"
+						" from quest_globals where npcid = %d", npcID);
+
+	if (database.RunQuery(query, errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -78,18 +80,20 @@ void QGlobalCache::LoadByNPCID(uint32 npcID)
 		}
 		mysql_free_result(result);
 	}
-	safe_delete_array(query);
 }
 
 void QGlobalCache::LoadByCharID(uint32 charID)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate from"
-		" quest_globals where charid = %d && npcid = 0", charID), errbuf, &result))
+	StringFormat(query,"select name, charid, npcid, zoneid, value, expdate from "
+						"quest_globals where charid = %d && npcid = 0", 
+						charID);
+
+	if (database.RunQuery(query,  errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -97,18 +101,19 @@ void QGlobalCache::LoadByCharID(uint32 charID)
 		}
 		mysql_free_result(result);
 	}
-	safe_delete_array(query);
 }
 
 void QGlobalCache::LoadByZoneID(uint32 zoneID)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate from quest_globals"
-		" where zoneid = %d && npcid = 0 && charid = 0", zoneID), errbuf, &result))
+	StringFormat(query,"select name, charid, npcid, zoneid, value, expdate from quest_globals"
+						" where zoneid = %d && npcid = 0 && charid = 0", zoneID);
+
+	if (database.RunQuery(query, errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -116,17 +121,18 @@ void QGlobalCache::LoadByZoneID(uint32 zoneID)
 		}
 		mysql_free_result(result);
 	}
-	safe_delete_array(query);
 }
 void QGlobalCache::LoadByGlobalContext()
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select name, charid, npcid, zoneid, value, expdate from quest_globals"
-		" where zoneid = 0 && npcid = 0 && charid = 0"), errbuf, &result))
+	query = "select name, charid, npcid, zoneid, value, expdate from quest_globals"
+			" where zoneid = 0 && npcid = 0 && charid = 0";
+
+	if (database.RunQuery(query, errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -134,5 +140,4 @@ void QGlobalCache::LoadByGlobalContext()
 		}
 		mysql_free_result(result);
 	}
-	safe_delete_array(query);
 }

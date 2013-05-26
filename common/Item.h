@@ -47,7 +47,7 @@ namespace ItemField {
 	enum {
 		source=0,
 #define F(x) x,
-#include "item_fieldlist.h"
+	#include "item_fieldlist.h"
 #undef F
 		updated
 	};

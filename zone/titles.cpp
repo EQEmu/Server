@@ -34,20 +34,21 @@ bool TitleManager::LoadTitles()
 	TitleEntry Title;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `id`, `skill_id`, `min_skill_value`, `max_skill_value`, `min_aa_points`, `max_aa_points`, `class`, `gender`, "
-		"`char_id`, `status`, `item_id`, `prefix`, `suffix`, `title_set` from titles"), errbuf, &result))
+	query = "SELECT `id`, `skill_id`, `min_skill_value`, `max_skill_value`, "
+			"`min_aa_points`, `max_aa_points`, `class`, `gender`, "
+			"`char_id`, `status`, `item_id`, `prefix`, `suffix`, "
+			"`title_set` from titles";
+			
+	if (!database.RunQuery(query, errbuf, &result))
 	{
-		LogFile->write(EQEMuLog::Error, "Unable to load titles: %s : %s", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Unable to load titles: %s : %s", query.c_str(), errbuf);
 		return(false);
 	}
 
-	safe_delete_array(query);
 
 	while ((row = mysql_fetch_row(result))) {
 		Title.TitleID = atoi(row[0]);
@@ -250,42 +251,38 @@ void TitleManager::CreateNewPlayerTitle(Client *c, const char *Title)
 		return;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
+	std::string query;
 	MYSQL_RES *result;
 
-	char *EscTitle = new char[strlen(Title) * 2 + 1];
+	std::string escTitle;
 
 	c->SetAATitle(Title);
 
-	database.DoEscapeString(EscTitle, Title, strlen(Title));
-
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `id` from titles where `prefix` = '%s' and char_id = %i", EscTitle, c->CharacterID()), errbuf, &result))
+	database.DoEscapeString(escTitle, Title, strlen(Title));
+	
+	StringFormat(query,"SELECT `id` from titles where `prefix` = '%s' and char_id = %i", escTitle.c_str(), c->CharacterID());
+	
+	if (database.RunQuery(query, errbuf, &result))
 	{
 		if(mysql_num_rows(result) > 0)
 		{
 			mysql_free_result(result);
-			safe_delete_array(query);
-			safe_delete_array(EscTitle);
 			return;
 		}
 		mysql_free_result(result);
 	}
 
-	safe_delete_array(query);
-
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT into titles (`char_id`, `prefix`) VALUES(%i, '%s')",
-							c->CharacterID(), EscTitle), errbuf))
-		LogFile->write(EQEMuLog::Error, "Error adding title: %s %s", query, errbuf);
+	StringFormat(query, "INSERT into titles (`char_id`, `prefix`) VALUES(%i, '%s')",
+						c->CharacterID(), escTitle.c_str());
+							
+	if(!database.RunQuery(query,errbuf))
+		LogFile->write(EQEMuLog::Error, "Error adding title: %s %s", query.c_str(), errbuf);
 	else
 	{
 		ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
-	safe_delete_array(query);
-	safe_delete_array(EscTitle);
-
 }
 
 void TitleManager::CreateNewPlayerSuffix(Client *c, const char *Suffix)
@@ -294,41 +291,39 @@ void TitleManager::CreateNewPlayerSuffix(Client *c, const char *Suffix)
 		return;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
+	std::string query;
 	MYSQL_RES *result;
 
-	char *EscSuffix = new char[strlen(Suffix) * 2 + 1];
+	std::string escSuffix;
 
 	c->SetTitleSuffix(Suffix);
 
-	database.DoEscapeString(EscSuffix, Suffix, strlen(Suffix));
+	database.DoEscapeString(escSuffix, Suffix, strlen(Suffix));
 
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `id` from titles where `suffix` = '%s' and char_id = %i", EscSuffix, c->CharacterID()), errbuf, &result))
+	StringFormat(query, "SELECT `id` from titles where `suffix` = '%s' and char_id = %i", 
+						escSuffix.c_str(), c->CharacterID());
+
+	if (database.RunQuery(query, errbuf, &result))
 	{
 		if(mysql_num_rows(result) > 0)
 		{
 			mysql_free_result(result);
-			safe_delete_array(query);
-			safe_delete_array(EscSuffix);
 			return;
 		}
 		mysql_free_result(result);
 	}
 
-	safe_delete_array(query);
+	StringFormat(query, "INSERT into titles (`char_id`, `suffix`) VALUES(%i, '%s')",
+						c->CharacterID(), escSuffix.c_str());
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT into titles (`char_id`, `suffix`) VALUES(%i, '%s')",
-							c->CharacterID(), EscSuffix), errbuf))
-		LogFile->write(EQEMuLog::Error, "Error adding title suffix: %s %s", query, errbuf);
+	if(!database.RunQuery(query, errbuf))
+		LogFile->write(EQEMuLog::Error, "Error adding title suffix: %s %s", query.c_str(), errbuf);
 	else
 	{
 		ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
-	safe_delete_array(query);
-	safe_delete_array(EscSuffix);
 
 }
 
@@ -375,27 +370,31 @@ void Client::EnableTitle(int titleset) {
 	}
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO player_titlesets (char_id, title_set) VALUES (%i, %i)", CharacterID(), titleset), errbuf)) {
+	StringFormat(query, "INSERT INTO player_titlesets "
+						"(char_id, title_set) VALUES (%i, %i)", 
+						CharacterID(), titleset);
+
+	if(!database.RunQuery(query, errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in EnableTitle query for titleset %i and charid %i", titleset, CharacterID());
-		safe_delete_array(query);
-		return;
 	}
-	else {
-		safe_delete_array(query);
-		return;
-	}
+	
+	return;
 }
 
 bool Client::CheckTitle(int titleset) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	MYSQL_RES *result;
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT `id` FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i LIMIT 1", titleset, CharacterID()), errbuf, &result)) {
-		safe_delete_array(query);
+	StringFormat(query, "SELECT `id` FROM player_titlesets "
+						"WHERE `title_set`=%i AND "
+						"`char_id`=%i LIMIT 1", 
+						titleset, CharacterID());
+
+	if (database.RunQuery(query, errbuf, &result)) {
 		if (mysql_num_rows(result) >= 1) {
 			mysql_free_result(result);
 			return(true);
@@ -404,11 +403,10 @@ bool Client::CheckTitle(int titleset) {
 	}
 
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in CheckTitle query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in CheckTitle query '%s': %s", query.c_str(), errbuf);
 	}
 
-	return(false);
+	return false;
 }
 
 void Client::RemoveTitle(int titleset) {
@@ -418,15 +416,14 @@ void Client::RemoveTitle(int titleset) {
 	}
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i", titleset, CharacterID()), errbuf)) {
-		safe_delete_array(query);
-	}
+	StringFormat(query, "DELETE FROM player_titlesets WHERE "
+						"`title_set`=%i AND `char_id`=%i", 
+						titleset, CharacterID());
 
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in RemoveTitle query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	if (!database.RunQuery(query, errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error in RemoveTitle query '%s': %s", query.c_str(), errbuf);
 	}
 
 	return;
