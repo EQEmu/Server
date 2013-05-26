@@ -10,10 +10,10 @@
 #include <stdio.h>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 #include "masterentity.h"
 #include "../common/spdat.h"
-#include "../common/seperator.h"
 #include "lua_entity.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
@@ -767,14 +767,7 @@ void LuaParser::LoadScript(std::string filename, std::string package_name) {
 }
 
 bool LuaParser::HasFunction(std::string subname, std::string package_name) {
-	size_t sz = subname.length();
-	for(size_t i = 0; i < sz; ++i) {
-		char c = subname[i];
-		if(65 <= c && c <= 90) {
-			c += 32;
-		}
-		subname[i] = c;
-	}
+	std::transform(subname.begin(), subname.end(), subname.begin(), ::tolower);
 
 	auto iter = loaded_.find(package_name);
 	if(iter == loaded_.end()) {

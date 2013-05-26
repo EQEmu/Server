@@ -3940,8 +3940,7 @@ XS(XS_Client_SetAAPoints) {
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->GetPP().aapoints = points;
-		THIS->SendAAStats();
+		THIS->SetAAPoints(points);
 	}
 	XSRETURN_EMPTY;
 }
@@ -3965,7 +3964,7 @@ XS(XS_Client_GetAAPoints) {
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetPP().aapoints;
+		RETVAL = THIS->GetAAPoints();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -3990,7 +3989,7 @@ XS(XS_Client_GetSpentAA) {
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetPP().aapoints_spent;
+		RETVAL = THIS->GetSpentAA();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -4014,8 +4013,7 @@ XS(XS_Client_AddAAPoints) {
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->GetPP().aapoints += points;
-		THIS->SendAAStats();
+		THIS->AddAAPoints(points);
 	}
 	XSRETURN_EMPTY;
 }
@@ -4875,22 +4873,7 @@ XS(XS_Client_IncrementAA)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		SendAA_Struct* aa2 = zone->FindAA(aaskillid);
-
-		if(aa2 == nullptr)
-			Perl_croak(aTHX_ "Invalid AA.");
-
-		if(THIS->GetAA(aaskillid) == aa2->max_level)
-			Perl_croak(aTHX_ "AA at Max already.");
-
-		THIS->SetAA(aaskillid, THIS->GetAA(aaskillid)+1);
-
-		THIS->Save();
-
-		THIS->SendAA(aaskillid);
-		THIS->SendAATable();
-		THIS->SendAAStats();
-		THIS->CalcBonuses();
+		THIS->IncrementAA(aaskillid);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5205,7 +5188,7 @@ XS(XS_Client_GetCorpseCount)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = database.GetPlayerCorpseCount(THIS->CharacterID());
+		RETVAL = THIS->GetCorpseCount();
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
@@ -5232,7 +5215,7 @@ XS(XS_Client_GetCorpseID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = database.GetPlayerCorpseID(THIS->CharacterID(), corpse);
+		RETVAL = THIS->GetCorpseID(corpse);
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
@@ -5260,7 +5243,7 @@ XS(XS_Client_GetCorpseItemAt)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = database.GetPlayerCorpseItemAt(corpse_id, slotid);
+		RETVAL = THIS->GetCorpseItemAt(corpse_id, slotid);
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);

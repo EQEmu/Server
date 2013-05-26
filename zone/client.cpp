@@ -7720,3 +7720,52 @@ void Client::TryItemTick(int slot)
         }
     }
 }
+
+void Client::RefundAA() {
+	int cur = 0;
+	bool refunded = false;
+
+	for(int x = 0; x < aaHighestID; x++) {
+		cur = GetAA(x);
+		if(cur > 0){
+			SendAA_Struct* curaa = zone->FindAA(x);
+			if(cur){
+				SetAA(x, 0);
+				for(int j = 0; j < cur; j++) {
+					m_pp.aapoints += curaa->cost + (curaa->cost_inc * j);
+					refunded = true;
+				}
+			}
+			else
+			{
+				m_pp.aapoints += cur;
+				SetAA(x, 0);
+				refunded = true;
+			}
+		}
+	}
+
+	if(refunded) {
+		Save();
+		Kick();
+	}
+}
+
+void Client::IncrementAA(int aa_id) {
+	SendAA_Struct* aa2 = zone->FindAA(aa_id);
+
+	if(aa2 == nullptr)
+		return;
+
+	if(GetAA(aa_id) == aa2->max_level)
+		return;
+
+	SetAA(aa_id, GetAA(aa_id) + 1);
+
+	Save();
+
+	SendAA(aa_id);
+	SendAATable();
+	SendAAStats();
+	CalcBonuses();
+}

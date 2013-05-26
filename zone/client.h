@@ -750,6 +750,12 @@ public:
 	inline uint32 GetAAPointsSpent() { return m_pp.aapoints_spent; }
 	int16 CalcAAFocusEffect(focusType type, uint16 focus_spell, uint16 spell_id);
 	int16 CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id);
+	void SetAAPoints(uint32 points) { m_pp.aapoints = points; SendAAStats(); }
+	void AddAAPoints(uint32 points) { m_pp.aapoints += points; SendAAStats(); }
+	int GetAAPoints() { return m_pp.aapoints; }
+	int GetSpentAA() { return m_pp.aapoints_spent; }
+	void RefundAA();
+	void IncrementAA(int aa_id);
 
 	int16 acmod();
 
@@ -1015,6 +1021,9 @@ public:
 	void DepopAllCorpses();
 	void DepopPlayerCorpse(uint32 dbid);
 	void BuryPlayerCorpses();
+	uint32 GetCorpseCount() { return database.GetPlayerCorpseCount(CharacterID()); }
+	uint32 GetCorpseID(int corpse) { return database.GetPlayerCorpseID(CharacterID(), corpse); }
+	uint32 GetCorpseItemAt(int corpse_id, int slot_id) { return database.GetPlayerCorpseItemAt(corpse_id, slot_id); }
 	void SuspendMinion();
 	void Doppelganger(uint16 spell_id, Mob *target, const char *name_override, int pet_count, int pet_duration);
 	void NotifyNewTitlesAvailable();

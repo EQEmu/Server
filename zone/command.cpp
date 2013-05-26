@@ -8650,9 +8650,7 @@ void command_altactivate(Client *c, const Seperator *sep){
 
 void command_refundaa(Client *c, const Seperator *sep){
 	Client* refundee = nullptr;
-	int curpt = 0;
-	bool refunded = false;
-	if(c){
+	if(c) {
 		if(c->GetTarget()){
 			if(c->GetTarget()->IsClient())
 				refundee = c->GetTarget()->CastToClient();
@@ -8663,31 +8661,9 @@ void command_refundaa(Client *c, const Seperator *sep){
 			c->Message(0, "You must have a target selected.");
 		}
 
-		if(refundee){
-			for(int x1=0;x1<aaHighestID;x1++){
-				curpt = refundee->GetAA(x1);
-				if(curpt > 0){
-					SendAA_Struct* curaa = zone->FindAA(x1);
-					if(curaa){
-						refundee->SetAA(x1, 0);
-						for(int x2=0;x2<curpt;x2++){ //add up all the AA points pt by pt to get the correct cost
-							refundee->GetPP().aapoints += curaa->cost + (curaa->cost_inc * x2);
-							refunded = true;
-						}
-					}
-					else //aa doesn't exist.. but if they bought it then it had at least a cost of 1 point each
-					{ //so give back what we can
-						refundee->GetPP().aapoints += curpt;
-						refundee->SetAA(x1, 0);
-						refunded = true;
-					}
-				}
-			}
+		if(refundee) {
+			refundee->RefundAA();
 		}
-	}
-	if(refunded){
-		refundee->Save(); //save of course
-		refundee->Kick(); //client gets all buggy if we don't immediatly relog so just force it on them
 	}
 }
 
