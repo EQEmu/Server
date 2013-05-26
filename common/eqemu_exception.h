@@ -95,11 +95,11 @@ namespace EQEmu
 		*/
 		const char* what() const throw() { return full_description().c_str(); }
 	protected:
-		std::string name_; //!< Exception name
-		std::string desc_; //!< Exception Description
 		mutable std::string full_desc_; //!< Full Exception Description
-		std::string file_; //!< File Name
 		long line_; //<! File Line
+		std::string file_; //!< File Name
+		std::string desc_; //!< Exception Description
+		std::string name_; //!< Exception name
 	};
 } // EQEmu
 

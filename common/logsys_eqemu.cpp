@@ -18,9 +18,12 @@
 
 #include "debug.h"
 #include "logsys.h"
+#include "StringUtil.h"
+
 #include <stdarg.h>
 #include <stdio.h>
-#include <string.h>
+
+#include <string>
 
 void log_message(LogType type, const char *fmt, ...) {
 	va_list args;
@@ -30,10 +33,10 @@ void log_message(LogType type, const char *fmt, ...) {
 }
 
 void log_messageVA(LogType type, const char *fmt, va_list args) {
-	char prefix_buffer[256];
-	snprintf(prefix_buffer, 255, "[%s] ", log_type_info[type].name);
-	prefix_buffer[255] = '\0';
-
-	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer, fmt, args);
+	std::string prefix_buffer;
+	
+	StringFormat(prefix_buffer, "[%s] ", log_type_info[type].name);
+	
+	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer.c_str(), fmt, args);
 }
 

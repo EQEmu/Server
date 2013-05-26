@@ -1,6 +1,8 @@
 #include "../common/debug.h"
 #include "../common/StringUtil.h"
 #include "QGlobals.h"
+#include "masterentity.h"
+#include "zone.h"
 #include "zonedb.h"
 
 void QGlobalCache::AddGlobal(uint32 id, QGlobal global)
@@ -16,7 +18,9 @@ void QGlobalCache::RemoveGlobal(std::string name, uint32 npcID, uint32 charID, u
 	{
 		if(name.compare((*iter).name) == 0)
 		{
-			if((npcID == (*iter).npc_id || (*iter).npc_id == 0) && (charID == (*iter).char_id || (*iter).char_id == 0) && (zoneID == (*iter).zone_id || (*iter).zone_id == 0))
+			if((npcID == (*iter).npc_id || (*iter).npc_id == 0) &&
+				(charID == (*iter).char_id || (*iter).char_id == 0) &&
+				(zoneID == (*iter).zone_id || (*iter).zone_id == 0))
 			{
 				qGlobalBucket.erase(iter);
 				return;
@@ -33,7 +37,8 @@ void QGlobalCache::Combine(std::list<QGlobal> &cacheA, std::list<QGlobal> cacheB
 	{
 		QGlobal cur = (*iter);
 
-		if((cur.npc_id == npcID || cur.npc_id == 0) && (cur.char_id == charID || cur.char_id == 0) && (cur.zone_id == zoneID || cur.zone_id == 0))
+		if((cur.npc_id == npcID || cur.npc_id == 0) && (cur.char_id == charID || cur.char_id == 0) &&
+			(cur.zone_id == zoneID || cur.zone_id == 0))
 		{
 			if(Timer::GetTimeSeconds() < cur.expdate)
 			{
@@ -42,6 +47,76 @@ void QGlobalCache::Combine(std::list<QGlobal> &cacheA, std::list<QGlobal> cacheB
 		}
 		++iter;
 	}
+}
+
+void QGlobalCache::GetQGlobals(std::list<QGlobal> &globals, NPC *n, Client *c, Zone *z) {
+	globals.clear();
+	
+	QGlobalCache *npc_c = nullptr;
+	QGlobalCache *char_c = nullptr;
+	QGlobalCache *zone_c = nullptr;
+	uint32 npc_id = 0;
+	uint32 char_id = 0;
+	uint32 zone_id = 0;
+
+	if(n) {
+		npc_id = n->GetNPCTypeID();
+		npc_c = n->GetQGlobals();
+	}
+
+	if(c) {
+		char_id = c->CharacterID();
+		char_c = c->GetQGlobals();
+	}
+
+	if(z) {
+		zone_id = z->GetZoneID();
+		zone_c = z->GetQGlobals();
+	}
+
+	if(!npc_c && n) {
+		npc_c = n->CreateQGlobals();
+		npc_c->LoadByNPCID(npc_id);
+	}
+
+	if(!char_c && c) {
+		char_c = c->CreateQGlobals();
+		char_c->LoadByCharID(char_id);
+	}
+
+	if(!zone_c && z) {
+		zone_c = z->CreateQGlobals();
+		zone_c->LoadByZoneID(zone_id);
+		zone_c->LoadByGlobalContext();
+	}
+
+	if(npc_c) {
+		QGlobalCache::Combine(globals, npc_c->GetBucket(), npc_id, char_id, zone_id);
+	}
+
+	if(char_c) {
+		QGlobalCache::Combine(globals, char_c->GetBucket(), npc_id, char_id, zone_id);
+	}
+
+	if(zone_c) {
+		QGlobalCache::Combine(globals, zone_c->GetBucket(), npc_id, char_id, zone_id);
+	}
+}
+
+bool QGlobalCache::GetQGlobal(QGlobal &g, std::string name, NPC *n, Client *c, Zone *z) {
+	std::list<QGlobal> globals;
+	QGlobalCache::GetQGlobals(globals, n, c, z);
+
+	auto iter = globals.begin();
+	while(iter != globals.end()) {
+		if(iter->name.compare(name) == 0) {
+			g = (*iter);
+			return true;
+		}
+		++iter;
+	}
+
+	return false;
 }
 
 void QGlobalCache::PurgeExpiredGlobals()

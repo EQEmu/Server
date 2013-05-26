@@ -1,4 +1,3 @@
-#define DONT_SHARED_OPCODES
 /*	EQEMu: Everquest Server Emulator
 	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
@@ -16,34 +15,11 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
+#define DONT_SHARED_OPCODES
+
 #include "../common/debug.h"
 #include "../common/features.h"
-#include <iostream>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
-#include <time.h>
-	#ifdef _CRTDBG_MAP_ALLOC
-		#undef new
-	#endif
-#include <fstream>
-	#ifdef _CRTDBG_MAP_ALLOC
-		#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
-	#endif
-#ifdef _WINDOWS
-#include <conio.h>
-#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
-#define strncasecmp	_strnicmp
-#define strcasecmp	_stricmp
-#endif
-
-volatile bool RunLoops = true;
-extern volatile bool ZoneLoaded;
-
 #include "../common/queue.h"
 #include "../common/timer.h"
 #include "../common/EQStream.h"
@@ -52,7 +28,6 @@ extern volatile bool ZoneLoaded;
 #include "../common/Mutex.h"
 #include "../common/version.h"
 #include "../common/EQEMuError.h"
-#include "ZoneConfig.h"
 #include "../common/packet_dump_file.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
@@ -60,16 +35,18 @@ extern volatile bool ZoneLoaded;
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
+#include "../common/spdat.h"
 
+#include "ZoneConfig.h"
 #include "masterentity.h"
 #include "worldserver.h"
 #include "net.h"
-#include "../common/spdat.h"
 #include "zone.h"
 #include "command.h"
 #include "parser.h"
@@ -81,6 +58,33 @@ extern volatile bool ZoneLoaded;
 #include "guild_mgr.h"
 #include "tasks.h"
 #include "QuestParserCollection.h"
+
+#include <iostream>
+#include <string>
+#include <fstream>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <signal.h>
+#include <time.h>
+
+#ifdef _CRTDBG_MAP_ALLOC
+	#undef new
+	#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
+	
+#ifdef _WINDOWS
+	#include <conio.h>
+	#include <process.h>
+#else
+	#include <pthread.h>
+	#include "../common/unix.h"
+#endif
+
+volatile bool RunLoops = true;
+extern volatile bool ZoneLoaded;
+
+
 
 TimeoutManager timeout_manager;
 NetConnection net;
@@ -101,13 +105,6 @@ QuestParserCollection *parse = 0;
 const SPDat_Spell_Struct* spells;
 void LoadSpells(EQEmu::MemoryMappedFile **mmf);
 int32 SPDAT_RECORDS = -1;
-
-#ifdef _WINDOWS
-#include <process.h>
-#else
-#include <pthread.h>
-#include "../common/unix.h"
-#endif
 
 void Shutdown();
 extern void MapOpcodes();

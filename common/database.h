@@ -256,7 +256,7 @@ private:
 	void DBInitVars();
 
 	uint32				max_zonename;
-	public: char**				zonename_array;
+	char**				zonename_array;
 
 	Mutex				Mvarcache;
 	uint32				varcache_max;

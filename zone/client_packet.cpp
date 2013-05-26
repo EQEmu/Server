@@ -3912,7 +3912,7 @@ void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 {
 	if(app->size!=sizeof(DyeStruct))
-		printf("Wrong size of DyeStruct, Got: %i, Expected: %lu\n",app->size,sizeof(DyeStruct));
+		printf("Wrong size of DyeStruct, Got: %i, Expected: %i\n",app->size,sizeof(DyeStruct));
 	else{
 		DyeStruct* dye = (DyeStruct*)app->pBuffer;
 		DyeArmor(dye);
@@ -3983,7 +3983,7 @@ void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
 
 	if (app->size < sizeof(GuildUpdate_PublicNote)) {
 		// client calls for a motd on login even if they arent in a guild
-		printf("Error: app size of %i < size of OP_GuildPublicNote of %lu\n",app->size,sizeof(GuildUpdate_PublicNote));
+		printf("Error: app size of %i < size of OP_GuildPublicNote of %i\n",app->size,sizeof(GuildUpdate_PublicNote));
 		return;
 	}
 	GuildUpdate_PublicNote* gpn=(GuildUpdate_PublicNote*)app->pBuffer;
@@ -4041,7 +4041,7 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(GuildMOTD_Struct)) {
 		// client calls for a motd on login even if they arent in a guild
-		printf("Error: app size of %i != size of GuildMOTD_Struct of %lu\n",app->size,sizeof(GuildMOTD_Struct));
+		printf("Error: app size of %i != size of GuildMOTD_Struct of %i\n",app->size,sizeof(GuildMOTD_Struct));
 		return;
 	}
 	if(!IsInAGuild()) {
@@ -5020,7 +5020,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FinishTrade, 0);
 		QueuePacket(outapp);
 		safe_delete(outapp);
-		if(with->IsNPC())
+		if(with->IsNPC()) {
 			// Audit trade to database for player trade stream
 			if(RuleB(QueryServ, PlayerLogHandins)) {
 				uint16 handin_count = 0;
@@ -5040,6 +5040,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			else {
 				FinishTrade(with->CastToNPC());
 			}
+		}
 #ifdef BOTS
 		else if(with->IsBot())
 			with->CastToBot()->FinishTrade(this, Bot::BotTradeClientNormal);
@@ -6947,7 +6948,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 {
 	if(app->size!=sizeof(LoadSpellSet_Struct)) {
-		printf("Wrong size of LoadSpellSet_Struct! Expected: %lu, Got: %i\n",sizeof(LoadSpellSet_Struct),app->size);
+		printf("Wrong size of LoadSpellSet_Struct! Expected: %i, Got: %i\n",sizeof(LoadSpellSet_Struct),app->size);
 		return;
 	}
 	int i;
@@ -6962,7 +6963,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 {
 	if(app->size!=sizeof(PetitionBug_Struct))
-		printf("Wrong size of BugStruct! Expected: %lu, Got: %i\n",sizeof(PetitionBug_Struct),app->size);
+		printf("Wrong size of BugStruct! Expected: %i, Got: %i\n",sizeof(PetitionBug_Struct),app->size);
 	else{
 		Message(0, "Petition Bugs are not supported, please use /bug.");
 	}
@@ -6972,7 +6973,7 @@ void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
 	if(app->size!=sizeof(BugStruct))
-		printf("Wrong size of BugStruct got %d expected %lu!\n", app->size, sizeof(BugStruct));
+		printf("Wrong size of BugStruct got %d expected %i!\n", app->size, sizeof(BugStruct));
 	else{
 		BugStruct* bug=(BugStruct*)app->pBuffer;
 		database.UpdateBug(bug);
@@ -8368,7 +8369,7 @@ void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
 	_pkt(TRIBUTE__IN, app);
 
 	if(app->size != sizeof(StartTribute_Struct))
-		printf("Error in OP_OpenTributeMaster. Expected size of: %lu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
+		printf("Error in OP_OpenTributeMaster. Expected size of: %i, but got: %i\n",sizeof(StartTribute_Struct),app->size);
 	else {
 		//Opens the tribute master window
 		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
@@ -8393,7 +8394,7 @@ void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 	_pkt(TRIBUTE__IN, app);
 
 	if(app->size != sizeof(StartTribute_Struct))
-		printf("Error in OP_OpenGuildTributeMaster. Expected size of: %lu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
+		printf("Error in OP_OpenGuildTributeMaster. Expected size of: %i, but got: %i\n",sizeof(StartTribute_Struct),app->size);
 	else {
 		//Opens the guild tribute master window
 		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
@@ -8419,7 +8420,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 
 	//player donates an item...
 	if(app->size != sizeof(TributeItem_Struct))
-		printf("Error in OP_TributeItem. Expected size of: %lu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
+		printf("Error in OP_TributeItem. Expected size of: %i, but got: %i\n",sizeof(StartTribute_Struct),app->size);
 	else {
 		TributeItem_Struct* t = (TributeItem_Struct*)app->pBuffer;
 
@@ -8448,7 +8449,7 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 
 	//player donates money
 	if(app->size != sizeof(TributeMoney_Struct))
-		printf("Error in OP_TributeMoney. Expected size of: %lu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
+		printf("Error in OP_TributeMoney. Expected size of: %i, but got: %i\n",sizeof(StartTribute_Struct),app->size);
 	else {
 		TributeMoney_Struct* t = (TributeMoney_Struct*)app->pBuffer;
 
@@ -8596,7 +8597,7 @@ void Client::Handle_OP_Ignore(const EQApplicationPacket *app)
 void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 {
 	if(app->size != sizeof(FindPersonRequest_Struct))
-		printf("Error in FindPersonRequest_Struct. Expected size of: %lu, but got: %i\n",sizeof(FindPersonRequest_Struct),app->size);
+		printf("Error in FindPersonRequest_Struct. Expected size of: %i, but got: %i\n",sizeof(FindPersonRequest_Struct),app->size);
 	else {
 		FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
 
@@ -9204,7 +9205,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 #ifdef _EQDEBUG
 	printf("Dumping inventory on load:\n");
-	m_inv.dumpInventory();
+	m_inv.dumpEntireInventory();
 #endif
 
 //lost in current PP

@@ -1278,8 +1278,8 @@ void AdventureManager::DoLeaderboardRequestWins(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins.begin();
 		while(i < 100 && iter != leaderboard_info_wins.end())
@@ -1345,8 +1345,8 @@ void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage.begin();
 		while(i < 100 && iter != leaderboard_info_percentage.end())
@@ -1412,8 +1412,8 @@ void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_guk.begin();
 		while(i < 100 && iter != leaderboard_info_wins_guk.end())
@@ -1479,8 +1479,8 @@ void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_guk.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_guk.end())
@@ -1546,8 +1546,8 @@ void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_mir.begin();
 		while(i < 100 && iter != leaderboard_info_wins_mir.end())
@@ -1613,8 +1613,8 @@ void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_mir.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_mir.end())
@@ -1680,8 +1680,8 @@ void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_mmc.begin();
 		while(i < 100 && iter != leaderboard_info_wins_mmc.end())
@@ -1747,8 +1747,8 @@ void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_mmc.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_mmc.end())
@@ -1814,8 +1814,8 @@ void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_ruj.begin();
 		while(i < 100 && iter != leaderboard_info_wins_ruj.end())
@@ -1881,8 +1881,8 @@ void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_ruj.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_ruj.end())
@@ -1948,8 +1948,8 @@ void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_wins_ruj.begin();
 		while(i < 100 && iter != leaderboard_info_wins_ruj.end())
@@ -2015,8 +2015,8 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 		strcpy((char*)pack->pBuffer, player);
 
 		int place = -1;
-		int our_successes;
-		int our_failures;
+		int our_successes = 0;
+		int our_failures = 0;
 		int i = 0;
 		std::list<LeaderboardInfo>::iterator iter = leaderboard_info_percentage_tak.begin();
 		while(i < 100 && iter != leaderboard_info_percentage_tak.end())

@@ -126,27 +126,6 @@ bool strn0cpyt(char* dest, const char* source, uint32 size) {
 	return (bool) (source[strlen(dest)] == 0);
 }
 
-const char *MakeUpperString(const char *source) {
-	static char str[128];
-	if (!source)
-		return nullptr;
-	MakeUpperString(source, str);
-	return str;
-}
-
-void MakeUpperString(const char *source, char *target) {
-	if (!source || !target) {
-	*target=0;
-		return;
-	}
-	while (*source)
-	{
-		*target = toupper(*source);
-		target++;source++;
-	}
-	*target = 0;
-}
-
 const char *MakeLowerString(const char *source) {
 	static char str[128];
 	if (!source)

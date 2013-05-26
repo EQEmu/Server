@@ -94,6 +94,8 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 				return;
 			}
 			break;
+		default:
+			break;
 		};
 	}
 	else {
@@ -247,6 +249,8 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%s'. Not near a zone point.", GetName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
+	default:
+		break;
 	};
 
 	//OK, now we should know where were going...

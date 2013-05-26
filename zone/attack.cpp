@@ -1424,7 +1424,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	if(dead)
 		return;	//cant die more than once...
 
-	int exploss;
+	int exploss = 0;
 
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob ? killerMob->GetName() : "Unknown", damage, spell, attack_skill);
 
@@ -1476,7 +1476,7 @@ void Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	if (killerMob != nullptr)
 	{
 		if (killerMob->IsNPC()) {
-            parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
+			parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
 
 			mod_client_death_npc(killerMob);
 
@@ -2124,7 +2124,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 			/* Send the EVENT_KILLED_MERIT event for all raid members */
 			for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
 				if (kr->members[i].member != nullptr) { // If Group Member is Client
-                    parse->EventNPC(EVENT_KILLED_MERIT, this, kr->members[i].member, "killed", 0);
+					parse->EventNPC(EVENT_KILLED_MERIT, this, kr->members[i].member, "killed", 0);
 
 					mod_npc_killed_merit(kr->members[i].member);
 
@@ -2167,7 +2167,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 				if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
 					Client *c = kg->members[i]->CastToClient();
-                    parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
+					parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
 
 					mod_npc_killed_merit(c);
 
@@ -2214,7 +2214,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 				}
 			}
 			 /* Send the EVENT_KILLED_MERIT event */
-            parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
+			parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
 
 			mod_npc_killed_merit(give_exp_client);
 
@@ -2347,7 +2347,7 @@ void NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	// Parse quests even if we're killed by an NPC
 	if(killerMob) {
 		Mob *oos = killerMob->GetOwnerOrSelf();
-        parse->EventNPC(EVENT_DEATH, this, oos, "", 0);
+		parse->EventNPC(EVENT_DEATH, this, oos, "", 0);
 
 		mod_npc_killed(oos);
 
@@ -4234,7 +4234,7 @@ void Mob::ApplyMeleeDamageBonus(uint16 skill, int32 &damage){
 
 	if(!RuleB(Combat, UseIntervalAC)){
 		if(IsNPC()){ //across the board NPC damage bonuses.
- 			//only account for STR here, assume their base STR was factored into their DB damages
+			//only account for STR here, assume their base STR was factored into their DB damages
 			int dmgbonusmod = 0;
 			dmgbonusmod += (100*(itembonuses.STR + spellbonuses.STR))/3;
 			dmgbonusmod += (100*(spellbonuses.ATK + itembonuses.ATK))/5;

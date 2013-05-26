@@ -8,8 +8,6 @@
 #endif
 #include <mysql.h>
 #include <string>
-
-#include "../common/DBMemLeak.h"
 #include "../common/types.h"
 #include "../common/Mutex.h"
 #include "../common/linked_list.h"

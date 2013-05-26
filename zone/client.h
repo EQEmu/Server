@@ -19,8 +19,6 @@
 #define CLIENT_H
 class Client;
 
-
-
 #include "../common/timer.h"
 #include "../common/ptimer.h"
 #include "../common/emu_opcodes.h"
@@ -30,28 +28,38 @@ class Client;
 #include "../common/EQPacket.h"
 #include "../common/linked_list.h"
 #include "../common/extprofile.h"
-#include "zonedb.h"
-#include "errno.h"
 #include "../common/classes.h"
 #include "../common/races.h"
 #include "../common/deity.h"
+#include "../common/seperator.h"
+#include "../common/Item.h"
+#include "../common/guilds.h"
+#include "../common/item_struct.h"
+#include "../common/clientversions.h"
+
+#include "zonedb.h"
+#include "errno.h"
 #include "mob.h"
 #include "npc.h"
 #include "merc.h"
 #include "zone.h"
 #include "AA.h"
-#include "../common/seperator.h"
-#include "../common/Item.h"
 #include "updatemgr.h"
-#include "../common/guilds.h"
 #include "questmgr.h"
+#include "QGlobals.h"
+
+#ifdef _WINDOWS
+	// since windows defines these within windef.h (which windows.h include)
+	// we are required to undefine these to use min and max from <algorithm>
+	#undef min
+	#undef max
+#endif
+
 #include <float.h>
 #include <set>
 #include <string>
-#include "../common/item_struct.h"
-#include "../common/clientversions.h"
-#include "QGlobals.h"
 #include <algorithm>
+
 
 #define CLIENT_TIMEOUT		90000
 #define CLIENT_LD_TIMEOUT	30000 // length of time client stays in zone after LDing
