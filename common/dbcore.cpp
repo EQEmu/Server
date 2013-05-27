@@ -74,7 +74,7 @@ bool DBcore::RunQuery(const std::string query, char* errbuf, MYSQL_RES** result,
 	strn0cpy(tmp, query.c_str(), sizeof(tmp));
 	std::cout << "QUERY: " << tmp << std::endl;
 #endif
-	if (mysql_real_query(&mysql, query.c_str(), strlen(query.c_str()))) {
+	if (mysql_real_query(&mysql, query.c_str(), query.length())) {
 		if (mysql_errno(&mysql) == CR_SERVER_GONE_ERROR)
 			pStatus = Error;
 		if (mysql_errno(&mysql) == CR_SERVER_LOST || mysql_errno(&mysql) == CR_SERVER_GONE_ERROR) {
@@ -156,9 +156,9 @@ bool DBcore::RunQuery(const std::string query, char* errbuf, MYSQL_RES** result,
 void DBcore::DoEscapeString(std::string& outString, const char* frombuf, uint32 fromlen) {
 //	No good reason to lock the DB, we only need it in the first place to check char encoding.
 //	LockMutex lock(&MDatabase);
-	char* tobuf = new char[sizeof(frombuf)*fromlen]();
-	mysql_real_escape_string(&mysql, tobuf, frombuf, fromlen);
-	outString.assign(tobuf,sizeof(frombuf)*fromlen);
+	char* tobuf = new char[sizeof(frombuf)*fromlen*2]();
+	unsigned long length = mysql_real_escape_string(&mysql, tobuf, frombuf, fromlen);
+	outString.assign(tobuf,length);
 	safe_delete_array(tobuf);
 }
 

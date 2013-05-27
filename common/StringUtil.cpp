@@ -56,10 +56,10 @@ void vStringFormat(std::string& output, const char* format, va_list args)
 		
 		throw std::runtime_error(errorMessage);
 	}
-	else if ((unsigned int)characters_used > output.capacity()) {
-		output.resize(characters_used+1);
+	if ((unsigned int)characters_used > output.capacity()) {
+		output.resize(characters_used);
 		va_copy(tmpargs,args);
-		characters_used = vsnprintf(&output[0], output.capacity(), format, tmpargs);
+		characters_used = vsnprintf(&output[0], output.capacity()+1, format, tmpargs);
 		va_end(tmpargs);
 
 		if (characters_used < 0) {
@@ -70,24 +70,23 @@ void vStringFormat(std::string& output, const char* format, va_list args)
 		
 			throw std::runtime_error(errorMessage);
 		}
+		return;
 	} 
-	else {
-		output.resize(characters_used + 1);
+	output.resize(characters_used+1);
 
-		va_copy(tmpargs,args);
-		characters_used = vsnprintf(&output[0], output.capacity(), format, tmpargs);
-		va_end(tmpargs);
+	va_copy(tmpargs,args);
+	characters_used = vsnprintf(&output[0], output.capacity()+1, format, tmpargs);
+	va_end(tmpargs);
 
-		if (characters_used < 0) {
-			// We shouldn't have a format error by this point, but I can't imagine what error we
-			// could have by this point. still error out and report it.
-			std::string errorMessage("Invalid format string or unknown vsnprintf error; vsnprintf returned negative with format string: ");
-			errorMessage.append(format);
+	if (characters_used < 0) {
+		// We shouldn't have a format error by this point, but I can't imagine what error we
+		// could have by this point. still error out and report it.
+		std::string errorMessage("Invalid format string or unknown vsnprintf error; vsnprintf returned negative with format string: ");
+		errorMessage.append(format);
 		
-			throw std::runtime_error(errorMessage);
-		}
-		
+		throw std::runtime_error(errorMessage);
 	}
+	return;
 }
 
 void StringFormat(std::string& output, const char* format, ...)

@@ -626,6 +626,7 @@ bool Database::DeleteCharacter(char *name)
 
 	return true;
 }
+
 // Store new character information into the character_ and inventory tables
 bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext)
 {
@@ -637,8 +638,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	uint32 charid = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row = 0;
-	std::string playerProfileBuffer;
-	std::string extendedProfileBuffer;
+
 	char zone[50];
 	float x, y, z;
 
@@ -675,22 +675,30 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	y=pp->y;
 	z=pp->z;
 
+	std::string playerProfileBuffer;
+	std::string extendedProfileBuffer;
+
 	// construct the character_ query
 	StringFormat(query, "UPDATE character_ SET timelaston=0, "
 						"zonename=\'%s\', x=%f, y=%f, z=%f, profile=\'",
 						zone, x, y, z);
-
+	
 	DoEscapeString(playerProfileBuffer, (char*)pp, sizeof(PlayerProfile_Struct));
 
 	query.append(playerProfileBuffer);
+	
 	query.append("\', extprofile=\'");
+	
 	DoEscapeString(extendedProfileBuffer, (char*)ext, sizeof(ExtendedProfile_Struct));
+	
 	query.append(extendedProfileBuffer);
 
 	std::string ending;
+	
 	StringFormat(ending, "\' WHERE account_id=%d AND name='%s'",account_id, pp->name);
+	
 	query.append(ending);
-
+	
 	RunQuery(query, errbuf, 0, &affected_rows);
 
 	if(!affected_rows)
