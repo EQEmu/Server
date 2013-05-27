@@ -134,6 +134,9 @@ int Client::mod_client_damage(int damage, SkillType skillinuse, int hand, const 
 	float cagi = (float)GetActAGI() - DW_STATBASE;
 	float csta = (float)GetActSTA() - DW_STATBASE;
 
+	//if(Admin() > 80) { Message(315, "Dex: %f, Str: %f, Agi: %f, Sta: %f", cdex, cstr, cagi, csta); }
+	//if(Admin() > 80) { Message(315, "Str: %f, %d, %d", cstr, GetMaxSTR(), GetSTR()); }
+
 	float cmax = ((float)GetLevel() * 2) + 150;
 	if(GetLevel() > 49) { cmax = 10000; }
 
@@ -145,12 +148,12 @@ int Client::mod_client_damage(int damage, SkillType skillinuse, int hand, const 
     switch(skillinuse)
     {
         case ARCHERY:
-            dmult += cdex / 600;
-            dmult += csta / 600;
+            dmult += cdex / 900;
+            dmult += csta / 900;
 
             if(GetClass() == RANGER)
             {
-                dmult += cdex / 1000;
+                dmult += cdex / 1200;
             }
             break;
 
@@ -332,7 +335,7 @@ int16 Client::mod_increase_skill_chance(int16 chance, Mob* against_who) {
 
     float bonus = (cint + (cwis / 2)) / 10;
 
-    if(bonus < 0) { bonus = 0; }
+    if(bonus < 0.8) { bonus = 0.8; }
 
     return( (int)((float)chance * bonus) );
 }
@@ -395,6 +398,12 @@ int Client::mod_client_haste(int h) {
 
 	h += (int)(agibonus / 10);
 	return(h);
+}
+
+//Haste cap override
+int Client::mod_client_haste_cap(int cap)
+{
+	return( RuleI(Character, HasteCap) );
 }
 
 //This is called when a client cons a mob
@@ -519,24 +528,27 @@ int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mo
 	float spadd = 0.0f;
 
 	int adval = caster->CastToClient()->Admin();
-//	adval = 0;
+	adval = 0;
 
     if(caster->GetCasterClass() == 'W')
     {
         spbonus = (float)(caster->CastToClient()->GetActWIS() - DW_STATBASE) / 400;
         spbonus += (float)(caster->CastToClient()->GetActSTA() - DW_STATBASE) / 400;
+		if(adval > 80) { caster->Message(315, "WIS FORMULA"); }
     }
     else if(caster->GetCasterClass() == 'I')
     {
 	    if(caster->GetClass() == BARD)
     	{
-        	spbonus = (float)(caster->CastToClient()->GetActCHA() - DW_STATBASE) / 150;
-        	spbonus += (float)(caster->CastToClient()->GetActINT() - DW_STATBASE) / 150;
+        	spbonus = (float)(caster->CastToClient()->GetActCHA() - DW_STATBASE) / 400;
+        	spbonus += (float)(caster->CastToClient()->GetActINT() - DW_STATBASE) / 400;
+			if(adval > 80) { caster->Message(315, "CHA FORMULA"); }
     	}
 		else
 		{
         	spbonus = (float)(caster->CastToClient()->GetActINT() - DW_STATBASE) / 400;
         	spbonus += (float)(caster->CastToClient()->GetActDEX() - DW_STATBASE) / 400;
+			if(adval > 80) { caster->Message(315, "INT FORMULA"); }
 		}
     }
 	else
@@ -658,14 +670,16 @@ int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mo
 		mult = 1.0f;
 	}
 
+	int base_effect = effect_value;
+
     if(effect_value > 0) { effect_value += (int)ceil(spadd); }
     else { effect_value -= (int)ceil(spadd); }
 
-    effect_value *= mult;
+    effect_value = (int)( ceil((float)effect_value * mult) );
 
-	if(adval > 80) { caster->Message(315, "Spell Bonus: %d, %d, %d", effect_value, spadd, effect_type); }
+	if(adval > 80) { caster->Message(315, "Spell Bonus: Base: %d, New: %d, Add: %d", base_effect, effect_value, spadd); }
 
-    return( (int)(ceil(effect_value)) );
+    return( effect_value );
 }
 
 //chancetohit - 0 to 100 percent - set over 1000 for a guaranteed hit
@@ -858,7 +872,15 @@ int32 Mob::mod_bash_damage(int32 dmg) {
 int32 Mob::mod_frenzy_damage(int32 dmg) {
 	if(!IsClient()) { return(dmg); }
 
+	float hprmult = 1 + (1 - (GetHP()/GetMaxHP()));
+
 	dmg = CastToClient()->mod_client_damage(dmg, FRENZY, 0, nullptr, nullptr);
+
+	if(GetClass() == BERSERKER)
+	{
+		dmg = (int)( (float)dmg * hprmult );
+	}
+
 	return(dmg);
 }
 
