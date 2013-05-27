@@ -74,7 +74,7 @@ bool DBcore::RunQuery(const std::string query, char* errbuf, MYSQL_RES** result,
 	strn0cpy(tmp, query.c_str(), sizeof(tmp));
 	std::cout << "QUERY: " << tmp << std::endl;
 #endif
-	if (mysql_real_query(&mysql, query.c_str(), query.length())) {
+	if (mysql_real_query(&mysql, query.c_str(), strlen(query.c_str()))) {
 		if (mysql_errno(&mysql) == CR_SERVER_GONE_ERROR)
 			pStatus = Error;
 		if (mysql_errno(&mysql) == CR_SERVER_LOST || mysql_errno(&mysql) == CR_SERVER_GONE_ERROR) {

@@ -1603,6 +1603,7 @@ void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpe
 	StringFormat(query,"SELECT `spellid`, `type` from `damageshieldtypes` "
 						"WHERE `spellid` > 0 AND `spellid` <= %i", iMaxSpellID);
 
+
 	if(RunQuery(query,errbuf,&result)) {
 
 		while((row = mysql_fetch_row(result))) {
