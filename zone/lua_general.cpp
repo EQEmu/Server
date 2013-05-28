@@ -207,96 +207,140 @@ Lua_Mob lua_spawn_from_spawn2(uint32 spawn2_id) {
 	return Lua_Mob(quest_manager.spawn_from_spawn2(spawn2_id));
 }
 
-void lua_enable_spawn2() {
-
+void lua_enable_spawn2(int spawn2_id) {
+	quest_manager.enable_spawn2(spawn2_id);
 }
 
-void lua_disable_spawn2() {
-
+void lua_disable_spawn2(int spawn2_id) {
+	quest_manager.disable_spawn2(spawn2_id);
 }
 
-void lua_cast_spell() {
-
+void lua_cast_spell(int spell_id, int target_id) {
+	quest_manager.castspell(spell_id, target_id);
 }
 
-void lua_self_cast() {
-
+void lua_self_cast(int spell_id) {
+	quest_manager.selfcast(spell_id);
 }
 
-void lua_set_timer() {
-
+void lua_set_timer(const char *timer, int time_ms) {
+	quest_manager.settimerMS(timer, time_ms);
 }
 
-void lua_stop_timer() {
-
+void lua_stop_timer(const char *timer) {
+	quest_manager.stoptimer(timer);
 }
 
 void lua_stop_all_timers() {
-
+	quest_manager.stopalltimers();
 }
 
-void lua_emote() {
-
+void lua_emote(const char *str) {
+	quest_manager.emote(str);
 }
 
-void lua_shout() {
-
+void lua_shout(const char *str) {
+	quest_manager.shout(str);
 }
 
-void lua_gmsay() {
+void lua_gmsay(const char *str) {
+	quest_manager.gmsay(str, 7, false, 0, 0);
+}
 
+void lua_gmsay(const char *str, int color) {
+	quest_manager.gmsay(str, color, false, 0, 0);
+}
+
+void lua_gmsay(const char *str, int color, bool send_to_world) {
+	quest_manager.gmsay(str, color, send_to_world, 0, 0);
+}
+
+void lua_gmsay(const char *str, int color, bool send_to_world, uint32 to_guilddbid) {
+	quest_manager.gmsay(str, color, send_to_world, to_guilddbid, 0);
+}
+
+void lua_gmsay(const char *str, int color, bool send_to_world, uint32 to_guilddbid, int to_minstatus) {
+	quest_manager.gmsay(str, color, send_to_world, to_guilddbid, to_minstatus);
 }
 
 void lua_depop() {
+	quest_manager.depop(0);
+}
 
+void lua_depop(int npc_type) {
+	quest_manager.depop(npc_type);
 }
 
 void lua_depop_with_timer() {
-
+	quest_manager.depop_withtimer(0);
 }
 
-void lua_follow() {
+void lua_depop_with_timer(int npc_type) {
+	quest_manager.depop_withtimer(npc_type);
+}
 
+void lua_depop_all() {
+	quest_manager.depopall(0);
+}
+
+void lua_depop_all(int npc_type) {
+	quest_manager.depopall(npc_type);
+}
+
+void lua_depop_zone(bool start_spawn_status) {
+	quest_manager.depopzone(start_spawn_status);
+}
+
+void lua_repop_zone() {
+	quest_manager.repopzone();
+}
+
+void lua_follow(int entity_id) {
+	quest_manager.follow(entity_id, 10);
+}
+
+void lua_follow(int entity_id, int distance) {
+	quest_manager.follow(entity_id, distance);
 }
 
 void lua_stop_follow() {
-
+	quest_manager.sfollow();
 }
 
-void lua_change_deity() {
-
+void lua_change_deity(int deity_id) {
+	quest_manager.changedeity(diety_id);
 }
 
-void lua_is_disc_tome() {
-
+bool lua_is_disc_tome() {
+	return quest_manager.isdisctome(item_id);
 }
 
 void lua_safe_move() {
-
+	quest_manager.safemove();
 }
 
-void lua_rain() {
-
+void lua_rain(int weather) {
+	quest_manager.rain(weather);
 }
 
-void lua_snow() {
-
+void lua_snow(int weather) {
+	quest_manager.rain(weather);
 }
 
-void lua_surname() {
-
+void lua_surname(const char *name) {
+	quest_manager.surname(name);
 }
 
-void lua_perma_class() {
-
+void lua_perma_class(int class_id) {
+	quest_manager.permaclass(class_id);
 }
 
-void lua_perma_race() {
-
+void lua_perma_race(int race_id) {
+	quest_manager.permarace(race_id);
 }
 
-void lua_perma_gender() {
-
+void lua_perma_gender(int gender_id) {
+	quest_manager.permagender(gender_id);
 }
 
 void lua_scribe_spells() {
@@ -452,18 +496,6 @@ void lua_get_player_burried_corpse_count() {
 }
 
 void lua_bury_player_corpse() {
-
-}
-
-void lua_depop_all() {
-
-}
-
-void lua_depop_zone() {
-
-}
-
-void lua_repop_zone() {
 
 }
 
@@ -735,10 +767,21 @@ luabind::scope lua_register_general() {
 		luabind::def("stop_all_timers", &lua_stop_all_timers),
 		luabind::def("emote", &lua_emote),
 		luabind::def("shout", &lua_shout),
-		luabind::def("gmsay", &lua_gmsay),
-		luabind::def("depop", &lua_depop),
-		luabind::def("depop_with_timer", &lua_depop_with_timer),
-		luabind::def("follow", &lua_follow),
+		luabind::def("gmsay", (void(*)(const char*))&lua_gmsay),
+		luabind::def("gmsay", (void(*)(const char*,int))&lua_gmsay),
+		luabind::def("gmsay", (void(*)(const char*,int,bool))&lua_gmsay),
+		luabind::def("gmsay", (void(*)(const char*,int,bool,uint32))&lua_gmsay),
+		luabind::def("gmsay", (void(*)(const char*,int,bool,uint32,int))&lua_gmsay),
+		luabind::def("depop", (void(*)(void))&lua_depop),
+		luabind::def("depop", (void(*)(int))&lua_depop),
+		luabind::def("depop_with_timer", (void(*)(void))&lua_depop_with_timer),
+		luabind::def("depop_with_timer", (void(*)(int))&lua_depop_with_timer),
+		luabind::def("depop_all", (void(*)(void))&lua_depop_all),
+		luabind::def("depop_all", (void(*)(int))&lua_depop_all),
+		luabind::def("depop_zone", &lua_depop_zone),
+		luabind::def("repop_zone", &lua_repop_zone),
+		luabind::def("follow", (void(*)(int))&lua_follow),
+		luabind::def("follow", (void(*)(int,int))&lua_follow),
 		luabind::def("stop_follow", &lua_stop_follow),
 		luabind::def("change_deity", &lua_change_deity),
 		luabind::def("is_disc_tome", &lua_is_disc_tome),
@@ -788,9 +831,6 @@ luabind::scope lua_register_general() {
 		luabind::def("summon_all_player_corpses", &lua_summon_all_player_corpses),
 		luabind::def("get_player_burried_corpse_count", &lua_get_player_burried_corpse_count),
 		luabind::def("bury_player_corpse", &lua_bury_player_corpse),
-		luabind::def("depop_all", &lua_depop_all),
-		luabind::def("depop_zone", &lua_depop_zone),
-		luabind::def("repop_zone", &lua_repop_zone),
 		luabind::def("task_selector", &lua_task_selector),
 		luabind::def("task_set_selector", &lua_task_set_selector),
 		luabind::def("enable_task", &lua_enable_task),

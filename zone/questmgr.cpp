@@ -107,7 +107,6 @@ QuestManager quest_manager;
 
 QuestManager::QuestManager() {
 	HaveProximitySays = false;
-	
 }
 
 QuestManager::~QuestManager() {
