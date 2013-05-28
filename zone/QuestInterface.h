@@ -58,6 +58,7 @@ public:
 	
 	virtual void AddVar(std::string name, std::string val) { }
 	virtual std::string GetVar(std::string name) { return std::string(); }
+	virtual void Init() { }
 	virtual void ReloadQuests() { }
 	virtual uint32 GetIdentifier() = 0;
 	

@@ -53,6 +53,14 @@ void QuestParserCollection::AddVar(std::string name, std::string val) {
 	}
 }
 
+void QuestParserCollection::Init() {
+	std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		(*iter)->Init();
+		iter++;
+	}
+}
+
 void QuestParserCollection::ReloadQuests(bool reset_timers) {
 	if(reset_timers) {
 		quest_manager.ClearAllTimers();

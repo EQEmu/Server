@@ -41,6 +41,7 @@ public:
 	void RegisterQuestInterface(QuestInterface *qi, std::string ext);
 
 	void AddVar(std::string name, std::string val);
+	void Init();
 	void ReloadQuests(bool reset_timers = true);
 
 	bool HasQuestSub(uint32 npcid, const char *subname);

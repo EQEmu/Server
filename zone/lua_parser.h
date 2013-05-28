@@ -51,6 +51,7 @@ public:
 
 	virtual void AddVar(std::string name, std::string val);
 	virtual std::string GetVar(std::string name);
+	virtual void Init();
 	virtual void ReloadQuests();
     virtual uint32 GetIdentifier() { return 0xb0712acc; }
 

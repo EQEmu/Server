@@ -7,6 +7,9 @@
 class Lua_Mob;
 struct tHateEntry;
 
+luabind::scope lua_register_hate_entry();
+luabind::scope lua_register_hate_list();
+
 class Lua_HateEntry : public Lua_Ptr<void>
 {
 	typedef tHateEntry NativeType;

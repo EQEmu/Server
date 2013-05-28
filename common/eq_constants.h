@@ -651,7 +651,7 @@ enum InventorySlot
 	// Slot used in OP_TradeSkillCombine for world tradeskill containers
 	SLOT_TRADESKILL = 1000,
 	SLOT_AUGMENT = 1001,
-	// SLOT_POWER_SOURCE = 9999,
+	SLOT_POWER_SOURCE = 9999,
 	// Value recognized by client for destroying an item
 	SLOT_INVALID = (int16)0xFFFF
 };

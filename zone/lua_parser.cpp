@@ -3,7 +3,6 @@
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
-#include <luabind/iterator_policy.hpp>
 #include <boost/any.hpp>
 
 #include <ctype.h>
@@ -674,6 +673,10 @@ std::string LuaParser::GetVar(std::string name) {
 	return std::string();
 }
 
+void LuaParser::Init() {
+	ReloadQuests();
+}
+
 void LuaParser::ReloadQuests() {
 	loaded_.clear();
 	errors_.clear();
@@ -795,6 +798,10 @@ void LuaParser::MapFunctions(lua_State *L) {
 		[
 			lua_register_general(),
 			lua_register_events(),
+			lua_register_faction(),
+			lua_register_slot(),
+			lua_register_material(),
+			lua_register_client_version(),
 			lua_register_entity(),
 			lua_register_mob(),
 			lua_register_npc(),
@@ -803,17 +810,8 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_iteminst(),
 			lua_register_item(),
 			lua_register_spell(),
-
-			luabind::class_<Lua_HateEntry>("HateEntry")
-				.property("null", &Lua_HateEntry::Null)
-				.property("valid", &Lua_HateEntry::Valid)
-				.property("ent", &Lua_HateEntry::GetEnt, &Lua_HateEntry::SetEnt)
-				.property("damage", &Lua_HateEntry::GetDamage, &Lua_HateEntry::SetDamage)
-				.property("hate", &Lua_HateEntry::GetHate, &Lua_HateEntry::SetHate)
-				.property("frenzy", &Lua_HateEntry::GetFrenzy, &Lua_HateEntry::SetFrenzy),
-
-			luabind::class_<Lua_HateList>("HateList")
-				.def_readwrite("entries", &Lua_HateList::entries, luabind::return_stl_iterator)
+			lua_register_hate_entry(),
+			lua_register_hate_list()
 		];
 	
 	} catch(std::exception &ex) {

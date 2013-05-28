@@ -2451,9 +2451,7 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 	char* link = 0;
 	char* tempstr = 0;
 	if (initiator->MakeItemLink(link, inst)) {	// make a link to the item
-		MakeAnyLenString(&tempstr, "%c%s%s%c", 0x12, link, inst->GetItem()->Name, 0x12);
-		strn0cpy(perltext, tempstr, 250);	// the perl string is only 250 chars, so make sure the link isn't too large
-		safe_delete_array(tempstr);	// MakeAnyLenString() uses new, so clean up after it
+		snprintf(perltext, 250, "%c%s%s%c", 0x12, link, inst->GetItem()->Name, 0x12);
 	}
 	safe_delete_array(link);	// MakeItemLink() uses new also
 	safe_delete(inst);

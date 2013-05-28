@@ -136,6 +136,8 @@ SET(zone_headers
 	lua_client.h
 	lua_entity.h
 	lua_general.h
+	lua_hate_entry.h
+	lua_hate_list.h
 	lua_item.h
 	lua_iteminst.h
 	lua_mob.h
