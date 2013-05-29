@@ -662,8 +662,8 @@ int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mo
             break;
     }
 
-	//Shroud of the bear
-	if(caster->FindBuff(5045))
+	//Shroud of the bear and Blood of the Master
+	if(caster->FindBuff(5045) || caster->FindBuff(1169))
 	{
 		if(adval > 80) { caster->Message(315, "Shroud of bear nerf"); }
 		spadd = spadd * -1;
@@ -969,24 +969,29 @@ int32 Mob::mod_cast_time(int32 cast_time) {
 
 //res - Default buff duration formula
 int Mob::mod_buff_duration(int res, Mob* caster, Mob* target, uint16 spell_id) {
-	if(!IsClient()) { return(res); }
+    //if(!IsClient()) { return(res); }
+    if(res <= 1) { return(res); }
+    if(!caster) { return(res); }
+    if(!caster->IsClient()) { return(res); }
 
     float cmult = 1;
 
-    if(GetClass() == BARD)
+//    caster->Message(315, "Duration: %d", res);
+
+    if(caster->GetClass() == BARD)
     {
-        cmult = (float)(CastToClient()->GetActCHA() - DW_STATBASE) / 200;
+        cmult = (float)(caster->CastToClient()->GetActCHA() - DW_STATBASE) / 200;
     }
-    else if(GetCasterClass() == 'W')
+    else if(caster->GetCasterClass() == 'W')
     {
-        cmult = (float)(CastToClient()->GetActWIS() - DW_STATBASE) / 200;
+        cmult = (float)(caster->CastToClient()->GetActWIS() - DW_STATBASE) / 200;
     }
-    else if(GetCasterClass() == 'I')
+    else if(caster->GetCasterClass() == 'I')
     {
-        cmult = (float)(CastToClient()->GetActINT() - DW_STATBASE) / 200;
+        cmult = (float)(caster->CastToClient()->GetActINT() - DW_STATBASE) / 200;
     }
 
-    cmult += (float)(CastToClient()->GetActSTA() - DW_STATBASE) / 400;
+    cmult += (float)(caster->CastToClient()->GetActSTA() - DW_STATBASE) / 400;
 
     if(cmult < 1) { cmult = 1; }
 
@@ -1066,6 +1071,38 @@ int Mob::mod_spell_resist(int resist_chance, int level_mod, int resist_modifier,
 	}
 
 	return(final);
+}
+
+//Spell is cast by this on spelltar, called from spellontarget after the event_cast_on NPC event
+void Mob::mod_spell_cast(uint16 spell_id, Mob* spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust, bool isproc)
+{
+	float cval = 5;
+
+	if(!IsClient()) { return; }
+	if(GetClass() == WIZARD)
+	{
+		cval += (float)(CastToClient()->GetActINT() - DW_STATBASE) / 100;
+		cval += (float)(CastToClient()->GetActDEX() - DW_STATBASE) / 100;
+		cval += (float)(CastToClient()->GetActCHA() - DW_STATBASE) / 100;
+
+		if(MakeRandomFloat(0, 99) < cval)
+		{
+			Message(14, "You channel addition power into the spell!");
+			SpellOnTarget(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
+
+			if(MakeRandomFloat(0, 99) < cval)
+			{
+				Message(14, "You continue to channel additional power!");
+				SpellOnTarget(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
+
+				if(MakeRandomFloat(0, 99) < cval)
+				{
+					Message(14, "You apply the full force of your concentration into the spell!");
+					SpellOnTarget(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
+				}
+			}
+		}
+	}
 }
 
 //This is called right before regular event processing (the switch block)
