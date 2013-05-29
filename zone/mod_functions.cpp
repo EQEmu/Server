@@ -210,6 +210,7 @@ int Client::mod_client_damage(int damage, SkillType skillinuse, int hand, const 
 			{
 				dmult += csta / 100;
 				dmult += cstr / 100;
+				if(berserk) { dmult += cstr / 100; }
 			}
 			else
 			{
@@ -765,6 +766,10 @@ float Mob::mod_mitigation_rating(float mitigation_rating, Mob* attacker) {
 		case BARD:
 			return(mitigation_rating + (armor/5));
 
+		case BERSERKER:
+			if(CastToClient()->berserk) { return(mitigation_rating / 1.5); }
+			else { return(mitigation_rating); }
+
 		default:
 			return(mitigation_rating);
 	}
@@ -1084,12 +1089,16 @@ void Mob::mod_spell_cast(uint16 spell_id, Mob* spelltar, bool reflect, bool use_
 		cval += (float)(CastToClient()->GetActINT() - DW_STATBASE) / 100;
 		cval += (float)(CastToClient()->GetActDEX() - DW_STATBASE) / 100;
 		cval += (float)(CastToClient()->GetActCHA() - DW_STATBASE) / 100;
+		cval += (float)(CastToClient()->GetActSTA() - DW_STATBASE) / 100;
+
+		if(cval > 50) { cval = 50; } //This absolutely needs a cap
 
 		if(MakeRandomFloat(0, 99) < cval)
 		{
 			Message(14, "You channel addition power into the spell!");
 			SpellOnTarget(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
 
+/*			This is already recursive
 			if(MakeRandomFloat(0, 99) < cval)
 			{
 				Message(14, "You continue to channel additional power!");
@@ -1101,6 +1110,7 @@ void Mob::mod_spell_cast(uint16 spell_id, Mob* spelltar, bool reflect, bool use_
 					SpellOnTarget(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
 				}
 			}
+*/
 		}
 	}
 }
