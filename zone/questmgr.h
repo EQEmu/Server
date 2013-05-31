@@ -165,7 +165,7 @@ public:
 	void playertexture(int newtexture);
 	void playerfeature(char *feature, int setting);
 	void npcfeature(char *feature, int setting);
-	void popup(char *title, char *text, uint32 popupid, uint32 buttons, uint32 Duration);
+	void popup(const char *title, const char *text, uint32 popupid, uint32 buttons, uint32 Duration);
 	void taskselector(int taskcount, int *tasks);
 	void tasksetselector(int tasksettid);
 	void enabletask(int taskcount, int *tasks);
@@ -215,14 +215,14 @@ public:
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version);
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);
 	const char* varlink(char* perltext, int item_id);
-	const char* saylink(char* Phrase, bool silent, char* LinkName);
+	const char* saylink(char* Phrase, bool silent, const char* LinkName);
 	const char* getguildnamebyid(int guild_id);
 	void SetRunning(bool val);
 	bool IsRunning();
 	void FlyMode(uint8 flymode);
 	uint8 FactionValue();
 	void wearchange(uint8 slot, uint16 texture);
-	void voicetell(char *str, int macronum, int racenum, int gendernum);
+	void voicetell(const char *str, int macronum, int racenum, int gendernum);
     void LearnRecipe(uint32 recipe_id);
     void SendMail(const char *to, const char *from, const char *subject, const char *message);
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);

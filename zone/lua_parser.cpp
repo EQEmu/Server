@@ -3,7 +3,6 @@
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
-#include <boost/any.hpp>
 
 #include <ctype.h>
 #include <stdio.h>

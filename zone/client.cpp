@@ -7128,11 +7128,11 @@ void Client::SendWebLink(const char *website)
 
 void Client::SendMercPersonalInfo()
 {
-uint32 mercTypeCount = 1;
-uint32 mercCount = 1; //TODO: Un-hardcode this and support multiple mercs like in later clients than SoD.
-//uint32 packetSize = 0;
-uint32 i=0;
-uint32 altCurrentType = 19; //TODO: Implement alternate currency purchases involving mercs!
+	uint32 mercTypeCount = 1;
+	uint32 mercCount = 1; //TODO: Un-hardcode this and support multiple mercs like in later clients than SoD.
+	//uint32 packetSize = 0;
+	uint32 i=0;
+	uint32 altCurrentType = 19; //TODO: Implement alternate currency purchases involving mercs!
 
 	if (GetClientVersion() >= EQClientRoF)
 	{

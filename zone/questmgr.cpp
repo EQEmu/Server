@@ -1951,7 +1951,7 @@ void QuestManager::npcfeature(char *feature, int setting)
 										DrakkinHeritage, DrakkinTattoo, DrakkinDetails, Size);
 }
 
-void QuestManager::popup(char *title, char *text, uint32 popupid, uint32 buttons, uint32 Duration)
+void QuestManager::popup(const char *title, const char *text, uint32 popupid, uint32 buttons, uint32 Duration)
 {
 	QuestManagerCurrentQuestVars();
 	if(initiator)
@@ -2569,7 +2569,7 @@ void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 	}
 }
 
-const char* QuestManager::saylink(char* Phrase, bool silent, char* LinkName) {
+const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkName) {
 	QuestManagerCurrentQuestVars();
 
 	const char *ERR_MYSQLERROR = "Error in saylink phrase queries";
@@ -2764,7 +2764,7 @@ void QuestManager::wearchange(uint8 slot, uint16 texture)
 	}
 }
 
-void QuestManager::voicetell(char *str, int macronum, int racenum, int gendernum)
+void QuestManager::voicetell(const char *str, int macronum, int racenum, int gendernum)
 {
 	QuestManagerCurrentQuestVars();
 	if(owner && str)
