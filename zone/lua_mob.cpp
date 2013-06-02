@@ -353,7 +353,7 @@ const char *Lua_Mob::GetCleanName() {
 }
 
 Lua_Mob Lua_Mob::GetTarget() {
-	Lua_Safe_Call_Mob();
+	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->GetTarget());
 }
 
@@ -750,17 +750,17 @@ void Lua_Mob::SpellEffect(Lua_Mob caster, int spell_id, double partial) {
 }
 
 Lua_Mob Lua_Mob::GetPet() {
-	Lua_Safe_Call_Mob();
+	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->GetPet());
 }
 
 Lua_Mob Lua_Mob::GetOwner() {
-	Lua_Safe_Call_Mob();
+	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->GetOwner());
 }
 
 Lua_HateList Lua_Mob::GetHateList() {
-	Lua_Safe_Call_HateList();
+	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
 	
 	auto h_list = self->GetHateList();
@@ -775,17 +775,17 @@ Lua_HateList Lua_Mob::GetHateList() {
 }
 
 Lua_Mob Lua_Mob::GetHateTop() {
-	Lua_Safe_Call_Mob();
+	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->GetHateTop());
 }
 
 Lua_Mob Lua_Mob::GetHateDamageTop(Lua_Mob other) {
-	Lua_Safe_Call_Mob();
+	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->GetHateDamageTop(other));
 }
 
 Lua_Mob Lua_Mob::GetHateRandom() {
-	Lua_Safe_Call_Mob();
+	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->GetHateRandom());
 }
 

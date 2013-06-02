@@ -151,7 +151,7 @@ public:
 	Group*	GetGroupByMob(Mob* mob);
 	Group*	GetGroupByClient(Client* client);
 	Group*	GetGroupByID(uint32 id);
-	Group*	GetGroupByLeaderName(char* leader);
+	Group*	GetGroupByLeaderName(const char* leader);
 	Raid*	GetRaidByMob(Mob* mob);
 	Raid*	GetRaidByClient(Client* client);
 	Raid*	GetRaidByID(uint32 id);

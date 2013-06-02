@@ -44,12 +44,12 @@ bool Lua_ItemInst::IsExpendable() {
 }
 
 Lua_ItemInst Lua_ItemInst::GetItem(int slot) {
-	Lua_Safe_Call_ItemInst();
+	Lua_Safe_Call_Class(Lua_ItemInst);
 	return Lua_ItemInst(self->GetItem(slot));
 }
 
 Lua_Item Lua_ItemInst::GetItem() {
-	Lua_Safe_Call_Item();
+	Lua_Safe_Call_Class(Lua_Item);
 	return Lua_Item(self->GetItem());
 }
 
@@ -59,7 +59,7 @@ void Lua_ItemInst::SetItem(Lua_Item item) {
 }
 
 Lua_Item Lua_ItemInst::GetUnscaledItem(int slot) {
-	Lua_Safe_Call_Item();
+	Lua_Safe_Call_Class(Lua_Item);
 	if(self->IsScaling()) {
 		const EvoItemInst *ev = reinterpret_cast<const EvoItemInst*>(self);
 		return Lua_Item(ev->GetUnscaledItem());
@@ -78,7 +78,7 @@ int Lua_ItemInst::GetTotalItemCount() {
 }
 
 Lua_ItemInst Lua_ItemInst::GetAugment(int slot) {
-	Lua_Safe_Call_ItemInst();
+	Lua_Safe_Call_Class(Lua_ItemInst);
 	return self->GetAugment(slot);
 }
 

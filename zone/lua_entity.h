@@ -11,6 +11,9 @@ class Lua_Mob;
 struct Lua_HateList;
 class Lua_Item;
 class Lua_ItemInst;
+class Lua_Corpse;
+class Lua_Object;
+class Lua_Door;
 
 namespace luabind {
 	struct scope;
@@ -51,12 +54,9 @@ public:
 	Lua_Client CastToClient();
 	Lua_NPC CastToNPC();
 	Lua_Mob CastToMob();
-	//Lua_Merc CastToMerc();
-	//Lua_Corpse CastToCorpse();
-	//Lua_Object CastToObject();
-	//Lua_Doors CastToDoors();
-	//Lua_Trap CastToTrap();
-	//Lua_Beacon CastToBeacon();
+	Lua_Corpse CastToCorpse();
+	Lua_Object CastToObject();
+	Lua_Door CastToDoor();
 };
 
 #endif

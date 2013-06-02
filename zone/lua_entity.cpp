@@ -9,6 +9,9 @@
 #include "lua_mob.h"
 #include "lua_client.h"
 #include "lua_npc.h"
+#include "lua_corpse.h"
+#include "lua_object.h"
+#include "lua_door.h"
 
 bool Lua_Entity::IsClient() {
 	Lua_Safe_Call_Bool();
@@ -88,6 +91,24 @@ Lua_Mob Lua_Entity::CastToMob() {
 	return Lua_Mob(m);
 }
 
+Lua_Corpse Lua_Entity::CastToCorpse() {
+	void *d = GetLuaPtrData();
+	Corpse *m = reinterpret_cast<Corpse*>(d);
+	return Lua_Corpse(m);
+}
+
+Lua_Object Lua_Entity::CastToObject() {
+	void *d = GetLuaPtrData();
+	Object *m = reinterpret_cast<Object*>(d);
+	return Lua_Object(m);
+}
+
+Lua_Door Lua_Entity::CastToDoor() {
+	void *d = GetLuaPtrData();
+	Doors *m = reinterpret_cast<Doors*>(d);
+	return Lua_Door(m);
+}
+
 luabind::scope lua_register_entity() {
 	return luabind::class_<Lua_Entity>("Entity")
 		.def(luabind::constructor<>())
@@ -107,7 +128,10 @@ luabind::scope lua_register_entity() {
 		.def("GetID", &Lua_Entity::GetID)
 		.def("CastToClient", &Lua_Entity::CastToClient)
 		.def("CastToNPC", &Lua_Entity::CastToNPC)
-		.def("CastToMob", &Lua_Entity::CastToMob);
+		.def("CastToMob", &Lua_Entity::CastToMob)
+		.def("CastToCorpse", &Lua_Entity::CastToCorpse)
+		.def("CastToObject", &Lua_Entity::CastToObject)
+		.def("CastToDoor", &Lua_Entity::CastToDoor);
 }
 
 #endif

@@ -5,6 +5,8 @@
 #include "lua_mob.h"
 
 class Client;
+class Lua_Group;
+class Lua_Raid;
 
 namespace luabind {
 	struct scope;
@@ -259,12 +261,8 @@ public:
 	bool HasSpellScribed(int spell_id);
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag);
-
-	/*
-	//unsup features
 	Lua_Group GetGroup();
 	Lua_Raid GetRaid();
-	*/
 };
 
 #endif

@@ -477,79 +477,34 @@ uint32 Lua_Item::GetAugType() {
 	return self->AugType;
 }
 
-int Lua_Item::GetAugSlotType1() {
+int Lua_Item::GetAugSlotType(int i) {
 	Lua_Safe_Call_Int();
-	return self->AugSlotType[1];
+
+	if(i >= 5 || i < 0) {
+		return 0;
+	}
+
+	return self->AugSlotType[i];
 }
 
-int Lua_Item::GetAugSlotType2() {
+int Lua_Item::GetAugSlotVisible(int i) {
 	Lua_Safe_Call_Int();
-	return self->AugSlotType[2];
+
+	if(i >= 5 || i < 0) {
+		return 0;
+	}
+
+	return self->AugSlotVisible[i];
 }
 
-int Lua_Item::GetAugSlotType3() {
+int Lua_Item::GetAugSlotUnk2(int i) {
 	Lua_Safe_Call_Int();
-	return self->AugSlotType[3];
-}
 
-int Lua_Item::GetAugSlotType4() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotType[4];
-}
+	if(i >= 5 || i < 0) {
+		return 0;
+	}
 
-int Lua_Item::GetAugSlotType5() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotType[5];
-}
-
-int Lua_Item::GetAugSlotVisible1() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotVisible[1];
-}
-
-int Lua_Item::GetAugSlotVisible2() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotVisible[2];
-}
-
-int Lua_Item::GetAugSlotVisible3() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotVisible[3];
-}
-
-int Lua_Item::GetAugSlotVisible4() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotVisible[4];
-}
-
-int Lua_Item::GetAugSlotVisible5() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotVisible[5];
-}
-
-int Lua_Item::GetAugSlotUnk21() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotUnk2[1];
-}
-
-int Lua_Item::GetAugSlotUnk22() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotUnk2[2];
-}
-
-int Lua_Item::GetAugSlotUnk23() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotUnk2[3];
-}
-
-int Lua_Item::GetAugSlotUnk24() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotUnk2[4];
-}
-
-int Lua_Item::GetAugSlotUnk25() {
-	Lua_Safe_Call_Int();
-	return self->AugSlotUnk2[5];
+	return self->AugSlotUnk2[i];
 }
 
 uint32 Lua_Item::GetLDoNTheme() {
@@ -951,195 +906,183 @@ luabind::scope lua_register_item() {
 	return luabind::class_<Lua_Item>("Item")
 		.def(luabind::constructor<>())
 		.def(luabind::constructor<uint32>())
-		.property("null", &Lua_Item::Null)
-		.property("valid", &Lua_Item::Valid)
-		.property("MinStatus", &Lua_Item::GetMinStatus)
-		.property("ItemClass", &Lua_Item::GetItemClass)
-		.property("Name", &Lua_Item::GetName)
-		.property("Lore", &Lua_Item::GetLore)
-		.property("IDFile", &Lua_Item::GetIDFile)
-		.property("ID", &Lua_Item::GetID)
-		.property("Weight", &Lua_Item::GetWeight)
-		.property("NoRent", &Lua_Item::GetNoRent)
-		.property("NoDrop", &Lua_Item::GetNoDrop)
-		.property("Size", &Lua_Item::GetSize)
-		.property("Slots", &Lua_Item::GetSlots)
-		.property("Price", &Lua_Item::GetPrice)
-		.property("Icon", &Lua_Item::GetIcon)
-		.property("LoreGroup", &Lua_Item::GetLoreGroup)
-		.property("LoreFlag", &Lua_Item::GetLoreFlag)
-		.property("PendingLoreFlag", &Lua_Item::GetPendingLoreFlag)
-		.property("ArtifactFlag", &Lua_Item::GetArtifactFlag)
-		.property("SummonedFlag", &Lua_Item::GetSummonedFlag)
-		.property("FVNoDrop", &Lua_Item::GetFVNoDrop)
-		.property("Favor", &Lua_Item::GetFavor)
-		.property("GuildFavor", &Lua_Item::GetGuildFavor)
-		.property("PointType", &Lua_Item::GetPointType)
-		.property("BagType", &Lua_Item::GetBagType)
-		.property("BagSlots", &Lua_Item::GetBagSlots)
-		.property("BagSize", &Lua_Item::GetBagSize)
-		.property("BagWR", &Lua_Item::GetBagWR)
-		.property("BenefitFlag", &Lua_Item::GetBenefitFlag)
-		.property("Tradeskills", &Lua_Item::GetTradeskills)
-		.property("CR", &Lua_Item::GetCR)
-		.property("DR", &Lua_Item::GetDR)
-		.property("PR", &Lua_Item::GetPR)
-		.property("MR", &Lua_Item::GetMR)
-		.property("FR", &Lua_Item::GetFR)
-		.property("AStr", &Lua_Item::GetAStr)
-		.property("ASta", &Lua_Item::GetASta)
-		.property("AAgi", &Lua_Item::GetAAgi)
-		.property("ADex", &Lua_Item::GetADex)
-		.property("ACha", &Lua_Item::GetACha)
-		.property("AInt", &Lua_Item::GetAInt)
-		.property("AWis", &Lua_Item::GetAWis)
-		.property("HP", &Lua_Item::GetHP)
-		.property("Mana", &Lua_Item::GetMana)
-		.property("AC", &Lua_Item::GetAC)
-		.property("Deity", &Lua_Item::GetDeity)
-		.property("SkillModValue", &Lua_Item::GetSkillModValue)
-		.property("SkillModType", &Lua_Item::GetSkillModType)
-		.property("BaneDmgRace", &Lua_Item::GetBaneDmgRace)
-		.property("BaneDmgAmt", &Lua_Item::GetBaneDmgAmt)
-		.property("BaneDmgBody", &Lua_Item::GetBaneDmgBody)
-		.property("Magic", &Lua_Item::GetMagic)
-		.property("CastTime_", &Lua_Item::GetCastTime_)
-		.property("ReqLevel", &Lua_Item::GetReqLevel)
-		.property("BardType", &Lua_Item::GetBardType)
-		.property("BardValue", &Lua_Item::GetBardValue)
-		.property("Light", &Lua_Item::GetLight)
-		.property("Delay", &Lua_Item::GetDelay)
-		.property("RecLevel", &Lua_Item::GetRecLevel)
-		.property("RecSkill", &Lua_Item::GetRecSkill)
-		.property("ElemDmgType", &Lua_Item::GetElemDmgType)
-		.property("ElemDmgAmt", &Lua_Item::GetElemDmgAmt)
-		.property("Range", &Lua_Item::GetRange)
-		.property("Damage", &Lua_Item::GetDamage)
-		.property("Color", &Lua_Item::GetColor)
-		.property("Classes", &Lua_Item::GetClasses)
-		.property("Races", &Lua_Item::GetRaces)
-		.property("MaxCharges", &Lua_Item::GetMaxCharges)
-		.property("ItemType", &Lua_Item::GetItemType)
-		.property("Material", &Lua_Item::GetMaterial)
-		.property("SellRate", &Lua_Item::GetSellRate)
-		.property("Fulfilment", &Lua_Item::GetFulfilment)
-		.property("CastTime", &Lua_Item::GetCastTime)
-		.property("EliteMaterial", &Lua_Item::GetEliteMaterial)
-		.property("ProcRate", &Lua_Item::GetProcRate)
-		.property("CombatEffects", &Lua_Item::GetCombatEffects)
-		.property("Shielding", &Lua_Item::GetShielding)
-		.property("StunResist", &Lua_Item::GetStunResist)
-		.property("StrikeThrough", &Lua_Item::GetStrikeThrough)
-		.property("ExtraDmgSkill", &Lua_Item::GetExtraDmgSkill)
-		.property("ExtraDmgAmt", &Lua_Item::GetExtraDmgAmt)
-		.property("SpellShield", &Lua_Item::GetSpellShield)
-		.property("Avoidance", &Lua_Item::GetAvoidance)
-		.property("Accuracy", &Lua_Item::GetAccuracy)
-		.property("CharmFileID", &Lua_Item::GetCharmFileID)
-		.property("FactionMod1", &Lua_Item::GetFactionMod1)
-		.property("FactionMod2", &Lua_Item::GetFactionMod2)
-		.property("FactionMod3", &Lua_Item::GetFactionMod3)
-		.property("FactionMod4", &Lua_Item::GetFactionMod4)
-		.property("FactionAmt1", &Lua_Item::GetFactionAmt1)
-		.property("FactionAmt2", &Lua_Item::GetFactionAmt2)
-		.property("FactionAmt3", &Lua_Item::GetFactionAmt3)
-		.property("FactionAmt4", &Lua_Item::GetFactionAmt4)
-		.property("CharmFile", &Lua_Item::GetCharmFile)
-		.property("AugType", &Lua_Item::GetAugType)
-		.property("AugSlotType1", &Lua_Item::GetAugSlotType1)
-		.property("AugSlotType2", &Lua_Item::GetAugSlotType2)
-		.property("AugSlotType3", &Lua_Item::GetAugSlotType3)
-		.property("AugSlotType4", &Lua_Item::GetAugSlotType4)
-		.property("AugSlotType5", &Lua_Item::GetAugSlotType5)
-		.property("AugSlotVisible1", &Lua_Item::GetAugSlotVisible1)
-		.property("AugSlotVisible2", &Lua_Item::GetAugSlotVisible2)
-		.property("AugSlotVisible3", &Lua_Item::GetAugSlotVisible3)
-		.property("AugSlotVisible4", &Lua_Item::GetAugSlotVisible4)
-		.property("AugSlotVisible5", &Lua_Item::GetAugSlotVisible5)
-		.property("AugSlotUnk21", &Lua_Item::GetAugSlotUnk21)
-		.property("AugSlotUnk22", &Lua_Item::GetAugSlotUnk22)
-		.property("AugSlotUnk23", &Lua_Item::GetAugSlotUnk23)
-		.property("AugSlotUnk24", &Lua_Item::GetAugSlotUnk24)
-		.property("AugSlotUnk25", &Lua_Item::GetAugSlotUnk25)
-		.property("LDoNTheme", &Lua_Item::GetLDoNTheme)
-		.property("LDoNPrice", &Lua_Item::GetLDoNPrice)
-		.property("LDoNSold", &Lua_Item::GetLDoNSold)
-		.property("BaneDmgRaceAmt", &Lua_Item::GetBaneDmgRaceAmt)
-		.property("AugRestrict", &Lua_Item::GetAugRestrict)
-		.property("Endur", &Lua_Item::GetEndur)
-		.property("DotShielding", &Lua_Item::GetDotShielding)
-		.property("Attack", &Lua_Item::GetAttack)
-		.property("Regen", &Lua_Item::GetRegen)
-		.property("ManaRegen", &Lua_Item::GetManaRegen)
-		.property("EnduranceRegen", &Lua_Item::GetEnduranceRegen)
-		.property("Haste", &Lua_Item::GetHaste)
-		.property("DamageShield", &Lua_Item::GetDamageShield)
-		.property("RecastDelay", &Lua_Item::GetRecastDelay)
-		.property("RecastType", &Lua_Item::GetRecastType)
-		.property("AugDistiller", &Lua_Item::GetAugDistiller)
-		.property("Attuneable", &Lua_Item::GetAttuneable)
-		.property("NoPet", &Lua_Item::GetNoPet)
-		.property("PotionBelt", &Lua_Item::GetPotionBelt)
-		.property("Stackable", &Lua_Item::GetStackable)
-		.property("NoTransfer", &Lua_Item::GetNoTransfer)
-		.property("QuestItemFlag", &Lua_Item::GetQuestItemFlag)
-		.property("StackSize", &Lua_Item::GetStackSize)
-		.property("PotionBeltSlots", &Lua_Item::GetPotionBeltSlots)
-		.property("Click_Effect", &Lua_Item::GetClick_Effect)
-		.property("Click_Type", &Lua_Item::GetClick_Type)
-		.property("Click_Level", &Lua_Item::GetClick_Level)
-		.property("Click_Level2", &Lua_Item::GetClick_Level2)
-		.property("Proc_Effect", &Lua_Item::GetProc_Effect)
-		.property("Proc_Type", &Lua_Item::GetProc_Type)
-		.property("Proc_Level", &Lua_Item::GetProc_Level)
-		.property("Proc_Level2", &Lua_Item::GetProc_Level2)
-		.property("Worn_Effect", &Lua_Item::GetWorn_Effect)
-		.property("Worn_Type", &Lua_Item::GetWorn_Type)
-		.property("Worn_Level", &Lua_Item::GetWorn_Level)
-		.property("Worn_Level2", &Lua_Item::GetWorn_Level2)
-		.property("Focus_Effect", &Lua_Item::GetFocus_Effect)
-		.property("Focus_Type", &Lua_Item::GetFocus_Type)
-		.property("Focus_Level", &Lua_Item::GetFocus_Level)
-		.property("Focus_Level2", &Lua_Item::GetFocus_Level2)
-		.property("Scroll_Effect", &Lua_Item::GetScroll_Effect)
-		.property("Scroll_Type", &Lua_Item::GetScroll_Type)
-		.property("Scroll_Level", &Lua_Item::GetScroll_Level)
-		.property("Scroll_Level2", &Lua_Item::GetScroll_Level2)
-		.property("Bard_Effect", &Lua_Item::GetBard_Effect)
-		.property("Bard_Type", &Lua_Item::GetBard_Type)
-		.property("Bard_Level", &Lua_Item::GetBard_Level)
-		.property("Bard_Level2", &Lua_Item::GetBard_Level2)
-		.property("Book", &Lua_Item::GetBook)
-		.property("BookType", &Lua_Item::GetBookType)
-		.property("Filename", &Lua_Item::GetFilename)
-		.property("SVCorruption", &Lua_Item::GetSVCorruption)
-		.property("Purity", &Lua_Item::GetPurity)
-		.property("BackstabDmg", &Lua_Item::GetBackstabDmg)
-		.property("DSMitigation", &Lua_Item::GetDSMitigation)
-		.property("HeroicStr", &Lua_Item::GetHeroicStr)
-		.property("HeroicInt", &Lua_Item::GetHeroicInt)
-		.property("HeroicWis", &Lua_Item::GetHeroicWis)
-		.property("HeroicAgi", &Lua_Item::GetHeroicAgi)
-		.property("HeroicDex", &Lua_Item::GetHeroicDex)
-		.property("HeroicSta", &Lua_Item::GetHeroicSta)
-		.property("HeroicCha", &Lua_Item::GetHeroicCha)
-		.property("HeroicMR", &Lua_Item::GetHeroicMR)
-		.property("HeroicFR", &Lua_Item::GetHeroicFR)
-		.property("HeroicCR", &Lua_Item::GetHeroicCR)
-		.property("HeroicDR", &Lua_Item::GetHeroicDR)
-		.property("HeroicPR", &Lua_Item::GetHeroicPR)
-		.property("HeroicSVCorrup", &Lua_Item::GetHeroicSVCorrup)
-		.property("HealAmt", &Lua_Item::GetHealAmt)
-		.property("SpellDmg", &Lua_Item::GetSpellDmg)
-		.property("LDoNSellBackRate", &Lua_Item::GetLDoNSellBackRate)
-		.property("ScriptFileID", &Lua_Item::GetScriptFileID)
-		.property("ExpendableArrow", &Lua_Item::GetExpendableArrow)
-		.property("Clairvoyance", &Lua_Item::GetClairvoyance)
-		.property("ClickName", &Lua_Item::GetClickName)
-		.property("ProcName", &Lua_Item::GetProcName)
-		.property("WornName", &Lua_Item::GetWornName)
-		.property("FocusName", &Lua_Item::GetFocusName)
-		.property("ScrollName", &Lua_Item::GetScrollName);
+		.def("null", &Lua_Item::Null)
+		.def("valid", &Lua_Item::Valid)
+		.def("MinStatus", &Lua_Item::GetMinStatus)
+		.def("ItemClass", &Lua_Item::GetItemClass)
+		.def("Name", &Lua_Item::GetName)
+		.def("Lore", &Lua_Item::GetLore)
+		.def("IDFile", &Lua_Item::GetIDFile)
+		.def("ID", &Lua_Item::GetID)
+		.def("Weight", &Lua_Item::GetWeight)
+		.def("NoRent", &Lua_Item::GetNoRent)
+		.def("NoDrop", &Lua_Item::GetNoDrop)
+		.def("Size", &Lua_Item::GetSize)
+		.def("Slots", &Lua_Item::GetSlots)
+		.def("Price", &Lua_Item::GetPrice)
+		.def("Icon", &Lua_Item::GetIcon)
+		.def("LoreGroup", &Lua_Item::GetLoreGroup)
+		.def("LoreFlag", &Lua_Item::GetLoreFlag)
+		.def("PendingLoreFlag", &Lua_Item::GetPendingLoreFlag)
+		.def("ArtifactFlag", &Lua_Item::GetArtifactFlag)
+		.def("SummonedFlag", &Lua_Item::GetSummonedFlag)
+		.def("FVNoDrop", &Lua_Item::GetFVNoDrop)
+		.def("Favor", &Lua_Item::GetFavor)
+		.def("GuildFavor", &Lua_Item::GetGuildFavor)
+		.def("PointType", &Lua_Item::GetPointType)
+		.def("BagType", &Lua_Item::GetBagType)
+		.def("BagSlots", &Lua_Item::GetBagSlots)
+		.def("BagSize", &Lua_Item::GetBagSize)
+		.def("BagWR", &Lua_Item::GetBagWR)
+		.def("BenefitFlag", &Lua_Item::GetBenefitFlag)
+		.def("Tradeskills", &Lua_Item::GetTradeskills)
+		.def("CR", &Lua_Item::GetCR)
+		.def("DR", &Lua_Item::GetDR)
+		.def("PR", &Lua_Item::GetPR)
+		.def("MR", &Lua_Item::GetMR)
+		.def("FR", &Lua_Item::GetFR)
+		.def("AStr", &Lua_Item::GetAStr)
+		.def("ASta", &Lua_Item::GetASta)
+		.def("AAgi", &Lua_Item::GetAAgi)
+		.def("ADex", &Lua_Item::GetADex)
+		.def("ACha", &Lua_Item::GetACha)
+		.def("AInt", &Lua_Item::GetAInt)
+		.def("AWis", &Lua_Item::GetAWis)
+		.def("HP", &Lua_Item::GetHP)
+		.def("Mana", &Lua_Item::GetMana)
+		.def("AC", &Lua_Item::GetAC)
+		.def("Deity", &Lua_Item::GetDeity)
+		.def("SkillModValue", &Lua_Item::GetSkillModValue)
+		.def("SkillModType", &Lua_Item::GetSkillModType)
+		.def("BaneDmgRace", &Lua_Item::GetBaneDmgRace)
+		.def("BaneDmgAmt", &Lua_Item::GetBaneDmgAmt)
+		.def("BaneDmgBody", &Lua_Item::GetBaneDmgBody)
+		.def("Magic", &Lua_Item::GetMagic)
+		.def("CastTime_", &Lua_Item::GetCastTime_)
+		.def("ReqLevel", &Lua_Item::GetReqLevel)
+		.def("BardType", &Lua_Item::GetBardType)
+		.def("BardValue", &Lua_Item::GetBardValue)
+		.def("Light", &Lua_Item::GetLight)
+		.def("Delay", &Lua_Item::GetDelay)
+		.def("RecLevel", &Lua_Item::GetRecLevel)
+		.def("RecSkill", &Lua_Item::GetRecSkill)
+		.def("ElemDmgType", &Lua_Item::GetElemDmgType)
+		.def("ElemDmgAmt", &Lua_Item::GetElemDmgAmt)
+		.def("Range", &Lua_Item::GetRange)
+		.def("Damage", &Lua_Item::GetDamage)
+		.def("Color", &Lua_Item::GetColor)
+		.def("Classes", &Lua_Item::GetClasses)
+		.def("Races", &Lua_Item::GetRaces)
+		.def("MaxCharges", &Lua_Item::GetMaxCharges)
+		.def("ItemType", &Lua_Item::GetItemType)
+		.def("Material", &Lua_Item::GetMaterial)
+		.def("SellRate", &Lua_Item::GetSellRate)
+		.def("Fulfilment", &Lua_Item::GetFulfilment)
+		.def("CastTime", &Lua_Item::GetCastTime)
+		.def("EliteMaterial", &Lua_Item::GetEliteMaterial)
+		.def("ProcRate", &Lua_Item::GetProcRate)
+		.def("CombatEffects", &Lua_Item::GetCombatEffects)
+		.def("Shielding", &Lua_Item::GetShielding)
+		.def("StunResist", &Lua_Item::GetStunResist)
+		.def("StrikeThrough", &Lua_Item::GetStrikeThrough)
+		.def("ExtraDmgSkill", &Lua_Item::GetExtraDmgSkill)
+		.def("ExtraDmgAmt", &Lua_Item::GetExtraDmgAmt)
+		.def("SpellShield", &Lua_Item::GetSpellShield)
+		.def("Avoidance", &Lua_Item::GetAvoidance)
+		.def("Accuracy", &Lua_Item::GetAccuracy)
+		.def("CharmFileID", &Lua_Item::GetCharmFileID)
+		.def("FactionMod1", &Lua_Item::GetFactionMod1)
+		.def("FactionMod2", &Lua_Item::GetFactionMod2)
+		.def("FactionMod3", &Lua_Item::GetFactionMod3)
+		.def("FactionMod4", &Lua_Item::GetFactionMod4)
+		.def("FactionAmt1", &Lua_Item::GetFactionAmt1)
+		.def("FactionAmt2", &Lua_Item::GetFactionAmt2)
+		.def("FactionAmt3", &Lua_Item::GetFactionAmt3)
+		.def("FactionAmt4", &Lua_Item::GetFactionAmt4)
+		.def("CharmFile", &Lua_Item::GetCharmFile)
+		.def("AugType", &Lua_Item::GetAugType)
+		.def("AugSlotType", &Lua_Item::GetAugSlotType)
+		.def("AugSlotVisible", &Lua_Item::GetAugSlotVisible)
+		.def("AugSlotUnk2", &Lua_Item::GetAugSlotUnk2)
+		.def("LDoNTheme", &Lua_Item::GetLDoNTheme)
+		.def("LDoNPrice", &Lua_Item::GetLDoNPrice)
+		.def("LDoNSold", &Lua_Item::GetLDoNSold)
+		.def("BaneDmgRaceAmt", &Lua_Item::GetBaneDmgRaceAmt)
+		.def("AugRestrict", &Lua_Item::GetAugRestrict)
+		.def("Endur", &Lua_Item::GetEndur)
+		.def("DotShielding", &Lua_Item::GetDotShielding)
+		.def("Attack", &Lua_Item::GetAttack)
+		.def("Regen", &Lua_Item::GetRegen)
+		.def("ManaRegen", &Lua_Item::GetManaRegen)
+		.def("EnduranceRegen", &Lua_Item::GetEnduranceRegen)
+		.def("Haste", &Lua_Item::GetHaste)
+		.def("DamageShield", &Lua_Item::GetDamageShield)
+		.def("RecastDelay", &Lua_Item::GetRecastDelay)
+		.def("RecastType", &Lua_Item::GetRecastType)
+		.def("AugDistiller", &Lua_Item::GetAugDistiller)
+		.def("Attuneable", &Lua_Item::GetAttuneable)
+		.def("NoPet", &Lua_Item::GetNoPet)
+		.def("PotionBelt", &Lua_Item::GetPotionBelt)
+		.def("Stackable", &Lua_Item::GetStackable)
+		.def("NoTransfer", &Lua_Item::GetNoTransfer)
+		.def("QuestItemFlag", &Lua_Item::GetQuestItemFlag)
+		.def("StackSize", &Lua_Item::GetStackSize)
+		.def("PotionBeltSlots", &Lua_Item::GetPotionBeltSlots)
+		.def("Click_Effect", &Lua_Item::GetClick_Effect)
+		.def("Click_Type", &Lua_Item::GetClick_Type)
+		.def("Click_Level", &Lua_Item::GetClick_Level)
+		.def("Click_Level2", &Lua_Item::GetClick_Level2)
+		.def("Proc_Effect", &Lua_Item::GetProc_Effect)
+		.def("Proc_Type", &Lua_Item::GetProc_Type)
+		.def("Proc_Level", &Lua_Item::GetProc_Level)
+		.def("Proc_Level2", &Lua_Item::GetProc_Level2)
+		.def("Worn_Effect", &Lua_Item::GetWorn_Effect)
+		.def("Worn_Type", &Lua_Item::GetWorn_Type)
+		.def("Worn_Level", &Lua_Item::GetWorn_Level)
+		.def("Worn_Level2", &Lua_Item::GetWorn_Level2)
+		.def("Focus_Effect", &Lua_Item::GetFocus_Effect)
+		.def("Focus_Type", &Lua_Item::GetFocus_Type)
+		.def("Focus_Level", &Lua_Item::GetFocus_Level)
+		.def("Focus_Level2", &Lua_Item::GetFocus_Level2)
+		.def("Scroll_Effect", &Lua_Item::GetScroll_Effect)
+		.def("Scroll_Type", &Lua_Item::GetScroll_Type)
+		.def("Scroll_Level", &Lua_Item::GetScroll_Level)
+		.def("Scroll_Level2", &Lua_Item::GetScroll_Level2)
+		.def("Bard_Effect", &Lua_Item::GetBard_Effect)
+		.def("Bard_Type", &Lua_Item::GetBard_Type)
+		.def("Bard_Level", &Lua_Item::GetBard_Level)
+		.def("Bard_Level2", &Lua_Item::GetBard_Level2)
+		.def("Book", &Lua_Item::GetBook)
+		.def("BookType", &Lua_Item::GetBookType)
+		.def("Filename", &Lua_Item::GetFilename)
+		.def("SVCorruption", &Lua_Item::GetSVCorruption)
+		.def("Purity", &Lua_Item::GetPurity)
+		.def("BackstabDmg", &Lua_Item::GetBackstabDmg)
+		.def("DSMitigation", &Lua_Item::GetDSMitigation)
+		.def("HeroicStr", &Lua_Item::GetHeroicStr)
+		.def("HeroicInt", &Lua_Item::GetHeroicInt)
+		.def("HeroicWis", &Lua_Item::GetHeroicWis)
+		.def("HeroicAgi", &Lua_Item::GetHeroicAgi)
+		.def("HeroicDex", &Lua_Item::GetHeroicDex)
+		.def("HeroicSta", &Lua_Item::GetHeroicSta)
+		.def("HeroicCha", &Lua_Item::GetHeroicCha)
+		.def("HeroicMR", &Lua_Item::GetHeroicMR)
+		.def("HeroicFR", &Lua_Item::GetHeroicFR)
+		.def("HeroicCR", &Lua_Item::GetHeroicCR)
+		.def("HeroicDR", &Lua_Item::GetHeroicDR)
+		.def("HeroicPR", &Lua_Item::GetHeroicPR)
+		.def("HeroicSVCorrup", &Lua_Item::GetHeroicSVCorrup)
+		.def("HealAmt", &Lua_Item::GetHealAmt)
+		.def("SpellDmg", &Lua_Item::GetSpellDmg)
+		.def("LDoNSellBackRate", &Lua_Item::GetLDoNSellBackRate)
+		.def("ScriptFileID", &Lua_Item::GetScriptFileID)
+		.def("ExpendableArrow", &Lua_Item::GetExpendableArrow)
+		.def("Clairvoyance", &Lua_Item::GetClairvoyance)
+		.def("ClickName", &Lua_Item::GetClickName)
+		.def("ProcName", &Lua_Item::GetProcName)
+		.def("WornName", &Lua_Item::GetWornName)
+		.def("FocusName", &Lua_Item::GetFocusName)
+		.def("ScrollName", &Lua_Item::GetScrollName);
 }
 
 #endif

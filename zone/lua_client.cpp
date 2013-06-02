@@ -9,6 +9,8 @@
 #include "lua_npc.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
+#include "lua_group.h"
+#include "lua_raid.h"
 #include "../common/item.h"
 
 struct InventoryWhere { };
@@ -881,7 +883,7 @@ int Lua_Client::GetLDoNLossesTheme(int theme) {
 }
 
 Lua_ItemInst Lua_Client::GetItemAt(int slot) {
-	Lua_Safe_Call_ItemInst();
+	Lua_Safe_Call_Class(Lua_ItemInst);
 	return Lua_ItemInst(self->GetInv().GetItem(slot));
 }
 
@@ -1150,6 +1152,16 @@ std::string Lua_Client::GetAccountFlag(std::string flag) {
 	return self->GetAccountFlag(flag);
 }
 
+Lua_Group Lua_Client::GetGroup() {
+	Lua_Safe_Call_Class(Lua_Group);
+	return Lua_Group(self->GetGroup());
+}
+
+Lua_Raid Lua_Client::GetRaid() {
+	Lua_Safe_Call_Class(Lua_Raid);
+	return Lua_Raid(self->GetRaid());
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1379,7 +1391,9 @@ luabind::scope lua_register_client() {
 		.def("SendWebLink", (void(Lua_Client::*)(const char *))&Lua_Client::SendWebLink)
 		.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
 		.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
-		.def("GetAccountFlag", (std::string(Lua_Client::*)(std::string))&Lua_Client::GetAccountFlag);
+		.def("GetAccountFlag", (std::string(Lua_Client::*)(std::string))&Lua_Client::GetAccountFlag)
+		.def("GetGroup", (Lua_Group(Lua_Client::*)(void))&Lua_Client::GetGroup)
+		.def("GetRaid", (Lua_Raid(Lua_Client::*)(void))&Lua_Client::GetRaid);
 }
 
 luabind::scope lua_register_inventory_where() {

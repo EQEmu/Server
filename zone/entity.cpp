@@ -2104,7 +2104,7 @@ Group* EntityList::GetGroupByMob(Mob* mob)
 	return 0;
 }
 
-Group* EntityList::GetGroupByLeaderName(char* leader){
+Group* EntityList::GetGroupByLeaderName(const char* leader){
 	std::list<Group *>::iterator iterator;
 
 	iterator = group_list.begin();

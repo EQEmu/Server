@@ -31,16 +31,22 @@ SET(zone_sources
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
+	lua_corpse.cpp
 	lua_client.cpp
+	lua_door.cpp
 	lua_entity.cpp
+	lua_entity_list.cpp
 	lua_general.cpp
+	lua_group.cpp
 	lua_hate_entry.cpp
 	lua_item.cpp
 	lua_iteminst.cpp
 	lua_mob.cpp
 	lua_npc.cpp
+	lua_object.cpp
 	lua_parser.cpp
 	lua_parser_events.cpp
+	lua_raid.cpp
 	lua_spell.cpp
 	embperl.cpp
 	embxs.cpp
@@ -134,10 +140,12 @@ SET(zone_headers
 	hate_list.h
 	horse.h
 	lua_client.h
+	lua_corpse.h
 	lua_entity.h
+	lua_entity_list.h
 	lua_general.h
+	lua_group.h
 	lua_hate_entry.h
-	lua_hate_list.h
 	lua_item.h
 	lua_iteminst.h
 	lua_mob.h
@@ -145,6 +153,7 @@ SET(zone_headers
 	lua_parser.h
 	lua_parser_events.h
 	lua_ptr.h
+	lua_raid.h
 	lua_spell.h
 	map.h
 	masterentity.h

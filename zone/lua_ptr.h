@@ -8,13 +8,7 @@
 #define Lua_Safe_Call_Int() if(!d_) { return 0; } NativeType *self = reinterpret_cast<NativeType*>(d_)
 #define Lua_Safe_Call_Real() if(!d_) { return 0.0; } NativeType *self = reinterpret_cast<NativeType*>(d_)
 #define Lua_Safe_Call_String() if(!d_) { return ""; } NativeType *self = reinterpret_cast<NativeType*>(d_)
-#define Lua_Safe_Call_Entity() if(!d_) { return Lua_Entity(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
-#define Lua_Safe_Call_Mob() if(!d_) { return Lua_Mob(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
-#define Lua_Safe_Call_NPC() if(!d_) { return Lua_NPC(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
-#define Lua_Safe_Call_Client() if(!d_) { return Lua_Client(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
-#define Lua_Safe_Call_HateList() if(!d_) { return Lua_HateList(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
-#define Lua_Safe_Call_Item() if(!d_) { return Lua_Item(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
-#define Lua_Safe_Call_ItemInst() if(!d_) { return Lua_ItemInst(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
+#define Lua_Safe_Call_Class(type) if(!d_) { return type(); } NativeType *self = reinterpret_cast<NativeType*>(d_)
 
 template<typename T>
 class Lua_Ptr

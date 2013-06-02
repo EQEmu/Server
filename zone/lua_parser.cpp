@@ -17,10 +17,15 @@
 #include "lua_iteminst.h"
 #include "lua_mob.h"
 #include "lua_hate_entry.h"
-#include "lua_hate_list.h"
 #include "lua_client.h"
 #include "lua_npc.h"
 #include "lua_spell.h"
+#include "lua_entity_list.h"
+#include "lua_group.h"
+#include "lua_raid.h"
+#include "lua_corpse.h"
+#include "lua_object.h"
+#include "lua_door.h"
 #include "lua_general.h"
 #include "QGlobals.h"
 #include "questmgr.h"
@@ -810,7 +815,19 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_item(),
 			lua_register_spell(),
 			lua_register_hate_entry(),
-			lua_register_hate_list()
+			lua_register_hate_list(),
+			lua_register_entity_list(),
+			lua_register_mob_list(),
+			lua_register_client_list(),
+			lua_register_npc_list(),
+			lua_register_corpse_list(),
+			lua_register_object_list(),
+			lua_register_door_list(),
+			lua_register_group(),
+			lua_register_raid(),
+			lua_register_corpse(),
+			lua_register_door(),
+			lua_register_object()
 		];
 	
 	} catch(std::exception &ex) {
@@ -943,6 +960,11 @@ void LuaParser::ExportZoneVariables() {
 	if(zone == nullptr) {
 		return;
 	}
+
+	Lua_EntityList l_entity_list(&entity_list);
+	luabind::object l_entity_list_o = luabind::object(L, l_entity_list);
+	l_entity_list_o.push(L);
+	lua_setfield(L, -2, "entity_list");
 
 	lua_pushinteger(L, zone->GetZoneID());
 	lua_setfield(L, -2, "zone_id");
