@@ -26,8 +26,6 @@
 #include "../common/packet_dump.h"
 #include <string>
 
-using namespace std;
-
 /**
  * World server class, controls the connected server processing.
  */
@@ -78,12 +76,12 @@ public:
 	/**
 	* Gets the long name of the server.
 	*/
-	string GetLongName() const { return long_name; }
+	std::string GetLongName() const { return long_name; }
 
 	/**
 	* Gets the short name of the server.
 	*/
-	string GetShortName() const { return short_name; }
+	std::string GetShortName() const { return short_name; }
 
 	/**
 	* Gets whether the server is authorized to show up on the server list or not.
@@ -93,12 +91,12 @@ public:
 	/**
 	* Gets the local ip of the server.
 	*/
-	string GetLocalIP() const { return local_ip; }
+	std::string GetLocalIP() const { return local_ip; }
 
 	/**
 	* Gets the remote ip of the server.
 	*/
-	string GetRemoteIP() const { return remote_ip; }
+	std::string GetRemoteIP() const { return remote_ip; }
 
 	/**
 	* Gets what kind of server this server is (legends, preferred, normal)
@@ -133,7 +131,7 @@ public:
 	/**
 	* Informs world that there is a client incoming with the following data.
 	*/
-	void SendClientAuth(unsigned int ip, string account, string key, unsigned int account_id);
+	void SendClientAuth(unsigned int ip, std::string account, std::string key, unsigned int account_id);
 
 private:
 
@@ -144,15 +142,15 @@ private:
 	unsigned int runtime_id;
 	unsigned int server_list_id;
 	unsigned int server_type;
-	string desc;
-	string long_name;
-	string short_name;
-	string account_name;
-	string account_password;
-	string remote_ip;
-	string local_ip;
-	string protocol;
-	string version;
+	std::string desc;
+	std::string long_name;
+	std::string short_name;
+	std::string account_name;
+	std::string account_password;
+	std::string remote_ip;
+	std::string local_ip;
+	std::string protocol;
+	std::string version;
 	bool authorized;
 	bool logged_in;
 	bool trusted;

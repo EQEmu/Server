@@ -10,7 +10,6 @@ SET(common_sources
 	database.cpp
 	dbasync.cpp
 	dbcore.cpp
-	DBMemLeak.cpp
 	debug.cpp
 	emu_opcodes.cpp
 	EmuTCPConnection.cpp
@@ -55,6 +54,7 @@ SET(common_sources
 	serverinfo.cpp
 	shareddb.cpp
 	spdat.cpp
+    StringUtil.cpp
 	StructStrategy.cpp
 	TCPConnection.cpp
 	TCPServer.cpp
@@ -102,7 +102,6 @@ SET(common_headers
 	database.h
 	dbasync.h
 	dbcore.h
-	DBMemLeak.h
 	debug.h
 	deity.h
 	emu_opcodes.h
@@ -170,6 +169,7 @@ SET(common_headers
 	shareddb.h
 	skills.h
 	spdat.h
+    StringUtil.h
 	StructStrategy.h
 	TCPBasicServer.h
 	TCPConnection.h
@@ -312,7 +312,6 @@ SOURCE_GROUP(TinyXML FILES
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
 ADD_LIBRARY(Common ${common_sources} ${common_headers})
-
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)

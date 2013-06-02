@@ -35,7 +35,7 @@ void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 
 	//make sure they arnt allready subscribed.
 
-	vector<Client *>::iterator cur,end;
+	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
 	for(; cur != end; cur++) {
@@ -55,7 +55,7 @@ void ClientLogs::unsubscribe(EQEMuLog::LogIDs id, Client *c) {
 	if(c == nullptr)
 		return;
 
-	vector<Client *>::iterator cur,end;
+	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
 	for(; cur != end; cur++) {
@@ -94,7 +94,7 @@ void ClientLogs::clear() {
 void ClientLogs::msg(EQEMuLog::LogIDs id, const char *buf) {
 	if(id >= EQEMuLog::MaxLogID)
 		return;
-	vector<Client *>::iterator cur,end;
+	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
 	for(; cur != end; cur++) {
@@ -128,7 +128,7 @@ void ClientLogs::EQEmuIO_pva(EQEMuLog::LogIDs id, const char *prefix, const char
 	if(fmt[0] == '\n' || fmt[0] == '\r')
 		return;	//skip new lines...
 	char *buf = _buffer;
-	int plen = snprintf(buf, MAX_CLIENT_LOG_MESSAGE_LENGTH, prefix);
+	int plen = snprintf(buf, MAX_CLIENT_LOG_MESSAGE_LENGTH, "%s", prefix);
 	buf += plen;
 	vsnprintf(buf, MAX_CLIENT_LOG_MESSAGE_LENGTH-plen, fmt, ap);
 	_buffer[MAX_CLIENT_LOG_MESSAGE_LENGTH] = '\0';

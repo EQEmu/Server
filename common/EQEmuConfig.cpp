@@ -21,7 +21,7 @@
 #include <iostream>
 #include <sstream>
 
-string EQEmuConfig::ConfigFile = "eqemu_config.xml";
+std::string EQEmuConfig::ConfigFile = "eqemu_config.xml";
 EQEmuConfig *EQEmuConfig::_config = nullptr;
 
 void EQEmuConfig::do_world(TiXmlElement *ele) {
@@ -315,7 +315,7 @@ void EQEmuConfig::do_launcher(TiXmlElement *ele) {
 	}
 }
 
-string EQEmuConfig::GetByName(const string &var_name) const {
+std::string EQEmuConfig::GetByName(const std::string &var_name) const {
 	if(var_name == "ShortName")
 		return(ShortName);
 	if(var_name == "LongName")
@@ -405,44 +405,44 @@ string EQEmuConfig::GetByName(const string &var_name) const {
 
 void EQEmuConfig::Dump() const
 {
-	cout << "ShortName = " << ShortName << endl;
-	cout << "LongName = " << LongName << endl;
-	cout << "WorldAddress = " << WorldAddress << endl;
-	cout << "LoginHost = " << LoginHost << endl;
-	cout << "LoginAccount = " << LoginAccount << endl;
-	cout << "LoginPassword = " << LoginPassword << endl;
-	cout << "LoginPort = " << LoginPort << endl;
-	cout << "Locked = " << Locked << endl;
-	cout << "WorldTCPPort = " << WorldTCPPort << endl;
-	cout << "WorldIP = " << WorldIP << endl;
-	cout << "TelnetEnabled = " << TelnetEnabled << endl;
-	cout << "WorldHTTPPort = " << WorldHTTPPort << endl;
-	cout << "WorldHTTPMimeFile = " << WorldHTTPMimeFile << endl;
-	cout << "WorldHTTPEnabled = " << WorldHTTPEnabled << endl;
-	cout << "ChatHost = " << ChatHost << endl;
-	cout << "ChatPort = " << ChatPort << endl;
-	cout << "MailHost = " << MailHost << endl;
-	cout << "MailPort = " << MailPort << endl;
-	cout << "DatabaseHost = " << DatabaseHost << endl;
-	cout << "DatabaseUsername = " << DatabaseUsername << endl;
-	cout << "DatabasePassword = " << DatabasePassword << endl;
-	cout << "DatabaseDB = " << DatabaseDB << endl;
-	cout << "DatabasePort = " << DatabasePort << endl;
-	cout << "QSDatabaseHost = " << QSDatabaseHost << endl;
-	cout << "QSDatabaseUsername = " << QSDatabaseUsername << endl;
-	cout << "QSDatabasePassword = " << QSDatabasePassword << endl;
-	cout << "QSDatabaseDB = " << QSDatabaseDB << endl;
-	cout << "QSDatabasePort = " << QSDatabasePort << endl;
-	cout << "SpellsFile = " << SpellsFile << endl;
-	cout << "OpCodesFile = " << OpCodesFile << endl;
-	cout << "EQTimeFile = " << EQTimeFile << endl;
-	cout << "LogSettingsFile = " << LogSettingsFile << endl;
-	cout << "MapDir = " << MapDir << endl;
-	cout << "QuestDir = " << QuestDir << endl;
-	cout << "PluginDir = " << PluginDir << endl;
-	cout << "ZonePortLow = " << ZonePortLow << endl;
-	cout << "ZonePortHigh = " << ZonePortHigh << endl;
-	cout << "DefaultStatus = " << (int)DefaultStatus << endl;
-//	cout << "DynamicCount = " << DynamicCount << endl;
+	std::cout << "ShortName = " << ShortName << std::endl;
+	std::cout << "LongName = " << LongName << std::endl;
+	std::cout << "WorldAddress = " << WorldAddress << std::endl;
+	std::cout << "LoginHost = " << LoginHost << std::endl;
+	std::cout << "LoginAccount = " << LoginAccount << std::endl;
+	std::cout << "LoginPassword = " << LoginPassword << std::endl;
+	std::cout << "LoginPort = " << LoginPort << std::endl;
+	std::cout << "Locked = " << Locked << std::endl;
+	std::cout << "WorldTCPPort = " << WorldTCPPort << std::endl;
+	std::cout << "WorldIP = " << WorldIP << std::endl;
+	std::cout << "TelnetEnabled = " << TelnetEnabled << std::endl;
+	std::cout << "WorldHTTPPort = " << WorldHTTPPort << std::endl;
+	std::cout << "WorldHTTPMimeFile = " << WorldHTTPMimeFile << std::endl;
+	std::cout << "WorldHTTPEnabled = " << WorldHTTPEnabled << std::endl;
+	std::cout << "ChatHost = " << ChatHost << std::endl;
+	std::cout << "ChatPort = " << ChatPort << std::endl;
+	std::cout << "MailHost = " << MailHost << std::endl;
+	std::cout << "MailPort = " << MailPort << std::endl;
+	std::cout << "DatabaseHost = " << DatabaseHost << std::endl;
+	std::cout << "DatabaseUsername = " << DatabaseUsername << std::endl;
+	std::cout << "DatabasePassword = " << DatabasePassword << std::endl;
+	std::cout << "DatabaseDB = " << DatabaseDB << std::endl;
+	std::cout << "DatabasePort = " << DatabasePort << std::endl;
+	std::cout << "QSDatabaseHost = " << QSDatabaseHost << std::endl;
+	std::cout << "QSDatabaseUsername = " << QSDatabaseUsername << std::endl;
+	std::cout << "QSDatabasePassword = " << QSDatabasePassword << std::endl;
+	std::cout << "QSDatabaseDB = " << QSDatabaseDB << std::endl;
+	std::cout << "QSDatabasePort = " << QSDatabasePort << std::endl;
+	std::cout << "SpellsFile = " << SpellsFile << std::endl;
+	std::cout << "OpCodesFile = " << OpCodesFile << std::endl;
+	std::cout << "EQTimeFile = " << EQTimeFile << std::endl;
+	std::cout << "LogSettingsFile = " << LogSettingsFile << std::endl;
+	std::cout << "MapDir = " << MapDir << std::endl;
+	std::cout << "QuestDir = " << QuestDir << std::endl;
+	std::cout << "PluginDir = " << PluginDir << std::endl;
+	std::cout << "ZonePortLow = " << ZonePortLow << std::endl;
+	std::cout << "ZonePortHigh = " << ZonePortHigh << std::endl;
+	std::cout << "DefaultStatus = " << (int)DefaultStatus << std::endl;
+//	std::cout << "DynamicCount = " << DynamicCount << std::endl;
 }
 

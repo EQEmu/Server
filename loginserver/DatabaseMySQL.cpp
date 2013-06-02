@@ -43,7 +43,8 @@ DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port,
 		if(!mysql_real_connect(db, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
 		{
 			mysql_close(db);
-			server_log->Log(log_database, "Failed to connect to MySQL database.");
+			server_log->Log(log_database, "Failed to connect to MySQL database. Error: %s", mysql_error(db));
+			exit(1);
 		}
 	}
 	else

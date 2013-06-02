@@ -29,9 +29,6 @@
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 #else
@@ -48,7 +45,7 @@
 #include "worldserver.h"
 #include "../common/rdtsc.h"
 #include "../common/packet_dump_file.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/breakdowns.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
@@ -73,9 +70,6 @@
 #include "../common/ZoneNumbers.h"
 #include "QuestParserCollection.h"
 
-using namespace std;
-
-
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
 extern WorldServer worldserver;
@@ -87,7 +81,7 @@ extern DBAsync *dbasync;
 typedef void (Client::*ClientPacketProc)(const EQApplicationPacket *app);
 
 //Use a map for connecting opcodes since it dosent get used a lot and is sparse
-map<uint32, ClientPacketProc> ConnectingOpcodes;
+std::map<uint32, ClientPacketProc> ConnectingOpcodes;
 //Use a static array for connected, for speed
 ClientPacketProc ConnectedOpcodes[_maxEmuOpcode];
 
@@ -411,14 +405,14 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	}
 
 	#if EQDEBUG >= 9
-		cout << "Received 0x" << hex << setw(4) << setfill('0') << opcode << ", size=" << dec << app->size << endl;
+		std::cout << "Received 0x" << hex << setw(4) << setfill('0') << opcode << ", size=" << dec << app->size << std::endl;
 	#endif
 
 	#ifdef SOLAR
 		if(0 && opcode != OP_ClientUpdate)
 		{
 			LogFile->write(EQEMuLog::Debug,"HandlePacket() OPCODE debug enabled client %s", GetName());
-			cerr << "OPCODE: " << hex << setw(4) << setfill('0') << opcode << dec << ", size: " << app->size << endl;
+			std::cerr << "OPCODE: " << hex << setw(4) << setfill('0') << opcode << dec << ", size: " << app->size << std::endl;
 			DumpPacket(app);
 		}
 	#endif
@@ -429,7 +423,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 //TODO: replace this 0 with the EQ opcode
 			LogFile->write(EQEMuLog::Error, "HandlePacket() Opcode error: Unexpected packet during CLIENT_CONNECTING: opcode: %s (#%d eq=0x%04x), size: %i", OpcodeNames[opcode], opcode, 0, app->size);
 #if EQDEBUG >= 9
-			cout << "Unexpected packet during CLIENT_CONNECTING: OpCode: 0x" << hex << setw(4) << setfill('0') << opcode << dec << ", size: " << app->size << endl;
+			std::cout << "Unexpected packet during CLIENT_CONNECTING: OpCode: 0x" << hex << setw(4) << setfill('0') << opcode << dec << ", size: " << app->size << std::endl;
 			DumpPacket(app);
 #endif
 			break;
@@ -458,7 +452,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			if(app->size<1000)
 				DumpPacket(app->pBuffer, app->size);
 			else{
-				cout << "Dump limited to 1000 characters:\n";
+				std::cout << "Dump limited to 1000 characters:\n";
 				DumpPacket(app->pBuffer, 1000);
 			}
 			break;
@@ -2993,7 +2987,7 @@ void Client::Handle_OP_RequestDuel(const EQApplicationPacket *app)
 void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SpawnAppearance_Struct)) {
-		cout << "Wrong size on OP_SpawnAppearance. Got: " << app->size << ", Expected: " << sizeof(SpawnAppearance_Struct) << endl;
+		std::cout << "Wrong size on OP_SpawnAppearance. Got: " << app->size << ", Expected: " << sizeof(SpawnAppearance_Struct) << std::endl;
 		return;
 	}
 	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)app->pBuffer;
@@ -3068,7 +3062,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		}
 		*/
 		else {
-			cerr << "Client " << name << " unknown apperance " << (int)sa->parameter << endl;
+			std::cerr << "Client " << name << " unknown apperance " << (int)sa->parameter << std::endl;
 			return;
 		}
 
@@ -3086,7 +3080,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			m_pp.anon = 0;
 		}
 		else {
-			cerr << "Client " << name << " unknown Anon/Roleplay Switch " << (int)sa->parameter << endl;
+			std::cerr << "Client " << name << " unknown Anon/Roleplay Switch " << (int)sa->parameter << std::endl;
 			return;
 		}
 		entity_list.QueueClients(this, app, true);
@@ -3139,8 +3133,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		entity_list.QueueClients(this, app, true);
 	}
 	else {
-		cout << "Unknown SpawnAppearance type: 0x" << hex << setw(4) << setfill('0') << sa->type << dec
-			<< " value: 0x" << hex << setw(8) << setfill('0') << sa->parameter << dec << endl;
+		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec
+			<< " value: 0x" << std::hex << std::setw(8) << std::setfill('0') << sa->parameter << std::dec << std::endl;
 	}
 	return;
 }
@@ -3220,7 +3214,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 	if (!item) {
 		if (ivrs->item_id > 500000)
 		{
-			string response = "";
+			std::string response = "";
 			int sayid = ivrs->item_id - 500000;
 			bool silentsaylink = false;
 
@@ -3584,7 +3578,7 @@ void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 	ChannelMessage_Struct* cm=(ChannelMessage_Struct*)app->pBuffer;
 
 	if (app->size < sizeof(ChannelMessage_Struct)) {
-		cout << "Wrong size " << app->size << ", should be " << sizeof(ChannelMessage_Struct) << "+ on 0x" << hex << setfill('0') << setw(4) << app->GetOpcode() << dec << endl;
+		std::cout << "Wrong size " << app->size << ", should be " << sizeof(ChannelMessage_Struct) << "+ on 0x" << std::hex << std::setfill('0') << std::setw(4) << app->GetOpcode() << std::dec << std::endl;
 		return;
 	}
 	if (IsAIControlled()) {
@@ -3599,7 +3593,7 @@ void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(WearChange_Struct)) {
-		cout << "Wrong size: OP_WearChange, size=" << app->size << ", expected " << sizeof(WearChange_Struct) << endl;
+		std::cout << "Wrong size: OP_WearChange, size=" << app->size << ", expected " << sizeof(WearChange_Struct) << std::endl;
 		return;
 	}
 
@@ -3653,7 +3647,7 @@ void Client::Handle_OP_Save(const EQApplicationPacket *app)
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Who_All_Struct)) {
-		cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << endl;
+		std::cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << std::endl;
 		return;
 	}
 	Who_All_Struct* whoall = (Who_All_Struct*) app->pBuffer;
@@ -3675,7 +3669,7 @@ void Client::Handle_OP_FriendsWho(const EQApplicationPacket *app)
 void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMZoneRequest_Struct)) {
-		cout << "Wrong size on OP_GMZoneRequest. Got: " << app->size << ", Expected: " << sizeof(GMZoneRequest_Struct) << endl;
+		std::cout << "Wrong size on OP_GMZoneRequest. Got: " << app->size << ", Expected: " << sizeof(GMZoneRequest_Struct) << std::endl;
 		return;
 	}
 	if (this->Admin() < minStatusToBeGM) {
@@ -3715,7 +3709,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	if (tarzone[0] != 0 && admin >= minstatus && GetLevel() >= minlevel)
 		gmzr2->success = 1;
 	else {
-		cout << "GetZoneSafeCoords failed. zoneid = " << gmzr->zone_id << "; czone = " << zone->GetZoneID() << endl;
+		std::cout << "GetZoneSafeCoords failed. zoneid = " << gmzr->zone_id << "; czone = " << zone->GetZoneID() << std::endl;
 		gmzr2->success = 0;
 	}
 
@@ -3744,7 +3738,7 @@ void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket *app)
 void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
-		cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint32) << endl;
+		std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
 		return;
 	}
 
@@ -3773,7 +3767,7 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
-		cout << "Wrong size: OP_LootRequest, size=" << app->size << ", expected " << sizeof(uint32) << endl;
+		std::cout << "Wrong size: OP_LootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
 		return;
 	}
 
@@ -3824,7 +3818,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 		return;
 	}
 	else {
-		cout << "npc == 0 LOOTING FOOKED3" << endl;
+		std::cout << "npc == 0 LOOTING FOOKED3" << std::endl;
 		Message(13, "Error: OP_LootRequest: Corpse not a corpse?");
 		Corpse::SendLootReqErrorPacket(this);
 	}
@@ -3905,7 +3899,7 @@ void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 {
 	if(app->size!=sizeof(DyeStruct))
-		printf("Wrong size of DyeStruct, Got: %i, Expected: %lu\n",app->size,sizeof(DyeStruct));
+		printf("Wrong size of DyeStruct, Got: %i, Expected: %i\n",app->size,sizeof(DyeStruct));
 	else{
 		DyeStruct* dye = (DyeStruct*)app->pBuffer;
 		DyeArmor(dye);
@@ -3976,7 +3970,7 @@ void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
 
 	if (app->size < sizeof(GuildUpdate_PublicNote)) {
 		// client calls for a motd on login even if they arent in a guild
-		printf("Error: app size of %i < size of OP_GuildPublicNote of %lu\n",app->size,sizeof(GuildUpdate_PublicNote));
+		printf("Error: app size of %i < size of OP_GuildPublicNote of %i\n",app->size,sizeof(GuildUpdate_PublicNote));
 		return;
 	}
 	GuildUpdate_PublicNote* gpn=(GuildUpdate_PublicNote*)app->pBuffer;
@@ -4034,7 +4028,7 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 
 	if (app->size != sizeof(GuildMOTD_Struct)) {
 		// client calls for a motd on login even if they arent in a guild
-		printf("Error: app size of %i != size of GuildMOTD_Struct of %lu\n",app->size,sizeof(GuildMOTD_Struct));
+		printf("Error: app size of %i != size of GuildMOTD_Struct of %i\n",app->size,sizeof(GuildMOTD_Struct));
 		return;
 	}
 	if(!IsInAGuild()) {
@@ -4252,7 +4246,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
 	if (app->size != sizeof(GuildCommand_Struct)) {
-		cout << "Wrong size: OP_GuildInvite, size=" << app->size << ", expected " << sizeof(GuildCommand_Struct) << endl;
+		std::cout << "Wrong size: OP_GuildInvite, size=" << app->size << ", expected " << sizeof(GuildCommand_Struct) << std::endl;
 		return;
 	}
 
@@ -4379,7 +4373,7 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
 	if (app->size != sizeof(GuildCommand_Struct)) {
-		cout << "Wrong size: OP_GuildRemove, size=" << app->size << ", expected " << sizeof(GuildCommand_Struct) << endl;
+		std::cout << "Wrong size: OP_GuildRemove, size=" << app->size << ", expected " << sizeof(GuildCommand_Struct) << std::endl;
 		return;
 	}
 	GuildCommand_Struct* gc = (GuildCommand_Struct*) app->pBuffer;
@@ -4450,7 +4444,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 	SetPendingGuildInvitation(false);
 
 	if (app->size != sizeof(GuildInviteAccept_Struct)) {
-		cout << "Wrong size: OP_GuildInviteAccept, size=" << app->size << ", expected " << sizeof(GuildJoin_Struct) << endl;
+		std::cout << "Wrong size: OP_GuildInviteAccept, size=" << app->size << ", expected " << sizeof(GuildJoin_Struct) << std::endl;
 		return;
 	}
 
@@ -4542,7 +4536,7 @@ void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SwapSpell_Struct)) {
-		cout << "Wrong size on OP_SwapSpell. Got: " << app->size << ", Expected: " << sizeof(SwapSpell_Struct) << endl;
+		std::cout << "Wrong size on OP_SwapSpell. Got: " << app->size << ", Expected: " << sizeof(SwapSpell_Struct) << std::endl;
 		return;
 	}
 	const SwapSpell_Struct* swapspell = (const SwapSpell_Struct*) app->pBuffer;
@@ -4562,7 +4556,7 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(CastSpell_Struct)) {
-		cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << endl;
+		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
 		return;
 	}
 	if (IsAIControlled()) {
@@ -4746,7 +4740,7 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(DeleteItem_Struct)) {
-		cout << "Wrong size on OP_DeleteItem. Got: " << app->size << ", Expected: " << sizeof(DeleteItem_Struct) << endl;
+		std::cout << "Wrong size on OP_DeleteItem. Got: " << app->size << ", Expected: " << sizeof(DeleteItem_Struct) << std::endl;
 		return;
 	}
 
@@ -4780,7 +4774,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(CombatAbility_Struct)) {
-		cout << "Wrong size on OP_CombatAbility. Got: " << app->size << ", Expected: " << sizeof(CombatAbility_Struct) << endl;
+		std::cout << "Wrong size on OP_CombatAbility. Got: " << app->size << ", Expected: " << sizeof(CombatAbility_Struct) << std::endl;
 		return;
 	}
 	OPCombatAbility(app);
@@ -4790,7 +4784,7 @@ void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app)
 void Client::Handle_OP_Taunt(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClientTarget_Struct)) {
-		cout << "Wrong size on OP_Taunt. Got: " << app->size << ", Expected: "<< sizeof(ClientTarget_Struct) << endl;
+		std::cout << "Wrong size on OP_Taunt. Got: " << app->size << ", Expected: "<< sizeof(ClientTarget_Struct) << std::endl;
 		return;
 	}
 
@@ -4849,7 +4843,7 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 void Client::Handle_OP_GMSummon(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMSummon_Struct)) {
-		cout << "Wrong size on OP_GMSummon. Got: " << app->size << ", Expected: " << sizeof(GMSummon_Struct) << endl;
+		std::cout << "Wrong size on OP_GMSummon. Got: " << app->size << ", Expected: " << sizeof(GMSummon_Struct) << std::endl;
 		return;
 	}
 	OPGMSummon(app);
@@ -5013,7 +5007,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_FinishTrade, 0);
 		QueuePacket(outapp);
 		safe_delete(outapp);
-		if(with->IsNPC())
+		if(with->IsNPC()) {
 			// Audit trade to database for player trade stream
 			if(RuleB(QueryServ, PlayerLogHandins)) {
 				uint16 handin_count = 0;
@@ -5033,6 +5027,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			else {
 				FinishTrade(with->CastToNPC());
 			}
+		}
 #ifdef BOTS
 		else if(with->IsBot())
 			with->CastToBot()->FinishTrade(this, Bot::BotTradeClientNormal);
@@ -5249,7 +5244,7 @@ void Client::Handle_OP_GMKill(const EQApplicationPacket *app)
 void Client::Handle_OP_GMLastName(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMLastName_Struct)) {
-		cout << "Wrong size on OP_GMLastName. Got: " << app->size << ", Expected: " << sizeof(GMLastName_Struct) << endl;
+		std::cout << "Wrong size on OP_GMLastName. Got: " << app->size << ", Expected: " << sizeof(GMLastName_Struct) << std::endl;
 		return;
 	}
 	GMLastName_Struct* gmln = (GMLastName_Struct*) app->pBuffer;
@@ -5283,7 +5278,7 @@ void Client::Handle_OP_GMLastName(const EQApplicationPacket *app)
 void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMToggle_Struct)) {
-		cout << "Wrong size on OP_GMToggle. Got: " << app->size << ", Expected: " << sizeof(GMToggle_Struct) << endl;
+		std::cout << "Wrong size on OP_GMToggle. Got: " << app->size << ", Expected: " << sizeof(GMToggle_Struct) << std::endl;
 		return;
 	}
 	if (this->Admin() < minStatusToUseGMCommands) {
@@ -5312,7 +5307,7 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 void Client::Handle_OP_LFGCommand(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(LFG_Struct)) {
-		cout << "Wrong size on OP_LFGCommand. Got: " << app->size << ", Expected: " << sizeof(LFG_Struct) << endl;
+		std::cout << "Wrong size on OP_LFGCommand. Got: " << app->size << ", Expected: " << sizeof(LFG_Struct) << std::endl;
 		DumpPacket(app);
 		return;
 	}
@@ -5358,7 +5353,7 @@ void Client::Handle_OP_LFGCommand(const EQApplicationPacket *app)
 void Client::Handle_OP_GMGoto(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMSummon_Struct)) {
-		cout << "Wrong size on OP_GMGoto. Got: " << app->size << ", Expected: " << sizeof(GMSummon_Struct) << endl;
+		std::cout << "Wrong size on OP_GMGoto. Got: " << app->size << ", Expected: " << sizeof(GMSummon_Struct) << std::endl;
 		return;
 	}
 	if (this->Admin() < minStatusToUseGMCommands) {
@@ -5728,7 +5723,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		return;
 	}
 
-	string packet;
+	std::string packet;
 	if(mp->quantity==1 && item->MaxCharges>0 && item->MaxCharges<255)
 		mp->quantity=item->MaxCharges;
 
@@ -5810,7 +5805,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 
 	t1.stop();
-	cout << "At 1: " << t1.getDuration() << endl;
+	std::cout << "At 1: " << t1.getDuration() << std::endl;
 	return;
 }
 
@@ -5955,7 +5950,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	t1.start();
 	Save(1);
 	t1.stop();
-	cout << "Save took: " << t1.getDuration() << endl;
+	std::cout << "Save took: " << t1.getDuration() << std::endl;
 	return;
 }
 
@@ -6941,7 +6936,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 {
 	if(app->size!=sizeof(LoadSpellSet_Struct)) {
-		printf("Wrong size of LoadSpellSet_Struct! Expected: %lu, Got: %i\n",sizeof(LoadSpellSet_Struct),app->size);
+		printf("Wrong size of LoadSpellSet_Struct! Expected: %i, Got: %i\n",sizeof(LoadSpellSet_Struct),app->size);
 		return;
 	}
 	int i;
@@ -6956,7 +6951,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 {
 	if(app->size!=sizeof(PetitionBug_Struct))
-		printf("Wrong size of BugStruct! Expected: %lu, Got: %i\n",sizeof(PetitionBug_Struct),app->size);
+		printf("Wrong size of BugStruct! Expected: %i, Got: %i\n",sizeof(PetitionBug_Struct),app->size);
 	else{
 		Message(0, "Petition Bugs are not supported, please use /bug.");
 	}
@@ -6966,7 +6961,7 @@ void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
 	if(app->size!=sizeof(BugStruct))
-		printf("Wrong size of BugStruct got %d expected %lu!\n", app->size, sizeof(BugStruct));
+		printf("Wrong size of BugStruct got %d expected %i!\n", app->size, sizeof(BugStruct));
 	else{
 		BugStruct* bug=(BugStruct*)app->pBuffer;
 		database.UpdateBug(bug);
@@ -7057,7 +7052,7 @@ void Client::Handle_OP_PetitionDelete(const EQApplicationPacket *app)
 	FastQueuePacket(&outapp);
 
 	if (petition_list.DeletePetition(pet->petnumber) == -1)
-		cout << "Something is borked with: " << pet->petnumber << endl;
+		std::cout << "Something is borked with: " << pet->petnumber << std::endl;
 	petition_list.ClearPetitions();
 	petition_list.UpdateGMQueue();
 	petition_list.ReadDatabase();
@@ -7339,7 +7334,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 void Client::Handle_OP_PetitionUnCheckout(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
-		cout << "Wrong size: OP_PetitionUnCheckout, size=" << app->size << ", expected " << sizeof(uint32) << endl;
+		std::cout << "Wrong size: OP_PetitionUnCheckout, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
 		return;
 	}
 	if (!worldserver.Connected())
@@ -7381,7 +7376,7 @@ void Client::Handle_OP_PDeletePetition(const EQApplicationPacket *app)
 void Client::Handle_OP_PetitionCheckout(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
-		cout << "Wrong size: OP_PetitionCheckout, size=" << app->size << ", expected " << sizeof(uint32) << endl;
+		std::cout << "Wrong size: OP_PetitionCheckout, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
 		return;
 	}
 	if (!worldserver.Connected())
@@ -7525,7 +7520,7 @@ void Client::Handle_OP_GMDelCorpse(const EQApplicationPacket *app)
 		return;
 	}
 	corpse->CastToCorpse()->Delete();
-	cout << name << " deleted corpse " << dc->corpsename << endl;
+	std::cout << name << " deleted corpse " << dc->corpsename << std::endl;
 	Message(13, "Corpse %s deleted.", dc->corpsename);
 	return;
 }
@@ -8362,7 +8357,7 @@ void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
 	_pkt(TRIBUTE__IN, app);
 
 	if(app->size != sizeof(StartTribute_Struct))
-		printf("Error in OP_OpenTributeMaster. Expected size of: %lu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
+		printf("Error in OP_OpenTributeMaster. Expected size of: %i, but got: %i\n",sizeof(StartTribute_Struct),app->size);
 	else {
 		//Opens the tribute master window
 		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
@@ -8387,7 +8382,7 @@ void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 	_pkt(TRIBUTE__IN, app);
 
 	if(app->size != sizeof(StartTribute_Struct))
-		printf("Error in OP_OpenGuildTributeMaster. Expected size of: %lu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
+		printf("Error in OP_OpenGuildTributeMaster. Expected size of: %i, but got: %i\n",sizeof(StartTribute_Struct),app->size);
 	else {
 		//Opens the guild tribute master window
 		StartTribute_Struct* st = (StartTribute_Struct*)app->pBuffer;
@@ -8413,7 +8408,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 
 	//player donates an item...
 	if(app->size != sizeof(TributeItem_Struct))
-		printf("Error in OP_TributeItem. Expected size of: %lu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
+		printf("Error in OP_TributeItem. Expected size of: %i, but got: %i\n",sizeof(StartTribute_Struct),app->size);
 	else {
 		TributeItem_Struct* t = (TributeItem_Struct*)app->pBuffer;
 
@@ -8442,7 +8437,7 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 
 	//player donates money
 	if(app->size != sizeof(TributeMoney_Struct))
-		printf("Error in OP_TributeMoney. Expected size of: %lu, but got: %i\n",sizeof(StartTribute_Struct),app->size);
+		printf("Error in OP_TributeMoney. Expected size of: %i, but got: %i\n",sizeof(StartTribute_Struct),app->size);
 	else {
 		TributeMoney_Struct* t = (TributeMoney_Struct*)app->pBuffer;
 
@@ -8590,11 +8585,11 @@ void Client::Handle_OP_Ignore(const EQApplicationPacket *app)
 void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 {
 	if(app->size != sizeof(FindPersonRequest_Struct))
-		printf("Error in FindPersonRequest_Struct. Expected size of: %lu, but got: %i\n",sizeof(FindPersonRequest_Struct),app->size);
+		printf("Error in FindPersonRequest_Struct. Expected size of: %i, but got: %i\n",sizeof(FindPersonRequest_Struct),app->size);
 	else {
 		FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
 
-		vector<FindPerson_Point> points;
+		std::vector<FindPerson_Point> points;
 
 		Message(13, "Searched for NPC ID: %d\n", t->npc_id);
 		Mob* target = entity_list.GetMob(t->npc_id);
@@ -8645,7 +8640,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 			}
 			else
 			{
-				list<int> pathlist = zone->pathing->FindRoute(Start, End);
+				std::list<int> pathlist = zone->pathing->FindRoute(Start, End);
 
 				if(pathlist.size() == 0)
 				{
@@ -8684,7 +8679,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 				p.z = GetZ();
 				points.push_back(p);
 
-				for(list<int>::iterator Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
+				for(std::list<int>::iterator Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
 				{
 					if((*Iterator) == -1) // Teleporter
 					{
@@ -8735,7 +8730,7 @@ void Client::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 				}
 			}
 			else {
-				cout << "Async client save failed. '" << errbuf << "'" << endl;
+				std::cout << "Async client save failed. '" << errbuf << "'" << std::endl;
 				Message(13, "Error: Asyncronous save of your character failed.");
 				if (Admin() >= 200)
 					Message(13, "errbuf: %s", errbuf);
@@ -8744,7 +8739,7 @@ void Client::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 			break;
 		}
 		default: {
-			cout << "Error: Client::DBAWComplete(): Unknown workpt_b1" << endl;
+			std::cout << "Error: Client::DBAWComplete(): Unknown workpt_b1" << std::endl;
 			break;
 		}
 	}
@@ -8762,11 +8757,11 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	for (i=1; i<=3; i++) {
 		dbaq = dbaw->PopAnswer();
 		if (!dbaq) {
-			cout << "Error in FinishConnState2(): dbaq==0" << endl;
+			std::cout << "Error in FinishConnState2(): dbaq==0" << std::endl;
 			return false;
 		}
 		if (!dbaq->GetAnswer(errbuf, &result)) {
-			cout << "Error in FinishConnState2(): !dbaq[" << dbaq->QPT() << "]->GetAnswer(): " << errbuf << endl;
+			std::cout << "Error in FinishConnState2(): !dbaq[" << dbaq->QPT() << "]->GetAnswer(): " << errbuf << std::endl;
 			return false;
 		}
 		if (dbaq->QPT() == 1) {
@@ -8784,7 +8779,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			database.LoadFactionValues_result(result, factionvalues);
 		}
 		else {
-			cout << "Error in FinishConnState2(): dbaq->PQT() unknown" << endl;
+			std::cout << "Error in FinishConnState2(): dbaq->PQT() unknown" << std::endl;
 			return false;
 		}
 	}
@@ -9198,7 +9193,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 #ifdef _EQDEBUG
 	printf("Dumping inventory on load:\n");
-	m_inv.dumpInventory();
+	m_inv.dumpEntireInventory();
 #endif
 
 //lost in current PP
@@ -9793,7 +9788,7 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 
 	SetTitle_Struct *sts = (SetTitle_Struct *)app->pBuffer;
 
-	string Title;
+	std::string Title;
 
 	if(!sts->is_suffix)
 	{
@@ -11604,8 +11599,8 @@ void Client::Handle_OP_Report(const EQApplicationPacket *app)
 
 	uint32 size = app->size;
 	uint32 current_point = 0;
-	string reported, reporter;
-	string current_string;
+	std::string reported, reporter;
+	std::string current_string;
 	int mode = 0;
 
 	while(current_point < size)
@@ -11742,7 +11737,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 		char CharName[64], TimeOfDeath[20], Buffer[512];
 
-		string PopupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
+		std::string PopupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
 					"Rezzed</td><td>Buried</td></tr><tr><td>&nbsp</td><td></td><td></td><td></td><td></td><td>"
 					"</td><td></td><td></td></tr>";
 
@@ -12490,7 +12485,7 @@ void Client::Handle_OP_CorpseDrop(const EQApplicationPacket *app)
 		return;
 	}
 
-	for(std::list<string>::iterator Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
+	for(std::list<std::string>::iterator Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
 	{
 		if(!strcasecmp((*Iterator).c_str(), (const char *)app->pBuffer))
 		{
@@ -12616,7 +12611,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 			return;
 		}
 
-		list<AltCurrencyDefinition_Struct>::iterator altc_iter = zone->AlternateCurrencies.begin();
+		std::list<AltCurrencyDefinition_Struct>::iterator altc_iter = zone->AlternateCurrencies.begin();
 		bool found = false;
 		while(altc_iter != zone->AlternateCurrencies.end()) {
 			if((*altc_iter).id == alt_cur_id) {
@@ -12825,7 +12820,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app) {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencyReclaim, app, AltCurrencyReclaim_Struct);
 	AltCurrencyReclaim_Struct *reclaim = (AltCurrencyReclaim_Struct*)app->pBuffer;
 	uint32 item_id = 0;
-	list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
+	std::list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
 	while(iter != zone->AlternateCurrencies.end()) {
 		if((*iter).id == reclaim->currency_id) {
 			item_id = (*iter).item_id;
@@ -13579,7 +13574,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 
 		for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); mercListItr++)
 		{
-			list<MercStanceInfo>::iterator siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin();
+			std::list<MercStanceInfo>::iterator siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin();
 			for(siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin(); siter != zone->merc_stance_list[mercListItr->MercTemplateID].end(); siter++)
 			{
 				StanceCount++;
@@ -13618,7 +13613,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 				mml->Mercs[i].MerchantSlot = i + 1;
 				mml->Mercs[i].MercUnk02 = 1;
 				int mercStanceCount = 0;
-				list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
+				std::list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
 				for(iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin(); iter != zone->merc_stance_list[mercListIter->MercTemplateID].end(); iter++)
 				{
 				mercStanceCount++;
@@ -13630,7 +13625,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 				int stanceindex = 0;
 				if(mercStanceCount > 0)
 				{
-					list<MercStanceInfo>::iterator iter2 = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
+					std::list<MercStanceInfo>::iterator iter2 = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
 					while(iter2 != zone->merc_stance_list[mercListIter->MercTemplateID].end())
 					{
 						mml->Mercs[i].Stances[stanceindex].StanceIndex = stanceindex;
@@ -13768,7 +13763,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 
 			//get number of available stances for the current merc
 			std::list<MercStanceInfo> mercStanceList = zone->merc_stance_list[merc->GetMercTemplateID()];
-			list<MercStanceInfo>::iterator iter = mercStanceList.begin();
+			std::list<MercStanceInfo>::iterator iter = mercStanceList.begin();
 			while(iter != mercStanceList.end()) {
 				numStances++;
 				iter++;

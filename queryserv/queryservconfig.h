@@ -24,7 +24,7 @@
 
 class queryservconfig : public EQEmuConfig {
 public:
-	virtual string GetByName(const string &var_name) const;
+	virtual std::string GetByName(const std::string &var_name) const;
 
 private:
 

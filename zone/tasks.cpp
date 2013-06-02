@@ -28,6 +28,7 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #endif
 
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/rulesys.h"
 #include "masterentity.h"
 #include "../common/features.h"
@@ -381,7 +382,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 			}
 
 			int UpdatedActivityCount = 0;
-			string UpdateActivityQuery = ActivityQuery;
+			std::string UpdateActivityQuery = ActivityQuery;
 			char *buf = 0;
 
 			for(int Activity=0; Activity<Tasks[TaskID]->ActivityCount; Activity++) {
@@ -812,8 +813,8 @@ void ClientTaskState::EnableTask(int CharID, int TaskCount, int *TaskList) {
 
 	// Check if the Task is already enabled for this client
 	//
-	vector<int> TasksEnabled;
-	vector<int>::iterator Iterator;
+	std::vector<int> TasksEnabled;
+	std::vector<int>::iterator Iterator;
 
 	for(int i=0; i<TaskCount; i++) {
 		Iterator = EnabledTasks.begin();
@@ -843,7 +844,7 @@ void ClientTaskState::EnableTask(int CharID, int TaskCount, int *TaskList) {
 
 	if(TasksEnabled.size() == 0 ) return;
 
-	string TaskQuery="REPLACE INTO character_enabledtasks (charid, taskid) VALUES ";
+	std::string TaskQuery="REPLACE INTO character_enabledtasks (charid, taskid) VALUES ";
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in ClientTaskState::EnableTask %s %s";
 
@@ -876,8 +877,8 @@ void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
 
 	// Check if the Task is enabled for this client
 	//
-	vector<int> TasksDisabled;
-	vector<int>::iterator Iterator;
+	std::vector<int> TasksDisabled;
+	std::vector<int>::iterator Iterator;
 
 	for(int i=0; i<TaskCount; i++) {
 		Iterator = EnabledTasks.begin();
@@ -903,7 +904,7 @@ void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
 
 	if(TasksDisabled.size() == 0) return;
 
-	string TaskQuery="DELETE FROM character_enabledtasks WHERE ";
+	std::string TaskQuery="DELETE FROM character_enabledtasks WHERE ";
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in ClientTaskState::DisableTask %s %s";
 
@@ -939,7 +940,7 @@ void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
 
 bool ClientTaskState::IsTaskEnabled(int TaskID) {
 
-	vector<int>::iterator Iterator;
+	std::vector<int>::iterator Iterator;
 
 	Iterator = EnabledTasks.begin();
 
@@ -1015,7 +1016,7 @@ int TaskManager::FirstTaskInSet(int TaskSetID) {
 
 	if(TaskSets[TaskSetID].size() == 0) return 0;
 
-	vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
+	std::vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
 
 	while(Iterator != TaskSets[TaskSetID].end()) {
 		if((*Iterator) > 0)
@@ -1079,7 +1080,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 		if(TaskSets[TaskSetID][0] == 0) {
 
 			_log(TASKS__UPDATE, "TaskSets[%i][0] == 0. All Tasks in Set enabled.", TaskSetID);
-			vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
+			std::vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
 
 			while((Iterator != TaskSets[TaskSetID].end()) && (TaskListIndex < MAXCHOOSERENTRIES)) {
 				if(AppropriateLevel((*Iterator), PlayerLevel) && !state->IsTaskActive((*Iterator)) &&
@@ -1487,7 +1488,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 		if(AllActivitiesComplete && RuleB(TaskSystem, RecordCompletedTasks)) {
 			if(RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
 				_log(TASKS__UPDATE, "KeepOneRecord enabled");
-				vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
+				std::vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
 				int ErasedElements = 0;
 				while(Iterator != CompletedTasks.end()) {
 					int TaskID = (*Iterator).TaskID;
@@ -1560,7 +1561,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 			// the same task again, erase the previous completed entry for this task.
 			if(RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
 				_log(TASKS__UPDATE, "KeepOneRecord enabled");
-				vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
+				std::vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
 				int ErasedElements = 0;
 				while(Iterator != CompletedTasks.end()) {
 					int TaskID = (*Iterator).TaskID;
@@ -2025,7 +2026,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 	if(!Task || !c) return;
 
 	const Item_Struct* Item;
-	vector<int> RewardList;
+	std::vector<int> RewardList;
 
 	switch(Task->RewardMethod) {
 
@@ -2069,7 +2070,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 		Silver = Copper / 10;
 		Copper = Copper - (Silver * 10);
 
-		string CashMessage;
+		std::string CashMessage;
 
 		if (Plat>0){
 			CashMessage = "You receive ";
@@ -2482,10 +2483,8 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 			thd1 = (TaskHistoryReplyData1_Struct*)Ptr;
 			thd1->ActivityType = Task->Activity[i].Type;
 			Ptr = (char *)thd1 + sizeof(TaskHistoryReplyData1_Struct);
-			sprintf(Ptr, Task->Activity[i].Text1);
-			Ptr = Ptr + strlen(Ptr) + 1;
-			sprintf(Ptr, Task->Activity[i].Text2);
-			Ptr = Ptr + strlen(Ptr) + 1;
+			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].Text1);
+			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].Text2);
 			thd2 = (TaskHistoryReplyData2_Struct*)Ptr;
 			thd2->GoalCount = Task->Activity[i].GoalCount;
 			thd2->unknown04 = 0xffffffff;
@@ -2493,8 +2492,7 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 			thd2->ZoneID = Task->Activity[i].ZoneID;
 			thd2->unknown16 = 0x00000000;
 			Ptr = (char *)thd2 + sizeof(TaskHistoryReplyData2_Struct);
-			sprintf(Ptr, Task->Activity[i].Text3);
-			Ptr = Ptr + strlen(Ptr) + 1;
+			VARSTRUCT_ENCODE_STRING(Ptr, Task->Activity[i].Text3);
 		}
 	}
 
@@ -2908,7 +2906,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 				+ sizeof(TaskDescriptionData1_Struct) + strlen(Tasks[TaskID]->Description) + 1
 				+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
-	string RewardText;
+	std::string RewardText;
 	int ItemID = 0;
 
 	// If there is an item make the Reward text into a link to the item (only the first item if a list
@@ -3427,9 +3425,9 @@ int TaskGoalListManager::GetFirstEntry(int ListID) {
 	return TaskGoalLists[ListIndex].GoalItemEntries[0];
 }
 
-vector<int> TaskGoalListManager::GetListContents(int ListID) {
+std::vector<int> TaskGoalListManager::GetListContents(int ListID) {
 
-	vector<int> ListContents;
+	std::vector<int> ListContents;
 
 	int ListIndex = GetListByID(ListID);
 

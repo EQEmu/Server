@@ -9,8 +9,6 @@
 #include <string>
 #include <stdlib.h>
 
-using namespace std;
-
 enum AdventureStatus
 {
 	AS_WaitingForZoneIn,
@@ -28,7 +26,7 @@ enum AdventureWinStatus
 
 struct AdventureZones
 {
-	string zone;
+	std::string zone;
 	int version;
 };
 
@@ -40,7 +38,7 @@ struct AdventureZoneIn
 
 struct AdventureFinishEvent
 {
-	string name;
+	std::string name;
 	bool win;
 	int points;
 	int theme;
@@ -48,7 +46,7 @@ struct AdventureFinishEvent
 
 struct LeaderboardInfo
 {
-	string name;
+	std::string name;
 	uint32 wins;
 	uint32 guk_wins;
 	uint32 mir_wins;
@@ -71,9 +69,9 @@ public:
 	~Adventure();
 	bool Process();
 	bool IsActive();
-	void AddPlayer(string character_name, bool add_client_to_instance = true);
-	void RemovePlayer(string character_name);
-	bool PlayerExists(string character_name);
+	void AddPlayer(std::string character_name, bool add_client_to_instance = true);
+	void RemovePlayer(std::string character_name);
+	bool PlayerExists(std::string character_name);
 	bool CreateInstance();
 	void IncrementCount();
 	void IncrementAssassinationCount();
@@ -85,7 +83,7 @@ public:
 	uint16 GetInstanceID() const { return instance_id; }
 	const AdventureTemplate *GetTemplate() const { return adventure_template; }
 	AdventureStatus GetStatus() const { return status; }
-	list<string> GetPlayers() { return players; }
+	std::list<std::string> GetPlayers() { return players; }
 	int GetCount() const { return count; }
 	int GetAssassinationCount() const { return assassination_count; }
 	uint32 GetRemainingTime() const { if(current_timer) { return (current_timer->GetRemainingTime() / 1000); } else { return 0; } }
@@ -95,7 +93,7 @@ protected:
 	int assassination_count;
 	AdventureTemplate *adventure_template;
 	AdventureStatus status;
-	list<string> players;
+	std::list<std::string> players;
 	Timer *current_timer;
 	int instance_id;
 };

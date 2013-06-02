@@ -3759,7 +3759,7 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 		return 0;
 	}
 
-	for (map<uint32, AA_Ability>::const_iterator iter = aa_effects[aa_ID].begin(); iter != aa_effects[aa_ID].end(); ++iter)
+	for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aa_ID].begin(); iter != aa_effects[aa_ID].end(); ++iter)
 	{
 		effect = iter->second.skill_id;
 		base1 = iter->second.base1;
@@ -4488,12 +4488,13 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		case SE_TriggerOnCast:
 		{
 			if(type == focusTriggerOnCast)
-
+			{
 				if(MakeRandomInt(0, 100) <= focus_spell.base[i])
 					value = focus_spell.base2[i];
 
 				else
 					value = 0;
+			}
 
 			break;
 		}
@@ -4642,7 +4643,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	uint8 SizeProcList = 0;
 	uint8 MAX_SYMPATHETIC = 10;
 
-	vector<int> SympatheticProcList;
+	std::vector<int> SympatheticProcList;
 
 	//item focus
 	if (itembonuses.FocusEffects[type]){
@@ -5106,7 +5107,7 @@ bool Mob::TryDivineSave()
 	{
 		SetHP(1);
 
-		uint16 EffectsToTry[] =
+		int16 EffectsToTry[] =
 		{
 			aabonuses.DivineSaveChance[1],
 			itembonuses.DivineSaveChance[1],

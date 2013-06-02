@@ -23,8 +23,6 @@
 #include <map>
 #include <string>
 
-using namespace std;
-
 /**
  * Keeps track of all the configuration for the application with a small parser.
  * Note: This is not a thread safe class, but only parse writes to variables in the class.
@@ -44,10 +42,10 @@ public:
 	/**
 	* Gets a variable if it exists.
 	*/
-	string GetVariable(string title, string parameter);
+	std::string GetVariable(std::string title, std::string parameter);
 
 protected:
-	map<string, map<string, string> > vars;
+	std::map<std::string, std::map<std::string, std::string> > vars;
 
 private:
 	/**
@@ -56,7 +54,7 @@ private:
 	* may get it's input from other places than a C file pointer. (a http get request for example).
 	* The programmer of a derived class would be expected to make their own Tokenize function for their own Parse().
 	*/
-	void Tokenize(FILE* input, list<string> &tokens);
+	void Tokenize(FILE* input, std::list<std::string> &tokens);
 };
 
 #endif

@@ -23,8 +23,6 @@
 #include <map>
 #include <string>
 
-using namespace std;
-
 class LauncherLink;
 
 typedef struct {
@@ -60,16 +58,16 @@ public:
 	bool SetDynamicCount(int count);
 	int GetDynamicCount() const;
 
-	vector<string> ListZones();	//returns an array of zone refs
-	map<string,string> GetZoneDetails(Const_char *zone_ref);
+	std::vector<std::string> ListZones();	//returns an array of zone refs
+	std::map<std::string,std::string> GetZoneDetails(Const_char *zone_ref);
 //END PERL EXPORT
 
 protected:
-	const string m_name;
+	const std::string m_name;
 
 	uint8 m_dynamics;
 
-	map<string, LauncherZone> m_zones;	//static zones.
+	std::map<std::string, LauncherZone> m_zones;	//static zones.
 };
 
 #endif /*EQLCONFIG_H_*/

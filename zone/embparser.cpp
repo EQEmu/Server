@@ -31,6 +31,7 @@
 #include "command.h"
 #include "../common/seperator.h"
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "QGlobals.h"
 #include "zone.h"
 
@@ -131,7 +132,7 @@ void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, cons
 }
 
 // Exports key-value pairs to a hash named pkgprefix::hashname
-void PerlembParser::ExportHash(const char *pkgprefix, const char *hashname, std::map<string,string> &vals)
+void PerlembParser::ExportHash(const char *pkgprefix, const char *hashname, std::map<std::string,std::string> &vals)
 {
 	if (!perl)
 		return;
@@ -271,7 +272,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		}
 	}
 
-	string packagename;
+	std::string packagename;
 	if(!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest && !isSpellQuest){
 
 		if(global){
@@ -370,7 +371,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		//only export for npcs that are global enabled.
 		if(npcmob && npcmob->GetQglobal())
 		{
-			map<string, string> globhash;
+			std::map<std::string, std::string> globhash;
 			QGlobalCache *npc_c = nullptr;
 			QGlobalCache *char_c = nullptr;
 			QGlobalCache *zone_c = nullptr;
@@ -431,7 +432,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	}
 	else
 	{
-		map<string, string> globhash;
+		std::map<std::string, std::string> globhash;
 		QGlobalCache *char_c = nullptr;
 		QGlobalCache *zone_c = nullptr;
 
@@ -553,7 +554,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 
 	if(mob && mob->IsClient())
 	{
-		string hashname = packagename + std::string("::hasitem");
+		std::string hashname = packagename + std::string("::hasitem");
 #if EQDEBUG >= 7
 		LogFile->write(EQEMuLog::Debug, "starting hasitem, on : %s",hashname.c_str() );
 #endif
@@ -579,7 +580,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	}
 // $oncursor
 	if(mob && mob->IsClient()) {
-		string hashname = packagename + std::string("::oncursor");
+		std::string hashname = packagename + std::string("::oncursor");
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 		char *hi_decl = nullptr;
 		int itemid = mob->CastToClient()->GetItemIDAt(30);
@@ -622,7 +623,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 			ExportVar(packagename.c_str(), "silver", GetVar("silver", objid).c_str());
 			ExportVar(packagename.c_str(), "gold", GetVar("gold", objid).c_str());
 			ExportVar(packagename.c_str(), "platinum", GetVar("platinum", objid).c_str());
-			string hashname = packagename + std::string("::itemcount");
+			std::string hashname = packagename + std::string("::itemcount");
 			perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 			perl->eval(std::string("++$").append(hashname).append("{$").append(packagename).append("::item1};").c_str());
 			perl->eval(std::string("++$").append(hashname).append("{$").append(packagename).append("::item2};").c_str());
@@ -936,7 +937,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 		return(1);
 	}
 
-	string filename = "quests/", packagename = GetPkgPrefix(npcid);
+	std::string filename = "quests/", packagename = GetPkgPrefix(npcid);
 	//each package name is of the form qstxxxx where xxxx = npcid (since numbers alone are not valid package names)
 	questMode curmode = questDefault;
 	FILE *tmpf;
@@ -953,7 +954,7 @@ int PerlembParser::LoadScript(int npcid, const char * zone, Mob* activater)
 		filename += zone;
 		filename += "/";
 #ifdef QUEST_SCRIPTS_BYNAME
-		string bnfilename = filename;
+		std::string bnfilename = filename;
 #endif
 		filename += itoa(npcid);
 		filename += ".pl";
@@ -1193,10 +1194,10 @@ int PerlembParser::LoadGlobalNPCScript()
 		return 1;
 	}
 
-	string filename = "quests/";
+	std::string filename = "quests/";
 	filename += QUEST_TEMPLATES_DIRECTORY;
 	filename += "/global_npc.pl";
-	string packagename = "global_npc";
+	std::string packagename = "global_npc";
 
 	try {
 		perl->eval_file(packagename.c_str(), filename.c_str());
@@ -1225,12 +1226,12 @@ int PerlembParser::LoadPlayerScript(const char *zone_name)
 		return 1;
 	}
 
-	string filename= "quests/";
+	std::string filename= "quests/";
 	filename += zone_name;
 	filename += "/player_v";
 	filename += itoa(zone->GetInstanceVersion());
 	filename += ".pl";
-	string packagename = "player";
+	std::string packagename = "player";
 	packagename += "_";
 	packagename += zone_name;
 
@@ -1297,10 +1298,10 @@ int PerlembParser::LoadGlobalPlayerScript()
 		return 1;
 	}
 
-	string filename = "quests/";
+	std::string filename = "quests/";
 	filename += QUEST_TEMPLATES_DIRECTORY;
 	filename += "/global_player.pl";
-	string packagename = "global_player";
+	std::string packagename = "global_player";
 
 	try {
 		perl->eval_file(packagename.c_str(), filename.c_str());
@@ -1317,7 +1318,7 @@ int PerlembParser::LoadGlobalPlayerScript()
 	return 1;
 }
 
-int PerlembParser::LoadItemScript(ItemInst* iteminst, string packagename, itemQuestMode Qtype) {
+int PerlembParser::LoadItemScript(ItemInst* iteminst, std::string packagename, itemQuestMode Qtype) {
 	if(!perl)
 		return 0;
 
@@ -1330,7 +1331,7 @@ int PerlembParser::LoadItemScript(ItemInst* iteminst, string packagename, itemQu
 	if(itemQuestLoaded.count(packagename) == 1)
 		return 1;
 
-	string filename = "quests/items/";
+	std::string filename = "quests/items/";
 	if(Qtype == itemQuestScale)
 		filename += packagename;
 	else if(Qtype == itemQuestLore) {
@@ -1376,8 +1377,8 @@ int PerlembParser::LoadSpellScript(uint32 id)
 	if(spellQuestLoaded.count(id) == 1)
 		return 1;
 
-	string filename = "quests/spells/";
-	string packagename = "spell_effect_";
+	std::string filename = "quests/spells/";
+	std::string packagename = "spell_effect_";
 	filename += itoa(id);
 	packagename += itoa(id);
 	filename += ".pl";
@@ -1444,7 +1445,7 @@ bool PerlembParser::HasQuestSub(uint32 npcid, const char *subname) {
 		}
 	}
 
-	string packagename = GetPkgPrefix(npcid);
+	std::string packagename = GetPkgPrefix(npcid);
 
 	return(perl->SubExists(packagename.c_str(), subname));
 }
@@ -1454,20 +1455,20 @@ bool PerlembParser::HasGlobalQuestSub(const char *subname) {
 		return(false);
 	}
 
-	string packagename = "global_npc";
+	std::string packagename = "global_npc";
 
 	return(perl->SubExists(packagename.c_str(), subname));
 }
 
 bool PerlembParser::PlayerHasQuestSub(const char *subname) {
 
-	string packagename = "player_";
+	std::string packagename = "player_";
 	packagename += zone->GetShortName();
 
 	if(playerQuestLoaded.count(zone->GetShortName()) == 0)
 		LoadPlayerScript(zone->GetShortName());
 
-	if(subname == "EVENT_CAST")
+	if(strcmp("EVENT_CAST",subname) == 0)
 		return (playerQuestLoaded[zone->GetShortName()] == pQuestEventCast);
 
 	return(perl->SubExists(packagename.c_str(), subname));
@@ -1475,12 +1476,12 @@ bool PerlembParser::PlayerHasQuestSub(const char *subname) {
 
 bool PerlembParser::GlobalPlayerHasQuestSub(const char *subname) {
 
-	string packagename = "global_player";
+	std::string packagename = "global_player";
 
 	if(globalPlayerQuestLoaded == pQuestReadyToLoad)
 		LoadGlobalPlayerScript();
 
-	if(subname == "EVENT_CAST")
+	if(strcmp("EVENT_CAST",subname) == 0)
 		return (globalPlayerQuestLoaded == pQuestEventCast);
 
 	return(perl->SubExists(packagename.c_str(), subname));
@@ -1488,7 +1489,7 @@ bool PerlembParser::GlobalPlayerHasQuestSub(const char *subname) {
 
 bool PerlembParser::SpellHasQuestSub(uint32 id, const char *subname)
 {
-	string packagename = "spell_effect_";
+	std::string packagename = "spell_effect_";
 	packagename += itoa(id);
 
 	if(spellQuestLoaded.count(id) == 0)
@@ -1499,7 +1500,7 @@ bool PerlembParser::SpellHasQuestSub(uint32 id, const char *subname)
 
 bool PerlembParser::ItemHasQuestSub(ItemInst *itm, const char *subname)
 {
-	string packagename;
+	std::string packagename;
 	const Item_Struct* item = itm->GetItem();
 	if(!item)
 		return false;

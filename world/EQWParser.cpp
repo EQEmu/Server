@@ -27,12 +27,9 @@
 #include "../common/logsys.h"
 #include "worlddb.h"
 
-using namespace std;
-
 #ifndef GvCV_set
 #define GvCV_set(gv,cv) (GvCV(gv) = (cv))
 #endif
-
 
 XS(XS_EQWIO_PRINT);
 
@@ -186,7 +183,7 @@ void EQWParser::DoInit() {
 
 #ifdef EMBPERL_PLUGIN
 	_log(WORLD__PERL, "Loading worldui perl plugins.");
-	string err;
+	std::string err;
 	if(!eval_file("world", "worldui.pl", err)) {
 		_log(WORLD__PERL_ERR, "Warning - world.pl: %s", err.c_str());
 	}
@@ -224,7 +221,7 @@ bool EQWParser::eval_file(const char * packagename, const char * filename, std::
 	return(dosub("eval_file", args, error));
 }
 
-bool EQWParser::dosub(const char * subname, const std::vector<std::string> &args, string &error, int mode) {
+bool EQWParser::dosub(const char * subname, const std::vector<std::string> &args, std::string &error, int mode) {
 	bool err = false;
 	dSP;				// initialize stack pointer
 	ENTER;				// everything created after here
@@ -254,7 +251,7 @@ bool EQWParser::dosub(const char * subname, const std::vector<std::string> &args
 	return(true);
 }
 
-bool EQWParser::eval(const char * code, string &error) {
+bool EQWParser::eval(const char * code, std::string &error) {
 	std::vector<std::string> arg;
 	arg.push_back(code);
 	return(dosub("my_eval", arg, error, G_SCALAR|G_DISCARD|G_EVAL|G_KEEPERR));
@@ -289,7 +286,7 @@ void EQWParser::EQW_eval(const char *pkg, const char *code) {
 		sv_setsv(l_db, _empty_sv);
 	}
 
-	string err;
+	std::string err;
 	if(!eval(code, err)) {
 		EQW::Singleton()->AppendOutput(err.c_str());
 	}

@@ -22,6 +22,7 @@
 #include "masterentity.h"
 #include "../common/packet_dump.h"
 #include "../common/rulesys.h"
+#include "../common/StringUtil.h"
 #include "StringIDs.h"
 #include "QuestParserCollection.h"
 
@@ -92,6 +93,8 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 				SendZoneCancel(zc);
 				return;
 			}
+			break;
+		default:
 			break;
 		};
 	}
@@ -246,6 +249,8 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%s'. Not near a zone point.", GetName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
+	default:
+		break;
 	};
 
 	//OK, now we should know where were going...
@@ -787,7 +792,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		return;
 	}
 
-	set<uint32>::const_iterator cur, end;
+	std::set<uint32>::const_iterator cur, end;
 	cur = zone_flags.begin();
 	end = zone_flags.end();
 	char empty[1] = { '\0' };

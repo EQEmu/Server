@@ -19,8 +19,6 @@
 #include "EQStream.h"
 #include "logsys.h"
 
-using namespace std;
-
 ThreadReturnType EQStreamFactoryReaderLoop(void *eqfs)
 {
 EQStreamFactory *fs=(EQStreamFactory *)eqfs;
@@ -146,7 +144,7 @@ void EQStreamFactory::Push(EQStream *s)
 void EQStreamFactory::ReaderLoop()
 {
 fd_set readset;
-map<string,EQStream *>::iterator stream_itr;
+std::map<std::string,EQStream *>::iterator stream_itr;
 int num;
 int length;
 unsigned char buffer[2048];
@@ -227,7 +225,7 @@ void EQStreamFactory::CheckTimeout()
 	MStreams.lock();
 
 	unsigned long now=Timer::GetCurrentTime();
-	map<string,EQStream *>::iterator stream_itr;
+	std::map<std::string,EQStream *>::iterator stream_itr;
 
 	for(stream_itr=Streams.begin();stream_itr!=Streams.end();) {
 		EQStream *s = stream_itr->second;
@@ -243,7 +241,7 @@ void EQStreamFactory::CheckTimeout()
 			} else {
 				//everybody is done, we can delete it now
 				//cout << "Removing connection" << endl;
-				map<string,EQStream *>::iterator temp=stream_itr;
+				std::map<std::string,EQStream *>::iterator temp=stream_itr;
 				stream_itr++;
 				//let whoever has the stream outside delete it
 				delete temp->second;
@@ -259,10 +257,10 @@ void EQStreamFactory::CheckTimeout()
 
 void EQStreamFactory::WriterLoop()
 {
-map<string,EQStream *>::iterator stream_itr;
+std::map<std::string,EQStream *>::iterator stream_itr;
 bool havework=true;
-vector<EQStream *> wants_write;
-vector<EQStream *>::iterator cur,end;
+std::vector<EQStream *> wants_write;
+std::vector<EQStream *>::iterator cur,end;
 bool decay=false;
 uint32 stream_count;
 

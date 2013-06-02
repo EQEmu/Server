@@ -27,7 +27,6 @@
 #include "timer.h"
 
 #include <vector>
-using namespace std;
 
 //timeoutable objects automatically register themselves
 //with the global TimeoutManager object
@@ -59,7 +58,7 @@ protected:
 	void AddMember(Timeoutable *who);
 	void DeleteMember(Timeoutable *who);
 
-	vector<Timeoutable *> members;
+	std::vector<Timeoutable *> members;
 };
 
 extern TimeoutManager timeout_manager;

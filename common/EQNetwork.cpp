@@ -46,8 +46,6 @@
 #include "../common/crc32.h"
 #include "../common/eq_packet_structs.h"
 
-using namespace std;
-
 #define EQN_DEBUG			0
 #define EQN_DEBUG_Error		0
 #define EQN_DEBUG_Packet	0
@@ -230,19 +228,19 @@ void EQStreamServer::Process() {
 		}
 	}
 
-	map <string, EQStream*>::iterator connection;
+	std::map <std::string, EQStream*>::iterator connection;
 	for (connection = connection_list.begin( ); connection != connection_list.end( );)
 	{
 		if(!connection->second)
 		{
-			map <string, EQStream*>::iterator tmp=connection;
+			std::map <std::string, EQStream*>::iterator tmp=connection;
 			connection++;
 			connection_list.erase(tmp);
 			continue;
 		}
 		EQStream* eqs_data = connection->second;
 		if (eqs_data->IsFree() && (!eqs_data->CheckNetActive())) {
-			map <string, EQStream*>::iterator tmp=connection;
+			std::map <std::string, EQStream*>::iterator tmp=connection;
 			connection++;
 			safe_delete(eqs_data);
 			connection_list.erase(tmp);
@@ -277,7 +275,7 @@ void EQStreamServer::RecvData(uchar* data, uint32 size, uint32 irIP, uint16 irPo
 	sprintf(temp,"%lu:%u",(unsigned long)irIP,irPort);
 	cout << "Data from " << temp << endl;
 	EQStream* tmp = NULL;
-	map <string, EQStream*>::iterator connection;
+	std::map <std::string, EQStream*>::iterator connection;
 	if ((connection=connection_list.find(temp))!=connection_list.end())
 		tmp=connection->second;
 	if(tmp != NULL && tmp->GetrPort() == irPort)

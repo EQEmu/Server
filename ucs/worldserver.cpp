@@ -17,7 +17,6 @@
 */
 #include "../common/debug.h"
 #include <iostream>
-using namespace std;
 #include <string.h>
 #include <stdio.h>
 #include <iomanip>
@@ -38,7 +37,7 @@ extern Clientlist *CL;
 extern const ucsconfig *Config;
 extern Database database;
 
-void ProcessMailTo(Client *c, string from, string subject, string message);
+void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message);
 
 WorldServer::WorldServer()
 : WorldConnection(EmuTCPConnection::packetModeUCS, Config->SharedKey.c_str())
@@ -86,7 +85,7 @@ void WorldServer::Process()
 
 				VARSTRUCT_DECODE_STRING(From, Buffer);
 
-				string Message = Buffer;
+				std::string Message = Buffer;
 
 				_log(UCS__TRACE, "Player: %s, Sent Message: %s", From, Message.c_str());
 
@@ -105,11 +104,11 @@ void WorldServer::Process()
 
 				if(Message[0] == ';')
 				{
-					c->SendChannelMessageByNumber(Message.substr(1, string::npos));
+					c->SendChannelMessageByNumber(Message.substr(1, std::string::npos));
 				}
 				else if(Message[0] == '[')
 				{
-					CL->ProcessOPMailCommand(c, Message.substr(1, string::npos));
+					CL->ProcessOPMailCommand(c, Message.substr(1, std::string::npos));
 				}
 
 				break;
@@ -118,11 +117,11 @@ void WorldServer::Process()
 			case ServerOP_UCSMailMessage:
 			{
 				ServerMailMessageHeader_Struct *mail = (ServerMailMessageHeader_Struct*)pack->pBuffer;
-				database.SendMail(string("SOE.EQ.") + Config->ShortName + string(".") + string(mail->to),
-					string(mail->from),
+				database.SendMail(std::string("SOE.EQ.") + Config->ShortName + std::string(".") + std::string(mail->to),
+					std::string(mail->from),
 					mail->subject,
 					mail->message,
-					string());
+					std::string());
 				break;
 			}
 		}

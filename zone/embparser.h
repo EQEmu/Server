@@ -16,7 +16,6 @@
 #include <string>
 #include <map>
 #include <queue>
-using namespace std;
 
 class Seperator;
 
@@ -60,7 +59,7 @@ typedef enum {
 struct EventRecord {
 	QuestEventID event;
 	uint32 objid;
-	string data;
+	std::string data;
 	NPC* npcmob;
 	ItemInst* iteminst;
 	Mob* mob;
@@ -75,14 +74,14 @@ protected:
 	//could prolly get rid of this map now, since I check for the
 	//actual subroutine in the quest package as opposed to just seeing
 	//if they do not have a quest or the default.
-	map<uint32, questMode> hasQuests;	//npcid -> questMode
-	map<std::string, playerQuestMode> playerQuestLoaded; //zone shortname -> playerQuestMode
+	std::map<uint32, questMode> hasQuests;	//npcid -> questMode
+	std::map<std::string, playerQuestMode> playerQuestLoaded; //zone shortname -> playerQuestMode
 	playerQuestMode globalPlayerQuestLoaded;
 	GlobalNPCQuestMode globalNPCQuestLoaded;
-	map<std::string, itemQuestMode> itemQuestLoaded;		// package name - > itemQuestMode
-	map<uint32, spellQuestMode> spellQuestLoaded;
+	std::map<std::string, itemQuestMode> itemQuestLoaded;		// package name - > itemQuestMode
+	std::map<uint32, spellQuestMode> spellQuestLoaded;
 
-	queue<EventRecord> eventQueue;		//for events that happen when perl is in use.
+	std::queue<EventRecord> eventQueue;		//for events that happen when perl is in use.
 	bool eventQueueProcessing;
 
 	void HandleQueue();
@@ -122,13 +121,13 @@ public:
 	int LoadGlobalNPCScript();
 	int LoadPlayerScript(const char *zone);
 	int LoadGlobalPlayerScript();
-	int LoadItemScript(ItemInst* iteminst, string packagename, itemQuestMode Qtype);
+	int LoadItemScript(ItemInst* iteminst, std::string packagename, itemQuestMode Qtype);
 	int LoadSpellScript(uint32 id);
 
 	//expose a var to the script (probably parallels addvar))
 	//i.e. exportvar("qst1234", "name", "somemob");
 	//would expose the variable $name='somemob' to the script that handles npc1234
-	void ExportHash(const char *pkgprefix, const char *hashname, std::map<string,string> &vals);
+	void ExportHash(const char *pkgprefix, const char *hashname, std::map<std::string,std::string> &vals);
 	void ExportVar(const char * pkgprefix, const char * varname, const char * value) const;
 	void ExportVar(const char * pkgprefix, const char * varname, int value) const;
 	void ExportVar(const char * pkgprefix, const char * varname, unsigned int value) const;

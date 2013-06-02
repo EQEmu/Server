@@ -32,9 +32,6 @@
 	#include <windows.h>
 	#include <winsock.h>
 	#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
-#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 #else
@@ -50,7 +47,7 @@
 #include "../common/packet_dump.h"
 #include "worldserver.h"
 #include "../common/packet_dump_file.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "../common/spdat.h"
 #include "petitions.h"
 #include "NpcAI.h"
@@ -66,9 +63,6 @@
 #include "guild_mgr.h"
 #include <string>
 #include "QuestParserCollection.h"
-
-using namespace std;
-
 
 extern Zone* zone;
 extern volatile bool ZoneLoaded;
@@ -656,26 +650,26 @@ bool Client::Process() {
 	if (client_state == CLIENT_KICKED) {
 		Save();
 		OnDisconnect(true);
-		cout << "Client disconnected (cs=k): " << GetName() << endl;
+		std::cout << "Client disconnected (cs=k): " << GetName() << std::endl;
 		return false;
 	}
 
 	if (client_state == DISCONNECTED) {
 		OnDisconnect(true);
-		cout << "Client disconnected (cs=d): " << GetName() << endl;
+		std::cout << "Client disconnected (cs=d): " << GetName() << std::endl;
 		database.SetMQDetectionFlag(this->AccountName(), GetName(), "/MQInstantCamp: Possible instant camp disconnect.", zone->GetShortName());
 		return false;
 	}
 
 	if (client_state == CLIENT_ERROR) {
 		OnDisconnect(true);
-		cout << "Client disconnected (cs=e): " << GetName() << endl;
+		std::cout << "Client disconnected (cs=e): " << GetName() << std::endl;
 		return false;
 	}
 
 	if (client_state != CLIENT_LINKDEAD && !eqs->CheckState(ESTABLISHED)) {
 		OnDisconnect(true);
-		cout << "Client linkdead: " << name << endl;
+		std::cout << "Client linkdead: " << name << std::endl;
 
 		if (GetGM()) {
 			if (GetMerc())
@@ -879,14 +873,14 @@ void Client::BulkSendInventoryItems() {
 
 	uint32 size = 0;
 	uint16 i = 0;
-	map<uint16, string> ser_items;
-	map<uint16, string>::iterator itr;
+	std::map<uint16, std::string> ser_items;
+	std::map<uint16, std::string>::iterator itr;
 
 	//Inventory items
 	for(slot_id = 0; slot_id <= 30; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
-			string packet = inst->Serialize(slot_id);
+			std::string packet = inst->Serialize(slot_id);
 			ser_items[i++] = packet;
 			size += packet.length();
 		}
@@ -896,7 +890,7 @@ void Client::BulkSendInventoryItems() {
 	if(GetClientVersion() >= EQClientSoF) {
 		const ItemInst* inst = m_inv[9999];
 		if(inst) {
-			string packet = inst->Serialize(9999);
+			std::string packet = inst->Serialize(9999);
 			ser_items[i++] = packet;
 			size += packet.length();
 		}
@@ -906,7 +900,7 @@ void Client::BulkSendInventoryItems() {
 	for(slot_id = 2000; slot_id <= 2023; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
-			string packet = inst->Serialize(slot_id);
+			std::string packet = inst->Serialize(slot_id);
 			ser_items[i++] = packet;
 			size += packet.length();
 		}
@@ -916,7 +910,7 @@ void Client::BulkSendInventoryItems() {
 	for(slot_id = 2500; slot_id <= 2501; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
-			string packet = inst->Serialize(slot_id);
+			std::string packet = inst->Serialize(slot_id);
 			ser_items[i++] = packet;
 			size += packet.length();
 		}
@@ -1693,7 +1687,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		// languages go here
 		if (gmskill->skill_id > 25)
 		{
-			cout << "Wrong Training Skill (languages)" << endl;
+			std::cout << "Wrong Training Skill (languages)" << std::endl;
 			DumpPacket(app);
 			return;
 		}
@@ -1708,7 +1702,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		// normal skills go here
 		if (gmskill->skill_id > HIGHEST_SKILL)
 		{
-			cout << "Wrong Training Skill (abilities)" << endl;
+			std::cout << "Wrong Training Skill (abilities)" << std::endl;
 			DumpPacket(app);
 			return;
 		}

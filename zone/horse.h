@@ -22,7 +22,6 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "npc.h"
 
 #include <map>
-using namespace std;
 
 class Horse : public NPC {
 public:
@@ -36,7 +35,7 @@ protected:
 	Client *owner;
 
 	//generate npc type records for horses
-	static map<uint16, const NPCType *> horse_types;
+	static std::map<uint16, const NPCType *> horse_types;
 	static const NPCType *GetHorseType(uint16 spell_id);
 	static const NPCType *BuildHorseType(uint16 spell_id);
 };

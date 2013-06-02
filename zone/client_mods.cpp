@@ -15,19 +15,21 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+#include <algorithm>
+
 #include "../common/debug.h"
-#include "masterentity.h"
-#include "worldserver.h"
-#include "zonedb.h"
 #include "../common/spdat.h"
 #include "../common/packet_dump.h"
 #include "../common/packet_functions.h"
-#include "petitions.h"
 #include "../common/serverinfo.h"
 #include "../common/ZoneNumbers.h"
 #include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "../common/logsys.h"
+#include "masterentity.h"
+#include "worldserver.h"
+#include "zonedb.h"
+#include "petitions.h"
 #include "StringIDs.h"
 #include "NpcAI.h"
 
@@ -1999,7 +2001,7 @@ int32 Client::CalcBaseEndurance()
 		int BonusUpto800 = int( at_most_800 / 4 ) ;
 		if(Stats > 400) {
 			Bonus400to800 = int( (at_most_800 - 400) / 4 );
-			HalfBonus400to800 = int( max( ( at_most_800 - 400 ), 0 ) / 8 );
+			HalfBonus400to800 = int( std::max( ( at_most_800 - 400 ), 0 ) / 8 );
 
 			if(Stats > 800) {
 				Bonus800plus = int( (Stats - 800) / 8 ) * 2;

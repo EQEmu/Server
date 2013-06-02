@@ -26,7 +26,7 @@
 #include "../common/skills.h"
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "pets.h"
 #include <math.h>
 #include <assert.h>

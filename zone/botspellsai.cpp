@@ -1,6 +1,7 @@
 #ifdef BOTS
 
 #include "bot.h"
+#include "../common/StringUtil.h"
 
 bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 	_ZP(Bot_AICastSpell);
@@ -558,7 +559,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 				std::list<BotSpell> inCombatBuffList = GetBotSpellsBySpellType(this, SpellType_InCombatBuff);
 
-				for(list<BotSpell>::iterator itr = inCombatBuffList.begin(); itr != inCombatBuffList.end(); itr++) {
+				for(std::list<BotSpell>::iterator itr = inCombatBuffList.begin(); itr != inCombatBuffList.end(); itr++) {
 					BotSpell selectedBotSpell = *itr;
 
 					if(selectedBotSpell.SpellId == 0)
@@ -645,7 +646,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				const int maxDotSelect = 5;
 				int dotSelectCounter = 0;
 
-				for(list<BotSpell>::iterator itr = dotList.begin(); itr != dotList.end(); itr++) {
+				for(std::list<BotSpell>::iterator itr = dotList.begin(); itr != dotList.end(); itr++) {
 					BotSpell selectedBotSpell = *itr;
 
 					if(selectedBotSpell.SpellId == 0)
@@ -2048,7 +2049,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 
 		//Check for group cure first
 		if(countNeedsCured > 2) {
-			for(list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
+			for(std::list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
 				BotSpell selectedBotSpell = *itr;
 
 				if(IsGroupSpell(itr->SpellId) && CheckSpellRecastTimers(botCaster, itr->SpellIndex)) {
@@ -2085,7 +2086,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 
 		//no group cure for target- try to find single target spell
 		if(!spellSelected) {
-			for(list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
+			for(std::list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
 				BotSpell selectedBotSpell = *itr;
 
 				if(CheckSpellRecastTimers(botCaster, itr->SpellIndex)) {

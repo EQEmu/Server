@@ -24,7 +24,6 @@
 #endif
 
 #include <iostream>
-using namespace std;
 
 #include "timer.h"
 
@@ -77,7 +76,7 @@ bool Timer::Check(bool iReset)
 {
 	_CP(Timer_Check);
 	if (this==0) {
-		cerr << "Null timer during ->Check()!?\n";
+		std::cerr << "Null timer during ->Check()!?\n";
 		return true;
 	}
 //	if (!current_time || !start_time || !timer_time) {cerr << "Timer::Check on a timer that does not have a vital member defined.";

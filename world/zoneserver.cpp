@@ -29,7 +29,7 @@
 #include "../common/guilds.h"
 #include "../common/packet_dump.h"
 #include "../common/misc.h"
-#include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include "cliententry.h"
 #include "wguild_mgr.h"
 #include "lfplist.h"

@@ -25,7 +25,6 @@ class NPC;
 
 #include <list>
 #include <deque>
-using namespace std;
 
 #include "spawn2.h"
 #include "../common/loottable.h"
@@ -256,7 +255,7 @@ public:
 	void				ResumeWandering();
 	void				PauseWandering(int pausetime);
 	void				MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot);
-	void				GetClosestWaypoint(list<wplist> &wp_list, int count, float m_x, float m_y, float m_z);
+	void				GetClosestWaypoint(std::list<wplist> &wp_list, int count, float m_x, float m_y, float m_z);
 
 	uint32				GetEquipment(uint8 material_slot) const;	// returns item id
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
@@ -467,7 +466,7 @@ protected:
 	NPCType*	NPCTypedata_ours;	//special case for npcs with uniquely created data.
 
 	friend class EntityList;
-	list<struct NPCFaction*> faction_list;
+	std::list<struct NPCFaction*> faction_list;
 	uint32	copper;
 	uint32	silver;
 	uint32	gold;
@@ -516,10 +515,10 @@ protected:
 
 	bool npc_aggro;
 
-	deque<int> signal_q;
+	std::deque<int> signal_q;
 
 	//waypoint crap:
-	vector<wplist> Waypoints;
+	std::vector<wplist> Waypoints;
 	void _ClearWaypints();
 	int max_wp;
 	int save_wp;

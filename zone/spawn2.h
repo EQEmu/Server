@@ -22,7 +22,6 @@
 #include "npc.h"
 
 #include <string>
-using namespace std;
 
 #define SC_AlwaysEnabled 0
 
@@ -129,7 +128,7 @@ public:
 
 	uint32	id;
 	uint16	condition_id;
-	string	zone_name;
+	std::string	zone_name;
 
 	bool	enabled;
 	Action	action;
@@ -153,12 +152,12 @@ public:
 	void ReloadEvent(uint32 event_id);
 
 protected:
-	map<uint16, SpawnCondition> spawn_conditions;
-	vector<SpawnEvent> spawn_events;
+	std::map<uint16, SpawnCondition> spawn_conditions;
+	std::vector<SpawnEvent> spawn_events;
 
 	void ExecEvent(SpawnEvent &e, bool send_update);
 	void UpdateDBEvent(SpawnEvent &e);
-	bool LoadDBEvent(uint32 event_id, SpawnEvent &e, string &zone_name);
+	bool LoadDBEvent(uint32 event_id, SpawnEvent &e, std::string &zone_name);
 	void UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value);
 	void FindNearestEvent();
 

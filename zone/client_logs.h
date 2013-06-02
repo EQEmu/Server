@@ -30,7 +30,6 @@
 #define MAX_CLIENT_LOG_MESSAGE_LENGTH 512
 
 #include <vector>
-using namespace std;
 
 class Client;
 
@@ -50,7 +49,7 @@ public:
 
 protected:
 
-	vector<Client *> entries[EQEMuLog::MaxLogID];
+	std::vector<Client *> entries[EQEMuLog::MaxLogID];
 
 	static char _buffer[MAX_CLIENT_LOG_MESSAGE_LENGTH+1];
 };

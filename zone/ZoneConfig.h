@@ -23,7 +23,7 @@
 class ZoneConfig : public EQEmuConfig {
 	public:
 		uint16 ZonePort;
-		string ZoneAddress;
+		std::string ZoneAddress;
 
 	private:
 

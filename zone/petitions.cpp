@@ -28,13 +28,11 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #endif
 
 #ifdef _WINDOWS
-#define snprintf	_snprintf
-#if (_MSC_VER < 1500)
-	#define vsnprintf	_vsnprintf
+	#define snprintf	_snprintf
+	#define strncasecmp	_strnicmp
+	#define strcasecmp	_stricmp
 #endif
-#define strncasecmp	_strnicmp
-#define strcasecmp	_stricmp
-#endif
+#include "../common/StringUtil.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "../common/packet_dump_file.h"
@@ -300,7 +298,7 @@ void ZoneDatabase::RefreshPetitionsFromDB()
 			newpet->SetUnavails(atoi(row[11]));
 			newpet->SetSentTime2(atol(row[13]));
 			newpet->SetGMText(row[14]);
-			cout << "Petition " << row[0] << " pettime = " << newpet->GetSentTime() << endl;
+			std::cout << "Petition " << row[0] << " pettime = " << newpet->GetSentTime() << std::endl;
 			if (atoi(row[12]) == 1) newpet->SetCheckedOut(true);
 			else newpet->SetCheckedOut(false);
 			petition_list.AddPetition(newpet);

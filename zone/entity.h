@@ -20,12 +20,13 @@
 
 #include "../common/types.h"
 #include "../common/linked_list.h"
-#include "zonedb.h"
-#include "../common/eq_constants.h"
-#include "zonedump.h"
-#include "zonedbasync.h"
 #include "../common/servertalk.h"
 #include "../common/bodytypes.h"
+#include "../common/eq_constants.h"
+
+#include "zonedb.h"
+#include "zonedump.h"
+#include "zonedbasync.h"
 #include "QGlobals.h"
 
 // max number of newspawns to send per bulk packet
@@ -387,14 +388,14 @@ public:
 	void	UpdateFindableNPCState(NPC *n, bool Remove);
 	void	HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode);
 
-	void GetMobList(list<Mob*> &m_list);
-	void GetNPCList(list<NPC*> &n_list);
-	void GetMercList(list<Merc*> &n_list);
-	void GetClientList(list<Client*> &c_list);
-	void GetCorpseList(list<Corpse*> &c_list);
-	void GetObjectList(list<Object*> &o_list);
-	void GetDoorsList(list<Doors*> &d_list);
-	void GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height, list<Mob*> &m_list);
+	void GetMobList(std::list<Mob*> &m_list);
+	void GetNPCList(std::list<NPC*> &n_list);
+	void GetMercList(std::list<Merc*> &n_list);
+	void GetClientList(std::list<Client*> &c_list);
+	void GetCorpseList(std::list<Corpse*> &c_list);
+	void GetObjectList(std::list<Object*> &o_list);
+	void GetDoorsList(std::list<Doors*> &d_list);
+	void GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height, std::list<Mob*> &m_list);
 
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
@@ -412,7 +413,7 @@ private:
 
 	//used for limiting spawns
 	class SpawnLimitRecord { public: uint32 spawngroup_id; uint32 npc_type; };
-	map<uint16, SpawnLimitRecord> npc_limit_list;		//entity id -> npc type
+	std::map<uint16, SpawnLimitRecord> npc_limit_list;		//entity id -> npc type
 
 	uint32	tsFirstSpawnOnQueue; // timestamp that the top spawn on the spawnqueue was added, should be 0xFFFFFFFF if queue is empty
 	uint32	NumSpawnsOnQueue;
@@ -422,14 +423,14 @@ private:
 	LinkedList<Mob*> mob_list;
 	LinkedList<NPC*> npc_list;
 	LinkedList<Merc *> merc_list;
-	list<Group*> group_list;
+	std::list<Group*> group_list;
 	LinkedList<Corpse*> corpse_list;
 	LinkedList<Object*> object_list;
 	LinkedList<Doors*> door_list;
 	LinkedList<Trap*> trap_list;
 	LinkedList<Beacon*> beacon_list;
 	LinkedList<NPC *> proximity_list;
-	list<Raid *> raid_list;
+	std::list<Raid *> raid_list;
 	uint16 last_insert_id;
 
 	// Please Do Not Declare Any EntityList Class Members After This Comment
@@ -441,7 +442,7 @@ private:
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);
 		Bot* GetBotByBotName(std::string botName);
-		list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
+		std::list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
 
 		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff

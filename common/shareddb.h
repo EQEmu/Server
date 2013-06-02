@@ -48,7 +48,7 @@ public:
 	void	SetPlayerInspectMessage(char* playername, const InspectMessage_Struct* message);
 	void	GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message);
 	void	SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message);
-	bool	GetCommandSettings(map<string,uint8> &commands);
+	bool	GetCommandSettings(std::map<std::string,uint8> &commands);
 	uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
 
 	/*
@@ -65,7 +65,7 @@ public:
 	bool	SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
 
 
-	string	GetBook(const char *txtfile);
+	std::string	GetBook(const char *txtfile);
 
 	/*
 	* Item Methods
@@ -112,6 +112,7 @@ public:
 
 protected:
 
+	EQEmu::MemoryMappedFile *skill_caps_mmf;
 	EQEmu::MemoryMappedFile *items_mmf;
 	EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
 	EQEmu::MemoryMappedFile *faction_mmf;
@@ -120,7 +121,6 @@ protected:
 	EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> *loot_table_hash;
 	EQEmu::MemoryMappedFile *loot_drop_mmf;
 	EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> *loot_drop_hash;
-	EQEmu::MemoryMappedFile *skill_caps_mmf;
 };
 
 #endif /*SHAREDDB_H_*/

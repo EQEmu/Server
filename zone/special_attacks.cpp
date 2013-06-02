@@ -75,17 +75,20 @@ void Mob::ApplySpecialAttackMod(SkillType skill, int32 &dmg, int32 &mindmg) {
 			case ROUND_KICK:
 			case KICK:
 				item_slot = SLOT_FEET;
-			break;
+				break;
 
 			case BASH:
 				item_slot = SLOT_SECONDARY;
-			break;
+				break;
 
 			case DRAGON_PUNCH:
 			case EAGLE_STRIKE:
 			case TIGER_CLAW:
 				item_slot = SLOT_HANDS;
-			break;
+				break;
+
+			default:
+				break;
 		}
 
 		if (item_slot >= 0){
