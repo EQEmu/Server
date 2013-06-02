@@ -28,7 +28,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include "object.h"
 #include "doors.h"
 #include "beacon.h"
-#include "PlayerCorpse.h"
+#include "corpse.h"
 #include "titles.h"
 #include "../common/races.h"
 #include "../common/classes.h"

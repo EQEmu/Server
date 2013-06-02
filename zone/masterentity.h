@@ -6,7 +6,7 @@
 #include "raids.h"
 #include "client.h"
 #include "object.h"
-#include "PlayerCorpse.h"
+#include "corpse.h"
 #include "doors.h"
 #include "mob.h"
 #include "trap.h"

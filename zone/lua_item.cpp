@@ -2,7 +2,6 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
 
 #include "masterentity.h"
 #include "lua_item.h"

@@ -33,7 +33,6 @@
 #include "net.h"
 #include "masterentity.h"
 #include "worldserver.h"
-#include "PlayerCorpse.h"
 #include "../common/guilds.h"
 #include "../common/packet_dump.h"
 #include "../common/packet_functions.h"

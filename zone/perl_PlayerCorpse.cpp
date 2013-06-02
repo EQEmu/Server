@@ -34,7 +34,7 @@
 #undef seed
 #endif
 
-#include "PlayerCorpse.h"
+#include "corpse.h"
 
 #ifdef THIS /* this macro seems to leak out on some systems */
 #undef THIS

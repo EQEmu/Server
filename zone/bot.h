@@ -8,7 +8,7 @@
 #include "client.h"
 #include "pets.h"
 #include "groups.h"
-#include "PlayerCorpse.h"
+#include "corpse.h"
 #include "zonedb.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"

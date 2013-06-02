@@ -2,13 +2,12 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
 
-#include "masterentity.h"
+#include "client.h"
+#include "npc.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
-#include "lua_hate_entry.h"
 #include "lua_hate_list.h"
 #include "lua_client.h"
 

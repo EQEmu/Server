@@ -10,11 +10,6 @@
 #include "lua_mob.h"
 #include "lua_hate_list.h"
 
-struct Lua_HateList
-{
-	std::vector<Lua_HateEntry> entries;
-};
-
 Lua_Mob Lua_HateEntry::GetEnt() {
 	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->ent);

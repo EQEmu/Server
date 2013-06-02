@@ -16,7 +16,7 @@
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
-#include "lua_hate_entry.h"
+#include "lua_hate_list.h"
 #include "lua_client.h"
 #include "lua_npc.h"
 #include "lua_spell.h"

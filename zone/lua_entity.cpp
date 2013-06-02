@@ -2,9 +2,8 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
 
-#include "masterentity.h"
+#include "entity.h"
 #include "lua_entity.h"
 #include "lua_mob.h"
 #include "lua_client.h"

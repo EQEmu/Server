@@ -2,16 +2,14 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
 
-#include "masterentity.h"
+#include "client.h"
 #include "lua_client.h"
 #include "lua_npc.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_group.h"
 #include "lua_raid.h"
-#include "../common/item.h"
 
 struct InventoryWhere { };
 

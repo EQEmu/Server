@@ -4,7 +4,7 @@
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
-#include "masterentity.h"
+#include "doors.h"
 #include "lua_door.h"
 
 luabind::scope lua_register_door() {

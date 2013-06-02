@@ -1,10 +1,10 @@
 #ifdef LUA_EQEMU
 
-#include "../common/spdat.h"
-#include "lua_spell.h"
-
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
+
+#include "../common/spdat.h"
+#include "lua_spell.h"
 
 int Lua_Spell::GetID() {
 	Lua_Safe_Call_Int();

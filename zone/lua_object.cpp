@@ -2,9 +2,8 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
 
-#include "masterentity.h"
+#include "object.h"
 #include "lua_object.h"
 
 luabind::scope lua_register_object() {

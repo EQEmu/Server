@@ -2,9 +2,8 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
 
-#include "masterentity.h"
+#include "npc.h"
 #include "lua_npc.h"
 #include "lua_client.h"
 

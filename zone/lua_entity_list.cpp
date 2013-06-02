@@ -2,7 +2,6 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
 #include <luabind/iterator_policy.hpp>
 
 #include "masterentity.h"

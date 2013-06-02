@@ -14,6 +14,7 @@ SET(zone_sources
 	client_packet.cpp
 	client_process.cpp
 	command.cpp
+	corpse.cpp
 	doors.cpp
 	effects.cpp
 	embparser.cpp
@@ -38,7 +39,7 @@ SET(zone_sources
 	lua_entity_list.cpp
 	lua_general.cpp
 	lua_group.cpp
-	lua_hate_entry.cpp
+	lua_hate_list.cpp
 	lua_item.cpp
 	lua_iteminst.cpp
 	lua_mob.cpp
@@ -86,7 +87,6 @@ SET(zone_sources
 	perlpacket.cpp
 	petitions.cpp
 	pets.cpp
-	PlayerCorpse.cpp
 	QGlobals.cpp
 	questmgr.cpp
 	QuestParserCollection.cpp
@@ -127,6 +127,7 @@ SET(zone_headers
 	client_packet.h
 	command.h
 	common.h
+	corpse.h
 	doors.h
 	embparser.h
 	embperl.h
@@ -145,7 +146,7 @@ SET(zone_headers
 	lua_entity_list.h
 	lua_general.h
 	lua_group.h
-	lua_hate_entry.h
+	lua_hate_list.h
 	lua_item.h
 	lua_iteminst.h
 	lua_mob.h
@@ -169,7 +170,6 @@ SET(zone_headers
 	perlpacket.h
 	petitions.h
 	pets.h
-	PlayerCorpse.h
 	QGlobals.h
 	QuestInterface.h
 	questmgr.h
