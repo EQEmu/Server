@@ -155,6 +155,8 @@ void Lua_Corpse::AddLooter(Lua_Mob who) {
 luabind::scope lua_register_corpse() {
 	return luabind::class_<Lua_Corpse, Lua_Mob>("Corpse")
 		.def(luabind::constructor<>())
+		.property("null", &Lua_Corpse::Null)
+		.property("valid", &Lua_Corpse::Valid)
 		.def("GetCharID", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetCharID)
 		.def("GetDecayTime", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetDecayTime)
 		.def("Lock", (void(Lua_Corpse::*)(void))&Lua_Corpse::Lock)
@@ -183,9 +185,7 @@ luabind::scope lua_register_corpse() {
 		.def("GetSilver", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetSilver)
 		.def("GetGold", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetGold)
 		.def("GetPlatinum", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetPlatinum)
-		.def("AddLooter", (void(Lua_Corpse::*)(Lua_Mob))&Lua_Corpse::AddLooter)
-		.property("null", &Lua_Corpse::Null)
-		.property("valid", &Lua_Corpse::Valid);
+		.def("AddLooter", (void(Lua_Corpse::*)(Lua_Mob))&Lua_Corpse::AddLooter);
 }
 
 #endif

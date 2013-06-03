@@ -23,12 +23,7 @@ public:
 	virtual ~Lua_Raid() { }
 
 	operator Raid*() {
-		void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<Raid*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<Raid*>(GetLuaPtrData());
 	}
 
 	bool IsRaidMember(const char *name);

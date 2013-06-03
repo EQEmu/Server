@@ -22,12 +22,7 @@ public:
 	virtual ~Lua_Corpse() { }
 
 	operator Corpse*() {
-		void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<Corpse*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<Corpse*>(GetLuaPtrData());
 	}
 
 	uint32 GetCharID();

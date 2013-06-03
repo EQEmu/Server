@@ -28,6 +28,34 @@ public:
 
 		return nullptr;
 	}
+
+	int GetID();
+	void SetDoorName(const char *name);
+	const char *GetDoorName();
+	float GetX();
+	float GetY();
+	float GetZ();
+	float GetHeading();
+	void SetX(float x);
+	void SetY(float y);
+	void SetZ(float z);
+	void SetHeading(float h);
+	void SetLocation(float x, float y, float z);
+	uint32 GetDoorDBID();
+	uint32 GetDoorID();
+	void SetSize(uint32 sz);
+	uint32 GetSize();
+	void SetIncline(uint32 incline);
+	uint32 GetIncline();
+	void SetOpenType(uint32 type);
+	uint32 GetOpenType();
+	void SetLockPick(uint32 pick);
+	uint32 GetLockPick();
+	void SetKeyItem(uint32 key);
+	uint32 GetKeyItem();
+	void SetNoKeyring(int type);
+	int GetNoKeyring();
+	void CreateDatabaseEntry();
 };
 
 #endif

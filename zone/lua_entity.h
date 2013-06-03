@@ -30,12 +30,7 @@ public:
 	virtual ~Lua_Entity() { }
 
 	operator Entity*() {
-		void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<Entity*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<Entity*>(GetLuaPtrData());
 	}
 
 	bool IsClient();

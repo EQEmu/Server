@@ -68,7 +68,7 @@ public:
 	void	SetZ(float in);
 	void	SetHeading(float in);
 	void	SetIncline(int in);
-	void	SetDoorName(char* name);
+	void	SetDoorName(const char* name);
 	void	SetOpenType(uint8 in);
 	void	SetLocation(float x, float y, float z);
 	void	SetSize(uint16 size);

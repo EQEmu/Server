@@ -21,12 +21,7 @@ public:
 	virtual ~Lua_Spell() { }
 
 	operator const SPDat_Spell_Struct*() {
-		const void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<const SPDat_Spell_Struct*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<const SPDat_Spell_Struct*>(GetLuaPtrData());
 	}
 
 	int GetID();

@@ -23,12 +23,7 @@ public:
 	virtual ~Lua_Group() { }
 
 	operator Group*() {
-		void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<Group*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<Group*>(GetLuaPtrData());
 	}
 
 	void DisbandGroup();

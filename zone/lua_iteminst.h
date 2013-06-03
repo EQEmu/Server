@@ -22,12 +22,7 @@ public:
 	virtual ~Lua_ItemInst() { }
 
 	operator ItemInst*() {
-		void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<ItemInst*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<ItemInst*>(GetLuaPtrData());
 	}
 
 	bool IsType(int item_class);

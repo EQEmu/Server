@@ -22,12 +22,7 @@ public:
 	virtual ~Lua_Item() { }
 
 	operator const Item_Struct*() {
-		const void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<const Item_Struct*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<const Item_Struct*>(GetLuaPtrData());
 	}
 
 	int GetMinStatus();

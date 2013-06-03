@@ -766,7 +766,7 @@ void Doors::SetOpenType(uint8 in) {
 	entity_list.RespawnAllDoors();
 }
 
-void Doors::SetDoorName(char* name) {
+void Doors::SetDoorName(const char* name) {
 	entity_list.DespawnAllDoors();
 	memset(door_name, 0, sizeof(door_name));
 	strncpy(door_name, name, sizeof(door_name));

@@ -41,12 +41,7 @@ public:
 	virtual ~Lua_EntityList() { }
 
 	operator EntityList*() {
-		void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<EntityList*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<EntityList*>(GetLuaPtrData());
 	}
 
 	Lua_Mob GetMobID(int id);

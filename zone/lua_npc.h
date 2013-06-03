@@ -24,12 +24,7 @@ public:
 	virtual ~Lua_NPC() { }
 
 	operator NPC*() {
-		void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<NPC*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<NPC*>(GetLuaPtrData());
 	}
 
 	void Signal(int id);

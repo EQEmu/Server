@@ -24,12 +24,7 @@ public:
 	virtual ~Lua_Client() { }
 
 	operator Client*() {
-		void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<Client*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<Client*>(GetLuaPtrData());
 	}
 
 	void SendSound();

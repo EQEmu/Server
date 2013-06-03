@@ -25,12 +25,7 @@ public:
 	virtual ~Lua_Mob() { }
 
 	operator Mob*() {
-		void *d = GetLuaPtrData();
-		if(d) {
-			return reinterpret_cast<Mob*>(d);
-		}
-
-		return nullptr;
+		return reinterpret_cast<Mob*>(GetLuaPtrData());
 	}
 
 	const char *GetName();
