@@ -426,7 +426,7 @@ void Merc::AddItemBonuses(const Item_Struct *item, StatBonuses* newbon) {
 
 	if(item->Attack > 0) {
 
-		int cap = RuleI(Character, ItemATKCap);
+		unsigned int cap = RuleI(Character, ItemATKCap);
 		cap += itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
 
 		if((newbon->ATK + item->Attack) > cap)
@@ -2284,7 +2284,6 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 						else {
 							for( int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 								if(g->members[i]) {
-									int32 oDontDoAgainBefore;
 									Mob* tar = g->members[i];
 
 									if( !tar->IsImmuneToSpell(selectedMercSpell.spellid, this)
@@ -2463,7 +2462,6 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 						if(castedSpell) {
 							if(IsGroupSpell(selectedMercSpell.spellid)){
-								Group *g;
 
 								if(this->HasGroup()) {
 									Group *g = this->GetGroup();

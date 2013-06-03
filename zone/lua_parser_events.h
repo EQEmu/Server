@@ -23,6 +23,24 @@ void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data);
 
 //Player
+void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_timer(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_discover_item(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_fish_forage_success(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_click_object(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_click_door(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_signal(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_popup_response(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_pick_up(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_task_fail(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_zone(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_duel_win(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_duel_loss(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_loot(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_task_stage_complete(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
+void handle_player_task_complete(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data);
 
 //Item

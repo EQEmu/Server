@@ -138,6 +138,26 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_TIMER] = handle_npc_timer;
 	NPCArgumentDispatch[EVENT_DEATH] = handle_npc_death;
 
+	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
+	PlayerArgumentDispatch[EVENT_DEATH] = handle_player_death;
+	PlayerArgumentDispatch[EVENT_TIMER] = handle_player_timer;
+	PlayerArgumentDispatch[EVENT_DISCOVER_ITEM] = handle_player_discover_item;
+	PlayerArgumentDispatch[EVENT_FISH_SUCCESS] = handle_player_fish_forage_success;
+	PlayerArgumentDispatch[EVENT_FORAGE_SUCCESS] = handle_player_fish_forage_success;
+	PlayerArgumentDispatch[EVENT_CLICK_OBJECT] = handle_player_click_object;
+	PlayerArgumentDispatch[EVENT_CLICK_DOOR] = handle_player_click_door;
+	PlayerArgumentDispatch[EVENT_SIGNAL] = handle_player_signal;
+	PlayerArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_player_popup_response;
+	PlayerArgumentDispatch[EVENT_PLAYER_PICKUP] = handle_player_pick_up;
+	PlayerArgumentDispatch[EVENT_CAST] = handle_player_cast;
+	PlayerArgumentDispatch[EVENT_TASK_FAIL] = handle_player_task_fail;
+	PlayerArgumentDispatch[EVENT_ZONE] = handle_player_zone;
+	PlayerArgumentDispatch[EVENT_DUEL_WIN] = handle_player_duel_win;
+	PlayerArgumentDispatch[EVENT_DUEL_LOSE] = handle_player_duel_loss;
+	PlayerArgumentDispatch[EVENT_LOOT] = handle_player_loot;
+	PlayerArgumentDispatch[EVENT_TASK_STAGE_COMPLETE] = handle_player_task_stage_complete;
+	PlayerArgumentDispatch[EVENT_TASK_COMPLETE] = handle_player_task_complete;
+
 	L = nullptr;
 }
 
@@ -463,10 +483,16 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 		
 		lua_createtable(L, 0, 0);
 
-		//always push self
-		Lua_Spell l_spell(&spells[spell_id]);
-		luabind::object l_spell_o = luabind::object(L, l_spell);
-		l_spell_o.push(L);
+		//always push self even if invalid
+		if(IsValidSpell(spell_id)) {
+			Lua_Spell l_spell(&spells[spell_id]);
+			luabind::object l_spell_o = luabind::object(L, l_spell);
+			l_spell_o.push(L);
+		} else {
+			Lua_Spell l_spell(nullptr);
+			luabind::object l_spell_o = luabind::object(L, l_spell);
+			l_spell_o.push(L);
+		}
 		lua_setfield(L, -2, "self");
 		
 		auto arg_function = SpellArgumentDispatch[evt];

@@ -189,68 +189,6 @@ void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
 }
 
-/*switch(evt) {
-case EVENT_FISH_SUCCESS:
-case EVENT_FORAGE_SUCCESS: {
-	lua_pushinteger(L, extra_data);
-
-	arg_count += 1;
-	break;
-}
-
-case EVENT_CLICK_OBJECT:
-case EVENT_CLICK_DOOR:
-case EVENT_SIGNAL:
-case EVENT_POPUP_RESPONSE:
-case EVENT_PLAYER_PICKUP: 
-case EVENT_CAST: 
-case EVENT_TASK_FAIL:
-case EVENT_ZONE: {
-	lua_pushinteger(L, std::stoi(data));
-
-	arg_count += 1;
-	break;
-}
-
-case EVENT_DUEL_WIN:
-case EVENT_DUEL_LOSE: {
-	lua_pushstring(L, data.c_str());
-	lua_pushinteger(L, extra_data);
-	arg_count += 2;
-	break;
-}
-
-case EVENT_LOOT: {
-	Seperator sep(data.c_str());
-	lua_pushinteger(L, std::stoi(sep.arg[0]));
-	lua_pushinteger(L, std::stoi(sep.arg[1]));
-	lua_pushstring(L, sep.arg[2]);
-
-	arg_count += 3;
-	break;
-}
-
-case EVENT_TASK_STAGE_COMPLETE: {
-	Seperator sep(data.c_str());
-	lua_pushinteger(L, std::stoi(sep.arg[0]));
-	lua_pushinteger(L, std::stoi(sep.arg[1]));
-
-	arg_count += 2;
-	break;
-}
-
-case EVENT_TASK_COMPLETE: {
-	Seperator sep(data.c_str());
-	lua_pushinteger(L, std::stoi(sep.arg[0]));
-	lua_pushinteger(L, std::stoi(sep.arg[1]));
-	lua_pushinteger(L, std::stoi(sep.arg[2]));
-
-	arg_count += 3;
-	break;
-}
-
-}*/
-
 //Player
 void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
 	lua_pushstring(L, data.c_str());
@@ -259,7 +197,6 @@ void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std:
 	lua_pushinteger(L, extra_data);
 	lua_setfield(L, -2, "language");
 }
-
 
 void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
 	Seperator sep(data.c_str());
@@ -295,7 +232,7 @@ void handle_player_timer(QuestInterface *parse, lua_State* L, Client* client, st
 	lua_setfield(L, -2, "timer");
 }
 
-void handle_discover_item(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+void handle_player_discover_item(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
 	const Item_Struct *item = database.GetItem(extra_data);
 	if(item) {
 		Lua_Item l_item(item);
@@ -308,6 +245,110 @@ void handle_discover_item(QuestInterface *parse, lua_State* L, Client* client, s
 		l_item_o.push(L);
 		lua_setfield(L, -2, "item");
 	}
+}
+
+void handle_player_fish_forage_success(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "item_id");
+}
+
+void handle_player_click_object(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "object_id");
+}
+
+void handle_player_click_door(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "door_id");
+}
+
+void handle_player_signal(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "signal");
+}
+
+void handle_player_popup_response(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "popup_id");
+}
+
+void handle_player_pick_up(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "picked_up_id");
+}
+
+void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	int spell_id = std::stoi(data);
+	if(IsValidSpell(spell_id)) {
+		Lua_Spell l_spell(&spells[spell_id]);
+		luabind::object l_spell_o = luabind::object(L, l_spell);
+		l_spell_o.push(L);
+	} else {
+		Lua_Spell l_spell(nullptr);
+		luabind::object l_spell_o = luabind::object(L, l_spell);
+		l_spell_o.push(L);
+	}
+
+	lua_setfield(L, -2, "spell");
+}
+
+void handle_player_task_fail(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "task_id");
+}
+
+void handle_player_zone(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "zone_id");
+}
+
+void handle_player_duel_win(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "loser_character_name");
+
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "loser_character_id");
+}
+
+void handle_player_duel_loss(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "winner_character_name");
+
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "winner_character_id");
+}
+
+void handle_player_loot(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "looted_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "looted_charges");
+
+	lua_pushstring(L, sep.arg[2]);
+	lua_setfield(L, -2, "corpse");
+}
+
+void handle_player_task_stage_complete(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "task_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "activity_id");
+}
+
+void handle_player_task_complete(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "done_count");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "activity_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "task_id");
 }
 
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {

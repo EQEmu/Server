@@ -151,6 +151,7 @@ SET(zone_headers
 	lua_iteminst.h
 	lua_mob.h
 	lua_npc.h
+	lua_object.h
 	lua_parser.h
 	lua_parser_events.h
 	lua_ptr.h
