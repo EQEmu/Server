@@ -130,25 +130,24 @@ bool PersistentTimer::Load(Database *db) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	char *query = 0;
+	std::string query;
 	uint32 qlen = 0;
 	uint32 qcount = 0;
 
-	qlen = MakeAnyLenString(&query, "SELECT start,duration,enable "
-	" FROM timers WHERE char_id=%lu AND type=%u", (unsigned long)_char_id, _type);
+	StringFormat(query, "SELECT start,duration,enable "
+						" FROM timers WHERE char_id=%lu AND type=%u", 
+						(unsigned long)_char_id, _type);
 
 #ifdef DEBUG_PTIMERS
 	printf("Loading timer: char %lu of type %u\n", (unsigned long)_char_id, _type);
 #endif
 
-	if (!db->RunQuery(query, qlen, errbuf, &result)) {
-		safe_delete_array(query);
+	if (!db->RunQuery(query, errbuf, &result)) {
 #if EQDEBUG > 5
 		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Load, error: %s", errbuf);
 #endif
 		return(false);
 	}
-	safe_delete_array(query);
 
 	bool res = false;
 	qcount = mysql_num_rows(result);
@@ -169,55 +168,51 @@ bool PersistentTimer::Store(Database *db) {
 		return(true);
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	uint32 qlen = 0;
 
-	qlen = MakeAnyLenString(&query, "REPLACE INTO timers "
-		" (char_id,type,start,duration,enable) "
-		" VALUES(%lu,%u,%lu,%lu,%d)",
-		(unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time, enabled?1:0);
+	StringFormat(query, "REPLACE INTO timers "
+						"(char_id, type, start, duration, enable) "
+						"VALUES (%lu, %u, %lu, %lu, %d) ",
+						(unsigned long)_char_id, _type, (unsigned long)start_time, 
+						(unsigned long)timer_time, enabled?1:0);
 
 
 #ifdef DEBUG_PTIMERS
 	printf("Storing timer: char %lu of type %u: '%s'\n", (unsigned long)_char_id, _type, query);
 #endif
 
-	if (!db->RunQuery(query, qlen, errbuf)) {
-		safe_delete_array(query);
+	if (!db->RunQuery(query, errbuf)) {
 #if EQDEBUG > 5
 		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Store, error: %s", errbuf);
 #endif
 		return(false);
 	}
-	safe_delete_array(query);
 
 	return(true);
 }
 
 bool PersistentTimer::Clear(Database *db) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	uint32 qlen = 0;
 
-	qlen = MakeAnyLenString(&query, "DELETE FROM timers "
-		" WHERE char_id=%lu AND type=%u ",
-		(unsigned long)_char_id, _type);
+	StringFormat(query, "DELETE FROM timers "
+						" WHERE char_id=%lu AND type=%u ",
+						(unsigned long)_char_id, _type);
 
 #ifdef DEBUG_PTIMERS
 	printf("Clearing timer: char %lu of type %u: '%s'\n", (unsigned long)_char_id, _type, query);
 #endif
 
-	if (!db->RunQuery(query, qlen, errbuf)) {
-		safe_delete_array(query);
+	if (!db->RunQuery(query, errbuf)) {
 #if EQDEBUG > 5
 		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Clear, error: %s", errbuf);
 #endif
 		return(false);
 	}
-	safe_delete_array(query);
 
 	return(true);
-
 }
 
 /* This function checks if the timer triggered */
@@ -312,25 +307,24 @@ bool PTimerList::Load(Database *db) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	char *query = 0;
+	std::string query;
 	uint32 qlen = 0;
 	uint32 qcount = 0;
 
-	qlen = MakeAnyLenString(&query, "SELECT type,start,duration,enable "
-	" FROM timers WHERE char_id=%lu", (unsigned long)_char_id);
+	StringFormat(query, "SELECT type,start,duration,enable "
+						"FROM timers WHERE char_id=%lu", 
+						(unsigned long)_char_id);
 
 #ifdef DEBUG_PTIMERS
 	printf("Loading all timers for char %lu\n", (unsigned long)_char_id);
 #endif
 
-	if (!db->RunQuery(query, qlen, errbuf, &result)) {
-		safe_delete_array(query);
+	if (!db->RunQuery(query, errbuf, &result)) {
 #if EQDEBUG > 5
 		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Load, error: %s", errbuf);
 #endif
 		return(false);
 	}
-	safe_delete_array(query);
 
 	pTimerType type;
 	uint32 start_time, timer_time;
@@ -382,24 +376,23 @@ bool PTimerList::Clear(Database *db) {
 	_list.clear();
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	uint32 qlen = 0;
 
-	qlen = MakeAnyLenString(&query, "DELETE FROM timers "
-		" WHERE char_id=%lu ", (unsigned long)_char_id);
+	StringFormat(query, "DELETE FROM timers "
+						"WHERE char_id=%lu ", 
+						(unsigned long)_char_id);
 
 #ifdef DEBUG_PTIMERS
 	printf("Storing all timers for char %lu: '%s'\n", (unsigned long)_char_id, query);
 #endif
 
-	if (!db->RunQuery(query, qlen, errbuf)) {
-		safe_delete_array(query);
+	if (!db->RunQuery(query, errbuf)) {
 #if EQDEBUG > 5
 		LogFile->write(EQEMuLog::Error, "Error in PersistentTimer::Clear, error: %s", errbuf);
 #endif
 		return(false);
 	}
-	safe_delete_array(query);
 
 	return(true);
 }
@@ -480,23 +473,21 @@ void PTimerList::ToVector(std::vector< std::pair<pTimerType, PersistentTimer *> 
 
 bool PTimerList::ClearOffline(Database *db, uint32 char_id, pTimerType type) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 qlen = 0;
+	std::string query;
 
-	qlen = MakeAnyLenString(&query, "DELETE FROM timers WHERE char_id=%lu AND type=%u ",(unsigned long)char_id, type);
+	StringFormat(query, "DELETE FROM timers WHERE char_id=%lu AND type=%u ",
+						(unsigned long)char_id, type);
 
 #ifdef DEBUG_PTIMERS
 	printf("Clearing timer (offline): char %lu of type %u: '%s'\n", (unsigned long)char_id, type, query);
 #endif
 
-	if (!db->RunQuery(query, qlen, errbuf)) {
-		safe_delete_array(query);
+	if (!db->RunQuery(query, errbuf)) {
 #if EQDEBUG > 5
 		LogFile->write(EQEMuLog::Error, "Error in PTimerList::ClearOffline, error: %s", errbuf);
 #endif
 		return(false);
 	}
-	safe_delete_array(query);
 
 	return(true);
 

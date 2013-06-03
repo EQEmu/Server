@@ -537,23 +537,37 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		client->Disconnect();
 	}
 
-	char* query = 0;
+	
 	uint32_breakdown workpt;
 	workpt.b4() = DBA_b4_Entity;
 	workpt.w2_3() = GetID();
 	workpt.b1() = DBA_b1_Entity_Client_InfoForLogin;
 	DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Read);
-	dbaw->AddQuery(1, &query, MakeAnyLenString(&query,
-		"SELECT status,name,lsaccount_id,gmspeed,revoked,hideme,time_creation FROM account WHERE id=%i",
-		account_id));
+
+	std::string accountQuery;
+	StringFormat(accountQuery,"SELECT status, name, lsaccount_id, gmspeed, "
+								"revoked, hideme, time_creation FROM account "
+								"WHERE id=%i", account_id);
+
+	dbaw->AddQuery(1, accountQuery);
+
 	//DO NOT FORGET TO EDIT ZoneDatabase::GetCharacterInfoForLogin if you change this
-	dbaw->AddQuery(2, &query, MakeAnyLenString(&query,
-		"SELECT id,profile,zonename,x,y,z,guild_id,rank,extprofile,class,level,lfp,lfg,instanceid,xtargets,firstlogon"
-		" FROM character_ LEFT JOIN guild_members ON id=char_id WHERE id=%i",
-		character_id));
-	dbaw->AddQuery(3, &query, MakeAnyLenString(&query,
-		"SELECT faction_id,current_value FROM faction_values WHERE temp = 0 AND char_id = %i",
-		character_id));
+	std::string characterInfoQuery;
+	StringFormat(characterInfoQuery,"SELECT id, profile, zonename, x, y, z, "
+										"guild_id, rank, extprofile, class, "
+										"level, lfp, lfg, instanceid, xtargets, "
+										"firstlogon FROM character_ LEFT JOIN "
+										"guild_members ON id=char_id WHERE id=%i",
+										character_id);
+
+	dbaw->AddQuery(2, characterInfoQuery);
+
+	std::string characterFactionQuery;
+	StringFormat(characterFactionQuery, "SELECT faction_id,current_value FROM "
+										"faction_values WHERE temp = 0 AND "
+										"char_id = %i", character_id);
+
+	dbaw->AddQuery(3, characterFactionQuery);
 	if (!(pDBAsyncWorkID = dbasync->AddWork(&dbaw))) {
 		safe_delete(dbaw);
 		LogFile->write(EQEMuLog::Error,"dbasync->AddWork() returned false, client crash");
@@ -2070,28 +2084,28 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 		}
 
-        int r;
-        bool tryaug = false;
-        ItemInst* clickaug = 0;
-        Item_Struct* augitem = 0;
+		int r;
+		bool tryaug = false;
+		ItemInst* clickaug = 0;
+		Item_Struct* augitem = 0;
 
-        for(r = 0; r < MAX_AUGMENT_SLOTS; r++) {
-            const ItemInst* aug_i = inst->GetAugment(r);
-            if(!aug_i)
-                continue;
-            const Item_Struct* aug = aug_i->GetItem();
-            if(!aug)
-                continue;
+		for(r = 0; r < MAX_AUGMENT_SLOTS; r++) {
+			const ItemInst* aug_i = inst->GetAugment(r);
+			if(!aug_i)
+				continue;
+			const Item_Struct* aug = aug_i->GetItem();
+			if(!aug)
+				continue;
 
-            if ( (aug->Click.Type == ET_ClickEffect) || (aug->Click.Type == ET_Expendable) || (aug->Click.Type == ET_EquipClick) || (aug->Click.Type == ET_ClickEffect2) )
-            {
-                tryaug = true;
-                clickaug = (ItemInst*)aug_i;
-                augitem = (Item_Struct*)aug;
-                spell_id = aug->Click.Effect;
-                break;
-            }
-        }
+			if ( (aug->Click.Type == ET_ClickEffect) || (aug->Click.Type == ET_Expendable) || (aug->Click.Type == ET_EquipClick) || (aug->Click.Type == ET_ClickEffect2) )
+			{
+				tryaug = true;
+				clickaug = (ItemInst*)aug_i;
+				augitem = (Item_Struct*)aug;
+				spell_id = aug->Click.Effect;
+				break;
+			}
+		}
 
 		if((spell_id <= 0) && (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol && item->ItemType != ItemTypeSpell))
 		{
@@ -2140,39 +2154,39 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					return;
 				}
 			}
-            else if (tryaug)
-            {
-                if (clickaug->GetCharges() == 0)
-                {
-                    //Message(0, "This item is out of charges.");
-                    Message_StringID(13, ITEM_OUT_OF_CHARGES);
-                    return;
-                }
-                if(GetLevel() >= augitem->Click.Level2)
-                {
-                    if(parse->ItemHasQuestSub(clickaug, "EVENT_ITEM_CLICK_CAST"))
-                    {
-                        //TODO: need to enforce and set recast timers here because the spell may not be cast.
-                        parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, clickaug->GetID(), slot_id);
-                        inst = m_inv[slot_id];
-                        if (!inst)
-                        {
-                            // Item was deleted by the perl event
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        //We assume augs aren't consumable
-                        CastSpell(augitem->Click.Effect, target_id, 10, augitem->CastTime, 0, 0, slot_id);
-                    }
-                }
-                else
-                {
-                    Message_StringID(13, ITEMS_INSUFFICIENT_LEVEL);
-                    return;
-                }
-            }
+			else if (tryaug)
+			{
+				if (clickaug->GetCharges() == 0)
+				{
+					//Message(0, "This item is out of charges.");
+					Message_StringID(13, ITEM_OUT_OF_CHARGES);
+					return;
+				}
+				if(GetLevel() >= augitem->Click.Level2)
+				{
+					if(parse->ItemHasQuestSub(clickaug, "EVENT_ITEM_CLICK_CAST"))
+					{
+						//TODO: need to enforce and set recast timers here because the spell may not be cast.
+						parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, clickaug->GetID(), slot_id);
+						inst = m_inv[slot_id];
+						if (!inst)
+						{
+							// Item was deleted by the perl event
+							return;
+						}
+					}
+					else
+					{
+						//We assume augs aren't consumable
+						CastSpell(augitem->Click.Effect, target_id, 10, augitem->CastTime, 0, 0, slot_id);
+					}
+				}
+				else
+				{
+					Message_StringID(13, ITEMS_INSUFFICIENT_LEVEL);
+					return;
+				}
+			}
 			else
 			{
 				if(GetClientVersion() >= EQClientSoD && !inst->IsEquipable(GetBaseRace(),GetClass()))
@@ -3227,12 +3241,13 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			if (sayid && sayid > 0)
 			{
 				char errbuf[MYSQL_ERRMSG_SIZE];
-				char *query = 0;
+				std::string query;
 				MYSQL_RES *result;
 				MYSQL_ROW row;
 
-
-				if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid),errbuf,&result))
+				StringFormat(query, "SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid);
+				
+				if(database.RunQuery(query,errbuf,&result))
 				{
 					if (mysql_num_rows(result) == 1)
 					{
@@ -3244,10 +3259,8 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 				else
 				{
 					Message(13, "Error: The saylink (%s) was not found in the database.",response.c_str());
-					safe_delete_array(query);
 					return;
 				}
-				safe_delete_array(query);
 			}
 
 			if((response).size() > 0)
@@ -6159,35 +6172,34 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 		snprintf(containers,29, "in (%u,%u)", rss->object_type, rss->some_id);
 	}
 
-	char *query = 0;
+	std::string query;
 	char searchclause[140];	//2X rss->query + SQL crap
 
 	//omit the rlike clause if query is empty
 	if(rss->query[0] != 0) {
-		char buf[120];	//larger than 2X rss->query
+		std::string buf;	//larger than 2X rss->query
 		database.DoEscapeString(buf, rss->query, strlen(rss->query));
 
-		snprintf(searchclause, 139, "name rlike '%s' AND", buf);
+		snprintf(searchclause, 139, "name rlike '%s' AND", buf.c_str());
 	} else {
 		searchclause[0] = '\0';
 	}
-	uint32 qlen = 0;
 
 	//arbitrary limit of 200 recipes, makes sense to me.
-	qlen = MakeAnyLenString(&query, "SELECT tr.id,tr.name,tr.trivial,SUM(tre.componentcount),crl.madecount,tr.tradeskill "
-		" FROM tradeskill_recipe AS tr "
-		" LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		" WHERE %s tr.trivial >= %u AND tr.trivial <= %u "
-		" AND tr.must_learn & 0x20 <> 0x20 AND((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
-		" GROUP BY tr.id "
-		" HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
-		" LIMIT 200 "
-		, CharacterID(), searchclause, rss->mintrivial, rss->maxtrivial, containers);
+	
+	StringFormat(query,"SELECT tr.id,tr.name,tr.trivial,SUM(tre.componentcount),crl.madecount,tr.tradeskill "
+						"FROM tradeskill_recipe AS tr "
+						"LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
+						"LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
+						"WHERE %s tr.trivial >= %u AND tr.trivial <= %u "
+						"AND tr.must_learn & 0x20 <> 0x20 AND((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) OR (tr.must_learn & 0x3 = 0)) "
+						"GROUP BY tr.id "
+						"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 "
+						"LIMIT 200 ", 
+						CharacterID(), searchclause, rss->mintrivial, rss->maxtrivial, containers);
 
-	TradeskillSearchResults(query, qlen, rss->object_type, rss->some_id);
+	TradeskillSearchResults(query, query.length(), rss->object_type, rss->some_id);
 
-	safe_delete_array(query);
 	return;
 }
 
@@ -11508,7 +11520,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	}
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	MYSQL_RES *result = nullptr;
 	MYSQL_ROW row = 0;
 	float x(0),y(0),z(0);
@@ -11516,22 +11528,12 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 
 	uint32 StartCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
 	bool ValidCity = false;
-	database.RunQuery
-	(
-		query,
-		MakeAnyLenString
-		(
-			&query,
-			"SELECT zone_id, bind_id, x, y, z FROM start_zones "
-			"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-			m_pp.class_,
-			m_pp.deity,
-			m_pp.race
-		),
-		errbuf,
-		&result
-	);
-	safe_delete_array(query);
+	
+	StringFormat(query,"SELECT zone_id, bind_id, x, y, z FROM start_zones "
+						"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
+						m_pp.class_, m_pp.deity, m_pp.race);
+	
+	database.RunQuery(query, errbuf, &result);
 
 	if(!result) {
 		LogFile->write(EQEMuLog::Error, "No valid start zones found for /setstartcity");
@@ -11557,22 +11559,13 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		SetStartZone(StartCity, x, y, z);
 	}
 	else {
-		database.RunQuery
-		(
-			query,
-			MakeAnyLenString
-			(
-				&query,
-				"SELECT zone_id, bind_id FROM start_zones "
-				"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-				m_pp.class_,
-				m_pp.deity,
-				m_pp.race
-			),
-			errbuf,
-			&result
-	);
-		safe_delete_array(query);
+		
+		StringFormat(query, "SELECT zone_id, bind_id FROM start_zones "
+							"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
+							m_pp.class_, m_pp.deity, m_pp.race);
+		
+		database.RunQuery(query,errbuf,&result);
+		
 		Message(15,"Use \"/startcity #\" to choose a home city from the following list:");
 		char* name;
 		while(row = mysql_fetch_row(result)) {
@@ -11706,17 +11699,19 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	GMSearchCorpse_Struct *gmscs = (GMSearchCorpse_Struct *)app->pBuffer;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* Query = 0;
+	std::string query;
 	MYSQL_RES *Result;
 	MYSQL_ROW Row;
 
-	char *EscSearchString = new char[129];
+	std::string escSearchString;
 
-	database.DoEscapeString(EscSearchString, gmscs->Name, strlen(gmscs->Name));
-
-	if (database.RunQuery(Query, MakeAnyLenString(&Query, "select charname, zoneid, x, y, z, timeofdeath, rezzed, IsBurried from "
-								"player_corpses where charname like '%%%s%%' order by charname limit %i",
-								EscSearchString, MaxResults), errbuf, &Result))
+	database.DoEscapeString(escSearchString, gmscs->Name, strlen(gmscs->Name));
+	
+	StringFormat(query, "select charname, zoneid, x, y, z, timeofdeath, rezzed, IsBurried from "
+						"player_corpses where charname like '%%%s%%' order by charname limit %i",
+						escSearchString.c_str(), MaxResults);
+	
+	if (database.RunQuery(query,  errbuf, &Result))
 	{
 
 		int NumberOfRows = mysql_num_rows(Result);
@@ -11731,7 +11726,6 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 		if(NumberOfRows == 0)
 		{
 			mysql_free_result(Result);
-			safe_delete_array(Query);
 			return;
 		}
 
@@ -11782,8 +11776,6 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 		Message(0, "Query failed: %s.", errbuf);
 
 	}
-	safe_delete_array(Query);
-	safe_delete_array(EscSearchString);
 }
 
 void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)

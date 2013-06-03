@@ -57,7 +57,7 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 	char errbuf[MYSQL_ERRMSG_SIZE] = "dbaq == 0";
 	MYSQL_RES* result = 0;
 	MYSQL_ROW row;
-	char* query = 0;
+	std::string query;
 	uint32 i;
 	uint8 ToDeleteIndex = 0;
 	uint32 ToDelete[MAX_TO_DELETE];
@@ -90,16 +90,22 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 		}
 		if (ToDelete[0]) {
 			uint32 len = 0, size = 0;
-			AppendAnyLenString(&query, &size, &len, "Delete from character_backup where id=%u", ToDelete[0]);
+			
+			std::string toAppend;
+			
+			StringFormat(toAppend, "Delete from character_backup where id=%u", ToDelete[0]);
+			query.append(toAppend);
+			
 			for (uint8 i=1; i<ToDeleteIndex; i++) {
-				AppendAnyLenString(&query, &size, &len, " or id=%u", ToDelete[i]);
+				
+				StringFormat(toAppend, " or id=%u", ToDelete[i]);
+				query.append(toAppend);
+				
 			}
-			if (!database.RunQuery(query, len, errbuf)) {
-				LogFile->write(EQEMuLog::Error, "Error in DBAsyncCB_CharacterBackup query2 '%s' %s", query, errbuf);
-				safe_delete_array(query);
+			if (!database.RunQuery(query, errbuf)) {
+				LogFile->write(EQEMuLog::Error, "Error in DBAsyncCB_CharacterBackup query2 '%s' %s", query.c_str(), errbuf);
 				return true;
 			}
-			safe_delete_array(query);
 		}
 		bool needtoinsert = false;
 		for (i=0; i<MAX_BACKUPS; i++) {
@@ -107,20 +113,20 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 				needtoinsert = true;
 		}
 		if (needtoinsert) {
-			if (!database.RunQuery(query, MakeAnyLenString(&query,
-				"Insert Delayed into character_backup (charid, account_id, name, profile, level, class, x, y, z, zoneid) "
-				"select id, account_id, name, profile, level, class, x, y, z, zoneid "
-				"from character_ where id=%u", iWork->WPT()), errbuf)) {
+			
+			StringFormat(query, "Insert Delayed into character_backup "
+								"(charid, account_id, name, profile, level, class, x, y, z, zoneid) "
+								"select id, account_id, name, profile, level, class, x, y, z, zoneid "
+								"from character_ where id=%u", iWork->WPT());
+			
+			if (!database.RunQuery(query, errbuf)) {
 				std::cout << "Error in DBAsyncCB_CharacterBackup query3 '" << query << "' " << errbuf << std::endl;
-				safe_delete_array(query);
 				return true;
 			}
-			safe_delete_array(query);
 		}
 	}
 	else {
 //		cout << "Error in DBAsyncCB_CharacterBackup query1 '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
 		return true;
 	}
 	return true;

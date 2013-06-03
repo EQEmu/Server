@@ -61,15 +61,8 @@ TaskManager::~TaskManager() {
 }
 
 bool TaskManager::LoadTaskSets() {
-
-
-	const char *TaskSetQuery = "SELECT `id`, `taskid` from `tasksets` WHERE `id` > 0 AND `id` < %i "
-					"AND `taskid` >= 0 AND `taskid` < %i ORDER BY `id`, `taskid` ASC";
-
-	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTaskSets: %s";
-
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -79,7 +72,11 @@ bool TaskManager::LoadTaskSets() {
 		TaskSets[i].clear();
 	}
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,TaskSetQuery,MAXTASKSETS,MAXTASKS),errbuf,&result)) {
+	StringFormat(query,"SELECT `id`, `taskid` from `tasksets` WHERE `id` > 0 AND `id` < %i "
+						"AND `taskid` >= 0 AND `taskid` < %i ORDER BY `id`, `taskid` ASC",
+						MAXTASKSETS, MAXTASKS);
+
+	if(database.RunQuery(query,errbuf,&result)) {
 
 		while((row = mysql_fetch_row(result))) {
 			int TaskSet = atoi(row[0]);
@@ -89,11 +86,9 @@ bool TaskManager::LoadTaskSets() {
 			_log(TASKS__GLOBALLOAD, "Adding TaskID %4i to TaskSet %4i", TaskID, TaskSet);
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "[TASKS]Error in TaskManager::LoadTaskSets: %s", errbuf);
 		return false;
 	}
 
@@ -164,7 +159,7 @@ bool TaskManager::LoadTasks(int SingleTask) {
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTasks: %s";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 	int QueryLength = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -177,13 +172,15 @@ bool TaskManager::LoadTasks(int SingleTask) {
 
 		if(!LoadTaskSets())
 			_log(TASKS__GLOBALLOAD,"TaskManager::LoadTasks LoadTaskSets failed");
-
-		QueryLength = MakeAnyLenString(&query,AllTaskQuery,MAXTASKS);
+		
+		StringFormat(query,AllTaskQuery,MAXTASKS);
 	}
 	else
-		QueryLength = MakeAnyLenString(&query,SingleTaskQuery,SingleTask);
+	{
+		StringFormat(query,SingleTaskQuery,SingleTask);
+	}
 
-	if(database.RunQuery(query,QueryLength,errbuf,&result)) {
+	if(database.RunQuery(query,errbuf,&result)) {
 
 		while((row = mysql_fetch_row(result))) {
 			int TaskID = atoi(row[0]);
@@ -221,21 +218,23 @@ bool TaskManager::LoadTasks(int SingleTask) {
 
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
 
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-		safe_delete_array(query);
 		return false;
 	}
 
 	if(SingleTask==0)
-		QueryLength = MakeAnyLenString(&query,AllActivityQuery,MAXTASKS, MAXACTIVITIESPERTASK);
+	{
+		StringFormat(query, AllActivityQuery,MAXTASKS, MAXACTIVITIESPERTASK);
+	}
 	else
-		QueryLength = MakeAnyLenString(&query,SingleTaskActivityQuery, SingleTask, MAXACTIVITIESPERTASK);
+	{
+		StringFormat(query, SingleTaskActivityQuery, SingleTask, MAXACTIVITIESPERTASK);
+	}
 
-	if(database.RunQuery(query,QueryLength, errbuf, &result)) {
+	if(database.RunQuery(query, errbuf, &result)) {
 
 		while((row = mysql_fetch_row(result))) {
 			int TaskID = atoi(row[0]);
@@ -319,12 +318,9 @@ bool TaskManager::LoadTasks(int SingleTask) {
 
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
-
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
-		safe_delete_array(query);
 		return false;
 	}
 	return true;
@@ -356,7 +352,7 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 
 	if(state->ActiveTaskCount > 0) {
 		for(int Task=0; Task<MAXACTIVETASKS; Task++) {
@@ -366,19 +362,16 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 
 				_log(TASKS__CLIENTSAVE, "TaskManager::SaveClientState for character ID %d, Updating TaskIndex %i TaskID %i",
 						CharacterID, Task, TaskID);
-
-				if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery,
-							CharacterID,
-							TaskID,
-							Task,
-							state->ActiveTasks[Task].AcceptedTime), errbuf)) {
-
+						
+				StringFormat(query, TaskQuery, CharacterID,
+									TaskID, Task, state->ActiveTasks[Task].AcceptedTime);
+							
+				if(!database.RunQuery(query, errbuf)) {
 					LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
 				}
 				else
 					state->ActiveTasks[Task].Updated = false;
 
-				safe_delete_array(query);
 			}
 
 			int UpdatedActivityCount = 0;
@@ -415,8 +408,10 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 
 			if(UpdatedActivityCount > 0) {
 				_log(TASKS__CLIENTSAVE, "Executing query %s", UpdateActivityQuery.c_str());
-				if(!database.RunQuery(query,MakeAnyLenString(&query, UpdateActivityQuery.c_str()),
-								errbuf)) {
+				
+				query = UpdateActivityQuery;
+				
+				if(!database.RunQuery(query,errbuf)) {
 
 					LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
 				}
@@ -427,7 +422,6 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 
 				}
 
-				safe_delete_array(query);
 			}
 		}
 
@@ -445,15 +439,16 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 			// This indicates this task was completed at the given time. We infer that all
 			// none optional activities were completed.
 			//
-			if(!database.RunQuery(query,MakeAnyLenString(&query, CompletedTaskQuery,
-							CharacterID,
-							state->CompletedTasks[i].CompletedTime,
-							TaskID, -1), errbuf)) {
+			
+			StringFormat(query,CompletedTaskQuery, CharacterID,
+								state->CompletedTasks[i].CompletedTime,
+								TaskID, -1);
+			
+			if(!database.RunQuery(query,errbuf)) {
 
 				LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
 				continue;
 			}
-			safe_delete_array(query);
 
 			// If the Rule to record non-optional task completion is not enabled, don't save it
 			if(!RuleB(TaskSystem, RecordCompletedOptionalActivities)) continue;
@@ -462,15 +457,15 @@ bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
 
 			for(int j=0; j<Tasks[TaskID]->ActivityCount; j++) {
 				if(Tasks[TaskID]->Activity[j].Optional && state->CompletedTasks[i].ActivityDone[j]) {
-
-					if(!database.RunQuery(query,MakeAnyLenString(&query, CompletedTaskQuery,
-									CharacterID,
-									state->CompletedTasks[i].CompletedTime,
-									TaskID, j), errbuf)) {
+					
+					StringFormat(query,CompletedTaskQuery,
+										CharacterID, state->CompletedTasks[i].CompletedTime,
+										TaskID, j);
+										
+					if(!database.RunQuery(query,errbuf)) {
 
 						LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
 					}
-					safe_delete_array(query);
 				}
 			}
 		}
@@ -521,7 +516,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 	const char *ERR_MYSQLERROR1 = "[TASKS]Error in TaskManager::LoadClientState load Tasks: %s";
 
 	char		errbuf[MYSQL_ERRMSG_SIZE];
-	char*		query = 0;
+	std::string query;
 	MYSQL_RES	*result;
 	MYSQL_ROW	row;
 
@@ -533,7 +528,9 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
 	_log(TASKS__CLIENTLOAD, "TaskManager::LoadClientSate for character ID %d", CharacterID);
 
-	if(database.RunQuery(query,MakeAnyLenString(&query, TaskQuery, CharacterID), errbuf, &result)) {
+	StringFormat(query, TaskQuery, CharacterID);
+
+	if(database.RunQuery(query, errbuf, &result)) {
 
 		while((row = mysql_fetch_row(result))) {
 
@@ -580,11 +577,9 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 					CharacterID, TaskID,acceptedtime);
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR1, errbuf);
-		safe_delete_array(query);
 		safe_delete(state);
 		return false;
 	}
@@ -593,7 +588,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
 	const char *ActivityQuery = "SELECT `taskid`, `activityid`, `donecount`, `completed` "
 								" from `character_activities` WHERE `charid` = %i "
-					"ORDER BY `taskid` ASC, `activityid` ASC";
+								"ORDER BY `taskid` ASC, `activityid` ASC";
 
 	const char *ERR_TASK_OOR2 = "[TASKS]Task ID %i out of range while loading character activities from database";
 
@@ -605,11 +600,9 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
 	_log(TASKS__CLIENTLOAD, "LoadClientState. Loading activities for character ID %d", CharacterID);
 
+	StringFormat(query, ActivityQuery, CharacterID);
 
-
-	if(database.RunQuery(query,MakeAnyLenString(&query, ActivityQuery,
-							CharacterID), errbuf, &result)) {
-
+	if(database.RunQuery(query, errbuf, &result)) {
 
 		while((row = mysql_fetch_row(result))) {
 			int TaskID = atoi(row[0]);
@@ -654,11 +647,9 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR2, errbuf);
-		safe_delete_array(query);
 		safe_delete(state);
 		return false;
 	}
@@ -675,8 +666,10 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
 
 	if(RuleB(TaskSystem, RecordCompletedTasks)) {
-		if(database.RunQuery(query,MakeAnyLenString(&query, CompletedTaskQuery,
-							CharacterID), errbuf, &result)) {
+		
+		StringFormat(query, CompletedTaskQuery, CharacterID);
+		
+		if(database.RunQuery(query, errbuf, &result)) {
 
 			CompletedTaskInformation cti;
 
@@ -733,11 +726,9 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 			state->LastCompletedTaskLoaded = state->CompletedTasks.size();
 
 			mysql_free_result(result);
-			safe_delete_array(query);
 		}
 		else {
 			LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR3, errbuf);
-			safe_delete_array(query);
 			safe_delete(state);
 			return false;
 		}
@@ -748,8 +739,9 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 
 	const char *ERR_MYSQLERROR4 = "[TASKS]Error in TaskManager::LoadClientState load enabled tasks: %s";
 
-	if(database.RunQuery(query,MakeAnyLenString(&query, EnabledTaskQuery,
-							CharacterID, MAXTASKS), errbuf, &result)) {
+	StringFormat(query, EnabledTaskQuery, CharacterID, MAXTASKS);
+
+	if(database.RunQuery(query, errbuf, &result)) {
 
 		while((row = mysql_fetch_row(result))) {
 			int TaskID = atoi(row[0]);
@@ -757,11 +749,9 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 			_log(TASKS__CLIENTLOAD, "Adding TaskID %i to enabled tasks", TaskID);
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR4, errbuf);
-		safe_delete_array(query);
 	}
 
 	// Check that there is an entry in the client task state for every activity in each task
@@ -849,7 +839,7 @@ void ClientTaskState::EnableTask(int CharID, int TaskCount, int *TaskList) {
 	const char *ERR_MYSQLERROR = "[TASKS]Error in ClientTaskState::EnableTask %s %s";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 
 	char *buf = 0;
 
@@ -864,13 +854,12 @@ void ClientTaskState::EnableTask(int CharID, int TaskCount, int *TaskList) {
 	}
 
 	_log(TASKS__UPDATE, "Executing query %s", TaskQuery.c_str());
+	query = TaskQuery;
+	if(!database.RunQuery(query, errbuf)) {
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery.c_str()), errbuf)) {
-
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
+		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query.c_str(), errbuf);
 	}
 
-	safe_delete_array(query);
 }
 
 void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
@@ -909,7 +898,7 @@ void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
 	const char *ERR_MYSQLERROR = "[TASKS]Error in ClientTaskState::DisableTask %s %s";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 
 	char *buf = 0;
 
@@ -929,13 +918,14 @@ void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
 
 	TaskQuery = TaskQuery + ")";
 	_log(TASKS__UPDATE, "Executing query %s", TaskQuery.c_str());
+	
+	query = TaskQuery;
+	
+	if(!database.RunQuery(query, errbuf)) {
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery.c_str()), errbuf)) {
-
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
+		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query.c_str(), errbuf);
 	}
 
-	safe_delete_array(query);
 }
 
 bool ClientTaskState::IsTaskEnabled(int TaskID) {
@@ -1437,21 +1427,21 @@ int ClientTaskState::GetActiveTaskID(int index) {
 static void DeleteCompletedTaskFromDatabase(int CharID, int TaskID) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 
 	const char *TaskQuery="DELETE FROM completed_tasks WHERE charid=%i AND taskid = %i";
 
 	_log(TASKS__UPDATE, "DeleteCompletedTasksFromDatabase. CharID = %i, TaskID = %i",
 		CharID, TaskID);
+		
+	StringFormat(query, TaskQuery, CharID, TaskID);
+	
+	if(!database.RunQuery(query, errbuf)) {
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery, CharID, TaskID), errbuf)) {
-
-		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s, %s", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s, %s", query.c_str(), errbuf);
 		return;
 	}
-	_log(TASKS__UPDATE, "Delete query %s", query);
-	safe_delete_array(query);
+	_log(TASKS__UPDATE, "Delete query %s", query.c_str());
 }
 
 bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
@@ -3141,33 +3131,31 @@ void ClientTaskState::RemoveTask(Client *c, int SequenceNumber) {
 	int CharacterID = c->CharacterID();
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 
 	const char *TaskQuery="DELETE FROM character_tasks WHERE charid=%i AND taskid = %i";
 
 	const char *ActivityQuery="DELETE FROM character_activities WHERE charid=%i AND taskid = %i";
 
 	_log(TASKS__UPDATE, "ClientTaskState Cancel Task %i ", SequenceNumber);
-
-	if(!database.RunQuery(query,MakeAnyLenString(&query, ActivityQuery,
-							CharacterID,
-							ActiveTasks[SequenceNumber].TaskID), errbuf)) {
+	
+	StringFormat(query,ActivityQuery, CharacterID, ActiveTasks[SequenceNumber].TaskID);
+	
+	if(!database.RunQuery(query,errbuf)) {
 
 		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s", errbuf);
-		safe_delete_array(query);
 		return;
 	}
-	_log(TASKS__UPDATE, "CancelTask: %s", query);
-	safe_delete_array(query);
-	if(!database.RunQuery(query,MakeAnyLenString(&query, TaskQuery,
-							CharacterID,
-							ActiveTasks[SequenceNumber].TaskID), errbuf)) {
+	_log(TASKS__UPDATE, "CancelTask: %s", query.c_str());
+	
+	StringFormat(query,TaskQuery, CharacterID, ActiveTasks[SequenceNumber].TaskID);
+	
+	if(!database.RunQuery(query, errbuf)) {
 
 		LogFile->write(EQEMuLog::Error, "[TASKS]Error in CientTaskState::CancelTask %s", errbuf);
 	}
 
-	_log(TASKS__UPDATE, "CancelTask: %s", query);
-	safe_delete_array(query);
+	_log(TASKS__UPDATE, "CancelTask: %s", query.c_str());
 
 	ActiveTasks[SequenceNumber].TaskID = TASKSLOTEMPTY;
 	ActiveTaskCount--;
@@ -3305,7 +3293,7 @@ bool TaskGoalListManager::LoadLists() {
 	const char *ERR_MYSQLERROR = "Error in TaskGoalListManager::LoadLists: %s %s";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -3319,8 +3307,10 @@ bool TaskGoalListManager::LoadLists() {
 	safe_delete_array(TaskGoalLists);
 
 	NumberOfLists = 0;
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,CountQuery),errbuf,&result)) {
+	
+	query = CountQuery;
+	
+	if(database.RunQuery(query,errbuf,&result)) {
 
 		NumberOfLists = mysql_num_rows(result);
 		_log(TASKS__GLOBALLOAD, "Database returned a count of %i lists", NumberOfLists);
@@ -3342,11 +3332,9 @@ bool TaskGoalListManager::LoadLists() {
 			ListIndex++;
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query.c_str(), errbuf);
 		return false;
 	}
 
@@ -3355,7 +3343,9 @@ bool TaskGoalListManager::LoadLists() {
 		int ListID = TaskGoalLists[ListIndex].ListID;
 		unsigned int Size = TaskGoalLists[ListIndex].Size;
 
-		if(database.RunQuery(query,MakeAnyLenString(&query,ListQuery,ListID,Size),errbuf,&result)) {
+		StringFormat(query,ListQuery,ListID,Size);
+
+		if(database.RunQuery(query,errbuf,&result)) {
 			// This should only happen if a row is deleted in between us retrieving the counts
 			// at the start of this method and getting to here. It should not be possible for
 			// an INSERT to cause a problem, as the SELECT is used with a LIMIT
@@ -3379,12 +3369,10 @@ bool TaskGoalListManager::LoadLists() {
 			}
 
 			mysql_free_result(result);
-			safe_delete_array(query);
 		}
 		else {
-			LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
+			LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query.c_str(), errbuf);
 			TaskGoalLists[ListIndex].Size = 0;
-			safe_delete_array(query);
 		}
 	}
 	return true;
@@ -3493,7 +3481,7 @@ bool TaskProximityManager::LoadProximities(int ZoneID) {
 	const char *ERR_MYSQLERROR = "Error in TaskProximityManager::LoadProximities %s %s";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -3502,8 +3490,10 @@ bool TaskProximityManager::LoadProximities(int ZoneID) {
 
 	_log(TASKS__GLOBALLOAD, "TaskProximityManager::LoadProximities Called for zone %i", ZoneID);
 	TaskProximities.clear();
-
-	if(database.RunQuery(query,MakeAnyLenString(&query,ProximityQuery, ZoneID),errbuf,&result)) {
+	
+	StringFormat(query,ProximityQuery, ZoneID);
+	
+	if(database.RunQuery(query, errbuf,&result)) {
 
 		while((row = mysql_fetch_row(result))) {
 			Proximity.ExploreID = atoi(row[0]);
@@ -3520,11 +3510,9 @@ bool TaskProximityManager::LoadProximities(int ZoneID) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, query.c_str(), errbuf);
 		return false;
 	}
-	safe_delete_array(query);
 
 	return true;
 

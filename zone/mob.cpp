@@ -3729,7 +3729,7 @@ void Mob::TarGlobal(const char *varname, const char *value, const char *duration
 void Mob::DelGlobal(const char *varname) {
 	// delglobal(varname)
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	int qgZoneid=zone->GetZoneID();
 	int qgCharid=0;
 	int qgNpcid=0;
@@ -3748,15 +3748,14 @@ void Mob::DelGlobal(const char *varname) {
 		qgCharid = -qgNpcid;		// make char id negative npc id as a fudge
 	}
 
-	if (!database.RunQuery(query,
-		MakeAnyLenString(&query,
-		"DELETE FROM quest_globals WHERE name='%s'"
-		" && (npcid=0 || npcid=%i) && (charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
-		varname,qgNpcid,qgCharid,qgZoneid),errbuf))
-	{
+	StringFormat(query,"DELETE FROM quest_globals WHERE name='%s' && "
+						"(npcid=0 || npcid=%i) && "
+						"(charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
+						varname,qgNpcid,qgCharid,qgZoneid);
+
+	if (!database.RunQuery(query,errbuf)) {
 		//_log(QUESTS, "DelGlobal error deleting %s : %s", varname, errbuf);
 	}
-	safe_delete_array(query);
 
 	if(zone)
 	{
@@ -3779,7 +3778,7 @@ void Mob::DelGlobal(const char *varname) {
 // Inserts global variable into quest_globals table
 void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varname, const char *varvalue, int duration) {
 
-	char *query = 0;
+	std::string query;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
@@ -3797,15 +3796,15 @@ void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varna
 	//NOTE: this should be escaping the contents of arglist
 	//npcwise a malicious script can arbitrarily alter the DB
 	uint32 last_id = 0;
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
-		"VALUES (%i, %i, %i, '%s', '%s', %s)",
-		charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str()
-		), errbuf))
+
+	StringFormat(query, "REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
+						"VALUES (%i, %i, %i, '%s', '%s', %s)",
+						charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str());
+
+	if (!database.RunQuery(query,  errbuf))
 	{
 		//_log(QUESTS, "SelGlobal error inserting %s : %s", varname, errbuf);
 	}
-	safe_delete_array(query);
 
 	if(zone)
 	{
@@ -4675,18 +4674,18 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 
 bool Mob::HasSpellEffect(int effectid)
 {
-    int i;
+	int i;
 
-    uint32 buff_count = GetMaxTotalSlots();
-    for(i = 0; i < buff_count; i++)
-    {
-        if(buffs[i].spellid == SPELL_UNKNOWN) { continue; }
+	uint32 buff_count = GetMaxTotalSlots();
+	for(i = 0; i < buff_count; i++)
+	{
+		if(buffs[i].spellid == SPELL_UNKNOWN) { continue; }
 
-        if(IsEffectInSpell(buffs[i].spellid, effectid))
-        {
-            return(1);
-        }
-    }
-    return(0);
+		if(IsEffectInSpell(buffs[i].spellid, effectid))
+		{
+			return(1);
+		}
+	}
+	return(0);
 }
 

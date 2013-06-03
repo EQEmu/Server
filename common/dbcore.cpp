@@ -12,6 +12,7 @@
 #include <string.h>
 #include "../common/MiscFunctions.h"
 #include <cstdlib>
+#include <string>
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -58,7 +59,7 @@ void DBcore::ping() {
 	MDatabase.unlock();
 }
 
-bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum, bool retry) {
+bool DBcore::RunQuery(const std::string& query, char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum, bool retry) {
 	_CP(DBcore_RunQuery);
 	if (errnum)
 		*errnum = 0;
@@ -70,16 +71,16 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 		Open();
 #if DEBUG_MYSQL_QUERIES >= 1
 	char tmp[120];
-	strn0cpy(tmp, query, sizeof(tmp));
+	strn0cpy(tmp, query.c_str(), sizeof(tmp));
 	std::cout << "QUERY: " << tmp << std::endl;
 #endif
-	if (mysql_real_query(&mysql, query, querylen)) {
+	if (mysql_real_query(&mysql, query.c_str(), query.length())) {
 		if (mysql_errno(&mysql) == CR_SERVER_GONE_ERROR)
 			pStatus = Error;
 		if (mysql_errno(&mysql) == CR_SERVER_LOST || mysql_errno(&mysql) == CR_SERVER_GONE_ERROR) {
 			if (retry) {
 				std::cout << "Database Error: Lost connection, attempting to recover...." << std::endl;
-				ret = RunQuery(query, querylen, errbuf, result, affected_rows, last_insert_id, errnum, false);
+				ret = RunQuery(query, errbuf, result, affected_rows, last_insert_id, errnum, false);
 				if (ret)
 					std::cout << "Reconnection to database successful." << std::endl;
 			}
@@ -152,10 +153,13 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 	return ret;
 }
 
-uint32 DBcore::DoEscapeString(char* tobuf, const char* frombuf, uint32 fromlen) {
+void DBcore::DoEscapeString(std::string& outString, const char* frombuf, uint32 fromlen) {
 //	No good reason to lock the DB, we only need it in the first place to check char encoding.
 //	LockMutex lock(&MDatabase);
-	return mysql_real_escape_string(&mysql, tobuf, frombuf, fromlen);
+	char* tobuf = new char[sizeof(frombuf)*fromlen*2]();
+	unsigned long length = mysql_real_escape_string(&mysql, tobuf, frombuf, fromlen);
+	outString.assign(tobuf,length);
+	safe_delete_array(tobuf);
 }
 
 bool DBcore::Open(const char* iHost, const char* iUser, const char* iPassword, const char* iDatabase,uint32 iPort, uint32* errnum, char* errbuf, bool iCompress, bool iSSL) {

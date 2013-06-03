@@ -388,8 +388,9 @@ bool ZoneDatabase::LoadTributes() {
 
 	tribute_list.clear();
 
-	const char *query = "SELECT id,name,descr,unknown,isguild FROM tributes";
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
+	std::string query = "SELECT id,name,descr,unknown,isguild FROM tributes";
+	
+	if (RunQuery(query, errbuf, &result)) {
 		int r;
 		while ((row = mysql_fetch_row(result))) {
 			r = 0;
@@ -403,13 +404,14 @@ bool ZoneDatabase::LoadTributes() {
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadTributes first query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadTributes first query '%s': %s", query.c_str(), errbuf);
 		return false;
 	}
 
 
-	const char *query2 = "SELECT tribute_id,level,cost,item_id FROM tribute_levels ORDER BY tribute_id,level";
-	if (RunQuery(query2, strlen(query2), errbuf, &result)) {
+	std::string query2 = "SELECT tribute_id,level,cost,item_id FROM tribute_levels ORDER BY tribute_id,level";
+	
+	if (RunQuery(query2, errbuf, &result)) {
 		int r;
 		while ((row = mysql_fetch_row(result))) {
 			r = 0;
@@ -436,7 +438,7 @@ bool ZoneDatabase::LoadTributes() {
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadTributes level query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadTributes level query '%s': %s", query.c_str(), errbuf);
 		return false;
 	}
 

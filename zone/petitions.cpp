@@ -217,30 +217,42 @@ void PetitionList::UpdatePetition(Petition* pet) {
 
 void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	uint32 affected_rows = 0;
 	uint8 checkedout = 0;
-	if (wpet->CheckedOut()) checkedout = 0;
-	else checkedout = 1;
-	if (!RunQuery(query, MakeAnyLenString(&query, "DELETE from petitions where petid = %i", wpet->GetID()), errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in DeletePetitionFromDB query '%s': %s", query, errbuf);
+	
+	if (wpet->CheckedOut()) 
+		checkedout = 0;
+	else 
+		checkedout = 1;
+		
+	StringFormat(query, "DELETE from petitions where petid = %i", wpet->GetID());
+		
+	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+		LogFile->write(EQEMuLog::Error, "Error in DeletePetitionFromDB query '%s': %s", query.c_str(), errbuf);
 	}
-	safe_delete_array(query);
 
 	return;
 }
 
 void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	uint32 affected_rows = 0;
 	uint8 checkedout = 0;
-	if (wpet->CheckedOut()) checkedout = 1;
-	else checkedout = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE petitions set gmtext = '%s', lastgm = '%s', urgency = %i, checkouts = %i, unavailables = %i, ischeckedout = %i where petid = %i", wpet->GetGMText(), wpet->GetLastGM(), wpet->GetUrgency(), wpet->GetCheckouts(), wpet->GetUnavails(), checkedout, wpet->GetID()), errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in UpdatePetitionToDB query '%s': %s", query, errbuf);
+	if (wpet->CheckedOut()) 
+		checkedout = 1;
+	else 
+		checkedout = 0;
+	
+	StringFormat(query,"UPDATE petitions set gmtext = '%s', lastgm = '%s', urgency = %i, "
+						"checkouts = %i, unavailables = %i, ischeckedout = %i where petid = %i", 
+						wpet->GetGMText(), wpet->GetLastGM(), wpet->GetUrgency(), 
+						wpet->GetCheckouts(), wpet->GetUnavails(), checkedout, wpet->GetID());
+		
+	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+		LogFile->write(EQEMuLog::Error, "Error in UpdatePetitionToDB query '%s': %s", query.c_str(), errbuf);
 	}
-	safe_delete_array(query);
 	return;
 }
 
@@ -249,7 +261,7 @@ void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
 void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	uint32 affected_rows = 0;
 	uint8 checkedout = 0;
 	if (wpet->CheckedOut())
@@ -258,15 +270,22 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 		checkedout = 0;
 
 	uint32 len = strlen(wpet->GetPetitionText());
-	char* petitiontext = new char[2*len+1];
-	memset(petitiontext, 0, 2*len+1);
+	std::string petitiontext;
 	DoEscapeString(petitiontext, wpet->GetPetitionText(), len);
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO petitions (petid, charname, accountname, lastgm, petitiontext, zone, urgency, charclass, charrace, charlevel, checkouts, unavailables, ischeckedout, senttime, gmtext) values (%i,'%s','%s','%s','%s',%i,%i,%i,%i,%i,%i,%i,%i,%i, '%s')", wpet->GetID(), wpet->GetCharName(), wpet->GetAccountName(), wpet->GetLastGM(), petitiontext, wpet->GetZone(), wpet->GetUrgency(), wpet->GetCharClass(), wpet->GetCharRace(), wpet->GetCharLevel(), wpet->GetCheckouts(), wpet->GetUnavails(), checkedout, wpet->GetSentTime(), wpet->GetGMText()), errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in InsertPetitionToDB query '%s': %s", query, errbuf);
+	
+	StringFormat(query,"INSERT INTO petitions (petid, charname, accountname, lastgm, "
+						"petitiontext, zone, urgency, charclass, charrace, charlevel, "
+						"checkouts, unavailables, ischeckedout, senttime, gmtext) "
+						"values (%i,'%s','%s','%s','%s',%i,%i,%i,%i,%i,%i,%i,%i,%i, '%s')", 
+						wpet->GetID(), wpet->GetCharName(), wpet->GetAccountName(), wpet->GetLastGM(), 
+						petitiontext.c_str(), wpet->GetZone(), wpet->GetUrgency(), wpet->GetCharClass(), 
+						wpet->GetCharRace(), wpet->GetCharLevel(), wpet->GetCheckouts(), 
+						wpet->GetUnavails(), checkedout, wpet->GetSentTime(), wpet->GetGMText());
+	
+	if (!RunQuery(query,  errbuf, 0, &affected_rows)) {
+		LogFile->write(EQEMuLog::Error, "Error in InsertPetitionToDB query '%s': %s", query.c_str(), errbuf);
 	}
 
-	safe_delete_array(petitiontext);
-	safe_delete_array(query);
 #if EQDEBUG >= 5
 		LogFile->write(EQEMuLog::Debug, "New petition created");
 #endif
@@ -276,13 +295,18 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 void ZoneDatabase::RefreshPetitionsFromDB()
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	Petition* newpet;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT petid, charname, accountname, lastgm, petitiontext, zone, urgency, charclass, charrace, charlevel, checkouts, unavailables, ischeckedout, senttime, gmtext from petitions order by petid"), errbuf, &result))
+	
+	query ="SELECT petid, charname, accountname, lastgm, "
+			"petitiontext, zone, urgency, charclass, charrace, "
+			"charlevel, checkouts, unavailables, ischeckedout, "
+			"senttime, gmtext from petitions order by petid";
+	
+	if (RunQuery(query, errbuf, &result))
 	{
-		safe_delete_array(query);
 		while ((row = mysql_fetch_row(result))) {
 			newpet = new Petition(atoi(row[0]));
 			newpet->SetCName(row[1]);
@@ -299,15 +323,18 @@ void ZoneDatabase::RefreshPetitionsFromDB()
 			newpet->SetSentTime2(atol(row[13]));
 			newpet->SetGMText(row[14]);
 			std::cout << "Petition " << row[0] << " pettime = " << newpet->GetSentTime() << std::endl;
-			if (atoi(row[12]) == 1) newpet->SetCheckedOut(true);
-			else newpet->SetCheckedOut(false);
+			
+			if (atoi(row[12]) == 1) 
+				newpet->SetCheckedOut(true);
+			else 
+				newpet->SetCheckedOut(false);
+				
 			petition_list.AddPetition(newpet);
 		}
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query.c_str(), errbuf);
 		return;
 	}
 

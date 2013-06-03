@@ -316,16 +316,16 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 	if (npcmob->GetQglobal())
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
+		std::string query;
 		MYSQL_RES *result;
 		MYSQL_ROW row;
 		char tmpname[65];
 		int charid=0;
 
-			if (mob && mob->IsClient())  // some events like waypoint and spawn don't have a player involved
-			{
-					charid=mob->CastToClient()->CharacterID();
-			}
+		if (mob && mob->IsClient())  // some events like waypoint and spawn don't have a player involved
+		{
+			charid=mob->CastToClient()->CharacterID();
+		}
 
 		else
 		{
@@ -333,11 +333,14 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 		}
 
 		AddVar("charid.g",itoa(charid));
-
-		database.RunQuery(query, MakeAnyLenString(&query,
-		  "SELECT name,value FROM quest_globals WHERE (npcid=%i || npcid=0) && (charid=%i || charid=0) && (zoneid=%i || zoneid=0) && expdate >= unix_timestamp(now())",
-		     npcmob->GetNPCTypeID(),charid,zone->GetZoneID()), errbuf, &result);
-		printf("%s\n",query);
+		
+		StringFormat(query,"SELECT name, value FROM quest_globals WHERE "
+							"(npcid=%i || npcid=0) && (charid=%i || charid=0) && "
+							"(zoneid=%i || zoneid=0) && expdate >= unix_timestamp(now())",
+							npcmob->GetNPCTypeID(), charid, zone->GetZoneID());
+		
+		database.RunQuery(query, errbuf, &result);
+		printf("%s\n",query.c_str());
 		printf("%s\n",errbuf);
 		if (result)
 		{
@@ -348,11 +351,6 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 				AddVar(tmpname, row[1]);
 			}
 			mysql_free_result(result);
-		}
-		if (query)
-		{
-			safe_delete_array(query);
-			query=0;
 		}
 	}
 
