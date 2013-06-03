@@ -1305,9 +1305,6 @@ uint32 SharedDatabase::SetPlayerProfile_MQ(std::string &query, uint32 account_id
 	if(strlen(pp->name) == 0) // Sanity check in case pp never loaded
 		return false;
 
-	// Why times two plus 5? no clue.
-	// Had it in another place, it will 
-	// definitely give us enough room though.
 	std::string playerProfileBuffer;
 	std::string extendedProfileBuffer;
 
