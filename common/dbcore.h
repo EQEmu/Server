@@ -22,7 +22,7 @@ public:
 	DBcore();
 	~DBcore();
 	eStatus	GetStatus() { return pStatus; }
-	bool	RunQuery(const std::string query, char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0, bool retry = true);
+	bool	RunQuery(const std::string& query, char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0, bool retry = true);
 	void	DoEscapeString(std::string& outString, const char* frombuf, uint32 fromlen);
 	void	ping();
 	MYSQL*	getMySQL(){ return &mysql; }

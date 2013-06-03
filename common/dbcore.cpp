@@ -59,7 +59,7 @@ void DBcore::ping() {
 	MDatabase.unlock();
 }
 
-bool DBcore::RunQuery(const std::string query, char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum, bool retry) {
+bool DBcore::RunQuery(const std::string& query, char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum, bool retry) {
 	_CP(DBcore_RunQuery);
 	if (errnum)
 		*errnum = 0;
