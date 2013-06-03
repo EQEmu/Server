@@ -1230,8 +1230,6 @@ int16 Client::CalcSTR() {
 
 	int16 mod = aabonuses.STR;
 
-	if(val>255 && GetLevel() <= 60)
-		val = 255;
 	STR = val + mod;
 
 	if(STR < 1)
@@ -1249,8 +1247,6 @@ int16 Client::CalcSTA() {
 
 	int16 mod = aabonuses.STA;
 
-	if(val>255 && GetLevel() <= 60)
-		val = 255;
 	STA = val + mod;
 
 	if(STA < 1)
@@ -1266,9 +1262,6 @@ int16 Client::CalcSTA() {
 int16 Client::CalcAGI() {
 	int16 val = m_pp.AGI + itembonuses.AGI + spellbonuses.AGI - CalcAlcoholPhysicalEffect();;
 	int16 mod = aabonuses.AGI;
-
-	if(val>255 && GetLevel() <= 60)
-		val = 255;
 
 	int16 str = GetSTR();
 
@@ -1296,8 +1289,6 @@ int16 Client::CalcDEX() {
 
 	int16 mod = aabonuses.DEX;
 
-	if(val>255 && GetLevel() <= 60)
-		val = 255;
 	DEX = val + mod;
 
 	if(DEX < 1)
@@ -1315,8 +1306,6 @@ int16 Client::CalcINT() {
 
 	int16 mod = aabonuses.INT;
 
-	if(val>255 && GetLevel() <= 60)
-		val = 255;
 	INT = val + mod;
 
 	if(m_pp.intoxication)
@@ -1344,8 +1333,6 @@ int16 Client::CalcWIS() {
 
 	int16 mod = aabonuses.WIS;
 
-	if(val>255 && GetLevel() <= 60)
-		val = 255;
 	WIS = val + mod;
 
 	if(m_pp.intoxication)
@@ -1373,8 +1360,6 @@ int16 Client::CalcCHA() {
 
 	int16 mod = aabonuses.CHA;
 
-	if(val>255 && GetLevel() <= 60)
-		val = 255;
 	CHA = val + mod;
 
 	if(CHA < 1)
@@ -1411,6 +1396,8 @@ int Client::CalcHaste() {
 	} else {
 		cap = RuleI(Character, HasteCap);
 	}
+
+	cap = mod_client_haste_cap(cap);
 
 	if(h > cap) h = cap;
 

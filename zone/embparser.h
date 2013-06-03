@@ -143,6 +143,7 @@ public:
 	virtual void SendCommands(const char * pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst* iteminst);
 
 	int	HasQuestFile(uint32 npcid);
+	void mod_quest_event(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, bool global, std::string packagename);
 
 #ifdef EMBPERL_COMMANDS
 	void ExecCommand(Client *c, Seperator *sep);
