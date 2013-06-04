@@ -14,7 +14,7 @@ class Lua_HateEntry : public Lua_Ptr<void>
 {
 	typedef tHateEntry NativeType;
 public:
-	Lua_HateEntry() { }
+	Lua_HateEntry() : Lua_Ptr(nullptr) { }
 	Lua_HateEntry(tHateEntry *d) : Lua_Ptr(d) { }
 	virtual ~Lua_HateEntry() { }
 	

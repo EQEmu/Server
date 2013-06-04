@@ -19,7 +19,7 @@ class Lua_NPC : public Lua_Mob
 {
 	typedef NPC NativeType;
 public:
-	Lua_NPC() { }
+	Lua_NPC() { SetLuaPtrData(nullptr); }
 	Lua_NPC(NPC *d) { SetLuaPtrData(d); }
 	virtual ~Lua_NPC() { }
 

@@ -75,7 +75,6 @@ private:
 	bool HasFunction(std::string function, std::string package_name);
 	void ClearStates();
 	void MapFunctions(lua_State *L);
-	void ExportQGlobals(NPC *n, Client *c);
 	void ExportZoneVariables();
 
 	std::map<std::string, std::string> vars_;

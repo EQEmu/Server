@@ -18,7 +18,7 @@ class Lua_Group : public Lua_Ptr<void>
 {
 	typedef Group NativeType;
 public:
-	Lua_Group() { }
+	Lua_Group() : Lua_Ptr(nullptr) { }
 	Lua_Group(Group *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Group() { }
 

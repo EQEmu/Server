@@ -18,7 +18,7 @@ class Lua_Raid : public Lua_Ptr<void>
 {
 	typedef Raid NativeType;
 public:
-	Lua_Raid() { }
+	Lua_Raid() : Lua_Ptr(nullptr) { }
 	Lua_Raid(Raid *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Raid() { }
 

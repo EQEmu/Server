@@ -27,7 +27,6 @@
 #include "lua_object.h"
 #include "lua_door.h"
 #include "lua_general.h"
-#include "QGlobals.h"
 #include "questmgr.h"
 #include "zone.h"
 #include "lua_parser.h"
@@ -229,7 +228,6 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		arg_function(this, L, npc, init, data, extra_data);
 		ExportZoneVariables();
 		Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
-		ExportQGlobals(npc, c);
 		
 		quest_manager.StartQuest(npc, c, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -320,7 +318,6 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		auto arg_function = PlayerArgumentDispatch[evt];
 		arg_function(this, L, client, data, extra_data);
 		ExportZoneVariables();
-		ExportQGlobals(nullptr, client);
 	
 		quest_manager.StartQuest(nullptr, client, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -416,7 +413,6 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		auto arg_function = ItemArgumentDispatch[evt];
 		arg_function(this, L, client, item, objid, extra_data);
 		ExportZoneVariables();
-		ExportQGlobals(nullptr, nullptr);
 		
 		quest_manager.StartQuest(nullptr, client, item);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -498,7 +494,6 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 		auto arg_function = SpellArgumentDispatch[evt];
 		arg_function(this, L, npc, client, spell_id, extra_data);
 		ExportZoneVariables();
-		ExportQGlobals(npc, client);
 		
 		quest_manager.StartQuest(npc, client, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -560,7 +555,6 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		lua_setfield(L, -2, "name");
 
 		ExportZoneVariables();
-		ExportQGlobals(nullptr, nullptr);
 
 		quest_manager.StartQuest(nullptr, nullptr, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -959,27 +953,6 @@ void LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, u
 		}
 		++riter;
 	}
-}
-
-void LuaParser::ExportQGlobals(NPC *n, Client *c) {
-	lua_createtable(L, 0, 0);
-
-	if(n && !n->GetQglobal()) {
-		lua_setfield(L, -2, "qglobals");
-		return;
-	}
-
-	std::list<QGlobal> global_map;
-	QGlobalCache::GetQGlobals(global_map, n, c, zone);
-
-	auto iter = global_map.begin();
-	while(iter != global_map.end()) {
-		lua_pushstring(L, (*iter).value.c_str());
-		lua_setfield(L, -2, (*iter).name.c_str());
-		++iter;
-	}
-
-	lua_setfield(L, -2, "qglobals");
 }
 
 void LuaParser::ExportZoneVariables() {

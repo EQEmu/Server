@@ -17,7 +17,7 @@ class Lua_ItemInst : public Lua_Ptr<void>
 {
 	typedef ItemInst NativeType;
 public:
-	Lua_ItemInst() { }
+	Lua_ItemInst() : Lua_Ptr(nullptr) { }
 	Lua_ItemInst(ItemInst *d) : Lua_Ptr(d) { }
 	virtual ~Lua_ItemInst() { }
 

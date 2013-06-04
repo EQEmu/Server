@@ -25,7 +25,7 @@ class Lua_Entity : public Lua_Ptr<void>
 {
 	typedef Entity NativeType;
 public:
-	Lua_Entity() { }
+	Lua_Entity() : Lua_Ptr(nullptr) { }
 	Lua_Entity(Entity *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Entity() { }
 

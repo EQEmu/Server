@@ -36,7 +36,7 @@ class Lua_EntityList : public Lua_Ptr<void>
 {
 	typedef EntityList NativeType;
 public:
-	Lua_EntityList() { }
+	Lua_EntityList() : Lua_Ptr(nullptr) { }
 	Lua_EntityList(EntityList *d) : Lua_Ptr(d) { }
 	virtual ~Lua_EntityList() { }
 

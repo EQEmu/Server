@@ -17,7 +17,7 @@ class Lua_Corpse : public Lua_Mob
 {
 	typedef Corpse NativeType;
 public:
-	Lua_Corpse() { }
+	Lua_Corpse() { SetLuaPtrData(nullptr); }
 	Lua_Corpse(Corpse *d) { SetLuaPtrData(d); }
 	virtual ~Lua_Corpse() { }
 

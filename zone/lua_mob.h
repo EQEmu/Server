@@ -20,7 +20,7 @@ class Lua_Mob : public Lua_Entity
 {
 	typedef Mob NativeType;
 public:
-	Lua_Mob() { }
+	Lua_Mob() { SetLuaPtrData(nullptr); }
 	Lua_Mob(Mob *d) { SetLuaPtrData(d); }
 	virtual ~Lua_Mob() { }
 

@@ -10,9 +10,11 @@
 #include "lua_parser.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
-#include "lua_mob.h"
+#include "lua_client.h"
+#include "lua_npc.h"
 #include "QuestParserCollection.h"
 #include "questmgr.h"
+#include "QGlobals.h"
 
 struct Events { };
 struct Factions { };
@@ -353,7 +355,6 @@ void lua_set_proximity(float min_x, float max_x, float min_y, float max_y) {
 void lua_set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z) {
 	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z);
 }
-
 
 void lua_clear_proximity() {
 	quest_manager.clear_proximity();
@@ -724,6 +725,42 @@ void lua_cross_zone_message_player_by_name(uint32 type, const char *player, cons
 	quest_manager.CrossZoneMessagePlayerByName(type, player, message);
 }
 
+luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
+	luabind::object ret = luabind::newtable(L);
+
+	NPC *n = npc;
+	Client *c = client;
+
+	if(n && !n->GetQglobal()) {
+		return ret;
+	}
+
+	std::list<QGlobal> global_map;
+	QGlobalCache::GetQGlobals(global_map, n, c, zone);
+	auto iter = global_map.begin();
+	while(iter != global_map.end()) {
+		ret[(*iter).name] = (*iter).value;
+		++iter;
+	}
+	return ret;
+}
+
+luabind::object lua_get_qglobals(lua_State *L, Lua_Client client, Lua_NPC npc) {
+	return lua_get_qglobals(L, npc, client);
+}
+
+luabind::object lua_get_qglobals(lua_State *L, Lua_Client client) {
+	return lua_get_qglobals(L, Lua_NPC(nullptr), client);
+}
+
+luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc) {
+	return lua_get_qglobals(L, npc, Lua_Client(nullptr));
+}
+
+luabind::object lua_get_qglobals(lua_State *L) {
+	return lua_get_qglobals(L, Lua_NPC(nullptr), Lua_Client(nullptr));
+}
+
 
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
@@ -855,7 +892,12 @@ luabind::scope lua_register_general() {
 		luabind::def("send_mail", &lua_send_mail),
 		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
 		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
-		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name)
+		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
+		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
+		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_Client,Lua_NPC))&lua_get_qglobals),
+		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
+		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
+		luabind::def("get_qglobals", (luabind::object(*)(lua_State*))&lua_get_qglobals)
 	];
 }
 

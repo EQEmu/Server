@@ -17,7 +17,7 @@ class Lua_Item : public Lua_Ptr<const void>
 	typedef const Item_Struct NativeType;
 public:
 	Lua_Item(uint32 item_id);
-	Lua_Item() { }
+	Lua_Item() : Lua_Ptr(nullptr) { }
 	Lua_Item(const Item_Struct *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Item() { }
 

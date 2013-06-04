@@ -16,7 +16,7 @@ class Lua_Object : public Lua_Entity
 {
 	typedef Object NativeType;
 public:
-	Lua_Object() { }
+	Lua_Object() { SetLuaPtrData(nullptr); }
 	Lua_Object(Object *d) { SetLuaPtrData(d); }
 	virtual ~Lua_Object() { }
 

@@ -16,7 +16,7 @@ class Lua_Spell : public Lua_Ptr<const void>
 {
 	typedef const SPDat_Spell_Struct NativeType;
 public:
-	Lua_Spell() { }
+	Lua_Spell() : Lua_Ptr(nullptr) { }
 	Lua_Spell(const SPDat_Spell_Struct *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Spell() { }
 

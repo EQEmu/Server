@@ -19,7 +19,7 @@ class Lua_Client : public Lua_Mob
 {
 	typedef Client NativeType;
 public:
-	Lua_Client() { }
+	Lua_Client() { SetLuaPtrData(nullptr); }
 	Lua_Client(Client *d) { SetLuaPtrData(d); }
 	virtual ~Lua_Client() { }
 
