@@ -266,7 +266,7 @@ Mob* EntityList::GetTrapTrigger(Trap* trap) {
 
 //todo: rewrite this to not need direct access to trap members.
 bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -280,7 +280,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 						"AND version=%u", 
 						zonename, version);
 						
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while ((row = mysql_fetch_row(result)))
 		{
 			lengths = mysql_fetch_lengths(result);
@@ -306,7 +306,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), errbuf.c_str());
 		return false;
 	}
 

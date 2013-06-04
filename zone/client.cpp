@@ -3856,14 +3856,14 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 
 void Client::KeyRingLoad()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
 	std::string query;
 	StringFormat(query, "SELECT item_id FROM keyring WHERE char_id='%i' ORDER BY item_id",character_id);
 	
-	if (database.RunQuery(query, errbuf, &result))
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		while(0 != (row = mysql_fetch_row(result))){
 			keyring.push_back(atoi(row[0]));
@@ -3878,7 +3878,7 @@ void Client::KeyRingLoad()
 void Client::KeyRingAdd(uint32 item_id)
 {
 	if(0==item_id)return;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	uint32 affected_rows = 0;
 	std::string query;
 	bool bFound = KeyRingCheck(item_id);
@@ -3887,7 +3887,7 @@ void Client::KeyRingAdd(uint32 item_id)
 		StringFormat(query, "INSERT INTO keyring(char_id,item_id) VALUES(%i,%i)",
 							character_id, item_id);
 		
-		if(database.RunQuery(query, errbuf, 0, &affected_rows))
+		if(database.RunQuery(query, &errbuf, 0, &affected_rows))
 		{
 			Message(4,"Added to keyring.");
 		}
@@ -3928,14 +3928,14 @@ void Client::KeyRingList()
 
 bool Client::IsDiscovered(uint32 itemid) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid);
 
-	if (database.RunQuery(query, errbuf, &result))
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		row = mysql_fetch_row(result);
 		if (atoi(row[0]))
@@ -3954,7 +3954,7 @@ bool Client::IsDiscovered(uint32 itemid) {
 
 void Client::DiscoverItem(uint32 itemid) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 
@@ -3963,7 +3963,7 @@ void Client::DiscoverItem(uint32 itemid) {
 						"discovered_date=UNIX_TIMESTAMP(), account_status=%i", 
 						itemid, GetName(), Admin());
 
-	if (database.RunQuery(query, errbuf, &result))
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		mysql_free_result(result);
 	}
@@ -5109,7 +5109,7 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 void Client::SendRewards()
 {
 	std::vector<ClientReward> rewards;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -5119,7 +5119,7 @@ void Client::SendRewards()
 						"ORDER by reward_id", 
 						AccountID());
 						
-	if(database.RunQuery(query,errbuf,&result))
+	if(database.RunQuery(query,&errbuf,&result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -5132,7 +5132,7 @@ void Client::SendRewards()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), errbuf.c_str());
 		return;
 	}
 
@@ -5199,7 +5199,7 @@ bool Client::TryReward(uint32 claim_id)
 		return false;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -5211,7 +5211,7 @@ bool Client::TryReward(uint32 claim_id)
 						"account_id=%i AND reward_id=%i", 
 						AccountID(), claim_id);
 						
-	if(database.RunQuery(query,errbuf,&result))
+	if(database.RunQuery(query,&errbuf,&result))
 	{
 		row = mysql_fetch_row(result);
 		if(row)
@@ -5227,7 +5227,7 @@ bool Client::TryReward(uint32 claim_id)
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
@@ -5257,9 +5257,9 @@ bool Client::TryReward(uint32 claim_id)
 							"account_id=%i AND reward_id=%i", 
 							AccountID(), claim_id);
 		
-		if(!database.RunQuery(query, errbuf))
+		if(!database.RunQuery(query, &errbuf))
 		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), errbuf);
+			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), errbuf.c_str());
 		}
 	}
 	else
@@ -5268,9 +5268,9 @@ bool Client::TryReward(uint32 claim_id)
 							" WHERE account_id=%i AND reward_id=%i", 
 							AccountID(), claim_id);
 		
-		if(!database.RunQuery(query,errbuf))
+		if(!database.RunQuery(query,&errbuf))
 		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), errbuf);
+			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), errbuf.c_str());
 		}
 	}
 
@@ -7637,7 +7637,7 @@ some day.
 
 void Client::LoadAccountFlags()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -7648,7 +7648,7 @@ void Client::LoadAccountFlags()
 						"account_flags WHERE p_accid = '%d'", 
 						account_id);
 	
-	if(database.RunQuery(query,  errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while(row = mysql_fetch_row(result))
 		{
@@ -7666,14 +7666,14 @@ void Client::LoadAccountFlags()
 
 void Client::SetAccountFlag(std::string flag, std::string val)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	
 	StringFormat(query, "REPLACE INTO account_flags (p_accid, p_flag, p_value) "
 						"VALUES( '%d', '%s', '%s')", 
 						account_id, flag.c_str(), val.c_str());
 	 
-	if(!database.RunQuery(query, errbuf))
+	if(!database.RunQuery(query, &errbuf))
 	{
 		std::cerr << "Error in SetAccountFlags query '" << query << "' " << errbuf << std::endl;
 	}

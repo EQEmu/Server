@@ -5929,7 +5929,6 @@ void Client::SendMercAssignPacket(uint32 entityID, uint32 unk01, uint32 unk02) {
 void NPC::LoadMercTypes(){
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 	
@@ -5941,8 +5940,8 @@ void NPC::LoadMercTypes(){
 						"MTem.merc_type_id = MTyp.merc_type_id;", 
 						GetNPCTypeID());
 	
-	if(!database.RunQuery(query,TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes(). Error Message: %s", errorMessage.c_str());
 	}
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -5957,16 +5956,12 @@ void NPC::LoadMercTypes(){
 		mysql_free_result(DatasetResult);
 	}
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
-	}
 }
 
 void NPC::LoadMercs(){
 
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
@@ -5982,8 +5977,8 @@ void NPC::LoadMercs(){
 				"MTem.merc_type_id = MTyp.merc_type_id;", 
 				GetNPCTypeID());
 				
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes(). Error message: %s", errorMessage.c_str());
 	}
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -6002,10 +5997,6 @@ void NPC::LoadMercs(){
 		mysql_free_result(DatasetResult);
 	}
 
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in NPC::LoadMercTypes()");
-	}
 }
 
 int NPC::GetNumMercTypes(uint32 clientVersion)

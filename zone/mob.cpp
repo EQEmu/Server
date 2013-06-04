@@ -3728,7 +3728,7 @@ void Mob::TarGlobal(const char *varname, const char *value, const char *duration
 
 void Mob::DelGlobal(const char *varname) {
 	// delglobal(varname)
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	int qgZoneid=zone->GetZoneID();
 	int qgCharid=0;
@@ -3753,8 +3753,9 @@ void Mob::DelGlobal(const char *varname) {
 						"(charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
 						varname,qgNpcid,qgCharid,qgZoneid);
 
-	if (!database.RunQuery(query,errbuf)) {
+	if (!database.RunQuery(query, &errbuf)) {
 		//_log(QUESTS, "DelGlobal error deleting %s : %s", varname, errbuf);
+		// TODO: Log error.
 	}
 
 	if(zone)
@@ -3779,7 +3780,7 @@ void Mob::DelGlobal(const char *varname) {
 void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varname, const char *varvalue, int duration) {
 
 	std::string query;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
 	std::stringstream duration_ss;
@@ -3801,9 +3802,10 @@ void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varna
 						"VALUES (%i, %i, %i, '%s', '%s', %s)",
 						charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str());
 
-	if (!database.RunQuery(query,  errbuf))
+	if (!database.RunQuery(query, &errbuf))
 	{
 		//_log(QUESTS, "SelGlobal error inserting %s : %s", varname, errbuf);
+		// TODO: Log error.
 	}
 
 	if(zone)

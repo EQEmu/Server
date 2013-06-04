@@ -380,15 +380,15 @@ void Client::GuildChangeRank(const char* name, uint32 guild_id, uint32 oldrank, 
 
 bool ZoneDatabase::CheckGuildDoor(uint8 doorid,uint16 guild_id,const char* zone) {
 	MYSQL_ROW row;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 
 	StringFormat(query, "SELECT guild FROM doors where doorid=%i AND zone='%s'",
 						doorid-128, zone);
 
-	if (!RunQuery(query, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in CheckGuildDoor query '%s': %s", query.c_str(), errbuf);
+	if (!RunQuery(query, &errbuf, &result)) {
+		LogFile->write(EQEMuLog::Error, "Error in CheckGuildDoor query '%s': %s", query.c_str(), errbuf.c_str());
 		return false;
 	} else {
 		if (mysql_num_rows(result) == 1) {
@@ -413,7 +413,7 @@ bool ZoneDatabase::CheckGuildDoor(uint8 doorid,uint16 guild_id,const char* zone)
 }
 
 bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 	if (doorid > 127)
@@ -422,8 +422,8 @@ bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) 
 	StringFormat(query, "UPDATE doors SET guild = %i WHERE (doorid=%i) AND (zone='%s')",
 						guild_id, doorid, zone);
 
-	if (!RunQuery(query, errbuf, nullptr,&affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in SetGuildDoor query '%s': %s", query.c_str(), errbuf);
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
+		LogFile->write(EQEMuLog::Error, "Error in SetGuildDoor query '%s': %s", query.c_str(), errbuf.c_str());
 		return false;
 	}
 

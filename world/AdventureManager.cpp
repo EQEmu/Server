@@ -635,7 +635,7 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int id)
 
 bool AdventureManager::LoadAdventureTemplates()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -646,7 +646,7 @@ bool AdventureManager::LoadAdventureTemplates()
 						" dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
 						"graveyard_radius FROM adventure_template";
 
-	if(database.RunQuery(query,errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -691,7 +691,7 @@ bool AdventureManager::LoadAdventureTemplates()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventures: %s (%s)", query.c_str(), errbuf.c_str());
 		return false;
 	}
 	return false;
@@ -699,13 +699,13 @@ bool AdventureManager::LoadAdventureTemplates()
 
 bool AdventureManager::LoadAdventureEntries()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
 	std::string query= "SELECT id, template_id FROM adventure_template_entry";
 	
-	if(database.RunQuery(query, errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -742,7 +742,7 @@ bool AdventureManager::LoadAdventureEntries()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::LoadAdventureEntries: %s (%s)", query.c_str(), errbuf.c_str());
 		return false;
 	}
 	return false;
@@ -1090,7 +1090,7 @@ void AdventureManager::LoadLeaderboardInfo()
 	leaderboard_info_percentage_ruj.clear();
 	leaderboard_info_wins_tak.clear();
 	leaderboard_info_percentage_tak.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -1098,7 +1098,7 @@ void AdventureManager::LoadLeaderboardInfo()
 						"AS adv_stats ""left join character_ AS ch on "
 						"adv_stats.player_id = ch.id;";
 						
-	if(database.RunQuery(query,errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -1159,7 +1159,7 @@ void AdventureManager::LoadLeaderboardInfo()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::GetLeaderboardInfo: %s (%s)", query.c_str(), errbuf.c_str());
 		return;
 	}
 	return;

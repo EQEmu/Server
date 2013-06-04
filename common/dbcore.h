@@ -22,15 +22,15 @@ public:
 	DBcore();
 	~DBcore();
 	eStatus	GetStatus() { return pStatus; }
-	bool	RunQuery(const std::string& query, char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0, bool retry = true);
+	bool	RunQuery(const std::string& query, std::string* errbuf = nullptr, MYSQL_RES** result = nullptr, uint32* affected_rows = nullptr, uint32* last_insert_id = nullptr, uint32* errnum = nullptr, bool retry = true);
 	void	DoEscapeString(std::string& outString, const char* frombuf, uint32 fromlen);
 	void	ping();
 	MYSQL*	getMySQL(){ return &mysql; }
 
 protected:
-	bool	Open(const char* iHost, const char* iUser, const char* iPassword, const char* iDatabase, uint32 iPort, uint32* errnum = 0, char* errbuf = 0, bool iCompress = false, bool iSSL = false);
+	bool	Open(const char* iHost, const char* iUser, const char* iPassword, const char* iDatabase, uint32 iPort, uint32* errnum = 0, std::string* errbuf = nullptr, bool iCompress = false, bool iSSL = false);
 private:
-	bool	Open(uint32* errnum = 0, char* errbuf = 0);
+	bool	Open(uint32* errnum = 0, std::string* errbuf = nullptr);
 
 	MYSQL	mysql;
 	Mutex	MDatabase;

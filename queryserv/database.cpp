@@ -64,10 +64,10 @@ Database::Database(const char* host, const char* user, const char* passwd, const
 bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 {
 	uint32 errnum= 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
+	std::string errbuf;
+	if (!Open(host, user, passwd, database, port, &errnum, &errbuf))
 	{
-		LogFile->write(EQEMuLog::Error, "Failed to connect to database: Error: %s", errbuf);
+		LogFile->write(EQEMuLog::Error, "Failed to connect to database: Error: %s", errbuf.c_str());
 		HandleMysqlError(errnum);
 
 		return false;
@@ -98,16 +98,16 @@ Database::~Database()
 
 bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_len) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"select `value` from `variables` where `varname`='%s'", varname);
 
-	if (!RunQuery(query, errbuf, &result)) {
+	if (!RunQuery(query, &errbuf, &result)) {
 
-		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query.c_str(), errbuf);
+		_log(UCS__ERROR, "Unable to get message count from database. %s %s", query.c_str(), errbuf.c_str());
 
 		return false;
 	}
@@ -130,7 +130,7 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 
 
 void Database::AddSpeech(const char* from, const char* to, const char* message, uint16 minstatus, uint32 guilddbid, uint8 type) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query, speechFrom, speechTo, speechMeesage;
 	
 	DoEscapeString(speechFrom, from, strlen(from));
@@ -142,15 +142,15 @@ void Database::AddSpeech(const char* from, const char* to, const char* message, 
 						"`minstatus`='%i', `guilddbid`='%i', `type`='%i'", 
 						speechFrom.c_str(), speechTo.c_str(), speechMeesage.c_str(), minstatus, guilddbid, type);
 
-	if(!RunQuery(query, errbuf, 0, 0)) {
-		_log(NET__WORLD, "Failed Speech Entry Insert: %s", errbuf);
+	if(!RunQuery(query, &errbuf, 0, 0)) {
+		_log(NET__WORLD, "Failed Speech Entry Insert: %s", errbuf.c_str());
 		_log(NET__WORLD, "%s", query.c_str());
 	}
 }
 
 void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 Items) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 lastid = 0;
 
@@ -165,8 +165,8 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 Items) {
 						QS->char2_money.silver, QS->char2_money.copper, QS->char2_count);
 		
 
-	if(!RunQuery(query, errbuf, nullptr, nullptr, &lastid)) {
-		_log(NET__WORLD, "Failed Trade Log Record Insert: %s", errbuf);
+	if(!RunQuery(query, &errbuf, nullptr, nullptr, &lastid)) {
+		_log(NET__WORLD, "Failed Trade Log Record Insert: %s", errbuf.c_str());
 		_log(NET__WORLD, "%s", query.c_str());
 	}
 
@@ -181,8 +181,8 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 Items) {
 								QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, 
 								QS->items[i].aug_4, QS->items[i].aug_5);
 
-			if(!RunQuery(query, errbuf, 0, 0)) {
-				_log(NET__WORLD, "Failed Trade Log Record Entry Insert: %s", errbuf);
+			if(!RunQuery(query, &errbuf)) {
+				_log(NET__WORLD, "Failed Trade Log Record Entry Insert: %s", errbuf.c_str());
 				_log(NET__WORLD, "%s", query.c_str());
 			}
 		}
@@ -191,7 +191,7 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 Items) {
 
 void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 Items) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 lastid = 0;
 
@@ -204,8 +204,8 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 Items) {
 						QS->npc_id, QS->npc_money.platinum, QS->npc_money.gold, QS->npc_money.silver, 
 						QS->npc_money.copper, QS->npc_count);
 
-	if(!RunQuery(query, errbuf, 0, 0, &lastid)) {
-		_log(NET__WORLD, "Failed Handin Log Record Insert: %s", errbuf);
+	if(!RunQuery(query, &errbuf, nullptr, nullptr, &lastid)) {
+		_log(NET__WORLD, "Failed Handin Log Record Insert: %s", errbuf.c_str());
 		_log(NET__WORLD, "%s", query.c_str());
 	}
 
@@ -219,8 +219,8 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 Items) {
 								QS->items[i].item_id, QS->items[i].charges, QS->items[i].aug_1, 
 								QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
 
-			if(!RunQuery(query, errbuf, 0, 0)) {
-				_log(NET__WORLD, "Failed Handin Log Record Entry Insert: %s", errbuf);
+			if(!RunQuery(query, &errbuf, 0, 0)) {
+				_log(NET__WORLD, "Failed Handin Log Record Entry Insert: %s", errbuf.c_str());
 				_log(NET__WORLD, "%s", query.c_str());
 			}
 		}
@@ -228,7 +228,7 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 Items) {
 }
 
 void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 lastid = 0;
 
@@ -236,8 +236,8 @@ void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members){
 						"`type`='%i', `zone_id`='%i', `time`=NOW()", 
 						QS->s1.NPCID, QS->s1.Type, QS->s1.ZoneID);
 
-	if(!RunQuery(query, errbuf, nullptr, nullptr, &lastid)) {
-		_log(NET__WORLD, "Failed NPC Kill Log Record Insert: %s", errbuf);
+	if(!RunQuery(query, &errbuf, nullptr, nullptr, &lastid)) {
+		_log(NET__WORLD, "Failed NPC Kill Log Record Insert: %s", errbuf.c_str());
 		_log(NET__WORLD, "%s", query.c_str());
 	}
 
@@ -248,8 +248,8 @@ void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members){
 								"`event_id`='%i', `char_id`='%i'", 
 								lastid, QS->Chars[i].char_id);
 
-			if(!RunQuery(query, errbuf, nullptr, nullptr)) {
-				_log(NET__WORLD, "Failed NPC Kill Log Entry Insert: %s", errbuf);
+			if(!RunQuery(query, &errbuf, nullptr, nullptr)) {
+				_log(NET__WORLD, "Failed NPC Kill Log Entry Insert: %s", errbuf.c_str());
 				_log(NET__WORLD, "%s", query.c_str());
 			}
 		}
@@ -258,7 +258,7 @@ void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members){
 
 void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 lastid = 0;
 
@@ -266,8 +266,8 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items) {
 						"`char_id`='%i', `stack_size`='%i', `char_items`='%i'",
 						QS->char_id, QS->stack_size, QS->char_count, QS->char_count);
 
-	if(!RunQuery(query, errbuf, nullptr, nullptr, &lastid)) {
-		_log(NET__WORLD, "Failed Delete Log Record Insert: %s", errbuf);
+	if(!RunQuery(query, &errbuf, nullptr, nullptr, &lastid)) {
+		_log(NET__WORLD, "Failed Delete Log Record Insert: %s", errbuf.c_str());
 		_log(NET__WORLD, "%s", query.c_str());
 	}
 
@@ -281,8 +281,8 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items) {
 								QS->items[i].charges, QS->items[i].aug_1,QS->items[i].aug_2, 
 								QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5);
 
-			if(!RunQuery(query, errbuf, nullptr, nullptr)) {
-				_log(NET__WORLD, "Failed Delete Log Record Entry Insert: %s", errbuf);
+			if(!RunQuery(query, &errbuf, nullptr, nullptr)) {
+				_log(NET__WORLD, "Failed Delete Log Record Entry Insert: %s", errbuf.c_str());
 				_log(NET__WORLD, "%s", query.c_str());
 			}
 		}
@@ -291,7 +291,7 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items) {
 
 void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 lastid = 0;
 
@@ -301,8 +301,8 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) {
 						QS->char_id, QS->from_slot, QS->to_slot, QS->stack_size, 
 						QS->char_count, QS->postaction);
 
-	if(!RunQuery(query, errbuf, 0, 0, &lastid)) {
-		_log(NET__WORLD, "Failed Move Log Record Insert: %s", errbuf);
+	if(!RunQuery(query, &errbuf, nullptr, nullptr, &lastid)) {
+		_log(NET__WORLD, "Failed Move Log Record Insert: %s", errbuf.c_str());
 		_log(NET__WORLD, "%s", query.c_str());
 	}
 
@@ -316,8 +316,8 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) {
 								QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, 
 								QS->items[i].aug_4, QS->items[i].aug_5);
 
-			if(!RunQuery(query, errbuf, nullptr, nullptr)) {
-				_log(NET__WORLD, "Failed Move Log Record Entry Insert: %s", errbuf);
+			if(!RunQuery(query, &errbuf, nullptr, nullptr)) {
+				_log(NET__WORLD, "Failed Move Log Record Entry Insert: %s", errbuf.c_str());
 				_log(NET__WORLD, "%s", query.c_str());
 			}
 		}
@@ -327,7 +327,7 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items) {
 void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 Items) {
 	// Merchant transactions are from the perspective of the merchant, not the player -U
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 lastid = 0;
 
@@ -342,8 +342,8 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint3
 						QS->char_id, QS->char_money.platinum, QS->char_money.gold, 
 						QS->char_money.silver, QS->char_money.copper, QS->char_count);
 
-	if(!RunQuery(query, errbuf, 0, 0, &lastid)) {
-		_log(NET__WORLD, "Failed Transaction Log Record Insert: %s", errbuf);
+	if(!RunQuery(query, &errbuf, nullptr, nullptr, &lastid)) {
+		_log(NET__WORLD, "Failed Transaction Log Record Insert: %s", errbuf.c_str());
 		_log(NET__WORLD, "%s", query.c_str());
 	}
 
@@ -357,8 +357,8 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint3
 								QS->items[i].aug_1, QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4, 
 								QS->items[i].aug_5);
 
-			if(!RunQuery(query, errbuf, 0, 0)) {
-				_log(NET__WORLD, "Failed Transaction Log Record Entry Insert: %s", errbuf);
+			if(!RunQuery(query, &errbuf)) {
+				_log(NET__WORLD, "Failed Transaction Log Record Entry Insert: %s", errbuf.c_str());
 				_log(NET__WORLD, "%s", query.c_str());
 			}
 		}

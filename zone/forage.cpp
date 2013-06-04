@@ -85,7 +85,7 @@ CREATE TABLE fishing (
 
 // This allows EqEmu to have zone specific foraging - BoB
 uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -103,7 +103,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
 	StringFormat(query,"SELECT itemid,chance FROM forage WHERE zoneid= '%i' and level <= '%i' LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while ((row = mysql_fetch_row(result)) && (index < FORAGE_ITEM_LIMIT)) {
 			item[index] = atoi(row[0]);
@@ -116,7 +116,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Forage query '%s': %s", query.c_str(), errbuf.c_str());
 		return 0;
 	}
 
@@ -143,7 +143,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 
 uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -163,7 +163,7 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 
 	StringFormat(query,"SELECT itemid,chance,npc_id,npc_chance FROM fishing WHERE (zoneid= '%i' || zoneid = 0) and skill_level <= '%i'",ZoneID, skill );
 
-	if (RunQuery(query,errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while ((row = mysql_fetch_row(result))&&(index<50)) {
 			item[index] = atoi(row[0]);

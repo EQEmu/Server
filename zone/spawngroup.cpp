@@ -143,7 +143,7 @@ bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id) {
 }
 
 bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -157,7 +157,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 						"and spawn2.version=%u and zone='%s'", 
 						version, zone_name);
 	
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result))) {
 			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]));
@@ -179,7 +179,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 						zone_name);
 		
 		
-	if (RunQuery(query,errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result)))
 		{
 			SpawnEntry* newSpawnEntry = new SpawnEntry( atoi(row[1]), atoi(row[2]), row[3]?atoi(row[3]):0);
@@ -202,7 +202,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 }
 
 bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_group_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -217,7 +217,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 						"WHERE spawngroup.ID='%i'", 
 						spawngroupid);
 						
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result))) {
 			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]));
@@ -237,7 +237,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 						"AND spawngroup.spawn_limit='0' ORDER by chance", 
 						spawngroupid);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result)))
 		{
 			SpawnEntry* newSpawnEntry = new SpawnEntry( atoi(row[1]), atoi(row[2]), row[3]?atoi(row[3]):0);

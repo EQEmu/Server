@@ -981,7 +981,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 }
 
 uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -1000,7 +1000,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 				StringFormat(query, "SELECT MAX(id) FROM npc_types WHERE id >= %i AND id < %i", 
 									starting_npc_id, (starting_npc_id + 1000));
 				
-				if (RunQuery(query, errbuf, &result)) {
+				if (RunQuery(query, &errbuf, &result)) {
 					row = mysql_fetch_row(result);
 					if(row)
 					{
@@ -1040,8 +1040,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 									spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 
 									28, 28);
 				
-				if (!RunQuery(query, errbuf, 0, 0, &npc_type_id)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf);
+				if (!RunQuery(query, &errbuf, nullptr, nullptr, &npc_type_id)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 					return false;
 				}
 			}
@@ -1057,8 +1057,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 									spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), 
 									spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
 									
-				if (!RunQuery(query, errbuf, 0, 0, &npc_type_id)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf);
+				if (!RunQuery(query, &errbuf, 0, 0, &npc_type_id)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 					return false;
 				}
 			}
@@ -1070,8 +1070,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			
 			StringFormat(query,"INSERT INTO spawngroup (id, name) values(%i, '%s')", tmp, spawnIDAndName.c_str());
 			
-			if (!RunQuery(query,errbuf, 0, 0, &spawngroupid)) {
-				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf);
+			if (!RunQuery(query, &errbuf, 0, 0, &spawngroupid)) {
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
 			
@@ -1084,8 +1084,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 								zone, zone_version, spawn->GetX(), spawn->GetY(), 
 								spawn->GetZ(), 1200, spawn->GetHeading(), spawngroupid);
 				
-			if (!RunQuery(query, errbuf, 0, 0, &tmp)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf);
+			if (!RunQuery(query, &errbuf, 0, 0, &tmp)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
 			
@@ -1095,8 +1095,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			StringFormat(query, "INSERT INTO spawnentry (spawngroupID, npcID, chance) values(%i, %i, %i)", 
 								spawngroupid, npc_type_id, 100);
 			
-			if (!RunQuery(query, errbuf, 0)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf);
+			if (!RunQuery(query, &errbuf, 0)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
 			if(c) 
@@ -1112,8 +1112,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			
 			StringFormat(query, "INSERT INTO spawngroup (name) values('%s')", zoneSpawnNameTime.c_str());
 			
-			if (!RunQuery(query, errbuf, 0, 0, &last_insert_id)) {
-				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf);
+			if (!RunQuery(query, &errbuf, 0, 0, &last_insert_id)) {
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
 			if(c) 
@@ -1135,8 +1135,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 								zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), 
 								respawntime, spawn->GetHeading(), last_insert_id);
 				
-			if (!RunQuery(query,errbuf, 0, 0, &spawnid)) {
-				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf);
+			if (!RunQuery(query, &errbuf, 0, 0, &spawnid)) {
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
 			if(c) 
@@ -1147,8 +1147,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 								"values(%i, %i, %i)", 
 								last_insert_id, tmp2, 100);
 
-			if (!RunQuery(query, errbuf, 0)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf);
+			if (!RunQuery(query, &errbuf, 0)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
 			if(c) 
@@ -1167,7 +1167,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 								spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), 
 								spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID());
 			
-			if (!RunQuery(query, errbuf, 0)) {
+			if (!RunQuery(query,&errbuf, 0)) {
 				if(c) 
 					c->LogSQL(query.c_str());
 				return true;
@@ -1182,7 +1182,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 								"spawngroupID=%i", 
 								zone, spawn->GetSp2());
 			
-			if (!RunQuery(query, errbuf, &result)) {
+			if (!RunQuery(query, &errbuf, &result)) {
 				return 0;
 			}
 
@@ -1193,7 +1193,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			
 			StringFormat(query, "DELETE FROM spawn2 WHERE id='%i'", tmp);
 			
-			if (!RunQuery(query,errbuf,0)) {
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
 			if(c) 
@@ -1201,7 +1202,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			
 			StringFormat(query, "DELETE FROM spawngroup WHERE id='%i'", tmp2);
 			
-			if (!RunQuery(query, errbuf,0)) {
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
 			
@@ -1210,7 +1212,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			
 			StringFormat(query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2);
 			
-			if (!RunQuery(query, errbuf,0)) {
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: log message
 				return false;
 			}
 			
@@ -1229,7 +1232,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 								"spawngroupID=%i", 
 								zone, zone_version, spawn->GetSp2());
 								
-			if (!RunQuery(query, errbuf, &result)) {
+			if (!RunQuery(query, &errbuf, &result)) {
+				// TODO: Log message
 				return(0);
 			}
 
@@ -1241,7 +1245,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 
 			StringFormat(query,"DELETE FROM spawn2 WHERE id='%i'", tmp);
 
-			if (!RunQuery(query,errbuf,0)) {
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message.
 				return false;
 			}
 			
@@ -1250,7 +1255,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			
 			StringFormat(query, "DELETE FROM spawngroup WHERE id='%i'", tmp2);	
 			
-			if (!RunQuery(query, errbuf,0)) {
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
 			
@@ -1259,7 +1265,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 				
 			StringFormat(query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2);
 			
-			if (!RunQuery(query, errbuf,0)) {
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
 			
@@ -1268,7 +1275,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 				
 			StringFormat(query,"DELETE FROM npc_types WHERE id='%i'", spawn->GetNPCTypeID());
 				
-			if (!RunQuery(query,errbuf,0)) {
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
 			
@@ -1286,7 +1294,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 								zone, zone_version, c->GetX(), c->GetY(), c->GetZ(), 120, c->GetHeading(), extra);
 			
 			
-			if (!RunQuery(query, errbuf, 0, 0, &tmp)) {
+			if (!RunQuery(query, &errbuf, nullptr, nullptr, &tmp)) {
+				// TODO: Log message
 				return false;
 			}
 			
@@ -1315,7 +1324,8 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			
 			
 			
-			if (!RunQuery(query, errbuf, 0, 0, &npc_type_id)) {
+			if (!RunQuery(query, &errbuf, nullptr, nullptr, &npc_type_id)) {
+				// TODO: Log message
 				return false;
 			}
 			

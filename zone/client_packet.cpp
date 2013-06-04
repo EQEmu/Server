@@ -3240,14 +3240,14 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 			if (sayid && sayid > 0)
 			{
-				char errbuf[MYSQL_ERRMSG_SIZE];
+				std::string errbuf;
 				std::string query;
 				MYSQL_RES *result;
 				MYSQL_ROW row;
 
 				StringFormat(query, "SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid);
 				
-				if(database.RunQuery(query,errbuf,&result))
+				if(database.RunQuery(query, &errbuf,&result))
 				{
 					if (mysql_num_rows(result) == 1)
 					{
@@ -8733,10 +8733,10 @@ void Client::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 			break;
 		}
 		case DBA_b1_Entity_Client_Save: {
-			char errbuf[MYSQL_ERRMSG_SIZE];
+			std::string errbuf;
 			uint32 affected_rows = 0;
 			DBAsyncQuery* dbaq = dbaw->PopAnswer();
-			if (dbaq->GetAnswer(errbuf, 0, &affected_rows) && affected_rows == 1) {
+			if (dbaq->GetAnswer(&errbuf, 0, &affected_rows) && affected_rows == 1) {
 				if (dbaq->QPT()) {
 					SaveBackup();
 				}
@@ -8745,7 +8745,7 @@ void Client::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 				std::cout << "Async client save failed. '" << errbuf << "'" << std::endl;
 				Message(13, "Error: Asyncronous save of your character failed.");
 				if (Admin() >= 200)
-					Message(13, "errbuf: %s", errbuf);
+					Message(13, "errbuf: %s", errbuf.c_str());
 			}
 			pQueuedSaveWorkID = 0;
 			break;
@@ -8763,7 +8763,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	EQApplicationPacket* outapp = 0;
 	MYSQL_RES* result = 0;
 	bool loaditems = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	uint32 i;
 
 	for (i=1; i<=3; i++) {
@@ -8772,7 +8772,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			std::cout << "Error in FinishConnState2(): dbaq==0" << std::endl;
 			return false;
 		}
-		if (!dbaq->GetAnswer(errbuf, &result)) {
+		if (!dbaq->GetAnswer(&errbuf, &result)) {
 			std::cout << "Error in FinishConnState2(): !dbaq[" << dbaq->QPT() << "]->GetAnswer(): " << errbuf << std::endl;
 			return false;
 		}
@@ -11519,7 +11519,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result = nullptr;
 	MYSQL_ROW row = 0;
@@ -11533,7 +11533,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 						"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
 						m_pp.class_, m_pp.deity, m_pp.race);
 	
-	database.RunQuery(query, errbuf, &result);
+	database.RunQuery(query, &errbuf, &result);
 
 	if(!result) {
 		LogFile->write(EQEMuLog::Error, "No valid start zones found for /setstartcity");
@@ -11564,7 +11564,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 							"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
 							m_pp.class_, m_pp.deity, m_pp.race);
 		
-		database.RunQuery(query,errbuf,&result);
+		database.RunQuery(query,&errbuf,&result);
 		
 		Message(15,"Use \"/startcity #\" to choose a home city from the following list:");
 		char* name;
@@ -11698,7 +11698,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 	GMSearchCorpse_Struct *gmscs = (GMSearchCorpse_Struct *)app->pBuffer;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *Result;
 	MYSQL_ROW Row;
@@ -11711,7 +11711,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 						"player_corpses where charname like '%%%s%%' order by charname limit %i",
 						escSearchString.c_str(), MaxResults);
 	
-	if (database.RunQuery(query,  errbuf, &Result))
+	if (database.RunQuery(query, &errbuf, &Result))
 	{
 
 		int NumberOfRows = mysql_num_rows(Result);
@@ -11773,7 +11773,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 		SendPopupToClient("Corpses", PopupText.c_str());
 	}
 	else{
-		Message(0, "Query failed: %s.", errbuf);
+		Message(0, "Query failed: %s.", errbuf.c_str());
 
 	}
 }

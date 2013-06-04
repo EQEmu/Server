@@ -951,14 +951,14 @@ void command_setfaction(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #setfaction [faction number]");
 	else
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"Setting NPC %u to faction %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[1]));
 
 		StringFormat(query,"update npc_types set npc_faction_id=%i where id=%i",
 							atoi(sep->argplus[1]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 
-		database.RunQuery(query,  errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 }
@@ -1648,7 +1648,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #viewpetition (petition number) Type #listpetition for a list");
 	else
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		
 		int queryfound = 0;
 		MYSQL_RES *result;
@@ -1657,7 +1657,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
 
 		std::string query = "SELECT petid, charname, petitiontext from petitions order by petid";
 
-		if (database.RunQuery(query, errbuf, &result))
+		if (database.RunQuery(query, &errbuf, &result))
 		{
 			while ((row = mysql_fetch_row(result)))
 			{
@@ -1681,14 +1681,14 @@ void command_petitioninfo(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #petitioninfo (petition number) Type #listpetition for a list");
 	else
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		int queryfound = 0;
 		MYSQL_RES *result;
 		MYSQL_ROW row;
 
 		std::string query = "SELECT petid, charname, accountname, zone, charclass, charrace, charlevel from petitions order by petid";
 
-		if (database.RunQuery(query,errbuf, &result))
+		if (database.RunQuery(query, &errbuf, &result))
 		{
 			while ((row = mysql_fetch_row(result)))
 				if (strcasecmp(row[0],sep->argplus[1])== 0)
@@ -1709,13 +1709,13 @@ void command_delpetition(Client *c, const Seperator *sep)
 	if (sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0)
 		c->Message(0, "Usage: #delpetition (petition number) Type #listpetition for a list");
 	else {
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(13,"Attempting to delete petition number: %i",atoi(sep->argplus[1]));
 
 		StringFormat(query,"DELETE from petitions where petid=%i",atoi(sep->argplus[1]));
 
-		if (database.RunQuery(query,errbuf)) {
+		if (database.RunQuery(query, &errbuf)) {
 			LogFile->write(EQEMuLog::Normal,"Delete petition request from %s, petition number:", c->GetName(), atoi(sep->argplus[1]) );
 		}
 	}
@@ -2905,7 +2905,7 @@ void command_appearance(Client *c, const Seperator *sep)
 
 void command_charbackup(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES* result;
 	MYSQL_ROW row;
@@ -2921,7 +2921,7 @@ void command_charbackup(Client *c, const Seperator *sep)
 								"zoneid, DATE_FORMAT(ts, '%%m/%%d/%%Y %%H:%%i:%%s') "
 								" from character_backup where charid=%u", charid);
 
-			if (database.RunQuery(query, errbuf, &result)) {
+			if (database.RunQuery(query, &errbuf, &result)) {
 				uint32 x = 0;
 				while ((row = mysql_fetch_row(result))) {
 					c->Message(0, " %u: %s, %s (%u), reason=%u", atoi(row[0]), row[5], database.GetZoneName(atoi(row[4])), atoi(row[4]), atoi(row[1]));
@@ -2931,7 +2931,7 @@ void command_charbackup(Client *c, const Seperator *sep)
 				mysql_free_result(result);
 			}
 			else {
-				c->Message(13, "Query error: '%s' %s", query.c_str(), errbuf);
+				c->Message(13, "Query error: '%s' %s", query.c_str(), errbuf.c_str());
 			}
 		}
 		else
@@ -2952,7 +2952,7 @@ void command_charbackup(Client *c, const Seperator *sep)
 								" select 1, id, account_id, name, profile, level, class, x, y, z, zoneid, "
 								"alt_adv from character_ where id=%u", charid);
 
-			if (database.RunQuery(query, errbuf)) {
+			if (database.RunQuery(query, &errbuf)) {
 
 				StringFormat(query, "update character_ inner join character_backup on character_.id = character_backup.charid "
 									" set character_.name = character_backup.name, "
@@ -2965,15 +2965,15 @@ void command_charbackup(Client *c, const Seperator *sep)
 									" character_.zoneid = character_backup.zoneid "
 									" where character_backup.charid=%u and character_backup.id=%u", charid, cbid);
 
-				if (database.RunQuery(query, errbuf)) {
+				if (database.RunQuery(query, &errbuf)) {
 					c->Message(0, "Character restored.");
 				}
 				else {
-					c->Message(13, "Query error: '%s' %s", query.c_str(), errbuf);
+					c->Message(13, "Query error: '%s' %s", query.c_str(), errbuf.c_str());
 				}
 			}
 			else {
-				c->Message(13, "Query error: '%s' %s", query.c_str(), errbuf);
+				c->Message(13, "Query error: '%s' %s", query.c_str(), errbuf.c_str());
 			}
 		}
 		else
@@ -3329,7 +3329,7 @@ void command_findnpctype(Client *c, const Seperator *sep)
 		int id;
 		int count;
 		const int maxrows = 20;
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		MYSQL_RES *result;
 		MYSQL_ROW row;
@@ -3352,7 +3352,7 @@ void command_findnpctype(Client *c, const Seperator *sep)
 				
 		}
 		// If query runs successfully.
-		if (database.RunQuery(query, errbuf, &result))
+		if (database.RunQuery(query, &errbuf, &result))
 		{
 			count = 0;
 
@@ -3397,7 +3397,7 @@ void command_findzone(Client *c, const Seperator *sep)
 		int id;
 		int count;
 		const int maxrows = 20;
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		MYSQL_RES *result;
 		MYSQL_ROW row;
@@ -3423,7 +3423,7 @@ void command_findzone(Client *c, const Seperator *sep)
 			
 		}
 		
-		if (database.RunQuery(query, errbuf, &result))
+		if (database.RunQuery(query, &errbuf, &result))
 		{
 			count = 0;
 
@@ -3639,7 +3639,7 @@ void command_motd(Client *c, const Seperator *sep)
 
 void command_listpetition(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -3647,7 +3647,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 	
 	StringFormat(query,"SELECT petid, charname, accountname from petitions order by petid");
 	
-	if (database.RunQuery(query, errbuf, &result)) {
+	if (database.RunQuery(query, &errbuf, &result)) {
 		LogFile->write(EQEMuLog::Normal,"Petition list requested by %s", c->GetName());
 		while ((row = mysql_fetch_row(result))) {
 			if(!header) {
@@ -4419,14 +4419,14 @@ void command_repop(Client *c, const Seperator *sep)
 		iterator.Reset();
 		while (iterator.MoreElements())
 		{
-			char errbuf[MYSQL_ERRMSG_SIZE];
+			std::string errbuf;
 			std::string query;
 			
 			StringFormat(query, "DELETE FROM respawn_times WHERE id=%lu AND instance_id=%lu",
 								(unsigned long)iterator.GetData()->GetID(), 
 								(unsigned long)zone->GetInstanceID());
 			
-			database.RunQuery(query, errbuf);
+			database.RunQuery(query, &errbuf);
 			iterator.Advance();
 		}
 		c->Message(0, "Zone depop: Force resetting spawn timers.");
@@ -4788,7 +4788,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
 		c->Message(0, "Error: #spawnfix: Need an NPC target.");
 	else {
 		Spawn2* s2 = t->CastToNPC()->respawn2;
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 
 		if(!s2) {
@@ -4800,7 +4800,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
 			StringFormat(query,"UPDATE spawn2 SET x='%f', y='%f', z='%f', heading='%f' WHERE id='%i'",
 								c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
 			
-			if(database.RunQuery(query, errbuf))
+			if(database.RunQuery(query, &errbuf))
 			{
 				c->LogSQL(query.c_str());
 				c->Message(0, "Updating coordinates successful.");
@@ -4809,7 +4809,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
 			else
 			{
 				c->Message(13, "Update failed! MySQL gave the following error:");
-				c->Message(13, errbuf);
+				c->Message(13, errbuf.c_str());
 			}
 		}
 	}
@@ -5422,7 +5422,7 @@ void command_manaburn(Client *c, const Seperator *sep)
 
 void command_viewmessage(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -5433,7 +5433,7 @@ void command_viewmessage(Client *c, const Seperator *sep)
 							"tellque where receiver='%s'",
 							c->GetName());
 		
-		if (database.RunQuery(query, errbuf, &result))
+		if (database.RunQuery(query, &errbuf, &result))
 		{
 			if (mysql_num_rows(result)>0)
 			{
@@ -5454,7 +5454,7 @@ void command_viewmessage(Client *c, const Seperator *sep)
 							"tellque where id=%s",
 							sep->argplus[1]);
 		
-		if (database.RunQuery(query, errbuf, &result))
+		if (database.RunQuery(query, &errbuf, &result))
 		{
 			if (mysql_num_rows(result)==1)
 			{
@@ -5466,7 +5466,7 @@ void command_viewmessage(Client *c, const Seperator *sep)
 					
 					StringFormat(query, "Delete from tellque where id=%s",row[0]);
 					
-					database.RunQuery(query, errbuf);
+					database.RunQuery(query, &errbuf);
 				}
 				else
 					c->Message(13,"Invalid Message Number, check the number and try again.");
@@ -6540,7 +6540,7 @@ void command_embperl_eval(Client *c, const Seperator *sep)
 
 void command_ban(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -6553,7 +6553,7 @@ void command_ban(Client *c, const Seperator *sep)
 	{
 		StringFormat(query,"SELECT account_id from character_ where name = '%s'", sep->arg[1]);
 		
-		database.RunQuery(query, errbuf, &result);
+		database.RunQuery(query, &errbuf, &result);
 
 		if(mysql_num_rows(result))
 		{
@@ -6561,7 +6561,7 @@ void command_ban(Client *c, const Seperator *sep)
 			
 			StringFormat(query, "UPDATE account set status = -2 where id = %i", atoi(row[0]));
 			
-			database.RunQuery(query, errbuf, 0);
+			database.RunQuery(query, &errbuf);
 			c->Message(13,"Account number %i with the character %s has been banned.", atoi(row[0]), sep->arg[1]);
 
 			ServerPacket* pack = new ServerPacket(ServerOP_FlagUpdate, 6);
@@ -6598,7 +6598,7 @@ void command_ban(Client *c, const Seperator *sep)
 
 void command_suspend(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	if((sep->arg[1][0] == 0) || (sep->arg[2][0] == 0))
@@ -6622,7 +6622,7 @@ void command_suspend(Client *c, const Seperator *sep)
 			StringFormat(query, "UPDATE `account` SET `suspendeduntil` = DATE_ADD(NOW(), INTERVAL %i DAY)"
 								" WHERE `id` = %i", Duration, AccountID);
 			
-			database.RunQuery(query, errbuf, 0);
+			database.RunQuery(query, &errbuf);
 
 			if(Duration)
 				c->Message(13,"Account number %i with the character %s has been temporarily suspended for %i day(s).", AccountID, sep->arg[1],
@@ -6671,7 +6671,7 @@ void command_ipban(Client *c, const Seperator *sep)
 
 void command_revoke(Client *c, const Seperator *sep)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	if(sep->arg[1][0] == 0 || sep->arg[2][0] == 0)
@@ -6688,7 +6688,7 @@ void command_revoke(Client *c, const Seperator *sep)
 			StringFormat(query,"UPDATE account set revoked=%d where id = %i", 
 								flag, tmp);
 			
-			database.RunQuery(query, errbuf, 0);
+			database.RunQuery(query, &errbuf);
 			c->Message(13,"%s account number %i with the character %s.", flag?"Revoking":"Unrevoking", tmp, sep->arg[1]);
 			Client* revokee = entity_list.GetClientByAccID(tmp);
 			if(revokee)
@@ -6881,416 +6881,416 @@ void command_npcedit(Client *c, const Seperator *sep)
 	}
 	else if ( strcasecmp( sep->arg[1], "name" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has the name %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(),(sep->argplus[2]));
 		
 		StringFormat(query, "update npc_types set name='%s' where id=%i",
 							(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 
 	else if ( strcasecmp( sep->arg[1], "lastname" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has the lastname %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(),(sep->argplus[2]));
 		
 		StringFormat(query,"update npc_types set lastname='%s' where id=%i",
 							(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "race" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has the race %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set race=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "class" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u is now class %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set class=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "bodytype" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has type %i bodytype ",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set bodytype=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query,  errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "hp" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has %i Hitpoints",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set hp=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query,  errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "gender" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u is now gender %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set gender=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "texture" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now uses texture %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set texture=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query,  errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "helmtexture" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now uses helmtexture %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set helmtexture=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "size" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u is now size %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set size=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "hpregen" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now regens %i hitpoints per tick",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set hp_regen_rate=%i where hp_regen_rate=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "manaregen" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now regens %i mana per tick",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set mana_regen_rate=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "loottable" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u is now on loottable_id %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set loottable_id=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query,  errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "merchantid" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now is merchant_id %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set merchant_id=%i where id=%i", 
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "alt_currency_id" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has field 'alt_currency_id' set to %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
 		
 		StringFormat(query,"update npc_types set alt_currency_id='%s' where id=%i",
 							(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query,  errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "spell" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now uses spell list %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set npc_spells_id=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query,errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "faction" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u is now faction %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set npc_faction_id=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "mindmg" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now hits for a min of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set mindmg=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query,  errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "maxdmg" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now hits for a max of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set maxdmg=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "aggroradius" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has an aggro radius of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set aggroradius=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query,  errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "social" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u social status is now %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set social=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "runspeed" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u is now runs at %f",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atof(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set runspeed=%f where id=%i",
 							atof(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "MR" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		
 		StringFormat(query, "update npc_types set MR=%i where id=%i", 
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
 		c->Message(15,"NPCID %u now has a magic resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "DR" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has a disease resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set DR=%i where id=%i", 
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query,  errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "CR" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has a cold resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set CR=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "FR" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has a fire resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set FR=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "PR" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has a poison resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set PR=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "Corrup" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has a corruption resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set corrup=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "seeinvis" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has seeinvis set to %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 			StringFormat(query,"update npc_types set see_invis=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "seeinvisundead" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has seeinvisundead set to %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query,"update npc_types set see_invis_undead=%i where id=%i",
 					atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "seehide" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has seehide set to %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set see_hide=%i where id=%i", 
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "seeimprovedhide" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has seeimprovedhide set to %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set see_improved_hide=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "AC" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has %i armor class",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
 		
 		StringFormat(query, "update npc_types set ac=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "level" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u is now level %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set level=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "qglobal" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"Quest globals have been %d for NPCID %u",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2])==0?"disabled":"enabled");
 		
@@ -7298,12 +7298,12 @@ void command_npcedit(Client *c, const Seperator *sep)
 							atoi(sep->argplus[2])==0?0:1,
 							c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "npcaggro" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u will now %s other NPCs with negative faction npc_value",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2])==0?"not aggro":"aggro");
 		
@@ -7311,36 +7311,36 @@ void command_npcedit(Client *c, const Seperator *sep)
 							atoi(sep->argplus[2])==0?0:1,
 							c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "limit" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has a spawn limit of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
 		
 		StringFormat(query, "update npc_types set limit=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "Attackspeed" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has attack_speed set to %f",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atof(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set attack_speed=%f where id=%i",
 							atof(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "findable" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u is now %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2])==0?"not findable":"findable");
 		
@@ -7348,104 +7348,104 @@ void command_npcedit(Client *c, const Seperator *sep)
 							atoi(sep->argplus[2])==0?0:1,
 							c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "wep1" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u will have item graphic %i set to his primary on repop.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set d_meele_texture1=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "wep2" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u will have item graphic %i set to his secondary on repop.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		
 		StringFormat(query, "update npc_types set d_meele_texture2=%i where id=%i",
 							atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "featuresave" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u saved with all current facial feature settings",c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
 		StringFormat(query, "update npc_types set luclin_haircolor=%i where id=%i",
 							c->GetTarget()->GetHairColor(),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 					
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 		
 		StringFormat(query, "update npc_types set luclin_beardcolor=%i where id=%i",
 							c->GetTarget()->GetBeardColor(),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 		
 		StringFormat(query, "update npc_types set luclin_hairstyle=%i where id=%i",
 							c->GetTarget()->GetHairStyle(),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 		
 		StringFormat(query, "update npc_types set luclin_beard=%i where id=%i", 
 							c->GetTarget()->GetBeard(),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 		
 		StringFormat(query, "update npc_types set face=%i where id=%i",
 							c->GetTarget()->GetLuclinFace(),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 		
 		StringFormat(query, "update npc_types set drakkin_heritage=%i where id=%i",
 							c->GetTarget()->GetDrakkinHeritage(),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 		
 		StringFormat(query, "update npc_types set drakkin_tattoo=%i where id=%i",
 							c->GetTarget()->GetDrakkinTattoo(),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);		
+		database.RunQuery(query, &errbuf);		
 		c->LogSQL(query.c_str());
 		
 		StringFormat(query, "update npc_types set drakkin_details=%i where id=%i",
 							c->GetTarget()->GetDrakkinDetails(),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 
 	}
 
 	else if ( strcasecmp( sep->arg[1], "armortint_id" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		c->Message(15,"NPCID %u now has field 'armortint_id' set to %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
 		
 		StringFormat(query, "update npc_types set armortint_id='%s' where id=%i",
 							(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->LogSQL(query.c_str());
 	}
 	else if ( strcasecmp( sep->arg[1], "setanimation" ) == 0 )
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		int Animation = 0;
 		if(sep->arg[2] && atoi(sep->arg[2]) <= 4){
@@ -7476,7 +7476,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		StringFormat(query, "update spawn2 set animation = %i where spawngroupID=%i", 
 							Animation, c->GetTarget()->CastToNPC()->GetSp2());
 		
-		database.RunQuery(query, errbuf);
+		database.RunQuery(query, &errbuf);
 		c->GetTarget()->SetAppearance(EmuAppearance(Animation));
 		c->LogSQL(query.c_str());
 	}
@@ -7589,7 +7589,7 @@ void command_nologs(Client *c, const Seperator *sep)
 
 void command_qglobal(Client *c, const Seperator *sep) {
 	//In-game switch for qglobal column
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	if(sep->arg[1][0] == 0) {
 		c->Message(0, "Syntax: #qglobal [on/off/view]. Requires NPC target.");
@@ -7605,7 +7605,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 		StringFormat(query, "UPDATE npc_types SET qglobal=1 WHERE id='%i'", 
 							targetMob->GetNPCTypeID());
 		
-		if(!database.RunQuery(query,  errbuf, 0))
+		if(!database.RunQuery(query, &errbuf))
 		{
 			c->Message(15, "Could not update database.");
 		}
@@ -7620,7 +7620,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 		StringFormat(query, "UPDATE npc_types SET qglobal=0 WHERE id='%i'", 
 							targetMob->GetNPCTypeID());
 		
-		if(!database.RunQuery(query, errbuf, 0))
+		if(!database.RunQuery(query, &errbuf))
 		{
 			c->Message(15, "Could not update database.");
 		}
@@ -7648,7 +7648,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 void command_fear(Client *c, const Seperator *sep) {
 /*
 	//super-command for editing fear grids and hints
-//	char errbuf[MYSQL_ERRMSG_SIZE];
+//	std::string errbuf;
 //	char *query = 0;
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(0, "Syntax: #fear [view|close|add|link|list|del].");
@@ -8333,7 +8333,7 @@ void command_flags(Client *c, const Seperator *sep) {
 
 void command_flagedit(Client *c, const Seperator *sep) {
 	//super-command for editing zone flags
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(0, "Syntax: #flagedit [lockzone|unlockzone|listzones|give|take].");
@@ -8371,9 +8371,9 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		StringFormat(query,"UPDATE zone SET flag_needed='%s' WHERE zoneidnumber=%d AND version=%d",
 							flagName.c_str(), zoneid, zone->GetInstanceVersion());
 		
-		if(!database.RunQuery(query, errbuf))
+		if(!database.RunQuery(query, &errbuf))
 		{
-			c->Message(13, "Error updating zone: %s", errbuf);
+			c->Message(13, "Error updating zone: %s", errbuf.c_str());
 		} else {
 			c->LogSQL(query.c_str());
 			c->Message(15, "Success! Zone %s now requires a flag, named %s", database.GetZoneName(zoneid), flagName.c_str());
@@ -8396,8 +8396,8 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		StringFormat(query, "UPDATE zone SET flag_needed='' WHERE zoneidnumber=%d AND version=%d",
 							zoneid, zone->GetInstanceVersion());
 		
-		if(!database.RunQuery(query, errbuf)) {
-			c->Message(15, "Error updating zone: %s", errbuf);
+		if(!database.RunQuery(query, &errbuf)) {
+			c->Message(15, "Error updating zone: %s", errbuf.c_str());
 		} else {
 			c->LogSQL(query.c_str());
 			c->Message(15, "Success! Zone %s no longer requires a flag.", database.GetZoneName(zoneid));
@@ -8409,7 +8409,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		query = "SELECT zoneidnumber, short_name, long_name, version, flag_needed "
 				"FROM zone WHERE flag_needed != ''";
 		
-		if (database.RunQuery(query, errbuf, &result)){
+		if (database.RunQuery(query, &errbuf, &result)){
 			c->Message(0, "Zones which require flags:");
 			while ((row = mysql_fetch_row(result)))
 			{
@@ -8417,7 +8417,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 			}
 			mysql_free_result(result);
 		} else {
-			c->Message(13, "Unable to query zone flags: %s", errbuf);
+			c->Message(13, "Unable to query zone flags: %s", errbuf.c_str());
 		}
 	} else if(!strcasecmp(sep->arg[1], "give")) {
 		uint32 zoneid = 0;
@@ -9256,7 +9256,7 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 void command_advnpcspawn(Client *c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	uint32 last_insert_id = 0;
 
@@ -9281,10 +9281,10 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 									(sep->arg[6]?atof(sep->arg[6]):0), (sep->arg[7]?atof(sep->arg[7]):0), 
 									(sep->arg[8]?atof(sep->arg[8]):0), (sep->arg[9]?atoi(sep->arg[9]):0));
 				
-				if (!database.RunQuery(query, errbuf, 0, 0, &last_insert_id))
+				if (!database.RunQuery(query, &errbuf, 0, 0, &last_insert_id))
 				{
 					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
-					c->Message(13, errbuf);
+					c->Message(13, errbuf.c_str());
 				}
 				else
 				{
@@ -9305,10 +9305,10 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 				StringFormat(query,"INSERT INTO spawnentry (spawngroupID,npcID,chance) VALUES (%i,%i,%i)", 
 									atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
 				
-				if (!database.RunQuery(query, errbuf, 0, 0, &last_insert_id))
+				if (!database.RunQuery(query, &errbuf, 0, 0, &last_insert_id))
 				{
 					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
-					c->Message(13, errbuf);
+					c->Message(13, errbuf.c_str());
 				}
 				else
 				{
@@ -9331,10 +9331,10 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 									atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]), atof(sep->arg[6]), atof(sep->arg[7]),
 									atoi(sep->arg[8]),atoi(sep->arg[2]));
 				
-				if (!database.RunQuery(query, errbuf, 0, 0, &last_insert_id))
+				if (!database.RunQuery(query, &errbuf, 0, 0, &last_insert_id))
 				{
 					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
-					c->Message(13, errbuf);
+					c->Message(13, errbuf.c_str());
 				}
 				else
 				{
@@ -9357,10 +9357,10 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 									"WHERE id='%i'",
 									atoi(sep->arg[2]));
 				
-				if (!database.RunQuery(query, errbuf, 0, 0, &last_insert_id))
+				if (!database.RunQuery(query, &errbuf, 0, 0, &last_insert_id))
 				{
 					c->Message(0, "Invalid Arguments -- MySQL gave the following error:");
-					c->Message(13, errbuf);
+					c->Message(13, errbuf.c_str());
 				}
 				else
 				{
@@ -9393,7 +9393,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 					
 					StringFormat(query, "DELETE FROM spawn2 WHERE id='%i'",s2->GetID());
 					
-					if(database.RunQuery(query, errbuf))
+					if(database.RunQuery(query, &errbuf))
 					{
 						c->LogSQL(query.c_str());
 						c->Message(0, "Spawnpoint Removed successfully.");
@@ -9402,7 +9402,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 					else
 					{
 						c->Message(13, "Update failed! MySQL gave the following error:");
-						c->Message(13, errbuf);
+						c->Message(13, errbuf.c_str());
 					}
 				}
 			}
@@ -9423,7 +9423,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 					StringFormat(query, "UPDATE spawn2 SET x='%f', y='%f', z='%f', heading='%f' WHERE id='%i'",
 										c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
 					
-					if(database.RunQuery(query, errbuf))
+					if(database.RunQuery(query, &errbuf))
 					{
 						c->LogSQL(query.c_str());
 						c->Message(0, "Updating coordinates successful.");
@@ -9434,7 +9434,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 					else
 					{
 						c->Message(13, "Update failed! MySQL gave the following error:");
-						c->Message(13, errbuf);
+						c->Message(13, errbuf.c_str());
 					}
 				}
 			}
@@ -9472,7 +9472,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 					StringFormat(query, "UPDATE spawn2 SET respawntime=%u, variance=%u WHERE id='%i'", 
 										new_rs, new_var, s2->GetID());
 					
-					if(database.RunQuery(query, errbuf))
+					if(database.RunQuery(query, &errbuf))
 					{
 						c->LogSQL(query.c_str());
 						c->Message(0, "Updating respawn timer successful.");
@@ -9482,7 +9482,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 					else
 					{
 						c->Message(13, "Update failed! MySQL gave the following error:");
-						c->Message(13, errbuf);
+						c->Message(13, errbuf.c_str());
 					}
 				}
 			}
@@ -9500,14 +9500,14 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 					StringFormat(query, "UPDATE spawn2 SET version=%i WHERE spawngroupID='%i'", 
 										Version, c->GetTarget()->CastToNPC()->GetSp2());
 					
-					if(database.RunQuery(query, errbuf)){
+					if(database.RunQuery(query, &errbuf)){
 						c->LogSQL(query.c_str());
 						c->Message(0, "Version change to %i was successful from SpawnGroupID %i", Version, c->GetTarget()->CastToNPC()->GetSp2());
 						c->GetTarget()->Depop(false);
 					}
 					else{
 						c->Message(13, "Update failed! MySQL gave the following error:");
-						c->Message(13, errbuf);
+						c->Message(13, errbuf.c_str());
 					}
 				}
 				else{
@@ -9820,7 +9820,7 @@ void command_object(Client *c, const Seperator *sep)
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	uint32 col;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -9921,7 +9921,7 @@ void command_object(Client *c, const Seperator *sep)
 									
 			}
 
-			if (database.RunQuery(query, errbuf, &result))
+			if (database.RunQuery(query, &errbuf, &result))
 			{
 				while ((row = mysql_fetch_row(result)))
 				{
@@ -10059,7 +10059,7 @@ void command_object(Client *c, const Seperator *sep)
 				StringFormat(query, "SELECT COUNT(*) FROM object WHERE ID=%u", id);
 
 				// Already in database?
-				if (database.RunQuery(query,errbuf, &result))
+				if (database.RunQuery(query, &errbuf, &result))
 				{
 					if ((row = mysql_fetch_row(result)) != nullptr)
 					{
@@ -10108,7 +10108,7 @@ void command_object(Client *c, const Seperator *sep)
 							od.z - 0.2f, od.z + 0.2f);		// It's pretty forgiving, though, allowing for close-proximity objects
 
 			iObjectsFound = 0;
-			if (database.RunQuery(query, errbuf, &result))
+			if (database.RunQuery(query, &errbuf, &result))
 			{
 				if ((row = mysql_fetch_row(result)) != nullptr)
 				{
@@ -10166,7 +10166,7 @@ void command_object(Client *c, const Seperator *sep)
 				// If there's a problem retrieving an ID from the database, it'll end up being object # 1. No biggie.
 				query = "SELECT MAX(id) FROM object";
 
-				if (database.RunQuery(query, errbuf, &result))
+				if (database.RunQuery(query, &errbuf, &result))
 				{
 					if (row = mysql_fetch_row(result))
 					{
@@ -10245,7 +10245,7 @@ void command_object(Client *c, const Seperator *sep)
 									id);
 
 				iObjectsFound = 0;
-				if (database.RunQuery(query, errbuf, &result))
+				if (database.RunQuery(query, &errbuf, &result))
 				{
 					if (row = mysql_fetch_row(result))
 					{
@@ -10530,7 +10530,7 @@ void command_object(Client *c, const Seperator *sep)
 				
 				StringFormat(query, "SELECT zoneid, version, type FROM object WHERE id=%u", id);
 				
-				if ((!database.RunQuery(query, errbuf, &result)) || ((row = mysql_fetch_row(result)) == 0))
+				if ((!database.RunQuery(query, &errbuf, &result)) || ((row = mysql_fetch_row(result)) == 0))
 				{
 					if (result)
 					{
@@ -10690,7 +10690,7 @@ void command_object(Client *c, const Seperator *sep)
 
 			// If this ID isn't in the database yet, it's a new object
 			bNewObject = true;
-			if (database.RunQuery(query, errbuf, &result))
+			if (database.RunQuery(query, &errbuf, &result))
 			{
 				if (row = mysql_fetch_row(result))
 				{
@@ -10819,7 +10819,7 @@ void command_object(Client *c, const Seperator *sep)
 									
 			}
 
-			if (!database.RunQuery(query, errbuf, 0, &col, &newid))
+			if (!database.RunQuery(query, &errbuf, 0, &col, &newid))
 			{
 				col = 0;
 			}
@@ -10833,7 +10833,7 @@ void command_object(Client *c, const Seperator *sep)
 				}
 				else
 				{
-					c->Message(0, "Database Error: %s", errbuf);
+					c->Message(0, "Database Error: %s", &errbuf);
 				}
 
 				return;
@@ -10966,7 +10966,7 @@ void command_object(Client *c, const Seperator *sep)
 									"WHERE (zoneid=%u) AND (version=%u)",
 									od.zone_instance, zone->GetZoneID(), zone->GetInstanceVersion());
 
-				if (database.RunQuery(query, errbuf, 0, &col))
+				if (database.RunQuery(query, &errbuf, 0, &col))
 				{
 					c->Message(0, "Copied %u object%s into instance version %u", col, (col == 1) ? "" : "s", od.zone_instance);
 				}
@@ -10978,7 +10978,7 @@ void command_object(Client *c, const Seperator *sep)
 					}
 					else
 					{
-						c->Message(0, "Database Error: %s", errbuf);
+						c->Message(0, "Database Error: %s", errbuf.c_str());
 					}
 				}
 			}
@@ -10995,7 +10995,7 @@ void command_object(Client *c, const Seperator *sep)
 									"WHERE (id=%u) AND (zoneid=%u) AND (version=%u)",
 									od.zone_instance, id, zone->GetZoneID(), zone->GetInstanceVersion());
 
-				if ((database.RunQuery(query, errbuf, 0, &col)) && (col > 0))
+				if ((database.RunQuery(query, &errbuf, 0, &col)) && (col > 0))
 				{
 					c->Message(0, "Copied Object %u into instance version %u", id, od.zone_instance);
 				}
@@ -11003,12 +11003,12 @@ void command_object(Client *c, const Seperator *sep)
 				{
 					// Couldn't copy the object.
 
-					if (errbuf[0] == '\0')
+					if (errbuf.empty())
 					{
 						// No database error returned. See if we can figure out why.
 						StringFormat(query, "SELECT zoneid, version FROM object WHERE id=%u", id);
 
-						if (database.RunQuery(query, errbuf, &result))
+						if (database.RunQuery(query, &errbuf, &result))
 						{
 							if (row = mysql_fetch_row(result))
 							{
@@ -11048,7 +11048,7 @@ void command_object(Client *c, const Seperator *sep)
 					}
 					else
 					{
-						c->Message(0, "Database Error: %s", errbuf);
+						c->Message(0, "Database Error: %s", errbuf.c_str());
 					}
 				}
 			}
@@ -11091,7 +11091,7 @@ void command_object(Client *c, const Seperator *sep)
 									"AND (version=%u) LIMIT 1", 
 									id, zone->GetZoneID(), zone->GetInstanceVersion());
 
-				if (database.RunQuery(query,  errbuf, &result))
+				if (database.RunQuery(query, &errbuf, &result))
 				{
 					if (row = mysql_fetch_row(result))
 					{
@@ -11166,7 +11166,7 @@ void command_object(Client *c, const Seperator *sep)
 								"FROM object WHERE id=%u", 
 								id);
 
-			if ((!database.RunQuery(query, errbuf, &result)) || ((row = mysql_fetch_row(result)) == 0))
+			if ((!database.RunQuery(query, &errbuf, &result)) || ((row = mysql_fetch_row(result)) == 0))
 			{
 				if (result)
 				{
@@ -11180,7 +11180,7 @@ void command_object(Client *c, const Seperator *sep)
 					return;
 				}
 
-				c->Message(0, "Database Error: %s", errbuf);
+				c->Message(0, "Database Error: %s", errbuf.c_str());
 
 				return;
 			}
@@ -11706,7 +11706,7 @@ void command_mysql(Client *c, const Seperator *sep)
 		}
 
 		if(!Fail) {
-			char errbuf[MYSQL_ERRMSG_SIZE];
+			std::string errbuf;
 			int HText = 0;
 			MYSQL_RES *result;
 			std::stringstream MsgText;
@@ -11714,7 +11714,7 @@ void command_mysql(Client *c, const Seperator *sep)
 			//swap # for % so like queries can work
 			std::replace(QueryText.begin(), QueryText.end(), '#', '%');
 
-			if (database.RunQuery(QueryText, errbuf, &result)) {
+			if (database.RunQuery(QueryText, &errbuf, &result)) {
 				//Using sep->arg[2] again, replace # with %% so it doesn't screw up when sent through vsnprintf in Message
 				QueryText = sep->arg[2];
 				int pos = QueryText.find('#');

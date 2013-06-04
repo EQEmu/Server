@@ -838,7 +838,7 @@ void NPC::AssignWaypoints(int32 grid) {
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -851,7 +851,7 @@ void NPC::AssignWaypoints(int32 grid) {
 						"WHERE `id`=%i AND `zoneid`=%i",
 						grid, zone->GetZoneID());
 	
-	if(database.RunQuery(query, errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		if((row = mysql_fetch_row(result)))
 		{
@@ -871,7 +871,7 @@ void NPC::AssignWaypoints(int32 grid) {
 	else	// DB query error!
 	{
 		GridErr = true;
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, errbuf);
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign grid %u to mob %s: %s", grid, name, errbuf.c_str());
 	}
 
 	if(!GridErr)
@@ -885,7 +885,7 @@ void NPC::AssignWaypoints(int32 grid) {
 							"`zoneid`=%i ORDER BY `number`",
 							grid,zone->GetZoneID());
 		
-		if(database.RunQuery(query,errbuf,&result))
+		if(database.RunQuery(query,&errbuf,&result))
 		{
 			roamer = true;
 			max_wp = -1;	// Initialize it; will increment it for each waypoint successfully added to the list
@@ -925,7 +925,7 @@ void NPC::AssignWaypoints(int32 grid) {
 		else	// DB query error!
 		{
 			WPErr = true;
-			LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, errbuf);
+			LogFile->write(EQEMuLog::Error, "MySQL Error while trying to assign waypoints from grid %u to mob %s: %s", grid, name, errbuf.c_str());
 		}
 	} // end if (!GridErr)
 	if(Waypoints.size() < 2) {
@@ -997,7 +997,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 
 int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
 	std::string query;
-	char errbuff[MYSQL_ERRMSG_SIZE];
+	std::string errbuff;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int res = 0;
@@ -1005,14 +1005,14 @@ int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
 	StringFormat(query, "SELECT COALESCE(MAX(id), 0) FROM grid WHERE zoneid = %i",
 						zoneid);
 	
-	if (RunQuery(query, errbuff,&result)) {
+	if (RunQuery(query, &errbuff,&result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			res = atoi( row[0] );
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetHighestGrid query '%s': %s", query.c_str(), errbuff);
+		LogFile->write(EQEMuLog::Error, "Error in GetHighestGrid query '%s': %s", query.c_str(), errbuff.c_str());
 	}
 
 	return(res);
@@ -1020,7 +1020,7 @@ int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
 
 uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
 	std::string query;
-	char errbuff[MYSQL_ERRMSG_SIZE];
+	std::string errbuff;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int type2 = 0;
@@ -1028,14 +1028,14 @@ uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
 	StringFormat(query, "SELECT type2 from grid where id = %i and zoneid = %i",
 						grid,zoneid);
 	
-	if (RunQuery(query, errbuff,&result)) {
+	if (RunQuery(query, &errbuff,&result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			type2 = atoi( row[0] );
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetGridType2 query '%s': %s", query.c_str(), errbuff);
+		LogFile->write(EQEMuLog::Error, "Error in GetGridType2 query '%s': %s", query.c_str(), errbuff.c_str());
 	}
 
 	return(type2);
@@ -1044,7 +1044,7 @@ uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
 bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp) {
 	_CP(Database_GetWaypoints);
 	std::string query;
-	char errbuff[MYSQL_ERRMSG_SIZE];
+	std::string errbuff;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
@@ -1052,7 +1052,7 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
 						"gridid = %i and number = %i and zoneid = %i",
 						grid,num,zoneid);
 	
-	if (RunQuery(query, errbuff,&result)) {
+	if (RunQuery(query, &errbuff,&result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			if ( wp ) {
@@ -1068,7 +1068,7 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetWaypoints query '%s': %s", query.c_str(), errbuff);
+		LogFile->write(EQEMuLog::Error, "Error in GetWaypoints query '%s': %s", query.c_str(), errbuff.c_str());
 	}
 	return false;
 }
@@ -1076,7 +1076,7 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
 void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 {
 	std::string query;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int matches = 0, fuzzy = 0, spawn2id = 0;
@@ -1089,8 +1089,8 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 	StringFormat(query, "SELECT id,x,y FROM spawn2 WHERE zone='%s' AND x=%i AND y=%i",
 						zone->GetShortName(), (int)x, (int)y);
 	
-	if(!RunQuery(query,errbuf,&result)) {
-		LogFile->write(EQEMuLog::Error, "Error querying spawn2 '%s': '%s'", query.c_str(), errbuf);
+	if(!RunQuery(query, &errbuf,&result)) {
+		LogFile->write(EQEMuLog::Error, "Error querying spawn2 '%s': '%s'", query.c_str(), errbuf.c_str());
 		return;
 	}
 
@@ -1106,8 +1106,8 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 							zone->GetShortName(), x, _GASSIGN_TOLERANCE, 
 							y, _GASSIGN_TOLERANCE);
 		
-		if(!RunQuery(query,errbuf,&result)) {
-			LogFile->write(EQEMuLog::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), errbuf);
+		if(!RunQuery(query,&errbuf,&result)) {
+			LogFile->write(EQEMuLog::Error, "Error querying fuzzy spawn2 '%s': '%s'", query.c_str(), errbuf.c_str());
 			return;
 		}
 		fuzzy = 1;
@@ -1130,8 +1130,8 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 			
 			StringFormat(query, "UPDATE spawn2 SET pathgrid = %d WHERE id = %d", grid, spawn2id);
 			
-			if(!RunQuery(query,errbuf,&result, &affected_rows)) {
-				LogFile->write(EQEMuLog::Error, "Error updating spawn2 '%s': '%s'", query.c_str(), errbuf);
+			if(!RunQuery(query, &errbuf, &result, &affected_rows)) {
+				LogFile->write(EQEMuLog::Error, "Error updating spawn2 '%s': '%s'", query.c_str(), errbuf.c_str());
 				return;
 			}
 			if(affected_rows == 1)
@@ -1171,7 +1171,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 
 void ZoneDatabase::ModifyGrid(Client *c, bool remove, uint32 id, uint8 type, uint8 type2, uint16 zoneid) {
 	std::string query;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	if (!remove)
 	{
 		
@@ -1179,8 +1179,8 @@ void ZoneDatabase::ModifyGrid(Client *c, bool remove, uint32 id, uint8 type, uin
 							"VALUES(%i,%i,%i,%i)",
 							id,zoneid,type,type2);
 		
-		if(!RunQuery(query, errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error creating grid entry '%s': '%s'", query.c_str(), errbuf);
+		if(!RunQuery(query, &errbuf)) {
+			LogFile->write(EQEMuLog::Error, "Error creating grid entry '%s': '%s'", query.c_str(), errbuf.c_str());
 		} 
 		else {
 			if(c) 
@@ -1192,8 +1192,8 @@ void ZoneDatabase::ModifyGrid(Client *c, bool remove, uint32 id, uint8 type, uin
 		
 		StringFormat(query, "DELETE FROM grid where id=%i",id);
 		
-		if(!RunQuery(query, errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error deleting grid '%s': '%s'", query.c_str(), errbuf);
+		if(!RunQuery(query, &errbuf)) {
+			LogFile->write(EQEMuLog::Error, "Error deleting grid '%s': '%s'", query.c_str(), errbuf.c_str());
 		} else {
 			if(c) 
 				c->LogSQL(query.c_str());
@@ -1201,8 +1201,8 @@ void ZoneDatabase::ModifyGrid(Client *c, bool remove, uint32 id, uint8 type, uin
 		
 		StringFormat(query, "DELETE FROM grid_entries WHERE zoneid=%i AND gridid=%i", zoneid, id);
 		
-		if(!RunQuery(query, errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error deleting grid entries '%s': '%s'", query.c_str(), errbuf);
+		if(!RunQuery(query, &errbuf)) {
+			LogFile->write(EQEMuLog::Error, "Error deleting grid entries '%s': '%s'", query.c_str(), errbuf.c_str());
 		} else {
 			if(c) 
 				c->LogSQL(query.c_str());
@@ -1217,14 +1217,14 @@ void ZoneDatabase::ModifyGrid(Client *c, bool remove, uint32 id, uint8 type, uin
 void ZoneDatabase::AddWP(Client *c, uint32 gridid, uint32 wpnum, float xpos, float ypos, float zpos, uint32 pause, uint16 zoneid, float heading)
 {
 	std::string query;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 
 	StringFormat(query, "INSERT INTO grid_entries (gridid,zoneid,`number`,x,y,z,pause,heading) "
 						"values (%i, %i, %i, %f, %f, %f, %i, %f)",
 						gridid, zoneid, wpnum, xpos, ypos, zpos, pause, heading);
 
-	if(!RunQuery(query,errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error adding waypoint '%s': '%s'", query.c_str(), errbuf);
+	if(!RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error adding waypoint '%s': '%s'", query.c_str(), errbuf.c_str());
 	} else {
 		if(c) 
 			c->LogSQL(query.c_str());
@@ -1246,14 +1246,14 @@ void ZoneDatabase::AddWP(Client *c, uint32 gridid, uint32 wpnum, float xpos, flo
 void ZoneDatabase::DeleteWaypoint(Client *c, uint32 grid_num, uint32 wp_num, uint16 zoneid)
 {
 	std::string query;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 
 	StringFormat(query, "DELETE FROM grid_entries where "
 						"gridid=%i and zoneid=%i and `number`=%i",
 						grid_num,zoneid,wp_num);
 	
-	if(!RunQuery(query, errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error deleting waypoint '%s': '%s'", query.c_str(), errbuf);
+	if(!RunQuery(query, &errbuf)) {
+			LogFile->write(EQEMuLog::Error, "Error deleting waypoint '%s': '%s'", query.c_str(), errbuf.c_str());
 	} 
 	else {
 		if(c) 
@@ -1278,12 +1278,12 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float
 	bool	CreatedNewGrid;	// Did we create a new grid in this function?
 	MYSQL_RES	*result;
 	MYSQL_ROW	row;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 
 	// See what grid number our spawn is assigned
 	StringFormat(query, "SELECT pathgrid FROM spawn2 WHERE id=%i",spawn2id);
 	
-	if(RunQuery(query, errbuf,&result))
+	if(RunQuery(query, &errbuf, &result))
 	{
 		if(mysql_num_rows(result) > 0)
 		{
@@ -1296,7 +1296,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float
 		mysql_free_result(result);
 	}
 	else {	// Query error
-		LogFile->write(EQEMuLog::Error, "Error setting pathgrid '%s': '%s'", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error setting pathgrid '%s': '%s'", query.c_str(), errbuf.c_str());
 		return 0;
 	}
 
@@ -1309,8 +1309,8 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float
 		StringFormat(query,"insert into grid set id='%i',zoneid= %i, type='%i', type2='%i'",
 							grid_num,zoneid,type1,type2);
 		
-		if(!RunQuery(query,  errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error adding grid '%s': '%s'", query.c_str(), errbuf);
+		if(!RunQuery(query, &errbuf)) {
+			LogFile->write(EQEMuLog::Error, "Error adding grid '%s': '%s'", query.c_str(), errbuf.c_str());
 		} else {
 			if(c) 
 				c->LogSQL(query.c_str());
@@ -1319,8 +1319,8 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float
 		StringFormat(query, "update spawn2 set pathgrid='%i' where id='%i'",
 							grid_num, spawn2id);
 
-		if(!RunQuery(query, errbuf)) {
-			LogFile->write(EQEMuLog::Error, "Error updating spawn2 pathing '%s': '%s'", query.c_str(), errbuf);
+		if(!RunQuery(query, &errbuf)) {
+			LogFile->write(EQEMuLog::Error, "Error updating spawn2 pathing '%s': '%s'", query.c_str(), errbuf.c_str());
 		} else {
 			if(c) 
 				c->LogSQL(query.c_str());
@@ -1336,7 +1336,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float
 						"AND gridid='%i'", 
 						zoneid, grid_num);
 	
-	if(RunQuery(query,errbuf,&result))
+	if(RunQuery(query,&errbuf,&result))
 	{
 		row = mysql_fetch_row(result);
 		if(row[0] != 0)
@@ -1347,7 +1347,7 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float
 		mysql_free_result(result);
 	}
 	else {	// Query error
-		LogFile->write(EQEMuLog::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error getting next waypoint id '%s': '%s'", query.c_str(), errbuf.c_str());
 		return 0;
 	}
 
@@ -1355,8 +1355,8 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float
 						"VALUES (%i,%i,%i,%f,%f,%f,%i,%f)",
 						grid_num, zoneid, next_wp_num, xpos, ypos, zpos, pause, heading);
 
-	if(!RunQuery(query, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error adding grid entry '%s': '%s'", query.c_str(), errbuf);
+	if(!RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error adding grid entry '%s': '%s'", query.c_str(), errbuf.c_str());
 	} else {
 		if(c) 
 			c->LogSQL(query.c_str());
@@ -1371,13 +1371,13 @@ uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float
 
 uint32 ZoneDatabase::GetFreeGrid(uint16 zoneid) {
 	std::string query;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
 	StringFormat(query, "SELECT max(id) from grid where zoneid = %i",zoneid);
 	
-	if (RunQuery(query, errbuf,&result)) {
+	if (RunQuery(query, &errbuf,&result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			uint32 tmp=0;
@@ -1390,14 +1390,14 @@ uint32 ZoneDatabase::GetFreeGrid(uint16 zoneid) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetFreeGrid query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in GetFreeGrid query '%s': %s", query.c_str(), errbuf.c_str());
 	}
 	return 0;
 }
 
 int ZoneDatabase::GetHighestWaypoint(uint32 zoneid, uint32 gridid) {
 	std::string query;
-	char errbuff[MYSQL_ERRMSG_SIZE];
+	std::string errbuff;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int res = 0;
@@ -1406,14 +1406,14 @@ int ZoneDatabase::GetHighestWaypoint(uint32 zoneid, uint32 gridid) {
 						"grid_entries WHERE zoneid = %i AND gridid = %i",
 						zoneid, gridid);
 	
-	if (RunQuery(query,errbuff,&result)) {
+	if (RunQuery(query, &errbuff, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			res = atoi( row[0] );
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetHighestWaypoint query '%s': %s", query.c_str(), errbuff);
+		LogFile->write(EQEMuLog::Error, "Error in GetHighestWaypoint query '%s': %s", query.c_str(), errbuff.c_str());
 	}
 
 	return(res);

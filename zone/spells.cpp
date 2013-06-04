@@ -4605,7 +4605,7 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 	int Spell_Global_Value;
 	int Global_Value;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -4614,7 +4614,7 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 						"spell_globals WHERE spellid=%i", 
 						Spell_ID);
 
-	if (database.RunQuery(query,errbuf, &result)) {
+	if (database.RunQuery(query, &errbuf, &result)) {
 
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
@@ -4631,7 +4631,7 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 			if (Spell_Global_Name.empty()) { // If the entry in the spell_globals table has nothing set for the qglobal name
 				return true;
 			}
-			else if (database.RunQuery(query, errbuf, &result)) {
+			else if (database.RunQuery(query, &errbuf, &result)) {
 
 				if (mysql_num_rows(result) == 1) {
 					row = mysql_fetch_row(result);
@@ -4662,7 +4662,7 @@ bool Client::SpellGlobalCheck(uint16 Spell_ID, uint16 Char_ID) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", Spell_ID, query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error while querying Spell ID %i spell_globals table query '%s': %s", Spell_ID, query.c_str(), errbuf.c_str());
 		return false; // Query failed, so prevent spell from scribing just in case
 	}
 	return false; // Default is false

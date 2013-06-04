@@ -177,7 +177,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 
 //this really loads the objects into entity_list
 bool Zone::LoadZoneObjects() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -188,7 +188,7 @@ bool Zone::LoadZoneObjects() {
 						"from object where zoneid=%i and (version=%u or version=-1)", 
 						zoneid, instanceversion);
 
-	if (database.RunQuery(query, errbuf, &result)) {
+	if (database.RunQuery(query, &errbuf, &result)) {
 		LogFile->write(EQEMuLog::Status, "Loading Objects from DB...");
 		while ((row = mysql_fetch_row(result))) {
 			if (atoi(row[9]) == 0)
@@ -306,7 +306,7 @@ bool Zone::LoadZoneObjects() {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error Loading Objects from DB: %s",errbuf);
+		LogFile->write(EQEMuLog::Error, "Error Loading Objects from DB: %s", errbuf.c_str());
 		return false;
 	}
 	return true;
@@ -487,7 +487,7 @@ void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
 
 //there should prolly be a temp counterpart of this...
 void Zone::LoadNewMerchantData(uint32 merchantid){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -498,7 +498,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 						"FROM merchantlist WHERE merchantid=%d", 
 						merchantid);
 
-	if (database.RunQuery(query, errbuf, &result)) {
+	if (database.RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result))) {
 			MerchantList ml;
 			ml.id = merchantid;
@@ -513,7 +513,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 		mysql_free_result(result);
 	}
 	else
-		LogFile->write(EQEMuLog::Error, "Error in LoadNewMerchantData query '%s' %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadNewMerchantData query '%s' %s", query.c_str(), errbuf.c_str());
 }
 
 void Zone::LoadMerchantData_result(MYSQL_RES* result) {
@@ -587,7 +587,6 @@ void Zone::GetMerchantDataForZoneLoad(){
 
 void Zone::LoadMercTemplates(){
 	std::string errorMessage;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 	std::list<MercStanceInfo> merc_stances;
@@ -596,8 +595,8 @@ void Zone::LoadMercTemplates(){
 	std::string query = "SELECT `class_id`, `proficiency_id`, `stance_id`, `isdefault` "
 						"FROM `merc_stance_entries` order by `class_id`, `proficiency_id`, `stance_id`";
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		// TODO: log this query individually here.
 	}
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -621,8 +620,8 @@ void Zone::LoadMercTemplates(){
 			"MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id "
 			"ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;";
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		// TODO: log this query individually here.
 	}
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -666,15 +665,14 @@ void Zone::LoadMercTemplates(){
 
 void Zone::LoadLevelEXPMods(){
 	std::string errorMessage;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 	level_exp_mod.clear();
 
 	std::string query = "SELECT level, exp_mod, aa_exp_mod FROM level_exp_mods";
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadEXPLevelMods()");
 	}
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -687,22 +685,18 @@ void Zone::LoadLevelEXPMods(){
 		mysql_free_result(DatasetResult);
 	}
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadEXPLevelMods()");
-	}
 }
 void Zone::LoadMercSpells(){
 
 	std::string errorMessage;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 	merc_spells_list.clear();
 
 	std::string query = "SELECT msl.class_id, msl.proficiency_id, msle.spell_id, msle.spell_type, msle.stance_id, msle.minlevel, msle.maxlevel, msle.slot, msle.procChance FROM merc_spell_lists msl, merc_spell_list_entries msle WHERE msle.merc_spell_list_id = msl.merc_spell_list_id ORDER BY msl.class_id, msl.proficiency_id, msle.spell_type, msle.minlevel, msle.slot;";
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadMercSpells()");
 	}
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -728,23 +722,20 @@ void Zone::LoadMercSpells(){
 			LogFile->write(EQEMuLog::Debug, "Mercenary Debug: Loaded %i merc spells.", merc_spells_list[1].size() + merc_spells_list[2].size() + merc_spells_list[9].size() + merc_spells_list[12].size());
 	}
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadMercSpells()");
-	}
 }
 
 void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 //	LogFile->write(EQEMuLog::Debug, "Zone work complete...");
 	switch (workpt_b1) {
 		case DBA_b1_Zone_MerchantLists: {
-			char errbuf[MYSQL_ERRMSG_SIZE];
+			std::string errbuf;
 			MYSQL_RES* result = 0;
 			DBAsyncQuery* dbaq = dbaw->PopAnswer();
 			if(dbaq == nullptr) {
 				LogFile->write(EQEMuLog::Error, "nullptr answer provided for async merchant list load.");
 				break;
 			}
-			if(!dbaq->GetAnswer(errbuf, &result)) {
+			if(!dbaq->GetAnswer(&errbuf, &result)) {
 				LogFile->write(EQEMuLog::Error, "Zone::DBAWComplete(): Unable to get results for merchant lists");
 				break;
 			}
@@ -759,14 +750,14 @@ void Zone::DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) {
 			break;
 		}
 		case DBA_b1_Zone_MerchantListsTemp: {
-			char errbuf[MYSQL_ERRMSG_SIZE];
+			std::string errbuf;
 			MYSQL_RES* result = 0;
 			DBAsyncQuery* dbaq = dbaw->PopAnswer();
 			if(dbaq == nullptr) {
 				LogFile->write(EQEMuLog::Error, "nullptr answer provided for async temp merchant list load.");
 				break;
 			}
-			if(!dbaq->GetAnswer(errbuf, &result)) {
+			if(!dbaq->GetAnswer(&errbuf, &result)) {
 				LogFile->write(EQEMuLog::Error, "Zone::DBAWComplete(): Unable to get results for temp merchant lists");
 				break;
 			}
@@ -1638,7 +1629,7 @@ ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Clien
 
 bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list, const char* zonename, uint32 version)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -1651,7 +1642,7 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 						"WHERE zone='%s' AND (version=%i OR version=-1) order by number", 
 						zonename, version);
 						
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -1682,12 +1673,12 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 }
 
 bool ZoneDatabase::DumpZoneState() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "DELETE FROM zone_state_dump WHERE zonename='%s'", zone->GetShortName());
 
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in DumpZoneState query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -1779,7 +1770,7 @@ bool ZoneDatabase::DumpZoneState() {
 	query.append("\')");
 
 	uint32 affected_rows = 0;
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, 0, &affected_rows)) {
 		std::cerr << "Error in ZoneDump query " << errbuf << std::endl;
 		return false;
 	}
@@ -1792,7 +1783,7 @@ bool ZoneDatabase::DumpZoneState() {
 }
 
 int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spawn2_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -1815,7 +1806,7 @@ int8 ZoneDatabase::LoadZoneState(const char* zonename, LinkedList<Spawn2*>& spaw
 						"npcs, npc_loot, gmspawntype, (UNIX_TIMESTAMP()-UNIX_TIMESTAMP(time)) "
 						"as elapsedtime FROM zone_state_dump WHERE zonename='%s'", zonename);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			std::cout << "Elapsed time: " << row[8] << std::endl;
@@ -2113,14 +2104,14 @@ bool Zone::RemoveSpawnGroup(uint32 in_id) {
 
 // Added By Hogie
 bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	int i = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query = "SELECT varname, value FROM variables WHERE varname like 'decaytime%%' ORDER BY varname";
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result))) {
 			Seperator sep(row[0]);
 			npcCorpseDecayTimes[i].minlvl = atoi(sep.arg[1]);
@@ -2323,14 +2314,14 @@ void Zone::SetInstanceTimer(uint32 new_duration)
 
 void Zone::LoadLDoNTraps()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query = "SELECT id, type, spell_id, "
 						"skill, locked FROM ldon_trap_templates";
 
-	if(database.RunQuery(query, errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -2347,20 +2338,20 @@ void Zone::LoadLDoNTraps()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTraps: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTraps: %s (%s)", query.c_str(), errbuf.c_str());
 		return;
 	}
 }
 
 void Zone::LoadLDoNTrapEntries()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query = "SELECT id, trap_id FROM ldon_trap_entries";
 
-	if(database.RunQuery(query,errbuf,&result)) {
+	if(database.RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result)))
 		{
 			uint32 id = atoi(row[0]);
@@ -2398,7 +2389,7 @@ void Zone::LoadLDoNTrapEntries()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTrapEntries: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadLDoNTrapEntries: %s (%s)", query.c_str(), errbuf.c_str());
 		return;
 	}
 }
@@ -2406,7 +2397,7 @@ void Zone::LoadLDoNTrapEntries()
 void Zone::LoadVeteranRewards()
 {
 	VeteranRewards.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	InternalVeteranReward current_reward;
@@ -2418,7 +2409,7 @@ void Zone::LoadVeteranRewards()
 						"veteran_reward_templates WHERE reward_slot < 8 "
 						"and claim_id > 0 ORDER by claim_id, reward_slot";
 
-	if(database.RunQuery(query,errbuf,&result))
+	if(database.RunQuery(query, &errbuf,&result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -2452,21 +2443,21 @@ void Zone::LoadVeteranRewards()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadVeteranRewards: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadVeteranRewards: %s (%s)", query.c_str(), errbuf.c_str());
 	}
 }
 
 void Zone::LoadAlternateCurrencies()
 {
 	AlternateCurrencies.clear();
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	AltCurrencyDefinition_Struct current_currency;
 
 	std::string query = "SELECT id, item_id from alternate_currency";
 
-	if(database.RunQuery(query,errbuf,&result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -2479,7 +2470,7 @@ void Zone::LoadAlternateCurrencies()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAlternateCurrencies: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAlternateCurrencies: %s (%s)", query.c_str(), errbuf.c_str());
 	}
 }
 
@@ -2515,13 +2506,13 @@ void Zone::DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 z
 
 void Zone::LoadAdventureFlavor()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query = "SELECT id, text FROM adventure_template_entry_flavor";
 
-	if(database.RunQuery(query,errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -2533,7 +2524,7 @@ void Zone::LoadAdventureFlavor()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAdventureFlavor: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadAdventureFlavor: %s (%s)", query.c_str(), errbuf.c_str());
 		return;
 	}
 }
@@ -2597,14 +2588,14 @@ void Zone::DoAdventureActions()
 
 void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	NPCEmoteList->Clear();
 
 	std::string query = "SELECT emoteid, event_, type, text FROM npc_emotes";
 
-	if(database.RunQuery(query, errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -2619,7 +2610,7 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadNPCEmotes: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadNPCEmotes: %s (%s)", query.c_str(), errbuf.c_str());
 	}
 }
 
@@ -2632,7 +2623,7 @@ void Zone::ReloadWorld(uint32 Option){
 
 void Zone::LoadTickItems()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2640,7 +2631,7 @@ void Zone::LoadTickItems()
 
 	query = "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick";
 
-	if(database.RunQuery(query, errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -2659,7 +2650,7 @@ void Zone::LoadTickItems()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadTickItems: %s (%s)", query.c_str(), errbuf.c_str());
 	}
 }
 
@@ -2680,7 +2671,7 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 
 void Zone::UpdateHotzone()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2688,7 +2679,7 @@ void Zone::UpdateHotzone()
 
 	StringFormat(query, "SELECT  hotzone FROM zone WHERE short_name = '%s'",GetShortName());
 
-	if(database.RunQuery(query, errbuf, &result) )
+	if(database.RunQuery(query, &errbuf, &result) )
 	{
 		if( (row = mysql_fetch_row(result)) )
 		{

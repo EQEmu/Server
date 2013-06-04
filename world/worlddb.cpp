@@ -35,7 +35,7 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 // solar: the current stuff is at the bottom of this function
 void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -58,7 +58,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 						"order by name limit 10", 
 						account_id);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while ((row = mysql_fetch_row(result))) {
 			lengths = mysql_fetch_lengths(result);
 			////////////
@@ -128,7 +128,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 											"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
 											pp->class_, pp->deity, pp->race);
 
-						RunQuery(query,errbuf,&result2);
+						RunQuery(query,&errbuf,&result2);
 
 						// if there is only one possible start city, set it
 						if(mysql_num_rows(result2) == 1) {
@@ -161,7 +161,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 
 						StringFormat(query,"SELECT extprofile FROM character_ WHERE id=%i",char_id);
 
-						RunQuery(query,errbuf, &result2);
+						RunQuery(query, &errbuf, &result2);
 						if(result2) {
 							row2 = mysql_fetch_row(result2);
 							ExtendedProfile_Struct* ext = (ExtendedProfile_Struct*)row2[0];
@@ -240,7 +240,7 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 	if (bindnum > 4)
 		bindnum = 0;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -251,7 +251,7 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 
 	StringFormat(query, "SELECT profile from character_ where id='%i'", CharID);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		unsigned long* lengths = mysql_fetch_lengths(result);
 		if (lengths[0] == sizeof(PlayerProfile_Struct)) {
@@ -271,7 +271,7 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 							BindZoneName, pp.binds[bindnum].zoneId, pp.binds[bindnum].x, pp.binds[bindnum].y, pp.binds[bindnum].z,
 							CharID);
 
-	if (!RunQuery(query, errbuf, nullptr,&affected_rows)) {
+	if (!RunQuery(query, &errbuf, nullptr,&affected_rows)) {
 
 		return pp.zone_id;
 	}
@@ -281,7 +281,7 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
 
 bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row = 0;
@@ -299,9 +299,9 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 						in_cc->start_zone, in_cc->class_,
 						in_cc->deity, in_cc->race);
 
-	if(!RunQuery(query, errbuf, &result))
+	if(!RunQuery(query, &errbuf, &result))
 	{
-		LogFile->write(EQEMuLog::Error, "Start zone query failed: %s : %s\n", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Start zone query failed: %s : %s\n", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
@@ -432,7 +432,7 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 	// For now, if no row matching row is found, send them to Crescent Reach, as that is probably the most likely
 	// reason for no match being found.
 	//
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row = 0;
@@ -450,9 +450,9 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 						in_cc->start_zone, in_cc->class_,
 						in_cc->deity, in_cc->race);
 
-	if(!RunQuery(query, errbuf, &result))
+	if(!RunQuery(query, &errbuf, &result))
 	{
-		LogFile->write(EQEMuLog::Status, "SoF Start zone query failed: %s : %s\n", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Status, "SoF Start zone query failed: %s : %s\n", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
@@ -497,7 +497,7 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 }
 
 void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -505,7 +505,7 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
 
 	std::string query = "SELECT name FROM launcher";
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while ((row = mysql_fetch_row(result))) {
 			rl.push_back(row[0]);
@@ -513,13 +513,13 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "WorldDatabase::GetLauncherList: %s", errbuf);
+		LogFile->write(EQEMuLog::Error, "WorldDatabase::GetLauncherList: %s", errbuf.c_str());
 	}
 }
 
 void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	char MailKeyString[17];
@@ -532,21 +532,21 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 	StringFormat(query, "UPDATE character_ SET mailkey = '%s' WHERE id='%i'",
 						MailKeyString, CharID);
 
-	if (!RunQuery(query, errbuf))
-		LogFile->write(EQEMuLog::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, errbuf);
+	if (!RunQuery(query, &errbuf))
+		LogFile->write(EQEMuLog::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, errbuf.c_str());
 
 }
 
 bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query, "SELECT level FROM character_ WHERE name='%s'", name);
 
-	if(RunQuery(query, errbuf, &result))
+	if(RunQuery(query, &errbuf, &result))
 	{
 		if(row = mysql_fetch_row(result))
 		{
@@ -558,7 +558,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "WorldDatabase::GetCharacterLevel: %s", errbuf);
+		LogFile->write(EQEMuLog::Error, "WorldDatabase::GetCharacterLevel: %s", errbuf.c_str());
 	}
 	return false;
 }
@@ -566,14 +566,14 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 bool WorldDatabase::LoadCharacterCreateAllocations() {
 	character_create_allocations.clear();
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query = "SELECT * FROM char_create_point_allocations order by id";
 
-	if(RunQuery(query, errbuf, &result)) {
+	if(RunQuery(query, &errbuf, &result)) {
 		while(row = mysql_fetch_row(result)) {
 			RaceClassAllocation allocate;
 			int r = 0;
@@ -605,13 +605,13 @@ bool WorldDatabase::LoadCharacterCreateAllocations() {
 bool WorldDatabase::LoadCharacterCreateCombos() {
 	character_create_race_class_combos.clear();
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query ="select * from char_create_combinations order by race, class, deity, start_zone";
 
-	if(RunQuery(query, errbuf, &result)) {
+	if(RunQuery(query, &errbuf, &result)) {
 		while(row = mysql_fetch_row(result)) {
 			RaceClassCombos combo;
 			int r = 0;

@@ -28,7 +28,7 @@
 
 /*
 void Database::GetGuildMembers(uint32 guild_id, GuildMember_Struct* gms){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -51,7 +51,7 @@ void Database::GetGuildMembers(uint32 guild_id, GuildMember_Struct* gms){
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetGuildMembers query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in GetGuildMembers query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 	}
 	gms->count=count;
@@ -59,7 +59,7 @@ void Database::GetGuildMembers(uint32 guild_id, GuildMember_Struct* gms){
 }
 
 uint32 Database::NumberInGuild(uint32 guild_id) {
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		char *query = 0;
 		MYSQL_RES *result;
 		MYSQL_ROW row;
@@ -75,14 +75,14 @@ uint32 Database::NumberInGuild(uint32 guild_id) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in NumberInGuild query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in NumberInGuild query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 		return 0;
 	}
 	return 0;
 }
 bool Database::SetGuild(char* name, uint32 guild_id, uint8 guildrank) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	uint32 affected_rows = 0;
 
@@ -94,7 +94,7 @@ bool Database::SetGuild(char* name, uint32 guild_id, uint8 guildrank) {
 			return false;
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in SetGuild query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in SetGuild query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 		return false;
 	}
@@ -102,7 +102,7 @@ bool Database::SetGuild(char* name, uint32 guild_id, uint8 guildrank) {
 }
 
 bool Database::SetGuild(uint32 charid, uint32 guild_id, uint8 guildrank) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	uint32 affected_rows = 0;
 
@@ -115,7 +115,7 @@ bool Database::SetGuild(uint32 charid, uint32 guild_id, uint8 guildrank) {
 			return false;
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in SetGuild query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in SetGuild query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 		return false;
 	}
@@ -125,7 +125,7 @@ bool Database::SetGuild(uint32 charid, uint32 guild_id, uint8 guildrank) {
 
 bool Database::DeleteGuild(uint32 guild_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	char *query2 = 0;
 	uint32 affected_rows = 0;
@@ -142,7 +142,7 @@ bool Database::DeleteGuild(uint32 guild_id)
 			return false;
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in DeleteGuild query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in DeleteGuild query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 		return false;
 	}
@@ -151,7 +151,7 @@ bool Database::DeleteGuild(uint32 guild_id)
 }
 
 bool Database::RenameGuild(uint32 guild_id, const char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	uint32 affected_rows = 0;
 	char buf[65];
@@ -165,7 +165,7 @@ bool Database::RenameGuild(uint32 guild_id, const char* name) {
 			return false;
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in RenameGuild query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in RenameGuild query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 		return false;
 	}
@@ -177,7 +177,7 @@ bool Database::RenameGuild(uint32 guild_id, const char* name) {
 
 bool Database::EditGuild(uint32 guild_id, uint8 ranknum, GuildRankLevel_Struct* grl)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	int chars = 0;
 	uint32 affected_rows = 0;
@@ -206,7 +206,7 @@ bool Database::EditGuild(uint32 guild_id, uint8 ranknum, GuildRankLevel_Struct* 
 			return false;
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in EditGuild query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in EditGuild query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 		return false;
 	}
@@ -216,7 +216,7 @@ bool Database::EditGuild(uint32 guild_id, uint8 ranknum, GuildRankLevel_Struct* 
 
 bool Database::GetGuildNameByID(uint32 guild_id, char * name) {
 	if (!name || !guild_id) return false;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -230,7 +230,7 @@ bool Database::GetGuildNameByID(uint32 guild_id, char * name) {
 		return true;
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetGuildNameByID query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in GetGuildNameByID query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 		return false;
 	}
@@ -240,7 +240,7 @@ bool Database::GetGuildNameByID(uint32 guild_id, char * name) {
 
 uint32 Database::GetGuildIDbyLeader(uint32 leader)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -257,7 +257,7 @@ uint32 Database::GetGuildIDbyLeader(uint32 leader)
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in Getguild_idbyLeader query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Getguild_idbyLeader query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 	}
 
@@ -266,7 +266,7 @@ uint32 Database::GetGuildIDbyLeader(uint32 leader)
 
 bool Database::SetGuildLeader(uint32 guild_id, uint32 leader)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	uint32 affected_rows = 0;
 
@@ -278,7 +278,7 @@ bool Database::SetGuildLeader(uint32 guild_id, uint32 leader)
 			return false;
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in SetGuildLeader query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in SetGuildLeader query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 		return false;
 	}
@@ -287,7 +287,7 @@ bool Database::SetGuildLeader(uint32 guild_id, uint32 leader)
 }
 
 bool Database::SetGuildMOTD(uint32 guild_id, const char* motd) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	char* motdbuf = 0;
 	uint32 affected_rows = 0;
@@ -306,7 +306,7 @@ bool Database::SetGuildMOTD(uint32 guild_id, const char* motd) {
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in SetGuildMOTD query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in SetGuildMOTD query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 		delete motdbuf;
 		return false;
@@ -317,7 +317,7 @@ bool Database::SetGuildMOTD(uint32 guild_id, const char* motd) {
 
 string Database::GetGuildMOTD(uint32 guild_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -332,7 +332,7 @@ string Database::GetGuildMOTD(uint32 guild_id)
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetGuildMOTD query '%s': %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in GetGuildMOTD query '%s': %s", query, &errbuf);
 		safe_delete_array(query);
 	}
 	return motd_str;

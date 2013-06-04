@@ -11,13 +11,11 @@
 #include "dbcore.h"
 #include <string.h>
 #include "../common/MiscFunctions.h"
+#include "../common/StringUtil.h"
 #include <cstdlib>
 #include <string>
 
 #ifdef _WINDOWS
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
 	#include <process.h>
 #else
 	#include "unix.h"
@@ -59,12 +57,10 @@ void DBcore::ping() {
 	MDatabase.unlock();
 }
 
-bool DBcore::RunQuery(const std::string& query, char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum, bool retry) {
+bool DBcore::RunQuery(const std::string& query, std::string* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum, bool retry) {
 	_CP(DBcore_RunQuery);
 	if (errnum)
 		*errnum = 0;
-	if (errbuf)
-		errbuf[0] = 0;
 	bool ret = false;
 	LockMutex lock(&MDatabase);
 	if (pStatus != Connected)
@@ -89,7 +85,10 @@ bool DBcore::RunQuery(const std::string& query, char* errbuf, MYSQL_RES** result
 				if (errnum)
 					*errnum = mysql_errno(&mysql);
 				if (errbuf)
-					snprintf(errbuf, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+				{
+					StringFormat(*errbuf,"#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+				}
+					
 				std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
 				ret = false;
 			}
@@ -98,7 +97,10 @@ bool DBcore::RunQuery(const std::string& query, char* errbuf, MYSQL_RES** result
 			if (errnum)
 				*errnum = mysql_errno(&mysql);
 			if (errbuf)
-				snprintf(errbuf, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+			{
+				StringFormat(*errbuf, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+			}
+				
 #ifdef _EQDEBUG
 			std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
 #endif
@@ -129,7 +131,7 @@ bool DBcore::RunQuery(const std::string& query, char* errbuf, MYSQL_RES** result
 				if (errnum)
 					*errnum = UINT_MAX;
 				if (errbuf)
-					strcpy(errbuf, "DBcore::RunQuery: No Result");
+					errbuf->assign("DBcore::RunQuery: No Result");
 				ret = false;
 			}
 		}
@@ -162,7 +164,7 @@ void DBcore::DoEscapeString(std::string& outString, const char* frombuf, uint32 
 	safe_delete_array(tobuf);
 }
 
-bool DBcore::Open(const char* iHost, const char* iUser, const char* iPassword, const char* iDatabase,uint32 iPort, uint32* errnum, char* errbuf, bool iCompress, bool iSSL) {
+bool DBcore::Open(const char* iHost, const char* iUser, const char* iPassword, const char* iDatabase,uint32 iPort, uint32* errnum, std::string* errbuf, bool iCompress, bool iSSL) {
 	LockMutex lock(&MDatabase);
 	safe_delete(pHost);
 	safe_delete(pUser);
@@ -178,9 +180,7 @@ bool DBcore::Open(const char* iHost, const char* iUser, const char* iPassword, c
 	return Open(errnum, errbuf);
 }
 
-bool DBcore::Open(uint32* errnum, char* errbuf) {
-	if (errbuf)
-		errbuf[0] = 0;
+bool DBcore::Open(uint32* errnum, std::string* errbuf) {
 	LockMutex lock(&MDatabase);
 	if (GetStatus() == Connected)
 		return true;
@@ -208,7 +208,10 @@ bool DBcore::Open(uint32* errnum, char* errbuf) {
 		if (errnum)
 			*errnum = mysql_errno(&mysql);
 		if (errbuf)
-			snprintf(errbuf, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+		{
+			StringFormat(*errbuf, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+		}
+			
 		pStatus = Error;
 		return false;
 	}

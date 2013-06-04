@@ -143,7 +143,7 @@ public:
 	DBAsyncQuery(uint32 iQPT, std::string iQuery, bool iGetResultSet = true, bool iGetErrbuf = true);
 	~DBAsyncQuery();
 
-	bool	GetAnswer(char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0);
+	bool	GetAnswer(std::string* errbuf = nullptr, MYSQL_RES** result = nullptr, uint32* affected_rows = nullptr, uint32* last_insert_id = nullptr, uint32* errnum = nullptr);
 	inline uint32 QPT()	{ return pQPT; }
 protected:
 	friend class DBAsyncWork;
@@ -155,15 +155,15 @@ protected:
 	void		Init(uint32 iQPT, bool iGetResultSet, bool iGetErrbuf);
 	DBAsync::Status pstatus;
 	std::string		pQuery;
-	bool		pGetResultSet;
-	bool		pGetErrbuf;
+	bool			pGetResultSet;
+	bool			pGetErrbuf;
 
-	bool		pmysqlsuccess;
-	char*		perrbuf;
-	uint32		perrnum;
-	uint32		paffected_rows;
-	uint32		plast_insert_id;
-	MYSQL_RES*	presult;
+	bool			pmysqlsuccess;
+	std::string*	perrbuf;
+	uint32			perrnum;
+	uint32			paffected_rows;
+	uint32			plast_insert_id;
+	MYSQL_RES*		presult;
 };
 
 

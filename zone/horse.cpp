@@ -71,14 +71,14 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 
 	char mount_color = 0;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query, "SELECT race,gender,texture,mountspeed FROM horses WHERE filename='%s'", FileName);
 
-	if (database.RunQuery(query,errbuf, &result)) {
+	if (database.RunQuery(query, &errbuf, &result)) {
 
 		if (mysql_num_rows(result) == 1) {
 
@@ -125,7 +125,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 		return nullptr;
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in Mount query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in Mount query '%s': %s", query.c_str(), errbuf.c_str());
 		return nullptr;
 	}
 

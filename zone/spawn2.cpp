@@ -354,7 +354,7 @@ void Spawn2::DeathReset(bool realdeath)
 }
 
 bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -366,7 +366,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 						"WHERE zone='%s' AND version=%u", 
 						zone_name, version);
 	
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -381,7 +381,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in PopulateZoneLists query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in PopulateZoneLists query '%s': %s", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
@@ -390,7 +390,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 
 Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -399,7 +399,7 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 						"variance, pathgrid, _condition, cond_value, enabled, animation "
 						"FROM spawn2 WHERE id=%i", spawn2id);
 
-	if (RunQuery(query,  errbuf, &result))	{
+	if (RunQuery(query, &errbuf, &result))	{
 		if (mysql_num_rows(result) == 1)
 		{
 			row = mysql_fetch_row(result);
@@ -412,13 +412,13 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 		mysql_free_result(result);
 	}
 
-	LogFile->write(EQEMuLog::Error, "Error in LoadSpawn2 query '%s': %s", query.c_str(), errbuf);
+	LogFile->write(EQEMuLog::Error, "Error in LoadSpawn2 query '%s': %s", query.c_str(), errbuf.c_str());
 	return 0;
 }
 
 bool ZoneDatabase::CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, float heading, float x, float y, float z, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 
 	std::string query;
 	uint32 affected_rows = 0;
@@ -433,7 +433,7 @@ bool ZoneDatabase::CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, 
 						"Values (%i, '%s', %f, %f, %f, %f, %i, %i, %u, %i)",
 						spawngroup, zone, x, y, z, heading, respawn, variance, condition, cond_value);
 		
-	if (RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (RunQuery(query, &errbuf, 0, &affected_rows)) {
 		if (affected_rows == 1) {
 			if(c) c->LogSQL(query.c_str());
 				return true;
@@ -443,7 +443,7 @@ bool ZoneDatabase::CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, 
 		}
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in CreateSpawn2 query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in CreateSpawn2 query '%s': %s", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
@@ -682,7 +682,7 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 }
 
 void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	char* query = 0;
 	int len;
 
@@ -695,14 +695,14 @@ void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
 		event.next.minute, event.next.hour, event.next.day, event.next.month,
 		event.next.year, event.enabled?1:0, event.id
 	);
-	if(!database.RunQuery(query, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to update spawn event '%s': %s\n", query, errbuf);
+	if(!database.RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Unable to update spawn event '%s': %s\n", query, &errbuf);
 	}
 	safe_delete_array(query);
 }
 
 void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	int len;
 
@@ -712,13 +712,13 @@ void SpawnConditionManager::UpdateDBCondition(const char* zone_name, uint32 inst
 						"VALUES(%u, %u, '%s', %u)",
 						cond_id, value, zone_name, instance_id);
 						
-	if(!database.RunQuery(query, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to update spawn condition '%s': %s\n", query.c_str(), errbuf);
+	if(!database.RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Unable to update spawn condition '%s': %s\n", query.c_str(), errbuf.c_str());
 	}
 }
 
 bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std::string &zone_name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -733,7 +733,7 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
 						"FROM spawn_events WHERE id=%d", 
 						event_id);
 						
-	if (database.RunQuery(query,errbuf, &result)) {
+	if (database.RunQuery(query, &errbuf, &result)) {
 		if((row = mysql_fetch_row(result))) {
 			event.id = atoi(row[0]);
 			event.condition_id = atoi(row[1]);
@@ -759,14 +759,14 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadDBEvent query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadDBEvent query '%s': %s", query.c_str(), errbuf.c_str());
 	}
 	return(ret);
 }
 
 bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -780,7 +780,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	
 	StringFormat(query, "SELECT id, onchange, value FROM spawn_conditions WHERE zone='%s'", zone_name);
 	
-	if (database.RunQuery(query, errbuf, &result)) {
+	if (database.RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result))) {
 			cond.condition_id = atoi(row[0]);
 			cond.value = atoi(row[2]);
@@ -791,14 +791,14 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
 	//load values
 	StringFormat(query, "SELECT id, value FROM spawn_condition_values WHERE zone='%s' and instance_id=%u", zone_name, instance_id);
 	
-	if (database.RunQuery(query, errbuf, &result)) {
+	if (database.RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result)))
 		{
 			std::map<uint16, SpawnCondition>::iterator iter = spawn_conditions.find(atoi(row[0]));
@@ -811,7 +811,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions query '%s': %s", query.c_str(), errbuf.c_str());
 		spawn_conditions.clear();
 		return false;
 	}
@@ -823,7 +823,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 							"FROM spawn_events WHERE zone='%s'", 
 							zone_name);
 						
-	if (database.RunQuery(query,errbuf, &result)) {
+	if (database.RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result))) {
 			event.id = atoi(row[0]);
 			event.condition_id = atoi(row[1]);
@@ -849,7 +849,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 		}
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions events query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadSpawnConditions events query '%s': %s", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
@@ -1160,7 +1160,7 @@ int16 SpawnConditionManager::GetCondition(const char *zone_short, uint32 instanc
 		return(cond.value);
 	} else {
 		//this is a remote spawn condition, grab it from the DB
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		MYSQL_RES *result;
 		MYSQL_ROW row;
@@ -1174,7 +1174,7 @@ int16 SpawnConditionManager::GetCondition(const char *zone_short, uint32 instanc
 							"WHERE zone='%s' AND instance_id=%u AND id=%d",
 							zone_short, instance_id, condition_id);
 							
-		if (database.RunQuery(query, errbuf, &result)) {
+		if (database.RunQuery(query, &errbuf, &result)) {
 			if((row = mysql_fetch_row(result))) {
 				value = atoi(row[0]);
 			} else {

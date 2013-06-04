@@ -730,7 +730,7 @@ void Client::SetZoneFlag(uint32 zone_id) {
 	zone_flags.insert(zone_id);
 
 	//update the DB
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	// Retrieve all waypoints for this grid
@@ -738,8 +738,8 @@ void Client::SetZoneFlag(uint32 zone_id) {
 	StringFormat(query, "INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)",
 						CharacterID(),zone_id);
 	
-	if(!database.RunQuery(query, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), errbuf);
+	if(!database.RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), errbuf.c_str());
 	}
 }
 
@@ -750,7 +750,7 @@ void Client::ClearZoneFlag(uint32 zone_id) {
 	zone_flags.erase(zone_id);
 
 	//update the DB
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	// Retrieve all waypoints for this grid
@@ -758,13 +758,13 @@ void Client::ClearZoneFlag(uint32 zone_id) {
 	StringFormat(query, "DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d",
 						CharacterID(),zone_id);
 	
-	if(!database.RunQuery(query,errbuf)) {
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), errbuf);
+	if(!database.RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), errbuf.c_str());
 	}
 }
 
 void Client::LoadZoneFlags() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -774,7 +774,7 @@ void Client::LoadZoneFlags() {
 	StringFormat(query,"SELECT zoneID from zone_flags WHERE charID=%d",
 						CharacterID());
 	
-	if(database.RunQuery(query,errbuf,&result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result))) {
 			zone_flags.insert(atoi(row[0]));
@@ -783,7 +783,7 @@ void Client::LoadZoneFlags() {
 	}
 	else	// DB query error!
 	{
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), errbuf);
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), errbuf.c_str());
 	}
 }
 

@@ -15,7 +15,7 @@ void DispatchFinishedDBAsync(DBAsyncWork* dbaw) {
 /*		case DBA_b4_Main: {
 			switch (workpt.i24_1()) {
 				case DBA_i24_1_Main_LoadVariables: {
-					char errbuf[MYSQL_ERRMSG_SIZE];
+					std::string errbuf;
 					MYSQL_RES* result;
 					DBAsyncQuery* dbaq = dbaw->PopAnswer();
 					if (dbaq->GetAnswer(errbuf, result))
@@ -54,7 +54,7 @@ void DispatchFinishedDBAsync(DBAsyncWork* dbaw) {
 #define MAX_TO_DELETE	10
 #define MAX_BACKUPS		5
 bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete data
-	char errbuf[MYSQL_ERRMSG_SIZE] = "dbaq == 0";
+	std::string errbuf = "dbaq == 0";
 	MYSQL_RES* result = 0;
 	MYSQL_ROW row;
 	std::string query;
@@ -73,7 +73,7 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 	BackupAges[1] = 3600;
 
 	DBAsyncQuery* dbaq = iWork->PopAnswer();
-	if (dbaq && dbaq->GetAnswer(errbuf, &result)) {
+	if (dbaq && dbaq->GetAnswer(&errbuf, &result)) {
 		while ((row = mysql_fetch_row(result))) {
 			for (i=0; i<MAX_BACKUPS; i++) {
 				if (BackupAges[i] == 0 || (uint32)atoi(row[1]) > BackupAges[i])
@@ -102,8 +102,8 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 				query.append(toAppend);
 				
 			}
-			if (!database.RunQuery(query, errbuf)) {
-				LogFile->write(EQEMuLog::Error, "Error in DBAsyncCB_CharacterBackup query2 '%s' %s", query.c_str(), errbuf);
+			if (!database.RunQuery(query, &errbuf)) {
+				LogFile->write(EQEMuLog::Error, "Error in DBAsyncCB_CharacterBackup query2 '%s' %s", query.c_str(), errbuf.c_str());
 				return true;
 			}
 		}
@@ -119,7 +119,7 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 								"select id, account_id, name, profile, level, class, x, y, z, zoneid "
 								"from character_ where id=%u", iWork->WPT());
 			
-			if (!database.RunQuery(query, errbuf)) {
+			if (!database.RunQuery(query, &errbuf)) {
 				std::cout << "Error in DBAsyncCB_CharacterBackup query3 '" << query << "' " << errbuf << std::endl;
 				return true;
 			}

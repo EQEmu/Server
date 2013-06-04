@@ -34,7 +34,7 @@ GuildLookingForPlayers::GuildLookingForPlayers(char *Name, char *Comments, uint3
 
 bool LFGuildManager::LoadDatabase()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -42,9 +42,9 @@ bool LFGuildManager::LoadDatabase()
 						"`tolevel`, `classes`, `aacount`, `timezone`, "
 						"`timeposted` FROM `lfguild`";
 
-	if (!database.RunQuery(query,errbuf,&result)){
+	if (!database.RunQuery(query, &errbuf, &result)){
 
-		_log(QUERYSERV__ERROR, "Failed to load LFGuild info from database. %s %s", query.c_str(), errbuf);
+		_log(QUERYSERV__ERROR, "Failed to load LFGuild info from database. %s %s", query.c_str(), errbuf.c_str());
 
 		return false;
 	}
@@ -243,7 +243,7 @@ void LFGuildManager::SendGuildMatches(uint32 FromZoneID, uint32 FromInstanceID, 
 
 void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char *From, uint32 Class, uint32 Level, uint32 AAPoints, char *Comments, uint32 Toggle, uint32 TimeZone)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	std::list<PlayerLookingForGuild>::iterator it;
@@ -260,8 +260,8 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 
 	StringFormat(query,"DELETE FROM `lfguild` WHERE `type` = 0 AND `name` = '%s'", From);
 
-	if(!database.RunQuery(query, errbuf, 0, 0))
-		_log(QUERYSERV__ERROR, "Error removing player from LFGuild table, query was %s, %s", query.c_str(), errbuf);
+	if(!database.RunQuery(query, &errbuf, 0, 0))
+		_log(QUERYSERV__ERROR, "Error removing player from LFGuild table, query was %s, %s", query.c_str(), errbuf.c_str());
 
 
 	uint32 Now = time(nullptr);
@@ -276,8 +276,8 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 							"VALUES(0, '%s', '%s', %u, 0, %u, %u, %u, %u)", 
 							From, Comments, Level, Class, AAPoints, TimeZone, Now);
 
-		if(!database.RunQuery(query, errbuf, nullptr, nullptr))
-			_log(QUERYSERV__ERROR, "Error inserting player into LFGuild table, query was %s, %s", query.c_str(), errbuf);
+		if(!database.RunQuery(query, &errbuf, nullptr, nullptr))
+			_log(QUERYSERV__ERROR, "Error inserting player into LFGuild table, query was %s, %s", query.c_str(), errbuf.c_str());
 
 	}
 
@@ -300,7 +300,7 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
 
 void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char *From, char* GuildName, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Toggle, uint32 TimeZone)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	std::list<GuildLookingForPlayers>::iterator it;
@@ -316,8 +316,8 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 
 	StringFormat(query,"DELETE FROM `lfguild` WHERE `type` = 1 AND `name` = '%s'", GuildName);
 
-	if(!database.RunQuery(query, errbuf, 0, 0))
-		_log(QUERYSERV__ERROR, "Error removing guild from LFGuild table, query was %s, %s", query.c_str(), errbuf);
+	if(!database.RunQuery(query, &errbuf))
+		_log(QUERYSERV__ERROR, "Error removing guild from LFGuild table, query was %s, %s", query.c_str(), errbuf.c_str());
 
 
 	uint32 Now = time(nullptr);
@@ -333,8 +333,8 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 							GuildName, Comments, FromLevel, ToLevel, Classes, 
 							AACount, TimeZone, Now);
 
-		if(!database.RunQuery(query, errbuf, 0, 0))
-			_log(QUERYSERV__ERROR, "Error inserting guild into LFGuild table, query was %s, %s", query.c_str(), errbuf);
+		if(!database.RunQuery(query, &errbuf))
+			_log(QUERYSERV__ERROR, "Error inserting guild into LFGuild table, query was %s, %s", query.c_str(), errbuf.c_str());
 
 
 	}
@@ -356,7 +356,7 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 
 void LFGuildManager::ExpireEntries()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	std::list<PlayerLookingForGuild>::iterator it;
@@ -369,8 +369,8 @@ void LFGuildManager::ExpireEntries()
 
 			StringFormat(query, "DELETE from `lfguild` WHERE `type` = 0 AND `name` = '%s'", (*it).Name.c_str());
 
-			if(!database.RunQuery(query, errbuf, 0, 0))
-				_log(QUERYSERV__ERROR, "Error expiring player LFGuild entry, query was %s, %s", query.c_str(), errbuf);
+			if(!database.RunQuery(query, &errbuf))
+				_log(QUERYSERV__ERROR, "Error expiring player LFGuild entry, query was %s, %s", query.c_str(), errbuf.c_str());
 
 
 			it = Players.erase(it);
@@ -383,8 +383,8 @@ void LFGuildManager::ExpireEntries()
 		{
 			StringFormat(query, "DELETE from `lfguild` WHERE `type` = 1 AND `name` = '%s'", (*it2).Name.c_str());
 
-			if(!database.RunQuery(query, errbuf, 0, 0))
-				_log(QUERYSERV__ERROR, "Error removing guild LFGuild entry, query was %s, %s", query.c_str(), errbuf);
+			if(!database.RunQuery(query, &errbuf))
+				_log(QUERYSERV__ERROR, "Error removing guild LFGuild entry, query was %s, %s", query.c_str(), errbuf.c_str());
 
 
 			it2 = Guilds.erase(it2);

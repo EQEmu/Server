@@ -139,7 +139,7 @@ void QGlobalCache::PurgeExpiredGlobals()
 
 void QGlobalCache::LoadByNPCID(uint32 npcID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -147,7 +147,7 @@ void QGlobalCache::LoadByNPCID(uint32 npcID)
 	StringFormat(query,"select name, charid, npcid, zoneid, value, expdate"
 						" from quest_globals where npcid = %d", npcID);
 
-	if (database.RunQuery(query, errbuf, &result))
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -159,7 +159,7 @@ void QGlobalCache::LoadByNPCID(uint32 npcID)
 
 void QGlobalCache::LoadByCharID(uint32 charID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -168,7 +168,7 @@ void QGlobalCache::LoadByCharID(uint32 charID)
 						"quest_globals where charid = %d && npcid = 0", 
 						charID);
 
-	if (database.RunQuery(query,  errbuf, &result))
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -180,7 +180,7 @@ void QGlobalCache::LoadByCharID(uint32 charID)
 
 void QGlobalCache::LoadByZoneID(uint32 zoneID)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -188,7 +188,7 @@ void QGlobalCache::LoadByZoneID(uint32 zoneID)
 	StringFormat(query,"select name, charid, npcid, zoneid, value, expdate from quest_globals"
 						" where zoneid = %d && npcid = 0 && charid = 0", zoneID);
 
-	if (database.RunQuery(query, errbuf, &result))
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -199,7 +199,7 @@ void QGlobalCache::LoadByZoneID(uint32 zoneID)
 }
 void QGlobalCache::LoadByGlobalContext()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -207,7 +207,7 @@ void QGlobalCache::LoadByGlobalContext()
 	query = "select name, charid, npcid, zoneid, value, expdate from quest_globals"
 			" where zoneid = 0 && npcid = 0 && charid = 0";
 
-	if (database.RunQuery(query, errbuf, &result))
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{

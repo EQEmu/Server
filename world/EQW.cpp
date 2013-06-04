@@ -384,13 +384,13 @@ bool EQW::SetPublicNote(uint32 charid, const char *note) {
 }
 
 int EQW::CountBugs() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
 	std::string query = "SELECT count(*) FROM bugs where status = 0";
 	
-	if(database.RunQuery(query, errbuf, &result)) {
+	if(database.RunQuery(query, &errbuf, &result)) {
 		if((row = mysql_fetch_row(result))) {
 			int count = atoi(row[0]);
 			mysql_free_result(result);
@@ -403,14 +403,14 @@ int EQW::CountBugs() {
 
 std::vector<std::string> EQW::ListBugs(uint32 offset) {
 	std::vector<std::string> res;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
 	StringFormat(query,"SELECT id FROM bugs WHERE status = 0 limit %d, 30", offset);
 	
-	if(database.RunQuery(query, errbuf, &result)) {
+	if(database.RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result))) {
 			res.push_back(row[0]);
 		}
@@ -421,14 +421,14 @@ std::vector<std::string> EQW::ListBugs(uint32 offset) {
 
 std::map<std::string,std::string> EQW::GetBugDetails(Const_char *id) {
 	std::map<std::string,std::string> res;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
 	StringFormat(query,"select name, zone, x, y, z, target, bug from bugs where id = %s", id);
 	
-	if(database.RunQuery(query, errbuf, &result)) {
+	if(database.RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result))) {
 			res["name"] = row[0];
 			res["zone"] = row[1];
@@ -446,12 +446,12 @@ std::map<std::string,std::string> EQW::GetBugDetails(Const_char *id) {
 
 void EQW::ResolveBug(const char *id) {
 	std::vector<std::string> res;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	
 	StringFormat(query,"UPDATE bugs SET status=1 WHERE id=%s", id);
 	
-	if(!database.RunQuery(query, errbuf)) {
+	if(!database.RunQuery(query, &errbuf)) {
 		// TODO: log failed statement.
 	}
 }

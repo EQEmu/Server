@@ -569,7 +569,7 @@ void Doors::DumpDoor(){
 }
 
 int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -577,7 +577,7 @@ int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 v
 	
 	StringFormat(query,"SELECT MAX(id), count(*) FROM doors WHERE zone='%s' AND (version=%u OR version=-1)",zone_name, version);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		if (row != nullptr && row[1] != 0) {
 			int32 ret = atoi(row[1]);
@@ -601,7 +601,7 @@ int32 ZoneDatabase::GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 v
 }
 
 int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 oMaxID = 0;
 
@@ -611,7 +611,7 @@ int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
 
 	StringFormat(query, "SELECT MAX(id) FROM doors WHERE zone='%s' AND version=%u", zone_name, version);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		if (row != nullptr && row[1] != 0) {
 				if (row[0])
@@ -632,7 +632,7 @@ int32 ZoneDatabase::GetDoorsCountPlusOne(const char *zone_name, int16 version) {
 }
 
 int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 oMaxID = 0;
 
@@ -641,7 +641,7 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 	
 	StringFormat(query, "SELECT MAX(doorid) FROM doors WHERE zone='%s' AND (version=%u OR version=-1)", zone_name, version);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		if (row != nullptr && row[1] != 0) {
 				if (row[0])
@@ -663,7 +663,7 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 
 bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name, int16 version) {
 	LogFile->write(EQEMuLog::Status, "Loading Doors from database...");
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -677,7 +677,7 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 						"FROM doors WHERE zone='%s' AND (version=%u OR version=-1) "
 						"ORDER BY doorid asc", zone_name, version);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		int32 r;
 		for(r = 0; (row = mysql_fetch_row(result)); r++) {
 			if(r >= iDoorCount) {

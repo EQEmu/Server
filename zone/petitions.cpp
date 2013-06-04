@@ -216,7 +216,7 @@ void PetitionList::UpdatePetition(Petition* pet) {
 }
 
 void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 	uint8 checkedout = 0;
@@ -228,15 +228,15 @@ void ZoneDatabase::DeletePetitionFromDB(Petition* wpet) {
 		
 	StringFormat(query, "DELETE from petitions where petid = %i", wpet->GetID());
 		
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in DeletePetitionFromDB query '%s': %s", query.c_str(), errbuf);
+	if (!RunQuery(query, &errbuf, 0, &affected_rows)) {
+		LogFile->write(EQEMuLog::Error, "Error in DeletePetitionFromDB query '%s': %s", query.c_str(), errbuf.c_str());
 	}
 
 	return;
 }
 
 void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 	uint8 checkedout = 0;
@@ -250,8 +250,8 @@ void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
 						wpet->GetGMText(), wpet->GetLastGM(), wpet->GetUrgency(), 
 						wpet->GetCheckouts(), wpet->GetUnavails(), checkedout, wpet->GetID());
 		
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in UpdatePetitionToDB query '%s': %s", query.c_str(), errbuf);
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
+		LogFile->write(EQEMuLog::Error, "Error in UpdatePetitionToDB query '%s': %s", query.c_str(), errbuf.c_str());
 	}
 	return;
 }
@@ -260,7 +260,7 @@ void ZoneDatabase::UpdatePetitionToDB(Petition* wpet) {
 
 void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 	uint8 checkedout = 0;
@@ -282,8 +282,8 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 						wpet->GetCharRace(), wpet->GetCharLevel(), wpet->GetCheckouts(), 
 						wpet->GetUnavails(), checkedout, wpet->GetSentTime(), wpet->GetGMText());
 	
-	if (!RunQuery(query,  errbuf, 0, &affected_rows)) {
-		LogFile->write(EQEMuLog::Error, "Error in InsertPetitionToDB query '%s': %s", query.c_str(), errbuf);
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
+		LogFile->write(EQEMuLog::Error, "Error in InsertPetitionToDB query '%s': %s", query.c_str(), errbuf.c_str());
 	}
 
 #if EQDEBUG >= 5
@@ -294,7 +294,7 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 
 void ZoneDatabase::RefreshPetitionsFromDB()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -305,7 +305,7 @@ void ZoneDatabase::RefreshPetitionsFromDB()
 			"charlevel, checkouts, unavailables, ischeckedout, "
 			"senttime, gmtext from petitions order by petid";
 	
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while ((row = mysql_fetch_row(result))) {
 			newpet = new Petition(atoi(row[0]));
@@ -334,7 +334,7 @@ void ZoneDatabase::RefreshPetitionsFromDB()
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in RefreshPetitionsFromDB query '%s': %s", query.c_str(), errbuf.c_str());
 		return;
 	}
 

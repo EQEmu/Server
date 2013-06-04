@@ -1467,7 +1467,6 @@ void Bot::GenerateAABonuses(StatBonuses* newbon) {
 void Bot::LoadAAs() {
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
@@ -1479,10 +1478,11 @@ void Bot::LoadAAs() {
 	else
 		StringFormat(query,"SELECT skill_id FROM altadv_vars WHERE ((classes & ( 1 << %i )) >> %i) = 1 AND class_type > 1 AND class_type <= %i AND aa_expansion <= %i ORDER BY skill_id;", GetClass(), GetClass(), GetLevel(), maxAAExpansion);
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) 
+	{
+		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadAAs(). Error Message: %s",errorMessage.c_str());
 	}
-	else {
+	{
 		int totalAAs = database.CountAAs();
 
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -1537,10 +1537,6 @@ void Bot::LoadAAs() {
 		mysql_free_result(DatasetResult);
 	}
 
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadAAs()");
-	}
 }
 
 uint32 Bot::GetAA(uint32 aa_id) {
@@ -2349,14 +2345,15 @@ bool Bot::IsBotNameAvailable(std::string* errorMessage) {
 
 	if(this->GetCleanName()) {
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+		std::string errorMessageBuffer;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"SELECT COUNT(id) FROM vwBotCharacterMobs WHERE name LIKE '%s'", this->GetCleanName());
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessageBuffer, &DatasetResult)) {
+			// probably was supposed to *do* something with the error message here.
+			// TODO: log error.
 		}
 		else {
 			uint32 ExistingNameCount = 0;
@@ -2381,7 +2378,7 @@ bool Bot::Save() {
 	std::string errorMessage;
 
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+	
 	uint32 affectedRows = 0;
 
 	if(this->GetBotID() == 0) {
@@ -2404,10 +2401,7 @@ bool Bot::Save() {
 							GetCorrup(), GetAC(), GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA(), 
 							GetATK(), _lastZoneId);
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, nullptr, &affectedRows, &TempNewBotID)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
+		if(database.RunQuery(query, &errorMessage, nullptr, &affectedRows, &TempNewBotID)) {
 			SetBotID(TempNewBotID);
 			Result = true;
 		}
@@ -2436,10 +2430,7 @@ bool Bot::Save() {
 							_baseAGI, _baseINT, _baseWIS, _baseCHA, _baseATK, GetTotalPlayTime(), 
 							_lastZoneId, GetBotID());
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, 0, &affectedRows)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else {
+		if(database.RunQuery(query, &errorMessage, 0, &affectedRows)) {
 			Result = true;
 			time(&_startTotalPlayTime);
 		}
@@ -2483,7 +2474,6 @@ uint32 Bot::GetTotalPlayTime() {
 void Bot::SaveBuffs() {
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	int BuffCount = 0;
 	int InsertCount = 0;
 
@@ -2495,8 +2485,7 @@ void Bot::SaveBuffs() {
 
 				StringFormat(query, "DELETE FROM botbuffs WHERE BotId = %u", GetBotID());
 
-				if(!database.RunQuery(query,  TempErrorMessageBuffer)) {
-					errorMessage = std::string(TempErrorMessageBuffer);
+				if(!database.RunQuery(query, &errorMessage)) {
 					break;
 				}
 			}
@@ -2523,8 +2512,7 @@ void Bot::SaveBuffs() {
 								buffs[BuffCount].deathSaveSuccessChance,
 								buffs[BuffCount].deathsaveCasterAARank, IsPersistent);
 
-			if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
+			if(!database.RunQuery(query, &errorMessage)) {
 				break;
 			}
 			else {
@@ -2543,7 +2531,6 @@ void Bot::SaveBuffs() {
 void Bot::LoadBuffs() {
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
@@ -2554,10 +2541,7 @@ void Bot::LoadBuffs() {
 						"HitCount, MeleeRune, MagicRune, DeathSaveSuccessChance, CasterAARank, "
 						"Persistent FROM botbuffs WHERE BotId = %u", GetBotID());
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
+	if(database.RunQuery(query, &errorMessage, &DatasetResult)) {
 		int BuffCount = 0;
 
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -2604,8 +2588,8 @@ void Bot::LoadBuffs() {
 
 		StringFormat(query, "DELETE FROM botbuffs WHERE BotId = %u", GetBotID());
 
-		if(!database.RunQuery(query,  TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage)) {
+			// TODO: Record this error message to zone error log
 		}
 	}
 
@@ -2618,14 +2602,13 @@ uint32 Bot::GetPetSaveId() {
 	uint32 Result = 0;
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
 	StringFormat(query, "select BotPetsId from botpets where BotId = %u;", GetBotID());
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		// TODO: Record this error message to zone error log
 	}
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -2634,10 +2617,6 @@ uint32 Bot::GetPetSaveId() {
 		}
 
 		mysql_free_result(DatasetResult);
-	}
-
-	if(!errorMessage.empty()) {
-		// TODO: Record this error message to zone error log
 	}
 
 	return Result;
@@ -2678,7 +2657,6 @@ void Bot::LoadPetStats(std::string* petName, uint16* petMana, uint16* petHitPoin
 	if(botPetSaveId > 0) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
@@ -2686,8 +2664,8 @@ void Bot::LoadPetStats(std::string* petName, uint16* petMana, uint16* petHitPoin
 
 		StringFormat(query,"select PetId, Name, Mana, HitPoints from botpets where BotPetsId = %u;", botPetSaveId);
 
-		if(!database.RunQuery(query,  TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+			// TODO: Record this error message to zone error log
 		}
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -2703,10 +2681,6 @@ void Bot::LoadPetStats(std::string* petName, uint16* petMana, uint16* petHitPoin
 			statsLoaded = true;
 		}
 
-
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
 	}
 }
 
@@ -2714,7 +2688,6 @@ void Bot::LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 	if(petBuffs && botPetSaveId > 0) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
@@ -2722,8 +2695,8 @@ void Bot::LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 
 		StringFormat(query,"SELECT SpellId, CasterLevel, Duration FROM botpetbuffs WHERE BotPetsId = %u;", botPetSaveId);
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+			// TODO: Record this error message to zone error log
 		}
 		else {
 			int BuffCount = 0;
@@ -2748,14 +2721,11 @@ void Bot::LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 
 			StringFormat(query, "DELETE FROM botpetbuffs WHERE BotPetsId = %u;", botPetSaveId);
 
-			if(!database.RunQuery(query,TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
+			if(!database.RunQuery(query,&errorMessage)) {
+				// TODO: Record this error message to zone error log
 			}
 		}
 
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
 	}
 }
 
@@ -2763,7 +2733,6 @@ void Bot::LoadPetItems(uint32* petItems, uint32 botPetSaveId) {
 	if(petItems && botPetSaveId > 0) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
@@ -2771,8 +2740,8 @@ void Bot::LoadPetItems(uint32* petItems, uint32 botPetSaveId) {
 
 		StringFormat(query,"SELECT ItemId FROM botpetinventory WHERE BotPetsId = %u;", botPetSaveId);
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+			// TODO: Record this error message to zone error log
 		}
 		else {
 			int ItemCount = 0;
@@ -2795,14 +2764,11 @@ void Bot::LoadPetItems(uint32* petItems, uint32 botPetSaveId) {
 
 			StringFormat(query,"DELETE FROM botpetinventory WHERE BotPetsId = %u;", botPetSaveId);
 
-			if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
+			if(!database.RunQuery(query, &errorMessage)) {
+				// TODO: Record this error message to zone error log
 			}
 		}
 
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
 	}
 }
 
@@ -2847,12 +2813,11 @@ uint32 Bot::SavePetStats(std::string petName, uint16 petMana, uint16 petHitPoint
 
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 
 	StringFormat(query,"REPLACE INTO botpets SET PetId = %u, BotId = %u, Name = '%s', Mana = %u, HitPoints = %u;", botPetId, GetBotID(), petName.c_str(), petMana, petHitPoints);
 
-	if(!database.RunQuery(query,TempErrorMessageBuffer, 0, 0, &Result)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, nullptr, nullptr, &Result)) {
+		// TODO: Record this error message to zone error log
 	}
 
 	return Result;
@@ -2862,7 +2827,6 @@ void Bot::SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 	if(petBuffs && botPetSaveId > 0) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		int BuffCount = 0;
 
 		while(BuffCount < BUFF_COUNT) {
@@ -2871,8 +2835,8 @@ void Bot::SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 				StringFormat(query,"INSERT INTO botpetbuffs (BotPetsId, SpellId, CasterLevel, Duration) VALUES(%u, %u, %u, %u);", 
 									botPetSaveId, petBuffs[BuffCount].spellid, petBuffs[BuffCount].level, petBuffs[BuffCount].duration);
 
-				if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-					errorMessage = std::string(TempErrorMessageBuffer);
+				if(!database.RunQuery(query, &errorMessage)) {
+					// TODO: Record this error message to zone error log
 					break;
 				}
 				else {
@@ -2883,9 +2847,6 @@ void Bot::SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 			BuffCount++;
 		}
 
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
 	}
 }
 
@@ -2893,7 +2854,6 @@ void Bot::SavePetItems(uint32* petItems, uint32 botPetSaveId) {
 	if(petItems && botPetSaveId > 0) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		int ItemCount = 0;
 
 		while(ItemCount < MAX_WORN_INVENTORY) {
@@ -2902,8 +2862,8 @@ void Bot::SavePetItems(uint32* petItems, uint32 botPetSaveId) {
 				StringFormat(query,"INSERT INTO botpetinventory (BotPetsId, ItemId) VALUES(%u, %u);", 
 									botPetSaveId, petItems[ItemCount]);
 
-				if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-					errorMessage = std::string(TempErrorMessageBuffer);
+				if(!database.RunQuery(query, &errorMessage)) {
+					// TODO: Record this error message to zone error log
 					break;
 				}
 				else {
@@ -2914,9 +2874,6 @@ void Bot::SavePetItems(uint32* petItems, uint32 botPetSaveId) {
 			ItemCount++;
 		}
 
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
 	}
 }
 
@@ -2924,12 +2881,11 @@ void Bot::DeletePetBuffs(uint32 botPetSaveId) {
 	if(botPetSaveId > 0) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 
 		StringFormat(query,"DELETE FROM botpetbuffs WHERE BotPetsId = %u;", botPetSaveId);
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage)) {
+			// TODO: Record this error message to zone error log
 		}
 	}
 }
@@ -2938,12 +2894,11 @@ void Bot::DeletePetItems(uint32 botPetSaveId) {
 	if(botPetSaveId > 0) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 
 		StringFormat(query,"DELETE FROM botpetinventory WHERE BotPetsId = %u;", botPetSaveId);
 
-		if(!database.RunQuery(query,  TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage)) {
+			// TODO: Record this error message to zone error log
 		}
 	}
 }
@@ -2952,12 +2907,11 @@ void Bot::DeletePetStats(uint32 botPetSaveId) {
 	if(botPetSaveId > 0) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 
 		StringFormat(query, "DELETE from botpets where BotPetsId = %u;", botPetSaveId);
 
-		if(!database.RunQuery(query,  TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage)) {
+			// TODO: Record this error message to zone error log
 		}
 
 	}
@@ -2968,14 +2922,14 @@ void Bot::LoadStance() {
 	bool loaded = false;
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
 	StringFormat(query,"select StanceID from botstances where BotID = %u;", GetBotID());
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadStance(). Error message: %s", errorMessage.c_str());
+		
 	}
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -2985,10 +2939,6 @@ void Bot::LoadStance() {
 		}
 
 		mysql_free_result(DatasetResult);
-	}
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadStance()");
 	}
 
 	if(loaded)
@@ -3001,24 +2951,19 @@ void Bot::SaveStance() {
 	if(_baseBotStance != _botStance) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 
 		StringFormat(query,"REPLACE INTO botstances (BotID, StanceId) VALUES(%u, %u);", GetBotID(), GetBotStance());
 
-		if(!database.RunQuery(query,  TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
-		}
-
-		if(!errorMessage.empty()) {
+		if(!database.RunQuery(query, &errorMessage)) {
 			LogFile->write(EQEMuLog::Error, "Error in Bot::SaveStance()");
 		}
+
 	}
 }
 
 void Bot::LoadTimers() {
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
@@ -3028,8 +2973,8 @@ void Bot::LoadTimers() {
 						"WHERE TimerID = bt.TimerID AND BotID = bt.BotID ) AND sn.classes%i <= %i;", 
 						GetBotID(), DisciplineReuseStart-1, DisciplineReuseStart-1, GetClass(), GetLevel());
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadTimers()");
 	}
 	else {
 		int TimerID = 0;
@@ -3049,20 +2994,16 @@ void Bot::LoadTimers() {
 		mysql_free_result(DatasetResult);
 	}
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::LoadTimers()");
-	}
 }
 
 void Bot::SaveTimers() {
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 
 	StringFormat(query,"DELETE FROM bottimers WHERE BotID = %u;", GetBotID());
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage)) {
+		LogFile->write(EQEMuLog::Error, "Error in Bot::SaveTimers()");
 	}
 
 	for(int i = 0; i < MaxTimer; i++) {
@@ -3071,16 +3012,13 @@ void Bot::SaveTimers() {
 			StringFormat(query,"REPLACE INTO bottimers (BotID, TimerID, Value) VALUES(%u, %u, %u);", 
 								GetBotID(), i+1, timers[i]);
 
-			if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
+			if(!database.RunQuery(query, &errorMessage)) {
+				LogFile->write(EQEMuLog::Error, "Error in Bot::SaveTimers()");
 			}
 
 		}
 	}
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in Bot::SaveTimers()");
-	}
 }
 
 bool Bot::Process()
@@ -4284,43 +4222,31 @@ void Bot::Depop() {
 bool Bot::DeleteBot(std::string* errorMessage) {
 	bool Result = false;
 	int TempCounter = 0;
-
+	
 	if(this->GetBotID() > 0) {
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
+		std::string errorMessage;
 
 		// TODO: These queries need to be ran together as a transaction.. ie, if one or more fail then they all will fail to commit to the database.
-
+		// TODO: Cleanup 
 		StringFormat(query,"DELETE FROM botinventory WHERE botid = '%u'", this->GetBotID());
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
+		if(database.RunQuery(query, &errorMessage)) 
 			TempCounter++;
 
 		StringFormat(query, "DELETE FROM botbuffs WHERE botid = '%u'", this->GetBotID());
 
-		if(!database.RunQuery(query,  TempErrorMessageBuffer)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
+		if(database.RunQuery(query, &errorMessage)) 
 			TempCounter++;
 
 		StringFormat(query, "DELETE FROM botstances WHERE BotID = '%u'", this->GetBotID());
 
-		if(!database.RunQuery(query,  TempErrorMessageBuffer)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
+		if(database.RunQuery(query, &errorMessage)) 
 			TempCounter++;
 
 		StringFormat(query,"DELETE FROM bots WHERE BotID = '%u'", this->GetBotID());
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
-		}
-		else
+		if(database.RunQuery(query, &errorMessage)) 
 			TempCounter++;
 
 		if(TempCounter == 4)
@@ -4381,7 +4307,7 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 
 // Saves the specified item as an inventory record in the database for this bot.
 void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, std::string *errorMessage) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 augslot[5] = { 0, 0, 0, 0, 0 };
 
@@ -4403,7 +4329,7 @@ void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, s
 							(unsigned long)inst->GetColor(),(unsigned long)augslot[0],(unsigned long)augslot[1],
 							(unsigned long)augslot[2],(unsigned long)augslot[3],(unsigned long)augslot[4]);
 
-		if(!database.RunQuery(query, errbuf)) {
+		if(!database.RunQuery(query, &errbuf)) {
 				*errorMessage = std::string(errbuf);
 		}
 	}
@@ -4411,15 +4337,15 @@ void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, s
 
 // Deletes the inventory record for the specified item from the database for this bot.
 void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	if(this->GetBotID() > 0 && slotID >= 0) {
 
 		StringFormat(query,"DELETE FROM botinventory WHERE botid=%i AND slotid=%i", this->GetBotID(), slotID);
 
-		if(!database.RunQuery(query,  errbuf)){
-			*errorMessage = std::string(errbuf);
+		if(!database.RunQuery(query, &errbuf)){
+			// TODO: Log to zone.
 		}
 		m_inv.DeleteItem(slotID);
 	}
@@ -4429,7 +4355,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
 void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
 	if(this->GetBotID() > 0) {
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
@@ -4438,7 +4364,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 							"augslot3, augslot4, augslot5, instnodrop FROM botinventory "
 							"WHERE botid=%i order by slotid", this->GetBotID());
 
-		if(database.RunQuery(query, errbuf, &DatasetResult)) {
+		if(database.RunQuery(query, &errbuf, &DatasetResult)) {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
 				int16 slot_id	= atoi(DataRow[0]);
 				uint32 item_id	= atoi(DataRow[1]);
@@ -4523,14 +4449,14 @@ uint32 Bot::GetBotItemsCount(std::string *errorMessage) {
 	uint32 Result = 0;
 
 	if(this->GetBotID() > 0) {
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"SELECT COUNT(*) FROM botinventory WHERE botid=%i", this->GetBotID());
 
-		if(database.RunQuery(query, errbuf, &DatasetResult)) {
+		if(database.RunQuery(query, &errbuf, &DatasetResult)) {
 			if(mysql_num_rows(DatasetResult) == 1) {
 				DataRow = mysql_fetch_row(DatasetResult);
 				if(DataRow)
@@ -4738,15 +4664,14 @@ uint32 Bot::GetBotIDByBotName(std::string botName) {
 
 	if(!botName.empty()) {
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 		std::string errorMessage;
 
 		StringFormat(query,"SELECT BotID FROM bots WHERE Name = '%s'", botName.c_str());
 
-		if(!database.RunQuery(query,  TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+			// TODO: Log this error to zone error log
 		}
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -4758,9 +4683,6 @@ uint32 Bot::GetBotIDByBotName(std::string botName) {
 		}
 
 
-		if(!errorMessage.empty()) {
-			// TODO: Log this error to zone error log
-		}
 	}
 
 	return Result;
@@ -4771,7 +4693,6 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage) {
 
 	if(botID > 0) {
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
@@ -4783,8 +4704,8 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage) {
 							"BotCreateDate, LastSpawnDate, TotalPlayTime, LastZoneId "
 							"FROM bots WHERE BotID = '%u'", botID);
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, errorMessage, &DatasetResult)) {
+			// TODO: Log this error to zone error log
 		}
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -4807,14 +4728,13 @@ std::list<uint32> Bot::GetGroupedBotsByGroupId(uint32 groupId, std::string* erro
 
 	if(groupId > 0) {
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"select g.mobid as BotID from vwGroups as g join bots as b on g.mobid = b.BotId and g.mobtype = 'B' where g.groupid = %u", groupId);
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, errorMessage, &DatasetResult)) {
+			// TODO: log error.
 		}
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -4898,14 +4818,13 @@ std::list<BotsAvailableList> Bot::GetBotList(uint32 botOwnerCharacterID, std::st
 
 	if(botOwnerCharacterID > 0) {
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"SELECT BotID, Name, Class, BotLevel, Race FROM bots WHERE BotOwnerCharacterID = '%u'", botOwnerCharacterID);
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-			*errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, errorMessage, &DatasetResult)) {
+			// TODO: Log Error.
 		}
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -4931,7 +4850,7 @@ std::list<BotsAvailableList> Bot::GetBotList(uint32 botOwnerCharacterID, std::st
 
 std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string* errorMessage) {
 	std::list<SpawnedBotsList> Result;
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
@@ -4939,8 +4858,8 @@ std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string*
 	StringFormat(query,"SELECT bot_name, zone_name FROM botleader WHERE leaderid=%i", characterID);
 
 	if(characterID > 0) {
-		if(!database.RunQuery(query,  ErrBuf, &DatasetResult)) {
-			*errorMessage = std::string(ErrBuf);
+		if(!database.RunQuery(query, errorMessage, &DatasetResult)) {
+			// TODO: Log Error
 		}
 		else {
 			uint32 RowCount = mysql_num_rows(DatasetResult);
@@ -4967,7 +4886,6 @@ std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string*
 
 void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage) {
 	if(botGroup && !botGroupName.empty()) {
-		char errbuf[MYSQL_ERRMSG_SIZE];
 		std::string query;
 
 		Mob* tempGroupLeader = botGroup->GetLeader();
@@ -4979,8 +4897,8 @@ void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* e
 
 			StringFormat(query,"INSERT into botgroup (BotGroupLeaderBotId, BotGroupName) values (%u, '%s')", botGroupLeaderBotId, botGroupName.c_str());
 
-			if(!database.RunQuery(query, errbuf, 0, 0, &botGroupId)) {
-				*errorMessage = std::string(errbuf);
+			if(!database.RunQuery(query, errorMessage, 0, 0, &botGroupId)) {
+				// TODO: Log error.
 			}
 			else {
 				if(botGroupId > 0) {
@@ -4993,8 +4911,8 @@ void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* e
 							StringFormat(query, "INSERT into botgroupmembers (BotGroupId, BotId) values (%u, %u)", 
 												botGroupId, botGroupMemberBotId);
 
-							if(!database.RunQuery(query, errbuf)) {
-								*errorMessage = std::string(errbuf);
+							if(!database.RunQuery(query, errorMessage)) {
+								// TODO: Log error message
 							}
 						}
 					}
@@ -5006,7 +4924,7 @@ void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* e
 }
 
 void Bot::DeleteBotGroup(std::string botGroupName, std::string* errorMessage) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	if(!botGroupName.empty()) {
@@ -5016,14 +4934,14 @@ void Bot::DeleteBotGroup(std::string botGroupName, std::string* errorMessage) {
 
 			StringFormat(query, "DELETE FROM botgroupmembers WHERE BotGroupId = %u", botGroupId);
 
-			if(!database.RunQuery(query, errbuf)) {
+			if(!database.RunQuery(query, &errbuf)) {
 				*errorMessage = std::string(errbuf);
 			}
 			else {
 
 				StringFormat(query, "DELETE FROM botgroup WHERE BotGroupId = %u", botGroupId);
 
-				if(!database.RunQuery(query, errbuf)) {
+				if(!database.RunQuery(query, &errbuf)) {
 					*errorMessage = std::string(errbuf);
 				}
 			}
@@ -5033,7 +4951,6 @@ void Bot::DeleteBotGroup(std::string botGroupName, std::string* errorMessage) {
 
 std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* errorMessage) {
 	std::list<BotGroup> Result;
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
 	std::string query;
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
@@ -5045,8 +4962,8 @@ std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* err
 
 			StringFormat(query,"select BotId from botgroupmembers where BotGroupId = %u", botGroupId);
 
-			if(!database.RunQuery(query, ErrBuf, &DatasetResult)) {
-				*errorMessage = std::string(ErrBuf);
+			if(!database.RunQuery(query, errorMessage, &DatasetResult)) {
+				// TODO: Log error.
 			}
 			else {
 				uint32 RowCount = mysql_num_rows(DatasetResult);
@@ -5078,15 +4995,14 @@ std::list<BotGroupList> Bot::GetBotGroupListByBotOwnerCharacterId(uint32 botOwne
 	std::list<BotGroupList> result;
 
 	if(botOwnerCharacterId > 0) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
 		std::string query;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"select BotGroupName, BotGroupLeaderName from vwBotGroups where BotOwnerCharacterId = %u", botOwnerCharacterId);
 
-		if(!database.RunQuery(query, ErrBuf, &DatasetResult)) {
-			*errorMessage = std::string(ErrBuf);
+		if(!database.RunQuery(query, errorMessage, &DatasetResult)) {
+			// TODO: Log error.
 		}
 		else {
 			uint32 RowCount = mysql_num_rows(DatasetResult);
@@ -5154,15 +5070,14 @@ uint32 Bot::CanLoadBotGroup(uint32 botOwnerCharacterId, std::string botGroupName
 	uint32 result = 0;
 
 	if(botOwnerCharacterId > 0 && !botGroupName.empty()) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
 		std::string query;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"select BotGroupId, BotGroupName from vwBotGroups where BotOwnerCharacterId = %u", botOwnerCharacterId);
 
-		if(!database.RunQuery(query, ErrBuf, &DatasetResult)) {
-			*errorMessage = std::string(ErrBuf);
+		if(!database.RunQuery(query, errorMessage, &DatasetResult)) {
+			// TODO: Log error.
 		}
 		else {
 			uint32 RowCount = mysql_num_rows(DatasetResult);
@@ -5195,15 +5110,14 @@ uint32 Bot::GetBotGroupIdByBotGroupName(std::string botGroupName, std::string* e
 	uint32 result = 0;
 
 	if(!botGroupName.empty()) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
 		std::string query;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"select BotGroupId from vwBotGroups where BotGroupName = '%s'", botGroupName.c_str());
 
-		if(!database.RunQuery(query, ErrBuf, &DatasetResult)) {
-			*errorMessage = std::string(ErrBuf);
+		if(!database.RunQuery(query, errorMessage, &DatasetResult)) {
+			// TODO: log error.
 		}
 		else {
 			uint32 RowCount = mysql_num_rows(DatasetResult);
@@ -5263,14 +5177,13 @@ uint32 Bot::AllowedBotSpawns(uint32 botOwnerCharacterID, std::string* errorMessa
 	uint32 Result = 0;
 
 	if(botOwnerCharacterID > 0) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
 		std::string query;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"SELECT value FROM quest_globals WHERE name='bot_spawn_limit' and charid=%i", botOwnerCharacterID);
 
-		if(database.RunQuery(query, ErrBuf, &DatasetResult)) {
+		if(database.RunQuery(query, errorMessage, &DatasetResult)) {
 			if(mysql_num_rows(DatasetResult) == 1) {
 				DataRow = mysql_fetch_row(DatasetResult);
 				if(DataRow)
@@ -5279,8 +5192,10 @@ uint32 Bot::AllowedBotSpawns(uint32 botOwnerCharacterID, std::string* errorMessa
 
 			mysql_free_result(DatasetResult);
 		}
-		else
-			*errorMessage = std::string(ErrBuf);
+		else {
+			// TODO: Log error.
+		}
+		
 
 	}
 
@@ -5303,14 +5218,13 @@ uint32 Bot::CreatedBotCount(uint32 botOwnerCharacterID, std::string* errorMessag
 	uint32 Result = 0;
 
 	if(botOwnerCharacterID > 0) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
 		std::string query;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"SELECT COUNT(BotID) FROM bots WHERE BotOwnerCharacterID=%i", botOwnerCharacterID);
 
-		if(database.RunQuery(query, ErrBuf, &DatasetResult)) {
+		if(database.RunQuery(query, errorMessage, &DatasetResult)) {
 			if(mysql_num_rows(DatasetResult) == 1) {
 				DataRow = mysql_fetch_row(DatasetResult);
 				if(DataRow)
@@ -5320,7 +5234,9 @@ uint32 Bot::CreatedBotCount(uint32 botOwnerCharacterID, std::string* errorMessag
 			mysql_free_result(DatasetResult);
 		}
 		else
-			*errorMessage = std::string(ErrBuf);
+		{
+			// TODO: Log error.
+		}
 
 	}
 
@@ -5331,14 +5247,13 @@ uint32 Bot::GetBotOwnerCharacterID(uint32 botID, std::string* errorMessage) {
 	uint32 Result = 0;
 
 	if(botID > 0) {
-		char ErrBuf[MYSQL_ERRMSG_SIZE];
 		std::string query;
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
 		StringFormat(query,"SELECT BotOwnerCharacterID FROM bots WHERE BotID = %u", botID);
 
-		if(database.RunQuery(query, ErrBuf, &DatasetResult)) {
+		if(database.RunQuery(query, errorMessage, &DatasetResult)) {
 			if(mysql_num_rows(DatasetResult) == 1) {
 				if(DataRow = mysql_fetch_row(DatasetResult))
 					Result = atoi(DataRow[0]);
@@ -5347,7 +5262,9 @@ uint32 Bot::GetBotOwnerCharacterID(uint32 botID, std::string* errorMessage) {
 			mysql_free_result(DatasetResult);
 		}
 		else
-			*errorMessage = std::string(ErrBuf);
+		{
+			//TODO: log error message.
+		}
 
 	}
 
@@ -9326,14 +9243,14 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 void Bot::SetBotGuildMembership(uint32 botId, uint32 guildid, uint8 rank) {
 	if(botId > 0) {
 		std::string errorMessage;
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 
 		if(guildid > 0) {
 
 			StringFormat(query,"REPLACE INTO botguildmembers SET char_id = %u, guild_id = %u, rank = %u;", botId, guildid, rank);
 
-			if(!database.RunQuery(query, errbuf)) {
+			if(!database.RunQuery(query, &errbuf)) {
 				errorMessage = std::string(errbuf);
 			}
 		}
@@ -9341,7 +9258,7 @@ void Bot::SetBotGuildMembership(uint32 botId, uint32 guildid, uint8 rank) {
 
 			StringFormat(query, "DELETE FROM botguildmembers WHERE char_id = %u;",botId);
 
-			if(!database.RunQuery(query, errbuf)) {
+			if(!database.RunQuery(query, &errbuf)) {
 				errorMessage = std::string(errbuf);
 			}
 		}
@@ -9356,7 +9273,6 @@ void Bot::LoadGuildMembership(uint32* guildId, uint8* guildRank, std::string* gu
 	if(guildId && guildRank && guildName) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 
@@ -9364,8 +9280,8 @@ void Bot::LoadGuildMembership(uint32* guildId, uint8* guildRank, std::string* gu
 							"AS gm JOIN guilds AS g ON gm.guild_id = g.id "
 							"WHERE gm.char_id = %u AND gm.mobtype = 'B';", GetBotID());
 
-		if(!database.RunQuery(query,  TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+			// TODO: Record this error message to zone error log
 		}
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -9379,9 +9295,6 @@ void Bot::LoadGuildMembership(uint32* guildId, uint8* guildRank, std::string* gu
 		}
 
 
-		if(!errorMessage.empty()) {
-			// TODO: Record this error message to zone error log
-		}
 	}
 }
 

@@ -1187,13 +1187,13 @@ static void BazaarAuditTrail(const char *Seller, const char *Buyer, const char *
 	const char *AuditQuery="INSERT INTO `trader_audit` (`time`, `seller`, `buyer`, `itemname`, `quantity`, `totalcost`, `trantype`) "
 				"VALUES (NOW(), '%s', '%s', '%s', %i, %i, %i)";
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, AuditQuery, Seller, Buyer, ItemName, Quantity, TotalCost, TranType);
 
-	if(!database.RunQuery(query, errbuf))
-		_log(TRADING__CLIENT, "Audit write error: %s : %s", query.c_str(), errbuf);
+	if(!database.RunQuery(query, &errbuf))
+		_log(TRADING__CLIENT, "Audit write error: %s : %s", query.c_str(), errbuf.c_str());
 
 }
 
@@ -1335,13 +1335,13 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 
 void Client::SendBazaarWelcome(){
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query = "select count(distinct char_id),count(char_id) from trader";
 
-	if (database.RunQuery(query,errbuf,&result)){
+	if (database.RunQuery(query,&errbuf,&result)){
 		if(mysql_num_rows(result)==1){
 
 			row = mysql_fetch_row(result);
@@ -1367,7 +1367,7 @@ void Client::SendBazaarWelcome(){
 	
 	query = "select count(distinct charid) from buyer";
 
-	if (database.RunQuery(query,errbuf,&result)){
+	if (database.RunQuery(query,&errbuf,&result)){
 		if(mysql_num_rows(result)==1) {
 
 			row = mysql_fetch_row(result);
@@ -1382,7 +1382,7 @@ void Client::SendBazaarWelcome(){
 void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint32 ItemStat, uint32 Slot, uint32 Type,
 					char Name[64], uint32 MinPrice, uint32 MaxPrice) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	std::string Search, Values;
 	MYSQL_RES *Result;
@@ -1577,7 +1577,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 						"items.id,charges,char_id limit %i",
 						Values.c_str(),Search.c_str(), RuleI(Bazaar, MaxSearchResults));
 
-	if (database.RunQuery(query,errbuf,&Result)){
+	if (database.RunQuery(query,&errbuf,&Result)){
 
 		_log(TRADING__CLIENT, "SRCH: %s", query.c_str());
 
@@ -1688,7 +1688,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 
 	}
 	else{
-		_log(TRADING__CLIENT, "Failed to retrieve Bazaar Search!! %s %s\n", query.c_str(), errbuf);
+		_log(TRADING__CLIENT, "Failed to retrieve Bazaar Search!! %s %s\n", query.c_str(), errbuf.c_str());
 		return;
 	}
 }
@@ -2018,7 +2018,7 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 	//
 	_log(TRADING__BARTER, "Client::SendBuyerResults %s\n", SearchString);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	char ItemName[64];
 	std::string Search, Values;
@@ -2031,7 +2031,7 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 	StringFormat(query, "select * from buyer where itemname like '%%%s%%' order by charid limit %i",
 						escSearchString.c_str(), RuleI(Bazaar, MaxBarterSearchResults));
 
-	if (database.RunQuery(query,errbuf, &Result)) {
+	if (database.RunQuery(query,&errbuf, &Result)) {
 
 		int NumberOfRows = mysql_num_rows(Result);
 
@@ -2106,7 +2106,7 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 		mysql_free_result(Result);
 	}
 	else{
-		_log(TRADING__CLIENT, "Failed to retrieve Barter Search!! %s %s\n", query.c_str(), errbuf);
+		_log(TRADING__CLIENT, "Failed to retrieve Barter Search!! %s %s\n", query.c_str(), errbuf.c_str());
 	}
 }
 
@@ -2150,7 +2150,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 
 	safe_delete(outapp);
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	char ItemName[64];
 	std::string Search, Values;
@@ -2160,7 +2160,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 	StringFormat(query, "select * from buyer where charid = %i",
 						Buyer->CharacterID());
 
-	if (database.RunQuery(query,errbuf,&Result)){
+	if (database.RunQuery(query,&errbuf,&Result)){
 
 		if(mysql_num_rows(Result) == 0) {
 			mysql_free_result(Result);

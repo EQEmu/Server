@@ -59,7 +59,7 @@ ZoneDatabase::~ZoneDatabase() {
 }
 
 bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	
 	StringFormat(query, "update zone set underworld=%f,minclip=%f, "
@@ -74,15 +74,15 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
 						zd->sky, zd->ztype, zd->zone_exp_multiplier,
 						zd->safe_x, zd->safe_y, zd->safe_z, zoneid, instance_id);
 	
-	if (!RunQuery(query,errbuf))	{
-			LogFile->write(EQEMuLog::Error, "Error in SaveZoneCFG query %s: %s", query.c_str(), errbuf);
+	if (!RunQuery(query, &errbuf))	{
+			LogFile->write(EQEMuLog::Error, "Error in SaveZoneCFG query %s: %s", query.c_str(), errbuf.c_str());
 			return false;
 	}
 	return true;
 }
 
 bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *zone_data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, int &ruleset, char **map_filename) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -104,7 +104,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 						"from zone where zoneidnumber=%i and version=%i",
 						zoneid, instance_id);
 	
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		if(row)
 		{
@@ -159,7 +159,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in GetZoneCFG query %s: %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in GetZoneCFG query %s: %s", query.c_str(), errbuf.c_str());
 		strcpy(*map_filename, "default");
 	}
 
@@ -175,7 +175,7 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
 	gettimeofday(&tv, nullptr);
 	uint32 cur = tv.tv_sec;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	//if we pass timeleft as 0 that means we clear from respawn time
@@ -187,9 +187,9 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
 							"AND instance_id=%lu",
 							(unsigned long)id, (unsigned long)instance_id);
 		
-		if (!RunQuery(query,errbuf))
+		if (!RunQuery(query,&errbuf))
 		{
-			LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), errbuf);
+			LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), errbuf.c_str());
 		}
 	}
 	else
@@ -200,9 +200,9 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
 							(unsigned long)id, (unsigned long)cur, 
 							(unsigned long)timeleft, (unsigned long)instance_id);
 		
-		if (!RunQuery(query,errbuf))
+		if (!RunQuery(query,&errbuf))
 		{
-			LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), errbuf);
+			LogFile->write(EQEMuLog::Error, "Error in UpdateTimeLeft query %s: %s", query.c_str(), errbuf.c_str());
 		}
 	}
 	return;
@@ -211,7 +211,7 @@ void ZoneDatabase::UpdateSpawn2Timeleft(uint32 id, uint16 instance_id, uint32 ti
 //Gets the respawn time left in the database for the current spawn id
 uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -219,7 +219,7 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 	StringFormat(query, "SELECT start, duration FROM respawn_times WHERE id=%lu AND instance_id=%lu",
 						(unsigned long)id, (unsigned long)zone->GetInstanceID());
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		row = mysql_fetch_row(result);
 		if(row)
@@ -251,7 +251,7 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in GetSpawnTimeLeft query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in GetSpawnTimeLeft query '%s': %s", query.c_str(), errbuf.c_str());
 		return 0;
 	}
 	return 0;
@@ -259,21 +259,21 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 
 void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "UPDATE spawn2 SET enabled=%i WHERE id=%lu", 
 						new_status, (unsigned long)id);
 
-	if(!RunQuery(query, errbuf))
+	if(!RunQuery(query, &errbuf))
 	{
-		LogFile->write(EQEMuLog::Error, "Error in UpdateSpawn2Status query %s: %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in UpdateSpawn2Status query %s: %s", query.c_str(), errbuf.c_str());
 	}
 	return;
 }
 
 bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 status,const char* charname, const char* target,const char* descriptiontype, const char* description,int event_nid){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 len = strlen(description);
 	uint32 len2 = strlen(target);
@@ -287,7 +287,7 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 						"values('%s', %i, %i, '%s', '%s', '%s', '%s', '%i')", 
 						accountname, accountid, status, charname, targetarr.c_str(), descriptiontype, descriptiontext.c_str(), event_nid);
 	
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in logevents" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -296,7 +296,7 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 
 
 void ZoneDatabase::UpdateBug(BugStruct* bug){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 
@@ -329,13 +329,13 @@ void ZoneDatabase::UpdateBug(BugStruct* bug){
 						bug->y, bug->x, bug->z, bug->chartype, bug->type, targetText==""?"Unknown Target":targetText.c_str(),
 						bugText.c_str());
 	
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in UpdateBug" << query << "' " << errbuf << std::endl;
 	}
 }
 
 void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 len = strlen(bug->text);
 	std::string bugText;
@@ -345,7 +345,7 @@ void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
 						"values('%s', '%s', '%s', %i)","Petition",
 						bug->name, bugText.c_str(),25);
 	
-	if (!RunQuery(query, errbuf))	{
+	if (!RunQuery(query, &errbuf))	{
 		std::cerr << "Error in UpdateBug" << query << "' " << errbuf << std::endl;
 	}
 }
@@ -386,14 +386,14 @@ bool ZoneDatabase::GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin
 
 
 bool ZoneDatabase::SetSpecialAttkFlag(uint8 id, const char* flag) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 
 	StringFormat(query, "UPDATE npc_types SET npcspecialattks='%s' WHERE id=%i;", 
 						flag, id);
 
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, 0, &affected_rows)) {
 		return false;
 	}
 
@@ -423,7 +423,7 @@ void ZoneDatabase::SetDoorPlace(uint8 value,uint8 door_id,const char* zone_name)
 
 void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,uint8 eventid,char* detail,char* timestamp, CharacterEventLog_Struct* cel)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -454,7 +454,7 @@ void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,
 						"FROM eventlog where %s", 
 						modifications);
 						
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -489,7 +489,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -502,7 +502,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 						"object_contents where parentid=%i", 
 						parentid);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while ((row = mysql_fetch_row(result))) {
 			uint8 index = (uint8)atoi(row[0]);
 			uint32 item_id = (uint32)atoi(row[1]);
@@ -531,7 +531,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in DB::LoadWorldContainer: %s", errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in DB::LoadWorldContainer: %s", errbuf.c_str());
 	}
 
 }
@@ -539,7 +539,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 // Save child objects for a world container (i.e., forge, bag dropped to ground, etc)
 void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const ItemInst* container)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	// Since state is not saved for each world container action, we'll just delete
@@ -570,8 +570,8 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 								zone_id, parent_id, index, item_id, inst->GetCharges(),
 								augslot[0], augslot[1], augslot[2], augslot[3], augslot[4]);
 
-			if (!RunQuery(query, errbuf)) {
-				LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", errbuf);
+			if (!RunQuery(query, &errbuf)) {
+				LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::SaveWorldContainer: %s", errbuf.c_str());
 			}
 		}
 
@@ -581,20 +581,20 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 // Remove all child objects inside a world container (i.e., forge, bag dropped to ground, etc)
 void ZoneDatabase::DeleteWorldContainer(uint32 parent_id,uint32 zone_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "delete from object_contents where parentid=%i and zoneid=%i", 
 						parent_id,zone_id);
 						
-	if (!RunQuery(query,errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", errbuf);
+	if (!RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::DeleteWorldContainer: %s", errbuf.c_str());
 	}
 
 }
 
 Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -603,7 +603,7 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id){
 	
 	StringFormat(query, "select * from trader where char_id=%i order by slot_id limit 80", char_id);
 	
-	if (RunQuery(query,errbuf,&result)){
+	if (RunQuery(query, &errbuf,&result)){
 		loadti->Code = BazaarTrader_ShowItems;
 		while ((row = mysql_fetch_row(result))) {
 			if(atoi(row[5])>=80 || atoi(row[4])<0)
@@ -622,7 +622,7 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id){
 }
 
 TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -631,7 +631,7 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id){
 	
 	StringFormat(query, "select * from trader where char_id=%i order by slot_id limit 80", char_id);
 	
-	if (RunQuery(query,errbuf,&result)){
+	if (RunQuery(query, &errbuf,&result)){
 		while ((row = mysql_fetch_row(result))) {
 			if(atoi(row[5])>=80 || atoi(row[5])<0)
 				_log(TRADING__CLIENT, "Bad Slot number when trying to load trader information!\n");
@@ -652,7 +652,7 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id){
 
 ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -660,7 +660,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 	StringFormat(query, "select * from trader where char_id=%i and serialnumber=%i order by slot_id limit 80",
 						CharID, SerialNumber);
 
-	if (RunQuery(query, errbuf,&result)){
+	if (RunQuery(query, &errbuf,&result)){
 
 		if (mysql_num_rows(result) != 1) {
 			_log(TRADING__CLIENT, "Bad result from query\n"); fflush(stdout);
@@ -703,29 +703,29 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 
 void ZoneDatabase::SaveTraderItem(uint32 CharID, uint32 ItemID, uint32 SerialNumber, int32 Charges, uint32 ItemCost, uint8 Slot){
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	
 	StringFormat(query, "replace INTO trader VALUES (%i, %i, %i, %i, %i, %i)",
 						CharID, ItemID, SerialNumber, Charges, ItemCost, Slot);
 	
-	if (!RunQuery(query,errbuf))
-		_log(TRADING__CLIENT, "Failed to save trader item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, errbuf);
+	if (!RunQuery(query, &errbuf))
+		_log(TRADING__CLIENT, "Failed to save trader item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, errbuf.c_str());
 
 }
 
 void ZoneDatabase::UpdateTraderItemCharges(int CharID, uint32 SerialNumber, int32 Charges) {
 
 	_log(TRADING__CLIENT, "ZoneDatabase::UpdateTraderItemCharges(%i, %i, %i)", CharID, SerialNumber, Charges);
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	
 	StringFormat(query, "update trader set charges=%i where char_id=%i and serialnumber=%i",
 						Charges, CharID, SerialNumber);
 	
-	if (!(RunQuery(query,errbuf)))
+	if (!(RunQuery(query, &errbuf)))
 		_log(TRADING__CLIENT, "Failed to update charges for trader item: %i for char_id: %i, the error was: %s\n",
-								SerialNumber, CharID, errbuf);
+								SerialNumber, CharID, errbuf.c_str());
 
 }
 
@@ -738,7 +738,7 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 	if(!item)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 
 	std::string query;
 
@@ -748,9 +748,9 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 		StringFormat(query, "delete from trader where char_id=%i and item_id=%i",
 							CharID, ItemID);
 
-		if (!RunQuery(query,errbuf)) {
+		if (!RunQuery(query, &errbuf)) {
 			_log(TRADING__CLIENT, "Failed to remove trader item(s): %i for char_id: %i, the error was: %s\n",
-									ItemID, CharID, errbuf);
+									ItemID, CharID, errbuf.c_str());
 		}
 		return;
 	}
@@ -761,9 +761,9 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 								"and item_id=%i and charges=%i", 
 								NewPrice, CharID, ItemID, Charges);
 			
-			if (!RunQuery(query,errbuf)) {
+			if (!RunQuery(query, &errbuf)) {
 				_log(TRADING__CLIENT, "Failed to update price for trader item: %i for char_id: %i, the error was: %s\n",
-										ItemID, CharID, errbuf);
+										ItemID, CharID, errbuf.c_str());
 			}
 		}
 		else {
@@ -771,9 +771,9 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 			StringFormat(query, "update trader set item_cost=%i where char_id=%i and item_id=%i",
 								NewPrice, CharID, ItemID);
 			
-			if (!RunQuery(query,errbuf)) {
+			if (!RunQuery(query, &errbuf)) {
 				_log(TRADING__CLIENT, "Failed to update price for trader item: %i for char_id: %i, the error was: %s\n",
-										ItemID, CharID, errbuf);
+										ItemID, CharID, errbuf.c_str());
 			}
 		}
 	}
@@ -781,76 +781,76 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 }
 
 void ZoneDatabase::DeleteTraderItem(uint32 char_id){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	if(char_id==0){
 		
 		query = "delete from trader";
 		
-		if (!RunQuery(query,errbuf))
-			_log(TRADING__CLIENT, "Failed to delete all trader items data, the error was: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			_log(TRADING__CLIENT, "Failed to delete all trader items data, the error was: %s\n",errbuf.c_str());
 		
 	}
 	else {
 		
 		StringFormat(query, "delete from trader where char_id=%i", char_id);
 		
-		if (!RunQuery(query,errbuf))
-			_log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n",char_id,errbuf);
+		if (!RunQuery(query, &errbuf))
+			_log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n",char_id,errbuf.c_str());
 	}
 }
 void ZoneDatabase::DeleteTraderItem(uint32 CharID,uint16 SlotID){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	
 	StringFormat(query, "delete from trader where char_id=%i and slot_id=%i",CharID, SlotID);
 	
-	if (!RunQuery(query,errbuf))
-		_log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n",CharID, errbuf);
+	if (!RunQuery(query, &errbuf))
+		_log(TRADING__CLIENT, "Failed to delete trader item data for char_id: %i, the error was: %s\n",CharID, errbuf.c_str());
 }
 
 void ZoneDatabase::DeleteBuyLines(uint32 CharID){
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	if(CharID==0){
 		
 		query = "delete from buyer";
 		
-		if (!RunQuery(query,errbuf))
-			_log(TRADING__CLIENT, "Failed to delete all buyer items data, the error was: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			_log(TRADING__CLIENT, "Failed to delete all buyer items data, the error was: %s\n",errbuf.c_str());
 	}
 	else{
 		
 		StringFormat(query, "delete from buyer where charid=%i", CharID);
 		
-		if (!(RunQuery(query,errbuf)))
-			_log(TRADING__CLIENT, "Failed to delete buyer item data for charid: %i, the error was: %s\n",CharID,errbuf);
+		if (!(RunQuery(query, &errbuf)))
+			_log(TRADING__CLIENT, "Failed to delete buyer item data for charid: %i, the error was: %s\n",CharID,errbuf.c_str());
 	}
 }
 
 void ZoneDatabase::AddBuyLine(uint32 CharID, uint32 BuySlot, uint32 ItemID, const char* ItemName, uint32 Quantity, uint32 Price) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	
 	StringFormat(query, "replace INTO buyer VALUES(%i,%i, %i,\"%s\",%i,%i)",
 						CharID, BuySlot, ItemID, ItemName, Quantity, Price);
 	
-	if (!RunQuery(query,errbuf))
-		_log(TRADING__CLIENT, "Failed to save buline item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, errbuf);
+	if (!RunQuery(query, &errbuf))
+		_log(TRADING__CLIENT, "Failed to save buline item: %i for char_id: %i, the error was: %s\n", ItemID, CharID, errbuf.c_str());
 
 }
 
 void ZoneDatabase::RemoveBuyLine(uint32 CharID, uint32 BuySlot) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "delete from buyer where charid=%i and buyslot=%i", CharID, BuySlot);
 
-	if (!(RunQuery(query,errbuf)))
-		_log(TRADING__CLIENT, "Failed to delete buyslot %i for charid: %i, the error was: %s\n", BuySlot, CharID, errbuf);
+	if (!(RunQuery(query, &errbuf)))
+		_log(TRADING__CLIENT, "Failed to delete buyslot %i for charid: %i, the error was: %s\n", BuySlot, CharID, errbuf.c_str());
 
 }
 
@@ -861,14 +861,14 @@ void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity)
 		return;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "update buyer set quantity=%i where charid=%i and buyslot=%i",
 						Quantity, CharID, BuySlot);
 
-	if (!(RunQuery(query,errbuf)))
-		_log(TRADING__CLIENT, "Failed to update quantity in buyslot %i for charid: %i, the error was: %s\n", BuySlot, CharID, errbuf);
+	if (!(RunQuery(query, &errbuf)))
+		_log(TRADING__CLIENT, "Failed to update quantity in buyslot %i for charid: %i, the error was: %s\n", BuySlot, CharID, errbuf.c_str());
 
 }
 
@@ -877,7 +877,7 @@ char* current_zone, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_St
 uint32* pplen, uint32* guilddbid, uint8* guildrank,
 uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *firstlogon) {
 	_CP(Database_GetCharacterInfoForLogin);
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 querylen;
 	MYSQL_RES *result;
@@ -901,12 +901,12 @@ uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *fi
 							name);
 	}
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		ret = GetCharacterInfoForLogin_result(result, character_id, current_zone, pp, inv, ext, pplen, guilddbid, guildrank, class_, level, LFP, LFG, NumXTargets, firstlogon);
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "GetCharacterInfoForLogin query '%s' %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "GetCharacterInfoForLogin query '%s' %s", query.c_str(), errbuf.c_str());
 	}
 
 	return ret;
@@ -1013,14 +1013,14 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 }
 
 bool ZoneDatabase::NoRentExpired(const char* name){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
 	StringFormat(query, "Select (UNIX_TIMESTAMP(NOW())-timelaston) from character_ where name='%s'", name);
 	
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			uint32 seconds = atoi(row[0]);
@@ -1045,7 +1045,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 		return itr->second;
 
 		// Otherwise, get NPCs from database.
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		
 		MYSQL_RES *result;
 		MYSQL_ROW row;
@@ -1090,7 +1090,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 							"npc_types.healscale FROM npc_types WHERE id=%d", 
 							id);
 
-		if (RunQuery(query, errbuf, &result)) {
+		if (RunQuery(query, &errbuf, &result)) {
 			// Process each row returned.
 			while((row = mysql_fetch_row(result))) {
 				NPCType *tmpNPCType;
@@ -1180,7 +1180,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				{
 					if (tmpNPCType->armor_tint[0] == 0)
 					{
-						char at_errbuf[MYSQL_ERRMSG_SIZE];
+						std::string at_errbuf;
 						MYSQL_RES *at_result = nullptr;
 						MYSQL_ROW at_row;
 
@@ -1197,7 +1197,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 											"FROM npc_types_tint WHERE id=%d", 
 											armor_tint_id);
 
-						if (RunQuery(query, at_errbuf, &at_result))
+						if (RunQuery(query, &at_errbuf, &at_result))
 						{
 							if ((at_row = mysql_fetch_row(at_result)))
 							{
@@ -1303,7 +1303,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		return nullptr;
 
 	// Otherwise, get NPCs from database.
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -1338,7 +1338,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 						"WHERE merc_npc_type_id=%d AND clientlevel=%d AND race_id = %d", 
 						id, clientlevel, raceid); //dual primary keys. one is ID, one is level.
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		// Process each row returned.
 		while((row = mysql_fetch_row(result))) {
 			NPCType *tmpNPCType;
@@ -1403,7 +1403,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 			{
 				if (tmpNPCType->armor_tint[0] == 0)
 				{
-					char at_errbuf[MYSQL_ERRMSG_SIZE];
+					std::string at_errbuf;
 					MYSQL_RES *at_result = nullptr;
 					MYSQL_ROW at_row;
 
@@ -1420,7 +1420,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 										"FROM npc_types_tint WHERE id=%d", 
 										armor_tint_id);
 
-						if (RunQuery(query, at_errbuf, &at_result))
+						if (RunQuery(query, &at_errbuf, &at_result))
 						{
 							if ((at_row = mysql_fetch_row(at_result)))
 							{
@@ -1498,7 +1498,6 @@ bool ZoneDatabase::LoadMercInfo(Client *c) {
 	if(c->GetEPP().merc_name[0] != 0) {
 		std::string errorMessage;
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 		//char name[64];
@@ -1512,8 +1511,8 @@ bool ZoneDatabase::LoadMercInfo(Client *c) {
 							"DrakkinDetails FROM mercs WHERE OwnerCharacterID = '%i' ORDER BY Slot", 
 							c->CharacterID());
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+			// TODO: Log Error
 		}
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -1563,7 +1562,6 @@ bool ZoneDatabase::LoadCurrentMerc(Client *c) {
 	if(c->GetEPP().merc_name[0] != 0) {
 		std::string errorMessage;
 		std::string query ;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 		MYSQL_RES* DatasetResult;
 		MYSQL_ROW DataRow;
 		//char name[64];
@@ -1581,8 +1579,8 @@ bool ZoneDatabase::LoadCurrentMerc(Client *c) {
 							"DrakkinDetails FROM mercs WHERE OwnerCharacterID = '%i' AND Slot = '%u'", 
 							c->CharacterID(), slot);
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+			// TODO: LogMessage
 		}
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
@@ -1629,7 +1627,6 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 	}
 
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	uint32 affectedRows = 0;
 
 	if(merc->GetMercID() == 0) {
@@ -1653,8 +1650,8 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 							merc->GetBeardColor(), merc->GetBeard(), merc->GetDrakkinHeritage(), 
 							merc->GetDrakkinTattoo(), merc->GetDrakkinDetails());
 		
-		if(!database.RunQuery(query, TempErrorMessageBuffer, 0, &affectedRows, &TempNewMercID)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage, nullptr, &affectedRows, &TempNewMercID)) {
+			// TODO: Log error here.
 		}
 		else {
 			merc->SetMercID(TempNewMercID);
@@ -1680,8 +1677,8 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 							merc->GetBeardColor(), merc->GetBeard(), merc->GetDrakkinHeritage(), 
 							merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(), merc->GetMercID());
 		
-		if(!database.RunQuery(query, TempErrorMessageBuffer, 0, &affectedRows)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage, 0, &affectedRows)) {
+			// TODO: Log error message.
 		}
 		else {
 			Result = true;
@@ -1712,7 +1709,6 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 	Buffs_Struct *buffs = merc->GetBuffs();
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	int BuffCount = 0;
 	int InsertCount = 0;
 
@@ -1724,8 +1720,8 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 				
 				StringFormat(query,"DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
 				
-				if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-					errorMessage = std::string(TempErrorMessageBuffer);
+				if(!database.RunQuery(query, &errorMessage)) {
+					LogFile->write(EQEMuLog::Error, "Error Saving Merc Buffs: %s", errorMessage.c_str());
 					break;
 				}
 			}
@@ -1752,8 +1748,8 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 								buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
 								buffs[BuffCount].deathSaveSuccessChance, buffs[BuffCount].deathsaveCasterAARank, IsPersistent);
 
-			if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-				errorMessage = std::string(TempErrorMessageBuffer);
+			if(!database.RunQuery(query, &errorMessage)) {
+				LogFile->write(EQEMuLog::Error, "Error Saving Merc Buffs: %s", errorMessage.c_str());
 				break;
 			}
 			else {
@@ -1763,10 +1759,6 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 
 		BuffCount++;
 	}
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error Saving Merc Buffs: %s", errorMessage.c_str());
-	}
 }
 
 void ZoneDatabase::LoadMercBuffs(Merc *merc) {
@@ -1774,7 +1766,6 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 	uint32 max_slots = merc->GetMaxBuffSlots();
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
@@ -1786,8 +1777,8 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 						"DeathSaveSuccessChance, CasterAARank, Persistent "
 						"FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", errorMessage.c_str());
 	}
 	else {
 		int BuffCount = 0;
@@ -1835,14 +1826,11 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 		
 		StringFormat(query,"DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
 		
-		if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage)) {
+			LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", errorMessage.c_str());
 		}
 	}
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error Loading Merc Buffs: %s", errorMessage.c_str());
-	}
 }
 
 bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
@@ -1852,20 +1840,19 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 
 	if(merc_id > 0) {
 		std::string query;
-		char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 
 		// TODO: These queries need to be ran together as a transaction.. ie, if one or more fail then they all will fail to commit to the database.
 		StringFormat(query, "DELETE FROM merc_buffs WHERE MercID = '%u'", merc_id);
-		if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage)) {
+			LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", errorMessage.c_str());
 		}
 		else
 			TempCounter++;
 
 		StringFormat(query, "DELETE FROM mercs WHERE MercID = '%u'", merc_id);
 
-		if(!database.RunQuery(query, TempErrorMessageBuffer)) {
-			errorMessage = std::string(TempErrorMessageBuffer);
+		if(!database.RunQuery(query, &errorMessage)) {
+			LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", errorMessage.c_str());
 		}
 		else
 			TempCounter++;
@@ -1875,9 +1862,6 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 			Result = true;
 	}
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error Deleting Merc: %s", errorMessage.c_str());
-	}
 
 	return Result;
 }
@@ -1885,7 +1869,6 @@ bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
 void ZoneDatabase::LoadMercEquipment(Merc *merc) {
 	std::string errorMessage;
 	std::string query;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* DatasetResult;
 	MYSQL_ROW DataRow;
 
@@ -1895,8 +1878,8 @@ void ZoneDatabase::LoadMercEquipment(Merc *merc) {
 						"AND min_level <= %u AND max_level >= %u", 
 						merc->GetClass(), merc->GetTierID(), merc->GetLevel(), merc->GetLevel());
 
-	if(!database.RunQuery(query, TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
+	if(!database.RunQuery(query, &errorMessage, &DatasetResult)) {
+		LogFile->write(EQEMuLog::Error, "Error Loading Merc Inventory: %s", errorMessage.c_str());
 	}
 	else {
 		int itemCount = 0;
@@ -1915,21 +1898,18 @@ void ZoneDatabase::LoadMercEquipment(Merc *merc) {
 		mysql_free_result(DatasetResult);
 	}
 
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error Loading Merc Inventory: %s", errorMessage.c_str());
-	}
 }
 
 uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
 	std::string query;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int type = 0;
 	
 	StringFormat(query, "SELECT type from grid where id = %i and zoneid = %i", grid, zoneid);
 	
-	if (RunQuery(query, errbuf,&result)) {
+	if (RunQuery(query, &errbuf,&result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			type = atoi( row[0] );
@@ -1944,7 +1924,7 @@ uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
 
 
 void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint32 charges){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"replace into merchantlist_temp "
@@ -1952,25 +1932,25 @@ void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint
 						"values(%d, %d, %d, %d)", 
 						npcid, slot, item, charges);
 
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in SaveMerchantTemp query '" << query << "' " << errbuf << std::endl;
 	}
 }
 
 void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "delete from merchantlist_temp where npcid=%d and slot=%d", npcid, slot);
 	
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in DeleteMerchantTemp query '" << query << "' " << errbuf << std::endl;
 	}
 }
 
 
 bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, float x=0, float y=0, float z=0) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 
@@ -1978,7 +1958,7 @@ bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, float x=0, float y
 						"WHERE short_name='%s';", 
 						x, y, z, zonename);
 
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, 0, &affected_rows)) {
 		return false;
 	}
 
@@ -1993,13 +1973,13 @@ bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, float x=0, float y
 
 uint8 ZoneDatabase::GetUseCFGSafeCoords()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	
 	std::string query = "SELECT value FROM variables WHERE varname='UseCFGSafeCoords'";
 	
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1)
 		{
 			row = mysql_fetch_row(result);
@@ -2027,7 +2007,7 @@ uint8 ZoneDatabase::GetUseCFGSafeCoords()
 
 
 uint32 ZoneDatabase::GetServerFilters(char* name, ServerSideFilters_Struct *ssfs) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2035,7 +2015,7 @@ uint32 ZoneDatabase::GetServerFilters(char* name, ServerSideFilters_Struct *ssfs
 
 	StringFormat(query, "SELECT serverfilters FROM account WHERE name='%s'", name);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			lengths = mysql_fetch_lengths(result);
@@ -2066,7 +2046,7 @@ uint32 ZoneDatabase::GetServerFilters(char* name, ServerSideFilters_Struct *ssfs
 }
 
 bool ZoneDatabase::SetServerFilters(char* name, ServerSideFilters_Struct *ssfs) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string serverSideFilterBuffer;
 	uint32 affected_rows = 0;
 	
@@ -2079,7 +2059,7 @@ bool ZoneDatabase::SetServerFilters(char* name, ServerSideFilters_Struct *ssfs) 
 	StringFormat(endOfQuery, "WHERE name='%s'", name);
 	query.append(endOfQuery);
 	
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		std::cerr << "Error in SetServerSideFilters query " << errbuf << std::endl;
 		return false;
 	}
@@ -2094,7 +2074,7 @@ bool ZoneDatabase::SetServerFilters(char* name, ServerSideFilters_Struct *ssfs) 
 
 //New functions for timezone
 uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2103,7 +2083,7 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
 						"zoneidnumber=%i AND (version=%i OR version=0) "
 						"ORDER BY version DESC", zoneid, version);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) > 0) {
 			row = mysql_fetch_row(result);
@@ -2120,14 +2100,14 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
 }
 
 bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 
 	StringFormat(query,"UPDATE zone SET timezone=%i WHERE zoneidnumber=%i AND version=%i", 
 						tz, zoneid, version);
 						
-	if (RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (RunQuery(query, &errbuf, 0, &affected_rows)) {
 
 		if (affected_rows == 1)
 			return true;
@@ -2146,7 +2126,7 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
 
 //Functions for weather
 uint8 ZoneDatabase::GetZoneWeather(uint32 zoneid, uint32 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2155,7 +2135,7 @@ uint8 ZoneDatabase::GetZoneWeather(uint32 zoneid, uint32 version) {
 						"(version=%i OR version=0) ORDER BY version DESC", 
 						zoneid, version);
 	
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) > 0) {
 			row = mysql_fetch_row(result);
@@ -2173,14 +2153,14 @@ uint8 ZoneDatabase::GetZoneWeather(uint32 zoneid, uint32 version) {
 }
 
 bool ZoneDatabase::SetZoneWeather(uint32 zoneid, uint32 version, uint8 weatherID) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 
 	StringFormat(query, "UPDATE zone SET weather=%i WHERE zoneidnumber=%i AND version=%i", 
 						weatherID, zoneid, version);
 
-	if (RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		if (affected_rows == 1)
 			return true;
 		else
@@ -2200,7 +2180,7 @@ bool ZoneDatabase::SetZoneWeather(uint32 zoneid, uint32 version, uint8 weatherID
  instead and uses GetAccountInfoForLogin_result to process it..
  */
 bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* revoked,bool* gmhideme) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 
@@ -2208,7 +2188,7 @@ bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char*
 	StringFormat(query, "SELECT status, name, lsaccount_id, gmspeed, revoked, hideme "
 						"FROM account WHERE id=%i", account_id);
 	
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		bool ret = GetAccountInfoForLogin_result(result, admin, account_name, lsaccountid, gmspeed, revoked, gmhideme);
 		mysql_free_result(result);
 		return ret;
@@ -2236,7 +2216,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate2_Struct));
 	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2248,7 +2228,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	
 	StringFormat(query, "SELECT name from group_id where groupid=%d", g->GetID());
 	
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result))){
 			if(index < 6){
 				if(strcmp(c->GetName(), row[0]) != 0){
@@ -2261,7 +2241,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	}
 	else
 	{
-		printf("Error in group update query: %s\n", errbuf);
+		printf("Error in group update query: %s\n", errbuf.c_str());
 	}
 
 	c->QueuePacket(outapp);
@@ -2283,7 +2263,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 }
 
 uint8 ZoneDatabase::GroupCount(uint32 groupid){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2291,19 +2271,19 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid){
 	
 	StringFormat(query, "SELECT count(charid) FROM group_id WHERE groupid=%d", groupid);
 	
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if((row = mysql_fetch_row(result))!=nullptr)
 			count = atoi(row[0]);
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::GroupCount query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::GroupCount query '%s': %s", query.c_str(), errbuf.c_str());
 	}
 	return count;
 }
 
  uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid)
  {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2312,19 +2292,19 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid){
 	StringFormat(query, "SELECT count(charid) FROM raid_members "
 						"WHERE raidid=%d AND groupid=%d;", raidid, groupid);
 	
-	if (RunQuery(query,  errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if((row = mysql_fetch_row(result))!=nullptr)
 			count = atoi(row[0]);
 		mysql_free_result(result);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::RaidGroupCount query '%s': %s", query.c_str(), errbuf.c_str());
 	}
 	return count;
  }
 
 int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	MYSQL_RES *result;
@@ -2332,7 +2312,7 @@ int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 	
 	StringFormat(query, "SELECT count(*) FROM blocked_spells WHERE zoneid=%d", zoneid);
 	
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		if (row != nullptr && row[0] != 0) {
 			int32 ret = atoi(row[0]);
@@ -2353,7 +2333,7 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 {
 	LogFile->write(EQEMuLog::Status, "Loading Blocked Spells from database...");
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2361,7 +2341,7 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 	StringFormat(query, "SELECT id, spellid, type, x, y, z, x_diff, y_diff, z_diff, message "
 						"FROM blocked_spells WHERE zoneid=%d ORDER BY id asc", zoneid);
 		
-	if (RunQuery(query,  errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		int32 r;
 		for(r = 0; (row = mysql_fetch_row(result)); r++) {
 			if(r >= blockedSpellsCount) {
@@ -2393,7 +2373,7 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 
 int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2402,7 +2382,7 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 						"zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", 
 						zoneID, version);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) > 0) {
 			row = mysql_fetch_row(result);
@@ -2425,7 +2405,7 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 
 uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2434,7 +2414,7 @@ uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 	StringFormat(query, "select `karma` from `account` where `id`='%i' limit 1",
 						acct_id);
 
-	if (!RunQuery(query,errbuf,&result))
+	if (!RunQuery(query, &errbuf,&result))
 	{
 		return 0;
 	}
@@ -2450,13 +2430,13 @@ uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 
 void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 
 	StringFormat(query, "UPDATE account set karma=%i where id=%i", amount, acct_id);
 	
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		std::cerr << "Error in UpdateKarma query '" << query << "' " << errbuf << std::endl;
 	}
 }
@@ -2466,7 +2446,7 @@ void ZoneDatabase::ListAllInstances(Client* c, uint32 charid)
 	if(!c)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2475,7 +2455,7 @@ void ZoneDatabase::ListAllInstances(Client* c, uint32 charid)
 						"instance_lockout_player ON instance_lockout.id = instance_lockout_player.id "
 						"WHERE instance_lockout_player.charid=%lu", (unsigned long)charid);
 		
-	if (RunQuery(query,errbuf,&result))
+	if (RunQuery(query, &errbuf,&result))
 	{
 
 		char name[64];
@@ -2493,15 +2473,15 @@ void ZoneDatabase::ListAllInstances(Client* c, uint32 charid)
 
 void ZoneDatabase::QGlobalPurge()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	
 	std::string query = "DELETE FROM quest_globals WHERE expdate < UNIX_TIMESTAMP()";
 	
-	database.RunQuery(query, errbuf);
+	database.RunQuery(query, &errbuf);
 }
 
 void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoor_name, float dxpos, float dypos, float dzpos, float dheading, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	
 	StringFormat(query,"replace into doors "
@@ -2518,13 +2498,13 @@ void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoo
 						dguildid, dlockpick, dkeyitem, ddoor_param, 
 						dinvert, dincline, dsize);
 	
-	if (!RunQuery(query, errbuf))	{
+	if (!RunQuery(query, &errbuf))	{
 		std::cerr << "Error in InsertDoor" << query << "' " << errbuf << std::endl;
 	}
 }
 
 void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2533,7 +2513,7 @@ void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32
 						"character_alt_currency where char_id='%u'", 
 						char_id);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while ((row = mysql_fetch_row(result)))
 		{
 			currency[atoi(row[0])] = atoi(row[1]);
@@ -2541,28 +2521,28 @@ void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadAltCurrencyValues query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadAltCurrencyValues query '%s': %s", query.c_str(), errbuf.c_str());
 	}
 }
 
 void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	
 	StringFormat(query, "REPLACE INTO character_alt_currency (char_id, currency_id, amount)"
 						" VALUES('%u', '%u', '%u')", char_id, currency_id, value);
 	
-	database.RunQuery(query, errbuf);
+	database.RunQuery(query, &errbuf);
 }
 
 void ZoneDatabase::SaveBuffs(Client *c) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "DELETE FROM `character_buffs` "
 						"WHERE `character_id`='%u'", c->CharacterID());
 
-	database.RunQuery(query, errbuf);
+	database.RunQuery(query, &errbuf);
 
 	uint32 buff_count = c->GetMaxBuffSlots();
 	Buffs_Struct *buffs = c->GetBuffs();
@@ -2582,8 +2562,8 @@ void ZoneDatabase::SaveBuffs(Client *c) {
 								buffs[i].magic_rune, buffs[i].persistant_buff,
 								buffs[i].deathSaveSuccessChance, buffs[i].deathsaveCasterAARank);
 			
-			if(!database.RunQuery(query, errbuf)) {
-				LogFile->write(EQEMuLog::Error, "Error in SaveBuffs query '%s': %s", query.c_str(), errbuf);
+			if(!database.RunQuery(query, &errbuf)) {
+				LogFile->write(EQEMuLog::Error, "Error in SaveBuffs query '%s': %s", query.c_str(), errbuf.c_str());
 			}
 		}
 	}
@@ -2597,7 +2577,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 	}
 
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2607,7 +2587,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 						"FROM `character_buffs` WHERE `character_id`='%u'",
 						c->CharacterID());
 	
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while ((row = mysql_fetch_row(result)))
 		{
@@ -2664,7 +2644,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadBuffs query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadBuffs query '%s': %s", query.c_str(), errbuf.c_str());
 		return;
 	}
 
@@ -2697,7 +2677,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 }
 
 void ZoneDatabase::SavePetInfo(Client *c) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	int i = 0;
 	PetInfo *petinfo = c->GetPetInfo(0);
@@ -2705,13 +2685,13 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 
 	StringFormat(query, "DELETE FROM `character_pet_buffs` WHERE `char_id`=%u", c->CharacterID());
 
-	if(!database.RunQuery(query, errbuf)) {
+	if(!database.RunQuery(query, &errbuf)) {
 		return;
 	}
 	
 	StringFormat(query, "DELETE FROM `character_pet_inventory` WHERE `char_id`=%u", c->CharacterID());
 	
-	if (!database.RunQuery(query, errbuf)) {
+	if (!database.RunQuery(query, &errbuf)) {
 		// error report
 		return;
 	}
@@ -2724,7 +2704,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 						c->CharacterID(), petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana,
 						petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana);
 	
-	if(!database.RunQuery(query, errbuf))
+	if(!database.RunQuery(query, &errbuf))
 	{
 		return;
 	}
@@ -2739,7 +2719,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 								c->CharacterID(), i, petinfo->Buffs[i].spellid, petinfo->Buffs[i].level, 
 								petinfo->Buffs[i].duration, petinfo->Buffs[i].counters);
 			
-			database.RunQuery(query, errbuf);
+			database.RunQuery(query, &errbuf);
 		}
 		if (suspended->Buffs[i].spellid != SPELL_UNKNOWN && suspended->Buffs[i].spellid != 0) {
 			
@@ -2751,7 +2731,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 								suspended->Buffs[i].level, suspended->Buffs[i].duration,
 								suspended->Buffs[i].counters);
 			
-			database.RunQuery(query, errbuf);
+			database.RunQuery(query, &errbuf);
 		}
 	}
 
@@ -2763,7 +2743,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 								"values (%u, 0, %u, %u)",
 								c->CharacterID(), i, petinfo->Items[i]);
 			
-			database.RunQuery(query, errbuf);
+			database.RunQuery(query, &errbuf);
 			// should check for errors
 		}
 	}
@@ -2776,7 +2756,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 						c->CharacterID(), suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana,
 						suspended->Name, suspended->petpower, suspended->SpellID, suspended->HP, suspended->Mana);
 
-	if(!database.RunQuery(query, errbuf))
+	if(!database.RunQuery(query, &errbuf))
 	{
 		return;
 	}
@@ -2789,7 +2769,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 								"values (%u, 1, %u, %u)",
 								c->CharacterID(), i, suspended->Items[i]);
 			
-			database.RunQuery(query, errbuf);
+			database.RunQuery(query, &errbuf);
 			// should check for errors
 		}
 	}
@@ -2797,19 +2777,19 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 }
 
 void ZoneDatabase::RemoveTempFactions(Client *c){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "DELETE FROM faction_values WHERE temp = 1 AND char_id=%u", c->CharacterID());
 	
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in RemoveTempFactions query '" << query << "' " << errbuf << std::endl;
 	}
 }
 
 void ZoneDatabase::LoadPetInfo(Client *c) {
 	// Load current pet and suspended pet
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2826,7 +2806,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 						"from `character_pet_info` where `char_id`=%u",
 						c->CharacterID());
 
-	if(database.RunQuery(query, errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while ((row = mysql_fetch_row(result))) {
 			pet = atoi(row[0]);
@@ -2847,7 +2827,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), errbuf.c_str());
 		return;
 	}
 
@@ -2855,7 +2835,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 						"`ticsremaining`, `counters` FROM `character_pet_buffs` "
 						"WHERE `char_id`=%u", c->CharacterID());
 	
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while ((row = mysql_fetch_row(result)))
 		{
@@ -2895,7 +2875,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), errbuf.c_str());
 		return;
 	}
 
@@ -2904,7 +2884,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 						"WHERE `char_id`=%u",
 						c->CharacterID());
 
-	if (database.RunQuery(query, errbuf,&result))
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result))) {
 			pet = atoi(row[0]);
@@ -2924,7 +2904,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in LoadPetInfo query '%s': %s", query.c_str(), errbuf.c_str());
 		return;
 	}
 }
@@ -2985,13 +2965,13 @@ bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race
 }
 
 bool ZoneDatabase::LoadFactionValues(uint32 char_id, faction_map & val_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	
 	StringFormat(query, "SELECT faction_id,current_value FROM faction_values WHERE char_id = %i",char_id);
 	
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		bool ret = LoadFactionValues_result(result, val_list);
 		mysql_free_result(result);
 		return ret;
@@ -3057,7 +3037,7 @@ bool ZoneDatabase::GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, in
 //o--------------------------------------------------------------
 bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 
@@ -3065,7 +3045,7 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 						"WHERE char_id=%i AND faction_id = %i",
 						char_id, faction_id);
 
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -3086,7 +3066,7 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 						"VALUES (%i, %i, %i, %i)",
 						char_id, faction_id, value, temp);
 
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, 0, &affected_rows)) {
 		std::cerr << "Error in SetCharacterFactionLevel query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -3102,7 +3082,7 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 
 bool ZoneDatabase::LoadFactionData()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -3110,7 +3090,7 @@ bool ZoneDatabase::LoadFactionData()
 	query = "SELECT MAX(id) FROM faction_list";
 
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		if (row && row[0])
 		{
@@ -3124,7 +3104,7 @@ bool ZoneDatabase::LoadFactionData()
 			
 			query ="SELECT id,name,base FROM faction_list";
 			
-			if (RunQuery(query, errbuf, &result))
+			if (RunQuery(query, &errbuf, &result))
 			{
 				while((row = mysql_fetch_row(result)))
 				{
@@ -3133,7 +3113,7 @@ bool ZoneDatabase::LoadFactionData()
 					strn0cpy(faction_array[index]->name, row[1], 50);
 					faction_array[index]->base = atoi(row[2]);
 
-					char sec_errbuf[MYSQL_ERRMSG_SIZE];
+					std::string sec_errbuf;
 					MYSQL_RES *sec_result;
 					MYSQL_ROW sec_row;
 					
@@ -3142,7 +3122,7 @@ bool ZoneDatabase::LoadFactionData()
 										"WHERE faction_id=%u", 
 										index);
 					
-					if (RunQuery(query, sec_errbuf, &sec_result)) {
+					if (RunQuery(query, &sec_errbuf, &sec_result)) {
 						while((sec_row = mysql_fetch_row(sec_result)))
 						{
 							faction_array[index]->mods[sec_row[1]] = atoi(sec_row[0]);

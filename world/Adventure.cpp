@@ -374,14 +374,14 @@ void Adventure::MoveCorpsesToGraveyard()
 
 	std::list<uint32> dbid_list;
 	std::list<uint32> charid_list;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT id, charid FROM player_corpses WHERE instanceid=%d", GetInstanceID());
 
-	if(database.RunQuery(query,errbuf, &result))
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -392,7 +392,7 @@ void Adventure::MoveCorpsesToGraveyard()
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), errbuf.c_str());
 	}
 
 	std::list<uint32>::iterator iter = dbid_list.begin();
@@ -405,9 +405,9 @@ void Adventure::MoveCorpsesToGraveyard()
 		StringFormat(query,"UPDATE player_corpses SET zoneid=%d, instanceid=0, x=%f, y=%f, z=%f WHERE instanceid=%d",
 							GetTemplate()->graveyard_zone_id, x, y, z, GetInstanceID());
 		
-		if(!database.RunQuery(query,errbuf))
+		if(!database.RunQuery(query,&errbuf))
 		{
-			LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), errbuf);
+			LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), errbuf.c_str());
 		}
 		iter++;
 	}

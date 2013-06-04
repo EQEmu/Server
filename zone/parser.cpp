@@ -315,7 +315,7 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 
 	if (npcmob->GetQglobal())
 	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		MYSQL_RES *result;
 		MYSQL_ROW row;
@@ -339,9 +339,9 @@ void Parser::Event(QuestEventID event, uint32 npcid, const char * data, NPC* npc
 							"(zoneid=%i || zoneid=0) && expdate >= unix_timestamp(now())",
 							npcmob->GetNPCTypeID(), charid, zone->GetZoneID());
 		
-		database.RunQuery(query, errbuf, &result);
+		database.RunQuery(query, &errbuf, &result);
 		printf("%s\n",query.c_str());
-		printf("%s\n",errbuf);
+		printf("%s\n",errbuf.c_str());
 		if (result)
 		{
 			printf("Loading global variables for %s\n",npcmob->GetName());

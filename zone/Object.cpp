@@ -558,7 +558,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 // Add new Zone Object (theoretically only called for items dropped to ground)
 uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& object, const ItemInst* inst)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	uint32 database_id = 0;
@@ -581,8 +581,8 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 						item_id, charges, object_name.c_str(), type, icon);
 						
 	// Save new record for object
-	if (!RunQuery(query, errbuf, nullptr, nullptr, &database_id)) {
-		LogFile->write(EQEMuLog::Error, "Unable to insert object: %s", errbuf);
+	if (!RunQuery(query, &errbuf, nullptr, nullptr, &database_id)) {
+		LogFile->write(EQEMuLog::Error, "Unable to insert object: %s", errbuf.c_str());
 	}
 	else {
 		// Save container contents, if container
@@ -597,7 +597,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 // Update information about existing object in database
 void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const ItemInst* inst)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	uint32 item_id = 0;
@@ -619,8 +619,8 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 						item_id, charges, object_name.c_str(), type, icon, id);
 
 	// Save new record for object
-	if (!RunQuery(query, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to update object: %s", errbuf);
+	if (!RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Unable to update object: %s", errbuf.c_str());
 	}
 	else {
 		// Save container contents, if container
@@ -631,7 +631,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 
 }
 Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -642,7 +642,7 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
 						"(version=%u OR version=-1) limit 50", 
 						zone_id, version);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		int i=0;
 		while( (row=mysql_fetch_row(result) ) ) {
@@ -667,14 +667,14 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
 }
 void ZoneDatabase::DeleteObject(uint32 id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	// Save new record for object
 	StringFormat(query,"delete from object where id=%i", id);
 	
-	if (!RunQuery(query, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Unable to delete object: %s", errbuf);
+	if (!RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Unable to delete object: %s", errbuf.c_str());
 	}
 }
 

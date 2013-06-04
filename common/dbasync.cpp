@@ -18,10 +18,10 @@
 #define ASYNC_LOOP_GRANULARITY 4 //# of ms between checking our work
 
 bool DBAsyncCB_LoadVariables(DBAsyncWork* iWork) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES* result = 0;
 	DBAsyncQuery* dbaq = iWork->PopAnswer();
-	if (dbaq->GetAnswer(errbuf, &result))
+	if (dbaq->GetAnswer(&errbuf, &result))
 		iWork->GetDB()->LoadVariables_result(result);
 	else
 		std::cout << "Error: DBAsyncCB_LoadVariables failed: !GetAnswer: '" << errbuf << "'" << std::endl;
@@ -615,10 +615,13 @@ DBAsyncQuery::~DBAsyncQuery() {
 		mysql_free_result(presult);
 }
 
-bool DBAsyncQuery::GetAnswer(char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum) {
+bool DBAsyncQuery::GetAnswer(std::string* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum) {
 	if (pstatus != DBAsync::Finished) {
 		if (errbuf)
-			snprintf(errbuf, MYSQL_ERRMSG_SIZE, "Error: Query not finished.");
+		{
+			errbuf->assign("Error: Query not finished.");
+		}
+			
 		if (errnum)
 			*errnum = UINT_MAX;
 		return false;
@@ -626,12 +629,16 @@ bool DBAsyncQuery::GetAnswer(char* errbuf, MYSQL_RES** result, uint32* affected_
 	if (errbuf) {
 		if (pGetErrbuf) {
 			if (perrbuf)
-				strn0cpy(errbuf, perrbuf, MYSQL_ERRMSG_SIZE);
+			{
+				errbuf->assign(*perrbuf);
+			}
 			else
-				snprintf(errbuf, MYSQL_ERRMSG_SIZE, "Error message should've been saved, but hasnt. errno: %u", perrnum);
+			{
+				StringFormat(*errbuf, "Error message should've been saved, but hasnt. errno: %u", perrnum);
+			}
 		}
 		else
-			snprintf(errbuf, MYSQL_ERRMSG_SIZE, "Error message not saved. errno: %u", perrnum);
+			StringFormat(*errbuf, "Error message not saved. errno: %u", perrnum);
 	}
 	if (errnum)
 		*errnum = perrnum;
@@ -647,7 +654,9 @@ bool DBAsyncQuery::GetAnswer(char* errbuf, MYSQL_RES** result, uint32* affected_
 void DBAsyncQuery::Process(DBcore* iDBC) {
 	pstatus = DBAsync::Executing;
 	if (pGetErrbuf)
-		perrbuf = new char[MYSQL_ERRMSG_SIZE];
+	{
+		std::string perrbuf = "";
+	}
 	MYSQL_RES** resultPP = 0;
 	if (pGetResultSet)
 		resultPP = &presult;

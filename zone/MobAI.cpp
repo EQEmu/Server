@@ -2329,14 +2329,14 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 	}
 	else if (!npc_spells_loadtried[iDBSpellsID]) { // no reason to ask the DB again if we have failed once already
 		npc_spells_loadtried[iDBSpellsID] = true;
-		char errbuf[MYSQL_ERRMSG_SIZE];
+		std::string errbuf;
 		std::string query;
 		MYSQL_RES *result;
 		MYSQL_ROW row;
 		
 		StringFormat(query, "SELECT id, parent_list, attack_proc, proc_chance from npc_spells where id=%d", iDBSpellsID);
 		
-		if (RunQuery(query,  errbuf, &result)) {
+		if (RunQuery(query, &errbuf, &result)) {
 			if (mysql_num_rows(result) == 1) {
 				row = mysql_fetch_row(result);
 				uint32 tmpparent_list = atoi(row[1]);
@@ -2349,7 +2349,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 									"where npc_spells_id=%d ORDER BY minlevel", 
 									iDBSpellsID);
 				
-				if (RunQuery(query, errbuf, &result)) {
+				if (RunQuery(query, &errbuf, &result)) {
 					uint32 tmpSize = sizeof(DBnpcspells_Struct) + (sizeof(DBnpcspells_entries_Struct) * mysql_num_rows(result));
 					npc_spells_cache[iDBSpellsID] = (DBnpcspells_Struct*) new uchar[tmpSize];
 					memset(npc_spells_cache[iDBSpellsID], 0, tmpSize);
@@ -2403,13 +2403,13 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 }
 
 uint32 ZoneDatabase::GetMaxNPCSpellsID() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query = "SELECT max(id) from npc_spells";
 
-	if (RunQuery(query,errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			uint32 ret = 0;

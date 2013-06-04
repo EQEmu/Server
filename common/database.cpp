@@ -78,10 +78,10 @@ Database::Database(const char* host, const char* user, const char* passwd, const
 bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 {
 	uint32 errnum= 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	if (!Open(host, user, passwd, database, port, &errnum, errbuf))
+	std::string errbuf;
+	if (!Open(host, user, passwd, database, port, &errnum, &errbuf))
 	{
-		LogFile->write(EQEMuLog::Error, "Failed to connect to database: Error: %s", errbuf);
+		LogFile->write(EQEMuLog::Error, "Failed to connect to database: Error: %s", errbuf.c_str());
 		HandleMysqlError(errnum);
 
 		return false;
@@ -157,7 +157,7 @@ Return the account id or zero if no account matches.
 Zero will also be returned if there is a database error.
 */
 uint32 Database::CheckLogin(const char* name, const char* password, int16* oStatus) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -165,16 +165,16 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 	if(strlen(name) >= 50 || strlen(password) >= 50)
 		return(0);
 
-	std::string tmpUN;
-	std::string tmpPW;
+	std::string tmpUserName;
+	std::string tmpPassWord;
 	
-	DoEscapeString(tmpUN, name, strlen(name));
-	DoEscapeString(tmpPW, password, strlen(password));
+	DoEscapeString(tmpUserName, name, strlen(name));
+	DoEscapeString(tmpPassWord, password, strlen(password));
 
 	StringFormat(query,"SELECT id, status FROM account WHERE name='%s' AND password is not null "
 						"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
-						tmpUN.c_str(), tmpPW.c_str(), tmpPW.c_str());
-	if (RunQuery(query, errbuf, &result)) {
+						tmpUserName.c_str(), tmpPassWord.c_str(), tmpPassWord.c_str());
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1)
 		{
 			row = mysql_fetch_row(result);
@@ -204,13 +204,13 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 //Lieka: Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
 bool Database::CheckBannedIPs(const char* loginIP)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	//cout << "Checking against Banned IPs table."<< endl; //Lieka: Debugging
 	StringFormat(query,"SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) != 0)
 		{
 			//cout << loginIP << " was present in the banned IPs table" << endl; //Lieka: Debugging
@@ -235,11 +235,11 @@ bool Database::CheckBannedIPs(const char* loginIP)
 
 bool Database::AddBannedIP(char* bannedIP, const char* notes)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes);
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in ReserveName query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -248,13 +248,13 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
  //End Lieka Edit
 
  bool Database::CheckGMIPs(const char* ip_address, uint32 account_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 
 	StringFormat(query, "SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			mysql_free_result(result);
 			return true;
@@ -272,12 +272,12 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
 }
 
 bool Database::AddGMIP(char* ip_address, char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name);
 
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		return false;
 	}
 	return true;
@@ -285,18 +285,18 @@ bool Database::AddGMIP(char* ip_address, char* name) {
 
 void Database::LoginIP(uint32 AccountID, const char* LoginIP)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP);
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in Log IP query '" << query << "' " << errbuf << std::endl;
 	}
 }
 
 int16 Database::CheckStatus(uint32 account_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query ;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -304,7 +304,7 @@ int16 Database::CheckStatus(uint32 account_id)
 	StringFormat(query, "SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
 							" FROM `account` WHERE `id` = %i", account_id);
 
-	if (RunQuery(query,errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 
 		if (mysql_num_rows(result) == 1)
@@ -341,7 +341,7 @@ int16 Database::CheckStatus(uint32 account_id)
 }
 
 uint32 Database::CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 querylen;
 	uint32 last_insert_id;
@@ -356,7 +356,7 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 	}
 
 	std::cerr << "Account Attempting to be created:" << name << " " << (int16) status << std::endl;
-	if (!RunQuery(query, errbuf, 0, 0, &last_insert_id)) {
+	if (!RunQuery(query, &errbuf, nullptr, nullptr, &last_insert_id)) {
 		std::cerr << "Error in CreateAccount query '" << query << "' " << errbuf << std::endl;
 		return 0;
 	}
@@ -370,14 +370,14 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 }
 
 bool Database::DeleteAccount(const char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 
 	std::cerr << "Account Attempting to be deleted:" << name << std::endl;
 	StringFormat(query,"DELETE FROM account WHERE name='%s';",name);
 
-	if (RunQuery(query,  errbuf, 0, &affected_rows)) {
+	if (RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		if (affected_rows == 1) {
 			return true;
 		}
@@ -391,12 +391,12 @@ bool Database::DeleteAccount(const char* name) {
 }
 
 bool Database::SetLocalPassword(uint32 accid, const char* password) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"UPDATE account SET password=MD5('%s') where id=%i;", password, accid);
 
-	if (!RunQuery(query,  errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in SetLocalPassword query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -405,13 +405,13 @@ bool Database::SetLocalPassword(uint32 accid, const char* password) {
 }
 
 bool Database::SetAccountStatus(const char* name, int16 status) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 
 	std::cout << "Account being GM Flagged:" << name << ", Level: " << (int16) status << std::endl;
 	StringFormat(query,"UPDATE account SET status=%i WHERE name='%s';", status, name);
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		return false;
 	}
 
@@ -425,11 +425,11 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 
 bool Database::ReserveName(uint32 account_id, char* name)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"INSERT into character_ SET account_id=%i, name='%s', profile=NULL", account_id, name);
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in ReserveName query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -442,7 +442,7 @@ returns false on failure, true otherwise
 */
 bool Database::DeleteCharacter(char *name)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -462,7 +462,7 @@ bool Database::DeleteCharacter(char *name)
 #endif
 	StringFormat(query,"SELECT id from character_ WHERE name='%s'", name);
 	
-	RunQuery(query, errbuf, &result);
+	RunQuery(query, &errbuf, &result);
 	matches = mysql_num_rows(result);
 	if(matches == 1)
 	{
@@ -494,55 +494,55 @@ bool Database::DeleteCharacter(char *name)
 	printf(" quest_globals");
 #endif
 	StringFormat(query,"DELETE from quest_globals WHERE charid='%d'", charid);
-	RunQuery(query, errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" character_tasks");
 #endif
 	StringFormat(query,"DELETE from character_tasks WHERE charid='%d'", charid);
-	RunQuery(query, errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" character_activities");
 #endif
 	StringFormat(query,"DELETE from character_activities WHERE charid='%d'", charid);
-	RunQuery(query, errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" character_enabledtasks");
 #endif
 	StringFormat(query,"DELETE from character_enabledtasks WHERE charid='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" completed_tasks");
 #endif
 	StringFormat(query,"DELETE from completed_tasks WHERE charid='%d'", charid);
-	RunQuery(query, errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" friends");
 #endif
 	StringFormat(query, "DELETE from friends WHERE charid='%d'", charid);
-	RunQuery(query, errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" mail");
 #endif
 	StringFormat(query, "DELETE from mail WHERE charid='%d'", charid);
-	RunQuery(query, errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" ptimers");
 #endif
 	StringFormat(query, "DELETE from timers WHERE char_id='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" inventory");
 #endif
 	StringFormat(query, "DELETE from inventory WHERE charid='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" guild_members");
@@ -552,61 +552,61 @@ bool Database::DeleteCharacter(char *name)
 #else
 	StringFormat(query,"DELETE FROM guild_members WHERE char_id='%d'", charid);
 #endif
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" recipes");
 #endif
 	StringFormat(query,"DELETE FROM char_recipe_list WHERE char_id='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" adventure_stats");
 #endif
 	StringFormat(query,"DELETE FROM adventure_stats WHERE player_id='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" zone_flags");
 #endif
 	StringFormat(query,"DELETE FROM zone_flags WHERE charID='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" titles");
 #endif
 	StringFormat(query, "DELETE FROM titles WHERE char_id='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" titlesets");
 #endif
 	StringFormat(query,"DELETE FROM player_titlesets WHERE char_id='%d'", charid);
-	RunQuery(query, errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" keyring");
 #endif
 	StringFormat(query, "DELETE FROM keyring WHERE char_id='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" factions");
 #endif
 	StringFormat(query,"DELETE FROM faction_values WHERE char_id='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" instances");
 #endif
 	StringFormat(query,"DELETE FROM instance_lockout_player WHERE charid='%d'", charid);
-	RunQuery(query,errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf(" _character");
 #endif
 	StringFormat(query,"DELETE from character_ WHERE id='%d'", charid);
-	RunQuery(query,  errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 	if(affected_rows != 1)	// here we have to have a match or it's an error
 	{
 		LogFile->write(EQEMuLog::Error, "DeleteCharacter: error: delete operation affected %d rows\n", affected_rows);
@@ -617,7 +617,7 @@ bool Database::DeleteCharacter(char *name)
 	printf(" alternate currency");
 #endif
 	StringFormat(query,"DELETE FROM character_alt_currency WHERE char_id='%d'", charid);
-	RunQuery(query, errbuf, nullptr, &affected_rows);
+	RunQuery(query, &errbuf, nullptr, &affected_rows);
 
 #if DEBUG >= 5
 	printf("\n");
@@ -631,7 +631,7 @@ bool Database::DeleteCharacter(char *name)
 bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext)
 {
 	_CP(Database_StoreCharacter);
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 	int i;
@@ -646,8 +646,8 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	// get the char id (used in inventory inserts below)
 	StringFormat(query,"SELECT id FROM character_ where name='%s'", pp->name);
 
-	if(!RunQuery(query,errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in char store id query: %s: %s", query.c_str(), errbuf);
+	if(!RunQuery(query, &errbuf, &result)) {
+		LogFile->write(EQEMuLog::Error, "Error in char store id query: %s: %s", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
@@ -699,11 +699,11 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	
 	query.append(ending);
 	
-	RunQuery(query, errbuf, 0, &affected_rows);
+	RunQuery(query, &errbuf, 0, &affected_rows);
 
 	if(!affected_rows)
 	{
-		LogFile->write(EQEMuLog::Error, "StoreCharacter query '%s' %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "StoreCharacter query '%s' %s", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
@@ -723,15 +723,15 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 								charid, i, newinv->GetItem()->ID,
 								newinv->GetCharges(), newinv->GetColor());
 			
-			RunQuery(query, errbuf, 0, &affected_rows);
+			RunQuery(query, &errbuf, 0, &affected_rows);
 			if(!affected_rows)
 			{
-				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", query.c_str(), errbuf);
+				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", query.c_str(), errbuf.c_str());
 			}
 #if EQDEBUG >= 9
 			else
 			{
-				LogFile->write(EQEMuLog::Debug, "StoreCharacter inventory succeeded. Query '%s' %s", query, errbuf);
+				LogFile->write(EQEMuLog::Debug, "StoreCharacter inventory succeeded. Query '%s' %s", query.c_str(), errbuf.c_str());
 			}
 #endif
 		}
@@ -767,13 +767,13 @@ the name "name" or zero if no character with that name was found
 Zero will also be returned if there is a database error.
 */
 uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT account_id, id FROM character_ WHERE name='%s'", charname);
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1)
 		{
 			row = mysql_fetch_row(result);
@@ -794,14 +794,14 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 
 // Retrieve account_id for a given char_id
 uint32 Database::GetAccountIDByChar(uint32 char_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 ret = 0;
 
 	StringFormat(query,"SELECT account_id FROM character_ WHERE id=%i", char_id);
-	if (RunQuery(query,  errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			ret = atoi(row[0]); // copy to temp var because gotta free the result before exitting this function
@@ -809,14 +809,14 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query.c_str(), errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query.c_str(), errbuf.c_str());
 	}
 
 	return ret;
 }
 
 uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* lsid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -830,7 +830,7 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 	}
 
 	StringFormat(query,"SELECT id, status, lsaccount_id FROM account WHERE name='%s'", accname);
-	if (RunQuery(query,  errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			uint32 tmp = atoi(row[0]); // copy to temp var because gotta free the result before exitting this function
@@ -855,13 +855,13 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 }
 
 void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT name, lsaccount_id FROM account WHERE id='%i'", accountid);
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 
@@ -879,13 +879,13 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 }
 
 void Database::GetCharName(uint32 char_id, char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT name FROM character_ WHERE id='%i'", char_id);
-	if (RunQuery(query,  errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 
@@ -909,13 +909,13 @@ void Database::LoadVariables_MQ(std::string& query) {
 }
 
 bool Database::LoadVariables() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	
 	LoadVariables_MQ(query);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		bool ret = LoadVariables_result(result);
 		mysql_free_result(result);
 		return ret;
@@ -1006,7 +1006,7 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 }
 
 bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 
@@ -1016,14 +1016,14 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 
 	StringFormat(query,"Update variables set value='%s' WHERE varname like '%s'", varvalue.c_str(), varname.c_str());
 
-	if (RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (RunQuery(query, &errbuf, 0, &affected_rows)) {
 		if (affected_rows == 1) {
 			LoadVariables(); // refresh cache
 			return true;
 		}
 		else {
 			StringFormat(query,"Insert Into variables (varname, value) values ('%s', '%s')", varname.c_str(), varvalue.c_str());
-			if (RunQuery(query, errbuf, 0, &affected_rows)) {
+			if (RunQuery(query, &errbuf, 0, &affected_rows)) {
 				if (affected_rows == 1) {
 					LoadVariables(); // refresh cache
 					return true;
@@ -1038,14 +1038,14 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 }
 
 uint32 Database::GetMiniLoginAccount(char* ip){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 retid = 0;
 
 	StringFormat(query,"SELECT id FROM account WHERE minilogin_ip='%s'", ip);
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if ((row = mysql_fetch_row(result)))
 			retid = atoi(row[0]);
 		mysql_free_result(result);
@@ -1059,7 +1059,7 @@ uint32 Database::GetMiniLoginAccount(char* ip){
 
 // Pyro: Get zone starting points from DB
 bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, char *flag_needed) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	//	int buf_len = 256;
 	//	int chars = -1;
@@ -1071,7 +1071,7 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 						"WHERE short_name='%s' AND (version=%i OR version=0) "
 						"ORDER BY version DESC", short_name, version);
 
-	if (RunQuery(query, errbuf, &result) ){
+	if (RunQuery(query, &errbuf, &result) ){
 		if (mysql_num_rows(result) > 0) {
 			row = mysql_fetch_row(result);
 			if (safe_x != 0)
@@ -1105,7 +1105,7 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 
 
 bool Database::GetZoneLongName(const char* short_name, char** long_name, char* file_name, float* safe_x, float* safe_y, float* safe_z, uint32* graveyard_id, uint32* maxclients) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -1113,7 +1113,7 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 	StringFormat(query, "SELECT long_name, file_name, safe_x, safe_y, safe_z, graveyard_id, maxclients "
 						"FROM zone WHERE short_name='%s' AND version=0", short_name);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) > 0) {
 			row = mysql_fetch_row(result);
@@ -1150,7 +1150,7 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 	return false;
 }
 uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -1158,7 +1158,7 @@ uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 
 	StringFormat(query,"SELECT graveyard_id FROM zone WHERE zoneidnumber='%u' "
 						"AND (version=%i OR version=0) ORDER BY version DESC", zone_id, version);
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) > 0) {
 			row = mysql_fetch_row(result);
@@ -1175,14 +1175,14 @@ uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 }
 
 bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid, float* graveyard_x, float* graveyard_y, float* graveyard_z, float* graveyard_heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT zone_id, x, y, z, heading FROM graveyard WHERE id=%i", graveyard_id);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
@@ -1211,13 +1211,13 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 }
 
 bool Database::LoadZoneNames() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query = "SELECT MAX(zoneidnumber) FROM zone";
 
-	if (RunQuery(query,  errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		if (row && row[0])
 		{
@@ -1230,7 +1230,7 @@ bool Database::LoadZoneNames() {
 
 
 			query = "SELECT zoneidnumber, short_name FROM zone";
-			if (RunQuery(query, errbuf, &result)) {
+			if (RunQuery(query, &errbuf, &result)) {
 				while((row = mysql_fetch_row(result))) {
 					zonename_array[atoi(row[0])] = new char[strlen(row[1]) + 1];
 					strcpy(zonename_array[atoi(row[0])], row[1]);
@@ -1295,7 +1295,7 @@ const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
 }
 
 uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -1304,7 +1304,7 @@ uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 	StringFormat(query,"SELECT peqzone from zone where zoneidnumber='%i' "
 						"AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) > 0)
 		{
@@ -1324,7 +1324,7 @@ uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 bool Database::CheckNameFilter(const char* name, bool surname)
 {
 	std::string str_name = name;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -1380,7 +1380,7 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 
 	query ="SELECT name FROM name_filter";
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result)))
 		{
 			std::string current_row = row[0];
@@ -1407,12 +1407,12 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 }
 
 bool Database::AddToNameFilter(const char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected_rows = 0;
 
 	StringFormat(query,"INSERT INTO name_filter (name) values ('%s')", name);
-	if (!RunQuery(query, errbuf, 0, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, 0, &affected_rows)) {
 		std::cerr << "Error in AddToNameFilter query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -1425,14 +1425,14 @@ bool Database::AddToNameFilter(const char* name) {
 }
 
 uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* oStatus) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT id, name, status FROM account WHERE lsaccount_id=%i", iLSID);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
@@ -1460,13 +1460,13 @@ uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* o
 }
 
 void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query, "SELECT name, status FROM account WHERE id=%i", id);
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
@@ -1482,17 +1482,17 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 }
 
 void Database::ClearMerchantTemp(){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 
 	std::string query = "delete from merchantlist_temp";
 
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in ClearMerchantTemp query '" << query << "' " << errbuf << std::endl;
 	}
 }
 
 bool Database::UpdateName(const char* oldname, const char* newname) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 
@@ -1500,7 +1500,7 @@ bool Database::UpdateName(const char* oldname, const char* newname) {
 
 	StringFormat(query,"UPDATE character_ SET name='%s' WHERE name='%s';", newname, oldname);
 
-	if (!RunQuery(query,  errbuf, 0, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		return false;
 	}
 
@@ -1515,7 +1515,7 @@ bool Database::UpdateName(const char* oldname, const char* newname) {
 // If the name is used or an error occurs, it returns false, otherwise it returns true
 bool Database::CheckUsedName(const char* name)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 
@@ -1524,7 +1524,7 @@ bool Database::CheckUsedName(const char* name)
 
 	StringFormat(query,"SELECT id FROM character_ where name='%s'", name);
 
-	if (!RunQuery(query, errbuf, &result)) {
+	if (!RunQuery(query, &errbuf, &result)) {
 		std::cerr << "Error in CheckUsedName query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -1540,14 +1540,14 @@ bool Database::CheckUsedName(const char* name)
 
 uint8 Database::GetServerType()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	std::string query ="SELECT value FROM variables WHERE varname='ServerType'";
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1)
 		{
 			row = mysql_fetch_row(result);
@@ -1572,7 +1572,7 @@ uint8 Database::GetServerType()
 }
 
 bool Database::MoveCharacterToZone(const char* charname, const char* zonename,uint32 zoneid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 
@@ -1580,7 +1580,7 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename,ui
 		return(false);
 
 	StringFormat(query,"UPDATE character_ SET zonename = '%s',zoneid=%i,x=-1, y=-1, z=-1 WHERE name='%s'", zonename,zoneid, charname);
-	if (!RunQuery(query, errbuf, 0,&affected_rows)) {
+	if (!RunQuery(query, &errbuf, 0,&affected_rows)) {
 		std::cerr << "Error in MoveCharacterToZone(name) query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -1596,12 +1596,12 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename) {
 }
 
 bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 
 	StringFormat(query,"UPDATE character_ SET zonename = '%s', zoneid=%i, x=-1, y=-1, z=-1 WHERE id=%i", iZonename, GetZoneID(iZonename), iCharID);
-	if (!RunQuery(query, errbuf, 0,&affected_rows)) {
+	if (!RunQuery(query, &errbuf, 0,&affected_rows)) {
 		std::cerr << "Error in MoveCharacterToZone(id) query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -1613,7 +1613,7 @@ bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
 }
 
 uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 acctid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -1621,7 +1621,7 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 	ExtendedProfile_Struct* ext;
 
 	StringFormat(query,"SELECT profile, guild, guildrank, extprofile FROM character_ WHERE name='%s'", oldname);
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 
 		row = mysql_fetch_row(result);
 
@@ -1658,7 +1658,7 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 
 	query.append(queryEnding);
 
-	if (!RunQuery(query, errbuf, nullptr, &affected_rows)) {
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		std::cerr << "Error in CopyCharacter query '" << query << "' " << errbuf << std::endl;
 		return 0;
 	}
@@ -1672,13 +1672,13 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 }
 
 bool Database::SetHackerFlag(const char* accountname, const char* charactername, const char* hacked) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 
 	StringFormat(query,"INSERT INTO hackers(account,name,hacked) values('%s','%s','%s')", accountname, charactername, hacked);
 
-	if (!RunQuery(query, errbuf, 0,&affected_rows)) {
+	if (!RunQuery(query, &errbuf, 0,&affected_rows)) {
 		std::cerr << "Error in SetHackerFlag query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -1693,13 +1693,13 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 
 bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) { //Utilize the "hacker" table, but also give zone information.
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 
 	StringFormat(query,"INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, hacked, zone);
 
-	if (!RunQuery(query, errbuf, 0,&affected_rows)) {
+	if (!RunQuery(query, &errbuf, 0,&affected_rows)) {
 		std::cerr << "Error in SetMQDetectionFlag query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -1716,7 +1716,7 @@ bool Database::SetMQDetectionFlag(const char* accountname, const char* character
 uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 {
 	uint16 race_cap = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 	MYSQL_RES *result;
@@ -1724,7 +1724,7 @@ uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 
 	//Check for a racial cap!
 	StringFormat(query,"SELECT skillcap from race_skillcaps where skill = %i && race = %i", skillid, in_race);
-	if (RunQuery(query, errbuf, &result, &affected_rows))
+	if (RunQuery(query, &errbuf, &result, &affected_rows))
 	{
 		if (affected_rows != 0)
 		{
@@ -1741,14 +1741,14 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 {
 	uint8 skill_level = 0, skill_formula = 0;
 	uint16 base_cap = 0, skill_cap = 0, skill_cap2 = 0, skill_cap3 = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32	affected_rows = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	//Fetch the data from DB.
 	StringFormat(query,"SELECT level, formula, pre50cap, post50cap, post60cap from skillcaps where skill = %i && class = %i", skillid, in_class);
-	if (RunQuery(query, errbuf, &result, &affected_rows))
+	if (RunQuery(query, &errbuf, &result, &affected_rows))
 	{
 		if (affected_rows != 0)
 		{
@@ -1790,13 +1790,13 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 }
 
 uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZoneID, uint32* oInstanceID, float* oX, float* oY, float* oZ) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query, "SELECT id, account_id, zonename, instanceid, x, y, z FROM character_ WHERE name='%s'", iName);
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			uint32 charid = atoi(row[0]);
@@ -1824,12 +1824,12 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 }
 
 bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "UPDATE account SET charname='%s' WHERE id=%i;",charname, lsaccount_id);
 
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in UpdateLiveChar query '" << query << "' " << errbuf << std::endl;
 		return false;
 	}
@@ -1837,12 +1837,12 @@ bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
 }
 
 bool Database::GetLiveChar(uint32 account_id, char* cname) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	StringFormat(query, "SELECT charname FROM account WHERE id=%i", account_id);
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			strcpy(cname,row[0]);
@@ -1860,114 +1860,114 @@ bool Database::GetLiveChar(uint32 account_id, char* cname) {
 
 void Database::SetLFP(uint32 CharID, bool LFP) {
 
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"update character_ set lfp=%i where id=%i",LFP, CharID);
 
-	if (!RunQuery(query, ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, ErrBuf);
+	if (!RunQuery(query, &errbuf))
+		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, errbuf.c_str());
 
 
 }
 
 void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon) {
 
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
+	std::string errBuf;
 	std::string query;
 
 	StringFormat(query,"update character_ set lfp=%i, lfg=%i, firstlogon=%i where id=%i",LFP, LFG, firstlogon, CharID);
 
-	if (!RunQuery(query,  ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, ErrBuf);
+	if (!RunQuery(query, &errBuf))
+		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, errBuf.c_str());
 }
 
 void Database::SetLFG(uint32 CharID, bool LFG) {
 
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"update character_ set lfg=%i where id=%i",LFG, CharID);
 
-	if (!RunQuery(query, ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, ErrBuf);
+	if (!RunQuery(query, &errbuf))
+		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, errbuf.c_str());
 
 
 }
 
 void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) {
 
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"update character_ set firstlogon=%i where id=%i",firstlogon, CharID);
 
-	if (!RunQuery(query, ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error updating firstlogon for character %i : %s", CharID, ErrBuf);
+	if (!RunQuery(query, &errbuf))
+		LogFile->write(EQEMuLog::Error, "Error updating firstlogon for character %i : %s", CharID, errbuf.c_str());
 
 }
 
 void Database::AddReport(std::string who, std::string against, std::string lines)
 {
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	std::string escape_str;
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
 	StringFormat(query,"INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", who.c_str(), against.c_str(), escape_str.c_str());
-	if (!RunQuery(query, ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error adding a report for %s: %s", who.c_str(), ErrBuf);
+	if (!RunQuery(query, &errbuf))
+		LogFile->write(EQEMuLog::Error, "Error adding a report for %s: %s", who.c_str(), errbuf.c_str());
 
 }
 
 void Database::SetGroupID(const char* name,uint32 id, uint32 charid, uint32 ismerc){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	if(id == 0) { //removing you from table
 
 		StringFormat(query,"delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc);
 
-		if (!RunQuery(query, errbuf))
-			LogFile->write(EQEMuLog::Error, "Error deleting character from group id: %s", errbuf);
+		if (!RunQuery(query, &errbuf))
+			LogFile->write(EQEMuLog::Error, "Error deleting character from group id: %s", errbuf.c_str());
 	}
 	else {
 
 		StringFormat(query, "replace into group_id set charid=%i, groupid=%i, name='%s', ismerc='%i'",charid, id, name, ismerc);
 
-		if (!RunQuery(query, errbuf))
-			LogFile->write(EQEMuLog::Error, "Error adding character to group id: %s", errbuf);
+		if (!RunQuery(query, &errbuf))
+			LogFile->write(EQEMuLog::Error, "Error adding character to group id: %s", errbuf.c_str());
 	}
 }
 
 void Database::ClearGroup(uint32 gid) {
 	ClearGroupLeader(gid);
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	if(gid == 0) { //clear all groups
 
 		query = "delete from group_id";
 
-		if (!RunQuery(query,  errbuf))
-			printf("Unable to clear groups: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			printf("Unable to clear groups: %s\n",errbuf.c_str());
 	} else {	//clear a specific group
 		
 		StringFormat(query,"delete from group_id where groupid = %lu", (unsigned long)gid);
 
-		if (!RunQuery(query, errbuf))
-			printf("Unable to clear groups: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			printf("Unable to clear groups: %s\n",errbuf.c_str());
 	}
 }
 
 uint32 Database::GetGroupID(const char* name){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 groupid=0;
 
 	StringFormat(query,"SELECT groupid from group_id where name='%s'", name);
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if((row = mysql_fetch_row(result)))
 		{
 			if(row[0])
@@ -1978,19 +1978,19 @@ uint32 Database::GetGroupID(const char* name){
 		mysql_free_result(result);
 	}
 	else
-	LogFile->write(EQEMuLog::Error, "Error getting group id: %s", errbuf);
+	LogFile->write(EQEMuLog::Error, "Error getting group id: %s", errbuf.c_str());
 	return groupid;
 }
 
 char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	PlayerProfile_Struct pp;
 
 	StringFormat(query, "SELECT profile from character_ where name='%s'", name);
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		unsigned long* lengths = mysql_fetch_lengths(result);
 		if (lengths[0] == sizeof(PlayerProfile_Struct)) {
@@ -2000,24 +2000,24 @@ char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
 		mysql_free_result(result);
 	}
 	else{
-			printf("Unable to get leader name: %s\n",errbuf);
+			printf("Unable to get leader name: %s\n",errbuf.c_str());
 	}
 	return leaderbuf;
 }
 
 void Database::SetGroupLeaderName(uint32 gid, const char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"Replace into group_leaders set gid=%lu, leadername='%s'",(unsigned long)gid,name);
 
-	if (!RunQuery(query, errbuf))
-		printf("Unable to set group leader: %s\n",errbuf);
+	if (!RunQuery(query, &errbuf))
+		printf("Unable to set group leader: %s\n",errbuf.c_str());
 
 }
 
 char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, GroupLeadershipAA_Struct* GLAA){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES* result;
 	MYSQL_ROW row;
@@ -2025,7 +2025,7 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 	StringFormat(query,"SELECT leadername, maintank, assist, puller, marknpc, leadershipaa "
 						"FROM group_leaders WHERE gid=%lu",(unsigned long)gid);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 
 		row = mysql_fetch_row(result);
 		unsigned long* Lengths = mysql_fetch_lengths(result);
@@ -2074,19 +2074,19 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 }
 
 void Database::ClearGroupLeader(uint32 gid){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	if(gid == 0) { //clear all group leaders
 		query = "DELETE from group_leaders";
 
-		if (!RunQuery(query, errbuf))
-			printf("Unable to clear group leaders: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			printf("Unable to clear group leaders: %s\n",errbuf.c_str());
 	} else {	//clear a specific group leader
 		StringFormat(query,"DELETE from group_leaders where gid = %lu", (unsigned long)gid);
 
-		if (!RunQuery(query, errbuf))
-			printf("Unable to clear group leader: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			printf("Unable to clear group leader: %s\n",errbuf.c_str());
 	}
 }
 
@@ -2109,13 +2109,13 @@ bool FetchRowMap(MYSQL_RES *result, std::map<std::string,std::string> &rowmap)
 
 uint8 Database::GetAgreementFlag(uint32 acctid)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES* result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT rulesflag FROM account WHERE id=%i",acctid);
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1)
 		{
 			row = mysql_fetch_row(result);
@@ -2129,57 +2129,57 @@ uint8 Database::GetAgreementFlag(uint32 acctid)
 
 void Database::SetAgreementFlag(uint32 acctid)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"UPDATE account SET rulesflag=1 where id=%i",acctid);
 
-	if (!RunQuery(query, errbuf)) {
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Unable to set agreement flag for account id: " << acctid << std::endl;
 		std::cerr << "Error message was " << errbuf << std::endl;
 	}
 }
 
 void Database::ClearRaid(uint32 rid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	if(rid == 0) { //clear all raids
 
 		query = "delete from raid_members";
 
-		if (!RunQuery(query, errbuf))
-			printf("Unable to clear raids: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			printf("Unable to clear raids: %s\n",errbuf.c_str());
 	} else {	//clear a specific group
 
 		StringFormat(query,"delete from raid_members where raidid = %lu", (unsigned long)rid);
 
-		if (!RunQuery(query, errbuf))
-			printf("Unable to clear raids: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			printf("Unable to clear raids: %s\n",errbuf.c_str());
 	}
 }
 
 void Database::ClearRaidDetails(uint32 rid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	if(rid == 0) { //clear all raids
 
 		query = "delete from raid_details";
 
-		if (!RunQuery(query,  errbuf))
-			printf("Unable to clear raid details: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			printf("Unable to clear raid details: %s\n",errbuf.c_str());
 	} 
 	else {	//clear a specific group
 
 		StringFormat(query,"delete from raid_details where raidid = %lu", (unsigned long)rid);
 
-		if (!RunQuery(query,  errbuf))
-			printf("Unable to clear raid details: %s\n",errbuf);
+		if (!RunQuery(query, &errbuf))
+			printf("Unable to clear raid details: %s\n",errbuf.c_str());
 	}
 }
 
 uint32 Database::GetRaidID(const char* name){
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2187,7 +2187,7 @@ uint32 Database::GetRaidID(const char* name){
 
 	StringFormat(query,"SELECT raidid from raid_members where name='%s'", name);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if((row = mysql_fetch_row(result)))
 		{
 			if(row[0])
@@ -2198,7 +2198,7 @@ uint32 Database::GetRaidID(const char* name){
 		mysql_free_result(result);
 	}
 	else
-		printf("Unable to get raid id: %s\n",errbuf);
+		printf("Unable to get raid id: %s\n",errbuf.c_str());
 
 	return raidid;
 }
@@ -2207,14 +2207,14 @@ const char *Database::GetRaidLeaderName(uint32 rid)
 {
 	static char name[128];
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1", rid);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if((row = mysql_fetch_row(result)) != nullptr)
 		{
 			memset(name, 0, 128);
@@ -2227,7 +2227,7 @@ const char *Database::GetRaidLeaderName(uint32 rid)
 		mysql_free_result(result);
 	}
 	else
-		printf("Unable to get raid id: %s\n",errbuf);
+		printf("Unable to get raid id: %s\n",errbuf.c_str());
 
 	return "UNKNOWN";
 }
@@ -2251,14 +2251,14 @@ bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
 
 bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 
 	StringFormat(query,"SELECT id FROM instance_lockout where id=%u AND zone=%u",
 						instance_id, zone_id);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) != 0)
 		{
@@ -2276,7 +2276,7 @@ bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 
 bool Database::CharacterInInstanceGroup(uint16 instance_id, uint32 char_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	bool lockout_instance_player = false;
@@ -2284,7 +2284,7 @@ bool Database::CharacterInInstanceGroup(uint16 instance_id, uint32 char_id)
 	StringFormat(query,"SELECT charid FROM instance_lockout_player where id=%u AND charid=%u",
 						instance_id, char_id);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) == 1)
 		{
@@ -2298,31 +2298,31 @@ bool Database::CharacterInInstanceGroup(uint16 instance_id, uint32 char_id)
 
 void Database::DeleteInstance(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query,"DELETE FROM instance_lockout WHERE id=%u", instance_id);
 
-	RunQuery(query, errbuf);
+	RunQuery(query, &errbuf);
 
 	StringFormat(query,"DELETE FROM instance_lockout_player WHERE id=%u", instance_id);
 
-	RunQuery(query, errbuf);
+	RunQuery(query, &errbuf);
 
 	StringFormat(query,"DELETE FROM respawn_times WHERE instance_id=%u", instance_id);
 
-	RunQuery(query, errbuf);
+	RunQuery(query, &errbuf);
 
 	StringFormat(query,"DELETE FROM spawn_condition_values WHERE instance_id=%u", instance_id);
 
-	RunQuery(query, errbuf);
+	RunQuery(query, &errbuf);
 
 	BuryCorpsesInInstance(instance_id);
 }
 
 bool Database::CheckInstanceExpired(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2333,7 +2333,7 @@ bool Database::CheckInstanceExpired(uint16 instance_id)
 
 	StringFormat(query,"SELECT start_time, duration, never_expires FROM instance_lockout WHERE id=%u", instance_id);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) != 0)
 		{
@@ -2370,7 +2370,7 @@ bool Database::CheckInstanceExpired(uint16 instance_id)
 
 uint32 Database::ZoneIDFromInstanceID(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2378,7 +2378,7 @@ uint32 Database::ZoneIDFromInstanceID(uint16 instance_id)
 
 	StringFormat(query, "SELECT zone FROM instance_lockout where id=%u", instance_id);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
@@ -2397,7 +2397,7 @@ uint32 Database::ZoneIDFromInstanceID(uint16 instance_id)
 
 uint32 Database::VersionFromInstanceID(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2405,7 +2405,7 @@ uint32 Database::VersionFromInstanceID(uint16 instance_id)
 
 	StringFormat(query, "SELECT version FROM instance_lockout where id=%u", instance_id);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) != 0)
 		{
@@ -2429,7 +2429,7 @@ uint32 Database::VersionFromInstanceID(uint16 instance_id)
 
 uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2439,7 +2439,7 @@ uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 
 	StringFormat(query,"SELECT start_time, duration, never_expires FROM instance_lockout WHERE id=%u",
 						instance_id);
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) != 0)
 		{
@@ -2479,13 +2479,13 @@ uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 
 bool Database::GetUnusedInstanceID(uint16 &instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query,"SELECT COUNT(*) FROM instance_lockout");
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) != 0) {
 			row = mysql_fetch_row(result);
 			int count = atoi(row[0]);
@@ -2513,7 +2513,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 
 	StringFormat(query,"SELECT id FROM instance_lockout where id >= %i ORDER BY id", count);
 
-	if (RunQuery(query,  errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) != 0)
 		{
 			while((row = mysql_fetch_row(result)))
@@ -2548,7 +2548,7 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 //perhaps purge any expireds too
 bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "INSERT INTO instance_lockout (id, zone, version, start_time, duration)"
@@ -2556,12 +2556,12 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 						(unsigned long)instance_id, (unsigned long)zone_id, 
 						(unsigned long)version, (unsigned long)duration);
 	
-	return RunQuery(query, errbuf);
+	return RunQuery(query, &errbuf);
 }
 
 void Database::PurgeExpiredInstances()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2570,7 +2570,7 @@ void Database::PurgeExpiredInstances()
 	query = "SELECT id FROM instance_lockout where "
 			"(start_time+duration) <= UNIX_TIMESTAMP() and never_expires = 0";
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) > 0)
 		{
@@ -2588,46 +2588,46 @@ void Database::PurgeExpiredInstances()
 
 bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "INSERT INTO instance_lockout_player(id, charid) "
 						"values(%lu, %lu)", (unsigned long)instance_id, (unsigned long)char_id);
 
-	return RunQuery(query, errbuf);
+	return RunQuery(query, &errbuf);
 }
 
 bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "DELETE FROM instance_lockout_player WHERE id=%lu AND charid=%lu",
 						(unsigned long)instance_id, (unsigned long)char_id);
 
-	return RunQuery(query, errbuf);
+	return RunQuery(query, &errbuf);
 }
 
 bool Database::RemoveClientsFromInstance(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "DELETE FROM instance_lockout_player WHERE id=%lu",
 						(unsigned long)instance_id);
 
-	return RunQuery(query, errbuf);
+	return RunQuery(query, &errbuf);
 }
 
 bool Database::CheckInstanceExists(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 
 	StringFormat(query,"SELECT * FROM instance_lockout where id=%u", instance_id);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) != 0)
 		{
@@ -2643,13 +2643,13 @@ bool Database::CheckInstanceExists(uint16 instance_id)
 
 void Database::BuryCorpsesInInstance(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 
 	StringFormat(query,"UPDATE player_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u",instance_id);
 
-	if(RunQuery(query, errbuf, &result))
+	if(RunQuery(query, &errbuf, &result))
 	{
 		mysql_free_result(result);
 	}
@@ -2660,7 +2660,7 @@ uint16 Database::GetInstanceVersion(uint16 instance_id)
 	if(instance_id < 1)
 		return 0;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2668,7 +2668,7 @@ uint16 Database::GetInstanceVersion(uint16 instance_id)
 
 	StringFormat(query,"SELECT version FROM instance_lockout where id=%u", instance_id);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
@@ -2688,7 +2688,7 @@ uint16 Database::GetInstanceVersion(uint16 instance_id)
 
 uint16 Database::GetInstanceID(const char* zone, uint32 charid, int16 version)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2700,7 +2700,7 @@ uint16 Database::GetInstanceID(const char* zone, uint32 charid, int16 version)
 						"instance_lockout_player.charid=%u LIMIT 1;", 
 						GetZoneID(zone), version, charid, charid);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) != 0)
 		{
 			row = mysql_fetch_row(result);
@@ -2722,7 +2722,7 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 	if(!zone)
 		return 0;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2733,7 +2733,7 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 						"instance_lockout.id=instance_lockout_player.id AND "
 						"instance_lockout_player.charid=%u LIMIT 1;", zone, version, charid);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		if (mysql_num_rows(result) != 0)
 		{
@@ -2753,7 +2753,7 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 
 void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2762,7 +2762,7 @@ void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 
 	StringFormat(query,"SELECT charid FROM group_id WHERE groupid=%u", gid);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result)) != nullptr)
 		{
 			uint32 charid = atoi(row[0]);
@@ -2777,7 +2777,7 @@ void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 
 void Database::AssignRaidToInstance(uint32 rid, uint32 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2786,7 +2786,7 @@ void Database::AssignRaidToInstance(uint32 rid, uint32 instance_id)
 
 	StringFormat(query,"SELECT charid FROM raid_members WHERE raidid=%u", rid);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result)) != nullptr)
 		{
 			uint32 charid = atoi(row[0]);
@@ -2834,25 +2834,25 @@ void Database::FlagInstanceByRaidLeader(uint32 zone, int16 version, uint32 chari
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 
 	StringFormat(query, "UPDATE `instance_lockout` SET start_time=UNIX_TIMESTAMP(), "
 						"duration=%u WHERE id=%u", new_duration, instance_id);
 
-	RunQuery(query, errbuf);
+	RunQuery(query, &errbuf);
 }
 
 bool Database::GlobalInstance(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	StringFormat(query, "SELECT is_global from instance_lockout where id=%u LIMIT 1", instance_id);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		row = mysql_fetch_row(result);
 		if(row)
@@ -2871,7 +2871,7 @@ bool Database::GlobalInstance(uint16 instance_id)
 
 void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	uint32 affected = 0;
 
@@ -2951,7 +2951,7 @@ void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 	StringFormat(query, "UPDATE `adventure_stats` SET %s=%s+1 WHERE player_id=%u",
 						field.c_str(), field.c_str(), char_id);
 
-	RunQuery(query, errbuf, nullptr, &affected);
+	RunQuery(query, &errbuf, nullptr, &affected);
 
 	if(affected == 0)
 	{
@@ -2959,14 +2959,14 @@ void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 		StringFormat(query, "INSERT INTO `adventure_stats` SET %s=1, player_id=%u",
 							field.c_str(), char_id);
 
-		RunQuery(query, errbuf);
+		RunQuery(query, &errbuf);
 	}
 }
 
 bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w,
 								uint32 &tak_w, uint32 &guk_l, uint32 &mir_l, uint32 &mmc_l, uint32 &ruj_l, uint32 &tak_l)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
@@ -2975,7 +2975,7 @@ bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, u
 						"`guk_losses`, `mir_losses`, `mmc_losses`, `ruj_losses`, `tak_losses` "
 						"FROM `adventure_stats` WHERE player_id=%u", char_id);
 
-	if (RunQuery(query, errbuf, &result))
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)) != nullptr)
 		{
@@ -2998,14 +2998,14 @@ bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, u
 }
 
 uint32 Database::GetGuildDBIDByCharID(uint32 char_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	std::string query;
 	MYSQL_RES *result;
 	int retVal = 0;
 
 	StringFormat(query, "SELECT guild_id FROM guild_members WHERE char_id='%i'", char_id);
 
-	if (RunQuery(query, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 		if (mysql_num_rows(result) == 1) {
 			MYSQL_ROW row = mysql_fetch_row(result);
 			retVal = atoi(row[0]);
