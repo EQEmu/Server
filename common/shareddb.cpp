@@ -1308,15 +1308,15 @@ uint32 SharedDatabase::SetPlayerProfile_MQ(std::string &query, uint32 account_id
 	std::string playerProfileBuffer;
 	std::string extendedProfileBuffer;
 
-	StringFormat(query, "UPDATE character_ SET timelaston=unix_timestamp(now()), name=\'%s\', zonename=\'%s\', "
-						"zoneid=%u, instanceid=%u, x = %f, y = %f, z = %f, profile=\'", 
+	StringFormat(query, "UPDATE character_ SET timelaston=unix_timestamp(now()), name='%s', zonename='%s', "
+						"zoneid=%u, instanceid=%u, x = %f, y = %f, z = %f, profile='", 
 						pp->name, GetZoneName(current_zone), current_zone, current_instance, 
 						pp->x, pp->y, pp->z);
 
 	DoEscapeString(playerProfileBuffer, (char*)pp, sizeof(PlayerProfile_Struct));
 
 	query.append(playerProfileBuffer);
-	query.append("\', extprofile=\'");
+	query.append("', extprofile='");
 
 	DoEscapeString(extendedProfileBuffer, (char*)ext, sizeof(ExtendedProfile_Struct));
 
@@ -1324,12 +1324,12 @@ uint32 SharedDatabase::SetPlayerProfile_MQ(std::string &query, uint32 account_id
 	
 	std::string endingOfQuery;
 
-	StringFormat(endingOfQuery,"\',class=%d,level=%d,xtargets=%u "
+	StringFormat(endingOfQuery,"',class=%d,level=%d,xtargets=%u "
 								"WHERE id=%u", pp->class_, pp->level, 
 								MaxXTargets, charid);
 
 	query.append(endingOfQuery);
-
+	
 	return query.length();
 }
 
