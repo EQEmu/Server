@@ -75,7 +75,6 @@ private:
 	bool HasFunction(std::string function, std::string package_name);
 	void ClearStates();
 	void MapFunctions(lua_State *L);
-	void ExportZoneVariables();
 
 	std::map<std::string, std::string> vars_;
 	std::map<std::string, bool> loaded_;

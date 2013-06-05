@@ -355,9 +355,19 @@ void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std
 }
 
 //Item
+void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, uint32 objid, uint32 extra_data) {
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "slot_id");	
+}
+
 void handle_item_null(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, uint32 objid, uint32 extra_data) {
 }
 
 //Spell
+void handle_spell_effect(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data) {
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "caster_id");	
+}
+
 void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data) {
 }

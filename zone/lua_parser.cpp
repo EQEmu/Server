@@ -157,6 +157,14 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_TASK_STAGE_COMPLETE] = handle_player_task_stage_complete;
 	PlayerArgumentDispatch[EVENT_TASK_COMPLETE] = handle_player_task_complete;
 
+	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
+	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
+
+	SpellArgumentDispatch[EVENT_SPELL_EFFECT_NPC] = handle_spell_effect;
+	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT] = handle_spell_effect;
+	SpellArgumentDispatch[EVENT_SPELL_EFFECT_BUFF_TIC_NPC] = handle_spell_effect;
+	SpellArgumentDispatch[EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT] = handle_spell_effect;
+
 	L = nullptr;
 }
 
@@ -226,7 +234,6 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 
 		auto arg_function = NPCArgumentDispatch[evt];
 		arg_function(this, L, npc, init, data, extra_data);
-		ExportZoneVariables();
 		Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 		
 		quest_manager.StartQuest(npc, c, nullptr);
@@ -317,7 +324,6 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		
 		auto arg_function = PlayerArgumentDispatch[evt];
 		arg_function(this, L, client, data, extra_data);
-		ExportZoneVariables();
 	
 		quest_manager.StartQuest(nullptr, client, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -412,7 +418,6 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 
 		auto arg_function = ItemArgumentDispatch[evt];
 		arg_function(this, L, client, item, objid, extra_data);
-		ExportZoneVariables();
 		
 		quest_manager.StartQuest(nullptr, client, item);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -493,7 +498,6 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 		
 		auto arg_function = SpellArgumentDispatch[evt];
 		arg_function(this, L, npc, client, spell_id, extra_data);
-		ExportZoneVariables();
 		
 		quest_manager.StartQuest(npc, client, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -553,8 +557,6 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		lua_createtable(L, 0, 0);
 		lua_pushstring(L, encounter_name.c_str());
 		lua_setfield(L, -2, "name");
-
-		ExportZoneVariables();
 
 		quest_manager.StartQuest(nullptr, nullptr, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -728,7 +730,11 @@ void LuaParser::ReloadQuests() {
 	MapFunctions(L);
 
 	//load init
-	FILE *f = fopen("quests/global/script_init.lua", "r");
+	std::string path = "quests/";
+	path += QUEST_GLOBAL_DIRECTORY;
+	path += "/script_init.lua";
+
+	FILE *f = fopen(path.c_str(), "r");
 	if(f) {
 		fclose(f);
 	
@@ -740,7 +746,8 @@ void LuaParser::ReloadQuests() {
 	
 	//zone init - always loads after global
 	if(zone) {
-		std::string zone_script = "quests/" + std::string(zone->GetShortName());
+		std::string zone_script = "quests/";
+		zone_script += zone->GetShortName();
 		zone_script += "/script_init.lua";
 		f = fopen(zone_script.c_str(), "r");
 		if(f) {
@@ -953,47 +960,6 @@ void LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, u
 		}
 		++riter;
 	}
-}
-
-void LuaParser::ExportZoneVariables() {
-	if(zone == nullptr) {
-		return;
-	}
-
-	Lua_EntityList l_entity_list(&entity_list);
-	luabind::object l_entity_list_o = luabind::object(L, l_entity_list);
-	l_entity_list_o.push(L);
-	lua_setfield(L, -2, "entity_list");
-
-	lua_pushinteger(L, zone->GetZoneID());
-	lua_setfield(L, -2, "zone_id");
-
-	lua_pushstring(L, zone->GetLongName());
-	lua_setfield(L, -2, "zone_ln");
-
-	lua_pushstring(L, zone->GetShortName());
-	lua_setfield(L, -2, "zone_sn");
-
-	lua_pushinteger(L, zone->GetInstanceID());
-	lua_setfield(L, -2, "instance_id");
-
-	lua_pushinteger(L, zone->GetInstanceVersion());
-	lua_setfield(L, -2, "instance_version");
-
-	TimeOfDay_Struct eqTime;
-	zone->zone_time.getEQTimeOfDay(time(0), &eqTime);
-
-	lua_pushinteger(L, eqTime.hour - 1);
-	lua_setfield(L, -2, "zone_hour");
-
-	lua_pushinteger(L, eqTime.minute);
-	lua_setfield(L, -2, "zone_minute");
-
-	lua_pushinteger(L, (eqTime.hour - 1) * 100 + eqTime.minute);
-	lua_setfield(L, -2, "zone_time");
-
-	lua_pushinteger(L, zone->zone_weather);
-	lua_setfield(L, -2, "zone_weather");
 }
 
 #endif

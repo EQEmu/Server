@@ -12,6 +12,7 @@
 #include "lua_iteminst.h"
 #include "lua_client.h"
 #include "lua_npc.h"
+#include "lua_entity_list.h"
 #include "QuestParserCollection.h"
 #include "questmgr.h"
 #include "QGlobals.h"
@@ -761,6 +762,62 @@ luabind::object lua_get_qglobals(lua_State *L) {
 	return lua_get_qglobals(L, Lua_NPC(nullptr), Lua_Client(nullptr));
 }
 
+Lua_EntityList lua_get_entity_list() {
+	return Lua_EntityList(&entity_list);
+}
+
+int lua_get_zone_id() {
+	if(!zone)
+		return 0;
+
+	return zone->GetZoneID();
+}
+
+const char *lua_get_zone_long_name() {
+	if(!zone)
+		return "";
+
+	return zone->GetLongName();
+}
+
+const char *lua_get_zone_short_name() {
+	if(!zone)
+		return "";
+
+	return zone->GetShortName();
+}
+
+int lua_get_zone_instance_id() {
+	if(!zone)
+		return 0;
+
+	return zone->GetInstanceID();
+}
+
+int lua_get_zone_instance_version() {
+	if(!zone)
+		return 0;
+
+	return zone->GetInstanceVersion();
+}
+
+int lua_get_zone_weather() {
+	if(!zone)
+		return 0;
+
+	return zone->zone_weather;
+}
+
+luabind::object lua_get_zone_time(lua_State *L) {
+	TimeOfDay_Struct eqTime;
+	zone->zone_time.getEQTimeOfDay(time(0), &eqTime);
+
+	luabind::object ret = luabind::newtable(L);
+	ret["zone_hour"] = eqTime.hour - 1;
+	ret["zone_minute"] = eqTime.minute;
+	ret["zone_time"] = (eqTime.hour - 1) * 100 + eqTime.minute;
+	return ret;
+}
 
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
@@ -897,7 +954,15 @@ luabind::scope lua_register_general() {
 		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_Client,Lua_NPC))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
-		luabind::def("get_qglobals", (luabind::object(*)(lua_State*))&lua_get_qglobals)
+		luabind::def("get_qglobals", (luabind::object(*)(lua_State*))&lua_get_qglobals),
+		luabind::def("get_entity_list", &lua_get_entity_list),
+		luabind::def("get_zone_id", &lua_get_zone_id),
+		luabind::def("get_zone_long_name", &lua_get_zone_long_name),
+		luabind::def("get_zone_short_name", &lua_get_zone_short_name),
+		luabind::def("get_zone_instance_id", &lua_get_zone_instance_id),
+		luabind::def("get_zone_instance_version", &lua_get_zone_instance_version),
+		luabind::def("get_zone_weather", &lua_get_zone_weather),
+		luabind::def("get_zone_time", &lua_get_zone_time)
 	];
 }
 
