@@ -3079,6 +3079,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, temp1, 0);
 	}
 
+	mod_spell_cast(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
+
 	// now check if the spell is allowed to land
 
 	// invuln mobs can't be affected by any spells, good or bad

@@ -485,7 +485,10 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 
 	mod *= 1000;
 
-	return(uint32(base * mod));
+	uint32 finalxp = uint32(base * mod);
+	finalxp = mod_client_xp_for_level(finalxp, check_level);
+
+	return(finalxp);
 }
 
 void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) {

@@ -2335,7 +2335,7 @@ bool Client::CheckIncreaseSkill(SkillType skillid, Mob *against_who, int chancem
 			GetLevelCon(against_who->GetLevel()) == CON_GREEN)
 		{
 			//false by default
-			return mod_can_increase_skill(skillid, against_who);
+			if( !mod_can_increase_skill(skillid, against_who) ) { return(false); }
 		}
 	}
 

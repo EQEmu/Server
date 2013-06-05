@@ -833,7 +833,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 			spells[curspell].classes[initiator->GetPP().class_-1] <= max_level &&   //maximum level
 			spells[curspell].classes[initiator->GetPP().class_-1] >= min_level &&   //minimum level
 			spells[curspell].skill != 52 &&
-			( !RuleB(Spells, UseCHAScribeHack) || spells[curspell].effectid[EFFECT_COUNT - 1] != 10 )
+			spells[curspell].effectid[EFFECT_COUNT - 1] != 10
 		)
 		{
 			if (book_slot == -1) //no more book slots

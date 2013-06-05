@@ -590,6 +590,9 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 			safe_delete_array(hi_decl);
 		}
 	}
+
+	mod_quest_event(event, objid, data, npcmob, iteminst, mob, extradata, global, packagename);
+
 	//do any event-specific stuff...
 	switch (event) {
 		case EVENT_SAY: {
