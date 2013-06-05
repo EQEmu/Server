@@ -574,51 +574,47 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			quest_npc = true;
 		}
 
+		std::vector<ItemInst*> item_list;
 		uint32 items[4] = { 0 };
-		uint8 charges[4] = { 0 };
-		bool attuned[4] = { 0 };
-		uint32 augments[4][5] = { 0 };
-
-		for (int i = 3000; i < 3004; i++) {
-			const ItemInst* inst = m_inv[i];
-			if (inst) {
+		for(int i = 3000; i < 3004; ++i) {
+			ItemInst *inst = m_inv.GetItem(i);
+			if(inst) {
 				items[i - 3000] = inst->GetItem()->ID;
-				charges[i - 3000] = inst->GetCharges();
-				attuned[i - 3000] = inst->IsInstNoDrop();
+				item_list.push_back(inst);
+			} else {
+				item_list.push_back(nullptr);
+				continue;
+			}
 
-				for(int j = 0; j < 5; j++) {
-					augments[i - 3000][j] = inst->GetAugmentItemID(j);
-				}
-
-				const Item_Struct* item2 = database.GetItem(items[i - 3000]);
-				// Handle non-quest NPC trading
-				if (item2 && quest_npc == false) {
-					// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
-					if(GetGM() || (item2->NoDrop != 0 && inst->IsInstNoDrop() == false)) {
-						// pets need to look inside bags and try to equip items found there
-						if (item2->ItemClass == ItemClassContainer && item2->BagSlots > 0) {
-							for(int16 bslot=0; bslot < item2->BagSlots; bslot++) {
-								const ItemInst* baginst = inst->GetItem(bslot);
-								if (baginst) {
-									const Item_Struct* bagitem = database.GetItem(baginst->GetItem()->ID);
-									if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsInstNoDrop() == false))) {
-										tradingWith->CastToNPC()->AddLootDrop(bagitem, &tradingWith->CastToNPC()->itemlist, baginst->GetCharges(), 1, 127, true, true);
-									}
-									else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
-										PushItemOnCursor(*baginst, true);
-									}
+			const Item_Struct* item = inst->GetItem();
+			if(item && quest_npc == false) {
+				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
+				if(GetGM() || (item->NoDrop != 0 && inst->IsInstNoDrop() == false)) {
+					// pets need to look inside bags and try to equip items found there
+					if(item->ItemClass == ItemClassContainer && item->BagSlots > 0) {
+						for(int16 bslot=0; bslot < item->BagSlots; bslot++) {
+							const ItemInst* baginst = inst->GetItem(bslot);
+							if (baginst) {
+								const Item_Struct* bagitem = baginst->GetItem();
+								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsInstNoDrop() == false))) {
+									tradingWith->CastToNPC()->AddLootDrop(bagitem, &tradingWith->CastToNPC()->itemlist, 
+										baginst->GetCharges(), 1, 127, true, true);
+								}
+								else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
+									PushItemOnCursor(*baginst, true);
 								}
 							}
 						}
-
-						tradingWith->CastToNPC()->AddLootDrop(item2, &tradingWith->CastToNPC()->itemlist, charges[i-3000], 1, 127, true, true);
 					}
-					// Return NO DROP and Attuned items being handed into a non-quest NPC if the rule is true
-					else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
-						PushItemOnCursor(*inst, true);
-					}
+	
+					tradingWith->CastToNPC()->AddLootDrop(item, &tradingWith->CastToNPC()->itemlist, 
+						inst->GetCharges(), 1, 127, true, true);
 				}
-				DeleteItemInInventory(i);
+				// Return NO DROP and Attuned items being handed into a non-quest NPC if the rule is true
+				else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
+					PushItemOnCursor(*inst, true);
+					DeleteItemInInventory(i);
+				}
 			}
 		}
 
@@ -630,46 +626,32 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			}
 		}
 
-		//dont bother with this crap unless we have a quest...
-		//pets can have quests! (especially charmed NPCs)
-		if (quest_npc) {
-			char temp1[100] = { 0 };
-			char temp2[100] = { 0 };
-			for(int z = 0; z < 4; z++) {
-				snprintf(temp1, 100, "item%d.%d", z + 1, tradingWith->GetNPCTypeID());
-				snprintf(temp2, 100, "%d", items[z]);
-				parse->AddVar(temp1, temp2);
-				snprintf(temp1, 100, "item%d.charges.%d", z + 1, tradingWith->GetNPCTypeID());
-				snprintf(temp2, 100, "%d", charges[z]);
-				parse->AddVar(temp1, temp2);
-				snprintf(temp1, 100, "item%d.attuned.%d", z + 1, tradingWith->GetNPCTypeID());
-				snprintf(temp2, 100, "%d", attuned[z]);
-				parse->AddVar(temp1, temp2);
+		char temp1[100] = { 0 };
+		char temp2[100] = { 0 };
+		snprintf(temp1, 100, "copper.%d", tradingWith->GetNPCTypeID());
+		snprintf(temp2, 100, "%u", trade->cp);
+		parse->AddVar(temp1, temp2);
+		snprintf(temp1, 100, "silver.%d", tradingWith->GetNPCTypeID());
+		snprintf(temp2, 100, "%u", trade->sp);
+		parse->AddVar(temp1, temp2);
+		snprintf(temp1, 100, "gold.%d", tradingWith->GetNPCTypeID());
+		snprintf(temp2, 100, "%u", trade->gp);
+		parse->AddVar(temp1, temp2);
+		snprintf(temp1, 100, "platinum.%d", tradingWith->GetNPCTypeID());
+		snprintf(temp2, 100, "%u", trade->pp);
+		parse->AddVar(temp1, temp2);
 
-				for(int y = 0; y < 5; y++) {
-					snprintf(temp1, 100, "item%d.augment%d.%d", z + 1, y + 1, tradingWith->GetNPCTypeID());
-					snprintf(temp2, 100, "%d", augments[z][y]);
-					parse->AddVar(temp1, temp2);
-				}
+		if(tradingWith->GetAppearance() != eaDead) {
+			tradingWith->FaceTarget(this);
+		}
+	
+		parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
+
+		for(int i = 3000; i < 3004; ++i) {
+			ItemInst *inst = m_inv.GetItem(i);
+			if(inst) {
+				DeleteItemInInventory(i);
 			}
-			snprintf(temp1, 100, "copper.%d", tradingWith->GetNPCTypeID());
-			snprintf(temp2, 100, "%u", trade->cp);
-			parse->AddVar(temp1, temp2);
-			snprintf(temp1, 100, "silver.%d", tradingWith->GetNPCTypeID());
-			snprintf(temp2, 100, "%u", trade->sp);
-			parse->AddVar(temp1, temp2);
-			snprintf(temp1, 100, "gold.%d", tradingWith->GetNPCTypeID());
-			snprintf(temp2, 100, "%u", trade->gp);
-			parse->AddVar(temp1, temp2);
-			snprintf(temp1, 100, "platinum.%d", tradingWith->GetNPCTypeID());
-			snprintf(temp2, 100, "%u", trade->pp);
-			parse->AddVar(temp1, temp2);
-
-			if(tradingWith->GetAppearance() != eaDead) {
-				tradingWith->FaceTarget(this);
-			}
-
-			parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0);
 		}
 	}
 }

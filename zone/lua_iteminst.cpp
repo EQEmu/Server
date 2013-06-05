@@ -8,6 +8,16 @@
 #include "lua_iteminst.h"
 #include "lua_item.h"
 
+Lua_ItemInst::Lua_ItemInst(int item_id) {
+	SetLuaPtrData(database.CreateItem(item_id));
+	cloned_ = true;
+}
+
+Lua_ItemInst::Lua_ItemInst(int item_id, int charges) {
+	SetLuaPtrData(database.CreateItem(item_id, charges));
+	cloned_ = true;
+}
+
 bool Lua_ItemInst::IsType(int item_class) {
 	Lua_Safe_Call_Bool();
 	return self->IsType(static_cast<ItemClass>(item_class));
@@ -238,9 +248,16 @@ uint32 Lua_ItemInst::GetKillsNeeded(int current_level) {
 	return 0;
 }
 
+Lua_ItemInst Lua_ItemInst::Clone() {
+	Lua_Safe_Call_Class(Lua_ItemInst);
+	return Lua_ItemInst(self->Clone(), true);
+}
+
 luabind::scope lua_register_iteminst() {
 	return luabind::class_<Lua_ItemInst>("ItemInst")
 		.def(luabind::constructor<>())
+		.def(luabind::constructor<int>())
+		.def(luabind::constructor<int,int>())
 		.property("null", &Lua_ItemInst::Null)
 		.property("valid", &Lua_ItemInst::Valid)
 		.def("IsType", (bool(Lua_ItemInst::*)(int))&Lua_ItemInst::IsType)
@@ -283,7 +300,8 @@ luabind::scope lua_register_iteminst() {
 		.def("SetExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetExp)
 		.def("AddExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::AddExp)
 		.def("GetMaxEvolveLvl", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetMaxEvolveLvl)
-		.def("GetKillsNeeded", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetKillsNeeded);
+		.def("GetKillsNeeded", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetKillsNeeded)
+		.def("Clone", (Lua_ItemInst(Lua_ItemInst::*)(void))&Lua_ItemInst::Clone);
 }
 
 #endif

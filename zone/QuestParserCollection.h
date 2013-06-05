@@ -49,7 +49,8 @@ public:
 	bool SpellHasQuestSub(uint32 spell_id, const char *subname);
 	bool ItemHasQuestSub(ItemInst *itm, const char *subname);
 
-	int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+		std::vector<ItemInst*> *items = nullptr);
 	int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 	int EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
 	int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
@@ -63,8 +64,8 @@ private:
 	bool PlayerHasQuestSubLocal(const char *subname);
 	bool PlayerHasQuestSubGlobal(const char *subname);
 
-	int EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
-	int EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	int EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<ItemInst*> *items);
+	int EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<ItemInst*> *items);
 	int EventPlayerLocal(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 	int EventPlayerGlobal(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 
@@ -76,7 +77,7 @@ private:
 	QuestInterface *GetQIByItemQuest(std::string item_script, std::string &filename);
 	QuestInterface *GetQIByEncounterQuest(std::string encounter_name, std::string &filename);
 	
-	void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<ItemInst*> *items);
 	void DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 	void DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
 	void DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);

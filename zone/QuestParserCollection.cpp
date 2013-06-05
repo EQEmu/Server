@@ -224,10 +224,11 @@ bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, const char *subname) 
 	return false;
 }
 
-int QuestParserCollection::EventNPC(QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data) {
-	int rl = EventNPCLocal(evt, npc, init, data, extra_data);
-	int rg = EventNPCGlobal(evt, npc, init, data, extra_data);
-	DispatchEventNPC(evt, npc, init, data, extra_data);
+int QuestParserCollection::EventNPC(QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
+									std::vector<ItemInst*> *items) {
+	int rl = EventNPCLocal(evt, npc, init, data, extra_data, items);
+	int rg = EventNPCGlobal(evt, npc, init, data, extra_data, items);
+	DispatchEventNPC(evt, npc, init, data, extra_data, items);
 	
 	//Local quests returning non-default values have priority over global quests
 	if(rl != 0) {
@@ -239,13 +240,14 @@ int QuestParserCollection::EventNPC(QuestEventID evt, NPC *npc, Mob *init, std::
 	return 0;
 }
 
-int QuestParserCollection::EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+int QuestParserCollection::EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+										 std::vector<ItemInst*> *items) {
 	std::map<uint32, uint32>::iterator iter = _npc_quest_status.find(npc->GetNPCTypeID());
 	if(iter != _npc_quest_status.end()) {
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			return qiter->second->EventNPC(evt, npc, init, data, extra_data);
+			return qiter->second->EventNPC(evt, npc, init, data, extra_data, items);
 		}
 	} else {
 		std::string filename;
@@ -253,7 +255,7 @@ int QuestParserCollection::EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, 
 		if(qi) {
 			_npc_quest_status[npc->GetNPCTypeID()] = qi->GetIdentifier();
 			qi->LoadNPCScript(filename, npc->GetNPCTypeID());
-			return qi->EventNPC(evt, npc, init, data, extra_data);
+			return qi->EventNPC(evt, npc, init, data, extra_data, items);
 		} else {
 			_npc_quest_status[npc->GetNPCTypeID()] = QuestFailedToLoad;
 		}
@@ -261,17 +263,18 @@ int QuestParserCollection::EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, 
 	return 0;
 }
 
-int QuestParserCollection::EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+int QuestParserCollection::EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+										  std::vector<ItemInst*> *items) {
 	if(_global_npc_quest_status != QuestUnloaded && _global_npc_quest_status != QuestFailedToLoad) {
 		std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(_global_npc_quest_status);
-		return qiter->second->EventGlobalNPC(evt, npc, init, data, extra_data);
+		return qiter->second->EventGlobalNPC(evt, npc, init, data, extra_data, items);
 	} else {
 		std::string filename;
 		QuestInterface *qi = GetQIByGlobalNPCQuest(filename);
 		if(qi) {
 			_global_npc_quest_status = qi->GetIdentifier();
 			qi->LoadGlobalNPCScript(filename);
-			return qi->EventGlobalNPC(evt, npc, init, data, extra_data);
+			return qi->EventGlobalNPC(evt, npc, init, data, extra_data, items);
 		} else {
 			_global_npc_quest_status = QuestFailedToLoad;
 		}
@@ -849,10 +852,11 @@ void QuestParserCollection::GetErrors(std::list<std::string> &err) {
 	}
 }
 
-void QuestParserCollection::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
+void QuestParserCollection::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+											 std::vector<ItemInst*> *items) {
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
-		(*iter)->DispatchEventNPC(evt, npc, init, data, extra_data);
+		(*iter)->DispatchEventNPC(evt, npc, init, data, extra_data, items);
 		++iter;
 	}
 }

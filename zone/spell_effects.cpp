@@ -141,7 +141,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 	if(IsNPC())
 	{
-		int i = parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
+		int i = parse->EventSpell(EVENT_SPELL_EFFECT, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
 		if(i != 0){
 			CalcBonuses();
 			return true;
@@ -149,7 +149,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	}
 	else if(IsClient())
 	{
-		int i = parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
+		int i = parse->EventSpell(EVENT_SPELL_EFFECT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
 		if(i != 0){
 			CalcBonuses();
 			return true;
@@ -3066,14 +3066,14 @@ void Mob::DoBuffTic(uint16 spell_id, uint32 ticsremaining, uint8 caster_level, M
 
 	if(IsNPC())
 	{
-		int i = parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
+		int i = parse->EventSpell(EVENT_SPELL_BUFF_TIC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0);
 		if(i != 0) {
 			return;
 		}
 	}
 	else
 	{
-		int i = parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
+		int i = parse->EventSpell(EVENT_SPELL_BUFF_TIC, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0);
 		if(i != 0) {
 			return;
 		}
@@ -3331,6 +3331,12 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			viral_timer.Disable();
 			has_virus = false;
 		}
+	}
+
+	if(IsClient()) {
+		parse->EventSpell(EVENT_SPELL_FADE, nullptr, CastToClient(), buffs[slot].spellid, slot);
+	} else if(IsNPC()) {
+		parse->EventSpell(EVENT_SPELL_FADE, CastToNPC(), nullptr, buffs[slot].spellid, slot);
 	}
 
 	for (int i=0; i < EFFECT_COUNT; i++)

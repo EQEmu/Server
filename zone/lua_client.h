@@ -258,6 +258,8 @@ public:
 	std::string GetAccountFlag(std::string flag);
 	Lua_Group GetGroup();
 	Lua_Raid GetRaid();
+	bool PutItemInInventory(int slot_id, Lua_ItemInst inst);
+	bool PushItemOnCursor(Lua_ItemInst inst);
 };
 
 #endif

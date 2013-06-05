@@ -1007,10 +1007,9 @@ luabind::scope lua_register_events() {
 			luabind::value("item_enter_zone", static_cast<int>(EVENT_ITEM_ENTER_ZONE)),
 			luabind::value("target_change", static_cast<int>(EVENT_TARGET_CHANGE)),
 			luabind::value("hate_list", static_cast<int>(EVENT_HATE_LIST)),
-			luabind::value("spell_effect_client", static_cast<int>(EVENT_SPELL_EFFECT_CLIENT)),
-			luabind::value("spell_effect_npc", static_cast<int>(EVENT_SPELL_EFFECT_NPC)),
-			luabind::value("spell_effect_buff_tic_client", static_cast<int>(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT)),
-			luabind::value("spell_effect_buff_tic_npc", static_cast<int>(EVENT_SPELL_EFFECT_BUFF_TIC_NPC)),
+			luabind::value("spell_effect", static_cast<int>(EVENT_SPELL_EFFECT)),
+			luabind::value("spell_buff_tic", static_cast<int>(EVENT_SPELL_BUFF_TIC)),
+			luabind::value("spell_fade", static_cast<int>(EVENT_SPELL_FADE)),
 			luabind::value("spell_effect_translocate_complete", static_cast<int>(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)),
 			luabind::value("combine_success ", static_cast<int>(EVENT_COMBINE_SUCCESS )),
 			luabind::value("combine_failure ", static_cast<int>(EVENT_COMBINE_FAILURE )),
@@ -1030,7 +1029,8 @@ luabind::scope lua_register_events() {
 			luabind::value("duel_win", static_cast<int>(EVENT_DUEL_WIN)),
 			luabind::value("duel_lose", static_cast<int>(EVENT_DUEL_LOSE)),
 			luabind::value("encounter_load", static_cast<int>(EVENT_ENCOUNTER_LOAD)),
-			luabind::value("encounter_unload", static_cast<int>(EVENT_ENCOUNTER_UNLOAD))
+			luabind::value("encounter_unload", static_cast<int>(EVENT_ENCOUNTER_UNLOAD)),
+			luabind::value("command", static_cast<int>(EVENT_COMMAND))
 		];
 }
 

@@ -1029,17 +1029,18 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	case 8: { // /say
 		if(message[0] == COMMAND_CHAR) {
 			if(command_dispatch(this, message) == -2) {
-				//LUA_TODO: fix this with something like event_command
-				//if(RuleB(Chat, FlowCommandstoPerl_EVENT_SAY)) {
-				//	if(parse->PlayerHasQuestSub("EVENT_SAY")) {
-				//		parse->EventPlayer(EVENT_SAY, this, message, language);
-				//	}
-				//} else {
-					this->Message(13, "Command '%s' not recognized.", message);
-				//}
+				if(parse->PlayerHasQuestSub("EVENT_COMMAND")) {
+					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
+					if(i != 0) {
+						Message(13, "Command '%s' not recognized.", message);
+					}
+				} else {
+					Message(13, "Command '%s' not recognized.", message);
+				}
 			}
 			break;
 		}
+
 		Mob* sender = this;
 		if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();

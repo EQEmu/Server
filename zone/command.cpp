@@ -490,13 +490,7 @@ int command_init(void) {
  */
 void command_deinit(void)
 {
-/*	LinkedListIterator<CommandRecord *> cur(cleanup_commandlist);
-	while(cur.MoreElements()) {
-		CommandRecord *tmp = cur.GetData();
-		safe_delete(tmp);
-		cur.Advance();
-	}
-*/	commandlist.clear();
+	commandlist.clear();
 
 	command_dispatch = command_notavail;
 	commandcount = 0;

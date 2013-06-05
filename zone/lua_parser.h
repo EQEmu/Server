@@ -25,8 +25,10 @@ public:
 	LuaParser();
 	~LuaParser();
 
-	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
-	virtual int EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+		std::vector<ItemInst*> *items);
+	virtual int EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+		std::vector<ItemInst*> *items);
 	virtual int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
@@ -55,14 +57,15 @@ public:
 	virtual void ReloadQuests();
     virtual uint32 GetIdentifier() { return 0xb0712acc; }
 
-	virtual void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data);
+	virtual void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+		std::vector<ItemInst*> *items);
 	virtual void DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 	virtual void DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
 	virtual void DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
 private:
 	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		luabind::object *l_func = nullptr);
+		std::vector<ItemInst*> *items, luabind::object *l_func = nullptr);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		luabind::object *l_func = nullptr);
 	int _EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data,

@@ -297,6 +297,16 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		}
 	}
 
+	if(IsClient()) {
+		char temp[64];
+		sprintf(temp, "%d", spell_id);
+		parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), temp, 0);
+	} else if(IsNPC()) {
+		char temp[64];
+		sprintf(temp, "%d", spell_id);
+		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, temp, 0);
+	}
+
 	if(resist_adjust)
 	{
 		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, type, *resist_adjust));
@@ -1197,13 +1207,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	// at this point the spell has successfully been cast
 	//
 
-	// if the spell is cast by a client, trigger the EVENT_CAST player quest
-	if(this->IsClient()) {
-		if(parse->PlayerHasQuestSub("EVENT_CAST") ) {
-			char temp[64];
-			sprintf(temp, "%d", spell_id);
-			parse->EventPlayer(EVENT_CAST, CastToClient(), temp, 0);
-		}
+	if(IsClient()) {
+		char temp[64];
+		sprintf(temp, "%d", spell_id);
+		parse->EventPlayer(EVENT_CAST, CastToClient(), temp, 0);
+	} else if(IsNPC()) {
+		char temp[64];
+		sprintf(temp, "%d", spell_id);
+		parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, temp, 0);
 	}
 
 	if(bard_song_mode)

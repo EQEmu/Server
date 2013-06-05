@@ -67,14 +67,14 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_POPUP_RESPONSE",
 	"EVENT_PROXIMITY_SAY",
 	"EVENT_CAST",
+	"EVENT_CAST_BEGIN",
 	"EVENT_SCALE_CALC",
 	"EVENT_ITEM_ENTER_ZONE",
 	"EVENT_TARGET_CHANGE",
 	"EVENT_HATE_LIST",
-	"EVENT_SPELL_EFFECT_CLIENT",
-	"EVENT_SPELL_EFFECT_NPC",
-	"EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT",
-	"EVENT_SPELL_EFFECT_BUFF_TIC_NPC",
+	"EVENT_SPELL_EFFECT",
+	"EVENT_SPELL_BUFF_TIC",
+	"EVENT_SPELL_FADE",
 	"EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE",
 	"EVENT_COMBINE_SUCCESS",
 	"EVENT_COMBINE_FAILURE",
@@ -94,7 +94,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DUEL_WIN",
 	"EVENT_DUEL_LOSE",
 	"EVENT_ENCOUNTER_LOAD",
-	"EVENT_ENCOUNTER_UNLOAD"
+	"EVENT_ENCOUNTER_UNLOAD",
+	"EVENT_COMMAND"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr), event_queue_in_use_(false) {
@@ -136,7 +137,7 @@ void PerlembParser::ReloadQuests() {
 }
 
 void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
-	uint32 extradata, bool global)
+	uint32 extradata, bool global, std::vector<ItemInst*> *items)
 {
 	if(!perl)
 		return;
@@ -145,7 +146,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		return;
 
 	if(perl->InUse()) {
-		AddQueueEvent(event, objid, data, npcmob, iteminst, mob, extradata, global);
+		AddQueueEvent(event, objid, data, npcmob, iteminst, mob, extradata, global, items);
 		return;
 	}
 
@@ -176,7 +177,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		package_name, mob, npcmob);
 	ExportZoneVariables(package_name);
 	ExportItemVariables(package_name, mob);
-	ExportEventVariables(package_name, event, objid, data, npcmob, iteminst, mob, extradata);
+	ExportEventVariables(package_name, event, objid, data, npcmob, iteminst, mob, extradata, items);
 
 	if(isPlayerQuest || isGlobalPlayerQuest){
 		SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
@@ -199,33 +200,35 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	HandleQueue();
 }
 
-int PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
-	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false);
+int PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+							std::vector<ItemInst*> *items) {
+	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false, items);
 	return 0;
 }
 
-int PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data) {
-	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true);
+int PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+								  std::vector<ItemInst*> *items) {
+	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true, nullptr);
 	return 0;
 }
 
 int PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false);
+	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false, nullptr);
 	return 0;
 }
 
 int PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true);
+	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true, nullptr);
 	return 0;
 }
 
 int PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
-	EventCommon(evt, objid, nullptr, nullptr, item, client, extra_data, false);
+	EventCommon(evt, objid, nullptr, nullptr, item, client, extra_data, false, nullptr);
 	return 0;
 }
 
 int PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
-	EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false);
+	EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false, nullptr);
 	return 0;
 }
 
@@ -731,14 +734,18 @@ void PerlembParser::HandleQueue() {
 		EventRecord e = event_queue_.front();
 		event_queue_.pop();
 
-		EventCommon(e.event, e.objid, e.data.c_str(), e.npcmob, e.iteminst, e.mob, e.extradata, e.global);
+		EventCommon(e.event, e.objid, e.data.c_str(), e.npcmob, e.iteminst, e.mob, e.extradata, e.global, &e.items);
+
+		for(size_t i = 0; i < e.items.size(); ++i) {
+			delete e.items[i];
+		}
 	}
 
 	event_queue_in_use_ = false;
 }
 
 void PerlembParser::AddQueueEvent(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
-		uint32 extradata, bool global) 
+		uint32 extradata, bool global, std::vector<ItemInst*> *items) 
 {
 	EventRecord e;
 	e.event = event;
@@ -749,16 +756,22 @@ void PerlembParser::AddQueueEvent(QuestEventID event, uint32 objid, const char *
 	e.mob = mob;
 	e.extradata = extradata;
 	e.global = global;
+
+	if(items) {
+		for(size_t i = 0; i < items->size(); ++i) {
+			e.items.push_back(items->at(i)->Clone());
+		}
+	}
+
 	event_queue_.push(e);
 }
 
 void PerlembParser::GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 
 		bool &isSpellQuest, QuestEventID event, NPC* npcmob, ItemInst* iteminst, Mob* mob, bool global)
 {
-	if(event == EVENT_SPELL_EFFECT_CLIENT || 
-		event == EVENT_SPELL_EFFECT_NPC || 
-		event == EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT ||
-		event == EVENT_SPELL_EFFECT_BUFF_TIC_NPC ||
+	if(event == EVENT_SPELL_EFFECT || 
+		event == EVENT_SPELL_BUFF_TIC ||
+		event == EVENT_SPELL_FADE ||
 		event == EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)
 	{
 		isSpellQuest = true;
@@ -1063,7 +1076,7 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 #undef HASITEM_ISNULLITEM
 
 void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID event, uint32 objid, const char * data, 
-	NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata) 
+	NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, std::vector<ItemInst*> *items) 
 {
 	switch (event) {
 		case EVENT_SAY: {
@@ -1078,19 +1091,36 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 
 		case EVENT_TRADE: {
-			//this is such a hack... why aren't these just set directly..
-			ExportVar(package_name.c_str(), "item1", GetVar("item1." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item2", GetVar("item2." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item3", GetVar("item3." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item4", GetVar("item4." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item1_charges", GetVar("item1.charges." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item2_charges", GetVar("item2.charges." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item3_charges", GetVar("item3.charges." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item4_charges", GetVar("item4.charges." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item1_attuned", GetVar("item1.attuned." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item2_attuned", GetVar("item2.attuned." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item3_attuned", GetVar("item3.attuned." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "item4_attuned", GetVar("item4.attuned." + std::string(itoa(objid))).c_str());
+			if(items) {
+				for(size_t i = 0; i < items->size(); ++i) {
+					ItemInst *inst = items->at(i);
+					std::string var_name = "item";
+					var_name += std::to_string(i + 1);
+
+					if(inst) {
+						ExportVar(package_name.c_str(), var_name.c_str(), inst->GetItem()->ID);
+
+						std::string temp_var_name = var_name;
+						temp_var_name += "_charges";
+						ExportVar(package_name.c_str(), temp_var_name.c_str(), inst->GetCharges());
+
+						temp_var_name = var_name;
+						temp_var_name += "_attuned";
+						ExportVar(package_name.c_str(), temp_var_name.c_str(), inst->IsInstNoDrop());
+					} else {
+						ExportVar(package_name.c_str(), var_name.c_str(), 0);
+
+						std::string temp_var_name = var_name;
+						temp_var_name += "_charges";
+						ExportVar(package_name.c_str(), temp_var_name.c_str(), 0);
+
+						temp_var_name = var_name;
+						temp_var_name += "_attuned";
+						ExportVar(package_name.c_str(), temp_var_name.c_str(), 0);
+					}
+				}
+			}
+
 			ExportVar(package_name.c_str(), "copper", GetVar("copper." + std::string(itoa(objid))).c_str());
 			ExportVar(package_name.c_str(), "silver", GetVar("silver." + std::string(itoa(objid))).c_str());
 			ExportVar(package_name.c_str(), "gold", GetVar("gold." + std::string(itoa(objid))).c_str());
@@ -1163,7 +1193,8 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 		
 		case EVENT_CAST_ON:
-		case EVENT_CAST:{
+		case EVENT_CAST:
+		case EVENT_CAST_BEGIN: {
 			ExportVar(package_name.c_str(), "spell_id", data);
 			break;
 		}
@@ -1248,10 +1279,8 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_SPELL_EFFECT_CLIENT:
-		case EVENT_SPELL_EFFECT_NPC:
-		case EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT:
-		case EVENT_SPELL_EFFECT_BUFF_TIC_NPC:
+		case EVENT_SPELL_EFFECT:
+		case EVENT_SPELL_BUFF_TIC:
 		{
 			ExportVar(package_name.c_str(), "caster_id", extradata);
 			break;
@@ -1283,6 +1312,11 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 		case EVENT_DISCOVER_ITEM: {
 			ExportVar(package_name.c_str(), "itemid", extradata);
+			break;
+		}
+
+		case EVENT_COMMAND: {
+			ExportVar(package_name.c_str(), "message", data);
 			break;
 		}
 

@@ -17,9 +17,12 @@ class Lua_ItemInst : public Lua_Ptr<void>
 {
 	typedef ItemInst NativeType;
 public:
-	Lua_ItemInst() : Lua_Ptr(nullptr) { }
-	Lua_ItemInst(ItemInst *d) : Lua_Ptr(d) { }
-	virtual ~Lua_ItemInst() { }
+	Lua_ItemInst(int item_id);
+	Lua_ItemInst(int item_id, int charges);
+	Lua_ItemInst() : Lua_Ptr(nullptr), cloned_(false) { }
+	Lua_ItemInst(ItemInst *d) : Lua_Ptr(d), cloned_(false) { }
+	Lua_ItemInst(ItemInst *d, bool cloned) : Lua_Ptr(d), cloned_(cloned) { }
+	virtual ~Lua_ItemInst() { if(cloned_) { void *ptr = GetLuaPtrData(); if(ptr) { delete ptr; } } }
 
 	operator ItemInst*() {
 		return reinterpret_cast<ItemInst*>(GetLuaPtrData());
@@ -66,6 +69,10 @@ public:
 	void AddExp(uint32 exp);
 	int GetMaxEvolveLvl();
 	uint32 GetKillsNeeded(int current_level);
+	Lua_ItemInst Clone();
+
+private:
+	bool cloned_;
 };
 
 #endif

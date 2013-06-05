@@ -1160,6 +1160,18 @@ Lua_Raid Lua_Client::GetRaid() {
 	return Lua_Raid(self->GetRaid());
 }
 
+bool Lua_Client::PutItemInInventory(int slot_id, Lua_ItemInst inst) {
+	Lua_Safe_Call_Bool();
+	ItemInst *rinst = inst;
+	return self->PutItemInInventory(slot_id, *rinst, true);
+}
+
+bool Lua_Client::PushItemOnCursor(Lua_ItemInst inst) {
+	Lua_Safe_Call_Bool();
+	ItemInst *rinst = inst;
+	return self->PushItemOnCursor(*rinst, true);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1391,7 +1403,9 @@ luabind::scope lua_register_client() {
 		.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
 		.def("GetAccountFlag", (std::string(Lua_Client::*)(std::string))&Lua_Client::GetAccountFlag)
 		.def("GetGroup", (Lua_Group(Lua_Client::*)(void))&Lua_Client::GetGroup)
-		.def("GetRaid", (Lua_Raid(Lua_Client::*)(void))&Lua_Client::GetRaid);
+		.def("GetRaid", (Lua_Raid(Lua_Client::*)(void))&Lua_Client::GetRaid)
+		.def("PutItemInInventory", (bool(Lua_Client::*)(int,Lua_ItemInst))&Lua_Client::PutItemInInventory)
+		.def("PushItemOnCursor", (bool(Lua_Client::*)(Lua_ItemInst))&Lua_Client::PushItemOnCursor);
 }
 
 luabind::scope lua_register_inventory_where() {
