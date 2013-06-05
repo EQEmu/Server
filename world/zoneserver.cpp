@@ -447,8 +447,8 @@ bool ZoneServer::Process() {
 					}
 					else if (cle->Online() == CLE_Status_Zoning) {
 						if (!scm->noreply) {
-							char errbuf[MYSQL_ERRMSG_SIZE];
-							char *query = 0;
+							std::string errbuf;
+							std::string query;
 							MYSQL_RES *result;
 							//MYSQL_ROW row; Trumpcard - commenting. Currently unused.
 							time_t rawtime;
@@ -456,21 +456,25 @@ bool ZoneServer::Process() {
 							time ( &rawtime );
 							timeinfo = localtime ( &rawtime );
 							char *telldate=asctime(timeinfo);
-							if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT name from character_ where name='%s'",scm->deliverto), errbuf, &result)) {
-								safe_delete(query);
+							
+							StringFormat(query,"SELECT name from character_ where name='%s'",scm->deliverto);
+							
+							if (database.RunQuery(query, &errbuf, &result)) {
 								if (result!=0) {
-									if (database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO tellque (Date,Receiver,Sender,Message) values('%s','%s','%s','%s')",telldate,scm->deliverto,scm->from,scm->message), errbuf, &result))
+									
+									StringFormat(query, "INSERT INTO tellque (Date,Receiver,Sender,Message) "
+														"values('%s','%s','%s','%s')",
+														telldate, scm->deliverto, scm->from,scm->message);
+									
+									if (database.RunQuery(query, &errbuf, &result))
 										zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "Your message has been added to the %s's que.", scm->to);
 									else
 										zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
-									safe_delete(query);
 								}
 								else
 									zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
 								mysql_free_result(result);
 							}
-							else
-								safe_delete(query);
 						}
 					//		zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
 					}

@@ -956,17 +956,18 @@ void Group::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float 
 }
 
 bool Group::LearnMembers() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT name FROM group_id WHERE groupid=%lu", (unsigned long)GetID()),
-					errbuf,&result)){
-		safe_delete_array(query);
+
+	StringFormat(query, "SELECT name FROM group_id WHERE groupid=%lu", (unsigned long)GetID());
+
+	if (database.RunQuery(query,&errbuf,&result)){
 		if(mysql_num_rows(result) < 1) {	//could prolly be 2
 			mysql_free_result(result);
-			LogFile->write(EQEMuLog::Error, "Error getting group members for group %lu: %s", (unsigned long)GetID(), errbuf);
-			return(false);
+			LogFile->write(EQEMuLog::Error, "Error getting group members for group %lu: %s", (unsigned long)GetID(), errbuf.c_str());
+			return false;
 		}
 		int i = 0;
 		while((row = mysql_fetch_row(result))) {
@@ -980,7 +981,7 @@ bool Group::LearnMembers() {
 		mysql_free_result(result);
 	}
 
-	return(true);
+	return true;
 }
 
 void Group::VerifyGroup() {
@@ -1271,15 +1272,15 @@ void Group::DelegateMainTank(const char *NewMainTankName, uint8 toggle)
 	}
 
 	if(updateDB) {
-		char errbuff[MYSQL_ERRMSG_SIZE];
+		std::string errbuff;
+		std::string query;
 
-		char *Query = nullptr;
+		StringFormat(query, "UPDATE group_leaders SET maintank='%s' WHERE gid=%i LIMIT 1",
+							MainTankName.c_str(), GetID());
 
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET maintank='%s' WHERE gid=%i LIMIT 1",
-									MainTankName.c_str(), GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to set group main tank: %s\n", errbuff);
+		if (!database.RunQuery(query, &errbuff))
+			LogFile->write(EQEMuLog::Error, "Unable to set group main tank: %s\n", errbuff.c_str());
 
-		safe_delete_array(Query);
 	}
 }
 
@@ -1320,15 +1321,15 @@ void Group::DelegateMainAssist(const char *NewMainAssistName, uint8 toggle)
 	}
 
 	if(updateDB) {
-		char errbuff[MYSQL_ERRMSG_SIZE];
+		std::string errbuff;
+		std::string query;
 
-		char *Query = nullptr;
+		StringFormat(query, "UPDATE group_leaders SET assist='%s' WHERE gid=%i LIMIT 1",
+									MainAssistName.c_str(), GetID());
 
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET assist='%s' WHERE gid=%i LIMIT 1",
-									MainAssistName.c_str(), GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to set group main assist: %s\n", errbuff);
+		if (!database.RunQuery(query, &errbuff))
+			LogFile->write(EQEMuLog::Error, "Unable to set group main assist: %s\n", errbuff.c_str());
 
-		safe_delete_array(Query);
 	}
 }
 
@@ -1369,15 +1370,15 @@ void Group::DelegatePuller(const char *NewPullerName, uint8 toggle)
 	}
 
 	if(updateDB) {
-		char errbuff[MYSQL_ERRMSG_SIZE];
+		std::string errbuff;
+		std::string query;
 
-		char *Query = nullptr;
+		StringFormat(query, "UPDATE group_leaders SET puller='%s' WHERE gid=%i LIMIT 1",
+							PullerName.c_str(), GetID());
 
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET puller='%s' WHERE gid=%i LIMIT 1",
-									PullerName.c_str(), GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to set group main puller: %s\n", errbuff);
+		if (!database.RunQuery(query, &errbuff))
+			LogFile->write(EQEMuLog::Error, "Unable to set group main puller: %s\n", errbuff.c_str());
 
-		safe_delete_array(Query);
 	}
 
 }
@@ -1523,15 +1524,15 @@ void Group::UnDelegateMainTank(const char *OldMainTankName, uint8 toggle)
 	// informing them of the change and update the group_leaders table.
 	//
 	if(OldMainTankName == MainTankName) {
-		char errbuff[MYSQL_ERRMSG_SIZE];
+		std::string errbuff;
 
-		char *Query = 0;
+		std::string query;
 
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET maintank='' WHERE gid=%i LIMIT 1",
-									GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to clear group main tank: %s\n", errbuff);
+		StringFormat(query, "UPDATE group_leaders SET maintank='' WHERE gid=%i LIMIT 1",
+							GetID());
 
-		safe_delete_array(Query);
+		if (!database.RunQuery(query, &errbuff))
+			LogFile->write(EQEMuLog::Error, "Unable to clear group main tank: %s\n", errbuff.c_str());
 
 		if(!toggle) {
 			for(uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i) {
@@ -1577,15 +1578,15 @@ void Group::UnDelegateMainAssist(const char *OldMainAssistName, uint8 toggle)
 
 		safe_delete(outapp);
 
-		char errbuff[MYSQL_ERRMSG_SIZE];
+		std::string errbuff;
+		std::string query;
 
-		char *Query = 0;
+		StringFormat(query, "UPDATE group_leaders SET assist='' WHERE gid=%i LIMIT 1",
+							GetID());
 
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET assist='' WHERE gid=%i LIMIT 1",
-									GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to clear group main assist: %s\n", errbuff);
+		if (!database.RunQuery(query, &errbuff))
+			LogFile->write(EQEMuLog::Error, "Unable to clear group main assist: %s\n", errbuff.c_str());
 
-		safe_delete_array(Query);
 
 		if(!toggle)
 		{
@@ -1609,15 +1610,14 @@ void Group::UnDelegatePuller(const char *OldPullerName, uint8 toggle)
 	// informing them of the change and update the group_leaders table.
 	//
 	if(OldPullerName == PullerName) {
-		char errbuff[MYSQL_ERRMSG_SIZE];
+		std::string errbuff;
+		std::string query;
 
-		char *Query = 0;
+		StringFormat(query, "UPDATE group_leaders SET puller='' WHERE gid=%i LIMIT 1",
+							GetID());
 
-		if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET puller='' WHERE gid=%i LIMIT 1",
-									GetID()), errbuff))
-			LogFile->write(EQEMuLog::Error, "Unable to clear group main puller: %s\n", errbuff);
-
-		safe_delete_array(Query);
+		if (!database.RunQuery(query, &errbuff))
+			LogFile->write(EQEMuLog::Error, "Unable to clear group main puller: %s\n", errbuff.c_str());
 
 		if(!toggle) {
 			for(uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i) {
@@ -1752,15 +1752,16 @@ void Group::DelegateMarkNPC(const char *NewNPCMarkerName)
 		if(members[i] && members[i]->IsClient())
 			NotifyMarkNPC(members[i]->CastToClient());
 
-	char errbuff[MYSQL_ERRMSG_SIZE];
+	std::string errbuff;
 
-	char *Query = 0;
+	std::string query;
 
-	if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET marknpc='%s' WHERE gid=%i LIMIT 1",
-								NewNPCMarkerName, GetID()), errbuff))
-		LogFile->write(EQEMuLog::Error, "Unable to set group mark npc: %s\n", errbuff);
+	StringFormat(query, "UPDATE group_leaders SET marknpc='%s' WHERE gid=%i LIMIT 1",
+						NewNPCMarkerName, GetID());
 
-	safe_delete_array(Query);
+	if (!database.RunQuery(query, &errbuff))
+		LogFile->write(EQEMuLog::Error, "Unable to set group mark npc: %s\n", errbuff.c_str());
+
 
 }
 
@@ -1838,15 +1839,16 @@ void Group::UnDelegateMarkNPC(const char *OldNPCMarkerName)
 
 	NPCMarkerName.clear();
 
-	char errbuff[MYSQL_ERRMSG_SIZE];
+	std::string errbuff;
 
-	char *Query = 0;
+	std::string query;
 
-	if (!database.RunQuery(Query, MakeAnyLenString(&Query, "UPDATE group_leaders SET marknpc='' WHERE gid=%i LIMIT 1",
-								GetID()), errbuff))
-		LogFile->write(EQEMuLog::Error, "Unable to clear group marknpc: %s\n", errbuff);
+	StringFormat(query, "UPDATE group_leaders SET marknpc='' WHERE gid=%i LIMIT 1",
+						GetID());
 
-	safe_delete_array(Query);
+	if (!database.RunQuery(query, &errbuff))
+		LogFile->write(EQEMuLog::Error, "Unable to clear group marknpc: %s\n", errbuff.c_str());
+
 }
 
 void Group::SaveGroupLeaderAA()
@@ -1854,21 +1856,24 @@ void Group::SaveGroupLeaderAA()
 	// Stores the Group Leaders Leadership AA data from the Player Profile as a blob in the group_leaders table.
 	// This is done so that group members not in the same zone as the Leader still have access to this information.
 
-	char *Query = new char[200 + sizeof(GroupLeadershipAA_Struct)*2];
+	std::string leaderAABuffer;
 
-	char *End = Query;
+	std::string endingOfQuery;
 
-	End += sprintf(End, "UPDATE group_leaders SET leadershipaa='");
+	std::string query = "UPDATE group_leaders SET leadershipaa='";
 
-	End += database.DoEscapeString(End, (char*)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
+	database.DoEscapeString(leaderAABuffer, (char*)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
 
-	End += sprintf(End,"' WHERE gid=%i LIMIT 1", GetID());
+	query.append(leaderAABuffer);
 
-	char errbuff[MYSQL_ERRMSG_SIZE];
-	if (!database.RunQuery(Query, End - Query, errbuff))
-		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", errbuff);
+	StringFormat(endingOfQuery, "' WHERE gid=%i LIMIT 1", GetID());
 
-	safe_delete_array(Query);
+	query.append(endingOfQuery);
+
+	std::string errbuff;
+	if (!database.RunQuery(query, &errbuff))
+		LogFile->write(EQEMuLog::Error, "Unable to store LeadershipAA: %s\n", errbuff.c_str());
+
 }
 
 void Group::UnMarkNPC(uint16 ID)

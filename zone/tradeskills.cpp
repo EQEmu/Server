@@ -390,27 +390,26 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	}
 
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	char *query = 0;
+	std::string query;
 
 	uint32 qlen = 0;
 	uint8 qcount = 0;
 
 	//pull the list of components
-	qlen = MakeAnyLenString(&query, "SELECT tre.item_id,tre.componentcount "
-	 " FROM tradeskill_recipe_entries AS tre "
-	 " WHERE tre.componentcount > 0 AND tre.recipe_id=%u", rac->recipe_id);
+	StringFormat(query, "SELECT tre.item_id,tre.componentcount "
+						"FROM tradeskill_recipe_entries AS tre "
+						"WHERE tre.componentcount > 0 AND "
+						"tre.recipe_id=%u", rac->recipe_id);
 
-	if (!database.RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in HandleAutoCombine query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	if (!database.RunQuery(query, &errbuf, &result)) {
+		LogFile->write(EQEMuLog::Error, "Error in HandleAutoCombine query '%s': %s", query.c_str(), errbuf.c_str());
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
 	}
-	safe_delete_array(query);
 
 	qcount = mysql_num_rows(result);
 	if(qcount < 1) {
@@ -608,14 +607,13 @@ SkillType Object::TypeToSkill(uint32 type) {
 	return(tradeskill);
 }
 
-void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsigned long objtype, unsigned long someid) {
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
+void Client::TradeskillSearchResults(const std::string query, unsigned long qlen, unsigned long objtype, unsigned long someid) {
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (!database.RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': %s", query, errbuf);
+	if (!database.RunQuery(query, &errbuf, &result)) {
+		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': %s", query.c_str(), errbuf.c_str());
 		return;
 	}
 
@@ -627,7 +625,7 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsi
 		return;
 	}
 	if(mysql_num_fields(result) != 6) {
-		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': Invalid column count in result", query);
+		LogFile->write(EQEMuLog::Error, "Error in TradeskillSearchResults query '%s': Invalid column count in result", query.c_str());
 		return;
 	}
 
@@ -670,26 +668,24 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsi
 
 void Client::SendTradeskillDetails(uint32 recipe_id) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	char *query = 0;
+	std::string query;
 
 	uint32 qlen = 0;
 	uint8 qcount = 0;
 
 	//pull the list of components
-	qlen = MakeAnyLenString(&query, "SELECT tre.item_id,tre.componentcount,i.icon,i.Name "
-	 " FROM tradeskill_recipe_entries AS tre "
-	 " LEFT JOIN items AS i ON tre.item_id = i.id "
-	 " WHERE tre.componentcount > 0 AND tre.recipe_id=%u", recipe_id);
+	StringFormat(query, "SELECT tre.item_id,tre.componentcount,i.icon,i.Name "
+						"FROM tradeskill_recipe_entries AS tre "
+						"LEFT JOIN items AS i ON tre.item_id = i.id "
+						"WHERE tre.componentcount > 0 AND tre.recipe_id=%u", recipe_id);
 
-	if (!database.RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in SendTradeskillDetails query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	if (!database.RunQuery(query, &errbuf, &result)) {
+		LogFile->write(EQEMuLog::Error, "Error in SendTradeskillDetails query '%s': %s", query.c_str(), errbuf.c_str());
 		return;
 	}
-	safe_delete_array(query);
 
 	qcount = mysql_num_rows(result);
 	if(qcount < 1) {
@@ -1128,10 +1124,10 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint32 some_id,
 	uint32 char_id, DBTradeskillRecipe_Struct *spec)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	char *query = 0;
+	std::string query;
 	char buf2[4096];
 
 	uint32 sum = 0;
@@ -1178,20 +1174,19 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 		return(false);	//no items == no recipe
 	}
 
-	qlen = MakeAnyLenString(&query, "SELECT tre.recipe_id "
-	" FROM tradeskill_recipe_entries AS tre"
-	" WHERE ( tre.item_id IN(%s) AND tre.componentcount>0 )"
-	" OR ( tre.item_id %s AND tre.iscontainer=1 )"
-	" GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u"
-	" AND sum(tre.item_id * tre.componentcount) = %u", buf2, containers, count, sum);
+	StringFormat(query, "SELECT tre.recipe_id "
+						"FROM tradeskill_recipe_entries AS tre "
+						"WHERE ( tre.item_id IN(%s) AND tre.componentcount>0 ) "
+						"OR ( tre.item_id %s AND tre.iscontainer=1 ) "
+						"GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
+						"AND sum(tre.item_id * tre.componentcount) = %u", 
+						buf2, containers, count, sum);
 
-	if (!RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, query: %s", query);
-		safe_delete_array(query);
-		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, error: %s", errbuf);
-		return(false);
+	if (!RunQuery(query, &errbuf, &result)) {
+		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, query: %s", query.c_str());
+		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe search, error: %s", errbuf.c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
 	qcount = mysql_num_rows(result);
 	if(qcount > 1) {
@@ -1217,19 +1212,18 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 			}
 		}
 
-		qlen = MakeAnyLenString(&query, "SELECT tre.recipe_id"
-		" FROM tradeskill_recipe_entries AS tre"
-		" WHERE tre.recipe_id IN (%s)"
-		" GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u"
-		" AND sum(tre.item_id * tre.componentcount) = %u", buf2, count, sum);
+		StringFormat(query, "SELECT tre.recipe_id "
+							"FROM tradeskill_recipe_entries AS tre "
+							"WHERE tre.recipe_id IN (%s) "
+							"GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
+							"AND sum(tre.item_id * tre.componentcount) = %u", 
+							buf2, count, sum);
 
-		if (!RunQuery(query, qlen, errbuf, &result)) {
-			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query);
-			safe_delete_array(query);
-			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", errbuf);
-			return(false);
+		if (!RunQuery(query, &errbuf, &result)) {
+			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query.c_str());
+			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", errbuf.c_str());
+			return false;
 		}
-		safe_delete_array(query);
 
 		qcount = mysql_num_rows(result);
 	}
@@ -1253,22 +1247,22 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 			return(false);
 		}
 
-		qlen = MakeAnyLenString(&query,"SELECT tre.recipe_id FROM tradeskill_recipe_entries as tre WHERE tre.recipe_id IN (%s)"
-		" AND tre.item_id = %u;",buf2,containerId);
+		StringFormat(query,"SELECT tre.recipe_id FROM "
+							"tradeskill_recipe_entries as tre WHERE tre.recipe_id IN (%s) "
+							"AND tre.item_id = %u;",
+							buf2, containerId);
 
-		if (!RunQuery(query, qlen, errbuf, &result)) {
-			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query);
-			safe_delete_array(query);
-			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", errbuf);
-			return(false);
+		if (!RunQuery(query, &errbuf, &result)) {
+			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, re-query: %s", query.c_str());
+			LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", errbuf.c_str());
+			return false;
 		}
-		safe_delete_array(query);
 
 		uint32 resultRowTotal = mysql_num_rows(result);
 
 		if(resultRowTotal == 0) { //Recipe contents matched more than 1 recipe, but not in this container
 			LogFile->write(EQEMuLog::Error, "Combine error: Incorrect container is being used!");
-			return(false);
+			return false;
 		}
 		if(resultRowTotal > 1) { //Recipe contents matched more than 1 recipe in this container
 			LogFile->write(EQEMuLog::Error, "Combine error: Recipe is not unique! %u matches found for container %u. Continuing with first recipe match.", resultRowTotal, containerId);
@@ -1283,11 +1277,15 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	//instead of part which is possible with experimentation.
 	//This is here because something's up with the query above.. it needs to be rethought out
 	bool has_components = true;
-	char TSerrbuf[MYSQL_ERRMSG_SIZE];
-	char *TSquery = 0;
 	MYSQL_RES *TSresult;
 	MYSQL_ROW TSrow;
-	if (RunQuery(TSquery, MakeAnyLenString(&TSquery, "SELECT item_id, componentcount from tradeskill_recipe_entries where recipe_id=%i AND componentcount > 0", recipe_id), TSerrbuf, &TSresult)) {
+	
+	StringFormat(query, "SELECT item_id, componentcount from "
+						"tradeskill_recipe_entries where "
+						"recipe_id=%i AND componentcount > 0", 
+						recipe_id);
+	
+	if (RunQuery(query, &errbuf, &TSresult)) {
 		while((TSrow = mysql_fetch_row(TSresult))!=nullptr) {
 			int ccnt = 0;
 			for(int x = 0; x < 10; x++){
@@ -1306,24 +1304,23 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 		}
 		mysql_free_result(TSresult);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Error in tradeskill verify query: '%s': %s", TSquery, TSerrbuf);
+		LogFile->write(EQEMuLog::Error, "Error in tradeskill verify query: '%s': %s", query.c_str(), errbuf.c_str());
 	}
-	safe_delete_array(TSquery);
+	
 	if(has_components == false){
-
 		return false;
 	}
 
-	return(GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec));
+	return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
 }
 
 bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id,
 	uint32 char_id, DBTradeskillRecipe_Struct *spec)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	char *query = 0;
+	std::string query;
 
 	uint32 qcount = 0;
 	uint32 qlen;
@@ -1338,22 +1335,24 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 		snprintf(containers,29, "in (%u,%u)", c_type, some_id);
 	}
 
-	qlen = MakeAnyLenString(&query, "SELECT tr.id, tr.tradeskill, tr.skillneeded,"
-	" tr.trivial, tr.nofail, tr.replace_container, tr.name, tr.must_learn, tr.quest, crl.madecount"
-	" FROM tradeskill_recipe AS tr inner join tradeskill_recipe_entries as tre"
-	" ON tr.id = tre.recipe_id"
-	" LEFT JOIN (SELECT recipe_id, madecount from char_recipe_list WHERE char_id = %u) AS crl "
-	" ON tr.id = crl.recipe_id "
-	" WHERE tr.id = %lu AND tre.item_id %s"
-	" GROUP BY tr.id", char_id, (unsigned long)recipe_id, containers);
+	StringFormat(query, "SELECT tr.id, tr.tradeskill, tr.skillneeded, "
+						"tr.trivial, tr.nofail, tr.replace_container, "
+						"tr.name, tr.must_learn, tr.quest, crl.madecount "
+						"FROM tradeskill_recipe AS tr "
+						"inner join "
+						"tradeskill_recipe_entries as tre "
+						"ON tr.id = tre.recipe_id "
+						"LEFT JOIN (SELECT recipe_id, madecount from char_recipe_list WHERE char_id = %u) AS crl "
+						"ON tr.id = crl.recipe_id "
+						"WHERE tr.id = %lu AND tre.item_id %s "
+						"GROUP BY tr.id", 
+						char_id, (unsigned long)recipe_id, containers);
 
-	if (!RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, query: %s", query);
-		safe_delete_array(query);
-		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", errbuf);
-		return(false);
+	if (!RunQuery(query, &errbuf, &result)) {
+		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, query: %s", query.c_str());
+		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecipe, error: %s", errbuf.c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
 	qcount = mysql_num_rows(result);
 	if(qcount != 1) {
@@ -1381,15 +1380,14 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	mysql_free_result(result);
 
 	//Pull the on-success items...
-	qlen = MakeAnyLenString(&query, "SELECT item_id,successcount FROM tradeskill_recipe_entries"
-	 " WHERE successcount>0 AND recipe_id=%u", recipe_id);
+	StringFormat(query, "SELECT item_id,successcount FROM tradeskill_recipe_entries "
+						"WHERE successcount>0 AND recipe_id=%u", 
+						recipe_id);
 
-	if (!RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecept success query '%s': %s", query, errbuf);
-		safe_delete_array(query);
-		return(false);
+	if (!RunQuery(query, &errbuf, &result)) {
+		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecept success query '%s': %s", query.c_str(), errbuf.c_str());
+		return false;
 	}
-	safe_delete_array(query);
 
 	qcount = mysql_num_rows(result);
 	if(qcount < 1) {
@@ -1407,11 +1405,12 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	mysql_free_result(result);
 
 	//Pull the on-fail items...
-	qlen = MakeAnyLenString(&query, "SELECT item_id,failcount FROM tradeskill_recipe_entries"
-	 " WHERE failcount>0 AND recipe_id=%u", recipe_id);
+	StringFormat(query, "SELECT item_id,failcount FROM tradeskill_recipe_entries "
+						"WHERE failcount>0 AND recipe_id=%u", 
+						recipe_id);
 
 	spec->onfail.clear();
-	if (RunQuery(query, qlen, errbuf, &result)) {
+	if (RunQuery(query, &errbuf, &result)) {
 
 		qcount = mysql_num_rows(result);
 		uint8 r;
@@ -1425,11 +1424,14 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	}
 
 	// Pull the salvage list
-	qlen = MakeAnyLenString(&query, "SELECT item_id,salvagecount FROM tradeskill_recipe_entries WHERE salvagecount>0 AND recipe_id=%u", recipe_id);
+	StringFormat(query, "SELECT item_id,salvagecount FROM "
+						"tradeskill_recipe_entries WHERE "
+						"salvagecount>0 AND recipe_id=%u", 
+						recipe_id);
 
 	spec->salvage.clear();
 	// Don't bother with the query if TS is nofail
-	if (!spec->nofail && RunQuery(query, qlen, errbuf, &result)) {
+	if (!spec->nofail && RunQuery(query, &errbuf, &result)) {
 		qcount = mysql_num_rows(result);
 		uint8 r;
 		for(r = 0; r < qcount; r++) {
@@ -1441,46 +1443,45 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 		mysql_free_result(result);
 	}
 
-	safe_delete_array(query);
 
-	return(true);
+	return true;
 }
 
 void ZoneDatabase::UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount)
 {
-	char *query = 0;
+	std::string query;
 	uint32 qlen;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 
-	qlen = MakeAnyLenString(&query, "INSERT INTO char_recipe_list "
-		" SET recipe_id = %u, char_id = %u, madecount = %u "
-		" ON DUPLICATE KEY UPDATE madecount = %u;"
-	, recipe_id, char_id, madecount, madecount);
+	StringFormat(query, "INSERT INTO char_recipe_list "
+						"SET recipe_id = %u, char_id = %u, madecount = %u "
+						"ON DUPLICATE KEY UPDATE madecount = %u;", 
+						recipe_id, char_id, madecount, madecount);
 
-	if (!RunQuery(query, qlen, errbuf)) {
-		LogFile->write(EQEMuLog::Error, "Error in UpdateRecipeMadecount query '%s': %s", query, errbuf);
+	if (!RunQuery(query, &errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error in UpdateRecipeMadecount query '%s': %s", query.c_str(), errbuf.c_str());
 	}
-	safe_delete_array(query);
 }
 
 void Client::LearnRecipe(uint32 recipeID)
 {
-	char *query = 0;
+	std::string query;
 	uint32 qlen;
 	uint32 qcount = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	qlen = MakeAnyLenString(&query, "SELECT tr.name, crl.madecount "
-		" FROM tradeskill_recipe as tr "
-		" LEFT JOIN (SELECT recipe_id, madecount FROM char_recipe_list WHERE char_id = %u) AS crl "
-		" ON tr.id = crl.recipe_id "
-		" WHERE tr.id = %u ;", CharacterID(), recipeID);
+	StringFormat(query, "SELECT tr.name, crl.madecount "
+						"FROM tradeskill_recipe as tr "
+						"LEFT JOIN (SELECT recipe_id, madecount "
+						"FROM char_recipe_list WHERE char_id = %u) AS crl "
+						"ON tr.id = crl.recipe_id "
+						"WHERE tr.id = %u ;", 
+						CharacterID(), recipeID);
 
-	if (!database.RunQuery(query, qlen, errbuf, &result)) {
-		LogFile->write(EQEMuLog::Error, "Error in Client::LearnRecipe query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+	if (!database.RunQuery(query, &errbuf, &result)) {
+		LogFile->write(EQEMuLog::Error, "Error in Client::LearnRecipe query '%s': %s", query.c_str(), errbuf.c_str());
 		return;
 	}
 
@@ -1488,10 +1489,8 @@ void Client::LearnRecipe(uint32 recipeID)
 	if (qcount != 1) {
 		LogFile->write(EQEMuLog::Normal, "Client::LearnRecipe - RecipeID: %d had %d occurences.", recipeID, qcount);
 		mysql_free_result(result);
-		safe_delete_array(query);
 		return;
 	}
-	safe_delete_array(query);
 
 	row = mysql_fetch_row(result);
 
@@ -1500,15 +1499,14 @@ void Client::LearnRecipe(uint32 recipeID)
 		if (row[1] == nullptr) {
 			Message_StringID(4, TRADESKILL_LEARN_RECIPE, row[0]);
 			// Actually learn the recipe now
-			qlen = MakeAnyLenString(&query, "INSERT INTO char_recipe_list "
-				" SET recipe_id = %u, char_id = %u, madecount = 0 "
-				" ON DUPLICATE KEY UPDATE madecount = madecount;"
-			, recipeID, CharacterID());
+			StringFormat(query, "INSERT INTO char_recipe_list "
+								"SET recipe_id = %u, char_id = %u, madecount = 0 "
+								"ON DUPLICATE KEY UPDATE madecount = madecount;", 
+								recipeID, CharacterID());
 
-			if (!database.RunQuery(query, qlen, errbuf)) {
-				LogFile->write(EQEMuLog::Error, "Error in LearnRecipe query '%s': %s", query, errbuf);
+			if (!database.RunQuery(query, &errbuf)) {
+				LogFile->write(EQEMuLog::Error, "Error in LearnRecipe query '%s': %s", query.c_str(), errbuf.c_str());
 			}
-			safe_delete_array(query);
 		}
 	}
 

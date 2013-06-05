@@ -18,10 +18,10 @@
 #define ASYNC_LOOP_GRANULARITY 4 //# of ms between checking our work
 
 bool DBAsyncCB_LoadVariables(DBAsyncWork* iWork) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 	MYSQL_RES* result = 0;
 	DBAsyncQuery* dbaq = iWork->PopAnswer();
-	if (dbaq->GetAnswer(errbuf, &result))
+	if (dbaq->GetAnswer(&errbuf, &result))
 		iWork->GetDB()->LoadVariables_result(result);
 	else
 		std::cout << "Error: DBAsyncCB_LoadVariables failed: !GetAnswer: '" << errbuf << "'" << std::endl;
@@ -29,9 +29,11 @@ bool DBAsyncCB_LoadVariables(DBAsyncWork* iWork) {
 }
 
 void AsyncLoadVariables(DBAsync *dba, Database *db) {
-	char* query = 0;
+	std::string query;
 	DBAsyncWork* dbaw = new DBAsyncWork(db, &DBAsyncCB_LoadVariables, 0, DBAsync::Read);
-	dbaw->AddQuery(0, &query, db->LoadVariables_MQ(&query));
+	db->LoadVariables_MQ(query);
+						
+	dbaw->AddQuery(0, query);
 	dba->AddWork(&dbaw);
 }
 
@@ -466,8 +468,8 @@ bool DBAsyncWork::AddQuery(DBAsyncQuery** iDBAQ) {
 	return ret;
 }
 
-bool DBAsyncWork::AddQuery(uint32 iQPT, char** iQuery, uint32 iQueryLen, bool iGetResultSet, bool iGetErrbuf) {
-	DBAsyncQuery* DBAQ = new DBAsyncQuery(iQPT, iQuery, iQueryLen, iGetResultSet, iGetErrbuf);
+bool DBAsyncWork::AddQuery(uint32 iQPT, std::string iQuery, bool iGetResultSet, bool iGetErrbuf) {
+	DBAsyncQuery* DBAQ = new DBAsyncQuery(iQPT, iQuery,  iGetResultSet, iGetErrbuf);
 	if (AddQuery(&DBAQ))
 		return true;
 	else {
@@ -587,24 +589,11 @@ void DBAsyncWork::PushAnswer(DBAsyncQuery* iDBAQ) {
 }
 
 
-DBAsyncQuery::DBAsyncQuery(uint32 iQPT, char** iQuery, uint32 iQueryLen, bool iGetResultSet, bool iGetErrbuf) {
-	if (iQueryLen == 0xFFFFFFFF)
-		pQueryLen = strlen(*iQuery);
-	else
-		pQueryLen = iQueryLen;
-	pQuery = *iQuery;
-	*iQuery = 0;
+DBAsyncQuery::DBAsyncQuery(uint32 iQPT, std::string iQuery, bool iGetResultSet, bool iGetErrbuf) {
+	pQuery = iQuery;
 	Init(iQPT, iGetResultSet, iGetErrbuf);
 }
 
-DBAsyncQuery::DBAsyncQuery(uint32 iQPT, const char* iQuery, uint32 iQueryLen, bool iGetResultSet, bool iGetErrbuf) {
-	if (iQueryLen == 0xFFFFFFFF)
-		pQueryLen = strlen(iQuery);
-	else
-		pQueryLen = iQueryLen;
-	pQuery = strn0cpy(new char[pQueryLen+1], iQuery, pQueryLen+1);
-	Init(iQPT, iGetResultSet, iGetErrbuf);
-}
 
 void DBAsyncQuery::Init(uint32 iQPT, bool iGetResultSet, bool iGetErrbuf) {
 	pstatus = DBAsync::AddingWork;
@@ -622,15 +611,17 @@ void DBAsyncQuery::Init(uint32 iQPT, bool iGetResultSet, bool iGetErrbuf) {
 
 DBAsyncQuery::~DBAsyncQuery() {
 	safe_delete_array(perrbuf);
-	safe_delete_array(pQuery);
 	if (presult)
 		mysql_free_result(presult);
 }
 
-bool DBAsyncQuery::GetAnswer(char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum) {
+bool DBAsyncQuery::GetAnswer(std::string* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum) {
 	if (pstatus != DBAsync::Finished) {
 		if (errbuf)
-			snprintf(errbuf, MYSQL_ERRMSG_SIZE, "Error: Query not finished.");
+		{
+			errbuf->assign("Error: Query not finished.");
+		}
+			
 		if (errnum)
 			*errnum = UINT_MAX;
 		return false;
@@ -638,12 +629,16 @@ bool DBAsyncQuery::GetAnswer(char* errbuf, MYSQL_RES** result, uint32* affected_
 	if (errbuf) {
 		if (pGetErrbuf) {
 			if (perrbuf)
-				strn0cpy(errbuf, perrbuf, MYSQL_ERRMSG_SIZE);
+			{
+				errbuf->assign(*perrbuf);
+			}
 			else
-				snprintf(errbuf, MYSQL_ERRMSG_SIZE, "Error message should've been saved, but hasnt. errno: %u", perrnum);
+			{
+				StringFormat(*errbuf, "Error message should've been saved, but hasnt. errno: %u", perrnum);
+			}
 		}
 		else
-			snprintf(errbuf, MYSQL_ERRMSG_SIZE, "Error message not saved. errno: %u", perrnum);
+			StringFormat(*errbuf, "Error message not saved. errno: %u", perrnum);
 	}
 	if (errnum)
 		*errnum = perrnum;
@@ -659,11 +654,13 @@ bool DBAsyncQuery::GetAnswer(char* errbuf, MYSQL_RES** result, uint32* affected_
 void DBAsyncQuery::Process(DBcore* iDBC) {
 	pstatus = DBAsync::Executing;
 	if (pGetErrbuf)
-		perrbuf = new char[MYSQL_ERRMSG_SIZE];
+	{
+		std::string perrbuf = "";
+	}
 	MYSQL_RES** resultPP = 0;
 	if (pGetResultSet)
 		resultPP = &presult;
-	pmysqlsuccess = iDBC->RunQuery(pQuery, pQueryLen, perrbuf, resultPP, &paffected_rows, &plast_insert_id, &perrnum);
+	pmysqlsuccess = iDBC->RunQuery(pQuery, perrbuf, resultPP, &paffected_rows, &plast_insert_id, &perrnum);
 	pstatus = DBAsync::Finished;
 }
 

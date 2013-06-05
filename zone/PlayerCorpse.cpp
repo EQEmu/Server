@@ -416,7 +416,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 				iter++;
 			}
 			ss << ")";
-			database.RunQuery(ss.str().c_str(), ss.str().length());
+			database.RunQuery(ss.str());
 		}
 
 		if(cursor) { // all cursor items should be on corpse (client < SoF or RespawnFromHover = false)
@@ -1445,15 +1445,14 @@ void Corpse::Spawn() {
 }
 
 bool ZoneDatabase::DeleteGraveyard(uint32 zone_id, uint32 graveyard_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256];
+	std::string errbuf;
+	std::string query;
 	uint32 query_length = 0;
 	uint32 affected_rows = 0;
 
-	query_length = sprintf(query,"UPDATE zone SET graveyard_id=0 WHERE zoneidnumber=%u AND version=0", zone_id);
+	StringFormat(query, "UPDATE zone SET graveyard_id=0 WHERE zoneidnumber=%u AND version=0", zone_id);
 
-	if (!RunQuery(query, query_length, errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		std::cerr << "Error1 in DeleteGraveyard query " << errbuf << std::endl;
 		return false;
 	}
@@ -1463,14 +1462,12 @@ bool ZoneDatabase::DeleteGraveyard(uint32 zone_id, uint32 graveyard_id) {
 		return false;
 	}
 
-	query_length = sprintf(query,"DELETE FROM graveyard WHERE id=%u", graveyard_id);
+	StringFormat(query,"DELETE FROM graveyard WHERE id=%u", graveyard_id);
 
-	if (!RunQuery(query, query_length, errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		std::cerr << "Error3 in DeleteGraveyard query " << errbuf << std::endl;
 		return false;
 	}
-	safe_delete_array(query);
 
 	if (affected_rows == 0) {
 		std::cerr << "Error4 in DeleteGraveyard query: affected_rows = 0" << std::endl;
@@ -1480,19 +1477,18 @@ bool ZoneDatabase::DeleteGraveyard(uint32 zone_id, uint32 graveyard_id) {
 	return true;
 }
 uint32 ZoneDatabase::AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256];
-	char* end = query;
+	std::string errbuf;
+	std::string query;
 	uint32 affected_rows = 0;
 
-	end += sprintf(end,"UPDATE zone SET graveyard_id=%u WHERE zoneidnumber=%u AND version=0", graveyard_id, zone_id);
+	StringFormat(query, "UPDATE zone SET graveyard_id=%u "
+						"WHERE zoneidnumber=%u AND version=0", 
+						graveyard_id, zone_id);
 
-	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		std::cerr << "Error1 in AddGraveyardIDToZone query " << errbuf << std::endl;
 		return 0;
 	}
-	safe_delete_array(query);
 
 	if (affected_rows == 0) {
 		std::cerr << "Error2 in AddGraveyardIDToZone query: affected_rows = 0" << std::endl;
@@ -1502,20 +1498,18 @@ uint32 ZoneDatabase::AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id) {
 	return zone_id;
 }
 uint32 ZoneDatabase::NewGraveyardRecord(uint32 graveyard_zoneid, float graveyard_x, float graveyard_y, float graveyard_z, float graveyard_heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256];
-	char* end = query;
+	std::string errbuf;
+	std::string query;
 	uint32 affected_rows = 0;
 	uint32 new_graveyard_id = 0;
 
-	end += sprintf(end,"INSERT INTO graveyard SET zone_id=%u, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f", graveyard_zoneid, graveyard_x, graveyard_y, graveyard_z, graveyard_heading);
+	StringFormat(query, "INSERT INTO graveyard SET zone_id=%u, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f", 
+						graveyard_zoneid, graveyard_x, graveyard_y, graveyard_z, graveyard_heading);
 
-	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows, &new_graveyard_id)) {
-		safe_delete_array(query);
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows, &new_graveyard_id)) {
 		std::cerr << "Error1 in NewGraveyardRecord query " << errbuf << std::endl;
 		return 0;
 	}
-	safe_delete_array(query);
 
 	if (affected_rows == 0) {
 		std::cerr << "Error2 in NewGraveyardRecord query: affected_rows = 0" << std::endl;
@@ -1529,21 +1523,22 @@ uint32 ZoneDatabase::NewGraveyardRecord(uint32 graveyard_zoneid, float graveyard
 
 	return new_graveyard_id;
 }
+
 uint32 ZoneDatabase::GraveyardPlayerCorpse(uint32 dbid, uint32 zoneid, uint16 instanceid, float x, float y, float z, float heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256];
-	char* end = query;
+	std::string errbuf;
+	std::string query;
 	uint32 affected_rows = 0;
 
 	// We probably don't want a graveyard located in an instance.
-	end += sprintf(end,"Update player_corpses SET zoneid=%u, instanceid=0, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f, WasAtGraveyard=1 WHERE id=%d", zoneid, x, y, z, heading, dbid);
+	StringFormat(query,"Update player_corpses SET zoneid=%u, instanceid=0, "
+						"x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f, "
+						"WasAtGraveyard=1 WHERE id=%d", 
+						zoneid, x, y, z, heading, dbid);
 
-	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		std::cerr << "Error1 in GraveyardPlayerCorpse query " << errbuf << std::endl;
 		return 0;
 	}
-	safe_delete_array(query);
 
 	if (affected_rows == 0) {
 		std::cerr << "Error2 in GraveyardPlayerCorpse query: affected_rows = 0" << std::endl;
@@ -1551,72 +1546,85 @@ uint32 ZoneDatabase::GraveyardPlayerCorpse(uint32 dbid, uint32 zoneid, uint16 in
 	}
 	return dbid;
 }
+
 uint32 ZoneDatabase::UpdatePlayerCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading, bool rezzed) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256+(datasize*2)];
-	char* end = query;
+	std::string errbuf;
+	std::string query;
+	std::string dataSection;
+	std::string endOfQuery;
 	uint32 affected_rows = 0;
 
-	end += sprintf(end, "Update player_corpses SET data=");
-	*end++ = '\'';
-	end += DoEscapeString(end, (char*)data, datasize);
-	*end++ = '\'';
-	end += sprintf(end,", charname='%s', zoneid=%u, instanceid=%u, charid=%d, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f WHERE id=%d", charname, zoneid, instanceid, charid, x, y, z, heading, dbid);
+	query = "Update player_corpses SET data= \'";
+	
+	DoEscapeString(dataSection, (char*)data, datasize);
+	
+	query.append(dataSection);
 
-	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
+	StringFormat(endOfQuery,"\', charname='%s', zoneid=%u, instanceid=%u, "
+							"charid=%d, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f "
+							"WHERE id=%d", 
+							charname, zoneid, instanceid, charid, 
+							x, y, z, heading, dbid);
+							
+	query.append(endOfQuery);
+	
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 		std::cerr << "Error1 in UpdatePlayerCorpse query " << errbuf << std::endl;
 		return 0;
 	}
-	safe_delete_array(query);
 
 	if (affected_rows == 0) {
 		std::cerr << "Error2 in UpdatePlayerCorpse query: affected_rows = 0" << std::endl;
 		return 0;
 	}
 	if(rezzed){
-		if (!RunQuery(query, MakeAnyLenString(&query, "update player_corpses set rezzed = 1 WHERE id=%d",dbid), errbuf)) {
+		
+		StringFormat(query,"update player_corpses set rezzed = 1 WHERE id=%d",dbid);
+		
+		if (!RunQuery(query, &errbuf)) {
 			std::cerr << "Error in UpdatePlayerCorpse/Rezzed query: " << errbuf << std::endl;
 		}
-		safe_delete_array(query);
 	}
 	return dbid;
 }
 
 void ZoneDatabase::MarkCorpseAsRezzed(uint32 dbid)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string errbuf;
+	std::string query;
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "UPDATE player_corpses SET rezzed = 1 WHERE id = %i", dbid), errbuf))
+	StringFormat(query,"UPDATE player_corpses SET rezzed = 1 WHERE id = %i", dbid);
+
+	if(!database.RunQuery(query, &errbuf))
 	{
-		LogFile->write(EQEMuLog::Error, "MarkCorpseAsRezzed failed: %s, %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "MarkCorpseAsRezzed failed: %s, %s", query.c_str(), errbuf.c_str());
 	}
-	safe_delete_array(query);
 }
 
 uint32 ZoneDatabase::CreatePlayerCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256+(datasize*2)];
-	char* end = query;
-	//MYSQL_RES *result;
-	//MYSQL_ROW row;
+	std::string errbuf;
+	std::string dataSection;
 	uint32 affected_rows = 0;
 	uint32 last_insert_id = 0;
 
-	end += sprintf(end, "Insert into player_corpses SET data=");
-	*end++ = '\'';
-	end += DoEscapeString(end, (char*)data, datasize);
-	*end++ = '\'';
-	end += sprintf(end,", charname='%s', zoneid=%u, instanceid=%u, charid=%d, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f, timeofdeath=Now(), IsBurried=0", charname, zoneid, instanceid, charid, x, y, z, heading);
+	std::string endOfQuery;
+	std::string query = "Insert into player_corpses SET data= \'";
+	
+	DoEscapeString(dataSection, (char*)data, datasize);
+	
+	query.append(dataSection);
 
-	if (!RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows, &last_insert_id)) {
-		safe_delete_array(query);
+	StringFormat(endOfQuery,"\', charname='%s', zoneid=%u, instanceid=%u, "
+							"charid=%d, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f, "
+							"timeofdeath=Now(), IsBurried=0", 
+							charname, zoneid, instanceid, charid, x, y, z, heading);
+	query.append(endOfQuery);
+				
+	if (!RunQuery(query, &errbuf, nullptr, &affected_rows, &last_insert_id)) {
 		std::cerr << "Error1 in CreatePlayerCorpse query " << errbuf << std::endl;
 		return 0;
 	}
-	safe_delete_array(query);
-
+	
 	if (affected_rows == 0) {
 		std::cerr << "Error2 in CreatePlayerCorpse query: affected_rows = 0" << std::endl;
 		return 0;
@@ -1631,9 +1639,9 @@ uint32 ZoneDatabase::CreatePlayerCorpse(uint32 charid, const char* charname, uin
 }
 
 bool ZoneDatabase::CreatePlayerCorpseBackup(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256+(datasize*2)];
-	char* end = query;
+	std::string errbuf;
+	std::string query;
+	std::string dataSection;
 	uint32 affected_rows = 0;
 	uint32 last_insert_id = 0;
 	bool result = false;
@@ -1641,13 +1649,24 @@ bool ZoneDatabase::CreatePlayerCorpseBackup(uint32 dbid, uint32 charid, const ch
 
 	if (dbid != 0) {
 		if(RuleB(Character, LeaveCorpses) == true && dbpcs->level >= RuleI(Character, DeathItemLossLevel)){
-			end += sprintf(end, "Insert into player_corpses_backup SET data=");
-			*end++ = '\'';
-			end += DoEscapeString(end, (char*)data, datasize);
-			*end++ = '\'';
-			end += sprintf(end,", charname='%s', zoneid=%u, instanceid=%u, charid=%d, x=%1.1f, y=%1.1f, z=%1.1f, heading=%1.1f, timeofdeath=Now(), IsBurried=0, id=%u", charname, zoneid, instanceid, charid, x, y, z, heading, dbid);
+			
+			query = "Insert into player_corpses_backup SET data=\'";
+			
+			DoEscapeString(dataSection, (char*)data, datasize);
+			
+			query.append(dataSection);
+			
+			std::string endOfQuery;
+			
+			StringFormat(endOfQuery, "\', charname='%s', zoneid=%u, instanceid=%u, "
+								"charid=%d, x=%1.1f, y=%1.1f, z=%1.1f, "
+								"heading=%1.1f, timeofdeath=Now(), IsBurried=0, id=%u", 
+								charname, zoneid, instanceid, charid, 
+								x, y, z, heading, dbid);
+								
+			query.append(endOfQuery);
 
-			if (RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
+			if (RunQuery(query, &errbuf, nullptr, &affected_rows)) {
 				if (affected_rows == 1)
 					result = true;
 				else
@@ -1656,7 +1675,6 @@ bool ZoneDatabase::CreatePlayerCorpseBackup(uint32 dbid, uint32 charid, const ch
 			else
 				std::cerr << "Error in CreatePlayerCorpseBackup query " << errbuf << std::endl;
 		}
-		safe_delete_array(query);
 	}
 	else {
 		std::cerr << "Error in CreatePlayerCorpseBackup: dbid = 0" << std::endl;
@@ -1665,13 +1683,16 @@ bool ZoneDatabase::CreatePlayerCorpseBackup(uint32 dbid, uint32 charid, const ch
 }
 
 uint32 ZoneDatabase::GetPlayerBurriedCorpseCount(uint32 char_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 CorpseCount = 0;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "select count(*) from player_corpses where charid = '%u' and IsBurried = 1", char_id), errbuf, &result)) {
+	StringFormat(query,"select count(*) from player_corpses "
+						"where charid = '%u' and IsBurried = 1", char_id);
+
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		CorpseCount = atoi(row[0]);
 		mysql_free_result(result);
@@ -1680,19 +1701,19 @@ uint32 ZoneDatabase::GetPlayerBurriedCorpseCount(uint32 char_id) {
 		std::cerr << "Error in GetPlayerBurriedCorpseCount query '" << query << "' " << errbuf << std::endl;
 	}
 
-	safe_delete_array(query);
-
 	return CorpseCount;
 }
 
 uint32 ZoneDatabase::GetPlayerCorpseCount(uint32 char_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 CorpseCount = 0;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "select count(*) from player_corpses where charid = '%u'", char_id), errbuf, &result)) {
+	StringFormat(query,"select count(*) from player_corpses where charid = '%u'", char_id);
+
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		CorpseCount = atoi(row[0]);
 		mysql_free_result(result);
@@ -1701,19 +1722,19 @@ uint32 ZoneDatabase::GetPlayerCorpseCount(uint32 char_id) {
 		std::cerr << "Error in GetPlayerCorpseCount query '" << query << "' " << errbuf << std::endl;
 	}
 
-	safe_delete_array(query);
-
 	return CorpseCount;
 }
 
 uint32 ZoneDatabase::GetPlayerCorpseID(uint32 char_id, uint8 corpse) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 id = 0;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "select id from player_corpses where charid = '%u'", char_id), errbuf, &result)) {
+	StringFormat(query,"select id from player_corpses where charid = '%u'", char_id);
+
+	if (RunQuery(query, &errbuf, &result)) {
 		for (int i=0; i<corpse;i++) {
 			row = mysql_fetch_row(result);
 			id = (uint32)atoi(row[0]);
@@ -1723,8 +1744,6 @@ uint32 ZoneDatabase::GetPlayerCorpseID(uint32 char_id, uint8 corpse) {
 	else {
 		std::cerr << "Error in GetPlayerCorpseID query '" << query << "' " << errbuf << std::endl;
 	}
-
-	safe_delete_array(query);
 
 	return id;
 }
@@ -1741,14 +1760,18 @@ uint32 ZoneDatabase::GetPlayerCorpseItemAt(uint32 corpse_id, uint16 slotid) {
 }
 
 Corpse* ZoneDatabase::SummonBurriedPlayerCorpse(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	Corpse* NewCorpse = 0;
 	unsigned long* lengths;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, charname, data, timeofdeath, rezzed FROM player_corpses WHERE charid='%u' AND IsBurried=1 ORDER BY timeofdeath LIMIT 1", char_id), errbuf, &result)) {
+	StringFormat(query,"SELECT id, charname, data, timeofdeath, rezzed "
+						"FROM player_corpses WHERE charid='%u' AND "
+						"IsBurried=1 ORDER BY timeofdeath LIMIT 1", char_id);
+
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		lengths = mysql_fetch_lengths(result);
 		if(row) {
@@ -1770,31 +1793,33 @@ Corpse* ZoneDatabase::SummonBurriedPlayerCorpse(uint32 char_id, uint32 dest_zone
 		std::cerr << "Error in SummonBurriedPlayerCorpse query '" << query << "' " << errbuf << std::endl;
 	}
 
-	safe_delete_array(query);
-
 	return NewCorpse;
 }
 
 bool ZoneDatabase::SummonAllPlayerCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid,
 					float dest_x, float dest_y, float dest_z, float dest_heading)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	Corpse* NewCorpse = 0;
 	int CorpseCount = 0;
 	unsigned long* lengths;
 
-	if(!RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET zoneid = %i, instanceid = %i, x = %f, y = %f, z = %f, "
-							"heading = %f, IsBurried = 0, WasAtGraveyard = 0 WHERE charid = %i",
-							dest_zoneid, dest_instanceid, dest_x, dest_y, dest_z, dest_heading, char_id), errbuf))
-		LogFile->write(EQEMuLog::Error, "Error moving corpses, Query = %s, Error = %s\n", query, errbuf);
+	StringFormat(query,"UPDATE player_corpses SET zoneid = %i, instanceid = %i, x = %f, y = %f, z = %f, "
+						"heading = %f, IsBurried = 0, WasAtGraveyard = 0 WHERE charid = %i",
+						dest_zoneid, dest_instanceid, dest_x, dest_y, dest_z, dest_heading, char_id);
 
-	safe_delete_array(query);
+	if(!RunQuery(query, &errbuf))
+		LogFile->write(EQEMuLog::Error, "Error moving corpses, Query = %s, Error = %s\n", query.c_str(), errbuf.c_str());
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, charname, data, timeofdeath, rezzed FROM player_corpses WHERE charid='%u'"
-							"ORDER BY timeofdeath", char_id), errbuf, &result))
+	StringFormat(query,"SELECT id, charname, data, timeofdeath, rezzed "
+						"FROM player_corpses WHERE charid='%u'"
+						"ORDER BY timeofdeath", 
+						char_id);
+
+	if (RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -1814,23 +1839,24 @@ bool ZoneDatabase::SummonAllPlayerCorpses(uint32 char_id, uint32 dest_zoneid, ui
 		mysql_free_result(result);
 	}
 	else
-		LogFile->write(EQEMuLog::Error, "Error in SummonAllPlayerCorpses Query = %s, Error = %s\n", query, errbuf);
-
-	safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in SummonAllPlayerCorpses Query = %s, Error = %s\n", query.c_str(), errbuf.c_str());
 
 	return (CorpseCount > 0);
 }
 
 bool ZoneDatabase::UnburyPlayerCorpse(uint32 dbid, uint32 new_zoneid, uint16 new_instanceid, float new_x, float new_y, float new_z, float new_heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = new char[256];
-	char* end = query;
+	std::string errbuf;
+	std::string query;
 	uint32 affected_rows = 0;
 	bool Result = false;
 
-	end += sprintf(end, "UPDATE player_corpses SET IsBurried=0, zoneid=%u, instanceid=%u, x=%f, y=%f, z=%f, heading=%f, timeofdeath=Now(), WasAtGraveyard=0 WHERE id=%u", new_zoneid, new_instanceid, new_x, new_y, new_z, new_heading, dbid);
+	StringFormat(query,"UPDATE player_corpses SET IsBurried=0, zoneid=%u, "
+						"instanceid=%u, x=%f, y=%f, z=%f, heading=%f, "
+						"timeofdeath=Now(), WasAtGraveyard=0 WHERE id=%u", 
+						new_zoneid, new_instanceid, new_x, new_y, new_z, 
+						new_heading, dbid);
 
-	if (RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows)) {
+	if (RunQuery(query, &errbuf, 0, &affected_rows)) {
 		if (affected_rows == 1)
 			Result = true;
 		else
@@ -1839,26 +1865,29 @@ bool ZoneDatabase::UnburyPlayerCorpse(uint32 dbid, uint32 new_zoneid, uint16 new
 	else
 		std::cerr << "Error1 in UnburyPlayerCorpse query " << errbuf << std::endl;
 
-	safe_delete_array(query);
-
 	return Result;
 }
 
 Corpse* ZoneDatabase::LoadPlayerCorpse(uint32 player_corpse_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	Corpse* NewCorpse = 0;
 	unsigned long* lengths;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, charid, charname, x, y, z, heading, data, timeofdeath, rezzed, WasAtGraveyard FROM player_corpses WHERE id='%u'", player_corpse_id), errbuf, &result)) {
+	StringFormat(query,"SELECT id, charid, charname, x, y, z, "
+						"heading, data, timeofdeath, rezzed, WasAtGraveyard "
+						"FROM player_corpses WHERE id='%u'", 
+						player_corpse_id);
+
+	if (RunQuery(query, &errbuf, &result)) {
 		row = mysql_fetch_row(result);
 		lengths = mysql_fetch_lengths(result);
 		if(row && lengths)
 		{
-		NewCorpse = Corpse::LoadFromDBData(atoi(row[0]), atoi(row[1]), row[2], (uchar*) row[7], lengths[7], atof(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), row[8],atoi(row[9])==1, atoi(row[10]));
-		entity_list.AddCorpse(NewCorpse);
+			NewCorpse = Corpse::LoadFromDBData(atoi(row[0]), atoi(row[1]), row[2], (uchar*) row[7], lengths[7], atof(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), row[8],atoi(row[9])==1, atoi(row[10]));
+			entity_list.AddCorpse(NewCorpse);
 		}
 		mysql_free_result(result);
 	}
@@ -1867,27 +1896,35 @@ Corpse* ZoneDatabase::LoadPlayerCorpse(uint32 player_corpse_id) {
 		std::cerr << "Note that if your missing the 'rezzed' field you can add it with:\nALTER TABLE `player_corpses` ADD `rezzed` TINYINT UNSIGNED DEFAULT \"0\";\n";
 	}
 
-	safe_delete_array(query);
-
 	return NewCorpse;
 }
 
 bool ZoneDatabase::LoadPlayerCorpses(uint32 iZoneID, uint16 iInstanceID) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 query_length = 0;
 
 	unsigned long* lengths;
 
-	if(!RuleB(Zone, EnableShadowrest))
-		query_length = MakeAnyLenString(&query, "SELECT id, charid, charname, x, y, z, heading, data, timeofdeath, rezzed, WasAtGraveyard FROM player_corpses WHERE zoneid='%u' AND instanceid='%u'", iZoneID, iInstanceID);
-	else
-		query_length = MakeAnyLenString(&query, "SELECT id, charid, charname, x, y, z, heading, data, timeofdeath, rezzed, 0 FROM player_corpses WHERE zoneid='%u' AND instanceid='%u' AND IsBurried=0", iZoneID, iInstanceID);
+	if(!RuleB(Zone, EnableShadowrest)) {
+		
+		StringFormat(query, "SELECT id, charid, charname, x, y, z, "
+							"heading, data, timeofdeath, rezzed, "
+							"WasAtGraveyard FROM player_corpses WHERE "
+							"zoneid='%u' AND instanceid='%u'", 
+							iZoneID, iInstanceID);
+	}
+	else {
+		StringFormat(query, "SELECT id, charid, charname, x, y, z, "
+							"heading, data, timeofdeath, rezzed, 0 "
+							"FROM player_corpses WHERE zoneid='%u' "
+							"AND instanceid='%u' AND IsBurried=0", 
+							iZoneID, iInstanceID);
+	}
 
-	if (RunQuery(query, query_length, errbuf, &result)) {
-		safe_delete_array(query);
+	if (RunQuery(query, &errbuf, &result)) {
 		while ((row = mysql_fetch_row(result))) {
 			lengths = mysql_fetch_lengths(result);
 			entity_list.AddCorpse(Corpse::LoadFromDBData(atoi(row[0]), atoi(row[1]), row[2], (uchar*) row[7], lengths[7], atof(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), row[8],atoi(row[9])==1, atoi(row[10])));
@@ -1897,7 +1934,6 @@ bool ZoneDatabase::LoadPlayerCorpses(uint32 iZoneID, uint16 iInstanceID) {
 	else {
 		std::cerr << "Error in LoadPlayerCorpses query '" << query << "' " << errbuf << std::endl;
 		std::cerr << "Note that if your missing the 'rezzed' field you can add it with:\nALTER TABLE `player_corpses` ADD `rezzed` TINYINT UNSIGNED DEFAULT \"0\";\n";
-		safe_delete_array(query);
 		return false;
 	}
 
@@ -1905,69 +1941,69 @@ bool ZoneDatabase::LoadPlayerCorpses(uint32 iZoneID, uint16 iInstanceID) {
 }
 
 uint32 ZoneDatabase::GetFirstCorpseID(uint32 char_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 CorpseID = 0;
 
-	MakeAnyLenString(&query, "SELECT id FROM player_corpses WHERE charid='%u' AND IsBurried=0 ORDER BY timeofdeath LIMIT 1", char_id);
-		if (RunQuery(query, strlen(query), errbuf, &result)) {
-			if (mysql_num_rows(result)!= 0){
-				row = mysql_fetch_row(result);
-				CorpseID = atoi(row[0]);
-				mysql_free_result(result);
-	}
+	StringFormat(query, "SELECT id FROM player_corpses WHERE charid='%u' "
+						"AND IsBurried=0 ORDER BY timeofdeath LIMIT 1", 
+						char_id);
+						
+	if (RunQuery(query, &errbuf, &result)) {
+		if (mysql_num_rows(result)!= 0) {
+			row = mysql_fetch_row(result);
+			CorpseID = atoi(row[0]);
+			mysql_free_result(result);
 		}
+	}
 	else {
 		std::cerr << "Error in GetFirstCorpseID query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
-
-	safe_delete_array(query);
 	return CorpseID;
 }
 
 bool ZoneDatabase::BuryPlayerCorpse(uint32 dbid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried = 1 WHERE id=%d", dbid), errbuf)) {
+	StringFormat(query,"UPDATE player_corpses SET IsBurried = 1 WHERE id=%d", dbid);
+	
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in BuryPlayerCorpse query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
 
-	safe_delete_array(query);
 	return true;
 }
 
 bool ZoneDatabase::BuryAllPlayerCorpses(uint32 charid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried = 1 WHERE charid=%d", charid), errbuf)) {
+	StringFormat(query,"UPDATE player_corpses SET IsBurried = 1 WHERE charid=%d", charid);
+
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in BuryPlayerCorpse query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
 
-	safe_delete_array(query);
 	return true;
 }
 
 bool ZoneDatabase::DeletePlayerCorpse(uint32 dbid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "Delete from player_corpses where id=%d", dbid), errbuf)) {
+	StringFormat(query,"Delete from player_corpses where id=%d", dbid);
+
+	if (!RunQuery(query, &errbuf)) {
 		std::cerr << "Error in DeletePlayerCorpse query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
 
-	safe_delete_array(query);
 	return true;
 }
 
@@ -2021,12 +2057,16 @@ void Corpse::AddLooter(Mob* who)
 void Corpse::LoadPlayerCorpseDecayTime(uint32 dbid){
 	if(!dbid)
 		return;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) FROM player_corpses WHERE id=%d and not timeofdeath=0", dbid), errbuf, &result)) {
-		safe_delete_array(query);
+	
+	StringFormat(query,"SELECT (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) "
+						"FROM player_corpses WHERE id=%d and not timeofdeath=0", 
+						dbid);
+	
+	if (database.RunQuery(query, &errbuf, &result)) {
 		while ((row = mysql_fetch_row(result))) {
 			if(atoi(row[0]) > 0 && RuleI(Character, CorpseDecayTimeMS) > (atoi(row[0]) * 1000)) {
 				corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTimeMS) - (atoi(row[0]) * 1000));
@@ -2054,8 +2094,6 @@ void Corpse::LoadPlayerCorpseDecayTime(uint32 dbid){
 		}
 		mysql_free_result(result);
 	}
-	else
-		safe_delete_array(query);
 }
 
 /*

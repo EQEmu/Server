@@ -266,16 +266,21 @@ Mob* EntityList::GetTrapTrigger(Trap* trap) {
 
 //todo: rewrite this to not need direct access to trap members.
 bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	//	int char_num = 0;
 	unsigned long* lengths;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id,x,y,z,effect,effectvalue,effectvalue2,skill,maxzdiff,radius,chance,message,respawn_time,respawn_var,level FROM traps WHERE zone='%s' AND version=%u", zonename, version), errbuf, &result)) {
-		safe_delete_array(query);
+	StringFormat(query, "SELECT id, x, y, z, effect, effectvalue, "
+						"effectvalue2, skill, maxzdiff, radius, "
+						"chance, message, respawn_time, respawn_var, "
+						"level FROM traps WHERE zone='%s' "
+						"AND version=%u", 
+						zonename, version);
+						
+	if (RunQuery(query, &errbuf, &result)) {
 		while ((row = mysql_fetch_row(result)))
 		{
 			lengths = mysql_fetch_lengths(result);
@@ -301,8 +306,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 		mysql_free_result(result);
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in LoadTraps query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in LoadTraps query '%s': %s", query.c_str(), errbuf.c_str());
 		return false;
 	}
 

@@ -374,12 +374,14 @@ void Adventure::MoveCorpsesToGraveyard()
 
 	std::list<uint32> dbid_list;
 	std::list<uint32> charid_list;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT id, charid FROM player_corpses WHERE instanceid=%d", GetInstanceID()), errbuf, &result))
+	StringFormat(query,"SELECT id, charid FROM player_corpses WHERE instanceid=%d", GetInstanceID());
+
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -387,12 +389,10 @@ void Adventure::MoveCorpsesToGraveyard()
 			charid_list.push_back(atoi(row[1]));
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), errbuf.c_str());
 	}
 
 	std::list<uint32>::iterator iter = dbid_list.begin();
@@ -401,15 +401,13 @@ void Adventure::MoveCorpsesToGraveyard()
 		float x = GetTemplate()->graveyard_x + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float y = GetTemplate()->graveyard_y + MakeRandomFloat(-GetTemplate()->graveyard_radius, GetTemplate()->graveyard_radius);
 		float z = GetTemplate()->graveyard_z;
-		if(database.RunQuery(query,MakeAnyLenString(&query, "UPDATE player_corpses SET zoneid=%d, instanceid=0, x=%f, y=%f, z=%f WHERE instanceid=%d",
-			GetTemplate()->graveyard_zone_id, x, y, z, GetInstanceID()), errbuf))
+		
+		StringFormat(query,"UPDATE player_corpses SET zoneid=%d, instanceid=0, x=%f, y=%f, z=%f WHERE instanceid=%d",
+							GetTemplate()->graveyard_zone_id, x, y, z, GetInstanceID());
+		
+		if(!database.RunQuery(query,&errbuf))
 		{
-			safe_delete_array(query);
-		}
-		else
-		{
-			LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query, errbuf);
-			safe_delete_array(query);
+			LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query.c_str(), errbuf.c_str());
 		}
 		iter++;
 	}

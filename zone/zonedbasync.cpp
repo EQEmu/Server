@@ -15,7 +15,7 @@ void DispatchFinishedDBAsync(DBAsyncWork* dbaw) {
 /*		case DBA_b4_Main: {
 			switch (workpt.i24_1()) {
 				case DBA_i24_1_Main_LoadVariables: {
-					char errbuf[MYSQL_ERRMSG_SIZE];
+					std::string errbuf;
 					MYSQL_RES* result;
 					DBAsyncQuery* dbaq = dbaw->PopAnswer();
 					if (dbaq->GetAnswer(errbuf, result))
@@ -54,10 +54,10 @@ void DispatchFinishedDBAsync(DBAsyncWork* dbaw) {
 #define MAX_TO_DELETE	10
 #define MAX_BACKUPS		5
 bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete data
-	char errbuf[MYSQL_ERRMSG_SIZE] = "dbaq == 0";
+	std::string errbuf = "dbaq == 0";
 	MYSQL_RES* result = 0;
 	MYSQL_ROW row;
-	char* query = 0;
+	std::string query;
 	uint32 i;
 	uint8 ToDeleteIndex = 0;
 	uint32 ToDelete[MAX_TO_DELETE];
@@ -73,7 +73,7 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 	BackupAges[1] = 3600;
 
 	DBAsyncQuery* dbaq = iWork->PopAnswer();
-	if (dbaq && dbaq->GetAnswer(errbuf, &result)) {
+	if (dbaq && dbaq->GetAnswer(&errbuf, &result)) {
 		while ((row = mysql_fetch_row(result))) {
 			for (i=0; i<MAX_BACKUPS; i++) {
 				if (BackupAges[i] == 0 || (uint32)atoi(row[1]) > BackupAges[i])
@@ -90,16 +90,22 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 		}
 		if (ToDelete[0]) {
 			uint32 len = 0, size = 0;
-			AppendAnyLenString(&query, &size, &len, "Delete from character_backup where id=%u", ToDelete[0]);
+			
+			std::string toAppend;
+			
+			StringFormat(toAppend, "Delete from character_backup where id=%u", ToDelete[0]);
+			query.append(toAppend);
+			
 			for (uint8 i=1; i<ToDeleteIndex; i++) {
-				AppendAnyLenString(&query, &size, &len, " or id=%u", ToDelete[i]);
+				
+				StringFormat(toAppend, " or id=%u", ToDelete[i]);
+				query.append(toAppend);
+				
 			}
-			if (!database.RunQuery(query, len, errbuf)) {
-				LogFile->write(EQEMuLog::Error, "Error in DBAsyncCB_CharacterBackup query2 '%s' %s", query, errbuf);
-				safe_delete_array(query);
+			if (!database.RunQuery(query, &errbuf)) {
+				LogFile->write(EQEMuLog::Error, "Error in DBAsyncCB_CharacterBackup query2 '%s' %s", query.c_str(), errbuf.c_str());
 				return true;
 			}
-			safe_delete_array(query);
 		}
 		bool needtoinsert = false;
 		for (i=0; i<MAX_BACKUPS; i++) {
@@ -107,20 +113,20 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 				needtoinsert = true;
 		}
 		if (needtoinsert) {
-			if (!database.RunQuery(query, MakeAnyLenString(&query,
-				"Insert Delayed into character_backup (charid, account_id, name, profile, level, class, x, y, z, zoneid) "
-				"select id, account_id, name, profile, level, class, x, y, z, zoneid "
-				"from character_ where id=%u", iWork->WPT()), errbuf)) {
+			
+			StringFormat(query, "Insert Delayed into character_backup "
+								"(charid, account_id, name, profile, level, class, x, y, z, zoneid) "
+								"select id, account_id, name, profile, level, class, x, y, z, zoneid "
+								"from character_ where id=%u", iWork->WPT());
+			
+			if (!database.RunQuery(query, &errbuf)) {
 				std::cout << "Error in DBAsyncCB_CharacterBackup query3 '" << query << "' " << errbuf << std::endl;
-				safe_delete_array(query);
 				return true;
 			}
-			safe_delete_array(query);
 		}
 	}
 	else {
 //		cout << "Error in DBAsyncCB_CharacterBackup query1 '" << query << "' " << errbuf << endl;
-		safe_delete_array(query);
 		return true;
 	}
 	return true;

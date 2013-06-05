@@ -1235,13 +1235,10 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 }
 
 /* Inserts global variable into quest_globals table */
-int QuestManager::InsertQuestGlobal(
-									int charid, int npcid, int zoneid,
-									const char *varname, const char *varvalue,
-									int duration)
+int QuestManager::InsertQuestGlobal(int charid, int npcid, int zoneid,const char *varname, const char *varvalue,int duration)
 {
-	char *query = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
+	std::string query;
 
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
 	std::stringstream duration_ss;
@@ -1257,15 +1254,14 @@ int QuestManager::InsertQuestGlobal(
 	//NOTE: this should be escaping the contents of arglist
 	//npcwise a malicious script can arbitrarily alter the DB
 	uint32 last_id = 0;
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
-		"VALUES (%i, %i, %i, '%s', '%s', %s)",
-		charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str()
-		), errbuf, nullptr, nullptr, &last_id))
-	{
+	
+	StringFormat(query, "REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
+						"VALUES (%i, %i, %i, '%s', '%s', %s)",
+						charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str());
+	
+	if (!database.RunQuery(query, &errbuf, nullptr, nullptr, &last_id)) {
 		std::cerr << "setglobal error inserting " << varname << " : " << errbuf << std::endl;
 	}
-	safe_delete_array(query);
 
 	if(zone)
 	{
@@ -1329,8 +1325,8 @@ void QuestManager::targlobal(const char *varname, const char *value, const char 
 
 void QuestManager::delglobal(const char *varname) {
 	// delglobal(varname)
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	int qgZoneid=zone->GetZoneID();
 	int qgCharid=0;
 	int qgNpcid=owner->GetNPCTypeID();
@@ -1343,15 +1339,17 @@ void QuestManager::delglobal(const char *varname) {
 	{
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
 	}
-	if (!database.RunQuery(query,
-		MakeAnyLenString(&query,
-		"DELETE FROM quest_globals WHERE name='%s'"
-		" && (npcid=0 || npcid=%i) && (charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
-		varname,qgNpcid,qgCharid,qgZoneid),errbuf))
+	
+	StringFormat(query,"DELETE FROM quest_globals WHERE name='%s' && "
+						"(npcid=0 || npcid=%i) && "
+						"(charid=0 || charid=%i) "
+						"&& (zoneid=%i || zoneid=0)",
+						varname,qgNpcid,qgCharid,qgZoneid);
+	
+	if (!database.RunQuery(query, &errbuf))
 	{
 		std::cerr << "delglobal error deleting " << varname << " : " << errbuf << std::endl;
 	}
-	safe_delete_array(query);
 
 	if(zone)
 	{
@@ -1562,8 +1560,8 @@ void QuestManager::showgrid(int grid) {
 	if(initiator == nullptr)
 		return;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
@@ -1576,7 +1574,12 @@ void QuestManager::showgrid(int grid) {
 	pts.push_back(pt);
 
 	// Retrieve all waypoints for this grid
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `x`,`y`,`z` FROM grid_entries WHERE `gridid`=%i AND `zoneid`=%i ORDER BY `number`",grid,zone->GetZoneID()),errbuf,&result))
+	StringFormat(query,"SELECT `x`,`y`,`z` FROM "
+						"grid_entries WHERE `gridid`=%i "
+						"AND `zoneid`=%i ORDER BY `number`",
+						grid,zone->GetZoneID());
+	
+	if(database.RunQuery(query, &errbuf,&result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -1591,10 +1594,9 @@ void QuestManager::showgrid(int grid) {
 	}
 	else	// DB query error!
 	{
-		LogFile->write(EQEMuLog::Quest, "Error loading grid %d for showgrid(): %s", grid, errbuf);
+		LogFile->write(EQEMuLog::Quest, "Error loading grid %d for showgrid(): %s", grid, errbuf.c_str());
 		return;
 	}
-	safe_delete_array(query);
 }
 
 //displays an in game path based on path finding.
@@ -2136,11 +2138,14 @@ void QuestManager::clearspawntimers() {
 		iterator.Reset();
 		while (iterator.MoreElements())
 		{
-			char errbuf[MYSQL_ERRMSG_SIZE];
-			char *query = 0;
-			database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM respawn_times WHERE id=%lu AND "
-				"instance_id=%lu",(unsigned long)iterator.GetData()->GetID(), (unsigned long)zone->GetInstanceID()), errbuf);
-			safe_delete_array(query);
+			std::string errbuf;
+			std::string query;
+			
+			StringFormat(query,"DELETE FROM respawn_times WHERE id=%lu AND instance_id=%lu",
+								(unsigned long)iterator.GetData()->GetID(), 
+								(unsigned long)zone->GetInstanceID());
+			
+			database.RunQuery(query, &errbuf);
 			iterator.Advance();
 		}
 	}
@@ -2472,18 +2477,20 @@ void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 const char* QuestManager::saylink(char* Phrase, bool silent, char* LinkName) {
 
 	const char *ERR_MYSQLERROR = "Error in saylink phrase queries";
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int sayid = 0;
 
 	int sz = strlen(Phrase);
-	char *escaped_string = new char[sz * 2];
+	std::string escaped_string;
 	database.DoEscapeString(escaped_string, Phrase, sz);
 
 	// Query for an existing phrase and id in the saylink table
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string),errbuf,&result))
+	StringFormat(query,"SELECT `id` FROM `saylink` WHERE `phrase` = '%s'", escaped_string.c_str());
+	
+	if(database.RunQuery(query, &errbuf,&result))
 	{
 		if (mysql_num_rows(result) >= 1)
 		{
@@ -2495,12 +2502,13 @@ const char* QuestManager::saylink(char* Phrase, bool silent, char* LinkName) {
 		}
 		else // Add a new saylink entry to the database and query it again for the new sayid number
 		{
-			safe_delete_array(query);
-
-			database.RunQuery(query,MakeAnyLenString(&query,"INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string),errbuf);
-			safe_delete_array(query);
-
-			if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `id` FROM saylink WHERE `phrase` = '%s'", escaped_string),errbuf,&result))
+			StringFormat(query,"INSERT INTO `saylink` (`phrase`) VALUES ('%s')", escaped_string.c_str());
+			
+			database.RunQuery(query, &errbuf);
+			
+			StringFormat(query,"SELECT `id` FROM saylink WHERE `phrase` = '%s'", escaped_string.c_str());
+			
+			if(database.RunQuery(query, &errbuf,&result))
 			{
 				if (mysql_num_rows(result) >= 1)
 				{
@@ -2513,21 +2521,18 @@ const char* QuestManager::saylink(char* Phrase, bool silent, char* LinkName) {
 			}
 			else
 			{
-				LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf);
+				LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR, errbuf.c_str());
 			}
-			safe_delete_array(query);
 		}
 	}
-	safe_delete_array(query);
-	safe_delete_array(escaped_string);
 
 	if(silent)
 		sayid = sayid + 750000;
 	else
 		sayid = sayid + 500000;
 
-		//Create the say link as an item link hash
-		char linktext[250];
+	//Create the say link as an item link hash
+	char linktext[250];
 
 	if(initiator)
 	{

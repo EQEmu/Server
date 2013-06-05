@@ -981,8 +981,8 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 }
 
 uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 tmp = 0;
@@ -996,7 +996,11 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			{
 				// Set an npc_type ID within the standard range for the current zone if possible (zone_id * 1000)
 				int starting_npc_id = c->GetZoneID() * 1000;
-				if (RunQuery(query, MakeAnyLenString(&query, "SELECT MAX(id) FROM npc_types WHERE id >= %i AND id < %i", starting_npc_id, (starting_npc_id + 1000)), errbuf, &result)) {
+				
+				StringFormat(query, "SELECT MAX(id) FROM npc_types WHERE id >= %i AND id < %i", 
+									starting_npc_id, (starting_npc_id + 1000));
+				
+				if (RunQuery(query, &errbuf, &result)) {
 					row = mysql_fetch_row(result);
 					if(row)
 					{
@@ -1016,66 +1020,105 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 						}
 					}
 
-					safe_delete_array(query);
 					mysql_free_result(result);
 				}
 			}
-			char tmpstr[64];
+			
+			char *tmpstr;
+			
 			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->GetName(), sizeof(tmpstr)));
 			if (npc_type_id)
 			{
-				if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (id, name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(%i,\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
-						LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
-					safe_delete(query);
+				StringFormat(query,"INSERT INTO npc_types "
+									"(id, name, level, race, class, hp, gender, "
+									"texture, helmtexture, size, loottable_id, "
+									"merchant_id, face, runspeed, prim_melee_type, sec_melee_type) "
+									"values(%i,\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", 
+									npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), 
+									spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), 
+									spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), 
+									spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 
+									28, 28);
+				
+				if (!RunQuery(query, &errbuf, nullptr, nullptr, &npc_type_id)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 					return false;
 				}
 			}
 			else
 			{
-				if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
-						LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
-					safe_delete(query);
+				StringFormat(query, "INSERT INTO npc_types "
+									"(name, level, race, class, hp, gender, texture, "
+									"helmtexture, size, loottable_id, merchant_id, face, "
+									"runspeed, prim_melee_type, sec_melee_type) "
+									"values(\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", 
+									tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), 
+									spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), 
+									spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), 
+									spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
+									
+				if (!RunQuery(query, &errbuf, 0, 0, &npc_type_id)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 					return false;
 				}
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			snprintf(tmpstr, sizeof(tmpstr), "%s-%s", zone, spawn->GetName());
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (id, name) values(%i, '%s')", tmp, tmpstr), errbuf, 0, 0, &spawngroupid)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
-				safe_delete(query);
+			if(c) 
+				c->LogSQL(query.c_str());
+			
+			std::string spawnIDAndName;
+			StringFormat(spawnIDAndName, "%s-%s", zone, spawn->GetName());
+			
+			StringFormat(query,"INSERT INTO spawngroup (id, name) values(%i, '%s')", tmp, spawnIDAndName.c_str());
+			
+			if (!RunQuery(query, &errbuf, 0, 0, &spawngroupid)) {
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), 1200, spawn->GetHeading(), spawngroupid), errbuf, 0, 0, &tmp)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
-				safe_delete(query);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
+				
+			StringFormat(query, "INSERT INTO spawn2 "
+								"(zone, version, x, y, z, respawntime, heading, spawngroupID) "
+								"values('%s', %u, %f, %f, %f, %i, %f, %i)", 
+								zone, zone_version, spawn->GetX(), spawn->GetY(), 
+								spawn->GetZ(), 1200, spawn->GetHeading(), spawngroupid);
+				
+			if (!RunQuery(query, &errbuf, 0, 0, &tmp)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawnentry (spawngroupID, npcID, chance) values(%i, %i, %i)", spawngroupid, npc_type_id, 100), errbuf, 0)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
-				safe_delete(query);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
+			
+			StringFormat(query, "INSERT INTO spawnentry (spawngroupID, npcID, chance) values(%i, %i, %i)", 
+								spawngroupid, npc_type_id, 100);
+			
+			if (!RunQuery(query, &errbuf, 0)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
+			if(c) 
+				c->LogSQL(query.c_str());
 			return true;
 			break;
 		}
 		case 1:{ // Add new spawn group and spawn point for an existing NPC Type ID
 			tmp2 = spawn->GetNPCTypeID();
-			char tmpstr[64];
-			snprintf(tmpstr, sizeof(tmpstr), "%s%s%i", zone, spawn->GetName(),Timer::GetCurrentTime());
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (name) values('%s')", tmpstr), errbuf, 0, 0, &last_insert_id)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
-				safe_delete(query);
+			std::string zoneSpawnNameTime;
+			
+			StringFormat(zoneSpawnNameTime, "%s%s%i", zone, spawn->GetName(),Timer::GetCurrentTime());
+			
+			StringFormat(query, "INSERT INTO spawngroup (name) values('%s')", zoneSpawnNameTime.c_str());
+			
+			if (!RunQuery(query, &errbuf, 0, 0, &last_insert_id)) {
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
+			if(c) 
+				c->LogSQL(query.c_str());
+			
 
 			uint32 respawntime = 0;
 			uint32 spawnid = 0;
@@ -1085,77 +1128,114 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 				respawntime = spawn->respawn2->RespawnTimer();
 			else
 				respawntime = 1200;
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), respawntime, spawn->GetHeading(), last_insert_id), errbuf, 0, 0, &spawnid)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
-				safe_delete(query);
+			
+			StringFormat(query, "INSERT INTO spawn2 "
+								"(zone, version, x, y, z, respawntime, heading, spawngroupID) "
+								"values('%s', %u, %f, %f, %f, %i, %f, %i)", 
+								zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), 
+								respawntime, spawn->GetHeading(), last_insert_id);
+				
+			if (!RunQuery(query, &errbuf, 0, 0, &spawnid)) {
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
+			if(c) 
+				c->LogSQL(query.c_str());
+				
+			StringFormat(query,"INSERT INTO spawnentry "
+								"(spawngroupID, npcID, chance) "
+								"values(%i, %i, %i)", 
+								last_insert_id, tmp2, 100);
 
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawnentry (spawngroupID, npcID, chance) values(%i, %i, %i)", last_insert_id, tmp2, 100), errbuf, 0)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
-				safe_delete(query);
+			if (!RunQuery(query, &errbuf, 0)) {
+					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query.c_str(), errbuf.c_str());
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
+			if(c) 
+				c->LogSQL(query.c_str());
 			return spawnid;
 			break;
 		}
 		case 2: { // Update npc_type appearance and other data on targeted spawn
-			if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET name=\"%s\", level=%i, race=%i, class=%i, hp=%i, gender=%i, texture=%i, helmtexture=%i, size=%i, loottable_id=%i, merchant_id=%i, face=%i, WHERE id=%i", spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID()), errbuf, 0)) {
-				if(c) c->LogSQL(query);
-				safe_delete_array(query);
+			
+			StringFormat(query, "UPDATE npc_types SET name=\"%s\", level=%i, race=%i, "
+								"class=%i, hp=%i, gender=%i, texture=%i, helmtexture=%i, "
+								"size=%i, loottable_id=%i, merchant_id=%i, face=%i, "
+								"WHERE id=%i", 
+								spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), 
+								spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), 
+								spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), 
+								spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID());
+			
+			if (!RunQuery(query,&errbuf, 0)) {
+				if(c) 
+					c->LogSQL(query.c_str());
 				return true;
 			}
-			else {
-				safe_delete_array(query);
-				return false;
-			}
+			return false;
 			break;
 		}
 		case 3: { // delete spawn from spawning, but leave in npc_types table
-			if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id,spawngroupID from spawn2 where zone='%s' AND spawngroupID=%i", zone, spawn->GetSp2()), errbuf, &result)) {
-				safe_delete_array(query);
+			
+			StringFormat(query, "SELECT id,spawngroupID from "
+								"spawn2 where zone='%s' AND "
+								"spawngroupID=%i", 
+								zone, spawn->GetSp2());
+			
+			if (!RunQuery(query, &errbuf, &result)) {
 				return 0;
 			}
-			safe_delete_array(query);
 
 			row = mysql_fetch_row(result);
 			if (row == nullptr) return false;
 			if (row[0]) tmp = atoi(row[0]);
 			if (row[1]) tmp2 = atoi(row[1]);
-
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'", tmp), errbuf,0)) {
-				safe_delete(query);
+			
+			StringFormat(query, "DELETE FROM spawn2 WHERE id='%i'", tmp);
+			
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawngroup WHERE id='%i'", tmp2), errbuf,0)) {
-				safe_delete(query);
+			if(c) 
+				c->LogSQL(query.c_str());
+			
+			StringFormat(query, "DELETE FROM spawngroup WHERE id='%i'", tmp2);
+			
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2), errbuf,0)) {
-				safe_delete(query);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
+			
+			StringFormat(query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2);
+			
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: log message
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
+				
 			return true;
 
 
 			break;
 		}
 		case 4: { //delete spawn from DB (including npc_type)
-			if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id,spawngroupID from spawn2 where zone='%s' AND version=%u AND spawngroupID=%i", zone, zone_version, spawn->GetSp2()), errbuf, &result)) {
-				safe_delete_array(query);
+			
+			StringFormat(query,"SELECT id,spawngroupID from spawn2 "
+								"where zone='%s' AND version=%u AND "
+								"spawngroupID=%i", 
+								zone, zone_version, spawn->GetSp2());
+								
+			if (!RunQuery(query, &errbuf, &result)) {
+				// TODO: Log message
 				return(0);
 			}
-			safe_delete_array(query);
 
 			row = mysql_fetch_row(result);
 			if (row == nullptr) return false;
@@ -1163,40 +1243,64 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			if (row[1]) tmp2 = atoi(row[1]);
 			mysql_free_result(result);
 
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'", tmp), errbuf,0)) {
-				safe_delete(query);
+			StringFormat(query,"DELETE FROM spawn2 WHERE id='%i'", tmp);
+
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message.
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawngroup WHERE id='%i'", tmp2), errbuf,0)) {
-				safe_delete(query);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
+			
+			StringFormat(query, "DELETE FROM spawngroup WHERE id='%i'", tmp2);	
+			
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2), errbuf,0)) {
-				safe_delete(query);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
+				
+			StringFormat(query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2);
+			
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM npc_types WHERE id='%i'", spawn->GetNPCTypeID()), errbuf,0)) {
-				safe_delete(query);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
+				
+			StringFormat(query,"DELETE FROM npc_types WHERE id='%i'", spawn->GetNPCTypeID());
+				
+			if (!RunQuery(query, &errbuf)) {
+				// TODO: Log message
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
+				
 			return true;
 			break;
 		}
 		case 5: { // add a spawn from spawngroup
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, c->GetX(), c->GetY(), c->GetZ(), 120, c->GetHeading(), extra), errbuf, 0, 0, &tmp)) {
-				safe_delete(query);
+			
+			StringFormat(query, "INSERT INTO spawn2 "
+								"(zone, version, x, y, z, respawntime, heading, spawngroupID) "
+								"values('%s', %u, %f, %f, %f, %i, %f, %i)", 
+								zone, zone_version, c->GetX(), c->GetY(), c->GetZ(), 120, c->GetHeading(), extra);
+			
+			
+			if (!RunQuery(query, &errbuf, nullptr, nullptr, &tmp)) {
+				// TODO: Log message
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
 
 			return true;
 			break;
@@ -1204,14 +1308,32 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 		case 6: { // add npc_type
 			uint32 npc_type_id;
 			char tmpstr[64];
+			
 			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->GetName(), sizeof(tmpstr)));
-			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
-				safe_delete(query);
+			
+			StringFormat(query,"INSERT INTO npc_types "
+								"(name, level, race, class, hp, gender, "
+								"texture, helmtexture, size, loottable_id, "
+								"merchant_id, face, runspeed, prim_melee_type, "
+								"sec_melee_type) "
+								"values(\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", 
+								tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), 
+								spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), 
+								spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), 
+								spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
+			
+			
+			
+			if (!RunQuery(query, &errbuf, nullptr, nullptr, &npc_type_id)) {
+				// TODO: Log message
 				return false;
 			}
-			if(c) c->LogSQL(query);
-			safe_delete_array(query);
-			if(c) c->Message(0, "%s npc_type ID %i created successfully!", tmpstr, npc_type_id);
+			
+			if(c) 
+				c->LogSQL(query.c_str());
+				
+			if(c) 
+				c->Message(0, "%s npc_type ID %i created successfully!", tmpstr, npc_type_id);
 			return true;
 			break;
 		}

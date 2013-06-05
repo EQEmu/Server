@@ -646,18 +646,15 @@ GuildBankManager::~GuildBankManager()
 
 bool GuildBankManager::Load(uint32 GuildID)
 {
-	const char *LoadQuery = "SELECT `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `whofor` from `guild_bank` "
-				"WHERE `guildid` = %i";
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-
-	char* query = 0;
-
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
-
 	MYSQL_ROW row;
 
-	if(database.RunQuery(query, MakeAnyLenString(&query, LoadQuery, GuildID), errbuf, &result))
+	StringFormat(query, "SELECT `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `whofor` "
+						"FROM `guild_bank` WHERE `guildid` = %i", GuildID);
+
+	if(database.RunQuery(query, &errbuf, &result))
 	{
 		GuildBank *Bank = new GuildBank;
 
@@ -727,15 +724,12 @@ bool GuildBankManager::Load(uint32 GuildID)
 		}
 		mysql_free_result(result);
 
-		safe_delete_array(query);
 
 		Banks.push_back(Bank);
 	}
 	else
 	{
-		_log(GUILDS__BANK_ERROR, "Error Loading guild bank: %s, %s", query, errbuf);
-
-		safe_delete_array(query);
+		_log(GUILDS__BANK_ERROR, "Error Loading guild bank: %s, %s", query.c_str(), errbuf.c_str());
 
 		return false;
 	}
@@ -930,23 +924,22 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 		return false;
 	}
 
-	const char *Query="INSERT INTO `guild_bank` (`guildid`, `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `WhoFor`) "
-				"VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')";
+	std::string errbuf;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string query;
 
-	char* query = 0;
+	StringFormat(query, "INSERT INTO `guild_bank` "
+						"(`guildid`, `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `WhoFor`) "
+						"VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')", 
+						GuildID, Area, Slot, ItemID, QtyOrCharges, 
+						Donator, Permissions, WhoFor);
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, GuildID, Area, Slot, ItemID, QtyOrCharges, Donator, Permissions, WhoFor), errbuf))
+	if(!database.RunQuery(query, &errbuf))
 	{
-		_log(GUILDS__BANK_ERROR, "Insert Error: %s : %s", query, errbuf);
-
-		safe_delete_array(query);
+		_log(GUILDS__BANK_ERROR, "Insert Error: %s : %s", query.c_str(), errbuf.c_str());
 
 		return false;
 	}
-
-	safe_delete_array(query);
 
 	const Item_Struct *Item = database.GetItem(ItemID);
 
@@ -1013,22 +1006,19 @@ int GuildBankManager::Promote(uint32 GuildID, int SlotID)
 
 	strn0cpy((*Iterator)->Items.MainArea[MainSlot].WhoFor, (*Iterator)->Items.DepositArea[SlotID].WhoFor, sizeof((*Iterator)->Items.MainArea[MainSlot].WhoFor));
 
-	const char *Query="UPDATE `guild_bank` SET `area` = 1, `slot` = %i WHERE `guildid` = %i AND `area` = 0 AND `slot` = %i LIMIT 1";
+	std::string errbuf;
+	std::string query;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	StringFormat(query, "UPDATE `guild_bank` SET `area` = 1, `slot` = %i WHERE "
+						"`guildid` = %i AND `area` = 0 AND `slot` = %i LIMIT 1",
+						MainSlot, GuildID, SlotID);
 
-	char* query = 0;
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, MainSlot, GuildID, SlotID), errbuf))
+	if(!database.RunQuery(query, &errbuf))
 	{
-		_log(GUILDS__BANK_ERROR, "error promoting item: %s : %s", query, errbuf);
-
-		safe_delete_array(query);
+		_log(GUILDS__BANK_ERROR, "error promoting item: %s : %s", query.c_str(), errbuf.c_str());
 
 		return -1;
 	}
-
-	safe_delete_array(query);
 
 	(*Iterator)->Items.DepositArea[SlotID].ItemID = 0;
 
@@ -1076,22 +1066,17 @@ void GuildBankManager::SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Perm
 		return;
 	}
 
-	const char *Query="UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s' WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1";
+	std::string errbuf;
+	std::string query;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	StringFormat(query, "UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s' WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1",Permissions, MemberName, GuildID, SlotID);
 
-	char* query = 0;
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, Permissions, MemberName, GuildID, SlotID), errbuf))
-	{
-		_log(GUILDS__BANK_ERROR, "error changing permissions: %s : %s", query, errbuf);
-
-		safe_delete_array(query);
+	if(!database.RunQuery(query, &errbuf)) {
+		_log(GUILDS__BANK_ERROR, "error changing permissions: %s : %s", query.c_str(), errbuf.c_str());
 
 		return;
 	}
 
-	safe_delete_array(query);
 
 	(*Iterator)->Items.MainArea[SlotID].Permissions = Permissions;
 
@@ -1215,9 +1200,9 @@ bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, ui
 	if(Iterator == Banks.end())
 		return false;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
 
-	char* query = 0;
+	std::string query;
 
 	GuildBankItem* BankArea = nullptr;
 
@@ -1243,36 +1228,33 @@ bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, ui
 
 	if(!Item->Stackable || (Quantity >= BankArea[SlotID].Quantity))
 	{
-		const char *Query = "DELETE from `guild_bank` where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
+		StringFormat(query, "DELETE from `guild_bank` where `guildid` = %i "
+							"AND `area` = %i AND `slot` = %i LIMIT 1", 
+							GuildID, Area, SlotID);
 
-		if(!database.RunQuery(query, MakeAnyLenString(&query, Query, GuildID, Area, SlotID), errbuf))
+		if(!database.RunQuery(query, &errbuf))
 		{
-			_log(GUILDS__BANK_ERROR, "Delete item failed. %s : %s", query, errbuf);
-
-			safe_delete_array(query);
+			_log(GUILDS__BANK_ERROR, "Delete item failed. %s : %s", query.c_str(), errbuf.c_str());
 
 			return false;
 		}
-
-		safe_delete_array(query);
 
 		BankArea[SlotID].ItemID = 0;
 	}
 	else
 	{
-		const char *Query = "UPDATE `guild_bank` SET `qty` = %i where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
+		std::string query;
 
-		if(!database.RunQuery(query, MakeAnyLenString(&query, Query, BankArea[SlotID].Quantity - Quantity,
-				GuildID, Area, SlotID), errbuf))
+		StringFormat(query, "UPDATE `guild_bank` SET `qty` = %i where "
+							"`guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1", 
+							BankArea[SlotID].Quantity - Quantity, GuildID, Area, SlotID);
+
+		if(!database.RunQuery(query, &errbuf))
 		{
-			_log(GUILDS__BANK_ERROR, "Update item failed. %s : %s", query, errbuf);
-
-			safe_delete_array(query);
+			_log(GUILDS__BANK_ERROR, "Update item failed. %s : %s", query.c_str(), errbuf.c_str());
 
 			return false;
 		}
-
-		safe_delete_array(query);
 
 		BankArea[SlotID].Quantity -= Quantity;
 
@@ -1426,22 +1408,20 @@ void GuildBankManager::UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 Sl
 {
 	// Helper method for MergeStacks. Assuming all passed parameters are valid.
 	//
-	char errbuf[MYSQL_ERRMSG_SIZE];
+	std::string errbuf;
+	std::string query;
 
-	char* query = 0;
+	StringFormat(query, "UPDATE `guild_bank` SET `qty` = %i where "
+						"`guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1",
+						Quantity, GuildID, Area, SlotID);
 
-	const char *Query = "UPDATE `guild_bank` SET `qty` = %i where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
-
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, Quantity, GuildID, Area, SlotID), errbuf))
+	if(!database.RunQuery(query, &errbuf))
 	{
-		_log(GUILDS__BANK_ERROR, "Update item quantity failed. %s : %s", query, errbuf);
-
-		safe_delete_array(query);
+		_log(GUILDS__BANK_ERROR, "Update item quantity failed. %s : %s", query.c_str(), errbuf.c_str());
 
 		return;
 	}
 
-	safe_delete_array(query);
 }
 
 bool GuildBankManager::AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 SlotID, const char *Name)

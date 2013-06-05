@@ -143,16 +143,22 @@ bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id) {
 }
 
 bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 	// CODER new spawn code
-	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT DISTINCT(spawngroupID), spawngroup.name, spawngroup.spawn_limit, spawngroup.dist, spawngroup.max_x, spawngroup.min_x, spawngroup.max_y, spawngroup.min_y, spawngroup.delay, spawngroup.despawn, spawngroup.despawn_timer FROM spawn2,spawngroup WHERE spawn2.spawngroupID=spawngroup.ID and spawn2.version=%u and zone='%s'", version, zone_name), errbuf, &result))
+	StringFormat(query, "SELECT DISTINCT(spawngroupID), spawngroup.name, "
+						"spawngroup.spawn_limit, spawngroup.dist, spawngroup.max_x, "
+						"spawngroup.min_x, spawngroup.max_y, spawngroup.min_y, "
+						"spawngroup.delay, spawngroup.despawn, spawngroup.despawn_timer "
+						"FROM spawn2,spawngroup WHERE spawn2.spawngroupID=spawngroup.ID "
+						"and spawn2.version=%u and zone='%s'", 
+						version, zone_name);
+	
+	if (RunQuery(query, &errbuf, &result))
 	{
-		safe_delete_array(query);
 		while((row = mysql_fetch_row(result))) {
 			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]));
 			spawn_group_list->AddSpawnGroup(newSpawnGroup);
@@ -162,18 +168,18 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 	else
 	{
 		std::cerr << "Error2 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
 
-	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query,
-		"SELECT DISTINCT spawnentry.spawngroupID, npcid, chance, "
-		"npc_types.spawn_limit AS sl "
-		"FROM spawnentry, spawn2, npc_types "
-		"WHERE spawnentry.npcID=npc_types.id AND spawnentry.spawngroupID=spawn2.spawngroupID "
-		"AND zone='%s'", zone_name), errbuf, &result)) {
-		safe_delete_array(query);
+	StringFormat(query,"SELECT DISTINCT spawnentry.spawngroupID, npcid, chance, "
+						"npc_types.spawn_limit AS sl "
+						"FROM spawnentry, spawn2, npc_types "
+						"WHERE spawnentry.npcID=npc_types.id AND spawnentry.spawngroupID=spawn2.spawngroupID "
+						"AND zone='%s'", 
+						zone_name);
+		
+		
+	if (RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result)))
 		{
 			SpawnEntry* newSpawnEntry = new SpawnEntry( atoi(row[1]), atoi(row[2]), row[3]?atoi(row[3]):0);
@@ -188,7 +194,6 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 	else
 	{
 		std::cerr << "Error3 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
 
@@ -197,17 +202,23 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 }
 
 bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_group_list) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
 
 	// CODER new spawn code
-	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT DISTINCT spawngroup.id, spawngroup.name, spawngroup.spawn_limit, spawngroup.dist, spawngroup.max_x, spawngroup.min_x, spawngroup.max_y, spawngroup.min_y, spawngroup.delay, spawngroup.despawn, spawngroup.despawn_timer FROM spawngroup WHERE spawngroup.ID='%i'", spawngroupid), errbuf, &result))
+	StringFormat(query, "SELECT DISTINCT spawngroup.id, spawngroup.name, "
+						"spawngroup.spawn_limit, spawngroup.dist, "
+						"spawngroup.max_x, spawngroup.min_x, spawngroup.max_y, "
+						"spawngroup.min_y, spawngroup.delay, spawngroup.despawn, "
+						"spawngroup.despawn_timer FROM spawngroup "
+						"WHERE spawngroup.ID='%i'", 
+						spawngroupid);
+						
+	if (RunQuery(query, &errbuf, &result))
 	{
-		safe_delete_array(query);
 		while((row = mysql_fetch_row(result))) {
 			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]));
 			spawn_group_list->AddSpawnGroup(newSpawnGroup);
@@ -217,14 +228,16 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 	else
 	{
 		std::cerr << "Error2 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
 
-	query = 0;
-	if (RunQuery(query, MakeAnyLenString(&query,
-		"SELECT DISTINCT spawnentry.spawngroupID, spawnentry.npcid, spawnentry.chance, spawngroup.spawn_limit FROM spawnentry,spawngroup WHERE spawnentry.spawngroupID='%i' AND spawngroup.spawn_limit='0' ORDER by chance", spawngroupid), errbuf, &result)) {
-		safe_delete_array(query);
+	StringFormat(query,"SELECT DISTINCT spawnentry.spawngroupID, spawnentry.npcid, "
+						"spawnentry.chance, spawngroup.spawn_limit "
+						"FROM spawnentry,spawngroup WHERE spawnentry.spawngroupID='%i' "
+						"AND spawngroup.spawn_limit='0' ORDER by chance", 
+						spawngroupid);
+
+	if (RunQuery(query, &errbuf, &result)) {
 		while((row = mysql_fetch_row(result)))
 		{
 			SpawnEntry* newSpawnEntry = new SpawnEntry( atoi(row[1]), atoi(row[2]), row[3]?atoi(row[3]):0);
@@ -239,7 +252,6 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 	else
 	{
 		std::cerr << "Error3 in PopulateZoneLists query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
 

@@ -71,14 +71,15 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 
 	char mount_color = 0;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (database.RunQuery(query,MakeAnyLenString(&query, "SELECT race,gender,texture,mountspeed FROM horses WHERE filename='%s'", FileName), errbuf, &result)) {
+	StringFormat(query, "SELECT race,gender,texture,mountspeed FROM horses WHERE filename='%s'", FileName);
 
-		safe_delete_array(query);
+	if (database.RunQuery(query, &errbuf, &result)) {
+
 		if (mysql_num_rows(result) == 1) {
 
 			row = mysql_fetch_row(result);
@@ -119,14 +120,12 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 		else {
 			LogFile->write(EQEMuLog::Error, "No Database entry for mount: %s, check the horses table", FileName);
 			//Message(13, "Unable to find data for mount %s", FileName);
-			safe_delete_array(query);
 		}
 		mysql_free_result(result);
 		return nullptr;
 	}
 	else {
-		LogFile->write(EQEMuLog::Error, "Error in Mount query '%s': %s", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in Mount query '%s': %s", query.c_str(), errbuf.c_str());
 		return nullptr;
 	}
 

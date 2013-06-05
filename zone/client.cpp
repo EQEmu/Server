@@ -599,13 +599,17 @@ bool Client::Save(uint8 iCommitNow) {
 
 	SaveTaskState();
 	if (iCommitNow <= 1) {
-		char* query = 0;
+		std::string query;
 		uint32_breakdown workpt;
 		workpt.b4() = DBA_b4_Entity;
 		workpt.w2_3() = GetID();
 		workpt.b1() = DBA_b1_Entity_Client_Save;
 		DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Write, 0xFFFFFFFF);
-		dbaw->AddQuery(iCommitNow == 0 ? true : false, &query, database.SetPlayerProfile_MQ(&query, account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets), false);
+
+
+		database.SetPlayerProfile_MQ(query, account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets);
+
+		dbaw->AddQuery(iCommitNow == 0 ? true : false, query, false);
 		if (iCommitNow == 0){
 			pQueuedSaveWorkID = dbasync->AddWork(&dbaw, 2500);
 		}
@@ -613,7 +617,6 @@ bool Client::Save(uint8 iCommitNow) {
 			dbasync->AddWork(&dbaw, 0);
 			SaveBackup();
 		}
-		safe_delete_array(query);
 		return true;
 	}
 	else if (database.SetPlayerProfile(account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets)) {
@@ -630,9 +633,14 @@ bool Client::Save(uint8 iCommitNow) {
 void Client::SaveBackup() {
 	if (!RunLoops)
 		return;
-	char* query = 0;
+	std::string query;
 	DBAsyncWork* dbaw = new DBAsyncWork(&database, &DBAsyncCB_CharacterBackup, this->CharacterID(), DBAsync::Read);
-	dbaw->AddQuery(0, &query, MakeAnyLenString(&query, "Select id, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(ts) as age from character_backup where charid=%u and backupreason=0 order by ts asc", this->CharacterID()), true);
+
+	StringFormat(query,"Select id, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(ts) as age "
+						"from character_backup where charid=%u and backupreason=0 "
+						"order by ts asc", this->CharacterID());
+
+	dbaw->AddQuery(0, query,  true);
 	dbasync->AddWork(&dbaw, 0);
 }
 
@@ -3848,23 +3856,21 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 
 void Client::KeyRingLoad()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	query = new char[256];
-
-	sprintf(query, "SELECT item_id FROM keyring WHERE char_id='%i' ORDER BY item_id",character_id);
-	if (database.RunQuery(query, strlen(query), errbuf, &result))
+	
+	std::string query;
+	StringFormat(query, "SELECT item_id FROM keyring WHERE char_id='%i' ORDER BY item_id",character_id);
+	
+	if (database.RunQuery(query, &errbuf, &result))
 	{
-		safe_delete_array(query);
 		while(0 != (row = mysql_fetch_row(result))){
 			keyring.push_back(atoi(row[0]));
 		}
 		mysql_free_result(result);
 	}else {
 		std::cerr << "Error in Client::KeyRingLoad query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
 		return;
 	}
 }
@@ -3872,22 +3878,22 @@ void Client::KeyRingLoad()
 void Client::KeyRingAdd(uint32 item_id)
 {
 	if(0==item_id)return;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
 	uint32 affected_rows = 0;
-	query = new char[256];
+	std::string query;
 	bool bFound = KeyRingCheck(item_id);
 	if(!bFound){
-		sprintf(query, "INSERT INTO keyring(char_id,item_id) VALUES(%i,%i)",character_id,item_id);
-		if(database.RunQuery(query, strlen(query), errbuf, 0, &affected_rows))
+		
+		StringFormat(query, "INSERT INTO keyring(char_id,item_id) VALUES(%i,%i)",
+							character_id, item_id);
+		
+		if(database.RunQuery(query, &errbuf, 0, &affected_rows))
 		{
 			Message(4,"Added to keyring.");
-			safe_delete_array(query);
 		}
 		else
 		{
 			std::cerr << "Error in Doors::HandleClick query '" << query << "' " << errbuf << std::endl;
-			safe_delete_array(query);
 			return;
 		}
 		keyring.push_back(item_id);
@@ -3922,18 +3928,19 @@ void Client::KeyRingList()
 
 bool Client::IsDiscovered(uint32 itemid) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid), errbuf, &result))
+	StringFormat(query,"SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid);
+
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		row = mysql_fetch_row(result);
 		if (atoi(row[0]))
 		{
 			mysql_free_result(result);
-			safe_delete_array(query);
 			return true;
 		}
 	}
@@ -3942,20 +3949,24 @@ bool Client::IsDiscovered(uint32 itemid) {
 		std::cerr << "Error in IsDiscovered query '" << query << "' " << errbuf << std::endl;
 	}
 	mysql_free_result(result);
-	safe_delete_array(query);
 	return false;
 }
 
 void Client::DiscoverItem(uint32 itemid) {
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
-	if (database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO discovered_items SET item_id=%lu, char_name='%s', discovered_date=UNIX_TIMESTAMP(), account_status=%i", itemid, GetName(), Admin()), errbuf, &result))
+
+	StringFormat(query,"INSERT INTO discovered_items SET "
+						"item_id=%lu, char_name='%s', "
+						"discovered_date=UNIX_TIMESTAMP(), account_status=%i", 
+						itemid, GetName(), Admin());
+
+	if (database.RunQuery(query, &errbuf, &result))
 	{
 		mysql_free_result(result);
 	}
-	safe_delete_array(query);
 
 	parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", itemid);
 }
@@ -5098,14 +5109,17 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 void Client::SendRewards()
 {
 	std::vector<ClientReward> rewards;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT reward_id, amount FROM"
-		" account_rewards WHERE account_id=%i ORDER by reward_id", AccountID()),
-		errbuf,&result))
+	StringFormat(query, "SELECT reward_id, amount FROM"
+						" account_rewards WHERE account_id=%i "
+						"ORDER by reward_id", 
+						AccountID());
+						
+	if(database.RunQuery(query,&errbuf,&result))
 	{
 		while((row = mysql_fetch_row(result)))
 		{
@@ -5115,12 +5129,10 @@ void Client::SendRewards()
 			rewards.push_back(cr);
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in Client::SendRewards(): %s (%s)", query.c_str(), errbuf.c_str());
 		return;
 	}
 
@@ -5187,15 +5199,19 @@ bool Client::TryReward(uint32 claim_id)
 		return false;
 	}
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
+	std::string errbuf;
+	std::string query;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32 amt = 0;
 
-	if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT amount FROM"
-		" account_rewards WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-		errbuf,&result))
+
+	StringFormat(query, "SELECT amount FROM"
+						" account_rewards WHERE "
+						"account_id=%i AND reward_id=%i", 
+						AccountID(), claim_id);
+						
+	if(database.RunQuery(query,&errbuf,&result))
 	{
 		row = mysql_fetch_row(result);
 		if(row)
@@ -5205,16 +5221,13 @@ bool Client::TryReward(uint32 claim_id)
 		else
 		{
 			mysql_free_result(result);
-			safe_delete_array(query);
 			return false;
 		}
 		mysql_free_result(result);
-		safe_delete_array(query);
 	}
 	else
 	{
-		LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), errbuf.c_str());
 		return false;
 	}
 
@@ -5240,30 +5253,24 @@ bool Client::TryReward(uint32 claim_id)
 
 	if(amt == 1)
 	{
-		if(!database.RunQuery(query,MakeAnyLenString(&query,"DELETE FROM"
-			" account_rewards WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-			errbuf))
+		StringFormat(query, "DELETE FROM account_rewards WHERE "
+							"account_id=%i AND reward_id=%i", 
+							AccountID(), claim_id);
+		
+		if(!database.RunQuery(query, &errbuf))
 		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-			safe_delete_array(query);
-		}
-		else
-		{
-			safe_delete_array(query);
+			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), errbuf.c_str());
 		}
 	}
 	else
 	{
-		if(!database.RunQuery(query,MakeAnyLenString(&query,"UPDATE account_rewards SET amount=(amount-1)"
-			" WHERE account_id=%i AND reward_id=%i", AccountID(), claim_id),
-			errbuf))
+		StringFormat(query,"UPDATE account_rewards SET amount=(amount-1)"
+							" WHERE account_id=%i AND reward_id=%i", 
+							AccountID(), claim_id);
+		
+		if(!database.RunQuery(query,&errbuf))
 		{
-			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query, errbuf);
-			safe_delete_array(query);
-		}
-		else
-		{
-			safe_delete_array(query);
+			LogFile->write(EQEMuLog::Error, "Error in Client::TryReward(): %s (%s)", query.c_str(), errbuf.c_str());
 		}
 	}
 
@@ -7630,107 +7637,112 @@ some day.
 
 void Client::LoadAccountFlags()
 {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	std::string errbuf;
+	std::string query;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
-    accountflags.clear();
-    MakeAnyLenString(&query, "SELECT p_flag, p_value FROM account_flags WHERE p_accid = '%d'", account_id);
-    if(database.RunQuery(query, strlen(query), errbuf, &result))
-    {
-        while(row = mysql_fetch_row(result))
-        {
-            std::string fname(row[0]);
-            std::string fval(row[1]);
-            accountflags[fname] = fval;
-        }
-        mysql_free_result(result);
-    }
-    else
-    {
-        std::cerr << "Error in LoadAccountFlags query '" << query << "' " << errbuf << std::endl;
-    }
-    safe_delete_array(query);
+	accountflags.clear();
+	
+	StringFormat(query,"SELECT p_flag, p_value FROM "
+						"account_flags WHERE p_accid = '%d'", 
+						account_id);
+	
+	if(database.RunQuery(query, &errbuf, &result))
+	{
+		while(row = mysql_fetch_row(result))
+		{
+			std::string fname(row[0]);
+			std::string fval(row[1]);
+			accountflags[fname] = fval;
+		}
+		mysql_free_result(result);
+	}
+	else
+	{
+		std::cerr << "Error in LoadAccountFlags query '" << query << "' " << errbuf << std::endl;
+	}
 }
 
 void Client::SetAccountFlag(std::string flag, std::string val)
 {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	std::string errbuf;
+	std::string query;
+	
+	StringFormat(query, "REPLACE INTO account_flags (p_accid, p_flag, p_value) "
+						"VALUES( '%d', '%s', '%s')", 
+						account_id, flag.c_str(), val.c_str());
+	 
+	if(!database.RunQuery(query, &errbuf))
+	{
+		std::cerr << "Error in SetAccountFlags query '" << query << "' " << errbuf << std::endl;
+	}
 
-    MakeAnyLenString(&query, "REPLACE INTO account_flags (p_accid, p_flag, p_value) VALUES( '%d', '%s', '%s')", account_id, flag.c_str(), val.c_str());
-    if(!database.RunQuery(query, strlen(query), errbuf))
-    {
-        std::cerr << "Error in SetAccountFlags query '" << query << "' " << errbuf << std::endl;
-    }
-    safe_delete_array(query);
-
-    accountflags[flag] = val;
+	accountflags[flag] = val;
 }
 
 std::string Client::GetAccountFlag(std::string flag)
 {
-    return(accountflags[flag]);
+	return(accountflags[flag]);
 }
 
 void Client::TickItemCheck()
 {
-    int i;
+	int i;
 
 	if(zone->tick_items.empty()) { return; }
 
-    //Scan equip slots for items
-    for(i = 0; i <= 21; i++)
-    {
+	//Scan equip slots for items
+	for(i = 0; i <= 21; i++)
+	{
 		TryItemTick(i);
-    }
-    //Scan main inventory + cursor
-    for(i = 22; i < 31; i++)
-    {
+	}
+	//Scan main inventory + cursor
+	for(i = 22; i < 31; i++)
+	{
 		TryItemTick(i);
-    }
-    //Scan bags
-    for(i = 251; i < 340; i++)
-    {
+	}
+	//Scan bags
+	for(i = 251; i < 340; i++)
+	{
 		TryItemTick(i);
-    }
+	}
 }
 
 void Client::TryItemTick(int slot)
 {
 	int iid = 0;
-    const ItemInst* inst = m_inv[slot];
-    if(inst == 0) { return; }
+	const ItemInst* inst = m_inv[slot];
+	if(inst == 0) { return; }
 
-    iid = inst->GetID();
+	iid = inst->GetID();
 
-    if(zone->tick_items.count(iid) > 0)
-    {
-        if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot < 22) )
-        {
-            ItemInst* e_inst = (ItemInst*)inst;
-            parse->EventItem(EVENT_ITEM_TICK, this, e_inst, e_inst->GetID(), slot);
-        }
-    }
+	if(zone->tick_items.count(iid) > 0)
+	{
+		if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot < 22) )
+		{
+			ItemInst* e_inst = (ItemInst*)inst;
+			parse->EventItem(EVENT_ITEM_TICK, this, e_inst, e_inst->GetID(), slot);
+		}
+	}
 
 	//Only look at augs in main inventory
 	if(slot > 21) { return; }
 
-    for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
-    {
-        ItemInst * a_inst = inst->GetAugment(x);
-        if(!a_inst) { continue; }
+	for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
+	{
+		ItemInst * a_inst = inst->GetAugment(x);
+		if(!a_inst) { continue; }
 
-        iid = a_inst->GetID();
+		iid = a_inst->GetID();
 
-        if(zone->tick_items.count(iid) > 0)
-        {
-            if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) )
-            {
-                ItemInst* e_inst = (ItemInst*)a_inst;
-                parse->EventItem(EVENT_ITEM_TICK, this, e_inst, e_inst->GetID(), slot);
-            }
-        }
-    }
+		if(zone->tick_items.count(iid) > 0)
+		{
+			if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) )
+			{
+				ItemInst* e_inst = (ItemInst*)a_inst;
+				parse->EventItem(EVENT_ITEM_TICK, this, e_inst, e_inst->GetID(), slot);
+			}
+		}
+	}
 }
