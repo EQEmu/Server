@@ -156,9 +156,10 @@ bool DBcore::RunQuery(const std::string& query, char* errbuf, MYSQL_RES** result
 void DBcore::DoEscapeString(std::string& outString, const char* frombuf, uint32 fromlen) {
 //	No good reason to lock the DB, we only need it in the first place to check char encoding.
 //	LockMutex lock(&MDatabase);
-	char* tobuf = new char[sizeof(frombuf)*fromlen*2]();
+	char* tobuf = new char[fromlen*2+1]();
 	unsigned long length = mysql_real_escape_string(&mysql, tobuf, frombuf, fromlen);
 	outString.assign(tobuf,length);
+	outString.resize(length);
 	safe_delete_array(tobuf);
 }
 
