@@ -907,7 +907,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					{
 						MaxDmg *= (float)2;
 						hate *= (float)2;
-						MaxDmg = mod_archery_bonus_damage(MaxDmg);
+						MaxDmg = mod_archery_bonus_damage(MaxDmg, RangeWeapon);
 
 						mlog(COMBAT__RANGED, "Ranger. Double damage success roll, doubling damage to %d", MaxDmg);
 						Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
@@ -940,7 +940,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					TotalDmg += other->GetAdditionalDamage(this, 0, true, ARCHERY);
 					TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(ARCHERY) / 100) + GetSkillDmgAmt(ARCHERY);
 
-					TotalDmg = mod_archery_damage(TotalDmg, dobonus);
+					TotalDmg = mod_archery_damage(TotalDmg, dobonus, RangeWeapon);
 
 					TryCriticalHit(other, ARCHERY, TotalDmg);
 					other->AddToHateList(this, hate, 0, false);

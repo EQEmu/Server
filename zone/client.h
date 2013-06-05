@@ -1130,7 +1130,7 @@ public:
 	void LoadAccountFlags();
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillType);
-	int mod_client_damage(int damage, SkillType skillinuse, int hand, ItemInst* weapon, Mob* other);
+	int mod_client_damage(int damage, SkillType skillinuse, int hand, const ItemInst* weapon, Mob* other);
 	bool mod_client_message(char* message, uint8 chan_num);
 	bool mod_can_increase_skill(SkillType skillid, Mob* against_who);
 	int16 mod_increase_skill_chance(int16 chance, Mob* against_who);
@@ -1142,10 +1142,13 @@ public:
 	int16 mod_pet_power(int16 act_power, uint16 spell_id);
 	float mod_tradeskill_chance(float chance, DBTradeskillRecipe_Struct *spec);
 	float mod_tradeskill_skillup(float chance_stage2);
-	int32 mod_tribute_item_value(int32 pts);
+	int32 mod_tribute_item_value(int32 pts, const ItemInst* item);
 	void mod_client_death_npc(Mob* killerMob);
 	void mod_client_death_duel(Mob* killerMob);
 	void mod_client_death_env();
+	int32 mod_client_xp(int32 in_exp, NPC *npc);
+	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
+	int mod_client_haste_cap(int cap);
 
 protected:
 	friend class Mob;

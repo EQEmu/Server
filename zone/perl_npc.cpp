@@ -129,8 +129,8 @@ XS(XS_NPC_AddLootTable); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddLootTable)
 {
 	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::AddLootTable(THIS)");
+	if (items < 1)
+		Perl_croak(aTHX_ "Usage: NPC::AddLootTable(THIS, [loottable_id])");
 	{
 		NPC *		THIS;
 

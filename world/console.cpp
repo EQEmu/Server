@@ -466,6 +466,7 @@ void Console::ProcessCommand(const char* command) {
 				if (admin >= 100) {
 					SendMessage(1, "  LSReconnect");
 					SendMessage(1, "  signalcharbyname charname ID");
+					SendMessage(1, "  reloadworld");
 				}
 			}
 			else if (strcasecmp(sep.arg[0], "ping") == 0) {
@@ -834,6 +835,15 @@ void Console::ProcessCommand(const char* command) {
 						SendMessage(1, "  unlock [zonename]");
 					}
 				}
+			}
+			else if (strcasecmp(sep.arg[0], "reloadworld") == 0 && admin > 101)
+			{
+				SendEmoteMessage(0,0,0,15,"Reloading World...");
+				ServerPacket* pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
+				ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
+				RW->Option = 1;
+				zoneserver_list.SendPacket(pack);
+				safe_delete(pack);
 			}
 			else {
 				SendMessage(1, "Command unknown.");
