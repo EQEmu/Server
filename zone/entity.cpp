@@ -3362,17 +3362,29 @@ void EntityList::ClearFeignAggro(Mob* targ)
 		{
 			if(iterator.GetData()->SpecAttacks[IMMUNE_FEIGN_DEATH])
 			{
-				iterator.GetData()->SetHate(targ, 0);
 				iterator.Advance();
 				continue;
 			}
 
+			if(targ->IsClient()) {
+				int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0);
+				if(i != 0) {
+					iterator.Advance();
+					continue;
+				}
+
+				if(iterator.GetData()->IsNPC()) {
+					int i = parse->EventNPC(EVENT_FEIGN_DEATH, iterator.GetData()->CastToNPC(), targ, "", 0);
+					if(i != 0) {
+						iterator.Advance();
+						continue;
+					}
+				}
+			}
+
 			iterator.GetData()->RemoveFromHateList(targ);
-			// EverHood 6/24/06
-			// For client targets if the mob that hated us is 35+
-			// there is a 3 outta 5 chance he adds us to feign memory
 			if(targ->IsClient()){
-				if (iterator.GetData()->GetLevel() >= 35 && (MakeRandomInt(1,100)<=60)){
+				if (iterator.GetData()->GetLevel() >= 35 && MakeRandomInt(1, 100) <= 60){
 					iterator.GetData()->AddFeignMemory(targ->CastToClient());
 				} else {
 					targ->CastToClient()->RemoveXTarget(iterator.GetData(), false);
@@ -3382,7 +3394,7 @@ void EntityList::ClearFeignAggro(Mob* targ)
 		iterator.Advance();
 	}
 }
-// EverHood 6/17/06
+
 void EntityList::ClearZoneFeignAggro(Client* targ)
 {
 	LinkedListIterator<NPC*> iterator(npc_list);

@@ -95,7 +95,10 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DUEL_LOSE",
 	"EVENT_ENCOUNTER_LOAD",
 	"EVENT_ENCOUNTER_UNLOAD",
-	"EVENT_COMMAND"
+	"EVENT_COMMAND",
+	"EVENT_DROP_ITEM",
+	"EVENT_DESTROY_ITEM",
+	"EVENT_FEIGN_DEATH"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr), event_queue_in_use_(false) {
@@ -312,7 +315,6 @@ bool PerlembParser::ItemHasQuestSub(ItemInst *itm, const char *subname) {
 	}
 	else
 	{
-		item_name = "item_";
 		item_name += itoa(item->ID);
 	}
 
@@ -817,7 +819,6 @@ void PerlembParser::GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlaye
 			package_name += itoa(item->ScriptFileID);
 		}
 		else {
-			package_name += "item_";
 			package_name += itoa(objid);
 		}
 	}

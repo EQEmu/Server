@@ -93,7 +93,10 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_duel_lose",
 	"event_encounter_load",
 	"event_encounter_unload",
-	"event_command"
+	"event_command",
+	"event_drop_item",
+	"event_destroy_item",
+	"event_feign_death"
 };
 
 extern Zone *zone;
@@ -376,8 +379,7 @@ int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint3
 		return 0;
 	}
 
-	std::stringstream package_name;
-	package_name << "item_";
+	std::string package_name = "item_";
 
 	std::stringstream item_name;
 	const Item_Struct* itm = item->GetItem();
@@ -392,12 +394,11 @@ int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint3
 	}
 	else
 	{
-		item_name << "item_";
 		item_name << itm->ID;
 	}
-	package_name << item_name;
+	package_name += item_name.str();
 
-	return _EventItem(package_name.str(), evt, client, item, objid, extra_data);
+	return _EventItem(package_name, evt, client, item, objid, extra_data);
 }
 
 int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data,
@@ -421,6 +422,11 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		luabind::object l_item_o = luabind::object(L, l_item);
 		l_item_o.push(L);
 		lua_setfield(L, -2, "self");
+
+		Lua_Client l_client(client);
+		luabind::object l_client_o = luabind::object(L, l_client);
+		l_client_o.push(L);
+		lua_setfield(L, -2, "owner");
 
 		auto arg_function = ItemArgumentDispatch[evt];
 		arg_function(this, L, client, item, objid, extra_data);
@@ -623,8 +629,7 @@ bool LuaParser::SpellHasQuestSub(uint32 spell_id, const char *subname) {
 }
 
 bool LuaParser::ItemHasQuestSub(ItemInst *itm, const char *subname) {
-	std::stringstream package_name;
-	package_name << "item_";
+	std::string package_name = "item_";
 
 	std::stringstream item_name;
 	const Item_Struct* item = itm->GetItem();
@@ -639,12 +644,11 @@ bool LuaParser::ItemHasQuestSub(ItemInst *itm, const char *subname) {
 	}
 	else
 	{
-		item_name << "item_";
 		item_name << item->ID;
 	}
 
-	package_name << item_name;
-	return HasFunction(subname, package_name.str());
+	package_name += item_name.str();
+	return HasFunction(subname, package_name);
 }
 
 bool LuaParser::EncounterHasQuestSub(std::string encounter_name, const char *subname) {
@@ -930,7 +934,6 @@ void LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *it
 	}
 	else
 	{
-		item_name << "item_";
 		item_name << itm->ID;
 	}
 	package_name << item_name;

@@ -32,6 +32,7 @@
 #include "../common/StringUtil.h"
 #include "StringIDs.h"
 #include "NpcAI.h"
+#include "QuestParserCollection.h"
 extern WorldServer worldserver;
 
 // @merth: this needs to be touched up
@@ -319,29 +320,34 @@ void Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 // Drop item from inventory to ground (generally only dropped from SLOT_CURSOR)
 void Client::DropItem(int16 slot_id)
 {
-
-	if (GetInv().CheckNoDrop(slot_id) && RuleI(World, FVNoDropFlag) == 0 || RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2) {
-		//Message(0, "No Drop Exploit: Items Destroyed.");
+	if(GetInv().CheckNoDrop(slot_id) && RuleI(World, FVNoDropFlag) == 0 ||
+		RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2) {
 		database.SetHackerFlag(this->AccountName(), this->GetCleanName(), "Tried to drop an item on the ground that was nodrop!");
 		GetInv().DeleteItem(slot_id);
 		return;
 	}
 
 	// Take control of item in client inventory
-	ItemInst* inst = m_inv.PopItem(slot_id);
-
-	if (!inst) {
+	ItemInst *inst = m_inv.PopItem(slot_id);
+	if(inst) {
+		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, 0, 0);
+		if(i != 0) {
+			safe_delete(inst);
+			return;
+		}
+	} else {
 		// Item doesn't exist in inventory!
 		Message(13, "Error: Item not found in slot %i", slot_id);
 		return;
 	}
 
 	// Save client inventory change to database
-	if (slot_id==SLOT_CURSOR) {
+	if(slot_id == SLOT_CURSOR) {
 		std::list<ItemInst*>::const_iterator s=m_inv.cursor_begin(),e=m_inv.cursor_end();
 		database.SaveCursor(CharacterID(), s, e);
-	} else
+	} else {
 		database.SaveInventory(CharacterID(), nullptr, slot_id);
+	}
 
 	// Package as zone object
 	Object* object = new Object(this, inst);
@@ -1005,6 +1011,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		if(move_in->from_slot == (uint32)SLOT_CURSOR) {
 			mlog(INVENTORY__SLOTS, "Client destroyed item from cursor slot %d", move_in->from_slot);
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
+
+			ItemInst *inst = m_inv.GetItem(SLOT_CURSOR);
+			if(inst) {
+				parse->EventItem(EVENT_DESTROY_ITEM, this, inst, 0, 0);
+			}
+
 			DeleteItemInInventory(move_in->from_slot);
 			return true; // Item destroyed by client
 		}

@@ -200,7 +200,7 @@ bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, const char *subname) 
 		item_script = "script_";
 		item_script += itoa(itm->GetItem()->ScriptFileID);
 	} else {
-		item_script = itoa(itm->GetItem()->ID);
+		item_script += itoa(itm->GetItem()->ID);
 	}
 
 	std::map<std::string, uint32>::iterator iter = _item_quest_status.find(item_script);
@@ -341,7 +341,7 @@ int QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst 
 		item_script = "script_";
 		item_script += itoa(item->GetItem()->ScriptFileID);
 	} else {
-		item_script = itoa(item->GetItem()->ID);
+		item_script += itoa(item->GetItem()->ID);
 	}
 
 	std::map<std::string, uint32>::iterator iter = _item_quest_status.find(item_script);

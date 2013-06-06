@@ -159,7 +159,7 @@ bool Client::Process() {
 			Save();
 
 			Group *mygroup = GetGroup();
-			if (mygroup)	// && zone.GetZoneID() != m_pp.binds[0].zoneId
+			if (mygroup)
 			{
 				entity_list.MessageGroup(this,true,15,"%s died.", GetName());
 				mygroup->MemberZoned(this);

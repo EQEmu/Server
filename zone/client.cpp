@@ -151,7 +151,7 @@ Client::Client(EQStreamInterface* ieqs)
 #endif
 	proximity_timer(ClientProximity_interval),
 	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
-	charm_update_timer(60000),
+	charm_update_timer(6000),
 	rest_timer(1),
 	charm_class_attacks_timer(3000),
 	charm_cast_timer(3500),
@@ -1029,14 +1029,14 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	case 8: { // /say
 		if(message[0] == COMMAND_CHAR) {
 			if(command_dispatch(this, message) == -2) {
-				if(parse->PlayerHasQuestSub("EVENT_COMMAND")) {
-					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
-					if(i != 0) {
-						Message(13, "Command '%s' not recognized.", message);
-					}
-				} else {
+				//if(parse->PlayerHasQuestSub("EVENT_COMMAND")) {
+				//	int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
+				//	if(i != 0) {
+				//		Message(13, "Command '%s' not recognized.", message);
+				//	}
+				//} else {
 					Message(13, "Command '%s' not recognized.", message);
-				}
+				//}
 			}
 			break;
 		}
