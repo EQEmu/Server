@@ -194,16 +194,17 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, const char *subnam
 
 bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, const char *subname) {
 	std::string item_script;
-	if(strcmp("EVENT_SCALE_CALC", subname) == 0 || strcmp("EVENT_ITEM_ENTER_ZONE", subname) == 0) {
-		item_script = itm->GetItem()->CharmFile;
-	} else if(strcmp("EVENT_ITEM_CLICK", subname) == 0 || strcmp("EVENT_ITEM_CLICK_CAST", subname) == 0) {
+	if(itm->GetItem()->ScriptFileID != 0) {
 		item_script = "script_";
-		item_script += itoa(itm->GetItem()->ScriptFileID);
+		item_script += std::to_string(itm->GetItem()->ScriptFileID);
+	} else if(strlen(itm->GetItem()->CharmFile) > 0) {
+		item_script = itm->GetItem()->CharmFile;
 	} else {
-		item_script += itoa(itm->GetItem()->ID);
+		item_script = std::to_string(itm->GetID());
 	}
 
-	std::map<std::string, uint32>::iterator iter = _item_quest_status.find(item_script);
+	uint32 item_id = itm->GetID();
+	std::map<uint32, uint32>::iterator iter = _item_quest_status.find(item_id);
 	if(iter != _item_quest_status.end()) {
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
@@ -214,11 +215,11 @@ bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, const char *subname) 
 		std::string filename;
 		QuestInterface *qi = GetQIByItemQuest(item_script, filename);
 		if(qi) {
-			_item_quest_status[item_script] = qi->GetIdentifier();
-			qi->LoadItemScript(filename, item_script);
+			_item_quest_status[item_id] = qi->GetIdentifier();
+			qi->LoadItemScript(filename, itm);
 			return qi->ItemHasQuestSub(itm, subname);
 		} else {
-			_item_quest_status[item_script] = QuestFailedToLoad;
+			_item_quest_status[item_id] = QuestFailedToLoad;
 		}
 	}
 	return false;
@@ -333,39 +334,40 @@ int QuestParserCollection::EventPlayerGlobal(QuestEventID evt, Client *client, s
 	return 0;
 }
 
-int QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+int QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data) {
 	std::string item_script;
-	if(evt == EVENT_SCALE_CALC || evt == EVENT_ITEM_ENTER_ZONE) {
-		item_script = item->GetItem()->CharmFile;
-	} else if(evt == EVENT_ITEM_CLICK || evt == EVENT_ITEM_CLICK_CAST) {
+	if(item->GetItem()->ScriptFileID != 0) {
 		item_script = "script_";
-		item_script += itoa(item->GetItem()->ScriptFileID);
+		item_script += std::to_string(item->GetItem()->ScriptFileID);
+	} else if(strlen(item->GetItem()->CharmFile) > 0) {
+		item_script = item->GetItem()->CharmFile;
 	} else {
-		item_script += itoa(item->GetItem()->ID);
+		item_script = std::to_string(item->GetID());
 	}
 
-	std::map<std::string, uint32>::iterator iter = _item_quest_status.find(item_script);
+	uint32 item_id = item->GetID();
+	std::map<uint32, uint32>::iterator iter = _item_quest_status.find(item_id);
 	if(iter != _item_quest_status.end()) {
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			auto ret = qiter->second->EventItem(evt, client, item, objid, extra_data);
-			DispatchEventItem(evt, client, item, objid, extra_data);
+			auto ret = qiter->second->EventItem(evt, client, item, mob, data, extra_data);
+			DispatchEventItem(evt, client, item, mob, data, extra_data);
 			return ret;
 		}
-		DispatchEventItem(evt, client, item, objid, extra_data);
+		DispatchEventItem(evt, client, item, mob, data, extra_data);
 	} else {
 		std::string filename;
 		QuestInterface *qi = GetQIByItemQuest(item_script, filename);
 		if(qi) {
-			_item_quest_status[item_script] = qi->GetIdentifier();
-			qi->LoadItemScript(filename, item_script);
-			auto ret = qi->EventItem(evt, client, item, objid, extra_data);
-			DispatchEventItem(evt, client, item, objid, extra_data);
+			_item_quest_status[item_id] = qi->GetIdentifier();
+			qi->LoadItemScript(filename, item);
+			auto ret = qi->EventItem(evt, client, item, mob, data, extra_data);
+			DispatchEventItem(evt, client, item, mob, data, extra_data);
 			return ret;
 		} else {
-			_item_quest_status[item_script] = QuestFailedToLoad;
-			DispatchEventItem(evt, client, item, objid, extra_data);
+			_item_quest_status[item_id] = QuestFailedToLoad;
+			DispatchEventItem(evt, client, item, mob, data, extra_data);
 		}
 	}
 	return 0;
@@ -869,10 +871,11 @@ void QuestParserCollection::DispatchEventPlayer(QuestEventID evt, Client *client
 	}
 }
 
-void QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+void QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data,
+											  uint32 extra_data) {
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
-		(*iter)->DispatchEventItem(evt, client, item, objid, extra_data);
+		(*iter)->DispatchEventItem(evt, client, item, mob, data, extra_data);
 		++iter;
 	}
 }

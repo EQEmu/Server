@@ -2443,9 +2443,9 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
 			uint16 oldexp = e_inst->GetExp();
 
 			if(login) {
-				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, e_inst->GetID(), 0);
+				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
 			}
-			parse->EventItem(EVENT_SCALE_CALC, this, e_inst, e_inst->GetID(), 0);
+			parse->EventItem(EVENT_SCALE_CALC, this, e_inst, nullptr, "", 0);
 
 			if (e_inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
 				e_inst->ScaleItem();
@@ -2467,9 +2467,9 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
 				uint16 oldexp = e_inst->GetExp();
 
 				if(login) {
-					parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, e_inst->GetID(), 0);
+					parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
 				}
-				parse->EventItem(EVENT_SCALE_CALC, this, e_inst, e_inst->GetID(), 0);
+				parse->EventItem(EVENT_SCALE_CALC, this, e_inst, nullptr, "", 0);
 
 				if (e_inst->GetExp() != oldexp)
 				{

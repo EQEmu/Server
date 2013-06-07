@@ -62,7 +62,7 @@ public:
 		std::vector<ItemInst*> *items);
 	virtual int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
+	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data);
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
 	virtual bool HasQuestSub(uint32 npcid, const char *subname);
@@ -76,7 +76,7 @@ public:
 	virtual void LoadGlobalNPCScript(std::string filename);
 	virtual void LoadPlayerScript(std::string filename);
 	virtual void LoadGlobalPlayerScript(std::string filename);
-	virtual void LoadItemScript(std::string filename, std::string item_script);
+	virtual void LoadItemScript(std::string filename, ItemInst *item);
 	virtual void LoadSpellScript(std::string filename, uint32 spell_id);
 
 	virtual void AddVar(std::string name, std::string val);
@@ -121,7 +121,7 @@ private:
 	PerlQuestStatus global_npc_quest_status_;
 	PerlQuestStatus player_quest_status_;
 	PerlQuestStatus global_player_quest_status_;
-	std::map<std::string, PerlQuestStatus> item_quest_status_;
+	std::map<uint32, PerlQuestStatus> item_quest_status_;
 	std::map<uint32, PerlQuestStatus> spell_quest_status_;
 
 	bool event_queue_in_use_;

@@ -7697,7 +7697,7 @@ void Client::TryItemTick(int slot)
         if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot < 22) )
         {
             ItemInst* e_inst = (ItemInst*)inst;
-            parse->EventItem(EVENT_ITEM_TICK, this, e_inst, e_inst->GetID(), slot);
+            parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
         }
     }
 
@@ -7716,7 +7716,7 @@ void Client::TryItemTick(int slot)
             if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) )
             {
                 ItemInst* e_inst = (ItemInst*)a_inst;
-                parse->EventItem(EVENT_ITEM_TICK, this, e_inst, e_inst->GetID(), slot);
+                parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
             }
         }
     }

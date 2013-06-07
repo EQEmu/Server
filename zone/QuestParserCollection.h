@@ -52,7 +52,7 @@ public:
 	int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<ItemInst*> *items = nullptr);
 	int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-	int EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
+	int EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data);
 	int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 	int EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data);
 	
@@ -79,7 +79,7 @@ private:
 	
 	void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<ItemInst*> *items);
 	void DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-	void DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
+	void DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data);
 	void DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
 	std::map<uint32, QuestInterface*> _interfaces;
@@ -93,7 +93,7 @@ private:
 	uint32 _player_quest_status;
 	uint32 _global_player_quest_status;
 	std::map<uint32, uint32> _spell_quest_status;
-	std::map<std::string, uint32> _item_quest_status;
+	std::map<uint32, uint32> _item_quest_status;
 	std::map<std::string, uint32> _encounter_quest_status;
 };
 

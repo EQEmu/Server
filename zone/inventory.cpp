@@ -330,7 +330,7 @@ void Client::DropItem(int16 slot_id)
 	// Take control of item in client inventory
 	ItemInst *inst = m_inv.PopItem(slot_id);
 	if(inst) {
-		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, 0, 0);
+		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", 0);
 		if(i != 0) {
 			safe_delete(inst);
 			return;
@@ -1014,7 +1014,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 			ItemInst *inst = m_inv.GetItem(SLOT_CURSOR);
 			if(inst) {
-				parse->EventItem(EVENT_DESTROY_ITEM, this, inst, 0, 0);
+				parse->EventItem(EVENT_DESTROY_ITEM, this, inst, nullptr, "", 0);
 			}
 
 			DeleteItemInInventory(move_in->from_slot);

@@ -2059,7 +2059,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	{
 		ItemInst* p_inst = (ItemInst*)inst;
 
-		int i = parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, p_inst->GetID(), slot_id);
+		int i = parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, nullptr, "", slot_id);
 		inst = m_inv[slot_id];
 		if(!inst)
 		{
@@ -2114,7 +2114,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				}
 				if(GetLevel() >= item->Click.Level2)
 				{
-					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, p_inst->GetID(), slot_id);
+					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", slot_id);
 					inst = m_inv[slot_id];
 					if(!inst)
 					{
@@ -2141,7 +2141,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
                 }
                 if(GetLevel() >= augitem->Click.Level2)
                 {
-					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, clickaug->GetID(), slot_id);
+					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, nullptr, "", slot_id);
 					inst = m_inv[slot_id];
 					if(!inst)
 					{
@@ -4595,7 +4595,7 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 						if(GetLevel() >= item->Click.Level2)
 						{
 							ItemInst* p_inst = (ItemInst*)inst;
-							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, p_inst->GetID(), castspell->inventoryslot);
+							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
 							if(i != 0) {
 								CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
@@ -4614,7 +4614,7 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 					else
 					{
 						ItemInst* p_inst = (ItemInst*)inst;
-						int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, p_inst->GetID(), castspell->inventoryslot);
+						int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
 						if(i != 0) {
 							CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);

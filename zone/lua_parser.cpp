@@ -366,43 +366,26 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 	return 0;
 }
 
-int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data) {
 	if(evt >= _LargestEventID) {
 		return 0;
 	}
-
+	
 	if(!item) {
 		return 0;
 	}
-
+	
 	if(!ItemHasQuestSub(item, LuaEvents[evt])) {
 		return 0;
 	}
-
+	
 	std::string package_name = "item_";
-
-	std::stringstream item_name;
-	const Item_Struct* itm = item->GetItem();
-	if(evt == EVENT_SCALE_CALC || evt == EVENT_ITEM_ENTER_ZONE)
-	{
-		item_name << itm->CharmFile;
-	}
-	else if(evt == EVENT_ITEM_CLICK || evt == EVENT_ITEM_CLICK_CAST)
-	{
-		item_name << "script_";
-		item_name << itm->ScriptFileID;
-	}
-	else
-	{
-		item_name << itm->ID;
-	}
-	package_name += item_name.str();
-
-	return _EventItem(package_name, evt, client, item, objid, extra_data);
+	package_name += std::to_string(item->GetID());
+	return _EventItem(package_name, evt, client, item, mob, data, extra_data);
 }
 
-int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data,
-						  luabind::object *l_func) {
+int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, Mob *mob,
+						  std::string data, uint32 extra_data, luabind::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 
 	int start = lua_gettop(L);
@@ -428,8 +411,9 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		l_client_o.push(L);
 		lua_setfield(L, -2, "owner");
 
+		//redo this arg function
 		auto arg_function = ItemArgumentDispatch[evt];
-		arg_function(this, L, client, item, objid, extra_data);
+		arg_function(this, L, client, item, 0, extra_data);
 		
 		quest_manager.StartQuest(nullptr, client, item);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -630,24 +614,8 @@ bool LuaParser::SpellHasQuestSub(uint32 spell_id, const char *subname) {
 
 bool LuaParser::ItemHasQuestSub(ItemInst *itm, const char *subname) {
 	std::string package_name = "item_";
+	package_name += std::to_string(itm->GetID());
 
-	std::stringstream item_name;
-	const Item_Struct* item = itm->GetItem();
-	if(strcmp("EVENT_SCALE_CALC", subname) == 0 || strcmp("EVENT_ITEM_ENTER_ZONE", subname) == 0)
-	{
-		item_name << item->CharmFile;
-	}
-	else if(strcmp("EVENT_ITEM_CLICK", subname) == 0 || strcmp("EVENT_ITEM_CLICK_CAST", subname) == 0 )
-	{
-		item_name << "script_";
-		item_name << item->ScriptFileID;
-	}
-	else
-	{
-		item_name << item->ID;
-	}
-
-	package_name += item_name.str();
 	return HasFunction(subname, package_name);
 }
 
@@ -676,11 +644,11 @@ void LuaParser::LoadGlobalPlayerScript(std::string filename) {
 	LoadScript(filename, "global_player");
 }
 
-void LuaParser::LoadItemScript(std::string filename, std::string item_script) {
-	std::stringstream package_name;
-	package_name << "item_" << item_script;
+void LuaParser::LoadItemScript(std::string filename, ItemInst *item) {
+	std::string package_name = "item_";
+	package_name += std::to_string(item->GetID());
 
-	LoadScript(filename, package_name.str());
+	LoadScript(filename, package_name);
 }
 
 void LuaParser::LoadSpellScript(std::string filename, uint32 spell_id) {
@@ -914,40 +882,23 @@ void LuaParser::DispatchEventPlayer(QuestEventID evt, Client *client, std::strin
 	}
 }
 
-void LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
+void LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data) {
 	if(!item)
 		return;
-
-	std::stringstream package_name;
-	package_name << "item_";
-
-	std::stringstream item_name;
-	const Item_Struct* itm = item->GetItem();
-	if(evt == EVENT_SCALE_CALC || evt == EVENT_ITEM_ENTER_ZONE)
-	{
-		item_name << itm->CharmFile;
-	}
-	else if(evt == EVENT_ITEM_CLICK || evt == EVENT_ITEM_CLICK_CAST)
-	{
-		item_name << "script_";
-		item_name << itm->ScriptFileID;
-	}
-	else
-	{
-		item_name << itm->ID;
-	}
-	package_name << item_name;
-
-	auto iter = lua_encounter_events_registered.find(package_name.str());
+	
+	std::string package_name = "item_";
+	package_name += std::to_string(item->GetID());
+	
+	auto iter = lua_encounter_events_registered.find(package_name);
 	if(iter == lua_encounter_events_registered.end()) {
 		return;
 	}
-
+	
 	auto riter = iter->second.begin();
 	while(riter != iter->second.end()) {
 		if(riter->event_id == evt) {
 			std::string package_name = "encounter_" + riter->encounter_name;
-			_EventItem(package_name, evt, client, item, objid, extra_data, &riter->lua_reference);
+			_EventItem(package_name, evt, client, item, mob, data, extra_data, &riter->lua_reference);
 		}
 		++riter;
 	}

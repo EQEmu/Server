@@ -107,6 +107,7 @@ QuestManager quest_manager;
 
 QuestManager::QuestManager() {
 	HaveProximitySays = false;
+	item_timers = 0;
 }
 
 QuestManager::~QuestManager() {
@@ -118,8 +119,13 @@ void QuestManager::Process() {
 	end = QTimerList.end();
 	while (cur != end) {
 		if (cur->Timer_.Enabled() && cur->Timer_.Check()) {
-			//make sure the mob is still in zone.
-			if(entity_list.IsMobInZone(cur->mob)){
+
+			if(cur->item) {
+				parse->EventItem(EVENT_TIMER, cur->mob->CastToClient(), cur->item, nullptr, cur->name, 0);
+
+				cur = QTimerList.begin();
+				end = QTimerList.end();
+			} else if(entity_list.IsMobInZone(cur->mob)) {
 				if(cur->mob->IsNPC()) {
 					parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
 				}
@@ -188,17 +194,7 @@ void QuestManager::EndQuest() {
 }
 
 void QuestManager::ClearAllTimers() {
-
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
-
-	end = QTimerList.end();
-	while (cur != end)
-	{
-		tmp = cur;
-		tmp++;
-		QTimerList.erase(cur);
-		cur = tmp;
-	}
+	QTimerList.clear();
 }
 
 //quest perl functions
@@ -461,17 +457,16 @@ void QuestManager::settimer(const char *timer_name, int seconds) {
 
 	end = QTimerList.end();
 	while (cur != end) {
-		if (cur->mob == owner && cur->name == timer_name) {
+		if (cur->mob == owner && cur->item == questitem && cur->name == timer_name) {
 			cur->mob = owner;
 			cur->Timer_.Enable();
 			cur->Timer_.Start(seconds * 1000, false);
-			printf("Resetting: %s for %d seconds\n", cur->name.c_str(), seconds);
 			return;
 		}
 		cur++;
 	}
 
-	QTimerList.push_back(QuestTimer(seconds * 1000, owner, timer_name));
+	QTimerList.push_back(QuestTimer(seconds * 1000, owner, questitem, timer_name));
 }
 
 void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
@@ -481,17 +476,16 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 
 	end = QTimerList.end();
 	while (cur != end) {
-		if (cur->mob == owner && cur->name == timer_name) {
+		if (cur->mob == owner && cur->item == questitem && cur->name == timer_name) {
 			cur->mob = owner;
 			cur->Timer_.Enable();
 			cur->Timer_.Start(milliseconds, false);
-			printf("Resetting: %s for %d seconds\n", cur->name.c_str(), milliseconds);
 			return;
 		}
 		cur++;
 	}
 
-	QTimerList.push_back(QuestTimer(milliseconds, owner, timer_name));
+	QTimerList.push_back(QuestTimer(milliseconds, owner, questitem, timer_name));
 }
 
 void QuestManager::stoptimer(const char *timer_name) {
@@ -502,7 +496,7 @@ void QuestManager::stoptimer(const char *timer_name) {
 	end = QTimerList.end();
 	while (cur != end)
 	{
-		if(cur->mob == owner && cur->name == timer_name)
+		if(cur->mob == owner && cur->item == questitem && cur->name == timer_name)
 		{
 			QTimerList.erase(cur);
 			return;
@@ -519,7 +513,7 @@ void QuestManager::stopalltimers() {
 	end = QTimerList.end();
 	while (cur != end)
 	{
-		if(cur->mob == owner)
+		if(cur->mob == owner && cur->item == questitem)
 		{
 			tmp = cur;
 			tmp++;
@@ -2904,4 +2898,20 @@ ItemInst *QuestManager::GetQuestItem() const {
 	}
 
 	return nullptr;
+}
+
+void QuestManager::stop_item_timers(ItemInst *item) {
+	if(item_timers == 0)
+		return;
+
+	auto iter = QTimerList.begin();
+	while(iter != QTimerList.end()) {
+		if(iter->item == item) {
+			iter = QTimerList.erase(iter);
+			--item_timers;
+			continue;
+		}
+
+		++iter;
+	}
 }

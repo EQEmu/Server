@@ -31,7 +31,7 @@ public:
 		std::vector<ItemInst*> *items);
 	virtual int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
 	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
+	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data);
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data);
 
@@ -47,7 +47,7 @@ public:
 	virtual void LoadGlobalNPCScript(std::string filename);
 	virtual void LoadPlayerScript(std::string filename);
 	virtual void LoadGlobalPlayerScript(std::string filename);
-	virtual void LoadItemScript(std::string filename, std::string item_script);
+	virtual void LoadItemScript(std::string filename, ItemInst *item);
 	virtual void LoadSpellScript(std::string filename, uint32 spell_id);
 	virtual void LoadEncounterScript(std::string filename, std::string encounter_name);
 
@@ -60,7 +60,7 @@ public:
 	virtual void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<ItemInst*> *items);
 	virtual void DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data);
-	virtual void DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data);
+	virtual void DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data);
 	virtual void DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
 private:
@@ -68,8 +68,8 @@ private:
 		std::vector<ItemInst*> *items, luabind::object *l_func = nullptr);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		luabind::object *l_func = nullptr);
-	int _EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data,
-		luabind::object *l_func = nullptr);
+	int _EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data,
+		uint32 extra_data, luabind::object *l_func = nullptr);
 	int _EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		luabind::object *l_func = nullptr);
 	int _EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, uint32 extra_data);

@@ -225,8 +225,8 @@ int PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::stri
 	return 0;
 }
 
-int PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, uint32 objid, uint32 extra_data) {
-	EventCommon(evt, objid, nullptr, nullptr, item, client, extra_data, false, nullptr);
+int PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data) {
+	EventCommon(evt, item->GetID(), nullptr, nullptr, item, client, extra_data, false, nullptr);
 	return 0;
 }
 
@@ -300,30 +300,12 @@ bool PerlembParser::SpellHasQuestSub(uint32 spell_id, const char *subname) {
 
 bool PerlembParser::ItemHasQuestSub(ItemInst *itm, const char *subname) {
 	std::stringstream package_name;
-	package_name << "qst_item_";
-
-	std::string item_name;
-	const Item_Struct* item = itm->GetItem();
-	if(strcmp("EVENT_SCALE_CALC", subname) == 0 || strcmp("EVENT_ITEM_ENTER_ZONE", subname) == 0)
-	{
-		item_name = item->CharmFile;
-	}
-	else if(strcmp("EVENT_ITEM_CLICK", subname) == 0 || strcmp("EVENT_ITEM_CLICK_CAST", subname) == 0 )
-	{
-		item_name = "script_";
-		item_name += itoa(item->ScriptFileID);
-	}
-	else
-	{
-		item_name += itoa(item->ID);
-	}
-
-	package_name << item_name;
+	package_name << "qst_item_" << itm->GetID();
 
 	if(!perl)
 		return false;
 
-	auto iter = item_quest_status_.find(item_name);
+	auto iter = item_quest_status_.find(itm->GetID());
 	if(iter == item_quest_status_.end() || iter->second == QuestFailedToLoad) {
 		return false;
 	}
@@ -439,34 +421,34 @@ void PerlembParser::LoadGlobalPlayerScript(std::string filename) {
 	global_player_quest_status_ = questLoaded;
 }
 
-void PerlembParser::LoadItemScript(std::string filename, std::string item_script) {
+void PerlembParser::LoadItemScript(std::string filename, ItemInst *item) {
 	std::stringstream package_name;
-	package_name << "qst_item_" << item_script;
-
+	package_name << "qst_item_" << item->GetID();
+	
 	if(!perl)
 		return;
-
+	
 	if(perl->InUse())
 	{
 		return;
 	}
-
-	auto iter = item_quest_status_.find(item_script);
+	
+	auto iter = item_quest_status_.find(item->GetID());
 	if(iter != item_quest_status_.end()) {
 		return;
 	}
-
+	
 	try {
 		perl->eval_file(package_name.str().c_str(), filename.c_str());
 	}
 	catch(const char *err)
 	{
 		LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
-		item_quest_status_[item_script] = questFailedToLoad;
+		item_quest_status_[item->GetID()] = questFailedToLoad;
 		return;
 	}
-
-	item_quest_status_[item_script] = questLoaded;
+	
+	item_quest_status_[item->GetID()] = questLoaded;
 }
 
 void PerlembParser::LoadSpellScript(std::string filename, uint32 spell_id) {
@@ -810,17 +792,7 @@ void PerlembParser::GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlaye
 	else if(isItemQuest) {
 		const Item_Struct* item = iteminst->GetItem();
 		package_name = "qst_item_";
-
-		if (event == EVENT_SCALE_CALC || event == EVENT_ITEM_ENTER_ZONE) {
-			package_name += item->CharmFile;
-		}
-		else if (event == EVENT_ITEM_CLICK || event == EVENT_ITEM_CLICK_CAST) {
-			package_name += "script_";
-			package_name += itoa(item->ScriptFileID);
-		}
-		else {
-			package_name += itoa(objid);
-		}
+		package_name += itoa(item->ID);
 	}
 	else if(isPlayerQuest) {
 		package_name = "qst_player";

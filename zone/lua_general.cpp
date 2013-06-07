@@ -112,29 +112,11 @@ void register_item_event(std::string name, int evt, Lua_Item item, luabind::obje
 		return;
 	}
 
-	std::stringstream package_name;
-	package_name << "item_";
+	std::string package_name = "item_";
+	package_name += std::to_string(itm->ID);
 	
-	std::stringstream item_name;
-	if(EVENT_SCALE_CALC == evt || EVENT_ITEM_ENTER_ZONE == evt)
-	{
-		item_name << itm->CharmFile;
-	}
-	else if(EVENT_ITEM_CLICK == evt || EVENT_ITEM_CLICK_CAST == evt)
-	{
-		item_name << "script_";
-		item_name << itm->ScriptFileID;
-	}
-	else
-	{
-		item_name << "item_";
-		item_name << itm->ID;
-	}
-	
-	package_name << item_name;
-
 	if(luabind::type(func) == LUA_TFUNCTION) {
-		register_event(package_name.str(), name, evt, func);
+		register_event(package_name, name, evt, func);
 	}
 }
 
@@ -144,27 +126,10 @@ void unregister_item_event(std::string name, int evt, Lua_Item item) {
 		return;
 	}
 
-	std::stringstream package_name;
-	package_name << "item_";
-	
-	std::stringstream item_name;
-	if(EVENT_SCALE_CALC == evt || EVENT_ITEM_ENTER_ZONE == evt)
-	{
-		item_name << itm->CharmFile;
-	}
-	else if(EVENT_ITEM_CLICK == evt || EVENT_ITEM_CLICK_CAST == evt)
-	{
-		item_name << "script_";
-		item_name << itm->ScriptFileID;
-	}
-	else
-	{
-		item_name << "item_";
-		item_name << itm->ID;
-	}
-	
-	package_name << item_name;
-	unregister_event(package_name.str(), name, evt);
+	std::string package_name = "item_";
+	package_name += std::to_string(itm->ID);
+
+	unregister_event(package_name, name, evt);
 }
 
 void register_spell_event(std::string name, int evt, int spell_id, luabind::object func) {
