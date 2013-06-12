@@ -37,7 +37,7 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/eq_packet_structs.h"
 #include "../common/eq_constants.h"
 #include "../common/item_struct.h"
-#include "callback_manager.h"
+#include "../common/timer.h"
 
 // Helper typedefs
 typedef std::list<ItemInst*>::const_iterator					iter_queue;
@@ -266,8 +266,6 @@ public:
 		m_instnodrop = false;
 		m_merchantslot = 0;
 		m_color = 0;
-
-		m_on_destroy = GetEQCallback("OnItemInstDestroy");
 	}
 
 	ItemInst(const ItemInst& copy);
@@ -381,6 +379,8 @@ public:
 	inline int32 GetSerialNumber() const { return m_SerialNumber; }
 	inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
 
+	std::map<std::string, Timer>& GetTimers() { return m_timers; }
+
 protected:
 	//////////////////////////
 	// Protected Members
@@ -407,7 +407,7 @@ protected:
 	// Items inside of this item (augs or contents);
 	std::map<uint8, ItemInst*> m_contents; // Zero-based index: min=0, max=9
 	std::map<std::string, std::string> m_custom_data;
-	eqemu_callback m_on_destroy;
+	std::map<std::string, Timer> m_timers;
 };
 
 class EvoItemInst: public ItemInst {

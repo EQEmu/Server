@@ -1013,8 +1013,10 @@ public:
 
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count=1);
 
-	void CalcItemScale(bool login = false);
-	bool CalcItemScale(uint32 slot_x, uint32 slot_y, bool login = false);
+	void CalcItemScale();
+	bool CalcItemScale(uint32 slot_x, uint32 slot_y);
+	void DoItemEnterZone();
+	bool DoItemEnterZone(uint32 slot_x, uint32 slot_y);
 	void SummonAndRezzAllCorpses();
 	void SummonAllCorpses(float dest_x, float dest_y, float dest_z, float dest_heading);
 	void DepopAllCorpses();

@@ -44,10 +44,10 @@ public:
 	void Init();
 	void ReloadQuests(bool reset_timers = true);
 
-	bool HasQuestSub(uint32 npcid, const char *subname);
-	bool PlayerHasQuestSub(const char *subname);
-	bool SpellHasQuestSub(uint32 spell_id, const char *subname);
-	bool ItemHasQuestSub(ItemInst *itm, const char *subname);
+	bool HasQuestSub(uint32 npcid, QuestEventID evt);
+	bool PlayerHasQuestSub(QuestEventID evt);
+	bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
+	bool ItemHasQuestSub(ItemInst *itm, QuestEventID evt);
 
 	int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<ItemInst*> *items = nullptr);
@@ -59,10 +59,10 @@ public:
 	void GetErrors(std::list<std::string> &err);
 
 private:
-	bool HasQuestSubLocal(uint32 npcid, const char *subname);
-	bool HasQuestSubGlobal(const char *subname);
-	bool PlayerHasQuestSubLocal(const char *subname);
-	bool PlayerHasQuestSubGlobal(const char *subname);
+	bool HasQuestSubLocal(uint32 npcid, QuestEventID evt);
+	bool HasQuestSubGlobal(QuestEventID evt);
+	bool PlayerHasQuestSubLocal(QuestEventID evt);
+	bool PlayerHasQuestSubGlobal(QuestEventID evt);
 
 	int EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<ItemInst*> *items);
 	int EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<ItemInst*> *items);

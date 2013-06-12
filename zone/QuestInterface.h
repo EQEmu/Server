@@ -38,12 +38,13 @@ public:
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) { return 0; }
 	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data) { return 0; }
 	
-	virtual bool HasQuestSub(uint32 npcid, const char *subname) { return false; }
-	virtual bool HasGlobalQuestSub(const char *subname) { return false; }
-	virtual bool PlayerHasQuestSub(const char *subname) { return false; }
-	virtual bool GlobalPlayerHasQuestSub(const char *subname) { return false; }
-	virtual bool SpellHasQuestSub(uint32 spell_id, const char *subname) { return false; }
-	virtual bool ItemHasQuestSub(ItemInst *itm, const char *subname) { return false; }
+	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt) { return false; }
+	virtual bool HasGlobalQuestSub(QuestEventID evt) { return false; }
+	virtual bool PlayerHasQuestSub(QuestEventID evt) { return false; }
+	virtual bool GlobalPlayerHasQuestSub(QuestEventID evt) { return false; }
+	virtual bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt) { return false; }
+	virtual bool ItemHasQuestSub(ItemInst *itm, QuestEventID evt) { return false; }
+	virtual bool EncounterHasQuestSub(std::string encounter_name, QuestEventID evt) { return false; }
 
 	virtual void LoadNPCScript(std::string filename, int npc_id) { }
 	virtual void LoadGlobalNPCScript(std::string filename) { }

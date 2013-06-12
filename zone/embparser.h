@@ -65,12 +65,12 @@ public:
 	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data);
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 
-	virtual bool HasQuestSub(uint32 npcid, const char *subname);
-	virtual bool HasGlobalQuestSub(const char *subname);
-	virtual bool PlayerHasQuestSub(const char *subname);
-	virtual bool GlobalPlayerHasQuestSub(const char *subname);
-	virtual bool SpellHasQuestSub(uint32 spell_id, const char *subname);
-	virtual bool ItemHasQuestSub(ItemInst *itm, const char *subname);
+	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt);
+	virtual bool HasGlobalQuestSub(QuestEventID evt);
+	virtual bool PlayerHasQuestSub(QuestEventID evt);
+	virtual bool GlobalPlayerHasQuestSub(QuestEventID evt);
+	virtual bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
+	virtual bool ItemHasQuestSub(ItemInst *itm, QuestEventID evt);
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);

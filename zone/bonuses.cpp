@@ -2398,26 +2398,26 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 	}
 }
 
-void Client::CalcItemScale(bool login)
+void Client::CalcItemScale()
 {
 	bool changed = false;
 
-	if(CalcItemScale(0, 21, login))
+	if(CalcItemScale(0, 21))
 		changed = true;
 
-	if(CalcItemScale(22, 30, login))
+	if(CalcItemScale(22, 30))
 		changed = true;
 
-	if(CalcItemScale(251, 341, login))
+	if(CalcItemScale(251, 341))
 		changed = true;
 
-	if(CalcItemScale(400, 405, login))
+	if(CalcItemScale(400, 405))
 		changed = true;
 
 	//Power Source Slot
 	if (GetClientVersion() >= EQClientSoF)
 	{
-		if(CalcItemScale(9999, 10000, login))
+		if(CalcItemScale(9999, 10000))
 			changed = true;
 	}
 
@@ -2427,7 +2427,7 @@ void Client::CalcItemScale(bool login)
 	}
 }
 
-bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
+bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 {
 	bool changed = false;
 	int i;
@@ -2442,9 +2442,9 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
 			EvoItemInst* e_inst = (EvoItemInst*)inst;
 			uint16 oldexp = e_inst->GetExp();
 
-			if(login) {
-				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
-			}
+			//if(login) {
+			//	parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
+			//}
 			parse->EventItem(EVENT_SCALE_CALC, this, e_inst, nullptr, "", 0);
 
 			if (e_inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
@@ -2466,9 +2466,9 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
 				EvoItemInst* e_inst = (EvoItemInst*)a_inst;
 				uint16 oldexp = e_inst->GetExp();
 
-				if(login) {
-					parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
-				}
+				//if(login) {
+				//	parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
+				//}
 				parse->EventItem(EVENT_SCALE_CALC, this, e_inst, nullptr, "", 0);
 
 				if (e_inst->GetExp() != oldexp)
@@ -2477,6 +2477,91 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y, bool login)
 					changed = true;
 					update_slot = true;
 				}
+			}
+		}
+
+		if(update_slot)
+		{
+			SendItemPacket(i, inst, ItemPacketCharmUpdate);
+		}
+	}
+	return changed;
+}
+
+void Client::DoItemEnterZone() {
+	bool changed = false;
+
+	if(DoItemEnterZone(0, 21))
+		changed = true;
+
+	if(DoItemEnterZone(22, 30))
+		changed = true;
+
+	if(DoItemEnterZone(251, 341))
+		changed = true;
+
+	if(DoItemEnterZone(400, 405))
+		changed = true;
+
+	//Power Source Slot
+	if (GetClientVersion() >= EQClientSoF)
+	{
+		if(DoItemEnterZone(9999, 10000))
+			changed = true;
+	}
+
+	if(changed)
+	{
+		CalcBonuses();
+	}
+}
+
+bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
+	bool changed = false;
+	for(int i = slot_x; i < slot_y; i++) {
+		ItemInst* inst = m_inv.GetItem(i);
+		if(inst == 0)
+			continue;
+
+		bool update_slot = false;
+		if(inst->IsScaling())
+		{
+			EvoItemInst* e_inst = (EvoItemInst*)inst;
+			uint16 oldexp = e_inst->GetExp();
+
+			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
+
+			if (e_inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
+				e_inst->ScaleItem();
+				changed = true;
+				update_slot = true;
+			}
+		} else {
+			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
+		}
+
+		//iterate all augments
+		for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
+		{
+			ItemInst *a_inst = inst->GetAugment(x);
+			if(!a_inst)
+				continue;
+
+			if(a_inst->IsScaling())
+			{
+				EvoItemInst* e_inst = (EvoItemInst*)a_inst;
+				uint16 oldexp = e_inst->GetExp();
+
+				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
+
+				if (e_inst->GetExp() != oldexp)
+				{
+					e_inst->ScaleItem();
+					changed = true;
+					update_slot = true;
+				}
+			} else {
+				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, a_inst, nullptr, "", 0);
 			}
 		}
 

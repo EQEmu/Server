@@ -30,6 +30,14 @@
 uint32 current_time = 0;
 uint32 last_time = 0;
 
+Timer::Timer() {
+	timer_time = 0;
+	start_time = current_time;
+	set_at_trigger = timer_time;
+	pUseAcurateTiming = false;
+	enabled = false;
+}
+
 Timer::Timer(uint32 in_timer_time, bool iUseAcurateTiming) {
 	timer_time = in_timer_time;
 	start_time = current_time;

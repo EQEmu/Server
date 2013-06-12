@@ -80,18 +80,18 @@ void QuestParserCollection::ReloadQuests(bool reset_timers) {
 	}
 }
 
-bool QuestParserCollection::HasQuestSub(uint32 npcid, const char *subname) {
-	return HasQuestSubLocal(npcid, subname) || HasQuestSubGlobal(subname);
+bool QuestParserCollection::HasQuestSub(uint32 npcid, QuestEventID evt) {
+	return HasQuestSubLocal(npcid, evt) || HasQuestSubGlobal(evt);
 }
 
-bool QuestParserCollection::HasQuestSubLocal(uint32 npcid, const char *subname) {
+bool QuestParserCollection::HasQuestSubLocal(uint32 npcid, QuestEventID evt) {
 	std::map<uint32, uint32>::iterator iter = _npc_quest_status.find(npcid);
 	
 	if(iter != _npc_quest_status.end()) {
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			if(qiter->second->HasQuestSub(npcid, subname)) {
+			if(qiter->second->HasQuestSub(npcid, evt)) {
 				return true;
 			}
 		}
@@ -102,7 +102,7 @@ bool QuestParserCollection::HasQuestSubLocal(uint32 npcid, const char *subname) 
 			_npc_quest_status[npcid] = qi->GetIdentifier();
 
 			qi->LoadNPCScript(filename, npcid);
-			if(qi->HasQuestSub(npcid, subname)) {
+			if(qi->HasQuestSub(npcid, evt)) {
 				return true;
 			}
 		} else {
@@ -112,21 +112,21 @@ bool QuestParserCollection::HasQuestSubLocal(uint32 npcid, const char *subname) 
 	return false;
 }
 
-bool QuestParserCollection::HasQuestSubGlobal(const char *subname) {
+bool QuestParserCollection::HasQuestSubGlobal(QuestEventID evt) {
 	if(_global_npc_quest_status == QuestUnloaded) {
 		std::string filename;
 		QuestInterface *qi = GetQIByGlobalNPCQuest(filename);
 		if(qi) {
 			qi->LoadGlobalNPCScript(filename);
 			_global_npc_quest_status = qi->GetIdentifier();
-			if(qi->HasGlobalQuestSub(subname)) {
+			if(qi->HasGlobalQuestSub(evt)) {
 				return true;
 			}
 		}
 	} else {
 		if(_global_npc_quest_status != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(_global_npc_quest_status);
-			if(qiter->second->HasGlobalQuestSub(subname)) {
+			if(qiter->second->HasGlobalQuestSub(evt)) {
 				return true;
 			}
 		}
@@ -134,49 +134,49 @@ bool QuestParserCollection::HasQuestSubGlobal(const char *subname) {
 	return false;
 }
 
-bool QuestParserCollection::PlayerHasQuestSub(const char *subname) {
-	return PlayerHasQuestSubLocal(subname) || PlayerHasQuestSubGlobal(subname);
+bool QuestParserCollection::PlayerHasQuestSub(QuestEventID evt) {
+	return PlayerHasQuestSubLocal(evt) || PlayerHasQuestSubGlobal(evt);
 }
 
-bool QuestParserCollection::PlayerHasQuestSubLocal(const char *subname) {
+bool QuestParserCollection::PlayerHasQuestSubLocal(QuestEventID evt) {
 	if(_player_quest_status == QuestUnloaded) {
 		std::string filename;	
 		QuestInterface *qi = GetQIByPlayerQuest(filename);
 		if(qi) {
 			_player_quest_status = qi->GetIdentifier();
 			qi->LoadPlayerScript(filename);
-			return qi->PlayerHasQuestSub(subname);
+			return qi->PlayerHasQuestSub(evt);
 		}
 	} else if(_player_quest_status != QuestFailedToLoad) {
 		std::map<uint32, QuestInterface*>::iterator iter = _interfaces.find(_player_quest_status);
-		return iter->second->PlayerHasQuestSub(subname);
+		return iter->second->PlayerHasQuestSub(evt);
 	}
 	return false;
 }
 
-bool QuestParserCollection::PlayerHasQuestSubGlobal(const char *subname) {
+bool QuestParserCollection::PlayerHasQuestSubGlobal(QuestEventID evt) {
 	if(_global_player_quest_status == QuestUnloaded) {
 		std::string filename;	
 		QuestInterface *qi = GetQIByPlayerQuest(filename);
 		if(qi) {
 			_global_player_quest_status = qi->GetIdentifier();
 			qi->LoadPlayerScript(filename);
-			return qi->GlobalPlayerHasQuestSub(subname);
+			return qi->GlobalPlayerHasQuestSub(evt);
 		}
 	} else if(_global_player_quest_status != QuestFailedToLoad) {
 		std::map<uint32, QuestInterface*>::iterator iter = _interfaces.find(_global_player_quest_status);
-		return iter->second->GlobalPlayerHasQuestSub(subname);
+		return iter->second->GlobalPlayerHasQuestSub(evt);
 	}
 	return false;
 }
 
-bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, const char *subname) {
+bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) {
 	std::map<uint32, uint32>::iterator iter = _spell_quest_status.find(spell_id);
 	if(iter != _spell_quest_status.end()) {
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			return qiter->second->SpellHasQuestSub(spell_id, subname);
+			return qiter->second->SpellHasQuestSub(spell_id, evt);
 		}
 	} else {
 		std::string filename;
@@ -184,7 +184,7 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, const char *subnam
 		if(qi) {
 			_spell_quest_status[spell_id] = qi->GetIdentifier();
 			qi->LoadSpellScript(filename, spell_id);
-			return qi->SpellHasQuestSub(spell_id, subname);
+			return qi->SpellHasQuestSub(spell_id, evt);
 		} else {
 			_spell_quest_status[spell_id] = QuestFailedToLoad;
 		}
@@ -192,7 +192,7 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, const char *subnam
 	return false;
 }
 
-bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, const char *subname) {
+bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
 	std::string item_script;
 	if(itm->GetItem()->ScriptFileID != 0) {
 		item_script = "script_";
@@ -209,7 +209,7 @@ bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, const char *subname) 
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			return qiter->second->ItemHasQuestSub(itm, subname);
+			return qiter->second->ItemHasQuestSub(itm, evt);
 		}
 	} else {
 		std::string filename;
@@ -217,7 +217,7 @@ bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, const char *subname) 
 		if(qi) {
 			_item_quest_status[item_id] = qi->GetIdentifier();
 			qi->LoadItemScript(filename, itm);
-			return qi->ItemHasQuestSub(itm, subname);
+			return qi->ItemHasQuestSub(itm, evt);
 		} else {
 			_item_quest_status[item_id] = QuestFailedToLoad;
 		}
@@ -646,7 +646,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 }
 
 QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filename) {
-	// simply look for quests/global/global_npc.pl
+	// simply look for /quests/global/global_npc.ext
 	filename = "quests/";
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";

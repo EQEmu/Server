@@ -333,7 +333,6 @@ void Client::DropItem(int16 slot_id)
 		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", 0);
 		if(i != 0) {
 			safe_delete(inst);
-			return;
 		}
 	} else {
 		// Item doesn't exist in inventory!
@@ -348,6 +347,9 @@ void Client::DropItem(int16 slot_id)
 	} else {
 		database.SaveInventory(CharacterID(), nullptr, slot_id);
 	}
+
+	if(!inst)
+		return;
 
 	// Package as zone object
 	Object* object = new Object(this, inst);

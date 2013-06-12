@@ -569,7 +569,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		}
 
 		bool quest_npc = false;
-		if(parse->HasQuestSub(tradingWith->GetNPCTypeID(), "EVENT_TRADE")) {
+		if(parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
 			// This is a quest NPC
 			quest_npc = true;
 		}

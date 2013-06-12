@@ -1029,14 +1029,14 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	case 8: { // /say
 		if(message[0] == COMMAND_CHAR) {
 			if(command_dispatch(this, message) == -2) {
-				//if(parse->PlayerHasQuestSub("EVENT_COMMAND")) {
-				//	int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
-				//	if(i != 0) {
-				//		Message(13, "Command '%s' not recognized.", message);
-				//	}
-				//} else {
+				if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
+					if(i != 0) {
+						Message(13, "Command '%s' not recognized.", message);
+					}
+				} else {
 					Message(13, "Command '%s' not recognized.", message);
-				//}
+				}
 			}
 			break;
 		}
@@ -4737,7 +4737,7 @@ void Client::ShowSkillsWindow()
 		if(GetSkill(it->second) > 0 || MaxSkill(it->second) > 0) {
 			WindowText += it->first;
 			// line up the values
-			for (int j = 0; j < 5; j++)
+			for (int j = 0; j < MAX_AUGMENT_SLOTS; j++)
 				WindowText += "&nbsp;";
 			WindowText += itoa(this->GetSkill(it->second));
 			if (MaxSkill(it->second) > 0) {

@@ -35,13 +35,13 @@ public:
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data);
 	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data);
 
-	virtual bool HasQuestSub(uint32 npc_id, const char *subname);
-	virtual bool HasGlobalQuestSub(const char *subname);
-	virtual bool PlayerHasQuestSub(const char *subname);
-	virtual bool GlobalPlayerHasQuestSub(const char *subname);
-	virtual bool SpellHasQuestSub(uint32 spell_id, const char *subname);
-	virtual bool ItemHasQuestSub(ItemInst *itm, const char *subname);
-	virtual bool EncounterHasQuestSub(std::string encounter_name, const char *subname);
+	virtual bool HasQuestSub(uint32 npc_id, QuestEventID evt);
+	virtual bool HasGlobalQuestSub(QuestEventID evt);
+	virtual bool PlayerHasQuestSub(QuestEventID evt);
+	virtual bool GlobalPlayerHasQuestSub(QuestEventID evt);
+	virtual bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
+	virtual bool ItemHasQuestSub(ItemInst *itm, QuestEventID evt);
+	virtual bool EncounterHasQuestSub(std::string encounter_name, QuestEventID evt);
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);
@@ -78,6 +78,7 @@ private:
 	bool HasFunction(std::string function, std::string package_name);
 	void ClearStates();
 	void MapFunctions(lua_State *L);
+	QuestEventID ConvertLuaEvent(QuestEventID evt);
 
 	std::map<std::string, std::string> vars_;
 	std::map<std::string, bool> loaded_;

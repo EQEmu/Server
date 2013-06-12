@@ -178,7 +178,6 @@ public:
 	Lua_Mob GetPet();
 	Lua_Mob GetOwner();
 	Lua_HateList GetHateList();
-
 	Lua_Mob GetHateTop();
 	Lua_Mob GetHateDamageTop(Lua_Mob other);
 	Lua_Mob GetHateRandom();

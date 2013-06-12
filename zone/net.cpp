@@ -42,7 +42,6 @@
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
-#include "../common/callback_manager.h"
 
 #include "ZoneConfig.h"
 #include "masterentity.h"
@@ -288,10 +287,6 @@ int main(int argc, char** argv) {
 	PerlembParser *perl_parser = new PerlembParser();
 	parse->RegisterQuestInterface(perl_parser, "pl");
 #endif
-
-	RegisterEQCallback("OnItemInstDestroy", [](void* item) {
-		quest_manager.stop_item_timers(reinterpret_cast<ItemInst*>(item));
-	});
 
 	//now we have our parser, load the quests
 	_log(ZONE__INIT, "Loading quests");

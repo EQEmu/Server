@@ -2,7 +2,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(common_sources
 	BasePacket.cpp
-	callback_manager.cpp
 	classes.cpp
 	Condition.cpp
 	crash.cpp
@@ -94,7 +93,6 @@ SET(common_headers
 	BasePacket.h
 	bodytypes.h
 	breakdowns.h
-	callback_manager.h
 	classes.h
 	common_profile.h
 	Condition.h

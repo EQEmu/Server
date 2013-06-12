@@ -35,7 +35,7 @@ extern Zone* zone;
 
 const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_SAY",
-	"EVENT_TRADE",
+	"EVENT_ITEM",
 	"EVENT_DEATH",
 	"EVENT_SPAWN",
 	"EVENT_ATTACK",
@@ -50,21 +50,21 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_HP",
 	"EVENT_ENTER",
 	"EVENT_EXIT",
-	"EVENT_ENTER_ZONE",
-	"EVENT_CLICK_DOOR",
+	"EVENT_ENTERZONE",
+	"EVENT_CLICKDOOR",
 	"EVENT_LOOT",
 	"EVENT_ZONE",
 	"EVENT_LEVEL_UP",
 	"EVENT_KILLED_MERIT",
 	"EVENT_CAST_ON",
-	"EVENT_TASK_ACCEPTED",
+	"EVENT_TASKACCEPTED",
 	"EVENT_TASK_STAGE_COMPLETE",
 	"EVENT_TASK_UPDATE",
 	"EVENT_TASK_COMPLETE",
 	"EVENT_TASK_FAIL",
 	"EVENT_AGGRO_SAY",
 	"EVENT_PLAYER_PICKUP",
-	"EVENT_POPUP_RESPONSE",
+	"EVENT_POPUPRESPONSE",
 	"EVENT_PROXIMITY_SAY",
 	"EVENT_CAST",
 	"EVENT_CAST_BEGIN",
@@ -72,8 +72,10 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_ITEM_ENTER_ZONE",
 	"EVENT_TARGET_CHANGE",
 	"EVENT_HATE_LIST",
-	"EVENT_SPELL_EFFECT",
-	"EVENT_SPELL_BUFF_TIC",
+	"EVENT_SPELL_EFFECT_CLIENT",
+	"EVENT_SPELL_EFFECT_NPC",
+	"EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT",
+	"EVENT_SPELL_EFFECT_BUFF_TIC_NPC",
 	"EVENT_SPELL_FADE",
 	"EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE",
 	"EVENT_COMBINE_SUCCESS",
@@ -95,7 +97,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DUEL_LOSE",
 	"EVENT_ENCOUNTER_LOAD",
 	"EVENT_ENCOUNTER_UNLOAD",
-	"EVENT_COMMAND",
+	"EVENT_SAY",
 	"EVENT_DROP_ITEM",
 	"EVENT_DESTROY_ITEM",
 	"EVENT_FEIGN_DEATH"
@@ -235,12 +237,17 @@ int PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32
 	return 0;
 }
 
-bool PerlembParser::HasQuestSub(uint32 npcid, const char *subname) {
+bool PerlembParser::HasQuestSub(uint32 npcid, QuestEventID evt) {
 	std::stringstream package_name;
 	package_name << "qst_npc_" << npcid;
 
 	if(!perl)
 		return false;
+
+	if(evt >= _LargestEventID)
+		return false;
+
+	const char *subname = QuestEventSubroutines[evt];
 
 	auto iter = npc_quest_status_.find(npcid);
 	if(iter == npc_quest_status_.end() || iter->second == QuestFailedToLoad) {
@@ -250,7 +257,7 @@ bool PerlembParser::HasQuestSub(uint32 npcid, const char *subname) {
 	return(perl->SubExists(package_name.str().c_str(), subname));
 }
 
-bool PerlembParser::HasGlobalQuestSub(const char *subname) {
+bool PerlembParser::HasGlobalQuestSub(QuestEventID evt) {
 	if(!perl)
 		return false;
 
@@ -258,10 +265,15 @@ bool PerlembParser::HasGlobalQuestSub(const char *subname) {
 		return false;
 	}
 
+	if(evt >= _LargestEventID)
+		return false;
+
+	const char *subname = QuestEventSubroutines[evt];
+
 	return(perl->SubExists("qst_global_npc", subname));
 }
 
-bool PerlembParser::PlayerHasQuestSub(const char *subname) {
+bool PerlembParser::PlayerHasQuestSub(QuestEventID evt) {
 	if(!perl)
 		return false;
 
@@ -269,10 +281,15 @@ bool PerlembParser::PlayerHasQuestSub(const char *subname) {
 		return false;
 	}
 
+	if(evt >= _LargestEventID)
+		return false;
+
+	const char *subname = QuestEventSubroutines[evt];
+
 	return(perl->SubExists("qst_player", subname));
 }
 
-bool PerlembParser::GlobalPlayerHasQuestSub(const char *subname) {
+bool PerlembParser::GlobalPlayerHasQuestSub(QuestEventID evt) {
 	if(!perl)
 		return false;
 
@@ -280,10 +297,15 @@ bool PerlembParser::GlobalPlayerHasQuestSub(const char *subname) {
 		return false;
 	}
 
+	if(evt >= _LargestEventID)
+		return false;
+
+	const char *subname = QuestEventSubroutines[evt];
+
 	return(perl->SubExists("qst_global_player", subname));
 }
 
-bool PerlembParser::SpellHasQuestSub(uint32 spell_id, const char *subname) {
+bool PerlembParser::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) {
 	std::stringstream package_name;
 	package_name << "qst_spell_" << spell_id;
 
@@ -295,15 +317,25 @@ bool PerlembParser::SpellHasQuestSub(uint32 spell_id, const char *subname) {
 		return false;
 	}
 
+	if(evt >= _LargestEventID)
+		return false;
+
+	const char *subname = QuestEventSubroutines[evt];
+
 	return(perl->SubExists(package_name.str().c_str(), subname));
 }
 
-bool PerlembParser::ItemHasQuestSub(ItemInst *itm, const char *subname) {
+bool PerlembParser::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
 	std::stringstream package_name;
 	package_name << "qst_item_" << itm->GetID();
 
 	if(!perl)
 		return false;
+
+	if(evt >= _LargestEventID)
+		return false;
+
+	const char *subname = QuestEventSubroutines[evt];
 
 	auto iter = item_quest_status_.find(itm->GetID());
 	if(iter == item_quest_status_.end() || iter->second == QuestFailedToLoad) {
@@ -753,8 +785,10 @@ void PerlembParser::AddQueueEvent(QuestEventID event, uint32 objid, const char *
 void PerlembParser::GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 
 		bool &isSpellQuest, QuestEventID event, NPC* npcmob, ItemInst* iteminst, Mob* mob, bool global)
 {
-	if(event == EVENT_SPELL_EFFECT || 
-		event == EVENT_SPELL_BUFF_TIC ||
+	if(event == EVENT_SPELL_EFFECT_CLIENT || 
+		event == EVENT_SPELL_EFFECT_NPC ||
+		event == EVENT_SPELL_BUFF_TIC_CLIENT ||
+		event == EVENT_SPELL_BUFF_TIC_NPC ||
 		event == EVENT_SPELL_FADE ||
 		event == EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)
 	{
@@ -1252,8 +1286,10 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			break;
 		}
 
-		case EVENT_SPELL_EFFECT:
-		case EVENT_SPELL_BUFF_TIC:
+		case EVENT_SPELL_EFFECT_CLIENT:
+		case EVENT_SPELL_EFFECT_NPC:
+		case EVENT_SPELL_BUFF_TIC_CLIENT:
+		case EVENT_SPELL_BUFF_TIC_NPC:
 		{
 			ExportVar(package_name.c_str(), "caster_id", extradata);
 			break;
@@ -1289,7 +1325,9 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 
 		case EVENT_COMMAND: {
-			ExportVar(package_name.c_str(), "message", data);
+			ExportVar(package_name.c_str(), "text", data);
+			ExportVar(package_name.c_str(), "data", "0");
+			ExportVar(package_name.c_str(), "langid", "0");
 			break;
 		}
 

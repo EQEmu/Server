@@ -29,6 +29,7 @@
 class Timer
 {
 public:
+	Timer();
 	Timer(uint32 timer_time, bool iUseAcurateTiming = false);
 	Timer(uint32 start, uint32 timer, bool iUseAcurateTiming);
 	~Timer() { }
@@ -62,9 +63,6 @@ private:
 	// Instead of Check() setting the start_time = now,
 	// it it sets it to start_time += timer_time
 	bool	pUseAcurateTiming;
-
-//	static uint32 current_time;
-//	static uint32 last_time;
 };
 
 #endif

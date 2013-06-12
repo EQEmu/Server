@@ -1211,7 +1211,7 @@ luabind::scope lua_register_client() {
 		.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
 		.def("GetTotalSecondsPlayed", (uint32(Lua_Client::*)(void))&Lua_Client::GetTotalSecondsPlayed)
 		.def("UpdateLDoNPoints", (void(Lua_Client::*)(int,uint32))&Lua_Client::UpdateLDoNPoints)
-		.def("SetDeity", (void(Lua_Client::*)(int v))&Lua_Client::SetDeity)
+		.def("SetDeity", (void(Lua_Client::*)(int))&Lua_Client::SetDeity)
 		.def("AddEXP", (void(Lua_Client::*)(uint32))&Lua_Client::AddEXP)
 		.def("AddEXP", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddEXP)
 		.def("AddEXP", (void(Lua_Client::*)(uint32,int,bool))&Lua_Client::AddEXP)

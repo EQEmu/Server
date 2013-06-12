@@ -918,7 +918,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 					dmg = weapon_item->GetItem()->Damage;
 				}
 
-				for(int x = 0; x < 5; x++){
+				for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
 					if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 						dmg += weapon_item->GetAugment(x)->GetItem()->Damage;
 						if (hate) *hate += weapon_item->GetAugment(x)->GetItem()->Damage + weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt;
@@ -955,7 +955,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 					dmg = weapon_item->GetItem()->Damage;
 				}
 
-				for(int x = 0; x < 5; x++){
+				for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
 					if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 						dmg += weapon_item->GetAugment(x)->GetItem()->Damage;
 						if (hate) *hate += weapon_item->GetAugment(x)->GetItem()->Damage + weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt;
@@ -992,7 +992,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 		}
 
 		if(weapon_item){
-			for(int x = 0; x < 5; x++){
+			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
 				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 					if(weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt)
 						eledmg += (weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt * against->ResistSpell(weapon_item->GetAugment(x)->GetItem()->ElemDmgType, 0, this) / 100);
@@ -1021,7 +1021,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 				}
 			}
 
-			for(int x = 0; x < 5; x++){
+			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
 				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgBody == against->GetBodyType()){
 						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgAmt;
@@ -1066,7 +1066,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 				}
 			}
 
-			for(int x = 0; x < 5; x++){
+			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
 				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgBody == against->GetBodyType()){
 						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgAmt;
@@ -2020,7 +2020,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_ski
 	
 	Mob *oos = nullptr;
 	if(killerMob) {
-		Mob *oos = killerMob->GetOwnerOrSelf();
+		oos = killerMob->GetOwnerOrSelf();
 
 		char buffer[32] = { 0 };
 		snprintf(buffer, 31, "%d %d %d", damage, spell, static_cast<int>(attack_skill));

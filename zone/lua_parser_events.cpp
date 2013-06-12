@@ -151,7 +151,7 @@ void handle_npc_hate(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 void handle_npc_signal(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<ItemInst*> *items) {
 	lua_pushinteger(L, std::stoi(data));
-	lua_setfield(L, -2, "signal_id");
+	lua_setfield(L, -2, "signal");
 }
 
 void handle_npc_timer(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
@@ -243,7 +243,7 @@ void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, st
 	}
 
 	lua_pushinteger(L, std::stoi(sep.arg[3]));
-	lua_setfield(L, -2, "skill_id");
+	lua_setfield(L, -2, "skill");
 }
 
 void handle_player_timer(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data) {
@@ -379,8 +379,8 @@ void handle_player_command(QuestInterface *parse, lua_State* L, Client* client, 
 	luabind::object args = luabind::newtable(L);
 	int max_args = sep.GetMaxArgNum();
 	for(int i = 1; i < max_args; ++i) {
-		if(strlen(sep.arg[0]) > 0) {
-			args[i] = sep.arg[i];
+		if(strlen(sep.arg[i]) > 0) {
+			args[i] = std::string(sep.arg[i]);
 		}
 	}
 

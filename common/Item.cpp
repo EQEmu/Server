@@ -65,7 +65,6 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 		m_color = 0;
 	m_merchantcount = 1;
 	m_SerialNumber = GetNextItemInstSerialNumber();
-	m_on_destroy = GetEQCallback("OnItemInstDestroy");
 }
 
 ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
@@ -81,7 +80,6 @@ ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
 		m_color = 0;
 	m_merchantcount = 1;
 	m_SerialNumber = GetNextItemInstSerialNumber();
-	m_on_destroy = GetEQCallback("OnItemInstDestroy");
 }
 
 ItemInstQueue::~ItemInstQueue() {
@@ -172,16 +170,12 @@ ItemInst::ItemInst(const ItemInst& copy)
 	}
 	m_SerialNumber = copy.m_SerialNumber;
 	m_custom_data = copy.m_custom_data;
-	m_on_destroy = copy.m_on_destroy;
+	m_timers = copy.m_timers;
 }
 
 // Clean up container contents
 ItemInst::~ItemInst()
 {
-	if(m_on_destroy) {
-		m_on_destroy(this);
-	}
-
 	Clear();
 }
 
@@ -1685,7 +1679,7 @@ EvoItemInst::EvoItemInst(const EvoItemInst &copy) {
 	else
 		m_scaledItem = nullptr;
 
-	m_on_destroy = GetEQCallback("OnItemInstDestroy");
+	m_timers = copy.m_timers;
 }
 
 EvoItemInst::EvoItemInst(const ItemInst &basecopy) {
@@ -1725,7 +1719,7 @@ EvoItemInst::EvoItemInst(const ItemInst &basecopy) {
 	m_activated = false;
 	m_evolveInfo = nullptr;
 	m_scaledItem = nullptr;
-	m_on_destroy = copy->m_on_destroy;
+	m_timers = copy->m_timers;
 }
 
 EvoItemInst::EvoItemInst(const Item_Struct* item, int16 charges) {
@@ -1746,13 +1740,9 @@ EvoItemInst::EvoItemInst(const Item_Struct* item, int16 charges) {
 	m_activated = false;
 	m_evolveInfo = nullptr;
 	m_scaledItem = nullptr;
-	m_on_destroy = GetEQCallback("OnItemInstDestroy");
 }
 
 EvoItemInst::~EvoItemInst() {
-	if(m_on_destroy) {
-		m_on_destroy(this);
-	}
 	safe_delete(m_scaledItem);
 }
 

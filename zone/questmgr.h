@@ -237,7 +237,6 @@ public:
 	Mob *GetOwner() const;
 	ItemInst *GetQuestItem() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
-	void stop_item_timers(ItemInst *item);
 
 #ifdef BOTS
 	int createbotcount();
@@ -258,10 +257,9 @@ private:
 
 	class QuestTimer {
 	public:
-		inline QuestTimer(int duration, Mob *_mob, ItemInst *_item, std::string _name)
-			: mob(_mob), item(_item), name(_name), Timer_(duration) { Timer_.Start(duration, false); }
+		inline QuestTimer(int duration, Mob *_mob, std::string _name)
+			: mob(_mob), name(_name), Timer_(duration) { Timer_.Start(duration, false); }
 		Mob*   mob;
-		ItemInst *item;
 		std::string name;
 		Timer Timer_;
 	};

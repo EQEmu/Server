@@ -786,11 +786,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		if (MyRaid)
 			MyRaid->MemberZoned(this);
 
-		if(this->IsClient()){
-			if(parse->PlayerHasQuestSub("EVENT_DISCONNECT")) {
-				parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
-			}
-		}
+		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 	}
 
 	Mob *Other = trade->With();

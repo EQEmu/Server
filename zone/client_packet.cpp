@@ -9642,7 +9642,8 @@ void Client::CompleteConnect()
 	SendAltCurrencies();
 	database.LoadAltCurrencyValues(CharacterID(), alternate_currency);
 	SendAlternateCurrencyValues();
-	CalcItemScale(true);
+	CalcItemScale();
+	DoItemEnterZone();
 
 	if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 		GuildBanks->SendGuildBank(this);
