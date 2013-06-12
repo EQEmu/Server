@@ -11043,7 +11043,7 @@ int32 Bot::CalcMaxHP() {
 
 	bot_hp += GroupLeadershipAAHealthEnhancement();
 
-	bot_hp += bot_hp * (spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000;
+	bot_hp += bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
 	max_hp = bot_hp;
 
 	if (cur_hp > max_hp)

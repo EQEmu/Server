@@ -918,7 +918,7 @@ int32 Merc::CalcMaxHP() {
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
 
-	max_hp += max_hp * (spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000;
+	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
 
 	if (cur_hp > max_hp)
 		cur_hp = max_hp;

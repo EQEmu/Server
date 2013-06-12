@@ -283,7 +283,7 @@ struct StatBonuses {
 	int16	HundredHands;						//extra haste, stacks with all other haste	i
 	int8	MeleeLifetap;						//i
 	int16	HealRate;							// Spell effect that influences effectiveness of heals
-	int16	MaxHPChange;						// Spell Effect
+	int32	MaxHPChange;						// Spell Effect
 	int16	SkillDmgTaken[HIGHEST_SKILL+2];		// All Skills + -1
 	int32	HealAmt;							// Item Effect
 	int32	SpellDmg;							// Item Effect

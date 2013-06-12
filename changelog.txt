@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/12/2013 ==
+KLS: Merge Hateborne's hp cap stuff
+KLS: We haven't updated changelog in a while but there's been:
+	-Some string stuff
+	-A lot of fixes to things like caps.
+	-More work on custom mod stuff (including examples)
+	-Fix for login not bailing out if it cant connect to a db
+	-Quite a few warning changes.
+
 == 05/05/2013 ==
 Tabasco: Added EVENT_ITEM_TICK for interactive item quest scripts.  (See https://github.com/josheb/quests_dc/blob/master/items/12204.pl)
 	Added simple account flags.  Would this work better as an additional qglobal category?
