@@ -9,6 +9,14 @@ KLS: We haven't updated changelog in a while but there's been:
 	-Fix for login not bailing out if it cant connect to a db
 	-Quite a few warning changes.
 
+== 05/09/2013 ==
+Uleat: (Updated: 06/12/2013) Fixed a few observed bot issues and an beneficial AE casting bug:
+	Added missing Bot primary weapon proc call (secondary and ranged already exist)
+	Added Bard Bot instrumentation bonuses
+	Added checks to avoid AE Buff casting on enemy mobs
+	Fixed a few typos in 'Vah Shir'-related code
+	(Please post any discrepancies as bugs)
+
 == 05/05/2013 ==
 Tabasco: Added EVENT_ITEM_TICK for interactive item quest scripts.  (See https://github.com/josheb/quests_dc/blob/master/items/12204.pl)
 	Added simple account flags.  Would this work better as an additional qglobal category?
