@@ -625,7 +625,7 @@ struct SPDat_Spell_Struct
 /* 019 */	uint16		mana; // Mana Used
 /* 020 */	int			base[EFFECT_COUNT];	//various purposes
 /* 032 */	int			base2[EFFECT_COUNT]; //various purposes
-/* 044 */	int16		max[EFFECT_COUNT];
+/* 044 */	int32		max[EFFECT_COUNT];
 /* 056 */	//uint16 icon; // Spell icon
 /* 057 */	//uint16 memicon; // Icon on membarthing
 /* 058 */	int32		components[4]; // reagents
