@@ -4577,7 +4577,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		LogFile->write(EQEMuLog::Debug, "cs_unknown2: 16 %p %u %u", &castspell->cs_unknown, *(uint16*) castspell->cs_unknown, *(uint16*) castspell->cs_unknown+sizeof(uint16) );
 		LogFile->write(EQEMuLog::Debug, "cs_unknown2: 16 %p %i %i", &castspell->cs_unknown, *(uint16*) castspell->cs_unknown, *(uint16*) castspell->cs_unknown+sizeof(uint16) );
 #endif
-LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
+	LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 
 	if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// this means item
 	{
@@ -4690,47 +4690,24 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 			else
 				spell_to_cast = SPELL_HARM_TOUCH2;
 			p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
-		}
-
-		//handle disciplines, OLD, they keep changing this
-		if(castspell->slot == DISCIPLINE_SPELL_SLOT) {
+		} else if(castspell->slot == DISCIPLINE_SPELL_SLOT) {
 			if(!UseDiscipline(castspell->spell_id, castspell->target_id)) {
 				printf("Unknown ability being used by %s, spell being cast is: %i\n",GetName(),castspell->spell_id);
 				InterruptSpell(castspell->spell_id);
 			}
 			return;
-		}
-
-		if(castspell->slot < MAX_PP_MEMSPELL)
-		{
+		} else if(castspell->slot < MAX_PP_MEMSPELL) {
 			spell_to_cast = m_pp.mem_spells[castspell->slot];
 			if(spell_to_cast != castspell->spell_id)
 			{
 				InterruptSpell(castspell->spell_id); //CHEATER!!!
 				return;
 			}
+		} else {
+			//If we get to here this slot should be invalid invalid
+			InterruptSpell(castspell->spell_id);
+			return;
 		}
-		/*
-		these are coming through with slot 8 now...
-		else if(castspell->slot == 9)	//discipline, LoH, HT, etc
-		{
-			if(GetClass() == PALADIN && castspell->spell_id == SPELL_LAY_ON_HANDS)
-			{
-				spell_to_cast = SPELL_LAY_ON_HANDS;
-				p_timers.Start(pTimerLayHands, LayOnHandsReuseTime);
-				CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
-			}
-			else if(GetClass() == SHADOWKNIGHT
-				&& (castspell->spell_id == SPELL_HARM_TOUCH || castspell->spell_id == SPELL_HARM_TOUCH2))
-			{
-				if(GetLevel() < 40)
-					spell_to_cast = SPELL_HARM_TOUCH;
-				else
-					spell_to_cast = SPELL_HARM_TOUCH2;
-				p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
-			}
-			else*/
-			//try disciplines
 
 		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
