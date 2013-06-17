@@ -186,6 +186,8 @@ int Mob::mod_spell_resist(int resist_chance, int level_mod, int resist_modifier,
 //Spell is cast by this on spelltar, called from spellontarget after the event_cast_on NPC event
 void Mob::mod_spell_cast(uint16 spell_id, Mob* spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust, bool isproc) { return; }
 
+#ifdef EMBPERL
 //This is called right before regular event processing (the switch block)
 //It is intended to be used for exporting new variables to new or existing events.
 void PerlembParser::mod_quest_event(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, bool global, std::string packagename) { return; }
+#endif
