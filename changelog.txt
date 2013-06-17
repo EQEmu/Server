@@ -1,5 +1,28 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/16/2013 ==
+Secrets: Fixed an issue with RoF items and Req/Rec level above 100 appearing yellow. Recommended to enable the #iteminfo command for items that have a req/rec above 100 to display proper information regarding the info.
+
+== 06/15/2013 ==
+KLS: (image) Potentially could bypass some spell checks by passing a specially crafted spell slot.  This has been addressed.
+
+== 06/12/2013 ==
+KLS: Merge Hateborne's hp cap stuff
+KLS: We haven't updated changelog in a while but there's been:
+	-Some string stuff
+	-A lot of fixes to things like caps.
+	-More work on custom mod stuff (including examples)
+	-Fix for login not bailing out if it cant connect to a db
+	-Quite a few warning changes.
+
+== 05/09/2013 ==
+Uleat: (Updated: 06/12/2013) Fixed a few observed bot issues and an beneficial AE casting bug:
+	Added missing Bot primary weapon proc call (secondary and ranged already exist)
+	Added Bard Bot instrumentation bonuses
+	Added checks to avoid AE Buff casting on enemy mobs
+	Fixed a few typos in 'Vah Shir'-related code
+	(Please post any discrepancies as bugs)
+
 == 05/05/2013 ==
 Tabasco: Added EVENT_ITEM_TICK for interactive item quest scripts.  (See https://github.com/josheb/quests_dc/blob/master/items/12204.pl)
 	Added simple account flags.  Would this work better as an additional qglobal category?

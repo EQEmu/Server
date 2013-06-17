@@ -4992,7 +4992,11 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 	ibs.Magic = item->Magic;
 	ibs.CastTime_ = item->CastTime_;
 	ibs.ReqLevel = item->ReqLevel;
+	if(item->ReqLevel > 100)
+	ibs.ReqLevel = 100;
 	ibs.RecLevel = item->RecLevel;
+	if(item->RecLevel > 100)
+	ibs.RecLevel = 100;
 	ibs.RecSkill = item->RecSkill;
 	ibs.BardType = item->BardType;
 	ibs.BardValue = item->BardValue;
