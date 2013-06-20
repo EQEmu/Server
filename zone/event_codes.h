@@ -69,6 +69,7 @@ typedef enum {
 	EVENT_DROP_ITEM,
 	EVENT_DESTROY_ITEM,
 	EVENT_FEIGN_DEATH,
+	EVENT_WEAPON_PROC,
 
 	_LargestEventID
 } QuestEventID;

@@ -18,6 +18,7 @@
 #include "lua_mob.h"
 #include "lua_hate_list.h"
 #include "lua_client.h"
+#include "lua_inventory.h"
 #include "lua_npc.h"
 #include "lua_spell.h"
 #include "lua_entity_list.h"
@@ -98,7 +99,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_command",
 	"event_drop_item",
 	"event_destroy_item",
-	"event_feign_death"
+	"event_feign_death",
+	"event_weapon_proc"
 };
 
 extern Zone *zone;
@@ -172,10 +174,13 @@ LuaParser::LuaParser() {
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
 	ItemArgumentDispatch[EVENT_TIMER] = handle_item_timer;
+	ItemArgumentDispatch[EVENT_WEAPON_PROC] = handle_item_proc;
+	ItemArgumentDispatch[EVENT_LOOT] = handle_item_loot;
 
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT] = handle_spell_effect;
-	SpellArgumentDispatch[EVENT_SPELL_BUFF_TIC_CLIENT] = handle_spell_effect;
+	SpellArgumentDispatch[EVENT_SPELL_BUFF_TIC_CLIENT] = handle_spell_tic;
 	SpellArgumentDispatch[EVENT_SPELL_FADE] = handle_spell_fade;
+	SpellArgumentDispatch[EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE] = handle_translocate_finish;
 
 	L = nullptr;
 }
@@ -424,7 +429,7 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 
 		//redo this arg function
 		auto arg_function = ItemArgumentDispatch[evt];
-		arg_function(this, L, client, item, data, extra_data, extra_pointers);
+		arg_function(this, L, client, item, mob, data, extra_data, extra_pointers);
 		
 		quest_manager.StartQuest(client, client, item);
 		if(lua_pcall(L, 1, 1, 0)) {
@@ -867,6 +872,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_mob(),
 			lua_register_npc(),
 			lua_register_client(),
+			lua_register_inventory(),
 			lua_register_inventory_where(),
 			lua_register_iteminst(),
 			lua_register_item(),

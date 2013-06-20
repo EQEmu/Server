@@ -40,6 +40,7 @@ SET(zone_sources
 	lua_general.cpp
 	lua_group.cpp
 	lua_hate_list.cpp
+	lua_inventory.cpp
 	lua_item.cpp
 	lua_iteminst.cpp
 	lua_mob.cpp
@@ -147,6 +148,7 @@ SET(zone_headers
 	lua_general.h
 	lua_group.h
 	lua_hate_list.h
+	lua_inventory.h
 	lua_item.h
 	lua_iteminst.h
 	lua_mob.h

@@ -8,6 +8,7 @@
 #include "lua_npc.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
+#include "lua_inventory.h"
 #include "lua_group.h"
 #include "lua_raid.h"
 
@@ -880,11 +881,6 @@ int Lua_Client::GetLDoNLossesTheme(int theme) {
 	return self->GetLDoNLossesTheme(theme);
 }
 
-Lua_ItemInst Lua_Client::GetItemAt(int slot) {
-	Lua_Safe_Call_Class(Lua_ItemInst);
-	return Lua_ItemInst(self->GetInv().GetItem(slot));
-}
-
 int Lua_Client::GetStartZone() {
 	Lua_Safe_Call_Int();
 	return self->GetStartZone();
@@ -1152,12 +1148,12 @@ std::string Lua_Client::GetAccountFlag(std::string flag) {
 
 Lua_Group Lua_Client::GetGroup() {
 	Lua_Safe_Call_Class(Lua_Group);
-	return Lua_Group(self->GetGroup());
+	return self->GetGroup();
 }
 
 Lua_Raid Lua_Client::GetRaid() {
 	Lua_Safe_Call_Class(Lua_Raid);
-	return Lua_Raid(self->GetRaid());
+	return self->GetRaid();
 }
 
 bool Lua_Client::PutItemInInventory(int slot_id, Lua_ItemInst inst) {
@@ -1170,6 +1166,11 @@ bool Lua_Client::PushItemOnCursor(Lua_ItemInst inst) {
 	Lua_Safe_Call_Bool();
 	ItemInst *rinst = inst;
 	return self->PushItemOnCursor(*rinst, true);
+}
+
+Lua_Inventory Lua_Client::GetInventory() {
+	Lua_Safe_Call_Class(Lua_Inventory);
+	return &self->GetInv();
 }
 
 luabind::scope lua_register_client() {
@@ -1348,7 +1349,6 @@ luabind::scope lua_register_client() {
 		.def("GetLDoNLosses", (int(Lua_Client::*)(void))&Lua_Client::GetLDoNLosses)
 		.def("GetLDoNWinsTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNWinsTheme)
 		.def("GetLDoNLossesTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNLossesTheme)
-		.def("GetItemAt", (Lua_ItemInst(Lua_Client::*)(int))&Lua_Client::GetItemAt)
 		.def("GetStartZone", (int(Lua_Client::*)(void))&Lua_Client::GetStartZone)
 		.def("SetStartZone", (void(Lua_Client::*)(int))&Lua_Client::SetStartZone)
 		.def("SetStartZone", (void(Lua_Client::*)(int,float))&Lua_Client::SetStartZone)
@@ -1405,7 +1405,8 @@ luabind::scope lua_register_client() {
 		.def("GetGroup", (Lua_Group(Lua_Client::*)(void))&Lua_Client::GetGroup)
 		.def("GetRaid", (Lua_Raid(Lua_Client::*)(void))&Lua_Client::GetRaid)
 		.def("PutItemInInventory", (bool(Lua_Client::*)(int,Lua_ItemInst))&Lua_Client::PutItemInInventory)
-		.def("PushItemOnCursor", (bool(Lua_Client::*)(Lua_ItemInst))&Lua_Client::PushItemOnCursor);
+		.def("PushItemOnCursor", (bool(Lua_Client::*)(Lua_ItemInst))&Lua_Client::PushItemOnCursor)
+		.def("GetInventory", (Lua_Inventory(Lua_Client::*)(void))&Lua_Client::GetInventory);
 }
 
 luabind::scope lua_register_inventory_where() {

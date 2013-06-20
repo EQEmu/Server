@@ -192,7 +192,7 @@ public:
 
 	//Buff
 	void BuffProcess();
-	virtual void DoBuffTic(uint16 spell_id, uint32 ticsremaining, uint8 caster_level, Mob* caster = 0);
+	virtual void DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caster_level, Mob* caster = 0);
 	void BuffFadeBySpellID(uint16 spell_id);
 	void BuffFadeByEffect(int effectid, int skipslot = -1);
 	void BuffFadeAll();
@@ -878,7 +878,6 @@ protected:
 	uint32 scalerate;
 	Buffs_Struct *buffs;
 	uint32 current_buff_count;
-	Timer *buff_tic_timer;
 	StatBonuses itembonuses;
 	StatBonuses spellbonuses;
 	StatBonuses aabonuses;
@@ -917,9 +916,9 @@ protected:
 	bool PassLimitToSkill(uint16 spell_id, uint16 skill);
 	bool PassLimitClass(uint32 Classes_, uint16 Class_);
 	void TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand = 13, int damage=0);
-	void TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand = 13);
+	void TryWeaponProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = 13);
 	void TryWeaponProc(const ItemInst* weapon, Mob *on, uint16 hand = 13);
-	void ExecWeaponProc(uint16 spell_id, Mob *on);
+	void ExecWeaponProc(const ItemInst* weapon, uint16 spell_id, Mob *on);
 	virtual float GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
 	int GetWeaponDamage(Mob *against, const Item_Struct *weapon_item);

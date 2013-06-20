@@ -1171,6 +1171,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		args.push_back(inst);
 		args.push_back(this);
 		parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args);
+		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
 
 		if ((RuleB(Character, EnableDiscoveredItems)))
 		{

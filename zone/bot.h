@@ -312,7 +312,7 @@ public:
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration);
 	virtual float GetAOERange(uint16 spell_id);
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100);
-	virtual void DoBuffTic(uint16 spell_id, uint32 ticsremaining, uint8 caster_level, Mob* caster = 0);
+	virtual void DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caster_level, Mob* caster = 0);
 	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, int16 *resist_adjust = nullptr);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);

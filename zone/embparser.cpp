@@ -100,7 +100,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_SAY",
 	"EVENT_DROP_ITEM",
 	"EVENT_DESTROY_ITEM",
-	"EVENT_FEIGN_DEATH"
+	"EVENT_FEIGN_DEATH",
+	"EVENT_WEAPON_PROC"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr), event_queue_in_use_(false) {

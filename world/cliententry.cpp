@@ -250,7 +250,7 @@ void ClientListEntry::Camp(ZoneServer* iZS) {
 
 bool ClientListEntry::CheckStale() {
 	stale++;
-	if (stale >= 3) {
+	if (stale > 20) {
 		if (pOnline > CLE_Status_Offline)
 			SetOnline(CLE_Status_Offline);
 		else
@@ -260,7 +260,6 @@ bool ClientListEntry::CheckStale() {
 }
 
 bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
-//	if (LSID() == iLSID && strncmp(plskey, iKey,10) == 0) {
 	if (strncmp(plskey, iKey,10) == 0) {
 		if (paccountid == 0 && LSID()>0) {
 			int16 tmpStatus = WorldConfig::get()->DefaultStatus;

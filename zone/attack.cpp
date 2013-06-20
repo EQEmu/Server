@@ -1953,8 +1953,8 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	if (!GetTarget())
 		return true; //We killed them
 
-	if( !bRiposte && other->GetHP() > 0 ) {
-		TryWeaponProc(weapon, other, Hand);	//no weapon
+	if(!bRiposte && other->GetHP() > 0 ) {
+		TryWeaponProc(nullptr, weapon, other, Hand);	//no weapon
 	}
 
 	TriggerDefensiveProcs(nullptr, other, Hand, damage);
@@ -3780,7 +3780,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 				if (DefensiveProcs[i].spellID != SPELL_UNKNOWN) {
 					int chance = ProcChance * (DefensiveProcs[i].chance);
 					if ((MakeRandomInt(0, 100) < chance)) {
-						ExecWeaponProc(DefensiveProcs[i].spellID, on);
+						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
 						CheckHitsRemaining(0, false, false, 0, DefensiveProcs[i].base_spellID);
 					}
 				}
@@ -3812,17 +3812,17 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	}
 
 	if(!weapon_g) {
-		TryWeaponProc((const Item_Struct*) nullptr, on, hand);
+		TryWeaponProc(nullptr, (const Item_Struct*)nullptr, on, hand);
 		return;
 	}
 
 	if(!weapon_g->IsType(ItemClassCommon)) {
-		TryWeaponProc((const Item_Struct*) nullptr, on, hand);
+		TryWeaponProc(nullptr, (const Item_Struct*) nullptr, on, hand);
 		return;
 	}
 
 	//do main procs
-	TryWeaponProc(weapon_g->GetItem(), on, hand);
+	TryWeaponProc(weapon_g, weapon_g->GetItem(), on, hand);
 
 
 	//we have to calculate these again, oh well
@@ -3855,14 +3855,14 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 						Message_StringID(13,PROC_TOOLOW);
 					}
 				} else {
-					ExecWeaponProc(aug->Proc.Effect, on);
+					ExecWeaponProc(aug_i, aug->Proc.Effect, on);
 				}
 			}
 		}
 	}
 }
 
-void Mob::TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand) {
+void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on, uint16 hand) {
 	_ZP(Mob_TryWeaponProcB);
 	uint16 skillinuse = 28;
 	int ourlevel = GetLevel();
@@ -3891,7 +3891,7 @@ void Mob::TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand) {
 					}
 				} else {
 					mlog(COMBAT__PROCS, "Attacking weapon (%s) successfully procing spell %d (%.2f percent chance)", weapon->Name, weapon->Proc.Effect, ProcChance*100);
-					ExecWeaponProc(weapon->Proc.Effect, on);
+					ExecWeaponProc(inst, weapon->Proc.Effect, on);
 				}
 			} else {
 				mlog(COMBAT__PROCS, "Attacking weapon (%s) did no proc (%.2f percent chance).", weapon->Name, ProcChance*100);
@@ -3928,7 +3928,7 @@ void Mob::TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand) {
 		if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
 			if(MakeRandomInt(0, 100) < PermaProcs[i].chance) {
 				mlog(COMBAT__PROCS, "Permanent proc %d procing spell %d (%d percent chance)", i, PermaProcs[i].spellID, PermaProcs[i].chance);
-				ExecWeaponProc(PermaProcs[i].spellID, on);
+				ExecWeaponProc(nullptr, PermaProcs[i].spellID, on);
 			} else {
 				mlog(COMBAT__PROCS, "Permanent proc %d failed to proc %d (%d percent chance)", i, PermaProcs[i].spellID, PermaProcs[i].chance);
 			}
@@ -3945,7 +3945,7 @@ void Mob::TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand) {
 				int chance = ProcChance * (SpellProcs[i].chance);
 				if(MakeRandomInt(0, 100) < chance) {
 					mlog(COMBAT__PROCS, "Spell proc %d procing spell %d (%d percent chance)", i, SpellProcs[i].spellID, chance);
-					ExecWeaponProc(SpellProcs[i].spellID, on);
+					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
 				} else {
 					mlog(COMBAT__PROCS, "Spell proc %d failed to proc %d (%d percent chance)", i, SpellProcs[i].spellID, chance);
 				}
@@ -3955,7 +3955,7 @@ void Mob::TryWeaponProc(const Item_Struct* weapon, Mob *on, uint16 hand) {
 			int chance = ProcChance * RangedProcs[i].chance;
 			if(MakeRandomInt(0, 100) < chance) {
 				mlog(COMBAT__PROCS, "Ranged proc %d procing spell %d", i, RangedProcs[i].spellID, RangedProcs[i].chance);
-				ExecWeaponProc(RangedProcs[i].spellID, on);
+				ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
 				CheckHitsRemaining(0, false, false, 0, RangedProcs[i].base_spellID);
 			} else {
 				mlog(COMBAT__PROCS, "Ranged proc %d failed to proc %d", i, RangedProcs[i].spellID, RangedProcs[i].chance);
@@ -4295,7 +4295,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 			if (PassLimitToSkill(SkillProcs[i].base_spellID,skill)){
 				int ProcChance = chance * (float)SkillProcs[i].chance;
 				if ((MakeRandomInt(0, 100) < ProcChance)) {
-					ExecWeaponProc(SkillProcs[i].spellID, on);
+					ExecWeaponProc(nullptr, SkillProcs[i].spellID, on);
 					CheckHitsRemaining(0, false, false, 0, SkillProcs[i].base_spellID);
 				}
 			}

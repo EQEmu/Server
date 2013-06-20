@@ -2816,48 +2816,54 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 	return(casttime);
 }
 
-void Mob::ExecWeaponProc(uint16 spell_id, Mob *on) {
+void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
 	// Changed proc targets to look up based on the spells goodEffect flag.
 	// This should work for the majority of weapons.
-	if(spell_id == SPELL_UNKNOWN || on->SpecAttacks[NO_HARM_FROM_CLIENT]){ //This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
-				return;
+	if(spell_id == SPELL_UNKNOWN || on->SpecAttacks[NO_HARM_FROM_CLIENT]) {
+		//This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
+		return;
 	}
 
 	if (IsNoCast())
 		return;
 
-	if(!IsValidSpell(spell_id)){ // Check for a valid spell otherwise it will crash through the function
-		if(this->IsClient()){
-			this->Message(0, "Invalid spell proc %u", spell_id);
+	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
+		if(IsClient()){
+			Message(0, "Invalid spell proc %u", spell_id);
 			mlog(CLIENT__SPELLS, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
 		}
 		return;
 	}
-		/*
 
-		int twinproc_chance = itembonuses.TwinProc + spellbonuses.TwinProc;
-		if(IsClient())
-			twinproc_chance += aabonuses.TwinProc;
-		*/
-		bool twinproc = false;
-		int32 twinproc_chance = 0;
-
-		if(IsClient())
-			twinproc_chance = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
-
-		if(twinproc_chance && (MakeRandomInt(0,99) < twinproc_chance))
-			twinproc = true;
-
-		if (IsBeneficialSpell(spell_id)) {
-			SpellFinished(spell_id, this, 10, 0, -1, spells[spell_id].ResistDiff, true);
-			if(twinproc)
-				SpellOnTarget(spell_id, this, false, false, 0, true);
+	if(inst && IsClient()) {
+		//const cast is dirty but it would require redoing a ton of interfaces at this point
+		//It should be safe as we don't have any truly const ItemInst floating around anywhere.
+		//So we'll live with it for now
+		int i = parse->EventItem(EVENT_WEAPON_PROC, CastToClient(), const_cast<ItemInst*>(inst), on, "", spell_id);
+		if(i != 0) {
+			return;
 		}
-		else if(!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
-			SpellFinished(spell_id, on, 10, 0, -1, spells[spell_id].ResistDiff, true);
-			if(twinproc)
-				SpellOnTarget(spell_id, on, false, false, 0, true);
-		}
+	}
+
+	bool twinproc = false;
+	int32 twinproc_chance = 0;
+
+	if(IsClient())
+		twinproc_chance = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
+
+	if(twinproc_chance && (MakeRandomInt(0,99) < twinproc_chance))
+		twinproc = true;
+
+	if (IsBeneficialSpell(spell_id)) {
+		SpellFinished(spell_id, this, 10, 0, -1, spells[spell_id].ResistDiff, true);
+		if(twinproc)
+			SpellOnTarget(spell_id, this, false, false, 0, true);
+	}
+	else if(!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
+		SpellFinished(spell_id, on, 10, 0, -1, spells[spell_id].ResistDiff, true);
+		if(twinproc)
+			SpellOnTarget(spell_id, on, false, false, 0, true);
+	}
 	return;
 }
 

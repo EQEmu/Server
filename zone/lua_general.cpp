@@ -965,6 +965,7 @@ luabind::scope lua_register_events() {
 			luabind::value("popup_response", static_cast<int>(EVENT_POPUP_RESPONSE)),
 			luabind::value("proximity_say", static_cast<int>(EVENT_PROXIMITY_SAY)),
 			luabind::value("cast", static_cast<int>(EVENT_CAST)),
+			luabind::value("cast_begin", static_cast<int>(EVENT_CAST_BEGIN)),
 			luabind::value("scale_calc", static_cast<int>(EVENT_SCALE_CALC)),
 			luabind::value("item_enter_zone", static_cast<int>(EVENT_ITEM_ENTER_ZONE)),
 			luabind::value("target_change", static_cast<int>(EVENT_TARGET_CHANGE)),
@@ -992,7 +993,11 @@ luabind::scope lua_register_events() {
 			luabind::value("duel_lose", static_cast<int>(EVENT_DUEL_LOSE)),
 			luabind::value("encounter_load", static_cast<int>(EVENT_ENCOUNTER_LOAD)),
 			luabind::value("encounter_unload", static_cast<int>(EVENT_ENCOUNTER_UNLOAD)),
-			luabind::value("command", static_cast<int>(EVENT_COMMAND))
+			luabind::value("command", static_cast<int>(EVENT_COMMAND)),
+			luabind::value("drop_item", static_cast<int>(EVENT_DROP_ITEM)),
+			luabind::value("destroy_item", static_cast<int>(EVENT_DESTROY_ITEM)),
+			luabind::value("feign_death", static_cast<int>(EVENT_FEIGN_DEATH)),
+			luabind::value("weapon_proc", static_cast<int>(EVENT_WEAPON_PROC))
 		];
 }
 

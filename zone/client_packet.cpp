@@ -1218,7 +1218,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	if(proximity_timer.Check()) {
 		entity_list.ProcessMove(this, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-			if(RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem,EnableTaskProximity))
+		if(RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem,EnableTaskProximity))
 			ProcessTaskProximities(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 		proximity_x = ppu->x_pos;
 		proximity_y = ppu->y_pos;

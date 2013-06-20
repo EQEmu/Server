@@ -5099,7 +5099,6 @@ void Client::InitializeBuffSlots()
 		buffs[x].spellid = SPELL_UNKNOWN;
 	}
 	current_buff_count = 0;
-	buff_tic_timer = nullptr;
 }
 
 void Client::UninitializeBuffSlots()
@@ -5116,7 +5115,6 @@ void NPC::InitializeBuffSlots()
 		buffs[x].spellid = SPELL_UNKNOWN;
 	}
 	current_buff_count = 0;
-	buff_tic_timer = nullptr;
 }
 
 void NPC::UninitializeBuffSlots()
