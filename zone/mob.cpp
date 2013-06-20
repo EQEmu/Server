@@ -726,6 +726,71 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, Mob* ForWho) {
 	memset(app->pBuffer, 0, app->size);
 	NewSpawn_Struct* ns = (NewSpawn_Struct*)app->pBuffer;
 	FillSpawnStruct(ns, ForWho);
+
+	if(strlen(ns->spawn.lastName) == 0) {
+		switch(ns->spawn.class_)
+		{
+		case TRIBUTE_MASTER:
+			strcpy(ns->spawn.lastName, "Tribute Master");
+			break;
+		case ADVENTURERECRUITER:
+			strcpy(ns->spawn.lastName, "Adventure Recruiter");
+			break;
+		case BANKER:
+			strcpy(ns->spawn.lastName, "Banker");
+			break;
+		case ADVENTUREMERCHANT:
+			strcpy(ns->spawn.lastName,"Adventure Merchant");
+			break;
+		case WARRIORGM:
+			strcpy(ns->spawn.lastName, "GM Warrior");
+			break;
+		case PALADINGM:
+			strcpy(ns->spawn.lastName, "GM Paladin");
+			break;
+		case RANGERGM:
+			strcpy(ns->spawn.lastName, "GM Ranger");
+			break;
+		case SHADOWKNIGHTGM:
+			strcpy(ns->spawn.lastName, "GM Shadowknight");
+			break;
+		case DRUIDGM:
+			strcpy(ns->spawn.lastName, "GM Druid");
+			break;
+		case BARDGM:
+			strcpy(ns->spawn.lastName, "GM Bard");
+			break;
+		case ROGUEGM:
+			strcpy(ns->spawn.lastName, "GM Rogue");
+			break;
+		case SHAMANGM:
+			strcpy(ns->spawn.lastName, "GM Shaman");
+			break;
+		case NECROMANCERGM:
+			strcpy(ns->spawn.lastName, "GM Necromancer");
+			break;
+		case WIZARDGM:
+			strcpy(ns->spawn.lastName, "GM Wizard");
+			break;
+		case MAGICIANGM:
+			strcpy(ns->spawn.lastName, "GM Magician");
+			break;
+		case ENCHANTERGM:
+			strcpy(ns->spawn.lastName, "GM Enchanter");
+			break;
+		case BEASTLORDGM:
+			strcpy(ns->spawn.lastName, "GM Beastlord");
+			break;
+		case BERSERKERGM:
+			strcpy(ns->spawn.lastName, "GM Berserker");
+			break;
+		case MERCERNARY_MASTER:
+			strcpy(ns->spawn.lastName, "Mercenary Recruiter");
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void Mob::CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns) {
@@ -740,47 +805,71 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns) {
 	// Custom packet data
 	NewSpawn_Struct* ns2 = (NewSpawn_Struct*)app->pBuffer;
 	strcpy(ns2->spawn.name, ns->spawn.name);
-	/*if (ns->spawn.class_==MERCHANT)
-		strcpy(ns2->spawn.lastName, "EQEmu Shopkeeper");
-	else*/ if (ns->spawn.class_==TRIBUTE_MASTER)
+	switch(ns->spawn.class_)
+	{
+	case TRIBUTE_MASTER:
 		strcpy(ns2->spawn.lastName, "Tribute Master");
-	else if (ns->spawn.class_==ADVENTURERECRUITER)
+		break;
+	case ADVENTURERECRUITER:
 		strcpy(ns2->spawn.lastName, "Adventure Recruiter");
-	else if (ns->spawn.class_==BANKER)
+		break;
+	case BANKER:
 		strcpy(ns2->spawn.lastName, "Banker");
-	else if (ns->spawn.class_==ADVENTUREMERCHANT)
+		break;
+	case ADVENTUREMERCHANT:
 		strcpy(ns->spawn.lastName,"Adventure Merchant");
-	else if (ns->spawn.class_==WARRIORGM)
+		break;
+	case WARRIORGM:
 		strcpy(ns2->spawn.lastName, "GM Warrior");
-	else if (ns->spawn.class_==PALADINGM)
+		break;
+	case PALADINGM:
 		strcpy(ns2->spawn.lastName, "GM Paladin");
-	else if (ns->spawn.class_==RANGERGM)
+		break;
+	case RANGERGM:
 		strcpy(ns2->spawn.lastName, "GM Ranger");
-	else if (ns->spawn.class_==SHADOWKNIGHTGM)
+		break;
+	case SHADOWKNIGHTGM:
 		strcpy(ns2->spawn.lastName, "GM Shadowknight");
-	else if (ns->spawn.class_==DRUIDGM)
+		break;
+	case DRUIDGM:
 		strcpy(ns2->spawn.lastName, "GM Druid");
-	else if (ns->spawn.class_==BARDGM)
+		break;
+	case BARDGM:
 		strcpy(ns2->spawn.lastName, "GM Bard");
-	else if (ns->spawn.class_==ROGUEGM)
+		break;
+	case ROGUEGM:
 		strcpy(ns2->spawn.lastName, "GM Rogue");
-	else if (ns->spawn.class_==SHAMANGM)
+		break;
+	case SHAMANGM:
 		strcpy(ns2->spawn.lastName, "GM Shaman");
-	else if (ns->spawn.class_==NECROMANCERGM)
+		break;
+	case NECROMANCERGM:
 		strcpy(ns2->spawn.lastName, "GM Necromancer");
-	else if (ns->spawn.class_==WIZARDGM)
+		break;
+	case WIZARDGM:
 		strcpy(ns2->spawn.lastName, "GM Wizard");
-	else if (ns->spawn.class_==MAGICIANGM)
+		break;
+	case MAGICIANGM:
 		strcpy(ns2->spawn.lastName, "GM Magician");
-	else if (ns->spawn.class_==ENCHANTERGM)
+		break;
+	case ENCHANTERGM:
 		strcpy(ns2->spawn.lastName, "GM Enchanter");
-	else if (ns->spawn.class_==BEASTLORDGM)
+		break;
+	case BEASTLORDGM:
 		strcpy(ns2->spawn.lastName, "GM Beastlord");
-	else if (ns->spawn.class_==BERSERKERGM)
+		break;
+	case BERSERKERGM:
 		strcpy(ns2->spawn.lastName, "GM Berserker");
-	else
+		break;
+	case MERCERNARY_MASTER:
+		strcpy(ns->spawn.lastName, "Mercenary Recruiter");
+		break;
+	default:
 		strcpy(ns2->spawn.lastName, ns->spawn.lastName);
-	memset(&app->pBuffer[sizeof(Spawn_Struct)-7],0xFF,7);
+		break;
+	}
+
+	memset(&app->pBuffer[sizeof(Spawn_Struct)-7], 0xFF, 7);
 }
 
 void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
@@ -788,10 +877,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	int i;
 
 	strcpy(ns->spawn.name, name);
-	if(IsClient())
-		{
-		strn0cpy(ns->spawn.lastName,lastname,sizeof(ns->spawn.lastName));
-		}
+	if(IsClient()) {
+		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
+	}
+
 	ns->spawn.heading	= FloatToEQ19(heading);
 	ns->spawn.x			= FloatToEQ19(x_pos);//((int32)x_pos)<<3;
 	ns->spawn.y			= FloatToEQ19(y_pos);//((int32)y_pos)<<3;
@@ -808,7 +897,6 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.deity		= deity;
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
-// vesuvias - appearence fix
 	ns->spawn.light		= light;
 	ns->spawn.showhelm = 1;
 

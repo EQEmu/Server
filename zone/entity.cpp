@@ -715,13 +715,12 @@ void EntityList::AddToSpawnQueue(uint16 entityid, NewSpawn_Struct** ns) {
 	NumSpawnsOnQueue++;
 	if (tsFirstSpawnOnQueue == 0xFFFFFFFF)
 		tsFirstSpawnOnQueue = Timer::GetCurrentTime();
-	*ns = 0; // make it so the calling function cant fuck us and delete the data =)
+	*ns = nullptr;
 }
 
 void EntityList::CheckSpawnQueue() {
 	// Send the stuff if the oldest packet on the queue is older than 50ms -Quagmire
 	if (tsFirstSpawnOnQueue != 0xFFFFFFFF && (Timer::GetCurrentTime() - tsFirstSpawnOnQueue) > 50) {
-		//if (NumSpawnsOnQueue <= 5) {
 			LinkedListIterator<NewSpawn_Struct*> iterator(SpawnQueue);
 			EQApplicationPacket* outapp = 0;
 
@@ -729,29 +728,10 @@ void EntityList::CheckSpawnQueue() {
 			while(iterator.MoreElements()) {
 				outapp = new EQApplicationPacket;
 				Mob::CreateSpawnPacket(outapp, iterator.GetData());
-//				cout << "Sending spawn packet: " << iterator.GetData()->spawn.name << endl;
 				QueueClients(0, outapp);
 				safe_delete(outapp);
 				iterator.RemoveCurrent();
 			}
-			//sending Spawns like this after zone in causes the client to freeze...
-		/*}
-		else {
-			uint32 spawns_per_pack = MAX_SPAWNS_PER_PACKET;
-			if(NumSpawnsOnQueue < spawns_per_pack)
-				spawns_per_pack = NumSpawnsOnQueue;
-
-			BulkZoneSpawnPacket* bzsp = new BulkZoneSpawnPacket(0, spawns_per_pack);
-			LinkedListIterator<NewSpawn_Struct*> iterator(SpawnQueue);
-
-			iterator.Reset();
-			while(iterator.MoreElements()) {
-				bzsp->AddSpawn(iterator.GetData());
-				iterator.RemoveCurrent();
-			}
-			safe_delete(bzsp);
-		}*/
-
 		tsFirstSpawnOnQueue = 0xFFFFFFFF;
 		NumSpawnsOnQueue = 0;
 	}
@@ -1883,8 +1863,12 @@ void EntityList::DuelMessage(Mob* winner, Mob* loser, bool flee) {
 
 	if(winner->GetLevelCon(winner->GetLevel(), loser->GetLevel()) > 2)
 	{
-		parse->EventPlayer(EVENT_DUEL_WIN, winner->CastToClient(), loser->GetName(), loser->CastToClient()->CharacterID());
-		parse->EventPlayer(EVENT_DUEL_LOSE, loser->CastToClient(), winner->GetName(), winner->CastToClient()->CharacterID());
+		std::vector<void*> args;
+		args.push_back(winner);
+		args.push_back(loser);
+
+		parse->EventPlayer(EVENT_DUEL_WIN, winner->CastToClient(), loser->GetName(), loser->CastToClient()->CharacterID(), &args);
+		parse->EventPlayer(EVENT_DUEL_LOSE, loser->CastToClient(), winner->GetName(), winner->CastToClient()->CharacterID(), &args);
 	}
 
 	iterator.Reset();
@@ -3367,6 +3351,8 @@ void EntityList::ClearFeignAggro(Mob* targ)
 			}
 
 			if(targ->IsClient()) {
+				std::vector<void*> args;
+				args.push_back(iterator.GetData());
 				int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0);
 				if(i != 0) {
 					iterator.Advance();

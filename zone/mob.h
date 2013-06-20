@@ -425,6 +425,7 @@ public:
 	void CreateDespawnPacket(EQApplicationPacket* app, bool Decay);
 	void CreateHorseSpawnPacket(EQApplicationPacket* app, const char* ownername, uint16 ownerid, Mob* ForWho = 0);
 	void CreateSpawnPacket(EQApplicationPacket* app, Mob* ForWho = 0);
+	static void CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns);
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	void CreateHPPacket(EQApplicationPacket* app);
 	void SendHPUpdate();
@@ -432,7 +433,6 @@ public:
 	//Util
 	static uint32 RandomTimer(int min, int max);
 	static uint8 GetDefaultGender(uint16 in_race, uint8 in_gender = 0xFF);
-	static void CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns);
 	uint16 GetSkillByItemType(int ItemType);
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
 	virtual void MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname = nullptr);

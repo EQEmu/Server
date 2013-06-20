@@ -142,7 +142,7 @@ void PerlembParser::ReloadQuests() {
 }
 
 void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
-	uint32 extradata, bool global, std::vector<ItemInst*> *items)
+	uint32 extradata, bool global, std::vector<void*> *extra_pointers)
 {
 	if(!perl)
 		return;
@@ -151,7 +151,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		return;
 
 	if(perl->InUse()) {
-		AddQueueEvent(event, objid, data, npcmob, iteminst, mob, extradata, global, items);
+		AddQueueEvent(event, objid, data, npcmob, iteminst, mob, extradata, global, extra_pointers);
 		return;
 	}
 
@@ -182,7 +182,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 		package_name, mob, npcmob);
 	ExportZoneVariables(package_name);
 	ExportItemVariables(package_name, mob);
-	ExportEventVariables(package_name, event, objid, data, npcmob, iteminst, mob, extradata, items);
+	ExportEventVariables(package_name, event, objid, data, npcmob, iteminst, mob, extradata, extra_pointers);
 
 	if(isPlayerQuest || isGlobalPlayerQuest){
 		SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
@@ -206,34 +206,38 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 }
 
 int PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-							std::vector<ItemInst*> *items) {
-	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false, items);
+							std::vector<void*> *extra_pointers) {
+	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false, extra_pointers);
 	return 0;
 }
 
 int PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-								  std::vector<ItemInst*> *items) {
-	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true, nullptr);
+								  std::vector<void*> *extra_pointers) {
+	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true, extra_pointers);
 	return 0;
 }
 
-int PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false, nullptr);
+int PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+								std::vector<void*> *extra_pointers) {
+	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false, extra_pointers);
 	return 0;
 }
 
-int PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data) {
-	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true, nullptr);
+int PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+									std::vector<void*> *extra_pointers) {
+	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true, extra_pointers);
 	return 0;
 }
 
-int PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data) {
-	EventCommon(evt, item->GetID(), nullptr, nullptr, item, client, extra_data, false, nullptr);
+int PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+							std::vector<void*> *extra_pointers) {
+	EventCommon(evt, item->GetID(), nullptr, nullptr, item, client, extra_data, false, extra_pointers);
 	return 0;
 }
 
-int PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data) {
-	EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false, nullptr);
+int PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+							std::vector<void*> *extra_pointers) {
+	EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false, extra_pointers);
 	return 0;
 }
 
@@ -750,10 +754,10 @@ void PerlembParser::HandleQueue() {
 		EventRecord e = event_queue_.front();
 		event_queue_.pop();
 
-		EventCommon(e.event, e.objid, e.data.c_str(), e.npcmob, e.iteminst, e.mob, e.extradata, e.global, &e.items);
+		EventCommon(e.event, e.objid, e.data.c_str(), e.npcmob, e.iteminst, e.mob, e.extradata, e.global, &e.extra_pointers);
 
-		for(size_t i = 0; i < e.items.size(); ++i) {
-			delete e.items[i];
+		for(size_t i = 0; i < e.extra_pointers.size(); ++i) {
+			delete e.extra_pointers[i];
 		}
 	}
 
@@ -761,7 +765,7 @@ void PerlembParser::HandleQueue() {
 }
 
 void PerlembParser::AddQueueEvent(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
-		uint32 extradata, bool global, std::vector<ItemInst*> *items) 
+		uint32 extradata, bool global, std::vector<void*> *extra_pointers) 
 {
 	EventRecord e;
 	e.event = event;
@@ -773,9 +777,9 @@ void PerlembParser::AddQueueEvent(QuestEventID event, uint32 objid, const char *
 	e.extradata = extradata;
 	e.global = global;
 
-	if(items) {
-		for(size_t i = 0; i < items->size(); ++i) {
-			e.items.push_back(items->at(i)->Clone());
+	if(extra_pointers) {
+		for(size_t i = 0; i < extra_pointers->size(); ++i) {
+			e.extra_pointers.push_back(reinterpret_cast<ItemInst*>(extra_pointers->at(i))->Clone());
 		}
 	}
 
@@ -1083,7 +1087,7 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 #undef HASITEM_ISNULLITEM
 
 void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID event, uint32 objid, const char * data, 
-	NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, std::vector<ItemInst*> *items) 
+	NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, std::vector<void*> *extra_pointers) 
 {
 	switch (event) {
 		case EVENT_SAY: {
@@ -1098,9 +1102,9 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 
 		case EVENT_TRADE: {
-			if(items) {
-				for(size_t i = 0; i < items->size(); ++i) {
-					ItemInst *inst = items->at(i);
+			if(extra_pointers) {
+				for(size_t i = 0; i < extra_pointers->size(); ++i) {
+					ItemInst *inst = reinterpret_cast<ItemInst*>(extra_pointers->at(i));
 					std::string var_name = "item";
 					var_name += std::to_string(i + 1);
 

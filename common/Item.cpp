@@ -632,6 +632,23 @@ std::string ItemInst::GetCustomData(std::string identifier) {
 	return "";
 }
 
+void ItemInst::SetTimer(std::string name, uint32 time) {
+	Timer t(time);
+	t.Start(time, false);
+	m_timers[name] = t;
+}
+
+void ItemInst::StopTimer(std::string name) {
+	auto iter = m_timers.find(name);
+	if(iter != m_timers.end()) {
+		m_timers.erase(iter);
+	}
+}
+
+void ItemInst::ClearTimers() {
+	m_timers.clear();
+}
+
 // Retrieve item at specified position within bag
 ItemInst* Inventory::GetItem(int16 slot_id, uint8 bagidx) const
 {

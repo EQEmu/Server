@@ -70,6 +70,9 @@ public:
 	int GetMaxEvolveLvl();
 	uint32 GetKillsNeeded(int current_level);
 	Lua_ItemInst Clone();
+	void SetTimer(std::string name, uint32 time);
+	void StopTimer(std::string name);
+	void ClearTimers();
 
 private:
 	bool cloned_;

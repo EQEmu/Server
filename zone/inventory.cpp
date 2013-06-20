@@ -303,7 +303,7 @@ void Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			if ((RuleB(Character, EnableDiscoveredItems)))
 			{
 				if(!GetGM() && !IsDiscovered(item_id))
-				DiscoverItem(item_id);
+					DiscoverItem(item_id);
 			}
 		}
 	}

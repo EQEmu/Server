@@ -2441,10 +2441,6 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 		{
 			EvoItemInst* e_inst = (EvoItemInst*)inst;
 			uint16 oldexp = e_inst->GetExp();
-
-			//if(login) {
-			//	parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
-			//}
 			parse->EventItem(EVENT_SCALE_CALC, this, e_inst, nullptr, "", 0);
 
 			if (e_inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
@@ -2465,10 +2461,6 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 			{
 				EvoItemInst* e_inst = (EvoItemInst*)a_inst;
 				uint16 oldexp = e_inst->GetExp();
-
-				//if(login) {
-				//	parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
-				//}
 				parse->EventItem(EVENT_SCALE_CALC, this, e_inst, nullptr, "", 0);
 
 				if (e_inst->GetExp() != oldexp)
@@ -2520,7 +2512,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 	bool changed = false;
 	for(int i = slot_x; i < slot_y; i++) {
 		ItemInst* inst = m_inv.GetItem(i);
-		if(inst == 0)
+		if(!inst)
 			continue;
 
 		bool update_slot = false;

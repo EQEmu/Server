@@ -448,10 +448,7 @@ void QuestManager::settimer(const char *timer_name, int seconds) {
 	QuestManagerCurrentQuestVars();
 
 	if(questitem) {
-		auto timers = questitem->GetTimers();
-		Timer t(seconds * 1000);
-		t.Start(seconds * 1000, false);
-		timers[timer_name] = t;
+		questitem->SetTimer(timer_name, seconds * 1000);
 		return;
 	}
 
@@ -475,10 +472,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 	QuestManagerCurrentQuestVars();
 
 	if(questitem) {
-		auto timers = questitem->GetTimers();
-		Timer t(milliseconds);
-		t.Start(milliseconds, false);
-		timers[timer_name] = t;
+		questitem->SetTimer(timer_name, milliseconds);
 		return;
 	}
 
@@ -501,6 +495,11 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 void QuestManager::stoptimer(const char *timer_name) {
 	QuestManagerCurrentQuestVars();
 
+	if(questitem) {
+		questitem->StopTimer(timer_name);
+		return;
+	}
+
 	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 	end = QTimerList.end();
@@ -517,6 +516,11 @@ void QuestManager::stoptimer(const char *timer_name) {
 
 void QuestManager::stopalltimers() {
 	QuestManagerCurrentQuestVars();
+
+	if(questitem) {
+		questitem->ClearTimers();
+		return;
+	}
 
 	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
 

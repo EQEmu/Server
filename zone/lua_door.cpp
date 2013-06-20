@@ -7,11 +7,6 @@
 #include "doors.h"
 #include "lua_door.h"
 
-int Lua_Door::GetID() {
-	Lua_Safe_Call_Int();
-	return self->GetID();
-}
-
 void Lua_Door::SetDoorName(const char *name) {
 	Lua_Safe_Call_Void();
 	self->SetDoorName(name);
@@ -147,7 +142,6 @@ luabind::scope lua_register_door() {
 		.def(luabind::constructor<>())
 		.property("null", &Lua_Door::Null)
 		.property("valid", &Lua_Door::Valid)
-		.def("GetID", (int(Lua_Door::*)(void))&Lua_Door::GetID)
 		.def("SetDoorName", (void(Lua_Door::*)(const char*))&Lua_Door::SetDoorName)
 		.def("GetDoorName", (const char*(Lua_Door::*)(void))&Lua_Door::GetDoorName)
 		.def("GetX", (float(Lua_Door::*)(void))&Lua_Door::GetX)

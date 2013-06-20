@@ -253,6 +253,21 @@ Lua_ItemInst Lua_ItemInst::Clone() {
 	return Lua_ItemInst(self->Clone(), true);
 }
 
+void Lua_ItemInst::SetTimer(std::string name, uint32 time) {
+	Lua_Safe_Call_Void();
+	self->SetTimer(name, time);
+}
+
+void Lua_ItemInst::StopTimer(std::string name) {
+	Lua_Safe_Call_Void();
+	self->StopTimer(name);
+}
+
+void Lua_ItemInst::ClearTimers() {
+	Lua_Safe_Call_Void();
+	self->ClearTimers();
+}
+
 luabind::scope lua_register_iteminst() {
 	return luabind::class_<Lua_ItemInst>("ItemInst")
 		.def(luabind::constructor<>())
@@ -301,7 +316,10 @@ luabind::scope lua_register_iteminst() {
 		.def("AddExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::AddExp)
 		.def("GetMaxEvolveLvl", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetMaxEvolveLvl)
 		.def("GetKillsNeeded", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetKillsNeeded)
-		.def("Clone", (Lua_ItemInst(Lua_ItemInst::*)(void))&Lua_ItemInst::Clone);
+		.def("Clone", (Lua_ItemInst(Lua_ItemInst::*)(void))&Lua_ItemInst::Clone)
+		.def("SetTimer", (void(Lua_ItemInst::*)(std::string,uint32))&Lua_ItemInst::SetTimer)
+		.def("StopTimer", (void(Lua_ItemInst::*)(std::string))&Lua_ItemInst::StopTimer)
+		.def("ClearTimers", (void(Lua_ItemInst::*)(void))&Lua_ItemInst::ClearTimers);
 }
 
 #endif

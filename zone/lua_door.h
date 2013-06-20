@@ -29,7 +29,6 @@ public:
 		return nullptr;
 	}
 
-	int GetID();
 	void SetDoorName(const char *name);
 	const char *GetDoorName();
 	float GetX();

@@ -641,9 +641,14 @@ bool Client::Process() {
 			}
 
 			if(ItemTickTimer.Check())
-            {
-                TickItemCheck();
-            }
+			{
+				TickItemCheck();
+			}
+
+			if(ItemQuestTimer.Check())
+			{
+				ItemTimerCheck();
+			}
 		}
 	}
 

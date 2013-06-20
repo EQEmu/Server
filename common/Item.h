@@ -380,6 +380,9 @@ public:
 	inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
 
 	std::map<std::string, Timer>& GetTimers() { return m_timers; }
+	void SetTimer(std::string name, uint32 time);
+	void StopTimer(std::string name);
+	void ClearTimers();
 
 protected:
 	//////////////////////////

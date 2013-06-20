@@ -1167,12 +1167,15 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		strcpy(corpse_name, orgname);
 		snprintf(buf, 87, "%d %d %s", inst->GetItem()->ID, inst->GetCharges(), EntityList::RemoveNumbers(corpse_name));
 		buf[87] = '\0';
-		parse->EventPlayer(EVENT_LOOT, client, buf, 0);
+		std::vector<void*> args;
+		args.push_back(inst);
+		args.push_back(this);
+		parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args);
 
 		if ((RuleB(Character, EnableDiscoveredItems)))
 		{
 			if(client && !client->GetGM() && !client->IsDiscovered(inst->GetItem()->ID))
-			client->DiscoverItem(inst->GetItem()->ID);
+				client->DiscoverItem(inst->GetItem()->ID);
 		}
 
 		if (zone->lootvar != 0)

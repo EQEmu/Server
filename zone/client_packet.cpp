@@ -4562,7 +4562,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		LogFile->write(EQEMuLog::Debug, "cs_unknown2: 16 %p %u %u", &castspell->cs_unknown, *(uint16*) castspell->cs_unknown, *(uint16*) castspell->cs_unknown+sizeof(uint16) );
 		LogFile->write(EQEMuLog::Debug, "cs_unknown2: 16 %p %i %i", &castspell->cs_unknown, *(uint16*) castspell->cs_unknown, *(uint16*) castspell->cs_unknown+sizeof(uint16) );
 #endif
-	LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
+LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 
 	if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// this means item
 	{
@@ -4671,22 +4671,28 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			else
 				spell_to_cast = SPELL_HARM_TOUCH2;
 			p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
-		} else if(castspell->slot == DISCIPLINE_SPELL_SLOT) {
+		}
+
+		//handle disciplines, OLD, they keep changing this
+		if(castspell->slot == DISCIPLINE_SPELL_SLOT) {
 			if(!UseDiscipline(castspell->spell_id, castspell->target_id)) {
 				printf("Unknown ability being used by %s, spell being cast is: %i\n",GetName(),castspell->spell_id);
 				InterruptSpell(castspell->spell_id);
 			}
 			return;
-		} else if(castspell->slot < MAX_PP_MEMSPELL) {
+		}
+
+		if(castspell->slot < MAX_PP_MEMSPELL)
+		{
 			spell_to_cast = m_pp.mem_spells[castspell->slot];
 			if(spell_to_cast != castspell->spell_id)
 			{
 				InterruptSpell(castspell->spell_id); //CHEATER!!!
 				return;
 			}
-		} else {
-			//If we get to here this slot should be invalid invalid
-			InterruptSpell(castspell->spell_id);
+		}
+		else {
+			InterruptSpell();
 			return;
 		}
 
@@ -5759,7 +5765,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	if ((RuleB(Character, EnableDiscoveredItems)))
 	{
 		if(!GetGM() && !IsDiscovered(item_id))
-		DiscoverItem(item_id);
+			DiscoverItem(item_id);
 	}
 
 	t1.stop();
@@ -6009,15 +6015,18 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 
 	ClickObject_Struct* click_object = (ClickObject_Struct*)app->pBuffer;
 	Entity* entity = entity_list.GetID(click_object->drop_id);
-	//TODO: should enforce range checking here.
 	if (entity && entity->IsObject()) {
 		Object* object = entity->CastToObject();
+
 		object->HandleClick(this, click_object);
+
+		std::vector<void*> args;
+		args.push_back(object);
 
 		char buf[10];
 		snprintf(buf, 9, "%u", click_object->drop_id);
 		buf[9] = '\0';
-		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, 0);
+		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, 0, &args);
 	}
 
 	// Observed in RoF after OP_ClickObjectAction:
@@ -6253,7 +6262,9 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	char buf[20];
 	snprintf(buf, 19, "%u", cd->doorid);
 	buf[19] = '\0';
-	parse->EventPlayer(EVENT_CLICK_DOOR, this, buf, 0);
+	std::vector<void*> args;
+	args.push_back(currentdoor);
+	parse->EventPlayer(EVENT_CLICK_DOOR, this, buf, 0, &args);
 
 	currentdoor->HandleClick(this,0);
 	return;

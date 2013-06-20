@@ -26,13 +26,13 @@
 
 // for windows compile
 #ifdef _WINDOWS
-    #define abs64 _abs64
+	#define abs64 _abs64
 #else
-    #include <stdarg.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include "../common/unix.h"
-    #define abs64 abs
+	#include <stdarg.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include "../common/unix.h"
+	#define abs64 abs
 #endif
 
 extern volatile bool RunLoops;
@@ -159,7 +159,8 @@ Client::Client(EQStreamInterface* ieqs)
 	TrackingTimer(2000),
 	RespawnFromHoverTimer(0),
 	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
-	ItemTickTimer(10000)
+	ItemTickTimer(10000),
+	ItemQuestTimer(500)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
 		ClientFilters[cf] = FilterShow;
@@ -7617,109 +7618,166 @@ some day.
 
 void Client::LoadAccountFlags()
 {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
-    MYSQL_RES *result;
-    MYSQL_ROW row;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
 
-    accountflags.clear();
-    MakeAnyLenString(&query, "SELECT p_flag, p_value FROM account_flags WHERE p_accid = '%d'", account_id);
-    if(database.RunQuery(query, strlen(query), errbuf, &result))
-    {
-        while(row = mysql_fetch_row(result))
-        {
-            std::string fname(row[0]);
-            std::string fval(row[1]);
-            accountflags[fname] = fval;
-        }
-        mysql_free_result(result);
-    }
-    else
-    {
-        std::cerr << "Error in LoadAccountFlags query '" << query << "' " << errbuf << std::endl;
-    }
-    safe_delete_array(query);
+	accountflags.clear();
+	MakeAnyLenString(&query, "SELECT p_flag, p_value FROM account_flags WHERE p_accid = '%d'", account_id);
+	if(database.RunQuery(query, strlen(query), errbuf, &result))
+	{
+		while(row = mysql_fetch_row(result))
+		{
+			std::string fname(row[0]);
+			std::string fval(row[1]);
+			accountflags[fname] = fval;
+		}
+		mysql_free_result(result);
+	}
+	else
+	{
+		std::cerr << "Error in LoadAccountFlags query '" << query << "' " << errbuf << std::endl;
+	}
+	safe_delete_array(query);
 }
 
 void Client::SetAccountFlag(std::string flag, std::string val)
 {
-    char errbuf[MYSQL_ERRMSG_SIZE];
-    char *query = 0;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
 
-    MakeAnyLenString(&query, "REPLACE INTO account_flags (p_accid, p_flag, p_value) VALUES( '%d', '%s', '%s')", account_id, flag.c_str(), val.c_str());
-    if(!database.RunQuery(query, strlen(query), errbuf))
-    {
-        std::cerr << "Error in SetAccountFlags query '" << query << "' " << errbuf << std::endl;
-    }
-    safe_delete_array(query);
+	MakeAnyLenString(&query, "REPLACE INTO account_flags (p_accid, p_flag, p_value) VALUES( '%d', '%s', '%s')", account_id, flag.c_str(), val.c_str());
+	if(!database.RunQuery(query, strlen(query), errbuf))
+	{
+		std::cerr << "Error in SetAccountFlags query '" << query << "' " << errbuf << std::endl;
+	}
+	safe_delete_array(query);
 
-    accountflags[flag] = val;
+	accountflags[flag] = val;
 }
 
 std::string Client::GetAccountFlag(std::string flag)
 {
-    return(accountflags[flag]);
+	return(accountflags[flag]);
 }
 
 void Client::TickItemCheck()
 {
-    int i;
+	int i;
 
 	if(zone->tick_items.empty()) { return; }
 
-    //Scan equip slots for items
-    for(i = 0; i <= 21; i++)
-    {
+	//Scan equip slots for items
+	for(i = 0; i <= 21; i++)
+	{
 		TryItemTick(i);
-    }
-    //Scan main inventory + cursor
-    for(i = 22; i < 31; i++)
-    {
+	}
+	//Scan main inventory + cursor
+	for(i = 22; i < 31; i++)
+	{
 		TryItemTick(i);
-    }
-    //Scan bags
-    for(i = 251; i < 340; i++)
-    {
+	}
+	//Scan bags
+	for(i = 251; i < 340; i++)
+	{
 		TryItemTick(i);
-    }
+	}
 }
 
 void Client::TryItemTick(int slot)
 {
 	int iid = 0;
-    const ItemInst* inst = m_inv[slot];
-    if(inst == 0) { return; }
+	const ItemInst* inst = m_inv[slot];
+	if(inst == 0) { return; }
 
-    iid = inst->GetID();
+	iid = inst->GetID();
 
-    if(zone->tick_items.count(iid) > 0)
-    {
-        if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot < 22) )
-        {
-            ItemInst* e_inst = (ItemInst*)inst;
-            parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
-        }
-    }
+	if(zone->tick_items.count(iid) > 0)
+	{
+		if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot < 22) )
+		{
+			ItemInst* e_inst = (ItemInst*)inst;
+			parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
+		}
+	}
 
 	//Only look at augs in main inventory
 	if(slot > 21) { return; }
 
-    for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
-    {
-        ItemInst * a_inst = inst->GetAugment(x);
-        if(!a_inst) { continue; }
+	for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
+	{
+		ItemInst * a_inst = inst->GetAugment(x);
+		if(!a_inst) { continue; }
 
-        iid = a_inst->GetID();
+		iid = a_inst->GetID();
 
-        if(zone->tick_items.count(iid) > 0)
-        {
-            if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) )
-            {
-                ItemInst* e_inst = (ItemInst*)a_inst;
-                parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
-            }
-        }
-    }
+		if(zone->tick_items.count(iid) > 0)
+		{
+			if( GetLevel() >= zone->tick_items[iid].level && MakeRandomInt(0, 100) >= (100 - zone->tick_items[iid].chance) )
+			{
+				ItemInst* e_inst = (ItemInst*)a_inst;
+				parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
+			}
+		}
+	}
+}
+
+void Client::ItemTimerCheck()
+{
+	int i;
+	for(i = 0; i <= 21; i++)
+	{
+		TryItemTimer(i);
+	}
+
+	for(i = 22; i < 31; i++)
+	{
+		TryItemTimer(i);
+	}
+
+	for(i = 251; i < 340; i++)
+	{
+		TryItemTimer(i);
+	}
+}
+
+void Client::TryItemTimer(int slot)
+{
+	ItemInst* inst = m_inv.GetItem(slot);
+	if(!inst) {
+		return;
+	}
+
+	auto item_timers = inst->GetTimers();
+	auto it_iter = item_timers.begin();
+	while(it_iter != item_timers.end()) {
+		if(it_iter->second.Check()) {
+			parse->EventItem(EVENT_TIMER, this, inst, nullptr, it_iter->first, 0);
+		}
+		++it_iter;
+	}
+	
+	if(slot > 21) {
+		return;
+	}
+
+	for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
+	{
+		ItemInst * a_inst = inst->GetAugment(x);
+		if(!a_inst) {
+			continue;
+		}
+
+		auto item_timers = a_inst->GetTimers();
+		auto it_iter = item_timers.begin();
+		while(it_iter != item_timers.end()) {
+			if(it_iter->second.Check()) {
+				parse->EventItem(EVENT_TIMER, this, a_inst, nullptr, it_iter->first, 0);
+			}
+			++it_iter;
+		}
+	}
 }
 
 void Client::RefundAA() {

@@ -1122,6 +1122,9 @@ public:
 
 	void TickItemCheck();
 	void TryItemTick(int slot);
+	void ItemTimerCheck();
+	void TryItemTimer(int slot);
+
 	int16 GetActSTR() { return( std::min(GetMaxSTR(), GetSTR()) ); }
 	int16 GetActSTA() { return( std::min(GetMaxSTA(), GetSTA()) ); }
 	int16 GetActDEX() { return( std::min(GetMaxDEX(), GetDEX()) ); }
@@ -1455,7 +1458,8 @@ private:
 
 	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
 
-	Timer   ItemTickTimer;
+	Timer ItemTickTimer;
+	Timer ItemQuestTimer;
 	std::map<std::string,std::string> accountflags;
 };
 

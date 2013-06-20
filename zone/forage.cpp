@@ -350,23 +350,28 @@ void Client::GoFish()
 		const Item_Struct* food_item = database.GetItem(food_id);
 
 		Message_StringID(MT_Skills, FISHING_SUCCESS);
-		const ItemInst* inst = database.CreateItem(food_item, 1);
+		ItemInst* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			if(CheckLoreConflict(inst->GetItem()))
 			{
-				this->Message_StringID(0,DUP_LORE);
+				Message_StringID(0, DUP_LORE);
+				safe_delete(inst);
 			}
 			else
 			{
-				PushItemOnCursor(*inst); // changed from PutItemInInventory(SLOT_CURSOR, *inst); - was additional overhead
+				PushItemOnCursor(*inst);
 				SendItemPacket(SLOT_CURSOR,inst,ItemPacketSummonItem);
 				if(RuleB(TaskSystem, EnableTaskSystem))
 					UpdateTasksForItem(ActivityFish, food_id);
+
+				safe_delete(inst);
+				inst = m_inv.GetItem(SLOT_CURSOR);
 			}
-			safe_delete(inst);
 		}
 
-		parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst != nullptr ? inst->GetItem()->ID : 0);
+		std::vector<void*> args;
+		args.push_back(inst);
+		parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst != nullptr ? inst->GetItem()->ID : 0, &args);
 	}
 	else
 	{
@@ -459,28 +464,33 @@ void Client::ForageItem(bool guarantee) {
 				}
 
 		Message_StringID(MT_Skills, stringid);
-		const ItemInst* inst = database.CreateItem(food_item, 1);
+		ItemInst* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
 			if(CheckLoreConflict(inst->GetItem()))
 			{
-				this->Message_StringID(0,DUP_LORE);
+				Message_StringID(0, DUP_LORE);
+				safe_delete(inst);
 			}
 			else {
 				PushItemOnCursor(*inst);
 				SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
 				if(RuleB(TaskSystem, EnableTaskSystem))
 					UpdateTasksForItem(ActivityForage, foragedfood);
+
+				safe_delete(inst);
+				inst = m_inv.GetItem(SLOT_CURSOR);
 			}
-			safe_delete(inst);
 		}
 
-		parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst != nullptr ? inst->GetItem()->ID : 0);
+		std::vector<void*> args;
+		args.push_back(inst);
+		parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst ? inst->GetItem()->ID : 0, &args);
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
 		if(!guarantee && MakeRandomInt(0,99) < ChanceSecondForage) {
-			this->Message_StringID(MT_Skills, FORAGE_MASTERY);
-			this->ForageItem(true);
+			Message_StringID(MT_Skills, FORAGE_MASTERY);
+			ForageItem(true);
 		}
 
 	} else {

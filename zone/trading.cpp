@@ -574,7 +574,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			quest_npc = true;
 		}
 
-		std::vector<ItemInst*> item_list;
+		std::vector<void*> item_list;
 		uint32 items[4] = { 0 };
 		for(int i = 3000; i < 3004; ++i) {
 			ItemInst *inst = m_inv.GetItem(i);
