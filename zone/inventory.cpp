@@ -676,6 +676,8 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 					{
 						SendWearChange(worn_slot_material);
 					}
+					
+					parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
 					return true;
 				}
 			}
@@ -1338,6 +1340,26 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 		if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) { return false; }
 		mlog(INVENTORY__SLOTS, "Moving entire item from slot %d to slot %d", src_slot_id, dst_slot_id);
+
+		if(src_slot_id < 22 || src_slot_id == 9999) {
+			if(src_inst) {
+				parse->EventItem(EVENT_UNEQUIP_ITEM, this, src_inst, nullptr, "", src_slot_id);
+			}
+
+			if(dst_inst) {
+				parse->EventItem(EVENT_EQUIP_ITEM, this, dst_inst, nullptr, "", src_slot_id);
+			}
+		}
+
+		if(dst_slot_id < 22 || dst_slot_id == 9999) {
+			if(dst_inst) {
+				parse->EventItem(EVENT_UNEQUIP_ITEM, this, dst_inst, nullptr, "", dst_slot_id);
+			}
+
+			if(src_inst) {
+				parse->EventItem(EVENT_EQUIP_ITEM, this, src_inst, nullptr, "", dst_slot_id);
+			}
+		}
 	}
 
 	int matslot = SlotConvert2(dst_slot_id);

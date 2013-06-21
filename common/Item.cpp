@@ -1090,6 +1090,65 @@ void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
 
 }
 
+int Inventory::GetSlotByItemInst(ItemInst *inst) {
+	if(!inst)
+		return -1;
+
+	int i = GetSlotByItemInstCollection(m_worn, inst);
+	if(i != -1) {
+		return i;
+	}
+
+	i = GetSlotByItemInstCollection(m_inv, inst);
+	if(i != -1) {
+		return i;
+	}
+
+	i = GetSlotByItemInstCollection(m_bank, inst);
+	if(i != -1) {
+		return i;
+	}
+
+	i = GetSlotByItemInstCollection(m_shbank, inst);
+	if(i != -1) {
+		return i;
+	}
+
+	i = GetSlotByItemInstCollection(m_trade, inst);
+	if(i != -1) {
+		return i;
+	}
+
+	auto iter = m_cursor.begin();
+	while(iter != m_cursor.end()) {
+		if((*iter) == inst) {
+			return SLOT_CURSOR;
+		}
+		++iter;
+	}
+	
+	return -1;
+}
+
+int Inventory::GetSlotByItemInstCollection(const std::map<int16, ItemInst*> &collection, ItemInst *inst) {
+	for(auto iter = collection.begin(); iter != collection.end(); ++iter) {
+		ItemInst *t_inst = iter->second;
+		if(t_inst == inst) {
+			return iter->first;
+		}
+
+		if(t_inst && !t_inst->IsType(ItemClassContainer)) {
+			for(auto b_iter = t_inst->_begin(); b_iter != t_inst->_end(); ++b_iter) {
+				if(b_iter->second == inst) {
+					return Inventory::CalcSlotId(iter->first, b_iter->first);
+				}
+			}
+		}
+	}
+
+	return -1;
+}
+
 void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection) {
 	iter_inst it;
 	iter_contents itb;
@@ -1097,7 +1156,6 @@ void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection)
 	
 	for (it=collection.begin(); it!=collection.end(); it++) {
 		inst = it->second;
-		it->first;
 		if(!inst || !inst->GetItem())
 			continue;
 		

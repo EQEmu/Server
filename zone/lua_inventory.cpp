@@ -158,6 +158,10 @@ bool Lua_Inventory::SupportsContainers(int slot_id) {
 	return self->SupportsContainers(slot_id);
 }
 
+int Lua_Inventory::GetSlotByItemInst(Lua_ItemInst inst) {
+	Lua_Safe_Call_Int();
+	return self->GetSlotByItemInst(inst);
+}
 
 luabind::scope lua_register_inventory() {
 	return luabind::class_<Lua_Inventory>("Inventory")
@@ -189,7 +193,8 @@ luabind::scope lua_register_inventory() {
 		.def("CalcSlotFromMaterial", (int(Lua_Inventory::*)(int))&Lua_Inventory::CalcSlotFromMaterial)
 		.def("CalcMaterialFromSlot", (int(Lua_Inventory::*)(int))&Lua_Inventory::CalcMaterialFromSlot)
 		.def("CanItemFitInContainer", (bool(Lua_Inventory::*)(Lua_Item,Lua_Item))&Lua_Inventory::CanItemFitInContainer)
-		.def("SupportsContainers", (bool(Lua_Inventory::*)(int))&Lua_Inventory::SupportsContainers);
+		.def("SupportsContainers", (bool(Lua_Inventory::*)(int))&Lua_Inventory::SupportsContainers)
+		.def("GetSlotByItemInst", (int(Lua_Inventory::*)(Lua_ItemInst))&Lua_Inventory::GetSlotByItemInst);
 }
 
 #endif

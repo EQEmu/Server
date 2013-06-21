@@ -54,6 +54,7 @@ public:
 	int CalcMaterialFromSlot(int equipslot);
 	bool CanItemFitInContainer(Lua_Item item, Lua_Item container);
 	bool SupportsContainers(int slot_id);
+	int GetSlotByItemInst(Lua_ItemInst inst);
 };
 
 #endif

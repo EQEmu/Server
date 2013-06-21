@@ -196,6 +196,8 @@ public:
 	// Test whether a given slot can support a container item
 	static bool SupportsContainers(int16 slot_id);
 
+	int GetSlotByItemInst(ItemInst *inst);
+
 	void dumpEntireInventory();
 	void dumpWornItems();
 	void dumpInventory();
@@ -212,6 +214,7 @@ protected:
 	// Protected Methods
 	///////////////////////////////
 
+	int GetSlotByItemInstCollection(const std::map<int16, ItemInst*> &collection, ItemInst *inst);
 	void dumpItemCollection(const std::map<int16, ItemInst*> &collection);
 	void dumpBagContents(ItemInst *inst, iter_inst *it);
 

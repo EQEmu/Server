@@ -94,6 +94,12 @@ void handle_item_proc(QuestInterface *parse, lua_State* L, Client* client, ItemI
 		std::vector<void*> *extra_pointers);
 void handle_item_loot(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
+void handle_item_equip(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers);
+void handle_item_augment(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers);
+void handle_item_augment_reverse(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers);
 void handle_item_null(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 

@@ -2048,7 +2048,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		)
 	)
 	{
-		//Message(13, "Error: the item effect can not be used at this time");
 		SendSpellBarEnable(spell_id);
 		return;
 	}
@@ -2059,7 +2058,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	{
 		ItemInst* p_inst = (ItemInst*)inst;
 
-		int i = parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, nullptr, "", slot_id);
+		parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, nullptr, "", slot_id);
 		inst = m_inv[slot_id];
 		if(!inst)
 		{
@@ -6232,12 +6231,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 			sizeof(AugmentItem_Struct), app->size);
 		return;
 	}
-	/*if (m_tradeskill_object == nullptr) {
-		Message(13, "Error: Server is not aware of the tradeskill container you are attempting to use");
-		return;
-	}*/
-
-	//fixed this to work for non-world objects
 
 	// Delegate to tradeskill object to perform combine
 	AugmentItem_Struct* in_augment = (AugmentItem_Struct*)app->pBuffer;

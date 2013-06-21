@@ -2522,6 +2522,9 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 			uint16 oldexp = e_inst->GetExp();
 
 			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
+			if(i < 22 || i == 9999) {
+				parse->EventItem(EVENT_EQUIP_ITEM, this, e_inst, nullptr, "", i);
+			}
 
 			if (e_inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
 				e_inst->ScaleItem();
@@ -2529,6 +2532,10 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 				update_slot = true;
 			}
 		} else {
+			if(i < 22 || i == 9999) {
+				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
+			}
+
 			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
 		}
 

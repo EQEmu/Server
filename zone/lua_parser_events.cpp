@@ -493,6 +493,28 @@ void handle_item_loot(QuestInterface *parse, lua_State* L, Client* client, ItemI
 	}
 }
 
+void handle_item_equip(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
+					   std::vector<void*> *extra_pointers) {
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "slot_id");
+}
+
+void handle_item_augment(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
+					  std::vector<void*> *extra_pointers) {
+	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
+	luabind::object l_item_o = luabind::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "aug");
+}
+
+void handle_item_augment_reverse(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
+					  std::vector<void*> *extra_pointers) {
+	Lua_ItemInst l_item(reinterpret_cast<ItemInst*>(extra_pointers->at(0)));
+	luabind::object l_item_o = luabind::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+}
+
 void handle_item_null(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
 					  std::vector<void*> *extra_pointers) {
 }

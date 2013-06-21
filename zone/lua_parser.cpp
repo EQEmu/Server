@@ -100,7 +100,13 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_drop_item",
 	"event_destroy_item",
 	"event_feign_death",
-	"event_weapon_proc"
+	"event_weapon_proc",
+	"event_equip_item",
+	"event_unequip_item",
+	"event_augment_item",
+	"event_unaugment_item",
+	"event_augment_insert",
+	"event_augment_remove"
 };
 
 extern Zone *zone;
@@ -176,6 +182,12 @@ LuaParser::LuaParser() {
 	ItemArgumentDispatch[EVENT_TIMER] = handle_item_timer;
 	ItemArgumentDispatch[EVENT_WEAPON_PROC] = handle_item_proc;
 	ItemArgumentDispatch[EVENT_LOOT] = handle_item_loot;
+	ItemArgumentDispatch[EVENT_EQUIP_ITEM] = handle_item_equip;
+	ItemArgumentDispatch[EVENT_UNEQUIP_ITEM] = handle_item_equip;
+	ItemArgumentDispatch[EVENT_AUGMENT_ITEM] = handle_item_augment;
+	ItemArgumentDispatch[EVENT_UNAUGMENT_ITEM] = handle_item_augment;
+	ItemArgumentDispatch[EVENT_AUGMENT_INSERT] = handle_item_augment_reverse;
+	ItemArgumentDispatch[EVENT_AUGMENT_REMOVE] = handle_item_augment_reverse;
 
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT] = handle_spell_effect;
 	SpellArgumentDispatch[EVENT_SPELL_BUFF_TIC_CLIENT] = handle_spell_tic;
