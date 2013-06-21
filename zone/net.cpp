@@ -72,7 +72,7 @@
 	#undef new
 	#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
-	
+
 #ifdef _WINDOWS
 	#include <conio.h>
 	#include <process.h>
@@ -475,6 +475,7 @@ int main(int argc, char** argv) {
 #endif
 	safe_delete(ps);
 	safe_delete(mmf);
+	safe_delete(Config);
 
 	if (zone != 0)
 		Zone::Shutdown(true);

@@ -27,6 +27,10 @@ AdventureManager::~AdventureManager()
 	safe_delete(process_timer);
 	safe_delete(save_timer);
 	safe_delete(leaderboard_info_timer);
+
+	for (auto iter = adventure_templates.begin(); iter != adventure_templates.end(); ++iter) {
+		delete iter->second;
+	}
 }
 
 void AdventureManager::Process()
