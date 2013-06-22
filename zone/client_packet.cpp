@@ -1269,11 +1269,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		if (gmhideme)
 			entity_list.QueueClientsStatus(this,outapp,true,Admin(),250);
 		else
-#ifdef PACKET_UPDATE_MANAGER
-			entity_list.QueueManaged(this,outapp,true,false);
-#else
 			entity_list.QueueCloseClients(this,outapp,true,300,nullptr,false);
-#endif
 		safe_delete(outapp);
 	}
 

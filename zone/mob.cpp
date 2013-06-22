@@ -1075,9 +1075,6 @@ void Mob::SendHPUpdate()
 	// destructor will free the pBuffer
 	CreateHPPacket(&hp_app);
 
-#ifdef MANAGE_HP_UPDATES
-	entity_list.QueueManaged(this, &hp_app, true);
-#else
 	// send to people who have us targeted
 	entity_list.QueueClientsByTarget(this, &hp_app, false, 0, false, true, BIT_AllClients);
 	entity_list.QueueClientsByXTarget(this, &hp_app, false);
@@ -1115,7 +1112,6 @@ void Mob::SendHPUpdate()
 	{
 		GetPet()->CastToClient()->QueuePacket(&hp_app, false);
 	}
-#endif //MANAGE_HP_PACKETS
 
 	// Update the damage state of destructible objects
 	if(IsNPC() && IsDestructibleObject())
@@ -1195,9 +1191,6 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 	}
 	else
 	{
-#ifdef PACKET_UPDATE_MANAGER
-		entity_list.QueueManaged(this, app, (iSendToSelf==0),false);
-#else
 		if(move_tic_count == RuleI(Zone, NPCPositonUpdateTicCount))
 		{
 			entity_list.QueueClients(this, app, (iSendToSelf==0), false);
@@ -1208,7 +1201,6 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 			entity_list.QueueCloseClients(this, app, (iSendToSelf==0), 800, nullptr, false);
 			move_tic_count++;
 		}
-#endif
 	}
 	safe_delete(app);
 }
@@ -1372,12 +1364,6 @@ void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
 		CastToNPC()->SaveGuardSpot(true);
 	if(SendUpdate)
 		SendPosition();
-	//SendPosUpdate(1);
-#ifdef PACKET_UPDATE_MANAGER
-	if(IsClient()) {
-		CastToClient()->GetUpdateManager()->FlushQueues();
-	}
-#endif
 }
 
 void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, uint8 in_helmtexture, uint8 in_haircolor, uint8 in_beardcolor, uint8 in_eyecolor1, uint8 in_eyecolor2, uint8 in_hairstyle, uint8 in_luclinface, uint8 in_beard, uint8 in_aa_title, uint32 in_drakkin_heritage, uint32 in_drakkin_tattoo, uint32 in_drakkin_details, float in_size) {

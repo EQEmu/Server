@@ -14,7 +14,7 @@ namespace luabind {
 
 luabind::scope lua_register_group();
 
-class Lua_Group : public Lua_Ptr<void>
+class Lua_Group : public Lua_Ptr<Group>
 {
 	typedef Group NativeType;
 public:

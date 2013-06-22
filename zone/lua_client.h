@@ -21,7 +21,7 @@ class Lua_Client : public Lua_Mob
 	typedef Client NativeType;
 public:
 	Lua_Client() { SetLuaPtrData(nullptr); }
-	Lua_Client(Client *d) { SetLuaPtrData(d); }
+	Lua_Client(Client *d) { SetLuaPtrData(reinterpret_cast<Entity*>(d)); }
 	virtual ~Lua_Client() { }
 
 	operator Client*() {
@@ -261,6 +261,7 @@ public:
 	bool PutItemInInventory(int slot_id, Lua_ItemInst inst);
 	bool PushItemOnCursor(Lua_ItemInst inst);
 	Lua_Inventory GetInventory();
+	void SendItemScale(Lua_ItemInst inst);
 };
 
 #endif

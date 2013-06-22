@@ -186,8 +186,8 @@ LuaParser::LuaParser() {
 	ItemArgumentDispatch[EVENT_UNEQUIP_ITEM] = handle_item_equip;
 	ItemArgumentDispatch[EVENT_AUGMENT_ITEM] = handle_item_augment;
 	ItemArgumentDispatch[EVENT_UNAUGMENT_ITEM] = handle_item_augment;
-	ItemArgumentDispatch[EVENT_AUGMENT_INSERT] = handle_item_augment_reverse;
-	ItemArgumentDispatch[EVENT_AUGMENT_REMOVE] = handle_item_augment_reverse;
+	ItemArgumentDispatch[EVENT_AUGMENT_INSERT] = handle_item_augment_insert;
+	ItemArgumentDispatch[EVENT_AUGMENT_REMOVE] = handle_item_augment_remove;
 
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT] = handle_spell_effect;
 	SpellArgumentDispatch[EVENT_SPELL_BUFF_TIC_CLIENT] = handle_spell_tic;

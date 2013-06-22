@@ -44,7 +44,6 @@ class Client;
 #include "merc.h"
 #include "zone.h"
 #include "AA.h"
-#include "updatemgr.h"
 #include "questmgr.h"
 #include "QGlobals.h"
 
@@ -838,9 +837,6 @@ public:
 	void	EnableTitle(int titleset);
 	void	RemoveTitle(int titleset);
 
-#ifdef PACKET_UPDATE_MANAGER
-	inline UpdateManager *GetUpdateManager() { return(&update_manager); }
-#endif
 	void	EnteringMessages(Client* client);
 	void	SendRules(Client* client);
 	std::list<std::string> consent_list;
@@ -1124,6 +1120,7 @@ public:
 	void TryItemTick(int slot);
 	void ItemTimerCheck();
 	void TryItemTimer(int slot);
+	void SendItemScale(ItemInst *inst);
 
 	int16 GetActSTR() { return( std::min(GetMaxSTR(), GetSTR()) ); }
 	int16 GetActSTA() { return( std::min(GetMaxSTA(), GetSTA()) ); }
@@ -1355,10 +1352,6 @@ private:
 	Timer	scanarea_timer;
 #endif
 	Timer	tribute_timer;
-
-#ifdef PACKET_UPDATE_MANAGER
-	UpdateManager update_manager;
-#endif
 
 	Timer	proximity_timer;
 	Timer	TaskPeriodic_Timer;

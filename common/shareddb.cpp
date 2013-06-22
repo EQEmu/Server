@@ -1343,12 +1343,11 @@ ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges)
 		if (charges == 0 && item->MaxCharges == -1)
 			charges = 1;
 
+		inst = new ItemInst(item, charges);
+
 		if(item->CharmFileID != 0 || (item->LoreGroup >= 1000 && item->LoreGroup != -1)) {
-			inst = new EvoItemInst(item, charges);
-			((EvoItemInst*)inst)->Initialize(this);
+			inst->Initialize(this);
 		}
-		else
-			inst = new ItemInst(item, charges);
 	}
 	return inst;
 }

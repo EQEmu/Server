@@ -17,7 +17,7 @@ class Lua_Door : public Lua_Entity
 	typedef Doors NativeType;
 public:
 	Lua_Door() { }
-	Lua_Door(Doors *d) { SetLuaPtrData(d); }
+	Lua_Door(Doors *d) { SetLuaPtrData(reinterpret_cast<Entity*>(d)); }
 	virtual ~Lua_Door() { }
 
 	operator Doors*() {

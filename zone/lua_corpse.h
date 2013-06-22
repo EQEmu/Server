@@ -18,7 +18,7 @@ class Lua_Corpse : public Lua_Mob
 	typedef Corpse NativeType;
 public:
 	Lua_Corpse() { SetLuaPtrData(nullptr); }
-	Lua_Corpse(Corpse *d) { SetLuaPtrData(d); }
+	Lua_Corpse(Corpse *d) { SetLuaPtrData(reinterpret_cast<Entity*>(d)); }
 	virtual ~Lua_Corpse() { }
 
 	operator Corpse*() {

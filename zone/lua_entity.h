@@ -21,7 +21,7 @@ namespace luabind {
 
 luabind::scope lua_register_entity();
 
-class Lua_Entity : public Lua_Ptr<void>
+class Lua_Entity : public Lua_Ptr<Entity>
 {
 	typedef Entity NativeType;
 public:

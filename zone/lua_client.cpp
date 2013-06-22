@@ -1173,6 +1173,11 @@ Lua_Inventory Lua_Client::GetInventory() {
 	return &self->GetInv();
 }
 
+void Lua_Client::SendItemScale(Lua_ItemInst inst) {
+	Lua_Safe_Call_Void();
+	self->SendItemScale(inst);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1406,7 +1411,8 @@ luabind::scope lua_register_client() {
 		.def("GetRaid", (Lua_Raid(Lua_Client::*)(void))&Lua_Client::GetRaid)
 		.def("PutItemInInventory", (bool(Lua_Client::*)(int,Lua_ItemInst))&Lua_Client::PutItemInInventory)
 		.def("PushItemOnCursor", (bool(Lua_Client::*)(Lua_ItemInst))&Lua_Client::PushItemOnCursor)
-		.def("GetInventory", (Lua_Inventory(Lua_Client::*)(void))&Lua_Client::GetInventory);
+		.def("GetInventory", (Lua_Inventory(Lua_Client::*)(void))&Lua_Client::GetInventory)
+		.def("SendItemScale", (void(Lua_Client::*)(Lua_ItemInst))&Lua_Client::SendItemScale);
 }
 
 luabind::scope lua_register_inventory_where() {

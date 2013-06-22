@@ -2432,19 +2432,18 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 	bool changed = false;
 	int i;
 	for (i = slot_x; i < slot_y; i++) {
-		const ItemInst* inst = m_inv[i];
+		ItemInst* inst = m_inv.GetItem(i);
 		if(inst == 0)
 			continue;
 
 		bool update_slot = false;
 		if(inst->IsScaling())
 		{
-			EvoItemInst* e_inst = (EvoItemInst*)inst;
-			uint16 oldexp = e_inst->GetExp();
-			parse->EventItem(EVENT_SCALE_CALC, this, e_inst, nullptr, "", 0);
+			uint16 oldexp = inst->GetExp();
+			parse->EventItem(EVENT_SCALE_CALC, this, inst, nullptr, "", 0);
 
-			if (e_inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
-				e_inst->ScaleItem();
+			if (inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
+				inst->ScaleItem();
 				changed = true;
 				update_slot = true;
 			}
@@ -2459,13 +2458,12 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 
 			if(a_inst->IsScaling())
 			{
-				EvoItemInst* e_inst = (EvoItemInst*)a_inst;
-				uint16 oldexp = e_inst->GetExp();
-				parse->EventItem(EVENT_SCALE_CALC, this, e_inst, nullptr, "", 0);
+				uint16 oldexp = a_inst->GetExp();
+				parse->EventItem(EVENT_SCALE_CALC, this, a_inst, nullptr, "", 0);
 
-				if (e_inst->GetExp() != oldexp)
+				if (a_inst->GetExp() != oldexp)
 				{
-					e_inst->ScaleItem();
+					a_inst->ScaleItem();
 					changed = true;
 					update_slot = true;
 				}
@@ -2518,16 +2516,15 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 		bool update_slot = false;
 		if(inst->IsScaling())
 		{
-			EvoItemInst* e_inst = (EvoItemInst*)inst;
-			uint16 oldexp = e_inst->GetExp();
+			uint16 oldexp = inst->GetExp();
 
-			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
+			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
 			if(i < 22 || i == 9999) {
-				parse->EventItem(EVENT_EQUIP_ITEM, this, e_inst, nullptr, "", i);
+				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
-			if (e_inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
-				e_inst->ScaleItem();
+			if (inst->GetExp() != oldexp) {	// if the scaling factor changed, rescale the item and update the client
+				inst->ScaleItem();
 				changed = true;
 				update_slot = true;
 			}
@@ -2548,14 +2545,13 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 
 			if(a_inst->IsScaling())
 			{
-				EvoItemInst* e_inst = (EvoItemInst*)a_inst;
-				uint16 oldexp = e_inst->GetExp();
+				uint16 oldexp = a_inst->GetExp();
 
-				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, e_inst, nullptr, "", 0);
+				parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, a_inst, nullptr, "", 0);
 
-				if (e_inst->GetExp() != oldexp)
+				if (a_inst->GetExp() != oldexp)
 				{
-					e_inst->ScaleItem();
+					a_inst->ScaleItem();
 					changed = true;
 					update_slot = true;
 				}

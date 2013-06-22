@@ -27,7 +27,6 @@ class ItemInst;				// Item belonging to a client (contains info on item, dye, au
 class ItemInstQueue;		// Queue of ItemInst objects (i.e., cursor)
 class Inventory;			// Character inventory
 class ItemParse;			// Parses item packets
-class EvoItemInst;			// Extended item inst, for use with scaling/evolving items
 class EvolveInfo;			// Stores information about an evolving item family
 
 #include <string>
@@ -135,7 +134,7 @@ public:
 	// Public Methods
 	///////////////////////////////
 
-	virtual ~Inventory();
+	~Inventory();
 
 	// Retrieve a writeable item at specified slot
 	ItemInst* GetItem(int16 slot_id) const;
@@ -269,21 +268,28 @@ public:
 		m_instnodrop = false;
 		m_merchantslot = 0;
 		m_color = 0;
+
+		m_exp = 0;
+		m_evolveLvl = 0;
+		m_activated = false;
+		m_scaledItem = nullptr;
+		m_evolveInfo = nullptr;
+		m_scaling = false;
 	}
 
 	ItemInst(const ItemInst& copy);
 
-	virtual ~ItemInst();
+	~ItemInst();
 
 	// Query item type
-	virtual bool IsType(ItemClass item_class) const;
+	bool IsType(ItemClass item_class) const;
 
 	// Can item be stacked?
-	virtual bool IsStackable() const;
+	bool IsStackable() const;
 
 	// Can item be equipped by/at?
-	virtual bool IsEquipable(uint16 race, uint16 class_) const;
-	virtual bool IsEquipable(int16 slot_id) const;
+	bool IsEquipable(uint16 race, uint16 class_) const;
+	bool IsEquipable(int16 slot_id) const;
 
 	//
 	// Augements
@@ -299,7 +305,7 @@ public:
 	// Contents
 	//
 	ItemInst* GetItem(uint8 slot) const;
-	virtual uint32 GetItemID(uint8 slot) const;
+	uint32 GetItemID(uint8 slot) const;
 	inline const ItemInst* operator[](uint8 slot) const { return GetItem(slot); }
 	void PutItem(uint8 slot, const ItemInst& inst);
 	void PutItem(SharedDatabase *db, uint8 slot, uint32 item_id);
@@ -316,7 +322,7 @@ public:
 	// Augments
 	//
 	ItemInst* GetAugment(uint8 slot) const;
-	virtual uint32 GetAugmentItemID(uint8 slot) const;
+	uint32 GetAugmentItemID(uint8 slot) const;
 	void PutAugment(uint8 slot, const ItemInst& inst);
 	void PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id);
 	void DeleteAugment(uint8 slot);
@@ -324,14 +330,14 @@ public:
 	bool IsAugmented();
 
 	// Has attack/delay?
-	virtual bool IsWeapon() const;
-	virtual bool IsAmmo() const;
+	bool IsWeapon() const;
+	bool IsAmmo() const;
 
 	// Accessors
 	const uint32 GetID() const { return m_item->ID; }
 	const uint32 GetItemScriptID() const { return m_item->ScriptFileID; }
-	virtual const Item_Struct* GetItem() const		{ return m_item; }
-	void SetItem(const Item_Struct* item)	{ m_item = item; }
+	const Item_Struct* GetItem() const;
+	const Item_Struct* GetUnscaledItem() const;
 
 	int16 GetCharges() const				{ return m_charges; }
 	void SetCharges(int16 charges)			{ m_charges = charges; }
@@ -371,12 +377,25 @@ public:
 	bool operator!=(const ItemInst& right) const { return (this->m_item != right.m_item); }
 
 	// Clone current item
-	virtual ItemInst* Clone() const;
+	ItemInst* Clone() const;
 
 	bool IsSlotAllowed(int16 slot_id) const;
 
-	virtual bool IsScaling() const		{ return false; }
-	virtual bool IsEvolving() const		{ return false; }
+	bool IsScaling() const				{ return m_scaling; }
+	bool IsEvolving() const				{ return (m_evolveLvl >= 1); }
+	uint32 GetExp() const				{ return m_exp; }
+	void SetExp(uint32 exp)				{ m_exp = exp; }
+	void AddExp(uint32 exp)				{ m_exp += exp; }
+	bool IsActivated()					{ return m_activated; }
+	void SetActivated(bool activated)	{ m_activated = activated; }
+	int8 GetEvolveLvl() const			{ return m_evolveLvl; }
+	void SetScaling(bool v) { m_scaling = v; }
+
+	void Initialize(SharedDatabase *db = nullptr);
+	void ScaleItem();
+	bool EvolveOnAllKills() const;
+	int8 GetMaxEvolveLvl() const;
+	uint32 GetKillsNeeded(uint8 currentlevel);
 
 	std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id=slot_id; s.inst=(const void *)this; std::string ser; ser.assign((char *)&s,sizeof(InternalSerializedItem_Struct)); return ser; }
 	inline int32 GetSerialNumber() const { return m_SerialNumber; }
@@ -409,6 +428,13 @@ protected:
 	bool				m_instnodrop;
 	int32				m_merchantcount;		//number avaliable on the merchant, -1=unlimited
 	int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
+	uint32				m_exp;
+	int8				m_evolveLvl;
+	bool				m_activated;
+	Item_Struct*		m_scaledItem;
+	EvolveInfo*			m_evolveInfo;
+	bool				m_scaling;
+
 	//
 	// Items inside of this item (augs or contents);
 	std::map<uint8, ItemInst*> m_contents; // Zero-based index: min=0, max=9
@@ -416,45 +442,9 @@ protected:
 	std::map<std::string, Timer> m_timers;
 };
 
-class EvoItemInst: public ItemInst {
-public:
-	// constructor and destructor
-	EvoItemInst(const EvoItemInst& copy);
-	EvoItemInst(const ItemInst& copy);
-	EvoItemInst(const Item_Struct* item = nullptr, int16 charges = 0);
-	~EvoItemInst();
-
-	// accessors... a lot of these are for evolving items (not complete yet)
-	bool IsScaling() const				{ return (m_evolveLvl == -1); }
-	bool IsEvolving() const				{ return (m_evolveLvl >= 1); }
-	uint32 GetExp() const				{ return m_exp; }
-	void SetExp(uint32 exp)				{ m_exp = exp; }
-	void AddExp(uint32 exp)				{ m_exp += exp; }
-	bool IsActivated()					{ return m_activated; }
-	void SetActivated(bool activated)	{ m_activated = activated; }
-	int8 GetEvolveLvl() const			{ return m_evolveLvl; }
-
-	EvoItemInst* Clone() const;
-	const Item_Struct* GetItem() const;
-	const Item_Struct* GetUnscaledItem() const;
-	void Initialize(SharedDatabase *db = nullptr);
-	void ScaleItem();
-	bool EvolveOnAllKills() const;
-	int8 GetMaxEvolveLvl() const;
-	uint32 GetKillsNeeded(uint8 currentlevel);
-
-
-private:
-	uint32				m_exp;
-	int8				m_evolveLvl;
-	bool				m_activated;
-	Item_Struct*		m_scaledItem;
-	const EvolveInfo*	m_evolveInfo;
-};
-
 class EvolveInfo {
 public:
-	friend class EvoItemInst;
+	friend class ItemInst;
 	//temporary
 	uint16				LvlKills[9];
 	uint32				FirstItem;

@@ -164,6 +164,8 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	}
 	else
 	{
+		ItemInst *old_aug = nullptr;
+		const uint32 id = auged_with->GetID();
 		ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_slot);
 		if(aug) {
 			std::vector<void*> args;
@@ -171,15 +173,20 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 
 			args.assign(1, tobe_auged);
+			bool destroyed = false;
+			if(id == 40408 || id == 40409 || id == 40410) {
+				destroyed = true;
+			}
+
+			args.push_back(&destroyed);
+
 			parse->EventItem(EVENT_AUGMENT_REMOVE, user, aug, nullptr, "", slot, &args);
 		}
 
-		ItemInst *old_aug=nullptr;
-		const uint32 id=auged_with->GetID();
-		if (id==40408 || id==40409 || id==40410)
+		if(id == 40408 || id == 40409 || id == 40410)
 			tobe_auged->DeleteAugment(in_augment->augment_slot);
 		else
-			old_aug=tobe_auged->RemoveAugment(in_augment->augment_slot);
+			old_aug = tobe_auged->RemoveAugment(in_augment->augment_slot);
 
 		itemOneToPush = tobe_auged->Clone();
 		if (old_aug)

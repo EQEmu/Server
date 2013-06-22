@@ -14,7 +14,7 @@ namespace luabind {
 
 luabind::scope lua_register_raid();
 
-class Lua_Raid : public Lua_Ptr<void>
+class Lua_Raid : public Lua_Ptr<Raid>
 {
 	typedef Raid NativeType;
 public:

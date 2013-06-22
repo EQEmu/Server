@@ -732,8 +732,10 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 		iter++;
 	}
 
-	//second look for /quests/spells/spell_id.ext (precedence)
-	filename = "quests/spells/";
+	//second look for /quests/global/spells/spell_id.ext (precedence)
+	filename = "quests/";
+	filename += QUEST_GLOBAL_DIRECTORY;
+	filename += "/spells/";
 	filename += itoa(spell_id);
 
 	iter = _load_precedence.begin();
@@ -750,7 +752,49 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 		}
 
 		iter++;
-	}	
+	}
+
+	//third look for /quests/zone/spells/default.ext (precedence)
+	filename = "quests/";
+	filename += zone->GetShortName();
+	filename += "/spells/default";
+
+	iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		tmp = filename;
+		std::map<uint32, std::string>::iterator ext = _extensions.find((*iter)->GetIdentifier());
+		tmp += ".";
+		tmp += ext->second;
+		f = fopen(tmp.c_str(), "r");
+		if(f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		iter++;
+	}
+
+	//last look for /quests/global/spells/default.ext (precedence)
+	filename = "quests/";
+	filename += QUEST_GLOBAL_DIRECTORY;
+	filename += "/spells/default";
+
+	iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		tmp = filename;
+		std::map<uint32, std::string>::iterator ext = _extensions.find((*iter)->GetIdentifier());
+		tmp += ".";
+		tmp += ext->second;
+		f = fopen(tmp.c_str(), "r");
+		if(f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		iter++;
+	}
 
 	return nullptr;
 }
@@ -780,9 +824,53 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 		iter++;
 	}
 	
-	//second look for /quests/items/item_script.ext (precedence)
-	filename = "quests/items/";
+	//second look for /quests/global/items/item_script.ext (precedence)
+	filename = "quests/";
+	filename += QUEST_GLOBAL_DIRECTORY;
+	filename += "/items/";
 	filename += item_script;
+
+	iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		tmp = filename;
+		std::map<uint32, std::string>::iterator ext = _extensions.find((*iter)->GetIdentifier());
+		tmp += ".";
+		tmp += ext->second;
+		f = fopen(tmp.c_str(), "r");
+		if(f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		iter++;
+	}
+
+	//third look for /quests/zone/items/default.ext (precedence)
+	filename = "quests/";
+	filename += zone->GetShortName();
+	filename += "/items/default";
+
+	iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		tmp = filename;
+		std::map<uint32, std::string>::iterator ext = _extensions.find((*iter)->GetIdentifier());
+		tmp += ".";
+		tmp += ext->second;
+		f = fopen(tmp.c_str(), "r");
+		if(f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		iter++;
+	}
+
+	//last look for /quests/global/items/default.ext (precedence)
+	filename = "quests/";
+	filename += QUEST_GLOBAL_DIRECTORY;
+	filename += "/items/default";
 
 	iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
@@ -828,8 +916,10 @@ QuestInterface *QuestParserCollection::GetQIByEncounterQuest(std::string encount
 		++iter;
 	}
 	
-	//second look for /quests/encounters/encounter_name.ext (precedence)
-	filename = "quests/encounters/";
+	//second look for /quests/global/encounters/encounter_name.ext (precedence)
+	filename = "quests/";
+	filename += QUEST_GLOBAL_DIRECTORY;
+	filename += "/encounters/";
 	filename += encounter_name;
 
 	iter = _load_precedence.begin();

@@ -117,17 +117,10 @@ Zone extensions and features
 //New aggro system to reduce overhead.
 #define REVERSE_AGGRO
 
-//Enable spacial queue to manage NPC update packets
-//#define PACKET_UPDATE_MANAGER
-//#define MANAGE_HP_UPDATES
-
 //The highest you can #setskill / #setallskill
 #define HIGHEST_CAN_SET_SKILL 400
 
 #define SKILL_MAX_LEVEL 75
-
-//#define MIN_RANGED_ATK_RANGE 25
-//replaced the above define with RuleI(Combat, MinRangedAttackDist)
 
 /*
 
@@ -169,7 +162,7 @@ enum {	//timer settings, all in milliseconds
 	AItarget_check_duration = 500,
 	AIClientScanarea_delay = 750,	//used in REVERSE_AGGRO
 	AIassistcheck_delay = 3000,		//now often a fighting NPC will yell for help
-	ClientProximity_interval = 1000,
+	ClientProximity_interval = 150,
 	CombatEventTimer_expire = 12000,
 	Tribute_duration = 600000,
 	ZoneTimerResolution = 3,			//sleep time between zone main loop runs (milliseconds)

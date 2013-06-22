@@ -12,7 +12,7 @@ namespace luabind {
 
 luabind::scope lua_register_item();
 
-class Lua_Item : public Lua_Ptr<const void>
+class Lua_Item : public Lua_Ptr<const Item_Struct>
 {
 	typedef const Item_Struct NativeType;
 public:

@@ -21,7 +21,7 @@ class Lua_Mob : public Lua_Entity
 	typedef Mob NativeType;
 public:
 	Lua_Mob() { SetLuaPtrData(nullptr); }
-	Lua_Mob(Mob *d) { SetLuaPtrData(d); }
+	Lua_Mob(Mob *d) { SetLuaPtrData(reinterpret_cast<Entity*>(d)); }
 	virtual ~Lua_Mob() { }
 
 	operator Mob*() {
@@ -331,6 +331,7 @@ public:
 	void SetFlurryChance(int value);
 	int GetFlurryChance();
 	int GetSkill(int skill_id);
+	void CalcBonuses();
 };
 
 #endif

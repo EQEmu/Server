@@ -79,7 +79,7 @@ XS(XS_QuestItem_SetScale)
 		Mult = (float)SvNV(ST(1));
 
 		if(THIS->IsScaling()) {
-			((EvoItemInst*)THIS)->SetExp((int)(Mult*10000+.5));
+			THIS->SetExp((int)(Mult*10000+.5));
 		}
 	}
 	XSRETURN_EMPTY;

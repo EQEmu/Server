@@ -82,10 +82,6 @@ bool Client::Process() {
 			SendAllPackets();
 		}
 
-#ifdef PACKET_UPDATE_MANAGER
-		update_manager.Process();
-#endif
-
 		if(adventure_request_timer)
 		{
 			if(adventure_request_timer->Check())

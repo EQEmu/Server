@@ -104,7 +104,6 @@ SET(zone_sources
 	trading.cpp
 	trap.cpp
 	tribute.cpp
-	updatemgr.cpp
 	watermap.cpp
 	waypoints.cpp
 	worldserver.cpp
@@ -187,7 +186,6 @@ SET(zone_headers
 	tasks.h
 	titles.h
 	trap.h
-	updatemgr.h
 	watermap.h
 	worldserver.h
 	zone.h

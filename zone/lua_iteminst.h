@@ -13,7 +13,7 @@ namespace luabind {
 
 luabind::scope lua_register_iteminst();
 
-class Lua_ItemInst : public Lua_Ptr<void>
+class Lua_ItemInst : public Lua_Ptr<ItemInst>
 {
 	typedef ItemInst NativeType;
 public:
@@ -22,7 +22,7 @@ public:
 	Lua_ItemInst() : Lua_Ptr(nullptr), cloned_(false) { }
 	Lua_ItemInst(ItemInst *d) : Lua_Ptr(d), cloned_(false) { }
 	Lua_ItemInst(ItemInst *d, bool cloned) : Lua_Ptr(d), cloned_(cloned) { }
-	virtual ~Lua_ItemInst() { if(cloned_) { void *ptr = GetLuaPtrData(); if(ptr) { delete ptr; } } }
+	virtual ~Lua_ItemInst() { if(cloned_) { ItemInst *ptr = GetLuaPtrData(); if(ptr) { delete ptr; } } }
 
 	operator ItemInst*() {
 		return reinterpret_cast<ItemInst*>(GetLuaPtrData());
@@ -63,6 +63,7 @@ public:
 	void SetCustomData(std::string identifier, bool value);
 	std::string GetCustomData(std::string identifier);
 	void DeleteCustomData(std::string identifier);
+	void SetScaling(bool v);
 	void SetScale(double scale_factor);
 	uint32 GetExp();
 	void SetExp(uint32 exp);

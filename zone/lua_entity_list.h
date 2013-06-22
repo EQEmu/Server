@@ -32,7 +32,7 @@ luabind::scope lua_register_corpse_list();
 luabind::scope lua_register_object_list();
 luabind::scope lua_register_door_list();
 
-class Lua_EntityList : public Lua_Ptr<void>
+class Lua_EntityList : public Lua_Ptr<EntityList>
 {
 	typedef EntityList NativeType;
 public:

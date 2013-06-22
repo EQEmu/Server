@@ -12,7 +12,7 @@ namespace luabind {
 
 luabind::scope lua_register_spell();
 
-class Lua_Spell : public Lua_Ptr<const void>
+class Lua_Spell : public Lua_Ptr<const SPDat_Spell_Struct>
 {
 	typedef const SPDat_Spell_Struct NativeType;
 public:

@@ -625,11 +625,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 				//send out updates to people in zone.
 				SendPosition();
-
-#ifdef PACKET_UPDATE_MANAGER
-				//flush our position queues because we dont know where we will end up
-				update_manager.FlushQueues();
-#endif
 			}
 
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));

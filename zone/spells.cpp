@@ -3472,15 +3472,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	TrySpellTrigger(spelltar, spell_id);
 	TryApplyEffect(spelltar, spell_id);
 
-
-	if(spell_id == 982)	// Cazic Touch, hehe =P
-	{
-		char target_name[64];
-		strcpy(target_name, spelltar->GetCleanName());
-		strupr(target_name);
-		Shout("%s!", target_name);
-	}
-
 	if (spelltar->IsAIControlled() && IsDetrimentalSpell(spell_id) && !IsHarmonySpell(spell_id)) {
 		int32 aggro_amount = CheckAggroAmount(spell_id, isproc);
 		mlog(SPELLS__CASTING, "Spell %d cast on %s generated %d hate", spell_id, spelltar->GetName(), aggro_amount);

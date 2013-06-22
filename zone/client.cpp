@@ -146,9 +146,6 @@ Client::Client(EQStreamInterface* ieqs)
 	scanarea_timer(AIClientScanarea_delay),
 #endif
 	tribute_timer(Tribute_duration),
-#ifdef PACKET_UPDATE_MANAGER
-	update_manager(ieqs),
-#endif
 	proximity_timer(ClientProximity_interval),
 	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
 	charm_update_timer(6000),
@@ -7827,4 +7824,13 @@ void Client::IncrementAA(int aa_id) {
 	SendAATable();
 	SendAAStats();
 	CalcBonuses();
+}
+
+void Client::SendItemScale(ItemInst *inst) {
+	int slot = m_inv.GetSlotByItemInst(inst);
+	if(slot != -1) {
+		inst->ScaleItem();
+		SendItemPacket(slot, inst, ItemPacketCharmUpdate);
+		CalcBonuses();
+	}
 }

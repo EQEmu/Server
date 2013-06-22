@@ -63,18 +63,9 @@ Lua_Item Lua_ItemInst::GetItem() {
 	return Lua_Item(self->GetItem());
 }
 
-void Lua_ItemInst::SetItem(Lua_Item item) {
-	Lua_Safe_Call_Void();
-	return self->SetItem(item);
-}
-
 Lua_Item Lua_ItemInst::GetUnscaledItem(int slot) {
 	Lua_Safe_Call_Class(Lua_Item);
-	if(self->IsScaling()) {
-		const EvoItemInst *ev = reinterpret_cast<const EvoItemInst*>(self);
-		return Lua_Item(ev->GetUnscaledItem());
-	}
-	return Lua_Item(self->GetItem());
+	return self->GetUnscaledItem();
 }
 
 uint32 Lua_ItemInst::GetItemID(int slot) {
@@ -199,53 +190,37 @@ void Lua_ItemInst::DeleteCustomData(std::string identifier) {
 
 void Lua_ItemInst::SetScale(double scale_factor) {
 	Lua_Safe_Call_Void();
-	if(self->IsScaling()) {
-		EvoItemInst *ev = reinterpret_cast<EvoItemInst*>(self);
-		ev->SetExp(static_cast<uint32>(scale_factor * 10000.0 + 0.5));
-	}
+	self->SetExp((int)(scale_factor*10000+.5));
+}
+
+void Lua_ItemInst::SetScaling(bool v) {
+	Lua_Safe_Call_Void();
+	self->SetScaling(v);
 }
 
 uint32 Lua_ItemInst::GetExp() {
 	Lua_Safe_Call_Int();
-	if(self->IsScaling()) {
-		EvoItemInst *ev = reinterpret_cast<EvoItemInst*>(self);
-		return ev->GetExp();
-	}
-	return 0;
+	return self->GetExp();
 }
 
 void Lua_ItemInst::SetExp(uint32 exp) {
 	Lua_Safe_Call_Void();
-	if(self->IsScaling()) {
-		EvoItemInst *ev = reinterpret_cast<EvoItemInst*>(self);
-		ev->SetExp(exp);
-	}
+	self->SetExp(exp);
 }
 
 void Lua_ItemInst::AddExp(uint32 exp) {
 	Lua_Safe_Call_Void();
-	if(self->IsScaling()) {
-		EvoItemInst *ev = reinterpret_cast<EvoItemInst*>(self);
-		ev->AddExp(exp);
-	}
+	self->AddExp(exp);
 }
 
 int Lua_ItemInst::GetMaxEvolveLvl() {
 	Lua_Safe_Call_Int();
-	if(self->IsScaling()) {
-		EvoItemInst *ev = reinterpret_cast<EvoItemInst*>(self);
-		return ev->GetMaxEvolveLvl();
-	}
-	return 0;
+	return self->GetMaxEvolveLvl();
 }
 
 uint32 Lua_ItemInst::GetKillsNeeded(int current_level) {
 	Lua_Safe_Call_Int();
-	if(self->IsScaling()) {
-		EvoItemInst *ev = reinterpret_cast<EvoItemInst*>(self);
-		return ev->GetKillsNeeded(current_level);
-	}
-	return 0;
+	return self->GetKillsNeeded(current_level);
 }
 
 Lua_ItemInst Lua_ItemInst::Clone() {
@@ -294,7 +269,6 @@ luabind::scope lua_register_iteminst() {
 		.def("GetID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetID)
 		.def("GetItemScriptID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItemScriptID)
 		.def("GetItem", (Lua_Item(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItem)
-		.def("SetItem", (void(Lua_ItemInst::*)(Lua_Item))&Lua_ItemInst::SetItem)
 		.def("GetCharges", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetCharges)
 		.def("SetCharges", (void(Lua_ItemInst::*)(int))&Lua_ItemInst::SetCharges)
 		.def("GetPrice", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetPrice)
@@ -310,7 +284,8 @@ luabind::scope lua_register_iteminst() {
 		.def("SetCustomData", (void(Lua_ItemInst::*)(std::string,bool))&Lua_ItemInst::SetCustomData)
 		.def("GetCustomData", (std::string(Lua_ItemInst::*)(std::string))&Lua_ItemInst::GetCustomData)
 		.def("DeleteCustomData", (void(Lua_ItemInst::*)(std::string))&Lua_ItemInst::DeleteCustomData)
-		.def("SetScale", (void(Lua_ItemInst::*)(void))&Lua_ItemInst::SetScale)
+		.def("SetScaling", (void(Lua_ItemInst::*)(bool))&Lua_ItemInst::SetScaling)
+		.def("SetScale", (void(Lua_ItemInst::*)(double))&Lua_ItemInst::SetScale)
 		.def("GetExp", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetExp)
 		.def("SetExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetExp)
 		.def("AddExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::AddExp)

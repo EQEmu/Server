@@ -14,7 +14,7 @@ namespace luabind {
 
 luabind::scope lua_register_inventory();
 
-class Lua_Inventory : public Lua_Ptr<void>
+class Lua_Inventory : public Lua_Ptr<Inventory>
 {
 	typedef Inventory NativeType;
 public:
