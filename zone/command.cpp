@@ -3388,11 +3388,13 @@ void command_reloadqst(Client *c, const Seperator *sep)
 	if (sep->arg[1][0] == 0)
 	{
 		c->Message(0, "Clearing quest memory cache.");
+		entity_list.ClearAreas();
 		parse->ReloadQuests();
 	}
 	else
 	{
 		c->Message(0, "Clearing quest memory cache and stopping timers.");
+		entity_list.ClearAreas();
 		parse->ReloadQuests(true);
 	}
 

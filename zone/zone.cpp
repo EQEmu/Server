@@ -112,9 +112,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	zone->pathing = PathManager::LoadPathFile(zone->map_name);
 
 	char tmp[10];
-	//PlayerProfile_Struct* pp;
-	//int char_num = 0;
-	//unsigned long* lengths;
 	if (database.GetVariable("loglevel",tmp, 9)) {
 		int log_levels[4];
 		if (atoi(tmp)>9){ //Server is using the new code
@@ -457,36 +454,6 @@ void Zone::LoadTempMerchantData(){
 		LogFile->write(EQEMuLog::Error, "dbasync->AddWork() failed adding merchant list query");
 		return;
 	}
-/*	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	std::list<TempMerchantList> merlist;
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select ml.npcid,ml.slot,ml.itemid,ml.charges from merchantlist_temp ml, npc_types nt, spawnentry se, spawn2 s2 where nt.id=ml.npcid and nt.id=se.npcid and se.spawngroupid=s2.spawngroupid and s2.zone='%s' group by ml.npcid,slot order by npcid,slot asc", GetShortName()), errbuf, &result)) {
-		uint32 npcid = 0;
-		while((row = mysql_fetch_row(result))) {
-			if(npcid != atoul(row[0])){
-				if(npcid > 0)
-					tmpmerchanttable[npcid] = merlist;
-				npcid = atoul(row[0]);
-				merlist.clear();
-			}
-			TempMerchantList ml;
-			ml.npcid = npcid;
-			ml.slot = atoul(row[1]);
-			ml.item = atoul(row[2]);
-			ml.charges = atoul(row[3]);
-			ml.origslot = ml.slot;
-			merlist.push_back(ml);
-		}
-		if(npcid > 0)
-			tmpmerchanttable[npcid] = merlist;
-		mysql_free_result(result);
-	}
-	else
-		cerr << "Error in LoadTempMerchantData query '" << query << "' " << errbuf << endl;
-	safe_delete_array(query);
-*/
 }
 
 void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
@@ -511,8 +478,6 @@ void Zone::LoadTempMerchantData_result(MYSQL_RES* result) {
 		ml.origslot = ml.slot;
 		cur->second.push_back(ml);
 	}
-	//mysql_free_result(result);
-	//LogFile->write(EQEMuLog::Status, "Finished Loading Temporary Merchant Lists...");
 }
 
 //there should prolly be a temp counterpart of this...
@@ -601,34 +566,6 @@ void Zone::GetMerchantDataForZoneLoad(){
 		LogFile->write(EQEMuLog::Error,"dbasync->AddWork() failed adding merchant list query");
 		return;
 	}
-/*	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	std::list<MerchantList> merlist;
-	if (database.RunQuery(query, MakeAnyLenString(&query, "select ml.merchantid,ml.slot,ml.item from merchantlist ml, npc_types nt, spawnentry se, spawn2 s2 where nt.merchant_id=ml.merchantid and nt.id=se.npcid and se.spawngroupid=s2.spawngroupid and s2.zone='%s' group by ml.merchantid,slot order by merchantid,slot asc", GetShortName()), errbuf, &result)) {
-		uint32 npcid = 0;
-		while((row = mysql_fetch_row(result))) {
-			if(npcid != atoul(row[0])){
-				if(npcid > 0)
-					merchanttable[npcid] = merlist;
-				npcid = atoul(row[0]);
-				merlist.clear();
-			}
-			MerchantList ml;
-			ml.id = npcid;
-			ml.slot = atoul(row[1]);
-			ml.item = atoul(row[2]);
-			merlist.push_back(ml);
-		}
-		if(npcid > 0)
-			merchanttable[npcid] = merlist;
-		mysql_free_result(result);
-	}
-	else
-		cerr << "Error in GetMerchantDataForZoneLoad query '" << query << "' " << errbuf << endl;
-	safe_delete_array(query);
-*/
 }
 
 void Zone::LoadMercTemplates(){
@@ -879,6 +816,7 @@ void Zone::Shutdown(bool quite)
 	zone->ResetAuth();
 	safe_delete(zone);
 	dbasync->CommitWrites();
+	entity_list.ClearAreas();
 	parse->ReloadQuests(true);
 	UpdateWindowTitle();
 }
@@ -2665,6 +2603,7 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 void Zone::ReloadWorld(uint32 Option){
 	if(Option == 1){
 		zone->Repop(0);
+		entity_list.ClearAreas();
 		parse->ReloadQuests();
 	}
 }

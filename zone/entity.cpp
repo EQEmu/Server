@@ -1334,8 +1334,6 @@ void EntityList::SendZoneSpawnsBulk(Client* client)
 	Mob *spawn;
 	uint32 maxspawns=100;
 
-	//rate = rate > 1.0 ? (rate < 10.0 ? rate : 10.0) : 1.0;
-	//maxspawns = (uint32)rate * SPAWNS_PER_POINT_DATARATE; // FYI > 10240 entities will cause BulkZoneSpawnPacket to throw exception
 	if(maxspawns > mob_list.Count())
 		maxspawns = mob_list.Count();
 	BulkZoneSpawnPacket* bzsp = new BulkZoneSpawnPacket(client, maxspawns);
@@ -1389,8 +1387,6 @@ void EntityList::SendZoneCorpsesBulk(Client* client) {
 	Corpse *spawn;
 	uint32 maxspawns=100;
 
-	//rate = rate > 1.0 ? (rate < 10.0 ? rate : 10.0) : 1.0;
-	//maxspawns = (uint32)rate * SPAWNS_PER_POINT_DATARATE; // FYI > 10240 entities will cause BulkZoneSpawnPacket to throw exception
 	BulkZoneSpawnPacket* bzsp = new BulkZoneSpawnPacket(client, maxspawns);
 
 	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance())
@@ -3527,31 +3523,26 @@ void EntityList::SendAlarm(Trap* trap, Mob* currenttarget, uint8 kos)
 void EntityList::AddProximity(NPC *proximity_for) {
 	RemoveProximity(proximity_for->GetID());
 
-	proximity_list.Insert(proximity_for);
+	proximity_list.push_back(proximity_for);
 
 	proximity_for->proximity = new NPCProximity;
 }
 
 bool EntityList::RemoveProximity(uint16 delete_npc_id) {
-	LinkedListIterator<NPC*> iterator(proximity_list);
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		NPC *d = iterator.GetData();
-		if(d->GetID() == delete_npc_id) {
-			//safe_delete(d->proximity);
-			iterator.RemoveCurrent(false);
+	auto iter = proximity_list.begin();
+
+	while(iter != proximity_list.end()) {
+		if((*iter)->GetID() == delete_npc_id) {
+			proximity_list.erase(iter);
 			return true;
 		}
-		iterator.Advance();
+		++iter;
 	}
 	return false;
 }
 
 void EntityList::RemoveAllLocalities() {
-	LinkedListIterator<NPC*> iterator(proximity_list);
-	iterator.Reset();
-	while(iterator.MoreElements())
-		iterator.RemoveCurrent(false);
+	proximity_list.clear();
 }
 
 void EntityList::ProcessMove(Client *c, float x, float y, float z) {
@@ -3559,15 +3550,15 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z) {
 		We look through each proximity, looking to see if last_* was in(out)
 		the proximity, and the new supplied coords are out(in)...
 	*/
-	LinkedListIterator<NPC*> iterator(proximity_list);
 	std::list<int> skip_ids;
 
 	float last_x = c->ProximityX();
 	float last_y = c->ProximityY();
 	float last_z = c->ProximityZ();
 
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
-		NPC *d = iterator.GetData();
+	auto iter = proximity_list.begin();
+	for(; iter != proximity_list.end(); ++iter) {
+		NPC *d = (*iter);
 		NPCProximity *l = d->proximity;
 		if(l == nullptr)
 			continue;
@@ -3577,16 +3568,16 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z) {
 		//This causes our list to become invalid but we don't know it. On GCC it's basic heap
 		//corruption and it doesn't appear to catch it at all.
 		//MSVC it's a crash with 0xfeeefeee debug address (freed memory off the heap)
-		std::list<int>::iterator iter = skip_ids.begin();
+		std::list<int>::iterator skip_iter = skip_ids.begin();
 		bool skip = false;
-		while(iter != skip_ids.end())
+		while(skip_iter != skip_ids.end())
 		{
-			if(d->GetID() == (*iter))
+			if(d->GetID() == (*skip_iter))
 			{
 				skip = true;
 				break;
 			}
-			iter++;
+			++skip_iter;
 		}
 
 		if(skip)
@@ -3614,18 +3605,120 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z) {
 			parse->EventNPC(EVENT_EXIT, d, c, "", 0);
 
 			//Reentrant fix
-			iterator.Reset();
+			iter = proximity_list.begin();
 			skip_ids.push_back(d->GetID());
 		} else if(new_in && !old_in) {
 			//we were not in the proximity, we are now, send enter event
 			parse->EventNPC(EVENT_ENTER, d, c, "", 0);
 
 			//Reentrant fix
-			iterator.Reset();
+			iter = proximity_list.begin();
 			skip_ids.push_back(d->GetID());
 		}
 	}
 
+	for(auto area_iter = area_list.begin(); area_iter != area_list.end(); ++area_iter) {
+		Area& a = (*area_iter);
+		bool old_in = true;
+		bool new_in = true;
+		if(last_x < a.min_x || last_x > a.max_x ||
+			last_y < a.min_y || last_y > a.max_y ||
+			last_z < a.min_z || last_z > a.max_z )
+		{
+			old_in = false;
+		}
+	
+		if(x < a.min_x || x > a.max_x ||
+			y < a.min_y || y > a.max_y ||
+			z < a.min_z || z > a.max_z ) 
+		{
+			new_in = false;
+		}
+
+		if(old_in && !new_in) {
+			//were in but are no longer.
+		} else if (!old_in && new_in) {
+			//were not in but now are
+		}
+	}
+}
+
+void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
+	float last_x = n->GetX();
+	float last_y = n->GetY();
+	float last_z = n->GetZ();
+
+	for(auto area_iter = area_list.begin(); area_iter != area_list.end(); ++area_iter) {
+		Area& a = (*area_iter);
+		bool old_in = true;
+		bool new_in = true;
+		if(last_x < a.min_x || last_x > a.max_x ||
+			last_y < a.min_y || last_y > a.max_y ||
+			last_z < a.min_z || last_z > a.max_z )
+		{
+			old_in = false;
+		}
+	
+		if(x < a.min_x || x > a.max_x ||
+			y < a.min_y || y > a.max_y ||
+			z < a.min_z || z > a.max_z ) 
+		{
+			new_in = false;
+		}
+
+		if(old_in && !new_in) {
+			//were in but are no longer.
+		} else if (!old_in && new_in) {
+			//were not in but now are
+		}
+	}
+}
+
+void EntityList::AddArea(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z) {
+	RemoveArea(id);
+	Area a;
+	a.id = id;
+	a.type = type;
+	if(min_x > max_x) {
+		a.min_x = max_x;
+		a.max_x = min_x;
+	} else {
+		a.min_x = min_x;
+		a.max_x = max_x;
+	}
+
+	if(min_y > max_y) {
+		a.min_y = max_y;
+		a.max_y = min_y;
+	} else {
+		a.min_y = min_y;
+		a.max_y = max_y;
+	}
+
+	if(min_z > max_z) {
+		a.min_z = max_z;
+		a.max_z = min_z;
+	} else {
+		a.min_z = min_z;
+		a.max_z = max_z;
+	}
+
+	area_list.push_back(a);
+}
+
+void EntityList::RemoveArea(int id) {
+	auto iter = area_list.begin();
+	while(iter != area_list.end()) {
+		if((*iter).id == id) {
+			area_list.erase(iter);
+			return;
+		}
+		++iter;
+	}
+}
+
+void EntityList::ClearAreas() {
+	area_list.clear();
 }
 
 void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 language) {
@@ -3633,10 +3726,9 @@ void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 langu
 	if(!Message || !c)
 		return;
 
-	LinkedListIterator<NPC*> iterator(proximity_list);
-
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
-		NPC *d = iterator.GetData();
+	auto iter = proximity_list.begin();
+	for(; iter != proximity_list.end(); ++iter) {
+		NPC *d = (*iter);
 		NPCProximity *l = d->proximity;
 		if(l == nullptr || !l->say)
 			continue;

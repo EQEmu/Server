@@ -18,6 +18,27 @@ Lua_ItemInst::Lua_ItemInst(int item_id, int charges) {
 	cloned_ = true;
 }
 
+Lua_ItemInst& Lua_ItemInst::operator=(const Lua_ItemInst& o) {
+	if(o.cloned_) {
+		cloned_ = true;
+		d_ = new ItemInst(*o.d_);
+	} else {
+		cloned_ = false;
+		d_ = o.d_;
+	}
+	return *this;
+}
+
+Lua_ItemInst::Lua_ItemInst(const Lua_ItemInst& o) {
+	if(o.cloned_) {
+		cloned_ = true;
+		d_ = new ItemInst(*o.d_);
+	} else {
+		cloned_ = false;
+		d_ = o.d_;
+	}
+}
+
 bool Lua_ItemInst::IsType(int item_class) {
 	Lua_Safe_Call_Bool();
 	return self->IsType(static_cast<ItemClass>(item_class));

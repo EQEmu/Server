@@ -924,6 +924,18 @@ void LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::str
 	std::string package_name = "npc_" + std::to_string(npc->GetNPCTypeID());
 
 	auto iter = lua_encounter_events_registered.find(package_name);
+	if(iter != lua_encounter_events_registered.end()) {
+		auto riter = iter->second.begin();
+		while(riter != iter->second.end()) {
+			if(riter->event_id == evt) {
+				std::string package_name = "encounter_" + riter->encounter_name;
+				_EventNPC(package_name, evt, npc, init, data, extra_data, extra_pointers, &riter->lua_reference);
+			}
+			++riter;
+		}
+	}
+
+	iter = lua_encounter_events_registered.find("npc_-1");
 	if(iter == lua_encounter_events_registered.end()) {
 		return;
 	}
@@ -976,6 +988,18 @@ void LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *it
 	package_name += std::to_string(item->GetID());
 	
 	auto iter = lua_encounter_events_registered.find(package_name);
+	if(iter != lua_encounter_events_registered.end()) {
+		auto riter = iter->second.begin();
+		while(riter != iter->second.end()) {
+			if(riter->event_id == evt) {
+				std::string package_name = "encounter_" + riter->encounter_name;
+				_EventItem(package_name, evt, client, item, mob, data, extra_data, extra_pointers, &riter->lua_reference);
+			}
+			++riter;
+		}
+	}
+
+	iter = lua_encounter_events_registered.find("item_-1");
 	if(iter == lua_encounter_events_registered.end()) {
 		return;
 	}
@@ -1000,6 +1024,18 @@ void LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, u
 	std::string package_name = "spell_" + std::to_string(spell_id);
 
 	auto iter = lua_encounter_events_registered.find(package_name);
+	if(iter != lua_encounter_events_registered.end()) {
+	auto riter = iter->second.begin();
+		while(riter != iter->second.end()) {
+			if(riter->event_id == evt) {
+				std::string package_name = "encounter_" + riter->encounter_name;
+				_EventSpell(package_name, evt, npc, client, spell_id, extra_data, extra_pointers, &riter->lua_reference);
+			}
+			++riter;
+		}
+	}
+
+	iter = lua_encounter_events_registered.find("spell_-1");
 	if(iter == lua_encounter_events_registered.end()) {
 		return;
 	}

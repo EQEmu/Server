@@ -3261,10 +3261,9 @@ void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float 
 	float LastY = c->ProximityY();
 	float LastZ = c->ProximityZ();
 
-	//_log(TASKS__PROXIMITY, "Checing proximities for Position %8.3f, %8.3f, %8.3f Last: %8.3f, %8.3f, %8.3f\n", X, Y, Z, LastX, LastY, LastZ);
 	if((LastX==X) && (LastY==Y) && (LastZ==Z)) return;
 
-	_log(TASKS__PROXIMITY, "Checing proximities for Position %8.3f, %8.3f, %8.3f\n", X, Y, Z);
+	_log(TASKS__PROXIMITY, "Checking proximities for Position %8.3f, %8.3f, %8.3f\n", X, Y, Z);
 	int ExploreID = taskmanager->ProximityManager.CheckProximities(X, Y, Z);
 
 	if(ExploreID>0) {
@@ -3272,9 +3271,6 @@ void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float 
 		UpdateTasksOnExplore(c, ExploreID);
 	}
 }
-
-
-
 
 TaskGoalListManager::TaskGoalListManager() {
 

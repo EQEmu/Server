@@ -22,6 +22,8 @@ public:
 	Lua_ItemInst() : Lua_Ptr(nullptr), cloned_(false) { }
 	Lua_ItemInst(ItemInst *d) : Lua_Ptr(d), cloned_(false) { }
 	Lua_ItemInst(ItemInst *d, bool cloned) : Lua_Ptr(d), cloned_(cloned) { }
+	Lua_ItemInst& operator=(const Lua_ItemInst& o);
+	Lua_ItemInst(const Lua_ItemInst& o);
 	virtual ~Lua_ItemInst() { if(cloned_) { ItemInst *ptr = GetLuaPtrData(); if(ptr) { delete ptr; } } }
 
 	operator ItemInst*() {

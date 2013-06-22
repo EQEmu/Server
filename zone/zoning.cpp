@@ -616,7 +616,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			safe_delete(outapp);
 		}
 		else {
-			if(zoneID == this->GetZoneID()) {
+			if(zoneID == GetZoneID()) {
 				//properly handle proximities
 				entity_list.ProcessMove(this, x_pos, y_pos, z_pos);
 				proximity_x = x_pos;
