@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
 	_log(ZONE__INIT, "Loading server configuration..");
 	if (!ZoneConfig::LoadConfig()) {
 		_log(ZONE__INIT_ERR, "Loading server configuration failed.");
-		return(1);
+		return 1;
 	}
 	const ZoneConfig *Config=ZoneConfig::get();
 
@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
 		_log(ZONE__INIT_ERR, "Cannot continue without a database connection.");
-		return(1);
+		return 1;
 	}
 	dbasync = new DBAsync(&database);
 	dbasync->AddFQ(&MTdbafq);
@@ -182,16 +182,16 @@ int main(int argc, char** argv) {
 	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(ZONE__INIT_ERR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
 		_log(ZONE__INIT_ERR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
 		_log(ZONE__INIT_ERR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 	#endif
 
@@ -217,19 +217,19 @@ int main(int argc, char** argv) {
 	if (!database.LoadNPCFactionLists()) {
 		_log(ZONE__INIT_ERR, "Loading npcs faction lists FAILED!");
 		CheckEQEMuErrorAndPause();
-		return 0;
+		return 1;
 	}
 	_log(ZONE__INIT, "Loading loot tables");
 	if (!database.LoadLoot()) {
 		_log(ZONE__INIT_ERR, "Loading loot FAILED!");
 		CheckEQEMuErrorAndPause();
-		return 0;
+		return 1;
 	}
 	_log(ZONE__INIT, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
 		_log(ZONE__INIT_ERR, "Loading skill caps FAILED!");
 		CheckEQEMuErrorAndPause();
-		return 0;
+		return 1;
 	}
 
 	_log(ZONE__INIT, "Loading spells");

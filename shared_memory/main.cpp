@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 	LogFile->write(EQEMuLog::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
 		LogFile->write(EQEMuLog::Error, "Unable to load configuration file.");
-		return 0;
+		return 1;
 	}
 
 	const EQEmuConfig *config = EQEmuConfig::get();
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
 		LogFile->write(EQEMuLog::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
-		return 0;
+		return 1;
 	}
 
 	bool load_all = true;
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
 			LoadItems(&database);
 		} catch(std::exception &ex) {
 			LogFile->write(EQEMuLog::Error, "%s", ex.what());
-			return 0;
+			return 1;
 		}
 	}
 
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 			LoadFactions(&database);
 		} catch(std::exception &ex) {
 			LogFile->write(EQEMuLog::Error, "%s", ex.what());
-			return 0;
+			return 1;
 		}
 	}
 
@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
 			LoadLoot(&database);
 		} catch(std::exception &ex) {
 			LogFile->write(EQEMuLog::Error, "%s", ex.what());
-			return 0;
+			return 1;
 		}
 	}
 
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
 			LoadSkillCaps(&database);
 		} catch(std::exception &ex) {
 			LogFile->write(EQEMuLog::Error, "%s", ex.what());
-			return 0;
+			return 1;
 		}
 	}
 
@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
 			LoadSpells(&database);
 		} catch(std::exception &ex) {
 			LogFile->write(EQEMuLog::Error, "%s", ex.what());
-			return 0;
+			return 1;
 		}
 	}
 
