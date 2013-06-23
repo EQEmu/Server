@@ -106,7 +106,9 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_augment_item",
 	"event_unaugment_item",
 	"event_augment_insert",
-	"event_augment_remove"
+	"event_augment_remove",
+	"event_enter_area",
+	"event_leave_area"
 };
 
 extern Zone *zone;
@@ -150,6 +152,8 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_CAST] = handle_npc_cast;
 	NPCArgumentDispatch[EVENT_CAST_BEGIN] = handle_npc_cast;
 	NPCArgumentDispatch[EVENT_FEIGN_DEATH] = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_ENTER_AREA] = handle_npc_area;
+	NPCArgumentDispatch[EVENT_LEAVE_AREA] = handle_npc_area;
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
 	PlayerArgumentDispatch[EVENT_DEATH] = handle_player_death;
@@ -176,6 +180,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_COMBINE_SUCCESS] = handle_player_combine;
 	PlayerArgumentDispatch[EVENT_COMBINE_FAILURE] = handle_player_combine;
 	PlayerArgumentDispatch[EVENT_FEIGN_DEATH] = handle_player_feign;
+	PlayerArgumentDispatch[EVENT_ENTER_AREA] = handle_player_area;
+	PlayerArgumentDispatch[EVENT_LEAVE_AREA] = handle_player_area;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

@@ -106,28 +106,18 @@ void unregister_player_event(std::string name, int evt) {
 	unregister_event("player", name, evt);
 }
 
-void register_item_event(std::string name, int evt, Lua_Item item, luabind::object func) {
-	const Item_Struct *itm = item;
-	if(!itm) {
-		return;
-	}
-
+void register_item_event(std::string name, int evt, int item_id, luabind::object func) {
 	std::string package_name = "item_";
-	package_name += std::to_string(itm->ID);
+	package_name += std::to_string(item_id);
 	
 	if(luabind::type(func) == LUA_TFUNCTION) {
 		register_event(package_name, name, evt, func);
 	}
 }
 
-void unregister_item_event(std::string name, int evt, Lua_Item item) {
-	const Item_Struct *itm = item;
-	if(!itm) {
-		return;
-	}
-
+void unregister_item_event(std::string name, int evt, int item_id) {
 	std::string package_name = "item_";
-	package_name += std::to_string(itm->ID);
+	package_name += std::to_string(item_id);
 
 	unregister_event(package_name, name, evt);
 }
@@ -773,6 +763,18 @@ int lua_get_zone_weather() {
 	return zone->zone_weather;
 }
 
+void lua_add_area(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z) {
+	entity_list.AddArea(id, type, min_x, max_x, min_y, max_y, min_z, max_z);
+}
+
+void lua_remove_area(int id) {
+	entity_list.RemoveArea(id);
+}
+
+void lua_clear_areas() {
+	entity_list.ClearAreas();
+}
+
 luabind::object lua_get_zone_time(lua_State *L) {
 	TimeOfDay_Struct eqTime;
 	zone->zone_time.getEQTimeOfDay(time(0), &eqTime);
@@ -927,7 +929,10 @@ luabind::scope lua_register_general() {
 		luabind::def("get_zone_instance_id", &lua_get_zone_instance_id),
 		luabind::def("get_zone_instance_version", &lua_get_zone_instance_version),
 		luabind::def("get_zone_weather", &lua_get_zone_weather),
-		luabind::def("get_zone_time", &lua_get_zone_time)
+		luabind::def("get_zone_time", &lua_get_zone_time),
+		luabind::def("add_area", &lua_add_area),
+		luabind::def("remove_area", &lua_remove_area),
+		luabind::def("clear_areas", &lua_clear_areas)
 	];
 }
 
@@ -997,7 +1002,15 @@ luabind::scope lua_register_events() {
 			luabind::value("drop_item", static_cast<int>(EVENT_DROP_ITEM)),
 			luabind::value("destroy_item", static_cast<int>(EVENT_DESTROY_ITEM)),
 			luabind::value("feign_death", static_cast<int>(EVENT_FEIGN_DEATH)),
-			luabind::value("weapon_proc", static_cast<int>(EVENT_WEAPON_PROC))
+			luabind::value("weapon_proc", static_cast<int>(EVENT_WEAPON_PROC)),
+			luabind::value("equip_item", static_cast<int>(EVENT_EQUIP_ITEM)),
+			luabind::value("unequip_item", static_cast<int>(EVENT_UNEQUIP_ITEM)),
+			luabind::value("augment_item", static_cast<int>(EVENT_AUGMENT_ITEM)),
+			luabind::value("unaugment_item", static_cast<int>(EVENT_UNAUGMENT_ITEM)),
+			luabind::value("augment_insert", static_cast<int>(EVENT_AUGMENT_INSERT)),
+			luabind::value("augment_remove", static_cast<int>(EVENT_AUGMENT_REMOVE)),
+			luabind::value("enter_area", static_cast<int>(EVENT_ENTER_AREA)),
+			luabind::value("leave_area", static_cast<int>(EVENT_LEAVE_AREA))
 		];
 }
 

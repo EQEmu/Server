@@ -218,6 +218,15 @@ void handle_npc_cast(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 	}
 }
 
+void handle_npc_area(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+						  std::vector<void*> *extra_pointers) {
+	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(0)));
+	lua_setfield(L, -2, "area_id");
+
+	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(1)));
+	lua_setfield(L, -2, "area_type");
+}
+
 void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers) {
 }
@@ -438,6 +447,19 @@ void handle_player_combine(QuestInterface *parse, lua_State* L, Client* client, 
 
 void handle_player_feign(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						std::vector<void*> *extra_pointers) {
+	Lua_NPC l_npc(reinterpret_cast<NPC*>(extra_pointers->at(0)));
+	luabind::object l_npc_o = luabind::object(L, l_npc);
+	l_npc_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
+void handle_player_area(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+						std::vector<void*> *extra_pointers) {
+	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(0)));
+	lua_setfield(L, -2, "area_id");
+
+	lua_pushinteger(L, *reinterpret_cast<int*>(extra_pointers->at(1)));
+	lua_setfield(L, -2, "area_type");
 }
 
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,

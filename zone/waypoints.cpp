@@ -534,6 +534,11 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	else if ((ABS(x_pos - x) < 0.1) && (ABS(y_pos - y) < 0.1))
 	{
 		mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
+
+		if(IsNPC()) {
+			entity_list.ProcessMove(CastToNPC(), x, y, z);
+		}
+
 		x_pos = x;
 		y_pos = y;
 		z_pos = z;
@@ -541,10 +546,18 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	}
 
 	int compare_steps = IsBoat() ? 1 : 20;
-	if(tar_ndx < compare_steps && tarx==x && tary==y){
-		x_pos = x_pos + tar_vx*tar_vector;
-		y_pos = y_pos + tar_vy*tar_vector;
-		z_pos = z_pos + tar_vz*tar_vector;
+	if(tar_ndx < compare_steps && tarx==x && tary==y) {
+
+		float new_x = x_pos + tar_vx*tar_vector;
+		float new_y = y_pos + tar_vy*tar_vector;
+		float new_z = z_pos + tar_vz*tar_vector;
+		if(IsNPC()) {
+			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+		}
+
+		x_pos = new_x;
+		y_pos = new_y;
+		z_pos = new_z;
 
 		mlog(AI__WAYPOINTS, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, tar_vx, tar_vy, tar_vz);
 
@@ -630,15 +643,27 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			tar_vx = tar_vx/numsteps;
 			tar_vy = tar_vy/numsteps;
 			tar_vz = tar_vz/numsteps;
-			x_pos = x_pos + tar_vx;
-			y_pos = y_pos + tar_vy;
-			z_pos = z_pos + tar_vz;
+
+			float new_x = x_pos + tar_vx;
+			float new_y = y_pos + tar_vy;
+			float new_z = z_pos + tar_vz;
+			if(IsNPC()) {
+				entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+			}
+
+			x_pos = new_x;
+			y_pos = new_y;
+			z_pos = new_z;
 			tar_ndx=22-numsteps;
 			heading = CalculateHeadingToTarget(x, y);
 			mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
 		}
 		else
 		{
+			if(IsNPC()) {
+				entity_list.ProcessMove(CastToNPC(), x, y, z);
+			}
+
 			x_pos = x;
 			y_pos = y;
 			z_pos = z;
@@ -650,9 +675,17 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 	else {
 		tar_vector/=20;
-		x_pos = x_pos + tar_vx*tar_vector;
-		y_pos = y_pos + tar_vy*tar_vector;
-		z_pos = z_pos + tar_vz*tar_vector;
+
+		float new_x = x_pos + tar_vx*tar_vector;
+		float new_y = y_pos + tar_vy*tar_vector;
+		float new_z = z_pos + tar_vz*tar_vector;
+		if(IsNPC()) {
+			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+		}
+
+		x_pos = new_x;
+		y_pos = new_y;
+		z_pos = new_z;
 		heading = CalculateHeadingToTarget(x, y);
 		mlog(AI__WAYPOINTS, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", x_pos, y_pos, z_pos, numsteps);
 	}
@@ -762,15 +795,26 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	heading = CalculateHeadingToTarget(x, y);
 
 	if (tar_vector >= 1.0) {
+		if(IsNPC()) {
+			entity_list.ProcessMove(CastToNPC(), x, y, z);
+		}
+
 		x_pos = x;
 		y_pos = y;
 		z_pos = z;
 		mlog(AI__WAYPOINTS, "Close enough, jumping to waypoint");
 	}
 	else {
-		x_pos = x_pos + tar_vx*tar_vector;
-		y_pos = y_pos + tar_vy*tar_vector;
-		z_pos = z_pos + tar_vz*tar_vector;
+		float new_x = x_pos + tar_vx*tar_vector;
+		float new_y = y_pos + tar_vy*tar_vector;
+		float new_z = z_pos + tar_vz*tar_vector;
+		if(IsNPC()) {
+			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+		}
+
+		x_pos = new_x;
+		y_pos = new_y;
+		z_pos = new_z;
 		mlog(AI__WAYPOINTS, "Next position (%.3f, %.3f, %.3f)", x_pos, y_pos, z_pos);
 	}
 
@@ -933,6 +977,10 @@ void NPC::AssignWaypoints(int32 grid) {
 }
 
 void Mob::SendTo(float new_x, float new_y, float new_z) {
+	if(IsNPC()) {
+		entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+	}
+
 	x_pos = new_x;
 	y_pos = new_y;
 	z_pos = new_z;
@@ -963,6 +1011,10 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 }
 
 void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
+	if(IsNPC()) {
+		entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z + 0.1);
+	}
+
 	x_pos = new_x;
 	y_pos = new_y;
 	z_pos = new_z + 0.1;

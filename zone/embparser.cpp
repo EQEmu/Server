@@ -107,7 +107,9 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_AUGMENT_ITEM",
 	"EVENT_UNAUGMENT_ITEM",
 	"EVENT_AUGMENT_INSERT",
-	"EVENT_AUGMENT_REMOVE"
+	"EVENT_AUGMENT_REMOVE",
+	"EVENT_ENTER_AREA",
+	"EVENT_LEAVE_AREA"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr), event_queue_in_use_(false) {

@@ -3204,7 +3204,7 @@ void EntityList::ClearFeignAggro(Mob* targ)
 			if(targ->IsClient()) {
 				std::vector<void*> args;
 				args.push_back(iterator.GetData());
-				int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0);
+				int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0, &args);
 				if(i != 0) {
 					iterator.Advance();
 					continue;
@@ -3545,80 +3545,62 @@ void EntityList::RemoveAllLocalities() {
 	proximity_list.clear();
 }
 
-void EntityList::ProcessMove(Client *c, float x, float y, float z) {
-	/*
-		We look through each proximity, looking to see if last_* was in(out)
-		the proximity, and the new supplied coords are out(in)...
-	*/
-	std::list<int> skip_ids;
+struct quest_proximity_event {
+	QuestEventID event_id;
+	Client *client;
+	NPC *npc;
+	int area_id;
+	int area_type;
+};
 
+void EntityList::ProcessMove(Client *c, float x, float y, float z) {
 	float last_x = c->ProximityX();
 	float last_y = c->ProximityY();
 	float last_z = c->ProximityZ();
 
-	auto iter = proximity_list.begin();
-	for(; iter != proximity_list.end(); ++iter) {
+	std::list<quest_proximity_event> events;
+	for(auto iter = proximity_list.begin(); iter != proximity_list.end(); ++iter) {
 		NPC *d = (*iter);
 		NPCProximity *l = d->proximity;
 		if(l == nullptr)
 			continue;
-
-		//This is done to address the issue of this code not being reentrant
-		//because perl can call clear_proximity() while we're still iterating through the list
-		//This causes our list to become invalid but we don't know it. On GCC it's basic heap
-		//corruption and it doesn't appear to catch it at all.
-		//MSVC it's a crash with 0xfeeefeee debug address (freed memory off the heap)
-		std::list<int>::iterator skip_iter = skip_ids.begin();
-		bool skip = false;
-		while(skip_iter != skip_ids.end())
-		{
-			if(d->GetID() == (*skip_iter))
-			{
-				skip = true;
-				break;
-			}
-			++skip_iter;
-		}
-
-		if(skip)
-		{
-			continue;
-		}
-
+	
 		//check both bounding boxes, if either coords pairs
 		//cross a boundary, send the event.
 		bool old_in = true;
 		bool new_in = true;
-		if(last_x < l->min_x || last_x > l->max_x
-		|| last_y < l->min_y || last_y > l->max_y
-		|| last_z < l->min_z || last_z > l->max_z ) {
+		if(last_x < l->min_x || last_x > l->max_x ||
+			last_y < l->min_y || last_y > l->max_y ||
+			last_z < l->min_z || last_z > l->max_z ) {
 			old_in = false;
 		}
-		if(x < l->min_x || x > l->max_x
-		|| y < l->min_y || y > l->max_y
-		|| z < l->min_z || z > l->max_z ) {
+		if(x < l->min_x || x > l->max_x ||
+			y < l->min_y || y > l->max_y ||
+			z < l->min_z || z > l->max_z ) {
 			new_in = false;
 		}
-
+	
 		if(old_in && !new_in) {
-			//we were in the proximity, we are no longer, send event exit
-			parse->EventNPC(EVENT_EXIT, d, c, "", 0);
-
-			//Reentrant fix
-			iter = proximity_list.begin();
-			skip_ids.push_back(d->GetID());
+			quest_proximity_event evt;
+			evt.event_id = EVENT_EXIT;
+			evt.client = c;
+			evt.npc = d;
+			evt.area_id = 0;
+			evt.area_type = 0;
+			events.push_back(evt);
 		} else if(new_in && !old_in) {
-			//we were not in the proximity, we are now, send enter event
-			parse->EventNPC(EVENT_ENTER, d, c, "", 0);
-
-			//Reentrant fix
-			iter = proximity_list.begin();
-			skip_ids.push_back(d->GetID());
+			quest_proximity_event evt;
+			evt.event_id = EVENT_ENTER;
+			evt.client = c;
+			evt.npc = d;
+			evt.area_id = 0;
+			evt.area_type = 0;
+			events.push_back(evt);
 		}
 	}
-
-	for(auto area_iter = area_list.begin(); area_iter != area_list.end(); ++area_iter) {
-		Area& a = (*area_iter);
+	
+	for(auto iter = area_list.begin(); iter != area_list.end(); ++iter) {
+		Area& a = (*iter);
 		bool old_in = true;
 		bool new_in = true;
 		if(last_x < a.min_x || last_x > a.max_x ||
@@ -3634,11 +3616,37 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z) {
 		{
 			new_in = false;
 		}
-
+	
 		if(old_in && !new_in) {
 			//were in but are no longer.
+			quest_proximity_event evt;
+			evt.event_id = EVENT_LEAVE_AREA;
+			evt.client = c;
+			evt.npc = nullptr;
+			evt.area_id = a.id;
+			evt.area_type = a.type;
+			events.push_back(evt);
 		} else if (!old_in && new_in) {
 			//were not in but now are
+			quest_proximity_event evt;
+			evt.event_id = EVENT_ENTER_AREA;
+			evt.client = c;
+			evt.npc = nullptr;
+			evt.area_id = a.id;
+			evt.area_type = a.type;
+			events.push_back(evt);
+		}
+	}
+
+	for(auto iter = events.begin(); iter != events.end(); ++iter) {
+		quest_proximity_event& evt = (*iter);
+		if(evt.npc) {
+			parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0);
+		} else {
+			std::vector<void*> args;
+			args.push_back(&evt.area_id);
+			args.push_back(&evt.area_type);
+			parse->EventPlayer(evt.event_id, evt.client, "", 0, &args);
 		}
 	}
 }
@@ -3647,9 +3655,10 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 	float last_x = n->GetX();
 	float last_y = n->GetY();
 	float last_z = n->GetZ();
-
-	for(auto area_iter = area_list.begin(); area_iter != area_list.end(); ++area_iter) {
-		Area& a = (*area_iter);
+	
+	std::list<quest_proximity_event> events;
+	for(auto iter = area_list.begin(); iter != area_list.end(); ++iter) {
+		Area& a = (*iter);
 		bool old_in = true;
 		bool new_in = true;
 		if(last_x < a.min_x || last_x > a.max_x ||
@@ -3665,12 +3674,34 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 		{
 			new_in = false;
 		}
-
+	
 		if(old_in && !new_in) {
 			//were in but are no longer.
+			quest_proximity_event evt;
+			evt.event_id = EVENT_LEAVE_AREA;
+			evt.client = nullptr;
+			evt.npc = n;
+			evt.area_id = a.id;
+			evt.area_type = a.type;
+			events.push_back(evt);
 		} else if (!old_in && new_in) {
 			//were not in but now are
+			quest_proximity_event evt;
+			evt.event_id = EVENT_ENTER_AREA;
+			evt.client = nullptr;
+			evt.npc = n;
+			evt.area_id = a.id;
+			evt.area_type = a.type;
+			events.push_back(evt);
 		}
+	}
+
+	for(auto iter = events.begin(); iter != events.end(); ++iter) {
+		quest_proximity_event& evt = (*iter);
+		std::vector<void*> args;
+		args.push_back(&evt.area_id);
+		args.push_back(&evt.area_type);
+		parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0, &args);
 	}
 }
 

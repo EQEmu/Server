@@ -36,6 +36,8 @@ void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 						  std::vector<void*> *extra_pointers);
 void handle_npc_cast(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers);
+void handle_npc_area(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+						  std::vector<void*> *extra_pointers);
 void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<void*> *extra_pointers);
 
@@ -81,6 +83,8 @@ void handle_player_command(QuestInterface *parse, lua_State* L, Client* client, 
 void handle_player_combine(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 void handle_player_feign(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers);
+void handle_player_area(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);

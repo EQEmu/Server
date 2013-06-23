@@ -1355,6 +1355,10 @@ void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
 
 	Route.clear();
 
+	if(IsNPC()) {
+		entity_list.ProcessMove(CastToNPC(), x, y, z);
+	}
+
 	x_pos = x;
 	y_pos = y;
 	z_pos = z;
@@ -2692,6 +2696,10 @@ void Mob::SetNextIncHPEvent( int inchpevent )
 //warp for quest function,from sandy
 void Mob::Warp( float x, float y, float z )
 {
+	if(IsNPC()) {
+		entity_list.ProcessMove(CastToNPC(), x, y, z);
+	}
+
 	x_pos = x;
 	y_pos = y;
 	z_pos = z;

@@ -188,7 +188,7 @@ public:
 	void	BeaconProcess();
 	void	ProcessMove(Client *c, float x, float y, float z);
 	void	ProcessMove(NPC *n, float x, float y, float z);
-	void	AddArea(int id, int type, float x1, float x2, float y1, float y2, float z1, float z2);
+	void	AddArea(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z);
 	void	RemoveArea(int id);
 	void	ClearAreas();
 	void	ProcessProximitySay(const char *Message, Client *c, uint8 language = 0);

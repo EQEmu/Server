@@ -354,10 +354,6 @@ Client::~Client() {
 	client_logs.unsubscribeAll(this);
 #endif
 
-
-//	if(AbilityTimer || GetLevel()>=51)
-//		database.UpdateAndDeleteAATimers(CharacterID());
-
 	ChangeSQLLog(nullptr);
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());
