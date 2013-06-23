@@ -13,12 +13,14 @@ class Lua_Corpse;
 class Lua_Object;
 class Lua_Group;
 class Lua_Raid;
+class Lua_Spawn;
 struct Lua_Mob_List;
 struct Lua_Client_List;
 struct Lua_NPC_List;
 struct Lua_Corpse_List;
 struct Lua_Object_List;
 struct Lua_Doors_List;
+struct Lua_Spawn_List;
 
 namespace luabind {
 	struct scope;
@@ -31,6 +33,7 @@ luabind::scope lua_register_npc_list();
 luabind::scope lua_register_corpse_list();
 luabind::scope lua_register_object_list();
 luabind::scope lua_register_door_list();
+luabind::scope lua_register_spawn_list();
 
 class Lua_EntityList : public Lua_Ptr<EntityList>
 {
@@ -70,6 +73,7 @@ public:
 	Lua_Corpse GetCorpseByOwner(Lua_Client client);
 	Lua_Corpse GetCorpseByID(int id);
 	Lua_Corpse GetCorpseByName(const char *name);
+	Lua_Spawn GetSpawnByID(uint32 id);
 	void ClearClientPetitionQueue();
 	bool CanAddHateForMob(Lua_Mob p);
 	void Message(uint32 guild_dbid, uint32 type, const char *message);
@@ -98,6 +102,7 @@ public:
 	Lua_Corpse_List GetCorpseList();
 	Lua_Object_List GetObjectList();
 	Lua_Doors_List GetDoorsList();
+	Lua_Spawn_List GetSpawnList();
 	void SignalAllClients(int signal);
 };
 

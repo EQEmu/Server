@@ -22,6 +22,7 @@ struct Factions { };
 struct Slots { };
 struct Materials { };
 struct ClientVersions { };
+struct Appearances { };
 
 struct lua_registered_event {
 	std::string encounter_name;
@@ -763,6 +764,17 @@ int lua_get_zone_weather() {
 	return zone->zone_weather;
 }
 
+luabind::object lua_get_zone_time(lua_State *L) {
+	TimeOfDay_Struct eqTime;
+	zone->zone_time.getEQTimeOfDay(time(0), &eqTime);
+
+	luabind::object ret = luabind::newtable(L);
+	ret["zone_hour"] = eqTime.hour - 1;
+	ret["zone_minute"] = eqTime.minute;
+	ret["zone_time"] = (eqTime.hour - 1) * 100 + eqTime.minute;
+	return ret;
+}
+
 void lua_add_area(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z) {
 	entity_list.AddArea(id, type, min_x, max_x, min_y, max_y, min_z, max_z);
 }
@@ -775,15 +787,186 @@ void lua_clear_areas() {
 	entity_list.ClearAreas();
 }
 
-luabind::object lua_get_zone_time(lua_State *L) {
-	TimeOfDay_Struct eqTime;
-	zone->zone_time.getEQTimeOfDay(time(0), &eqTime);
+void lua_remove_spawn_point(uint32 spawn2_id) {
+	if(zone) {
+		LinkedListIterator<Spawn2*> iter(zone->spawn2_list);
+		iter.Reset();
 
-	luabind::object ret = luabind::newtable(L);
-	ret["zone_hour"] = eqTime.hour - 1;
-	ret["zone_minute"] = eqTime.minute;
-	ret["zone_time"] = (eqTime.hour - 1) * 100 + eqTime.minute;
-	return ret;
+		while(iter.MoreElements()) {
+			Spawn2* cur = iter.GetData();
+			if(cur->GetID() == spawn2_id) {
+				cur->ForceDespawn();
+				iter.RemoveCurrent(true);
+				return;
+			}
+
+			iter.Advance();
+		}
+	}
+}
+
+void lua_add_spawn_point(luabind::object table) {
+	if(!zone)
+		return;
+
+	if(luabind::type(table) == LUA_TTABLE) {
+		uint32 spawn2_id;
+		uint32 spawngroup_id;
+		float x;
+		float y;
+		float z;
+		float heading;
+		uint32 respawn;
+		uint32 variance;
+		uint32 timeleft = 0;
+		uint32 grid = 0;
+		int condition_id = 0;
+		int condition_min_value = 0;
+		bool enabled = true;
+		int animation = 0;
+		
+		auto cur = table["spawn2_id"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				spawn2_id = luabind::object_cast<uint32>(cur);
+			} catch(luabind::cast_failed) {
+				return;
+			}
+		} else {
+			return;
+		}
+
+		cur = table["spawngroup_id"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				spawngroup_id = luabind::object_cast<uint32>(cur);
+			} catch(luabind::cast_failed) {
+				return;
+			}
+		} else {
+			return;
+		}
+
+		cur = table["x"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				x = luabind::object_cast<float>(cur);
+			} catch(luabind::cast_failed) {
+				return;
+			}
+		} else {
+			return;
+		}
+
+		cur = table["y"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				y = luabind::object_cast<float>(cur);
+			} catch(luabind::cast_failed) {
+				return;
+			}
+		} else {
+			return;
+		}
+
+		cur = table["z"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				z = luabind::object_cast<float>(cur);
+			} catch(luabind::cast_failed) {
+				return;
+			}
+		} else {
+			return;
+		}
+
+		cur = table["heading"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				heading = luabind::object_cast<float>(cur);
+			} catch(luabind::cast_failed) {
+				return;
+			}
+		} else {
+			return;
+		}
+
+		cur = table["respawn"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				respawn = luabind::object_cast<uint32>(cur);
+			} catch(luabind::cast_failed) {
+				return;
+			}
+		} else {
+			return;
+		}
+
+		cur = table["variance"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				variance = luabind::object_cast<uint32>(cur);
+			} catch(luabind::cast_failed) {
+				return;
+			}
+		} else {
+			return;
+		}
+
+		cur = table["timeleft"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				timeleft = luabind::object_cast<uint32>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = table["grid"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				grid = luabind::object_cast<uint32>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = table["condition_id"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				condition_id = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = table["condition_min_value"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				condition_min_value = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = table["enabled"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				enabled = luabind::object_cast<bool>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = table["animation"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				animation = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		lua_remove_spawn_point(spawn2_id);
+
+		Spawn2 *t = new Spawn2(spawn2_id, spawngroup_id, x, y, z, heading, respawn, variance, timeleft, grid, condition_id,
+			condition_min_value, enabled, static_cast<EmuAppearance>(animation));
+		zone->spawn2_list.Insert(t);
+	}
 }
 
 luabind::scope lua_register_general() {
@@ -932,7 +1115,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_zone_time", &lua_get_zone_time),
 		luabind::def("add_area", &lua_add_area),
 		luabind::def("remove_area", &lua_remove_area),
-		luabind::def("clear_areas", &lua_clear_areas)
+		luabind::def("clear_areas", &lua_clear_areas),
+		luabind::def("add_spawn_point", &lua_add_spawn_point),
+		luabind::def("remove_spawn_point", &lua_remove_spawn_point)
 	];
 }
 
@@ -1095,6 +1280,18 @@ luabind::scope lua_register_client_version() {
 			luabind::value("SoD", static_cast<int>(EQClientSoD)),
 			luabind::value("Underfoot", static_cast<int>(EQClientUnderfoot)),
 			luabind::value("RoF", static_cast<int>(EQClientRoF))
+		];
+}
+
+luabind::scope lua_register_appearance() {
+	return luabind::class_<Appearances>("Appearance")
+		.enum_("constants")
+		[
+			luabind::value("Standing", static_cast<int>(eaStanding)),
+			luabind::value("Sitting", static_cast<int>(eaSitting)),
+			luabind::value("Crouching", static_cast<int>(eaCrouching)),
+			luabind::value("Dead", static_cast<int>(eaDead)),
+			luabind::value("Looting", static_cast<int>(eaLooting))
 		];
 }
 

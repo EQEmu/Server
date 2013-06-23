@@ -159,6 +159,8 @@ public:
 	Corpse* GetCorpseByDBID(uint32 dbid);
 	Corpse* GetCorpseByName(const char* name);
 
+	Spawn2* GetSpawnByID(uint32 id);
+
 	Client* FindCorpseDragger(const char *CorpseName);
 
 	Object*	GetObjectByID(uint16 id);
@@ -393,6 +395,7 @@ public:
 	void GetCorpseList(std::list<Corpse*> &c_list);
 	void GetObjectList(std::list<Object*> &o_list);
 	void GetDoorsList(std::list<Doors*> &d_list);
+	void GetSpawnList(std::list<Spawn2*> &d_list);
 	void GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height, std::list<Mob*> &m_list);
 
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);

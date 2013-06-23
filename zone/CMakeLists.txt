@@ -49,6 +49,7 @@ SET(zone_sources
 	lua_parser.cpp
 	lua_parser_events.cpp
 	lua_raid.cpp
+	lua_spawn.cpp
 	lua_spell.cpp
 	embperl.cpp
 	embxs.cpp
@@ -157,6 +158,7 @@ SET(zone_headers
 	lua_parser_events.h
 	lua_ptr.h
 	lua_raid.h
+	lua_spawn.h
 	lua_spell.h
 	map.h
 	masterentity.h

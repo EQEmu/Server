@@ -15,6 +15,7 @@
 #include "lua_corpse.h"
 #include "lua_group.h"
 #include "lua_raid.h"
+#include "lua_spawn.h"
 
 struct Lua_Mob_List {
 	std::vector<Lua_Mob> entries;
@@ -38,6 +39,10 @@ struct Lua_Object_List {
 
 struct Lua_Doors_List {
 	std::vector<Lua_Door> entries;
+};
+
+struct Lua_Spawn_List {
+	std::vector<Lua_Spawn> entries;
 };
 
 Lua_Mob Lua_EntityList::GetMobID(int id) {
@@ -168,6 +173,11 @@ Lua_Corpse Lua_EntityList::GetCorpseByID(int id) {
 Lua_Corpse Lua_EntityList::GetCorpseByName(const char *name) {
 	Lua_Safe_Call_Class(Lua_Corpse);
 	return Lua_Corpse(self->GetCorpseByName(name));
+}
+
+Lua_Spawn Lua_EntityList::GetSpawnByID(uint32 id) {
+	Lua_Safe_Call_Class(Lua_Spawn);
+	return self->GetSpawnByID(id);
 }
 
 void Lua_EntityList::ClearClientPetitionQueue() {
@@ -376,6 +386,21 @@ Lua_Doors_List Lua_EntityList::GetDoorsList() {
 	return ret;
 }
 
+Lua_Spawn_List Lua_EntityList::GetSpawnList() {
+	Lua_Safe_Call_Class(Lua_Spawn_List);
+	Lua_Spawn_List ret;
+	std::list<Spawn2*> t_list;
+	self->GetSpawnList(t_list);
+
+	auto iter = t_list.begin();
+	while(iter != t_list.end()) {
+		ret.entries.push_back(Lua_Spawn(*iter));
+		++iter;
+	}
+
+	return ret;
+}
+
 void Lua_EntityList::SignalAllClients(int signal) {
 	Lua_Safe_Call_Void();
 	self->SignalAllClients(signal);
@@ -412,6 +437,7 @@ luabind::scope lua_register_entity_list() {
 		.def("GetCorpseByOwner", (Lua_Corpse(Lua_EntityList::*)(Lua_Client))&Lua_EntityList::GetCorpseByOwner)
 		.def("GetCorpseByID", (Lua_Corpse(Lua_EntityList::*)(int))&Lua_EntityList::GetCorpseByID)
 		.def("GetCorpseByName", (Lua_Corpse(Lua_EntityList::*)(const char*))&Lua_EntityList::GetCorpseByName)
+		.def("GetSpawnByID", (Lua_Spawn(Lua_EntityList::*)(uint32))&Lua_EntityList::GetSpawnByID)
 		.def("ClearClientPetitionQueue", (void(Lua_EntityList::*)(void))&Lua_EntityList::ClearClientPetitionQueue)
 		.def("CanAddHateForMob", (bool(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::CanAddHateForMob)
 		.def("Message", (void(Lua_EntityList::*)(uint32,uint32,const char*))&Lua_EntityList::Message)
@@ -440,6 +466,7 @@ luabind::scope lua_register_entity_list() {
 		.def("GetCorpseList", (Lua_Corpse_List(Lua_EntityList::*)(void))&Lua_EntityList::GetCorpseList)
 		.def("GetObjectList", (Lua_Object_List(Lua_EntityList::*)(void))&Lua_EntityList::GetObjectList)
 		.def("GetDoorsList", (Lua_Doors_List(Lua_EntityList::*)(void))&Lua_EntityList::GetDoorsList)
+		.def("GetSpawnList", (Lua_Spawn_List(Lua_EntityList::*)(void))&Lua_EntityList::GetSpawnList)
 		.def("SignalAllClients", (void(Lua_EntityList::*)(int))&Lua_EntityList::SignalAllClients);
 }
 
@@ -471,6 +498,11 @@ luabind::scope lua_register_object_list() {
 luabind::scope lua_register_door_list() {
 	return luabind::class_<Lua_Doors_List>("DoorList")
 			.def_readwrite("entries", &Lua_Doors_List::entries, luabind::return_stl_iterator);
+}
+
+luabind::scope lua_register_spawn_list() {
+	return luabind::class_<Lua_Spawn_List>("SpawnList")
+			.def_readwrite("entries", &Lua_Spawn_List::entries, luabind::return_stl_iterator);
 }
 
 #endif

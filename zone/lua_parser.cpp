@@ -27,6 +27,7 @@
 #include "lua_corpse.h"
 #include "lua_object.h"
 #include "lua_door.h"
+#include "lua_spawn.h"
 #include "lua_general.h"
 #include "questmgr.h"
 #include "zone.h"
@@ -886,6 +887,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_slot(),
 			lua_register_material(),
 			lua_register_client_version(),
+			lua_register_appearance(),
 			lua_register_entity(),
 			lua_register_mob(),
 			lua_register_npc(),
@@ -895,6 +897,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_iteminst(),
 			lua_register_item(),
 			lua_register_spell(),
+			lua_register_spawn(),
 			lua_register_hate_entry(),
 			lua_register_hate_list(),
 			lua_register_entity_list(),
@@ -904,6 +907,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_corpse_list(),
 			lua_register_object_list(),
 			lua_register_door_list(),
+			lua_register_spawn_list(),
 			lua_register_group(),
 			lua_register_raid(),
 			lua_register_corpse(),

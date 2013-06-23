@@ -64,8 +64,6 @@ public:
 	uint32	CurrentNPCID() { return currentnpcid; }
 	void	SetCurrentNPCID(uint32 nid) { currentnpcid = nid; }
 	uint32	GetSpawnCondition() { return condition_id; }
-	uint32	spawn2_id;
-	uint32	respawn_;
 
 	bool	NPCPointerValid() { return (npcthis!=nullptr); }
 	void	SetNPCPointer(NPC* n) { npcthis = n; }
@@ -75,6 +73,8 @@ protected:
 	friend class Zone;
 	Timer	timer;
 private:
+	uint32	spawn2_id;
+	uint32	respawn_;
 	uint32	resetTimer();
 	uint32	despawnTimer(uint32 despawn_timer);
 

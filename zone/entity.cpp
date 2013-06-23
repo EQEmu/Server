@@ -1874,6 +1874,23 @@ Corpse* EntityList::GetCorpseByName(const char* name){
 	return 0;
 }
 
+Spawn2* EntityList::GetSpawnByID(uint32 id) {
+	if(!zone)
+		return nullptr;
+
+	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+	iterator.Reset();
+	while(iterator.MoreElements())
+	{
+		if(iterator.GetData()->GetID() == id) {
+			return iterator.GetData();
+		}
+		iterator.Advance();
+	}
+
+	return nullptr;
+}
+
 void EntityList::RemoveAllCorpsesByCharID(uint32 charid)
 {
 	LinkedListIterator<Corpse*> iterator(corpse_list);
@@ -4793,6 +4810,21 @@ void EntityList::GetDoorsList(std::list<Doors*> &o_list)
 		Doors *ent = iterator.GetData();
 		o_list.push_back(ent);
 		iterator.Advance();
+	}
+}
+
+void EntityList::GetSpawnList(std::list<Spawn2*> &o_list)
+{
+	o_list.clear();
+	if(zone) {
+		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+		iterator.Reset();
+		while(iterator.MoreElements())
+		{
+			Spawn2 *ent = iterator.GetData();
+			o_list.push_back(ent);
+			iterator.Advance();
+		}
 	}
 }
 
