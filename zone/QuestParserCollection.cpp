@@ -227,9 +227,9 @@ bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
 
 int QuestParserCollection::EventNPC(QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
 									std::vector<void*> *extra_pointers) {
+	DispatchEventNPC(evt, npc, init, data, extra_data, extra_pointers);
 	int rl = EventNPCLocal(evt, npc, init, data, extra_data, extra_pointers);
 	int rg = EventNPCGlobal(evt, npc, init, data, extra_data, extra_pointers);
-	DispatchEventNPC(evt, npc, init, data, extra_data, extra_pointers);
 	
 	//Local quests returning non-default values have priority over global quests
 	if(rl != 0) {
@@ -285,9 +285,9 @@ int QuestParserCollection::EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init,
 
 int QuestParserCollection::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 									   std::vector<void*> *extra_pointers) {
+	DispatchEventPlayer(evt, client, data, extra_data, extra_pointers);
 	int rl = EventPlayerLocal(evt, client, data, extra_data, extra_pointers);
 	int rg = EventPlayerGlobal(evt, client, data, extra_data, extra_pointers);
-	DispatchEventPlayer(evt, client, data, extra_data, extra_pointers);
 	
 	//Local quests returning non-default values have priority over global quests
 	if(rl != 0) {
@@ -355,8 +355,8 @@ int QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst 
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			auto ret = qiter->second->EventItem(evt, client, item, mob, data, extra_data, extra_pointers);
 			DispatchEventItem(evt, client, item, mob, data, extra_data, extra_pointers);
+			auto ret = qiter->second->EventItem(evt, client, item, mob, data, extra_data, extra_pointers);
 			return ret;
 		}
 		DispatchEventItem(evt, client, item, mob, data, extra_data, extra_pointers);
@@ -366,8 +366,8 @@ int QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst 
 		if(qi) {
 			_item_quest_status[item_id] = qi->GetIdentifier();
 			qi->LoadItemScript(filename, item);
-			auto ret = qi->EventItem(evt, client, item, mob, data, extra_data, extra_pointers);
 			DispatchEventItem(evt, client, item, mob, data, extra_data, extra_pointers);
+			auto ret = qi->EventItem(evt, client, item, mob, data, extra_data, extra_pointers);
 			return ret;
 		} else {
 			_item_quest_status[item_id] = QuestFailedToLoad;
@@ -384,8 +384,8 @@ int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			auto ret = qiter->second->EventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
 			DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
+			auto ret = qiter->second->EventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
 			return ret;
 		}
 		DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
@@ -395,8 +395,8 @@ int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client
 		if(qi) {
 			_spell_quest_status[spell_id] = qi->GetIdentifier();
 			qi->LoadSpellScript(filename, spell_id);
-			auto ret = qi->EventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
 			DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
+			auto ret = qi->EventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
 			return ret;
 		} else {
 			_spell_quest_status[spell_id] = QuestFailedToLoad;

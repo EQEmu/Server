@@ -2116,7 +2116,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						return;
 					}
 
-					if(i != 0) {
+					if(i == 0) {
 						CastSpell(item->Click.Effect, target_id, 10, item->CastTime, 0, 0, slot_id);
 					}
 				}
@@ -2143,7 +2143,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						return;
 					}
 
-					if(i != 0) {
+					if(i == 0) {
 						CastSpell(augitem->Click.Effect, target_id, 10, augitem->CastTime, 0, 0, slot_id);
 					}
                 }
@@ -4592,10 +4592,10 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 							ItemInst* p_inst = (ItemInst*)inst;
 							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
-							if(i != 0) {
+							if(i == 0) {
 								CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
 							} else {
-								SendSpellBarEnable(castspell->spell_id);
+								InterruptSpell(castspell->spell_id);
 								return;
 							}
 						}
@@ -4611,10 +4611,10 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 						ItemInst* p_inst = (ItemInst*)inst;
 						int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
-						if(i != 0) {
+						if(i == 0) {
 							CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
 						} else {
-							SendSpellBarEnable(castspell->spell_id);
+							InterruptSpell(castspell->spell_id);
 							return;
 						}
 					}
