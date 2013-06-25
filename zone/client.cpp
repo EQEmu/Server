@@ -2683,9 +2683,6 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					}
 					// Send client bind done
 
-					//this is taken care of on start of bind, not finish now, and is improved
-					//DeleteItemInInventory(m_inv.HasItem(13009, 1), 1, true);
-
 					bind_out->type = 1; // Done
 					QueuePacket(outapp);
 					bind_out->type = 0;

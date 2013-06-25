@@ -136,6 +136,9 @@ public:
 
 	~Inventory();
 
+	static void CleanDirty();
+	static void MarkDirty(ItemInst *inst);
+
 	// Retrieve a writeable item at specified slot
 	ItemInst* GetItem(int16 slot_id) const;
 	ItemInst* GetItem(int16 slot_id, uint8 bagidx) const;

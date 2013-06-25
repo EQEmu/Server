@@ -12,6 +12,7 @@
 
 #include "masterentity.h"
 #include "../common/spdat.h"
+#include "lua_bit.h"
 #include "lua_entity.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
@@ -769,11 +770,18 @@ void LuaParser::ReloadQuests() {
 	L = luaL_newstate();
 	luaL_openlibs(L);
 
+	if(luaopen_bit(L) != 1) {
+		std::string error = lua_tostring(L, -1);
+		AddError(error);
+	}
+
+#ifdef SANITIZE_LUA_LIBS
 	lua_pushnil(L);
 	lua_setglobal(L, "os");
 
 	lua_pushnil(L);
 	lua_setglobal(L, "io");
+#endif
 
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");

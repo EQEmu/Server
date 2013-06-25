@@ -1286,6 +1286,8 @@ bool Zone::Process() {
 	if(spawn2_timer.Check()) {
 		LinkedListIterator<Spawn2*> iterator(spawn2_list);
 
+		Inventory::CleanDirty();
+
 		iterator.Reset();
 		while (iterator.MoreElements()) {
 			if (iterator.GetData()->Process()) {

@@ -692,14 +692,9 @@ bool Client::Process() {
 	/************ Get all packets from packet manager out queue and process them ************/
 	adverrorinfo = 5;
 
-	EQApplicationPacket *app = 0;
-//	if(eqs->GetState()==CLOSING && eqs->CheckActive())
-	if(eqs->CheckState(CLOSING))
+	EQApplicationPacket *app = nullptr;
+	if(!eqs->CheckState(CLOSING))
 	{
-		//eqs->Close();
-		//return false;
-		//handled below
-	} else {
 		while(ret && (app = (EQApplicationPacket *)eqs->PopPacket())) {
 			if(app)
 				ret = HandlePacket(app);

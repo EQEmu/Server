@@ -609,6 +609,11 @@ int Lua_Client::GetHorseId() {
 	return self->GetHorseId();
 }
 
+void Lua_Client::NukeItem(uint32 item_num) {
+	Lua_Safe_Call_Void();
+	self->NukeItem(item_num, 0xFF);
+}
+
 void Lua_Client::NukeItem(uint32 item_num, int where_to_check) {
 	Lua_Safe_Call_Void();
 	self->NukeItem(item_num, where_to_check);
@@ -1300,6 +1305,7 @@ luabind::scope lua_register_client() {
 		.def("AutoSplitEnabled", (bool(Lua_Client::*)(void))&Lua_Client::AutoSplitEnabled)
 		.def("SetHorseId", (void(Lua_Client::*)(int))&Lua_Client::SetHorseId)
 		.def("GetHorseId", (int(Lua_Client::*)(void))&Lua_Client::GetHorseId)
+		.def("NukeItem", (void(Lua_Client::*)(uint32))&Lua_Client::NukeItem)
 		.def("NukeItem", (void(Lua_Client::*)(uint32,int))&Lua_Client::NukeItem)
 		.def("SetTint", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetTint)
 		.def("SetMaterial", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetMaterial)

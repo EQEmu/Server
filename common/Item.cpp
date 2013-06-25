@@ -30,6 +30,7 @@
 #include <sstream>
 #include <iostream>
 
+std::list<ItemInst*> dirty_inst;
 int32 NextItemInstSerialNumber = 1;
 
 static inline int32 GetNextItemInstSerialNumber() {
@@ -109,7 +110,6 @@ ItemInstQueue::~ItemInstQueue() {
 
 Inventory::~Inventory() {
 	std::map<int16, ItemInst*>::iterator cur,end;
-
 
 	cur = m_worn.begin();
 	end = m_worn.end();
@@ -1116,7 +1116,7 @@ bool Inventory::DeleteItem(int16 slot_id, uint8 quantity)
 				(!item_to_delete->IsStackable() &&
 				((item_to_delete->GetItem()->MaxCharges == 0) || item_to_delete->IsExpendable()))) {
 				// Item can now be destroyed
-				safe_delete(item_to_delete);
+				Inventory::MarkDirty(item_to_delete);
 				return true;
 			}
 		}
@@ -1126,8 +1126,7 @@ bool Inventory::DeleteItem(int16 slot_id, uint8 quantity)
 		return false;
 	}
 
-	safe_delete(item_to_delete);
-
+	Inventory::MarkDirty(item_to_delete);
 	return true;
 
 }
@@ -1418,7 +1417,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 
 	if (result == SLOT_INVALID) {
 		LogFile->write(EQEMuLog::Error, "Inventory::_PutItem: Invalid slot_id specified (%i)", slot_id);
-		safe_delete(inst); // Slot not found, clean up
+		Inventory::MarkDirty(inst); // Slot not found, clean up
 	}
 
 	return result;
@@ -1932,4 +1931,19 @@ bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
 		Races_ >>= 1;
 	}
 	return (IsRace && IsClass);
+}
+
+void Inventory::CleanDirty() {
+	auto iter = dirty_inst.begin();
+	while(iter != dirty_inst.end()) {
+		delete (*iter);
+		++iter;
+	}
+	dirty_inst.clear();
+}
+
+void Inventory::MarkDirty(ItemInst *inst) {
+	if(inst) {
+		dirty_inst.push_back(inst);
+	}
 }
