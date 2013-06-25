@@ -2068,18 +2068,19 @@ void Client::HandleRespawnFromHover(uint32 Option)
 	}
 
 	//If they somehow chose an option they don't have, just send them to bind
-	RespawnOption default_to_bind; //must keep in scope!
+	RespawnOption* default_to_bind = nullptr;
 	if (!chosen)
 	{
 		/* put error logging here */
 		BindStruct* b = &m_pp.binds[0];
-		default_to_bind.name = "Bind Location";
-		default_to_bind.zoneid = b->zoneId;
-		default_to_bind.x = b->x;
-		default_to_bind.y = b->y;
-		default_to_bind.z = b->z;
-		default_to_bind.heading = b->heading;
-		chosen = &default_to_bind;
+		default_to_bind = new RespawnOption;
+		default_to_bind->name = "Bind Location";
+		default_to_bind->zoneid = b->zoneId;
+		default_to_bind->x = b->x;
+		default_to_bind->y = b->y;
+		default_to_bind->z = b->z;
+		default_to_bind->heading = b->heading;
+		chosen = default_to_bind;
 		is_rez = false;
 	}
 
@@ -2192,6 +2193,8 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 		MovePC(chosen->zoneid,chosen->x,chosen->y,chosen->z,chosen->heading,1);
 	}
+
+	safe_delete(default_to_bind);
 }
 
 void Client::ClearHover()
