@@ -61,6 +61,7 @@ typedef enum {
 	EVENT_ITEM_TICK,
 	EVENT_DUEL_WIN,
 	EVENT_DUEL_LOSE,
+	EVENT_RESPAWN, //PC respawning from hover without changing zones
 
 	_LargestEventID
 } QuestEventID;
