@@ -91,11 +91,11 @@ private:
 	Embperl *perl;
 	
 	void ExportHash(const char *pkgprefix, const char *hashname, std::map<std::string, std::string> &vals);
-	void ExportVar(const char *pkgprefix, const char *varname, const char *value) const;
-	void ExportVar(const char *pkgprefix, const char *varname, int32 value) const;
-	void ExportVar(const char *pkgprefix, const char *varname, uint32 value) const;
-	void ExportVar(const char *pkgprefix, const char *varname, float value) const;
-	void ExportVarComplex(const char *pkgprefix, const char *varname, const char *value) const;
+	void ExportVar(const char *pkgprefix, const char *varname, const char *value);
+	void ExportVar(const char *pkgprefix, const char *varname, int32 value);
+	void ExportVar(const char *pkgprefix, const char *varname, uint32 value);
+	void ExportVar(const char *pkgprefix, const char *varname, float value);
+	void ExportVarComplex(const char *pkgprefix, const char *varname, const char *value);
 
 	void EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
 		uint32 extradata, bool global, std::vector<void*> *extra_pointers);

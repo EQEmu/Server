@@ -59,14 +59,14 @@ public:
 	virtual void LoadSpellScript(std::string filename, uint32 spell_id) { }
 	virtual void LoadEncounterScript(std::string filename, std::string encounter_name) { }
 
-	virtual void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers) { }
-	virtual void DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers) { }
-	virtual void DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers) { }
-	virtual void DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
-		std::vector<void*> *extra_pointers) { }
+	virtual int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers) { return 0; }
+	virtual int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers) { return 0; }
+	virtual int DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers) { return 0; }
+	virtual int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+		std::vector<void*> *extra_pointers) { return 0; }
 	
 	virtual void AddVar(std::string name, std::string val) { }
 	virtual std::string GetVar(std::string name) { return std::string(); }

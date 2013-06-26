@@ -62,13 +62,13 @@ public:
 	virtual void ReloadQuests();
     virtual uint32 GetIdentifier() { return 0xb0712acc; }
 
-	virtual void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+	virtual int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
-	virtual void DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+	virtual int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
-	virtual void DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+	virtual int DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
-	virtual void DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+	virtual int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 
 private:

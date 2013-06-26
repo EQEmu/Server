@@ -10471,7 +10471,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app) {
 		int SpellID = PendingTranslocateData.SpellID;
 		int i = parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, SpellID, 0);
 
-		if(i != 0)
+		if(i == 0)
 		{
 			// If the spell has a translocate to bind effect, AND we are already in the zone the client
 			// is bound in, use the GoToBind method. If we send OP_Translocate in this case, the client moves itself

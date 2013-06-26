@@ -380,7 +380,10 @@ void PerlembParser::LoadNPCScript(std::string filename, int npc_id) {
 	}
 	catch(const char *err)
 	{
-		LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
+        std::string error = "Error compiling quest file " + filename;
+        error += ": ";
+        error += err;
+        AddError(error);
 		npc_quest_status_[npc_id] = questFailedToLoad;
 		return;
 	}
@@ -406,7 +409,10 @@ void PerlembParser::LoadGlobalNPCScript(std::string filename) {
 	}
 	catch(const char *err)
 	{
-		LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
+		std::string error = "Error compiling quest file " + filename;
+        error += ": ";
+        error += err;
+        AddError(error);
 		global_npc_quest_status_ = questFailedToLoad;
 		return;
 	}
@@ -432,7 +438,10 @@ void PerlembParser::LoadPlayerScript(std::string filename) {
 	}
 	catch(const char *err)
 	{
-		LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
+		std::string error = "Error compiling quest file " + filename;
+        error += ": ";
+        error += err;
+        AddError(error);
 		player_quest_status_ = questFailedToLoad;
 		return;
 	}
@@ -458,7 +467,10 @@ void PerlembParser::LoadGlobalPlayerScript(std::string filename) {
 	}
 	catch(const char *err)
 	{
-		LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
+		std::string error = "Error compiling quest file " + filename;
+        error += ": ";
+        error += err;
+        AddError(error);
 		global_player_quest_status_ = questFailedToLoad;
 		return;
 	}
@@ -488,7 +500,10 @@ void PerlembParser::LoadItemScript(std::string filename, ItemInst *item) {
 	}
 	catch(const char *err)
 	{
-		LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
+		std::string error = "Error compiling quest file " + filename;
+        error += ": ";
+        error += err;
+        AddError(error);
 		item_quest_status_[item->GetID()] = questFailedToLoad;
 		return;
 	}
@@ -518,7 +533,10 @@ void PerlembParser::LoadSpellScript(std::string filename, uint32 spell_id) {
 	}
 	catch(const char *err)
 	{
-		LogFile->write(EQEMuLog::Quest, "WARNING: error compiling quest file %s: %s", filename.c_str(), err);
+		std::string error = "Error compiling quest file " + filename;
+        error += ": ";
+        error += err;
+        AddError(error);
 		spell_quest_status_[spell_id] = questFailedToLoad;
 		return;
 	}
@@ -551,11 +569,13 @@ void PerlembParser::ExportHash(const char *pkgprefix, const char *hashname, std:
 			vals
 		);
 	} catch(const char *err) {
-		LogFile->write(EQEMuLog::Status, "Error exporting hash: %s", err);
+        std::string error = "Error exporting hash: ";
+        error += err;
+        AddError(error);
 	}
 }
 
-void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, int value) const
+void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, int value)
 {
 
 	if(!perl)
@@ -565,11 +585,13 @@ void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, int 
 		perl->seti(std::string(pkgprefix).append("::").append(varname).c_str(), value);
 
 	} catch(const char * err) {
-		LogFile->write(EQEMuLog::Status, "Error exporting var: %s", err);
+		std::string error = "Error exporting var: ";
+        error += err;
+        AddError(error);
 	}
 }
 
-void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, unsigned int value) const
+void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, unsigned int value)
 {
 
 	if(!perl)
@@ -579,11 +601,13 @@ void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, unsi
 		perl->seti(std::string(pkgprefix).append("::").append(varname).c_str(), value);
 
 	} catch(const char * err) {
-		LogFile->write(EQEMuLog::Status, "Error exporting var: %s", err);
+		std::string error = "Error exporting var: ";
+        error += err;
+        AddError(error);
 	}
 }
 
-void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, float value) const
+void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, float value)
 {
 
 	if(!perl)
@@ -592,11 +616,13 @@ void PerlembParser::ExportVar(const char * pkgprefix, const char * varname, floa
 	try {
 		perl->setd(std::string(pkgprefix).append("::").append(varname).c_str(), value);
 	} catch(const char * err) {
-		LogFile->write(EQEMuLog::Status, "Error exporting var: %s", err);
+		std::string error = "Error exporting var: ";
+        error += err;
+        AddError(error);
 	}
 }
 
-void PerlembParser::ExportVarComplex(const char * pkgprefix, const char *varname, const char *value) const
+void PerlembParser::ExportVarComplex(const char * pkgprefix, const char *varname, const char *value)
 {
 
 	if(!perl)
@@ -607,11 +633,13 @@ void PerlembParser::ExportVarComplex(const char * pkgprefix, const char *varname
 	}
 	catch(const char * err)
 	{
-		LogFile->write(EQEMuLog::Status, "Error exporting var: %s", err);
+		std::string error = "Error exporting var: ";
+        error += err;
+        AddError(error);
 	}
 }
 
-void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, const char *value) const
+void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, const char *value)
 {
 	if(!perl)
 		return;
@@ -622,7 +650,9 @@ void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, const 
 	}
 	catch(const char * err)
 	{
-		LogFile->write(EQEMuLog::Status, "Error exporting var: %s", err);
+		std::string error = "Error exporting var: ";
+        error += err;
+        AddError(error);
 	}
 }
 
@@ -690,8 +720,15 @@ void PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint3
 
 		//try to reduce some of the console spam...
 		//todo: tweak this to be more accurate at deciding what to filter (we don't want to gag legit errors)
-		if(!strstr(err,"Undefined subroutine"))
-			LogFile->write(EQEMuLog::Status, "Script error: %s::%s - %s", pkgprefix, event, err);
+		if(!strstr(err,"Undefined subroutine")) {
+            std::string error = "Script error: ";
+            error += pkgprefix;
+            error += "::";
+            error += event;
+            error += " - ";
+            error += err;
+            AddError(error);
+        }
 	}
 
 	quest_manager.EndQuest();
@@ -1115,7 +1152,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 				for(size_t i = 0; i < extra_pointers->size(); ++i) {
 					ItemInst *inst = reinterpret_cast<ItemInst*>(extra_pointers->at(i));
 					std::string var_name = "item";
-					var_name += std::to_string(i + 1);
+					var_name += std::to_string(static_cast<long long>(i + 1));
 
 					if(inst) {
 						ExportVar(package_name.c_str(), var_name.c_str(), inst->GetItem()->ID);

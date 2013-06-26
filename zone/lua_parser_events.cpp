@@ -53,7 +53,7 @@ void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *
 	
 	if(extra_pointers) {
 		for(size_t i = 0; i < extra_pointers->size(); ++i) {
-			std::string prefix = "item" + std::to_string(i + 1);
+			std::string prefix = "item" + std::to_string(static_cast<long long>(i + 1));
 			Lua_ItemInst l_inst = reinterpret_cast<ItemInst*>(extra_pointers->at(i));
 			luabind::object l_inst_o = luabind::object(L, l_inst);
 			l_inst_o.push(L);

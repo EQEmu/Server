@@ -932,17 +932,18 @@ void LuaParser::MapFunctions(lua_State *L) {
 	}
 }
 
-void LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+int LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 								 std::vector<void*> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
-		return;
+		return 0;
 	}
 
 	if(!npc)
-		return;
+		return 0;
 
 	std::string package_name = "npc_" + std::to_string(static_cast<long long>(npc->GetNPCTypeID()));
+    int ret = 0;
 
 	auto iter = lua_encounter_events_registered.find(package_name);
 	if(iter != lua_encounter_events_registered.end()) {
@@ -950,7 +951,9 @@ void LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::str
 		while(riter != iter->second.end()) {
 			if(riter->event_id == evt) {
 				std::string package_name = "encounter_" + riter->encounter_name;
-				_EventNPC(package_name, evt, npc, init, data, extra_data, extra_pointers, &riter->lua_reference);
+				int i = _EventNPC(package_name, evt, npc, init, data, extra_data, extra_pointers, &riter->lua_reference);
+                if(i != 0)
+                    ret = i;
 			}
 			++riter;
 		}
@@ -958,55 +961,65 @@ void LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::str
 
 	iter = lua_encounter_events_registered.find("npc_-1");
 	if(iter == lua_encounter_events_registered.end()) {
-		return;
+		return ret;
 	}
 
 	auto riter = iter->second.begin();
 	while(riter != iter->second.end()) {
 		if(riter->event_id == evt) {
 			std::string package_name = "encounter_" + riter->encounter_name;
-			_EventNPC(package_name, evt, npc, init, data, extra_data, extra_pointers, &riter->lua_reference);
+			int i = _EventNPC(package_name, evt, npc, init, data, extra_data, extra_pointers, &riter->lua_reference);
+            if(i != 0)
+                ret = i;
 		}
 		++riter;
 	}
+
+    return ret;
 }
 
-void LuaParser::DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+int LuaParser::DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 									std::vector<void*> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
-		return;
+		return 0;
 	}
 
 	std::string package_name = "player";
 
 	auto iter = lua_encounter_events_registered.find(package_name);
 	if(iter == lua_encounter_events_registered.end()) {
-		return;
+		return 0;
 	}
 
+    int ret = 0;
 	auto riter = iter->second.begin();
 	while(riter != iter->second.end()) {
 		if(riter->event_id == evt) {
 			std::string package_name = "encounter_" + riter->encounter_name;
-			_EventPlayer(package_name, evt, client, data, extra_data, extra_pointers, &riter->lua_reference);
+			int i = _EventPlayer(package_name, evt, client, data, extra_data, extra_pointers, &riter->lua_reference);
+            if(i != 0)
+                ret = i;
 		}
 		++riter;
 	}
+
+    return ret;
 }
 
-void LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+int LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
 								  std::vector<void*> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
-		return;
+		return 0;
 	}
 
 	if(!item)
-		return;
+		return 0;
 	
 	std::string package_name = "item_";
 	package_name += std::to_string(static_cast<long long>(item->GetID()));
+    int ret = 0;
 	
 	auto iter = lua_encounter_events_registered.find(package_name);
 	if(iter != lua_encounter_events_registered.end()) {
@@ -1014,7 +1027,9 @@ void LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *it
 		while(riter != iter->second.end()) {
 			if(riter->event_id == evt) {
 				std::string package_name = "encounter_" + riter->encounter_name;
-				_EventItem(package_name, evt, client, item, mob, data, extra_data, extra_pointers, &riter->lua_reference);
+				int i = _EventItem(package_name, evt, client, item, mob, data, extra_data, extra_pointers, &riter->lua_reference);
+                if(i != 0)
+                    ret = i;
 			}
 			++riter;
 		}
@@ -1022,35 +1037,42 @@ void LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *it
 
 	iter = lua_encounter_events_registered.find("item_-1");
 	if(iter == lua_encounter_events_registered.end()) {
-		return;
+		return ret;
 	}
 	
 	auto riter = iter->second.begin();
 	while(riter != iter->second.end()) {
 		if(riter->event_id == evt) {
 			std::string package_name = "encounter_" + riter->encounter_name;
-			_EventItem(package_name, evt, client, item, mob, data, extra_data, extra_pointers, &riter->lua_reference);
+			int i = _EventItem(package_name, evt, client, item, mob, data, extra_data, extra_pointers, &riter->lua_reference);
+            if(i != 0)
+                ret = i;
 		}
 		++riter;
 	}
+    return ret;
 }
 
-void LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+int LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 								   std::vector<void*> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
-		return;
+		return 0;
 	}
 
 	std::string package_name = "spell_" + std::to_string(static_cast<long long>(spell_id));
 
+    int ret = 0;
 	auto iter = lua_encounter_events_registered.find(package_name);
 	if(iter != lua_encounter_events_registered.end()) {
-	auto riter = iter->second.begin();
+	    auto riter = iter->second.begin();
 		while(riter != iter->second.end()) {
 			if(riter->event_id == evt) {
 				std::string package_name = "encounter_" + riter->encounter_name;
-				_EventSpell(package_name, evt, npc, client, spell_id, extra_data, extra_pointers, &riter->lua_reference);
+				int i = _EventSpell(package_name, evt, npc, client, spell_id, extra_data, extra_pointers, &riter->lua_reference);
+                if(i != 0) {
+                    ret = i;
+                }
 			}
 			++riter;
 		}
@@ -1058,17 +1080,20 @@ void LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, u
 
 	iter = lua_encounter_events_registered.find("spell_-1");
 	if(iter == lua_encounter_events_registered.end()) {
-		return;
+		return ret;
 	}
 
 	auto riter = iter->second.begin();
 	while(riter != iter->second.end()) {
 		if(riter->event_id == evt) {
 			std::string package_name = "encounter_" + riter->encounter_name;
-			_EventSpell(package_name, evt, npc, client, spell_id, extra_data, extra_pointers, &riter->lua_reference);
+			int i = _EventSpell(package_name, evt, npc, client, spell_id, extra_data, extra_pointers, &riter->lua_reference);
+            if(i != 0)
+                ret = i;
 		}
 		++riter;
 	}
+    return ret;
 }
 
 QuestEventID LuaParser::ConvertLuaEvent(QuestEventID evt) {

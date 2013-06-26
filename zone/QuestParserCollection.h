@@ -81,13 +81,13 @@ private:
 	QuestInterface *GetQIByItemQuest(std::string item_script, std::string &filename);
 	QuestInterface *GetQIByEncounterQuest(std::string encounter_name, std::string &filename);
 	
-	void DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+	int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
-	void DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
+	int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
-	void DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+	int DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
-	void DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+	int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 
 	std::map<uint32, QuestInterface*> _interfaces;
