@@ -26,6 +26,7 @@
 ** [ MIT license: http://www.opensource.org/licenses/mit-license.php ]
 */
 
+#ifdef LUA_EQEMU
 #define LUA_BITOP_VERSION	"1.0.2"
 
 #include "lua.hpp"
@@ -177,3 +178,4 @@ LUALIB_API int luaopen_bit(lua_State *L)
   return 1;
 }
 
+#endif

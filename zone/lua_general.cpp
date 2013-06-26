@@ -109,7 +109,7 @@ void unregister_player_event(std::string name, int evt) {
 
 void register_item_event(std::string name, int evt, int item_id, luabind::object func) {
 	std::string package_name = "item_";
-	package_name += std::to_string(item_id);
+	package_name += std::to_string(static_cast<long long>(item_id));
 	
 	if(luabind::type(func) == LUA_TFUNCTION) {
 		register_event(package_name, name, evt, func);
@@ -118,7 +118,7 @@ void register_item_event(std::string name, int evt, int item_id, luabind::object
 
 void unregister_item_event(std::string name, int evt, int item_id) {
 	std::string package_name = "item_";
-	package_name += std::to_string(item_id);
+	package_name += std::to_string(static_cast<long long>(item_id));
 
 	unregister_event(package_name, name, evt);
 }
