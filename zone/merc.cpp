@@ -5730,7 +5730,7 @@ bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 
 void Client::InitializeMercInfo() {
 	for(int i=0; i<MAXMERCS; i++) {
-		m_mercinfo[i].mercid = 0;
+		m_mercinfo[i] = MercInfo();
 	}
 }
 

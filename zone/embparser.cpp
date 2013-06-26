@@ -109,7 +109,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_AUGMENT_INSERT",
 	"EVENT_AUGMENT_REMOVE",
 	"EVENT_ENTER_AREA",
-	"EVENT_LEAVE_AREA"
+	"EVENT_LEAVE_AREA",
+	"EVENT_RESPAWN"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr), event_queue_in_use_(false) {
@@ -1378,6 +1379,12 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "text", data);
 			ExportVar(package_name.c_str(), "data", "0");
 			ExportVar(package_name.c_str(), "langid", "0");
+			break;
+		}
+
+		case EVENT_RESPAWN: {
+			ExportVar(package_name.c_str(), "option", data);
+			ExportVar(package_name.c_str(), "resurrect", extradata);
 			break;
 		}
 

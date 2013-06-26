@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include <sstream>
 
 #include "lua.hpp"
@@ -462,6 +463,15 @@ void handle_player_area(QuestInterface *parse, lua_State* L, Client* client, std
 	lua_setfield(L, -2, "area_type");
 }
 
+void handle_player_respawn(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+						std::vector<void*> *extra_pointers) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "option");
+
+	lua_pushboolean(L, extra_data == 1 ? true : false);
+	lua_setfield(L, -2, "resurrect");
+}
+
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						std::vector<void*> *extra_pointers) {
 }
@@ -665,3 +675,5 @@ void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Cl
 void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
 					   std::vector<void*> *extra_pointers) {
 }
+
+#endif

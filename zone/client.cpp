@@ -317,6 +317,8 @@ Client::Client(EQStreamInterface* ieqs)
 	MaxXTargets = 5;
 	XTargetAutoAddHaters = true;
 	LoadAccountFlags();
+
+	initial_respawn_selection = 0;
 }
 
 Client::~Client() {
@@ -408,6 +410,8 @@ Client::~Client() {
 	safe_delete(adventure_leaderboard_timer);
 	safe_delete_array(adv_requested_data);
 	safe_delete_array(adv_data);
+
+	ClearRespawnOptions();
 
 	numclients--;
 	UpdateWindowTitle();
@@ -4288,45 +4292,68 @@ void Client::SendRespawnBinds()
 	// Client will respond with a 4 byte packet that includes the number of the selection made
 	//
 
+		//If no options have been given, default to Bind + Rez
+	if (respawn_options.empty())
+	{
+		BindStruct* b = &m_pp.binds[0];
+		RespawnOption opt;
+		opt.name = "Bind Location";
+		opt.zoneid = b->zoneId;
+		opt.x = b->x;
+		opt.y = b->y;
+		opt.z = b->z;
+		opt.heading = b->heading;
+		respawn_options.push_front(opt);
+	}
+	//Rez is always added at the end
+	RespawnOption rez;
+	rez.name = "Resurrect";
+	rez.zoneid = zone->GetZoneID();
+	rez.x = GetX();
+	rez.y = GetY();
+	rez.z = GetZ();
+	rez.heading = GetHeading();
+	respawn_options.push_back(rez);
 
-	const char* BindName = "Bind Location";
-	const char* Resurrect = "Resurrect";
+	int num_options = respawn_options.size();
+	uint32 PacketLength = 17 + (26 * num_options); //Header size + per-option invariant size
+	
+	std::list<RespawnOption>::iterator itr;
+	RespawnOption* opt;
 
-	int PacketLength;
+	//Find string size for each option
+	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
+	{
+		opt = &(*itr);
+		PacketLength += opt->name.size() + 1; //+1 for cstring
+	}
 
-	PacketLength = 17 + (26 * 2) + strlen(BindName) + strlen(Resurrect);	// SoF
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespawnWindow, PacketLength);
+	char* buffer = (char*)outapp->pBuffer;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_RespawnWindow, PacketLength);
+	//Packet header
+	VARSTRUCT_ENCODE_TYPE(uint32, buffer, initial_respawn_selection); //initial selection (from 0)
+	VARSTRUCT_ENCODE_TYPE(uint32, buffer, RuleI(Character, RespawnFromHoverTimer) * 1000);
+	VARSTRUCT_ENCODE_TYPE(uint32, buffer, 0); //unknown
+	VARSTRUCT_ENCODE_TYPE(uint32, buffer, num_options); //number of options to display
 
-	char *Buffer = (char *)outapp->pBuffer;
-
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Unknown
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, RuleI(Character, RespawnFromHoverTimer) * 1000);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Unknown
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 2);	// Two options, Bind or Rez
-
-
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Entry 0
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, m_pp.binds[0].zoneId);
-	VARSTRUCT_ENCODE_TYPE(float, Buffer, m_pp.binds[0].x);
-	VARSTRUCT_ENCODE_TYPE(float, Buffer, m_pp.binds[0].y);
-	VARSTRUCT_ENCODE_TYPE(float, Buffer, m_pp.binds[0].z);
-	VARSTRUCT_ENCODE_TYPE(float, Buffer, m_pp.binds[0].heading);
-	VARSTRUCT_ENCODE_STRING(Buffer, BindName);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);	// Entry 1
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, zone->GetZoneID());
-	VARSTRUCT_ENCODE_TYPE(float, Buffer, GetX());
-	VARSTRUCT_ENCODE_TYPE(float, Buffer, GetY());
-	VARSTRUCT_ENCODE_TYPE(float, Buffer, GetZ());
-	VARSTRUCT_ENCODE_TYPE(float, Buffer, GetHeading());
-	VARSTRUCT_ENCODE_STRING(Buffer, Resurrect);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);
+	//Individual options
+	int count = 0;
+	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
+	{
+		opt = &(*itr);
+		VARSTRUCT_ENCODE_TYPE(uint32, buffer, count++); //option num (from 0)
+		VARSTRUCT_ENCODE_TYPE(uint32, buffer, opt->zoneid);
+		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->x);
+		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->y);
+		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->z);
+		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->heading);
+		VARSTRUCT_ENCODE_STRING(buffer, opt->name.c_str());
+		VARSTRUCT_ENCODE_TYPE(uint8, buffer, (count == num_options)); //is this one Rez (the last option)?
+	}
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
-
 	return;
 }
 
@@ -7826,4 +7853,105 @@ void Client::SendItemScale(ItemInst *inst) {
 		SendItemPacket(slot, inst, ItemPacketCharmUpdate);
 		CalcBonuses();
 	}
+}
+
+void Client::AddRespawnOption(std::string option_name, uint32 zoneid, float x, float y, float z, float heading, bool initial_selection, int8 position)
+{
+	//If respawn window is already open, any changes would create an inconsistency with the client
+	if (IsHoveringForRespawn()) { return; }
+
+	if (zoneid == 0)
+		zoneid = zone->GetZoneID();
+
+	//Create respawn option
+	RespawnOption res_opt;
+	res_opt.name = option_name;
+	res_opt.zoneid = zoneid;
+	res_opt.x = x;
+	res_opt.y = y;
+	res_opt.z = z;
+	res_opt.heading = heading;
+
+	if (position == -1 || position >= respawn_options.size())
+	{
+		//No position specified, or specified beyond the end, simply append
+		respawn_options.push_back(res_opt);
+		//Make this option the initial selection for the window if desired
+		if (initial_selection)
+			initial_respawn_selection = static_cast<uint8>(respawn_options.size()) - 1;
+	}
+	else if (position == 0)
+	{
+		respawn_options.push_front(res_opt);
+		if (initial_selection)
+			initial_respawn_selection = 0;
+	}
+	else
+	{
+		//Insert new option between existing options
+		std::list<RespawnOption>::iterator itr;
+		uint8 pos = 0;
+		for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
+		{
+			if (pos++ == position)
+			{
+				respawn_options.insert(itr,res_opt);
+				//Make this option the initial selection for the window if desired
+				if (initial_selection)
+					initial_respawn_selection = pos;
+				return;
+			}
+		}
+	}
+}
+
+bool Client::RemoveRespawnOption(std::string option_name)
+{
+	//If respawn window is already open, any changes would create an inconsistency with the client
+	if (IsHoveringForRespawn() || respawn_options.empty()) { return false; }
+
+	bool had = false;
+	RespawnOption* opt;
+	std::list<RespawnOption>::iterator itr;
+	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
+	{
+		opt = &(*itr);
+		if (opt->name.compare(option_name) == 0)
+		{
+			respawn_options.erase(itr); 
+			had = true;
+			//could be more with the same name, so keep going...
+		}
+	}
+	return had;
+}
+
+bool Client::RemoveRespawnOption(uint8 position)
+{
+	//If respawn window is already open, any changes would create an inconsistency with the client
+	if (IsHoveringForRespawn() || respawn_options.empty()) { return false; }
+
+	//Easy cases first...
+	if (position == 0)
+	{
+		respawn_options.pop_front();
+		return true;
+	}
+	else if (position == (respawn_options.size() - 1))
+	{
+		respawn_options.pop_back();
+		return true;
+	}
+
+	std::list<RespawnOption>::iterator itr;
+	uint8 pos = 0;
+	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
+	{
+		if (pos++ == position)
+		{
+			respawn_options.erase(itr);
+			return true;
+		}
+	}
+	return false;
 }

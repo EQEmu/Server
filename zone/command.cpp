@@ -9500,22 +9500,22 @@ void command_object(Client *c, const Seperator *sep)
 
 					od.object_type = atoi(row[col++]);
 					icon = atoi(row[col++]);
-					od.unknown008[0] = atoi(row[col++]);
-					od.unknown008[1] = atoi(row[col++]);
+					od.unknown008 = atoi(row[col++]);
+					od.unknown010 = atoi(row[col++]);
 					od.unknown020 = atoi(row[col++]);
 
 					switch (od.object_type)
 					{
 						case 0: // Static Object
 						case TempStaticType: // Static Object unlocked for changes
-							if (od.unknown008[0] == 0) // Unknown08 field is optional Size parameter for static objects
+							if (od.unknown008 == 0) // Unknown08 field is optional Size parameter for static objects
 							{
-								od.unknown008[0] = 100;	// Static object default Size is 100%
+								od.unknown008 = 100;	// Static object default Size is 100%
 							}
 
 							c->Message(0,
 								"- STATIC Object (%s): id %u, x %.1f, y %.1f, z %.1f, h %.1f, model %s, size %u, solidtype %u, incline %u",
-								(od.object_type == 0) ? "locked" : "unlocked", id, od.x, od.y, od.z, od.heading, od.object_name, od.unknown008[0], od.unknown008[1], od.unknown020);
+								(od.object_type == 0) ? "locked" : "unlocked", id, od.x, od.y, od.z, od.heading, od.object_name, od.unknown008, od.unknown010, od.unknown020);
 							break;
 						case OT_DROPPEDITEM: // Ground Spawn
 							c->Message(0,
@@ -9581,11 +9581,11 @@ void command_object(Client *c, const Seperator *sep)
 				case 0: // Static Object
 					if ((sep->argnum - col) > 3)
 					{
-						od.unknown008[0] = atoi(sep->arg[4 + col]); // Size specified
+						od.unknown008 = atoi(sep->arg[4 + col]); // Size specified
 
 						if ((sep->argnum - col) > 4)
 						{
-							od.unknown008[1] = atoi(sep->arg[5 + col]); // SolidType specified
+							od.unknown010 = atoi(sep->arg[5 + col]); // SolidType specified
 
 							if ((sep->argnum - col) > 5)
 							{
@@ -9972,15 +9972,15 @@ void command_object(Client *c, const Seperator *sep)
 							return;
 						}
 
-						od.unknown008[0] = atoi(sep->arg[4]);
+						od.unknown008 = atoi(sep->arg[4]);
 						o->SetObjectData(&od);
 
-						if (od.unknown008[0] == 0) // 0 == unspecified == 100%
+						if (od.unknown008 == 0) // 0 == unspecified == 100%
 						{
-							od.unknown008[0] = 100;
+							od.unknown008 = 100;
 						}
 
-						c->Message(0, "Static Object %u set to %u%% size. Size will take effect when you commit to the database with '#object Save', after which the object will be unchangeable until you unlock it again with '#object Edit' and zone out and back in.", id, od.unknown008[0]);
+						c->Message(0, "Static Object %u set to %u%% size. Size will take effect when you commit to the database with '#object Save', after which the object will be unchangeable until you unlock it again with '#object Edit' and zone out and back in.", id, od.unknown008);
 					}
 					else if (strcmp(sep->arg[3], "solidtype") == 0)
 					{
@@ -9998,10 +9998,10 @@ void command_object(Client *c, const Seperator *sep)
 							return;
 						}
 
-						od.unknown008[1] = atoi(sep->arg[4]);
+						od.unknown010 = atoi(sep->arg[4]);
 						o->SetObjectData(&od);
 
-						c->Message(0, "Static Object %u set to SolidType %u. Change will take effect when you commit to the database with '#object Save'. Support for this property is on a per-model basis, mostly seen in smaller objects such as chests and tables.", id, od.unknown008[1]);
+						c->Message(0, "Static Object %u set to SolidType %u. Change will take effect when you commit to the database with '#object Save'. Support for this property is on a per-model basis, mostly seen in smaller objects such as chests and tables.", id, od.unknown010);
 					}
 					else
 					{
@@ -10352,7 +10352,7 @@ void command_object(Client *c, const Seperator *sep)
 						zone->GetZoneID(), zone->GetInstanceVersion(),
 						od.x, od.y, od.z, od.heading,
 						od.object_name, od.object_type, icon,
-						od.unknown008[0], od.unknown008[1], od.unknown020);
+						od.unknown008, od.unknown010, od.unknown020);
 				}
 				else
 				{
@@ -10362,7 +10362,7 @@ void command_object(Client *c, const Seperator *sep)
 						id, zone->GetZoneID(), zone->GetInstanceVersion(),
 						od.x, od.y, od.z, od.heading,
 						od.object_name, od.object_type, icon,
-						od.unknown008[0], od.unknown008[1], od.unknown020);
+						od.unknown008, od.unknown010, od.unknown020);
 				}
 			}
 			else
@@ -10377,7 +10377,7 @@ void command_object(Client *c, const Seperator *sep)
 					zone->GetZoneID(), zone->GetInstanceVersion(),
 					od.x, od.y, od.z, od.heading,
 					od.object_name, od.object_type, icon,
-					od.unknown008[0], od.unknown008[1], od.unknown020,
+					od.unknown008, od.unknown010, od.unknown020,
 					id);
 			}
 
@@ -10455,12 +10455,12 @@ void command_object(Client *c, const Seperator *sep)
 
 				memcpy(door.dest_zone, "NONE", 5);
 
-				if ((door.size = od.unknown008[0]) == 0) // unknown08 = optional size percentage
+				if ((door.size = od.unknown008) == 0) // unknown08 = optional size percentage
 				{
 					door.size = 100;
 				}
 
-				switch (door.opentype = od.unknown008[1]) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
+				switch (door.opentype = od.unknown010) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
 				{
 					case 0:
 						door.opentype = 31;
@@ -10747,8 +10747,8 @@ void command_object(Client *c, const Seperator *sep)
 			strn0cpy(od.object_name, row[col++], sizeof(od.object_name));
 			od.object_type = atoi(row[col++]);
 			icon = atoi(row[col++]);
-			od.unknown008[0] = atoi(row[col++]);
-			od.unknown008[1] = atoi(row[col++]);
+			od.unknown008 = atoi(row[col++]);
+			od.unknown010 = atoi(row[col++]);
 			od.unknown020 = atoi(row[col++]);
 
 			if (od.object_type == 0)

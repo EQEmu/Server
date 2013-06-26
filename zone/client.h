@@ -178,6 +178,16 @@ struct XTarget_Struct
 	char Name[65];
 };
 
+struct RespawnOption
+{
+	std::string name;
+	uint32 zoneid;
+	float x;
+	float y;
+	float z;
+	float heading;
+};
+
 
 const uint32 POPUPID_UPDATE_SHOWSTATSWINDOW = 1000000;
 
@@ -1048,6 +1058,11 @@ public:
 	bool	MoveItemToInventory(ItemInst *BInst, bool UpdateClient = false);
 	void HandleRespawnFromHover(uint32 Option);
 	bool IsHoveringForRespawn() { return RespawnFromHoverTimer.Enabled(); }
+	std::list<RespawnOption> respawn_options;
+	void AddRespawnOption(std::string option_name, uint32 zoneid, float x, float y, float z, float h = 0, bool initial_selection = false, int8 position = -1);
+	bool RemoveRespawnOption(std::string option_name);
+	bool RemoveRespawnOption(uint8 position);
+	void ClearRespawnOptions() { respawn_options.clear(); }
 	void SetPendingRezzData(int XP, uint32 DBID, uint16 SpellID, const char *CorpseName) { PendingRezzXP = XP; PendingRezzDBID = DBID; PendingRezzSpellID = SpellID; PendingRezzCorpseName = CorpseName; }
 	bool IsRezzPending() { return PendingRezzSpellID > 0; }
 	void ClearHover();
@@ -1454,6 +1469,8 @@ private:
 	Timer ItemTickTimer;
 	Timer ItemQuestTimer;
 	std::map<std::string,std::string> accountflags;
+
+	uint8 initial_respawn_selection;
 };
 
 #endif

@@ -1621,7 +1621,6 @@ ENCODE(OP_ZonePlayerToBind)
 	ZonePlayerToBind_Struct *zps = (ZonePlayerToBind_Struct*)(*p)->pBuffer;
 
 	std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-	ss.clear();
 
 	unsigned char *buffer1 = new unsigned char[sizeof(structs::ZonePlayerToBindHeader_Struct) + strlen(zps->zone_name)];
 	structs::ZonePlayerToBindHeader_Struct *zph = (structs::ZonePlayerToBindHeader_Struct*)buffer1;
@@ -2376,7 +2375,6 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 		charges = 0xFFFFFFFF;
 
 	std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-	ss.clear();
 
 	const Item_Struct *item = inst->GetItem();
 	//_log(NET__ERROR, "Serialize called for: %s", item->Name);

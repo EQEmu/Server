@@ -110,7 +110,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_augment_insert",
 	"event_augment_remove",
 	"event_enter_area",
-	"event_leave_area"
+	"event_leave_area",
+	"event_respawn"
 };
 
 extern Zone *zone;
@@ -184,6 +185,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_FEIGN_DEATH] = handle_player_feign;
 	PlayerArgumentDispatch[EVENT_ENTER_AREA] = handle_player_area;
 	PlayerArgumentDispatch[EVENT_LEAVE_AREA] = handle_player_area;
+	PlayerArgumentDispatch[EVENT_RESPAWN] = handle_player_respawn;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
