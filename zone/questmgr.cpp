@@ -596,12 +596,18 @@ void QuestManager::depop(int npc_type) {
 					tmp->CastToNPC()->Depop();
 				}
 				else {
-					depop_npc = true;
+					running_quest e = quests_running_.top();
+					e.depop_npc = true;
+					quests_running_.pop();
+					quests_running_.push(e);
 				}
 			}
 		}
 		else {	//depop self
-			depop_npc = true;
+			running_quest e = quests_running_.top();
+			e.depop_npc = true;
+			quests_running_.pop();
+			quests_running_.push(e);
 		}
 	}
 }
@@ -1572,7 +1578,11 @@ void QuestManager::respawn(int npc_type, int grid) {
 	y = owner->GetY();
 	z = owner->GetZ();
 	h = owner->GetHeading();
-	depop_npc = true;
+
+	running_quest e = quests_running_.top();
+	e.depop_npc = true;
+	quests_running_.pop();
+	quests_running_.push(e);
 
 	const NPCType* tmp = 0;
 	if ((tmp = database.GetNPCType(npc_type)))
