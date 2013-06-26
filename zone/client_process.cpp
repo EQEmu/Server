@@ -2040,87 +2040,140 @@ void Client::HandleRespawnFromHover(uint32 Option)
 {
 	RespawnFromHoverTimer.Disable();
 
-	if(Option == 1)	// Resurrect
+	RespawnOption* chosen = nullptr;
+	bool is_rez = false;
+
+	//Find the selected option
+	if (Option == 0)
 	{
-		if((PendingRezzXP < 0) || (PendingRezzSpellID == 0))
-		{
-			_log(SPELLS__REZ, "Unexpected Rezz from hover request.");
-			return;
-		}
-		SetHP(GetMaxHP() / 5);
-
-		Corpse* corpse = entity_list.GetCorpseByName(PendingRezzCorpseName.c_str());
-
-		if(corpse)
-		{
-			x_pos = corpse->GetX();
-			y_pos = corpse->GetY();
-			z_pos = corpse->GetZ();
-		}
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + 10);
-		ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
-
-		gmg->bind_zone_id = zone->GetZoneID();
-		gmg->bind_instance_id = zone->GetInstanceID();
-		gmg->x = GetX();
-		gmg->y = GetY();
-		gmg->z = GetZ();
-		gmg->heading = GetHeading();
-		strcpy(gmg->zone_name, "Resurrect");
-
-		FastQueuePacket(&outapp);
-
-		ClearHover();
-		SendHPUpdate();
-		OPRezzAnswer(1, PendingRezzSpellID, zone->GetZoneID(), zone->GetInstanceID(), GetX(), GetY(), GetZ());
-
-		if (corpse && corpse->IsCorpse()) {
-			_log(SPELLS__REZ, "Hover Rez in zone %s for corpse %s",
-					zone->GetShortName(), PendingRezzCorpseName.c_str());
-
-			_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
-
-			corpse->Rezzed(true);
-			corpse->CompleteRezz();
-		}
-		return;
+		chosen = &respawn_options.front();
 	}
-
-	// Respawn at Bind Point.
-	//
-	if(m_pp.binds[0].zoneId == zone->GetZoneID())
+	else if (Option == (respawn_options.size() - 1))
 	{
-		PendingRezzSpellID = 0;
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + 14);
-		ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
-
-		gmg->bind_zone_id = m_pp.binds[0].zoneId;
-		gmg->x = m_pp.binds[0].x;
-		gmg->y = m_pp.binds[0].y;
-		gmg->z = m_pp.binds[0].z;
-		gmg->heading = 0;
-		strcpy(gmg->zone_name, "Bind Location");
-
-		FastQueuePacket(&outapp);
-
-		CalcBonuses();
-		SetHP(GetMaxHP());
-		SetMana(GetMaxMana());
-		SetEndurance(GetMaxEndurance());
-
-		x_pos = m_pp.binds[0].x;
-		y_pos = m_pp.binds[0].y;
-		z_pos = m_pp.binds[0].z;
-
-		ClearHover();
-		entity_list.RefreshClientXTargets(this);
-		SendHPUpdate();
-
+		chosen = &respawn_options.back();
+		is_rez = true; //Rez must always be the last option
 	}
 	else
 	{
+		std::list<RespawnOption>::iterator itr;
+		uint32 pos = 0;
+		for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
+		{
+			if (pos++ == Option)
+			{
+				chosen = &(*itr);
+				break;
+			}
+		}
+	}
+
+	//If they somehow chose an option they don't have, just send them to bind
+	RespawnOption* default_to_bind = nullptr;
+	if (!chosen)
+	{
+		/* put error logging here */
+		BindStruct* b = &m_pp.binds[0];
+		default_to_bind = new RespawnOption;
+		default_to_bind->name = "Bind Location";
+		default_to_bind->zoneid = b->zoneId;
+		default_to_bind->x = b->x;
+		default_to_bind->y = b->y;
+		default_to_bind->z = b->z;
+		default_to_bind->heading = b->heading;
+		chosen = default_to_bind;
+		is_rez = false;
+	}
+
+	if (chosen->zoneid == zone->GetZoneID()) //If they should respawn in the current zone...
+	{
+		if (is_rez)
+		{
+			if (PendingRezzXP < 0 || PendingRezzSpellID == 0)
+			{
+				_log(SPELLS__REZ, "Unexpected Rezz from hover request.");
+				return;
+			}
+			SetHP(GetMaxHP() / 5);
+
+			Corpse* corpse = entity_list.GetCorpseByName(PendingRezzCorpseName.c_str());
+
+			if (corpse)
+			{
+				x_pos = corpse->GetX();
+				y_pos = corpse->GetY();
+				z_pos = corpse->GetZ();
+			}
+
+			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + 10);
+			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
+
+			gmg->bind_zone_id = zone->GetZoneID();
+			gmg->bind_instance_id = zone->GetInstanceID();
+			gmg->x = GetX();
+			gmg->y = GetY();
+			gmg->z = GetZ();
+			gmg->heading = GetHeading();
+			strcpy(gmg->zone_name, "Resurrect");
+
+			FastQueuePacket(&outapp);
+
+			ClearHover();
+			SendHPUpdate();
+			OPRezzAnswer(1, PendingRezzSpellID, zone->GetZoneID(), zone->GetInstanceID(), GetX(), GetY(), GetZ());
+
+			if (corpse && corpse->IsCorpse())
+			{
+				_log(SPELLS__REZ, "Hover Rez in zone %s for corpse %s",
+						zone->GetShortName(), PendingRezzCorpseName.c_str());
+
+				_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
+
+				corpse->Rezzed(true);
+				corpse->CompleteRezz();
+			}
+		}
+		else //Not rez
+		{
+			PendingRezzSpellID = 0;
+
+			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + chosen->name.length() + 1);
+			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
+
+			gmg->bind_zone_id = zone->GetZoneID();
+			gmg->x = chosen->x;
+			gmg->y = chosen->y;
+			gmg->z = chosen->z;
+			gmg->heading = chosen->heading;
+			strcpy(gmg->zone_name, chosen->name.c_str());
+
+			FastQueuePacket(&outapp);
+
+			CalcBonuses();
+			SetHP(GetMaxHP());
+			SetMana(GetMaxMana());
+			SetEndurance(GetMaxEndurance());
+
+			x_pos = chosen->x;
+			y_pos = chosen->y;
+			z_pos = chosen->z;
+			heading = chosen->heading;
+
+			ClearHover();
+			entity_list.RefreshClientXTargets(this);
+			SendHPUpdate();
+		}
+
+		//After they've respawned into the same zone, trigger EVENT_RESPAWN
+		parse->EventPlayer(EVENT_RESPAWN, this, static_cast<std::string>(itoa(Option)), is_rez ? 1 : 0);
+
+		//Pop Rez option from the respawn options list; 
+		//easiest way to make sure it stays at the end and
+		//doesn't disrupt adding/removing scripted options
+		respawn_options.pop_back();
+	}
+	else
+	{
+		//Heading to a different zone
 		if(isgrouped)
 		{
 			Group *g = GetGroup();
@@ -2129,18 +2182,19 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		}
 
 		Raid* r = entity_list.GetRaidByClient(this);
-
 		if(r)
 			r->MemberZoned(this);
 
-		m_pp.zone_id = m_pp.binds[0].zoneId;
+		m_pp.zone_id = chosen->zoneid;
 		m_pp.zoneInstance = 0;
-		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(m_pp.zone_id));
+		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(chosen->zoneid));
 
 		Save();
 
-		GoToDeath();
+		MovePC(chosen->zoneid,chosen->x,chosen->y,chosen->z,chosen->heading,1);
 	}
+
+	safe_delete(default_to_bind);
 }
 
 void Client::ClearHover()
