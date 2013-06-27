@@ -255,7 +255,8 @@ protected:
 private:
 	void DBInitVars();
 
-	std::map<uint32,std::string>	zonename_array;
+	uint32				max_zonename;
+	char**				zonename_array;
 
 	Mutex				Mvarcache;
 	uint32				varcache_max;
