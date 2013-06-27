@@ -73,7 +73,7 @@
 	#undef new
 	#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
-
+	
 #ifdef _WINDOWS
 	#include <conio.h>
 	#include <process.h>
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
 	_log(ZONE__INIT, "Loading server configuration..");
 	if (!ZoneConfig::LoadConfig()) {
 		_log(ZONE__INIT_ERR, "Loading server configuration failed.");
-		return 1;
+		return(1);
 	}
 	const ZoneConfig *Config=ZoneConfig::get();
 
@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
 		_log(ZONE__INIT_ERR, "Cannot continue without a database connection.");
-		return 1;
+		return(1);
 	}
 	dbasync = new DBAsync(&database);
 	dbasync->AddFQ(&MTdbafq);
@@ -181,16 +181,16 @@ int main(int argc, char** argv) {
 	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(ZONE__INIT_ERR, "Could not set signal handler");
-		return 1;
+		return 0;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
 		_log(ZONE__INIT_ERR, "Could not set signal handler");
-		return 1;
+		return 0;
 	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
 		_log(ZONE__INIT_ERR, "Could not set signal handler");
-		return 1;
+		return 0;
 	}
 	#endif
 
@@ -216,19 +216,19 @@ int main(int argc, char** argv) {
 	if (!database.LoadNPCFactionLists()) {
 		_log(ZONE__INIT_ERR, "Loading npcs faction lists FAILED!");
 		CheckEQEMuErrorAndPause();
-		return 1;
+		return 0;
 	}
 	_log(ZONE__INIT, "Loading loot tables");
 	if (!database.LoadLoot()) {
 		_log(ZONE__INIT_ERR, "Loading loot FAILED!");
 		CheckEQEMuErrorAndPause();
-		return 1;
+		return 0;
 	}
 	_log(ZONE__INIT, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
 		_log(ZONE__INIT_ERR, "Loading skill caps FAILED!");
 		CheckEQEMuErrorAndPause();
-		return 1;
+		return 0;
 	}
 
 	_log(ZONE__INIT, "Loading spells");
@@ -479,7 +479,6 @@ int main(int argc, char** argv) {
 #endif
 
 	safe_delete(mmf);
-	safe_delete(Config);
 
 	if (zone != 0)
 		Zone::Shutdown(true);
