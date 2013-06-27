@@ -1814,6 +1814,7 @@ luabind::scope lua_register_mob() {
 		.def("Message", &Lua_Mob::Message)
 		.def("Message_StringID", &Lua_Mob::Message_StringID)
 		.def("Say", &Lua_Mob::Say)
+		.def("QuestSay", &Lua_Mob::QuestSay)
 		.def("Shout", &Lua_Mob::Shout)
 		.def("Emote", &Lua_Mob::Emote)
 		.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
