@@ -1195,7 +1195,8 @@ luabind::scope lua_register_events() {
 			luabind::value("augment_insert", static_cast<int>(EVENT_AUGMENT_INSERT)),
 			luabind::value("augment_remove", static_cast<int>(EVENT_AUGMENT_REMOVE)),
 			luabind::value("enter_area", static_cast<int>(EVENT_ENTER_AREA)),
-			luabind::value("leave_area", static_cast<int>(EVENT_LEAVE_AREA))
+			luabind::value("leave_area", static_cast<int>(EVENT_LEAVE_AREA)),
+			luabind::value("death_complete", static_cast<int>(EVENT_DEATH_COMPLETE))
 		];
 }
 

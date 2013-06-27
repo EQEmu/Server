@@ -110,7 +110,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_AUGMENT_REMOVE",
 	"EVENT_ENTER_AREA",
 	"EVENT_LEAVE_AREA",
-	"EVENT_RESPAWN"
+	"EVENT_RESPAWN",
+	"EVENT_DEATH_COMPLETE"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr), event_queue_in_use_(false) {

@@ -79,6 +79,7 @@ typedef enum {
 	EVENT_ENTER_AREA,
 	EVENT_LEAVE_AREA,
 	EVENT_RESPAWN,
+	EVENT_DEATH_COMPLETE,
 
 	_LargestEventID
 } QuestEventID;
