@@ -366,11 +366,6 @@ void PerlembParser::LoadNPCScript(std::string filename, int npc_id) {
 	if(!perl)
 		return;
 
-	if(perl->InUse())
-	{
-		return;
-	}
-
 	auto iter = npc_quest_status_.find(npc_id);
 	if(iter != npc_quest_status_.end()) {
 		return;
@@ -396,11 +391,6 @@ void PerlembParser::LoadGlobalNPCScript(std::string filename) {
 	if(!perl)
 		return;
 
-	if(perl->InUse())
-	{
-		return;
-	}
-
 	if(global_npc_quest_status_ != questUnloaded) {
 		return;
 	}
@@ -425,11 +415,6 @@ void PerlembParser::LoadPlayerScript(std::string filename) {
 	if(!perl)
 		return;
 
-	if(perl->InUse())
-	{
-		return;
-	}
-
 	if(player_quest_status_ != questUnloaded) {
 		return;
 	}
@@ -453,11 +438,6 @@ void PerlembParser::LoadPlayerScript(std::string filename) {
 void PerlembParser::LoadGlobalPlayerScript(std::string filename) {
 	if(!perl)
 		return;
-
-	if(perl->InUse())
-	{
-		return;
-	}
 
 	if(global_player_quest_status_ != questUnloaded) {
 		return;
@@ -486,11 +466,6 @@ void PerlembParser::LoadItemScript(std::string filename, ItemInst *item) {
 	if(!perl)
 		return;
 	
-	if(perl->InUse())
-	{
-		return;
-	}
-	
 	auto iter = item_quest_status_.find(item->GetID());
 	if(iter != item_quest_status_.end()) {
 		return;
@@ -518,11 +493,6 @@ void PerlembParser::LoadSpellScript(std::string filename, uint32 spell_id) {
 
 	if(!perl)
 		return;
-
-	if(perl->InUse())
-	{
-		return;
-	}
 
 	auto iter = spell_quest_status_.find(spell_id);
 	if(iter != spell_quest_status_.end()) {

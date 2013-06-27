@@ -255,7 +255,7 @@ void Embperl::eval_file(const char * packagename, const char * filename)
 	std::vector<std::string> args;
 	args.push_back(packagename);
 	args.push_back(filename);
-	dosub("eval_file", &args);
+	dosub("main::eval_file", &args);
 }
 
 void Embperl::dosub(const char * subname, const std::vector<std::string> * args, int mode)
@@ -303,7 +303,7 @@ void Embperl::eval(const char * code)
 	std::vector<std::string> arg;
 	arg.push_back(code);
 // MYRA - added EVAL & KEEPERR to eval per Eglin's recommendation
-	dosub("my_eval", &arg, G_SCALAR|G_DISCARD|G_EVAL|G_KEEPERR);
+	dosub("main::my_eval", &arg, G_SCALAR|G_DISCARD|G_EVAL|G_KEEPERR);
 //end Myra
 }
 

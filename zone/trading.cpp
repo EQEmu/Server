@@ -644,13 +644,17 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		if(tradingWith->GetAppearance() != eaDead) {
 			tradingWith->FaceTarget(this);
 		}
-	
+		
+		ItemInst *insts[4] = { 0 };
+		for(int i = 3000; i < 3004; ++i) {
+			insts[i - 3000] = m_inv.PopItem(i);
+		}
+
 		parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
 
-		for(int i = 3000; i < 3004; ++i) {
-			ItemInst *inst = m_inv.GetItem(i);
-			if(inst) {
-				DeleteItemInInventory(i);
+		for(int i = 0; i < 4; ++i) {
+			if(insts[i]) {
+				safe_delete(insts[i]);
 			}
 		}
 	}
