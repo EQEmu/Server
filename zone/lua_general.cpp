@@ -973,6 +973,14 @@ void lua_attack(const char *client_name) {
 	quest_manager.attack(client_name);
 }
 
+void lua_attack_npc(int entity_id) {
+	quest_manager.attacknpc(entity_id);
+}
+
+void lua_attack_npc_type(int npc_type) {
+	quest_manager.attacknpctype(npc_type);
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1122,7 +1130,9 @@ luabind::scope lua_register_general() {
 		luabind::def("clear_areas", &lua_clear_areas),
 		luabind::def("add_spawn_point", &lua_add_spawn_point),
 		luabind::def("remove_spawn_point", &lua_remove_spawn_point),
-		luabind::def("attack", &lua_attack)
+		luabind::def("attack", &lua_attack),
+		luabind::def("attack_npc", &lua_attack_npc),
+		luabind::def("attack_npc_type", &lua_attack_npc_type)
 	];
 }
 
