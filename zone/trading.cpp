@@ -648,6 +648,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		ItemInst *insts[4] = { 0 };
 		for(int i = 3000; i < 3004; ++i) {
 			insts[i - 3000] = m_inv.PopItem(i);
+			database.SaveInventory(CharacterID(), nullptr, i);
 		}
 
 		parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
