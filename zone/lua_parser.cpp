@@ -780,12 +780,40 @@ void LuaParser::ReloadQuests() {
 		AddError(error);
 	}
 
-#ifdef SANITIZE_LUA_LIBS
-	lua_pushnil(L);
-	lua_setglobal(L, "os");
+	if(luaL_dostring(L, "math.randomseed(os.time())")) {
+		std::string error = lua_tostring(L, -1);
+		AddError(error);
+	}
 
+#ifdef SANITIZE_LUA_LIBS
+	//io
 	lua_pushnil(L);
 	lua_setglobal(L, "io");
+
+	//some os/debug are okay some are not
+	lua_getglobal(L, "os");
+	lua_pushnil(L);
+	lua_setfield(L, -2, "exit");
+	lua_pushnil(L);
+	lua_setfield(L, -2, "execute");
+	lua_pushnil(L);
+	lua_setfield(L, -2, "getenv");
+	lua_pushnil(L);
+	lua_setfield(L, -2, "remove");
+	lua_pushnil(L);
+	lua_setfield(L, -2, "rename");
+	lua_pushnil(L);
+	lua_setfield(L, -2, "setlocale");
+	lua_pushnil(L);
+	lua_setfield(L, -2, "tmpname");
+	lua_pop(L, 1);
+
+	lua_pushnil(L);
+	lua_setglobal(L, "collectgarbage");
+
+	lua_pushnil(L);
+	lua_setglobal(L, "loadfile");
+
 #endif
 
 	lua_getglobal(L, "package");
