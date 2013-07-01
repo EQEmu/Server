@@ -3,6 +3,20 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 07/01/2013 ==
 demonstar55: Fix Monster Summoning related to giants/cyclops
 demonstar55: Prevent Monster Summoning from summoning a portal in bothunder
+KLS: Merge of lua branch to master
+See: http://www.eqemulator.org/forums/showthread.php?t=37008 for more detailed information on what is added.
+Upgrade notes:
+	-'templates' quest folder needs to be renamed 'global'
+	-'items' quest folder needs to be moved into the 'global' folder
+	-'spells' quest folder needs to be moved into the 'global' folder
+	-EVENT_PROXIMITY_SAY needs to be enabled via quest before it will work, calling quest::enable_proximity_say() in EVENT_SPAWN will suffice.
+	-quest::handleturnin, quest::completehandin, quest::resethandin, and quest::clearhandin have been removed. Take a look at https://code.google.com/p/projecteqquests/source/browse/trunk/quests/plugins/check_handin.pl plugin::mq_process_items, plugin::check_mq_handin, plugin::clear_mq_handin for MQ viable replacements.
+	-Some spell quests that overwrote the effects from the spell they were cast on no longer function properly on perl, it's suggested you make the spells empty or rewrite the broken quests in lua and return a non-zero value.
+	-Some item quests have changed in a subtle way, though it's unlikely any quests are impacted and the thread has more information if you found any of your quests broke.  As far as I know for example: PEQ didn't have to update any of its nearly 70 item quests.
+	-Cazic Touch (982) no longer shouts the name of the thing it is targeting without a script.
+	-EVENT_DEATH now triggers before the death is complete.  For the old functionality you may use EVENT_DEATH_COMPLETE.  It might be a good idea to replace all EVENT_DEATH with EVENT_DEATH_COMPLETE in existing spells.
+	
+We sought to minimize changes required but it's still a bit disruptive so take a few minutes when upgrading to make sure everything is correct.  Most notably quest::clearhandin was used in some popular plugins to avoid a dupe involved with its code and now that it's gone those will not function if fixes are not applied.
 
 == 06/16/2013 ==
 Secrets: Fixed an issue with RoF items and Req/Rec level above 100 appearing yellow. Recommended to enable the #iteminfo command for items that have a req/rec above 100 to display proper information regarding the info.
