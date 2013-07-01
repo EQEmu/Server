@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/01/2013 ==
+demonstar55: Fix Monster Summoning related to giants/cyclops
+
 == 06/16/2013 ==
 Secrets: Fixed an issue with RoF items and Req/Rec level above 100 appearing yellow. Recommended to enable the #iteminfo command for items that have a req/rec above 100 to display proper information regarding the info.
 

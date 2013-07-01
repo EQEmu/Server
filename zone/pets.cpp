@@ -393,6 +393,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, c
 			npc_type->size = monster->size;
 			npc_type->texture = monster->texture;
 			npc_type->gender = monster->gender;
+			npc_type->luclinface = monster->luclinface;
+			npc_type->helmtexture = monster->helmtexture;
 		}
 		else {
 			LogFile->write(EQEMuLog::Error, "Error loading NPC data for monster summoning pet (NPC ID %d)", monsterid);
