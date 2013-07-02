@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/02/2013 ==
+KLS: Exported eq.follow(entity_id, [distance]) and eq.stop_follow() to lua.
+
 == 07/01/2013 ==
 demonstar55: Fix Monster Summoning related to giants/cyclops
 demonstar55: Prevent Monster Summoning from summoning a portal in bothunder

@@ -981,6 +981,18 @@ void lua_attack_npc_type(int npc_type) {
 	quest_manager.attacknpctype(npc_type);
 }
 
+void lua_follow(int entity_id) {
+	quest_manager.follow(entity_id, 10);
+}
+
+void lua_follow(int entity_id, int distance) {
+	quest_manager.follow(entity_id, distance);
+}
+
+void lua_stop_follow() {
+	quest_manager.sfollow();
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1132,7 +1144,10 @@ luabind::scope lua_register_general() {
 		luabind::def("remove_spawn_point", &lua_remove_spawn_point),
 		luabind::def("attack", &lua_attack),
 		luabind::def("attack_npc", &lua_attack_npc),
-		luabind::def("attack_npc_type", &lua_attack_npc_type)
+		luabind::def("attack_npc_type", &lua_attack_npc_type),
+		luabind::def("follow", (void(*)(int))&lua_follow),
+		luabind::def("follow", (void(*)(int,int))&lua_follow),
+		luabind::def("stop_follow", &lua_stop_follow)
 	];
 }
 
