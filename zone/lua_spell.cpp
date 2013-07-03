@@ -6,6 +6,14 @@
 #include "../common/spdat.h"
 #include "lua_spell.h"
 
+Lua_Spell::Lua_Spell(int id) {
+	if(IsValidSpell(id)) {
+		SetLuaPtrData(&spells[id]);
+	} else {
+		SetLuaPtrData(nullptr);
+	}
+}
+
 int Lua_Spell::GetID() {
 	Lua_Safe_Call_Int();
 	return self->id;
@@ -416,10 +424,10 @@ int Lua_Spell::GetDamageShieldType() {
 	return self->DamageShieldType;
 }
 
-
 luabind::scope lua_register_spell() {
 	return luabind::class_<Lua_Spell>("Spell")
 		.def(luabind::constructor<>())
+		.def(luabind::constructor<int>())
 		.property("null", &Lua_Spell::Null)
 		.property("valid", &Lua_Spell::Valid)
 		.def("ID", &Lua_Spell::GetID)
