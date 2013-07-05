@@ -250,56 +250,72 @@ void Embperl::init_eval_file(void)
 		,FALSE);
  }
 
-void Embperl::eval_file(const char * packagename, const char * filename)
+int Embperl::eval_file(const char * packagename, const char * filename)
 {
 	std::vector<std::string> args;
 	args.push_back(packagename);
 	args.push_back(filename);
-	dosub("main::eval_file", &args);
+	return dosub("main::eval_file", &args);
 }
 
-void Embperl::dosub(const char * subname, const std::vector<std::string> * args, int mode)
+int Embperl::dosub(const char * subname, const std::vector<std::string> * args, int mode)
 {
-	in_use = true;
-	bool err = false;
-	dSP;                            /* initialize stack pointer      */
-	ENTER;                          /* everything created after here */
-	SAVETMPS;                       /* ...is a temporary variable.   */
-	PUSHMARK(SP);                   /* remember the stack pointer    */
+	dSP;
+	int ret_value = 0;
+	int count;
+	std::string error;
+
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(SP);
 	if(args && args->size())
 	{
 		for(std::vector<std::string>::const_iterator i = args->begin(); i != args->end(); ++i)
-		{/* push the arguments onto the perl stack  */
+		{
 			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length())));
 		}
 	}
-	PUTBACK;                      /* make local stack pointer global */
-	call_pv(subname, mode); /*eval our code*/
-	SPAGAIN;                        /* refresh stack pointer         */
+	PUTBACK;
+
+	count = call_pv(subname, mode);
+	SPAGAIN;
+
 	if(SvTRUE(ERRSV))
 	{
-		err = true;
+		error = SvPV_nolen(ERRSV);
+		POPs;
 	}
-	FREETMPS;                       /* free temp values        */
-	LEAVE;                       /* ...and the XPUSHed "mortal" args.*/
-
-	in_use = false;
-	if(err)
+	else
 	{
-		errmsg = "Perl runtime error: ";
+		if(count == 1) {
+			SV *ret = POPs;
+			if(SvTYPE(ret) == SVt_IV) {
+				IV v = SvIV(ret);
+				ret_value = v;
+			}
+			PUTBACK;
+		}
+	}
+
+	FREETMPS;
+	LEAVE;
+
+	if(error.length() > 0)
+	{
+		std::string errmsg = "Perl runtime error: ";
 		errmsg += SvPVX(ERRSV);
 		throw errmsg.c_str();
 	}
+
+	return ret_value;
 }
 
 //evaluate an expression. throw error on fail
-void Embperl::eval(const char * code)
+int Embperl::eval(const char * code)
 {
 	std::vector<std::string> arg;
 	arg.push_back(code);
-// MYRA - added EVAL & KEEPERR to eval per Eglin's recommendation
-	dosub("main::my_eval", &arg, G_SCALAR|G_DISCARD|G_EVAL|G_KEEPERR);
-//end Myra
+	return dosub("main::my_eval", &arg, G_SCALAR|G_EVAL|G_KEEPERR);
 }
 
 bool Embperl::SubExists(const char *package, const char *sub) {

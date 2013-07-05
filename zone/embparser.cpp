@@ -152,14 +152,14 @@ void PerlembParser::ReloadQuests() {
 	spell_quest_status_.clear();
 }
 
-void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
+int PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
 	uint32 extradata, bool global, std::vector<void*> *extra_pointers)
 {
 	if(!perl)
-		return;
+		return 0;
 
 	if(event >= _LargestEventID)
-		return;
+		return 0;
 
 	bool isPlayerQuest = false;
 	bool isGlobalPlayerQuest = false;
@@ -175,7 +175,7 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 
 	const char *sub_name = QuestEventSubroutines[event];
 	if(!perl->SubExists(package_name.c_str(), sub_name)) {
-		return;
+		return 0;
 	}
 
 	int char_id = 0;
@@ -191,58 +191,52 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	ExportEventVariables(package_name, event, objid, data, npcmob, iteminst, mob, extradata, extra_pointers);
 
 	if(isPlayerQuest || isGlobalPlayerQuest){
-		SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
+		return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
 	}
 	else if(isItemQuest) {
-		SendCommands(package_name.c_str(), sub_name, 0, mob, mob, iteminst);
+		return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, iteminst);
 	}
 	else if(isSpellQuest)
 	{
 		if(mob) {
-			SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
+			return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
 		} else {
-			SendCommands(package_name.c_str(), sub_name, 0, npcmob, mob, nullptr);
+			return SendCommands(package_name.c_str(), sub_name, 0, npcmob, mob, nullptr);
 		}
 	}
 	else {
-		SendCommands(package_name.c_str(), sub_name, objid, npcmob, mob, nullptr);
+		return SendCommands(package_name.c_str(), sub_name, objid, npcmob, mob, nullptr);
 	}
 }
 
 int PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 							std::vector<void*> *extra_pointers) {
-	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false, extra_pointers);
-	return 0;
+	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false, extra_pointers);
 }
 
 int PerlembParser::EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 								  std::vector<void*> *extra_pointers) {
-	EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true, extra_pointers);
-	return 0;
+	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true, extra_pointers);
 }
 
 int PerlembParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 								std::vector<void*> *extra_pointers) {
-	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false, extra_pointers);
-	return 0;
+	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false, extra_pointers);
 }
 
 int PerlembParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 									std::vector<void*> *extra_pointers) {
-	EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true, extra_pointers);
-	return 0;
+	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true, extra_pointers);
 }
 
 int PerlembParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
 							std::vector<void*> *extra_pointers) {
-	EventCommon(evt, item->GetID(), nullptr, nullptr, item, client, extra_data, false, extra_pointers);
-	return 0;
+	return EventCommon(evt, item->GetID(), nullptr, nullptr, item, client, extra_data, false, extra_pointers);
 }
 
 int PerlembParser::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 							std::vector<void*> *extra_pointers) {
-	EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false, extra_pointers);
-	return 0;
+	return EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false, extra_pointers);
 }
 
 bool PerlembParser::HasQuestSub(uint32 npcid, QuestEventID evt) {
@@ -621,10 +615,11 @@ void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, const 
 	}
 }
 
-void PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst* iteminst) {
+int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst* iteminst) {
 	if(!perl)
-		return;
+		return 0;
 
+	int ret_value = 0;
 	if(mob && mob->IsClient())
 		quest_manager.StartQuest(other, mob->CastToClient(), iteminst);
 	else
@@ -671,7 +666,7 @@ void PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint3
 #endif
 
 		//now call the requested sub
-		perl->dosub(std::string(pkgprefix).append("::").append(event).c_str());
+		ret_value = perl->dosub(std::string(pkgprefix).append("::").append(event).c_str());
 
 #ifdef EMBPERL_XS_CLASSES
 		std::string eval_str = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client = undef;";
@@ -697,6 +692,7 @@ void PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint3
 	}
 
 	quest_manager.EndQuest();
+	return ret_value;
 }
 
 void PerlembParser::MapFunctions() {

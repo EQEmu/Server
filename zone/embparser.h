@@ -85,9 +85,9 @@ private:
 	void ExportVar(const char *pkgprefix, const char *varname, float value);
 	void ExportVarComplex(const char *pkgprefix, const char *varname, const char *value);
 
-	void EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
+	int EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
 		uint32 extradata, bool global, std::vector<void*> *extra_pointers);
-	void SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst *iteminst);
+	int SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst *iteminst);
 	void MapFunctions();
 
 	void GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 

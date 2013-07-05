@@ -89,9 +89,9 @@ public:
 	//return the last error msg
 	std::string lasterr(void) const { return errmsg;};
 	//evaluate an expression. throws string errors on fail
-	void eval(const char * code);
+	int eval(const char * code);
 	//execute a subroutine. throws lasterr on failure
-	void dosub(const char * subname, const std::vector<std::string> * args = nullptr, int mode = G_SCALAR|G_DISCARD|G_EVAL);
+	int dosub(const char * subname, const std::vector<std::string> * args = nullptr, int mode = G_SCALAR|G_EVAL);
 
 	//Access to perl variables
 	//all varnames here should be of the form package::name
@@ -145,7 +145,7 @@ public:
 
 	//loads a file and compiles it into our interpreter (assuming it hasn't already been read in)
 	//idea borrowed from perlembed
-	void eval_file(const char * packagename, const char * filename);
+	int eval_file(const char * packagename, const char * filename);
 
 	inline bool InUse() const { return(in_use); }
 
