@@ -106,7 +106,7 @@ void Lua_Client::SetBaseClass(int v) {
 
 void Lua_Client::SetBaseRace(int v) {
 	Lua_Safe_Call_Void();
-	self->SetBaseClass(v);
+	self->SetBaseRace(v);
 }
 
 void Lua_Client::SetBaseGender(int v) {

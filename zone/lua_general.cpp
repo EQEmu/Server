@@ -285,6 +285,14 @@ void lua_pause(int duration) {
 	quest_manager.pause(duration);
 }
 
+void lua_move_to(float x, float y, float z) {
+	quest_manager.moveto(x, y, z, 0, false);
+}
+
+void lua_move_to(float x, float y, float z, float h) {
+	quest_manager.moveto(x, y, z, h, false);
+}
+
 void lua_move_to(float x, float y, float z, float h, bool save_guard_spot) {
 	quest_manager.moveto(x, y, z, h, save_guard_spot);
 }
@@ -993,6 +1001,18 @@ void lua_stop_follow() {
 	quest_manager.sfollow();
 }
 
+Lua_Client lua_get_initiator() {
+	return quest_manager.GetInitiator();
+}
+
+Lua_Mob lua_get_owner() {
+	return quest_manager.GetOwner();
+}
+
+Lua_ItemInst lua_get_quest_item() {
+	return quest_manager.GetQuestItem();
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1043,7 +1063,9 @@ luabind::scope lua_register_general() {
 		luabind::def("start", &lua_start),
 		luabind::def("stop", &lua_stop),
 		luabind::def("pause", &lua_pause),
-		luabind::def("move_to", &lua_move_to),
+		luabind::def("move_to", (void(*)(float,float,float))&lua_move_to),
+		luabind::def("move_to", (void(*)(float,float,float,float))&lua_move_to),
+		luabind::def("move_to", (void(*)(float,float,float,float,bool))&lua_move_to),
 		luabind::def("resume", &lua_path_resume),
 		luabind::def("set_next_hp_event", &lua_set_next_hp_event),
 		luabind::def("set_next_inc_hp_event", &lua_set_next_inc_hp_event),
@@ -1147,7 +1169,10 @@ luabind::scope lua_register_general() {
 		luabind::def("attack_npc_type", &lua_attack_npc_type),
 		luabind::def("follow", (void(*)(int))&lua_follow),
 		luabind::def("follow", (void(*)(int,int))&lua_follow),
-		luabind::def("stop_follow", &lua_stop_follow)
+		luabind::def("stop_follow", &lua_stop_follow),
+		luabind::def("get_initiator", &lua_get_initiator),
+		luabind::def("get_owner", &lua_get_owner),
+		luabind::def("get_quest_item", &lua_get_quest_item)
 	];
 }
 
