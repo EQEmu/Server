@@ -259,12 +259,7 @@ void Embperl::eval_file(const char * packagename, const char * filename)
 }
 
 void Embperl::dosub(const char * subname, const std::vector<std::string> * args, int mode)
-{//as seen in perlembed docs
-#if EQDEBUG >= 5
-	if(InUse()) {
-		LogFile->write(EQEMuLog::Debug, "Warning: Perl dosub called for %s when perl is allready in use.\n", subname);
-	}
-#endif
+{
 	in_use = true;
 	bool err = false;
 	dSP;                            /* initialize stack pointer      */

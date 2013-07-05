@@ -114,7 +114,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DEATH_COMPLETE"
 };
 
-PerlembParser::PerlembParser() : perl(nullptr), event_queue_in_use_(false) {
+PerlembParser::PerlembParser() : perl(nullptr) {
 	global_npc_quest_status_ = questUnloaded;
 	player_quest_status_ = questUnloaded;
 	global_player_quest_status_ = questUnloaded;
@@ -160,11 +160,6 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 
 	if(event >= _LargestEventID)
 		return;
-
-	if(perl->InUse()) {
-		AddQueueEvent(event, objid, data, npcmob, iteminst, mob, extradata, global, extra_pointers);
-		return;
-	}
 
 	bool isPlayerQuest = false;
 	bool isGlobalPlayerQuest = false;
@@ -212,8 +207,6 @@ void PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * d
 	else {
 		SendCommands(package_name.c_str(), sub_name, objid, npcmob, mob, nullptr);
 	}
-
-	HandleQueue();
 }
 
 int PerlembParser::EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
@@ -760,48 +753,6 @@ void PerlembParser::MapFunctions() {
 	"package main;"
 	"}"
 	);
-}
-
-void PerlembParser::HandleQueue() {
-	if(event_queue_in_use_)
-		return;
-
-	event_queue_in_use_ = true;
-
-	while(!event_queue_.empty()) {
-		EventRecord e = event_queue_.front();
-		event_queue_.pop();
-
-		EventCommon(e.event, e.objid, e.data.c_str(), e.npcmob, e.iteminst, e.mob, e.extradata, e.global, &e.extra_pointers);
-
-		for(size_t i = 0; i < e.extra_pointers.size(); ++i) {
-			delete e.extra_pointers[i];
-		}
-	}
-
-	event_queue_in_use_ = false;
-}
-
-void PerlembParser::AddQueueEvent(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
-		uint32 extradata, bool global, std::vector<void*> *extra_pointers) 
-{
-	EventRecord e;
-	e.event = event;
-	e.objid = objid;
-	e.data = data;
-	e.npcmob = npcmob;
-	e.iteminst = iteminst;
-	e.mob = mob;
-	e.extradata = extradata;
-	e.global = global;
-
-	if(extra_pointers) {
-		for(size_t i = 0; i < extra_pointers->size(); ++i) {
-			e.extra_pointers.push_back(reinterpret_cast<ItemInst*>(extra_pointers->at(i))->Clone());
-		}
-	}
-
-	event_queue_.push(e);
 }
 
 void PerlembParser::GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 

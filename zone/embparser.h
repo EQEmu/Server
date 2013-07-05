@@ -40,18 +40,6 @@ typedef enum
 } PerlQuestStatus;
 
 class PerlembParser : public QuestInterface {
-	typedef struct {
-		QuestEventID event;
-		uint32 objid;
-		std::string data;
-		NPC* npcmob;
-		ItemInst* iteminst;
-		Mob* mob;
-		uint32 extradata;
-		bool global;
-		std::vector<void*> extra_pointers;
-	} EventRecord;
-
 public:
 	PerlembParser();
 	~PerlembParser();
@@ -102,10 +90,6 @@ private:
 	void SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst *iteminst);
 	void MapFunctions();
 
-	void HandleQueue();
-	void AddQueueEvent(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
-		uint32 extradata, bool global, std::vector<void*> *extra_pointers);
-
 	void GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 
 		bool &isSpellQuest, QuestEventID event, NPC* npcmob, ItemInst* iteminst, Mob* mob, bool global);
 	void GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 
@@ -127,9 +111,6 @@ private:
 	PerlQuestStatus global_player_quest_status_;
 	std::map<uint32, PerlQuestStatus> item_quest_status_;
 	std::map<uint32, PerlQuestStatus> spell_quest_status_;
-
-	bool event_queue_in_use_;
-	std::queue<EventRecord> event_queue_;
 
 	std::map<std::string, std::string> vars_;
 	SV *_empty_sv;
