@@ -716,23 +716,6 @@ uint32 NPC::CountLoot() {
 	return(itemlist.size());
 }
 
-void NPC::DumpLoot(uint32 npcdump_index, ZSDump_NPC_Loot* npclootdump, uint32* NPCLootindex) {
-	ItemList::iterator cur,end;
-	cur = itemlist.begin();
-	end = itemlist.end();
-	for(; cur != end; cur++) {
-		ServerLootItem_Struct* item = *cur;
-		npclootdump[*NPCLootindex].npc_dump_index = npcdump_index;
-		npclootdump[*NPCLootindex].itemid = item->item_id;
-		npclootdump[*NPCLootindex].charges = item->charges;
-		npclootdump[*NPCLootindex].equipSlot = item->equipSlot;
-		npclootdump[*NPCLootindex].minlevel = item->minlevel;
-		npclootdump[*NPCLootindex].maxlevel = item->maxlevel;
-		(*NPCLootindex)++;
-	}
-	ClearItemList();
-}
-
 void NPC::Depop(bool StartSpawnTimer) {
 	uint16 emoteid = this->GetEmoteID();
 	if(emoteid != 0)
@@ -1431,11 +1414,7 @@ void NPC::PickPocket(Client* thief) {
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {
 	if(reset)
 	{
-		for(int i = 0; i < SPECATK_MAXNUM; i++)
-		{
-			SpecAttacks[i] = false;
-			safe_delete(SpecAttackTimers[i]);
-		}
+		ClearSpecialAbilities();
 	}
 
 	const char* orig_parse = parse;
@@ -1444,124 +1423,122 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 		switch(*parse)
 		{
 			case 'E':
-				SpecAttacks[SPECATK_ENRAGE] = (remove ? false : true);
+				SetSpecialAbility(SPECATK_ENRAGE, remove ? 0 : 1);
 				break;
 			case 'F':
-				SpecAttacks[SPECATK_FLURRY] = (remove ? false : true);
+				SetSpecialAbility(SPECATK_FLURRY, remove ? 0 : 1);
 				break;
 			case 'R':
-				SpecAttacks[SPECATK_RAMPAGE] = (remove ? false : true);
+				SetSpecialAbility(SPECATK_RAMPAGE, remove ? 0 : 1);
 				break;
 			case 'r':
-				SpecAttacks[SPECATK_AREA_RAMPAGE] = (remove ? false : true);
+				SetSpecialAbility(SPECATK_AREA_RAMPAGE, remove ? 0 : 1);
 				break;
 			case 'S':
 				if(remove) {
-					SpecAttacks[SPECATK_SUMMON] = false;
-					safe_delete(SpecAttackTimers[SPECATK_SUMMON]);
+					SetSpecialAbility(SPECATK_SUMMON, 0);
+					StopSpecialAbilityTimer(SPECATK_SUMMON);
 				} else {
-					SpecAttacks[SPECATK_SUMMON] = true;
-					safe_delete(SpecAttackTimers[SPECATK_SUMMON]);
-					SpecAttackTimers[SPECATK_SUMMON] = new Timer(6000);
-					SpecAttackTimers[SPECATK_SUMMON]->Start();
+					SetSpecialAbility(SPECATK_SUMMON, 1);
+					StartSpecialAbilityTimer(SPECATK_SUMMON, 6000);
 				}
 			break;
 			case 'T':
-				SpecAttacks[SPECATK_TRIPLE] = (remove ? false : true);
+				SetSpecialAbility(SPECATK_TRIPLE, remove ? 0 : 1);
 				break;
 			case 'Q':
 				//quad requires triple to work properly
 				if(remove) {
-					SpecAttacks[SPECATK_QUAD] = false;
+					SetSpecialAbility(SPECATK_QUAD, 0);
 				} else {
-					SpecAttacks[SPECATK_TRIPLE] = true;
-					SpecAttacks[SPECATK_QUAD] = true;
-				}
+					SetSpecialAbility(SPECATK_TRIPLE, 1);
+					SetSpecialAbility(SPECATK_QUAD, 1);
+					}
 				break;
 			case 'b':
-				SpecAttacks[SPECATK_BANE] = (remove ? false : true);
+				SetSpecialAbility(SPECATK_BANE, remove ? 0 : 1);
 				break;
 			case 'm':
-				SpecAttacks[SPECATK_MAGICAL] = (remove ? false : true);
+				SetSpecialAbility(SPECATK_MAGICAL, remove ? 0 : 1);
 				break;
 			case 'U':
-				SpecAttacks[UNSLOWABLE] = (remove ? false : true);
+				SetSpecialAbility(UNSLOWABLE, remove ? 0 : 1);
 				break;
 			case 'M':
-				SpecAttacks[UNMEZABLE] = (remove ? false : true);
+				SetSpecialAbility(UNMEZABLE, remove ? 0 : 1);
 				break;
 			case 'C':
-				SpecAttacks[UNCHARMABLE] = (remove ? false : true);
+				SetSpecialAbility(UNCHARMABLE, remove ? 0 : 1);
 				break;
 			case 'N':
-				SpecAttacks[UNSTUNABLE] = (remove ? false : true);
+				SetSpecialAbility(UNSTUNABLE, remove ? 0 : 1);
 				break;
 			case 'I':
-				SpecAttacks[UNSNAREABLE] = (remove ? false : true);
+				SetSpecialAbility(UNSNAREABLE, remove ? 0 : 1);
 				break;
 			case 'D':
-				SpecAttacks[UNFEARABLE] = (remove ? false : true);
+				SetSpecialAbility(UNFEARABLE, remove ? 0 : 1);
 				break;
 			case 'K':
-				SpecAttacks[UNDISPELLABLE] = (remove ? false : true);
+				SetSpecialAbility(UNDISPELLABLE, remove ? 0 : 1);
 				break;
 			case 'A':
-				SpecAttacks[IMMUNE_MELEE] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_MELEE, remove ? 0 : 1);
 				break;
 			case 'B':
-				SpecAttacks[IMMUNE_MAGIC] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_MAGIC, remove ? 0 : 1);
 				break;
 			case 'f':
-				SpecAttacks[IMMUNE_FLEEING] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_FLEEING, remove ? 0 : 1);
 				break;
 			case 'O':
-				SpecAttacks[IMMUNE_MELEE_EXCEPT_BANE] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE, remove ? 0 : 1);
 				break;
 			case 'W':
-				SpecAttacks[IMMUNE_MELEE_NONMAGICAL] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_MELEE_NONMAGICAL, remove ? 0 : 1);
 				break;
 			case 'H':
-				SpecAttacks[IMMUNE_AGGRO] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_AGGRO, remove ? 0 : 1);
 				break;
 			case 'G':
-				SpecAttacks[IMMUNE_AGGRO_ON] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_AGGRO_ON, remove ? 0 : 1);
 				break;
 			case 'g':
-				SpecAttacks[IMMUNE_CASTING_FROM_RANGE] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_CASTING_FROM_RANGE, remove ? 0 : 1);
 				break;
 			case 'd':
-				SpecAttacks[IMMUNE_FEIGN_DEATH] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_FEIGN_DEATH, remove ? 0 : 1);
 				break;
 			case 'Y':
-				SpecAttacks[SPECATK_RANGED_ATK] = (remove ? false : true);
+				SetSpecialAbility(SPECATK_RANGED_ATK, remove ? 0 : 1);
 				break;
 			case 'L':
-				SpecAttacks[SPECATK_INNATE_DW] = (remove ? false : true);
+				SetSpecialAbility(SPECATK_INNATE_DW, remove ? 0 : 1);
 				break;
 			case 't':
-				SpecAttacks[NPC_TUNNELVISION] = (remove ? false : true);
+				SetSpecialAbility(NPC_TUNNELVISION, remove ? 0 : 1);
 				break;
 			case 'n':
-				SpecAttacks[NPC_NO_BUFFHEAL_FRIENDS] = (remove ? false : true);
+				SetSpecialAbility(NPC_NO_BUFFHEAL_FRIENDS, remove ? 0 : 1);
 				break;
 			case 'p':
-				SpecAttacks[IMMUNE_PACIFY] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_PACIFY, remove ? 0 : 1);
 				break;
 			case 'J':
-				SpecAttacks[LEASH] = (remove ? false : true);
+				SetSpecialAbility(LEASH, remove ? 0 : 1);
 				break;
 			case 'j':
-				SpecAttacks[TETHER] = (remove ? false : true);
+				SetSpecialAbility(TETHER, remove ? 0 : 1);
 				break;
 			case 'o':
-				SpecAttacks[DESTRUCTIBLE_OBJECT] = (remove ? false : true);
-				SetDestructibleObject(true);
+				SetSpecialAbility(DESTRUCTIBLE_OBJECT, remove ? 0 : 1);
+				SetDestructibleObject(remove ? true : false);
 				break;
 			case 'Z':
-				SpecAttacks[NO_HARM_FROM_CLIENT] = (remove ? false : true);
+				SetSpecialAbility(NO_HARM_FROM_CLIENT, remove ? 0 : 1);
 				break;
 			case 'i':
-				SpecAttacks[IMMUNE_TAUNT] = (remove ? false : true);
+				SetSpecialAbility(IMMUNE_TAUNT, remove ? 0 : 1);
 				break;
 
 			default:
@@ -1588,138 +1565,138 @@ bool Mob::HasNPCSpecialAtk(const char* parse) {
 		switch(*parse)
 		{
 			case 'E':
-				if (!SpecAttacks[SPECATK_ENRAGE])
+				if (!GetSpecialAbility(SPECATK_ENRAGE))
 					HasAllAttacks = false;
 				break;
 			case 'F':
-				if (!SpecAttacks[SPECATK_FLURRY])
+				if (!GetSpecialAbility(SPECATK_FLURRY))
 					HasAllAttacks = false;
 				break;
 			case 'R':
-				if (!SpecAttacks[SPECATK_RAMPAGE])
+				if (!GetSpecialAbility(SPECATK_RAMPAGE))
 					HasAllAttacks = false;
 				break;
 			case 'r':
-				if (!SpecAttacks[SPECATK_AREA_RAMPAGE])
+				if (!GetSpecialAbility(SPECATK_AREA_RAMPAGE))
 					HasAllAttacks = false;
 				break;
 			case 'S':
-				if (!SpecAttacks[SPECATK_SUMMON])
+				if (!GetSpecialAbility(SPECATK_SUMMON))
 					HasAllAttacks = false;
 				break;
 			case 'T':
-				if (!SpecAttacks[SPECATK_TRIPLE])
+				if (!GetSpecialAbility(SPECATK_TRIPLE))
 					HasAllAttacks = false;
 				break;
 			case 'Q':
-				if (!SpecAttacks[SPECATK_QUAD])
+				if (!GetSpecialAbility(SPECATK_QUAD))
 					HasAllAttacks = false;
 				break;
 			case 'b':
-				if (!SpecAttacks[SPECATK_BANE])
+				if (!GetSpecialAbility(SPECATK_BANE))
 					HasAllAttacks = false;
 				break;
 			case 'm':
-				if (!SpecAttacks[SPECATK_MAGICAL])
+				if (!GetSpecialAbility(SPECATK_MAGICAL))
 					HasAllAttacks = false;
 				break;
 			case 'U':
-				if (!SpecAttacks[UNSLOWABLE])
+				if (!GetSpecialAbility(UNSLOWABLE))
 					HasAllAttacks = false;
 				break;
 			case 'M':
-				if (!SpecAttacks[UNMEZABLE])
+				if (!GetSpecialAbility(UNMEZABLE))
 					HasAllAttacks = false;
 				break;
 			case 'C':
-				if (!SpecAttacks[UNCHARMABLE])
+				if (!GetSpecialAbility(UNCHARMABLE))
 					HasAllAttacks = false;
 				break;
 			case 'N':
-				if (!SpecAttacks[UNSTUNABLE])
+				if (!GetSpecialAbility(UNSTUNABLE))
 					HasAllAttacks = false;
 				break;
 			case 'I':
-				if (!SpecAttacks[UNSNAREABLE])
+				if (!GetSpecialAbility(UNSNAREABLE))
 					HasAllAttacks = false;
 				break;
 			case 'D':
-				if (!SpecAttacks[UNFEARABLE])
+				if (!GetSpecialAbility(UNFEARABLE))
 					HasAllAttacks = false;
 				break;
 			case 'A':
-				if (!SpecAttacks[IMMUNE_MELEE])
+				if (!GetSpecialAbility(IMMUNE_MELEE))
 					HasAllAttacks = false;
 				break;
 			case 'B':
-				if (!SpecAttacks[IMMUNE_MAGIC])
+				if (!GetSpecialAbility(IMMUNE_MAGIC))
 					HasAllAttacks = false;
 				break;
 			case 'f':
-				if (!SpecAttacks[IMMUNE_FLEEING])
+				if (!GetSpecialAbility(IMMUNE_FLEEING))
 					HasAllAttacks = false;
 				break;
 			case 'O':
-				if (!SpecAttacks[IMMUNE_MELEE_EXCEPT_BANE])
+				if (!GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE))
 					HasAllAttacks = false;
 				break;
 			case 'W':
-				if (!SpecAttacks[IMMUNE_MELEE_NONMAGICAL])
+				if (!GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL))
 					HasAllAttacks = false;
 				break;
 			case 'H':
-				if (!SpecAttacks[IMMUNE_AGGRO])
+				if (!GetSpecialAbility(IMMUNE_AGGRO))
 					HasAllAttacks = false;
 				break;
 			case 'G':
-				if (!SpecAttacks[IMMUNE_AGGRO_ON])
+				if (!GetSpecialAbility(IMMUNE_AGGRO_ON))
 					HasAllAttacks = false;
 				break;
 			case 'g':
-				if (!SpecAttacks[IMMUNE_CASTING_FROM_RANGE])
+				if (!GetSpecialAbility(IMMUNE_CASTING_FROM_RANGE))
 					HasAllAttacks = false;
 				break;
 			case 'd':
-				if (!SpecAttacks[IMMUNE_FEIGN_DEATH])
+				if (!GetSpecialAbility(IMMUNE_FEIGN_DEATH))
 					HasAllAttacks = false;
 				break;
 			case 'Y':
-				if (!SpecAttacks[SPECATK_RANGED_ATK])
+				if (!GetSpecialAbility(SPECATK_RANGED_ATK))
 					HasAllAttacks = false;
 				break;
 			case 'L':
-				if (!SpecAttacks[SPECATK_INNATE_DW])
+				if (!GetSpecialAbility(SPECATK_INNATE_DW))
 					HasAllAttacks = false;
 				break;
 			case 't':
-				if (!SpecAttacks[NPC_TUNNELVISION])
+				if (!GetSpecialAbility(NPC_TUNNELVISION))
 					HasAllAttacks = false;
 				break;
 			case 'n':
-				if (!SpecAttacks[NPC_NO_BUFFHEAL_FRIENDS])
+				if (!GetSpecialAbility(NPC_NO_BUFFHEAL_FRIENDS))
 					HasAllAttacks = false;
 				break;
 			case 'p':
-				if(!SpecAttacks[IMMUNE_PACIFY])
+				if(!GetSpecialAbility(IMMUNE_PACIFY))
 					HasAllAttacks = false;
 				break;
 			case 'J':
-				if(!SpecAttacks[LEASH])
+				if(!GetSpecialAbility(LEASH))
 					HasAllAttacks = false;
 				break;
 			case 'j':
-				if(!SpecAttacks[TETHER])
+				if(!GetSpecialAbility(TETHER))
 					HasAllAttacks = false;
 				break;
 			case 'o':
-				if(!SpecAttacks[DESTRUCTIBLE_OBJECT])
+				if(!GetSpecialAbility(DESTRUCTIBLE_OBJECT))
 				{
 					HasAllAttacks = false;
 					SetDestructibleObject(false);
 				}
 				break;
 			case 'Z':
-				if(!SpecAttacks[NO_HARM_FROM_CLIENT]){
+				if(!GetSpecialAbility(NO_HARM_FROM_CLIENT)){
 					HasAllAttacks = false;
 				}
 				break;

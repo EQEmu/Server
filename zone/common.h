@@ -128,8 +128,7 @@ enum {
 	LEASH,						// J - Dispell, wipe agro && return to spawn
 	TETHER,						// j - Return to spawn
 	DESTRUCTIBLE_OBJECT,		// o - This is only for destructible objects
-	NO_HARM_FROM_CLIENT,			// Z - This is to prevent attacking NPC's period for clients
-	SPECATK_MAXNUM
+	NO_HARM_FROM_CLIENT			// Z - This is to prevent attacking NPC's period for clients
 };
 
 typedef enum {	//fear states

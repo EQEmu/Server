@@ -16,7 +16,8 @@
 #ifndef _STRINGUTIL_H_
 #define _STRINGUTIL_H_
 
-#include <string>
+#include <sstream>
+#include <vector>
 #include <cstdarg>
 #include "types.h"
 
@@ -47,5 +48,7 @@ const char *ConvertArrayF(float input, char *returnchar);
 
 void RemoveApostrophes(std::string &s);
 char *RemoveApostrophes(const char *s);
+
+std::vector<std::string> SplitString(const std::string &s, char delim);
 
 #endif

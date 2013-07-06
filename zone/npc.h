@@ -164,7 +164,6 @@ public:
 	void	RemoveCash();
 	void	QueryLoot(Client* to);
 	uint32	CountLoot();
-	void	DumpLoot(uint32 npcdump_index, ZSDump_NPC_Loot* npclootdump, uint32* NPCLootindex);
 	inline uint32	GetLoottableID()	const { return loottable_id; }
 
 	inline uint32	GetCopper()		const { return copper; }

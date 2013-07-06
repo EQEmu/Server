@@ -419,7 +419,7 @@ bool Client::Process() {
 
 					//triple attack: rangers, monks, warriors, berserkers over level 60
 					if((((GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER)
-						&& GetLevel() >= 60) || SpecAttacks[SPECATK_TRIPLE])
+						&& GetLevel() >= 60) || GetSpecialAbility(SPECATK_TRIPLE))
 						&& CheckDoubleAttack(true))
 					{
 						tripleAttackSuccess = true;
@@ -427,7 +427,7 @@ bool Client::Process() {
 					}
 
 					//quad attack, does this belong here??
-					if(SpecAttacks[SPECATK_QUAD] && CheckDoubleAttack(true))
+					if(GetSpecialAbility(SPECATK_QUAD) && CheckDoubleAttack(true))
 					{
 						Attack(auto_attack_target, 13, false);
 					}

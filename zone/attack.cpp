@@ -771,12 +771,12 @@ int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
 	int banedmg = 0;
 
 	//can't hit invulnerable stuff with weapons.
-	if(against->GetInvul() || against->SpecAttacks[IMMUNE_MELEE]){
+	if(against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE)){
 		return 0;
 	}
 
 	//check to see if our weapons or fists are magical.
-	if(against->SpecAttacks[IMMUNE_MELEE_NONMAGICAL]){
+	if(against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)){
 		if(weapon_item){
 			if(weapon_item->Magic){
 				dmg = weapon_item->Damage;
@@ -797,7 +797,7 @@ int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
 				//it gives us an idea if we can hit due to the dual nature of this function
 				dmg = 1;
 			}
-			else if(SpecAttacks[SPECATK_MAGICAL])
+			else if(GetSpecialAbility(SPECATK_MAGICAL))
 			{
 				dmg = 1;
 			}
@@ -822,7 +822,7 @@ int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
 	}
 
 	int eledmg = 0;
-	if(!against->SpecAttacks[IMMUNE_MAGIC]){
+	if(!against->GetSpecialAbility(IMMUNE_MAGIC)){
 		if(weapon_item && weapon_item->ElemDmgAmt){
 			//we don't check resist for npcs here
 			eledmg = weapon_item->ElemDmgAmt;
@@ -830,7 +830,7 @@ int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
 		}
 	}
 
-	if(against->SpecAttacks[IMMUNE_MELEE_EXCEPT_BANE]){
+	if(against->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE)){
 		if(weapon_item){
 			if(weapon_item->BaneDmgBody == against->GetBodyType()){
 				banedmg += weapon_item->BaneDmgAmt;
@@ -842,7 +842,7 @@ int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
 		}
 
 		if(!eledmg && !banedmg){
-			if(!SpecAttacks[SPECATK_BANE])
+			if(!GetSpecialAbility(SPECATK_BANE))
 				return 0;
 			else
 				return 1;
@@ -877,7 +877,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 	int dmg = 0;
 	int banedmg = 0;
 
-	if(!against || against->GetInvul() || against->SpecAttacks[IMMUNE_MELEE]){
+	if(!against || against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE)){
 		return 0;
 	}
 
@@ -898,7 +898,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 		}
 	}
 
-	if(against->SpecAttacks[IMMUNE_MELEE_NONMAGICAL]){
+	if(against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)){
 		if(weapon_item){
 			// check to see if the weapon is magic
 			bool MagicWeapon = false;
@@ -937,7 +937,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 			else if(GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)){ //pets wouldn't actually use this but...
 				dmg = 1;															//it gives us an idea if we can hit
 			}
-			else if(SpecAttacks[SPECATK_MAGICAL]){
+			else if(GetSpecialAbility(SPECATK_MAGICAL)){
 				dmg = 1;
 			}
 			else
@@ -976,7 +976,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 	}
 
 	int eledmg = 0;
-	if(!against->SpecAttacks[IMMUNE_MAGIC]){
+	if(!against->GetSpecialAbility(IMMUNE_MAGIC)){
 		if(weapon_item && weapon_item->GetItem() && weapon_item->GetItem()->ElemDmgAmt){
 			if(IsClient() && GetLevel() < weapon_item->GetItem()->RecLevel){
 				eledmg = CastToClient()->CalcRecommendedLevelBonus(GetLevel(), weapon_item->GetItem()->RecLevel, weapon_item->GetItem()->ElemDmgAmt);
@@ -1001,7 +1001,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 		}
 	}
 
-	if(against->SpecAttacks[IMMUNE_MELEE_EXCEPT_BANE]){
+	if(against->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE)){
 		if(weapon_item && weapon_item->GetItem()){
 			if(weapon_item->GetItem()->BaneDmgBody == against->GetBodyType()){
 				if(IsClient() && GetLevel() < weapon_item->GetItem()->RecLevel){
@@ -1036,7 +1036,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 
 		if(!eledmg && !banedmg)
 		{
-			if(!SpecAttacks[SPECATK_BANE])
+			if(!GetSpecialAbility(SPECATK_BANE))
 				return 0;
 			else
 				return 1;
@@ -2423,16 +2423,16 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 	if(IsClient() && !IsAIControlled())
 		return;
 
-	if(IsFamiliar() || SpecAttacks[IMMUNE_AGGRO])
+	if(IsFamiliar() || GetSpecialAbility(IMMUNE_AGGRO))
 		return;
 
 	if (other == myowner)
 		return;
 
-	if(other->SpecAttacks[IMMUNE_AGGRO_ON])
+	if(other->GetSpecialAbility(IMMUNE_AGGRO_ON))
 		return;
 
-	if(SpecAttacks[NPC_TUNNELVISION]) {
+	if(GetSpecialAbility(NPC_TUNNELVISION)) {
 		Mob *top = GetTarget();
 		if(top && top != other) {
 			hate *= RuleR(Aggro, TunnelVisionAggroMod);
@@ -2493,7 +2493,7 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 		} else {
 			// cb:2007-08-17
 			// owner must get on list, but he's not actually gained any hate yet
-			if(!owner->SpecAttacks[IMMUNE_AGGRO])
+			if(!owner->GetSpecialAbility(IMMUNE_AGGRO))
 			{
 				hate_list.Add(owner, 0, 0, false, !iBuffTic);
 				if(owner->IsClient())
@@ -2503,10 +2503,10 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 	}
 
 	if (mypet && (!(GetAA(aaPetDiscipline) && mypet->IsHeld()))) { // I have a pet, add other to it
-		if(!mypet->IsFamiliar() && !mypet->SpecAttacks[IMMUNE_AGGRO])
+		if(!mypet->IsFamiliar() && !mypet->GetSpecialAbility(IMMUNE_AGGRO))
 			mypet->hate_list.Add(other, 0, 0, bFrenzy);
 	} else if (myowner) { // I am a pet, add other to owner if it's NPC/LD
-		if (myowner->IsAIControlled() && !myowner->SpecAttacks[IMMUNE_AGGRO])
+		if (myowner->IsAIControlled() && !myowner->GetSpecialAbility(IMMUNE_AGGRO))
 			myowner->hate_list.Add(other, 0, 0, bFrenzy);
 	}
 	if (!wasengaged) {
@@ -3366,7 +3366,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		}	//end `if there is some damage being done and theres anattacker person involved`
 
 		Mob *pet = GetPet();
-		if (pet && !pet->IsFamiliar() && !pet->SpecAttacks[IMMUNE_AGGRO] && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse())
+		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse())
 		{
 			if (!pet->IsHeld()) {
 				mlog(PETS__AGGRO, "Sending pet %s into battle due to attack.", pet->GetName());
@@ -4143,7 +4143,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, CRIPPLING_BLOW, GetCleanName(), itoa(damage));
 				// Crippling blows also have a chance to stun
 				//Kayen: Crippling Blow would cause a chance to interrupt for npcs < 55, with a staggers message.
-				if (defender->GetLevel() <= 55 && !defender->SpecAttacks[IMMUNE_STUN]){
+				if (defender->GetLevel() <= 55 && !defender->GetSpecialAbility(IMMUNE_STUN)){
 					defender->Emote("staggers.");
 					defender->Stun(0);
 				}

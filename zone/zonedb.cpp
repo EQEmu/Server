@@ -1035,7 +1035,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.mindmg,"
 			"npc_types.maxdmg,"
 			"npc_types.attack_count,"
-			"npc_types.npcspecialattks,"
+			"npc_types.special_abilities,"
 			"npc_types.npc_spells_id,"
 			"npc_types.d_meele_texture1,"
 			"npc_types.d_meele_texture2,"
@@ -1130,7 +1130,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->min_dmg = atoi(row[r++]);
 				tmpNPCType->max_dmg = atoi(row[r++]);
 				tmpNPCType->attack_count = atoi(row[r++]);
-				strcpy(tmpNPCType->npc_attacks,row[r++]);
+				tmpNPCType->special_abilities = row[r++];
 				tmpNPCType->npc_spells_id = atoi(row[r++]);
 				tmpNPCType->d_meele_texture1 = atoi(row[r++]);
 				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
@@ -1345,7 +1345,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 			"vwMercNpcTypes.mindmg,"
 			"vwMercNpcTypes.maxdmg,"
 			"vwMercNpcTypes.attack_count,"
-			"vwMercNpcTypes.npcspecialattks,"
+			"vwMercNpcTypes.special_abilities,"
 			// "vwMercNpcTypes.npc_spells_id,"
 			"vwMercNpcTypes.d_meele_texture1,"
 			"vwMercNpcTypes.d_meele_texture2,"
@@ -1440,7 +1440,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				tmpNPCType->min_dmg = atoi(row[r++]);
 				tmpNPCType->max_dmg = atoi(row[r++]);
 				tmpNPCType->attack_count = atoi(row[r++]);
-				strcpy(tmpNPCType->npc_attacks,row[r++]);
+				tmpNPCType->special_abilities = row[r++];
 				//tmpNPCType->npc_spells_id = atoi(row[r++]);
 				tmpNPCType->d_meele_texture1 = atoi(row[r++]);
 				tmpNPCType->d_meele_texture2 = atoi(row[r++]);

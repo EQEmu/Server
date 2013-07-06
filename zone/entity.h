@@ -316,7 +316,6 @@ public:
 	static char* RemoveNumbers(char* name);
 	void	SignalMobsByNPCID(uint32 npc_type, int signal_id);
 	void	CountNPC(uint32* NPCCount, uint32* NPCLootCount, uint32* gmspawntype_count);
-	void	DoZoneDump(ZSDump_Spawn2* spawn2dump, ZSDump_NPC* npcdump, ZSDump_NPC_Loot* npclootdump, NPCType* gmspawntype_dump);
 	void	RemoveEntity(uint16 id);
 	void	SendPetitionToAdmins(Petition* pet);
 	void	SendPetitionToAdmins();

@@ -2316,7 +2316,7 @@ bool Client::CheckIncreaseSkill(SkillType skillid, Mob *against_who, int chancem
 
 	if(against_who)
 	{
-		if(against_who->SpecAttacks[IMMUNE_AGGRO] || against_who->IsClient() ||
+		if(against_who->GetSpecialAbility(IMMUNE_AGGRO) || against_who->IsClient() ||
 			GetLevelCon(against_who->GetLevel()) == CON_GREEN)
 		{
 			//false by default

@@ -139,8 +139,6 @@ public:
 	bool RemoveSpawnGroup(uint32 in_id);
 
 	bool	Process();
-	void	DumpAllSpawn2(ZSDump_Spawn2* spawn2dump, uint32* spawn2index);
-	uint32	DumpSpawn2(ZSDump_Spawn2* spawn2dump, uint32* spawn2index, Spawn2* spawn2);
 	void	Despawn(uint32 spawngroupID);
 
 	bool	Depop(bool StartSpawnTimer = false);

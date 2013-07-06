@@ -299,10 +299,7 @@ Mob::Mob(const char* in_name,
 		shielder[m].shielder_id = 0;
 		shielder[m].shielder_bonus = 0;
 	}
-	for (i=0; i<SPECATK_MAXNUM ; i++) {
-		SpecAttacks[i] = false;
-		SpecAttackTimers[i] = 0;
-	}
+	
 	destructibleobject = false;
 	wandertype=0;
 	pausetype=0;
@@ -402,9 +399,9 @@ Mob::~Mob()
 		else
 			SetPet(0);
 	}
-	for (int i=0; i<SPECATK_MAXNUM ; i++) {
-		safe_delete(SpecAttackTimers[i]);
-	}
+	
+	ClearSpecialAbilities();
+
 	EQApplicationPacket app;
 	CreateDespawnPacket(&app, !IsCorpse());
 	Corpse* corpse = entity_list.GetCorpseByID(GetID());
@@ -2339,19 +2336,19 @@ bool Mob::HateSummon() {
 	if(GetOwnerID())
 		mob_owner = entity_list.GetMob(GetOwnerID());
 
-	if (GetHPRatio() >= 98 || SpecAttacks[SPECATK_SUMMON] == false || !GetTarget() ||
+	if (GetHPRatio() >= 98 || GetSpecialAbility(SPECATK_SUMMON) == 0 || !GetTarget() ||
 		(mob_owner && mob_owner->IsClient() && !CheckLosFN(GetTarget())))
 		return false;
 
 	// now validate the timer
-	if (!SpecAttackTimers[SPECATK_SUMMON])
+	Timer *timer = GetSpecialAbilityTimer(SPECATK_SUMMON);
+	if (!timer)
 	{
-		SpecAttackTimers[SPECATK_SUMMON] = new Timer(6000);
-		SpecAttackTimers[SPECATK_SUMMON]->Start();
+		StartSpecialAbilityTimer(SPECATK_SUMMON, 6000);
 	}
 
 	// now check the timer
-	if (!SpecAttackTimers[SPECATK_SUMMON]->Check())
+	if (!timer->Check())
 		return false;
 
 	// get summon target
@@ -2813,7 +2810,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
 	// Changed proc targets to look up based on the spells goodEffect flag.
 	// This should work for the majority of weapons.
-	if(spell_id == SPELL_UNKNOWN || on->SpecAttacks[NO_HARM_FROM_CLIENT]) {
+	if(spell_id == SPELL_UNKNOWN || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
 		//This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
 		return;
 	}
@@ -4778,3 +4775,117 @@ bool Mob::HasSpellEffect(int effectid)
     return(0);
 }
 
+int Mob::GetSpecialAbility(int ability) {
+	auto iter = SpecialAbilities.find(ability);
+	if(iter != SpecialAbilities.end()) {
+		return iter->second.level;
+	}
+
+	return 0;
+}
+
+void Mob::SetSpecialAbility(int ability, int level) {
+	auto iter = SpecialAbilities.find(ability);
+	if(iter != SpecialAbilities.end()) {
+		SpecialAbility spec = iter->second;
+		spec.level = level;
+		SpecialAbilities[ability] = spec;
+	} else {
+		SpecialAbility spec;
+		spec.level = level;
+		spec.timer = nullptr;
+		SpecialAbilities[ability] = spec;
+	}
+}
+
+void Mob::StartSpecialAbilityTimer(int ability, uint32 time) {
+	auto iter = SpecialAbilities.find(ability);
+	if(iter != SpecialAbilities.end()) {
+		SpecialAbility spec = iter->second;
+		spec.level = level;
+		if(spec.timer) {
+			spec.timer->Start(time);
+		} else {
+			spec.timer = new Timer(time);
+			spec.timer->Start();
+		}
+
+		SpecialAbilities[ability] = spec;
+	} else {
+		SpecialAbility spec;
+		spec.level = level;
+		spec.timer = new Timer(time);
+		spec.timer->Start();
+		SpecialAbilities[ability] = spec;
+	}
+}
+
+void Mob::StopSpecialAbilityTimer(int ability) {
+	auto iter = SpecialAbilities.find(ability);
+	if(iter != SpecialAbilities.end()) {
+		SpecialAbility spec = iter->second;
+		if(spec.timer) {
+			delete spec.timer;
+			spec.timer = nullptr;
+		}
+
+		SpecialAbilities[ability] = spec;
+	}
+}
+
+Timer *Mob::GetSpecialAbilityTimer(int ability) {
+	auto iter = SpecialAbilities.find(ability);
+	if(iter != SpecialAbilities.end()) {
+		return iter->second.timer;
+	}
+
+	return nullptr;
+}
+
+void Mob::ClearSpecialAbilities() {
+	auto iter = SpecialAbilities.begin();
+	while(iter != SpecialAbilities.end()) {
+		if(iter->second.timer) {
+			delete iter->second.timer;
+		}
+		++iter;
+	}
+
+	SpecialAbilities.clear();
+}
+
+void Mob::ProcessSpecialAbilities(const std::string str) {
+	ClearSpecialAbilities();
+
+	std::vector<std::string> sp = SplitString(str, '^');
+	for(auto iter = sp.begin(); iter != sp.end(); ++iter) {
+		std::vector<std::string> sub_sp = SplitString((*iter), ',');
+		if(sub_sp.size() == 2) {
+			int ability = std::stoi(sub_sp[0]);
+			int value = std::stoi(sub_sp[1]);
+
+			SetSpecialAbility(ability, value);
+			switch(ability) {
+			case SPECATK_SUMMON:
+				if(value > 0) {
+					StartSpecialAbilityTimer(SPECATK_SUMMON, 6000);
+				}
+				break;
+			case SPECATK_QUAD:
+				if(value > 0) {
+					SetSpecialAbility(SPECATK_TRIPLE, 1);
+				}
+				break;
+			case DESTRUCTIBLE_OBJECT:
+				if(value == 0) {
+					SetDestructibleObject(false);
+				} else {
+					SetDestructibleObject(true);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}

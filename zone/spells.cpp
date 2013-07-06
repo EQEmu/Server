@@ -222,7 +222,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		for(int i = 0; i < EFFECT_COUNT; i++) {
 			// not important to check limit on SE_Lull as it doesnt have one and if the other components won't land, then SE_Lull wont either
 			if (spells[spell_id].effectid[i] == SE_ChangeFrenzyRad || spells[spell_id].effectid[i] == SE_Harmony) {
-				if((spells[spell_id].max[i] != 0 && GetTarget()->GetLevel() > spells[spell_id].max[i]) || GetTarget()->SpecAttacks[IMMUNE_PACIFY]) {
+				if((spells[spell_id].max[i] != 0 && GetTarget()->GetLevel() > spells[spell_id].max[i]) || GetTarget()->GetSpecialAbility(IMMUNE_PACIFY)) {
 					InterruptSpell(CANNOT_AFFECT_NPC, 0x121, spell_id);
 					return(false);
 				}
@@ -3761,7 +3761,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 	if(IsMezSpell(spell_id))
 	{
-		if(SpecAttacks[UNMEZABLE]) {
+		if(GetSpecialAbility(UNMEZABLE)) {
 			mlog(SPELLS__RESISTS, "We are immune to Mez spells.");
 			caster->Message_StringID(MT_Shout, CANNOT_MEZ);
 			int32 aggro = CheckAggroAmount(spell_id);
@@ -3787,7 +3787,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	}
 
 	// slow and haste spells
-	if(SpecAttacks[UNSLOWABLE] && IsEffectInSpell(spell_id, SE_AttackSpeed))
+	if(GetSpecialAbility(UNSLOWABLE) && IsEffectInSpell(spell_id, SE_AttackSpeed))
 	{
 		mlog(SPELLS__RESISTS, "We are immune to Slow spells.");
 		caster->Message_StringID(MT_Shout, IMMUNE_ATKSPEED);
@@ -3804,7 +3804,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	if(IsEffectInSpell(spell_id, SE_Fear))
 	{
 		effect_index = GetSpellEffectIndex(spell_id, SE_Fear);
-		if(SpecAttacks[UNFEARABLE]) {
+		if(GetSpecialAbility(UNFEARABLE)) {
 			mlog(SPELLS__RESISTS, "We are immune to Fear spells.");
 			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
 			int32 aggro = CheckAggroAmount(spell_id);
@@ -3838,7 +3838,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 	if(IsCharmSpell(spell_id))
 	{
-		if(SpecAttacks[UNCHARMABLE])
+		if(GetSpecialAbility(UNCHARMABLE))
 		{
 			mlog(SPELLS__RESISTS, "We are immune to Charm spells.");
 			caster->Message_StringID(MT_Shout, CANNOT_CHARM);
@@ -3879,7 +3879,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		IsEffectInSpell(spell_id, SE_MovementSpeed)
 	)
 	{
-		if(SpecAttacks[UNSNAREABLE]) {
+		if(GetSpecialAbility(UNSNAREABLE)) {
 			mlog(SPELLS__RESISTS, "We are immune to Snare spells.");
 			caster->Message_StringID(MT_Shout, IMMUNE_MOVEMENT);
 			int32 aggro = CheckAggroAmount(spell_id);
@@ -3939,7 +3939,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		return 0;
 	}
 
-	if(SpecAttacks[IMMUNE_CASTING_FROM_RANGE])
+	if(GetSpecialAbility(IMMUNE_CASTING_FROM_RANGE))
 	{
 		if(!caster->CombatRange(this))
 		{
@@ -3947,7 +3947,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 	}
 
-	if(SpecAttacks[IMMUNE_MAGIC])
+	if(GetSpecialAbility(IMMUNE_MAGIC))
 	{
 		mlog(SPELLS__RESISTS, "We are immune to magic, so we fully resist the spell %d", spell_id);
 		return(0);

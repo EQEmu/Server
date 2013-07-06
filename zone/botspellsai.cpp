@@ -484,7 +484,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						if(botClass == PALADIN)
 							stunChance = 50;
 
-						if(!tar->SpecAttacks[UNSTUNABLE] && !tar->IsStunned() && (MakeRandomInt(1, 100) <= stunChance)) {
+						if(!tar->GetSpecialAbility(UNSTUNABLE) && !tar->IsStunned() && (MakeRandomInt(1, 100) <= stunChance)) {
 							botSpell = GetBestBotSpellForStunByTargetType(this, ST_Target);
 						}
 					}

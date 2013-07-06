@@ -1671,13 +1671,13 @@ void Merc::AI_Process() {
 							Attack(GetTarget(), SLOT_PRIMARY, true);
 						}
 
-						if(GetOwner() && GetTarget() && SpecAttacks[SPECATK_TRIPLE]) {
+						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE)) {
 							tripleSuccess = true;
 							Attack(GetTarget(), SLOT_PRIMARY, true);
 						}
 
 						//quad attack, does this belong here??
-						if(GetOwner() && GetTarget() && SpecAttacks[SPECATK_QUAD]) {
+						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_QUAD)) {
 							Attack(GetTarget(), SLOT_PRIMARY, true);
 						}
 					}
@@ -1851,7 +1851,7 @@ void Merc::AI_Start(int32 iMoveDelay) {
 
 	if (NPCTypedata_ours) {
 		//AI_AddNPCSpells(ourNPCData->npc_spells_id);
-		NPCSpecialAttacks(NPCTypedata_ours->npc_attacks,0);
+		ProcessSpecialAbilities(NPCTypedata_ours->special_abilities);
 	}
 
 	SendTo(GetX(), GetY(), GetZ());
@@ -2373,7 +2373,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 							selectedMercSpell = GetBestMercSpellForAENuke(this, tar);
 
-							if(selectedMercSpell.spellid == 0 && !tar->SpecAttacks[UNSTUNABLE] && !tar->IsStunned()) {
+							if(selectedMercSpell.spellid == 0 && !tar->GetSpecialAbility(UNSTUNABLE) && !tar->IsStunned()) {
 								uint8 stunChance = 15;
 								if(MakeRandomInt(1, 100) <= stunChance) {
 									selectedMercSpell = GetBestMercSpellForStun(this);

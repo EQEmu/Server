@@ -37,6 +37,11 @@ public:
 						CLIENT_KICKED, DISCONNECTED, CLIENT_ERROR, CLIENT_CONNECTINGALL };
 	enum eStandingPetOrder { SPO_Follow, SPO_Sit, SPO_Guard };
 
+	struct SpecialAbility {
+		int level;
+		Timer *timer;
+	};
+
 	Mob(const char*	in_name,
 		const char*	in_lastname,
 		int32		in_cur_hp,
@@ -758,12 +763,19 @@ public:
 	void SetNextIncHPEvent( int inchpevent );
 
 	bool DivineAura() const;
-	bool SpecAttacks[SPECATK_MAXNUM];
+
 	bool HasNPCSpecialAtk(const char* parse);
+	int GetSpecialAbility(int ability);
+	void SetSpecialAbility(int ability, int level);
+	void StartSpecialAbilityTimer(int ability, uint32 time);
+	void StopSpecialAbilityTimer(int ability);
+	Timer *GetSpecialAbilityTimer(int ability);
+	void ClearSpecialAbilities();
+	void ProcessSpecialAbilities(const std::string str);
+
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
-
-
+	
 	inline float GetCWPX() const { return(cur_wp_x); }
 	inline float GetCWPY() const { return(cur_wp_y); }
 	inline float GetCWPZ() const { return(cur_wp_z); }
@@ -946,10 +958,6 @@ protected:
 	char orig_name[64];
 	char clean_name[64];
 	char lastname[64];
-
-	bool bEnraged;
-	Timer *SpecAttackTimers[SPECATK_MAXNUM];
-	bool destructibleobject;
 
 	int32 delta_heading;
 	float delta_x;
@@ -1144,6 +1152,10 @@ protected:
 	int QGVarDuration(const char *fmt);
 	void InsertQuestGlobal(int charid, int npcid, int zoneid, const char *name, const char *value, int expdate);
 	uint16 emoteid;
+
+	std::map<int, SpecialAbility> SpecialAbilities;
+	bool bEnraged;
+	bool destructibleobject;
 
 private:
 	void _StopSong(); //this is not what you think it is

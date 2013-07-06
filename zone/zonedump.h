@@ -89,7 +89,7 @@ struct NPCType
 	uint32	min_dmg;
 	uint32	max_dmg;
 	int16	attack_count;
-	char	npc_attacks[30];
+	std::string special_abilities;
 	uint16	d_meele_texture1;
 	uint16	d_meele_texture2;
 	uint8	prim_melee_type;
@@ -118,38 +118,6 @@ struct NPCType
 	uint32	emoteid;
 	float	spellscale;
 	float	healscale;
-};
-
-struct ZSDump_Spawn2 {
-	uint32	spawn2_id;
-	uint32	time_left;
-};
-
-struct ZSDump_NPC {
-	uint32			spawn2_dump_index;
-	uint32			gmspawntype_index;
-	uint32			npctype_id;
-	int32			cur_hp;
-	uint8			corpse; // 0=no, 1=yes, 2=yes and locked
-	uint32			decay_time_left;
-//	needatype		buffs;		// decided not to save these, would be hard because if expired them on bootup, wouldnt take into account the npcai refreshing them, etc
-	float			x;
-	float			y;
-	float			z;
-	float			heading;
-	uint32			copper;
-	uint32			silver;
-	uint32			gold;
-	uint32			platinum;
-};
-
-struct ZSDump_NPC_Loot {
-	uint32	npc_dump_index;
-	uint16	itemid;
-	int8	charges;
-	int16	equipSlot;
-	uint8	minlevel;
-	uint8	maxlevel;
 };
 
 /*

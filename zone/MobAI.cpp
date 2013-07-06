@@ -358,7 +358,7 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 	if(caster->AI_HasSpells() == false)
 		return false;
 
-	if(caster->SpecAttacks[NPC_NO_BUFFHEAL_FRIENDS])
+	if(caster->GetSpecialAbility(NPC_NO_BUFFHEAL_FRIENDS))
 		return false;
 
 	if (iChance < 100) {
@@ -522,7 +522,7 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 
 	if (NPCTypedata) {
 		AI_AddNPCSpells(NPCTypedata->npc_spells_id);
-		NPCSpecialAttacks(NPCTypedata->npc_attacks,0);
+		ProcessSpecialAbilities(NPCTypedata->special_abilities);
 	}
 
 	SendTo(GetX(), GetY(), GetZ());
@@ -823,7 +823,7 @@ void Client::AI_Process()
 							if(GetTarget()) {
 								bool triple_attack_success = false;
 								if((((GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER)
-									&& GetLevel() >= 60) || SpecAttacks[SPECATK_TRIPLE])
+									&& GetLevel() >= 60) || GetSpecialAbility(SPECATK_TRIPLE))
 									&& CheckDoubleAttack(true))
 								{
 									Attack(GetTarget(), 13, true);
@@ -1095,10 +1095,10 @@ void Mob::AI_Process() {
 		if(DivineAura())
 			return;
 
-		if(SpecAttacks[TETHER] || SpecAttacks[LEASH]) {
+		if(GetSpecialAbility(TETHER) || GetSpecialAbility(LEASH)) {
 			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > pAggroRange*pAggroRange) {
 				GMMove(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY(), CastToNPC()->GetSpawnPointZ(), CastToNPC()->GetSpawnPointH());
-				if(SpecAttacks[LEASH]) {
+				if(GetSpecialAbility(LEASH)) {
 					SetHP(GetMaxHP());
 					BuffFadeAll();
 					WipeHateList();
@@ -1164,27 +1164,25 @@ void Mob::AI_Process() {
 							//check double attack, this is NOT the same rules that clients use...
 							&& RandRoll < (GetLevel() + NPCDualAttackModifier))
 						{
-							if (Attack(target, 13))
+							Attack(target, 13);
+							// lets see if we can do a triple attack with the main hand
+							//pets are excluded from triple and quads...
+							if (GetSpecialAbility(SPECATK_TRIPLE)
+								&& !IsPet() && RandRoll < (GetLevel()+NPCTripleAttackModifier))
 							{
-								// lets see if we can do a triple attack with the main hand
-								//pets are excluded from triple and quads...
-								if (SpecAttacks[SPECATK_TRIPLE]
-									&& !IsPet() && RandRoll < (GetLevel()+NPCTripleAttackModifier))
+								Attack(target, 13);
+								// now lets check the quad attack
+								if (GetSpecialAbility(SPECATK_QUAD)
+									&& RandRoll < (GetLevel() + NPCQuadAttackModifier))
 								{
-									if (Attack(target, 13))
-									{	// now lets check the quad attack
-										if (SpecAttacks[SPECATK_QUAD]
-											&& RandRoll < (GetLevel() + NPCQuadAttackModifier))
-										{
-											Attack(target, 13);
-										}
-									}
+									Attack(target, 13);
 								}
+								
 							}
 						}
 					}
 
-					if (SpecAttacks[SPECATK_FLURRY]) {
+					if (GetSpecialAbility(SPECATK_FLURRY)) {
 
 						uint8 npc_flurry = RuleI(Combat, NPCFlurryChance);
 						if (GetFlurryChance())
@@ -1206,14 +1204,14 @@ void Mob::AI_Process() {
 						}
 					}
 
-					if (SpecAttacks[SPECATK_RAMPAGE])
+					if (GetSpecialAbility(SPECATK_RAMPAGE))
 					{
 						//simply based off dex for now, probably a better calc
 						if(MakeRandomInt(0, 100) < ((int)(GetDEX() / ((GetLevel() * 0.760) + 10.0)) + 5))
 							Rampage();
 					}
 
-					if (SpecAttacks[SPECATK_AREA_RAMPAGE])
+					if (GetSpecialAbility(SPECATK_AREA_RAMPAGE))
 					{
 
 						//simply based off dex for now, probably a better calc
@@ -1227,7 +1225,7 @@ void Mob::AI_Process() {
 				{
 					int myclass = GetClass();
 					//can only dual wield without a weapon if your a monk
-					if(SpecAttacks[SPECATK_INNATE_DW] || (GetEquipment(MATERIAL_SECONDARY) != 0 && GetLevel() > 29) || myclass == MONK || myclass == MONKGM) {
+					if(GetSpecialAbility(SPECATK_INNATE_DW) || (GetEquipment(MATERIAL_SECONDARY) != 0 && GetLevel() > 29) || myclass == MONK || myclass == MONKGM) {
 						float DualWieldProbability = (GetSkill(DUAL_WIELD) + GetLevel()) / 400.0f;
 						if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
 						{
@@ -1274,7 +1272,7 @@ void Mob::AI_Process() {
 			if (!HateSummon())
 			{
 				//could not summon them, check ranged...
-				if(SpecAttacks[SPECATK_RANGED_ATK])
+				if(GetSpecialAbility(SPECATK_RANGED_ATK))
 					doranged = true;
 
 				// Now pursue
@@ -1863,33 +1861,27 @@ void Mob::StartEnrage()
 	// dont continue if already enraged
 	if (bEnraged)
 		return;
-	if (SpecAttackTimers[SPECATK_ENRAGE] && !SpecAttackTimers[SPECATK_ENRAGE]->Check())
-		return;
-	// see if NPC has possibility to enrage
-	if (!SpecAttacks[SPECATK_ENRAGE])
-		return;
-	// check if timer exists (should be true at all times)
-	if (SpecAttackTimers[SPECATK_ENRAGE])
-	{
-		safe_delete(SpecAttackTimers[SPECATK_ENRAGE]);
-		SpecAttackTimers[SPECATK_ENRAGE] = nullptr;
-	}
 
-	if (!SpecAttackTimers[SPECATK_ENRAGE])
-	{
-		SpecAttackTimers[SPECATK_ENRAGE] = new Timer(EnragedDurationTimer);
-	}
+	if(!GetSpecialAbility(SPECATK_ENRAGE))
+		return;
+
+	Timer *timer = GetSpecialAbilityTimer(SPECATK_ENRAGE);
+	if (timer && !timer->Check())
+		return;
+
+	StartSpecialAbilityTimer(SPECATK_ENRAGE, EnragedDurationTimer);
+
 	// start the timer. need to call IsEnraged frequently since we dont have callback timers :-/
-	SpecAttackTimers[SPECATK_ENRAGE]->Start();
 	bEnraged = true;
 	entity_list.MessageClose_StringID(this, true, 200, MT_NPCEnrage, NPC_ENRAGE_START, GetCleanName());
 }
 
 void Mob::ProcessEnrage(){
 	if(IsEnraged()){
-		if(SpecAttackTimers[SPECATK_ENRAGE] && SpecAttackTimers[SPECATK_ENRAGE]->Check()){
+		Timer *timer = GetSpecialAbilityTimer(SPECATK_ENRAGE);
+		if(timer && timer->Check()){
 			entity_list.MessageClose_StringID(this, true, 200, MT_NPCEnrage, NPC_ENRAGE_END, GetCleanName());
-			SpecAttackTimers[SPECATK_ENRAGE]->Start(EnragedTimer);
+			StartSpecialAbilityTimer(SPECATK_ENRAGE, EnragedTimer);
 			bEnraged = false;
 		}
 	}
@@ -1921,7 +1913,7 @@ bool Mob::AddRampage(Mob *mob)
 	if(!mob)
 		return false;
 
-	if (!SpecAttacks[SPECATK_RAMPAGE])
+	if (!GetSpecialAbility(SPECATK_RAMPAGE))
 		return false;
 
 	for (int i = 0; i < RampageArray.size(); i++)

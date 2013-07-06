@@ -2646,57 +2646,6 @@ void EntityList::CountNPC(uint32* NPCCount, uint32* NPCLootCount, uint32* gmspaw
 	}
 }
 
-void EntityList::DoZoneDump(ZSDump_Spawn2* spawn2_dump, ZSDump_NPC* npc_dump, ZSDump_NPC_Loot* npcloot_dump, NPCType* gmspawntype_dump) {
-	uint32 spawn2index = 0;
-	uint32 NPCindex = 0;
-	uint32 NPCLootindex = 0;
-	uint32 gmspawntype_index = 0;
-
-	if (npc_dump != 0) {
-		LinkedListIterator<NPC*> iterator(npc_list);
-		NPC* npc = 0;
-		iterator.Reset();
-		while(iterator.MoreElements())
-		{
-			npc = iterator.GetData()->CastToNPC();
-			if (spawn2_dump != 0)
-				npc_dump[NPCindex].spawn2_dump_index = zone->DumpSpawn2(spawn2_dump, &spawn2index, npc->respawn2);
-			npc_dump[NPCindex].npctype_id = npc->GetNPCTypeID();
-			npc_dump[NPCindex].cur_hp = npc->GetHP();
-			if (npc->IsCorpse()) {
-				if (npc->CastToCorpse()->IsLocked())
-					npc_dump[NPCindex].corpse = 2;
-				else
-					npc_dump[NPCindex].corpse = 1;
-			}
-			else
-				npc_dump[NPCindex].corpse = 0;
-			npc_dump[NPCindex].decay_time_left = 0xFFFFFFFF;
-			npc_dump[NPCindex].x = npc->GetX();
-			npc_dump[NPCindex].y = npc->GetY();
-			npc_dump[NPCindex].z = npc->GetZ();
-			npc_dump[NPCindex].heading = npc->GetHeading();
-			npc_dump[NPCindex].copper = npc->copper;
-			npc_dump[NPCindex].silver = npc->silver;
-			npc_dump[NPCindex].gold = npc->gold;
-			npc_dump[NPCindex].platinum = npc->platinum;
-			if (npcloot_dump != 0)
-				npc->DumpLoot(NPCindex, npcloot_dump, &NPCLootindex);
-			if (gmspawntype_dump != 0) {
-				if (npc->GetNPCTypeID() == 0) {
-					memcpy(&gmspawntype_dump[gmspawntype_index], npc->NPCTypedata, sizeof(NPCType));
-					npc_dump[NPCindex].gmspawntype_index = gmspawntype_index;
-					gmspawntype_index++;
-				}
-			}
-			NPCindex++;
-			iterator.Advance();
-		}
-	}
-	if (spawn2_dump != 0)
-		zone->DumpAllSpawn2(spawn2_dump, &spawn2index);
-}
-
 void EntityList::Depop(bool StartSpawnTimer) {
 	LinkedListIterator<NPC*> iterator(npc_list);
 
@@ -3212,7 +3161,7 @@ void EntityList::ClearFeignAggro(Mob* targ)
 	{
 		if (iterator.GetData()->CheckAggro(targ))
 		{
-			if(iterator.GetData()->SpecAttacks[IMMUNE_FEIGN_DEATH])
+			if(iterator.GetData()->GetSpecialAbility(IMMUNE_FEIGN_DEATH))
 			{
 				iterator.Advance();
 				continue;

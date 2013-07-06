@@ -3,7 +3,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 07/05/2013 ==
 KLS: Added some lua functions
 KLS: Fixed some lua functions
-KLS: Perl now will (like lua) keep track of the values you return from EVENT_*.  This allows perl to use the extra behavior in things like EVENT_DEATH.  Now g,enerally the perl system is now considered deprecated (in favor of lua in the long term) I felt this was too big a change to pass up adding when I got it working.
+KLS: Perl now will (like lua) keep track of the values you return from EVENT_*.  This allows perl to use the extra behavior in things like EVENT_DEATH.  Now generally the perl system is now considered deprecated (in favor of lua in the long term) I felt this was too big a change to pass up adding when I got it working.
 
 == 07/02/2013 ==
 KLS: Exported eq.follow(entity_id, [distance]) and eq.stop_follow() to lua.

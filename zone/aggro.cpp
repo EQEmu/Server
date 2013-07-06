@@ -517,7 +517,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	if(this == target)	// you can attack yourself
 		return true;
 
-	if(target->SpecAttacks[NO_HARM_FROM_CLIENT]){
+	if(target->GetSpecialAbility(NO_HARM_FROM_CLIENT)){
 		return false;
 	}
 

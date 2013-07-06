@@ -646,7 +646,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if (max_level == 0)
 					max_level = RuleI(Spells, BaseImmunityLevel);
 				// NPCs get to ignore max_level for their spells.
-				if(SpecAttacks[UNSTUNABLE] ||
+				if(GetSpecialAbility(UNSTUNABLE) ||
 					((GetLevel() > max_level)
 					&& caster && (!caster->IsNPC() || (caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity)))))
 				{
@@ -989,7 +989,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Cancel Magic: %d", effect_value);
 #endif
-				if(SpecAttacks[UNDISPELLABLE]){
+				if(GetSpecialAbility(UNDISPELLABLE)){
 					caster->Message_StringID(MT_SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
@@ -1013,7 +1013,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Dispel Detrimental: %d", effect_value);
 #endif
-				if(SpecAttacks[UNDISPELLABLE]){
+				if(GetSpecialAbility(UNDISPELLABLE)){
 					caster->Message_StringID(MT_SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
@@ -1037,7 +1037,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Dispel Beneficial: %d", effect_value);
 #endif
-				if(SpecAttacks[UNDISPELLABLE]){
+				if(GetSpecialAbility(UNDISPELLABLE)){
 					caster->Message_StringID(MT_SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
@@ -1377,7 +1377,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					max_level = RuleI(Spells, BaseImmunityLevel); // Default max is 55 level limit
 
 				// NPCs ignore level limits in their spells
-				if(SpecAttacks[UNSTUNABLE] ||
+				if(GetSpecialAbility(UNSTUNABLE) ||
 					((GetLevel() > max_level)
 					&& caster && (!caster->IsNPC() || (caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity)))))
 				{

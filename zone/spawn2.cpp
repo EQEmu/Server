@@ -459,41 +459,6 @@ uint32 Zone::CountSpawn2() {
 	return count;
 }
 
-uint32 Zone::DumpSpawn2(ZSDump_Spawn2* spawn2dump, uint32* spawn2index, Spawn2* spawn2) {
-	if (spawn2 == 0)
-		return 0;
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	//	uint32	index = 0;
-
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData() == spawn2) {
-			spawn2dump[*spawn2index].spawn2_id = iterator.GetData()->spawn2_id;
-			spawn2dump[*spawn2index].time_left = iterator.GetData()->timer.GetRemainingTime();
-			iterator.RemoveCurrent();
-			return (*spawn2index)++;
-		}
-		iterator.Advance();
-	}
-	return 0xFFFFFFFF;
-}
-
-void Zone::DumpAllSpawn2(ZSDump_Spawn2* spawn2dump, uint32* spawn2index) {
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	//	uint32	index = 0;
-
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		spawn2dump[*spawn2index].spawn2_id = iterator.GetData()->spawn2_id;
-		spawn2dump[*spawn2index].time_left = iterator.GetData()->timer.GetRemainingTime();
-		(*spawn2index)++;
-		iterator.RemoveCurrent();
-
-	}
-}
-
 void Zone::Despawn(uint32 spawn2ID) {
 	LinkedListIterator<Spawn2*> iterator(spawn2_list);
 

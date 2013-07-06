@@ -16,8 +16,6 @@
 
 #include "StringUtil.h"
 
-#include <string>
-#include <cstdarg>
 #include <cstring> // for strncpy
 #include <stdexcept>
 
@@ -327,4 +325,16 @@ const char *ConvertArrayF(float input, char *returnchar)
 {
 	sprintf(returnchar, "%0.2f", input);
 	return returnchar;
+}
+
+std::vector<std::string> SplitString(const std::string &str, char delim) {
+	std::vector<std::string> ret;
+	std::stringstream ss(str);
+    std::string item;
+
+    while(std::getline(ss, item, delim)) {
+        ret.push_back(item);
+    }
+	
+	return ret;
 }

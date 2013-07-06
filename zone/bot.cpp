@@ -3438,7 +3438,7 @@ bool Bot::CanDoSpecialAttack(Mob *other)
 		return false;
 	}
 
-	if(other->GetInvul() || other->SpecAttacks[IMMUNE_MELEE])
+	if(other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE))
 		return false;
 
 	return true;
@@ -3776,13 +3776,13 @@ void Bot::AI_Process() {
 							Attack(GetTarget(), SLOT_PRIMARY, true);
 						}
 
-						if(BotOwner && GetTarget() && SpecAttacks[SPECATK_TRIPLE] && CheckBotDoubleAttack(true)) {
+						if(BotOwner && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
 							tripleSuccess = true;
 							Attack(GetTarget(), SLOT_PRIMARY, true);
 						}
 
 						//quad attack, does this belong here??
-						if(BotOwner && GetTarget() && SpecAttacks[SPECATK_QUAD] && CheckBotDoubleAttack(true)) {
+						if(BotOwner && GetTarget() && GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
 							Attack(GetTarget(), SLOT_PRIMARY, true);
 						}
 					}
@@ -8098,7 +8098,7 @@ void Bot::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, CRIPPLING_BLOW, GetCleanName(), itoa(damage));
 				// Crippling blows also have a chance to stun
 				//Kayen: Crippling Blow would cause a chance to interrupt for npcs < 55, with a staggers message.
-				if (defender->GetLevel() <= 55 && !defender->SpecAttacks[IMMUNE_STUN]){
+				if (defender->GetLevel() <= 55 && !defender->GetSpecialAbility(IMMUNE_STUN)){
 					defender->Emote("staggers.");
 					defender->Stun(0);
 				}
@@ -10258,7 +10258,7 @@ void Bot::GenerateSpecialAttacks()
 {
 	// Special Attacks
 	if(((GetClass() == MONK) || (GetClass() == WARRIOR) || (GetClass() == RANGER) || (GetClass() == BERSERKER))	&& (GetLevel() >= 60)) {
-		SpecAttacks[SPECATK_TRIPLE] = true;
+		SetSpecialAbility(SPECATK_TRIPLE, 1);
 	}
 }
 
