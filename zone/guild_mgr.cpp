@@ -1571,7 +1571,6 @@ void GuildApproval::GuildApproved()
 			{
 			owner->Message(0, "%s",members[i]->GetName());
 			owner->Message(0, "%i",members[i]->CharacterID());
-			if(guild_mgr.IsGuildLeader(tmpeq,members[i]->CharacterID()));
 			guild_mgr.SetGuild(members[i]->CharacterID(),tmpeq,0);
 			size_t len = MBUFFER - strlen(gmembers)+1;
 			strncat(gmembers," ",len);

@@ -1440,7 +1440,6 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 					StopSpecialAbilityTimer(SPECATK_SUMMON);
 				} else {
 					SetSpecialAbility(SPECATK_SUMMON, 1);
-					StartSpecialAbilityTimer(SPECATK_SUMMON, 6000);
 				}
 			break;
 			case 'T':

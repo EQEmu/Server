@@ -81,54 +81,43 @@ typedef enum {	//focus types
 } focusType; //Any new FocusType needs to be added to the Mob::IsFocus function
 #define HIGHEST_FOCUS	focusAdditionalHeal //Should always be last focusType in enum
 
-
-/*
-Used:
-b,d,f,g,j,m,n,o,p,r,t
-A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,Q,R,S,T,U,W,Y
-
-Unused:
-a,c,e,h,k,l,q,s,u,v,w,x,y,z
-P,V,X
-*/
-
 enum {
 	SPECATK_NONE = 0,
-	SPECATK_SUMMON,				// S
-	SPECATK_ENRAGE,				// E
-	SPECATK_RAMPAGE,			// R
-	SPECATK_AREA_RAMPAGE,		// r
-	SPECATK_FLURRY,				// F
-	SPECATK_TRIPLE,				// T
-	SPECATK_QUAD,				// Q
-	SPECATK_INNATE_DW,			// L
-	SPECATK_BANE,				// b
-	SPECATK_MAGICAL,			// m
-	SPECATK_RANGED_ATK,			// Y
-	UNSLOWABLE,					// U
-	UNMEZABLE,					// M
-	UNCHARMABLE,				// C
-	UNSTUNABLE,					// N
-	UNSNAREABLE,				// I
-	UNFEARABLE,					// D
-	UNDISPELLABLE,				// K
-	IMMUNE_MELEE,				// A
-	IMMUNE_MAGIC,				// B
-	IMMUNE_FLEEING,				// f
-	IMMUNE_MELEE_EXCEPT_BANE,	// O
-	IMMUNE_MELEE_NONMAGICAL,	// W
-	IMMUNE_AGGRO,				// H - Won't aggro, ever.
-	IMMUNE_AGGRO_ON,			// G - Immune to being aggroed
-	IMMUNE_CASTING_FROM_RANGE,	// g
-	IMMUNE_FEIGN_DEATH,			// d
-	IMMUNE_TAUNT,				// i
-	NPC_TUNNELVISION,			// t
-	NPC_NO_BUFFHEAL_FRIENDS,	// n
-	IMMUNE_PACIFY,				// p
-	LEASH,						// J - Dispell, wipe agro && return to spawn
-	TETHER,						// j - Return to spawn
-	DESTRUCTIBLE_OBJECT,		// o - This is only for destructible objects
-	NO_HARM_FROM_CLIENT			// Z - This is to prevent attacking NPC's period for clients
+	SPECATK_SUMMON = 1,
+	SPECATK_ENRAGE = 2,
+	SPECATK_RAMPAGE = 3,
+	SPECATK_AREA_RAMPAGE = 4,
+	SPECATK_FLURRY = 5,
+	SPECATK_TRIPLE = 6,
+	SPECATK_QUAD = 7,
+	SPECATK_INNATE_DW = 8,
+	SPECATK_BANE = 9,
+	SPECATK_MAGICAL = 10,
+	SPECATK_RANGED_ATK = 11,
+	UNSLOWABLE = 12,
+	UNMEZABLE = 13,
+	UNCHARMABLE = 14,
+	UNSTUNABLE = 15,
+	UNSNAREABLE = 16,
+	UNFEARABLE = 17,
+	UNDISPELLABLE = 18,
+	IMMUNE_MELEE = 19,
+	IMMUNE_MAGIC = 20,
+	IMMUNE_FLEEING = 21,
+	IMMUNE_MELEE_EXCEPT_BANE = 22,
+	IMMUNE_MELEE_NONMAGICAL = 23,
+	IMMUNE_AGGRO = 24,
+	IMMUNE_AGGRO_ON = 25,
+	IMMUNE_CASTING_FROM_RANGE = 26,
+	IMMUNE_FEIGN_DEATH = 27,
+	IMMUNE_TAUNT = 28,
+	NPC_TUNNELVISION = 29,
+	NPC_NO_BUFFHEAL_FRIENDS = 30,
+	IMMUNE_PACIFY = 31,
+	LEASH = 32,
+	TETHER = 33,
+	DESTRUCTIBLE_OBJECT = 34,
+	NO_HARM_FROM_CLIENT = 35
 };
 
 typedef enum {	//fear states

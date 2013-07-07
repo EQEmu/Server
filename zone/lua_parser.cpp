@@ -934,6 +934,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_appearance(),
 			lua_register_entity(),
 			lua_register_mob(),
+			lua_register_special_abilities(),
 			lua_register_npc(),
 			lua_register_client(),
 			lua_register_inventory(),

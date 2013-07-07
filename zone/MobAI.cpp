@@ -1235,7 +1235,7 @@ void Mob::AI_Process() {
 								int32 RandRoll = MakeRandomInt(0, 99);
 								if (RandRoll < (GetLevel() + 20))
 								{
-									if (Attack(target, 14));
+									Attack(target, 14);
 								}
 							}
 						}

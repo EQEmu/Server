@@ -2336,48 +2336,63 @@ bool Mob::HateSummon() {
 	if(GetOwnerID())
 		mob_owner = entity_list.GetMob(GetOwnerID());
 
-	if (GetHPRatio() >= 98 || GetSpecialAbility(SPECATK_SUMMON) == 0 || !GetTarget() ||
-		(mob_owner && mob_owner->IsClient() && !CheckLosFN(GetTarget())))
+	int summon_level = GetSpecialAbility(SPECATK_SUMMON);
+	if(summon_level == 1 || summon_level == 3) {
+		//Summon things after we're hurt
+		if(GetHPRatio() >= 98 || !GetTarget() || (mob_owner && mob_owner->IsClient() && !CheckLosFN(GetTarget()))) {
+			return false;
+		}
+	} else if(summon_level == 2 || summon_level == 4) {
+		//Summon things always
+		if(!GetTarget() || (mob_owner && mob_owner->IsClient() && !CheckLosFN(GetTarget()))) {
+			return false;
+		}
+	} else {
+		//unsupported summon level or OFF
 		return false;
+	}
 
 	// now validate the timer
 	Timer *timer = GetSpecialAbilityTimer(SPECATK_SUMMON);
 	if (!timer)
 	{
 		StartSpecialAbilityTimer(SPECATK_SUMMON, 6000);
-	}
+	} else {
+		if(!timer->Check())
+			return false;
 
-	// now check the timer
-	if (!timer->Check())
-		return false;
+		timer->Start(6000);
+	}
 
 	// get summon target
 	SetTarget(GetHateTop());
 	if(target)
 	{
-		if (target->IsClient())
-			target->CastToClient()->Message(15,"You have been summoned!");
-		entity_list.MessageClose(this, true, 500, 10, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
-
-		// RangerDown - GMMove doesn't seem to be working well with players, so use MovePC for them, GMMove for NPC's
-		if (target->IsClient()) {
-			target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x_pos, y_pos, z_pos, target->GetHeading(), 0, SummonPC);
-		}
-		else {
-#ifdef BOTS
-			if(target && target->IsBot()) {
-				// set pre summoning info to return to (to get out of melee range for caster)
-				target->CastToBot()->SetHasBeenSummoned(true);
-				target->CastToBot()->SetPreSummonX(target->GetX());
-				target->CastToBot()->SetPreSummonY(target->GetY());
-				target->CastToBot()->SetPreSummonZ(target->GetZ());
-
+		if(summon_level == 1 || summon_level == 2) {
+			entity_list.MessageClose(this, true, 500, 10, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
+	
+			if (target->IsClient()) {
+				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x_pos, y_pos, z_pos, target->GetHeading(), 0, SummonPC);
 			}
+			else {
+#ifdef BOTS
+				if(target && target->IsBot()) {
+					// set pre summoning info to return to (to get out of melee range for caster)
+					target->CastToBot()->SetHasBeenSummoned(true);
+					target->CastToBot()->SetPreSummonX(target->GetX());
+					target->CastToBot()->SetPreSummonY(target->GetY());
+					target->CastToBot()->SetPreSummonZ(target->GetZ());
+	
+				}
 #endif //BOTS
-			target->GMMove(x_pos, y_pos, z_pos, target->GetHeading());
+				target->GMMove(x_pos, y_pos, z_pos, target->GetHeading());
+			}
+	
+			return true;
+		} else if(summon_level == 3 || summon_level == 4) {
+			entity_list.MessageClose(this, true, 500, 10, "%s blinks to %s' ", GetCleanName(), target->GetCleanName());
+			GMMove(target->GetX(), target->GetY(), target->GetZ());
 		}
-
-		return true;
 	}
 	return false;
 }
@@ -4802,7 +4817,6 @@ void Mob::StartSpecialAbilityTimer(int ability, uint32 time) {
 	auto iter = SpecialAbilities.find(ability);
 	if(iter != SpecialAbilities.end()) {
 		SpecialAbility spec = iter->second;
-		spec.level = level;
 		if(spec.timer) {
 			spec.timer->Start(time);
 		} else {
@@ -4813,7 +4827,6 @@ void Mob::StartSpecialAbilityTimer(int ability, uint32 time) {
 		SpecialAbilities[ability] = spec;
 	} else {
 		SpecialAbility spec;
-		spec.level = level;
 		spec.timer = new Timer(time);
 		spec.timer->Start();
 		SpecialAbilities[ability] = spec;
@@ -4866,11 +4879,6 @@ void Mob::ProcessSpecialAbilities(const std::string str) {
 
 			SetSpecialAbility(ability, value);
 			switch(ability) {
-			case SPECATK_SUMMON:
-				if(value > 0) {
-					StartSpecialAbilityTimer(SPECATK_SUMMON, 6000);
-				}
-				break;
 			case SPECATK_QUAD:
 				if(value > 0) {
 					SetSpecialAbility(SPECATK_TRIPLE, 1);

@@ -15,6 +15,7 @@ namespace luabind {
 }
 
 luabind::scope lua_register_mob();
+luabind::scope lua_register_special_abilities();
 
 class Lua_Mob : public Lua_Entity
 {
@@ -332,6 +333,12 @@ public:
 	int GetFlurryChance();
 	int GetSkill(int skill_id);
 	void CalcBonuses();
+	int GetSpecialAbility(int ability);
+	void SetSpecialAbility(int ability, int level);
+	void ClearSpecialAbilities();
+	void ProcessSpecialAbilities(std::string str);
+	void SetAppearance(int app);
+	void SetAppearance(int app, bool ignore_self);
 };
 
 #endif

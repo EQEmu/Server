@@ -696,10 +696,6 @@ luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
 	NPC *n = npc;
 	Client *c = client;
 
-	if(n && !n->GetQglobal()) {
-		return ret;
-	}
-
 	std::list<QGlobal> global_map;
 	QGlobalCache::GetQGlobals(global_map, n, c, zone);
 	auto iter = global_map.begin();

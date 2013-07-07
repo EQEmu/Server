@@ -8273,17 +8273,13 @@ void command_acceptrules(Client *c, const Seperator *sep)
 
 void command_guildcreate(Client *c, const Seperator *sep)
 {
-	char founders[3];
-	if (database.GetVariable("GuildCreation", founders, 3));
+	if(strlen(sep->argplus[1])>4 && strlen(sep->argplus[1])<16)
 	{
-		if(strlen(sep->argplus[1])>4 && strlen(sep->argplus[1])<16)
-		{
-			guild_mgr.AddGuildApproval(sep->argplus[1],c);
-		}
-		else
-		{
-			c->Message(0,"Guild name must be more than 4 characters and less than 16.");
-		}
+		guild_mgr.AddGuildApproval(sep->argplus[1],c);
+	}
+	else
+	{
+		c->Message(0,"Guild name must be more than 4 characters and less than 16.");
 	}
 }
 
