@@ -986,7 +986,7 @@ EQRawApplicationPacket *p=nullptr;
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
 #if EQDEBUG >= 4
 			if(emu_op == OP_Unknown) {
-				LogFile->write(EQEMuLog::Debug, "Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
+				_log(NET__ERROR, "Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
 			}
 #endif
 			p->SetOpcode(emu_op);

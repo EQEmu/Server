@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/08/2013 ==
+Secrets: Cleanup of some log functions that did not have an 'off' function.**
+Secrets: Unknown opcode messages only show on EQDEBUG* >= 5 or higher now. (including the dumped packet)
+
+*NOTE: We recommend for debugging and feature development that you keep EQDEBUG to 5 or higher. For production environments, we recommend 1 to help with CPU performance on windows machines and disk I/O on all platforms.
+**Affected filters:
+NET__ERROR
+NET__DEBUG
+
 == 07/05/2013 ==
 KLS: Added some lua functions
 KLS: Fixed some lua functions

@@ -446,6 +446,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		ClientPacketProc p;
 		p = ConnectedOpcodes[opcode];
 		if(p == nullptr) {
+#if (EQDEBUG>=5)
 			char buffer[64];
 			app->build_header_dump(buffer);
 			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: %s", buffer);
@@ -455,6 +456,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 				std::cout << "Dump limited to 1000 characters:\n";
 				DumpPacket(app->pBuffer, 1000);
 			}
+#endif
 			break;
 		}
 
@@ -8548,8 +8550,6 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
 
 		std::vector<FindPerson_Point> points;
-
-		Message(13, "Searched for NPC ID: %d\n", t->npc_id);
 		Mob* target = entity_list.GetMob(t->npc_id);
 
 		if(target == nullptr) {
@@ -8564,8 +8564,6 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 			Message(15, "Moving you to Trader %s", target->GetName());
 			MovePC(zone->GetZoneID(), zone->GetInstanceID(), target->GetX(), target->GetY(), target->GetZ() , 0.0f);
 		}
-		else
-			Message(13, "Found NPC '%s'\n", target->GetName());
 
 		if(!RuleB(Pathing, Find) || !zone->pathing)
 		{
