@@ -29,6 +29,8 @@
 
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
+#define MAX_SPECIAL_ATTACK_PARAMS 8
+
 class EGNode;
 class MobFearState;
 class Mob : public Entity {
@@ -40,6 +42,7 @@ public:
 	struct SpecialAbility {
 		int level;
 		Timer *timer;
+		int params[MAX_SPECIAL_ATTACK_PARAMS];
 	};
 
 	Mob(const char*	in_name,
@@ -109,19 +112,19 @@ public:
 	uint16 GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg);
 	// 13 = Primary (default), 14 = secondary
 	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false,
-		bool IsFromSpell = false) = 0;
+		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) = 0;
 	int MonkSpecialAttack(Mob* other, uint8 skill_used);
 	virtual void TryBackstab(Mob *other,int ReuseTime = 10);
 	void TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand = 13, int damage = 0);
 	virtual bool AvoidDamage(Mob* attacker, int32 &damage, bool CanRiposte = true);
 	virtual bool CheckHitChance(Mob* attacker, SkillType skillinuse, int Hand, int16 chance_mod = 0);
-	virtual void TryCriticalHit(Mob *defender, uint16 skill, int32 &damage);
+	virtual void TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttackOptions *opts = nullptr);
 	void TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage);
 	virtual bool TryFinishingBlow(Mob *defender, SkillType skillinuse);
 	virtual bool TryHeadShot(Mob* defender, SkillType skillInUse);
 	virtual void DoRiposte(Mob* defender);
 	void ApplyMeleeDamageBonus(uint16 skill, int32 &damage);
-	virtual void MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit);
+	virtual void MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts = nullptr);
 	bool CombatRange(Mob* other);
 
 	//Appearance
@@ -569,8 +572,8 @@ public:
 	bool IsOffHandAtk() const { return offhand; }
 	inline void OffHandAtk(bool val) { offhand = val; }
 
-	inline void SetFlurryChance(uint8 value) { NPC_FlurryChance = value;}
-	uint8 GetFlurryChance() { return NPC_FlurryChance; }
+	void SetFlurryChance(uint8 value) { SetSpecialAbilityParam(SPECATK_FLURRY, 0, value); }
+	uint8 GetFlurryChance() { return GetSpecialAbilityParam(SPECATK_FLURRY, 0); }
 
 	static uint32 GetAppearanceValue(EmuAppearance iAppearance);
 	void SendAppearancePacket(uint32 type, uint32 value, bool WholeZone = true, bool iIgnoreSelf = false, Client *specific_target=nullptr);
@@ -647,11 +650,11 @@ public:
 	virtual void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillType skillinuse, int16 chance_mod=0, int16 focus=0, bool CanRiposte=false);
 	virtual void DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const ItemInst* Ammo=nullptr, uint16 weapon_damage=0, int16 chance_mod=0, int16 focus=0);
 	bool CanDoSpecialAttack(Mob *other);
-	bool Flurry();
-	bool Rampage();
+	bool Flurry(ExtraAttackOptions *opts);
+	bool Rampage(ExtraAttackOptions *opts);
 	bool AddRampage(Mob*);
 	void ClearRampage();
-	void AreaRampage();
+	void AreaRampage(ExtraAttackOptions *opts);
 
 	void StartEnrage();
 	void ProcessEnrage();
@@ -766,7 +769,9 @@ public:
 
 	bool HasNPCSpecialAtk(const char* parse);
 	int GetSpecialAbility(int ability);
+	int GetSpecialAbilityParam(int ability, int param);
 	void SetSpecialAbility(int ability, int level);
+	void SetSpecialAbilityParam(int ability, int param, int value);
 	void StartSpecialAbilityTimer(int ability, uint32 time);
 	void StopSpecialAbilityTimer(int ability);
 	Timer *GetSpecialAbilityTimer(int ability);
@@ -850,7 +855,6 @@ protected:
 	int16 Vulnerability_Mod[HIGHEST_RESIST+2];
 	bool m_AllowBeneficial;
 	bool m_DisableMelee;
-	uint8 NPC_FlurryChance;
 
 	bool isgrouped;
 	bool israidgrouped;

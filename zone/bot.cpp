@@ -3337,7 +3337,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillType skil
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += other->GetAdditionalDamage(this, 0, true, skillinuse);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
-				TryCriticalHit(other, skillinuse, damage);
+				TryCriticalHit(other, skillinuse, damage, opts);
 			}
 		}
 
@@ -6365,7 +6365,7 @@ void Bot::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic);
 }
 
-bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell)
+bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
 	_ZP(Bot_Attack);
 
@@ -6520,6 +6520,13 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		mlog(COMBAT__DAMAGE, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, GetLevel());
 
+		if(opts) {
+			damage *= opts->damage_percent;
+			damage += opts->damage_flat;
+			hate *= opts->hate_percent;
+			hate += opts->hate_flat;
+		}
+
 		//check to see if we hit..
 		if(!other->CheckHitChance(other, skillinuse, Hand)) {
 			mlog(COMBAT__ATTACKS, "Attack missed. Damage set to 0.");
@@ -6527,11 +6534,11 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			other->AddToHateList(this, 0);
 		} else {	//we hit, try to avoid it
 			other->AvoidDamage(this, damage);
-			other->MeleeMitigation(this, damage, min_hit);
+			other->MeleeMitigation(this, damage, min_hit, opts);
 			if(damage > 0) {
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
-				TryCriticalHit(other, skillinuse, damage);
+				TryCriticalHit(other, skillinuse, damage, opts);
 				mlog(COMBAT__HITS, "Generating hate %d towards %s", hate, GetCleanName());
 				// now add done damage to the hate list
 				//other->AddToHateList(this, hate);
@@ -8001,117 +8008,6 @@ int Bot::GetMonkHandToHandDamage(void)
 			return damage[Level];
 }
 
-void Bot::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage)
-{
-	bool slayUndeadCrit = false;
-
-	if(damage < 1) //We can't critical hit if we don't hit.
-		return;
-
-	float critChance = 0.0f;
-
-	//1: Try Slay Undead
-	if(defender && defender->GetBodyType() == BT_Undead || defender->GetBodyType() == BT_SummonedUndead || defender->GetBodyType() == BT_Vampire){
-
-		int16 SlayRateBonus = aabonuses.SlayUndead[0] + itembonuses.SlayUndead[0] + spellbonuses.SlayUndead[0];
-
-		if (SlayRateBonus) {
-
-			critChance += (float(SlayRateBonus)/100.0f);
-			critChance /= 100.0f;
-
-			if(MakeRandomFloat(0, 1) < critChance){
-				int16 SlayDmgBonus = aabonuses.SlayUndead[1] + itembonuses.SlayUndead[1] + spellbonuses.SlayUndead[1];
-				damage = (damage*SlayDmgBonus*2.25)/100;
-				entity_list.MessageClose(this, false, 200, MT_CritMelee, "%s cleanses %s target!(%d)", GetCleanName(), this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its", damage);
-				return;
-			}
-		}
-	}
-
-	//2: Try Melee Critical
-
-	//Base critical rate for all classes is dervived from DEX stat, this rate is then augmented
-	//by item,spell and AA bonuses allowing you a chance to critical hit. If the following rules
-	//are defined you will have an innate chance to hit at Level 1 regardless of bonuses.
-	//Warning: Do not define these rules if you want live like critical hits.
-	critChance += RuleI(Combat, MeleeBaseCritChance);
-
-	critChance += RuleI(Combat, ClientBaseCritChance);
-
-	if(((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12))
-	{
-		if((GetHPRatio() < 30) && GetClass() == BERSERKER){
-			critChance += RuleI(Combat, BerserkBaseCritChance);
-			berserk = true;
-		}
-		else
-			critChance += RuleI(Combat, WarBerBaseCritChance);
-	}
-
-	if(skill == ARCHERY && GetClass() == RANGER && GetSkill(ARCHERY) >= 65)
-		critChance += 6;
-
-	if(skill == THROWING && GetClass() == ROGUE && GetSkill(THROWING) >= 65)
-		critChance += 6;
-
-	int CritChanceBonus = GetCriticalChanceBonus(skill);
-
-	if (CritChanceBonus || critChance) {
-
-		//Get Base CritChance from Dex. (200 = ~1.6%, 255 = ~2.0%, 355 = ~2.20%) Fall off rate > 255
-		//http://giline.versus.jp/shiden/su.htm , http://giline.versus.jp/shiden/damage_e.htm
-		if (GetDEX() <= 255)
-			critChance += (float(GetDEX()) / 125.0f);
-		else if (GetDEX() > 255)
-			critChance += (float(GetDEX()-255)/ 500.0f) + 2.0f;
-		critChance += critChance*(float)CritChanceBonus /100.0f;
-	}
-
-	if(critChance > 0){
-
-		critChance /= 100;
-
-		if(MakeRandomFloat(0, 1) < critChance)
-		{
-			uint16 critMod = 200;
-			bool crip_success = false;
-			int16 CripplingBlowChance = GetCrippBlowChance();
-
-			//Crippling Blow Chance: The percent value of the effect is applied
-			//to the your Chance to Critical. (ie You have 10% chance to critical and you
-			//have a 200% Chance to Critical Blow effect, therefore you have a 20% Chance to Critical Blow.
-			if (CripplingBlowChance){
-				critChance *= float(CripplingBlowChance)/100.0f;
-
-				if(MakeRandomFloat(0, 1) < critChance){
-					critMod = 400;
-					crip_success = true;
-				}
-			}
-
-			critMod += GetCritDmgMob(skill) * 2; // To account for base crit mod being 200 not 100
-			damage = damage * critMod / 100;
-
-			if(berserk || crip_success)
-			{
-				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, CRIPPLING_BLOW, GetCleanName(), itoa(damage));
-				// Crippling blows also have a chance to stun
-				//Kayen: Crippling Blow would cause a chance to interrupt for npcs < 55, with a staggers message.
-				if (defender->GetLevel() <= 55 && !defender->GetSpecialAbility(IMMUNE_STUN)){
-					defender->Emote("staggers.");
-					defender->Stun(0);
-				}
-			}
-
-			else
-			{
-				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, CRITICAL_HIT, GetCleanName(), itoa(damage));
-			}
-		}
-	}
-}
-
 bool Bot::TryFinishingBlow(Mob *defender, SkillType skillinuse)
 {
 	if (!defender)
@@ -8167,208 +8063,6 @@ void Bot::DoRiposte(Mob* defender) {
 		else if (defender->IsBot())
 			defender->CastToClient()->DoClassAttacks(this,defender->GetAABonuses().GiveDoubleRiposte[2], true);
 	}
-}
-
-void Bot::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
-{
-	if(damage <= 0)
-		return;
-
-	Mob* defender = this;
-	float aa_mit = 0;
-
-	aa_mit = (aabonuses.CombatStability + itembonuses.CombatStability + spellbonuses.CombatStability)/100.0f;
-
-	if(RuleB(Combat, UseIntervalAC))
-	{
-		float softcap = 0.0;
-		float mitigation_rating = 0.0;
-		float attack_rating = 0.0;
-		int shield_ac = 0;
-		int armor;
-		float weight = 0.0;
-		if(IsBot())
-		{
-			armor = GetRawACNoShield(shield_ac);
-			weight = (CalcCurrentWeight() / 10.0);
-		}
-
-		if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER)
-		{
-			softcap = RuleI(Combat, ClothACSoftcap);
-		}
-		else if(GetClass() == MONK && weight <= 15.0)
-		{
-			softcap = RuleI(Combat, MonkACSoftcap);
-		}
-		else if(GetClass() == DRUID || GetClass() == BEASTLORD || GetClass() == MONK)
-		{
-			softcap = RuleI(Combat, LeatherACSoftcap);
-		}
-		else if(GetClass() == SHAMAN || GetClass() == ROGUE || GetClass() == BERSERKER || GetClass() == RANGER)
-		{
-			softcap = RuleI(Combat, ChainACSoftcap);
-		}
-		else
-		{
-			softcap = RuleI(Combat, PlateACSoftcap);
-		}
-
-		softcap += shield_ac;
-		armor += shield_ac;
-		softcap += (softcap * (aa_mit * RuleR(Combat, AAMitigationACFactor)));
-		if(armor > softcap)
-		{
-			int softcap_armor = armor - softcap;
-			if(GetClass() == WARRIOR)
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, WarriorACSoftcapReturn);
-			}
-			else if(GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || (GetClass() == MONK && weight <= 15.0))
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, KnightACSoftcapReturn);
-			}
-			else if(GetClass() == CLERIC || GetClass() == BARD || GetClass() == BERSERKER || GetClass() == ROGUE || GetClass() == SHAMAN || GetClass() == MONK)
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, LowPlateChainACSoftcapReturn);
-			}
-			else if(GetClass() == RANGER || GetClass() == BEASTLORD)
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, LowChainLeatherACSoftcapReturn);
-			}
-			else if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER || GetClass() == DRUID)
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, CasterACSoftcapReturn);
-			}
-			else
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, MiscACSoftcapReturn);
-			}
-			armor = softcap + softcap_armor;
-		}
-
-		mitigation_rating = 0.0;
-		if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER)
-		{
-			mitigation_rating = ((GetSkill(DEFENSE) + itembonuses.HeroicAGI/10) / 4.0) + armor + 1;
-		}
-		else
-		{
-			mitigation_rating = ((GetSkill(DEFENSE) + itembonuses.HeroicAGI/10) / 3.0) + (armor * 1.333333) + 1;
-		}
-		mitigation_rating *= 0.847;
-
-		if(attacker->IsClient())
-		{
-			attack_rating = (attacker->CastToClient()->GetATK() + ((attacker->GetSTR()-66) * 0.9) + (attacker->GetSkill(OFFENSE)*1.345));
-		}
-		else if(attacker->IsBot())
-		{
-			attack_rating = (attacker->CastToBot()->CalcATK() + ((attacker->GetSTR()-66) * 0.9) + (attacker->GetSkill(OFFENSE)*1.345));
-		}
-		else
-		{
-			attack_rating = (attacker->GetATK() + (attacker->GetSkill(OFFENSE)*1.345) + ((attacker->GetSTR()-66) * 0.9));
-		}
-
-		float d = 10.0;
-		float mit_roll = MakeRandomFloat(0, mitigation_rating);
-		float atk_roll = MakeRandomFloat(0, attack_rating);
-
-		if(atk_roll > mit_roll)
-		{
-			float a_diff = (atk_roll - mit_roll);
-			float thac0 = attack_rating * RuleR(Combat, ACthac0Factor);
-			float thac0cap = ((attacker->GetLevel() * 9) + 20);
-			if(thac0 > thac0cap)
-			{
-				thac0 = thac0cap;
-			}
-			d -= 10.0 * (a_diff / thac0);
-		}
-		else if(mit_roll > atk_roll)
-		{
-			float m_diff = (mit_roll - atk_roll);
-			float thac20 = mitigation_rating * RuleR(Combat, ACthac20Factor);
-			float thac20cap = ((defender->GetLevel() * 9) + 20);
-			if(thac20 > thac20cap)
-			{
-				thac20 = thac20cap;
-			}
-			d += 10 * (m_diff / thac20);
-		}
-
-		if(d < 0.0)
-		{
-			d = 0.0;
-		}
-
-		if(d > 20)
-		{
-			d = 20.0;
-		}
-
-		float interval = (damage - minhit) / 20.0;
-		damage = damage - ((int)d * interval);
-	}
-	else{
-		////////////////////////////////////////////////////////
-		// Scorpious2k: Include AC in the calculation
-		// use serverop variables to set values
-		int myac = GetAC();
-		if (damage > 0 && myac > 0) {
-			int acfail=1000;
-			char tmp[10];
-
-			if (database.GetVariable("ACfail", tmp, 9)) {
-				acfail = (int) (atof(tmp) * 100);
-				if (acfail>100) acfail=100;
-			}
-
-			if (acfail<=0 || MakeRandomInt(0, 100)>acfail) {
-				float acreduction=1;
-				int acrandom=300;
-				if (database.GetVariable("ACreduction", tmp, 9))
-				{
-					acreduction=atof(tmp);
-					if (acreduction>100) acreduction=100;
-				}
-
-				if (database.GetVariable("ACrandom", tmp, 9))
-				{
-					acrandom = (int) ((atof(tmp)+1) * 100);
-					if (acrandom>10100) acrandom=10100;
-				}
-
-				if (acreduction>0) {
-					damage -= (int) (GetAC() * acreduction/100.0f);
-				}
-				if (acrandom>0) {
-					damage -= (myac * MakeRandomInt(0, acrandom) / 10000);
-				}
-				if (damage<1) damage=1;
-				mlog(COMBAT__DAMAGE, "AC Damage Reduction: fail chance %d%%. Failed. Reduction %.3f%%, random %d. Resulting damage %d.", acfail, acreduction, acrandom, damage);
-			} else {
-				mlog(COMBAT__DAMAGE, "AC Damage Reduction: fail chance %d%%. Did not fail.", acfail);
-			}
-		}
-
-		damage -= (aa_mit * damage);
-
-		if(damage != 0 && damage < minhit)
-			damage = minhit;
-	}
-
-
-	//reduce the damage from shielding item and aa based on the min dmg
-	//spells offer pure mitigation
-	damage -= (minhit * itembonuses.MeleeMitigation / 100);
-	damage -= (damage * spellbonuses.MeleeMitigation / 100);
-
-	if(damage < 0)
-		damage = 0;
-
-	mlog(COMBAT__DAMAGE, "Applied %d percent mitigation, remaining damage %d", aa_mit, damage);
 }
 
 void Bot::DoSpecialAttackDamage(Mob *who, SkillType skill, int32 max_damage, int32 min_damage, int32 hate_override,int ReuseTime, bool HitChance) {

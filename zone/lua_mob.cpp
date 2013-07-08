@@ -103,6 +103,79 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 	return self->Attack(other, hand, from_riposte, is_strikethrough, is_from_spell);
 }
 
+bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, luabind::object opts) {
+	Lua_Safe_Call_Bool();
+
+	ExtraAttackOptions options;
+	if(luabind::type(opts) == LUA_TTABLE) {
+		auto cur = opts["armor_pen_flat"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				options.armor_pen_flat = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = opts["crit_flat"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				options.crit_flat = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = opts["damage_flat"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				options.damage_flat = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = opts["hate_flat"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				options.hate_flat = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = opts["armor_pen_percent"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				options.armor_pen_percent = luabind::object_cast<float>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = opts["crit_percent"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				options.crit_percent = luabind::object_cast<float>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = opts["damage_percent"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				options.damage_percent = luabind::object_cast<float>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+
+		cur = opts["hate_percent"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				options.hate_percent = luabind::object_cast<float>(cur);
+			} catch(luabind::cast_failed) {
+			}
+		}
+	}
+
+	return self->Attack(other, hand, from_riposte, is_strikethrough, is_from_spell, &options);
+}
+
 void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill) {
 	Lua_Safe_Call_Void();
 	return self->Damage(from, damage, spell_id, static_cast<SkillType>(attack_skill));
@@ -1693,9 +1766,19 @@ int Lua_Mob::GetSpecialAbility(int ability) {
 	return self->GetSpecialAbility(ability);
 }
 
+int Lua_Mob::GetSpecialAbilityParam(int ability, int param) {
+	Lua_Safe_Call_Int();
+	return self->GetSpecialAbilityParam(ability, param);
+}
+
 void Lua_Mob::SetSpecialAbility(int ability, int level) {
 	Lua_Safe_Call_Void();
 	self->SetSpecialAbility(ability, level);
+}
+
+void Lua_Mob::SetSpecialAbilityParam(int ability, int param, int value) {
+	Lua_Safe_Call_Void();
+	self->SetSpecialAbilityParam(ability, param, value);
 }
 
 void Lua_Mob::ClearSpecialAbilities() {
@@ -2017,7 +2100,9 @@ luabind::scope lua_register_mob() {
 		.def("GetFlurryChance", (int(Lua_Mob::*)(void))&Lua_Mob::GetFlurryChance)
 		.def("GetSkill", (int(Lua_Mob::*)(int))&Lua_Mob::GetSkill)
 		.def("GetSpecialAbility", (int(Lua_Mob::*)(int))&Lua_Mob::GetSpecialAbility)
+		.def("GetSpecialAbilityParam", (int(Lua_Mob::*)(int,int))&Lua_Mob::GetSpecialAbilityParam)
 		.def("SetSpecialAbility", (void(Lua_Mob::*)(int,int))&Lua_Mob::SetSpecialAbility)
+		.def("SetSpecialAbilityParam", (void(Lua_Mob::*)(int,int,int))&Lua_Mob::SetSpecialAbilityParam)
 		.def("ClearSpecialAbilities", (void(Lua_Mob::*)(void))&Lua_Mob::ClearSpecialAbilities)
 		.def("ProcessSpecialAbilities", (void(Lua_Mob::*)(std::string))&Lua_Mob::ProcessSpecialAbilities)
 		.def("SetAppearance", (void(Lua_Mob::*)(int))&Lua_Mob::SetAppearance)
@@ -2028,7 +2113,6 @@ luabind::scope lua_register_special_abilities() {
 	return luabind::class_<SpecialAbilities>("SpecialAbility")
 		.enum_("constants")
 		[
-				luabind::value("none", static_cast<int>(SPECATK_NONE)),
 				luabind::value("summon", static_cast<int>(SPECATK_SUMMON)),
 				luabind::value("enrage", static_cast<int>(SPECATK_ENRAGE)),
 				luabind::value("rampage", static_cast<int>(SPECATK_RAMPAGE)),

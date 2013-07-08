@@ -4713,7 +4713,7 @@ void Merc::DoClassAttacks(Mob *target) {
 	classattack_timer.Start(reuse*HasteModifier/100);
 }
 
-bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell)
+bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
 
 	_ZP(Client_Attack);
@@ -4724,7 +4724,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 		return false;
 	}
 
-	return NPC::Attack(other, Hand, bRiposte, IsStrikethrough, IsFromSpell);
+	return NPC::Attack(other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts);
 }
 
 void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)

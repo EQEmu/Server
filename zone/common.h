@@ -82,7 +82,6 @@ typedef enum {	//focus types
 #define HIGHEST_FOCUS	focusAdditionalHeal //Should always be last focusType in enum
 
 enum {
-	SPECATK_NONE = 0,
 	SPECATK_SUMMON = 1,
 	SPECATK_ENRAGE = 2,
 	SPECATK_RAMPAGE = 3,
@@ -470,6 +469,24 @@ private:
 
 	uint32 with_id;
 	Mob* owner;
+};
+
+struct ExtraAttackOptions {
+	ExtraAttackOptions()
+		: damage_percent(1.0f), damage_flat(0),
+		armor_pen_percent(0.0f), armor_pen_flat(0),
+		crit_percent(1.0f), crit_flat(0.0f),
+		hate_percent(1.0f), hate_flat(0)
+	{ }
+
+	float damage_percent;
+	int damage_flat;
+	float armor_pen_percent;
+	int armor_pen_flat;
+	float crit_percent;
+	float crit_flat;
+	float hate_percent;
+	int hate_flat;
 };
 
 #endif

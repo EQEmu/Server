@@ -473,7 +473,7 @@ void HateList::PrintToClient(Client *c)
 	}
 }
 
-int HateList::AreaRampage(Mob *caster, Mob *target)
+int HateList::AreaRampage(Mob *caster, Mob *target, ExtraAttackOptions *opts)
 {
 	if(!target || !caster)
 		return 0;
@@ -501,7 +501,7 @@ int HateList::AreaRampage(Mob *caster, Mob *target)
 		Mob *cur = entity_list.GetMobID((*iter));
 		if(cur)
 		{
-			caster->Attack(cur);
+			caster->Attack(cur, 13, false, false, false, opts);
 		}
 		iter++;
 	}

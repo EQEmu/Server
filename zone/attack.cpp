@@ -543,7 +543,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	return false;
 }
 
-void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
+void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts)
 {
 	if(damage <= 0)
 		return;
@@ -580,6 +580,11 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 			}
 
 			armor += spellbonuses.AC + itembonuses.AC + 1;
+		}
+
+		if(opts) {
+			armor *= (1.0f - opts->armor_pen_percent);
+			armor -= opts->armor_pen_flat;
 		}
 
 		if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER)
@@ -708,6 +713,11 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit)
 		// Scorpious2k: Include AC in the calculation
 		// use serverop variables to set values
 		int myac = GetAC();
+		if(opts) {
+			myac *= (1.0f - opts->armor_pen_percent);
+			myac -= opts->armor_pen_flat;
+		}
+
 		if (damage > 0 && myac > 0) {
 			int acfail=1000;
 			char tmp[10];
@@ -1092,7 +1102,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 //note: throughout this method, setting `damage` to a negative is a way to
 //stop the attack calculations
 // IsFromSpell added to allow spell effects to use Attack. (Mainly for the Rampage AA right now.)
-bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell)
+bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
 
 	_ZP(Client_Attack);
@@ -1243,17 +1253,24 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		mlog(COMBAT__DAMAGE, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, mylevel);
 
+		if(opts) {
+			damage *= opts->damage_percent;
+			damage += opts->damage_flat;
+			hate *= opts->hate_percent;
+			hate += opts->hate_flat;
+		}
+
 		//check to see if we hit..
 		if(!other->CheckHitChance(this, skillinuse, Hand)) {
 			mlog(COMBAT__ATTACKS, "Attack missed. Damage set to 0.");
 			damage = 0;
 		} else {	//we hit, try to avoid it
 			other->AvoidDamage(this, damage);
-			other->MeleeMitigation(this, damage, min_hit);
+			other->MeleeMitigation(this, damage, min_hit, opts);
 			if(damage > 0) {
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
-				TryCriticalHit(other, skillinuse, damage);
+				TryCriticalHit(other, skillinuse, damage, opts);
 			}
 			mlog(COMBAT__DAMAGE, "Final damage after all reductions: %d", damage);
 		}
@@ -1296,7 +1313,6 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	else{
 		damage = -5;
 	}
-
 
 	// Hate Generation is on a per swing basis, regardless of a hit, miss, or block, its always the same.
 	// If we are this far, this means we are atleast making a swing.
@@ -1701,7 +1717,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 	return true;
 }
 
-bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell) // Kaiyodo - base function has changed prototype, need to update overloaded version
+bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
 	_ZP(NPC_Attack);
 	int damage = 0;
@@ -1858,25 +1874,39 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		{
 			hate = hate * 100 / GetDamageTable(skillinuse);
 		}
-		//THIS IS WHERE WE CHECK TO SEE IF WE HIT:
+
 		if(other->IsClient() && other->CastToClient()->IsSitting()) {
 			mlog(COMBAT__DAMAGE, "Client %s is sitting. Hitting for max damage (%d).", other->GetName(), (max_dmg+eleBane));
 			damage = (max_dmg+eleBane);
 			damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
 
+			if(opts) {
+				damage *= opts->damage_percent;
+				damage += opts->damage_flat;
+				hate *= opts->hate_percent;
+				hate += opts->hate_flat;
+			}
+
 			mlog(COMBAT__HITS, "Generating hate %d towards %s", hate, GetName());
 			// now add done damage to the hate list
 			other->AddToHateList(this, hate);
 		} else {
+			if(opts) {
+				damage *= opts->damage_percent;
+				damage += opts->damage_flat;
+				hate *= opts->hate_percent;
+				hate += opts->hate_flat;
+			}
+
 			if(!other->CheckHitChance(this, skillinuse, Hand)) {
 				damage = 0;	//miss
 			} else {	//hit, check for damage avoidance
 				other->AvoidDamage(this, damage);
-				other->MeleeMitigation(this, damage, min_dmg+eleBane);
+				other->MeleeMitigation(this, damage, min_dmg+eleBane, opts);
 				if(damage > 0) {
 					ApplyMeleeDamageBonus(skillinuse, damage);
 					damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
-					TryCriticalHit(other, skillinuse, damage);
+					TryCriticalHit(other, skillinuse, damage, opts);
 				}
 				mlog(COMBAT__HITS, "Generating hate %d towards %s", hate, GetName());
 				// now add done damage to the hate list
@@ -2433,9 +2463,16 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 		return;
 
 	if(GetSpecialAbility(NPC_TUNNELVISION)) {
+		int tv_mod = GetSpecialAbilityParam(NPC_TUNNELVISION, 0);
+
 		Mob *top = GetTarget();
 		if(top && top != other) {
-			hate *= RuleR(Aggro, TunnelVisionAggroMod);
+			if(tv_mod) {
+				float tv = tv_mod / 100.0f;
+				hate *= tv;
+			} else {
+				hate *= RuleR(Aggro, TunnelVisionAggroMod);
+			}
 		}
 	}
 
@@ -4030,7 +4067,7 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 	}
 }
 
-void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage)
+void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttackOptions *opts)
 {
 	if(damage < 1)
 		return;
@@ -4113,7 +4150,12 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 		critChance += critChance*(float)CritChanceBonus /100.0f;
 	}
 
-	if(critChance > 0){
+	if(opts) {
+		critChance *= opts->crit_percent;
+		critChance += opts->crit_flat;
+	}
+
+	if(critChance > 0) {
 
 		critChance /= 100;
 

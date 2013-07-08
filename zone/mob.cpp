@@ -2337,12 +2337,7 @@ bool Mob::HateSummon() {
 		mob_owner = entity_list.GetMob(GetOwnerID());
 
 	int summon_level = GetSpecialAbility(SPECATK_SUMMON);
-	if(summon_level == 1 || summon_level == 3) {
-		//Summon things after we're hurt
-		if(GetHPRatio() >= 98 || !GetTarget() || (mob_owner && mob_owner->IsClient() && !CheckLosFN(GetTarget()))) {
-			return false;
-		}
-	} else if(summon_level == 2 || summon_level == 4) {
+	if(summon_level == 1 || summon_level == 2) {
 		//Summon things always
 		if(!GetTarget() || (mob_owner && mob_owner->IsClient() && !CheckLosFN(GetTarget()))) {
 			return false;
@@ -2352,24 +2347,33 @@ bool Mob::HateSummon() {
 		return false;
 	}
 
+	// validate hp
+	int hp_ratio = GetSpecialAbilityParam(SPECATK_SUMMON, 1);
+	hp_ratio = hp_ratio > 0 ? hp_ratio : 97;
+	if(GetHPRatio() > static_cast<float>(hp_ratio)) {
+		return false;
+	}
+
 	// now validate the timer
+	int summon_timer_duration = GetSpecialAbilityParam(SPECATK_SUMMON, 0);
+	summon_timer_duration = summon_timer_duration > 0 ? summon_timer_duration : 6000;
 	Timer *timer = GetSpecialAbilityTimer(SPECATK_SUMMON);
 	if (!timer)
 	{
-		StartSpecialAbilityTimer(SPECATK_SUMMON, 6000);
+		StartSpecialAbilityTimer(SPECATK_SUMMON, summon_timer_duration);
 	} else {
 		if(!timer->Check())
 			return false;
 
-		timer->Start(6000);
+		timer->Start(summon_timer_duration);
 	}
 
 	// get summon target
 	SetTarget(GetHateTop());
 	if(target)
 	{
-		if(summon_level == 1 || summon_level == 2) {
-			entity_list.MessageClose(this, true, 500, 10, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
+		if(summon_level == 1) {
+			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 	
 			if (target->IsClient()) {
 				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x_pos, y_pos, z_pos, target->GetHeading(), 0, SummonPC);
@@ -2389,8 +2393,8 @@ bool Mob::HateSummon() {
 			}
 	
 			return true;
-		} else if(summon_level == 3 || summon_level == 4) {
-			entity_list.MessageClose(this, true, 500, 10, "%s blinks to %s' ", GetCleanName(), target->GetCleanName());
+		} else if(summon_level == 2) {
+			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!'", GetCleanName(), target->GetCleanName());
 			GMMove(target->GetX(), target->GetY(), target->GetZ());
 		}
 	}
@@ -4799,6 +4803,19 @@ int Mob::GetSpecialAbility(int ability) {
 	return 0;
 }
 
+int Mob::GetSpecialAbilityParam(int ability, int param) {
+	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0) {
+		return 0;
+	}
+
+	auto iter = SpecialAbilities.find(ability);
+	if(iter != SpecialAbilities.end()) {
+		return iter->second.params[param];
+	}
+
+	return 0;
+}
+
 void Mob::SetSpecialAbility(int ability, int level) {
 	auto iter = SpecialAbilities.find(ability);
 	if(iter != SpecialAbilities.end()) {
@@ -4808,6 +4825,24 @@ void Mob::SetSpecialAbility(int ability, int level) {
 	} else {
 		SpecialAbility spec;
 		spec.level = level;
+		spec.timer = nullptr;
+		SpecialAbilities[ability] = spec;
+	}
+}
+
+void Mob::SetSpecialAbilityParam(int ability, int param, int value) {
+	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0) {
+		return;
+	}
+
+	auto iter = SpecialAbilities.find(ability);
+	if(iter != SpecialAbilities.end()) {
+		SpecialAbility spec = iter->second;
+		spec.params[param] = value;
+		SpecialAbilities[ability] = spec;
+	} else {
+		SpecialAbility spec;
+		spec.params[param] = value;
 		spec.timer = nullptr;
 		SpecialAbilities[ability] = spec;
 	}
@@ -4873,7 +4908,7 @@ void Mob::ProcessSpecialAbilities(const std::string str) {
 	std::vector<std::string> sp = SplitString(str, '^');
 	for(auto iter = sp.begin(); iter != sp.end(); ++iter) {
 		std::vector<std::string> sub_sp = SplitString((*iter), ',');
-		if(sub_sp.size() == 2) {
+		if(sub_sp.size() >= 2) {
 			int ability = std::stoi(sub_sp[0]);
 			int value = std::stoi(sub_sp[1]);
 
@@ -4893,6 +4928,14 @@ void Mob::ProcessSpecialAbilities(const std::string str) {
 				break;
 			default:
 				break;
+			}
+
+			for(size_t i = 2, p = 0; i < sub_sp.size(); ++i, ++p) {
+				if(p >= MAX_SPECIAL_ATTACK_PARAMS) {
+					break;
+				}
+
+				SetSpecialAbilityParam(ability, p, std::stoi(sub_sp[i]));
 			}
 		}
 	}

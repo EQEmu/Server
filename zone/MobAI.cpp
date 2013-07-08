@@ -1107,14 +1107,7 @@ void Mob::AI_Process() {
 			}
 		}
 
-		if (GetHPRatio() < (RuleI(NPC, StartEnrageValue)+1) &&
-			(!RuleB(NPC, LiveLikeEnrage) ||
-			(RuleB(NPC, LiveLikeEnrage) &&
-			((IsPet() && !IsCharmed() && GetOwner() && GetOwner()->IsClient()) ||
-			(CastToNPC()->GetSwarmOwner() && entity_list.GetMob(CastToNPC()->GetSwarmOwner())->IsClient())))))
-		{
-			StartEnrage();
-		}
+		StartEnrage();
 
 		bool is_combat_range = CombatRange(target);
 
@@ -1183,13 +1176,42 @@ void Mob::AI_Process() {
 					}
 
 					if (GetSpecialAbility(SPECATK_FLURRY)) {
+						int flurry_chance = GetSpecialAbilityParam(SPECATK_FLURRY, 0);
+						flurry_chance = flurry_chance > 0 ? flurry_chance : RuleI(Combat, NPCFlurryChance); 
 
-						uint8 npc_flurry = RuleI(Combat, NPCFlurryChance);
-						if (GetFlurryChance())
-							npc_flurry = GetFlurryChance();
+						ExtraAttackOptions opts;
+						int cur = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
+						if(cur > 0) {
+							opts.damage_percent = cur / 100.0f;
+						}
 
-						if (MakeRandomInt(0, 99) < npc_flurry)
-							Flurry();
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 2);
+						if(cur > 0) {
+							opts.damage_flat = cur;
+						}
+
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 3);
+						if(cur > 0) {
+							opts.armor_pen_percent = cur / 100.0f;
+						}
+
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 4);
+						if(cur > 0) {
+							opts.armor_pen_flat = cur;
+						}
+
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 5);
+						if(cur > 0) {
+							opts.crit_percent = cur / 100.0f;
+						}
+
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 6);
+						if(cur > 0) {
+							opts.crit_flat = cur;
+						}
+
+						if (MakeRandomInt(0, 99) < flurry_chance)
+							Flurry(&opts);
 					}
 
 					if (IsPet()) {
@@ -1200,23 +1222,87 @@ void Mob::AI_Process() {
 						int16 flurry_chance = owner->aabonuses.PetFlurry + owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
 
 							if (flurry_chance && (MakeRandomInt(0, 99) < flurry_chance))
-								Flurry();
+								Flurry(nullptr);
 						}
 					}
 
 					if (GetSpecialAbility(SPECATK_RAMPAGE))
 					{
-						//simply based off dex for now, probably a better calc
-						if(MakeRandomInt(0, 100) < ((int)(GetDEX() / ((GetLevel() * 0.760) + 10.0)) + 5))
-							Rampage();
+						int rampage_chance = GetSpecialAbilityParam(SPECATK_RAMPAGE, 0);
+						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
+						if(MakeRandomInt(0, 99) < rampage_chance) {
+							ExtraAttackOptions opts;
+							int cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
+							if(cur > 0) {
+								opts.damage_percent = cur / 100.0f;
+							}
+
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 2);
+							if(cur > 0) {
+								opts.damage_flat = cur;
+							}
+
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 3);
+							if(cur > 0) {
+								opts.armor_pen_percent = cur / 100.0f;
+							}
+
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 4);
+							if(cur > 0) {
+								opts.armor_pen_flat = cur;
+							}
+
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 5);
+							if(cur > 0) {
+								opts.crit_percent = cur / 100.0f;
+							}
+
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 6);
+							if(cur > 0) {
+								opts.crit_flat = cur;
+							}
+							Rampage(&opts);
+						}
 					}
 
 					if (GetSpecialAbility(SPECATK_AREA_RAMPAGE))
 					{
+						int rampage_chance = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 0);
+						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
+						if(MakeRandomInt(0, 99) < rampage_chance) {
+							ExtraAttackOptions opts;
+							int cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 1);
+							if(cur > 0) {
+								opts.damage_percent = cur / 100.0f;
+							}
 
-						//simply based off dex for now, probably a better calc
-						if(MakeRandomInt(0, 100) < ((int)(GetDEX() / ((GetLevel() * 0.760) + 10.0)) + 5))
-							AreaRampage();
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 2);
+							if(cur > 0) {
+								opts.damage_flat = cur;
+							}
+
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 3);
+							if(cur > 0) {
+								opts.armor_pen_percent = cur / 100.0f;
+							}
+
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 4);
+							if(cur > 0) {
+								opts.armor_pen_flat = cur;
+							}
+
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 5);
+							if(cur > 0) {
+								opts.crit_percent = cur / 100.0f;
+							}
+
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 6);
+							if(cur > 0) {
+								opts.crit_flat = cur;
+							}
+							
+							AreaRampage(&opts);
+						}
 					}
 				}
 
@@ -1488,7 +1574,11 @@ void Mob::AI_Process() {
 	//Do Ranged attack here
 	if(doranged)
 	{
-		RangedAttack(target);
+		int attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
+		attacks = attacks > 0 ? attacks : 1;
+		for(int i = 0; i < attacks; ++i) {
+			RangedAttack(target);
+		}
 	}
 }
 
@@ -1865,11 +1955,24 @@ void Mob::StartEnrage()
 	if(!GetSpecialAbility(SPECATK_ENRAGE))
 		return;
 
+	int hp_ratio = GetSpecialAbilityParam(SPECATK_ENRAGE, 0);
+	hp_ratio = hp_ratio > 0 ? hp_ratio : RuleI(NPC, StartEnrageValue);
+	if(GetHPRatio() > static_cast<float>(hp_ratio)) {
+		return;
+	}
+
+	if(RuleB(NPC, LiveLikeEnrage) && !((IsPet() && !IsCharmed() && GetOwner() && GetOwner()->IsClient()) ||
+		(CastToNPC()->GetSwarmOwner() && entity_list.GetMob(CastToNPC()->GetSwarmOwner())->IsClient()))) {
+		return;
+	}
+
 	Timer *timer = GetSpecialAbilityTimer(SPECATK_ENRAGE);
 	if (timer && !timer->Check())
 		return;
 
-	StartSpecialAbilityTimer(SPECATK_ENRAGE, EnragedDurationTimer);
+	int enraged_duration = GetSpecialAbilityParam(SPECATK_ENRAGE, 1);
+	enraged_duration = enraged_duration > 0 ? enraged_duration : EnragedDurationTimer;
+	StartSpecialAbilityTimer(SPECATK_ENRAGE, enraged_duration);
 
 	// start the timer. need to call IsEnraged frequently since we dont have callback timers :-/
 	bEnraged = true;
@@ -1881,7 +1984,10 @@ void Mob::ProcessEnrage(){
 		Timer *timer = GetSpecialAbilityTimer(SPECATK_ENRAGE);
 		if(timer && timer->Check()){
 			entity_list.MessageClose_StringID(this, true, 200, MT_NPCEnrage, NPC_ENRAGE_END, GetCleanName());
-			StartSpecialAbilityTimer(SPECATK_ENRAGE, EnragedTimer);
+
+			int enraged_cooldown = GetSpecialAbilityParam(SPECATK_ENRAGE, 2);
+			enraged_cooldown = enraged_cooldown > 0 ? enraged_cooldown : EnragedTimer;
+			StartSpecialAbilityTimer(SPECATK_ENRAGE, enraged_cooldown);
 			bEnraged = false;
 		}
 	}
@@ -1892,7 +1998,7 @@ bool Mob::IsEnraged()
 	return bEnraged;
 }
 
-bool Mob::Flurry()
+bool Mob::Flurry(ExtraAttackOptions *opts)
 {
 	// this is wrong, flurry is extra attacks on the current target
 	Mob *target = GetTarget();
@@ -1903,7 +2009,7 @@ bool Mob::Flurry()
 			entity_list.MessageClose_StringID(this, true, 200, MT_PetFlurry, NPC_FLURRY, GetCleanName(), target->GetCleanName());
 		}
 		for (int i = 0; i < RuleI(Combat, MaxFlurryHits); i++)
-			Attack(target);
+			Attack(target, 13, false, false, false, opts);
 	}
 	return true;
 }
@@ -1931,7 +2037,7 @@ void Mob::ClearRampage(){
 	RampageArray.clear();
 }
 
-bool Mob::Rampage()
+bool Mob::Rampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
 	if (!IsPet()) {
@@ -1951,17 +2057,19 @@ bool Mob::Rampage()
 				continue;
 			if (CombatRange(m_target))
 			{
-				Attack(m_target);
+				Attack(m_target, 13, false, false, false, opts);
 				index_hit++;
 			}
 		}
 	}
-	if(index_hit < RuleI(Combat, MaxRampageTargets))
-		Attack(GetTarget());
+	
+	if(index_hit < RuleI(Combat, MaxRampageTargets)) {
+		Attack(GetTarget(), 13, false, false, false, opts);
+	}
 	return true;
 }
 
-void Mob::AreaRampage()
+void Mob::AreaRampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
 	if (!IsPet()) { // do not know every pet AA so thought it safer to add this
@@ -1969,10 +2077,11 @@ void Mob::AreaRampage()
 	} else {
 		entity_list.MessageClose_StringID(this, true, 200, MT_PetFlurry, AE_RAMPAGE, GetCleanName());
 	}
-	index_hit = hate_list.AreaRampage(this, GetTarget());
+	index_hit = hate_list.AreaRampage(this, GetTarget(), opts);
 
-	if(index_hit == 0)
-		Attack(GetTarget());
+	if(index_hit == 0) {
+		Attack(GetTarget(), 13, false, false, false, opts);
+	}
 }
 
 uint32 Mob::GetLevelCon(uint8 mylevel, uint8 iOtherLevel) {

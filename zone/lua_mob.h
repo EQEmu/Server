@@ -47,6 +47,7 @@ public:
 	bool Attack(Lua_Mob other, int hand, bool from_riposte);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell);
+	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, luabind::object opts);
 	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill);
 	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable);
 	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot);
@@ -334,7 +335,9 @@ public:
 	int GetSkill(int skill_id);
 	void CalcBonuses();
 	int GetSpecialAbility(int ability);
+	int GetSpecialAbilityParam(int ability, int param);
 	void SetSpecialAbility(int ability, int level);
+	void SetSpecialAbilityParam(int ability, int param, int value);
 	void ClearSpecialAbilities();
 	void ProcessSpecialAbilities(std::string str);
 	void SetAppearance(int app);

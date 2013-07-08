@@ -931,7 +931,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					hate += (2*((GetLevel()-25)/3));
 				}
 
-				other->AvoidDamage(this, TotalDmg, false); //CanRiposte=false - Can not riposte archery attacks.
+				other->AvoidDamage(this, TotalDmg, false);
 				other->MeleeMitigation(this, TotalDmg, minDmg);
 				if(TotalDmg > 0)
 				{
