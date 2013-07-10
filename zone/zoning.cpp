@@ -642,7 +642,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			safe_delete(outapp);
 		}
 
-		LogFile->write(EQEMuLog::Debug, "Player %s has requested a zoning to LOC x=%f, y=%f, z=%f, heading=%f in zoneid=%i", GetName(), x, y, z, heading, zoneID);
+		_log(NET__DEBUG, "Player %s has requested a zoning to LOC x=%f, y=%f, z=%f, heading=%f in zoneid=%i", GetName(), x, y, z, heading, zoneID);
 		//Clear zonesummon variables if we're zoning to our own zone
 		//Client wont generate a zone change packet to the server in this case so
 		//They aren't needed and it keeps behavior on next zone attempt from being undefined.
