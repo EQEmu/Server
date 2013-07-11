@@ -5,6 +5,7 @@
 #include "lua_entity.h"
 
 class Doors;
+class Lua_Mob;
 
 namespace luabind {
 	struct scope;
@@ -55,6 +56,10 @@ public:
 	void SetNoKeyring(int type);
 	int GetNoKeyring();
 	void CreateDatabaseEntry();
+	void ForceOpen(Lua_Mob sender);
+	void ForceOpen(Lua_Mob sender, bool alt_mode);
+	void ForceClose(Lua_Mob sender);
+	void ForceClose(Lua_Mob sender, bool alt_mode);
 };
 
 #endif

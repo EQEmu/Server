@@ -59,7 +59,7 @@ public:
 	//Gets the target with the most hate regardless of things like frenzy etc.
 	Mob* GetMostHate();
 
-	int AreaRampage(Mob *caster, Mob *target, ExtraAttackOptions *opts);
+	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
 
 	void SpellCast(Mob *caster, uint32 spell_id, float range);
 

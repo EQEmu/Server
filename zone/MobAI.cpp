@@ -1095,15 +1095,23 @@ void Mob::AI_Process() {
 		if(DivineAura())
 			return;
 
-		if(GetSpecialAbility(TETHER) || GetSpecialAbility(LEASH)) {
-			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > pAggroRange*pAggroRange) {
+		if(GetSpecialAbility(TETHER)) {
+			float aggro_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
+			aggro_range = aggro_range > 0.0f ? aggro_range : pAggroRange * pAggroRange;
+
+			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > aggro_range) {
 				GMMove(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY(), CastToNPC()->GetSpawnPointZ(), CastToNPC()->GetSpawnPointH());
-				if(GetSpecialAbility(LEASH)) {
-					SetHP(GetMaxHP());
-					BuffFadeAll();
-					WipeHateList();
-					return;
-				}
+			}
+		} else if(GetSpecialAbility(LEASH)) {
+			float aggro_range = static_cast<float>(GetSpecialAbilityParam(LEASH, 0));
+			aggro_range = aggro_range > 0.0f ? aggro_range : pAggroRange * pAggroRange;
+
+			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > aggro_range) {
+				GMMove(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY(), CastToNPC()->GetSpawnPointZ(), CastToNPC()->GetSpawnPointH());
+				SetHP(GetMaxHP());
+				BuffFadeAll();
+				WipeHateList();
+				return;
 			}
 		}
 
@@ -1180,32 +1188,32 @@ void Mob::AI_Process() {
 						flurry_chance = flurry_chance > 0 ? flurry_chance : RuleI(Combat, NPCFlurryChance); 
 
 						ExtraAttackOptions opts;
-						int cur = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
+						int cur = GetSpecialAbilityParam(SPECATK_FLURRY, 2);
 						if(cur > 0) {
 							opts.damage_percent = cur / 100.0f;
 						}
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 2);
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 3);
 						if(cur > 0) {
 							opts.damage_flat = cur;
 						}
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 3);
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 4);
 						if(cur > 0) {
 							opts.armor_pen_percent = cur / 100.0f;
 						}
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 4);
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 5);
 						if(cur > 0) {
 							opts.armor_pen_flat = cur;
 						}
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 5);
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 6);
 						if(cur > 0) {
 							opts.crit_percent = cur / 100.0f;
 						}
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 6);
+						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 7);
 						if(cur > 0) {
 							opts.crit_flat = cur;
 						}
@@ -1232,32 +1240,32 @@ void Mob::AI_Process() {
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
 						if(MakeRandomInt(0, 99) < rampage_chance) {
 							ExtraAttackOptions opts;
-							int cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
+							int cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 2);
 							if(cur > 0) {
 								opts.damage_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 2);
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 3);
 							if(cur > 0) {
 								opts.damage_flat = cur;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 3);
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 4);
 							if(cur > 0) {
 								opts.armor_pen_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 4);
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 5);
 							if(cur > 0) {
 								opts.armor_pen_flat = cur;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 5);
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 6);
 							if(cur > 0) {
 								opts.crit_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 6);
+							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 7);
 							if(cur > 0) {
 								opts.crit_flat = cur;
 							}
@@ -1271,32 +1279,32 @@ void Mob::AI_Process() {
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
 						if(MakeRandomInt(0, 99) < rampage_chance) {
 							ExtraAttackOptions opts;
-							int cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 1);
+							int cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 2);
 							if(cur > 0) {
 								opts.damage_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 2);
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 3);
 							if(cur > 0) {
 								opts.damage_flat = cur;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 3);
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 4);
 							if(cur > 0) {
 								opts.armor_pen_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 4);
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 5);
 							if(cur > 0) {
 								opts.armor_pen_flat = cur;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 5);
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 6);
 							if(cur > 0) {
 								opts.crit_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 6);
+							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 7);
 							if(cur > 0) {
 								opts.crit_flat = cur;
 							}
@@ -2008,7 +2016,10 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 		} else {
 			entity_list.MessageClose_StringID(this, true, 200, MT_PetFlurry, NPC_FLURRY, GetCleanName(), target->GetCleanName());
 		}
-		for (int i = 0; i < RuleI(Combat, MaxFlurryHits); i++)
+
+		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
+		num_attacks = num_attacks > 0 ? num_attacks : RuleI(Combat, MaxFlurryHits);
+		for (int i = 0; i < num_attacks; i++)
 			Attack(target, 13, false, false, false, opts);
 	}
 	return true;
@@ -2045,9 +2056,12 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 	} else {
 		entity_list.MessageClose_StringID(this, true, 200, MT_PetFlurry, NPC_RAMPAGE, GetCleanName());
 	}
+
+	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
+	rampage_targets = rampage_targets > 0 ? rampage_targets : RuleI(Combat, MaxRampageTargets);
 	for (int i = 0; i < RampageArray.size(); i++)
 	{
-		if(index_hit >= RuleI(Combat, MaxRampageTargets))
+		if(index_hit >= rampage_targets)
 			break;
 		// range is important
 		Mob *m_target = entity_list.GetMob(RampageArray[i].c_str());
@@ -2063,7 +2077,7 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		}
 	}
 	
-	if(index_hit < RuleI(Combat, MaxRampageTargets)) {
+	if(index_hit < rampage_targets) {
 		Attack(GetTarget(), 13, false, false, false, opts);
 	}
 	return true;
@@ -2077,7 +2091,10 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 	} else {
 		entity_list.MessageClose_StringID(this, true, 200, MT_PetFlurry, AE_RAMPAGE, GetCleanName());
 	}
-	index_hit = hate_list.AreaRampage(this, GetTarget(), opts);
+
+	int rampage_targets = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 1);
+	rampage_targets = rampage_targets > 0 ? rampage_targets : 1;
+	index_hit = hate_list.AreaRampage(this, GetTarget(), rampage_targets, opts);
 
 	if(index_hit == 0) {
 		Attack(GetTarget(), 13, false, false, false, opts);

@@ -5,6 +5,7 @@
 #include <luabind/object.hpp>
 
 #include "doors.h"
+#include "lua_mob.h"
 #include "lua_door.h"
 
 void Lua_Door::SetDoorName(const char *name) {
@@ -137,6 +138,26 @@ void Lua_Door::CreateDatabaseEntry() {
 	self->CreateDatabaseEntry();
 }
 
+void Lua_Door::ForceOpen(Lua_Mob sender) {
+	Lua_Safe_Call_Void();
+	self->ForceOpen(sender);
+}
+
+void Lua_Door::ForceOpen(Lua_Mob sender, bool alt_mode) {
+	Lua_Safe_Call_Void();
+	self->ForceOpen(sender, alt_mode);
+}
+
+void Lua_Door::ForceClose(Lua_Mob sender) {
+	Lua_Safe_Call_Void();
+	self->ForceClose(sender);
+}
+
+void Lua_Door::ForceClose(Lua_Mob sender, bool alt_mode) {
+	Lua_Safe_Call_Void();
+	self->ForceClose(sender, alt_mode);
+}
+
 luabind::scope lua_register_door() {
 	return luabind::class_<Lua_Door, Lua_Entity>("Door")
 		.def(luabind::constructor<>())
@@ -167,7 +188,11 @@ luabind::scope lua_register_door() {
 		.def("GetKeyItem", (uint32(Lua_Door::*)(void))&Lua_Door::GetKeyItem)
 		.def("SetNoKeyring", (void(Lua_Door::*)(int))&Lua_Door::SetNoKeyring)
 		.def("GetNoKeyring", (int(Lua_Door::*)(void))&Lua_Door::GetNoKeyring)
-		.def("CreateDatabaseEntry", (void(Lua_Door::*)(void))&Lua_Door::CreateDatabaseEntry);
+		.def("CreateDatabaseEntry", (void(Lua_Door::*)(void))&Lua_Door::CreateDatabaseEntry)
+		.def("ForceOpen", (void(Lua_Door::*)(Lua_Mob))&Lua_Door::ForceOpen)
+		.def("ForceOpen", (void(Lua_Door::*)(Lua_Mob,bool))&Lua_Door::ForceOpen)
+		.def("ForceClose", (void(Lua_Door::*)(Lua_Mob))&Lua_Door::ForceClose)
+		.def("ForceClose", (void(Lua_Door::*)(Lua_Mob,bool))&Lua_Door::ForceClose);
 }
 
 #endif

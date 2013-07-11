@@ -2338,7 +2338,6 @@ bool Mob::HateSummon() {
 
 	int summon_level = GetSpecialAbility(SPECATK_SUMMON);
 	if(summon_level == 1 || summon_level == 2) {
-		//Summon things always
 		if(!GetTarget() || (mob_owner && mob_owner->IsClient() && !CheckLosFN(GetTarget()))) {
 			return false;
 		}
