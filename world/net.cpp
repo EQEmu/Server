@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
 	_log(WORLD__INIT, "Loading server configuration..");
 	if (!WorldConfig::LoadConfig()) {
 		_log(WORLD__INIT_ERR, "Loading server configuration failed.");
-		return(1);
+		return 1;
 	}
 	const WorldConfig *Config=WorldConfig::get();
 
@@ -144,16 +144,16 @@ int main(int argc, char** argv) {
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(WORLD__INIT_ERR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
 		_log(WORLD__INIT_ERR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
 		_log(WORLD__INIT_ERR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 	#endif
 
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
 		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
-		return(1);
+		return 1;
 	}
 	dbasync = new DBAsync(&database);
 	guild_mgr.SetDatabase(&database);
@@ -204,8 +204,8 @@ int main(int argc, char** argv) {
 		else if (database.GetVariable("disablecommandline", tmp, 2)) {
 			if (strlen(tmp) == 1) {
 				if (tmp[0] == '1') {
-					std::cout << "Command line disabled in database... exiting" << std::endl;
-					return 0;
+					std::cerr << "Command line disabled in database... exiting" << std::endl;
+					return 1;
 				}
 			}
 		}
@@ -213,11 +213,14 @@ int main(int argc, char** argv) {
 			if (argc == 5) {
 				if (Seperator::IsNumber(argv[4])) {
 					if (atoi(argv[4]) >= 0 && atoi(argv[4]) <= 255) {
-						if (database.CreateAccount(argv[2], argv[3], atoi(argv[4])) == 0)
-							std::cout << "database.CreateAccount failed." << std::endl;
-						else
+						if (database.CreateAccount(argv[2], argv[3], atoi(argv[4])) == 0) {
+							std::cerr << "database.CreateAccount failed." << std::endl;
+							return 1;
+						}
+						else {
 							std::cout << "Account created: Username='" << argv[2] << "', Password='" << argv[3] << "', status=" << argv[4] << std::endl;
-						return 0;
+							return 0;
+						}
 					}
 				}
 			}
@@ -230,11 +233,14 @@ int main(int argc, char** argv) {
 				if (Seperator::IsNumber(argv[3])) {
 
 					if (atoi(argv[3]) >= 0 && atoi(argv[3]) <= 255) {
-						if (database.SetAccountStatus(argv[2], atoi(argv[3])))
+						if (database.SetAccountStatus(argv[2], atoi(argv[3]))) {
 							std::cout << "Account flagged: Username='" << argv[2] << "', status=" << argv[3] << std::endl;
-						else
-							std::cout << "database.SetAccountStatus failed." << std::endl;
-						return 0;
+							return 0;
+						}
+						else {
+							std::cerr << "database.SetAccountStatus failed." << std::endl;
+							return 1;
+						}
 					}
 				}
 			}
@@ -245,25 +251,30 @@ int main(int argc, char** argv) {
 		else if (strcasecmp(argv[1], "startzone") == 0) {
 			if (argc == 3) {
 				if (strlen(argv[2]) < 3) {
-					std::cout << "Error: zone name too short" << std::endl;
+					std::cerr << "Error: zone name too short" << std::endl;
+					return 1;
 				}
 				else if (strlen(argv[2]) > 15) {
-					std::cout << "Error: zone name too long" << std::endl;
+					std::cerr << "Error: zone name too long" << std::endl;
+					return 1;
 				}
 				else {
-					if (database.SetVariable("startzone", argv[2]))
+					if (database.SetVariable("startzone", argv[2])) {
 						std::cout << "Starting zone changed: '" << argv[2] << "'" << std::endl;
-					else
-						std::cout << "database.SetVariable failed." << std::endl;
+						return 0;
+					}
+					else {
+						std::cerr << "database.SetVariable failed." << std::endl;
+						return 1;
+					}
 				}
-				return 0;
 			}
 			std::cout << "Usage: world startzone zoneshortname" << std::endl;
 			return 0;
 		}
 		else {
-			std::cout << "Error, unknown command line option" << std::endl;
-			return 0;
+			std::cerr << "Error, unknown command line option" << std::endl;
+			return 1;
 		}
 	}
 

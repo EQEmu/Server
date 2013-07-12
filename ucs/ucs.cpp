@@ -82,7 +82,7 @@ int main() {
 
 		_log(UCS__INIT, "Loading server configuration failed.");
 
-		return(1);
+		return 1;
 	}
 
 	Config = ucsconfig::get();
@@ -103,7 +103,7 @@ int main() {
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
 		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
-		return(1);
+		return 1;
 	}
 
 	char tmp[64];
@@ -137,11 +137,11 @@ int main() {
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(UCS__ERROR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
 		_log(UCS__ERROR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 
 	worldserver = new WorldServer;

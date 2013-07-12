@@ -226,7 +226,8 @@ Mob::Mob(const char* in_name,
 		PermaProcs[j].chance = 0;
 		PermaProcs[j].base_spellID = SPELL_UNKNOWN;
 		SpellProcs[j].spellID = SPELL_UNKNOWN;
-
+		SpellProcs[j].chance = 0;
+		SpellProcs[j].base_spellID = SPELL_UNKNOWN;
 		DefensiveProcs[j].spellID = SPELL_UNKNOWN;
 		DefensiveProcs[j].chance = 0;
 		DefensiveProcs[j].base_spellID = SPELL_UNKNOWN;
@@ -271,6 +272,7 @@ Mob::Mob(const char* in_name,
 	casting_spell_timer = 0;
 	casting_spell_timer_duration = 0;
 	casting_spell_type = 0;
+	casting_spell_inventory_slot = 0;
 	target = 0;
 
 	memset(&itembonuses, 0, sizeof(StatBonuses));
