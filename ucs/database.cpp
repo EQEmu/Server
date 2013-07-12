@@ -402,7 +402,7 @@ void Database::SendHeaders(Client *c) {
 
 	char Buf[100];
 
-	my_ulonglong NumRows = mysql_num_rows(result);
+	uint32 NumRows = mysql_num_rows(result);
 
 	int HeaderCountPacketLength = 0;
 

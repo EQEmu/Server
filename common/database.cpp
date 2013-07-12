@@ -95,8 +95,6 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 
 void Database::DBInitVars() {
 
-	max_zonename = 0;
-	zonename_array = 0;
 	varcache_array = 0;
 	varcache_max = 0;
 	varcache_lastupdate = 0;
@@ -135,13 +133,6 @@ Close the connection to the database
 Database::~Database()
 {
 	unsigned int x;
-	if (zonename_array) {
-		for (x=0; x<=max_zonename; x++) {
-			if (zonename_array[x])
-				safe_delete_array(zonename_array[x]);
-		}
-		safe_delete_array(zonename_array);
-	}
 	if (varcache_array) {
 		for (x=0; x<varcache_max; x++) {
 			safe_delete_array(varcache_array[x]);
@@ -1316,39 +1307,13 @@ bool Database::LoadZoneNames() {
 	char *query = 0;
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	query = new char[256];
-	strcpy(query, "SELECT MAX(zoneidnumber) FROM zone");
 
-	if (RunQuery(query, strlen(query), errbuf, &result)) {
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT zoneidnumber, short_name FROM zone"), errbuf, &result)) {
 		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if (row && row[0])
-		{
-			max_zonename = atoi(row[0]);
-			zonename_array = new char*[max_zonename+1];
-			for(unsigned int i=0; i<max_zonename; i++) {
-				zonename_array[i] = 0;
-			}
-			mysql_free_result(result);
-
-			MakeAnyLenString(&query, "SELECT zoneidnumber, short_name FROM zone");
-			if (RunQuery(query, strlen(query), errbuf, &result)) {
-				safe_delete_array(query);
-				while((row = mysql_fetch_row(result))) {
-					zonename_array[atoi(row[0])] = new char[strlen(row[1]) + 1];
-					strcpy(zonename_array[atoi(row[0])], row[1]);
-					Sleep(0);
-				}
-				mysql_free_result(result);
-			}
-			else {
-				std::cerr << "Error in LoadZoneNames query '" << query << "' " << errbuf << std::endl;
-				safe_delete_array(query);
-				return false;
-			}
-		}
-		else {
-			mysql_free_result(result);
+		while ((row = mysql_fetch_row(result))) {
+			uint32 zoneid = atoi(row[0]);
+			std::string zonename = row[1];
+			zonename_array.insert(std::pair<uint32,std::string>(zoneid,zonename));
 		}
 	}
 	else {
@@ -1356,39 +1321,27 @@ bool Database::LoadZoneNames() {
 		safe_delete_array(query);
 		return false;
 	}
+	mysql_free_result(result);
+
 	return true;
 }
 
 uint32 Database::GetZoneID(const char* zonename) {
-	if (zonename_array == 0)
-		return 0;
 	if (zonename == 0)
 		return 0;
-	for (unsigned int i=0; i<=max_zonename; i++) {
-		if (zonename_array[i] != 0 && strcasecmp(zonename_array[i], zonename) == 0) {
-			return i;
+	for (auto iter = zonename_array.begin(); iter != zonename_array.end(); ++iter) {
+		if (strcasecmp(iter->second.c_str(), zonename) == 0) {
+			return iter->first;
 		}
 	}
 	return 0;
 }
 
 const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
-	if (zonename_array == 0) {
-		if (ErrorUnknown)
-			return "UNKNOWN";
-		else
-			return 0;
-	}
+	auto iter = zonename_array.find(zoneID);
 
-	if (zoneID <= max_zonename) {
-		if (zonename_array[zoneID])
-			return zonename_array[zoneID];
-		else {
-			if (ErrorUnknown)
-				return "UNKNOWN";
-			else
-				return 0;
-		}
+	if (iter != zonename_array.end()) {
+		return iter->second.c_str();
 	}
 	else {
 		if (ErrorUnknown)

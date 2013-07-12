@@ -2415,7 +2415,8 @@ struct BookRequest_Struct {
 */
 struct Object_Struct {
 /*00*/	uint32	linked_list_addr[2];// <Zaphod> They are, get this, prev and next, ala linked list
-/*08*/	uint16	unknown008[2];		//
+/*08*/	uint16	unknown008;			//
+/*10*/	uint16	unknown010;			//
 /*12*/	uint32	drop_id;			// Unique object id for zone
 /*16*/	uint16	zone_id;			// Redudant, but: Zone the object appears in
 /*18*/	uint16	zone_instance;		//

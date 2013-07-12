@@ -44,13 +44,13 @@ int main(int argc, char *argv[]) {
 	}
 	if(launcher_name.length() < 1) {
 		_log(LAUNCHER__ERROR, "You must specfify a launcher name as the first argument to this program.");
-		return(1);
+		return 1;
 	}
 
 	_log(LAUNCHER__INIT, "Loading server configuration..");
 	if (!EQEmuConfig::LoadConfig()) {
 		_log(LAUNCHER__ERROR, "Loading server configuration failed.");
-		return(1);
+		return 1;
 	}
 	const EQEmuConfig *Config = EQEmuConfig::get();
 
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
 		delete zone->second;
 	}
 
-	return(0);
+	return 0;
 }
 
 

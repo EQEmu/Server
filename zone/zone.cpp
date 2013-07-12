@@ -245,25 +245,25 @@ bool Zone::LoadZoneObjects() {
 			uint32 idx = 0;
 			int16 charges = 0;
 
-			id							= (uint32)atoi(row[idx++]);
-			data.zone_id				= atoi(row[idx++]);
-			data.x						= atof(row[idx++]);
-			data.y						= atof(row[idx++]);
-			data.z						= atof(row[idx++]);
-			data.heading				= atof(row[idx++]);
-			itemid						= (uint32)atoi(row[idx++]);
-			charges						= (int16)atoi(row[idx++]);
-			strcpy(data.object_name, row[idx++]);
-			type						= (uint8)atoi(row[idx++]);
-			icon						= (uint32)atoi(row[idx++]);
-			data.object_type			= (uint32)atoi(row[idx++]);
+			id							= (uint32)atoi(row[0]);
+			data.zone_id				= atoi(row[1]);
+			data.x						= atof(row[2]);
+			data.y						= atof(row[3]);
+			data.z						= atof(row[4]);
+			data.heading				= atof(row[5]);
+			itemid						= (uint32)atoi(row[6]);
+			charges						= (int16)atoi(row[7]);
+			strcpy(data.object_name, row[8]);
+			type						= (uint8)atoi(row[9]);
+			icon						= (uint32)atoi(row[10]);
+			data.object_type			= type;
 			data.linked_list_addr[0]	= 0;
 			data.linked_list_addr[1]	= 0;
-			data.unknown008[0]			= (uint32)atoi(row[idx++]);
-			data.unknown008[1]			= (uint32)atoi(row[idx++]);
-			data.unknown020				= (uint32)atoi(row[idx++]);
-			data.unknown024				= (uint32)atoi(row[idx++]);
-			data.unknown076				= (uint32)atoi(row[idx++]);
+			data.unknown008				= (uint32)atoi(row[11]);
+			data.unknown010				= (uint32)atoi(row[12]);
+			data.unknown020				= (uint32)atoi(row[13]);
+			data.unknown024				= (uint32)atoi(row[14]);
+			data.unknown076				= (uint32)atoi(row[15]);
 			data.unknown084				= 0;
 
 			ItemInst* inst = nullptr;
@@ -661,7 +661,7 @@ void Zone::LoadLevelEXPMods(){
 		mysql_free_result(DatasetResult);
 	}
 
-	safe_delete(Query);
+	safe_delete_array(Query);
 	Query = 0;
 
 	if(!errorMessage.empty()) {
@@ -855,6 +855,11 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	pathing = nullptr;
 	qGlobals = nullptr;
 	default_ruleset = 0;
+
+	loglevelvar = 0;
+	merchantvar = 0;
+	tradevar = 0;
+	lootvar = 0;
 
 	if(RuleB(TaskSystem, EnableTaskSystem)) {
 		taskmanager->LoadProximities(zoneid);

@@ -69,7 +69,7 @@ int main() {
 
 		_log(QUERYSERV__INIT, "Loading server configuration failed.");
 
-		return(1);
+		return 1;
 	}
 
 	Config = queryservconfig::get();
@@ -90,16 +90,16 @@ int main() {
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
 		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
-		return(1);
+		return 1;
 	}
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(QUERYSERV__ERROR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
 		_log(QUERYSERV__ERROR, "Could not set signal handler");
-		return 0;
+		return 1;
 	}
 
 	worldserver = new WorldServer;
