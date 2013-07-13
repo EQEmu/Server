@@ -43,6 +43,11 @@ Lua_Packet::Lua_Packet(const Lua_Packet& o) {
 	}
 }
 
+int Lua_Packet::GetSize() {
+	Lua_Safe_Call_Int();
+	return static_cast<int>(self->size);
+}
+
 int Lua_Packet::GetOpcode() {
 	Lua_Safe_Call_Int();
 	return static_cast<int>(self->GetOpcode());
@@ -241,6 +246,7 @@ luabind::scope lua_register_packet() {
 		.def(luabind::constructor<int,int>())
 		.property("null", &Lua_Packet::Null)
 		.property("valid", &Lua_Packet::Valid)
+		.def("GetSize", &Lua_Packet::GetSize)
 		.def("GetOpcode", &Lua_Packet::GetOpcode)
 		.def("SetOpcode", &Lua_Packet::SetOpcode)
 		.def("WriteInt8", &Lua_Packet::WriteInt8)

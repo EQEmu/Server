@@ -31,6 +31,8 @@ struct lua_registered_event {
 };
 
 extern std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_registered;
+extern void MapOpcodes();
+extern void ClearMappedOpcode(EmuOpcode op);
 
 void load_encounter(std::string name) {
 	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, 0);
@@ -1009,6 +1011,14 @@ Lua_ItemInst lua_get_quest_item() {
 	return quest_manager.GetQuestItem();
 }
 
+void lua_map_opcodes() {
+	MapOpcodes();
+}
+
+void lua_clear_opcode(int op) {
+	ClearMappedOpcode(static_cast<EmuOpcode>(op));
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1168,7 +1178,9 @@ luabind::scope lua_register_general() {
 		luabind::def("stop_follow", &lua_stop_follow),
 		luabind::def("get_initiator", &lua_get_initiator),
 		luabind::def("get_owner", &lua_get_owner),
-		luabind::def("get_quest_item", &lua_get_quest_item)
+		luabind::def("get_quest_item", &lua_get_quest_item),
+		luabind::def("map_opcodes", &lua_map_opcodes),
+		luabind::def("clear_opcode", &lua_clear_opcode)
 	];
 }
 
@@ -1247,7 +1259,8 @@ luabind::scope lua_register_events() {
 			luabind::value("augment_remove", static_cast<int>(EVENT_AUGMENT_REMOVE)),
 			luabind::value("enter_area", static_cast<int>(EVENT_ENTER_AREA)),
 			luabind::value("leave_area", static_cast<int>(EVENT_LEAVE_AREA)),
-			luabind::value("death_complete", static_cast<int>(EVENT_DEATH_COMPLETE))
+			luabind::value("death_complete", static_cast<int>(EVENT_DEATH_COMPLETE)),
+			luabind::value("unhandled_opcode", static_cast<int>(EVENT_UNHANDLED_OPCODE))
 		];
 }
 

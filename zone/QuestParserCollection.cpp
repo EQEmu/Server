@@ -29,6 +29,7 @@
 #include <assert.h>
 
 extern Zone* zone;
+extern void MapOpcodes();
 
 QuestParserCollection::QuestParserCollection() {
 	_player_quest_status = QuestUnloaded;
@@ -66,6 +67,7 @@ void QuestParserCollection::ReloadQuests(bool reset_timers) {
 		quest_manager.ClearAllTimers();
 	}
 
+	MapOpcodes();
 	_npc_quest_status.clear();
 	_player_quest_status = QuestUnloaded;
 	_global_player_quest_status = QuestUnloaded;

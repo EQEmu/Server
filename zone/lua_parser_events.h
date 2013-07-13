@@ -88,6 +88,8 @@ void handle_player_area(QuestInterface *parse, lua_State* L, Client* client, std
 		std::vector<void*> *extra_pointers);
 void handle_player_respawn(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
+void handle_player_packet(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+		std::vector<void*> *extra_pointers);
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 

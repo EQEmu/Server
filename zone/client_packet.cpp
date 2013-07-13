@@ -388,6 +388,17 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 }
 
+void ClearMappedOpcode(EmuOpcode op) {
+	if(op >= _maxEmuOpcode)
+		return;
+
+	ConnectedOpcodes[op] = nullptr;
+	auto iter = ConnectingOpcodes.find(op);
+	if(iter != ConnectingOpcodes.end()) {
+		ConnectingOpcodes.erase(iter);
+	}
+}
+
 int Client::HandlePacket(const EQApplicationPacket *app)
 {
 	_ZP(Client_HandlePacket);
@@ -420,10 +431,14 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	switch(client_state) {
 	case CLIENT_CONNECTING: {
 		if(ConnectingOpcodes.count(opcode) != 1) {
-//TODO: replace this 0 with the EQ opcode
-			LogFile->write(EQEMuLog::Error, "HandlePacket() Opcode error: Unexpected packet during CLIENT_CONNECTING: opcode: %s (#%d eq=0x%04x), size: %i", OpcodeNames[opcode], opcode, 0, app->size);
-#if EQDEBUG >= 9
-			std::cout << "Unexpected packet during CLIENT_CONNECTING: OpCode: 0x" << hex << setw(4) << setfill('0') << opcode << dec << ", size: " << app->size << std::endl;
+			//Hate const cast but everything in lua needs to be non-const even if i make it non-mutable
+			std::vector<void*> args;
+			args.push_back(const_cast<EQApplicationPacket*>(app));
+			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 1, &args);
+
+#if EQDEBUG >= 10
+			LogFile->write(EQEMuLog::Error, "HandlePacket() Opcode error: Unexpected packet during CLIENT_CONNECTING: opcode:"
+				" %s (#%d eq=0x%04x), size: %i", OpcodeNames[opcode], opcode, 0, app->size);
 			DumpPacket(app);
 #endif
 			break;
@@ -446,11 +461,16 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		ClientPacketProc p;
 		p = ConnectedOpcodes[opcode];
 		if(p == nullptr) {
-#if (EQDEBUG>=5)
+			std::vector<void*> args;
+			args.push_back(const_cast<EQApplicationPacket*>(app));
+			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
+
+#if (EQDEBUG >= 10)
 			char buffer[64];
 			app->build_header_dump(buffer);
 			mlog(CLIENT__NET_ERR, "Unhandled incoming opcode: %s", buffer);
-			if(app->size<1000)
+
+			if(app->size < 1000)
 				DumpPacket(app->pBuffer, app->size);
 			else{
 				std::cout << "Dump limited to 1000 characters:\n";
@@ -475,28 +495,6 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 
 	return(true);
 }
-
-
-
-/*void Client::Handle_Connect_OP_SetDataRate(const EQApplicationPacket *app)
-{
-	// Set client datarate
-	//if (app->size != sizeof(float)) {
-		//LogFile->write(EQEMuLog::Error,"Wrong size on OP_SetDatarate. Got: %i, Expected: %i", app->size, sizeof(float));
-		//return;
-	//}
-	//LogFile->write(EQEMuLog::Debug, "HandlePacket() OP_SetDataRate request : %f", *(float*) app->pBuffer);
-	//float tmpDR = *(float*) app->pBuffer;
-	//if (tmpDR <= 0.0f) {
-		//LogFile->write(EQEMuLog::Error,"HandlePacket() OP_SetDataRate INVALID request : %f <= 0", tmpDR);
-		//LogFile->write(EQEMuLog::Normal,"WARNING: Setting datarate for client to 5.0 expect a client lock up =(");
-		//tmpDR = 5.0f;
-	//}
-	//if (tmpDR > 25.0f)
-		//tmpDR = 25.0f;
-	//eqs->SetDataRate(tmpDR);
-	return;
-}*/
 
 void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 {

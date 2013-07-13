@@ -21,6 +21,7 @@
 #include "lua_corpse.h"
 #include "lua_door.h"
 #include "lua_object.h"
+#include "lua_packet.h"
 #include "zone.h"
 #include "lua_parser_events.h"
 
@@ -470,6 +471,17 @@ void handle_player_respawn(QuestInterface *parse, lua_State* L, Client* client, 
 
 	lua_pushboolean(L, extra_data == 1 ? true : false);
 	lua_setfield(L, -2, "resurrect");
+}
+
+void handle_player_packet(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+						std::vector<void*> *extra_pointers) {
+	Lua_Packet l_packet(reinterpret_cast<EQApplicationPacket*>(extra_pointers->at(0)));
+	luabind::object l_packet_o = luabind::object(L, l_packet);
+	l_packet_o.push(L);
+	lua_setfield(L, -2, "packet");
+
+	lua_pushboolean(L, extra_data == 1 ? true : false);
+	lua_setfield(L, -2, "connecting");
 }
 
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,

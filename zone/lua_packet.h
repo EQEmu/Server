@@ -25,6 +25,7 @@ public:
 	Lua_Packet(const Lua_Packet& o);
 	virtual ~Lua_Packet() { if(owned_) { EQApplicationPacket *ptr = GetLuaPtrData(); if(ptr) { delete ptr; } } }
 
+	int GetSize();
 	int GetOpcode();
 	void SetOpcode(int op);
 	void WriteInt8(int offset, int value);
