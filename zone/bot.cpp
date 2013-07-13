@@ -3337,7 +3337,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillType skil
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += other->GetAdditionalDamage(this, 0, true, skillinuse);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
-				TryCriticalHit(other, skillinuse, damage, opts);
+				TryCriticalHit(other, skillinuse, damage, nullptr);
 			}
 		}
 
@@ -4124,7 +4124,7 @@ void Bot::PetAIProcess() {
 							//aa_chance += botPet->GetOwner()->GetAA(aaCompanionsAlacrity) * 3;
 
 							if (MakeRandomInt(1, 100) < aa_chance)
-								Flurry();
+								Flurry(nullptr);
 						}
 
 						// Ok now, let's check pet's offhand.
