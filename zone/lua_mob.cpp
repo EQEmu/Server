@@ -119,7 +119,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 		cur = opts["crit_flat"];
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
-				options.crit_flat = luabind::object_cast<int>(cur);
+				options.crit_flat = luabind::object_cast<float>(cur);
 			} catch(luabind::cast_failed) {
 			}
 		}

@@ -47,6 +47,7 @@ SET(zone_sources
 	lua_mob.cpp
 	lua_npc.cpp
 	lua_object.cpp
+	lua_packet.cpp
 	lua_parser.cpp
 	lua_parser_events.cpp
 	lua_raid.cpp
@@ -156,6 +157,7 @@ SET(zone_headers
 	lua_mob.h
 	lua_npc.h
 	lua_object.h
+	lua_packet.h
 	lua_parser.h
 	lua_parser_events.h
 	lua_ptr.h

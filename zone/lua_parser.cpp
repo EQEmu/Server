@@ -29,6 +29,7 @@
 #include "lua_object.h"
 #include "lua_door.h"
 #include "lua_spawn.h"
+#include "lua_packet.h"
 #include "lua_general.h"
 #include "questmgr.h"
 #include "zone.h"
@@ -957,7 +958,9 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_raid(),
 			lua_register_corpse(),
 			lua_register_door(),
-			lua_register_object()
+			lua_register_object(),
+			lua_register_packet(),
+			lua_register_packet_opcodes()
 		];
 	
 	} catch(std::exception &ex) {

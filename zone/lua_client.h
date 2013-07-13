@@ -8,6 +8,7 @@ class Client;
 class Lua_Group;
 class Lua_Raid;
 class Lua_Inventory;
+class Lua_Packet;
 
 namespace luabind {
 	struct scope;
@@ -263,6 +264,10 @@ public:
 	bool PushItemOnCursor(Lua_ItemInst inst);
 	Lua_Inventory GetInventory();
 	void SendItemScale(Lua_ItemInst inst);
+	void QueuePacket(Lua_Packet app);
+	void QueuePacket(Lua_Packet app, bool ack_req);
+	void QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status);
+	void QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status, int filter);
 };
 
 #endif

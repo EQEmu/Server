@@ -11,6 +11,7 @@
 #include "lua_inventory.h"
 #include "lua_group.h"
 #include "lua_raid.h"
+#include "lua_packet.h"
 
 struct InventoryWhere { };
 
@@ -1183,6 +1184,26 @@ void Lua_Client::SendItemScale(Lua_ItemInst inst) {
 	self->SendItemScale(inst);
 }
 
+void Lua_Client::QueuePacket(Lua_Packet app) {
+	Lua_Safe_Call_Void();
+	self->QueuePacket(app);
+}
+
+void Lua_Client::QueuePacket(Lua_Packet app, bool ack_req) {
+	Lua_Safe_Call_Void();
+	self->QueuePacket(app, ack_req);
+}
+
+void Lua_Client::QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status) {
+	Lua_Safe_Call_Void();
+	self->QueuePacket(app, ack_req, static_cast<Mob::CLIENT_CONN_STATUS>(client_connection_status));
+}
+
+void Lua_Client::QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status, int filter) {
+	Lua_Safe_Call_Void();
+	self->QueuePacket(app, ack_req, static_cast<Mob::CLIENT_CONN_STATUS>(client_connection_status), static_cast<eqFilterType>(filter));
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1418,7 +1439,11 @@ luabind::scope lua_register_client() {
 		.def("PutItemInInventory", (bool(Lua_Client::*)(int,Lua_ItemInst))&Lua_Client::PutItemInInventory)
 		.def("PushItemOnCursor", (bool(Lua_Client::*)(Lua_ItemInst))&Lua_Client::PushItemOnCursor)
 		.def("GetInventory", (Lua_Inventory(Lua_Client::*)(void))&Lua_Client::GetInventory)
-		.def("SendItemScale", (void(Lua_Client::*)(Lua_ItemInst))&Lua_Client::SendItemScale);
+		.def("SendItemScale", (void(Lua_Client::*)(Lua_ItemInst))&Lua_Client::SendItemScale)
+		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet))&Lua_Client::QueuePacket)
+		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool))&Lua_Client::QueuePacket)
+		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool,int))&Lua_Client::QueuePacket)
+		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool,int,int))&Lua_Client::QueuePacket);
 }
 
 luabind::scope lua_register_inventory_where() {
