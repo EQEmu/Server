@@ -1,6 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 07/13/2013 ==
+KLS: Added packet class and helper functions to Lua.
+KLS: Added quest event: event_unhandled_opcode
+
 == 07/11/2013 ==
 KLS: Added a few lua functions.
 KLS: Redid the npcspecialatk system with a new system that is more flexible but a little more complicated (this will break any 3rd party tools that deal with them).
