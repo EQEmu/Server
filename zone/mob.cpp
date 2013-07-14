@@ -4825,6 +4825,7 @@ void Mob::SetSpecialAbility(int ability, int level) {
 		SpecialAbilities[ability] = spec;
 	} else {
 		SpecialAbility spec;
+		memset(&spec, 0, sizeof spec);
 		spec.level = level;
 		spec.timer = nullptr;
 		SpecialAbilities[ability] = spec;
@@ -4843,6 +4844,7 @@ void Mob::SetSpecialAbilityParam(int ability, int param, int value) {
 		SpecialAbilities[ability] = spec;
 	} else {
 		SpecialAbility spec;
+		memset(&spec, 0, sizeof spec);
 		spec.params[param] = value;
 		spec.timer = nullptr;
 		SpecialAbilities[ability] = spec;
@@ -4863,6 +4865,7 @@ void Mob::StartSpecialAbilityTimer(int ability, uint32 time) {
 		SpecialAbilities[ability] = spec;
 	} else {
 		SpecialAbility spec;
+		memset(&spec, 0, sizeof spec);
 		spec.timer = new Timer(time);
 		spec.timer->Start();
 		SpecialAbilities[ability] = spec;
