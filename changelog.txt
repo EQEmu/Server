@@ -1,5 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/15/2013 ==
+Sorvani: fix for lua_general.cpp funtion get_spawn_condition
 
 == 07/13/2013 ==
 KLS: Added packet class and helper functions to Lua.

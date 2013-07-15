@@ -343,8 +343,8 @@ void lua_spawn_condition(const char *zone, uint32 instance_id, int condition_id,
 	quest_manager.spawn_condition(zone, instance_id, condition_id, value);
 }
 
-void lua_get_spawn_condition(const char *zone, uint32 instance_id, int condition_id) {
-	quest_manager.get_spawn_condition(zone, instance_id, condition_id);
+int lua_get_spawn_condition(const char *zone, uint32 instance_id, int condition_id) {
+	return quest_manager.get_spawn_condition(zone, instance_id, condition_id);
 }
 
 void lua_toggle_spawn_event(int event_id, bool enable, bool reset) {
