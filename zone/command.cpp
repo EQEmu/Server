@@ -3373,7 +3373,7 @@ void command_viewnpctype(Client *c, const Seperator *sep)
 			c->Message(0, "  Class: %i", npct->class_);
 			c->Message(0, "  MinDmg: %i", npct->min_dmg);
 			c->Message(0, "  MaxDmg: %i", npct->max_dmg);
-			c->Message(0, "  Special Abilities: %s", npct->special_abilities.c_str());
+			c->Message(0, "  Special Abilities: %s", npct->special_abilities);
 			c->Message(0, "  Spells: %i", npct->npc_spells_id);
 			c->Message(0, "  Loot Table: %i", npct->loottable_id);
 			c->Message(0, "  NPCFactionID: %i", npct->npc_faction_id);

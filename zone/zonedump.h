@@ -89,7 +89,7 @@ struct NPCType
 	uint32	min_dmg;
 	uint32	max_dmg;
 	int16	attack_count;
-	std::string special_abilities;
+	char special_abilities[512];
 	uint16	d_meele_texture1;
 	uint16	d_meele_texture2;
 	uint8	prim_melee_type;

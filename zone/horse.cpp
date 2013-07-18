@@ -87,12 +87,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 			memset(npc_type, 0, sizeof(NPCType));
 			strcpy(npc_type->name,"Unclaimed_Mount");	//this should never get used
 
-			npc_type->special_abilities = itoa(IMMUNE_MELEE);
-			npc_type->special_abilities += std::string(",1^"); 
-			npc_type->special_abilities += itoa(IMMUNE_MAGIC);
-			npc_type->special_abilities += std::string(",1^");
-			npc_type->special_abilities += itoa(IMMUNE_AGGRO);
-			npc_type->special_abilities += std::string(",1");
+			strcpy(npc_type->special_abilities, "19,1^20,1^24,1");
 			npc_type->cur_hp = 1;
 			npc_type->max_hp = 1;
 			npc_type->race = atoi(row[0]);

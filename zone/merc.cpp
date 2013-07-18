@@ -1850,7 +1850,6 @@ void Merc::AI_Start(int32 iMoveDelay) {
 	}
 
 	if (NPCTypedata_ours) {
-		//AI_AddNPCSpells(ourNPCData->npc_spells_id);
 		ProcessSpecialAbilities(NPCTypedata_ours->special_abilities);
 	}
 

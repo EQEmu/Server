@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/18/2013 ==
+KLS: Fix for crash in special_abilities code due to existing use of some dangerous code we didn't catch before.
+
 == 07/15/2013 ==
 Sorvani: fix for lua_general.cpp funtion get_spawn_condition
 Uleat: added non-extensioned wildcard filter to \\...\dependencies\.gitignore to fix tortoisegit inclusion errors (fixes commit and display overlay issues.)

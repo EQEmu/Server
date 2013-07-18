@@ -330,14 +330,7 @@ void Trap::CreateHiddenTrigger()
 	make_npc->d_meele_texture2 = 0;
 	make_npc->trackable = 0;
 	make_npc->level = level;
-	make_npc->special_abilities = itoa(IMMUNE_MELEE);
-	make_npc->special_abilities += std::string(",1^"); 
-	make_npc->special_abilities += itoa(IMMUNE_MAGIC);
-	make_npc->special_abilities += std::string(",1^");
-	make_npc->special_abilities += itoa(IMMUNE_AGGRO);
-	make_npc->special_abilities += std::string(",1^");
-	make_npc->special_abilities += itoa(IMMUNE_AGGRO_ON);
-	make_npc->special_abilities += std::string(",1");
+	strcpy(make_npc->special_abilities, "19,1^20,1^24,1^25,1");
 	NPC* npca = new NPC(make_npc, 0, x, y, z, 0, FlyMode3);
 	npca->GiveNPCTypeData(make_npc);
 	entity_list.AddNPC(npca);
