@@ -833,6 +833,7 @@ public:
 	int		mod_spell_stack(uint16 spellid1, int caster_level1, Mob* caster1, uint16 spellid2, int caster_level2, Mob* caster2);
 	int		mod_spell_resist(int resist_chance, int level_mod, int resist_modifier, int target_resist, uint8 resist_type, uint16 spell_id, Mob* caster);
 	void	mod_spell_cast(uint16 spell_id, Mob* spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust, bool isproc);
+	bool    mod_will_aggro(Mob *attacker, Mob *on);
 
 protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);

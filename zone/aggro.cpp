@@ -163,7 +163,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 		return;
 	}
 
-	if(GetINT() > 75 && mob->GetLevelCon(GetLevel()) == CON_GREEN ) {
+	if(GetINT() > RuleI(Aggro, IntAggroThreshold) && mob->GetLevelCon(GetLevel()) == CON_GREEN ) {
 		towho->Message(0, "...%s is red to me (basically)", mob->GetName(),
 		dist2, iAggroRange2);
 		return;
@@ -325,7 +325,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	(
 	//old InZone check taken care of above by !mob->CastToClient()->Connected()
 	(
-		( GetINT() <= 75 )
+		( GetINT() <= RuleI(Aggro, IntAggroThreshold) )
 		||( mob->IsClient() && mob->CastToClient()->IsSitting() )
 		||( mob->GetLevelCon(GetLevel()) != CON_GREEN )
 
@@ -352,7 +352,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			#if EQDEBUG>=6
 				LogFile->write(EQEMuLog::Debug, "Check aggro for %s target %s.", GetName(), mob->GetName());
 			#endif
-			return(true);
+			return( mod_will_aggro(mob, this) );
 		}
 	}
 #if EQDEBUG >= 6

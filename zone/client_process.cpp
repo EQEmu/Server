@@ -1886,10 +1886,11 @@ void Client::DoStaminaUpdate() {
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 
 	if(zone->GetZoneID() != 151) {
+		int loss = RuleI(Character, FoodLossPerUpdate);
 		if (m_pp.hunger_level > 0)
-			m_pp.hunger_level-=35;
+			m_pp.hunger_level-=loss;
 		if (m_pp.thirst_level > 0)
-			m_pp.thirst_level-=35;
+			m_pp.thirst_level-=loss;
 		sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
 		sta->water = m_pp.thirst_level> 6000 ? 6000 : m_pp.thirst_level;
 	}

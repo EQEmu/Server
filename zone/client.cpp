@@ -7955,3 +7955,103 @@ bool Client::RemoveRespawnOption(uint8 position)
 	}
 	return false;
 }
+
+void Client::SetHunger(int32 in_hunger)
+{
+	EQApplicationPacket *outapp;
+	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
+	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
+	sta->food = in_hunger;
+	sta->water = m_pp.thirst_level > 6000 ? 6000 : m_pp.thirst_level;
+
+	m_pp.hunger_level = in_hunger;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::SetThirst(int32 in_thirst)
+{
+	EQApplicationPacket *outapp;
+	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
+	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
+	sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
+	sta->water = in_thirst;
+
+	m_pp.thirst_level = in_thirst;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::SetConsumption(int32 in_hunger, int32 in_thirst)
+{
+	EQApplicationPacket *outapp;
+	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
+	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
+	sta->food = in_hunger;
+	sta->water = in_thirst;
+
+	m_pp.hunger_level = in_hunger;
+	m_pp.thirst_level = in_thirst;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume)
+{
+   if(!item) { return; }
+
+    uint16 cons_mod = 180;
+
+    switch(GetAA(aaInnateMetabolism)){
+        case 1:
+            cons_mod = cons_mod * 110 * RuleI(Character, ConsumptionMultiplier) / 10000;
+            break;
+        case 2:
+            cons_mod = cons_mod * 125 * RuleI(Character, ConsumptionMultiplier) / 10000;
+            break;
+        case 3:
+            cons_mod = cons_mod * 150 * RuleI(Character, ConsumptionMultiplier) / 10000;
+            break;
+        default:
+            cons_mod = cons_mod * RuleI(Character, ConsumptionMultiplier) / 100;
+            break;
+    }
+
+   if(type == ItemTypeFood)
+   {
+       int hchange = item->CastTime * cons_mod;
+       hchange = mod_food_value(item, hchange);
+
+       if(hchange < 0) { return; }
+
+       m_pp.hunger_level += hchange;
+       DeleteItemInInventory(slot, 1, false);
+
+       if(!auto_consume) //no message if the client consumed for us
+           entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
+
+#if EQDEBUG >= 1
+       LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", (int)slot);
+#endif
+   }
+   else
+   {
+       int tchange = item->CastTime * cons_mod;
+       tchange = mod_drink_value(item, tchange);
+
+       if(tchange < 0) { return; }
+
+        m_pp.thirst_level += tchange;
+        DeleteItemInInventory(slot, 1, false);
+
+        if(auto_consume) //no message if the client consumed for us
+            entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
+
+#if EQDEBUG >= 1
+        LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", (int)slot);
+#endif
+   }
+}
