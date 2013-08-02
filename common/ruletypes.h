@@ -96,6 +96,7 @@ RULE_BOOL ( Character, MaintainIntoxicationAcrossZones, true ) // If true, alcoh
 RULE_BOOL ( Character, EnableDiscoveredItems, true ) // If enabled, it enables EVENT_DISCOVER_ITEM and also saves character names and timestamps for the first time an item is discovered.
 RULE_BOOL ( Character, EnableXTargetting, true) // Enable Extended Targetting Window, for users with UF and later clients.
 RULE_BOOL ( Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
+RULE_INT ( Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )
@@ -398,6 +399,7 @@ RULE_INT ( Aggro, SongAggroMod, 33 )
 RULE_INT ( Aggro, PetSpellAggroMod, 10 )
 RULE_REAL ( Aggro, TunnelVisionAggroMod, 0.75 ) //people not currently the top hate generate this much hate on a Tunnel Vision mob
 RULE_INT ( Aggro, MaxStunProcAggro, 400 ) // Set to -1 for no limit. Maxmimum amount of aggro that a stun based proc will add.
+RULE_INT ( Aggro, IntAggroThreshold, 75 ) // Int <= this will aggro regardless of level difference.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY ( TaskSystem)
