@@ -1468,7 +1468,6 @@ luabind::scope lua_register_client() {
 		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet))&Lua_Client::QueuePacket)
 		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool))&Lua_Client::QueuePacket)
 		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool,int))&Lua_Client::QueuePacket)
-		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool,int,int))&Lua_Client::QueuePacket);
 		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool,int,int))&Lua_Client::QueuePacket)
 		.def("GetHunger", (int32(Lua_Client::*)(void))&Lua_Client::GetHunger)
 		.def("GetThirst", (int32(Lua_Client::*)(void))&Lua_Client::GetThirst)
