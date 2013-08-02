@@ -1908,24 +1908,6 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 		}
 	}
 
-
-	uint16 cons_mod = 180;
-
-	switch(GetAA(aaInnateMetabolism)){
-		case 1:
-			cons_mod = cons_mod * 110 * RuleI(Character, ConsumptionMultiplier) / 10000;
-			break;
-		case 2:
-			cons_mod = cons_mod * 125 * RuleI(Character, ConsumptionMultiplier) / 10000;
-			break;
-		case 3:
-			cons_mod = cons_mod * 150 * RuleI(Character, ConsumptionMultiplier) / 10000;
-			break;
-		default:
-			cons_mod = cons_mod * RuleI(Character, ConsumptionMultiplier) / 100;
-			break;
-	}
-
 	ItemInst *myitem = GetInv().GetItem(pcs->slot);
 	if(myitem == nullptr) {
 		LogFile->write(EQEMuLog::Error, "Consuming from empty slot %d", pcs->slot);
@@ -2148,23 +2130,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					else
 					{
 						//This is food/drink - consume it
-						uint16 cons_mod = 180;
-						switch(GetAA(aaInnateMetabolism))
-						{
-							case 1:
-								cons_mod = cons_mod * 110 * RuleI(Character, ConsumptionMultiplier) / 10000;
-								break;
-							case 2:
-								cons_mod = cons_mod * 125 * RuleI(Character, ConsumptionMultiplier) / 10000;
-								break;
-							case 3:
-								cons_mod = cons_mod * 150 * RuleI(Character, ConsumptionMultiplier) / 10000;
-								break;
-							default:
-								cons_mod = cons_mod * RuleI(Character, ConsumptionMultiplier) / 100;
-								break;
-						}
-
 						if (item->ItemType == ItemTypeFood && m_pp.hunger_level < 5000)
 						{
 							Consume(item, item->ItemType, slot_id, false);
