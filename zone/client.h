@@ -807,6 +807,11 @@ public:
 
 	bool	Hungry() const {if (GetGM()) return false; return m_pp.hunger_level <= 3000;}
 	bool	Thirsty() const {if (GetGM()) return false; return m_pp.thirst_level <= 3000;}
+    int32   GetHunger() const { return m_pp.hunger_level; }
+    int32   GetThirst() const { return m_pp.thirst_level; }
+    void    SetHunger(int32 in_hunger);
+    void    SetThirst(int32 in_thirst);
+    void    SetConsumption(int32 in_hunger, int32 in_thirst);
 
 	bool	CheckTradeLoreConflict(Client* other);
 	void	LinkDead();
@@ -1148,6 +1153,7 @@ public:
 	void LoadAccountFlags();
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillType);
+	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
 	int mod_client_damage(int damage, SkillType skillinuse, int hand, const ItemInst* weapon, Mob* other);
 	bool mod_client_message(char* message, uint8 chan_num);
 	bool mod_can_increase_skill(SkillType skillid, Mob* against_who);
@@ -1167,6 +1173,9 @@ public:
 	int32 mod_client_xp(int32 in_exp, NPC *npc);
 	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
 	int mod_client_haste_cap(int cap);
+    int mod_consume(Item_Struct *item, ItemTypes type, int change);
+    int mod_food_value(const Item_Struct *item, int change);
+    int mod_drink_value(const Item_Struct *item, int change);
 
 protected:
 	friend class Mob;

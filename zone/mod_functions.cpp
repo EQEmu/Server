@@ -110,6 +110,10 @@ int32 Client::mod_client_xp(int32 in_xp, NPC *npc) { return(in_xp); }
 //To adjust how much XP is given per kill, use mod_client_xp
 uint32 Client::mod_client_xp_for_level(uint32 xp, uint16 check_level) { return(xp); }
 
+//Food and drink values as computed by consume requests.  Return < 0 to abort the request.
+int Client::mod_food_value(const Item_Struct *item, int change) { return(change); }
+int Client::mod_drink_value(const Item_Struct *item, int change) { return(change); }
+
 //effect_vallue - Spell effect value as calculated by default formulas.  You will want to ignore effects that don't lend themselves to scaling - pet ID's, gate coords, etc.
 int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster) { return(effect_value); }
 
@@ -185,3 +189,6 @@ int Mob::mod_spell_resist(int resist_chance, int level_mod, int resist_modifier,
 
 //Spell is cast by this on spelltar, called from spellontarget after the event_cast_on NPC event
 void Mob::mod_spell_cast(uint16 spell_id, Mob* spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust, bool isproc) { return; }
+
+//At this point all applicable aggro checks have succeeded.  Attacker should aggro unless we return false.
+bool Mob::mod_will_aggro(Mob *attacker, Mob *on) { return(true); }

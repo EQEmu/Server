@@ -268,6 +268,11 @@ public:
 	void QueuePacket(Lua_Packet app, bool ack_req);
 	void QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status);
 	void QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status, int filter);
+	int32 GetHunger();
+	int32 GetThirst();
+	void SetHunger(int32 in_hunger);
+	void SetThirst(int32 in_thirst);
+	void SetConsumption(int32 in_hunger, int32 in_thirst);
 };
 
 #endif

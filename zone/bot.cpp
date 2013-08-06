@@ -6464,9 +6464,9 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		int min_hit = 1;
 		int max_hit = (2*weapon_damage*GetDamageTable(skillinuse)) / 100;
 
-		if(GetLevel() < 10 && max_hit > 20)
+		if(GetLevel() < 10 && max_hit > RuleI(Combat, HitCapPre10))
 			max_hit = (RuleI(Combat, HitCapPre10));
-		else if(GetLevel() < 20 && max_hit > 40)
+		else if(GetLevel() < 20 && max_hit > RuleI(Combat, HitCapPre20))
 			max_hit = (RuleI(Combat, HitCapPre20));
 
 		// ***************************************************************

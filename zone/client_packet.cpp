@@ -1908,24 +1908,6 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 		}
 	}
 
-
-	uint16 cons_mod = 180;
-
-	switch(GetAA(aaInnateMetabolism)){
-		case 1:
-			cons_mod = cons_mod * 110 * RuleI(Character, ConsumptionMultiplier) / 10000;
-			break;
-		case 2:
-			cons_mod = cons_mod * 125 * RuleI(Character, ConsumptionMultiplier) / 10000;
-			break;
-		case 3:
-			cons_mod = cons_mod * 150 * RuleI(Character, ConsumptionMultiplier) / 10000;
-			break;
-		default:
-			cons_mod = cons_mod * RuleI(Character, ConsumptionMultiplier) / 100;
-			break;
-	}
-
 	ItemInst *myitem = GetInv().GetItem(pcs->slot);
 	if(myitem == nullptr) {
 		LogFile->write(EQEMuLog::Error, "Consuming from empty slot %d", pcs->slot);
@@ -1934,26 +1916,10 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 
 	const Item_Struct* eat_item = myitem->GetItem();
 	if (pcs->type == 0x01) {
-#if EQDEBUG >= 1
-		LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", (int)pcs->slot);
-#endif
-		m_pp.hunger_level += eat_item->CastTime*cons_mod; //roughly 1 item per 10 minutes
-		DeleteItemInInventory(pcs->slot, 1, false);
-
-		if(pcs->auto_consumed != 0xffffffff) //no message if the client consumed for us
-			entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), eat_item->Name);
+		Consume(eat_item, ItemTypeFood, pcs->slot, (pcs->auto_consumed == 0xffffffff));
 	}
 	else if (pcs->type == 0x02) {
-#if EQDEBUG >= 1
-		LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", (int)pcs->slot);
-#endif
-		// 6000 is the max. value
-		//m_pp.thirst_level += 1000;
-		m_pp.thirst_level += eat_item->CastTime*cons_mod; //roughly 1 item per 10 minutes
-		DeleteItemInInventory(pcs->slot, 1, false);
-
-		if(pcs->auto_consumed != 0xffffffff) //no message if the client consumed for us
-			entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), eat_item->Name);
+		Consume(eat_item, ItemTypeDrink, pcs->slot, (pcs->auto_consumed == 0xffffffff));
 	}
 	else {
 		LogFile->write(EQEMuLog::Error, "OP_Consume: unknown type, type:%i", (int)pcs->type);
@@ -2164,41 +2130,13 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					else
 					{
 						//This is food/drink - consume it
-						uint16 cons_mod = 180;
-						switch(GetAA(aaInnateMetabolism))
-						{
-							case 1:
-								cons_mod = cons_mod * 110 * RuleI(Character, ConsumptionMultiplier) / 10000;
-								break;
-							case 2:
-								cons_mod = cons_mod * 125 * RuleI(Character, ConsumptionMultiplier) / 10000;
-								break;
-							case 3:
-								cons_mod = cons_mod * 150 * RuleI(Character, ConsumptionMultiplier) / 10000;
-								break;
-							default:
-								cons_mod = cons_mod * RuleI(Character, ConsumptionMultiplier) / 100;
-								break;
-						}
-
 						if (item->ItemType == ItemTypeFood && m_pp.hunger_level < 5000)
 						{
-#if EQDEBUG >= 1
-							LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", slot_id);
-#endif
-							m_pp.hunger_level += item->CastTime*cons_mod; //roughly 1 item per 10 minutes
-							DeleteItemInInventory(slot_id, 1, false);
-							entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
+							Consume(item, item->ItemType, slot_id, false);
 						}
 						else if (item->ItemType == ItemTypeDrink && m_pp.thirst_level < 5000)
 						{
-#if EQDEBUG >= 1
-							LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", slot_id);
-#endif
-							// 6000 is the max. value
-							m_pp.thirst_level += item->CastTime*cons_mod; //roughly 1 item per 10 minutes
-							DeleteItemInInventory(slot_id, 1, false);
-							entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
+							Consume(item, item->ItemType, slot_id, false);
 						}
 						else if (item->ItemType == ItemTypeAlcohol)
 						{
