@@ -1631,7 +1631,7 @@ void QuestManager::disable_proximity_say() {
 void QuestManager::setanim(int npc_type, int animnum) {
 	//adds appearance changes
 	Mob* thenpc = entity_list.GetMobByNpcTypeID(npc_type);
-	if(animnum < 0 || animnum >= _eaMaxAppearance)
+	if(!thenpc || animnum < 0 || animnum >= _eaMaxAppearance)
 		return;
 	thenpc->SetAppearance(EmuAppearance(animnum));
 }

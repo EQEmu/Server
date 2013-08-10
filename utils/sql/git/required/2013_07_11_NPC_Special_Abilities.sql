@@ -34,6 +34,7 @@ UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "31,1^") WHER
 UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "32,1^") WHERE npcspecialattks LIKE BINARY '%J%';
 UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "33,1^") WHERE npcspecialattks LIKE BINARY '%j%';
 UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "34,1^") WHERE npcspecialattks LIKE BINARY '%o%';
+UPDATE npc_types SET special_abilities = CONCAT(special_abilities, "35,1^") WHERE npcspecialattks LIKE BINARY '%Z%';
 UPDATE npc_types SET special_abilities = TRIM(TRAILING '^' FROM special_abilities);
 
 ALTER TABLE `npc_types`  DROP COLUMN `npcspecialattks`;
