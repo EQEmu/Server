@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/20/2013 ==
+Uleat: Fix for bot pet spell buff corruption (existing db issues will correct themselves through pet death attrition)
+
 == 07/18/2013 ==
 KLS: Fix for crash in special_abilities code due to existing use of some dangerous code we didn't catch before.
 
