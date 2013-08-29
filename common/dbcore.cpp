@@ -59,7 +59,6 @@ void DBcore::ping() {
 }
 
 bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum, bool retry) {
-	_CP(DBcore_RunQuery);
 	if (errnum)
 		*errnum = 0;
 	if (errbuf)
@@ -68,11 +67,7 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 	LockMutex lock(&MDatabase);
 	if (pStatus != Connected)
 		Open();
-#if DEBUG_MYSQL_QUERIES >= 1
-	char tmp[120];
-	strn0cpy(tmp, query, sizeof(tmp));
-	std::cout << "QUERY: " << tmp << std::endl;
-#endif
+
 	if (mysql_real_query(&mysql, query, querylen)) {
 		if (mysql_errno(&mysql) == CR_SERVER_GONE_ERROR)
 			pStatus = Error;

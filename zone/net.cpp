@@ -333,7 +333,6 @@ int main(int argc, char** argv) {
 	temp_timer.Start();
 	while(RunLoops) {
 		{	//profiler block to omit the sleep from times
-		_ZP(net_main);
 
 		//Advance the timer to our current point in time
 		Timer::SetCurrentTime();

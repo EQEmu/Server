@@ -520,8 +520,6 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	if(GetID()==0)
 		return true;
 
-	_ZP(Mob_CalculateNewPosition2);
-
 	if ((x_pos-x == 0) && (y_pos-y == 0)) {//spawn is at target coords
 		if(z_pos-z != 0) {
 			z_pos = z;
@@ -755,12 +753,9 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	if(GetID()==0)
 		return true;
 
-	_ZP(Mob_CalculateNewPosition);
-
 	float nx = x_pos;
 	float ny = y_pos;
 	float nz = z_pos;
-//	float nh = heading;
 
 	// if NPC is rooted
 	if (speed == 0.0) {
@@ -917,14 +912,12 @@ void NPC::AssignWaypoints(int32 grid) {
 	if(!GridErr)
 	{
 		this->CastToNPC()->SetGrid(grid);	// Assign grid number
-		adverrorinfo = 7561;
 
 		// Retrieve all waypoints for this grid
 		if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `x`,`y`,`z`,`pause`,`heading` FROM grid_entries WHERE `gridid`=%i AND `zoneid`=%i ORDER BY `number`",grid,zone->GetZoneID()),errbuf,&result))
 		{
 			roamer = true;
 			max_wp = -1;	// Initialize it; will increment it for each waypoint successfully added to the list
-			adverrorinfo = 7564;
 
 			while((row = mysql_fetch_row(result)))
 			{
@@ -1084,7 +1077,6 @@ uint8 ZoneDatabase::GetGridType2(uint32 grid, uint16 zoneid) {
 }
 
 bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp) {
-	_CP(Database_GetWaypoints);
 	char *query = 0;
 	char errbuff[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES *result;

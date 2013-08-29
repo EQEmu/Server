@@ -531,7 +531,6 @@ ItemInst* ItemInstQueue::peek_front() const
 // Retrieve item at specified slot; returns false if item not found
 ItemInst* Inventory::GetItem(int16 slot_id) const
 {
-	_CP(Inventory_GetItem);
 	ItemInst* result = nullptr;
 
 	// Cursor
@@ -862,7 +861,6 @@ bool Inventory::SwapItem(int16 slot_a, int16 slot_b)
 
 int16 Inventory::HasItem(uint32 item_id, uint8 quantity, uint8 where)
 {
-	_CP(Inventory_HasItem);
 	int16 slot_id = SLOT_INVALID;
 
 	//Altered by Father Nitwit to support a specification of

@@ -135,8 +135,6 @@ void WorldServer::OnConnected() {
 }
 
 void WorldServer::Process() {
-	_ZP(WorldServer_Process);
-
 	WorldConnection::Process();
 
 	if (!Connected())

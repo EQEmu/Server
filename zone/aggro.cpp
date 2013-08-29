@@ -33,11 +33,9 @@ extern Zone* zone;
 
 //look around a client for things which might aggro the client.
 void EntityList::CheckClientAggro(Client *around) {
-	_ZP(EntityList_CheckClientAggro);
 
 	LinkedListIterator<Mob*> iterator(mob_list);
 	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
-		_ZP(EntityList_CheckClientAggro_Loop);
 		Mob* mob = iterator.GetData();
 		if(mob->IsClient())	//also ensures that mob != around
 			continue;
@@ -245,7 +243,6 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 bool Mob::CheckWillAggro(Mob *mob) {
 	if(!mob)
 		return false;
-	_ZP(Mob_CheckWillAggro);
 
 	//sometimes if a client has some lag while zoning into a dangerous place while either invis or a GM
 	//they will aggro mobs even though it's supposed to be impossible, to lets make sure we've finished connecting
@@ -369,7 +366,6 @@ bool Mob::CheckWillAggro(Mob *mob) {
 Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange) {
 	if (!sender || !sender->IsNPC())
 		return(nullptr);
-	_ZP(EntityList_AICheckCloseAggro);
 
 #ifdef REVERSE_AGGRO
 	//with reverse aggro, npc->client is checked elsewhere, no need to check again
@@ -433,7 +429,6 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude) {
 }
 
 void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
-	_ZP(EntityList_AIYellForHelp);
 	if(!sender || !attacker)
 		return;
 	if (sender->GetPrimaryFaction() == 0 )
@@ -1035,7 +1030,6 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 		return(false);
 #endif
 	}
-	_ZP(Mob_CheckLosFN);
 
 	VERTEX myloc;
 	VERTEX oloc;

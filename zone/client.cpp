@@ -488,7 +488,6 @@ bool Client::Save(uint8 iCommitNow) {
 
 	if(!ClientDataLoaded())
 		return false;
-	_ZP(Client_Save);
 
 	m_pp.x = x_pos;
 	m_pp.y = y_pos;
@@ -698,16 +697,6 @@ bool Client::SendAllPackets() {
 }
 
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CONN_STATUS required_state, eqFilterType filter) {
-/*	if (app->opcode==0x9999) {
-		cout << "Sending an unknown opcode from: " << endl;
-		print_stacktrace();
-	}
-	if (app->opcode==OP_SkillUpdate) {
-		cout << "Sending OP_SkillUpdate from: " << endl;
-		print_stacktrace();
-	}
-*/
-	_ZP(Client_QueuePacket);
 	if(filter!=FilterNone){
 		//this is incomplete... no support for FilterShowGroupOnly or FilterShowSelfOnly
 		if(GetFilter(filter) == FilterHide)
@@ -723,7 +712,6 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 	{
 		// todo: save packets for later use
 		AddPacket(app, ack_req);
-//		LogFile->write(EQEMuLog::Normal, "Adding Packet to list (%d) (%d)", app->GetOpcode(), (int)required_state);
 	}
 	else
 		if(eqs)
@@ -7363,12 +7351,9 @@ FACTION_VALUE Client::GetReverseFactionCon(Mob* iOther) {
 //o--------------------------------------------------------------
 FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
 {
-	_ZP(Client_GetFactionLevel);
-
 	if (pFaction < 0)
 		return GetSpecialFactionCon(tnpc);
 	FACTION_VALUE fac = FACTION_INDIFFERENT;
-	//int32 pFacValue; -Trumpcard: commenting. Not currently used.
 	int32 tmpFactionValue;
 	FactionMods fmods;
 
@@ -7424,7 +7409,6 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 //o--------------------------------------------------------------
 void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity)
 {
-	_ZP(Client_SetFactionLevel);
 	int32 faction_id[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
 	int32 npc_value[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
 	uint8 temp[MAX_NPC_FACTIONS]={ 0,0,0,0,0,0,0,0,0,0 };
@@ -7517,7 +7501,6 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 
 void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp)
 {
-	_ZP(Client_SetFactionLevel2);
 	int32 current_value;
 	//Get the npc faction list
 	if(faction_id > 0 && value != 0) {
@@ -7562,7 +7545,6 @@ bool Client::HatedByClass(uint32 p_race, uint32 p_class, uint32 p_deity, int32 p
 {
 
 	bool Result = false;
-	_ZP(Client_GetFactionLevel);
 
 	int32 tmpFactionValue;
 	FactionMods fmods;

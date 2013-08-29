@@ -59,8 +59,6 @@ void WorldConnection::OnConnected() {
 }
 
 void WorldConnection::Process() {
-	_CP(WorldConnection_Process);
-
 	//persistent connection....
 	if (!Connected()) {
 		pConnected = tcpc.Connected();

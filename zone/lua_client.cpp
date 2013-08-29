@@ -1204,27 +1204,27 @@ void Lua_Client::QueuePacket(Lua_Packet app, bool ack_req, int client_connection
 	self->QueuePacket(app, ack_req, static_cast<Mob::CLIENT_CONN_STATUS>(client_connection_status), static_cast<eqFilterType>(filter));
 }
 
-int32 Lua_Client::GetHunger() {
+int Lua_Client::GetHunger() {
 	Lua_Safe_Call_Int();
 	return self->GetHunger();
 }
 
-int32 Lua_Client::GetThirst() {
+int Lua_Client::GetThirst() {
 	Lua_Safe_Call_Int();
 	return self->GetThirst();
 }
 
-void Lua_Client::SetHunger(int32 in_hunger) {
+void Lua_Client::SetHunger(int in_hunger) {
 	Lua_Safe_Call_Void();
 	self->SetHunger(in_hunger);
 }
 
-void Lua_Client::SetThirst(int32 in_thirst) {
+void Lua_Client::SetThirst(int in_thirst) {
 	Lua_Safe_Call_Void();
 	self->SetThirst(in_thirst);
 }
 
-void Lua_Client::SetConsumption(int32 in_hunger, int32 in_thirst) {
+void Lua_Client::SetConsumption(int in_hunger, int in_thirst) {
 	Lua_Safe_Call_Void();
 	self->SetConsumption(in_hunger, in_thirst);
 }
@@ -1469,11 +1469,11 @@ luabind::scope lua_register_client() {
 		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool))&Lua_Client::QueuePacket)
 		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool,int))&Lua_Client::QueuePacket)
 		.def("QueuePacket", (void(Lua_Client::*)(Lua_Packet,bool,int,int))&Lua_Client::QueuePacket)
-		.def("GetHunger", (int32(Lua_Client::*)(void))&Lua_Client::GetHunger)
-		.def("GetThirst", (int32(Lua_Client::*)(void))&Lua_Client::GetThirst)
-		.def("SetHunger", (void(Lua_Client::*)(int32))&Lua_Client::SetHunger)
-		.def("SetThirst", (void(Lua_Client::*)(int32))&Lua_Client::SetThirst)
-		.def("SetConsumption", (void(Lua_Client::*)(int32, int32))&Lua_Client::SetConsumption);
+		.def("GetHunger", (int(Lua_Client::*)(void))&Lua_Client::GetHunger)
+		.def("GetThirst", (int(Lua_Client::*)(void))&Lua_Client::GetThirst)
+		.def("SetHunger", (void(Lua_Client::*)(int))&Lua_Client::SetHunger)
+		.def("SetThirst", (void(Lua_Client::*)(int))&Lua_Client::SetThirst)
+		.def("SetConsumption", (void(Lua_Client::*)(int, int))&Lua_Client::SetConsumption);
 }
 
 luabind::scope lua_register_inventory_where() {

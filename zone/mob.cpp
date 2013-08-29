@@ -124,7 +124,6 @@ Mob::Mob(const char* in_name,
 	move_tic_count = 0;
 
 	_egnode = nullptr;
-	adverrorinfo = 0;
 	name[0]=0;
 	orig_name[0]=0;
 	clean_name[0]=0;
@@ -2180,7 +2179,6 @@ bool Mob::CanThisClassBlock(void) const
 }
 
 float Mob::Dist(const Mob &other) const {
-	_ZP(Mob_Dist);
 	float xDiff = other.x_pos - x_pos;
 	float yDiff = other.y_pos - y_pos;
 	float zDiff = other.z_pos - z_pos;
@@ -2191,7 +2189,6 @@ float Mob::Dist(const Mob &other) const {
 }
 
 float Mob::DistNoZ(const Mob &other) const {
-	_ZP(Mob_DistNoZ);
 	float xDiff = other.x_pos - x_pos;
 	float yDiff = other.y_pos - y_pos;
 
@@ -2200,7 +2197,6 @@ float Mob::DistNoZ(const Mob &other) const {
 }
 
 float Mob::DistNoRoot(const Mob &other) const {
-	_ZP(Mob_DistNoRoot);
 	float xDiff = other.x_pos - x_pos;
 	float yDiff = other.y_pos - y_pos;
 	float zDiff = other.z_pos - z_pos;
@@ -2211,7 +2207,6 @@ float Mob::DistNoRoot(const Mob &other) const {
 }
 
 float Mob::DistNoRoot(float x, float y, float z) const {
-	_ZP(Mob_DistNoRoot);
 	float xDiff = x - x_pos;
 	float yDiff = y - y_pos;
 	float zDiff = z - z_pos;
@@ -2222,7 +2217,6 @@ float Mob::DistNoRoot(float x, float y, float z) const {
 }
 
 float Mob::DistNoRootNoZ(float x, float y) const {
-	_ZP(Mob_DistNoRoot);
 	float xDiff = x - x_pos;
 	float yDiff = y - y_pos;
 
@@ -2230,7 +2224,6 @@ float Mob::DistNoRootNoZ(float x, float y) const {
 }
 
 float Mob::DistNoRootNoZ(const Mob &other) const {
-	_ZP(Mob_DistNoRootNoZ);
 	float xDiff = other.x_pos - x_pos;
 	float yDiff = other.y_pos - y_pos;
 

@@ -71,7 +71,6 @@ ThreadReturnType BaseTCPServer::TCPServerLoop(void* tmp) {
 
 	tcps->MLoopRunning.lock();
 	while (tcps->RunLoop()) {
-		_CP(BaseTCPServerLoop);
 		Sleep(SERVER_LOOP_GRANULARITY);
 		tcps->Process();
 	}

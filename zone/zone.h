@@ -322,7 +322,6 @@ private:
 	QGlobalCache *qGlobals;
 	
 	Timer	hotzone_timer;
-	Mutex	MZoneLock;
 };
 
 #endif

@@ -80,7 +80,6 @@ bool HateList::IsOnHateList(Mob *mob)
 
 tHateEntry *HateList::Find(Mob *ent)
 {
-	_ZP(HateList_Find);
 	auto iterator = list.begin();
 	while(iterator != list.end())
 	{
@@ -105,7 +104,6 @@ void HateList::Set(Mob* other, uint32 in_hate, uint32 in_dam)
 
 Mob* HateList::GetDamageTop(Mob* hater)
 {
-	_ZP(HateList_GetDamageTop);
 	Mob* current = nullptr;
 	Group* grp = nullptr;
 	Raid* r = nullptr;
@@ -149,7 +147,6 @@ Mob* HateList::GetDamageTop(Mob* hater)
 }
 
 Mob* HateList::GetClosest(Mob *hater) {
-	_ZP(HateList_GetClosest);
 	Mob* close = nullptr;
 	float closedist = 99999.9f;
 	float thisdist;
@@ -229,7 +226,6 @@ bool HateList::RemoveEnt(Mob *ent)
 }
 
 void HateList::DoFactionHits(int32 nfl_id) {
-	_ZP(HateList_DoFactionHits);
 	if (nfl_id <= 0)
 		return;
 	auto iterator = list.begin();
@@ -250,7 +246,6 @@ void HateList::DoFactionHits(int32 nfl_id) {
 
 Mob *HateList::GetTop(Mob *center)
 {
-	_ZP(HateList_GetTop);
 	Mob* top = nullptr;
 	int32 hate = -1;
 
@@ -406,8 +401,6 @@ Mob *HateList::GetTop(Mob *center)
 }
 
 Mob *HateList::GetMostHate(){
-	_ZP(HateList_GetMostHate);
-
 	Mob* top = nullptr;
 	int32 hate = -1;
 
@@ -453,8 +446,6 @@ int32 HateList::GetEntHate(Mob *ent, bool damage)
 
 //looking for any mob with hate > -1
 bool HateList::IsEmpty() {
-	_ZP(HateList_IsEmpty);
-
 	return(list.size() == 0);
 }
 

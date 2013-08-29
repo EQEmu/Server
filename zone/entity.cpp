@@ -323,7 +323,7 @@ void EntityList::AddClient(Client* client) {
 void EntityList::TrapProcess() {
 	if(numclients < 1)
 		return;
-	_ZP(EntityList_TrapProcess);
+
 	LinkedListIterator<Trap*> iterator(trap_list);
 	iterator.Reset();
 	uint32 count=0;
@@ -363,7 +363,6 @@ void EntityList::GroupProcess() {
 
 	if(numclients < 1)
 		return;
-	_ZP(EntityList_GroupProcess);
 
 	iterator = group_list.begin();
 	while(iterator != group_list.end())
@@ -392,8 +391,6 @@ void EntityList::QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPac
 
 	std::list<Group *>::iterator iterator = group_list.begin();
 
-	_ZP(EntityList_QueueToGroupsForNPCHealthAA);
-
 	while(iterator != group_list.end())
 	{
 		(*iterator)->QueueHPPacketsForNPCHealthAA(sender, app);
@@ -407,7 +404,6 @@ void EntityList::RaidProcess() {
 
 	if(numclients < 1)
 		return;
-	_ZP(EntityList_RaidProcess);
 
 	iterator = raid_list.begin();
 	while(iterator != raid_list.end())
@@ -425,7 +421,6 @@ void EntityList::DoorProcess() {
 	if(numclients < 1)
 		return;
 #endif
-	_ZP(EntityList_DoorProcess);
 	LinkedListIterator<Doors*> iterator(door_list);
 	iterator.Reset();
 	uint32 count=0;
@@ -443,7 +438,6 @@ void EntityList::DoorProcess() {
 }
 
 void EntityList::ObjectProcess() {
-	_ZP(EntityList_ObjectProcess);
 	LinkedListIterator<Object*> iterator(object_list);
 	iterator.Reset();
 	uint32 count=0;
@@ -461,7 +455,6 @@ void EntityList::ObjectProcess() {
 }
 
 void EntityList::CorpseProcess() {
-	_ZP(EntityList_CorpseProcess);
 	LinkedListIterator<Corpse*> iterator(corpse_list);
 	iterator.Reset();
 	uint32 count=0;
@@ -483,7 +476,6 @@ void EntityList::MobProcess() {
 	if(numclients < 1)
 		return;
 #endif
-	_ZP(EntityList_MobProcess);
 	LinkedListIterator<Mob*> iterator(mob_list);
 	iterator.Reset();
 	while(iterator.MoreElements())
@@ -532,7 +524,6 @@ void EntityList::MobProcess() {
 }
 
 void EntityList::BeaconProcess() {
-	_ZP(EntityList_BeaconProcess);
 	LinkedListIterator<Beacon *> iterator(beacon_list);
 	int count;
 
@@ -2626,7 +2617,6 @@ void EntityList::RemoveEntity(uint16 id)
 
 void EntityList::Process()
 {
-	_ZP(EntityList_Process);
 	CheckSpawnQueue();
 }
 

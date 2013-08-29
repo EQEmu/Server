@@ -11,7 +11,6 @@
 #include <mysqld_error.h>
 #include <limits.h>
 #include "dbcore.h"
-#include "common_profile.h"
 #include <string.h>
 //#include "../common/MiscFunctions.h"
 #include "StringUtil.h"
@@ -54,10 +53,8 @@ ThreadReturnType DBAsyncLoop(void* tmp) {
 		//we could check dba->RunLoop() again to see if we
 		//got turned off while we were waiting
 		{
-			_CP(DBAsyncLoop_loop);
 			dba->Process();
 		}
-//		Sleep(ASYNC_LOOP_GRANULARITY);
 	}
 	dba->MLoopRunning.unlock();
 
@@ -302,11 +299,7 @@ void DBAsync::CommitWrites() {
 }
 
 void DBAsync::ProcessWork(DBAsyncWork* iWork, bool iSleep) {
-	_CP(DBAsync_ProcessWork);
 	DBAsyncQuery* CurrentQuery;
-#if DEBUG_MYSQL_QUERIES >= 2
-	std::cout << "Processing AsyncWork #" << iWork->GetWorkID() << std::endl;
-#endif
 	while ((CurrentQuery = iWork->PopQuery())) {
 		CurrentQuery->Process(pDBC);
 		iWork->PushAnswer(CurrentQuery);
@@ -316,7 +309,6 @@ void DBAsync::ProcessWork(DBAsyncWork* iWork, bool iSleep) {
 }
 
 void DBAsync::DispatchWork(DBAsyncWork* iWork) {
-	_CP(DBAsync_DispatchWork);
 	//if this work has a callback, call it
 	//otherwise, stick the work on the finish queue
 	if (iWork->pCB) {

@@ -138,8 +138,6 @@ uint32 Spawn2::despawnTimer(uint32 despawn_timer)
 }
 
 bool Spawn2::Process() {
-	_ZP(Spawn2_Process);
-
 	IsDespawned = false;
 
 	if(!Enabled())

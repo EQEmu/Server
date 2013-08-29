@@ -776,7 +776,6 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 //GetWeaponDamage(mob*, const Item_Struct*) is intended to be used for mobs or any other situation where we do not have a client inventory item
 //GetWeaponDamage(mob*, const ItemInst*) is intended to be used for situations where we have a client inventory item
 int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
-	_ZP(Mob_GetWeaponDamageA);
 	int dmg = 0;
 	int banedmg = 0;
 
@@ -883,7 +882,6 @@ int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
 
 int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate)
 {
-	_ZP(Mob_GetWeaponDamageB);
 	int dmg = 0;
 	int banedmg = 0;
 
@@ -1104,9 +1102,6 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 // IsFromSpell added to allow spell effects to use Attack. (Mainly for the Rampage AA right now.)
 bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
-
-	_ZP(Client_Attack);
-
 	if (!other) {
 		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Client::Attack() for evaluation!");
@@ -1719,7 +1714,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_
 
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
-	_ZP(NPC_Attack);
 	int damage = 0;
 
 	if (!other) {
@@ -2046,7 +2040,6 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_ski
 }
 
 bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill) {
-	_ZP(NPC_Death);
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob->GetName(), damage, spell, attack_skill);
 	
 	Mob *oos = nullptr;
@@ -2550,7 +2543,6 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 		if(IsNPC() && other->IsClient() && other->CastToClient())
 			parse->EventNPC(EVENT_AGGRO, this->CastToNPC(), other, "", 0);
 		AI_Event_Engaged(other, iYellForHelp);
-		adverrorinfo = 8293;
 	}
 }
 
@@ -2637,23 +2629,11 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 		mlog(COMBAT__HITS, "Applying Reverse Damage Shield of value %d to %s", rev_ds, attacker->GetName());
 		attacker->Damage(this, -rev_ds, rev_ds_spell_id, ABJURE/*hackish*/, false); //"this" (us) will get the hate, etc. not sure how this works on Live, but it'll works for now, and tanks will love us for this
 		//do we need to send a damage packet here also?
-		/*
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
-		CombatDamage_Struct* cds = (CombatDamage_Struct*)outapp->pBuffer;
-		cds->target = attacker->GetID();
-		cds->source = GetID();
-		cds->type = attacker->spellbonuses.ReverseDamageShieldType;
-		cds->spellid = 0x0;
-		cds->damage = rev_ds;
-		entity_list.QueueCloseClients(this, outapp);
-		safe_delete(outapp);
-		*/
 	}
 }
 
 uint8 Mob::GetWeaponDamageBonus( const Item_Struct *Weapon )
 {
-	_ZP(Mob_GetWeaponDamageBonus);
 	// This function calculates and returns the damage bonus for the weapon identified by the parameter "Weapon".
 	// Modified 9/21/2008 by Cantus
 
@@ -3855,7 +3835,6 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 }
 
 void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
-	_ZP(Mob_TryWeaponProcA);
 	if(!on) {
 		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Mob::TryWeaponProc for evaluation!");
@@ -3914,7 +3893,6 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 }
 
 void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on, uint16 hand) {
-	_ZP(Mob_TryWeaponProcB);
 	uint16 skillinuse = 28;
 	int ourlevel = GetLevel();
 	float ProcChance, ProcBonus;

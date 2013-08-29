@@ -560,9 +560,6 @@ void NPC::RemoveCash() {
 
 bool NPC::Process()
 {
-	_ZP(NPC_Process);
-
-	adverrorinfo = 1;
 	if (IsStunned() && stunned_timer.Check())
 	{
 		this->stunned = false;
@@ -582,8 +579,6 @@ bool NPC::Process()
 		}
 		return false;
 	}
-
-	adverrorinfo = 2;
 
 	SpellProcess();
 
@@ -2321,8 +2316,6 @@ bool NPC::CanTalk()
 //iOther the mob who is doing the looking. It should figure out
 //what iOther thinks about 'this'
 FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
-	_ZP(NPC_GetReverseFactionCon);
-
 	iOther = iOther->GetOwnerOrSelf();
 	int primaryFaction= iOther->GetPrimaryFaction();
 

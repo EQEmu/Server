@@ -167,8 +167,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot,
 	uint32 timer, uint32 timer_duration, uint32 type, int16 *resist_adjust)
 {
-	_ZP(Mob_CastSpell);
-
 	mlog(SPELLS__CASTING, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 		spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
@@ -330,8 +328,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 					uint32 item_slot, uint32 timer, uint32 timer_duration, uint32 type,
 					int16 resist_adjust)
 {
-	_ZP(Mob_DoCastSpell);
-
 	Mob* pMob = nullptr;
 	int32 orgcasttime;
 	EQApplicationPacket *outapp = nullptr;
@@ -800,8 +796,6 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 							uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
 {
-	_ZP(Mob_CastedSpellFinished);
-
 	bool IsFromItem = false;
 
 	if(IsClient() && slot != USE_ITEM_SPELL_SLOT && slot != POTION_BELT_SPELL_SLOT && spells[spell_id].recast_time > 1000) { // 10 is item
@@ -1676,8 +1670,6 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 mana_used,
 						uint32 inventory_slot, int16 resist_adjust, bool isproc)
 {
-	_ZP(Mob_SpellFinished);
-
 	//EQApplicationPacket *outapp = nullptr;
 	Mob *ae_center = nullptr;
 
@@ -3741,7 +3733,6 @@ void Mob::BuffFadeByEffect(int effectid, int skipslot)
 // returns true if the spell should fail, false otherwise
 bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 {
-	_ZP(Mob_IsImmuneToSpell);
 	int effect_index;
 
 	if(caster == nullptr)

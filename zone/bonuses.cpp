@@ -68,7 +68,6 @@ void NPC::CalcBonuses()
 
 void Client::CalcBonuses()
 {
-	_ZP(Client_CalcBonuses);
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	CalcItemBonuses(&itembonuses);
 	CalcEdibleBonuses(&itembonuses);

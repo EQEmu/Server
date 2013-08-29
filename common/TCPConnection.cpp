@@ -904,7 +904,6 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 	while (tcpc->RunLoop()) {
 		Sleep(LOOP_GRANULARITY);
 		if (!tcpc->ConnectReady()) {
-			_CP(TCPConnectionLoop);
 			if (!tcpc->Process()) {
 				//the processing loop has detecting an error..
 				//we want to drop the link immediately, so we clear buffers too.
@@ -914,7 +913,6 @@ ThreadReturnType TCPConnection::TCPConnectionLoop(void* tmp) {
 			Sleep(1);
 		}
 		else if (tcpc->GetAsyncConnect()) {
-			_CP(TCPConnectionLoop);
 			if (tcpc->charAsyncConnect)
 				tcpc->Connect(tcpc->charAsyncConnect, tcpc->GetrPort());
 			else

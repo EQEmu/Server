@@ -565,9 +565,6 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
  */
 int command_realdispatch(Client *c, const char *message)
 {
-	_ZP(command_realdispatch);
-
-
 	Seperator sep(message, ' ', 10, 100, true); // "three word argument" should be considered 1 arg
 
 	command_logcommand(c, message);

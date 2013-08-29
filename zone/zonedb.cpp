@@ -833,7 +833,6 @@ bool ZoneDatabase::GetCharacterInfoForLogin(const char* name, uint32* character_
 char* current_zone, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext,
 uint32* pplen, uint32* guilddbid, uint8* guildrank,
 uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8 *firstlogon) {
-	_CP(Database_GetCharacterInfoForLogin);
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	uint32 querylen;
@@ -871,7 +870,6 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 	uint32* character_id, char* current_zone, PlayerProfile_Struct* pp, Inventory* inv,
 	ExtendedProfile_Struct *ext, uint32* pplen, uint32* guilddbid, uint8* guildrank,
 	uint8 *class_, uint8 *level, bool *LFP, bool *LFG, uint8 *NumXTargets, uint8* firstlogon) {
-	_CP(Database_GetCharacterInfoForLogin_result);
 
 	MYSQL_ROW row;
 	unsigned long* lengths;

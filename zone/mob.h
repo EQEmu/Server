@@ -640,7 +640,6 @@ public:
 	inline bool IsStunned() const { return stunned; }
 	inline bool IsSilenced() const { return silenced; }
 	inline bool IsAmnesiad() const { return amnesiad; }
-	inline uint16 GetErrorNumber() const {return adverrorinfo;}
 
 	int32 ReduceDamage(int32 damage);
 	int32 AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
@@ -1052,7 +1051,6 @@ protected:
 	Timer gravity_timer;
 	Timer viral_timer;
 	uint8 viral_timer_counter;
-	uint16 adverrorinfo;
 
 	// MobAI stuff
 	eStandingPetOrder pStandingPetOrder;

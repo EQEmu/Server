@@ -401,8 +401,6 @@ void ClearMappedOpcode(EmuOpcode op) {
 
 int Client::HandlePacket(const EQApplicationPacket *app)
 {
-	_ZP(Client_HandlePacket);
-
 	if(is_log_enabled(CLIENT__NET_IN_TRACE)) {
 		char buffer[64];
 		app->build_header_dump(buffer);

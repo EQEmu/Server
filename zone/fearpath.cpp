@@ -24,7 +24,6 @@
 
 #include "../common/rulesys.h"
 #include "../common/MiscFunctions.h"
-#include "zone_profile.h"
 #include "map.h"
 #include "zone.h"
 #include "pathing.h"

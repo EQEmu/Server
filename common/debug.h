@@ -68,10 +68,6 @@
 #endif
 
 #include "logsys.h"
-#include "common_profile.h"
-#ifdef ZONE
-#include "../zone/zone_profile.h"
-#endif
 
 #include "../common/Mutex.h"
 #include <stdio.h>

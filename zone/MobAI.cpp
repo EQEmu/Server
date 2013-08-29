@@ -47,8 +47,6 @@ extern Zone *zone;
 
 //NOTE: do NOT pass in beneficial and detrimental spell types into the same call here!
 bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
-	_ZP(Mob_AICastSpell);
-// Faction isnt checked here, it's assumed you wouldnt pass a spell type you wouldnt want casted on the mob
 	if (!tar)
 		return false;
 
@@ -340,8 +338,6 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 }
 
 bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint16 iSpellTypes) {
-	_ZP(EntityList_AICheckCloseBeneficialSpells);
-
 	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
@@ -991,8 +987,6 @@ void Client::AI_Process()
 }
 
 void Mob::AI_Process() {
-	_ZP(Mob_AI_Process);
-
 	if (!IsAIControlled())
 		return;
 
@@ -1056,7 +1050,6 @@ void Mob::AI_Process() {
 
 	if (engaged)
 	{
-		_ZP(Mob_AI_Process_engaged);
 		if (IsRooted())
 			SetTarget(hate_list.GetClosest(this));
 		else
@@ -1449,7 +1442,6 @@ void Mob::AI_Process() {
 			* by the clients.
 			*
 			*/
-			_ZP(Mob_AI_Process_scanarea);
 
 			Mob* tmptar = entity_list.AICheckCloseAggro(this, GetAggroRange(), GetAssistRange());
 			if (tmptar)
@@ -1457,11 +1449,9 @@ void Mob::AI_Process() {
 		}
 		else if (AImovement_timer->Check() && !IsRooted())
 		{
-			_ZP(Mob_AI_Process_move);
 			SetRunAnimSpeed(0);
 			if (IsPet())
 			{
-				_ZP(Mob_AI_Process_pet);
 				// we're a pet, do as we're told
 				switch (pStandingPetOrder)
 				{
@@ -1596,7 +1586,6 @@ void NPC::AI_DoMovement() {
 		return;	//this is idle movement at walk speed, and we are unable to walk right now.
 
 	if (roambox_distance > 0) {
-		_ZP(Mob_AI_Process_roambox);
 		if (
 			roambox_movingto_x > roambox_max_x
 			|| roambox_movingto_x < roambox_min_x
@@ -1635,7 +1624,6 @@ void NPC::AI_DoMovement() {
 	}
 	else if (roamer)
 	{
-		_ZP(Mob_AI_Process_roamer);
 		if (AIwalking_timer->Check())
 		{
 			movetimercompleted=true;
@@ -1749,8 +1737,6 @@ void NPC::AI_DoMovement() {
 	}
 	else if (IsGuarding())
 	{
-		_ZP(Mob_AI_Process_guard);
-
 		bool CP2Moved;
 		if(!RuleB(Pathing, Guard) || !zone->pathing)
 			CP2Moved = CalculateNewPosition2(guard_x, guard_y, guard_z, walksp);
@@ -1898,7 +1884,6 @@ void NPC::AI_Event_SpellCastFinished(bool iCastSucceeded, uint8 slot) {
 
 bool NPC::AI_EngagedCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
-		_ZP(Mob_AI_Process_engaged_cast);
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		mlog(AI__SPELLS, "Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells.");
@@ -1922,7 +1907,6 @@ bool NPC::AI_EngagedCastCheck() {
 
 bool NPC::AI_PursueCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
-		_ZP(Mob_AI_Process_pursue_cast);
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		mlog(AI__SPELLS, "Engaged (pursuing) autocast check triggered. Trying to cast offensive spells.");
@@ -1937,7 +1921,6 @@ bool NPC::AI_PursueCastCheck() {
 
 bool NPC::AI_IdleCastCheck() {
 	if (AIautocastspell_timer->Check(false)) {
-		_ZP(Mob_AI_Process_autocast);
 #if MobAI_DEBUG_Spells >= 25
 		std::cout << "Non-Engaged autocast check triggered: " << this->GetName() << std::endl;
 #endif

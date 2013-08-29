@@ -185,7 +185,6 @@ const char * itoa(int num, char* a,int b) {
  */
 int MakeRandomInt(int low, int high)
 {
-	_CP(MakeRandomInt);
 	if(low >= high)
 		return(low);
 
@@ -203,7 +202,6 @@ int MakeRandomInt(int low, int high)
 
 double MakeRandomFloat(double low, double high)
 {
-	_CP(MakeRandomFloat);
 	if(low >= high)
 		return(low);
 

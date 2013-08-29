@@ -23,8 +23,6 @@ extern Zone *zone;
 
 float VertexDistance(VERTEX a, VERTEX b)
 {
-	_ZP(Pathing_VertexDistance);
-
 	float xdist = a.x - b.x;
 	float ydist = a.y - b.y;
 	float zdist = a.z - b.z;
@@ -33,8 +31,6 @@ float VertexDistance(VERTEX a, VERTEX b)
 
 float VertexDistanceNoRoot(VERTEX a, VERTEX b)
 {
-	_ZP(Pathing_VertexDistanceNoRoot);
-
 	float xdist = a.x - b.x;
 	float ydist = a.y - b.y;
 	float zdist = a.z - b.z;
@@ -211,8 +207,6 @@ VERTEX PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 
 std::list<int> PathManager::FindRoute(int startID, int endID)
 {
-	_ZP(Pathing_FindRoute_FromNodes);
-
 	_log(PATHING__DEBUG, "FindRoute from node %i to %i", startID, endID);
 
 	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount);
@@ -358,9 +352,6 @@ bool SortPathNodesByDistance(PathNodeSortStruct n1, PathNodeSortStruct n2)
 
 std::list<int> PathManager::FindRoute(VERTEX Start, VERTEX End)
 {
-
-	_ZP(Pathing_FindRoute_FromVertices);
-
 	_log(PATHING__DEBUG, "FindRoute(%8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f)", Start.x, Start.y, Start.z, End.x, End.y, End.z);
 
 	std::list<int> noderoute;
@@ -663,8 +654,6 @@ void PathManager::SimpleMeshTest()
 
 VERTEX Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChanged, bool &NodeReached)
 {
-	_ZP(Pathing_UpdatePath);
-
 	WaypointChanged = false;
 
 	NodeReached = false;
@@ -1153,8 +1142,6 @@ int PathManager::FindNearestPathNode(VERTEX Position)
 
 bool PathManager::NoHazards(VERTEX From, VERTEX To)
 {
-	_ZP(Pathing_NoHazards);
-
 	// Test the Z coordinate at the mid point.
 	//
 	VERTEX MidPoint((From.x + To.x) / 2, (From.y + To.y) / 2, From.z);
@@ -1293,9 +1280,6 @@ void Mob::PrintRoute()
 
 void PathManager::OpenDoors(int Node1, int Node2, Mob *ForWho)
 {
-
-	_ZP(Pathing_OpenDoors);
-
 	if(!ForWho || (Node1 >= Head.PathNodeCount) || (Node2 >= Head.PathNodeCount) || (Node1 < 0) || (Node2 < 0))
 		return;
 

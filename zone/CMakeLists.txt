@@ -112,7 +112,6 @@ SET(zone_sources
 	worldserver.cpp
 	zone.cpp
 	zone_logsys.cpp
-	zone_profile.cpp
 	ZoneConfig.cpp
 	zonedb.cpp
 	zonedbasync.cpp
@@ -195,7 +194,6 @@ SET(zone_headers
 	watermap.h
 	worldserver.h
 	zone.h
-	zone_profile.h
 	ZoneConfig.h
 	zonedb.h
 	zonedbasync.h
@@ -234,7 +232,5 @@ IF(UNIX)
 	TARGET_LINK_LIBRARIES(zone "pthread")
 	ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)
-
-INCLUDE_DIRECTORIES(${VLD_INCLUDE_DIR})
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)

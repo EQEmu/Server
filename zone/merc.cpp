@@ -81,20 +81,14 @@ Merc::~Merc() {
 
 void Merc::CalcBonuses()
 {
-	//_ZP(Merc_CalcBonuses);
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	memset(&aabonuses, 0, sizeof(StatBonuses));
 	CalcItemBonuses(&itembonuses);
 
 	CalcSpellBonuses(&spellbonuses);
 
-	//_log(AA__BONUSES, "Calculating AA Bonuses for %s.", this->GetCleanName());
-	//CalcAABonuses(&aabonuses);	//we're not quite ready for this
-	//_log(AA__BONUSES, "Finished calculating AA Bonuses for %s.", this->GetCleanName());
-
 	CalcAC();
 	CalcATK();
-	//CalcHaste();
 
 	CalcSTR();
 	CalcSTA();
@@ -1500,8 +1494,6 @@ void Merc::AI_Process() {
 
 	if(IsEngaged())
 	{
-		_ZP(Mob_BOT_Process_IsEngaged);
-
 		if(rest_timer.Enabled())
 			rest_timer.Disable();
 
@@ -1868,7 +1860,6 @@ bool Merc::AI_EngagedCastCheck() {
 	bool failedToCast = false;
 
 	if (GetTarget() && AIautocastspell_timer->Check(false)) {
-		_ZP(Merc_AI_Process_engaged_cast);
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -1926,7 +1917,6 @@ bool Merc::AI_IdleCastCheck() {
 	bool failedToCast = false;
 
 	if (AIautocastspell_timer->Check(false)) {
-		_ZP(Merc_AI_IdleCastCheck);
 #if MobAI_DEBUG_Spells >= 25
 		std::cout << "Non-Engaged autocast check triggered: " << this->GetCleanName() << std::endl;
 #endif
@@ -1973,7 +1963,6 @@ bool Merc::AI_IdleCastCheck() {
 }
 
 bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	_ZP(EntityList_Merc_AICheckCloseBeneficialSpells);
 
 	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
 		//according to live, you can buff and heal through walls...
@@ -2083,7 +2072,6 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 }
 
 bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
-	_ZP(Bot_AICastSpell);
 
 	if(!AI_HasSpells())
 		return false;
@@ -4714,9 +4702,6 @@ void Merc::DoClassAttacks(Mob *target) {
 
 bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
-
-	_ZP(Client_Attack);
-
 	if (!other) {
 		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to Merc::Attack() for evaluation!");

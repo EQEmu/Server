@@ -200,7 +200,6 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 }
 
 bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
-	_CP(Database_SaveInventory);
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	bool ret = false;
@@ -509,7 +508,6 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 
 // Overloaded: Retrieve character inventory based on character id
 bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
-	_CP(Database_GetInventory);
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	MYSQL_RES* result;
@@ -618,7 +616,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 
 // Overloaded: Retrieve character inventory based on account_id and character name
 bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv) {
-	_CP(Database_GetInventory_name);
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	MYSQL_RES* result;
@@ -1204,7 +1201,6 @@ bool SharedDatabase::LoadNPCFactionLists() {
 // character name "name". Return true if the character was found, otherwise false.
 // False will also be returned if there is a database error.
 bool SharedDatabase::GetPlayerProfile(uint32 account_id, char* name, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, char* current_zone, uint32 *current_instance) {
-	_CP(Database_GetPlayerProfile);
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	MYSQL_RES* result;
@@ -1258,7 +1254,6 @@ bool SharedDatabase::GetPlayerProfile(uint32 account_id, char* name, PlayerProfi
 }
 
 bool SharedDatabase::SetPlayerProfile(uint32 account_id, uint32 charid, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext, uint32 current_zone, uint32 current_instance, uint8 MaxXTargets) {
-	_CP(Database_SetPlayerProfile);
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 affected_rows = 0;

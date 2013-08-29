@@ -71,8 +71,6 @@ extern PetitionList petition_list;
 extern EntityList entity_list;
 
 bool Client::Process() {
-	_ZP(Client_Process);
-	adverrorinfo = 1;
 	bool ret = true;
 
 	if(Connected() || IsLD())
@@ -523,7 +521,6 @@ bool Client::Process() {
 			}
 		}
 
-		adverrorinfo = 2;
 		if (position_timer.Check()) {
 			if (IsAIControlled())
 			{
@@ -599,9 +596,7 @@ bool Client::Process() {
 			}
 		}
 
-		adverrorinfo = 3;
 		SpellProcess();
-		adverrorinfo = 4;
 		if (endupkeep_timer.Check() && !dead){
 			DoEnduranceUpkeep();
 		}
@@ -690,8 +685,6 @@ bool Client::Process() {
 
 
 	/************ Get all packets from packet manager out queue and process them ************/
-	adverrorinfo = 5;
-
 	EQApplicationPacket *app = nullptr;
 	if(!eqs->CheckState(CLOSING))
 	{
@@ -721,24 +714,21 @@ bool Client::Process() {
 		{
 			GetMerc()->Depop();
 		}
-		adverrorinfo = 811;
+
 		client_state = CLIENT_LINKDEAD;
-		if (/*!loggedin || */zoning || instalog || GetGM())
+		if (zoning || instalog || GetGM())
 		{
-			adverrorinfo = 811;
 			Group *mygroup = GetGroup();
 			if (mygroup)
 			{
-				adverrorinfo = 812;
 				if (!zoning) {
-					entity_list.MessageGroup(this,true,15,"%s logged out.",GetName());
+					entity_list.MessageGroup(this, true, 15, "%s logged out.", GetName());
 					mygroup->DelMember(this);
 				} else {
-					entity_list.MessageGroup(this,true,15,"%s left the zone.",GetName());
+					entity_list.MessageGroup(this, true, 15, "%s left the zone.", GetName());
 					mygroup->MemberZoned(this);
 				}
 
-				adverrorinfo = 813;
 			}
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
@@ -757,7 +747,6 @@ bool Client::Process() {
 		}
 		else
 		{
-			adverrorinfo = 814;
 			LinkDead();
 		}
 		OnDisconnect(true);
@@ -766,7 +755,7 @@ bool Client::Process() {
 	if (forget_timer.Check()) {
 		forget_timer.Disable();
 		entity_list.ClearZoneFeignAggro(this);
-		Message(0,"Your enemies have forgotten you!");
+		Message(0, "Your enemies have forgotten you!");
 	}
 
 	return ret;

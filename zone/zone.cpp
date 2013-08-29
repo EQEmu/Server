@@ -81,7 +81,6 @@ extern DBAsyncFinishedQueue MTdbafq;
 extern DBAsync *dbasync;
 
 bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
-	_ZP(Zone_Bootup);
 	const char* zonename = database.GetZoneName(iZoneID);
 
 	if (iZoneID == 0 || zonename == 0)
@@ -1272,10 +1271,6 @@ uint32 Zone::CountAuth() {
 }
 
 bool Zone::Process() {
-	LockMutex lock(&MZoneLock);
-	_ZP(Zone_Process);
-
-
 	spawn_conditions.Process();
 
 	if(spawn2_timer.Check()) {
@@ -1430,7 +1425,6 @@ bool Zone::Process() {
 }
 
 void Zone::StartShutdownTimer(uint32 set_time) {
-	MZoneLock.lock();
 	if (set_time > autoshutdown_timer.GetRemainingTime()) {
 		if (set_time == (RuleI(Zone, AutoShutdownDelay)))
 		{
@@ -1438,11 +1432,10 @@ void Zone::StartShutdownTimer(uint32 set_time) {
 		}
 		autoshutdown_timer.Start(set_time, false);
 	}
-	MZoneLock.unlock();
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
-std::map<uint32,NPCType *>::iterator itr;
+	std::map<uint32,NPCType *>::iterator itr;
 	entity_list.Depop(StartSpawnTimer);
 
 	// Refresh npctable, getting current info from database.
@@ -1462,7 +1455,6 @@ void Zone::Repop(uint32 delay) {
 
 	LinkedListIterator<Spawn2*> iterator(spawn2_list);
 
-	MZoneLock.lock();
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		iterator.RemoveCurrent();
@@ -1470,8 +1462,6 @@ void Zone::Repop(uint32 delay) {
 
 	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay))
 		LogFile->write(EQEMuLog::Debug, "Error in Zone::Repop: database.PopulateZoneSpawnList failed");
-
-	MZoneLock.unlock();
 
 	initgrids_timer.Start();
 

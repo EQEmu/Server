@@ -45,8 +45,6 @@ extern WorldServer worldserver;
 // in this case false will be returned, true otherwise
 bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 {
-	_ZP(Mob_SpellEffect);
-
 	int caster_level, buffslot, effect, effect_value, i;
 	ItemInst *SummonedItem=nullptr;
 #ifdef SPELL_EFFECT_SPAM
@@ -3056,8 +3054,6 @@ void Mob::BuffProcess()
 }
 
 void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caster_level, Mob* caster) {
-	_ZP(Mob_DoBuffTic);
-
 	int effect, effect_value;
 
 	if(!IsValidSpell(spell_id))

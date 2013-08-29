@@ -27,7 +27,6 @@
 #define SLOW_AND_CRAPPY_MAKES_VALGRIND_HAPPY
 #endif
 
-#include "zone_profile.h"
 #include "map.h"
 #include "zone.h"
 #ifdef _WINDOWS
@@ -378,7 +377,6 @@ float Map::GetFaceHeight( int _idx, float x, float y ) const {
 
 bool Map::LineIntersectsZone(VERTEX start, VERTEX end, float step_mag, VERTEX *result, FACE **on) const
 {
-	_ZP(Map_LineIntersectsZone);
 	// Cast a ray from start to end, checking for collisions in each node between the two points.
 	//
 	float stepx, stepy, stepz, curx, cury, curz;
@@ -464,7 +462,6 @@ bool Map::LocWithinNode( NodeRef node_r, float x, float y ) const {
 }
 
 bool Map::LineIntersectsNode( NodeRef node_r, VERTEX p1, VERTEX p2, VERTEX *result, FACE **on) const {
-	_ZP(Map_LineIntersectsNode);
 	if( node_r == NODE_NONE || node_r >= m_Nodes) {
 		return(true); //can see through empty nodes, just allow LOS on error...
 	}
@@ -497,7 +494,6 @@ bool Map::LineIntersectsNode( NodeRef node_r, VERTEX p1, VERTEX p2, VERTEX *resu
 
 
 float Map::FindBestZ( NodeRef node_r, VERTEX p1, VERTEX *result, FACE **on) const {
-	_ZP(Map_FindBestZ);
 
 	p1.z += RuleI(Map, FindBestZHeightAdjust);
 

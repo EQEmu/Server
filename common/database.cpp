@@ -706,7 +706,6 @@ bool Database::DeleteCharacter(char *name)
 // Store new character information into the character_ and inventory tables
 bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext)
 {
-	_CP(Database_StoreCharacter);
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char query[256+sizeof(PlayerProfile_Struct)*2+sizeof(ExtendedProfile_Struct)*2+5];
 	char* end = query;
