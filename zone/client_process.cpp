@@ -1695,6 +1695,11 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			return;
 		}
 
+		if(MaxSkill(skill) == 0) {
+			mlog(CLIENT__ERROR, "Tried to train skill %d, but training is not allowed at this level.", skill);
+			return;
+		}
+
 		uint16 skilllevel = GetRawSkill(skill);
 		if(skilllevel == 0) {
 			//this is a new skill..
@@ -1703,6 +1708,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			{
 				return;
 			}
+
 			SetSkill(skill, t_level);
 		} else {
 			switch(skill) {

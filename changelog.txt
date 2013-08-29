@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/29/2013 ==
+KLS: Removed Common Profiler and Zone Profiler.  They're well past outdated status and are just code bloat.
+KLS: Fix for reported issue on forums with skills that could potentially be trained before a player achieved the level to train.
+
 == 08/20/2013 ==
 Uleat: Fix for bot pet spell buff corruption (existing db issues will correct themselves through pet death attrition)
 
