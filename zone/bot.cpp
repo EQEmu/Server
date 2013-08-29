@@ -2620,6 +2620,7 @@ void Bot::LoadPet() {
 		if(GetPet() && GetPet()->IsNPC()) {
 			NPC *pet = GetPet()->CastToNPC();
 			SpellBuff_Struct petBuffs[BUFF_COUNT];
+			memset(petBuffs, 0, sizeof(petBuffs));
 			uint32 petItems[MAX_WORN_INVENTORY];
 
 			LoadPetBuffs(petBuffs, PetSaveId);
