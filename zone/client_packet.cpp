@@ -7169,6 +7169,22 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 		break;
 	}
+	case PET_HOLD_ON: {
+		if (GetAA(aaPetDiscipline) && mypet->IsNPC() && !mypet->IsHeld()) {
+			if (mypet->IsFeared())
+				break; //could be exploited like PET_BACKOFF
+
+			mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD);
+			mypet->WipeHateList();
+			mypet->SetHeld(true);
+		}
+		break;
+	}
+	case PET_HOLD_OFF: {
+		if (GetAA(aaPetDiscipline) && mypet->IsNPC() && mypet->IsHeld())
+			mypet->SetHeld(false);
+		break;
+	}
 	case PET_NOCAST: {
 		if(GetAA(aaAdvancedPetDiscipline) == 2 && mypet->IsNPC()) {
 			if (mypet->IsFeared())

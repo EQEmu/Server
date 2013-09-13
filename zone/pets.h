@@ -19,6 +19,8 @@
 	#define	PET_FOCUS			19
 	#define	PET_FOCUS_ON		25
 	#define	PET_FOCUS_OFF		26
+	#define PET_HOLD_ON			27
+	#define PET_HOLD_OFF		28
 
 	class Pet : public NPC {
 	public:

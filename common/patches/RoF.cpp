@@ -4051,6 +4051,12 @@ DECODE(OP_PetCommands)
 		case 0x0f:
 			emu->command = 0x0c;	// Hold
 			break;
+		case 0x10:
+			emu->command = 0x1b;	// Hold on
+			break;
+		case 0x11:
+			emu->command = 0x1c;	// Hold off
+			break;
 		case 0x1c:
 			emu->command = 0x01;	// Back
 			break;

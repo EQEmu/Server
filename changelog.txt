@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/13/2013 ==
+demonstar55: Add support for /pet hold on and /pet hold off (UF and RoF)
+
 == 08/29/2013 ==
 KLS: Removed Common Profiler and Zone Profiler.  They're well past outdated status and are just code bloat.
 KLS: Fix for reported issue on forums with skills that could potentially be trained before a player achieved the level to train.
