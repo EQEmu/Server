@@ -18,6 +18,7 @@
 #include "../common/debug.h"
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -6620,34 +6621,36 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 					indP + "Wind: " + itoa(GetWindMod()) + "<br>";
 	}
 
-	std::string final_stats = "" +
-	/*	C/L/R	*/	indP + "Class: " + class_Name + indS + "Level: " + itoa(GetLevel()) + indS + "Race: " + race_Name + "<br>" +
-	/*	Runes	*/	indP + "Rune: " + itoa(rune_number) + indL + indS + "Spell Rune: " + itoa(magic_rune_number) + "<br>" +
-	/*	HP/M/E	*/	HME_row +
-	/*	DS		*/	indP + "DS: " + itoa(itembonuses.DamageShield + spellbonuses.DamageShield*-1) + " (Spell: " + itoa(spellbonuses.DamageShield*-1) + " + Item: " + itoa(itembonuses.DamageShield) + " / " + itoa(RuleI(Character, ItemDamageShieldCap)) + ")<br>" +
-	/*	Atk		*/	indP + "<c \"#CCFF00\">ATK: " + itoa(GetTotalATK()) + "</c><br>" +
-	/*	Atk2	*/	indP + "- Base: " + itoa(GetATKRating()) + " | Item: " + itoa(itembonuses.ATK) + " (" + itoa(RuleI(Character, ItemATKCap)) + ")~Used: " + itoa((itembonuses.ATK * 1.342)) + " | Spell: " + itoa(spellbonuses.ATK) + "<br>" +
-	/*	AC		*/	indP + "<c \"#CCFF00\">AC: " + itoa(CalcAC()) + "</c><br>" +
-	/*	AC2		*/	indP + "- Mit: " + itoa(GetACMit()) + " | Avoid: " + itoa(GetACAvoid()) + " | Spell: " + itoa(spellbonuses.AC) + " | Shield: " + itoa(shield_ac) + "<br>" +
-	/*	Haste	*/	indP + "<c \"#CCFF00\">Haste: " + itoa(GetHaste()) + "</c><br>" +
-	/*	Haste2	*/	indP + " - Item: " + itoa(itembonuses.haste) + " + Spell: " + itoa(spellbonuses.haste + spellbonuses.hastetype2) + " (Cap: " + itoa(RuleI(Character, HasteCap)) + ") | Over: " + itoa(spellbonuses.hastetype3 + ExtraHaste) + "<br><br>" +
-	/* RegenLbl	*/	indL + indS + "Regen<br>" + indS + indP + indP + " Base | Items (Cap) " + indP + " | Spell | A.A.s | Total<br>" +
-	/*	Regen	*/	regen_string + "<br>" +
-	/*	Stats	*/	stat_field + "<br><br>" +
-	/*	Mod2s	*/	mod2_field + "<br>" +
-	/*	HealAmt	*/	indP + "Heal Amount: " + itoa(GetHealAmt()) + " / " + itoa(RuleI(Character, ItemHealAmtCap)) + "<br>" +
-	/*	SpellDmg*/	indP + "Spell Dmg: " + itoa(GetSpellDmg()) + " / " + itoa(RuleI(Character, ItemSpellDmgCap)) + "<br>" +
-	/*	Clair	*/	indP + "Clairvoyance: " + itoa(GetClair()) + " / " + itoa(RuleI(Character, ItemClairvoyanceCap)) + "<br>" +
-	/*	DSMit	*/	indP + "Dmg Shld Mit: " + itoa(GetDSMit()) + " / " + itoa(RuleI(Character, ItemDSMitigationCap)) + "<br><br>";
+	std::ostringstream final_string;
+					final_string <<
+	/*	C/L/R	*/	indP << "Class: " << class_Name << indS << "Level: " << static_cast<int>(GetLevel()) << indS << "Race: " << race_Name << "<br>" <<
+	/*	Runes	*/	indP << "Rune: " << rune_number << indL << indS << "Spell Rune: " << magic_rune_number << "<br>" <<
+	/*	HP/M/E	*/	HME_row <<
+	/*	DS		*/	indP << "DS: " << (itembonuses.DamageShield + spellbonuses.DamageShield*-1) << " (Spell: " << (spellbonuses.DamageShield*-1) << " + Item: " << itembonuses.DamageShield << " / " << RuleI(Character, ItemDamageShieldCap) << ")<br>" <<
+	/*	Atk		*/	indP << "<c \"#CCFF00\">ATK: " << GetTotalATK() << "</c><br>" <<
+	/*	Atk2	*/	indP << "- Base: " << GetATKRating() << " | Item: " << itembonuses.ATK << " (" << RuleI(Character, ItemATKCap) << ")~Used: " << (itembonuses.ATK * 1.342) << " | Spell: " << spellbonuses.ATK << "<br>" <<
+	/*	AC		*/	indP << "<c \"#CCFF00\">AC: " << CalcAC() << "</c><br>" <<
+	/*	AC2		*/	indP << "- Mit: " << GetACMit() << " | Avoid: " << GetACAvoid() << " | Spell: " << spellbonuses.AC << " | Shield: " << shield_ac << "<br>" <<
+	/*	Haste	*/	indP << "<c \"#CCFF00\">Haste: " << GetHaste() << "</c><br>" <<
+	/*	Haste2	*/	indP << " - Item: " << itembonuses.haste << " + Spell: " << (spellbonuses.haste + spellbonuses.hastetype2) << " (Cap: " << RuleI(Character, HasteCap) << ") | Over: " << (spellbonuses.hastetype3 + ExtraHaste) << "<br><br>" <<
+	/* RegenLbl	*/	indL << indS << "Regen<br>" << indS << indP << indP << " Base | Items (Cap) " << indP << " | Spell | A.A.s | Total<br>" <<
+	/*	Regen	*/	regen_string << "<br>" <<
+	/*	Stats	*/	stat_field << "<br><br>" <<
+	/*	Mod2s	*/	mod2_field << "<br>" <<
+	/*	HealAmt	*/	indP << "Heal Amount: " << GetHealAmt() << " / " << RuleI(Character, ItemHealAmtCap) << "<br>" <<
+	/*	SpellDmg*/	indP << "Spell Dmg: " << GetSpellDmg() << " / " << RuleI(Character, ItemSpellDmgCap) << "<br>" <<
+	/*	Clair	*/	indP << "Clairvoyance: " << GetClair() << " / " << RuleI(Character, ItemClairvoyanceCap) << "<br>" <<
+	/*	DSMit	*/	indP << "Dmg Shld Mit: " << GetDSMit() << " / " << RuleI(Character, ItemDSMitigationCap) << "<br><br>";
 	if(GetClass() == BARD)
-		final_stats += bard_info + "<br>";
+		final_string << bard_info << "<br>";
 	if(skill_mods.size() > 0)
-		final_stats += skill_mods + "<br>";
+		final_string << skill_mods << "<br>";
 	if(skill_dmgs.size() > 0)
-		final_stats += skill_dmgs + "<br>";
+		final_string << skill_dmgs << "<br>";
 	if(faction_item_string.size() > 0)
-		final_stats += faction_item_string;
+		final_string << faction_item_string;
 
+	std::string final_stats = final_string.str();
 
 	if(use_window) {
 		if(final_stats.size() < 4096)

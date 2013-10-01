@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 09/30/2013 ==
 Sorvani: Changed SummonItem to only summon an item with max charges when said default value is present and not on zero charges
+demonstar55: Fixed issue with #showstats showing your level for a bunch of values
 
 == 09/13/2013 ==
 demonstar55: Add support for /pet hold on and /pet hold off (UF and RoF)
