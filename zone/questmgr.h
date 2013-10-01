@@ -52,7 +52,7 @@ public:
 	void say(const char *str);
 	void say(const char *str, uint8 language);
 	void me(const char *str);
-	void summonitem(uint32 itemid, int16 charges = 0);
+	void summonitem(uint32 itemid, int16 charges = -1);
 	void write(const char *file, const char *str);
 	Mob* spawn2(int npc_type, int grid, int unused, float x, float y, float z, float heading);
 	Mob* unique_spawn(int npc_type, int grid, int unused, float x, float y, float z, float heading = 0);

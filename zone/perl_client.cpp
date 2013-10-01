@@ -3049,7 +3049,7 @@ XS(XS_Client_SummonItem)
 	{
 		Client *		THIS;
 		uint32		item_id = (uint32)SvUV(ST(1));
-		int16		charges = 0;
+		int16		charges = -1;
 		bool		attune = false;
 		uint32		aug1 = 0;
 		uint32		aug2 = 0;

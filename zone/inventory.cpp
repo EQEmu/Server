@@ -208,11 +208,13 @@ void Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		return;
 	} else {
 		// if 0 and max charges 0 and stackable, set the created item charge to 1
-		if (charges == 0 && item->MaxCharges == 0 && item->Stackable)
+		if (charges == 0 && item->MaxCharges == 0 && item->Stackable) {
 			charges = 1;
-		// if 0 or no charge value was passed, set the created item charge to max charges
-		else if(charges == 0)
+		// if the charges is -1, then no charge value was passed in set to max charges
+		} else if(charges == -1) {
 			charges = item->MaxCharges;
+		// in any other situatino just use charges as passed
+		}
 	}
 	// Checking to see if the Item is lore or not.
 	bool foundlore = CheckLoreConflict(item);
