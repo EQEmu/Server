@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/03/2013 ==
+demonstar55: Fix when the random +1 tick is added to nerf extension focus effects to where they should be
+
 == 09/30/2013 ==
 Sorvani: Changed SummonItem to only summon an item with max charges when said default value is present and not on zero charges
 demonstar55: Fixed issue with #showstats showing your level for a bunch of values
