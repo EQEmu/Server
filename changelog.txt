@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/05/2013 ==
+Sorvani: fixed issue with stackable items being created with 0 charges cause by fix to SummonItems
+
 == 10/03/2013 ==
 demonstar55: Fix when the random +1 tick is added to nerf extension focus effects to where they should be
 
