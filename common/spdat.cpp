@@ -987,6 +987,13 @@ bool IsSelfConversionSpell(uint16 spell_id) {
 		return false;
 }
 
+// returns true for both detrimental and beneficial buffs
+bool IsBuffSpell(uint16 spell_id) {
+	if(IsValidSpell(spell_id) && (spells[spell_id].buffduration || spells[spell_id].buffdurationformula))
+		return true;
+	return false;
+}
+
 uint32 GetMorphTrigger(uint32 spell_id)
 {
 	for(int i = 0; i < EFFECT_COUNT; ++i)

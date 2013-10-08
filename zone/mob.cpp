@@ -3033,15 +3033,6 @@ void Mob::SetDeltas(float dx, float dy, float dz, float dh) {
 	delta_heading = static_cast<int>(dh);
 }
 
-
-bool Mob::HasBuffIcon(Mob *caster, Mob *target, uint16 spell_id)
-{
-	if((caster->CalcBuffDuration(caster, target, spell_id)-1) > 0)
-		return true;
-	else
-		return false;
-}
-
 void Mob::SetEntityVariable(const char *id, const char *m_var)
 {
 	std::string n_m_var = m_var;

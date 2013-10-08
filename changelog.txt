@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/08/2013 ==
+demonstar55: Added IsBuffSpell(spell_id) that will return true if the spell has a duration, so would end up in effects/song/discs etc windows on the client
+demonstar55: Replaced instances of using CalcBuffDuration to determine if a spell was a buff with IsBuffSpell
+demonstar55: Removed Mob::HasBuffIcon since it was doing what IsBuffSpell does in a more convoluted way with a rather misleading name
+demonstar55: Fixed issues that arose from the 10/03/2013 change
+
 == 10/05/2013 ==
 Sorvani: fixed issue with stackable items being created with 0 charges cause by fix to SummonItems
 

@@ -2257,7 +2257,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			{
 				if(IsClient())
 				{
-					if(HasBuffIcon(caster, this, spell_id) == false)
+					if(!IsBuffSpell(spell_id))
 					{
 						CastToClient()->SetKnockBackExemption(true);
 
@@ -3497,7 +3497,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	{
 		if(spelltar->IsClient())
 		{
-			if(HasBuffIcon(this, spelltar, spell_id) == false)
+			if(!IsBuffSpell(spell_id))
 			{
 				spelltar->CastToClient()->SetKnockBackExemption(true);
 

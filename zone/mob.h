@@ -241,7 +241,6 @@ public:
 	int16 GetBuffSlotFromType(uint16 type);
 	uint16 GetSpellIDFromSlot(uint8 slot);
 	int CountDispellableBuffs();
-	bool HasBuffIcon(Mob* caster, Mob* target, uint16 spell_id);
 	bool CheckHitsRemaining(uint32 buff_slot, bool when_spell_done=false, bool negate=false,uint16 type=0,
 		uint16 spell_id=0, bool use_skill=false,uint16 skill=0);
 	void SpreadVirus(uint16 spell_id, uint16 casterID);
