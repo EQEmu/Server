@@ -262,7 +262,6 @@ void Client::ActivateAA(aaID activate){
 			}
 			SetMana(GetMana() - caa->mana_cost);
 		}
-		HandleAAAction(aaid);
 		if(caa->reuse_time > 0)
 		{
 			uint32 timer_base = CalcAAReuseTimer(caa);
@@ -273,6 +272,7 @@ void Client::ActivateAA(aaID activate){
 			p_timers.Start(AATimerID + pTimerAAStart, timer_base);
 			SendAATimer(AATimerID, 0, 0);
 		}
+		HandleAAAction(aaid);
 	}
 
 	//cast the spell, if we have one
@@ -531,10 +531,14 @@ void Client::HandleAAAction(aaID activate) {
 	}
 
 	//cast the spell, if we have one
-	if(spell_id > 0 && spell_id < SPDAT_RECORDS) {
-		//I dont know when we need to mem and when we do not, if ever...
-		//MemorizeSpell(8, spell_id, 3);
-		CastSpell(spell_id, target_id);
+	if(IsValidSpell(spell_id)) {
+		int aatid = GetAATimerID(activate);
+		if(!CastSpell(spell_id, target_id , 10, -1, -1, 0, -1, pTimerAAStart + aatid , CalcAAReuseTimer(caa), 1)) {
+			SendAATimer(aatid, 0, 0xFFFFFF);
+			Message_StringID(15,ABILITY_FAILED);
+			p_timers.Clear(&database, pTimerAAStart + aatid);
+			return;
+		}
 	}
 
 	//handle the duration timer if we have one.

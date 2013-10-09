@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/09/2013 ==
+demonstar55: Fixed some more instances of the AA timer being eaten
+
 == 10/08/2013 ==
 demonstar55: Added IsBuffSpell(spell_id) that will return true if the spell has a duration, so would end up in effects/song/discs etc windows on the client
 demonstar55: Replaced instances of using CalcBuffDuration to determine if a spell was a buff with IsBuffSpell

@@ -1818,7 +1818,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if (isproc) {
 				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, true);
 			} else {
-				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false);
+				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false))
+					if(casting_spell_type == 1) // AA failed to cast, InterruptSpell to reset timer
+						InterruptSpell();
 			}
 			if(IsPlayerIllusionSpell(spell_id)
 			&& IsClient()
@@ -3478,7 +3480,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		// if SpellEffect returned false there's a problem applying the
 		// spell. It's most likely a buff that can't stack.
 		mlog(SPELLS__CASTING_ERR, "Spell %d could not apply its effects %s -> %s\n", spell_id, GetName(), spelltar->GetName());
-		Message_StringID(MT_Shout, SPELL_NO_HOLD);
+		if(casting_spell_type != 1) // AA is handled differently
+			Message_StringID(MT_Shout, SPELL_NO_HOLD);
 		safe_delete(action_packet);
 		return false;
 	}
