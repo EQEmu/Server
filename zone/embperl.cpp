@@ -43,6 +43,17 @@ EXTERN_C XS(boot_PerlPacket);
 XS(XS_EQEmuIO_PRINT);
 #endif //EMBPERL_IO_CAPTURE
 
+const char *argv_eqemu[] = { "",
+#ifdef EMBPERL_IO_CAPTURE
+		"-w", "-W",
+#endif
+		"-e", "0;", nullptr };
+
+#ifdef EMBPERL_IO_CAPTURE
+	int argc = 5;
+#else
+	int argc = 3;
+#endif
 //so embedded scripts can use xs extensions (ala 'use socket;')
 EXTERN_C void boot_DynaLoader(pTHX_ CV* cv);
 EXTERN_C void xs_init(pTHX)
@@ -85,38 +96,25 @@ EXTERN_C void xs_init(pTHX)
 
 Embperl::Embperl()
 {
+	char **argv = (char **)argv_eqemu;
+	char **env = { nullptr };
 	in_use = true;	//in case one of these files generates an event
-
-	//setup perl...
-	my_perl = perl_alloc();
-	if(!my_perl)
-		throw "Failed to init Perl (perl_alloc)";
+	PERL_SYS_INIT3(&argc, &argv, &env);
 	DoInit();
 }
 
 void Embperl::DoInit() {
-	const char *argv_eqemu[] = { "",
-#ifdef EMBPERL_IO_CAPTURE
-		"-w", "-W",
-#endif
-		"-e", "0;", nullptr };
-
-	int argc = 3;
-#ifdef EMBPERL_IO_CAPTURE
-	argc = 5;
-#endif
-
 	char **argv = (char **)argv_eqemu;
 	char **env = { nullptr };
-
+	my_perl = perl_alloc();
+	//setup perl...
+	if(!my_perl)
+		throw "Failed to init Perl (perl_alloc)";
+	PERL_SET_CONTEXT(my_perl);
+	PERL_SET_INTERP(my_perl);
 	PL_perl_destruct_level = 1;
-
 	perl_construct(my_perl);
-
-	PERL_SYS_INIT3(&argc, &argv, &env);
-
-	perl_parse(my_perl, xs_init, argc, argv, env);
-
+	perl_parse(my_perl, xs_init, argc, argv, nullptr);
 	perl_run(my_perl);
 
 	//a little routine we use a lot.
@@ -213,12 +211,19 @@ Embperl::~Embperl()
 		,FALSE);
 #endif
 	perl_free(my_perl);
+	PERL_SYS_TERM();
+	my_perl = NULL;
 }
 
 void Embperl::Reinit() {
 	in_use = true;
+	PERL_SET_CONTEXT(my_perl);
+	PERL_SET_INTERP(my_perl);
 	PL_perl_destruct_level = 1;
 	perl_destruct(my_perl);
+	perl_free(my_perl);
+	my_perl = NULL;
+	//Now reinit...
 	DoInit();
 	in_use = false;
 }

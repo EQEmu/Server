@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/10/2013 ==
+Secrets: Fixed zone shutdown (or #reloadqst) reinitalization of Perl. This should allow for Perl 5.14 and later to work on Windows under the new quest system.
+
 == 10/09/2013 ==
 demonstar55: Fixed some more instances of the AA timer being eaten
 
