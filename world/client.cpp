@@ -723,7 +723,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				if(cs->gohome[x] == 1)
 				{
 					home_enabled = true;
-					return true;
+					break;
 				}
 			}
 		}
@@ -755,7 +755,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				if(cs->tutorial[x] == 1)
 				{
 					tutorial_enabled = true;
-					return true;
+					break;
 				}
 			}
 		}
