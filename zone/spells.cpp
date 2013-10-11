@@ -1818,9 +1818,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if (isproc) {
 				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, true);
 			} else {
-				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false))
-					if(casting_spell_type == 1) // AA failed to cast, InterruptSpell to reset timer
+				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
+					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
+						// Prevent mana usage/timers being set for beneficial buffs
 						InterruptSpell();
+						return false;
+					}
+				}
 			}
 			if(IsPlayerIllusionSpell(spell_id)
 			&& IsClient()
