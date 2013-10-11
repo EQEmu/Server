@@ -217,7 +217,7 @@ public:
 	bool	GetAccountInfoForLogin(uint32 account_id, int16* admin = 0, char* account_name = 0,
 				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = 0);
 	bool	GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin = 0, char* account_name = 0,
-				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = false,
+				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = nullptr,
 				uint32* account_creation = 0);
 	bool	GetCharacterInfoForLogin_result(MYSQL_RES* result, uint32* character_id = 0, char* current_zone = 0,
 				PlayerProfile_Struct* pp = 0, Inventory* inv = 0, ExtendedProfile_Struct *ext = 0, uint32* pplen = 0,
