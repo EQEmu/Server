@@ -1025,7 +1025,7 @@ bool Bot::AI_IdleCastCheck() {
 			// bard bots
 			if(!AICastSpell(this, 100, SpellType_Cure)) {
 				if(!AICastSpell(this, 100, SpellType_Heal)) {
-					if(!RuleB(Bots, BotBardUseOutOfCombatSongs) || !AICastSpell(this, 100, SpellType_Buff)) { // skips if rule is false
+					if((!RuleB(Bots, BotBardUseOutOfCombatSongs) || !GetBardUseOutOfCombatSongs()) || !AICastSpell(this, 100, SpellType_Buff)) { // skips if rule is false
 						if(!AICastSpell(this, 100, SpellType_InCombatBuff)) { // this tries to keep some combat buffs on the group until engaged code can pick up the buffing
 							//
 						}

@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 10/11/2013 ==
 Bad_Captain: Fixed merc crash issue by updating special_abilities & vwMercNpcTypes (Sorvani).
+Bad_Captain: Bots- added out of combat bard songs & #bot bardoutofcombat on|off command to turn them on/off.
 JJ: (demonstar55) Allow use of Go Home button when Tutorial still selected in RoF.
 
 == 10/10/2013 ==

@@ -464,6 +464,7 @@ public:
 	uint8 GetNumHealRotationMembers () { return _numHealRotationMembers; }
 	uint32 GetHealRotationNextHealTime() { return _healRotationNextHeal; }
 	uint32 GetHealRotationTimer () { return _healRotationTimer; }
+	bool GetBardUseOutOfCombatSongs() { return _bardUseOutOfCombatSongs;}
 	inline virtual int16	GetAC()	const { return AC; }
 	inline virtual int16	GetSTR()	const { return STR; }
 	inline virtual int16	GetSTA()	const { return STA; }
@@ -548,6 +549,7 @@ public:
 	void SetHealRotationNextHealTime( uint32 nextHealTime ) { _healRotationNextHeal = nextHealTime; }
 	void SetHealRotationTimer( uint32 timer ) { _healRotationTimer = timer; }
 	void SetNumHealRotationMembers( uint8 numMembers ) { _numHealRotationMembers = numMembers; }
+	void SetBardUseOutOfCombatSongs(bool useOutOfCombatSongs) { _bardUseOutOfCombatSongs = useOutOfCombatSongs;}
 
 	// Class Destructors
 	virtual ~Bot();
@@ -621,6 +623,7 @@ private:
 	uint8 _numHealRotationMembers;
 	std::map<uint32, BotAA> botAAs;
 	InspectMessage_Struct _botInspectMessage;
+	bool _bardUseOutOfCombatSongs;
 
 	// Private "base stats" Members
 	int16 _baseMR;
