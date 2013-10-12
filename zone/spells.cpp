@@ -1821,7 +1821,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
-						InterruptSpell();
+            if(casting_spell_type == 1)
+              InterruptSpell();
 						return false;
 					}
 				}
