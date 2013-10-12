@@ -709,7 +709,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		return true;
 	}
 
-	if(!pZoning && ew->return_home)
+	if(!pZoning && ew->return_home && !ew->tutorial)
 	{
 		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
 		memset(cs, 0, sizeof(CharacterSelect_Struct));

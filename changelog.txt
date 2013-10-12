@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/11/2013 ==
+JJ: (demonstar55) Allow use of Go Home button when Tutorial still selected in RoF.
+
 == 10/10/2013 ==
 Secrets: Fixed zone shutdown (or #reloadqst) reinitalization of Perl. This should allow for Perl 5.14 and later to work on Windows under the new quest system.
 demonstar55: Beneficial single target buffs shouldn't have their mana/timers set if they fail to cast after the Mob::SpellOnTarget call in Mob::SpellFinished
