@@ -332,7 +332,9 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					// Put the zone levitate and movement check here since bots are able to bypass the client casting check
 					if((IsEffectInSpell(selectedBotSpell.SpellId, SE_Levitate) && !zone->CanLevitate())
 						|| (IsEffectInSpell(selectedBotSpell.SpellId, SE_MovementSpeed) && !zone->CanCastOutdoor())) {
-							continue;
+							if(botClass != BARD || !IsSpellUsableThisZoneType(selectedBotSpell.SpellId, zone->GetZoneType())){
+								continue;
+							}
 					}
 
 					switch(tar->GetArchetype())
@@ -580,6 +582,86 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 					if(castedSpell)
 						break;
+				}
+			}
+			else if(botClass == BARD) { 
+				if (tar->DontBuffMeBefore() < Timer::GetCurrentTime()) {
+					std::list<BotSpell> inCombatBuffList = GetBotSpellsBySpellType(this, SpellType_InCombatBuff);
+
+					for(std::list<BotSpell>::iterator itr = inCombatBuffList.begin(); itr != inCombatBuffList.end(); itr++) {
+						BotSpell selectedBotSpell = *itr;
+
+						if(selectedBotSpell.SpellId == 0)
+							continue;
+
+						if(CheckSpellRecastTimers(this, itr->SpellIndex)) {
+							uint32 TempDontBuffMeBefore = tar->DontBuffMeBefore();
+
+							// no buffs with illusions.. use #bot command to cast illusions
+							if(IsEffectInSpell(selectedBotSpell.SpellId, SE_Illusion) && tar != this)
+								continue;
+
+							//no teleport spells use #bot command to cast teleports
+							if(IsEffectInSpell(selectedBotSpell.SpellId, SE_Teleport) || IsEffectInSpell(selectedBotSpell.SpellId, SE_Succor))
+								continue;
+
+							// can not cast buffs for your own pet only on another pet that isn't yours
+							if((spells[selectedBotSpell.SpellId].targettype == ST_Pet) && (tar != this->GetPet()))
+								continue;
+
+							// Validate target
+
+							if(!((spells[selectedBotSpell.SpellId].targettype == ST_Target || spells[selectedBotSpell.SpellId].targettype == ST_Pet || tar == this ||
+								spells[selectedBotSpell.SpellId].targettype == ST_Group || spells[selectedBotSpell.SpellId].targettype == ST_GroupTeleport ||
+								(botClass == BARD && spells[selectedBotSpell.SpellId].targettype == ST_AEBard))
+								&& !tar->IsImmuneToSpell(selectedBotSpell.SpellId, this)
+								&& (tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0))) {
+									continue;
+							}
+
+							// Put the zone levitate and movement check here since bots are able to bypass the client casting check
+							if((IsEffectInSpell(selectedBotSpell.SpellId, SE_Levitate) && !zone->CanLevitate())
+								|| (IsEffectInSpell(selectedBotSpell.SpellId, SE_MovementSpeed) && !zone->CanCastOutdoor())) {
+									if(!IsSpellUsableThisZoneType(selectedBotSpell.SpellId, zone->GetZoneType())) {
+										continue;
+									}
+							}
+
+							if(!IsGroupSpell(selectedBotSpell.SpellId)) {
+								//Only check archetype if song is not a group spell
+								switch(tar->GetArchetype()) {
+									case ARCHETYPE_CASTER:
+										//TODO: probably more caster specific spell effects in here
+										if(IsEffectInSpell(selectedBotSpell.SpellId, SE_AttackSpeed) || IsEffectInSpell(selectedBotSpell.SpellId, SE_ATK) ||
+											IsEffectInSpell(selectedBotSpell.SpellId, SE_STR) || IsEffectInSpell(selectedBotSpell.SpellId, SE_ReverseDS))
+										{
+											continue;
+										}
+										break;
+									case ARCHETYPE_MELEE:
+										if(IsEffectInSpell(selectedBotSpell.SpellId, SE_IncreaseSpellHaste) || IsEffectInSpell(selectedBotSpell.SpellId, SE_ManaPool) ||
+											IsEffectInSpell(selectedBotSpell.SpellId, SE_CastingLevel) || IsEffectInSpell(selectedBotSpell.SpellId, SE_ManaRegen_v2) ||
+											IsEffectInSpell(selectedBotSpell.SpellId, SE_CurrentMana))
+										{
+											continue;
+										}
+										break;
+									case ARCHETYPE_HYBRID:
+										//Hybrids get all buffs
+									default:
+										break;
+								}
+							}
+
+							castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontBuffMeBefore);
+
+							if(TempDontBuffMeBefore != tar->DontBuffMeBefore())
+								tar->SetDontBuffMeBefore(TempDontBuffMeBefore);
+						}
+
+						if(castedSpell)
+							break;
+					}
 				}
 			}
 			break;
@@ -838,7 +920,17 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	}
 	else { //handle spell recast and recast timers
 		if(GetClass() == BARD && IsGroupSpell(AIspells[i].spellid)) {
-			AIspells[i].time_cancast = (spells[AIspells[i].spellid].recast_time > (spells[AIspells[i].spellid].buffduration * 6000)) ? Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time : Timer::GetCurrentTime() + spells[AIspells[i].spellid].buffduration * 6000;
+			// Bard Clarity songs (spellids: 723 & 1287) are recast_time = 0 and buffduration = 0.
+			// This translates to an insta-recast in the above check and is essentially locking all idle bard songs
+			// between levels 20 & 33 to one of the clarity songs.
+
+			// Hard-coded fix of '0/0' bard songs..watch for issues in other song lines
+			if(spells[AIspells[i].spellid].recast_time == 0 && spells[AIspells[i].spellid].buffduration == 0 && spells[AIspells[i].spellid].goodEffect > 0) {
+				AIspells[i].time_cancast = Timer::GetCurrentTime() + (3 * 6000); // pseudo 'buffduration' of 3 (value matches others in bard 'heal' song line)
+			}
+			else {
+				AIspells[i].time_cancast = (spells[AIspells[i].spellid].recast_time > (spells[AIspells[i].spellid].buffduration * 6000)) ? Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time : Timer::GetCurrentTime() + spells[AIspells[i].spellid].buffduration * 6000;
+			}
 			//spellend_timer.Start(spells[AIspells[i].spellid].cast_time);
 		}
 		else
@@ -933,9 +1025,11 @@ bool Bot::AI_IdleCastCheck() {
 			// bard bots
 			if(!AICastSpell(this, 100, SpellType_Cure)) {
 				if(!AICastSpell(this, 100, SpellType_Heal)) {
-					if(!AICastSpell(this, 100, SpellType_Buff)) {
-						//
-					}
+					if(!RuleB(Bots, BotBardUseOutOfCombatSongs) || !AICastSpell(this, 100, SpellType_Buff)) { // skips if rule is false
+						if(!AICastSpell(this, 100, SpellType_InCombatBuff)) { // this tries to keep some combat buffs on the group until engaged code can pick up the buffing
+							//
+						}
+ 					}
 				}
 			}
 
@@ -1136,11 +1230,11 @@ bool Bot::AI_EngagedCastCheck() {
 			}
 		}
 		else if(botClass == BARD) {
-			if(!AICastSpell(this, GetChanceToCastBySpellType(SpellType_Buff), SpellType_Buff)) {
+			if(!AICastSpell(this, GetChanceToCastBySpellType(SpellType_InCombatBuff), SpellType_InCombatBuff)) {
 				if(!AICastSpell(this, GetChanceToCastBySpellType(SpellType_Heal), SpellType_Heal)) {
-					if(!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Dispel), SpellType_Dispel)) {// Bards will use their debuff songs
-						if(!AICastSpell(GetTarget(), mayGetAggro?0:GetChanceToCastBySpellType(SpellType_Nuke), SpellType_Nuke)) {// Bards will use their debuff songs
-							if(!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {// Bards will use their debuff songs
+					if(!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Dispel), SpellType_Dispel)) {// Bards will use their dispel songs
+						if(!AICastSpell(GetTarget(), mayGetAggro?0:GetChanceToCastBySpellType(SpellType_Nuke), SpellType_Nuke)) {// Bards will use their nuke songs
+							if(!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {// Bards will use their escape songs
 								//
 								failedToCast = true;
 							}
@@ -2969,11 +3063,30 @@ void Bot::CalcChanceToCast() {
 					break;
 			}
 			break;
+		case BARD:
+			switch(botStance)
+			{
+				case BotStanceBalanced:
+				case BotStanceReactive:
+					castChance = 100;
+					break;
+				case BotStanceEfficient:
+				case BotStanceAggressive:
+					castChance = 50;
+					break;
+				case BotStanceBurn:
+				case BotStanceBurnAE:
+					castChance = 25;
+					break;
+				default:
+					castChance = 0;
+					break;
+			}
+			break;
 		case BEASTLORD:
 		case MAGICIAN:
 		case DRUID:
 		case ENCHANTER:
-		case BARD:
 		case WIZARD:
 		case NECROMANCER:
 		case SHADOWKNIGHT:

@@ -1102,6 +1102,21 @@ bool IsShortDurationBuff(uint16 spell_id)
 	return false;
 }
 
+bool IsSpellUsableThisZoneType(uint16 spell_id, uint8 zone_type)
+{
+	if((spell_id > 0) && (spell_id < SPDAT_RECORDS))
+	{
+		//check if spell can be cast in any zone (-1 or 255), then if spell zonetype matches zone's zonetype
+		if(spells[spell_id].zonetype == -1
+			|| spells[spell_id].zonetype == 255
+			|| spells[spell_id].zonetype == zone_type) { 
+			return true; 
+		}
+	}
+
+	return false;
+}
+
 const char* GetSpellName(int16 spell_id)
 {
     return( spells[spell_id].name );

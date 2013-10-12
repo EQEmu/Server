@@ -5011,38 +5011,41 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			npc_type->maxlevel = 0; //We should hard-set this to override scalerate's functionality in the NPC class when it is constructed.
 
 			Merc* merc = new Merc(npc_type, c->GetX(), c->GetY(), c->GetZ(), 0);
-			merc->SetMercData( merc_template->MercTemplateID );
-			database.LoadMercEquipment(merc);
-			merc->UpdateMercStats(c);
 
-			if(updateFromDB) {
-				database.LoadCurrentMerc(c);
+			if(merc) {
+				merc->SetMercData( merc_template->MercTemplateID );
+				database.LoadMercEquipment(merc);
+				merc->UpdateMercStats(c);
 
-				merc->SetMercID(c->GetMercInfo().mercid);
-				snprintf(merc->name, 64, "%s", c->GetMercInfo().merc_name);
-				snprintf(c->GetEPP().merc_name, 64, "%s", c->GetMercInfo().merc_name);
-				merc->SetSuspended(c->GetMercInfo().IsSuspended);
-				merc->gender = c->GetMercInfo().Gender;
-				merc->SetHP(c->GetMercInfo().hp <= 0 ? merc->GetMaxHP() : c->GetMercInfo().hp);
-				merc->SetMana(c->GetMercInfo().hp <= 0 ? merc->GetMaxMana() : c->GetMercInfo().mana);
-				merc->SetEndurance(c->GetMercInfo().endurance);
-				merc->luclinface = c->GetMercInfo().face;
-				merc->hairstyle = c->GetMercInfo().luclinHairStyle;
-				merc->haircolor = c->GetMercInfo().luclinHairColor;
-				merc->eyecolor1 = c->GetMercInfo().luclinEyeColor;
-				merc->eyecolor2 = c->GetMercInfo().luclinEyeColor2;
-				merc->beardcolor = c->GetMercInfo().luclinBeardColor;
-				merc->beard = c->GetMercInfo().luclinBeard;
-				merc->drakkin_heritage = c->GetMercInfo().drakkinHeritage;
-				merc->drakkin_tattoo = c->GetMercInfo().drakkinTattoo;
-				merc->drakkin_details = c->GetMercInfo().drakkinDetails;
+				if(updateFromDB) {
+					database.LoadCurrentMerc(c);
+
+					merc->SetMercID(c->GetMercInfo().mercid);
+					snprintf(merc->name, 64, "%s", c->GetMercInfo().merc_name);
+					snprintf(c->GetEPP().merc_name, 64, "%s", c->GetMercInfo().merc_name);
+					merc->SetSuspended(c->GetMercInfo().IsSuspended);
+					merc->gender = c->GetMercInfo().Gender;
+					merc->SetHP(c->GetMercInfo().hp <= 0 ? merc->GetMaxHP() : c->GetMercInfo().hp);
+					merc->SetMana(c->GetMercInfo().hp <= 0 ? merc->GetMaxMana() : c->GetMercInfo().mana);
+					merc->SetEndurance(c->GetMercInfo().endurance);
+					merc->luclinface = c->GetMercInfo().face;
+					merc->hairstyle = c->GetMercInfo().luclinHairStyle;
+					merc->haircolor = c->GetMercInfo().luclinHairColor;
+					merc->eyecolor1 = c->GetMercInfo().luclinEyeColor;
+					merc->eyecolor2 = c->GetMercInfo().luclinEyeColor2;
+					merc->beardcolor = c->GetMercInfo().luclinBeardColor;
+					merc->beard = c->GetMercInfo().luclinBeard;
+					merc->drakkin_heritage = c->GetMercInfo().drakkinHeritage;
+					merc->drakkin_tattoo = c->GetMercInfo().drakkinTattoo;
+					merc->drakkin_details = c->GetMercInfo().drakkinDetails;
+				}
+
+				if(merc->GetMercID()) {
+					database.LoadMercBuffs(merc);
+				}
+
+				merc->LoadMercSpells();
 			}
-
-			if(merc->GetMercID()) {
-				database.LoadMercBuffs(merc);
-			}
-
-			merc->LoadMercSpells();
 
 			return merc;
 		}
@@ -5456,8 +5459,10 @@ void Client::SpawnMercOnZone()
 					return;
 				}
 				Merc* merc = Merc::LoadMerc(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
-				SpawnMerc(merc, false);
-				SendMercTimerPacket(merc->GetID(), 5, GetMercInfo().SuspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
+				if(merc) {
+					SpawnMerc(merc, false);
+					SendMercTimerPacket(merc->GetID(), 5, GetMercInfo().SuspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
+				}
 			}
 		}
 		else

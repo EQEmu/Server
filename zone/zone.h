@@ -104,6 +104,7 @@ public:
 	inline const uint32	GetZoneID() const { return zoneid; }
 	inline const uint32	GetInstanceID() const { return instanceid; }
 	inline const uint16	GetInstanceVersion() const { return instanceversion; }
+	inline const uint8	GetZoneType() const { return zone_type; }
 
 	inline Timer* GetInstanceTimer() { return Instance_Timer; }
 
@@ -286,6 +287,7 @@ private:
 	bool	can_castoutdoor;
 	bool	can_levitate;
 	bool	is_hotzone;
+	uint8	zone_type;
 	bool	allow_mercs;
 	uint32	pgraveyard_id, pgraveyard_zoneid;
 	float	pgraveyard_x, pgraveyard_y, pgraveyard_z, pgraveyard_heading;

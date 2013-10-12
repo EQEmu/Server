@@ -295,7 +295,7 @@ public:
 	/*
 	* Zone related
 	*/
-	bool	GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, int &ruleset, char **map_filename);
+	bool	GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, uint8 &zone_type, int &ruleset, char **map_filename);
 	bool	SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd);
 	bool	LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
 	bool	UpdateZoneSafeCoords(const char* zonename, float x, float y, float z);

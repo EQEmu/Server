@@ -422,6 +422,7 @@ RULE_BOOL ( Bots, BotGroupBuffing, false ) // Bots will cast single target buffs
 RULE_BOOL ( Bots, BotSpellQuest, false ) // Anita Thrall's (Anita_Thrall.pl) Bot Spell Scriber quests.
 RULE_INT ( Bots, BotAAExpansion, 8 ) // Bots get AAs through this expansion
 RULE_BOOL ( Bots, BotGroupXP, false ) // Determines whether client gets xp for bots outside their group.
+RULE_BOOL ( Bots, BotBardUseOutOfCombatSongs, true) // Determines whether bard bots use additional out of combat songs.
 RULE_CATEGORY_END()
 #endif
 
