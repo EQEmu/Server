@@ -666,7 +666,11 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 		safe_delete(outapp);
 	}
 	else
+	{
+		if(ClientVersionBit & BIT_TitaniumAndEarlier)
+			StartInTutorial = true;
 		SendCharInfo();
+	}
 
 	return true;
 }

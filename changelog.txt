@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/12/2013 ==
+demonstar55: Allow Titanium and lower clients to enter Tutorial zone from character select
+
 == 10/11/2013 ==
 Bad_Captain: Fixed merc crash issue by updating special_abilities & vwMercNpcTypes (Sorvani).
 Bad_Captain: Bots- added out of combat bard songs & #bot bardoutofcombat on|off command to turn them on/off.
