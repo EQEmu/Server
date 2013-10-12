@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/12/2013 ==
+demonstar55: Allow Titanium and lower clients to enter Tutorial zone from character select
+
 == 10/11/2013 ==
 JJ: (demonstar55) Allow use of Go Home button when Tutorial still selected in RoF.
 
