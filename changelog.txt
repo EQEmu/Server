@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/11/2013 ==
+Bad_Captain: Fixed merc crash issue by updating special_abilities & vwMercNpcTypes (Sorvani).
+
 == 10/05/2013 ==
 Sorvani: fixed issue with stackable items being created with 0 charges cause by fix to SummonItems
 
