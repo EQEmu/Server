@@ -9329,7 +9329,7 @@ int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 			|| botclass == PALADIN || botclass == BEASTLORD ))
 		cast_reducer += (GetLevel()-50)*3;
 
-	if((casttime >= 4000) && BeneficialSpell(spell_id) && ((CalcBuffDuration(this,this,spell_id)-1) > 0)) {
+	if((casttime >= 4000) && BeneficialSpell(spell_id) && IsBuffSpell(spell_id)) {
 		switch (GetAA(aaSpellCastingDeftness)) {
 			case 1:
 				cast_reducer += 5;

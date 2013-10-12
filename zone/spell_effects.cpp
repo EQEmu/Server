@@ -82,7 +82,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	if(c_override)
 	{
 		int durat = CalcBuffDuration(caster, this, spell_id, caster_level);
-		if((durat-1) > 0)
+		if(durat > 0)
 		{
 			buffslot = AddBuff(caster, spell_id, durat, caster_level);
 			if(buffslot == -1)	// stacking failure
@@ -95,7 +95,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	}
 	else
 	{
-		if((CalcBuffDuration(caster,this,spell_id)-1) > 0){
+		if(IsBuffSpell(spell_id)){
 			if(IsEffectInSpell(spell_id, SE_BindSight))
 			{
 				if(caster)
