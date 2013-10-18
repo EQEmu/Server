@@ -235,6 +235,13 @@ int main(int argc, char** argv) {
 	EQEmu::MemoryMappedFile *mmf = nullptr;
 	LoadSpells(&mmf);
 
+	_log(ZONE__INIT, "Loading base data");
+	if (!database.LoadBaseData()) {
+		_log(ZONE__INIT_ERR, "Loading base data FAILED!");
+		CheckEQEMuErrorAndPause();
+		return 1;
+	}
+
 	_log(ZONE__INIT, "Loading guilds");
 	guild_mgr.LoadGuilds();
 	_log(ZONE__INIT, "Loading factions");

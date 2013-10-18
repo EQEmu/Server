@@ -29,6 +29,7 @@
 #include "loot.h"
 #include "skill_caps.h"
 #include "spells.h"
+#include "base_data.h"
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
@@ -55,24 +56,26 @@ int main(int argc, char **argv) {
 	}
 
 	bool load_all = true;
-	bool load_items = true;
-	bool load_factions = true;
-	bool load_loot = true;
-	bool load_skill_caps = true;
-	bool load_spells = true;
+	bool load_items = false;
+	bool load_factions = false;
+	bool load_loot = false;
+	bool load_skill_caps = false;
+	bool load_spells = false;
+	bool load_bd = false;
 	if(argc > 1) {
 		load_all = false;
-		load_items = false;
-		load_factions = false;
-		load_loot = false;
-		load_skill_caps = false;
-		load_spells = false;
 
 		for(int i = 1; i < argc; ++i) {
 			switch(argv[i][0]) {
 			case 'a':
 				if(strcasecmp("all", argv[i]) == 0) {
 					load_all = true;
+				}
+				break;
+
+			case 'b':
+				if(strcasecmp("base_data", argv[i]) == 0) {
+					load_bd = true;
 				}
 				break;
 
@@ -149,6 +152,16 @@ int main(int argc, char **argv) {
 		LogFile->write(EQEMuLog::Status, "Loading spells...");
 		try {
 			LoadSpells(&database);
+		} catch(std::exception &ex) {
+			LogFile->write(EQEMuLog::Error, "%s", ex.what());
+			return 1;
+		}
+	}
+
+	if(load_all || load_bd) {
+		LogFile->write(EQEMuLog::Status, "Loading base data...");
+		try {
+			LoadBaseData(&database);
 		} catch(std::exception &ex) {
 			LogFile->write(EQEMuLog::Error, "%s", ex.what());
 			return 1;

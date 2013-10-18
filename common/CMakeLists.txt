@@ -91,6 +91,7 @@ SET(common_sources
 
 SET(common_headers
 	BasePacket.h
+	base_data.h
 	bodytypes.h
 	breakdowns.h
 	classes.h

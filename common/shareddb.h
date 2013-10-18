@@ -7,6 +7,7 @@
 #include "skills.h"
 #include "spdat.h"
 #include "Item.h"
+#include "base_data.h"
 #include "fixed_memory_hash_set.h"
 #include "fixed_memory_variable_hash_set.h"
 
@@ -110,6 +111,11 @@ public:
 	void LoadSpells(void *data, int max_spells);
 	void LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
 
+	int GetMaxBaseDataLevel();
+	bool LoadBaseData();
+	void LoadBaseData(void *data, int max_level);
+	const BaseDataStruct* GetBaseData(int lvl, int cl);
+
 protected:
 
 	EQEmu::MemoryMappedFile *skill_caps_mmf;
@@ -121,6 +127,7 @@ protected:
 	EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> *loot_table_hash;
 	EQEmu::MemoryMappedFile *loot_drop_mmf;
 	EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> *loot_drop_hash;
+	EQEmu::MemoryMappedFile *base_data_mmf;
 };
 
 #endif /*SHAREDDB_H_*/

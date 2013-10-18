@@ -21,14 +21,14 @@
 
 SharedDatabase::SharedDatabase()
 : Database(), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), faction_mmf(nullptr), faction_hash(nullptr),
-	loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr), loot_drop_hash(nullptr)
+	loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr), loot_drop_hash(nullptr), base_data_mmf(nullptr)
 {
 }
 
 SharedDatabase::SharedDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 : Database(host, user, passwd, database, port), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr),
 	faction_mmf(nullptr), faction_hash(nullptr), loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr),
-	loot_drop_hash(nullptr)
+	loot_drop_hash(nullptr), base_data_mmf(nullptr)
 {
 }
 
@@ -42,6 +42,7 @@ SharedDatabase::~SharedDatabase() {
 	safe_delete(loot_drop_mmf);
 	safe_delete(loot_table_hash);
 	safe_delete(loot_drop_hash);
+	safe_delete(base_data_mmf);
 }
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
@@ -1740,6 +1741,136 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		_log(SPELLS__LOAD_ERR, "Error in LoadSpells query '%s' %s", query, errbuf);
 		safe_delete_array(query);
 	}
+}
+
+int SharedDatabase::GetMaxBaseDataLevel() {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = "SELECT MAX(level) FROM base_data";
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	int32 ret = 0;
+	if(RunQuery(query, strlen(query), errbuf, &result)) {
+		row = mysql_fetch_row(result);
+		if(row) {
+			ret = atoi(row[0]);
+			mysql_free_result(result);
+		} else {
+			ret = -1;
+			mysql_free_result(result);
+		}
+	} else {
+		_log(SPELLS__LOAD_ERR, "Error in GetMaxBaseDataLevel query '%s' %s", query, errbuf);
+		ret = -1;
+	}
+	return ret;
+}
+
+bool SharedDatabase::LoadBaseData() {
+	if(base_data_mmf) {
+		return true;
+	}
+
+	try {
+		EQEmu::IPCMutex mutex("base_data");
+		mutex.Lock();
+		base_data_mmf = new EQEmu::MemoryMappedFile("shared/base_data");
+	
+		int size = 16 * (GetMaxBaseDataLevel() + 1) * sizeof(BaseDataStruct);
+		if(size == 0) {
+			EQ_EXCEPT("SharedDatabase", "Base Data size is zero");
+		}
+
+		if(base_data_mmf->Size() != size) {
+			EQ_EXCEPT("SharedDatabase", "Couldn't load base data because base_data_mmf->Size() != size");
+		}
+
+		mutex.Unlock();
+	} catch(std::exception& ex) {
+		LogFile->write(EQEMuLog::Error, "Error Loading Base Data: %s", ex.what());
+		return false;
+	}
+
+	return true;
+}
+
+void SharedDatabase::LoadBaseData(void *data, int max_level) {
+	char *base_ptr = reinterpret_cast<char*>(data);
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = "SELECT * FROM base_data ORDER BY level, class ASC";
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	
+	if(RunQuery(query, strlen(query), errbuf, &result)) {
+	
+		int lvl = 0;
+		int cl = 0;
+		while (row = mysql_fetch_row(result)) {
+			lvl = atoi(row[0]);
+			cl = atoi(row[1]);
+			if(lvl <= 0) {
+				LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.level <= 0, ignoring.");
+				continue;
+			}
+
+			if(lvl >= max_level) {
+				LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.level >= max_level, ignoring.");
+				continue;
+			}
+
+			if(cl <= 0) {
+				LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.cl <= 0, ignoring.");
+				continue;
+			}
+
+			if(cl > 16) {
+				LogFile->write(EQEMuLog::Error, "Non fatal error: base_data.class > 16, ignoring.");
+				continue;
+			}
+
+			BaseDataStruct *bd = reinterpret_cast<BaseDataStruct*>(base_ptr + (((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct)));
+			bd->base_hp = atof(row[2]);
+			bd->base_mana = atof(row[3]);
+			bd->base_end = atof(row[4]);
+			bd->unk1 = atof(row[5]);
+			bd->unk2 = atof(row[6]);
+			bd->hp_factor = atof(row[7]);
+			bd->mana_factor = atof(row[8]);
+			bd->endurance_factor = atof(row[9]);
+		}
+		mysql_free_result(result);
+	} else {
+		LogFile->write(EQEMuLog::Error, "Error in LoadBaseData query '%s' %s", query, errbuf);
+		safe_delete_array(query);
+	}
+}
+
+const BaseDataStruct* SharedDatabase::GetBaseData(int lvl, int cl) {
+	if(!base_data_mmf) {
+		return nullptr;
+	}
+
+	if(lvl <= 0) {
+		return nullptr;
+	}
+
+	if(cl <= 0) {
+		return nullptr;
+	}
+
+	if(cl > 16) {
+		return nullptr;
+	}
+
+	char *base_ptr = reinterpret_cast<char*>(base_data_mmf->Get());
+
+	uint32 offset = ((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct);
+
+	if(offset >= base_data_mmf->Size()) {
+		return nullptr;
+	}
+
+	BaseDataStruct *bd = reinterpret_cast<BaseDataStruct*>(base_ptr + offset);
+	return bd;
 }
 
 void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries) {

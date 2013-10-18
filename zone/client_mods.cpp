@@ -371,34 +371,19 @@ uint16 Mob::GetClassLevelFactor(){
 
 int32 Client::CalcBaseHP()
 {
-	if(GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		float SoDPost255;
-		uint16 NormalSTA = GetSTA();
-
-		if(((NormalSTA - 255) / 2) > 0)
-			SoDPost255 = ((NormalSTA - 255) / 2);
-		else
-			SoDPost255 = 0;
-
-		int hp_factor = GetClassHPFactor();
-
-		if (level < 41) {
-			base_hp = (5 + (GetLevel() * hp_factor / 12) +
-				((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
+	if(GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+		int stats = GetSTA();
+		if(stats > 255) {
+			stats = (stats - 255) / 2;
+			stats += 255;
 		}
-		else if (level < 81) {
-			base_hp = (5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
-				((NormalSTA - SoDPost255) * hp_factor / 90) +
-				((NormalSTA - SoDPost255) * (GetLevel() - 40) * hp_factor / 1800));
+		
+		base_hp = 5;
+		auto base_data = database.GetBaseData(GetLevel(), GetClass());
+		if(base_data) {
+			base_hp += base_data->base_hp + (base_data->hp_factor * stats);
+			base_hp += (GetHeroicSTA() * 10);
 		}
-		else {
-			base_hp = (5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
-				((NormalSTA - SoDPost255) * hp_factor / 90) +
-				((NormalSTA - SoDPost255) * hp_factor / 45));
-		}
-
-		base_hp += (GetHeroicSTA() * 10);
-
 	}
 	else {
 		uint16 Post255;
@@ -991,7 +976,7 @@ int32 Client::CalcBaseMana()
 		case 'I':
 			WisInt = GetINT();
 
-			if (GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 
 				if (WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
@@ -1003,19 +988,10 @@ int32 Client::CalcBaseMana()
 					ConvertedWisInt = WisInt;
 				}
 
-				if (GetLevel() < 41) {
-					wisint_mana = (GetLevel() * 75 * ConvertedWisInt / 1000);
-					base_mana = (GetLevel() * 15);
+				auto base_data = database.GetBaseData(GetLevel(), GetClass());
+				if(base_data) {
+					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10);
 				}
-				else if (GetLevel() < 81) {
-					wisint_mana = ((3 * ConvertedWisInt) + ((GetLevel() - 40) * 15 * ConvertedWisInt / 100));
-					base_mana = (600 + ((GetLevel() - 40) * 30));
-				}
-				else {
-					wisint_mana = (9 * ConvertedWisInt);
-					base_mana = (1800 + ((GetLevel() - 80) * 18));
-				}
-				max_m = base_mana + wisint_mana + (GetHeroicINT() * 10);
 			}
 			else
 			{
@@ -1035,7 +1011,7 @@ int32 Client::CalcBaseMana()
 		case 'W':
 			WisInt = GetWIS();
 
-			if (GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 
 				if (WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
@@ -1047,19 +1023,10 @@ int32 Client::CalcBaseMana()
 					ConvertedWisInt = WisInt;
 				}
 
-				if (GetLevel() < 41) {
-					wisint_mana = (GetLevel() * 75 * ConvertedWisInt / 1000);
-					base_mana = (GetLevel() * 15);
+				auto base_data = database.GetBaseData(GetLevel(), GetClass());
+				if(base_data) {
+					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10);
 				}
-				else if (GetLevel() < 81) {
-					wisint_mana = ((3 * ConvertedWisInt) + ((GetLevel() - 40) * 15 * ConvertedWisInt / 100));
-					base_mana = (600 + ((GetLevel() - 40) * 30));
-				}
-				else {
-					wisint_mana = (9 * ConvertedWisInt);
-					base_mana = (1800 + ((GetLevel() - 80) * 18));
-				}
-				max_m = base_mana + wisint_mana + (GetHeroicWIS() * 10);
 			}
 			else
 			{
@@ -1934,44 +1901,25 @@ void Client::CalcMaxEndurance()
 int32 Client::CalcBaseEndurance()
 {
 	int32 base_end = 0;
-	int32 base_endurance = 0;
-	int32 ConvertedStats = 0;
-	int32 sta_end = 0;
-	int Stats = 0;
 
-	if(GetClientVersion() >= EQClientSoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		int HeroicStats = 0;
+	if(GetClientVersion() >= EQClientSoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+		double heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4.0f;
+		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
 
-		Stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
-		HeroicStats = ((GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4);
-
-		if (Stats > 100) {
-			ConvertedStats = (((Stats - 100) * 5 / 2) + 100);
-			if (Stats > 201) {
-				ConvertedStats -= ((Stats - 201) * 5 / 4);
-			}
-		}
-		else {
-			ConvertedStats = Stats;
+		if(stats > 201.0f) {
+			stats = 1.25f * (stats - 201.0f) + 352.5f;
+		} else if(stats > 100.0f) {
+			stats = 2.5f * (stats - 100.0f) + 100.0f;
 		}
 
-		if (GetLevel() < 41) {
-			sta_end = (GetLevel() * 75 * ConvertedStats / 1000);
-			base_endurance = (GetLevel() * 15);
+		auto base_data = database.GetBaseData(GetLevel(), GetClass());
+		if(base_data) {
+			base_end = base_data->base_end + (heroic_stats * 10.0f) + (base_data->endurance_factor * static_cast<int>(stats));
 		}
-		else if (GetLevel() < 81) {
-			sta_end = ((3 * ConvertedStats) + ((GetLevel() - 40) * 15 * ConvertedStats / 100));
-			base_endurance = (600 + ((GetLevel() - 40) * 30));
-		}
-		else {
-			sta_end = (9 * ConvertedStats);
-			base_endurance = (1800 + ((GetLevel() - 80) * 18));
-		}
-		base_end = (base_endurance + sta_end + (HeroicStats * 10));
 	}
 	else
 	{
-		Stats = GetSTR()+GetSTA()+GetDEX()+GetAGI();
+		int Stats = GetSTR()+GetSTA()+GetDEX()+GetAGI();
 		int LevelBase = GetLevel() * 15;
 
 		int at_most_800 = Stats;
@@ -2000,6 +1948,7 @@ int32 Client::CalcBaseEndurance()
 		//take all of the sums from above, then multiply by level*0.075
 		base_end += ( bonus_sum * 3 * GetLevel() ) / 40;
 	}
+
 	return base_end;
 }
 
