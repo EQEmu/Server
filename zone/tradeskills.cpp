@@ -576,68 +576,79 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name.c_str(), spec.recipe_id);
 }
 
-SkillType Object::TypeToSkill(uint32 type) {
-	SkillType tradeskill = TradeskillUnknown;
-	switch (type) {
-		case OT_MEDICINEBAG: {
-			tradeskill = ALCHEMY;
-			break;
-		}
-		case OT_SEWINGKIT: {
-			tradeskill = TAILORING;
-			break;
-		}
-		case OT_FORGE:
-		case OT_TEIRDALFORGE:
-		case OT_OGGOKFORGE:
-		case OT_FIERDALFFORGE:
-		case OT_STORMGUARDF:
-			case OT_VALEFORGE: {
-			tradeskill = BLACKSMITHING;
-			break;
-		}
-		case OT_FLETCHINGKIT: {
-			tradeskill = FLETCHING;
-			break;
-		}
-		case OT_BREWBARREL: {
-			tradeskill = BREWING;
-			break;
-		}
-		case OT_JEWELERSKIT: {
-			tradeskill = JEWELRY_MAKING;
-			break;
-		}
-		case OT_POTTERYWHEEL:
-		case OT_KILN: {
-			tradeskill = POTTERY;
-			break;
-		}
-		case OT_OVEN: {
-			tradeskill = BAKING;
-			break;
-		}
-		case OT_TACKLEBOX: {
-			tradeskill = FISHING;
-			break;
-		}
-		case OT_KEYMAKER: { //unknown for now...
-			tradeskill = TradeskillUnknown;
-			break;
-		}
-		case OT_TOOLBOX: {
-			tradeskill = TINKERING;
-			break;
-		}
-		case OT_WIZARDLEX:
-		case OT_MAGELEX:
-		case OT_NECROLEX:
-		case OT_ENCHLEX: {
-			tradeskill = RESEARCH;
-			break;
-		}
+SkillType Object::TypeToSkill(uint32 type)
+{
+	switch(type) // grouped and ordered by SkillType name - new types need to be verified for proper SkillType and use
+	{
+	/*ALCHEMY*/
+		case BagType_MedicineBag: { return (SkillType)ALCHEMY; }
+
+	/*BAKING*/
+		// case BagType_MixingBowl: // No idea...
+		case BagType_Oven: { return (SkillType)BAKING; }
+
+	/*BLACKSMITHING*/
+		case BagType_Forge:
+		// case BagType_KoadaDalForge:
+		case BagType_TeirDalForge:
+		case BagType_OggokForge:
+		case BagType_StormguardForge:
+		// case BagType_AkanonForge:
+		// case BagType_NorthmanForge:
+		// case BagType_CabilisForge:
+		// case BagType_FreeportForge:
+		// case BagType_RoyalQeynosForge:
+		// case BagType_TrollForge:
+		case BagType_FierDalForge:
+		case BagType_ValeForge: { return (SkillType)BLACKSMITHING; } // Delete return if BagType_GuktaForge enabled
+		// case BagType_ErudForge:
+		// case BagType_GuktaForge: { return (SkillType)BLACKSMITHING; }
+
+	/*BREWING*/
+		// case BagType_IceCreamChurn: // No idea...
+		case BagType_BrewBarrel: { return (SkillType)BREWING; }
+
+	/*FISHING*/
+		case BagType_TackleBox: { return (SkillType)FISHING; }
+
+	/*FLETCHING*/
+		case BagType_FletchingKit: { return (SkillType)FLETCHING; } // Delete return if BagType_FierDalFletchingKit enabled
+		// case BagType_FierDalFletchingKit: { return (SkillType)FLETCHING; }
+
+	/*JEWELRY_MAKING*/
+		case BagType_JewelersKit: { return (SkillType)JEWELRY_MAKING; }
+
+	/*MAKE_POISON*/
+		// This is a guess and needs to be verified... (Could be ALCHEMY)
+		// case BagType_Mortar: { return (SkillType)MAKE_POISON; }
+
+	/*POTTERY*/
+		case BagType_PotteryWheel:
+		case BagType_Kiln: { return (SkillType)POTTERY; } // Delete return if BagType_IksarPotteryWheel enabled
+		// case BagType_IksarPotteryWheel: { return (SkillType)POTTERY; }
+
+	/*RESEARCH*/
+		// case BagType_Lexicon:
+		case BagType_WizardsLexicon:
+		case BagType_MagesLexicon:
+		case BagType_NecromancersLexicon:
+		case BagType_EnchantersLexicon: { return (SkillType)RESEARCH; } // Delete return if BagType_ConcordanceofResearch enabled
+		// case BagType_ConcordanceofResearch: { return (SkillType)RESEARCH; }
+
+	/*TAILORING*/
+		case BagType_SewingKit: { return (SkillType)TAILORING; } // Delete return if BagType_FierDalTailoringKit enabled
+		// case BagType_HalflingTailoringKit:
+		// case BagType_ErudTailoringKit:
+		// case BagType_FierDalTailoringKit: { return (SkillType)TAILORING; }
+
+	/*TINKERING*/
+		case BagType_ToolBox: { return (SkillType)TINKERING; }
+
+	/*Undefined*/
+		default: { break; }
 	}
-	return(tradeskill);
+
+	return TradeskillUnknown;
 }
 
 void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsigned long objtype, unsigned long someid) {

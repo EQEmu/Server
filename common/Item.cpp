@@ -1201,7 +1201,7 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 			if (inst && inst->IsType(ItemClassContainer)
 				&& inst->GetItem()->BagSize >= min_size)
 			{
-				if(inst->GetItem()->BagType == bagTypeQuiver && inst->GetItem()->ItemType != ItemTypeArrow)
+				if(inst->GetItem()->BagType == BagType_Quiver && inst->GetItem()->ItemType != ItemTypeArrow)
 				{
 					continue;
 				}
@@ -1861,9 +1861,9 @@ bool Inventory::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_S
 
 	if(ItemToTry->Size > Container->BagSize) return false;
 
-	if((Container->BagType == bagTypeQuiver) && (ItemToTry->ItemType != ItemTypeArrow)) return false;
+	if((Container->BagType == BagType_Quiver) && (ItemToTry->ItemType != ItemTypeArrow)) return false;
 
-	if((Container->BagType == bagTypeBandolier) && (ItemToTry->ItemType != ItemTypeThrowingv2)) return false;
+	if((Container->BagType == BagType_Bandolier) && (ItemToTry->ItemType != ItemTypeThrowingv2)) return false;
 
 	return true;
 }

@@ -2880,7 +2880,7 @@ struct LogServer_Struct {
 /*260*/	uint8	enable_petition_wnd;
 /*261*/	uint8	enablevoicemacros;
 /*262*/	uint8	enablemail;
-/*263*/	uint8	disable_tutorial_go_home;
+/*263*/	uint8	disable_tutorial_go_home; // This appears valid on Ti and RoF..other clients need verification
 /*264*/
 };
 
