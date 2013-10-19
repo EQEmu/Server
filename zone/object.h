@@ -70,47 +70,7 @@ IT10714_ACTORDEF=Augmentation Sealer
 IT10725_ACTORDEF=Shuriken
 */
 
-// Object Types
-#define OT_DROPPEDITEM	0x01
-#define OT_MEDICINEBAG	0x09
-#define OT_TOOLBOX		0x0A
-#define OT_OVEN			0x0F
-#define OT_SEWINGKIT	0x10	//and loom
-#define OT_FORGE		0x11
-#define OT_FLETCHINGKIT	0x12
-#define OT_BREWBARREL	0x13
-#define OT_JEWELERSKIT	0x14
-#define OT_POTTERYWHEEL	0x15
-#define OT_KILN			0x16
-#define OT_KEYMAKER		0x17
-#define OT_WIZARDLEX	0x18
-#define OT_MAGELEX		0x19
-#define OT_NECROLEX		0x1A
-#define OT_ENCHLEX		0x1B
-// high elf forge is 0x1F (Koada'dal forge)
-#define OT_TEIRDALFORGE	0x20	//dark elf
-#define OT_OGGOKFORGE	0x21	//ogre
-#define OT_STORMGUARDF	0x22	//dwarven
-#define OT_VALEFORGE	0x31	//halfling
-// gnome forge 0x23 (ak'anon forge)
-// barbarian forge 0x24 (northman forge)
-//
-// iksar forge 0x26	(cabilis forge)
-// human forge 0x27 (qeynos or freeport?) (royal qeynos forge or freeport forge)
-// human forge 0x28 (qeynos or freeport?)
-// halfling tailoring kit 0x29
-// erudite tailoring kit 0x2A
-// wood elf tailoring kit 0x2B
-// wood elf fletching kit 0x2C
-// iksar pottery wheel 0x2D
-#define OT_TACKLEBOX	0x2e
-// troll forge 0x2F (grobb forge)
-#define OT_FIERDALFFORGE	0x30
-// erudite forge 0x32 (erud forge)
-#define OT_AUGMENT		0x35
-//... (shar vahl forge)
-//... wood elf (fier'dal forge)
-//... (froglok forge)
+#define OT_DROPPEDITEM BagType_LargeBag
 
 // Icon values:
 //0x0453 a pie
@@ -209,7 +169,7 @@ protected:
 	ItemInst*		m_inst;		// Item representing object
 	bool			m_inuse;	// Currently in use by a client?
 	uint32			m_id;		// Database key, different than drop_id
-	uint32			m_type;		// Object Type, ie, forge, oven, dropped item, etc
+	uint32			m_type;		// Object Type, ie, forge, oven, dropped item, etc (ref: ContainerTypes)
 	uint32			m_icon;		// Icon to use for forge, oven, etc
 	float			m_max_x;
 	float			m_max_y;

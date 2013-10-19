@@ -736,7 +736,7 @@ void Client::RangedAttack(Mob* other) {
 			if(pi == nullptr || !pi->IsType(ItemClassContainer))
 				continue;
 			const Item_Struct* bagitem = pi->GetItem();
-			if(!bagitem || bagitem->BagType != bagTypeQuiver)
+			if(!bagitem || bagitem->BagType != BagType_Quiver)
 				continue;
 
 			//we found a quiver, look for the ammo in it

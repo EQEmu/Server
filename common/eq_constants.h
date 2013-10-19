@@ -21,19 +21,20 @@
 #include "skills.h"
 
 /*
-** Item attributes
+**	Item attributes
 **
+**	(There are no grepwin hits other than these declarations... Do they have a use?)
 */
-enum ItemAttrib
+enum ItemAttributes : uint32
 {
-	ItemAttribLore			= (1 << 0),
-	ItemAttribArtifact		= (1 << 1),
-	ItemAttribSummoned		= (1 << 2),
-	ItemAttribMagic			= (1 << 3),
-	ItemAttribAugment		= (1 << 4),
-	ItemAttribPendingLore	= (1 << 5),
-	ItemAttribNone			= 0,
-	ItemAttribUnknown		= 0xFFFFFFFF
+	ItemAttr_None			= 0x00000000,
+	ItemAttr_Lore			= 0x00000001,
+	ItemAttr_Artifact		= 0x00000002,
+	ItemAttr_Summoned		= 0x00000004,
+	ItemAttr_Magic			= 0x00000008,
+	ItemAttr_Augment		= 0x00000010,
+	ItemAttr_PendingLore	= 0x00000020,
+	ItemAttr_Unknown		= 0xFFFFFFFF
 };
 
 /*
@@ -101,17 +102,76 @@ enum ItemTypes
 };
 
 /*
-	Bag types
+**	Container types
+**
+**	This correlates to world 'object.type' (object.h/Object.cpp) as well as Item_Struct.BagType
+**
+**	(ref: database, web forums and eqstr_us.txt)
 */
-enum {
-	bagTypeSmallBag		= 0,
-	bagTypeLargeBag		= 1,
-	bagTypeQuiver		= 2,
-	bagTypeBeltPouch	= 3,
-	bagTypeBandolier	= 8
-	//... there are 50 types
+enum ContainerTypes : uint8
+{
+/*3400*/	BagType_SmallBag = 0,
+/*3401*/	BagType_LargeBag,
+/*3402*/	BagType_Quiver,
+/*3403*/	BagType_BeltPouch,
+/*3404*/	BagType_WristPouch,
+/*3405*/	BagType_BackPack,
+/*3406*/	BagType_SmallChest,
+/*3407*/	BagType_LargeChest,
+/*----*/	BagType_Bandolier,				// <*Database Reference Only>
+/*3408*/	BagType_MedicineBag,
+/*3409*/	BagType_ToolBox,
+/*3410*/	BagType_Lexicon,
+/*3411*/	BagType_Mortar,
+/*3412*/	BagType_SelfDusting,			// Quest container (Auto-clear contents?)
+/*3413*/	BagType_MixingBowl,
+/*3414*/	BagType_Oven,
+/*3415*/	BagType_SewingKit,
+/*3416*/	BagType_Forge,
+/*3417*/	BagType_FletchingKit,
+/*3418*/	BagType_BrewBarrel,
+/*3419*/	BagType_JewelersKit,
+/*3420*/	BagType_PotteryWheel,
+/*3421*/	BagType_Kiln,
+/*3422*/	BagType_Keymaker,				// (no database entries as of peq rev 69)
+/*3423*/	BagType_WizardsLexicon,
+/*3424*/	BagType_MagesLexicon,
+/*3425*/	BagType_NecromancersLexicon,
+/*3426*/	BagType_EnchantersLexicon,
+/*----*/	BagType_Unknown01,				// (a coin pouch/purse?) (no database entries as of peq rev 69)
+/*----*/	BagType_ConcordanceofResearch,	// <*Database Reference Only>
+/*3427*/	BagType_AlwaysWorks,			// Quest container (Never-fail combines?)
+/*3428*/	BagType_KoadaDalForge,			// High Elf
+/*3429*/	BagType_TeirDalForge,			// Dark Elf
+/*3430*/	BagType_OggokForge,				// Ogre
+/*3431*/	BagType_StormguardForge,		// Dwarf
+/*3432*/	BagType_AkanonForge,			// Gnome
+/*3433*/	BagType_NorthmanForge,			// Barbarian
+/*----*/	BagType_Unknown02,				// (no database entries as of peq rev 69)
+/*3434*/	BagType_CabilisForge,			// Iksar
+/*3435*/	BagType_FreeportForge,			// Human 1
+/*3436*/	BagType_RoyalQeynosForge,		// Human 2
+/*3439*/	BagType_HalflingTailoringKit,
+/*3438*/	BagType_ErudTailoringKit,
+/*3440*/	BagType_FierDalTailoringKit,	// Wood Elf
+/*3441*/	BagType_FierDalFletchingKit,	// Wood Elf
+/*3437*/	BagType_IksarPotteryWheel,
+/*3442*/	BagType_TackleBox,
+/*3443*/	BagType_TrollForge,
+/*3445*/	BagType_FierDalForge,			// Wood Elf
+/*3444*/	BagType_ValeForge,				// Halfling
+/*3446*/	BagType_ErudForge,
+/*----*/	BagType_TradersSatchel,			// <*Database Reference Only> (db: Yellow Trader's Satchel Token?)
+/*5785*/	BagType_GuktaForge,				// Froglok (no database entries as of peq rev 69)
+/*3359*/	BagType_AugmentationSealer,
+/*----*/	BagType_IceCreamChurn,			// <*Database Reference Only>
+/*6325*/	BagType_Transformationmold,		// Ornamentation
+/*6340*/	BagType_Detransformationmold,	// Ornamentation Stripper
+/*5400*/	BagType_Unattuner,
+/*7684*/	BagType_TradeskillBag,
+/*7692*/	BagType_CollectibleBag,
+/*----*/	BagType_Count
 };
-
 
 /*
 ** Item Effect Types
@@ -171,28 +231,33 @@ typedef enum {
 } EmuAppearance;
 
 /*
-** Diety List
+**	Diety types
+**
+**	(ref: eqstr_us.txt)
+**
+**	(Another orphaned enumeration...)
 */
-#define DEITY_UNKNOWN			0
-#define DEITY_AGNOSTIC			396
-#define DEITY_BRELL				202
-#define DEITY_CAZIC				203
-#define DEITY_EROL				204
-#define DEITY_BRISTLE			205
-#define DEITY_INNY				206
-#define DEITY_KARANA			207
-#define DEITY_MITH				208
-#define DEITY_PREXUS			209
-#define DEITY_QUELLIOUS			210
-#define DEITY_RALLOS			211
-#define DEITY_SOLUSEK			213
-#define DEITY_TRIBUNAL			214
-#define DEITY_TUNARE			215
-
-//Guessed:
-#define DEITY_BERT				201
-#define DEITY_RODCET			212
-#define DEITY_VEESHAN			216
+enum DeityTypes
+{
+/*----*/	Deity_Unknown = 0,
+/*3251*/	Deity_Bertoxxulous = 201,
+/*3262*/	Deity_BrellSirilis,
+/*3253*/	Deity_CazicThule,
+/*3256*/	Deity_ErollisiMarr,
+/*3252*/	Deity_Bristlebane,
+/*3254*/	Deity_Innoruuk,
+/*3255*/	Deity_Karana,
+/*3257*/	Deity_MithanielMarr,
+/*3259*/	Deity_Prexus,
+/*3260*/	Deity_Quellious,
+/*3266*/	Deity_RallosZek,
+/*3258*/	Deity_RodcetNife,
+/*3261*/	Deity_SolusekRo,
+/*3263*/	Deity_TheTribunal,
+/*3264*/	Deity_Tunare,
+/*3265*/	Deity_Veeshan,
+/*3250*/	Deity_Agnostic = 396
+};
 
 // msg_type's for custom usercolors
 #define MT_Say					256
@@ -435,31 +500,33 @@ typedef enum {
 #define STAT_HASTE		19
 #define STAT_DAMAGE_SHIELD	20
 
-/**
-* Recast timer types. Used as an off set to charProfileStruct timers.
+/*
+**	Recast timer types. Used as an off set to charProfileStruct timers.
+**
+**	(Another orphaned enumeration...)
 */
-enum RecastTypes
+enum RecastTimerTypes
 {
-	RecastTimer0 = 0,
-	RecastTimer1,
-	WeaponHealClickTimer, // 2
-	MuramiteBaneNukeClickTimer, // 3
-	RecastTimer4,
-	DispellClickTimer, // 5 (also click heal orbs?)
-	EpicTimer, // 6
-	OoWBPClickTimer, // 7
-	VishQuestClassItemTimer, // 8
-	HealPotionTimer, // 9
-	RecastTimer10,
-	RecastTimer11,
-	RecastTimer12,
-	RecastTimer13,
-	RecastTimer14,
-	RecastTimer15,
-	RecastTimer16,
-	RecastTimer17,
-	RecastTimer18,
-	ModRodTimer // 19
+	RecTimer_0 = 0,
+	RecTimer_1,
+	RecTimer_WeaponHealClick,		// 2
+	RecTimer_MuramiteBaneNukeClick,	// 3
+	RecTimer_4,
+	RecTimer_DispellClick,			// 5 (also click heal orbs?)
+	RecTimer_Epic,					// 6
+	RecTimer_OoWBPClick,			// 7
+	RecTimer_VishQuestClassItem,	// 8
+	RecTimer_HealPotion,			// 9
+	RecTimer_10,
+	RecTimer_11,
+	RecTimer_12,
+	RecTimer_13,
+	RecTimer_14,
+	RecTimer_15,
+	RecTimer_16,
+	RecTimer_17,
+	RecTimer_18,
+	RecTimer_ModRod					// 19
 };
 
 enum GroupUpdateAction
@@ -574,20 +641,33 @@ static const uint8 SkillDamageTypes[HIGHEST_SKILL+1] = {
 
 
 /*
-** Inventory Slot Equipment Enum
-** Mostly used for third-party tools to reference inventory slots
+**	Inventory Slot Equipment Enum
+**	Mostly used for third-party tools to reference inventory slots
 **
-** NOTE: Numbering for personal inventory goes top to bottom, then left to right
+**	[pre-HoT]
+**	NOTE: Numbering for personal inventory goes top to bottom, then left to right
 **	It's the opposite for inside bags: left to right, then top to bottom
 **	Example:
-**	inventory:	containers:
-**	1 6			1 2
-**	2 7			3 4
-**	3 8			5 6
-**	4 9			7 8
-**	5 10		9 10
+**	Inventory:	Containers:
+**	1	5		1	2
+**	2	6		3	4
+**	3	7		5	6
+**	4	8		7	8
+**	-	-		9	10
+**
+**	[HoT and Higher]
+**	Note: Numbering for inventory and bags goes left to right, then top to bottom
+**	Example:
+**	Inventory:	Containers:
+**	1	2		1	2
+**	3	4		3	4
+**	5	6		5	6
+**	7	8		7	8
+**	9	10		9	10
+**	-	-		11	12	[Note: Additional slots are only available in RoF and higher]
 **
 */
+
 enum InventorySlot
 {
 	////////////////////////

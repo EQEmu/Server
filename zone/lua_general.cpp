@@ -600,16 +600,18 @@ int lua_merchant_count_item(uint32 npc_id, uint32 item_id) {
 }
 
 std::string lua_item_link(int item_id) {
-	char text[250];
+	char text[250] = { 0 };
 	quest_manager.varlink(text, item_id);
 
 	return std::string(text);
 }
 
-void lua_say_link(const char *phrase, bool silent, const char *link_name) {
+std::string lua_say_link(const char *phrase, bool silent, const char *link_name) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
 	quest_manager.saylink(text, silent, link_name);
+
+	return std::string(text);
 }
 
 const char *lua_get_guild_name_by_id(uint32 guild_id) {

@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/18/2013 ==
+Uleat: Expanded the 'Bag Type' enumeration to include all known values. Also, set in place additional 'Bag Type' to 'Skill Type' conversions. Some of these will need to be verified before activation.
+Uleat: Cleaned up some unused enumerations to show a move towards standardization. More to come...
+
 == 10/12/2013 ==
 demonstar55: Allow Titanium and lower clients to enter Tutorial zone from character select
 Bad_Captain: Fixed merc crash issue by updating special_abilities & vwMercNpcTypes (Sorvani).
