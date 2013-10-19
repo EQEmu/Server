@@ -70,9 +70,6 @@ IT10714_ACTORDEF=Augmentation Sealer
 IT10725_ACTORDEF=Shuriken
 */
 
-// Object Types
-extern ContainerTypes;
-
 #define OT_DROPPEDITEM BagType_LargeBag
 
 // Icon values:
