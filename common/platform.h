@@ -10,7 +10,9 @@ enum EQEmuExePlatform
 	ExePlatformQueryServ,
 	ExePlatformUCS,
 	ExePlatformLaunch,
-	ExePlatformSharedMemory
+	ExePlatformSharedMemory,
+	ExePlatformClientImport,
+	ExePlatformClientExport
 };
 
 void RegisterExecutablePlatform(EQEmuExePlatform p);

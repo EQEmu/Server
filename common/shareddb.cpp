@@ -1759,7 +1759,7 @@ int SharedDatabase::GetMaxBaseDataLevel() {
 			mysql_free_result(result);
 		}
 	} else {
-		_log(SPELLS__LOAD_ERR, "Error in GetMaxBaseDataLevel query '%s' %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "Error in GetMaxBaseDataLevel query '%s' %s", query, errbuf);
 		ret = -1;
 	}
 	return ret;
