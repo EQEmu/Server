@@ -294,6 +294,7 @@ RULE_INT ( Spells, DeathSaveCharismaMod, 3) //Determines how much charisma effec
 RULE_INT ( Spells, DivineInterventionHeal, 8000) //Divine intervention heal amount.
 RULE_BOOL ( Spells, AdditiveBonusValues, false) //Allow certain bonuses to be calculated by adding together the value from each item, instead of taking the highest value. (ie Add together all Cleave Effects)
 RULE_BOOL ( Spells, UseCHAScribeHack, false) //ScribeSpells and TrainDiscs quest functions will ignore entries where field 12 is CHA.  What's the best way to do this?
+RULE_BOOL ( Spells, BuffLevelRestrictions, true) //Buffs will not land on low level toons like live
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )

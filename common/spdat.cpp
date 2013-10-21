@@ -496,7 +496,8 @@ int GetMinLevel(uint16 spell_id) {
 
 	//if we can't cast the spell return 0
 	//just so it wont screw up calculations used in other areas of the code
-	if(min == 255)
+	//seen 127, 254, 255
+	if(min >= 127)
 		return 0;
 	else
 		return(min);

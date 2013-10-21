@@ -2709,6 +2709,41 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	return 0;
 }
 
+// Check Spell Level Restrictions
+// returns true if they meet the restrictions, false otherwise
+// derived from http://samanna.net/eq.general/buffs.shtml
+// spells 1-50: no restrictons
+// 51-65: SpellLevel/2+15
+// 66+L Group Spells 62, Single Target 61
+bool Mob::CheckSpellLevelRestriction(uint16 spell_id)
+{
+	return true;
+}
+
+bool Client::CheckSpellLevelRestriction(uint16 spell_id)
+{
+	int SpellLevel = GetMinLevel(spell_id);
+
+	// Only check for beneficial buffs, if it's a bard song, only if it's short duration
+	if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id) &&
+			!(IsBardSong(spell_id) && !IsShortDurationBuff(spell_id)))
+	{
+		if(SpellLevel > 65)
+		{
+			if(IsGroupSpell(spell_id) && GetLevel() < 62)
+				return false;
+			else if(GetLevel() < 61)
+				return false;
+		}
+		else if(SpellLevel > 50) // 51-65
+		{
+			if(GetLevel() < (SpellLevel/2+15))
+				return false;
+		}
+	}
+
+	return true;
+}
 
 // returns the slot the buff was added to, -1 if it wasn't added due to
 // stacking problems, and -2 if this is not a buff
@@ -3478,6 +3513,15 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	}
 	else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id))
 		entity_list.AddHealAggro(spelltar, this, CheckHealAggroAmount(spell_id, (spelltar->GetMaxHP() - spelltar->GetHP())));
+
+	// make sure spelltar is high enough level for the buff
+	if(RuleB(Spells, BuffLevelRestrictions) && !spelltar->CheckSpellLevelRestriction(spell_id))
+	{
+		mlog(SPELLS__BUFFS, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
+		if(!IsBardSong(spell_id))
+			Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
+		return false;
+	}
 
 	// cause the effects to the target
 	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness))

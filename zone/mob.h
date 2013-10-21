@@ -191,6 +191,7 @@ public:
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
 		CastAction_type &CastAction);
 	virtual bool CheckFizzle(uint16 spell_id);
+	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
 	virtual float GetAOERange(uint16 spell_id);
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
