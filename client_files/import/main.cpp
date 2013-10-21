@@ -22,6 +22,7 @@
 #include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
+#include "../../common/StringUtil.h"
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -58,11 +59,60 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
+int GetSpellColumns(SharedDatabase *db) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = "DESCRIBE spells_new";
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	int res = 0;
+	if(db->RunQuery(query, strlen(query), errbuf, &result)) {
+		while(row = mysql_fetch_row(result)) {
+			++res;
+		}
+		mysql_free_result(result);
+	} else {
+		LogFile->write(EQEMuLog::Error, "Error in GetSpellColumns query '%s' %s", query, errbuf);
+	}
+
+	return res;
+}
+
 void ImportSpells(SharedDatabase *db) {
+	LogFile->write(EQEMuLog::Status, "Importing Spells...");
+	FILE *f = fopen("import/spells_us.txt", "r");
+	if(!f) {
+		LogFile->write(EQEMuLog::Error, "Unable to open import/spells_us.txt to read, skipping.");
+		return;
+	}
+
+	int columns = GetSpellColumns(db);
+
+	char buffer[2048];
+	while(fgets(buffer, 2048, f)) {
+		auto split = SplitString(buffer, '^');
+	}
+
+	fclose(f);
 }
 
 void ImportSkillCaps(SharedDatabase *db) {
+	LogFile->write(EQEMuLog::Status, "Importing Skill Caps...");
+	FILE *f = fopen("import/SkillCaps.txt", "r");
+	if(!f) {
+		LogFile->write(EQEMuLog::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
+		return;
+	}
+
+	fclose(f);
 }
 
 void ImportBaseData(SharedDatabase *db) {
+	LogFile->write(EQEMuLog::Status, "Importing Base Data...");
+	FILE *f = fopen("import/BaseData.txt", "r");
+	if(!f) {
+		LogFile->write(EQEMuLog::Error, "Unable to open import/BaseData.txt to read, skipping.");
+		return;
+	}
+
+	fclose(f);
 }

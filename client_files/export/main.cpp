@@ -95,7 +95,7 @@ void ExportSpells(SharedDatabase *db) {
 	fclose(f);
 }
 
-bool skill_usable(SharedDatabase *db, int skill_id, int class_id) {
+bool SkillUsable(SharedDatabase *db, int skill_id, int class_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = nullptr;
 	MYSQL_RES *result;
@@ -117,7 +117,7 @@ bool skill_usable(SharedDatabase *db, int skill_id, int class_id) {
 	return res;
 }
 
-int get_skill(SharedDatabase *db, int skill_id, int class_id, int level) {
+int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = nullptr;
 	MYSQL_RES *result;
@@ -148,10 +148,10 @@ void ExportSkillCaps(SharedDatabase *db) {
 
 	for(int cl = 1; cl <= 16; ++cl) {
 		for(int skill = 0; skill <= 77; ++skill) {
-			if(skill_usable(db, skill, cl)) {
+			if(SkillUsable(db, skill, cl)) {
 				int previous_cap = 0;
 				for(int level = 1; level <= 100; ++level) {
-					int cap = get_skill(db, skill, cl, level);
+					int cap = GetSkill(db, skill, cl, level);
 					if(cap < previous_cap) {
 						cap = previous_cap;
 					}
