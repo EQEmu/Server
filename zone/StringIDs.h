@@ -50,6 +50,7 @@
 #define ITEM_OUT_OF_CHARGES			182		//Item is out of charges.
 #define TARGET_NO_MANA				191		//Your target has no mana to affect
 #define TARGET_GROUP_MEMBER			196		//You must first target a group member.
+#define SPELL_TOO_POWERFUL			197		//Your spell is too powerful for your intended target.
 #define INSUFFICIENT_MANA			199		//Insufficient Mana to cast this spell!
 #define SAC_TOO_LOW					203		//This being is not a worthy sacrifice.
 #define SAC_TOO_HIGH				204		//This being is too powerful to be a sacrifice.

@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 10/21/2013 ==
 demonstar55: Changed GetMinLevel return 0 for more cases that EQ uses for some reason ...
+demonstar55: Added buff level restrictions, set the Spells:BuffLevelRestrictions to false to have the old behavior.
 
 == 10/18/2013 ==
 Uleat: Expanded the 'Bag Type' enumeration to include all known values. Also, set in place additional 'Bag Type' to 'Skill Type' conversions. Some of these will need to be verified before activation.
