@@ -3287,6 +3287,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			spelltar->GetBodyType() != BT_Undead &&
 			spelltar->GetBodyType() != BT_Vampire)
 		{
+			safe_delete(action_packet);
 			return false;
 		}
 	}
@@ -3300,6 +3301,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				if(focus) {
 					CheckHitsRemaining(b);
 					Message_StringID(MT_Shout, SPELL_WOULDNT_HOLD);
+					safe_delete(action_packet);
 					return false;
 				}
 			}
@@ -3347,6 +3349,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		if(reflect_chance) {
 			Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
 			SpellOnTarget(spell_id, this, true, use_resist_adjust, resist_adjust);
+			safe_delete(action_packet);
 			return false;
 		}
 	}
@@ -3520,6 +3523,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		mlog(SPELLS__BUFFS, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
 		if(!IsBardSong(spell_id))
 			Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
+		safe_delete(action_packet);
 		return false;
 	}
 
