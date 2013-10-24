@@ -3014,7 +3014,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar) && !IsResurrectionEffects(spell_id)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
-			Message_StringID(MT_Shout, SPELL_NO_HOLD);
+			Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
 			return false;
 		}
 	}
@@ -3151,7 +3151,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	{
 		if(spelltar->invisible)
 		{
-			spelltar->Message_StringID(MT_Shout, ALREADY_INVIS, GetCleanName());
+			spelltar->Message_StringID(MT_SpellFailure, ALREADY_INVIS, GetCleanName());
 			safe_delete(action_packet);
 			return false;
 		}
@@ -3161,7 +3161,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	{
 		if(spelltar->invisible_undead)
 		{
-			spelltar->Message_StringID(MT_Shout, ALREADY_INVIS, GetCleanName());
+			spelltar->Message_StringID(MT_SpellFailure, ALREADY_INVIS, GetCleanName());
 			safe_delete(action_packet);
 			return false;
 		}
@@ -3171,7 +3171,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	{
 		if(spelltar->invisible_animals)
 		{
-			spelltar->Message_StringID(MT_Shout, ALREADY_INVIS, GetCleanName());
+			spelltar->Message_StringID(MT_SpellFailure, ALREADY_INVIS, GetCleanName());
 			safe_delete(action_packet);
 			return false;
 		}
@@ -3252,7 +3252,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 						mlog(SPELLS__CASTING_ERR, "Beneficial ae bard song %d can't take hold %s -> %s, IBA? %d", spell_id, GetName(), spelltar->GetName(), IsBeneficialAllowed(spelltar));
 					} else {
 						mlog(SPELLS__CASTING_ERR, "Beneficial spell %d can't take hold %s -> %s, IBA? %d", spell_id, GetName(), spelltar->GetName(), IsBeneficialAllowed(spelltar));
-						Message_StringID(MT_Shout, SPELL_NO_HOLD);
+						Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
 					}
 					safe_delete(action_packet);
 					return false;
@@ -3262,7 +3262,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		else if	( !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id)) // Detrimental spells - PVP check
 		{
 			mlog(SPELLS__CASTING_ERR, "Detrimental spell %d can't take hold %s -> %s", spell_id, GetName(), spelltar->GetName());
-			spelltar->Message_StringID(MT_Shout, YOU_ARE_PROTECTED, GetCleanName());
+			spelltar->Message_StringID(MT_SpellFailure, YOU_ARE_PROTECTED, GetCleanName());
 			safe_delete(action_packet);
 			return false;
 		}
@@ -3300,7 +3300,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				focus = CalcFocusEffect(focusBlockNextSpell, buffs[b].spellid, spell_id);
 				if(focus) {
 					CheckHitsRemaining(b);
-					Message_StringID(MT_Shout, SPELL_WOULDNT_HOLD);
+					Message_StringID(MT_SpellFailure, SPELL_WOULDNT_HOLD);
 					safe_delete(action_packet);
 					return false;
 				}
@@ -3534,7 +3534,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		// spell. It's most likely a buff that can't stack.
 		mlog(SPELLS__CASTING_ERR, "Spell %d could not apply its effects %s -> %s\n", spell_id, GetName(), spelltar->GetName());
 		if(casting_spell_type != 1) // AA is handled differently
-			Message_StringID(MT_Shout, SPELL_NO_HOLD);
+			Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
 		safe_delete(action_packet);
 		return false;
 	}
