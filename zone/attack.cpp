@@ -3646,8 +3646,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 
 void Mob::HealDamage(uint32 amount, Mob* caster) {
-	uint32 maxhp = GetMaxHP();
-	uint32 curhp = GetHP();
+	int32 maxhp = GetMaxHP();
+	int32 curhp = GetHP();
 	uint32 acthealed = 0;
 
 	if(caster && amount > 0)
