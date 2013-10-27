@@ -539,7 +539,7 @@ bool TCPConnection::Process() {
 		if (!RecvData(errbuf)) {
 			struct in_addr	in;
 			in.s_addr = GetrIP();
-			//cout << inet_ntoa(in) << ":" << GetrPort() << ": " << errbuf << endl;
+			//std::cout << inet_ntoa(in) << ":" << GetrPort() << ": " << errbuf << std::endl;
 			return false;
 		}
 		/* we break to do the send */

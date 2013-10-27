@@ -80,7 +80,7 @@ void oldFileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, u
 		}
 		sprintf(output, "%02X ",(unsigned char)buf[i]);
 		logfile << output;
-//		logfile << setfill(0) << setw(2) << hex << (int)buf[i] << " ";
+		//logfile << std::setfill(0) << std::setw(2) << std::hex << (int)buf[i] << " "; // unknown intent [CODEBUG]
 	}
 	logfile << std::endl << std::endl;
 }
@@ -115,7 +115,7 @@ void FileDumpPacketHex(const char* filename, const uchar* buf, uint32 size, uint
 		else {
 			ascii[j++] = '.';
 		}
-//		logfile << setfill(0) << setw(2) << hex << (int)buf[i] << " ";
+		//logfile << std::setfill(0) << std::setw(2) << std::hex << (int)buf[i] << " "; // unknown intent [CODEBUG]
 	}
 	uint32 k = ((i-skip)-1)%cols;
 	if (k < 8)

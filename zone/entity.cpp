@@ -130,7 +130,7 @@ Trap* Entity::CastToTrap()
 #ifdef DEBUG
 	if(!IsTrap())
 	{
-		//cout << "CastToTrap error" << endl;
+		//std::cout << "CastToTrap error" << std::endl;
 		return 0;
 	}
 #endif
@@ -161,7 +161,7 @@ Object* Entity::CastToObject() {
 /*Group* Entity::CastToGroup() {
 #ifdef _EQDEBUG
 	if(!IsGroup()) {
-		cout << "CastToGroup error" << endl;
+		std::cout << "CastToGroup error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -230,7 +230,7 @@ const Trap* Entity::CastToTrap() const {
 #ifdef DEBUG
 	if(!IsTrap())
 	{
-		//cout << "CastToTrap error" << endl;
+		//std::cout << "CastToTrap error" << std::endl;
 		return 0;
 	}
 #endif

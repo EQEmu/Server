@@ -721,7 +721,7 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 
 void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CONN_STATUS required_state) {
 
-	//cout << "Sending: 0x" << hex << setw(4) << setfill('0') << (*app)->GetOpcode() << dec << ", size=" << (*app)->size << endl;
+	//std::cout << "Sending: 0x" << std::hex << std::setw(4) << std::setfill('0') << (*app)->GetOpcode() << std::dec << ", size=" << (*app)->size << std::endl;
 
 	// if the program doesnt care about the status or if the status isnt what we requested
 	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
@@ -1745,7 +1745,7 @@ void Client::SendManaUpdatePacket() {
 		SendEnduranceUpdate();
 	}
 
-	//cout << "Sending mana update: " << (cur_mana - last_reported_mana) << endl;
+	//std::cout << "Sending mana update: " << (cur_mana - last_reported_mana) << std::endl;
 	if (last_reported_mana != cur_mana || last_reported_endur != cur_end) {
 
 

@@ -171,7 +171,7 @@ bool EmuTCPConnection::SendPacket(ServerPacket* pack, uint32 iDestination) {
 				struct in_addr	in;
 				in.s_addr = GetrIP();
 				CoutTimestamp(true);
-				std::cout << ": Logging outgoing TCP OldPacket. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
+				std::cout << ": Logging outgoing TCP OldPacket. OPCode: 0x" << std::hex << std::setw(4) << std::setfill('0') << pack->opcode << std::dec << ", size: " << std::setw(5) << std::setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
 				#if TCPN_LOG_PACKETS == 2
 					if (pack->size >= 32)
 						DumpPacket(pack->pBuffer, 32);
@@ -198,7 +198,7 @@ bool EmuTCPConnection::SendPacket(ServerPacket* pack, uint32 iDestination) {
 					struct in_addr	in;
 					in.s_addr = GetrIP();
 					CoutTimestamp(true);
-					std::cout << ": Logging outgoing TCP packet. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
+					std::cout << ": Logging outgoing TCP packet. OPCode: 0x" << std::hex << std::setw(4) << std::setfill('0') << pack->opcode << std::dec << ", size: " << std::setw(5) << std::setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
 					#if TCPN_LOG_PACKETS == 2
 						if (pack->size >= 32)
 							DumpPacket(pack->pBuffer, 32);
@@ -237,7 +237,7 @@ bool EmuTCPConnection::SendPacket(EmuTCPNetPacket_Struct* tnps) {
 			struct in_addr	in;
 			in.s_addr = GetrIP();
 			CoutTimestamp(true);
-			std::cout << ": Logging outgoing TCP NetPacket. OPCode: 0x" << hex << setw(4) << setfill('0') << tnps->opcode << dec << ", size: " << setw(5) << setfill(' ') << tnps->size << " " << inet_ntoa(in) << ":" << GetrPort();
+			std::cout << ": Logging outgoing TCP NetPacket. OPCode: 0x" << std::hex << std::setw(4) << std::setfill('0') << tnps->opcode << std::dec << ", size: " << std::setw(5) << std::setfill(' ') << tnps->size << " " << inet_ntoa(in) << ":" << GetrPort();
 			if (pOldFormat)
 				std::cout << " (OldFormat)";
 			std::cout << std::endl;
@@ -578,7 +578,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsPackets(char* errbuf) {
 						struct in_addr	in;
 						in.s_addr = GetrIP();
 						CoutTimestamp(true);
-						std::cout << ": Logging incoming TCP packet. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
+						std::cout << ": Logging incoming TCP packet. OPCode: 0x" << std::hex << std::setw(4) << std::setfill('0') << pack->opcode << std::dec << ", size: " << std::setw(5) << std::setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
 						#if TCPN_LOG_PACKETS == 2
 							if (pack->size >= 32)
 								DumpPacket(pack->pBuffer, 32);
@@ -663,7 +663,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsOldPackets(char* errbuf) {
 						struct in_addr	in;
 						in.s_addr = GetrIP();
 						CoutTimestamp(true);
-						std::cout << ": Logging incoming TCP OldPacket. OPCode: 0x" << hex << setw(4) << setfill('0') << pack->opcode << dec << ", size: " << setw(5) << setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
+						std::cout << ": Logging incoming TCP OldPacket. OPCode: 0x" << std::hex << std::setw(4) << std::setfill('0') << pack->opcode << std::dec << ", size: " << std::setw(5) << std::setfill(' ') << pack->size << " " << inet_ntoa(in) << ":" << GetrPort() << std::endl;
 						#if TCPN_LOG_PACKETS == 2
 							if (pack->size >= 32)
 								DumpPacket(pack->pBuffer, 32);

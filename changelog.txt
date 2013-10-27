@@ -1,5 +1,13 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/27/2013 ==
+Uleat: Attempted fix for high level (12) debug compile failiures
+Notes:
+	- Explicit Windows vs. Linus code was not changed due to my inability to compile Linux code
+	- Only CMake accessible flags were corrected if adding the 'std' namespace did not correct the issue
+	- the tag [CODEBUG] was added to code identifed by the above note
+	- If you are having compile issues after this patch is committed, look to the changes here first
+
 == 10/24/2013 ==
 demonstar55: Fix some memory leaks in Mob::SpellOnTarget
 

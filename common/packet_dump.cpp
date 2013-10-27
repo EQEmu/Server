@@ -78,7 +78,7 @@ void DumpPacketHex(const uchar* buf, uint32 size, uint32 cols, uint32 skip) {
 		else {
 			ascii[j++] = '.';
 		}
-//		cout << setfill(0) << setw(2) << hex << (int)buf[i] << " ";
+//		std::cout << std::setfill(0) << std::setw(2) << std::hex << (int)buf[i] << " "; // unknown intent [CODEBUG]
 	}
 	uint32 k = ((i-skip)-1)%cols;
 	if (k < 8)

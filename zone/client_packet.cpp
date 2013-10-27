@@ -414,14 +414,14 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	}
 
 	#if EQDEBUG >= 9
-		std::cout << "Received 0x" << hex << setw(4) << setfill('0') << opcode << ", size=" << dec << app->size << std::endl;
+		std::cout << "Received 0x" << std::hex << std::setw(4) << std::setfill('0') << opcode << ", size=" << std::dec << app->size << std::endl;
 	#endif
 
 	#ifdef SOLAR
 		if(0 && opcode != OP_ClientUpdate)
 		{
 			LogFile->write(EQEMuLog::Debug,"HandlePacket() OPCODE debug enabled client %s", GetName());
-			std::cerr << "OPCODE: " << hex << setw(4) << setfill('0') << opcode << dec << ", size: " << app->size << std::endl;
+			std::cerr << "OPCODE: " << std::hex << std::setw(4) << std::setfill('0') << opcode << std::dec << ", size: " << app->size << std::endl;
 			DumpPacket(app);
 		}
 	#endif
@@ -2973,7 +2973,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		/*
 		else if (sa->parameter == 0x05) {
 			// Illusion
-			cout << "Illusion packet recv'd:" << endl;
+			std::cout << "Illusion packet recv'd:" << std::endl;
 			DumpPacket(app);
 		}
 		*/
@@ -8708,7 +8708,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	//uint32 aalen = database.GetPlayerAlternateAdv(account_id, name, &aa);
 	//if (aalen == 0) {
-	//	cout << "Client dropped: !GetPlayerAlternateAdv, name=" << name << endl;
+	//	std::cout << "Client dropped: !GetPlayerAlternateAdv, name=" << name << std::endl;
 	//	return false;
 	//}
 
