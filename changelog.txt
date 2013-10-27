@@ -9,6 +9,7 @@ Notes:
 	- If you are having compile issues after this patch is committed, look to the changes here first
 Uleat: Changed riposte enabling check to proper failure criteria (x == 1 && x == 2 never fails) (discovery find, no known reported occurences)
 Uleat: Enforced naming standard on my recent changes (Sorry for any inconviencies)
+Uleat: Moved DeityTypes enumeration from eq_constants.h to deity.h (expanded utility of accessors, but are yet to be implemented)
 
 == 10/24/2013 ==
 demonstar55: Fix some memory leaks in Mob::SpellOnTarget

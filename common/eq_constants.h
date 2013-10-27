@@ -230,35 +230,6 @@ typedef enum {
 	_eaMaxAppearance
 } EmuAppearance;
 
-/*
-**	Diety types
-**
-**	(ref: eqstr_us.txt)
-**
-**	(Another orphaned enumeration...)
-*/
-enum DeityTypes
-{
-/*----*/	Deity_Unknown = 0,
-/*3251*/	Deity_Bertoxxulous = 201,
-/*3262*/	Deity_BrellSirilis,
-/*3253*/	Deity_CazicThule,
-/*3256*/	Deity_ErollisiMarr,
-/*3252*/	Deity_Bristlebane,
-/*3254*/	Deity_Innoruuk,
-/*3255*/	Deity_Karana,
-/*3257*/	Deity_MithanielMarr,
-/*3259*/	Deity_Prexus,
-/*3260*/	Deity_Quellious,
-/*3266*/	Deity_RallosZek,
-/*3258*/	Deity_RodcetNife,
-/*3261*/	Deity_SolusekRo,
-/*3263*/	Deity_TheTribunal,
-/*3264*/	Deity_Tunare,
-/*3265*/	Deity_Veeshan,
-/*3250*/	Deity_Agnostic = 396
-};
-
 // msg_type's for custom usercolors
 #define MT_Say					256
 #define MT_Tell					257
