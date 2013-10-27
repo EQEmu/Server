@@ -132,7 +132,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillType skill, int32 max_damage, int
 
 	else{
 		bool CanRiposte = true;
-		if(skill == THROWING && skill == ARCHERY)
+		if(skill == THROWING || skill == ARCHERY) // changed from '&&'
 			CanRiposte = false;
 
 		who->AvoidDamage(this, max_damage, CanRiposte);
