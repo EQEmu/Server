@@ -27,14 +27,14 @@
 */
 enum ItemAttributes : uint32
 {
-	ItemAttr_None			= 0x00000000,
-	ItemAttr_Lore			= 0x00000001,
-	ItemAttr_Artifact		= 0x00000002,
-	ItemAttr_Summoned		= 0x00000004,
-	ItemAttr_Magic			= 0x00000008,
-	ItemAttr_Augment		= 0x00000010,
-	ItemAttr_PendingLore	= 0x00000020,
-	ItemAttr_Unknown		= 0xFFFFFFFF
+	ItemAttrNone			= 0x00000000,
+	ItemAttrLore			= 0x00000001,
+	ItemAttrArtifact		= 0x00000002,
+	ItemAttrSummoned		= 0x00000004,
+	ItemAttrMagic			= 0x00000008,
+	ItemAttrAugment			= 0x00000010,
+	ItemAttrPendingLore		= 0x00000020,
+	ItemAttrUnknown			= 0xFFFFFFFF
 };
 
 /*
@@ -102,75 +102,75 @@ enum ItemTypes
 };
 
 /*
-**	Container types
+**	Container use types
 **
 **	This correlates to world 'object.type' (object.h/Object.cpp) as well as Item_Struct.BagType
 **
 **	(ref: database, web forums and eqstr_us.txt)
 */
-enum ContainerTypes : uint8
+enum ContainerUseTypes : uint8
 {
-/*3400*/	BagType_SmallBag = 0,
-/*3401*/	BagType_LargeBag,
-/*3402*/	BagType_Quiver,
-/*3403*/	BagType_BeltPouch,
-/*3404*/	BagType_WristPouch,
-/*3405*/	BagType_BackPack,
-/*3406*/	BagType_SmallChest,
-/*3407*/	BagType_LargeChest,
-/*----*/	BagType_Bandolier,				// <*Database Reference Only>
-/*3408*/	BagType_MedicineBag,
-/*3409*/	BagType_ToolBox,
-/*3410*/	BagType_Lexicon,
-/*3411*/	BagType_Mortar,
-/*3412*/	BagType_SelfDusting,			// Quest container (Auto-clear contents?)
-/*3413*/	BagType_MixingBowl,
-/*3414*/	BagType_Oven,
-/*3415*/	BagType_SewingKit,
-/*3416*/	BagType_Forge,
-/*3417*/	BagType_FletchingKit,
-/*3418*/	BagType_BrewBarrel,
-/*3419*/	BagType_JewelersKit,
-/*3420*/	BagType_PotteryWheel,
-/*3421*/	BagType_Kiln,
-/*3422*/	BagType_Keymaker,				// (no database entries as of peq rev 69)
-/*3423*/	BagType_WizardsLexicon,
-/*3424*/	BagType_MagesLexicon,
-/*3425*/	BagType_NecromancersLexicon,
-/*3426*/	BagType_EnchantersLexicon,
-/*----*/	BagType_Unknown01,				// (a coin pouch/purse?) (no database entries as of peq rev 69)
-/*----*/	BagType_ConcordanceofResearch,	// <*Database Reference Only>
-/*3427*/	BagType_AlwaysWorks,			// Quest container (Never-fail combines?)
-/*3428*/	BagType_KoadaDalForge,			// High Elf
-/*3429*/	BagType_TeirDalForge,			// Dark Elf
-/*3430*/	BagType_OggokForge,				// Ogre
-/*3431*/	BagType_StormguardForge,		// Dwarf
-/*3432*/	BagType_AkanonForge,			// Gnome
-/*3433*/	BagType_NorthmanForge,			// Barbarian
-/*----*/	BagType_Unknown02,				// (no database entries as of peq rev 69)
-/*3434*/	BagType_CabilisForge,			// Iksar
-/*3435*/	BagType_FreeportForge,			// Human 1
-/*3436*/	BagType_RoyalQeynosForge,		// Human 2
-/*3439*/	BagType_HalflingTailoringKit,
-/*3438*/	BagType_ErudTailoringKit,
-/*3440*/	BagType_FierDalTailoringKit,	// Wood Elf
-/*3441*/	BagType_FierDalFletchingKit,	// Wood Elf
-/*3437*/	BagType_IksarPotteryWheel,
-/*3442*/	BagType_TackleBox,
-/*3443*/	BagType_TrollForge,
-/*3445*/	BagType_FierDalForge,			// Wood Elf
-/*3444*/	BagType_ValeForge,				// Halfling
-/*3446*/	BagType_ErudForge,
-/*----*/	BagType_TradersSatchel,			// <*Database Reference Only> (db: Yellow Trader's Satchel Token?)
-/*5785*/	BagType_GuktaForge,				// Froglok (no database entries as of peq rev 69)
-/*3359*/	BagType_AugmentationSealer,
-/*----*/	BagType_IceCreamChurn,			// <*Database Reference Only>
-/*6325*/	BagType_Transformationmold,		// Ornamentation
-/*6340*/	BagType_Detransformationmold,	// Ornamentation Stripper
-/*5400*/	BagType_Unattuner,
-/*7684*/	BagType_TradeskillBag,
-/*7692*/	BagType_CollectibleBag,
-/*----*/	BagType_Count
+/*3400*/	BagTypeSmallBag = 0,
+/*3401*/	BagTypeLargeBag,
+/*3402*/	BagTypeQuiver,
+/*3403*/	BagTypeBeltPouch,
+/*3404*/	BagTypeWristPouch,
+/*3405*/	BagTypeBackPack,
+/*3406*/	BagTypeSmallChest,
+/*3407*/	BagTypeLargeChest,
+/*----*/	BagTypeBandolier,				// <*Database Reference Only>
+/*3408*/	BagTypeMedicineBag,
+/*3409*/	BagTypeToolBox,
+/*3410*/	BagTypeLexicon,
+/*3411*/	BagTypeMortar,
+/*3412*/	BagTypeSelfDusting,				// Quest container (Auto-clear contents?)
+/*3413*/	BagTypeMixingBowl,
+/*3414*/	BagTypeOven,
+/*3415*/	BagTypeSewingKit,
+/*3416*/	BagTypeForge,
+/*3417*/	BagTypeFletchingKit,
+/*3418*/	BagTypeBrewBarrel,
+/*3419*/	BagTypeJewelersKit,
+/*3420*/	BagTypePotteryWheel,
+/*3421*/	BagTypeKiln,
+/*3422*/	BagTypeKeymaker,				// (no database entries as of peq rev 69)
+/*3423*/	BagTypeWizardsLexicon,
+/*3424*/	BagTypeMagesLexicon,
+/*3425*/	BagTypeNecromancersLexicon,
+/*3426*/	BagTypeEnchantersLexicon,
+/*----*/	BagTypeUnknown1,				// (a coin pouch/purse?) (no database entries as of peq rev 69)
+/*----*/	BagTypeConcordanceofResearch,	// <*Database Reference Only>
+/*3427*/	BagTypeAlwaysWorks,				// Quest container (Never-fail combines?)
+/*3428*/	BagTypeKoadaDalForge,			// High Elf
+/*3429*/	BagTypeTeirDalForge,			// Dark Elf
+/*3430*/	BagTypeOggokForge,				// Ogre
+/*3431*/	BagTypeStormguardForge,			// Dwarf
+/*3432*/	BagTypeAkanonForge,				// Gnome
+/*3433*/	BagTypeNorthmanForge,			// Barbarian
+/*----*/	BagTypeUnknown2,				// (no database entries as of peq rev 69)
+/*3434*/	BagTypeCabilisForge,			// Iksar
+/*3435*/	BagTypeFreeportForge,			// Human 1
+/*3436*/	BagTypeRoyalQeynosForge,		// Human 2
+/*3439*/	BagTypeHalflingTailoringKit,
+/*3438*/	BagTypeErudTailoringKit,
+/*3440*/	BagTypeFierDalTailoringKit,		// Wood Elf
+/*3441*/	BagTypeFierDalFletchingKit,		// Wood Elf
+/*3437*/	BagTypeIksarPotteryWheel,
+/*3442*/	BagTypeTackleBox,
+/*3443*/	BagTypeTrollForge,
+/*3445*/	BagTypeFierDalForge,			// Wood Elf
+/*3444*/	BagTypeValeForge,				// Halfling
+/*3446*/	BagTypeErudForge,
+/*----*/	BagTypeTradersSatchel,			// <*Database Reference Only> (db: Yellow Trader's Satchel Token?)
+/*5785*/	BagTypeGuktaForge,				// Froglok (no database entries as of peq rev 69)
+/*3359*/	BagTypeAugmentationSealer,
+/*----*/	BagTypeIceCreamChurn,			// <*Database Reference Only>
+/*6325*/	BagTypeTransformationmold,		// Ornamentation
+/*6340*/	BagTypeDetransformationmold,	// Ornamentation Stripper
+/*5400*/	BagTypeUnattuner,
+/*7684*/	BagTypeTradeskillBag,
+/*7692*/	BagTypeCollectibleBag,
+/*----*/	_BagTypeCount
 };
 
 /*
@@ -526,7 +526,8 @@ enum RecastTimerTypes
 	RecTimer_16,
 	RecTimer_17,
 	RecTimer_18,
-	RecTimer_ModRod					// 19
+	RecTimer_ModRod,				// 19
+	_RecTimerCount
 };
 
 enum GroupUpdateAction

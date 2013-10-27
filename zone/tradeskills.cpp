@@ -581,68 +581,68 @@ SkillType Object::TypeToSkill(uint32 type)
 	switch(type) // grouped and ordered by SkillType name - new types need to be verified for proper SkillType and use
 	{
 	/*ALCHEMY*/
-		case BagType_MedicineBag: { return (SkillType)ALCHEMY; }
+		case BagTypeMedicineBag: { return (SkillType)ALCHEMY; }
 
 	/*BAKING*/
 		// case BagType_MixingBowl: // No idea...
-		case BagType_Oven: { return (SkillType)BAKING; }
+		case BagTypeOven: { return (SkillType)BAKING; }
 
 	/*BLACKSMITHING*/
-		case BagType_Forge:
-		// case BagType_KoadaDalForge:
-		case BagType_TeirDalForge:
-		case BagType_OggokForge:
-		case BagType_StormguardForge:
-		// case BagType_AkanonForge:
-		// case BagType_NorthmanForge:
-		// case BagType_CabilisForge:
-		// case BagType_FreeportForge:
-		// case BagType_RoyalQeynosForge:
-		// case BagType_TrollForge:
-		case BagType_FierDalForge:
-		case BagType_ValeForge: { return (SkillType)BLACKSMITHING; } // Delete return if BagType_GuktaForge enabled
-		// case BagType_ErudForge:
-		// case BagType_GuktaForge: { return (SkillType)BLACKSMITHING; }
+		case BagTypeForge:
+		// case BagTypeKoadaDalForge:
+		case BagTypeTeirDalForge:
+		case BagTypeOggokForge:
+		case BagTypeStormguardForge:
+		// case BagTypeAkanonForge:
+		// case BagTypeNorthmanForge:
+		// case BagTypeCabilisForge:
+		// case BagTypeFreeportForge:
+		// case BagTypeRoyalQeynosForge:
+		// case BagTypeTrollForge:
+		case BagTypeFierDalForge:
+		case BagTypeValeForge: { return (SkillType)BLACKSMITHING; } // Delete return if BagTypeGuktaForge enabled
+		// case BagTypeErudForge:
+		// case BagTypeGuktaForge: { return (SkillType)BLACKSMITHING; }
 
 	/*BREWING*/
-		// case BagType_IceCreamChurn: // No idea...
-		case BagType_BrewBarrel: { return (SkillType)BREWING; }
+		// case BagTypeIceCreamChurn: // No idea...
+		case BagTypeBrewBarrel: { return (SkillType)BREWING; }
 
 	/*FISHING*/
-		case BagType_TackleBox: { return (SkillType)FISHING; }
+		case BagTypeTackleBox: { return (SkillType)FISHING; }
 
 	/*FLETCHING*/
-		case BagType_FletchingKit: { return (SkillType)FLETCHING; } // Delete return if BagType_FierDalFletchingKit enabled
-		// case BagType_FierDalFletchingKit: { return (SkillType)FLETCHING; }
+		case BagTypeFletchingKit: { return (SkillType)FLETCHING; } // Delete return if BagTypeFierDalFletchingKit enabled
+		// case BagTypeFierDalFletchingKit: { return (SkillType)FLETCHING; }
 
 	/*JEWELRY_MAKING*/
-		case BagType_JewelersKit: { return (SkillType)JEWELRY_MAKING; }
+		case BagTypeJewelersKit: { return (SkillType)JEWELRY_MAKING; }
 
 	/*MAKE_POISON*/
 		// This is a guess and needs to be verified... (Could be ALCHEMY)
-		// case BagType_Mortar: { return (SkillType)MAKE_POISON; }
+		// case BagTypeMortar: { return (SkillType)MAKE_POISON; }
 
 	/*POTTERY*/
-		case BagType_PotteryWheel:
-		case BagType_Kiln: { return (SkillType)POTTERY; } // Delete return if BagType_IksarPotteryWheel enabled
-		// case BagType_IksarPotteryWheel: { return (SkillType)POTTERY; }
+		case BagTypePotteryWheel:
+		case BagTypeKiln: { return (SkillType)POTTERY; } // Delete return if BagTypeIksarPotteryWheel enabled
+		// case BagTypeIksarPotteryWheel: { return (SkillType)POTTERY; }
 
 	/*RESEARCH*/
-		// case BagType_Lexicon:
-		case BagType_WizardsLexicon:
-		case BagType_MagesLexicon:
-		case BagType_NecromancersLexicon:
-		case BagType_EnchantersLexicon: { return (SkillType)RESEARCH; } // Delete return if BagType_ConcordanceofResearch enabled
-		// case BagType_ConcordanceofResearch: { return (SkillType)RESEARCH; }
+		// case BagTypeLexicon:
+		case BagTypeWizardsLexicon:
+		case BagTypeMagesLexicon:
+		case BagTypeNecromancersLexicon:
+		case BagTypeEnchantersLexicon: { return (SkillType)RESEARCH; } // Delete return if BagTypeConcordanceofResearch enabled
+		// case BagTypeConcordanceofResearch: { return (SkillType)RESEARCH; }
 
 	/*TAILORING*/
-		case BagType_SewingKit: { return (SkillType)TAILORING; } // Delete return if BagType_FierDalTailoringKit enabled
-		// case BagType_HalflingTailoringKit:
-		// case BagType_ErudTailoringKit:
-		// case BagType_FierDalTailoringKit: { return (SkillType)TAILORING; }
+		case BagTypeSewingKit: { return (SkillType)TAILORING; } // Delete return if BagTypeFierDalTailoringKit enabled
+		// case BagTypeHalflingTailoringKit:
+		// case BagTypeErudTailoringKit:
+		// case BagTypeFierDalTailoringKit: { return (SkillType)TAILORING; }
 
 	/*TINKERING*/
-		case BagType_ToolBox: { return (SkillType)TINKERING; }
+		case BagTypeToolBox: { return (SkillType)TINKERING; }
 
 	/*Undefined*/
 		default: { break; }

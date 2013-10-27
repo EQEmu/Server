@@ -2049,7 +2049,7 @@ void Mob::SetAttackTimer() {
 						const ItemInst *pi = CastToClient()->GetInv().GetItem(r);
 						if(!pi)
 							continue;
-						if(pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagType_Quiver)
+						if(pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagTypeQuiver)
 						{
 							float temp_wr = ( pi->GetItem()->BagWR / RuleI(Combat, QuiverWRHasteDiv) );
 							if(temp_wr > max_quiver)
