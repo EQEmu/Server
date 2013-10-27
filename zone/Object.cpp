@@ -218,7 +218,7 @@ Object::Object(const char *model, float x, float y, float z, float heading, uint
 	user = nullptr;
 	last_user = nullptr;
 	ItemInst* inst = nullptr;
-	inst = new ItemInst(ItemUseWorldContainer);
+	inst = new ItemInst(ItemInstWorldContainer);
 
 	// Initialize members
 	m_id	= 0;

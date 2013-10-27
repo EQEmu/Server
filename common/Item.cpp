@@ -54,7 +54,7 @@ static inline int32 GetNextItemInstSerialNumber() {
 }
 
 ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
-	m_use_type = ItemUseNormal;
+	m_use_type = ItemInstNormal;
 	m_item = item;
 	m_charges = charges;
 	m_price = 0;
@@ -76,7 +76,7 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 }
 
 ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
-	m_use_type = ItemUseNormal;
+	m_use_type = ItemInstNormal;
 	m_item = db->GetItem(item_id);
 	m_charges = charges;
 	m_price = 0;
@@ -223,7 +223,7 @@ ItemInst* ItemInst::Clone() const
 bool ItemInst::IsType(ItemClass item_class) const
 {
 	// Check usage type
-	if ((m_use_type == ItemUseWorldContainer) && (item_class == ItemClassContainer))
+	if ((m_use_type == ItemInstWorldContainer) && (item_class == ItemClassContainer))
 
 		return true;
 	if (!m_item)
