@@ -3985,37 +3985,37 @@ uint16 Client::GetPrimarySkillValue()
 
 		switch (type)
 		{
-			case ItemType1HS: // 1H Slashing
+			case ItemType1HSlash: // 1H Slashing
 			{
 				skill = _1H_SLASHING;
 				break;
 			}
-			case ItemType2HS: // 2H Slashing
+			case ItemType2HSlash: // 2H Slashing
 			{
 				skill = _2H_SLASHING;
 				break;
 			}
-			case ItemTypePierce: // Piercing
+			case ItemType1HPiercing: // Piercing
 			{
 				skill = PIERCING;
 				break;
 			}
-			case ItemType1HB: // 1H Blunt
+			case ItemType1HBlunt: // 1H Blunt
 			{
 				skill = _1H_BLUNT;
 				break;
 			}
-			case ItemType2HB: // 2H Blunt
+			case ItemType2HBlunt: // 2H Blunt
 			{
 				skill = _2H_BLUNT;
 				break;
 			}
-			case ItemType2HPierce: // 2H Piercing
+			case ItemType2HPiercing: // 2H Piercing
 			{
 				skill = PIERCING;
 				break;
 			}
-			case ItemTypeHand2Hand: // Hand to Hand
+			case ItemTypeMartial: // Hand to Hand
 			{
 				skill = HAND_TO_HAND;
 				break;

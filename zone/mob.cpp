@@ -1969,9 +1969,9 @@ void Mob::SetAttackTimer() {
 			//if we have a 2H weapon in our main hand, no dual
 			if(PrimaryWeapon != nullptr) {
 				if(	PrimaryWeapon->ItemClass == ItemClassCommon
-					&& (PrimaryWeapon->ItemType == ItemType2HS
-					||	PrimaryWeapon->ItemType == ItemType2HB
-					||	PrimaryWeapon->ItemType == ItemType2HPierce)) {
+					&& (PrimaryWeapon->ItemType == ItemType2HSlash
+					||	PrimaryWeapon->ItemType == ItemType2HBlunt
+					||	PrimaryWeapon->ItemType == ItemType2HPiercing)) {
 					attack_dw_timer.Disable();
 					continue;
 				}
@@ -2003,7 +2003,7 @@ void Mob::SetAttackTimer() {
 				ItemToUse = nullptr;
 			}
 			// Check to see if skill is valid
-			else if((ItemToUse->ItemType > ItemTypeThrowing) && (ItemToUse->ItemType != ItemTypeHand2Hand) && (ItemToUse->ItemType != ItemType2HPierce)) {
+			else if((ItemToUse->ItemType > ItemTypeLargeThrowing) && (ItemToUse->ItemType != ItemTypeMartial) && (ItemToUse->ItemType != ItemType2HPiercing)) {
 				//no weapon
 				ItemToUse = nullptr;
 			}
@@ -2039,7 +2039,7 @@ void Mob::SetAttackTimer() {
 			if(speed < RuleI(Combat, MinHastedDelay))
 				speed = RuleI(Combat, MinHastedDelay);
 
-			if(ItemToUse && (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeThrowing))
+			if(ItemToUse && (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeLargeThrowing))
 			{
 				if(IsClient())
 				{
@@ -2083,7 +2083,7 @@ bool Mob::CanThisClassDualWield(void) const
 		// 2HS, 2HB, or 2HP
 		if (inst && inst->IsType(ItemClassCommon)) {
 			const Item_Struct* item = inst->GetItem();
-			if ((item->ItemType == ItemType2HB) || (item->ItemType == ItemType2HS) || (item->ItemType == ItemType2HPierce))
+			if ((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
 				return false;
 		} else {
 			//No weapon in hand... using hand-to-hand...
@@ -4536,19 +4536,19 @@ uint16 Mob::GetSkillByItemType(int ItemType)
 {
 	switch (ItemType)
 	{
-		case ItemType1HS:
+		case ItemType1HSlash:
 			return _1H_SLASHING;
-		case ItemType2HS:
+		case ItemType2HSlash:
 			return _2H_SLASHING;
-		case ItemTypePierce:
+		case ItemType1HPiercing:
 			return PIERCING;
-		case ItemType1HB:
+		case ItemType1HBlunt:
 			return _1H_BLUNT;
-		case ItemType2HB:
+		case ItemType2HBlunt:
 			return _2H_BLUNT;
-		case ItemType2HPierce:
+		case ItemType2HPiercing:
 			return PIERCING;
-		case ItemTypeHand2Hand:
+		case ItemTypeMartial:
 			return HAND_TO_HAND;
 		default:
 			return HAND_TO_HAND;

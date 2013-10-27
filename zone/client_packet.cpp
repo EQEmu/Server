@@ -11029,8 +11029,8 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {
 	}
 	else if(GetClass() == ROGUE)
 	{
-		if ((PrimaryWeapon && PrimaryWeapon->GetItem()->ItemType == ItemTypePierce) ||
-			(SecondaryWeapon && SecondaryWeapon->GetItem()->ItemType == ItemTypePierce)) {
+		if ((PrimaryWeapon && PrimaryWeapon->GetItem()->ItemType == ItemType1HPiercing) ||
+			(SecondaryWeapon && SecondaryWeapon->GetItem()->ItemType == ItemType1HPiercing)) {
 			float SuccessChance = (GetSkill(APPLY_POISON) + GetLevel()) / 400.0f;
 			double ChanceRoll = MakeRandomFloat(0, 1);
 

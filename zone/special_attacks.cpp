@@ -506,7 +506,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 	//make sure we have a proper weapon if we are a client.
 	if(IsClient()) {
 		const ItemInst *wpn = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
-		if(!wpn || (wpn->GetItem()->ItemType != ItemTypePierce)){
+		if(!wpn || (wpn->GetItem()->ItemType != ItemType1HPiercing)){
 			Message_StringID(13, BACKSTAB_WEAPON);
 			return;
 		}
@@ -1138,7 +1138,7 @@ void Client::ThrowingAttack(Mob* other) { //old was 51
 	}
 
 	const Item_Struct* item = RangeWeapon->GetItem();
-	if(item->ItemType != ItemTypeThrowing && item->ItemType != ItemTypeThrowingv2) {
+	if(item->ItemType != ItemTypeLargeThrowing && item->ItemType != ItemTypeSmallThrowing) {
 		mlog(COMBAT__RANGED, "Ranged attack canceled. Ranged item %d is not a throwing weapon. type %d.", item->ItemType);
 		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing useful to throw!", GetItemIDAt(SLOT_RANGE));
 		return;

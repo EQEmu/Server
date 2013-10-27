@@ -1302,37 +1302,37 @@ uint16 Bot::GetPrimarySkillValue()
 		uint8 type = m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType; //is this the best way to do this?
 		switch(type)
 		{
-			case ItemType1HS: // 1H Slashing
+			case ItemType1HSlash: // 1H Slashing
 			{
 				skill = _1H_SLASHING;
 				break;
 			}
-			case ItemType2HS: // 2H Slashing
+			case ItemType2HSlash: // 2H Slashing
 			{
 				skill = _2H_SLASHING;
 				break;
 			}
-			case ItemTypePierce: // Piercing
+			case ItemType1HPiercing: // Piercing
 			{
 				skill = PIERCING;
 				break;
 			}
-			case ItemType1HB: // 1H Blunt
+			case ItemType1HBlunt: // 1H Blunt
 			{
 				skill = _1H_BLUNT;
 				break;
 			}
-			case ItemType2HB: // 2H Blunt
+			case ItemType2HBlunt: // 2H Blunt
 			{
 				skill = _2H_BLUNT;
 				break;
 			}
-			case ItemType2HPierce: // 2H Piercing
+			case ItemType2HPiercing: // 2H Piercing
 			{
 				skill = PIERCING;
 				break;
 			}
-			case ItemTypeHand2Hand: // Hand to Hand
+			case ItemTypeMartial: // Hand to Hand
 			{
 				skill = HAND_TO_HAND;
 				break;
@@ -3802,9 +3802,9 @@ void Bot::AI_Process() {
 					if (GetTarget() && ExtraAttackChanceBonus) {
 						ItemInst *wpn = GetBotItem(SLOT_PRIMARY);
 						if(wpn){
-							if(wpn->GetItem()->ItemType == ItemType2HS ||
-								wpn->GetItem()->ItemType == ItemType2HB ||
-								wpn->GetItem()->ItemType == ItemType2HPierce )
+							if(wpn->GetItem()->ItemType == ItemType2HSlash ||
+								wpn->GetItem()->ItemType == ItemType2HBlunt ||
+								wpn->GetItem()->ItemType == ItemType2HPiercing )
 							{
 								if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
 								{
@@ -3843,7 +3843,7 @@ void Bot::AI_Process() {
 							bIsFist = false;
 						}
 
-						if(bIsFist || ((weapontype != ItemType2HS) && (weapontype != ItemType2HPierce) && (weapontype != ItemType2HB))) {
+						if(bIsFist || ((weapontype != ItemType2HSlash) && (weapontype != ItemType2HPiercing) && (weapontype != ItemType2HBlunt))) {
 							float DualWieldProbability = 0.0f;
 
 							int16 Ambidexterity = aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
@@ -6039,9 +6039,9 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 							how_many_slots++;
 							if(!GetBotItem(j)) {
 								if(j == SLOT_PRIMARY) {
-									if((mWeaponItem->ItemType == ItemType2HS) || (mWeaponItem->ItemType == ItemType2HB) || (mWeaponItem->ItemType == ItemType2HPierce)) {
+									if((mWeaponItem->ItemType == ItemType2HSlash) || (mWeaponItem->ItemType == ItemType2HBlunt) || (mWeaponItem->ItemType == ItemType2HPiercing)) {
 										if(GetBotItem(SLOT_SECONDARY)) {
-											if(mWeaponItem && (mWeaponItem->ItemType == ItemType2HS) || (mWeaponItem->ItemType == ItemType2HB) || (mWeaponItem->ItemType == ItemType2HPierce)) {
+											if(mWeaponItem && (mWeaponItem->ItemType == ItemType2HSlash) || (mWeaponItem->ItemType == ItemType2HBlunt) || (mWeaponItem->ItemType == ItemType2HPiercing)) {
 												if(client->CheckLoreConflict(GetBotItem(SLOT_SECONDARY)->GetItem())) {
 													failedLoreCheck = true;
 												}
@@ -6076,7 +6076,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 									if(success) {
 										if(GetBotItem(SLOT_PRIMARY)) {
 											ItemInst* remove_item = GetBotItem(SLOT_PRIMARY);
-											if((remove_item->GetItem()->ItemType == ItemType2HS) || (remove_item->GetItem()->ItemType == ItemType2HB) || (remove_item->GetItem()->ItemType == ItemType2HPierce)) {
+											if((remove_item->GetItem()->ItemType == ItemType2HSlash) || (remove_item->GetItem()->ItemType == ItemType2HBlunt) || (remove_item->GetItem()->ItemType == ItemType2HPiercing)) {
 												BotTradeSwapItem(client, SLOT_PRIMARY, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
 											}
 										}
@@ -6110,7 +6110,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 								}
 								if(!failedLoreCheck) {
 									if(j == SLOT_PRIMARY) {
-										if((mWeaponItem->ItemType == ItemType2HS) || (mWeaponItem->ItemType == ItemType2HB) || (mWeaponItem->ItemType == ItemType2HPierce)) {
+										if((mWeaponItem->ItemType == ItemType2HSlash) || (mWeaponItem->ItemType == ItemType2HBlunt) || (mWeaponItem->ItemType == ItemType2HPiercing)) {
 											if(GetBotItem(SLOT_SECONDARY)) {
 												if(client->CheckLoreConflict(GetBotItem(SLOT_SECONDARY)->GetItem())) {
 													failedLoreCheck = true;
@@ -6144,7 +6144,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 										}
 										if(success && GetBotItem(SLOT_PRIMARY)) {
 											ItemInst* remove_item = GetBotItem(SLOT_PRIMARY);
-											if((remove_item->GetItem()->ItemType == ItemType2HS) || (remove_item->GetItem()->ItemType == ItemType2HB) || (remove_item->GetItem()->ItemType == ItemType2HPierce)) {
+											if((remove_item->GetItem()->ItemType == ItemType2HSlash) || (remove_item->GetItem()->ItemType == ItemType2HBlunt) || (remove_item->GetItem()->ItemType == ItemType2HPiercing)) {
 												BotTradeSwapItem(client, SLOT_PRIMARY, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
 											}
 										}
@@ -7897,7 +7897,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		if(equiped2) {
 			uint8 TwoHandBlunt = GetBotItem(SLOT_PRIMARY)->GetItem()->ItemType;
 			float bonusStaffBlock = 0.0f;
-			if(TwoHandBlunt == ItemType2HB) {
+			if(TwoHandBlunt == ItemType2HBlunt) {
 
 				bonusStaffBlock = aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock;
 				RollTable[1] = RollTable[0] + bonusStaffBlock;
@@ -8138,7 +8138,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 	const Item_Struct* botpiercer = nullptr;
 	if(inst)
 		botpiercer = inst->GetItem();
-	if(!botpiercer || (botpiercer->ItemType != ItemTypePierce)) {
+	if(!botpiercer || (botpiercer->ItemType != ItemType1HPiercing)) {
 		Say("I can't backstab with this weapon!");
 		return;
 	}
@@ -8381,9 +8381,9 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 			bool canBash = false;
 			if((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) // Racial Slam
 						|| (m_inv.GetItem(SLOT_SECONDARY) && m_inv.GetItem(SLOT_SECONDARY)->GetItem()->ItemType == ItemTypeShield) //Using Shield
-						|| (m_inv.GetItem(SLOT_PRIMARY) && (m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HS
-							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HB
-							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HPierce)
+						|| (m_inv.GetItem(SLOT_PRIMARY) && (m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HSlash
+							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HBlunt
+							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HPiercing)
 							&& GetAA(aa2HandBash) >= 1)) { //Using 2 hand weapon, but has AA 2 Hand Bash
 				canBash = true;
 			}
@@ -8408,9 +8408,9 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		if(level >= RuleI(Combat, NPCBashKickLevel)){
 			if((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) // Racial Slam
 						|| (m_inv.GetItem(SLOT_SECONDARY) && m_inv.GetItem(SLOT_SECONDARY)->GetItem()->ItemType == ItemTypeShield) //Using Shield
-						|| (m_inv.GetItem(SLOT_PRIMARY) && (m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HS
-							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HB
-							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HPierce)
+						|| (m_inv.GetItem(SLOT_PRIMARY) && (m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HSlash
+							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HBlunt
+							|| m_inv.GetItem(SLOT_PRIMARY)->GetItem()->ItemType == ItemType2HPiercing)
 							&& GetAA(aa2HandBash) >= 1)) { //Using 2 hand weapon, but has AA 2 Hand Bash
 				skill_to_use = BASH;
 			}
@@ -9027,9 +9027,9 @@ void Bot::SetAttackTimer() {
 			//if we have a 2H weapon in our main hand, no dual
 			if(PrimaryWeapon != nullptr) {
 				if(	PrimaryWeapon->ItemClass == ItemClassCommon
-					&& (PrimaryWeapon->ItemType == ItemType2HS
-					||	PrimaryWeapon->ItemType == ItemType2HB
-					||	PrimaryWeapon->ItemType == ItemType2HPierce)) {
+					&& (PrimaryWeapon->ItemType == ItemType2HSlash
+					||	PrimaryWeapon->ItemType == ItemType2HBlunt
+					||	PrimaryWeapon->ItemType == ItemType2HPiercing)) {
 						attack_dw_timer.Disable();
 						continue;
 				}
@@ -9052,7 +9052,7 @@ void Bot::SetAttackTimer() {
 					ItemToUse = nullptr;
 			}
 			// Check to see if skill is valid
-			else if((ItemToUse->ItemType > ItemTypeThrowing) && (ItemToUse->ItemType != ItemTypeHand2Hand) && (ItemToUse->ItemType != ItemType2HPierce)) {
+			else if((ItemToUse->ItemType > ItemTypeLargeThrowing) && (ItemToUse->ItemType != ItemTypeMartial) && (ItemToUse->ItemType != ItemType2HPiercing)) {
 				//no weapon
 				ItemToUse = nullptr;
 			}
@@ -9088,7 +9088,7 @@ void Bot::SetAttackTimer() {
 			if(speed < RuleI(Combat, MinHastedDelay))
 				speed = RuleI(Combat, MinHastedDelay);
 
-			if(ItemToUse && (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeThrowing))
+			if(ItemToUse && (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeLargeThrowing))
 			{
 				/*if(IsClient())
 				{
@@ -11430,17 +11430,17 @@ void Bot::CalcItemBonuses()
 						if(itembonuses.haste < itemtmp->Haste)
 							itembonuses.haste = itemtmp->Haste;
 					if(GetClass() == BARD && itemtmp->BardValue != 0) {
-						if(itemtmp->BardType == ItemTypeBrassInstr)
+						if(itemtmp->BardType == ItemTypeBrassInstrument)
 							itembonuses.brassMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemTypeDrumInstr)
+						else if(itemtmp->BardType == ItemTypePercussionInstrument)
 							itembonuses.percussionMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemUseSinging)
+						else if(itemtmp->BardType == ItemTypeSinging)
 							itembonuses.singingMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemTypeStringInstr)
+						else if(itemtmp->BardType == ItemTypeStringedInstrument)
 							itembonuses.stringedMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemTypeWindInstr)
+						else if(itemtmp->BardType == ItemTypeWindInstrument)
 							itembonuses.windMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemUseAllInstruments) {
+						else if(itemtmp->BardType == ItemTypeAllInstrumentTypes) {
 							itembonuses.brassMod += itemtmp->BardValue;
 							itembonuses.percussionMod += itemtmp->BardValue;
 							itembonuses.singingMod += itemtmp->BardValue;
@@ -11514,17 +11514,17 @@ void Bot::CalcItemBonuses()
 				if(itembonuses.haste < itemtmp->Haste)
 					itembonuses.haste = itemtmp->Haste;
 			if(GetClass() == BARD && itemtmp->BardValue != 0) {
-				if(itemtmp->BardType == ItemTypeBrassInstr)
+				if(itemtmp->BardType == ItemTypeBrassInstrument)
 					itembonuses.brassMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemTypeDrumInstr)
+				else if(itemtmp->BardType == ItemTypePercussionInstrument)
 					itembonuses.percussionMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemUseSinging)
+				else if(itemtmp->BardType == ItemTypeSinging)
 					itembonuses.singingMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemTypeStringInstr)
+				else if(itemtmp->BardType == ItemTypeStringedInstrument)
 					itembonuses.stringedMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemTypeWindInstr)
+				else if(itemtmp->BardType == ItemTypeWindInstrument)
 					itembonuses.windMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemUseAllInstruments) {
+				else if(itemtmp->BardType == ItemTypeAllInstrumentTypes) {
 					itembonuses.brassMod += itemtmp->BardValue;
 					itembonuses.percussionMod += itemtmp->BardValue;
 					itembonuses.singingMod += itemtmp->BardValue;
@@ -12235,7 +12235,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						c->Message(15, "I need something for my %s (Item %i)", equipped[i], i);
 						continue;
 					}
-					if((i == 13) && ((item2->ItemType == ItemType2HS) || (item2->ItemType == ItemType2HB) || (item2->ItemType == ItemType2HPierce))) {
+					if((i == 13) && ((item2->ItemType == ItemType2HSlash) || (item2->ItemType == ItemType2HBlunt) || (item2->ItemType == ItemType2HPiercing))) {
 						is2Hweapon = true;
 					}
 

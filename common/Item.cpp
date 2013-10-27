@@ -340,8 +340,8 @@ bool ItemInst::IsAmmo() const {
 	if(!m_item) return false;
 
 	if((m_item->ItemType == ItemTypeArrow) ||
-		(m_item->ItemType == ItemTypeThrowing) ||
-		(m_item->ItemType == ItemTypeThrowingv2))
+		(m_item->ItemType == ItemTypeLargeThrowing) ||
+		(m_item->ItemType == ItemTypeSmallThrowing))
 		return true;
 
 	return false;
@@ -1863,7 +1863,7 @@ bool Inventory::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_S
 
 	if((Container->BagType == BagTypeQuiver) && (ItemToTry->ItemType != ItemTypeArrow)) return false;
 
-	if((Container->BagType == BagTypeBandolier) && (ItemToTry->ItemType != ItemTypeThrowingv2)) return false;
+	if((Container->BagType == BagTypeBandolier) && (ItemToTry->ItemType != ItemTypeSmallThrowing)) return false;
 
 	return true;
 }

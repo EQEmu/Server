@@ -314,7 +314,7 @@ bool Client::Process() {
 							ranged_timer.Start();
 					}
 				}
-				else if(ranged->GetItem() && (ranged->GetItem()->ItemType == ItemTypeThrowing || ranged->GetItem()->ItemType == ItemTypeThrowingv2)){
+				else if(ranged->GetItem() && (ranged->GetItem()->ItemType == ItemTypeLargeThrowing || ranged->GetItem()->ItemType == ItemTypeSmallThrowing)){
 					if(ranged_timer.Check(false)){
 						if(GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())){
 							if(!GetTarget()->BehindMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
@@ -449,9 +449,9 @@ bool Client::Process() {
 				if (auto_attack_target && ExtraAttackChanceBonus) {
 					ItemInst *wpn = GetInv().GetItem(SLOT_PRIMARY);
 					if(wpn){
-						if(wpn->GetItem()->ItemType == ItemType2HS ||
-							wpn->GetItem()->ItemType == ItemType2HB ||
-							wpn->GetItem()->ItemType == ItemType2HPierce )
+						if(wpn->GetItem()->ItemType == ItemType2HSlash ||
+							wpn->GetItem()->ItemType == ItemType2HBlunt ||
+							wpn->GetItem()->ItemType == ItemType2HPiercing )
 						{
 							if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
 							{

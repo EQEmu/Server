@@ -282,8 +282,8 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		}
 		else if (foundslot == SLOT_SECONDARY
 			&& (GetOwner() != nullptr || (GetLevel() >= 13 && MakeRandomInt(0,99) < NPC_DW_CHANCE) || (item2->Damage==0)) &&
-			(item2->ItemType == ItemType1HS || item2->ItemType == ItemType1HB || item2->ItemType == ItemTypeShield ||
-			item2->ItemType == ItemTypePierce))
+			(item2->ItemType == ItemType1HSlash || item2->ItemType == ItemType1HBlunt || item2->ItemType == ItemTypeShield ||
+			item2->ItemType == ItemType1HPiercing))
 		{
 			if (item2->Proc.Effect!=0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);

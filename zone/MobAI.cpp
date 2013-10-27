@@ -846,9 +846,9 @@ void Client::AI_Process()
 									if (ExtraAttackChanceBonus && GetTarget()) {
 										ItemInst *wpn = GetInv().GetItem(SLOT_PRIMARY);
 										if(wpn){
-											if(wpn->GetItem()->ItemType == ItemType2HS ||
-												wpn->GetItem()->ItemType == ItemType2HB ||
-												wpn->GetItem()->ItemType == ItemType2HPierce )
+											if(wpn->GetItem()->ItemType == ItemType2HSlash ||
+												wpn->GetItem()->ItemType == ItemType2HBlunt ||
+												wpn->GetItem()->ItemType == ItemType2HPiercing )
 											{
 												if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
 												{

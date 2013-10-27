@@ -50,56 +50,91 @@ enum ItemClassTypes
 };
 
 /*
-** Item uses
+**	Item use types
 **
+**	(ref: database and eqstr_us.txt)
+**
+**	(Looking at a recent database, it's possible that some of the item values may be off [10-27-2013] -U)
 */
-enum ItemTypes
+enum ItemUseTypes : uint8
 {
-	ItemType1HS				= 0,
-	ItemType2HS				= 1,
-	ItemTypePierce			= 2,
-	ItemType1HB				= 3,
-	ItemType2HB				= 4,
-	ItemTypeBow				= 5,
-	//6
-	ItemTypeThrowing		= 7,
-	ItemTypeShield			= 8,
-	//9
-	ItemTypeArmor			= 10,
-	ItemTypeUnknon			= 11,	//A lot of random crap has this item use.
-	ItemTypeLockPick		= 12,
-	ItemTypeFood			= 14,
-	ItemTypeDrink			= 15,
-	ItemTypeLightSource		= 16,
-	ItemTypeStackable		= 17,	//Not all stackable items are this use...
-	ItemTypeBandage			= 18,
-	ItemTypeThrowingv2		= 19,
-	ItemTypeSpell			= 20,	//spells and tomes
-	ItemTypePotion			= 21,
-	ItemTypeWindInstr		= 23,
-	ItemTypeStringInstr		= 24,
-	ItemTypeBrassInstr		= 25,
-	ItemTypeDrumInstr		= 26,
-	ItemTypeArrow			= 27,
-	ItemTypeJewlery			= 29,
-	ItemTypeSkull			= 30,
-	ItemTypeTome			= 31,
-	ItemTypeNote			= 32,
-	ItemTypeKey				= 33,
-	ItemTypeCoin			= 34,
-	ItemType2HPierce		= 35,
-	ItemTypeFishingPole		= 36,
-	ItemTypeFishingBait		= 37,
-	ItemTypeAlcohol			= 38,
-	ItemTypeCompass			= 40,
-	ItemTypePoison			= 42,	//might be wrong, but includes poisons
-	ItemTypeHand2Hand		= 45,
-	ItemUseSinging			= 50,
-	ItemUseAllInstruments	= 51,
-	ItemTypeCharm			= 52,
-	ItemTypeAugment			= 54,
-	ItemTypeAugmentSolvent	= 55,
-	ItemTypeAugmentDistill	= 56
+/*9138*/	ItemType1HSlash = 0,
+/*9141*/	ItemType2HSlash,
+/*9140*/	ItemType1HPiercing,
+/*9139*/	ItemType1HBlunt,
+/*9142*/	ItemType2HBlunt,
+/*5504*/	ItemTypeBow,
+/*----*/	ItemTypeUnknown1,
+/*----*/	ItemTypeLargeThrowing,
+/*5505*/	ItemTypeShield,
+/*5506*/	ItemTypeScroll,
+/*5507*/	ItemTypeArmor,
+/*5508*/	ItemTypeMisc,			// a lot of random crap has this item use.
+/*7564*/	ItemTypeLockPick,
+/*----*/	ItemTypeUnknown2,
+/*5509*/	ItemTypeFood,
+/*5510*/	ItemTypeDrink,
+/*5511*/	ItemTypeLight,
+/*5512*/	ItemTypeCombinable,		// not all stackable items are this use...
+/*5513*/	ItemTypeBandage,
+/*----*/	ItemTypeSmallThrowing,
+/*----*/	ItemTypeSpell,			// spells and tomes
+/*5514*/	ItemTypePotion,
+/*----*/	ItemTypeUnknown3,
+/*0406*/	ItemTypeWindInstrument,
+/*0407*/	ItemTypeStringedInstrument,
+/*0408*/	ItemTypeBrassInstrument,
+/*0405*/	ItemTypePercussionInstrument,
+/*5515*/	ItemTypeArrow,
+/*----*/	ItemTypeUnknown4,
+/*5521*/	ItemTypeJewelry,
+/*----*/	ItemTypeSkull,
+/*5516*/	ItemTypeBook,			// skill-up tomes/books? (would probably need a pp flag if true...)
+/*5517*/	ItemTypeNote,
+/*5518*/	ItemTypeKey,
+/*----*/	ItemTypeCoin,
+/*5520*/	ItemType2HPiercing,
+/*----*/	ItemTypeFishingPole,
+/*----*/	ItemTypeFishingBait,
+/*5519*/	ItemTypeAlcohol,
+/*----*/	ItemTypeKey2,			// keys and satchels?? (questable keys?)
+/*----*/	ItemTypeCompass,
+/*----*/	ItemTypeUnknown5,
+/*----*/	ItemTypePoison,			// might be wrong, but includes poisons
+/*----*/	ItemTypeUnknown6,
+/*----*/	ItemTypeUnknown7,
+/*5522*/	ItemTypeMartial,
+/*----*/	ItemTypeUnknown8,
+/*----*/	ItemTypeUnknown9,
+/*----*/	ItemTypeUnknown10,
+/*----*/	ItemTypeUnknown11,
+/*----*/	ItemTypeSinging,
+/*5750*/	ItemTypeAllInstrumentTypes,
+/*5776*/	ItemTypeCharm,
+/*----*/	ItemTypeDye,
+/*----*/	ItemTypeAugmentation,
+/*----*/	ItemTypeAugmentationSolvent,
+/*----*/	ItemTypeAugmentationDistiller,
+/*----*/	ItemTypeUnknown12,
+/*----*/	ItemTypeFellowshipKit,
+/*----*/	ItemTypeUnknown13,
+/*----*/	ItemTypeRecipe,
+/*----*/	ItemTypeAdvancedRecipe,
+/*----*/	ItemTypeJournal,		// only one(1) database entry
+/*----*/	ItemTypeAltCurrency,	// alt-currency (as opposed to coinage)
+/*5881*/	ItemTypePerfectedAugmentationDistiller,
+/*----*/	_ItemTypeCount
+
+/*
+	Unknowns:
+
+	Mounts?
+	Ornamentations?
+	GuildBanners?
+	Collectible? 
+	Placeable?
+	(others?)
+*/
 };
 
 /*

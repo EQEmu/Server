@@ -64,43 +64,43 @@ bool Mob::AttackAnimation(SkillType &skillinuse, int Hand, const ItemInst* weapo
 #endif
 		switch (item->ItemType)
 		{
-			case ItemType1HS: // 1H Slashing
+			case ItemType1HSlash: // 1H Slashing
 			{
 				skillinuse = _1H_SLASHING;
 				type = anim1HWeapon;
 				break;
 			}
-			case ItemType2HS: // 2H Slashing
+			case ItemType2HSlash: // 2H Slashing
 			{
 				skillinuse = _2H_SLASHING;
 				type = anim2HSlashing;
 				break;
 			}
-			case ItemTypePierce: // Piercing
+			case ItemType1HPiercing: // Piercing
 			{
 				skillinuse = PIERCING;
 				type = animPiercing;
 				break;
 			}
-			case ItemType1HB: // 1H Blunt
+			case ItemType1HBlunt: // 1H Blunt
 			{
 				skillinuse = _1H_BLUNT;
 				type = anim1HWeapon;
 				break;
 			}
-			case ItemType2HB: // 2H Blunt
+			case ItemType2HBlunt: // 2H Blunt
 			{
 				skillinuse = _2H_BLUNT;
 				type = anim2HWeapon;
 				break;
 			}
-			case ItemType2HPierce: // 2H Piercing
+			case ItemType2HPiercing: // 2H Piercing
 			{
 				skillinuse = PIERCING;
 				type = anim2HWeapon;
 				break;
 			}
-			case ItemTypeHand2Hand:
+			case ItemTypeMartial:
 			{
 				skillinuse = HAND_TO_HAND;
 				type = animHand2Hand;
@@ -465,7 +465,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		if(equiped2) {
 			uint8 TwoHandBlunt = CastToClient()->m_inv.GetItem(13)->GetItem()->ItemType;
 			float bonusStaffBlock = 0.0f;
-			if(TwoHandBlunt == ItemType2HB) {
+			if(TwoHandBlunt == ItemType2HBlunt) {
 
 				bonusStaffBlock = aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock;
 				RollTable[1] += bonusStaffBlock;
@@ -1771,27 +1771,27 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		}
 
 		switch(weapon->ItemType){
-			case ItemType1HS:
+			case ItemType1HSlash:
 				skillinuse = _1H_SLASHING;
 				break;
-			case ItemType2HS:
+			case ItemType2HSlash:
 				skillinuse = _2H_SLASHING;
 				break;
-			case ItemTypePierce:
-			case ItemType2HPierce:
+			case ItemType1HPiercing:
+			case ItemType2HPiercing:
 				skillinuse = PIERCING;
 				break;
-			case ItemType1HB:
+			case ItemType1HBlunt:
 				skillinuse = _1H_BLUNT;
 				break;
-			case ItemType2HB:
+			case ItemType2HBlunt:
 				skillinuse = _2H_BLUNT;
 				break;
 			case ItemTypeBow:
 				skillinuse = ARCHERY;
 				break;
-			case ItemTypeThrowing:
-			case ItemTypeThrowingv2:
+			case ItemTypeLargeThrowing:
+			case ItemTypeSmallThrowing:
 				skillinuse = THROWING;
 				break;
 			default:
@@ -2650,7 +2650,7 @@ uint8 Mob::GetWeaponDamageBonus( const Item_Struct *Weapon )
 	// Assert: This function should not be called unless the player is a melee class, as casters do not receive a damage bonus.
 
 
-	if( Weapon == nullptr || Weapon->ItemType == ItemType1HS || Weapon->ItemType == ItemType1HB || Weapon->ItemType == ItemTypeHand2Hand || Weapon->ItemType == ItemTypePierce )
+	if( Weapon == nullptr || Weapon->ItemType == ItemType1HSlash || Weapon->ItemType == ItemType1HBlunt || Weapon->ItemType == ItemTypeMartial || Weapon->ItemType == ItemType1HPiercing )
 	{
 		// The weapon in the player's main (primary) hand is a one-handed weapon, or there is no item equipped at all.
 		//
@@ -3935,7 +3935,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 
 	bool bRangedAttack = false;
 	if (weapon != nullptr) {
-		if (weapon->ItemType == ItemTypeBow || weapon->ItemType == ItemTypeThrowing || weapon->ItemType == ItemTypeThrowingv2) {
+		if (weapon->ItemType == ItemTypeBow || weapon->ItemType == ItemTypeLargeThrowing || weapon->ItemType == ItemTypeSmallThrowing) {
 			bRangedAttack = true;
 		}
 	}
@@ -3944,8 +3944,8 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 	if(weapon)
 	{
 		if(weapon->ItemType == ItemTypeArrow ||
-			weapon->ItemType == ItemTypeThrowing ||
-			weapon->ItemType == ItemTypeThrowingv2 ||
+			weapon->ItemType == ItemTypeLargeThrowing ||
+			weapon->ItemType == ItemTypeSmallThrowing ||
 			weapon->ItemType == ItemTypeBow)
 		{
 			isRanged = true;
