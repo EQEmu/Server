@@ -287,7 +287,7 @@ public:
 	~ItemInst();
 
 	// Query item type
-	bool IsType(ItemClass item_class) const;
+	bool IsType(ItemClassTypes item_class) const;
 
 	// Can item be stacked?
 	bool IsStackable() const;

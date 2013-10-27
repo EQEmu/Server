@@ -220,7 +220,7 @@ ItemInst* ItemInst::Clone() const
 }
 
 // Query item type
-bool ItemInst::IsType(ItemClass item_class) const
+bool ItemInst::IsType(ItemClassTypes item_class) const
 {
 	// Check usage type
 	if ((m_use_type == ItemInstWorldContainer) && (item_class == ItemClassContainer))

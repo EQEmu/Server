@@ -38,14 +38,15 @@ enum ItemAttributes : uint32
 };
 
 /*
-** Item types
+**	Item class types
 **
 */
-enum ItemClass
+enum ItemClassTypes
 {
-	ItemClassCommon		= 0,
-	ItemClassContainer	= 1,
-	ItemClassBook		= 2
+	ItemClassCommon = 0,
+	ItemClassContainer,
+	ItemClassBook,
+	_ItemClassCount
 };
 
 /*

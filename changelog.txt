@@ -11,6 +11,7 @@ Uleat: Changed riposte enabling check to proper failure criteria (x == 1 && x ==
 Uleat: Enforced naming standard on my recent changes (Sorry for any inconviencies)
 Uleat: Moved DeityTypes enumeration from eq_constants.h to deity.h (expanded utility of accessors, but are yet to be implemented)
 Uleat: Changed ItemUseType to ItemInstTypes to better reflect the definition (also to free-up the namespace)
+Uleat: Changed ItemClass to ItemClassTypes
 
 == 10/24/2013 ==
 demonstar55: Fix some memory leaks in Mob::SpellOnTarget
