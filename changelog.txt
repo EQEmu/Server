@@ -15,6 +15,7 @@ Uleat: Changed ItemClass to ItemClassTypes
 Uleat: Converted MATERIAL defines to MaterialUseSlots enumeration - use of scripted 'Bracer' and 'Max' are deprecated
 Uleat: Changed ItemTypes to ItemUseTypes - retained the 'ItemType' prefix to avoid too much confusion. Also adopted the '1H Piercing' model found in later clients
 Uleat: Converted SkillType typedef enumeration to SkillUseTypes enumeration - Some prep work for adding the newer skills
+Uleat: Prepped the client patch files for larger skill buffer size (not active)
 
 == 10/24/2013 ==
 demonstar55: Fix some memory leaks in Mob::SpellOnTarget

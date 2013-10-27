@@ -627,6 +627,7 @@ static const uint32 MAX_PP_LANGUAGE		= 28;
 static const uint32 MAX_PP_SPELLBOOK	= 400;
 static const uint32 MAX_PP_MEMSPELL		= 9;
 static const uint32 MAX_PP_SKILL		= 75;
+//static const uint32 MAX_PP_SKILL		= 100; // actual buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 struct PlayerProfile_Struct
@@ -725,6 +726,7 @@ struct PlayerProfile_Struct
 /*4772*/	uint8				unknown3812[24];        // @bp unknown skills?
 /*4796*/	uint32				skills[MAX_PP_SKILL];
 /*5096*/	uint8				unknown5096[284];     // @bp unknown skills?
+///*5196*/	uint8				unknown5096[184];     // @bp unknown skills?
 /*5380*/	uint32				pvp2;	//
 /*5384*/	uint32				unknown4420;	//
 /*5388*/	uint32				pvptype;	//
