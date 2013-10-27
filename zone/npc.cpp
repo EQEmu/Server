@@ -266,7 +266,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	//give NPCs skill values...
 	int r;
 	for(r = 0; r <= HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(),(SkillType)r,moblevel);
+		skills[r] = database.GetSkillCap(GetClass(),(SkillUseTypes)r,moblevel);
 	}
 
 	if(d->trap_template > 0)
@@ -1240,7 +1240,7 @@ uint32 NPC::GetMaxDamage(uint8 tlevel)
 
 void NPC::PickPocket(Client* thief) {
 
-	thief->CheckIncreaseSkill(PICK_POCKETS, nullptr, 5);
+	thief->CheckIncreaseSkill(SkillPickPockets, nullptr, 5);
 
 	//make sure were allowed to targte them:
 	int olevel = GetLevel();
@@ -1259,7 +1259,7 @@ void NPC::PickPocket(Client* thief) {
 		return;
 	}
 
-	int steal_skill = thief->GetSkill(PICK_POCKETS);
+	int steal_skill = thief->GetSkill(SkillPickPockets);
 	int stealchance = steal_skill*100/(5*olevel+5);
 	ItemInst* inst = 0;
 	int x = 0;

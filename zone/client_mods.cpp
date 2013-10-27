@@ -855,7 +855,7 @@ int16 Client::acmod() {
 int16 Client::CalcAC() {
 
 	// new formula
-	int avoidance = (acmod() + ((GetSkill(DEFENSE) + itembonuses.HeroicAGI/10)*16)/9);
+	int avoidance = (acmod() + ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10)*16)/9);
 	if (avoidance < 0)
 		avoidance = 0;
 
@@ -863,12 +863,12 @@ int16 Client::CalcAC() {
 	if (m_pp.class_ == WIZARD || m_pp.class_ == MAGICIAN || m_pp.class_ == NECROMANCER || m_pp.class_ == ENCHANTER) {
 		//something is wrong with this, naked casters have the wrong natural AC
 //		mitigation = (spellbonuses.AC/3) + (GetSkill(DEFENSE)/2) + (itembonuses.AC+1);
-		mitigation = (GetSkill(DEFENSE) + itembonuses.HeroicAGI/10)/4 + (itembonuses.AC+1);
+		mitigation = (GetSkill(SkillDefense) + itembonuses.HeroicAGI/10)/4 + (itembonuses.AC+1);
 		//this might be off by 4..
 		mitigation -= 4;
 	} else {
 //		mitigation = (spellbonuses.AC/4) + (GetSkill(DEFENSE)/3) + ((itembonuses.AC*4)/3);
-		mitigation = (GetSkill(DEFENSE) + itembonuses.HeroicAGI/10)/3 + ((itembonuses.AC*4)/3);
+		mitigation = (GetSkill(SkillDefense) + itembonuses.HeroicAGI/10)/3 + ((itembonuses.AC*4)/3);
 		if(m_pp.class_ == MONK)
 			mitigation += GetLevel() * 13/10;	//the 13/10 might be wrong, but it is close...
 	}
@@ -907,11 +907,11 @@ int16 Client::GetACMit() {
 
 	int mitigation = 0;
 	if (m_pp.class_ == WIZARD || m_pp.class_ == MAGICIAN || m_pp.class_ == NECROMANCER || m_pp.class_ == ENCHANTER) {
-		mitigation = (GetSkill(DEFENSE) + itembonuses.HeroicAGI/10)/4 + (itembonuses.AC+1);
+		mitigation = (GetSkill(SkillDefense) + itembonuses.HeroicAGI/10)/4 + (itembonuses.AC+1);
 		mitigation -= 4;
 	}
 	else {
-		mitigation = (GetSkill(DEFENSE) + itembonuses.HeroicAGI/10)/3 + ((itembonuses.AC*4)/3);
+		mitigation = (GetSkill(SkillDefense) + itembonuses.HeroicAGI/10)/3 + ((itembonuses.AC*4)/3);
 		if(m_pp.class_ == MONK)
 			mitigation += GetLevel() * 13/10;	//the 13/10 might be wrong, but it is close...
 	}
@@ -931,7 +931,7 @@ int16 Client::GetACMit() {
 
 int16 Client::GetACAvoid() {
 
-	int avoidance = (acmod() + ((GetSkill(DEFENSE) + itembonuses.HeroicAGI/10)*16)/9);
+	int avoidance = (acmod() + ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10)*16)/9);
 	if (avoidance < 0)
 		avoidance = 0;
 
@@ -1099,8 +1099,8 @@ int32 Client::CalcBaseManaRegen()
 	int32 regen = 0;
 	if (IsSitting() || (GetHorseId() != 0))
 	{
-		if(HasSkill(MEDITATE))
-			regen = (((GetSkill(MEDITATE) / 10) + (clevel - (clevel / 4))) / 4) + 4;
+		if(HasSkill(SkillMeditate))
+			regen = (((GetSkill(SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
 		else
 			regen = 2;
 	}
@@ -1118,11 +1118,11 @@ int32 Client::CalcManaRegen()
 	if (IsSitting() || (GetHorseId() != 0))
 	{
 		BuffFadeBySitModifier();
-		if(HasSkill(MEDITATE)) {
+		if(HasSkill(SkillMeditate)) {
 			this->medding = true;
-			regen = (((GetSkill(MEDITATE) / 10) + (clevel - (clevel / 4))) / 4) + 4;
+			regen = (((GetSkill(SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
 			regen += spellbonuses.ManaRegen + itembonuses.ManaRegen;
-			CheckIncreaseSkill(MEDITATE, nullptr, -5);
+			CheckIncreaseSkill(SkillMeditate, nullptr, -5);
 		}
 		else
 			regen = 2 + spellbonuses.ManaRegen + itembonuses.ManaRegen;
@@ -1836,47 +1836,47 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 
 	//item mods are in 10ths of percent increases
 	switch(spells[spell_id].skill) {
-		case PERCUSSION_INSTRUMENTS:
+		case SkillPercussionInstruments:
 			if(itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
 				effectmod = 10;
-			else if(GetSkill(PERCUSSION_INSTRUMENTS) == 0)
+			else if(GetSkill(SkillPercussionInstruments) == 0)
 				effectmod = 10;
 			else if(itembonuses.percussionMod > spellbonuses.percussionMod)
 				effectmod = itembonuses.percussionMod;
 			else
 				effectmod = spellbonuses.percussionMod;
 			break;
-		case STRINGED_INSTRUMENTS:
+		case SkillStringedInstruments:
 			if(itembonuses.stringedMod == 0 && spellbonuses.stringedMod == 0)
 				effectmod = 10;
-			else if(GetSkill(STRINGED_INSTRUMENTS) == 0)
+			else if(GetSkill(SkillStringedInstruments) == 0)
 				effectmod = 10;
 			else if(itembonuses.stringedMod > spellbonuses.stringedMod)
 				effectmod = itembonuses.stringedMod;
 			else
 				effectmod = spellbonuses.stringedMod;
 			break;
-		case WIND_INSTRUMENTS:
+		case SkillWindInstruments:
 			if(itembonuses.windMod == 0 && spellbonuses.windMod == 0)
 				effectmod = 10;
-			else if(GetSkill(WIND_INSTRUMENTS) == 0)
+			else if(GetSkill(SkillWindInstruments) == 0)
 				effectmod = 10;
 			else if(itembonuses.windMod > spellbonuses.windMod)
 				effectmod = itembonuses.windMod;
 			else
 				effectmod = spellbonuses.windMod;
 			break;
-		case BRASS_INSTRUMENTS:
+		case SkillBrassInstruments:
 			if(itembonuses.brassMod == 0 && spellbonuses.brassMod == 0)
 				effectmod = 10;
-			else if(GetSkill(BRASS_INSTRUMENTS) == 0)
+			else if(GetSkill(SkillBrassInstruments) == 0)
 				effectmod = 10;
 			else if(itembonuses.brassMod > spellbonuses.brassMod)
 				effectmod = itembonuses.brassMod;
 			else
 				effectmod = spellbonuses.brassMod;
 			break;
-		case SINGING:
+		case SkillSinging:
 			if(itembonuses.singingMod == 0 && spellbonuses.singingMod == 0)
 				effectmod = 10;
 			else if(itembonuses.singingMod > spellbonuses.singingMod)
@@ -1889,7 +1889,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 			break;
 	}
 
-	if(spells[spell_id].skill == SINGING)
+	if(spells[spell_id].skill == SkillSinging)
 	{
 		effectmod += 2*GetAA(aaSingingMastery);
 		effectmod += 2*GetAA(aaImprovedSingingMastery);

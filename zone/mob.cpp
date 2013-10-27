@@ -1918,7 +1918,7 @@ void Mob::SetZone(uint32 zone_id, uint32 instance_id)
 }
 
 void Mob::Kill() {
-	Death(this, 0, SPELL_UNKNOWN, HAND_TO_HAND);
+	Death(this, 0, SPELL_UNKNOWN, SkillHandtoHand);
 }
 
 void Mob::SetAttackTimer() {
@@ -2077,7 +2077,7 @@ void Mob::SetAttackTimer() {
 bool Mob::CanThisClassDualWield(void) const
 {
 	if (!IsClient()) {
-		return(GetSkill(DUAL_WIELD) > 0);
+		return(GetSkill(SkillDualWield) > 0);
 	} else {
 		const ItemInst* inst = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
 		// 2HS, 2HB, or 2HP
@@ -2093,19 +2093,19 @@ bool Mob::CanThisClassDualWield(void) const
 			}
 		}
 
-		return (CastToClient()->HasSkill(DUAL_WIELD));	// No skill = no chance
+		return (CastToClient()->HasSkill(SkillDualWield));	// No skill = no chance
 	}
 }
 
 bool Mob::CanThisClassDoubleAttack(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(DOUBLE_ATTACK) > 0);
+		return(GetSkill(SkillDoubleAttack) > 0);
 	} else {
 		if(aabonuses.GiveDoubleAttack || itembonuses.GiveDoubleAttack || spellbonuses.GiveDoubleAttack) {
 			return true;
 		}
-		return(CastToClient()->HasSkill(DOUBLE_ATTACK));
+		return(CastToClient()->HasSkill(SkillDoubleAttack));
 	}
 }
 
@@ -2145,36 +2145,36 @@ bool Mob::IsWarriorClass(void) const
 bool Mob::CanThisClassParry(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(PARRY) > 0);
+		return(GetSkill(SkillParry) > 0);
 	} else {
-		return(CastToClient()->HasSkill(PARRY));
+		return(CastToClient()->HasSkill(SkillParry));
 	}
 }
 
 bool Mob::CanThisClassDodge(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(DODGE) > 0);
+		return(GetSkill(SkillDodge) > 0);
 	} else {
-		return(CastToClient()->HasSkill(DODGE));
+		return(CastToClient()->HasSkill(SkillDodge));
 	}
 }
 
 bool Mob::CanThisClassRiposte(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(RIPOSTE) > 0);
+		return(GetSkill(SkillRiposte) > 0);
 	} else {
-		return(CastToClient()->HasSkill(RIPOSTE));
+		return(CastToClient()->HasSkill(SkillRiposte));
 	}
 }
 
 bool Mob::CanThisClassBlock(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(BLOCKSKILL) > 0);
+		return(GetSkill(SkillBlock) > 0);
 	} else {
-		return(CastToClient()->HasSkill(BLOCKSKILL));
+		return(CastToClient()->HasSkill(SkillBlock));
 	}
 }
 
@@ -3308,7 +3308,7 @@ int32 Mob::GetVulnerability(int32 damage, Mob *caster, uint32 spell_id, uint32 t
 	return damage;
 }
 
-int16 Mob::GetSkillDmgTaken(const SkillType skill_used)
+int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 {
 	int skilldmg_mod = 0;
 
@@ -4414,7 +4414,7 @@ void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
 }
 
 
-void Mob::ModSkillDmgTaken(SkillType skill_num, int value)
+void Mob::ModSkillDmgTaken(SkillUseTypes skill_num, int value)
 {
 	if (skill_num <= HIGHEST_SKILL)
 		SkillDmgTaken_Mod[skill_num] = value;
@@ -4424,7 +4424,7 @@ void Mob::ModSkillDmgTaken(SkillType skill_num, int value)
 		SkillDmgTaken_Mod[HIGHEST_SKILL+1] = value;
 }
 
-int16 Mob::GetModSkillDmgTaken(const SkillType skill_num)
+int16 Mob::GetModSkillDmgTaken(const SkillUseTypes skill_num)
 {
 	if (skill_num <= HIGHEST_SKILL)
 		return SkillDmgTaken_Mod[skill_num];
@@ -4537,23 +4537,23 @@ uint16 Mob::GetSkillByItemType(int ItemType)
 	switch (ItemType)
 	{
 		case ItemType1HSlash:
-			return _1H_SLASHING;
+			return Skill1HSlashing;
 		case ItemType2HSlash:
-			return _2H_SLASHING;
+			return Skill2HSlashing;
 		case ItemType1HPiercing:
-			return PIERCING;
+			return Skill1HPiercing;
 		case ItemType1HBlunt:
-			return _1H_BLUNT;
+			return Skill1HBlunt;
 		case ItemType2HBlunt:
-			return _2H_BLUNT;
+			return Skill2HBlunt;
 		case ItemType2HPiercing:
-			return PIERCING;
+			return Skill1HPiercing; // change to 2HPiercing once activated
 		case ItemTypeMartial:
-			return HAND_TO_HAND;
+			return SkillHandtoHand;
 		default:
-			return HAND_TO_HAND;
+			return SkillHandtoHand;
 	}
-	return HAND_TO_HAND;
+	return SkillHandtoHand;
  }
 
 

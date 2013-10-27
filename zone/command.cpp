@@ -2462,7 +2462,7 @@ void command_showskills(Client *c, const Seperator *sep)
 		t=c->GetTarget()->CastToClient();
 
 	c->Message(0, "Skills for %s", t->GetName());
-	for (SkillType i=_1H_BLUNT; i <= HIGHEST_SKILL; i=(SkillType)(i+1))
+	for (SkillUseTypes i=Skill1HBlunt; i <= HIGHEST_SKILL; i=(SkillUseTypes)(i+1))
 		c->Message(0, "Skill [%d] is at [%d]", i, t->GetSkill(i));
 }
 
@@ -2623,7 +2623,7 @@ void command_setskill(Client *c, const Seperator *sep)
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
 		if(skill_num < HIGHEST_SKILL)
-			c->GetTarget()->CastToClient()->SetSkill((SkillType)skill_num, skill_value);
+			c->GetTarget()->CastToClient()->SetSkill((SkillUseTypes)skill_num, skill_value);
 	}
 }
 
@@ -2641,7 +2641,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 		if (c->Admin() >= commandSetSkillsOther || c->GetTarget()==c || c->GetTarget()==0) {
 			LogFile->write(EQEMuLog::Normal,"Set ALL skill request from %s, target:%s", c->GetName(), c->GetTarget()->GetName());
 			uint16 level = atoi(sep->arg[1]);
-			for(SkillType skill_num=_1H_BLUNT;skill_num <= HIGHEST_SKILL;skill_num=(SkillType)(skill_num+1)) {
+			for(SkillUseTypes skill_num=Skill1HBlunt;skill_num <= HIGHEST_SKILL;skill_num=(SkillUseTypes)(skill_num+1)) {
 				c->GetTarget()->CastToClient()->SetSkill(skill_num, level);
 			}
 		}
@@ -4586,7 +4586,7 @@ void command_damage(Client *c, const Seperator *sep)
 		if (nkdmg > 2100000000)
 			c->Message(0, "Enter a value less then 2,100,000,000.");
 		else
-			c->GetTarget()->Damage(c, nkdmg, SPELL_UNKNOWN, HAND_TO_HAND, false);
+			c->GetTarget()->Damage(c, nkdmg, SPELL_UNKNOWN, SkillHandtoHand, false);
 	}
 }
 
@@ -5302,7 +5302,7 @@ void command_manaburn(Client *c, const Seperator *sep)
 					int nukedmg=(c->GetMana())*2;
 					if (nukedmg>0)
 					{
-						target->Damage(c, nukedmg, 2751, ABJURE/*hackish*/);
+						target->Damage(c, nukedmg, 2751, SkillAbjuration/*hackish*/);
 						c->Message(4,"You unleash an enormous blast of magical energies.");
 					}
 					LogFile->write(EQEMuLog::Normal,"Manaburn request from %s, damage: %d", c->GetName(), nukedmg);
@@ -11042,14 +11042,14 @@ void command_max_all_skills(Client *c, const Seperator *sep)
 	{
 		for(int i = 0; i <= HIGHEST_SKILL; ++i)
 		{
-			if(i >= SPECIALIZE_ABJURE && i <= SPECIALIZE_EVOCATION)
+			if(i >= SkillSpecializeAbjure && i <= SkillSpecializeEvocation)
 			{
-				c->SetSkill((SkillType)i, 50);
+				c->SetSkill((SkillUseTypes)i, 50);
 			}
 			else
 			{
-				int max_skill_level = database.GetSkillCap(c->GetClass(), (SkillType)i, c->GetLevel());
-				c->SetSkill((SkillType)i, max_skill_level);
+				int max_skill_level = database.GetSkillCap(c->GetClass(), (SkillUseTypes)i, c->GetLevel());
+				c->SetSkill((SkillUseTypes)i, max_skill_level);
 			}
 		}
 	}
@@ -11139,14 +11139,14 @@ void command_disarmtrap(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if(c->HasSkill(DISARM_TRAPS))
+		if(c->HasSkill(SkillDisarmTraps))
 		{
 			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.", target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(DISARM_TRAPS), LDoNTypeMechanical);
+			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(SkillDisarmTraps), LDoNTypeMechanical);
 		}
 		else
 			c->Message(13, "You do not have the disarm trap skill.");
@@ -11164,14 +11164,14 @@ void command_sensetrap(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if(c->HasSkill(SENSE_TRAPS))
+		if(c->HasSkill(SkillSenseTraps))
 		{
 			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.", target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNSenseTraps(target->CastToNPC(), c->GetSkill(SENSE_TRAPS), LDoNTypeMechanical);
+			c->HandleLDoNSenseTraps(target->CastToNPC(), c->GetSkill(SkillSenseTraps), LDoNTypeMechanical);
 		}
 		else
 			c->Message(13, "You do not have the sense traps skill.");
@@ -11189,14 +11189,14 @@ void command_picklock(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if(c->HasSkill(PICK_LOCK))
+		if(c->HasSkill(SkillPickLock))
 		{
 			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.", target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNPickLock(target->CastToNPC(), c->GetSkill(PICK_LOCK), LDoNTypeMechanical);
+			c->HandleLDoNPickLock(target->CastToNPC(), c->GetSkill(SkillPickLock), LDoNTypeMechanical);
 		}
 		else
 			c->Message(13, "You do not have the pick locks skill.");

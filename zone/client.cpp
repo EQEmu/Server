@@ -1386,7 +1386,7 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 	return(false);
 }
 
-void Client::SetSkill(SkillType skillid, uint16 value) {
+void Client::SetSkill(SkillUseTypes skillid, uint16 value) {
 	if (skillid > HIGHEST_SKILL)
 		return;
 	m_pp.skills[skillid] = value; // We need to be able to #setskill 254 and 255 to reset skills
@@ -1419,7 +1419,7 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 	Message_StringID( MT_Skills, LANG_SKILL_IMPROVED ); //Notify client
 }
 
-void Client::AddSkill(SkillType skillid, uint16 value) {
+void Client::AddSkill(SkillUseTypes skillid, uint16 value) {
 	if (skillid > HIGHEST_SKILL)
 		return;
 	value = GetRawSkill(skillid) + value;
@@ -2295,7 +2295,7 @@ uint64 Client::GetAllMoney() {
 		(static_cast<uint64>(m_pp.platinum_shared) * 1000)))));
 }
 
-bool Client::CheckIncreaseSkill(SkillType skillid, Mob *against_who, int chancemodi) {
+bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int chancemodi) {
 	if (IsAIControlled()) // no skillups while chamred =p
 		return false;
 	if (skillid > HIGHEST_SKILL)
@@ -2357,24 +2357,24 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 	}
 }
 
-bool Client::HasSkill(SkillType skill_id) const {
+bool Client::HasSkill(SkillUseTypes skill_id) const {
 	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 
-bool Client::CanHaveSkill(SkillType skill_id) const {
+bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
 	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
 	//if you don't have it by max level, then odds are you never will?
 }
 
-uint16 Client::MaxSkill(SkillType skillid, uint16 class_, uint16 level) const {
+uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
 	return(database.GetSkillCap(class_, skillid, level));
 }
 
-uint8 Client::SkillTrainLevel(SkillType skillid, uint16 class_){
+uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_){
 	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
 }
 
-uint16 Client::GetMaxSkillAfterSpecializationRules(SkillType skillid, uint16 maxSkill)
+uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16 maxSkill)
 {
 	uint16 Result = maxSkill;
 
@@ -2384,13 +2384,13 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillType skillid, uint16 max
 
 	uint16 MaxSpecializations = GetAA(aaSecondaryForte) ? 2 : 1;
 
-	if(skillid >= SPECIALIZE_ABJURE && skillid <= SPECIALIZE_EVOCATION)
+	if(skillid >= SkillSpecializeAbjure && skillid <= SkillSpecializeEvocation)
 	{
 		bool HasPrimarySpecSkill = false;
 
 		int NumberOfPrimarySpecSkills = 0;
 
-		for(int i = SPECIALIZE_ABJURE; i <= SPECIALIZE_EVOCATION; ++i)
+		for(int i = SkillSpecializeAbjure; i <= SkillSpecializeEvocation; ++i)
 		{
 			if(m_pp.skills[i] > 50)
 			{
@@ -2447,8 +2447,8 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillType skillid, uint16 max
 				Message(13, "Your spell casting specializations skills have been reset. "
 						"Only %i primary specialization skill is allowed.", MaxSpecializations);
 
-				for(int i = SPECIALIZE_ABJURE; i <= SPECIALIZE_EVOCATION; ++i)
-					SetSkill((SkillType)i, 1);
+				for(int i = SkillSpecializeAbjure; i <= SkillSpecializeEvocation; ++i)
+					SetSkill((SkillUseTypes)i, 1);
 
 				Save();
 
@@ -2461,7 +2461,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillType skillid, uint16 max
 	// This should possibly be handled by bonuses rather than here.
 	switch(skillid)
 	{
-		case TRACKING:
+		case SkillTracking:
 		{
 			Result += ((GetAA(aaAdvancedTracking) * 10) + (GetAA(aaTuneofPursuance) * 10));
 			break;
@@ -2679,13 +2679,13 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					bind_out->type = 1; // Done
 					QueuePacket(outapp);
 					bind_out->type = 0;
-					CheckIncreaseSkill(BIND_WOUND, nullptr, 5);
+					CheckIncreaseSkill(SkillBindWound, nullptr, 5);
 
 					int maxHPBonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound + aabonuses.MaxBindWound;
 
 					int max_percent = 50 + 10 * maxHPBonus;
 
-					if(GetClass() == MONK && GetSkill(BIND_WOUND) > 200) {
+					if(GetClass() == MONK && GetSkill(SkillBindWound) > 200) {
 						max_percent = 70 + 10 * maxHPBonus;
 					}
 
@@ -2699,10 +2699,10 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 						int bindhps = 3;
 
 
-						if (GetSkill(BIND_WOUND) > 200) {
-							bindhps += GetSkill(BIND_WOUND)*4/10;
-						} else if (GetSkill(BIND_WOUND) >= 10) {
-							bindhps += GetSkill(BIND_WOUND)/4;
+						if (GetSkill(SkillBindWound) > 200) {
+							bindhps += GetSkill(SkillBindWound)*4/10;
+						} else if (GetSkill(SkillBindWound) >= 10) {
+							bindhps += GetSkill(SkillBindWound)/4;
 						}
 
 						//Implementation of aaMithanielsBinding is a guess (the multiplier)
@@ -3700,7 +3700,7 @@ void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_
 		pick_out->coin = amt;
 		pick_out->from = GetID();
 		pick_out->to = from->GetID();
-		pick_out->myskill = GetSkill(PICK_POCKETS);
+		pick_out->myskill = GetSkill(SkillPickPockets);
 
 		if((type >= PickPocketPlatinum) && (type <= PickPocketCopper) && (amt == 0))
 			type = PickPocketFailed;
@@ -3973,11 +3973,11 @@ void Client::UpdateLFP() {
 
 uint16 Client::GetPrimarySkillValue()
 {
-	SkillType skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
+	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
 	bool equiped = m_inv.GetItem(13);
 
 	if (!equiped)
-		skill = HAND_TO_HAND;
+		skill = SkillHandtoHand;
 
 	else {
 
@@ -3987,42 +3987,42 @@ uint16 Client::GetPrimarySkillValue()
 		{
 			case ItemType1HSlash: // 1H Slashing
 			{
-				skill = _1H_SLASHING;
+				skill = Skill1HSlashing;
 				break;
 			}
 			case ItemType2HSlash: // 2H Slashing
 			{
-				skill = _2H_SLASHING;
+				skill = Skill2HSlashing;
 				break;
 			}
 			case ItemType1HPiercing: // Piercing
 			{
-				skill = PIERCING;
+				skill = Skill1HPiercing;
 				break;
 			}
 			case ItemType1HBlunt: // 1H Blunt
 			{
-				skill = _1H_BLUNT;
+				skill = Skill1HBlunt;
 				break;
 			}
 			case ItemType2HBlunt: // 2H Blunt
 			{
-				skill = _2H_BLUNT;
+				skill = Skill2HBlunt;
 				break;
 			}
 			case ItemType2HPiercing: // 2H Piercing
 			{
-				skill = PIERCING;
+				skill = Skill1HPiercing; // change to Skill2HPiercing once activated
 				break;
 			}
 			case ItemTypeMartial: // Hand to Hand
 			{
-				skill = HAND_TO_HAND;
+				skill = SkillHandtoHand;
 				break;
 			}
 			default: // All other types default to Hand to Hand
 			{
-				skill = HAND_TO_HAND;
+				skill = SkillHandtoHand;
 				break;
 			}
 		}
@@ -4037,7 +4037,7 @@ uint16 Client::GetTotalATK()
 	uint16 WornCap = itembonuses.ATK;
 
 	if(IsClient()) {
-		AttackRating = ((WornCap * 1.342) + (GetSkill(OFFENSE) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
+		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
 		AttackRating += aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 
 		if (AttackRating < 10)
@@ -4055,7 +4055,7 @@ uint16 Client::GetATKRating()
 {
 	uint16 AttackRating = 0;
 	if(IsClient()) {
-		AttackRating = (GetSkill(OFFENSE) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
+		AttackRating = (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
 
 		if (AttackRating < 10)
 			AttackRating = 10;
@@ -4406,7 +4406,7 @@ void Client::HandleLDoNOpen(NPC *target)
 					AddEXP(target->GetLevel()*target->GetLevel()*2625/10, GetLevelCon(target->GetLevel()));
 				}
 			}
-			target->Death(this, 1, SPELL_UNKNOWN, HAND_TO_HAND);
+			target->Death(this, 1, SPELL_UNKNOWN, SkillHandtoHand);
 		}
 	}
 }
@@ -4724,8 +4724,8 @@ void Client::ShowSkillsWindow()
 	const char *WindowTitle = "Skills";
 	std::string WindowText;
 	// using a map for easy alphabetizing of the skills list
-	std::map<std::string, SkillType> Skills;
-	std::map<std::string, SkillType>::iterator it;
+	std::map<std::string, SkillUseTypes> Skills;
+	std::map<std::string, SkillUseTypes>::iterator it;
 
 	// this list of names must keep the same order as that in common/skills.h
 	const char* SkillName[] = {"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration","Alteration","Apply Poison","Archery",
@@ -4737,7 +4737,7 @@ void Client::ShowSkillsWindow()
 		"Alchemy","Baking","Tailoring","Sense Traps","Blacksmithing","Fletching","Brewing","Alcohol Tolerance","Begging","Jewelry Making",
 		"Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy"};
 	for(int i = 0; i <= (int)HIGHEST_SKILL; i++)
-		Skills[SkillName[i]] = (SkillType)i;
+		Skills[SkillName[i]] = (SkillUseTypes)i;
 
 	// print out all available skills
 	for(it = Skills.begin(); it != Skills.end(); it++) {
