@@ -596,17 +596,24 @@ static const uint8 SkillDamageTypes[HIGHEST_SKILL+1] = {
 	/* FRENZY */ 74
 };
 
-// Indexing positions into item material arrays
-#define MATERIAL_HEAD		0
-#define MATERIAL_CHEST		1
-#define MATERIAL_ARMS		2
-#define MATERIAL_BRACER		3
-#define MATERIAL_HANDS		4
-#define MATERIAL_LEGS		5
-#define MATERIAL_FEET		6
-#define MATERIAL_PRIMARY	7
-#define MATERIAL_SECONDARY	8
-#define MAX_MATERIALS		9	//number of equipables
+/*
+**	Material use slots
+**
+*/
+enum MaterialUseSlots : uint8
+{
+	MaterialHead = 0,
+	MaterialChest,
+	MaterialArms,
+	MaterialWrist,
+	MaterialHands,
+	MaterialLegs,
+	MaterialFeet,
+	MaterialPrimary,
+	MaterialSecondary,
+	_MaterialCount,
+	_MaterialInvalid = 255
+};
 
 // Used for worn NPC inventory tracking. NPCs don't use
 // augments, so only the basic slots need to be kept track of.

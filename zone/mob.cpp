@@ -72,7 +72,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_drakkin_heritage,
 		uint32		in_drakkin_tattoo,
 		uint32		in_drakkin_details,
-		uint32		in_armor_tint[MAX_MATERIALS],
+		uint32		in_armor_tint[_MaterialCount],
 
 		uint8		in_aa_title,
 		uint8		in_see_invis, // see through invis/ivu
@@ -238,7 +238,7 @@ Mob::Mob(const char* in_name,
 		SkillProcs[j].base_spellID = SPELL_UNKNOWN;
 	}
 
-	for (i = 0; i < MAX_MATERIALS; i++)
+	for (i = 0; i < _MaterialCount; i++)
 	{
 		if (in_armor_tint)
 		{
@@ -945,7 +945,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
-	for(i = 0; i < MAX_MATERIALS; i++)
+	for(i = 0; i < _MaterialCount; i++)
 	{
 		ns->spawn.equipment[i] = GetEquipmentMaterial(i);
 		if (armor_tint[i])
@@ -2556,8 +2556,8 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	{
 		if	// for primary and secondary we need the model, not the material
 		(
-			material_slot == MATERIAL_PRIMARY ||
-			material_slot == MATERIAL_SECONDARY
+			material_slot == MaterialPrimary ||
+			material_slot == MaterialSecondary
 		)
 		{
 			if(strlen(item->IDFile) > 2)

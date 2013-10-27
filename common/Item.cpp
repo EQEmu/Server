@@ -1790,26 +1790,26 @@ int16 Inventory::CalcSlotFromMaterial(uint8 material)
 {
 	switch(material)
 	{
-		case MATERIAL_HEAD:
+		case MaterialHead:
 			return SLOT_HEAD;
-		case MATERIAL_CHEST:
+		case MaterialChest:
 			return SLOT_CHEST;
-		case MATERIAL_ARMS:
+		case MaterialArms:
 			return SLOT_ARMS;
-		case MATERIAL_BRACER:
+		case MaterialWrist:
 			return SLOT_BRACER01;	// there's 2 bracers, only one bracer material
-		case MATERIAL_HANDS:
+		case MaterialHands:
 			return SLOT_HANDS;
-		case MATERIAL_LEGS:
+		case MaterialLegs:
 			return SLOT_LEGS;
-		case MATERIAL_FEET:
+		case MaterialFeet:
 			return SLOT_FEET;
-		case MATERIAL_PRIMARY:
+		case MaterialPrimary:
 			return SLOT_PRIMARY;
-		case MATERIAL_SECONDARY:
+		case MaterialSecondary:
 			return SLOT_SECONDARY;
 		default:
-			return -1;
+			return SLOT_INVALID;
 	}
 }
 
@@ -1818,26 +1818,26 @@ uint8 Inventory::CalcMaterialFromSlot(int16 equipslot)
 	switch(equipslot)
 	{
 		case SLOT_HEAD:
-			return MATERIAL_HEAD;
+			return MaterialHead;
 		case SLOT_CHEST:
-			return MATERIAL_CHEST;
+			return MaterialChest;
 		case SLOT_ARMS:
-			return MATERIAL_ARMS;
+			return MaterialArms;
 		case SLOT_BRACER01:
 		case SLOT_BRACER02:
-			return MATERIAL_BRACER;
+			return MaterialWrist;
 		case SLOT_HANDS:
-			return MATERIAL_HANDS;
+			return MaterialHands;
 		case SLOT_LEGS:
-			return MATERIAL_LEGS;
+			return MaterialLegs;
 		case SLOT_FEET:
-			return MATERIAL_FEET;
+			return MaterialFeet;
 		case SLOT_PRIMARY:
-			return MATERIAL_PRIMARY;
+			return MaterialPrimary;
 		case SLOT_SECONDARY:
-			return MATERIAL_SECONDARY;
+			return MaterialSecondary;
 		default:
-			return 0xFF;
+			return _MaterialInvalid;
 	}
 }
 

@@ -1198,7 +1198,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 
 int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
-	if (material_slot >= MAX_MATERIALS)
+	if (material_slot >= _MaterialCount)
 		return 0;
 
 	int inv_slot = Inventory::CalcSlotFromMaterial(material_slot);
@@ -1206,13 +1206,13 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 		return 0;
 	if(equipment[inv_slot] == 0) {
 		switch(material_slot) {
-		case MATERIAL_HEAD:
+		case MaterialHead:
 			return helmtexture;
-		case MATERIAL_CHEST:
+		case MaterialChest:
 			return texture;
-		case MATERIAL_PRIMARY:
+		case MaterialPrimary:
 			return d_meele_texture1;
-		case MATERIAL_SECONDARY:
+		case MaterialSecondary:
 			return d_meele_texture2;
 		default:
 			//they have nothing in the slot, and its not a special slot... they get nothing.

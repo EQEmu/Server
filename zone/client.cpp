@@ -1858,53 +1858,53 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	const ItemInst* inst = nullptr;
 	if ((inst = m_inv[SLOT_HANDS]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_HANDS]	= item->Material;
-		ns->spawn.colors[MATERIAL_HANDS].color	= GetEquipmentColor(MATERIAL_HANDS);
+		ns->spawn.equipment[MaterialHands]	= item->Material;
+		ns->spawn.colors[MaterialHands].color	= GetEquipmentColor(MaterialHands);
 	}
 	if ((inst = m_inv[SLOT_HEAD]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_HEAD]	= item->Material;
-		ns->spawn.colors[MATERIAL_HEAD].color	= GetEquipmentColor(MATERIAL_HEAD);
+		ns->spawn.equipment[MaterialHead]	= item->Material;
+		ns->spawn.colors[MaterialHead].color	= GetEquipmentColor(MaterialHead);
 	}
 	if ((inst = m_inv[SLOT_ARMS]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_ARMS]	= item->Material;
-		ns->spawn.colors[MATERIAL_ARMS].color	= GetEquipmentColor(MATERIAL_ARMS);
+		ns->spawn.equipment[MaterialArms]	= item->Material;
+		ns->spawn.colors[MaterialArms].color	= GetEquipmentColor(MaterialArms);
 	}
 	if ((inst = m_inv[SLOT_BRACER01]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_BRACER]= item->Material;
-		ns->spawn.colors[MATERIAL_BRACER].color	= GetEquipmentColor(MATERIAL_BRACER);
+		ns->spawn.equipment[MaterialWrist]= item->Material;
+		ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
 	}
 	if ((inst = m_inv[SLOT_BRACER02]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_BRACER]= item->Material;
-		ns->spawn.colors[MATERIAL_BRACER].color	= GetEquipmentColor(MATERIAL_BRACER);
+		ns->spawn.equipment[MaterialWrist]= item->Material;
+		ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
 	}
 	if ((inst = m_inv[SLOT_CHEST]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_CHEST]	= item->Material;
-		ns->spawn.colors[MATERIAL_CHEST].color	= GetEquipmentColor(MATERIAL_CHEST);
+		ns->spawn.equipment[MaterialChest]	= item->Material;
+		ns->spawn.colors[MaterialChest].color	= GetEquipmentColor(MaterialChest);
 	}
 	if ((inst = m_inv[SLOT_LEGS]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_LEGS]	= item->Material;
-		ns->spawn.colors[MATERIAL_LEGS].color	= GetEquipmentColor(MATERIAL_LEGS);
+		ns->spawn.equipment[MaterialLegs]	= item->Material;
+		ns->spawn.colors[MaterialLegs].color	= GetEquipmentColor(MaterialLegs);
 	}
 	if ((inst = m_inv[SLOT_FEET]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_FEET]	= item->Material;
-		ns->spawn.colors[MATERIAL_FEET].color	= GetEquipmentColor(MATERIAL_FEET);
+		ns->spawn.equipment[MaterialFeet]	= item->Material;
+		ns->spawn.colors[MaterialFeet].color	= GetEquipmentColor(MaterialFeet);
 	}
 	if ((inst = m_inv[SLOT_PRIMARY]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
 		if (strlen(item->IDFile) > 2)
-			ns->spawn.equipment[MATERIAL_PRIMARY] = atoi(&item->IDFile[2]);
+			ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
 	}
 	if ((inst = m_inv[SLOT_SECONDARY]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
 		if (strlen(item->IDFile) > 2)
-			ns->spawn.equipment[MATERIAL_SECONDARY] = atoi(&item->IDFile[2]);
+			ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
 	}
 
 	//these two may be related to ns->spawn.texture
@@ -2762,25 +2762,25 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id){
 	const Item_Struct* item = database.GetItem(item_id);
 	if (item && (item->ItemClass==ItemClassCommon)) {
 		if (in_slot==SLOT_HEAD)
-			m_pp.item_material[MATERIAL_HEAD]		= item->Material;
+			m_pp.item_material[MaterialHead]		= item->Material;
 		else if (in_slot==SLOT_CHEST)
-			m_pp.item_material[MATERIAL_CHEST]		= item->Material;
+			m_pp.item_material[MaterialChest]		= item->Material;
 		else if (in_slot==SLOT_ARMS)
-			m_pp.item_material[MATERIAL_ARMS]		= item->Material;
+			m_pp.item_material[MaterialArms]		= item->Material;
 		else if (in_slot==SLOT_BRACER01)
-			m_pp.item_material[MATERIAL_BRACER]		= item->Material;
+			m_pp.item_material[MaterialWrist]		= item->Material;
 		else if (in_slot==SLOT_BRACER02)
-			m_pp.item_material[MATERIAL_BRACER]		= item->Material;
+			m_pp.item_material[MaterialWrist]		= item->Material;
 		else if (in_slot==SLOT_HANDS)
-			m_pp.item_material[MATERIAL_HANDS]		= item->Material;
+			m_pp.item_material[MaterialHands]		= item->Material;
 		else if (in_slot==SLOT_LEGS)
-			m_pp.item_material[MATERIAL_LEGS]		= item->Material;
+			m_pp.item_material[MaterialLegs]		= item->Material;
 		else if (in_slot==SLOT_FEET)
-			m_pp.item_material[MATERIAL_FEET]		= item->Material;
+			m_pp.item_material[MaterialFeet]		= item->Material;
 		else if (in_slot==SLOT_PRIMARY)
-			m_pp.item_material[MATERIAL_PRIMARY]	= atoi(item->IDFile+2);
+			m_pp.item_material[MaterialPrimary]	= atoi(item->IDFile+2);
 		else if (in_slot==SLOT_SECONDARY)
-			m_pp.item_material[MATERIAL_SECONDARY]	= atoi(item->IDFile+2);
+			m_pp.item_material[MaterialSecondary]	= atoi(item->IDFile+2);
 	}
 }
 
@@ -2963,25 +2963,25 @@ void Client::SetTint(int16 in_slot, uint32 color) {
 // Still need to reconcile bracer01 versus bracer02
 void Client::SetTint(int16 in_slot, Color_Struct& color) {
 	if (in_slot==SLOT_HEAD)
-		m_pp.item_tint[MATERIAL_HEAD].color=color.color;
+		m_pp.item_tint[MaterialHead].color=color.color;
 	else if (in_slot==SLOT_ARMS)
-		m_pp.item_tint[MATERIAL_ARMS].color=color.color;
+		m_pp.item_tint[MaterialArms].color=color.color;
 	else if (in_slot==SLOT_BRACER01)
-		m_pp.item_tint[MATERIAL_BRACER].color=color.color;
+		m_pp.item_tint[MaterialWrist].color=color.color;
 	else if (in_slot==SLOT_BRACER02)
-		m_pp.item_tint[MATERIAL_BRACER].color=color.color;
+		m_pp.item_tint[MaterialWrist].color=color.color;
 	else if (in_slot==SLOT_HANDS)
-		m_pp.item_tint[MATERIAL_HANDS].color=color.color;
+		m_pp.item_tint[MaterialHands].color=color.color;
 	else if (in_slot==SLOT_PRIMARY)
-		m_pp.item_tint[MATERIAL_PRIMARY].color=color.color;
+		m_pp.item_tint[MaterialPrimary].color=color.color;
 	else if (in_slot==SLOT_SECONDARY)
-		m_pp.item_tint[MATERIAL_SECONDARY].color=color.color;
+		m_pp.item_tint[MaterialSecondary].color=color.color;
 	else if (in_slot==SLOT_CHEST)
-		m_pp.item_tint[MATERIAL_CHEST].color=color.color;
+		m_pp.item_tint[MaterialChest].color=color.color;
 	else if (in_slot==SLOT_LEGS)
-		m_pp.item_tint[MATERIAL_LEGS].color=color.color;
+		m_pp.item_tint[MaterialLegs].color=color.color;
 	else if (in_slot==SLOT_FEET)
-		m_pp.item_tint[MATERIAL_FEET].color=color.color;
+		m_pp.item_tint[MaterialFeet].color=color.color;
 }
 
 void Client::SetHideMe(bool flag)
@@ -3050,25 +3050,25 @@ uint8 Client::SlotConvert(uint8 slot,bool bracer){
 	if(bracer)
 		return SLOT_BRACER02;
 	switch(slot){
-		case MATERIAL_HEAD:
+		case MaterialHead:
 			slot2=SLOT_HEAD;
 			break;
-		case MATERIAL_CHEST:
+		case MaterialChest:
 			slot2=SLOT_CHEST;
 			break;
-		case MATERIAL_ARMS:
+		case MaterialArms:
 			slot2=SLOT_ARMS;
 			break;
-		case MATERIAL_BRACER:
+		case MaterialWrist:
 			slot2=SLOT_BRACER01;
 			break;
-		case MATERIAL_HANDS:
+		case MaterialHands:
 			slot2=SLOT_HANDS;
 			break;
-		case MATERIAL_LEGS:
+		case MaterialLegs:
 			slot2=SLOT_LEGS;
 			break;
-		case MATERIAL_FEET:
+		case MaterialFeet:
 			slot2=SLOT_FEET;
 			break;
 		}
@@ -3079,25 +3079,25 @@ uint8 Client::SlotConvert2(uint8 slot){
 	uint8 slot2=0;
 	switch(slot){
 		case SLOT_HEAD:
-			slot2=MATERIAL_HEAD;
+			slot2=MaterialHead;
 			break;
 		case SLOT_CHEST:
-			slot2=MATERIAL_CHEST;
+			slot2=MaterialChest;
 			break;
 		case SLOT_ARMS:
-			slot2=MATERIAL_ARMS;
+			slot2=MaterialArms;
 			break;
 		case SLOT_BRACER01:
-			slot2=MATERIAL_BRACER;
+			slot2=MaterialWrist;
 			break;
 		case SLOT_HANDS:
-			slot2=MATERIAL_HANDS;
+			slot2=MaterialHands;
 			break;
 		case SLOT_LEGS:
-			slot2=MATERIAL_LEGS;
+			slot2=MaterialLegs;
 			break;
 		case SLOT_FEET:
-			slot2=MATERIAL_FEET;
+			slot2=MaterialFeet;
 			break;
 		}
 	return slot2;
@@ -6122,7 +6122,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->drakkin_details = GetDrakkinDetails();
 	made_npc->d_meele_texture1 = GetEquipmentMaterial(7);
 	made_npc->d_meele_texture2 = GetEquipmentMaterial(8);
-	for (int i = 0; i < MAX_MATERIALS; i++)	{
+	for (int i = 0; i < _MaterialCount; i++)	{
 		made_npc->armor_tint[i] = GetEquipmentColor(i);
 	}
 	made_npc->loottable_id = 0;

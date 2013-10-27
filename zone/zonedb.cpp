@@ -1197,7 +1197,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 						{
 							if ((at_row = mysql_fetch_row(at_result)))
 							{
-								for (i = 0; i < MAX_MATERIALS; i++)
+								for (i = 0; i < _MaterialCount; i++)
 								{
 									tmpNPCType->armor_tint[i] = atoi(at_row[i * 3]) << 16;
 									tmpNPCType->armor_tint[i] |= atoi(at_row[i * 3 + 1]) << 8;
@@ -1230,7 +1230,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 
 				if (armor_tint_id == 0)
 				{
-					for (i = 1; i < MAX_MATERIALS; i++)
+					for (i = 1; i < _MaterialCount; i++)
 					{
 						tmpNPCType->armor_tint[i] = tmpNPCType->armor_tint[0];
 					}
@@ -1508,7 +1508,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 						{
 							if ((at_row = mysql_fetch_row(at_result)))
 							{
-								for (i = 0; i < MAX_MATERIALS; i++)
+								for (i = 0; i < _MaterialCount; i++)
 								{
 									tmpNPCType->armor_tint[i] = atoi(at_row[i * 3]) << 16;
 									tmpNPCType->armor_tint[i] |= atoi(at_row[i * 3 + 1]) << 8;
@@ -1541,7 +1541,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 
 				if (armor_tint_id == 0)
 				{
-					for (i = 1; i < MAX_MATERIALS; i++)
+					for (i = 1; i < _MaterialCount; i++)
 					{
 						tmpNPCType->armor_tint[i] = tmpNPCType->armor_tint[0];
 					}

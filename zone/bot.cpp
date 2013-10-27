@@ -4584,8 +4584,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				ns->spawn.equipment[MATERIAL_HANDS]	= item->Material;
-				ns->spawn.colors[MATERIAL_HANDS].color = GetEquipmentColor(MATERIAL_HANDS);
+				ns->spawn.equipment[MaterialHands]	= item->Material;
+				ns->spawn.colors[MaterialHands].color = GetEquipmentColor(MaterialHands);
 			}
 		}
 
@@ -4593,8 +4593,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				ns->spawn.equipment[MATERIAL_HEAD] = item->Material;
-				ns->spawn.colors[MATERIAL_HEAD].color = GetEquipmentColor(MATERIAL_HEAD);
+				ns->spawn.equipment[MaterialHead] = item->Material;
+				ns->spawn.colors[MaterialHead].color = GetEquipmentColor(MaterialHead);
 			}
 		}
 
@@ -4602,8 +4602,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				ns->spawn.equipment[MATERIAL_ARMS] = item->Material;
-				ns->spawn.colors[MATERIAL_ARMS].color = GetEquipmentColor(MATERIAL_ARMS);
+				ns->spawn.equipment[MaterialArms] = item->Material;
+				ns->spawn.colors[MaterialArms].color = GetEquipmentColor(MaterialArms);
 			}
 		}
 
@@ -4611,8 +4611,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				ns->spawn.equipment[MATERIAL_BRACER] = item->Material;
-				ns->spawn.colors[MATERIAL_BRACER].color	= GetEquipmentColor(MATERIAL_BRACER);
+				ns->spawn.equipment[MaterialWrist] = item->Material;
+				ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
 			}
 		}
 
@@ -4620,8 +4620,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				ns->spawn.equipment[MATERIAL_BRACER] = item->Material;
-				ns->spawn.colors[MATERIAL_BRACER].color	= GetEquipmentColor(MATERIAL_BRACER);
+				ns->spawn.equipment[MaterialWrist] = item->Material;
+				ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
 			}
 		}
 
@@ -4629,8 +4629,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				ns->spawn.equipment[MATERIAL_CHEST]	= item->Material;
-				ns->spawn.colors[MATERIAL_CHEST].color = GetEquipmentColor(MATERIAL_CHEST);
+				ns->spawn.equipment[MaterialChest]	= item->Material;
+				ns->spawn.colors[MaterialChest].color = GetEquipmentColor(MaterialChest);
 			}
 		}
 
@@ -4638,8 +4638,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				ns->spawn.equipment[MATERIAL_LEGS] = item->Material;
-				ns->spawn.colors[MATERIAL_LEGS].color = GetEquipmentColor(MATERIAL_LEGS);
+				ns->spawn.equipment[MaterialLegs] = item->Material;
+				ns->spawn.colors[MaterialLegs].color = GetEquipmentColor(MaterialLegs);
 			}
 		}
 
@@ -4647,8 +4647,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				ns->spawn.equipment[MATERIAL_FEET] = item->Material;
-				ns->spawn.colors[MATERIAL_FEET].color = GetEquipmentColor(MATERIAL_FEET);
+				ns->spawn.equipment[MaterialFeet] = item->Material;
+				ns->spawn.colors[MaterialFeet].color = GetEquipmentColor(MaterialFeet);
 			}
 		}
 
@@ -4657,8 +4657,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			item = inst->GetItem();
 			if(item) {
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment[MATERIAL_PRIMARY] = atoi(&item->IDFile[2]);
-					ns->spawn.colors[MATERIAL_PRIMARY].color = GetEquipmentColor(MATERIAL_PRIMARY);
+					ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
+					ns->spawn.colors[MaterialPrimary].color = GetEquipmentColor(MaterialPrimary);
 			}
 		}
 
@@ -4667,8 +4667,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			item = inst->GetItem();
 			if(item) {
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment[MATERIAL_SECONDARY] = atoi(&item->IDFile[2]);
-					ns->spawn.colors[MATERIAL_SECONDARY].color = GetEquipmentColor(MATERIAL_SECONDARY);
+					ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
+					ns->spawn.colors[MaterialSecondary].color = GetEquipmentColor(MaterialSecondary);
 			}
 		}
 	}
@@ -5431,8 +5431,8 @@ void Bot::BotRemoveEquipItem(int slot) {
 		if(materialFromSlot != 0xFF) {
 			equipment[slot] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
 			SendWearChange(materialFromSlot);
-			if(materialFromSlot == MATERIAL_CHEST)
-				SendWearChange(MATERIAL_ARMS);
+			if(materialFromSlot == MaterialChest)
+				SendWearChange(MaterialArms);
 		}
 	}
 }
@@ -7981,7 +7981,7 @@ int Bot::GetMonkHandToHandDamage(void)
 		// Have a look to see if we have epic fists on
 
 		uint32 botWeaponId = INVALID_ID;
-		botWeaponId = CastToNPC()->GetEquipment(MATERIAL_HANDS);
+		botWeaponId = CastToNPC()->GetEquipment(MaterialHands);
 		if(botWeaponId == 10652) { //Monk Epic ID
 			return 9;
 		}

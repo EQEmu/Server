@@ -12,6 +12,7 @@ Uleat: Enforced naming standard on my recent changes (Sorry for any inconviencie
 Uleat: Moved DeityTypes enumeration from eq_constants.h to deity.h (expanded utility of accessors, but are yet to be implemented)
 Uleat: Changed ItemUseType to ItemInstTypes to better reflect the definition (also to free-up the namespace)
 Uleat: Changed ItemClass to ItemClassTypes
+Uleat: Converted MATERIAL defines to MaterialUseSlots enumeration - use of scripted 'Bracer' and 'Max' are deprecated
 
 == 10/24/2013 ==
 demonstar55: Fix some memory leaks in Mob::SpellOnTarget

@@ -334,7 +334,7 @@ ENCODE(OP_SendCharInfo) {
 			eq2->haircolor = emu->haircolor[r];
 			eq2->face = emu->face[r];
 			int k;
-			for(k = 0; k < MAX_MATERIALS; k++) {
+			for(k = 0; k < _MaterialCount; k++) {
 				eq2->equip[k].equip0 = emu->equip[r][k];
 				eq2->equip[k].equip1 = 0;
 				eq2->equip[k].itemid = 0;
