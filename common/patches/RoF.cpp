@@ -1020,30 +1020,18 @@ ENCODE(OP_PlayerProfile)
 
 	outapp->WriteUInt32(structs::MAX_PP_SKILL);
 
-	for(uint32 r = 0; r < MAX_PP_SKILL; r++)
+	for(uint32 r = 0; r < structs::MAX_PP_SKILL; r++)
 	{
 		outapp->WriteUInt32(emu->skills[r]);
 	}
 
+	// deprecated
 	// Write zeroes for the rest of the skills
+	/*
 	for(uint32 r = 0; r < structs::MAX_PP_SKILL - MAX_PP_SKILL; r++)
 	{
 		outapp->WriteUInt32(emu->skills[r]);
 	}
-
-	/*
-	// SKILLS TEST
-	outapp->WriteUInt32(5);		// SkillRemoveTrap
-	outapp->WriteUInt32(10);	// SkillTripleAttack
-	outapp->WriteUInt32(15);	// Skill2HPiercing
-	outapp->WriteUInt32(20);	// SkillNone
-
-	// Write zeroes for the rest of the skills
-	for(uint32 r = 0; r < structs::MAX_PP_SKILL - MAX_PP_SKILL - 4; r++)
-	{
-		outapp->WriteUInt32(emu->skills[r]);
-	}
-	// END TEST
 	*/
 
 	outapp->WriteUInt32(25);			// Unknown count

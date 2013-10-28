@@ -2,13 +2,19 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 10/28/2013 ==
 Uleat: Client patch prep work for extending usable skill range (no apparent issues with Ti through RoF[12-10-2012] testing - i.e., clients showed proper skills and they didn't crash)
+Uleat: This final patch aligns the existing server PlayerProfile_Struct with the previous changes. The pp_struct, as well as the character 'pp' blob, remains unchanged in size and alignment. The only difference is that the first trailing 100 bytes of the unknown array have been re-assigned to the skills array, and the unknown array decreased by the same amount.
+Notes:
+	- The existing configuration will allow the use of any new skills up to 99
+	- Due to this new segment of the blob having never been written to properly, we may have erratic data there that needs to be cleared before use
+	- None of the new skills are coded to use these 'new' skill slots
+	- A per-client method will still need to be observed when coding for the new skill uses
 
 == 10/27/2013 ==
 Uleat: Attempted fix for high level (12) debug compile failiures
 Notes:
-	- Explicit Windows vs. Linus code was not changed due to my inability to compile Linux code
+	- Explicit Windows vs. Linux code was not changed due to my inability to compile Linux code
 	- Only CMake accessible flags were corrected if adding the 'std' namespace did not correct the issue
-	- the tag [CODEBUG] was added to code identifed by the above note
+	- the tag [CODEBUG] was added to failed code identifed by the above note
 	- If you are having compile issues after this patch is committed, look to the changes here first
 Uleat: Changed riposte fail check to proper failure criteria - (x == a && x == b, where a != b) never passes, so skills a and b can riposte (discovery find, no known reported occurences)
 Uleat: Enforced naming standard on my recent changes (Sorry for any inconviencies)
