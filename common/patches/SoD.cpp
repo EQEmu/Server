@@ -535,7 +535,22 @@ ENCODE(OP_PlayerProfile) {
 	OUT(gold_cursor);
 	OUT(silver_cursor);
 	OUT(copper_cursor);
-	OUT_array(skills, structs::MAX_PP_SKILL);
+
+	//OUT_array(skills, structs::MAX_PP_SKILL);	// 1:1 direct copy (100 dword)
+	OUT_array(skills, MAX_PP_SKILL);	// copy first 75 from server struct
+	for(r = MAX_PP_SKILL; r < structs::MAX_PP_SKILL; r++) { eq->skills[r] = (uint32)0; }	// zero the rest
+
+	/*
+	// SKILLS TEST
+	eq->skills[75] = (uint32)5;		// SkillRemoveTrap
+	eq->skills[76] = (uint32)10;	// SkillTripleAttack
+	eq->skills[77] = (uint32)15;	// Skill2HPiercing
+	eq->skills[78] = (uint32)20;	// SkillNone
+
+	for(r = MAX_PP_SKILL + 4; r < structs::MAX_PP_SKILL; r++) { eq->skills[r] = (uint32)0; }
+	// END TEST
+	*/
+
 //	OUT(unknown04760[236]);
 	OUT(toxicity);
 	OUT(thirst_level);

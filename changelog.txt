@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/28/2013 ==
+Uleat: Client patch prep work for extending usable skill range (no apparent issues with Ti through RoF[12-10-2012] testing - i.e., clients showed proper skills and they didn't crash)
+
 == 10/27/2013 ==
 Uleat: Attempted fix for high level (12) debug compile failiures
 Notes:

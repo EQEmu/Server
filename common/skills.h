@@ -123,7 +123,7 @@ enum SkillUseTypes : uint32
 
 // Support values
 // /*-----*/	_SkillServerArraySize = _SkillCount_RoF2,	// Should reflect last client '_SkillCount'
-// /*-----*/	_SkillPacketArraySize = 100,				// Currently supported clients appear to iterate full 100 dword buffer range
+/*-----*/	_SkillPacketArraySize = 100,				// Currently supported clients appear to iterate full 100 dword buffer range
 
 // Superfluous additions to SkillUseTypes..server-use only
 // /*-----*/	ExtSkillGenericTradeskill = 100

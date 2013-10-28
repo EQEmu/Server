@@ -802,8 +802,8 @@ struct SuspendedMinion_Struct
 static const uint32 MAX_PP_LANGUAGE		= 28;
 static const uint32 MAX_PP_SPELLBOOK	= 480;	// Increased to 480 to support SoF
 static const uint32 MAX_PP_MEMSPELL		= 9;
-static const uint32 MAX_PP_SKILL		= 75;
-//static const uint32 MAX_PP_SKILL		= 100; // actual buffer size
+static const uint32 MAX_PP_SKILL		= 75;	// still in-use server-side - this must remain 75 until all code and database can be changed
+//static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
@@ -941,10 +941,10 @@ struct PlayerProfile_Struct
 /*4760*/	int32				silver_cursor;		// Silver on cursor
 /*4764*/	int32				copper_cursor;		// Copper on cursor
 /*4768*/	int32				platinum_shared;	// Platinum shared between characters
-/*4772*/	uint8				unknown4808[24];	// @bp unknown skills?
-/*4796*/	uint32				skills[MAX_PP_SKILL];
-/*5096*/	uint8				unknown5132[284];	// @bp unknown skills?
-///*5196*/	uint8				unknown5132[184];	// @bp unknown skills?
+/*4772*/	uint8				unknown4808[24];
+/*4796*/	uint32				skills[MAX_PP_SKILL];	// currently, 75 dword buffer
+/*5096*/	uint8				unknown5132[284];		// this is for 75 dword buffer
+///*5196*/	uint8				unknown5132[184];		// this is for 100 dword buffer
 /*5380*/	uint32				pvp2;				//
 /*5384*/	uint32				unknown5420;		//
 /*5388*/	uint32				pvptype;			//
