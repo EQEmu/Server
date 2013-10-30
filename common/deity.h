@@ -18,7 +18,7 @@
 #ifndef DEITY_H
 #define DEITY_H
 
-#include "..\common\types.h"
+#include "types.h"
 #include <string>
 
 // NOTE: This code is not fully implemented since there are no references in the existing code
