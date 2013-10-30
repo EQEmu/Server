@@ -144,7 +144,7 @@ bool EQTime::saveFile(const char *filename)
 		return false;
 	}
 	//Enable for debugging
-	//cout << "SAVE: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl;
+	//std::cout << "SAVE: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << std::endl;
 	of << EQT_VERSION << std::endl;
 	of << (long)eqTime.start_eqtime.day << std::endl;
 	of << (long)eqTime.start_eqtime.hour << std::endl;
@@ -194,7 +194,7 @@ bool EQTime::loadFile(const char *filename)
 	in.ignore(80, '\n');
 	in >> eqTime.start_realtime;
 	//Enable for debugging...
-	//cout << "LOAD: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << endl;
+	//std::cout << "LOAD: day=" << (long)eqTime.start_eqtime.day << ";hour=" << (long)eqTime.start_eqtime.hour << ";min=" << (long)eqTime.start_eqtime.minute << ";mon=" << (long)eqTime.start_eqtime.month << ";yr=" << eqTime.start_eqtime.year << ";timet=" << eqTime.start_realtime << std::endl;
 	in.close();
 	return true;
 }

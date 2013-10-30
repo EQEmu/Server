@@ -1,3 +1,5 @@
+// This file needs more than just 'std' updates
+
 uint16 Mob::MaxSkill_weapon(uint16 skillid, uint16 class_, uint16 level) const{
 	if (skillid > HIGHEST_SKILL)
 		return 0;
@@ -273,7 +275,7 @@ uint16 Mob::MaxSkill_weapon(uint16 skillid, uint16 class_, uint16 level) const{
         }
         default:
 #if EQDEBUG
-        cout<<"MaxSkill_Weapon() Unknown class: "<<class_<<endl;
+        std::cout<<"MaxSkill_Weapon() Unknown class: "<<class_<<std::endl;
 #endif
         break;
     }
@@ -281,7 +283,7 @@ uint16 Mob::MaxSkill_weapon(uint16 skillid, uint16 class_, uint16 level) const{
     }
     default:
 #if EQDEBUG
-    cout<<"Unknown weapon skill: "<<skillid<<endl;
+    std::cout<<"Unknown weapon skill: "<<skillid<<std::endl;
 #endif
     break;
   }// Switch skill
@@ -812,7 +814,7 @@ uint16 Mob::MaxSkill_offensive(uint16 skillid, uint16 class_, uint16 level) cons
 ////////////////////////////////////////////////////////
     default:
 #if EQDEBUG >= 1
-    cout<<"Unknown Offensive skill: "<<skillid<<endl;
+    std::cout<<"Unknown Offensive skill: "<<skillid<<std::endl;
 #endif
     break;
   }// Switch skill
@@ -1351,7 +1353,7 @@ uint16 Mob::MaxSkill_defensive(uint16 skillid, uint16 class_, uint16 level) cons
 
     default:
 #if EQDEBUG
-    cout<<"Unknown Defensive skill: "<<skillid<<endl;
+    std::cout<<"Unknown Defensive skill: "<<skillid<<std::endl;
 #endif
     break;
   }// Switch skill
@@ -1613,7 +1615,7 @@ uint16 Mob::MaxSkill_arcane(uint16 skillid, uint16 class_, uint16 level) const{
 ////////////////////////////////////////////////////////
     default:
 #if EQDEBUG
-    cout<<"Unknown arcane skill: "<<skillid<<endl;
+    std::cout<<"Unknown arcane skill: "<<skillid<<std::endl;
 #endif
     break;
   }// Switch skill
@@ -2069,7 +2071,7 @@ uint16 Mob::MaxSkill_class(uint16 skillid, uint16 class_, uint16 level) const{
 ////////////////////////////////////////////////////////
     default:
 #if EQDEBUG
-    cout<<"Unknown class skill: "<<skillid<<endl;
+    std::cout<<"Unknown class skill: "<<skillid<<std::endl;
 #endif
     break;
   }// Switch skill

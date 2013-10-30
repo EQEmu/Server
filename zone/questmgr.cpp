@@ -1073,7 +1073,7 @@ void QuestManager::addskill(int skill_id, int value) {
 	if(skill_id < 0 || skill_id > HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->AddSkill((SkillType) skill_id, value);
+		initiator->AddSkill((SkillUseTypes) skill_id, value);
 }
 
 void QuestManager::setlanguage(int skill_id, int value) {
@@ -1087,7 +1087,7 @@ void QuestManager::setskill(int skill_id, int value) {
 	if(skill_id < 0 || skill_id > HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->SetSkill((SkillType) skill_id, value);
+		initiator->SetSkill((SkillUseTypes) skill_id, value);
 }
 
 void QuestManager::setallskill(int value) {
@@ -1095,8 +1095,8 @@ void QuestManager::setallskill(int value) {
 	if (!initiator)
 		return;
 	if (initiator && initiator->IsClient()) {
-		SkillType sk;
-		for (sk = _1H_BLUNT; sk <= HIGHEST_SKILL; sk = (SkillType)(sk+1)) {
+		SkillUseTypes sk;
+		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) {
 			initiator->SetSkill(sk, value);
 		}
 	}
@@ -1710,7 +1710,7 @@ void QuestManager::clear_zone_flag(int zone_id) {
 void QuestManager::sethp(int hpperc) {
 	QuestManagerCurrentQuestVars();
 	int newhp = (owner->GetMaxHP() * (100 - hpperc)) / 100;
-	owner->Damage(owner, newhp, SPELL_UNKNOWN, HAND_TO_HAND, false, 0, false);
+	owner->Damage(owner, newhp, SPELL_UNKNOWN, SkillHandtoHand, false, 0, false);
 }
 
 bool QuestManager::summonburriedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading) {

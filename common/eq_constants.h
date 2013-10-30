@@ -27,150 +27,186 @@
 */
 enum ItemAttributes : uint32
 {
-	ItemAttr_None			= 0x00000000,
-	ItemAttr_Lore			= 0x00000001,
-	ItemAttr_Artifact		= 0x00000002,
-	ItemAttr_Summoned		= 0x00000004,
-	ItemAttr_Magic			= 0x00000008,
-	ItemAttr_Augment		= 0x00000010,
-	ItemAttr_PendingLore	= 0x00000020,
-	ItemAttr_Unknown		= 0xFFFFFFFF
+	ItemAttrNone			= 0x00000000,
+	ItemAttrLore			= 0x00000001,
+	ItemAttrArtifact		= 0x00000002,
+	ItemAttrSummoned		= 0x00000004,
+	ItemAttrMagic			= 0x00000008,
+	ItemAttrAugment			= 0x00000010,
+	ItemAttrPendingLore		= 0x00000020,
+	ItemAttrUnknown			= 0xFFFFFFFF
 };
 
 /*
-** Item types
+**	Item class types
 **
 */
-enum ItemClass
+enum ItemClassTypes
 {
-	ItemClassCommon		= 0,
-	ItemClassContainer	= 1,
-	ItemClassBook		= 2
+	ItemClassCommon = 0,
+	ItemClassContainer,
+	ItemClassBook,
+	_ItemClassCount
 };
 
 /*
-** Item uses
+**	Item use types
 **
+**	(ref: database and eqstr_us.txt)
+**
+**	(Looking at a recent database, it's possible that some of the item values may be off [10-27-2013] -U)
 */
-enum ItemTypes
+enum ItemUseTypes : uint8
 {
-	ItemType1HS				= 0,
-	ItemType2HS				= 1,
-	ItemTypePierce			= 2,
-	ItemType1HB				= 3,
-	ItemType2HB				= 4,
-	ItemTypeBow				= 5,
-	//6
-	ItemTypeThrowing		= 7,
-	ItemTypeShield			= 8,
-	//9
-	ItemTypeArmor			= 10,
-	ItemTypeUnknon			= 11,	//A lot of random crap has this item use.
-	ItemTypeLockPick		= 12,
-	ItemTypeFood			= 14,
-	ItemTypeDrink			= 15,
-	ItemTypeLightSource		= 16,
-	ItemTypeStackable		= 17,	//Not all stackable items are this use...
-	ItemTypeBandage			= 18,
-	ItemTypeThrowingv2		= 19,
-	ItemTypeSpell			= 20,	//spells and tomes
-	ItemTypePotion			= 21,
-	ItemTypeWindInstr		= 23,
-	ItemTypeStringInstr		= 24,
-	ItemTypeBrassInstr		= 25,
-	ItemTypeDrumInstr		= 26,
-	ItemTypeArrow			= 27,
-	ItemTypeJewlery			= 29,
-	ItemTypeSkull			= 30,
-	ItemTypeTome			= 31,
-	ItemTypeNote			= 32,
-	ItemTypeKey				= 33,
-	ItemTypeCoin			= 34,
-	ItemType2HPierce		= 35,
-	ItemTypeFishingPole		= 36,
-	ItemTypeFishingBait		= 37,
-	ItemTypeAlcohol			= 38,
-	ItemTypeCompass			= 40,
-	ItemTypePoison			= 42,	//might be wrong, but includes poisons
-	ItemTypeHand2Hand		= 45,
-	ItemUseSinging			= 50,
-	ItemUseAllInstruments	= 51,
-	ItemTypeCharm			= 52,
-	ItemTypeAugment			= 54,
-	ItemTypeAugmentSolvent	= 55,
-	ItemTypeAugmentDistill	= 56
+/*9138*/	ItemType1HSlash = 0,
+/*9141*/	ItemType2HSlash,
+/*9140*/	ItemType1HPiercing,
+/*9139*/	ItemType1HBlunt,
+/*9142*/	ItemType2HBlunt,
+/*5504*/	ItemTypeBow,
+/*----*/	ItemTypeUnknown1,
+/*----*/	ItemTypeLargeThrowing,
+/*5505*/	ItemTypeShield,
+/*5506*/	ItemTypeScroll,
+/*5507*/	ItemTypeArmor,
+/*5508*/	ItemTypeMisc,			// a lot of random crap has this item use.
+/*7564*/	ItemTypeLockPick,
+/*----*/	ItemTypeUnknown2,
+/*5509*/	ItemTypeFood,
+/*5510*/	ItemTypeDrink,
+/*5511*/	ItemTypeLight,
+/*5512*/	ItemTypeCombinable,		// not all stackable items are this use...
+/*5513*/	ItemTypeBandage,
+/*----*/	ItemTypeSmallThrowing,
+/*----*/	ItemTypeSpell,			// spells and tomes
+/*5514*/	ItemTypePotion,
+/*----*/	ItemTypeUnknown3,
+/*0406*/	ItemTypeWindInstrument,
+/*0407*/	ItemTypeStringedInstrument,
+/*0408*/	ItemTypeBrassInstrument,
+/*0405*/	ItemTypePercussionInstrument,
+/*5515*/	ItemTypeArrow,
+/*----*/	ItemTypeUnknown4,
+/*5521*/	ItemTypeJewelry,
+/*----*/	ItemTypeSkull,
+/*5516*/	ItemTypeBook,			// skill-up tomes/books? (would probably need a pp flag if true...)
+/*5517*/	ItemTypeNote,
+/*5518*/	ItemTypeKey,
+/*----*/	ItemTypeCoin,
+/*5520*/	ItemType2HPiercing,
+/*----*/	ItemTypeFishingPole,
+/*----*/	ItemTypeFishingBait,
+/*5519*/	ItemTypeAlcohol,
+/*----*/	ItemTypeKey2,			// keys and satchels?? (questable keys?)
+/*----*/	ItemTypeCompass,
+/*----*/	ItemTypeUnknown5,
+/*----*/	ItemTypePoison,			// might be wrong, but includes poisons
+/*----*/	ItemTypeUnknown6,
+/*----*/	ItemTypeUnknown7,
+/*5522*/	ItemTypeMartial,
+/*----*/	ItemTypeUnknown8,
+/*----*/	ItemTypeUnknown9,
+/*----*/	ItemTypeUnknown10,
+/*----*/	ItemTypeUnknown11,
+/*----*/	ItemTypeSinging,
+/*5750*/	ItemTypeAllInstrumentTypes,
+/*5776*/	ItemTypeCharm,
+/*----*/	ItemTypeDye,
+/*----*/	ItemTypeAugmentation,
+/*----*/	ItemTypeAugmentationSolvent,
+/*----*/	ItemTypeAugmentationDistiller,
+/*----*/	ItemTypeUnknown12,
+/*----*/	ItemTypeFellowshipKit,
+/*----*/	ItemTypeUnknown13,
+/*----*/	ItemTypeRecipe,
+/*----*/	ItemTypeAdvancedRecipe,
+/*----*/	ItemTypeJournal,		// only one(1) database entry
+/*----*/	ItemTypeAltCurrency,	// alt-currency (as opposed to coinage)
+/*5881*/	ItemTypePerfectedAugmentationDistiller,
+/*----*/	_ItemTypeCount
+
+/*
+	Unknowns:
+
+	Mounts?
+	Ornamentations?
+	GuildBanners?
+	Collectible? 
+	Placeable?
+	(others?)
+*/
 };
 
 /*
-**	Container types
+**	Container use types
 **
 **	This correlates to world 'object.type' (object.h/Object.cpp) as well as Item_Struct.BagType
 **
 **	(ref: database, web forums and eqstr_us.txt)
 */
-enum ContainerTypes : uint8
+enum ContainerUseTypes : uint8
 {
-/*3400*/	BagType_SmallBag = 0,
-/*3401*/	BagType_LargeBag,
-/*3402*/	BagType_Quiver,
-/*3403*/	BagType_BeltPouch,
-/*3404*/	BagType_WristPouch,
-/*3405*/	BagType_BackPack,
-/*3406*/	BagType_SmallChest,
-/*3407*/	BagType_LargeChest,
-/*----*/	BagType_Bandolier,				// <*Database Reference Only>
-/*3408*/	BagType_MedicineBag,
-/*3409*/	BagType_ToolBox,
-/*3410*/	BagType_Lexicon,
-/*3411*/	BagType_Mortar,
-/*3412*/	BagType_SelfDusting,			// Quest container (Auto-clear contents?)
-/*3413*/	BagType_MixingBowl,
-/*3414*/	BagType_Oven,
-/*3415*/	BagType_SewingKit,
-/*3416*/	BagType_Forge,
-/*3417*/	BagType_FletchingKit,
-/*3418*/	BagType_BrewBarrel,
-/*3419*/	BagType_JewelersKit,
-/*3420*/	BagType_PotteryWheel,
-/*3421*/	BagType_Kiln,
-/*3422*/	BagType_Keymaker,				// (no database entries as of peq rev 69)
-/*3423*/	BagType_WizardsLexicon,
-/*3424*/	BagType_MagesLexicon,
-/*3425*/	BagType_NecromancersLexicon,
-/*3426*/	BagType_EnchantersLexicon,
-/*----*/	BagType_Unknown01,				// (a coin pouch/purse?) (no database entries as of peq rev 69)
-/*----*/	BagType_ConcordanceofResearch,	// <*Database Reference Only>
-/*3427*/	BagType_AlwaysWorks,			// Quest container (Never-fail combines?)
-/*3428*/	BagType_KoadaDalForge,			// High Elf
-/*3429*/	BagType_TeirDalForge,			// Dark Elf
-/*3430*/	BagType_OggokForge,				// Ogre
-/*3431*/	BagType_StormguardForge,		// Dwarf
-/*3432*/	BagType_AkanonForge,			// Gnome
-/*3433*/	BagType_NorthmanForge,			// Barbarian
-/*----*/	BagType_Unknown02,				// (no database entries as of peq rev 69)
-/*3434*/	BagType_CabilisForge,			// Iksar
-/*3435*/	BagType_FreeportForge,			// Human 1
-/*3436*/	BagType_RoyalQeynosForge,		// Human 2
-/*3439*/	BagType_HalflingTailoringKit,
-/*3438*/	BagType_ErudTailoringKit,
-/*3440*/	BagType_FierDalTailoringKit,	// Wood Elf
-/*3441*/	BagType_FierDalFletchingKit,	// Wood Elf
-/*3437*/	BagType_IksarPotteryWheel,
-/*3442*/	BagType_TackleBox,
-/*3443*/	BagType_TrollForge,
-/*3445*/	BagType_FierDalForge,			// Wood Elf
-/*3444*/	BagType_ValeForge,				// Halfling
-/*3446*/	BagType_ErudForge,
-/*----*/	BagType_TradersSatchel,			// <*Database Reference Only> (db: Yellow Trader's Satchel Token?)
-/*5785*/	BagType_GuktaForge,				// Froglok (no database entries as of peq rev 69)
-/*3359*/	BagType_AugmentationSealer,
-/*----*/	BagType_IceCreamChurn,			// <*Database Reference Only>
-/*6325*/	BagType_Transformationmold,		// Ornamentation
-/*6340*/	BagType_Detransformationmold,	// Ornamentation Stripper
-/*5400*/	BagType_Unattuner,
-/*7684*/	BagType_TradeskillBag,
-/*7692*/	BagType_CollectibleBag,
-/*----*/	BagType_Count
+/*3400*/	BagTypeSmallBag = 0,
+/*3401*/	BagTypeLargeBag,
+/*3402*/	BagTypeQuiver,
+/*3403*/	BagTypeBeltPouch,
+/*3404*/	BagTypeWristPouch,
+/*3405*/	BagTypeBackPack,
+/*3406*/	BagTypeSmallChest,
+/*3407*/	BagTypeLargeChest,
+/*----*/	BagTypeBandolier,				// <*Database Reference Only>
+/*3408*/	BagTypeMedicineBag,
+/*3409*/	BagTypeToolBox,
+/*3410*/	BagTypeLexicon,
+/*3411*/	BagTypeMortar,
+/*3412*/	BagTypeSelfDusting,				// Quest container (Auto-clear contents?)
+/*3413*/	BagTypeMixingBowl,
+/*3414*/	BagTypeOven,
+/*3415*/	BagTypeSewingKit,
+/*3416*/	BagTypeForge,
+/*3417*/	BagTypeFletchingKit,
+/*3418*/	BagTypeBrewBarrel,
+/*3419*/	BagTypeJewelersKit,
+/*3420*/	BagTypePotteryWheel,
+/*3421*/	BagTypeKiln,
+/*3422*/	BagTypeKeymaker,				// (no database entries as of peq rev 69)
+/*3423*/	BagTypeWizardsLexicon,
+/*3424*/	BagTypeMagesLexicon,
+/*3425*/	BagTypeNecromancersLexicon,
+/*3426*/	BagTypeEnchantersLexicon,
+/*----*/	BagTypeUnknown1,				// (a coin pouch/purse?) (no database entries as of peq rev 69)
+/*----*/	BagTypeConcordanceofResearch,	// <*Database Reference Only>
+/*3427*/	BagTypeAlwaysWorks,				// Quest container (Never-fail combines?)
+/*3428*/	BagTypeKoadaDalForge,			// High Elf
+/*3429*/	BagTypeTeirDalForge,			// Dark Elf
+/*3430*/	BagTypeOggokForge,				// Ogre
+/*3431*/	BagTypeStormguardForge,			// Dwarf
+/*3432*/	BagTypeAkanonForge,				// Gnome
+/*3433*/	BagTypeNorthmanForge,			// Barbarian
+/*----*/	BagTypeUnknown2,				// (no database entries as of peq rev 69)
+/*3434*/	BagTypeCabilisForge,			// Iksar
+/*3435*/	BagTypeFreeportForge,			// Human 1
+/*3436*/	BagTypeRoyalQeynosForge,		// Human 2
+/*3439*/	BagTypeHalflingTailoringKit,
+/*3438*/	BagTypeErudTailoringKit,
+/*3440*/	BagTypeFierDalTailoringKit,		// Wood Elf
+/*3441*/	BagTypeFierDalFletchingKit,		// Wood Elf
+/*3437*/	BagTypeIksarPotteryWheel,
+/*3442*/	BagTypeTackleBox,
+/*3443*/	BagTypeTrollForge,
+/*3445*/	BagTypeFierDalForge,			// Wood Elf
+/*3444*/	BagTypeValeForge,				// Halfling
+/*3446*/	BagTypeErudForge,
+/*----*/	BagTypeTradersSatchel,			// <*Database Reference Only> (db: Yellow Trader's Satchel Token?)
+/*5785*/	BagTypeGuktaForge,				// Froglok (no database entries as of peq rev 69)
+/*3359*/	BagTypeAugmentationSealer,
+/*----*/	BagTypeIceCreamChurn,			// <*Database Reference Only>
+/*6325*/	BagTypeTransformationmold,		// Ornamentation
+/*6340*/	BagTypeDetransformationmold,	// Ornamentation Stripper
+/*5400*/	BagTypeUnattuner,
+/*7684*/	BagTypeTradeskillBag,
+/*7692*/	BagTypeCollectibleBag,
+/*----*/	_BagTypeCount
 };
 
 /*
@@ -229,35 +265,6 @@ typedef enum {
 	eaLooting,		//4
 	_eaMaxAppearance
 } EmuAppearance;
-
-/*
-**	Diety types
-**
-**	(ref: eqstr_us.txt)
-**
-**	(Another orphaned enumeration...)
-*/
-enum DeityTypes
-{
-/*----*/	Deity_Unknown = 0,
-/*3251*/	Deity_Bertoxxulous = 201,
-/*3262*/	Deity_BrellSirilis,
-/*3253*/	Deity_CazicThule,
-/*3256*/	Deity_ErollisiMarr,
-/*3252*/	Deity_Bristlebane,
-/*3254*/	Deity_Innoruuk,
-/*3255*/	Deity_Karana,
-/*3257*/	Deity_MithanielMarr,
-/*3259*/	Deity_Prexus,
-/*3260*/	Deity_Quellious,
-/*3266*/	Deity_RallosZek,
-/*3258*/	Deity_RodcetNife,
-/*3261*/	Deity_SolusekRo,
-/*3263*/	Deity_TheTribunal,
-/*3264*/	Deity_Tunare,
-/*3265*/	Deity_Veeshan,
-/*3250*/	Deity_Agnostic = 396
-};
 
 // msg_type's for custom usercolors
 #define MT_Say					256
@@ -526,7 +533,8 @@ enum RecastTimerTypes
 	RecTimer_16,
 	RecTimer_17,
 	RecTimer_18,
-	RecTimer_ModRod					// 19
+	RecTimer_ModRod,				// 19
+	_RecTimerCount
 };
 
 enum GroupUpdateAction
@@ -539,101 +547,116 @@ enum GroupUpdateAction
 	GUA_Started = 9
 };
 
-//0x1c is something...
-static const uint8 FallingDamageType = 0xFC;
-static const uint8 SpellDamageType = 0xe7;
-static const uint8 DamageTypeUnknown = 0xFF;
+static const uint8 DamageTypeSomething	= 0x1C;	//0x1c is something...
+static const uint8 DamageTypeFalling	= 0xFC;
+static const uint8 DamageTypeSpell		= 0xE7;
+static const uint8 DamageTypeUnknown	= 0xFF;
 
-//indexed by 'SkillType'
-static const uint8 SkillDamageTypes[HIGHEST_SKILL+1] = {
-	/* _1H_BLUNT */ 0,
-	/* _1H_SLASHING */ 1,
-	/* _2H_BLUNT */ 0,
-	/* _2H_SLASHING */ 1,
-	/* ABJURE */ SpellDamageType,
-	/* ALTERATION */ SpellDamageType,
-	/* APPLY_POISON */ DamageTypeUnknown,
-	/* ARCHERY */ 7,
-	/* BACKSTAB */ 8,
-	/* BIND_WOUND */ DamageTypeUnknown,
-	/* BASH */ 10,
-	/* BLOCKSKILL */ DamageTypeUnknown,
-	/* BRASS_INSTRUMENTS */ SpellDamageType,
-	/* CHANNELING */ DamageTypeUnknown,
-	/* CONJURATION */ SpellDamageType,
-	/* DEFENSE */ DamageTypeUnknown,
-	/* DISARM */ DamageTypeUnknown,
-	/* DISARM_TRAPS */ DamageTypeUnknown,
-	/* DIVINATION */ SpellDamageType,
-	/* DODGE */ DamageTypeUnknown,
-	/* DOUBLE_ATTACK */ DamageTypeUnknown,
-	/* DRAGON_PUNCH */ 21,
-	/* DUAL_WIELD */ DamageTypeUnknown,
-	/* EAGLE_STRIKE */ 23,
-	/* EVOCATION */ SpellDamageType,
-	/* FEIGN_DEATH */ 4,
-	/* FLYING_KICK */ 30,
-	/* FORAGE */ DamageTypeUnknown,
-	/* HAND_TO_HAND */ 4,
-	/* HIDE */ DamageTypeUnknown,
-	/* KICK */ 30,
-	/* MEDITATE */ DamageTypeUnknown,
-	/* MEND */ DamageTypeUnknown,
-	/* OFFENSE */ DamageTypeUnknown,
-	/* PARRY */ DamageTypeUnknown,
-	/* PICK_LOCK */ DamageTypeUnknown,
-	/* PIERCING */ 36,
-	/* RIPOSTE */ DamageTypeUnknown,
-	/* ROUND_KICK */ 30,
-	/* SAFE_FALL */ DamageTypeUnknown,
-	/* SENSE_HEADING */ DamageTypeUnknown,
-	/* SINGING */ SpellDamageType,
-	/* SNEAK */ DamageTypeUnknown,
-	/* SPECIALIZE_ABJURE */ DamageTypeUnknown,
-	/* SPECIALIZE_ALTERATION */ DamageTypeUnknown,
-	/* SPECIALIZE_CONJURATION */ DamageTypeUnknown,
-	/* SPECIALIZE_DIVINATION */ DamageTypeUnknown,
-	/* SPECIALIZE_EVOCATION */ DamageTypeUnknown,
-	/* PICK_POCKETS */ DamageTypeUnknown,
-	/* STRINGED_INSTRUMENTS */ SpellDamageType,
-	/* SWIMMING */ DamageTypeUnknown,
-	/* THROWING */ 51,
-	/* TIGER_CLAW */ 23,
-	/* TRACKING */ DamageTypeUnknown,
-	/* WIND_INSTRUMENTS */ SpellDamageType,
-	/* FISHING */ DamageTypeUnknown,
-	/* MAKE_POISON */ DamageTypeUnknown,
-	/* TINKERING */ DamageTypeUnknown,
-	/* RESEARCH */ DamageTypeUnknown,
-	/* ALCHEMY */ DamageTypeUnknown,
-	/* BAKING */ DamageTypeUnknown,
-	/* TAILORING */ DamageTypeUnknown,
-	/* SENSE_TRAPS */ DamageTypeUnknown,
-	/* BLACKSMITHING */ DamageTypeUnknown,
-	/* FLETCHING */ DamageTypeUnknown,
-	/* BREWING */ DamageTypeUnknown,
-	/* ALCOHOL_TOLERANCE */ DamageTypeUnknown,
-	/* BEGGING */ DamageTypeUnknown,
-	/* JEWELRY_MAKING */ DamageTypeUnknown,
-	/* POTTERY */ DamageTypeUnknown,
-	/* PERCUSSION_INSTRUMENTS */ SpellDamageType,
-	/* INTIMIDATION */ DamageTypeUnknown,
-	/* BERSERKING */ DamageTypeUnknown,
-	/* TAUNT */ DamageTypeUnknown,
-	/* FRENZY */ 74
+/*
+**	Skill damage types
+**
+**	(indexed by 'Skill' of SkillUseTypes)
+*/
+static const uint8 SkillDamageTypes[HIGHEST_SKILL + 1] = // change to _SkillServerArraySize once activated
+{
+/*1HBlunt*/					0,
+/*1HSlashing*/				1,
+/*2HBlunt*/					0,
+/*2HSlashing*/				1,
+/*Abjuration*/				DamageTypeSpell,
+/*Alteration*/				DamageTypeSpell,
+/*ApplyPoison*/				DamageTypeUnknown,
+/*Archery*/					7,
+/*Backstab*/				8,
+/*BindWound*/				DamageTypeUnknown,
+/*Bash*/					10,
+/*Block*/					DamageTypeUnknown,
+/*BrassInstruments*/		DamageTypeSpell,
+/*Channeling*/				DamageTypeUnknown,
+/*Conjuration*/				DamageTypeSpell,
+/*Defense*/					DamageTypeUnknown,
+/*Disarm*/					DamageTypeUnknown,
+/*DisarmTraps*/				DamageTypeUnknown,
+/*Divination*/				DamageTypeSpell,
+/*Dodge*/					DamageTypeUnknown,
+/*DoubleAttack*/			DamageTypeUnknown,
+/*DragonPunch*/				21,
+/*DualWield*/				DamageTypeUnknown,
+/*EagleStrike*/				23,
+/*Evocation*/				DamageTypeSpell,
+/*FeignDeath*/				4,
+/*FlyingKick*/				30,
+/*Forage*/					DamageTypeUnknown,
+/*HandtoHand*/				4,
+/*Hide*/					DamageTypeUnknown,
+/*Kick*/					30,
+/*Meditate*/				DamageTypeUnknown,
+/*Mend*/					DamageTypeUnknown,
+/*Offense*/					DamageTypeUnknown,
+/*Parry*/					DamageTypeUnknown,
+/*PickLock*/				DamageTypeUnknown,
+/*1HPiercing*/				36,
+/*Riposte*/					DamageTypeUnknown,
+/*RoundKick*/				30,
+/*SafeFall*/				DamageTypeUnknown,
+/*SsenseHeading*/			DamageTypeUnknown,
+/*Singing*/					DamageTypeSpell,
+/*Sneak*/					DamageTypeUnknown,
+/*SpecializeAbjure*/		DamageTypeUnknown,
+/*SpecializeAlteration*/	DamageTypeUnknown,
+/*SpecializeConjuration*/	DamageTypeUnknown,
+/*SpecializeDivination*/	DamageTypeUnknown,
+/*SpecializeEvocation*/		DamageTypeUnknown,
+/*PickPockets*/				DamageTypeUnknown,
+/*StringedInstruments*/		DamageTypeSpell,
+/*Swimming*/				DamageTypeUnknown,
+/*Throwing*/				51,
+/*TigerClaw*/				23,
+/*Tracking*/				DamageTypeUnknown,
+/*WindInstruments*/			DamageTypeSpell,
+/*Fishing*/					DamageTypeUnknown,
+/*MakePoison*/				DamageTypeUnknown,
+/*Tinkering*/				DamageTypeUnknown,
+/*Research*/				DamageTypeUnknown,
+/*Alchemy*/					DamageTypeUnknown,
+/*Baking*/					DamageTypeUnknown,
+/*Tailoring*/				DamageTypeUnknown,
+/*SenseTraps*/				DamageTypeUnknown,
+/*Blacksmithing*/			DamageTypeUnknown,
+/*Fletching*/				DamageTypeUnknown,
+/*Brewing*/					DamageTypeUnknown,
+/*AlcoholTolerance*/		DamageTypeUnknown,
+/*Begging*/					DamageTypeUnknown,
+/*JewelryMaking*/			DamageTypeUnknown,
+/*Pottery*/					DamageTypeUnknown,
+/*PercussionInstruments*/	DamageTypeSpell,
+/*Intimidation*/			DamageTypeUnknown,
+/*Berserking*/				DamageTypeUnknown,
+/*Taunt*/					DamageTypeUnknown,
+/*Frenzy*/					74 //,
+// /*RemoveTrap*/				DamageTypeUnknown,	// Needs research (set for SenseTrap value)
+// /*TripleAttack*/			DamageTypeUnknown,	// Needs research (set for DoubleAttack value)
+// /*2HPiercing*/				36					// Needs research (set for 1HPiercing value - similar to slash/blunt)
 };
 
-// Indexing positions into item material arrays
-#define MATERIAL_HEAD		0
-#define MATERIAL_CHEST		1
-#define MATERIAL_ARMS		2
-#define MATERIAL_BRACER		3
-#define MATERIAL_HANDS		4
-#define MATERIAL_LEGS		5
-#define MATERIAL_FEET		6
-#define MATERIAL_PRIMARY	7
-#define MATERIAL_SECONDARY	8
-#define MAX_MATERIALS		9	//number of equipables
+/*
+**	Material use slots
+**
+*/
+enum MaterialUseSlots : uint8
+{
+	MaterialHead = 0,
+	MaterialChest,
+	MaterialArms,
+	MaterialWrist,
+	MaterialHands,
+	MaterialLegs,
+	MaterialFeet,
+	MaterialPrimary,
+	MaterialSecondary,
+	_MaterialCount,
+	_MaterialInvalid = 255
+};
 
 // Used for worn NPC inventory tracking. NPCs don't use
 // augments, so only the basic slots need to be kept track of.

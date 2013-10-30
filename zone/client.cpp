@@ -721,7 +721,7 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 
 void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CONN_STATUS required_state) {
 
-	//cout << "Sending: 0x" << hex << setw(4) << setfill('0') << (*app)->GetOpcode() << dec << ", size=" << (*app)->size << endl;
+	//std::cout << "Sending: 0x" << std::hex << std::setw(4) << std::setfill('0') << (*app)->GetOpcode() << std::dec << ", size=" << (*app)->size << std::endl;
 
 	// if the program doesnt care about the status or if the status isnt what we requested
 	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
@@ -1386,7 +1386,7 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 	return(false);
 }
 
-void Client::SetSkill(SkillType skillid, uint16 value) {
+void Client::SetSkill(SkillUseTypes skillid, uint16 value) {
 	if (skillid > HIGHEST_SKILL)
 		return;
 	m_pp.skills[skillid] = value; // We need to be able to #setskill 254 and 255 to reset skills
@@ -1419,7 +1419,7 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 	Message_StringID( MT_Skills, LANG_SKILL_IMPROVED ); //Notify client
 }
 
-void Client::AddSkill(SkillType skillid, uint16 value) {
+void Client::AddSkill(SkillUseTypes skillid, uint16 value) {
 	if (skillid > HIGHEST_SKILL)
 		return;
 	value = GetRawSkill(skillid) + value;
@@ -1745,7 +1745,7 @@ void Client::SendManaUpdatePacket() {
 		SendEnduranceUpdate();
 	}
 
-	//cout << "Sending mana update: " << (cur_mana - last_reported_mana) << endl;
+	//std::cout << "Sending mana update: " << (cur_mana - last_reported_mana) << std::endl;
 	if (last_reported_mana != cur_mana || last_reported_endur != cur_end) {
 
 
@@ -1858,53 +1858,53 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	const ItemInst* inst = nullptr;
 	if ((inst = m_inv[SLOT_HANDS]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_HANDS]	= item->Material;
-		ns->spawn.colors[MATERIAL_HANDS].color	= GetEquipmentColor(MATERIAL_HANDS);
+		ns->spawn.equipment[MaterialHands]	= item->Material;
+		ns->spawn.colors[MaterialHands].color	= GetEquipmentColor(MaterialHands);
 	}
 	if ((inst = m_inv[SLOT_HEAD]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_HEAD]	= item->Material;
-		ns->spawn.colors[MATERIAL_HEAD].color	= GetEquipmentColor(MATERIAL_HEAD);
+		ns->spawn.equipment[MaterialHead]	= item->Material;
+		ns->spawn.colors[MaterialHead].color	= GetEquipmentColor(MaterialHead);
 	}
 	if ((inst = m_inv[SLOT_ARMS]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_ARMS]	= item->Material;
-		ns->spawn.colors[MATERIAL_ARMS].color	= GetEquipmentColor(MATERIAL_ARMS);
+		ns->spawn.equipment[MaterialArms]	= item->Material;
+		ns->spawn.colors[MaterialArms].color	= GetEquipmentColor(MaterialArms);
 	}
 	if ((inst = m_inv[SLOT_BRACER01]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_BRACER]= item->Material;
-		ns->spawn.colors[MATERIAL_BRACER].color	= GetEquipmentColor(MATERIAL_BRACER);
+		ns->spawn.equipment[MaterialWrist]= item->Material;
+		ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
 	}
 	if ((inst = m_inv[SLOT_BRACER02]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_BRACER]= item->Material;
-		ns->spawn.colors[MATERIAL_BRACER].color	= GetEquipmentColor(MATERIAL_BRACER);
+		ns->spawn.equipment[MaterialWrist]= item->Material;
+		ns->spawn.colors[MaterialWrist].color	= GetEquipmentColor(MaterialWrist);
 	}
 	if ((inst = m_inv[SLOT_CHEST]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_CHEST]	= item->Material;
-		ns->spawn.colors[MATERIAL_CHEST].color	= GetEquipmentColor(MATERIAL_CHEST);
+		ns->spawn.equipment[MaterialChest]	= item->Material;
+		ns->spawn.colors[MaterialChest].color	= GetEquipmentColor(MaterialChest);
 	}
 	if ((inst = m_inv[SLOT_LEGS]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_LEGS]	= item->Material;
-		ns->spawn.colors[MATERIAL_LEGS].color	= GetEquipmentColor(MATERIAL_LEGS);
+		ns->spawn.equipment[MaterialLegs]	= item->Material;
+		ns->spawn.colors[MaterialLegs].color	= GetEquipmentColor(MaterialLegs);
 	}
 	if ((inst = m_inv[SLOT_FEET]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
-		ns->spawn.equipment[MATERIAL_FEET]	= item->Material;
-		ns->spawn.colors[MATERIAL_FEET].color	= GetEquipmentColor(MATERIAL_FEET);
+		ns->spawn.equipment[MaterialFeet]	= item->Material;
+		ns->spawn.colors[MaterialFeet].color	= GetEquipmentColor(MaterialFeet);
 	}
 	if ((inst = m_inv[SLOT_PRIMARY]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
 		if (strlen(item->IDFile) > 2)
-			ns->spawn.equipment[MATERIAL_PRIMARY] = atoi(&item->IDFile[2]);
+			ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
 	}
 	if ((inst = m_inv[SLOT_SECONDARY]) && inst->IsType(ItemClassCommon)) {
 		item = inst->GetItem();
 		if (strlen(item->IDFile) > 2)
-			ns->spawn.equipment[MATERIAL_SECONDARY] = atoi(&item->IDFile[2]);
+			ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
 	}
 
 	//these two may be related to ns->spawn.texture
@@ -2295,7 +2295,7 @@ uint64 Client::GetAllMoney() {
 		(static_cast<uint64>(m_pp.platinum_shared) * 1000)))));
 }
 
-bool Client::CheckIncreaseSkill(SkillType skillid, Mob *against_who, int chancemodi) {
+bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int chancemodi) {
 	if (IsAIControlled()) // no skillups while chamred =p
 		return false;
 	if (skillid > HIGHEST_SKILL)
@@ -2357,24 +2357,24 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 	}
 }
 
-bool Client::HasSkill(SkillType skill_id) const {
+bool Client::HasSkill(SkillUseTypes skill_id) const {
 	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 
-bool Client::CanHaveSkill(SkillType skill_id) const {
+bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
 	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
 	//if you don't have it by max level, then odds are you never will?
 }
 
-uint16 Client::MaxSkill(SkillType skillid, uint16 class_, uint16 level) const {
+uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
 	return(database.GetSkillCap(class_, skillid, level));
 }
 
-uint8 Client::SkillTrainLevel(SkillType skillid, uint16 class_){
+uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_){
 	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
 }
 
-uint16 Client::GetMaxSkillAfterSpecializationRules(SkillType skillid, uint16 maxSkill)
+uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16 maxSkill)
 {
 	uint16 Result = maxSkill;
 
@@ -2384,13 +2384,13 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillType skillid, uint16 max
 
 	uint16 MaxSpecializations = GetAA(aaSecondaryForte) ? 2 : 1;
 
-	if(skillid >= SPECIALIZE_ABJURE && skillid <= SPECIALIZE_EVOCATION)
+	if(skillid >= SkillSpecializeAbjure && skillid <= SkillSpecializeEvocation)
 	{
 		bool HasPrimarySpecSkill = false;
 
 		int NumberOfPrimarySpecSkills = 0;
 
-		for(int i = SPECIALIZE_ABJURE; i <= SPECIALIZE_EVOCATION; ++i)
+		for(int i = SkillSpecializeAbjure; i <= SkillSpecializeEvocation; ++i)
 		{
 			if(m_pp.skills[i] > 50)
 			{
@@ -2447,8 +2447,8 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillType skillid, uint16 max
 				Message(13, "Your spell casting specializations skills have been reset. "
 						"Only %i primary specialization skill is allowed.", MaxSpecializations);
 
-				for(int i = SPECIALIZE_ABJURE; i <= SPECIALIZE_EVOCATION; ++i)
-					SetSkill((SkillType)i, 1);
+				for(int i = SkillSpecializeAbjure; i <= SkillSpecializeEvocation; ++i)
+					SetSkill((SkillUseTypes)i, 1);
 
 				Save();
 
@@ -2461,7 +2461,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillType skillid, uint16 max
 	// This should possibly be handled by bonuses rather than here.
 	switch(skillid)
 	{
-		case TRACKING:
+		case SkillTracking:
 		{
 			Result += ((GetAA(aaAdvancedTracking) * 10) + (GetAA(aaTuneofPursuance) * 10));
 			break;
@@ -2679,13 +2679,13 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					bind_out->type = 1; // Done
 					QueuePacket(outapp);
 					bind_out->type = 0;
-					CheckIncreaseSkill(BIND_WOUND, nullptr, 5);
+					CheckIncreaseSkill(SkillBindWound, nullptr, 5);
 
 					int maxHPBonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound + aabonuses.MaxBindWound;
 
 					int max_percent = 50 + 10 * maxHPBonus;
 
-					if(GetClass() == MONK && GetSkill(BIND_WOUND) > 200) {
+					if(GetClass() == MONK && GetSkill(SkillBindWound) > 200) {
 						max_percent = 70 + 10 * maxHPBonus;
 					}
 
@@ -2699,10 +2699,10 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 						int bindhps = 3;
 
 
-						if (GetSkill(BIND_WOUND) > 200) {
-							bindhps += GetSkill(BIND_WOUND)*4/10;
-						} else if (GetSkill(BIND_WOUND) >= 10) {
-							bindhps += GetSkill(BIND_WOUND)/4;
+						if (GetSkill(SkillBindWound) > 200) {
+							bindhps += GetSkill(SkillBindWound)*4/10;
+						} else if (GetSkill(SkillBindWound) >= 10) {
+							bindhps += GetSkill(SkillBindWound)/4;
 						}
 
 						//Implementation of aaMithanielsBinding is a guess (the multiplier)
@@ -2762,25 +2762,25 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id){
 	const Item_Struct* item = database.GetItem(item_id);
 	if (item && (item->ItemClass==ItemClassCommon)) {
 		if (in_slot==SLOT_HEAD)
-			m_pp.item_material[MATERIAL_HEAD]		= item->Material;
+			m_pp.item_material[MaterialHead]		= item->Material;
 		else if (in_slot==SLOT_CHEST)
-			m_pp.item_material[MATERIAL_CHEST]		= item->Material;
+			m_pp.item_material[MaterialChest]		= item->Material;
 		else if (in_slot==SLOT_ARMS)
-			m_pp.item_material[MATERIAL_ARMS]		= item->Material;
+			m_pp.item_material[MaterialArms]		= item->Material;
 		else if (in_slot==SLOT_BRACER01)
-			m_pp.item_material[MATERIAL_BRACER]		= item->Material;
+			m_pp.item_material[MaterialWrist]		= item->Material;
 		else if (in_slot==SLOT_BRACER02)
-			m_pp.item_material[MATERIAL_BRACER]		= item->Material;
+			m_pp.item_material[MaterialWrist]		= item->Material;
 		else if (in_slot==SLOT_HANDS)
-			m_pp.item_material[MATERIAL_HANDS]		= item->Material;
+			m_pp.item_material[MaterialHands]		= item->Material;
 		else if (in_slot==SLOT_LEGS)
-			m_pp.item_material[MATERIAL_LEGS]		= item->Material;
+			m_pp.item_material[MaterialLegs]		= item->Material;
 		else if (in_slot==SLOT_FEET)
-			m_pp.item_material[MATERIAL_FEET]		= item->Material;
+			m_pp.item_material[MaterialFeet]		= item->Material;
 		else if (in_slot==SLOT_PRIMARY)
-			m_pp.item_material[MATERIAL_PRIMARY]	= atoi(item->IDFile+2);
+			m_pp.item_material[MaterialPrimary]	= atoi(item->IDFile+2);
 		else if (in_slot==SLOT_SECONDARY)
-			m_pp.item_material[MATERIAL_SECONDARY]	= atoi(item->IDFile+2);
+			m_pp.item_material[MaterialSecondary]	= atoi(item->IDFile+2);
 	}
 }
 
@@ -2963,25 +2963,25 @@ void Client::SetTint(int16 in_slot, uint32 color) {
 // Still need to reconcile bracer01 versus bracer02
 void Client::SetTint(int16 in_slot, Color_Struct& color) {
 	if (in_slot==SLOT_HEAD)
-		m_pp.item_tint[MATERIAL_HEAD].color=color.color;
+		m_pp.item_tint[MaterialHead].color=color.color;
 	else if (in_slot==SLOT_ARMS)
-		m_pp.item_tint[MATERIAL_ARMS].color=color.color;
+		m_pp.item_tint[MaterialArms].color=color.color;
 	else if (in_slot==SLOT_BRACER01)
-		m_pp.item_tint[MATERIAL_BRACER].color=color.color;
+		m_pp.item_tint[MaterialWrist].color=color.color;
 	else if (in_slot==SLOT_BRACER02)
-		m_pp.item_tint[MATERIAL_BRACER].color=color.color;
+		m_pp.item_tint[MaterialWrist].color=color.color;
 	else if (in_slot==SLOT_HANDS)
-		m_pp.item_tint[MATERIAL_HANDS].color=color.color;
+		m_pp.item_tint[MaterialHands].color=color.color;
 	else if (in_slot==SLOT_PRIMARY)
-		m_pp.item_tint[MATERIAL_PRIMARY].color=color.color;
+		m_pp.item_tint[MaterialPrimary].color=color.color;
 	else if (in_slot==SLOT_SECONDARY)
-		m_pp.item_tint[MATERIAL_SECONDARY].color=color.color;
+		m_pp.item_tint[MaterialSecondary].color=color.color;
 	else if (in_slot==SLOT_CHEST)
-		m_pp.item_tint[MATERIAL_CHEST].color=color.color;
+		m_pp.item_tint[MaterialChest].color=color.color;
 	else if (in_slot==SLOT_LEGS)
-		m_pp.item_tint[MATERIAL_LEGS].color=color.color;
+		m_pp.item_tint[MaterialLegs].color=color.color;
 	else if (in_slot==SLOT_FEET)
-		m_pp.item_tint[MATERIAL_FEET].color=color.color;
+		m_pp.item_tint[MaterialFeet].color=color.color;
 }
 
 void Client::SetHideMe(bool flag)
@@ -3050,25 +3050,25 @@ uint8 Client::SlotConvert(uint8 slot,bool bracer){
 	if(bracer)
 		return SLOT_BRACER02;
 	switch(slot){
-		case MATERIAL_HEAD:
+		case MaterialHead:
 			slot2=SLOT_HEAD;
 			break;
-		case MATERIAL_CHEST:
+		case MaterialChest:
 			slot2=SLOT_CHEST;
 			break;
-		case MATERIAL_ARMS:
+		case MaterialArms:
 			slot2=SLOT_ARMS;
 			break;
-		case MATERIAL_BRACER:
+		case MaterialWrist:
 			slot2=SLOT_BRACER01;
 			break;
-		case MATERIAL_HANDS:
+		case MaterialHands:
 			slot2=SLOT_HANDS;
 			break;
-		case MATERIAL_LEGS:
+		case MaterialLegs:
 			slot2=SLOT_LEGS;
 			break;
-		case MATERIAL_FEET:
+		case MaterialFeet:
 			slot2=SLOT_FEET;
 			break;
 		}
@@ -3079,25 +3079,25 @@ uint8 Client::SlotConvert2(uint8 slot){
 	uint8 slot2=0;
 	switch(slot){
 		case SLOT_HEAD:
-			slot2=MATERIAL_HEAD;
+			slot2=MaterialHead;
 			break;
 		case SLOT_CHEST:
-			slot2=MATERIAL_CHEST;
+			slot2=MaterialChest;
 			break;
 		case SLOT_ARMS:
-			slot2=MATERIAL_ARMS;
+			slot2=MaterialArms;
 			break;
 		case SLOT_BRACER01:
-			slot2=MATERIAL_BRACER;
+			slot2=MaterialWrist;
 			break;
 		case SLOT_HANDS:
-			slot2=MATERIAL_HANDS;
+			slot2=MaterialHands;
 			break;
 		case SLOT_LEGS:
-			slot2=MATERIAL_LEGS;
+			slot2=MaterialLegs;
 			break;
 		case SLOT_FEET:
-			slot2=MATERIAL_FEET;
+			slot2=MaterialFeet;
 			break;
 		}
 	return slot2;
@@ -3700,7 +3700,7 @@ void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_
 		pick_out->coin = amt;
 		pick_out->from = GetID();
 		pick_out->to = from->GetID();
-		pick_out->myskill = GetSkill(PICK_POCKETS);
+		pick_out->myskill = GetSkill(SkillPickPockets);
 
 		if((type >= PickPocketPlatinum) && (type <= PickPocketCopper) && (amt == 0))
 			type = PickPocketFailed;
@@ -3973,11 +3973,11 @@ void Client::UpdateLFP() {
 
 uint16 Client::GetPrimarySkillValue()
 {
-	SkillType skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
+	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
 	bool equiped = m_inv.GetItem(13);
 
 	if (!equiped)
-		skill = HAND_TO_HAND;
+		skill = SkillHandtoHand;
 
 	else {
 
@@ -3985,44 +3985,44 @@ uint16 Client::GetPrimarySkillValue()
 
 		switch (type)
 		{
-			case ItemType1HS: // 1H Slashing
+			case ItemType1HSlash: // 1H Slashing
 			{
-				skill = _1H_SLASHING;
+				skill = Skill1HSlashing;
 				break;
 			}
-			case ItemType2HS: // 2H Slashing
+			case ItemType2HSlash: // 2H Slashing
 			{
-				skill = _2H_SLASHING;
+				skill = Skill2HSlashing;
 				break;
 			}
-			case ItemTypePierce: // Piercing
+			case ItemType1HPiercing: // Piercing
 			{
-				skill = PIERCING;
+				skill = Skill1HPiercing;
 				break;
 			}
-			case ItemType1HB: // 1H Blunt
+			case ItemType1HBlunt: // 1H Blunt
 			{
-				skill = _1H_BLUNT;
+				skill = Skill1HBlunt;
 				break;
 			}
-			case ItemType2HB: // 2H Blunt
+			case ItemType2HBlunt: // 2H Blunt
 			{
-				skill = _2H_BLUNT;
+				skill = Skill2HBlunt;
 				break;
 			}
-			case ItemType2HPierce: // 2H Piercing
+			case ItemType2HPiercing: // 2H Piercing
 			{
-				skill = PIERCING;
+				skill = Skill1HPiercing; // change to Skill2HPiercing once activated
 				break;
 			}
-			case ItemTypeHand2Hand: // Hand to Hand
+			case ItemTypeMartial: // Hand to Hand
 			{
-				skill = HAND_TO_HAND;
+				skill = SkillHandtoHand;
 				break;
 			}
 			default: // All other types default to Hand to Hand
 			{
-				skill = HAND_TO_HAND;
+				skill = SkillHandtoHand;
 				break;
 			}
 		}
@@ -4037,7 +4037,7 @@ uint16 Client::GetTotalATK()
 	uint16 WornCap = itembonuses.ATK;
 
 	if(IsClient()) {
-		AttackRating = ((WornCap * 1.342) + (GetSkill(OFFENSE) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
+		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
 		AttackRating += aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 
 		if (AttackRating < 10)
@@ -4055,7 +4055,7 @@ uint16 Client::GetATKRating()
 {
 	uint16 AttackRating = 0;
 	if(IsClient()) {
-		AttackRating = (GetSkill(OFFENSE) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
+		AttackRating = (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
 
 		if (AttackRating < 10)
 			AttackRating = 10;
@@ -4406,7 +4406,7 @@ void Client::HandleLDoNOpen(NPC *target)
 					AddEXP(target->GetLevel()*target->GetLevel()*2625/10, GetLevelCon(target->GetLevel()));
 				}
 			}
-			target->Death(this, 1, SPELL_UNKNOWN, HAND_TO_HAND);
+			target->Death(this, 1, SPELL_UNKNOWN, SkillHandtoHand);
 		}
 	}
 }
@@ -4724,8 +4724,8 @@ void Client::ShowSkillsWindow()
 	const char *WindowTitle = "Skills";
 	std::string WindowText;
 	// using a map for easy alphabetizing of the skills list
-	std::map<std::string, SkillType> Skills;
-	std::map<std::string, SkillType>::iterator it;
+	std::map<std::string, SkillUseTypes> Skills;
+	std::map<std::string, SkillUseTypes>::iterator it;
 
 	// this list of names must keep the same order as that in common/skills.h
 	const char* SkillName[] = {"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration","Alteration","Apply Poison","Archery",
@@ -4737,7 +4737,7 @@ void Client::ShowSkillsWindow()
 		"Alchemy","Baking","Tailoring","Sense Traps","Blacksmithing","Fletching","Brewing","Alcohol Tolerance","Begging","Jewelry Making",
 		"Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy"};
 	for(int i = 0; i <= (int)HIGHEST_SKILL; i++)
-		Skills[SkillName[i]] = (SkillType)i;
+		Skills[SkillName[i]] = (SkillUseTypes)i;
 
 	// print out all available skills
 	for(it = Skills.begin(); it != Skills.end(); it++) {
@@ -6122,7 +6122,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->drakkin_details = GetDrakkinDetails();
 	made_npc->d_meele_texture1 = GetEquipmentMaterial(7);
 	made_npc->d_meele_texture2 = GetEquipmentMaterial(8);
-	for (int i = 0; i < MAX_MATERIALS; i++)	{
+	for (int i = 0; i < _MaterialCount; i++)	{
 		made_npc->armor_tint[i] = GetEquipmentColor(i);
 	}
 	made_npc->loottable_id = 0;

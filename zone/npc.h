@@ -79,8 +79,8 @@ public:
 	virtual ~NPC();
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
+	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
+	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
 	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
@@ -117,7 +117,7 @@ public:
 	int32 SpellFocusHeal;
 
 	virtual void SetTarget(Mob* mob);
-	virtual uint16 GetSkill(SkillType skill_num) const { if (skill_num <= HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
+	virtual uint16 GetSkill(SkillUseTypes skill_num) const { if (skill_num <= HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
 
 	void CalcItemBonuses(StatBonuses *newbon);
 	virtual void CalcBonuses();
@@ -352,7 +352,7 @@ public:
     uint32 	GetSpawnKillCount();
     int 	GetScore();
     void 	mod_prespawn(Spawn2 *sp);
-	int 	mod_npc_damage(int damage, SkillType skillinuse, int hand, const Item_Struct* weapon, Mob* other);
+	int 	mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const Item_Struct* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
 

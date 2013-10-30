@@ -59,7 +59,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 
 	int r;
 	for(r = 0; r <= HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(),(SkillType)r,GetLevel());
+		skills[r] = database.GetSkillCap(GetClass(),(SkillUseTypes)r,GetLevel());
 	}
 
 	GetMercSize();
@@ -983,8 +983,8 @@ int32 Merc::CalcBaseManaRegen()
 	int32 regen = 0;
 	if (IsSitting())
 	{
-		if(HasSkill(MEDITATE))
-			regen = (((GetSkill(MEDITATE) / 10) + (clevel - (clevel / 4))) / 4) + 4;
+		if(HasSkill(SkillMeditate))
+			regen = (((GetSkill(SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
 		else
 			regen = 2;
 	}
@@ -1000,9 +1000,9 @@ int32 Merc::CalcManaRegen()
 	if (IsSitting())
 	{
 		BuffFadeBySitModifier();
-		if(HasSkill(MEDITATE)) {
+		if(HasSkill(SkillMeditate)) {
 			this->_medding = true;
-			regen = ((GetSkill(MEDITATE) / 10) + mana_regen);
+			regen = ((GetSkill(SkillMeditate) / 10) + mana_regen);
 			regen += spellbonuses.ManaRegen + itembonuses.ManaRegen;
 		}
 		else
@@ -1223,16 +1223,16 @@ void Merc::CalcRestState() {
 		RestRegenEndurance = (GetMaxEndurance() * RuleI(Character, RestRegenPercent) / 100);
 }
 
-bool Merc::HasSkill(SkillType skill_id) const {
+bool Merc::HasSkill(SkillUseTypes skill_id) const {
 	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 
-bool Merc::CanHaveSkill(SkillType skill_id) const {
+bool Merc::CanHaveSkill(SkillUseTypes skill_id) const {
 	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
 	//if you don't have it by max level, then odds are you never will?
 }
 
-uint16 Merc::MaxSkill(SkillType skillid, uint16 class_, uint16 level) const {
+uint16 Merc::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
 	return(database.GetSkillCap(class_, skillid, level));
 }
 
@@ -1715,11 +1715,11 @@ void Merc::AI_Process() {
 						int weapontype = 0; // No weapon type
 						bool bIsFist = true;
 
-						if(bIsFist || ((weapontype != ItemType2HS) && (weapontype != ItemType2HPierce) && (weapontype != ItemType2HB))) {
+						if(bIsFist || ((weapontype != ItemType2HSlash) && (weapontype != ItemType2HPiercing) && (weapontype != ItemType2HBlunt))) {
 							float DualWieldProbability = 0.0f;
 
 							int16 Ambidexterity = aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
-							DualWieldProbability = (GetSkill(DUAL_WIELD) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
+							DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
 							int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 							DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
@@ -2403,7 +2403,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 							continue;
 						}
 
-						if(spells[selectedMercSpell.spellid].skill == BACKSTAB && spells[selectedMercSpell.spellid].targettype == ST_Self) {
+						if(spells[selectedMercSpell.spellid].skill == SkillBackstab && spells[selectedMercSpell.spellid].targettype == ST_Self) {
 							if(!hidden) {
 								continue;
 							}
@@ -4658,7 +4658,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						dmg = -5;
 					}
 					else{
-						if(target->CheckHitChance(this, KICK, 0)) {
+						if(target->CheckHitChance(this, SkillKick, 0)) {
 							if(RuleB(Combat, UseIntervalAC))
 								dmg = GetKickDamage();
 							else
@@ -4668,7 +4668,7 @@ void Merc::DoClassAttacks(Mob *target) {
 					}
 
 					reuse = KickReuseTime * 1000;
-					DoSpecialAttackDamage(target, KICK, dmg, 1, -1, reuse);
+					DoSpecialAttackDamage(target, SkillKick, dmg, 1, -1, reuse);
 					did_attack = true;
 				}
 				else
@@ -4680,7 +4680,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						dmg = -5;
 					}
 					else{
-						if(target->CheckHitChance(this, BASH, 0)) {
+						if(target->CheckHitChance(this, SkillBash, 0)) {
 							if(RuleB(Combat, UseIntervalAC))
 								dmg = GetBashDamage();
 							else
@@ -4689,7 +4689,7 @@ void Merc::DoClassAttacks(Mob *target) {
 					}
 
 					reuse = BashReuseTime * 1000;
-					DoSpecialAttackDamage(target, BASH, dmg, 1, -1, reuse);
+					DoSpecialAttackDamage(target, SkillBash, dmg, 1, -1, reuse);
 					did_attack = true;
 				}
 			}
@@ -4711,7 +4711,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 	return NPC::Attack(other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts);
 }
 
-void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)
+void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)
 {
 	if(IsDead() || IsCorpse())
 		return;
@@ -4752,7 +4752,7 @@ Mob* Merc::GetOwnerOrSelf() {
 	return Result;
 }
 
-bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill)
+bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack_skill)
 {
 	if(!NPC::Death(killerMob, damage, spell, attack_skill))
 		return false;

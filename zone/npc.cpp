@@ -266,7 +266,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	//give NPCs skill values...
 	int r;
 	for(r = 0; r <= HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(),(SkillType)r,moblevel);
+		skills[r] = database.GetSkillCap(GetClass(),(SkillUseTypes)r,moblevel);
 	}
 
 	if(d->trap_template > 0)
@@ -444,7 +444,7 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 			return;
 		}
 		else if (item->item_id == item_id && item->equipSlot == slot && quantity >= 1) {
-			//cout<<"NPC::RemoveItem"<<" equipSlot:"<<iterator.GetData()->equipSlot<<" quantity:"<< quantity<<endl;
+			//std::cout<<"NPC::RemoveItem"<<" equipSlot:"<<iterator.GetData()->equipSlot<<" quantity:"<< quantity<<std::endl; // iterator undefined [CODEBUG]
 			if (item->charges <= quantity)
 				itemlist.erase(cur);
 			else
@@ -1198,7 +1198,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 
 int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
-	if (material_slot >= MAX_MATERIALS)
+	if (material_slot >= _MaterialCount)
 		return 0;
 
 	int inv_slot = Inventory::CalcSlotFromMaterial(material_slot);
@@ -1206,13 +1206,13 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 		return 0;
 	if(equipment[inv_slot] == 0) {
 		switch(material_slot) {
-		case MATERIAL_HEAD:
+		case MaterialHead:
 			return helmtexture;
-		case MATERIAL_CHEST:
+		case MaterialChest:
 			return texture;
-		case MATERIAL_PRIMARY:
+		case MaterialPrimary:
 			return d_meele_texture1;
-		case MATERIAL_SECONDARY:
+		case MaterialSecondary:
 			return d_meele_texture2;
 		default:
 			//they have nothing in the slot, and its not a special slot... they get nothing.
@@ -1240,7 +1240,7 @@ uint32 NPC::GetMaxDamage(uint8 tlevel)
 
 void NPC::PickPocket(Client* thief) {
 
-	thief->CheckIncreaseSkill(PICK_POCKETS, nullptr, 5);
+	thief->CheckIncreaseSkill(SkillPickPockets, nullptr, 5);
 
 	//make sure were allowed to targte them:
 	int olevel = GetLevel();
@@ -1259,7 +1259,7 @@ void NPC::PickPocket(Client* thief) {
 		return;
 	}
 
-	int steal_skill = thief->GetSkill(PICK_POCKETS);
+	int steal_skill = thief->GetSkill(SkillPickPockets);
 	int stealchance = steal_skill*100/(5*olevel+5);
 	ItemInst* inst = 0;
 	int x = 0;

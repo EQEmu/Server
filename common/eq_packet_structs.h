@@ -270,7 +270,7 @@ struct Spawn_Struct {
 				/*0225*/ uint32 equip_primary;		// Equipment: Primary Visual
 				/*0229*/ uint32 equip_secondary;	// Equipment: Secondary Visual
 			} equip;
-			/*0197*/ uint32 equipment[MAX_MATERIALS]; // Array elements correspond to struct equipment above
+			/*0197*/ uint32 equipment[_MaterialCount]; // Array elements correspond to struct equipment above
 		 };
 /*0233*/ float	runspeed;		// Speed when running
 /*0036*/ uint8	afk;			// 0=no, 1=afk
@@ -316,7 +316,7 @@ union
 				/*0376*/ Color_Struct color_primary;	// Color of primary item
 				/*0380*/ Color_Struct color_secondary;	// Color of secondary item
 			} equipment_colors;
-			/*0348*/ Color_Struct colors[MAX_MATERIALS]; // Array elements correspond to struct equipment_colors above
+			/*0348*/ Color_Struct colors[_MaterialCount]; // Array elements correspond to struct equipment_colors above
 		 };
 /*0384*/ uint8	lfg;			// 0=off, 1=lfg on
 /*0385*/
@@ -787,7 +787,7 @@ struct SuspendedMinion_Struct
 	/*002*/	uint32	HP;
 	/*006*/	uint32	Mana;
 	/*010*/	SpellBuff_Struct	Buffs[BUFF_COUNT];
-	/*510*/	uint32	Items[MAX_MATERIALS];
+	/*510*/	uint32	Items[_MaterialCount];
 	/*546*/	char	Name[64];
 	/*610*/
 };
@@ -802,7 +802,7 @@ struct SuspendedMinion_Struct
 static const uint32 MAX_PP_LANGUAGE		= 28;
 static const uint32 MAX_PP_SPELLBOOK	= 480;	// Increased to 480 to support SoF
 static const uint32 MAX_PP_MEMSPELL		= 9;
-static const uint32 MAX_PP_SKILL		= 75;
+static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
@@ -892,9 +892,9 @@ struct PlayerProfile_Struct
 /*0304*/	uint8				ability_time_minutes;
 /*0305*/	uint8				ability_time_hours;	//place holder
 /*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
-/*0312*/	uint32				item_material[MAX_MATERIALS];	// Item texture/material of worn/held items
+/*0312*/	uint32				item_material[_MaterialCount];	// Item texture/material of worn/held items
 /*0348*/	uint8				unknown0348[44];
-/*0392*/	Color_Struct		item_tint[MAX_MATERIALS];
+/*0392*/	Color_Struct		item_tint[_MaterialCount];
 /*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
 /*2348*/	float				unknown2384;		//seen ~128, ~47
 /*2352*/	char				servername[32];		// length probably not right
@@ -940,9 +940,9 @@ struct PlayerProfile_Struct
 /*4760*/	int32				silver_cursor;		// Silver on cursor
 /*4764*/	int32				copper_cursor;		// Copper on cursor
 /*4768*/	int32				platinum_shared;	// Platinum shared between characters
-/*4772*/	uint8				unknown4808[24];	// @bp unknown skills?
-/*4796*/	uint32				skills[MAX_PP_SKILL];
-/*5096*/	uint8				unknown5132[284];	// @bp unknown skills?
+/*4772*/	uint8				unknown4808[24];
+/*4796*/	uint32				skills[MAX_PP_SKILL];	// [400] List of skills	// 100 dword buffer
+/*5196*/	uint8				unknown5132[184];
 /*5380*/	uint32				pvp2;				//
 /*5384*/	uint32				unknown5420;		//
 /*5388*/	uint32				pvptype;			//
@@ -2013,7 +2013,7 @@ struct Illusion_Struct { //size: 256 - SoF
 /*092*/	uint32	drakkin_heritage;	//
 /*096*/	uint32	drakkin_tattoo;		//
 /*100*/	uint32	drakkin_details;	//
-/*104*/	uint32	armor_tint[MAX_MATERIALS];	//
+/*104*/	uint32	armor_tint[_MaterialCount];	//
 /*140*/	uint8	eyecolor1;		// Field Not Identified in any Illusion Struct
 /*141*/	uint8	eyecolor2;		// Field Not Identified in any Illusion Struct
 /*142*/	uint8	unknown138[114];	//
@@ -3257,7 +3257,7 @@ struct DyeStruct
 			struct Color_Struct secondary;	// or this
 		}
 		dyes;
-		struct Color_Struct dye[MAX_MATERIALS];
+		struct Color_Struct dye[_MaterialCount];
 	};
 };
 

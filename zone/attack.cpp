@@ -53,7 +53,7 @@ extern WorldServer worldserver;
 extern EntityList entity_list;
 extern Zone* zone;
 
-bool Mob::AttackAnimation(SkillType &skillinuse, int Hand, const ItemInst* weapon)
+bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon)
 {
 	// Determine animation
 	int type = 0;
@@ -64,51 +64,51 @@ bool Mob::AttackAnimation(SkillType &skillinuse, int Hand, const ItemInst* weapo
 #endif
 		switch (item->ItemType)
 		{
-			case ItemType1HS: // 1H Slashing
+			case ItemType1HSlash: // 1H Slashing
 			{
-				skillinuse = _1H_SLASHING;
+				skillinuse = Skill1HSlashing;
 				type = anim1HWeapon;
 				break;
 			}
-			case ItemType2HS: // 2H Slashing
+			case ItemType2HSlash: // 2H Slashing
 			{
-				skillinuse = _2H_SLASHING;
+				skillinuse = Skill2HSlashing;
 				type = anim2HSlashing;
 				break;
 			}
-			case ItemTypePierce: // Piercing
+			case ItemType1HPiercing: // Piercing
 			{
-				skillinuse = PIERCING;
+				skillinuse = Skill1HPiercing;
 				type = animPiercing;
 				break;
 			}
-			case ItemType1HB: // 1H Blunt
+			case ItemType1HBlunt: // 1H Blunt
 			{
-				skillinuse = _1H_BLUNT;
+				skillinuse = Skill1HBlunt;
 				type = anim1HWeapon;
 				break;
 			}
-			case ItemType2HB: // 2H Blunt
+			case ItemType2HBlunt: // 2H Blunt
 			{
-				skillinuse = _2H_BLUNT;
+				skillinuse = Skill2HBlunt;
 				type = anim2HWeapon;
 				break;
 			}
-			case ItemType2HPierce: // 2H Piercing
+			case ItemType2HPiercing: // 2H Piercing
 			{
-				skillinuse = PIERCING;
+				skillinuse = Skill1HPiercing; // change to Skill2HPiercing once activated
 				type = anim2HWeapon;
 				break;
 			}
-			case ItemTypeHand2Hand:
+			case ItemTypeMartial:
 			{
-				skillinuse = HAND_TO_HAND;
+				skillinuse = SkillHandtoHand;
 				type = animHand2Hand;
 				break;
 			}
 			default:
 			{
-				skillinuse = HAND_TO_HAND;
+				skillinuse = SkillHandtoHand;
 				type = animHand2Hand;
 				break;
 			}
@@ -118,37 +118,37 @@ bool Mob::AttackAnimation(SkillType &skillinuse, int Hand, const ItemInst* weapo
 
 		switch (skillinuse)
 		{
-			case _1H_SLASHING: // 1H Slashing
+			case Skill1HSlashing: // 1H Slashing
 			{
 				type = anim1HWeapon;
 				break;
 			}
-			case _2H_SLASHING: // 2H Slashing
+			case Skill2HSlashing: // 2H Slashing
 			{
 				type = anim2HSlashing;
 				break;
 			}
-			case PIERCING: // Piercing
+			case Skill1HPiercing: // Piercing
 			{
 				type = animPiercing;
 				break;
 			}
-			case _1H_BLUNT: // 1H Blunt
+			case Skill1HBlunt: // 1H Blunt
 			{
 				type = anim1HWeapon;
 				break;
 			}
-			case _2H_BLUNT: // 2H Blunt
+			case Skill2HBlunt: // 2H Blunt
 			{
 				type = anim2HWeapon;
 				break;
 			}
-			case 99: // 2H Piercing
+			case 99: // 2H Piercing // change to Skill2HPiercing once activated
 			{
 				type = anim2HWeapon;
 				break;
 			}
-			case HAND_TO_HAND:
+			case SkillHandtoHand:
 			{
 				type = animHand2Hand;
 				break;
@@ -161,7 +161,7 @@ bool Mob::AttackAnimation(SkillType &skillinuse, int Hand, const ItemInst* weapo
 		}// switch
 	}
 	else {
-		skillinuse = HAND_TO_HAND;
+		skillinuse = SkillHandtoHand;
 		type = animHand2Hand;
 	}
 
@@ -175,7 +175,7 @@ bool Mob::AttackAnimation(SkillType &skillinuse, int Hand, const ItemInst* weapo
 
 // called when a mob is attacked, does the checks to see if it's a hit
 // and does other mitigation checks. 'this' is the mob being attacked.
-bool Mob::CheckHitChance(Mob* other, SkillType skillinuse, int Hand, int16 chance_mod)
+bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 chance_mod)
 {
 /*/
 		//Reworked a lot of this code to achieve better balance at higher levels.
@@ -254,7 +254,7 @@ bool Mob::CheckHitChance(Mob* other, SkillType skillinuse, int Hand, int16 chanc
 
 	if(defender->IsClient())
 	{
-		chancetohit += (RuleR(Combat,WeaponSkillFalloff) * (defender->CastToClient()->MaxSkill(DEFENSE) - defender->GetSkill(DEFENSE)));
+		chancetohit += (RuleR(Combat,WeaponSkillFalloff) * (defender->CastToClient()->MaxSkill(SkillDefense) - defender->GetSkill(SkillDefense)));
 		mlog(COMBAT__TOHIT, "Chance to hit after weapon falloff calc (defense) %.2f", chancetohit);
 	}
 
@@ -314,7 +314,7 @@ bool Mob::CheckHitChance(Mob* other, SkillType skillinuse, int Hand, int16 chanc
 
 	chancetohit += ((chancetohit * hitBonus) / 100.0f);
 
-	if(skillinuse == ARCHERY)
+	if(skillinuse == SkillArchery)
 		chancetohit -= (chancetohit * RuleR(Combat, ArcheryHitPenalty)) / 100.0f;
 
 	chancetohit = mod_hit_chance(chancetohit, skillinuse, attacker);
@@ -389,9 +389,9 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	if (CanRiposte && damage > 0 && CanThisClassRiposte() && !other->BehindMob(this, other->GetX(), other->GetY()))
 	{
 		riposte_chance = (100.0f + (float)defender->aabonuses.RiposteChance + (float)defender->spellbonuses.RiposteChance + (float)defender->itembonuses.RiposteChance) / 100.0f;
-		skill = GetSkill(RIPOSTE);
+		skill = GetSkill(SkillRiposte);
 		if (IsClient()) {
-			CastToClient()->CheckIncreaseSkill(RIPOSTE, other, -10);
+			CastToClient()->CheckIncreaseSkill(SkillRiposte, other, -10);
 		}
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
@@ -429,9 +429,9 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	float block_chance = 0.0f;
 	if (damage > 0 && CanThisClassBlock() && (!other->BehindMob(this, other->GetX(), other->GetY()) || bBlockFromRear)) {
 		block_chance = (100.0f + (float)spellbonuses.IncreaseBlockChance + (float)itembonuses.IncreaseBlockChance) / 100.0f;
-		skill = CastToClient()->GetSkill(BLOCKSKILL);
+		skill = CastToClient()->GetSkill(SkillBlock);
 		if (IsClient()) {
-			CastToClient()->CheckIncreaseSkill(BLOCKSKILL, other, -10);
+			CastToClient()->CheckIncreaseSkill(SkillBlock, other, -10);
 		}
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
@@ -465,7 +465,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		if(equiped2) {
 			uint8 TwoHandBlunt = CastToClient()->m_inv.GetItem(13)->GetItem()->ItemType;
 			float bonusStaffBlock = 0.0f;
-			if(TwoHandBlunt == ItemType2HB) {
+			if(TwoHandBlunt == ItemType2HBlunt) {
 
 				bonusStaffBlock = aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock;
 				RollTable[1] += bonusStaffBlock;
@@ -480,9 +480,9 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	if (damage > 0 && CanThisClassParry() && !other->BehindMob(this, other->GetX(), other->GetY()))
 	{
 		parry_chance = (100.0f + (float)defender->spellbonuses.ParryChance + (float)defender->itembonuses.ParryChance) / 100.0f;
-		skill = CastToClient()->GetSkill(PARRY);
+		skill = CastToClient()->GetSkill(SkillParry);
 		if (IsClient()) {
-			CastToClient()->CheckIncreaseSkill(PARRY, other, -10);
+			CastToClient()->CheckIncreaseSkill(SkillParry, other, -10);
 		}
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
@@ -503,9 +503,9 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	if (damage > 0 && CanThisClassDodge() && !other->BehindMob(this, other->GetX(), other->GetY()))
 	{
 		dodge_chance = (100.0f + (float)defender->spellbonuses.DodgeChance + (float)defender->itembonuses.DodgeChance) / 100.0f;
-		skill = CastToClient()->GetSkill(DODGE);
+		skill = CastToClient()->GetSkill(SkillDodge);
 		if (IsClient()) {
-			CastToClient()->CheckIncreaseSkill(DODGE, other, -10);
+			CastToClient()->CheckIncreaseSkill(SkillDodge, other, -10);
 		}
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
@@ -644,11 +644,11 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		mitigation_rating = 0.0;
 		if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER)
 		{
-			mitigation_rating = ((GetSkill(DEFENSE) + itembonuses.HeroicAGI/10) / 4.0) + armor + 1;
+			mitigation_rating = ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10) / 4.0) + armor + 1;
 		}
 		else
 		{
-			mitigation_rating = ((GetSkill(DEFENSE) + itembonuses.HeroicAGI/10) / 3.0) + (armor * 1.333333) + 1;
+			mitigation_rating = ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10) / 3.0) + (armor * 1.333333) + 1;
 		}
 		mitigation_rating *= 0.847;
 
@@ -656,11 +656,11 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 
 		if(attacker->IsClient())
 		{
-			attack_rating = (attacker->CastToClient()->CalcATK() + ((attacker->GetSTR()-66) * 0.9) + (attacker->GetSkill(OFFENSE)*1.345));
+			attack_rating = (attacker->CastToClient()->CalcATK() + ((attacker->GetSTR()-66) * 0.9) + (attacker->GetSkill(SkillOffense)*1.345));
 		}
 		else
 		{
-			attack_rating = (attacker->GetATK() + (attacker->GetSkill(OFFENSE)*1.345) + ((attacker->GetSTR()-66) * 0.9));
+			attack_rating = (attacker->GetATK() + (attacker->GetSkill(SkillOffense)*1.345) + ((attacker->GetSTR()-66) * 0.9));
 		}
 
 		attack_rating = attacker->mod_attack_rating(attack_rating, this);
@@ -1156,7 +1156,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
-	SkillType skillinuse;
+	SkillUseTypes skillinuse;
 	AttackAnimation(skillinuse, Hand, weapon);
 	mlog(COMBAT__ATTACKS, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, skillinuse);
 
@@ -1192,7 +1192,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			max_hit = (RuleI(Combat, HitCapPre20));
 
 		CheckIncreaseSkill(skillinuse, other, -15);
-		CheckIncreaseSkill(OFFENSE, other, -15);
+		CheckIncreaseSkill(SkillOffense, other, -15);
 
 
 		// ***************************************************************
@@ -1385,7 +1385,7 @@ void Mob::Heal()
 	SendHPUpdate();
 }
 
-void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)
+void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)
 {
 	if(dead || IsCorpse())
 		return;
@@ -1407,7 +1407,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_
 	//Don't do PvP mitigation if the caster is damaging himself
 	if(other && other->IsClient() && (other != this) && damage > 0) {
 		int PvPMitigation = 100;
-		if(attack_skill == ARCHERY)
+		if(attack_skill == SkillArchery)
 			PvPMitigation = 80;
 		else
 			PvPMitigation = 67;
@@ -1423,11 +1423,11 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_
 	if (damage > 0) {
 
 		if (spell_id == SPELL_UNKNOWN)
-			CheckIncreaseSkill(DEFENSE, other, -15);
+			CheckIncreaseSkill(SkillDefense, other, -15);
 	}
 }
 
-bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill)
+bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack_skill)
 {
 	if(!ClientFinishedLoading())
 		return false;
@@ -1743,13 +1743,13 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	FaceTarget(GetTarget());
 
-	SkillType skillinuse = HAND_TO_HAND;
+	SkillUseTypes skillinuse = SkillHandtoHand;
 	if (Hand == 13) {
-		skillinuse = static_cast<SkillType>(GetPrimSkill());
+		skillinuse = static_cast<SkillUseTypes>(GetPrimSkill());
 		OffHandAtk(false);
 	}
 	if (Hand == 14) {
-		skillinuse = static_cast<SkillType>(GetSecSkill());
+		skillinuse = static_cast<SkillUseTypes>(GetSecSkill());
 		OffHandAtk(true);
 	}
 
@@ -1771,31 +1771,33 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		}
 
 		switch(weapon->ItemType){
-			case ItemType1HS:
-				skillinuse = _1H_SLASHING;
+			case ItemType1HSlash:
+				skillinuse = Skill1HSlashing;
 				break;
-			case ItemType2HS:
-				skillinuse = _2H_SLASHING;
+			case ItemType2HSlash:
+				skillinuse = Skill2HSlashing;
 				break;
-			case ItemTypePierce:
-			case ItemType2HPierce:
-				skillinuse = PIERCING;
+			case ItemType1HPiercing:
+				//skillinuse = Skill1HPiercing;
+				//break;
+			case ItemType2HPiercing:
+				skillinuse = Skill1HPiercing; // change to Skill2HPiercing once activated
 				break;
-			case ItemType1HB:
-				skillinuse = _1H_BLUNT;
+			case ItemType1HBlunt:
+				skillinuse = Skill1HBlunt;
 				break;
-			case ItemType2HB:
-				skillinuse = _2H_BLUNT;
+			case ItemType2HBlunt:
+				skillinuse = Skill2HBlunt;
 				break;
 			case ItemTypeBow:
-				skillinuse = ARCHERY;
+				skillinuse = SkillArchery;
 				break;
-			case ItemTypeThrowing:
-			case ItemTypeThrowingv2:
-				skillinuse = THROWING;
+			case ItemTypeLargeThrowing:
+			case ItemTypeSmallThrowing:
+				skillinuse = SkillThrowing;
 				break;
 			default:
-				skillinuse = HAND_TO_HAND;
+				skillinuse = SkillHandtoHand;
 				break;
 		}
 	}
@@ -1807,9 +1809,10 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	ItemInst weapon_inst(weapon, charges);
 	AttackAnimation(skillinuse, Hand, &weapon_inst);
 
+	// Remove this once Skill2HPiercing is activated
 	//Work-around for there being no 2HP skill - We use 99 for the 2HB animation and 36 for pierce messages
 	if(skillinuse == 99)
-		skillinuse = static_cast<SkillType>(36);
+		skillinuse = static_cast<SkillUseTypes>(36);
 
 	//basically "if not immune" then do the attack
 	if((weapon_damage) > 0) {
@@ -1996,7 +1999,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		return false;
 }
 
-void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic) {
+void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic) {
 	if(spell_id==0)
 		spell_id = SPELL_UNKNOWN;
 
@@ -2039,7 +2042,7 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillType attack_ski
 	}
 }
 
-bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillType attack_skill) {
+bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack_skill) {
 	mlog(COMBAT__HITS, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob->GetName(), damage, spell, attack_skill);
 	
 	Mob *oos = nullptr;
@@ -2600,7 +2603,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 			}
 			DS -= DS * attacker->itembonuses.DSMitigation / 100;
 		}
-		attacker->Damage(this, -DS, spellid, ABJURE/*hackish*/, false);
+		attacker->Damage(this, -DS, spellid, SkillAbjuration/*hackish*/, false);
 		//we can assume there is a spell now
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 		CombatDamage_Struct* cds = (CombatDamage_Struct*)outapp->pBuffer;
@@ -2627,7 +2630,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 
 	if(rev_ds < 0) {
 		mlog(COMBAT__HITS, "Applying Reverse Damage Shield of value %d to %s", rev_ds, attacker->GetName());
-		attacker->Damage(this, -rev_ds, rev_ds_spell_id, ABJURE/*hackish*/, false); //"this" (us) will get the hate, etc. not sure how this works on Live, but it'll works for now, and tanks will love us for this
+		attacker->Damage(this, -rev_ds, rev_ds_spell_id, SkillAbjuration/*hackish*/, false); //"this" (us) will get the hate, etc. not sure how this works on Live, but it'll works for now, and tanks will love us for this
 		//do we need to send a damage packet here also?
 	}
 }
@@ -2650,7 +2653,7 @@ uint8 Mob::GetWeaponDamageBonus( const Item_Struct *Weapon )
 	// Assert: This function should not be called unless the player is a melee class, as casters do not receive a damage bonus.
 
 
-	if( Weapon == nullptr || Weapon->ItemType == ItemType1HS || Weapon->ItemType == ItemType1HB || Weapon->ItemType == ItemTypeHand2Hand || Weapon->ItemType == ItemTypePierce )
+	if( Weapon == nullptr || Weapon->ItemType == ItemType1HSlash || Weapon->ItemType == ItemType1HBlunt || Weapon->ItemType == ItemTypeMartial || Weapon->ItemType == ItemType1HPiercing )
 	{
 		// The weapon in the player's main (primary) hand is a one-handed weapon, or there is no item equipped at all.
 		//
@@ -3285,12 +3288,12 @@ bool Client::CheckDoubleAttack(bool tripleAttack) {
 	//Check for bonuses that give you a double attack chance regardless of skill (ie Bestial Frenzy/Harmonious Attack AA)
 	uint16 bonusGiveDA = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
 
-	if(!HasSkill(DOUBLE_ATTACK) && !bonusGiveDA)
+	if(!HasSkill(SkillDoubleAttack) && !bonusGiveDA)
 		return false;
 
 	float chance = 0.0f;
 
-	uint16 skill = GetSkill(DOUBLE_ATTACK);
+	uint16 skill = GetSkill(SkillDoubleAttack);
 
 	int16 bonusDA = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
 
@@ -3317,9 +3320,9 @@ bool Client::CheckDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, const SkillType skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic) {
+void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, const SkillUseTypes skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic) {
 	// This method is called with skill_used=ABJURE for Damage Shield damage.
-	bool FromDamageShield = (skill_used == ABJURE);
+	bool FromDamageShield = (skill_used == SkillAbjuration);
 
 	mlog(COMBAT__HITS, "Applying damage %d done by %s with skill %d and spell %d, avoidable? %s, is %sa buff tic in slot %d",
 		damage, attacker?attacker->GetName():"NOBODY", skill_used, spell_id, avoidable?"yes":"no", iBuffTic?"":"not ", buffslot);
@@ -3334,7 +3337,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 	// only apply DS if physical damage (no spell damage)
 	// damage shield calls this function with spell_id set, so its unavoidable
-	if (attacker && damage > 0 && spell_id == SPELL_UNKNOWN && skill_used != ARCHERY && skill_used != THROWING) {
+	if (attacker && damage > 0 && spell_id == SPELL_UNKNOWN && skill_used != SkillArchery && skill_used != SkillThrowing) {
 		DamageShield(attacker);
 
 		if (spellbonuses.DamageShield)
@@ -3450,7 +3453,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		}
 
 		//check stun chances if bashing
-		if (damage > 0 && ((skill_used == BASH || skill_used == KICK) && attacker))
+		if (damage > 0 && ((skill_used == SkillBash || skill_used == SkillKick) && attacker))
 		{
 			// NPCs can stun with their bash/kick as soon as they recieve it.
 			// Clients can stun mobs under level 56 with their bash/kick when they get level 55 or greater.
@@ -3821,16 +3824,16 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 		if (bSkillProc && damage < 0){
 
 			if (damage == -1)
-				TrySkillProc(on, BLOCKSKILL, ProcChance);
+				TrySkillProc(on, SkillBlock, ProcChance);
 
 			if (damage == -2)
-				TrySkillProc(on, PARRY, ProcChance);
+				TrySkillProc(on, SkillParry, ProcChance);
 
 			if (damage == -3)
-				TrySkillProc(on, RIPOSTE, ProcChance);
+				TrySkillProc(on, SkillRiposte, ProcChance);
 
 			if (damage == -4)
-				TrySkillProc(on, DODGE, ProcChance);
+				TrySkillProc(on, SkillDodge, ProcChance);
 		}
 }
 
@@ -3935,7 +3938,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 
 	bool bRangedAttack = false;
 	if (weapon != nullptr) {
-		if (weapon->ItemType == ItemTypeBow || weapon->ItemType == ItemTypeThrowing || weapon->ItemType == ItemTypeThrowingv2) {
+		if (weapon->ItemType == ItemTypeBow || weapon->ItemType == ItemTypeLargeThrowing || weapon->ItemType == ItemTypeSmallThrowing) {
 			bRangedAttack = true;
 		}
 	}
@@ -3944,8 +3947,8 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 	if(weapon)
 	{
 		if(weapon->ItemType == ItemTypeArrow ||
-			weapon->ItemType == ItemTypeThrowing ||
-			weapon->ItemType == ItemTypeThrowingv2 ||
+			weapon->ItemType == ItemTypeLargeThrowing ||
+			weapon->ItemType == ItemTypeSmallThrowing ||
 			weapon->ItemType == ItemTypeBow)
 		{
 			isRanged = true;
@@ -4109,10 +4112,10 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			critChance += RuleI(Combat, WarBerBaseCritChance);
 	}
 
-	if(skill == ARCHERY && GetClass() == RANGER && GetSkill(ARCHERY) >= 65)
+	if(skill == SkillArchery && GetClass() == RANGER && GetSkill(SkillArchery) >= 65)
 		critChance += 6;
 
-	if(skill == THROWING && GetClass() == ROGUE && GetSkill(THROWING) >= 65)
+	if(skill == SkillThrowing && GetClass() == ROGUE && GetSkill(SkillThrowing) >= 65)
 		critChance += 6;
 
 	int CritChanceBonus = GetCriticalChanceBonus(skill);
@@ -4178,7 +4181,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 }
 
 
-bool Mob::TryFinishingBlow(Mob *defender, SkillType skillinuse)
+bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 {
 
 	if (!defender)
@@ -4271,7 +4274,7 @@ bool Mob::HasDied() {
 	return Result;
 }
 
-uint16 Mob::GetDamageTable(SkillType skillinuse)
+uint16 Mob::GetDamageTable(SkillUseTypes skillinuse)
 {
 	if(GetLevel() <= 51)
 	{

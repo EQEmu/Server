@@ -212,8 +212,8 @@ public:
 	~Client();
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillType attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
+	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
+	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
 	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
@@ -284,7 +284,7 @@ public:
 	void	VoiceMacroReceived(uint32 Type, char *Target, uint32 MacroNumber);
 	void	SendSound();
 	void	LearnRecipe(uint32 recipeID);
-	bool	CanIncreaseTradeskill(SkillType tradeskill);
+	bool	CanIncreaseTradeskill(SkillUseTypes tradeskill);
 
 	EQApplicationPacket*	ReturnItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type);
 
@@ -391,7 +391,7 @@ public:
 	virtual void CalcBonuses();
 	//these are all precalculated now
 	inline virtual int16	GetAC()		const { return AC; }
-	inline virtual int16 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(OFFENSE)) * 9 / 10); }
+	inline virtual int16 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(SkillOffense)) * 9 / 10); }
 	inline virtual int16 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
 	inline virtual int	GetHaste() const { return Haste; }
 	int GetRawACNoShield(int &shield_ac) const;
@@ -650,29 +650,29 @@ public:
 
 	void	IncreaseSkill(int skill_id, int value = 1) { if (skill_id <= HIGHEST_SKILL) { m_pp.skills[skill_id] += value; } }
 	void	IncreaseLanguageSkill(int skill_id, int value = 1);
-	virtual uint16 GetSkill(SkillType skill_id) const { if (skill_id <= HIGHEST_SKILL) { return((itembonuses.skillmod[skill_id] > 0)? m_pp.skills[skill_id]*(100 + itembonuses.skillmod[skill_id])/100 : m_pp.skills[skill_id]); } return 0; }
-	uint32	GetRawSkill(SkillType skill_id) const { if (skill_id <= HIGHEST_SKILL) { return(m_pp.skills[skill_id]); } return 0; }
-	bool	HasSkill(SkillType skill_id) const;
-	bool	CanHaveSkill(SkillType skill_id) const;
-	void	SetSkill(SkillType skill_num, uint16 value);
-	void	AddSkill(SkillType skillid, uint16 value);
+	virtual uint16 GetSkill(SkillUseTypes skill_id) const { if (skill_id <= HIGHEST_SKILL) { return((itembonuses.skillmod[skill_id] > 0)? m_pp.skills[skill_id]*(100 + itembonuses.skillmod[skill_id])/100 : m_pp.skills[skill_id]); } return 0; }
+	uint32	GetRawSkill(SkillUseTypes skill_id) const { if (skill_id <= HIGHEST_SKILL) { return(m_pp.skills[skill_id]); } return 0; }
+	bool	HasSkill(SkillUseTypes skill_id) const;
+	bool	CanHaveSkill(SkillUseTypes skill_id) const;
+	void	SetSkill(SkillUseTypes skill_num, uint16 value);
+	void	AddSkill(SkillUseTypes skillid, uint16 value);
 	void	CheckSpecializeIncrease(uint16 spell_id);
 	void	CheckSongSkillIncrease(uint16 spell_id);
-	bool	CheckIncreaseSkill(SkillType skillid, Mob *against_who, int chancemodi = 0);
+	bool	CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int chancemodi = 0);
 	void	CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill);
 	void	SetLanguageSkill(int langid, int value);
 	void	SetHoTT(uint32 mobid);
 	void	ShowSkillsWindow();
 	void	SendStatsWindow(Client* client, bool use_window);
 
-	uint16	MaxSkill(SkillType skillid, uint16 class_, uint16 level) const;
-	inline	uint16	MaxSkill(SkillType skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
-	uint8	SkillTrainLevel(SkillType skillid, uint16 class_);
+	uint16	MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const;
+	inline	uint16	MaxSkill(SkillUseTypes skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
+	uint8	SkillTrainLevel(SkillUseTypes skillid, uint16 class_);
 
 	void TradeskillSearchResults(const char *query, unsigned long qlen, unsigned long objtype, unsigned long someid);
 	void SendTradeskillDetails(uint32 recipe_id);
 	bool TradeskillExecute(DBTradeskillRecipe_Struct *spec);
-	void CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, SkillType tradeskill);
+	void CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, SkillUseTypes tradeskill);
 
 	void GMKill();
 	inline bool	IsMedding()	const {return medding;}
@@ -885,7 +885,7 @@ public:
 	int		GetNextAvailableSpellBookSlot(int starting_slot = 0);
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
 	inline bool HasSpellScribed(int spellid) { return (FindSpellBookSlotBySpellID(spellid) != -1 ? true : false); }
-	uint16	GetMaxSkillAfterSpecializationRules(SkillType skillid, uint16 maxSkill);
+	uint16	GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16 maxSkill);
 	void	SendPopupToClient(const char *Title, const char *Text, uint32 PopupID = 0, uint32 Buttons = 0, uint32 Duration = 0);
 	void	SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...);
 	bool	PendingTranslocate;
@@ -1153,11 +1153,11 @@ public:
 	int16 GetActCHA() { return( std::min(GetMaxCHA(), GetCHA()) ); }
 	void LoadAccountFlags();
 	void SetAccountFlag(std::string flag, std::string val);
-	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillType);
+	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillUseTypes);
 	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
-	int mod_client_damage(int damage, SkillType skillinuse, int hand, const ItemInst* weapon, Mob* other);
+	int mod_client_damage(int damage, SkillUseTypes skillinuse, int hand, const ItemInst* weapon, Mob* other);
 	bool mod_client_message(char* message, uint8 chan_num);
-	bool mod_can_increase_skill(SkillType skillid, Mob* against_who);
+	bool mod_can_increase_skill(SkillUseTypes skillid, Mob* against_who);
 	int16 mod_increase_skill_chance(int16 chance, Mob* against_who);
 	int mod_bindwound_percent(int max_percent, Mob* bindmob);
 	int mod_bindwound_hp(int bindhps, Mob* bindmob);
@@ -1174,7 +1174,7 @@ public:
 	int32 mod_client_xp(int32 in_exp, NPC *npc);
 	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
 	int mod_client_haste_cap(int cap);
-    int mod_consume(Item_Struct *item, ItemTypes type, int change);
+    int mod_consume(Item_Struct *item, ItemUseTypes type, int change);
     int mod_food_value(const Item_Struct *item, int change);
     int mod_drink_value(const Item_Struct *item, int change);
 

@@ -130,7 +130,7 @@ Trap* Entity::CastToTrap()
 #ifdef DEBUG
 	if(!IsTrap())
 	{
-		//cout << "CastToTrap error" << endl;
+		//std::cout << "CastToTrap error" << std::endl;
 		return 0;
 	}
 #endif
@@ -161,7 +161,7 @@ Object* Entity::CastToObject() {
 /*Group* Entity::CastToGroup() {
 #ifdef _EQDEBUG
 	if(!IsGroup()) {
-		cout << "CastToGroup error" << endl;
+		std::cout << "CastToGroup error" << std::endl;
 		DebugBreak();
 		return 0;
 	}
@@ -230,7 +230,7 @@ const Trap* Entity::CastToTrap() const {
 #ifdef DEBUG
 	if(!IsTrap())
 	{
-		//cout << "CastToTrap error" << endl;
+		//std::cout << "CastToTrap error" << std::endl;
 		return 0;
 	}
 #endif
@@ -3234,11 +3234,11 @@ bool EntityList::MakeTrackPacket(Client* client)
 	float MobDistance;
 
 	if(client->GetClass() == DRUID)
-		distance = (client->GetSkill(TRACKING)*10);
+		distance = (client->GetSkill(SkillTracking)*10);
 	else if(client->GetClass() == RANGER)
-		distance = (client->GetSkill(TRACKING)*12);
+		distance = (client->GetSkill(SkillTracking)*12);
 	else if(client->GetClass() == BARD)
-		distance = (client->GetSkill(TRACKING)*7);
+		distance = (client->GetSkill(SkillTracking)*7);
 	if(distance <= 0)
 		return false;
 	if(distance<300)

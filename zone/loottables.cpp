@@ -278,38 +278,38 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			if (item2->Proc.Effect != 0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
-			eslot = MATERIAL_PRIMARY;
+			eslot = MaterialPrimary;
 		}
 		else if (foundslot == SLOT_SECONDARY
 			&& (GetOwner() != nullptr || (GetLevel() >= 13 && MakeRandomInt(0,99) < NPC_DW_CHANCE) || (item2->Damage==0)) &&
-			(item2->ItemType == ItemType1HS || item2->ItemType == ItemType1HB || item2->ItemType == ItemTypeShield ||
-			item2->ItemType == ItemTypePierce))
+			(item2->ItemType == ItemType1HSlash || item2->ItemType == ItemType1HBlunt || item2->ItemType == ItemTypeShield ||
+			item2->ItemType == ItemType1HPiercing))
 		{
 			if (item2->Proc.Effect!=0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
-			eslot = MATERIAL_SECONDARY;
+			eslot = MaterialSecondary;
 		}
 		else if (foundslot == SLOT_HEAD) {
-			eslot = MATERIAL_HEAD;
+			eslot = MaterialHead;
 		}
 		else if (foundslot == SLOT_CHEST) {
-			eslot = MATERIAL_CHEST;
+			eslot = MaterialChest;
 		}
 		else if (foundslot == SLOT_ARMS) {
-			eslot = MATERIAL_ARMS;
+			eslot = MaterialArms;
 		}
 		else if (foundslot == SLOT_BRACER01 || foundslot == SLOT_BRACER02) {
-			eslot = MATERIAL_BRACER;
+			eslot = MaterialWrist;
 		}
 		else if (foundslot == SLOT_HANDS) {
-			eslot = MATERIAL_HANDS;
+			eslot = MaterialHands;
 		}
 		else if (foundslot == SLOT_LEGS) {
-			eslot = MATERIAL_LEGS;
+			eslot = MaterialLegs;
 		}
 		else if (foundslot == SLOT_FEET) {
-			eslot = MATERIAL_FEET;
+			eslot = MaterialFeet;
 		}
 
 		/*

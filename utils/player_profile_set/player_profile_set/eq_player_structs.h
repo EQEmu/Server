@@ -738,7 +738,7 @@ struct BindStruct {
 static const uint32 MAX_PP_LANGUAGE		= 28;
 static const uint32 MAX_PP_SPELLBOOK	= 400;
 static const uint32 MAX_PP_MEMSPELL		= 9;
-static const uint32 MAX_PP_SKILL		= 75;
+static const uint32 MAX_PP_SKILL		= 100;
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 
@@ -878,7 +878,7 @@ struct PlayerProfile_Struct
 /*4768*/	sint32				platinum_shared;        // Platinum shared between characters
 /*4772*/	uint8				unknown3812[24];        // @bp unknown skills?
 /*4796*/	uint32				skills[MAX_PP_SKILL];
-/*5096*/	uint8				unknown5096[284];     // @bp unknown skills?
+/*5196*/	uint8				unknown5096[184];     // @bp unknown skills?
 /*5380*/	int32				pvp2;	//
 /*5384*/	int32				unknown4420;	//
 /*5388*/	int32				pvptype;	//

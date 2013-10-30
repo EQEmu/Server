@@ -337,7 +337,7 @@ ListElement<TYPE>::ListElement(const TYPE& d)
 template<class TYPE>
 ListElement<TYPE>::~ListElement()
 {
-//	cout << "ListElement<TYPE>::~ListElement()" << endl;
+//	std::cout << "ListElement<TYPE>::~ListElement()" << std::endl;
 
 	if (data != 0)
 		safe_delete(data);

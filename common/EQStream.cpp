@@ -326,7 +326,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				break;
 			}
 #endif
-			//cout << "Got OP_SessionRequest" << endl;
+			//std::cout << "Got OP_SessionRequest" << std::endl;
 			init();
 			OutboundQueueClear();
 			SessionRequest *Request=(SessionRequest *)p->pBuffer;
@@ -654,7 +654,7 @@ void EQStream::Write(int eq_fd)
 	int32 threshold=RateThreshold;
 	MRate.unlock();
 	if (BytesWritten > threshold) {
-		//cout << "Over threshold: " << BytesWritten << " > " << threshold << endl;
+		//std::cout << "Over threshold: " << BytesWritten << " > " << threshold << std::endl;
 		return;
 	}
 
@@ -848,15 +848,15 @@ sockaddr_in address;
 	address.sin_port=remote_port;
 #ifdef NOWAY
 	uint32 ip=address.sin_addr.s_addr;
-	cout << "Sending to: "
+	std::cout << "Sending to: "
 		<< (int)*(unsigned char *)&ip
 		<< "." << (int)*((unsigned char *)&ip+1)
 		<< "." << (int)*((unsigned char *)&ip+2)
 		<< "." << (int)*((unsigned char *)&ip+3)
-		<< "," << (int)ntohs(address.sin_port) << "(" << p->size << ")" << endl;
+		<< "," << (int)ntohs(address.sin_port) << "(" << p->size << ")" << std::endl;
 
 	p->DumpRaw();
-	cout << "-------------" << endl;
+	std::cout << "-------------" << std::endl;
 #endif
 	length=p->serialize(buffer);
 	if (p->opcode!=OP_SessionRequest && p->opcode!=OP_SessionResponse) {
@@ -907,7 +907,7 @@ char temp[15];
 			*((unsigned char *)&ip+2),
 			*((unsigned char *)&ip+3),
 			ntohs(from->sin_port));
-		//cout << timestamp() << "Data from: " << temp << " OpCode 0x" << hex << setw(2) << setfill('0') << (int)p->opcode << dec << endl;
+		//std::cout << timestamp() << "Data from: " << temp << " OpCode 0x" << std::hex << std::setw(2) << std::setfill('0') << (int)p->opcode << std::dec << std::endl;
 		//dump_message(p->pBuffer,p->size,timestamp());
 
 	}

@@ -479,16 +479,16 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 uint16 Mob::GetSpecializeSkillValue(uint16 spell_id) const {
 	switch(spells[spell_id].skill) {
-	case ABJURE:
-		return(GetSkill(SPECIALIZE_ABJURE));
-	case ALTERATION:
-		return(GetSkill(SPECIALIZE_ALTERATION));
-	case CONJURATION:
-		return(GetSkill(SPECIALIZE_CONJURATION));
-	case DIVINATION:
-		return(GetSkill(SPECIALIZE_DIVINATION));
-	case EVOCATION:
-		return(GetSkill(SPECIALIZE_EVOCATION));
+	case SkillAbjuration:
+		return(GetSkill(SkillSpecializeAbjure));
+	case SkillAlteration:
+		return(GetSkill(SkillSpecializeAlteration));
+	case SkillConjuration:
+		return(GetSkill(SkillSpecializeConjuration));
+	case SkillDivination:
+		return(GetSkill(SkillSpecializeDivination));
+	case SkillEvocation:
+		return(GetSkill(SkillSpecializeEvocation));
 	default:
 		//wtf...
 		break;
@@ -498,20 +498,20 @@ uint16 Mob::GetSpecializeSkillValue(uint16 spell_id) const {
 
 void Client::CheckSpecializeIncrease(uint16 spell_id) {
 	switch(spells[spell_id].skill) {
-	case ABJURE:
-		CheckIncreaseSkill(SPECIALIZE_ABJURE, nullptr);
+	case SkillAbjuration:
+		CheckIncreaseSkill(SkillSpecializeAbjure, nullptr);
 		break;
-	case ALTERATION:
-		CheckIncreaseSkill(SPECIALIZE_ALTERATION, nullptr);
+	case SkillAlteration:
+		CheckIncreaseSkill(SkillSpecializeAlteration, nullptr);
 		break;
-	case CONJURATION:
-		CheckIncreaseSkill(SPECIALIZE_CONJURATION, nullptr);
+	case SkillConjuration:
+		CheckIncreaseSkill(SkillSpecializeConjuration, nullptr);
 		break;
-	case DIVINATION:
-		CheckIncreaseSkill(SPECIALIZE_DIVINATION, nullptr);
+	case SkillDivination:
+		CheckIncreaseSkill(SkillSpecializeDivination, nullptr);
 		break;
-	case EVOCATION:
-		CheckIncreaseSkill(SPECIALIZE_EVOCATION, nullptr);
+	case SkillEvocation:
+		CheckIncreaseSkill(SkillSpecializeEvocation, nullptr);
 		break;
 	default:
 		//wtf...
@@ -522,48 +522,48 @@ void Client::CheckSpecializeIncrease(uint16 spell_id) {
 void Client::CheckSongSkillIncrease(uint16 spell_id){
 	switch(spells[spell_id].skill)
 	{
-	case SINGING:
-		CheckIncreaseSkill(SINGING, nullptr, -15);
+	case SkillSinging:
+		CheckIncreaseSkill(SkillSinging, nullptr, -15);
 		break;
-	case PERCUSSION_INSTRUMENTS:
+	case SkillPercussionInstruments:
 		if(this->itembonuses.percussionMod > 0) {
-			if(GetRawSkill(PERCUSSION_INSTRUMENTS) > 0)	// no skill increases if not trained in the instrument
-				CheckIncreaseSkill(PERCUSSION_INSTRUMENTS, nullptr, -15);
+			if(GetRawSkill(SkillPercussionInstruments) > 0)	// no skill increases if not trained in the instrument
+				CheckIncreaseSkill(SkillPercussionInstruments, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);	// tell the client that they need instrument training
 		}
 		else
-			CheckIncreaseSkill(SINGING, nullptr, -15);
+			CheckIncreaseSkill(SkillSinging, nullptr, -15);
 		break;
-	case STRINGED_INSTRUMENTS:
+	case SkillStringedInstruments:
 		if(this->itembonuses.stringedMod > 0) {
-			if(GetRawSkill(STRINGED_INSTRUMENTS) > 0)
-				CheckIncreaseSkill(STRINGED_INSTRUMENTS, nullptr, -15);
+			if(GetRawSkill(SkillStringedInstruments) > 0)
+				CheckIncreaseSkill(SkillStringedInstruments, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);
 		}
 		else
-			CheckIncreaseSkill(SINGING, nullptr, -15);
+			CheckIncreaseSkill(SkillSinging, nullptr, -15);
 		break;
-	case WIND_INSTRUMENTS:
+	case SkillWindInstruments:
 		if(this->itembonuses.windMod > 0) {
-			if(GetRawSkill(WIND_INSTRUMENTS) > 0)
-				CheckIncreaseSkill(WIND_INSTRUMENTS, nullptr, -15);
+			if(GetRawSkill(SkillWindInstruments) > 0)
+				CheckIncreaseSkill(SkillWindInstruments, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);
 		}
 		else
-			CheckIncreaseSkill(SINGING, nullptr, -15);
+			CheckIncreaseSkill(SkillSinging, nullptr, -15);
 		break;
-	case BRASS_INSTRUMENTS:
+	case SkillBrassInstruments:
 		if(this->itembonuses.brassMod > 0) {
-			if(GetRawSkill(BRASS_INSTRUMENTS) > 0)
-				CheckIncreaseSkill(BRASS_INSTRUMENTS, nullptr, -15);
+			if(GetRawSkill(SkillBrassInstruments) > 0)
+				CheckIncreaseSkill(SkillBrassInstruments, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);
 		}
 		else
-			CheckIncreaseSkill(SINGING, nullptr, -15);
+			CheckIncreaseSkill(SkillSinging, nullptr, -15);
 		break;
 	default:
 		break;
@@ -904,7 +904,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 					channelbonuses += spellbonuses.ChannelChanceSpells + itembonuses.ChannelChanceSpells + aabonuses.ChannelChanceSpells;
 
 				// max 93% chance at 252 skill
-				channelchance = 30 + GetSkill(CHANNELING) / 400.0f * 100;
+				channelchance = 30 + GetSkill(SkillChanneling) / 400.0f * 100;
 				channelchance -= attacked_count * 2;
 				channelchance += channelchance * channelbonuses / 100.0f;
 			}
@@ -918,7 +918,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 					channelbonuses += spellbonuses.ChannelChanceSpells + itembonuses.ChannelChanceSpells + aabonuses.ChannelChanceSpells;
 
 				// max 93% chance at 252 skill
-				channelchance = 30 + GetSkill(CHANNELING) / 400.0f * 100;
+				channelchance = 30 + GetSkill(SkillChanneling) / 400.0f * 100;
 				channelchance -= attacked_count * 2;
 				channelchance += channelchance * channelbonuses / 100.0f;
 			}
@@ -950,7 +950,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				}
 			}
 
-			mlog(SPELLS__CASTING, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(CHANNELING));
+			mlog(SPELLS__CASTING, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(SkillChanneling));
 
 			if(MakeRandomFloat(0, 100) > channelchance) {
 				mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: interrupted.", spell_id);
@@ -1239,7 +1239,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				c->CheckIncreaseSkill(spells[spell_id].skill, nullptr);
 
 				// increased chance of gaining channel skill if you regained concentration
-				c->CheckIncreaseSkill(CHANNELING, nullptr, regain_conc ? 5 : 0);
+				c->CheckIncreaseSkill(SkillChanneling, nullptr, regain_conc ? 5 : 0);
 
 				c->CheckSpecializeIncrease(spell_id);
 			}
@@ -2251,7 +2251,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			action->instrument_mod = caster->GetInstrumentMod(spell_id);
 			action->buff_unknown = 0;
 			action->level = buffs[buffs_i].casterlevel;
-			action->type = SpellDamageType;
+			action->type = DamageTypeSpell;
 			entity_list.QueueCloseClients(this, packet, false, 200, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 
 			action->buff_unknown = 4;
@@ -2317,7 +2317,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
 			cd->target = action->target;
 			cd->source = action->source;
-			cd->type = SpellDamageType;
+			cd->type = DamageTypeSpell;
 			cd->spellid = action->spell;
 			cd->sequence = action->sequence;
 			cd->damage = 0;

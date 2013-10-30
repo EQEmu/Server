@@ -717,7 +717,7 @@ ENCODE(OP_SendCharInfo) {
 			eq2->gender = emu->gender[r];
 			eq2->face = emu->face[r];
 			int k;
-			for(k = 0; k < MAX_MATERIALS; k++) {
+			for(k = 0; k < _MaterialCount; k++) {
 				eq2->equip[k].equip0 = emu->equip[r][k];
 				eq2->equip[k].equip1 = 0;
 				eq2->equip[k].equip2 = 0;
@@ -1020,16 +1020,19 @@ ENCODE(OP_PlayerProfile)
 
 	outapp->WriteUInt32(structs::MAX_PP_SKILL);
 
-	for(uint32 r = 0; r < MAX_PP_SKILL; r++)
+	for(uint32 r = 0; r < structs::MAX_PP_SKILL; r++)
 	{
 		outapp->WriteUInt32(emu->skills[r]);
 	}
 
+	// deprecated
 	// Write zeroes for the rest of the skills
+	/*
 	for(uint32 r = 0; r < structs::MAX_PP_SKILL - MAX_PP_SKILL; r++)
 	{
 		outapp->WriteUInt32(emu->skills[r]);
 	}
+	*/
 
 	outapp->WriteUInt32(25);			// Unknown count
 
@@ -2015,13 +2018,13 @@ ENCODE(OP_ZoneSpawns)
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MATERIAL_PRIMARY]);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary]);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MATERIAL_SECONDARY]);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary]);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);

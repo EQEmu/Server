@@ -103,8 +103,8 @@ public:
 
 	void LoadSkillCaps(void *data);
 	bool LoadSkillCaps();
-	uint16 GetSkillCap(uint8 Class_, SkillType Skill, uint8 Level);
-	uint8 GetTrainLevel(uint8 Class_, SkillType Skill, uint8 Level);
+	uint16 GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level);
+	uint8 GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Level);
 
 	int GetMaxSpellID();
 	void LoadSpells(void *data, int max_spells);

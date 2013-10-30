@@ -294,7 +294,7 @@ void Client::GoFish()
 
 	//success formula is not researched at all
 
-	int fishing_skill = GetSkill(FISHING);	//will take into account skill bonuses on pole & bait
+	int fishing_skill = GetSkill(SkillFishing);	//will take into account skill bonuses on pole & bait
 
 	//make sure we still have a fishing pole on:
 	int32 bslot = m_inv.HasItemByUse(ItemTypeFishingBait, 1, invWhereWorn|invWherePersonal);
@@ -303,7 +303,7 @@ void Client::GoFish()
 		Bait = m_inv.GetItem(bslot);
 
 	//if the bait isnt equipped, need to add its skill bonus
-	if(bslot >= IDX_INV && Bait->GetItem()->SkillModType == FISHING) {
+	if(bslot >= IDX_INV && Bait->GetItem()->SkillModType == SkillFishing) {
 		fishing_skill += Bait->GetItem()->SkillModValue;
 	}
 
@@ -398,16 +398,16 @@ void Client::GoFish()
 		DeleteItemInInventory(13,0,true);
 	}
 
-	if(CheckIncreaseSkill(FISHING, nullptr, 5))
+	if(CheckIncreaseSkill(SkillFishing, nullptr, 5))
 	{
-		if(title_manager.IsNewTradeSkillTitleAvailable(FISHING, GetRawSkill(FISHING)))
+		if(title_manager.IsNewTradeSkillTitleAvailable(SkillFishing, GetRawSkill(SkillFishing)))
 			NotifyNewTitlesAvailable();
 	}
 }
 
 void Client::ForageItem(bool guarantee) {
 
-	int skill_level = GetSkill(FORAGE);
+	int skill_level = GetSkill(SkillForage);
 
 	//be wary of the string ids in switch below when changing this.
 	uint32 common_food_ids[MAX_COMMON_FOOD_IDS] = {
@@ -498,7 +498,7 @@ void Client::ForageItem(bool guarantee) {
 		parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
 	}
 
-	CheckIncreaseSkill(FORAGE, nullptr, 5);
+	CheckIncreaseSkill(SkillForage, nullptr, 5);
 
 }
 

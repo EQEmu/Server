@@ -978,7 +978,7 @@ bool Bot::AI_IdleCastCheck() {
 
 	if (AIautocastspell_timer->Check(false)) {
 #if MobAI_DEBUG_Spells >= 25
-		cout << "Non-Engaged autocast check triggered: " << this->GetCleanName() << endl;
+		std::cout << "Non-Engaged autocast check triggered: " << this->GetCleanName() << std::endl; // cout undefine [CODEBUG]
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 

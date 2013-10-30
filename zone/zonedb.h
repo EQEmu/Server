@@ -39,7 +39,7 @@ struct DBnpcspells_Struct {
 };
 
 struct DBTradeskillRecipe_Struct {
-	SkillType tradeskill;
+	SkillUseTypes tradeskill;
 	int16 skill_needed;
 	uint16 trivial;
 	bool nofail;
