@@ -1599,3 +1599,31 @@ bool Client::CanIncreaseTradeskill(SkillUseTypes tradeskill) {
 	}
 	return true;
 }
+
+void ZoneDatabase::EnableRecipe(uint32 recipe_id)
+{
+	char *query = 0;
+	uint32 qlen;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+
+	qlen = MakeAnyLenString(&query, "UPDATE tradeskill_recipe SET enabled = 1 WHERE id = %u;", recipe_id);
+
+	if (!RunQuery(query, qlen, errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error in EnableRecipe query '%s': %s", query, errbuf);
+	}
+	safe_delete_array(query);
+}
+
+void ZoneDatabase::DisableRecipe(uint32 recipe_id)
+{
+	char *query = 0;
+	uint32 qlen;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+
+	qlen = MakeAnyLenString(&query, "UPDATE tradeskill_recipe SET enabled = 0 WHERE id = %u;", recipe_id);
+
+	if (!RunQuery(query, qlen, errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error in DisableRecipe query '%s': %s", query, errbuf);
+	}
+	safe_delete_array(query);
+}

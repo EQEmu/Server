@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/01/2013 ==
+JJ: Added in-game commands to enable/disable tradeskill recipes
+-Commands: #enablerecipe recipe_id, #disablerecipe recipe_id
+-Perl: quest::enablerecipe(recipe_id), quest::disablerecipe(recipe_id)
+-Lua: eq.enable_recipe(recipe_id), eq.disable_recipe(recipe_id)
+
 == 10/31/2013 ==
 Leere: Add the ability to disable a tradeskill recipe
 

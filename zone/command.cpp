@@ -24,7 +24,7 @@
 	2.	Add the function in this file.
 	3.	In the command_init function you must add a call to command_add
 		for your function. If you want an alias for your command, add
-		a second call to command_add with the descriptin and access args
+		a second call to command_add with the description and access args
 		set to nullptr and 0 respectively since they aren't used when adding
 		an alias. The function pointers being equal is makes it an alias.
 		The access level you set with command_add is only a default if
@@ -445,7 +445,9 @@ int command_init(void) {
 		command_add("xtargets", "Show your targets Extended Targets and optionally set how many xtargets they can have.", 250, command_xtargets) ||
 		command_add("zopp", "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", 250, command_zopp) ||
 		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", 250, command_augmentitem) ||
-		command_add("questerrors", "Shows quest errors.", 100, command_questerrors)
+		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
+		command_add("enablerecipe", "[recipe_id] - Enables a recipe using the recipe id.", 80, command_enablerecipe) ||
+		command_add("disablerecipe", "[recipe_id] - Disables a recipe using the recipe id.", 80, command_disablerecipe)
 		)
 	{
 		command_deinit();
@@ -11424,5 +11426,47 @@ void command_questerrors(Client *c, const Seperator *sep)
 		c->Message(0, iter->c_str());
 		++i;
 		++iter;
+	}
+}
+
+void command_enablerecipe(Client *c, const Seperator *sep)
+{
+	uint32 recipe_id = 0;
+	if (c) {
+		if (sep->argnum == 1) {
+			recipe_id = atoi(sep->arg[1]);
+		}
+		else {
+			c->Message(0, "Invalid number of arguments.\nUsage: #enablerecipe recipe_id");
+			return;
+		}
+		if (recipe_id > 0) {
+			database.EnableRecipe(recipe_id);
+			c->Message(0, "Recipe enabled.");
+		}
+		else {
+			c->Message(0, "Invalid recipe id.\nUsage: #enablerecipe recipe_id");
+		}
+	}
+}
+
+void command_disablerecipe(Client *c, const Seperator *sep)
+{
+	uint32 recipe_id = 0;
+	if (c) {
+		if (sep->argnum == 1) {
+			recipe_id = atoi(sep->arg[1]);
+		}
+		else {
+			c->Message(0, "Invalid number of arguments.\nUsage: #disablerecipe recipe_id");
+			return;
+		}
+		if (recipe_id > 0) {
+			database.DisableRecipe(recipe_id);
+			c->Message(0, "Recipe disabled.");
+		}
+		else {
+			c->Message(0, "Invalid recipe id.\nUsage: #disablerecipe recipe_id");
+		}
 	}
 }

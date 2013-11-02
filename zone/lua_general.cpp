@@ -1021,6 +1021,14 @@ void lua_clear_opcode(int op) {
 	ClearMappedOpcode(static_cast<EmuOpcode>(op));
 }
 
+void lua_enable_recipe(uint32 recipe_id) {
+	quest_manager.EnableRecipe(recipe_id);
+}
+
+void lua_disable_recipe(uint32 recipe_id) {
+	quest_manager.DisableRecipe(recipe_id);
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1182,7 +1190,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_owner", &lua_get_owner),
 		luabind::def("get_quest_item", &lua_get_quest_item),
 		luabind::def("map_opcodes", &lua_map_opcodes),
-		luabind::def("clear_opcode", &lua_clear_opcode)
+		luabind::def("clear_opcode", &lua_clear_opcode),
+		luabind::def("enable_recipe", &lua_enable_recipe),
+		luabind::def("disable_recipe", &lua_disable_recipe)
 	];
 }
 

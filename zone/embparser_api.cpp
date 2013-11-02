@@ -2584,7 +2584,8 @@ XS(XS__istaskappropriate)
 		quest_manager.popup(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)), popupid, buttons, duration);
 
 		XSRETURN_EMPTY;
- }
+}
+
 XS(XS__clearspawntimers);
 XS(XS__clearspawntimers)
 {
@@ -2596,6 +2597,7 @@ XS(XS__clearspawntimers)
 
 	XSRETURN_EMPTY;
 }
+
 XS(XS__ze);
 XS(XS__ze)
 {
@@ -2625,6 +2627,7 @@ XS(XS__we)
 
 	XSRETURN_EMPTY;
 }
+
 XS(XS__getlevel);
 XS(XS__getlevel)
 {
@@ -3310,6 +3313,38 @@ XS(XS__crosszonemessageplayerbyname)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__enablerecipe);
+XS(XS__enablerecipe)
+{
+	dXSARGS;
+
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: enablerecipe(recipe_id)");
+	}
+	else {
+		uint32 recipe_id = (uint32)SvIV(ST(0));
+		quest_manager.EnableRecipe(recipe_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__disablerecipe);
+XS(XS__disablerecipe)
+{
+	dXSARGS;
+
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: disablerecipe(recipe_id)");
+	}
+	else {
+		uint32 recipe_id = (uint32)SvIV(ST(0));
+		quest_manager.DisableRecipe(recipe_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -3528,7 +3563,9 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 		newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
-	XSRETURN_YES;
+		newXS(strcpy(buf, "enablerecipe"), XS__enablerecipe, file);
+		newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
+		XSRETURN_YES;
 }
 
 #endif
