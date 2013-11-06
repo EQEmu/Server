@@ -39,13 +39,15 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/timer.h"
 
 // Helper typedefs
-typedef std::list<ItemInst*>::const_iterator					iter_queue;
+typedef std::list<ItemInst*>::const_iterator				iter_queue;
 typedef std::map<int16, ItemInst*>::const_iterator			iter_inst;
 typedef std::map<uint8, ItemInst*>::const_iterator			iter_contents;
 
-namespace ItemField {
-	enum {
-		source=0,
+namespace ItemField
+{
+	enum
+	{
+		source = 0,
 #define F(x) x,
 #include "item_fieldlist.h"
 #undef F
@@ -69,10 +71,10 @@ namespace ItemField {
 #define MAX_ITEMS_PER_BAG 10
 
 // Specifies usage type for item inside ItemInst
-enum ItemUseType
+enum ItemInstTypes
 {
-	ItemUseNormal,
-	ItemUseWorldContainer
+	ItemInstNormal = 0,
+	ItemInstWorldContainer
 };
 
 typedef enum {
@@ -263,7 +265,7 @@ public:
 
 	ItemInst(SharedDatabase *db, uint32 item_id, int16 charges = 0);
 
-	ItemInst(ItemUseType use_type) {
+	ItemInst(ItemInstTypes use_type) {
 		m_use_type = use_type;
 		m_item = nullptr;
 		m_charges = 0;
@@ -285,7 +287,7 @@ public:
 	~ItemInst();
 
 	// Query item type
-	bool IsType(ItemClass item_class) const;
+	bool IsType(ItemClassTypes item_class) const;
 
 	// Can item be stacked?
 	bool IsStackable() const;
@@ -421,7 +423,7 @@ protected:
 
 	void _PutItem(uint8 index, ItemInst* inst) { m_contents[index] = inst; }
 
-	ItemUseType			m_use_type;	// Usage type for item
+	ItemInstTypes		m_use_type;	// Usage type for item
 	const Item_Struct*	m_item;		// Ptr to item data
 	int16				m_charges;	// # of charges for chargeable items
 	uint32				m_price;	// Bazaar /trader price

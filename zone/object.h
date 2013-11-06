@@ -70,7 +70,7 @@ IT10714_ACTORDEF=Augmentation Sealer
 IT10725_ACTORDEF=Shuriken
 */
 
-#define OT_DROPPEDITEM BagType_LargeBag
+#define OT_DROPPEDITEM BagTypeLargeBag
 
 // Icon values:
 //0x0453 a pie
@@ -109,7 +109,7 @@ public:
 	static void HandleAugmentation(Client* user, const AugmentItem_Struct* in_augment, Object *worldo);
 	static void HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac);
 
-	static SkillType TypeToSkill(uint32 type);
+	static SkillUseTypes TypeToSkill(uint32 type);
 
 	// Packet functions
 	void CreateSpawnPacket(EQApplicationPacket* app);
@@ -169,7 +169,7 @@ protected:
 	ItemInst*		m_inst;		// Item representing object
 	bool			m_inuse;	// Currently in use by a client?
 	uint32			m_id;		// Database key, different than drop_id
-	uint32			m_type;		// Object Type, ie, forge, oven, dropped item, etc (ref: ContainerTypes)
+	uint32			m_type;		// Object Type, ie, forge, oven, dropped item, etc (ref: ContainerUseTypes)
 	uint32			m_icon;		// Icon to use for forge, oven, etc
 	float			m_max_x;
 	float			m_max_y;

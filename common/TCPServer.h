@@ -91,7 +91,7 @@ protected:
 			T *data = *cur;
 			if (data->IsFree() && (!data->CheckNetActive())) {
 				#if EQN_DEBUG >= 4
-					cout << "TCPConnection Connection deleted." << endl;
+					std::cout << "TCPConnection Connection deleted." << std::endl;
 				#endif
 				delete data;
 				cur = m_list.erase(cur);

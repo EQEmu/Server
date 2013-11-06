@@ -1021,6 +1021,14 @@ void lua_clear_opcode(int op) {
 	ClearMappedOpcode(static_cast<EmuOpcode>(op));
 }
 
+void lua_enable_recipe(uint32 recipe_id) {
+	quest_manager.EnableRecipe(recipe_id);
+}
+
+void lua_disable_recipe(uint32 recipe_id) {
+	quest_manager.DisableRecipe(recipe_id);
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1182,7 +1190,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_owner", &lua_get_owner),
 		luabind::def("get_quest_item", &lua_get_quest_item),
 		luabind::def("map_opcodes", &lua_map_opcodes),
-		luabind::def("clear_opcode", &lua_clear_opcode)
+		luabind::def("clear_opcode", &lua_clear_opcode),
+		luabind::def("enable_recipe", &lua_enable_recipe),
+		luabind::def("disable_recipe", &lua_disable_recipe)
 	];
 }
 
@@ -1323,16 +1333,19 @@ luabind::scope lua_register_material() {
 	return luabind::class_<Materials>("Material")
 		.enum_("constants")
 		[
-			luabind::value("Head", MATERIAL_HEAD),
-			luabind::value("Chest", MATERIAL_CHEST),
-			luabind::value("Arms", MATERIAL_ARMS),
-			luabind::value("Bracer", MATERIAL_BRACER),
-			luabind::value("Hands", MATERIAL_HANDS),
-			luabind::value("Legs", MATERIAL_LEGS),
-			luabind::value("Feet", MATERIAL_FEET),
-			luabind::value("Primary", MATERIAL_PRIMARY),
-			luabind::value("Secondary", MATERIAL_SECONDARY),
-			luabind::value("Max", MAX_MATERIALS)
+			luabind::value("Head", static_cast<int>(MaterialHead)),
+			luabind::value("Chest", static_cast<int>(MaterialChest)),
+			luabind::value("Arms", static_cast<int>(MaterialArms)),
+			luabind::value("Bracer", static_cast<int>(MaterialWrist)), // deprecated
+			luabind::value("Wrist", static_cast<int>(MaterialWrist)),
+			luabind::value("Hands", static_cast<int>(MaterialHands)),
+			luabind::value("Legs", static_cast<int>(MaterialLegs)),
+			luabind::value("Feet", static_cast<int>(MaterialFeet)),
+			luabind::value("Primary", static_cast<int>(MaterialPrimary)),
+			luabind::value("Secondary", static_cast<int>(MaterialSecondary)),
+			luabind::value("Max", static_cast<int>(_MaterialCount)), // deprecated
+			luabind::value("Count", static_cast<int>(_MaterialCount)),
+			luabind::value("Invalid", static_cast<int>(_MaterialInvalid))
 		];
 }
 

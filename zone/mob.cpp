@@ -72,7 +72,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_drakkin_heritage,
 		uint32		in_drakkin_tattoo,
 		uint32		in_drakkin_details,
-		uint32		in_armor_tint[MAX_MATERIALS],
+		uint32		in_armor_tint[_MaterialCount],
 
 		uint8		in_aa_title,
 		uint8		in_see_invis, // see through invis/ivu
@@ -238,7 +238,7 @@ Mob::Mob(const char* in_name,
 		SkillProcs[j].base_spellID = SPELL_UNKNOWN;
 	}
 
-	for (i = 0; i < MAX_MATERIALS; i++)
+	for (i = 0; i < _MaterialCount; i++)
 	{
 		if (in_armor_tint)
 		{
@@ -945,7 +945,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
-	for(i = 0; i < MAX_MATERIALS; i++)
+	for(i = 0; i < _MaterialCount; i++)
 	{
 		ns->spawn.equipment[i] = GetEquipmentMaterial(i);
 		if (armor_tint[i])
@@ -1546,7 +1546,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 }
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
-//cout << "Gender in: " << (int)in_gender << endl;
+//std::cout << "Gender in: " << (int)in_gender << std::endl; // undefined cout [CODEBUG]
 	if ((in_race > 0 && in_race <= GNOME )
 		|| in_race == IKSAR || in_race == VAHSHIR || in_race == FROGLOK || in_race == DRAKKIN
 		|| in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118) {
@@ -1918,7 +1918,7 @@ void Mob::SetZone(uint32 zone_id, uint32 instance_id)
 }
 
 void Mob::Kill() {
-	Death(this, 0, SPELL_UNKNOWN, HAND_TO_HAND);
+	Death(this, 0, SPELL_UNKNOWN, SkillHandtoHand);
 }
 
 void Mob::SetAttackTimer() {
@@ -1969,9 +1969,9 @@ void Mob::SetAttackTimer() {
 			//if we have a 2H weapon in our main hand, no dual
 			if(PrimaryWeapon != nullptr) {
 				if(	PrimaryWeapon->ItemClass == ItemClassCommon
-					&& (PrimaryWeapon->ItemType == ItemType2HS
-					||	PrimaryWeapon->ItemType == ItemType2HB
-					||	PrimaryWeapon->ItemType == ItemType2HPierce)) {
+					&& (PrimaryWeapon->ItemType == ItemType2HSlash
+					||	PrimaryWeapon->ItemType == ItemType2HBlunt
+					||	PrimaryWeapon->ItemType == ItemType2HPiercing)) {
 					attack_dw_timer.Disable();
 					continue;
 				}
@@ -2003,7 +2003,7 @@ void Mob::SetAttackTimer() {
 				ItemToUse = nullptr;
 			}
 			// Check to see if skill is valid
-			else if((ItemToUse->ItemType > ItemTypeThrowing) && (ItemToUse->ItemType != ItemTypeHand2Hand) && (ItemToUse->ItemType != ItemType2HPierce)) {
+			else if((ItemToUse->ItemType > ItemTypeLargeThrowing) && (ItemToUse->ItemType != ItemTypeMartial) && (ItemToUse->ItemType != ItemType2HPiercing)) {
 				//no weapon
 				ItemToUse = nullptr;
 			}
@@ -2039,7 +2039,7 @@ void Mob::SetAttackTimer() {
 			if(speed < RuleI(Combat, MinHastedDelay))
 				speed = RuleI(Combat, MinHastedDelay);
 
-			if(ItemToUse && (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeThrowing))
+			if(ItemToUse && (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeLargeThrowing))
 			{
 				if(IsClient())
 				{
@@ -2049,7 +2049,7 @@ void Mob::SetAttackTimer() {
 						const ItemInst *pi = CastToClient()->GetInv().GetItem(r);
 						if(!pi)
 							continue;
-						if(pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagType_Quiver)
+						if(pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagTypeQuiver)
 						{
 							float temp_wr = ( pi->GetItem()->BagWR / RuleI(Combat, QuiverWRHasteDiv) );
 							if(temp_wr > max_quiver)
@@ -2077,13 +2077,13 @@ void Mob::SetAttackTimer() {
 bool Mob::CanThisClassDualWield(void) const
 {
 	if (!IsClient()) {
-		return(GetSkill(DUAL_WIELD) > 0);
+		return(GetSkill(SkillDualWield) > 0);
 	} else {
 		const ItemInst* inst = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
 		// 2HS, 2HB, or 2HP
 		if (inst && inst->IsType(ItemClassCommon)) {
 			const Item_Struct* item = inst->GetItem();
-			if ((item->ItemType == ItemType2HB) || (item->ItemType == ItemType2HS) || (item->ItemType == ItemType2HPierce))
+			if ((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
 				return false;
 		} else {
 			//No weapon in hand... using hand-to-hand...
@@ -2093,19 +2093,19 @@ bool Mob::CanThisClassDualWield(void) const
 			}
 		}
 
-		return (CastToClient()->HasSkill(DUAL_WIELD));	// No skill = no chance
+		return (CastToClient()->HasSkill(SkillDualWield));	// No skill = no chance
 	}
 }
 
 bool Mob::CanThisClassDoubleAttack(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(DOUBLE_ATTACK) > 0);
+		return(GetSkill(SkillDoubleAttack) > 0);
 	} else {
 		if(aabonuses.GiveDoubleAttack || itembonuses.GiveDoubleAttack || spellbonuses.GiveDoubleAttack) {
 			return true;
 		}
-		return(CastToClient()->HasSkill(DOUBLE_ATTACK));
+		return(CastToClient()->HasSkill(SkillDoubleAttack));
 	}
 }
 
@@ -2145,36 +2145,36 @@ bool Mob::IsWarriorClass(void) const
 bool Mob::CanThisClassParry(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(PARRY) > 0);
+		return(GetSkill(SkillParry) > 0);
 	} else {
-		return(CastToClient()->HasSkill(PARRY));
+		return(CastToClient()->HasSkill(SkillParry));
 	}
 }
 
 bool Mob::CanThisClassDodge(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(DODGE) > 0);
+		return(GetSkill(SkillDodge) > 0);
 	} else {
-		return(CastToClient()->HasSkill(DODGE));
+		return(CastToClient()->HasSkill(SkillDodge));
 	}
 }
 
 bool Mob::CanThisClassRiposte(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(RIPOSTE) > 0);
+		return(GetSkill(SkillRiposte) > 0);
 	} else {
-		return(CastToClient()->HasSkill(RIPOSTE));
+		return(CastToClient()->HasSkill(SkillRiposte));
 	}
 }
 
 bool Mob::CanThisClassBlock(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(BLOCKSKILL) > 0);
+		return(GetSkill(SkillBlock) > 0);
 	} else {
-		return(CastToClient()->HasSkill(BLOCKSKILL));
+		return(CastToClient()->HasSkill(SkillBlock));
 	}
 }
 
@@ -2556,8 +2556,8 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	{
 		if	// for primary and secondary we need the model, not the material
 		(
-			material_slot == MATERIAL_PRIMARY ||
-			material_slot == MATERIAL_SECONDARY
+			material_slot == MaterialPrimary ||
+			material_slot == MaterialSecondary
 		)
 		{
 			if(strlen(item->IDFile) > 2)
@@ -2775,7 +2775,7 @@ int16 Mob::GetResist(uint8 type) const
 
 uint32 Mob::GetLevelHP(uint8 tlevel)
 {
-	//cout<<"Tlevel: "<<(int)tlevel<<endl;
+	//std::cout<<"Tlevel: "<<(int)tlevel<<std::endl; // cout undefined [CODEBUG]
 	int multiplier = 0;
 	if (tlevel < 10)
 	{
@@ -3308,7 +3308,7 @@ int32 Mob::GetVulnerability(int32 damage, Mob *caster, uint32 spell_id, uint32 t
 	return damage;
 }
 
-int16 Mob::GetSkillDmgTaken(const SkillType skill_used)
+int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 {
 	int skilldmg_mod = 0;
 
@@ -4414,7 +4414,7 @@ void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
 }
 
 
-void Mob::ModSkillDmgTaken(SkillType skill_num, int value)
+void Mob::ModSkillDmgTaken(SkillUseTypes skill_num, int value)
 {
 	if (skill_num <= HIGHEST_SKILL)
 		SkillDmgTaken_Mod[skill_num] = value;
@@ -4424,7 +4424,7 @@ void Mob::ModSkillDmgTaken(SkillType skill_num, int value)
 		SkillDmgTaken_Mod[HIGHEST_SKILL+1] = value;
 }
 
-int16 Mob::GetModSkillDmgTaken(const SkillType skill_num)
+int16 Mob::GetModSkillDmgTaken(const SkillUseTypes skill_num)
 {
 	if (skill_num <= HIGHEST_SKILL)
 		return SkillDmgTaken_Mod[skill_num];
@@ -4536,24 +4536,24 @@ uint16 Mob::GetSkillByItemType(int ItemType)
 {
 	switch (ItemType)
 	{
-		case ItemType1HS:
-			return _1H_SLASHING;
-		case ItemType2HS:
-			return _2H_SLASHING;
-		case ItemTypePierce:
-			return PIERCING;
-		case ItemType1HB:
-			return _1H_BLUNT;
-		case ItemType2HB:
-			return _2H_BLUNT;
-		case ItemType2HPierce:
-			return PIERCING;
-		case ItemTypeHand2Hand:
-			return HAND_TO_HAND;
+		case ItemType1HSlash:
+			return Skill1HSlashing;
+		case ItemType2HSlash:
+			return Skill2HSlashing;
+		case ItemType1HPiercing:
+			return Skill1HPiercing;
+		case ItemType1HBlunt:
+			return Skill1HBlunt;
+		case ItemType2HBlunt:
+			return Skill2HBlunt;
+		case ItemType2HPiercing:
+			return Skill1HPiercing; // change to 2HPiercing once activated
+		case ItemTypeMartial:
+			return SkillHandtoHand;
 		default:
-			return HAND_TO_HAND;
+			return SkillHandtoHand;
 	}
-	return HAND_TO_HAND;
+	return SkillHandtoHand;
  }
 
 

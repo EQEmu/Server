@@ -57,7 +57,7 @@ public:
 			return;
 
 		for (i=0; i<len; i++) {
-//			cout << i << ": 0x" << hex << (int) message[i] << dec << " " << message[i] << endl;
+//			std::cout << i << ": 0x" << std::hex << (int) message[i] << std::dec << " " << message[i] << std::endl; // undefined cout [CODEBUG]
 			if (inarg) {
 				if ((inquote == false && (message[i] == div || message[i] == div2 || message[i] == div3)) || (inquote && (message[i] == '\'' || message[i] == '\"') && (message[i+1] == div || message[i+1] == div2 || message[i+1] == div3 || message[i+1] == 0))) {
 					inquote = false;

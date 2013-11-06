@@ -54,7 +54,7 @@ static inline int32 GetNextItemInstSerialNumber() {
 }
 
 ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
-	m_use_type = ItemUseNormal;
+	m_use_type = ItemInstNormal;
 	m_item = item;
 	m_charges = charges;
 	m_price = 0;
@@ -76,7 +76,7 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 }
 
 ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
-	m_use_type = ItemUseNormal;
+	m_use_type = ItemInstNormal;
 	m_item = db->GetItem(item_id);
 	m_charges = charges;
 	m_price = 0;
@@ -220,10 +220,10 @@ ItemInst* ItemInst::Clone() const
 }
 
 // Query item type
-bool ItemInst::IsType(ItemClass item_class) const
+bool ItemInst::IsType(ItemClassTypes item_class) const
 {
 	// Check usage type
-	if ((m_use_type == ItemUseWorldContainer) && (item_class == ItemClassContainer))
+	if ((m_use_type == ItemInstWorldContainer) && (item_class == ItemClassContainer))
 
 		return true;
 	if (!m_item)
@@ -340,8 +340,8 @@ bool ItemInst::IsAmmo() const {
 	if(!m_item) return false;
 
 	if((m_item->ItemType == ItemTypeArrow) ||
-		(m_item->ItemType == ItemTypeThrowing) ||
-		(m_item->ItemType == ItemTypeThrowingv2))
+		(m_item->ItemType == ItemTypeLargeThrowing) ||
+		(m_item->ItemType == ItemTypeSmallThrowing))
 		return true;
 
 	return false;
@@ -1201,7 +1201,7 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 			if (inst && inst->IsType(ItemClassContainer)
 				&& inst->GetItem()->BagSize >= min_size)
 			{
-				if(inst->GetItem()->BagType == BagType_Quiver && inst->GetItem()->ItemType != ItemTypeArrow)
+				if(inst->GetItem()->BagType == BagTypeQuiver && inst->GetItem()->ItemType != ItemTypeArrow)
 				{
 					continue;
 				}
@@ -1790,26 +1790,26 @@ int16 Inventory::CalcSlotFromMaterial(uint8 material)
 {
 	switch(material)
 	{
-		case MATERIAL_HEAD:
+		case MaterialHead:
 			return SLOT_HEAD;
-		case MATERIAL_CHEST:
+		case MaterialChest:
 			return SLOT_CHEST;
-		case MATERIAL_ARMS:
+		case MaterialArms:
 			return SLOT_ARMS;
-		case MATERIAL_BRACER:
+		case MaterialWrist:
 			return SLOT_BRACER01;	// there's 2 bracers, only one bracer material
-		case MATERIAL_HANDS:
+		case MaterialHands:
 			return SLOT_HANDS;
-		case MATERIAL_LEGS:
+		case MaterialLegs:
 			return SLOT_LEGS;
-		case MATERIAL_FEET:
+		case MaterialFeet:
 			return SLOT_FEET;
-		case MATERIAL_PRIMARY:
+		case MaterialPrimary:
 			return SLOT_PRIMARY;
-		case MATERIAL_SECONDARY:
+		case MaterialSecondary:
 			return SLOT_SECONDARY;
 		default:
-			return -1;
+			return SLOT_INVALID;
 	}
 }
 
@@ -1818,26 +1818,26 @@ uint8 Inventory::CalcMaterialFromSlot(int16 equipslot)
 	switch(equipslot)
 	{
 		case SLOT_HEAD:
-			return MATERIAL_HEAD;
+			return MaterialHead;
 		case SLOT_CHEST:
-			return MATERIAL_CHEST;
+			return MaterialChest;
 		case SLOT_ARMS:
-			return MATERIAL_ARMS;
+			return MaterialArms;
 		case SLOT_BRACER01:
 		case SLOT_BRACER02:
-			return MATERIAL_BRACER;
+			return MaterialWrist;
 		case SLOT_HANDS:
-			return MATERIAL_HANDS;
+			return MaterialHands;
 		case SLOT_LEGS:
-			return MATERIAL_LEGS;
+			return MaterialLegs;
 		case SLOT_FEET:
-			return MATERIAL_FEET;
+			return MaterialFeet;
 		case SLOT_PRIMARY:
-			return MATERIAL_PRIMARY;
+			return MaterialPrimary;
 		case SLOT_SECONDARY:
-			return MATERIAL_SECONDARY;
+			return MaterialSecondary;
 		default:
-			return 0xFF;
+			return _MaterialInvalid;
 	}
 }
 
@@ -1861,9 +1861,9 @@ bool Inventory::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_S
 
 	if(ItemToTry->Size > Container->BagSize) return false;
 
-	if((Container->BagType == BagType_Quiver) && (ItemToTry->ItemType != ItemTypeArrow)) return false;
+	if((Container->BagType == BagTypeQuiver) && (ItemToTry->ItemType != ItemTypeArrow)) return false;
 
-	if((Container->BagType == BagType_Bandolier) && (ItemToTry->ItemType != ItemTypeThrowingv2)) return false;
+	if((Container->BagType == BagTypeBandolier) && (ItemToTry->ItemType != ItemTypeSmallThrowing)) return false;
 
 	return true;
 }

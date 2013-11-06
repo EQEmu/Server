@@ -270,7 +270,7 @@ bool Zone::LoadZoneObjects() {
 			//tradeskill containers do not have an itemid of 0... at least what I am seeing
 			if (itemid == 0) {
 				// Generic tradeskill container
-				inst = new ItemInst(ItemUseWorldContainer);
+				inst = new ItemInst(ItemInstWorldContainer);
 			}
 			else {
 				// Groundspawn object
@@ -279,7 +279,7 @@ bool Zone::LoadZoneObjects() {
 
 			//Father Nitwit's fix... not perfect...
 			if(inst == nullptr && type != OT_DROPPEDITEM) {
-				inst = new ItemInst(ItemUseWorldContainer);
+				inst = new ItemInst(ItemInstWorldContainer);
 			}
 
 			// Load child objects if container

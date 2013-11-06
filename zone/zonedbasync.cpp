@@ -21,11 +21,11 @@ void DispatchFinishedDBAsync(DBAsyncWork* dbaw) {
 					if (dbaq->GetAnswer(errbuf, result))
 						database.LoadVariables_result(result);
 					else
-						cout << "Async DB.LoadVariables() failed: '" << errbuf << "'" << endl;
+						std::cout << "Async DB.LoadVariables() failed: '" << errbuf << "'" << std::endl;
 					break;
 				}
 				default: {
-					cout << "Error: DispatchFinishedDBAsync(): Unknown workpt.b4" << endl;
+					std::cout << "Error: DispatchFinishedDBAsync(): Unknown workpt.b4" << std::endl;
 					break;
 				}
 			}
@@ -119,7 +119,7 @@ bool DBAsyncCB_CharacterBackup(DBAsyncWork* iWork) { // return true means delete
 		}
 	}
 	else {
-//		cout << "Error in DBAsyncCB_CharacterBackup query1 '" << query << "' " << errbuf << endl;
+//		std::cout << "Error in DBAsyncCB_CharacterBackup query1 '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return true;
 	}

@@ -1446,7 +1446,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	SetRacialLanguages( &pp ); // bUsh
 	SetRaceStartingSkills( &pp ); // bUsh
 	SetClassStartingSkills( &pp ); // bUsh
-	pp.skills[SENSE_HEADING] = 200;
+	pp.skills[SkillSenseHeading] = 200;
 	// Some one fucking fix this to use a field name. -Doodman
 	//pp.unknown3596[28] = 15; // @bp: This is to enable disc usage
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
@@ -1835,26 +1835,26 @@ void Client::SetClassStartingSkills( PlayerProfile_Struct *pp )
 {
 	for(uint32 i = 0; i <= HIGHEST_SKILL; ++i) {
 		if(pp->skills[i] == 0) {
-			if(i >= SPECIALIZE_ABJURE && i <= SPECIALIZE_EVOCATION) {
+			if(i >= SkillSpecializeAbjure && i <= SkillSpecializeEvocation) {
 				continue;
 			}
 
-			if(i == MAKE_POISON ||
-				i == TINKERING ||
-				i == RESEARCH ||
-				i == ALCHEMY ||
-				i == BAKING ||
-				i == TAILORING ||
-				i == BLACKSMITHING ||
-				i == FLETCHING ||
-				i == BREWING ||
-				i == POTTERY ||
-				i == JEWELRY_MAKING ||
-				i == BEGGING) {
+			if(i == SkillMakePoison ||
+				i == SkillTinkering ||
+				i == SkillResearch ||
+				i == SkillAlchemy ||
+				i == SkillBaking ||
+				i == SkillTailoring ||
+				i == SkillBlacksmithing ||
+				i == SkillFletching ||
+				i == SkillBrewing ||
+				i == SkillPottery ||
+				i == SkillJewelryMaking ||
+				i == SkillBegging) {
 				continue;
 			}
 
-			pp->skills[i] = database.GetSkillCap(pp->class_, (SkillType)i, 1);
+			pp->skills[i] = database.GetSkillCap(pp->class_, (SkillUseTypes)i, 1);
 		}
 	}
 }
@@ -1878,41 +1878,41 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case DARK_ELF:
 		{
-			pp->skills[HIDE] = 50;
+			pp->skills[SkillHide] = 50;
 			break;
 		}
 	case FROGLOK:
 		{
-			pp->skills[SWIMMING] = 125;
+			pp->skills[SkillSwimming] = 125;
 			break;
 		}
 	case GNOME:
 		{
-			pp->skills[TINKERING] = 50;
+			pp->skills[SkillTinkering] = 50;
 			break;
 		}
 	case HALFLING:
 		{
-			pp->skills[HIDE] = 50;
-			pp->skills[SNEAK] = 50;
+			pp->skills[SkillHide] = 50;
+			pp->skills[SkillSneak] = 50;
 			break;
 		}
 	case IKSAR:
 		{
-			pp->skills[FORAGE] = 50;
-			pp->skills[SWIMMING] = 100;
+			pp->skills[SkillForage] = 50;
+			pp->skills[SkillSwimming] = 100;
 			break;
 		}
 	case WOOD_ELF:
 		{
-			pp->skills[FORAGE] = 50;
-			pp->skills[HIDE] = 50;
+			pp->skills[SkillForage] = 50;
+			pp->skills[SkillHide] = 50;
 			break;
 		}
 	case VAHSHIR:
 		{
-			pp->skills[SAFE_FALL] = 50;
-			pp->skills[SNEAK] = 50;
+			pp->skills[SkillSafeFall] = 50;
+			pp->skills[SkillSneak] = 50;
 			break;
 		}
 	}

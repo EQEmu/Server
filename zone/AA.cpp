@@ -432,7 +432,7 @@ void Client::HandleAAAction(aaID activate) {
 				int curhp = GetTarget()->GetHP();
 				target = aaTargetCurrent;
 				GetTarget()->HealDamage(curhp, this);
-				Death(this, 0, SPELL_UNKNOWN, HAND_TO_HAND);
+				Death(this, 0, SPELL_UNKNOWN, SkillHandtoHand);
 			}
 			break;
 

@@ -41,7 +41,7 @@ struct ExtendedProfile_Struct {
 	uint16				old_pet_hp;
 	uint16				old_pet_mana;
 	SpellBuff_Struct	pet_buffs[BUFF_COUNT];
-	uint32				pet_items[MAX_MATERIALS];
+	uint32				pet_items[_MaterialCount];
 	char				merc_name[64];
 
 	uint32				aa_effects;

@@ -1476,7 +1476,7 @@ void SharedDatabase::LoadSkillCaps(void *data) {
 	}
 }
 
-uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillType Skill, uint8 Level) {
+uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level) {
 	if(!skill_caps_mmf) {
 		return 0;
 	}
@@ -1505,7 +1505,7 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillType Skill, uint8 Level) {
 	return skill_caps_table[index];
 }
 
-uint8 SharedDatabase::GetTrainLevel(uint8 Class_, SkillType Skill, uint8 Level) {
+uint8 SharedDatabase::GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Level) {
 	if(!skill_caps_mmf) {
 		return 0;
 	}
@@ -1683,9 +1683,9 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].basediff=atoi(row[99]);
 			int tmp_skill = atoi(row[100]);;
 			if(tmp_skill < 0 || tmp_skill > HIGHEST_SKILL)
-				sp[tempid].skill = BEGGING; /* not much better we can do. */
+				sp[tempid].skill = SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
 			else
-				sp[tempid].skill = (SkillType) tmp_skill;
+				sp[tempid].skill = (SkillUseTypes) tmp_skill;
 			sp[tempid].zonetype=atoi(row[101]);
 			sp[tempid].EnvironmentType=atoi(row[102]);
 			sp[tempid].TimeOfDay=atoi(row[103]);

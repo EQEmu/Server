@@ -197,11 +197,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 						cs->cs_colors[char_num][material].color = color;
 
 						// the weapons are kept elsewhere
-						if ((material==MATERIAL_PRIMARY) || (material==MATERIAL_SECONDARY))
+						if ((material==MaterialPrimary) || (material==MaterialSecondary))
 						{
 							if(strlen(item->GetItem()->IDFile) > 2) {
 								uint32 idfile=atoi(&item->GetItem()->IDFile[2]);
-								if (material==MATERIAL_PRIMARY)
+								if (material==MaterialPrimary)
 									cs->primary[char_num]=idfile;
 								else
 									cs->secondary[char_num]=idfile;

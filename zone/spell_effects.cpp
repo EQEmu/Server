@@ -2113,11 +2113,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				switch(spells[spell_id].skill)
 				{
-					case THROWING:
+					case SkillThrowing:
 						caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus);
 					break;
 
-					case ARCHERY:
+					case SkillArchery:
 						caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus);
 					break;
 
@@ -3238,11 +3238,11 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 						double break_chance = 2.0;
 						if(caster)
 						{
-							break_chance -= (2 * (((double)caster->GetSkill(DIVINATION) + ((double)caster->GetLevel() * 3.0)) / 650.0));
+							break_chance -= (2 * (((double)caster->GetSkill(SkillDivination) + ((double)caster->GetLevel() * 3.0)) / 650.0));
 						}
 						else
 						{
-							break_chance -= (2 * (((double)GetSkill(DIVINATION) + ((double)GetLevel() * 3.0)) / 650.0));
+							break_chance -= (2 * (((double)GetSkill(SkillDivination) + ((double)GetLevel() * 3.0)) / 650.0));
 						}
 
 						if(MakeRandomFloat(0.0, 100.0) < break_chance)

@@ -269,7 +269,9 @@ ENCODE(OP_PlayerProfile) {
 	OUT(gold_cursor);
 	OUT(silver_cursor);
 	OUT(copper_cursor);
-	OUT_array(skills, structs::MAX_PP_SKILL);
+
+	OUT_array(skills, structs::MAX_PP_SKILL);	// 1:1 direct copy (100 dword)
+
 //	OUT(unknown04760[236]);
 	OUT(toxicity);
 	OUT(thirst_level);

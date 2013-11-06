@@ -343,7 +343,7 @@ bool valid=false;
 		uint16 packet_crc=ntohs(*(const uint16 *)(buffer+length-2));
 #ifdef EQN_DEBUG
 		if (packet_crc && comp_crc != packet_crc) {
-			cout << "CRC mismatch: comp=" << hex << comp_crc << ", packet=" << packet_crc << dec << endl;
+			std::cout << "CRC mismatch: comp=" << std::hex << comp_crc << ", packet=" << packet_crc << std::dec << std::endl;
 		}
 #endif
 		valid = (!packet_crc || comp_crc == packet_crc);

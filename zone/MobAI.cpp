@@ -846,9 +846,9 @@ void Client::AI_Process()
 									if (ExtraAttackChanceBonus && GetTarget()) {
 										ItemInst *wpn = GetInv().GetItem(SLOT_PRIMARY);
 										if(wpn){
-											if(wpn->GetItem()->ItemType == ItemType2HS ||
-												wpn->GetItem()->ItemType == ItemType2HB ||
-												wpn->GetItem()->ItemType == ItemType2HPierce )
+											if(wpn->GetItem()->ItemType == ItemType2HSlash ||
+												wpn->GetItem()->ItemType == ItemType2HBlunt ||
+												wpn->GetItem()->ItemType == ItemType2HPiercing )
 											{
 												if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
 												{
@@ -885,7 +885,7 @@ void Client::AI_Process()
 					float DualWieldProbability = 0.0f;
 
 					int16 Ambidexterity = aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
-					DualWieldProbability = (GetSkill(DUAL_WIELD) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
+					DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
 					int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 					DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
@@ -1312,8 +1312,8 @@ void Mob::AI_Process() {
 				{
 					int myclass = GetClass();
 					//can only dual wield without a weapon if your a monk
-					if(GetSpecialAbility(SPECATK_INNATE_DW) || (GetEquipment(MATERIAL_SECONDARY) != 0 && GetLevel() > 29) || myclass == MONK || myclass == MONKGM) {
-						float DualWieldProbability = (GetSkill(DUAL_WIELD) + GetLevel()) / 400.0f;
+					if(GetSpecialAbility(SPECATK_INNATE_DW) || (GetEquipment(MaterialSecondary) != 0 && GetLevel() > 29) || myclass == MONK || myclass == MONKGM) {
+						float DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel()) / 400.0f;
 						if(MakeRandomFloat(0.0, 1.0) < DualWieldProbability)
 						{
 							Attack(target, 14);

@@ -1073,7 +1073,7 @@ void QuestManager::addskill(int skill_id, int value) {
 	if(skill_id < 0 || skill_id > HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->AddSkill((SkillType) skill_id, value);
+		initiator->AddSkill((SkillUseTypes) skill_id, value);
 }
 
 void QuestManager::setlanguage(int skill_id, int value) {
@@ -1087,7 +1087,7 @@ void QuestManager::setskill(int skill_id, int value) {
 	if(skill_id < 0 || skill_id > HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->SetSkill((SkillType) skill_id, value);
+		initiator->SetSkill((SkillUseTypes) skill_id, value);
 }
 
 void QuestManager::setallskill(int value) {
@@ -1095,8 +1095,8 @@ void QuestManager::setallskill(int value) {
 	if (!initiator)
 		return;
 	if (initiator && initiator->IsClient()) {
-		SkillType sk;
-		for (sk = _1H_BLUNT; sk <= HIGHEST_SKILL; sk = (SkillType)(sk+1)) {
+		SkillUseTypes sk;
+		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) {
 			initiator->SetSkill(sk, value);
 		}
 	}
@@ -1710,7 +1710,7 @@ void QuestManager::clear_zone_flag(int zone_id) {
 void QuestManager::sethp(int hpperc) {
 	QuestManagerCurrentQuestVars();
 	int newhp = (owner->GetMaxHP() * (100 - hpperc)) / 100;
-	owner->Damage(owner, newhp, SPELL_UNKNOWN, HAND_TO_HAND, false, 0, false);
+	owner->Damage(owner, newhp, SPELL_UNKNOWN, SkillHandtoHand, false, 0, false);
 }
 
 bool QuestManager::summonburriedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading) {
@@ -2096,6 +2096,7 @@ bool QuestManager::istaskactive(int task) {
 
 	return false;
 }
+
 bool QuestManager::istaskactivityactive(int task, int activity) {
 	QuestManagerCurrentQuestVars();
 
@@ -2104,6 +2105,7 @@ bool QuestManager::istaskactivityactive(int task, int activity) {
 
 	return false;
 }
+
 int QuestManager::gettaskactivitydonecount(int task, int activity) {
 	QuestManagerCurrentQuestVars();
 
@@ -2113,6 +2115,7 @@ int QuestManager::gettaskactivitydonecount(int task, int activity) {
 	return 0;
 
 }
+
 void QuestManager::updatetaskactivity(int task, int activity, int count) {
 	QuestManagerCurrentQuestVars();
 
@@ -2165,6 +2168,7 @@ int QuestManager::enabledtaskcount(int taskset) {
 
 	return -1;
 }
+
 int QuestManager::firsttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
@@ -2173,6 +2177,7 @@ int QuestManager::firsttaskinset(int taskset) {
 
 	return -1;
 }
+
 int QuestManager::lasttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
@@ -2181,6 +2186,7 @@ int QuestManager::lasttaskinset(int taskset) {
 
 	return -1;
 }
+
 int QuestManager::nexttaskinset(int taskset, int taskid) {
 	QuestManagerCurrentQuestVars();
 
@@ -2189,6 +2195,7 @@ int QuestManager::nexttaskinset(int taskset, int taskid) {
 
 	return -1;
 }
+
 int QuestManager::activespeaktask() {
 	QuestManagerCurrentQuestVars();
 
@@ -2196,6 +2203,7 @@ int QuestManager::activespeaktask() {
 		return initiator->ActiveSpeakTask(owner->GetNPCTypeID());
 	return 0;
 }
+
 int QuestManager::activespeakactivity(int taskid) {
 	QuestManagerCurrentQuestVars();
 
@@ -2204,6 +2212,7 @@ int QuestManager::activespeakactivity(int taskid) {
 
 	return 0;
 }
+
 int QuestManager::istaskcompleted(int taskid) {
 	QuestManagerCurrentQuestVars();
 
@@ -2212,6 +2221,7 @@ int QuestManager::istaskcompleted(int taskid) {
 
 	return -1;
 }
+
 int QuestManager::activetasksinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
@@ -2220,6 +2230,7 @@ int QuestManager::activetasksinset(int taskset) {
 
 	return -1;
 }
+
 int QuestManager::completedtasksinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
@@ -2237,6 +2248,7 @@ bool QuestManager::istaskappropriate(int task) {
 
 	return false;
 }
+
 void QuestManager::clearspawntimers() {
 	if(zone) {
 		//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
@@ -2253,6 +2265,7 @@ void QuestManager::clearspawntimers() {
 		}
 	}
 }
+
 void QuestManager::ze(int type, const char *str) {
 	entity_list.Message(0, type, str);
 }
@@ -2886,6 +2899,18 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 	strn0cpy(CZSC->Message, Message, 512);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+void QuestManager::EnableRecipe(uint32 recipe_id)
+{
+	if (recipe_id > 0)
+		database.EnableRecipe(recipe_id);
+}
+
+void QuestManager::DisableRecipe(uint32 recipe_id)
+{
+	if (recipe_id > 0)
+		database.DisableRecipe(recipe_id);
 }
 
 Client *QuestManager::GetInitiator() const {

@@ -35,7 +35,7 @@
 #include "../common/rulesys.h"
 #include "QuestParserCollection.h"
 
-static const SkillType TradeskillUnknown = _1H_BLUNT; /* an arbitrary non-tradeskill */
+static const SkillUseTypes TradeskillUnknown = Skill1HBlunt; /* an arbitrary non-tradeskill */
 
 void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augment, Object *worldo)
 {
@@ -315,7 +315,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	//changing from a switch to string of if's since we don't need to iterate through all of the skills in the SkillType enum
-	if (spec.tradeskill == ALCHEMY) {
+	if (spec.tradeskill == SkillAlchemy) {
 		if (user_pp.class_ != SHAMAN) {
 			user->Message(13, "This tradeskill can only be performed by a shaman.");
 			return;
@@ -325,13 +325,13 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			return;
 		}
 	}
-	else if (spec.tradeskill == TINKERING) {
+	else if (spec.tradeskill == SkillTinkering) {
 		if (user_pp.race != GNOME) {
 			user->Message(13, "Only gnomes can tinker.");
 			return;
 		}
 	}
-	else if (spec.tradeskill == MAKE_POISON) {
+	else if (spec.tradeskill == SkillMakePoison) {
 		if (user_pp.class_ != ROGUE) {
 			user->Message(13, "Only rogues can mix poisons.");
 			return;
@@ -576,75 +576,75 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name.c_str(), spec.recipe_id);
 }
 
-SkillType Object::TypeToSkill(uint32 type)
+SkillUseTypes Object::TypeToSkill(uint32 type)
 {
-	switch(type) // grouped and ordered by SkillType name - new types need to be verified for proper SkillType and use
+	switch(type) // grouped and ordered by SkillUseTypes name - new types need to be verified for proper SkillUseTypes and use
 	{
-	/*ALCHEMY*/
-		case BagType_MedicineBag: { return (SkillType)ALCHEMY; }
+/*SkillAlchemy*/
+		case BagTypeMedicineBag: { return SkillAlchemy; }
 
-	/*BAKING*/
-		// case BagType_MixingBowl: // No idea...
-		case BagType_Oven: { return (SkillType)BAKING; }
+/*SkillBaking*/
+		// case BagTypeMixingBowl: // No idea...
+		case BagTypeOven: { return SkillBaking; }
 
-	/*BLACKSMITHING*/
-		case BagType_Forge:
-		// case BagType_KoadaDalForge:
-		case BagType_TeirDalForge:
-		case BagType_OggokForge:
-		case BagType_StormguardForge:
-		// case BagType_AkanonForge:
-		// case BagType_NorthmanForge:
-		// case BagType_CabilisForge:
-		// case BagType_FreeportForge:
-		// case BagType_RoyalQeynosForge:
-		// case BagType_TrollForge:
-		case BagType_FierDalForge:
-		case BagType_ValeForge: { return (SkillType)BLACKSMITHING; } // Delete return if BagType_GuktaForge enabled
-		// case BagType_ErudForge:
-		// case BagType_GuktaForge: { return (SkillType)BLACKSMITHING; }
+/*SkillBlacksmithing*/
+		case BagTypeForge:
+		// case BagTypeKoadaDalForge:
+		case BagTypeTeirDalForge:
+		case BagTypeOggokForge:
+		case BagTypeStormguardForge:
+		// case BagTypeAkanonForge:
+		// case BagTypeNorthmanForge:
+		// case BagTypeCabilisForge:
+		// case BagTypeFreeportForge:
+		// case BagTypeRoyalQeynosForge:
+		// case BagTypeTrollForge:
+		case BagTypeFierDalForge:
+		case BagTypeValeForge: { return SkillBlacksmithing; } // Delete return if BagTypeGuktaForge enabled
+		// case BagTypeErudForge:
+		// case BagTypeGuktaForge: { return SkillBlacksmithing; }
 
-	/*BREWING*/
-		// case BagType_IceCreamChurn: // No idea...
-		case BagType_BrewBarrel: { return (SkillType)BREWING; }
+/*SkillBrewing*/
+		// case BagTypeIceCreamChurn: // No idea...
+		case BagTypeBrewBarrel: { return SkillBrewing; }
 
-	/*FISHING*/
-		case BagType_TackleBox: { return (SkillType)FISHING; }
+/*SkillFishing*/
+		case BagTypeTackleBox: { return SkillFishing; }
 
-	/*FLETCHING*/
-		case BagType_FletchingKit: { return (SkillType)FLETCHING; } // Delete return if BagType_FierDalFletchingKit enabled
-		// case BagType_FierDalFletchingKit: { return (SkillType)FLETCHING; }
+/*SkillFletching*/
+		case BagTypeFletchingKit: { return SkillFletching; } // Delete return if BagTypeFierDalFletchingKit enabled
+		// case BagTypeFierDalFletchingKit: { return SkillFletching; }
 
-	/*JEWELRY_MAKING*/
-		case BagType_JewelersKit: { return (SkillType)JEWELRY_MAKING; }
+/*SkillJewelryMaking*/
+		case BagTypeJewelersKit: { return SkillJewelryMaking; }
 
-	/*MAKE_POISON*/
-		// This is a guess and needs to be verified... (Could be ALCHEMY)
-		// case BagType_Mortar: { return (SkillType)MAKE_POISON; }
+/*SkillMakePoison*/
+		// This is a guess and needs to be verified... (Could be SkillAlchemy)
+		// case BagTypeMortar: { return SkillMakePoison; }
 
-	/*POTTERY*/
-		case BagType_PotteryWheel:
-		case BagType_Kiln: { return (SkillType)POTTERY; } // Delete return if BagType_IksarPotteryWheel enabled
-		// case BagType_IksarPotteryWheel: { return (SkillType)POTTERY; }
+/*SkillPottery*/
+		case BagTypePotteryWheel:
+		case BagTypeKiln: { return SkillPottery; } // Delete return if BagTypeIksarPotteryWheel enabled
+		// case BagTypeIksarPotteryWheel: { return SkillPottery; }
 
-	/*RESEARCH*/
-		// case BagType_Lexicon:
-		case BagType_WizardsLexicon:
-		case BagType_MagesLexicon:
-		case BagType_NecromancersLexicon:
-		case BagType_EnchantersLexicon: { return (SkillType)RESEARCH; } // Delete return if BagType_ConcordanceofResearch enabled
-		// case BagType_ConcordanceofResearch: { return (SkillType)RESEARCH; }
+/*SkillResearch*/
+		// case BagTypeLexicon:
+		case BagTypeWizardsLexicon:
+		case BagTypeMagesLexicon:
+		case BagTypeNecromancersLexicon:
+		case BagTypeEnchantersLexicon: { return SkillResearch; } // Delete return if BagTypeConcordanceofResearch enabled
+		// case BagTypeConcordanceofResearch: { return SkillResearch; }
 
-	/*TAILORING*/
-		case BagType_SewingKit: { return (SkillType)TAILORING; } // Delete return if BagType_FierDalTailoringKit enabled
-		// case BagType_HalflingTailoringKit:
-		// case BagType_ErudTailoringKit:
-		// case BagType_FierDalTailoringKit: { return (SkillType)TAILORING; }
+/*SkillTailoring*/
+		case BagTypeSewingKit: { return SkillTailoring; } // Delete return if BagTypeFierDalTailoringKit enabled
+		// case BagTypeHalflingTailoringKit:
+		// case BagTypeErudTailoringKit:
+		// case BagTypeFierDalTailoringKit: { return SkillTailoring; }
 
-	/*TINKERING*/
-		case BagType_ToolBox: { return (SkillType)TINKERING; }
+/*SkillTinkering*/
+		case BagTypeToolBox: { return SkillTinkering; }
 
-	/*Undefined*/
+/*Undefined*/
 		default: { break; }
 	}
 
@@ -689,7 +689,7 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsi
 		// Recipes that have either been made before or were
 		// explicitly learned are excempt from that limit
 		if (RuleB(Skills, UseLimitTradeskillSearchSkillDiff)) {
-			if (((int32)trivial - (int32)GetSkill((SkillType)tradeskill)) > RuleI(Skills, MaxTradeskillSearchSkillDiff)
+			if (((int32)trivial - (int32)GetSkill((SkillUseTypes)tradeskill)) > RuleI(Skills, MaxTradeskillSearchSkillDiff)
 				&& row[4] == nullptr)
 			{
 				continue;
@@ -855,17 +855,17 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// If you want to customize the stage1 success rate do it here.
 	// Remember: skillup_modifier is (float). Lower is better
 	switch(spec->tradeskill) {
-	case FLETCHING:
-	case ALCHEMY:
-	case JEWELRY_MAKING:
-	case POTTERY:
+	case SkillFletching:
+	case SkillAlchemy:
+	case SkillJewelryMaking:
+	case SkillPottery:
 		skillup_modifier = 4;
 		break;
-	case BAKING:
-	case BREWING:
+	case SkillBaking:
+	case SkillBrewing:
 		skillup_modifier = 3;
 		break;
-	case RESEARCH:
+	case SkillResearch:
 		skillup_modifier = 1;
 		break;
 	default:
@@ -876,10 +876,10 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// Some tradeskills take the higher of one additional stat beside INT and WIS
 	// to determine the skillup rate. Additionally these tradeskills do not have an
 	// -15 modifier on their statbonus.
-	if (spec->tradeskill == FLETCHING || spec->tradeskill == MAKE_POISON) {
+	if (spec->tradeskill == SkillFletching || spec->tradeskill == SkillMakePoison) {
 		thirdstat = GetDEX();
 		stat_modifier = 0;
-	} else if (spec->tradeskill == BLACKSMITHING) {
+	} else if (spec->tradeskill == SkillBlacksmithing) {
 		thirdstat = GetSTR();
 		stat_modifier = 0;
 	}
@@ -932,7 +932,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 	//AA modifiers
 	//can we do this with nested switches?
-	if(spec->tradeskill == ALCHEMY){
+	if(spec->tradeskill == SkillAlchemy){
 		switch(GetAA(aaAlchemyMastery)){
 		case 1:
 			AAChance = 10;
@@ -946,7 +946,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		}
 	}
 
-	if(spec->tradeskill == JEWELRY_MAKING){
+	if(spec->tradeskill == SkillJewelryMaking){
 		switch(GetAA(aaJewelCraftMastery)){
 		case 1:
 			AAChance = 10;
@@ -961,7 +961,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	}
 	const Item_Struct* item = nullptr;
 
-	if (spec->tradeskill == BLACKSMITHING) {
+	if (spec->tradeskill == SkillBlacksmithing) {
 		switch(GetAA(aaBlacksmithingMastery)) {
 		case 1:
 			AAChance = 10;
@@ -975,7 +975,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		}
 	}
 
-	if (spec->tradeskill == BAKING) {
+	if (spec->tradeskill == SkillBaking) {
 		switch(GetAA(aaBakingMastery)) {
 		case 1:
 			AAChance = 10;
@@ -989,7 +989,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		}
 	}
 
-	if (spec->tradeskill == BREWING) {
+	if (spec->tradeskill == SkillBrewing) {
 		switch(GetAA(aaBrewingMastery)) {
 		case 1:
 			AAChance = 10;
@@ -1003,7 +1003,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		}
 	}
 
-	if (spec->tradeskill == FLETCHING) {
+	if (spec->tradeskill == SkillFletching) {
 		switch(GetAA(aaFletchingMastery2)) {
 		case 1:
 			AAChance = 10;
@@ -1017,7 +1017,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		}
 	}
 
-	if (spec->tradeskill == POTTERY) {
+	if (spec->tradeskill == SkillPottery) {
 		switch(GetAA(aaPotteryMastery)) {
 		case 1:
 			AAChance = 10;
@@ -1031,7 +1031,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		}
 	}
 
-	if (spec->tradeskill == TAILORING) {
+	if (spec->tradeskill == SkillTailoring) {
 		switch(GetAA(aaTailoringMastery)) {
 		case 1:
 			AAChance = 10;
@@ -1045,7 +1045,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		}
 	}
 
-	if (spec->tradeskill == RESEARCH) {
+	if (spec->tradeskill == SkillResearch) {
 		switch(GetAA(aaArcaneTongues)) {
 		case 1:
 			AAChance = 10;
@@ -1124,7 +1124,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	return(false);
 }
 
-void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, SkillType tradeskill)
+void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, SkillUseTypes tradeskill)
 {
 	uint16 current_raw_skill = GetRawSkill(tradeskill);
 
@@ -1223,8 +1223,9 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 
 	qlen = MakeAnyLenString(&query, "SELECT tre.recipe_id "
 	" FROM tradeskill_recipe_entries AS tre"
-	" WHERE ( tre.item_id IN(%s) AND tre.componentcount>0 )"
-	" OR ( tre.item_id %s AND tre.iscontainer=1 )"
+	"   INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
+	" WHERE tr.enabled AND (( tre.item_id IN(%s) AND tre.componentcount>0 )"
+	" OR ( tre.item_id %s AND tre.iscontainer=1 ))"
 	" GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u"
 	" AND sum(tre.item_id * tre.componentcount) = %u", buf2, containers, count, sum);
 
@@ -1387,7 +1388,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	" ON tr.id = tre.recipe_id"
 	" LEFT JOIN (SELECT recipe_id, madecount from char_recipe_list WHERE char_id = %u) AS crl "
 	" ON tr.id = crl.recipe_id "
-	" WHERE tr.id = %lu AND tre.item_id %s"
+	" WHERE tr.id = %lu AND tre.item_id %s AND tr.enabled "
 	" GROUP BY tr.id", char_id, (unsigned long)recipe_id, containers);
 
 	if (!RunQuery(query, qlen, errbuf, &result)) {
@@ -1405,7 +1406,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	}
 
 	row = mysql_fetch_row(result);
-	spec->tradeskill			= (SkillType)atoi(row[1]);
+	spec->tradeskill			= (SkillUseTypes)atoi(row[1]);
 	spec->skill_needed		= (int16)atoi(row[2]);
 	spec->trivial			= (uint16)atoi(row[3]);
 	spec->nofail			= atoi(row[4]) ? true : false;
@@ -1559,31 +1560,31 @@ void Client::LearnRecipe(uint32 recipeID)
 
 }
 
-bool Client::CanIncreaseTradeskill(SkillType tradeskill) {
+bool Client::CanIncreaseTradeskill(SkillUseTypes tradeskill) {
 	uint32 rawskill = GetRawSkill(tradeskill);
 	uint16 maxskill = MaxSkill(tradeskill);
 
 	if (rawskill >= maxskill) //Max skill sanity check
 		return false;
 
-	uint8 Baking	= (GetRawSkill(BAKING) > 200) ? 1 : 0;
-	uint8 Smithing	= (GetRawSkill(BLACKSMITHING) > 200) ? 1 : 0;
-	uint8 Brewing	= (GetRawSkill(BREWING) > 200) ? 1 : 0;
-	uint8 Fletching	= (GetRawSkill(FLETCHING) > 200) ? 1 : 0;
-	uint8 Jewelry	= (GetRawSkill(JEWELRY_MAKING) > 200) ? 1 : 0;
-	uint8 Pottery	= (GetRawSkill(POTTERY) > 200) ? 1 : 0;
-	uint8 Tailoring	= (GetRawSkill(TAILORING) > 200) ? 1 : 0;
+	uint8 Baking	= (GetRawSkill(SkillBaking) > 200) ? 1 : 0;
+	uint8 Smithing	= (GetRawSkill(SkillBlacksmithing) > 200) ? 1 : 0;
+	uint8 Brewing	= (GetRawSkill(SkillBrewing) > 200) ? 1 : 0;
+	uint8 Fletching	= (GetRawSkill(SkillFletching) > 200) ? 1 : 0;
+	uint8 Jewelry	= (GetRawSkill(SkillJewelryMaking) > 200) ? 1 : 0;
+	uint8 Pottery	= (GetRawSkill(SkillPottery) > 200) ? 1 : 0;
+	uint8 Tailoring	= (GetRawSkill(SkillTailoring) > 200) ? 1 : 0;
 	uint8 SkillTotal = Baking + Smithing + Brewing + Fletching + Jewelry + Pottery + Tailoring; //Tradeskills above 200
 	uint32 aaLevel	= GetAA(aaNewTanaanCraftingMastery); //New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
 
 	switch (tradeskill) {
-		case BAKING:
-		case BLACKSMITHING:
-		case BREWING:
-		case FLETCHING:
-		case JEWELRY_MAKING:
-		case POTTERY:
-		case TAILORING:
+		case SkillBaking:
+		case SkillBlacksmithing:
+		case SkillBrewing:
+		case SkillFletching:
+		case SkillJewelryMaking:
+		case SkillPottery:
+		case SkillTailoring:
 			if (aaLevel == 6)
 				break; //Maxed AA
 			if (SkillTotal == 0)
@@ -1597,4 +1598,32 @@ bool Client::CanIncreaseTradeskill(SkillType tradeskill) {
 			break; //Other skills unchecked and ability to increase assumed true
 	}
 	return true;
+}
+
+void ZoneDatabase::EnableRecipe(uint32 recipe_id)
+{
+	char *query = 0;
+	uint32 qlen;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+
+	qlen = MakeAnyLenString(&query, "UPDATE tradeskill_recipe SET enabled = 1 WHERE id = %u;", recipe_id);
+
+	if (!RunQuery(query, qlen, errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error in EnableRecipe query '%s': %s", query, errbuf);
+	}
+	safe_delete_array(query);
+}
+
+void ZoneDatabase::DisableRecipe(uint32 recipe_id)
+{
+	char *query = 0;
+	uint32 qlen;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+
+	qlen = MakeAnyLenString(&query, "UPDATE tradeskill_recipe SET enabled = 0 WHERE id = %u;", recipe_id);
+
+	if (!RunQuery(query, qlen, errbuf)) {
+		LogFile->write(EQEMuLog::Error, "Error in DisableRecipe query '%s': %s", query, errbuf);
+	}
+	safe_delete_array(query);
 }

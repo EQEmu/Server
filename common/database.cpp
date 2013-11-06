@@ -199,18 +199,18 @@ bool Database::CheckBannedIPs(const char* loginIP)
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;
-	//cout << "Checking against Banned IPs table."<< endl; //Lieka: Debugging
+	//std::cout << "Checking against Banned IPs table."<< std::endl; //Lieka: Debugging
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP), errbuf, &result)) {
 		safe_delete_array(query);
 		if (mysql_num_rows(result) != 0)
 		{
-			//cout << loginIP << " was present in the banned IPs table" << endl; //Lieka: Debugging
+			//std::cout << loginIP << " was present in the banned IPs table" << std::endl; //Lieka: Debugging
 			mysql_free_result(result);
 			return true;
 		}
 		else
 		{
-			//cout << loginIP << " was not present in the banned IPs table." << endl; //Lieka: Debugging
+			//std::cout << loginIP << " was not present in the banned IPs table." << std::endl; //Lieka: Debugging
 			mysql_free_result(result);
 			return false;
 		}
