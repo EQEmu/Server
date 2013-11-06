@@ -24,11 +24,11 @@
 
 void vStringFormat(std::string& output, const char* format, va_list args);
 void StringFormat(std::string& output, const char* format, ...);
+std::string EscapeString(const std::string &s);
 
 const char *MakeLowerString(const char *source);
 
 void MakeLowerString(const char *source, char *target);
-
 
 int MakeAnyLenString(char** ret, const char* format, ...);
 uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...);

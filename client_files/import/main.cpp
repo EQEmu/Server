@@ -65,7 +65,7 @@ int GetSpellColumns(SharedDatabase *db) {
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int res = 0;
-	if(db->RunQuery(query, strlen(query), errbuf, &result)) {
+	if(db->RunQuery(query, (uint32)strlen(query), errbuf, &result)) {
 		while(row = mysql_fetch_row(result)) {
 			++res;
 		}
@@ -85,11 +85,71 @@ void ImportSpells(SharedDatabase *db) {
 		return;
 	}
 
+	std::string delete_sql = "DELETE FROM spells_new";
+	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
+
 	int columns = GetSpellColumns(db);
+	int spells_imported = 0;
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
+		for(int i = 0; i < 2048; ++i) {
+			if(buffer[i] == '\n') {
+				buffer[i] = 0;
+				break;
+			}
+		}
+
+		std::string escaped = ::EscapeString(buffer);
+		auto split = SplitString(escaped, '^');
+		int line_columns = (int)split.size();
+		std::string sql;
+		
+		if(line_columns >= columns) {
+			sql = "INSERT INTO spells_new VALUES(";
+			for(int i = 0; i < columns; ++i) {
+				if(i != 0) {
+					sql += ", '";
+				} else {
+					sql += "'";
+				}
+
+				sql += split[i];
+				sql += "'";
+			}
+
+			sql += ");";
+		} else {
+			int i = 0;
+			sql = "INSERT INTO spells_new VALUES(";
+			for(; i < line_columns; ++i) {
+				if(i != 0) {
+					sql += ", '";
+				} else {
+					sql += "'";
+				}
+
+				sql += split[i];
+				sql += "'";
+			}
+
+			for(; i < columns; ++i) {
+				sql += ", '0'";
+			}
+
+			sql += ");";
+		}
+
+		db->RunQuery(sql.c_str(), (uint32)sql.length());
+
+		spells_imported++;
+		if(spells_imported % 1000 == 0) {
+			LogFile->write(EQEMuLog::Status, "%d spells imported.", spells_imported);
+		}
+	}
+
+	if(spells_imported % 1000 != 0) {
+		LogFile->write(EQEMuLog::Status, "%d spells imported.", spells_imported);
 	}
 
 	fclose(f);
@@ -97,10 +157,35 @@ void ImportSpells(SharedDatabase *db) {
 
 void ImportSkillCaps(SharedDatabase *db) {
 	LogFile->write(EQEMuLog::Status, "Importing Skill Caps...");
+
 	FILE *f = fopen("import/SkillCaps.txt", "r");
 	if(!f) {
 		LogFile->write(EQEMuLog::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
 		return;
+	}
+
+	std::string delete_sql = "DELETE FROM skill_caps";
+	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
+
+	char buffer[2048];
+	while(fgets(buffer, 2048, f)) {
+		auto split = SplitString(buffer, '^');
+		
+		if(split.size() < 4) {
+			continue;
+		}
+
+		std::string sql;
+		int class_id, skill_id, level, cap;
+		class_id = atoi(split[0].c_str());
+		skill_id = atoi(split[1].c_str());
+		level = atoi(split[2].c_str());
+		cap = atoi(split[3].c_str());
+
+		StringFormat(sql, "INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)",
+			class_id, skill_id, level, cap);
+
+		db->RunQuery(sql.c_str(), (uint32)sql.length());
 	}
 
 	fclose(f);
@@ -108,10 +193,44 @@ void ImportSkillCaps(SharedDatabase *db) {
 
 void ImportBaseData(SharedDatabase *db) {
 	LogFile->write(EQEMuLog::Status, "Importing Base Data...");
+
 	FILE *f = fopen("import/BaseData.txt", "r");
 	if(!f) {
 		LogFile->write(EQEMuLog::Error, "Unable to open import/BaseData.txt to read, skipping.");
 		return;
+	}
+
+	std::string delete_sql = "DELETE FROM base_data";
+	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
+
+	char buffer[2048];
+	while(fgets(buffer, 2048, f)) {
+		auto split = SplitString(buffer, '^');
+
+		if(split.size() < 10) {
+			continue;
+		}
+
+		std::string sql;
+		int level, class_id;
+		double hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac;
+
+		level = atoi(split[0].c_str());
+		class_id = atoi(split[1].c_str());
+		hp = atof(split[2].c_str());
+		mana = atof(split[3].c_str());
+		end = atof(split[4].c_str());
+		unk1 = atof(split[5].c_str());
+		unk2 = atof(split[6].c_str());
+		hp_fac = atof(split[7].c_str());
+		mana_fac = atof(split[8].c_str());
+		end_fac = atof(split[9].c_str());
+
+		StringFormat(sql, "INSERT INTO base_data(level, class, hp, mana, end, unk1, unk2, hp_fac, "
+			"mana_fac, end_fac) VALUES(%d, %d, %f, %f, %f, %f, %f, %f, %f, %f)",
+			level, class_id, hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac);
+
+		db->RunQuery(sql.c_str(), (uint32)sql.length());
 	}
 
 	fclose(f);

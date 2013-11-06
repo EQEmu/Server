@@ -338,3 +338,40 @@ std::vector<std::string> SplitString(const std::string &str, char delim) {
 	
 	return ret;
 }
+
+std::string EscapeString(const std::string &s) {
+	std::string ret;
+
+	size_t sz = s.length();
+	for(size_t i = 0; i < sz; ++i) {
+		char c = s[i];
+		switch(c) {
+		case '\x00':
+			ret += "\\x00";
+			break;
+		case '\n':
+			ret += "\\n";
+			break;
+		case '\r':
+			ret += "\\r";
+			break;
+		case '\\':
+			ret += "\\\\";
+			break;
+		case '\'':
+			ret += "\\'";
+			break;
+		case '\"':
+			ret += "\\\"";
+			break;
+		case '\x1a':
+			ret += "\\x1a";
+			break;
+		default:
+			ret.push_back(c);
+			break;
+		}
+	}
+
+	return ret;
+}
