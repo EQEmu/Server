@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/07/2013 ==
+KLS: Added a system to use the BaseData system in the client.
+KLS: Added an optional utility to import spells, skill caps and base data (will import from ./import and export to ./export).
+
+Be sure to source the SQL and run shared_memory.
+
 == 11/01/2013 ==
 JJ: Added in-game commands to enable/disable tradeskill recipes
 -Commands: #enablerecipe recipe_id, #disablerecipe recipe_id
