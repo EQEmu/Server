@@ -1,10 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
 == 11/07/2013 ==
 KLS: Added a system to use the BaseData system in the client.
 KLS: Added an optional utility to import spells, skill caps and base data (will import from ./import and export to ./export).
 
 Be sure to source the SQL and run shared_memory.
+
+== 11/06/2013 ==
+JJ: (Kingly_Krab) Fix for #npcedit qglobal command.
 
 == 11/01/2013 ==
 JJ: Added in-game commands to enable/disable tradeskill recipes
@@ -25,7 +29,7 @@ Notes:
 	- A per-client method will still need to be observed when coding for the new skill uses
 
 == 10/27/2013 ==
-Uleat: Attempted fix for high level (12) debug compile failiures
+Uleat: Attempted fix for high level (12) debug compile failures
 Notes:
 	- Explicit Windows vs. Linux code was not changed due to my inability to compile Linux code
 	- Only CMake accessible flags were corrected if adding the 'std' namespace did not correct the issue
