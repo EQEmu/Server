@@ -6983,8 +6983,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"Quest globals have been %d for NPCID %u",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2])==0?"disabled":"enabled");
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set qglobal=%i where id=%i",atoi(sep->argplus[2])==0?0:1,c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->Message(15, "Quest globals have been %s for NPCID %u", atoi(sep->arg[2]) == 0 ? "disabled" : "enabled", c->GetTarget()->CastToNPC()->GetNPCTypeID());
+		database.RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET qglobal=%i WHERE id=%i", atoi(sep->argplus[2]) == 0 ? 0 : 1, c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}

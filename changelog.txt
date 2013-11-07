@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/06/2013 ==
+JJ: (Kingly_Krab) Fix for #npcedit qglobal command.
+
 == 11/01/2013 ==
 JJ: Added in-game commands to enable/disable tradeskill recipes
 -Commands: #enablerecipe recipe_id, #disablerecipe recipe_id
@@ -19,7 +22,7 @@ Notes:
 	- A per-client method will still need to be observed when coding for the new skill uses
 
 == 10/27/2013 ==
-Uleat: Attempted fix for high level (12) debug compile failiures
+Uleat: Attempted fix for high level (12) debug compile failures
 Notes:
 	- Explicit Windows vs. Linux code was not changed due to my inability to compile Linux code
 	- Only CMake accessible flags were corrected if adding the 'std' namespace did not correct the issue
