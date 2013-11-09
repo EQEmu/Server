@@ -1,5 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/09/2013 ==
+Leere: Fixed Bard mana regen, they now only are affected by items and AA.
 
 == 11/07/2013 ==
 KLS: Added a system to use the BaseData system in the client.

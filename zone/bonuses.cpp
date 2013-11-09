@@ -1188,6 +1188,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	}
 	//this prolly suffer from roundoff error slightly...
 	newbon->AC = newbon->AC * 10 / 34;	//ratio determined impirically from client.
+	if (GetClass() == BARD) newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }
 
 void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterId, bool item_bonus, uint32 ticsremaining, int buffslot)
