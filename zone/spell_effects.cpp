@@ -325,6 +325,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_CurrentMana:
 			{
+				// Bards don't get mana from effects, good or bad.
+				if(GetClass() == BARD)
+					break;
 				if(IsManaTapSpell(spell_id)) {
 					if(GetCasterClass() != 'N') {
 #ifdef SPELL_EFFECT_SPAM
@@ -352,6 +355,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_CurrentManaOnce:
 			{
+				// Bards don't get mana from effects, good or bad.
+				if(GetClass() == BARD)
+					break;
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Current Mana Once: %+i", effect_value);
 #endif
