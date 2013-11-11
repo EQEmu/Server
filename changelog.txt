@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/11/2013 ==
+demonstar55: Mobs shouldn't do any non-attacking related movement while snared.
+
 == 11/09/2013 ==
 Leere: Fixed Bard mana regen, they now only are affected by items and AA.
 
