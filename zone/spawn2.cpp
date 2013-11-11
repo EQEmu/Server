@@ -34,33 +34,33 @@ extern WorldServer worldserver;
 /*
 
 CREATE TABLE spawn_conditions (
-	zone VARCHAR(16) NOT nullptr,
-	id MEDIUMINT UNSIGNED NOT nullptr DEFAULT '1',
-	value MEDIUMINT NOT nullptr DEFAULT '0',
-	onchange TINYINT UNSIGNED NOT nullptr DEFAULT '0',
-	name VARCHAR(255) NOT nullptr DEFAULT '',
+	zone VARCHAR(16) NOT NULL,
+	id MEDIUMINT UNSIGNED NOT NULL DEFAULT '1',
+	value MEDIUMINT NOT NULL DEFAULT '0',
+	onchange TINYINT UNSIGNED NOT NULL DEFAULT '0',
+	name VARCHAR(255) NOT NULL DEFAULT '',
 	PRIMARY KEY(zone,id)
 );
 
 CREATE TABLE spawn_events (
 	#identifiers
 	id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	zone VARCHAR(16) NOT nullptr,
-	cond_id MEDIUMINT UNSIGNED NOT nullptr,
-	name VARCHAR(255) NOT nullptr DEFAULT '',
+	zone VARCHAR(16) NOT NULL,
+	cond_id MEDIUMINT UNSIGNED NOT NULL,
+	name VARCHAR(255) NOT NULL DEFAULT '',
 
 	#timing information
-	period INT UNSIGNED NOT nullptr,
-	next_minute TINYINT UNSIGNED NOT nullptr,
-	next_hour TINYINT UNSIGNED NOT nullptr,
-	next_day TINYINT UNSIGNED NOT nullptr,
-	next_month TINYINT UNSIGNED NOT nullptr,
-	next_year INT UNSIGNED NOT nullptr,
-	enabled TINYINT NOT nullptr DEFAULT '1',
+	period INT UNSIGNED NOT NULL,
+	next_minute TINYINT UNSIGNED NOT NULL,
+	next_hour TINYINT UNSIGNED NOT NULL,
+	next_day TINYINT UNSIGNED NOT NULL,
+	next_month TINYINT UNSIGNED NOT NULL,
+	next_year INT UNSIGNED NOT NULL,
+	enabled TINYINT NOT NULL DEFAULT '1',
 
 	#action:
-	action TINYINT UNSIGNED NOT nullptr DEFAULT '0',
-	argument MEDIUMINT NOT nullptr DEFAULT '0'
+	action TINYINT UNSIGNED NOT NULL DEFAULT '0',
+	argument MEDIUMINT NOT NULL DEFAULT '0'
 );
 
 */
