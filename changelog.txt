@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/11/2013 ==
+demonstar55: Changed the way walk speed is calculated to allow mobs to have their walk speed equal a 100% movement reduction
+
 == 11/09/2013 ==
 Leere: Fixed Bard mana regen, they now only are affected by items and AA.
 

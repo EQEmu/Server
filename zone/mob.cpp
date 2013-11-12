@@ -561,16 +561,16 @@ float Mob::_GetMovementSpeed(int mod) const {
 		movemod = static_cast<int>(aa_mod);
 	}
 
-	if(movemod < -85) //cap it at moving very very slow
+	if(mod != 0)
+		movemod += mod;
+
+	if(IsClient() && movemod < -85) //cap it at moving very very slow
 		movemod = -85;
 
 	if (!has_horse && movemod != 0)
 		speed_mod += (speed_mod * float(movemod) / 100.0f);
 
-	if(mod != 0)
-		speed_mod += (speed_mod * (float)mod / 100.0f);
-
-	if(speed_mod <= 0.0f)
+	if(IsClient() && speed_mod <= 0.0f)
 		return(0.0001f);
 
 	//runspeed cap.
