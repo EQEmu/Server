@@ -1554,7 +1554,7 @@ void Mob::AI_Process() {
 						return;
 					}
 
-					if(IsNPC() && GetSnaredAmount() == -1)
+					if(IsNPC())
 					{
 						if(RuleB(NPC, SmartLastFightingDelayMoving) && !feign_memory_list.empty())
 						{
