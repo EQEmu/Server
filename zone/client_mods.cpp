@@ -1796,6 +1796,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 		return(10);
 
 	uint16 effectmod = 10;
+	int effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
 
 	//this should never use spell modifiers...
 	//if a spell grants better modifers, they are copied into the item mods
@@ -1856,6 +1857,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 			break;
 	}
 
+	// TODO: These shouldn't be hardcoded.
 	if(spells[spell_id].skill == SkillSinging)
 	{
 		effectmod += 2*GetAA(aaSingingMastery);
@@ -1866,14 +1868,20 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 		effectmod += 2*GetAA(aaInstrumentMastery);
 		effectmod += 2*GetAA(aaImprovedInstrumentMastery);
 	}
-	effectmod += 2*GetAA(aaAyonaesTutelage); //singing & instruments
-	effectmod += 2*GetAA(aaEchoofTaelosia); //singing & instruments
+
+	// TODO: These shouldn't be hardcoded.
+	effectmodcap += GetAA(aaAyonaesTutelage);
+	effectmodcap += GetAA(aaEchoofTaelosia);
 
 
 	if(effectmod < 10)
 		effectmod = 10;
 
-	_log(SPELLS__BARDS, "%s::GetInstrumentMod() spell=%d mod=%d\n", GetName(), spell_id, effectmod);
+	if (effectmod > effectmodcap)
+		effectmod = effectmodcap;
+
+	_log(SPELLS__BARDS, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n",
+			GetName(), spell_id, effectmod, effectmodcap);
 
 	return(effectmod);
 }

@@ -97,6 +97,7 @@ RULE_BOOL ( Character, EnableDiscoveredItems, true ) // If enabled, it enables E
 RULE_BOOL ( Character, EnableXTargetting, true) // Enable Extended Targetting Window, for users with UF and later clients.
 RULE_BOOL ( Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
 RULE_INT ( Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
+RULE_INT ( Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )
