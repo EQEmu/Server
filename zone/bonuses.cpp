@@ -874,6 +874,26 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_CombatStability:
 				newbon->CombatStability += base1;
 				break;
+			case SE_AddSingingMod:
+				switch (base2)
+				{
+					case ItemTypeWindInstrument:
+						newbon->windMod += base1;
+						break;
+					case ItemTypeStringedInstrument:
+						newbon->stringedMod += base1;
+						break;
+					case ItemTypeBrassInstrument:
+						newbon->brassMod += base1;
+						break;
+					case ItemTypePercussionInstrument:
+						newbon->percussionMod += base1;
+						break;
+					case ItemTypeSinging:
+						newbon->singingMod += base1;
+						break;
+				}
+				break;
 			case SE_PetCriticalHit:
 				newbon->PetCriticalHit += base1;
 				break;
@@ -2229,6 +2249,27 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_CombatStability:
 				newbon->CombatStability += effect_value;
+				break;
+
+			case SE_AddSingingMod:
+				switch (spells[spell_id].base2[i])
+				{
+					case ItemTypeWindInstrument:
+						newbon->windMod += effect_value;
+						break;
+					case ItemTypeStringedInstrument:
+						newbon->stringedMod += effect_value;
+						break;
+					case ItemTypeBrassInstrument:
+						newbon->brassMod += effect_value;
+						break;
+					case ItemTypePercussionInstrument:
+						newbon->percussionMod += effect_value;
+						break;
+					case ItemTypeSinging:
+						newbon->singingMod += effect_value;
+						break;
+				}
 				break;
 
 			case SE_PetAvoidance:

@@ -3,6 +3,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 11/13/2013 ==
 demonstar55: Implemented bard song effect cap. You can set the base cap with the rule Character:BaseInstrumentSoftCap, defaults to 36 or "3.6" as it is sometimes referred to.
 demonstar55: Fix Echo of Taelosia and Ayonae's Tutelage to increase the mod cap instead of further improving the instrument mod
+demonstar55: Implemented Singing/Instrument Mastery as an AA bonus.
 
 == 11/11/2013 ==
 demonstar55: Changed the way walk speed is calculated to allow mobs to have their walk speed equal a 100% movement reduction

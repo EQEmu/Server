@@ -1813,6 +1813,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 				effectmod = itembonuses.percussionMod;
 			else
 				effectmod = spellbonuses.percussionMod;
+			effectmod += aabonuses.percussionMod;
 			break;
 		case SkillStringedInstruments:
 			if(itembonuses.stringedMod == 0 && spellbonuses.stringedMod == 0)
@@ -1823,6 +1824,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 				effectmod = itembonuses.stringedMod;
 			else
 				effectmod = spellbonuses.stringedMod;
+			effectmod += aabonuses.stringedMod;
 			break;
 		case SkillWindInstruments:
 			if(itembonuses.windMod == 0 && spellbonuses.windMod == 0)
@@ -1833,6 +1835,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 				effectmod = itembonuses.windMod;
 			else
 				effectmod = spellbonuses.windMod;
+			effectmod += aabonuses.windMod;
 			break;
 		case SkillBrassInstruments:
 			if(itembonuses.brassMod == 0 && spellbonuses.brassMod == 0)
@@ -1843,6 +1846,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 				effectmod = itembonuses.brassMod;
 			else
 				effectmod = spellbonuses.brassMod;
+			effectmod += aabonuses.brassMod;
 			break;
 		case SkillSinging:
 			if(itembonuses.singingMod == 0 && spellbonuses.singingMod == 0)
@@ -1851,22 +1855,11 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 				effectmod = itembonuses.singingMod;
 			else
 				effectmod = spellbonuses.singingMod;
+			effectmod += aabonuses.singingMod;
 			break;
 		default:
 			effectmod = 10;
 			break;
-	}
-
-	// TODO: These shouldn't be hardcoded.
-	if(spells[spell_id].skill == SkillSinging)
-	{
-		effectmod += 2*GetAA(aaSingingMastery);
-		effectmod += 2*GetAA(aaImprovedSingingMastery);
-	}
-	else
-	{
-		effectmod += 2*GetAA(aaInstrumentMastery);
-		effectmod += 2*GetAA(aaImprovedInstrumentMastery);
 	}
 
 	// TODO: These shouldn't be hardcoded.

@@ -2733,6 +2733,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ImprovedBindWound:
 			case SE_MaxBindWound:
 			case SE_CombatStability:
+			case SE_AddSingingMod:
 			case SE_PetAvoidance:
 			case SE_GiveDoubleRiposte:
 			case SE_Ambidexterity:
