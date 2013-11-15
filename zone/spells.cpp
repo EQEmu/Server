@@ -2509,43 +2509,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		}
 	}
 
-
-	// check for special stacking block command in spell1 against spell2
-	for(i = 0; i < EFFECT_COUNT; i++)
-	{
-		effect1 = sp1.effectid[i];
-		if(effect1 == SE_StackingCommand_Block)
-		{
-			/*
-			The logic here is if you're comparing the same spells they can't block each other
-			from refreshing
-			*/
-			if(spellid1 == spellid2)
-				continue;
-
-			blocked_effect = sp1.base[i];
-			blocked_slot = sp1.formula[i] - 201;	//they use base 1 for slots, we use base 0
-			blocked_below_value = sp1.max[i];
-
-			if(sp2.effectid[blocked_slot] == blocked_effect)
-			{
-				sp2_value = CalcSpellEffectValue(spellid2, blocked_slot, caster_level2);
-
-				mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d. New spell has value %d on that slot/effect. %s.",
-					sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value, sp2_value, (sp2_value < blocked_below_value)?"Blocked":"Not blocked");
-
-				if(sp2_value < blocked_below_value)
-				{
-					mlog(SPELLS__STACKING, "Blocking spell because sp2_value < blocked_below_value");
-					return -1;	// blocked
-				}
-			} else {
-				mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d, but we do not have that effect on that slot. Ignored.",
-					sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value);
-			}
-		}
-	}
-
 	// check for special stacking overwrite in spell2 against effects in spell1
 	for(i = 0; i < EFFECT_COUNT; i++)
 	{
@@ -2588,13 +2551,40 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	// arbitration takes place if 2 spells have the same effect at the same
 	// effect slot, otherwise they're stackable, even if it's the same effect
 	bool will_overwrite = false;
+	bool effect_match = true; // Figure out if we're identical in effects on all slots.
 	for(i = 0; i < EFFECT_COUNT; i++)
 	{
-		if(IsBlankSpellEffect(spellid1, i) || IsBlankSpellEffect(spellid2, i))
-			continue;
-
 		effect1 = sp1.effectid[i];
 		effect2 = sp2.effectid[i];
+
+		/*
+		Quick check, are the effects the same, if so then
+		keep going else ignore it for stacking purposes.
+		*/
+		if(effect1 != effect2) {
+			effect_match = false;
+			continue;
+		}
+
+		// If both spells have SE_StackingCommand_Block in the slot then we check if
+		// it applies to the same slot and effect type.
+		// This is handled here because IsBlankSpellEffect() would block it otherwise,
+		// but for stacking we need to handle it.
+		if (effect1 == SE_StackingCommand_Block) {
+			if (sp1.formula[i] == sp2.formula[i] && sp1.base[i] == sp2.base[i]) {
+				if(sp1.max[i] > sp2.max[i]) {
+					return(-1);
+				} else {
+					continue;
+				}
+			} else {
+				effect_match = false;
+				continue;
+			}
+		}
+
+		if(IsBlankSpellEffect(spellid1, i) || IsBlankSpellEffect(spellid2, i))
+			continue;
 
 		//Effects which really aren't going to affect stacking.
 		if(effect1 == SE_CurrentHPOnce ||
@@ -2604,12 +2594,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			continue;
 			}
 
-		/*
-		Quick check, are the effects the same, if so then
-		keep going else ignore it for stacking purposes.
-		*/
-		if(effect1 != effect2)
-			continue;
 
 		/*
 		Skip check if effect is SE_Limit*
@@ -2698,9 +2682,50 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		will_overwrite = true;
 	}
 
+	// check for special stacking block command in spell1 against spell2
+	// This has to happen last so that we don't mess ourselves up for effect identical
+	// spells. They should just overwrite each other without needing the stacking block
+	if (!effect_match)
+	{
+		for(i = 0; i < EFFECT_COUNT; i++)
+		{
+			effect1 = sp1.effectid[i];
+			if(effect1 == SE_StackingCommand_Block)
+			{
+				/*
+				The logic here is if you're comparing the same spells they can't block each other
+				from refreshing
+				*/
+				if(spellid1 == spellid2)
+					continue;
+
+				blocked_effect = sp1.base[i];
+				blocked_slot = sp1.formula[i] - 201;	//they use base 1 for slots, we use base 0
+				blocked_below_value = sp1.max[i];
+
+				if(sp2.effectid[blocked_slot] == blocked_effect)
+				{
+					sp2_value = CalcSpellEffectValue(spellid2, blocked_slot, caster_level2);
+
+					mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d. New spell has value %d on that slot/effect. %s.",
+						sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value, sp2_value, (sp2_value < blocked_below_value)?"Blocked":"Not blocked");
+
+					if(sp2_value < blocked_below_value)
+					{
+						mlog(SPELLS__STACKING, "Blocking spell because sp2_value < blocked_below_value");
+						return -1;	// blocked
+					}
+				} else {
+					mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d, but we do not have that effect on that slot. Ignored.",
+						sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value);
+				}
+			}
+		}
+	}
+
 	//if we get here, then none of the values on the new spell are "worse"
 	//so now we see if this new spell is any better, or if its not related at all
-	if(will_overwrite) {
+	if(will_overwrite || effect_match) {
 		mlog(SPELLS__STACKING, "Stacking code decided that %s should overwrite %s.", sp2.name, sp1.name);
 		return(1);
 	}
