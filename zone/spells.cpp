@@ -2724,20 +2724,15 @@ bool Client::CheckSpellLevelRestriction(uint16 spell_id)
 {
 	int SpellLevel = GetMinLevel(spell_id);
 
-	// Only check for beneficial buffs, if it's a bard song, only if it's short duration
-	if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id) &&
-			!(IsBardSong(spell_id) && !IsShortDurationBuff(spell_id)))
-	{
-		if(SpellLevel > 65)
-		{
-			if(IsGroupSpell(spell_id) && GetLevel() < 62)
+	// Only check for beneficial buffs
+	if (IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
+		if (SpellLevel > 65) {
+			if (IsGroupSpell(spell_id) && GetLevel() < 62)
 				return false;
-			else if(GetLevel() < 61)
+			else if (GetLevel() < 61)
 				return false;
-		}
-		else if(SpellLevel > 50) // 51-65
-		{
-			if(GetLevel() < (SpellLevel/2+15))
+		} else if (SpellLevel > 50) { // 51-56
+			if (GetLevel() < (SpellLevel/2+15))
 				return false;
 		}
 	}
