@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/15/2013 ==
+demonstar55: Fixed Mob::CalcFocusEffect()'s SE_LimitEffect
+
 == 11/13/2013 ==
 demonstar55: Implemented bard song effect cap. You can set the base cap with the rule Character:BaseInstrumentSoftCap, defaults to 36 or "3.6" as it is sometimes referred to.
 demonstar55: Fix Echo of Taelosia and Ayonae's Tutelage to increase the mod cap instead of further improving the instrument mod

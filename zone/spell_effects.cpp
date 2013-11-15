@@ -4279,7 +4279,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_LimitEffect:
 			if(focus_spell.base[i] < 0){
-				if(IsEffectInSpell(spell_id,focus_spell.base[i])){ //we limit this effect, can't have
+				if(IsEffectInSpell(spell_id,(focus_spell.base[i] * -1))){ //we limit this effect, can't have
 					return 0;
 				}
 			}
