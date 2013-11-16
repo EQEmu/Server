@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/16/2013 ==
+Leere: Fixed the drinking message for auto-consume, it will again correctly show up for forced consumption instead.
+
 == 11/15/2013 ==
 demonstar55: Fixed Mob::CalcFocusEffect()'s SE_LimitEffect
 Leere: Fixed a stacking issue for SE_StackingCommand_Block
