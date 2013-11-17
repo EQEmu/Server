@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 11/16/2013 ==
 Leere: Fixed the drinking message for auto-consume, it will again correctly show up for forced consumption instead.
+demonstar55: Added Mob::DoCastingChecks() which will check for various fail conditions while the casting bar is up. This is called after Mob::DoCastSpell() starts the casting and before it returns.
 
 == 11/15/2013 ==
 demonstar55: Fixed Mob::CalcFocusEffect()'s SE_LimitEffect

@@ -115,7 +115,7 @@ void Mob::SpellProcess()
 	}
 
 	// a timed spell is finished casting
-	if (casting_spell_id != 0 && spellend_timer.Check())
+	if (casting_spell_id != 0 && casting_spell_checks && spellend_timer.Check())
 	{
 		spellend_timer.Disable();
 		delaytimer = false;
@@ -474,7 +474,64 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	entity_list.QueueCloseClients(this, outapp, false, 200, 0, true); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
 	safe_delete(outapp);
 	outapp = nullptr;
+
+	if (!DoCastingChecks()) {
+		InterruptSpell();
+		return false;
+	}
+
 	return(true);
+}
+
+/*
+ * Some failures should be caught before the spell finishes casting
+ * This is especially helpful to clients when they cast really long things
+ * If this passes it sets casting_spell_checks to true which is checked in
+ * SpellProcess(), if a situation ever arises where a spell is delayed by these
+ * it's probably doing something wrong.
+ */
+
+bool Mob::DoCastingChecks()
+{
+	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
+		casting_spell_checks = true;
+		return true;
+	}
+
+	uint16 spell_id = casting_spell_id;
+	Mob *spell_target = entity_list.GetMob(casting_spell_targetid);
+
+	if (RuleB(Spells, BuffLevelRestrictions) &&
+			!spell_target->CheckSpellLevelRestriction(spell_id)) {
+		mlog(SPELLS__BUFFS, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
+		if (!IsBardSong(spell_id))
+			Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
+		return false;
+	}
+
+	if (spells[spell_id].zonetype == 1 && !zone->CanCastOutdoor()) {
+		Message_StringID(13, CAST_OUTDOORS);
+		return false;
+	}
+
+	if (IsEffectInSpell(spell_id, SE_Levitate) && !zone->CanLevitate()) {
+		Message(13, "You can't levitate in this zone.");
+		return false;
+	}
+
+	if (zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
+		const char *msg = zone->GetSpellBlockedMessage(spell_id, GetX(), GetY(), GetZ());
+		if (msg) {
+			Message(13, msg);
+			return false;
+		} else {
+			Message(13, "You can't cast this spell here.");
+			return false;
+		}
+	}
+
+	casting_spell_checks = true;
+	return true;
 }
 
 uint16 Mob::GetSpecializeSkillValue(uint16 spell_id) const {
@@ -687,6 +744,7 @@ void Mob::ZeroCastingVars()
 	casting_spell_timer_duration = 0;
 	casting_spell_type = 0;
 	casting_spell_resist_adjust = 0;
+	casting_spell_checks = false;
 	delaytimer = false;
 }
 
