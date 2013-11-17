@@ -16,9 +16,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-
 /*
-
 	General outline of spell casting process
 
 	1.
@@ -64,13 +62,9 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 		If this was timed, CastedSpellFinished() will restore the client's
 		spell bar gems.
 
-
 	Most user code should call CastSpell(), with a 0 casting time if needed,
 	and not SpellFinished().
-
 */
-
-
 
 #include "../common/debug.h"
 #include "../common/spdat.h"
@@ -88,8 +82,8 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include <assert.h>
 
 #ifndef WIN32
-    #include <stdlib.h>
-    #include "../common/unix.h"
+	#include <stdlib.h>
+	#include "../common/unix.h"
 #endif
 
 #ifdef _GOTFRAGS
@@ -341,7 +335,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	mlog(SPELLS__CASTING, "DoCastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item %d",
 		spell.name, spell_id, target_id, slot, cast_time, mana_cost, item_slot==0xFFFFFFFF?999:item_slot);
-
 
 	casting_spell_id = spell_id;
 	casting_spell_slot = slot;
@@ -1165,52 +1158,52 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	if(IsClient() && ((slot == USE_ITEM_SPELL_SLOT) || (slot == POTION_BELT_SPELL_SLOT))
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
-        bool fromaug = false;
-        const ItemInst* inst = CastToClient()->GetInv()[inventory_slot];
-        Item_Struct* augitem = 0;
-        uint32 recastdelay = 0;
-        uint32 recasttype = 0;
+		bool fromaug = false;
+		const ItemInst* inst = CastToClient()->GetInv()[inventory_slot];
+		Item_Struct* augitem = 0;
+		uint32 recastdelay = 0;
+		uint32 recasttype = 0;
 
-        for(int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
-            const ItemInst* aug_i = inst->GetAugment(r);
+		for(int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
+			const ItemInst* aug_i = inst->GetAugment(r);
 
-            if(!aug_i)
-                continue;
-            const Item_Struct* aug = aug_i->GetItem();
-            if(!aug)
-                continue;
+			if(!aug_i)
+				continue;
+			const Item_Struct* aug = aug_i->GetItem();
+			if(!aug)
+				continue;
 
-            if ( aug->Click.Effect == spell_id )
-            {
-                recastdelay = aug_i->GetItem()->RecastDelay;
-                recasttype = aug_i->GetItem()->RecastType;
-                fromaug = true;
-                break;
-            }
-        }
+			if ( aug->Click.Effect == spell_id )
+			{
+				recastdelay = aug_i->GetItem()->RecastDelay;
+				recasttype = aug_i->GetItem()->RecastType;
+				fromaug = true;
+				break;
+			}
+		}
 
-        //Test the aug recast delay
-        if(IsClient() && fromaug && recastdelay > 0)
-        {
-            if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recasttype), false)) {
-                Message_StringID(13, SPELL_RECAST);
-                mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
-                InterruptSpell();  
-                return;
-            }
-            else
-            {
-                //Can we start the timer here?  I don't see why not.
-                CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
-            }
-        }
+		//Test the aug recast delay
+		if(IsClient() && fromaug && recastdelay > 0)
+		{
+			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recasttype), false)) {
+				Message_StringID(13, SPELL_RECAST);
+				mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
+				InterruptSpell();
+				return;
+			}
+			else
+			{
+				//Can we start the timer here?  I don't see why not.
+				CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
+			}
+		}
 
 		if (inst && inst->IsType(ItemClassCommon) && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges() || fromaug)
 		{
 			//const Item_Struct* item = inst->GetItem();
 			int16 charges = inst->GetItem()->MaxCharges;
 
-            if(fromaug) { charges = -1; } //Don't destroy the parent item
+			if(fromaug) { charges = -1; } //Don't destroy the parent item
 
 			if(charges > -1) {	// charged item, expend a charge
 				mlog(SPELLS__CASTING, "Spell %d: Consuming a charge from item %s (%d) which had %d/%d charges.", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetCharges(), inst->GetItem()->MaxCharges);
@@ -1787,7 +1780,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 
-
 	//determine the type of spell target we have
 	CastAction_type CastAction;
 	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction))
@@ -1879,8 +1871,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
-            if(casting_spell_type == 1)
-              InterruptSpell();
+			if(casting_spell_type == 1)
+			  InterruptSpell();
 						return false;
 					}
 				}
@@ -2161,7 +2153,6 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		SetMana(GetMana() - mana_used);
 	}
 
-
 	// check line of sight to target if it's a detrimental spell
 	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target))
 	{
@@ -2429,7 +2420,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 		castlevel = caster_level_override;
 
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
-	
+
 	res = mod_buff_duration(res, caster, target, spell_id);
 
 	mlog(SPELLS__CASTING, "Spell %d: Casting level %d, formula %d, base_duration %d: result %d",
@@ -2651,7 +2642,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			effect1 == SE_PoisonCounter){
 			continue;
 			}
-
 
 		/*
 		Skip check if effect is SE_Limit*
@@ -2989,7 +2979,6 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		SendPetBuffsToClient();
 	}
 
-
 	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
 				(IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
 	{
@@ -3181,7 +3170,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	// send to people in the area, ignoring caster and target
 	entity_list.QueueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells);
 
-
 	/* Send the EVENT_CAST_ON event */
 	if(spelltar->IsNPC())
 	{
@@ -3312,7 +3300,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 				}
 
-
 				if(!IsBeneficialAllowed(spelltar) ||
 					(IsGroupOnlySpell(spell_id) &&
 						!(
@@ -3348,7 +3335,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 	// ok at this point the spell is permitted to affect the target,
 	// but we need to check special cases and resists
-
 
 	// check immunities
 	if(spelltar->IsImmuneToSpell(spell_id, this))
@@ -4092,7 +4078,6 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 	}
 
-
 	if (!CharismaCheck){
 
 		//Check for Spell Effect specific resistance chances (ie AA Mental Fortitude)
@@ -4188,60 +4173,60 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		resist_chance = 0;
 	}
 
-    //Adjust our resist chance based on level modifiers
-    int temp_level_diff = GetLevel() - caster->GetLevel();
-    if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
-    {
-        int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-        if(a > 0)
-        {
-            temp_level_diff = a;
-        }
-        else
-        {
-            temp_level_diff = 0;
-        }
-    }
+	//Adjust our resist chance based on level modifiers
+	int temp_level_diff = GetLevel() - caster->GetLevel();
+	if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
+	{
+		int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+		if(a > 0)
+		{
+			temp_level_diff = a;
+		}
+		else
+		{
+			temp_level_diff = 0;
+		}
+	}
 
-    if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
-    {
-        temp_level_diff = 15;
-    }
+	if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
+	{
+		temp_level_diff = 15;
+	}
 
-    if(IsNPC() && temp_level_diff < -9)
-    {
-        temp_level_diff = -9;
-    }
+	if(IsNPC() && temp_level_diff < -9)
+	{
+		temp_level_diff = -9;
+	}
 
-    int level_mod = temp_level_diff * temp_level_diff / 2;
-    if(temp_level_diff < 0)
-    {
-        level_mod = -level_mod;
-    }
+	int level_mod = temp_level_diff * temp_level_diff / 2;
+	if(temp_level_diff < 0)
+	{
+		level_mod = -level_mod;
+	}
 
-    if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
-    {
-        level_mod = 1000;
-    }
+	if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
+	{
+		level_mod = 1000;
+	}
 
-    //Even more level stuff this time dealing with damage spells
-    if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
-    {
-        int level_diff;
-        if(GetLevel() >= RuleI(Casting,ResistFalloff))
-        {
-            level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-            if(level_diff < 0)
-            {
-                level_diff = 0;
-            }
-        }
-        else
-        {
-            level_diff = GetLevel() - caster->GetLevel();
-        }
-        level_mod += (2 * level_diff);
-    }
+	//Even more level stuff this time dealing with damage spells
+	if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
+	{
+		int level_diff;
+		if(GetLevel() >= RuleI(Casting,ResistFalloff))
+		{
+			level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+			if(level_diff < 0)
+			{
+				level_diff = 0;
+			}
+		}
+		else
+		{
+			level_diff = GetLevel() - caster->GetLevel();
+		}
+		level_mod += (2 * level_diff);
+	}
 
 	if (CharismaCheck)
 	{
@@ -4801,7 +4786,6 @@ uint16 Mob::GetSpellIDFromSlot(uint8 slot)
 	return 0;
 }
 
-
 bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 	uint32 buff_count = GetMaxTotalSlots();
 	for (int i = 0; i < buff_count; i++) {
@@ -5000,7 +4984,6 @@ int Mob::GetCasterLevel(uint16 spell_id) {
 	return(level);
 }
 
-
 //this method does NOT tell the client to stop singing the song.
 //this is NOT the right way to stop a mob from singing, use InterruptSpell
 //you should really know what your doing before you call this
@@ -5042,7 +5025,6 @@ void Mob::SendPetBuffsToClient()
 		return;
 
 	int PetBuffCount = 0;
-
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_PetBuffWindow,sizeof(PetBuff_Struct));
 	PetBuff_Struct* pbs=(PetBuff_Struct*)outapp->pBuffer;
@@ -5121,8 +5103,6 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 
 	return outapp;
 }
-
-
 
 void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 {
