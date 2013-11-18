@@ -2787,7 +2787,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 // derived from http://samanna.net/eq.general/buffs.shtml
 // spells 1-50: no restrictons
 // 51-65: SpellLevel/2+15
-// 66+L Group Spells 62, Single Target 61
+// 66+ Group Spells 62, Single Target 61
 bool Mob::CheckSpellLevelRestriction(uint16 spell_id)
 {
 	return true;
@@ -2804,8 +2804,8 @@ bool Client::CheckSpellLevelRestriction(uint16 spell_id)
 				return false;
 			else if (GetLevel() < 61)
 				return false;
-		} else if (SpellLevel > 50) { // 51-56
-			if (GetLevel() < (SpellLevel/2+15))
+		} else if (SpellLevel > 50) { // 51-65
+			if (GetLevel() < (SpellLevel / 2 + 15))
 				return false;
 		}
 	}
