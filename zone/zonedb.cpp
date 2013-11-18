@@ -1046,6 +1046,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.hp_regen_rate,"
 			"npc_types.mana_regen_rate,"
 			"npc_types.aggroradius,"
+			"npc_types.assistradius,"
 			"npc_types.bodytype,"
 			"npc_types.npc_faction_id,"
 			"npc_types.face,"
@@ -1145,6 +1146,9 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				// set defaultvalue for aggroradius
 				if (tmpNPCType->aggroradius <= 0)
 					tmpNPCType->aggroradius = 70;
+				tmpNPCType->assistradius = (int32)atoi(row[r++]);
+				if (tmpNPCType->assistradius <= 0)
+					tmpNPCType->assistradius = tmpNPCType->aggroradius;
 
 				if (row[r] && strlen(row[r]))
 					tmpNPCType->bodytype = (uint8)atoi(row[r]);

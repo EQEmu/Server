@@ -6647,6 +6647,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit Mindmg - Sets an NPCs minimum damage");
 		c->Message(0, "#npcedit Maxdmg - Sets an NPCs maximum damage");
 		c->Message(0, "#npcedit Aggroradius - Sets an NPCs aggro radius");
+		c->Message(0, "#npcedit Assistradius - Sets an NPCs assist radius");
 		c->Message(0, "#npcedit Social - Set to 1 if an NPC should assist others on its faction");
 		c->Message(0, "#npcedit Runspeed - Sets an NPCs run speed");
 		c->Message(0, "#npcedit MR - Sets an NPCs magic resistance");
@@ -6850,6 +6851,15 @@ void command_npcedit(Client *c, const Seperator *sep)
 		char *query = 0;
 		c->Message(15,"NPCID %u now has an aggro radius of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set aggroradius=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "assistradius" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has an assist radius of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set assistradius=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}

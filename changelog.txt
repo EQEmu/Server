@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/18/2013 ==
+demonstar55: Added assistradius to npc_types, defaults to aggroradius if set to 0 (old behaviour)
+
 == 11/17/2013 ==
 Sorvani: fixed leash and tether special abilities to use the specified range correctly.
 demonstar55: Rewrote the Mob::_GetMovementSpeed fix an issue that arose from the change on 11/11
