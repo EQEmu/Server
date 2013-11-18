@@ -1090,14 +1090,14 @@ void Mob::AI_Process() {
 
 		if(GetSpecialAbility(TETHER)) {
 			float aggro_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
-			aggro_range = aggro_range > 0.0f ? aggro_range : pAggroRange * pAggroRange;
+			aggro_range = aggro_range > 0.0f ? aggro_range * aggro_range : pAggroRange * pAggroRange;
 
 			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > aggro_range) {
 				GMMove(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY(), CastToNPC()->GetSpawnPointZ(), CastToNPC()->GetSpawnPointH());
 			}
 		} else if(GetSpecialAbility(LEASH)) {
 			float aggro_range = static_cast<float>(GetSpecialAbilityParam(LEASH, 0));
-			aggro_range = aggro_range > 0.0f ? aggro_range : pAggroRange * pAggroRange;
+			aggro_range = aggro_range > 0.0f ? aggro_range * aggro_range : pAggroRange * pAggroRange;
 
 			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > aggro_range) {
 				GMMove(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY(), CastToNPC()->GetSpawnPointZ(), CastToNPC()->GetSpawnPointH());

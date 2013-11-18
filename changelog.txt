@@ -1,6 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 11/17/2013 ==
+Sorvani: fixed leash and tether special abilities to use the specified range correctly.
 demonstar55: Rewrote the Mob::_GetMovementSpeed fix an issue that arose from the change on 11/11
 	- Added the rule Character:BaseRunSpeedCap (default 158) so people can customize what their runspeed cap is. Hardcapped to 225 so stuff doesn't get too crazy.
 
