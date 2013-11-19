@@ -2669,8 +2669,9 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		*/
 		if(IsNPC() && caster1 && caster2 && caster1 != caster2) {
 			if(effect1 == SE_CurrentHP && sp1_detrimental && sp2_detrimental) {
-				continue;
+				effect_match = false; // We want to skip this logic
 				mlog(SPELLS__STACKING, "Both casters exist and are not the same, the effect is a detrimental dot, moving on");
+				continue;
 			}
 		}
 
@@ -2696,6 +2697,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		and the effect is a dot we can go ahead and stack it
 		*/
 		if(effect1 == SE_CurrentHP && spellid1 != spellid2 && sp1_detrimental && sp2_detrimental) {
+			effect_match = false; // We want to skip this logic
 			mlog(SPELLS__STACKING, "The spells are not the same and it is a detrimental dot, passing");
 			continue;
 		}
