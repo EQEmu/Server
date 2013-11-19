@@ -105,9 +105,6 @@ Zone extensions and features
 //uncomment to allow perl commands to override compiled commands
 #define COMMANDS_PERL_OVERRIDE
 
-//enable logging of commands used
-#define COMMANDS_LOGGING
-
 //only log commands which require this minimum status or more
 #define COMMANDS_LOGGING_MIN_STATUS 1
 

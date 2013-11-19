@@ -115,6 +115,15 @@ SET(EQEMU_DEBUG_LEVEL 5 CACHE STRING "EQEmu debug level:
 
 #Bots are a compile time option so on/off
 OPTION(EQEMU_ENABLE_BOTS "Enable Bots" OFF)
+
+#Disable entire _mlog system (excludes trade/command logs)
+OPTION(DISABLE_LOGSYS "Enable Logging INI System" OFF)
+
+#Disable entire _mlog system (excludes trade/command logs)
+OPTION(DISABLE_LOGSYS "Enable Logging INI System" OFF)
+#Enable GM Command log system
+OPTION(COMMANDS_LOGGING "Enable GM Command logs" ON)
+
 IF(EQEMU_ENABLE_BOTS)
 	ADD_DEFINITIONS(-DBOTS)
 ENDIF(EQEMU_ENABLE_BOTS)

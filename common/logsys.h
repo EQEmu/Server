@@ -120,7 +120,7 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 		#endif
 #endif	//!DISABLE_LOGSYS
 
-
+#ifndef DISABLE_LOGSYS
 /* these are macros which do not use ..., and work for anybody */
 	#define _hex( type, data, len) \
 		do { \
@@ -140,6 +140,12 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 				log_raw_packet(type, seq, packet); \
 			} \
 		} while(false)
+
+#else
+		#define _hex( type, data, len) {}
+		#define _pkt( type, packet) {}
+		#define _raw( type, seq, packet) {}
+#endif //!DISABLE_LOGSYS
 #ifdef ZONE
 	class Mob;
 	extern void log_hex_mob(LogType type, Mob *who, const char *data, uint32 length);
