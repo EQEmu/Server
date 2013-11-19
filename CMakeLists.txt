@@ -119,10 +119,16 @@ OPTION(EQEMU_ENABLE_BOTS "Enable Bots" OFF)
 #Disable entire _mlog system (excludes trade/command logs)
 OPTION(DISABLE_LOGSYS "Enable Logging INI System" OFF)
 
-#Disable entire _mlog system (excludes trade/command logs)
-OPTION(DISABLE_LOGSYS "Enable Logging INI System" OFF)
 #Enable GM Command log system
 OPTION(COMMANDS_LOGGING "Enable GM Command logs" ON)
+
+IF(COMMANDS_LOGGING)
+	ADD_DEFINITIONS(-DCOMMANDS_LOGGING)
+ENDIF(COMMANDS_LOGGING)
+
+IF(DISABLE_LOGSYS)
+	ADD_DEFINITIONS(-DDISABLE_LOGSYS)
+ENDIF(DISABLE_LOGSYS)
 
 IF(EQEMU_ENABLE_BOTS)
 	ADD_DEFINITIONS(-DBOTS)
