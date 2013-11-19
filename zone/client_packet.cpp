@@ -917,7 +917,7 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 				Message(13, "Large warp detected.");
 				char hString[250];
 				sprintf(hString, "/MQWarp with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
-				database.SetMQDetectionFlag(this->account_name,this->name, hString, zone->GetShortName());
+				database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
 			}
 			break;
 		case MQWarpShadowStep:
@@ -927,7 +927,7 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			{
 				char *hString = nullptr;
 				MakeAnyLenString(&hString, "/MQWarp(SS) with location %.2f, %.2f, %.2f, the target was shadow step exempt but we still found this suspicious.", GetX(), GetY(), GetZ());
-				database.SetMQDetectionFlag(this->account_name,this->name, hString, zone->GetShortName());
+				database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
 				safe_delete_array(hString);
 			}
 			break;
@@ -938,7 +938,7 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			{
 				char *hString = nullptr;
 				MakeAnyLenString(&hString, "/MQWarp(KB) with location %.2f, %.2f, %.2f, the target was Knock Back exempt but we still found this suspicious.", GetX(), GetY(), GetZ());
-				database.SetMQDetectionFlag(this->account_name,this->name, hString, zone->GetShortName());
+				database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
 				safe_delete_array(hString);
 			}
 			break;
@@ -952,7 +952,7 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 				{
 					char *hString = nullptr;
 					MakeAnyLenString(&hString, "/MQWarp(LT) with location %.2f, %.2f, %.2f, running fast but not fast enough to get killed, possibly: small warp, speed hack, excessive lag, marked as suspicious.", GetX(), GetY(), GetZ());
-					database.SetMQDetectionFlag(this->account_name,this->name, hString, zone->GetShortName());
+					database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
 					safe_delete_array(hString);
 				}
 			}
@@ -963,7 +963,7 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			{
 				char hString[250];
 				sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f to %.2f %.2f %.2f", GetX(), GetY(), GetZ(), x, y, z);
-				database.SetMQDetectionFlag(this->account_name,this->name, hString, zone->GetShortName());
+				database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
 			}
 			break;
 		case MQZoneUnknownDest:
@@ -971,13 +971,15 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			{
 				char hString[250];
 				sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
-				database.SetMQDetectionFlag(this->account_name,this->name, hString, zone->GetShortName());
+				database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
 			}
 			break;
 		case MQGate:
 			if (RuleB(Zone, EnableMQGateDetector)&& ((this->Admin() < RuleI(Zone, MQGateExemptStatus) || (RuleI(Zone, MQGateExemptStatus)) == -1))) {
 				Message(13, "Illegal gate request.");
-				database.SetMQDetectionFlag(this->account_name,this->name, "/MQGate", zone->GetShortName());
+				char hString[250];
+				sprintf(hString, "/MQGate used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+				database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
 				if(zone)
 				{
 					this->SetZone(this->GetZoneID(), zone->GetInstanceID()); //Prevent the player from zoning, place him back in the zone where he tried to originally /gate.
@@ -991,13 +993,13 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			break;
 		case MQGhost: //Not currently implemented, but the framework is in place - just needs detection scenarios identified
 			if (RuleB(Zone, EnableMQGhostDetector) && ((this->Admin() < RuleI(Zone, MQGhostExemptStatus) || (RuleI(Zone, MQGhostExemptStatus)) == -1))) {
-				database.SetMQDetectionFlag(this->account_name,this->name, "/MQGhost", zone->GetShortName());
+				database.SetMQDetectionFlag(this->account_name, this->name, "/MQGhost", zone->GetShortName());
 			}
 			break;
 		default:
 			char *hString = nullptr;
 			MakeAnyLenString(&hString, "Unhandled HackerDetection flag with location %.2f, %.2f, %.2f.", GetX(), GetY(), GetZ());
-			database.SetMQDetectionFlag(this->account_name,this->name, hString, zone->GetShortName());
+			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
 			safe_delete_array(hString);
 			break;
 	}

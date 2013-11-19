@@ -56,27 +56,27 @@ very low chance of dropping.
 
 Schema:
 CREATE TABLE forage (
-  id int(11) NOT nullptr auto_increment,
-  zoneid int(4) NOT nullptr default '0',
-  Itemid int(11) NOT nullptr default '0',
-  level smallint(6) NOT nullptr default '0',
-  chance smallint(6) NOT nullptr default '0',
+  id int(11) NOT NULL auto_increment,
+  zoneid int(4) NOT NULL default '0',
+  Itemid int(11) NOT NULL default '0',
+  level smallint(6) NOT NULL default '0',
+  chance smallint(6) NOT NULL default '0',
   PRIMARY KEY  (id)
 ) TYPE=MyISAM;
 
 old table upgrade:
-alter table forage add chance smallint(6) NOT nullptr default '0';
+alter table forage add chance smallint(6) NOT NULL default '0';
 update forage set chance=100;
 
 
 CREATE TABLE fishing (
-  id int(11) NOT nullptr auto_increment,
-  zoneid int(4) NOT nullptr default '0',
-  Itemid int(11) NOT nullptr default '0',
-  skill_level smallint(6) NOT nullptr default '0',
-  chance smallint(6) NOT nullptr default '0',
-  npc_id int NOT nullptr default 0,
-  npc_chance int NOT nullptr default 0,
+  id int(11) NOT NULL auto_increment,
+  zoneid int(4) NOT NULL default '0',
+  Itemid int(11) NOT NULL default '0',
+  skill_level smallint(6) NOT NULL default '0',
+  chance smallint(6) NOT NULL default '0',
+  npc_id int NOT NULL default 0,
+  npc_chance int NOT NULL default 0,
   PRIMARY KEY  (id)
 ) TYPE=MyISAM;
 

@@ -325,6 +325,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_CurrentMana:
 			{
+				// Bards don't get mana from effects, good or bad.
+				if(GetClass() == BARD)
+					break;
 				if(IsManaTapSpell(spell_id)) {
 					if(GetCasterClass() != 'N') {
 #ifdef SPELL_EFFECT_SPAM
@@ -352,6 +355,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_CurrentManaOnce:
 			{
+				// Bards don't get mana from effects, good or bad.
+				if(GetClass() == BARD)
+					break;
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Current Mana Once: %+i", effect_value);
 #endif
@@ -2727,6 +2733,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ImprovedBindWound:
 			case SE_MaxBindWound:
 			case SE_CombatStability:
+			case SE_AddSingingMod:
 			case SE_PetAvoidance:
 			case SE_GiveDoubleRiposte:
 			case SE_Ambidexterity:
@@ -4272,7 +4279,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_LimitEffect:
 			if(focus_spell.base[i] < 0){
-				if(IsEffectInSpell(spell_id,focus_spell.base[i])){ //we limit this effect, can't have
+				if(IsEffectInSpell(spell_id,(focus_spell.base[i] * -1))){ //we limit this effect, can't have
 					return 0;
 				}
 			}

@@ -8032,7 +8032,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
         m_pp.thirst_level += tchange;
         DeleteItemInInventory(slot, 1, false);
 
-        if(auto_consume) //no message if the client consumed for us
+        if(!auto_consume) //no message if the client consumed for us
             entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
 #if EQDEBUG >= 1

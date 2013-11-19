@@ -148,7 +148,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	logging_enabled = NPC_DEFAULT_LOGGING_ENABLED;
 
 	pAggroRange = d->aggroradius;
-	pAssistRange = GetAggroRange();
+	pAssistRange = d->assistradius;
 	findable = d->findable;
 	trackable = d->trackable;
 

@@ -74,11 +74,11 @@ To use ptimers, you need to create the table below in your DB:
 Schema:
 
 CREATE TABLE timers (
-	char_id INT(11) NOT nullptr,
-	type MEDIUMINT UNSIGNED NOT nullptr,
-	start INT UNSIGNED NOT nullptr,
-	duration INT UNSIGNED NOT nullptr,
-	enable TINYINT NOT nullptr,
+	char_id INT(11) NOT NULL,
+	type MEDIUMINT UNSIGNED NOT NULL,
+	start INT UNSIGNED NOT NULL,
+	duration INT UNSIGNED NOT NULL,
+	enable TINYINT NOT NULL,
 	PRIMARY KEY(char_id, type)
 );
 

@@ -517,76 +517,75 @@ bool Mob::IsInvisible(Mob* other) const
 	return(false);
 }
 
-float Mob::_GetMovementSpeed(int mod) const {
+float Mob::_GetMovementSpeed(int mod) const
+{
 	// List of movement speed modifiers, including AAs & spells:
 	// http://everquest.allakhazam.com/db/item.html?item=1721;page=1;howmany=50#m10822246245352
 	if (IsRooted())
 		return 0.0f;
 
-	float aa_mod = 0.0f;
 	float speed_mod = runspeed;
-	bool has_horse = false;
-	if (IsClient())
-	{
-		if(CastToClient()->GetGMSpeed())
-		{
+
+	// These two cases ignore the cap, be wise in the DB for horses.
+	if (IsClient()) {
+		if (CastToClient()->GetGMSpeed()) {
 			speed_mod = 3.125f;
-		}
-		else
-		{
-			Mob* horse = entity_list.GetMob(CastToClient()->GetHorseId());
-			if(horse)
-			{
+			if (mod != 0)
+				speed_mod += speed_mod * static_cast<float>(mod) / 100.0f;
+			return speed_mod;
+		} else {
+			Mob *horse = entity_list.GetMob(CastToClient()->GetHorseId());
+			if (horse) {
 				speed_mod = horse->GetBaseRunspeed();
-				has_horse = true;
+				if (mod != 0)
+					speed_mod += speed_mod * static_cast<float>(mod) / 100.0f;
+				return speed_mod;
 			}
 		}
 	}
 
-	aa_mod += itembonuses.BaseMovementSpeed + spellbonuses.BaseMovementSpeed + aabonuses.BaseMovementSpeed;
-
-	int spell_mod = spellbonuses.movementspeed + itembonuses.movementspeed;
+	int aa_mod = 0;
+	int spell_mod = 0;
+	int runspeedcap = RuleI(Character,BaseRunSpeedCap);
 	int movemod = 0;
+	float frunspeedcap = 0.0f;
 
-	if(spell_mod < 0)
-	{
+	runspeedcap += itembonuses.IncreaseRunSpeedCap + spellbonuses.IncreaseRunSpeedCap + aabonuses.IncreaseRunSpeedCap;
+	aa_mod += itembonuses.BaseMovementSpeed + spellbonuses.BaseMovementSpeed + aabonuses.BaseMovementSpeed;
+	spell_mod += spellbonuses.movementspeed + itembonuses.movementspeed;
+
+	// hard cap
+	if (runspeedcap > 225)
+		runspeedcap = 225;
+
+	if (spell_mod < 0)
 		movemod += spell_mod;
-	}
-	else if(spell_mod > (aa_mod))
-	{
+	else if (spell_mod > aa_mod)
 		movemod = spell_mod;
-	}
 	else
-	{
-		movemod = static_cast<int>(aa_mod);
-	}
+		movemod = aa_mod;
 
-	if(movemod < -85) //cap it at moving very very slow
+	// cap negative movemods from snares mostly
+	if (movemod < -85)
 		movemod = -85;
 
-	if (!has_horse && movemod != 0)
-		speed_mod += (speed_mod * float(movemod) / 100.0f);
+	if (movemod != 0)
+		speed_mod += speed_mod * static_cast<float>(movemod) / 100.0f;
 
-	if(mod != 0)
-		speed_mod += (speed_mod * (float)mod / 100.0f);
+	// runspeed caps
+	frunspeedcap = static_cast<float>(runspeedcap) / 100.0f;
+	if (IsClient() && speed_mod > frunspeedcap)
+		speed_mod = frunspeedcap;
 
-	if(speed_mod <= 0.0f)
-		return(0.0001f);
+	// apply final mod such as the -47 for walking
+	// use runspeed since it should stack with snares
+	// and if we get here, we know runspeed was the initial
+	// value before we applied movemod.
+	if (mod != 0)
+		speed_mod += runspeed * static_cast<float>(mod) / 100.0f;
 
-	//runspeed cap.
-	if(IsClient())
-	{
-		if (speed_mod > 1.58){
-			uint8 bonus_IncreaseRunSpeedCap = itembonuses.IncreaseRunSpeedCap + spellbonuses.IncreaseRunSpeedCap + aabonuses.IncreaseRunSpeedCap;
-			if (bonus_IncreaseRunSpeedCap){
-				speed_mod += float(bonus_IncreaseRunSpeedCap)/100.0f;
-					if(speed_mod > 1.74)
-						speed_mod = 1.74;
-			}
-			else
-				speed_mod = 1.58;
-		}
-	}
+	if (speed_mod <= 0.0f)
+		speed_mod = IsClient() ? 0.0001f : 0.0f;
 
 	return speed_mod;
 }

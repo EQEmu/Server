@@ -16,9 +16,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-
 /*
-
 	General outline of spell casting process
 
 	1.
@@ -64,13 +62,9 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 		If this was timed, CastedSpellFinished() will restore the client's
 		spell bar gems.
 
-
 	Most user code should call CastSpell(), with a 0 casting time if needed,
 	and not SpellFinished().
-
 */
-
-
 
 #include "../common/debug.h"
 #include "../common/spdat.h"
@@ -88,8 +82,8 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include <assert.h>
 
 #ifndef WIN32
-    #include <stdlib.h>
-    #include "../common/unix.h"
+	#include <stdlib.h>
+	#include "../common/unix.h"
 #endif
 
 #ifdef _GOTFRAGS
@@ -115,7 +109,7 @@ void Mob::SpellProcess()
 	}
 
 	// a timed spell is finished casting
-	if (casting_spell_id != 0 && spellend_timer.Check())
+	if (casting_spell_id != 0 && casting_spell_checks && spellend_timer.Check())
 	{
 		spellend_timer.Disable();
 		delaytimer = false;
@@ -342,7 +336,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	mlog(SPELLS__CASTING, "DoCastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item %d",
 		spell.name, spell_id, target_id, slot, cast_time, mana_cost, item_slot==0xFFFFFFFF?999:item_slot);
 
-
 	casting_spell_id = spell_id;
 	casting_spell_slot = slot;
 	casting_spell_inventory_slot = item_slot;
@@ -474,7 +467,64 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	entity_list.QueueCloseClients(this, outapp, false, 200, 0, true); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
 	safe_delete(outapp);
 	outapp = nullptr;
+
+	if (!DoCastingChecks()) {
+		InterruptSpell();
+		return false;
+	}
+
 	return(true);
+}
+
+/*
+ * Some failures should be caught before the spell finishes casting
+ * This is especially helpful to clients when they cast really long things
+ * If this passes it sets casting_spell_checks to true which is checked in
+ * SpellProcess(), if a situation ever arises where a spell is delayed by these
+ * it's probably doing something wrong.
+ */
+
+bool Mob::DoCastingChecks()
+{
+	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
+		casting_spell_checks = true;
+		return true;
+	}
+
+	uint16 spell_id = casting_spell_id;
+	Mob *spell_target = entity_list.GetMob(casting_spell_targetid);
+
+	if (RuleB(Spells, BuffLevelRestrictions) &&
+			!spell_target->CheckSpellLevelRestriction(spell_id)) {
+		mlog(SPELLS__BUFFS, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
+		if (!IsBardSong(spell_id))
+			Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
+		return false;
+	}
+
+	if (spells[spell_id].zonetype == 1 && !zone->CanCastOutdoor()) {
+		Message_StringID(13, CAST_OUTDOORS);
+		return false;
+	}
+
+	if (IsEffectInSpell(spell_id, SE_Levitate) && !zone->CanLevitate()) {
+		Message(13, "You can't levitate in this zone.");
+		return false;
+	}
+
+	if (zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
+		const char *msg = zone->GetSpellBlockedMessage(spell_id, GetX(), GetY(), GetZ());
+		if (msg) {
+			Message(13, msg);
+			return false;
+		} else {
+			Message(13, "You can't cast this spell here.");
+			return false;
+		}
+	}
+
+	casting_spell_checks = true;
+	return true;
 }
 
 uint16 Mob::GetSpecializeSkillValue(uint16 spell_id) const {
@@ -687,6 +737,7 @@ void Mob::ZeroCastingVars()
 	casting_spell_timer_duration = 0;
 	casting_spell_type = 0;
 	casting_spell_resist_adjust = 0;
+	casting_spell_checks = false;
 	delaytimer = false;
 }
 
@@ -1107,52 +1158,52 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	if(IsClient() && ((slot == USE_ITEM_SPELL_SLOT) || (slot == POTION_BELT_SPELL_SLOT))
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
-        bool fromaug = false;
-        const ItemInst* inst = CastToClient()->GetInv()[inventory_slot];
-        Item_Struct* augitem = 0;
-        uint32 recastdelay = 0;
-        uint32 recasttype = 0;
+		bool fromaug = false;
+		const ItemInst* inst = CastToClient()->GetInv()[inventory_slot];
+		Item_Struct* augitem = 0;
+		uint32 recastdelay = 0;
+		uint32 recasttype = 0;
 
-        for(int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
-            const ItemInst* aug_i = inst->GetAugment(r);
+		for(int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
+			const ItemInst* aug_i = inst->GetAugment(r);
 
-            if(!aug_i)
-                continue;
-            const Item_Struct* aug = aug_i->GetItem();
-            if(!aug)
-                continue;
+			if(!aug_i)
+				continue;
+			const Item_Struct* aug = aug_i->GetItem();
+			if(!aug)
+				continue;
 
-            if ( aug->Click.Effect == spell_id )
-            {
-                recastdelay = aug_i->GetItem()->RecastDelay;
-                recasttype = aug_i->GetItem()->RecastType;
-                fromaug = true;
-                break;
-            }
-        }
+			if ( aug->Click.Effect == spell_id )
+			{
+				recastdelay = aug_i->GetItem()->RecastDelay;
+				recasttype = aug_i->GetItem()->RecastType;
+				fromaug = true;
+				break;
+			}
+		}
 
-        //Test the aug recast delay
-        if(IsClient() && fromaug && recastdelay > 0)
-        {
-            if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recasttype), false)) {
-                Message_StringID(13, SPELL_RECAST);
-                mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
-                InterruptSpell();  
-                return;
-            }
-            else
-            {
-                //Can we start the timer here?  I don't see why not.
-                CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
-            }
-        }
+		//Test the aug recast delay
+		if(IsClient() && fromaug && recastdelay > 0)
+		{
+			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recasttype), false)) {
+				Message_StringID(13, SPELL_RECAST);
+				mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
+				InterruptSpell();
+				return;
+			}
+			else
+			{
+				//Can we start the timer here?  I don't see why not.
+				CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
+			}
+		}
 
 		if (inst && inst->IsType(ItemClassCommon) && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges() || fromaug)
 		{
 			//const Item_Struct* item = inst->GetItem();
 			int16 charges = inst->GetItem()->MaxCharges;
 
-            if(fromaug) { charges = -1; } //Don't destroy the parent item
+			if(fromaug) { charges = -1; } //Don't destroy the parent item
 
 			if(charges > -1) {	// charged item, expend a charge
 				mlog(SPELLS__CASTING, "Spell %d: Consuming a charge from item %s (%d) which had %d/%d charges.", spell_id, inst->GetItem()->Name, inst->GetItem()->ID, inst->GetCharges(), inst->GetItem()->MaxCharges);
@@ -1729,7 +1780,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 
-
 	//determine the type of spell target we have
 	CastAction_type CastAction;
 	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction))
@@ -1821,8 +1871,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
-            if(casting_spell_type == 1)
-              InterruptSpell();
+			if(casting_spell_type == 1)
+			  InterruptSpell();
 						return false;
 					}
 				}
@@ -2103,7 +2153,6 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		SetMana(GetMana() - mana_used);
 	}
 
-
 	// check line of sight to target if it's a detrimental spell
 	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target))
 	{
@@ -2371,7 +2420,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 		castlevel = caster_level_override;
 
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
-	
+
 	res = mod_buff_duration(res, caster, target, spell_id);
 
 	mlog(SPELLS__CASTING, "Spell %d: Casting level %d, formula %d, base_duration %d: result %d",
@@ -2509,43 +2558,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		}
 	}
 
-
-	// check for special stacking block command in spell1 against spell2
-	for(i = 0; i < EFFECT_COUNT; i++)
-	{
-		effect1 = sp1.effectid[i];
-		if(effect1 == SE_StackingCommand_Block)
-		{
-			/*
-			The logic here is if you're comparing the same spells they can't block each other
-			from refreshing
-			*/
-			if(spellid1 == spellid2)
-				continue;
-
-			blocked_effect = sp1.base[i];
-			blocked_slot = sp1.formula[i] - 201;	//they use base 1 for slots, we use base 0
-			blocked_below_value = sp1.max[i];
-
-			if(sp2.effectid[blocked_slot] == blocked_effect)
-			{
-				sp2_value = CalcSpellEffectValue(spellid2, blocked_slot, caster_level2);
-
-				mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d. New spell has value %d on that slot/effect. %s.",
-					sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value, sp2_value, (sp2_value < blocked_below_value)?"Blocked":"Not blocked");
-
-				if(sp2_value < blocked_below_value)
-				{
-					mlog(SPELLS__STACKING, "Blocking spell because sp2_value < blocked_below_value");
-					return -1;	// blocked
-				}
-			} else {
-				mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d, but we do not have that effect on that slot. Ignored.",
-					sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value);
-			}
-		}
-	}
-
 	// check for special stacking overwrite in spell2 against effects in spell1
 	for(i = 0; i < EFFECT_COUNT; i++)
 	{
@@ -2588,13 +2600,40 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	// arbitration takes place if 2 spells have the same effect at the same
 	// effect slot, otherwise they're stackable, even if it's the same effect
 	bool will_overwrite = false;
+	bool effect_match = true; // Figure out if we're identical in effects on all slots.
 	for(i = 0; i < EFFECT_COUNT; i++)
 	{
-		if(IsBlankSpellEffect(spellid1, i) || IsBlankSpellEffect(spellid2, i))
-			continue;
-
 		effect1 = sp1.effectid[i];
 		effect2 = sp2.effectid[i];
+
+		/*
+		Quick check, are the effects the same, if so then
+		keep going else ignore it for stacking purposes.
+		*/
+		if(effect1 != effect2) {
+			effect_match = false;
+			continue;
+		}
+
+		// If both spells have SE_StackingCommand_Block in the slot then we check if
+		// it applies to the same slot and effect type.
+		// This is handled here because IsBlankSpellEffect() would block it otherwise,
+		// but for stacking we need to handle it.
+		if (effect1 == SE_StackingCommand_Block) {
+			if (sp1.formula[i] == sp2.formula[i] && sp1.base[i] == sp2.base[i]) {
+				if(sp1.max[i] > sp2.max[i]) {
+					return(-1);
+				} else {
+					continue;
+				}
+			} else {
+				effect_match = false;
+				continue;
+			}
+		}
+
+		if(IsBlankSpellEffect(spellid1, i) || IsBlankSpellEffect(spellid2, i))
+			continue;
 
 		//Effects which really aren't going to affect stacking.
 		if(effect1 == SE_CurrentHPOnce ||
@@ -2603,13 +2642,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			effect1 == SE_PoisonCounter){
 			continue;
 			}
-
-		/*
-		Quick check, are the effects the same, if so then
-		keep going else ignore it for stacking purposes.
-		*/
-		if(effect1 != effect2)
-			continue;
 
 		/*
 		Skip check if effect is SE_Limit*
@@ -2698,9 +2730,50 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		will_overwrite = true;
 	}
 
+	// check for special stacking block command in spell1 against spell2
+	// This has to happen last so that we don't mess ourselves up for effect identical
+	// spells. They should just overwrite each other without needing the stacking block
+	if (!effect_match)
+	{
+		for(i = 0; i < EFFECT_COUNT; i++)
+		{
+			effect1 = sp1.effectid[i];
+			if(effect1 == SE_StackingCommand_Block)
+			{
+				/*
+				The logic here is if you're comparing the same spells they can't block each other
+				from refreshing
+				*/
+				if(spellid1 == spellid2)
+					continue;
+
+				blocked_effect = sp1.base[i];
+				blocked_slot = sp1.formula[i] - 201;	//they use base 1 for slots, we use base 0
+				blocked_below_value = sp1.max[i];
+
+				if(sp2.effectid[blocked_slot] == blocked_effect)
+				{
+					sp2_value = CalcSpellEffectValue(spellid2, blocked_slot, caster_level2);
+
+					mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d. New spell has value %d on that slot/effect. %s.",
+						sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value, sp2_value, (sp2_value < blocked_below_value)?"Blocked":"Not blocked");
+
+					if(sp2_value < blocked_below_value)
+					{
+						mlog(SPELLS__STACKING, "Blocking spell because sp2_value < blocked_below_value");
+						return -1;	// blocked
+					}
+				} else {
+					mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d, but we do not have that effect on that slot. Ignored.",
+						sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value);
+				}
+			}
+		}
+	}
+
 	//if we get here, then none of the values on the new spell are "worse"
 	//so now we see if this new spell is any better, or if its not related at all
-	if(will_overwrite) {
+	if(will_overwrite || effect_match) {
 		mlog(SPELLS__STACKING, "Stacking code decided that %s should overwrite %s.", sp2.name, sp1.name);
 		return(1);
 	}
@@ -2714,7 +2787,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 // derived from http://samanna.net/eq.general/buffs.shtml
 // spells 1-50: no restrictons
 // 51-65: SpellLevel/2+15
-// 66+L Group Spells 62, Single Target 61
+// 66+ Group Spells 62, Single Target 61
 bool Mob::CheckSpellLevelRestriction(uint16 spell_id)
 {
 	return true;
@@ -2724,20 +2797,15 @@ bool Client::CheckSpellLevelRestriction(uint16 spell_id)
 {
 	int SpellLevel = GetMinLevel(spell_id);
 
-	// Only check for beneficial buffs, if it's a bard song, only if it's short duration
-	if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id) &&
-			!(IsBardSong(spell_id) && !IsShortDurationBuff(spell_id)))
-	{
-		if(SpellLevel > 65)
-		{
-			if(IsGroupSpell(spell_id) && GetLevel() < 62)
+	// Only check for beneficial buffs
+	if (IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
+		if (SpellLevel > 65) {
+			if (IsGroupSpell(spell_id) && GetLevel() < 62)
 				return false;
-			else if(GetLevel() < 61)
+			else if (GetLevel() < 61)
 				return false;
-		}
-		else if(SpellLevel > 50) // 51-65
-		{
-			if(GetLevel() < (SpellLevel/2+15))
+		} else if (SpellLevel > 50) { // 51-65
+			if (GetLevel() < (SpellLevel / 2 + 15))
 				return false;
 		}
 	}
@@ -2910,7 +2978,6 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	if(IsPet() && GetOwner() && GetOwner()->IsClient()) {
 		SendPetBuffsToClient();
 	}
-
 
 	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
 				(IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
@@ -3103,7 +3170,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	// send to people in the area, ignoring caster and target
 	entity_list.QueueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells);
 
-
 	/* Send the EVENT_CAST_ON event */
 	if(spelltar->IsNPC())
 	{
@@ -3234,7 +3300,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 				}
 
-
 				if(!IsBeneficialAllowed(spelltar) ||
 					(IsGroupOnlySpell(spell_id) &&
 						!(
@@ -3270,7 +3335,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 	// ok at this point the spell is permitted to affect the target,
 	// but we need to check special cases and resists
-
 
 	// check immunities
 	if(spelltar->IsImmuneToSpell(spell_id, this))
@@ -4014,7 +4078,6 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 	}
 
-
 	if (!CharismaCheck){
 
 		//Check for Spell Effect specific resistance chances (ie AA Mental Fortitude)
@@ -4110,60 +4173,60 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		resist_chance = 0;
 	}
 
-    //Adjust our resist chance based on level modifiers
-    int temp_level_diff = GetLevel() - caster->GetLevel();
-    if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
-    {
-        int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-        if(a > 0)
-        {
-            temp_level_diff = a;
-        }
-        else
-        {
-            temp_level_diff = 0;
-        }
-    }
+	//Adjust our resist chance based on level modifiers
+	int temp_level_diff = GetLevel() - caster->GetLevel();
+	if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
+	{
+		int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+		if(a > 0)
+		{
+			temp_level_diff = a;
+		}
+		else
+		{
+			temp_level_diff = 0;
+		}
+	}
 
-    if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
-    {
-        temp_level_diff = 15;
-    }
+	if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
+	{
+		temp_level_diff = 15;
+	}
 
-    if(IsNPC() && temp_level_diff < -9)
-    {
-        temp_level_diff = -9;
-    }
+	if(IsNPC() && temp_level_diff < -9)
+	{
+		temp_level_diff = -9;
+	}
 
-    int level_mod = temp_level_diff * temp_level_diff / 2;
-    if(temp_level_diff < 0)
-    {
-        level_mod = -level_mod;
-    }
+	int level_mod = temp_level_diff * temp_level_diff / 2;
+	if(temp_level_diff < 0)
+	{
+		level_mod = -level_mod;
+	}
 
-    if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
-    {
-        level_mod = 1000;
-    }
+	if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
+	{
+		level_mod = 1000;
+	}
 
-    //Even more level stuff this time dealing with damage spells
-    if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
-    {
-        int level_diff;
-        if(GetLevel() >= RuleI(Casting,ResistFalloff))
-        {
-            level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-            if(level_diff < 0)
-            {
-                level_diff = 0;
-            }
-        }
-        else
-        {
-            level_diff = GetLevel() - caster->GetLevel();
-        }
-        level_mod += (2 * level_diff);
-    }
+	//Even more level stuff this time dealing with damage spells
+	if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
+	{
+		int level_diff;
+		if(GetLevel() >= RuleI(Casting,ResistFalloff))
+		{
+			level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+			if(level_diff < 0)
+			{
+				level_diff = 0;
+			}
+		}
+		else
+		{
+			level_diff = GetLevel() - caster->GetLevel();
+		}
+		level_mod += (2 * level_diff);
+	}
 
 	if (CharismaCheck)
 	{
@@ -4723,7 +4786,6 @@ uint16 Mob::GetSpellIDFromSlot(uint8 slot)
 	return 0;
 }
 
-
 bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 	uint32 buff_count = GetMaxTotalSlots();
 	for (int i = 0; i < buff_count; i++) {
@@ -4922,7 +4984,6 @@ int Mob::GetCasterLevel(uint16 spell_id) {
 	return(level);
 }
 
-
 //this method does NOT tell the client to stop singing the song.
 //this is NOT the right way to stop a mob from singing, use InterruptSpell
 //you should really know what your doing before you call this
@@ -4964,7 +5025,6 @@ void Mob::SendPetBuffsToClient()
 		return;
 
 	int PetBuffCount = 0;
-
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_PetBuffWindow,sizeof(PetBuff_Struct));
 	PetBuff_Struct* pbs=(PetBuff_Struct*)outapp->pBuffer;
@@ -5043,8 +5103,6 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 
 	return outapp;
 }
-
-
 
 void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 {

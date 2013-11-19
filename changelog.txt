@@ -1,5 +1,31 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/18/2013 ==
+demonstar55: Added assistradius to npc_types, defaults to aggroradius if set to 0 (old behaviour)
+
+== 11/17/2013 ==
+Sorvani: fixed leash and tether special abilities to use the specified range correctly.
+demonstar55: Rewrote the Mob::_GetMovementSpeed fix an issue that arose from the change on 11/11
+	- Added the rule Character:BaseRunSpeedCap (default 158) so people can customize what their runspeed cap is. Hardcapped to 225 so stuff doesn't get too crazy.
+
+== 11/16/2013 ==
+Leere: Fixed the drinking message for auto-consume, it will again correctly show up for forced consumption instead.
+demonstar55: Added Mob::DoCastingChecks() which will check for various fail conditions while the casting bar is up. This is called after Mob::DoCastSpell() starts the casting and before it returns.
+
+== 11/15/2013 ==
+demonstar55: Fixed Mob::CalcFocusEffect()'s SE_LimitEffect
+Leere: Fixed a stacking issue for SE_StackingCommand_Block
+
+== 11/13/2013 ==
+demonstar55: Implemented bard song effect cap. You can set the base cap with the rule Character:BaseInstrumentSoftCap, defaults to 36 or "3.6" as it is sometimes referred to.
+demonstar55: Fix Echo of Taelosia and Ayonae's Tutelage to increase the mod cap instead of further improving the instrument mod
+demonstar55: Implemented Singing/Instrument Mastery as an AA bonus.
+
+== 11/11/2013 ==
+demonstar55: Changed the way walk speed is calculated to allow mobs to have their walk speed equal a 100% movement reduction
+
+== 11/09/2013 ==
+Leere: Fixed Bard mana regen, they now only are affected by items and AA.
 
 == 11/07/2013 ==
 KLS: Added a system to use the BaseData system in the client.

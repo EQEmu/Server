@@ -1089,17 +1089,17 @@ void Mob::AI_Process() {
 			return;
 
 		if(GetSpecialAbility(TETHER)) {
-			float aggro_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
-			aggro_range = aggro_range > 0.0f ? aggro_range : pAggroRange * pAggroRange;
+			float tether_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
+			tether_range = tether_range > 0.0f ? tether_range * tether_range : pAggroRange * pAggroRange;
 
-			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > aggro_range) {
+			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > tether_range) {
 				GMMove(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY(), CastToNPC()->GetSpawnPointZ(), CastToNPC()->GetSpawnPointH());
 			}
 		} else if(GetSpecialAbility(LEASH)) {
-			float aggro_range = static_cast<float>(GetSpecialAbilityParam(LEASH, 0));
-			aggro_range = aggro_range > 0.0f ? aggro_range : pAggroRange * pAggroRange;
+			float leash_range = static_cast<float>(GetSpecialAbilityParam(LEASH, 0));
+			leash_range = leash_range > 0.0f ? leash_range * leash_range : pAggroRange * pAggroRange;
 
-			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > aggro_range) {
+			if(DistNoRootNoZ(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY()) > leash_range) {
 				GMMove(CastToNPC()->GetSpawnPointX(), CastToNPC()->GetSpawnPointY(), CastToNPC()->GetSpawnPointZ(), CastToNPC()->GetSpawnPointH());
 				SetHP(GetMaxHP());
 				BuffFadeAll();

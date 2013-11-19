@@ -404,7 +404,7 @@ typedef enum {
 #define SE_PetDiscipline				257 // not implemented as bonus - /pet hold
 #define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab
 #define SE_CombatStability				259 // implemented[AA] - damage mitigation
-#define SE_AddSingingMod				260 // *not implemented
+#define SE_AddSingingMod				260 // implemented[AA] - Instrument/Singing Mastery, base1 is the mod, base2 is the ItemType
 //#define SE_Unknown261					261	// not used
 #define SE_RaiseStatCap					262 // implemented
 #define	SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.

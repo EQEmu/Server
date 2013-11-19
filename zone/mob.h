@@ -198,6 +198,7 @@ public:
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
+	bool DoCastingChecks();
 
 	//Buff
 	void BuffProcess();
@@ -998,6 +999,7 @@ protected:
 	uint32 casting_spell_timer_duration;
 	uint32 casting_spell_type;
 	int16 casting_spell_resist_adjust;
+	bool casting_spell_checks;
 	uint16 bardsong;
 	uint8 bardsong_slot;
 	uint32 bardsong_target_id;

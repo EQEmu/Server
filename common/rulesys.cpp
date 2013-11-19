@@ -35,17 +35,17 @@ Requred SQL:
 
 
 CREATE TABLE rule_sets (
-  ruleset_id TINYINT UNSIGNED NOT nullptr auto_increment,
-  name VARCHAR(255) NOT nullptr,
+  ruleset_id TINYINT UNSIGNED NOT NULL auto_increment,
+  name VARCHAR(255) NOT NULL,
   PRIMARY KEY(ruleset_id)
 );
 INSERT INTO rule_sets VALUES(0, "default");
 UPDATE rule_sets SET ruleset_id=0;
 
 CREATE TABLE rule_values (
-  ruleset_id TINYINT UNSIGNED NOT nullptr,
-  rule_name VARCHAR(64) NOT nullptr,
-  rule_value VARCHAR(10) NOT nullptr,
+  ruleset_id TINYINT UNSIGNED NOT NULL,
+  rule_name VARCHAR(64) NOT NULL,
+  rule_value VARCHAR(10) NOT NULL,
   INDEX(ruleset_id),
   PRIMARY KEY(ruleset_id,rule_name)
 );
