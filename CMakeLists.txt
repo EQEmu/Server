@@ -117,7 +117,7 @@ SET(EQEMU_DEBUG_LEVEL 5 CACHE STRING "EQEmu debug level:
 OPTION(EQEMU_ENABLE_BOTS "Enable Bots" OFF)
 
 #Disable entire _mlog system (excludes trade/command logs)
-OPTION(DISABLE_LOGSYS "Enable Logging INI System" OFF)
+OPTION(DISABLE_LOGSYS "Disable Logging INI System" ON)
 
 #Enable GM Command log system
 OPTION(COMMANDS_LOGGING "Enable GM Command logs" ON)
