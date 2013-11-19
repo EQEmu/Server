@@ -1702,6 +1702,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 			sp[tempid].uninterruptable=atoi(row[146]);
 			sp[tempid].ResistDiff=atoi(row[147]);
+			sp[tempid].dot_stacking_exempt=atoi(row[148]);
 			sp[tempid].RecourseLink = atoi(row[150]);
 
 			sp[tempid].short_buff_box = atoi(row[154]);

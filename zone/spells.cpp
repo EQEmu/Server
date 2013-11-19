@@ -2519,12 +2519,16 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 	mlog(SPELLS__STACKING, "Check Stacking on old %s (%d) @ lvl %d (by %s) vs. new %s (%d) @ lvl %d (by %s)", sp1.name, spellid1, caster_level1, (caster1==nullptr)?"Nobody":caster1->GetName(), sp2.name, spellid2, caster_level2, (caster2==nullptr)?"Nobody":caster2->GetName());
 
-	if(((spellid1 == spellid2) && (spellid1 == 2751)) || //special case spells that will block each other no matter what
-		((spellid1 == spellid2) && (spellid1 == 2755)) //manaburn / lifeburn
-		){
-			mlog(SPELLS__STACKING, "Blocking spell because manaburn/lifeburn does not stack with itself");
+	// Same Spells and dot exemption is set to 1 or spell is Manaburn
+	if (spellid1 == spellid2) {
+		if (sp1.dot_stacking_exempt == 1 && caster1 != caster2) { // same caster can refresh
+			mlog(SPELLS__STACKING, "Blocking spell due to dot stacking exemption.");
+			return -1;
+		} else if (spellid1 == 2751) {
+			mlog(SPELLS__STACKING, "Blocking spell because manaburn does not stack with itself.");
 			return -1;
 		}
+	}
 
 	int modval = mod_spell_stack(spellid1, caster_level1, caster1, spellid2, caster_level2, caster2);
 	if(modval < 2) { return(modval); }

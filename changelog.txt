@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/19/2013 ==
+demonstar55: Partially make use of dot_stacking_exempt (case when it's 1 is implemented, -1 case isn't)
+
 == 11/18/2013 ==
 demonstar55: Added assistradius to npc_types, defaults to aggroradius if set to 0 (old behaviour)
 

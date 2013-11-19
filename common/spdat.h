@@ -660,7 +660,7 @@ struct SPDat_Spell_Struct
 /* 145 */	//int16 spellanim; // Doesn't look like it's the same as #doanim, so not sure what this is
 /* 146 */	int8 uninterruptable;	// Looks like anything != 0 is uninterruptable. Values are mostly -1, 0, & 1 (Fetid Breath = 90?)
 /* 147 */	int16 ResistDiff;
-/* 148 */	//int dot_stacking_exempt;
+/* 148 */	int8 dot_stacking_exempt; // If 1 doesn't stack with self cast by others. If -1 (not implemented) doesn't stack with same effect (???)
 /* 149 */	//int deletable;
 /* 150 */	uint16 RecourseLink;
 /* 151 */						// 151: -1, 0, or 1
