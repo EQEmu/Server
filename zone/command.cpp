@@ -6364,7 +6364,7 @@ void command_ban(Client *c, const Seperator *sep)
 			client = entity_list.GetClientByName(sep->arg[1]);
 			if(client)
 			{
-				client->Kick();
+				client->WorldKick();
 			}
 			else
 			{
@@ -6426,7 +6426,7 @@ void command_suspend(Client *c, const Seperator *sep)
 			Client *BannedClient = entity_list.GetClientByName(sep->arg[1]);
 
 			if(BannedClient)
-				BannedClient->Kick();
+				BannedClient->WorldKick();
 			else
 			{
 				ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
