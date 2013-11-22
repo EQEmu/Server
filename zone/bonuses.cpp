@@ -580,15 +580,17 @@ void Client::CalcAABonuses(StatBonuses* newbon) {
 	uint32 slots = 0;
 	uint32 aa_AA = 0;
 	uint32 aa_value = 0;
-	for (i = 0; i < MAX_PP_AA_ARRAY; i++) {	//iterate through all of the client's AAs
-		if (this->aa[i]) {	// make sure aa exists or we'll crash zone
-			aa_AA = this->aa[i]->AA;	//same as aaid from the aa_effects table
-			aa_value = this->aa[i]->value;	//how many points in it
-			if (aa_AA > 0 || aa_value > 0) {	//do we have the AA? if 1 of the 2 is set, we can assume we do
-				//slots = database.GetTotalAALevels(aa_AA);	//find out how many effects from aa_effects table
-				slots = zone->GetTotalAALevels(aa_AA);	//find out how many effects from aa_effects, which is loaded into memory
-				if (slots > 0)	//and does it have any effects? may be able to put this above, not sure if it runs on each iteration
-					ApplyAABonuses(aa_AA, slots, newbon);	//add the bonuses
+	if(this->aa) {
+		for (i = 0; i < MAX_PP_AA_ARRAY; i++) {	//iterate through all of the client's AAs
+			if (this->aa[i]) {	// make sure aa exists or we'll crash zone
+				aa_AA = this->aa[i]->AA;	//same as aaid from the aa_effects table
+				aa_value = this->aa[i]->value;	//how many points in it
+				if (aa_AA > 0 || aa_value > 0) {	//do we have the AA? if 1 of the 2 is set, we can assume we do
+					//slots = database.GetTotalAALevels(aa_AA);	//find out how many effects from aa_effects table
+					slots = zone->GetTotalAALevels(aa_AA);	//find out how many effects from aa_effects, which is loaded into memory
+					if (slots > 0)	//and does it have any effects? may be able to put this above, not sure if it runs on each iteration
+						ApplyAABonuses(aa_AA, slots, newbon);	//add the bonuses
+				}
 			}
 		}
 	}

@@ -494,12 +494,13 @@ bool Mob::DoCastingChecks()
 	uint16 spell_id = casting_spell_id;
 	Mob *spell_target = entity_list.GetMob(casting_spell_targetid);
 
-	if (RuleB(Spells, BuffLevelRestrictions) &&
-			!spell_target->CheckSpellLevelRestriction(spell_id)) {
-		mlog(SPELLS__BUFFS, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
-		if (!IsBardSong(spell_id))
-			Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
-		return false;
+	if (RuleB(Spells, BuffLevelRestrictions)) {
+		if(spell_target && !spell_target->CheckSpellLevelRestriction(spell_id)) {
+			mlog(SPELLS__BUFFS, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
+			if (!IsBardSong(spell_id))
+				Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
+			return false;
+		}
 	}
 
 	if (spells[spell_id].zonetype == 1 && !zone->CanCastOutdoor()) {
