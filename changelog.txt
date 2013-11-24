@@ -1,6 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/23/2013 ==
+Secrets: Fixed an issue related to a zone crash where the count of the abilities in an AA was 0, leading to a size 0 buffer issue.
+
 == 11/19/2013 ==
+Secrets: Fixed an issue with two zone crashes reported on PEQ related to the buff restrictions code and AAs.
 demonstar55: Partially make use of dot_stacking_exempt (case when it's 1 is implemented, -1 case isn't)
 
 == 11/18/2013 ==

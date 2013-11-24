@@ -1300,6 +1300,10 @@ void Client::SendAA(uint32 id, int seq) {
 		return;
 
 	int size=sizeof(SendAA_Struct)+sizeof(AA_Ability)*saa2->total_abilities;
+
+	if(size == 0)
+		return;
+
 	uchar* buffer = new uchar[size];
 	SendAA_Struct* saa=(SendAA_Struct*)buffer;
 	memcpy(saa,saa2,size);
