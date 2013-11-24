@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/24/2013 ==
+Leere: Added the seq number for AAs as something loaded from the DB. Only those AAs that should not have their seq number (which the client uses for /alt act and hotkeys) change when new AAs are added need to have it set. The server will still generate numbers for those that have seq set to the default of 0.
+- There is a required SQL file: 2013-11-24_AA_Seq_Support.sql
+
 == 11/23/2013 ==
 Secrets: Fixed an issue related to a zone crash where the count of the abilities in an AA was 0, leading to a size 0 buffer issue.
 

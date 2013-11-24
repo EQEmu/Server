@@ -1458,10 +1458,57 @@ void Zone::LoadAAs() {
 
 	database.LoadAAs(aas);
 
+	std::list<uint32> used;
+
+	// Gather information and set up access to each AA by the AAID of the first rank.
 	int i;
 	for(i=0; i < totalAAs; i++){
 		SendAA_Struct* aa = aas[i];
 		aas_send[aa->id] = aa;
+		if (aa->seq != 0) {
+			used.push_back(aa->seq);
+		}
+	}
+
+	used.sort();
+	used.unique();
+	uint32 curseq = 1;
+	std::list<uint32>::iterator iter = used.begin();
+
+	// Fill in any missing information like seq numbers and perform basic error checking.
+	// We need to have them in a valid state to properly link from AAID to Seq number below.
+	for (i=0; i < totalAAs; i++) {
+		if (aas[i]->seq == 0) {
+			while (iter != used.end() && curseq == *iter) {
+				++iter;
+				curseq++;
+			}
+			aas[i]->seq = curseq;
+			curseq++;
+		}
+		// Check that the sof_next_id points to something that exists.
+		if (aas[i]->sof_next_id != 0) {
+			SendAA_Struct *next = aas_send[aas[i]->sof_next_id];
+			if (next == nullptr) {
+				LogFile->write(EQEMuLog::Error, "Invalid AA in stacking list for %s (aaid=%d - sof_next_id=%d).", aas[i]->name, aas[i]->id, aas[i]->sof_next_id);
+				aas[i]->sof_next_id = 0;
+			}
+		}
+	}
+
+
+	// Translate the prereq_skill into the seq numbers.
+	// This is handled here, instead of in the SQL, so we can create both stacked and unstacked prereqs.
+	// Stacked prereqs are not yet implemented.
+	for (i=0; i < totalAAs; i++) {
+		if (aas[i]->prereq_skill != 0) {
+			SendAA_Struct* aa = aas_send[aas[i]->prereq_skill];
+			if (aa != nullptr) {
+				aas[i]->prereq_skill = aa->seq;
+			} else {
+				LogFile->write(EQEMuLog::Error, "Invalid Prereq Skill for %s (aaid=%d - prereq_skill=%d)", aas[i]->name, aas[i]->id, aas[i]->prereq_skill);
+			}
+		}
 	}
 
 	//load AA Effects into aa_effects
@@ -1810,7 +1857,6 @@ void ZoneDatabase::LoadAAs(SendAA_Struct **load){
 		while((row = mysql_fetch_row(result))!=nullptr) {
 			skill=atoi(row[0]);
 			load[ndx] = GetAASkillVars(skill);
-			load[ndx]->seq = ndx+1;
 			ndx++;
 		}
 		mysql_free_result(result);
@@ -1858,22 +1904,7 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 				"a.title_sid, "
 				"a.desc_sid, "
 				"a.type, "
-				"COALESCE("	//so we can return 0 if it's null
-					"("	//this is our derived table that has the row # that we can SELECT from, because the client is stupid
-					"SELECT "
-						"p.prereq_index_num "
-					"FROM "
-						"("
-						"SELECT "
-							"a2.skill_id, "
-							"@row := @row + 1 AS prereq_index_num "
-						"FROM "
-							"altadv_vars a2"
-						") AS p "
-					"WHERE "
-						"p.skill_id = a.prereq_skill"
-					"), "
-					"0) AS prereq_skill_index, "
+				"a.prereq_skill, "
 				"a.prereq_minpoints, "
 				"a.spell_type, "
 				"a.spell_refresh, "
@@ -1893,7 +1924,8 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 				"a.account_time_required, "
 				"a.sof_current_level,"
 				"a.sof_next_id, "
-				"a.level_inc "
+				"a.level_inc, "
+				"a.seq "
 			" FROM altadv_vars a WHERE skill_id=%i", skill_id), errbuf, &result)) {
 			safe_delete_array(query);
 			if (mysql_num_rows(result) == 1) {
@@ -1949,6 +1981,8 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 				sendaa->sof_current_level = atoul(row[25]);
 				sendaa->sof_next_id = atoul(row[26]);
 				sendaa->level_inc = static_cast<uint8>(atoul(row[27]));
+
+				sendaa->seq = atoul(row[28]);
 			}
 			mysql_free_result(result);
 		} else {
