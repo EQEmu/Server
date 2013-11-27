@@ -495,7 +495,8 @@ bool Mob::DoCastingChecks()
 	Mob *spell_target = entity_list.GetMob(casting_spell_targetid);
 
 	if (RuleB(Spells, BuffLevelRestrictions)) {
-		if(spell_target && !spell_target->CheckSpellLevelRestriction(spell_id)) {
+		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
+		if (spell_target && spells[spell_id].targettype != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
 			mlog(SPELLS__BUFFS, "Spell %d failed: recipient did not meet the level restrictions", spell_id);
 			if (!IsBardSong(spell_id))
 				Message_StringID(MT_SpellFailure, SPELL_TOO_POWERFUL);
