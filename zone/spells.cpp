@@ -2571,18 +2571,16 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if(effect2 == SE_StackingCommand_Overwrite)
 		{
 			overwrite_effect = sp2.base[i];
-			// TODO: seems 201 is special (any?), need to figure it out, 202 is slot 1 (index 0 for us)
-			overwrite_slot = sp2.formula[i] - 202;	//they use base 1 for slots, we use base 0
+			overwrite_slot = sp2.formula[i] - 201;	//they use base 1 for slots, we use base 0
 			overwrite_below_value = sp2.max[i];
-			if(overwrite_slot >= 0 && sp1.effectid[overwrite_slot] == overwrite_effect)
+			if(sp1.effectid[overwrite_slot] == overwrite_effect)
 			{
 				sp1_value = CalcSpellEffectValue(spellid1, overwrite_slot, caster_level1);
-				sp2_value = CalcSpellEffectValue(spellid2, overwrite_slot, caster_level2);
 
 				mlog(SPELLS__STACKING, "%s (%d) overwrites existing spell if effect %d on slot %d is below %d. Old spell has value %d on that slot/effect. %s.",
-					sp2.name, spellid2, overwrite_effect, overwrite_slot, overwrite_below_value, sp1_value, (sp1_value < overwrite_below_value && sp1_value <= sp2_value)?"Overwriting":"Not overwriting");
+					sp2.name, spellid2, overwrite_effect, overwrite_slot, overwrite_below_value, sp1_value, (sp1_value < overwrite_below_value)?"Overwriting":"Not overwriting");
 
-				if(sp1_value < overwrite_below_value && sp1_value <= sp2_value)
+				if(sp1_value < overwrite_below_value)
 				{
 					mlog(SPELLS__STACKING, "Overwrite spell because sp1_value < overwrite_below_value");
 					return 1;			// overwrite spell if its value is less
@@ -2590,6 +2588,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			} else {
 				mlog(SPELLS__STACKING, "%s (%d) overwrites existing spell if effect %d on slot %d is below %d, but we do not have that effect on that slot. Ignored.",
 					sp2.name, spellid2, overwrite_effect, overwrite_slot, overwrite_below_value);
+
 			}
 		}
 	}

@@ -1,8 +1,5 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-== 11/27/2013 ==
-demonstar55: Fixed issue with SE_StackingCommand_Overwrite getting the wrong slots, still need to figure out what it means when the calc is 201.
-
 == 11/23/2013 ==
 Secrets: Fixed an issue related to a zone crash where the count of the abilities in an AA was 0, leading to a size 0 buffer issue.
 
