@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/29/2013 ==
+demonstar55: Stacking issues should be resolved now, probably could be optimized more, but went from 3 loops that do stuff to 3 where only 2 really does stuff and one breaks early in most cases, so slightly better
+
 == 11/23/2013 ==
 Secrets: Fixed an issue related to a zone crash where the count of the abilities in an AA was 0, leading to a size 0 buffer issue.
 
