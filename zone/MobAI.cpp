@@ -2410,6 +2410,18 @@ void NPC::RemoveSpellFromNPCList(int16 spell_id)
 	}
 }
 
+void NPC::AISpellsList(Client *c)
+{
+	if (!c)
+		return;
+
+	for (std::vector<AISpells_Struct>::iterator it = AIspells.begin(); it != AIspells.end(); ++it)
+		c->Message(0, "%s (%d): Type %d, Priority %d",
+				spells[it->spellid].name, it->spellid, it->type, it->priority);
+
+	return;
+}
+
 DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 	if (iDBSpellsID == 0)
 		return 0;

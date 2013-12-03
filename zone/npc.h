@@ -355,6 +355,7 @@ public:
 	int 	mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const Item_Struct* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
+	void AISpellsList(Client *c);
 
 protected:
 

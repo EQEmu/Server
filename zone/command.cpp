@@ -220,6 +220,7 @@ int command_init(void) {
 		command_add("itemtest","- merth's test function",250,command_itemtest) ||
 		command_add("gassign","[id] - Assign targetted NPC to predefined wandering grid id",100,command_gassign) ||
 		command_add("ai","[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target",100,command_ai) ||
+		command_add("showspellslist","Shows spell list of targeted NPC",100,command_showspellslist) ||
 		command_add("worldshutdown","- Shut down world and all zones",200,command_worldshutdown) ||
 		command_add("sendzonespawns","- Refresh spawn list for all clients in zone",150,command_sendzonespawns) ||
 		command_add("dbspawn2","[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table",100,command_dbspawn2) ||
@@ -10770,6 +10771,25 @@ void command_object(Client *c, const Seperator *sep)
 			c->Message(0, usage_string);
 			break;
 	}
+}
+
+void command_showspellslist(Client *c, const Seperator *sep)
+{
+	Mob *target = c->GetTarget();
+
+	if (!target) {
+		c->Message(0, "Must target an NPC.");
+		return;
+	}
+
+	if (!target->IsNPC()) {
+		c->Message(0, "%s is not an NPC.", target->GetName());
+		return;
+	}
+
+	target->CastToNPC()->AISpellsList(c);
+
+	return;
 }
 
 // All new code added to command.cpp ought to be BEFORE this comment line. Do no append code to this file below the BOTS code block.
