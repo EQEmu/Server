@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/03/2013 ==
 demonstar55: Added #showspellslist to view a mobs spell list
+demonstar55: Fix procing off of unattackable things
 
 == 12/02/2013 ==
 JJ: Bandaid fix to CopyCharacter function.

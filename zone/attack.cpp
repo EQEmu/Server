@@ -3844,6 +3844,11 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 		return;
 	}
 
+	if (!IsAttackAllowed(on)) {
+		mlog(COMBAT__PROCS, "Preventing procing off of unattackable things.");
+		return;
+	}
+
 	if(!weapon_g) {
 		TryWeaponProc(nullptr, (const Item_Struct*)nullptr, on, hand);
 		return;
