@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/02/2013 ==
+JJ: Bandaid fix to CopyCharacter function.
+
 == 11/29/2013 ==
 demonstar55: Stacking issues should be resolved now, probably could be optimized more, but went from 3 loops that do stuff to 3 where only 2 really does stuff and one breaks early in most cases, so slightly better
 

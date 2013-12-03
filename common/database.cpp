@@ -1670,6 +1670,7 @@ bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
 }
 
 uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 acctid) {
+	//TODO: Rewrite better function
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;
@@ -1677,7 +1678,7 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 	PlayerProfile_Struct* pp;
 	ExtendedProfile_Struct* ext;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT profile, guild, guildrank, extprofile FROM character_ WHERE name='%s'", oldname), errbuf, &result)) {
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT profile, extprofile FROM character_ WHERE name='%s'", oldname), errbuf, &result)) {
 		safe_delete_array(query);
 
 		row = mysql_fetch_row(result);
@@ -1685,7 +1686,7 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 		pp = (PlayerProfile_Struct*)row[0];
 		strcpy(pp->name, newname);
 
-		ext = (ExtendedProfile_Struct*)row[3];
+		ext = (ExtendedProfile_Struct*)row[1];
 
 		mysql_free_result(result);
 	}
@@ -1711,7 +1712,6 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 		return 0;
 	}
 
-	// @merth: Need to copy inventory as well (and shared bank?)
 	if (affected_rows == 0) {
 		return 0;
 	}
