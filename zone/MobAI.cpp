@@ -241,8 +241,8 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 								AIDoSpellCast(i, chrmTar, mana_cost);
 								return true;
 							}
-							break;
 						}
+						break;
 					}
 
 					case SpellType_Pet: {
