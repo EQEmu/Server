@@ -220,6 +220,7 @@ public:
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
 	virtual Raid* GetRaid() { return entity_list.GetRaidByClient(this); }
 	virtual Group* GetGroup() { return entity_list.GetGroupByClient(this); }
+	virtual inline bool IsBerserk() { return berserk; }
 
 	void	AI_Init();
 	void	AI_Start(uint32 iMoveDelay = 0);

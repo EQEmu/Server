@@ -1173,7 +1173,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	if(weapon_damage > 0){
 
 		//Berserker Berserk damage bonus
-		if(berserk && GetClass() == BERSERKER){
+		if(IsBerserk() && GetClass() == BERSERKER){
 			int bonus = 3 + GetLevel()/10;		//unverified
 			weapon_damage = weapon_damage * (100+bonus) / 100;
 			mlog(COMBAT__DAMAGE, "Berserker damage bonus increases DMG to %d", weapon_damage);
@@ -4102,19 +4102,15 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	//Warning: Do not define these rules if you want live like critical hits.
 	critChance += RuleI(Combat, MeleeBaseCritChance);
 
-	if(IsClient())
+	if (IsClient()) {
 		critChance += RuleI(Combat, ClientBaseCritChance);
 
-	bool IsBerserk = false;
-	if(((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12 && IsClient()))
-	{
-		if(CastToClient()->berserk){
-			critChance += RuleI(Combat, BerserkBaseCritChance);
-			IsBerserk = true;
+		if ((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12) {
+			if (IsBerserk())
+				critChance += RuleI(Combat, BerserkBaseCritChance);
+			else
+				critChance += RuleI(Combat, WarBerBaseCritChance);
 		}
-
-		else
-			critChance += RuleI(Combat, WarBerBaseCritChance);
 	}
 
 	if(skill == SkillArchery && GetClass() == RANGER && GetSkill(SkillArchery) >= 65)
@@ -4154,10 +4150,11 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			//Crippling Blow Chance: The percent value of the effect is applied
 			//to the your Chance to Critical. (ie You have 10% chance to critical and you
 			//have a 200% Chance to Critical Blow effect, therefore you have a 20% Chance to Critical Blow.
-			if (CripplingBlowChance){
-				critChance *= float(CripplingBlowChance)/100.0f;
+			if (CripplingBlowChance || IsBerserk()) {
+				if (!IsBerserk())
+					critChance *= float(CripplingBlowChance)/100.0f;
 
-				if(MakeRandomFloat(0, 1) < critChance){
+				if (IsBerserk() || MakeRandomFloat(0, 1) < critChance) {
 					critMod = 400;
 					crip_success = true;
 				}
@@ -4166,8 +4163,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			critMod += GetCritDmgMob(skill) * 2; // To account for base crit mod being 200 not 100
 			damage = damage * critMod / 100;
 
-			if(IsBerserk || crip_success)
-			{
+			if (crip_success) {
 				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, CRIPPLING_BLOW, GetCleanName(), itoa(damage));
 				// Crippling blows also have a chance to stun
 				//Kayen: Crippling Blow would cause a chance to interrupt for npcs < 55, with a staggers message.
@@ -4175,10 +4171,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 					defender->Emote("staggers.");
 					defender->Stun(0);
 				}
-			}
-
-			else
-			{
+			} else {
 				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, CRITICAL_HIT, GetCleanName(), itoa(damage));
 			}
 		}

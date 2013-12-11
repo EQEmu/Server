@@ -464,13 +464,13 @@ bool Client::Process() {
 		}
 
 		if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
-			if(!dead && !berserk && this->GetHPRatio() < 30) {
+			if (!dead && !IsBerserk() && GetHPRatio() < RuleI(Combat, BerserkerFrenzyStart)) {
 				entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, GetName());
-				this->berserk = true;
+				berserk = true;
 			}
-			if (berserk && this->GetHPRatio() > 30) {
+			if (IsBerserk() && GetHPRatio() > RuleI(Combat, BerserkerFrenzyEnd)) {
 				entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, GetName());
-				this->berserk = false;
+				berserk = false;
 			}
 		}
 

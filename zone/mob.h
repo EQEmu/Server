@@ -126,6 +126,7 @@ public:
 	void ApplyMeleeDamageBonus(uint16 skill, int32 &damage);
 	virtual void MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts = nullptr);
 	bool CombatRange(Mob* other);
+	virtual inline bool IsBerserk() { return false; } // only clients
 
 	//Appearance
 	void SendLevelAppearance();

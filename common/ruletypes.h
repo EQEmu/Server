@@ -371,6 +371,8 @@ RULE_INT ( Combat, ClientStunLevel, 55) //This is the level where client kicks a
 RULE_INT ( Combat, QuiverWRHasteDiv, 3) //Weight Reduction is divided by this to get haste contribution for quivers
 RULE_BOOL ( Combat, UseArcheryBonusRoll, false) //Make the 51+ archery bonus require an actual roll
 RULE_INT ( Combat, ArcheryBonusChance, 50)
+RULE_INT ( Combat, BerserkerFrenzyStart, 35)
+RULE_INT ( Combat, BerserkerFrenzyEnd, 45)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( NPC )
