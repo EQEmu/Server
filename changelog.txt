@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/11/2013 ==
 demonstar55: Fixed issue with crippling blow from berserker frenzy not actually doing anything
+demonstar55: Fix haste caps
 
 == 12/04/2013 ==
 demonstar55: Fixed SpellType_Charm case in AICastSpell
