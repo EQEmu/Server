@@ -385,8 +385,8 @@ public:
 	uint32	GetZoneForage(uint32 ZoneID, uint8 skill); /* for foraging */
 	uint32	GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance);
 	void	UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount);
-	void    EnableRecipe(uint32 recipe_id);
-	void    DisableRecipe(uint32 recipe_id);
+	bool    EnableRecipe(uint32 recipe_id);
+	bool    DisableRecipe(uint32 recipe_id);
 
 	/*
 	* Tribute

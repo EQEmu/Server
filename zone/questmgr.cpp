@@ -2901,16 +2901,20 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 	safe_delete(pack);
 }
 
-void QuestManager::EnableRecipe(uint32 recipe_id)
+bool QuestManager::EnableRecipe(uint32 recipe_id)
 {
+	bool success = false;
 	if (recipe_id > 0)
-		database.EnableRecipe(recipe_id);
+		success = database.EnableRecipe(recipe_id);
+	return (success);
 }
 
-void QuestManager::DisableRecipe(uint32 recipe_id)
+bool QuestManager::DisableRecipe(uint32 recipe_id)
 {
+	bool success = false;
 	if (recipe_id > 0)
-		database.DisableRecipe(recipe_id);
+		success = database.DisableRecipe(recipe_id);
+	return (success);
 }
 
 Client *QuestManager::GetInitiator() const {

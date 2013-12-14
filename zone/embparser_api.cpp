@@ -3317,32 +3317,40 @@ XS(XS__enablerecipe);
 XS(XS__enablerecipe)
 {
 	dXSARGS;
+	bool success = false;
 
 	if (items != 1) {
 		Perl_croak(aTHX_ "Usage: enablerecipe(recipe_id)");
 	}
 	else {
 		uint32 recipe_id = (uint32)SvIV(ST(0));
-		quest_manager.EnableRecipe(recipe_id);
+		success = quest_manager.EnableRecipe(recipe_id);
+	}
+	if (!success) {
+		XSRETURN_NO;
 	}
 
-	XSRETURN_EMPTY;
+	XSRETURN_YES;
 }
 
 XS(XS__disablerecipe);
 XS(XS__disablerecipe)
 {
 	dXSARGS;
+	bool success = false;
 
 	if (items != 1) {
 		Perl_croak(aTHX_ "Usage: disablerecipe(recipe_id)");
 	}
 	else {
 		uint32 recipe_id = (uint32)SvIV(ST(0));
-		quest_manager.DisableRecipe(recipe_id);
+		success = quest_manager.DisableRecipe(recipe_id);
+	}
+	if (!success) {
+		XSRETURN_NO;
 	}
 
-	XSRETURN_EMPTY;
+	XSRETURN_YES;
 }
 
 /*
