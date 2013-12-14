@@ -3083,14 +3083,14 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		if(spelltar->IsBlockedBuff(spell_id))
 		{
 			mlog(SPELLS__BUFFS, "Spell %i not applied to %s as it is a Blocked Buff.", spell_id, spelltar->GetName());
-			return false;
+			return true;
 		}
 
 		if(spelltar->IsPet() && spelltar->GetOwner() && spelltar->GetOwner()->IsBlockedPetBuff(spell_id))
 		{
 			mlog(SPELLS__BUFFS, "Spell %i not applied to %s (%s's pet) as it is a Pet Blocked Buff.", spell_id, spelltar->GetName(),
 						spelltar->GetOwner()->GetName());
-			return false;
+			return true;
 		}
 	}
 
