@@ -3139,14 +3139,14 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 		trigger_spell_id = CastToClient()->CalcAAFocus(focusTriggerOnCast, focus_spell, spell_id);
 
 		if(IsValidSpell(trigger_spell_id) && GetTarget())
-			SpellFinished(trigger_spell_id, GetTarget());
+			SpellFinished(trigger_spell_id, GetTarget(), 10, 0, -1, spells[trigger_spell_id].ResistDiff);
 	}
 
 	else{
 		trigger_spell_id = CalcFocusEffect(focusTriggerOnCast, focus_spell, spell_id);
 
 		if(IsValidSpell(trigger_spell_id) && GetTarget()){
-			SpellFinished(trigger_spell_id, GetTarget());
+			SpellFinished(trigger_spell_id, GetTarget(),10, 0, -1, spells[trigger_spell_id].ResistDiff);
 			CheckHitsRemaining(0, false,false, 0, focus_spell);
 		}
 	}
@@ -3238,7 +3238,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 			if(MakeRandomInt(0, 100) <= focus)
 			{
 				Message(MT_Spells,"You twincast %s!",spells[spell_id].name);
-				SpellFinished(spell_id, target);
+				SpellFinished(spell_id, target, 10, 0, -1, spells[spell_id].ResistDiff);
 			}
 		}
 	}
@@ -3256,7 +3256,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 				{
 					if(MakeRandomInt(0, 100) <= focus)
 					{
-						SpellFinished(spell_id, target);
+						SpellFinished(spell_id, target, 10, 0, -1, spells[spell_id].ResistDiff);
 					}
 				}
 			}
@@ -3374,7 +3374,8 @@ bool Mob::TryFadeEffect(int slot)
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
-			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnWearoff || spells[buffs[slot].spellid].effectid[i] == SE_EffectOnFade)
+			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnWearoff || spells[buffs[slot].spellid].effectid[i] == SE_EffectOnFade
+				|| spells[buffs[slot].spellid].effectid[i] == SE_SpellOnAmtDmgTaken)
 			{
 				uint16 spell_id = spells[buffs[slot].spellid].base[i];
 				BuffFadeBySlot(slot);
@@ -3419,7 +3420,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 					SpellFinished(focus_trigger, target);
 
 				else
-					SpellFinished(focus_trigger, this);
+					SpellFinished(focus_trigger, this, 10, 0, -1, spells[focus_trigger].ResistDiff);
 			}
 			// For detrimental spells, if the triggered spell is beneficial, then it will land on the caster
 			// if the triggered spell is also detrimental, then it will land on the target
@@ -3429,7 +3430,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 					SpellFinished(focus_trigger, this);
 
 				else
-					SpellFinished(focus_trigger, target);
+					SpellFinished(focus_trigger, target, 10, 0, -1, spells[focus_trigger].ResistDiff);
 			}
 			CheckHitsRemaining(0, false,false, 0, focus_spell);
 		}
@@ -4428,7 +4429,7 @@ void Mob::ModSkillDmgTaken(SkillUseTypes skill_num, int value)
 		SkillDmgTaken_Mod[skill_num] = value;
 
 
-	else if (skill_num == 255)
+	else if (skill_num == 255 || skill_num == -1)
 		SkillDmgTaken_Mod[HIGHEST_SKILL+1] = value;
 }
 
@@ -4437,7 +4438,7 @@ int16 Mob::GetModSkillDmgTaken(const SkillUseTypes skill_num)
 	if (skill_num <= HIGHEST_SKILL)
 		return SkillDmgTaken_Mod[skill_num];
 
-	else if (skill_num == 255)
+	else if (skill_num == 255 || skill_num == -1)
 		return SkillDmgTaken_Mod[HIGHEST_SKILL+1];
 
 	return 0;

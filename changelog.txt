@@ -1,5 +1,13 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/13/2013 ==
+Kayen: Implemented additional functionality for SE_CurrentHP utilizing base2 values. (ie limit to body type)
+Kayen: Implemented SE_MitigateMeleeDamageSP (Partial Melee Rune that only is lowered if melee hits are over X amount of damage)
+Kayen: Implemented SE_SpellOnAmtDmgTaken (Effect is triggered when X amount of damage is taken)
+Kayen: Fix for various spell triggers/procs to now properly use their resist modifier.
+Kayen: Fix to mob->ModSkillDmgTaken(skill_num, value), setting value to -1 will now properly effect all skills.
+
+=======
 == 12/11/2013 ==
 demonstar55: Fixed issue with crippling blow from berserker frenzy not actually doing anything
 demonstar55: Fix haste caps

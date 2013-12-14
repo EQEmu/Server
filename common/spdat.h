@@ -582,7 +582,7 @@ typedef enum {
 #define SE_CriticalHealOverTime2		435 // implemented - increase critical heal over time chance
 //#define SE_Unknown432					436 // not used
 #define SE_Anchor						437 // *not implemented - Teleport Guild Hall Anchor(33099)
-//#define SE_Unknown438					438 // not used
+#define SE_Anchor2						438 // *not implemented - Translocate Primary Anchor (27750)
 #define SE_IncreaseAssassinationLvl		439 // *not implemented[AA] - increases the maximum level of humanoid that can be affected by assassination
 #define SE_FinishingBlowLvl				440 // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
 #define SE_MovementSpeed2				441 // *not implemented - new snare effect
@@ -590,6 +590,15 @@ typedef enum {
 //#define SE_Unknown443					443 // *not implemented - related to Finishing Blow AA
 #define SE_AggroLock					444 // *not implemented - target will ignore all but caster for duration
 #define SE_AdditionalMercenary			445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
+//#define SE_Unknown446					446 // *not implementet - bufff stacking blocker ? Blezon's Persistence
+//#define SE_Unknown447					447 // *not implemented 
+//#define SE_Unknown448					448 // *not implemented
+//#define SE_Unknown449					449 // *not implemented 
+//#define SE_Unknown450					450 // *not implemented 
+#define SE_MitigateMeleeDamageSP		451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
+//#define SE_Unknown452					452 // *not implemented
+#define SE_SpellOnAmtDmgTaken			453 // implemented  Trigger effect on X amount of damage taken
+
 // LAST
 
 

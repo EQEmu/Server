@@ -645,6 +645,7 @@ public:
 
 	int32 ReduceDamage(int32 damage);
 	int32 AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
+	int32 ReduceAllDamage(int32 damage);
 
 	virtual void DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance=false);
 	virtual void DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const Item_Struct* item=nullptr, uint16 weapon_damage=0, int16 chance_mod=0,int16 focus=0);

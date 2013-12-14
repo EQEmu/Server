@@ -2150,6 +2150,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			
+			case SE_MitigateMeleeDamageSP:
+			{
+				if (newbon->MitigateMeleeRuneSP[0] < effect_value){
+					newbon->MitigateMeleeRuneSP[0] = effect_value;
+					newbon->MitigateMeleeRuneSP[1] = buffslot;
+					newbon->MitigateMeleeRuneSP[2] = spells[spell_id].base2[i];
+				}
+				break;
+			}
+
 			case SE_MitigateSpellDamage:
 			{
 				if (newbon->MitigateSpellRune[0] < effect_value){
@@ -2158,12 +2169,22 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				}
 				break;
 			}
-
+			
 			case SE_ManaAbsorbPercentDamage:
 			{
 				if (newbon->ManaAbsorbPercentDamage[0] < effect_value){
 					newbon->ManaAbsorbPercentDamage[0] = effect_value;
 					newbon->ManaAbsorbPercentDamage[1] = buffslot;
+				}
+				break;
+			}
+
+			case SE_SpellOnAmtDmgTaken:
+			{
+				if (newbon->SpellOnAmtDmgTaken[2] < spells[spell_id].base2[i]){
+					newbon->SpellOnAmtDmgTaken[0] = effect_value;
+					newbon->SpellOnAmtDmgTaken[1] = buffslot;
+					newbon->SpellOnAmtDmgTaken[2] = spells[spell_id].base2[i];
 				}
 				break;
 			}
@@ -3384,6 +3405,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 				case SE_MitigateMeleeDamage:
 					spellbonuses.MitigateMeleeRune[0] = effect_value;
 					spellbonuses.MitigateMeleeRune[1] = -1;
+					break;
+
+				case SE_MitigateMeleeDamageSP:
+					spellbonuses.MitigateMeleeRuneSP[0] = effect_value;
+					spellbonuses.MitigateMeleeRuneSP[1] = -1;
+					spellbonuses.MitigateMeleeRuneSP[1] = effect_value;
 					break;
 
 				case SE_MitigateSpellDamage:

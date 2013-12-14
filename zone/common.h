@@ -307,7 +307,9 @@ struct StatBonuses {
 	int16	SkillDamageAmount2[HIGHEST_SKILL+2];	// Adds skill specific damage
 	uint16	NegateAttacks[2];					// 0 = bool HasEffect 1 = Buff Slot
 	uint16	MitigateMeleeRune[2];				// 0 = Mitigation value 1 = Buff Slot
+	uint16	MitigateMeleeRuneSP[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
 	uint16	MitigateSpellRune[2];				// 0 = Mitigation value 1 = Buff Slot
+	uint32	SpellOnAmtDmgTaken[3];				// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint16	ManaAbsorbPercentDamage[2];			// 0 = Mitigation value 1 = Buff Slot
 	int16	ShieldBlock;						// Chance to Shield Block
 	int16	BlockBehind;						// Chance to Block Behind (with our without shield)
