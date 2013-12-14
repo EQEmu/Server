@@ -3114,12 +3114,37 @@ int Mob::GetMonkHandToHandDelay(void)
 	}
 }
 
+int32 Mob::ReduceAllDamage(int32 damage)
+{
+	if(damage <= 0)
+		return damage;
+
+	int32 slot = -1;
+
+	if (spellbonuses.SpellOnAmtDmgTaken[2]){
+		slot = spellbonuses.SpellOnAmtDmgTaken[1];
+		
+		if (slot >= 0) {
+			if(damage > buffs[slot].melee_rune)	{
+				if(!TryFadeEffect(slot))
+					BuffFadeBySlot(slot);
+			}
+			else{
+				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage);
+				CheckHitsRemaining(slot);
+			}
+		}
+	}
+	return(damage);
+}
+
 int32 Mob::ReduceDamage(int32 damage)
 {
 	if(damage <= 0)
 		return damage;
 
 	int32 slot = -1;
+	bool DisableMeleeRune = false;
 
 	if (spellbonuses.NegateAttacks[0]){
 		slot = spellbonuses.NegateAttacks[1];
@@ -3129,7 +3154,36 @@ int32 Mob::ReduceDamage(int32 damage)
 		}
 	}
 
-	if (spellbonuses.MitigateMeleeRune[0]){
+	//Only mitigate if damage is above the minimium specified.
+	if (spellbonuses.MitigateMeleeRuneSP[0]){
+		slot = spellbonuses.MitigateMeleeRuneSP[1];
+		
+		if (slot >= 0 && (damage > spellbonuses.MitigateMeleeRuneSP[2])) 
+		{
+			DisableMeleeRune = true;
+			int damage_to_reduce = damage * spellbonuses.MitigateMeleeRuneSP[0] / 100;
+			if(damage_to_reduce > buffs[slot].melee_rune)
+			{
+				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamageSP %d damage negated, %d"
+					" damage remaining, fading buff.", damage_to_reduce, buffs[slot].melee_rune);
+				damage -= damage_to_reduce;
+				if(!TryFadeEffect(slot))
+					BuffFadeBySlot(slot);
+				//UpdateRuneFlags();
+			}
+			else
+			{
+				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamageSP %d damage negated, %d"
+					" damage remaining.", damage_to_reduce, buffs[slot].melee_rune);
+				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
+				damage -= damage_to_reduce;
+				CheckHitsRemaining(slot);
+			}
+		}
+	}
+
+
+	if (spellbonuses.MitigateMeleeRune[0] && !DisableMeleeRune){
 		slot = spellbonuses.MitigateMeleeRune[1];
 		if(slot >= 0)
 		{
@@ -3424,7 +3478,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		attacker->SendAppearancePacket(AT_Sneak, 0);
 	}
 		//final damage has been determined.
-
+		
+		ReduceAllDamage(damage);
 		SetHP(GetHP() - damage);
 
 		if(HasDied()) {

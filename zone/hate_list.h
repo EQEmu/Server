@@ -58,6 +58,8 @@ public:
 	void CheckFrenzyHate();
 	//Gets the target with the most hate regardless of things like frenzy etc.
 	Mob* GetMostHate();
+	// Count 'Summoned' pets on hatelist
+	int SummonedPetCount(Mob *hater);
 
 	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
 
