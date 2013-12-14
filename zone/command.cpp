@@ -11462,6 +11462,7 @@ void command_questerrors(Client *c, const Seperator *sep)
 void command_enablerecipe(Client *c, const Seperator *sep)
 {
 	uint32 recipe_id = 0;
+	bool success = false;
 	if (c) {
 		if (sep->argnum == 1) {
 			recipe_id = atoi(sep->arg[1]);
@@ -11471,8 +11472,13 @@ void command_enablerecipe(Client *c, const Seperator *sep)
 			return;
 		}
 		if (recipe_id > 0) {
-			database.EnableRecipe(recipe_id);
-			c->Message(0, "Recipe enabled.");
+			success = database.EnableRecipe(recipe_id);
+			if (success) {
+				c->Message(0, "Recipe enabled.");
+			}
+			else {
+				c->Message(0, "Recipe not enabled.");
+			}
 		}
 		else {
 			c->Message(0, "Invalid recipe id.\nUsage: #enablerecipe recipe_id");
@@ -11483,6 +11489,7 @@ void command_enablerecipe(Client *c, const Seperator *sep)
 void command_disablerecipe(Client *c, const Seperator *sep)
 {
 	uint32 recipe_id = 0;
+	bool success = false;
 	if (c) {
 		if (sep->argnum == 1) {
 			recipe_id = atoi(sep->arg[1]);
@@ -11492,8 +11499,13 @@ void command_disablerecipe(Client *c, const Seperator *sep)
 			return;
 		}
 		if (recipe_id > 0) {
-			database.DisableRecipe(recipe_id);
-			c->Message(0, "Recipe disabled.");
+			success = database.DisableRecipe(recipe_id);
+			if (success) {
+				c->Message(0, "Recipe disabled.");
+			}
+			else {
+				c->Message(0, "Recipe not disabled.");
+			}
 		}
 		else {
 			c->Message(0, "Invalid recipe id.\nUsage: #disablerecipe recipe_id");

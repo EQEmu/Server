@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/14/2013 ==
+JJ: Changed enable/disable recipe to confirm change made.
+
 == 12/13/2013 ==
 Kayen: Implemented additional functionality for SE_CurrentHP utilizing base2 values. (ie limit to body type)
 Kayen: Implemented SE_MitigateMeleeDamageSP (Partial Melee Rune that only is lowered if melee hits are over X amount of damage)

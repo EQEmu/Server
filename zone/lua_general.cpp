@@ -1021,12 +1021,12 @@ void lua_clear_opcode(int op) {
 	ClearMappedOpcode(static_cast<EmuOpcode>(op));
 }
 
-void lua_enable_recipe(uint32 recipe_id) {
-	quest_manager.EnableRecipe(recipe_id);
+bool lua_enable_recipe(uint32 recipe_id) {
+	return quest_manager.EnableRecipe(recipe_id);
 }
 
-void lua_disable_recipe(uint32 recipe_id) {
-	quest_manager.DisableRecipe(recipe_id);
+bool lua_disable_recipe(uint32 recipe_id) {
+	return quest_manager.DisableRecipe(recipe_id);
 }
 
 luabind::scope lua_register_general() {
