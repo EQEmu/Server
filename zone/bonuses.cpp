@@ -1574,6 +1574,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->MeleeMitigation -= effect_value;
 				break;
 
+			case SE_IncreaseHitDmgTaken:
+				newbon->MeleeMitigation += effect_value;
+				break;
+
 			case SE_CriticalHitChance:
 			{
 
@@ -2689,6 +2693,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusImprovedDamage2;
 		case SE_Empathy:
 			return focusAdditionalDamage;
+		case SE_ReduceHeal:
+			return focusReduceHeal;
 		case SE_HealRate2:
 			return focusHealRate;
 		case SE_IncreaseSpellPower:
@@ -3001,6 +3007,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_MeleeMitigation:
+					spellbonuses.MeleeMitigation = effect_value;
+					itembonuses.MeleeMitigation = effect_value;
+					aabonuses.MeleeMitigation = effect_value;
+					break;
+
+				case SE_IncreaseHitDmgTaken:
 					spellbonuses.MeleeMitigation = effect_value;
 					itembonuses.MeleeMitigation = effect_value;
 					aabonuses.MeleeMitigation = effect_value;
