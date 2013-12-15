@@ -2804,6 +2804,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_SpellVulnerability:
 			case SE_SpellTrigger:
 			case SE_ApplyEffect:
+			case SE_ApplyEffect2:
 			case SE_Twincast:
 			case SE_DelayDeath:
 			case SE_InterruptCasting:
@@ -2892,6 +2893,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ChannelChanceItems:
 			case SE_CriticalHealRate:
 			case SE_IncreaseNumHits:
+			case SE_CastonFocusEffect:
+			case SE_ReduceHeal:
+			case SE_IncreaseHitDmgTaken:
 			{
 				break;
 			}
@@ -4266,6 +4270,14 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 
+			case SE_ReduceHeal:
+			{
+				if(type == focusReduceHeal)
+					value = base1;
+
+				break;
+			}
+
 			case SE_CriticalHealRate:
 			{
 				if (type == focusCriticalHealRate)
@@ -4351,6 +4363,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	int lvldiff = 0;
 	bool LimitSpellSkill = false;
 	bool SpellSkill_Found = false;
+	uint32 Caston_spell_id = 0;
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 
@@ -4509,6 +4522,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
 			if (!PassLimitClass(focus_spell.base[i], GetClass()))
 				return 0;
+			break;
+
+		case SE_CastonFocusEffect:
+			if (focus_spell.base[i] > 0)
+				Caston_spell_id = focus_spell.base[i];
 			break;
 
 		//handle effects
@@ -4732,6 +4750,14 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 		}
 
+		case SE_ReduceHeal:
+		{
+			if(type == focusReduceHeal)
+				value = focus_spell.base[i];
+
+			break;
+		}
+
 		case SE_CriticalHealRate:
 		{
 			if (type == focusCriticalHealRate)
@@ -4798,6 +4824,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	//Check for spell skill limits.
 	if ((LimitSpellSkill) && (!SpellSkill_Found))
 		return 0;
+
+	if (Caston_spell_id){
+		if(IsValidSpell(Caston_spell_id) && (Caston_spell_id != spell_id))
+			SpellFinished(Caston_spell_id, this, 10, 0, -1, spells[Caston_spell_id].ResistDiff);
+	}
 
 	return(value*lvlModifier/100);
 }

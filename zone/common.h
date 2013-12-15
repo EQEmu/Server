@@ -73,6 +73,7 @@ typedef enum {	//focus types
 	focusBlockNextSpell,
 	focusHealRate,
 	focusAdditionalDamage,
+	focusReduceHeal,
 	focusSpellEffectiveness,
 	focusIncreaseNumHits,
 	focusCriticalHealRate,

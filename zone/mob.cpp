@@ -3176,7 +3176,7 @@ void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
 				if(MakeRandomInt(0, trig_chance) <= spells[spell_id].base[i])
 				{
 					// If we trigger an effect then its over.
-					SpellFinished(spells[spell_id].base2[i], target);
+					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
 					break;
 				}
 				else
@@ -3197,7 +3197,7 @@ void Mob::TrySpellTrigger(Mob *target, uint32 spell_id)
 			{
 				if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
 				{
-					SpellFinished(spells[spell_id].base2[i], target);
+					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
 				}
 			}
 		}
@@ -3213,12 +3213,12 @@ void Mob::TryApplyEffect(Mob *target, uint32 spell_id)
 
 	for(int i = 0; i < EFFECT_COUNT; i++)
 	{
-		if (spells[spell_id].effectid[i] == SE_ApplyEffect)
+		if (spells[spell_id].effectid[i] == SE_ApplyEffect || spells[spell_id].effectid[i] == SE_ApplyEffect2)
 		{
 			if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
 			{
 				if(target)
-					SpellFinished(spells[spell_id].base2[i], target);
+					SpellFinished(spells[spell_id].base2[i], target, 10, 0, -1, spells[spell_id].ResistDiff);
 			}
 		}
 	}
