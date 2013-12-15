@@ -3078,22 +3078,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 	}
 
-	if(RuleB(Spells, EnableBlockedBuffs))
-	{
-		if(spelltar->IsBlockedBuff(spell_id))
-		{
-			mlog(SPELLS__BUFFS, "Spell %i not applied to %s as it is a Blocked Buff.", spell_id, spelltar->GetName());
-			return true;
-		}
-
-		if(spelltar->IsPet() && spelltar->GetOwner() && spelltar->GetOwner()->IsBlockedPetBuff(spell_id))
-		{
-			mlog(SPELLS__BUFFS, "Spell %i not applied to %s (%s's pet) as it is a Pet Blocked Buff.", spell_id, spelltar->GetName(),
-						spelltar->GetOwner()->GetName());
-			return true;
-		}
-	}
-
 	EQApplicationPacket *action_packet, *message_packet;
 	float spell_effectiveness;
 
@@ -3173,6 +3157,23 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	mod_spell_cast(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
 
 	// now check if the spell is allowed to land
+	if (RuleB(Spells, EnableBlockedBuffs)) {
+		// We return true here since the caster's client should act like normal
+		if (spelltar->IsBlockedBuff(spell_id)) {
+			mlog(SPELLS__BUFFS, "Spell %i not applied to %s as it is a Blocked Buff.",
+					spell_id, spelltar->GetName());
+			safe_delete(action_packet);
+			return true;
+		}
+
+		if (spelltar->IsPet() && spelltar->GetOwner() &&
+				spelltar->GetOwner()->IsBlockedPetBuff(spell_id)) {
+			mlog(SPELLS__BUFFS, "Spell %i not applied to %s (%s's pet) as it is a Pet Blocked Buff.",
+					spell_id, spelltar->GetName(), spelltar->GetOwner()->GetName());
+			safe_delete(action_packet);
+			return true;
+		}
+	}
 
 	// invuln mobs can't be affected by any spells, good or bad
 	if(spelltar->GetInvul() || spelltar->DivineAura()) {

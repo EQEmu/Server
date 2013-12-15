@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/15/2013 ==
+demonstar55: Moved the blocked buff check down so we get spell effects like on live
+
 == 12/14/2013 ==
 demonstar55: Blocked buffs shouldn't fail, they should just not be applied.
 JJ: Changed enable/disable recipe to confirm change made.
