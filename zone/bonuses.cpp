@@ -2680,7 +2680,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 		case SE_SpellVulnerability:
 			return focusSpellVulnerability;
 		case SE_BlockNextSpellFocus:
-			return focusBlockNextSpell;
+			//return focusBlockNextSpell;
+			return 0; //This is calculated as an actual bonus
 		case SE_Twincast:
 			return focusTwincast;
 		case SE_SympatheticProc:
