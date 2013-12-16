@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/16/2013 ==
+Kayen: Fix to SE_BlockNextSpellFocus to make it functional again.
+
 == 12/15/2013 ==
 demonstar55: Moved the blocked buff check down so we get spell effects like on live
 Kayen: Implemented SE_ReduceHealing (Reduces amount of healing on target by X amount)
