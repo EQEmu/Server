@@ -2,6 +2,10 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/15/2013 ==
 demonstar55: Moved the blocked buff check down so we get spell effects like on live
+Kayen: Implemented SE_ReduceHealing (Reduces amount of healing on target by X amount)
+Kayen: Implemented SE_CastonFocusEffect (Triggers spell as part of a focus, when that focus effect is used)
+Kayen: Implemented SE_IncreaseHitDmgTaken (Effect is triggered when X amount of damage is taken)
+Kayen: More fixes for various spell triggers/procs to now properly use their resist modifier.
 
 == 12/14/2013 ==
 demonstar55: Blocked buffs shouldn't fail, they should just not be applied.

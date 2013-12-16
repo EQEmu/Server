@@ -277,7 +277,7 @@ typedef enum {
 #define SE_SpellHateMod					130 // implemented
 #define SE_ReduceReagentCost			131 // implemented
 #define SE_ReduceManaCost				132 // implemented
-//#define SE_Unknown133					133	// not used
+#define SE_ApplyEffect2					133	// implemented - Apply additional spell to target
 #define SE_LimitMaxLevel				134 // implemented
 #define SE_LimitResist					135 // implemented
 #define SE_LimitTarget					136 // implemented
@@ -288,9 +288,9 @@ typedef enum {
 #define SE_LimitInstant					141 // implemented
 #define SE_LimitMinLevel				142 // implemented
 #define SE_LimitCastTime				143 // implemented
-//#define SE_Unknown144					144	// not used
+#define SE_Unknown144					144	// not used
 #define SE_Teleport2					145	// implemented - Banishment of the Pantheon
-//#define SE_Unknown146					146	// not used (Lightning Rod) Electrical Resist? (exp. VoA)
+#define SE_ElectricityResist			146	// *not implemented (Lightning Rod: 23233) 
 #define SE_PercentalHeal				147 // implemented
 #define SE_StackingCommand_Block		148 // implemented?
 #define SE_StackingCommand_Overwrite	149 // implemented?
@@ -498,10 +498,10 @@ typedef enum {
 #define SE_PersistentEffect				351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
 #define SE_Unknown352					352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
 #define SE_AdditionalAura				353	// *not implemented - allows use of more than 1 aura, aa effect
-#define SE_Unknown354					354	// *not implemented - looks to be some type of invulnerability? Test DAT (8757)
-#define SE_Unknown355					355	// *not implemented - looks to be some type of invulnerability? Test LT (8758)
+//#define SE_Unknown354					354	// *not implemented - looks to be some type of invulnerability? Test DAT (8757)
+//#define SE_Unknown355					355	// *not implemented - looks to be some type of invulnerability? Test LT (8758)
 //#define SE_Unknown356					356	// not used
-//#define SE_Unknown357					357	// *not implemented - (Stunted Growth) Something to do with negate effects? Focus? Chance?
+#define SE_InhibitSpellCasting			357	// *not implemented - (Stunted Growth 31160) Unlcear what this effect does? silence?
 #define SE_CurrentManaOnce				358	// implemented
 #define SE_Invulnerabilty				359	// *not implemented - Invulnerability (Brell's Blessing)
 #define SE_SpellOnKill					360	// implemented - a buff that has a base1 % to cast spell base2 when you kill a "challenging foe" base3 min level
@@ -520,7 +520,7 @@ typedef enum {
 #define SE_CastOnWearoff				373 // implemented
 #define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
-//#define SE_Unknown376					376	// *not implemented - used in 2 spells
+//#define SE_Unknown376					376	// *not implemented - used in 2 test spells  (12945 | Movement Test Spell 1) 
 #define SE_BossSpellTrigger				377	// implemented - spell is cast on fade
 #define SE_SpellEffectResistChance		378	// implemented - Increase chance to resist specific spell effect (base1=value, base2=spell effect id)
 #define SE_ShadowStepDirectional		379 // implemented - handled by client
@@ -534,11 +534,11 @@ typedef enum {
 #define SE_CastOnCure					387 // implemented - Casts a spell on the cured person
 #define SE_SummonCorpseZone				388 // *not implemented - summons a corpse from any zone(nec AA)
 #define SE_Forceful_Rejuv				389 // Refresh spell icons
-#define SE_CastResistRestrict			390 // *not implemented - some sort of restriction of what resist spells you can cast
-//#define SE_Unknown391					391 // not used (Warlord's Fury/Twinproc) likely a focus limit
+#define SE_SetRecastTimer				390 // *not implemented - Sets recast timers to specific value, focus limited.
+#define SE_IncreaseHitDmgTaken			391	// implemented - Most likely a simple negative mitigation modifier (Warlords fury: 23528) 
 #define SE_AdditionalHeal2				392 // implemented - Adds or removes healing from spells
 #define SE_HealRate2					393 // implemented - HealRate with focus restrictions.
-//#define SE_Unknown394					394 // *not implemented - (Diminishing Presence) Adds or removes healing from spells
+#define SE_ReduceHeal					394 // implemented - Reduces amount of healing on target by X value with foucs restrictions.
 #define SE_CriticalHealRate				395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
 #define SE_AdditionalHeal				396 // implemented - Adds a direct healing amount to spells
 #define SE_PetMeleeMitigation			397 // *not implemented[AA] - additional mitigation to your pets.
@@ -547,11 +547,11 @@ typedef enum {
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
 #define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
 #define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
-#define SE_ReluctantBene				403 // *not implemented - Reluctant Benevolence(21662)
+#define SE_TriggerOnCast2				403 // *not implemented - trigger a spell with percent chance, focus limited.
 #define SE_LimitExcludeSkill			404 // implemented - Limit a focus to exclude spells cast using a specific skill.
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
-//#define SE_Unknown397					407 // *not implemented (Diminished Presence) Triggerable spell effect
+#define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied) 
 #define SE_LimitHPPercent				408 // implemented - limited to a certain percent of your hp(ie heals up to 50%)
 #define SE_LimitManaPercent				409 // implemented - limited to a certain percent of your mana
 #define SE_LimitEndPercent				410 // implemented - limited to a certain percent of your end
@@ -566,31 +566,31 @@ typedef enum {
 #define SE_AddMeleeProc					419 // implemented - Adds a proc
 //#define SE_Unknown420					420 // *not used
 #define SE_IncreaseNumHits				421 // implemented[AA] - increases number of hits a buff has till fade. (focus)
-//#define SE_Unknown422					422 // not used - Seen in Lasting Bravery likely a focus limit
-//#define SE_Unknown423					423 // not used	- Seen in Lasting Bravery likely a focus limit
+//#define SE_Unknown422					422 // not used - Seen in Lasting Bravery[AA] likely a focus limit
+//#define SE_Unknown423					423 // not used	- Seen in Lasting Bravery[AA] likely a focus limit
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
 #define SE_Display						425 // *not implemented - Illusion: Flying Dragon(21626)
 #define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
 #define SE_SkillProc					427 // implemented - chance to proc when using a skill(ie taunt)
 #define SE_LimitToSkill					428 // implemented - limits what skills will effect a skill proc
 #define SE_SkillProc2					429 // implemented - chance to proc when using a skill (most have hit limits)
-//#define SE_Unknown430					430 // *not implemented - Fear of the Dark(27641)
-//#define SE_Unknown431					431 // *not implemented - Fear of the Dark(27641)
+//#define SE_Unknown430					430 // *not implemented - Fear of the Dark(27641) - Alters vision
+//#define SE_Unknown431					431 // *not implemented - Fear of the Dark(27641) - Alters vision
 //#define SE_Unknown432					432 // not used
-//#define SE_Uknonwn433					433 // not used
+//#define SE_Uknonwn433					433 // not used  (12266 | Placeholder - Test - New Dot Only)
 #define SE_CriticalHealChance2			434 // implemented - increase critical heal chance
 #define SE_CriticalHealOverTime2		435 // implemented - increase critical heal over time chance
-//#define SE_Unknown432					436 // not used
+//#define SE_Unknown436					436 // not used ( 23491 | ABTest Buff Hold)
 #define SE_Anchor						437 // *not implemented - Teleport Guild Hall Anchor(33099)
 #define SE_Anchor2						438 // *not implemented - Translocate Primary Anchor (27750)
 #define SE_IncreaseAssassinationLvl		439 // *not implemented[AA] - increases the maximum level of humanoid that can be affected by assassination
 #define SE_FinishingBlowLvl				440 // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
-#define SE_MovementSpeed2				441 // *not implemented - new snare effect
+#define SE_CancleIfMoved				441 // *not implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
 #define SE_TriggerOnHPAmount			442 // *not implemented - triggers a spell which a certain hp level is reached
-//#define SE_Unknown443					443 // *not implemented - related to Finishing Blow AA
-#define SE_AggroLock					444 // *not implemented - target will ignore all but caster for duration
+#define SE_TriggerIfMovement			443 // *not implemented - Trigger a spell if you move (37846 | Chopping Block)
+#define SE_AggroLock					444 // *not implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% up to level Z
 #define SE_AdditionalMercenary			445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
-//#define SE_Unknown446					446 // *not implementet - bufff stacking blocker ? Blezon's Persistence
+//#define SE_Unknown446					446 // *not implementet - bufff stacking blocker ? (26219 | Qirik's Watch)
 //#define SE_Unknown447					447 // *not implemented 
 //#define SE_Unknown448					448 // *not implemented
 //#define SE_Unknown449					449 // *not implemented 

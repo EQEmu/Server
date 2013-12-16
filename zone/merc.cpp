@@ -2868,6 +2868,7 @@ int32 Merc::Additional_Heal(uint16 spell_id)
 
 	heal_amt += GetFocusEffect(focusAdditionalHeal, spell_id);
 	heal_amt += GetFocusEffect(focusAdditionalHeal2, spell_id);
+	heal_amt -= GetFocusEffect(focusReduceHeal, spell_id);
 
 	if (heal_amt){
 		int duration = CalcBuffDuration(this, this, spell_id);
