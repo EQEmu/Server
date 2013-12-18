@@ -819,6 +819,7 @@ public:
 	void	LinkDead();
 	void	Insight(uint32 t_id);
 	bool	CheckDoubleAttack(bool tripleAttack = false);
+	bool	CheckArcheryDoubleAttack();
 
 	//remove charges/multiple objects from inventory:
 	//bool	DecreaseByType(uint32 type, uint8 amt);
@@ -828,7 +829,7 @@ public:
 	void	RemoveNoRent(bool client_update = true);
 	void	RemoveDuplicateLore(bool client_update = true);
 	void	MoveSlotNotAllowed(bool client_update = true);
-	virtual void	RangedAttack(Mob* other);
+	virtual void	RangedAttack(Mob* other, bool CanDoubleAttack = false);
 	virtual void	ThrowingAttack(Mob* other);
 	void	DoClassAttacks(Mob *ca_target, uint16 skill = -1, bool IsRiposte=false);
 

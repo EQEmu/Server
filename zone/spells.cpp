@@ -235,6 +235,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 		// fizzle 1/4 the mana away
 		SetMana(GetMana() - use_mana);
+		TryTriggerOnValueAmount(false, true);
 		return(false);
 	}
 
@@ -2069,6 +2070,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		mlog(SPELLS__CASTING, "Spell %d: consuming %d mana", spell_id, mana_used);
 		if (!DoHPToManaCovert(mana_used))
 			SetMana(GetMana() - mana_used);
+			TryTriggerOnValueAmount(false, true);
 	}
 
 	//set our reuse timer on long ass reuse_time spells...

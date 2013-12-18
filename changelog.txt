@@ -1,6 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/16/2013 ==
+Kayen: Implemented SE_ArcheryDoubleAttack (Chance to do an extra archery attack)
+Kayen: Implemented SE_ShieldEquipDmgMod (Increase damage in primary hand if shield equiped)
+Kayen: Implemented SE_ShieldEquipHateMod (Increase hate generated if shield equiped)
+Kayen: Implemented SE_TriggerOnAmountValue (Trigger spell if HP/Mana/End bellow X value or num pet on target)
+
+== 12/16/2013 ==
 Kayen: Fix to SE_BlockNextSpellFocus to make it functional again.
 
 == 12/15/2013 ==

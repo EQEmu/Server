@@ -444,19 +444,20 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		RollTable[1] = RollTable[0];
 	}
 
-	if(damage > 0 && (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
+	if(damage > 0 && HasShieldEquiped()	&& (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
 		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
+		
+		/*
 		bool equiped = CastToClient()->m_inv.GetItem(14);
 		if(equiped) {
 			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
 			float bonusShieldBlock = 0.0f;
 			if(shield == ItemTypeShield) {
-
-				//Live AA - Shield Block
-				bonusShieldBlock = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
-				RollTable[1] += bonusShieldBlock;
-			}
-		}
+		*/
+						
+		float bonusShieldBlock = 0.0f;
+		bonusShieldBlock = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
+		RollTable[1] += bonusShieldBlock;
 	}
 
 	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
@@ -1141,7 +1142,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	}
 	else{
 		weapon = GetInv().GetItem(SLOT_PRIMARY);
-		OffHandAtk(false);
+		OffHandAtk(false); 
 	}
 
 	if(weapon != nullptr) {
@@ -2432,6 +2433,12 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 	if(other){
 		AddRampage(other);
 		int hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
+		
+		int16 shieldhatemod = other->spellbonuses.ShieldEquipHateMod + other->itembonuses.ShieldEquipHateMod + other->aabonuses.ShieldEquipHateMod;
+
+		if (shieldhatemod && other->HasShieldEquiped())
+			hatemod += shieldhatemod;
+		
 		if(hatemod < 1)
 			hatemod = 1;
 		hate = ((hate * (hatemod))/100);
@@ -2446,6 +2453,9 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 			return;
 	}
 
+	if (other->IsNPC() && (other->IsPet() || other->CastToNPC()->GetSwarmOwner() > 0))
+		TryTriggerOnValueAmount(false, false, false, true);
+	
 	if(IsClient() && !IsAIControlled())
 		return;
 
@@ -3223,6 +3233,7 @@ int32 Mob::ReduceDamage(int32 damage)
 		if(GetMana() > damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100) {
 			damage -= (damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100);
 			SetMana(GetMana() - damage);
+			TryTriggerOnValueAmount(false, true);
 			CheckHitsRemaining(slot);
 		}
 	}
@@ -3298,6 +3309,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			if(GetMana() > damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100) {
 				damage -= (damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100);
 				SetMana(GetMana() - damage);
+				TryTriggerOnValueAmount(false, true);
 				CheckHitsRemaining(slot);
 			}
 		}
@@ -3369,6 +3381,16 @@ bool Client::CheckDoubleAttack(bool tripleAttack) {
 	}
 
 	if((MakeRandomFloat(0, 1) < chance))
+		return true;
+
+	return false;
+}
+
+bool Client::CheckArcheryDoubleAttack() {
+		
+	int16 chance = spellbonuses.ArcheryDoubleAttack + itembonuses.ArcheryDoubleAttack + aabonuses.ArcheryDoubleAttack;
+
+	if(chance && (MakeRandomInt(0, 100) < chance))
 		return true;
 
 	return false;
@@ -3481,7 +3503,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		
 		ReduceAllDamage(damage);
 		SetHP(GetHP() - damage);
-
+		
 		if(HasDied()) {
 			bool IsSaved = false;
 
@@ -3500,6 +3522,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			if(GetHPRatio() < 16)
 				TryDeathSave();
 		}
+
+		TryTriggerOnValueAmount(true);
 
 		//fade mez if we are mezzed
 		if (IsMezzed()) {

@@ -448,7 +448,7 @@ typedef enum {
 #define SE_ArcheryDamageModifier		301	// implemented[AA] - increase archery damage by percent
 #define SE_ImprovedDamage2				302	// implemented - spell damage focus
 #define SE_FF_Damage_Amount				303	// implemented - adds direct spell damage
-#define SE_OffhandRiposteFail			304 // not implemented as bonus - enemy cannot riposte offhand attacks
+#define SE_OffhandRiposteFail			304 // implemented as bonus - enemy cannot riposte offhand attacks
 #define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
 #define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
 #define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
@@ -491,9 +491,9 @@ typedef enum {
 #define SE_ChannelChanceItems			344	// implemented[AA] - chance to not have ITEM effects interrupted when you take damage.
 #define SE_AssassinationLevel			345	// not implemented as bonus - AA Assisination max level to kill
 #define SE_HeadShotLevel				346	// not implemented as bonus - AA HeadShot max level to kill
-#define SE_ExtraArcheryAttack			347	// not implemented - chance at an additional archery attack (consumes arrow)
+#define SE_ArcheryDoubleAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
 #define SE_LimitManaCost				348	// implemented
-#define SE_ShieldEquipHateMod			349	// *not implemented[AA] ie. used to increase melee hate when wearing a shield w/ Shield Specialist AA.
+#define SE_ShieldEquipHateMod			349	// implemented[AA] Increase melee hate when wearing a shield.
 #define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
 #define SE_PersistentEffect				351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
 #define SE_Unknown352					352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
@@ -510,7 +510,7 @@ typedef enum {
 #define SE_BandolierSlots				363	// *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
 #define SE_TripleAttackChance			364	// implemented
 #define SE_SpellOnKill2					365	// implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
-#define SE_ShieldEquipDmgMod			366	// *not implemented - [AA Shield Specialist] - damage bonus to weapon if shield equiped.
+#define SE_ShieldEquipDmgMod			366	// implemented[AA] Damage modifier to melee if shield equiped. (base1 = dmg mod , base2 = ?) ie Shield Specialist AA
 #define SE_SetBodyType					367	// implemented - set body type of base1 so it can be affected by spells that are limited to that type (Plant, Animal, Undead, etc)
 #define SE_FactionMod					368	// *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2
 #define SE_CorruptionCounter			369	// implemented
@@ -586,7 +586,7 @@ typedef enum {
 #define SE_IncreaseAssassinationLvl		439 // *not implemented[AA] - increases the maximum level of humanoid that can be affected by assassination
 #define SE_FinishingBlowLvl				440 // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
 #define SE_CancleIfMoved				441 // *not implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
-#define SE_TriggerOnHPAmount			442 // *not implemented - triggers a spell which a certain hp level is reached
+#define SE_TriggerOnValueAmount			442 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
 #define SE_TriggerIfMovement			443 // *not implemented - Trigger a spell if you move (37846 | Chopping Block)
 #define SE_AggroLock					444 // *not implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% up to level Z
 #define SE_AdditionalMercenary			445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.

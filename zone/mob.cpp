@@ -177,6 +177,7 @@ Mob::Mob(const char* in_name,
 	slow_mitigation= 0;
 	findable	= false;
 	trackable	= true;
+	has_shieldequiped = false;
 
 	if(in_aa_title>0)
 		aa_title	= in_aa_title;
@@ -3223,6 +3224,80 @@ void Mob::TryApplyEffect(Mob *target, uint32 spell_id)
 		}
 	}
 }
+
+void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsPet)
+{
+	/*
+	Base2 Range: 500-520 = Below (base2 - 500)*5 HP
+	Base2 Range: 521	 = Below (?) Mana UKNOWN - Will assume its 20% unless proven otherwise
+	Base2 Range: 522	 = Below (40%) Endurance
+	Base2 Range: 523	 = Below (40%) Mana
+	Base2 Range: 220-?	 = Number of pets on hatelist to trigger (base2 - 220) (Set at 30 pets max for now)
+	*/
+
+	if (!spellbonuses.TriggerOnValueAmount)
+		return;
+	
+	if (spellbonuses.TriggerOnValueAmount){
+
+		int buff_count = GetMaxTotalSlots();
+
+		for(int e = 0; e < buff_count; e++){
+
+			uint32 spell_id = buffs[e].spellid;
+
+			if (IsValidSpell(spell_id)){
+
+				for(int i = 0; i < EFFECT_COUNT; i++){
+
+					if (spells[spell_id].effectid[i] == SE_TriggerOnValueAmount){
+
+						int base2 = spells[spell_id].base2[i];
+						bool use_spell = false;
+
+						if (IsHP){
+							if ((base2 >= 500 && base2 <= 520) && GetHPRatio() < (base2 - 500)*5){
+								use_spell = true;
+							}
+						}
+
+						else if (IsMana){
+							if ( (base2 = 521 && GetManaRatio() < 20) || (base2 = 523 && GetManaRatio() < 40)) {
+								use_spell = true;
+							}
+						}
+
+						else if (IsEndur){
+							if (base2 = 522 && GetEndurancePercent() < 40){
+								use_spell = true;
+							}
+						}
+
+						else if (IsPet){
+							int count = hate_list.SummonedPetCount(this);
+							if ((base2 >= 220 && base2 <= 250) && count >= (base2 - 220)){
+								use_spell = true;
+							}
+						}
+
+						if (use_spell){
+							SpellFinished(spells[spell_id].base[i], this, 10, 0, -1, spells[spell_id].ResistDiff);
+							
+							/*Note, spell data shows numhits values of 0 or 1, however many descriptions of these spells indicate they should
+							be fading when consumed even with numhits of 0 (It makes sense they should fade...).
+							Unless proven otherwise, they should fade when triggered. */
+							
+							if(!TryFadeEffect(e))
+								BuffFadeBySlot(e);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
 //Twincast Focus effects should stack across different types (Spell, AA - when implemented ect)
 void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 {
@@ -4199,6 +4274,9 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 	// All skill dmg mod + Skill specific
 	dmg_mod += itembonuses.DamageModifier[HIGHEST_SKILL+1] + spellbonuses.DamageModifier[HIGHEST_SKILL+1] + aabonuses.DamageModifier[HIGHEST_SKILL+1] +
 				itembonuses.DamageModifier[skill] + spellbonuses.DamageModifier[skill] + aabonuses.DamageModifier[skill];
+
+	if (HasShieldEquiped() && !IsOffHandAtk())
+		dmg_mod += itembonuses.ShieldEquipDmgMod[0] + spellbonuses.ShieldEquipDmgMod[0] + aabonuses.ShieldEquipDmgMod[0];
 
 	if(dmg_mod < -100)
 		dmg_mod = -100;

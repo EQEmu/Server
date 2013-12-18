@@ -612,6 +612,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	if(GetEndurance() > spell.EndurCost) {
 		SetEndurance(GetEndurance() - spell.EndurCost);
+		TryTriggerOnValueAmount(false, false, true);
 	} else {
 		Message(11, "You are too fatigued to use this skill right now.");
 		return(false);

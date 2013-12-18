@@ -135,6 +135,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	// Clear item faction mods
 	ClearItemFactionBonuses();
+	ShieldEquiped(false);
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
@@ -143,6 +144,10 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 		if(inst == 0)
 			continue;
 		AddItemBonuses(inst, newbon);
+
+		//Check if item is secondary slot is a 'shield'. Required for multiple spelll effects.
+		if (i == 14 && (m_inv.GetItem(14)->GetItem()->ItemType == ItemTypeShield))
+			ShieldEquiped(true);
 	}
 
 	//Power Source Slot
@@ -846,6 +851,9 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_ArcheryDamageModifier:
 				newbon->ArcheryDamageModifier += base1;
 				break;
+			case SE_ArcheryDoubleAttack:
+				newbon->ArcheryDoubleAttack += base1;
+				break;
 			case SE_DamageShield:
 				newbon->DamageShield += base1;
 				break;
@@ -904,6 +912,13 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			case SE_ShieldBlock:
 				newbon->ShieldBlock += base1;
+				break;
+			case SE_ShieldEquipHateMod:
+				newbon->ShieldEquipHateMod += base1;
+				break;
+			case SE_ShieldEquipDmgMod:
+				newbon->ShieldEquipDmgMod[0] += base1;
+				newbon->ShieldEquipDmgMod[1] += base2;
 				break;
 			case SE_SecondaryDmgInc:
 				newbon->SecondaryDmgInc = true;
@@ -2196,6 +2211,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_ShieldBlock:
 				newbon->ShieldBlock += effect_value;
 				break;
+			
+			case SE_ShieldEquipHateMod:
+				newbon->ShieldEquipHateMod += effect_value;
+				break;
+
+			case SE_ShieldEquipDmgMod:
+				newbon->ShieldEquipDmgMod[0] += effect_value;
+				newbon->ShieldEquipDmgMod[1] += spells[spell_id].base2[i];
+				break;
 
 			case SE_BlockBehind:
 				newbon->BlockBehind += effect_value;
@@ -2256,6 +2280,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_ArcheryDamageModifier:
 				newbon->ArcheryDamageModifier += effect_value;
+				break;
+
+			case SE_ArcheryDoubleAttack:
+				newbon->ArcheryDoubleAttack += effect_value;
 				break;
 
 			case SE_SecondaryDmgInc:
@@ -2391,6 +2419,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_TriggerOnValueAmount:
+				newbon->TriggerOnValueAmount = true;
+				break;
 
 		}
 	}
@@ -3659,7 +3690,27 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.SlayUndead[0] = effect_value;
 					aabonuses.SlayUndead[1] = effect_value;
 					break;
+			
+				case SE_ArcheryDoubleAttack:
+					spellbonuses.ArcheryDoubleAttack = effect_value;
+					aabonuses.ArcheryDoubleAttack = effect_value;
+					itembonuses.ArcheryDoubleAttack = effect_value;
+					break;
 
+				case SE_ShieldEquipHateMod:
+					spellbonuses.ShieldEquipHateMod = effect_value;
+					aabonuses.ShieldEquipHateMod = effect_value;
+					itembonuses.ShieldEquipHateMod = effect_value;
+					break;
+
+				case SE_ShieldEquipDmgMod:
+					spellbonuses.ShieldEquipDmgMod[0] = effect_value;
+					spellbonuses.ShieldEquipDmgMod[1] = effect_value;
+					aabonuses.ShieldEquipDmgMod[0] = effect_value;
+					aabonuses.ShieldEquipDmgMod[1] = effect_value;
+					itembonuses.ShieldEquipDmgMod[0] = effect_value;
+					itembonuses.ShieldEquipDmgMod[1] = effect_value;
+					break; 
 			}
 		}
 	}
