@@ -1876,35 +1876,43 @@ void Mob::SetOwnerID(uint16 NewOwnerID) {
 		this->Depop();
 }
 
-//heko: for backstab
-bool Mob::BehindMob(Mob* other, float playerx, float playery) const {
-	if (!other)
-		return true; // sure your behind your invisible friend?? (fall thru for sneak)
-	//see if player is behind mob
-	float angle, lengthb, vectorx, vectory;
-	float mobx = -(other->GetX());	// mob xlocation (inverse because eq is confused)
-	float moby = other->GetY();		// mobylocation
+// used in checking for behind (backstab) and checking in front (melee LoS)
+float Mob::MobAngle(Mob *other, float ourx, float oury) const {
+	if (!other || other == this)
+		return 0.0f;
+
+	float angle, lengthb, vectorx, vectory, dotp;
+	float mobx = -(other->GetX());	// mob xloc (inverse because eq)
+	float moby = other->GetY();		// mob yloc
 	float heading = other->GetHeading();	// mob heading
 	heading = (heading * 360.0f) / 256.0f;	// convert to degrees
 	if (heading < 270)
 		heading += 90;
 	else
 		heading -= 270;
+
 	heading = heading * 3.1415f / 180.0f;	// convert to radians
 	vectorx = mobx + (10.0f * cosf(heading));	// create a vector based on heading
 	vectory = moby + (10.0f * sinf(heading));	// of mob length 10
 
-	//length of mob to player vector
-	//lengthb = (float)sqrtf(pow((-playerx-mobx),2) + pow((playery-moby),2));
-	lengthb = (float) sqrtf( ( (-playerx-mobx) * (-playerx-mobx) ) + ( (playery-moby) * (playery-moby) ) );
+	// length of mob to player vector
+	lengthb = (float) sqrtf(((-ourx - mobx) * (-ourx - mobx)) + ((oury - moby) * (oury - moby)));
 
 	// calculate dot product to get angle
-	angle = acosf(((vectorx-mobx)*(-playerx-mobx)+(vectory-moby)*(playery-moby)) / (10 * lengthb));
+	// Handle acos domain errors due to floating point rounding errors
+	dotp = ((vectorx - mobx) * (-ourx - mobx) +
+			(vectory - moby) * (oury - moby)) / (10 * lengthb);
+	// I haven't seen any errors that  cause problems that weren't slightly
+	// larger/smaller than 1/-1, so only handle these cases for now
+	if (dotp > 1)
+		return 0.0f;
+	else if (dotp < -1)
+		return 180.0f;
+
+	angle = acosf(dotp);
 	angle = angle * 180.0f / 3.1415f;
-	if (angle > 90.0f) //not sure what value to use (90*2=180 degrees is front)
-		return true;
-	else
-		return false;
+
+	return angle;
 }
 
 void Mob::SetZone(uint32 zone_id, uint32 instance_id)

@@ -284,11 +284,13 @@ Client::Client(EQStreamInterface* ieqs)
 	aa_los_me.x = 0;
 	aa_los_me.y = 0;
 	aa_los_me.z = 0;
+	aa_los_me_heading = 0;
 	aa_los_them.x = 0;
 	aa_los_them.y = 0;
 	aa_los_them.z = 0;
 	aa_los_them_mob = nullptr;
 	los_status = false;
+	los_status_facing = false;
 	qGlobals = nullptr;
 	HideCorpseMode = HideCorpseNone;
 	PendingGuildInvitation = false;

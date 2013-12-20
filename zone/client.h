@@ -1200,6 +1200,8 @@ protected:
 	VERTEX aa_los_them;
 	Mob *aa_los_them_mob;
 	bool los_status;
+	float aa_los_me_heading;
+	bool los_status_facing;
 	QGlobalCache *qGlobals;
 
 	/** Adventure Variables **/

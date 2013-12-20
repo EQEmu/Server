@@ -299,7 +299,7 @@ bool Client::Process() {
 				if(ranged->GetItem() && ranged->GetItem()->ItemType == ItemTypeBow){
 					if(ranged_timer.Check(false)){
 						if(GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())){
-							if(!GetTarget()->BehindMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
+							if(GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
 								if(CheckLosFN(GetTarget())){
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
@@ -319,7 +319,7 @@ bool Client::Process() {
 				else if(ranged->GetItem() && (ranged->GetItem()->ItemType == ItemTypeLargeThrowing || ranged->GetItem()->ItemType == ItemTypeSmallThrowing)){
 					if(ranged_timer.Check(false)){
 						if(GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())){
-							if(!GetTarget()->BehindMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
+							if(GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
 								if(CheckLosFN(GetTarget())){
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());
@@ -359,10 +359,15 @@ bool Client::Process() {
 					aa_los_them.x = aa_los_them_mob->GetX();
 					aa_los_them.y = aa_los_them_mob->GetY();
 					aa_los_them.z = aa_los_them_mob->GetZ();
-					if(CheckLosFN(auto_attack_target))
-						los_status = true;
-					else
-						los_status = false;
+					los_status = CheckLosFN(auto_attack_target);
+					aa_los_me_heading = GetHeading();
+					los_status_facing = aa_los_them_mob->InFrontMob(this, aa_los_them.x, aa_los_them.y);
+				}
+				// If only our heading changes, we can skip the CheckLosFN call
+				// but above we still need to update los_status_facing
+				if (aa_los_me_heading != GetHeading()) {
+					aa_los_me_heading = GetHeading();
+					los_status_facing = aa_los_them_mob->InFrontMob(this, aa_los_them.x, aa_los_them.y);
 				}
 			}
 			else
@@ -371,25 +376,23 @@ bool Client::Process() {
 				aa_los_me.x = GetX();
 				aa_los_me.y = GetY();
 				aa_los_me.z = GetZ();
+				aa_los_me_heading = GetHeading();
 				aa_los_them.x = aa_los_them_mob->GetX();
 				aa_los_them.y = aa_los_them_mob->GetY();
 				aa_los_them.z = aa_los_them_mob->GetZ();
-				if(CheckLosFN(auto_attack_target))
-					los_status = true;
-				else
-					los_status = false;
+				los_status = CheckLosFN(auto_attack_target);
+				los_status_facing = aa_los_them_mob->InFrontMob(this, aa_los_them.x, aa_los_them.y);
 			}
 
 			if (!CombatRange(auto_attack_target))
 			{
-				//duplicate message not wanting to see it.
-				//Message_StringID(MT_TooFarAway,TARGET_TOO_FAR);
+				Message_StringID(MT_TooFarAway,TARGET_TOO_FAR);
 			}
 			else if (auto_attack_target == this)
 			{
 				Message_StringID(MT_TooFarAway,TRY_ATTACKING_SOMEONE);
 			}
-			else if (!los_status)
+			else if (!los_status || !los_status_facing)
 			{
 				//you can't see your target
 			}
@@ -482,13 +485,13 @@ bool Client::Process() {
 			// Range check
 			if(!CombatRange(auto_attack_target)) {
 				// this is a duplicate message don't use it.
-				Message_StringID(MT_TooFarAway,TARGET_TOO_FAR);
+				//Message_StringID(MT_TooFarAway,TARGET_TOO_FAR);
 			}
 			// Don't attack yourself
 			else if(auto_attack_target == this) {
-				Message_StringID(MT_TooFarAway,TRY_ATTACKING_SOMEONE);
+				//Message_StringID(MT_TooFarAway,TRY_ATTACKING_SOMEONE);
 			}
-			else if (!los_status)
+			else if (!los_status || !los_status_facing)
 			{
 				//you can't see your target
 			}

@@ -1303,6 +1303,7 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 		aa_los_me.x = 0;
 		aa_los_me.y = 0;
 		aa_los_me.z = 0;
+		aa_los_me_heading = 0;
 		aa_los_them.x = 0;
 		aa_los_them.y = 0;
 		aa_los_them.z = 0;
@@ -1322,24 +1323,25 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 			aa_los_me.x = GetX();
 			aa_los_me.y = GetY();
 			aa_los_me.z = GetZ();
+			aa_los_me_heading = GetHeading();
 			aa_los_them.x = aa_los_them_mob->GetX();
 			aa_los_them.y = aa_los_them_mob->GetY();
 			aa_los_them.z = aa_los_them_mob->GetZ();
-			if(CheckLosFN(aa_los_them_mob))
-				los_status = true;
-			else
-				los_status = false;
+			los_status = CheckLosFN(aa_los_them_mob);
+			los_status_facing = aa_los_them_mob->InFrontMob(this, aa_los_them.x, aa_los_them.y);
 		}
 		else
 		{
 			aa_los_me.x = GetX();
 			aa_los_me.y = GetY();
 			aa_los_me.z = GetZ();
+			aa_los_me_heading = GetHeading();
 			aa_los_them.x = 0;
 			aa_los_them.y = 0;
 			aa_los_them.z = 0;
 			aa_los_them_mob = nullptr;
 			los_status = false;
+			los_status_facing = false;
 		}
 	}
 }

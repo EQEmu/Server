@@ -106,7 +106,13 @@ public:
 	//Attack
 	virtual void RogueBackstab(Mob* other, bool min_damage = false, int ReuseTime = 10);
 	virtual void RogueAssassinate(Mob* other); // solar
-	bool BehindMob(Mob* other = 0, float playerx = 0.0f, float playery = 0.0f) const;
+	float MobAngle(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const;
+	// greater than 90 is behind
+	inline bool BehindMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const
+		{ return (!other || other == this) ? true : MobAngle(other, ourx, oury) > 90.0f; }
+	// less than 56 is in front, greater than 56 is usually where the client generates the messages
+	inline bool InFrontMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const
+		{ return (!other || other == this) ? true : MobAngle(other, ourx, oury) < 56.0f; }
 	virtual void RangedAttack(Mob* other) { }
 	virtual void ThrowingAttack(Mob* other) { }
 	uint16 GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg);
