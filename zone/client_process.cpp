@@ -303,6 +303,8 @@ bool Client::Process() {
 								if(CheckLosFN(GetTarget())){
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
+										if (CheckArcheryDoubleAttack())
+											RangedAttack(GetTarget(), true);
 								}
 								else
 									ranged_timer.Start();
@@ -1931,8 +1933,10 @@ void Client::DoEnduranceUpkeep() {
 		}
 	}
 
-	if(upkeep_sum != 0)
+	if(upkeep_sum != 0){
 		SetEndurance(GetEndurance() - upkeep_sum);
+		TryTriggerOnValueAmount(false, false, true);
+	}
 }
 
 void Client::CalcRestState() {

@@ -250,6 +250,7 @@ struct StatBonuses {
 	int16	DualWieldChance;					//i
 	int16	DoubleAttackChance;					//i
 	int16	TripleAttackChance;					//i
+	int16   ArcheryDoubleAttack;				//i
 	int16	ResistSpellChance;					//i
 	int16	ResistFearChance;					//i
 	bool	Fearless;							//i
@@ -359,6 +360,9 @@ struct StatBonuses {
 	int16	ItemATKCap;							// Raise item attack cap
 	int32	FinishingBlow[2];					// Chance to do a finishing blow for specified damage amount.
 	uint16	FinishingBlowLvl[2];				// Sets max level an NPC can be affected by FB. (base1 = lv, base2= ???)
+	int16	ShieldEquipHateMod;					// Hate mod when shield equiped.
+	int16	ShieldEquipDmgMod[2];				// Damage mod when shield equiped. 0 = damage modifier 1 = Unknown
+	bool	TriggerOnValueAmount;				// Triggers off various different conditions, bool to check if client has effect.
 };
 
 typedef struct

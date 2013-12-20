@@ -203,6 +203,9 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 		if (ca_atk->m_skill == SkillArchery) {
 			SetAttackTimer();
 			RangedAttack(GetTarget());
+			bool test = CheckArcheryDoubleAttack();
+			if (CheckArcheryDoubleAttack())
+				RangedAttack(GetTarget(), true);
 			return;
 		}
 		//could we return here? Im not sure is m_atk 11 is used for real specials
@@ -682,12 +685,12 @@ void Mob::RogueAssassinate(Mob* other)
 	DoAnim(animPiercing);	//piercing animation
 }
 
-void Client::RangedAttack(Mob* other) {
+void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	//conditions to use an attack checked before we are called
 
 	//make sure the attack and ranged timers are up
 	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
-	if((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check())) {
+	if(!CanDoubleAttack && ((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check()))) {
 		mlog(COMBAT__RANGED, "Throwing attack canceled. Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		// The server and client timers are not exact matches currently, so this would spam too often if enabled
 		//Message(0, "Error: Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
