@@ -377,7 +377,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	//////////////////////////////////////////////////////////
 	// make enrage same as riposte
 	/////////////////////////////////////////////////////////
-	if (IsEnraged() && !other->BehindMob(this, other->GetX(), other->GetY())) {
+	if (IsEnraged() && other->InFrontMob(this, other->GetX(), other->GetY())) {
 		damage = -3;
 		mlog(COMBAT__DAMAGE, "I am enraged, riposting frontal attack.");
 	}
@@ -386,7 +386,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	// riposte
 	/////////////////////////////////////////////////////////
 	float riposte_chance = 0.0f;
-	if (CanRiposte && damage > 0 && CanThisClassRiposte() && !other->BehindMob(this, other->GetX(), other->GetY()))
+	if (CanRiposte && damage > 0 && CanThisClassRiposte() && other->InFrontMob(this, other->GetX(), other->GetY()))
 	{
 		riposte_chance = (100.0f + (float)defender->aabonuses.RiposteChance + (float)defender->spellbonuses.RiposteChance + (float)defender->itembonuses.RiposteChance) / 100.0f;
 		skill = GetSkill(SkillRiposte);
@@ -427,7 +427,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	}
 
 	float block_chance = 0.0f;
-	if (damage > 0 && CanThisClassBlock() && (!other->BehindMob(this, other->GetX(), other->GetY()) || bBlockFromRear)) {
+	if (damage > 0 && CanThisClassBlock() && (other->InFrontMob(this, other->GetX(), other->GetY()) || bBlockFromRear)) {
 		block_chance = (100.0f + (float)spellbonuses.IncreaseBlockChance + (float)itembonuses.IncreaseBlockChance) / 100.0f;
 		skill = CastToClient()->GetSkill(SkillBlock);
 		if (IsClient()) {
@@ -445,7 +445,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	}
 
 	if(damage > 0 && HasShieldEquiped()	&& (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
-		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
+		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
 
 		float bonusShieldBlock = 0.0f;
 		bonusShieldBlock = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
@@ -453,7 +453,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	}
 
 	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
-		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
+		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
 		bool equiped2 = CastToClient()->m_inv.GetItem(13);
 		if(equiped2) {
 			uint8 TwoHandBlunt = CastToClient()->m_inv.GetItem(13)->GetItem()->ItemType;
@@ -470,7 +470,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	// parry
 	//////////////////////////////////////////////////////
 	float parry_chance = 0.0f;
-	if (damage > 0 && CanThisClassParry() && !other->BehindMob(this, other->GetX(), other->GetY()))
+	if (damage > 0 && CanThisClassParry() && other->InFrontMob(this, other->GetX(), other->GetY()))
 	{
 		parry_chance = (100.0f + (float)defender->spellbonuses.ParryChance + (float)defender->itembonuses.ParryChance) / 100.0f;
 		skill = CastToClient()->GetSkill(SkillParry);
@@ -493,7 +493,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	// dodge
 	////////////////////////////////////////////////////////
 	float dodge_chance = 0.0f;
-	if (damage > 0 && CanThisClassDodge() && !other->BehindMob(this, other->GetX(), other->GetY()))
+	if (damage > 0 && CanThisClassDodge() && other->InFrontMob(this, other->GetX(), other->GetY()))
 	{
 		dodge_chance = (100.0f + (float)defender->spellbonuses.DodgeChance + (float)defender->itembonuses.DodgeChance) / 100.0f;
 		skill = CastToClient()->GetSkill(SkillDodge);
