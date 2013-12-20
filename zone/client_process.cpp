@@ -441,7 +441,7 @@ bool Client::Process() {
 
 				if (auto_attack_target && flurrychance)
 				{
-					if(MakeRandomInt(0, 100) < flurrychance)
+					if(MakeRandomInt(0, 99) < flurrychance)
 					{
 						Message_StringID(MT_NPCFlurry, 128);
 						Attack(auto_attack_target, 13, false);
@@ -458,7 +458,7 @@ bool Client::Process() {
 							wpn->GetItem()->ItemType == ItemType2HBlunt ||
 							wpn->GetItem()->ItemType == ItemType2HPiercing )
 						{
-							if(MakeRandomInt(0, 100) < ExtraAttackChanceBonus)
+							if(MakeRandomInt(0, 99) < ExtraAttackChanceBonus)
 							{
 								Attack(auto_attack_target, 13, false);
 							}
