@@ -271,14 +271,14 @@ bool Client::Process() {
 			Things which prevent us from attacking:
 				- being under AI control, the AI does attacks
 				- being dead
-				- casting a spell (not sure what the rest is doing, prolly bard)
+				- casting a spell and bard check
 				- not having a target
 				- being stunned or mezzed
 				- having used a ranged weapon recently
 		*/
 		if(auto_attack) {
 			if(!IsAIControlled() && !dead
-				&& !(spellend_timer.Enabled() && (spells[casting_spell_id].classes[7] < 1 && spells[casting_spell_id].classes[7] > 65))
+				&& !(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 				&& !IsStunned() && !IsFeared() && !IsMezzed() && GetAppearance() != eaDead && !IsMeleeDisabled()
 				)
 				may_use_attacks = true;
