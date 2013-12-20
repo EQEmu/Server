@@ -3789,7 +3789,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				SetBodyType(GetOrigBodyType(), false);
 				break;
 			}
-			
+
 			case SE_MovementSpeed:
 			{
 				if(IsClient())
@@ -5223,7 +5223,7 @@ bool Mob::CheckHitsRemaining(uint32 buff_slot, bool when_spell_done, bool negate
 		}
 	return false;
 	}
-	
+
 	// For spell buffs that are limited by the number of times it can successfully trigger a spell.
 	// Effects: SE_TriggerOnCast, SE_SympatheticProc,SE_DefensiveProc, SE_SkillProc, SE_RangedProc
 	if(spell_id){

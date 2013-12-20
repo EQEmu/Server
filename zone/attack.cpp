@@ -446,15 +446,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0 && HasShieldEquiped()	&& (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
 		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		
-		/*
-		bool equiped = CastToClient()->m_inv.GetItem(14);
-		if(equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
-			float bonusShieldBlock = 0.0f;
-			if(shield == ItemTypeShield) {
-		*/
-						
+
 		float bonusShieldBlock = 0.0f;
 		bonusShieldBlock = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
 		RollTable[1] += bonusShieldBlock;
@@ -1142,7 +1134,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	}
 	else{
 		weapon = GetInv().GetItem(SLOT_PRIMARY);
-		OffHandAtk(false); 
+		OffHandAtk(false);
 	}
 
 	if(weapon != nullptr) {
@@ -3500,10 +3492,10 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		attacker->SendAppearancePacket(AT_Sneak, 0);
 	}
 		//final damage has been determined.
-		
+
 		ReduceAllDamage(damage);
 		SetHP(GetHP() - damage);
-		
+
 		if(HasDied()) {
 			bool IsSaved = false;
 
