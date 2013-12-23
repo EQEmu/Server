@@ -5073,6 +5073,24 @@ struct ServerLootItem_Struct {
 	uint8 maxlevel;
 };
 
+//Found in client near a ref to the string:
+//"Got a broadcast message for ... %s ...\n"
+struct ClientMarqueeMessage_Struct {
+	uint32 type;
+	uint32 unk04; // no idea, have seen 10 mostly, didn't notice a change when altering it
+	uint32 priority; //needs a better name but it does:
+	//opacity = priority / 255
+	//# of ending blinks = (int)((priority - 1) / 255)
+	//so 510 would have 100% opacity and 1 extra blink at end
+	uint32 unk12; //no idea, seen 0, 500, 1000.  
+	uint32 unk16; //no idea, seen 500, 1000
+	//Visually I couldn't tell a difference from these previous two, 
+	//but there's probably a reason for them that's more subtle than what i was looking for
+	uint32 duration; //in ms
+	char msg[1]; //message plus null terminator
+	
+};
+
 typedef std::list<ServerLootItem_Struct*> ItemList;
 
 // Restore structure packing to default
