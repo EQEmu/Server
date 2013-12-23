@@ -719,71 +719,6 @@ void command_sendop(Client *c,const Seperator *sep){
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
 	return;
-
-	/*if(sep->arg[1][0] && sep->arg[2][0])
-	{
-		c->Message_StringID(atoi(sep->arg[1]),atoi(sep->arg[2]),sep->arg[3],sep->arg[4],sep->arg[5],sep->arg[6],sep->arg[7],sep->arg[8]);
-	}
-	else
-		c->Message(0,"type,string id, message1...");*/
-	/*
-		clientupdate lvl and such
-			uint32	level; //new level
-
-
-	*/
-
-
-	/*
-	if(sep->arg[1][0] && sep->arg[2][0]){
-		EQApplicationPacket* outapp = new EQApplicationPacket((EmuOpcode)atoi(sep->arg[1]),sizeof(GMName_Struct));
-		GMName_Struct* gms=(GMName_Struct*)outapp->pBuffer;
-		memset(outapp->pBuffer,0,outapp->size);
-		strcpy(gms->gmname,c->GetName());
-		strcpy(gms->oldname,c->GetName());
-		strcpy(gms->newname,sep->arg[3]);
-		if(sep->arg[4][0])
-			gms->badname=atoi(sep->arg[4]);
-		c->QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-	*/
-	/*
-		else{
-			EQApplicationPacket* outapp = new EQApplicationPacket(121,atoi(sep->arg[2]));
-			memset(outapp->pBuffer,0,outapp->size);
-			uint8 offset=atoi(sep->arg[3]);
-			if(offset<outapp->size && sep->arg[4][0])
-				outapp->pBuffer[offset]=atoi(sep->arg[4]);
-			offset++;
-			if(offset<outapp->size && sep->arg[5][0])
-				outapp->pBuffer[offset+3]=atoi(sep->arg[5]);
-			offset++;
-			if(offset<outapp->size && sep->arg[6][0])
-				outapp->pBuffer[offset+3]=atoi(sep->arg[6]);
-			offset++;
-			if(offset<outapp->size && sep->arg[7][0])
-				outapp->pBuffer[offset]=atoi(sep->arg[7]);
-			offset++;
-			if(offset<outapp->size && sep->arg[8][0])
-				outapp->pBuffer[offset]=atoi(sep->arg[8]);
-			offset++;
-			if(offset<outapp->size && sep->arg[9][0])
-				outapp->pBuffer[offset]=atoi(sep->arg[9]);
-			c->QueuePacket(outapp);
-			safe_delete(outapp);
-		}*/
-		//c->SetStats(atoi(sep->arg[1]),atoi(sep->arg[2]));
-	//}
-		/*EQApplicationPacket* outapp = new EQApplicationPacket(atoi(sep->arg[1]), sizeof(PlayerAA_Struct));
-		memcpy(outapp->pBuffer,c->GetAAStruct(),outapp->size);
-		c->QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-	else
-		c->Message(15,"Invalid opcode!");
-		*/
-
 }
 
 void command_optest(Client *c, const Seperator *sep)
@@ -822,6 +757,22 @@ void command_optest(Client *c, const Seperator *sep)
 				arr->y = c->GetX();
 				arr->z = c->GetZ();
 				c->FastQueuePacket(&outapp);
+				break;
+			}
+			case 3:
+			{
+				char *msg = "This is a test message";
+				EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + strlen(msg));
+				ClientMarqueeMessage_Struct *cms = (ClientMarqueeMessage_Struct*)outapp.pBuffer;
+				cms->priority = 510;
+				cms->type = 15;
+				cms->unk04 = 10;
+				cms->unk12 = 1000;
+				cms->unk16 = 1000;
+				cms->duration = 5000;
+				strcpy(cms->msg, msg);
+
+				c->QueuePacket(&outapp);
 				break;
 			}
 			default:
