@@ -761,18 +761,7 @@ void command_optest(Client *c, const Seperator *sep)
 			}
 			case 3:
 			{
-				char *msg = "This is a test message";
-				EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + strlen(msg));
-				ClientMarqueeMessage_Struct *cms = (ClientMarqueeMessage_Struct*)outapp.pBuffer;
-				cms->priority = 510;
-				cms->type = 15;
-				cms->unk04 = 10;
-				cms->unk12 = 1000;
-				cms->unk16 = 1000;
-				cms->duration = 5000;
-				strcpy(cms->msg, msg);
-
-				c->QueuePacket(&outapp);
+				c->SendMarqueeMessage(15, 250, 0, 500, 5000, "Some msg");
 				break;
 			}
 			default:

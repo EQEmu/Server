@@ -8042,3 +8042,23 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
 #endif
    }
 }
+
+void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg)
+{
+	if(duration == 0 || msg.length() == 0) {
+		return;
+	}
+
+	EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + msg.length());
+	ClientMarqueeMessage_Struct *cms = (ClientMarqueeMessage_Struct*)outapp.pBuffer;
+
+	cms->type = type;
+	cms->unk04 = 10;
+	cms->priority = priority;
+	cms->fade_in_time = fade_in;
+	cms->fade_out_time = fade_out;
+	cms->duration = duration;
+	strcpy(cms->msg, msg.c_str());
+
+	QueuePacket(&outapp);
+}

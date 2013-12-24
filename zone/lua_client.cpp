@@ -1229,6 +1229,11 @@ void Lua_Client::SetConsumption(int in_hunger, int in_thirst) {
 	self->SetConsumption(in_hunger, in_thirst);
 }
 
+void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg) {
+	Lua_Safe_Call_Void();
+	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1473,7 +1478,8 @@ luabind::scope lua_register_client() {
 		.def("GetThirst", (int(Lua_Client::*)(void))&Lua_Client::GetThirst)
 		.def("SetHunger", (void(Lua_Client::*)(int))&Lua_Client::SetHunger)
 		.def("SetThirst", (void(Lua_Client::*)(int))&Lua_Client::SetThirst)
-		.def("SetConsumption", (void(Lua_Client::*)(int, int))&Lua_Client::SetConsumption);
+		.def("SetConsumption", (void(Lua_Client::*)(int, int))&Lua_Client::SetConsumption)
+		.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage);
 }
 
 luabind::scope lua_register_inventory_where() {
