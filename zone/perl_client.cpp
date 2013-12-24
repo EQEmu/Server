@@ -5817,6 +5817,37 @@ XS(XS_Client_SetConsumption)
    XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SilentMessage); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SilentMessage)
+{
+        dXSARGS;
+        if (items != 2)
+                Perl_croak(aTHX_ "Usage: Client::SilentMessage(THIS, Message)");
+        {
+                Client *                THIS;
+                dXSTARG;
+ 
+                if (sv_derived_from(ST(0), "Client")) {
+                        IV tmp = SvIV((SV*)SvRV(ST(0)));
+                        THIS = INT2PTR(Client *,tmp);
+                }
+                else
+                        Perl_croak(aTHX_ "THIS is not of type Client");
+                if(THIS == NULL)
+                        Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+                if(THIS->GetTarget() != NULL){
+                        if(THIS->GetTarget()->IsNPC()){
+                                if (THIS->DistNoRootNoZ(*THIS->GetTarget()) <= 200) {
+                                                if(THIS->GetTarget()->CastToNPC()->IsMoving() && !THIS->GetTarget()->CastToNPC()->IsOnHatelist(THIS->GetTarget()))
+                                                        THIS->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
+                                        THIS->ChannelMessageReceived(8, 0, 100, SvPV_nolen(ST(1)));
+                                }
+                        }
+                }
+        }
+        XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6050,6 +6081,7 @@ XS(boot_Client)
         newXSproto(strcpy(buf, "SetHunger"), XS_Client_SetHunger, file, "$$");
         newXSproto(strcpy(buf, "SetThirst"), XS_Client_SetThirst, file, "$$");
         newXSproto(strcpy(buf, "SetConsumption"), XS_Client_SetConsumption, file, "$$$");
+		newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
 		XSRETURN_YES;
 }
 
