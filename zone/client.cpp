@@ -8062,3 +8062,13 @@ void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, ui
 
 	QueuePacket(&outapp);
 }
+
+void Client::PlayMP3(const char* fname)
+{
+	std::string filename = fname;
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayMP3, filename.length() + 1);
+	PlayMP3_Struct* buf = (PlayMP3_Struct*)outapp->pBuffer;
+	strncpy(buf->filename, fname, filename.length());
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}

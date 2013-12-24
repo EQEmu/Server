@@ -3095,7 +3095,7 @@ struct MobRename_Struct {
 };
 
 struct PlayMP3_Struct {
-	char filename[128];
+	char filename[0];
 };
 
 //this is for custom title display in the skill window
