@@ -9571,6 +9571,9 @@ void Client::CompleteConnect()
 	SendAltCurrencies();
 	database.LoadAltCurrencyValues(CharacterID(), alternate_currency);
 	SendAlternateCurrencyValues();
+	alternate_currency_loaded = true;
+	ProcessAlternateCurrencyQueue();
+
 	CalcItemScale();
 	DoItemEnterZone();
 

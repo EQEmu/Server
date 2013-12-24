@@ -1087,6 +1087,7 @@ public:
 	void SendAlternateCurrencyValues();
 	void SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null = true);
 	uint32 GetAlternateCurrencyValue(uint32 currency_id) const;
+	void ProcessAlternateCurrencyQueue();
 	void OpenLFGuildWindow();
 	void HandleLFGuildResponse(ServerPacket *pack);
 	void SendLFGuildStatus();
@@ -1448,7 +1449,9 @@ private:
 	bool m_KnockBackExemption;
 	bool m_PortExemption;
 	bool m_SenseExemption;
+	bool alternate_currency_loaded;
 	std::map<uint32, uint32> alternate_currency;
+	std::queue<std::pair<uint32, int32>> alternate_currency_queued_operations;
 
 	//Connecting debug code.
 	enum { //connecting states, used for debugging only

@@ -322,6 +322,7 @@ Client::Client(EQStreamInterface* ieqs)
 	LoadAccountFlags();
 
 	initial_respawn_selection = 0;
+	alternate_currency_loaded = false;
 }
 
 Client::~Client() {
@@ -6741,6 +6742,11 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount)
 		return;
 	}
 
+	if(!alternate_currency_loaded) {
+		alternate_currency_queued_operations.push(std::make_pair(currency_id, amount));
+		return;
+	}
+
 	int new_value = 0;
 	std::map<uint32, uint32>::iterator iter = alternate_currency.find(currency_id);
 	if(iter == alternate_currency.end()) {
@@ -6790,6 +6796,16 @@ uint32 Client::GetAlternateCurrencyValue(uint32 currency_id) const
 		return 0;
 	} else {
 		return (*iter).second;
+	}
+}
+
+void Client::ProcessAlternateCurrencyQueue() {
+	while(!alternate_currency_queued_operations.empty()) {
+		std::pair<uint32, int32> op = alternate_currency_queued_operations.front();
+
+		AddAlternateCurrencyValue(op.first, op.second);
+
+		alternate_currency_queued_operations.pop();
 	}
 }
 
