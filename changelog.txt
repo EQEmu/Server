@@ -6,6 +6,8 @@ Secrets: Added functionality to Perl for $client->PlayMP3("name of file").
   Usage varies, but typically you can place an MP3/WAV/XMI in the EQDir//sounds, pfs, s3d, or root client folder and it will play through this Perl function. Example, $client->PlayMP3("combattheme1.mp3") or $client->PlayMP3("TUTBTrade1.mp3")
   All clients except Secrets of Faydwer and 6.2 have their opcodes identified for this function. The struct + supported params is the same throughout versions. 
   Use $client->PlayMP3 with an invalid sound file to stop playback or simply wait for it to end.
+KLS: Added functionality to Lua for Client:PlayMP3(filename)
+KLS: Added functionality to Lua for Client:SendMarqueeMessage(type, priority/opacity, fade_in_time_ms, fade_out_time_ms, duration_ms, msg)
   
 == 12/16/2013 ==
 Kayen: Implemented SE_ArcheryDoubleAttack (Chance to do an extra archery attack)
