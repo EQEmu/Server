@@ -3428,15 +3428,18 @@ struct LevelAppearance_Struct { //Sends a little graphic on level up
 	uint32	value5b;
 /*64*/
 };
-struct MerchantList{
+
+struct MerchantList {
 	uint32	id;
 	uint32	slot;
 	uint32	item;
 	int16	faction_required;
 	int8	level_required;
 	uint16	alt_currency_cost;
+	uint32	classes_required;
 };
-struct TempMerchantList{
+
+struct TempMerchantList {
 	uint32	npcid;
 	uint32	slot;
 	uint32	item;

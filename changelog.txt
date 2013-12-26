@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/26/2013 ==
+demonstar55: Added classes_required to merchantlist (same bitmask as items)
+
 == 12/24/2013 ==
 Secrets (Akkadius): Perl $client->SilentMessage("Message"); addition, this is a pre-req for a Perl plugin I've shared with EQEmu. This function essentially mimics a player speaking with an NPC - which is used in popup window responses 
 Secrets: Added functionality to Perl for $client->PlayMP3("name of file"). 

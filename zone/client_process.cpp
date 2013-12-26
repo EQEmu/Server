@@ -984,6 +984,9 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			continue;
 		}
 
+		if (!(ml.classes_required & (1 << (GetClass() - 1))))
+			continue;
+
 		int32 fac = merch ? merch->GetPrimaryFaction() : 0;
 		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
 			continue;
