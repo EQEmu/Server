@@ -4480,7 +4480,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		return;
 	}
 	if (IsAIControlled()) {
-		this->Message_StringID(13,NOT_IN_CONTROL);
+		this->Message_StringID(13, NOT_IN_CONTROL);
 		//Message(13, "You cant cast right now, you arent in control of yourself!");
 		return;
 	}
@@ -4488,23 +4488,23 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
 #ifdef _EQDEBUG
-		LogFile->write(EQEMuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[0], castspell->cs_unknown[0]);
-		LogFile->write(EQEMuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[1], castspell->cs_unknown[1]);
-		LogFile->write(EQEMuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[2], castspell->cs_unknown[2]);
-		LogFile->write(EQEMuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[3], castspell->cs_unknown[3]);
-		LogFile->write(EQEMuLog::Debug, "cs_unknown2: 32 %p %u", &castspell->cs_unknown, *(uint32*) castspell->cs_unknown );
-		LogFile->write(EQEMuLog::Debug, "cs_unknown2: 32 %p %i", &castspell->cs_unknown, *(uint32*) castspell->cs_unknown );
-		LogFile->write(EQEMuLog::Debug, "cs_unknown2: 16 %p %u %u", &castspell->cs_unknown, *(uint16*) castspell->cs_unknown, *(uint16*) castspell->cs_unknown+sizeof(uint16) );
-		LogFile->write(EQEMuLog::Debug, "cs_unknown2: 16 %p %i %i", &castspell->cs_unknown, *(uint16*) castspell->cs_unknown, *(uint16*) castspell->cs_unknown+sizeof(uint16) );
+	LogFile->write(EQEMuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[0], castspell->cs_unknown[0]);
+	LogFile->write(EQEMuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[1], castspell->cs_unknown[1]);
+	LogFile->write(EQEMuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[2], castspell->cs_unknown[2]);
+	LogFile->write(EQEMuLog::Debug, "cs_unknown2: %u %i", (uint8)castspell->cs_unknown[3], castspell->cs_unknown[3]);
+	LogFile->write(EQEMuLog::Debug, "cs_unknown2: 32 %p %u", &castspell->cs_unknown, *(uint32*) castspell->cs_unknown );
+	LogFile->write(EQEMuLog::Debug, "cs_unknown2: 32 %p %i", &castspell->cs_unknown, *(uint32*) castspell->cs_unknown );
+	LogFile->write(EQEMuLog::Debug, "cs_unknown2: 16 %p %u %u", &castspell->cs_unknown, *(uint16*) castspell->cs_unknown, *(uint16*) castspell->cs_unknown+sizeof(uint16) );
+	LogFile->write(EQEMuLog::Debug, "cs_unknown2: 16 %p %i %i", &castspell->cs_unknown, *(uint16*) castspell->cs_unknown, *(uint16*) castspell->cs_unknown+sizeof(uint16) );
 #endif
-LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
+	LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 
-	if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// this means item
+	if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// ITEM or POTION cast
 	{
 		//discipline, using the item spell slot
-		if(castspell->inventoryslot == 0xFFFFFFFF) {
-			if(!UseDiscipline(castspell->spell_id, castspell->target_id)) {
-				LogFile->write(EQEMuLog::Debug, "Unknown ability being used by %s, spell being cast is: %i\n",GetName(),castspell->spell_id);
+		if (castspell->inventoryslot == 0xFFFFFFFF) {
+			if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
+				LogFile->write(EQEMuLog::Debug, "Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
 				InterruptSpell(castspell->spell_id);
 			}
 			return;
@@ -4516,7 +4516,7 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 			if (inst && inst->IsType(ItemClassCommon))
 			{
 				const Item_Struct* item = inst->GetItem();
-				if(item->Click.Effect != (uint32)castspell->spell_id)
+				if (item->Click.Effect != (uint32)castspell->spell_id)
 				{
 					database.SetMQDetectionFlag(account_name, name, "OP_CastSpell with item, tried to cast a different spell.", zone->GetShortName());
 					InterruptSpell(castspell->spell_id);	//CHEATER!!
@@ -4525,16 +4525,17 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 
 				if ((item->Click.Type == ET_ClickEffect) || (item->Click.Type == ET_Expendable) || (item->Click.Type == ET_EquipClick) || (item->Click.Type == ET_ClickEffect2))
 				{
-					if(item->Click.Level2 > 0)
+					if (item->Click.Level2 > 0)
 					{
-						if(GetLevel() >= item->Click.Level2)
+						if (GetLevel() >= item->Click.Level2)
 						{
 							ItemInst* p_inst = (ItemInst*)inst;
 							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
-							if(i == 0) {
+							if (i == 0) {
 								CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
-							} else {
+							}
+							else {
 								InterruptSpell(castspell->spell_id);
 								return;
 							}
@@ -4551,9 +4552,10 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 						ItemInst* p_inst = (ItemInst*)inst;
 						int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
-						if(i == 0) {
+						if (i == 0) {
 							CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
-						} else {
+						}
+						else {
 							InterruptSpell(castspell->spell_id);
 							return;
 						}
@@ -4576,46 +4578,48 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 			InterruptSpell(castspell->spell_id);
 		}
 	}
-	else	// ability, or regular memmed spell
-	{
+	else if (castspell->slot == DISCIPLINE_SPELL_SLOT) {	// DISCIPLINE cast
+		if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
+			printf("Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
+			InterruptSpell(castspell->spell_id);
+			return;
+		}
+	}
+	else if (castspell->slot == ABILITY_SPELL_SLOT) {	// ABILITY cast (LoH and Harm Touch)
 		uint16 spell_to_cast = 0;
 
-		//current client seems to send LH in slot 8 now...
-		if(castspell->slot == ABILITY_SPELL_SLOT &&
-			castspell->spell_id == SPELL_LAY_ON_HANDS && GetClass() == PALADIN) {
-			if(!p_timers.Expired(&database, pTimerLayHands)) {
-				Message(13,"Ability recovery time not yet met.");
+		if (castspell->spell_id == SPELL_LAY_ON_HANDS && GetClass() == PALADIN) {
+			if (!p_timers.Expired(&database, pTimerLayHands)) {
+				Message(13, "Ability recovery time not yet met.");
 				InterruptSpell(castspell->spell_id);
 				return;
 			}
 			spell_to_cast = SPELL_LAY_ON_HANDS;
 			p_timers.Start(pTimerLayHands, LayOnHandsReuseTime);
-		} else if(castspell->slot == ABILITY_SPELL_SLOT &&
-			(castspell->spell_id == SPELL_HARM_TOUCH
-				|| castspell->spell_id == SPELL_HARM_TOUCH2
-			) && GetClass() == SHADOWKNIGHT) {
-
-			if(!p_timers.Expired(&database, pTimerHarmTouch)) {
-				Message(13,"Ability recovery time not yet met.");
+		}
+		else if ((castspell->spell_id == SPELL_HARM_TOUCH
+			|| castspell->spell_id == SPELL_HARM_TOUCH2) && GetClass() == SHADOWKNIGHT) {
+			if (!p_timers.Expired(&database, pTimerHarmTouch)) {
+				Message(13, "Ability recovery time not yet met.");
 				InterruptSpell(castspell->spell_id);
 				return;
 			}
 
-			if(GetLevel() < 40)
+			// determine which version of HT we are casting based on level
+			if (GetLevel() < 40)
 				spell_to_cast = SPELL_HARM_TOUCH;
 			else
 				spell_to_cast = SPELL_HARM_TOUCH2;
+
 			p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
 		}
-
-		//handle disciplines, OLD, they keep changing this
-		if(castspell->slot == DISCIPLINE_SPELL_SLOT) {
-			if(!UseDiscipline(castspell->spell_id, castspell->target_id)) {
-				printf("Unknown ability being used by %s, spell being cast is: %i\n",GetName(),castspell->spell_id);
-				InterruptSpell(castspell->spell_id);
-			}
-			return;
-		}
+		
+		if (spell_to_cast > 0)	// if we've matched LoH or HT, cast now
+			CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
+	}
+	else	// MEMORIZED SPELL (first confirm that it's a valid memmed spell slot, then validate that the spell is currently memorized)
+	{
+		uint16 spell_to_cast = 0;
 
 		if(castspell->slot < MAX_PP_MEMSPELL)
 		{
@@ -4626,7 +4630,7 @@ LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv
 				return;
 			}
 		}
-		else {
+		else if (castspell->slot >= MAX_PP_MEMSPELL) {
 			InterruptSpell();
 			return;
 		}
