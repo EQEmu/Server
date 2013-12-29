@@ -24,6 +24,7 @@
 
 #include <luabind/detail/object_rep.hpp>
 #include <luabind/detail/class_rep.hpp>
+#include <luabind/lua502.hpp>
 
 namespace luabind { namespace detail
 {

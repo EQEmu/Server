@@ -347,8 +347,7 @@ namespace luabind
 			, luabind::detail::proxy_function_void_caller<boost::tuples::tuple<BOOST_PP_ENUM(BOOST_PP_ITERATION(), LUABIND_TUPLE_PARAMS, _)> >
 			, luabind::detail::proxy_function_caller<Ret, boost::tuples::tuple<BOOST_PP_ENUM(BOOST_PP_ITERATION(), LUABIND_TUPLE_PARAMS, _)> > >::type proxy_type;
 
-		lua_pushstring(L, name);
-		lua_gettable(L, LUA_GLOBALSINDEX);
+		lua_getglobal(L, name);
 
 		return proxy_type(L, 1, &detail::pcall, args);
 	}
@@ -390,8 +389,7 @@ namespace luabind
 			, luabind::detail::proxy_function_void_caller<boost::tuples::tuple<BOOST_PP_ENUM(BOOST_PP_ITERATION(), LUABIND_TUPLE_PARAMS, _)> >
 			, luabind::detail::proxy_function_caller<Ret, boost::tuples::tuple<BOOST_PP_ENUM(BOOST_PP_ITERATION(), LUABIND_TUPLE_PARAMS, _)> > >::type proxy_type;
 
-		lua_pushstring(L, name);
-		lua_gettable(L, LUA_GLOBALSINDEX);
+		lua_getglobal(L, name);
 
 		return proxy_type(L, 1, &detail::resume_impl, args);
 	}

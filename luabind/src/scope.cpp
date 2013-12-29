@@ -27,6 +27,7 @@
 #include <luabind/scope.hpp>
 #include <luabind/detail/debug.hpp>
 #include <luabind/detail/stack_utils.hpp>
+#include <luabind/lua502.hpp>
 #include <cassert>
 
 namespace luabind { namespace detail {
@@ -136,22 +137,20 @@ namespace luabind {
     {
         if (m_name)
         {
-            lua_pushstring(m_state, m_name);
-            lua_gettable(m_state, LUA_GLOBALSINDEX);
+            lua_getglobal(m_state, m_name);
 
             if (!lua_istable(m_state, -1))
             {
                 lua_pop(m_state, 1);
 
                 lua_newtable(m_state);
-                lua_pushstring(m_state, m_name);
-                lua_pushvalue(m_state, -2);
-                lua_settable(m_state, LUA_GLOBALSINDEX);
+                lua_pushvalue(m_state, -1);
+                lua_setglobal(m_state, m_name);
             }
         }
         else
         {
-            lua_pushvalue(m_state, LUA_GLOBALSINDEX);
+            lua_pushglobaltable(m_state);
         }
 
         lua_pop_stack guard(m_state);

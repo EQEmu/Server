@@ -65,6 +65,7 @@
 #include <luabind/value_wrapper.hpp>
 #include <luabind/from_stack.hpp>
 #include <luabind/typeid.hpp>
+#include <luabind/lua502.hpp>
 
 namespace luabind
 {

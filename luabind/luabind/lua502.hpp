@@ -1,4 +1,4 @@
-// Copyright (c) 2003 Daniel Wallin and Arvid Norberg
+// Copyright (c) 2004 Daniel Wallin and Arvid Norberg
 
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,46 +20,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-#define LUABIND_BUILDING
+#ifndef LUA_502_HPP
+#define LUA_502_HPP
 
-#include <luabind/detail/pcall.hpp>
-#include <luabind/error.hpp>
-#include <luabind/lua_include.hpp>
-
-namespace luabind { namespace detail
-{
-	int pcall(lua_State *L, int nargs, int nresults)
-	{
-		pcall_callback_fun e = get_pcall_callback();
-		int en = 0;
-		if ( e )
-		{
-			int base = lua_gettop(L) - nargs;
-			lua_pushcfunction(L, e);
-			lua_insert(L, base);  // push pcall_callback under chunk and args
-			en = base;
-  		}
-		int result = lua_pcall(L, nargs, nresults, en);
-		if ( en )
-			lua_remove(L, en);  // remove pcall_callback
-		return result;
-	}
-
-	int resume_impl(lua_State *L, int nargs, int)
-	{
 #if LUA_VERSION_NUM >= 502
-    int res = lua_resume(L, NULL, nargs);
-#else
-    int res = lua_resume(L, nargs);
-#endif
 
-#if LUA_VERSION_NUM >= 501
-		// Lua 5.1 added  LUA_YIELD as a possible return value,
-		// this was causing crashes, because the caller expects 0 on success.
-		return (res == LUA_YIELD) ? 0 : res;
-#else
-		return res;
-#endif
-	}
+inline LUA_API int lua_equal(lua_State *L, int idx1, int idx2)
+{
+  return lua_compare(L, idx1, idx2, LUA_OPEQ);
+}
 
-}}
+inline LUA_API int lua_lessthan(lua_State *L, int idx1, int idx2)
+{
+  return lua_compare(L, idx1, idx2, LUA_OPLT);
+}
+
+#undef lua_strlen
+#define lua_strlen lua_rawlen
+
+#undef lua_getfenv
+#define lua_getfenv lua_getuservalue
+
+#undef lua_setfenv
+#define lua_setfenv lua_setuservalue
+
+#undef lua_open
+#define lua_open luaL_newstate
+
+#else  // LUA_VERSION_NUM >= 502
+
+#define lua_pushglobaltable(L) lua_pushvalue(L, LUA_GLOBALSINDEX)
+
+#endif  // LUA_VERSION_NUM >= 502
+
+#endif

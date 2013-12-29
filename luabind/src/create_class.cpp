@@ -126,9 +126,8 @@ namespace luabind { namespace detail
 		new(c) class_rep(L, name);
 
 		// make the class globally available
-		lua_pushstring(L, name);
-		lua_pushvalue(L, -2);
-		lua_settable(L, LUA_GLOBALSINDEX);
+		lua_pushvalue(L, -1);
+		lua_setglobal(L, name);
 
 		// also add it to the closure as return value
 		lua_pushcclosure(L, &stage2, 1);
