@@ -788,25 +788,22 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if (max_level == 0)
 					max_level = RuleI(Spells, BaseImmunityLevel);
 				// NPCs get to ignore max_level for their spells.
-				if(GetSpecialAbility(UNSTUNABLE) ||
-					((GetLevel() > max_level)
-					&& caster && (!caster->IsNPC() || (caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity)))))
+				// Ignore if spell is beneficial (ex. Harvest)
+				if (IsDetrimentalSpell(spell.id) && (GetSpecialAbility(UNSTUNABLE) ||
+						((GetLevel() > max_level) && caster && (!caster->IsNPC() ||
+						(caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity)))))
 				{
 					caster->Message_StringID(MT_SpellFailure, IMMUNE_STUN);
-				}
-				else
-				{
+				} else {
 					int stun_resist = itembonuses.StunResist+spellbonuses.StunResist;
-					if(IsClient())
+					if (IsClient())
 						stun_resist += aabonuses.StunResist;
 
-					if(stun_resist <= 0 || MakeRandomInt(0,99) >= stun_resist)
-					{
+					if (stun_resist <= 0 || MakeRandomInt(0,99) >= stun_resist) {
 						mlog(COMBAT__HITS, "Stunned. We had %d percent resist chance.", stun_resist);
 						Stun(effect_value);
-					}
-					else {
-						if(IsClient())
+					} else {
+						if (IsClient())
 							Message_StringID(MT_Stun, SHAKE_OFF_STUN);
 
 						mlog(COMBAT__HITS, "Stun Resisted. We had %d percent resist chance.", stun_resist);

@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/02/2014 ==
+demonstar55: Stuns from beneficial spells (Harvest) ignore immunity
+
 == 12/26/2013 ==
 demonstar55: Added classes_required to merchantlist (same bitmask as items)
 
