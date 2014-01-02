@@ -791,7 +791,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				// Ignore if spell is beneficial (ex. Harvest)
 				if (IsDetrimentalSpell(spell.id) && (GetSpecialAbility(UNSTUNABLE) ||
 						((GetLevel() > max_level) && caster && (!caster->IsNPC() ||
-						(caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity)))))
+						(caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity))))))
 				{
 					caster->Message_StringID(MT_SpellFailure, IMMUNE_STUN);
 				} else {
