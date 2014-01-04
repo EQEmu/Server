@@ -290,7 +290,7 @@ typedef enum {
 #define SE_LimitInstant					141 // implemented
 #define SE_LimitMinLevel				142 // implemented
 #define SE_LimitCastTime				143 // implemented
-#define SE_Unknown144					144	// not used
+#define SE_FfCastTimeMax				144	// not used
 #define SE_Teleport2					145	// implemented - Banishment of the Pantheon
 #define SE_ElectricityResist			146	// *not implemented (Lightning Rod: 23233) 
 #define SE_PercentalHeal				147 // implemented
