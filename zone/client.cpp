@@ -1080,6 +1080,10 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	case 22:
 	{
 		// Emotes for Underfoot and later.
+		// crash protection -- cheater
+		if (strlen(message) > 512)
+			message[512] = '\0';
+
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Emote, 4 + strlen(message) + strlen(GetName()) + 2);
 		Emote_Struct* es = (Emote_Struct*)outapp->pBuffer;
 		char *Buffer = (char *)es;

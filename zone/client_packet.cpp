@@ -7353,8 +7353,13 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 	const char* name	= GetName();
 	uint32 len_name		= strlen(name);
 	uint32 len_msg		= strlen(in->message);
+	// crash protection -- cheater
+	if (len_msg > 512) {
+		in->message[512] = '\0';
+		len_msg = 512;
+	}
 	uint32 len_packet	= sizeof(in->unknown01) + len_name
-						+ strlen(in->message) + 1;
+						+ len_msg + 1;
 
 	// Construct outgoing packet
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Emote, len_packet);
@@ -7381,7 +7386,7 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 	}
 	else
 	*/
-	entity_list.QueueCloseClients(this, outapp, true, 100,0,true,FilterSocials);
+	entity_list.QueueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
 
 	safe_delete(outapp);
 	return;
