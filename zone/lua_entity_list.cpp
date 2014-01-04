@@ -210,6 +210,11 @@ void Lua_EntityList::RemoveFromTargets(Lua_Mob mob) {
 	self->RemoveFromTargets(mob);
 }
 
+void Lua_EntityList::RemoveFromTargets(Lua_Mob mob, bool RemoveFromXTargets) {
+	Lua_Safe_Call_Void();
+	self->RemoveFromTargets(mob, RemoveFromXTargets);
+}
+
 void Lua_EntityList::ReplaceWithTarget(Lua_Mob target, Lua_Mob new_target) {
 	Lua_Safe_Call_Void();
 	self->ReplaceWithTarget(target, new_target);
@@ -444,6 +449,7 @@ luabind::scope lua_register_entity_list() {
 		.def("MessageStatus", (void(Lua_EntityList::*)(uint32,uint32,uint32,const char*))&Lua_EntityList::MessageStatus)
 		.def("MessageClose", (void(Lua_EntityList::*)(Lua_Mob,bool,float,uint32,const char*))&Lua_EntityList::MessageClose)
 		.def("RemoveFromTargets", (void(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::RemoveFromTargets)
+		.def("RemoveFromTargets", (void(Lua_EntityList::*)(Lua_Mob,bool))&Lua_EntityList::RemoveFromTargets)
 		.def("ReplaceWithTarget", (void(Lua_EntityList::*)(Lua_Mob,Lua_Mob))&Lua_EntityList::ReplaceWithTarget)
 		.def("OpenDoorsNear", (void(Lua_EntityList::*)(Lua_NPC))&Lua_EntityList::OpenDoorsNear)
 		.def("MakeNameUnique", (std::string(Lua_EntityList::*)(const char*))&Lua_EntityList::MakeNameUnique)
