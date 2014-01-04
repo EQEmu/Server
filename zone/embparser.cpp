@@ -126,7 +126,6 @@ PerlembParser::~PerlembParser() {
 }
 
 void PerlembParser::ReloadQuests() {
-
 	try {
 		if(perl == nullptr) {
 			perl = new Embperl;
@@ -145,6 +144,7 @@ void PerlembParser::ReloadQuests() {
 		throw e.what();
 	}
 
+	errors_.clear();
 	npc_quest_status_.clear();
 	global_npc_quest_status_ = questUnloaded;
 	player_quest_status_ = questUnloaded;

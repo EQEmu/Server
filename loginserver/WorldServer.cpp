@@ -201,6 +201,13 @@ bool WorldServer::Process()
 			}
 		case ServerOP_LSAccountUpdate:
 			{
+				if(app->size < sizeof(ServerLSAccountUpdate_Struct))
+				{
+					server_log->Log(log_network_error, "Recieved application packet from server that had opcode ServerLSAccountUpdate_Struct, "
+						"but was too small. Discarded to avoid buffer overrun.");
+					break;
+				}
+			
 				server_log->Log(log_network_trace, "ServerOP_LSAccountUpdate packet received from: %s", short_name.c_str());
 				ServerLSAccountUpdate_Struct *lsau = (ServerLSAccountUpdate_Struct*)app->pBuffer;
 				if(trusted)
