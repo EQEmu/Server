@@ -230,6 +230,7 @@ struct StatBonuses {
 	uint16	percussionMod;
 	uint16	windMod;
 	uint16	stringedMod;
+	uint16	songModCap;
 	int8	hatemod;
 	int32	EnduranceReduction;
 

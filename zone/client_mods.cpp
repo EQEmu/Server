@@ -1792,9 +1792,10 @@ int16 Client::CalcATK() {
 	return(ATK);
 }
 
-uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
-	if(GetClass() != BARD)
-		return(10);
+uint16 Mob::GetInstrumentMod(uint16 spell_id) const
+{
+	if (GetClass() != BARD)
+		return 10;
 
 	uint16 effectmod = 10;
 	int effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
@@ -1804,7 +1805,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 	//because the spells are supposed to act just like having the intrument.
 
 	//item mods are in 10ths of percent increases
-	switch(spells[spell_id].skill) {
+	switch (spells[spell_id].skill) {
 		case SkillPercussionInstruments:
 			if(itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
 				effectmod = 10;
@@ -1863,12 +1864,9 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 			break;
 	}
 
-	// TODO: These shouldn't be hardcoded.
-	effectmodcap += GetAA(aaAyonaesTutelage);
-	effectmodcap += GetAA(aaEchoofTaelosia);
+	effectmodcap += aabonuses.songModCap + spellbonuses.songModCap;
 
-
-	if(effectmod < 10)
+	if (effectmod < 10)
 		effectmod = 10;
 
 	if (effectmod > effectmodcap)
@@ -1877,7 +1875,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const {
 	_log(SPELLS__BARDS, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n",
 			GetName(), spell_id, effectmod, effectmodcap);
 
-	return(effectmod);
+	return effectmod;
 }
 
 void Client::CalcMaxEndurance()

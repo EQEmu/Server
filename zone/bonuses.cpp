@@ -904,6 +904,9 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 						break;
 				}
 				break;
+			case SE_SongModCap:
+				newbon->songModCap += base1;
+				break;
 			case SE_PetCriticalHit:
 				newbon->PetCriticalHit += base1;
 				break;
@@ -2325,6 +2328,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 						newbon->singingMod += effect_value;
 						break;
 				}
+				break;
+
+			case SE_SongModCap:
+				newbon->songModCap += effect_value;
 				break;
 
 			case SE_PetAvoidance:
