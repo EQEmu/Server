@@ -7019,7 +7019,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			Message_StringID(10, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
 			break;
 		}
-		if (mypet->IsFeared()) break; //prevent pet from attacking stuff while feared
+		if (mypet->IsFeared())
+			break; //prevent pet from attacking stuff while feared
+
+		if (!mypet->IsAttackAllowed(GetTarget())) {
+			mypet->Say_StringID(NOT_LEGAL_TARGET);
+			break;
+		}
 
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
 			if (GetTarget() != this && mypet->DistNoRootNoZ(*GetTarget()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {

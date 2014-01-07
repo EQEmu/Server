@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/07/2014 ==
+demonstar55: Moved pet can attack check to before it tries to attack, which is more live like.
+
 == 01/03/2014 ==
 demonstar55: Crash prevention for emote.
 
