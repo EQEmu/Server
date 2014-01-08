@@ -1211,31 +1211,28 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				const char *itemname = item ? item->Name : "*Unknown Item*";
 				snprintf(effect_desc, _EDLEN, "Summon Item: %s (id %d)", itemname, spell.base[i]);
 #endif
-				if(!item)
-				{
+				if (!item) {
 					Message(13, "Unable to summon item %d. Item not found.", spell.base[i]);
-				}
-				else if(IsClient()){
-					Client *c=CastToClient();
+				} else if (IsClient()) {
+					Client *c = CastToClient();
 					if (c->CheckLoreConflict(item)) {
 						c->DuplicateLoreMessage(spell.base[i]);
 					} else {
 						int charges;
-						if (spell.formula[i] < 100)
-						{
-							charges = spell.formula[i];
-						}
-						else	// variable charges
-						{
-							charges = CalcSpellEffectValue_formula(spell.formula[i], 0, 20, caster_level, spell_id);
-						}
-						charges = (spell.formula[i] < 100) ? charges : (charges > 20) ? 20 : (spell.max[i] < 1) ? item->MaxCharges : spell.max[i];
+						if (item->Stackable)
+							charges = (spell.formula[i] > item->StackSize) ? item->StackSize : spell.formula[i];
+						else
+							charges = 1;
+
+						if (charges < 1)
+							charges = 1;
+
 						if (SummonedItem) {
 							c->PushItemOnCursor(*SummonedItem);
 							c->SendItemPacket(SLOT_CURSOR, SummonedItem, ItemPacketSummonItem);
 							safe_delete(SummonedItem);
 						}
-						SummonedItem=database.CreateItem(spell.base[i],charges);
+						SummonedItem = database.CreateItem(spell.base[i], charges);
 					}
 				}
 
@@ -1251,26 +1248,28 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				uint8 slot;
 
 				if (!SummonedItem || !SummonedItem->IsType(ItemClassContainer)) {
-					if(caster) caster->Message(13,"SE_SummonItemIntoBag but no bag has been summoned!");
-				} else if ((slot=SummonedItem->FirstOpenSlot())==0xff) {
-					if(caster) caster->Message(13,"SE_SummonItemIntoBag but no room in summoned bag!");
+					if (caster)
+						caster->Message(13, "SE_SummonItemIntoBag but no bag has been summoned!");
+				} else if ((slot = SummonedItem->FirstOpenSlot()) == 0xff) {
+					if (caster)
+						caster->Message(13, "SE_SummonItemIntoBag but no room in summoned bag!");
 				} else if (IsClient()) {
 					if (CastToClient()->CheckLoreConflict(item)) {
 						CastToClient()->DuplicateLoreMessage(spell.base[i]);
 					} else {
 						int charges;
-						if (spell.formula[i] < 100)
-						{
-							charges = spell.formula[i];
-						}
-						else	// variable charges
-						{
-							charges = CalcSpellEffectValue_formula(spell.formula[i], 0, 20, caster_level, spell_id);
-						}
-						charges = charges < 1 ? 1 : (charges > 20 ? 20 : charges);
-						ItemInst *SubItem=database.CreateItem(spell.base[i],charges);
-						if (SubItem!=nullptr) {
-							SummonedItem->PutItem(slot,*SubItem);
+
+						if (item->Stackable)
+							charges = (spell.formula[i] > item->StackSize) ? item->StackSize : spell.formula[i];
+						else
+							charges = 1;
+
+						if (charges < 1)
+							charges = 1;
+
+						ItemInst *SubItem = database.CreateItem(spell.base[i], charges);
+						if (SubItem != nullptr) {
+							SummonedItem->PutItem(slot, *SubItem);
 							safe_delete(SubItem);
 						}
 					}
