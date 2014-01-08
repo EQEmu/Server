@@ -3181,7 +3181,7 @@ void Mob::BuffProcess()
 
 			if(spells[buffs[buffs_i].spellid].buffdurationformula != DF_Permanent)
 			{
-				if(!zone->BuffTimersSuspended() || IsDetrimentalSpell(buffs[buffs_i].spellid))
+				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{
 					--buffs[buffs_i].ticsremaining;
 

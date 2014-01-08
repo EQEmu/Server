@@ -711,7 +711,7 @@ struct SPDat_Spell_Struct
 /* 194 */	float directional_start;
 /* 195 */	float directional_end;
 /* 196 - 199 */
-/* 200 */	//bool suspendable; // buff is suspended in suspended buff zones
+/* 200 */	bool suspendable; // buff is suspended in suspended buff zones
 /* 201 - 202 */
 /* 203 */	//int songcap; // individual song cap (how live currently does it, not implemented)
 /* 204 - 206 */
@@ -821,6 +821,7 @@ bool IsResistDebuffSpell(uint16 spell_id);
 bool IsSelfConversionSpell(uint16 spell_id);
 bool IsBuffSpell(uint16 spell_id);
 bool IsPersistDeathSpell(uint16 spell_id);
+bool IsSuspendableSpell(uint16 spell_id);
 uint32 GetMorphTrigger(uint32 spell_id);
 uint32 GetPartialMeleeRuneReduction(uint32 spell_id);
 uint32 GetPartialMagicRuneReduction(uint32 spell_id);
