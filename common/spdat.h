@@ -725,7 +725,7 @@ struct SPDat_Spell_Struct
 /* 219 */	//int maxtargets; // is used for beam and ring spells for target # limits (not implemented)
 /* 220 - 223 */
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death
-/* 225 - 236 */
+/* 225 - 236 */ // Not in DB
 			uint8 DamageShieldType; // This field does not exist in spells_us.txt
 };
 
