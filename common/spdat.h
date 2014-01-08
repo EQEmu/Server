@@ -710,11 +710,22 @@ struct SPDat_Spell_Struct
 /* 193 */	int NimbusEffect;
 /* 194 */	float directional_start;
 /* 195 */	float directional_end;
+/* 196 - 199 */
+/* 200 */	//bool suspendable; // buff is suspended in suspended buff zones
+/* 201 - 202 */
+/* 203 */	//int songcap; // individual song cap (how live currently does it, not implemented)
+/* 204 - 206 */
 /* 207 */	int spellgroup;
+/* 208 */
 /* 209 */	int powerful_flag; // Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
+/* 210 */
 /* 211 */	int CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
 /* 212 */	bool AllowRest;
-/* 219 */	//int maxtargets; // not in DB yet, is used for beam and ring spells for target # limits
+/* 213 - 218 */
+/* 219 */	//int maxtargets; // is used for beam and ring spells for target # limits (not implemented)
+/* 220 - 223 */
+/* 224 */	bool persistdeath; // buff doesn't get stripped on death
+/* 225 - 236 */
 			uint8 DamageShieldType; // This field does not exist in spells_us.txt
 };
 
@@ -809,6 +820,7 @@ bool IsDebuffSpell(uint16 spell_id);
 bool IsResistDebuffSpell(uint16 spell_id);
 bool IsSelfConversionSpell(uint16 spell_id);
 bool IsBuffSpell(uint16 spell_id);
+bool IsPersistDeathSpell(uint16 spell_id);
 uint32 GetMorphTrigger(uint32 spell_id);
 uint32 GetPartialMeleeRuneReduction(uint32 spell_id);
 uint32 GetPartialMagicRuneReduction(uint32 spell_id);

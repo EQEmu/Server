@@ -1733,6 +1733,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].powerful_flag=atoi(row[209]);
 			sp[tempid].CastRestriction = atoi(row[211]);
 			sp[tempid].AllowRest = atoi(row[212]) != 0;
+			sp[tempid].persistdeath = atoi(row[224]) != 0;
 			sp[tempid].DamageShieldType = 0;
 		}
 		mysql_free_result(result);

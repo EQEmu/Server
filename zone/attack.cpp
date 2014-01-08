@@ -1601,7 +1601,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 		}
 
 		//this generates a lot of 'updates' to the client that the client does not need
-		BuffFadeAll();
+		BuffFadeNonPersistDeath();
 		if((GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
 			UnmemSpellAll(true);
 		else

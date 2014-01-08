@@ -966,6 +966,14 @@ bool IsBuffSpell(uint16 spell_id)
 	return false;
 }
 
+bool IsPersistDeathSpell(uint16 spell_id)
+{
+	if (IsValidSpell(spell_id) && spells[spell_id].persistdeath)
+		return true;
+
+	return false;
+}
+
 uint32 GetMorphTrigger(uint32 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i)
