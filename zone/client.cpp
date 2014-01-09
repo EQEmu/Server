@@ -581,6 +581,7 @@ bool Client::Save(uint8 iCommitNow) {
 		m_petinfo.Mana = pet->GetMana();
 		pet->GetPetState(m_petinfo.Buffs, m_petinfo.Items, m_petinfo.Name);
 		m_petinfo.petpower = pet->GetPetPower();
+		m_petinfo.size = pet->GetSize();
 	} else {
 		memset(&m_petinfo, 0, sizeof(struct PetInfo));
 	}
@@ -5437,7 +5438,7 @@ void Client::SuspendMinion()
 		if(m_suspendedminion.SpellID > 0)
 		{
 			MakePoweredPet(m_suspendedminion.SpellID, spells[m_suspendedminion.SpellID].teleport_zone,
-				m_suspendedminion.petpower, m_suspendedminion.Name);
+				m_suspendedminion.petpower, m_suspendedminion.Name, m_suspendedminion.size);
 
 			CurrentPet = GetPet()->CastToNPC();
 
@@ -5497,6 +5498,7 @@ void Client::SuspendMinion()
 
 				m_suspendedminion.Mana = CurrentPet->GetMana();
 				m_suspendedminion.petpower = CurrentPet->GetPetPower();
+				m_suspendedminion.size = CurrentPet->GetSize();
 
 				if(AALevel >= 2)
 					CurrentPet->GetPetState(m_suspendedminion.Buffs, m_suspendedminion.Items, m_suspendedminion.Name);

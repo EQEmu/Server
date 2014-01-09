@@ -225,7 +225,8 @@ void Mob::MakePet(uint16 spell_id, const char* pettype, const char *petname) {
 // making it possible for petpower to be retained without the focus item having to
 // stay equipped when the character zones. petpower of -1 means that the currently equipped petfocus
 // of a client is searched for and used instead.
-void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname) {
+void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
+		const char *petname, float in_size) {
 	// Sanity and early out checking first.
 	if(HasPet() || pettype == nullptr)
 		return;
@@ -422,6 +423,9 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, c
 			}
 	}
 
+	// finally, override size if one was provided
+	if (in_size > 0.0f)
+		npc->size = in_size;
 
 	entity_list.AddNPC(npc, true, true);
 	SetPetID(npc->GetID());

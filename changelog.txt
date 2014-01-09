@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/09/2014 ==
+demonstar55: Add pet size preservation like live (zone, camp, etc)
+
 == 01/07/2014 ==
 demonstar55: Moved pet can attack check to before it tries to attack, which is more live like.
 

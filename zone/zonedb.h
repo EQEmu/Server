@@ -71,6 +71,7 @@ struct PetInfo {
 	int16	petpower;
 	uint32	HP;
 	uint32	Mana;
+	float	size;
 	SpellBuff_Struct	Buffs[BUFF_COUNT];
 	uint32	Items[MAX_WORN_INVENTORY];
 	char	Name[64];
