@@ -7516,10 +7516,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 				if(tmpValue <= MIN_FACTION)
 					tmpValue = MIN_FACTION;
 
-				char* msg = BuildFactionMessage(npc_value[i],faction_id[i],tmpValue,temp[i]);
-				if (msg != 0)
-					Message(0, msg);
-				safe_delete_array(msg);
+				SendFactionMessage(npc_value[i], faction_id[i], tmpValue, temp[i]);
 			}
 		}
 	}
@@ -7536,11 +7533,7 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 		if(!(database.SetCharacterFactionLevel(char_id, faction_id, current_value, temp, factionvalues)))
 			return;
 
-		char* msg = BuildFactionMessage(value, faction_id, current_value, temp);
-		if (msg != 0)
-			Message(0, msg);
-		safe_delete(msg);
-
+		SendFactionMessage(value, faction_id, current_value, temp);
 	}
 	return;
 }
@@ -7594,52 +7587,30 @@ bool Client::HatedByClass(uint32 p_race, uint32 p_class, uint32 p_deity, int32 p
 }
 
 //o--------------------------------------------------------------
-//| Name: BuildFactionMessage; rembrant, Dec. 16, 2001
+//| Name: SendFactionMessage
 //o--------------------------------------------------------------
-//| Purpose: duh?
+//| Purpose: Send faction change message to client
 //o--------------------------------------------------------------
-char* Client::BuildFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalvalue, uint8 temp)
+void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalvalue, uint8 temp)
 {
-/*
-
-This should be replaced to send string-ID based messages using:
-#define FACTION_WORST 469 //Your faction standing with %1 could not possibly get any worse.
-#define FACTION_WORSE 470 //Your faction standing with %1 got worse.
-#define FACTION_BEST 471 //Your faction standing with %1 could not possibly get any better.
-#define FACTION_BETTER 472 //Your faction standing with %1 got better.
-
-some day.
-
-*/
-	//tmpvalue is the change as best I can tell.
-	char *faction_message = 0;
-
 	char name[50];
 
-	if(database.GetFactionName(faction_id, name, sizeof(name)) == false) {
+	// default to Faction# if we couldn't get the name from the ID
+	if (database.GetFactionName(faction_id, name, sizeof(name)) == false)
 		snprintf(name, sizeof(name),"Faction%i",faction_id);
-	}
 
-	if(tmpvalue == 0 || temp == 1 || temp == 2) {
-		return 0;
-	}
-	else if (totalvalue >= MAX_FACTION) {
-		MakeAnyLenString(&faction_message, "Your faction standing with %s could not possibly get any better!", name);
-		return faction_message;
-	}
-	else if(tmpvalue > 0 && totalvalue < MAX_FACTION) {
-		MakeAnyLenString(&faction_message, "Your faction standing with %s has gotten better!", name);
-		return faction_message;
-	}
-	else if(tmpvalue < 0 && totalvalue > MIN_FACTION) {
-		MakeAnyLenString(&faction_message, "Your faction standing with %s has gotten worse!", name);
-		return faction_message;
-	}
-	else if(totalvalue <= MIN_FACTION) {
-		MakeAnyLenString(&faction_message, "Your faction standing with %s could not possibly get any worse!", name);
-		return faction_message;
-	}
-	return 0;
+	if (tmpvalue == 0 || temp == 1 || temp == 2)
+		return;
+	else if (totalvalue >= MAX_FACTION)
+		Message_StringID(0, FACTION_BEST, name);
+	else if (tmpvalue > 0 && totalvalue < MAX_FACTION)
+		Message_StringID(0, FACTION_BETTER, name);
+	else if (tmpvalue < 0 && totalvalue > MIN_FACTION)
+		Message_StringID(0, FACTION_WORSE, name);
+	else if (totalvalue <= MIN_FACTION)
+		Message_StringID(0, FACTION_WORST, name);
+
+	return;
 }
 
 void Client::LoadAccountFlags()
