@@ -614,6 +614,22 @@ std::string lua_say_link(const char *phrase, bool silent, const char *link_name)
 	return std::string(text);
 }
 
+std::string lua_say_link(const char *phrase, bool silent) {
+	char text[256] = { 0 };
+	strncpy(text, phrase, 255);
+	quest_manager.saylink(text, silent, text);
+
+	return std::string(text);
+}
+
+std::string lua_say_link(const char *phrase) {
+	char text[256] = { 0 };
+	strncpy(text, phrase, 255);
+	quest_manager.saylink(text, false, text);
+
+	return std::string(text);
+}
+
 const char *lua_get_guild_name_by_id(uint32 guild_id) {
 	return quest_manager.getguildnamebyid(guild_id);
 }
@@ -1141,7 +1157,9 @@ luabind::scope lua_register_general() {
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_count_item", &lua_merchant_count_item),
 		luabind::def("item_link", &lua_item_link),
-		luabind::def("say_link", &lua_say_link),
+		luabind::def("say_link", (std::string(*)(const char*,bool,const char*))&lua_say_link),
+		luabind::def("say_link", (std::string(*)(const char*,bool))&lua_say_link),
+		luabind::def("say_link", (std::string(*)(const char*))&lua_say_link),
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
 		luabind::def("create_instance", &lua_create_instance),
 		luabind::def("destroy_instance", &lua_destroy_instance),
