@@ -187,15 +187,17 @@ void ExportBaseData(SharedDatabase *db) {
 				if(i != 0) {
 					line.push_back('^');
 				}
-				
+
 				line += row[i];
 			}
-			
+
 			fprintf(f, "%s\n", line.c_str());
 		}
 		mysql_free_result(result);
 	} else {
 		LogFile->write(EQEMuLog::Error, "Error in ExportBaseData query '%s' %s", query, errbuf);
 	}
+
+	fclose(f);
 }
 
