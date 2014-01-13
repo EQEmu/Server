@@ -1,5 +1,22 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/13/2014 ==
+Kayen: Numerous minor fixes to spell effects.
+Kayen: Changed SE_ArcheryDoubleAttack -> SE_DoubleRangedAttack (now works with throwing ect)
+Kayen: Changed SE_IncreaseHitDmgTaken -> SE_TriggerMeleeThreshold (now only works on melee)
+Kayen: Changed SE_MitigateMeleeDamageSP -> SE_MeleeThresholdGuard
+Kayen: Implemented SE_SpellThresholdGuard (Partial Spell Rune that only is lowered if spell hits are over X amount of damage)
+Kayen: Implemented SE_TriggerSpellThreshold (implemented  Trigger effect on X amount of spell damage taken)
+Kayen: Changed SE_ReduceHealing -> SE_FcHealAmtIncoming (focus limited Add/Remove amount of healing on target by X amount)
+Kayen: Change SE_CriticalHealChance2 -> SE_CriticalHealDecay	
+Kayen: Change SE_CriticalHealOverTime2 -> SE_CriticalRegenDecay	
+Kayen: Implemented SE_CriticalDotDecay	
+Note: 'Decay' effects means the chance to critical decays based on the level of the spell using the effect (like focus decay)
+Kayen: Implemented SE_FfLimitUseMin (focus limit to require a min amount of numhits value)
+Kayen: Implemented SE_FcLimitUse (focus to increases numhits count by percent)
+Kayen: Implemented SE_LimitRace	(Limits to spells cast by a certain race)
+Kayen: Implemented SE_FcMute  (silences casting of spells that contain specific spell effects) ie silence only heals
+
 == 01/09/2014 ==
 demonstar55: Add pet size preservation like live (zone, camp, etc)
 

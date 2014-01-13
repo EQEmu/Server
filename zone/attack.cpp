@@ -3116,29 +3116,6 @@ int Mob::GetMonkHandToHandDelay(void)
 	}
 }
 
-int32 Mob::ReduceAllDamage(int32 damage)
-{
-	if(damage <= 0)
-		return damage;
-
-	int32 slot = -1;
-
-	if (spellbonuses.SpellOnAmtDmgTaken[2]){
-		slot = spellbonuses.SpellOnAmtDmgTaken[1];
-		
-		if (slot >= 0) {
-			if(damage > buffs[slot].melee_rune)	{
-				if(!TryFadeEffect(slot))
-					BuffFadeBySlot(slot);
-			}
-			else{
-				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage);
-				CheckHitsRemaining(slot);
-			}
-		}
-	}
-	return(damage);
-}
 
 int32 Mob::ReduceDamage(int32 damage)
 {
@@ -3157,16 +3134,16 @@ int32 Mob::ReduceDamage(int32 damage)
 	}
 
 	//Only mitigate if damage is above the minimium specified.
-	if (spellbonuses.MitigateMeleeRuneSP[0]){
-		slot = spellbonuses.MitigateMeleeRuneSP[1];
+	if (spellbonuses.MeleeThresholdGuard[0]){
+		slot = spellbonuses.MeleeThresholdGuard[1];
 		
-		if (slot >= 0 && (damage > spellbonuses.MitigateMeleeRuneSP[2])) 
+		if (slot >= 0 && (damage > spellbonuses.MeleeThresholdGuard[2])) 
 		{
 			DisableMeleeRune = true;
-			int damage_to_reduce = damage * spellbonuses.MitigateMeleeRuneSP[0] / 100;
+			int damage_to_reduce = damage * spellbonuses.MeleeThresholdGuard[0] / 100;
 			if(damage_to_reduce > buffs[slot].melee_rune)
 			{
-				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamageSP %d damage negated, %d"
+				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MeleeThresholdGuard %d damage negated, %d"
 					" damage remaining, fading buff.", damage_to_reduce, buffs[slot].melee_rune);
 				damage -= damage_to_reduce;
 				if(!TryFadeEffect(slot))
@@ -3175,7 +3152,7 @@ int32 Mob::ReduceDamage(int32 damage)
 			}
 			else
 			{
-				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamageSP %d damage negated, %d"
+				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MeleeThresholdGuard %d damage negated, %d"
 					" damage remaining.", damage_to_reduce, buffs[slot].melee_rune);
 				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
 				damage -= damage_to_reduce;
@@ -3211,6 +3188,21 @@ int32 Mob::ReduceDamage(int32 damage)
 		}
 	}
 
+	if (spellbonuses.TriggerMeleeThreshold[2]){
+		slot = spellbonuses.TriggerMeleeThreshold[1];
+		
+		if (slot >= 0) {
+			if(damage > buffs[slot].melee_rune)	{
+				if(!TryFadeEffect(slot))
+					BuffFadeBySlot(slot);
+			}
+			else{
+				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage);
+				CheckHitsRemaining(slot);
+			}
+		}
+	}
+
 	if(damage < 1)
 		return -6;
 
@@ -3238,6 +3230,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	if(damage <= 0)
 		return damage;
 
+	bool DisableSpellRune = false;
 	int32 slot = -1;
 
 	// See if we block the spell outright first
@@ -3259,8 +3252,34 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 		// Reduce damage by the Spell Shielding first so that the runes don't take the raw damage.
 		damage -= (damage * itembonuses.SpellShield / 100);
 
+		
+		//Only mitigate if damage is above the minimium specified.
+		if (spellbonuses.SpellThresholdGuard[0]){
+			slot = spellbonuses.SpellThresholdGuard[1];
+		
+			if (slot >= 0 && (damage > spellbonuses.MeleeThresholdGuard[2])) 
+			{
+				DisableSpellRune = true;
+				int damage_to_reduce = damage * spellbonuses.SpellThresholdGuard[0] / 100;
+				if(damage_to_reduce > buffs[slot].magic_rune)
+				{
+					damage -= damage_to_reduce;
+					if(!TryFadeEffect(slot))
+						BuffFadeBySlot(slot);
+					//UpdateRuneFlags();
+				}
+				else
+				{
+					buffs[slot].melee_rune = (buffs[slot].magic_rune - damage_to_reduce);
+					damage -= damage_to_reduce;
+					CheckHitsRemaining(slot);
+				}
+			}
+		}
+		
+		
 		// Do runes now.
-		if (spellbonuses.MitigateSpellRune[0]){
+		if (spellbonuses.MitigateSpellRune[0] && !DisableSpellRune){
 			slot = spellbonuses.MitigateSpellRune[1];
 			if(slot >= 0)
 			{
@@ -3282,6 +3301,21 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 					damage -= damage_to_reduce;
 					if (!CheckHitsRemaining(slot))
 						UpdateRuneFlags();
+				}
+			}
+		}
+
+		if (spellbonuses.TriggerSpellThreshold[2]){
+			slot = spellbonuses.TriggerSpellThreshold[1];
+		
+			if (slot >= 0) {
+				if(damage > buffs[slot].magic_rune)	{
+					if(!TryFadeEffect(slot))
+						BuffFadeBySlot(slot);
+				}
+				else{
+					buffs[slot].melee_rune = (buffs[slot].magic_rune - damage);
+					CheckHitsRemaining(slot);
 				}
 			}
 		}
@@ -3378,9 +3412,9 @@ bool Client::CheckDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-bool Client::CheckArcheryDoubleAttack() {
+bool Client::CheckDoubleRangedAttack() {
 		
-	int16 chance = spellbonuses.ArcheryDoubleAttack + itembonuses.ArcheryDoubleAttack + aabonuses.ArcheryDoubleAttack;
+	int16 chance = spellbonuses.DoubleRangedAttack + itembonuses.DoubleRangedAttack + aabonuses.DoubleRangedAttack;
 
 	if(chance && (MakeRandomInt(0, 100) < chance))
 		return true;
@@ -3493,7 +3527,6 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 	}
 		//final damage has been determined.
 
-		ReduceAllDamage(damage);
 		SetHP(GetHP() - damage);
 
 		if(HasDied()) {

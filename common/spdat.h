@@ -493,7 +493,7 @@ typedef enum {
 #define SE_ChannelChanceItems			344	// implemented[AA] - chance to not have ITEM effects interrupted when you take damage.
 #define SE_AssassinationLevel			345	// not implemented as bonus - AA Assisination max level to kill
 #define SE_HeadShotLevel				346	// not implemented as bonus - AA HeadShot max level to kill
-#define SE_ArcheryDoubleAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
+#define SE_DoubleRangedAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
 #define SE_LimitManaCost				348	// implemented
 #define SE_ShieldEquipHateMod			349	// implemented[AA] Increase melee hate when wearing a shield.
 #define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
@@ -503,7 +503,7 @@ typedef enum {
 //#define SE_DeactivateAllTraps			354	// *not implemented - looks to be some type of invulnerability? Test DAT (8757)
 //#define SE_LearnTrap					355	// *not implemented - looks to be some type of invulnerability? Test LT (8758)
 //#define SE_ChangeTriggerType			356	// not used
-#define SE_InhibitSpellCasting			357	// *not implemented - (Stunted Growth 31160) Unlcear what this effect does? silence?
+#define SE_FcMute						357	// implemented - silences casting of spells that contain specific spell effects (focus limited)
 #define SE_CurrentManaOnce				358	// implemented
 #define SE_Invulnerabilty				359	// *not implemented - Invulnerability (Brell's Blessing)
 #define SE_SpellOnKill					360	// implemented - a buff that has a base1 % to cast spell base2 when you kill a "challenging foe" base3 min level
@@ -540,7 +540,7 @@ typedef enum {
 #define SE_IncreaseHitDmgTaken			391	// implemented - Most likely a simple negative mitigation modifier (Warlords fury: 23528) 
 #define SE_AdditionalHeal2				392 // implemented - Adds or removes healing from spells
 #define SE_HealRate2					393 // implemented - HealRate with focus restrictions.
-#define SE_ReduceHeal					394 // implemented - Reduces amount of healing on target by X value with foucs restrictions.
+#define SE_FcHealAmtIncoming			394 // implemented - Adds/Removes amount of healing on target by X value with foucs restrictions.
 #define SE_CriticalHealRate				395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
 #define SE_AdditionalHeal				396 // implemented - Adds a direct healing amount to spells
 #define SE_PetMeleeMitigation			397 // *not implemented[AA] - additional mitigation to your pets.
@@ -549,7 +549,7 @@ typedef enum {
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
 #define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
 #define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
-#define SE_TriggerOnCast2				403 // *not implemented - trigger a spell with percent chance, focus limited.
+#define SE_Ff_SpellClass				403 // *not implemented -
 #define SE_LimitExcludeSkill			404 // implemented - Limit a focus to exclude spells cast using a specific skill.
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
@@ -558,7 +558,7 @@ typedef enum {
 #define SE_LimitManaPercent				409 // implemented - limited to a certain percent of your mana
 #define SE_LimitEndPercent				410 // implemented - limited to a certain percent of your end
 #define SE_LimitClass					411 // implemented - Limits to spells of a certain class (Note: The class value in dbase is +1 in relation to item class value)
-//#define SE_FfRace						412 // not used
+#define SE_LimitRace					412 // implemented - Limits to spells cast by a certain race (Note: not used in any known live spells)
 #define SE_IncreaseSpellPower			413 // implemented - Increases the power of bard songs, skill attacks, runes, bard allowed foci, damage/heal
 #define SE_LimitSpellSkill				414 // implemented - Limit a focus to include spells cast using a specific skill.
 //#define SE_FFItemClass				415 // not used
@@ -566,10 +566,10 @@ typedef enum {
 #define SE_ManaRegen_v2					417 // implemented - New mana regen effect
 #define SE_SkillDamageAmount2			418 // implemented - adds skill damage directly to certain attacks
 #define SE_AddMeleeProc					419 // implemented - Adds a proc
-//#define SE_FcLimitUse					420 // *not used
+#define SE_FcLimitUse					420 // implemented - increases numhits count by percent (Note: not used in any known live spells)
 #define SE_IncreaseNumHits				421 // implemented[AA] - increases number of hits a buff has till fade. (focus)
-//#define SE_FfLimitUseMin				422 // not used - Seen in Lasting Bravery[AA] likely a focus limit
-//#define SE_FfLimitUseType				423 // not used	- Seen in Lasting Bravery[AA] likely a focus limit
+#define SE_FfLimitUseMin				422 // implemented - limit a focus to require a min amount of numhits value (used with above)
+//#define SE_FfLimitUseType				423 // not used	- limit a focus to require a certain numhits type (Field in spells table 175)
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
 #define SE_Display						425 // *not implemented - Illusion: Flying Dragon(21626)
 #define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
@@ -579,28 +579,28 @@ typedef enum {
 //#define SE_PostEffect					430 // *not implemented - Fear of the Dark(27641) - Alters vision
 //#define SE_PostEffectData				431 // *not implemented - Fear of the Dark(27641) - Alters vision
 //#define SE_ExpandMaxActiveTrophyBen	432 // not used
-//#define SE_CriticalDotDecay			433 // not used  (12266 | Placeholder - Test - New Dot Only)
-#define SE_CriticalHealChance2			434 // implemented - increase critical heal chance
-#define SE_CriticalHealOverTime2		435 // implemented - increase critical heal over time chance
+#define SE_CriticalDotDecay				433 // implemented - increase critical dot chance, effect decays based on level of spell it effects. (12266)
+#define SE_CriticalHealDecay			434 // implemented - increase critical heal chance, effect decays based on level of spell it effects.
+#define SE_CriticalRegenDecay			435 // implemented - increase critical heal over time chance, effect decays based on level of spell it effects.
 //#define SE_BeneficialCountDownHold	436 // not used ( 23491 | ABTest Buff Hold)
-#define SE_Anchor						437 // *not implemented - Teleport Guild Hall Anchor(33099)
-#define SE_Anchor2						438 // *not implemented - Translocate Primary Anchor (27750)
+#define SE_TeleporttoAnchor				437 // *not implemented - Teleport Guild Hall Anchor(33099)
+#define SE_TranslocatetoAnchor			438 // *not implemented - Translocate Primary Anchor (27750)
 #define SE_IncreaseAssassinationLvl		439 // *not implemented[AA] - increases the maximum level of humanoid that can be affected by assassination
 #define SE_FinishingBlowLvl				440 // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
 #define SE_CancleIfMoved				441 // *not implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
 #define SE_TriggerOnValueAmount			442 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
 #define SE_TriggerIfMovement			443 // *not implemented - Trigger a spell if you move (37846 | Chopping Block)
-#define SE_AggroLock					444 // *not implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% up to level Z
-#define SE_AdditionalMercenary			445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
+#define SE_ImprovedTaunt				444 // *not implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% up to level Z
+#define SE_AddMercSlot					445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
 //#define SE_AStacker					446 // *not implementet - bufff stacking blocker ? (26219 | Qirik's Watch)
 //#define SE_BStacker					447 // *not implemented 
 //#define SE_CStacker					448 // *not implemented
 //#define SE_DStacker					449 // *not implemented 
 //#define SE_DotGuard					450 // *not implemented 
-#define SE_MitigateMeleeDamageSP		451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
-//#define SE_SpellThresholdGuard		452 // *not implemented
-#define SE_SpellOnAmtDmgTaken			453 // implemented  Trigger effect on X amount of damage taken
-//#define SE_DoomSpellThreshold			454 // not used
+#define SE_MeleeThresholdGuard			451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
+#define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
+#define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken
+#define SE_TriggerSpellThreshold		454 // implemented  Trigger effect on X amount of spell damage taken
 //#define SE_AddHatePct					455 // not used
 //#define SE_AddHateOverTimePct			456 // not used
 //#define SE_ResourceTap				457 // not used
@@ -694,7 +694,7 @@ struct SPDat_Spell_Struct
 /* 169 */
 /* 173 */	int HateAdded;
 /* 174 */	int EndurUpkeep;
-/* 175 */
+/* 175 */	//numhitstype; // defines which type of behavior will tick down the numhit counter.
 /* 176 */	int numhits;
 /* 177 */	int pvpresistbase;
 /* 178 */	int pvpresistcalc;

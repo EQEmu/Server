@@ -303,7 +303,7 @@ bool Client::Process() {
 								if(CheckLosFN(GetTarget())){
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
-										if (CheckArcheryDoubleAttack())
+										if (CheckDoubleRangedAttack())
 											RangedAttack(GetTarget(), true);
 								}
 								else

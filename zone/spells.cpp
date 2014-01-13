@@ -193,6 +193,17 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		return(false);
 	}
 
+	if(IsClient()){
+		int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);
+
+		if (MakeRandomInt(0,99) < chance){
+			Message_StringID(13, SILENCED_STRING);
+			if(IsClient())
+				CastToClient()->SendSpellBarEnable(spell_id);
+			return(false);
+		}
+	}
+
 	if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()){
 		Message_StringID(13, SPELL_WOULDNT_HOLD);
 		if(IsClient())
