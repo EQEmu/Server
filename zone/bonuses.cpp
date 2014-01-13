@@ -851,8 +851,8 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_ArcheryDamageModifier:
 				newbon->ArcheryDamageModifier += base1;
 				break;
-			case SE_ArcheryDoubleAttack:
-				newbon->ArcheryDoubleAttack += base1;
+			case SE_DoubleRangedAttack:
+				newbon->DoubleRangedAttack += base1;
 				break;
 			case SE_DamageShield:
 				newbon->DamageShield += base1;
@@ -1982,14 +1982,24 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->DotCritDmgIncrease += effect_value;
 				break;
 
-			case SE_CriticalHealChance2:
 			case SE_CriticalHealChance:
 				newbon->CriticalHealChance += effect_value;
 				break;
 
-			case SE_CriticalHealOverTime2:
 			case SE_CriticalHealOverTime:
 				newbon->CriticalHealOverTime += effect_value;
+				break;
+
+			case SE_CriticalHealDecay:
+				newbon->CriticalHealDecay = true;
+				break;
+
+			case SE_CriticalRegenDecay:
+				newbon->CriticalRegenDecay = true;
+				break;
+
+			case SE_CriticalDotDecay:
+				newbon->CriticalDotDecay = true;
 				break;
 
 			case SE_MitigateDamageShield:
@@ -2173,12 +2183,22 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			}
 
 			
-			case SE_MitigateMeleeDamageSP:
+			case SE_MeleeThresholdGuard:
 			{
-				if (newbon->MitigateMeleeRuneSP[0] < effect_value){
-					newbon->MitigateMeleeRuneSP[0] = effect_value;
-					newbon->MitigateMeleeRuneSP[1] = buffslot;
-					newbon->MitigateMeleeRuneSP[2] = spells[spell_id].base2[i];
+				if (newbon->MeleeThresholdGuard[0] < effect_value){
+					newbon->MeleeThresholdGuard[0] = effect_value;
+					newbon->MeleeThresholdGuard[1] = buffslot;
+					newbon->MeleeThresholdGuard[2] = spells[spell_id].base2[i];
+				}
+				break;
+			}
+
+			case SE_SpellThresholdGuard:
+			{
+				if (newbon->SpellThresholdGuard[0] < effect_value){
+					newbon->SpellThresholdGuard[0] = effect_value;
+					newbon->SpellThresholdGuard[1] = buffslot;
+					newbon->SpellThresholdGuard[2] = spells[spell_id].base2[i];
 				}
 				break;
 			}
@@ -2201,12 +2221,22 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
-			case SE_SpellOnAmtDmgTaken:
+			case SE_TriggerMeleeThreshold:
 			{
-				if (newbon->SpellOnAmtDmgTaken[2] < spells[spell_id].base2[i]){
-					newbon->SpellOnAmtDmgTaken[0] = effect_value;
-					newbon->SpellOnAmtDmgTaken[1] = buffslot;
-					newbon->SpellOnAmtDmgTaken[2] = spells[spell_id].base2[i];
+				if (newbon->TriggerMeleeThreshold[2] < spells[spell_id].base2[i]){
+					newbon->TriggerMeleeThreshold[0] = effect_value;
+					newbon->TriggerMeleeThreshold[1] = buffslot;
+					newbon->TriggerMeleeThreshold[2] = spells[spell_id].base2[i];
+				}
+				break;
+			}
+
+			case SE_TriggerSpellThreshold:
+			{
+				if (newbon->TriggerSpellThreshold[2] < spells[spell_id].base2[i]){
+					newbon->TriggerSpellThreshold[0] = effect_value;
+					newbon->TriggerSpellThreshold[1] = buffslot;
+					newbon->TriggerSpellThreshold[2] = spells[spell_id].base2[i];
 				}
 				break;
 			}
@@ -2285,8 +2315,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->ArcheryDamageModifier += effect_value;
 				break;
 
-			case SE_ArcheryDoubleAttack:
-				newbon->ArcheryDoubleAttack += effect_value;
+			case SE_DoubleRangedAttack:
+				newbon->DoubleRangedAttack += effect_value;
 				break;
 
 			case SE_SecondaryDmgInc:
@@ -2732,14 +2762,18 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusImprovedDamage2;
 		case SE_Empathy:
 			return focusAdditionalDamage;
-		case SE_ReduceHeal:
-			return focusReduceHeal;
+		case SE_FcHealAmtIncoming:
+			return focusFcHealAmtIncoming;
 		case SE_HealRate2:
 			return focusHealRate;
 		case SE_IncreaseSpellPower:
 			return focusSpellEffectiveness;
 		case SE_IncreaseNumHits:
 			return focusIncreaseNumHits;
+		case SE_FcLimitUse:
+			return focusFcLimitUse;
+		case SE_FcMute:
+			return focusFcMute;
 		case SE_CriticalHealRate:
 			return focusCriticalHealRate;
 		case SE_AdditionalHeal2:
@@ -3318,14 +3352,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.DotCritDmgIncrease = effect_value;
 					break;
 
-				case SE_CriticalHealChance2:
 				case SE_CriticalHealChance:
 					spellbonuses.CriticalHealChance = effect_value;
 					aabonuses.CriticalHealChance = effect_value;
 					itembonuses.CriticalHealChance = effect_value;
 					break;
 
-				case SE_CriticalHealOverTime2:
 				case SE_CriticalHealOverTime:
 					spellbonuses.CriticalHealOverTime = effect_value;
 					aabonuses.CriticalHealOverTime = effect_value;
@@ -3458,10 +3490,16 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.MitigateMeleeRune[1] = -1;
 					break;
 
-				case SE_MitigateMeleeDamageSP:
-					spellbonuses.MitigateMeleeRuneSP[0] = effect_value;
-					spellbonuses.MitigateMeleeRuneSP[1] = -1;
-					spellbonuses.MitigateMeleeRuneSP[1] = effect_value;
+				case SE_MeleeThresholdGuard:
+					spellbonuses.MeleeThresholdGuard[0] = effect_value;
+					spellbonuses.MeleeThresholdGuard[1] = -1;
+					spellbonuses.MeleeThresholdGuard[1] = effect_value;
+					break;
+
+				case SE_SpellThresholdGuard:
+					spellbonuses.SpellThresholdGuard[0] = effect_value;
+					spellbonuses.SpellThresholdGuard[1] = -1;
+					spellbonuses.SpellThresholdGuard[1] = effect_value;
 					break;
 
 				case SE_MitigateSpellDamage:
@@ -3698,10 +3736,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.SlayUndead[1] = effect_value;
 					break;
 			
-				case SE_ArcheryDoubleAttack:
-					spellbonuses.ArcheryDoubleAttack = effect_value;
-					aabonuses.ArcheryDoubleAttack = effect_value;
-					itembonuses.ArcheryDoubleAttack = effect_value;
+				case SE_DoubleRangedAttack:
+					spellbonuses.DoubleRangedAttack = effect_value;
+					aabonuses.DoubleRangedAttack = effect_value;
+					itembonuses.DoubleRangedAttack = effect_value;
 					break;
 
 				case SE_ShieldEquipHateMod:
@@ -3718,6 +3756,19 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.ShieldEquipDmgMod[0] = effect_value;
 					itembonuses.ShieldEquipDmgMod[1] = effect_value;
 					break; 
+
+				case SE_TriggerMeleeThreshold:
+					spellbonuses.TriggerMeleeThreshold[0] = effect_value;
+					spellbonuses.TriggerMeleeThreshold[1] = effect_value;
+					spellbonuses.TriggerMeleeThreshold[2] = effect_value;
+					break;
+
+				case SE_TriggerSpellThreshold:
+					spellbonuses.TriggerSpellThreshold[0] = effect_value;
+					spellbonuses.TriggerSpellThreshold[1] = effect_value;
+					spellbonuses.TriggerSpellThreshold[2] = effect_value;
+					break;
+			
 			}
 		}
 	}
