@@ -131,7 +131,7 @@ public:
 		hv_clear(hv);
 
 		// Iterate through key-value pairs, storing them in hash
-		for (it = vals.begin(); it != vals.end(); it++)
+		for (it = vals.begin(); it != vals.end(); ++it)
 		{
 			int keylen = static_cast<int>(it->first.length());
 

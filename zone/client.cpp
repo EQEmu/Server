@@ -4748,7 +4748,7 @@ void Client::ShowSkillsWindow()
 		Skills[SkillName[i]] = (SkillUseTypes)i;
 
 	// print out all available skills
-	for(it = Skills.begin(); it != Skills.end(); it++) {
+	for(it = Skills.begin(); it != Skills.end(); ++it) {
 		if(GetSkill(it->second) > 0 || MaxSkill(it->second) > 0) {
 			WindowText += it->first;
 			// line up the values
@@ -5142,7 +5142,7 @@ void Client::SendRewards()
 				{
 					break;
 				}
-				iter++;
+				++iter;
 			}
 
 			if(iter != zone->VeteranRewards.end())
@@ -5232,7 +5232,7 @@ bool Client::TryReward(uint32 claim_id)
 		{
 			break;
 		}
-		iter++;
+		++iter;
 	}
 
 	if(iter == zone->VeteranRewards.end())
@@ -6606,7 +6606,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 
 	for(std::map <uint32, int32>::iterator iter = item_faction_bonuses.begin();
 		iter != item_faction_bonuses.end();
-		iter++)
+		++iter)
 	{
 		memset(&faction_buf, 0, sizeof(faction_buf));
 
@@ -6728,7 +6728,7 @@ void Client::SendAltCurrencies() {
 				altc->entries[i].stack_size = 1000;
 			}
 			i++;
-			iter++;
+			++iter;
 		}
 
 		FastQueuePacket(&outapp);
@@ -6776,7 +6776,7 @@ void Client::SendAlternateCurrencyValues()
 	std::list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
 	while(iter != zone->AlternateCurrencies.end()) {
 		SendAlternateCurrencyValue((*iter).id, false);
-		iter++;
+		++iter;
 	}
 }
 
@@ -7215,7 +7215,7 @@ void Client::SendMercPersonalInfo()
 						mdus->MercData[i].Stances[stanceindex].StanceIndex = stanceindex;
 						mdus->MercData[i].Stances[stanceindex].Stance = (iter->StanceID);
 						stanceindex++;
-						iter++;
+						++iter;
 					}
 				}
 
@@ -7281,7 +7281,7 @@ void Client::SendMercPersonalInfo()
 						mml->Mercs[i].Stances[stanceindex].StanceIndex = stanceindex;
 						mml->Mercs[i].Stances[stanceindex].Stance = (iter->StanceID);
 						stanceindex++;
-						iter++;
+						++iter;
 					}
 				}
 				FastQueuePacket(&outapp);
@@ -7898,7 +7898,7 @@ bool Client::RemoveRespawnOption(std::string option_name)
 		opt = &(*itr);
 		if (opt->name.compare(option_name) == 0)
 		{
-			respawn_options.erase(itr); 
+			itr = respawn_options.erase(itr);
 			had = true;
 			//could be more with the same name, so keep going...
 		}

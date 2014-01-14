@@ -39,7 +39,7 @@ void TimeoutManager::CheckTimeouts() {
 	std::vector<Timeoutable *>::iterator cur,end;
 	cur = members.begin();
 	end = members.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		Timeoutable *it = *cur;
 		if(it->next_check.Check()) {
 #ifdef TIMEOUT_DEBUG
@@ -69,7 +69,7 @@ void TimeoutManager::DeleteMember(Timeoutable *who) {
 	std::vector<Timeoutable *>::iterator cur,end;
 	cur = members.begin();
 	end = members.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(*cur == who) {
 			members.erase(cur);
 			return;

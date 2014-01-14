@@ -101,7 +101,7 @@ ItemInstQueue::~ItemInstQueue() {
 	iter_queue cur,end;
 	cur = m_list.begin();
 	end = m_list.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ItemInst *tmp = * cur;
 		safe_delete(tmp);
 	}
@@ -113,7 +113,7 @@ Inventory::~Inventory() {
 
 	cur = m_worn.begin();
 	end = m_worn.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ItemInst *tmp = cur->second;
 		safe_delete(tmp);
 	}
@@ -121,7 +121,7 @@ Inventory::~Inventory() {
 
 	cur = m_inv.begin();
 	end = m_inv.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ItemInst *tmp = cur->second;
 		safe_delete(tmp);
 	}
@@ -129,7 +129,7 @@ Inventory::~Inventory() {
 
 	cur = m_bank.begin();
 	end = m_bank.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ItemInst *tmp = cur->second;
 		safe_delete(tmp);
 	}
@@ -137,7 +137,7 @@ Inventory::~Inventory() {
 
 	cur = m_shbank.begin();
 	end = m_shbank.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ItemInst *tmp = cur->second;
 		safe_delete(tmp);
 	}
@@ -145,7 +145,7 @@ Inventory::~Inventory() {
 
 	cur = m_trade.begin();
 	end = m_trade.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ItemInst *tmp = cur->second;
 		safe_delete(tmp);
 	}
@@ -166,7 +166,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 	m_merchantcount=copy.m_merchantcount;
 	// Copy container contents
 	iter_contents it;
-	for (it=copy.m_contents.begin(); it!=copy.m_contents.end(); it++) {
+	for (it=copy.m_contents.begin(); it!=copy.m_contents.end(); ++it) {
 		ItemInst* inst_old = it->second;
 		ItemInst* inst_new = nullptr;
 
@@ -179,7 +179,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 		}
 	}
 	std::map<std::string, std::string>::const_iterator iter;
-	for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); iter++) {
+	for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); ++iter) {
 		m_custom_data[iter->first] = iter->second;
 	}
 	m_SerialNumber = copy.m_SerialNumber;
@@ -428,7 +428,7 @@ void ItemInst::Clear()
 	iter_contents cur, end;
 	cur = m_contents.begin();
 	end = m_contents.end();
-	for (; cur != end; cur++) {
+	for (; cur != end; ++cur) {
 		ItemInst* inst = cur->second;
 		safe_delete(inst);
 	}
@@ -446,7 +446,7 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 		ItemInst* inst = cur->second;
 		const Item_Struct* item = inst->GetItem();
 		del = cur;
-		cur++;
+		++cur;
 
 		switch(is_nodrop) {
 		case byFlagSet:
@@ -611,7 +611,7 @@ std::string ItemInst::GetCustomDataString() const {
 		ret_val += iter->first;
 		ret_val += "^";
 		ret_val += iter->second;
-		iter++;
+		++iter;
 
 		if(ret_val.length() > 0) {
 			ret_val += "^";
@@ -1231,11 +1231,11 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
 	iter_contents itb;
 
-	if (!inst || !inst->IsType(ItemClassContainer)) 
+	if (!inst || !inst->IsType(ItemClassContainer))
 		return;
 
 	// Go through bag, if bag
-	for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
+	for (itb=inst->_begin(); itb!=inst->_end(); ++itb) {
 		ItemInst* baginst = itb->second;
 		if(!baginst || !baginst->GetItem())
 			continue;
@@ -1308,7 +1308,7 @@ void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection)
 	iter_contents itb;
 	ItemInst* inst = nullptr;
 	
-	for (it=collection.begin(); it!=collection.end(); it++) {
+	for (it=collection.begin(); it!=collection.end(); ++it) {
 		inst = it->second;
 		if(!inst || !inst->GetItem())
 			continue;
@@ -1430,7 +1430,7 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 	uint8 quantity_found = 0;
 
 	// Check item: After failed checks, check bag contents (if bag)
-	for (it=bucket.begin(); it!=bucket.end(); it++) {
+	for (it=bucket.begin(); it!=bucket.end(); ++it) {
 		inst = it->second;
 		if (inst) {
 			if (inst->GetID() == item_id) {
@@ -1447,7 +1447,7 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
 
-			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
+			for (itb=inst->_begin(); itb!=inst->_end(); ++itb) {
 				ItemInst* baginst = itb->second;
 				if (baginst->GetID() == item_id) {
 					quantity_found += (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges();
@@ -1474,7 +1474,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 	uint8 quantity_found = 0;
 
 	// Read-only iteration of queue
-	for (it=iqueue.begin(); it!=iqueue.end(); it++) {
+	for (it=iqueue.begin(); it!=iqueue.end(); ++it) {
 		ItemInst* inst = *it;
 		if (inst)
 		{
@@ -1491,7 +1491,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
 
-			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
+			for (itb=inst->_begin(); itb!=inst->_end(); ++itb) {
 				ItemInst* baginst = itb->second;
 				if (baginst->GetID() == item_id) {
 					quantity_found += (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges();
@@ -1520,7 +1520,7 @@ int16 Inventory::_HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, ui
 	uint8 quantity_found = 0;
 
 	// Check item: After failed checks, check bag contents (if bag)
-	for (it=bucket.begin(); it!=bucket.end(); it++) {
+	for (it=bucket.begin(); it!=bucket.end(); ++it) {
 		inst = it->second;
 		if (inst && inst->IsType(ItemClassCommon) && inst->GetItem()->ItemType == use) {
 			quantity_found += (inst->GetCharges()<=0) ? 1 : inst->GetCharges();
@@ -1554,7 +1554,7 @@ int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 	uint8 quantity_found = 0;
 
 	// Read-only iteration of queue
-	for (it=iqueue.begin(); it!=iqueue.end(); it++) {
+	for (it=iqueue.begin(); it!=iqueue.end(); ++it) {
 		ItemInst* inst = *it;
 		if (inst && inst->IsType(ItemClassCommon) && inst->GetItem()->ItemType == use) {
 			quantity_found += (inst->GetCharges()<=0) ? 1 : inst->GetCharges();
@@ -1565,7 +1565,7 @@ int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
 
-			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
+			for (itb=inst->_begin(); itb!=inst->_end(); ++itb) {
 				ItemInst* baginst = itb->second;
 				if (baginst && baginst->IsType(ItemClassCommon) && baginst->GetItem()->ItemType == use) {
 					quantity_found += (baginst->GetCharges()<=0) ? 1 : baginst->GetCharges();
@@ -1587,7 +1587,7 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 	ItemInst* inst = nullptr;
 
 	// Check item: After failed checks, check bag contents (if bag)
-	for (it=bucket.begin(); it!=bucket.end(); it++) {
+	for (it=bucket.begin(); it!=bucket.end(); ++it) {
 		inst = it->second;
 		if (inst) {
 			if (inst->GetItem()->LoreGroup == loregroup)
@@ -1603,7 +1603,7 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
 
-			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
+			for (itb=inst->_begin(); itb!=inst->_end(); ++itb) {
 				ItemInst* baginst = itb->second;
 				if (baginst && baginst->IsType(ItemClassCommon)&& baginst->GetItem()->LoreGroup == loregroup)
 					return Inventory::CalcSlotId(it->first, itb->first);
@@ -1629,7 +1629,7 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 	iter_contents itb;
 
 	// Read-only iteration of queue
-	for (it=iqueue.begin(); it!=iqueue.end(); it++) {
+	for (it=iqueue.begin(); it!=iqueue.end(); ++it) {
 		ItemInst* inst = *it;
 		if (inst)
 		{
@@ -1646,7 +1646,7 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 		// Go through bag, if bag
 		if (inst && inst->IsType(ItemClassContainer)) {
 
-			for (itb=inst->_begin(); itb!=inst->_end(); itb++) {
+			for (itb=inst->_begin(); itb!=inst->_end(); ++itb) {
 				ItemInst* baginst = itb->second;
 				if (baginst && baginst->IsType(ItemClassCommon)&& baginst->GetItem()->LoreGroup == loregroup)
 					return Inventory::CalcSlotId(SLOT_CURSOR, itb->first);

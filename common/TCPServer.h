@@ -65,7 +65,7 @@ public:
 		vitr cur, end;
 		cur = m_list.begin();
 		end = m_list.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			delete *cur;
 		}
 	}
@@ -98,7 +98,7 @@ protected:
 			} else {
 				if (!data->Process())
 					data->Disconnect();
-				cur++;
+				++cur;
 			}
 		}
 	}

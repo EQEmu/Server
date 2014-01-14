@@ -48,7 +48,7 @@ void AdventureManager::Process()
 				delete adv;
 				continue;
 			}
-			iter++;
+			++iter;
 		}
 	}
 
@@ -118,7 +118,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 				}
 			}
 		}
-		iter++;
+		++iter;
 	}
 
 	/**
@@ -171,7 +171,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 			ea_iter = eligible_adventures.erase(ea_iter);
 			continue;
 		}
-		ea_iter++;
+		++ea_iter;
 	}
 
 	/**
@@ -281,9 +281,9 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 				ea_iter = eligible_adventures.erase(ea_iter);
 				continue;
 			}
-			ea_iter++;
+			++ea_iter;
 		}
-		ez_iter++;
+		++ez_iter;
 	}
 
 	std::list<AdventureZoneIn>::iterator ezi_iter = excluded_zone_ins.begin();
@@ -297,9 +297,9 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 				ea_iter = eligible_adventures.erase(ea_iter);
 				continue;
 			}
-			ea_iter++;
+			++ea_iter;
 		}
-		ezi_iter++;
+		++ezi_iter;
 	}
 
 	/**
@@ -319,7 +319,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 			ea_iter = eligible_adventures.erase(ea_iter);
 			continue;
 		}
-		ea_iter++;
+		++ea_iter;
 	}
 
 	if(eligible_adventures.size() > 0)
@@ -328,7 +328,7 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		int c_index = MakeRandomInt(0, (eligible_adventures.size()-1));
 		for(int i = 0; i < c_index; ++i)
 		{
-			ea_iter++;
+			++ea_iter;
 		}
 		ServerPacket *pack = new ServerPacket(ServerOP_AdventureRequestAccept, sizeof(ServerAdventureRequestAccept_Struct) + (sar->member_count * 64));
 		ServerAdventureRequestAccept_Struct *sra = (ServerAdventureRequestAccept_Struct*)pack->pBuffer;
@@ -457,7 +457,7 @@ void AdventureManager::GetAdventureData(Adventure *adv)
 	while(iter != player_list.end())
 	{
 		GetAdventureData((*iter).c_str());
-		iter++;
+		++iter;
 	}
 }
 
@@ -537,7 +537,7 @@ bool AdventureManager::IsInExcludedZoneList(std::list<AdventureZones> excluded_z
 		{
 			return true;
 		}
-		iter++;
+		++iter;
 	}
 	return false;
 }
@@ -551,7 +551,7 @@ bool AdventureManager::IsInExcludedZoneInList(std::list<AdventureZoneIn> exclude
 		{
 			return true;
 		}
-		iter++;
+		++iter;
 	}
 	return false;
 }
@@ -587,7 +587,7 @@ Adventure **AdventureManager::GetFinishedAdventures(const char *player, int &cou
 				count++;
 			}
 		}
-		iter++;
+		++iter;
 	}
 	return ret;
 }
@@ -601,7 +601,7 @@ Adventure *AdventureManager::GetActiveAdventure(const char *player)
 		{
 			return (*iter);
 		}
-		iter++;
+		++iter;
 	}
 	return nullptr;
 }
@@ -621,7 +621,7 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int theme, int id)
 		{
 			return (*l_iter);
 		}
-		l_iter++;
+		++l_iter;
 	}
 	return nullptr;
 }
@@ -788,7 +788,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 				return;
 			}
 		}
-		iter++;
+		++iter;
 	}
 
 	ClientListEntry *pc = client_list.FindCharacter(player);
@@ -855,7 +855,7 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 			current = (*iter);
 			break;
 		}
-		iter++;
+		++iter;
 	}
 
 	if(current)
@@ -877,7 +877,7 @@ void AdventureManager::IncrementCount(uint16 instance_id)
 				strcpy(ac->player, (*siter).c_str());
 				zoneserver_list.SendPacket(pc->zone(), pc->instance(), pack);
 			}
-			siter++;
+			++siter;
 		}
 
 		delete pack;
@@ -895,7 +895,7 @@ void AdventureManager::IncrementAssassinationCount(uint16 instance_id)
 			current = (*iter);
 			break;
 		}
-		iter++;
+		++iter;
 	}
 
 	if(current)
@@ -916,7 +916,7 @@ void AdventureManager::GetZoneData(uint16 instance_id)
 			current = (*iter);
 			break;
 		}
-		iter++;
+		++iter;
 	}
 
 	if(current)
@@ -1302,7 +1302,7 @@ void AdventureManager::DoLeaderboardRequestWins(const char* player)
 			al->entries[i].failure = li.losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_wins.end())
@@ -1318,7 +1318,7 @@ void AdventureManager::DoLeaderboardRequestWins(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1369,7 +1369,7 @@ void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 			al->entries[i].failure = li.losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_percentage.end())
@@ -1385,7 +1385,7 @@ void AdventureManager::DoLeaderboardRequestPercentage(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1436,7 +1436,7 @@ void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 			al->entries[i].failure = li.guk_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_wins_guk.end())
@@ -1452,7 +1452,7 @@ void AdventureManager::DoLeaderboardRequestWinsGuk(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1503,7 +1503,7 @@ void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 			al->entries[i].failure = li.guk_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_percentage_guk.end())
@@ -1519,7 +1519,7 @@ void AdventureManager::DoLeaderboardRequestPercentageGuk(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1570,7 +1570,7 @@ void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 			al->entries[i].failure = li.mir_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_wins_mir.end())
@@ -1586,7 +1586,7 @@ void AdventureManager::DoLeaderboardRequestWinsMir(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1637,7 +1637,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 			al->entries[i].failure = li.mir_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_percentage_mir.end())
@@ -1653,7 +1653,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMir(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1704,7 +1704,7 @@ void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 			al->entries[i].failure = li.mmc_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_wins_mmc.end())
@@ -1720,7 +1720,7 @@ void AdventureManager::DoLeaderboardRequestWinsMmc(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1771,7 +1771,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 			al->entries[i].failure = li.mmc_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_percentage_mmc.end())
@@ -1787,7 +1787,7 @@ void AdventureManager::DoLeaderboardRequestPercentageMmc(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1838,7 +1838,7 @@ void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 			al->entries[i].failure = li.ruj_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_wins_ruj.end())
@@ -1854,7 +1854,7 @@ void AdventureManager::DoLeaderboardRequestWinsRuj(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1905,7 +1905,7 @@ void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 			al->entries[i].failure = li.ruj_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_percentage_ruj.end())
@@ -1921,7 +1921,7 @@ void AdventureManager::DoLeaderboardRequestPercentageRuj(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -1972,7 +1972,7 @@ void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 			al->entries[i].failure = li.tak_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_wins_ruj.end())
@@ -1988,7 +1988,7 @@ void AdventureManager::DoLeaderboardRequestWinsTak(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -2039,7 +2039,7 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 			al->entries[i].failure = li.tak_losses;
 			strcpy(al->entries[i].name, li.name.c_str());
 			i++;
-			iter++;
+			++iter;
 		}
 
 		if(place == -1 && iter != leaderboard_info_percentage_tak.end())
@@ -2055,7 +2055,7 @@ void AdventureManager::DoLeaderboardRequestPercentageTak(const char* player)
 					break;
 				}
 				i++;
-				iter++;
+				++iter;
 			}
 		}
 
@@ -2093,7 +2093,7 @@ bool AdventureManager::PopFinishedEvent(const char *name, AdventureFinishEvent &
 			Save();
 			return true;
 		}
-		iter++;
+		++iter;
 	}
 	return false;
 }

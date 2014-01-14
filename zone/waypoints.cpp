@@ -73,7 +73,7 @@ void NPC::DisplayWaypointInfo(Client *c) {
 	std::vector<wplist>::iterator cur, end;
 	cur = Waypoints.begin();
 	end = Waypoints.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		c->Message(0,"Waypoint %d: (%.2f,%.2f,%.2f,%.2f) pause %d",
 				cur->index,
 				cur->x,
@@ -272,12 +272,8 @@ void NPC::CalculateNewWaypoint()
 		std::list<wplist>::iterator iter = closest.begin();
 		if(closest.size() != 0)
 		{
-			int idx = MakeRandomInt(0, closest.size() - 1);
 			iter = closest.begin();
-			for(int i = 0; i < idx; ++i)
-			{
-				iter++;
-			}
+			std::advance(iter, MakeRandomInt(0, closest.size() - 1));
 			cur_wp = (*iter).index;
 		}
 
@@ -335,7 +331,7 @@ void NPC::CalculateNewWaypoint()
 		{
 			if(CheckLosFN((*iter).x, (*iter).y, (*iter).z, GetSize()))
 			{
-				iter++;
+				++iter;
 			}
 			else
 			{
@@ -345,12 +341,8 @@ void NPC::CalculateNewWaypoint()
 
 		if(closest.size() != 0)
 		{
-			int idx = MakeRandomInt(0, closest.size() - 1);
 			iter = closest.begin();
-			for(int i = 0; i < idx; ++i)
-			{
-				iter++;
-			}
+			std::advance(iter, MakeRandomInt(0, closest.size() - 1));
 			cur_wp = (*iter).index;
 		}
 		break;
@@ -406,7 +398,7 @@ void NPC::GetClosestWaypoint(std::list<wplist> &wp_list, int count, float m_x, f
 	for(int i = 0; i < count; ++i)
 	{
 		wp_list.push_back(Waypoints[(*iter).index]);
-		iter++;
+		++iter;
 	}
 }
 

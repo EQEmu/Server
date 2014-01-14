@@ -2236,7 +2236,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 					std::list<MercSpell> buffSpellList = GetMercSpellsBySpellType(this, SpellType_Buff);
 
-					for(std::list<MercSpell>::iterator itr = buffSpellList.begin(); itr != buffSpellList.end(); itr++) {
+					for(std::list<MercSpell>::iterator itr = buffSpellList.begin(); itr != buffSpellList.end(); ++itr) {
 						MercSpell selectedMercSpell = *itr;
 
 						if(!((spells[selectedMercSpell.spellid].targettype == ST_Target || spells[selectedMercSpell.spellid].targettype == ST_Pet ||
@@ -2396,7 +2396,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 					std::list<MercSpell> buffSpellList = GetMercSpellsBySpellType(this, SpellType_InCombatBuff);
 					Mob* tar = this;
 
-					for(std::list<MercSpell>::iterator itr = buffSpellList.begin(); itr != buffSpellList.end(); itr++) {
+					for(std::list<MercSpell>::iterator itr = buffSpellList.begin(); itr != buffSpellList.end(); ++itr) {
 						MercSpell selectedMercSpell = *itr;
 
 						if(!(spells[selectedMercSpell.spellid].targettype == ST_Self)) {
@@ -2541,7 +2541,7 @@ void Merc::CheckHateList() {
 					std::list<NPC*> npc_list;
 					entity_list.GetNPCList(npc_list);
 
-					for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); itr++) {
+					for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 						NPC* npc = *itr;
 						float dist = npc->DistNoRootNoZ(*this);
 						int radius = RuleI(Mercs, AggroRadius);
@@ -2594,7 +2594,7 @@ bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTarget
 	std::list<NPC*> npc_list;
 	entity_list.GetNPCList(npc_list);
 
-	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); itr++) {
+	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 		NPC* npc = *itr;
 
 		if(npc->DistNoRootNoZ(*tar) <= spells[spell_id].aoerange * spells[spell_id].aoerange) {
@@ -3311,7 +3311,7 @@ MercSpell Merc::GetBestMercSpellForVeryFastHeal(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsVeryFastHealSpell(mercSpellListItr->spellid)
 				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -3343,7 +3343,7 @@ MercSpell Merc::GetBestMercSpellForFastHeal(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsFastHealSpell(mercSpellListItr->spellid)
 				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -3375,7 +3375,7 @@ MercSpell Merc::GetBestMercSpellForHealOverTime(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercHoTSpellList = GetMercSpellsForSpellEffect(caster, SE_HealOverTime);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercHoTSpellList.begin(); mercSpellListItr != mercHoTSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercHoTSpellList.begin(); mercSpellListItr != mercHoTSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsHealOverTimeSpell(mercSpellListItr->spellid)) {
 
@@ -3415,7 +3415,7 @@ MercSpell Merc::GetBestMercSpellForPercentageHeal(Merc* caster) {
 	if(caster && caster->AI_HasSpells()) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsCompleteHealSpell(mercSpellListItr->spellid)
 				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -3447,7 +3447,7 @@ MercSpell Merc::GetBestMercSpellForRegularSingleTargetHeal(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsRegularSingleTargetHealSpell(mercSpellListItr->spellid)
 				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -3479,7 +3479,7 @@ MercSpell Merc::GetFirstMercSpellForSingleTargetHeal(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if((IsRegularSingleTargetHealSpell(mercSpellListItr->spellid)
 				|| IsFastHealSpell(mercSpellListItr->spellid))
@@ -3512,7 +3512,7 @@ MercSpell Merc::GetBestMercSpellForGroupHeal(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsRegularGroupHealSpell(mercSpellListItr->spellid)
 				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -3544,7 +3544,7 @@ MercSpell Merc::GetBestMercSpellForGroupHealOverTime(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercHoTSpellList = GetMercSpellsForSpellEffect(caster, SE_HealOverTime);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercHoTSpellList.begin(); mercSpellListItr != mercHoTSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercHoTSpellList.begin(); mercSpellListItr != mercHoTSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsGroupHealOverTimeSpell(mercSpellListItr->spellid)) {
 
@@ -3584,7 +3584,7 @@ MercSpell Merc::GetBestMercSpellForGroupCompleteHeal(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CompleteHeal);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsGroupCompleteHealSpell(mercSpellListItr->spellid)
 				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -3616,7 +3616,7 @@ MercSpell Merc::GetBestMercSpellForAETaunt(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_Taunt);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if((spells[mercSpellListItr->spellid].targettype == ST_AECaster
 				|| spells[mercSpellListItr->spellid].targettype == ST_AETarget
@@ -3650,7 +3650,7 @@ MercSpell Merc::GetBestMercSpellForTaunt(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_Taunt);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if((spells[mercSpellListItr->spellid].targettype == ST_Target)
 				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -3682,7 +3682,7 @@ MercSpell Merc::GetBestMercSpellForHate(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_Calm);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 				result.spellid = mercSpellListItr->spellid;
@@ -3738,7 +3738,7 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 
 		//Check for group cure first
 		if(countNeedsCured > 2) {
-			for(std::list<MercSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
+			for(std::list<MercSpell>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
 				MercSpell selectedMercSpell = *itr;
 
 				if(IsGroupSpell(itr->spellid) && CheckSpellRecastTimers(caster, itr->spellid)) {
@@ -3778,7 +3778,7 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 
 		//no group cure for target- try to find single target spell
 		if(!spellSelected) {
-			for(std::list<MercSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
+			for(std::list<MercSpell>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
 				MercSpell selectedMercSpell = *itr;
 
 				if(CheckSpellRecastTimers(caster, itr->spellid)) {
@@ -3834,7 +3834,7 @@ MercSpell Merc::GetBestMercSpellForStun(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_Stun);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 				result.spellid = mercSpellListItr->spellid;
@@ -3929,7 +3929,7 @@ MercSpell Merc::GetBestMercSpellForTargetedAENuke(Merc* caster, Mob* tar) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsAENukeSpell(mercSpellListItr->spellid) && !IsAERainNukeSpell(mercSpellListItr->spellid)
 				&& !IsPBAENukeSpell(mercSpellListItr->spellid) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -3980,7 +3980,7 @@ MercSpell Merc::GetBestMercSpellForPBAENuke(Merc* caster, Mob* tar) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsPBAENukeSpell(mercSpellListItr->spellid) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 				uint8 numTargets = 0;
@@ -4030,7 +4030,7 @@ MercSpell Merc::GetBestMercSpellForAERainNuke(Merc* caster, Mob* tar) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsAERainNukeSpell(mercSpellListItr->spellid) && MakeRandomInt(1, 100) <= castChance && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 				uint8 numTargets = 0;
@@ -4068,7 +4068,7 @@ MercSpell Merc::GetBestMercSpellForNuke(Merc* caster) {
 	if(caster) {
 		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsPureNukeSpell(mercSpellListItr->spellid) && !IsAENukeSpell(mercSpellListItr->spellid)
 					&& MakeRandomInt(1, 100) <= castChance && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -4111,7 +4111,7 @@ MercSpell Merc::GetBestMercSpellForNukeByTargetResists(Merc* caster, Mob* target
 
 		std::list<MercSpell> mercSpellList = GetMercSpellsBySpellType(caster, SpellType_Nuke);
 
-		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); mercSpellListItr++) {
+		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 
 			if(IsPureNukeSpell(mercSpellListItr->spellid) && !IsAENukeSpell(mercSpellListItr->spellid) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
@@ -4350,7 +4350,7 @@ bool Merc::CheckAETaunt() {
 		std::list<NPC*> npc_list;
 		entity_list.GetNPCList(npc_list);
 
-		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); itr++) {
+		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
 			float dist = npc->DistNoRootNoZ(*this);
 			int range = GetActSpellRange(mercSpell.spellid, spells[mercSpell.spellid].range);
@@ -4436,7 +4436,7 @@ bool Merc::CheckConfidence() {
 	std::list<NPC*> npc_list;
 	entity_list.GetNPCList(npc_list);
 
-	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); itr++) {
+	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 		NPC* mob = *itr;
 		float ConRating = 1.0;
 		int CurrentCon = 0;
@@ -4920,7 +4920,7 @@ bool Merc::LoadMercSpells() {
 	int16 attack_proc_spell = -1;
 	int8 proc_chance = 0;
 
-	for (std::list<MercSpellEntry>::iterator mercSpellEntryItr = spellList.begin(); mercSpellEntryItr != spellList.end(); mercSpellEntryItr++) {
+	for (std::list<MercSpellEntry>::iterator mercSpellEntryItr = spellList.begin(); mercSpellEntryItr != spellList.end(); ++mercSpellEntryItr) {
 		if (proficiency_id == mercSpellEntryItr->proficiencyid && GetLevel() >= mercSpellEntryItr->minlevel && GetLevel() <= mercSpellEntryItr->maxlevel && mercSpellEntryItr->spellid > 0) {
 			MercSpell mercSpell;
 
@@ -5932,7 +5932,7 @@ int NPC::GetNumMercTypes(uint32 clientVersion)
 	int count = 0;
 	std::list<MercType> mercTypeList = GetMercTypesList();
 
-	for(std::list<MercType>::iterator mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); mercTypeListItr++) {
+	for(std::list<MercType>::iterator mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); ++mercTypeListItr) {
 		if(mercTypeListItr->ClientVersion <= clientVersion)
 			count++;
 	}
@@ -5945,7 +5945,7 @@ int NPC::GetNumMercs(uint32 clientVersion)
 	int count = 0;
 	std::list<MercData> mercDataList = GetMercsList();
 
-	for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); mercListItr++) {
+	for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); ++mercListItr) {
 		if(mercListItr->ClientVersion <= clientVersion)
 			count++;
 	}
@@ -5957,7 +5957,7 @@ std::list<MercType> NPC::GetMercTypesList(uint32 clientVersion) {
 	std::list<MercType> result;
 
 	if(GetNumMercTypes() > 0) {
-		for(std::list<MercType>::iterator mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); mercTypeListItr++) {
+		for(std::list<MercType>::iterator mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); ++mercTypeListItr) {
 			if(mercTypeListItr->ClientVersion <= clientVersion) {
 				MercType mercType;
 				mercType.Type = mercTypeListItr->Type;
@@ -5974,7 +5974,7 @@ std::list<MercData> NPC::GetMercsList(uint32 clientVersion) {
 	std::list<MercData> result;
 
 	if(GetNumMercs() > 0) {
-		for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); mercListItr++) {
+		for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); ++mercListItr) {
 			if(mercListItr->ClientVersion <= clientVersion) {
 				MercTemplate *merc_template = zone->GetMercTemplate(mercListItr->MercTemplateID);
 

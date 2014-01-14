@@ -150,7 +150,7 @@ bool ret=true;
 	char* query = 0;
 	// Delete cursor items
 	if ((ret = RunQuery(query, MakeAnyLenString(&query, "DELETE FROM inventory WHERE charid=%i AND ( (slotid >=8000 and slotid<=8999) or slotid=30 or (slotid>=331 and slotid<=340))", char_id), errbuf))) {
-		for(it=start,i=8000;it!=end;it++,i++) {
+		for(it=start,i=8000;it!=end;++it,i++) {
 			ItemInst *inst=*it;
 			if (!(ret=SaveInventory(char_id,inst,(i==8000) ? 30 : i)))
 				break;

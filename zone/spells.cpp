@@ -2058,7 +2058,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 							SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 					}
 				}
-				iter++;
+				++iter;
 			}
 			break;
 		}
@@ -2940,7 +2940,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		std::vector<int>::iterator cur, end;
 		cur = overwrite_slots.begin();
 		end = overwrite_slots.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			// strip spell
 			BuffFadeBySlot(*cur, false);
 

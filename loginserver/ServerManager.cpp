@@ -87,7 +87,7 @@ void ServerManager::Process()
 		}
 		else
 		{
-			iter++;
+			++iter;
 		}
 	}
 }
@@ -109,7 +109,7 @@ void ServerManager::ProcessDisconnect()
 		}
 		else
 		{
-			iter++;
+			++iter;
 		}
 	}
 }
@@ -123,7 +123,7 @@ WorldServer* ServerManager::GetServerByAddress(unsigned int address)
 		{
 			return (*iter);
 		}
-		iter++;
+		++iter;
 	}
 
 	return nullptr;
@@ -142,7 +142,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 	{
 		if((*iter)->IsAuthorized() == false)
 		{
-			iter++;
+			++iter;
 			continue;
 		}
 
@@ -163,7 +163,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 		}
 
 		server_count++;
-		iter++;
+		++iter;
 	}
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ServerListResponse, packet_size);
@@ -186,7 +186,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 	{
 		if((*iter)->IsAuthorized() == false)
 		{
-			iter++;
+			++iter;
 			continue;
 		}
 
@@ -260,7 +260,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 		*(uint32*)data_ptr = (*iter)->GetPlayersOnline();
 		data_ptr += 4;
 
-		iter++;
+		++iter;
 	}
 
 	return outapp;
@@ -287,7 +287,7 @@ void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int 
 			}
 			delete outapp;
 		}
-		iter++;
+		++iter;
 	}
 
 	if(!found && server.options.IsTraceOn())
@@ -303,7 +303,7 @@ bool ServerManager::ServerExists(string l_name, string s_name, WorldServer *igno
 	{
 		if((*iter) == ignore)
 		{
-			iter++;
+			++iter;
 			continue;
 		}
 
@@ -312,7 +312,7 @@ bool ServerManager::ServerExists(string l_name, string s_name, WorldServer *igno
 			return true;
 		}
 
-		iter++;
+		++iter;
 	}
 	return false;
 }
@@ -324,7 +324,7 @@ void ServerManager::DestroyServerByName(string l_name, string s_name, WorldServe
 	{
 		if((*iter) == ignore)
 		{
-			iter++;
+			++iter;
 		}
 
 		if((*iter)->GetLongName().compare(l_name) == 0 && (*iter)->GetShortName().compare(s_name) == 0)
@@ -339,7 +339,7 @@ void ServerManager::DestroyServerByName(string l_name, string s_name, WorldServe
 			iter = world_servers.erase(iter);
 		}
 
-		iter++;
+		++iter;
 	}
 }
 

@@ -1324,12 +1324,12 @@ void Client::SendPathPacket(std::vector<FindPerson_Point> &points) {
 	cur = points.begin();
 	end = points.end();
 	unsigned int r;
-	for(r = 0; cur != end; cur++, r++) {
+	for(r = 0; cur != end; ++cur, r++) {
 		fpr->path[r] = *cur;
 
 	}
 	//put the last element into the destination field
-	cur--;
+	--cur;
 	fpr->path[r] = *cur;
 	fpr->dest = *cur;
 

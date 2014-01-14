@@ -935,25 +935,25 @@ void Client::AI_Process()
 	{
 		if(AIfeignremember_timer->Check()) {
 			std::set<uint32>::iterator RememberedCharID, tmp;
-			RememberedCharID=feign_memory_list.begin();
+			RememberedCharID = feign_memory_list.begin();
 			bool got_one = false;
-			while(RememberedCharID != feign_memory_list.end()) {
+			while (RememberedCharID != feign_memory_list.end()) {
 				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-				if(remember_client == nullptr) {
+				if (remember_client == nullptr) {
 					//they are gone now...
 					tmp = RememberedCharID;
-					RememberedCharID++;
+					++RememberedCharID;
 					feign_memory_list.erase(tmp);
 				} else if (!remember_client->GetFeigned()) {
 					AddToHateList(remember_client->CastToMob(),1);
 					tmp = RememberedCharID;
-					RememberedCharID++;
+					++RememberedCharID;
 					feign_memory_list.erase(tmp);
 					got_one = true;
 					break;
 				} else {
 					//they are still feigned, carry on...
-					RememberedCharID++;
+					++RememberedCharID;
 				}
 			}
 		}
@@ -1406,25 +1406,25 @@ void Mob::AI_Process() {
 			// Improved Feign Death Memory
 			// check to see if any of our previous feigned targets have gotten up.
 			std::set<uint32>::iterator RememberedCharID, tmp;
-			RememberedCharID=feign_memory_list.begin();
+			RememberedCharID = feign_memory_list.begin();
 			bool got_one = false;
-			while(RememberedCharID != feign_memory_list.end()) {
+			while (RememberedCharID != feign_memory_list.end()) {
 				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-				if(remember_client == nullptr) {
+				if (remember_client == nullptr) {
 					//they are gone now...
 					tmp = RememberedCharID;
-					RememberedCharID++;
+					++RememberedCharID;
 					feign_memory_list.erase(tmp);
 				} else if (!remember_client->GetFeigned()) {
 					AddToHateList(remember_client->CastToMob(),1);
 					tmp = RememberedCharID;
-					RememberedCharID++;
+					++RememberedCharID;
 					feign_memory_list.erase(tmp);
 					got_one = true;
 					break;
 				} else {
 					//they are still feigned, carry on...
-					RememberedCharID++;
+					++RememberedCharID;
 				}
 			}
 		}
@@ -2406,7 +2406,7 @@ void NPC::RemoveSpellFromNPCList(int16 spell_id)
 			iter = AIspells.erase(iter);
 			continue;
 		}
-		iter++;
+		++iter;
 	}
 }
 

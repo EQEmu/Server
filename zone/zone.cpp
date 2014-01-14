@@ -341,7 +341,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 	std::list<MerchantList> merlist = merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
 	uint32 i = 1;
-	for(itr = merlist.begin();itr != merlist.end();itr++){
+	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
 		MerchantList ml = *itr;
 		if(ml.item == item)
 			return 0;
@@ -357,7 +357,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 	TempMerchantList ml;
 	while(freeslot == 0 && !update_charges){
 		freeslot = i;
-		for(tmp_itr = tmp_merlist.begin();tmp_itr != tmp_merlist.end();tmp_itr++){
+		for (tmp_itr = tmp_merlist.begin(); tmp_itr != tmp_merlist.end(); ++tmp_itr) {
 			ml = *tmp_itr;
 			if(ml.item == item){
 				update_charges = true;
@@ -373,7 +373,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 	if(update_charges){
 		tmp_merlist.clear();
 		std::list<TempMerchantList> oldtmp_merlist = tmpmerchanttable[npcid];
-		for(tmp_itr = oldtmp_merlist.begin();tmp_itr != oldtmp_merlist.end();tmp_itr++){
+		for (tmp_itr = oldtmp_merlist.begin(); tmp_itr != oldtmp_merlist.end(); ++tmp_itr) {
 			TempMerchantList ml2 = *tmp_itr;
 			if(ml2.item != item)
 				tmp_merlist.push_back(ml2);
@@ -419,7 +419,7 @@ uint32 Zone::GetTempMerchantQuantity(uint32 NPCID, uint32 Slot) {
 	std::list<TempMerchantList> TmpMerchantList = tmpmerchanttable[NPCID];
 	std::list<TempMerchantList>::const_iterator Iterator;
 
-	for(Iterator = TmpMerchantList.begin(); Iterator != TmpMerchantList.end(); Iterator++)
+	for (Iterator = TmpMerchantList.begin(); Iterator != TmpMerchantList.end(); ++Iterator)
 		if((*Iterator).slot == Slot)
 			return (*Iterator).charges;
 
@@ -527,7 +527,7 @@ void Zone::LoadMerchantData_result(MYSQL_RES* result) {
 				found = true;
 				break;
 			}
-			iter++;
+			++iter;
 		}
 
 		if(found) {
@@ -617,7 +617,7 @@ void Zone::LoadMercTemplates(){
 				tempMercTemplate.Stances[i] = 0;
 			}
 
-			for(std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); mercStanceListItr++) {
+			for (std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr) {
 				if(mercStanceListItr->ClassID == tempMercTemplate.ClassID && mercStanceListItr->ProficiencyID == tempMercTemplate.ProficiencyID) {
 					zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
 					tempMercTemplate.Stances[stanceIndex] = mercStanceListItr->StanceID;

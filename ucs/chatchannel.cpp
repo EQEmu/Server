@@ -314,7 +314,7 @@ void ChatChannel::SendOPList(Client *c) {
 
 	std::list<std::string>::iterator Iterator;
 
-	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); Iterator++)
+	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); ++Iterator)
 		c->GeneralChannelMessage((*Iterator));
 
 }
@@ -580,7 +580,7 @@ void ChatChannel::RemoveInvitee(std::string Invitee) {
 
 	std::list<std::string>::iterator Iterator;
 
-	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); Iterator++) {
+	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); ++Iterator) {
 
 		if((*Iterator) == Invitee) {
 
@@ -597,7 +597,7 @@ bool ChatChannel::IsInvitee(std::string Invitee) {
 
 	std::list<std::string>::iterator Iterator;
 
-	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); Iterator++) {
+	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); ++Iterator) {
 
 		if((*Iterator) == Invitee)
 			return true;
@@ -621,7 +621,7 @@ void ChatChannel::RemoveModerator(std::string Moderator) {
 
 	std::list<std::string>::iterator Iterator;
 
-	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); Iterator++) {
+	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); ++Iterator) {
 
 		if((*Iterator) == Moderator) {
 
@@ -638,7 +638,7 @@ bool ChatChannel::IsModerator(std::string Moderator) {
 
 	std::list<std::string>::iterator Iterator;
 
-	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); Iterator++) {
+	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); ++Iterator) {
 
 		if((*Iterator) == Moderator)
 			return true;
@@ -662,7 +662,7 @@ void ChatChannel::RemoveVoice(std::string inVoiced) {
 
 	std::list<std::string>::iterator Iterator;
 
-	for(Iterator = Voiced.begin(); Iterator != Voiced.end(); Iterator++) {
+	for(Iterator = Voiced.begin(); Iterator != Voiced.end(); ++Iterator) {
 
 		if((*Iterator) == inVoiced) {
 
@@ -679,7 +679,7 @@ bool ChatChannel::HasVoice(std::string inVoiced) {
 
 	std::list<std::string>::iterator Iterator;
 
-	for(Iterator = Voiced.begin(); Iterator != Voiced.end(); Iterator++) {
+	for(Iterator = Voiced.begin(); Iterator != Voiced.end(); ++Iterator) {
 
 		if((*Iterator) == inVoiced)
 			return true;

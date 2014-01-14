@@ -32,28 +32,28 @@ LauncherList::~LauncherList() {
 	std::vector<LauncherLink *>::iterator cur, end;
 	cur = m_pendingLaunchers.begin();
 	end = m_pendingLaunchers.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		delete *cur;
 	}
 
 	std::map<std::string, EQLConfig *>::iterator curc, endc;
 	curc = m_configs.begin();
 	endc = m_configs.end();
-	for(; curc != endc; curc++) {
+	for(; curc != endc; ++curc) {
 		delete curc->second;
 	}
 
 	std::map<std::string, LauncherLink *>::iterator curl, endl;
 	curl = m_launchers.begin();
 	endl = m_launchers.end();
-	for(; curl != endl; curl++) {
+	for(; curl != endl; ++curl) {
 		delete curl->second;
 	}
 }
 
 void LauncherList::Process() {
 	//process pending launchers..
-	std::vector<LauncherLink *>::iterator cur, end;
+	std::vector<LauncherLink *>::iterator cur;
 	cur = m_pendingLaunchers.begin();
 	while(cur != m_pendingLaunchers.end()) {
 		LauncherLink *l = *cur;
@@ -79,12 +79,12 @@ void LauncherList::Process() {
 			//put the launcher in the list.
 			m_launchers[name] = l;
 		} else {
-			cur++;
+			++cur;
 		}
 	}
 
 	//process active launchers.
-	std::map<std::string, LauncherLink *>::iterator curl, tmp;
+	std::map<std::string, LauncherLink *>::iterator curl;
 	curl = m_launchers.begin();
 	while(curl != m_launchers.end()) {
 		LauncherLink *l = curl->second;
@@ -92,12 +92,10 @@ void LauncherList::Process() {
 		if(!l->Process()) {
 			//launcher has died before it identified itself.
 			_log(WORLD__LAUNCH, "Removing launcher %s (%d)", l->GetName(), l->GetID());
-			tmp = curl;
-			curl++;
-			m_launchers.erase(tmp);
+			curl = m_launchers.erase(curl);
 			delete l;
 		} else {
-			curl++;
+			++curl;
 		}
 	}
 }
@@ -124,7 +122,7 @@ LauncherLink *LauncherList::FindByZone(const char *short_name) {
 	std::map<std::string, LauncherLink *>::iterator cur, end;
 	cur = m_launchers.begin();
 	end = m_launchers.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(cur->second->ContainsZone(short_name))
 			return(cur->second);
 	}
@@ -146,7 +144,7 @@ void LauncherList::GetLauncherNameList(std::vector<std::string> &res) {
 	std::map<std::string, EQLConfig *>::iterator cur, end;
 	cur = m_configs.begin();
 	end = m_configs.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		res.push_back(cur->first);
 	}
 }
@@ -159,7 +157,7 @@ void LauncherList::LoadList() {
 	std::vector<std::string>::iterator cur, end;
 	cur = launchers.begin();
 	end = launchers.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		m_configs[*cur] = new EQLConfig(cur->c_str());
 	}
 }

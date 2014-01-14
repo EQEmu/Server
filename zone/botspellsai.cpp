@@ -301,7 +301,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 			if (tar->DontBuffMeBefore() < Timer::GetCurrentTime()) {
 				std::list<BotSpell> buffSpellList = GetBotSpellsBySpellType(this, SpellType_Buff);
 
-				for(std::list<BotSpell>::iterator itr = buffSpellList.begin(); itr != buffSpellList.end(); itr++) {
+				for(std::list<BotSpell>::iterator itr = buffSpellList.begin(); itr != buffSpellList.end(); ++itr) {
 					BotSpell selectedBotSpell = *itr;
 
 					if(selectedBotSpell.SpellId == 0)
@@ -560,7 +560,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 				std::list<BotSpell> inCombatBuffList = GetBotSpellsBySpellType(this, SpellType_InCombatBuff);
 
-				for(std::list<BotSpell>::iterator itr = inCombatBuffList.begin(); itr != inCombatBuffList.end(); itr++) {
+				for(std::list<BotSpell>::iterator itr = inCombatBuffList.begin(); itr != inCombatBuffList.end(); ++itr) {
 					BotSpell selectedBotSpell = *itr;
 
 					if(selectedBotSpell.SpellId == 0)
@@ -588,7 +588,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				if (tar->DontBuffMeBefore() < Timer::GetCurrentTime()) {
 					std::list<BotSpell> inCombatBuffList = GetBotSpellsBySpellType(this, SpellType_InCombatBuff);
 
-					for(std::list<BotSpell>::iterator itr = inCombatBuffList.begin(); itr != inCombatBuffList.end(); itr++) {
+					for(std::list<BotSpell>::iterator itr = inCombatBuffList.begin(); itr != inCombatBuffList.end(); ++itr) {
 						BotSpell selectedBotSpell = *itr;
 
 						if(selectedBotSpell.SpellId == 0)
@@ -727,7 +727,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				const int maxDotSelect = 5;
 				int dotSelectCounter = 0;
 
-				for(std::list<BotSpell>::iterator itr = dotList.begin(); itr != dotList.end(); itr++) {
+				for(std::list<BotSpell>::iterator itr = dotList.begin(); itr != dotList.end(); ++itr) {
 					BotSpell selectedBotSpell = *itr;
 
 					if(selectedBotSpell.SpellId == 0)
@@ -1450,7 +1450,7 @@ BotSpell Bot::GetBestBotSpellForFastHeal(Bot *botCaster) {
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CurrentHP);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsFastHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
@@ -1476,7 +1476,7 @@ BotSpell Bot::GetBestBotSpellForHealOverTime(Bot* botCaster) {
 		std::list<BotSpell> botHoTSpellList = GetBotSpellsForSpellEffect(botCaster, SE_HealOverTime);
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsHealOverTimeSpell(botSpellListItr->SpellId)) {
 
@@ -1542,7 +1542,7 @@ BotSpell Bot::GetBestBotSpellForRegularSingleTargetHeal(Bot* botCaster) {
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CurrentHP);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsRegularSingleTargetHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
@@ -1567,7 +1567,7 @@ BotSpell Bot::GetFirstBotSpellForSingleTargetHeal(Bot* botCaster) {
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CurrentHP);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if((IsRegularSingleTargetHealSpell(botSpellListItr->SpellId) || IsFastHealSpell(botSpellListItr->SpellId)) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
@@ -1592,7 +1592,7 @@ BotSpell Bot::GetBestBotSpellForGroupHeal(Bot* botCaster) {
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CurrentHP);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsRegularGroupHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
@@ -1618,7 +1618,7 @@ BotSpell Bot::GetBestBotSpellForGroupHealOverTime(Bot* botCaster) {
 		std::list<BotSpell> botHoTSpellList = GetBotSpellsForSpellEffect(botCaster, SE_HealOverTime);
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsGroupHealOverTimeSpell(botSpellListItr->SpellId)) {
 
@@ -1654,7 +1654,7 @@ BotSpell Bot::GetBestBotSpellForGroupCompleteHeal(Bot* botCaster) {
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CompleteHeal);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsGroupCompleteHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
@@ -1679,7 +1679,7 @@ BotSpell Bot::GetBestBotSpellForMez(Bot* botCaster) {
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_Mez);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsMezSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
@@ -1704,7 +1704,7 @@ BotSpell Bot::GetBestBotSpellForMagicBasedSlow(Bot* botCaster) {
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_AttackSpeed);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsSlowSpell(botSpellListItr->SpellId) && spells[botSpellListItr->SpellId].resisttype == RESIST_MAGIC && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
@@ -1729,7 +1729,7 @@ BotSpell Bot::GetBestBotSpellForDiseaseBasedSlow(Bot* botCaster) {
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_AttackSpeed);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsSlowSpell(botSpellListItr->SpellId) && spells[botSpellListItr->SpellId].resisttype == RESIST_DISEASE && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
@@ -1752,7 +1752,7 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, BotSpell botSpell) {
 		std::list<NPC*> npc_list;
 		entity_list.GetNPCList(npc_list);
 
-		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); itr++) {
+		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
 
 			if(npc->DistNoRootNoZ(*botCaster) <= botCaster->GetActSpellRange(botSpell.SpellId, spells[botSpell.SpellId].range)) {
@@ -1792,7 +1792,7 @@ BotSpell Bot::GetBestBotMagicianPetSpell(Bot *botCaster) {
 
 		std::string petType = GetBotMagicianPetType(botCaster);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsSummonPetSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				if(!strncmp(spells[botSpellListItr->SpellId].teleport_zone, petType.c_str(), petType.length())) {
@@ -1901,7 +1901,7 @@ BotSpell Bot::GetBestBotSpellForNukeByTargetType(Bot* botCaster, SpellTargetType
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffectAndTargetType(botCaster, SE_CurrentHP, targetType);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsPureNukeSpell(botSpellListItr->SpellId) && IsDamageSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
@@ -1928,7 +1928,7 @@ BotSpell Bot::GetBestBotSpellForStunByTargetType(Bot* botCaster, SpellTargetType
 	{
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffectAndTargetType(botCaster, SE_Stun, targetType);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++)
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr)
 		{
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			if(IsStunSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex))
@@ -1967,7 +1967,7 @@ BotSpell Bot::GetBestBotWizardNukeSpellByTargetResists(Bot* botCaster, Mob* targ
 		firstWizardMagicNukeSpellFound.SpellIndex = 0;
 		firstWizardMagicNukeSpellFound.ManaCost = 0;
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); botSpellListItr++) {
+		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
 			bool spellSelected = false;
 
@@ -2139,7 +2139,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 
 		//Check for group cure first
 		if(countNeedsCured > 2) {
-			for(std::list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
+			for(std::list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
 				BotSpell selectedBotSpell = *itr;
 
 				if(IsGroupSpell(itr->SpellId) && CheckSpellRecastTimers(botCaster, itr->SpellIndex)) {
@@ -2176,7 +2176,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 
 		//no group cure for target- try to find single target spell
 		if(!spellSelected) {
-			for(std::list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); itr++) {
+			for(std::list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
 				BotSpell selectedBotSpell = *itr;
 
 				if(CheckSpellRecastTimers(botCaster, itr->SpellIndex)) {

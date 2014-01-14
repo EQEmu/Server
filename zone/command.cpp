@@ -461,7 +461,7 @@ int command_init(void) {
 	std::map<std::string,uint8> command_settings;
 	std::map<std::string,uint8>::iterator itr;
 	database.GetCommandSettings(command_settings);
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if ((itr=command_settings.find(cur->first))!=command_settings.end())
 		{
 			cur->second->access = itr->second;
@@ -526,7 +526,7 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
 	std::map<std::string, CommandRecord *>::iterator cur,end,del;
 	cur = commandlist.begin();
 	end = commandlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(cur->second->function == function) {
 			int r;
 			for(r = 1; r < CMDALIASES; r++) {
@@ -782,7 +782,7 @@ void command_help(Client *c, const Seperator *sep)
 	cur = commandlist.begin();
 	end = commandlist.end();
 
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(sep->arg[1][0]) {
 			if(cur->first.find(sep->arg[1]) == std::string::npos) {
 				continue;
@@ -2961,7 +2961,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			}
 		}
 		else {
-			for(it=client->GetInv().cursor_begin();it!=client->GetInv().cursor_end();it++,i++) {
+			for(it=client->GetInv().cursor_begin();it!=client->GetInv().cursor_end();++it,i++) {
 				const ItemInst* inst = *it;
 				item = (inst) ? inst->GetItem() : nullptr;
 				if (c->GetClientVersion() >= EQClientSoF)
@@ -8299,7 +8299,7 @@ void command_rules(Client *c, const Seperator *sep) {
 		std::map<int, std::string>::iterator cur, end;
 		cur = sets.begin();
 		end = sets.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			c->Message(0, "(%d) %s", cur->first, cur->second.c_str());
 		}
 	} else if(!strcasecmp(sep->arg[1], "reload")) {
@@ -8398,7 +8398,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			std::vector<const char *>::iterator cur, end;
 			cur = rule_list.begin();
 			end = rule_list.end();
-			for(; cur != end; cur++) {
+			for(; cur != end; ++cur) {
 				c->Message(0, " %s", *cur);
 			}
 		} else if(sep->argnum == 2) {
@@ -8414,7 +8414,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			std::vector<const char *>::iterator cur, end;
 			cur = rule_list.begin();
 			end = rule_list.end();
-			for(; cur != end; cur++) {
+			for(; cur != end; ++cur) {
 				c->Message(0, " %s", *cur);
 			}
 		} else {
@@ -8437,7 +8437,7 @@ void command_rules(Client *c, const Seperator *sep) {
 			std::vector<const char *>::iterator cur, end;
 			cur = rule_list.begin();
 			end = rule_list.end();
-			for(std::string tmp_value; cur != end; cur++) {
+			for(std::string tmp_value; cur != end; ++cur) {
 				if (RuleManager::Instance()->GetRule(*cur, tmp_value))
 					c->Message(0, " %s - %s", *cur, tmp_value.c_str());
 			}

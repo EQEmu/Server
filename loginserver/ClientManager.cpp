@@ -131,7 +131,7 @@ void ClientManager::Process()
 		}
 		else
 		{
-			iter++;
+			++iter;
 		}
 	}
 }
@@ -150,7 +150,7 @@ void ClientManager::ProcessDisconnect()
 		}
 		else
 		{
-			iter++;
+			++iter;
 		}
 	}
 }
@@ -161,7 +161,7 @@ void ClientManager::UpdateServerList()
 	while(iter != clients.end())
 	{
 		(*iter)->SendServerListPacket();
-		iter++;
+		++iter;
 	}
 }
 
@@ -178,7 +178,7 @@ void ClientManager::RemoveExistingClient(unsigned int account_id)
 		}
 		else
 		{
-			iter++;
+			++iter;
 		}
 	}
 }
@@ -195,7 +195,7 @@ Client *ClientManager::GetClient(unsigned int account_id)
 			cur = (*iter);
 			count++;
 		}
-		iter++;
+		++iter;
 	}
 
 	if(count > 1)

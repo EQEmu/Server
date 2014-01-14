@@ -50,7 +50,7 @@ void QuestParserCollection::AddVar(std::string name, std::string val) {
 	std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
 		(*iter)->AddVar(name, val);
-		iter++;
+		++iter;
 	}
 }
 
@@ -58,7 +58,7 @@ void QuestParserCollection::Init() {
 	std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
 		(*iter)->Init();
-		iter++;
+		++iter;
 	}
 }
 
@@ -78,7 +78,7 @@ void QuestParserCollection::ReloadQuests(bool reset_timers) {
 	std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
 		(*iter)->ReloadQuests();
-		iter++;
+		++iter;
 	}
 }
 
@@ -469,7 +469,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//second look for /quests/zone/npcname.ext (precedence)
@@ -503,7 +503,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//third look for /quests/global/npcid.ext (precedence)
@@ -524,7 +524,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//fourth look for /quests/global/npcname.ext (precedence)
@@ -545,7 +545,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//fifth look for /quests/zone/default.ext (precedence)
@@ -566,7 +566,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//last look for /quests/global/default.ext (precedence)
@@ -587,7 +587,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	return nullptr;
@@ -620,8 +620,8 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 			return (*iter);
 		}
 
-		iter++;
-	}	
+		++iter;
+	}
 
 	//second look for /quests/zone/player.ext (precedence)
 	filename = "quests/";
@@ -642,7 +642,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//third look for /quests/global/player.ext (precedence)
@@ -663,7 +663,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	return nullptr;
@@ -691,7 +691,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filena
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	return nullptr;
@@ -719,7 +719,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &fil
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	return nullptr;
@@ -747,7 +747,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//second look for /quests/global/spells/spell_id.ext (precedence)
@@ -769,7 +769,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//third look for /quests/zone/spells/default.ext (precedence)
@@ -790,7 +790,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//last look for /quests/global/spells/default.ext (precedence)
@@ -811,7 +811,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	return nullptr;
@@ -839,7 +839,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 	
 	//second look for /quests/global/items/item_script.ext (precedence)
@@ -861,7 +861,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//third look for /quests/zone/items/default.ext (precedence)
@@ -882,7 +882,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	//last look for /quests/global/items/default.ext (precedence)
@@ -903,7 +903,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 			return (*iter);
 		}
 
-		iter++;
+		++iter;
 	}
 
 	return nullptr;

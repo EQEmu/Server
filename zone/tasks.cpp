@@ -829,7 +829,7 @@ void ClientTaskState::EnableTask(int CharID, int TaskCount, int *TaskList) {
 			// Our list of enabled tasks is sorted, so we can quit if we find a taskid higher than
 			// the one we are looking for.
 			if((*Iterator) > TaskList[i]) break;
-			Iterator++;
+			++Iterator;
 		}
 		if(AddTask) {
 			EnabledTasks.insert(Iterator, TaskList[i]);
@@ -890,7 +890,7 @@ void ClientTaskState::DisableTask(int CharID, int TaskCount, int *TaskList) {
 				break;
 			}
 			if((*Iterator) > TaskList[i]) break;
-			Iterator++;
+			++Iterator;
 		}
 		if(RemoveTask) {
 			EnabledTasks.erase(Iterator);
@@ -947,7 +947,7 @@ bool ClientTaskState::IsTaskEnabled(int TaskID) {
 	while(Iterator != EnabledTasks.end()) {
 		if((*Iterator) == TaskID) return true;
 		if((*Iterator) > TaskID) break;
-		Iterator++;
+		++Iterator;
 	}
 
 	return false;
@@ -1021,7 +1021,7 @@ int TaskManager::FirstTaskInSet(int TaskSetID) {
 	while(Iterator != TaskSets[TaskSetID].end()) {
 		if((*Iterator) > 0)
 			return (*Iterator);
-		Iterator++;
+		++Iterator;
 	}
 
 	return 0;
@@ -1087,7 +1087,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 					(IsTaskRepeatable((*Iterator)) || !state->IsTaskCompleted((*Iterator))))
 					TaskList[TaskListIndex++] = (*Iterator);
 
-				Iterator++;
+				++Iterator;
 			}
 			if(TaskListIndex > 0)
 			{
@@ -1497,7 +1497,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 						ErasedElements++;
 					}
 					else
-						Iterator++;
+						++Iterator;
 				}
 				_log(TASKS__UPDATE, "Erased Element count is %i", ErasedElements);
 				if(ErasedElements) {
@@ -1570,7 +1570,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 						ErasedElements++;
 					}
 					else
-						Iterator++;
+						++Iterator;
 				}
 				_log(TASKS__UPDATE, "Erased Element count is %i", ErasedElements);
 				if(ErasedElements) {

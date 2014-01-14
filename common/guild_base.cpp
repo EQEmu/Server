@@ -1113,7 +1113,7 @@ uint8 *BaseGuildManager::MakeGuildList(const char *head_name, uint32 &length) co
 	std::map<uint32, GuildInfo *>::const_iterator cur, end;
 	cur = m_guilds.begin();
 	end = m_guilds.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		pos = 64 + (64 * cur->first);
 		strn0cpy((char *) buffer + pos, cur->second->name.c_str(), 64);
 	}
@@ -1218,7 +1218,7 @@ uint32 BaseGuildManager::FindGuildByLeader(uint32 leader) const {
 	std::map<uint32, GuildInfo *>::const_iterator cur, end;
 	cur = m_guilds.begin();
 	end = m_guilds.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(cur->second->leader_char_id == leader)
 			return(cur->first);
 	}
@@ -1297,7 +1297,7 @@ void BaseGuildManager::ClearGuilds() {
 	std::map<uint32, GuildInfo *>::iterator cur, end;
 	cur = m_guilds.begin();
 	end = m_guilds.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		delete cur->second;
 	}
 	m_guilds.clear();

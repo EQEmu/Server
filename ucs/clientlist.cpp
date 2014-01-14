@@ -190,11 +190,11 @@ std::vector<std::string> ParseRecipients(std::string RecipientString) {
 
 		(*Iterator) = Secret + (*Iterator);
 
-		Iterator++;
+		++Iterator;
 
 	}
 
-	for(Iterator = RecipientList.begin(); Iterator != RecipientList.end(); Iterator++) {
+	for(Iterator = RecipientList.begin(); Iterator != RecipientList.end(); ++Iterator) {
 
 		if((*Iterator).length() > 0) {
 
@@ -554,7 +554,7 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 
 	std::list<Client*>::iterator Iterator;
 
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
+	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
 		if(((*Iterator) != c) && ((c->GetName() == (*Iterator)->GetName())
 				&& (c->GetConnectionType() == (*Iterator)->GetConnectionType()))) {
@@ -596,7 +596,7 @@ void Clientlist::Process() {
 
 	std::list<Client*>::iterator Iterator;
 
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
+	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
 		(*Iterator)->AccountUpdate();
 		if((*Iterator)->ClientStream->CheckClosed()) {
@@ -893,7 +893,7 @@ void Clientlist::CloseAllConnections() {
 
 	std::list<Client*>::iterator Iterator;
 
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
+	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
 		_log(UCS__TRACE, "Removing client %s", (*Iterator)->GetName().c_str());
 
@@ -953,7 +953,7 @@ Client *Clientlist::FindCharacter(std::string CharacterName) {
 
 	std::list<Client*>::iterator Iterator;
 
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
+	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
 		if((*Iterator)->GetName() == CharacterName)
 			return ((*Iterator));
@@ -2243,7 +2243,7 @@ Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
 	//
 	std::list<Client*>::iterator Iterator;
 
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); Iterator++) {
+	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
 		if(!(*Iterator)->IsMailConnection())
 			continue;
@@ -2352,7 +2352,7 @@ void Client::SendFriends() {
 
 		safe_delete(outapp);
 
-		Iterator++;
+		++Iterator;
 	}
 
 	Iterator = Ignorees.begin();
@@ -2375,7 +2375,7 @@ void Client::SendFriends() {
 
 		safe_delete(outapp);
 
-		Iterator++;
+		++Iterator;
 	}
 }
 

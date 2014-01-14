@@ -64,7 +64,7 @@ uint32 SpawnGroup::GetNPCType() {
 	std::list<SpawnEntry*> possible;
 	cur = list_.begin();
 	end = list_.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		SpawnEntry *se = *cur;
 
 		//check limits on this spawn group and npc type
@@ -83,7 +83,7 @@ uint32 SpawnGroup::GetNPCType() {
 
 	cur = possible.begin();
 	end = possible.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		SpawnEntry *se = *cur;
 		if (roll < se->chance) {
 			npcType = se->NPCType;
@@ -104,7 +104,7 @@ SpawnGroup::~SpawnGroup() {
 	std::list<SpawnEntry*>::iterator cur,end;
 	cur = list_.begin();
 	end = list_.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		SpawnEntry* tmp = *cur;
 		safe_delete(tmp);
 	}
@@ -115,7 +115,7 @@ SpawnGroupList::~SpawnGroupList() {
 	std::map<uint32, SpawnGroup*>::iterator cur,end;
 	cur = groups.begin();
 	end = groups.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		SpawnGroup* tmp = cur->second;
 		safe_delete(tmp);
 	}

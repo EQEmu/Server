@@ -165,7 +165,7 @@ std::string TitleManager::GetSuffix(int TitleID)
 		if((*Iterator).TitleID == TitleID)
 			return (*Iterator).Suffix;
 
-		Iterator++;
+		++Iterator;
 	}
 
 	return "";

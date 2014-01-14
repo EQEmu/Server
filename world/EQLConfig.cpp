@@ -99,7 +99,7 @@ void EQLConfig::GetZones(std::vector<LauncherZone> &result) {
 	std::map<std::string, LauncherZone>::iterator cur, end;
 	cur = m_zones.begin();
 	end = m_zones.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		result.push_back(cur->second);
 	}
 }
@@ -112,7 +112,7 @@ std::vector<std::string> EQLConfig::ListZones() {
 		std::map<std::string, LauncherZone>::iterator cur, end;
 		cur = m_zones.begin();
 		end = m_zones.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			res.push_back(cur->first);
 		}
 	} else {
