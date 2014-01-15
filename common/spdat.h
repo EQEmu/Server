@@ -694,7 +694,7 @@ struct SPDat_Spell_Struct
 /* 169 */
 /* 173 */	int HateAdded;
 /* 174 */	int EndurUpkeep;
-/* 175 */	//numhitstype; // defines which type of behavior will tick down the numhit counter.
+/* 175 */	int numhitstype; // defines which type of behavior will tick down the numhit counter.
 /* 176 */	int numhits;
 /* 177 */	int pvpresistbase;
 /* 178 */	int pvpresistcalc;

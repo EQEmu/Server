@@ -1715,6 +1715,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].EndurTimerIndex=atoi(row[167]);
 			sp[tempid].HateAdded=atoi(row[173]);
 			sp[tempid].EndurUpkeep=atoi(row[174]);
+			sp[tempid].numhitstype = atoi(row[175]);
 			sp[tempid].numhits = atoi(row[176]);
 			sp[tempid].pvpresistbase=atoi(row[177]);
 			sp[tempid].pvpresistcalc=atoi(row[178]);
