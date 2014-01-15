@@ -1223,6 +1223,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						int charges;
 						if (item->Stackable)
 							charges = (spell.formula[i] > item->StackSize) ? item->StackSize : spell.formula[i];
+						else if (item->MaxCharges) // mod rods etc
+							charges = (spell.formula[i] > item->MaxCharges) ? item->MaxCharges : spell.formula[i];
 						else
 							charges = 1;
 
@@ -1263,6 +1265,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 						if (item->Stackable)
 							charges = (spell.formula[i] > item->StackSize) ? item->StackSize : spell.formula[i];
+						else if (item->MaxCharges) // mod rods, not sure if there are actual examples of this for IntoBag
+							charges = (spell.formula[i] > item->MaxCharges) ? item->MaxCharges : spell.formula[i];
 						else
 							charges = 1;
 
