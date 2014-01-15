@@ -1224,7 +1224,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (item->Stackable)
 							charges = (spell.formula[i] > item->StackSize) ? item->StackSize : spell.formula[i];
 						else if (item->MaxCharges) // mod rods etc
-							charges = (spell.formula[i] > item->MaxCharges) ? item->MaxCharges : spell.formula[i];
+							charges = item->MaxCharges;
 						else
 							charges = 1;
 
@@ -1266,7 +1266,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (item->Stackable)
 							charges = (spell.formula[i] > item->StackSize) ? item->StackSize : spell.formula[i];
 						else if (item->MaxCharges) // mod rods, not sure if there are actual examples of this for IntoBag
-							charges = (spell.formula[i] > item->MaxCharges) ? item->MaxCharges : spell.formula[i];
+							charges = item->MaxCharges;
 						else
 							charges = 1;
 
@@ -4058,19 +4058,15 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 					LimitFound = true;
 			break;
 			case SE_LimitEffect:
-				// Exclude effect(any but this)
-				if(base1 < 0) {
-					if(IsEffectInSpell(spell_id,(base1*-1)))
+				// Exclude effect (any but this)
+				if (base1 < 0) {
+					if (IsEffectInSpell(spell_id, (base1 * -1)))
+						LimitFound = true;
+				} else {
+					// Include effect (only this)
+					if (!IsEffectInSpell(spell_id, base1))
 						LimitFound = true;
 				}
-				
-				
-				else if(base1 >= 0){
-				LimitSpellEffect = true;
-				if  (IsEffectInSpell(spell_id,base1))
-					SpellEffect_Found = true;
-				}
-
 			break;
 			case SE_LimitSpellType:
 				switch(base1)
