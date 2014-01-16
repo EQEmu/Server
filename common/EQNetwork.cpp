@@ -229,25 +229,18 @@ void EQStreamServer::Process() {
 	}
 
 	std::map <std::string, EQStream*>::iterator connection;
-	for (connection = connection_list.begin( ); connection != connection_list.end( );)
-	{
-		if(!connection->second)
-		{
-			std::map <std::string, EQStream*>::iterator tmp=connection;
-			connection++;
-			connection_list.erase(tmp);
+	for (connection = connection_list.begin(); connection != connection_list.end();) {
+		if (!connection->second) {
+			connection = connection_list.erase(connection);
 			continue;
 		}
 		EQStream* eqs_data = connection->second;
 		if (eqs_data->IsFree() && (!eqs_data->CheckNetActive())) {
-			std::map <std::string, EQStream*>::iterator tmp=connection;
-			connection++;
 			safe_delete(eqs_data);
-			connection_list.erase(tmp);
-		}
-		else if(!eqs_data->RunLoop) {
+			connection = connection_list.erase(connection);
+		} else if (!eqs_data->RunLoop) {
 			eqs_data->Process(sock);
-			connection++;
+			++connection;
 		}
 	}
 }

@@ -348,7 +348,7 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 {
 	std::list<Group *>::iterator it;
 
-	for (it = group_list.begin(); it != group_list.end(); it++)
+	for (it = group_list.begin(); it != group_list.end(); ++it)
 	{
 		if (*it == nullptr)
 		{
@@ -394,7 +394,7 @@ void EntityList::QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPac
 	while(iterator != group_list.end())
 	{
 		(*iterator)->QueueHPPacketsForNPCHealthAA(sender, app);
-		iterator++;
+		++iterator;
 	}
 }
 
@@ -410,7 +410,7 @@ void EntityList::RaidProcess() {
 	{
 		count++;
 		(*iterator)->Process();
-		iterator++;
+		++iterator;
 	}
 	if(count == 0)
 		net.raid_timer.Disable();//No groups in list, disable until one is added
@@ -1938,7 +1938,7 @@ Group* EntityList::GetGroupByMob(Mob* mob)
 		if ((*iterator)->IsGroupMember(mob)) {
 			return *iterator;
 		}
-		iterator++;
+		++iterator;
 	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
@@ -1956,7 +1956,7 @@ Group* EntityList::GetGroupByLeaderName(const char* leader){
 		if (!strcmp((*iterator)->GetLeaderName(), leader)) {
 			return *iterator;
 		}
-		iterator++;
+		++iterator;
 	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
@@ -1973,7 +1973,7 @@ Group* EntityList::GetGroupByID(uint32 group_id){
 		if ((*iterator)->GetID() == group_id) {
 			return *iterator;
 		}
-		iterator++;
+		++iterator;
 	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
@@ -1991,7 +1991,7 @@ Group* EntityList::GetGroupByClient(Client* client)
 		if ((*iterator)->IsGroupMember(client->CastToMob())) {
 			return *iterator;
 		}
-		iterator++;
+		++iterator;
 	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
@@ -2011,7 +2011,7 @@ Raid* EntityList::GetRaidByLeaderName(const char *leader){
 				return *iterator;
 	}
 }
-		iterator++;
+		++iterator;
 	}
 	return 0;
 }
@@ -2025,7 +2025,7 @@ Raid* EntityList::GetRaidByID(uint32 id){
 		if ((*iterator)->GetID() == id) {
 			return *iterator;
 		}
-		iterator++;
+		++iterator;
 	}
 	return 0;
 }
@@ -2045,7 +2045,7 @@ Raid* EntityList::GetRaidByClient(Client* client)
 					return *iterator;
 			}
 		}
-		iterator++;
+		++iterator;
 	}
 	return 0;
 }
@@ -2065,7 +2065,7 @@ Raid* EntityList::GetRaidByMob(Mob* mob) {
 					return *iterator;
 			}*/
 		}
-		iterator++;
+		++iterator;
 	}
 	return 0;
 }
@@ -2507,7 +2507,7 @@ bool EntityList::RemoveGroup(uint32 delete_id){
 #endif
 			return true;
 		}
-		iterator++;
+		++iterator;
 	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
@@ -2526,7 +2526,7 @@ bool EntityList::RemoveRaid(uint32 delete_id){
 			raid_list.remove (*iterator);
 			return true;
 		}
-		iterator++;
+		++iterator;
 	}
 	return false;
 }
@@ -3821,7 +3821,7 @@ bool EntityList::LimitCheckType(uint32 npc_type, int count) {
 	cur = npc_limit_list.begin();
 	end = npc_limit_list.end();
 
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(cur->second.npc_type == npc_type) {
 			count--;
 			if(count == 0) {
@@ -3842,7 +3842,7 @@ bool EntityList::LimitCheckGroup(uint32 spawngroup_id, int count) {
 	cur = npc_limit_list.begin();
 	end = npc_limit_list.end();
 
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(cur->second.spawngroup_id == spawngroup_id) {
 			count--;
 			if(count == 0) {
@@ -3864,7 +3864,7 @@ bool EntityList::LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group
 	cur = npc_limit_list.begin();
 	end = npc_limit_list.end();
 
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(cur->second.npc_type == npc_type) {
 			type_count--;
 			if(type_count == 0) {

@@ -566,7 +566,7 @@ void SpawnConditionManager::Process() {
 		std::vector<SpawnEvent>::iterator cur,end;
 		cur = spawn_events.begin();
 		end = spawn_events.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			SpawnEvent &cevent = *cur;
 
 			if(!cevent.enabled)
@@ -827,7 +827,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	cur = spawn_events.begin();
 	end = spawn_events.end();
 	bool ran;
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		SpawnEvent &cevent = *cur;
 
 		if(!cevent.enabled)
@@ -875,7 +875,7 @@ void SpawnConditionManager::FindNearestEvent() {
 	cur = spawn_events.begin();
 	end = spawn_events.end();
 	int next_id = -1;
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		SpawnEvent &cevent = *cur;
 
 		if(!cevent.enabled)
@@ -983,7 +983,7 @@ void SpawnConditionManager::ReloadEvent(uint32 event_id) {
 	std::vector<SpawnEvent>::iterator cur,end;
 	cur = spawn_events.begin();
 	end = spawn_events.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		SpawnEvent &cevent = *cur;
 
 		if(cevent.id == event_id) {
@@ -1026,7 +1026,7 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool rese
 	std::vector<SpawnEvent>::iterator cur,end;
 	cur = spawn_events.begin();
 	end = spawn_events.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		SpawnEvent &cevent = *cur;
 
 		if(cevent.id == event_id) {

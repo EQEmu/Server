@@ -389,7 +389,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 			// this was mainly for client profile state reflection..should match db player inventory entries now.
 
 			iter_queue it;
-			for(it=client->GetInv().cursor_begin(),i=8001; it!=client->GetInv().cursor_end(); it++,i++) {
+			for(it=client->GetInv().cursor_begin(),i=8001; it!=client->GetInv().cursor_end(); ++it,i++) {
 				item = *it;
 				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent))
 				{
@@ -413,7 +413,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 					ss << " OR ";
 				}
 				ss << "slotid=" << (*iter);
-				iter++;
+				++iter;
 			}
 			ss << ")";
 			database.RunQuery(ss.str().c_str(), ss.str().length());
@@ -519,7 +519,7 @@ Corpse::~Corpse() {
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
 		safe_delete(item);
 	}
@@ -598,7 +598,7 @@ bool Corpse::Save() {
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
 		memcpy((char*) &dbpc->items[x++], (char*) item, sizeof(player_lootitem::ServerLootItem_Struct));
 	}
@@ -675,7 +675,7 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if((*cur)->lootslot == lootslot)
 		{
 			sitem = *cur;
@@ -689,7 +689,7 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 
 		cur = itemlist.begin();
 		end = itemlist.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			sitem2 = *cur;
 			if(sitem2->equipSlot >= bagstart && sitem2->equipSlot < bagstart + 10)
 			{
@@ -705,7 +705,7 @@ uint32 Corpse::GetWornItem(int16 equipSlot) const {
 	ItemList::const_iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
 		if (item->equipSlot == equipSlot)
 		{
@@ -725,7 +725,7 @@ void Corpse::RemoveItem(uint16 lootslot)
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;
 		if (sitem->lootslot == lootslot)
 		{
@@ -742,7 +742,7 @@ void Corpse::RemoveItem(ServerLootItem_Struct* item_data)
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;
 		if (sitem == item_data)
 		{
@@ -1006,7 +1006,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		else if(client->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
 		else { corpselootlimit = 30; }
 
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			ServerLootItem_Struct* item_data = *cur;
 			item_data->lootslot = 0xFFFF;
 
@@ -1046,7 +1046,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 				cur = itemlist.begin();
 				end = itemlist.end();
-				for(; cur != end; cur++) {
+				for(; cur != end; ++cur) {
 					ServerLootItem_Struct* item_data = *cur;
 					item = database.GetItem(item_data->item_id);
 					LogFile->write(EQEMuLog::Debug, "Corpse Looting: %s was not sent to client loot window (corpse_dbid: %i, charname: %s(%s))", item->Name, GetDBID(), client->GetName(), client->GetGM() ? "GM" : "Owner");
@@ -1337,7 +1337,7 @@ void Corpse::QueryLoot(Client* to) {
 	else if (to->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
 	else { corpselootlimit = 30; }
 
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;
 
 		if (IsPlayerCorpse()) {
@@ -1403,7 +1403,7 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance)
 		{
 			bool consented = false;
 			std::list<std::string>::iterator itr;
-			for(itr = client->consent_list.begin(); itr != client->consent_list.end(); itr++)
+			for(itr = client->consent_list.begin(); itr != client->consent_list.end(); ++itr)
 			{
 				if(strcmp(this->GetOwnerName(), itr->c_str()) == 0)
 				{

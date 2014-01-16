@@ -58,7 +58,7 @@ bool LauncherLink::Process() {
 		std::map<std::string, ZoneState>::iterator cur, end;
 		cur = m_states.begin();
 		end = m_states.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			if(!cur->second.up) {
 				StartZone(cur->first.c_str());
 			}

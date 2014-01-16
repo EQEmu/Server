@@ -308,7 +308,7 @@ void Client::SendTributes() {
 	cur = tribute_list.begin();
 	end = tribute_list.end();
 
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(cur->second.is_guild)
 			continue;	//skip guild tributes here
 		int len = cur->second.name.length();
@@ -342,7 +342,7 @@ void Client::SendGuildTributes() {
 	cur = tribute_list.begin();
 	end = tribute_list.end();
 
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(!cur->second.is_guild)
 			continue;	//skip guild tributes here
 		int len = cur->second.name.length();

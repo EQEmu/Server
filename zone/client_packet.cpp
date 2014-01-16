@@ -2215,7 +2215,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 	const Item_Struct *item = 0;
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
-	for(itr = merlist.begin();itr != merlist.end() && count<255;itr++){
+	for(itr = merlist.begin();itr != merlist.end() && count<255;++itr){
 		const MerchantList &ml = *itr;
 		if(GetLevel() < ml.level_required) {
 			continue;
@@ -2311,7 +2311,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
 
-	for(itr = merlist.begin();itr != merlist.end();itr++){
+	for(itr = merlist.begin();itr != merlist.end();++itr){
 		MerchantList ml = *itr;
 		if(GetLevel() < ml.level_required) {
 			continue;
@@ -5505,7 +5505,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	uint32 item_id = 0;
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
-	for(itr = merlist.begin();itr != merlist.end();itr++){
+	for(itr = merlist.begin();itr != merlist.end();++itr){
 		MerchantList ml = *itr;
 		if(GetLevel() < ml.level_required) {
 			continue;
@@ -5527,7 +5527,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		std::list<TempMerchantList> tmp_merlist = zone->tmpmerchanttable[tmp->GetNPCTypeID()];
 		std::list<TempMerchantList>::const_iterator tmp_itr;
 		TempMerchantList ml;
-		for(tmp_itr = tmp_merlist.begin();tmp_itr != tmp_merlist.end();tmp_itr++){
+		for(tmp_itr = tmp_merlist.begin();tmp_itr != tmp_merlist.end();++tmp_itr){
 			ml = *tmp_itr;
 			if(mp->itemslot == ml.slot){
 				item_id = ml.item;
@@ -9220,7 +9220,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 		// Send stuff on the cursor which isnt sent in bulk
 		iter_queue it;
-		for (it=m_inv.cursor_begin();it!=m_inv.cursor_end();it++) {
+		for (it=m_inv.cursor_begin();it!=m_inv.cursor_end();++it) {
 			// First item cursor is sent in bulk inventory packet
 			if (it==m_inv.cursor_begin())
 				continue;
@@ -12544,7 +12544,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 				found = true;
 				break;
 			}
-			altc_iter++;
+			++altc_iter;
 		}
 
 		if(!found) {
@@ -12560,7 +12560,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 
 		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 		std::list<MerchantList>::const_iterator itr;
-		for(itr = merlist.begin(); itr != merlist.end() && count < 255; itr++){
+		for(itr = merlist.begin(); itr != merlist.end() && count < 255; ++itr){
 			const MerchantList &ml = *itr;
 			if(GetLevel() < ml.level_required) {
 				continue;
@@ -12627,7 +12627,7 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app) 
 		bool found = false;
 		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 		std::list<MerchantList>::const_iterator itr;
-		for(itr = merlist.begin(); itr != merlist.end(); itr++) {
+		for(itr = merlist.begin(); itr != merlist.end(); ++itr) {
 			MerchantList ml = *itr;
 			if(GetLevel() < ml.level_required) {
 				continue;
@@ -12689,7 +12689,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app) {
 		bool found = false;
 		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 		std::list<MerchantList>::const_iterator itr;
-		for(itr = merlist.begin(); itr != merlist.end(); itr++) {
+		for(itr = merlist.begin(); itr != merlist.end(); ++itr) {
 			MerchantList ml = *itr;
 			if(GetLevel() < ml.level_required) {
 				continue;
@@ -12751,7 +12751,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app) {
 		if((*iter).id == reclaim->currency_id) {
 			item_id = (*iter).item_id;
 		}
-		iter++;
+		++iter;
 	}
 
 	if(item_id == 0) {
@@ -12806,7 +12806,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 		bool found = false;
 		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 		std::list<MerchantList>::const_iterator itr;
-		for(itr = merlist.begin(); itr != merlist.end(); itr++) {
+		for(itr = merlist.begin(); itr != merlist.end(); ++itr) {
 			MerchantList ml = *itr;
 			if(GetLevel() < ml.level_required) {
 				continue;
@@ -13498,10 +13498,10 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		int i = 0;
 		int StanceCount = 0;
 
-		for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); mercListItr++)
+		for(std::list<MercData>::iterator mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); ++mercListItr)
 		{
 			std::list<MercStanceInfo>::iterator siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin();
-			for(siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin(); siter != zone->merc_stance_list[mercListItr->MercTemplateID].end(); siter++)
+			for(siter = zone->merc_stance_list[mercListItr->MercTemplateID].begin(); siter != zone->merc_stance_list[mercListItr->MercTemplateID].end(); ++siter)
 			{
 				StanceCount++;
 			}
@@ -13513,7 +13513,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		mml->MercTypeCount = mercTypeCount;
 		if(mercTypeCount > 0)
 		{
-			for(std::list<MercType>::iterator mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); mercTypeListItr++) {
+			for(std::list<MercType>::iterator mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); ++mercTypeListItr) {
 			mml->MercGrades[i] = mercTypeListItr->Type;	// DBStringID for Type
 			i++;
 			}
@@ -13523,7 +13523,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 		if(mercCount > 0)
 		{
 			i = 0;
-			for(std::list<MercData>::iterator mercListIter = mercDataList.begin(); mercListIter != mercDataList.end(); mercListIter++)
+			for(std::list<MercData>::iterator mercListIter = mercDataList.begin(); mercListIter != mercDataList.end(); ++mercListIter)
 			{
 				mml->Mercs[i].MercID = mercListIter->MercTemplateID;
 				mml->Mercs[i].MercType = mercListIter->MercType;
@@ -13540,7 +13540,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 				mml->Mercs[i].MercUnk02 = 1;
 				int mercStanceCount = 0;
 				std::list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin();
-				for(iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin(); iter != zone->merc_stance_list[mercListIter->MercTemplateID].end(); iter++)
+				for(iter = zone->merc_stance_list[mercListIter->MercTemplateID].begin(); iter != zone->merc_stance_list[mercListIter->MercTemplateID].end(); ++iter)
 				{
 				mercStanceCount++;
 				}
@@ -13557,7 +13557,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 						mml->Mercs[i].Stances[stanceindex].StanceIndex = stanceindex;
 						mml->Mercs[i].Stances[stanceindex].Stance = (iter2->StanceID);
 						stanceindex++;
-						iter2++;
+						++iter2;
 					}
 				}
 				i++;
@@ -13692,7 +13692,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 			std::list<MercStanceInfo>::iterator iter = mercStanceList.begin();
 			while(iter != mercStanceList.end()) {
 				numStances++;
-				iter++;
+				++iter;
 			}
 
 			MercTemplate* mercTemplate = zone->GetMercTemplate(GetMerc()->GetMercTemplateID());

@@ -68,7 +68,7 @@ void Config::Parse(const char *file_name)
 			{
 				title.clear();
 				bool first = true;
-				iter++;
+				++iter;
 				if(iter == tokens.end())
 				{
 					server_log->Log(log_error, "Config::Parse(), EOF before title done parsing.");
@@ -89,9 +89,9 @@ void Config::Parse(const char *file_name)
 					}
 
 					title += (*iter);
-					iter++;
+					++iter;
 				}
-				iter++;
+				++iter;
 			}
 
 			if(mode == 0)
@@ -127,7 +127,7 @@ void Config::Parse(const char *file_name)
 					vars[title] = var_map;
 				}
 			}
-			iter++;
+			++iter;
 		}
 		fclose(input);
 	}

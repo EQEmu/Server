@@ -49,7 +49,7 @@ void WorldServer::OnConnected() {
 	std::map<std::string, ZoneLaunch *>::iterator cur, end;
 	cur = m_zones.begin();
 	end = m_zones.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		cur->second->SendStatus();
 	}
 }

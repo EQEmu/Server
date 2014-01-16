@@ -189,7 +189,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 			cur = faction_list.begin();
 			end = faction_list.end();
 			bool res = false;
-			for(; cur != end; cur++) {
+			for(; cur != end; ++cur) {
 				struct NPCFaction* fac = *cur;
 				if ((int32)fac->factionID == mob_primary) {
 					if (fac->npc_value > 0) {

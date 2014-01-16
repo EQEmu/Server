@@ -1082,7 +1082,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			}
 			if(RuleB(TaskSystem, EnableTaskSystem))
 				UpdateTasksForItem(ActivityTradeSkill, itr->first, itr->second);
-			itr++;
+			++itr;
 		}
 		return(true);
 	} else {
@@ -1103,7 +1103,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		while(itr != spec->onfail.end()) {
 			//should we check these arguments?
 			SummonItem(itr->first, itr->second);
-			itr++;
+			++itr;
 		}
 
 		// Rolls on each item, is possible to return everything
@@ -1116,7 +1116,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 				for(sc = 0; sc < itr->second; sc++)
 					if(MakeRandomInt(0,99) < SalvageChance)
 						SummonItem(itr->first, 1);
-				itr++;
+				++itr;
 			}
 		}
 

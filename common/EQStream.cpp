@@ -747,7 +747,7 @@ void EQStream::Write(int eq_fd)
 					// Copy it first as it will still live until it is acked
 					p=(*sitr)->Copy();
 					_log(NET__NET_COMBINE, _L "Starting combined packet with seq packet %d of len %d" __L, seq_send, p->size);
-					sitr++;
+					++sitr;
 					NextSequencedSend++;
 				} else if (!p->combine(*sitr)) {
 					// Trying to combine this packet with the base didn't work (too big maybe)
@@ -765,7 +765,7 @@ void EQStream::Write(int eq_fd)
 				} else {
 					// Combine worked
 					_log(NET__NET_COMBINE, _L "Combined seq packet %d of len %d, yeilding %d combined." __L, seq_send, (*sitr)->size, p->size);
-					sitr++;
+					++sitr;
 					NextSequencedSend++;
 				}
 			} else {
@@ -774,7 +774,7 @@ void EQStream::Write(int eq_fd)
 					// Copy it first as it will still live until it is acked
 					p=(*sitr)->Copy();
 					_log(NET__NET_COMBINE, _L "Starting combined packet with seq packet %d of len %d" __L, seq_send, p->size);
-					sitr++;
+					++sitr;
 					NextSequencedSend++;
 				} else if (!p->combine(*sitr)) {
 					// Trying to combine this packet with the base didn't work (too big maybe)
@@ -792,7 +792,7 @@ void EQStream::Write(int eq_fd)
 				} else {
 					// Combine worked
 					_log(NET__NET_COMBINE, _L "Combined seq packet %d of len %d, yeilding %d combined." __L, seq_send, (*sitr)->size, p->size);
-					sitr++;
+					++sitr;
 					NextSequencedSend++;
 				}
 			}
@@ -1047,7 +1047,7 @@ EQApplicationPacket *p=nullptr;
 	MInboundQueue.lock();
 	if (!InboundQueue.empty()) {
 		std::vector<EQRawApplicationPacket *>::iterator itr;
-		for(itr=InboundQueue.begin();itr!=InboundQueue.end();itr++) {
+		for(itr=InboundQueue.begin();itr!=InboundQueue.end();++itr) {
 			p=*itr;
 			delete p;
 		}
@@ -1094,7 +1094,7 @@ EQProtocolPacket *p=nullptr;
 	}
 	if(!SequencedQueue.empty()) {
 		std::deque<EQProtocolPacket *>::iterator itr;
-		for(itr=SequencedQueue.begin();itr!=SequencedQueue.end();itr++) {
+		for(itr=SequencedQueue.begin();itr!=SequencedQueue.end();++itr) {
 			p=*itr;
 			delete p;
 		}
@@ -1119,7 +1119,7 @@ EQProtocolPacket *p=nullptr;
 
 	if(!PacketQueue.empty()) {
 		std::map<unsigned short,EQProtocolPacket *>::iterator itr;
-		for(itr=PacketQueue.begin();itr!=PacketQueue.end();itr++) {
+		for(itr=PacketQueue.begin();itr!=PacketQueue.end();++itr) {
 			p=itr->second;
 			delete p;
 		}

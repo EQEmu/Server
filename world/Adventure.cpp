@@ -74,7 +74,7 @@ void Adventure::RemovePlayer(std::string character_name)
 			players.erase(iter);
 			return;
 		}
-		iter++;
+		++iter;
 	}
 }
 
@@ -87,7 +87,7 @@ bool Adventure::PlayerExists(std::string character_name)
 		{
 			return true;
 		}
-		iter++;
+		++iter;
 	}
 	return false;
 }
@@ -214,7 +214,7 @@ void Adventure::SetStatus(AdventureStatus new_status)
 	while(iter != players.end())
 	{
 		adventure_manager.GetAdventureData((*iter).c_str());
-		iter++;
+		++iter;
 	}
 }
 
@@ -233,7 +233,7 @@ void Adventure::SendAdventureMessage(uint32 type, const char *msg)
 			strcpy(sms->to, (*iter).c_str());
 			zoneserver_list.SendPacket(current->zone(), current->instance(), pack);
 		}
-		iter++;
+		++iter;
 	}
 	delete pack;
 }
@@ -360,7 +360,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 			adventure_manager.AddFinishedEvent(afe);
 			database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter).c_str()), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 		}
-		iter++;
+		++iter;
 	}
 	adventure_manager.GetAdventureData(this);
 }
@@ -411,7 +411,7 @@ void Adventure::MoveCorpsesToGraveyard()
 			LogFile->write(EQEMuLog::Error, "Error in AdventureManager:::MoveCorpsesToGraveyard: %s (%s)", query, errbuf);
 			safe_delete_array(query);
 		}
-		iter++;
+		++iter;
 	}
 
 	iter = dbid_list.begin();
@@ -433,8 +433,8 @@ void Adventure::MoveCorpsesToGraveyard()
 
 		zoneserver_list.SendPacket(spc->zone_id, 0, pack);
 		delete pack;
-		iter++;
-		c_iter++;
+		++iter;
+		++c_iter;
 	}
 }
 

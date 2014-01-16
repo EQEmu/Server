@@ -3458,7 +3458,7 @@ bool Mob::TryFadeEffect(int slot)
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
 			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnWearoff || spells[buffs[slot].spellid].effectid[i] == SE_EffectOnFade
-				|| spells[buffs[slot].spellid].effectid[i] == SE_SpellOnAmtDmgTaken)
+				|| spells[buffs[slot].spellid].effectid[i] == SE_TriggerMeleeThreshold)
 			{
 				uint16 spell_id = spells[buffs[slot].spellid].base[i];
 				BuffFadeBySlot(slot);
@@ -4611,10 +4611,10 @@ int Mob::SlowMitigation(bool slow_msg, Mob *caster, int slow_value)
 			if ((int_slow_mitigation > 0.0f) && (int_slow_mitigation < 26.0f))
 				caster->Message(262, "Your spell was mostly successful");
 
-			else if ((int_slow_mitigation > 26.0f) && (int_slow_mitigation < 74.0f))
+			else if ((int_slow_mitigation >= 26.0f) && (int_slow_mitigation < 74.0f))
 				caster->Message(262, "Your spell was partially successful");
 
-			else if ((int_slow_mitigation > 74.0f) && (int_slow_mitigation < 101.0f))
+			else if ((int_slow_mitigation >= 74.0f) && (int_slow_mitigation < 101.0f))
 				caster->Message(262, "Your spell was slightly successful");
 		}
 		return 0;
@@ -4657,9 +4657,6 @@ bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
 	if (!IsValidSpell(spell_id))
 		return false;
 
-	if (!IsEffectInSpell(spell_id, SE_LimitToSkill))
-		return false;
-
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (spells[spell_id].effectid[i] == SE_LimitToSkill){
 			if (spells[spell_id].base[i] == skill){
@@ -4668,6 +4665,44 @@ bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
 		}
 	}
 	return false;
+}
+
+int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
+
+	if (!IsValidSpell(spell_id))
+		return false;
+
+	int spell_level = spells[spell_id].classes[(GetClass()%16) - 1];
+	int effect_value = 0;
+	int lvlModifier = 100;
+
+	int buff_count = GetMaxTotalSlots();
+	for (int slot = 0; slot < buff_count; slot++){
+		if (IsValidSpell(buffs[slot].spellid)){
+			for (int i = 0; i < EFFECT_COUNT; i++){
+				if(spells[buffs[slot].spellid].effectid[i] == spelleffect) {
+					
+					int critchance = spells[buffs[slot].spellid].base[i];
+					int decay = spells[buffs[slot].spellid].base2[i];
+					int lvldiff = spell_level - spells[buffs[slot].spellid].max[i];
+					
+					if(lvldiff > 0 && decay > 0)
+					{
+						lvlModifier -= decay*lvldiff;
+						if (lvlModifier > 0){
+							critchance = (critchance*lvlModifier)/100;
+							effect_value += critchance;
+						}
+					}
+
+					else
+						effect_value += critchance;
+				}
+			}
+		}
+	}
+	
+	return effect_value;
 }
 
 // Faction Mods for Alliance type spells
@@ -4732,7 +4767,7 @@ int32 Mob::GetItemFactionBonus(uint32 pFactionID) {
 
 void Mob::ClearItemFactionBonuses() {
 	std::map <uint32, int32> :: iterator itr;
-	for(itr = item_faction_bonuses.begin(); itr != item_faction_bonuses.end(); itr++)
+	for(itr = item_faction_bonuses.begin(); itr != item_faction_bonuses.end(); ++itr)
 	{
 		item_faction_bonuses.erase(itr->first);
 	}

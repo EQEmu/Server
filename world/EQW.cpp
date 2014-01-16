@@ -120,7 +120,7 @@ std::vector<std::string> EQW::ListBootedZones() {
 	std::vector<uint32>::iterator cur, end;
 	cur = zones.begin();
 	end = zones.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		res.push_back(itoa(*cur));
 	}
 
@@ -170,7 +170,7 @@ std::vector<std::string> EQW::ListPlayers(Const_char *zone_name) {
 	std::vector<ClientListEntry *>::iterator cur, end;
 	cur = list.begin();
 	end = list.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		res.push_back((*cur)->name());
 	}
 	return(res);

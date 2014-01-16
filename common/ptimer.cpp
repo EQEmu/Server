@@ -294,7 +294,7 @@ PTimerList::~PTimerList() {
 	while(s != _list.end()) {
 		if(s->second != nullptr)
 			delete s->second;
-		s++;
+		++s;
 	}
 }
 
@@ -305,7 +305,7 @@ bool PTimerList::Load(Database *db) {
 	while(s != _list.end()) {
 		if(s->second != nullptr)
 			delete s->second;
-		s++;
+		++s;
 	}
 	_list.clear();
 
@@ -373,7 +373,7 @@ bool PTimerList::Store(Database *db) {
 			if(!s->second->Store(db))
 				res = false;
 		}
-		s++;
+		++s;
 	}
 	return(res);
 }
@@ -474,7 +474,7 @@ void PTimerList::ToVector(std::vector< std::pair<pTimerType, PersistentTimer *> 
 			p.second = s->second;
 			out.push_back(p);
 		}
-		s++;
+		++s;
 	}
 }
 

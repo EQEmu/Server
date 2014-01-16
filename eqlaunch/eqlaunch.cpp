@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
 		*/
 		zone = zones.begin();
 		zend = zones.end();
-		for(; zone != zend; zone++) {
+		for(; zone != zend; ++zone) {
 			if(!zone->second->Process())
 				to_remove.insert(zone->first);
 		}
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 	//try to be semi-nice about this... without waiting too long
 	zone = zones.begin();
 	zend = zones.end();
-	for(; zone != zend; zone++) {
+	for(; zone != zend; ++zone) {
 		zone->second->Stop();
 	}
 	Sleep(1);
@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
 	launch->Process();
 	//kill anybody left
 	launch->TerminateAll(true);
-	for(; zone != zend; zone++) {
+	for(; zone != zend; ++zone) {
 		delete zone->second;
 	}
 

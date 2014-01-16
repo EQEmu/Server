@@ -177,7 +177,7 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 	end = members.end();
 	uint32 name_len = 0;
 	uint32 note_len = 0;
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ci = *cur;
 		name_len += ci->char_name.length();
 		note_len += ci->public_note.length();
@@ -205,7 +205,7 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 
 	cur = members.begin();
 	end = members.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ci = *cur;
 
 		//the order we set things here must match the struct
@@ -247,7 +247,7 @@ void ZoneGuildManager::ListGuilds(Client *c) const {
 	cur = m_guilds.begin();
 	end = m_guilds.end();
 	int r = 0;
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		leadername[0] = '\0';
 		database.GetCharName(cur->second->leader_char_id, leadername);
 		if (leadername[0] == '\0')

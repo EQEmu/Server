@@ -303,7 +303,7 @@ bool Client::Process() {
 								if(CheckLosFN(GetTarget())){
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
-										if (CheckArcheryDoubleAttack())
+										if (CheckDoubleRangedAttack())
 											RangedAttack(GetTarget(), true);
 								}
 								else
@@ -904,7 +904,7 @@ void Client::BulkSendInventoryItems() {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, size);
 	uchar* ptr = outapp->pBuffer;
-	for(itr = ser_items.begin(); itr != ser_items.end(); itr++){
+	for(itr = ser_items.begin(); itr != ser_items.end(); ++itr){
 		int length = itr->second.length();
 		if(length > 5) {
 			memcpy(ptr, itr->second.c_str(), length);
@@ -978,7 +978,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 
 	uint32 i=1;
 	uint8 handychance = 0;
-	for(itr = merlist.begin();itr != merlist.end() && i<numItemSlots;itr++){
+	for (itr = merlist.begin(); itr != merlist.end() && i < numItemSlots; ++itr) {
 		MerchantList ml = *itr;
 		if(GetLevel() < ml.level_required) {
 			continue;
@@ -1027,7 +1027,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	}
 	std::list<TempMerchantList> origtmp_merlist = zone->tmpmerchanttable[npcid];
 	tmp_merlist.clear();
-	for(tmp_itr = origtmp_merlist.begin();tmp_itr != origtmp_merlist.end() && i<numItemSlots;tmp_itr++){
+	for(tmp_itr = origtmp_merlist.begin();tmp_itr != origtmp_merlist.end() && i<numItemSlots;++tmp_itr){
 		TempMerchantList ml = *tmp_itr;
 		item=database.GetItem(ml.item);
 		ml.slot=i;

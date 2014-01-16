@@ -193,6 +193,17 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		return(false);
 	}
 
+	if(IsClient()){
+		int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);
+
+		if (MakeRandomInt(0,99) < chance){
+			Message_StringID(13, SILENCED_STRING);
+			if(IsClient())
+				CastToClient()->SendSpellBarEnable(spell_id);
+			return(false);
+		}
+	}
+
 	if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()){
 		Message_StringID(13, SPELL_WOULDNT_HOLD);
 		if(IsClient())
@@ -2047,7 +2058,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 							SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 					}
 				}
-				iter++;
+				++iter;
 			}
 			break;
 		}
@@ -2929,7 +2940,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		std::vector<int>::iterator cur, end;
 		cur = overwrite_slots.begin();
 		end = overwrite_slots.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			// strip spell
 			BuffFadeBySlot(*cur, false);
 

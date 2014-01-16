@@ -114,7 +114,7 @@ QuestManager::~QuestManager() {
 }
 
 void QuestManager::Process() {
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 	end = QTimerList.end();
 	while (cur != end) {
@@ -122,8 +122,7 @@ void QuestManager::Process() {
 			if(entity_list.IsMobInZone(cur->mob)) {
 				if(cur->mob->IsNPC()) {
 					parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
-				}
-				else {
+				} else {
 					//this is inheriently unsafe if we ever make it so more than npc/client start timers
 					parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
 				}
@@ -133,13 +132,10 @@ void QuestManager::Process() {
 				cur = QTimerList.begin();
 				end = QTimerList.end();	//dunno if this is needed, cant hurt...
 			} else {
-				tmp = cur;
-				tmp++;
-				QTimerList.erase(cur);
-				cur = tmp;
+				cur = QTimerList.erase(cur);
 			}
 		} else
-			cur++;
+			++cur;
 	}
 
 	auto cur_iter = STimerList.begin();
@@ -168,18 +164,14 @@ void QuestManager::EndQuest() {
 	running_quest run = quests_running_.top();
 	if(run.depop_npc && run.owner->IsNPC()) {
 		//clear out any timers for them...
-		std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+		std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 		end = QTimerList.end();
 		while (cur != end) {
-			if(cur->mob == run.owner) {
-				tmp = cur;
-				tmp++;
-				QTimerList.erase(cur);
-				cur = tmp;
-			} else {
-				cur++;
-			}
+			if (cur->mob == run.owner)
+				cur = QTimerList.erase(cur);
+			else
+				++cur;
 		}
 
 		run.owner->Depop();
@@ -462,7 +454,7 @@ void QuestManager::settimer(const char *timer_name, int seconds) {
 			cur->Timer_.Start(seconds * 1000, false);
 			return;
 		}
-		cur++;
+		++cur;
 	}
 
 	QTimerList.push_back(QuestTimer(seconds * 1000, owner, timer_name));
@@ -486,7 +478,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 			cur->Timer_.Start(milliseconds, false);
 			return;
 		}
-		cur++;
+		++cur;
 	}
 
 	QTimerList.push_back(QuestTimer(milliseconds, owner, timer_name));
@@ -495,7 +487,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 void QuestManager::stoptimer(const char *timer_name) {
 	QuestManagerCurrentQuestVars();
 
-	if(questitem) {
+	if (questitem) {
 		questitem->StopTimer(timer_name);
 		return;
 	}
@@ -503,14 +495,12 @@ void QuestManager::stoptimer(const char *timer_name) {
 	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
 
 	end = QTimerList.end();
-	while (cur != end)
-	{
-		if(cur->mob && cur->mob == owner && cur->name == timer_name)
-		{
+	while (cur != end) {
+		if (cur->mob && cur->mob == owner && cur->name == timer_name) {
 			QTimerList.erase(cur);
 			return;
 		}
-		cur++;
+		++cur;
 	}
 }
 
@@ -525,19 +515,11 @@ void QuestManager::stopalltimers() {
 	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
 
 	end = QTimerList.end();
-	while (cur != end)
-	{
+	while (cur != end) {
 		if(cur->mob && cur->mob == owner)
-		{
-			tmp = cur;
-			tmp++;
-			QTimerList.erase(cur);
-			cur = tmp;
-		}
+			cur = QTimerList.erase(cur);
 		else
-		{
-			cur++;
-		}
+			++cur;
 	}
 }
 
@@ -666,31 +648,31 @@ void QuestManager::repopzone() {
 
 void QuestManager::settarget(const char *type, int target_id) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	Mob* tmp = nullptr;
-	if (!strcasecmp(type,"npctype")) {
+	if (!strcasecmp(type,"npctype"))
 		tmp = entity_list.GetMobByNpcTypeID(target_id);
-	}
-	else if (!strcasecmp(type, "entity")) {
+	else if (!strcasecmp(type, "entity"))
 		tmp = entity_list.GetMob(target_id);
-	}
-	if(tmp != nullptr) {
+
+	if (tmp != nullptr)
 		owner->SetTarget(tmp);
-	}
 }
 
 void QuestManager::follow(int entity_id, int distance) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	owner->SetFollowID(entity_id);
 	owner->SetFollowDistance(distance * distance);
 }
 
 void QuestManager::sfollow() {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (owner == nullptr || !owner->IsNPC())
 		return;
 	owner->SetFollowID(0);
 }
@@ -1104,25 +1086,26 @@ void QuestManager::setallskill(int value) {
 
 void QuestManager::attack(const char *client_name) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	Client* getclient = entity_list.GetClientByName(client_name);
-	if(getclient && owner->IsAttackAllowed(getclient)) {
+	if (getclient && owner->IsAttackAllowed(getclient))
 		owner->AddToHateList(getclient,1);
-	} else {
+	else
 		owner->Say("I am unable to attack %s.", client_name);
-	}
 }
 
 void QuestManager::attacknpc(int npc_entity_id) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	Mob *it = entity_list.GetMob(npc_entity_id);
-	if(it && owner->IsAttackAllowed(it)) {
+	if (it && owner->IsAttackAllowed(it)) {
 		owner->AddToHateList(it,1);
 	} else {
-		if(it)
+		if (it)
 			owner->Say("I am unable to attack %s.", it->GetName());
 		else
 			owner->Say("I am unable to locate NPC entity %i", npc_entity_id);
@@ -1131,13 +1114,14 @@ void QuestManager::attacknpc(int npc_entity_id) {
 
 void QuestManager::attacknpctype(int npc_type_id) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	Mob *it = entity_list.GetMobByNpcTypeID(npc_type_id);
-	if(it && owner->IsAttackAllowed(it)) {
+	if (it && owner->IsAttackAllowed(it)) {
 		owner->AddToHateList(it,1);
 	} else {
-		if(it)
+		if (it)
 			owner->Say("I am unable to attack %s.", it->GetName());
 		else
 			owner->Say("I am unable to locate NPC type %i", npc_type_id);
@@ -1194,7 +1178,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 
 			uint32 tmp = guild_mgr.FindGuildByLeader(cid);
 			if (tmp != GUILD_NONE) {
-				sprintf(hString, "Guild Creation: Error: %s already is the leader of DB# %i '%s'.", leader, tmp, guild_mgr.GetGuildName(tmp));
+				sprintf(hString, "Guild Creation: Error: %s already is the leader of DB# %u '%s'.", leader, tmp, guild_mgr.GetGuildName(tmp));
 				worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
 			}
 			else {
@@ -1202,7 +1186,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 				if (gid == GUILD_NONE)
 					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Guild Creation: Guild creation failed");
 				else {
-					sprintf(hString, "Guild Creation: Guild created: Leader: %i, number %i: %s", cid, gid, leader);
+					sprintf(hString, "Guild Creation: Guild created: Leader: %u, number %u: %s", cid, gid, leader);
 					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
 					if(!guild_mgr.SetGuild(cid, gid, GUILD_LEADER))
 						worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Unable to set guild leader's guild in the database. Your going to have to run #guild set");
@@ -1218,12 +1202,15 @@ void QuestManager::settime(uint8 new_hour, uint8 new_min) {
 
 void QuestManager::itemlink(int item_id) {
 	QuestManagerCurrentQuestVars();
-	const ItemInst* inst = database.CreateItem(item_id);
-	char* link = 0;
-	if (initiator->MakeItemLink(link, inst))
-		initiator->Message(0, "%s tells you, %c%s%s%c", owner->GetCleanName(), 0x12, link, inst->GetItem()->Name, 0x12);
-	safe_delete_array(link);
-	safe_delete(inst);
+	if (initiator) {
+		const ItemInst* inst = database.CreateItem(item_id);
+		char* link = 0;
+		if (initiator->MakeItemLink(link, inst))
+			initiator->Message(0, "%s tells you, %c%s%s%c", owner->GetCleanName(),
+					0x12, link, inst->GetItem()->Name, 0x12);
+		safe_delete_array(link);
+		safe_delete(inst);
+	}
 }
 
 void QuestManager::signalwith(int npc_id, int signal_id, int wait_ms) {
@@ -1504,36 +1491,41 @@ void QuestManager::rebind(int zoneid, float x, float y, float z) {
 
 void QuestManager::start(int32 wp) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	owner->CastToNPC()->AssignWaypoints(wp);
 }
 
 void QuestManager::stop() {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	owner->CastToNPC()->StopWandering();
 }
 
 void QuestManager::pause(int duration) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	owner->CastToNPC()->PauseWandering(duration);
 }
 
 void QuestManager::moveto(float x, float y, float z, float h, bool saveguardspot) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	owner->CastToNPC()->MoveTo(x, y, z, h, saveguardspot);
 }
 
 void QuestManager::resume() {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
+
 	owner->CastToNPC()->ResumeWandering();
 }
 
@@ -1557,22 +1549,21 @@ void QuestManager::addldonloss(int32 losses, uint32 theme) {
 
 void QuestManager::setnexthpevent(int at) {
 	QuestManagerCurrentQuestVars();
-	owner->SetNextHPEvent( at );
+	if (owner)
+		owner->SetNextHPEvent(at);
 }
 
 void QuestManager::setnextinchpevent(int at) {
 	QuestManagerCurrentQuestVars();
-	owner->SetNextIncHPEvent( at );
+	if (owner)
+		owner->SetNextIncHPEvent(at);
 }
 
 void QuestManager::respawn(int npc_type, int grid) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
-	//char tempa[100];
 	float x,y,z,h;
-	if ( !owner )
-		return;
 
 	x = owner->GetX();
 	y = owner->GetY();
@@ -1599,7 +1590,7 @@ void QuestManager::respawn(int npc_type, int grid) {
 
 void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy, float minz, float maxz) {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if (!owner || !owner->IsNPC())
 		return;
 
 	entity_list.AddProximity(owner->CastToNPC());
@@ -1614,8 +1605,9 @@ void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy,
 
 void QuestManager::clear_proximity() {
 	QuestManagerCurrentQuestVars();
-	if(!owner->IsNPC())
+	if(!owner || !owner->IsNPC())
 		return;
+
 	entity_list.RemoveProximity(owner->GetID());
 	safe_delete(owner->CastToNPC()->proximity);
 }
@@ -1694,7 +1686,7 @@ void QuestManager::toggle_spawn_event(int event_id, bool enable, bool reset_base
 
 bool QuestManager::has_zone_flag(int zone_id) {
 	QuestManagerCurrentQuestVars();
-	return(initiator->HasZoneFlag(zone_id));
+	return initiator ? initiator->HasZoneFlag(zone_id) : false;
 }
 
 void QuestManager::set_zone_flag(int zone_id) {
@@ -2453,18 +2445,17 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 
 	const Item_Struct* item = nullptr;
 	item = database.GetItem(itemid);
-	if (!item) return 0;		// likewise, if it isn't a valid item, the merchant doesn't have any
+	if (!item)
+		return 0;	// if it isn't a valid item, the merchant doesn't have any
 
 	// look for the item in the merchant's temporary list
 	std::list<TempMerchantList> MerchList = zone->tmpmerchanttable[NPCid];
 	std::list<TempMerchantList>::const_iterator itr;
-	TempMerchantList ml;
 	uint32 Quant = 0;
 
-	for(itr = MerchList.begin(); itr != MerchList.end(); itr++){
-		ml = *itr;
-		if (ml.item == itemid) {	// if this is the item we're looking for
-			Quant = ml.charges;
+	for (itr = MerchList.begin(); itr != MerchList.end(); ++itr) {
+		if (itr->item == itemid) {	// if this is the item we're looking for
+			Quant = itr->charges;
 			break;
 		}
 	}
@@ -2776,7 +2767,7 @@ void QuestManager::enabletitle(int titleset) {
 
 bool QuestManager::checktitle(int titleset) {
 	QuestManagerCurrentQuestVars();
-	return initiator->CheckTitle(titleset);
+	return initiator ? initiator->CheckTitle(titleset) : false;
 }
 
 void QuestManager::removetitle(int titleset) {

@@ -793,7 +793,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 
 	to->Message(0, "Flags for %s:", GetName());
 
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		uint32 zoneid = *cur;
 
 		const char *short_name = database.GetZoneName(zoneid);

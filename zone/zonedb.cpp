@@ -3193,7 +3193,7 @@ bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFactio
 		std::list<struct NPCFaction*>::iterator cur,end;
 		cur = faction_list->begin();
 		end = faction_list->end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			struct NPCFaction* tmp = *cur;
 			safe_delete(tmp);
 		}
@@ -3212,7 +3212,7 @@ bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFactio
 	std::list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list->begin();
 	end = faction_list->end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		struct NPCFaction* tmp = *cur;
 		safe_delete(tmp);
 	}

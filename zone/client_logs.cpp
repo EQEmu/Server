@@ -38,7 +38,7 @@ void ClientLogs::subscribe(EQEMuLog::LogIDs id, Client *c) {
 	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(*cur == c) {
 	printf("%s was allready subscribed to %d\n", c->GetName(), id);
 			return;
@@ -58,7 +58,7 @@ void ClientLogs::unsubscribe(EQEMuLog::LogIDs id, Client *c) {
 	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(*cur == c) {
 			entries[id].erase(cur);
 			return;
@@ -97,7 +97,7 @@ void ClientLogs::msg(EQEMuLog::LogIDs id, const char *buf) {
 	std::vector<Client *>::iterator cur,end;
 	cur = entries[id].begin();
 	end = entries[id].end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		if(!(*cur)->InZone())
 			continue;
 		(*cur)->Message(CLIENT_LOG_CHANNEL, buf);

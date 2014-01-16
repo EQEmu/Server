@@ -280,12 +280,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 			trap_list = trap_ent_iter->second;
 			if(trap_list.size() > 0)
 			{
-				uint16 count = MakeRandomInt(0, (trap_list.size()-1));
 				std::list<LDoNTrapTemplate*>::iterator trap_list_iter = trap_list.begin();
-				for(int x = 0; x < count; ++x)
-				{
-					trap_list_iter++;
-				}
+				std::advance(trap_list_iter, MakeRandomInt(0, trap_list.size() - 1));
 				LDoNTrapTemplate* tt = (*trap_list_iter);
 				if(tt)
 				{
@@ -374,7 +370,7 @@ NPC::~NPC()
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
 		safe_delete(item);
 	}
@@ -385,7 +381,7 @@ NPC::~NPC()
 	std::list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list.begin();
 	end = faction_list.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		struct NPCFaction* fac = *cur;
 		safe_delete(fac);
 	}
@@ -424,7 +420,7 @@ ServerLootItem_Struct* NPC::GetItem(int slot_id) {
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
 		if (item->equipSlot == slot_id) {
 			return item;
@@ -437,7 +433,7 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
 		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
 			itemlist.erase(cur);
@@ -477,7 +473,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 			cur = itemlist.erase(cur);
 			continue;
 		}
-		cur++;
+		++cur;
 	}
 
 }
@@ -486,7 +482,7 @@ void NPC::ClearItemList() {
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
 		safe_delete(item);
 	}
@@ -500,7 +496,7 @@ void NPC::QueryLoot(Client* to) {
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
 	end = itemlist.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		const Item_Struct* item = database.GetItem((*cur)->item_id);
 		if (item)
 			if (to->GetClientVersion() >= EQClientRoF)
@@ -1286,7 +1282,7 @@ void NPC::PickPocket(Client* thief) {
 		ItemList::iterator cur,end;
 		cur = itemlist.begin();
 		end = itemlist.end();
-		for(; cur != end && x < 49; cur++) {
+		for(; cur != end && x < 49; ++cur) {
 			ServerLootItem_Struct* citem = *cur;
 			const Item_Struct* item = database.GetItem(citem->item_id);
 			if (item)
@@ -2351,7 +2347,7 @@ FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 	std::list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list.begin();
 	end = faction_list.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		struct NPCFaction* fac = *cur;
 		if ((int32)fac->factionID == other_faction) {
 			if (fac->npc_value > 0)
