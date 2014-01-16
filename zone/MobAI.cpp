@@ -934,22 +934,16 @@ void Client::AI_Process()
 	else
 	{
 		if(AIfeignremember_timer->Check()) {
-			std::set<uint32>::iterator RememberedCharID, tmp;
+			std::set<uint32>::iterator RememberedCharID;
 			RememberedCharID = feign_memory_list.begin();
-			bool got_one = false;
 			while (RememberedCharID != feign_memory_list.end()) {
 				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
 				if (remember_client == nullptr) {
 					//they are gone now...
-					tmp = RememberedCharID;
-					++RememberedCharID;
-					feign_memory_list.erase(tmp);
+					RememberedCharID = feign_memory_list.erase(RememberedCharID);
 				} else if (!remember_client->GetFeigned()) {
 					AddToHateList(remember_client->CastToMob(),1);
-					tmp = RememberedCharID;
-					++RememberedCharID;
-					feign_memory_list.erase(tmp);
-					got_one = true;
+					RememberedCharID = feign_memory_list.erase(RememberedCharID);
 					break;
 				} else {
 					//they are still feigned, carry on...
@@ -1405,22 +1399,16 @@ void Mob::AI_Process() {
 			// EverHood - 6/14/06
 			// Improved Feign Death Memory
 			// check to see if any of our previous feigned targets have gotten up.
-			std::set<uint32>::iterator RememberedCharID, tmp;
+			std::set<uint32>::iterator RememberedCharID;
 			RememberedCharID = feign_memory_list.begin();
-			bool got_one = false;
 			while (RememberedCharID != feign_memory_list.end()) {
 				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
 				if (remember_client == nullptr) {
 					//they are gone now...
-					tmp = RememberedCharID;
-					++RememberedCharID;
-					feign_memory_list.erase(tmp);
+					RememberedCharID = feign_memory_list.erase(RememberedCharID);
 				} else if (!remember_client->GetFeigned()) {
 					AddToHateList(remember_client->CastToMob(),1);
-					tmp = RememberedCharID;
-					++RememberedCharID;
-					feign_memory_list.erase(tmp);
-					got_one = true;
+					RememberedCharID = feign_memory_list.erase(RememberedCharID);
 					break;
 				} else {
 					//they are still feigned, carry on...
