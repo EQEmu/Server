@@ -1347,7 +1347,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spellid, uint32 heal_possible) {
 	for (int o = 0; o < EFFECT_COUNT; o++) {
 		switch(spells[spell_id].effectid[o]) {
 			case SE_CurrentHP: {
-				AggroAmount += spells[spell_id].mana;
+				AggroAmount += IsBuffSpell(spell_id) ? spells[spell_id].mana / 4 : spells[spell_id].mana;
 				break;
 			}
 			case SE_Rune: {
