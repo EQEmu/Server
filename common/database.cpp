@@ -2834,6 +2834,26 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 	return 0;
 }
 
+void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &charid_list) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char *query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charid FROM instance_lockout_player WHERE id=%u", instance_id), errbuf, &result)) {
+		safe_delete_array(query);
+		while ((row = mysql_fetch_row(result)))
+		{
+			charid_list.push_back(atoi(row[0]));
+		}
+		mysql_free_result(result);
+	}
+	else {
+		LogFile->write(EQEMuLog::Error, "Error in GetCharactersInInstace query '%s': %s", query, errbuf);
+		safe_delete_array(query);
+	}
+}
+
 void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];

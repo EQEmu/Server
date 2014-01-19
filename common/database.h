@@ -163,6 +163,7 @@ public:
 	uint16 GetInstanceVersion(uint16 instance_id);
 	uint16 GetInstanceID(const char* zone, uint32 charid, int16 version);
 	uint16 GetInstanceID(uint32 zone, uint32 charid, int16 version);
+	void GetCharactersInInstance(uint16 instance_id, std::list<uint32> &charid_list);
 	void AssignGroupToInstance(uint32 gid, uint32 instance_id);
 	void AssignRaidToInstance(uint32 rid, uint32 instance_id);
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version, uint32 charid, uint32 gid);

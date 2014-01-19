@@ -781,6 +781,21 @@ int lua_get_zone_instance_version() {
 	return zone->GetInstanceVersion();
 }
 
+luabind::object lua_get_characters_in_instance(lua_State *L, uint16 instance_id) {
+	luabind::object ret = luabind::newtable(L);
+
+	std::list<uint32> charid_list;
+	uint16 i = 1;
+	database.GetCharactersInInstance(instance_id,charid_list);
+	auto iter = charid_list.begin();
+	while(iter != charid_list.end()) {
+		ret[i] = *iter;
+		++i;
+		++iter;
+	}
+	return ret;
+}
+
 int lua_get_zone_weather() {
 	if(!zone)
 		return 0;
@@ -1164,6 +1179,7 @@ luabind::scope lua_register_general() {
 		luabind::def("create_instance", &lua_create_instance),
 		luabind::def("destroy_instance", &lua_destroy_instance),
 		luabind::def("get_instance_id", &lua_get_instance_id),
+		luabind::def("get_characters_in_instance", &lua_get_characters_in_instance),
 		luabind::def("assign_to_instance", &lua_assign_to_instance),
 		luabind::def("assign_group_to_instance", &lua_assign_group_to_instance),
 		luabind::def("assign_raid_to_instance", &lua_assign_raid_to_instance),

@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/18/2014 ==
+sorvani: Implemented for Lua eq.get_characters_in_instance(uint16 instance_id), return a Lua HashTable
+
 == 01/13/2014 ==
 Kayen: Numerous minor fixes to spell effects.
 Kayen: Changed SE_ArcheryDoubleAttack -> SE_DoubleRangedAttack (now works with throwing ect)
