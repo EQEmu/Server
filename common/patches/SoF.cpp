@@ -708,8 +708,20 @@ ENCODE(OP_NewZone) {
 	}
 	OUT(gravity);
 	OUT(time_type);
-	for(r = 16; r < 48; r++) {
-		eq->unknown521[r] = 0xFF;	//observed
+	for(r = 0; r < 4; r++) {
+		OUT(rain_chance[r]);
+	}
+	for(r = 0; r < 4; r++) {
+		OUT(rain_duration[r]);
+	}
+	for(r = 0; r < 4; r++) {
+		OUT(snow_chance[r]);
+	}
+	for(r = 0; r < 4; r++) {
+		OUT(snow_duration[r]);
+	}
+	for(r = 0; r < 32; r++) {
+		eq->unknown537[r] = 0xFF;	//observed
 	}
 	OUT(sky);
 	OUT(zone_exp_multiplier);

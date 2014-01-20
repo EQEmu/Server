@@ -429,11 +429,6 @@ public:
 	bool	SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz);
 
 	/*
-	* Weather
-	*/
-	uint8	GetZoneWeather(uint32 zoneid, uint32 version);
-	bool	SetZoneWeather(uint32 zoneid, uint32 version, uint8 w);
-	/*
 	* Group
 	*/
 	void RefreshGroupFromDB(Client *c);

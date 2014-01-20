@@ -94,7 +94,11 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 		"fog_red4,fog_green4,fog_blue4,fog_minclip4,fog_maxclip4,fog_density,"
 		"sky,zone_exp_multiplier,safe_x,safe_y,safe_z,underworld,"
 		"minclip,maxclip,time_type,canbind,cancombat,canlevitate,"
-		"castoutdoor,hotzone,ruleset,suspendbuffs,map_file_name,short_name"
+		"castoutdoor,hotzone,ruleset,suspendbuffs,map_file_name,short_name,"
+		"rain_chance1,rain_chance2,rain_chance3,rain_chance4,"
+		"rain_duration1,rain_duration2,rain_duration3,rain_duration4,"
+		"snow_chance1,snow_chance2,snow_chance3,snow_chance4,"
+		"snow_duration1,snow_duration2,snow_duration3,snow_duration4"
 		" from zone where zoneidnumber=%i and version=%i",zoneid, instance_id), errbuf, &result)) {
 		safe_delete_array(query);
 		row = mysql_fetch_row(result);
@@ -145,6 +149,18 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 			else
 			{
 				strcpy(*map_filename, row[r++]);
+			}
+			for(i=0;i<4;i++){
+				zone_data->rain_chance[i]=atoi(row[r++]);
+			}
+			for(i=0;i<4;i++){
+				zone_data->rain_duration[i]=atoi(row[r++]);
+			}
+			for(i=0;i<4;i++){
+				zone_data->snow_chance[i]=atoi(row[r++]);
+			}
+			for(i=0;i<4;i++){
+				zone_data->snow_duration[i]=atof(row[r++]);
 			}
 			good = true;
 		}
@@ -2196,55 +2212,6 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
 	return false;
 }
 //End new timezone functions.
-
-
-//Functions for weather
-uint8 ZoneDatabase::GetZoneWeather(uint32 zoneid, uint32 version) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT weather FROM zone WHERE zoneidnumber=%i AND (version=%i OR version=0) ORDER BY version DESC", zoneid, version), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) > 0) {
-			row = mysql_fetch_row(result);
-			uint8 tmp = atoi(row[0]);
-			mysql_free_result(result);
-			return tmp;
-		}
-		mysql_free_result(result);
-	}
-
-	else {
-		std::cerr << "Error in GetZoneWeather query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
-	return 0;
-}
-
-bool ZoneDatabase::SetZoneWeather(uint32 zoneid, uint32 version, uint8 w) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "UPDATE zone SET weather=%i WHERE zoneidnumber=%i AND version=%i", w, zoneid, version), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		if (affected_rows == 1)
-			return true;
-		else
-			return false;
-	}
-	else {
-		std::cerr << "Error in SetZoneWeather query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return false;
-	}
-
-	return false;
-}
-//End weather functions.
 
 /*
  solar: this is never actually called, client_process starts an async query

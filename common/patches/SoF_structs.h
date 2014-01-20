@@ -382,7 +382,11 @@ struct NewZone_Struct {
 /*0500*/	float	fog_maxclip[4];
 /*0516*/	float	gravity;
 /*0520*/	uint8	time_type;
-/*0521*/	uint8	unknown521[49];
+/*0521*/    uint8   rain_chance[4];
+/*0525*/    uint8   rain_duration[4];
+/*0529*/    uint8   snow_chance[4];
+/*0533*/    uint8   snow_duration[4];
+/*0537*/    uint8   unknown537[33];
 /*0570*/	uint8	sky;					// Sky Type
 /*0571*/	uint8	unknown571[13];			// ***Placeholder
 /*0584*/	float	zone_exp_multiplier;	// Experience Multiplier

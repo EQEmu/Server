@@ -2123,6 +2123,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Stop Rain");
 #endif
 				zone->zone_weather = 0;
+				zone->weather_intensity = 0;
 				zone->weatherSend();
 				break;
 			}
