@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/20/2014 ==
+cavedude: Live-Like weather system (Thanks to robregen for figuring it out!)
+
 == 01/18/2014 ==
 sorvani: Implemented for Lua eq.get_characters_in_instance(uint16 instance_id), return a Lua HashTable
 demonstar55: NPCs will now cast their charms.
