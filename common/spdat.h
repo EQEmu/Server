@@ -710,7 +710,9 @@ struct SPDat_Spell_Struct
 /* 193 */	int NimbusEffect;
 /* 194 */	float directional_start;
 /* 195 */	float directional_end;
-/* 196 - 199 */
+/* 196 */
+/* 197 */	bool not_extendable;
+/* 198- 199 */
 /* 200 */	bool suspendable; // buff is suspended in suspended buff zones
 /* 201 - 202 */
 /* 203 */	//int songcap; // individual song cap (how live currently does it, not implemented)

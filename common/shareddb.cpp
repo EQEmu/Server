@@ -1730,6 +1730,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].NimbusEffect = atoi(row[193]);
 			sp[tempid].directional_start = (float)atoi(row[194]);
 			sp[tempid].directional_end = (float)atoi(row[195]);
+			sp[tempid].not_extendable = atoi(row[197]) != 0;
 			sp[tempid].suspendable = atoi(row[200]) != 0;
 			sp[tempid].spellgroup=atoi(row[207]);
 			sp[tempid].powerful_flag=atoi(row[209]);

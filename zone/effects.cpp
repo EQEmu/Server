@@ -400,14 +400,16 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 
 int32 Client::GetActSpellDuration(uint16 spell_id, int32 duration)
 {
+	if (spells[spell_id].not_extendable)
+		return duration;
+
 	int increase = 100;
 	increase += GetFocusEffect(focusSpellDuration, spell_id);
 	int tic_inc = 0;
 	tic_inc = GetFocusEffect(focusSpellDurByTic, spell_id);
 
-	if(IsBeneficialSpell(spell_id))
-	{
-		switch(GetAA(aaSpellCastingReinforcement)) {
+	if (IsBeneficialSpell(spell_id)) {
+		switch (GetAA(aaSpellCastingReinforcement)) {
 		case 1:
 			increase += 5;
 			break;
@@ -422,16 +424,16 @@ int32 Client::GetActSpellDuration(uint16 spell_id, int32 duration)
 		}
 	}
 
-	if(IsMezSpell(spell_id)) {
+	if (IsMezSpell(spell_id))
 		tic_inc += GetAA(aaMesmerizationMastery);
-	}
+
 	// Only need this for clients, since the change was for bard songs, I assume we should keep non bard songs getting +1
 	// However if its bard or not and is mez, charm or fear, we need to add 1 so that client is in sync
-	if(!IsShortDurationBuff(spell_id) ||
-		IsFearSpell(spell_id) ||
-		IsCharmSpell(spell_id) ||
-		IsMezSpell(spell_id) ||
-		IsBlindSpell(spell_id))
+	if (!IsShortDurationBuff(spell_id) ||
+			IsFearSpell(spell_id) ||
+			IsCharmSpell(spell_id) ||
+			IsMezSpell(spell_id) ||
+			IsBlindSpell(spell_id))
 		tic_inc += 1;
 
 	return (((duration * increase) / 100) + tic_inc);
