@@ -408,22 +408,6 @@ int32 Client::GetActSpellDuration(uint16 spell_id, int32 duration)
 	int tic_inc = 0;
 	tic_inc = GetFocusEffect(focusSpellDurByTic, spell_id);
 
-	if (IsBeneficialSpell(spell_id)) {
-		switch (GetAA(aaSpellCastingReinforcement)) {
-		case 1:
-			increase += 5;
-			break;
-		case 2:
-			increase += 15;
-			break;
-		case 3:
-			increase += 30;
-			if (GetAA(aaSpellCastingReinforcementMastery) == 1)
-				increase += 20;
-			break;
-		}
-	}
-
 	if (IsMezSpell(spell_id))
 		tic_inc += GetAA(aaMesmerizationMastery);
 
