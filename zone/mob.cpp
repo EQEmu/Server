@@ -178,6 +178,7 @@ Mob::Mob(const char* in_name,
 	findable	= false;
 	trackable	= true;
 	has_shieldequiped = false;
+	has_numhits = false;
 
 	if(in_aa_title>0)
 		aa_title	= in_aa_title;
@@ -2732,21 +2733,9 @@ void Mob::Warp( float x, float y, float z )
 
 bool Mob::DivineAura() const
 {
-	uint32 l;
-	uint32 buff_count = GetMaxTotalSlots();
-	for (l = 0; l < buff_count; l++)
-	{
-		if (buffs[l].spellid != SPELL_UNKNOWN)
-		{
-			for (int k = 0; k < EFFECT_COUNT; k++)
-			{
-				if (spells[buffs[l].spellid].effectid[k] == SE_DivineAura)
-				{
-					return true;
-				}
-			}
-		}
-	}
+	if (spellbonuses.DivineAura)
+		return true;
+
 	return false;
 }
 
@@ -3156,7 +3145,7 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 
 		if(IsValidSpell(trigger_spell_id) && GetTarget()){
 			SpellFinished(trigger_spell_id, GetTarget(),10, 0, -1, spells[trigger_spell_id].ResistDiff);
-			CheckHitsRemaining(0, false,false, 0, focus_spell);
+			CheckNumHitsRemaining(7,0, focus_spell);
 		}
 	}
 }
@@ -3361,7 +3350,7 @@ int32 Mob::GetVulnerability(int32 damage, Mob *caster, uint32 spell_id, uint32 t
 
 	//Apply spell derived vulnerabilities
 	if (spellbonuses.FocusEffects[focusSpellVulnerability]){
-
+	
 		int32 tmp_focus = 0;
 		int tmp_buffslot = -1;
 
@@ -3394,7 +3383,7 @@ int32 Mob::GetVulnerability(int32 damage, Mob *caster, uint32 spell_id, uint32 t
 		damage += damage * tmp_focus / 100;
 
 		if (tmp_buffslot >= 0)
-			CheckHitsRemaining(tmp_buffslot);
+			CheckNumHitsRemaining(7, tmp_buffslot);
 	}
 	return damage;
 }
@@ -3402,7 +3391,7 @@ int32 Mob::GetVulnerability(int32 damage, Mob *caster, uint32 spell_id, uint32 t
 int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 {
 	int skilldmg_mod = 0;
-
+	
 	// All skill dmg mod + Skill specific
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
@@ -3414,8 +3403,7 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	if(skilldmg_mod < -100)
 		skilldmg_mod = -100;
 
-	if (spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] || spellbonuses.SkillDmgTaken[skill_used])
-		CheckHitsRemaining(0, false,false, SE_SkillDamageTaken,0,true,skill_used);
+	CheckNumHitsRemaining(6);
 
 	return skilldmg_mod;
 }
@@ -3458,7 +3446,7 @@ bool Mob::TryFadeEffect(int slot)
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
 			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnWearoff || spells[buffs[slot].spellid].effectid[i] == SE_EffectOnFade
-				|| spells[buffs[slot].spellid].effectid[i] == SE_TriggerMeleeThreshold)
+				|| spells[buffs[slot].spellid].effectid[i] == SE_TriggerMeleeThreshold || spells[buffs[slot].spellid].effectid[i] == SE_TriggerSpellThreshold)
 			{
 				uint16 spell_id = spells[buffs[slot].spellid].base[i];
 				BuffFadeBySlot(slot);
@@ -3515,7 +3503,8 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 				else
 					SpellFinished(focus_trigger, target, 10, 0, -1, spells[focus_trigger].ResistDiff);
 			}
-			CheckHitsRemaining(0, false,false, 0, focus_spell);
+			
+			CheckNumHitsRemaining(7, 0, focus_spell);
 		}
 }
 
@@ -4289,9 +4278,6 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 	if(dmg_mod < -100)
 		dmg_mod = -100;
 
-	if (spellbonuses.DamageModifier[HIGHEST_SKILL+1] || spellbonuses.DamageModifier[skill])
-		CheckHitsRemaining(0, false, false, SE_DamageModifier,0,true,skill);
-
 	return dmg_mod;
 }
 
@@ -4338,13 +4324,8 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 	skill_dmg += spellbonuses.SkillDamageAmount2[HIGHEST_SKILL+1] + itembonuses.SkillDamageAmount2[HIGHEST_SKILL+1]
 				+ itembonuses.SkillDamageAmount2[skill] + spellbonuses.SkillDamageAmount2[skill];
 
-	// Deplete the buff if needed
-	if (spellbonuses.SkillDamageAmount[HIGHEST_SKILL+1] || spellbonuses.SkillDamageAmount[skill])
-		CheckHitsRemaining(0, false,false, SE_SkillDamageAmount,0,true,skill);
-
-	if (spellbonuses.SkillDamageAmount2[HIGHEST_SKILL+1] || spellbonuses.SkillDamageAmount2[skill])
-		CheckHitsRemaining(0, false,false, SE_SkillDamageAmount2,0,true,skill);
-
+	CheckNumHitsRemaining(5);
+	
 	return skill_dmg;
 }
 
@@ -4352,10 +4333,7 @@ bool Mob::TryReflectSpell(uint32 spell_id)
 {
 	if(!GetTarget())
 		return false;
-
-	if(GetTarget()->spellbonuses.reflect_chance)
-		CheckHitsRemaining(0, false, false, SE_Reflect);
-
+	
 	if(MakeRandomInt(0, 99) < (GetTarget()->itembonuses.reflect_chance + GetTarget()->spellbonuses.reflect_chance))
 		return true;
 
@@ -4582,8 +4560,6 @@ void Mob::CastOnNumHitFade(uint32 spell_id)
 {
 	if(!IsValidSpell(spell_id))
 		return;
-
-	uint32 buff_max = GetMaxTotalSlots();
 
 	for(int i = 0; i < EFFECT_COUNT; i++)
 	{

@@ -251,8 +251,9 @@ public:
 	int16 GetBuffSlotFromType(uint16 type);
 	uint16 GetSpellIDFromSlot(uint8 slot);
 	int CountDispellableBuffs();
-	bool CheckHitsRemaining(uint32 buff_slot, bool when_spell_done=false, bool negate=false,uint16 type=0,
-		uint16 spell_id=0, bool use_skill=false,uint16 skill=0);
+	void CheckNumHitsRemaining(uint8 type, uint32 buff_slot=0, uint16 spell_id=SPELL_UNKNOWN);
+	bool HasNumhits() const { return has_numhits; }
+	inline void Numhits(bool val) { has_numhits = val; }
 	void SpreadVirus(uint16 spell_id, uint16 casterID);
 	bool IsNimbusEffectActive(uint32 nimbus_effect);
 	void SetNimbusEffect(uint32 nimbus_effect);
@@ -656,6 +657,7 @@ public:
 
 	int32 ReduceDamage(int32 damage);
 	int32 AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
+	int32 ReduceAllDamage(int32 damage);
 
 	virtual void DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance=false);
 	virtual void DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const Item_Struct* item=nullptr, uint16 weapon_damage=0, int16 chance_mod=0,int16 focus=0);
@@ -1055,6 +1057,7 @@ protected:
 	int16 rooted_mod; //Modifier to root break chance, defined when root is cast on a target.
 	bool offhand;
 	bool has_shieldequiped;
+	bool has_numhits;
 
 	// Bind wound
 	Timer bindwound_timer;

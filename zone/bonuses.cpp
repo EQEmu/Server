@@ -1148,7 +1148,6 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
-
 			case SE_DivineSave:
 			{
 				if(newbon->DivineSaveChance[0] < base1)
@@ -2460,6 +2459,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->TriggerOnValueAmount = true;
 				break;
 
+			case SE_DivineAura:
+				newbon->DivineAura = true;
+				break;
+
 		}
 	}
 }
@@ -3767,6 +3770,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.TriggerSpellThreshold[0] = effect_value;
 					spellbonuses.TriggerSpellThreshold[1] = effect_value;
 					spellbonuses.TriggerSpellThreshold[2] = effect_value;
+					break;
+
+				case SE_DivineAura:
+					spellbonuses.DivineAura = false;
 					break;
 			
 			}

@@ -182,9 +182,6 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 		//The old code basically meant that any in high level (50+) combat,
 		//both parties always had 95% chance to hit the other one.
 /*/
-	//If chance bonus set in spell data for Skill Attacks is 10k allow to hit without calculations.
-	if (chance_mod == 10000)
-		return true;
 
 	Mob *attacker=other;
 	Mob *defender=this;
@@ -281,8 +278,6 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	if(bonus > 0) {
 		chancetohit -= ((bonus * chancetohit) / 1000);
 		mlog(COMBAT__TOHIT, "Applied avoidance chance %.2f/10, yeilding %.2f", bonus, chancetohit);
-		if (defender->spellbonuses.AvoidMeleeChance)
-			defender->CheckHitsRemaining(0, false, false,SE_AvoidMeleeChance);
 	}
 
 	if(attacker->IsNPC())
@@ -329,6 +324,11 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	else if(chancetohit < 5) {
 		chancetohit = 5;
 	}
+
+	CheckNumHitsRemaining(1);
+	
+	if (attacker)
+		attacker->CheckNumHitsRemaining(2);
 
 	//I dont know the best way to handle a garunteed hit discipline being used
 	//agains a garunteed riposte (for example) discipline... for now, garunteed hit wins
@@ -1117,6 +1117,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		mlog(COMBAT__ATTACKS, "Attack canceled, invalid circumstances.");
 		return false; // Only bards can attack while casting
 	}
+
 	if(DivineAura() && !GetGM()) {//cant attack while invulnerable unless your a gm
 		mlog(COMBAT__ATTACKS, "Attack canceled, Divine Aura is in effect.");
 		Message_StringID(MT_DefaultText, DIVINE_AURA_NO_ATK);	//You can't attack while invulnerable!
@@ -1247,7 +1248,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
 		}
-
+				
 		//check to see if we hit..
 		if(!other->CheckHitChance(this, skillinuse, Hand)) {
 			mlog(COMBAT__ATTACKS, "Attack missed. Damage set to 0.");
@@ -1326,8 +1327,6 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		//heal self for damage done..
 		HealDamage(lifetap_amt);
 
-		if (spellbonuses.MeleeLifetap)
-			CheckHitsRemaining(0, false,false, SE_MeleeLifetap);
 	}
 
 	//break invis when you attack
@@ -2058,6 +2057,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 		}
 	} else {
+
 		char buffer[48] = { 0 };
 		snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
 		if(parse->EventNPC(EVENT_DEATH, this, nullptr, buffer, 0) != 0)
@@ -3128,8 +3128,12 @@ int32 Mob::ReduceDamage(int32 damage)
 	if (spellbonuses.NegateAttacks[0]){
 		slot = spellbonuses.NegateAttacks[1];
 		if(slot >= 0) {
-			if(CheckHitsRemaining(slot, false, true))
-				return -6;
+			if(--buffs[slot].numhits == 0) {
+				
+				if(!TryFadeEffect(slot))
+					BuffFadeBySlot(slot , true);
+			}
+			return -6;
 		}
 	}
 
@@ -3156,7 +3160,6 @@ int32 Mob::ReduceDamage(int32 damage)
 					" damage remaining.", damage_to_reduce, buffs[slot].melee_rune);
 				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
 				damage -= damage_to_reduce;
-				CheckHitsRemaining(slot);
 			}
 		}
 	}
@@ -3182,8 +3185,7 @@ int32 Mob::ReduceDamage(int32 damage)
 					" damage remaining.", damage_to_reduce, buffs[slot].melee_rune);
 				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
 				damage -= damage_to_reduce;
-				if (!CheckHitsRemaining(slot))
-					UpdateRuneFlags();
+				UpdateRuneFlags();
 			}
 		}
 	}
@@ -3198,7 +3200,6 @@ int32 Mob::ReduceDamage(int32 damage)
 			}
 			else{
 				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage);
-				CheckHitsRemaining(slot);
 			}
 		}
 	}
@@ -3211,16 +3212,6 @@ int32 Mob::ReduceDamage(int32 damage)
 
 	if(damage < 1)
 		return -6;
-
-	if (spellbonuses.ManaAbsorbPercentDamage[0]){
-		slot = spellbonuses.ManaAbsorbPercentDamage[1];
-		if(GetMana() > damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100) {
-			damage -= (damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100);
-			SetMana(GetMana() - damage);
-			TryTriggerOnValueAmount(false, true);
-			CheckHitsRemaining(slot);
-		}
-	}
 
 	return(damage);
 }
@@ -3237,8 +3228,12 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	if (spellbonuses.NegateAttacks[0]){
 		slot = spellbonuses.NegateAttacks[1];
 		if(slot >= 0) {
-			if(CheckHitsRemaining(slot, false, true))
-				return 0;
+			if(--buffs[slot].numhits == 0) {
+				
+				if(!TryFadeEffect(slot))
+					BuffFadeBySlot(slot , true);
+			}
+			return 0;
 		}
 	}
 
@@ -3272,7 +3267,6 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 				{
 					buffs[slot].melee_rune = (buffs[slot].magic_rune - damage_to_reduce);
 					damage -= damage_to_reduce;
-					CheckHitsRemaining(slot);
 				}
 			}
 		}
@@ -3299,8 +3293,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 						" damage remaining.", damage_to_reduce, buffs[slot].magic_rune);
 					buffs[slot].magic_rune = (buffs[slot].magic_rune - damage_to_reduce);
 					damage -= damage_to_reduce;
-					if (!CheckHitsRemaining(slot))
-						UpdateRuneFlags();
+					UpdateRuneFlags();
 				}
 			}
 		}
@@ -3315,7 +3308,6 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 				}
 				else{
 					buffs[slot].melee_rune = (buffs[slot].magic_rune - damage);
-					CheckHitsRemaining(slot);
 				}
 			}
 		}
@@ -3329,18 +3321,24 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 
 		if(damage < 1)
 			return 0;
-
-		if (spellbonuses.ManaAbsorbPercentDamage[0]){
-			slot = spellbonuses.ManaAbsorbPercentDamage[1];
-			if(GetMana() > damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100) {
-				damage -= (damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100);
-				SetMana(GetMana() - damage);
-				TryTriggerOnValueAmount(false, true);
-				CheckHitsRemaining(slot);
-			}
-		}
 	}
 	return damage;
+}
+
+int32 Mob::ReduceAllDamage(int32 damage)
+{
+	if(damage <= 0)
+		return damage;
+
+	if(spellbonuses.ManaAbsorbPercentDamage[0] && (GetMana() > damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100)) {
+		damage -= (damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100);
+		SetMana(GetMana() - damage);
+		TryTriggerOnValueAmount(false, true);
+	}
+	
+	CheckNumHitsRemaining(8);
+
+	return(damage);
 }
 
 bool Mob::HasProcs() const
@@ -3441,9 +3439,6 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 	// damage shield calls this function with spell_id set, so its unavoidable
 	if (attacker && damage > 0 && spell_id == SPELL_UNKNOWN && skill_used != SkillArchery && skill_used != SkillThrowing) {
 		DamageShield(attacker);
-
-		if (spellbonuses.DamageShield)
-			CheckHitsRemaining(0, false, false, SE_DamageShield);
 	}
 
 	if(attacker){
@@ -3511,11 +3506,12 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			}
 			if (damage == 0 && attacker && origdmg != damage && IsClient()) {
 				//Kayen: Probably need to add a filter for this - Not sure if this msg is correct but there should be a message for spell negate/runes.
-				Message(263, "%s tries to cast on you, but YOUR magical skin absorbs the spell.",attacker->GetCleanName());
+				Message(263, "%s tries to cast on YOU, but YOUR magical skin absorbs the spell.",attacker->GetCleanName());
 			}
 
 		}
 
+	ReduceAllDamage(damage);
 
 	if(IsClient() && CastToClient()->sneaking){
 		CastToClient()->sneaking = false;
@@ -3919,7 +3915,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 					int chance = ProcChance * (DefensiveProcs[i].chance);
 					if ((MakeRandomInt(0, 100) < chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
-						CheckHitsRemaining(0, false, false, 0, DefensiveProcs[i].base_spellID);
+						CheckNumHitsRemaining(10,0,DefensiveProcs[i].base_spellID);
 					}
 				}
 			}
@@ -4087,6 +4083,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 				if(MakeRandomInt(0, 100) < chance) {
 					mlog(COMBAT__PROCS, "Spell proc %d procing spell %d (%d percent chance)", i, SpellProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
+					CheckNumHitsRemaining(11, 0, SpellProcs[i].base_spellID);
 				} else {
 					mlog(COMBAT__PROCS, "Spell proc %d failed to proc %d (%d percent chance)", i, SpellProcs[i].spellID, chance);
 				}
@@ -4097,7 +4094,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 			if(MakeRandomInt(0, 100) < chance) {
 				mlog(COMBAT__PROCS, "Ranged proc %d procing spell %d", i, RangedProcs[i].spellID, RangedProcs[i].chance);
 				ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
-				CheckHitsRemaining(0, false, false, 0, RangedProcs[i].base_spellID);
+				CheckNumHitsRemaining(11, 0, RangedProcs[i].base_spellID);
 			} else {
 				mlog(COMBAT__PROCS, "Ranged proc %d failed to proc %d", i, RangedProcs[i].spellID, RangedProcs[i].chance);
 			}
@@ -4358,10 +4355,6 @@ void Mob::ApplyMeleeDamageBonus(uint16 skill, int32 &damage){
 	}
 
 	damage += damage * GetMeleeDamageMod_SE(skill) / 100;
-
-	//Rogue sneak attack disciplines make use of this, they are active for one hit
-	if (spellbonuses.HitChanceEffect[HIGHEST_SKILL+1] || spellbonuses.HitChanceEffect[skill])
-		CheckHitsRemaining(0, false, false, SE_HitChance,0,true,skill);
 }
 
 bool Mob::HasDied() {
@@ -4435,7 +4428,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 				int ProcChance = chance * (float)SkillProcs[i].chance;
 				if ((MakeRandomInt(0, 100) < ProcChance)) {
 					ExecWeaponProc(nullptr, SkillProcs[i].spellID, on);
-					CheckHitsRemaining(0, false, false, 0, SkillProcs[i].base_spellID);
+					CheckNumHitsRemaining(11,0, SkillProcs[i].base_spellID);
 				}
 			}
 		}
