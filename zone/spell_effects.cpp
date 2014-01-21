@@ -5254,7 +5254,6 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
 		if(buff_tracker >= 0 && buffs[buff_tracker].numhits > 0) {
 			m_spellHitsLeft[buff_tracker] = focusspell_tracker;
-			Shout("SET FOCUS SPELLL TRACKER ARRAY [%i]", m_spellHitsLeft[buff_tracker]);
 		}
 	}
 
