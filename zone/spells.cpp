@@ -1538,6 +1538,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		}
 
 		case ST_UndeadAE:	//should only affect undead...
+		case ST_TargetAETap:
 		case ST_AETarget:
 		{
 			if(!spell_target)

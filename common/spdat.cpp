@@ -104,7 +104,9 @@ bool IsLifetapSpell(uint16 spell_id)
 {
 	// Ancient Lifebane: 2115
 	if (IsValidSpell(spell_id) &&
-			(spells[spell_id].targettype == ST_Tap || spell_id == 2115))
+			(spells[spell_id].targettype == ST_Tap ||
+			 spells[spell_id].targettype == ST_TargetAETap ||
+			 spell_id == 2115))
 		return true;
 
 	return false;
