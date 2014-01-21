@@ -5,6 +5,7 @@ cavedude: Live-Like weather system (Thanks to robregen for figuring it out!)
 demonstar55: Implemented not_extendable spell flag
 demonstar55: Moved Spell Casting Reinforcement to DB
 demonstar55: Moved Mez Mastery to DB
+Kayen: Complete revision of the numhits systems to utilize 'numhits type' field in spell file.
 
 == 01/18/2014 ==
 sorvani: Implemented for Lua eq.get_characters_in_instance(uint16 instance_id), return a Lua HashTable

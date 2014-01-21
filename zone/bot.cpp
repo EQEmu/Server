@@ -6604,9 +6604,6 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
 		//heal self for damage done..
 		HealDamage(lifetap_amt);
-
-		if (spellbonuses.MeleeLifetap)
-			CheckHitsRemaining(0, false,false, SE_MeleeLifetap);
 	}
 
 	//break invis when you attack

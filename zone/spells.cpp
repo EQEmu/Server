@@ -1234,16 +1234,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			return;
 		}
 	}
-	if(IsClient()) {
-		uint32 buff_max = GetMaxTotalSlots();
-		for (int buffSlot = 0; buffSlot < buff_max; buffSlot++) {
-			if (buffs[buffSlot].spellid == 0 || buffs[buffSlot].spellid >= SPDAT_RECORDS)
-				continue;
 
-			if(spells[buffs[buffSlot].spellid].numhits > 0)
-				CheckHitsRemaining(buffSlot, true);
-		}
-
+	if(IsClient()) {		
+		CheckNumHitsRemaining(7);
 		TrySympatheticProc(target, spell_id);
 	}
 
@@ -3369,7 +3362,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			if(IsEffectInSpell(buffs[b].spellid, SE_BlockNextSpellFocus)) {
 				focus = CalcFocusEffect(focusBlockNextSpell, buffs[b].spellid, spell_id);
 				if(focus) {
-					CheckHitsRemaining(b);
+					CheckNumHitsRemaining(7,b);
 					Message_StringID(MT_SpellFailure, SPELL_WOULDNT_HOLD);
 					safe_delete(action_packet);
 					return false;
@@ -3418,11 +3411,15 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 		if(reflect_chance) {
 			Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
+			CheckNumHitsRemaining(9);
 			SpellOnTarget(spell_id, this, true, use_resist_adjust, resist_adjust);
 			safe_delete(action_packet);
 			return false;
 		}
 	}
+
+	if (spelltar && IsDetrimentalSpell(spell_id))
+		spelltar->CheckNumHitsRemaining(3);
 
 	// resist check - every spell can be resisted, beneficial or not
 	// add: ok this isn't true, eqlive's spell data is fucked up, buffs are
@@ -3563,14 +3560,12 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			}
 		}
 
-		if(spelltar->spellbonuses.SpellDamageShield && IsDetrimentalSpell(spell_id)){
-			spelltar->DamageShield(this, true);
-			spelltar->CheckHitsRemaining(0, false, false, SE_DamageShield);
-		}
+	if(spelltar->spellbonuses.SpellDamageShield && IsDetrimentalSpell(spell_id))
+		spelltar->DamageShield(this, true);
 
 	TrySpellTrigger(spelltar, spell_id);
 	TryApplyEffect(spelltar, spell_id);
-
+	
 	if (spelltar->IsAIControlled() && IsDetrimentalSpell(spell_id) && !IsHarmonySpell(spell_id)) {
 		int32 aggro_amount = CheckAggroAmount(spell_id, isproc);
 		mlog(SPELLS__CASTING, "Spell %d cast on %s generated %d hate", spell_id, spelltar->GetName(), aggro_amount);
@@ -4342,9 +4337,6 @@ int16 Mob::CalcResistChanceBonus()
 
 	if(IsClient())
 		resistchance += aabonuses.ResistSpellChance;
-
-	if (spellbonuses.ResistSpellChance)
-		CheckHitsRemaining(0, false, false, SE_ResistSpellChance);
 
 	return resistchance;
 }

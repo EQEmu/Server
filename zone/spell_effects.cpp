@@ -183,6 +183,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			numhit += caster->CastToClient()->GetFocusEffect(focusIncreaseNumHits, spell_id);
 		}
 		
+		Numhits(true);
 		buffs[buffslot].numhits = numhit;
 	}
 
@@ -3881,6 +3882,25 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		}
 	}
 
+	if (HasNumhits()){
+
+		uint32 buff_max = GetMaxTotalSlots();
+		bool found_numhits = false;
+		
+		for(uint32 d = 0; d < buff_max; d++) {
+	
+			if(IsValidSpell(buffs[d].spellid) && (buffs[d].numhits > 0)) {
+				Numhits(true);
+				found_numhits = true;
+			}
+		}
+
+		if (!found_numhits)
+			Numhits(false);
+	}
+
+	Numhits(false);
+
 	buffs[slot].spellid = SPELL_UNKNOWN;
 	if(IsPet() && GetOwner() && GetOwner()->IsClient()) {
 		SendPetBuffsToClient();
@@ -5274,123 +5294,91 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 	return realTotal + realTotal2 + realTotal3;
 }
 
-bool Mob::CheckHitsRemaining(uint32 buff_slot, bool when_spell_done, bool negate, uint16 type, uint16 spell_id,bool use_skill,uint16 skill)
+void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
 {
-
 	/*
-	TO DO: Rewrite code so it checks for numhits by type not after each specified spell effect is triggered...
 	Field 175 = numhits type
 	1:  [Incoming Hit Attempts] (323=SE_DefensiveProc, 172=SE_AvoidMeleeChance, 1=SE_ArmorClass, 40=SE_DivineAura)
-	2:  [Outgoing Hit Attempts]  (184=SE_DamageModifer, 185=SE_HitChance)
-	3:  [Incoming Spells]  (180=SE_ResistSpellChance, 296=SE_SpellVulnerability)
+	2:  [Outgoing Hit Attempts]  (185=SE_DamageModifer, 184=SE_HitChance)
+	3:  [Incoming Spells]  (180=SE_ResistSpellChance, 296=SE_SpellVulnerability) //Note: Determinetal spells only unless proven otherwise
 	4:  NONE
-	5:  [Outgoing Hit Successes] (196=SE_SkillDamageAmount, 178=SE_MeleeLifetap, 121=SE_ReverseDS, ?373=SE_CastOnWearoff)
+	5:  [Outgoing Hit Successes] (220=SE_SkillDamageAmount, 178=SE_MeleeLifetap, 121=SE_ReverseDS, ?373=SE_CastOnWearoff)
 	6:  [Incoming Hit Successes] (59=SE_DamageShield, 197=SE_SkillDamageTaken, 162=define SE_MitigateMeleeDamage)
 	7:  [Matching Spells] *When focus is triggered (focus effects)
 	8:  [Incoming Hits or Spells] (329=SE_ManaAbsorbPercentDamage)
-	9:  [Reflected Spells]
-	10: [Defensive Procs]
-	11: [Melee Procs]
+	9:  [Reflected Spells] If successful
+	10: [Defensive Procs] Only count down buff of the proc that executed
+	11: [Melee Procs] Only count down the buff of the proc that executed
 	*/
 
+	if (!HasNumhits())
+		return;
+
 	bool bDepleted = false;
-	//Effects: Cast:	SE_ResistSpellChance, SE_Reflect, SE_SpellDamageShield
-	//Effects: Attack:	SE_MeleeLifetap : SE_DamageShield, SE_AvoidMeleeChance, SE_SkillProc
-	//Effects: Skill:	SE_DamageModifier, SE_SkillDamageTaken, SE_SkillDamageAmount, SE_HitChance
-	//For spell buffs that are limited typically when you are attacked or are subject to an attack/cast and we do not know the buff slot.
-	if (type){
-		uint32 buff_max = GetMaxTotalSlots();
+	uint32 buff_max = GetMaxTotalSlots();
+
+	//Spell specific procs [Type 7,10,11]
+	if (IsValidSpell(spell_id)){
+		
 		for(uint32 d = 0; d < buff_max; d++) {
-			if((buffs[d].spellid != SPELL_UNKNOWN) && (buffs[d].numhits > 0) && IsEffectInSpell(buffs[d].spellid, type)){
-					if (!use_skill){
-						if(--buffs[d].numhits == 0) {
-							if(!TryFadeEffect(d)){
-								CastOnNumHitFade(buffs[d].spellid);
-								BuffFadeBySlot(d, true);
-							}
-						}
-					}
-					else{
-						bDepleted = false;
-						for (int j = 0; j < EFFECT_COUNT; j++) {
-							if (bDepleted)
-								continue;
-							if ((buffs[d].spellid != SPELL_UNKNOWN) && (spells[buffs[d].spellid].effectid[j] == type)) {
-								if(spells[buffs[d].spellid].base2[j] == -1 || spells[buffs[d].spellid].base2[j] == skill) {
-									bDepleted = true;
-									if(--buffs[d].numhits == 0) {
-										if(!TryFadeEffect(d)){
-											CastOnNumHitFade(buffs[d].spellid);
-											BuffFadeBySlot(d, true);
-											continue;
-										}
-									}
-								}
-							}
-						}
-					}
-			}
-		}
-	return false;
-	}
+		
+			if((buffs[d].spellid == spell_id) && (buffs[d].numhits > 0) && (spells[buffs[d].spellid].numhitstype == type)){
 
-	// For spell buffs that are limited by the number of times it can successfully trigger a spell.
-	// Effects: SE_TriggerOnCast, SE_SympatheticProc,SE_DefensiveProc, SE_SkillProc, SE_RangedProc
-	if(spell_id){
-		uint32 buff_count = GetMaxTotalSlots();
-		for(uint32 d = 0; d < buff_count; d++){
-			if((buffs[d].spellid != SPELL_UNKNOWN) && (buffs[d].numhits > 0) && buffs[d].spellid == spell_id){
 				if(--buffs[d].numhits == 0) {
-					if(!TryFadeEffect(d)){
-						CastOnNumHitFade(buffs[d].spellid);
-						BuffFadeBySlot(d, true);
-						return false;
-					}
-				}
-			}
-		}
-	return false;
-	}
-
-	// For focusTypes that limit the number of spell casts it will effect.
-	// Effect: Focus effects ie SE_ImprovedDamage ect
-	if(when_spell_done) {
-		uint32 buff_max = GetMaxTotalSlots();
-		// Go through all possible saved spells with limited hits, the place in the array is the same as the buff slot
-		for(int d = 0; d < buff_max; d++) {
-			if(!m_spellHitsLeft[d])
-				continue;
-			// Double check to make sure the saved spell matches the buff in that slot
-			if (m_spellHitsLeft[d] == buffs[d].spellid) {
-				if(buffs[d].numhits > 1) {
-					buffs[d].numhits--;
-					return true;
-				}
-				else {
+					CastOnNumHitFade(buffs[d].spellid);
 					if(!TryFadeEffect(d))
 						BuffFadeBySlot(d, true);
-						CastOnNumHitFade(m_spellHitsLeft[d]);
-						m_spellHitsLeft[d] = 0;
 				}
 			}
 		}
-	return false;
 	}
 
-	// For lowering numhits when we already know the effects buff_slot
-	// Effects: SE_SpellVulnerability,SE_MitigateMeleeDamage,SE_MitigateMeleeDamage2,SE_NegateAttacks,SE_MitigateSpellDamage,SE_ManaAbsorbPercentDamage
-	if(spells[buffs[buff_slot].spellid].numhits > 0 || negate) {
-		if(buffs[buff_slot].numhits > 1) {
-			buffs[buff_slot].numhits--;
-			return true;
-		}
-		else if(!TryFadeEffect(buff_slot)) {
-			CastOnNumHitFade(buffs[buff_slot].spellid);
-			BuffFadeBySlot(buff_slot, true);
-			return false;
+	else if (type == 7){
+		if (buff_slot > 0){
+
+			if(--buffs[buff_slot].numhits == 0) {
+				CastOnNumHitFade(buffs[buff_slot].spellid);
+				if(!TryFadeEffect(buff_slot))
+					BuffFadeBySlot(buff_slot , true);
+				}
+			}
+
+		else {
+	
+			for(int d = 0; d < buff_max; d++) {
+			
+				if(!m_spellHitsLeft[d])
+					continue;
+
+				if ((IsValidSpell(buffs[d].spellid)) && (m_spellHitsLeft[d] == buffs[d].spellid)) {
+					if(--buffs[d].numhits == 0) {
+						CastOnNumHitFade(buffs[d].spellid);
+						m_spellHitsLeft[d] = 0;
+						if(!TryFadeEffect(d))
+							BuffFadeBySlot(d, true);
+					}
+				}
+			}
 		}
 	}
-	return false;
+
+
+	else{
+
+		for(uint32 d = 0; d < buff_max; d++) {
+		
+			if((IsValidSpell(buffs[d].spellid)) && (buffs[d].numhits > 0) && (spells[buffs[d].spellid].numhitstype == type)){
+			
+				if(--buffs[d].numhits == 0) {
+					CastOnNumHitFade(buffs[d].spellid);
+					if(!TryFadeEffect(d)){
+						BuffFadeBySlot(d, true);
+					}
+				}
+			
+			}
+		}
+	}
 }
 
 //for some stupid reason SK procs return theirs one base off...
@@ -5627,7 +5615,7 @@ int32 Mob::GetAdditionalDamage(Mob *caster, uint32 spell_id, bool use_skill, uin
 					}
 					if ((!limit_exists) || (limit_exists && skill_found)){
 						dmg += temp_dmg;
-						CheckHitsRemaining(i);
+						CheckNumHitsRemaining(7,i);
 					}
 				}
 
@@ -5635,7 +5623,7 @@ int32 Mob::GetAdditionalDamage(Mob *caster, uint32 spell_id, bool use_skill, uin
 					int32 focus = caster->CalcFocusEffect(focusAdditionalDamage, buffs[i].spellid, spell_id);
 					if(focus){
 						dmg += focus;
-						CheckHitsRemaining(i);
+						CheckNumHitsRemaining(7,i);
 					}
 				}
 			}
