@@ -1526,6 +1526,12 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
+			else if(IsAssistExempted())
+			{
+				GetTarget()->IsTargeted(1);
+				SetAssistExemption(false);
+				return;
+			}
 			else if(GetTarget()->IsClient())
 			{
 				//make sure this client is in our raid/group
@@ -1552,12 +1558,6 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			{
 				GetTarget()->IsTargeted(1);
 				SetSenseExemption(false);
-				return;
-			}
-			else if(IsAssistExempted())
-			{
-				GetTarget()->IsTargeted(1);
-				SetAssistExemption(false);
 				return;
 			}
 			else if(GetBindSightTarget())
