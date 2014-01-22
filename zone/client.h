@@ -868,10 +868,12 @@ public:
 	void SetKnockBackExemption(bool v);
 	void SetPortExemption(bool v);
 	void SetSenseExemption(bool v) { m_SenseExemption = v; }
+	void SetAssistExemption(bool v) { m_AssistExemption = v; }
 	const bool IsShadowStepExempted() const { return m_ShadowStepExemption; }
 	const bool IsKnockBackExempted() const { return m_KnockBackExemption; }
 	const bool IsPortExempted() const { return m_PortExemption; }
 	const bool IsSenseExempted() const { return m_SenseExemption; }
+	const bool IsAssistExempted() const { return m_AssistExemption; }
 	const bool GetGMSpeed() const { return (gmspeed > 0); }
 	void CheatDetected(CheatTypes CheatType, float x, float y, float z);
 	const bool IsMQExemptedArea(uint32 zoneID, float x, float y, float z) const;
@@ -1449,6 +1451,7 @@ private:
 	bool m_KnockBackExemption;
 	bool m_PortExemption;
 	bool m_SenseExemption;
+	bool m_AssistExemption;
 	bool alternate_currency_loaded;
 	std::map<uint32, uint32> alternate_currency;
 	std::queue<std::pair<uint32, int32>> alternate_currency_queued_operations;
