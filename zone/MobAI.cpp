@@ -835,7 +835,7 @@ void Client::AI_Process()
 									{
 										if(MakeRandomInt(0, 100) < flurrychance)
 										{
-											Message_StringID(MT_NPCFlurry, 128);
+											Message_StringID(MT_NPCFlurry, YOU_FLURRY);
 											Attack(GetTarget(), 13, false);
 											Attack(GetTarget(), 13, false);
 										}

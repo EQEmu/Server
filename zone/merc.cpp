@@ -1681,7 +1681,7 @@ void Merc::AI_Process() {
 					{
 						if(MakeRandomInt(0, 100) < flurrychance)
 						{
-							Message_StringID(MT_NPCFlurry, 128);
+							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
 							Attack(GetTarget(), SLOT_PRIMARY, false);
 							Attack(GetTarget(), SLOT_PRIMARY, false);
 						}

@@ -164,7 +164,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 				{
 					if(sender->GetInv().HasItem(RuleI(Adventure, ItemIDToEnablePorts)) == SLOT_INVALID)
 					{
-						sender->Message_StringID(13, 5141);
+						sender->Message_StringID(13, DUNGEON_SEALED);
 						safe_delete(outapp);
 						return;
 					}

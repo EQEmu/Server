@@ -5103,7 +5103,7 @@ void EntityList::ExpeditionWarning(uint32 minutes_left)
 	iterator.Reset();
 	while(iterator.MoreElements())
 	{
-		iterator.GetData()->Message_StringID(15, 3551, itoa((int)minutes_left));
+		iterator.GetData()->Message_StringID(15, EXPEDITION_MIN_REMAIN, itoa((int)minutes_left));
 		iterator.GetData()->QueuePacket(outapp);
 		iterator.Advance();
 	}

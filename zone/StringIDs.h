@@ -5,6 +5,7 @@
 #define GENERIC_9_STRINGS			1		//%1 %2 %3 %4 %5 %6 %7 %8 %9
 #define TARGET_OUT_OF_RANGE			100		//Your target is out of range, get closer!
 #define TARGET_NOT_FOUND			101		//Target player not found.
+#define TRADE_CANCEL_LORE			104		//Trade cancelled, duplicated Lore Items would result.
 #define CANNOT_BIND					105		//You cannot form an affinity with this area. Try a city.
 #define SPELL_DOES_NOT_WORK_HERE	106		//This spell does not work here.
 #define SPELL_DOES_NOT_WORK_PLANE	107		//This spell does not work on this plane.
@@ -12,9 +13,12 @@
 #define MGB_STRING					113		//The next group buff you cast will hit all targets in range.
 #define ABILITY_FAILED				116		//Your ability failed. Timer has been reset.
 #define ESCAPE						114		//You escape from combat, hiding yourself from view.
+#define AA_OFF						119		//Alternate Experience is *OFF*.
+#define AA_ON						121		//Alternate Experience is *ON*.
 #define TARGET_TOO_FAR				124		//Your target is too far away, get closer!
 #define PROC_TOOLOW					126		//Your will is not sufficient to command this weapon.
 #define PROC_PETTOOLOW				127		//Your pet's will is not sufficient to command its weapon.
+#define YOU_FLURRY					128		//You unleash a flurry of attacks.
 #define DOORS_LOCKED				130		//It's locked and you're not holding the key.
 #define DOORS_CANT_PICK				131		//This lock cannot be picked.
 #define DOORS_INSUFFICIENT_SKILL	132		//You are not sufficiently skilled to pick this lock.
@@ -221,6 +225,8 @@
 #define TRADESKILL_MISSING_ITEM		3455	//You are missing a %1.
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
+#define EXPEDITION_MIN_REMAIN		3551	//You only have %1 minutes remaining before this expedition comes to an end.
+#define REWIND_WAIT					4059	//You must wait a bit longer before using the rewind command again.
 #define CORPSEDRAG_LIMIT		4061	//You are already dragging as much as you can!
 #define CORPSEDRAG_ALREADY		4062	//You are already dragging %1.
 #define CORPSEDRAG_SOMEONE_ELSE		4063	//Someone else is dragging %1.
@@ -231,6 +237,7 @@
 #define PETITION_NO_DELETE			5053	//You do not have a petition in the queue.
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
 #define GAIN_RAIDEXP				5085	//You gained raid experience!
+#define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!

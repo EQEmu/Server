@@ -4858,8 +4858,8 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			trade->state = TradeCompleting;
 
 			if (CheckTradeLoreConflict(other) || other->CheckTradeLoreConflict(this)) {
-				Message_StringID(13,104);
-				other->Message_StringID(13,104);
+				Message_StringID(13, TRADE_CANCEL_LORE);
+				other->Message_StringID(13, TRADE_CANCEL_LORE);
 				this->FinishTrade(this);
 				other->FinishTrade(other);
 				other->trade->Reset();
@@ -7742,12 +7742,12 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 	}
 	else if(action->action == aaActionDisableEXP){ //Turn Off AA Exp
 		if(m_epp.perAA > 0)
-			Message_StringID(0, 119);	//119 Alternate Experience is *OFF*.
+			Message_StringID(0, AA_OFF);
 		m_epp.perAA = 0;
 		SendAAStats();
 	} else if(action->action == aaActionSetEXP) {
 		if(m_epp.perAA == 0)
-			Message_StringID(0, 121);	//121 Alternate Experience is *ON*.
+			Message_StringID(0, AA_ON);
 		m_epp.perAA = action->exp_value;
 		if (m_epp.perAA<0 || m_epp.perAA>100) m_epp.perAA=0;	// stop exploit with sanity check
 		// send an update
@@ -9840,7 +9840,7 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 void Client::Handle_OP_Rewind(const EQApplicationPacket *app)
 {
 	if ((rewind_timer.GetRemainingTime() > 1 && rewind_timer.Enabled())) {
-			Message_StringID(MT_System, 4059); //You must wait a bit longer before using the rewind command again.
+			Message_StringID(MT_System, REWIND_WAIT);
 	} else {
 		CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), rewind_x, rewind_y, rewind_z, 0, 2, Rewind);
 		rewind_timer.Start(30000, true);
@@ -11519,7 +11519,7 @@ void Client::Handle_OP_Report(const EQApplicationPacket *app)
 {
 	if(!CanUseReport)
 	{
-		Message_StringID(MT_System, 12945);
+		Message_StringID(MT_System, REPORT_ONCE);
 		return;
 	}
 

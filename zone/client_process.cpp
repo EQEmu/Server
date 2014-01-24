@@ -443,7 +443,7 @@ bool Client::Process() {
 				{
 					if(MakeRandomInt(0, 99) < flurrychance)
 					{
-						Message_StringID(MT_NPCFlurry, 128);
+						Message_StringID(MT_NPCFlurry, YOU_FLURRY);
 						Attack(auto_attack_target, 13, false);
 						Attack(auto_attack_target, 13, false);
 					}
