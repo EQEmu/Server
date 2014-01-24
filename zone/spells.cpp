@@ -3940,6 +3940,12 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		{
 			mlog(SPELLS__RESISTS, "Level is %d, cannot be feared by this spell.", GetLevel());
 			caster->Message_StringID(MT_Shout, FEAR_TOO_HIGH);
+			int32 aggro = caster->CheckAggroAmount(spell_id);
+			if (aggro > 0) {
+				AddToHateList(caster, aggro);
+			} else {
+				AddToHateList(caster, 1);
+			}
 			return true;
 		}
 
