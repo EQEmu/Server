@@ -1560,6 +1560,11 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				SetSenseExemption(false);
 				return;
 			}
+			else if(IsXTarget(GetTarget()))
+			{
+				GetTarget()->IsTargeted(1);
+				return;
+			}
 			else if(GetBindSightTarget())
 			{
 				if(GetBindSightTarget()->DistNoRoot(*GetTarget()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
