@@ -2933,6 +2933,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_LimitRace:
 			case SE_FcLimitUse:
 			case SE_FcMute:	
+			case SE_FfLimitUseType:
 			{
 				break;
 			}
@@ -4167,6 +4168,11 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				LimitFound = true;
 			break;
 
+			case SE_FfLimitUseType:
+			if (base1 != spell.numhitstype)
+				LimitFound = true;
+			break;
+
 			//Handle Focus Effects
 			case SE_ImprovedDamage:
 				if (type == focusImprovedDamage && base1 > value)
@@ -4630,6 +4636,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_FfLimitUseMin:
 			if (focus_spell.base[i] > spell.numhits)
+				return 0;
+			break;
+
+		case SE_FfLimitUseType:
+			if (focus_spell.base[i] != spell.numhitstype)
 				return 0;
 			break;
 
