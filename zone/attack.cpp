@@ -199,6 +199,14 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	if(IsClient() && other->IsClient())
 		pvpmode = true;
 
+	CheckNumHitsRemaining(1);
+	
+	if (attacker)
+		attacker->CheckNumHitsRemaining(2);
+
+	if (chance_mod >= 10000)
+	    return true;
+
 	float bonus;
 
 	////////////////////////////////////////////////////////
@@ -324,12 +332,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	else if(chancetohit < 5) {
 		chancetohit = 5;
 	}
-
-	CheckNumHitsRemaining(1);
 	
-	if (attacker)
-		attacker->CheckNumHitsRemaining(2);
-
 	//I dont know the best way to handle a garunteed hit discipline being used
 	//agains a garunteed riposte (for example) discipline... for now, garunteed hit wins
 

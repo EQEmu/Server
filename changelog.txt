@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/23/2014 ==
+Kayen: Implemented SE_FfLimitUseType (focus limit to numhits type)
+
 == 01/20/2014 ==
 cavedude: Live-Like weather system (Thanks to robregen for figuring it out!)
 demonstar55: Implemented not_extendable spell flag

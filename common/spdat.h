@@ -435,7 +435,7 @@ typedef enum {
 #define SE_SpellDamage					286	// implemented - adds direct spell damage
 #define SE_SpellDurationIncByTic		287 // implemented
 #define SE_SpecialAttackKBProc			288	// implemented[AA] - Chance to to do a knockback from special attacks [AA Dragon Punch].
-#define SE_ImprovedSpellEffect			289 // implemented
+#define SE_ImprovedSpellEffect			289 // implemented - Triggers only if fades after natural duration.
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
 #define SE_Purify						291 // implemented - Removes determental effects
 #define SE_StrikeThrough2				292	// implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
@@ -519,11 +519,11 @@ typedef enum {
 #define SE_ResistCorruption				370	// implemented
 #define SE_AttackSpeed4					371 // implemented - stackable slow effect 'Inhibit Melee'
 #define SE_ForageSkill					372	// *not implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
-#define SE_CastOnWearoff				373 // implemented
+#define SE_CastOnWearoff				373 // implemented - Triggers only if fades after natural duration.
 #define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
 //#define SE_Fling						376	// *not implemented - used in 2 test spells  (12945 | Movement Test Spell 1) 
-#define SE_BossSpellTrigger				377	// implemented - spell is cast on fade
+#define SE_BossSpellTrigger				377	// implemented - Triggers only if fades after natural duration.
 #define SE_SpellEffectResistChance		378	// implemented - Increase chance to resist specific spell effect (base1=value, base2=spell effect id)
 #define SE_ShadowStepDirectional		379 // implemented - handled by client
 #define SE_Knockdown					380 // implemented - small knock back(handled by client)
@@ -569,7 +569,7 @@ typedef enum {
 #define SE_FcLimitUse					420 // implemented - increases numhits count by percent (Note: not used in any known live spells)
 #define SE_IncreaseNumHits				421 // implemented[AA] - increases number of hits a buff has till fade. (focus)
 #define SE_FfLimitUseMin				422 // implemented - limit a focus to require a min amount of numhits value (used with above)
-//#define SE_FfLimitUseType				423 // not used	- limit a focus to require a certain numhits type (Field in spells table 175)
+#define SE_FfLimitUseType				423 // implemented	- limit a focus to require a certain numhits type 
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
 #define SE_Display						425 // *not implemented - Illusion: Flying Dragon(21626)
 #define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
