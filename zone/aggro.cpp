@@ -1116,38 +1116,33 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 }
 
 //offensive spell aggro
-int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
-	uint16 spell_id = spellid;
+int32 Mob::CheckAggroAmount(uint16 spell_id, bool isproc)
+{
 	int32 AggroAmount = 0;
 	int32 nonModifiedAggro = 0;
 	uint16 slevel = GetLevel();
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
-		switch(spells[spell_id].effectid[o]) {
+		switch (spells[spell_id].effectid[o]) {
 			case SE_CurrentHPOnce:
-			case SE_CurrentHP:{
-					int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
-					if(val < 0)
-						AggroAmount -= val;
-					break;
-				}
+			case SE_CurrentHP: {
+				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
+				if(val < 0)
+					AggroAmount -= val;
+				break;
+			}
 			case SE_MovementSpeed: {
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
+				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				if (val < 0)
-				{
 					AggroAmount += (2 + ((slevel * slevel) / 8));
-					break;
-				}
 				break;
 			}
 			case SE_AttackSpeed:
 			case SE_AttackSpeed2:
-			case SE_AttackSpeed3:{
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
+			case SE_AttackSpeed3: {
+				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				if (val < 100)
-				{
 					AggroAmount += (5 + ((slevel * slevel) / 5));
-				}
 				break;
 			}
 			case SE_Stun: {
@@ -1179,33 +1174,27 @@ int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
 			}
 			case SE_ATK:
 			case SE_ACv2:
-			case SE_ArmorClass:	{
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
+			case SE_ArmorClass: {
+				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				if (val < 0)
-				{
-					AggroAmount -= val*2;
-				}
+					AggroAmount -= val * 2;
 				break;
 			}
 			case SE_ResistMagic:
 			case SE_ResistFire:
 			case SE_ResistCold:
 			case SE_ResistPoison:
-			case SE_ResistDisease:{
-					int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
-					if (val < 0)
-					{
-						AggroAmount -= val*3;
-					}
-					break;
+			case SE_ResistDisease: {
+				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
+				if (val < 0)
+					AggroAmount -= val * 3;
+				break;
 			}
-			case SE_ResistAll:{
-					int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
-					if (val < 0)
-					{
-						AggroAmount -= val*6;
-					}
-					break;
+			case SE_ResistAll: {
+				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
+				if (val < 0)
+					AggroAmount -= val * 6;
+				break;
 			}
 			case SE_STR:
 			case SE_STA:
@@ -1213,37 +1202,33 @@ int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
 			case SE_AGI:
 			case SE_INT:
 			case SE_WIS:
-			case SE_CHA:{
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
+			case SE_CHA: {
+				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				if (val < 0)
-				{
-					AggroAmount -= val*2;
-				}
+					AggroAmount -= val * 2;
 				break;
 			}
-			case SE_AllStats:{
-					int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
-					if (val < 0)
-					{
-						AggroAmount -= val*6;
-					}
-					break;
+			case SE_AllStats: {
+				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
+				if (val < 0)
+					AggroAmount -= val * 6;
+				break;
 			}
-			case SE_BardAEDot:{
-					AggroAmount += slevel*2;
-					break;
+			case SE_BardAEDot: {
+				AggroAmount += slevel * 2;
+				break;
 			}
-			case SE_SpinTarget:{
-					AggroAmount += (5 + ((slevel * slevel) / 5));
-					break;
+			case SE_SpinTarget: {
+				AggroAmount += (5 + ((slevel * slevel) / 5));
+				break;
 			}
 			case SE_Amnesia:
-			case SE_Silence:{
-				AggroAmount += slevel*2;
+			case SE_Silence: {
+				AggroAmount += slevel * 2;
 				break;
 			}
-			case SE_Destroy:{
-				AggroAmount += slevel*2;
+			case SE_Destroy: {
+				AggroAmount += slevel * 2;
 				break;
 			}
 			case SE_Harmony:
@@ -1264,59 +1249,49 @@ int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
 			case SE_Accuracy:
 			case SE_DamageShield:
 			case SE_SpellDamageShield:
-			case SE_ReverseDS:{
-				AggroAmount += slevel*2;
+			case SE_ReverseDS: {
+				AggroAmount += slevel * 2;
 				break;
 			}
 			case SE_CurrentMana:
 			case SE_ManaRegen_v2:
 			case SE_ManaPool:
-			case SE_CurrentEndurance:{
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
+			case SE_CurrentEndurance: {
+				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				if (val < 0)
-				{
-					AggroAmount -= val*2;
-				}
+					AggroAmount -= val * 2;
 				break;
 			}
 			case SE_CancelMagic:
-			case SE_DispelDetrimental:{
+			case SE_DispelDetrimental: {
 				AggroAmount += slevel;
 				break;
 			}
 			case SE_ReduceHate:
-			case SE_Calm:{
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
-				nonModifiedAggro = val;
+			case SE_Calm: {
+				nonModifiedAggro = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				break;
 			}
 		}
 	}
 
-	if(IsAEDurationSpell(spell_id))
-	{
+	if (IsAEDurationSpell(spell_id))
 		AggroAmount /= 2;
-	}
 
-	if(spells[spell_id].HateAdded > 0)
-	{
+	if (spells[spell_id].HateAdded > 0)
 		AggroAmount = spells[spell_id].HateAdded;
-	}
 
 	if (IsBardSong(spell_id))
 		AggroAmount = AggroAmount * RuleI(Aggro, SongAggroMod) / 100;
 	if (GetOwner() && IsPet())
 		AggroAmount = AggroAmount * RuleI(Aggro, PetSpellAggroMod) / 100;
 
-	if(AggroAmount > 0)
-	{
+	if (AggroAmount > 0) {
 
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 
-		if(IsClient())
-		{
+		if (IsClient())
 			HateMod += CastToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
-		}
 
 		//Live AA - Spell casting subtlety
 		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;
@@ -1333,32 +1308,29 @@ int32 Mob::CheckAggroAmount(uint16 spellid, bool isproc) {
 
 	}
 
-
-
-	AggroAmount += spells[spell_id].bonushate + nonModifiedAggro;
-	return AggroAmount;
+	return AggroAmount + spells[spell_id].bonushate + nonModifiedAggro;
 }
 
 //healing and buffing aggro
-int32 Mob::CheckHealAggroAmount(uint16 spellid, uint32 heal_possible) {
-	uint16 spell_id = spellid;
+int32 Mob::CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible)
+{
 	int32 AggroAmount = 0;
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
-		switch(spells[spell_id].effectid[o]) {
+		switch (spells[spell_id].effectid[o]) {
 			case SE_CurrentHP: {
 				AggroAmount += IsBuffSpell(spell_id) ? spells[spell_id].mana / 4 : spells[spell_id].mana;
 				break;
 			}
 			case SE_Rune: {
-				AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[0], spells[spell_id].base[0], spells[spell_id].max[o], this->GetLevel(), spellid) * 2;
+				AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[0], spells[spell_id].base[0], spells[spell_id].max[o], GetLevel(), spell_id) * 2;
 				break;
 			}
-			case SE_HealOverTime:{
-				AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], this->GetLevel(), spell_id);
+			case SE_HealOverTime: {
+				AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], GetLevel(), spell_id);
 				break;
 			}
-			default:{
+			default: {
 				break;
 			}
 		}
@@ -1368,14 +1340,11 @@ int32 Mob::CheckHealAggroAmount(uint16 spellid, uint32 heal_possible) {
 	if (GetOwner() && IsPet())
 		AggroAmount = AggroAmount * RuleI(Aggro, PetSpellAggroMod) / 100;
 
-	if(AggroAmount > 0)
-	{
+	if (AggroAmount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 
-		if(IsClient())
-		{
+		if (IsClient())
 			HateMod += CastToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
-		}
 
 		//Live AA - Spell casting subtlety
 		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;
@@ -1387,12 +1356,9 @@ int32 Mob::CheckHealAggroAmount(uint16 spellid, uint32 heal_possible) {
 		//confirmed by EQ devs to be 100 exactly at level 85. From their wording it doesn't seem like it's affected
 		//by hate modifiers either.
 		//AggroAmount += (slevel*slevel/72); // Moved Below
-
-
 	}
 
-
-	if(AggroAmount < 0)
+	if (AggroAmount < 0)
 		return 0;
 	else
 		return AggroAmount;
