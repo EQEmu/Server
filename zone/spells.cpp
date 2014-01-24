@@ -3939,7 +3939,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		else if(GetLevel() > spells[spell_id].max[effect_index] && spells[spell_id].max[effect_index] != 0)
 		{
 			mlog(SPELLS__RESISTS, "Level is %d, cannot be feared by this spell.", GetLevel());
-			caster->Message_StringID(MT_Shout, SPELL_NO_EFFECT);
+			caster->Message_StringID(MT_Shout, FEAR_TOO_HIGH);
 			return true;
 		}
 

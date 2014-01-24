@@ -274,6 +274,7 @@
 #define GAIN_GROUP_LEADERSHIP_EXP	8788	//
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
+#define FEAR_TOO_HIGH				9035	//Your target is too high of a level for your fear spell.
 #define YOU_HEAL					9068	//You have healed %1 for %2 points of damage.
 #define OTHER_HIT_DOT				9072	//%1 has taken %2 damage from your %3.
 #define HIT_NON_MELEE				9073	//%1 hit %2 for %3 points of non-melee damage.
