@@ -3880,7 +3880,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(GetSpecialAbility(UNMEZABLE)) {
 			mlog(SPELLS__RESISTS, "We are immune to Mez spells.");
 			caster->Message_StringID(MT_Shout, CANNOT_MEZ);
-			int32 aggro = CheckAggroAmount(spell_id);
+			int32 aggro = caster->CheckAggroAmount(spell_id);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
@@ -3907,7 +3907,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		mlog(SPELLS__RESISTS, "We are immune to Slow spells.");
 		caster->Message_StringID(MT_Shout, IMMUNE_ATKSPEED);
-		int32 aggro = CheckAggroAmount(spell_id);
+		int32 aggro = caster->CheckAggroAmount(spell_id);
 		if(aggro > 0) {
 			AddToHateList(caster, aggro);
 		} else {
@@ -3923,7 +3923,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(GetSpecialAbility(UNFEARABLE)) {
 			mlog(SPELLS__RESISTS, "We are immune to Fear spells.");
 			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
-			int32 aggro = CheckAggroAmount(spell_id);
+			int32 aggro = caster->CheckAggroAmount(spell_id);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
@@ -3958,7 +3958,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		{
 			mlog(SPELLS__RESISTS, "We are immune to Charm spells.");
 			caster->Message_StringID(MT_Shout, CANNOT_CHARM);
-			int32 aggro = CheckAggroAmount(spell_id);
+			int32 aggro = caster->CheckAggroAmount(spell_id);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
@@ -3998,7 +3998,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(GetSpecialAbility(UNSNAREABLE)) {
 			mlog(SPELLS__RESISTS, "We are immune to Snare spells.");
 			caster->Message_StringID(MT_Shout, IMMUNE_MOVEMENT);
-			int32 aggro = CheckAggroAmount(spell_id);
+			int32 aggro = caster->CheckAggroAmount(spell_id);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
