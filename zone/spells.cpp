@@ -2823,20 +2823,19 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	bool will_overwrite = false;
 	std::vector<int> overwrite_slots;
 
-	if(level_override > 0)
+	if (level_override > 0)
 		caster_level = level_override;
 	else
 		caster_level = caster ? caster->GetCasterLevel(spell_id) : GetCasterLevel(spell_id);
 
-	if(duration == 0)
-	{
+	if (duration == 0) {
 		duration = CalcBuffDuration(caster, this, spell_id);
 
-		if(caster)
+		if (caster)
 			duration = caster->GetActSpellDuration(spell_id, duration);
 	}
 
-	if(duration == 0) {
+	if (duration == 0) {
 		mlog(SPELLS__BUFFS, "Buff %d failed to add because its duration came back as 0.", spell_id);
 		return -2;	// no duration? this isn't a buff
 	}
@@ -2852,46 +2851,41 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	uint32 buff_count = GetMaxTotalSlots();
 	uint32 start_slot = 0;
 	uint32 end_slot = 0;
-	if(IsDisciplineBuff(spell_id))
-	{
+	if (IsDisciplineBuff(spell_id)) {
 		start_slot = GetMaxBuffSlots() + GetMaxSongSlots();
 		end_slot = start_slot + GetCurrentDiscSlots();
-	}
-	else if(spells[spell_id].short_buff_box)
-	{
+	} else if(spells[spell_id].short_buff_box) {
 		start_slot = GetMaxBuffSlots();
 		end_slot = start_slot + GetCurrentSongSlots();
-	}
-	else
-	{
+	} else {
 		start_slot = 0;
 		end_slot = GetCurrentBuffSlots();
 	}
 
-	for(buffslot = 0; buffslot < buff_count; buffslot++)
-	{
+	for (buffslot = 0; buffslot < buff_count; buffslot++) {
 		const Buffs_Struct &curbuf = buffs[buffslot];
 
-		if(curbuf.spellid != SPELL_UNKNOWN)
-		{
+		if (curbuf.spellid != SPELL_UNKNOWN) {
 			// there's a buff in this slot
-			ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spell_id, caster_level, entity_list.GetMobID(curbuf.casterid), caster);
-			if(ret == -1) {	// stop the spell
-				mlog(SPELLS__BUFFS, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d", spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
+			ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spell_id,
+					caster_level, entity_list.GetMobID(curbuf.casterid), caster);
+			if (ret == -1) {	// stop the spell
+				mlog(SPELLS__BUFFS, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d",
+						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
 				return -1;
 			}
-			if(ret == 1) {	// set a flag to indicate that there will be overwriting
-				mlog(SPELLS__BUFFS, "Adding buff %d will overwrite spell %d in slot %d with caster level %d", spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
+			if (ret == 1) {	// set a flag to indicate that there will be overwriting
+				mlog(SPELLS__BUFFS, "Adding buff %d will overwrite spell %d in slot %d with caster level %d",
+						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
+				// If this is the first buff it would override, use its slot
+				if (!will_overwrite)
+					emptyslot = buffslot;
 				will_overwrite = true;
 				overwrite_slots.push_back(buffslot);
 			}
-		}
-		else
-		{
-			if(emptyslot == -1)
-			{
-				if(buffslot >= start_slot && buffslot < end_slot)
-				{
+		} else {
+			if (emptyslot == -1) {
+				if (buffslot >= start_slot && buffslot < end_slot) {
 					emptyslot = buffslot;
 				}
 			}
@@ -2900,28 +2894,23 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	// we didn't find an empty slot to put it in, and it's not overwriting
 	// anything so there must not be any room left.
-	if(emptyslot == -1 && !will_overwrite)
-	//	return -1;
-	{
-		if(IsDetrimentalSpell(spell_id)) //Sucks to be you, bye bye one of your buffs
-		{
-			for(buffslot = 0; buffslot < buff_count; buffslot++)
-			{
+	if (emptyslot == -1 && !will_overwrite) {
+		if (IsDetrimentalSpell(spell_id))  {//Sucks to be you, bye bye one of your buffs
+			for (buffslot = 0; buffslot < buff_count; buffslot++) {
 				const Buffs_Struct &curbuf = buffs[buffslot];
-				if(IsBeneficialSpell(curbuf.spellid))
-				{
-					mlog(SPELLS__BUFFS, "No slot for detrimental buff %d, so we are overwriting a beneficial buff %d in slot %d", spell_id, curbuf.spellid, buffslot);
-					BuffFadeBySlot(buffslot,false);
+				if (IsBeneficialSpell(curbuf.spellid)) {
+					mlog(SPELLS__BUFFS, "No slot for detrimental buff %d, so we are overwriting a beneficial buff %d in slot %d",
+							spell_id, curbuf.spellid, buffslot);
+					BuffFadeBySlot(buffslot, false);
 					emptyslot = buffslot;
 					break;
 				}
 			}
 			if(emptyslot == -1) {
 				mlog(SPELLS__BUFFS, "Unable to find a buff slot for detrimental buff %d", spell_id);
-				return(-1);
+				return -1;
 			}
-		}
-		else {
+		} else {
 			mlog(SPELLS__BUFFS, "Unable to find a buff slot for beneficial buff %d", spell_id);
 			return -1;
 		}
@@ -2929,18 +2918,17 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	// at this point we know that this buff will stick, but we have
 	// to remove some other buffs already worn if will_overwrite is true
-	if(will_overwrite)
-	{
+	if (will_overwrite) {
 		std::vector<int>::iterator cur, end;
 		cur = overwrite_slots.begin();
 		end = overwrite_slots.end();
-		for(; cur != end; ++cur) {
+		for (; cur != end; ++cur) {
 			// strip spell
 			BuffFadeBySlot(*cur, false);
 
 			// if we hadn't found a free slot before, or if this is earlier
 			// we use it
-			if(emptyslot == -1 || *cur < emptyslot)
+			if (emptyslot == -1 || *cur < emptyslot)
 				emptyslot = *cur;
 		}
 	}
@@ -2950,11 +2938,10 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	buffs[emptyslot].spellid = spell_id;
 	buffs[emptyslot].casterlevel = caster_level;
-	if(caster && caster->IsClient()) {
+	if (caster && caster->IsClient())
 		strcpy(buffs[emptyslot].caster_name, caster->GetName());
-	} else {
+	else
 		memset(buffs[emptyslot].caster_name, 0, 64);
-	}
 	buffs[emptyslot].casterid = caster ? caster->GetID() : 0;
 	buffs[emptyslot].ticsremaining = duration;
 	buffs[emptyslot].counters = CalculateCounters(spell_id);
@@ -2964,19 +2951,16 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].deathsaveCasterAARank = 0;
 	buffs[emptyslot].deathSaveSuccessChance = 0;
 
-	if(level_override > 0)
-	{
+	if (level_override > 0) {
 		buffs[emptyslot].UpdateClient = true;
-	}
-	else{
-		if(buffs[emptyslot].ticsremaining > (1+CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration)))
+	} else {
+		if (buffs[emptyslot].ticsremaining > (1 + CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration)))
 			buffs[emptyslot].UpdateClient = true;
 	}
 
 	mlog(SPELLS__BUFFS, "Buff %d added to slot %d with caster level %d", spell_id, emptyslot, caster_level);
-	if(IsPet() && GetOwner() && GetOwner()->IsClient()) {
+	if (IsPet() && GetOwner() && GetOwner()->IsClient())
 		SendPetBuffsToClient();
-	}
 
 	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
 				(IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
@@ -2985,9 +2969,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
 
-		if(GetTarget() == this) {
+		if(GetTarget() == this)
 			CastToClient()->QueuePacket(outapp);
-		}
 
 		safe_delete(outapp);
 	}
