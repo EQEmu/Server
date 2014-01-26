@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/26/2014 ==
+Kayen: Revised 'dispel' type spell effects (ie cancel magic) to be consistent with live
+
 == 01/23/2014 ==
 Kayen: Implemented SE_FfLimitUseType (focus limit to numhits type)
 

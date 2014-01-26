@@ -206,6 +206,7 @@ public:
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks();
+	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
 
 	//Buff
 	void BuffProcess();

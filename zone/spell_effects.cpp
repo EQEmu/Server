@@ -1139,12 +1139,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				uint32 buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if(	buffs[slot].spellid != SPELL_UNKNOWN &&
-						spells[buffs[slot].spellid].buffdurationformula != DF_Permanent &&
-						spells[buffs[slot].spellid].dispel_flag < 1 &&
+						spells[buffs[slot].spellid].dispel_flag == 0 &&
 						!IsDiscipline(buffs[slot].spellid))
 					{
-						BuffFadeBySlot(slot);
-						slot = buff_count;
+						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+							BuffFadeBySlot(slot);
+							slot = buff_count;
+						}
 					}
 				}
 				break;
@@ -1163,12 +1164,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				uint32 buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if (buffs[slot].spellid != SPELL_UNKNOWN &&
-						spells[buffs[slot].spellid].buffdurationformula != DF_Permanent &&
 						IsDetrimentalSpell(buffs[slot].spellid) &&
-						spells[buffs[slot].spellid].dispel_flag < 1)
+						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
-						BuffFadeBySlot(slot);
-						slot = buff_count;
+						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+							BuffFadeBySlot(slot);
+							slot = buff_count;
+						}
 					}
 				}
 				break;
@@ -1187,12 +1189,29 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				uint32 buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if (buffs[slot].spellid != SPELL_UNKNOWN &&
-						spells[buffs[slot].spellid].buffdurationformula != DF_Permanent &&
 						IsBeneficialSpell(buffs[slot].spellid) &&
-						spells[buffs[slot].spellid].dispel_flag < 1)
+						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
-						BuffFadeBySlot(slot);
-						slot = buff_count;
+						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+							BuffFadeBySlot(slot);
+							slot = buff_count;
+						}
+					}
+				}
+				break;
+			}
+
+			case SE_Purify:
+			{
+				//Attempt to remove all Deterimental buffs.
+				uint32 buff_count = GetMaxTotalSlots();
+				for(int slot = 0; slot < buff_count; slot++) {
+					if (buffs[slot].spellid != SPELL_UNKNOWN &&
+						IsDetrimentalSpell(buffs[slot].spellid))
+					{
+						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+							BuffFadeBySlot(slot);
+						}
 					}
 				}
 				break;
@@ -2694,27 +2713,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			{
 				if (IsNPC())
 					caster->Taunt(this->CastToNPC(), false, spell.base[i]);
-			}
-
-			case SE_Purify:
-			{
-				/*
-				Guessing as to exactly how this effect works.
-				All spells that utilize it 'remove all determental effects'
-				with a value of (20). Lets assume the value determines
-				how many determental effects can be removed.
-				*/
-				uint32 buff_count = GetMaxTotalSlots();
-				int FadeCount = 0;
-
-				for (int j = 0; j <= buff_count; j++) {
-					if(buffs[j].spellid != SPELL_UNKNOWN) {
-						if((FadeCount <= spell.base[i]) && IsDetrimentalSpell(buffs[j].spellid)){
-							BuffFadeBySlot(j, false);
-							FadeCount++;
-						}
-					}
-				}
 			}
 
 			// Handled Elsewhere
@@ -5721,5 +5719,33 @@ uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
 		}
 	}
 	return resist_chance;
+}
+
+bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
+
+	//Dispels - Check level of caster agianst buffs level (level of the caster who cast the buff)
+	//Effect value of dispels are treated as a level modifier.
+	//Values for scaling were obtain from live parses, best estimates.
+
+	caster_level += level_modifier - 1; 
+	int dispel_chance = 36; //Baseline chance if no level difference and no modifier
+	int level_diff = caster_level - buff_level;
+
+	if (level_diff > 0)
+		dispel_chance += level_diff * 8;
+
+	else if (level_diff < 0)
+		dispel_chance += level_diff * 2;
+
+	if (dispel_chance >= 100)
+		return true;
+
+	else if (dispel_chance < 10)
+		dispel_chance = 10;
+
+	if (MakeRandomInt(0,99) < dispel_chance)
+		return true;
+	else
+		return false;
 }
 
