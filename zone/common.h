@@ -78,6 +78,7 @@ typedef enum {	//focus types
 	focusIncreaseNumHits,
 	focusFcLimitUse,
 	focusFcMute,
+	focusFcStunTimeMod,
 	focusCriticalHealRate,
 	focusAdditionalHeal2,
 	focusAdditionalHeal,
@@ -372,6 +373,9 @@ struct StatBonuses {
 	int16	ShieldEquipHateMod;					// Hate mod when shield equiped.
 	int16	ShieldEquipDmgMod[2];				// Damage mod when shield equiped. 0 = damage modifier 1 = Unknown
 	bool	TriggerOnValueAmount;				// Triggers off various different conditions, bool to check if client has effect.
+	int8	StunBashChance;						// chance to stun with bash.	
+	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
+	int8	CriticalMend;						// chance critical monk mend
 };
 
 typedef struct

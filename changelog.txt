@@ -1,5 +1,13 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/27/2014 ==
+Kayen: Implemented SE_CriticalMend  (chance to critical monk mend)
+Kayen: Implemented SE_IncreaseChanceMemwipe (increases the chance to wipe hate with memory blurr)
+Kayen: Implemented SE_FcStunTimeMod (modify stun duration from casted spells)
+Kayen: Implemented SE_StunBashChance (increase chance to stun from bash)
+
+Required SQL: utils/sql/git/2014_01_27_CritcalMendAA.sql
+
 == 01/26/2014 ==
 Kayen: Revised 'dispel' type spell effects (ie cancel magic) to be consistent with live
 

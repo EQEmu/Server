@@ -7610,19 +7610,8 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 	int mendhp = GetMaxHP() / 4;
 	int currenthp = GetHP();
 	if (MakeRandomInt(0, 199) < (int)GetSkill(SkillMend)) {
-		int criticalchance = 0;
-		switch(GetAA(aaCriticalMend)){
-		case 1:
-			criticalchance = 5;
-			break;
-		case 2:
-			criticalchance = 10;
-			break;
-		case 3:
-			criticalchance = 25;
-			break;
-		}
-		criticalchance += 5*GetAA(aaMendingoftheTranquil);
+		
+		int criticalchance = spellbonuses.CriticalMend + itembonuses.CriticalMend + aabonuses.CriticalMend;
 
 		if(MakeRandomInt(0,99) < criticalchance){
 			mendhp *= 2;

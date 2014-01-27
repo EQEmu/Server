@@ -804,6 +804,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					if (stun_resist <= 0 || MakeRandomInt(0,99) >= stun_resist) {
 						mlog(COMBAT__HITS, "Stunned. We had %d percent resist chance.", stun_resist);
+						
+						if (caster->IsClient())
+							effect_value += effect_value*caster->CastToClient()->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
+
 						Stun(effect_value);
 					} else {
 						if (IsClient())
@@ -1544,6 +1548,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Memory Blur: %d", effect_value);
 #endif
 				int wipechance = spells[spell_id].base[i];
+				int bonus = spellbonuses.IncreaseChanceMemwipe + itembonuses.IncreaseChanceMemwipe + aabonuses.IncreaseChanceMemwipe;
+				wipechance += wipechance*bonus/100;
+				
 				if(MakeRandomInt(0, 100) < wipechance)
 				{
 					if(IsAIControlled())
@@ -2831,7 +2838,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_SpellVulnerability:
 			case SE_SpellTrigger:
 			case SE_ApplyEffect:
-			case SE_ApplyEffect2:
 			case SE_Twincast:
 			case SE_DelayDeath:
 			case SE_InterruptCasting:
@@ -2932,6 +2938,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_FcLimitUse:
 			case SE_FcMute:	
 			case SE_FfLimitUseType:
+			case SE_FcStunTimeMod:
+			case SE_StunBashChance:
+			case SE_IncreaseChanceMemwipe:
+			case SE_CriticalMend:
 			{
 				break;
 			}
@@ -4425,6 +4435,14 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 
+			case SE_FcStunTimeMod:
+			{
+				if(type == focusFcStunTimeMod)
+					value = base1;
+
+				break;
+			}
+
 		}
 	}
 
@@ -4944,6 +4962,14 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		case SE_FcMute:
 		{
 			if(type == focusFcMute)
+				value = focus_spell.base[i];
+
+			break;
+		}
+
+		case SE_FcStunTimeMod:
+		{
+			if(type == focusFcStunTimeMod)
 				value = focus_spell.base[i];
 
 			break;

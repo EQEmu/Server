@@ -279,7 +279,7 @@ typedef enum {
 #define SE_SpellHateMod					130 // implemented
 #define SE_ReduceReagentCost			131 // implemented
 #define SE_ReduceManaCost				132 // implemented
-#define SE_ApplyEffect2					133	// implemented - Apply additional spell to target
+#define SE_FcStunTimeMod				133	// implemented - Modify duration of stuns.
 #define SE_LimitMaxLevel				134 // implemented
 #define SE_LimitResist					135 // implemented
 #define SE_LimitTarget					136 // implemented
@@ -377,7 +377,7 @@ typedef enum {
 #define SE_ReduceFallDamage				228	// not implented as bonus - reduce the damage that you take from falling
 #define SE_PersistantCasting			229 // implemented
 #define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
-//#define SE_StunBashChance				231	// not used *Unknown limit used in AA Overpowering Strikes (Decrease chance stun resist)
+#define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
 #define SE_DivineSave					232	// implemented (base1 == % chance on death to insta-res) (base2 == spell cast on save)
 #define SE_Metabolism					233	// *not implemented - (Crown of Feathers) Increase metabolism?
 #define SE_ReduceApplyPoisonTime		234	// not implemented as bonus - reduces the time to apply poison
@@ -388,7 +388,7 @@ typedef enum {
 #define SE_FeignedCastOnChance			239	// *not implemented as bonus - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
 //#define SE_StringUnbreakable			240	// not used [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
 #define SE_ImprovedReclaimEnergy		241	// not implemented as bonus - increase the amount of mana returned to you when reclaiming your pet.
-#define SE_ChanceWipeHateList			242	// *not implemented - increases the chance to wipe hate with memory blurr
+#define SE_IncreaseChanceMemwipe		242	// implemented - increases the chance to wipe hate with memory blurr
 #define SE_CharmBreakChance				243	// implemented - Total Domination
 #define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.
 #define SE_TrapCircumvention			245	// *not implemented[AA] - decreases the chance that you will set off a trap when opening a chest
@@ -421,7 +421,7 @@ typedef enum {
 #define SE_CastingLevel2				272 // implemented
 #define SE_CriticalDoTChance			273	// implemented
 #define SE_CriticalHealChance			274	// implemented
-//#define SE_CriticalMend				275	// not used
+#define SE_CriticalMend					275	// implemented[AA] - chance to critical monk mend
 #define SE_Ambidexterity				276 // implemented[AA] - increase chance to duel weild by adding bonus 'skill'
 #define SE_UnfailingDivinity			277	// implemented[AA] - ability grants your Death Pact-type spells a second chance to successfully heal their target, also can cause said spells to do a portion of their healing value even on a complete failure.
 #define	SE_FinishingBlow				278 // implemented[AA] - chance to do massive damage under 10% HP (base1 = chance, base2 = damage)
