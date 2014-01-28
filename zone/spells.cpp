@@ -4449,6 +4449,7 @@ void Mob::Stun(int duration)
 	{
 		stunned = true;
 		stunned_timer.Start(duration);
+		SendStunAppearance();
 	}
 }
 
