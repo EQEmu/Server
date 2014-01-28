@@ -3556,46 +3556,62 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		}
 
 		//check stun chances if bashing
-		if (damage > 0 && ((skill_used == SkillBash || skill_used == SkillKick) && attacker))
-		{
-			// NPCs can stun with their bash/kick as soon as they recieve it.
-			// Clients can stun mobs under level 56 with their bash/kick when they get level 55 or greater.
-			if( attacker->IsNPC() || (attacker->IsClient() && attacker->GetLevel() >= RuleI(Combat, ClientStunLevel) && GetLevel() < RuleI(Spells, BaseImmunityLevel)) )
-			{
-				int8 StunBashChanceBonus = spellbonuses.StunBashChance + itembonuses.StunBashChance + aabonuses.StunBashChance;
+		if (damage > 0 && ((skill_used == SkillBash || skill_used == SkillKick) && attacker)) {
+			// NPCs can stun with their bash/kick as soon as they receive it.
+			// Clients can stun mobs under level 56 with their kick when they get level 55 or greater.
+			// Clients have a chance to stun if the mob is 56+
 
-				if (MakeRandomInt(0,99) < ((RuleI(Character, NPCBashKickStunChance) + StunBashChanceBonus)) || attacker->IsClient())
-				{
-					int stun_resist = itembonuses.StunResist+spellbonuses.StunResist;
-					int frontal_stun_resist = itembonuses.FrontalStunResist+spellbonuses.FrontalStunResist;
+			// Calculate the chance to stun
+			int stun_chance = 0;
+			if (attacker->IsNPC()) {
+				stun_chance = RuleI(Combat, NPCBashKickStunChance);
+			} else if (attacker->IsClient()) {
+				// Less than base immunity
+				// Client vs. Client always uses the chance
+				if (!IsClient() && GetLevel() <= RuleI(Spells, BaseImmunityLevel)) {
+					if (skill_used == SkillBash) // Bash always will
+						stun_chance = 100;
+					else if (attacker->GetLevel() >= RuleI(Combat, ClientStunLevel))
+						stun_chance = 100; // only if you're over level 55 and using kick
+				} else { // higher than base immunity or Client vs. Client
+					// not sure on this number, use same as NPC for now
+					stun_chance = RuleI(Combat, NPCBashKickStunChance);
+					if (skill_used == SkillBash)
+						stun_chance += attacker->spellbonuses.StunBashChance +
+							attacker->itembonuses.StunBashChance +
+							attacker->aabonuses.StunBashChance;
+				}
+			}
 
-					if(IsClient()){
-						stun_resist += aabonuses.StunResist;
-						frontal_stun_resist += aabonuses.FrontalStunResist;
-					}
+			if (stun_chance && MakeRandomInt(0, 99) < stun_chance) {
+				// Passed stun, try to resist now
+				int stun_resist = itembonuses.StunResist + spellbonuses.StunResist;
+				int frontal_stun_resist = itembonuses.FrontalStunResist + spellbonuses.FrontalStunResist;
 
-					if( (GetBaseRace() == OGRE && IsClient() ||
-						(frontal_stun_resist && ((frontal_stun_resist >= 100) || (MakeRandomInt(0,100) <= frontal_stun_resist))))
-						&& !attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))
-					{
-						mlog(COMBAT__HITS, "Stun Resisted. Ogres are immune to frontal melee stuns.");
-					}
-					else
-					{
-						if(stun_resist <= 0 || MakeRandomInt(0,99) >= stun_resist)
-						{
-							mlog(COMBAT__HITS, "Stunned. We had %d percent resist chance.");
-							Stun(0);
-						}
-						else
-						{
-							if(IsClient())
-								Message_StringID(MT_Stun, SHAKE_OFF_STUN);
+				mlog(COMBAT__HITS, "Stun passed, checking resists. Was %d chance.", stun_chance);
+				if (IsClient()) {
+					stun_resist += aabonuses.StunResist;
+					frontal_stun_resist += aabonuses.FrontalStunResist;
+				}
 
-							mlog(COMBAT__HITS, "Stun Resisted. We had %dpercent resist chance.");
-						}
+				// frontal stun check for ogres/bonuses
+				if (((GetBaseRace() == OGRE && IsClient()) ||
+						(frontal_stun_resist && MakeRandomInt(0, 99) < frontal_stun_resist)) &&
+						!attacker->BehindMob(this, attacker->GetX(), attacker->GetY())) {
+					mlog(COMBAT__HITS, "Frontal stun resisted. %d chance.", frontal_stun_resist);
+				} else {
+					// Normal stun resist check.
+					if (stun_resist && MakeRandomInt(0, 99) < stun_resist) {
+						if (IsClient())
+							Message_StringID(MT_Stun, SHAKE_OFF_STUN);
+						mlog(COMBAT__HITS, "Stun Resisted. %d chance.", stun_resist);
+					} else {
+						mlog(COMBAT__HITS, "Stunned. %d resist chance.", stun_resist);
+						Stun(MakeRandomInt(0, 2) * 1000); // 0-2 seconds
 					}
 				}
+			} else {
+				mlog(COMBAT__HITS, "Stun failed. %d chance.", stun_chance);
 			}
 		}
 
