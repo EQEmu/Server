@@ -1200,6 +1200,18 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				}
 				break;
 			}
+
+			case SE_StunBashChance:
+				newbon->StunBashChance += base1;
+				break;
+
+			case SE_IncreaseChanceMemwipe:
+				newbon->IncreaseChanceMemwipe += base1;
+				break;
+
+			case SE_CriticalMend:
+				newbon->CriticalMend += base1;
+				break;
 		}
 	}
 }
@@ -2416,6 +2428,18 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->TwoHandBluntBlock += effect_value;
 				break;
 
+			case SE_StunBashChance:
+				newbon->StunBashChance += effect_value;
+				break;
+
+			case SE_IncreaseChanceMemwipe:
+				newbon->IncreaseChanceMemwipe += effect_value;
+				break;
+
+			case SE_CriticalMend:
+				newbon->CriticalMend += effect_value;
+				break;
+
 			case SE_SpellEffectResistChance:
 			{
 				for(int e = 0; e < MAX_RESISTABLE_EFFECTS*2; e+=2)
@@ -2777,6 +2801,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcLimitUse;
 		case SE_FcMute:
 			return focusFcMute;
+		case SE_FcStunTimeMod:
+			return focusFcStunTimeMod;
 		case SE_CriticalHealRate:
 			return focusCriticalHealRate;
 		case SE_AdditionalHeal2:
@@ -3774,6 +3800,24 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_DivineAura:
 					spellbonuses.DivineAura = false;
+					break;
+
+				case SE_StunBashChance:
+					spellbonuses.StunBashChance = effect_value;
+					itembonuses.StunBashChance = effect_value;
+					aabonuses.StunBashChance = effect_value;
+					break;
+
+				case SE_IncreaseChanceMemwipe:
+					spellbonuses.IncreaseChanceMemwipe = effect_value;
+					itembonuses.IncreaseChanceMemwipe = effect_value;
+					aabonuses.IncreaseChanceMemwipe = effect_value;
+					break;
+
+				case SE_CriticalMend:
+					spellbonuses.CriticalMend = effect_value;
+					itembonuses.CriticalMend = effect_value;
+					aabonuses.CriticalMend = effect_value;
 					break;
 			
 			}

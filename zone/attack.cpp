@@ -3562,7 +3562,9 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			// Clients can stun mobs under level 56 with their bash/kick when they get level 55 or greater.
 			if( attacker->IsNPC() || (attacker->IsClient() && attacker->GetLevel() >= RuleI(Combat, ClientStunLevel) && GetLevel() < RuleI(Spells, BaseImmunityLevel)) )
 			{
-				if (MakeRandomInt(0,99) < (RuleI(Character, NPCBashKickStunChance)) || attacker->IsClient())
+				int8 StunBashChanceBonus = spellbonuses.StunBashChance + itembonuses.StunBashChance + aabonuses.StunBashChance;
+
+				if (MakeRandomInt(0,99) < ((RuleI(Character, NPCBashKickStunChance) + StunBashChanceBonus)) || attacker->IsClient())
 				{
 					int stun_resist = itembonuses.StunResist+spellbonuses.StunResist;
 					int frontal_stun_resist = itembonuses.FrontalStunResist+spellbonuses.FrontalStunResist;

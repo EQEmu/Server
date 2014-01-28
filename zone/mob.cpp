@@ -3211,7 +3211,7 @@ void Mob::TryApplyEffect(Mob *target, uint32 spell_id)
 
 	for(int i = 0; i < EFFECT_COUNT; i++)
 	{
-		if (spells[spell_id].effectid[i] == SE_ApplyEffect || spells[spell_id].effectid[i] == SE_ApplyEffect2)
+		if (spells[spell_id].effectid[i] == SE_ApplyEffect)
 		{
 			if(MakeRandomInt(0, 100) <= spells[spell_id].base[i])
 			{
