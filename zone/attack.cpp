@@ -3563,23 +3563,27 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 			// Calculate the chance to stun
 			int stun_chance = 0;
-			if (attacker->IsNPC()) {
-				stun_chance = RuleI(Combat, NPCBashKickStunChance);
-			} else if (attacker->IsClient()) {
-				// Less than base immunity
-				// Client vs. Client always uses the chance
-				if (!IsClient() && GetLevel() <= RuleI(Spells, BaseImmunityLevel)) {
-					if (skill_used == SkillBash) // Bash always will
-						stun_chance = 100;
-					else if (attacker->GetLevel() >= RuleI(Combat, ClientStunLevel))
-						stun_chance = 100; // only if you're over level 55 and using kick
-				} else { // higher than base immunity or Client vs. Client
-					// not sure on this number, use same as NPC for now
+			if (!GetSpecialAbility(UNSTUNABLE)) {
+				if (attacker->IsNPC()) {
 					stun_chance = RuleI(Combat, NPCBashKickStunChance);
-					if (skill_used == SkillBash)
-						stun_chance += attacker->spellbonuses.StunBashChance +
-							attacker->itembonuses.StunBashChance +
-							attacker->aabonuses.StunBashChance;
+				} else if (attacker->IsClient()) {
+					// Less than base immunity
+					// Client vs. Client always uses the chance
+					if (!IsClient() && GetLevel() <= RuleI(Spells, BaseImmunityLevel)) {
+						if (skill_used == SkillBash) // Bash always will
+							stun_chance = 100;
+						else if (attacker->GetLevel() >= RuleI(Combat, ClientStunLevel))
+							stun_chance = 100; // only if you're over level 55 and using kick
+					} else { // higher than base immunity or Client vs. Client
+						// not sure on this number, use same as NPC for now
+						if (skill_used == SkillKick && attacker->GetLevel() < RuleI(Combat, ClientStunLevel))
+							stun_chance = RuleI(Combat, NPCBashKickStunChance);
+						else if (skill_used == SkillBash)
+							stun_chance = RuleI(Combat, NPCBashKickStunChance) +
+								attacker->spellbonuses.StunBashChance +
+								attacker->itembonuses.StunBashChance +
+								attacker->aabonuses.StunBashChance;
+					}
 				}
 			}
 
