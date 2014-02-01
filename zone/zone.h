@@ -144,6 +144,7 @@ public:
 
 	bool	Depop(bool StartSpawnTimer = false);
 	void	Repop(uint32 delay = 0);
+	void	ClearNPCTypeCache(int id);
 	void	SpawnStatus(Mob* client);
 	void	ShowEnabledSpawnStatus(Mob* client);
 	void	ShowDisabledSpawnStatus(Mob* client);

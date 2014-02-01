@@ -118,6 +118,9 @@ SET(EQEMU_DEBUG_LEVEL 5 CACHE STRING "EQEmu debug level:
 	10 - More errors than you ever wanted to see"
 )
 
+#NPC Types Cache Behavior
+OPTION(EQEMU_DEPOP_INVALIDATES_CACHE "#repop invalidates the npc_types cache (will cause a larger database hit on #repop but is more convienent)." ON)
+
 #Bots are a compile time option so on/off
 OPTION(EQEMU_ENABLE_BOTS "Enable Bots" OFF)
 

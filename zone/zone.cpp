@@ -1518,14 +1518,38 @@ bool Zone::Depop(bool StartSpawnTimer) {
 	std::map<uint32,NPCType *>::iterator itr;
 	entity_list.Depop(StartSpawnTimer);
 
+#ifdef DEPOP_INVALIDATES_NPC_TYPES_CACHE
 	// Refresh npctable, getting current info from database.
 	while(npctable.size()) {
 		itr=npctable.begin();
 		delete itr->second;
 		npctable.erase(itr);
 	}
+#endif
 
 	return true;
+}
+
+void Zone::ClearNPCTypeCache(int id) {
+	if (id <= 0) {
+		auto iter = npctable.begin();
+		while (iter != npctable.end()) {
+			delete iter->second;
+			++iter;
+		}
+		npctable.clear();
+	}
+	else {
+		auto iter = npctable.begin();
+		while (iter != npctable.end()) {
+			if (iter->first == (uint32)id) {
+				delete iter->second;
+				npctable.erase(iter);
+				return;
+			}
+			++iter;
+		}
+	}
 }
 
 void Zone::Repop(uint32 delay) {

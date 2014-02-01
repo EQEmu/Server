@@ -448,7 +448,8 @@ int command_init(void) {
 		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", 250, command_augmentitem) ||
 		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
 		command_add("enablerecipe", "[recipe_id] - Enables a recipe using the recipe id.", 80, command_enablerecipe) ||
-		command_add("disablerecipe", "[recipe_id] - Disables a recipe using the recipe id.", 80, command_disablerecipe)
+		command_add("disablerecipe", "[recipe_id] - Disables a recipe using the recipe id.", 80, command_disablerecipe) ||
+		command_add("npctype_cache", "[id] or all - Clears the npc type cache for either the id or all npcs.", 250, command_npctype_cache)
 		)
 	{
 		command_deinit();
@@ -11450,5 +11451,30 @@ void command_disablerecipe(Client *c, const Seperator *sep)
 		else {
 			c->Message(0, "Invalid recipe id.\nUsage: #disablerecipe recipe_id");
 		}
+	}
+}
+
+void command_npctype_cache(Client *c, const Seperator *sep)
+{
+	if (sep->argnum > 0) {
+		for (int i = 0; i < sep->argnum; ++i) {
+			if (strcasecmp(sep->arg[i + 1], "all") == 0) {
+				c->Message(0, "Clearing all npc types from the cache.");
+				zone->ClearNPCTypeCache(-1);
+			}
+			else {
+				int id = atoi(sep->arg[i + 1]);
+				if (id > 0) {
+					c->Message(0, "Clearing npc type %d from the cache.", id);
+					zone->ClearNPCTypeCache(id);
+					return;
+				}
+			}
+		}
+	}
+	else {
+		c->Message(0, "Usage:");
+		c->Message(0, "#npctype_cache [npctype_id] ...");
+		c->Message(0, "#npctype_cache all");
 	}
 }
