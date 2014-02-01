@@ -233,6 +233,7 @@ public:
 	void CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message);
 	bool EnableRecipe(uint32 recipe_id);
 	bool DisableRecipe(uint32 recipe_id);
+	void ClearNPCTypeCache(int npctype_id);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

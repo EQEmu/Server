@@ -2908,6 +2908,12 @@ bool QuestManager::DisableRecipe(uint32 recipe_id)
 	return (success);
 }
 
+void QuestManager::ClearNPCTypeCache(int npctype_id) {
+	if (zone) {
+		zone->ClearNPCTypeCache(npctype_id);
+	}
+}
+
 Client *QuestManager::GetInitiator() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();

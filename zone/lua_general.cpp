@@ -1060,6 +1060,10 @@ bool lua_disable_recipe(uint32 recipe_id) {
 	return quest_manager.DisableRecipe(recipe_id);
 }
 
+void lua_clear_npctype_cache(int npctype_id) {
+	quest_manager.ClearNPCTypeCache(npctype_id);
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1226,7 +1230,8 @@ luabind::scope lua_register_general() {
 		luabind::def("map_opcodes", &lua_map_opcodes),
 		luabind::def("clear_opcode", &lua_clear_opcode),
 		luabind::def("enable_recipe", &lua_enable_recipe),
-		luabind::def("disable_recipe", &lua_disable_recipe)
+		luabind::def("disable_recipe", &lua_disable_recipe),
+		luabind::def("clear_npctype_cache", &lua_clear_npctype_cache)
 	];
 }
 
