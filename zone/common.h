@@ -56,7 +56,7 @@ typedef enum {	//focus types
 	focusImprovedHeal,
 	focusImprovedDamage,
 	focusImprovedDOT,		//i dont know about this...
-	focusImprovedDamage2,
+	focusFcDamagePctCrit,
 	focusImprovedUndeadDamage,
 	focusPetPower,
 	focusResistRate,
@@ -65,16 +65,16 @@ typedef enum {	//focus types
 	focusSpellVulnerability,
 	focusTwincast,
 	focusSympatheticProc,
-	focusSpellDamage,
-	focusFF_Damage_Amount,
+	focusFcDamageAmt,
+	focusFcDamageAmtCrit,
 	focusSpellDurByTic,
 	focusSwarmPetDuration,
 	focusReduceRecastTime,
 	focusBlockNextSpell,
 	focusHealRate,
-	focusAdditionalDamage,
+	focusFcDamageAmtIncoming,
 	focusFcHealAmtIncoming,
-	focusSpellEffectiveness,
+	focusFcBaseEffects,
 	focusIncreaseNumHits,
 	focusFcLimitUse,
 	focusFcMute,
@@ -242,6 +242,7 @@ struct StatBonuses {
 	int16	CriticalHitChance[HIGHEST_SKILL+2];	//i
 	int16	CriticalSpellChance;				//i
 	int16	SpellCritDmgIncrease;				//i
+	int16	SpellCritDmgIncNoStack;				// increase
 	int16	DotCritDmgIncrease;					//i
 	int16	CriticalHealChance;					//i
 	int16	CriticalHealOverTime;				//i

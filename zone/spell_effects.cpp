@@ -301,11 +301,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					//handles AAs and what not...
 					if(caster)
-					{
-						dmg = GetVulnerability(dmg, caster, spell_id, 0);
-						dmg -= GetAdditionalDamage(caster, spell_id);
-						dmg = caster->GetActSpellDamage(spell_id, dmg);
-					}
+						dmg = caster->GetActSpellDamage(spell_id, dmg, this);
+					
 					dmg = -dmg;
 					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
 				}
@@ -2308,7 +2305,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				int16 focus = 0;
 
 				if(caster->IsClient())
-					focus = caster->CastToClient()->GetFocusEffect(focusSpellEffectiveness, spell_id);
+					focus = caster->CastToClient()->GetFocusEffect(focusFcBaseEffects, spell_id);
 
 				switch(spells[spell_id].skill)
 				{
@@ -2847,7 +2844,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_EffectOnFade:
 			case SE_MaxHPChange:
 			case SE_SympatheticProc:
-			case SE_SpellDamage:
+			case SE_FcDamageAmt:
 			case SE_CriticalSpellChance:
 			case SE_SpellCritChance:
 			case SE_SpellCritDmgIncrease:
@@ -2869,7 +2866,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_IncreaseBlockChance:
 			case SE_AntiGate:
 			case SE_Fearless:
-			case SE_FF_Damage_Amount:
+			case SE_FcDamageAmtCrit:
 			case SE_AdditionalHeal:
 			case SE_CastOnCurer:
 			case SE_CastOnCure:
@@ -2880,15 +2877,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_BardSongRange:
 			case SE_ACv2:
 			case SE_ManaRegen_v2:
-			case SE_ImprovedDamage2:
+			case SE_FcDamagePctCrit:
 			case SE_AdditionalHeal2:
 			case SE_HealRate2:
 			case SE_CriticalHealDecay:
 			case SE_CriticalRegenDecay:
-			case SE_Empathy:
+			case SE_FcDamageAmtIncoming:
 			case SE_LimitSpellSkill:
 			case SE_MitigateDamageShield:
-			case SE_IncreaseSpellPower:
+			case SE_FcBaseEffects:
 			case SE_LimitClass:
 			case SE_LimitExcludeSkill:
 			case SE_BlockBehind:
@@ -3310,8 +3307,8 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level, caster, ticsremaining);
 				//Handle client cast DOTs here.
 				if (caster && caster->IsClient() && IsDetrimentalSpell(spell_id) && effect_value < 0) {
-					effect_value = GetVulnerability(effect_value, caster, spell_id, ticsremaining);
-					effect_value = caster->CastToClient()->GetActDoTDamage(spell_id, effect_value);
+
+					effect_value = caster->CastToClient()->GetActDoTDamage(spell_id, effect_value, this);
 
 					if (!caster->CastToClient()->GetFeigned())
 						AddToHateList(caster, -effect_value);
@@ -3322,13 +3319,13 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 					if(caster)
 					{
 						if(!caster->IsClient()){
-							effect_value = GetVulnerability(effect_value, caster, spell_id, ticsremaining);
+
 							if (!IsClient()) //Allow NPC's to generate hate if casted on other NPC's.
 								AddToHateList(caster, -effect_value);
 						}
 
 						if(caster->IsNPC())
-							effect_value = caster->CastToNPC()->GetActSpellDamage(spell_id, effect_value);
+							effect_value = caster->CastToNPC()->GetActSpellDamage(spell_id, effect_value, this);
 					}
 
 					effect_value = -effect_value;
@@ -4328,25 +4325,25 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 			*/
-			case SE_SpellDamage:
+			case SE_FcDamageAmt:
 			{
-				if(type == focusSpellDamage)
+				if(type == focusFcDamageAmt)
 					value = base1;
 
 				break;
 			}
 
-			case SE_FF_Damage_Amount:
+			case SE_FcDamageAmtCrit:
 			{
-				if(type == focusFF_Damage_Amount)
+				if(type == focusFcDamageAmtCrit)
 					value = base1;
 
 				break;
 			}
 
-			case SE_Empathy:
+			case SE_FcDamageAmtIncoming:
 			{
-				if(type == focusAdditionalDamage)
+				if(type == focusFcDamageAmtIncoming)
 					value = base1;
 
 				break;
@@ -4392,16 +4389,16 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 
-			case SE_IncreaseSpellPower:
+			case SE_FcBaseEffects:
 			{
-				if (type == focusSpellEffectiveness)
+				if (type == focusFcBaseEffects)
 					value = base1;
 
 				break;
 			}
-			case SE_ImprovedDamage2:
+			case SE_FcDamagePctCrit:
 			{
-				if(type == focusImprovedDamage2)
+				if(type == focusFcDamagePctCrit)
 					value = base1;
 
 				break;
@@ -4861,25 +4858,25 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			}
 			break;
 		}
-		case SE_SpellDamage:
+		case SE_FcDamageAmt:
 		{
-			if(type == focusSpellDamage)
+			if(type == focusFcDamageAmt)
 				value = focus_spell.base[i];
 
 			break;
 		}
 
-		case SE_FF_Damage_Amount:
+		case SE_FcDamageAmtCrit:
 		{
-			if(type == focusFF_Damage_Amount)
+			if(type == focusFcDamageAmtCrit)
 				value = focus_spell.base[i];
 
 			break;
 		}
 
-		case SE_Empathy:
+		case SE_FcDamageAmtIncoming:
 		{
-			if(type == focusAdditionalDamage)
+			if(type == focusFcDamageAmtIncoming)
 				value = focus_spell.base[i];
 
 			break;
@@ -4925,16 +4922,16 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 		}
 
-		case SE_IncreaseSpellPower:
+		case SE_FcBaseEffects:
 		{
-			if (type == focusSpellEffectiveness)
+			if (type == focusFcBaseEffects)
 				value = focus_spell.base[i];
 
 			break;
 		}
-		case SE_ImprovedDamage2:
+		case SE_FcDamagePctCrit:
 		{
-			if(type == focusImprovedDamage2)
+			if(type == focusFcDamagePctCrit)
 				value = focus_spell.base[i];
 
 			break;
@@ -5095,7 +5092,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 
-	if (IsBardSong(spell_id) && type != focusSpellEffectiveness)
+	if (IsBardSong(spell_id) && type != focusFcBaseEffects)
 		return 0;
 
 	int16 realTotal = 0;
@@ -5611,9 +5608,9 @@ bool Mob::DoHPToManaCovert(uint16 mana_cost)
 	return false;
 }
 
-int32 Mob::GetAdditionalDamage(Mob *caster, uint32 spell_id, bool use_skill, uint16 skill )
+int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, uint16 skill )
 {
-	//Used to check focus derived from SE_Empathy which adds direct damage to Spells or Skill based attacks.
+	//Used to check focus derived from SE_FcDamageAmtIncoming which adds direct damage to Spells or Skill based attacks.
 	int32 dmg = 0;
 	bool limit_exists = false;
 	bool skill_found = false;
@@ -5621,17 +5618,17 @@ int32 Mob::GetAdditionalDamage(Mob *caster, uint32 spell_id, bool use_skill, uin
 	if (!caster)
 		return 0;
 
-	if (spellbonuses.FocusEffects[focusAdditionalDamage]){
+	if (spellbonuses.FocusEffects[focusFcDamageAmtIncoming]){
 		uint32 buff_count = GetMaxTotalSlots();
 		for(int i = 0; i < buff_count; i++){
 
-			if( (IsValidSpell(buffs[i].spellid) && (IsEffectInSpell(buffs[i].spellid, SE_Empathy))) ){
+			if( (IsValidSpell(buffs[i].spellid) && (IsEffectInSpell(buffs[i].spellid, SE_FcDamageAmtIncoming))) ){
 
 				if (use_skill){
 					int32 temp_dmg = 0;
 					for (int e = 0; e < EFFECT_COUNT; e++) {
 
-						if (spells[buffs[i].spellid].effectid[e] == SE_Empathy){
+						if (spells[buffs[i].spellid].effectid[e] == SE_FcDamageAmtIncoming){
 							temp_dmg += spells[buffs[i].spellid].base[e];
 							continue;
 						}
@@ -5653,7 +5650,7 @@ int32 Mob::GetAdditionalDamage(Mob *caster, uint32 spell_id, bool use_skill, uin
 				}
 
 				else{
-					int32 focus = caster->CalcFocusEffect(focusAdditionalDamage, buffs[i].spellid, spell_id);
+					int32 focus = caster->CalcFocusEffect(focusFcDamageAmtIncoming, buffs[i].spellid, spell_id);
 					if(focus){
 						dmg += focus;
 						CheckNumHitsRemaining(7,i);
@@ -5675,7 +5672,7 @@ int32 Mob::ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, boo
 		return value;
 
 	if (caster->IsClient()){
-		int16 focus = caster->CastToClient()->GetFocusEffect(focusSpellEffectiveness, spell_id);
+		int16 focus = caster->CastToClient()->GetFocusEffect(focusFcBaseEffects, spell_id);
 
 			if (IsBard)
 				value += focus;

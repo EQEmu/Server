@@ -43,8 +43,8 @@ float Client::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 int32 Client::Additional_SpellDmg(uint16 spell_id, bool bufftick)
 {
 	int32 spell_dmg = 0;
-	spell_dmg += GetFocusEffect(focusFF_Damage_Amount, spell_id);
-	spell_dmg += GetFocusEffect(focusSpellDamage, spell_id);
+	spell_dmg += GetFocusEffect(focusFcDamageAmtCrit, spell_id);
+	spell_dmg += GetFocusEffect(focusFcDamageAmt, spell_id);
 
 	//For DOTs you need to apply the damage over the duration of the dot to each tick (this is how live did it)
 	if (bufftick){
@@ -57,139 +57,178 @@ int32 Client::Additional_SpellDmg(uint16 spell_id, bool bufftick)
 	return spell_dmg;
 }
 
-//Scale all NPC spell Damage via $npc->SetSpellFocusDMG(value)
-//Direct Damage is checked in Mob::SpellEffect [spell_effects.cpp]
-//DoT Damage is checked in Mob::DoBuffTic [spell_effects.cpp] (This was added for npcs in that routine)
-int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value) {
+int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 
-	int32 modifier = 100;
+	//Quest scale all NPC spell damage via $npc->SetSpellFocusDMG(value)
+	//DoT Damage - Mob::DoBuffTic [spell_effects.cpp] / Direct Damage Mob::SpellEffect [spell_effects.cpp]
 
-	modifier += SpellFocusDMG;
+	int32 dmg = value;
 
-	return (value * modifier / 100);
+	 if (target) {
+		value += dmg*target->GetVulnerability(this, spell_id, 0)/100; 
+
+		if (spells[spell_id].buffduration == 0)
+			value -= target->GetFcDamageAmtIncoming(this, spell_id);
+		else
+			value -= target->GetFcDamageAmtIncoming(this, spell_id)/spells[spell_id].buffduration;
+	 }
+	 	 
+	 value += dmg*SpellFocusDMG/100; 
+
+	return value;
 }
 
-int32 Client::GetActSpellDamage(uint16 spell_id, int32 value) {
-	// Important variables:
-	// value: the actual damage after resists, passed from Mob::SpellEffect
-	// modifier: modifier to damage (from spells & focus effects?)
-	// ratio: % of the modifier to apply (from AAs & natural bonus?)
-	// chance: critital chance %
+int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
+	
+	if (spells[spell_id].targettype == ST_Self)
+		return value;
 
-	int32 modifier = 100;
-	int16 spell_dmg = 0;
+	bool Critical = false;
+	int32 value_BaseEffect = 0;
 
-
-	//Dunno if this makes sense:
-	if (spells[spell_id].resisttype > 0)
-		modifier += GetFocusEffect((focusType)(0-spells[spell_id].resisttype), spell_id);
-
-
-	int tt = spells[spell_id].targettype;
-	if (tt == ST_UndeadAE || tt == ST_Undead || tt == ST_Summoned) {
-		//undead/summoned spells
-		modifier += GetFocusEffect(focusImprovedUndeadDamage, spell_id);
-	} else {
-		//damage spells.
-		modifier += GetFocusEffect(focusImprovedDamage, spell_id);
-		modifier += GetFocusEffect(focusSpellEffectiveness, spell_id);
-		modifier += GetFocusEffect(focusImprovedDamage2, spell_id);
-	}
+	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
 
 	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
-	if ( spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) {
-		if (this->GetLevel() > 40)
-			value -= (this->GetLevel() - 40) * 20;
-	}
-
+	if ( (spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) && GetLevel() > 40)
+		value -= (GetLevel() - 40) * 20;
+       
 	//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm TOuch.
-	if (spell_id == SPELL_IMP_HARM_TOUCH) { //Improved Harm Touch
-			value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
-	}
-
-	// This adds the extra damage for the AA's Consumption of the Soul and Improved Consumption of the Soul, 200 per level to the AA Leech Curse for Shadowknights.
-	if (spell_id == SPELL_LEECH_TOUCH) { //Leech Touch
-		value -= GetAA(aaConsumptionoftheSoul) * 200; //Consumption of the Soul
-		value -= GetAA(aaImprovedConsumptionofSoul) * 200; //Improved Consumption of the Soul
-	}
-
-	//spell crits, dont make sense if cast on self.
-	if(tt != ST_Self) {
-		// item SpellDmg bonus
-		// Formula = SpellDmg * (casttime + recastime) / 7; Cant trigger off spell less than 5 levels below and cant cause more dmg than the spell itself.
-		if(this->itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5) {
-			spell_dmg = this->itembonuses.SpellDmg * (spells[spell_id].cast_time + spells[spell_id].recast_time) / 7000;
-			if(spell_dmg > -value)
-				spell_dmg = -value;
-		}
-
-		// Spell-based SpellDmg adds directly but it restricted by focuses.
-		spell_dmg += Additional_SpellDmg(spell_id);
-
-		int chance = RuleI(Spells, BaseCritChance);
-		int32 ratio = RuleI(Spells, BaseCritRatio);
-
+	if (spell_id == SPELL_IMP_HARM_TOUCH) //Improved Harm Touch
+		value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
+        
+	int chance = RuleI(Spells, BaseCritChance);
 		chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
-		ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
-
-		if(GetClass() == WIZARD) {
-			if (GetLevel() >= RuleI(Spells, WizCritLevel)) {
-				chance += RuleI(Spells, WizCritChance);
-				ratio += RuleI(Spells, WizCritRatio);
-			}
-			if(aabonuses.SpellCritDmgIncrease > 0) // wizards get an additional bonus
-				ratio += aabonuses.SpellCritDmgIncrease * 1.5; //108%, 115%, 124%, close to Graffe's 207%, 215%, & 225%
-		}
+		
+	if (chance > 0){
+ 
+		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
 		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
-		if (spell_id == SPELL_IMP_HARM_TOUCH) {
-			if ( (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0) )
-				chance = 100;
+		 if (spell_id == SPELL_IMP_HARM_TOUCH && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
+			 chance = 100;
+ 
+		 if (MakeRandomInt(1,100) <= chance){
+			Critical = true;
+			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
+			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
 		}
 
-		/*
-		//Handled in aa_effects will focus spells from 'spellgroup=99'. (SK life tap from buff procs)
-		//If you are using an older spell file table (Pre SOF)...
-		//Use SQL optional_EnableSoulAbrasionAA to update your spells table to properly use the effect.
-		//If you do not want to update your table then you may want to enable this.
-		if(tt == ST_Tap) {
-			if(spells[spell_id].classes[SHADOWKNIGHT-1] >= 254 && spell_id != SPELL_LEECH_TOUCH){
-				if(ratio < 100)	//chance increase and ratio are made up, not confirmed
-					ratio = 100;
+		else if (GetClass() == WIZARD && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (MakeRandomInt(1,100) <= RuleI(Spells, WizCritChance))) {
+			ratio = MakeRandomInt(1,100); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio.
+			Critical = true;
+		}
 
-				switch (GetAA(aaSoulAbrasion))
-				{
-				case 1:
-					modifier += 100;
-					break;
-				case 2:
-					modifier += 200;
-					break;
-				case 3:
-					modifier += 300;
-					break;
-				}
+		ratio += RuleI(Spells, WizCritRatio); //Default is zero
+			
+		if (Critical){
+
+			value = value_BaseEffect*ratio/100;  
+
+			value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100; 
+
+			value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
+
+			if (target) {
+				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;  
+				value -= target->GetFcDamageAmtIncoming(this, spell_id); 
 			}
-		}
-		*/
 
-		if (chance > 0) {
-			mlog(SPELLS__CRITS, "Attempting spell crit. Spell: %s (%d), Value: %d, Modifier: %d, Chance: %d, Ratio: %d", spells[spell_id].name, spell_id, value, modifier, chance, ratio);
-			if(MakeRandomInt(0,100) <= chance) {
-				modifier += modifier*ratio/100;
-				spell_dmg *= 2;
-				mlog(SPELLS__CRITS, "Spell crit successful. Final damage modifier: %d, Final Damage: %d", modifier, (value * modifier / 100) - spell_dmg);
-				entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), (-value * modifier / 100) + spell_dmg);
-			} else
-				mlog(SPELLS__CRITS, "Spell crit failed. Final Damage Modifier: %d, Final Damage: %d", modifier, (value * modifier / 100) - spell_dmg);
+			value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100; 
+
+			value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
+
+			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+				value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value)*ratio/100;
+
+			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
+
+			return value;
 		}
 	}
 
-	return ((value * modifier / 100) - spell_dmg);
+	 value = value_BaseEffect;
+ 
+	 value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100; 
+	 
+	 value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100;
+
+	 if (target) {
+		value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100;
+		value -= target->GetFcDamageAmtIncoming(this, spell_id); 
+	 }
+
+	 value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id); 
+
+	 value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
+	 
+	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+         value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value); 
+
+	return value;
+ }
+
+int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
+
+	if (target == nullptr)
+		return value;
+
+	int32 value_BaseEffect = 0;
+	int32 extra_dmg = 0;
+	int16 chance = 0;
+	chance += itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
+
+	if (spellbonuses.CriticalDotDecay)
+			chance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
+	
+	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
+
+	if (chance > 0 && (MakeRandomInt(1, 100) <= chance)) {
+	
+		int32 ratio = 100;
+		ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
+
+		value = value_BaseEffect*ratio/100;  
+
+		value += int(value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100)*ratio/100; 
+
+		value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
+	
+		value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100; 
+
+		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) + 
+					int(GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100) +
+					GetFocusEffect(focusFcDamageAmt, spell_id);
+
+		if (extra_dmg)
+			extra_dmg /= CalcBuffDuration(this, this, spell_id);
+
+		value -= extra_dmg;
+
+		return value;
+	}
+
+
+	value = value_BaseEffect;
+
+	value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100; 
+
+	value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100; 
+
+	value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100; 
+	
+	extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) + 
+				GetFocusEffect(focusFcDamageAmtCrit, spell_id) +
+				GetFocusEffect(focusFcDamageAmt, spell_id); 
+
+	if (extra_dmg)
+		extra_dmg /= CalcBuffDuration(this, this, spell_id); 
+	
+	value -= extra_dmg;
+
+	return value;
 }
 
-int32 Client::GetActDoTDamage(uint16 spell_id, int32 value) {
-
+	/*
 	int32 modifier = 100;
 	int16 spell_dmg = 0;
 	int16 critChance = 0;
@@ -199,11 +238,6 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value) {
 	critChance += itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
 	ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
 	spell_dmg += Additional_SpellDmg(spell_id,true);
-
-	// since DOTs are the Necromancer forte, give an innate bonus (Kayen: Is this a real bonus?)
-	// however, no chance to crit unless they've trained atleast one level in the AA first
-	if (GetClass() == NECROMANCER && critChance > 0)
-		critChance += 5;
 
 	if (spellbonuses.CriticalDotDecay)
 			critChance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
@@ -216,8 +250,34 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value) {
 	}
 
 	return ((value*modifier/100)-spell_dmg);
+	*/
 
+
+
+int32 Mob::GetExtraSpellDmg(uint16 spell_id, int32 extra_spell_dmg, int32 base_spell_dmg)
+{
+	int total_cast_time = 0;
+
+	if (spells[spell_id].recast_time >= spells[spell_id].recovery_time)
+			total_cast_time = spells[spell_id].recast_time + spells[spell_id].cast_time;
+	else
+		total_cast_time = spells[spell_id].recovery_time + spells[spell_id].cast_time;
+
+	if (total_cast_time > 0 && total_cast_time <= 2500)
+		extra_spell_dmg = extra_spell_dmg*25/100; 
+	 else if (total_cast_time > 2500 && total_cast_time < 7000) 
+		 extra_spell_dmg = extra_spell_dmg*(0.167*((total_cast_time - 1000)/1000)); 
+	 else 
+		 extra_spell_dmg = extra_spell_dmg * total_cast_time / 7000; 
+
+		extra_spell_dmg = -extra_spell_dmg;
+
+		if(extra_spell_dmg*2 < base_spell_dmg)
+			return 0;
+
+		return extra_spell_dmg;
 }
+
 
 //Scale all NPC spell healing via SetSpellFocusHeal(value)
 int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value) {
@@ -256,7 +316,7 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value) {
 	int32 modifier = 100;
 	int16 heal_amt = 0;
 	modifier += GetFocusEffect(focusImprovedHeal, spell_id);
-	modifier += GetFocusEffect(focusSpellEffectiveness, spell_id);
+	modifier += GetFocusEffect(focusFcBaseEffects, spell_id);
 	heal_amt += Additional_Heal(spell_id);
 	int chance = 0;
 

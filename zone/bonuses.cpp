@@ -1058,8 +1058,8 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			{
 				newbon->CriticalSpellChance += base1;
 
-				if (base2 > 100)
-					newbon->SpellCritDmgIncrease += (base2 - 100);
+				if (base2 > newbon->SpellCritDmgIncNoStack)
+					newbon->SpellCritDmgIncNoStack = base2;
 
 				break;
 			}
@@ -1980,8 +1980,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_CriticalSpellChance:
 			{
 				newbon->CriticalSpellChance += effect_value;
-				if (spells[spell_id].base2[i] > 100)
-					newbon->SpellCritDmgIncrease += (spells[spell_id].base2[i] - 100);
+				
+				if (spells[spell_id].base2[i] > newbon->SpellCritDmgIncNoStack)
+					newbon->SpellCritDmgIncNoStack = spells[spell_id].base2[i];
 				break;
 			}
 
@@ -2781,20 +2782,20 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusTwincast;
 		case SE_SympatheticProc:
 			return focusSympatheticProc;
-		case SE_SpellDamage:
-			return focusSpellDamage;
-		case SE_FF_Damage_Amount:
-			return focusFF_Damage_Amount;
-		case SE_ImprovedDamage2:
-			return focusImprovedDamage2;
-		case SE_Empathy:
-			return focusAdditionalDamage;
+		case SE_FcDamageAmt:
+			return focusFcDamageAmt;
+		case SE_FcDamageAmtCrit:
+			return focusFcDamageAmtCrit;
+		case SE_FcDamagePctCrit:
+			return focusFcDamagePctCrit;
+		case SE_FcDamageAmtIncoming:
+			return focusFcDamageAmtIncoming;
 		case SE_FcHealAmtIncoming:
 			return focusFcHealAmtIncoming;
 		case SE_HealRate2:
 			return focusHealRate;
-		case SE_IncreaseSpellPower:
-			return focusSpellEffectiveness;
+		case SE_FcBaseEffects:
+			return focusFcBaseEffects;
 		case SE_IncreaseNumHits:
 			return focusIncreaseNumHits;
 		case SE_FcLimitUse:

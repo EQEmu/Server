@@ -301,7 +301,7 @@ typedef enum {
 #define SE_TemporaryPets				152	// implemented
 #define SE_BalanceHP					153 // implemented
 #define SE_DispelDetrimental			154 // implemented
-#define SE_SpellCritDmgIncrease			155 // implemented
+#define SE_SpellCritDmgIncrease			155 // implemented - no known live spells use this currently
 #define SE_IllusionCopy					156	// implemented - Deception
 #define SE_SpellDamageShield			157	// implemented - Petrad's Protection
 #define SE_Reflect						158 // implemented
@@ -432,7 +432,7 @@ typedef enum {
 #define SE_DoubleSpecialAttack			283	// implemented[AA] - Chance to perform second special attack as monk
 //#define SE_LoHSetHeal					284	// not used
 #define SE_NimbleEvasion				285	// *not implemented - base1 = 100 for max
-#define SE_SpellDamage					286	// implemented - adds direct spell damage
+#define SE_FcDamageAmt					286	// implemented - adds direct spell damage
 #define SE_SpellDurationIncByTic		287 // implemented
 #define SE_SpecialAttackKBProc			288	// implemented[AA] - Chance to to do a knockback from special attacks [AA Dragon Punch].
 #define SE_ImprovedSpellEffect			289 // implemented - Triggers only if fades after natural duration.
@@ -440,16 +440,16 @@ typedef enum {
 #define SE_Purify						291 // implemented - Removes determental effects
 #define SE_StrikeThrough2				292	// implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
 #define SE_FrontalStunResist			293	// implemented[AA] - Reduce chance to be stunned from front.
-#define SE_CriticalSpellChance			294 // implemented
+#define SE_CriticalSpellChance			294 // implemented - increase chance to critical hit and critical damage modifier.
 //#define SE_ReduceTimerSpecial			295	// not used
 #define SE_SpellVulnerability			296	// implemented - increase in incoming spell damage
-#define SE_Empathy						297 // implemented - debuff that adds points damage to spells cast on target (focus effect).
+#define SE_FcDamageAmtIncoming			297 // implemented - debuff that adds points damage to spells cast on target (focus effect).
 #define SE_ChangeHeight					298	// implemented
 #define SE_WakeTheDead					299	// implemented
 #define SE_Doppelganger					300	// implemented
 #define SE_ArcheryDamageModifier		301	// implemented[AA] - increase archery damage by percent
-#define SE_ImprovedDamage2				302	// implemented - spell damage focus
-#define SE_FF_Damage_Amount				303	// implemented - adds direct spell damage
+#define SE_FcDamagePctCrit				302	// implemented - spell focus that is applied after critical hits has been calculated.
+#define SE_FcDamageAmtCrit				303	// implemented - adds direct spell damage
 #define SE_OffhandRiposteFail			304 // implemented as bonus - enemy cannot riposte offhand attacks
 #define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
 #define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
@@ -559,7 +559,7 @@ typedef enum {
 #define SE_LimitEndPercent				410 // implemented - limited to a certain percent of your end
 #define SE_LimitClass					411 // implemented - Limits to spells of a certain class (Note: The class value in dbase is +1 in relation to item class value)
 #define SE_LimitRace					412 // implemented - Limits to spells cast by a certain race (Note: not used in any known live spells)
-#define SE_IncreaseSpellPower			413 // implemented - Increases the power of bard songs, skill attacks, runes, bard allowed foci, damage/heal
+#define SE_FcBaseEffects				413 // implemented - Increases the power of bard songs, skill attacks, runes, bard allowed foci, damage/heal
 #define SE_LimitSpellSkill				414 // implemented - Limit a focus to include spells cast using a specific skill.
 //#define SE_FFItemClass				415 // not used
 #define SE_ACv2							416 // implemented - New AC spell effect

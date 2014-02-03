@@ -140,7 +140,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 		if(max_damage > 0) {
 			ApplyMeleeDamageBonus(skill, max_damage);
-			max_damage += who->GetAdditionalDamage(this, 0, true, skill);
+			max_damage += who->GetFcDamageAmtIncoming(this, 0, true, skill);
 			max_damage += (itembonuses.HeroicSTR / 10) + (max_damage * who->GetSkillDmgTaken(skill) / 100) + GetSkillDmgAmt(skill);
 			TryCriticalHit(who, skill, max_damage);
 		}
@@ -941,7 +941,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 				{
 					TotalDmg += TotalDmg*focus/100;
 					ApplyMeleeDamageBonus(SkillArchery, TotalDmg);
-					TotalDmg += other->GetAdditionalDamage(this, 0, true, SkillArchery);
+					TotalDmg += other->GetFcDamageAmtIncoming(this, 0, true, SkillArchery);
 					TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(SkillArchery) / 100) + GetSkillDmgAmt(SkillArchery);
 
 					TotalDmg = mod_archery_damage(TotalDmg, dobonus, RangeWeapon);
@@ -1265,7 +1265,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 			{
 				TotalDmg += TotalDmg*focus/100;
 				ApplyMeleeDamageBonus(SkillThrowing, TotalDmg);
-				TotalDmg += other->GetAdditionalDamage(this, 0, true, SkillThrowing);
+				TotalDmg += other->GetFcDamageAmtIncoming(this, 0, true, SkillThrowing);
 				TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(SkillThrowing) / 100) + GetSkillDmgAmt(SkillThrowing);
 				TryCriticalHit(other, SkillThrowing, TotalDmg);
 				int32 hate = (2*WDmg);
@@ -2139,7 +2139,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 			if(damage > 0) {
 				damage += damage*focus/100;
 				ApplyMeleeDamageBonus(skillinuse, damage);
-				damage += other->GetAdditionalDamage(this, 0, true, skillinuse);
+				damage += other->GetFcDamageAmtIncoming(this, 0, true, skillinuse);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
 				TryCriticalHit(other, skillinuse, damage);
 			}
