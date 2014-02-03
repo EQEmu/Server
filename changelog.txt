@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 02/2/2014 ==
+Kayen: Revised how spell/dot damage is calculated to properly incorporated all current focus effects/bonuses.
+
+
+Required SQL: utils/sql/git/2014_02_02_SpellCriticalsAA.sql
+
 == 01/27/2014 ==
 Kayen: Implemented SE_CriticalMend  (chance to critical monk mend)
 Kayen: Implemented SE_IncreaseChanceMemwipe (increases the chance to wipe hate with memory blurr)

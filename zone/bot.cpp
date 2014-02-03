@@ -1971,8 +1971,8 @@ void Bot::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			{
 				newbon->CriticalSpellChance += base1;
 
-				if (base2 > 100)
-					newbon->SpellCritDmgIncrease += (base2 - 100);
+				if (base2 > newbon->SpellCritDmgIncrease)
+					newbon->SpellCritDmgIncrease = base2;
 
 				break;
 			}
@@ -3335,7 +3335,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 			if(damage > 0) {
 				damage += damage*focus/100;
 				ApplyMeleeDamageBonus(skillinuse, damage);
-				damage += other->GetAdditionalDamage(this, 0, true, skillinuse);
+				damage += other->GetFcDamageAmtIncoming(this, 0, true, skillinuse);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
 				TryCriticalHit(other, skillinuse, damage, nullptr);
 			}
@@ -6986,25 +6986,25 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 			*/
-			case SE_SpellDamage:
+			case SE_FcDamageAmt:
 			{
-				if(type == focusSpellDamage)
+				if(type == focusFcDamageAmt)
 					value = base1;
 
 				break;
 			}
 
-			case SE_FF_Damage_Amount:
+			case SE_FcDamageAmtCrit:
 			{
-				if(type == focusFF_Damage_Amount)
+				if(type == focusFcDamageAmtCrit)
 					value = base1;
 
 				break;
 			}
 
-			case SE_Empathy:
+			case SE_FcDamageAmtIncoming:
 			{
-				if(type == focusAdditionalDamage)
+				if(type == focusFcDamageAmtIncoming)
 					value = base1;
 
 				break;
@@ -7042,16 +7042,16 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 
-			case SE_IncreaseSpellPower:
+			case SE_FcBaseEffects:
 			{
-				if (type == focusSpellEffectiveness)
+				if (type == focusFcBaseEffects)
 					value = base1;
 
 				break;
 			}
-			case SE_ImprovedDamage2:
+			case SE_FcDamagePctCrit:
 			{
-				if(type == focusImprovedDamage2)
+				if(type == focusFcDamagePctCrit)
 					value = base1;
 
 				break;
@@ -7080,7 +7080,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 }
 
 int16 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
-	if (IsBardSong(spell_id) && bottype != BotfocusSpellEffectiveness)
+	if (IsBardSong(spell_id) && bottype != BotfocusFcBaseEffects)
 		return 0;
 
 	int16 realTotal = 0;
@@ -7644,25 +7644,25 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 			}
 			break;
 		}
-		case SE_SpellDamage:
+		case SE_FcDamageAmt:
 		{
-			if(bottype == BotfocusSpellDamage)
+			if(bottype == BotfocusFcDamageAmt)
 				value = focus_spell.base[i];
 
 			break;
 		}
 
-		case SE_FF_Damage_Amount:
+		case SE_FcDamageAmtCrit:
 		{
-			if(bottype == BotfocusFF_Damage_Amount)
+			if(bottype == BotfocusFcDamageAmtCrit)
 				value = focus_spell.base[i];
 
 			break;
 		}
 
-		case SE_Empathy:
+		case SE_FcDamageAmtIncoming:
 		{
-			if(bottype == BotfocusAdditionalDamage)
+			if(bottype == BotfocusFcDamageAmtIncoming)
 				value = focus_spell.base[i];
 
 			break;
@@ -7700,16 +7700,16 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 			break;
 		}
 
-		case SE_IncreaseSpellPower:
+		case SE_FcBaseEffects:
 		{
-			if (bottype == BotfocusSpellEffectiveness)
+			if (bottype == BotfocusFcBaseEffects)
 				value = focus_spell.base[i];
 
 			break;
 		}
-		case SE_ImprovedDamage2:
+		case SE_FcDamagePctCrit:
 		{
-			if(bottype == BotfocusImprovedDamage2)
+			if(bottype == BotfocusFcDamagePctCrit)
 				value = focus_spell.base[i];
 
 			break;
@@ -8091,7 +8091,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 		if(max_damage > 0) {
 			ApplyMeleeDamageBonus(skill, max_damage);
-			max_damage += who->GetAdditionalDamage(this, 0, true, skill);
+			max_damage += who->GetFcDamageAmtIncoming(this, 0, true, skill);
 			max_damage += (itembonuses.HeroicSTR / 10) + (max_damage * who->GetSkillDmgTaken(skill) / 100) + GetSkillDmgAmt(skill);
 			TryCriticalHit(who, skill, max_damage);
 		}
@@ -9122,8 +9122,8 @@ void Bot::SetAttackTimer() {
 int32 Bot::Additional_SpellDmg(uint16 spell_id, bool bufftick)
 {
 	int32 spell_dmg = 0;
-	spell_dmg += GetBotFocusEffect(BotfocusFF_Damage_Amount, spell_id);
-	spell_dmg += GetBotFocusEffect(BotfocusSpellDamage, spell_id);
+	spell_dmg += GetBotFocusEffect(BotfocusFcDamageAmtCrit, spell_id);
+	spell_dmg += GetBotFocusEffect(BotfocusFcDamageAmt, spell_id);
 
 	//For DOTs you need to apply the damage over the duration of the dot to each tick (this is how live did it)
 	if (bufftick){
@@ -9136,123 +9136,94 @@ int32 Bot::Additional_SpellDmg(uint16 spell_id, bool bufftick)
 	return spell_dmg;
 }
 
-int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value) {
-	// Important variables:
-	// value: the actual damage after resists, passed from Mob::SpellEffect
-	// modifier: modifier to damage (from spells & focus effects?)
-	// ratio: % of the modifier to apply (from AAs & natural bonus?)
-	// chance: critital chance %
+int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
+	
+	if (spells[spell_id].targettype == ST_Self)
+		return value;
 
-	int32 modifier = 100;
-	int16 spell_dmg = 0;
+	bool Critical = false;
+	int32 value_BaseEffect = 0;
 
-	//Dunno if this makes sense:
-	if (spells[spell_id].resisttype > 0)
-		modifier += GetBotFocusEffect((BotfocusType)(0-spells[spell_id].resisttype), spell_id);
-
-
-	int tt = spells[spell_id].targettype;
-	if (tt == ST_UndeadAE || tt == ST_Undead || tt == ST_Summoned) {
-		//undead/summoned spells
-		modifier += GetBotFocusEffect(BotfocusImprovedUndeadDamage, spell_id);
-	} else {
-		//damage spells.
-		modifier += GetBotFocusEffect(BotfocusImprovedDamage, spell_id);
-		modifier += GetBotFocusEffect(BotfocusSpellEffectiveness, spell_id);
-		modifier += GetBotFocusEffect(BotfocusImprovedDamage2, spell_id);
-	}
+	value_BaseEffect = value + (value*GetBotFocusEffect(BotfocusFcBaseEffects, spell_id)/100);
 
 	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
-	if ( spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) {
-		if (this->GetLevel() > 40)
-			value -= (this->GetLevel() - 40) * 20;
-	}
-
+	if ( (spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) && GetLevel() > 40)
+		value -= (GetLevel() - 40) * 20;
+       
 	//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm TOuch.
-	if (spell_id == SPELL_IMP_HARM_TOUCH) { //Improved Harm Touch
-			value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
-	}
-
-	//these spell IDs could be wrong
-	if (spell_id == SPELL_LEECH_TOUCH) {	//leech touch
-		value -= GetAA(aaConsumptionoftheSoul) * 200; //Consumption of the Soul
-		value -= GetAA(aaImprovedConsumptionofSoul) * 200; //Improved Consumption of the Soul
-	}
-
-	//spell crits, dont make sense if cast on self.
-	if(tt != ST_Self) {
-		// item SpellDmg bonus
-		// Formula = SpellDmg * (casttime + recastime) / 7; Cant trigger off spell less than 5 levels below and cant cause more dmg than the spell itself.
-		if(this->itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5) {
-			spell_dmg = this->itembonuses.SpellDmg * (spells[spell_id].cast_time + spells[spell_id].recast_time) / 7000;
-			if(spell_dmg > -value)
-				spell_dmg = -value;
-		}
-
-		// Spell-based SpellDmg adds directly but it restricted by focuses.
-		spell_dmg += Additional_SpellDmg(spell_id);
-
-		int chance = RuleI(Spells, BaseCritChance);
-		int32 ratio = RuleI(Spells, BaseCritRatio);
-
+	if (spell_id == SPELL_IMP_HARM_TOUCH) //Improved Harm Touch
+		value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
+        
+	int chance = RuleI(Spells, BaseCritChance);
 		chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
-		ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
-
-		if(GetClass() == WIZARD) {
-			if (GetLevel() >= RuleI(Spells, WizCritLevel)) {
-				chance += RuleI(Spells, WizCritChance);
-				ratio += RuleI(Spells, WizCritRatio);
-			}
-			if(aabonuses.SpellCritDmgIncrease > 0) // wizards get an additional bonus
-				ratio += aabonuses.SpellCritDmgIncrease * 1.5; //108%, 115%, 124%, close to Graffe's 207%, 215%, & 225%
-		}
+		
+	if (chance > 0){
+ 
+		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
 		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
-		if (spell_id == SPELL_IMP_HARM_TOUCH) {
-			if ( (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0) )
-				chance = 100;
+		 if (spell_id == SPELL_IMP_HARM_TOUCH && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
+			 chance = 100;
+ 
+		 if (MakeRandomInt(1,100) <= chance){
+			Critical = true;
+			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
+			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
 		}
 
-		/*
-		//Handled in aa_effects will focus spells from 'spellgroup=99'. (SK life tap from buff procs)
-		//If you are using an older spell file table (Pre SOF)...
-		//Use SQL optional_EnableSoulAbrasionAA to update your spells table to properly use the effect.
-		//If you do not want to update your table then you may want to enable this.
-		if(tt == ST_Tap) {
-			if(spells[spell_id].classes[SHADOWKNIGHT-1] >= 254 && spell_id != SPELL_LEECH_TOUCH){
-				if(ratio < 100)	//chance increase and ratio are made up, not confirmed
-					ratio = 100;
+		else if (GetClass() == WIZARD && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (MakeRandomInt(1,100) <= RuleI(Spells, WizCritChance))) {
+			ratio = MakeRandomInt(1,100); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio.
+			Critical = true;
+		}
 
-				switch (GetAA(aaSoulAbrasion))
-				{
-				case 1:
-					modifier += 100;
-					break;
-				case 2:
-					modifier += 200;
-					break;
-				case 3:
-					modifier += 300;
-					break;
-				}
+		ratio += RuleI(Spells, WizCritRatio); //Default is zero
+			
+		if (Critical){
+
+			value = value_BaseEffect*ratio/100;  
+
+			value += value_BaseEffect*GetFocusEffect(BotfocusImprovedDamage, spell_id)/100; 
+
+			value += int(value_BaseEffect*GetFocusEffect(BotfocusFcDamagePctCrit, spell_id)/100)*ratio/100;
+
+			if (target) {
+				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;  
+				value -= target->GetFcDamageAmtIncoming(this, spell_id); 
 			}
-		}
-		*/
 
-		if (chance > 0) {
-			mlog(SPELLS__CRITS, "Attempting spell crit. Spell: %s (%d), Value: %d, Modifier: %d, Chance: %d, Ratio: %d", spells[spell_id].name, spell_id, value, modifier, chance, ratio);
-			if(MakeRandomInt(0,100) <= chance) {
-				modifier += modifier*ratio/100;
-				spell_dmg *= 2;
-				mlog(SPELLS__CRITS, "Spell crit successful. Final damage modifier: %d, Final Damage: %d", modifier, (value * modifier / 100) - spell_dmg);
-				entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), (-value * modifier / 100) + spell_dmg);
-			} else
-				mlog(SPELLS__CRITS, "Spell crit failed. Final Damage Modifier: %d, Final Damage: %d", modifier, (value * modifier / 100) - spell_dmg);
+			value -= GetFocusEffect(BotfocusFcDamageAmtCrit, spell_id)*ratio/100; 
+
+			value -= GetFocusEffect(BotfocusFcDamageAmt, spell_id); 
+
+			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+				value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value)*ratio/100;
+
+			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
+
+			return value;
 		}
 	}
 
-	return ((value * modifier / 100) - spell_dmg);
-}
+	 value = value_BaseEffect;
+ 
+	 value += value_BaseEffect*GetFocusEffect(BotfocusImprovedDamage, spell_id)/100; 
+	 
+	 value += value_BaseEffect*GetFocusEffect(BotfocusFcDamagePctCrit, spell_id)/100;
+
+	 if (target) {
+		value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100;
+		value -= target->GetFcDamageAmtIncoming(this, spell_id); 
+	 }
+
+	 value -= GetFocusEffect(BotfocusFcDamageAmtCrit, spell_id); 
+
+	 value -= GetFocusEffect(BotfocusFcDamageAmt, spell_id); 
+	 
+	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+         value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value); 
+
+	return value;
+ }
 
 int32 Bot::Additional_Heal(uint16 spell_id)
 {
@@ -9274,7 +9245,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value) {
 	int32 modifier = 100;
 	int16 heal_amt = 0;
 	modifier += GetBotFocusEffect(BotfocusImprovedHeal, spell_id);
-	modifier += GetBotFocusEffect(BotfocusSpellEffectiveness, spell_id);
+	modifier += GetBotFocusEffect(BotfocusFcBaseEffects, spell_id);
 	heal_amt += Additional_Heal(spell_id);
 	int chance = 0;
 

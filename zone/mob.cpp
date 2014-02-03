@@ -3351,17 +3351,23 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 	}
 }
 
-int32 Mob::GetVulnerability(int32 damage, Mob *caster, uint32 spell_id, uint32 ticsremaining)
+int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 {
+	if (!IsValidSpell(spell_id))
+		return 0;
+
 	if (!caster)
-		return damage;
+		return 0;
+	
+	int32 value = 0;
+
 	//Apply innate vulnerabilities
 	if (Vulnerability_Mod[GetSpellResistType(spell_id)] != 0)
-		damage += damage * Vulnerability_Mod[GetSpellResistType(spell_id)] / 100;
+		value = Vulnerability_Mod[GetSpellResistType(spell_id)];
 
 
 	else if (Vulnerability_Mod[HIGHEST_RESIST+1] != 0)
-		damage += damage * Vulnerability_Mod[HIGHEST_RESIST+1] / 100;
+		value = Vulnerability_Mod[HIGHEST_RESIST+1];
 
 	//Apply spell derived vulnerabilities
 	if (spellbonuses.FocusEffects[focusSpellVulnerability]){
@@ -3395,12 +3401,12 @@ int32 Mob::GetVulnerability(int32 damage, Mob *caster, uint32 spell_id, uint32 t
 		if (tmp_focus < -99)
 			tmp_focus = -99;
 
-		damage += damage * tmp_focus / 100;
+		value += tmp_focus;
 
 		if (tmp_buffslot >= 0)
 			CheckNumHitsRemaining(7, tmp_buffslot);
 	}
-	return damage;
+	return value;
 }
 
 int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)

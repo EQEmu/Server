@@ -79,7 +79,7 @@ public:
 	// Merc Spell Casting Methods
 	int32 Additional_SpellDmg(uint16 spell_id, bool bufftick = false);
 	int32 Additional_Heal(uint16 spell_id);
-	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value);
+	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
 	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
