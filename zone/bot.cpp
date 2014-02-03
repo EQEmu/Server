@@ -9182,18 +9182,18 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 			value = value_BaseEffect*ratio/100;  
 
-			value += value_BaseEffect*GetFocusEffect(BotfocusImprovedDamage, spell_id)/100; 
+			value += value_BaseEffect*GetBotFocusEffect(BotfocusImprovedDamage, spell_id)/100; 
 
-			value += int(value_BaseEffect*GetFocusEffect(BotfocusFcDamagePctCrit, spell_id)/100)*ratio/100;
+			value += int(value_BaseEffect*GetBotFocusEffect(BotfocusFcDamagePctCrit, spell_id)/100)*ratio/100;
 
 			if (target) {
 				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;  
 				value -= target->GetFcDamageAmtIncoming(this, spell_id); 
 			}
 
-			value -= GetFocusEffect(BotfocusFcDamageAmtCrit, spell_id)*ratio/100; 
+			value -= GetBotFocusEffect(BotfocusFcDamageAmtCrit, spell_id)*ratio/100; 
 
-			value -= GetFocusEffect(BotfocusFcDamageAmt, spell_id); 
+			value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id); 
 
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 				value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value)*ratio/100;
@@ -9206,18 +9206,18 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	 value = value_BaseEffect;
  
-	 value += value_BaseEffect*GetFocusEffect(BotfocusImprovedDamage, spell_id)/100; 
+	 value += value_BaseEffect*GetBotFocusEffect(BotfocusImprovedDamage, spell_id)/100; 
 	 
-	 value += value_BaseEffect*GetFocusEffect(BotfocusFcDamagePctCrit, spell_id)/100;
+	 value += value_BaseEffect*GetBotFocusEffect(BotfocusFcDamagePctCrit, spell_id)/100;
 
 	 if (target) {
 		value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100;
 		value -= target->GetFcDamageAmtIncoming(this, spell_id); 
 	 }
 
-	 value -= GetFocusEffect(BotfocusFcDamageAmtCrit, spell_id); 
+	 value -= GetBotFocusEffect(BotfocusFcDamageAmtCrit, spell_id); 
 
-	 value -= GetFocusEffect(BotfocusFcDamageAmt, spell_id); 
+	 value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id); 
 	 
 	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
          value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value); 
