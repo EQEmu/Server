@@ -319,60 +319,6 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 }
 
 
-/*
-int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
-
-	int32 modifier = 100;
-	int16 heal_amt = 0;
-	modifier += GetFocusEffect(focusImprovedHeal, spell_id);
-	modifier += GetFocusEffect(focusFcBaseEffects, spell_id);
-	heal_amt += Additional_Heal(spell_id);
-	int chance = 0;
-
-	// Instant Heals
-	if(spells[spell_id].buffduration < 1)
-	{
-		// Formula = HealAmt * (casttime + recastime) / 7; Cant trigger off spell less than 5 levels below and cant heal more than the spell itself.
-		if(this->itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5) {
-			heal_amt = this->itembonuses.HealAmt * (spells[spell_id].cast_time + spells[spell_id].recast_time) / 7000;
-			if(heal_amt > value)
-				heal_amt = value;
-		}
-
-		// Check for buffs that affect the healrate of the target and critical heal rate of target
-		if(GetTarget()){
-			value += value * GetHealRate(spell_id) / 100;
-			chance += GetCriticalHealRate(spell_id);
-		}
-
-		//Live AA - Healing Gift, Theft of Life
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
-						
-		if (spellbonuses.CriticalRegenDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
-
-		if(MakeRandomInt(0,99) < chance) {
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), ((value * modifier / 50) + heal_amt*2));
-			return ((value * modifier / 50) + heal_amt*2);
-		}
-		else{
-			return ((value * modifier / 100) + heal_amt);
-		}
-	}
-	// Hots
-	else {
-		chance += itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
-		
-		if (spellbonuses.CriticalRegenDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
-		
-		if(MakeRandomInt(0,99) < chance)
-			return ((value * modifier / 50) + heal_amt*2);
-	}
-	return ((value * modifier / 100) + heal_amt);
-}
-*/
-
 int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 {
 	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
