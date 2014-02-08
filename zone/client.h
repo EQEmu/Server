@@ -472,11 +472,9 @@ public:
 
 	inline virtual int16	GetDelayDeath()		const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
 
-	int32 Additional_SpellDmg(uint16 spell_id, bool bufftick = false);
-	int32 Additional_Heal(uint16 spell_id);
 	float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
-	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob *target = nullptr);
-	int32 GetActSpellHealing(uint16 spell_id, int32 value);
+	int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
+	int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
 	int32 GetActSpellCost(uint16 spell_id, int32);
 	int32 GetActSpellDuration(uint16 spell_id, int32);
 	int32 GetActSpellCasttime(uint16 spell_id, int32);

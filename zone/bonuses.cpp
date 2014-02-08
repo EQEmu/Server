@@ -1212,6 +1212,10 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_CriticalMend:
 				newbon->CriticalMend += base1;
 				break;
+
+			case SE_HealRate:
+				newbon->HealRate += base1;
+				break;
 		}
 	}
 }
@@ -2792,8 +2796,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcDamageAmtIncoming;
 		case SE_FcHealAmtIncoming:
 			return focusFcHealAmtIncoming;
-		case SE_HealRate2:
-			return focusHealRate;
+		case SE_FcHealPctIncoming:
+			return focusFcHealPctIncoming;
 		case SE_FcBaseEffects:
 			return focusFcBaseEffects;
 		case SE_IncreaseNumHits:
@@ -2804,12 +2808,12 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcMute;
 		case SE_FcStunTimeMod:
 			return focusFcStunTimeMod;
-		case SE_CriticalHealRate:
-			return focusCriticalHealRate;
-		case SE_AdditionalHeal2:
-			return focusAdditionalHeal2;
-		case SE_AdditionalHeal:
-			return focusAdditionalHeal;
+		case SE_FcHealPctCritIncoming:
+			return focusFcHealPctCritIncoming;
+		case  SE_FcHealAmt:
+			return focusFcHealAmt;
+		case SE_FcHealAmtCrit:
+			return focusFcHealAmtCrit;
 	}
 	return 0;
 }

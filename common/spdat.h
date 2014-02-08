@@ -538,11 +538,11 @@ typedef enum {
 #define SE_Forceful_Rejuv				389 // Refresh spell icons
 #define SE_SetRecastTimer				390 // *not implemented - Sets recast timers to specific value, focus limited.
 #define SE_IncreaseHitDmgTaken			391	// implemented - Most likely a simple negative mitigation modifier (Warlords fury: 23528) 
-#define SE_AdditionalHeal2				392 // implemented - Adds or removes healing from spells
-#define SE_HealRate2					393 // implemented - HealRate with focus restrictions.
+#define SE_FcHealAmt					392 // implemented - Adds or removes healing from spells
+#define SE_FcHealPctIncoming			393 // implemented - HealRate with focus restrictions.
 #define SE_FcHealAmtIncoming			394 // implemented - Adds/Removes amount of healing on target by X value with foucs restrictions.
-#define SE_CriticalHealRate				395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
-#define SE_AdditionalHeal				396 // implemented - Adds a direct healing amount to spells
+#define SE_FcHealPctCritIncoming		395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
+#define SE_FcHealAmtCrit				396 // implemented - Adds a direct healing amount to spells
 #define SE_PetMeleeMitigation			397 // *not implemented[AA] - additional mitigation to your pets.
 #define SE_SwarmPetDuration				398 // implemented - Affects the duration of swarm pets
 #define SE_Twincast						399 // implemented - cast 2 spells for every 1

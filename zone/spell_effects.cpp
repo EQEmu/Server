@@ -363,7 +363,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 										
 					if(caster)
-						dmg = caster->GetActSpellHealing(spell_id, dmg);
+						dmg = caster->GetActSpellHealing(spell_id, dmg, this);
 
 					HealDamage(dmg, caster);
 				}
@@ -415,7 +415,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				int32 val = spell.max[i];
 
 				if(caster)
-					val = caster->GetActSpellHealing(spell_id, val);
+					val = caster->GetActSpellHealing(spell_id, val, this);
 
 				int32 mhp = GetMaxHP();
 				int32 cap = mhp * spell.base[i] / 100;
@@ -2396,7 +2396,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				} else if(dmg > 0) {
 					//healing spell...
 					if(caster)
-						dmg = caster->GetActSpellHealing(spell_id, dmg);
+						dmg = caster->GetActSpellHealing(spell_id, dmg, this);
 					HealDamage(dmg, caster);
 				}
 #ifdef SPELL_EFFECT_SPAM
@@ -2867,7 +2867,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_AntiGate:
 			case SE_Fearless:
 			case SE_FcDamageAmtCrit:
-			case SE_AdditionalHeal:
+			case SE_FcHealAmtCrit:
 			case SE_CastOnCurer:
 			case SE_CastOnCure:
 			case SE_CastonNumHitFade:
@@ -2878,8 +2878,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ACv2:
 			case SE_ManaRegen_v2:
 			case SE_FcDamagePctCrit:
-			case SE_AdditionalHeal2:
-			case SE_HealRate2:
+			case  SE_FcHealAmt:
+			case SE_FcHealPctIncoming:
 			case SE_CriticalHealDecay:
 			case SE_CriticalRegenDecay:
 			case SE_FcDamageAmtIncoming:
@@ -2922,7 +2922,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_UnfailingDivinity:
 			case SE_ChannelChanceSpells:
 			case SE_ChannelChanceItems:
-			case SE_CriticalHealRate:
+			case SE_FcHealPctCritIncoming:
 			case SE_IncreaseNumHits:
 			case SE_CastonFocusEffect:
 			case SE_FcHealAmtIncoming:
@@ -3341,7 +3341,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level);
 				if(caster)
 					effect_value = caster->GetActSpellHealing(spell_id, effect_value);
-				effect_value += effect_value * (itembonuses.HealRate + spellbonuses.HealRate) / 100;
+				//effect_value += effect_value * (itembonuses.HealRate + spellbonuses.HealRate) / 100;
 				HealDamage(effect_value, caster);
 				//healing aggro would go here; removed for now
 				break;
@@ -4357,33 +4357,33 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 
-			case SE_CriticalHealRate:
+			case SE_FcHealPctCritIncoming:
 			{
-				if (type == focusCriticalHealRate)
+				if (type == focusFcHealPctCritIncoming)
 					value = base1;
 
 				break;
 			}
 
-			case SE_AdditionalHeal:
+			case SE_FcHealAmtCrit:
 			{
-				if(type == focusAdditionalHeal)
+				if(type == focusFcHealAmtCrit)
 					value = base1;
 
 				break;
 			}
 
-			case SE_AdditionalHeal2:
+			case  SE_FcHealAmt:
 			{
-				if(type == focusAdditionalHeal2)
+				if(type == focusFcHealAmt)
 					value = base1;
 
 				break;
 			}
 
-			case SE_HealRate2:
+			case SE_FcHealPctIncoming:
 			{
-				if(type == focusHealRate)
+				if(type == focusFcHealPctIncoming)
 					value = base1;
 
 				break;
@@ -4890,33 +4890,33 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 		}
 
-		case SE_CriticalHealRate:
+		case SE_FcHealPctCritIncoming:
 		{
-			if (type == focusCriticalHealRate)
+			if (type == focusFcHealPctCritIncoming)
 				value = focus_spell.base[i];
 
 			break;
 		}
 
-		case SE_AdditionalHeal:
+		case SE_FcHealAmtCrit:
 		{
-			if(type == focusAdditionalHeal)
+			if(type == focusFcHealAmtCrit)
 				value = focus_spell.base[i];
 
 			break;
 		}
 
-		case SE_AdditionalHeal2:
+		case  SE_FcHealAmt:
 		{
-			if(type == focusAdditionalHeal2)
+			if(type == focusFcHealAmt)
 				value = focus_spell.base[i];
 
 			break;
 		}
 
-		case SE_HealRate2:
+		case SE_FcHealPctIncoming:
 		{
-			if(type == focusHealRate)
+			if(type == focusFcHealPctIncoming)
 				value = focus_spell.base[i];
 
 			break;
@@ -5660,6 +5660,58 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 		}
 	}
 	return dmg;
+}
+
+int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id) {
+
+	/*
+	This is a general function for calculating best focus effect values for focus effects that exist on targets but modify incoming spells.
+	Should be used when checking for foci that can exist on clients or npcs ect.
+	Example: When your target has a focus limited buff that increases amount of healing on them.
+	*/
+
+	if (!caster)
+		return 0;
+
+	int value = 0;
+
+	if (spellbonuses.FocusEffects[type]){
+		uint32 buff_count = GetMaxTotalSlots();
+		for(int i = 0; i < buff_count; i++){
+
+			int32 tmp_focus = 0;
+			int tmp_buffslot = -1;
+
+			int buff_count = GetMaxTotalSlots();
+			for(int i = 0; i < buff_count; i++) {
+
+				if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, effect))){
+
+					int32 focus = caster->CalcFocusEffect(type, buffs[i].spellid, spell_id);
+
+					if (!focus)
+						continue;
+
+					if (tmp_focus && focus > tmp_focus){
+						tmp_focus = focus;
+						tmp_buffslot = i;
+					}
+
+					else if (!tmp_focus){
+						tmp_focus = focus;
+						tmp_buffslot = i;
+					}
+				}
+			}
+
+			value = tmp_focus;
+
+			if (tmp_buffslot >= 0)
+				CheckNumHitsRemaining(7, tmp_buffslot);
+		}
+
+	}
+	return value;
 }
 
 int32 Mob::ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard) {

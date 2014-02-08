@@ -3429,35 +3429,17 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	return skilldmg_mod;
 }
 
-int16 Mob::GetHealRate(uint16 spell_id)
-{
-	Mob* target = GetTarget();
-
+int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
+	
 	int16 heal_rate = 0;
 
-	if (target){
-		heal_rate = target->itembonuses.HealRate + target->spellbonuses.HealRate;
+	heal_rate += itembonuses.HealRate + spellbonuses.HealRate + aabonuses.HealRate; 
+	heal_rate += GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, caster, spell_id); 
 
-		if (target->IsClient())
-			heal_rate += target->CastToClient()->GetFocusEffect(focusHealRate, spell_id);
-
-		if(heal_rate < -99)
-			heal_rate = -99;
-	}
-
+	if(heal_rate < -99)
+		heal_rate = -99;
+	
 	return heal_rate;
-}
-
-int16 Mob::GetCriticalHealRate(uint16 spell_id)
-{
-	Mob* target = GetTarget();
-
-	int16 critical_heal_rate = 0;
-
-	if (target && target->IsClient())
-		critical_heal_rate = target->CastToClient()->GetFocusEffect(focusCriticalHealRate, spell_id);
-
-	return critical_heal_rate;
 }
 
 bool Mob::TryFadeEffect(int slot)
@@ -4669,7 +4651,7 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 	if (!IsValidSpell(spell_id))
 		return false;
 
-	int spell_level = spells[spell_id].classes[(GetClass()%16) - 1];
+	int spell_level = spells[spell_id].classes[(GetClass()%16) - 1]; 
 	int effect_value = 0;
 	int lvlModifier = 100;
 
@@ -4679,15 +4661,15 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 			for (int i = 0; i < EFFECT_COUNT; i++){
 				if(spells[buffs[slot].spellid].effectid[i] == spelleffect) {
 					
-					int critchance = spells[buffs[slot].spellid].base[i];
+					int critchance = spells[buffs[slot].spellid].base[i]; 
 					int decay = spells[buffs[slot].spellid].base2[i];
-					int lvldiff = spell_level - spells[buffs[slot].spellid].max[i];
+					int lvldiff = spell_level - spells[buffs[slot].spellid].max[i]; 
 					
 					if(lvldiff > 0 && decay > 0)
 					{
-						lvlModifier -= decay*lvldiff;
+						lvlModifier -= decay*lvldiff; 
 						if (lvlModifier > 0){
-							critchance = (critchance*lvlModifier)/100;
+							critchance = (critchance*lvlModifier)/100; 
 							effect_value += critchance;
 						}
 					}

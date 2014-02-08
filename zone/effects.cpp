@@ -40,23 +40,6 @@ float Client::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 }
 
 
-int32 Client::Additional_SpellDmg(uint16 spell_id, bool bufftick)
-{
-	int32 spell_dmg = 0;
-	spell_dmg += GetFocusEffect(focusFcDamageAmtCrit, spell_id);
-	spell_dmg += GetFocusEffect(focusFcDamageAmt, spell_id);
-
-	//For DOTs you need to apply the damage over the duration of the dot to each tick (this is how live did it)
-	if (bufftick){
-		int duration = CalcBuffDuration(this, this, spell_id);
-		if (duration > 0)
-			return spell_dmg /= duration;
-		else
-			return 0;
-	}
-	return spell_dmg;
-}
-
 int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 
 	//Quest scale all NPC spell damage via $npc->SetSpellFocusDMG(value)
@@ -138,7 +121,7 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
 
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-				value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value)*ratio/100;
+				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
 			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
 
@@ -162,7 +145,7 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	 value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
 	 
 	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-         value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value); 
+         value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value); 
 
 	return value;
  }
@@ -199,8 +182,11 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 					int(GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100) +
 					GetFocusEffect(focusFcDamageAmt, spell_id);
 
-		if (extra_dmg)
-			extra_dmg /= CalcBuffDuration(this, this, spell_id);
+		if (extra_dmg) {
+			int duration = CalcBuffDuration(this, this, spell_id);
+			if (duration > 0)
+				extra_dmg /= duration; 
+		}
 
 		value -= extra_dmg;
 
@@ -220,41 +206,18 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 				GetFocusEffect(focusFcDamageAmtCrit, spell_id) +
 				GetFocusEffect(focusFcDamageAmt, spell_id); 
 
-	if (extra_dmg)
-		extra_dmg /= CalcBuffDuration(this, this, spell_id); 
+	if (extra_dmg) {
+		int duration = CalcBuffDuration(this, this, spell_id);
+		if (duration > 0)
+			extra_dmg /= duration; 
+	} 
 	
 	value -= extra_dmg;
 
 	return value;
 }
 
-	/*
-	int32 modifier = 100;
-	int16 spell_dmg = 0;
-	int16 critChance = 0;
-	int32 ratio = 0;
-
-	modifier += GetFocusEffect(focusImprovedDamage, spell_id);
-	critChance += itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
-	ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
-	spell_dmg += Additional_SpellDmg(spell_id,true);
-
-	if (spellbonuses.CriticalDotDecay)
-			critChance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
-
-	if (critChance > 0){
-		if (MakeRandomInt(0, 99) < critChance){
-			modifier += modifier*ratio/100;
-			return (((value*modifier/100)-spell_dmg)*2);
-		}
-	}
-
-	return ((value*modifier/100)-spell_dmg);
-	*/
-
-
-
-int32 Mob::GetExtraSpellDmg(uint16 spell_id, int32 extra_spell_dmg, int32 base_spell_dmg)
+int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg)
 {
 	int total_cast_time = 0;
 
@@ -264,54 +227,100 @@ int32 Mob::GetExtraSpellDmg(uint16 spell_id, int32 extra_spell_dmg, int32 base_s
 		total_cast_time = spells[spell_id].recovery_time + spells[spell_id].cast_time;
 
 	if (total_cast_time > 0 && total_cast_time <= 2500)
-		extra_spell_dmg = extra_spell_dmg*25/100; 
+		extra_spell_amt = extra_spell_amt*25/100; 
 	 else if (total_cast_time > 2500 && total_cast_time < 7000) 
-		 extra_spell_dmg = extra_spell_dmg*(0.167*((total_cast_time - 1000)/1000)); 
+		 extra_spell_amt = extra_spell_amt*(0.167*((total_cast_time - 1000)/1000)); 
 	 else 
-		 extra_spell_dmg = extra_spell_dmg * total_cast_time / 7000; 
+		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000; 
 
-		extra_spell_dmg = -extra_spell_dmg;
-
-		if(extra_spell_dmg*2 < base_spell_dmg)
+		if(extra_spell_amt*2 < base_spell_dmg)
 			return 0;
 
-		return extra_spell_dmg;
+		return extra_spell_amt;
 }
 
 
-//Scale all NPC spell healing via SetSpellFocusHeal(value)
-int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value) {
+int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
-	int32 modifier = 100;
-	modifier += SpellFocusHeal;
+	//Scale all NPC spell healing via SetSpellFocusHeal(value)
 
-		// Check for buffs that affect the healrate of the target
-		if(this->GetTarget())
-		{
-			value += value * GetHealRate(spell_id) / 100;
+	value += value*SpellFocusHeal/100; 
+
+	 if (target) {
+		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
+		value += value*target->GetHealRate(spell_id, this)/100;
+	 }
+	 
+	return value;
+}
+
+int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
+	
+	if (target == nullptr)
+		target = this;
+
+	int32 value_BaseEffect = 0;
+	int16 chance = 0;
+	int8 modifier = 1;
+	bool Critical = false;
+		
+	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100); 
+		
+	value = value_BaseEffect;
+
+	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id)/100); 
+ 
+	// Instant Heals
+	if(spells[spell_id].buffduration < 1) {
+
+		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance; 
+
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
+						
+		if (spellbonuses.CriticalHealDecay)
+			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay); 
+	
+		if(chance && (MakeRandomInt(0,99) < chance)) {
+			Critical = true;
+			modifier = 2; //At present time no critical heal amount modifier SPA exists.
 		}
+		
+		value *= modifier;
+		value += GetFocusEffect(focusFcHealAmtCrit, spell_id) * modifier; 
+		value += GetFocusEffect(focusFcHealAmt, spell_id); 
+		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
+	
+		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
 
-	return (value * modifier / 100);
-}
+		value += value*target->GetHealRate(spell_id, this)/100; 
 
-int32 Client::Additional_Heal(uint16 spell_id)
-{
-	int32 heal_amt = 0;
+		if (Critical)
+			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), value);
 
-	heal_amt += GetFocusEffect(focusAdditionalHeal, spell_id);
-	heal_amt += GetFocusEffect(focusAdditionalHeal2, spell_id);
-	heal_amt -= GetFocusEffect(focusFcHealAmtIncoming, spell_id);
-
-	if (heal_amt){
-		int duration = CalcBuffDuration(this, this, spell_id);
-		if (duration > 0)
-			return heal_amt /= duration;
+		return value;
 	}
 
-	return heal_amt;
+	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
+	else {
+		
+		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime; 
+
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
+		
+		if (spellbonuses.CriticalRegenDecay)
+			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
+		
+		if(chance && (MakeRandomInt(0,99) < chance))
+			return (value * 2);
+	}
+
+	return value;
 }
 
-int32 Client::GetActSpellHealing(uint16 spell_id, int32 value) {
+
+/*
+int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	int32 modifier = 100;
 	int16 heal_amt = 0;
@@ -362,6 +371,7 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value) {
 	}
 	return ((value * modifier / 100) + heal_amt);
 }
+*/
 
 int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 {

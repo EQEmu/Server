@@ -9119,23 +9119,6 @@ void Bot::SetAttackTimer() {
 	}
 }
 
-int32 Bot::Additional_SpellDmg(uint16 spell_id, bool bufftick)
-{
-	int32 spell_dmg = 0;
-	spell_dmg += GetBotFocusEffect(BotfocusFcDamageAmtCrit, spell_id);
-	spell_dmg += GetBotFocusEffect(BotfocusFcDamageAmt, spell_id);
-
-	//For DOTs you need to apply the damage over the duration of the dot to each tick (this is how live did it)
-	if (bufftick){
-		int duration = CalcBuffDuration(this, this, spell_id);
-		if (duration > 0)
-			return spell_dmg /= duration;
-		else
-			return 0;
-	}
-	return spell_dmg;
-}
-
 int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	
 	if (spells[spell_id].targettype == ST_Self)
@@ -9195,8 +9178,8 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 			value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id); 
 
-			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-				value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value)*ratio/100;
+			if(itembonuses.SpellDmg && spells[spell_id].classes[(botclass%16) - 1] >= botlevel - 5)
+				value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
 			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
 
@@ -9219,71 +9202,74 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	 value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id); 
 	 
-	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-         value += GetExtraSpellDmg(spell_id, itembonuses.SpellDmg, value); 
+	if(itembonuses.SpellDmg && spells[spell_id].classes[(botclass%16) - 1] >= botlevel - 5)
+         value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value); 
 
 	return value;
  }
 
-int32 Bot::Additional_Heal(uint16 spell_id)
-{
-	int32 heal_amt = 0;
+int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
+	
+	if (target == nullptr)
+		target = this;
 
-	heal_amt += GetBotFocusEffect(BotfocusAdditionalHeal, spell_id);
-	heal_amt += GetBotFocusEffect(BotfocusAdditionalHeal2, spell_id);
+	int32 value_BaseEffect = 0;
+	int16 chance = 0;
+	int8 modifier = 1;
+	bool Critical = false;
+		
+	value_BaseEffect = value + (value*GetBotFocusEffect(BotfocusFcBaseEffects, spell_id)/100); 
+		
+	value = value_BaseEffect;
 
-	if (heal_amt){
-		int duration = CalcBuffDuration(this, this, spell_id);
-		if (duration > 0)
-			return heal_amt /= duration;
-	}
-
-	return heal_amt;
-}
-
-int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value) {
-	int32 modifier = 100;
-	int16 heal_amt = 0;
-	modifier += GetBotFocusEffect(BotfocusImprovedHeal, spell_id);
-	modifier += GetBotFocusEffect(BotfocusFcBaseEffects, spell_id);
-	heal_amt += Additional_Heal(spell_id);
-	int chance = 0;
-
+	value += int(value_BaseEffect*GetBotFocusEffect(BotfocusImprovedHeal, spell_id)/100); 
+ 
+	// Instant Heals
 	if(spells[spell_id].buffduration < 1) {
-		uint8 botlevel = GetLevel();
-		uint8 botclass = GetClass();
-		// Formula = HealAmt * (casttime + recastime) / 7; Cant trigger off spell less than 5 levels below and cant heal more than the spell itself.
-		if(this->itembonuses.HealAmt && spells[spell_id].classes[(botclass%16) - 1] >= botlevel - 5) {
-			heal_amt = this->itembonuses.HealAmt * (spells[spell_id].cast_time + spells[spell_id].recast_time) / 7000;
-			if(heal_amt > value)
-				heal_amt = value;
-		}
 
-		// Check for buffs that affect the healrate of the target and critical heal rate of target
-		if(GetTarget()) {
-			value += value * GetHealRate(spell_id) / 100;
-			chance += GetCriticalHealRate(spell_id);
-		}
+		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance; 
 
-		//Live AA - Healing Gift, Theft of Life
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
+		chance += target->GetBotFocusIncoming(BotfocusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
+						
+		if (spellbonuses.CriticalHealDecay)
+			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay); 
+	
+		if(chance && (MakeRandomInt(0,99) < chance)) {
+			Critical = true;
+			modifier = 2; //At present time no critical heal amount modifier SPA exists.
+		}
+		
+		value *= modifier;
+		value += GetBotFocusEffect(BotfocusFcHealAmtCrit, spell_id) * modifier; 
+		value += GetBotFocusEffect(BotfocusFcHealAmt, spell_id); 
+		value += target->GetBotFocusIncoming(BotfocusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
+	
+		if(itembonuses.HealAmt && spells[spell_id].classes[(botclass%16) - 1] >= botlevel - 5)
+			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
 
-		if(MakeRandomInt(0,99) < chance) {
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), ((value * modifier / 50) + heal_amt*2));
-			return ((value * modifier / 50) + heal_amt*2);
-		}
-		else{
-			return ((value * modifier / 100) + heal_amt);
-		}
+		value += value*target->GetHealRate(spell_id, this)/100; 
+
+		if (Critical)
+			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), value);
+
+		return value;
 	}
-	// Hots
+
+	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
-		if(MakeRandomInt(0,99) < chance)
-			return ((value * modifier / 50) + heal_amt*2);
+		
+		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime; 
+
+		chance += target->GetBotFocusIncoming(BotfocusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
+		
+		if (spellbonuses.CriticalRegenDecay)
+			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
+		
+		if(chance && (MakeRandomInt(0,99) < chance))
+			return (value * 2);
 	}
 
-	return ((value * modifier / 100) + heal_amt);
+	return value;
 }
 
 int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
