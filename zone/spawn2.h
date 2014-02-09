@@ -101,7 +101,8 @@ public:
 		DoNothing = 0,
 		DoDepop = 1,
 		DoRepop = 2,
-		//... 3...9 reserved for future use
+		DoRepopIfReady = 3,
+		//... 4...9 reserved for future use
 		DoSignalMin = 10	//any number above this value is used as
 							//a base for the signal ID sent. e.g.
 							// value 12 sends signal id 2
