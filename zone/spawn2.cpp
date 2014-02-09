@@ -482,6 +482,7 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 		return;	//no change
 	}
 
+	uint32 timer_remaining = 0;
 	switch(c.on_change) {
 	case SpawnCondition::DoNothing:
 		//that was easy.
@@ -498,6 +499,19 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 		if(npcthis != nullptr)
 			npcthis->Depop(false);	//remove the current mob
 		Repop();	//repop
+		break;
+	case SpawnCondition::DoRepopIfReady:
+		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Preforming a repop if repsawn timer is expired.", spawn2_id, new_state?"enabled":"disabled");
+		if(npcthis != nullptr)
+			npcthis->Depop(false);	//remove the current mob
+		if(new_state) { // only get repawn timer remaining when the SpawnCondition is enabled.
+			timer_remaining = database.GetSpawnTimeLeft(spawn2_id,zone->GetInstanceID());
+			_log(SPAWNS__CONDITIONS,"Spawn2 %d: Our condition is now %s. The respawn timer_remaining is %d. Preforming a repop if it is <= 0.", spawn2_id, new_state?"enabled":"disabled", timer_remaining);
+			if(timer_remaining <= 0)
+				Repop();
+		} else {
+			_log(SPAWNS__CONDITIONS,"Spawn2 %d: Our condition is now %s. Not checking respawn timer.", spawn2_id, new_state?"enabled":"disabled");
+		}
 		break;
 	default:
 		if(c.on_change < SpawnCondition::DoSignalMin) {
