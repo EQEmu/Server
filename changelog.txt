@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 02/8/2014 ==
+Kayen: Various updates/fixes/clean-ups to focus effect related code. Focus effect limits should now all work properly.
+
 == 02/7/2014 ==
 Kayen: Revised how heal amount is calculated to properly incorporate all current focus effects/bonuses.
 

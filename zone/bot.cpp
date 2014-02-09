@@ -6736,7 +6736,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 				if((spell.classes[(GetClass()%16) - 1]) < base1)
 					LimitFound = true;
 			break;
-			case SE_LimitCastTime:
+			case SE_LimitCastTimeMin:
 				if (spell.cast_time < base1)
 					LimitFound = true;
 			break;
@@ -6782,7 +6782,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 				}
 			break;
 
-			case SE_LimitManaCost:
+			case SE_LimitManaMin:
 				if(spell.mana < base1)
 					LimitFound = true;
 			break;
@@ -6800,7 +6800,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 			}
 			break;
 
-			case SE_CombatSkills:
+			case SE_LimitCombatSkills:
 				// 1 is for disciplines only
 				if(base1 == 1 && !IsDiscipline(spell_id))
 					LimitFound = true;
@@ -6817,13 +6817,13 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 			break;
 
 
-			case SE_LimitSpellSkill:
+			case SE_LimitCastingSkill:
 				LimitSpellSkill = true;
 				if(base1 == spell.skill)
 					SpellSkill_Found = true;
 			break;
 
-			case SE_LimitExcludeSkill:{
+			case SE_LimitSpellSubclass:{
 			int16 spell_skill = spell.skill * -1;
 			if(base1 == spell_skill)
 				LimitFound = true;
@@ -6941,7 +6941,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 				}
 				break;
 			}
-			case SE_SpellVulnerability:
+			case SE_FcSpellVulnerability:
 			{
 				if(type == focusSpellVulnerability)
 				{
@@ -6958,7 +6958,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 				}
 				break;
 			}
-			case SE_Twincast:
+			case SE_FcTwincast:
 			{
 				if(type == focusTwincast)
 				{
@@ -7057,7 +7057,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 
-			case SE_IncreaseNumHits:
+			case SE_FcIncreaseNumHits:
 			{
 				if(type == focusIncreaseNumHits)
 					value = base1;
@@ -7338,7 +7338,7 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 				return(0);
 			break;
 
-		case SE_LimitCastTime:
+		case SE_LimitCastTimeMin:
 			if (spells[spell_id].cast_time < (uint16)focus_spell.base[i])
 				return(0);
 			break;
@@ -7398,7 +7398,7 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 			}
 			break;
 
-		case SE_LimitManaCost:
+		case SE_LimitManaMin:
 				if(spell.mana < focus_spell.base[i])
 					return 0;
 			break;
@@ -7413,7 +7413,7 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 
 			break;
 
-		case SE_CombatSkills:
+		case SE_LimitCombatSkills:
 				// 1 is for disciplines only
 				if(focus_spell.base[i] == 1 && !IsDiscipline(spell_id))
 					return 0;
@@ -7429,13 +7429,13 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 					return 0;
 			break;
 
-		case SE_LimitSpellSkill:
+		case SE_LimitCastingSkill:
 				LimitSpellSkill = true;
 				if(focus_spell.base[i] == spell.skill)
 					SpellSkill_Found = true;
 			break;
 
-		case SE_LimitExcludeSkill:{
+		case SE_LimitSpellSubclass:{
 			int16 spell_skill = spell.skill * -1;
 			if(focus_spell.base[i] == spell_skill)
 				return 0;
@@ -7602,7 +7602,7 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 
 			break;
 		}
-		case SE_SpellVulnerability:
+		case SE_FcSpellVulnerability:
 		{
 			if(bottype == BotfocusSpellVulnerability)
 			{
@@ -7619,7 +7619,7 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 			}
 			break;
 		}
-		case SE_Twincast:
+		case SE_FcTwincast:
 		{
 			if(bottype == BotfocusTwincast)
 			{
@@ -7715,7 +7715,7 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 			break;
 		}
 
-		case SE_IncreaseNumHits:
+		case SE_FcIncreaseNumHits:
 		{
 			if(bottype == BotfocusIncreaseNumHits)
 				value = focus_spell.base[i];

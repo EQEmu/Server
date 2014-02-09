@@ -78,6 +78,7 @@ typedef enum {	//focus types
 	focusIncreaseNumHits,
 	focusFcLimitUse,
 	focusFcMute,
+	focusFcTimerRefresh,
 	focusFcStunTimeMod,
 	focusFcHealPctCritIncoming,
 	focusFcHealAmt,

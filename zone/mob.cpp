@@ -3336,7 +3336,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 		int buff_count = GetMaxTotalSlots();
 		for(int i = 0; i < buff_count; i++)
 		{
-			if(IsEffectInSpell(buffs[i].spellid, SE_Twincast))
+			if(IsEffectInSpell(buffs[i].spellid, SE_FcTwincast))
 			{
 				int32 focus = CalcFocusEffect(focusTwincast, buffs[i].spellid, spell_id);
 				if(focus > 0)
@@ -3378,7 +3378,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		int buff_count = GetMaxTotalSlots();
 		for(int i = 0; i < buff_count; i++) {
 
-			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_SpellVulnerability))){
+			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_FcSpellVulnerability))){
 
 				int32 focus = caster->CalcFocusEffect(focusSpellVulnerability, buffs[i].spellid, spell_id);
 
