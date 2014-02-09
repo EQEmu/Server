@@ -585,7 +585,6 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 	else {
 		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR1, errbuf);
 		safe_delete_array(query);
-		safe_delete(state);
 		return false;
 	}
 
@@ -659,7 +658,6 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 	else {
 		LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR2, errbuf);
 		safe_delete_array(query);
-		safe_delete(state);
 		return false;
 	}
 
@@ -738,7 +736,6 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 		else {
 			LogFile->write(EQEMuLog::Error, ERR_MYSQLERROR3, errbuf);
 			safe_delete_array(query);
-			safe_delete(state);
 			return false;
 		}
 	}
