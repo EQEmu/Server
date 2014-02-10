@@ -502,8 +502,11 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 		break;
 	case SpawnCondition::DoRepopIfReady:
 		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Forcing a repop if repsawn timer is expired.", spawn2_id, new_state?"enabled":"disabled");
-		if(npcthis != nullptr)
+		if(npcthis != nullptr) {
+			_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our npcthis is currently not null. The zone thinks it is %s. Forcing a depop.", spawn2_id, npcthis->GetName());
 			npcthis->Depop(false);	//remove the current mob
+			npcthis = nullptr;
+		}
 		if(new_state) { // only get repawn timer remaining when the SpawnCondition is enabled.
 			timer_remaining = database.GetSpawnTimeLeft(spawn2_id,zone->GetInstanceID());
 			_log(SPAWNS__CONDITIONS,"Spawn2 %d: Our condition is now %s. The respawn timer_remaining is %d. Forcing a repop if it is <= 0.", spawn2_id, new_state?"enabled":"disabled", timer_remaining);
