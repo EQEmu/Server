@@ -1212,6 +1212,10 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_CriticalMend:
 				newbon->CriticalMend += base1;
 				break;
+
+			case SE_HealRate:
+				newbon->HealRate += base1;
+				break;
 		}
 	}
 }
@@ -1601,10 +1605,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_MeleeMitigation:
 				//for some reason... this value is negative for increased mitigation
 				newbon->MeleeMitigation -= effect_value;
-				break;
-
-			case SE_IncreaseHitDmgTaken:
-				newbon->MeleeMitigation += effect_value;
 				break;
 
 			case SE_CriticalHitChance:
@@ -2773,12 +2773,12 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 		case SE_TriggerOnCast:
 			//return focusTriggerOnCast;
 			return 0; //This is calculated as an actual bonus
-		case SE_SpellVulnerability:
+		case SE_FcSpellVulnerability:
 			return focusSpellVulnerability;
 		case SE_BlockNextSpellFocus:
 			//return focusBlockNextSpell;
 			return 0; //This is calculated as an actual bonus
-		case SE_Twincast:
+		case SE_FcTwincast:
 			return focusTwincast;
 		case SE_SympatheticProc:
 			return focusSympatheticProc;
@@ -2792,24 +2792,26 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcDamageAmtIncoming;
 		case SE_FcHealAmtIncoming:
 			return focusFcHealAmtIncoming;
-		case SE_HealRate2:
-			return focusHealRate;
+		case SE_FcHealPctIncoming:
+			return focusFcHealPctIncoming;
 		case SE_FcBaseEffects:
 			return focusFcBaseEffects;
-		case SE_IncreaseNumHits:
+		case SE_FcIncreaseNumHits:
 			return focusIncreaseNumHits;
 		case SE_FcLimitUse:
 			return focusFcLimitUse;
 		case SE_FcMute:
 			return focusFcMute;
+		case SE_FcTimerRefresh:
+			return focusFcTimerRefresh;
 		case SE_FcStunTimeMod:
 			return focusFcStunTimeMod;
-		case SE_CriticalHealRate:
-			return focusCriticalHealRate;
-		case SE_AdditionalHeal2:
-			return focusAdditionalHeal2;
-		case SE_AdditionalHeal:
-			return focusAdditionalHeal;
+		case SE_FcHealPctCritIncoming:
+			return focusFcHealPctCritIncoming;
+		case  SE_FcHealAmt:
+			return focusFcHealAmt;
+		case SE_FcHealAmtCrit:
+			return focusFcHealAmtCrit;
 	}
 	return 0;
 }
@@ -3110,12 +3112,6 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_MeleeMitigation:
-					spellbonuses.MeleeMitigation = effect_value;
-					itembonuses.MeleeMitigation = effect_value;
-					aabonuses.MeleeMitigation = effect_value;
-					break;
-
-				case SE_IncreaseHitDmgTaken:
 					spellbonuses.MeleeMitigation = effect_value;
 					itembonuses.MeleeMitigation = effect_value;
 					aabonuses.MeleeMitigation = effect_value;

@@ -1057,17 +1057,27 @@ void Client::LeaveGroup() {
 	isgrouped = false;
 }
 
-void Group::HealGroup(uint32 heal_amt, Mob* caster)
+void Group::HealGroup(uint32 heal_amt, Mob* caster, int32 range)
 {
 	if (!caster)
 		return;
+
+	if (!range)
+		range = 200;
+	
+	float distance;
+	float range2 = range*range;
+
 
 	int numMem = 0;
 	unsigned int gi = 0;
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			numMem += 1;
+			distance = caster->DistNoRoot(*members[gi]);
+			if(distance <= range2){
+				numMem += 1;
+			}
 		}
 	}
 
@@ -1075,23 +1085,38 @@ void Group::HealGroup(uint32 heal_amt, Mob* caster)
 	for(gi = 0; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			//members[gi]->SetHP(members[gi]->GetHP() + heal_amt);
-			members[gi]->HealDamage(heal_amt, caster);
-			members[gi]->SendHPUpdate();
+			distance = caster->DistNoRoot(*members[gi]);
+			if(distance <= range2){
+				members[gi]->HealDamage(heal_amt, caster);
+				members[gi]->SendHPUpdate();
+			}
 		}
 	}
 }
 
 
-void Group::BalanceHP(int32 penalty)
+void Group::BalanceHP(int32 penalty, int32 range, Mob* caster)
 {
+	if (!caster)
+		return;
+
+	if (!range)
+		range = 200;	
+		
 	int dmgtaken = 0, numMem = 0;
+	
+	float distance;
+	float range2 = range*range;
+
 	unsigned int gi = 0;
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			dmgtaken += (members[gi]->GetMaxHP() - members[gi]->GetHP());
-			numMem += 1;
+			distance = caster->DistNoRoot(*members[gi]);
+			if(distance <= range2){
+				dmgtaken += (members[gi]->GetMaxHP() - members[gi]->GetHP());
+				numMem += 1;
+			}
 		}
 	}
 
@@ -1100,27 +1125,42 @@ void Group::BalanceHP(int32 penalty)
 	for(gi = 0; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			if((members[gi]->GetMaxHP() - dmgtaken) < 1){ //this way the ability will never kill someone
-				members[gi]->SetHP(1);					//but it will come darn close
-				members[gi]->SendHPUpdate();
-			}
-			else{
-				members[gi]->SetHP(members[gi]->GetMaxHP() - dmgtaken);
-				members[gi]->SendHPUpdate();
+			distance = caster->DistNoRoot(*members[gi]);
+			if(distance <= range2){
+				if((members[gi]->GetMaxHP() - dmgtaken) < 1){ //this way the ability will never kill someone
+					members[gi]->SetHP(1);					//but it will come darn close
+					members[gi]->SendHPUpdate();
+				}
+				else{
+					members[gi]->SetHP(members[gi]->GetMaxHP() - dmgtaken);
+					members[gi]->SendHPUpdate();
+				}
 			}
 		}
 	}
 }
 
-void Group::BalanceMana(int32 penalty)
+void Group::BalanceMana(int32 penalty, int32 range, Mob* caster)
 {
+	if (!caster)
+		return;
+
+	if (!range)
+		range = 200;	
+
+	float distance;
+	float range2 = range*range;
+	
 	int manataken = 0, numMem = 0;
 	unsigned int gi = 0;
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
-		if(members[gi]){
-			manataken += (members[gi]->GetMaxMana() - members[gi]->GetMana());
-			numMem += 1;
+		if(members[gi]){			
+			distance = caster->DistNoRoot(*members[gi]);
+			if(distance <= range2){
+				manataken += (members[gi]->GetMaxMana() - members[gi]->GetMana());
+				numMem += 1;
+			}
 		}
 	}
 
@@ -1129,15 +1169,18 @@ void Group::BalanceMana(int32 penalty)
 	for(gi = 0; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){
-			if((members[gi]->GetMaxMana() - manataken) < 1){
-				members[gi]->SetMana(1);
-				if (members[gi]->IsClient())
-					members[gi]->CastToClient()->SendManaUpdate();
-			}
-			else{
-				members[gi]->SetMana(members[gi]->GetMaxMana() - manataken);
-				if (members[gi]->IsClient())
-					members[gi]->CastToClient()->SendManaUpdate();
+			distance = caster->DistNoRoot(*members[gi]);
+			if(distance <= range2){
+				if((members[gi]->GetMaxMana() - manataken) < 1){
+					members[gi]->SetMana(1);
+					if (members[gi]->IsClient())
+						members[gi]->CastToClient()->SendManaUpdate();
+				}
+				else{
+					members[gi]->SetMana(members[gi]->GetMaxMana() - manataken);
+					if (members[gi]->IsClient())
+						members[gi]->CastToClient()->SendManaUpdate();
+				}
 			}
 		}
 	}

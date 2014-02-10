@@ -363,7 +363,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 										
 					if(caster)
-						dmg = caster->GetActSpellHealing(spell_id, dmg);
+						dmg = caster->GetActSpellHealing(spell_id, dmg, this);
 
 					HealDamage(dmg, caster);
 				}
@@ -415,7 +415,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				int32 val = spell.max[i];
 
 				if(caster)
-					val = caster->GetActSpellHealing(spell_id, val);
+					val = caster->GetActSpellHealing(spell_id, val, this);
 
 				int32 mhp = GetMaxHP();
 				int32 cap = mhp * spell.base[i] / 100;
@@ -2396,7 +2396,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				} else if(dmg > 0) {
 					//healing spell...
 					if(caster)
-						dmg = caster->GetActSpellHealing(spell_id, dmg);
+						dmg = caster->GetActSpellHealing(spell_id, dmg, this);
 					HealDamage(dmg, caster);
 				}
 #ifdef SPELL_EFFECT_SPAM
@@ -2445,7 +2445,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceHP(spell.base[i], gid);
+						r->BalanceHP(spell.base[i], gid, spell.range, caster);
 						break;
 					}
 				}
@@ -2455,7 +2455,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceHP(spell.base[i]);
+				g->BalanceHP(spell.base[i], spell.range, caster);
 				break;
 			}
 
@@ -2473,7 +2473,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceMana(spell.base[i], gid);
+						r->BalanceMana(spell.base[i], gid, spell.range, caster);
 						break;
 					}
 				}
@@ -2483,7 +2483,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceMana(spell.base[i]);
+				g->BalanceMana(spell.base[i], spell.range, caster);
 				break;
 			}
 
@@ -2535,13 +2535,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_Forceful_Rejuv:
+			case SE_FcTimerRefresh:
 			{
 				if(IsClient()) {
 					for(unsigned int i =0 ; i < MAX_PP_MEMSPELL; ++i) {
 						if(IsValidSpell(CastToClient()->m_pp.mem_spells[i])) {
-							CastToClient()->m_pp.spellSlotRefresh[i] = 1;
-							CastToClient()->GetPTimers().Clear(&database, (pTimerSpellStart + CastToClient()->m_pp.mem_spells[i]));
+							if (CalcFocusEffect(focusFcTimerRefresh, spell_id, CastToClient()->m_pp.mem_spells[i])){
+								CastToClient()->m_pp.spellSlotRefresh[i] = 1;
+								CastToClient()->GetPTimers().Clear(&database, (pTimerSpellStart + CastToClient()->m_pp.mem_spells[i]));
+							}
 						}
 					}
 					SetMana(GetMana());
@@ -2577,7 +2579,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->HealGroup(heal_amt,caster, gid);
+						r->HealGroup(heal_amt,caster, gid, spell.range);
 						break;
 					}
 				}
@@ -2589,7 +2591,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					break;
 				}
 
-				g->HealGroup(heal_amt, caster);
+				g->HealGroup(heal_amt, caster, spell.range);
 				break;
 			}
 
@@ -2825,17 +2827,17 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_LimitMinDur:
 			case SE_LimitInstant:
 			case SE_LimitMinLevel:
-			case SE_LimitCastTime:
-			case SE_LimitManaCost:
-			case SE_CombatSkills:
+			case SE_LimitCastTimeMin:
+			case SE_LimitManaMin:
+			case SE_LimitCombatSkills:
 			case SE_SpellDurationIncByTic:
 			case SE_TriggerOnCast:
 			case SE_HealRate:
 			case SE_SkillDamageTaken:
-			case SE_SpellVulnerability:
+			case SE_FcSpellVulnerability:
 			case SE_SpellTrigger:
 			case SE_ApplyEffect:
-			case SE_Twincast:
+			case SE_FcTwincast:
 			case SE_DelayDeath:
 			case SE_InterruptCasting:
 			case SE_ImprovedSpellEffect:
@@ -2867,7 +2869,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_AntiGate:
 			case SE_Fearless:
 			case SE_FcDamageAmtCrit:
-			case SE_AdditionalHeal:
+			case SE_FcHealAmtCrit:
 			case SE_CastOnCurer:
 			case SE_CastOnCure:
 			case SE_CastonNumHitFade:
@@ -2878,16 +2880,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ACv2:
 			case SE_ManaRegen_v2:
 			case SE_FcDamagePctCrit:
-			case SE_AdditionalHeal2:
-			case SE_HealRate2:
+			case  SE_FcHealAmt:
+			case SE_FcHealPctIncoming:
 			case SE_CriticalHealDecay:
 			case SE_CriticalRegenDecay:
 			case SE_FcDamageAmtIncoming:
-			case SE_LimitSpellSkill:
+			case SE_LimitCastingSkill:
 			case SE_MitigateDamageShield:
 			case SE_FcBaseEffects:
 			case SE_LimitClass:
-			case SE_LimitExcludeSkill:
+			case SE_LimitSpellSubclass:
 			case SE_BlockBehind:
 			case SE_ShieldBlock:
 			case SE_PetCriticalHit:
@@ -2922,11 +2924,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_UnfailingDivinity:
 			case SE_ChannelChanceSpells:
 			case SE_ChannelChanceItems:
-			case SE_CriticalHealRate:
-			case SE_IncreaseNumHits:
+			case SE_FcHealPctCritIncoming:
+			case SE_FcIncreaseNumHits:
 			case SE_CastonFocusEffect:
 			case SE_FcHealAmtIncoming:
-			case SE_IncreaseHitDmgTaken:
+			case SE_LimitManaMax:
 			case SE_DoubleRangedAttack:
 			case SE_ShieldEquipHateMod:
 			case SE_ShieldEquipDmgMod:
@@ -2934,11 +2936,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_LimitRace:
 			case SE_FcLimitUse:
 			case SE_FcMute:	
-			case SE_FfLimitUseType:
+			case SE_LimitUseType:
 			case SE_FcStunTimeMod:
 			case SE_StunBashChance:
 			case SE_IncreaseChanceMemwipe:
 			case SE_CriticalMend:
+			case SE_LimitCastTimeMax:
 			{
 				break;
 			}
@@ -3341,7 +3344,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level);
 				if(caster)
 					effect_value = caster->GetActSpellHealing(spell_id, effect_value);
-				effect_value += effect_value * (itembonuses.HealRate + spellbonuses.HealRate) / 100;
+
 				HealDamage(effect_value, caster);
 				//healing aggro would go here; removed for now
 				break;
@@ -3975,16 +3978,13 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 	int lvlModifier = 100;
 	int spell_level = 0;
 	int lvldiff = 0;
-	bool LimitSpellSkill = false;
-	bool SpellSkill_Found = false;
-	bool LimitSpellEffect = false;
-	bool SpellEffect_Found = false;
 	uint32 effect = 0;
 	int32 base1 = 0;
 	int32 base2 = 0;
 	uint32 slot = 0;
 
-	bool LimitFound = false;
+	bool LimitFailure = false;
+	bool LimitInclude[MaxLimitInclude] = { false }; 
 	int FocusCount = 0;
 
 	std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aa_ID);
@@ -4000,21 +4000,30 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 		base2 = iter->second.base2;
 		slot = iter->second.slot;
 
-		//AA Foci's can contain multiple focus effects within the same AA.
-		//To handle this we will not automatically return zero if a limit is found.
-		//Instead if limit is found and multiple effects, we will reset the limit check
-		//when the next valid focus effect is found.
+		/*
+		AA Foci's can contain multiple focus effects within the same AA.
+		To handle this we will not automatically return zero if a limit is found.
+		Instead if limit is found and multiple focus effects, we will reset the limit check
+		when the next valid focus effect is found.
+		*/
+
 		if (IsFocusEffect(0, 0, true,effect) || (effect == SE_TriggerOnCast)){
 			FocusCount++;
 			//If limit found on prior check next, else end loop.
 			if (FocusCount > 1){
-				if (LimitFound){
+
+				for(int e = 0; e < MaxLimitInclude; e+=2) {
+					if (LimitInclude[e] && !LimitInclude[e+1])
+						LimitFailure = true;
+				}
+
+				if (LimitFailure){
 					value = 0;
-					LimitFound = false;
-					LimitSpellSkill = false;
-					SpellSkill_Found = false;
-					LimitSpellEffect = false;
-					SpellEffect_Found = false;
+					LimitFailure = false;
+					
+					for(int e = 0; e < MaxLimitInclude; e++) {
+						LimitInclude[e] = false; //Reset array
+					}
 				}
 
 				else{
@@ -4030,165 +4039,185 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 
 			//Handle Focus Limits
+
 			case SE_LimitResist:
-				if(base1)
-				{
-					if(spell.resisttype != base1)
-						LimitFound = true;
+				if(base1 < 0){
+					if(spell.resisttype == -base1) //Exclude
+						LimitFailure = true;
 				}
-			break;
+				else {
+				LimitInclude[0] = true;
+				if (spell.resisttype == base1) //Include
+					LimitInclude[1] = true;
+				}
+				break;
+
 			case SE_LimitInstant:
 				if(spell.buffduration)
-					LimitFound = true;
-			break;
+					LimitFailure = true;
+				break;
+			
 			case SE_LimitMaxLevel:
 				spell_level = spell.classes[(GetClass()%16) - 1];
 				lvldiff = spell_level - base1;
 				//every level over cap reduces the effect by base2 percent unless from a clicky when ItemCastsUseFocus is true
-				if(lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) || RuleB(Character, ItemCastsUseFocus) == false))
-				{
-					if(base2 > 0)
-					{
+				if(lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) || RuleB(Character, ItemCastsUseFocus) == false))	{
+					if(base2 > 0){
 						lvlModifier -= base2*lvldiff;
 						if(lvlModifier < 1)
-							LimitFound = true;
+							LimitFailure = true;
 					}
-					else {
-						LimitFound = true;
-					}
+					else 
+						LimitFailure = true;
 				}
-			break;
+				break;
+
 			case SE_LimitMinLevel:
 				if((spell.classes[(GetClass()%16) - 1]) < base1)
-					LimitFound = true;
-			break;
-			case SE_LimitCastTime:
+					LimitFailure = true;
+				break;
+
+			case SE_LimitCastTimeMin:
 				if (spell.cast_time < base1)
-					LimitFound = true;
-			break;
+					LimitFailure = true;
+				break;
+
+			case SE_LimitCastTimeMax:
+				if (spell.cast_time > base1)
+					LimitFailure = true;
+				break;
+
 			case SE_LimitSpell:
-				// Exclude spell(any but this)
-				if(base1 < 0) {
-					if (spell_id == (base1*-1))
-						LimitFound = true;
-				}
+				if(base1 < 0) {	//Exclude
+					if (spell_id == -base1)
+						LimitFailure = true;
+				} 
 				else {
-				// Include Spell(only this)
-					if (spell_id != base1)
-						LimitFound = true;
+					LimitInclude[2] = true;
+					if (spell_id == base1) //Include
+						LimitInclude[3] = true;
 				}
-			break;
+				break;
+
 			case SE_LimitMinDur:
 				if (base1 > CalcBuffDuration_formula(GetLevel(), spell.buffdurationformula, spell.buffduration))
-					LimitFound = true;
-			break;
+					LimitFailure = true;
+					break;
+
 			case SE_LimitEffect:
-				// Exclude effect (any but this)
-				if (base1 < 0) {
-					if (IsEffectInSpell(spell_id, (base1 * -1)))
-						LimitFound = true;
-				} else {
-					// Include effect (only this)
-					if (!IsEffectInSpell(spell_id, base1))
-						LimitFound = true;
+				if(base1 < 0){
+					if(IsEffectInSpell(spell_id,-base1)) //Exclude
+						LimitFailure = true;
+					}
+				else{
+					LimitInclude[4] = true;
+					if(IsEffectInSpell(spell_id,base1)) //Include
+						LimitInclude[5] = true;
 				}
-			break;
+				break;
+
 			case SE_LimitSpellType:
 				switch(base1)
 				{
 					case 0:
 						if (!IsDetrimentalSpell(spell_id))
-							LimitFound = true;
+							LimitFailure = true;
 						break;
 					case 1:
 						if (!IsBeneficialSpell(spell_id))
-							LimitFound = true;
+							LimitFailure = true;
 						break;
 				}
-			break;
+				break;
 
-			case SE_LimitManaCost:
+			case SE_LimitManaMin:
 				if(spell.mana < base1)
-					LimitFound = true;
-			break;
+					LimitFailure = true;
+				break;
+
+			case SE_LimitManaMax:
+				if(spell.mana > base1)
+					LimitFailure = true;
+				break;
 
 			case SE_LimitTarget:
-			// Exclude
-			if(base1 < 0){
-				if(-base1 == spell.targettype)
-					LimitFound = true;
-			}
-			// Include
-			else {
-				if(base1 != spell.targettype)
-					LimitFound = true;
-			}
-			break;
+				if (base1 < 0) {
+					if (-base1 == spell.targettype) //Exclude
+						LimitFailure = true;
+				}
+				else {
+					LimitInclude[6] = true;
+					if (base1 == spell.targettype) //Include
+						LimitInclude[7] = true;
+				}
+				break;
 
-			case SE_CombatSkills:
-				// 1 is for disciplines only
-				if(base1 == 1 && !IsDiscipline(spell_id))
-					LimitFound = true;
-				// 0 is spells only
-				else if(base1 == 0 && IsDiscipline(spell_id))
-					LimitFound = true;
-			break;
+
+			case SE_LimitCombatSkills:
+				if (base1 == 0){
+					if((spell.cast_time == 0) && (spell.recast_time == 0) && (spell.recovery_time == 0)) //Exclude procs
+						LimitFailure = true;
+				}
+				break;
 
 			case SE_LimitSpellGroup:
-				if(base1 > 0 && base1 != spell.spellgroup)
-					LimitFound = true;
-				else if(base1 < 0 && base1 == spell.spellgroup)
-					LimitFound = true;
-			break;
+				if(base1 < 0) {
+					if (-base1 == spell.spellgroup) //Exclude
+						LimitFailure = true;
+				}
+				else {
+					LimitInclude[8] = true;
+					if (base1 == spell.spellgroup) //Include
+						LimitInclude[9] = true;
+				}
+				break;
 
-
-			case SE_LimitSpellSkill:
-				LimitSpellSkill = true;
-				if(base1 == spell.skill)
-					SpellSkill_Found = true;
-			break;
-
-			case SE_LimitExcludeSkill:{
-			int16 spell_skill = spell.skill * -1;
-			if(base1 == spell_skill)
-				LimitFound = true;
-			break;
+			case SE_LimitCastingSkill:
+			if(base1 < 0) {
+				if(-base1 == spell.skill)
+					LimitFailure = true;
 			}
+			else {
+				LimitInclude[10] = true;
+				if(base1 == spell.skill)
+					LimitInclude[11] = true;
+			}
+			break;
 
 			case SE_LimitClass:
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
 			if (!PassLimitClass(base1, GetClass()))
-				LimitFound = true;
-			break;
+				LimitFailure = true;
+				break;
 
 			case SE_LimitRace:
-			if (base1 != GetRace())
-				LimitFound = true;
-			break;
+				if (base1 != GetRace())
+					LimitFailure = true;
+				break;
 
-			case SE_FfLimitUseMin:
-			if (base1 > spell.numhits)
-				LimitFound = true;
-			break;
+			case SE_LimitUseMin:
+				if (base1 > spell.numhits)
+					LimitFailure = true;
+				break;
 
-			case SE_FfLimitUseType:
-			if (base1 != spell.numhitstype)
-				LimitFound = true;
-			break;
+			case SE_LimitUseType:
+				if (base1 != spell.numhitstype)
+					LimitFailure = true;
+				break;
 
 			//Handle Focus Effects
 			case SE_ImprovedDamage:
 				if (type == focusImprovedDamage && base1 > value)
 					value = base1;
-			break;
+				break;
 
 			case SE_ImprovedHeal:
 				if (type == focusImprovedHeal && base1 > value)
 					value = base1;
-			break;
+				break;
 
 			case SE_ReduceManaCost:
-				if (type == focusManaCost )
+				if (type == focusManaCost)
 					value = base1;
 			break;
 
@@ -4233,23 +4262,15 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 
 			case SE_SpellHateMod:
-				if (type == focusSpellHateMod)
-				{
-					if(value != 0)
-					{
-						if(value > 0)
-						{
+				if (type == focusSpellHateMod ) {
+					if(value != 0) {
+						if(value > 0){
 							if(base1 > value)
-							{
 								value = base1;
-							}
 						}
-						else
-						{
+						else{
 							if(base1 < value)
-							{
 								value = base1;
-							}
 						}
 					}
 					else
@@ -4258,196 +4279,123 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 
 			case SE_ReduceReuseTimer:
-			{
 				if(type == focusReduceRecastTime)
 					value = base1 / 1000;
-
 				break;
-			}
 
 			case SE_TriggerOnCast:
-			{
-				if(type == focusTriggerOnCast)
-				{
+				if(type == focusTriggerOnCast){
 					if(MakeRandomInt(0, 100) <= base1){
 						value = base2;
 					}
 
 					else{
 						value = 0;
-						LimitFound = true;
+						LimitFailure = true;
 					}
-				}
 				break;
-			}
-			case SE_SpellVulnerability:
-			{
+				}
+
+			case SE_FcSpellVulnerability:
 				if(type == focusSpellVulnerability)
-				{
 					value = base1;
-				}
 				break;
-			}
+
 			case SE_BlockNextSpellFocus:
-			{
-				if(type == focusBlockNextSpell)
-				{
+				if(type == focusBlockNextSpell){
 					if(MakeRandomInt(1, 100) <= base1)
 						value = 1;
 				}
 				break;
-			}
-			case SE_Twincast:
-			{
+
+			case SE_FcTwincast:
 				if(type == focusTwincast)
-				{
 					value = base1;
-				}
 				break;
-			}
 
-			/*
 			case SE_SympatheticProc:
-			{
-				if(type == focusSympatheticProc)
-				{
-					float ProcChance, ProcBonus;
-					int16 ProcRateMod = base1; //Baseline is 100 for most Sympathetic foci
-					int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
-					GetSympatheticProcChances(ProcBonus, ProcChance, cast_time, ProcRateMod);
-
-					if(MakeRandomFloat(0, 1) <= ProcChance)
-						value = focus_id;
-
-					else
-						value = 0;
-				}
+				//No AA support at this time.
 				break;
-			}
-			*/
+
 			case SE_FcDamageAmt:
-			{
 				if(type == focusFcDamageAmt)
 					value = base1;
-
 				break;
-			}
 
 			case SE_FcDamageAmtCrit:
-			{
 				if(type == focusFcDamageAmtCrit)
 					value = base1;
-
 				break;
-			}
 
 			case SE_FcDamageAmtIncoming:
-			{
 				if(type == focusFcDamageAmtIncoming)
 					value = base1;
-
 				break;
-			}
 
 			case SE_FcHealAmtIncoming:
-			{
 				if(type == focusFcHealAmtIncoming)
 					value = base1;
-
 				break;
-			}
 
-			case SE_CriticalHealRate:
-			{
-				if (type == focusCriticalHealRate)
+			case SE_FcHealPctCritIncoming:
+				if (type == focusFcHealPctCritIncoming)
 					value = base1;
-
 				break;
-			}
 
-			case SE_AdditionalHeal:
-			{
-				if(type == focusAdditionalHeal)
+			case SE_FcHealAmtCrit:
+				if(type == focusFcHealAmtCrit)
 					value = base1;
-
 				break;
-			}
 
-			case SE_AdditionalHeal2:
-			{
-				if(type == focusAdditionalHeal2)
+			case  SE_FcHealAmt:
+				if(type == focusFcHealAmt)
 					value = base1;
-
 				break;
-			}
 
-			case SE_HealRate2:
-			{
-				if(type == focusHealRate)
+			case SE_FcHealPctIncoming:
+				if(type == focusFcHealPctIncoming)
 					value = base1;
-
 				break;
-			}
 
 			case SE_FcBaseEffects:
-			{
 				if (type == focusFcBaseEffects)
 					value = base1;
-
 				break;
-			}
+
 			case SE_FcDamagePctCrit:
-			{
 				if(type == focusFcDamagePctCrit)
 					value = base1;
-
 				break;
-			}
 
-			case SE_IncreaseNumHits:
-			{
+			case SE_FcIncreaseNumHits:
 				if(type == focusIncreaseNumHits)
 					value = base1;
-
 				break;
-			}
-
 		
 			case SE_FcLimitUse:
-			{
 				if(type == focusFcLimitUse)
 					value = base1;
-
 				break;
-			}
-
 			
 			case SE_FcMute:
-			{
 				if(type == focusFcMute)
 					value = base1;
-
 				break;
-			}
 
 			case SE_FcStunTimeMod:
-			{
 				if(type == focusFcStunTimeMod)
 					value = base1;
-
 				break;
-			}
 
 		}
 	}
 
-	if (LimitSpellSkill && !SpellSkill_Found)
-		LimitFound = true;
+	for(int e = 0; e < MaxLimitInclude; e+=2) {
+		if (LimitInclude[e] && !LimitInclude[e+1])
+			return 0;
+	}
 
-	if (LimitSpellEffect && !SpellEffect_Found)
-		LimitFound = true;
-
-	if (LimitFound)
+	if (LimitFailure)
 		return 0;
 	
 	return(value*lvlModifier/100);
@@ -4468,54 +4416,60 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	int lvlModifier = 100;
 	int spell_level = 0;
 	int lvldiff = 0;
-	bool LimitSpellSkill = false;
-	bool SpellSkill_Found = false;
-	bool LimitSpellEffect = false;
-	bool SpellEffect_Found = false;
 	uint32 Caston_spell_id = 0;
 
+	bool LimitInclude[MaxLimitInclude] = { false }; 
+	/* Certain limits require only one of several Include conditions to be true. Ie. Add damage to fire OR ice spells.
+	0/1   SE_LimitResist
+	2/3   SE_LimitSpell
+	4/5   SE_LimitEffect
+	6/7   SE_LimitTarget
+	8/9   SE_LimitSpellGroup:
+	10/11 SE_LimitCastingSkill:
+	Remember: Update MaxLimitInclude in spdat.h if adding new limits that require Includes
+	*/ 
+	
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 
 		switch (focus_spell.effectid[i]) {
+		
 		case SE_Blank:
 			break;
-		//check limits
 			
-		case SE_LimitResist:{
-			if(focus_spell.base[i]){
-				if(spell.resisttype != focus_spell.base[i])
-					return(0);
+		case SE_LimitResist:
+			if(focus_spell.base[i] < 0){
+				if (spell.resisttype == -focus_spell.base[i]) //Exclude
+					return 0;
+			}
+			else {
+				LimitInclude[0] = true;
+				if (spell.resisttype == focus_spell.base[i]) //Include
+					LimitInclude[1] = true;
 			}
 			break;
-		}
-		case SE_LimitInstant:{
+		
+		case SE_LimitInstant:
 			if(spell.buffduration)
-				return(0);
+				return 0;
 			break;
-		}
 
-		case SE_LimitMaxLevel:{
+		case SE_LimitMaxLevel:
 			if (IsNPC())
 				break;
 			spell_level = spell.classes[(GetClass()%16) - 1];
 			lvldiff = spell_level - focus_spell.base[i];
 			//every level over cap reduces the effect by focus_spell.base2[i] percent unless from a clicky when ItemCastsUseFocus is true
-			if(lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) || RuleB(Character, ItemCastsUseFocus) == false))
-			{
-				if(focus_spell.base2[i] > 0)
-				{
+			if(lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) || RuleB(Character, ItemCastsUseFocus) == false)){
+				if(focus_spell.base2[i] > 0){
 					lvlModifier -= focus_spell.base2[i]*lvldiff;
 					if(lvlModifier < 1)
 						return 0;
 				}
 				else
-				{
 					return 0;
-				}
 			}
 			break;
-		}
-
+		
 		case SE_LimitMinLevel:
 			if (IsNPC())
 				break;
@@ -4523,19 +4477,25 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				return(0);
 			break;
 
-		case SE_LimitCastTime:
+		case SE_LimitCastTimeMin:
 			if (spells[spell_id].cast_time < (uint16)focus_spell.base[i])
 				return(0);
 			break;
 
+		case SE_LimitCastTimeMax:
+			if (spells[spell_id].cast_time > (uint16)focus_spell.base[i])
+				return(0);
+			break;
+			
 		case SE_LimitSpell:
-			if(focus_spell.base[i] < 0) {	//exclude spell
-				if (spell_id == (focus_spell.base[i]*-1))
+			if(focus_spell.base[i] < 0) {	//Exclude
+				if (spell_id == -focus_spell.base[i])
 					return(0);
-			} else {
-				//this makes the assumption that only one spell can be explicitly included...
-				if (spell_id != focus_spell.base[i])
-					return(0);
+			} 
+			else {
+				LimitInclude[2] = true;
+				if (spell_id == focus_spell.base[i]) //Include
+					LimitInclude[3] = true;
 			}
 			break;
 
@@ -4546,37 +4506,19 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_LimitEffect:
 			if(focus_spell.base[i] < 0){
-				if(IsEffectInSpell(spell_id,(focus_spell.base[i] * -1))){ //we limit this effect, can't have
+				if(IsEffectInSpell(spell_id,-focus_spell.base[i])) //Exclude
 					return 0;
 				}
-			}
 			else{
-				if(focus_spell.base[i] == SE_SummonPet) //summoning haste special case
-				{	//must have one of the three pet effects to qualify
-					if(!IsEffectInSpell(spell_id, SE_SummonPet) &&
-						!IsEffectInSpell(spell_id, SE_NecPet) &&
-						!IsEffectInSpell(spell_id, SE_SummonBSTPet))
-					{
-						return 0;
-					}
-				}
-				//else if(!SpellEffect_Found && (!IsEffectInSpell(spell_id,focus_spell.base[i])){ //we limit this effect, must have
-				//	return 0;
-				//}
+				LimitInclude[4] = true;
+				if(IsEffectInSpell(spell_id,focus_spell.base[i])) //Include
+					LimitInclude[5] = true;
 			}
-
-			if(focus_spell.base[i] >= 0){
-				LimitSpellEffect = true;
-				if  (IsEffectInSpell(spell_id,focus_spell.base[i]))
-					SpellEffect_Found = true;
-			}
-
 			break;
 
 
 		case SE_LimitSpellType:
-			switch( focus_spell.base[i] )
-			{
+			switch( focus_spell.base[i]){
 				case 0:
 					if (!IsDetrimentalSpell(spell_id))
 						return 0;
@@ -4590,50 +4532,59 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			}
 			break;
 
-		case SE_LimitManaCost:
-				if(spell.mana < focus_spell.base[i])
-					return 0;
+		case SE_LimitManaMin:
+			if(spell.mana < focus_spell.base[i])
+				return 0;
+			break;
+
+		case SE_LimitManaMax:
+			if(spell.mana > focus_spell.base[i])
+				return 0;
 			break;
 
 		case SE_LimitTarget:
-			// Exclude
-			if((focus_spell.base[i] < 0) && -focus_spell.base[i] == spell.targettype)
-				return 0;
-			// Include
-			else if (focus_spell.base[i] > 0 && focus_spell.base[i] != spell.targettype)
-				return 0;
-
+			if (focus_spell.base[i] < 0) {
+				if (-focus_spell.base[i] == spell.targettype) //Exclude
+					return 0;
+			}
+			else {
+				LimitInclude[6] = true;
+				if (focus_spell.base[i] == spell.targettype) //Include
+					LimitInclude[7] = true;
+			}
 			break;
 
-		case SE_CombatSkills:
-				// 1 is for disciplines only
-				if(focus_spell.base[i] == 1 && !IsDiscipline(spell_id))
+		case SE_LimitCombatSkills:
+			if (focus_spell.base[i] == 0){
+				if((spell.cast_time == 0) && (spell.recast_time == 0) && (spell.recovery_time == 0)) //Exclude procs
 					return 0;
-				// 0 is for spells only
-				else if(focus_spell.base[i] == 0 && IsDiscipline(spell_id))
-					return 0;
+			}
 			break;
 
 		case SE_LimitSpellGroup:
-				if(focus_spell.base[i] > 0 && focus_spell.base[i] != spell.spellgroup)
+			if(focus_spell.base[i] < 0) {
+				if (-focus_spell.base[i] == spell.spellgroup) //Exclude
 					return 0;
-				else if(focus_spell.base[i] < 0 && focus_spell.base[i] == spell.spellgroup)
-					return 0;
-			break;
-
-		case SE_LimitSpellSkill:
-				LimitSpellSkill = true;
-				if(focus_spell.base[i] == spell.skill)
-					SpellSkill_Found = true;
-			break;
-
-		case SE_LimitExcludeSkill:{
-			int16 spell_skill = spell.skill * -1;
-			if(focus_spell.base[i] == spell_skill)
-				return 0;
-			break;
 			}
+			else {
+				LimitInclude[8] = true;
+				if (focus_spell.base[i] == spell.spellgroup) //Include
+					LimitInclude[9] = true;
+			}
+			break;
 
+		case SE_LimitCastingSkill:
+			if(focus_spell.base[i] < 0) {
+				if(-focus_spell.base[i] == spell.skill)
+					return 0;
+			}
+			else {
+				LimitInclude[10] = true;
+				if(focus_spell.base[i] == spell.skill)
+					LimitInclude[11] = true;
+			}
+			break;
+		
 		case SE_LimitClass:
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
 			if (!PassLimitClass(focus_spell.base[i], GetClass()))
@@ -4645,12 +4596,12 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				return 0;
 			break;
 
-		case SE_FfLimitUseMin:
+		case SE_LimitUseMin:
 			if (focus_spell.base[i] > spell.numhits)
 				return 0;
 			break;
 
-		case SE_FfLimitUseType:
+		case SE_LimitUseType:
 			if (focus_spell.base[i] != spell.numhitstype)
 				return 0;
 			break;
@@ -4663,7 +4614,6 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		//handle effects
 		case SE_ImprovedDamage:
-		// No Spell used this, its handled by different spell effect IDs.
 			if (type == focusImprovedDamage) {
 				// This is used to determine which focus should be used for the random calculation
 				if(best_focus) {
@@ -4685,6 +4635,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				}
 			}
 			break;
+
 		case SE_ImprovedHeal:
 			if (type == focusImprovedHeal) {
 				if(best_focus) {
@@ -4703,6 +4654,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				}
 			}
 			break;
+
 		case SE_ReduceManaCost:
 			if (type == focusManaCost) {
 				if(best_focus) {
@@ -4724,70 +4676,54 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_IncreaseSpellHaste:
 			if (type == focusSpellHaste && focus_spell.base[i] > value)
-			{
 				value = focus_spell.base[i];
-			}
 			break;
+		
 		case SE_IncreaseSpellDuration:
 			if (type == focusSpellDuration && focus_spell.base[i] > value)
-			{
 				value = focus_spell.base[i];
-			}
 			break;
+
 		case SE_SpellDurationIncByTic:
 			if (type == focusSpellDurByTic && focus_spell.base[i] > value)
-			{
 				value = focus_spell.base[i];
-			}
 			break;
+
 		case SE_SwarmPetDuration:
 			if (type == focusSwarmPetDuration && focus_spell.base[i] > value)
-			{
 				value = focus_spell.base[i];
-			}
 			break;
+
 		case SE_IncreaseRange:
 			if (type == focusRange && focus_spell.base[i] > value)
-			{
 				value = focus_spell.base[i];
-			}
 			break;
+
 		case SE_ReduceReagentCost:
 			if (type == focusReagentCost && focus_spell.base[i] > value)
-			{
 				value = focus_spell.base[i];
-			}
 			break;
+
 		case SE_PetPowerIncrease:
 			if (type == focusPetPower && focus_spell.base[i] > value)
-			{
 				value = focus_spell.base[i];
-			}
 			break;
+
 		case SE_SpellResistReduction:
 			if (type == focusResistRate && focus_spell.base[i] > value)
-			{
 				value = focus_spell.base[i];
-			}
 			break;
+
 		case SE_SpellHateMod:
-			if (type == focusSpellHateMod)
-			{
-				if(value != 0)
-				{
-					if(value > 0)
-					{
+			if (type == focusSpellHateMod){
+				if(value != 0){
+					if(value > 0){
 						if(focus_spell.base[i] > value)
-						{
 							value = focus_spell.base[i];
-						}
 					}
-					else
-					{
+					else{
 						if(focus_spell.base[i] < value)
-						{
 							value = focus_spell.base[i];
-						}
 					}
 				}
 				else
@@ -4796,55 +4732,28 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_ReduceReuseTimer:
-		{
 			if(type == focusReduceRecastTime)
 				value = focus_spell.base[i] / 1000;
-
 			break;
-		}
 
 		case SE_TriggerOnCast:
-		{
-			if(type == focusTriggerOnCast)
-			{
-				if(MakeRandomInt(0, 100) <= focus_spell.base[i])
+			if(type == focusTriggerOnCast){
+				if(MakeRandomInt(1, 100) <= focus_spell.base[i])
 					value = focus_spell.base2[i];
-
 				else
 					value = 0;
 			}
+			break;
 
-			break;
-		}
-		case SE_SpellVulnerability:
-		{
-			if(type == focusSpellVulnerability)
-			{
-				value = focus_spell.base[i];
-			}
-			break;
-		}
 		case SE_BlockNextSpellFocus:
-		{
-			if(type == focusBlockNextSpell)
-			{
+			if(type == focusBlockNextSpell){
 				if(MakeRandomInt(1, 100) <= focus_spell.base[i])
 					value = 1;
 			}
 			break;
-		}
-		case SE_Twincast:
-		{
-			if(type == focusTwincast)
-			{
-				value = focus_spell.base[i];
-			}
-			break;
-		}
+
 		case SE_SympatheticProc:
-		{
-			if(type == focusSympatheticProc)
-			{
+			if(type == focusSympatheticProc) {
 				float ProcChance, ProcBonus;
 				int16 ProcRateMod = focus_spell.base[i]; //Baseline is 100 for most Sympathetic foci
 				int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
@@ -4857,118 +4766,91 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					value = 0;
 			}
 			break;
-		}
+
+		case SE_FcSpellVulnerability:
+			if(type == focusSpellVulnerability)
+				value = focus_spell.base[i];
+			break;
+
+		case SE_FcTwincast:
+			if(type == focusTwincast)
+				value = focus_spell.base[i];
+			break;
+
 		case SE_FcDamageAmt:
-		{
 			if(type == focusFcDamageAmt)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
 		case SE_FcDamageAmtCrit:
-		{
 			if(type == focusFcDamageAmtCrit)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
 		case SE_FcDamageAmtIncoming:
-		{
 			if(type == focusFcDamageAmtIncoming)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
 		case SE_FcHealAmtIncoming:
-		{
 			if(type == focusFcHealAmtIncoming)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
-		case SE_CriticalHealRate:
-		{
-			if (type == focusCriticalHealRate)
-				value = focus_spell.base[i];
-
-			break;
-		}
-
-		case SE_AdditionalHeal:
-		{
-			if(type == focusAdditionalHeal)
-				value = focus_spell.base[i];
-
-			break;
-		}
-
-		case SE_AdditionalHeal2:
-		{
-			if(type == focusAdditionalHeal2)
-				value = focus_spell.base[i];
-
-			break;
-		}
-
-		case SE_HealRate2:
-		{
-			if(type == focusHealRate)
-				value = focus_spell.base[i];
-
-			break;
-		}
-
-		case SE_FcBaseEffects:
-		{
-			if (type == focusFcBaseEffects)
-				value = focus_spell.base[i];
-
-			break;
-		}
 		case SE_FcDamagePctCrit:
-		{
 			if(type == focusFcDamagePctCrit)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
-		case SE_IncreaseNumHits:
-		{
+		case SE_FcHealPctCritIncoming:
+			if (type == focusFcHealPctCritIncoming)
+				value = focus_spell.base[i];
+			break;
+
+		case SE_FcHealAmtCrit:
+			if(type == focusFcHealAmtCrit)
+				value = focus_spell.base[i];
+			break;
+
+		case  SE_FcHealAmt:
+			if(type == focusFcHealAmt)
+				value = focus_spell.base[i];
+			break;
+
+		case SE_FcHealPctIncoming:
+			if(type == focusFcHealPctIncoming)
+				value = focus_spell.base[i];
+			break;
+
+		case SE_FcBaseEffects:
+			if (type == focusFcBaseEffects)
+				value = focus_spell.base[i];
+			break;
+
+		case SE_FcIncreaseNumHits:
 			if(type == focusIncreaseNumHits)
 				value = focus_spell.base[i];
-
 			break;
-		}
-
 
 		case SE_FcLimitUse:
-		{
 			if(type == focusFcLimitUse)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
 		case SE_FcMute:
-		{
 			if(type == focusFcMute)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
 		case SE_FcStunTimeMod:
-		{
 			if(type == focusFcStunTimeMod)
 				value = focus_spell.base[i];
-
 			break;
-		}
+
+		case SE_FcTimerRefresh:
+			if(type == focusFcTimerRefresh)
+				value = focus_spell.base[i];
+			break;
 
 #if EQDEBUG >= 6
 		//this spits up a lot of garbage when calculating spell focuses
@@ -4977,13 +4859,13 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			LogFile->write(EQEMuLog::Normal, "CalcFocusEffect: unknown effectid %d", focus_spell.effectid[i]);
 #endif
 		}
+		
 	}
-	//Check for spell skill limits.
-	if (LimitSpellSkill && !SpellSkill_Found)
-		return 0;
 
-	if (LimitSpellEffect && !SpellEffect_Found)
-		return 0;
+	for(int e = 0; e < MaxLimitInclude; e+=2) {
+		if (LimitInclude[e] && !LimitInclude[e+1])
+			return 0;
+	}
 	
 	if (Caston_spell_id){
 		if(IsValidSpell(Caston_spell_id) && (Caston_spell_id != spell_id))
@@ -5330,7 +5212,7 @@ void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
 	Field 175 = numhits type
 	1:  [Incoming Hit Attempts] (323=SE_DefensiveProc, 172=SE_AvoidMeleeChance, 1=SE_ArmorClass, 40=SE_DivineAura)
 	2:  [Outgoing Hit Attempts]  (185=SE_DamageModifer, 184=SE_HitChance)
-	3:  [Incoming Spells]  (180=SE_ResistSpellChance, 296=SE_SpellVulnerability) //Note: Determinetal spells only unless proven otherwise
+	3:  [Incoming Spells]  (180=SE_ResistSpellChance, 296=SE_FcSpellVulnerability) //Note: Determinetal spells only unless proven otherwise
 	4:  NONE
 	5:  [Outgoing Hit Successes] (220=SE_SkillDamageAmount, 178=SE_MeleeLifetap, 121=SE_ReverseDS, ?373=SE_CastOnWearoff)
 	6:  [Incoming Hit Successes] (59=SE_DamageShield, 197=SE_SkillDamageTaken, 162=define SE_MitigateMeleeDamage)
@@ -5635,7 +5517,7 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 
 						if (!skill_found){
 							if ((spells[buffs[i].spellid].effectid[e] == SE_LimitToSkill) ||
-								(spells[buffs[i].spellid].effectid[e] == SE_LimitSpellSkill)){
+								(spells[buffs[i].spellid].effectid[e] == SE_LimitCastingSkill)){
 								limit_exists = true;
 
 								if (spells[buffs[i].spellid].base[e] == skill)
@@ -5660,6 +5542,58 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 		}
 	}
 	return dmg;
+}
+
+int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id) {
+
+	/*
+	This is a general function for calculating best focus effect values for focus effects that exist on targets but modify incoming spells.
+	Should be used when checking for foci that can exist on clients or npcs ect.
+	Example: When your target has a focus limited buff that increases amount of healing on them.
+	*/
+
+	if (!caster)
+		return 0;
+
+	int value = 0;
+
+	if (spellbonuses.FocusEffects[type]){
+		uint32 buff_count = GetMaxTotalSlots();
+		for(int i = 0; i < buff_count; i++){
+
+			int32 tmp_focus = 0;
+			int tmp_buffslot = -1;
+
+			int buff_count = GetMaxTotalSlots();
+			for(int i = 0; i < buff_count; i++) {
+
+				if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, effect))){
+
+					int32 focus = caster->CalcFocusEffect(type, buffs[i].spellid, spell_id);
+
+					if (!focus)
+						continue;
+
+					if (tmp_focus && focus > tmp_focus){
+						tmp_focus = focus;
+						tmp_buffslot = i;
+					}
+
+					else if (!tmp_focus){
+						tmp_focus = focus;
+						tmp_buffslot = i;
+					}
+				}
+			}
+
+			value = tmp_focus;
+
+			if (tmp_buffslot >= 0)
+				CheckNumHitsRemaining(7, tmp_buffslot);
+		}
+
+	}
+	return value;
 }
 
 int32 Mob::ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard) {

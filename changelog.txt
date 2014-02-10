@@ -3,14 +3,22 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 02/10/2014 ==
 demonstar55 (Secrets): Re-wrote the entity list to be a std::map. This should be used for direct entityID lookups and is noticably faster performance-wise. Also should result in less nil pointers potentially.
 Secrets: Fixed a crash issue that could occur on #repop related to quest timers.
+Kayen: Divine Arbiration and other similar spell effects will now utilize a spell range check.
+Kayen: Revised how heal amount is calculated to properly incorporate all current focus effects/bonuses.
+Kayen: Various updates/fixes/clean-ups to focus effect related code. Focus effect limits should now all work properly.
 
 == 02/09/2014 ==
 Sorvani: Added new spawn condition onchange action: DoRepopIfReady. Choosing this will not repop mobs when the spawn condition is enabled if they have an existing respawn timer. Additionally, this condition will not even attempt repop when the condition is is changed to disabled. Will be in use on PEQ for: Cragbeast Queen in Natimbi.
 Secrets: Fixed a weird crash issue with deletion of pointers if task loading fails.
 
-== 02/2/2014 ==
-Kayen: Revised how spell/dot damage is calculated to properly incorporated all current focus effects/bonuses.
+== 02/8/2014 ==
+Kayen: Various updates/fixes/clean-ups to focus effect related code. Focus effect limits should now all work properly.
 
+== 02/7/2014 ==
+Kayen: Revised how heal amount is calculated to properly incorporate all current focus effects/bonuses.
+
+== 02/2/2014 ==
+Kayen: Revised how spell/dot damage is calculated to properly incorporate all current focus effects/bonuses.
 
 Required SQL: utils/sql/git/2014_02_02_SpellCriticalsAA.sql
 
