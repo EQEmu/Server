@@ -353,7 +353,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 NPC::~NPC()
 {
-	entity_list.RemoveNPC(GetID());
+	//entity_list.RemoveNPC(GetID());
 	AI_Stop();
 
 	if(proximity != nullptr) {
@@ -362,7 +362,7 @@ NPC::~NPC()
 	}
 
 	//clear our spawn limit record if we had one.
-	entity_list.LimitRemoveNPC(this);
+	//entity_list.LimitRemoveNPC(this);
 
 	safe_delete(NPCTypedata_ours);
 

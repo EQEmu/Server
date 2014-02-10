@@ -16185,17 +16185,14 @@ Mob* EntityList::GetMobByBotID(uint32 botID) {
 	Mob* Result = 0;
 
 	if(botID > 0) {
-		LinkedListIterator<Mob*> iterator(mob_list);
+		auto it = mob_list.begin();
 
-		iterator.Reset();
-
-		while(iterator.MoreElements()) {
-			if(iterator.GetData()->IsBot() && iterator.GetData()->CastToBot()->GetBotID() == botID) {
-				Result = iterator.GetData();
+	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+		if(!it->second) continue;
+			if(it->second->IsBot() && it->second->CastToBot()->GetBotID() == botID) {
+				Result = it->second;
 				break;
 			}
-
-			iterator.Advance();
 		}
 	}
 
@@ -16263,7 +16260,7 @@ void EntityList::AddBot(Bot *newBot, bool SendSpawnPacket, bool dontqueue) {
 
 		bot_list.push_back(newBot);
 
-		mob_list.Insert(newBot);
+		mob_list.insert(std::pair<uint16, Mob*>(newBot->GetID(), newBot));
 	}
 }
 
@@ -16284,10 +16281,9 @@ std::list<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacte
 
 void EntityList::BotPickLock(Bot* rogue)
 {
-	LinkedListIterator<Doors*> iterator(door_list);
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		Doors *cdoor = iterator.GetData();
+	auto it = door_list.begin();
+	for (auto it = door_list.begin(); it != door_list.end(); ++it) {
+		Doors *cdoor = it->second;
 		if(cdoor && !cdoor->IsDoorOpen()) {
 			float zdiff = rogue->GetZ() - cdoor->GetZ();
 			if(zdiff < 0)
@@ -16326,7 +16322,6 @@ void EntityList::BotPickLock(Bot* rogue)
 				}
 			}
 		}
-		iterator.Advance();
 	}
 }
 
@@ -16356,18 +16351,17 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 	std::string WindowText;
 	int LastCon = -1;
 	int CurrentCon = 0;
+	Mob* curMob = NULL;
 
 	uint32 array_counter = 0;
 
-	LinkedListIterator<Mob*> iterator(mob_list);
-	iterator.Reset();
+	auto it = mob_list.begin();
 
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData() && (iterator.GetData()->DistNoZ(*client)<=Distance))
-		{
-			if(iterator.GetData()->IsTrackable()) {
-				Mob* cur_entity = iterator.GetData();
+	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+	curMob = it->second;
+		if (curMob && curMob->DistNoZ(*client)<=Distance) {
+			if(curMob->IsTrackable()) {
+				Mob* cur_entity = curMob;
 				int Extras = (cur_entity->IsBot() || cur_entity->IsPet() || cur_entity->IsFamiliar() || cur_entity->IsClient());
 				const char *const MyArray[] = {
 					"a_","an_","Innkeep_","Barkeep_",
@@ -16409,7 +16403,6 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 					const char *CurEntityName = cur_entity->GetName(); //Call function once
 					for (int Index = 0; Index < MyArraySize; Index++) {
 						if (!strncasecmp(CurEntityName, MyArray[Index], strlen(MyArray[Index])) || (Extras)) {
-							iterator.Advance();
 							ContinueFlag = true;
 							break; //From Index for
 						};
@@ -16466,8 +16459,6 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 				}
 			}
 		}
-
-		iterator.Advance();
 	}
 	WindowText += "</c>";
 

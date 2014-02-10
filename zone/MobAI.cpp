@@ -371,9 +371,8 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 
 
 	//Only iterate through NPCs
-	LinkedListIterator<NPC*> iterator(npc_list);
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
-		NPC* mob = iterator.GetData();
+	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
+		NPC* mob = it->second;
 
 		//Since >90% of mobs will always be out of range, try to
 		//catch them with simple bounding box checks first. These

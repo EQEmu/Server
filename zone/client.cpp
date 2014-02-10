@@ -427,7 +427,7 @@ Client::~Client() {
 	eqs->Close();
 	eqs->ReleaseFromUse();
 
-	entity_list.RemoveClient(this);
+	//entity_list.RemoveClient(this);
 	UninitializeBuffSlots();
 }
 

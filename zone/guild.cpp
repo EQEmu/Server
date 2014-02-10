@@ -230,44 +230,41 @@ void Client::RefreshGuildInfo()
 void EntityList::SendGuildMOTD(uint32 guild_id) {
 	if(guild_id == GUILD_NONE)
 		return;
-	LinkedListIterator<Client*> iterator(client_list);
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		Client* client = iterator.GetData();
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->SendGuildMOTD();
 			client->SendGuildURL();
 			client->SendGuildChannel();
 		}
-		iterator.Advance();
+		++it;
 	}
 }
 
 void EntityList::SendGuildSpawnAppearance(uint32 guild_id) {
 	if(guild_id == GUILD_NONE)
 		return;
-	LinkedListIterator<Client*> iterator(client_list);
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		Client* client = iterator.GetData();
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->SendGuildSpawnAppearance();
 		}
-		iterator.Advance();
+		++it;
 	}
 }
 
 void EntityList::RefreshAllGuildInfo(uint32 guild_id) {
 	if(guild_id == GUILD_NONE)
 		return;
-	LinkedListIterator<Client*> iterator(client_list);
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		Client* client = iterator.GetData();
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->RefreshGuildInfo();
 		}
-		iterator.Advance();
+		++it;
 	}
 }
 
@@ -278,24 +275,22 @@ void EntityList::SendGuildMembers(uint32 guild_id) {
 	//this could be optimized a bit to only build the member's packet once
 	//and then keep swapping out the name in the packet on each send.
 
-	LinkedListIterator<Client*> iterator(client_list);
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		Client* client = iterator.GetData();
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->SendGuildMembers();
 		}
-		iterator.Advance();
+		++it;
 	}
 }
 
 void EntityList::SendGuildList() {
-	LinkedListIterator<Client*> iterator(client_list);
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		Client* client = iterator.GetData();
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		Client *client = it->second;
 		client->SendGuildList();
-		iterator.Advance();
+		++it;
 	}
 }
 

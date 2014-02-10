@@ -17,6 +17,8 @@
 */
 #ifndef ENTITY_H
 #define ENTITY_H
+#include <unordered_map>
+#include <queue>
 
 #include "../common/types.h"
 #include "../common/linked_list.h"
@@ -75,25 +77,25 @@ public:
 	virtual bool Save() { return true; }
 	virtual void Depop(bool StartSpawnTimer = false) {}
 
-	Client* CastToClient();
-	NPC*	CastToNPC();
-	Mob*	CastToMob();
-	Merc*	CastToMerc();
-	Corpse*	CastToCorpse();
-	Object* CastToObject();
-	Doors*	CastToDoors();
-	Trap*	CastToTrap();
-	Beacon*	CastToBeacon();
+	Client	*CastToClient();
+	NPC		*CastToNPC();
+	Mob		*CastToMob();
+	Merc	*CastToMerc();
+	Corpse	*CastToCorpse();
+	Object	*CastToObject();
+	Doors	*CastToDoors();
+	Trap	*CastToTrap();
+	Beacon	*CastToBeacon();
 
-	const Client* CastToClient() const;
-	const NPC*		CastToNPC() const;
-	const Mob*		CastToMob() const;
-	const Merc*		CastToMerc() const;
-	const Corpse*	CastToCorpse() const;
-	const Object*	CastToObject() const;
-	const Doors*	CastToDoors() const;
-	const Trap*		CastToTrap() const;
-	const Beacon*	CastToBeacon() const;
+	const Client	*CastToClient() const;
+	const NPC		*CastToNPC() const;
+	const Mob		*CastToMob() const;
+	const Merc		*CastToMerc() const;
+	const Corpse	*CastToCorpse() const;
+	const Object	*CastToObject() const;
+	const Doors		*CastToDoors() const;
+	const Trap		*CastToTrap() const;
+	const Beacon	*CastToBeacon() const;
 
 	inline const uint16& GetID() const { return id; }
 
@@ -108,7 +110,7 @@ public:
 
 protected:
 	friend class EntityList;
-	virtual void SetID(uint16 set_id);
+	inline virtual void SetID(uint16 set_id) { id = set_id; }
 	uint32 pDBAsyncWorkID;
 private:
 	uint16 id;
@@ -129,45 +131,51 @@ public:
 	~EntityList();
 
 	Entity* GetID(uint16 id);
-	Mob*	GetMob(uint16 id);
-	inline Mob*	GetMobID(uint16 id) { return(GetMob(id)); }	//for perl
-	Mob*	GetMob(const char* name);
-	Mob*	GetMobByNpcTypeID(uint32 get_id);
-	Mob*	GetTargetForVirus(Mob* spreader);
-	NPC*	GetNPCByID(uint16 id);
-	NPC*	GetNPCByNPCTypeID(uint32 npc_id);
-	Merc*	GetMercByID(uint16 id);
-	Client* GetClientByName(const char *name);
-	Client* GetClientByAccID(uint32 accid);
-	Client* GetClientByID(uint16 id);
-	Client* GetClientByCharID(uint32 iCharID);
-	Client* GetClientByWID(uint32 iWID);
-	Client* GetClient(uint32 ip, uint16 port);
-	Client* GetRandomClient(float x, float y, float z, float Distance, Client *ExcludeClient = nullptr);
-	Group*	GetGroupByMob(Mob* mob);
-	Group*	GetGroupByClient(Client* client);
-	Group*	GetGroupByID(uint32 id);
-	Group*	GetGroupByLeaderName(const char* leader);
-	Raid*	GetRaidByMob(Mob* mob);
-	Raid*	GetRaidByClient(Client* client);
-	Raid*	GetRaidByID(uint32 id);
-	Raid*	GetRaidByLeaderName(const char *leader);
+	Mob *GetMob(uint16 id);
+	inline Mob *GetMobID(uint16 id) { return(GetMob(id)); }	//for perl
+	Mob *GetMob(const char* name);
+	Mob *GetMobByNpcTypeID(uint32 get_id);
+	Mob *GetTargetForVirus(Mob* spreader);
+	inline NPC *GetNPCByID(uint16 id)
+		{ return npc_list.count(id) ? npc_list.at(id) : nullptr; }
+	NPC *GetNPCByNPCTypeID(uint32 npc_id);
+	inline Merc *GetMercByID(uint16 id)
+		{ return merc_list.count(id) ? merc_list.at(id) : nullptr; }
+	Client *GetClientByName(const char *name);
+	Client *GetClientByAccID(uint32 accid);
+	inline Client *GetClientByID(uint16 id)
+		{ return client_list.count(id) ? client_list.at(id) : nullptr; }
+	Client *GetClientByCharID(uint32 iCharID);
+	Client *GetClientByWID(uint32 iWID);
+	Client *GetClient(uint32 ip, uint16 port);
+	Client *GetRandomClient(float x, float y, float z, float Distance, Client *ExcludeClient = nullptr);
+	Group *GetGroupByMob(Mob* mob);
+	Group *GetGroupByClient(Client* client);
+	Group *GetGroupByID(uint32 id);
+	Group *GetGroupByLeaderName(const char* leader);
+	Raid *GetRaidByMob(Mob* mob);
+	Raid *GetRaidByClient(Client* client);
+	Raid *GetRaidByID(uint32 id);
+	Raid *GetRaidByLeaderName(const char *leader);
 
-	Corpse*	GetCorpseByOwner(Client* client);
-	Corpse*	GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
-	Corpse* GetCorpseByID(uint16 id);
-	Corpse* GetCorpseByDBID(uint32 dbid);
-	Corpse* GetCorpseByName(const char* name);
+	Corpse *GetCorpseByOwner(Client* client);
+	Corpse *GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
+	inline Corpse *GetCorpseByID(uint16 id)
+		{ return corpse_list.count(id) ? corpse_list.at(id) : nullptr; }
+	Corpse *GetCorpseByDBID(uint32 dbid);
+	Corpse *GetCorpseByName(const char* name);
 
 	Spawn2* GetSpawnByID(uint32 id);
 
 	Client* FindCorpseDragger(const char *CorpseName);
 
-	Object*	GetObjectByID(uint16 id);
-	Object*	GetObjectByDBID(uint32 id);
-	Doors*	GetDoorsByID(uint16 id);
-	Doors* GetDoorsByDoorID(uint32 id);
-	Doors*	GetDoorsByDBID(uint32 id);
+	inline Object *GetObjectByID(uint16 id)
+		{ return object_list.count(id) ? object_list.at(id) : nullptr; }
+	Object *GetObjectByDBID(uint32 id);
+	inline Doors *GetDoorsByID(uint16 id)
+		{ return door_list.count(id) ? door_list.at(id) : nullptr; }
+	Doors *GetDoorsByDoorID(uint32 id);
+	Doors *GetDoorsByDBID(uint32 id);
 	void RemoveAllCorpsesByCharID(uint32 charid);
 	void RemoveCorpseByDBID(uint32 dbid);
 	int RezzAllCorpsesByCharID(uint32 charid);
@@ -195,8 +203,8 @@ public:
 	void	ClearAreas();
 	void	ProcessProximitySay(const char *Message, Client *c, uint8 language = 0);
 	void	SendAATimer(uint32 charid,UseAA_Struct* uaa);
-	Doors*	FindDoor(uint8 door_id);
-	Object*	FindObject(uint32 object_id);
+	Doors *FindDoor(uint8 door_id);
+	Object *FindObject(uint32 object_id);
 	Object*	FindNearbyObject(float x, float y, float z, float radius);
 	bool	MakeDoorSpawnPacket(EQApplicationPacket* app, Client *client);
 	bool	MakeTrackPacket(Client* client);
@@ -242,15 +250,15 @@ public:
 	void	RemoveAllLocalities();
 	void	RemoveAllRaids();
 	void	DestroyTempPets(Mob *owner);
-	Entity*	GetEntityMob(uint16 id);
-	Entity* GetEntityMob(const char *name);
-	Entity*	GetEntityMerc(uint16 id);
-	Entity*	GetEntityDoor(uint16 id);
-	Entity*	GetEntityObject(uint16 id);
-	Entity*	GetEntityCorpse(uint16 id);
-	Entity* GetEntityCorpse(const char *name);
-	Entity*	GetEntityTrap(uint16 id);
-	Entity*	GetEntityBeacon(uint16 id);
+	Entity *GetEntityMob(uint16 id);
+	Entity *GetEntityMerc(uint16 id);
+	Entity *GetEntityDoor(uint16 id);
+	Entity *GetEntityObject(uint16 id);
+	Entity *GetEntityCorpse(uint16 id);
+	Entity *GetEntityTrap(uint16 id);
+	Entity *GetEntityBeacon(uint16 id);
+	Entity *GetEntityMob(const char *name);
+	Entity *GetEntityCorpse(const char *name);
 
 	void DescribeAggro(Client *towho, NPC *from_who, float dist, bool verbose);
 
@@ -419,20 +427,20 @@ private:
 	uint32	NumSpawnsOnQueue;
 	LinkedList<NewSpawn_Struct*> SpawnQueue;
 
-	LinkedList<Client*> client_list;
-	LinkedList<Mob*> mob_list;
-	LinkedList<NPC*> npc_list;
-	LinkedList<Merc *> merc_list;
-	std::list<Group*> group_list;
-	LinkedList<Corpse*> corpse_list;
-	LinkedList<Object*> object_list;
-	LinkedList<Doors*> door_list;
-	LinkedList<Trap*> trap_list;
-	LinkedList<Beacon*> beacon_list;
-	std::list<NPC*> proximity_list;
+	std::unordered_map<uint16, Client *> client_list;
+	std::unordered_map<uint16, Mob *> mob_list;
+	std::unordered_map<uint16, NPC *> npc_list;
+	std::unordered_map<uint16, Merc *> merc_list;
+	std::unordered_map<uint16, Corpse *> corpse_list;
+	std::unordered_map<uint16, Object *> object_list;
+	std::unordered_map<uint16, Doors *> door_list;
+	std::unordered_map<uint16, Trap *> trap_list;
+	std::unordered_map<uint16, Beacon *> beacon_list;
+	std::list<NPC *> proximity_list;
+	std::list<Group *> group_list;
 	std::list<Raid *> raid_list;
 	std::list<Area> area_list;
-	uint16 last_insert_id;
+	std::queue<uint16> free_ids;
 
 	// Please Do Not Declare Any EntityList Class Members After This Comment
 #ifdef BOTS

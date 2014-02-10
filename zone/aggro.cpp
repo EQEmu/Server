@@ -32,23 +32,18 @@ extern Zone* zone;
 //#define LOSDEBUG 6
 
 //look around a client for things which might aggro the client.
-void EntityList::CheckClientAggro(Client *around) {
-
-	LinkedListIterator<Mob*> iterator(mob_list);
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
-		Mob* mob = iterator.GetData();
-		if(mob->IsClient())	//also ensures that mob != around
+void EntityList::CheckClientAggro(Client *around)
+{
+	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+		Mob *mob = it->second;
+		if (mob->IsClient())	//also ensures that mob != around
 			continue;
 
-		if(mob->CheckWillAggro(around)) {
-			if(mob->IsEngaged())
-			{
+		if (mob->CheckWillAggro(around)) {
+			if (mob->IsEngaged())
 				mob->AddToHateList(around);
-			}
 			else
-			{
 				mob->AddToHateList(around, mob->GetLevel());
-			}
 		}
 	}
 }
@@ -84,23 +79,21 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		towho->Message(0, ".. I am on faction %s (%d)\n", namebuf, my_primary);
 	}
 
-	LinkedListIterator<Mob*> iterator(mob_list);
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
-		Mob* mob = iterator.GetData();
-		if(mob->IsClient())	//also ensures that mob != around
+	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+		Mob *mob = it->second;
+		if (mob->IsClient())	//also ensures that mob != around
 			continue;
 
-		if(mob->DistNoRoot(*from_who) > d2)
+		if (mob->DistNoRoot(*from_who) > d2)
 			continue;
 
-		if(engaged) {
+		if (engaged) {
 			uint32 amm = from_who->GetHateAmount(mob);
-			if(amm == 0) {
+			if (amm == 0)
 				towho->Message(0, "... %s is not on my hate list.", mob->GetName());
-			} else {
+			else
 				towho->Message(0, "... %s is on my hate list with value %lu", mob->GetName(), (unsigned long)amm);
-			}
-		} else if(!check_npcs && mob->IsNPC()) {
+		} else if (!check_npcs && mob->IsNPC()) {
 				towho->Message(0, "... %s is an NPC and my npc_aggro is disabled.", mob->GetName());
 		} else {
 			from_who->DescribeAggro(towho, mob, verbose);
@@ -369,59 +362,57 @@ Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssist
 
 #ifdef REVERSE_AGGRO
 	//with reverse aggro, npc->client is checked elsewhere, no need to check again
-	LinkedListIterator<NPC*> iterator(npc_list);
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
 #else
-	LinkedListIterator<Mob*> iterator(mob_list);
+	auto it = mob_list.begin();
+	while (it != mob_list.end()) {
 #endif
-	iterator.Reset();
-	//float distZ;
-	while(iterator.MoreElements()) {
-		Mob* mob = iterator.GetData();
+		Mob *mob = it->second;
 
-		if(sender->CheckWillAggro(mob)) {
-			return(mob);
-		}
-
-		iterator.Advance();
+		if (sender->CheckWillAggro(mob))
+			return mob;
+		++it;
 	}
 	//LogFile->write(EQEMuLog::Debug, "Check aggro for %s no target.", sender->GetName());
-	return(nullptr);
+	return nullptr;
 }
 
-int EntityList::GetHatedCount(Mob *attacker, Mob *exclude) {
-
+int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
+{
 	// Return a list of how many non-feared, non-mezzed, non-green mobs, within aggro range, hate *attacker
-
-	if(!attacker) return 0;
+	if (!attacker)
+		return 0;
 
 	int Count = 0;
 
-	LinkedListIterator<NPC*> iterator(npc_list);
+	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
+		NPC *mob = it->second;
+		if (!mob || (mob == exclude))
+			continue;
 
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
+		if (!mob->IsEngaged())
+			continue;
 
-		NPC* mob = iterator.GetData();
+		if (mob->IsFeared() || mob->IsMezzed())
+			continue;
 
-		if(!mob || (mob == exclude)) continue;
+		if (attacker->GetLevelCon(mob->GetLevel()) == CON_GREEN)
+			continue;
 
-		if(!mob->IsEngaged()) continue;
-
-		if(mob->IsFeared() || mob->IsMezzed()) continue;
-
-		if(attacker->GetLevelCon(mob->GetLevel()) == CON_GREEN) continue;
-
-		if(!mob->CheckAggro(attacker)) continue;
+		if (!mob->CheckAggro(attacker))
+			continue;
 
 		float AggroRange = mob->GetAggroRange();
 
 		// Square it because we will be using DistNoRoot
 
-		AggroRange = AggroRange * AggroRange;
+		AggroRange *= AggroRange;
 
-		if(mob->DistNoRoot(*attacker) > AggroRange) continue;
+		if (mob->DistNoRoot(*attacker) > AggroRange)
+			continue;
 
 		Count++;
-
 	}
 
 	return Count;
@@ -434,13 +425,11 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 	if (sender->GetPrimaryFaction() == 0 )
 		return; // well, if we dont have a faction set, we're gonna be indiff to everybody
 
-	LinkedListIterator<NPC*> iterator(npc_list);
-
-	for(iterator.Reset(); iterator.MoreElements(); iterator.Advance()) {
-		NPC* mob = iterator.GetData();
-		if(!mob){
+	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
+		NPC *mob = it->second;
+		if (!mob)
 			continue;
-		}
+
 		float r = mob->GetAssistRange();
 		r = r * r;
 
