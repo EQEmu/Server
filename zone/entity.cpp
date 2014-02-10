@@ -2036,7 +2036,7 @@ bool EntityList::RemoveMob(uint16 delete_id)
 		else if (client_list.count(delete_id))
 			entity_list.RemoveClient(delete_id);
 		safe_delete(it->second);
-		if (corpse_list.count(delete_id))
+		if (!corpse_list.count(delete_id))
 			free_ids.push(it->first);
 		mob_list.erase(it);
 		return true;
@@ -2054,7 +2054,7 @@ bool EntityList::RemoveMob(Mob *delete_mob)
 	while (it != mob_list.end()) {
 		if (it->second == delete_mob) {
 			safe_delete(it->second);
-			if (corpse_list.count(it->first))
+			if (!corpse_list.count(it->first))
 				free_ids.push(it->first);
 			mob_list.erase(it);
 			return true;
