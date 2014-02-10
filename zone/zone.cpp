@@ -1564,6 +1564,8 @@ void Zone::Repop(uint32 delay) {
 		iterator.RemoveCurrent();
 	}
 
+	quest_manager.ClearAllTimers();
+
 	if (!database.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay))
 		LogFile->write(EQEMuLog::Debug, "Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 
