@@ -2445,7 +2445,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceHP(spell.base[i], gid);
+						r->BalanceHP(spell.base[i], gid, spell.range, caster);
 						break;
 					}
 				}
@@ -2455,7 +2455,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceHP(spell.base[i]);
+				g->BalanceHP(spell.base[i], spell.range, caster);
 				break;
 			}
 
@@ -2473,7 +2473,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceMana(spell.base[i], gid);
+						r->BalanceMana(spell.base[i], gid, spell.range, caster);
 						break;
 					}
 				}
@@ -2483,7 +2483,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceMana(spell.base[i]);
+				g->BalanceMana(spell.base[i], spell.range, caster);
 				break;
 			}
 
@@ -2579,7 +2579,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->HealGroup(heal_amt,caster, gid);
+						r->HealGroup(heal_amt,caster, gid, spell.range);
 						break;
 					}
 				}
@@ -2591,7 +2591,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					break;
 				}
 
-				g->HealGroup(heal_amt, caster);
+				g->HealGroup(heal_amt, caster, spell.range);
 				break;
 			}
 
@@ -3978,10 +3978,6 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 	int lvlModifier = 100;
 	int spell_level = 0;
 	int lvldiff = 0;
-	bool LimitSpellSkill = false;
-	bool SpellSkill_Found = false;
-	bool LimitSpellEffect = false;
-	bool SpellEffect_Found = false;
 	uint32 effect = 0;
 	int32 base1 = 0;
 	int32 base2 = 0;

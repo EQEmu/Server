@@ -167,7 +167,7 @@ int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (chance > 0 && (MakeRandomInt(1, 100) <= chance)) {
 	
-		int32 ratio = 100;
+		int32 ratio = 200;
 		ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
 
 		value = value_BaseEffect*ratio/100;  

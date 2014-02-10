@@ -461,10 +461,16 @@ uint32 Raid::GetTotalRaidDamage(Mob* other)
 	return total;
 }
 
-void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid)
+void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, int32 range)
 {
 	if (!caster)
 		return;
+
+	if (!range)
+		range = 200;
+
+	float distance;
+	float range2 = range*range;
 
 	int numMem = 0;
 	unsigned int gi = 0;
@@ -473,7 +479,10 @@ void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				numMem += 1;
+				distance = caster->DistNoRoot(*members[gi].member);
+				if(distance <= range2){
+					numMem += 1;
+				}
 			}
 		}
 	}
@@ -484,25 +493,41 @@ void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				members[gi].member->SetHP(members[gi].member->GetHP() + heal_amt);
-				members[gi].member->SendHPUpdate();
+				distance = caster->DistNoRoot(*members[gi].member);
+				if(distance <= range2){
+					members[gi].member->SetHP(members[gi].member->GetHP() + heal_amt);
+					members[gi].member->SendHPUpdate();
+				}
 			}
 		}
 	}
 }
 
 
-void Raid::BalanceHP(int32 penalty, uint32 gid)
+void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster)
 {
+	if (!caster)
+		return;
+
+	if (!range)
+		range = 200;
+
 	int dmgtaken = 0, numMem = 0;
 	int gi = 0;
+	
+	float distance;
+	float range2 = range*range;
+
 	for(; gi < MAX_RAID_MEMBERS; gi++)
 	{
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				dmgtaken += (members[gi].member->GetMaxHP() - members[gi].member->GetHP());
-				numMem += 1;
+				distance = caster->DistNoRoot(*members[gi].member);
+				if(distance <= range2){
+					dmgtaken += (members[gi].member->GetMaxHP() - members[gi].member->GetHP());
+					numMem += 1;
+				}
 			}
 		}
 	}
@@ -514,21 +539,33 @@ void Raid::BalanceHP(int32 penalty, uint32 gid)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				if((members[gi].member->GetMaxHP() - dmgtaken) < 1){//this way the ability will never kill someone
-					members[gi].member->SetHP(1);					//but it will come darn close
-					members[gi].member->SendHPUpdate();
-				}
-				else{
-					members[gi].member->SetHP(members[gi].member->GetMaxHP() - dmgtaken);
-					members[gi].member->SendHPUpdate();
+				distance = caster->DistNoRoot(*members[gi].member);
+				if(distance <= range2){
+					if((members[gi].member->GetMaxHP() - dmgtaken) < 1){//this way the ability will never kill someone
+						members[gi].member->SetHP(1);					//but it will come darn close
+						members[gi].member->SendHPUpdate();
+					}
+					else{
+						members[gi].member->SetHP(members[gi].member->GetMaxHP() - dmgtaken);
+						members[gi].member->SendHPUpdate();
+					}
 				}
 			}
 		}
 	}
 }
 
-void Raid::BalanceMana(int32 penalty, uint32 gid)
+void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster)
 {
+	if (!caster)
+		return;
+
+	if (!range)
+		range = 200;
+			
+	float distance;
+	float range2 = range*range;
+
 	int manataken = 0, numMem = 0;
 	int gi = 0;
 	for(; gi < MAX_RAID_MEMBERS; gi++)
@@ -536,8 +573,11 @@ void Raid::BalanceMana(int32 penalty, uint32 gid)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				manataken += (members[gi].member->GetMaxMana() - members[gi].member->GetMana());
-				numMem += 1;
+				distance = caster->DistNoRoot(*members[gi].member);
+				if(distance <= range2){
+					manataken += (members[gi].member->GetMaxMana() - members[gi].member->GetMana());
+					numMem += 1;
+				}
 			}
 		}
 	}
@@ -549,15 +589,18 @@ void Raid::BalanceMana(int32 penalty, uint32 gid)
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				if((members[gi].member->GetMaxMana() - manataken) < 1){
-					members[gi].member->SetMana(1);
-					if (members[gi].member->IsClient())
-						members[gi].member->CastToClient()->SendManaUpdate();
-				}
-				else{
-					members[gi].member->SetMana(members[gi].member->GetMaxMana() - manataken);
-					if (members[gi].member->IsClient())
-						members[gi].member->CastToClient()->SendManaUpdate();
+				distance = caster->DistNoRoot(*members[gi].member);
+				if(distance <= range2){
+					if((members[gi].member->GetMaxMana() - manataken) < 1){
+						members[gi].member->SetMana(1);
+						if (members[gi].member->IsClient())
+							members[gi].member->CastToClient()->SendManaUpdate();
+					}
+					else{
+						members[gi].member->SetMana(members[gi].member->GetMaxMana() - manataken);
+						if (members[gi].member->IsClient())
+							members[gi].member->CastToClient()->SendManaUpdate();
+					}
 				}
 			}
 		}
