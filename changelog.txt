@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 02/09/2014 ==
 Sorvani: Added new spawn condition onchange action: DoRepopIfReady. Choosing this will not repop mobs when the spawn condition is enabled if they have an existing respawn timer. Additionally, this condition will not even attempt repop when the condition is is changed to disabled. Will be in use on PEQ for: Cragbeast Queen in Natimbi.
+Secrets: Fixed a weird crash issue with deletion of pointers if task loading fails.
 
 == 02/2/2014 ==
 Kayen: Revised how spell/dot damage is calculated to properly incorporated all current focus effects/bonuses.
