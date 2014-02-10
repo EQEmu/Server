@@ -172,7 +172,7 @@ public:
 	void NegateSpellsBonuses(uint16 spell_id);
 	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false) { return range;}
 	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr) { return value; }
-	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value) { return value; }
+	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr) { return value; }
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost){ return cost;}
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration){ return duration;}
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
@@ -548,10 +548,10 @@ public:
 	void TrySympatheticProc(Mob *target, uint32 spell_id);
 	bool TryFadeEffect(int slot);
 	uint16 GetSpellEffectResistChance(uint16 spell_id);
-	int16 GetHealRate(uint16 spell_id);
-	int16 GetCriticalHealRate(uint16 spell_id);
+	int16 GetHealRate(uint16 spell_id, Mob* caster = nullptr);
 	int32 GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining);
 	int32 GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill = false, uint16 skill=0);
+	int32 GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id);
 	int16 GetSkillDmgTaken(const SkillUseTypes skill_used);
 	void DoKnockback(Mob *caster, uint32 pushback, uint32 pushup);
 	int16 CalcResistChanceBonus();
@@ -574,7 +574,7 @@ public:
 	bool DoHPToManaCovert(uint16 mana_cost = 0);
 	int32 ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard = false);
 	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect); 
-	int32 GetExtraSpellDmg(uint16 spell_id, int32 extra_spell_dmg, int32 base_spell_dmg);
+	int32 GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg);
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
