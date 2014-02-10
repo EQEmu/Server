@@ -385,16 +385,6 @@ Mob::Mob(const char* in_name,
 
 Mob::~Mob()
 {
-	// Our Entity ID is set to 0 in NPC::Death. This leads to mobs hanging around for a while in
-	// the entity list, even after they have been destroyed. Use our memory pointer to remove the mob
-	// if our EntityID is 0.
-	//
-	/*if(GetID() > 0)
-		entity_list.RemoveMob(GetID());
-
-	else
-		entity_list.RemoveMob(this);*/
-
 	AI_Stop();
 	if (GetPet()) {
 		if (GetPet()->Charmed())
@@ -402,7 +392,7 @@ Mob::~Mob()
 		else
 			SetPet(0);
 	}
-	
+
 	ClearSpecialAbilities();
 
 	EQApplicationPacket app;
