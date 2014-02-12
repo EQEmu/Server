@@ -88,6 +88,7 @@ public:
 		BotfocusBlockNextSpell,
 		BotfocusFcHealPctIncoming,
 		BotfocusFcDamageAmtIncoming,
+		BotfocusFcHealAmtIncoming,
 		BotfocusFcBaseEffects,
 		BotfocusIncreaseNumHits,
 		BotfocusFcHealPctCritIncoming,
@@ -301,8 +302,8 @@ public:
 
 	// Mob Spell Virtual Override Methods
 	virtual void SpellProcess();
-	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target == nullptr);
-	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target == nullptr);
+	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
+	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
 	virtual float GetActSpellRange(uint16 spell_id, float range);

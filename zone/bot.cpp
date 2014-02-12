@@ -7010,37 +7010,30 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 			}
 
-			case SE_CriticalHealRate:
-			{
-				if (type == focusCriticalHealRate)
+			case SE_FcHealAmtIncoming:
+				if(type == focusFcHealAmtIncoming)
 					value = base1;
-
 				break;
-			}
 
-			case SE_AdditionalHeal:
-			{
-				if(type == focusAdditionalHeal)
+			case SE_FcHealPctCritIncoming:
+				if (type == focusFcHealPctCritIncoming)
 					value = base1;
-
 				break;
-			}
 
-			case SE_AdditionalHeal2:
-			{
-				if(type == focusAdditionalHeal2)
+			case SE_FcHealAmtCrit:
+				if(type == focusFcHealAmtCrit)
 					value = base1;
-
 				break;
-			}
 
-			case SE_HealRate2:
-			{
-				if(type == focusHealRate)
+			case  SE_FcHealAmt:
+				if(type == focusFcHealAmt)
 					value = base1;
-
 				break;
-			}
+
+			case SE_FcHealPctIncoming:
+				if(type == focusFcHealPctIncoming)
+					value = base1;
+				break;
 
 			case SE_FcBaseEffects:
 			{
@@ -7660,45 +7653,30 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 			break;
 		}
 
-		case SE_FcDamageAmtIncoming:
-		{
-			if(bottype == BotfocusFcDamageAmtIncoming)
+		case SE_FcHealAmtIncoming:
+			if(bottype == BotfocusFcHealAmtIncoming)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
-		case SE_CriticalHealRate:
-		{
-			if (bottype == BotfocusCriticalHealRate)
+		case SE_FcHealPctCritIncoming:
+			if (bottype == BotfocusFcHealPctCritIncoming)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
-		case SE_AdditionalHeal:
-		{
-			if(bottype == BotfocusAdditionalHeal)
+		case SE_FcHealAmtCrit:
+			if(bottype == BotfocusFcHealAmtCrit)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
-		case SE_AdditionalHeal2:
-		{
-			if(bottype == BotfocusAdditionalHeal2)
+		case  SE_FcHealAmt:
+			if(bottype == BotfocusFcHealAmt)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
-		case SE_HealRate2:
-		{
-			if(bottype == BotfocusHealRate)
+		case SE_FcHealPctIncoming:
+			if(bottype == BotfocusFcHealPctIncoming)
 				value = focus_spell.base[i];
-
 			break;
-		}
 
 		case SE_FcBaseEffects:
 		{
@@ -9178,7 +9156,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 			value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id); 
 
-			if(itembonuses.SpellDmg && spells[spell_id].classes[(botclass%16) - 1] >= botlevel - 5)
+			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 				value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
 			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
@@ -9202,7 +9180,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	 value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id); 
 	 
-	if(itembonuses.SpellDmg && spells[spell_id].classes[(botclass%16) - 1] >= botlevel - 5)
+	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
          value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value); 
 
 	return value;
@@ -9229,7 +9207,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance; 
 
-		chance += target->GetBotFocusIncoming(BotfocusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
 						
 		if (spellbonuses.CriticalHealDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay); 
@@ -9242,9 +9220,9 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value *= modifier;
 		value += GetBotFocusEffect(BotfocusFcHealAmtCrit, spell_id) * modifier; 
 		value += GetBotFocusEffect(BotfocusFcHealAmt, spell_id); 
-		value += target->GetBotFocusIncoming(BotfocusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
-	
-		if(itembonuses.HealAmt && spells[spell_id].classes[(botclass%16) - 1] >= botlevel - 5)
+		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
+
+		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
 
 		value += value*target->GetHealRate(spell_id, this)/100; 
@@ -9260,7 +9238,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		
 		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime; 
 
-		chance += target->GetBotFocusIncoming(BotfocusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
 		
 		if (spellbonuses.CriticalRegenDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
