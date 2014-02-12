@@ -21,13 +21,29 @@
 #define FLAG_COMPRESSED	0x01
 #define FLAG_ENCODED	0x04
 
-#define RATEBASE	1048576 // 1 MB
-#define DECAYBASE	78642	// RATEBASE/10
+#ifndef RATEBASE
+#define RATEBASE	1048576
+#endif
 
+#ifndef DECAYBASE
+#define DECAYBASE	78642
+#endif
+
+#ifndef RETRANSMIT_TIMEOUT_MULT
 #define RETRANSMIT_TIMEOUT_MULT 3.0
+#endif
+
+#ifndef RETRANSMIT_TIMEOUT_MAX
 #define RETRANSMIT_TIMEOUT_MAX 5000
+#endif
+
+#ifndef AVERAGE_DELTA_MAX
 #define AVERAGE_DELTA_MAX 2500
+#endif
+
+#ifndef RETRANSMIT_ACKED_PACKETS
 #define RETRANSMIT_ACKED_PACKETS true
+#endif
 
 #pragma pack(1)
 struct SessionRequest {
@@ -62,9 +78,6 @@ struct SessionStats {
 #pragma pack()
 
 class OpcodeManager;
-//extern OpcodeManager *EQNetworkOpcodeManager;
-
-//class EQStreamFactory;
 class EQStreamPair;
 class EQRawApplicationPacket;
 
@@ -142,8 +155,6 @@ class EQStream : public EQStreamInterface {
 
 		OpcodeManager **OpMgr;
 
-//		EQStreamFactory *const Factory;
-
 		EQRawApplicationPacket *MakeApplicationPacket(EQProtocolPacket *p);
 		EQRawApplicationPacket *MakeApplicationPacket(const unsigned char *buf, uint32 len);
 		EQProtocolPacket *MakeProtocolPacket(const unsigned char *buf, uint32 len);
@@ -167,8 +178,6 @@ class EQStream : public EQStreamInterface {
 		void SetSession(uint32 s) { Session=s; }
 
 		void ProcessPacket(EQProtocolPacket *p);
-//		virtual void DispatchPacket(EQApplicationPacket *p) { p->DumpRaw(); }
-
 
 		bool Stale(uint32 now, uint32 timeout=30) { return (LastPacket && (now-LastPacket) > timeout); }
 
@@ -190,7 +199,6 @@ class EQStream : public EQStreamInterface {
 		EQStream() { init(); remote_ip = 0; remote_port = 0; State=UNESTABLISHED; StreamType=UnknownStream; compressed=true; encoded=false; app_opcode_size=2; bytes_sent=0; bytes_recv=0; create_time=Timer::GetTimeSeconds(); }
 		EQStream(sockaddr_in addr) { init(); remote_ip=addr.sin_addr.s_addr; remote_port=addr.sin_port; State=UNESTABLISHED; StreamType=UnknownStream; compressed=true; encoded=false; app_opcode_size=2; bytes_sent=0; bytes_recv=0; create_time=Timer::GetTimeSeconds(); }
 		virtual ~EQStream() { RemoveData(); SetState(CLOSED); }
-//		inline void SetFactory(EQStreamFactory *f) { Factory=f; }
 		void SetMaxLen(uint32 length) { MaxLen=length; }
 
 		//interface used by application (EQStreamInterface)
@@ -219,10 +227,8 @@ class EQStream : public EQStreamInterface {
 
 		inline EQStreamState GetState() { EQStreamState s; MState.lock(); s=State; MState.unlock(); return s; }
 
-//		static EQProtocolPacket *Read(int eq_fd, sockaddr_in *from);
 		static SeqOrder CompareSequence(uint16 expected_seq , uint16 seq);
 
-//		void Close() { SendDisconnect(); }
 		bool CheckActive() { return GetState()==ESTABLISHED; }
 		bool CheckClosed() { return GetState()==CLOSED; }
 		void SetOpcodeSize(uint8 s) { app_opcode_size = s; }
