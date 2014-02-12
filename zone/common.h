@@ -121,7 +121,8 @@ enum {
 	LEASH = 32,
 	TETHER = 33,
 	DESTRUCTIBLE_OBJECT = 34,
-	NO_HARM_FROM_CLIENT = 35
+	NO_HARM_FROM_CLIENT = 35,
+	MAX_SPECIAL_ATTACK = 36
 };
 
 typedef enum {	//fear states

@@ -40,6 +40,18 @@ public:
 	enum eStandingPetOrder { SPO_Follow, SPO_Sit, SPO_Guard };
 
 	struct SpecialAbility {
+		SpecialAbility() {
+			level = 0;
+			timer = nullptr;
+			for(int i = 0; i < MAX_SPECIAL_ATTACK_PARAMS; ++i) {
+				params[i] = 0;
+			}
+		}
+
+		~SpecialAbility() {
+			safe_delete(timer);
+		}
+
 		int level;
 		Timer *timer;
 		int params[MAX_SPECIAL_ATTACK_PARAMS];
@@ -1177,7 +1189,7 @@ protected:
 	void InsertQuestGlobal(int charid, int npcid, int zoneid, const char *name, const char *value, int expdate);
 	uint16 emoteid;
 
-	std::map<int, SpecialAbility> SpecialAbilities;
+	SpecialAbility SpecialAbilities[MAX_SPECIAL_ATTACK];
 	bool bEnraged;
 	bool destructibleobject;
 

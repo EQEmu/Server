@@ -393,8 +393,6 @@ Mob::~Mob()
 			SetPet(0);
 	}
 
-	ClearSpecialAbilities();
-
 	EQApplicationPacket app;
 	CreateDespawnPacket(&app, !IsCorpse());
 	Corpse* corpse = entity_list.GetCorpseByID(GetID());
@@ -4879,111 +4877,74 @@ bool Mob::HasSpellEffect(int effectid)
 }
 
 int Mob::GetSpecialAbility(int ability) {
-	if (SpecialAbilities.count(ability))
-		return SpecialAbilities.at(ability).level;
-	return 0;
-}
-
-int Mob::GetSpecialAbilityParam(int ability, int param) {
-	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0) {
+	if(ability >= MAX_SPECIAL_ATTACK || ability < 0) {
 		return 0;
 	}
 
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		return iter->second.params[param];
+	return SpecialAbilities[ability].level;
+}
+
+int Mob::GetSpecialAbilityParam(int ability, int param) {
+	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0 || ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return 0;
 	}
 
-	return 0;
+	return SpecialAbilities[ability].params[param];
 }
 
 void Mob::SetSpecialAbility(int ability, int level) {
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		SpecialAbility spec = iter->second;
-		spec.level = level;
-		SpecialAbilities[ability] = spec;
-	} else {
-		SpecialAbility spec;
-		memset(&spec, 0, sizeof spec);
-		spec.level = level;
-		spec.timer = nullptr;
-		SpecialAbilities[ability] = spec;
-	}
-}
-
-void Mob::SetSpecialAbilityParam(int ability, int param, int value) {
-	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0) {
+	if(ability >= MAX_SPECIAL_ATTACK || ability < 0) {
 		return;
 	}
 
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		SpecialAbility spec = iter->second;
-		spec.params[param] = value;
-		SpecialAbilities[ability] = spec;
-	} else {
-		SpecialAbility spec;
-		memset(&spec, 0, sizeof spec);
-		spec.params[param] = value;
-		spec.timer = nullptr;
-		SpecialAbilities[ability] = spec;
+	SpecialAbilities[ability].level = level;
+}
+
+void Mob::SetSpecialAbilityParam(int ability, int param, int value) {
+	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0 || ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return;
 	}
+
+	SpecialAbilities[ability].params[param] = value;
 }
 
 void Mob::StartSpecialAbilityTimer(int ability, uint32 time) {
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		SpecialAbility spec = iter->second;
-		if(spec.timer) {
-			spec.timer->Start(time);
-		} else {
-			spec.timer = new Timer(time);
-			spec.timer->Start();
-		}
+	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return;
+	}
 
-		SpecialAbilities[ability] = spec;
+	if(SpecialAbilities[ability].timer) {
+		SpecialAbilities[ability].timer->Start(time);
 	} else {
-		SpecialAbility spec;
-		memset(&spec, 0, sizeof spec);
-		spec.timer = new Timer(time);
-		spec.timer->Start();
-		SpecialAbilities[ability] = spec;
+		SpecialAbilities[ability].timer = new Timer(time);
+		SpecialAbilities[ability].timer->Start();
 	}
 }
 
 void Mob::StopSpecialAbilityTimer(int ability) {
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		SpecialAbility spec = iter->second;
-		if(spec.timer) {
-			delete spec.timer;
-			spec.timer = nullptr;
-		}
-
-		SpecialAbilities[ability] = spec;
+	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return;
 	}
+
+	safe_delete(SpecialAbilities[ability].timer);
 }
 
 Timer *Mob::GetSpecialAbilityTimer(int ability) {
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		return iter->second.timer;
+	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return nullptr;
 	}
 
-	return nullptr;
+	return SpecialAbilities[ability].timer;
 }
 
 void Mob::ClearSpecialAbilities() {
-	auto iter = SpecialAbilities.begin();
-	while(iter != SpecialAbilities.end()) {
-		if(iter->second.timer) {
-			delete iter->second.timer;
+	for(int a = 0; a < MAX_SPECIAL_ATTACK; ++a) {
+		SpecialAbilities[a].level = 0;
+		safe_delete(SpecialAbilities[a].timer);
+		for(int p = 0; p < MAX_SPECIAL_ATTACK_PARAMS; ++p) {
+			SpecialAbilities[a].params[p] = 0;
 		}
-		++iter;
 	}
-
-	SpecialAbilities.clear();
 }
 
 void Mob::ProcessSpecialAbilities(const std::string str) {
