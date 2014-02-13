@@ -268,6 +268,9 @@ Mob *HateList::GetTop(Mob *center)
 	Mob* top = nullptr;
 	int32 hate = -1;
 
+	if(center == nullptr)
+		return nullptr;
+
 	if (RuleB(Aggro,SmartAggroList)){
 		Mob* topClientTypeInRange = nullptr;
 		int32 hateClientTypeInRange = -1;
@@ -380,15 +383,15 @@ Mob *HateList::GetTop(Mob *center)
 			}
 
 			if(!isTopClientType)
-				return topClientTypeInRange;
+				return topClientTypeInRange ? topClientTypeInRange : nullptr;
 
-			return top;
+			return top ? top : nullptr;
 		}
 		else {
 			if(top == nullptr && skipped_count > 0) {
-				return center->GetTarget();
+				return center->GetTarget() ? center->GetTarget() : nullptr;
 			}
-			return top;
+			return top ? top : nullptr;
 		}
 	}
 	else{
@@ -413,10 +416,11 @@ Mob *HateList::GetTop(Mob *center)
 			++iterator;
 		}
 		if(top == nullptr && skipped_count > 0) {
-			return center->GetTarget();
+			return center->GetTarget() ? center->GetTarget() : nullptr;
 		}
-		return top;
+		return top ? top : nullptr;
 	}
+	return nullptr;
 }
 
 Mob *HateList::GetMostHate(){

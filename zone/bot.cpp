@@ -16351,7 +16351,7 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 	std::string WindowText;
 	int LastCon = -1;
 	int CurrentCon = 0;
-	Mob* curMob = NULL;
+	Mob* curMob = nullptr;
 
 	uint32 array_counter = 0;
 
