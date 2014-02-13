@@ -1216,6 +1216,18 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_HealRate:
 				newbon->HealRate += base1;
 				break;
+
+			case SE_MeleeLifetap:
+			{
+
+				if((base1 < 0) && (newbon->MeleeLifetap > base1))
+					newbon->MeleeLifetap = base1;
+
+				else if(newbon->MeleeLifetap < base1)
+					newbon->MeleeLifetap = base1;
+				break;
+			}
+
 		}
 	}
 }
@@ -1230,8 +1242,12 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 
 	uint32 buff_count = GetMaxTotalSlots();
 	for(i = 0; i < buff_count; i++) {
-		if(buffs[i].spellid != SPELL_UNKNOWN)
+		if(buffs[i].spellid != SPELL_UNKNOWN){
 			ApplySpellsBonuses(buffs[i].spellid, buffs[i].casterlevel, newbon, buffs[i].casterid, false, buffs[i].ticsremaining,i);
+
+			if (buffs[i].numhits > 0)
+				Numhits(true);
+		}
 	}
 
 	//Removes the spell bonuses that are effected by a 'negate' debuff.
@@ -1750,7 +1766,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				else if((effect_value < 0) && (newbon->MeleeLifetap > effect_value))
 					newbon->MeleeLifetap = spells[spell_id].base[i];
 
-				if(newbon->MeleeLifetap < spells[spell_id].base[i])
+				else if(newbon->MeleeLifetap < spells[spell_id].base[i])
 					newbon->MeleeLifetap = spells[spell_id].base[i];
 				break;
 			}
