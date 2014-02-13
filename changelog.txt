@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/13/2014 ==
+Sorvani: Renamed the instance_lockout and instance_lockout_player tables to instance_list and instance_list_player. Cleaned up the Database::GetUnusedInstanceID logic.
+
+Required SQL: utils/sql/git/2014_02_13_Rename_instance_lockout_tables.sql
+
 == 02/10/2014 ==
 demonstar55 (Secrets): Re-wrote the entity list to be a std::map. This should be used for direct entityID lookups and is noticably faster performance-wise. Also should result in less nil pointers potentially.
 Secrets: Fixed a crash issue that could occur on #repop related to quest timers.
