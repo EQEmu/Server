@@ -36,6 +36,7 @@
 #define EFFECT_COUNT 12
 #define MAX_SPELL_TRIGGER 12	// One for each slot(only 6 for AA since AA use 2)
 #define MAX_RESISTABLE_EFFECTS 12	// Number of effects that are typcially checked agianst resists.
+#define MaxLimitInclude 12 //Number(x 0.5) of focus Limiters that have inclusive checksm used when calcing focus effects
 
 const int Z_AGGRO=10;
 
@@ -289,8 +290,8 @@ typedef enum {
 #define SE_LimitMinDur					140 // implemented
 #define SE_LimitInstant					141 // implemented
 #define SE_LimitMinLevel				142 // implemented
-#define SE_LimitCastTime				143 // implemented
-#define SE_FfCastTimeMax				144	// not used
+#define SE_LimitCastTimeMin				143 // implemented
+#define SE_LimitCastTimeMax				144	// implemented (*not used in any known live spell)
 #define SE_Teleport2					145	// implemented - Banishment of the Pantheon
 #define SE_ElectricityResist			146	// *not implemented (Lightning Rod: 23233) 
 #define SE_PercentalHeal				147 // implemented
@@ -442,7 +443,7 @@ typedef enum {
 #define SE_FrontalStunResist			293	// implemented[AA] - Reduce chance to be stunned from front.
 #define SE_CriticalSpellChance			294 // implemented - increase chance to critical hit and critical damage modifier.
 //#define SE_ReduceTimerSpecial			295	// not used
-#define SE_SpellVulnerability			296	// implemented - increase in incoming spell damage
+#define SE_FcSpellVulnerability			296	// implemented - increase in incoming spell damage
 #define SE_FcDamageAmtIncoming			297 // implemented - debuff that adds points damage to spells cast on target (focus effect).
 #define SE_ChangeHeight					298	// implemented
 #define SE_WakeTheDead					299	// implemented
@@ -457,7 +458,7 @@ typedef enum {
 #define SE_SuspendMinion				308 // not implemented as bonus
 #define SE_YetAnotherGate				309 // implemented
 #define SE_ReduceReuseTimer				310 // implemented
-#define SE_CombatSkills					311 // implemented
+#define SE_LimitCombatSkills			311 // implemented - Excludes focus from procs (except if proc is a memorizable spell)
 #define SE_Sanctuary					312 // *not implemented
 #define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
 #define SE_Invisibility2				314 // implemented - fixed duration invisible
@@ -494,7 +495,7 @@ typedef enum {
 #define SE_AssassinationLevel			345	// not implemented as bonus - AA Assisination max level to kill
 #define SE_HeadShotLevel				346	// not implemented as bonus - AA HeadShot max level to kill
 #define SE_DoubleRangedAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
-#define SE_LimitManaCost				348	// implemented
+#define SE_LimitManaMin					348	// implemented
 #define SE_ShieldEquipHateMod			349	// implemented[AA] Increase melee hate when wearing a shield.
 #define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
 #define SE_PersistentEffect				351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
@@ -535,22 +536,22 @@ typedef enum {
 #define SE_CastOnCurer					386 // implemented - Casts a spell on the person curing
 #define SE_CastOnCure					387 // implemented - Casts a spell on the cured person
 #define SE_SummonCorpseZone				388 // *not implemented - summons a corpse from any zone(nec AA)
-#define SE_Forceful_Rejuv				389 // Refresh spell icons
-#define SE_SetRecastTimer				390 // *not implemented - Sets recast timers to specific value, focus limited.
-#define SE_IncreaseHitDmgTaken			391	// implemented - Most likely a simple negative mitigation modifier (Warlords fury: 23528) 
-#define SE_AdditionalHeal2				392 // implemented - Adds or removes healing from spells
-#define SE_HealRate2					393 // implemented - HealRate with focus restrictions.
+#define SE_FcTimerRefresh				389 // implemented - Refresh spell icons
+#define SE_FcTimerLockout				390 // *not implemented - Sets recast timers to specific value, focus limited.
+#define SE_LimitManaMax					391	// implemented 
+#define SE_FcHealAmt					392 // implemented - Adds or removes healing from spells
+#define SE_FcHealPctIncoming			393 // implemented - HealRate with focus restrictions.
 #define SE_FcHealAmtIncoming			394 // implemented - Adds/Removes amount of healing on target by X value with foucs restrictions.
-#define SE_CriticalHealRate				395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
-#define SE_AdditionalHeal				396 // implemented - Adds a direct healing amount to spells
+#define SE_FcHealPctCritIncoming		395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
+#define SE_FcHealAmtCrit				396 // implemented - Adds a direct healing amount to spells
 #define SE_PetMeleeMitigation			397 // *not implemented[AA] - additional mitigation to your pets.
 #define SE_SwarmPetDuration				398 // implemented - Affects the duration of swarm pets
-#define SE_Twincast						399 // implemented - cast 2 spells for every 1
+#define SE_FcTwincast					399 // implemented - cast 2 spells for every 1
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
 #define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
 #define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
-#define SE_Ff_SpellClass				403 // *not implemented -
-#define SE_LimitExcludeSkill			404 // implemented - Limit a focus to exclude spells cast using a specific skill.
+#define SE_LimitSpellClass				403 // *not implemented - unclear what this refers too (not 'right click' spell bar)
+#define SE_LimitSpellSubclass			404 // *not implemented - unclear what this refers too (not 'right click' spell bar)
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
 #define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied) 
@@ -560,16 +561,16 @@ typedef enum {
 #define SE_LimitClass					411 // implemented - Limits to spells of a certain class (Note: The class value in dbase is +1 in relation to item class value)
 #define SE_LimitRace					412 // implemented - Limits to spells cast by a certain race (Note: not used in any known live spells)
 #define SE_FcBaseEffects				413 // implemented - Increases the power of bard songs, skill attacks, runes, bard allowed foci, damage/heal
-#define SE_LimitSpellSkill				414 // implemented - Limit a focus to include spells cast using a specific skill.
+#define SE_LimitCastingSkill			414 // implemented - Limit a focus to include spells cast using a specific skill.
 //#define SE_FFItemClass				415 // not used
 #define SE_ACv2							416 // implemented - New AC spell effect
 #define SE_ManaRegen_v2					417 // implemented - New mana regen effect
 #define SE_SkillDamageAmount2			418 // implemented - adds skill damage directly to certain attacks
 #define SE_AddMeleeProc					419 // implemented - Adds a proc
 #define SE_FcLimitUse					420 // implemented - increases numhits count by percent (Note: not used in any known live spells)
-#define SE_IncreaseNumHits				421 // implemented[AA] - increases number of hits a buff has till fade. (focus)
-#define SE_FfLimitUseMin				422 // implemented - limit a focus to require a min amount of numhits value (used with above)
-#define SE_FfLimitUseType				423 // implemented	- limit a focus to require a certain numhits type 
+#define SE_FcIncreaseNumHits			421 // implemented[AA] - increases number of hits a buff has till fade. (focus)
+#define SE_LimitUseMin					422 // implemented - limit a focus to require a min amount of numhits value (used with above)
+#define SE_LimitUseType					423 // implemented	- limit a focus to require a certain numhits type 
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
 #define SE_Display						425 // *not implemented - Illusion: Flying Dragon(21626)
 #define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window

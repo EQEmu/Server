@@ -2689,7 +2689,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			effect1 == SE_LimitMinDur ||
 			effect1 == SE_LimitInstant ||
 			effect1 == SE_LimitMinLevel ||
-			effect1 == SE_LimitCastTime)
+			effect1 == SE_LimitCastTimeMin)
 			continue;
 
 		/*

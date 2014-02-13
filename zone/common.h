@@ -71,19 +71,20 @@ typedef enum {	//focus types
 	focusSwarmPetDuration,
 	focusReduceRecastTime,
 	focusBlockNextSpell,
-	focusHealRate,
+	focusFcHealPctIncoming,
 	focusFcDamageAmtIncoming,
 	focusFcHealAmtIncoming,
 	focusFcBaseEffects,
 	focusIncreaseNumHits,
 	focusFcLimitUse,
 	focusFcMute,
+	focusFcTimerRefresh,
 	focusFcStunTimeMod,
-	focusCriticalHealRate,
-	focusAdditionalHeal2,
-	focusAdditionalHeal,
+	focusFcHealPctCritIncoming,
+	focusFcHealAmt,
+	focusFcHealAmtCrit,
 } focusType; //Any new FocusType needs to be added to the Mob::IsFocus function
-#define HIGHEST_FOCUS	focusAdditionalHeal //Should always be last focusType in enum
+#define HIGHEST_FOCUS	focusFcHealAmtCrit //Should always be last focusType in enum
 
 enum {
 	SPECATK_SUMMON = 1,
@@ -120,7 +121,8 @@ enum {
 	LEASH = 32,
 	TETHER = 33,
 	DESTRUCTIBLE_OBJECT = 34,
-	NO_HARM_FROM_CLIENT = 35
+	NO_HARM_FROM_CLIENT = 35,
+	MAX_SPECIAL_ATTACK = 36
 };
 
 typedef enum {	//fear states

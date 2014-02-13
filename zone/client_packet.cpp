@@ -7361,6 +7361,8 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 
 	// Calculate new packet dimensions
 	Emote_Struct* in	= (Emote_Struct*)app->pBuffer;
+	in->message[1023] = '\0';
+
 	const char* name	= GetName();
 	uint32 len_name		= strlen(name);
 	uint32 len_msg		= strlen(in->message);
@@ -11624,6 +11626,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	}
 
 	GMSearchCorpse_Struct *gmscs = (GMSearchCorpse_Struct *)app->pBuffer;
+	gmscs->Name[63] = '\0';
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* Query = 0;

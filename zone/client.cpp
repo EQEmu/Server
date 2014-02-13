@@ -427,7 +427,6 @@ Client::~Client() {
 	eqs->Close();
 	eqs->ReleaseFromUse();
 
-	//entity_list.RemoveClient(this);
 	UninitializeBuffSlots();
 }
 
@@ -1083,10 +1082,12 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	{
 		// Emotes for Underfoot and later.
 		// crash protection -- cheater
-		if (strlen(message) > 512)
+		message[1023] = '\0';
+		size_t msg_len = strlen(message);
+		if (msg_len > 512)
 			message[512] = '\0';
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Emote, 4 + strlen(message) + strlen(GetName()) + 2);
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Emote, 4 + msg_len + strlen(GetName()) + 2);
 		Emote_Struct* es = (Emote_Struct*)outapp->pBuffer;
 		char *Buffer = (char *)es;
 		Buffer += 4;

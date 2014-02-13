@@ -385,16 +385,6 @@ Mob::Mob(const char* in_name,
 
 Mob::~Mob()
 {
-	// Our Entity ID is set to 0 in NPC::Death. This leads to mobs hanging around for a while in
-	// the entity list, even after they have been destroyed. Use our memory pointer to remove the mob
-	// if our EntityID is 0.
-	//
-	/*if(GetID() > 0)
-		entity_list.RemoveMob(GetID());
-
-	else
-		entity_list.RemoveMob(this);*/
-
 	AI_Stop();
 	if (GetPet()) {
 		if (GetPet()->Charmed())
@@ -402,8 +392,6 @@ Mob::~Mob()
 		else
 			SetPet(0);
 	}
-	
-	ClearSpecialAbilities();
 
 	EQApplicationPacket app;
 	CreateDespawnPacket(&app, !IsCorpse());
@@ -3336,7 +3324,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 		int buff_count = GetMaxTotalSlots();
 		for(int i = 0; i < buff_count; i++)
 		{
-			if(IsEffectInSpell(buffs[i].spellid, SE_Twincast))
+			if(IsEffectInSpell(buffs[i].spellid, SE_FcTwincast))
 			{
 				int32 focus = CalcFocusEffect(focusTwincast, buffs[i].spellid, spell_id);
 				if(focus > 0)
@@ -3378,7 +3366,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		int buff_count = GetMaxTotalSlots();
 		for(int i = 0; i < buff_count; i++) {
 
-			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_SpellVulnerability))){
+			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_FcSpellVulnerability))){
 
 				int32 focus = caster->CalcFocusEffect(focusSpellVulnerability, buffs[i].spellid, spell_id);
 
@@ -3429,35 +3417,17 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	return skilldmg_mod;
 }
 
-int16 Mob::GetHealRate(uint16 spell_id)
-{
-	Mob* target = GetTarget();
-
+int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
+	
 	int16 heal_rate = 0;
 
-	if (target){
-		heal_rate = target->itembonuses.HealRate + target->spellbonuses.HealRate;
+	heal_rate += itembonuses.HealRate + spellbonuses.HealRate + aabonuses.HealRate; 
+	heal_rate += GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, caster, spell_id); 
 
-		if (target->IsClient())
-			heal_rate += target->CastToClient()->GetFocusEffect(focusHealRate, spell_id);
-
-		if(heal_rate < -99)
-			heal_rate = -99;
-	}
-
+	if(heal_rate < -99)
+		heal_rate = -99;
+	
 	return heal_rate;
-}
-
-int16 Mob::GetCriticalHealRate(uint16 spell_id)
-{
-	Mob* target = GetTarget();
-
-	int16 critical_heal_rate = 0;
-
-	if (target && target->IsClient())
-		critical_heal_rate = target->CastToClient()->GetFocusEffect(focusCriticalHealRate, spell_id);
-
-	return critical_heal_rate;
 }
 
 bool Mob::TryFadeEffect(int slot)
@@ -4669,7 +4639,7 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 	if (!IsValidSpell(spell_id))
 		return false;
 
-	int spell_level = spells[spell_id].classes[(GetClass()%16) - 1];
+	int spell_level = spells[spell_id].classes[(GetClass()%16) - 1]; 
 	int effect_value = 0;
 	int lvlModifier = 100;
 
@@ -4679,15 +4649,15 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 			for (int i = 0; i < EFFECT_COUNT; i++){
 				if(spells[buffs[slot].spellid].effectid[i] == spelleffect) {
 					
-					int critchance = spells[buffs[slot].spellid].base[i];
+					int critchance = spells[buffs[slot].spellid].base[i]; 
 					int decay = spells[buffs[slot].spellid].base2[i];
-					int lvldiff = spell_level - spells[buffs[slot].spellid].max[i];
+					int lvldiff = spell_level - spells[buffs[slot].spellid].max[i]; 
 					
 					if(lvldiff > 0 && decay > 0)
 					{
-						lvlModifier -= decay*lvldiff;
+						lvlModifier -= decay*lvldiff; 
 						if (lvlModifier > 0){
-							critchance = (critchance*lvlModifier)/100;
+							critchance = (critchance*lvlModifier)/100; 
 							effect_value += critchance;
 						}
 					}
@@ -4907,111 +4877,74 @@ bool Mob::HasSpellEffect(int effectid)
 }
 
 int Mob::GetSpecialAbility(int ability) {
-	if (SpecialAbilities.count(ability))
-		return SpecialAbilities.at(ability).level;
-	return 0;
-}
-
-int Mob::GetSpecialAbilityParam(int ability, int param) {
-	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0) {
+	if(ability >= MAX_SPECIAL_ATTACK || ability < 0) {
 		return 0;
 	}
 
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		return iter->second.params[param];
+	return SpecialAbilities[ability].level;
+}
+
+int Mob::GetSpecialAbilityParam(int ability, int param) {
+	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0 || ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return 0;
 	}
 
-	return 0;
+	return SpecialAbilities[ability].params[param];
 }
 
 void Mob::SetSpecialAbility(int ability, int level) {
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		SpecialAbility spec = iter->second;
-		spec.level = level;
-		SpecialAbilities[ability] = spec;
-	} else {
-		SpecialAbility spec;
-		memset(&spec, 0, sizeof spec);
-		spec.level = level;
-		spec.timer = nullptr;
-		SpecialAbilities[ability] = spec;
-	}
-}
-
-void Mob::SetSpecialAbilityParam(int ability, int param, int value) {
-	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0) {
+	if(ability >= MAX_SPECIAL_ATTACK || ability < 0) {
 		return;
 	}
 
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		SpecialAbility spec = iter->second;
-		spec.params[param] = value;
-		SpecialAbilities[ability] = spec;
-	} else {
-		SpecialAbility spec;
-		memset(&spec, 0, sizeof spec);
-		spec.params[param] = value;
-		spec.timer = nullptr;
-		SpecialAbilities[ability] = spec;
+	SpecialAbilities[ability].level = level;
+}
+
+void Mob::SetSpecialAbilityParam(int ability, int param, int value) {
+	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0 || ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return;
 	}
+
+	SpecialAbilities[ability].params[param] = value;
 }
 
 void Mob::StartSpecialAbilityTimer(int ability, uint32 time) {
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		SpecialAbility spec = iter->second;
-		if(spec.timer) {
-			spec.timer->Start(time);
-		} else {
-			spec.timer = new Timer(time);
-			spec.timer->Start();
-		}
+	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return;
+	}
 
-		SpecialAbilities[ability] = spec;
+	if(SpecialAbilities[ability].timer) {
+		SpecialAbilities[ability].timer->Start(time);
 	} else {
-		SpecialAbility spec;
-		memset(&spec, 0, sizeof spec);
-		spec.timer = new Timer(time);
-		spec.timer->Start();
-		SpecialAbilities[ability] = spec;
+		SpecialAbilities[ability].timer = new Timer(time);
+		SpecialAbilities[ability].timer->Start();
 	}
 }
 
 void Mob::StopSpecialAbilityTimer(int ability) {
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		SpecialAbility spec = iter->second;
-		if(spec.timer) {
-			delete spec.timer;
-			spec.timer = nullptr;
-		}
-
-		SpecialAbilities[ability] = spec;
+	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return;
 	}
+
+	safe_delete(SpecialAbilities[ability].timer);
 }
 
 Timer *Mob::GetSpecialAbilityTimer(int ability) {
-	auto iter = SpecialAbilities.find(ability);
-	if(iter != SpecialAbilities.end()) {
-		return iter->second.timer;
+	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+		return nullptr;
 	}
 
-	return nullptr;
+	return SpecialAbilities[ability].timer;
 }
 
 void Mob::ClearSpecialAbilities() {
-	auto iter = SpecialAbilities.begin();
-	while(iter != SpecialAbilities.end()) {
-		if(iter->second.timer) {
-			delete iter->second.timer;
+	for(int a = 0; a < MAX_SPECIAL_ATTACK; ++a) {
+		SpecialAbilities[a].level = 0;
+		safe_delete(SpecialAbilities[a].timer);
+		for(int p = 0; p < MAX_SPECIAL_ATTACK_PARAMS; ++p) {
+			SpecialAbilities[a].params[p] = 0;
 		}
-		++iter;
 	}
-
-	SpecialAbilities.clear();
 }
 
 void Mob::ProcessSpecialAbilities(const std::string str) {
