@@ -476,6 +476,8 @@ int main(int argc, char** argv) {
 
 	entity_list.Clear();
 
+	parse->ClearInterfaces();
+
 #ifdef EMBPERL
  	safe_delete(perl_parser);
 #endif
@@ -496,7 +498,7 @@ int main(int argc, char** argv) {
 	dbasync->StopThread();
 	safe_delete(taskmanager);
 	command_deinit();
-
+	safe_delete(parse);
 	CheckEQEMuErrorAndPause();
 	_log(ZONE__INIT, "Proper zone shutdown complete.");
 	return 0;
