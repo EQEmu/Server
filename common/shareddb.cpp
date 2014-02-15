@@ -1704,7 +1704,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].ResistDiff=atoi(row[147]);
 			sp[tempid].dot_stacking_exempt=atoi(row[148]);
 			sp[tempid].RecourseLink = atoi(row[150]);
-			sp[tempid].no_partial_resist = atoi(row[161]) != 0;
+			sp[tempid].no_partial_resist = atoi(row[151]) != 0;
 
 			sp[tempid].short_buff_box = atoi(row[154]);
 			sp[tempid].descnum = atoi(row[155]);

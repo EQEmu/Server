@@ -4344,7 +4344,7 @@ bool Mob::TryReflectSpell(uint32 spell_id)
 	
 	int chance = itembonuses.reflect_chance + spellbonuses.reflect_chance + aabonuses.reflect_chance;
  	
-	if(MakeRandomInt(0, 99) < (GetTarget()->itembonuses.reflect_chance + GetTarget()->spellbonuses.reflect_chance))
+	if(chance && MakeRandomInt(0, 99) < chance)
 		return true;
 
 	return false;
