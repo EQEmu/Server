@@ -56,6 +56,7 @@ void EQStreamIdentifier::Process() {
 		//if stream hasn't finished initializing then continue;
 		if(r->stream->GetState() == UNESTABLISHED)
 		{
+			cur++;
 			continue;
 		}
 		if(r->stream->GetState() != ESTABLISHED) {
