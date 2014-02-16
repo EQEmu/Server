@@ -2484,9 +2484,9 @@ void ZoneDatabase::ListAllInstances(Client* c, uint32 charid)
 	MYSQL_ROW row;
 
 
-	if (RunQuery(query,MakeAnyLenString(&query, "SELECT instance_lockout.id, zone, version FROM instance_lockout JOIN"
-		" instance_lockout_player ON instance_lockout.id = instance_lockout_player.id"
-		" WHERE instance_lockout_player.charid=%lu", (unsigned long)charid),errbuf,&result))
+	if (RunQuery(query,MakeAnyLenString(&query, "SELECT instance_list.id, zone, version FROM instance_list JOIN"
+		" instance_list_player ON instance_list.id = instance_list_player.id"
+		" WHERE instance_list_player.charid=%lu", (unsigned long)charid),errbuf,&result))
 	{
 		safe_delete_array(query);
 

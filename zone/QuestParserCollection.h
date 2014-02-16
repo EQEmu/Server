@@ -39,7 +39,8 @@ public:
 	~QuestParserCollection();
 
 	void RegisterQuestInterface(QuestInterface *qi, std::string ext);
-
+	void UnRegisterQuestInterface(QuestInterface *qi, std::string ext);
+	void ClearInterfaces();
 	void AddVar(std::string name, std::string val);
 	void Init();
 	void ReloadQuests(bool reset_timers = true);
