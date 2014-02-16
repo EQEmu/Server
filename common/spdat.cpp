@@ -675,6 +675,20 @@ bool IsDiscipline(uint16 spell_id)
 	return false;
 }
 
+bool IsCombatSkill(uint16 spell_id)
+{
+	if (!IsValidSpell(spell_id))
+		return false;
+
+	//Check if Discipline OR melee proc (from non-castable spell)
+	if ((spells[spell_id].mana == 0 &&
+			(spells[spell_id].EndurCost || spells[spell_id].EndurUpkeep)) || 
+			((spells[spell_id].cast_time == 0) && (spells[spell_id].recast_time == 0) && (spells[spell_id].recovery_time == 0)))
+		return true;
+
+	return false;
+}
+
 bool IsResurrectionEffects(uint16 spell_id)
 {
 	// spell id 756 is Resurrection Effects spell

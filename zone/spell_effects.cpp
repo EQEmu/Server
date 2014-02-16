@@ -4026,13 +4026,12 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				}
 				break;
 
-
 			case SE_LimitCombatSkills:
-				if (base1 == 0){
-					if((spell.cast_time == 0) && (spell.recast_time == 0) && (spell.recovery_time == 0)) //Exclude procs
-						LimitFailure = true;
-				}
-				break;
+				if (base1 == 0 && IsCombatSkill(spell_id)) //Exclude Discs
+					LimitFailure = true;
+				else if (base1 == 1 && !IsCombatSkill(spell_id)) //Exclude Spells
+					LimitFailure = true;
+			break;
 
 			case SE_LimitSpellGroup:
 				if(base1 < 0) {
@@ -4429,10 +4428,10 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_LimitCombatSkills:
-			if (focus_spell.base[i] == 0){
-				if((spell.cast_time == 0) && (spell.recast_time == 0) && (spell.recovery_time == 0)) //Exclude procs
-					return 0;
-			}
+			if (focus_spell.base[i] == 0 && IsCombatSkill(spell_id)) //Exclude Disc
+				return 0;				
+			else if (focus_spell.base[i] == 1 && !IsCombatSkill(spell_id)) //Include Spells
+				return 0;
 			break;
 
 		case SE_LimitSpellGroup:

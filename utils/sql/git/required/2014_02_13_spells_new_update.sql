@@ -11,3 +11,7 @@ ALTER TABLE `spells_new` CHANGE `field214` `NotInCombat` INT(11) NOT NULL DEFAUL
 ALTER TABLE `spells_new` CHANGE `field168` `IsDiscipline` INT(11) NOT NULL DEFAULT '0';
 ALTER TABLE `spells_new` CHANGE `field211` `CastRestriction` INT(11) NOT NULL DEFAULT '0';
 
+UPDATE altadv_vars SET sof_next_id = 8261 WHERE skill_id = 8232;
+UPDATE altadv_vars SET sof_next_id = 0 WHERE skill_id = 8261;
+UPDATE altadv_vars SET sof_current_level = 3 WHERE skill_id = 8261;
+

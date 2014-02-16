@@ -800,6 +800,7 @@ int32 CalculateCorruptionCounters(uint16 spell_id);
 int32 CalculateCounters(uint16 spell_id);
 bool IsDisciplineBuff(uint16 spell_id);
 bool IsDiscipline(uint16 spell_id);
+bool IsCombatSkill(uint16 spell_id);
 bool IsResurrectionEffects(uint16 spell_id);
 bool IsRuneSpell(uint16 spell_id);
 bool IsMagicRuneSpell(uint16 spell_id);
