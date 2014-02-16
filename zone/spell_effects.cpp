@@ -183,7 +183,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			numhit += caster->CastToClient()->GetFocusEffect(focusIncreaseNumHits, spell_id);
 		}
 		
-		Numhits(true);
 		buffs[buffslot].numhits = numhit;
 	}
 
@@ -218,83 +217,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				int32 dmg = effect_value;
 				if(dmg < 0)
 				{
-
-					/*Special Cases where Base2 is defined
-					Range 105		: Plant
-					Range 120		: Undead
-					Range 123		: Humanoid
-					Range 190		: No Raid boss flag *not implemented
-					Range 191		: This spell will deal less damage to 'exceptionally strong targets' - Raid boss flag *not implemented
-					Range 201		: Damage if HP > 75%
-					Range 221 - 299	: Causing damage dependent on how many pets/swarmpets are attacking your target.
-					Range 300 - 303	: UNKOWN *not implemented
-					Range 399 - 499	: Heal if HP within a specified range (400 = 0-25% 401 = 25 - 35% 402 = 35-45% ect)
-					Range 500 - 599	: Heal if HP less than a specified value
-					Range 600 - 699	: Limit to Body Type [base2 - 600 = Body]
-					Range 818 - 819 : If Undead/If Not Undead
-					Range 835 -		: Unknown *not implemented
-					Range 836 -	837	: Progression Server / Live Server *not implemented
-					Range 839 -		: Unknown *not implemented
-					Range 10000+	: Limit to Race [base2 - 10000 = Race] (*Not on live: Too useful a function to not implement)
-						
-					*/
-							
-					if (spells[spell_id].base2[i] > 0){
-
-						//It is unlikely these effects would give a fail message (Need to confirm)
-						if (spells[spell_id].base2[i] == 105){
-							if (GetBodyType() != BT_Plant)
-								break;
-						}
-
-						else if (spells[spell_id].base2[i] == 120){
-							if (GetBodyType() != BT_Undead)
-								break;
-						}
-
-						else if (spells[spell_id].base2[i] == 123){
-							if (GetBodyType() != BT_Humanoid)
-								break;
-						}
-											
-						//Limit to Body Type.
-						else if (spells[spell_id].base2[i] >= 600 && spells[spell_id].base2[i] <= 699){
-							if (GetBodyType() != (spells[spell_id].base2[i] - 600)){
-								//caster->Message_StringID(13,CANNOT_AFFECT_NPC);
-								break;
-							}
-						}
-
-						else if (spells[spell_id].base2[i] == 201){
-							if (GetHPRatio() < 75)
-								break;
-						}
-
-						//Limit to Race. *Not implemented on live
-						else if (spells[spell_id].base2[i] >= 10000 && spells[spell_id].base2[i] <= 11000){
-							if (GetRace() != (spells[spell_id].base2[i] - 10000)){
-								break;
-							}
-						}
-
-						//Limit to amount of pets
-						else if (spells[spell_id].base2[i] >= 221 && spells[spell_id].base2[i] <= 299){
-							bool allow_spell = false;
-							int count = hate_list.SummonedPetCount(this);
-	
-							for (int base2_value = 221; base2_value <= 233; ++base2_value){
-								if (spells[spell_id].base2[i] == base2_value){
-										if (count >= (base2_value - 220)){
-											allow_spell = true;
-											break;
-										}
-									}		
-								}
-
-							if (!allow_spell)
-								break;
-						}
-					}
+					if (!PassCastRestriction(false, spells[spell_id].base2[i], true))
+						break;
 
 					// take partial damage into account
 					dmg = (int32) (dmg * partial / 100);
@@ -308,60 +232,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				}
 				else if(dmg > 0) {
 					//healing spell...
-					
-					if (spells[spell_id].base2[i] > 0)
-					{
-						bool allow_spell = false;
-				
-						//Heal only if HP within specified range. [Doesn't follow a set forumla for all values...]
-						if (spells[spell_id].base2[i] >= 400 && spells[spell_id].base2[i] <= 408){
-							for (int base2_value = 400; base2_value <= 408; ++base2_value){
-								if (spells[spell_id].base2[i] == base2_value){
-																		
-									if (spells[spell_id].base2[i] == 400){
-										if (GetHPRatio() <= 25){
-											allow_spell = true;
-											break;
-										}
-									}
-							
-									else if (spells[spell_id].base2[i] == base2_value){
-										if (GetHPRatio() > 25+((base2_value - 401)*10) && GetHPRatio() <= 35+((base2_value - 401)*10)){
-											allow_spell = true;
-											break;
-										}
-									}
-								}
-							}
-						}
-						
 
-						else if (spells[spell_id].base2[i] >= 500 && spells[spell_id].base2[i] <= 520){
-							for (int base2_value = 500; base2_value <= 520; ++base2_value){
-								if (spells[spell_id].base2[i] == base2_value){
-								
-									if (spells[spell_id].base2[i] == base2_value){
-										if (GetHPRatio() < (base2_value - 500)*5) {
-											allow_spell = true;
-											break;
-										}
-									}
-								}
-							}
-						}
+					if (!PassCastRestriction(false, spells[spell_id].base2[i], false))
+						break;
 
-						else if (spells[spell_id].base2[i] == 399){
-							if (GetHPRatio() > 15 && GetHPRatio() <= 25){
-								allow_spell = true;
-									break;
-							}
-						}
-
-						if(!allow_spell)
-							break;
-					}
-
-										
 					if(caster)
 						dmg = caster->GetActSpellHealing(spell_id, dmg, this);
 
@@ -4152,13 +4026,12 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				}
 				break;
 
-
 			case SE_LimitCombatSkills:
-				if (base1 == 0){
-					if((spell.cast_time == 0) && (spell.recast_time == 0) && (spell.recovery_time == 0)) //Exclude procs
-						LimitFailure = true;
-				}
-				break;
+				if (base1 == 0 && IsCombatSkill(spell_id)) //Exclude Discs
+					LimitFailure = true;
+				else if (base1 == 1 && !IsCombatSkill(spell_id)) //Exclude Spells
+					LimitFailure = true;
+			break;
 
 			case SE_LimitSpellGroup:
 				if(base1 < 0) {
@@ -4555,10 +4428,10 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_LimitCombatSkills:
-			if (focus_spell.base[i] == 0){
-				if((spell.cast_time == 0) && (spell.recast_time == 0) && (spell.recovery_time == 0)) //Exclude procs
-					return 0;
-			}
+			if (focus_spell.base[i] == 0 && IsCombatSkill(spell_id)) //Exclude Disc
+				return 0;				
+			else if (focus_spell.base[i] == 1 && !IsCombatSkill(spell_id)) //Include Spells
+				return 0;
 			break;
 
 		case SE_LimitSpellGroup:
@@ -5702,5 +5575,303 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 		return true;
 	else
 		return false;
+}
+
+bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDamage)
+{
+	/*If return TRUE spell met all restrictions and can continue (this = target).
+	This check is used when the spell_new field CastRestriction is defined OR spell effect '0'(DD/Heal) has a defined limit
+	Range 1			: UNKNOWN
+	Range 100		: *Animal OR Humanoid
+	Range 101		: *Dragon
+	Range 102		: *Animal OR Insect
+	Range 103		: NOT USED
+	Range 104		: *Animal
+	Range 105		: Plant
+	Range 106		: *Giant
+	Range 107		: NOT USED
+	Range 108		: NOT Animal or Humaniod
+	Range 109		: *Bixie
+	Range 111		: *Harpy
+	Range 112		: *Sporali
+	Range 113		: *Kobold
+	Range 114		: *Shade Giant
+	Range 115		: *Drakkin
+	Range 116		: NOT USED
+	Range 117		: *Animal OR Plant
+	Range 118		: *Summoned
+	Range 119		: *Firepet
+	Range 120		: Undead
+	Range 121		: *Living (NOT Undead)
+	Range 122		: *Fairy
+	Range 123		: Humanoid
+	Range 124		: *Undead HP < 10%
+	Range 125		: *Clockwork HP < 10%
+	Range 126		: *Wisp HP < 10%
+	Range 127-130	: UNKNOWN
+	Range 150		: UNKNOWN
+	Range 190		: No Raid boss flag *not implemented
+	Range 191		: This spell will deal less damage to 'exceptionally strong targets' - Raid boss flag *not implemented
+	Range 201		: Damage if HP > 75%
+	Range 203		: Damage if HP < 20%
+	Range 216		: TARGET NOT IN COMBAT
+	Range 221 - 249	: Causing damage dependent on how many pets/swarmpets are attacking your target.
+	Range 250		: Damage if HP < 35%
+	Range 300 - 303	: UNKOWN *not implemented
+	Range 304		: Chain + Plate class (buffs)
+	Range 399 - 409	: Heal if HP within a specified range (400 = 0-25% 401 = 25 - 35% 402 = 35-45% ect)
+	Range 410 - 411 : UNKOWN
+	Range 500 - 599	: Heal if HP less than a specified value
+	Range 600 - 699	: Limit to Body Type [base2 - 600 = Body]
+	Range 700		: UNKNOWN
+	Range 701		: NOT PET
+	Range 800		: UKNOWN
+	Range 818 - 819 : If Undead/If Not Undead
+	Range 820 - 822	: UKNOWN
+	Range 835 		: Unknown *not implemented
+	Range 836 -	837	: Progression Server / Live Server *not implemented
+	Range 839 		: Unknown *not implemented
+	Range 842 - 844 : Humaniod lv MAX ((842 - 800) * 2)
+	Range 845 - 847	: UNKNOWN
+	Range 10000+	: Limit to Race [base2 - 10000 = Race] (*Not on live: Too useful a function to not implement)
+	THIS IS A WORK IN PROGRESS
+	*/ 
+
+	if (value <= 0)
+		return true;
+
+	if (IsDamage || UseCastRestriction) {
+
+		switch(value)
+		{
+			case 100:	
+				if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Humanoid))
+					return true;
+				break;
+
+			case 101:	
+				if (GetBodyType() == BT_Dragon)
+					return true;
+				break;
+
+			case 102:	
+				if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Insect))
+					return true;
+				break;
+
+			case 104:	
+				if (GetBodyType() == BT_Animal)
+					return true;
+				break;
+
+			case 105:	
+				if (GetBodyType() == BT_Plant)
+					return true;
+				break;
+
+			case 106:	
+				if (GetBodyType() == BT_Giant)
+					return true;
+				break;
+
+			case 108:	
+				if ((GetBodyType() != BT_Animal) || (GetBodyType() != BT_Humanoid))
+					return true;
+				break;
+
+			case 109:	
+				if ((GetRace() == 520) ||(GetRace() == 79))
+					return true;
+				break;
+
+			case 111:	
+				if ((GetRace() == 527) ||(GetRace() == 11))
+					return true;
+				break;
+
+			case 112:	
+				if ((GetRace() == 456) ||(GetRace() == 28))
+					return true;
+				break;
+
+			case 113:	
+				if ((GetRace() == 456) ||(GetRace() == 48))
+					return true;
+				break;
+
+			case 114:	
+				if (GetRace() == 526)
+					return true;
+				break;
+
+			case 115:	
+				if (GetRace() == 522)
+					return true;
+				break;
+
+			case 117:	
+				if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Plant))
+					return true;
+				break;
+
+			case 118:	
+				if (GetBodyType() == BT_Summoned)
+					return true;
+				break;
+
+			case 119:	
+				if (IsPet() && ((GetRace() == 212) || ((GetRace() == 75) && GetTexture() == 1)))
+					return true;
+				break;
+
+			case 120:	
+				if (GetBodyType() == BT_Undead)
+					return true;
+				break;
+
+			case 121:	
+				if (GetBodyType() != BT_Undead)
+					return true;
+				break;
+
+			case 122:	
+				if ((GetRace() == 473) || (GetRace() == 425))
+					return  true;
+				break;
+
+			case 123:	
+				if (GetBodyType() == BT_Humanoid)
+					return true;
+				break;
+
+			case 124:	
+				if ((GetBodyType() == BT_Undead) && (GetHPRatio() < 10))
+					return true;
+				break;
+
+			case 125:	
+				if ((GetRace() == 457 || GetRace() == 88) && (GetHPRatio() < 10))
+					return true;
+				break;
+
+			case 126:	
+				if ((GetRace() == 581 || GetRace() == 69) && (GetHPRatio() < 10))
+					return true;
+				break;
+
+			case 201:	
+				if (GetHPRatio() > 75)
+					return true;
+				break;
+
+			case 204:	
+				if (GetHPRatio() < 20)
+					return true;
+				break;
+
+			case 216:	
+				if (!IsEngaged())
+					return true;
+				break;
+
+			case 250:	
+				if (GetHPRatio() < 35)
+					return true;
+				break;
+
+			case 304:	
+				if (IsClient() && 
+					((GetClass() == WARRIOR) || (GetClass() == BARD)  || (GetClass() == SHADOWKNIGHT)  || (GetClass() == PALADIN)  || (GetClass() == CLERIC)
+					 || (GetClass() == RANGER) || (GetClass() == SHAMAN) || (GetClass() == ROGUE)  || (GetClass() == BERSERKER)))
+					return true;
+				break;
+
+			case 818:	
+				if (GetBodyType() == BT_Undead)
+					return true;
+				break;
+
+			case 819:	
+				if (GetBodyType() != BT_Undead)
+					return true;
+				break;
+
+			case 842:	
+				if (GetBodyType() == BT_Humanoid && GetLevel() <= 84)
+					return true;
+				break;
+
+			case 843:	
+				if (GetBodyType() == BT_Humanoid && GetLevel() <= 86)
+					return true;
+				break;
+
+			case 844:	
+				if (GetBodyType() == BT_Humanoid && GetLevel() <= 88)
+					return true;
+				break;
+		}
+
+		//Limit to amount of pets
+		if (value >= 221 && value <= 249){
+			int count = hate_list.SummonedPetCount(this);
+	
+			for (int base2_value = 221; base2_value <= 249; ++base2_value){
+				if (value == base2_value){
+					if (count >= (base2_value - 220)){
+						return true;
+					}
+				}
+			}
+		}
+
+		//Limit to Body Type
+		if (value >= 600 &&  value <= 699){
+			if (GetBodyType() == (value - 600))
+				return true;
+		}
+
+		//Limit to Race. *Not implemented on live
+		if (value >= 10000 && value <= 11000){
+			if (GetRace() == (value - 10000))
+				return true;
+		}
+	} //End Damage
+
+	if (!IsDamage || UseCastRestriction) {
+	
+		//Heal only if HP within specified range. [Doesn't follow a set forumla for all values...]
+		if (value >= 400 && value <= 408){
+			for (int base2_value = 400; base2_value <= 408; ++base2_value){
+				if (value == base2_value){
+																		
+					if (value == 400 && GetHPRatio() <= 25)
+							return true;
+
+					else if (value == base2_value){
+						if (GetHPRatio() > 25+((base2_value - 401)*10) && GetHPRatio() <= 35+((base2_value - 401)*10))
+							return true;
+					}
+				}
+			}
+		}
+						
+		else if (value >= 500 && value <= 549){
+			for (int base2_value = 500; base2_value <= 520; ++base2_value){
+				if (value == base2_value){
+					if (GetHPRatio() < (base2_value - 500)*5) 
+						return true;
+				}
+			}
+		}
+
+		else if (value == 399) {
+			if (GetHPRatio() > 15 && GetHPRatio() <= 25)
+				return true;
+		}
+	} // End Heal
+			
+						
+	return false;
 }
 

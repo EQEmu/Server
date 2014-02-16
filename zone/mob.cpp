@@ -3412,8 +3412,6 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	if(skilldmg_mod < -100)
 		skilldmg_mod = -100;
 
-	CheckNumHitsRemaining(6);
-
 	return skilldmg_mod;
 }
 
@@ -4315,17 +4313,38 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 	skill_dmg += spellbonuses.SkillDamageAmount2[HIGHEST_SKILL+1] + itembonuses.SkillDamageAmount2[HIGHEST_SKILL+1]
 				+ itembonuses.SkillDamageAmount2[skill] + spellbonuses.SkillDamageAmount2[skill];
 
-	CheckNumHitsRemaining(5);
-	
 	return skill_dmg;
+}
+
+void Mob::MeleeLifeTap(int32 damage) {
+	
+	if(damage > 0 && (spellbonuses.MeleeLifetap || itembonuses.MeleeLifetap || aabonuses.MeleeLifetap ))
+	{
+		int lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap;
+		
+		if(lifetap_amt > 100)
+			lifetap_amt = 100;
+
+		else if (lifetap_amt < -99)
+			lifetap_amt = -99;
+
+
+		lifetap_amt = damage * lifetap_amt / 100;
+
+		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
+		//heal self for damage done..
+		HealDamage(lifetap_amt);
+	}
 }
 
 bool Mob::TryReflectSpell(uint32 spell_id)
 {
-	if(!GetTarget())
-		return false;
+	if (spells[spell_id].not_reflectable)
+ 		return false;
 	
-	if(MakeRandomInt(0, 99) < (GetTarget()->itembonuses.reflect_chance + GetTarget()->spellbonuses.reflect_chance))
+	int chance = itembonuses.reflect_chance + spellbonuses.reflect_chance + aabonuses.reflect_chance;
+ 	
+	if(chance && MakeRandomInt(0, 99) < chance)
 		return true;
 
 	return false;

@@ -1361,6 +1361,11 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			mlog(AA__MESSAGE, "Project Illusion overwrote target caster: %s spell id: %d was ON", GetName(), spell_id);
 			targetType = ST_GroupClientAndPet;
 	}
+	
+	if (spell_target && !spell_target->PassCastRestriction(true, spells[spell_id].CastRestriction)){
+		Message_StringID(13,SPELL_NEED_TAR);
+		return false;
+	}
 
 	switch (targetType)
 	{
@@ -3355,7 +3360,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 	}
 	// Reflect
-	if(TryReflectSpell(spell_id) && spelltar && !reflect && IsDetrimentalSpell(spell_id) && this != spelltar) {
+	if(spelltar && spelltar->TryReflectSpell(spell_id) && !reflect && IsDetrimentalSpell(spell_id) && this != spelltar) {
 		int reflect_chance = 0;
 		switch(RuleI(Spells, ReflectType))
 		{
@@ -3402,9 +3407,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 	}
 
-	if (spelltar && IsDetrimentalSpell(spell_id))
-		spelltar->CheckNumHitsRemaining(3);
-
 	// resist check - every spell can be resisted, beneficial or not
 	// add: ok this isn't true, eqlive's spell data is fucked up, buffs are
 	// not all unresistable, so changing this to only check certain spells
@@ -3437,6 +3439,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 						}
 					}
 				}
+
+				spelltar->CheckNumHitsRemaining(3);
 
 				safe_delete(action_packet);
 				return false;
@@ -3575,7 +3579,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		safe_delete(action_packet);
 		return false;
 	}
-
+	
 	// cause the effects to the target
 	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness))
 	{
@@ -3587,6 +3591,10 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		safe_delete(action_packet);
 		return false;
 	}
+
+	
+	if (spelltar && IsDetrimentalSpell(spell_id))
+		spelltar->CheckNumHitsRemaining(3); //Incoming spells
 
 	// send the action packet again now that the spell is successful
 	// NOTE: this is what causes the buff icon to appear on the client, if
