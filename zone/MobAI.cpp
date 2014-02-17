@@ -1997,59 +1997,54 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 
 bool Mob::AddRampage(Mob *mob)
 {
-	if(!mob)
+	if (!mob)
 		return false;
 
 	if (!GetSpecialAbility(SPECATK_RAMPAGE))
 		return false;
 
-	for (int i = 0; i < RampageArray.size(); i++)
-	{
-		// if name is already on the list dont add it again
-		if (strcasecmp(mob->GetName(), RampageArray[i].c_str()) == 0)
+	for (int i = 0; i < RampageArray.size(); i++) {
+		// if Entity ID is already on the list don't add it again
+		if (mob->GetID() == RampageArray[i])
 			return false;
 	}
-	std::string r_name = mob->GetName();
-	RampageArray.push_back(r_name);
+	RampageArray.push_back(mob->GetID());
 	return true;
 }
 
-void Mob::ClearRampage(){
+void Mob::ClearRampage()
+{
 	RampageArray.clear();
 }
 
 bool Mob::Rampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
-	if (!IsPet()) {
+	if (!IsPet())
 		entity_list.MessageClose_StringID(this, true, 200, MT_NPCRampage, NPC_RAMPAGE, GetCleanName());
-	} else {
+	else
 		entity_list.MessageClose_StringID(this, true, 200, MT_PetFlurry, NPC_RAMPAGE, GetCleanName());
-	}
 
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
 	rampage_targets = rampage_targets > 0 ? rampage_targets : RuleI(Combat, MaxRampageTargets);
-	for (int i = 0; i < RampageArray.size(); i++)
-	{
-		if(index_hit >= rampage_targets)
+	for (int i = 0; i < RampageArray.size(); i++) {
+		if (index_hit >= rampage_targets)
 			break;
 		// range is important
-		Mob *m_target = entity_list.GetMob(RampageArray[i].c_str());
-		if(m_target)
-		{
-			if(m_target == GetTarget())
+		Mob *m_target = entity_list.GetMob(RampageArray[i]);
+		if (m_target) {
+			if (m_target == GetTarget())
 				continue;
-			if (CombatRange(m_target))
-			{
+			if (CombatRange(m_target)) {
 				Attack(m_target, 13, false, false, false, opts);
 				index_hit++;
 			}
 		}
 	}
-	
-	if(index_hit < rampage_targets) {
+
+	if (index_hit < rampage_targets)
 		Attack(GetTarget(), 13, false, false, false, opts);
-	}
+
 	return true;
 }
 

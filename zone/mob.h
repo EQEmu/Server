@@ -880,7 +880,7 @@ protected:
 	bool IsFullHP;
 	bool moved;
 
-	std::vector<std::string> RampageArray;
+	std::vector<uint16> RampageArray;
 	std::map<std::string, std::string> m_EntityVariables;
 
 	int16 SkillDmgTaken_Mod[HIGHEST_SKILL+2];
