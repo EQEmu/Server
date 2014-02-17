@@ -145,7 +145,6 @@ void EQStreamFactory::ReaderLoop()
 {
 fd_set readset;
 std::map<std::pair<uint32, uint16>,EQStream *>::iterator stream_itr;
-EQStream* currStream = NULL;
 int num;
 int length;
 unsigned char buffer[2048];
