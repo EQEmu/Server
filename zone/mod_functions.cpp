@@ -183,8 +183,7 @@ int Mob::mod_spell_stack(uint16 spellid1, int caster_level1, Mob* caster1, uint1
 
 //Sum of various resists rolled against a value of 200.
 int Mob::mod_spell_resist(int resist_chance, int level_mod, int resist_modifier, int target_resist, uint8 resist_type, uint16 spell_id, Mob* caster) {
-	int final = resist_chance + level_mod + resist_modifier + target_resist;
-	return(final);
+	return(resist_chance);
 }
 
 //Spell is cast by this on spelltar, called from spellontarget after the event_cast_on NPC event
