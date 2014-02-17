@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/14/2014 ==
+Kayen: Fixes for buffs not fading under certain conditions in revised numhits system, and other fixes.
+Kayen: Implemented support for spell_new field CastRestrictions (limits what type of targets spells can effect).
+*A detailed list describing what the values used in this field do can be found in Mob::PassCastRestriction*
+Kayen: Implemented support for spell_new field not_reflectable, no_partial_resists.
+
+Required SQL: utils/sql/git/2014_02_13_spells_new_updates.sql
+Names many unknown fields in the table.
+
 == 02/13/2014 ==
 Sorvani: Renamed the instance_lockout and instance_lockout_player tables to instance_list and instance_list_player. Cleaned up the Database::GetUnusedInstanceID logic.
 

@@ -1704,11 +1704,13 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].ResistDiff=atoi(row[147]);
 			sp[tempid].dot_stacking_exempt=atoi(row[148]);
 			sp[tempid].RecourseLink = atoi(row[150]);
+			sp[tempid].no_partial_resist = atoi(row[151]) != 0;
 
 			sp[tempid].short_buff_box = atoi(row[154]);
 			sp[tempid].descnum = atoi(row[155]);
 			sp[tempid].effectdescnum = atoi(row[157]);
 
+			sp[tempid].not_reflectable = atoi(row[161]) != 0;
 			sp[tempid].bonushate=atoi(row[162]);
 
 			sp[tempid].EndurCost=atoi(row[166]);
@@ -1736,6 +1738,8 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].powerful_flag=atoi(row[209]);
 			sp[tempid].CastRestriction = atoi(row[211]);
 			sp[tempid].AllowRest = atoi(row[212]) != 0;
+			sp[tempid].NotOutofCombat = atoi(row[213]) != 0;
+			sp[tempid].NotInCombat = atoi(row[214]) != 0;
 			sp[tempid].persistdeath = atoi(row[224]) != 0;
 			sp[tempid].DamageShieldType = 0;
 		}

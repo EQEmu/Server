@@ -241,7 +241,7 @@ void EQStreamFactory::CheckTimeout()
 				//everybody is done, we can delete it now
 				//std::cout << "Removing connection" << std::endl;
 				std::map<std::pair<uint32, uint16>,EQStream *>::iterator temp=stream_itr;
-				stream_itr++;
+				++stream_itr;
 				//let whoever has the stream outside delete it
 				delete temp->second;
 				Streams.erase(temp);
@@ -249,7 +249,7 @@ void EQStreamFactory::CheckTimeout()
 			}
 		}
 
-		stream_itr++;
+		++stream_itr;
 	}
 	MStreams.unlock();
 }
@@ -284,7 +284,7 @@ Timer DecayTimer(20);
 		//copy streams into a seperate list so we dont have to keep
 		//MStreams locked while we are writting
 		MStreams.lock();
-		for(stream_itr=Streams.begin();stream_itr!=Streams.end();stream_itr++) {
+		for(stream_itr=Streams.begin();stream_itr!=Streams.end();++stream_itr) {
 			// If it's time to decay the bytes sent, then let's do it before we try to write
 			if (decay)
 				stream_itr->second->Decay();
@@ -306,7 +306,7 @@ Timer DecayTimer(20);
 		//do the actual writes
 		cur = wants_write.begin();
 		end = wants_write.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			(*cur)->Write(sock);
 			(*cur)->ReleaseFromUse();
 		}

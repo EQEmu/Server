@@ -3377,6 +3377,9 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 	if (HasDied())
 		return;
 
+	if (damage > 0)
+		CheckNumHitsRemaining(5);
+
 	if((skillinuse == SkillDragonPunch) && GetAA(aaDragonPunch) && MakeRandomInt(0, 99) < 25){
 		SpellFinished(904, other, 10, 0, -1, spells[904].ResistDiff);
 		other->Stun(100);
@@ -6593,18 +6596,10 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 	if (GetHP() < 0) return false;
 
-	if(damage > 0 && (spellbonuses.MeleeLifetap || itembonuses.MeleeLifetap))
-	{
-		int lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap;
-		if(lifetap_amt > 100)
-			lifetap_amt = 100;
+	MeleeLifeTap(damage);
 
-		lifetap_amt = damage * lifetap_amt / 100;
-
-		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
-		//heal self for damage done..
-		HealDamage(lifetap_amt);
-	}
+	if (damage > 0)
+		CheckNumHitsRemaining(5);
 
 	//break invis when you attack
 	if(invisible) {
@@ -8082,6 +8077,9 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	if(!GetTarget())return;
 	if (HasDied())	return;
+
+	if (max_damage > 0)
+		CheckNumHitsRemaining(5);
 
 	//[AA Dragon Punch] value[0] = 100 for 25%, chance value[1] = skill
 	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skill){

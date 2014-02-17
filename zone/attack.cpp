@@ -199,11 +199,6 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	if(IsClient() && other->IsClient())
 		pvpmode = true;
 
-	CheckNumHitsRemaining(1);
-	
-	if (attacker)
-		attacker->CheckNumHitsRemaining(2);
-
 	if (chance_mod >= 10000)
 	    return true;
 
@@ -1318,19 +1313,10 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 	if (IsDead()) return false;
 
-	if(damage > 0 && (spellbonuses.MeleeLifetap || itembonuses.MeleeLifetap))
-	{
-		int lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap;
-		if(lifetap_amt > 100)
-			lifetap_amt = 100;
-
-		lifetap_amt = damage * lifetap_amt / 100;
-
-		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
-		//heal self for damage done..
-		HealDamage(lifetap_amt);
-
-	}
+	MeleeLifeTap(damage);
+	
+	if (damage > 0)
+		CheckNumHitsRemaining(5);
 
 	//break invis when you attack
 	if(invisible) {
@@ -1937,6 +1923,11 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	if (HasDied()) //killed by damage shield ect
 		return false;
+
+	MeleeLifeTap(damage);
+	
+	if (damage > 0)
+		CheckNumHitsRemaining(5);
 
 	//break invis when you attack
 	if(invisible) {
@@ -3434,7 +3425,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		mlog(COMBAT__DAMAGE, "Avoiding %d damage due to invulnerability.", damage);
 		damage = -5;
 	}
-
+	
 	if( spell_id != SPELL_UNKNOWN || attacker == nullptr )
 		avoidable = false;
 
@@ -3442,6 +3433,13 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 	// damage shield calls this function with spell_id set, so its unavoidable
 	if (attacker && damage > 0 && spell_id == SPELL_UNKNOWN && skill_used != SkillArchery && skill_used != SkillThrowing) {
 		DamageShield(attacker);
+	}
+
+	if (spell_id == SPELL_UNKNOWN && skill_used) {
+		CheckNumHitsRemaining(1); //Incoming Hit Attempts
+
+		if (attacker)
+			attacker->CheckNumHitsRemaining(2); //Outgoing Hit Attempts
 	}
 
 	if(attacker){
@@ -3514,16 +3512,20 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 		}
 
-	ReduceAllDamage(damage);
+		if (skill_used)
+			CheckNumHitsRemaining(6); //Incomming Hit Success on Defender
 
-	if(IsClient() && CastToClient()->sneaking){
-		CastToClient()->sneaking = false;
-		SendAppearancePacket(AT_Sneak, 0);
-	}
-	if(attacker && attacker->IsClient() && attacker->CastToClient()->sneaking){
-		attacker->CastToClient()->sneaking = false;
-		attacker->SendAppearancePacket(AT_Sneak, 0);
-	}
+		ReduceAllDamage(damage);
+
+		if(IsClient() && CastToClient()->sneaking){
+			CastToClient()->sneaking = false;
+			SendAppearancePacket(AT_Sneak, 0);
+		}
+		if(attacker && attacker->IsClient() && attacker->CastToClient()->sneaking){
+			attacker->CastToClient()->sneaking = false;
+			attacker->SendAppearancePacket(AT_Sneak, 0);
+		}
+		
 		//final damage has been determined.
 
 		SetHP(GetHP() - damage);
@@ -3770,6 +3772,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			}
 		}
 	} //end packet sending
+
 }
 
 

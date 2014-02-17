@@ -680,15 +680,18 @@ struct SPDat_Spell_Struct
 /* 148 */	int8 dot_stacking_exempt; // If 1 doesn't stack with self cast by others. If -1 (not implemented) doesn't stack with same effect (???)
 /* 149 */	//int deletable;
 /* 150 */	uint16 RecourseLink;
-/* 151 */						// 151: -1, 0, or 1
+/* 151 */	bool no_partial_resist;	// 151: -1, 0, or 1
 								// 152 & 153: all set to 0
 /* 154 */	int8 short_buff_box;	// != 0, goes to short buff box.
 /* 155 */	int descnum; // eqstr of description of spell
 /* 156 */	//int typedescnum; // eqstr of type description
 /* 157 */	int effectdescnum; // eqstr of effect description
-/* 158 */
+/* 158 */   //Category Desc ID 3
+/* 159 */	//bool npc_no_los;
+/* 161 */	bool not_reflectable;
 /* 162 */	int bonushate;
 /* 163 */
+/* 164 */	// for most spells this appears to mimic ResistDiff
 /* 166 */	int EndurCost;
 /* 167 */	int8 EndurTimerIndex;
 /* 168 */	//int IsDisciplineBuff; //Will goto the combat window when cast
@@ -709,8 +712,8 @@ struct SPDat_Spell_Struct
 /* 191 */	uint8 viral_targets;
 /* 192 */	uint8 viral_timer;
 /* 193 */	int NimbusEffect;
-/* 194 */	float directional_start;
-/* 195 */	float directional_end;
+/* 194 */	float directional_start; //Cone Start Angle:
+/* 195 */	float directional_end; // Cone End Angle:
 /* 196 */
 /* 197 */	bool not_extendable;
 /* 198- 199 */
@@ -719,12 +722,14 @@ struct SPDat_Spell_Struct
 /* 203 */	//int songcap; // individual song cap (how live currently does it, not implemented)
 /* 204 - 206 */
 /* 207 */	int spellgroup;
-/* 208 */
-/* 209 */	int powerful_flag; // Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
-/* 210 */
+/* 208 */	// int rank - increments AA effects with same name
+/* 209 */	int powerful_flag; //  Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
+/* 210 */	// bool DurationFrozen; ??? 
 /* 211 */	int CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
 /* 212 */	bool AllowRest;
-/* 213 - 218 */
+/* 213 */	bool NotOutofCombat; //Fail if cast out of combat
+/* 214 */   bool NotInCombat; //Fail if cast in combat
+/* 215 - 218 */
 /* 219 */	//int maxtargets; // is used for beam and ring spells for target # limits (not implemented)
 /* 220 - 223 */
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death
@@ -795,6 +800,7 @@ int32 CalculateCorruptionCounters(uint16 spell_id);
 int32 CalculateCounters(uint16 spell_id);
 bool IsDisciplineBuff(uint16 spell_id);
 bool IsDiscipline(uint16 spell_id);
+bool IsCombatSkill(uint16 spell_id);
 bool IsResurrectionEffects(uint16 spell_id);
 bool IsRuneSpell(uint16 spell_id);
 bool IsMagicRuneSpell(uint16 spell_id);
