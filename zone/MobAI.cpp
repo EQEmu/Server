@@ -1141,30 +1141,26 @@ void Mob::AI_Process() {
 						Attack(target, 13);
 					}
 
-					if (target)
-					{
+					if (target) {
 						//we use this random value in three comparisons with different
 						//thresholds, and if its truely random, then this should work
 						//out reasonably and will save us compute resources.
 						int32 RandRoll = MakeRandomInt(0, 99);
-						if (CanThisClassDoubleAttack()
-							//check double attack, this is NOT the same rules that clients use...
-							&& RandRoll < (GetLevel() + NPCDualAttackModifier))
-						{
+						if ((CanThisClassDoubleAttack() || GetSpecialAbility(SPECATK_TRIPLE)
+								|| GetSpecialAbility(SPECATK_QUAD))
+								//check double attack, this is NOT the same rules that clients use...
+								&& RandRoll < (GetLevel() + NPCDualAttackModifier)) {
 							Attack(target, 13);
 							// lets see if we can do a triple attack with the main hand
 							//pets are excluded from triple and quads...
-							if (GetSpecialAbility(SPECATK_TRIPLE)
-								&& !IsPet() && RandRoll < (GetLevel()+NPCTripleAttackModifier))
-							{
+							if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD))
+									&& !IsPet() && RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
 								Attack(target, 13);
 								// now lets check the quad attack
 								if (GetSpecialAbility(SPECATK_QUAD)
-									&& RandRoll < (GetLevel() + NPCQuadAttackModifier))
-								{
+										&& RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
 									Attack(target, 13);
 								}
-								
 							}
 						}
 					}
@@ -1204,12 +1200,10 @@ void Mob::AI_Process() {
 					}
 
 					if (IsPet()) {
-
 						Mob *owner = GetOwner();
-
-						if (owner){
-						int16 flurry_chance = owner->aabonuses.PetFlurry + owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
-
+						if (owner) {
+						int16 flurry_chance = owner->aabonuses.PetFlurry +
+							owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
 							if (flurry_chance && (MakeRandomInt(0, 99) < flurry_chance))
 								Flurry(nullptr);
 						}
@@ -1289,7 +1283,7 @@ void Mob::AI_Process() {
 							if(cur > 0) {
 								opts.crit_flat = cur;
 							}
-							
+
 							AreaRampage(&opts);
 						}
 					}
