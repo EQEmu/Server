@@ -427,6 +427,8 @@ public:
 		bool bFrenzy = false, bool iBuffTic = false);
 	bool RemoveFromHateList(Mob* mob);
 	void SetHate(Mob* other, int32 hate = 0, int32 damage = 0) { hate_list.Set(other,hate,damage);}
+	void HalveAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHate(other, (in_hate > 1 ? in_hate / 2 : 1)); }
+	void DoubleAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHate(other, (in_hate ? in_hate * 2 : 1)); }
 	uint32 GetHateAmount(Mob* tmob, bool is_dam = false) { return hate_list.GetEntHate(tmob,is_dam);}
 	uint32 GetDamageAmount(Mob* tmob) { return hate_list.GetEntHate(tmob, true);}
 	Mob* GetHateTop() { return hate_list.GetTop(this);}
