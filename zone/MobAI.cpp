@@ -2015,7 +2015,10 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		entity_list.MessageClose_StringID(this, true, 200, MT_PetFlurry, NPC_RAMPAGE, GetCleanName());
 
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
-	rampage_targets = rampage_targets > 0 ? rampage_targets : RuleI(Combat, MaxRampageTargets);
+	if (rampage_targets == 0) // if set to 0 or not set in the DB
+		rampage_targets = RuleI(Combat, DefaultRampageTargets);
+	if (rampage_targets > RuleI(Combat, MaxRampageTargets))
+		rampage_targets = RuleI(Combat, MaxRampageTargets);
 	for (int i = 0; i < RampageArray.size(); i++) {
 		if (index_hit >= rampage_targets)
 			break;
@@ -2031,7 +2034,7 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		}
 	}
 
-	if (index_hit < rampage_targets)
+	if (RuleB(Combat, RampageHitsTarget) && index_hit < rampage_targets)
 		Attack(GetTarget(), 13, false, false, false, opts);
 
 	return true;
