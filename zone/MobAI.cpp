@@ -1173,39 +1173,34 @@ void Mob::AI_Process() {
 						int flurry_chance = GetSpecialAbilityParam(SPECATK_FLURRY, 0);
 						flurry_chance = flurry_chance > 0 ? flurry_chance : RuleI(Combat, NPCFlurryChance); 
 
-						ExtraAttackOptions opts;
-						int cur = GetSpecialAbilityParam(SPECATK_FLURRY, 2);
-						if(cur > 0) {
-							opts.damage_percent = cur / 100.0f;
-						}
+						if (MakeRandomInt(0, 99) < flurry_chance) {
+							ExtraAttackOptions opts;
+							int cur = GetSpecialAbilityParam(SPECATK_FLURRY, 2);
+							if (cur > 0)
+								opts.damage_percent = cur / 100.0f;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 3);
-						if(cur > 0) {
-							opts.damage_flat = cur;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 3);
+							if (cur > 0)
+								opts.damage_flat = cur;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 4);
-						if(cur > 0) {
-							opts.armor_pen_percent = cur / 100.0f;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 4);
+							if (cur > 0)
+								opts.armor_pen_percent = cur / 100.0f;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 5);
-						if(cur > 0) {
-							opts.armor_pen_flat = cur;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 5);
+							if (cur > 0)
+								opts.armor_pen_flat = cur;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 6);
-						if(cur > 0) {
-							opts.crit_percent = cur / 100.0f;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 6);
+							if (cur > 0)
+								opts.crit_percent = cur / 100.0f;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 7);
-						if(cur > 0) {
-							opts.crit_flat = cur;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 7);
+							if (cur > 0)
+								opts.crit_flat = cur;
 
-						if (MakeRandomInt(0, 99) < flurry_chance)
 							Flurry(&opts);
+						}
 					}
 
 					if (IsPet()) {
