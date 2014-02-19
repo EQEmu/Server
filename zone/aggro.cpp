@@ -1257,7 +1257,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, bool isproc)
 				break;
 			}
 			case SE_ReduceHate:
-			case SE_Calm: {
+			case SE_InstantHate: {
 				nonModifiedAggro = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				break;
 			}
@@ -1281,9 +1281,6 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, bool isproc)
 
 		if (IsClient())
 			HateMod += CastToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
-
-		//Live AA - Spell casting subtlety
-		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;
 
 		AggroAmount = (AggroAmount * HateMod) / 100;
 
@@ -1405,7 +1402,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 			return true;
 
 		//1: The mob has a default 25% chance of being allowed a resistance check against the charm.
-		if (MakeRandomInt(0, 100) > RuleI(Spells, CharmBreakCheckChance))
+		if (MakeRandomInt(0, 99) > RuleI(Spells, CharmBreakCheckChance))
 			return true;
 
 		//2: The mob makes a resistance check against the charm
@@ -1419,7 +1416,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 				//3: At maxed ability, Total Domination has a 50% chance of preventing the charm break that otherwise would have occurred.
 				uint16 TotalDominationBonus = caster->aabonuses.CharmBreakChance + caster->spellbonuses.CharmBreakChance + caster->itembonuses.CharmBreakChance;
 
-				if (MakeRandomInt(0, 100) < TotalDominationBonus)
+				if (MakeRandomInt(0, 99) < TotalDominationBonus)
 					return true;
 
 			}

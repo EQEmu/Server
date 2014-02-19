@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/18/2014 ==
+Kayen: Implemented SE_TriggerOnReqCaster - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
+Kayen: Implemented SE_ImprovedTaunt	- Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y
+Kayen: Fixed an error where SE_ChangeAggro was adding its bonus x 2 for spell generated aggro. (this applies also to spell casting subtlety AA reduction) 
+
 == 02/14/2014 ==
 Kayen: Fixes for buffs not fading under certain conditions in revised numhits system, and other fixes.
 Kayen: Implemented support for spell_new field CastRestrictions (limits what type of targets spells can effect).

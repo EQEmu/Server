@@ -1054,7 +1054,8 @@ void Mob::AI_Process() {
 						SetTarget(hate_list.GetTop(this));
 					}
 				} else {
-					SetTarget(hate_list.GetTop(this));
+					if (!ImprovedTaunt())
+						SetTarget(hate_list.GetTop(this));
 				}
 
 			}
