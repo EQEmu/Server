@@ -2488,7 +2488,7 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 		damage = GetHP();
 
 	if (spellbonuses.ImprovedTaunt[1] && (GetLevel() < spellbonuses.ImprovedTaunt[0]) 
-		&& other &&  (buffs[spellbonuses.ImprovedTaunt[0]].casterid != other->GetID()))
+		&& other &&  (buffs[spellbonuses.ImprovedTaunt[2]].casterid != other->GetID()))
 		hate = (hate*spellbonuses.ImprovedTaunt[1])/100; 
 
 	hate_list.Add(other, hate, damage, bFrenzy, !iBuffTic);
