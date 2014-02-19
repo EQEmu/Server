@@ -19,6 +19,7 @@
 #define ENTITY_H
 #include <unordered_map>
 #include <queue>
+#include <vector>
 
 #include "../common/types.h"
 #include "../common/linked_list.h"
@@ -52,6 +53,17 @@ class EntityList;
 class Bot;
 class BotRaids;
 #endif
+
+struct NPCProximity {
+	float min_x;
+	float max_x;
+	float min_y;
+	float max_y;
+	float min_z;
+	float max_z;
+	bool say;
+	NPC* owner;
+};
 
 extern EntityList entity_list;
 
@@ -221,7 +233,7 @@ public:
 	void	AddDoor(Doors* door);
 	void	AddTrap(Trap* trap);
 	void	AddBeacon(Beacon *beacon);
-	void	AddProximity(NPC *proximity_for);
+	NPCProximity* AddProximity(NPC *proximity_for);
 	void	Clear();
 	bool	RemoveMob(uint16 delete_id);
 	bool	RemoveMob(Mob* delete_mob);
@@ -235,7 +247,7 @@ public:
 	bool	RemoveDoor(uint16 delete_id);
 	bool	RemoveTrap(uint16 delete_id);
 	bool	RemoveObject(uint16 delete_id);
-	bool	RemoveProximity(uint16 delete_npc_id);
+	bool	RemoveProximity(NPC* delete_owner);
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();
@@ -436,7 +448,7 @@ private:
 	std::unordered_map<uint16, Doors *> door_list;
 	std::unordered_map<uint16, Trap *> trap_list;
 	std::unordered_map<uint16, Beacon *> beacon_list;
-	std::list<NPC *> proximity_list;
+	std::vector<NPCProximity> proximity_list;
 	std::list<Group *> group_list;
 	std::list<Raid *> raid_list;
 	std::list<Area> area_list;

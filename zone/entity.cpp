@@ -2069,7 +2069,9 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 	auto it = npc_list.find(delete_id);
 	if (it != npc_list.end()) {
 		// make sure its proximity is removed
-		RemoveProximity(delete_id);
+		NPC* d = it->second;
+		if (d->has_proximity)
+			RemoveProximity(d);
 		// remove from the list
 		npc_list.erase(it);
 		// remove from limit list if needed
@@ -3070,25 +3072,24 @@ void EntityList::SendAlarm(Trap *trap, Mob *currenttarget, uint8 kos)
 	}
 }
 
-void EntityList::AddProximity(NPC *proximity_for)
+NPCProximity* EntityList::AddProximity(NPC *proximity_for)
 {
-	RemoveProximity(proximity_for->GetID());
+	RemoveProximity(proximity_for);
 
-	proximity_list.push_back(proximity_for);
+	proximity_list.push_back(NPCProximity());
 
-	proximity_for->proximity = new NPCProximity;
+	return &proximity_list.back();
 }
 
-bool EntityList::RemoveProximity(uint16 delete_npc_id)
+bool EntityList::RemoveProximity(NPC* delete_owner)
 {
-	auto iter = proximity_list.begin();
-
-	while (iter != proximity_list.end()) {
-		if ((*iter)->GetID() == delete_npc_id) {
-			proximity_list.erase(iter);
+	for (size_t i = 0; i < proximity_list.size(); ++i) {
+		if (proximity_list[i].owner == delete_owner) {
+			//swap 'n pop
+			proximity_list[i] = proximity_list.back();
+			proximity_list.pop_back();
 			return true;
 		}
-		++iter;
 	}
 	return false;
 }
@@ -3113,11 +3114,8 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z)
 	float last_z = c->ProximityZ();
 
 	std::list<quest_proximity_event> events;
-	for (auto iter = proximity_list.begin(); iter != proximity_list.end(); ++iter) {
-		NPC *d = (*iter);
-		NPCProximity *l = d->proximity;
-		if (l == nullptr)
-			continue;
+	for (size_t i = 0; i < proximity_list.size(); ++i) {
+		NPCProximity *l = &proximity_list[i];
 
 		//check both bounding boxes, if either coords pairs
 		//cross a boundary, send the event.
@@ -3138,7 +3136,7 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z)
 			quest_proximity_event evt;
 			evt.event_id = EVENT_EXIT;
 			evt.client = c;
-			evt.npc = d;
+			evt.npc = l->owner;
 			evt.area_id = 0;
 			evt.area_type = 0;
 			events.push_back(evt);
@@ -3146,7 +3144,7 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z)
 			quest_proximity_event evt;
 			evt.event_id = EVENT_ENTER;
 			evt.client = c;
-			evt.npc = d;
+			evt.npc = l->owner;
 			evt.area_id = 0;
 			evt.area_type = 0;
 			events.push_back(evt);
@@ -3312,11 +3310,9 @@ void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 langu
 	if (!Message || !c)
 		return;
 
-	auto iter = proximity_list.begin();
-	for (; iter != proximity_list.end(); ++iter) {
-		NPC *d = (*iter);
-		NPCProximity *l = d->proximity;
-		if (l == nullptr || !l->say)
+	for (size_t i = 0; i < proximity_list.size(); ++i) {
+		NPCProximity *l = &proximity_list[i];
+		if (!l->say)
 			continue;
 
 		if (c->GetX() < l->min_x || c->GetX() > l->max_x
@@ -3324,7 +3320,7 @@ void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 langu
 				|| c->GetZ() < l->min_z || c->GetZ() > l->max_z)
 			continue;
 
-		parse->EventNPC(EVENT_PROXIMITY_SAY, d, c, Message, language);
+		parse->EventNPC(EVENT_PROXIMITY_SAY, l->owner, c, Message, language);
 	}
 }
 

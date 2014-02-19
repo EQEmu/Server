@@ -46,16 +46,6 @@ class NPC;
 #define	ONSPAWN		7
 #define	ONDESPAWN	8
 
-typedef struct {
-	float min_x;
-	float max_x;
-	float min_y;
-	float max_y;
-	float min_z;
-	float max_z;
-	bool say;
-} NPCProximity;
-
 struct AISpells_Struct {
 	uint16	type;			// 0 = never, must be one (and only one) of the defined values
 	uint16	spellid;		// <= 0 = no spell
@@ -287,7 +277,7 @@ public:
 
 	ItemList	itemlist; //kathgar - why is this public? Doing other things or I would check the code
 
-	NPCProximity* proximity;
+	bool has_proximity;
 	Spawn2*	respawn2;
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
