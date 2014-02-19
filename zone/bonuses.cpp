@@ -2496,12 +2496,21 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
-			case SE_TriggerOnValueAmount:
+			case SE_TriggerOnReqTarget:
+			case SE_TriggerOnReqCaster:
 				newbon->TriggerOnValueAmount = true;
 				break;
 
 			case SE_DivineAura:
 				newbon->DivineAura = true;
+				break;
+
+			case SE_ImprovedTaunt:
+				if (newbon->ImprovedTaunt[0] < effect_value) {
+					newbon->ImprovedTaunt[0] = effect_value;
+					newbon->ImprovedTaunt[1] = spells[spell_id].base2[i];
+					newbon->ImprovedTaunt[2] = buffslot;
+				}
 				break;
 
 		}

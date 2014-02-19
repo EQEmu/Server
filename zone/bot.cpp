@@ -12973,7 +12973,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						pacer->Say("Trying to pacify %s \n", target->GetCleanName());
 
 						if(pacer->Bot_Command_CalmTarget(target)) {
-							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_Calm))
+							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_InstantHate))
 							//if(pacer->IsPacified(target))
 								c->Message(0, "I have successfully pacified %s.", target->GetCleanName());
 								return;
@@ -12989,7 +12989,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						pacer->Say("Trying to pacify %s \n", target->GetCleanName());
 
 						if(pacer->Bot_Command_CalmTarget(target)) {
-							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_Calm))
+							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_InstantHate))
 							//if(pacer->IsPacified(target))
 								c->Message(0, "I have successfully pacified %s.", target->GetCleanName());
 								return;

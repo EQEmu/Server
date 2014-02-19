@@ -3670,7 +3670,7 @@ MercSpell Merc::GetBestMercSpellForHate(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_Calm);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_InstantHate);
 
 		for(std::list<MercSpell>::iterator mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end(); ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
