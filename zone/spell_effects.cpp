@@ -5592,7 +5592,7 @@ bool Mob::ImprovedTaunt(){
 			return true;
 		}
 		else
-			BuffFadeByEffect(spellbonuses.ImprovedTaunt[2]); //If caster killed removed effect.
+			BuffFadeBySlot(spellbonuses.ImprovedTaunt[2]); //If caster killed removed effect.
 	}
 
 	return false;
