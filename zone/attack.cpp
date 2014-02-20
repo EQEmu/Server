@@ -1336,6 +1336,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 	// Hate Generation is on a per swing basis, regardless of a hit, miss, or block, its always the same.
 	// If we are this far, this means we are atleast making a swing.
+
 	if (!bRiposte) // Ripostes never generate any aggro.
 		other->AddToHateList(this, hate);
 
@@ -1901,6 +1902,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			mlog(COMBAT__HITS, "Generating hate %d towards %s", hate, GetName());
 			// now add done damage to the hate list
 			other->AddToHateList(this, hate);
+
 		} else {
 			if(opts) {
 				damage *= opts->damage_percent;
@@ -2435,7 +2437,9 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 }
 
 void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic) {
+	
 	assert(other != nullptr);
+	
 	if (other == this)
 		return;
 
@@ -2515,6 +2519,10 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 	//
 	if(damage > GetHP())
 		damage = GetHP();
+
+	if (spellbonuses.ImprovedTaunt[1] && (GetLevel() < spellbonuses.ImprovedTaunt[0]) 
+		&& other &&  (buffs[spellbonuses.ImprovedTaunt[2]].casterid != other->GetID()))
+		hate = (hate*spellbonuses.ImprovedTaunt[1])/100; 
 
 	hate_list.Add(other, hate, damage, bFrenzy, !iBuffTic);
 

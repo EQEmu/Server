@@ -2667,7 +2667,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ChangeAggro:
 			case SE_Hate2:
 			case SE_Identify:
-			case SE_Calm:
+			case SE_InstantHate:
 			case SE_ReduceHate:
 			case SE_SpellDamageShield:
 			case SE_ReverseDS:
@@ -2806,7 +2806,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_DoubleRangedAttack:
 			case SE_ShieldEquipHateMod:
 			case SE_ShieldEquipDmgMod:
-			case SE_TriggerOnValueAmount:
+			case SE_TriggerOnReqTarget:
 			case SE_LimitRace:
 			case SE_FcLimitUse:
 			case SE_FcMute:	
@@ -5577,6 +5577,28 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 		return false;
 }
 
+
+bool Mob::ImprovedTaunt(){
+
+	if (spellbonuses.ImprovedTaunt[2]){
+
+		if (GetLevel() > spellbonuses.ImprovedTaunt[0])
+			return false;
+
+		target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[2]].casterid);
+
+		if (target){
+			SetTarget(target);
+			return true;
+		}
+		else
+			BuffFadeBySlot(spellbonuses.ImprovedTaunt[2]); //If caster killed removed effect.
+	}
+
+	return false;
+}
+
+
 bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDamage)
 {
 	/*If return TRUE spell met all restrictions and can continue (this = target).
@@ -5633,7 +5655,7 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 	Range 839 		: Unknown *not implemented
 	Range 842 - 844 : Humaniod lv MAX ((842 - 800) * 2)
 	Range 845 - 847	: UNKNOWN
-	Range 10000+	: Limit to Race [base2 - 10000 = Race] (*Not on live: Too useful a function to not implement)
+	Range 10000 - 11000	: Limit to Race [base2 - 10000 = Race] (*Not on live: Too useful a function to not implement)
 	THIS IS A WORK IN PROGRESS
 	*/ 
 
@@ -5650,7 +5672,7 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 				break;
 
 			case 101:	
-				if (GetBodyType() == BT_Dragon)
+				if (GetBodyType() == BT_Dragon || GetBodyType() == BT_VeliousDragon || GetBodyType() == BT_Dragon3)
 					return true;
 				break;
 
@@ -5783,6 +5805,11 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 				if (IsClient() && 
 					((GetClass() == WARRIOR) || (GetClass() == BARD)  || (GetClass() == SHADOWKNIGHT)  || (GetClass() == PALADIN)  || (GetClass() == CLERIC)
 					 || (GetClass() == RANGER) || (GetClass() == SHAMAN) || (GetClass() == ROGUE)  || (GetClass() == BERSERKER)))
+					return true;
+				break;
+
+			case 701:	
+				if (!IsPet())
 					return true;
 				break;
 

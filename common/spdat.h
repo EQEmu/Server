@@ -148,7 +148,7 @@ typedef enum {
 // full listing: https://forums.station.sony.com/eq/index.php?threads/enumerated-spa-list.206288/
 // mirror: http://pastebin.com/MYeQqGwe
 #define SE_CurrentHP					0	// implemented - Heals and nukes, repeates every tic if in a buff
-#define SE_ArmorClass					1	// implemented
+#define SE_ArmorClass					1	// implemented	
 #define SE_ATK							2	// implemented
 #define SE_MovementSpeed				3	// implemented - SoW, SoC, etc
 #define SE_STR							4	// implemented
@@ -239,7 +239,7 @@ typedef enum {
 #define SE_ModelSize					89	// implemented - Shrink, Growth
 #define SE_Cloak						90	// *not implemented - Used in only 2 spells
 #define SE_SummonCorpse					91	// implemented
-#define SE_Calm							92	// implemented - Hate modifier stuff(poorly named)
+#define SE_InstantHate					92	// implemented - add hate
 #define SE_StopRain						93	// implemented - Wake of Karana
 #define SE_NegateIfCombat				94	// *not implemented? - Works client side but there is comment todo in spell effects...Component of Spirit of Scale
 #define SE_Sacrifice					95	// implemented
@@ -572,7 +572,7 @@ typedef enum {
 #define SE_LimitUseMin					422 // implemented - limit a focus to require a min amount of numhits value (used with above)
 #define SE_LimitUseType					423 // implemented	- limit a focus to require a certain numhits type 
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
-#define SE_Display						425 // *not implemented - Illusion: Flying Dragon(21626)
+//#define SE_Display					425 // *not implemented - Illusion: Flying Dragon(21626)
 #define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
 #define SE_SkillProc					427 // implemented - chance to proc when using a skill(ie taunt)
 #define SE_LimitToSkill					428 // implemented - limits what skills will effect a skill proc
@@ -589,9 +589,9 @@ typedef enum {
 #define SE_IncreaseAssassinationLvl		439 // *not implemented[AA] - increases the maximum level of humanoid that can be affected by assassination
 #define SE_FinishingBlowLvl				440 // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
 #define SE_CancleIfMoved				441 // *not implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
-#define SE_TriggerOnValueAmount			442 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
-#define SE_TriggerIfMovement			443 // *not implemented - Trigger a spell if you move (37846 | Chopping Block)
-#define SE_ImprovedTaunt				444 // *not implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% up to level Z
+#define SE_TriggerOnReqTarget			442 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
+#define SE_TriggerOnReqCaster			443 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
+#define SE_ImprovedTaunt				444 // implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y
 #define SE_AddMercSlot					445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
 //#define SE_AStacker					446 // *not implementet - bufff stacking blocker ? (26219 | Qirik's Watch)
 //#define SE_BStacker					447 // *not implemented 

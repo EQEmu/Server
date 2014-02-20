@@ -328,6 +328,7 @@ struct StatBonuses {
 	bool	CriticalHealDecay;					// increase critical heal chance, decays based on spell level cast
 	bool	CriticalDotDecay;					// increase critical dot chance, decays based on spell level cast
 	bool	DivineAura;							// invulnerability
+	int16	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buffid
 	//bool	AbsorbMagicAtt;						// Magic Rune *Need to be implemented for NegateEffect
 	//bool	MeleeRune;							// Melee Rune *Need to be implemented for NegateEffect
 
