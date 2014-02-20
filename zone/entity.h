@@ -167,7 +167,7 @@ public:
 
 	Spawn2* GetSpawnByID(uint32 id);
 
-	Client* FindCorpseDragger(const char *CorpseName);
+	Client* FindCorpseDragger(uint16 CorpseID);
 
 	inline Object *GetObjectByID(uint16 id)
 		{ return object_list.count(id) ? object_list.at(id) : nullptr; }

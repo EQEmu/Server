@@ -4512,11 +4512,11 @@ void EntityList::GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height,
 	}
 }
 
-Client *EntityList::FindCorpseDragger(const char *CorpseName)
+Client *EntityList::FindCorpseDragger(uint16 CorpseID)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		if (it->second->IsDraggingCorpse(CorpseName))
+		if (it->second->IsDraggingCorpse(CorpseID))
 			return it->second;
 		++it;
 	}

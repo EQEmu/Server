@@ -1078,7 +1078,7 @@ public:
 	void ClearHover();
 	inline bool IsBlockedBuff(int16 SpellID) { return PlayerBlockedBuffs.find(SpellID) != PlayerBlockedBuffs.end(); }
 	inline bool IsBlockedPetBuff(int16 SpellID) { return PetBlockedBuffs.find(SpellID) != PetBlockedBuffs.end(); }
-	bool IsDraggingCorpse(const char* CorpseName);
+	bool IsDraggingCorpse(uint16 CorpseID);
 	inline bool IsDraggingCorpse() { return (DraggedCorpses.size() > 0); }
 	void DragCorpses();
 	inline void ClearDraggedCorpses() { DraggedCorpses.clear(); }
@@ -1481,7 +1481,7 @@ private:
 
 	std::set<uint32> PlayerBlockedBuffs;
 	std::set<uint32> PetBlockedBuffs;
-	std::list<std::string> DraggedCorpses;
+	std::list<std::pair<std::string, uint16> > DraggedCorpses;
 
 	uint8 MaxXTargets;
 	bool XTargetAutoAddHaters;

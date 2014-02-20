@@ -12379,7 +12379,7 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	if(!corpse || !corpse->IsPlayerCorpse() || corpse->CastToCorpse()->IsBeingLooted())
 		return;
 
-	Client *c = entity_list.FindCorpseDragger(cds->CorpseName);
+	Client *c = entity_list.FindCorpseDragger(corpse->GetID());
 
 	if(c)
 	{
@@ -12394,7 +12394,7 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	if(!corpse->CastToCorpse()->Summon(this, false, true))
 		return;
 
-	DraggedCorpses.push_back(cds->CorpseName);
+	DraggedCorpses.push_back(std::pair<std::string, uint16>(cds->CorpseName, corpse->GetID()));
 
 	Message_StringID(MT_DefaultText, CORPSEDRAG_BEGIN, cds->CorpseName);
 }
@@ -12408,9 +12408,9 @@ void Client::Handle_OP_CorpseDrop(const EQApplicationPacket *app)
 		return;
 	}
 
-	for(std::list<std::string>::iterator Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
+	for (auto Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
 	{
-		if(!strcasecmp((*Iterator).c_str(), (const char *)app->pBuffer))
+		if(!strcasecmp(Iterator->first.c_str(), (const char *)app->pBuffer))
 		{
 			Message_StringID(MT_DefaultText, CORPSEDRAG_STOP);
 			Iterator = DraggedCorpses.erase(Iterator);

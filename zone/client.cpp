@@ -6045,11 +6045,10 @@ void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 	}
 }
 
-bool Client::IsDraggingCorpse(const char *CorpseName)
+bool Client::IsDraggingCorpse(uint16 CorpseID)
 {
-	for(std::list<std::string>::iterator Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
-	{
-		if(!strcasecmp((*Iterator).c_str(), CorpseName))
+	for (auto It = DraggedCorpses.begin(); It != DraggedCorpses.end(); ++It) {
+		if (It->second == CorpseID)
 			return true;
 	}
 
@@ -6058,20 +6057,22 @@ bool Client::IsDraggingCorpse(const char *CorpseName)
 
 void Client::DragCorpses()
 {
-	for(std::list<std::string>::iterator Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
-	{
-		Mob* corpse = entity_list.GetMob((*Iterator).c_str());
+	for (auto It = DraggedCorpses.begin(); It != DraggedCorpses.end(); ++It) {
+		Mob *corpse = entity_list.GetMob(It->second);
 
-		if(corpse && corpse->IsPlayerCorpse() && (DistNoRootNoZ(*corpse) <= RuleR(Character, DragCorpseDistance)))
+		if (corpse && corpse->IsPlayerCorpse() &&
+				(DistNoRootNoZ(*corpse) <= RuleR(Character, DragCorpseDistance)))
 			continue;
 
-		if(!corpse || !corpse->IsPlayerCorpse() || corpse->CastToCorpse()->IsBeingLooted() || !corpse->CastToCorpse()->Summon(this, false, false))
-		{
+		if (!corpse || !corpse->IsPlayerCorpse() ||
+				corpse->CastToCorpse()->IsBeingLooted() ||
+				!corpse->CastToCorpse()->Summon(this, false, false)) {
 			Message_StringID(MT_DefaultText, CORPSEDRAG_STOP);
-			Iterator = DraggedCorpses.erase(Iterator);
+			It = DraggedCorpses.erase(It);
 		}
 	}
 }
+
 void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_override, int pet_count, int pet_duration)
 {
 	if(!target || !IsValidSpell(spell_id) || this->GetID() == target->GetID())
