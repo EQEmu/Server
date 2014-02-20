@@ -536,17 +536,16 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts)
 {
-	if(damage <= 0)
+	if (damage <= 0)
 		return;
 
 	Mob* defender = this;
-	float aa_mit = 0;
+	float aa_mit = (aabonuses.CombatStability + itembonuses.CombatStability +
+			spellbonuses.CombatStability) / 100.0f;
 
-	aa_mit = (aabonuses.CombatStability + itembonuses.CombatStability + spellbonuses.CombatStability)/100.0f;
-
-	if(RuleB(Combat, UseIntervalAC))
-	{
-		float softcap = 0.0;
+	if (RuleB(Combat, UseIntervalAC)) {
+		float softcap = (GetSkill(SkillDefense) + GetLevel()) *
+			RuleR(Combat, SoftcapFactor) * (1.0 + aa_mit);
 		float mitigation_rating = 0.0;
 		float attack_rating = 0.0;
 		int shield_ac = 0;
@@ -556,150 +555,101 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		float monkweight = RuleI(Combat, MonkACBonusWeight);
 		monkweight = mod_monk_weight(monkweight, attacker);
 
-		if(IsClient())
-		{
+		if (IsClient()) {
 			armor = CastToClient()->GetRawACNoShield(shield_ac);
 			weight = (CastToClient()->CalcCurrentWeight() / 10.0);
-		}
-		else if(IsNPC())
-		{
+		} else if (IsNPC()) {
 			armor = CastToNPC()->GetRawAC();
 
-			if(!IsPet())
-			{
+			if (!IsPet())
 				armor = (armor / RuleR(Combat, NPCACFactor));
-			}
 
 			armor += spellbonuses.AC + itembonuses.AC + 1;
 		}
 
-		if(opts) {
+		if (opts) {
 			armor *= (1.0f - opts->armor_pen_percent);
 			armor -= opts->armor_pen_flat;
 		}
 
-		if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER)
-		{
-			softcap = RuleI(Combat, ClothACSoftcap);
-		}
-		else if(GetClass() == MONK && weight <= monkweight)
-		{
-			softcap = RuleI(Combat, MonkACSoftcap);
-		}
-		else if(GetClass() == DRUID || GetClass() == BEASTLORD || GetClass() == MONK)
-		{
-			softcap = RuleI(Combat, LeatherACSoftcap);
-		}
-		else if(GetClass() == SHAMAN || GetClass() == ROGUE || GetClass() == BERSERKER || GetClass() == RANGER)
-		{
-			softcap = RuleI(Combat, ChainACSoftcap);
-		}
-		else
-		{
-			softcap = RuleI(Combat, PlateACSoftcap);
+		if (RuleB(Combat, OldACSoftcapRules)) {
+			if (GetClass() == WIZARD || GetClass() == MAGICIAN ||
+					GetClass() == NECROMANCER || GetClass() == ENCHANTER)
+				softcap = RuleI(Combat, ClothACSoftcap);
+			else if (GetClass() == MONK && weight <= monkweight)
+				softcap = RuleI(Combat, MonkACSoftcap);
+			else if(GetClass() == DRUID || GetClass() == BEASTLORD || GetClass() == MONK)
+				softcap = RuleI(Combat, LeatherACSoftcap);
+			else if(GetClass() == SHAMAN || GetClass() == ROGUE ||
+					GetClass() == BERSERKER || GetClass() == RANGER)
+				softcap = RuleI(Combat, ChainACSoftcap);
+			else
+				softcap = RuleI(Combat, PlateACSoftcap);
 		}
 
 		softcap += shield_ac;
 		armor += shield_ac;
-		softcap += (softcap * (aa_mit * RuleR(Combat, AAMitigationACFactor)));
-		if(armor > softcap)
-		{
+		if (RuleB(Combat, OldACSoftcapRules))
+			softcap += (softcap * (aa_mit * RuleR(Combat, AAMitigationACFactor)));
+		if (armor > softcap) {
 			int softcap_armor = armor - softcap;
-			if(GetClass() == WARRIOR)
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, WarriorACSoftcapReturn);
-			}
-			else if(GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || (GetClass() == MONK && weight <= monkweight))
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, KnightACSoftcapReturn);
-			}
-			else if(GetClass() == CLERIC || GetClass() == BARD || GetClass() == BERSERKER || GetClass() == ROGUE || GetClass() == SHAMAN || GetClass() == MONK)
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, LowPlateChainACSoftcapReturn);
-			}
-			else if(GetClass() == RANGER || GetClass() == BEASTLORD)
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, LowChainLeatherACSoftcapReturn);
-			}
-			else if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER || GetClass() == DRUID)
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, CasterACSoftcapReturn);
-			}
-			else
-			{
-				softcap_armor = softcap_armor * RuleR(Combat, MiscACSoftcapReturn);
+			if (RuleB(Combat, OldACSoftcapRules)) {
+				if (GetClass() == WARRIOR)
+					softcap_armor = softcap_armor * RuleR(Combat, WarriorACSoftcapReturn);
+				else if (GetClass() == SHADOWKNIGHT || GetClass() == PALADIN ||
+						(GetClass() == MONK && weight <= monkweight))
+					softcap_armor = softcap_armor * RuleR(Combat, KnightACSoftcapReturn);
+				else if (GetClass() == CLERIC || GetClass() == BARD ||
+						GetClass() == BERSERKER || GetClass() == ROGUE ||
+						GetClass() == SHAMAN || GetClass() == MONK)
+					softcap_armor = softcap_armor * RuleR(Combat, LowPlateChainACSoftcapReturn);
+				else if (GetClass() == RANGER || GetClass() == BEASTLORD)
+					softcap_armor = softcap_armor * RuleR(Combat, LowChainLeatherACSoftcapReturn);
+				else if (GetClass() == WIZARD || GetClass() == MAGICIAN ||
+						GetClass() == NECROMANCER || GetClass() == ENCHANTER ||
+						GetClass() == DRUID)
+					softcap_armor = softcap_armor * RuleR(Combat, CasterACSoftcapReturn);
+				else
+					softcap_armor = softcap_armor * RuleR(Combat, MiscACSoftcapReturn);
+			} else {
+				if (GetClass() == WARRIOR)
+					softcap_armor *= RuleR(Combat, WarACSoftcapReturn);
+				else if (GetClass() == PALADIN || GetClass() == SHADOWKNIGHT)
+					softcap_armor *= RuleR(Combat, PalShdACSoftcapReturn);
+				else if (GetClass() == CLERIC || GetClass() == RANGER ||
+						GetClass() == MONK || GetClass() == BARD)
+					softcap_armor *= RuleR(Combat, ClrRngMnkBrdACSoftcapReturn);
+				else if (GetClass() == DRUID || GetClass() == NECROMANCER ||
+						GetClass() == WIZARD || GetClass() == ENCHANTER ||
+						GetClass() == MAGICIAN)
+					softcap_armor *= RuleR(Combat, DruNecWizEncMagACSoftcapReturn);
+				else if (GetClass() == ROGUE || GetClass() == SHAMAN ||
+						GetClass() == BEASTLORD || GetClass() == BERSERKER)
+					softcap_armor *= RuleR(Combat, RogShmBstBerACSoftcapReturn);
+				else
+					softcap_armor *= RuleR(Combat, MiscACSoftcapReturn);
 			}
 			armor = softcap + softcap_armor;
 		}
 
-		mitigation_rating = 0.0;
-		if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER)
-		{
+		if (GetClass() == WIZARD || GetClass() == MAGICIAN ||
+				GetClass() == NECROMANCER || GetClass() == ENCHANTER)
 			mitigation_rating = ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10) / 4.0) + armor + 1;
-		}
 		else
-		{
 			mitigation_rating = ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10) / 3.0) + (armor * 1.333333) + 1;
-		}
 		mitigation_rating *= 0.847;
 
 		mitigation_rating = mod_mitigation_rating(mitigation_rating, attacker);
 
-		if(attacker->IsClient())
-		{
+		if (attacker->IsClient())
 			attack_rating = (attacker->CastToClient()->CalcATK() + ((attacker->GetSTR()-66) * 0.9) + (attacker->GetSkill(SkillOffense)*1.345));
-		}
 		else
-		{
 			attack_rating = (attacker->GetATK() + (attacker->GetSkill(SkillOffense)*1.345) + ((attacker->GetSTR()-66) * 0.9));
-		}
 
 		attack_rating = attacker->mod_attack_rating(attack_rating, this);
 
-		float d = 10.0;
-		float mit_roll = MakeRandomFloat(0, mitigation_rating);
-		float atk_roll = MakeRandomFloat(0, attack_rating);
-
-		if(atk_roll > mit_roll)
-		{
-			float a_diff = (atk_roll - mit_roll);
-			float thac0 = attack_rating * RuleR(Combat, ACthac0Factor);
-			float thac0cap = ((attacker->GetLevel() * 9) + 20);
-			if(thac0 > thac0cap)
-			{
-				thac0 = thac0cap;
-			}
-			d -= 10.0 * (a_diff / thac0);
-		}
-		else if(mit_roll > atk_roll)
-		{
-			float m_diff = (mit_roll - atk_roll);
-			float thac20 = mitigation_rating * RuleR(Combat, ACthac20Factor);
-			float thac20cap = ((defender->GetLevel() * 9) + 20);
-			if(thac20 > thac20cap)
-			{
-				thac20 = thac20cap;
-
-
-
-			}
-			d += 10 * (m_diff / thac20);
-		}
-
-		if(d < 0.0)
-		{
-			d = 0.0;
-		}
-
-		if(d > 20)
-		{
-			d = 20.0;
-		}
-
-		float interval = (damage - minhit) / 20.0;
-		damage = damage - ((int)d * interval);
-	}
-	else{
+		damage = GetMeleeMitDmg(attacker, damage, minhit, mitigation_rating, attack_rating);
+	} else {
 		////////////////////////////////////////////////////////
 		// Scorpious2k: Include AC in the calculation
 		// use serverop variables to set values
@@ -750,15 +700,98 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 
 		if(damage != 0 && damage < minhit)
 			damage = minhit;
+		//reduce the damage from shielding item and aa based on the min dmg
+		//spells offer pure mitigation
+		damage -= (minhit * defender->itembonuses.MeleeMitigation / 100);
+		damage -= (damage * defender->spellbonuses.MeleeMitigation / 100);
 	}
 
-	//reduce the damage from shielding item and aa based on the min dmg
-	//spells offer pure mitigation
-	damage -= (minhit * defender->itembonuses.MeleeMitigation / 100);
-	damage -= (damage * defender->spellbonuses.MeleeMitigation / 100);
-
-	if(damage < 0)
+	if (damage < 0)
 		damage = 0;
+}
+
+// This is called when the Mob is the one being hit
+int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
+		float mit_rating, float atk_rating)
+{
+	float d = 10.0;
+	float mit_roll = MakeRandomFloat(0, mit_rating);
+	float atk_roll = MakeRandomFloat(0, atk_rating);
+
+	if (atk_roll > mit_roll) {
+		float a_diff = atk_roll - mit_roll;
+		float thac0 = atk_rating * RuleR(Combat, ACthac0Factor);
+		float thac0cap = attacker->GetLevel() * 9 + 20;
+		if (thac0 > thac0cap)
+			thac0 = thac0cap;
+
+		d -= 10.0 * (a_diff / thac0);
+	} else if (mit_roll > atk_roll) {
+		float m_diff = mit_roll - atk_roll;
+		float thac20 = mit_rating * RuleR(Combat, ACthac20Factor);
+		float thac20cap = GetLevel() * 9 + 20;
+		if (thac20 > thac20cap)
+			thac20 = thac20cap;
+
+		d += 10.0 * (m_diff / thac20);
+	}
+
+	if (d < 0.0)
+		d = 0.0;
+	else if (d > 20.0)
+		d = 20.0;
+
+	float interval = (damage - minhit) / 20.0;
+	damage -= ((int)d * interval);
+
+	damage -= (minhit * itembonuses.MeleeMitigation / 100);
+	damage -= (damage * spellbonuses.MeleeMitigation / 100);
+	return damage;
+}
+
+// This is called when the Client is the one being hit
+int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
+		float mit_rating, float atk_rating)
+{
+	if (!attacker->IsNPC() || RuleB(Combat, UseOldDamageIntervalRules))
+		return Mob::GetMeleeMitDmg(attacker, damage, minhit, mit_rating, atk_rating);
+	int d = 10;
+	// floats for the rounding issues
+	float dmg_interval = (damage - minhit) / 19.0;
+	float dmg_bonus = minhit - dmg_interval;
+	float spellMeleeMit = spellbonuses.MeleeMitigation / 100.0;
+	if (GetClass() == WARRIOR)
+		spellMeleeMit += 0.05;
+	dmg_bonus -= dmg_bonus * (itembonuses.MeleeMitigation / 100.0);
+	dmg_interval -= dmg_interval * spellMeleeMit;
+
+	float mit_roll = MakeRandomFloat(0, mit_rating);
+	float atk_roll = MakeRandomFloat(0, atk_rating);
+
+	if (atk_roll > mit_roll) {
+		float a_diff = atk_roll - mit_roll;
+		float thac0 = atk_rating * RuleR(Combat, ACthac0Factor);
+		float thac0cap = attacker->GetLevel() * 9 + 20;
+		if (thac0 > thac0cap)
+			thac0 = thac0cap;
+
+		d += 10 * (a_diff / thac0);
+	} else if (mit_roll > atk_roll) {
+		float m_diff = mit_roll - atk_roll;
+		float thac20 = mit_rating * RuleR(Combat, ACthac20Factor);
+		float thac20cap = GetLevel() * 9 + 20;
+		if (thac20 > thac20cap)
+			thac20 = thac20cap;
+
+		d -= 10 * (m_diff / thac20);
+	}
+
+	if (d < 1)
+		d = 1;
+	else if (d > 20)
+		d = 20;
+
+	return static_cast<int32>((dmg_bonus + dmg_interval * d));
 }
 
 //Returns the weapon damage against the input mob
@@ -1246,7 +1279,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
 		}
-				
+
 		//check to see if we hit..
 		if(!other->CheckHitChance(this, skillinuse, Hand)) {
 			mlog(COMBAT__ATTACKS, "Attack missed. Damage set to 0.");
@@ -1314,7 +1347,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	if (IsDead()) return false;
 
 	MeleeLifeTap(damage);
-	
+
 	if (damage > 0)
 		CheckNumHitsRemaining(5);
 

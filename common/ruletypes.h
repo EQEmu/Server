@@ -357,6 +357,14 @@ RULE_REAL ( Combat, LowPlateChainACSoftcapReturn, 0.23)
 RULE_REAL ( Combat, LowChainLeatherACSoftcapReturn, 0.17)
 RULE_REAL ( Combat, CasterACSoftcapReturn, 0.06)
 RULE_REAL ( Combat, MiscACSoftcapReturn, 0.3)
+RULE_BOOL ( Combat, OldACSoftcapRules, false) // use old softcaps
+RULE_BOOL ( Combat, UseOldDamageIntervalRules, false) // use old damage formulas for everything
+RULE_REAL ( Combat, WarACSoftcapReturn, 0.3448) // new AC returns
+RULE_REAL ( Combat, ClrRngMnkBrdACSoftcapReturn, 0.3030)
+RULE_REAL ( Combat, PalShdACSoftcapReturn, 0.3226)
+RULE_REAL ( Combat, DruNecWizEncMagACSoftcapReturn, 0.2000)
+RULE_REAL ( Combat, RogShmBstBerACSoftcapReturn, 0.2500)
+RULE_REAL ( Combat, SoftcapFactor, 1.88)
 RULE_REAL ( Combat, ACthac0Factor, 0.55)
 RULE_REAL ( Combat, ACthac20Factor, 0.55)
 RULE_INT ( Combat, HitCapPre20, 40) // live has it capped at 40 for whatever dumb reason... this is mainly for custom servers
