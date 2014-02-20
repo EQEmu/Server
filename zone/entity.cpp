@@ -3083,10 +3083,11 @@ NPCProximity* EntityList::AddProximity(NPC *proximity_for)
 
 bool EntityList::RemoveProximity(NPC* delete_owner)
 {
+	auto plist = proximity_list.data();
 	for (size_t i = 0; i < proximity_list.size(); ++i) {
-		if (proximity_list[i].owner == delete_owner) {
+		if (plist[i].owner == delete_owner) {
 			//swap 'n pop
-			proximity_list[i] = proximity_list.back();
+			plist[i] = proximity_list.back();
 			proximity_list.pop_back();
 			return true;
 		}
@@ -3114,8 +3115,9 @@ void EntityList::ProcessMove(Client *c, float x, float y, float z)
 	float last_z = c->ProximityZ();
 
 	std::list<quest_proximity_event> events;
+	auto plist = proximity_list.data();
 	for (size_t i = 0; i < proximity_list.size(); ++i) {
-		NPCProximity *l = &proximity_list[i];
+		NPCProximity *l = &plist[i];
 
 		//check both bounding boxes, if either coords pairs
 		//cross a boundary, send the event.
@@ -3310,8 +3312,9 @@ void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 langu
 	if (!Message || !c)
 		return;
 
+	auto plist = proximity_list.data();
 	for (size_t i = 0; i < proximity_list.size(); ++i) {
-		NPCProximity *l = &proximity_list[i];
+		NPCProximity *l = &plist[i];
 		if (!l->say)
 			continue;
 
