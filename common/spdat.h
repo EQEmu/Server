@@ -293,7 +293,7 @@ typedef enum {
 #define SE_LimitCastTimeMin				143 // implemented
 #define SE_LimitCastTimeMax				144	// implemented (*not used in any known live spell)
 #define SE_Teleport2					145	// implemented - Banishment of the Pantheon
-#define SE_ElectricityResist			146	// *not implemented (Lightning Rod: 23233) 
+//#define SE_ElectricityResist			146	// *not implemented (Lightning Rod: 23233) 
 #define SE_PercentalHeal				147 // implemented
 #define SE_StackingCommand_Block		148 // implemented?
 #define SE_StackingCommand_Overwrite	149 // implemented?
@@ -349,73 +349,73 @@ typedef enum {
 #define SE_Taunt						199	// implemented - % chance to taunt the target
 #define SE_ProcChance					200	// implemented
 #define SE_RangedProc					201	// implemented
-#define SE_IllusionOther				202	// *not implemented as bonus(Project Illusion)
-#define SE_MassGroupBuff				203	// *not implemented as bonus
+//#define SE_IllusionOther				202	// *not implemented as bonus(Project Illusion)
+//#define SE_MassGroupBuff				203	// *not implemented as bonus
 #define SE_GroupFearImmunity			204	// *not implemented as bonus
 #define SE_Rampage						205	// implemented
 #define SE_AETaunt						206	// implemented
 #define SE_FleshToBone					207	// implemented
 //#define SE_PurgePoison				208	// not used
 #define SE_DispelBeneficial				209 // implemented
-#define SE_PetShield					210	// *not implemented
+//#define SE_PetShield					210	// *not implemented
 #define SE_AEMelee						211	// implemented
-#define SE_CastingSkills				212	// *not implemented -Include/Exclude Casting Skill type. (*no longer used on live)
+//#define SE_CastingSkills				212	// *not implemented -Include/Exclude Casting Skill type. (*no longer used on live)
 #define SE_PetMaxHP						213	// implemented[AA] - increases the maximum hit points of your pet
 #define SE_MaxHPChange					214	// implemented
 #define SE_PetAvoidance					215	// implemented[AA] - increases pet ability to avoid melee damage
 #define SE_Accuracy						216	// implemented
-#define SE_HeadShot						217	// not implemented as bonus - ability to head shot (base2 = damage)
+//#define SE_HeadShot					217	// not implemented as bonus - ability to head shot (base2 = damage)
 #define SE_PetCriticalHit				218 // implemented[AA] - gives pets a baseline critical hit chance
 #define SE_SlayUndead					219	// implemented - Allow extra damage against undead (base1 = rate, base2 = damage mod).
 #define SE_SkillDamageAmount			220	// implemented
-#define SE_Packrat						221 // not implemented as bonus
+#define SE_Packrat						221 // implemented as bonus
 #define SE_BlockBehind					222	// implemented - Chance to block from behind (with our without Shield)
 //#define SE_DoubleRiposte				223	// not used
 #define	SE_GiveDoubleRiposte			224 // implemented[AA]
 #define SE_GiveDoubleAttack				225	// implemented[AA] - Allow any class to double attack with set chance.
-#define SE_TwoHandBash					226 // not implemented as bonus
+#define SE_TwoHandBash					226 // *not implemented as bonus
 #define SE_ReduceSkillTimer				227	// implemented
 #define SE_ReduceFallDamage				228	// not implented as bonus - reduce the damage that you take from falling
 #define SE_PersistantCasting			229 // implemented
-#define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
+//#define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
 #define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
 #define SE_DivineSave					232	// implemented (base1 == % chance on death to insta-res) (base2 == spell cast on save)
-#define SE_Metabolism					233	// *not implemented - (Crown of Feathers) Increase metabolism?
-#define SE_ReduceApplyPoisonTime		234	// not implemented as bonus - reduces the time to apply poison
+//#define SE_Metabolism					233	// *not implemented - (Crown of Feathers) Increase metabolism?
+//#define SE_ReduceApplyPoisonTime		234	// not implemented as bonus - reduces the time to apply poison
 #define	SE_ChannelChanceSpells			235 // implemented[AA] - chance to channel from SPELLS *No longer used on live.
 //#define SE_FreePet					236	// not used
 #define SE_GivePetGroupTarget			237 // implemented[AA] - (Pet Affinity)
-#define SE_IllusionPersistence			238	// *not implemented - lends persistence to your illusionary disguises, causing them to last until you die or the illusion is forcibly removed.
-#define SE_FeignedCastOnChance			239	// *not implemented as bonus - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
+//#define SE_IllusionPersistence		238	// *not implemented - lends persistence to your illusionary disguises, causing them to last until you die or the illusion is forcibly removed.
+//#define SE_FeignedCastOnChance		239	// *not implemented as bonus - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
 //#define SE_StringUnbreakable			240	// not used [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
 #define SE_ImprovedReclaimEnergy		241	// not implemented as bonus - increase the amount of mana returned to you when reclaiming your pet.
 #define SE_IncreaseChanceMemwipe		242	// implemented - increases the chance to wipe hate with memory blurr
 #define SE_CharmBreakChance				243	// implemented - Total Domination
 #define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.
-#define SE_TrapCircumvention			245	// *not implemented[AA] - decreases the chance that you will set off a trap when opening a chest
-#define SE_SetBreathLevel				246 // not implemented as bonus
+//#define SE_TrapCircumvention			245	// *not implemented[AA] - decreases the chance that you will set off a trap when opening a chest
+#define SE_SetBreathLevel				246 // *not implemented as bonus
 #define SE_RaiseSkillCap				247	// *not implemented[AA] - adds skill over the skill cap.
-#define SE_SecondaryForte				248 // not implemented as bonus(gives you a 2nd specialize skill that can go past 50 to 100)
+//#define SE_SecondaryForte				248 // not implemented as bonus(gives you a 2nd specialize skill that can go past 50 to 100)
 #define SE_SecondaryDmgInc				249 // implemented[AA] Allows off hand weapon to recieve a damage bonus (Sinister Strikes)
 #define SE_SpellProcChance				250	// implemented - Increase chance to sympathetic proc by %
 #define SE_ConsumeProjectile			251	// implemented[AA] - chance to not consume an arrow (ConsumeProjectile = 100)
 #define SE_FrontalBackstabChance		252	// implemented[AA] - chance to perform a full damage backstab from front.
 #define SE_FrontalBackstabMinDmg		253	// implemented[AA] - allow a frontal backstab for mininum damage.
 #define SE_Blank						254 // implemented
-#define SE_ShieldDuration				255	// not implemented as bonus - increases duration of /shield
-#define SE_ShroudofStealth				256	// not implemented as bonus - rogue improved invs
-#define SE_PetDiscipline				257 // not implemented as bonus - /pet hold
+//#define SE_ShieldDuration				255	// not implemented as bonus - increases duration of /shield
+//#define SE_ShroudofStealth			256	// not implemented as bonus - rogue improved invs
+//#define SE_PetDiscipline				257 // not implemented as bonus - /pet hold
 #define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab
 #define SE_CombatStability				259 // implemented[AA] - damage mitigation
 #define SE_AddSingingMod				260 // implemented[AA] - Instrument/Singing Mastery, base1 is the mod, base2 is the ItemType
 #define SE_SongModCap					261	// implemented[AA] - Song Mod cap increase (no longer used on live)
 #define SE_RaiseStatCap					262 // implemented
 #define	SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.
-#define SE_HastenedAASkill				264 // not implemented as bonus - Use redux field in aa_actions table for this effect
+//#define SE_HastenedAASkill			264 // not implemented as bonus - Use redux field in aa_actions table for this effect
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
 #define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
 #define SE_PetDiscipline2				267 // *not implemented - /pet focus, /pet no cast
-#define SE_ReduceTradeskillFail			268 // *not implemented? - reduces chance to fail with given tradeskill by a percent chance
+//#define SE_ReduceTradeskillFail		268 // *not implemented? - reduces chance to fail with given tradeskill by a percent chance
 #define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
 #define SE_BardSongRange				270	// implemented[AA] - increase range of beneficial bard songs (Sionachie's Crescendo)
 #define SE_BaseMovementSpeed			271 // implemented[AA] - mods basemove speed, doesn't stack with other move mods
@@ -428,11 +428,11 @@ typedef enum {
 #define	SE_FinishingBlow				278 // implemented[AA] - chance to do massive damage under 10% HP (base1 = chance, base2 = damage)
 #define SE_Flurry						279	// implemented
 #define SE_PetFlurry					280 // implemented[AA]
-#define SE_FeignedMinion				281	// *not implemented[AA] ability allows you to instruct your pet to feign death via the '/pet feign' command. value = succeed chance
+//#define SE_FeignedMinion				281	// *not implemented[AA] ability allows you to instruct your pet to feign death via the '/pet feign' command. value = succeed chance
 #define SE_ImprovedBindWound			282	// implemented[AA] - increase bind wound amount by percent.
 #define SE_DoubleSpecialAttack			283	// implemented[AA] - Chance to perform second special attack as monk
 //#define SE_LoHSetHeal					284	// not used
-#define SE_NimbleEvasion				285	// *not implemented - base1 = 100 for max
+//#define SE_NimbleEvasion				285	// *not implemented - base1 = 100 for max
 #define SE_FcDamageAmt					286	// implemented - adds direct spell damage
 #define SE_SpellDurationIncByTic		287 // implemented
 #define SE_SpecialAttackKBProc			288	// implemented[AA] - Chance to to do a knockback from special attacks [AA Dragon Punch].
@@ -453,13 +453,13 @@ typedef enum {
 #define SE_FcDamageAmtCrit				303	// implemented - adds direct spell damage
 #define SE_OffhandRiposteFail			304 // implemented as bonus - enemy cannot riposte offhand attacks
 #define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
-#define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
-#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
+//#define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
+//#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
 #define SE_SuspendMinion				308 // not implemented as bonus
 #define SE_YetAnotherGate				309 // implemented
 #define SE_ReduceReuseTimer				310 // implemented
 #define SE_LimitCombatSkills			311 // implemented - Excludes focus from procs (except if proc is a memorizable spell)
-#define SE_Sanctuary					312 // *not implemented
+//#define SE_Sanctuary					312 // *not implemented
 #define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
 #define SE_Invisibility2				314 // implemented - fixed duration invisible
 #define SE_InvisVsUndead2				315 // implemented - fixed duration ITU
@@ -472,14 +472,14 @@ typedef enum {
 #define SE_GateToHomeCity				322 // implemented
 #define SE_DefensiveProc				323 // implemented
 #define SE_HPToMana						324 // implemented
-#define SE_ChanceInvsBreakToAoE			325	// *not implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
-#define SE_SpellSlotIncrease			326 // not implemented as bonus - increases your spell slot availability
+//#define SE_ChanceInvsBreakToAoE		325	// *not implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
+#define SE_SpellSlotIncrease			326 // *not implemented as bonus - increases your spell slot availability
 #define SE_MysticalAttune				327 // implemented - increases amount of buffs that a player can have
 #define SE_DelayDeath					328 // implemented - increases how far you can fall below 0 hp before you die
 #define SE_ManaAbsorbPercentDamage		329 // implemented
 #define SE_CriticalDamageMob			330	// implemented
-#define SE_Salvage						331 // *not implemented - chance to recover items that would be destroyed in failed tradeskill combine
-#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp)
+#define SE_Salvage						331 // implemented - chance to recover items that would be destroyed in failed tradeskill combine
+//#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp)
 #define SE_EffectOnFade					333 // implemented
 #define SE_BardAEDot					334	// implemented
 #define SE_BlockNextSpellFocus			335	// implemented - base1 chance to block next spell ie Puratus (8494)
@@ -492,15 +492,15 @@ typedef enum {
 #define SE_ImmuneFleeing				342	// implemented - stop mob from fleeing
 #define SE_InterruptCasting				343	// implemented - % chance to interrupt spells being cast every tic. Cacophony (8272)
 #define SE_ChannelChanceItems			344	// implemented[AA] - chance to not have ITEM effects interrupted when you take damage.
-#define SE_AssassinationLevel			345	// not implemented as bonus - AA Assisination max level to kill
-#define SE_HeadShotLevel				346	// not implemented as bonus - AA HeadShot max level to kill
+//#define SE_AssassinationLevel			345	// not implemented as bonus - AA Assisination max level to kill
+//#define SE_HeadShotLevel				346	// not implemented as bonus - AA HeadShot max level to kill
 #define SE_DoubleRangedAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
 #define SE_LimitManaMin					348	// implemented
 #define SE_ShieldEquipHateMod			349	// implemented[AA] Increase melee hate when wearing a shield.
 #define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
-#define SE_PersistentEffect				351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
-#define SE_IncreaseTrapCount			352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
-#define SE_AdditionalAura				353	// *not implemented - allows use of more than 1 aura, aa effect
+//#define SE_PersistentEffect			351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
+//#define SE_IncreaseTrapCount			352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
+//#define SE_AdditionalAura				353	// *not implemented - allows use of more than 1 aura, aa effect
 //#define SE_DeactivateAllTraps			354	// *not implemented - looks to be some type of invulnerability? Test DAT (8757)
 //#define SE_LearnTrap					355	// *not implemented - looks to be some type of invulnerability? Test LT (8758)
 //#define SE_ChangeTriggerType			356	// not used
@@ -509,17 +509,17 @@ typedef enum {
 #define SE_Invulnerabilty				359	// *not implemented - Invulnerability (Brell's Blessing)
 #define SE_SpellOnKill					360	// implemented - a buff that has a base1 % to cast spell base2 when you kill a "challenging foe" base3 min level
 #define SE_SpellOnDeath					361	// implemented - casts spell on death of buffed
-#define SE_PotionBeltSlots				362	// *not implemented[AA] 'Quick Draw' expands the potion belt by one additional available item slot per rank.
-#define SE_BandolierSlots				363	// *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
+//#define SE_PotionBeltSlots			362	// *not implemented[AA] 'Quick Draw' expands the potion belt by one additional available item slot per rank.
+//#define SE_BandolierSlots				363	// *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
 #define SE_TripleAttackChance			364	// implemented
 #define SE_SpellOnKill2					365	// implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
 #define SE_ShieldEquipDmgMod			366	// implemented[AA] Damage modifier to melee if shield equiped. (base1 = dmg mod , base2 = ?) ie Shield Specialist AA
 #define SE_SetBodyType					367	// implemented - set body type of base1 so it can be affected by spells that are limited to that type (Plant, Animal, Undead, etc)
-#define SE_FactionMod					368	// *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2
+//#define SE_FactionMod					368	// *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2
 #define SE_CorruptionCounter			369	// implemented
 #define SE_ResistCorruption				370	// implemented
 #define SE_AttackSpeed4					371 // implemented - stackable slow effect 'Inhibit Melee'
-#define SE_ForageSkill					372	// *not implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
+//#define SE_ForageSkill				372	// *not implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
 #define SE_CastOnWearoff				373 // implemented - Triggers only if fades after natural duration.
 #define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
@@ -528,30 +528,30 @@ typedef enum {
 #define SE_SpellEffectResistChance		378	// implemented - Increase chance to resist specific spell effect (base1=value, base2=spell effect id)
 #define SE_ShadowStepDirectional		379 // implemented - handled by client
 #define SE_Knockdown					380 // implemented - small knock back(handled by client)
-#define	SE_KnockTowardCaster			381	// *not implemented (Call of Hither) knocks you back to caster (value) distance units infront
+//#define SE_KnockTowardCaster			381	// *not implemented (Call of Hither) knocks you back to caster (value) distance units infront
 #define SE_NegateSpellEffect			382 // implemented - negates specific spell bonuses for duration of the debuff.
 #define SE_SympatheticProc				383 // implemented - focus on items that has chance to proc a spell when you cast
 #define SE_Leap							384	// implemented - Leap effect, ie stomping leap
 #define SE_LimitSpellGroup				385	// implemented - Limits to spell group(ie type 3 reuse reduction augs that are class specific and thus all share s SG)
 #define SE_CastOnCurer					386 // implemented - Casts a spell on the person curing
 #define SE_CastOnCure					387 // implemented - Casts a spell on the cured person
-#define SE_SummonCorpseZone				388 // *not implemented - summons a corpse from any zone(nec AA)
+//#define SE_SummonCorpseZone			388 // *not implemented - summons a corpse from any zone(nec AA)
 #define SE_FcTimerRefresh				389 // implemented - Refresh spell icons
-#define SE_FcTimerLockout				390 // *not implemented - Sets recast timers to specific value, focus limited.
+//#define SE_FcTimerLockout				390 // *not implemented - Sets recast timers to specific value, focus limited.
 #define SE_LimitManaMax					391	// implemented 
 #define SE_FcHealAmt					392 // implemented - Adds or removes healing from spells
 #define SE_FcHealPctIncoming			393 // implemented - HealRate with focus restrictions.
 #define SE_FcHealAmtIncoming			394 // implemented - Adds/Removes amount of healing on target by X value with foucs restrictions.
 #define SE_FcHealPctCritIncoming		395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
 #define SE_FcHealAmtCrit				396 // implemented - Adds a direct healing amount to spells
-#define SE_PetMeleeMitigation			397 // *not implemented[AA] - additional mitigation to your pets.
+//#define SE_PetMeleeMitigation			397 // *not implemented[AA] - additional mitigation to your pets.
 #define SE_SwarmPetDuration				398 // implemented - Affects the duration of swarm pets
 #define SE_FcTwincast					399 // implemented - cast 2 spells for every 1
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
 #define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
 #define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
-#define SE_LimitSpellClass				403 // *not implemented - unclear what this refers too (not 'right click' spell bar)
-#define SE_LimitSpellSubclass			404 // *not implemented - unclear what this refers too (not 'right click' spell bar)
+//#define SE_LimitSpellClass			403 // *not implemented - unclear what this refers too (not 'right click' spell bar)
+//#define SE_LimitSpellSubclass			404 // *not implemented - unclear what this refers too (not 'right click' spell bar)
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
 #define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied) 
@@ -573,7 +573,7 @@ typedef enum {
 #define SE_LimitUseType					423 // implemented	- limit a focus to require a certain numhits type 
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
 //#define SE_Display					425 // *not implemented - Illusion: Flying Dragon(21626)
-#define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
+//#define SE_IncreaseExtTargetWindow	426 // *not implmented[AA] - increases the capacity of your extended target window
 #define SE_SkillProc					427 // implemented - chance to proc when using a skill(ie taunt)
 #define SE_LimitToSkill					428 // implemented - limits what skills will effect a skill proc
 #define SE_SkillProc2					429 // implemented - chance to proc when using a skill (most have hit limits)
@@ -584,20 +584,20 @@ typedef enum {
 #define SE_CriticalHealDecay			434 // implemented - increase critical heal chance, effect decays based on level of spell it effects.
 #define SE_CriticalRegenDecay			435 // implemented - increase critical heal over time chance, effect decays based on level of spell it effects.
 //#define SE_BeneficialCountDownHold	436 // not used ( 23491 | ABTest Buff Hold)
-#define SE_TeleporttoAnchor				437 // *not implemented - Teleport Guild Hall Anchor(33099)
-#define SE_TranslocatetoAnchor			438 // *not implemented - Translocate Primary Anchor (27750)
-#define SE_IncreaseAssassinationLvl		439 // *not implemented[AA] - increases the maximum level of humanoid that can be affected by assassination
+//#define SE_TeleporttoAnchor			437 // *not implemented - Teleport Guild Hall Anchor(33099)
+//#define SE_TranslocatetoAnchor		438 // *not implemented - Translocate Primary Anchor (27750)
+//#define SE_IncreaseAssassinationLvl	439 // *not implemented[AA] - increases the maximum level of humanoid that can be affected by assassination
 #define SE_FinishingBlowLvl				440 // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
-#define SE_CancleIfMoved				441 // *not implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
+#define SE_DistanceRemoval				441 // implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
 #define SE_TriggerOnReqTarget			442 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
 #define SE_TriggerOnReqCaster			443 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
 #define SE_ImprovedTaunt				444 // implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y
-#define SE_AddMercSlot					445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
+//#define SE_AddMercSlot				445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
 //#define SE_AStacker					446 // *not implementet - bufff stacking blocker ? (26219 | Qirik's Watch)
 //#define SE_BStacker					447 // *not implemented 
 //#define SE_CStacker					448 // *not implemented
 //#define SE_DStacker					449 // *not implemented 
-//#define SE_DotGuard					450 // *not implemented 
+#define SE_MitigateDotDamage			450 // implemented  DOT spell mitigation rune with max value
 #define SE_MeleeThresholdGuard			451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
 #define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
 #define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken

@@ -3273,8 +3273,28 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	}
 
 	// If this is a DoT, use DoT Shielding...
-	if(iBuffTic)
-		damage -= (damage * itembonuses.DoTShielding / 100);
+	if(iBuffTic) {
+ 		damage -= (damage * itembonuses.DoTShielding / 100);
+ 
+		if (spellbonuses.MitigateDotRune[0]){
+			slot = spellbonuses.MitigateDotRune[1];
+			if(slot >= 0)
+			{
+				int damage_to_reduce = damage * spellbonuses.MitigateDotRune[0] / 100;
+				if(damage_to_reduce > buffs[slot].dot_rune)
+				{
+					damage -= damage_to_reduce;
+					if(!TryFadeEffect(slot))
+						BuffFadeBySlot(slot);
+				}
+				else
+				{
+					buffs[slot].dot_rune = (buffs[slot].dot_rune - damage_to_reduce);
+					damage -= damage_to_reduce;
+				}
+			}
+		}
+	}
 
 	// This must be a DD then so lets apply Spell Shielding and runes.
 	else
@@ -3342,7 +3362,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 						BuffFadeBySlot(slot);
 				}
 				else{
-					buffs[slot].melee_rune = (buffs[slot].magic_rune - damage);
+					buffs[slot].magic_rune = (buffs[slot].magic_rune - damage);
 				}
 			}
 		}
