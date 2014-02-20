@@ -148,6 +148,7 @@ int main() {
 
 	worldserver->Connect();
 
+	Timer::InitBaseTime();
 	while(RunLoops) {
 
 		Timer::SetCurrentTime();

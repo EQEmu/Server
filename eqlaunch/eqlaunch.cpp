@@ -102,6 +102,7 @@ int main(int argc, char *argv[]) {
 
 	ProcLauncher *launch = ProcLauncher::get();
 	RunLoops = true;
+	Timer::InitBaseTime();
 	while(RunLoops) {
 		//Advance the timer to our current point in time
 		Timer::SetCurrentTime();

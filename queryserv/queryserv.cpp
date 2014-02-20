@@ -108,6 +108,7 @@ int main() {
 
 	lfguildmanager.LoadDatabase();
 
+	Timer::InitBaseTime();
 	while(RunLoops) {
 
 		Timer::SetCurrentTime();
