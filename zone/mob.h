@@ -500,7 +500,7 @@ public:
 	bool AddSkillProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveSkillProc(uint16 spell_id, bool bAll = false);
 	bool HasSkillProcs() const;
-	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3);
+	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveProcFromWeapon(uint16 spell_id, bool bAll = false);
 	bool HasProcs() const;
 

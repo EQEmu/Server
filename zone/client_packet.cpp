@@ -9466,7 +9466,7 @@ void Client::CompleteConnect()
 				case SE_AddMeleeProc:
 				case SE_WeaponProc:
 					{
-					AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100+spells[buffs[j1].spellid].base2[x1]);
+					AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100+spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid);
 					break;
 					}
 				case SE_DefensiveProc:

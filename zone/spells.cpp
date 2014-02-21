@@ -4824,7 +4824,7 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 	return false;
 }
 
-bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance) {
+bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 base_spell_id) {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
 
@@ -4834,7 +4834,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance) {
 			if (PermaProcs[i].spellID == SPELL_UNKNOWN) {
 				PermaProcs[i].spellID = spell_id;
 				PermaProcs[i].chance = iChance;
-				PermaProcs[i].base_spellID = SPELL_UNKNOWN;
+				PermaProcs[i].base_spellID = base_spell_id;
 				mlog(SPELLS__PROCS, "Added permanent proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 
 				return true;
@@ -4846,7 +4846,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance) {
 			if (SpellProcs[i].spellID == SPELL_UNKNOWN) {
 				SpellProcs[i].spellID = spell_id;
 				SpellProcs[i].chance = iChance;
-				SpellProcs[i].base_spellID = SPELL_UNKNOWN;;
+				SpellProcs[i].base_spellID = base_spell_id;;
 				mlog(SPELLS__PROCS, "Added spell-granted proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 				return true;
 			}

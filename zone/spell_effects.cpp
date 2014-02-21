@@ -1695,9 +1695,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 
 				if(spells[spell_id].base2[i] == 0)
-					AddProcToWeapon(procid, false, 100);
+					AddProcToWeapon(procid, false, 100, spell_id);
 				else
-					AddProcToWeapon(procid, false, spells[spell_id].base2[i]+100);
+					AddProcToWeapon(procid, false, spells[spell_id].base2[i]+100, spell_id);
 				break;
 			}
 
