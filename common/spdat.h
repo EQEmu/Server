@@ -688,7 +688,7 @@ struct SPDat_Spell_Struct
 /* 157 */	int effectdescnum; // eqstr of effect description
 /* 158 */   //Category Desc ID 3
 /* 159 */	//bool npc_no_los;
-/* 161 */	bool not_reflectable;
+/* 161 */	bool reflectable;
 /* 162 */	int bonushate;
 /* 163 */
 /* 164 */	// for most spells this appears to mimic ResistDiff

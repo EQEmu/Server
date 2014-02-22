@@ -1710,7 +1710,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 			sp[tempid].descnum = atoi(row[155]);
 			sp[tempid].effectdescnum = atoi(row[157]);
 
-			sp[tempid].not_reflectable = atoi(row[161]) != 0;
+			sp[tempid].reflectable = atoi(row[161]) != 0;
 			sp[tempid].bonushate=atoi(row[162]);
 
 			sp[tempid].EndurCost=atoi(row[166]);
