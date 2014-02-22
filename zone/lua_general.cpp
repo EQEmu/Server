@@ -16,6 +16,7 @@
 #include "QuestParserCollection.h"
 #include "questmgr.h"
 #include "QGlobals.h"
+#include "../common/timer.h"
 
 struct Events { };
 struct Factions { };
@@ -1064,6 +1065,13 @@ void lua_clear_npctype_cache(int npctype_id) {
 	quest_manager.ClearNPCTypeCache(npctype_id);
 }
 
+double lua_clock() {
+	timeval read_time;
+	gettimeofday(&read_time, nullptr);
+	uint32 t = read_time.tv_sec * 1000 + read_time.tv_usec / 1000;
+	return static_cast<double>(t) / 1000.0;
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1231,7 +1239,8 @@ luabind::scope lua_register_general() {
 		luabind::def("clear_opcode", &lua_clear_opcode),
 		luabind::def("enable_recipe", &lua_enable_recipe),
 		luabind::def("disable_recipe", &lua_disable_recipe),
-		luabind::def("clear_npctype_cache", &lua_clear_npctype_cache)
+		luabind::def("clear_npctype_cache", &lua_clear_npctype_cache),
+		luabind::def("clock", &lua_clock)
 	];
 }
 
