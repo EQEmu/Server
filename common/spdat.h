@@ -265,7 +265,7 @@ typedef enum {
 #define SE_Hunger						115	// implemented - Song of Sustenance
 #define SE_CurseCounter					116	// implemented
 #define SE_MagicWeapon					117	// implemented - makes weapon magical
-#define SE_SingingSkill					118	// *implemented - needs AA conversion
+#define SE_Amplification				118	// implemented - Harmonize/Amplification (stacks with other singing mods)
 #define SE_AttackSpeed3					119	// implemented
 #define SE_HealRate						120	// implemented - reduces healing by a %
 #define SE_ReverseDS					121 // implemented

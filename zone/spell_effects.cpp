@@ -2631,7 +2631,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_MeleeMitigation:
 			case SE_Reflect:
 			case SE_Screech:
-			case SE_SingingSkill:
+			case SE_Amplification:
 			case SE_MagicWeapon:
 			case SE_Hunger:
 			case SE_MagnifyVision:

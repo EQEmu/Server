@@ -1607,12 +1607,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->reflect_chance += effect_value;
 				break;
 
-			case SE_SingingSkill:
-			{
-				if(effect_value > newbon->singingMod)
-					newbon->singingMod = effect_value;
+			case SE_Amplification:
+				newbon->Amplification += effect_value;
 				break;
-			}
 
 			case SE_ChangeAggro:
 				newbon->hatemod += effect_value;
@@ -3124,10 +3121,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.reflect_chance = effect_value;
 					break;
 
-				case SE_SingingSkill:
-					spellbonuses.singingMod = effect_value;
-					itembonuses.singingMod = effect_value;
-					aabonuses.singingMod = effect_value;
+				case SE_Amplification:
+					spellbonuses.Amplification = effect_value;
+					itembonuses.Amplification = effect_value;
+					aabonuses.Amplification = effect_value;
 					break;
 
 				case SE_ChangeAggro:

@@ -231,6 +231,7 @@ struct StatBonuses {
 	int		effective_casting_level;
 	int		reflect_chance;						// chance to reflect incoming spell
 	uint16	singingMod;
+	uint16	Amplification;						// stacks with singingMod
 	uint16	brassMod;
 	uint16	percussionMod;
 	uint16	windMod;
