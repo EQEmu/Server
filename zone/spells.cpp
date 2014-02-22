@@ -2957,6 +2957,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].caston_y = 0;
 	buffs[emptyslot].caston_z = 0;
 	buffs[emptyslot].dot_rune = 0;
+	buffs[emptyslot].ExtraDIChance = 0;
 
 	if (level_override > 0) {
 		buffs[emptyslot].UpdateClient = true;

@@ -2476,7 +2476,7 @@ void Bot::SaveBuffs() {
 
 			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO botbuffs (BotId, SpellId, CasterLevel, DurationFormula, "
 				"TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, "
-				"dot_rune, caston_x, Persistent, caston_y, caston_z) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
+				"dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
 				GetBotID(), buffs[BuffCount].spellid, buffs[BuffCount].casterlevel, spells[buffs[BuffCount].spellid].buffdurationformula,
 				buffs[BuffCount].ticsremaining,
 				CalculatePoisonCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
@@ -2485,7 +2485,11 @@ void Bot::SaveBuffs() {
 				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
 				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
 				buffs[BuffCount].dot_rune,
-				buffs[BuffCount].caston_x, IsPersistent, buffs[BuffCount].caston_y,buffs[BuffCount].caston_z), TempErrorMessageBuffer)) {
+				buffs[BuffCount].caston_x, 
+				IsPersistent, 
+				buffs[BuffCount].caston_y,
+				buffs[BuffCount].caston_z, 
+				buffs[BuffCount].ExtraDIChance), TempErrorMessageBuffer)) {
 				errorMessage = std::string(TempErrorMessageBuffer);
 				safe_delete(Query);
 				Query = 0;
@@ -2515,7 +2519,7 @@ void Bot::LoadBuffs() {
 
 	bool BuffsLoaded = false;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, caston_y, caston_z FROM botbuffs WHERE BotId = %u", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
+	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance FROM botbuffs WHERE BotId = %u", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
@@ -2550,8 +2554,9 @@ void Bot::LoadBuffs() {
 			if(atoi(DataRow[13]))
 				IsPersistent = true;
 
-			buffs[BuffCount].caston_x = atoi(DataRow[14]);
-			buffs[BuffCount].caston_x = atoi(DataRow[15]);
+			buffs[BuffCount].caston_y = atoi(DataRow[14]);
+			buffs[BuffCount].caston_z = atoi(DataRow[15]);
+			buffs[BuffCount].ExtraDIChance = atoi(DataRow[16]);
 
 			buffs[BuffCount].persistant_buff = IsPersistent;
 

@@ -156,9 +156,10 @@ struct Buffs_Struct {
 	uint32	melee_rune;
 	uint32	magic_rune;
 	uint32	dot_rune;
-	uint32	caston_x;
-	uint32	caston_y;
-	uint32	caston_z;
+	int32	caston_x;
+	int32	caston_y;
+	int32	caston_z;
+	int32  ExtraDIChance;
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;

@@ -1321,6 +1321,20 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
+			case SE_DeathSave: {
+
+				int16 mod = 0;
+				
+				if(caster) {
+					mod =	caster->aabonuses.UnfailingDivinity +
+							caster->itembonuses.UnfailingDivinity +
+							caster->spellbonuses.UnfailingDivinity;
+				}
+ 				
+				buffs[buffslot].ExtraDIChance = mod;
+  				break;
+ 			}
+
 			case SE_Illusion:
 			{
 #ifdef SPELL_EFFECT_SPAM
@@ -1432,10 +1446,17 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Memory Blur: %d", effect_value);
 #endif
 				int wipechance = spells[spell_id].base[i];
-				int bonus = spellbonuses.IncreaseChanceMemwipe + itembonuses.IncreaseChanceMemwipe + aabonuses.IncreaseChanceMemwipe;
+				int bonus = 0;
+				
+				if (caster){
+				bonus = caster->spellbonuses.IncreaseChanceMemwipe + 
+						caster->itembonuses.IncreaseChanceMemwipe + 
+						caster->aabonuses.IncreaseChanceMemwipe;
+				}
+
 				wipechance += wipechance*bonus/100;
 				
-				if(MakeRandomInt(0, 100) < wipechance)
+				if(MakeRandomInt(0, 99) < wipechance)
 				{
 					if(IsAIControlled())
 					{
@@ -2804,7 +2825,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_IncreaseChanceMemwipe:
 			case SE_CriticalMend:
 			case SE_LimitCastTimeMax:
-			case SE_DeathSave:
 			case SE_TriggerOnReqCaster:
 			{
 				break;
@@ -3263,6 +3283,31 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 							SetHate(caster,newhate);
 						}
 					}
+				}
+				break;
+			}
+
+			case SE_WipeHateList:
+			{
+
+				int wipechance = spells[spell_id].base[i];
+				int bonus = 0;
+				
+				if (caster){
+					bonus =	caster->spellbonuses.IncreaseChanceMemwipe + 
+							caster->itembonuses.IncreaseChanceMemwipe + 
+							caster->aabonuses.IncreaseChanceMemwipe;
+				}
+				
+				wipechance += wipechance*bonus/100;
+				
+				if(MakeRandomInt(0, 99) < wipechance)
+				{
+					if(IsAIControlled())
+					{
+						WipeHateList();
+					}
+					Message(13, "Your mind fogs. Who are my friends? Who are my enemies?... it was all so clear a moment ago...");
 				}
 				break;
 			}
@@ -5262,12 +5307,9 @@ bool Mob::TryDeathSave() {
 		int16 UD_HealMod = 0;
 		uint32 HealAmt = 300; //Death Pact max Heal
 
-		Mob* caster = entity_list.GetMobID(buffs[buffSlot].casterid);
-
-		if (caster)
-			UD_HealMod = caster->spellbonuses.UnfailingDivinity + caster->itembonuses.UnfailingDivinity + caster->aabonuses.UnfailingDivinity;
-
 		if(buffSlot >= 0){
+
+			UD_HealMod = buffs[buffSlot].ExtraDIChance;
 
 			SuccessChance = ( (GetCHA() * (RuleI(Spells, DeathSaveCharismaMod))) + 1) / 10; //(CHA Mod Default = 3)
 
@@ -5333,6 +5375,8 @@ bool Mob::TryDeathSave() {
 				}
 			}
 		}
+
+		BuffFadeBySlot(buffSlot);
 	}
 	return false;
 }

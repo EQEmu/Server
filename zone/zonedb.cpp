@@ -1815,7 +1815,7 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 
 			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO merc_buffs (MercId, SpellId, CasterLevel, DurationFormula, "
 				"TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, "
-				"dot_rune, caston_x, Persistent, caston_y, caston_z) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
+				"dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
 				merc->GetMercID(), buffs[BuffCount].spellid, buffs[BuffCount].casterlevel, spells[buffs[BuffCount].spellid].buffdurationformula,
 				buffs[BuffCount].ticsremaining,
 				CalculatePoisonCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
@@ -1824,7 +1824,11 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
 				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
 				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
 				buffs[BuffCount].dot_rune,
-				buffs[BuffCount].caston_x, IsPersistent, buffs[BuffCount].caston_y, buffs[BuffCount].caston_z), TempErrorMessageBuffer)) {
+				buffs[BuffCount].caston_x, 
+				IsPersistent, 
+				buffs[BuffCount].caston_y, 
+				buffs[BuffCount].caston_z,
+				buffs[BuffCount].ExtraDIChance), TempErrorMessageBuffer)) {
 				errorMessage = std::string(TempErrorMessageBuffer);
 				safe_delete(Query);
 				Query = 0;
@@ -1856,7 +1860,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 
 	bool BuffsLoaded = false;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, CasterAARank, Persistent FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer, &DatasetResult)) {
+	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance FROM merc_buffs WHERE MercId = %u", merc->GetMercID()), TempErrorMessageBuffer, &DatasetResult)) {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
@@ -1893,6 +1897,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 
 			buffs[BuffCount].caston_y = atoi(DataRow[13]);
 			buffs[BuffCount].caston_z = atoi(DataRow[14]);
+			buffs[BuffCount].ExtraDIChance = atoi(DataRow[15]);
 
 			buffs[BuffCount].persistant_buff = IsPersistent;
 
@@ -2570,10 +2575,10 @@ void ZoneDatabase::SaveBuffs(Client *c) {
 		if(buffs[i].spellid != SPELL_UNKNOWN) {
 			if(!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `character_buffs` (character_id, slot_id, spell_id, "
 				"caster_level, caster_name, ticsremaining, counters, numhits, melee_rune, magic_rune, persistent, dot_rune, "
-				"caston_x, caston_y, caston_z) VALUES('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
+				"caston_x, caston_y, caston_z, ExtraDIChance) VALUES('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%i', '%i', '%i', '%i')",
 				c->CharacterID(), i, buffs[i].spellid, buffs[i].casterlevel, buffs[i].caster_name, buffs[i].ticsremaining,
 				buffs[i].counters, buffs[i].numhits, buffs[i].melee_rune, buffs[i].magic_rune, buffs[i].persistant_buff,
-				buffs[i].dot_rune, buffs[i].caston_x, buffs[i].caston_y, buffs[i].caston_z),
+				buffs[i].dot_rune, buffs[i].caston_x, buffs[i].caston_y, buffs[i].caston_z, buffs[i].ExtraDIChance),
 				errbuf)) {
 				LogFile->write(EQEMuLog::Error, "Error in SaveBuffs query '%s': %s", query, errbuf);
 			}
@@ -2595,7 +2600,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT spell_id, slot_id, caster_level, caster_name, ticsremaining, counters, "
-		"numhits, melee_rune, magic_rune, persistent, dot_rune, caston_x, caston_y, caston_z FROM `character_buffs` WHERE "
+		"numhits, melee_rune, magic_rune, persistent, dot_rune, caston_x, caston_y, caston_z, ExtraDIChance FROM `character_buffs` WHERE "
 		"`character_id`='%u'",
 		c->CharacterID()), errbuf, &result))
 	{
@@ -2621,9 +2626,10 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 			uint32 magic_rune = atoul(row[8]);
 			uint8 persistent = atoul(row[9]);
 			uint32 dot_rune = atoul(row[10]);
-			uint32 caston_x = atoul(row[11]);
-			uint32 caston_y = atoul(row[12]);
-			uint32 caston_z = atoul(row[13]);
+			int32 caston_x = atoul(row[11]);
+			int32 caston_y = atoul(row[12]);
+			int32 caston_z = atoul(row[13]);
+			int32 ExtraDIChance = atoul(row[14]);
 
 			buffs[slot_id].spellid = spell_id;
 			buffs[slot_id].casterlevel = caster_level;
@@ -2647,6 +2653,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 			buffs[slot_id].caston_x = caston_x;
 			buffs[slot_id].caston_y = caston_y;
 			buffs[slot_id].caston_z = caston_z;
+			buffs[slot_id].ExtraDIChance = ExtraDIChance;
 			buffs[slot_id].UpdateClient = false;
 			if(IsRuneSpell(spell_id)) {
 				c->SetHasRune(true);
@@ -2655,11 +2662,6 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 				c->SetHasSpellRune(true);
 			}
 
-			/*
-			if(IsDeathSaveSpell(spell_id)) {
-				c->SetDeathSaveChance(true);
-			}
-			*/
 		}
 		mysql_free_result(result);
 	}
