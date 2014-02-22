@@ -342,6 +342,7 @@ public:
 	void ProcessSpecialAbilities(std::string str);
 	void SetAppearance(int app);
 	void SetAppearance(int app, bool ignore_self);
+	void SetDestructibleObject(bool set);
 };
 
 #endif

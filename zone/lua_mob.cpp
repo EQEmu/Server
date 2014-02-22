@@ -1801,6 +1801,11 @@ void Lua_Mob::SetAppearance(int app, bool ignore_self) {
 	self->SetAppearance(static_cast<EmuAppearance>(app), ignore_self);
 }
 
+void Lua_Mob::SetDestructibleObject(bool set) {
+	Lua_Safe_Call_Void();
+	self->SetDestructibleObject(set);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2107,7 +2112,8 @@ luabind::scope lua_register_mob() {
 		.def("ClearSpecialAbilities", (void(Lua_Mob::*)(void))&Lua_Mob::ClearSpecialAbilities)
 		.def("ProcessSpecialAbilities", (void(Lua_Mob::*)(std::string))&Lua_Mob::ProcessSpecialAbilities)
 		.def("SetAppearance", (void(Lua_Mob::*)(int))&Lua_Mob::SetAppearance)
-		.def("SetAppearance", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetAppearance);
+		.def("SetAppearance", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetAppearance)
+		.def("SetDestructibleObject", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDestructibleObject);
 }
 
 luabind::scope lua_register_special_abilities() {
