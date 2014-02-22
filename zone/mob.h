@@ -143,6 +143,7 @@ public:
 	virtual void DoRiposte(Mob* defender);
 	void ApplyMeleeDamageBonus(uint16 skill, int32 &damage);
 	virtual void MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts = nullptr);
+	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
 	bool CombatRange(Mob* other);
 	virtual inline bool IsBerserk() { return false; } // only clients
 
@@ -427,6 +428,8 @@ public:
 		bool bFrenzy = false, bool iBuffTic = false);
 	bool RemoveFromHateList(Mob* mob);
 	void SetHate(Mob* other, int32 hate = 0, int32 damage = 0) { hate_list.Set(other,hate,damage);}
+	void HalveAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHate(other, (in_hate > 1 ? in_hate / 2 : 1)); }
+	void DoubleAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHate(other, (in_hate ? in_hate * 2 : 1)); }
 	uint32 GetHateAmount(Mob* tmob, bool is_dam = false) { return hate_list.GetEntHate(tmob,is_dam);}
 	uint32 GetDamageAmount(Mob* tmob) { return hate_list.GetEntHate(tmob, true);}
 	Mob* GetHateTop() { return hate_list.GetTop(this);}
@@ -497,7 +500,7 @@ public:
 	bool AddSkillProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveSkillProc(uint16 spell_id, bool bAll = false);
 	bool HasSkillProcs() const;
-	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3);
+	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveProcFromWeapon(uint16 spell_id, bool bAll = false);
 	bool HasProcs() const;
 
@@ -587,6 +590,9 @@ public:
 	int32 ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard = false);
 	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect); 
 	int32 GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg);
+	void MeleeLifeTap(int32 damage);
+	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
+	bool ImprovedTaunt();
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -878,7 +884,7 @@ protected:
 	bool IsFullHP;
 	bool moved;
 
-	std::vector<std::string> RampageArray;
+	std::vector<uint16> RampageArray;
 	std::map<std::string, std::string> m_EntityVariables;
 
 	int16 SkillDmgTaken_Mod[HIGHEST_SKILL+2];

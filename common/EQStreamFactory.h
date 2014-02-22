@@ -27,7 +27,7 @@ class EQStreamFactory : private Timeoutable {
 		std::queue<EQStream *> NewStreams;
 		Mutex MNewStreams;
 
-		std::map<std::string,EQStream *> Streams;
+		std::map<std::pair<uint32, uint16>,EQStream *> Streams;
 		Mutex MStreams;
 
 		virtual void CheckTimeout();

@@ -5341,6 +5341,72 @@ XS(XS_Mob_SetHate)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_HalveAggro);
+XS(XS_Mob_HalveAggro)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::HalveAggro(THIS, other)");
+	{
+		Mob *	THIS;
+		Mob *	other;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (sv_derived_from(ST(1), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(1)));
+			other = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "other is not of type Mob");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
+
+		THIS->HalveAggro(other);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_DoubleAggro);
+XS(XS_Mob_DoubleAggro)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::DoubleAggro(THIS, other)");
+	{
+		Mob *	THIS;
+		Mob *	other;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (sv_derived_from(ST(1), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(1)));
+			other = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "other is not of type Mob");
+		if(other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
+
+		THIS->DoubleAggro(other);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Mob_GetHateAmount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHateAmount)
 {
@@ -8274,6 +8340,8 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "IsRooted"), XS_Mob_IsRooted, file, "$");
 		newXSproto(strcpy(buf, "AddToHateList"), XS_Mob_AddToHateList, file, "$$;$$$$$");
 		newXSproto(strcpy(buf, "SetHate"), XS_Mob_SetHate, file, "$$;$$");
+		newXSproto(strcpy(buf, "HalveAggro"), XS_Mob_HalveAggro, file, "$$");
+		newXSproto(strcpy(buf, "DoubleAggro"), XS_Mob_DoubleAggro, file, "$$");
 		newXSproto(strcpy(buf, "GetHateAmount"), XS_Mob_GetHateAmount, file, "$$;$");
 		newXSproto(strcpy(buf, "GetDamageAmount"), XS_Mob_GetDamageAmount, file, "$$");
 		newXSproto(strcpy(buf, "GetHateTop"), XS_Mob_GetHateTop, file, "$");

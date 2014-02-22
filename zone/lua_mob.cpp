@@ -908,6 +908,16 @@ void Lua_Mob::SetHate(Lua_Mob other, int hate, int damage) {
 	self->SetHate(other, hate, damage);
 }
 
+void Lua_Mob::HalveAggro(Lua_Mob other) {
+	Lua_Safe_Call_Void();
+	self->HalveAggro(other);
+}
+
+void Lua_Mob::DoubleAggro(Lua_Mob other) {
+	Lua_Safe_Call_Void();
+	self->DoubleAggro(other);
+}
+
 uint32 Lua_Mob::GetHateAmount(Lua_Mob target) {
 	Lua_Safe_Call_Int();
 	return self->GetHateAmount(target);
@@ -1967,6 +1977,8 @@ luabind::scope lua_register_mob() {
 		.def("SetHate", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::SetHate)
 		.def("SetHate", (void(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::SetHate)
 		.def("SetHate", (void(Lua_Mob::*)(Lua_Mob,int,int))&Lua_Mob::SetHate)
+		.def("HalveAggro", &Lua_Mob::HalveAggro)
+		.def("DoubleAggro", &Lua_Mob::DoubleAggro)
 		.def("GetHateAmount", (uint32(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateAmount)
 		.def("GetHateAmount", (uint32(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::GetHateAmount)
 		.def("GetDamageAmount", (uint32(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetDamageAmount)

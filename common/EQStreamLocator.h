@@ -138,7 +138,7 @@ public:
 		iterator cur, end;
 		cur = streams.begin();
 		end = streams.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			if(cur->second == it) {
 				streams.erase(cur);
 				//lazy recursive delete for now, since we have to redo

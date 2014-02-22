@@ -1054,7 +1054,8 @@ void Mob::AI_Process() {
 						SetTarget(hate_list.GetTop(this));
 					}
 				} else {
-					SetTarget(hate_list.GetTop(this));
+					if (!ImprovedTaunt())
+						SetTarget(hate_list.GetTop(this));
 				}
 
 			}
@@ -1141,30 +1142,26 @@ void Mob::AI_Process() {
 						Attack(target, 13);
 					}
 
-					if (target)
-					{
+					if (target) {
 						//we use this random value in three comparisons with different
 						//thresholds, and if its truely random, then this should work
 						//out reasonably and will save us compute resources.
 						int32 RandRoll = MakeRandomInt(0, 99);
-						if (CanThisClassDoubleAttack()
-							//check double attack, this is NOT the same rules that clients use...
-							&& RandRoll < (GetLevel() + NPCDualAttackModifier))
-						{
+						if ((CanThisClassDoubleAttack() || GetSpecialAbility(SPECATK_TRIPLE)
+								|| GetSpecialAbility(SPECATK_QUAD))
+								//check double attack, this is NOT the same rules that clients use...
+								&& RandRoll < (GetLevel() + NPCDualAttackModifier)) {
 							Attack(target, 13);
 							// lets see if we can do a triple attack with the main hand
 							//pets are excluded from triple and quads...
-							if (GetSpecialAbility(SPECATK_TRIPLE)
-								&& !IsPet() && RandRoll < (GetLevel()+NPCTripleAttackModifier))
-							{
+							if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD))
+									&& !IsPet() && RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
 								Attack(target, 13);
 								// now lets check the quad attack
 								if (GetSpecialAbility(SPECATK_QUAD)
-									&& RandRoll < (GetLevel() + NPCQuadAttackModifier))
-								{
+										&& RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
 									Attack(target, 13);
 								}
-								
 							}
 						}
 					}
@@ -1173,48 +1170,41 @@ void Mob::AI_Process() {
 						int flurry_chance = GetSpecialAbilityParam(SPECATK_FLURRY, 0);
 						flurry_chance = flurry_chance > 0 ? flurry_chance : RuleI(Combat, NPCFlurryChance); 
 
-						ExtraAttackOptions opts;
-						int cur = GetSpecialAbilityParam(SPECATK_FLURRY, 2);
-						if(cur > 0) {
-							opts.damage_percent = cur / 100.0f;
-						}
+						if (MakeRandomInt(0, 99) < flurry_chance) {
+							ExtraAttackOptions opts;
+							int cur = GetSpecialAbilityParam(SPECATK_FLURRY, 2);
+							if (cur > 0)
+								opts.damage_percent = cur / 100.0f;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 3);
-						if(cur > 0) {
-							opts.damage_flat = cur;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 3);
+							if (cur > 0)
+								opts.damage_flat = cur;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 4);
-						if(cur > 0) {
-							opts.armor_pen_percent = cur / 100.0f;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 4);
+							if (cur > 0)
+								opts.armor_pen_percent = cur / 100.0f;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 5);
-						if(cur > 0) {
-							opts.armor_pen_flat = cur;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 5);
+							if (cur > 0)
+								opts.armor_pen_flat = cur;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 6);
-						if(cur > 0) {
-							opts.crit_percent = cur / 100.0f;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 6);
+							if (cur > 0)
+								opts.crit_percent = cur / 100.0f;
 
-						cur = GetSpecialAbilityParam(SPECATK_FLURRY, 7);
-						if(cur > 0) {
-							opts.crit_flat = cur;
-						}
+							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 7);
+							if (cur > 0)
+								opts.crit_flat = cur;
 
-						if (MakeRandomInt(0, 99) < flurry_chance)
 							Flurry(&opts);
+						}
 					}
 
 					if (IsPet()) {
-
 						Mob *owner = GetOwner();
-
-						if (owner){
-						int16 flurry_chance = owner->aabonuses.PetFlurry + owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
-
+						if (owner) {
+						int16 flurry_chance = owner->aabonuses.PetFlurry +
+							owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
 							if (flurry_chance && (MakeRandomInt(0, 99) < flurry_chance))
 								Flurry(nullptr);
 						}
@@ -1294,7 +1284,7 @@ void Mob::AI_Process() {
 							if(cur > 0) {
 								opts.crit_flat = cur;
 							}
-							
+
 							AreaRampage(&opts);
 						}
 					}
@@ -1997,59 +1987,57 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 
 bool Mob::AddRampage(Mob *mob)
 {
-	if(!mob)
+	if (!mob)
 		return false;
 
 	if (!GetSpecialAbility(SPECATK_RAMPAGE))
 		return false;
 
-	for (int i = 0; i < RampageArray.size(); i++)
-	{
-		// if name is already on the list dont add it again
-		if (strcasecmp(mob->GetName(), RampageArray[i].c_str()) == 0)
+	for (int i = 0; i < RampageArray.size(); i++) {
+		// if Entity ID is already on the list don't add it again
+		if (mob->GetID() == RampageArray[i])
 			return false;
 	}
-	std::string r_name = mob->GetName();
-	RampageArray.push_back(r_name);
+	RampageArray.push_back(mob->GetID());
 	return true;
 }
 
-void Mob::ClearRampage(){
+void Mob::ClearRampage()
+{
 	RampageArray.clear();
 }
 
 bool Mob::Rampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
-	if (!IsPet()) {
+	if (!IsPet())
 		entity_list.MessageClose_StringID(this, true, 200, MT_NPCRampage, NPC_RAMPAGE, GetCleanName());
-	} else {
+	else
 		entity_list.MessageClose_StringID(this, true, 200, MT_PetFlurry, NPC_RAMPAGE, GetCleanName());
-	}
 
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
-	rampage_targets = rampage_targets > 0 ? rampage_targets : RuleI(Combat, MaxRampageTargets);
-	for (int i = 0; i < RampageArray.size(); i++)
-	{
-		if(index_hit >= rampage_targets)
+	if (rampage_targets == 0) // if set to 0 or not set in the DB
+		rampage_targets = RuleI(Combat, DefaultRampageTargets);
+	if (rampage_targets > RuleI(Combat, MaxRampageTargets))
+		rampage_targets = RuleI(Combat, MaxRampageTargets);
+	for (int i = 0; i < RampageArray.size(); i++) {
+		if (index_hit >= rampage_targets)
 			break;
 		// range is important
-		Mob *m_target = entity_list.GetMob(RampageArray[i].c_str());
-		if(m_target)
-		{
-			if(m_target == GetTarget())
+		Mob *m_target = entity_list.GetMob(RampageArray[i]);
+		if (m_target) {
+			if (m_target == GetTarget())
 				continue;
-			if (CombatRange(m_target))
-			{
+			if (CombatRange(m_target)) {
 				Attack(m_target, 13, false, false, false, opts);
 				index_hit++;
 			}
 		}
 	}
-	
-	if(index_hit < rampage_targets) {
+
+	if (RuleB(Combat, RampageHitsTarget) && index_hit < rampage_targets)
 		Attack(GetTarget(), 13, false, false, false, opts);
-	}
+
 	return true;
 }
 

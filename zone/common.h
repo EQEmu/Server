@@ -155,8 +155,11 @@ struct Buffs_Struct {
 	uint32	numhits; //the number of physical hits this buff can take before it fades away, lots of druid armor spells take advantage of this mixed with powerful effects
 	uint32	melee_rune;
 	uint32	magic_rune;
-	uint8	deathSaveSuccessChance;
-	uint8	deathsaveCasterAARank;
+	uint32	dot_rune;
+	int32	caston_x;
+	int32	caston_y;
+	int32	caston_z;
+	int32  ExtraDIChance;
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;
@@ -231,6 +234,7 @@ struct StatBonuses {
 	int		effective_casting_level;
 	int		reflect_chance;						// chance to reflect incoming spell
 	uint16	singingMod;
+	uint16	Amplification;						// stacks with singingMod
 	uint16	brassMod;
 	uint16	percussionMod;
 	uint16	windMod;
@@ -319,6 +323,7 @@ struct StatBonuses {
 	uint16	MeleeThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
 	uint16	SpellThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
 	uint16	MitigateSpellRune[2];				// 0 = Mitigation value 1 = Buff Slot
+	uint16	MitigateDotRune[2];					// 0 = Mitigation value 1 = Buff Slot
 	uint32	TriggerMeleeThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint32	TriggerSpellThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint16	ManaAbsorbPercentDamage[2];			// 0 = Mitigation value 1 = Buff Slot
@@ -328,6 +333,8 @@ struct StatBonuses {
 	bool	CriticalHealDecay;					// increase critical heal chance, decays based on spell level cast
 	bool	CriticalDotDecay;					// increase critical dot chance, decays based on spell level cast
 	bool	DivineAura;							// invulnerability
+	bool	DistanceRemoval;					// Check if Cancle if Moved effect is present
+	int16	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buffid
 	//bool	AbsorbMagicAtt;						// Magic Rune *Need to be implemented for NegateEffect
 	//bool	MeleeRune;							// Melee Rune *Need to be implemented for NegateEffect
 

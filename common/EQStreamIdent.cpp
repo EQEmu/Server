@@ -11,7 +11,7 @@ EQStreamIdentifier::~EQStreamIdentifier() {
 	std::vector<Record *>::iterator cur, end;
 	cur = m_streams.begin();
 	end = m_streams.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		Record *r = *cur;
 		r->stream->ReleaseFromUse();
 		delete r;
@@ -19,7 +19,7 @@ EQStreamIdentifier::~EQStreamIdentifier() {
 	std::vector<Patch *>::iterator curp, endp;
 	curp = m_patches.begin();
 	endp = m_patches.end();
-	for(; curp != endp; curp++) {
+	for(; curp != endp; ++curp) {
 		delete *curp;
 	}
 }
@@ -56,6 +56,7 @@ void EQStreamIdentifier::Process() {
 		//if stream hasn't finished initializing then continue;
 		if(r->stream->GetState() == UNESTABLISHED)
 		{
+			++cur;
 			continue;
 		}
 		if(r->stream->GetState() != ESTABLISHED) {
@@ -93,7 +94,7 @@ void EQStreamIdentifier::Process() {
 		//foreach possbile patch...
 		curp = m_patches.begin();
 		endp = m_patches.end();
-		for(; !found_one && curp != endp; curp++) {
+		for(; !found_one && curp != endp; ++curp) {
 			Patch *p = *curp;
 
 			//ask the stream to see if it matches the supplied signature
@@ -136,7 +137,7 @@ void EQStreamIdentifier::Process() {
 			delete r;
 			cur = m_streams.erase(cur);
 		} else {
-			cur++;
+			++cur;
 		}
 	}	//end foreach stream
 }

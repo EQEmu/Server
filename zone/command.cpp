@@ -11047,9 +11047,6 @@ void command_showbonusstats(Client *c, const Seperator *sep)
 			c->Message(0, "  Target Spell Bonuses:");
 			c->Message(0, "  Accuracy: %i%%   Divine Save: %i%%",c->GetTarget()->GetSpellBonuses().Accuracy, c->GetTarget()->GetSpellBonuses().DivineSaveChance);
 			c->Message(0, "  Flurry: %i%%     HitChance: %i%% ",c->GetTarget()->GetSpellBonuses().FlurryChance, c->GetTarget()->GetSpellBonuses().HitChance / 15);
-			int deathsaveslot = c->GetTarget()->GetBuffSlotFromType(SE_DeathSave);
-			int dschance = deathsaveslot >= 0 ? c->GetTarget()->GetBuffs()[deathsaveslot].deathSaveSuccessChance : 0;
-			c->Message(0, "  Death Save: %i%%",dschance);
 		}
 		c->Message(0, "  Effective Casting Level: %i",c->GetTarget()->GetCasterLevel(0));
 	}

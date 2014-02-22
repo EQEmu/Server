@@ -144,7 +144,7 @@ void EQStreamFactory::Push(EQStream *s)
 void EQStreamFactory::ReaderLoop()
 {
 fd_set readset;
-std::map<std::string,EQStream *>::iterator stream_itr;
+std::map<std::pair<uint32, uint16>,EQStream *>::iterator stream_itr;
 int num;
 int length;
 unsigned char buffer[2048];
@@ -183,14 +183,13 @@ timeval sleep_time;
 			{
 				// What do we wanna do?
 			} else {
-				char temp[25];
-				sprintf(temp,"%u.%d",ntohl(from.sin_addr.s_addr),ntohs(from.sin_port));
 				MStreams.lock();
-				if ((stream_itr=Streams.find(temp))==Streams.end()) {
+				stream_itr=Streams.find(std::make_pair(from.sin_addr.s_addr, from.sin_port));
+				if (stream_itr == Streams.end()) {
 					if (buffer[1]==OP_SessionRequest) {
 						EQStream *s = new EQStream(from);
 						s->SetStreamType(StreamType);
-						Streams[temp]=s;
+						Streams[std::make_pair(from.sin_addr.s_addr, from.sin_port)]=s;
 						WriterWork.Signal();
 						Push(s);
 						s->AddBytesRecv(length);
@@ -225,7 +224,7 @@ void EQStreamFactory::CheckTimeout()
 	MStreams.lock();
 
 	unsigned long now=Timer::GetCurrentTime();
-	std::map<std::string,EQStream *>::iterator stream_itr;
+	std::map<std::pair<uint32, uint16>,EQStream *>::iterator stream_itr;
 
 	for(stream_itr=Streams.begin();stream_itr!=Streams.end();) {
 		EQStream *s = stream_itr->second;
@@ -241,8 +240,8 @@ void EQStreamFactory::CheckTimeout()
 			} else {
 				//everybody is done, we can delete it now
 				//std::cout << "Removing connection" << std::endl;
-				std::map<std::string,EQStream *>::iterator temp=stream_itr;
-				stream_itr++;
+				std::map<std::pair<uint32, uint16>,EQStream *>::iterator temp=stream_itr;
+				++stream_itr;
 				//let whoever has the stream outside delete it
 				delete temp->second;
 				Streams.erase(temp);
@@ -250,14 +249,14 @@ void EQStreamFactory::CheckTimeout()
 			}
 		}
 
-		stream_itr++;
+		++stream_itr;
 	}
 	MStreams.unlock();
 }
 
 void EQStreamFactory::WriterLoop()
 {
-std::map<std::string,EQStream *>::iterator stream_itr;
+std::map<std::pair<uint32, uint16>,EQStream *>::iterator stream_itr;
 bool havework=true;
 std::vector<EQStream *> wants_write;
 std::vector<EQStream *>::iterator cur,end;
@@ -285,14 +284,14 @@ Timer DecayTimer(20);
 		//copy streams into a seperate list so we dont have to keep
 		//MStreams locked while we are writting
 		MStreams.lock();
-		for(stream_itr=Streams.begin();stream_itr!=Streams.end();stream_itr++) {
+		for(stream_itr=Streams.begin();stream_itr!=Streams.end();++stream_itr) {
 			// If it's time to decay the bytes sent, then let's do it before we try to write
 			if (decay)
 				stream_itr->second->Decay();
 
 			//bullshit checking, to see if this is really happening, GDB seems to think so...
 			if(stream_itr->second == nullptr) {
-				fprintf(stderr, "ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %s", stream_itr->first.c_str());
+				fprintf(stderr, "ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %i", stream_itr->first.first, stream_itr->first.second);
 				continue;
 			}
 
@@ -307,7 +306,7 @@ Timer DecayTimer(20);
 		//do the actual writes
 		cur = wants_write.begin();
 		end = wants_write.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			(*cur)->Write(sock);
 			(*cur)->ReleaseFromUse();
 		}

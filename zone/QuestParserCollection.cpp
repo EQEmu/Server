@@ -46,6 +46,12 @@ void QuestParserCollection::RegisterQuestInterface(QuestInterface *qi, std::stri
 	_load_precedence.push_back(qi);
 }
 
+void QuestParserCollection::ClearInterfaces() {
+	_interfaces.clear();
+	_extensions.clear();
+	_load_precedence.clear();
+}
+
 void QuestParserCollection::AddVar(std::string name, std::string val) {
 	std::list<QuestInterface*>::iterator iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {

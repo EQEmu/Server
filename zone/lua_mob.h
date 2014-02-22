@@ -192,6 +192,8 @@ public:
 	void SetHate(Lua_Mob other);
 	void SetHate(Lua_Mob other, int hate);
 	void SetHate(Lua_Mob other, int hate, int damage);
+	void HalveAggro(Lua_Mob other);
+	void DoubleAggro(Lua_Mob other);
 	uint32 GetHateAmount(Lua_Mob target);
 	uint32 GetHateAmount(Lua_Mob target, bool is_damage);
 	uint32 GetDamageAmount(Lua_Mob target);

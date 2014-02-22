@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS tblWorldServerRegistration (
   ServerLastIPAddr varchar(15) NULL,
   ServerAdminID integer NOT NULL,
   Note varchar(300) NULL,
+  ServerTrusted int(11),
   PRIMARY KEY (ServerID, ServerLongName)
 ) ENGINE=InnoDB;
