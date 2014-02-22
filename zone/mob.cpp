@@ -4348,7 +4348,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 
 bool Mob::TryReflectSpell(uint32 spell_id)
 {
-	if (spells[spell_id].not_reflectable)
+	if (!spells[spell_id].reflectable)
  		return false;
 	
 	int chance = itembonuses.reflect_chance + spellbonuses.reflect_chance + aabonuses.reflect_chance;

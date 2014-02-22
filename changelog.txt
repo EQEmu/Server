@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/20/2014 ==
+Kayen: Implemented SE_MitigateDotDamage	- dot spell mitigation rune with max value
+Kayen: Implemented SE_DistanceRemoval - removed from target when target moves X amount of distance away from where initially hit.
+
+Required SQL: utils/sql/git/2014_02_20_buff_updates.sql
+
 == 02/18/2014 ==
 Kayen: Implemented SE_TriggerOnReqCaster - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
 Kayen: Implemented SE_ImprovedTaunt	- Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y

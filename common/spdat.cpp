@@ -391,8 +391,7 @@ bool IsPartialCapableSpell(uint16 spell_id)
 		return false;
 	
 	if (IsPureNukeSpell(spell_id) || IsFearSpell(spell_id) ||
-			IsEffectInSpell(spell_id, SE_Root) ||
-			IsEffectInSpell(spell_id, SE_Charm))
+			IsEffectInSpell(spell_id, SE_Root))
 		return true;
 
 	return false;

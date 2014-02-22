@@ -1284,6 +1284,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
+			case SE_MitigateDotDamage:
+			{
+				buffs[buffslot].dot_rune = spells[spell_id].max[i];
+				break;
+			}
+
 			case SE_TriggerMeleeThreshold:
 			{
 				buffs[buffslot].melee_rune = spells[spell_id].base2[i];
@@ -1296,7 +1302,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-
+			case SE_DistanceRemoval:
+			{
+				buffs[buffslot].caston_x = int(GetX());	
+				buffs[buffslot].caston_y = int(GetY());	
+				buffs[buffslot].caston_z = int(GetZ());	
+				break;
+			}
+			
 			case SE_Levitate:
 			{
 #ifdef SPELL_EFFECT_SPAM
@@ -1307,6 +1320,20 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				SendAppearancePacket(AT_Levitate, 2, true, true);
 				break;
 			}
+
+			case SE_DeathSave: {
+
+				int16 mod = 0;
+				
+				if(caster) {
+					mod =	caster->aabonuses.UnfailingDivinity +
+							caster->itembonuses.UnfailingDivinity +
+							caster->spellbonuses.UnfailingDivinity;
+				}
+ 				
+				buffs[buffslot].ExtraDIChance = mod;
+  				break;
+ 			}
 
 			case SE_Illusion:
 			{
@@ -1419,10 +1446,17 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Memory Blur: %d", effect_value);
 #endif
 				int wipechance = spells[spell_id].base[i];
-				int bonus = spellbonuses.IncreaseChanceMemwipe + itembonuses.IncreaseChanceMemwipe + aabonuses.IncreaseChanceMemwipe;
+				int bonus = 0;
+				
+				if (caster){
+				bonus = caster->spellbonuses.IncreaseChanceMemwipe + 
+						caster->itembonuses.IncreaseChanceMemwipe + 
+						caster->aabonuses.IncreaseChanceMemwipe;
+				}
+
 				wipechance += wipechance*bonus/100;
 				
-				if(MakeRandomInt(0, 100) < wipechance)
+				if(MakeRandomInt(0, 99) < wipechance)
 				{
 					if(IsAIControlled())
 					{
@@ -2361,30 +2395,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_DeathSave: {
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Death Save: %+i", effect_value);
-#endif
-				uint8 BonusChance = 0;
-				if(caster) {
-
-					BonusChance =	caster->aabonuses.UnfailingDivinity +
-									caster->itembonuses.UnfailingDivinity +
-									caster->spellbonuses.UnfailingDivinity;
-				}
-
-#ifdef SPELL_EFFECT_SPAM
-					//snprintf(effect_desc, _EDLEN, "Death Save Chance: %+i", SuccessChance);
-#endif
-					//buffs[buffslot].deathSaveSuccessChance = SuccessChance;
-					//buffs[buffslot].deathsaveCasterAARank = caster->GetAA(aaUnfailingDivinity);
-					buffs[buffslot].deathsaveCasterAARank = BonusChance;
-					//SetDeathSaveChance(true);
-
-
-				break;
-			}
-
 			case SE_SummonAndResAllCorpses:
 			{
 				if(IsClient())
@@ -2763,7 +2773,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_MitigateDamageShield:
 			case SE_FcBaseEffects:
 			case SE_LimitClass:
-			case SE_LimitSpellSubclass:
 			case SE_BlockBehind:
 			case SE_ShieldBlock:
 			case SE_PetCriticalHit:
@@ -2816,6 +2825,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_IncreaseChanceMemwipe:
 			case SE_CriticalMend:
 			case SE_LimitCastTimeMax:
+			case SE_TriggerOnReqCaster:
 			{
 				break;
 			}
@@ -3277,6 +3287,31 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				break;
 			}
 
+			case SE_WipeHateList:
+			{
+
+				int wipechance = spells[spell_id].base[i];
+				int bonus = 0;
+				
+				if (caster){
+					bonus =	caster->spellbonuses.IncreaseChanceMemwipe + 
+							caster->itembonuses.IncreaseChanceMemwipe + 
+							caster->aabonuses.IncreaseChanceMemwipe;
+				}
+				
+				wipechance += wipechance*bonus/100;
+				
+				if(MakeRandomInt(0, 99) < wipechance)
+				{
+					if(IsAIControlled())
+					{
+						WipeHateList();
+					}
+					Message(13, "Your mind fogs. Who are my friends? Who are my enemies?... it was all so clear a moment ago...");
+				}
+				break;
+			}
+
 			case SE_Charm: {
 				if (!caster || !PassCharismaCheck(caster, this, spell_id)) {
 					BuffFadeByEffect(SE_Charm);
@@ -3378,6 +3413,26 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				}
 				break;
 			}
+
+			case SE_DistanceRemoval:
+			{
+				if (spellbonuses.DistanceRemoval){
+
+					int distance =	sqrt(
+									((int(GetX()) - buffs[slot].caston_x) * (int(GetX()) - buffs[slot].caston_x)) + 
+									((int(GetY()) - buffs[slot].caston_y) *  (int(GetY()) - buffs[slot].caston_y)) +
+									((int(GetZ()) - buffs[slot].caston_z) * (int(GetZ()) - buffs[slot].caston_z)) 
+									);
+
+					if (distance > spells[spell_id].base[i]){
+
+						if(!TryFadeEffect(slot))
+							BuffFadeBySlot(slot , true);
+					}
+					break;
+				}
+			}
+
 			default:
 			{
 				// do we need to do anyting here?
@@ -5249,10 +5304,12 @@ bool Mob::TryDeathSave() {
 
 		int SuccessChance = 0;
 		int buffSlot = spellbonuses.DeathSave[1];
-		uint8 UD_HealMod = buffs[buffSlot].deathsaveCasterAARank; //Contains value of UD heal modifier.
+		int16 UD_HealMod = 0;
 		uint32 HealAmt = 300; //Death Pact max Heal
 
 		if(buffSlot >= 0){
+
+			UD_HealMod = buffs[buffSlot].ExtraDIChance;
 
 			SuccessChance = ( (GetCHA() * (RuleI(Spells, DeathSaveCharismaMod))) + 1) / 10; //(CHA Mod Default = 3)
 
@@ -5318,6 +5375,8 @@ bool Mob::TryDeathSave() {
 				}
 			}
 		}
+
+		BuffFadeBySlot(buffSlot);
 	}
 	return false;
 }
@@ -5580,19 +5639,24 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 
 bool Mob::ImprovedTaunt(){
 
-	if (spellbonuses.ImprovedTaunt[2]){
+	if (spellbonuses.ImprovedTaunt[0]){
 
 		if (GetLevel() > spellbonuses.ImprovedTaunt[0])
 			return false;
 
-		target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[2]].casterid);
+		if (spellbonuses.ImprovedTaunt[2] >= 0){
 
-		if (target){
-			SetTarget(target);
-			return true;
+			target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[2]].casterid);
+
+			if (target){
+				SetTarget(target);
+				return true;
+			}
+			else {
+				if(!TryFadeEffect(spellbonuses.ImprovedTaunt[2]))
+					BuffFadeBySlot(spellbonuses.ImprovedTaunt[2], true); //If caster killed removed effect.
+			}	
 		}
-		else
-			BuffFadeBySlot(spellbonuses.ImprovedTaunt[2]); //If caster killed removed effect.
 	}
 
 	return false;

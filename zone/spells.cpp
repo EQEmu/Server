@@ -2953,8 +2953,11 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].numhits = spells[spell_id].numhits;
 	buffs[emptyslot].client = caster ? caster->IsClient() : 0;
 	buffs[emptyslot].persistant_buff = 0;
-	buffs[emptyslot].deathsaveCasterAARank = 0;
-	buffs[emptyslot].deathSaveSuccessChance = 0;
+	buffs[emptyslot].caston_x = 0;
+	buffs[emptyslot].caston_y = 0;
+	buffs[emptyslot].caston_z = 0;
+	buffs[emptyslot].dot_rune = 0;
+	buffs[emptyslot].ExtraDIChance = 0;
 
 	if (level_override > 0) {
 		buffs[emptyslot].UpdateClient = true;
