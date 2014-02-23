@@ -5561,8 +5561,13 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		Message(15,"You can only have one of a lore item.");
 		return;
 	}
-	if(tmpmer_used && (mp->quantity > prevcharges))
-		mp->quantity = prevcharges;
+	if(tmpmer_used && (mp->quantity > prevcharges || item->MaxCharges > 1))
+	{
+		if(prevcharges > item->MaxCharges && item->MaxCharges > 1)
+			mp->quantity = item->MaxCharges;
+		else
+			mp->quantity = prevcharges;
+	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerBuy, sizeof(Merchant_Sell_Struct));
 	Merchant_Sell_Struct* mpo=(Merchant_Sell_Struct*)outapp->pBuffer;
@@ -5573,13 +5578,11 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	int16 freeslotid=0;
 	int16 charges = 0;
-	if (item->Stackable) {
+	if (item->Stackable || item->MaxCharges > 1)
 		charges = mp->quantity;
-	} else {
-		// this needs expanded to handle varying charges from the merchant,
-		// but will require merchantlist_temp changes amonst other things.
+	else
 		charges = item->MaxCharges;
-	}
+
 	ItemInst* inst = database.CreateItem(item, charges);
 
 	int SinglePrice = 0;
@@ -5588,7 +5591,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	else
 		SinglePrice = (item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate);
 
-	mpo->price = SinglePrice * mp->quantity;
+	if(item->MaxCharges > 1)
+		mpo->price = SinglePrice;
+	else
+		mpo->price = SinglePrice * mp->quantity;
 	if(mpo->price < 0 )
 	{
 		safe_delete(outapp);
@@ -5632,9 +5638,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 
 	std::string packet;
-	if(mp->quantity==1 && item->MaxCharges>0 && item->MaxCharges<255)
-		mp->quantity=item->MaxCharges;
-
 	if (!stacked && inst) {
 		PutItemInInventory(freeslotid, *inst);
 		SendItemPacket(freeslotid, inst, ItemPacketTrade);
@@ -5756,37 +5759,36 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		//Message(13,"%s tells you, 'LOL NOPE'", vendor->GetName());
 		return;
 	}
-	if (RuleB(Merchant, UsePriceMod)){
-	price=(int)((item->Price*mp->quantity)*(RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(vendor,true)+0.5); // need to round up, because client does it automatically when displaying price
-	}
+
+	int cost_quantity = mp->quantity;
+	if(inst->IsCharged())
+		int cost_quantity = 1;
+
+	if (RuleB(Merchant, UsePriceMod))
+		price=(int)((item->Price*cost_quantity)*(RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(vendor,true)+0.5); // need to round up, because client does it automatically when displaying price
 	else
-		price=(int)((item->Price*mp->quantity)*(RuleR(Merchant, BuyCostMod))+0.5);
+		price=(int)((item->Price*cost_quantity)*(RuleR(Merchant, BuyCostMod))+0.5);
 	AddMoneyToPP(price,false);
 
-	if (inst->IsStackable())
+	if (inst->IsStackable() || inst->IsCharged())
 	{
 		unsigned int i_quan = inst->GetCharges();
-		if (mp->quantity > i_quan)
+		if (mp->quantity > i_quan || inst->IsCharged())
 			mp->quantity = i_quan;
 	}
 	else
-	{
 		mp->quantity = 1;
-	}
 
 	if (RuleB(EventLog, RecordSellToMerchant))
 		LogMerchant(this, vendor, mp->quantity, price, item, false);
 
-	int freeslot = 0;
-	int charges = 0;
-	if(inst->IsStackable())
-		charges = mp->quantity;
-	else
-		//charges = inst->GetCharges();
-		//FIXME: Temp merchant table uses 'charges' as the quantity, so doesn't properly handle charged items.
+	int charges = mp->quantity;
+	//Hack workaround so usable items with 0 charges aren't simply deleted
+	if(charges == 0 && item->ItemType != 11 && item->ItemType != 17 && item->ItemType != 19 && item->ItemType != 21)
 		charges = 1;
 
-	if((freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(),itemid,charges,true)) > 0){
+	int freeslot = 0;
+	if(charges > 0 && (freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(),itemid,charges,true)) > 0){
 		ItemInst* inst2 = inst->Clone();
 		if (RuleB(Merchant, UsePriceMod)){
 		inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor,false));
@@ -5845,6 +5847,10 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		this->DeleteItemInInventory(mp->itemslot,0,false);
 	else
 		this->DeleteItemInInventory(mp->itemslot,mp->quantity,false);
+
+	//This forces the price to show up correctly for charged items. 
+	if(inst->IsCharged())
+		mp->quantity = 1; 
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(Merchant_Purchase_Struct));
 	Merchant_Purchase_Struct* mco=(Merchant_Purchase_Struct*)outapp->pBuffer;

@@ -291,6 +291,7 @@ public:
 
 	// Can item be stacked?
 	bool IsStackable() const;
+	bool IsCharged() const;
 
 	// Can item be equipped by/at?
 	bool IsEquipable(uint16 race, uint16 class_) const;
