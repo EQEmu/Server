@@ -125,20 +125,19 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						break;
 					}
 					case SpellType_Root: {
-						if (
-							!tar->IsRooted()
-							&& MakeRandomInt(0, 99) < 50
-							&& tar->DontRootMeBefore() < Timer::GetCurrentTime()
-							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
+						Mob *rootee = GetHateRandom();
+						if (rootee && !rootee->IsRooted() && MakeRandomInt(0, 99) < 50
+							&& rootee->DontRootMeBefore() < Timer::GetCurrentTime()
+							&& rootee->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
 							) {
 							if(!checked_los) {
-								if(!CheckLosFN(tar))
+								if(!CheckLosFN(rootee))
 									return(false);	//cannot see target... we assume that no spell is going to work since we will only be casting detrimental spells in this call
 								checked_los = true;
 							}
 							uint32 tempTime = 0;
-							AIDoSpellCast(i, tar, mana_cost, &tempTime);
-							tar->SetDontRootMeBefore(tempTime);
+							AIDoSpellCast(i, rootee, mana_cost, &tempTime);
+							rootee->SetDontRootMeBefore(tempTime);
 							return true;
 						}
 						break;
