@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/23/2014 ==
+Secrets: Exported the client object SendTargetCommand to Perl.
+
 == 02/20/2014 ==
 Kayen: Implemented SE_MitigateDotDamage	- dot spell mitigation rune with max value
 Kayen: Implemented SE_DistanceRemoval - removed from target when target moves X amount of distance away from where initially hit.
