@@ -127,7 +127,6 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					case SpellType_Root: {
 						if (
 							!tar->IsRooted()
-							&& dist2 >= 900
 							&& MakeRandomInt(0, 99) < 50
 							&& tar->DontRootMeBefore() < Timer::GetCurrentTime()
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
@@ -167,7 +166,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					}
 
 					case SpellType_InCombatBuff: {
-						if(MakeRandomInt(0,100) < 50)
+						if(MakeRandomInt(0, 99) < 50)
 						{
 							AIDoSpellCast(i, tar, mana_cost);
 							return true;
@@ -201,7 +200,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						break;
 					}
 					case SpellType_Dispel: {
-						if(MakeRandomInt(0, 100) < 15)
+						if(MakeRandomInt(0, 99) < 15)
 						{
 							if(!checked_los) {
 								if(!CheckLosFN(tar))
