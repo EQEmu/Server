@@ -182,7 +182,20 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						break;
 					}
 					case SpellType_Slow:
-					case SpellType_Debuff:
+					case SpellType_Debuff: {
+						Mob * debuffee = GetHateRandom();
+						if (debuffee && manaR >= 10 && MakeRandomInt(0, 99 < 70) &&
+								debuffee->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0) {
+							if (!checked_los) {
+								if (!CheckLosFN(debuffee))
+									return false;
+								checked_los = true;
+							}
+							AIDoSpellCast(i, debuffee, mana_cost);
+							return true;
+						}
+						break;
+					}
 					case SpellType_Nuke: {
 						if (
 							manaR >= 10 && MakeRandomInt(0, 99) < 70
