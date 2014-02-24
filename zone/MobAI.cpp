@@ -94,7 +94,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				dist2 <= spells[AIspells[i].spellid].range*spells[AIspells[i].spellid].range
 				)
 				&& (mana_cost <= GetMana() || GetMana() == GetMaxMana())
-				&& (AIspells[i].time_cancast+(MakeRandomInt(0, 4))) <= Timer::GetCurrentTime() //break up the spelling casting over a period of time.
+				&& (AIspells[i].time_cancast + (MakeRandomInt(0, 4) * 1000)) <= Timer::GetCurrentTime() //break up the spelling casting over a period of time.
 				) {
 
 #if MobAI_DEBUG_Spells >= 21
