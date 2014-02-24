@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/24/2014 ==
+Sorvani: Updated GetUnusedInstanceID to not recycle instance ID's unless it has reached max (65535)
+
 == 02/23/2014 ==
 Secrets: Exported the client object SendTargetCommand to Perl.
 
