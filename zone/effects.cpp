@@ -426,7 +426,7 @@ int32 Client::GetActSpellDuration(uint16 spell_id, int32 duration)
 
 	// Only need this for clients, since the change was for bard songs, I assume we should keep non bard songs getting +1
 	// However if its bard or not and is mez, charm or fear, we need to add 1 so that client is in sync
-	if (!IsShortDurationBuff(spell_id) ||
+	if (!(IsShortDurationBuff(spell_id) && IsBardSong(spell_id)) ||
 			IsFearSpell(spell_id) ||
 			IsCharmSpell(spell_id) ||
 			IsMezSpell(spell_id) ||
