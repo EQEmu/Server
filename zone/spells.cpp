@@ -461,8 +461,9 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	if (IsAIControlled())
 	{
 		SetRunAnimSpeed(0);
-		if(this != pMob)
-			this->FaceTarget(pMob);
+		pMob = entity_list.GetMob(target_id);
+		if (pMob && this != pMob)
+			FaceTarget(pMob);
 	}
 
 	// if we got here we didn't fizzle, and are starting our cast
