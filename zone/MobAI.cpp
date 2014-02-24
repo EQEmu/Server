@@ -754,7 +754,7 @@ void Client::AI_Process()
 					{
 						bool WaypointChanged, NodeReached;
 
-						VERTEX Goal = UpdatePath(fear_walkto_x, fear_walkto_y, fear_walkto_z,
+						Map::Vertex Goal = UpdatePath(fear_walkto_x, fear_walkto_y, fear_walkto_z,
 									GetFearSpeed(), WaypointChanged, NodeReached);
 
 						if(WaypointChanged)
@@ -910,7 +910,7 @@ void Client::AI_Process()
 				else
 				{
 					bool WaypointChanged, NodeReached;
-					VERTEX Goal = UpdatePath(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(),
+					Map::Vertex Goal = UpdatePath(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(),
 						GetRunspeed(), WaypointChanged, NodeReached);
 
 					if(WaypointChanged)
@@ -1022,7 +1022,7 @@ void Mob::AI_Process() {
 					{
 						bool WaypointChanged, NodeReached;
 
-						VERTEX Goal = UpdatePath(fear_walkto_x, fear_walkto_y, fear_walkto_z,
+						Map::Vertex Goal = UpdatePath(fear_walkto_x, fear_walkto_y, fear_walkto_z,
 									GetFearSpeed(), WaypointChanged, NodeReached);
 
 						if(WaypointChanged)
@@ -1360,7 +1360,7 @@ void Mob::AI_Process() {
 						{
 							bool WaypointChanged, NodeReached;
 
-							VERTEX Goal = UpdatePath(target->GetX(), target->GetY(), target->GetZ(),
+							Map::Vertex Goal = UpdatePath(target->GetX(), target->GetY(), target->GetZ(),
 											GetRunspeed(), WaypointChanged, NodeReached);
 
 							if(WaypointChanged)
@@ -1683,7 +1683,7 @@ void NPC::AI_DoMovement() {
 					{
 						bool WaypointChanged;
 						bool NodeReached;
-						VERTEX Goal = UpdatePath(cur_wp_x, cur_wp_y, cur_wp_z, walksp, WaypointChanged, NodeReached);
+						Map::Vertex Goal = UpdatePath(cur_wp_x, cur_wp_y, cur_wp_z, walksp, WaypointChanged, NodeReached);
 						if(WaypointChanged)
 							tar_ndx = 20;
 
@@ -1722,7 +1722,7 @@ void NPC::AI_DoMovement() {
 			if(!((x_pos == guard_x) && (y_pos == guard_y) && (z_pos == guard_z)))
 			{
 				bool WaypointChanged, NodeReached;
-				VERTEX Goal = UpdatePath(guard_x, guard_y, guard_z, walksp, WaypointChanged, NodeReached);
+				Map::Vertex Goal = UpdatePath(guard_x, guard_y, guard_z, walksp, WaypointChanged, NodeReached);
 				if(WaypointChanged)
 					tar_ndx = 20;
 

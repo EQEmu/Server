@@ -1200,8 +1200,8 @@ protected:
 
 	Mob*	bind_sight_target;
 
-	VERTEX aa_los_me;
-	VERTEX aa_los_them;
+	Map::Vertex aa_los_me;
+	Map::Vertex aa_los_them;
 	Mob *aa_los_them_mob;
 	bool los_status;
 	float aa_los_me_heading;

@@ -417,7 +417,7 @@ public:
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
 	void SendPosition();
 	void SetFlyMode(uint8 flymode);
-	inline void Teleport(VERTEX NewPosition) { x_pos = NewPosition.x; y_pos = NewPosition.y;
+	inline void Teleport(Map::Vertex NewPosition) { x_pos = NewPosition.x; y_pos = NewPosition.y;
 		z_pos = NewPosition.z; };
 
 	//AI
@@ -447,7 +447,6 @@ public:
 	void ClearFeignMemory();
 	void PrintHateListToClient(Client *who) { hate_list.PrintToClient(who); }
 	std::list<tHateEntry*>& GetHateList() { return hate_list.GetHateList(); }
-	bool CheckLos(Mob* other);
 	bool CheckLosFN(Mob* other);
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
 	inline void SetChanged() { pLastChange = Timer::GetCurrentTime(); }
@@ -981,7 +980,7 @@ protected:
 	bool HasDied();
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
-	VERTEX UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
+	Map::Vertex UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	void PrintRoute();
 	void UpdateRuneFlags();
 
@@ -1146,8 +1145,8 @@ protected:
 
 	// Pathing
 	//
-	VERTEX PathingDestination;
-	VERTEX PathingLastPosition;
+	Map::Vertex PathingDestination;
+	Map::Vertex PathingLastPosition;
 	int PathingLoopCount;
 	int PathingLastNodeVisited;
 	std::list<int> Route;

@@ -8550,10 +8550,10 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		}
 		else
 		{
-			VERTEX Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
-			VERTEX End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
+			Map::Vertex Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
+			Map::Vertex End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
 
-			if(!zone->zonemap->LineIntersectsZone(Start, End, 1.0f, nullptr, nullptr) && zone->pathing->NoHazards(Start, End))
+			if(!zone->zonemap->LineIntersectsZone(Start, End, 1.0f, nullptr) && zone->pathing->NoHazards(Start, End))
 			{
 				points.resize(2);
 				points[0].x = Start.x;
@@ -8594,7 +8594,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 
 				bool LeadsToTeleporter = false;
 
-				VERTEX v = zone->pathing->GetPathNodeCoordinates(pathlist.back());
+				Map::Vertex v = zone->pathing->GetPathNodeCoordinates(pathlist.back());
 
 				p.x = v.x;
 				p.y = v.y;
@@ -8614,7 +8614,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 						break;
 					}
 
-					VERTEX v = zone->pathing->GetPathNodeCoordinates((*Iterator), false);
+					Map::Vertex v = zone->pathing->GetPathNodeCoordinates((*Iterator), false);
 					p.x = v.x;
 					p.y = v.y;
 					p.z = v.z;
@@ -8785,47 +8785,38 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 	//if we zone in with invalid Z, fix it.
 	if (zone->zonemap != nullptr) {
 
-		//for whatever reason, LineIntersectsNode is giving better results than FindBestZ
-
-		NodeRef pnode;
-		VERTEX me;
+		Map::Vertex me;
 		me.x = GetX();
 		me.y = GetY();
-		me.z = GetZ() + (GetSize()==0.0?6:GetSize());
-		pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), me.x, me.y );
+		me.z = GetZ() + (GetSize() == 0.0 ? 6 : GetSize());
 
-		VERTEX hit;
-		VERTEX below_me(me);
-		below_me.z -= 500;
-		if(!zone->zonemap->LineIntersectsNode(pnode, me, below_me, &hit, nullptr) || hit.z < -5000) {
+		Map::Vertex hit;
+
+		if (zone->zonemap->FindBestZ(me, &hit) == BEST_Z_INVALID)
+		{
 #if EQDEBUG >= 5
 			LogFile->write(EQEMuLog::Debug, "Player %s started below the zone trying to fix! (%.3f, %.3f, %.3f)", GetName(), me.x, me.y, me.z);
 #endif
-			//theres nothing below us... try to find something to stand on
 			me.z += 200;	//arbitrary #
-			if(zone->zonemap->LineIntersectsNode(pnode, me, below_me, &hit, nullptr)) {
+			if (zone->zonemap->FindBestZ(me, &hit) != BEST_Z_INVALID)
+			{
 				//+10 so they dont stick in the ground
 				SendTo(me.x, me.y, hit.z + 10);
 				m_pp.z = hit.z + 10;
-			} else {
+			}
+			else
+			{
 				//one more, desperate try
 				me.z += 2000;
-				if(zone->zonemap->LineIntersectsNode(pnode, me, below_me, &hit, nullptr)) {
-				//+10 so they dont stick in the ground
+				if (zone->zonemap->FindBestZ(me, &hit) != BEST_Z_INVALID)
+				{
+					//+10 so they dont stick in the ground
 					SendTo(me.x, me.y, hit.z + 10);
 					m_pp.z = hit.z + 10;
 				}
 			}
 		}
 	}
-
-	//m_pp.hunger_level = 6000;
-	//m_pp.thirst_level = 6000;
-
-	//aa_title	= m_pp.aa_title;
-	//m_pp.timeplayed=64;
-	//m_pp.birthday=1057434792;
-	//m_pp.lastlogin=1057464792;
 
 	if (m_pp.gm && admin < minStatusToBeGM)
 		m_pp.gm = 0;

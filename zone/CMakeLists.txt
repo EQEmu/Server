@@ -66,7 +66,7 @@ SET(zone_sources
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
-	Map.cpp
+	map.cpp
 	merc.cpp
 	mob.cpp
 	MobAI.cpp
