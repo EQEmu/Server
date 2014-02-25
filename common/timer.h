@@ -31,33 +31,34 @@ class Timer
 public:
 	Timer();
 	Timer(uint32 timer_time, bool iUseAcurateTiming = false);
-	Timer(uint32 start, uint32 timer, bool iUseAcurateTiming);
-	~Timer() { }
+	Timer(uint32 start, uint32 timer, bool iUseAcurateTiming = false);
 
 	bool Check(bool iReset = true);
-	void Enable();
-	void Disable();
+	void Enable() { enabled = true; }
+	void Disable() { enabled = false; }
 	void Start(uint32 set_timer_time=0, bool ChangeResetTimer = true);
-	void SetTimer(uint32 set_timer_time=0);
+	void SetTimer(uint32 set_timer_time);
 	uint32 GetRemainingTime();
-	inline const uint32& GetTimerTime()		{ return timer_time; }
-	inline const uint32& GetSetAtTrigger()	{ return set_at_trigger; }
+	//inline const uint32& GetTimerTime()		{ return timer_time; } //unused
+	inline const uint32& GetSetAtTrigger()	{ return reset_interval; }
 	void Trigger();
 	void SetAtTrigger(uint32 set_at_trigger, bool iEnableIfDisabled = false);
 
 	inline bool Enabled() { return enabled; }
-	inline uint32 GetStartTime() { return(start_time); }
-	inline uint32 GetDuration() { return(timer_time); }
+	inline uint32 GetStartTime() { return start_time; }
+	inline uint32 GetDuration() { return trigger_time - start_time; }
 
-	static const uint32 SetCurrentTime();
+	static void SetCurrentTime();
 	static const uint32 GetCurrentTime();
 	static const uint32 GetTimeSeconds();
+	static uint32 GetTimeMilliseconds();
+	static void InitBaseTime(); //must be called before first Timer::SetCurrentTime()
 
 private:
 	uint32	start_time;
-	uint32	timer_time;
+	uint32	trigger_time;
 	bool	enabled;
-	uint32	set_at_trigger;
+	uint32	reset_interval;
 
 	// Tells the timer to be more acurate about happening every X ms.
 	// Instead of Check() setting the start_time = now,

@@ -1593,14 +1593,17 @@ void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy,
 	if (!owner || !owner->IsNPC())
 		return;
 
-	entity_list.AddProximity(owner->CastToNPC());
+	NPC* npc_owner = owner->CastToNPC();
+	npc_owner->has_proximity = true;
+	NPCProximity* prox = entity_list.AddProximity(npc_owner);
 
-	owner->CastToNPC()->proximity->min_x = minx;
-	owner->CastToNPC()->proximity->max_x = maxx;
-	owner->CastToNPC()->proximity->min_y = miny;
-	owner->CastToNPC()->proximity->max_y = maxy;
-	owner->CastToNPC()->proximity->min_z = minz;
-	owner->CastToNPC()->proximity->max_z = maxz;
+	prox->min_x = minx;
+	prox->max_x = maxx;
+	prox->min_y = miny;
+	prox->max_y = maxy;
+	prox->min_z = minz;
+	prox->max_z = maxz;
+	prox->owner = npc_owner;
 }
 
 void QuestManager::clear_proximity() {
@@ -1608,8 +1611,9 @@ void QuestManager::clear_proximity() {
 	if(!owner || !owner->IsNPC())
 		return;
 
-	entity_list.RemoveProximity(owner->GetID());
-	safe_delete(owner->CastToNPC()->proximity);
+	NPC* npc_owner = owner->CastToNPC();
+	npc_owner->has_proximity = false;
+	entity_list.RemoveProximity(npc_owner);
 }
 
 void QuestManager::enable_proximity_say() {

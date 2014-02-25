@@ -128,7 +128,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	swarm_timer.Disable();
 
 	taunting = false;
-	proximity = nullptr;
+	has_proximity = false;
 	copper = 0;
 	silver = 0;
 	gold = 0;
@@ -355,9 +355,8 @@ NPC::~NPC()
 {
 	AI_Stop();
 
-	if(proximity != nullptr) {
-		entity_list.RemoveProximity(GetID());
-		safe_delete(proximity);
+	if(has_proximity) {
+		entity_list.RemoveProximity(this);
 	}
 
 	safe_delete(NPCTypedata_ours);

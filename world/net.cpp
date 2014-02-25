@@ -383,6 +383,7 @@ int main(int argc, char** argv) {
 	EmuTCPConnection* tcpc;
 	EQStreamInterface *eqsi;
 
+	Timer::InitBaseTime();
 	while(RunLoops) {
 		Timer::SetCurrentTime();
 

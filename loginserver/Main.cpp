@@ -246,6 +246,7 @@ int main()
 #endif
 
 	server_log->Log(log_debug, "Server Started.");
+	Timer::InitBaseTime();
 	while(run_server)
 	{
 		Timer::SetCurrentTime();

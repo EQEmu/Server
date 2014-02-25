@@ -338,6 +338,7 @@ int main(int argc, char** argv) {
 	EQStreamInterface *eqsi;
 	Timer temp_timer(10);
 	temp_timer.Start();
+	Timer::InitBaseTime();
 	while(RunLoops) {
 		{	//profiler block to omit the sleep from times
 
