@@ -274,6 +274,7 @@ struct StatBonuses {
 	int16	DamageModifier[HIGHEST_SKILL+2];	//i
 	int16	MinDamageModifier[HIGHEST_SKILL+2]; //i
 	int16	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
+	int16	ProcChanceSPA;						// ProcChance from spell effects
 	int16	ExtraAttackChance;
 	int16	DoTShielding;
 	int16	DivineSaveChance[2];				// Second Chance (base1 = chance, base2 = spell on trigger)

@@ -963,7 +963,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->GiveDoubleAttack += base1;
 				break;
 			case SE_ProcChance:
-				newbon->ProcChance += base1;
+				newbon->ProcChanceSPA += base1;
 				break;
 			case SE_RiposteChance:
 				newbon->RiposteChance += base1;
@@ -1890,17 +1890,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_ProcChance:
 			{
-				//multiplier is to be compatible with item effects,watching for overflow too
-				effect_value = effect_value<3000? effect_value : 3000;
-
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
-					newbon->ProcChance += effect_value;
+					newbon->ProcChanceSPA += effect_value;
 
-				else if((effect_value < 0) && (newbon->DoubleAttackChance > effect_value))
-					newbon->ProcChance = effect_value;
+				else if((effect_value < 0) && (newbon->ProcChanceSPA > effect_value))
+					newbon->ProcChanceSPA = effect_value;
 
-				if(newbon->ProcChance < effect_value)
-					newbon->ProcChance = effect_value;
+				if(newbon->ProcChanceSPA < effect_value)
+					newbon->ProcChanceSPA = effect_value;
 
 				break;
 			}
@@ -3323,9 +3320,9 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_ProcChance:
-					spellbonuses.ProcChance = effect_value;
-					aabonuses.ProcChance = effect_value;
-					itembonuses.ProcChance = effect_value;
+					spellbonuses.ProcChanceSPA = effect_value;
+					aabonuses.ProcChanceSPA = effect_value;
+					itembonuses.ProcChanceSPA = effect_value;
 					break;
 
 				case SE_ExtraAttackChance:

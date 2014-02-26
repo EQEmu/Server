@@ -7705,14 +7705,14 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 }
 
 //proc chance includes proc bonus
-float Bot::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand) {
+float Bot::GetProcChances(float &BaseProcChance, float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand) {
 	int mydex = GetDEX();
-	float AABonus = 0;
 	ProcBonus = 0;
 	ProcChance = 0;
+	BaseProcChance = 0;
 
-	if (aabonuses.ProcChance)
-		AABonus = float(aabonuses.ProcChance) / 100.0f;
+	ProcBonus = float(aabonuses.ProcChanceSPA + spellbonuses.ProcChanceSPA + itembonuses.ProcChanceSPA); //Spell Effects
+	ProcBonus += float(itembonuses.ProcChance)/10.0f; //Combat Effects
 
 	switch(hand){
 		case SLOT_PRIMARY:
@@ -7732,18 +7732,18 @@ float Bot::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_spe
 	if(weapon_speed < RuleI(Combat, MinHastedDelay)) // fast as a client can swing, so should be the floor of the proc chance
 		weapon_speed = RuleI(Combat, MinHastedDelay);
 
-	ProcBonus += (float(itembonuses.ProcChance + spellbonuses.ProcChance) / 1000.0f + AABonus);
-
 	if(RuleB(Combat, AdjustProcPerMinute) == true)
 	{
 		ProcChance = ((float)weapon_speed * RuleR(Combat, AvgProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
-		ProcBonus += float(mydex) * RuleR(Combat, ProcPerMinDexContrib) / 100.0f;
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
+		ProcChance = BaseProcChance;
+		ProcBonus += float(mydex) * RuleR(Combat, ProcPerMinDexContrib);
+		ProcChance += ProcChance*ProcBonus / 100.0f;
 	}
 	else
 	{
 		ProcChance = RuleR(Combat, BaseProcChance) + float(mydex) / RuleR(Combat, ProcDexDivideBy);
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
+		ProcChance = BaseProcChance;
+		ProcChance += ProcChance*ProcBonus / 100.0f;
 	}
 
 	mlog(COMBAT__PROCS, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
