@@ -274,6 +274,7 @@ struct StatBonuses {
 	int16	DamageModifier[HIGHEST_SKILL+2];	//i
 	int16	MinDamageModifier[HIGHEST_SKILL+2]; //i
 	int16	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
+	int16	ProcChanceSPA;						// ProcChance from spell effects
 	int16	ExtraAttackChance;
 	int16	DoTShielding;
 	int16	DivineSaveChance[2];				// Second Chance (base1 = chance, base2 = spell on trigger)
@@ -311,8 +312,8 @@ struct StatBonuses {
 	//uint16	BlockSpellEffect[EFFECT_COUNT];		// Prevents spells with certain effects from landing on you *no longer used
 	bool	ImmuneToFlee;						// Bypass the fleeing flag
 	uint16	VoiceGraft;							// Stores the ID of the mob with which to talk through
-	uint16	SpellProcChance;					// chance to proc from sympathetic spell effects
-	uint16	CharmBreakChance;					// chance to break charm
+	int16	SpellProcChance;					// chance to proc from sympathetic spell effects
+	int16	CharmBreakChance;					// chance to break charm
 	int16	SongRange;							// increases range of beneficial bard songs
 	uint16	HPToManaConvert;					// Uses HP to cast spells at specific conversion
 	uint16	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
@@ -335,6 +336,7 @@ struct StatBonuses {
 	bool	DivineAura;							// invulnerability
 	bool	DistanceRemoval;					// Check if Cancle if Moved effect is present
 	int16	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buffid
+	int16	FrenziedDevastation;				// base1= AArank(used) base2= chance increase spell criticals + all DD spells 2x mana.
 	//bool	AbsorbMagicAtt;						// Magic Rune *Need to be implemented for NegateEffect
 	//bool	MeleeRune;							// Melee Rune *Need to be implemented for NegateEffect
 

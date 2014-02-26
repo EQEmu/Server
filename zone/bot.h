@@ -167,7 +167,7 @@ public:
 	uint16 BotGetSpells(int spellslot) { return AIspells[spellslot].spellid; }
 	uint16 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
 	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
-	virtual float GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand);
+	virtual float GetProcChances(float &BaseProcChance, float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand);
 	virtual bool AvoidDamage(Mob* other, int32 &damage, bool CanRiposte);
 	virtual int GetMonkHandToHandDamage(void);
 	virtual bool TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse);

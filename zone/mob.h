@@ -971,7 +971,7 @@ protected:
 	void TryWeaponProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = 13);
 	void TryWeaponProc(const ItemInst* weapon, Mob *on, uint16 hand = 13);
 	void ExecWeaponProc(const ItemInst* weapon, uint16 spell_id, Mob *on);
-	virtual float GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
+	virtual float GetProcChances(float &BaseProcChance, float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
 	int GetWeaponDamage(Mob *against, const Item_Struct *weapon_item);
 	int GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate = nullptr);

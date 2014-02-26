@@ -2826,6 +2826,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_CriticalMend:
 			case SE_LimitCastTimeMax:
 			case SE_TriggerOnReqCaster:
+			case SE_FrenziedDevastation:
 			{
 				break;
 			}
@@ -5396,14 +5397,12 @@ bool Mob::AffectedBySpellExcludingSlot(int slot, int effect)
 
 float Mob::GetSympatheticProcChances(float &ProcBonus, float &ProcChance, int32 cast_time, int16 ProcRateMod) {
 
-	ProcBonus = spellbonuses.SpellProcChance + itembonuses.SpellProcChance;
 	ProcChance = 0;
 
 	if(cast_time > 0)
 	{
 		ProcChance = ((float)cast_time * RuleR(Casting, AvgSpellProcsPerMinute) / 60000.0f);
 		ProcChance = ProcChance * (float)(ProcRateMod/100);
-		ProcChance = ProcChance+(ProcChance*ProcBonus/100);
 	}
 	return ProcChance;
 }

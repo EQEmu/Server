@@ -81,6 +81,8 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
         
 	int chance = RuleI(Spells, BaseCritChance);
 		chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
+
+		chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 		
 	if (chance > 0){
  
@@ -321,6 +323,12 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 {
+	//FrenziedDevastation doubles mana cost of all DD spells
+	int16 FrenziedDevastation = itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
+
+	if (FrenziedDevastation && IsPureNukeSpell(spell_id))
+		cost *= 2;	
+	
 	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
 	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 	{

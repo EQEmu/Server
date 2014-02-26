@@ -3888,14 +3888,14 @@ void Mob::HealDamage(uint32 amount, Mob* caster) {
 
 
 //proc chance includes proc bonus
-float Mob::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand) {
+float Mob::GetProcChances(float &BaseProcChance, float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand) {
 	int mydex = GetDEX();
-	float AABonus = 0;
 	ProcBonus = 0;
 	ProcChance = 0;
+	BaseProcChance = 0;
 
-	if (aabonuses.ProcChance)
-		AABonus = float(aabonuses.ProcChance) / 100.0f;
+	ProcBonus = float(aabonuses.ProcChanceSPA + spellbonuses.ProcChanceSPA + itembonuses.ProcChanceSPA); //Spell Effects
+	ProcBonus += float(itembonuses.ProcChance)/10.0f; //Combat Effects
 
 	switch(hand){
 		case 13:
@@ -3915,18 +3915,18 @@ float Mob::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_spe
 	if(weapon_speed < RuleI(Combat, MinHastedDelay)) // fast as a client can swing, so should be the floor of the proc chance
 		weapon_speed = RuleI(Combat, MinHastedDelay);
 
-	ProcBonus += (float(itembonuses.ProcChance + spellbonuses.ProcChance) / 1000.0f + AABonus);
-
 	if(RuleB(Combat, AdjustProcPerMinute) == true)
 	{
 		ProcChance = ((float)weapon_speed * RuleR(Combat, AvgProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
-		ProcBonus += float(mydex) * RuleR(Combat, ProcPerMinDexContrib) / 100.0f;
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
+		BaseProcChance = ProcChance;
+		ProcBonus += float(mydex) * RuleR(Combat, ProcPerMinDexContrib);
+		ProcChance += ProcChance*ProcBonus/100.0f;
 	}
 	else
 	{
 		ProcChance = RuleR(Combat, BaseProcChance) + float(mydex) / RuleR(Combat, ProcDexDivideBy);
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
+		BaseProcChance = ProcChance;
+		ProcChance += ProcChance*ProcBonus/100.0f;
 	}
 
 	mlog(COMBAT__PROCS, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
@@ -3949,16 +3949,6 @@ float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 w
 			return 0;
 			break;
 	}
-
-	/*
-	float PermaHaste;
-	if(GetHaste() > 0)
-		PermaHaste = 1 / (1 + (float)GetHaste()/100);
-	else if(GetHaste() < 0)
-		PermaHaste = 1 * (1 - (float)GetHaste()/100);
-	else
-		PermaHaste = 1.0f;
-	*/
 
 	//calculate the weapon speed in ms, so we can use the rule to compare against.
 	//weapon_speed = ((int)(weapon_speed*(100.0f+attack_speed)*PermaHaste));
@@ -4054,8 +4044,8 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 
 	//we have to calculate these again, oh well
 	int ourlevel = GetLevel();
-	float ProcChance, ProcBonus;
-	GetProcChances(ProcBonus, ProcChance, weapon_g->GetItem()->Delay, hand);
+	float ProcChance, ProcBonus, BaseProcChance;
+	GetProcChances(BaseProcChance, ProcBonus, ProcChance, weapon_g->GetItem()->Delay, hand);
 	if(hand != 13)
 	{
 		ProcChance /= 2;
@@ -4092,11 +4082,11 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on, uint16 hand) {
 	uint16 skillinuse = 28;
 	int ourlevel = GetLevel();
-	float ProcChance, ProcBonus;
+	float ProcChance, ProcBonus, BaseProcChance;
 	if(weapon!=nullptr)
-		GetProcChances(ProcBonus, ProcChance, weapon->Delay, hand);
+		GetProcChances(BaseProcChance, ProcBonus, ProcChance, weapon->Delay, hand);
 	else
-		GetProcChances(ProcBonus, ProcChance);
+		GetProcChances(BaseProcChance, ProcBonus, ProcChance);
 
 	if(hand != 13) //Is Archery intended to proc at 50% rate?
 		ProcChance /= 2;
@@ -4149,10 +4139,11 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 		}
 	}
 
+	int16 SpellProcChance = spellbonuses.SpellProcChance + itembonuses.SpellProcChance + aabonuses.SpellProcChance;
 	uint32 i;
 	for(i = 0; i < MAX_PROCS; i++) {
 		if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
-			if(MakeRandomInt(0, 100) < PermaProcs[i].chance) {
+			if(MakeRandomInt(0, 100) < PermaProcs[i].chance) { //TODO: Unclear if these are treated like Spells or WeaponProcs
 				mlog(COMBAT__PROCS, "Permanent proc %d procing spell %d (%d percent chance)", i, PermaProcs[i].spellID, PermaProcs[i].chance);
 				ExecWeaponProc(nullptr, PermaProcs[i].spellID, on);
 			} else {
@@ -4168,7 +4159,8 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 			}
 			else
 			{
-				int chance = ProcChance * (SpellProcs[i].chance);
+				int chance = BaseProcChance * (SpellProcs[i].chance);
+				chance += chance*SpellProcChance/100;
 				if(MakeRandomInt(0, 100) < chance) {
 					mlog(COMBAT__PROCS, "Spell proc %d procing spell %d (%d percent chance)", i, SpellProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
@@ -4179,7 +4171,8 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 			}
 		}
 		if (bRangedAttack) {
-			int chance = ProcChance * RangedProcs[i].chance;
+			int chance = BaseProcChance * RangedProcs[i].chance;
+			chance += chance*SpellProcChance/100;
 			if(MakeRandomInt(0, 100) < chance) {
 				mlog(COMBAT__PROCS, "Ranged proc %d procing spell %d", i, RangedProcs[i].spellID, RangedProcs[i].chance);
 				ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);

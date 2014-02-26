@@ -359,7 +359,7 @@ typedef enum {
 #define SE_DispelBeneficial				209 // implemented
 //#define SE_PetShield					210	// *not implemented
 #define SE_AEMelee						211	// implemented
-//#define SE_CastingSkills				212	// *not implemented -Include/Exclude Casting Skill type. (*no longer used on live)
+#define SE_FrenziedDevastation			212	// implemented - increase spell criticals + all DD spells cast 2x mana.
 #define SE_PetMaxHP						213	// implemented[AA] - increases the maximum hit points of your pet
 #define SE_MaxHPChange					214	// implemented
 #define SE_PetAvoidance					215	// implemented[AA] - increases pet ability to avoid melee damage
@@ -397,7 +397,7 @@ typedef enum {
 #define SE_RaiseSkillCap				247	// *not implemented[AA] - adds skill over the skill cap.
 //#define SE_SecondaryForte				248 // not implemented as bonus(gives you a 2nd specialize skill that can go past 50 to 100)
 #define SE_SecondaryDmgInc				249 // implemented[AA] Allows off hand weapon to recieve a damage bonus (Sinister Strikes)
-#define SE_SpellProcChance				250	// implemented - Increase chance to sympathetic proc by %
+#define SE_SpellProcChance				250	// implemented - Increase chance to proc from melee proc spells (ie Spirit of Panther)
 #define SE_ConsumeProjectile			251	// implemented[AA] - chance to not consume an arrow (ConsumeProjectile = 100)
 #define SE_FrontalBackstabChance		252	// implemented[AA] - chance to perform a full damage backstab from front.
 #define SE_FrontalBackstabMinDmg		253	// implemented[AA] - allow a frontal backstab for mininum damage.
