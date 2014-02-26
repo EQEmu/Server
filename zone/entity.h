@@ -135,6 +135,7 @@ public:
 	inline Mob *GetMobID(uint16 id) { return(GetMob(id)); }	//for perl
 	Mob *GetMob(const char* name);
 	Mob *GetMobByNpcTypeID(uint32 get_id);
+	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
 	Mob *GetTargetForVirus(Mob* spreader);
 	inline NPC *GetNPCByID(uint16 id)
 		{ return npc_list.count(id) ? npc_list.at(id) : nullptr; }

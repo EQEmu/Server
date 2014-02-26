@@ -1012,6 +1012,22 @@ Mob *EntityList::GetMobByNpcTypeID(uint32 get_id)
 	return nullptr;
 }
 
+bool EntityList::IsMobSpawnedByNpcTypeID(uint32 get_id)
+{
+	if (get_id == 0 || npc_list.empty())
+		return false;
+
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		// Mobs will have a 0 as their GetID() if they're dead
+		if (it->second->GetNPCTypeID() == get_id && it->second->GetID() != 0)
+			return true;
+		++it;
+	}
+
+	return false;
+}
+
 Object *EntityList::GetObjectByDBID(uint32 id)
 {
 	if (id == 0 || object_list.empty())
