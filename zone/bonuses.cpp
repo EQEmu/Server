@@ -1228,6 +1228,14 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_FrenziedDevastation:
+				newbon->FrenziedDevastation += base2;
+				break;
+
+			case SE_SpellProcChance:
+				newbon->SpellProcChance += base1;
+				break;
+
 		}
 	}
 }
@@ -2522,6 +2530,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_DistanceRemoval:
 				newbon->DistanceRemoval = true;
+				break;
+
+			case SE_FrenziedDevastation:
+				newbon->FrenziedDevastation += spells[spell_id].base2[i];
 				break;
 
 		}
@@ -3866,7 +3878,13 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.ImprovedTaunt[0] = effect_value;
 					spellbonuses.ImprovedTaunt[1] = effect_value;
 					spellbonuses.ImprovedTaunt[2] = -1;
-		
+					break;
+
+				case SE_FrenziedDevastation:
+					spellbonuses.FrenziedDevastation += effect_value;
+					aabonuses.FrenziedDevastation += effect_value;
+					itembonuses.FrenziedDevastation += effect_value;
+					break;
 			}
 		}
 	}

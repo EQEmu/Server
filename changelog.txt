@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 02/26/2014 ==
+Kayen: Implemented SE_FrenziedDevestation - increase critical spell chacnce and 2x mana cost for DD spells
+Kayen: Fixed SE_SpellProcChance - Now works on spell dervived procs
+
 == 02/24/2014 ==
 Sorvani: Updated GetUnusedInstanceID to not recycle instance ID's unless it has reached max (65535)
 

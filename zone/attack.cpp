@@ -4149,6 +4149,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 		}
 	}
 
+	int16 SpellProcChance = spellbonuses.SpellProcChance + itembonuses.SpellProcChance + aabonuses.SpellProcChance;
 	uint32 i;
 	for(i = 0; i < MAX_PROCS; i++) {
 		if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
@@ -4169,6 +4170,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 			else
 			{
 				int chance = ProcChance * (SpellProcs[i].chance);
+				chance += chance*SpellProcChance/100;
 				if(MakeRandomInt(0, 100) < chance) {
 					mlog(COMBAT__PROCS, "Spell proc %d procing spell %d (%d percent chance)", i, SpellProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
@@ -4180,6 +4182,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on
 		}
 		if (bRangedAttack) {
 			int chance = ProcChance * RangedProcs[i].chance;
+			chance += chance*SpellProcChance/100;
 			if(MakeRandomInt(0, 100) < chance) {
 				mlog(COMBAT__PROCS, "Ranged proc %d procing spell %d", i, RangedProcs[i].spellID, RangedProcs[i].chance);
 				ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
