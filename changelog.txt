@@ -7,6 +7,7 @@ Kayen: Fixed SE_SpellProcChance - Now works on spell dervived procs
 cavedude: Added two new NPC special_abilities. ALWAYS_FLEE, which forces the NPC to always flee ignoring FleeIfNotAlone and FLEE_PERCENT which allows you to change the HP an individual NPC will flee at. If no value is set, the rule is used as normal.
 cavedude: Fixed an issue where rectangular roamboxes could cause an NPC to get stuck on a single coord. 
 cavedude: Added a new roambox column, mindelay allowing you to have more control over the roambox delay.
+Uleat: Fix for 'sqrt' failure on vs2010 clients
 
 Required SQL: utils/sql/git/required/2014_02_26_roambox_update.sql
 

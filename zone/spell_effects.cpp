@@ -3419,13 +3419,11 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			{
 				if (spellbonuses.DistanceRemoval){
 
-					int distance =	sqrt(
-									((int(GetX()) - buffs[slot].caston_x) * (int(GetX()) - buffs[slot].caston_x)) + 
-									((int(GetY()) - buffs[slot].caston_y) *  (int(GetY()) - buffs[slot].caston_y)) +
-									((int(GetZ()) - buffs[slot].caston_z) * (int(GetZ()) - buffs[slot].caston_z)) 
-									);
+					int distance =	((int(GetX()) - buffs[slot].caston_x) * (int(GetX()) - buffs[slot].caston_x)) + 
+									((int(GetY()) - buffs[slot].caston_y) * (int(GetY()) - buffs[slot].caston_y)) +
+									((int(GetZ()) - buffs[slot].caston_z) * (int(GetZ()) - buffs[slot].caston_z));
 
-					if (distance > spells[spell_id].base[i]){
+					if (distance > (spells[spell_id].base[i] * spells[spell_id].base[i])){
 
 						if(!TryFadeEffect(slot))
 							BuffFadeBySlot(slot , true);
