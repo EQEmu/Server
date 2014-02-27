@@ -455,6 +455,7 @@ void NPC::AI_Init() {
 	roambox_distance = 0;
 	roambox_movingto_x = 0;
 	roambox_movingto_y = 0;
+	roambox_min_delay = 2500;
 	roambox_delay = 2500;
 }
 
@@ -1590,14 +1591,17 @@ void NPC::AI_DoMovement() {
 			movey *= MakeRandomInt(0, 1) ? 1 : -1;
 			roambox_movingto_x = GetX() + movex;
 			roambox_movingto_y = GetY() + movey;
+			//Try to calculate new coord using distance.
 			if (roambox_movingto_x > roambox_max_x || roambox_movingto_x < roambox_min_x)
 				roambox_movingto_x -= movex * 2;
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
 				roambox_movingto_y -= movey * 2;
+			//New coord is still invalid, ignore distance and just pick a new random coord. 
+			//If we're here we may have a roambox where one side is shorter than the specified distance. Commons, Wkarana, etc.
 			if (roambox_movingto_x > roambox_max_x || roambox_movingto_x < roambox_min_x)
-				roambox_movingto_x = roambox_max_x;
+				roambox_movingto_x = MakeRandomFloat(roambox_min_x+1,roambox_max_x-1);
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
-				roambox_movingto_y = roambox_max_y;
+				roambox_movingto_y = MakeRandomFloat(roambox_min_y+1,roambox_max_y-1);
 		}
 
 		mlog(AI__WAYPOINTS, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
@@ -1605,7 +1609,7 @@ void NPC::AI_DoMovement() {
 		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, GetZ(), walksp, true))
 		{
 			roambox_movingto_x = roambox_max_x + 1; // force update
-			pLastFightingDelayMoving = Timer::GetCurrentTime() + RandomTimer(roambox_delay, roambox_delay + 5000);
+			pLastFightingDelayMoving = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
 			SetMoving(false);
 			SendPosition();	// makes mobs stop clientside
 		}

@@ -265,8 +265,8 @@ public:
 	inline bool			IsGuarding() const { return(guard_heading != 0); }
 	void				SaveGuardSpotCharm();
 	void				RestoreGuardSpotCharm();
-	void				AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay = 2500);
-	void				AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, float iMinY, uint32 iDelay = 2500);
+	void				AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay = 2500, uint32 iMinDelay = 2500);
+	void				AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, float iMinY, uint32 iDelay = 2500, uint32 iMinDelay = 2500);
 
 	//mercenary stuff
 	void	LoadMercTypes();
@@ -430,6 +430,7 @@ protected:
 	float roambox_movingto_x;
 	float roambox_movingto_y;
 	uint32 roambox_delay;
+	uint32 roambox_min_delay;
 
 	uint16	skills[HIGHEST_SKILL+1];
 	uint32	equipment[MAX_WORN_INVENTORY];	//this is an array of item IDs

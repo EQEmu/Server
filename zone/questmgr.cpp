@@ -347,8 +347,8 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 		entity_list.AddNPC(npc);
 		entity_list.LimitAddNPC(npc);
 
-		if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay)
-			npc->AI_SetRoambox(sg->roamdist,sg->roambox[0],sg->roambox[1],sg->roambox[2],sg->roambox[3],sg->delay);
+		if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay && sg->min_delay)
+			npc->AI_SetRoambox(sg->roamdist,sg->roambox[0],sg->roambox[1],sg->roambox[2],sg->roambox[3],sg->delay,sg->min_delay);
 		if(zone->InstantGrids())
 		{
 			found_spawn->LoadGrid();

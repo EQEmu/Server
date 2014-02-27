@@ -2166,7 +2166,9 @@ luabind::scope lua_register_special_abilities() {
 				luabind::value("leash", static_cast<int>(LEASH)),
 				luabind::value("tether", static_cast<int>(TETHER)),
 				luabind::value("destructible_object", static_cast<int>(DESTRUCTIBLE_OBJECT)),
-				luabind::value("no_harm_from_client", static_cast<int>(NO_HARM_FROM_CLIENT))
+				luabind::value("no_harm_from_client", static_cast<int>(NO_HARM_FROM_CLIENT)),
+				luabind::value("always_flee", static_cast<int>(ALWAYS_FLEE)),
+				luabind::value("flee_percent", static_cast<int>(FLEE_PERCENT))
 		];
 }
 

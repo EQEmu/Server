@@ -47,11 +47,11 @@ static inline float ABS(float x) {
 	return(x);
 }
 
-void NPC::AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay) {
-	AI_SetRoambox(iDist, GetX()+iRoamDist, GetX()-iRoamDist, GetY()+iRoamDist, GetY()-iRoamDist, iDelay);
+void NPC::AI_SetRoambox(float iDist, float iRoamDist, uint32 iDelay, uint32 iMinDelay) {
+	AI_SetRoambox(iDist, GetX()+iRoamDist, GetX()-iRoamDist, GetY()+iRoamDist, GetY()-iRoamDist, iDelay, iMinDelay);
 }
 
-void NPC::AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, float iMinY, uint32 iDelay) {
+void NPC::AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, float iMinY, uint32 iDelay, uint32 iMinDelay) {
 	roambox_distance = iDist;
 	roambox_max_x = iMaxX;
 	roambox_min_x = iMinX;
@@ -59,6 +59,7 @@ void NPC::AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, floa
 	roambox_min_y = iMinY;
 	roambox_movingto_x = roambox_max_x + 1; // this will trigger a recalc
 	roambox_delay = iDelay;
+	roambox_min_delay = iMinDelay;
 }
 
 void NPC::DisplayWaypointInfo(Client *c) {

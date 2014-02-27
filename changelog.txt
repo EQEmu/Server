@@ -4,12 +4,19 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 02/26/2014 ==
 Kayen: Implemented SE_FrenziedDevestation - increase critical spell chacnce and 2x mana cost for DD spells
 Kayen: Fixed SE_SpellProcChance - Now works on spell dervived procs
+cavedude: Added two new NPC special_abilities. ALWAYS_FLEE, which forces the NPC to always flee ignoring FleeIfNotAlone and FLEE_PERCENT which allows you to change the HP an individual NPC will flee at. If no value is set, the rule is used as normal.
+cavedude: Fixed an issue where rectangular roamboxes could cause an NPC to get stuck on a single coord. 
+cavedude: Added a new roambox column, mindelay allowing you to have more control over the roambox delay.
+
+Required SQL: utils/sql/git/required/2014_02_26_roambox_update.sql
 
 == 02/24/2014 ==
+cavedude: Better flee runspeed calculation. Added rule Combat:FleeMultiplier to alter this behavior.
 Sorvani: Updated GetUnusedInstanceID to not recycle instance ID's unless it has reached max (65535)
 
 == 02/23/2014 ==
 Secrets: Exported the client object SendTargetCommand to Perl.
+cavedude: Merchants will now keep better track of charges.
 
 == 02/20/2014 ==
 Kayen: Implemented SE_MitigateDotDamage	- dot spell mitigation rune with max value

@@ -2085,21 +2085,27 @@ void command_ai(Client *c, const Seperator *sep)
 	}
 	else if (strcasecmp(sep->arg[1], "roambox") == 0) {
 		if (target && target->IsAIControlled() && target->IsNPC()) {
-			if ((sep->argnum == 6 || sep->argnum == 7) && sep->IsNumber(2) && sep->IsNumber(3) && sep->IsNumber(4) && sep->IsNumber(5) && sep->IsNumber(6)) {
+			if ((sep->argnum == 6 || sep->argnum == 7 || sep->argnum == 8) && sep->IsNumber(2) && sep->IsNumber(3) && sep->IsNumber(4) && sep->IsNumber(5) && sep->IsNumber(6)) {
 				uint32 tmp = 2500;
+				uint32 tmp2 = 2500;
 				if (sep->IsNumber(7))
 					tmp = atoi(sep->arg[7]);
-				target->CastToNPC()->AI_SetRoambox(atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]), atof(sep->arg[6]), tmp);
+				if (sep->IsNumber(8))
+					tmp2 = atoi(sep->arg[8]);
+				target->CastToNPC()->AI_SetRoambox(atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]), atof(sep->arg[6]), tmp, tmp2);
 			}
 			else if ((sep->argnum == 3 || sep->argnum == 4) && sep->IsNumber(2) && sep->IsNumber(3)) {
 				uint32 tmp = 2500;
+				uint32 tmp2 = 2500;
 				if (sep->IsNumber(4))
 					tmp = atoi(sep->arg[4]);
-				target->CastToNPC()->AI_SetRoambox(atof(sep->arg[2]), atof(sep->arg[3]), tmp);
+				if (sep->IsNumber(5))
+					tmp2 = atoi(sep->arg[5]);
+				target->CastToNPC()->AI_SetRoambox(atof(sep->arg[2]), atof(sep->arg[3]), tmp, tmp2);
 			}
 			else {
-				c->Message(0, "Usage: #ai roambox dist max_x min_x max_y min_y [delay]");
-				c->Message(0, "Usage: #ai roambox dist roamdist [delay]");
+				c->Message(0, "Usage: #ai roambox dist max_x min_x max_y min_y [delay] [mindelay]");
+				c->Message(0, "Usage: #ai roambox dist roamdist [delay] [mindelay]");
 			}
 		}
 		else

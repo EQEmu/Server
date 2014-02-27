@@ -381,6 +381,14 @@ int main(int argc, char** argv) {
 			entity_list.AddClient(client);
 		}
 
+		uint8 IDLEZONETIME = 200;
+		if ( numclients < 1 && temp_timer.GetDuration() != IDLEZONETIME )
+			temp_timer.SetTimer(IDLEZONETIME);
+		else if ( numclients > 0 && temp_timer.GetDuration() == IDLEZONETIME )
+		{
+			temp_timer.SetTimer(10);
+			temp_timer.Trigger();
+		}
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();

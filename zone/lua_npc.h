@@ -85,7 +85,7 @@ public:
 	void SaveGuardSpot(bool clear);
 	bool IsGuarding();
 	void AI_SetRoambox(float dist, float max_x, float min_x, float max_y, float min_y);
-	void AI_SetRoambox(float dist, float max_x, float min_x, float max_y, float min_y, uint32 delay);
+	void AI_SetRoambox(float dist, float max_x, float min_x, float max_y, float min_y, uint32 delay, uint32 mindelay);
 	int GetNPCSpellsID();
 	int GetSpawnPointID();
 	float GetSpawnPointX();
