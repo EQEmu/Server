@@ -12627,32 +12627,38 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app) 
 		uint32 cost = 0;
 		uint32 current_currency = GetAlternateCurrencyValue(alt_cur_id);
 		uint32 merchant_id = tar->MerchantType;
-		bool found = false;
-		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
-		std::list<MerchantList>::const_iterator itr;
-		for(itr = merlist.begin(); itr != merlist.end(); ++itr) {
-			MerchantList ml = *itr;
-			if(GetLevel() < ml.level_required) {
-				continue;
+
+		if (RuleB(Merchant, EnableAltCurrencySell))	{
+			bool found = false;
+			std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
+			std::list<MerchantList>::const_iterator itr;
+			for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
+				MerchantList ml = *itr;
+				if (GetLevel() < ml.level_required) {
+					continue;
+				}
+
+				int32 fac = tar->GetPrimaryFaction();
+				if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+					continue;
+				}
+
+				item = database.GetItem(ml.item);
+				if (!item)
+					continue;
+
+				if (item->ID == inst->GetItem()->ID) {
+					cost = ml.alt_currency_cost;
+					found = true;
+					break;
+				}
 			}
 
-			int32 fac = tar->GetPrimaryFaction();
-			if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
-				continue;
-			}
-
-			item = database.GetItem(ml.item);
-			if(!item)
-				continue;
-
-			if(item->ID == inst->GetItem()->ID) {
-				cost = ml.alt_currency_cost;
-				found = true;
-				break;
+			if (!found) {
+				cost = 0;
 			}
 		}
-
-		if(!found) {
+		else {
 			cost = 0;
 		}
 
@@ -12802,6 +12808,10 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 			return;
 		}
 
+		if (!RuleB(Merchant, EnableAltCurrencySell))	{
+			return;
+		}
+
 		const Item_Struct* item = nullptr;
 		uint32 cost = 0;
 		uint32 current_currency = GetAlternateCurrencyValue(alt_cur_id);
@@ -12824,7 +12834,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 			if(!item)
 				continue;
 
-			if(item->ID == inst->GetItem()->ID) {
+			if(item->ID == inst->GetItem()->ID)	{
 				cost = ml.alt_currency_cost;
 				found = true;
 				break;

@@ -4091,18 +4091,22 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 
 			if (aug->Proc.Type == ET_CombatProc) {
 				float APC = ProcChance * (100.0f + // Proc chance for this aug
-						static_cast<float>(aug->ProcRate)) / 100.0f;
+					static_cast<float>(aug->ProcRate)) / 100.0f;
 				if (MakeRandomFloat(0, 1) <= APC) {
-					if (IsPet()) {
-						Mob *own = GetOwner();
-						if (own)
-							own->Message_StringID(13, PROC_PETTOOLOW);
-					} else {
-						Message_StringID(13, PROC_TOOLOW);
+					if (aug->Proc.Level > ourlevel) {
+						if (IsPet()) {
+							Mob *own = GetOwner();
+							if (own)
+								own->Message_StringID(13, PROC_PETTOOLOW);
+						}
+						else {
+							Message_StringID(13, PROC_TOOLOW);
+						}
 					}
-				} else {
-					ExecWeaponProc(aug_i, aug->Proc.Effect, on);
-					break;
+					else {
+						ExecWeaponProc(aug_i, aug->Proc.Effect, on);
+						break;
+					}
 				}
 			}
 		}
