@@ -445,7 +445,8 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	casting_spell_resist_adjust = resist_adjust;
 
-	mlog(SPELLS__CASTING, "Spell %d: Casting time %d (orig %d), mana cost %d", orgcasttime, cast_time, mana_cost);
+	mlog(SPELLS__CASTING, "Spell %d: Casting time %d (orig %d), mana cost %d",
+			spell_id, cast_time, orgcasttime, mana_cost);
 
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {

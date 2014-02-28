@@ -62,7 +62,7 @@ int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 }
 
 int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
-	
+
 	if (spells[spell_id].targettype == ST_Self)
 		return value;
 
@@ -74,24 +74,24 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
 	if ( (spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) && GetLevel() > 40)
 		value -= (GetLevel() - 40) * 20;
-       
+
 	//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm TOuch.
 	if (spell_id == SPELL_IMP_HARM_TOUCH) //Improved Harm Touch
 		value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
-        
+
 	int chance = RuleI(Spells, BaseCritChance);
 		chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
 
 		chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
-		
+
 	if (chance > 0){
- 
+
 		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
 		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
 		 if (spell_id == SPELL_IMP_HARM_TOUCH && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
 			 chance = 100;
- 
+
 		 if (MakeRandomInt(1,100) <= chance){
 			Critical = true;
 			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
@@ -104,53 +104,55 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		}
 
 		ratio += RuleI(Spells, WizCritRatio); //Default is zero
-			
+
 		if (Critical){
 
-			value = value_BaseEffect*ratio/100;  
+			value = value_BaseEffect*ratio/100;
 
-			value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100; 
+			value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
 
 			value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
 
 			if (target) {
-				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;  
-				value -= target->GetFcDamageAmtIncoming(this, spell_id); 
+				value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
+				value -= target->GetFcDamageAmtIncoming(this, spell_id);
 			}
 
-			value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100; 
+			value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100;
 
-			value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
+			value -= GetFocusEffect(focusFcDamageAmt, spell_id);
 
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
+			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
+					OTHER_CRIT_BLAST, GetName(), itoa(-value));
+			Message_StringID(MT_SpellCrits, YOU_CRIT_BLAST, itoa(-value));
 
 			return value;
 		}
 	}
 
-	 value = value_BaseEffect;
- 
-	 value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100; 
-	 
-	 value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100;
+	value = value_BaseEffect;
 
-	 if (target) {
+	value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
+
+	value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100;
+
+	if (target) {
 		value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100;
-		value -= target->GetFcDamageAmtIncoming(this, spell_id); 
-	 }
+		value -= target->GetFcDamageAmtIncoming(this, spell_id);
+	}
 
-	 value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id); 
+	value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id);
 
-	 value -= GetFocusEffect(focusFcDamageAmt, spell_id); 
-	 
+	value -= GetFocusEffect(focusFcDamageAmt, spell_id);
+
 	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
-         value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value); 
+		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
 	return value;
- }
+}
 
 int32 Client::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
