@@ -1615,7 +1615,8 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 
 	if (shield_target)
 	{
-		entity_list.MessageClose(this,false,100,0,"%s ceases shielding %s.",GetName(),shield_target->GetName());
+		entity_list.MessageClose_StringID(this, false, 100, 0,
+			END_SHIELDING, GetName(), shield_target->GetName());
 		for (int y = 0; y < 2; y++)
 		{
 			if (shield_target->shielder[y].shielder_id == GetID())
@@ -1640,7 +1641,8 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 			{
 				if (shield_target->shielder[x].shielder_id == 0)
 				{
-					entity_list.MessageClose(this,false,100,0,"%s uses their shield to guard %s.",GetName(),shield_target->GetName());
+					entity_list.MessageClose_StringID(this ,false, 100, 0,
+						START_SHIELDING, GetName(), shield_target->GetName());
 					shield_target->shielder[x].shielder_id = GetID();
 					int shieldbonus = shield->AC*2;
 					switch (GetAA(197))
@@ -1677,7 +1679,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 	if (!ack)
 	{
-		Message(0, "No more than two warriors may shield the same being.");
+		Message_StringID(0, ALREADY_SHIELDED);
 		shield_target = 0;
 		return;
 	}

@@ -224,6 +224,9 @@
 #define SUSPEND_MINION_SUSPEND		3268	//%1 tells you, 'By your command, master.'
 #define ONLY_SUMMONED_PETS			3269	//3269 This effect only works with summoned pets.
 #define SUSPEND_MINION_FIGHTING		3270	//Your pet must be at peace, first.
+#define ALREADY_SHIELDED			3279	//Either you or your target is already being shielded.
+#define START_SHIELDING				3281	//%1 begins to use %2 as a living shield!
+#define END_SHIELDING				3282	//%1 ceases protecting %2.
 #define TRADESKILL_MISSING_ITEM		3455	//You are missing a %1.
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
