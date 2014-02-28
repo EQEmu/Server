@@ -4080,7 +4080,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 		}
 	}
 
-	if (!proced) {
+	if (!proced && inst) {
 		for (int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
 			const ItemInst *aug_i = inst->GetAugment(r);
 			if (!aug_i) // no aug, try next slot!
@@ -4098,12 +4098,10 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 							Mob *own = GetOwner();
 							if (own)
 								own->Message_StringID(13, PROC_PETTOOLOW);
-						}
-						else {
+						} else {
 							Message_StringID(13, PROC_TOOLOW);
 						}
-					}
-					else {
+					} else {
 						ExecWeaponProc(aug_i, aug->Proc.Effect, on);
 						break;
 					}
