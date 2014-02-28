@@ -259,7 +259,7 @@ int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 }
 
 int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
-	
+
 	if (target == nullptr)
 		target = this;
 
@@ -267,54 +267,57 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	int16 chance = 0;
 	int8 modifier = 1;
 	bool Critical = false;
-		
-	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100); 
-		
+
+	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
+
 	value = value_BaseEffect;
 
-	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id)/100); 
- 
+	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id)/100);
+
 	// Instant Heals
 	if(spells[spell_id].buffduration < 1) {
 
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance; 
+		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
 
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
-						
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
+
 		if (spellbonuses.CriticalHealDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay); 
-	
+			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
+
 		if(chance && (MakeRandomInt(0,99) < chance)) {
 			Critical = true;
 			modifier = 2; //At present time no critical heal amount modifier SPA exists.
 		}
-		
+
 		value *= modifier;
-		value += GetFocusEffect(focusFcHealAmtCrit, spell_id) * modifier; 
-		value += GetFocusEffect(focusFcHealAmt, spell_id); 
-		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
-	
+		value += GetFocusEffect(focusFcHealAmtCrit, spell_id) * modifier;
+		value += GetFocusEffect(focusFcHealAmt, spell_id);
+		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
+
 		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
 
-		value += value*target->GetHealRate(spell_id, this)/100; 
+		value += value*target->GetHealRate(spell_id, this)/100;
 
-		if (Critical)
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), value);
+		if (Critical) {
+			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
+					OTHER_CRIT_HEAL, GetName(), itoa(value));
+			Message_StringID(MT_SpellCrits, YOU_CRIT_HEAL, itoa(value));
+		}
 
 		return value;
 	}
 
 	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
-		
-		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime; 
 
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id); 
-		
+		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
+
+		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
+
 		if (spellbonuses.CriticalRegenDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
-		
+
 		if(chance && (MakeRandomInt(0,99) < chance))
 			return (value * 2);
 	}

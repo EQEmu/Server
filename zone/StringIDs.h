@@ -125,6 +125,7 @@
 #define YOU_ARE_PROTECTED			424		//%1 tries to cast a spell on you, but you are protected.
 #define TARGET_RESISTED				425		//Your target resisted the %1 spell.
 #define YOU_RESIST					426		//You resist the %1 spell!
+#define YOU_CRIT_HEAL				427		//You perform an exceptional heal! (%1)
 #define YOU_CRIT_BLAST				428		//You deliver a critical blast! (%1)
 #define SUMMONING_CORPSE			429		//Summoning your corpse.
 #define SUMMONING_CORPSE_OTHER		430		//Summoning %1's corpse.
@@ -169,6 +170,7 @@
 #define OTHER_REGAIN_CAST			1033	//%1 regains concentration and continues casting.
 #define GENERIC_SHOUT				1034	//%1 shouts '%2'
 #define GENERIC_EMOTE				1036	//%1 %2
+#define OTHER_CRIT_HEAL				1039	//%1 performs an exceptional heal! (%2)
 #define OTHER_CRIT_BLAST			1040	//%1 delivers a critical blast! (%2)
 #define NPC_ENRAGE_START			1042	//%1 has become ENRAGED.
 #define NPC_ENRAGE_END				1043	//%1 is no longer enraged.

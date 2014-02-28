@@ -3851,24 +3851,17 @@ void Mob::HealDamage(uint32 amount, Mob* caster) {
 		}
 	}
 
-
 	if(amount > (maxhp - curhp))
 		acthealed = (maxhp - curhp);
 	else
 		acthealed = amount;
 
-	char *TempString = nullptr;
-
-	MakeAnyLenString(&TempString, "%d", acthealed);
-
-	if(acthealed > 100){
-		if(caster){
-			Message_StringID(MT_NonMelee, YOU_HEALED, caster->GetCleanName(), TempString);
-			if(caster != this){
-				caster->Message_StringID(MT_NonMelee, YOU_HEAL, GetCleanName(), TempString);
-			}
-		}
-		else{
+	if (acthealed > 100) {
+		if (caster) {
+			Message_StringID(MT_NonMelee, YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+			if (caster != this)
+				caster->Message_StringID(MT_NonMelee, YOU_HEAL, GetCleanName(), itoa(acthealed));
+		} else {
 			Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);
 		}
 	}
@@ -3882,7 +3875,6 @@ void Mob::HealDamage(uint32 amount, Mob* caster) {
 
 		SendHPUpdate();
 	}
-	safe_delete_array(TempString);
 }
 
 //proc chance includes proc bonus
