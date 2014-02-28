@@ -336,8 +336,10 @@ int main(int argc, char** argv) {
 	bool worldwasconnected = worldserver.Connected();
 	EQStream* eqss;
 	EQStreamInterface *eqsi;
-	Timer temp_timer(10);
-	temp_timer.Start();
+	uint8 IDLEZONEUPDATE = 200;
+	uint8 ZONEUPDATE = 10;
+	Timer zoneupdate_timer(ZONEUPDATE);
+	zoneupdate_timer.Start();
 	while(RunLoops) {
 		{	//profiler block to omit the sleep from times
 
@@ -381,13 +383,12 @@ int main(int argc, char** argv) {
 			entity_list.AddClient(client);
 		}
 
-		uint8 IDLEZONETIME = 200;
-		if ( numclients < 1 && temp_timer.GetDuration() != IDLEZONETIME )
-			temp_timer.SetTimer(IDLEZONETIME);
-		else if ( numclients > 0 && temp_timer.GetDuration() == IDLEZONETIME )
+		if ( numclients < 1 && zoneupdate_timer.GetDuration() != IDLEZONEUPDATE )
+			zoneupdate_timer.SetTimer(IDLEZONEUPDATE);
+		else if ( numclients > 0 && zoneupdate_timer.GetDuration() == IDLEZONEUPDATE )
 		{
-			temp_timer.SetTimer(10);
-			temp_timer.Trigger();
+			zoneupdate_timer.SetTimer(ZONEUPDATE);
+			zoneupdate_timer.Trigger();
 		}
 
 		//check for timeouts in other threads
@@ -402,7 +403,7 @@ int main(int argc, char** argv) {
 			worldwasconnected = false;
 		}
 
-		if (ZoneLoaded && temp_timer.Check()) {
+		if (ZoneLoaded && zoneupdate_timer.Check()) {
 			{
 				if(net.group_timer.Enabled() && net.group_timer.Check())
 					entity_list.GroupProcess();

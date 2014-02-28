@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 02/27/2014 ==
+cavedude: Exported TrainDisc to Lua.
+
 == 02/26/2014 ==
 Kayen: Implemented SE_FrenziedDevestation - increase critical spell chacnce and 2x mana cost for DD spells
 Kayen: Fixed SE_SpellProcChance - Now works on spell dervived procs
@@ -8,6 +11,7 @@ cavedude: Added two new NPC special_abilities. ALWAYS_FLEE, which forces the NPC
 cavedude: Fixed an issue where rectangular roamboxes could cause an NPC to get stuck on a single coord. 
 cavedude: Added a new roambox column, mindelay allowing you to have more control over the roambox delay.
 Uleat: Fix for 'sqrt' failure on vs2010 clients
+image: Added idle zone timer to save CPU cycles.
 
 Required SQL: utils/sql/git/required/2014_02_26_roambox_update.sql
 
