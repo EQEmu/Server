@@ -2004,6 +2004,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	if(!bRiposte && other->GetHP() > 0 ) {
 		TryWeaponProc(nullptr, weapon, other, Hand);	//no weapon
+		TrySpellProc(nullptr, weapon, other, Hand);
 	}
 
 	TriggerDefensiveProcs(nullptr, other, Hand, damage);
@@ -4131,7 +4132,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 	}
 
 	for (uint32 i = 0; i < MAX_PROCS; i++) {
-		if (IsPet() && hand == 13) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
+		if (IsPet() && hand != 13) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
 			continue; // If pets ever can proc from off hand, this will need to change
 
 		// Not ranged
