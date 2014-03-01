@@ -1907,6 +1907,24 @@ void EntityList::MessageClose_StringID(Mob *sender, bool skipsender, float dist,
 	}
 }
 
+void EntityList::FilteredMessageClose_StringID(Mob *sender, bool skipsender,
+		float dist, uint32 type, eqFilterType filter, uint32 string_id,
+		const char *message1, const char *message2, const char *message3,
+		const char *message4, const char *message5, const char *message6,
+		const char *message7, const char *message8, const char *message9)
+{
+	Client *c;
+	float dist2 = dist * dist;
+
+	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
+		c = it->second;
+		if (c && c->DistNoRoot(*sender) <= dist2 && (!skipsender || c != sender))
+			c->FilteredMessage_StringID(sender, type, filter, string_id,
+					message1, message2, message3, message4, message5,
+					message6, message7, message8, message9);
+	}
+}
+
 void EntityList::Message_StringID(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1,const char* message2,const char* message3,const char* message4,const char* message5,const char* message6,const char* message7,const char* message8,const char* message9)
 {
 	Client *c;
@@ -1915,6 +1933,23 @@ void EntityList::Message_StringID(Mob *sender, bool skipsender, uint32 type, uin
 		c = it->second;
 		if(c && (!skipsender || c != sender))
 			c->Message_StringID(type, string_id, message1, message2, message3, message4, message5, message6, message7, message8, message9);
+	}
+}
+
+void EntityList::FilteredMessage_StringID(Mob *sender, bool skipsender,
+		uint32 type, eqFilterType filter, uint32 string_id,
+		const char *message1, const char *message2, const char *message3,
+		const char *message4, const char *message5, const char *message6,
+		const char *message7, const char *message8, const char *message9)
+{
+	Client *c;
+
+	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
+		c = it->second;
+		if (c && (!skipsender || c != sender))
+			c->FilteredMessage_StringID(sender, type, filter, string_id,
+					message1, message2, message3, message4, message5, message6,
+					message7, message8, message9);
 	}
 }
 

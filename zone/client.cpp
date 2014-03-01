@@ -2963,6 +2963,101 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	safe_delete(outapp);
 }
 
+// helper function, returns true if we should see the message
+bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
+{
+	eqFilterMode mode = GetFilter(filter);
+	// easy ones first
+	if (mode == FilterShow)
+		return true;
+	else if (mode == FilterHide)
+		return false;
+
+	if (!sender && mode == FilterHide) {
+		return false;
+	} else if (sender) {
+		if (this == sender) {
+			if (mode == FilterHide) // don't need to check others
+				return false;
+		} else if (mode == FilterShowSelfOnly) { // we know sender isn't us
+			return false;
+		} else if (mode == FilterShowGroupOnly) {
+			Group *g = GetGroup();
+			if (!g || !g->IsGroupMember(sender))
+				return false;
+		}
+	}
+
+	// we passed our checks
+	return true;
+}
+
+void Client::FilteredMessage_StringID(Mob *sender, uint32 type,
+		eqFilterType filter, uint32 string_id)
+{
+	if (!FilteredMessageCheck(sender, filter))
+		return;
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
+	SimpleMessage_Struct *sms = (SimpleMessage_Struct *)outapp->pBuffer;
+	sms->color = type;
+	sms->string_id = string_id;
+
+	sms->unknown8 = 0;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	return;
+}
+
+void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id,
+		const char *message1, const char *message2, const char *message3,
+		const char *message4, const char *message5, const char *message6,
+		const char *message7, const char *message8, const char *message9)
+{
+	if (!FilteredMessageCheck(sender, filter))
+		return;
+
+	int i, argcount, length;
+	char *bufptr;
+	const char *message_arg[9] = {0};
+
+	if (type == MT_Emote)
+		type = 4;
+
+	if (!message1) {
+		Message_StringID(type, string_id);	// use the simple message instead
+		return;
+	}
+
+	i = 0;
+	message_arg[i++] = message1;
+	message_arg[i++] = message2;
+	message_arg[i++] = message3;
+	message_arg[i++] = message4;
+	message_arg[i++] = message5;
+	message_arg[i++] = message6;
+	message_arg[i++] = message7;
+	message_arg[i++] = message8;
+	message_arg[i++] = message9;
+
+	for (argcount = length = 0; message_arg[argcount]; argcount++)
+		length += strlen(message_arg[argcount]) + 1;
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
+	fm->string_id = string_id;
+	fm->type = type;
+	bufptr = fm->message;
+	for (i = 0; i < argcount; i++) {
+		strcpy(bufptr, message_arg[i]);
+		bufptr += strlen(message_arg[i]) + 1;
+	}
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
 
 void Client::SetTint(int16 in_slot, uint32 color) {
 	Color_Struct new_color;
