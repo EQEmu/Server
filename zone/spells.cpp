@@ -4257,7 +4257,6 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			charisma = RuleI(Spells, CharismaEffectivenessCap);
 
 		resist_modifier -= charisma/RuleI(Spells, CharismaEffectiveness);
-		Shout("Resist MOD = %i", resist_modifier);
 	}
 
 	//Add our level, resist and -spell resist modifier to our roll chance
