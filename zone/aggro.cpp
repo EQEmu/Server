@@ -1388,13 +1388,24 @@ void Mob::ClearFeignMemory() {
 
 bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 
+	/*
+	Charm formula is correct based on over 50 hours of personal live parsing - Kayen
+	Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 200 CHA
+	Charisma DOES NOT extend charm durations.
+	Base effect value of charm spells in the spell file DOES NOT effect duration OR resist rate (unclear if does anything)
+	*/
+
 	if(!caster) return false;
 
 	if(spells[spell_id].ResistDiff <= -600)
 		return true;
 
-	//Applies additional Charisma bonus to resist rate
-	float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,0,0,1);
+	float resist_check = 0;
+	
+	if (RuleB(Spells, CharismaCharmDuration))
+		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,0,0,true);
+	else
+		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
 
 	if(IsCharmSpell(spell_id)) {
 

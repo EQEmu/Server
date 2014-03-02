@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/02/2014 ==
+Kayen: Revision to charm code to be consistent with live based on extensive personal parsing.
+*Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 200 CHA
+*Charisma DOES NOT extend charm durations.
+
+Optional SQL: utils/sql/git/optional/2014_03_02_CharmRules.sql
+
 
 == 02/27/2014 ==
 cavedude: Exported TrainDisc to Lua.

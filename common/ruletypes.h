@@ -290,6 +290,8 @@ RULE_BOOL ( Spells, NPCIgnoreBaseImmunity, true) // Whether or not NPCs get to i
 RULE_REAL ( Spells, AvgSpellProcsPerMinute, 6.0) //Adjust rate for sympathetic spell procs
 RULE_INT ( Spells, ResistFalloff, 67) //Max that level that will adjust our resist chance based on level modifiers
 RULE_INT ( Spells, CharismaEffectiveness, 10) // Deterimes how much resist modification charisma applies to charm/pacify checks. Default 10 CHA = -1 resist mod.
+RULE_INT ( Spells, CharismaEffectivenessCap, 200) // Deterimes how much resist modification charisma applies to charm/pacify checks. Default 10 CHA = -1 resist mod.
+RULE_BOOL ( Spells, CharismaCharmDuration, false) // Allow CHA resist mod to extend charm duration.
 RULE_INT ( Spells, CharmBreakCheckChance, 25) //Determines chance for a charm break check to occur each buff tick.
 RULE_INT ( Spells, MaxCastTimeReduction, 50) //Max percent your spell cast time can be reduced by spell haste
 RULE_INT ( Spells, RootBreakFromSpells, 20) //Chance for root to break when cast on.
