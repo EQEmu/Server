@@ -523,6 +523,13 @@ public:
 	virtual void Message_StringID(uint32 type, uint32 string_id, const char* message, const char* message2 = 0,
 		const char* message3 = 0, const char* message4 = 0, const char* message5 = 0, const char* message6 = 0,
 		const char* message7 = 0, const char* message8 = 0, const char* message9 = 0, uint32 distance = 0) { }
+	virtual void FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id) { }
+	virtual void FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter,
+			uint32 string_id, const char *message1, const char *message2 = nullptr,
+			const char *message3 = nullptr, const char *message4 = nullptr,
+			const char *message5 = nullptr, const char *message6 = nullptr,
+			const char *message7 = nullptr, const char *message8 = nullptr,
+			const char *message9 = nullptr) { }
 	void Say(const char *format, ...);
 	void Say_StringID(uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
 		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
@@ -968,9 +975,10 @@ protected:
 	bool PassLimitClass(uint32 Classes_, uint16 Class_);
 	void TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand = 13, int damage=0);
 	void TryWeaponProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = 13);
+	void TrySpellProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = 13);
 	void TryWeaponProc(const ItemInst* weapon, Mob *on, uint16 hand = 13);
 	void ExecWeaponProc(const ItemInst* weapon, uint16 spell_id, Mob *on);
-	virtual float GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
+	virtual float GetProcChances(float ProcBonus, uint16 weapon_speed = 30, uint16 hand = 13);
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
 	int GetWeaponDamage(Mob *against, const Item_Struct *weapon_item);
 	int GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate = nullptr);

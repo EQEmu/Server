@@ -125,6 +125,8 @@
 #define YOU_ARE_PROTECTED			424		//%1 tries to cast a spell on you, but you are protected.
 #define TARGET_RESISTED				425		//Your target resisted the %1 spell.
 #define YOU_RESIST					426		//You resist the %1 spell!
+#define YOU_CRIT_HEAL				427		//You perform an exceptional heal! (%1)
+#define YOU_CRIT_BLAST				428		//You deliver a critical blast! (%1)
 #define SUMMONING_CORPSE			429		//Summoning your corpse.
 #define SUMMONING_CORPSE_OTHER		430		//Summoning %1's corpse.
 #define MISSING_SPELL_COMP_ITEM		433		//You are missing %1.
@@ -168,6 +170,8 @@
 #define OTHER_REGAIN_CAST			1033	//%1 regains concentration and continues casting.
 #define GENERIC_SHOUT				1034	//%1 shouts '%2'
 #define GENERIC_EMOTE				1036	//%1 %2
+#define OTHER_CRIT_HEAL				1039	//%1 performs an exceptional heal! (%2)
+#define OTHER_CRIT_BLAST			1040	//%1 delivers a critical blast! (%2)
 #define NPC_ENRAGE_START			1042	//%1 has become ENRAGED.
 #define NPC_ENRAGE_END				1043	//%1 is no longer enraged.
 #define NPC_RAMPAGE					1044	//%1 goes on a RAMPAGE!
@@ -222,6 +226,9 @@
 #define SUSPEND_MINION_SUSPEND		3268	//%1 tells you, 'By your command, master.'
 #define ONLY_SUMMONED_PETS			3269	//3269 This effect only works with summoned pets.
 #define SUSPEND_MINION_FIGHTING		3270	//Your pet must be at peace, first.
+#define ALREADY_SHIELDED			3279	//Either you or your target is already being shielded.
+#define START_SHIELDING				3281	//%1 begins to use %2 as a living shield!
+#define END_SHIELDING				3282	//%1 ceases protecting %2.
 #define TRADESKILL_MISSING_ITEM		3455	//You are missing a %1.
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!

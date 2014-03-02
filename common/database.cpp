@@ -2516,30 +2516,53 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	uint32 count = RuleI(Zone, ReservedInstances) + 1;
+	uint32 count = RuleI(Zone, ReservedInstances);
 	uint32 max = 65535;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where id >= %i ORDER BY id", count), errbuf, &result)) {
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT IFNULL(MAX(id),%u)+1 FROM instance_list  WHERE id > %u", count,count), errbuf, &result)) {
 		safe_delete_array(query);
 		if (mysql_num_rows(result) != 0) {
-			while((row = mysql_fetch_row(result))) {
-				if(count < atoi(row[0])) {
-					instance_id = count;
-					mysql_free_result(result);
-					return true;
-				} else if(count > max) {
-					instance_id = 0;
-					mysql_free_result(result);
-					return false;
+			row = mysql_fetch_row(result);
+			mysql_free_result(result);
+			if(atoi(row[0]) <= max) {
+				count = atoi(row[0]);
+			} else {
+				if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where id > %u ORDER BY id", count), errbuf, &result)) {
+					safe_delete_array(query);
+					if (mysql_num_rows(result) != 0) {
+						count++;
+						while((row = mysql_fetch_row(result))) {
+							if(count < atoi(row[0])) {
+								instance_id = count;
+								mysql_free_result(result);
+								return true;
+							} else if(count > max) {
+								instance_id = 0;
+								mysql_free_result(result);
+								return false;
+							} else {
+								count++;
+							}
+						}
+					} else {
+						instance_id = 0;
+						mysql_free_result(result);
+						return false;
+					}
 				} else {
-					count++;
+					safe_delete_array(query);
+					instance_id = 0;
+					return false;
 				}
 			}
 		} else {
+			instance_id = 0;
 			mysql_free_result(result);
+			return false;
 		}
 	} else {
 		safe_delete_array(query);
+		instance_id = 0;
+		return false;
 	}
 	instance_id = count;
 	return true;

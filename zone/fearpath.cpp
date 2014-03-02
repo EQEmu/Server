@@ -53,7 +53,10 @@ void Mob::CheckFlee() {
 
 	//see if were possibly hurt enough
 	float ratio = GetHPRatio();
-	if(ratio >= RuleI(Combat, FleeHPRatio))
+	float fleeratio = GetSpecialAbility(FLEE_PERCENT);
+	fleeratio = fleeratio > 0 ? fleeratio : RuleI(Combat, FleeHPRatio);
+	
+	if(ratio >= fleeratio)
 		return;
 
 	//we might be hurt enough, check con now..
@@ -77,25 +80,24 @@ void Mob::CheckFlee() {
 	switch(con) {
 		//these values are not 100% researched
 		case CON_GREEN:
-			run_ratio = RuleI(Combat, FleeHPRatio);
+			run_ratio = fleeratio;
 			break;
 		case CON_LIGHTBLUE:
-			run_ratio = RuleI(Combat, FleeHPRatio) * 8 / 10;
+			run_ratio = fleeratio * 9 / 10;
 			break;
 		case CON_BLUE:
-			run_ratio = RuleI(Combat, FleeHPRatio) * 6 / 10;
+			run_ratio = fleeratio * 8 / 10;
 			break;
 		default:
-			run_ratio = RuleI(Combat, FleeHPRatio) * 4 / 10;
+			run_ratio = fleeratio * 7 / 10;
 			break;
 	}
 	if(ratio < run_ratio)
 	{
 		if (RuleB(Combat, FleeIfNotAlone) ||
-			(!RuleB(Combat, FleeIfNotAlone) &&
-			(entity_list.GetHatedCount(hate_top, this) == 0)))
+			GetSpecialAbility(ALWAYS_FLEE) ||
+			(!RuleB(Combat, FleeIfNotAlone) && (entity_list.GetHatedCount(hate_top, this) == 0)))
 			StartFleeing();
-
 	}
 }
 
@@ -110,7 +112,9 @@ void Mob::ProcessFlee() {
 	}
 
 	//see if we are still dying, if so, do nothing
-	if(GetHPRatio() < (float)RuleI(Combat, FleeHPRatio))
+	float fleeratio = GetSpecialAbility(FLEE_PERCENT);
+	fleeratio = fleeratio > 0 ? fleeratio : RuleI(Combat, FleeHPRatio);
+	if(GetHPRatio() < fleeratio)
 		return;
 
 	//we are not dying anymore... see what we do next
@@ -128,19 +132,19 @@ void Mob::ProcessFlee() {
 float Mob::GetFearSpeed() {
 	if(flee_mode) {
 		//we know ratio < FLEE_HP_RATIO
-		float speed = GetRunspeed();
+		float speed = GetBaseRunspeed();
 		float ratio = GetHPRatio();
+		float multiplier = RuleR(Combat, FleeMultiplier);
 
-		// mob's movement will halt with a decent snare at HP specified by rule.
-		if (ratio <= RuleI(Combat, FleeSnareHPRatio) && GetSnaredAmount() > 40) {
-				return 0.0001f;
-		}
+		if(GetSnaredAmount() > 40)
+			multiplier = multiplier / 6.0f;
 
-		if (ratio < FLEE_HP_MINSPEED)
-			ratio = FLEE_HP_MINSPEED;
+		speed = speed * ratio * multiplier / 100;
 
-		speed = speed * 0.5 * ratio / 100;
-
+		//NPC will eventually stop. Snares speeds this up.
+		if(speed < 0.09)
+			speed = 0.0001f;
+		
 		return(speed);
 	}
 	return(GetRunspeed());

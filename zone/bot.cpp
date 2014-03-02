@@ -7705,16 +7705,11 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 }
 
 //proc chance includes proc bonus
-float Bot::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand) {
+float Bot::GetProcChances(float ProcBonus, uint16 weapon_speed, uint16 hand) {
 	int mydex = GetDEX();
-	float AABonus = 0;
-	ProcBonus = 0;
-	ProcChance = 0;
+	float ProcChance = 0.0f;
 
-	if (aabonuses.ProcChance)
-		AABonus = float(aabonuses.ProcChance) / 100.0f;
-
-	switch(hand){
+	switch (hand) {
 		case SLOT_PRIMARY:
 			weapon_speed = attack_timer.GetDuration();
 			break;
@@ -7726,24 +7721,20 @@ float Bot::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_spe
 			break;
 	}
 
-
 	//calculate the weapon speed in ms, so we can use the rule to compare against.
-
-	if(weapon_speed < RuleI(Combat, MinHastedDelay)) // fast as a client can swing, so should be the floor of the proc chance
+	// fast as a client can swing, so should be the floor of the proc chance
+	if (weapon_speed < RuleI(Combat, MinHastedDelay))
 		weapon_speed = RuleI(Combat, MinHastedDelay);
 
-	ProcBonus += (float(itembonuses.ProcChance + spellbonuses.ProcChance) / 1000.0f + AABonus);
-
-	if(RuleB(Combat, AdjustProcPerMinute) == true)
-	{
-		ProcChance = ((float)weapon_speed * RuleR(Combat, AvgProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
-		ProcBonus += float(mydex) * RuleR(Combat, ProcPerMinDexContrib) / 100.0f;
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
-	}
-	else
-	{
-		ProcChance = RuleR(Combat, BaseProcChance) + float(mydex) / RuleR(Combat, ProcDexDivideBy);
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
+	if (RuleB(Combat, AdjustProcPerMinute)) {
+		ProcChance = (static_cast<float>(weapon_speed) *
+				RuleR(Combat, AvgProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
+		ProcBonus += static_cast<float>(mydex) * RuleR(Combat, ProcPerMinDexContrib);
+		ProcChance += ProcChance * ProcBonus / 100.0f;
+	} else {
+		ProcChance = RuleR(Combat, BaseProcChance) +
+			static_cast<float>(mydex) / RuleR(Combat, ProcDexDivideBy);
+		ProcChance += ProcChance*ProcBonus / 100.0f;
 	}
 
 	mlog(COMBAT__PROCS, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);

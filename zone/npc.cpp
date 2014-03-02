@@ -216,6 +216,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	roambox_min_y = -2;
 	roambox_movingto_x = -2;
 	roambox_movingto_y = -2;
+	roambox_min_delay = 1000;
 	roambox_delay = 1000;
 	org_heading = heading;
 	p_depop = false;
@@ -1526,6 +1527,12 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 			case 'i':
 				SetSpecialAbility(IMMUNE_TAUNT, remove ? 0 : 1);
 				break;
+			case 'e':
+				SetSpecialAbility(ALWAYS_FLEE, remove ? 0 : 1);
+				break;
+			case 'h':
+				SetSpecialAbility(FLEE_PERCENT, remove ? 0 : 1);
+				break;
 
 			default:
 				break;
@@ -1686,7 +1693,14 @@ bool Mob::HasNPCSpecialAtk(const char* parse) {
 					HasAllAttacks = false;
 				}
 				break;
-
+			case 'e':
+				if(!GetSpecialAbility(ALWAYS_FLEE))
+					HasAllAttacks = false;
+				break;
+			case 'h':
+				if(!GetSpecialAbility(FLEE_PERCENT))
+					HasAllAttacks = false;
+				break;
 			default:
 				HasAllAttacks = false;
 				break;

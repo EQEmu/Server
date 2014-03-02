@@ -1433,8 +1433,8 @@ XS(XS_NPC_AI_SetRoambox); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AI_SetRoambox)
 {
 	dXSARGS;
-	if (items < 6 || items > 7)
-		Perl_croak(aTHX_ "Usage: NPC::AI_SetRoambox(THIS, iDist, iMaxX, iMinX, iMaxY, iMinY, iDelay= 2500)");
+	if (items < 6 || items > 8)
+		Perl_croak(aTHX_ "Usage: NPC::AI_SetRoambox(THIS, iDist, iMaxX, iMinX, iMaxY, iMinY, iDelay= 2500, iMinDelay= 2500)");
 	{
 		NPC *		THIS;
 		float		iDist = (float)SvNV(ST(1));
@@ -1443,6 +1443,7 @@ XS(XS_NPC_AI_SetRoambox)
 		float		iMaxY = (float)SvNV(ST(4));
 		float		iMinY = (float)SvNV(ST(5));
 		uint32		iDelay;
+		uint32		iMinDelay;
 
 		if (sv_derived_from(ST(0), "NPC")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -1453,13 +1454,20 @@ XS(XS_NPC_AI_SetRoambox)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		if (items < 7)
+		if (items < 7){
+			iMinDelay = 2500;
 			iDelay = 2500;
-		else {
+		}
+		else if (items < 8){
+			iMinDelay = 2500;
 			iDelay = (uint32)SvUV(ST(6));
 		}
+		else {
+			iDelay = (uint32)SvUV(ST(6));
+			iMinDelay = (uint32)SvUV(ST(7));
+		}
 
-		THIS->AI_SetRoambox(iDist, iMaxX, iMinX, iMaxY, iMinY, iDelay);
+		THIS->AI_SetRoambox(iDist, iMaxX, iMinX, iMaxY, iMinY, iDelay, iMinDelay);
 	}
 	XSRETURN_EMPTY;
 }
@@ -2208,7 +2216,7 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "NextGuardPosition"), XS_NPC_NextGuardPosition, file, "$");
 		newXSproto(strcpy(buf, "SaveGuardSpot"), XS_NPC_SaveGuardSpot, file, "$;$");
 		newXSproto(strcpy(buf, "IsGuarding"), XS_NPC_IsGuarding, file, "$");
-		newXSproto(strcpy(buf, "AI_SetRoambox"), XS_NPC_AI_SetRoambox, file, "$$$$$$;$");
+		newXSproto(strcpy(buf, "AI_SetRoambox"), XS_NPC_AI_SetRoambox, file, "$$$$$$;$$");
 		newXSproto(strcpy(buf, "GetNPCSpellsID"), XS_NPC_GetNPCSpellsID, file, "$");
 		newXSproto(strcpy(buf, "GetSpawnPointID"), XS_NPC_GetSpawnPointID, file, "$");
 		newXSproto(strcpy(buf, "GetSpawnPointX"), XS_NPC_GetSpawnPointX, file, "$");

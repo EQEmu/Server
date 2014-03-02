@@ -310,8 +310,8 @@ RULE_INT ( Combat, ClientBaseCritChance, 0 ) //The base crit chance for all clie
 RULE_BOOL ( Combat, UseIntervalAC, true)
 RULE_INT ( Combat, PetAttackMagicLevel, 30)
 RULE_BOOL ( Combat, EnableFearPathing, true)
-RULE_INT ( Combat, FleeHPRatio, 25)
-RULE_INT ( Combat, FleeSnareHPRatio, 11) // HP at which snare will halt movement of a fleeing NPC.
+RULE_REAL ( Combat, FleeMultiplier, 2.0) // Determines how quickly a NPC will slow down while fleeing. Decrease multiplier to slow NPC down quicker.
+RULE_INT ( Combat, FleeHPRatio, 25) //HP % when a NPC begins to flee.
 RULE_BOOL ( Combat, FleeIfNotAlone, false) // If false, mobs won't flee if other mobs are in combat with it.
 RULE_BOOL ( Combat, AdjustProcPerMinute, true)
 RULE_REAL ( Combat, AvgProcsPerMinute, 2.0)
@@ -466,6 +466,8 @@ RULE_INT ( Merchant, PriceBonusPct, 4) // Determines maximum price bonus from ha
 RULE_INT ( Merchant, PricePenaltyPct, 4) // Determines maximum price penalty from having bad faction/CHA. Value is a percent.
 RULE_REAL( Merchant, ChaBonusMod, 3.45) // Determines CHA cap, from 104 CHA. 3.45 is 132 CHA at apprehensive. 0.34 is 400 CHA at apprehensive.
 RULE_REAL ( Merchant, ChaPenaltyMod, 1.52) // Determines CHA bottom, up to 102 CHA. 1.52 is 37 CHA at apprehensive. 0.98 is 0 CHA at apprehensive.
+RULE_BOOL ( Merchant, EnableAltCurrencySell, true) // Enables the ability to resell items to alternate currency merchants
+
 RULE_CATEGORY_END()
 
 RULE_CATEGORY ( Bazaar )

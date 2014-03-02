@@ -2826,6 +2826,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_CriticalMend:
 			case SE_LimitCastTimeMax:
 			case SE_TriggerOnReqCaster:
+			case SE_FrenziedDevastation:
 			{
 				break;
 			}
@@ -3418,13 +3419,11 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			{
 				if (spellbonuses.DistanceRemoval){
 
-					int distance =	sqrt(
-									((int(GetX()) - buffs[slot].caston_x) * (int(GetX()) - buffs[slot].caston_x)) + 
-									((int(GetY()) - buffs[slot].caston_y) *  (int(GetY()) - buffs[slot].caston_y)) +
-									((int(GetZ()) - buffs[slot].caston_z) * (int(GetZ()) - buffs[slot].caston_z)) 
-									);
+					int distance =	((int(GetX()) - buffs[slot].caston_x) * (int(GetX()) - buffs[slot].caston_x)) + 
+									((int(GetY()) - buffs[slot].caston_y) * (int(GetY()) - buffs[slot].caston_y)) +
+									((int(GetZ()) - buffs[slot].caston_z) * (int(GetZ()) - buffs[slot].caston_z));
 
-					if (distance > spells[spell_id].base[i]){
+					if (distance > (spells[spell_id].base[i] * spells[spell_id].base[i])){
 
 						if(!TryFadeEffect(slot))
 							BuffFadeBySlot(slot , true);
@@ -5396,14 +5395,12 @@ bool Mob::AffectedBySpellExcludingSlot(int slot, int effect)
 
 float Mob::GetSympatheticProcChances(float &ProcBonus, float &ProcChance, int32 cast_time, int16 ProcRateMod) {
 
-	ProcBonus = spellbonuses.SpellProcChance + itembonuses.SpellProcChance;
 	ProcChance = 0;
 
 	if(cast_time > 0)
 	{
 		ProcChance = ((float)cast_time * RuleR(Casting, AvgSpellProcsPerMinute) / 60000.0f);
 		ProcChance = ProcChance * (float)(ProcRateMod/100);
-		ProcChance = ProcChance+(ProcChance*ProcBonus/100);
 	}
 	return ProcChance;
 }

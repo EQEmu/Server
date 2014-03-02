@@ -2004,6 +2004,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	if(!bRiposte && other->GetHP() > 0 ) {
 		TryWeaponProc(nullptr, weapon, other, Hand);	//no weapon
+		TrySpellProc(nullptr, weapon, other, Hand);
 	}
 
 	TriggerDefensiveProcs(nullptr, other, Hand, damage);
@@ -3851,24 +3852,17 @@ void Mob::HealDamage(uint32 amount, Mob* caster) {
 		}
 	}
 
-
 	if(amount > (maxhp - curhp))
 		acthealed = (maxhp - curhp);
 	else
 		acthealed = amount;
 
-	char *TempString = nullptr;
-
-	MakeAnyLenString(&TempString, "%d", acthealed);
-
-	if(acthealed > 100){
-		if(caster){
-			Message_StringID(MT_NonMelee, YOU_HEALED, caster->GetCleanName(), TempString);
-			if(caster != this){
-				caster->Message_StringID(MT_NonMelee, YOU_HEAL, GetCleanName(), TempString);
-			}
-		}
-		else{
+	if (acthealed > 100) {
+		if (caster) {
+			Message_StringID(MT_NonMelee, YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+			if (caster != this)
+				caster->Message_StringID(MT_NonMelee, YOU_HEAL, GetCleanName(), itoa(acthealed));
+		} else {
 			Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);
 		}
 	}
@@ -3882,22 +3876,15 @@ void Mob::HealDamage(uint32 amount, Mob* caster) {
 
 		SendHPUpdate();
 	}
-	safe_delete_array(TempString);
 }
 
-
-
 //proc chance includes proc bonus
-float Mob::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand) {
+float Mob::GetProcChances(float ProcBonus, uint16 weapon_speed, uint16 hand)
+{
 	int mydex = GetDEX();
-	float AABonus = 0;
-	ProcBonus = 0;
-	ProcChance = 0;
+	float ProcChance = 0.0f;
 
-	if (aabonuses.ProcChance)
-		AABonus = float(aabonuses.ProcChance) / 100.0f;
-
-	switch(hand){
+	switch (hand) {
 		case 13:
 			weapon_speed = attack_timer.GetDuration();
 			break;
@@ -3909,24 +3896,20 @@ float Mob::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_spe
 			break;
 	}
 
-
 	//calculate the weapon speed in ms, so we can use the rule to compare against.
-
-	if(weapon_speed < RuleI(Combat, MinHastedDelay)) // fast as a client can swing, so should be the floor of the proc chance
+	// fast as a client can swing, so should be the floor of the proc chance
+	if (weapon_speed < RuleI(Combat, MinHastedDelay))
 		weapon_speed = RuleI(Combat, MinHastedDelay);
 
-	ProcBonus += (float(itembonuses.ProcChance + spellbonuses.ProcChance) / 1000.0f + AABonus);
-
-	if(RuleB(Combat, AdjustProcPerMinute) == true)
-	{
-		ProcChance = ((float)weapon_speed * RuleR(Combat, AvgProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
-		ProcBonus += float(mydex) * RuleR(Combat, ProcPerMinDexContrib) / 100.0f;
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
-	}
-	else
-	{
-		ProcChance = RuleR(Combat, BaseProcChance) + float(mydex) / RuleR(Combat, ProcDexDivideBy);
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
+	if (RuleB(Combat, AdjustProcPerMinute)) {
+		ProcChance = (static_cast<float>(weapon_speed) *
+				RuleR(Combat, AvgProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
+		ProcBonus += static_cast<float>(mydex) * RuleR(Combat, ProcPerMinDexContrib);
+		ProcChance += ProcChance * ProcBonus / 100.0f;
+	} else {
+		ProcChance = RuleR(Combat, BaseProcChance) +
+			static_cast<float>(mydex) / RuleR(Combat, ProcDexDivideBy);
+		ProcChance += ProcChance * ProcBonus / 100.0f;
 	}
 
 	mlog(COMBAT__PROCS, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
@@ -3949,16 +3932,6 @@ float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 w
 			return 0;
 			break;
 	}
-
-	/*
-	float PermaHaste;
-	if(GetHaste() > 0)
-		PermaHaste = 1 / (1 + (float)GetHaste()/100);
-	else if(GetHaste() < 0)
-		PermaHaste = 1 * (1 - (float)GetHaste()/100);
-	else
-		PermaHaste = 1.0f;
-	*/
 
 	//calculate the weapon speed in ms, so we can use the rule to compare against.
 	//weapon_speed = ((int)(weapon_speed*(100.0f+attack_speed)*PermaHaste));
@@ -4039,159 +4012,180 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	}
 
 	if(!weapon_g) {
-		TryWeaponProc(nullptr, (const Item_Struct*)nullptr, on, hand);
+		TrySpellProc(nullptr, (const Item_Struct*)nullptr, on);
 		return;
 	}
 
 	if(!weapon_g->IsType(ItemClassCommon)) {
-		TryWeaponProc(nullptr, (const Item_Struct*) nullptr, on, hand);
+		TrySpellProc(nullptr, (const Item_Struct*)nullptr, on);
 		return;
 	}
 
-	//do main procs
+	// Innate + aug procs from weapons
+	// TODO: powersource procs
 	TryWeaponProc(weapon_g, weapon_g->GetItem(), on, hand);
+	// Procs from Buffs and AA both melee and range
+	TrySpellProc(weapon_g, weapon_g->GetItem(), on, hand);
 
-
-	//we have to calculate these again, oh well
-	int ourlevel = GetLevel();
-	float ProcChance, ProcBonus;
-	GetProcChances(ProcBonus, ProcChance, weapon_g->GetItem()->Delay, hand);
-	if(hand != 13)
-	{
-		ProcChance /= 2;
-	}
-
-	//do augment procs
-	int r;
-	for(r = 0; r < MAX_AUGMENT_SLOTS; r++) {
-		const ItemInst* aug_i = weapon_g->GetAugment(r);
-		if(!aug_i)
-			continue;
-		const Item_Struct* aug = aug_i->GetItem();
-		if(!aug)
-			continue;
-
-		if (aug->Proc.Type == ET_CombatProc) {
-				ProcChance = ProcChance*(100+aug->ProcRate)/100;
-			if (MakeRandomFloat(0, 1) < ProcChance) {
-				if(aug->Proc.Level > ourlevel) {
-					Mob * own = GetOwner();
-					if(own != nullptr) {
-						own->Message_StringID(13,PROC_PETTOOLOW);
-					} else {
-						Message_StringID(13,PROC_TOOLOW);
-					}
-				} else {
-					ExecWeaponProc(aug_i, aug->Proc.Effect, on);
-				}
-			}
-		}
-	}
+	return;
 }
 
-void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct* weapon, Mob *on, uint16 hand) {
+void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on, uint16 hand)
+{
+	if (!weapon)
+		return;
 	uint16 skillinuse = 28;
 	int ourlevel = GetLevel();
-	float ProcChance, ProcBonus;
-	if(weapon!=nullptr)
-		GetProcChances(ProcBonus, ProcChance, weapon->Delay, hand);
-	else
-		GetProcChances(ProcBonus, ProcChance);
+	float ProcBonus = static_cast<float>(aabonuses.ProcChanceSPA +
+			spellbonuses.ProcChanceSPA + itembonuses.ProcChanceSPA);
+	ProcBonus += static_cast<float>(itembonuses.ProcChance) / 10.0f; // Combat Effects
+	float ProcChance = GetProcChances(ProcBonus, weapon->Delay, hand);
 
-	if(hand != 13) //Is Archery intended to proc at 50% rate?
+	if (hand != 13) //Is Archery intened to proc at 50% rate?
 		ProcChance /= 2;
 
-	//give weapon a chance to proc first.
-	if(weapon != nullptr) {
-		skillinuse = GetSkillByItemType(weapon->ItemType);
-		if (weapon->Proc.Type == ET_CombatProc) {
-			float WPC = ProcChance*(100.0f+(float)weapon->ProcRate)/100.0f;
-			if (MakeRandomFloat(0, 1) <= WPC) {	// 255 dex = 0.084 chance of proc. No idea what this number should be really.
-				if(weapon->Proc.Level > ourlevel) {
-					mlog(COMBAT__PROCS, "Tried to proc (%s), but our level (%d) is lower than required (%d)", weapon->Name, ourlevel, weapon->Proc.Level);
-					Mob * own = GetOwner();
-					if(own != nullptr) {
-						own->Message_StringID(13,PROC_PETTOOLOW);
-					} else {
-						Message_StringID(13,PROC_TOOLOW);
-					}
+	// Try innate proc on weapon
+	// We can proc once here, either weapon or one aug
+	bool proced = false; // silly bool to prevent augs from going if weapon does
+	skillinuse = GetSkillByItemType(weapon->ItemType);
+	if (weapon->Proc.Type == ET_CombatProc) {
+		float WPC = ProcChance * (100.0f + // Proc chance for this weapon
+				static_cast<float>(weapon->ProcRate)) / 100.0f;
+		if (MakeRandomFloat(0, 1) <= WPC) {	// 255 dex = 0.084 chance of proc. No idea what this number should be really.
+			if (weapon->Proc.Level > ourlevel) {
+				mlog(COMBAT__PROCS,
+						"Tried to proc (%s), but our level (%d) is lower than required (%d)",
+						weapon->Name, ourlevel, weapon->Proc.Level);
+				if (IsPet()) {
+					Mob *own = GetOwner();
+					if (own)
+						own->Message_StringID(13, PROC_PETTOOLOW);
 				} else {
-					mlog(COMBAT__PROCS, "Attacking weapon (%s) successfully procing spell %d (%.2f percent chance)", weapon->Name, weapon->Proc.Effect, ProcChance*100);
-					ExecWeaponProc(inst, weapon->Proc.Effect, on);
+					Message_StringID(13, PROC_TOOLOW);
 				}
 			} else {
-				mlog(COMBAT__PROCS, "Attacking weapon (%s) did no proc (%.2f percent chance).", weapon->Name, ProcChance*100);
+				mlog(COMBAT__PROCS,
+						"Attacking weapon (%s) successfully procing spell %d (%.2f percent chance)",
+						weapon->Name, weapon->Proc.Effect, WPC * 100);
+				ExecWeaponProc(inst, weapon->Proc.Effect, on);
+				proced = true;
 			}
 		}
 	}
 
-	if(ProcBonus == -1) {
-		LogFile->write(EQEMuLog::Error, "ProcBonus was -1 value!");
-		return;
-	}
+	if (!proced && inst) {
+		for (int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
+			const ItemInst *aug_i = inst->GetAugment(r);
+			if (!aug_i) // no aug, try next slot!
+				continue;
+			const Item_Struct *aug = aug_i->GetItem();
+			if (!aug)
+				continue;
 
-	bool bRangedAttack = false;
-	if (weapon != nullptr) {
-		if (weapon->ItemType == ItemTypeBow || weapon->ItemType == ItemTypeLargeThrowing || weapon->ItemType == ItemTypeSmallThrowing) {
-			bRangedAttack = true;
-		}
-	}
-
-	bool isRanged = false;
-	if(weapon)
-	{
-		if(weapon->ItemType == ItemTypeArrow ||
-			weapon->ItemType == ItemTypeLargeThrowing ||
-			weapon->ItemType == ItemTypeSmallThrowing ||
-			weapon->ItemType == ItemTypeBow)
-		{
-			isRanged = true;
-		}
-	}
-
-	uint32 i;
-	for(i = 0; i < MAX_PROCS; i++) {
-		if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
-			if(MakeRandomInt(0, 100) < PermaProcs[i].chance) {
-				mlog(COMBAT__PROCS, "Permanent proc %d procing spell %d (%d percent chance)", i, PermaProcs[i].spellID, PermaProcs[i].chance);
-				ExecWeaponProc(nullptr, PermaProcs[i].spellID, on);
-			} else {
-				mlog(COMBAT__PROCS, "Permanent proc %d failed to proc %d (%d percent chance)", i, PermaProcs[i].spellID, PermaProcs[i].chance);
+			if (aug->Proc.Type == ET_CombatProc) {
+				float APC = ProcChance * (100.0f + // Proc chance for this aug
+					static_cast<float>(aug->ProcRate)) / 100.0f;
+				if (MakeRandomFloat(0, 1) <= APC) {
+					if (aug->Proc.Level > ourlevel) {
+						if (IsPet()) {
+							Mob *own = GetOwner();
+							if (own)
+								own->Message_StringID(13, PROC_PETTOOLOW);
+						} else {
+							Message_StringID(13, PROC_TOOLOW);
+						}
+					} else {
+						ExecWeaponProc(aug_i, aug->Proc.Effect, on);
+						break;
+					}
+				}
 			}
 		}
+	}
+	// TODO: Powersource procs
+	if (HasSkillProcs())
+		TrySkillProc(on, skillinuse, ProcChance);
 
-		if(!isRanged)
-		{
-			if(IsPet() && hand != 13) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
-			{
-				//Maybe implement this later if pets are ever given dual procs?
+	return;
+}
+
+void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on, uint16 hand)
+{
+	float ProcBonus = static_cast<float>(spellbonuses.SpellProcChance +
+			itembonuses.SpellProcChance + aabonuses.SpellProcChance);
+	float ProcChance = 0.0f;
+	if (weapon)
+		ProcChance = GetProcChances(ProcBonus, weapon->Delay, hand);
+	else
+		ProcChance = GetProcChances(ProcBonus);
+
+	if (hand != 13) //Is Archery intened to proc at 50% rate?
+		ProcChance /= 2;
+
+	bool rangedattk = false;
+	if (weapon && hand == 11) {
+		if (weapon->ItemType == ItemTypeArrow ||
+				weapon->ItemType == ItemTypeLargeThrowing ||
+				weapon->ItemType == ItemTypeSmallThrowing ||
+				weapon->ItemType == ItemTypeBow)
+			rangedattk = true;
+	}
+
+	for (uint32 i = 0; i < MAX_PROCS; i++) {
+		if (IsPet() && hand != 13) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
+			continue; // If pets ever can proc from off hand, this will need to change
+
+		// Not ranged
+		if (!rangedattk) {
+			// Perma procs (AAs)
+			if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
+				if (MakeRandomInt(0, 99) < PermaProcs[i].chance) { // TODO: Do these get spell bonus?
+					mlog(COMBAT__PROCS,
+							"Permanent proc %d procing spell %d (%d percent chance)",
+							i, PermaProcs[i].spellID, PermaProcs[i].chance);
+					ExecWeaponProc(nullptr, PermaProcs[i].spellID, on);
+				} else {
+					mlog(COMBAT__PROCS,
+							"Permanent proc %d failed to proc %d (%d percent chance)",
+							i, PermaProcs[i].spellID, PermaProcs[i].chance);
+				}
 			}
-			else
-			{
-				int chance = ProcChance * (SpellProcs[i].chance);
-				if(MakeRandomInt(0, 100) < chance) {
-					mlog(COMBAT__PROCS, "Spell proc %d procing spell %d (%d percent chance)", i, SpellProcs[i].spellID, chance);
+
+			// Spell procs (buffs)
+			if (SpellProcs[i].spellID != SPELL_UNKNOWN) {
+				float chance = ProcChance * (SpellProcs[i].chance / 100.0f);
+				if (MakeRandomFloat(0, 1) <= chance) {
+					mlog(COMBAT__PROCS,
+							"Spell proc %d procing spell %d (%.2f percent chance)",
+							i, SpellProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
 					CheckNumHitsRemaining(11, 0, SpellProcs[i].base_spellID);
 				} else {
-					mlog(COMBAT__PROCS, "Spell proc %d failed to proc %d (%d percent chance)", i, SpellProcs[i].spellID, chance);
+					mlog(COMBAT__PROCS,
+							"Spell proc %d failed to proc %d (%.2f percent chance)",
+							i, SpellProcs[i].spellID, chance);
 				}
 			}
-		}
-		if (bRangedAttack) {
-			int chance = ProcChance * RangedProcs[i].chance;
-			if(MakeRandomInt(0, 100) < chance) {
-				mlog(COMBAT__PROCS, "Ranged proc %d procing spell %d", i, RangedProcs[i].spellID, RangedProcs[i].chance);
-				ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
-				CheckNumHitsRemaining(11, 0, RangedProcs[i].base_spellID);
-			} else {
-				mlog(COMBAT__PROCS, "Ranged proc %d failed to proc %d", i, RangedProcs[i].spellID, RangedProcs[i].chance);
+		} else if (rangedattk) { // ranged only
+			// ranged spell procs (buffs)
+			if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
+				float chance = ProcChance * (RangedProcs[i].chance / 100.0f);
+				if (MakeRandomFloat(0, 1) <= chance) {
+					mlog(COMBAT__PROCS,
+							"Ranged proc %d procing spell %d (%.2f percent chance)",
+							i, RangedProcs[i].spellID, chance);
+					ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
+					CheckNumHitsRemaining(11, 0, RangedProcs[i].base_spellID);
+				} else {
+					mlog(COMBAT__PROCS,
+							"Ranged proc %d failed to proc %d (%.2f percent chance)",
+							i, RangedProcs[i].spellID, chance);
+				}
 			}
 		}
 	}
 
-	if (HasSkillProcs())
-		TrySkillProc(on, skillinuse, ProcChance);
+	return;
 }
 
 void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)

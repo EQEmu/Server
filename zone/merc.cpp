@@ -2824,7 +2824,8 @@ int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 			value = (value * GetSpellScale() / 100);	
 				
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
+			entity_list.MessageClose_StringID(this, false, 100, MT_SpellCrits,
+					OTHER_CRIT_BLAST, GetName(), itoa(-value));
 
 			return value;
 		}
