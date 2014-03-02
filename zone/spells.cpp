@@ -3417,7 +3417,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	// not all unresistable, so changing this to only check certain spells
 	if(IsResistableSpell(spell_id))
 	{
-		spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust);
+		if (IsCharmSpell(spell_id))
+			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust,true);
+		else
+			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust);
+
 		if(spell_effectiveness < 100)
 		{
 			if(spell_effectiveness == 0 || !IsPartialCapableSpell(spell_id) )
@@ -4245,10 +4249,15 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	if (CharismaCheck)
 	{
-		//For charm chance to break checks, Default 10 CHA = -1 resist mod.
-		int16 cha_resist_modifier = 0;
-		cha_resist_modifier	= caster->GetCHA()/RuleI(Spells, CharismaEffectiveness);
-		resist_modifier -= cha_resist_modifier;
+		//Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 200 CHA
+		//Charisma DOES NOT extend charm durations.
+		int16 charisma = caster->GetCHA();
+
+		if (charisma > RuleI(Spells, CharismaEffectivenessCap))
+			charisma = RuleI(Spells, CharismaEffectivenessCap);
+
+		resist_modifier -= charisma/RuleI(Spells, CharismaEffectiveness);
+		Shout("Resist MOD = %i", resist_modifier);
 	}
 
 	//Add our level, resist and -spell resist modifier to our roll chance
