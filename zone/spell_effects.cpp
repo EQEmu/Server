@@ -3230,7 +3230,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				if(caster)
 					effect_value = caster->GetActSpellHealing(spell_id, effect_value);
 
-				HealDamage(effect_value, caster);
+				HealDamage(effect_value, caster, spell_id);
 				//healing aggro would go here; removed for now
 				break;
 			}

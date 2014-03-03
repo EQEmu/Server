@@ -290,7 +290,7 @@
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
 #define FEAR_TOO_HIGH				9035	//Your target is too high of a level for your fear spell.
 #define YOU_HEAL					9068	//You have healed %1 for %2 points of damage.
-#define OTHER_HIT_DOT				9072	//%1 has taken %2 damage from your %3.
+#define YOUR_HIT_DOT				9072	//%1 has taken %2 damage from your %3.
 #define HIT_NON_MELEE				9073	//%1 hit %2 for %3 points of non-melee damage.
 #define SHAKE_OFF_STUN				9077
 #define STRIKETHROUGH_STRING		9078	//You strike through your opponent's defenses!
@@ -353,10 +353,14 @@
 #define NOW_INVISIBLE				12950	//%1 is now Invisible.
 #define NOW_VISIBLE					12951	//%1 is now Visible.
 #define GUILD_NOT_MEMBER2			12966	//You are not in a guild.
+#define HOT_HEAL_SELF				12976 	//You have been healed for %1 hit points by your %2.
+#define HOT_HEAL_OTHER				12997	//You have healed %1 for %2 hit points with your %3.
+#define HOT_HEALED_OTHER			12998	//%1 healed you for %2 hit points by %3.
 #define DISC_LEVEL_USE_ERROR		13004	//You are not sufficient level to use this discipline.
 #define TOGGLE_ON					13172	//Asking server to turn ON your incoming tells.
 #define TOGGLE_OFF					13173	//Asking server to turn OFF all incoming tells for you.
 #define DUEL_INPROGRESS				13251	//You have already accepted a duel with someone else cowardly dog.
+#define OTHER_HIT_DOT				13327	//%1 has taken %2 damage from %3 by %4.
 #define GENERIC_MISS				15041	//%1 missed %2
 
 #endif

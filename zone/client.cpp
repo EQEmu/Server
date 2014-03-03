@@ -2852,7 +2852,12 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	else
 		ClientFilters[FilterSpellCrits] = FilterHide;
 
-	Filter1(FilterMeleeCrits);
+	if (filter->filters[FilterMeleeCrits] == 0)
+		ClientFilters[FilterMeleeCrits] = FilterShow;
+	else if (filter->filters[FilterMeleeCrits] == 1)
+		ClientFilters[FilterMeleeCrits] = FilterShowSelfOnly;
+	else
+		ClientFilters[FilterMeleeCrits] = FilterHide;
 
 	if(filter->filters[FilterSpellDamage] == 0)
 		ClientFilters[FilterSpellDamage] = FilterShow;
@@ -2866,12 +2871,41 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter0(FilterOthersHit);
 	Filter0(FilterMissedMe);
 	Filter1(FilterDamageShields);
-	Filter1(FilterDOT);
+
+	if (GetClientVersionBit() & BIT_SoDAndLater) {
+		if (filter->filters[FilterDOT] == 0)
+			ClientFilters[FilterDOT] = FilterShow;
+		else if (filter->filters[FilterDOT] == 1)
+			ClientFilters[FilterDOT] = FilterShowSelfOnly;
+		else if (filter->filters[FilterDOT] == 2)
+			ClientFilters[FilterDOT] = FilterShowGroupOnly;
+		else
+			ClientFilters[FilterDOT] = FilterHide;
+	} else {
+		if (filter->filters[FilterDOT] == 0) // show functions as self only
+			ClientFilters[FilterDOT] = FilterShowSelfOnly;
+		else
+			ClientFilters[FilterDOT] = FilterHide;
+	}
+
 	Filter1(FilterPetHits);
 	Filter1(FilterPetMisses);
 	Filter1(FilterFocusEffects);
 	Filter1(FilterPetSpells);
-	Filter1(FilterHealOverTime);
+
+	if (GetClientVersionBit() & BIT_SoDAndLater) {
+		if (filter->filters[FilterHealOverTime] == 0)
+			ClientFilters[FilterHealOverTime] = FilterShow;
+		// This is called 'Show Mine Only' in the clients, but functions the same as show
+		// so instead of apply special logic, just set to show
+		else if (filter->filters[FilterHealOverTime] == 1)
+			ClientFilters[FilterHealOverTime] = FilterShow;
+		else
+			ClientFilters[FilterHealOverTime] = FilterHide;
+	} else {
+		// these clients don't have a 'self only' filter
+		Filter1(FilterHealOverTime);
+	}
 }
 
 // this version is for messages with no parameters
@@ -2983,8 +3017,18 @@ bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
 			return false;
 		} else if (mode == FilterShowGroupOnly) {
 			Group *g = GetGroup();
-			if (!g || !g->IsGroupMember(sender))
+			Raid *r = GetRaid();
+			if (g) {
+				if (g->IsGroupMember(sender))
+					return true;
+			} else if (r && sender->IsClient()) {
+				uint32 rgid1 = r->GetGroup(this);
+				uint32 rgid2 = r->GetGroup(sender->CastToClient());
+				if (rgid1 != 0xFFFFFFFF && rgid1 == rgid2)
+					return true;
+			} else {
 				return false;
+			}
 		}
 	}
 
@@ -3027,7 +3071,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 		type = 4;
 
 	if (!message1) {
-		Message_StringID(type, string_id);	// use the simple message instead
+		FilteredMessage_StringID(sender, type, filter, string_id);	// use the simple message instead
 		return;
 	}
 

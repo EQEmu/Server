@@ -3829,49 +3829,83 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		// Everhood - So we can see our dot dmg like live shows it.
 		if(spell_id != SPELL_UNKNOWN && damage > 0 && attacker && attacker != this && attacker->IsClient()) {
 			//might filter on (attack_skill>200 && attack_skill<250), but I dont think we need it
-			if(attacker->CastToClient()->GetFilter(FilterDOT) != FilterHide) {
-				attacker->Message_StringID(MT_DoTDamage, OTHER_HIT_DOT, GetCleanName(),itoa(damage),spells[spell_id].name);
-			}
+			attacker->FilteredMessage_StringID(attacker, MT_DoTDamage, FilterDOT,
+					YOUR_HIT_DOT, GetCleanName(), itoa(damage), spells[spell_id].name);
+			// older clients don't have the below String ID, but it will be filtered
+			entity_list.FilteredMessageClose_StringID(attacker, true, 200,
+					MT_DoTDamage, FilterDOT, OTHER_HIT_DOT, GetCleanName(),
+					itoa(damage), attacker->GetCleanName(), spells[spell_id].name);
 		}
 	} //end packet sending
 
 }
 
 
-void Mob::HealDamage(uint32 amount, Mob* caster) {
+void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
+{
 	int32 maxhp = GetMaxHP();
 	int32 curhp = GetHP();
 	uint32 acthealed = 0;
 
-	if(caster && amount > 0)
-	{
-		if(caster->IsNPC() && !caster->IsPet())
-		{
+	if (caster && amount > 0) {
+		if (caster->IsNPC() && !caster->IsPet()) {
 			float npchealscale = caster->CastToNPC()->GetHealScale();
-			amount = ((float)amount * npchealscale) / (float)100;
+			amount = (static_cast<float>(amount) * npchealscale) / 100.0f;
 		}
 	}
 
-	if(amount > (maxhp - curhp))
+	if (amount > (maxhp - curhp))
 		acthealed = (maxhp - curhp);
 	else
 		acthealed = amount;
 
 	if (acthealed > 100) {
 		if (caster) {
-			Message_StringID(MT_NonMelee, YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
-			if (caster != this)
-				caster->Message_StringID(MT_NonMelee, YOU_HEAL, GetCleanName(), itoa(acthealed));
+			if (IsBuffSpell(spell_id)) { // hots
+				// message to caster
+				if (caster->IsClient() && caster == this) {
+					if (caster->CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
+						FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
+								HOT_HEAL_SELF, itoa(acthealed), spells[spell_id].name);
+					else
+						FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
+								YOU_HEALED, GetCleanName(), itoa(acthealed));
+				} else if (caster->IsClient() && caster != this) {
+					if (caster->CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
+						caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
+								HOT_HEAL_OTHER, GetCleanName(), itoa(acthealed),
+								spells[spell_id].name);
+					else
+						caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
+								YOU_HEAL, GetCleanName(), itoa(acthealed));
+				}
+				// message to target
+				if (IsClient() && caster != this) {
+					if (CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
+						FilteredMessage_StringID(this, MT_NonMelee, FilterHealOverTime,
+								HOT_HEALED_OTHER, caster->GetCleanName(),
+								itoa(acthealed), spells[spell_id].name);
+					else
+						FilteredMessage_StringID(this, MT_NonMelee, FilterHealOverTime,
+								YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+				}
+			} else { // normal heals
+				FilteredMessage_StringID(caster, MT_NonMelee, FilterSpellDamage,
+						YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+				if (caster != this)
+					caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterSpellDamage,
+							YOU_HEAL, GetCleanName(), itoa(acthealed));
+			}
 		} else {
 			Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);
 		}
 	}
 
 	if (curhp < maxhp) {
-		if ((curhp+amount)>maxhp)
-			curhp=maxhp;
+		if ((curhp + amount) > maxhp)
+			curhp = maxhp;
 		else
-			curhp+=amount;
+			curhp += amount;
 		SetHP(curhp);
 
 		SendHPUpdate();
@@ -4232,7 +4266,9 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 		{
 			critMod += GetCritDmgMob(skill) * 2; // To account for base crit mod being 200 not 100
 			damage = (damage * critMod) / 100;
-			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, CRITICAL_HIT, GetCleanName(), itoa(damage));
+			entity_list.FilteredMessageClose_StringID(this, false, 200,
+					MT_CritMelee, FilterMeleeCrits, CRITICAL_HIT,
+					GetCleanName(), itoa(damage));
 		}
 	}
 }
@@ -4348,7 +4384,9 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			damage = damage * critMod / 100;
 
 			if (crip_success) {
-				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, CRIPPLING_BLOW, GetCleanName(), itoa(damage));
+				entity_list.FilteredMessageClose_StringID(this, false, 200,
+						MT_CritMelee, FilterMeleeCrits, CRIPPLING_BLOW,
+						GetCleanName(), itoa(damage));
 				// Crippling blows also have a chance to stun
 				//Kayen: Crippling Blow would cause a chance to interrupt for npcs < 55, with a staggers message.
 				if (defender->GetLevel() <= 55 && !defender->GetSpecialAbility(IMMUNE_STUN)){
@@ -4356,7 +4394,9 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 					defender->Stun(0);
 				}
 			} else {
-				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, CRITICAL_HIT, GetCleanName(), itoa(damage));
+				entity_list.FilteredMessageClose_StringID(this, false, 200,
+						MT_CritMelee, FilterMeleeCrits, CRITICAL_HIT,
+						GetCleanName(), itoa(damage));
 			}
 		}
 	}

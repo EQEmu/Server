@@ -7,6 +7,9 @@ Kayen: Revision to charm code to be consistent with live based on extensive pers
 
 Optional SQL: utils/sql/git/optional/2014_03_02_CharmRules.sql
 
+demonstar55: Melee Crits, HoTs, DoTs messages should now be filtered correctly on all clients.
+	Clients that also support seeing others DoTs will now see them if they don't filter them
+	note: some newer clients have a 'mine only' option for HoTs but it functions the same as show
 
 == 02/27/2014 ==
 cavedude: Exported TrainDisc to Lua.
