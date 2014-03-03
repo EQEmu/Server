@@ -3016,6 +3016,7 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 thedam)
 {
 	NPC *cur = nullptr;
 	uint16 count = 0;
+	std::list<NPC *> npc_sub_list;
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		cur = it->second;
@@ -3025,10 +3026,12 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 thedam)
 			continue;
 		}
 		if (!cur->IsMezzed() && !cur->IsStunned() && !cur->IsFeared()) {
+			npc_sub_list.push_back(cur);
 			++count;
 		}
 		++it;
 	}
+
 
 	if (thedam > 1) {
 		if (count > 0)
@@ -3039,32 +3042,26 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 thedam)
 	}
 
 	cur = nullptr;
-	it = npc_list.begin();
-	while (it != npc_list.end()) {
-		cur = it->second;
-		if (!cur->CheckAggro(target)) {
-			++it;
-			continue;
-		}
+	auto sit = npc_sub_list.begin();
+	while (sit != npc_sub_list.end()) {
+		cur = *sit;
 
-		if (!cur->IsMezzed() && !cur->IsStunned() && !cur->IsFeared()) {
-			if (cur->IsPet()) {
-				if (caster) {
-					if (cur->CheckAggro(caster)) {
-						cur->AddToHateList(caster, thedam);
-					}
+		if (cur->IsPet()) {
+			if (caster) {
+				if (cur->CheckAggro(caster)) {
+					cur->AddToHateList(caster, thedam);
 				}
-			} else {
-				if (caster) {
-					if (cur->CheckAggro(caster)) {
-						cur->AddToHateList(caster, thedam);
-					} else {
-						cur->AddToHateList(caster, thedam * 0.33);
-					}
+			}
+		} else {
+			if (caster) {
+				if (cur->CheckAggro(caster)) {
+					cur->AddToHateList(caster, thedam);
+				} else {
+					cur->AddToHateList(caster, thedam * 0.33);
 				}
 			}
 		}
-		++it;
+		++sit;
 	}
 }
 
