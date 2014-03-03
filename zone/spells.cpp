@@ -4048,7 +4048,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 // pvp_resist_base
 // pvp_resist_calc
 // pvp_resist_cap
-float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override, int resist_override, bool CharismaCheck)
+float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override, int resist_override, bool CharismaCheck, bool CharmTick)
 {
 
 	if(!caster)
@@ -4277,6 +4277,10 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		resist_chance = spells[spell_id].MinResist;
 	}
 
+	//Charm can not have less than 5% chance to fail.
+	if (CharmTick && (resist_chance < 10))
+		resist_chance = 10;
+	
 	//Finally our roll
 	int roll = MakeRandomInt(0, 200);
 	if(roll > resist_chance)

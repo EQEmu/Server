@@ -1393,6 +1393,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 	Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 200 CHA
 	Charisma DOES NOT extend charm durations.
 	Base effect value of charm spells in the spell file DOES NOT effect duration OR resist rate (unclear if does anything)
+	Charm has a lower limit of 5% chance to break per tick, regardless of resist modifiers / level difference.
 	*/
 
 	if(!caster) return false;
@@ -1402,11 +1403,6 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 
 	float resist_check = 0;
 	
-	if (RuleB(Spells, CharismaCharmDuration))
-		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,0,0,true);
-	else
-		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
-
 	if(IsCharmSpell(spell_id)) {
 
 		if (spells[spell_id].powerful_flag == -1) //If charm spell has this set(-1), it can not break till end of duration.
@@ -1416,8 +1412,13 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 		if (MakeRandomInt(0, 99) > RuleI(Spells, CharmBreakCheckChance))
 			return true;
 
+		if (RuleB(Spells, CharismaCharmDuration))
+			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,0,0,true,true);
+		else
+			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, 0,0, false, true);
+
 		//2: The mob makes a resistance check against the charm
-		if (resist_check == 100)
+		if (resist_check == 100) 
 			return true;
 
 		else
@@ -1437,6 +1438,8 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 	else
 	{
 		// Assume this is a harmony/pacify spell
+		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
+
 		if (resist_check == 100)
 			return true;
 	}
