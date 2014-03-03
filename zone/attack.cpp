@@ -4333,11 +4333,16 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 		}
 	}
 
+	int deadlyChance = 0;
+	int deadlyMod = 0;
 	if(skill == SkillArchery && GetClass() == RANGER && GetSkill(SkillArchery) >= 65)
 		critChance += 6;
 
-	if(skill == SkillThrowing && GetClass() == ROGUE && GetSkill(SkillThrowing) >= 65)
-		critChance += 6;
+	if (skill == SkillThrowing && GetClass() == ROGUE && GetSkill(SkillThrowing) >= 65) {
+		critChance += RuleI(Combat, RogueCritThrowingChance);
+		deadlyChance = RuleI(Combat, RogueDeadlyStrikeChance);
+		deadlyMod = RuleI(Combat, RogueDeadlyStrikeMod);
+	}
 
 	int CritChanceBonus = GetCriticalChanceBonus(skill);
 
@@ -4383,6 +4388,14 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			critMod += GetCritDmgMob(skill) * 2; // To account for base crit mod being 200 not 100
 			damage = damage * critMod / 100;
 
+			bool deadlySuccess = false;
+			if (deadlyChance && MakeRandomFloat(0, 1) < static_cast<float>(deadlyChance) / 100.0f) {
+				if (BehindMob(defender, GetX(), GetY())) {
+					damage *= deadlyMod;
+					deadlySuccess = true;
+				}
+			}
+
 			if (crip_success) {
 				entity_list.FilteredMessageClose_StringID(this, false, 200,
 						MT_CritMelee, FilterMeleeCrits, CRIPPLING_BLOW,
@@ -4393,6 +4406,10 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 					defender->Emote("staggers.");
 					defender->Stun(0);
 				}
+			} else if (deadlySuccess) {
+				entity_list.FilteredMessageClose_StringID(this, false, 200,
+						MT_CritMelee, FilterMeleeCrits, DEADLY_STRIKE,
+						GetCleanName(), itoa(damage));
 			} else {
 				entity_list.FilteredMessageClose_StringID(this, false, 200,
 						MT_CritMelee, FilterMeleeCrits, CRITICAL_HIT,

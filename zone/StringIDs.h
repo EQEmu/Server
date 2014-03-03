@@ -160,6 +160,7 @@
 #define ASSASSINATES				1016	//%1 ASSASSINATES their victim!!
 #define CRIPPLING_BLOW				1021	//%1 lands a Crippling Blow!(%2)
 #define CRITICAL_HIT				1023	//%1 scores a critical hit! (%2)
+#define DEADLY_STRIKE				1024	//%1 scores a Deadly Strike!(%2)
 #define RESISTS_URGE				1025	//%1 resists their urge to flee.
 #define BERSERK_START				1027	//%1 goes into a berserker frenzy!
 #define DEATH_PACT					1028	//%1's death pact has been benevolently fulfilled!

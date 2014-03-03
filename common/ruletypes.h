@@ -308,6 +308,9 @@ RULE_INT ( Combat, WarBerBaseCritChance, 3 ) //The base crit chance for warriors
 RULE_INT ( Combat, BerserkBaseCritChance, 6 ) //The bonus base crit chance you get when you're berserk
 RULE_INT ( Combat, NPCBashKickLevel, 6 ) //The level that npcs can KICK/BASH
 RULE_INT ( Combat, NPCBashKickStunChance, 15 ) //Percent chance that a bash/kick will stun
+RULE_INT ( Combat, RogueCritThrowingChance, 25) //Rogue throwing crit bonus
+RULE_INT ( Combat, RogueDeadlyStrikeChance, 80) //Rogue chance throwing from behind crit becomes a deadly strike
+RULE_INT ( Combat, RogueDeadlyStrikeMod, 2) //Deadly strike modifier to crit damage
 RULE_INT ( Combat, ClientBaseCritChance, 0 ) //The base crit chance for all clients, this will stack with warrior's/zerker's crit chance.
 RULE_BOOL ( Combat, UseIntervalAC, true)
 RULE_INT ( Combat, PetAttackMagicLevel, 30)
