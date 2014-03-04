@@ -3685,29 +3685,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 		if(spell_id != SPELL_UNKNOWN && !iBuffTic) {
 			//see if root will break
-			if (IsRooted() && !FromDamageShield) { // neotoyko: only spells cancel root
-
-				/*Dev Quote 2010: http://forums.station.sony.com/eq/posts/list.m?topic_id=161443
-				The Viscid Roots AA does the following: Reduces the chance for root to break by X percent.
-				There is no distinction of any kind between the caster inflicted damage, or anyone
-				else's damage. There is also no distinction between Direct and DOT damage in the root code.
-				There is however, a provision that if the damage inflicted is greater than 500 per hit, the
-				chance to break root is increased. My guess is when this code was put in place, the devs at
-				the time couldn't imagine DOT damage getting that high.
-				*/
-				int BreakChance = RuleI(Spells, RootBreakFromSpells);
-				BreakChance -= BreakChance*rooted_mod/100;
-
-				if (BreakChance < 1)
-					BreakChance = 1;
-
-				if (MakeRandomInt(0, 99) < BreakChance) {
-					mlog(COMBAT__HITS, "Spell broke root! BreakChance percent chance");
-					BuffFadeByEffect(SE_Root, buffslot); // buff slot is passed through so a root w/ dam doesnt cancel itself
-				} else {
-					mlog(COMBAT__HITS, "Spell did not break root. BreakChance percent chance");
-				}
-			}
+			if (IsRooted() && !FromDamageShield)  // neotoyko: only spells cancel root
+				TryRootFadeByDamage(buffslot);
 		}
 		else if(spell_id == SPELL_UNKNOWN)
 		{
@@ -4573,6 +4552,50 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 			}
 		}
 	}
+}
+
+bool Mob::TryRootFadeByDamage(int buffslot)
+{
+	/*Dev Quote 2010: http://forums.station.sony.com/eq/posts/list.m?topic_id=161443
+	The Viscid Roots AA does the following: Reduces the chance for root to break by X percent.
+	There is no distinction of any kind between the caster inflicted damage, or anyone
+	else's damage. There is also no distinction between Direct and DOT damage in the root code.
+	There is however, a provision that if the damage inflicted is greater than 500 per hit, the
+	chance to break root is increased. My guess is when this code was put in place, the devs at
+	the time couldn't imagine DOT damage getting that high.
+	*/
+	
+	int BreakChance = RuleI(Spells, RootBreakFromSpells);
+	
+	BreakChance -= BreakChance*rooted_mod/100;
+
+	if (BreakChance < 1)
+		BreakChance = 1;
+
+	if (MakeRandomInt(0, 99) < BreakChance) {
+
+		/*
+		- Check buffslot to make sure damage from a root does not cancel the root
+		- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root. 
+		- Only roots on determental spells can be broken by damage.
+		*/
+
+		uint32 buff_count = GetMaxTotalSlots();
+		for(int i = 0; i < buff_count; i++)
+		{
+			if(IsValidSpell(buffs[i].spellid) && 
+				(IsEffectInSpell(buffs[i].spellid, SE_Root) && IsDetrimentalSpell(buffs[i].spellid) && i != buffslot)){
+				if (!TryFadeEffect(i)) {
+					BuffFadeBySlot(i);
+					mlog(COMBAT__HITS, "Spell broke root! BreakChance percent chance");
+					return true;
+				}
+			}
+		}
+	}
+
+	mlog(COMBAT__HITS, "Spell did not break root. BreakChance percent chance");
+	return false;
 }
 
 int32 Mob::RuneAbsorb(int32 damage, uint16 type)

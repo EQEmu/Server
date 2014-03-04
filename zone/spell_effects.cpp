@@ -3322,9 +3322,23 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			}
 
 			case SE_Root: {
-				float SpellEffectiveness = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
-				if(SpellEffectiveness < 25) {
-					BuffFadeByEffect(SE_Root);
+				
+				/* Root formula derived from extensive personal live parses - Kayen
+				ROOT has a 40% chance to do a resist check to break.
+				Resist check has NO LOWER bounds.
+				If multiple roots on target. Root in first slot will be checked first to break from nukes.
+				If multiple roots on target and broken by spell. Roots are removed ONE at a time in order of buff slot.
+				*/
+
+				if (MakeRandomInt(0, 99) < RuleI(Spells, RootBreakCheckChance)){
+				
+					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
+
+					if(resist_check == 100) 
+						break;
+					else
+						if(!TryFadeEffect(slot))
+							BuffFadeBySlot(slot);
 				}
 
 				break;
