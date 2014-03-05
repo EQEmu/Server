@@ -2574,7 +2574,7 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 	QuestManagerCurrentQuestVars();
 	if(initiator) {
 		std::list<uint32> charid_list;
-		boolean removed_all = true;
+		bool removed_all = true;
 		uint16 fail_count = 0;
 		database.GetCharactersInInstance(instance_id,charid_list);
 		auto iter = charid_list.begin();
