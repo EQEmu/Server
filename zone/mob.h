@@ -146,6 +146,7 @@ public:
 	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
 	bool CombatRange(Mob* other);
 	virtual inline bool IsBerserk() { return false; } // only clients
+	void RogueEvade(Mob *other);
 
 	//Appearance
 	void SendLevelAppearance();

@@ -99,6 +99,12 @@
 #define TRADESKILL_FAILED			336		//You lacked the skills to fashion the items together.
 #define TRADESKILL_TRIVIAL			338		//You can no longer advance your skill from making this item.
 #define TRADESKILL_SUCCEED			339		//You have fashioned the items together to create something new!
+#define EVADE_SUCCESS				343		//You have momentarily ducked away from the main combat.
+#define EVADE_FAIL					344		//Your attempts at ducking clear of combat fail.
+#define HIDE_FAIL					345		//You failed to hide yourself.
+#define HIDE_SUCCESS				346		//You have hidden yourself from view.
+#define SNEAK_SUCCESS				347		//You are as quiet as a cat stalking its prey.
+#define SNEAK_FAIL					348		//You are as quiet as a herd of running elephants.
 #define MEND_CRITICAL				349		//You magically mend your wounds and heal considerable damage.
 #define MEND_SUCCESS				350		//You mend your wounds and heal some damage.
 #define MEND_WORSEN					351		//You have worsened your wounds!

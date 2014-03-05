@@ -3478,21 +3478,23 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	}
 	if(GetClass() == ROGUE){
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage,sizeof(SimpleMessage_Struct));
-		SimpleMessage_Struct *msg=(SimpleMessage_Struct *)outapp->pBuffer;
-		msg->color=0x010E;
-		if (!auto_attack && entity_list.Fighting(this)) {
+		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
+		msg->color = 0x010E;
+		Mob *evadetar = GetTarget();
+		if (!auto_attack && (evadetar && evadetar->CheckAggro(this)
+					&& evadetar->IsNPC())) {
 			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) {
-				msg->string_id=343;
-				entity_list.Evade(this);
+				msg->string_id = EVADE_SUCCESS;
+				RogueEvade(evadetar);
 			} else {
-				msg->string_id=344;
+				msg->string_id = EVADE_FAIL;
 			}
 		} else {
 			if (hidden){
-				msg->string_id=346;
+				msg->string_id = HIDE_SUCCESS;
 			}
 			else {
-				msg->string_id=345;
+				msg->string_id = HIDE_FAIL;
 			}
 		}
 		FastQueuePacket(&outapp);
