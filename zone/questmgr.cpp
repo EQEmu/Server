@@ -2562,9 +2562,9 @@ void QuestManager::RemoveFromInstance(uint16 instance_id)
 	QuestManagerCurrentQuestVars();
 	if(initiator) {
 		if(database.RemoveClientFromInstance(instance_id, initiator->CharacterID())) {
-			initiator->Message(0, "Removed client from instance.");
+			initiator->Message(MT_Say, "Removed client from instance.");
 		} else {
-			initiator->Message(0, "Failed to remove client from instance.");
+			initiator->Message(MT_Say, "Failed to remove client from instance.");
 		}
 	}
 }
