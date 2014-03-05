@@ -2557,6 +2557,43 @@ void QuestManager::AssignRaidToInstance(uint16 instance_id)
 	}
 }
 
+void QuestManager::RemoveFromInstance(uint16 instance_id)
+{
+	QuestManagerCurrentQuestVars();
+	if(initiator) {
+		if(database.RemoveClientFromInstance(instance_id, initiator->CharacterID())) {
+			initiator->Message(0, "Removed client from instance.");
+		} else {
+			initiator->Message(0, "Failed to remove client from instance.");
+		}
+	}
+}
+
+void QuestManager::RemoveAllFromInstance(uint16 instance_id)
+{
+	QuestManagerCurrentQuestVars();
+	if(initiator) {
+		std::list<uint32> charid_list;
+		boolean removed_all = true;
+		uint16 fail_count = 0;
+		database.GetCharactersInInstance(instance_id,charid_list);
+		auto iter = charid_list.begin();
+		while(iter != charid_list.end()) {
+			if(!database.RemoveClientFromInstance(instance_id, *iter)) {
+				removed_all = false;
+				++fail_count;
+			}
+			++iter;
+		}
+		if (removed_all) {
+			initiator->Message(MT_Say, "Removed all players from instance.");
+		} else {
+			// once the expedition system is in, this message it not relevant
+			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", fail_count);
+		}
+	}
+}
+
 void QuestManager::MovePCInstance(int zone_id, int instance_id, float x, float y, float z, float heading)
 {
 	QuestManagerCurrentQuestVars();

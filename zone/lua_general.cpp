@@ -659,6 +659,14 @@ void lua_assign_raid_to_instance(uint32 instance_id) {
 	quest_manager.AssignRaidToInstance(instance_id);
 }
 
+void lua_remove_from_instance(uint32 instance_id) {
+	quest_manager.RemoveFromInstance(instance_id);
+}
+
+void lua_remove_all_from_instance(uint32 instance_id) {
+	quest_manager.RemoveAllFromInstance(instance_id);
+}
+
 void lua_flag_instance_by_group_leader(uint32 zone, uint32 version) {
 	quest_manager.FlagInstanceByGroupLeader(zone, version);
 }
@@ -1195,6 +1203,8 @@ luabind::scope lua_register_general() {
 		luabind::def("assign_to_instance", &lua_assign_to_instance),
 		luabind::def("assign_group_to_instance", &lua_assign_group_to_instance),
 		luabind::def("assign_raid_to_instance", &lua_assign_raid_to_instance),
+		luabind::def("remove_from_instance", &lua_remove_from_instance),
+		luabind::def("remove_all_from_instance", &lua_remove_all_from_instance),
 		luabind::def("flag_instance_by_group_leader", &lua_flag_instance_by_group_leader),
 		luabind::def("flag_instance_by_raid_leader", &lua_flag_instance_by_raid_leader),
 		luabind::def("fly_mode", &lua_fly_mode),
