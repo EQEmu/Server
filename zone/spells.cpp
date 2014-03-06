@@ -123,21 +123,12 @@ void NPC::SpellProcess()
 {
 	Mob::SpellProcess();
 
-	if(GetSwarmInfo()){
-		Mob *swp_o = GetSwarmInfo()->GetOwner();
-		if(!swp_o)
-		{
+	if (GetSwarmInfo()) {
+		if (GetSwarmInfo()->duration->Check(false))
 			Depop();
-		}
-
-		if(GetSwarmInfo()->duration->Check(false))
-		{
-			Depop();
-		}
 
 		Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
-		if(GetSwarmInfo()->target != 0)
-		{
+		if (GetSwarmInfo()->target != 0) {
 			if(!targMob || (targMob && targMob->IsCorpse()))
 				Depop();
 		}

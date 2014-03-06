@@ -513,6 +513,14 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	else if(our_owner && our_owner == target)
 		return false;
 
+	// invalidate for swarm pets for later on if their owner is a corpse
+	if (IsNPC() && CastToNPC()->GetSwarmInfo() && our_owner &&
+			our_owner->IsCorpse() && !our_owner->IsPlayerCorpse())
+		our_owner = nullptr;
+	if (target->IsNPC() && target->CastToNPC()->GetSwarmInfo() && target_owner &&
+			target_owner->IsCorpse() && !target_owner->IsPlayerCorpse())
+		target_owner = nullptr;
+
 	//cannot hurt untargetable mobs
 	bodyType bt = target->GetBodyType();
 
