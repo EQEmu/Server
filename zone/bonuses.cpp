@@ -3888,10 +3888,15 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_FrenziedDevastation:
-					spellbonuses.FrenziedDevastation += effect_value;
-					aabonuses.FrenziedDevastation += effect_value;
-					itembonuses.FrenziedDevastation += effect_value;
+					spellbonuses.FrenziedDevastation = effect_value;
+					aabonuses.FrenziedDevastation = effect_value;
+					itembonuses.FrenziedDevastation = effect_value;
 					break;
+
+				case SE_Root:
+					spellbonuses.Root[0] = effect_value;
+					spellbonuses.Root[1] = -1;
+
 			}
 		}
 	}
