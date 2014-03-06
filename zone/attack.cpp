@@ -4564,32 +4564,31 @@ bool Mob::TryRootFadeByDamage(int buffslot)
 	chance to break root is increased. My guess is when this code was put in place, the devs at
 	the time couldn't imagine DOT damage getting that high.
 	*/
+
+	/* General Mechanics
+	- Check buffslot to make sure damage from a root does not cancel the root
+	- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root. 
+	- Only roots on determental spells can be broken by damage.
+	*/
 	
-	int BreakChance = RuleI(Spells, RootBreakFromSpells);
+	if (!spellbonuses.Root[0] || spellbonuses.Root[1] < 0)
+		return false;
+
+	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot){
 	
-	BreakChance -= BreakChance*rooted_mod/100;
+		int BreakChance = RuleI(Spells, RootBreakFromSpells);
+		
+		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance/100;
 
-	if (BreakChance < 1)
-		BreakChance = 1;
+		if (BreakChance < 1)
+			BreakChance = 1;
 
-	if (MakeRandomInt(0, 99) < BreakChance) {
+		if (MakeRandomInt(0, 99) < BreakChance) {
 
-		/*
-		- Check buffslot to make sure damage from a root does not cancel the root
-		- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root. 
-		- Only roots on determental spells can be broken by damage.
-		*/
-
-		uint32 buff_count = GetMaxTotalSlots();
-		for(int i = 0; i < buff_count; i++)
-		{
-			if(IsValidSpell(buffs[i].spellid) && 
-				(IsEffectInSpell(buffs[i].spellid, SE_Root) && IsDetrimentalSpell(buffs[i].spellid) && i != buffslot)){
-				if (!TryFadeEffect(i)) {
-					BuffFadeBySlot(i);
-					mlog(COMBAT__HITS, "Spell broke root! BreakChance percent chance");
-					return true;
-				}
+			if (!TryFadeEffect(spellbonuses.Root[1])) {
+				BuffFadeBySlot(spellbonuses.Root[1]);
+				mlog(COMBAT__HITS, "Spell broke root! BreakChance percent chance");
+				return true;
 			}
 		}
 	}

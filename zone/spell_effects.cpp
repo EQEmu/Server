@@ -1631,12 +1631,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Root: %+i", effect_value);
 #endif
 				rooted = true;
-				rooted_mod = 0;
 
 				if (caster){
-					rooted_mod = caster->aabonuses.RootBreakChance +
-								caster->itembonuses.RootBreakChance +
-								caster->spellbonuses.RootBreakChance;
+					buffs[buffslot].RootBreakChance = caster->aabonuses.RootBreakChance + 
+													caster->itembonuses.RootBreakChance +
+													caster->spellbonuses.RootBreakChance;
 				}
 
 				break;
@@ -3709,7 +3708,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Root:
 			{
 				rooted = false;
-				rooted_mod = 0;
 				break;
 			}
 

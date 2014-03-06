@@ -2654,6 +2654,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 			buffs[slot_id].caston_y = caston_y;
 			buffs[slot_id].caston_z = caston_z;
 			buffs[slot_id].ExtraDIChance = ExtraDIChance;
+			buffs[slot_id].RootBreakChance = 0;
 			buffs[slot_id].UpdateClient = false;
 			if(IsRuneSpell(spell_id)) {
 				c->SetHasRune(true);

@@ -2533,6 +2533,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->FrenziedDevastation += spells[spell_id].base2[i];
 				break;
 
+			case SE_Root:
+				if (newbon->Root[0] && (newbon->Root[1] > buffslot)){
+					newbon->Root[0] = 1;
+					newbon->Root[1] = buffslot;
+				}
+				else {
+					newbon->Root[0] = 1;
+					newbon->Root[1] = buffslot;
+				}
+				break;
 		}
 	}
 }
