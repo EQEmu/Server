@@ -2522,10 +2522,11 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		safe_delete_array(query);
 		if (mysql_num_rows(result) != 0) {
 			row = mysql_fetch_row(result);
-			mysql_free_result(result);
 			if(atoi(row[0]) <= max) {
 				count = atoi(row[0]);
+				mysql_free_result(result);
 			} else {
+				mysql_free_result(result);
 				if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where id > %u ORDER BY id", count), errbuf, &result)) {
 					safe_delete_array(query);
 					if (mysql_num_rows(result) != 0) {

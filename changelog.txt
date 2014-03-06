@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 03/05/2014 ==
 demonstar55: Corrected rogue's evade to be single target
+sorvani: fixed crash issue 119
 
 == 03/04/2014 ==
 Sorvani: Created RemoveFromInstance and RemoveAllFromInstance to remove a single player or all players in an instance.
