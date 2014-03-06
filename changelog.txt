@@ -6,6 +6,13 @@ demonstar55: Corrected rogue's evade to be single target
 == 03/04/2014 ==
 Sorvani: Created RemoveFromInstance and RemoveAllFromInstance to remove a single player or all players in an instance.
 Sorvani: Exported to Lua as eq.remove_from_instance(instance_id) and eq.remove_all_from_instance(instance_id).
+Kayen: Revision to root code to be consistent with live based on extensive personal parsing.
+*ROOT has a 40% chance to do a resist check to break each buff tick.
+*If multiple roots on target. Root in first slot will always and only be check to break from nukes.
+*If multiple roots on target and broken by spell. Roots are removed ONE at a time in order of buff slot.
+*Roots on beneficial spells can not be broken by spell damage.
+
+Optional SQL: utils/sql/git/optional/2014_03_04_RootRule.sql
 
 == 03/03/2014 ==
 demonstar55: Implemented deadly strikes and gave rogues higher innate throwing crit chance
