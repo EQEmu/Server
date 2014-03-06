@@ -3707,6 +3707,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 			case SE_Root:
 			{
+				buffs[slot].RootBreakChance = 0;
 				rooted = false;
 				break;
 			}
