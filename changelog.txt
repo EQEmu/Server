@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/05/2014 ==
+demonstar55: Corrected rogue's evade to be single target
+
+== 03/04/2014 ==
+Sorvani: Created RemoveFromInstance and RemoveAllFromInstance to remove a single player or all players in an instance.
+Sorvani: Exported to Lua as eq.remove_from_instance(instance_id) and eq.remove_all_from_instance(instance_id).
+
 == 03/03/2014 ==
 demonstar55: Implemented deadly strikes and gave rogues higher innate throwing crit chance
 
