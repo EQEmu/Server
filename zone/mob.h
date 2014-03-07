@@ -1085,7 +1085,6 @@ protected:
 	bool inWater; // Set to true or false by Water Detection code if enabled by rules
 	bool has_virus; // whether this mob has a viral spell on them
 	uint16 viral_spells[MAX_SPELL_TRIGGER*2]; // Stores the spell ids of the viruses on target and caster ids
-	int16 rooted_mod; //Modifier to root break chance, defined when root is cast on a target.
 	bool offhand;
 	bool has_shieldequiped;
 	bool has_numhits;

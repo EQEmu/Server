@@ -2533,6 +2533,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->FrenziedDevastation += spells[spell_id].base2[i];
 				break;
 
+			case SE_Root:
+				if (newbon->Root[0] && (newbon->Root[1] > buffslot)){
+					newbon->Root[0] = 1;
+					newbon->Root[1] = buffslot;
+				}
+				else {
+					newbon->Root[0] = 1;
+					newbon->Root[1] = buffslot;
+				}
+				break;
 		}
 	}
 }
@@ -3878,10 +3888,15 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_FrenziedDevastation:
-					spellbonuses.FrenziedDevastation += effect_value;
-					aabonuses.FrenziedDevastation += effect_value;
-					itembonuses.FrenziedDevastation += effect_value;
+					spellbonuses.FrenziedDevastation = effect_value;
+					aabonuses.FrenziedDevastation = effect_value;
+					itembonuses.FrenziedDevastation = effect_value;
 					break;
+
+				case SE_Root:
+					spellbonuses.Root[0] = effect_value;
+					spellbonuses.Root[1] = -1;
+
 			}
 		}
 	}

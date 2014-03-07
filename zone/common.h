@@ -162,7 +162,8 @@ struct Buffs_Struct {
 	int32	caston_x;
 	int32	caston_y;
 	int32	caston_z;
-	int32  ExtraDIChance;
+	int32	ExtraDIChance;
+	int16	RootBreakChance; //Not saved to dbase
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;
@@ -339,6 +340,7 @@ struct StatBonuses {
 	bool	DivineAura;							// invulnerability
 	bool	DistanceRemoval;					// Check if Cancle if Moved effect is present
 	int16	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buffid
+	int8	Root[2];							// The lowest buff slot a root can be found. [0] = Bool if has root [1] = buff slot
 	int16	FrenziedDevastation;				// base1= AArank(used) base2= chance increase spell criticals + all DD spells 2x mana.
 	//bool	AbsorbMagicAtt;						// Magic Rune *Need to be implemented for NegateEffect
 	//bool	MeleeRune;							// Melee Rune *Need to be implemented for NegateEffect
