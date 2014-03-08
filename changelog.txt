@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/08/2014 ==
+Kayen: Revision to lull/harmony/pacification code to be consistent with live based on extensive personal parsing.
+*Lulls on initial cast do not check regular resists (MR ect) but only apply a flat ~7.5 % resist chance + level modifier
+*If Lull is resisted, a second resistance check is made this time using regular resists and a charisma modifier (same as charm)
+which if 'resisted' will cause the caster to gain aggro.
+
 == 03/05/2014 ==
 demonstar55: Corrected rogue's evade to be single target
 sorvani: fixed crash issue 119
