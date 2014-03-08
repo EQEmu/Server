@@ -670,11 +670,11 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 		ret_value = perl->dosub(std::string(pkgprefix).append("::").append(event).c_str());
 
 #ifdef EMBPERL_XS_CLASSES
-		std::string eval_str = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client = undef;";
-		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::npc = undef;";
-		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::questitem = undef;";
-		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::entity_list = undef;";
-		perl->eval(eval_str.c_str());
+//		std::string eval_str = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client = undef;";
+//		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::npc = undef;";
+//		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::questitem = undef;";
+//		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::entity_list = undef;";
+//		perl->eval(eval_str.c_str());
 #endif
 
 	} catch(const char * err) {
@@ -687,7 +687,8 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
             error += "::";
             error += event;
             error += " - ";
-            error += err;
+			if(strlen(err) > 0)
+				error += err;
             AddError(error);
         }
 	}
