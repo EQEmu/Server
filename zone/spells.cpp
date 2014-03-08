@@ -4173,16 +4173,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	}
 
 	//Setup our base resist chance.
-	//Lulls have a slightly higher chance to resist than normal 15/200 or ~ 7.5%
-	int resist_chance;
-	if(IsHarmonySpell(spell_id))
-	{
-		resist_chance = 15;
-	}
-	else
-	{
-		resist_chance = 0;
-	}
+	int resist_chance = 0;
 
 	//Adjust our resist chance based on level modifiers
 	int temp_level_diff = GetLevel() - caster->GetLevel();
@@ -4242,6 +4233,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	if (CharismaCheck)
 	{
 		//Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 200 CHA
+		//'Lull' spells only check charisma if inital cast is resisted to see if mob will aggro, same modifier/cap as above.
 		//Charisma DOES NOT extend charm durations.
 		int16 charisma = caster->GetCHA();
 
@@ -4250,6 +4242,11 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 		resist_modifier -= charisma/RuleI(Spells, CharismaEffectiveness);
 	}
+
+	//Lull spells DO NOT use regular resists on initial cast, instead they use a flat +15 modifier. Live parses confirm this.
+	//Regular resists are used when checking if mob will aggro off of a lull resist.
+	if(!CharismaCheck && IsHarmonySpell(spell_id))
+		target_resist = 15;
 
 	//Add our level, resist and -spell resist modifier to our roll chance
 	resist_chance += level_mod;

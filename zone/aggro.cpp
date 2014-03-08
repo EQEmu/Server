@@ -1446,7 +1446,8 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 	else
 	{
 		// Assume this is a harmony/pacify spell
-		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
+		// If 'Lull' spell resists, do a second resist check with a charisma modifier AND regular resist checks. If resists agian you gain aggro.
+		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, true);
 
 		if (resist_check == 100)
 			return true;
