@@ -41,6 +41,7 @@ public:
 
 	void StartQuest(Mob *_owner, Client *_initiator = nullptr, ItemInst* _questitem = nullptr);
 	void EndQuest();
+	bool QuestsRunning() { return !quests_running_.empty(); }
 
 	void Process();
 
