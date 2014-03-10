@@ -4761,11 +4761,7 @@ int32 Mob::GetItemFactionBonus(uint32 pFactionID) {
 }
 
 void Mob::ClearItemFactionBonuses() {
-	std::map <uint32, int32> :: iterator itr;
-	for(itr = item_faction_bonuses.begin(); itr != item_faction_bonuses.end(); ++itr)
-	{
-		item_faction_bonuses.erase(itr->first);
-	}
+	item_faction_bonuses.clear();
 }
 
 FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
