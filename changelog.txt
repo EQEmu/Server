@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 03/12/2014 ==
+Kayen: Melee/Magic runes are now calculated as bonuses. Resolved issues with runes not working and not fading properly.
+
 == 03/08/2014 ==
 Kayen: Revision to lull/harmony/pacification code to be consistent with live based on extensive personal parsing.
 *Lulls on initial cast do not check regular resists (MR ect) but only apply a flat ~7.5 % resist chance + level modifier

@@ -248,14 +248,6 @@ public:
 	virtual int GetMaxTotalSlots() const { return 0; }
 	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
 	virtual void UninitializeBuffSlots() { }
-	inline bool HasRune() const { return m_hasRune; }
-	inline bool HasSpellRune() const { return m_hasSpellRune; }
-	inline bool HasPartialMeleeRune() const { return m_hasPartialMeleeRune; }
-	inline bool HasPartialSpellRune() const { return m_hasPartialSpellRune; }
-	inline void SetHasRune(bool hasRune) { m_hasRune = hasRune; }
-	inline void SetHasSpellRune(bool hasSpellRune) { m_hasSpellRune = hasSpellRune; }
-	inline void SetHasPartialMeleeRune(bool hasPartialMeleeRune) { m_hasPartialMeleeRune = hasPartialMeleeRune; }
-	inline void SetHasPartialSpellRune(bool hasPartialSpellRune) { m_hasPartialSpellRune = hasPartialSpellRune; }
 	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
 	void SendBuffsToClient(Client *c);
 	inline Buffs_Struct* GetBuffs() { return buffs; }
@@ -993,7 +985,6 @@ protected:
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	VERTEX UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	void PrintRoute();
-	void UpdateRuneFlags();
 
 	virtual float GetSympatheticProcChances(float &ProcBonus, float &ProcChance, int32 cast_time, int16 ProcRateMod);
 
@@ -1192,11 +1183,6 @@ protected:
 	float tar_vz;
 	float test_vector;
 
-	bool m_hasRune;
-	bool m_hasSpellRune;
-	bool m_hasPartialMeleeRune;
-	bool m_hasPartialSpellRune;
-	bool m_hasDeathSaveChance;
 	uint32 m_spellHitsLeft[38]; // Used to track which spells will have their numhits incremented when spell finishes casting, 38 Buffslots
 	int flymode;
 	bool m_targetable;
