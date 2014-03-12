@@ -5133,51 +5133,6 @@ void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 		}
 	}
 }
-void Mob::UpdateRuneFlags()
-{
-	bool Has_SE_Rune = false, Has_SE_AbsorbMagicAtt = false, Has_SE_MitigateMeleeDamage = false, Has_SE_MitigateSpellDamage = false;
-	uint32 buff_count = GetMaxTotalSlots();
-	for (unsigned int i = 0; i < buff_count; ++i)
-	{
-		if (buffs[i].spellid != SPELL_UNKNOWN)
-		{
-			for (int j = 0; j < EFFECT_COUNT; ++j)
-			{
-				switch(spells[buffs[i].spellid].effectid[j])
-				{
-					case SE_Rune:
-					{
-						Has_SE_Rune = true;
-						break;
-					}
-					case SE_AbsorbMagicAtt:
-					{
-						Has_SE_AbsorbMagicAtt = true;
-						break;
-					}
-					case SE_MitigateMeleeDamage:
-					{
-						Has_SE_MitigateMeleeDamage = true;
-						break;
-					}
-					case SE_MitigateSpellDamage:
-					{
-						Has_SE_MitigateSpellDamage = true;
-						break;
-					}
-
-					default:
-						break;
-				}
-			}
-		}
-	}
-
-	SetHasRune(Has_SE_Rune);
-	SetHasSpellRune(Has_SE_AbsorbMagicAtt);
-	SetHasPartialMeleeRune(Has_SE_MitigateMeleeDamage);
-	SetHasPartialSpellRune(Has_SE_MitigateSpellDamage);
-}
 
 int Client::GetCurrentBuffSlots() const
 {

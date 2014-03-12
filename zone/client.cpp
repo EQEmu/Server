@@ -6710,9 +6710,9 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	uint32 buff_count = GetMaxTotalSlots();
 	for (int i=0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
-			if ((HasRune() || HasPartialMeleeRune()) && buffs[i].melee_rune > 0) { rune_number += buffs[i].melee_rune; }
+			if (buffs[i].melee_rune > 0) { rune_number += buffs[i].melee_rune; }
 
-			if ((HasSpellRune() || HasPartialSpellRune()) && buffs[i].magic_rune > 0) { magic_rune_number += buffs[i].magic_rune; }
+			if (buffs[i].magic_rune > 0) { magic_rune_number += buffs[i].magic_rune; }
 		}
 	}
 

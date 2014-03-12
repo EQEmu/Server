@@ -349,12 +349,6 @@ Mob::Mob(const char* in_name,
 	nextinchpevent = -1;
 
 	TempPets(false);
-	SetHasRune(false);
-	SetHasSpellRune(false);
-	SetHasPartialMeleeRune(false);
-	SetHasPartialSpellRune(false);
-
-	m_hasDeathSaveChance = false;
 
 	m_is_running = false;
 
