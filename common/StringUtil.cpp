@@ -193,7 +193,10 @@ uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const cha
 	return *strlen;
 }
 
-uint32 hextoi(char* num) {
+uint32 hextoi(const char* num) {
+	if (num == nullptr)
+		return 0;
+
 	int len = strlen(num);
 	if (len < 3)
 		return 0;
@@ -217,7 +220,10 @@ uint32 hextoi(char* num) {
 	return ret;
 }
 
-uint64 hextoi64(char* num) {
+uint64 hextoi64(const char* num) {
+	if (num == nullptr)
+		return 0;
+
 	int len = strlen(num);
 	if (len < 3)
 		return 0;
@@ -241,7 +247,10 @@ uint64 hextoi64(char* num) {
 	return ret;
 }
 
-bool atobool(char* iBool) {
+bool atobool(const char* iBool) {
+
+	if (iBool == nullptr)
+		return false;
 	if (!strcasecmp(iBool, "true"))
 		return true;
 	if (!strcasecmp(iBool, "false"))
