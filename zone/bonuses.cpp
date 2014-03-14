@@ -2538,9 +2538,34 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->Root[0] = 1;
 					newbon->Root[1] = buffslot;
 				}
-				else {
+				else if (!newbon->Root[0]){
 					newbon->Root[0] = 1;
 					newbon->Root[1] = buffslot;
+				}
+				break;
+
+			case SE_Rune:
+
+				if (newbon->MeleeRune[0] && (newbon->MeleeRune[1] > buffslot)){
+
+					newbon->MeleeRune[0] = effect_value;
+					newbon->MeleeRune[1] = buffslot;
+				}
+				else if (!newbon->MeleeRune[0]){
+					newbon->MeleeRune[0] = effect_value;
+					newbon->MeleeRune[1] = buffslot;
+				}
+
+				break;
+
+			case SE_AbsorbMagicAtt:
+				if (newbon->AbsorbMagicAtt[0] && (newbon->AbsorbMagicAtt[1] > buffslot)){
+					newbon->AbsorbMagicAtt[0] = effect_value;
+					newbon->AbsorbMagicAtt[1] = buffslot;
+				}
+				else if (!newbon->AbsorbMagicAtt[0]){
+					newbon->AbsorbMagicAtt[0] = effect_value;
+					newbon->AbsorbMagicAtt[1] = buffslot;
 				}
 				break;
 		}
@@ -3896,7 +3921,18 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 				case SE_Root:
 					spellbonuses.Root[0] = effect_value;
 					spellbonuses.Root[1] = -1;
+					break;
 
+				case SE_Rune:
+					spellbonuses.MeleeRune[0] = effect_value;
+					spellbonuses.MeleeRune[1] = -1;
+					break;
+
+				case SE_AbsorbMagicAtt:
+					spellbonuses.AbsorbMagicAtt[0] = effect_value;
+					spellbonuses.AbsorbMagicAtt[1] = -1;
+					break;
+				
 			}
 		}
 	}

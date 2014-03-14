@@ -1242,7 +1242,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				effect_value = ApplySpellEffectiveness(caster, spell_id, effect_value);
 				buffs[buffslot].melee_rune = effect_value;
-				SetHasRune(true);
 				break;
 			}
 
@@ -1251,17 +1250,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Spell Absorb Rune: %+i", effect_value);
 #endif
-				if(effect_value > 0) {
-				buffs[buffslot].magic_rune = effect_value;
-					SetHasSpellRune(true);
-				}
+				if(effect_value > 0) 
+					buffs[buffslot].magic_rune = effect_value;
+
 				break;
 			}
 
 			case SE_MitigateMeleeDamage:
 			{
-				buffs[buffslot].melee_rune = GetPartialMeleeRuneAmount(spell_id);
-				SetHasPartialMeleeRune(true);
+				buffs[buffslot].melee_rune = spells[spell_id].max[i];
 				break;
 			}
 
@@ -1279,8 +1276,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_MitigateSpellDamage:
 			{
-				buffs[buffslot].magic_rune = GetPartialMagicRuneAmount(spell_id);
-				SetHasPartialSpellRune(true);
+				buffs[buffslot].magic_rune = spells[spell_id].max[i];
 				break;
 			}
 

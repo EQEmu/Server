@@ -3188,7 +3188,6 @@ int32 Mob::ReduceDamage(int32 damage)
 				damage -= damage_to_reduce;
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
-				//UpdateRuneFlags();
 			}
 			else
 			{
@@ -3213,7 +3212,6 @@ int32 Mob::ReduceDamage(int32 damage)
 				damage -= damage_to_reduce;
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
-				UpdateRuneFlags();
 			}
 			else
 			{
@@ -3221,7 +3219,6 @@ int32 Mob::ReduceDamage(int32 damage)
 					" damage remaining.", damage_to_reduce, buffs[slot].melee_rune);
 				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
 				damage -= damage_to_reduce;
-				UpdateRuneFlags();
 			}
 		}
 	}
@@ -3243,7 +3240,7 @@ int32 Mob::ReduceDamage(int32 damage)
 	if(damage < 1)
 		return -6;
 
-	if (HasRune())
+	if (spellbonuses.MeleeRune[0] && spellbonuses.MeleeRune[1] >= 0)
 		damage = RuneAbsorb(damage, SE_Rune);
 
 	if(damage < 1)
@@ -3317,7 +3314,6 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 					damage -= damage_to_reduce;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
-					//UpdateRuneFlags();
 				}
 				else
 				{
@@ -3341,7 +3337,6 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 					damage -= damage_to_reduce;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
-					UpdateRuneFlags();
 				}
 				else
 				{
@@ -3349,7 +3344,6 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 						" damage remaining.", damage_to_reduce, buffs[slot].magic_rune);
 					buffs[slot].magic_rune = (buffs[slot].magic_rune - damage_to_reduce);
 					damage -= damage_to_reduce;
-					UpdateRuneFlags();
 				}
 			}
 		}
@@ -3372,7 +3366,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			return 0;
 
 
-		if (HasSpellRune())
+		if (spellbonuses.AbsorbMagicAtt[0] && spellbonuses.AbsorbMagicAtt[1] >= 0)
 			damage = RuneAbsorb(damage, SE_AbsorbMagicAtt);
 
 		if(damage < 1)
@@ -4602,9 +4596,10 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 	uint32 buff_max = GetMaxTotalSlots();
 	if (type == SE_Rune){
 		for(uint32 slot = 0; slot < buff_max; slot++) {
-			if((buffs[slot].spellid != SPELL_UNKNOWN) && (buffs[slot].melee_rune) && IsEffectInSpell(buffs[slot].spellid, type)){
+			if(slot == spellbonuses.MeleeRune[1] && spellbonuses.MeleeRune[0] && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)){
 				uint32 melee_rune_left = buffs[slot].melee_rune;
-				if(melee_rune_left >= damage)
+				
+				if(melee_rune_left > damage)
 				{
 					melee_rune_left -= damage;
 					buffs[slot].melee_rune = melee_rune_left;
@@ -4615,22 +4610,20 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 				{
 					if(melee_rune_left > 0)
 						damage -= melee_rune_left;
+						
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
-					UpdateRuneFlags();
-					continue;
 				}
 			}
 		}
-		return damage;
 	}
 
-
+		
 	else{
 		for(uint32 slot = 0; slot < buff_max; slot++) {
-			if((buffs[slot].spellid != SPELL_UNKNOWN) && (buffs[slot].magic_rune) && IsEffectInSpell(buffs[slot].spellid, type)){
+			if(slot == spellbonuses.AbsorbMagicAtt[1] && spellbonuses.AbsorbMagicAtt[0] && buffs[slot].magic_rune && IsValidSpell(buffs[slot].spellid)){
 				uint32 magic_rune_left = buffs[slot].magic_rune;
-				if(magic_rune_left >= damage)
+				if(magic_rune_left > damage)
 				{
 					magic_rune_left -= damage;
 					buffs[slot].magic_rune = magic_rune_left;
@@ -4641,14 +4634,14 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 				{
 					if(magic_rune_left > 0)
 						damage -= magic_rune_left;
+					
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
-					UpdateRuneFlags();
-					continue;
 				}
 			}
 		}
-		return damage;
 	}
+
+	return damage;
 }
 
