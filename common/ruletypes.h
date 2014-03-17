@@ -537,6 +537,12 @@ RULE_BOOL( QueryServ, MerchantLogTransactions, false) // Logs Merchant Transacti
 RULE_BOOL( QueryServ, PlayerLogPCCoordinates, false) // Logs Player Coordinates with certain events
 RULE_CATEGORY_END()
 
+RULE_CATEGORY( Inventory )
+RULE_BOOL ( Inventory, EnforceAugmentRestriction, true) // Forces augment slot restrictions
+RULE_BOOL ( Inventory, EnforceAugmentUsability, true) // Forces augmented item usability
+RULE_BOOL ( Inventory, EnforceAugmentWear, true) // Forces augment wear slot validation
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL
