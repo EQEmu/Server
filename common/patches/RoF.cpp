@@ -5070,8 +5070,9 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 	memset(&isbs, 0, sizeof(RoF::structs::ItemSecondaryBodyStruct));
 
 	isbs.augtype = item->AugType;
-	isbs.augrestrict = item->AugRestrict;
 	isbs.augdistiller = 0;
+	isbs.augrestrict = item->AugRestrict;
+	
 
 	for(int x = 0; x < 5; ++x)
 	{

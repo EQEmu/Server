@@ -1,5 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/17/2014 ==
+Uleat: Updated Client::SummonItem() to check for valid item combinations when augmentations are passed.
+Uleat: Changed the return type of Client::SummonItem() from void to bool. Calling methods and APIs have not been update as yet.
+Uleat: Fixed the RoF Item structure to properly pass the 'augrestrict' variable. RoF clients now show restrictions in the Item Information window.
+
+Optional SQL: 2014/03/17_EnforceAugmentRules.sql
+Note: This adds the rules Inventory:EnforceAugmentRestriction, Inventory:EnforceAugmentUsability and Inventory:EnforceAugmentWear.
+	If you run into script/recipe issues, running this sql file will set the default enforcement rules to false.
+	If you still run into issues, you may want to check that your scripts are not trying to augment non-common items.
+	Please post any failures as bugs and be sure to include the base item ID, as well as any augment IDs that you are using.
 
 == 03/12/2014 ==
 Kayen: Melee/Magic runes are now calculated as bonuses. Resolved issues with runes not working and not fading properly.
