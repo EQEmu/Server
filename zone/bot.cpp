@@ -3151,9 +3151,9 @@ void Bot::SpellProcess()
 void Bot::BotMeditate(bool isSitting) {
 	if(isSitting) {
 		// If the bot is a caster has less than 99% mana while its not engaged, he needs to sit to meditate
-		if(GetManaRatio() < 99.0f)
+		if(GetManaRatio() < 99.0f || GetHPRatio() < 99.0f)
 		{
-			if(!IsSitting())
+			if (!IsEngaged() && !IsSitting())
 				Sit();
 		}
 		else
