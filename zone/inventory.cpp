@@ -201,71 +201,44 @@ bool Client::CheckLoreConflict(const Item_Struct* item) {
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, uint16 to_slot) {
-	// I have 'over-logged' failure messages to aid in any troubleshooting of issues that arise from this change.
-	// The 'LogFile' code may be taken out once after a period of time with no script/recipe issues.
-	//
-	// I have also incorporated a bool return type..but, have not updated any calling methods to process failures.
-	// Once the APIs are updated, scripts may also be updated.
+	// TODO: update calling methods and script apis to handle a failure return
 
 	const Item_Struct* item = database.GetItem(item_id);
 
+	// make sure the item exists
 	if(item == nullptr) {
 		Message(13, "Item %u does not exist.", item_id);
-		LogFile->write(EQEMuLog::Error, "Player %s on account %s attempted to create an item with an invalid id.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-			account_name, GetName(), item->ID, aug1, aug2, aug3, aug4, aug5);
+		mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an item with an invalid id.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
 
 		return false;
 	}
-	else {
-		// if the item is stackable and the charge amount is -1 or 0 then set to 1 charge.
-		// removed  && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant 
-		if(charges <= 0 && item->Stackable)
-			charges = 1;
-
-		// if the charges is -1, then no charge value was passed in set to max charges
-		else if(charges == -1)
-			charges = item->MaxCharges;
-
-		// in any other situation just use charges as passed
-	}
-
-	// Base item is lore..so, cancel summon
-	if(CheckLoreConflict(item)) {
-		// this is the 'you can not pickup another...' message. I don't feel this is appropriate
-		// for a summoning failure response
+	// check that there is not a lore conflict between base item and existing inventory
+	else if(CheckLoreConflict(item)) {
 		// DuplicateLoreMessage(item_id);
 		Message(13, "You already have a lore %s (%i) in your inventory.", item->Name, item_id);
 
 		return false;
 	}
+	// check to make sure we are augmenting an augmentable item
+	else if(((item->ItemClass != ItemClassCommon) || (item->AugType > 0)) && (aug1 | aug2 | aug3 | aug4 | aug5)) {
+		Message(13, "You can not augment an augment or a non-common class item.");
+		mlog(INVENTORY__ERROR, "Player %s on account %s attempted to augment an augment or a non-common class item.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
 
-	// Checking to see if it is a GM only Item or not.
+		return false;
+	}
+	// check to make sure we are a GM if the item is GM-only
 	/*
-	if(item->gm && (this->Admin() < 100))
-		Message(0, "You are not a GM and can not summon this item!");
+	else if(item->gm && (this->Admin() < 100))
+		Message(13, "You are not a GM and can not summon this item.");
+		mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create a GM-only item with a status of %i.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+			GetName(), account_name, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5);
 
 		return false;
 	*/
 
-	if(((item->ItemClass != ItemClassCommon) || (item->AugType > 0)) && (aug1 | aug2 | aug3 | aug4 | aug5)) {
-		Message(13, "You can not augment an augment or a non-common class item.");
-		LogFile->write(EQEMuLog::Error, "Player %s on account %s attempted to augment an augment or a non-common class item.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-			account_name, GetName(), item->ID, aug1, aug2, aug3, aug4, aug5);
-
-		return false;
-	}
-
 	uint32 augments[MAX_AUGMENT_SLOTS] = { aug1, aug2, aug3, aug4, aug5 };
-
-	for(int iter = 0; iter < MAX_AUGMENT_SLOTS; ++iter) {
-		if(augments[iter] && (database.GetItem(augments[iter]) == nullptr)) {
-			Message(13, "Augment %u (Aug%i) does not exist.", augments[iter], iter + 1);
-			LogFile->write(EQEMuLog::Error, "Player %s on account %s attempted to create an augment (Aug%i) with an invalid id.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-				account_name, GetName(), iter + 1, item->ID, aug1, aug2, aug3, aug4, aug5);
-
-			return false;
-		}
-	}
 
 	uint32 classes	= item->Classes;
 	uint32 races	= item->Races;
@@ -278,41 +251,62 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	for(int iter = 0; iter < MAX_AUGMENT_SLOTS; ++iter) {
 		const Item_Struct* augtest = database.GetItem(augments[iter]);
 
-		if(augtest) {
+		if(augtest == nullptr) {
+			if(augments[iter]) {
+				Message(13, "Augment %u (Aug%i) does not exist.", augments[iter], iter + 1);
+				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an augment (Aug%i) with an invalid id.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+					GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5);
+
+				return false;
+			}
+		}
+		else {
+			// check that there is not a lore conflict between augment and existing inventory
 			if(CheckLoreConflict(augtest)) {
-				// ditto
 				// DuplicateLoreMessage(augtest->ID);
 				Message(13, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
 				
 				return false;
 			}
-
+			// check that augment is an actual augment
+			else if(augtest->AugType == 0) {
+				Message(13, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
+				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to use a non-augment item (Aug%i) as an augment.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+					GetName(), account_name, item->ID, (iter + 1), aug1, aug2, aug3, aug4, aug5);
+				
+				return false;
+			}
+			// check to make sure we are a GM if the augment is GM-only
 			/*
-			if(augtest->gm && (this->Admin() < 100)) {
-				Message(0, "You are not a GM and can not summon this augment!");
+			else if(augtest->gm && (this->Admin() < 100)) {
+				Message(13, "You are not a GM and can not summon this augment.");
+				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create a GM-only augment (Aug%i) with a status of %i.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+					GetName(), account_name, (iter + 1), this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5);
 
 				return false;
 			}
 			*/
 
-			if(augtest->AugType == 0) {
-				Message(13, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
-				LogFile->write(EQEMuLog::Error, "Player %s on account %s attempted to use a non-augment item (Aug%i) as an augment.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-					account_name, GetName(), item->ID, iter + 1, aug1, aug2, aug3, aug4, aug5);
-				
-				return false;
-			}
-
+			// check for augment type allowance
 			if(enforcewear) {
 				if((item->AugSlotType[iter] == AugTypeNone) || !(((uint32)1 << (item->AugSlotType[iter] - 1)) & augtest->AugType)) {
-					Message(13, "Augment %u (Aug%i) is not allowed wear on Item %u.", augments[iter], iter + 1, item->ID);
-					LogFile->write(EQEMuLog::Error, "Player %s on account %s attempted to augment an item with a disallowed augment type (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						account_name, GetName(), iter + 1, item->ID, aug1, aug2, aug3, aug4, aug5);
+					Message(13, "Augment %u (Aug%i) is not acceptable wear on Item %u.", augments[iter], iter + 1, item->ID);
+					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to augment an item with an unacceptable augment type (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5);
+
+					return false;
+				}
+
+				if(item->AugSlotVisible[iter] == 0) {
+					Message(13, "Item %u has not evolved enough to accept Augment %u (Aug%i).", item->ID, augments[iter], iter + 1);
+					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to augment an unevolved item with augment type (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5);
 
 					return false;
 				}
 			}
 
+			// check for augment to item restriction
 			if(enforcerestr) {
 				bool restrictfail = false;
 				uint8 it = item->ItemType;
@@ -481,41 +475,38 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 				}
 
 				if(restrictfail) {
-					Message(13, "Augment %u (Aug%i) is restricted from wear on Item %u.", augments[iter], iter + 1, item->ID);
-					LogFile->write(EQEMuLog::Error, "Player %s on account %s attempted to augment an item with a restricted augment (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						account_name, GetName(), iter + 1, item->ID, aug1, aug2, aug3, aug4, aug5);
+					Message(13, "Augment %u (Aug%i) is restricted from wear on Item %u.", augments[iter], (iter + 1), item->ID);
+					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to augment an item with a restricted augment (Aug%i).\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5);
 
 					return false;
 				}
 			}
 
 			if(enforceusable) {
-				classes &= augtest->Classes;
-
-				if(item->Classes && !classes) {
-					Message(13, "Augment %u (Aug%i) will result in an item not usable by any class.", augments[iter], iter + 1);
-					LogFile->write(EQEMuLog::Error, "Player %s on account %s attempted to create an item unusable by any class.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						account_name, GetName(), item->ID, aug1, aug2, aug3, aug4, aug5);
-
-					return false;
-				}
-
-				races &= augtest->Races;
-
-				if(item->Races && !races) {
-					Message(13, "Augment %u (Aug%i) will result in an item not usable by any race.", augments[iter], iter + 1);
-					LogFile->write(EQEMuLog::Error, "Player %s on account %s attempted to create an item unusable by any race.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						account_name, GetName(), item->ID, aug1, aug2, aug3, aug4, aug5);
+				// check for class usability
+				if(item->Classes && !(classes &= augtest->Classes)) {
+					Message(13, "Augment %u (Aug%i) will result in an item not usable by any class.", augments[iter], (iter + 1));
+					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an item unusable by any class.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
 
 					return false;
 				}
 
-				slots &= augtest->Slots;
+				// check for race usability
+				if(item->Races && !(races &= augtest->Races)) {
+					Message(13, "Augment %u (Aug%i) will result in an item not usable by any race.", augments[iter], (iter + 1));
+					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an item unusable by any race.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
 
-				if(item->Slots && !slots) {
-					Message(13, "Augment %u (Aug%i) will result in an item not usable in any slot.", augments[iter], iter + 1);
-					LogFile->write(EQEMuLog::Error, "Player %s on account %s attempted to create an item unusable in any slot.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-						account_name, GetName(), item->ID, aug1, aug2, aug3, aug4, aug5);
+					return false;
+				}
+
+				// check for slot usability
+				if(item->Slots && !(slots &= augtest->Slots)) {
+					Message(13, "Augment %u (Aug%i) will result in an item not usable in any slot.", augments[iter], (iter + 1));
+					mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an item unusable in any slot.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
 
 					return false;
 				}
@@ -523,35 +514,56 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		}
 	}
 
-	// Item is not lore..
-	// Item is not GM-Only..
-	// Augments are valid and match allowed slots..
-	// ..or Augments are valid and do not match allowed slots and..
-	// ..EnforceAugmentWear=false and EnforceAugmentRestriction=false and EnforceAugmentUsability=false
+	// validation passed..so, set the charges and create the actual item
+
+	// if the item is stackable and the charge amount is -1 or 0 then set to 1 charge.
+	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant 
+	if(charges <= 0 && item->Stackable)
+		charges = 1;
+
+	// if the charges is -1, then no charge value was passed in set to max charges
+	else if(charges == -1)
+		charges = item->MaxCharges;
+
+	// in any other situation just use charges as passed
 
 	ItemInst* inst = database.CreateItem(item, charges);
 
 	if(inst == nullptr) {
 		Message(13, "An unknown server error has occurred and your item was not created.");
+		// this goes to logfile since this is a major error
 		LogFile->write(EQEMuLog::Error, "Player %s on account %s encountered an unknown item creation error.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-			account_name, GetName(), item->ID, aug1, aug2, aug3, aug4, aug5);
+			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
 
 		return false;
 	}
 
+	// add any validated augments
 	for(int iter = 0; iter < MAX_AUGMENT_SLOTS; ++iter) {
 		if(augments[iter])
 			inst->PutAugment(&database, iter, augments[iter]);
 	}
 
-	// This may need augment checks as well..left out for now
+	// attune item
 	if(attuned && inst->GetItem()->Attuneable)
 		inst->SetInstNoDrop(true);
 
+	// check to see if item is usable in requested slot
+	if(enforceusable && (((to_slot >= 0) && (to_slot <= 21)) || (to_slot == 9999))) {
+		uint32 slottest = (to_slot == 9999) ? 22 : to_slot;
+
+		if(!(slots & ((uint32)1 << slottest))) {
+			Message(0, "This item is not equipable at slot %u - moving to cursor.", to_slot);
+			mlog(INVENTORY__ERROR, "Player %s on account %s attempted to equip an item unusable in slot %u - moved to cursor.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
+				GetName(), account_name, to_slot, item->ID, aug1, aug2, aug3, aug4, aug5);
+
+			to_slot = SLOT_CURSOR;
+		}
+	}
+
+	// put item into inventory
 	if(to_slot == SLOT_CURSOR) {
-		//inst->SetCharges(
 		PushItemOnCursor(*inst);
-		// Send item packet to user
 		SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
 	}
 	else {
@@ -560,6 +572,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	safe_delete(inst);
 
+	// discover item and any augments
 	if((RuleB(Character, EnableDiscoveredItems)) && !GetGM()) {
 		if(!IsDiscovered(item_id))
 			DiscoverItem(item_id);
@@ -1373,7 +1386,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	//verify shared bank transactions in the database
 	if(src_inst && src_slot_id >= 2500 && src_slot_id <= 2550) {
 		if(!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
-			LogFile->write(EQEMuLog::Error, "Player %s on account %s was found exploiting the shared bank.\n", account_name, GetName());
+			LogFile->write(EQEMuLog::Error, "Player %s on account %s was found exploiting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(dst_slot_id,0,true);
 			return(false);
 		}
@@ -1388,7 +1401,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 	if(dst_inst && dst_slot_id >= 2500 && dst_slot_id <= 2550) {
 		if(!database.VerifyInventory(account_id, dst_slot_id, dst_inst)) {
-			LogFile->write(EQEMuLog::Error, "Player %s on account %s was found exploting the shared bank.\n", account_name, GetName());
+			LogFile->write(EQEMuLog::Error, "Player %s on account %s was found exploting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(src_slot_id,0,true);
 			return(false);
 		}

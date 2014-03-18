@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/18/2014 ==
+Uleat: Fixed the name/account discrepancy in the Client::SummonItem() code as well as the origin of the mistake (thanks K_K!)
+Uleat: Condensed and rearranged certain snippets of code in SummonItem(). Added a 'augslotvisible' check to validation check.
+Note: If you are experiencing issues with SummonItem, please enable 'INVENTORY_ERROR' logging if it not active on your server.
+
 == 03/17/2014 ==
 Uleat: Updated Client::SummonItem() to check for valid item combinations when augmentations are passed.
 Uleat: Changed the return type of Client::SummonItem() from void to bool. Calling methods and APIs have not been update as yet.
