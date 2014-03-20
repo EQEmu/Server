@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+Kayen: Further refinements to root, charm, mez and fear behaviors - See commit message for full details
+
+New rule for 'Fear' break chance, and updates to default settings of various rules.
+Optional SQL: utils/sql/git/optional/2014_03_19_RulesUpdates.sql
+
+
 == 03/18/2014 ==
 Uleat: Fixed the name/account discrepancy in the Client::SummonItem() code as well as the origin of the mistake (thanks K_K!)
 Uleat: Condensed and rearranged certain snippets of code in SummonItem(). Added a 'augslotvisible' check to validation check.

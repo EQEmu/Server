@@ -390,7 +390,7 @@ bool IsPartialCapableSpell(uint16 spell_id)
 	if (spells[spell_id].no_partial_resist)
 		return false;
 	
-	if (IsPureNukeSpell(spell_id) || IsFearSpell(spell_id))
+	if (IsPureNukeSpell(spell_id))
 		return true;
 
 	return false;

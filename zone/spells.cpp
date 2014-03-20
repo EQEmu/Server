@@ -3409,7 +3409,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	// not all unresistable, so changing this to only check certain spells
 	if(IsResistableSpell(spell_id))
 	{
-		if (IsCharmSpell(spell_id))
+		if (IsCharmSpell(spell_id) || IsMezSpell(spell_id) || IsFearSpell(spell_id))
 			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust,true);
 		else
 			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust);
@@ -4040,7 +4040,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 // pvp_resist_base
 // pvp_resist_calc
 // pvp_resist_cap
-float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override, int resist_override, bool CharismaCheck, bool CharmTick)
+float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override, int resist_override, bool CharismaCheck, bool CharmTick, bool IsRoot)
 {
 
 	if(!caster)
@@ -4079,8 +4079,10 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	}
 
 	//Check for fear resist
+	bool IsFear = false;
 	if(IsFearSpell(spell_id))
 	{
+		IsFear = true;
 		int fear_resist_bonuses = CalcFearResistChance();
 		if(MakeRandomInt(0, 99) < fear_resist_bonuses)
 		{
@@ -4089,7 +4091,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 	}
 
-	if (!CharismaCheck){
+	if (!CharmTick){
 
 		//Check for Spell Effect specific resistance chances (ie AA Mental Fortitude)
 		int se_resist_bonuses = GetSpellEffectResistChance(spell_id);
@@ -4232,15 +4234,38 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	if (CharismaCheck)
 	{
-		//Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 200 CHA
-		//'Lull' spells only check charisma if inital cast is resisted to see if mob will aggro, same modifier/cap as above.
-		//Charisma DOES NOT extend charm durations.
+		/* 
+		Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 255 CHA (min ~ 75 cha)
+		Charisma less than ~ 75 gives a postive modifier to resist checks at approximate ratio of -10 CHA = +6 Resist.
+		Mez spells do same initial resist check as a above.
+		Lull spells only check charisma if inital cast is resisted to see if mob will aggro, same modifier/cap as above.
+		Charisma DOES NOT extend charm durations.
+		Fear resist chance is given a -20 resist modifier if CHA is < 100, from 100-255 it progressively reduces the negative mod to 0.
+		Fears verse undead DO NOT apply a charisma modifer. (Note: unknown Base1 values defined in undead fears do not effect duration).
+		*/
 		int16 charisma = caster->GetCHA();
 
-		if (charisma > RuleI(Spells, CharismaEffectivenessCap))
-			charisma = RuleI(Spells, CharismaEffectivenessCap);
+		if (IsFear && (spells[spell_id].targettype != 10)){
 
-		resist_modifier -= charisma/RuleI(Spells, CharismaEffectiveness);
+			if (charisma < 100)
+				resist_modifier -= 20;
+
+			else if (charisma <= 255)
+				resist_modifier += (charisma - 100)/8;
+		}
+
+		else {
+
+			if (charisma >= 75){
+
+				if (charisma > RuleI(Spells, CharismaEffectivenessCap))
+					charisma = RuleI(Spells, CharismaEffectivenessCap);
+
+				resist_modifier -= (charisma - 75)/RuleI(Spells, CharismaEffectiveness);
+			}
+			else
+				resist_modifier += ((75 - charisma)/10) * 6; //Increase Resist Chance
+		}
 	}
 
 	//Lull spells DO NOT use regular resists on initial cast, instead they use a flat +15 modifier. Live parses confirm this.
@@ -4266,10 +4291,26 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		resist_chance = spells[spell_id].MinResist;
 	}
 
-	//Charm can not have less than 5% chance to fail.
-	if (CharmTick && (resist_chance < 10))
-		resist_chance = 10;
-	
+	//Average charm duration agianst mobs with 0% chance to resist on LIVE is ~ 68 ticks.
+	//Minimum resist chance should be caclulated factoring in the RuleI(Spells, CharmBreakCheckChance)
+	if (CharmTick) {
+
+		int min_charmbreakchance = ((100/RuleI(Spells, CharmBreakCheckChance))/66 * 100)*2;
+		
+		if (resist_chance < min_charmbreakchance)
+			resist_chance = min_charmbreakchance;
+	}
+
+	//Average root duration agianst mobs with 0% chance to resist on LIVE is ~ 22 ticks (6% resist chance).
+	//Minimum resist chance should be caclulated factoring in the RuleI(Spells, RootBreakCheckChance)
+	if (IsRoot) {
+
+		int min_rootbreakchance = ((100/RuleI(Spells, RootBreakCheckChance))/22 * 100)*2;
+
+		if (resist_chance < min_rootbreakchance)
+			resist_chance = min_rootbreakchance;
+	}
+
 	//Finally our roll
 	int roll = MakeRandomInt(0, 200);
 	if(roll > resist_chance)

@@ -290,17 +290,18 @@ RULE_BOOL ( Spells, NPCIgnoreBaseImmunity, true) // Whether or not NPCs get to i
 RULE_REAL ( Spells, AvgSpellProcsPerMinute, 6.0) //Adjust rate for sympathetic spell procs
 RULE_INT ( Spells, ResistFalloff, 67) //Max that level that will adjust our resist chance based on level modifiers
 RULE_INT ( Spells, CharismaEffectiveness, 10) // Deterimes how much resist modification charisma applies to charm/pacify checks. Default 10 CHA = -1 resist mod.
-RULE_INT ( Spells, CharismaEffectivenessCap, 200) // Deterimes how much resist modification charisma applies to charm/pacify checks. Default 10 CHA = -1 resist mod.
+RULE_INT ( Spells, CharismaEffectivenessCap, 255) // Deterimes how much resist modification charisma applies to charm/pacify checks. Default 10 CHA = -1 resist mod.
 RULE_BOOL ( Spells, CharismaCharmDuration, false) // Allow CHA resist mod to extend charm duration.
 RULE_INT ( Spells, CharmBreakCheckChance, 25) //Determines chance for a charm break check to occur each buff tick.
 RULE_INT ( Spells, MaxCastTimeReduction, 50) //Max percent your spell cast time can be reduced by spell haste
-RULE_INT ( Spells, RootBreakFromSpells, 20) //Chance for root to break when cast on.
+RULE_INT ( Spells, RootBreakFromSpells, 55) //Chance for root to break when cast on.
 RULE_INT ( Spells, DeathSaveCharismaMod, 3) //Determines how much charisma effects chance of death save firing.
 RULE_INT ( Spells, DivineInterventionHeal, 8000) //Divine intervention heal amount.
 RULE_BOOL ( Spells, AdditiveBonusValues, false) //Allow certain bonuses to be calculated by adding together the value from each item, instead of taking the highest value. (ie Add together all Cleave Effects)
 RULE_BOOL ( Spells, UseCHAScribeHack, false) //ScribeSpells and TrainDiscs quest functions will ignore entries where field 12 is CHA.  What's the best way to do this?
 RULE_BOOL ( Spells, BuffLevelRestrictions, true) //Buffs will not land on low level toons like live
-RULE_INT ( Spells, RootBreakCheckChance, 40) //Determines chance for a root break check to occur each buff tick.
+RULE_INT ( Spells, RootBreakCheckChance, 70) //Determines chance for a root break check to occur each buff tick.
+RULE_INT ( Spells, FearBreakCheckChance, 70) //Determines chance for a fear break check to occur each buff tick.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
