@@ -1398,7 +1398,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 
 	/*
 	Charm formula is correct based on over 50 hours of personal live parsing - Kayen
-	Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 200 CHA
+	Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 255 CHA (min ~ 75 CHA)
 	Charisma DOES NOT extend charm durations.
 	Base effect value of charm spells in the spell file DOES NOT effect duration OR resist rate (unclear if does anything)
 	Charm has a lower limit of 5% chance to break per tick, regardless of resist modifiers / level difference.

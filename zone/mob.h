@@ -191,7 +191,7 @@ public:
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration){ return duration;}
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
-		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false);
+		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false);
 	uint16 GetSpecializeSkillValue(uint16 spell_id) const;
 	void SendSpellBarDisable();
 	void SendSpellBarEnable(uint16 spellid);
@@ -593,7 +593,7 @@ public:
 	void MeleeLifeTap(int32 damage);
 	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
 	bool ImprovedTaunt();
-	bool TryRootFadeByDamage(int buffslot);
+	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);

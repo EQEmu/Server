@@ -3680,7 +3680,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		if(spell_id != SPELL_UNKNOWN && !iBuffTic) {
 			//see if root will break
 			if (IsRooted() && !FromDamageShield)  // neotoyko: only spells cancel root
-				TryRootFadeByDamage(buffslot);
+				TryRootFadeByDamage(buffslot, attacker);
 		}
 		else if(spell_id == SPELL_UNKNOWN)
 		{
@@ -4548,34 +4548,43 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 	}
 }
 
-bool Mob::TryRootFadeByDamage(int buffslot)
-{
-	/*Dev Quote 2010: http://forums.station.sony.com/eq/posts/list.m?topic_id=161443
-	The Viscid Roots AA does the following: Reduces the chance for root to break by X percent.
-	There is no distinction of any kind between the caster inflicted damage, or anyone
-	else's damage. There is also no distinction between Direct and DOT damage in the root code.
-	There is however, a provision that if the damage inflicted is greater than 500 per hit, the
-	chance to break root is increased. My guess is when this code was put in place, the devs at
-	the time couldn't imagine DOT damage getting that high.
-	*/
-
-	/* General Mechanics
-	- Check buffslot to make sure damage from a root does not cancel the root
-	- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root. 
-	- Only roots on determental spells can be broken by damage.
-	*/
-	
-	if (!spellbonuses.Root[0] || spellbonuses.Root[1] < 0)
-		return false;
-
-	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot){
-	
-		int BreakChance = RuleI(Spells, RootBreakFromSpells);
+bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
+ 
+ 	/*Dev Quote 2010: http://forums.station.sony.com/eq/posts/list.m?topic_id=161443
+ 	The Viscid Roots AA does the following: Reduces the chance for root to break by X percent.
+ 	There is no distinction of any kind between the caster inflicted damage, or anyone
+ 	else's damage. There is also no distinction between Direct and DOT damage in the root code.
+ 
+ 	/* General Mechanics
+ 	- Check buffslot to make sure damage from a root does not cancel the root
+ 	- If multiple roots on target, always and only checks first root slot and if broken only removes that slots root. 
+ 	- Only roots on determental spells can be broken by damage.
+	- Root break chance values obtained from live parses.
+ 	*/
+ 	
+	if (!attacker || !spellbonuses.Root[0] || spellbonuses.Root[1] < 0)
+ 		return false;
+ 
+ 	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot){
+ 	
+ 		int BreakChance = RuleI(Spells, RootBreakFromSpells);
 		
-		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance/100;
+ 		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance/100;
+		int level_diff = attacker->GetLevel() - GetLevel();
 
-		if (BreakChance < 1)
-			BreakChance = 1;
+		//Use baseline if level difference <= 1 (ie. If target is (1) level less than you, or equal or greater level)
+
+		if (level_diff == 2)
+			BreakChance = (BreakChance * 80) /100; //Decrease by 20%;
+ 
+		else if (level_diff >= 3 && level_diff <= 20)
+			BreakChance = (BreakChance * 60) /100; //Decrease by 40%;
+
+		else if (level_diff > 21)
+			BreakChance = (BreakChance * 20) /100; //Decrease by 80%;
+		
+ 		if (BreakChance < 1)
+ 			BreakChance = 1;
 
 		if (MakeRandomInt(0, 99) < BreakChance) {
 
