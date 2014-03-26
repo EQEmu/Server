@@ -43,8 +43,6 @@ int Zonv4Loader::Open(char *base_path, char *zone_name, Archive *archive)
 
 	float rot_change = 180.0f / 3.14159f;
 
-	float base[3];
-
 	printf("Attempting to load EQG %s\n", zone_name);
 
 	filename = new char[strlen(zone_name) + 5];
