@@ -485,7 +485,6 @@ bool ProcessZoneFile(const char *shortname) {
 int WINAPI WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	MSG msg;
 	BOOL done=false;
-	FILE *fp;
 
 	for(int i=0;i<256;i++)
 		keys[i] = false;
