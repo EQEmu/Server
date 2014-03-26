@@ -1,5 +1,21 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/22/2014 ==
+Uleat: Moved the existing 'load_bots' and 'drop_bots' sqls into the emu git repository for the time being. Look to the
+	/utils/sql/git/bots/ folder to find them. The 'load_bots' sql has been updated to include the below fix, as well as
+	collecting the multiple files into one. This should allow HeidiSQL to now run  it properly. (You will still need to
+	search for the optional scripts for the time being.)
+Uleat: Fixed bot guild script failure. For existing bot databases only, use this sql file to update the affected table and view.
+
+Required Bot SQL: 2014_03_22_BotGuildMember_ScriptFailureFix.sql
+
+== 03/19/2014 ==
+Kayen: Further refinements to root, charm, mez and fear behaviors - See commit message for full details
+
+New rule for 'Fear' break chance, and updates to default settings of various rules.
+Optional SQL: utils/sql/git/optional/2014_03_19_RulesUpdates.sql
+
+
 == 03/18/2014 ==
 Uleat: Fixed the name/account discrepancy in the Client::SummonItem() code as well as the origin of the mistake (thanks K_K!)
 Uleat: Condensed and rearranged certain snippets of code in SummonItem(). Added a 'augslotvisible' check to validation check.

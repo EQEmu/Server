@@ -830,14 +830,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fear: %+i", effect_value);
 #endif
-				//use resistance value for duration...
-				buffs[buffslot].ticsremaining = ((buffs[buffslot].ticsremaining * partial) / 100);
-
 				if(IsClient())
 				{
 					if(buffs[buffslot].ticsremaining > RuleI(Character, MaxFearDurationForPlayerCharacter))
 						buffs[buffslot].ticsremaining = RuleI(Character, MaxFearDurationForPlayerCharacter);
 				}
+				
 
 				if(RuleB(Combat, EnableFearPathing)){
 					if(IsClient())
@@ -3326,6 +3324,22 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				*/
 
 				if (MakeRandomInt(0, 99) < RuleI(Spells, RootBreakCheckChance)){
+				
+					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, 0,0,0,0,true);
+
+					if(resist_check == 100) 
+						break;
+					else
+						if(!TryFadeEffect(slot))
+							BuffFadeBySlot(slot);
+				}
+
+				break;
+			}
+
+			case SE_Fear:
+			{
+				if (MakeRandomInt(0, 99) < RuleI(Spells, FearBreakCheckChance)){
 				
 					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
 
