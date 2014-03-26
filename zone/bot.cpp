@@ -11694,7 +11694,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		if(!strcasecmp(sep->arg[1], "help") && !strcasecmp(sep->arg[2], "armorcolor") ){
 		//read from db
 		char* Query = 0;
-		MYSQL_RES* DatasetResult;
 
 		c->Message(0, "-----------------#bot armorcolor help-----------------------------");
 		c->Message(0, "Armor: 17(Chest/Robe), 7(Arms), 9(Bracer), 12(Hands), 18(Legs), 19(Boots), 2(Helm)");
