@@ -839,8 +839,6 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				if(castedSpell) {
 					if(botClass != BARD) {
 						if(IsGroupSpell(botSpell.SpellId)){
-							Group *g;
-
 							if(this->HasGroup()) {
 								Group *g = this->GetGroup();
 
