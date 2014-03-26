@@ -11695,7 +11695,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		//read from db
 		char* Query = 0;
 		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
 
 		c->Message(0, "-----------------#bot armorcolor help-----------------------------");
 		c->Message(0, "Armor: 17(Chest/Robe), 7(Arms), 9(Bracer), 12(Hands), 18(Legs), 19(Boots), 2(Helm)");
