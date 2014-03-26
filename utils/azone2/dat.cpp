@@ -147,7 +147,7 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 	Zone_Model *zm;
 
 	char *buffer, *buf_start;
-	int buf_len, bone_count;
+	int buf_len;
 
 	char *filename;
 
