@@ -430,7 +430,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					if(MakeRandomInt(0, 99) < RuleI(Spells, SuccorFailChance)) { //2% Fail chance by default
 
 						if(IsClient()) {
-							CastToClient()->Message(MT_SpellFailure,"Your portal collapses before you can make your escape!");
+							CastToClient()->Message_StringID(MT_SpellFailure,SUCCOR_FAIL);
 						}
 						break;
 					}
@@ -1008,7 +1008,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					if(MakeRandomInt(0, 99) < effect_value)
 						Gate();						
 					else
-						caster->Message(MT_SpellFailure,"Your portal has collapsed.");
+						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
 				}
 				break;
 			}
@@ -1713,19 +1713,25 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					// Now we should either be casting this on self or its being cast on a valid group member
 					if(TargetClient) {
-						Corpse *corpse = entity_list.GetCorpseByOwner(TargetClient);
-						if(corpse) {
-							if(TargetClient == this->CastToClient())
-								Message_StringID(4, SUMMONING_CORPSE, TargetClient->CastToMob()->GetCleanName());
-							else
-								Message_StringID(4, SUMMONING_CORPSE_OTHER, TargetClient->CastToMob()->GetCleanName());
 
-							corpse->Summon(CastToClient(), true, true);
+						if (TargetClient->GetLevel() <= effect_value){
+
+							Corpse *corpse = entity_list.GetCorpseByOwner(TargetClient);
+							if(corpse) {
+								if(TargetClient == this->CastToClient())
+									Message_StringID(4, SUMMONING_CORPSE, TargetClient->CastToMob()->GetCleanName());
+								else
+									Message_StringID(4, SUMMONING_CORPSE_OTHER, TargetClient->CastToMob()->GetCleanName());
+
+								corpse->Summon(CastToClient(), true, true);
+							}
+							else {
+								// No corpse found in the zone
+								Message_StringID(4, CORPSE_CANT_SENSE);
+							}
 						}
-						else {
-							// No corpse found in the zone
-							Message_StringID(4, CORPSE_CANT_SENSE);
-						}
+						else
+							caster->Message_StringID(MT_SpellFailure, SPELL_LEVEL_REQ);
 					}
 					else {
 						Message_StringID(4, TARGET_NOT_FOUND);
