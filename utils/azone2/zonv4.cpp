@@ -34,9 +34,6 @@ int Zonv4Loader::Open(char *base_path, char *zone_name, Archive *archive)
 	Texture **tex;
 	int tex_count, tex_tmp, *tex_map;
 
-	int i, j, k, l;
-	char **model_names;
-
 	char *filename;
 
 	uchar *zon_tmp, *zon_orig;
