@@ -421,7 +421,6 @@ bool ProcessZoneFile(const char *shortname) {
   	Zone_Model *zm;
 	FILE *fff;
 	EQFileType FileType = UNKNOWN;
-	GLuint *textures;
 
 	sprintf(bufs, "%s.s3d", shortname);
 
