@@ -31,12 +31,7 @@ int Zonv4Loader::Open(char *base_path, char *zone_name, Archive *archive)
 	int position;
 	int buf_len;
 
-	Texture **tex;
-	int tex_count, tex_tmp, *tex_map;
-
 	char *filename;
-
-	uchar *zon_tmp, *zon_orig;
 
 	float rot_change = 180.0f / 3.14159f;
 
@@ -58,8 +53,6 @@ int Zonv4Loader::Open(char *base_path, char *zone_name, Archive *archive)
 	delete[] filename;
 
 	zonv4_header *hdr = (zonv4_header *) buffer;
-
-	zonv4_placeable *plac;
 
 	if(hdr->magic[0] != 'E' || hdr->magic[1] != 'Q' || hdr->magic[2] != 'T' || hdr->magic[3] != 'Z')
 	  return 0;
