@@ -396,10 +396,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			}
 
 			case SE_Succor:
-			{
+			{				
+				
 				float x, y, z, heading;
 				const char *target_zone;
-
+				
 				x = spell.base[1];
 				y = spell.base[0];
 				z = spell.base[2];
@@ -426,6 +427,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if(IsClient())
 				{
+					if(MakeRandomInt(0, 99) < RuleI(Spells, SuccorFailChance)) { //2% Fail chance by default
+
+						if(IsClient()) {
+							CastToClient()->Message(MT_SpellFailure,"Your portal collapses before you can make your escape!");
+						}
+						break;
+					}
+
 					// Below are the spellid's for known evac/succor spells that send player
 					// to the current zone's safe points.
 
@@ -441,10 +450,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 						LogFile->write(EQEMuLog::Debug, "Succor/Evacuation Spell In Same Zone.");
 #endif
-						if(IsClient())
-							CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
-						else
-							GMMove(x, y, z, heading);
+							if(IsClient())
+								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
+							else
+								GMMove(x, y, z, heading);
 					}
 					else {
 #ifdef SPELL_EFFECT_SPAM
@@ -457,7 +466,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				break;
 			}
-			case SE_YetAnotherGate: //Shin: Used on Teleport Bind.
+			case SE_GateCastersBindpoint: //Shin: Used on Teleport Bind.
 			case SE_Teleport:	// gates, rings, circles, etc
 			case SE_Teleport2:
 			{
@@ -489,7 +498,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 				}
 
-				if (effect == SE_YetAnotherGate && caster->IsClient())
+				if (effect == SE_GateCastersBindpoint && caster->IsClient())
 				{ //Shin: Teleport Bind uses caster's bind point
 					x = caster->CastToClient()->GetBindX();
 					y = caster->CastToClient()->GetBindY();
@@ -857,7 +866,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_BindAffinity:
+			case SE_BindAffinity: //TO DO: Add support for secondary and tertiary gate abilities
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Bind Affinity");
@@ -989,13 +998,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_Gate:
+			case SE_Gate: //TO DO: Add support for secondary and tertiary gate abilities (base2)
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Gate");
 #endif
-				if(!spellbonuses.AntiGate)
-					Gate();
+				if(!spellbonuses.AntiGate){
+
+					if(MakeRandomInt(0, 99) < effect_value)
+						Gate();						
+					else
+						caster->Message(MT_SpellFailure,"Your portal has collapsed.");
+				}
 				break;
 			}
 
@@ -1378,7 +1392,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					(
 						spell.base[i],
 						Mob::GetDefaultGender(spell.base[i], GetGender()),
-						spell.base2[i]
+						spell.base2[i],
+						spell.max[i]
 					);
 					if(spell.base[i] == OGRE){
 						SendAppearancePacket(AT_Size, 9);
@@ -1554,8 +1569,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(spell_id == 2488) //Dook- Lifeburn fix
 					break;
 
-				if(IsClient())
-					CastToClient()->SetFeigned(true);
+				if(IsClient()) {
+
+					if (MakeRandomInt(0, 99) > spells[spell_id].base[i]) {
+						CastToClient()->SetFeigned(false);
+						entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
+						}
+					else
+						CastToClient()->SetFeigned(true);
+				}
 				break;
 			}
 
