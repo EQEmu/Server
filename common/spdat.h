@@ -241,7 +241,7 @@ typedef enum {
 #define SE_SummonCorpse					91	// implemented
 #define SE_InstantHate					92	// implemented - add hate
 #define SE_StopRain						93	// implemented - Wake of Karana
-#define SE_NegateIfCombat				94	// *not implemented? - Works client side but there is comment todo in spell effects...Component of Spirit of Scale
+#define SE_NegateIfCombat				94	// implemented 
 #define SE_Sacrifice					95	// implemented
 #define SE_Silence						96	// implemented
 #define SE_ManaPool						97	// implemented

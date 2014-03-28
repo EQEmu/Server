@@ -344,6 +344,7 @@ struct StatBonuses {
 	int16	FrenziedDevastation;				// base1= AArank(used) base2= chance increase spell criticals + all DD spells 2x mana.
 	uint16	AbsorbMagicAtt[2];					// 0 = magic rune value 1 = buff slot
 	uint16	MeleeRune[2];						// 0 = rune value 1 = buff slot
+	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

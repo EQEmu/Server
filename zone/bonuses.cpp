@@ -2585,6 +2585,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->AbsorbMagicAtt[1] = buffslot;
 				}
 				break;
+
+			case SE_NegateIfCombat:
+				newbon->NegateIfCombat = true;
 		}
 	}
 }
