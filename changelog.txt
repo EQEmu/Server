@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/27/2014 ==
+Kayen: SE_Gate will now use have a fail chance as defined by its base value in the spell data.
+Kayen: SE_Succor will now have a baseline fail chance of (2%). Rule added to adjust this as needed.
+Kayen: SE_FeignDeath will now have a fail chance as defined by its base value in the spell data.
+
+Optional SQL: utils/sql/git/optional/2014_03_27_SuccorFailRule.sql
+
 == 03/22/2014 ==
 Uleat: Moved the existing 'load_bots' and 'drop_bots' sqls into the emu git repository for the time being. Look to the
 	/utils/sql/git/bots/ folder to find them. The 'load_bots' sql has been updated to include the below fix, as well as

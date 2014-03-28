@@ -159,8 +159,8 @@ typedef enum {
 #define SE_WIS							9	// implemented
 #define SE_CHA							10	// implemented - used as a spacer
 #define SE_AttackSpeed					11	// implemented
-#define SE_Invisibility					12	// implemented
-#define SE_SeeInvis						13	// implemented
+#define SE_Invisibility					12	// implemented - TO DO: Implemented Invisiblity Levels
+#define SE_SeeInvis						13	// implemented - TO DO: Implemented See Invisiblity Levels
 #define SE_WaterBreathing				14	// implemented
 #define SE_CurrentMana					15	// implemented
 //#define SE_NPCFrenzy					16	// not used
@@ -172,7 +172,7 @@ typedef enum {
 #define SE_Charm						22	// implemented
 #define SE_Fear							23	// implemented
 #define SE_Stamina						24	// implemented - Invigor and such
-#define SE_BindAffinity					25	// implemented
+#define SE_BindAffinity					25	// implemented - TO DO: Implement 2nd and 3rd Recall (value 2,3 ect). Sets additional bind points.
 #define SE_Gate							26	// implemented - Gate to bind point
 #define SE_CancelMagic					27	// implemented
 #define SE_InvisVsUndead				28	// implemented
@@ -211,7 +211,7 @@ typedef enum {
 #define SE_Identify						61	// implemented
 //#define SE_ItemID						62	// not used
 #define SE_WipeHateList					63	// implemented
-#define SE_SpinTarget					64	// implemented
+#define SE_SpinTarget					64	// implemented - TO DO: Not sure stun portion is working correctly
 #define SE_InfraVision					65	// implemented
 #define SE_UltraVision					66	// implemented
 #define SE_EyeOfZomm					67	// implemented
@@ -241,7 +241,7 @@ typedef enum {
 #define SE_SummonCorpse					91	// implemented
 #define SE_InstantHate					92	// implemented - add hate
 #define SE_StopRain						93	// implemented - Wake of Karana
-#define SE_NegateIfCombat				94	// *not implemented? - Works client side but there is comment todo in spell effects...Component of Spirit of Scale
+#define SE_NegateIfCombat				94	// implemented 
 #define SE_Sacrifice					95	// implemented
 #define SE_Silence						96	// implemented
 #define SE_ManaPool						97	// implemented
@@ -456,7 +456,7 @@ typedef enum {
 //#define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
 //#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
 #define SE_SuspendMinion				308 // not implemented as bonus
-#define SE_YetAnotherGate				309 // implemented
+#define SE_GateCastersBindpoint			309 // implemented - Gate to casters bind point
 #define SE_ReduceReuseTimer				310 // implemented
 #define SE_LimitCombatSkills			311 // implemented - Excludes focus from procs (except if proc is a memorizable spell)
 //#define SE_Sanctuary					312 // *not implemented

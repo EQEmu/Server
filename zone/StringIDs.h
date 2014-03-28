@@ -80,6 +80,7 @@
 #define CANNOT_AFFECT_NPC			251		//That spell can not affect this target NPC.
 #define SUSPEND_MINION_HAS_AGGRO	256		//Your pet is the focus of something's attention.
 #define NO_PET						255		//You do not have a pet.
+#define GATE_FAIL					260		//Your gate is too unstable, and collapses.
 #define CORPSE_CANT_SENSE			262		//You cannot sense any corpses for this PC in this zone.
 #define SPELL_NO_HOLD				263		//Your spell did not take hold.
 #define CANNOT_CHARM				267		//This NPC cannot be charmed.
@@ -208,6 +209,7 @@
 #define AA_POINTS					1215	//points
 #define SPELL_FIZZLE_OTHER			1218	//%1's spell fizzles!
 #define MISSED_NOTE_OTHER			1219	//A missed note brings %1's song to a close!
+#define SPELL_LEVEL_REQ				1226	//This spell only works on people who are level %1 and under.
 #define CORPSE_DECAY_NOW			1227	//This corpse is waiting to expire.
 #define SURNAME_REJECTED			1374	//Your new surname was rejected. Please try a different name.
 #define DUEL_DECLINE				1383	//%1 has declined your challenge to duel to the death.
@@ -253,6 +255,7 @@
 #define GAIN_RAIDEXP				5085	//You gained raid experience!
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
+#define SUCCOR_FAIL					5169	//The portal collapes before you can escape!
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!
 #define MELEE_SILENCE				5806	//You *CANNOT* use this melee ability, you are suffering from amnesia!

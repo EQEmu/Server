@@ -3237,6 +3237,9 @@ void Bot::BotRangedAttack(Mob* other) {
 		invisible_animals = false;
 	}
 
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
+
 	if(hidden || improved_hidden){
 		hidden = false;
 		improved_hidden = false;
@@ -6639,6 +6642,9 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
+
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
 
 	if(GetTarget())
 		TriggerDefensiveProcs(weapon, other, Hand, damage);

@@ -211,6 +211,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		return(false);
 	}
 
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
+
 	if(IsClient() && GetTarget() && IsHarmonySpell(spell_id))
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++) {

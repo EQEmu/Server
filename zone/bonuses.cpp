@@ -1358,16 +1358,27 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_AttackSpeed2:
 			{
 				if ((effect_value - 100) > 0) { // Haste V2 - Stacks with V1 but does not Overcap
+					if (newbon->hastetype2 < 0) break; //Slowed - Don't apply haste2
 					if ((effect_value - 100) > newbon->hastetype2) {
 						newbon->hastetype2 = effect_value - 100;
 					}
+				}
+				else if ((effect_value - 100) < 0) { // Slow
+					int real_slow_value = (100 - effect_value) * -1;
+					if (real_slow_value < newbon->hastetype2)
+						newbon->hastetype2 = real_slow_value;
 				}
 				break;
 			}
 
 			case SE_AttackSpeed3:
 			{
-				if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
+				if (effect_value < 0){ //Slow
+					if (effect_value < newbon->hastetype3)
+						newbon->hastetype3 = effect_value;
+				}
+
+				else if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
 					if (effect_value > newbon->hastetype3) {
 						newbon->hastetype3 = effect_value;
 					}
@@ -1377,18 +1388,24 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_AttackSpeed4:
 			{
-				if (effect_value > 0) {
+				if (effect_value < 0) //A few spells use negative values(Descriptions all indicate it should be a slow)
+					effect_value = effect_value * -1;
+
+				if (effect_value > 0 && effect_value > newbon->inhibitmelee) {
+
 					if (slow_mitigation){
 						int new_effect_value = SlowMitigation(false,caster,effect_value);
 						if (new_effect_value > newbon->inhibitmelee) {
-								newbon->inhibitmelee = new_effect_value;
-								SlowMitigation(true,caster);
+							newbon->inhibitmelee = new_effect_value;
+							SlowMitigation(true,caster);
 						}
 					}
+
 					else if (effect_value > newbon->inhibitmelee) {
-								newbon->inhibitmelee = effect_value;
+						newbon->inhibitmelee = effect_value;
 					}
 				}
+			
 				break;
 			}
 
@@ -2568,6 +2585,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->AbsorbMagicAtt[1] = buffslot;
 				}
 				break;
+
+			case SE_NegateIfCombat:
+				newbon->NegateIfCombat = true;
 		}
 	}
 }

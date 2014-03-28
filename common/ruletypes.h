@@ -302,6 +302,7 @@ RULE_BOOL ( Spells, UseCHAScribeHack, false) //ScribeSpells and TrainDiscs quest
 RULE_BOOL ( Spells, BuffLevelRestrictions, true) //Buffs will not land on low level toons like live
 RULE_INT ( Spells, RootBreakCheckChance, 70) //Determines chance for a root break check to occur each buff tick.
 RULE_INT ( Spells, FearBreakCheckChance, 70) //Determines chance for a fear break check to occur each buff tick.
+RULE_INT ( Spells, SuccorFailChance, 2) //Determines chance for a succor spell not to teleport an invidual player
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )

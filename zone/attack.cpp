@@ -1371,6 +1371,9 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		invisible_animals = false;
 	}
 
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
+
 	if(hidden || improved_hidden){
 		hidden = false;
 		improved_hidden = false;
@@ -1982,6 +1985,9 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
+
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
 
 	if(hidden || improved_hidden)
 	{
