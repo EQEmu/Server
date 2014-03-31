@@ -2638,19 +2638,35 @@ void command_makepet(Client *c, const Seperator *sep)
 void command_level(Client *c, const Seperator *sep)
 {
 	uint16 level = atoi(sep->arg[1]);
-	if ((level <= 0) || ((level > RuleI(Character, MaxLevel)) && (c->Admin() < commandLevelAboveCap)) )
+
+	if ((level <= 0) || ((level > RuleI(Character, MaxLevel)) && (c->Admin() < commandLevelAboveCap))) {
 		c->Message(0, "Error: #Level: Invalid Level");
-	else if (c->Admin() < 100)
+	}
+	else if (c->Admin() < 100) {
 		c->SetLevel(level, true);
-	else if (!c->GetTarget())
+#ifdef BOTS
+		if(RuleB(Bots, BotLevelsWithOwner))
+			Bot::LevelBotWithClient(c, level, true);
+#endif
+	}
+	else if (!c->GetTarget()) {
 		c->Message(0, "Error: #Level: No target");
-	else
-		if (!c->GetTarget()->IsNPC() && ((c->Admin() < commandLevelNPCAboveCap) && (level > RuleI(Character, MaxLevel))))
+	}
+	else {
+		if (!c->GetTarget()->IsNPC() && ((c->Admin() < commandLevelNPCAboveCap) && (level > RuleI(Character, MaxLevel)))) {
 			c->Message(0, "Error: #Level: Invalid Level");
-		else
+		}
+		else {
 			c->GetTarget()->SetLevel(level, true);
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		c->GetTarget()->CastToClient()->SendLevelAppearance();
+			if(c->GetTarget()->IsClient()) {
+				c->GetTarget()->CastToClient()->SendLevelAppearance();
+#ifdef BOTS
+				if(RuleB(Bots, BotLevelsWithOwner))
+					Bot::LevelBotWithClient(c->GetTarget()->CastToClient(), level, true);
+#endif
+			}
+		}
+	}
 }
 
 void command_spawn(Client *c, const Seperator *sep)

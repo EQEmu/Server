@@ -1,10 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-== xx/xx/2014 ==
+== 03/31/2014 ==
 Uleat: Fix for unconscious skillups.
 Uleat: Fix for crash issue with nullptr reference in recent Client::SummonItem() work.
 Uleat: Added rule for GM Status check code in Client::SummonItem().
 Note: Rule default is set to 250..but, implementation is on hold until load item code handles the database 'minstatus' field.
+
+Uleat: Added RuleB(Bots, BotLevelsWithOwner). Bots will auto-update as their owner levels/de-levels. Appearance packets are sent to show the 'leveling effect' as well as updating client entities.
+
+Optional Bot SQL: utils/sql/git/bot/optional/2014_03_31_BotLevelsWithOwnerRule.sql
+Note: This sql is required to activate the optional behavior.
 
 == 03/27/2014 ==
 Kayen: SE_Gate will now use have a fail chance as defined by its base value in the spell data.
