@@ -2306,6 +2306,8 @@ uint64 Client::GetAllMoney() {
 }
 
 bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int chancemodi) {
+	if (IsDead() || IsUnconscious())
+		return false;
 	if (IsAIControlled()) // no skillups while chamred =p
 		return false;
 	if (skillid > HIGHEST_SKILL)
@@ -2349,6 +2351,10 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 }
 
 void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
+	if (IsDead() || IsUnconscious())
+		return;
+	if (IsAIControlled())
+		return;
 	if (langid >= MAX_PP_LANGUAGE)
 		return;		// do nothing if langid is an invalid language
 

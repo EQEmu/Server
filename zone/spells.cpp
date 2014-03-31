@@ -557,6 +557,15 @@ uint16 Mob::GetSpecializeSkillValue(uint16 spell_id) const {
 }
 
 void Client::CheckSpecializeIncrease(uint16 spell_id) {
+	// These are not active because CheckIncreaseSkill() already does so.
+	// It's such a rare occurance that adding them here is wasted..(ref only)
+	/*
+	if (IsDead() || IsUnconscious())
+		return;
+	if (IsAIControlled())
+		return;
+	*/
+
 	switch(spells[spell_id].skill) {
 	case SkillAbjuration:
 		CheckIncreaseSkill(SkillSpecializeAbjure, nullptr);
@@ -580,6 +589,15 @@ void Client::CheckSpecializeIncrease(uint16 spell_id) {
 }
 
 void Client::CheckSongSkillIncrease(uint16 spell_id){
+	// These are not active because CheckIncreaseSkill() already does so.
+	// It's such a rare occurance that adding them here is wasted..(ref only)
+	/*
+	if (IsDead() || IsUnconscious())
+		return;
+	if (IsAIControlled())
+		return;
+	*/
+
 	switch(spells[spell_id].skill)
 	{
 	case SkillSinging:

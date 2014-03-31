@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== xx/xx/2014 ==
+Uleat: Fix for unconscious skillups.
+Uleat: Fix for crash issue with nullptr reference in recent Client::SummonItem() work.
+Uleat: Added rule for GM Status check code in Client::SummonItem().
+Note: Rule default is set to 250..but, implementation is on hold until load item code handles the database 'minstatus' field.
+
 == 03/27/2014 ==
 Kayen: SE_Gate will now use have a fail chance as defined by its base value in the spell data.
 Kayen: SE_Succor will now have a baseline fail chance of (2%). Rule added to adjust this as needed.

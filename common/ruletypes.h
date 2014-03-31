@@ -138,6 +138,7 @@ RULE_BOOL( Pets, UnTargetableSwarmPet, false )
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( GM )
+RULE_INT ( GM, MinStatusToSummonItem, 250)
 RULE_INT ( GM, MinStatusToZoneAnywhere, 250 )
 RULE_CATEGORY_END()
 
