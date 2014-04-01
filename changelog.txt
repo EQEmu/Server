@@ -5,8 +5,8 @@ Uleat: Fix for unconscious skillups.
 Uleat: Fix for crash issue with nullptr reference in recent Client::SummonItem() work.
 Uleat: Added rule for GM Status check code in Client::SummonItem().
 Note: Rule default is set to 250..but, implementation is on hold until load item code handles the database 'minstatus' field.
-
 Uleat: Added RuleB(Bots, BotLevelsWithOwner). Bots will auto-update as their owner levels/de-levels. Appearance packets are sent to show the 'leveling effect' as well as updating client entities.
+Trevius: Prevented an endless loop crash related to EVENT_TASK_STAGE_COMPLETE.
 
 Optional Bot SQL: utils/sql/git/bot/optional/2014_03_31_BotLevelsWithOwnerRule.sql
 Note: This sql is required to activate the optional behavior.
