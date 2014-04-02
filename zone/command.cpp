@@ -449,7 +449,11 @@ int command_init(void) {
 		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
 		command_add("enablerecipe", "[recipe_id] - Enables a recipe using the recipe id.", 80, command_enablerecipe) ||
 		command_add("disablerecipe", "[recipe_id] - Disables a recipe using the recipe id.", 80, command_disablerecipe) ||
-		command_add("npctype_cache", "[id] or all - Clears the npc type cache for either the id or all npcs.", 250, command_npctype_cache)
+		command_add("npctype_cache", "[id] or all - Clears the npc type cache for either the id or all npcs.", 250, command_npctype_cache) ||
+		command_add("merchant_open_shop", "Opens a merchants shop", 100, command_merchantopenshop) ||
+		command_add("open_shop", nullptr, 100, command_merchantopenshop) ||
+		command_add("merchant_close_shop", "Closes a merchant shop", 100, command_merchantcloseshop) ||
+		command_add("close_shop", nullptr, 100, command_merchantcloseshop)
 		)
 	{
 		command_deinit();
@@ -11497,3 +11501,26 @@ void command_npctype_cache(Client *c, const Seperator *sep)
 		c->Message(0, "#npctype_cache all");
 	}
 }
+
+void command_merchantopenshop(Client *c, const Seperator *sep)
+{
+	Mob *merchant = c->GetTarget();
+	if (!merchant || merchant->GetClass() != MERCHANT) {
+		c->Message(0, "You must target a merchant to open their shop.");
+		return;
+	}
+
+	merchant->CastToNPC()->MerchantOpenShop();
+}
+
+void command_merchantcloseshop(Client *c, const Seperator *sep)
+{
+	Mob *merchant = c->GetTarget();
+	if (!merchant || merchant->GetClass() != MERCHANT) {
+		c->Message(0, "You must target a merchant to close their shop.");
+		return;
+	}
+
+	merchant->CastToNPC()->MerchantCloseShop();
+}
+

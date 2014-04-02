@@ -112,6 +112,8 @@ public:
 	int GetAccuracyRating();
 	int GetSpawnKillCount();
 	int GetScore();
+	void MerchantOpenShop();
+	void MerchantCloseShop();
 };
 
 #endif

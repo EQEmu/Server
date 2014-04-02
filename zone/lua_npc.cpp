@@ -432,6 +432,16 @@ int Lua_NPC::GetScore() {
 	return self->GetScore();
 }
 
+void Lua_NPC::MerchantOpenShop() {
+	Lua_Safe_Call_Void();
+	self->MerchantOpenShop();
+}
+
+void Lua_NPC::MerchantCloseShop() {
+	Lua_Safe_Call_Void();
+	self->MerchantCloseShop();
+}
+
 
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
@@ -520,7 +530,9 @@ luabind::scope lua_register_npc() {
 		.def("GetAttackSpeed", (float(Lua_NPC::*)(void))&Lua_NPC::GetAttackSpeed)
 		.def("GetAccuracyRating", (int(Lua_NPC::*)(void))&Lua_NPC::GetAccuracyRating)
 		.def("GetSpawnKillCount", (int(Lua_NPC::*)(void))&Lua_NPC::GetSpawnKillCount)
-		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore);
+		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore)
+		.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
+		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop);
 }
 
 #endif

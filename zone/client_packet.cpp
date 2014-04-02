@@ -5421,6 +5421,12 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		action = 0;
 	}
 
+	// 1199 I don't have time for that now. etc
+	if (!tmp->CastToNPC()->IsMerchantOpen()) {
+		tmp->Say_StringID(MakeRandomInt(1199, 1202));
+		action = 0;
+	}
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(Merchant_Click_Struct));
 	Merchant_Click_Struct* mco=(Merchant_Click_Struct*)outapp->pBuffer;
 
