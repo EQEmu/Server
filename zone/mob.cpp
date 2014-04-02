@@ -2450,13 +2450,18 @@ bool Mob::RemoveFromHateList(Mob* mob)
 
 	return bFound;
 }
+
 void Mob::WipeHateList()
 {
 	if(IsEngaged())
 	{
+		hate_list.Wipe();
 		AI_Event_NoLongerEngaged();
 	}
-	hate_list.Wipe();
+	else
+	{
+		hate_list.Wipe();
+	}
 }
 
 uint32 Mob::RandomTimer(int min,int max) {

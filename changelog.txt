@@ -5,6 +5,7 @@ demonstar55: Implemented ability for a merchant to open and close shop.
 	Lua quest functions: e.self:MerchantOpenShop() and e.self:MerchantCloseShop()
 	GM Commands: #merchant_open_shop (short: #open_shop) and #merchant_close_shop (short: #close_shop)
 		default to status 100, just in case you need to force the merchants status
+Trevius: Fixed potential endless quest loop with EVENT_COMBAT and WipeHateList().
 
 == 03/31/2014 ==
 Uleat: Fix for unconscious skillups.
