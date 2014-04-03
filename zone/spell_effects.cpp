@@ -326,7 +326,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(inuse)
 					break;
 
-				Heal();
+				int32 val = 0;
+				val = 7500*effect_value;
+				val = caster->GetActSpellHealing(spell_id, val, this);
+
+				if (val > 0)
+					HealDamage(val, caster);
+
 				break;
 			}
 

@@ -252,6 +252,7 @@ public:
 	void SendBuffsToClient(Client *c);
 	inline Buffs_Struct* GetBuffs() { return buffs; }
 	void DoGravityEffect();
+	void SpellProjectileEffect();
 	void DamageShield(Mob* other, bool spell_ds = false);
 	int32 RuneAbsorb(int32 damage, uint16 type);
 	bool FindBuff(uint16 spellid);
@@ -1039,6 +1040,12 @@ protected:
 	uint16 bardsong;
 	uint8 bardsong_slot;
 	uint32 bardsong_target_id;
+
+	Timer projectile_timer;
+	uint32 projectile_spell_id[MAX_SPELL_PROJECTILE];
+	uint16 projectile_target_id[MAX_SPELL_PROJECTILE];
+	uint8 projectile_increment[MAX_SPELL_PROJECTILE];
+	float projectile_x[MAX_SPELL_PROJECTILE], projectile_y[MAX_SPELL_PROJECTILE], projectile_z[MAX_SPELL_PROJECTILE];
 
 	float rewind_x;
 	float rewind_y;

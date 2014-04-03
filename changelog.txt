@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/03/2014 ==
+Kayen: Implemented live like spell projectiles (ie. Mage Bolts). 
+
+Optional SQL: utils/sql/git/optional/2014_04_03_SpellProjectileRules.sql
+Note: The rules in this SQL are for setting the item id for the graphic used by the projectile on different clients.
+
 == 04/01/2014 ==
 demonstar55: Implemented ability for a merchant to open and close shop.
 	Lua quest functions: e.self:MerchantOpenShop() and e.self:MerchantCloseShop()
