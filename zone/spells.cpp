@@ -1868,70 +1868,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 
-	/*For mage 'Bolt' line and other various spells.
-	-This is mostly accurate for how the modern clients handle this effect.
-	-It was changed at some point to use an actual projectile as done here (opposed to a particle effect in classic)
-	-The projectile graphic appears to be that of 'Ball of Sunlight' ID 80648 and will be visible to anyone in SoF+
-	-There is no LOS check to prevent a bolt from being cast. If you don't have LOS your bolt simply goes into whatever barrier
-	and you lose your mana. If there is LOS the bolt will lock onto your target and the damage is applied when it hits the target.
-	-If your target moves the bolt moves with it in any direction or angle (consistent with other projectiles).
-	-The way this is written once a bolt is cast a timer checks the distance from the initial cast to the target repeatedly
-	and calculates at what predicted time the bolt should hit that target in client_process (therefore accounting for any target movement). 
-	When bolt hits its predicted point the damage is then done to target.
-	Note: Projectile speed of 1 takes 3 seconds to go 100 distance units. Calculations are based on this constant.
-	Live Bolt speed: Projectile speed of X takes 5 seconds to go 300 distance units. 
-	Pending Implementation: What this code can not do is prevent damage if the bolt hits a barrier after passing the initial LOS check
-	because the target has moved while the bolt is in motion. (it is rare to actual get this to occur on live in normal game play)
-	*/
-	if (spell_target && spells[spell_id].targettype == ST_TargetOptional){
-
-		uint8 anim = spells[spell_id].CastingAnim; 
-		int bolt_id = -1;
-
-		//Make sure there is an avialable bolt to be cast.
-		for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
-			if (projectile_spell_id[i] == 0){
-				bolt_id = i;
-				break;
-			}
-		}
-
-		if (bolt_id < 0)
-			return false;
-
-		if (CheckLosFN(spell_target)) {
-		
-			projectile_spell_id[bolt_id] = spell_id;
-			projectile_target_id[bolt_id] = spell_target->GetID();
-			projectile_x[bolt_id] = GetX(), projectile_y[bolt_id] = GetY(), projectile_z[bolt_id] = GetZ();
-			projectile_increment[bolt_id] = 1;
-			projectile_timer.Start(250);
-		}
-
-		//Only use fire graphic for fire spells.
-		if (spells[spell_id].resisttype == RESIST_FIRE) {
-
-			if (IsClient()){
-				if (CastToClient()->GetClientVersionBit() <= 4) //Titanium needs alternate graphic.
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, 1.5);
-				else
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, 1.5);
-			}
-			else
-				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, 1.5);
-
-			if (spells[spell_id].CastingAnim == 64)
-				anim = 44; //Corrects for animation error.
-		}
-
-		//Pending other types of projectile graphics. (They will function but with a default arrow graphic for now)
-		else
-			ProjectileAnimation(spell_target,0, 1, 1.5);
-
-		DoAnim(anim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
-		return true;
-	}
-
 	//
 	// Switch #2 - execute the spell
 	//
@@ -1959,7 +1895,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if (isproc) {
 				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, true);
 			} else {
-				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
+				if (spells[spell_id].targettype == ST_TargetOptional){
+					if (!TrySpellProjectile(spell_target, spell_id))
+						return false;
+				}
+				
+				else if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
 						if(casting_spell_type == 1)
@@ -1968,6 +1909,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 					}
 				}
 			}
+
 			if(IsPlayerIllusionSpell(spell_id)
 			&& IsClient()
 			&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
@@ -3504,8 +3446,15 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			if(spell_effectiveness == 0 || !IsPartialCapableSpell(spell_id) )
 			{
 				mlog(SPELLS__RESISTS, "Spell %d was completely resisted by %s", spell_id, spelltar->GetName());
-				Message_StringID(MT_SpellFailure, TARGET_RESISTED, spells[spell_id].name);
-				spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
+				
+				if (spells[spell_id].resisttype == RESIST_PHYSICAL){
+					Message_StringID(MT_SpellFailure, PHYSICAL_RESIST_FAIL,spells[spell_id].name);
+					spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
+				}
+				else {
+					Message_StringID(MT_SpellFailure, TARGET_RESISTED, spells[spell_id].name);
+					spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
+				}
 
 				if(spelltar->IsAIControlled()){
 					int32 aggro = CheckAggroAmount(spell_id);
@@ -4254,67 +4203,83 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 		break;
 	case RESIST_PHYSICAL:
+		{
+			if (IsNPC())
+				target_resist = GetPhR();
+			else
+				target_resist = 0;
+		}
 	default:
-		//This is guessed but the others are right
-		target_resist = (GetSTA() / 4);
+
+		target_resist = 0;
 	}
 
 	//Setup our base resist chance.
 	int resist_chance = 0;
+	int level_mod = 0;
 
 	//Adjust our resist chance based on level modifiers
 	int temp_level_diff = GetLevel() - caster->GetLevel();
-	if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
-	{
-		int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-		if(a > 0)
+
+	//Physical Resists are calclated using their own formula derived from extensive parsing.
+	if (resist_type == RESIST_PHYSICAL) {
+		level_mod = ResistPhysical(temp_level_diff, caster->GetLevel());
+	}
+
+	else {
+
+		if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
 		{
-			temp_level_diff = a;
-		}
-		else
-		{
-			temp_level_diff = 0;
-		}
-	}
-
-	if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
-	{
-		temp_level_diff = 15;
-	}
-
-	if(IsNPC() && temp_level_diff < -9)
-	{
-		temp_level_diff = -9;
-	}
-
-	int level_mod = temp_level_diff * temp_level_diff / 2;
-	if(temp_level_diff < 0)
-	{
-		level_mod = -level_mod;
-	}
-
-	if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
-	{
-		level_mod = 1000;
-	}
-
-	//Even more level stuff this time dealing with damage spells
-	if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
-	{
-		int level_diff;
-		if(GetLevel() >= RuleI(Casting,ResistFalloff))
-		{
-			level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-			if(level_diff < 0)
+			int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+			if(a > 0)
 			{
-				level_diff = 0;
+				temp_level_diff = a;
+			}
+			else
+			{
+				temp_level_diff = 0;
 			}
 		}
-		else
+
+		if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
 		{
-			level_diff = GetLevel() - caster->GetLevel();
+			temp_level_diff = 15;
 		}
-		level_mod += (2 * level_diff);
+
+		if(IsNPC() && temp_level_diff < -9)
+		{
+			temp_level_diff = -9;
+		}
+
+		level_mod = temp_level_diff * temp_level_diff / 2;
+		if(temp_level_diff < 0)
+		{
+			level_mod = -level_mod;
+		}
+
+		if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
+		{
+			level_mod = 1000;
+		}
+
+		//Even more level stuff this time dealing with damage spells
+		if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
+		{
+			int level_diff;
+			if(GetLevel() >= RuleI(Casting,ResistFalloff))
+			{
+				level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+				if(level_diff < 0)
+				{
+					level_diff = 0;
+				}
+			}
+			else
+			{
+				level_diff = GetLevel() - caster->GetLevel();
+			}
+			level_mod += (2 * level_diff);
+		}
 	}
 
 	if (CharismaCheck)
@@ -4459,6 +4424,43 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			return partial_modifier;
 		}
 	}
+}
+
+int Mob::ResistPhysical(int level_diff, uint8 caster_level)
+{
+	/*	Physical resists use the standard level mod calculation in
+	conjunction with a resist fall off formula that greatly prevents you
+	from landing abilities on mobs that are higher level than you.
+	After level 12, every 4 levels gained the max level you can hit
+	your target without a sharp resist penalty is raised by 1.
+	Extensive parsing confirms this, along with baseline phyiscal resist rates used.
+	*/
+
+
+	if (level_diff == 0)
+		return level_diff;
+
+	int level_mod = 0;
+
+	if (level_diff > 0) {
+
+		int ResistFallOff = 0;
+
+		if (caster_level <= 12)
+			ResistFallOff = 3;
+		else
+			ResistFallOff = caster_level/4;
+
+		if (level_diff > ResistFallOff || level_diff >= 15)
+			level_mod = ((level_diff * 10) + level_diff)*2;
+		else
+			level_mod = level_diff * level_diff / 2;
+	}
+
+	else
+		level_mod = -(level_diff * level_diff / 2);
+
+	return level_mod;
 }
 
 int16 Mob::CalcResistChanceBonus()

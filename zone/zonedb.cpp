@@ -1047,6 +1047,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.FR,"
 			"npc_types.PR,"
 			"npc_types.Corrup,"
+			"npc_types.PhR,"
 			"npc_types.mindmg,"
 			"npc_types.maxdmg,"
 			"npc_types.attack_count,"
@@ -1143,6 +1144,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->FR = atoi(row[r++]);
 				tmpNPCType->PR = atoi(row[r++]);
 				tmpNPCType->Corrup = atoi(row[r++]);
+				tmpNPCType->PhR = atoi(row[r++]);
 				tmpNPCType->min_dmg = atoi(row[r++]);
 				tmpNPCType->max_dmg = atoi(row[r++]);
 				tmpNPCType->attack_count = atoi(row[r++]);

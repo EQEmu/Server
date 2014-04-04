@@ -258,7 +258,7 @@ typedef enum {
 #define SE_Familiar						108	// implemented
 #define SE_SummonItemIntoBag			109	// implemented - summons stuff into container
 //#define SE_IncreaseArchery			110	// not used
-#define SE_ResistAll					111	// implemented
+#define SE_ResistAll					111	// implemented - Note: Physical Resists are not modified by this effect.
 #define SE_CastingLevel					112	// implemented
 #define	SE_SummonHorse					113	// implemented
 #define SE_ChangeAggro					114	// implemented - Hate modifing buffs(ie horrifying visage)

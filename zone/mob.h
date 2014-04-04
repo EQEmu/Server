@@ -192,6 +192,7 @@ public:
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false);
+	int ResistPhysical(int level_diff, uint8 caster_level);
 	uint16 GetSpecializeSkillValue(uint16 spell_id) const;
 	void SendSpellBarDisable();
 	void SendSpellBarEnable(uint16 spellid);
@@ -222,6 +223,8 @@ public:
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks();
 	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
+	void SpellProjectileEffect();
+	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id);
 
 	//Buff
 	void BuffProcess();
@@ -252,7 +255,6 @@ public:
 	void SendBuffsToClient(Client *c);
 	inline Buffs_Struct* GetBuffs() { return buffs; }
 	void DoGravityEffect();
-	void SpellProjectileEffect();
 	void DamageShield(Mob* other, bool spell_ds = false);
 	int32 RuneAbsorb(int32 damage, uint16 type);
 	bool FindBuff(uint16 spellid);
@@ -338,6 +340,7 @@ public:
 	inline virtual int16 GetPR() const { return PR + itembonuses.PR + spellbonuses.PR; }
 	inline virtual int16 GetCR() const { return CR + itembonuses.CR + spellbonuses.CR; }
 	inline virtual int16 GetCorrup() const { return Corrup + itembonuses.Corrup + spellbonuses.Corrup; }
+	inline virtual int16 GetPhR() const { return PhR; }
 	inline StatBonuses GetItemBonuses() const { return itembonuses; }
 	inline StatBonuses GetSpellBonuses() const { return spellbonuses; }
 	inline StatBonuses GetAABonuses() const { return aabonuses; }
@@ -916,6 +919,7 @@ protected:
 	int16 DR;
 	int16 PR;
 	int16 Corrup;
+	int16 PhR;
 	bool moving;
 	int targeted;
 	bool findable;
