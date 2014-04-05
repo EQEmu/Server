@@ -5,6 +5,7 @@
 #include "../common/spdat.h"
 
 #define	HIGHEST_RESIST 9 //Max resist type value
+#define MAX_SPELL_PROJECTILE 10 //Max amount of spell projectiles that can be active by a single mob.
 
 /* solar: macros for IsAttackAllowed, IsBeneficialAllowed */
 #define _CLIENT(x) (x && x->IsClient() && !x->CastToClient()->IsBecomeNPC())
@@ -345,6 +346,7 @@ struct StatBonuses {
 	uint16	AbsorbMagicAtt[2];					// 0 = magic rune value 1 = buff slot
 	uint16	MeleeRune[2];						// 0 = rune value 1 = buff slot
 	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
+	int8	Screech;							// -1 = Will be blocked if another Screech is +(1)
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

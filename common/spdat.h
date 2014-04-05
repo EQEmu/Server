@@ -258,7 +258,7 @@ typedef enum {
 #define SE_Familiar						108	// implemented
 #define SE_SummonItemIntoBag			109	// implemented - summons stuff into container
 //#define SE_IncreaseArchery			110	// not used
-#define SE_ResistAll					111	// implemented
+#define SE_ResistAll					111	// implemented - Note: Physical Resists are not modified by this effect.
 #define SE_CastingLevel					112	// implemented
 #define	SE_SummonHorse					113	// implemented
 #define SE_ChangeAggro					114	// implemented - Hate modifing buffs(ie horrifying visage)
@@ -270,7 +270,7 @@ typedef enum {
 #define SE_HealRate						120	// implemented - reduces healing by a %
 #define SE_ReverseDS					121 // implemented
 //#define SE_ReduceSkill				122	// not used
-#define SE_Screech						123	// implemented? Spell Blocker(can only have one buff with this effect at one time)
+#define SE_Screech						123	// implemented Spell Blocker(If have buff with value +1 will block any effect with -1)
 #define SE_ImprovedDamage				124 // implemented
 #define SE_ImprovedHeal					125 // implemented
 #define SE_SpellResistReduction			126 // implemented
