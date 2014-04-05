@@ -8,7 +8,24 @@ Akkadius: (Performance Adjustment) Removed AsyncLoadVariables from InterserverTi
 	see that the query 'SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= timestamp' is called every 10 seconds. This function is loading
 	variables that are initially loaded on World and Zone bootup. When running a large amount of zone servers, the amount of MySQL chatter that is produced is enormous and 
 	unnecessary. For example, if I ran 400 zone servers, I would see 3,456,000 unnecessary queries from all idle or active zone processes in a 24 hour interval.
+Secrets: Added a rule to enable multiple procs from the same weapon's other slots if a proc is deemed to trigger, Defaults to true.
+	If Combat:OneProcPerWeapon is not enabled, we reset the try for that weapon regardless of if we procced or not.
+	This is for some servers that may want to have as many procs triggering from weapons as possible in a single round.
+	
+Optional SQL: utils/sql/git/optional/2014_04_05_ProcRules.sql
+	
+== 04/04/2014 ==
+Kayen: Implemented 'Physical Resists' (Resist Type 9) to be consistent with live based on extensive parsing.
+       SQL will add new field to npc_types 'PhR' and fill in database with values consistent with observations.          
 
+Required SQL: utils/sql/git/optional/2014_04_04_PhysicalResists.sql
+
+== 04/03/2014 ==
+Kayen: Implemented live like spell projectiles (ie. Mage Bolts). 
+
+Optional SQL: utils/sql/git/optional/2014_04_03_SpellProjectileRules.sql
+Note: The rules in this SQL are for setting the item id for the graphic used by the projectile on different clients.
+	
 == 04/01/2014 ==
 demonstar55: Implemented ability for a merchant to open and close shop.
 	Lua quest functions: e.self:MerchantOpenShop() and e.self:MerchantCloseShop()
