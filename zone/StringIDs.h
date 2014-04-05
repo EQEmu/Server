@@ -262,6 +262,7 @@
 #define DISCIPLINE_REUSE_MSG		5807	//You can use the ability %1 again in %2 hour(s) %3 minute(s) %4 seconds.
 #define DISCIPLINE_REUSE_MSG2		5808	//You can use the ability %1 again in %2 minute(s) %3 seconds.
 #define FAILED_TAUNT				5811	//You have failed to taunt your target.
+#define PHYSICAL_RESIST_FAIL		5817	//Your target avoided your %1 ability.
 #define AA_NO_TARGET				5825	//You must first select a target for this ability!
 #define FORAGE_MASTERY				6012	//Your forage mastery has enabled you to find something else!
 #define GUILD_BANK_CANNOT_DEPOSIT	6097	// Cannot deposit this item. Containers must be empty, and only one of each LORE and no NO TRADE or TEMPORARY items may be deposited.
@@ -333,6 +334,7 @@
 #define ALREADY_CASTING				12442	//You are already casting a spell!
 #define SENSE_CORPSE_NOT_NAME		12446	//You don't sense any corpses of that name.
 #define SENSE_CORPSE_NONE			12447	//You don't sense any corpses.
+#define SCREECH_BUFF_BLOCK			12448	//Your immunity buff protected you from the spell %1!
 #define NOT_HOLDING_ITEM			12452	//You are not holding an item!
 #define SENSE_UNDEAD				12471	//You sense undead in this direction.
 #define SENSE_ANIMAL				12472	//You sense an animal in this direction.

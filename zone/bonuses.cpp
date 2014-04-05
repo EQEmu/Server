@@ -2588,6 +2588,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_NegateIfCombat:
 				newbon->NegateIfCombat = true;
+				break;
+
+			case SE_Screech: 
+				newbon->Screech = effect_value;
+				break;
+			
 		}
 	}
 }
