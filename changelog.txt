@@ -1,7 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 04/05/2014 ==
-Akkadius: BOOGABOOGABOOGA
+Akkadius: (Performance Adjustment) Removed AsyncLoadVariables from InterserverTimer.Check() in both zone and world. By watching the MySQL general.log file on mass zone idle activity, you can
+	see that the query 'SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= timestamp' is called every 10 seconds. This function is loading
+	variables that are initially loaded on World and Zone bootup. When running a large amount of zone servers, the amount of MySQL chatter that is produced is enormous and 
+	unnecessary. For example, if I ran 400 zone servers, I would see 3,456,000 unnecessary queries from all idle or active zone processes in a 24 hour interval.
 
 == 04/01/2014 ==
 demonstar55: Implemented ability for a merchant to open and close shop.
