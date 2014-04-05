@@ -4,7 +4,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 Kayen: Implemented 'Physical Resists' (Resist Type 9) to be consistent with live based on extensive parsing.
        SQL will add new field to npc_types 'PhR' and fill in database with values consistent with observations.          
 
-Optional SQL: utils/sql/git/optional/2014_04_04_PhysicalResists.sql
+Required SQL: utils/sql/git/optional/2014_04_04_PhysicalResists.sql
 
 == 04/03/2014 ==
 Kayen: Implemented live like spell projectiles (ie. Mage Bolts). 
