@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/05/2014 ==
+Akkadius: BOOGABOOGABOOGA
+
 == 04/01/2014 ==
 demonstar55: Implemented ability for a merchant to open and close shop.
 	Lua quest functions: e.self:MerchantOpenShop() and e.self:MerchantCloseShop()
