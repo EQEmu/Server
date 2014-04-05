@@ -4113,7 +4113,8 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 						}
 					} else {
 						ExecWeaponProc(aug_i, aug->Proc.Effect, on);
-						break;
+						if (!RuleB(Combat, OneProcPerWeapon))
+							break;
 					}
 				}
 			}
