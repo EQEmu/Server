@@ -346,6 +346,7 @@ struct StatBonuses {
 	uint16	AbsorbMagicAtt[2];					// 0 = magic rune value 1 = buff slot
 	uint16	MeleeRune[2];						// 0 = rune value 1 = buff slot
 	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
+	int8	Screech;							// -1 = Will be blocked if another Screech is +(1)
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

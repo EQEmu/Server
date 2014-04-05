@@ -2613,6 +2613,14 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		{
 			effect1 = sp1.effectid[i];
 			effect2 = sp2.effectid[i];
+
+			if (spellbonuses.Screech == 1) {
+				if (effect2 == SE_Screech && sp2.base[i] == -1) {
+					Message_StringID(MT_SpellFailure, SCREECH_BUFF_BLOCK, sp2.name);
+					return -1;
+				}
+			}
+
 			if(effect2 == SE_StackingCommand_Overwrite)
 			{
 				overwrite_effect = sp2.base[i];
@@ -2657,7 +2665,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 					mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d, but we do not have that effect on that slot. Ignored.",
 						sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value);
 				}
-			}
+			} 
 		}
 	} else {
 		mlog(SPELLS__STACKING, "%s (%d) and %s (%d) appear to be in the same line, skipping Stacking Overwrite/Blocking checks",

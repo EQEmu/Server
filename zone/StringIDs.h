@@ -334,6 +334,7 @@
 #define ALREADY_CASTING				12442	//You are already casting a spell!
 #define SENSE_CORPSE_NOT_NAME		12446	//You don't sense any corpses of that name.
 #define SENSE_CORPSE_NONE			12447	//You don't sense any corpses.
+#define SCREECH_BUFF_BLOCK			12448	//Your immunity buff protected you from the spell %1!
 #define NOT_HOLDING_ITEM			12452	//You are not holding an item!
 #define SENSE_UNDEAD				12471	//You sense undead in this direction.
 #define SENSE_ANIMAL				12472	//You sense an animal in this direction.
