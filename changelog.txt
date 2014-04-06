@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/06/2014 ==
+Uleat: Changed Mob::CanThisClassDualWield() behavior. This should let non-monk/beastlord dual-wielding classes attack with either fist as long as the other hand is occupied.
+Notes:
+	See this thread for more information and to provide feedback: http://www.eqemulator.org/forums/showthread.php?p=229328#post229328
+	
+
 == 04/05/2014 ==
 Akkadius: Fix for the Fix for the Fix: Rule Combat:OneProcPerWeapon was created so that you can revert to the original proc functionality 
 	for custom servers that have balanced their content around having more than 1 aug proc on weapons. By having this rule set to 'false' you revert this functionality. 

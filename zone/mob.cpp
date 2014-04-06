@@ -2088,27 +2088,35 @@ void Mob::SetAttackTimer() {
 
 }
 
-bool Mob::CanThisClassDualWield(void) const
-{
-	if (!IsClient()) {
+bool Mob::CanThisClassDualWield(void) const {
+	if(!IsClient()) {
 		return(GetSkill(SkillDualWield) > 0);
-	} else {
-		const ItemInst* inst = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+	}
+	else if(CastToClient()->HasSkill(SkillDualWield)) {
+		const ItemInst* pinst = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+		const ItemInst* sinst = CastToClient()->GetInv().GetItem(SLOT_SECONDARY);
+
 		// 2HS, 2HB, or 2HP
-		if (inst && inst->IsType(ItemClassCommon)) {
-			const Item_Struct* item = inst->GetItem();
-			if ((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
+		if(pinst && pinst->IsWeapon()) {
+			const Item_Struct* item = pinst->GetItem();
+
+			if((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
 				return false;
-		} else {
-			//No weapon in hand... using hand-to-hand...
-			//only monks and beastlords? can dual wield their fists.
-			if(class_ != MONK && class_ != MONKGM && class_ != BEASTLORD && class_ != BEASTLORDGM) {
-				return false;
-			}
 		}
 
-		return (CastToClient()->HasSkill(SkillDualWield));	// No skill = no chance
+		// OffHand Weapon
+		if(sinst && !sinst->IsWeapon())
+			return false;
+
+		// Dual-Wielding Empty Fists
+		if(!pinst && !sinst)
+			if(class_ != MONK && class_ != MONKGM && class_ != BEASTLORD && class_ != BEASTLORDGM)
+				return false;
+
+		return true;
 	}
+
+	return false;
 }
 
 bool Mob::CanThisClassDoubleAttack(void) const
