@@ -3415,9 +3415,14 @@ void EntityList::ReloadAllClientsTaskState(int TaskID)
 
 bool EntityList::IsMobInZone(Mob *who)
 {
-	auto it = mob_list.find(who->GetID());
-	if (it != mob_list.end())
-		return who == it->second;
+	//We don't use mob_list.find(who) because this code needs to be able to handle dangling pointers for the quest code.
+	auto it = mob_list.begin();
+	while(it != mob_list.end()) {
+		if(it->second == who) {
+			return true;
+		}
+		++it;
+	}
 	return false;
 }
 

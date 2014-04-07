@@ -4085,6 +4085,10 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 			}
 		}
 	}
+	//If OneProcPerWeapon is not enabled, we reset the try for that weapon regardless of if we procced or not.
+	//This is for some servers that may want to have as many procs triggering from weapons as possible in a single round.
+	if(!RuleB(Combat, OneProcPerWeapon))
+		proced = false;
 
 	if (!proced && inst) {
 		for (int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
@@ -4109,7 +4113,8 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 						}
 					} else {
 						ExecWeaponProc(aug_i, aug->Proc.Effect, on);
-						break;
+						if (RuleB(Combat, OneProcPerWeapon))
+							break;
 					}
 				}
 			}

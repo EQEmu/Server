@@ -158,6 +158,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	FR = d->FR;
 	PR = d->PR;
 	Corrup = d->Corrup;
+	PhR = d->PhR;
 
 	STR = d->STR;
 	STA = d->STA;
@@ -658,6 +659,9 @@ bool NPC::Process()
 		if(viral_timer_counter > 999)
 			viral_timer_counter = 0;
 	}
+
+	if(projectile_timer.Check())
+		SpellProjectileEffect();
 
 	if(spellbonuses.GravityEffect == 1) {
 		if(gravity_timer.Check())
@@ -2059,6 +2063,8 @@ void NPC::CalcNPCResists() {
 		PR = (GetLevel() * 11)/10;
 	if (!Corrup)
 		Corrup = 15;
+	if (!PhR)
+		PhR = 10;
 	return;
 }
 
