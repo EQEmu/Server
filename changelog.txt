@@ -1,10 +1,20 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/09/2014 ==
+Kayen: Implemented ability to use the actual live spell projectile graphics that are defined in the modern spell file.
+   *This is disabled by default. Recommend enabling if your server uses an UF+ spell file AND most of your players use UF+ clients.
+Kayen: Expanded the PERL ProjectileAnim(mob, item_id, [IsArrow?, speed, angle, tilt, arc, IDFile]) so you can now just set the weapon model graphic IT####
+Example: ProjectileAnim($npc, 0, 0, 1, 0, 0, 0, "IT10747")  This will shoot an SK 2.0 sword.
+Kayen: Updated wizard innate critical damage modifier to be from 20-70% of base damage (based on live parses)
+
+
+Optional SQL: utils/sql/git/optional/2014_04_09_SpellProjectileRule.sql
+Note: This sql also contains a query to check if your spell file is compatible.
+
 == 04/06/2014 ==
 Uleat: Changed Mob::CanThisClassDualWield() behavior. This should let non-monk/beastlord dual-wielding classes attack with either fist as long as the other hand is occupied.
 Notes:
 	See this thread for more information and to provide feedback: http://www.eqemulator.org/forums/showthread.php?p=229328#post229328
-	
 
 == 04/05/2014 ==
 Akkadius: Fix for the Fix for the Fix: Rule Combat:OneProcPerWeapon was created so that you can revert to the original proc functionality 
