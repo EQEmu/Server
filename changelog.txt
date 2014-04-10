@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/10/2014 ==
+Kayen: Added 'no_target_hotkey' field to npc_types table. This will prevent the NPC from being targeted with F8 (Warning: Will also turn it's name YELLOW)
+Kayen: Added a rule to make all (Player cast) Swarm Pets not targetable with F8 (nearest NPC) by default (Warning: Will also turn pets names YELLOW). This is semi-hack but it works.
+Kayen: Player cast swarm pets can now be healed and buffed consistent with live.
+
+Optional SQL: utils/sql/git/optional/2014_04_10_SwarmPetNotTargetableWithHotKey.sql
+Required SQL: utils/sql/git/required/2014_04_10_No_Target_With_Hotkey.sql
+Note: For the required new npc_types field you DO NOT need to set values for swarm pets if you enable the above rule.
+
 == 04/09/2014 ==
 Kayen: Implemented ability to use the actual live spell projectile graphics that are defined in the modern spell file.
    *This is disabled by default. Recommend enabling if your server uses an UF+ spell file AND most of your players use UF+ clients.

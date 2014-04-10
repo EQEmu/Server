@@ -1099,7 +1099,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.underwater,"
 			"npc_types.emoteid,"
 			"npc_types.spellscale,"
-			"npc_types.healscale";
+			"npc_types.healscale,"
+			"npc_types.no_target_hotkey";
 
 		MakeAnyLenString(&query, "%s FROM npc_types WHERE id=%d", basic_query, id);
 
@@ -1191,7 +1192,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF) << 8;
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF);
 				tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
-
+				
 				int i;
 				if (armor_tint_id > 0)
 				{
@@ -1281,7 +1282,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->emoteid = atoi(row[r++]);
 				tmpNPCType->spellscale = atoi(row[r++]);
 				tmpNPCType->healscale = atoi(row[r++]);
-
+				tmpNPCType->no_target_hotkey = atoi(row[r++]) == 1 ? true : false;
+				
 				// If NPC with duplicate NPC id already in table,
 				// free item we attempted to add.
 				if (zone->npctable.find(tmpNPCType->npc_id) != zone->npctable.end())

@@ -245,6 +245,7 @@ public:
 	void	AddLootDrop(const Item_Struct*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
+	inline bool IsTargetableWithHotkey() const { return no_target_hotkey; }
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }
