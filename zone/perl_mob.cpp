@@ -6856,7 +6856,7 @@ XS(XS_Mob_ProjectileAnim); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ProjectileAnim)
 {
 	dXSARGS;
-	if (items < 3 || items > 8)
+	if (items < 3 || items > 9)
 		Perl_croak(aTHX_ "Usage: Mob::ProjectileAnim(THIS, mob, item_id, IsArrow?, speed, angle, tilt, arc)");
 
 	{
@@ -6868,6 +6868,7 @@ XS(XS_Mob_ProjectileAnim)
 		float		angle = 0;
 		float		tilt = 0;
 		float		arc = 0;
+		char *		IDFile = nullptr;
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -6903,7 +6904,9 @@ XS(XS_Mob_ProjectileAnim)
 			arc = (float)SvNV(ST(7));
 		}
 
-		THIS->ProjectileAnimation(mob, item_id, IsArrow, speed, angle, tilt, arc);
+		if (items > 8)	{	IDFile = (char *)SvPV_nolen(ST(8));	}
+
+		THIS->ProjectileAnimation(mob, item_id, IsArrow, speed, angle, tilt, arc, IDFile);
 
 	}
 	XSRETURN_EMPTY;
@@ -8389,7 +8392,7 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "CheckLoS"), XS_Mob_CheckLoS, file, "$$");
 		newXSproto(strcpy(buf, "CheckLoSToLoc"), XS_Mob_CheckLoSToLoc, file, "$$$$;$");
 		newXSproto(strcpy(buf, "FindGroundZ"), XS_Mob_FindGroundZ, file, "$$$;$");
-		newXSproto(strcpy(buf, "ProjectileAnim"), XS_Mob_ProjectileAnim, file, "$$$;$$$$$");
+		newXSproto(strcpy(buf, "ProjectileAnim"), XS_Mob_ProjectileAnim, file, "$$$;$$$$$$");
 		newXSproto(strcpy(buf, "HasNPCSpecialAtk"), XS_Mob_HasNPCSpecialAtk, file, "$$");
 		newXSproto(strcpy(buf, "SendAppearanceEffect"), XS_Mob_SendAppearanceEffect, file, "$$;$$$$");
 		newXSproto(strcpy(buf, "SetFlyMode"), XS_Mob_SetFlyMode, file, "$$");

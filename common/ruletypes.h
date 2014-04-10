@@ -135,6 +135,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY( Pets )
 RULE_REAL( Pets, AttackCommandRange, 150 )
 RULE_BOOL( Pets, UnTargetableSwarmPet, false )
+RULE_BOOL( Pets, SwarmPetNotTargetableWithHotKey, false ) //On SOF+ clients this a semi-hack to make swarm pets not F8 targetable.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( GM )
@@ -307,6 +308,7 @@ RULE_INT ( Spells, SuccorFailChance, 2) //Determines chance for a succor spell n
 RULE_INT ( Spells, FRProjectileItem_Titanium, 1113) // Item id for Titanium clients for Fire 'spell projectile'.
 RULE_INT ( Spells, FRProjectileItem_SOF, 80684) // Item id for SOF clients for Fire 'spell projectile'.
 RULE_INT ( Spells, FRProjectileItem_NPC, 80684) // Item id for NPC Fire 'spell projectile'.
+RULE_BOOL ( Spells, UseLiveSpellProjectileGFX, false) // Use spell projectile graphics set in the spells_new table (player_1). Server must be using UF+ spell file.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )

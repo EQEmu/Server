@@ -3351,10 +3351,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			case SE_Root: {
 				
 				/* Root formula derived from extensive personal live parses - Kayen
-				ROOT has a 40% chance to do a resist check to break.
-				Resist check has NO LOWER bounds.
-				If multiple roots on target. Root in first slot will be checked first to break from nukes.
-				If multiple roots on target and broken by spell. Roots are removed ONE at a time in order of buff slot.
+				ROOT has a 70% chance to do a resist check to break.
 				*/
 
 				if (MakeRandomInt(0, 99) < RuleI(Spells, RootBreakCheckChance)){
@@ -6064,26 +6061,35 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
 		projectile_timer.Start(250);
 	}
 
-	//Only use fire graphic for fire spells.
-	if (spells[spell_id].resisttype == RESIST_FIRE) {
-		
-		if (IsClient()){
-			if (CastToClient()->GetClientVersionBit() <= 4) //Titanium needs alternate graphic.
-				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, 1.5);
-			else
-				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, 1.5);
-			}
-		
-		else
-			ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, 1.5);
-
-		if (spells[spell_id].CastingAnim == 64)
-			anim = 44; //Corrects for animation error.
+	//This will use the correct graphic as defined in the player_1 field of spells_new table. Found in UF+ spell files.
+	if (RuleB(Spells, UseLiveSpellProjectileGFX)) {
+		ProjectileAnimation(spell_target,0, false, 1.5,0,0,0, spells[spell_id].player_1);
 	}
 
-	//Pending other types of projectile graphics. (They will function but with a default arrow graphic for now)
-	else
-		ProjectileAnimation(spell_target,0, 1, 1.5);
+	//This allows limited support for server using older spell files that do not contain data for bolt graphics. 
+	else {
+		//Only use fire graphic for fire spells.
+		if (spells[spell_id].resisttype == RESIST_FIRE) {
+		
+			if (IsClient()){
+				if (CastToClient()->GetClientVersionBit() <= 4) //Titanium needs alternate graphic.
+					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, 1.5);
+				else 
+					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, 1.5);
+				}
+		
+			else
+				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, 1.5);
+
+		}
+
+		//Default to an arrow if not using a mage bolt (Use up to date spell file and enable above rules for best results)
+		else
+			ProjectileAnimation(spell_target,0, 1, 1.5);
+	}
+
+	if (spells[spell_id].CastingAnim == 64)
+		anim = 44; //Corrects for animation error.
 
 	DoAnim(anim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells); //Override the default projectile animation.
 	return true;
