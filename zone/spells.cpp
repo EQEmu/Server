@@ -211,6 +211,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		return(false);
 	}
 
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
+
 	if(IsClient() && GetTarget() && IsHarmonySpell(spell_id))
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++) {
@@ -554,6 +557,15 @@ uint16 Mob::GetSpecializeSkillValue(uint16 spell_id) const {
 }
 
 void Client::CheckSpecializeIncrease(uint16 spell_id) {
+	// These are not active because CheckIncreaseSkill() already does so.
+	// It's such a rare occurance that adding them here is wasted..(ref only)
+	/*
+	if (IsDead() || IsUnconscious())
+		return;
+	if (IsAIControlled())
+		return;
+	*/
+
 	switch(spells[spell_id].skill) {
 	case SkillAbjuration:
 		CheckIncreaseSkill(SkillSpecializeAbjure, nullptr);
@@ -577,6 +589,15 @@ void Client::CheckSpecializeIncrease(uint16 spell_id) {
 }
 
 void Client::CheckSongSkillIncrease(uint16 spell_id){
+	// These are not active because CheckIncreaseSkill() already does so.
+	// It's such a rare occurance that adding them here is wasted..(ref only)
+	/*
+	if (IsDead() || IsUnconscious())
+		return;
+	if (IsAIControlled())
+		return;
+	*/
+
 	switch(spells[spell_id].skill)
 	{
 	case SkillSinging:
@@ -1809,7 +1830,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	}
 
 	// check line of sight to target if it's a detrimental spell
-	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id))
+	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && spells[spell_id].targettype != ST_TargetOptional)
 	{
 		mlog(SPELLS__CASTING, "Spell %d: cannot see target %s", spell_target->GetName());
 		Message_StringID(13,CANT_SEE_TARGET);
@@ -1874,7 +1895,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if (isproc) {
 				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, true);
 			} else {
-				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
+				if (spells[spell_id].targettype == ST_TargetOptional){
+					if (!TrySpellProjectile(spell_target, spell_id))
+						return false;
+				}
+				
+				else if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
 						if(casting_spell_type == 1)
@@ -1883,6 +1909,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 					}
 				}
 			}
+
 			if(IsPlayerIllusionSpell(spell_id)
 			&& IsClient()
 			&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
@@ -2586,6 +2613,14 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		{
 			effect1 = sp1.effectid[i];
 			effect2 = sp2.effectid[i];
+
+			if (spellbonuses.Screech == 1) {
+				if (effect2 == SE_Screech && sp2.base[i] == -1) {
+					Message_StringID(MT_SpellFailure, SCREECH_BUFF_BLOCK, sp2.name);
+					return -1;
+				}
+			}
+
 			if(effect2 == SE_StackingCommand_Overwrite)
 			{
 				overwrite_effect = sp2.base[i];
@@ -2630,7 +2665,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 					mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d, but we do not have that effect on that slot. Ignored.",
 						sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value);
 				}
-			}
+			} 
 		}
 	} else {
 		mlog(SPELLS__STACKING, "%s (%d) and %s (%d) appear to be in the same line, skipping Stacking Overwrite/Blocking checks",
@@ -3419,8 +3454,15 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			if(spell_effectiveness == 0 || !IsPartialCapableSpell(spell_id) )
 			{
 				mlog(SPELLS__RESISTS, "Spell %d was completely resisted by %s", spell_id, spelltar->GetName());
-				Message_StringID(MT_SpellFailure, TARGET_RESISTED, spells[spell_id].name);
-				spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
+				
+				if (spells[spell_id].resisttype == RESIST_PHYSICAL){
+					Message_StringID(MT_SpellFailure, PHYSICAL_RESIST_FAIL,spells[spell_id].name);
+					spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
+				}
+				else {
+					Message_StringID(MT_SpellFailure, TARGET_RESISTED, spells[spell_id].name);
+					spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
+				}
 
 				if(spelltar->IsAIControlled()){
 					int32 aggro = CheckAggroAmount(spell_id);
@@ -4169,67 +4211,83 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 		break;
 	case RESIST_PHYSICAL:
+		{
+			if (IsNPC())
+				target_resist = GetPhR();
+			else
+				target_resist = 0;
+		}
 	default:
-		//This is guessed but the others are right
-		target_resist = (GetSTA() / 4);
+
+		target_resist = 0;
 	}
 
 	//Setup our base resist chance.
 	int resist_chance = 0;
+	int level_mod = 0;
 
 	//Adjust our resist chance based on level modifiers
 	int temp_level_diff = GetLevel() - caster->GetLevel();
-	if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
-	{
-		int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-		if(a > 0)
+
+	//Physical Resists are calclated using their own formula derived from extensive parsing.
+	if (resist_type == RESIST_PHYSICAL) {
+		level_mod = ResistPhysical(temp_level_diff, caster->GetLevel());
+	}
+
+	else {
+
+		if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
 		{
-			temp_level_diff = a;
-		}
-		else
-		{
-			temp_level_diff = 0;
-		}
-	}
-
-	if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
-	{
-		temp_level_diff = 15;
-	}
-
-	if(IsNPC() && temp_level_diff < -9)
-	{
-		temp_level_diff = -9;
-	}
-
-	int level_mod = temp_level_diff * temp_level_diff / 2;
-	if(temp_level_diff < 0)
-	{
-		level_mod = -level_mod;
-	}
-
-	if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
-	{
-		level_mod = 1000;
-	}
-
-	//Even more level stuff this time dealing with damage spells
-	if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
-	{
-		int level_diff;
-		if(GetLevel() >= RuleI(Casting,ResistFalloff))
-		{
-			level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-			if(level_diff < 0)
+			int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+			if(a > 0)
 			{
-				level_diff = 0;
+				temp_level_diff = a;
+			}
+			else
+			{
+				temp_level_diff = 0;
 			}
 		}
-		else
+
+		if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
 		{
-			level_diff = GetLevel() - caster->GetLevel();
+			temp_level_diff = 15;
 		}
-		level_mod += (2 * level_diff);
+
+		if(IsNPC() && temp_level_diff < -9)
+		{
+			temp_level_diff = -9;
+		}
+
+		level_mod = temp_level_diff * temp_level_diff / 2;
+		if(temp_level_diff < 0)
+		{
+			level_mod = -level_mod;
+		}
+
+		if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
+		{
+			level_mod = 1000;
+		}
+
+		//Even more level stuff this time dealing with damage spells
+		if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
+		{
+			int level_diff;
+			if(GetLevel() >= RuleI(Casting,ResistFalloff))
+			{
+				level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+				if(level_diff < 0)
+				{
+					level_diff = 0;
+				}
+			}
+			else
+			{
+				level_diff = GetLevel() - caster->GetLevel();
+			}
+			level_mod += (2 * level_diff);
+		}
 	}
 
 	if (CharismaCheck)
@@ -4374,6 +4432,43 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			return partial_modifier;
 		}
 	}
+}
+
+int Mob::ResistPhysical(int level_diff, uint8 caster_level)
+{
+	/*	Physical resists use the standard level mod calculation in
+	conjunction with a resist fall off formula that greatly prevents you
+	from landing abilities on mobs that are higher level than you.
+	After level 12, every 4 levels gained the max level you can hit
+	your target without a sharp resist penalty is raised by 1.
+	Extensive parsing confirms this, along with baseline phyiscal resist rates used.
+	*/
+
+
+	if (level_diff == 0)
+		return level_diff;
+
+	int level_mod = 0;
+
+	if (level_diff > 0) {
+
+		int ResistFallOff = 0;
+
+		if (caster_level <= 12)
+			ResistFallOff = 3;
+		else
+			ResistFallOff = caster_level/4;
+
+		if (level_diff > ResistFallOff || level_diff >= 15)
+			level_mod = ((level_diff * 10) + level_diff)*2;
+		else
+			level_mod = level_diff * level_diff / 2;
+	}
+
+	else
+		level_mod = -(level_diff * level_diff / 2);
+
+	return level_mod;
 }
 
 int16 Mob::CalcResistChanceBonus()

@@ -209,7 +209,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	if(item == nullptr) {
 		Message(13, "Item %u does not exist.", item_id);
 		mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create an item with an invalid id.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5);
+			GetName(), account_name, item_id, aug1, aug2, aug3, aug4, aug5);
 
 		return false;
 	}
@@ -228,14 +228,20 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 		return false;
 	}
+
+	// This code is ready to implement once the item load code is changed to process the 'minstatus' field.
+	// Checking #iteminfo in-game verfies that item->MinStatus is set to '0' regardless of field value.
+	// An optional sql script will also need to be added, once this goes live, to allow changing of the min status.
+
 	// check to make sure we are a GM if the item is GM-only
 	/*
-	else if(item->gm && (this->Admin() < 100))
-		Message(13, "You are not a GM and can not summon this item.");
-		mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create a GM-only item with a status of %i.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-			GetName(), account_name, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5);
+	else if(item->MinStatus && ((this->Admin() < item->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
+		Message(13, "You are not a GM or do not have the status to summon this item.");
+		mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create a GM-only item with a status of %i.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, MinStatus: %u)\n",
+			GetName(), account_name, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, item->MinStatus);
 
 		return false;
+	}
 	*/
 
 	uint32 augments[MAX_AUGMENT_SLOTS] = { aug1, aug2, aug3, aug4, aug5 };
@@ -276,12 +282,15 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 				
 				return false;
 			}
+
+			// Same as GM check above
+
 			// check to make sure we are a GM if the augment is GM-only
 			/*
-			else if(augtest->gm && (this->Admin() < 100)) {
-				Message(13, "You are not a GM and can not summon this augment.");
-				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create a GM-only augment (Aug%i) with a status of %i.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u)\n",
-					GetName(), account_name, (iter + 1), this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5);
+			else if(augtest->MinStatus && ((this->Admin() < augtest->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
+				Message(13, "You are not a GM or do not have the status to summon this augment.");
+				mlog(INVENTORY__ERROR, "Player %s on account %s attempted to create a GM-only augment (Aug%i) with a status of %i.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, MinStatus: %u)\n",
+					GetName(), account_name, (iter + 1), this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, item->MinStatus);
 
 				return false;
 			}

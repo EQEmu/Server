@@ -305,6 +305,7 @@ public:
 	void			SetHideMe(bool hm);
 	inline uint16	GetPort()		const { return port; }
 	bool			IsDead() const { return(dead); }
+	bool			IsUnconscious() const { return ((cur_hp <= 0) ? true : false); }
 	inline bool		IsLFP() { return LFP; }
 	void			UpdateLFP();
 
