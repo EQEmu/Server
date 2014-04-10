@@ -294,7 +294,7 @@ Timer DecayTimer(20);
 
 			//bullshit checking, to see if this is really happening, GDB seems to think so...
 			if(stream_itr->second == nullptr) {
-				fprintf(stderr, "ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %i", stream_itr->first.first, stream_itr->first.second);
+				fprintf(stderr, "ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %i", stream_itr->first.first);
 				continue;
 			}
 
