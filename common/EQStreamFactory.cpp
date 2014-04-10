@@ -64,13 +64,17 @@ EQStreamFactory::EQStreamFactory(EQStreamType type, int port, uint32 timeout)
 void EQStreamFactory::Close()
 {
 	Stop();
+    CloseWithoutStop();
+}
 
-#ifdef _WINDOWS
-	closesocket(sock);
-#else
-	close(sock);
-#endif
-	sock=-1;
+void EQStreamFactory::CloseWithoutStop()
+{
+    #ifdef _WINDOWS
+        closesocket(sock);
+    #else
+        close(sock);
+    #endif
+        sock=-1;
 }
 
 bool EQStreamFactory::Open()
@@ -93,8 +97,7 @@ struct sockaddr_in address;
 	}
 
 	if (bind(sock, (struct sockaddr *) &address, sizeof(address)) < 0) {
-		close(sock);
-		sock=-1;
+		CloseWithoutStop();
 		return false;
 	}
 	#ifdef _WINDOWS
