@@ -303,7 +303,8 @@ public:
 	bool AvailableWearSlot(uint32 aug_wear_slots) const;
 	int8 AvailableAugmentSlot(int32 augtype) const;
 	inline int32 GetAugmentType() const { return m_item->AugType; }
-
+	bool HasOrnamentation() const;
+	ItemInst* GetOrnamentation() const;
 	inline bool IsExpendable() const { return ((m_item->Click.Type == ET_Expendable ) || (m_item->ItemType == ItemTypePotion)); }
 
 	//

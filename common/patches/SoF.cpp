@@ -2437,13 +2437,27 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 		ss.write((const char*)&null_term, sizeof(uint8));
 	}
 
-	if(strlen(item->IDFile) > 0)
+	// Moofta: if the item has an aug of type 20/524288 (ornamentation) then we use the ID file of that when serializing.
+	// the only thing we should probably worry about is generating a wear change packet to all cl;ients in zone if someone adds a type 20 aug.
+	if (inst && inst->HasOrnamentation()) //instance is not null and does have an ornament aug (slot 20)
 	{
-		ss.write(item->IDFile, strlen(item->IDFile));
+		ItemInst* ornamentation = inst->GetOrnamentation();
+		if (ornamentation) //paranoid!
+		{
+			ss.write(ornamentation->GetItem()->IDFile, strlen(ornamentation->GetItem()->IDFile));
+		}
+		else if (strlen(item->IDFile) > 0)
+		{
+			ss.write(item->IDFile, strlen(item->IDFile));
+		}
 		ss.write((const char*)&null_term, sizeof(uint8));
 	}
-	else
+	else //original code although I shortened it
 	{
+		if (strlen(item->IDFile) > 0)
+		{
+			ss.write(item->IDFile, strlen(item->IDFile));
+		}
 		ss.write((const char*)&null_term, sizeof(uint8));
 	}
 

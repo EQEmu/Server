@@ -392,6 +392,35 @@ void ItemInst::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id)
 	}
 }
 
+bool ItemInst::HasOrnamentation() const
+{
+	const ItemInst *item;
+	for (int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
+	{
+		uint32 id = 0;
+		if ((item = GetItem(i)) != nullptr)
+		{
+			if (item->GetItem()->AugType == 524288)return true;
+		}
+	}
+	return false;
+}
+
+ItemInst* ItemInst::GetOrnamentation() const
+{
+	if (m_item->ItemClass == ItemClassCommon)
+	{
+		ItemInst *item;
+		for (int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
+		{
+
+			uint32 id = 0;
+			if ((item = GetItem(i)) != nullptr && item->GetItem()->AugType == 524288) return item;
+		}
+	}
+	return nullptr;
+}
+
 // Retrieve item inside container
 ItemInst* ItemInst::GetItem(uint8 index) const
 {
