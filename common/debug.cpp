@@ -12,7 +12,7 @@
 	#define strcasecmp	_stricmp
 
 #else
-	
+
 	#include <sys/types.h>
 	#include <unistd.h>
 
@@ -112,7 +112,11 @@ bool EQEMuLog::open(LogIDs id) {
 
 	char filename[200];
 #ifndef NO_PIDLOG
-	snprintf(filename, sizeof(filename), "%s%s_%04i.log", FileNames[id], exename, getpid());
+#ifdef _WINDOWS
+	snprintf(filename, sizeof(filename), "%s%s_%04i.log", FileNames[id], exename, _getpid());
+#else
+    snprintf(filename, sizeof(filename), "%s%s_%04i.log", FileNames[id], exename, getpid());
+#endif
 #else
 	snprintf(filename, sizeof(filename), "%s%s.log", FileNames[id], exename);
 #endif
@@ -356,8 +360,8 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 
 	write(id, "Dumping Packet: %i", size);
 	// Output as HEX
-	
-	int beginningOfLineOffset = 0; 
+
+	int beginningOfLineOffset = 0;
 	uint32 indexInData;
 	std::string asciiOutput;
 
@@ -377,7 +381,7 @@ bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 ski
 		if (data[indexInData] >= 32 && data[indexInData] < 127)
 		{
 			// According to http://msdn.microsoft.com/en-us/library/vstudio/ee404875(v=vs.100).aspx
-			// Visual Studio 2010 doesn't have std::to_string(int) but it does have the long long 
+			// Visual Studio 2010 doesn't have std::to_string(int) but it does have the long long
 			// version.
 			asciiOutput.append(std::to_string((long long)data[indexInData]));
 		}
