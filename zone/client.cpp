@@ -8068,3 +8068,4 @@ void Client::PlayMP3(const char* fname)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
+

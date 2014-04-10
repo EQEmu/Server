@@ -2561,9 +2561,7 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color)
 
 int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
-	const Item_Struct *item;
-
-	item = database.GetItem(GetEquipment(material_slot));
+	const Item_Struct *item = database.GetItem(GetEquipment(material_slot));
 	if(item != 0)
 	{
 		if	// for primary and secondary we need the model, not the material

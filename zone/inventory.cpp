@@ -1611,6 +1611,51 @@ void Client::DyeArmor(DyeStruct* dye){
 	Save();
 }
 
+int32 Client::GetEquipmentMaterial(uint8 material_slot) const
+{
+	//	Moofta:	Only supporting primary and secondary. next stage is heros forge. which could be any!
+	if	// for primary and secondary we need the model, not the material
+		(
+		material_slot == MaterialPrimary ||
+		material_slot == MaterialSecondary
+		)
+	{
+		uint8 inventorySlot = Inventory::CalcSlotFromMaterial(material_slot);
+		const ItemInst* inst = m_inv.GetItem(inventorySlot);
+		if (inst != nullptr)
+		{
+
+			if (strlen(inst->GetItem()->IDFile) > 2)
+			{
+				if (inst->HasOrnamentation())
+				{
+					ItemInst* ornament = inst->GetOrnamentation();
+					if (strlen(ornament->GetItem()->IDFile) > 2)
+					{
+						return atoi(&ornament->GetItem()->IDFile[2]);
+					}
+				}
+				else
+				{
+					return atoi(&inst->GetItem()->IDFile[2]);
+				}
+			}
+			else	//may as well try this, since were going to 0 anyways
+			{
+				return inst->GetItem()->Material;
+			}
+		}
+	}
+	else
+	{
+		const Item_Struct *item = database.GetItem(GetEquipment(material_slot));
+		if (item!=nullptr) return item->Material;
+	}
+
+
+	return 0;
+}
+
 /*bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
 	const Item_Struct* TempItem = 0;
 	ItemInst* ins;

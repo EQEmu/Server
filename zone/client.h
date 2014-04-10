@@ -797,6 +797,7 @@ public:
 	void	SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type);
 	bool	IsValidSlot(uint32 slot);
 	bool	IsBankSlot(uint32 slot);
+	int32	GetEquipmentMaterial(uint8 material_slot) const;
 
 	inline	bool IsTrader() const { return(Trader); }
 	inline	bool IsBuyer() const { return(Buyer); }

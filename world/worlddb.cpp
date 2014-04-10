@@ -199,7 +199,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 						// the weapons are kept elsewhere
 						if ((material == MaterialPrimary) || (material == MaterialSecondary))
 						{
-							if (strlen(item->GetItem()->IDFile) > 2) {
+							if (strlen(item->GetItem()->IDFile) > 2) 
+							{
 								uint32 idfile = 0;
 								if (item->HasOrnamentation())
 								{
