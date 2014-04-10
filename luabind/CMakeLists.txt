@@ -28,7 +28,7 @@ ADD_LIBRARY(luabind ${lb_sources} ${lb_headers})
 
 
 IF(UNIX)
-    ADD_DEFINITIONS(-fPIC)
+    ADD_DEFINITIONS(-fPIC -fsyntax-only)
 ENDIF(UNIX)
 
 SET(LIBRARY_OUTPUT_PATH ../Bin)
