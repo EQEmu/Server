@@ -1857,7 +1857,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const
 				effectmod = itembonuses.singingMod;
 			else
 				effectmod = spellbonuses.singingMod;
-			effectmod += aabonuses.singingMod;
+			effectmod += aabonuses.singingMod + spellbonuses.Amplification;
 			break;
 		default:
 			effectmod = 10;

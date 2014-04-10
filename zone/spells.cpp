@@ -123,21 +123,12 @@ void NPC::SpellProcess()
 {
 	Mob::SpellProcess();
 
-	if(GetSwarmInfo()){
-		Mob *swp_o = GetSwarmInfo()->GetOwner();
-		if(!swp_o)
-		{
+	if (GetSwarmInfo()) {
+		if (GetSwarmInfo()->duration->Check(false))
 			Depop();
-		}
-
-		if(GetSwarmInfo()->duration->Check(false))
-		{
-			Depop();
-		}
 
 		Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
-		if(GetSwarmInfo()->target != 0)
-		{
+		if (GetSwarmInfo()->target != 0) {
 			if(!targMob || (targMob && targMob->IsCorpse()))
 				Depop();
 		}
@@ -219,6 +210,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		InterruptSpell(173, 0x121, false);
 		return(false);
 	}
+
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
 
 	if(IsClient() && GetTarget() && IsHarmonySpell(spell_id))
 	{
@@ -445,7 +439,8 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	casting_spell_resist_adjust = resist_adjust;
 
-	mlog(SPELLS__CASTING, "Spell %d: Casting time %d (orig %d), mana cost %d", orgcasttime, cast_time, mana_cost);
+	mlog(SPELLS__CASTING, "Spell %d: Casting time %d (orig %d), mana cost %d",
+			spell_id, cast_time, orgcasttime, mana_cost);
 
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
@@ -461,8 +456,9 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	if (IsAIControlled())
 	{
 		SetRunAnimSpeed(0);
-		if(this != pMob)
-			this->FaceTarget(pMob);
+		pMob = entity_list.GetMob(target_id);
+		if (pMob && this != pMob)
+			FaceTarget(pMob);
 	}
 
 	// if we got here we didn't fizzle, and are starting our cast
@@ -561,6 +557,15 @@ uint16 Mob::GetSpecializeSkillValue(uint16 spell_id) const {
 }
 
 void Client::CheckSpecializeIncrease(uint16 spell_id) {
+	// These are not active because CheckIncreaseSkill() already does so.
+	// It's such a rare occurance that adding them here is wasted..(ref only)
+	/*
+	if (IsDead() || IsUnconscious())
+		return;
+	if (IsAIControlled())
+		return;
+	*/
+
 	switch(spells[spell_id].skill) {
 	case SkillAbjuration:
 		CheckIncreaseSkill(SkillSpecializeAbjure, nullptr);
@@ -584,6 +589,15 @@ void Client::CheckSpecializeIncrease(uint16 spell_id) {
 }
 
 void Client::CheckSongSkillIncrease(uint16 spell_id){
+	// These are not active because CheckIncreaseSkill() already does so.
+	// It's such a rare occurance that adding them here is wasted..(ref only)
+	/*
+	if (IsDead() || IsUnconscious())
+		return;
+	if (IsAIControlled())
+		return;
+	*/
+
 	switch(spells[spell_id].skill)
 	{
 	case SkillSinging:
@@ -1816,7 +1830,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	}
 
 	// check line of sight to target if it's a detrimental spell
-	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id))
+	if(spell_target && IsDetrimentalSpell(spell_id) && !CheckLosFN(spell_target) && !IsHarmonySpell(spell_id) && spells[spell_id].targettype != ST_TargetOptional)
 	{
 		mlog(SPELLS__CASTING, "Spell %d: cannot see target %s", spell_target->GetName());
 		Message_StringID(13,CANT_SEE_TARGET);
@@ -1881,7 +1895,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if (isproc) {
 				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, true);
 			} else {
-				if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
+				if (spells[spell_id].targettype == ST_TargetOptional){
+					if (!TrySpellProjectile(spell_target, spell_id))
+						return false;
+				}
+				
+				else if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
 						if(casting_spell_type == 1)
@@ -1890,6 +1909,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 					}
 				}
 			}
+
 			if(IsPlayerIllusionSpell(spell_id)
 			&& IsClient()
 			&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
@@ -2593,6 +2613,14 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		{
 			effect1 = sp1.effectid[i];
 			effect2 = sp2.effectid[i];
+
+			if (spellbonuses.Screech == 1) {
+				if (effect2 == SE_Screech && sp2.base[i] == -1) {
+					Message_StringID(MT_SpellFailure, SCREECH_BUFF_BLOCK, sp2.name);
+					return -1;
+				}
+			}
+
 			if(effect2 == SE_StackingCommand_Overwrite)
 			{
 				overwrite_effect = sp2.base[i];
@@ -2637,7 +2665,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 					mlog(SPELLS__STACKING, "%s (%d) blocks effect %d on slot %d below %d, but we do not have that effect on that slot. Ignored.",
 						sp1.name, spellid1, blocked_effect, blocked_slot, blocked_below_value);
 				}
-			}
+			} 
 		}
 	} else {
 		mlog(SPELLS__STACKING, "%s (%d) and %s (%d) appear to be in the same line, skipping Stacking Overwrite/Blocking checks",
@@ -2953,8 +2981,12 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].numhits = spells[spell_id].numhits;
 	buffs[emptyslot].client = caster ? caster->IsClient() : 0;
 	buffs[emptyslot].persistant_buff = 0;
-	buffs[emptyslot].deathsaveCasterAARank = 0;
-	buffs[emptyslot].deathSaveSuccessChance = 0;
+	buffs[emptyslot].caston_x = 0;
+	buffs[emptyslot].caston_y = 0;
+	buffs[emptyslot].caston_z = 0;
+	buffs[emptyslot].dot_rune = 0;
+	buffs[emptyslot].ExtraDIChance = 0;
+	buffs[emptyslot].RootBreakChance = 0;
 
 	if (level_override > 0) {
 		buffs[emptyslot].UpdateClient = true;
@@ -3412,14 +3444,25 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	// not all unresistable, so changing this to only check certain spells
 	if(IsResistableSpell(spell_id))
 	{
-		spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust);
+		if (IsCharmSpell(spell_id) || IsMezSpell(spell_id) || IsFearSpell(spell_id))
+			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust,true);
+		else
+			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust);
+
 		if(spell_effectiveness < 100)
 		{
 			if(spell_effectiveness == 0 || !IsPartialCapableSpell(spell_id) )
 			{
 				mlog(SPELLS__RESISTS, "Spell %d was completely resisted by %s", spell_id, spelltar->GetName());
-				Message_StringID(MT_SpellFailure, TARGET_RESISTED, spells[spell_id].name);
-				spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
+				
+				if (spells[spell_id].resisttype == RESIST_PHYSICAL){
+					Message_StringID(MT_SpellFailure, PHYSICAL_RESIST_FAIL,spells[spell_id].name);
+					spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
+				}
+				else {
+					Message_StringID(MT_SpellFailure, TARGET_RESISTED, spells[spell_id].name);
+					spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
+				}
 
 				if(spelltar->IsAIControlled()){
 					int32 aggro = CheckAggroAmount(spell_id);
@@ -4039,7 +4082,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 // pvp_resist_base
 // pvp_resist_calc
 // pvp_resist_cap
-float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override, int resist_override, bool CharismaCheck)
+float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override, int resist_override, bool CharismaCheck, bool CharmTick, bool IsRoot)
 {
 
 	if(!caster)
@@ -4078,8 +4121,10 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	}
 
 	//Check for fear resist
+	bool IsFear = false;
 	if(IsFearSpell(spell_id))
 	{
+		IsFear = true;
 		int fear_resist_bonuses = CalcFearResistChance();
 		if(MakeRandomInt(0, 99) < fear_resist_bonuses)
 		{
@@ -4088,7 +4133,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 	}
 
-	if (!CharismaCheck){
+	if (!CharmTick){
 
 		//Check for Spell Effect specific resistance chances (ie AA Mental Fortitude)
 		int se_resist_bonuses = GetSpellEffectResistChance(spell_id);
@@ -4166,85 +4211,125 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 		break;
 	case RESIST_PHYSICAL:
+		{
+			if (IsNPC())
+				target_resist = GetPhR();
+			else
+				target_resist = 0;
+		}
 	default:
-		//This is guessed but the others are right
-		target_resist = (GetSTA() / 4);
+
+		target_resist = 0;
 	}
 
 	//Setup our base resist chance.
-	//Lulls have a slightly higher chance to resist than normal 15/200 or ~ 7.5%
-	int resist_chance;
-	if(IsHarmonySpell(spell_id))
-	{
-		resist_chance = 15;
-	}
-	else
-	{
-		resist_chance = 0;
-	}
+	int resist_chance = 0;
+	int level_mod = 0;
 
 	//Adjust our resist chance based on level modifiers
 	int temp_level_diff = GetLevel() - caster->GetLevel();
-	if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
-	{
-		int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-		if(a > 0)
+
+	//Physical Resists are calclated using their own formula derived from extensive parsing.
+	if (resist_type == RESIST_PHYSICAL) {
+		level_mod = ResistPhysical(temp_level_diff, caster->GetLevel());
+	}
+
+	else {
+
+		if(IsNPC() && GetLevel() >= RuleI(Casting,ResistFalloff))
 		{
-			temp_level_diff = a;
-		}
-		else
-		{
-			temp_level_diff = 0;
-		}
-	}
-
-	if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
-	{
-		temp_level_diff = 15;
-	}
-
-	if(IsNPC() && temp_level_diff < -9)
-	{
-		temp_level_diff = -9;
-	}
-
-	int level_mod = temp_level_diff * temp_level_diff / 2;
-	if(temp_level_diff < 0)
-	{
-		level_mod = -level_mod;
-	}
-
-	if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
-	{
-		level_mod = 1000;
-	}
-
-	//Even more level stuff this time dealing with damage spells
-	if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
-	{
-		int level_diff;
-		if(GetLevel() >= RuleI(Casting,ResistFalloff))
-		{
-			level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
-			if(level_diff < 0)
+			int a = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+			if(a > 0)
 			{
-				level_diff = 0;
+				temp_level_diff = a;
+			}
+			else
+			{
+				temp_level_diff = 0;
 			}
 		}
-		else
+
+		if(IsClient() && GetLevel() >= 21 && temp_level_diff > 15)
 		{
-			level_diff = GetLevel() - caster->GetLevel();
+			temp_level_diff = 15;
 		}
-		level_mod += (2 * level_diff);
+
+		if(IsNPC() && temp_level_diff < -9)
+		{
+			temp_level_diff = -9;
+		}
+
+		level_mod = temp_level_diff * temp_level_diff / 2;
+		if(temp_level_diff < 0)
+		{
+			level_mod = -level_mod;
+		}
+
+		if(IsNPC() && (caster->GetLevel() - GetLevel()) < -20)
+		{
+			level_mod = 1000;
+		}
+
+		//Even more level stuff this time dealing with damage spells
+		if(IsNPC() && IsDamageSpell(spell_id) && GetLevel() >= 17)
+		{
+			int level_diff;
+			if(GetLevel() >= RuleI(Casting,ResistFalloff))
+			{
+				level_diff = (RuleI(Casting,ResistFalloff)-1) - caster->GetLevel();
+				if(level_diff < 0)
+				{
+					level_diff = 0;
+				}
+			}
+			else
+			{
+				level_diff = GetLevel() - caster->GetLevel();
+			}
+			level_mod += (2 * level_diff);
+		}
 	}
 
 	if (CharismaCheck)
 	{
-		//For charm chance to break checks, Default 10 CHA = -1 resist mod.
-		int16 cha_resist_modifier = 0;
-		cha_resist_modifier	= caster->GetCHA()/RuleI(Spells, CharismaEffectiveness);
-		resist_modifier -= cha_resist_modifier;
+		/* 
+		Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 255 CHA (min ~ 75 cha)
+		Charisma less than ~ 75 gives a postive modifier to resist checks at approximate ratio of -10 CHA = +6 Resist.
+		Mez spells do same initial resist check as a above.
+		Lull spells only check charisma if inital cast is resisted to see if mob will aggro, same modifier/cap as above.
+		Charisma DOES NOT extend charm durations.
+		Fear resist chance is given a -20 resist modifier if CHA is < 100, from 100-255 it progressively reduces the negative mod to 0.
+		Fears verse undead DO NOT apply a charisma modifer. (Note: unknown Base1 values defined in undead fears do not effect duration).
+		*/
+		int16 charisma = caster->GetCHA();
+
+		if (IsFear && (spells[spell_id].targettype != 10)){
+
+			if (charisma < 100)
+				resist_modifier -= 20;
+
+			else if (charisma <= 255)
+				resist_modifier += (charisma - 100)/8;
+		}
+
+		else {
+
+			if (charisma >= 75){
+
+				if (charisma > RuleI(Spells, CharismaEffectivenessCap))
+					charisma = RuleI(Spells, CharismaEffectivenessCap);
+
+				resist_modifier -= (charisma - 75)/RuleI(Spells, CharismaEffectiveness);
+			}
+			else
+				resist_modifier += ((75 - charisma)/10) * 6; //Increase Resist Chance
+		}
 	}
+
+	//Lull spells DO NOT use regular resists on initial cast, instead they use a flat +15 modifier. Live parses confirm this.
+	//Regular resists are used when checking if mob will aggro off of a lull resist.
+	if(!CharismaCheck && IsHarmonySpell(spell_id))
+		target_resist = 15;
 
 	//Add our level, resist and -spell resist modifier to our roll chance
 	resist_chance += level_mod;
@@ -4262,6 +4347,26 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	if(resist_chance < spells[spell_id].MinResist && spells[spell_id].MinResist != 0)
 	{
 		resist_chance = spells[spell_id].MinResist;
+	}
+
+	//Average charm duration agianst mobs with 0% chance to resist on LIVE is ~ 68 ticks.
+	//Minimum resist chance should be caclulated factoring in the RuleI(Spells, CharmBreakCheckChance)
+	if (CharmTick) {
+
+		int min_charmbreakchance = ((100/RuleI(Spells, CharmBreakCheckChance))/66 * 100)*2;
+		
+		if (resist_chance < min_charmbreakchance)
+			resist_chance = min_charmbreakchance;
+	}
+
+	//Average root duration agianst mobs with 0% chance to resist on LIVE is ~ 22 ticks (6% resist chance).
+	//Minimum resist chance should be caclulated factoring in the RuleI(Spells, RootBreakCheckChance)
+	if (IsRoot) {
+
+		int min_rootbreakchance = ((100/RuleI(Spells, RootBreakCheckChance))/22 * 100)*2;
+
+		if (resist_chance < min_rootbreakchance)
+			resist_chance = min_rootbreakchance;
 	}
 
 	//Finally our roll
@@ -4327,6 +4432,43 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			return partial_modifier;
 		}
 	}
+}
+
+int Mob::ResistPhysical(int level_diff, uint8 caster_level)
+{
+	/*	Physical resists use the standard level mod calculation in
+	conjunction with a resist fall off formula that greatly prevents you
+	from landing abilities on mobs that are higher level than you.
+	After level 12, every 4 levels gained the max level you can hit
+	your target without a sharp resist penalty is raised by 1.
+	Extensive parsing confirms this, along with baseline phyiscal resist rates used.
+	*/
+
+
+	if (level_diff == 0)
+		return level_diff;
+
+	int level_mod = 0;
+
+	if (level_diff > 0) {
+
+		int ResistFallOff = 0;
+
+		if (caster_level <= 12)
+			ResistFallOff = 3;
+		else
+			ResistFallOff = caster_level/4;
+
+		if (level_diff > ResistFallOff || level_diff >= 15)
+			level_mod = ((level_diff * 10) + level_diff)*2;
+		else
+			level_mod = level_diff * level_diff / 2;
+	}
+
+	else
+		level_mod = -(level_diff * level_diff / 2);
+
+	return level_mod;
 }
 
 int16 Mob::CalcResistChanceBonus()
@@ -5126,51 +5268,6 @@ void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 			}
 		}
 	}
-}
-void Mob::UpdateRuneFlags()
-{
-	bool Has_SE_Rune = false, Has_SE_AbsorbMagicAtt = false, Has_SE_MitigateMeleeDamage = false, Has_SE_MitigateSpellDamage = false;
-	uint32 buff_count = GetMaxTotalSlots();
-	for (unsigned int i = 0; i < buff_count; ++i)
-	{
-		if (buffs[i].spellid != SPELL_UNKNOWN)
-		{
-			for (int j = 0; j < EFFECT_COUNT; ++j)
-			{
-				switch(spells[buffs[i].spellid].effectid[j])
-				{
-					case SE_Rune:
-					{
-						Has_SE_Rune = true;
-						break;
-					}
-					case SE_AbsorbMagicAtt:
-					{
-						Has_SE_AbsorbMagicAtt = true;
-						break;
-					}
-					case SE_MitigateMeleeDamage:
-					{
-						Has_SE_MitigateMeleeDamage = true;
-						break;
-					}
-					case SE_MitigateSpellDamage:
-					{
-						Has_SE_MitigateSpellDamage = true;
-						break;
-					}
-
-					default:
-						break;
-				}
-			}
-		}
-	}
-
-	SetHasRune(Has_SE_Rune);
-	SetHasSpellRune(Has_SE_AbsorbMagicAtt);
-	SetHasPartialMeleeRune(Has_SE_MitigateMeleeDamage);
-	SetHasPartialSpellRune(Has_SE_MitigateSpellDamage);
 }
 
 int Client::GetCurrentBuffSlots() const

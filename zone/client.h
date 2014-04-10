@@ -250,6 +250,14 @@ public:
 	uint8	SlotConvert(uint8 slot,bool bracer=false);
 	void	Message_StringID(uint32 type, uint32 string_id, uint32 distance = 0);
 	void	Message_StringID(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
+	bool	FilteredMessageCheck(Mob *sender, eqFilterType filter);
+	void	FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
+	void	FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter,
+			uint32 string_id, const char *message1, const char *message2 = nullptr,
+			const char *message3 = nullptr, const char *message4 = nullptr,
+			const char *message5 = nullptr, const char *message6 = nullptr,
+			const char *message7 = nullptr, const char *message8 = nullptr,
+			const char *message9 = nullptr);
 	void	SendBazaarResults(uint32 trader_id,uint32 class_,uint32 race,uint32 stat,uint32 slot,uint32 type,char name[64],uint32 minprice,uint32 maxprice);
 	void	SendTraderItem(uint32 item_id,uint16 quantity);
 	uint16	FindTraderItem(int32 SerialNumber,uint16 Quantity);
@@ -297,6 +305,7 @@ public:
 	void			SetHideMe(bool hm);
 	inline uint16	GetPort()		const { return port; }
 	bool			IsDead() const { return(dead); }
+	bool			IsUnconscious() const { return ((cur_hp <= 0) ? true : false); }
 	inline bool		IsLFP() { return LFP; }
 	void			UpdateLFP();
 
@@ -786,7 +795,7 @@ public:
 	void	QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call = false);
 	void	PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootItem_Struct** bag_item_data = 0);
 	bool	AutoPutLootInInventory(ItemInst& inst, bool try_worn = false, bool try_cursor = true, ServerLootItem_Struct** bag_item_data = 0);
-	void	SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0, bool attuned=false, uint16 to_slot=SLOT_CURSOR);
+	bool	SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0, bool attuned=false, uint16 to_slot=SLOT_CURSOR);
 	void	SetStats(uint8 type,int16 set_val);
 	void	IncStats(uint8 type,int16 increase_val);
 	void	DropItem(int16 slot_id);

@@ -7,8 +7,8 @@ REPLACE INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES 
 UPDATE aa_effects SET base2 = 100 WHERE effectid = 294 AND base2 = 0;
 
 -- Consumption of Soul (Need live values - These are what had hard coded, but using spell effect)
-REPLACE INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('589', '1', '303', '200', '0');
-REPLACE INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('589', '2', '139', '2766', '0');
+REPLACE INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('559', '1', '303', '200', '0');
+REPLACE INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('559', '2', '139', '2766', '0');
 REPLACE INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('560', '1', '303', '400', '0');
 REPLACE INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('560', '2', '139', '2766', '0');
 REPLACE INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('561', '1', '303', '600', '0');

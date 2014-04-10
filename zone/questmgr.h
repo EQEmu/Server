@@ -41,6 +41,7 @@ public:
 
 	void StartQuest(Mob *_owner, Client *_initiator = nullptr, ItemInst* _questitem = nullptr);
 	void EndQuest();
+	bool QuestsRunning() { return !quests_running_.empty(); }
 
 	void Process();
 
@@ -66,9 +67,15 @@ public:
 	void addloot(int item_id, int charges = 0, bool equipitem = true);
 	void Zone(const char *zone_name);
 	void settimer(const char *timer_name, int seconds);
-    void settimerMS(const char *timer_name, int milliseconds);
+	void settimerMS(const char *timer_name, int milliseconds);
+	void settimerMS(const char *timer_name, int milliseconds, ItemInst *inst);
+	void settimerMS(const char *timer_name, int milliseconds, Mob *mob);
 	void stoptimer(const char *timer_name);
+	void stoptimer(const char *timer_name, ItemInst *inst);
+	void stoptimer(const char *timer_name, Mob *mob);
 	void stopalltimers();
+	void stopalltimers(ItemInst *inst);
+	void stopalltimers(Mob *mob);
 	void emote(const char *str);
 	void shout(const char *str);
 	void shout2(const char *str);
@@ -211,6 +218,10 @@ public:
 	void AssignToInstance(uint16 instance_id);
 	void AssignGroupToInstance(uint16 instance_id);
 	void AssignRaidToInstance(uint16 instance_id);
+	void RemoveFromInstance(uint16 instance_id);
+	//void RemoveGroupFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
+	//void RemoveRaidFromInstance(uint16 instance_id);	//potentially useful but not implmented at this time.
+	void RemoveAllFromInstance(uint16 instance_id);
 	void MovePCInstance(int zone_id, int instance_id, float x, float y, float z, float heading);
 	void FlagInstanceByGroupLeader(uint32 zone, int16 version);
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);

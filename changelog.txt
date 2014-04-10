@@ -1,5 +1,163 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/06/2014 ==
+Uleat: Changed Mob::CanThisClassDualWield() behavior. This should let non-monk/beastlord dual-wielding classes attack with either fist as long as the other hand is occupied.
+Notes:
+	See this thread for more information and to provide feedback: http://www.eqemulator.org/forums/showthread.php?p=229328#post229328
+	
+
+== 04/05/2014 ==
+Akkadius: Fix for the Fix for the Fix: Rule Combat:OneProcPerWeapon was created so that you can revert to the original proc functionality 
+	for custom servers that have balanced their content around having more than 1 aug proc on weapons. By having this rule set to 'false' you revert this functionality. 
+	This rule is set to 'true' by default as the original functionality from Live was intended to be
+Akkadius: (Performance Adjustment) Removed AsyncLoadVariables from InterserverTimer.Check() in both zone and world. By watching the MySQL general.log file on mass zone idle activity, you can
+	see that the query 'SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= timestamp' is called every 10 seconds. This function is loading
+	variables that are initially loaded on World and Zone bootup. When running a large amount of zone servers, the amount of MySQL chatter that is produced is enormous and 
+	unnecessary. For example, if I ran 400 zone servers, I would see 3,456,000 unnecessary queries from all idle or active zone processes in a 24 hour interval.
+Secrets: Added a rule to enable multiple procs from the same weapon's other slots if a proc is deemed to trigger, Defaults to true.
+	If Combat:OneProcPerWeapon is not enabled, we reset the try for that weapon regardless of if we procced or not.
+	This is for some servers that may want to have as many procs triggering from weapons as possible in a single round.
+	
+Optional SQL: utils/sql/git/optional/2014_04_05_ProcRules.sql
+	
+== 04/04/2014 ==
+Kayen: Implemented 'Physical Resists' (Resist Type 9) to be consistent with live based on extensive parsing.
+       SQL will add new field to npc_types 'PhR' and fill in database with values consistent with observations.          
+
+Required SQL: utils/sql/git/optional/2014_04_04_PhysicalResists.sql
+
+== 04/03/2014 ==
+Kayen: Implemented live like spell projectiles (ie. Mage Bolts). 
+
+Optional SQL: utils/sql/git/optional/2014_04_03_SpellProjectileRules.sql
+Note: The rules in this SQL are for setting the item id for the graphic used by the projectile on different clients.
+	
+== 04/01/2014 ==
+demonstar55: Implemented ability for a merchant to open and close shop.
+	Lua quest functions: e.self:MerchantOpenShop() and e.self:MerchantCloseShop()
+	GM Commands: #merchant_open_shop (short: #open_shop) and #merchant_close_shop (short: #close_shop)
+		default to status 100, just in case you need to force the merchants status
+Trevius: Fixed potential endless quest loop with EVENT_COMBAT and WipeHateList().
+
+== 03/31/2014 ==
+Uleat: Fix for unconscious skillups.
+Uleat: Fix for crash issue with nullptr reference in recent Client::SummonItem() work.
+Uleat: Added rule for GM Status check code in Client::SummonItem().
+Note: Rule default is set to 250..but, implementation is on hold until load item code handles the database 'minstatus' field.
+Uleat: Added RuleB(Bots, BotLevelsWithOwner). Bots will auto-update as their owner levels/de-levels. Appearance packets are sent to show the 'leveling effect' as well as updating client entities.
+Trevius: Prevented an endless loop crash related to EVENT_TASK_STAGE_COMPLETE.
+
+Optional Bot SQL: utils/sql/git/bot/optional/2014_03_31_BotLevelsWithOwnerRule.sql
+Note: This sql is required to activate the optional behavior.
+
+== 03/27/2014 ==
+Kayen: SE_Gate will now use have a fail chance as defined by its base value in the spell data.
+Kayen: SE_Succor will now have a baseline fail chance of (2%). Rule added to adjust this as needed.
+Kayen: SE_FeignDeath will now have a fail chance as defined by its base value in the spell data.
+
+Optional SQL: utils/sql/git/optional/2014_03_27_SuccorFailRule.sql
+
+== 03/22/2014 ==
+Uleat: Moved the existing 'load_bots' and 'drop_bots' sqls into the emu git repository for the time being. Look to the
+	/utils/sql/git/bots/ folder to find them. The 'load_bots' sql has been updated to include the below fix, as well as
+	collecting the multiple files into one. This should allow HeidiSQL to now run  it properly. (You will still need to
+	search for the optional scripts for the time being.)
+Uleat: Fixed bot guild script failure. For existing bot databases only, use this sql file to update the affected table and view.
+
+Required Bot SQL: 2014_03_22_BotGuildMember_ScriptFailureFix.sql
+
+== 03/19/2014 ==
+Kayen: Further refinements to root, charm, mez and fear behaviors - See commit message for full details
+
+New rule for 'Fear' break chance, and updates to default settings of various rules.
+Optional SQL: utils/sql/git/optional/2014_03_19_RulesUpdates.sql
+
+
+== 03/18/2014 ==
+Uleat: Fixed the name/account discrepancy in the Client::SummonItem() code as well as the origin of the mistake (thanks K_K!)
+Uleat: Condensed and rearranged certain snippets of code in SummonItem(). Added a 'augslotvisible' check to validation check.
+Note: If you are experiencing issues with SummonItem, please enable 'INVENTORY_ERROR' logging if it not active on your server.
+
+== 03/17/2014 ==
+Uleat: Updated Client::SummonItem() to check for valid item combinations when augmentations are passed.
+Uleat: Changed the return type of Client::SummonItem() from void to bool. Calling methods and APIs have not been update as yet.
+Uleat: Fixed the RoF Item structure to properly pass the 'augrestrict' variable. RoF clients now show restrictions in the Item Information window.
+
+Optional SQL: 2014/03/17_EnforceAugmentRules.sql
+Note: This adds the rules Inventory:EnforceAugmentRestriction, Inventory:EnforceAugmentUsability and Inventory:EnforceAugmentWear.
+	If you run into script/recipe issues, running this sql file will set the default enforcement rules to false.
+	If you still run into issues, you may want to check that your scripts are not trying to augment non-common items.
+	Please post any failures as bugs and be sure to include the base item ID, as well as any augment IDs that you are using.
+
+== 03/12/2014 ==
+Kayen: Melee/Magic runes are now calculated as bonuses. Resolved issues with runes not working and not fading properly.
+
+== 03/08/2014 ==
+Kayen: Revision to lull/harmony/pacification code to be consistent with live based on extensive personal parsing.
+*Lulls on initial cast do not check regular resists (MR ect) but only apply a flat ~7.5 % resist chance + level modifier
+*If Lull is resisted, a second resistance check is made this time using regular resists and a charisma modifier (same as charm)
+which if 'resisted' will cause the caster to gain aggro.
+
+== 03/05/2014 ==
+demonstar55: Corrected rogue's evade to be single target
+sorvani: fixed crash issue 119
+
+== 03/04/2014 ==
+Sorvani: Created RemoveFromInstance and RemoveAllFromInstance to remove a single player or all players in an instance.
+Sorvani: Exported to Lua as eq.remove_from_instance(instance_id) and eq.remove_all_from_instance(instance_id).
+Kayen: Revision to root code to be consistent with live based on extensive personal parsing.
+*ROOT has a 40% chance to do a resist check to break each buff tick.
+*If multiple roots on target. Root in first slot will always and only be check to break from nukes.
+*If multiple roots on target and broken by spell. Roots are removed ONE at a time in order of buff slot.
+*Roots on beneficial spells can not be broken by spell damage.
+
+Optional SQL: utils/sql/git/optional/2014_03_04_RootRule.sql
+
+== 03/03/2014 ==
+demonstar55: Implemented deadly strikes and gave rogues higher innate throwing crit chance
+
+New rules: Combat:RogueCritThrowingChance, Combat:RogueDeadlyStrikeChance, Combat:RogueDeadlyStrikeMod
+	Defaults should give fairly close to live results
+
+== 03/02/2014 ==
+Kayen: Revision to charm code to be consistent with live based on extensive personal parsing.
+*Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 200 CHA
+*Charisma DOES NOT extend charm durations.
+
+Optional SQL: utils/sql/git/optional/2014_03_02_CharmRules.sql
+
+demonstar55: Melee Crits, HoTs, DoTs messages should now be filtered correctly on all clients.
+	Clients that also support seeing others DoTs will now see them if they don't filter them
+	note: some newer clients have a 'mine only' option for HoTs but it functions the same as show
+
+== 02/27/2014 ==
+cavedude: Exported TrainDisc to Lua.
+
+== 02/26/2014 ==
+Kayen: Implemented SE_FrenziedDevestation - increase critical spell chacnce and 2x mana cost for DD spells
+Kayen: Fixed SE_SpellProcChance - Now works on spell dervived procs
+cavedude: Added two new NPC special_abilities. ALWAYS_FLEE, which forces the NPC to always flee ignoring FleeIfNotAlone and FLEE_PERCENT which allows you to change the HP an individual NPC will flee at. If no value is set, the rule is used as normal.
+cavedude: Fixed an issue where rectangular roamboxes could cause an NPC to get stuck on a single coord. 
+cavedude: Added a new roambox column, mindelay allowing you to have more control over the roambox delay.
+Uleat: Fix for 'sqrt' failure on vs2010 clients
+image: Added idle zone timer to save CPU cycles.
+
+Required SQL: utils/sql/git/required/2014_02_26_roambox_update.sql
+
+== 02/24/2014 ==
+cavedude: Better flee runspeed calculation. Added rule Combat:FleeMultiplier to alter this behavior.
+Sorvani: Updated GetUnusedInstanceID to not recycle instance ID's unless it has reached max (65535)
+
+== 02/23/2014 ==
+Secrets: Exported the client object SendTargetCommand to Perl.
+cavedude: Merchants will now keep better track of charges.
+
+== 02/20/2014 ==
+Kayen: Implemented SE_MitigateDotDamage	- dot spell mitigation rune with max value
+Kayen: Implemented SE_DistanceRemoval - removed from target when target moves X amount of distance away from where initially hit.
+
+Required SQL: utils/sql/git/2014_02_20_buff_updates.sql
+
 == 02/18/2014 ==
 Kayen: Implemented SE_TriggerOnReqCaster - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
 Kayen: Implemented SE_ImprovedTaunt	- Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y

@@ -167,7 +167,7 @@ public:
 	uint16 BotGetSpells(int spellslot) { return AIspells[spellslot].spellid; }
 	uint16 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
 	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
-	virtual float GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand);
+	virtual float GetProcChances(float ProcBonus, uint16 weapon_speed, uint16 hand);
 	virtual bool AvoidDamage(Mob* other, int32 &damage, bool CanRiposte);
 	virtual int GetMonkHandToHandDamage(void);
 	virtual bool TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse);
@@ -352,6 +352,7 @@ public:
 	static uint32 CreatedBotCount(uint32 botOwnerCharacterID, std::string* errorMessage);
 	static uint32 AllowedBotSpawns(uint32 botOwnerCharacterID, std::string* errorMessage);
 	static uint32 GetBotOwnerCharacterID(uint32 botID, std::string* errorMessage);
+	static void LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp);
 	//static bool SetBotOwnerCharacterID(uint32 botID, uint32 botOwnerCharacterID, std::string* errorMessage);
 	static std::string ClassIdToString(uint16 classId);
 	static std::string RaceIdToString(uint16 raceId);

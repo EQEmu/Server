@@ -2476,7 +2476,7 @@ void Bot::SaveBuffs() {
 
 			if(!database.RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO botbuffs (BotId, SpellId, CasterLevel, DurationFormula, "
 				"TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, "
-				"DeathSaveSuccessChance, CasterAARank, Persistent) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u);",
+				"dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance) VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
 				GetBotID(), buffs[BuffCount].spellid, buffs[BuffCount].casterlevel, spells[buffs[BuffCount].spellid].buffdurationformula,
 				buffs[BuffCount].ticsremaining,
 				CalculatePoisonCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
@@ -2484,8 +2484,12 @@ void Bot::SaveBuffs() {
 				CalculateCurseCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
 				CalculateCorruptionCounters(buffs[BuffCount].spellid) > 0 ? buffs[BuffCount].counters : 0,
 				buffs[BuffCount].numhits, buffs[BuffCount].melee_rune, buffs[BuffCount].magic_rune,
-				buffs[BuffCount].deathSaveSuccessChance,
-				buffs[BuffCount].deathsaveCasterAARank, IsPersistent), TempErrorMessageBuffer)) {
+				buffs[BuffCount].dot_rune,
+				buffs[BuffCount].caston_x, 
+				IsPersistent, 
+				buffs[BuffCount].caston_y,
+				buffs[BuffCount].caston_z, 
+				buffs[BuffCount].ExtraDIChance), TempErrorMessageBuffer)) {
 				errorMessage = std::string(TempErrorMessageBuffer);
 				safe_delete(Query);
 				Query = 0;
@@ -2515,7 +2519,7 @@ void Bot::LoadBuffs() {
 
 	bool BuffsLoaded = false;
 
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, DeathSaveSuccessChance, CasterAARank, Persistent FROM botbuffs WHERE BotId = %u", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
+	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance FROM botbuffs WHERE BotId = %u", GetBotID()), TempErrorMessageBuffer, &DatasetResult)) {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
@@ -2541,14 +2545,18 @@ void Bot::LoadBuffs() {
 			buffs[BuffCount].numhits = atoi(DataRow[8]);
 			buffs[BuffCount].melee_rune = atoi(DataRow[9]);
 			buffs[BuffCount].magic_rune = atoi(DataRow[10]);
-			buffs[BuffCount].deathSaveSuccessChance = atoi(DataRow[11]);
-			buffs[BuffCount].deathsaveCasterAARank = atoi(DataRow[12]);
+			buffs[BuffCount].dot_rune = atoi(DataRow[11]);
+			buffs[BuffCount].caston_x = atoi(DataRow[12]);
 			buffs[BuffCount].casterid = 0;
 
 			bool IsPersistent = false;
 
 			if(atoi(DataRow[13]))
 				IsPersistent = true;
+
+			buffs[BuffCount].caston_y = atoi(DataRow[14]);
+			buffs[BuffCount].caston_z = atoi(DataRow[15]);
+			buffs[BuffCount].ExtraDIChance = atoi(DataRow[16]);
 
 			buffs[BuffCount].persistant_buff = IsPersistent;
 
@@ -3143,9 +3151,9 @@ void Bot::SpellProcess()
 void Bot::BotMeditate(bool isSitting) {
 	if(isSitting) {
 		// If the bot is a caster has less than 99% mana while its not engaged, he needs to sit to meditate
-		if(GetManaRatio() < 99.0f)
+		if(GetManaRatio() < 99.0f || GetHPRatio() < 99.0f)
 		{
-			if(!IsSitting())
+			if (!IsEngaged() && !IsSitting())
 				Sit();
 		}
 		else
@@ -3228,6 +3236,9 @@ void Bot::BotRangedAttack(Mob* other) {
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
+
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
 
 	if(hidden || improved_hidden){
 		hidden = false;
@@ -5273,6 +5284,28 @@ uint32 Bot::GetBotOwnerCharacterID(uint32 botID, std::string* errorMessage) {
 	return Result;
 }
 
+void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
+	// This essentially performs a '#bot update,' with appearance packets, based on the current methods.
+	// This should not be called outside of Client::SetEXP() due to it's lack of rule checks.
+	if(client) {
+		std::list<Bot*> blist = entity_list.GetBotsByBotOwnerCharacterID(client->CharacterID());
+
+		for(std::list<Bot*>::iterator biter = blist.begin(); biter != blist.end(); ++biter) {
+			Bot* bot = *biter;
+			if(bot && (bot->GetLevel() != client->GetLevel())) {
+				bot->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
+				bot->CalcBotStats(false);
+				if(sendlvlapp)
+					bot->SendLevelAppearance();
+				// modified from Client::SetLevel()
+				bot->SendAppearancePacket(AT_WhoLevel, level, true, true); // who level change
+			}
+		}
+
+		blist.clear();
+	}
+}
+
 std::string Bot::ClassIdToString(uint16 classId) {
 	std::string Result;
 
@@ -6632,6 +6665,9 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		safe_delete(outapp);
 	}
 
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
+
 	if(GetTarget())
 		TriggerDefensiveProcs(weapon, other, Hand, damage);
 
@@ -6817,13 +6853,6 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 				if(base1 == spell.skill)
 					SpellSkill_Found = true;
 			break;
-
-			case SE_LimitSpellSubclass:{
-			int16 spell_skill = spell.skill * -1;
-			if(base1 == spell_skill)
-				LimitFound = true;
-			break;
-			}
 
 			case SE_LimitClass:
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
@@ -7423,13 +7452,6 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 					SpellSkill_Found = true;
 			break;
 
-		case SE_LimitSpellSubclass:{
-			int16 spell_skill = spell.skill * -1;
-			if(focus_spell.base[i] == spell_skill)
-				return 0;
-			break;
-			}
-
 		case SE_LimitClass:
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
 			if (!PassLimitClass(focus_spell.base[i], GetClass()))
@@ -7711,16 +7733,11 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 }
 
 //proc chance includes proc bonus
-float Bot::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand) {
+float Bot::GetProcChances(float ProcBonus, uint16 weapon_speed, uint16 hand) {
 	int mydex = GetDEX();
-	float AABonus = 0;
-	ProcBonus = 0;
-	ProcChance = 0;
+	float ProcChance = 0.0f;
 
-	if (aabonuses.ProcChance)
-		AABonus = float(aabonuses.ProcChance) / 100.0f;
-
-	switch(hand){
+	switch (hand) {
 		case SLOT_PRIMARY:
 			weapon_speed = attack_timer.GetDuration();
 			break;
@@ -7732,24 +7749,20 @@ float Bot::GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_spe
 			break;
 	}
 
-
 	//calculate the weapon speed in ms, so we can use the rule to compare against.
-
-	if(weapon_speed < RuleI(Combat, MinHastedDelay)) // fast as a client can swing, so should be the floor of the proc chance
+	// fast as a client can swing, so should be the floor of the proc chance
+	if (weapon_speed < RuleI(Combat, MinHastedDelay))
 		weapon_speed = RuleI(Combat, MinHastedDelay);
 
-	ProcBonus += (float(itembonuses.ProcChance + spellbonuses.ProcChance) / 1000.0f + AABonus);
-
-	if(RuleB(Combat, AdjustProcPerMinute) == true)
-	{
-		ProcChance = ((float)weapon_speed * RuleR(Combat, AvgProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
-		ProcBonus += float(mydex) * RuleR(Combat, ProcPerMinDexContrib) / 100.0f;
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
-	}
-	else
-	{
-		ProcChance = RuleR(Combat, BaseProcChance) + float(mydex) / RuleR(Combat, ProcDexDivideBy);
-		ProcChance = ProcChance + (ProcChance * ProcBonus);
+	if (RuleB(Combat, AdjustProcPerMinute)) {
+		ProcChance = (static_cast<float>(weapon_speed) *
+				RuleR(Combat, AvgProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
+		ProcBonus += static_cast<float>(mydex) * RuleR(Combat, ProcPerMinDexContrib);
+		ProcChance += ProcChance * ProcBonus / 100.0f;
+	} else {
+		ProcChance = RuleR(Combat, BaseProcChance) +
+			static_cast<float>(mydex) / RuleR(Combat, ProcDexDivideBy);
+		ProcChance += ProcChance*ProcBonus / 100.0f;
 	}
 
 	mlog(COMBAT__PROCS, "Proc chance %.2f (%.2f from bonuses)", ProcChance, ProcBonus);
@@ -14982,7 +14995,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				return;
 			}
 
-			Bot* targetedBot;
+			Bot *targetedBot = nullptr;
 
 			if(c->GetTarget() != nullptr) {
 				if (c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner() == c))

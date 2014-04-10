@@ -94,7 +94,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				dist2 <= spells[AIspells[i].spellid].range*spells[AIspells[i].spellid].range
 				)
 				&& (mana_cost <= GetMana() || GetMana() == GetMaxMana())
-				&& (AIspells[i].time_cancast+(MakeRandomInt(0, 4))) <= Timer::GetCurrentTime() //break up the spelling casting over a period of time.
+				&& (AIspells[i].time_cancast + (MakeRandomInt(0, 4) * 1000)) <= Timer::GetCurrentTime() //break up the spelling casting over a period of time.
 				) {
 
 #if MobAI_DEBUG_Spells >= 21
@@ -125,21 +125,19 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						break;
 					}
 					case SpellType_Root: {
-						if (
-							!tar->IsRooted()
-							&& dist2 >= 900
-							&& MakeRandomInt(0, 99) < 50
-							&& tar->DontRootMeBefore() < Timer::GetCurrentTime()
-							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
+						Mob *rootee = GetHateRandom();
+						if (rootee && !rootee->IsRooted() && MakeRandomInt(0, 99) < 50
+							&& rootee->DontRootMeBefore() < Timer::GetCurrentTime()
+							&& rootee->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
 							) {
 							if(!checked_los) {
-								if(!CheckLosFN(tar))
+								if(!CheckLosFN(rootee))
 									return(false);	//cannot see target... we assume that no spell is going to work since we will only be casting detrimental spells in this call
 								checked_los = true;
 							}
 							uint32 tempTime = 0;
-							AIDoSpellCast(i, tar, mana_cost, &tempTime);
-							tar->SetDontRootMeBefore(tempTime);
+							AIDoSpellCast(i, rootee, mana_cost, &tempTime);
+							rootee->SetDontRootMeBefore(tempTime);
 							return true;
 						}
 						break;
@@ -167,7 +165,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					}
 
 					case SpellType_InCombatBuff: {
-						if(MakeRandomInt(0,100) < 50)
+						if(MakeRandomInt(0, 99) < 50)
 						{
 							AIDoSpellCast(i, tar, mana_cost);
 							return true;
@@ -184,7 +182,20 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						break;
 					}
 					case SpellType_Slow:
-					case SpellType_Debuff:
+					case SpellType_Debuff: {
+						Mob * debuffee = GetHateRandom();
+						if (debuffee && manaR >= 10 && MakeRandomInt(0, 99 < 70) &&
+								debuffee->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0) {
+							if (!checked_los) {
+								if (!CheckLosFN(debuffee))
+									return false;
+								checked_los = true;
+							}
+							AIDoSpellCast(i, debuffee, mana_cost);
+							return true;
+						}
+						break;
+					}
 					case SpellType_Nuke: {
 						if (
 							manaR >= 10 && MakeRandomInt(0, 99) < 70
@@ -201,7 +212,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						break;
 					}
 					case SpellType_Dispel: {
-						if(MakeRandomInt(0, 100) < 15)
+						if(MakeRandomInt(0, 99) < 15)
 						{
 							if(!checked_los) {
 								if(!CheckLosFN(tar))
@@ -444,6 +455,7 @@ void NPC::AI_Init() {
 	roambox_distance = 0;
 	roambox_movingto_x = 0;
 	roambox_movingto_y = 0;
+	roambox_min_delay = 2500;
 	roambox_delay = 2500;
 }
 
@@ -1579,14 +1591,17 @@ void NPC::AI_DoMovement() {
 			movey *= MakeRandomInt(0, 1) ? 1 : -1;
 			roambox_movingto_x = GetX() + movex;
 			roambox_movingto_y = GetY() + movey;
+			//Try to calculate new coord using distance.
 			if (roambox_movingto_x > roambox_max_x || roambox_movingto_x < roambox_min_x)
 				roambox_movingto_x -= movex * 2;
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
 				roambox_movingto_y -= movey * 2;
+			//New coord is still invalid, ignore distance and just pick a new random coord. 
+			//If we're here we may have a roambox where one side is shorter than the specified distance. Commons, Wkarana, etc.
 			if (roambox_movingto_x > roambox_max_x || roambox_movingto_x < roambox_min_x)
-				roambox_movingto_x = roambox_max_x;
+				roambox_movingto_x = MakeRandomFloat(roambox_min_x+1,roambox_max_x-1);
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
-				roambox_movingto_y = roambox_max_y;
+				roambox_movingto_y = MakeRandomFloat(roambox_min_y+1,roambox_max_y-1);
 		}
 
 		mlog(AI__WAYPOINTS, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
@@ -1594,7 +1609,7 @@ void NPC::AI_DoMovement() {
 		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, GetZ(), walksp, true))
 		{
 			roambox_movingto_x = roambox_max_x + 1; // force update
-			pLastFightingDelayMoving = Timer::GetCurrentTime() + RandomTimer(roambox_delay, roambox_delay + 5000);
+			pLastFightingDelayMoving = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
 			SetMoving(false);
 			SendPosition();	// makes mobs stop clientside
 		}
@@ -1870,7 +1885,7 @@ bool NPC::AI_EngagedCastCheck() {
 			// try casting a heal on nearby
 			if (!entity_list.AICheckCloseBeneficialSpells(this, 25, MobAISpellRange, SpellType_Heal)) {
 				//nobody to heal, try some detrimental spells.
-				if(!AICastSpell(GetTarget(), 20, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm)) {
+				if(!AICastSpell(GetTarget(), 20, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root)) {
 					//no spell to cast, try again soon.
 					AIautocastspell_timer->Start(RandomTimer(500, 1000), false);
 				}

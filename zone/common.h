@@ -5,6 +5,7 @@
 #include "../common/spdat.h"
 
 #define	HIGHEST_RESIST 9 //Max resist type value
+#define MAX_SPELL_PROJECTILE 10 //Max amount of spell projectiles that can be active by a single mob.
 
 /* solar: macros for IsAttackAllowed, IsBeneficialAllowed */
 #define _CLIENT(x) (x && x->IsClient() && !x->CastToClient()->IsBecomeNPC())
@@ -122,7 +123,10 @@ enum {
 	TETHER = 33,
 	DESTRUCTIBLE_OBJECT = 34,
 	NO_HARM_FROM_CLIENT = 35,
-	MAX_SPECIAL_ATTACK = 36
+	ALWAYS_FLEE = 36,
+	FLEE_PERCENT = 37,
+	MAX_SPECIAL_ATTACK = 38
+	
 };
 
 typedef enum {	//fear states
@@ -155,8 +159,12 @@ struct Buffs_Struct {
 	uint32	numhits; //the number of physical hits this buff can take before it fades away, lots of druid armor spells take advantage of this mixed with powerful effects
 	uint32	melee_rune;
 	uint32	magic_rune;
-	uint8	deathSaveSuccessChance;
-	uint8	deathsaveCasterAARank;
+	uint32	dot_rune;
+	int32	caston_x;
+	int32	caston_y;
+	int32	caston_z;
+	int32	ExtraDIChance;
+	int16	RootBreakChance; //Not saved to dbase
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;
@@ -231,6 +239,7 @@ struct StatBonuses {
 	int		effective_casting_level;
 	int		reflect_chance;						// chance to reflect incoming spell
 	uint16	singingMod;
+	uint16	Amplification;						// stacks with singingMod
 	uint16	brassMod;
 	uint16	percussionMod;
 	uint16	windMod;
@@ -270,6 +279,7 @@ struct StatBonuses {
 	int16	DamageModifier[HIGHEST_SKILL+2];	//i
 	int16	MinDamageModifier[HIGHEST_SKILL+2]; //i
 	int16	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
+	int16	ProcChanceSPA;						// ProcChance from spell effects
 	int16	ExtraAttackChance;
 	int16	DoTShielding;
 	int16	DivineSaveChance[2];				// Second Chance (base1 = chance, base2 = spell on trigger)
@@ -307,8 +317,8 @@ struct StatBonuses {
 	//uint16	BlockSpellEffect[EFFECT_COUNT];		// Prevents spells with certain effects from landing on you *no longer used
 	bool	ImmuneToFlee;						// Bypass the fleeing flag
 	uint16	VoiceGraft;							// Stores the ID of the mob with which to talk through
-	uint16	SpellProcChance;					// chance to proc from sympathetic spell effects
-	uint16	CharmBreakChance;					// chance to break charm
+	int16	SpellProcChance;					// chance to proc from sympathetic spell effects
+	int16	CharmBreakChance;					// chance to break charm
 	int16	SongRange;							// increases range of beneficial bard songs
 	uint16	HPToManaConvert;					// Uses HP to cast spells at specific conversion
 	uint16	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
@@ -319,6 +329,7 @@ struct StatBonuses {
 	uint16	MeleeThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
 	uint16	SpellThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
 	uint16	MitigateSpellRune[2];				// 0 = Mitigation value 1 = Buff Slot
+	uint16	MitigateDotRune[2];					// 0 = Mitigation value 1 = Buff Slot
 	uint32	TriggerMeleeThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint32	TriggerSpellThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint16	ManaAbsorbPercentDamage[2];			// 0 = Mitigation value 1 = Buff Slot
@@ -328,9 +339,14 @@ struct StatBonuses {
 	bool	CriticalHealDecay;					// increase critical heal chance, decays based on spell level cast
 	bool	CriticalDotDecay;					// increase critical dot chance, decays based on spell level cast
 	bool	DivineAura;							// invulnerability
+	bool	DistanceRemoval;					// Check if Cancle if Moved effect is present
 	int16	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buffid
-	//bool	AbsorbMagicAtt;						// Magic Rune *Need to be implemented for NegateEffect
-	//bool	MeleeRune;							// Melee Rune *Need to be implemented for NegateEffect
+	int8	Root[2];							// The lowest buff slot a root can be found. [0] = Bool if has root [1] = buff slot
+	int16	FrenziedDevastation;				// base1= AArank(used) base2= chance increase spell criticals + all DD spells 2x mana.
+	uint16	AbsorbMagicAtt[2];					// 0 = magic rune value 1 = buff slot
+	uint16	MeleeRune[2];						// 0 = rune value 1 = buff slot
+	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
+	int8	Screech;							// -1 = Will be blocked if another Screech is +(1)
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

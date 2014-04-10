@@ -570,6 +570,9 @@ bool Client::Process() {
 				viral_timer_counter = 0;
 		}
 
+		if(projectile_timer.Check())
+			SpellProjectileEffect();
+					
 		if(spellbonuses.GravityEffect == 1) {
 			if(gravity_timer.Check())
 				DoGravityEffect();
@@ -581,7 +584,8 @@ bool Client::Process() {
 			{
 				if (!CombatRange(shield_target))
 				{
-					entity_list.MessageClose(this,false,100,0,"%s ceases shielding %s.",GetCleanName(),shield_target->GetCleanName());
+					entity_list.MessageClose_StringID(this, false, 100, 0,
+						END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
 					for (int y = 0; y < 2; y++)
 					{
 						if (shield_target->shielder[y].shielder_id == GetID())

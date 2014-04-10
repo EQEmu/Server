@@ -238,6 +238,14 @@ bool ItemInst::IsStackable() const
 	return m_item->Stackable;
 }
 
+bool ItemInst::IsCharged() const
+{
+	if(m_item->MaxCharges > 1)
+		return true;
+	else
+		return false;
+}
+
 // Can item be equipped?
 
 bool ItemInst::IsEquipable(uint16 race, uint16 class_) const

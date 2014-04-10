@@ -1615,7 +1615,8 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 
 	if (shield_target)
 	{
-		entity_list.MessageClose(this,false,100,0,"%s ceases shielding %s.",GetName(),shield_target->GetName());
+		entity_list.MessageClose_StringID(this, false, 100, 0,
+			END_SHIELDING, GetName(), shield_target->GetName());
 		for (int y = 0; y < 2; y++)
 		{
 			if (shield_target->shielder[y].shielder_id == GetID())
@@ -1640,7 +1641,8 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 			{
 				if (shield_target->shielder[x].shielder_id == 0)
 				{
-					entity_list.MessageClose(this,false,100,0,"%s uses their shield to guard %s.",GetName(),shield_target->GetName());
+					entity_list.MessageClose_StringID(this ,false, 100, 0,
+						START_SHIELDING, GetName(), shield_target->GetName());
 					shield_target->shielder[x].shielder_id = GetID();
 					int shieldbonus = shield->AC*2;
 					switch (GetAA(197))
@@ -1677,7 +1679,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 	if (!ack)
 	{
-		Message(0, "No more than two warriors may shield the same being.");
+		Message_StringID(0, ALREADY_SHIELDED);
 		shield_target = 0;
 		return;
 	}
@@ -3476,21 +3478,23 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	}
 	if(GetClass() == ROGUE){
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage,sizeof(SimpleMessage_Struct));
-		SimpleMessage_Struct *msg=(SimpleMessage_Struct *)outapp->pBuffer;
-		msg->color=0x010E;
-		if (!auto_attack && entity_list.Fighting(this)) {
+		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
+		msg->color = 0x010E;
+		Mob *evadetar = GetTarget();
+		if (!auto_attack && (evadetar && evadetar->CheckAggro(this)
+					&& evadetar->IsNPC())) {
 			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) {
-				msg->string_id=343;
-				entity_list.Evade(this);
+				msg->string_id = EVADE_SUCCESS;
+				RogueEvade(evadetar);
 			} else {
-				msg->string_id=344;
+				msg->string_id = EVADE_FAIL;
 			}
 		} else {
 			if (hidden){
-				msg->string_id=346;
+				msg->string_id = HIDE_SUCCESS;
 			}
 			else {
-				msg->string_id=345;
+				msg->string_id = HIDE_FAIL;
 			}
 		}
 		FastQueuePacket(&outapp);
@@ -5417,6 +5421,12 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		action = 0;
 	}
 
+	// 1199 I don't have time for that now. etc
+	if (!tmp->CastToNPC()->IsMerchantOpen()) {
+		tmp->Say_StringID(MakeRandomInt(1199, 1202));
+		action = 0;
+	}
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(Merchant_Click_Struct));
 	Merchant_Click_Struct* mco=(Merchant_Click_Struct*)outapp->pBuffer;
 
@@ -5561,8 +5571,13 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		Message(15,"You can only have one of a lore item.");
 		return;
 	}
-	if(tmpmer_used && (mp->quantity > prevcharges))
-		mp->quantity = prevcharges;
+	if(tmpmer_used && (mp->quantity > prevcharges || item->MaxCharges > 1))
+	{
+		if(prevcharges > item->MaxCharges && item->MaxCharges > 1)
+			mp->quantity = item->MaxCharges;
+		else
+			mp->quantity = prevcharges;
+	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerBuy, sizeof(Merchant_Sell_Struct));
 	Merchant_Sell_Struct* mpo=(Merchant_Sell_Struct*)outapp->pBuffer;
@@ -5573,13 +5588,11 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	int16 freeslotid=0;
 	int16 charges = 0;
-	if (item->Stackable) {
+	if (item->Stackable || item->MaxCharges > 1)
 		charges = mp->quantity;
-	} else {
-		// this needs expanded to handle varying charges from the merchant,
-		// but will require merchantlist_temp changes amonst other things.
+	else
 		charges = item->MaxCharges;
-	}
+
 	ItemInst* inst = database.CreateItem(item, charges);
 
 	int SinglePrice = 0;
@@ -5588,7 +5601,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	else
 		SinglePrice = (item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate);
 
-	mpo->price = SinglePrice * mp->quantity;
+	if(item->MaxCharges > 1)
+		mpo->price = SinglePrice;
+	else
+		mpo->price = SinglePrice * mp->quantity;
 	if(mpo->price < 0 )
 	{
 		safe_delete(outapp);
@@ -5632,9 +5648,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 
 	std::string packet;
-	if(mp->quantity==1 && item->MaxCharges>0 && item->MaxCharges<255)
-		mp->quantity=item->MaxCharges;
-
 	if (!stacked && inst) {
 		PutItemInInventory(freeslotid, *inst);
 		SendItemPacket(freeslotid, inst, ItemPacketTrade);
@@ -5756,37 +5769,36 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		//Message(13,"%s tells you, 'LOL NOPE'", vendor->GetName());
 		return;
 	}
-	if (RuleB(Merchant, UsePriceMod)){
-	price=(int)((item->Price*mp->quantity)*(RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(vendor,true)+0.5); // need to round up, because client does it automatically when displaying price
-	}
+
+	int cost_quantity = mp->quantity;
+	if(inst->IsCharged())
+		int cost_quantity = 1;
+
+	if (RuleB(Merchant, UsePriceMod))
+		price=(int)((item->Price*cost_quantity)*(RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(vendor,true)+0.5); // need to round up, because client does it automatically when displaying price
 	else
-		price=(int)((item->Price*mp->quantity)*(RuleR(Merchant, BuyCostMod))+0.5);
+		price=(int)((item->Price*cost_quantity)*(RuleR(Merchant, BuyCostMod))+0.5);
 	AddMoneyToPP(price,false);
 
-	if (inst->IsStackable())
+	if (inst->IsStackable() || inst->IsCharged())
 	{
 		unsigned int i_quan = inst->GetCharges();
-		if (mp->quantity > i_quan)
+		if (mp->quantity > i_quan || inst->IsCharged())
 			mp->quantity = i_quan;
 	}
 	else
-	{
 		mp->quantity = 1;
-	}
 
 	if (RuleB(EventLog, RecordSellToMerchant))
 		LogMerchant(this, vendor, mp->quantity, price, item, false);
 
-	int freeslot = 0;
-	int charges = 0;
-	if(inst->IsStackable())
-		charges = mp->quantity;
-	else
-		//charges = inst->GetCharges();
-		//FIXME: Temp merchant table uses 'charges' as the quantity, so doesn't properly handle charged items.
+	int charges = mp->quantity;
+	//Hack workaround so usable items with 0 charges aren't simply deleted
+	if(charges == 0 && item->ItemType != 11 && item->ItemType != 17 && item->ItemType != 19 && item->ItemType != 21)
 		charges = 1;
 
-	if((freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(),itemid,charges,true)) > 0){
+	int freeslot = 0;
+	if(charges > 0 && (freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(),itemid,charges,true)) > 0){
 		ItemInst* inst2 = inst->Clone();
 		if (RuleB(Merchant, UsePriceMod)){
 		inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor,false));
@@ -5845,6 +5857,10 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		this->DeleteItemInInventory(mp->itemslot,0,false);
 	else
 		this->DeleteItemInInventory(mp->itemslot,mp->quantity,false);
+
+	//This forces the price to show up correctly for charged items. 
+	if(inst->IsCharged())
+		mp->quantity = 1; 
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerSell, sizeof(Merchant_Purchase_Struct));
 	Merchant_Purchase_Struct* mco=(Merchant_Purchase_Struct*)outapp->pBuffer;
@@ -12621,32 +12637,38 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app) 
 		uint32 cost = 0;
 		uint32 current_currency = GetAlternateCurrencyValue(alt_cur_id);
 		uint32 merchant_id = tar->MerchantType;
-		bool found = false;
-		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
-		std::list<MerchantList>::const_iterator itr;
-		for(itr = merlist.begin(); itr != merlist.end(); ++itr) {
-			MerchantList ml = *itr;
-			if(GetLevel() < ml.level_required) {
-				continue;
+
+		if (RuleB(Merchant, EnableAltCurrencySell))	{
+			bool found = false;
+			std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
+			std::list<MerchantList>::const_iterator itr;
+			for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
+				MerchantList ml = *itr;
+				if (GetLevel() < ml.level_required) {
+					continue;
+				}
+
+				int32 fac = tar->GetPrimaryFaction();
+				if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+					continue;
+				}
+
+				item = database.GetItem(ml.item);
+				if (!item)
+					continue;
+
+				if (item->ID == inst->GetItem()->ID) {
+					cost = ml.alt_currency_cost;
+					found = true;
+					break;
+				}
 			}
 
-			int32 fac = tar->GetPrimaryFaction();
-			if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
-				continue;
-			}
-
-			item = database.GetItem(ml.item);
-			if(!item)
-				continue;
-
-			if(item->ID == inst->GetItem()->ID) {
-				cost = ml.alt_currency_cost;
-				found = true;
-				break;
+			if (!found) {
+				cost = 0;
 			}
 		}
-
-		if(!found) {
+		else {
 			cost = 0;
 		}
 
@@ -12796,6 +12818,10 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 			return;
 		}
 
+		if (!RuleB(Merchant, EnableAltCurrencySell))	{
+			return;
+		}
+
 		const Item_Struct* item = nullptr;
 		uint32 cost = 0;
 		uint32 current_currency = GetAlternateCurrencyValue(alt_cur_id);
@@ -12818,7 +12844,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 			if(!item)
 				continue;
 
-			if(item->ID == inst->GetItem()->ID) {
+			if(item->ID == inst->GetItem()->ID)	{
 				cost = ml.alt_currency_cost;
 				found = true;
 				break;

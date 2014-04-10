@@ -158,6 +158,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	FR = d->FR;
 	PR = d->PR;
 	Corrup = d->Corrup;
+	PhR = d->PhR;
 
 	STR = d->STR;
 	STA = d->STA;
@@ -199,6 +200,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	SetMana(GetMaxMana());
 
 	MerchantType = d->merchanttype;
+	merchant_open = GetClass() == MERCHANT;
 	adventure_template_id = d->adventure_template;
 	org_x = x;
 	org_y = y;
@@ -216,6 +218,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	roambox_min_y = -2;
 	roambox_movingto_x = -2;
 	roambox_movingto_y = -2;
+	roambox_min_delay = 1000;
 	roambox_delay = 1000;
 	org_heading = heading;
 	p_depop = false;
@@ -656,6 +659,9 @@ bool NPC::Process()
 		if(viral_timer_counter > 999)
 			viral_timer_counter = 0;
 	}
+
+	if(projectile_timer.Check())
+		SpellProjectileEffect();
 
 	if(spellbonuses.GravityEffect == 1) {
 		if(gravity_timer.Check())
@@ -1526,6 +1532,12 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 			case 'i':
 				SetSpecialAbility(IMMUNE_TAUNT, remove ? 0 : 1);
 				break;
+			case 'e':
+				SetSpecialAbility(ALWAYS_FLEE, remove ? 0 : 1);
+				break;
+			case 'h':
+				SetSpecialAbility(FLEE_PERCENT, remove ? 0 : 1);
+				break;
 
 			default:
 				break;
@@ -1686,7 +1698,14 @@ bool Mob::HasNPCSpecialAtk(const char* parse) {
 					HasAllAttacks = false;
 				}
 				break;
-
+			case 'e':
+				if(!GetSpecialAbility(ALWAYS_FLEE))
+					HasAllAttacks = false;
+				break;
+			case 'h':
+				if(!GetSpecialAbility(FLEE_PERCENT))
+					HasAllAttacks = false;
+				break;
 			default:
 				HasAllAttacks = false;
 				break;
@@ -2044,6 +2063,8 @@ void NPC::CalcNPCResists() {
 		PR = (GetLevel() * 11)/10;
 	if (!Corrup)
 		Corrup = 15;
+	if (!PhR)
+		PhR = 10;
 	return;
 }
 

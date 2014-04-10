@@ -2306,6 +2306,8 @@ uint64 Client::GetAllMoney() {
 }
 
 bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int chancemodi) {
+	if (IsDead() || IsUnconscious())
+		return false;
 	if (IsAIControlled()) // no skillups while chamred =p
 		return false;
 	if (skillid > HIGHEST_SKILL)
@@ -2349,6 +2351,10 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 }
 
 void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
+	if (IsDead() || IsUnconscious())
+		return;
+	if (IsAIControlled())
+		return;
 	if (langid >= MAX_PP_LANGUAGE)
 		return;		// do nothing if langid is an invalid language
 
@@ -2852,7 +2858,12 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	else
 		ClientFilters[FilterSpellCrits] = FilterHide;
 
-	Filter1(FilterMeleeCrits);
+	if (filter->filters[FilterMeleeCrits] == 0)
+		ClientFilters[FilterMeleeCrits] = FilterShow;
+	else if (filter->filters[FilterMeleeCrits] == 1)
+		ClientFilters[FilterMeleeCrits] = FilterShowSelfOnly;
+	else
+		ClientFilters[FilterMeleeCrits] = FilterHide;
 
 	if(filter->filters[FilterSpellDamage] == 0)
 		ClientFilters[FilterSpellDamage] = FilterShow;
@@ -2866,12 +2877,41 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter0(FilterOthersHit);
 	Filter0(FilterMissedMe);
 	Filter1(FilterDamageShields);
-	Filter1(FilterDOT);
+
+	if (GetClientVersionBit() & BIT_SoDAndLater) {
+		if (filter->filters[FilterDOT] == 0)
+			ClientFilters[FilterDOT] = FilterShow;
+		else if (filter->filters[FilterDOT] == 1)
+			ClientFilters[FilterDOT] = FilterShowSelfOnly;
+		else if (filter->filters[FilterDOT] == 2)
+			ClientFilters[FilterDOT] = FilterShowGroupOnly;
+		else
+			ClientFilters[FilterDOT] = FilterHide;
+	} else {
+		if (filter->filters[FilterDOT] == 0) // show functions as self only
+			ClientFilters[FilterDOT] = FilterShowSelfOnly;
+		else
+			ClientFilters[FilterDOT] = FilterHide;
+	}
+
 	Filter1(FilterPetHits);
 	Filter1(FilterPetMisses);
 	Filter1(FilterFocusEffects);
 	Filter1(FilterPetSpells);
-	Filter1(FilterHealOverTime);
+
+	if (GetClientVersionBit() & BIT_SoDAndLater) {
+		if (filter->filters[FilterHealOverTime] == 0)
+			ClientFilters[FilterHealOverTime] = FilterShow;
+		// This is called 'Show Mine Only' in the clients, but functions the same as show
+		// so instead of apply special logic, just set to show
+		else if (filter->filters[FilterHealOverTime] == 1)
+			ClientFilters[FilterHealOverTime] = FilterShow;
+		else
+			ClientFilters[FilterHealOverTime] = FilterHide;
+	} else {
+		// these clients don't have a 'self only' filter
+		Filter1(FilterHealOverTime);
+	}
 }
 
 // this version is for messages with no parameters
@@ -2963,6 +3003,111 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 	safe_delete(outapp);
 }
 
+// helper function, returns true if we should see the message
+bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
+{
+	eqFilterMode mode = GetFilter(filter);
+	// easy ones first
+	if (mode == FilterShow)
+		return true;
+	else if (mode == FilterHide)
+		return false;
+
+	if (!sender && mode == FilterHide) {
+		return false;
+	} else if (sender) {
+		if (this == sender) {
+			if (mode == FilterHide) // don't need to check others
+				return false;
+		} else if (mode == FilterShowSelfOnly) { // we know sender isn't us
+			return false;
+		} else if (mode == FilterShowGroupOnly) {
+			Group *g = GetGroup();
+			Raid *r = GetRaid();
+			if (g) {
+				if (g->IsGroupMember(sender))
+					return true;
+			} else if (r && sender->IsClient()) {
+				uint32 rgid1 = r->GetGroup(this);
+				uint32 rgid2 = r->GetGroup(sender->CastToClient());
+				if (rgid1 != 0xFFFFFFFF && rgid1 == rgid2)
+					return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	// we passed our checks
+	return true;
+}
+
+void Client::FilteredMessage_StringID(Mob *sender, uint32 type,
+		eqFilterType filter, uint32 string_id)
+{
+	if (!FilteredMessageCheck(sender, filter))
+		return;
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
+	SimpleMessage_Struct *sms = (SimpleMessage_Struct *)outapp->pBuffer;
+	sms->color = type;
+	sms->string_id = string_id;
+
+	sms->unknown8 = 0;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	return;
+}
+
+void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id,
+		const char *message1, const char *message2, const char *message3,
+		const char *message4, const char *message5, const char *message6,
+		const char *message7, const char *message8, const char *message9)
+{
+	if (!FilteredMessageCheck(sender, filter))
+		return;
+
+	int i, argcount, length;
+	char *bufptr;
+	const char *message_arg[9] = {0};
+
+	if (type == MT_Emote)
+		type = 4;
+
+	if (!message1) {
+		FilteredMessage_StringID(sender, type, filter, string_id);	// use the simple message instead
+		return;
+	}
+
+	i = 0;
+	message_arg[i++] = message1;
+	message_arg[i++] = message2;
+	message_arg[i++] = message3;
+	message_arg[i++] = message4;
+	message_arg[i++] = message5;
+	message_arg[i++] = message6;
+	message_arg[i++] = message7;
+	message_arg[i++] = message8;
+	message_arg[i++] = message9;
+
+	for (argcount = length = 0; message_arg[argcount]; argcount++)
+		length += strlen(message_arg[argcount]) + 1;
+
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FormattedMessage, length+13);
+	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
+	fm->string_id = string_id;
+	fm->type = type;
+	bufptr = fm->message;
+	for (i = 0; i < argcount; i++) {
+		strcpy(bufptr, message_arg[i]);
+		bufptr += strlen(message_arg[i]) + 1;
+	}
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
 
 void Client::SetTint(int16 in_slot, uint32 color) {
 	Color_Struct new_color;
@@ -6571,9 +6716,9 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	uint32 buff_count = GetMaxTotalSlots();
 	for (int i=0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
-			if ((HasRune() || HasPartialMeleeRune()) && buffs[i].melee_rune > 0) { rune_number += buffs[i].melee_rune; }
+			if (buffs[i].melee_rune > 0) { rune_number += buffs[i].melee_rune; }
 
-			if ((HasSpellRune() || HasPartialSpellRune()) && buffs[i].magic_rune > 0) { magic_rune_number += buffs[i].magic_rune; }
+			if (buffs[i].magic_rune > 0) { magic_rune_number += buffs[i].magic_rune; }
 		}
 	}
 

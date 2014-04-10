@@ -5792,6 +5792,30 @@ XS(XS_Client_SetThirst)
    XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SendTargetCommand); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SendTargetCommand)
+{
+   dXSARGS;
+   if (items != 2)
+       Perl_croak(aTHX_ "Usage: Client::SendTargetCommand(THIS, in_entid)");
+   {
+       Client *        THIS;
+       int32           in_entid = (uint32)SvUV(ST(1));
+
+       if (sv_derived_from(ST(0), "Client")) {
+           IV tmp = SvIV((SV*)SvRV(ST(0)));
+           THIS = INT2PTR(Client *,tmp);
+       }
+       else
+           Perl_croak(aTHX_ "THIS is not of type Client");
+       if(THIS == nullptr)
+           Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+       THIS->SendTargetCommand(in_entid);
+   }
+   XSRETURN_EMPTY;
+}
+
 XS(XS_Client_SetConsumption); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetConsumption)
 {
@@ -6109,6 +6133,7 @@ XS(boot_Client)
         newXSproto(strcpy(buf, "SetConsumption"), XS_Client_SetConsumption, file, "$$$");
 		newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
 		newXSproto(strcpy(buf, "PlayMP3"), XS_Client_PlayMP3, file, "$;$");
+		newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
 		XSRETURN_YES;
 }
 

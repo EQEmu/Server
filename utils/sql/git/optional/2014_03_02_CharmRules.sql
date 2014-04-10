@@ -1,0 +1,2 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:CharismaCharmDuration', 'false', 'Allow CHA to extend charm duration.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:CharismaResistCap', '200', 'Maximium amount of CHA that will effect charm resist rate.');

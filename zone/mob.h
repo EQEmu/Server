@@ -146,6 +146,7 @@ public:
 	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
 	bool CombatRange(Mob* other);
 	virtual inline bool IsBerserk() { return false; } // only clients
+	void RogueEvade(Mob *other);
 
 	//Appearance
 	void SendLevelAppearance();
@@ -190,7 +191,8 @@ public:
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration){ return duration;}
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
-		int resist_override = 0, bool CharismaCheck = false);
+		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false);
+	int ResistPhysical(int level_diff, uint8 caster_level);
 	uint16 GetSpecializeSkillValue(uint16 spell_id) const;
 	void SendSpellBarDisable();
 	void SendSpellBarEnable(uint16 spellid);
@@ -221,6 +223,8 @@ public:
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks();
 	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
+	void SpellProjectileEffect();
+	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id);
 
 	//Buff
 	void BuffProcess();
@@ -247,14 +251,6 @@ public:
 	virtual int GetMaxTotalSlots() const { return 0; }
 	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
 	virtual void UninitializeBuffSlots() { }
-	inline bool HasRune() const { return m_hasRune; }
-	inline bool HasSpellRune() const { return m_hasSpellRune; }
-	inline bool HasPartialMeleeRune() const { return m_hasPartialMeleeRune; }
-	inline bool HasPartialSpellRune() const { return m_hasPartialSpellRune; }
-	inline void SetHasRune(bool hasRune) { m_hasRune = hasRune; }
-	inline void SetHasSpellRune(bool hasSpellRune) { m_hasSpellRune = hasSpellRune; }
-	inline void SetHasPartialMeleeRune(bool hasPartialMeleeRune) { m_hasPartialMeleeRune = hasPartialMeleeRune; }
-	inline void SetHasPartialSpellRune(bool hasPartialSpellRune) { m_hasPartialSpellRune = hasPartialSpellRune; }
 	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
 	void SendBuffsToClient(Client *c);
 	inline Buffs_Struct* GetBuffs() { return buffs; }
@@ -297,7 +293,7 @@ public:
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
 	inline void SetOOCRegen(int32 newoocregen) {oocregen = newoocregen;}
 	virtual void Heal();
-	virtual void HealDamage(uint32 ammount, Mob* caster = nullptr);
+	virtual void HealDamage(uint32 ammount, Mob* caster = nullptr, uint16 spell_id = SPELL_UNKNOWN);
 	virtual void SetMaxHP() { cur_hp = max_hp; }
 	virtual inline uint16 GetBaseRace() const { return base_race; }
 	virtual inline uint8 GetBaseGender() const { return base_gender; }
@@ -344,6 +340,7 @@ public:
 	inline virtual int16 GetPR() const { return PR + itembonuses.PR + spellbonuses.PR; }
 	inline virtual int16 GetCR() const { return CR + itembonuses.CR + spellbonuses.CR; }
 	inline virtual int16 GetCorrup() const { return Corrup + itembonuses.Corrup + spellbonuses.Corrup; }
+	inline virtual int16 GetPhR() const { return PhR; }
 	inline StatBonuses GetItemBonuses() const { return itembonuses; }
 	inline StatBonuses GetSpellBonuses() const { return spellbonuses; }
 	inline StatBonuses GetAABonuses() const { return aabonuses; }
@@ -524,6 +521,13 @@ public:
 	virtual void Message_StringID(uint32 type, uint32 string_id, const char* message, const char* message2 = 0,
 		const char* message3 = 0, const char* message4 = 0, const char* message5 = 0, const char* message6 = 0,
 		const char* message7 = 0, const char* message8 = 0, const char* message9 = 0, uint32 distance = 0) { }
+	virtual void FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id) { }
+	virtual void FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter,
+			uint32 string_id, const char *message1, const char *message2 = nullptr,
+			const char *message3 = nullptr, const char *message4 = nullptr,
+			const char *message5 = nullptr, const char *message6 = nullptr,
+			const char *message7 = nullptr, const char *message8 = nullptr,
+			const char *message9 = nullptr) { }
 	void Say(const char *format, ...);
 	void Say_StringID(uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
 		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
@@ -593,6 +597,7 @@ public:
 	void MeleeLifeTap(int32 damage);
 	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
 	bool ImprovedTaunt();
+	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -914,6 +919,7 @@ protected:
 	int16 DR;
 	int16 PR;
 	int16 Corrup;
+	int16 PhR;
 	bool moving;
 	int targeted;
 	bool findable;
@@ -969,9 +975,10 @@ protected:
 	bool PassLimitClass(uint32 Classes_, uint16 Class_);
 	void TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand = 13, int damage=0);
 	void TryWeaponProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = 13);
+	void TrySpellProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = 13);
 	void TryWeaponProc(const ItemInst* weapon, Mob *on, uint16 hand = 13);
 	void ExecWeaponProc(const ItemInst* weapon, uint16 spell_id, Mob *on);
-	virtual float GetProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
+	virtual float GetProcChances(float ProcBonus, uint16 weapon_speed = 30, uint16 hand = 13);
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
 	int GetWeaponDamage(Mob *against, const Item_Struct *weapon_item);
 	int GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate = nullptr);
@@ -983,7 +990,6 @@ protected:
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	VERTEX UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	void PrintRoute();
-	void UpdateRuneFlags();
 
 	virtual float GetSympatheticProcChances(float &ProcBonus, float &ProcChance, int32 cast_time, int16 ProcRateMod);
 
@@ -1039,6 +1045,12 @@ protected:
 	uint8 bardsong_slot;
 	uint32 bardsong_target_id;
 
+	Timer projectile_timer;
+	uint32 projectile_spell_id[MAX_SPELL_PROJECTILE];
+	uint16 projectile_target_id[MAX_SPELL_PROJECTILE];
+	uint8 projectile_increment[MAX_SPELL_PROJECTILE];
+	float projectile_x[MAX_SPELL_PROJECTILE], projectile_y[MAX_SPELL_PROJECTILE], projectile_z[MAX_SPELL_PROJECTILE];
+
 	float rewind_x;
 	float rewind_y;
 	float rewind_z;
@@ -1075,7 +1087,6 @@ protected:
 	bool inWater; // Set to true or false by Water Detection code if enabled by rules
 	bool has_virus; // whether this mob has a viral spell on them
 	uint16 viral_spells[MAX_SPELL_TRIGGER*2]; // Stores the spell ids of the viruses on target and caster ids
-	int16 rooted_mod; //Modifier to root break chance, defined when root is cast on a target.
 	bool offhand;
 	bool has_shieldequiped;
 	bool has_numhits;
@@ -1183,11 +1194,6 @@ protected:
 	float tar_vz;
 	float test_vector;
 
-	bool m_hasRune;
-	bool m_hasSpellRune;
-	bool m_hasPartialMeleeRune;
-	bool m_hasPartialSpellRune;
-	bool m_hasDeathSaveChance;
 	uint32 m_spellHitsLeft[38]; // Used to track which spells will have their numhits incremented when spell finishes casting, 38 Buffslots
 	int flymode;
 	bool m_targetable;

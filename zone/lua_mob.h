@@ -344,6 +344,16 @@ public:
 	void ProcessSpecialAbilities(std::string str);
 	void SetAppearance(int app);
 	void SetAppearance(int app, bool ignore_self);
+	void SetDestructibleObject(bool set);
+	bool IsImmuneToSpell(int spell_id, Lua_Mob caster);
+	void BuffFadeBySpellID(int spell_id);
+	void BuffFadeByEffect(int effect_id);
+	void BuffFadeByEffect(int effect_id, int skipslot);
+	void BuffFadeAll();
+	void BuffFadeBySlot(int slot);
+	void BuffFadeBySlot(int slot, bool recalc_bonuses);
+	int CanBuffStack(int spell_id, int caster_level);
+	int CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite);
 };
 
 #endif

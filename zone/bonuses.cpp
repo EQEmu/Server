@@ -963,7 +963,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->GiveDoubleAttack += base1;
 				break;
 			case SE_ProcChance:
-				newbon->ProcChance += base1;
+				newbon->ProcChanceSPA += base1;
 				break;
 			case SE_RiposteChance:
 				newbon->RiposteChance += base1;
@@ -1228,6 +1228,14 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_FrenziedDevastation:
+				newbon->FrenziedDevastation += base2;
+				break;
+
+			case SE_SpellProcChance:
+				newbon->SpellProcChance += base1;
+				break;
+
 		}
 	}
 }
@@ -1350,16 +1358,27 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_AttackSpeed2:
 			{
 				if ((effect_value - 100) > 0) { // Haste V2 - Stacks with V1 but does not Overcap
+					if (newbon->hastetype2 < 0) break; //Slowed - Don't apply haste2
 					if ((effect_value - 100) > newbon->hastetype2) {
 						newbon->hastetype2 = effect_value - 100;
 					}
+				}
+				else if ((effect_value - 100) < 0) { // Slow
+					int real_slow_value = (100 - effect_value) * -1;
+					if (real_slow_value < newbon->hastetype2)
+						newbon->hastetype2 = real_slow_value;
 				}
 				break;
 			}
 
 			case SE_AttackSpeed3:
 			{
-				if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
+				if (effect_value < 0){ //Slow
+					if (effect_value < newbon->hastetype3)
+						newbon->hastetype3 = effect_value;
+				}
+
+				else if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
 					if (effect_value > newbon->hastetype3) {
 						newbon->hastetype3 = effect_value;
 					}
@@ -1369,18 +1388,24 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_AttackSpeed4:
 			{
-				if (effect_value > 0) {
+				if (effect_value < 0) //A few spells use negative values(Descriptions all indicate it should be a slow)
+					effect_value = effect_value * -1;
+
+				if (effect_value > 0 && effect_value > newbon->inhibitmelee) {
+
 					if (slow_mitigation){
 						int new_effect_value = SlowMitigation(false,caster,effect_value);
 						if (new_effect_value > newbon->inhibitmelee) {
-								newbon->inhibitmelee = new_effect_value;
-								SlowMitigation(true,caster);
+							newbon->inhibitmelee = new_effect_value;
+							SlowMitigation(true,caster);
 						}
 					}
+
 					else if (effect_value > newbon->inhibitmelee) {
-								newbon->inhibitmelee = effect_value;
+						newbon->inhibitmelee = effect_value;
 					}
 				}
+			
 				break;
 			}
 
@@ -1607,12 +1632,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->reflect_chance += effect_value;
 				break;
 
-			case SE_SingingSkill:
-			{
-				if(effect_value > newbon->singingMod)
-					newbon->singingMod = effect_value;
+			case SE_Amplification:
+				newbon->Amplification += effect_value;
 				break;
-			}
 
 			case SE_ChangeAggro:
 				newbon->hatemod += effect_value;
@@ -1885,17 +1907,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_ProcChance:
 			{
-				//multiplier is to be compatible with item effects,watching for overflow too
-				effect_value = effect_value<3000? effect_value : 3000;
-
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
-					newbon->ProcChance += effect_value;
+					newbon->ProcChanceSPA += effect_value;
 
-				else if((effect_value < 0) && (newbon->DoubleAttackChance > effect_value))
-					newbon->ProcChance = effect_value;
+				else if((effect_value < 0) && (newbon->ProcChanceSPA > effect_value))
+					newbon->ProcChanceSPA = effect_value;
 
-				if(newbon->ProcChance < effect_value)
-					newbon->ProcChance = effect_value;
+				if(newbon->ProcChanceSPA < effect_value)
+					newbon->ProcChanceSPA = effect_value;
 
 				break;
 			}
@@ -2239,6 +2258,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				}
 				break;
 			}
+
+			case SE_MitigateDotDamage:
+			{
+				if (newbon->MitigateDotRune[0] < effect_value){
+					newbon->MitigateDotRune[0] = effect_value;
+					newbon->MitigateDotRune[1] = buffslot;
+				}
+				break;
+			}
 			
 			case SE_ManaAbsorbPercentDamage:
 			{
@@ -2513,6 +2541,59 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				}
 				break;
 
+
+			case SE_DistanceRemoval:
+				newbon->DistanceRemoval = true;
+				break;
+
+			case SE_FrenziedDevastation:
+				newbon->FrenziedDevastation += spells[spell_id].base2[i];
+				break;
+
+			case SE_Root:
+				if (newbon->Root[0] && (newbon->Root[1] > buffslot)){
+					newbon->Root[0] = 1;
+					newbon->Root[1] = buffslot;
+				}
+				else if (!newbon->Root[0]){
+					newbon->Root[0] = 1;
+					newbon->Root[1] = buffslot;
+				}
+				break;
+
+			case SE_Rune:
+
+				if (newbon->MeleeRune[0] && (newbon->MeleeRune[1] > buffslot)){
+
+					newbon->MeleeRune[0] = effect_value;
+					newbon->MeleeRune[1] = buffslot;
+				}
+				else if (!newbon->MeleeRune[0]){
+					newbon->MeleeRune[0] = effect_value;
+					newbon->MeleeRune[1] = buffslot;
+				}
+
+				break;
+
+			case SE_AbsorbMagicAtt:
+				if (newbon->AbsorbMagicAtt[0] && (newbon->AbsorbMagicAtt[1] > buffslot)){
+					newbon->AbsorbMagicAtt[0] = effect_value;
+					newbon->AbsorbMagicAtt[1] = buffslot;
+				}
+				else if (!newbon->AbsorbMagicAtt[0]){
+					newbon->AbsorbMagicAtt[0] = effect_value;
+					newbon->AbsorbMagicAtt[1] = buffslot;
+				}
+				break;
+
+			case SE_NegateIfCombat:
+				newbon->NegateIfCombat = true;
+				break;
+
+			case SE_Screech: 
+				newbon->Screech = effect_value;
+				break;
+			
 		}
 	}
 }
@@ -3124,10 +3205,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.reflect_chance = effect_value;
 					break;
 
-				case SE_SingingSkill:
-					spellbonuses.singingMod = effect_value;
-					itembonuses.singingMod = effect_value;
-					aabonuses.singingMod = effect_value;
+				case SE_Amplification:
+					spellbonuses.Amplification = effect_value;
+					itembonuses.Amplification = effect_value;
+					aabonuses.Amplification = effect_value;
 					break;
 
 				case SE_ChangeAggro:
@@ -3300,9 +3381,9 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_ProcChance:
-					spellbonuses.ProcChance = effect_value;
-					aabonuses.ProcChance = effect_value;
-					itembonuses.ProcChance = effect_value;
+					spellbonuses.ProcChanceSPA = effect_value;
+					aabonuses.ProcChanceSPA = effect_value;
+					itembonuses.ProcChanceSPA = effect_value;
 					break;
 
 				case SE_ExtraAttackChance:
@@ -3556,6 +3637,11 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 				case SE_MitigateSpellDamage:
 					spellbonuses.MitigateSpellRune[0] = effect_value;
 					spellbonuses.MitigateSpellRune[1] = -1;
+					break;
+
+				case SE_MitigateDotDamage:
+					spellbonuses.MitigateDotRune[0] = effect_value;
+					spellbonuses.MitigateDotRune[1] = -1;
 					break;
 
 				case SE_ManaAbsorbPercentDamage:
@@ -3841,7 +3927,38 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.CriticalMend = effect_value;
 					aabonuses.CriticalMend = effect_value;
 					break;
-			
+
+				case SE_DistanceRemoval:
+					spellbonuses.DistanceRemoval = effect_value;
+					break;
+
+				case SE_ImprovedTaunt:
+					spellbonuses.ImprovedTaunt[0] = effect_value;
+					spellbonuses.ImprovedTaunt[1] = effect_value;
+					spellbonuses.ImprovedTaunt[2] = -1;
+					break;
+
+				case SE_FrenziedDevastation:
+					spellbonuses.FrenziedDevastation = effect_value;
+					aabonuses.FrenziedDevastation = effect_value;
+					itembonuses.FrenziedDevastation = effect_value;
+					break;
+
+				case SE_Root:
+					spellbonuses.Root[0] = effect_value;
+					spellbonuses.Root[1] = -1;
+					break;
+
+				case SE_Rune:
+					spellbonuses.MeleeRune[0] = effect_value;
+					spellbonuses.MeleeRune[1] = -1;
+					break;
+
+				case SE_AbsorbMagicAtt:
+					spellbonuses.AbsorbMagicAtt[0] = effect_value;
+					spellbonuses.AbsorbMagicAtt[1] = -1;
+					break;
+				
 			}
 		}
 	}

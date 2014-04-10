@@ -138,6 +138,83 @@ enum ItemUseTypes : uint8
 };
 
 /*
+**	Augmentation use types (in-work)
+**
+**	(ref: dbstr_us.txt)
+**
+*/
+enum AugmentationUseTypes : uint32 {
+	AugTypeNone = 0,				// not 100% sure on this...
+	AugTypeGeneralSingleStat,		/*1^16^1 (General: Single Stat)^0*/
+	AugTypeGeneralMultipleStat,		/*2^16^2 (General: Multiple Stat)^0*/
+	AugTypeGeneralSpellEffect,		/*3^16^3 (General: Spell Effect)^0*/
+	AugTypeWeaponGeneral,			/*4^16^4 (Weapon: General)^0*/
+	AugTypeWeaponElemDamage,		/*5^16^5 (Weapon: Elem Damage)^0*/
+	AugTypeWeaponBaseDamage,		/*6^16^6 (Weapon: Base Damage)^0*/
+	AugTypeGeneralGroup,			/*7^16^7 (General: Group)^0*/
+	AugTypeGeneralRaid,				/*8^16^8 (General: Raid)^0*/
+	AugTypeGeneralDragonsPoints,	/*9^16^9 (General: Dragons Points)^0*/
+	AugTypeCraftedCommon,			/*10^16^10 (Crafted: Common)^0*/
+	AugTypeCraftedGroup1,			/*11^16^11 (Crafted: Group)^0*/
+	AugTypeCraftedRaid1,			/*12^16^12 (Crafted: Raid)^0*/
+	AugTypeEnergeiacGroup,			/*13^16^13 (Energeiac: Group)^0*/
+	AugTypeEnergeiacRaid,			/*14^16^14 (Energeiac: Raid)^0*/
+	AugTypeEmblem,					/*15^16^15 (Emblem)^0*/
+	AugTypeCraftedGroup2,			/*16^16^16 (Crafted: Group)^0*/
+	AugTypeCraftedRaid2,			/*17^16^17 (Crafted: Raid)^0*/
+	AugTypeUnknown1,				/*18^16^18^0*/
+	AugTypeUnknown2,				/*19^16^19^0*/
+	AugTypeOrnamentation,			/*20^16^20 (Ornamentation)^0*/
+	AugTypeSpecialOrnamentation,	/*21^16^21 (Special Ornamentation)^0*/
+	AugTypeUnknown3,				/*22^16^22^0*/
+	AugTypeUnknown4,				/*23^16^23^0*/
+	AugTypeUnknown5,				/*24^16^24^0*/
+	AugTypeUnknown6,				/*25^16^25^0*/
+	AugTypeUnknown7,				/*26^16^26^0*/
+	AugTypeUnknown8,				/*27^16^27^0*/
+	AugTypeUnknown9,				/*28^16^28^0*/
+	AugTypeUnknown10,				/*29^16^29^0*/
+	AugTypeEpic25,					/*30^16^30^0*/
+	AugTypeTest,					/*31^16^Test^0*/ // listed as 31^16^31^0 in 5-10 client
+	_AugTypeCount
+};
+
+/*
+**	Augmentation restriction types (in-work)
+**
+**	(ref: eqstr_us.txt)
+**
+*/
+enum AugmentationRestrictionTypes : uint8 {
+/*4690*/	AugRestrAny = 0,
+/*9134*/	AugRestrArmor,
+/*9135*/	AugRestrWeapons,
+/*9136*/	AugRestr1HWeapons,
+/*9137*/	AugRestr2HWeapons,
+/*9138*/	AugRestr1HSlash,
+/*9139*/	AugRestr1HBlunt,
+/*9140*/	AugRestrPiercing,
+/*9148*/	AugRestrHandToHand,
+/*9141*/	AugRestr2HSlash,
+/*9142*/	AugRestr2HBlunt,
+/*9143*/	AugRestr2HPierce,
+/*9144*/	AugRestrBows,
+/*9145*/	AugRestrShields,
+/*8052*/	AugRestr1HSlash1HBluntOrHandToHand,
+/*9200*/	AugRestr1HBluntOrHandToHand,		// no listed peq entries
+
+// these three appear to be post-RoF (12-10-2012) and can not be verified until RoF (05-10-2013) is supported
+/*????*/	AugRestrUnknown1,
+/*????*/	AugRestrUnknown2,
+/*????*/	AugRestrUnknown3,					// last value in peq entries
+			_AugRestrCount
+
+/*4687*/	//AugTypeAllItems, // ?? unknown atm
+/*4688*/	//AugTypePrestige, // ?? unknown atm
+/*4689*/	//AugTypeNonPrestige, // ?? unknown atm
+};
+
+/*
 **	Container use types
 **
 **	This correlates to world 'object.type' (object.h/Object.cpp) as well as Item_Struct.BagType

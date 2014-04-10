@@ -114,6 +114,7 @@ private:
 
 	std::map<std::string, std::string> vars_;
 	SV *_empty_sv;
+	std::map<std::string, int> clear_vars_;
 };
 
 #endif

@@ -560,6 +560,11 @@ void Lua_Client::UnscribeSpellAll(bool update_client) {
 	self->UnscribeSpellAll(update_client);
 }
 
+void Lua_Client::TrainDisc(int itemid) {
+	Lua_Safe_Call_Void();
+	self->TrainDiscipline(itemid);
+}
+
 void Lua_Client::UntrainDisc(int slot) {
 	Lua_Safe_Call_Void();
 	self->UntrainDisc(slot);
@@ -1352,6 +1357,7 @@ luabind::scope lua_register_client() {
 		.def("UnscribeSpell", (void(Lua_Client::*)(int,bool))&Lua_Client::UnscribeSpell)
 		.def("UnscribeSpellAll", (void(Lua_Client::*)(void))&Lua_Client::UnscribeSpellAll)
 		.def("UnscribeSpellAll", (void(Lua_Client::*)(bool))&Lua_Client::UnscribeSpellAll)
+		.def("TrainDisc", (void(Lua_Client::*)(int))&Lua_Client::TrainDisc)
 		.def("UntrainDisc", (void(Lua_Client::*)(int))&Lua_Client::UntrainDisc)
 		.def("UntrainDisc", (void(Lua_Client::*)(int,bool))&Lua_Client::UntrainDisc)
 		.def("UntrainDiscAll", (void(Lua_Client::*)(void))&Lua_Client::UntrainDiscAll)

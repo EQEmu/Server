@@ -138,6 +138,7 @@ public:
 	void UnscribeSpell(int slot, bool update_client);
 	void UnscribeSpellAll();
 	void UnscribeSpellAll(bool update_client);
+	void TrainDisc(int itemid);
 	void UntrainDisc(int slot);
 	void UntrainDisc(int slot, bool update_client);
 	void UntrainDiscAll();

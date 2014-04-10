@@ -276,6 +276,14 @@ Mob::Mob(const char* in_name,
 	casting_spell_inventory_slot = 0;
 	target = 0;
 
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_spell_id[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_target_id[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_increment[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_x[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_y[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_z[i] = 0; }
+	projectile_timer.Disable();
+
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	memset(&spellbonuses, 0, sizeof(StatBonuses));
 	memset(&aabonuses, 0, sizeof(StatBonuses));
@@ -349,12 +357,6 @@ Mob::Mob(const char* in_name,
 	nextinchpevent = -1;
 
 	TempPets(false);
-	SetHasRune(false);
-	SetHasSpellRune(false);
-	SetHasPartialMeleeRune(false);
-	SetHasPartialSpellRune(false);
-
-	m_hasDeathSaveChance = false;
 
 	m_is_running = false;
 
@@ -2086,27 +2088,35 @@ void Mob::SetAttackTimer() {
 
 }
 
-bool Mob::CanThisClassDualWield(void) const
-{
-	if (!IsClient()) {
+bool Mob::CanThisClassDualWield(void) const {
+	if(!IsClient()) {
 		return(GetSkill(SkillDualWield) > 0);
-	} else {
-		const ItemInst* inst = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+	}
+	else if(CastToClient()->HasSkill(SkillDualWield)) {
+		const ItemInst* pinst = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+		const ItemInst* sinst = CastToClient()->GetInv().GetItem(SLOT_SECONDARY);
+
 		// 2HS, 2HB, or 2HP
-		if (inst && inst->IsType(ItemClassCommon)) {
-			const Item_Struct* item = inst->GetItem();
-			if ((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
+		if(pinst && pinst->IsWeapon()) {
+			const Item_Struct* item = pinst->GetItem();
+
+			if((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
 				return false;
-		} else {
-			//No weapon in hand... using hand-to-hand...
-			//only monks and beastlords? can dual wield their fists.
-			if(class_ != MONK && class_ != MONKGM && class_ != BEASTLORD && class_ != BEASTLORDGM) {
-				return false;
-			}
 		}
 
-		return (CastToClient()->HasSkill(SkillDualWield));	// No skill = no chance
+		// OffHand Weapon
+		if(sinst && !sinst->IsWeapon())
+			return false;
+
+		// Dual-Wielding Empty Fists
+		if(!pinst && !sinst)
+			if(class_ != MONK && class_ != MONKGM && class_ != BEASTLORD && class_ != BEASTLORDGM)
+				return false;
+
+		return true;
 	}
+
+	return false;
 }
 
 bool Mob::CanThisClassDoubleAttack(void) const
@@ -2456,13 +2466,18 @@ bool Mob::RemoveFromHateList(Mob* mob)
 
 	return bFound;
 }
+
 void Mob::WipeHateList()
 {
 	if(IsEngaged())
 	{
+		hate_list.Wipe();
 		AI_Event_NoLongerEngaged();
 	}
-	hate_list.Wipe();
+	else
+	{
+		hate_list.Wipe();
+	}
 }
 
 uint32 Mob::RandomTimer(int min,int max) {
@@ -4346,7 +4361,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 
 bool Mob::TryReflectSpell(uint32 spell_id)
 {
-	if (spells[spell_id].not_reflectable)
+	if (!spells[spell_id].reflectable)
  		return false;
 	
 	int chance = itembonuses.reflect_chance + spellbonuses.reflect_chance + aabonuses.reflect_chance;
@@ -4356,6 +4371,49 @@ bool Mob::TryReflectSpell(uint32 spell_id)
 
 	return false;
 }
+
+void Mob::SpellProjectileEffect()
+{
+	bool time_disable = false;
+
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
+
+		if (projectile_increment[i] == 0){
+			continue;
+		}
+
+		Mob* target = entity_list.GetMobID(projectile_target_id[i]);
+		
+		float dist = 0;
+		
+		if (target) 
+				dist = target->CalculateDistance(projectile_x[i], projectile_y[i],  projectile_z[i]);
+	
+		int increment_end = 0;
+		increment_end = (dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
+
+		if (increment_end <= projectile_increment[i]){
+
+			if (target && IsValidSpell(projectile_spell_id[i]))
+				SpellOnTarget(projectile_spell_id[i], target, false, true, spells[projectile_spell_id[i]].ResistDiff, true);
+
+			projectile_spell_id[i] = 0;
+			projectile_target_id[i] = 0;
+			projectile_x[i] = 0, projectile_y[i] = 0, projectile_z[i] = 0;
+			projectile_increment[i] = 0;
+			time_disable = true;
+		}
+
+		else {
+			projectile_increment[i]++;
+			time_disable = false;
+		}
+	}
+
+	if (time_disable)
+		projectile_timer.Disable();
+}
+
 
 void Mob::DoGravityEffect()
 {
@@ -4759,11 +4817,7 @@ int32 Mob::GetItemFactionBonus(uint32 pFactionID) {
 }
 
 void Mob::ClearItemFactionBonuses() {
-	std::map <uint32, int32> :: iterator itr;
-	for(itr = item_faction_bonuses.begin(); itr != item_faction_bonuses.end(); ++itr)
-	{
-		item_faction_bonuses.erase(itr->first);
-	}
+	item_faction_bonuses.clear();
 }
 
 FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {

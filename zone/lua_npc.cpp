@@ -297,9 +297,9 @@ void Lua_NPC::AI_SetRoambox(float dist, float max_x, float min_x, float max_y, f
 	self->AI_SetRoambox(dist, max_x, min_x, max_y, min_y);
 }
 
-void Lua_NPC::AI_SetRoambox(float dist, float max_x, float min_x, float max_y, float min_y, uint32 delay) {
+void Lua_NPC::AI_SetRoambox(float dist, float max_x, float min_x, float max_y, float min_y, uint32 delay, uint32 mindelay) {
 	Lua_Safe_Call_Void();
-	self->AI_SetRoambox(dist, max_x, min_x, max_y, min_y, delay);
+	self->AI_SetRoambox(dist, max_x, min_x, max_y, min_y, delay, mindelay);
 }
 
 int Lua_NPC::GetNPCSpellsID() {
@@ -432,6 +432,16 @@ int Lua_NPC::GetScore() {
 	return self->GetScore();
 }
 
+void Lua_NPC::MerchantOpenShop() {
+	Lua_Safe_Call_Void();
+	self->MerchantOpenShop();
+}
+
+void Lua_NPC::MerchantCloseShop() {
+	Lua_Safe_Call_Void();
+	self->MerchantCloseShop();
+}
+
 
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
@@ -494,7 +504,7 @@ luabind::scope lua_register_npc() {
 		.def("SaveGuardSpot", (void(Lua_NPC::*)(bool))&Lua_NPC::SaveGuardSpot)
 		.def("IsGuarding", (bool(Lua_NPC::*)(void))&Lua_NPC::IsGuarding)
 		.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float))&Lua_NPC::AI_SetRoambox)
-		.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float,uint32))&Lua_NPC::AI_SetRoambox)
+		.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float,uint32,uint32))&Lua_NPC::AI_SetRoambox)
 		.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 		.def("GetSpawnPointID", (int(Lua_NPC::*)(void))&Lua_NPC::GetSpawnPointID)
 		.def("GetSpawnPointX", (float(Lua_NPC::*)(void))&Lua_NPC::GetSpawnPointX)
@@ -520,7 +530,9 @@ luabind::scope lua_register_npc() {
 		.def("GetAttackSpeed", (float(Lua_NPC::*)(void))&Lua_NPC::GetAttackSpeed)
 		.def("GetAccuracyRating", (int(Lua_NPC::*)(void))&Lua_NPC::GetAccuracyRating)
 		.def("GetSpawnKillCount", (int(Lua_NPC::*)(void))&Lua_NPC::GetSpawnKillCount)
-		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore);
+		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore)
+		.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
+		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop);
 }
 
 #endif
