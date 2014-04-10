@@ -772,10 +772,10 @@ void Console::ProcessCommand(const char* command) {
 					char intbuffer [sizeof(unsigned long)];
 					SendMessage(1, "Operating system information.");
 					SendMessage(1, "  %s", Ver_name);
-					SendMessage(1, "  Build number: %s", ultoa(Ver_build, intbuffer, 10));
-					SendMessage(1, "  Minor version: %s", ultoa(Ver_min, intbuffer, 10));
-					SendMessage(1, "  Major version: %s", ultoa(Ver_maj, intbuffer, 10));
-					SendMessage(1, "  Platform Id: %s", ultoa(Ver_pid, intbuffer, 10));
+					SendMessage(1, "  Build number: %s", _ultoa(Ver_build, intbuffer, 10));
+					SendMessage(1, "  Minor version: %s", _ultoa(Ver_min, intbuffer, 10));
+					SendMessage(1, "  Major version: %s", _ultoa(Ver_maj, intbuffer, 10));
+					SendMessage(1, "  Platform Id: %s", _ultoa(Ver_pid, intbuffer, 10));
 				#else
 					char os_string[100];
 					SendMessage(1, "Operating system information.");
