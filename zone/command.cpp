@@ -4474,7 +4474,11 @@ void command_name(Client *c, const Seperator *sep)
 	else
 	{
 		target = c->GetTarget()->CastToClient();
+#ifdef _WINDOWS
+		char *oldname = _strdup(target->GetName());
+#else
 		char *oldname = strdup(target->GetName());
+#endif
 		if(target->ChangeFirstName(sep->arg[1], c->GetName()))
 		{
 			c->Message(0, "Successfully renamed %s to %s", oldname, sep->arg[1]);
@@ -4497,7 +4501,11 @@ void command_tempname(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #tempname newname (requires a target)");
 	else if(strlen(sep->arg[1]) > 0)
 	{
+#ifdef _WINDOWS
+		char *oldname = _strdup(target->GetName());
+#else
 		char *oldname = strdup(target->GetName());
+#endif
 		target->TempName(sep->arg[1]);
 		c->Message(0, "Renamed %s to %s", oldname, sep->arg[1]);
 		free(oldname);
