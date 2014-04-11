@@ -120,6 +120,7 @@ struct NPCType
 	uint32	emoteid;
 	float	spellscale;
 	float	healscale;
+	bool	no_target_hotkey;
 };
 
 /*

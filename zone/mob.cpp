@@ -891,7 +891,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
-	ns->spawn.IsMercenary = IsMerc() ? 1 : 0;
+	ns->spawn.IsMercenary = (IsMerc() || no_target_hotkey) ? 1 : 0;
+		
 	ns->spawn.petOwnerId	= ownerid;
 
 	ns->spawn.haircolor = haircolor;
@@ -1626,7 +1627,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	la->parm4 = parm4;
 	la->parm5 = parm5;
 	// Note that setting the b values to 0 will disable the related effect from the corresponding parameter.
-	// Setting the a value appears to have no affect at all.
+	// Setting the a value appears to have no affect at all.s
 	la->value1a = 1;
 	la->value1b = 1;
 	la->value2a = 1;

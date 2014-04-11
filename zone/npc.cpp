@@ -224,6 +224,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	p_depop = false;
 	loottable_id = d->loottable_id;
 
+	no_target_hotkey = d->no_target_hotkey;
+
 	primary_faction = 0;
 	SetNPCFactionID(d->npc_faction_id);
 
@@ -1719,6 +1721,22 @@ bool Mob::HasNPCSpecialAtk(const char* parse) {
 void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 {
 	Mob::FillSpawnStruct(ns, ForWho);
+
+	//Basic settings to make sure swarm pets work properly.
+	if  (GetSwarmOwner()) {
+		Client *c = entity_list.GetClientByID(GetSwarmOwner());
+			if(c) {
+				SetAllowBeneficial(1); //Allow client cast swarm pets to be heal/buffed.
+				//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
+				if (RuleB(Pets, SwarmPetNotTargetableWithHotKey))
+					ns->spawn.IsMercenary = 1;
+			}
+			//NPC cast swarm pets should still be targetable with F8.
+			else
+				ns->spawn.IsMercenary = 0;
+	}
+	
+	//Not recommended if using above (However, this will work better on older clients).
 	if (RuleB(Pets, UnTargetableSwarmPet)) {
 		if(GetOwnerID() || GetSwarmOwner()) {
 			ns->spawn.is_pet = 1;
@@ -1864,6 +1882,12 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	if(id == "dr")
 	{
 		DR = atoi(val.c_str());
+		return;
+	}
+
+	if(id == "PhR")
+	{
+		PhR = atoi(val.c_str());
 		return;
 	}
 
