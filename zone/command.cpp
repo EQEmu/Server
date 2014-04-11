@@ -958,10 +958,10 @@ void command_serverinfo(Client *c, const Seperator *sep)
 	char intbuffer [sizeof(unsigned long)];
 	c->Message(0, "Operating system information.");
 	c->Message(0, "	%s", Ver_name);
-	c->Message(0, "	Build number: %s", ultoa(Ver_build, intbuffer, 10));
-	c->Message(0, "	Minor version: %s", ultoa(Ver_min, intbuffer, 10));
-	c->Message(0, "	Major version: %s", ultoa(Ver_maj, intbuffer, 10));
-	c->Message(0, "	Platform Id: %s", ultoa(Ver_pid, intbuffer, 10));
+	c->Message(0, "	Build number: %s", _ultoa(Ver_build, intbuffer, 10));
+	c->Message(0, "	Minor version: %s", _ultoa(Ver_min, intbuffer, 10));
+	c->Message(0, "	Major version: %s", _ultoa(Ver_maj, intbuffer, 10));
+	c->Message(0, "	Platform Id: %s", _ultoa(Ver_pid, intbuffer, 10));
 #else
 char buffer[255];
 	c->Message(0, "Operating system information: %s",GetOS(buffer));
