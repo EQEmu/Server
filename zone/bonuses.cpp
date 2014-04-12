@@ -1338,19 +1338,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					}
 				}
 				else if ((effect_value - 100) < 0) { // Slow
-					//Slow Mitigation works by taking the amount that would be slowed, and adding a multiplied version of the difference.
 					int real_slow_value = (100 - effect_value) * -1;
-					if (slow_mitigation){
-						int new_effect_value = SlowMitigation(false,caster,real_slow_value);
-						if (new_effect_value < newbon->haste) {
-							newbon->haste = new_effect_value;
-							SlowMitigation(true,caster);
-						}
-					}
-					else {
-						if (real_slow_value < newbon->haste)
-							newbon->haste = real_slow_value;
-					}
+					real_slow_value -= ((real_slow_value * GetSlowMitigation()/100));
+					if (real_slow_value < newbon->haste)
+						newbon->haste = real_slow_value;
 				}
 				break;
 			}
@@ -1365,6 +1356,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				}
 				else if ((effect_value - 100) < 0) { // Slow
 					int real_slow_value = (100 - effect_value) * -1;
+					real_slow_value -= ((real_slow_value * GetSlowMitigation()/100));
 					if (real_slow_value < newbon->hastetype2)
 						newbon->hastetype2 = real_slow_value;
 				}
@@ -1374,6 +1366,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_AttackSpeed3:
 			{
 				if (effect_value < 0){ //Slow
+					effect_value -= ((effect_value * GetSlowMitigation()/100));
 					if (effect_value < newbon->hastetype3)
 						newbon->hastetype3 = effect_value;
 				}
@@ -1392,18 +1385,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					effect_value = effect_value * -1;
 
 				if (effect_value > 0 && effect_value > newbon->inhibitmelee) {
-
-					if (slow_mitigation){
-						int new_effect_value = SlowMitigation(false,caster,effect_value);
-						if (new_effect_value > newbon->inhibitmelee) {
-							newbon->inhibitmelee = new_effect_value;
-							SlowMitigation(true,caster);
-						}
-					}
-
-					else if (effect_value > newbon->inhibitmelee) {
+					effect_value -= ((effect_value * GetSlowMitigation()/100));
+					if (effect_value > newbon->inhibitmelee) 
 						newbon->inhibitmelee = effect_value;
-					}
 				}
 			
 				break;

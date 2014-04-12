@@ -4651,33 +4651,21 @@ void Mob::CastOnNumHitFade(uint32 spell_id)
 	}
 }
 
-int Mob::SlowMitigation(bool slow_msg, Mob *caster, int slow_value)
+void Mob::SlowMitigation(Mob* caster)
 {
-	float int_slow_mitigation = slow_mitigation * 100.0f;
-
-	if (int_slow_mitigation > 100.0f)
-		return 0;
-
-	if (slow_msg)
+	if (GetSlowMitigation() && caster && caster->IsClient())
 	{
-		if (caster && caster->IsClient())
-		{
-			if ((int_slow_mitigation > 0.0f) && (int_slow_mitigation < 26.0f))
-				caster->Message(262, "Your spell was mostly successful");
+		if ((GetSlowMitigation() > 0) && (GetSlowMitigation() < 26))
+			caster->Message_StringID(MT_SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
 
-			else if ((int_slow_mitigation >= 26.0f) && (int_slow_mitigation < 74.0f))
-				caster->Message(262, "Your spell was partially successful");
+		else if ((GetSlowMitigation() >= 26) && (GetSlowMitigation() < 74))
+			caster->Message_StringID(MT_SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
 
-			else if ((int_slow_mitigation >= 74.0f) && (int_slow_mitigation < 101.0f))
-				caster->Message(262, "Your spell was slightly successful");
-		}
-		return 0;
-	}
+		else if ((GetSlowMitigation() >= 74) && (GetSlowMitigation() < 101))
+			caster->Message_StringID(MT_SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
 
-	else
-	{
-		slow_value -= (slow_value * static_cast<int>(int_slow_mitigation) / 100);
-		return slow_value;
+		else if (GetSlowMitigation() > 100) 
+			caster->Message_StringID(MT_SpellFailure, SPELL_OPPOSITE_EFFECT);
 	}
 }
 

@@ -243,12 +243,12 @@
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
 #define EXPEDITION_MIN_REMAIN		3551	//You only have %1 minutes remaining before this expedition comes to an end.
 #define REWIND_WAIT					4059	//You must wait a bit longer before using the rewind command again.
-#define CORPSEDRAG_LIMIT		4061	//You are already dragging as much as you can!
-#define CORPSEDRAG_ALREADY		4062	//You are already dragging %1.
+#define CORPSEDRAG_LIMIT			4061	//You are already dragging as much as you can!
+#define CORPSEDRAG_ALREADY			4062	//You are already dragging %1.
 #define CORPSEDRAG_SOMEONE_ELSE		4063	//Someone else is dragging %1.
-#define CORPSEDRAG_BEGIN		4064	//You begin to drag %1.
-#define CORPSEDRAG_STOPALL		4065	//You stop dragging the corpses.
-#define CORPSEDRAG_STOP			4066	//You stop dragging the corpse.
+#define CORPSEDRAG_BEGIN			4064	//You begin to drag %1.
+#define CORPSEDRAG_STOPALL			4065	//You stop dragging the corpses.
+#define CORPSEDRAG_STOP				4066	//You stop dragging the corpse.
 #define WHOALL_NO_RESULTS			5029	//There are no players in EverQuest that match those who filters.
 #define PETITION_NO_DELETE			5053	//You do not have a petition in the queue.
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
@@ -300,6 +300,10 @@
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
 #define FEAR_TOO_HIGH				9035	//Your target is too high of a level for your fear spell.
+#define SLOW_MOSTLY_SUCCESSFUL		9029	//Your spell was mostly successful.
+#define SLOW_PARTIALLY_SUCCESSFUL	9030	// Your spell was partially successful.
+#define SLOW_SLIGHTLY_SUCCESSFUL	9031	//Your spell was slightly successful.
+#define SPELL_OPPOSITE_EFFECT		9032	//Your spell may have had the opposite effect of what you desired.
 #define YOU_HEAL					9068	//You have healed %1 for %2 points of damage.
 #define YOUR_HIT_DOT				9072	//%1 has taken %2 damage from your %3.
 #define HIT_NON_MELEE				9073	//%1 hit %2 for %3 points of non-melee damage.

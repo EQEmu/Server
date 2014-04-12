@@ -2624,13 +2624,36 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						HealDamage(dmg, caster);
 					}
 				}
+
+				break;
 			}
 
 			case SE_Taunt:
 			{
 				if (IsNPC())
 					caster->Taunt(this->CastToNPC(), false, spell.base[i]);
+
+				break;
 			}
+
+			case SE_AttackSpeed:
+				if (spell.base[i] < 100)
+					SlowMitigation(caster);
+				break;
+
+			case SE_AttackSpeed2:
+				if (spell.base[i] < 100)
+					SlowMitigation(caster);
+				break;
+
+			case SE_AttackSpeed3:
+				if (spell.base[i] < 0)
+					SlowMitigation(caster);
+				break;
+
+			case SE_AttackSpeed4:
+				SlowMitigation(caster);
+				break;
 
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
@@ -2717,10 +2740,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_DivineSave:
 			case SE_Accuracy:
 			case SE_Flurry:
-			case SE_AttackSpeed:
-			case SE_AttackSpeed2:
-			case SE_AttackSpeed3:
-			case SE_AttackSpeed4:
 			case SE_ImprovedDamage:
 			case SE_ImprovedHeal:
 			case SE_IncreaseSpellHaste:
