@@ -1273,7 +1273,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->see_improved_hide = atoi(row[r++])==0?false:true;
 				tmpNPCType->ATK = atoi(row[r++]);
 				tmpNPCType->accuracy_rating = atoi(row[r++]);
-				tmpNPCType->slow_mitigation = atof(row[r++]);
+				tmpNPCType->slow_mitigation = atoi(row[r++]);
 				tmpNPCType->maxlevel = atoi(row[r++]);
 				tmpNPCType->scalerate = atoi(row[r++]);
 				tmpNPCType->private_corpse = atoi(row[r++]) == 1 ? true : false;

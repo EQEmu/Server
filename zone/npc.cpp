@@ -2004,7 +2004,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "slow_mitigation")
 	{
-		slow_mitigation = atof(val.c_str());
+		slow_mitigation = atoi(val.c_str());
 		return;
 	}
 	if(id == "loottable_id")

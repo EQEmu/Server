@@ -111,7 +111,7 @@ struct NPCType
 	int		accuracy_rating;	//10 = 1% accuracy
 	bool	findable;		//can be found with find command
 	bool	trackable;
-	float	slow_mitigation;	// Slow mitigation % in decimal form.
+	int16	slow_mitigation;	
 	uint8	maxlevel;
 	uint32	scalerate;
 	bool	private_corpse;
