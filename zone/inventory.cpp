@@ -1899,26 +1899,25 @@ int32 Client::GetEquipmentMaterial(uint8 material_slot) const
 		const ItemInst* inst = m_inv.GetItem(inventorySlot);
 		if (inst != nullptr)
 		{
-
-			if (strlen(inst->GetItem()->IDFile) > 2)
+			if (inst->HasOrnamentation())
 			{
-				if (inst->HasOrnamentation())
+				ItemInst* ornament = inst->GetOrnamentation();
+				if (strlen(ornament->GetItem()->IDFile) > 2)
 				{
-					ItemInst* ornament = inst->GetOrnamentation();
-					if (strlen(ornament->GetItem()->IDFile) > 2)
-					{
-						return atoi(&ornament->GetItem()->IDFile[2]);
-					}
+					return atoi(&ornament->GetItem()->IDFile[2]);
 				}
-				else
+			}
+			else
+			{
+				if (strlen(inst->GetItem()->IDFile) > 2)
 				{
 					return atoi(&inst->GetItem()->IDFile[2]);
 				}
-			}
-			else	//may as well try this, since were going to 0 anyways
-			{
-				return inst->GetItem()->Material;
-			}
+				else	//may as well try this, since were going to 0 anyways
+				{
+					return inst->GetItem()->Material;
+				}
+			}		
 		}
 	}
 	else

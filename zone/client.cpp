@@ -1907,14 +1907,36 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		ns->spawn.colors[MaterialFeet].color	= GetEquipmentColor(MaterialFeet);
 	}
 	if ((inst = m_inv[SLOT_PRIMARY]) && inst->IsType(ItemClassCommon)) {
-		item = inst->GetItem();
-		if (strlen(item->IDFile) > 2)
-			ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
+		if (inst->HasOrnamentation())
+		{
+			ItemInst* ornament = inst->GetOrnamentation();
+			if (strlen(ornament->GetItem()->IDFile) > 2)
+			{
+				ns->spawn.equipment[MaterialPrimary]= atoi(&ornament->GetItem()->IDFile[2]);
+			}
+		}
+		else
+		{
+			item = inst->GetItem();
+			if (strlen(item->IDFile) > 2)
+				ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
+		}
 	}
 	if ((inst = m_inv[SLOT_SECONDARY]) && inst->IsType(ItemClassCommon)) {
-		item = inst->GetItem();
-		if (strlen(item->IDFile) > 2)
+		if (inst->HasOrnamentation())
+		{
+			ItemInst* ornament = inst->GetOrnamentation();
+			if (strlen(ornament->GetItem()->IDFile) > 2)
+			{
+				ns->spawn.equipment[MaterialPrimary]= atoi(&ornament->GetItem()->IDFile[2]);
+			}
+		}
+		else
+		{
+			item = inst->GetItem();
+			if (strlen(item->IDFile) > 2)
 			ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
+		}
 	}
 
 	//these two may be related to ns->spawn.texture
