@@ -284,20 +284,31 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Percental Heal: %+i (%d%% max)", spell.max[i], effect_value);
 #endif
-				//im not 100% sure about this implementation.
-				//the spell value forumula dosent work for these... at least spell 3232 anyways
-				int32 val = spell.max[i];
+				int32 val = GetMaxHP() * spell.base[i] / 100;
 
-				if(caster)
-					val = caster->GetActSpellHealing(spell_id, val, this);
+				//This effect can also do damage by percent.
+				if (val < 0) {
 
-				int32 mhp = GetMaxHP();
-				int32 cap = mhp * spell.base[i] / 100;
+					if (-val > spell.max[i])
+						val = -spell.max[i];
 
-				if(cap < val)
-					val = cap;
+					if (caster)
+						val = caster->GetActSpellDamage(spell_id, val, this);
 
-				if(val > 0)
+				}
+
+				else
+				{
+					if (val > spell.max[i])
+						val = spell.max[i];
+
+					if(caster)
+						val = caster->GetActSpellHealing(spell_id, val, this);
+				}
+
+				if (val < 0)
+					Damage(caster, -val, spell_id, spell.skill, false, buffslot, false);
+				else
 					HealDamage(val, caster);
 
 				break;
