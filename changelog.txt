@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/15/2014 ==
+Akkadius: Exported $client->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg) - Will be available for simple plugin use
+Akkadius: Exported $client->ExpeditionMessage(THIS, ExpdID, Message) - In use with custom expedition mod that will be released soon
 
 == 04/12/2014 ==
 Kayen: Fixed an with the slow mitigation code that would cause it to spam the message. Optimized the way the variable is handled for slow mitigation.
