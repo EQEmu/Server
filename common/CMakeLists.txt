@@ -44,8 +44,8 @@ SET(common_sources
 	packet_dump.cpp
 	packet_dump_file.cpp
 	packet_functions.cpp
-	perl_EQDB.cpp
-	perl_EQDBRes.cpp
+	#perl_EQDB.cpp
+	#perl_EQDBRes.cpp
 	ProcLauncher.cpp
 	ptimer.cpp
 	races.cpp
@@ -309,13 +309,20 @@ SOURCE_GROUP(TinyXML FILES
 	tinyxml/tinyxmlparser.cpp
 )
 
+SOURCE_GROUP(PerlFiles FILES
+    perl_EQDB.cpp
+	perl_EQDBRes.cpp
+)
+
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
-ADD_LIBRARY(Common ${common_sources} ${common_headers})
+ADD_LIBRARY(Common ${common_sources} ${common_headers} ${PerlFiles})
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
+	SET_PROPERTY(SOURCE PerlFiles PROPERTY COMPILE_FLAGS -Wsyntax-only)
 	SET_SOURCE_FILES_PROPERTIES("patches/SoD.cpp" "patches/SoF.cpp" "patches/RoF.cpp" "patches/Underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
+
 ENDIF(UNIX)
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)
