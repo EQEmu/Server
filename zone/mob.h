@@ -580,7 +580,7 @@ public:
 	void CastOnCurer(uint32 spell_id);
 	void CastOnCure(uint32 spell_id);
 	void CastOnNumHitFade(uint32 spell_id);
-	int SlowMitigation(bool slow_msg=false, Mob *caster = nullptr,int slow_value = 0);
+	void SlowMitigation(Mob* caster);
 	int16 GetCritDmgMob(uint16 skill);
 	int16 GetMeleeDamageMod_SE(uint16 skill);
 	int16 GetMeleeMinDamageMod_SE(uint16 skill);
@@ -598,6 +598,7 @@ public:
 	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
 	bool ImprovedTaunt();
 	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
+	int16 GetSlowMitigation() const {return slow_mitigation;}
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
@@ -1023,7 +1024,7 @@ protected:
 	Timer attack_dw_timer;
 	Timer ranged_timer;
 	float attack_speed; //% increase/decrease in attack speed (not haste)
-	float slow_mitigation; // Allows for a slow mitigation based on a % in decimal form. IE, 1 = 100% mitigation, .5 is 50%
+	float slow_mitigation; // Allows for a slow mitigation (100 = 100%, 50% = 50%)
 	Timer tic_timer;
 	Timer mana_timer;
 

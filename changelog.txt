@@ -1,5 +1,16 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/15/2014 ==
+Akkadius: Exported $client->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg) - Will be available for simple plugin use
+Akkadius: Exported $client->ExpeditionMessage(THIS, ExpdID, Message) - In use with custom expedition mod that will be released soon
+
+== 04/12/2014 ==
+Kayen: Fixed an with the slow mitigation code that would cause it to spam the message. Optimized the way the variable is handled for slow mitigation.
+
+Required SQL: utils/sql/git/required/2014_04_12_SlowMitigation.sql
+Note: This changes the variable type in the sql table from FLOAT to INT and updates your database.
+(When setting slow mitigation 50 = 50%, 100 = 100% ect. You can also set > 100 which will cause slow to become haste now with appropriate in game msg given)
+
 == 04/10/2014 ==
 Kayen: Added 'no_target_hotkey' field to npc_types table. This will prevent the NPC from being targeted with F8 (Warning: Will also turn it's name YELLOW)
 Kayen: Added a rule to make all (Player cast) Swarm Pets not targetable with F8 (nearest NPC) by default (Warning: Will also turn pets names YELLOW). This is semi-hack but it works.

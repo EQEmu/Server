@@ -1171,6 +1171,7 @@ public:
 	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillUseTypes);
 	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
+	void ExpeditionSay(const char *str, int ExpID);
 	int mod_client_damage(int damage, SkillUseTypes skillinuse, int hand, const ItemInst* weapon, Mob* other);
 	bool mod_client_message(char* message, uint8 chan_num);
 	bool mod_can_increase_skill(SkillUseTypes skillid, Mob* against_who);

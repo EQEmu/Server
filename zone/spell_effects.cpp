@@ -284,20 +284,31 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Percental Heal: %+i (%d%% max)", spell.max[i], effect_value);
 #endif
-				//im not 100% sure about this implementation.
-				//the spell value forumula dosent work for these... at least spell 3232 anyways
-				int32 val = spell.max[i];
+				int32 val = GetMaxHP() * spell.base[i] / 100;
 
-				if(caster)
-					val = caster->GetActSpellHealing(spell_id, val, this);
+				//This effect can also do damage by percent.
+				if (val < 0) {
 
-				int32 mhp = GetMaxHP();
-				int32 cap = mhp * spell.base[i] / 100;
+					if (-val > spell.max[i])
+						val = -spell.max[i];
 
-				if(cap < val)
-					val = cap;
+					if (caster)
+						val = caster->GetActSpellDamage(spell_id, val, this);
 
-				if(val > 0)
+				}
+
+				else
+				{
+					if (val > spell.max[i])
+						val = spell.max[i];
+
+					if(caster)
+						val = caster->GetActSpellHealing(spell_id, val, this);
+				}
+
+				if (val < 0)
+					Damage(caster, -val, spell_id, spell.skill, false, buffslot, false);
+				else
 					HealDamage(val, caster);
 
 				break;
@@ -2624,13 +2635,36 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						HealDamage(dmg, caster);
 					}
 				}
+
+				break;
 			}
 
 			case SE_Taunt:
 			{
 				if (IsNPC())
 					caster->Taunt(this->CastToNPC(), false, spell.base[i]);
+
+				break;
 			}
+
+			case SE_AttackSpeed:
+				if (spell.base[i] < 100)
+					SlowMitigation(caster);
+				break;
+
+			case SE_AttackSpeed2:
+				if (spell.base[i] < 100)
+					SlowMitigation(caster);
+				break;
+
+			case SE_AttackSpeed3:
+				if (spell.base[i] < 0)
+					SlowMitigation(caster);
+				break;
+
+			case SE_AttackSpeed4:
+				SlowMitigation(caster);
+				break;
 
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
@@ -2717,10 +2751,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_DivineSave:
 			case SE_Accuracy:
 			case SE_Flurry:
-			case SE_AttackSpeed:
-			case SE_AttackSpeed2:
-			case SE_AttackSpeed3:
-			case SE_AttackSpeed4:
 			case SE_ImprovedDamage:
 			case SE_ImprovedHeal:
 			case SE_IncreaseSpellHaste:

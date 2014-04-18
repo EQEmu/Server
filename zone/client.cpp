@@ -8236,3 +8236,29 @@ void Client::PlayMP3(const char* fname)
 	safe_delete(outapp);
 }
 
+void Client::ExpeditionSay(const char *str, int ExpID) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	if (!database.RunQuery(query,MakeAnyLenString(&query, "SELECT `player_name` FROM `cust_inst_players` WHERE `inst_id` = %i", ExpID),errbuf,&result)){
+		safe_delete_array(query);
+		return;
+	}
+
+	safe_delete_array(query);
+
+	if(result)
+		this->Message(14, "You say to the expedition, '%s'", str);
+
+	while((row = mysql_fetch_row(result))) {
+		const char* CharName = row[0];
+		if(strcmp(CharName, this->GetCleanName()) != 0)
+			worldserver.SendEmoteMessage(CharName, 0, 0, 14, "%s says to the expedition, '%s'", this->GetCleanName(), str); 
+		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
+	} 
+
+	mysql_free_result(result);
+	
+}
