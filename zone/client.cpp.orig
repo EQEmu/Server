@@ -1907,7 +1907,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		ns->spawn.colors[MaterialFeet].color	= GetEquipmentColor(MaterialFeet);
 	}
 	if ((inst = m_inv[SLOT_PRIMARY]) && inst->IsType(ItemClassCommon)) {
-		if (RuleB(Inventory,UseAugOrnamentations) && inst->HasOrnamentation())
+		if (inst->HasOrnamentation())
 		{
 			const ItemInst* ornament = inst->GetOrnamentation();
 			if (strlen(ornament->GetItem()->IDFile) > 2)
@@ -1923,7 +1923,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		}
 	}
 	if ((inst = m_inv[SLOT_SECONDARY]) && inst->IsType(ItemClassCommon)) {
-		if (RuleB(Inventory,UseAugOrnamentations) && inst->HasOrnamentation())
+		if (inst->HasOrnamentation())
 		{
 			const ItemInst* ornament = inst->GetOrnamentation();
 			if (strlen(ornament->GetItem()->IDFile) > 2)
@@ -8236,6 +8236,8 @@ void Client::PlayMP3(const char* fname)
 	safe_delete(outapp);
 }
 
+<<<<<<< HEAD
+=======
 void Client::ExpeditionSay(const char *str, int ExpID) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
@@ -8262,3 +8264,4 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 	mysql_free_result(result);
 	
 }
+>>>>>>> upstream/master

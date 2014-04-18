@@ -24,6 +24,7 @@
 #include "races.h"
 #include "shareddb.h"
 #include "classes.h"
+#include "../common/rulesys.h"
 
 #include <limits.h>
 
@@ -402,13 +403,14 @@ void ItemInst::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id)
 
 bool ItemInst::HasOrnamentation() const
 {
+	if(!RuleB(Inventory,UseAugOrnamentations)) return false;
 	const ItemInst *item;
 	for (int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
 	{
 		uint32 id = 0;
 		if ((item = GetItem(i)) != nullptr)
 		{
-			if (item->GetItem()->AugType == 524288)return true;
+			if (item->GetItem()->AugType == RuleI(Inventory,AugOrnamentationType))return true;
 		}
 	}
 	return false;
@@ -416,12 +418,13 @@ bool ItemInst::HasOrnamentation() const
 
 ItemInst* ItemInst::GetOrnamentation() const
 {
+	if(!RuleB(Inventory,UseAugOrnamentations)) return nullptr;
 	if (m_item->ItemClass == ItemClassCommon)
 	{
 		ItemInst *item;
 		for (int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
 		{
-			if ((item = GetItem(i)) != nullptr && item->GetItem()->AugType == 524288) return item;
+			if ((item = GetItem(i)) != nullptr && item->GetItem()->AugType == RuleI(Inventory,AugOrnamentationType)) return item;
 		}
 	}
 	return nullptr;

@@ -4578,7 +4578,7 @@ int32 Bot::GetEquipmentMaterial(uint8 material_slot) const
 		const ItemInst* inst = m_inv.GetItem(inventorySlot);
 		if (inst != nullptr)
 		{
-			if (inst->HasOrnamentation())
+			if (RuleB(Inventory,UseAugOrnamentations) && inst->HasOrnamentation())
 			{
 				const ItemInst* ornament = inst->GetOrnamentation();
 				if (strlen(ornament->GetItem()->IDFile) > 2)
@@ -4714,7 +4714,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			item = inst->GetItem();
 			if(item) 
 			{
-				if (inst->HasOrnamentation())
+				if (RuleB(Inventory,UseAugOrnamentations) && inst->HasOrnamentation())
 				{
 					const ItemInst* ornament = inst->GetOrnamentation();
 					if (strlen(ornament->GetItem()->IDFile) > 2)
@@ -4738,7 +4738,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			item = inst->GetItem();
 			if(item) 
 			{
-				if (inst->HasOrnamentation())
+				if (RuleB(Inventory,UseAugOrnamentations) && inst->HasOrnamentation())
 				{
 					const ItemInst* ornament = inst->GetOrnamentation();
 					if (strlen(ornament->GetItem()->IDFile) > 2)

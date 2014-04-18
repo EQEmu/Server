@@ -202,7 +202,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 							if (strlen(item->GetItem()->IDFile) > 2) 
 							{
 								uint32 idfile = 0;
-								if (item->HasOrnamentation())
+								if (RuleB(Inventory,UseAugOrnamentations) && item->HasOrnamentation())
 								{
 									ItemInst* ornament = item->GetOrnamentation();
 									if (strlen(ornament->GetItem()->IDFile) > 2)
