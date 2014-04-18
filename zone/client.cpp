@@ -1909,7 +1909,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	if ((inst = m_inv[SLOT_PRIMARY]) && inst->IsType(ItemClassCommon)) {
 		if (inst->HasOrnamentation())
 		{
-			ItemInst* ornament = inst->GetOrnamentation();
+			const ItemInst* ornament = inst->GetOrnamentation();
 			if (strlen(ornament->GetItem()->IDFile) > 2)
 			{
 				ns->spawn.equipment[MaterialPrimary]= atoi(&ornament->GetItem()->IDFile[2]);
@@ -1925,7 +1925,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	if ((inst = m_inv[SLOT_SECONDARY]) && inst->IsType(ItemClassCommon)) {
 		if (inst->HasOrnamentation())
 		{
-			ItemInst* ornament = inst->GetOrnamentation();
+			const ItemInst* ornament = inst->GetOrnamentation();
 			if (strlen(ornament->GetItem()->IDFile) > 2)
 			{
 				ns->spawn.equipment[MaterialPrimary]= atoi(&ornament->GetItem()->IDFile[2]);

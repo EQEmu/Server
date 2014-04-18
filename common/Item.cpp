@@ -421,8 +421,6 @@ ItemInst* ItemInst::GetOrnamentation() const
 		ItemInst *item;
 		for (int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
 		{
-
-			uint32 id = 0;
 			if ((item = GetItem(i)) != nullptr && item->GetItem()->AugType == 524288) return item;
 		}
 	}

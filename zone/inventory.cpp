@@ -1886,6 +1886,7 @@ void Client::DyeArmor(DyeStruct* dye){
 	Save();
 }
 
+
 int32 Client::GetEquipmentMaterial(uint8 material_slot) const
 {
 	//	Moofta:	Only supporting primary and secondary. next stage is heros forge. which could be any!
@@ -1901,7 +1902,7 @@ int32 Client::GetEquipmentMaterial(uint8 material_slot) const
 		{
 			if (inst->HasOrnamentation())
 			{
-				ItemInst* ornament = inst->GetOrnamentation();
+				const ItemInst* ornament = inst->GetOrnamentation();
 				if (strlen(ornament->GetItem()->IDFile) > 2)
 				{
 					return atoi(&ornament->GetItem()->IDFile[2]);

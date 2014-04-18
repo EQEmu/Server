@@ -4565,6 +4565,50 @@ void Bot::SetLevel(uint8 in_level, bool command) {
 	}
 }
 
+int32 Bot::GetEquipmentMaterial(uint8 material_slot) const
+{
+	//	Moofta:	Only supporting primary and secondary. next stage is heros forge. which could be any!
+	if	// for primary and secondary we need the model, not the material
+		(
+		material_slot == MaterialPrimary ||
+		material_slot == MaterialSecondary
+		)
+	{
+		uint8 inventorySlot = Inventory::CalcSlotFromMaterial(material_slot);
+		const ItemInst* inst = m_inv.GetItem(inventorySlot);
+		if (inst != nullptr)
+		{
+			if (inst->HasOrnamentation())
+			{
+				const ItemInst* ornament = inst->GetOrnamentation();
+				if (strlen(ornament->GetItem()->IDFile) > 2)
+				{
+					return atoi(&ornament->GetItem()->IDFile[2]);
+				}
+			}
+			else
+			{
+				if (strlen(inst->GetItem()->IDFile) > 2)
+				{
+					return atoi(&inst->GetItem()->IDFile[2]);
+				}
+				else	//may as well try this, since were going to 0 anyways
+				{
+					return inst->GetItem()->Material;
+				}
+			}		
+		}
+	}
+	else
+	{
+		const Item_Struct *item = database.GetItem(GetEquipment(material_slot));
+		if (item!=nullptr) return item->Material;
+	}
+
+
+	return 0;
+}
+
 void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 	if(ns) {
 		Mob::FillSpawnStruct(ns, ForWho);
@@ -4665,24 +4709,51 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 				ns->spawn.colors[MaterialFeet].color = GetEquipmentColor(MaterialFeet);
 			}
 		}
-
 		inst = GetBotItem(SLOT_PRIMARY);
 		if(inst) {
 			item = inst->GetItem();
-			if(item) {
-				if(strlen(item->IDFile) > 2)
+			if(item) 
+			{
+				if (inst->HasOrnamentation())
+				{
+					const ItemInst* ornament = inst->GetOrnamentation();
+					if (strlen(ornament->GetItem()->IDFile) > 2)
+					{
+						ns->spawn.equipment[MaterialPrimary]= atoi(&ornament->GetItem()->IDFile[2]);
+						ns->spawn.colors[MaterialPrimary].color = GetEquipmentColor(MaterialPrimary);
+					}
+				}
+				else
+				{
+					item = inst->GetItem();
+					if (strlen(item->IDFile) > 2)
 					ns->spawn.equipment[MaterialPrimary] = atoi(&item->IDFile[2]);
 					ns->spawn.colors[MaterialPrimary].color = GetEquipmentColor(MaterialPrimary);
+				}
 			}
 		}
 
 		inst = GetBotItem(SLOT_SECONDARY);
 		if(inst) {
 			item = inst->GetItem();
-			if(item) {
-				if(strlen(item->IDFile) > 2)
+			if(item) 
+			{
+				if (inst->HasOrnamentation())
+				{
+					const ItemInst* ornament = inst->GetOrnamentation();
+					if (strlen(ornament->GetItem()->IDFile) > 2)
+					{
+						ns->spawn.equipment[MaterialSecondary]= atoi(&ornament->GetItem()->IDFile[2]);
+						ns->spawn.colors[MaterialSecondary].color = GetEquipmentColor(MaterialSecondary);
+					}
+				}
+				else
+				{
+					item = inst->GetItem();
+					if (strlen(item->IDFile) > 2)
 					ns->spawn.equipment[MaterialSecondary] = atoi(&item->IDFile[2]);
 					ns->spawn.colors[MaterialSecondary].color = GetEquipmentColor(MaterialSecondary);
+				}
 			}
 		}
 	}
