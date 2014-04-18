@@ -39,6 +39,8 @@
 
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
+#define strlwr _strlwr
+#define strupr _strupr
 #endif
 
 #include "../common/debug.h"

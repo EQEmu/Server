@@ -31,6 +31,7 @@
 #include "zone.h"
 #ifdef _WINDOWS
 #define snprintf	_snprintf
+#define strlwr		_strlwr
 #endif
 
 extern Zone* zone;

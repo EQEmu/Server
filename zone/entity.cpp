@@ -25,6 +25,7 @@
 
 #ifdef _WINDOWS
 #include <process.h>
+#define strupr		_strupr
 #else
 #include <pthread.h>
 #include "../common/unix.h"

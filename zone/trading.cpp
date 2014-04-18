@@ -24,6 +24,10 @@
 #include "worldserver.h"
 extern WorldServer worldserver;
 
+#ifdef _WINDOWS
+#define strupr		_strupr
+#endif
+
 // The maximum amount of a single bazaar/barter transaction expressed in copper.
 // Equivalent to 2 Million plat
 #define MAX_TRANSACTION_VALUE 2000000000

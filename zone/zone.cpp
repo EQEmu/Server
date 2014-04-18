@@ -28,6 +28,7 @@
 #include <process.h>
 #define	snprintf	_snprintf
 #define	vsnprintf	_vsnprintf
+#define strlwr		_strlwr
 #else
 #include <pthread.h>
 #include "../common/unix.h"
