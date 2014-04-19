@@ -35,6 +35,12 @@
 #include "../common/features.h"
 #include "QuestParserCollection.h"
 
+#ifdef _WINDOWS
+
+#define itoa _itoa
+
+#endif
+
 struct wp_distance
 {
 	float dist;
