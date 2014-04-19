@@ -2590,7 +2590,13 @@ void Client::LogLoot(Client* player, Corpse* corpse, const Item_Struct* item){
 	if (item!=0){
 		memset(itemid,0,sizeof(itemid));
 		memset(itemname,0,sizeof(itemid));
+
+#ifdef _WINDOWS
+		_itoa(item->ID,itemid,10);
+#else
 		itoa(item->ID,itemid,10);
+#endif
+
 		sprintf(itemname,"%s",item->Name);
 		logtext=itemname;
 
