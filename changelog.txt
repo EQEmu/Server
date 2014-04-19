@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/18/2014 ==
+Akkadius: Added #command error message suppression for those who don't want to see 'Command is not recognized' constantly
+	- You need to have rule 'Chat:SuppressCommandErrors' set to true, this is set to false by default
+	- Required SQL: 2014_04_18_Suppress_Command_Error.sql
+
 == 04/15/2014 ==
 Akkadius: Exported $client->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg) - Will be available for simple plugin use
 Akkadius: Exported $client->ExpeditionMessage(THIS, ExpdID, Message) - In use with custom expedition mod that will be released soon
