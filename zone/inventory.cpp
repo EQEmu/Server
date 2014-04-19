@@ -1889,7 +1889,6 @@ void Client::DyeArmor(DyeStruct* dye){
 
 int32 Client::GetEquipmentMaterial(uint8 material_slot) const
 {
-	//	Moofta:	Only supporting primary and secondary. next stage is heros forge. which could be any!
 	if	// for primary and secondary we need the model, not the material
 		(
 		material_slot == MaterialPrimary ||

@@ -4926,9 +4926,7 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 		ss.write((const char*)&null_term, sizeof(uint8));
 	}
 
-	// Moofta: if the item has an aug of type 20 (ornamentation) then we use the ID file of that when serializing.
-	// the only thing we should probably worry about is generating a wear change packet to all cl;ients in zone if someone adds a type 20 aug.
-	if (RuleB(Inventory,UseAugOrnamentations) && inst && inst->HasOrnamentation()) //instance is not null and does have an ornament aug (slot 20)
+	if (RuleB(Inventory,UseAugOrnamentations) && inst && inst->HasOrnamentation()) 
 	{
 		ItemInst* ornamentation = inst->GetOrnamentation();
 		if (ornamentation) //paranoid!
