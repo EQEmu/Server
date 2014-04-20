@@ -42,22 +42,16 @@ EQEMuLog::EQEMuLog() {
 	for (int i=0; i<MaxLogID; i++) {
 		fp[i] = 0;
 //		MLog[i] = new Mutex;
-#if EQDEBUG >= 2
 		pLogStatus[i] = 1 | 2;
-#else
-		pLogStatus[i] = 0;
-#endif
 		logCallbackFmt[i] = nullptr;
 		logCallbackBuf[i] = nullptr;
 		logCallbackPva[i] = nullptr;
 	}
 // TODO: Make this read from an ini or something, everyone has different opinions on what it should be
-#if EQDEBUG < 2
 	pLogStatus[Status] = 2;
 	pLogStatus[Error] = 2;
 	pLogStatus[Quest] = 2;
 	pLogStatus[Commands] = 1;
-#endif
 	logFileValid = true;
 }
 

@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/20/2014 ==
+Secrets: Changed the functionality of EQDEBUG cmake flag. It now suppresses logs, but shows crashes in any scenario when set to 1. It will also now show crashes even if the log system is disabled.
+
 == 04/18/2014 ==
 Akkadius: Added #command error message suppression for those who don't want to see 'Command is not recognized' constantly
 	- You need to have rule 'Chat:SuppressCommandErrors' set to true, this is set to false by default

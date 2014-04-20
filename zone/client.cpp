@@ -8162,7 +8162,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
        if(!auto_consume) //no message if the client consumed for us
            entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
-#if EQDEBUG >= 1
+#if EQDEBUG >= 5
        LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", (int)slot);
 #endif
    }
@@ -8179,7 +8179,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
         if(!auto_consume) //no message if the client consumed for us
             entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
-#if EQDEBUG >= 1
+#if EQDEBUG >= 5
         LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", (int)slot);
 #endif
    }
