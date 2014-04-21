@@ -1277,16 +1277,9 @@ void QuestManager::signalwith(int npc_id, int signal_id, int wait_ms) {
 	if(wait_ms > 0) {
 		STimerList.push_back(SignalTimer(wait_ms, npc_id, signal_id));
 		return;
-	}
-
-	if (npc_id<1)
-	{
-		printf("signal() bad npcid=%i\n",npc_id);
-	}
-	else
-	{
-		//initiator* signalnpc=0;
-		entity_list.SignalMobsByNPCID(npc_id, signal_id);
+	} else {
+		STimerList.push_back(SignalTimer(0, npc_id, signal_id));
+		return;
 	}
 }
 

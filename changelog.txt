@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 04/20/2014 ==
 Secrets: Changed the functionality of EQDEBUG cmake flag. It now suppresses logs, but shows crashes in any scenario when set to 1. It will also now show crashes even if the log system is disabled.
+KLS: Change to how signals work, signals with no delay will now be added to the signal queue.  This addresses an odd timing issue where NPCs are in a state of life/death flux when a signal from event_death goes off.
 
 == 04/18/2014 ==
 Akkadius: Added #command error message suppression for those who don't want to see 'Command is not recognized' constantly
