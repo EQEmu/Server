@@ -304,6 +304,7 @@
 #define SLOW_PARTIALLY_SUCCESSFUL	9030	// Your spell was partially successful.
 #define SLOW_SLIGHTLY_SUCCESSFUL	9031	//Your spell was slightly successful.
 #define SPELL_OPPOSITE_EFFECT		9032	//Your spell may have had the opposite effect of what you desired.
+#define HAS_BEEN_AWAKENED			9037	//%1 has been awakened by %2.
 #define YOU_HEAL					9068	//You have healed %1 for %2 points of damage.
 #define YOUR_HIT_DOT				9072	//%1 has taken %2 damage from your %3.
 #define HIT_NON_MELEE				9073	//%1 hit %2 for %3 points of non-melee damage.
