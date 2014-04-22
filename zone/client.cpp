@@ -427,7 +427,7 @@ Client::~Client() {
 	eqs->Close();
 	eqs->ReleaseFromUse();
 	//Moved this from ~Mob, because it could cause a crash in some cases where a hate list was still used and that mob was the only one on the hate list.
-	entity_list.RemoveFromTargets(GetID(), true);
+	entity_list.RemoveFromTargets(this, true);
 	UninitializeBuffSlots();
 }
 
