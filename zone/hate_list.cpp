@@ -205,9 +205,6 @@ void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAd
 
 bool HateList::RemoveEnt(Mob *ent)
 {
-	if (!ent)
-		return NULL;
-
 	bool found = false;
 	auto iterator = list.begin();
 
@@ -215,10 +212,12 @@ bool HateList::RemoveEnt(Mob *ent)
 	{
 		if((*iterator)->ent == ent)
 		{
+			if(ent)
 			parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "0", 0);
 			found = true;
 
-			if(ent->IsClient())
+			
+			if(ent && ent->IsClient())
 				ent->CastToClient()->DecrementAggroCount();
 
 			delete (*iterator);

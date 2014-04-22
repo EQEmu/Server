@@ -392,6 +392,8 @@ NPC::~NPC()
 	safe_delete(reface_timer);
 	safe_delete(swarmInfoPtr);
 	safe_delete(qGlobals);
+	//Moved this from ~Mob, because it could cause a crash in some cases where a hate list was still used and that mob was the only one on the hate list.
+	entity_list.RemoveFromTargets(GetID(), true);
 	UninitializeBuffSlots();
 }
 

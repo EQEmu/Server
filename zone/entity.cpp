@@ -2107,9 +2107,6 @@ bool EntityList::RemoveMob(uint16 delete_id)
 	if (delete_id == 0)
 		return true;
 
-	//Moved this from ~Mob, because it could cause a crash in some cases where a hate list was still used and that mob was the only one on the hate list.
-	entity_list.RemoveFromTargets(delete_id, true);
-
 	auto it = mob_list.find(delete_id);
 	if (it != mob_list.end()) {
 		if (npc_list.count(delete_id))
@@ -2130,9 +2127,6 @@ bool EntityList::RemoveMob(Mob *delete_mob)
 {
 	if (delete_mob == 0)
 		return true;
-
-	//Moved this from ~Mob, because it could cause a crash in some cases where a hate list was still used and that mob was the only one on the hate list.
-	entity_list.RemoveFromTargets(delete_mob, true);
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {

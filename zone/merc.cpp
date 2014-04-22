@@ -76,6 +76,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 Merc::~Merc() {
 	AI_Stop();
 	entity_list.RemoveMerc(this->GetID());
+	entity_list.RemoveFromTargets(GetID(), true);
 	UninitializeBuffSlots();
 }
 
