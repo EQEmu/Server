@@ -3616,6 +3616,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		//fade mez if we are mezzed
 		if (IsMezzed()) {
 			mlog(COMBAT__HITS, "Breaking mez due to attack.");
+			entity_list.MessageClose_StringID(this, true, 100, MT_WornOff,
+					HAS_BEEN_AWAKENED, GetCleanName(), attacker->GetCleanName());
 			BuffFadeByEffect(SE_Mez);
 		}
 
