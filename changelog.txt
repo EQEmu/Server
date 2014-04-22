@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/21/2014 ==
+Secrets: Crash fix for more hatelist crashes.
+
 == 04/20/2014 ==
 Secrets: Changed the functionality of EQDEBUG cmake flag. It now suppresses logs, but shows crashes in any scenario when set to 1. It will also now show crashes even if the log system is disabled.
 KLS: Change to how quest signals work, signals with no delay will now be added to the signal queue.  This addresses an odd timing issue where NPCs are in a state of life/death flux when a signal from event_death goes off.

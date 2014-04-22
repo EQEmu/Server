@@ -401,8 +401,6 @@ Mob::~Mob()
 	if(!corpse || (corpse && !corpse->IsPlayerCorpse()))
 		entity_list.QueueClients(this, &app, true);
 
-	entity_list.RemoveFromTargets(this, true);
-
 	if(trade) {
 		Mob *with = trade->With();
 		if(with && with->IsClient()) {

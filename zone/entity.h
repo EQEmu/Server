@@ -290,6 +290,7 @@ public:
 	void	ExpeditionWarning(uint32 minutes_left);
 
 	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
+	void	RemoveFromTargets(uint16 mob, bool RemoveFromXTargets = false);
 	void	RemoveFromXTargets(Mob* mob);
 	void	RemoveFromAutoXTargets(Mob* mob);
 	void	ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);

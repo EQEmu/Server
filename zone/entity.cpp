@@ -1283,6 +1283,33 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 	}
 }
 
+void EntityList::RemoveFromTargets(uint16 MobID, bool RemoveFromXTargets)
+{
+	Mob* mob = entity_list.GetMob(MobID);
+
+	if(!mob) 
+		return;
+
+	auto it = mob_list.begin();
+	while (it != mob_list.end()) {
+		Mob *m = it->second;
+		++it;
+
+		if (!m)
+			continue;
+
+		m->RemoveFromHateList(mob);
+
+		if (RemoveFromXTargets) {
+			if (m->IsClient())
+				m->CastToClient()->RemoveXTarget(mob, false);
+			// FadingMemories calls this function passing the client.
+			else if (mob->IsClient())
+				mob->CastToClient()->RemoveXTarget(m, false);
+		}
+	}
+}
+
 void EntityList::RemoveFromXTargets(Mob *mob)
 {
 	auto it = client_list.begin();
@@ -2080,6 +2107,9 @@ bool EntityList::RemoveMob(uint16 delete_id)
 	if (delete_id == 0)
 		return true;
 
+	//Moved this from ~Mob, because it could cause a crash in some cases where a hate list was still used and that mob was the only one on the hate list.
+	entity_list.RemoveFromTargets(delete_id, true);
+
 	auto it = mob_list.find(delete_id);
 	if (it != mob_list.end()) {
 		if (npc_list.count(delete_id))
@@ -2100,6 +2130,9 @@ bool EntityList::RemoveMob(Mob *delete_mob)
 {
 	if (delete_mob == 0)
 		return true;
+
+	//Moved this from ~Mob, because it could cause a crash in some cases where a hate list was still used and that mob was the only one on the hate list.
+	entity_list.RemoveFromTargets(delete_mob, true);
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
