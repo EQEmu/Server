@@ -3,6 +3,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 04/21/2014 ==
 Secrets: Crash fix for more hatelist crashes.
 Secrets: Hate list fixes, again.
+Secrets: Revert of hatelist changes.
 
 == 04/20/2014 ==
 Secrets: Changed the functionality of EQDEBUG cmake flag. It now suppresses logs, but shows crashes in any scenario when set to 1. It will also now show crashes even if the log system is disabled.
