@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/23/2014 ==
+Kayen: Improved SE_LimitCombatSkills will now more accurately determine if a spell is a combat proc.
+Kayen: SE_LimitInstant will now also work when set to include instant spells.
+
+Optional SQL: utils/sql/git/optional/2014_04_23_FocusComabtProcs.sql
+Note: Set to false, if enabled will allow all combat procs to receive spell focuses.
+
 == 04/21/2014 ==
 Secrets: Crash fix for more hatelist crashes.
 Secrets: Hate list fixes, again.
