@@ -205,6 +205,9 @@ void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAd
 
 bool HateList::RemoveEnt(Mob *ent)
 {
+	if (!ent)
+		return false;
+
 	bool found = false;
 	auto iterator = list.begin();
 

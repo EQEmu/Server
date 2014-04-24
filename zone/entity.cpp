@@ -1283,33 +1283,6 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 	}
 }
 
-void EntityList::RemoveFromTargets(uint16 MobID, bool RemoveFromXTargets)
-{
-	Mob* mob = entity_list.GetMob(MobID);
-
-	if(!mob) 
-		return;
-
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		Mob *m = it->second;
-		++it;
-
-		if (!m)
-			continue;
-
-		m->RemoveFromHateList(mob);
-
-		if (RemoveFromXTargets) {
-			if (m->IsClient())
-				m->CastToClient()->RemoveXTarget(mob, false);
-			// FadingMemories calls this function passing the client.
-			else if (mob->IsClient())
-				mob->CastToClient()->RemoveXTarget(m, false);
-		}
-	}
-}
-
 void EntityList::RemoveFromXTargets(Mob *mob)
 {
 	auto it = client_list.begin();

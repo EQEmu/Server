@@ -223,7 +223,6 @@ Bot::~Bot() {
 		GetPet()->Depop();
 
 	entity_list.RemoveBot(GetID());
-	entity_list.RemoveFromTargets(this, true);
 }
 
 void Bot::SetBotID(uint32 botID) {
