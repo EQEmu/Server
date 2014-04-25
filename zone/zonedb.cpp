@@ -33,8 +33,11 @@ ZoneDatabase::ZoneDatabase(const char* host, const char* user, const char* passw
 void ZoneDatabase::ZDBInitVars() {
 	memset(door_isopen_array, 0, sizeof(door_isopen_array));
 	npc_spells_maxid = 0;
+	npc_spellseffects_maxid = 0;
 	npc_spells_cache = 0;
+	npc_spellseffects_cache = 0;
 	npc_spells_loadtried = 0;
+	npc_spellseffects_loadtried = 0;
 	max_faction = 0;
 	faction_array = nullptr;
 }
@@ -48,6 +51,14 @@ ZoneDatabase::~ZoneDatabase() {
 		safe_delete_array(npc_spells_cache);
 	}
 	safe_delete_array(npc_spells_loadtried);
+
+	if (npc_spellseffects_cache) {
+		for (x=0; x<=npc_spellseffects_maxid; x++) {
+			safe_delete_array(npc_spellseffects_cache[x]);
+		}
+		safe_delete_array(npc_spellseffects_cache);
+	}
+	safe_delete_array(npc_spellseffects_loadtried);
 
 	if (faction_array != nullptr) {
 		for (x=0; x <= max_faction; x++) {
@@ -1053,6 +1064,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.attack_count,"
 			"npc_types.special_abilities,"
 			"npc_types.npc_spells_id,"
+			"npc_types.npc_spells_effects_id,"
 			"npc_types.d_meele_texture1,"
 			"npc_types.d_meele_texture2,"
 			"npc_types.prim_melee_type,"
@@ -1151,6 +1163,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->attack_count = atoi(row[r++]);
 				strn0cpy(tmpNPCType->special_abilities, row[r++], 512);
 				tmpNPCType->npc_spells_id = atoi(row[r++]);
+				tmpNPCType->npc_spells_effects_id = atoi(row[r++]);
 				tmpNPCType->d_meele_texture1 = atoi(row[r++]);
 				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
 				tmpNPCType->prim_melee_type = atoi(row[r++]);
