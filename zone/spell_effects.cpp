@@ -1683,6 +1683,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				{
 					CastToClient()->SummonHorse(spell_id);
 				}
+
+
 				break;
 			}
 
@@ -3997,6 +3999,15 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 
 	bool LimitFailure = false;
 	bool LimitInclude[MaxLimitInclude] = { false }; 
+	/* Certain limits require only one of several Include conditions to be true. Ie. Add damage to fire OR ice spells.
+	0/1   SE_LimitResist
+	2/3   SE_LimitSpell
+	4/5   SE_LimitEffect
+	6/7   SE_LimitTarget
+	8/9   SE_LimitSpellGroup:
+	10/11 SE_LimitCastingSkill:
+	Remember: Update MaxLimitInclude in spdat.h if adding new limits that require Includes
+	*/ 
 	int FocusCount = 0;
 
 	std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aa_ID);
@@ -4011,7 +4022,7 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 		base1 = iter->second.base1;
 		base2 = iter->second.base2;
 		slot = iter->second.slot;
-
+		
 		/*
 		AA Foci's can contain multiple focus effects within the same AA.
 		To handle this we will not automatically return zero if a limit is found.
@@ -4065,8 +4076,11 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 
 			case SE_LimitInstant:
-				if(spell.buffduration)
+				if(base1 == 1 && spell.buffduration) //Fail if not instant
 					LimitFailure = true;
+				if(base1 == 0 && (spell.buffduration == 0)) //Fail if instant
+					LimitFailure = true;
+
 				break;
 			
 			case SE_LimitMaxLevel:
@@ -4114,13 +4128,14 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 			case SE_LimitMinDur:
 				if (base1 > CalcBuffDuration_formula(GetLevel(), spell.buffdurationformula, spell.buffduration))
 					LimitFailure = true;
-					break;
+
+				break;
 
 			case SE_LimitEffect:
 				if(base1 < 0){
 					if(IsEffectInSpell(spell_id,-base1)) //Exclude
 						LimitFailure = true;
-					}
+				}
 				else{
 					LimitInclude[4] = true;
 					if(IsEffectInSpell(spell_id,base1)) //Include
@@ -4165,10 +4180,11 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 
 			case SE_LimitCombatSkills:
-				if (base1 == 0 && IsCombatSkill(spell_id)) //Exclude Discs
+				if (base1 == 0 && (IsCombatSkill(spell_id) || IsCombatProc(spell_id))) //Exclude Discs / Procs
 					LimitFailure = true;
-				else if (base1 == 1 && !IsCombatSkill(spell_id)) //Exclude Spells
+				else if (base1 == 1 && (!IsCombatSkill(spell_id) || !IsCombatProc(spell_id))) //Exclude Spells
 					LimitFailure = true;
+
 			break;
 
 			case SE_LimitSpellGroup:
@@ -4199,7 +4215,7 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
 			if (!PassLimitClass(base1, GetClass()))
 				LimitFailure = true;
-				break;
+			break;
 
 			case SE_LimitRace:
 				if (base1 != GetRace())
@@ -4460,8 +4476,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 		
 		case SE_LimitInstant:
-			if(spell.buffduration)
+			if(focus_spell.base[i] == 1 && spell.buffduration) //Fail if not instant
 				return 0;
+			if(focus_spell.base[i] == 0 && (spell.buffduration == 0)) //Fail if instant
+				return 0;
+
 			break;
 
 		case SE_LimitMaxLevel:
@@ -4566,10 +4585,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_LimitCombatSkills:
-			if (focus_spell.base[i] == 0 && IsCombatSkill(spell_id)) //Exclude Disc
-				return 0;				
-			else if (focus_spell.base[i] == 1 && !IsCombatSkill(spell_id)) //Include Spells
+			if (focus_spell.base[i] == 0 && (IsCombatSkill(spell_id) || IsCombatProc(spell_id))) //Exclude Discs / Procs
 				return 0;
+			else if (focus_spell.base[i] == 1 && (!IsCombatSkill(spell_id) || !IsCombatProc(spell_id))) //Exclude Spells
+				return 0;
+
 			break;
 
 		case SE_LimitSpellGroup:

@@ -4966,6 +4966,28 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 	return false;
 }
 
+bool Mob::IsCombatProc(uint16 spell_id) {
+	
+	if (RuleB(Spells, FocusCombatProcs))
+		return false;
+
+	if(spell_id == SPELL_UNKNOWN)
+		return(false);
+
+	if ((spells[spell_id].cast_time == 0) && (spells[spell_id].recast_time == 0) && (spells[spell_id].recovery_time == 0))
+	{
+
+		for (int i = 0; i < MAX_PROCS; i++){
+			if (PermaProcs[i].spellID == spell_id || SpellProcs[i].spellID == spell_id 
+				|| SkillProcs[i].spellID == spell_id || RangedProcs[i].spellID == spell_id){
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 base_spell_id) {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);

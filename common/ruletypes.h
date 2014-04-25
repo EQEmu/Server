@@ -309,6 +309,7 @@ RULE_INT ( Spells, FRProjectileItem_Titanium, 1113) // Item id for Titanium clie
 RULE_INT ( Spells, FRProjectileItem_SOF, 80684) // Item id for SOF clients for Fire 'spell projectile'.
 RULE_INT ( Spells, FRProjectileItem_NPC, 80684) // Item id for NPC Fire 'spell projectile'.
 RULE_BOOL ( Spells, UseLiveSpellProjectileGFX, false) // Use spell projectile graphics set in the spells_new table (player_1). Server must be using UF+ spell file.
+RULE_BOOL ( Spells, FocusCombatProcs, false) //Allow all combat procs to receive focus effects.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
