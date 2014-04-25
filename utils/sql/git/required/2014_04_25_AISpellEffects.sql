@@ -1,6 +1,6 @@
 -- TEST SQL --
 
-ALTER TABLE  `npc_types` ADD  `npc_spells_effects` int( 11 ) UNSIGNED NOT NULL DEFAULT  '0' AFTER `npc_spells`;
+ALTER TABLE  `npc_types` ADD  `npc_spells_effects_id` int( 11 ) UNSIGNED NOT NULL DEFAULT  '0' AFTER `npc_spells_id`;
 
 SET FOREIGN_KEY_CHECKS=0;
 
