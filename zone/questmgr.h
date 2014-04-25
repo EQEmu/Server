@@ -150,7 +150,7 @@ public:
 	void showgrid(int gridid);
 	void spawn_condition(const char *zone_short, uint32 instance_id, uint16 condition_id, short new_value);
 	short get_spawn_condition(const char *zone_short, uint32 instance_id, uint16 condition_id);
-	void toggle_spawn_event(int event_id, bool enable, bool reset_base);
+	void toggle_spawn_event(int event_id, bool enable, bool strict, bool reset_base);
 	bool has_zone_flag(int zone_id);
 	void set_zone_flag(int zone_id);
 	void clear_zone_flag(int zone_id);

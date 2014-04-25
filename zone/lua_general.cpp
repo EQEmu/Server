@@ -372,8 +372,8 @@ int lua_get_spawn_condition(const char *zone, uint32 instance_id, int condition_
 	return quest_manager.get_spawn_condition(zone, instance_id, condition_id);
 }
 
-void lua_toggle_spawn_event(int event_id, bool enable, bool reset) {
-	quest_manager.toggle_spawn_event(event_id, enable, reset);
+void lua_toggle_spawn_event(int event_id, bool enable, bool strict, bool reset) {
+	quest_manager.toggle_spawn_event(event_id, enable, strict, reset);
 }
 
 void lua_summon_burried_player_corpse(uint32 char_id, float x, float y, float z, float h) {
