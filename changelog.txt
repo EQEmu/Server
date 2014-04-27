@@ -1,5 +1,19 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/27/2014 ==
+Kayen: Implemented new table 'npc_spells_effects' and 'npc_spells_effects_entires'.
+       Implemented new field in 'npc_spell_effects_id' in npc_types.
+       
+
+These are used to directly apply spell effect bonuses to NPC's without requirings spells/buffs.
+Example: Allow an npc to spawn with an innate 50 pt damage shield and a 5% chance to critical hit.
+Please see the wiki page: http://wiki.eqemulator.org/p?npc_spell_effects_entries for details.
+*NPC's can now do critical heals / damage spells if bonus is applied from table.
+
+Required SQL: utils/sql/git/required/2014_04_27_AISpellEffects.sql
+Note: 30 examples of spell effects have been included by default in this sql. Edited/removed as needed.
+
+
 == 04/25/2014 ==
 cavedude: Corrected a crash in spawn_conditions caused by NPCs on a one way path.
 cavedude: Added strict column to spawn_events which will prevent an event from enabling if it's mid-cycle.

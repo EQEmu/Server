@@ -55,8 +55,35 @@ int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 		else
 			value -= target->GetFcDamageAmtIncoming(this, spell_id)/spells[spell_id].buffduration;
 	 }
-	 	 
+	  	 
 	 value += dmg*SpellFocusDMG/100; 
+
+	if (AI_HasSpellsEffects()){
+		int16 chance = 0;
+		int ratio = 0;
+
+		if (spells[spell_id].buffduration == 0) {
+		
+			chance += spellbonuses.CriticalSpellChance + spellbonuses.FrenziedDevastation;
+		
+			if (chance && MakeRandomInt(1,100) <= chance){
+			
+				ratio += spellbonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncNoStack;
+				value += (value*ratio)/100;
+				entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits, OTHER_CRIT_BLAST, GetCleanName(), itoa(-value));
+			}
+		}
+		else {
+			
+			chance += spellbonuses.CriticalDoTChance;
+		
+			if (chance && MakeRandomInt(1,100) <= chance){
+			
+				ratio += spellbonuses.DotCritDmgIncrease;
+				value += (value*ratio)/100;
+			}
+		}
+	}
 
 	return value;
 }
@@ -253,6 +280,21 @@ int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	 if (target) {
 		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); 
 		value += value*target->GetHealRate(spell_id, this)/100;
+	 }
+
+	 //Allow for critical heal chance if NPC is loading spell effect bonuses.
+	 if (AI_HasSpellsEffects()){
+
+		if(spells[spell_id].buffduration < 1) {
+
+			if(spellbonuses.CriticalHealChance && (MakeRandomInt(0,99) < spellbonuses.CriticalHealChance)) {
+				value = value*2;	 			
+				entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits, OTHER_CRIT_HEAL, GetCleanName(), itoa(value));
+			}
+		}
+		else if(spellbonuses.CriticalHealOverTime && (MakeRandomInt(0,99) < spellbonuses.CriticalHealOverTime)) {
+				value = value*2;	 			
+		}
 	 }
 	 
 	return value;

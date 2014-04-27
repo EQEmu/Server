@@ -4150,10 +4150,10 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 			for (int i = 0; i < EFFECT_COUNT; i++) {
 				if (spells[spell_id].effectid[i] == SE_SpellOnKill2)
 				{
-					if (spells[spell_id].max[i] <= level)
+					if (IsValidSpell(spells[spell_id].base2[i]) && spells[spell_id].max[i] <= level)
 					{
 						if(MakeRandomInt(0,99) < spells[spell_id].base[i])
-							SpellFinished(spells[spell_id].base2[i], this);
+							SpellFinished(spells[spell_id].base2[i], this, 10, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
 					}
 				}
 			}
@@ -4166,19 +4166,19 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 	// Allow to check AA, items and buffs in all cases. Base2 = Spell to fire | Base1 = % chance | Base3 = min level
 	for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3) {
 
-		if(aabonuses.SpellOnKill[i] && (level >= aabonuses.SpellOnKill[i + 2])) {
+		if(aabonuses.SpellOnKill[i] && IsValidSpell(aabonuses.SpellOnKill[i]) && (level >= aabonuses.SpellOnKill[i + 2])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(aabonuses.SpellOnKill[i + 1]))
-				SpellFinished(aabonuses.SpellOnKill[i], this);
+				SpellFinished(aabonuses.SpellOnKill[i], this, 10, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
-		if(itembonuses.SpellOnKill[i] && (level >= itembonuses.SpellOnKill[i + 2])){
+		if(itembonuses.SpellOnKill[i] && IsValidSpell(itembonuses.SpellOnKill[i]) && (level >= itembonuses.SpellOnKill[i + 2])){
 			if(MakeRandomInt(0, 99) < static_cast<int>(itembonuses.SpellOnKill[i + 1]))
-				SpellFinished(itembonuses.SpellOnKill[i], this);
+				SpellFinished(itembonuses.SpellOnKill[i], this, 10, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
-		if(spellbonuses.SpellOnKill[i] && (level >= spellbonuses.SpellOnKill[i + 2])) {
+		if(spellbonuses.SpellOnKill[i] && IsValidSpell(spellbonuses.SpellOnKill[i]) && (level >= spellbonuses.SpellOnKill[i + 2])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(spellbonuses.SpellOnKill[i + 1]))
-				SpellFinished(spellbonuses.SpellOnKill[i], this);
+				SpellFinished(spellbonuses.SpellOnKill[i], this, 10, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
 	}
@@ -4193,21 +4193,21 @@ bool Mob::TrySpellOnDeath()
 		return false;
 
 	for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
-		if(IsClient() && aabonuses.SpellOnDeath[i]) {
+		if(IsClient() && aabonuses.SpellOnDeath[i] && IsValidSpell(aabonuses.SpellOnDeath[i])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(aabonuses.SpellOnDeath[i + 1])) {
-				SpellFinished(aabonuses.SpellOnDeath[i], this);
+				SpellFinished(aabonuses.SpellOnDeath[i], this, 10, 0, -1, spells[aabonuses.SpellOnDeath[i]].ResistDiff);
 			}
 		}
 
-		if(itembonuses.SpellOnDeath[i]) {
+		if(itembonuses.SpellOnDeath[i] && IsValidSpell(itembonuses.SpellOnDeath[i])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(itembonuses.SpellOnDeath[i + 1])) {
-				SpellFinished(itembonuses.SpellOnDeath[i], this);
+				SpellFinished(itembonuses.SpellOnDeath[i], this, 10, 0, -1, spells[itembonuses.SpellOnDeath[i]].ResistDiff);
 			}
 		}
 
-		if(spellbonuses.SpellOnDeath[i]) {
+		if(spellbonuses.SpellOnDeath[i] && IsValidSpell(spellbonuses.SpellOnDeath[i])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(spellbonuses.SpellOnDeath[i + 1])) {
-				SpellFinished(spellbonuses.SpellOnDeath[i], this);
+				SpellFinished(spellbonuses.SpellOnDeath[i], this, 10, 0, -1, spells[spellbonuses.SpellOnDeath[i]].ResistDiff);
 				}
 			}
 		}

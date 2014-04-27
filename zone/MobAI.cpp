@@ -1901,7 +1901,7 @@ bool NPC::AI_EngagedCastCheck() {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		mlog(AI__SPELLS, "Engaged autocast check triggered. Trying to cast healing spells then maybe offensive spells.");
-		Shout("KAYEN");
+
 		// try casting a heal or gate
 		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
 			// try casting a heal on nearby
@@ -2437,12 +2437,9 @@ void NPC::ApplyAISpellEffects(StatBonuses* newbon)
 {
 	if (!AI_HasSpellsEffects())
 		return;
-
 	
-
 	for(int i=0; i < AIspellsEffects.size(); i++)
 	{
-		Shout("ApplyAISpellEffects %i %i %i %i", AIspellsEffects[i].spelleffectid,  AIspellsEffects[i].base, AIspellsEffects[i].limit,AIspellsEffects[i].max);
 		ApplySpellsBonuses(0, 0, newbon, 0, false, 0,-1, 
 			true, AIspellsEffects[i].spelleffectid,  AIspellsEffects[i].base, AIspellsEffects[i].limit,AIspellsEffects[i].max);
 	}
@@ -2456,7 +2453,6 @@ void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit
 	
 	if(!iSpellEffectID)
 		return;
-
 	
 	HasAISpellEffects = true;
 	AISpellsEffects_Struct t;
@@ -2465,7 +2461,6 @@ void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit
 	t.base = base;
 	t.limit = limit;
 	t.max = max;
-	Shout("AddSpellEffectToNPCList %i %i %i %i", iSpellEffectID,base, limit, max );
 	AIspellsEffects.push_back(t);
 }
 
@@ -2692,7 +2687,7 @@ DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 				mysql_free_result(result);
 				if (RunQuery(query, MakeAnyLenString(&query, "SELECT spell_effect_id, minlevel, maxlevel,se_base, se_limit, se_max from npc_spells_effects_entries where npc_spells_effects_id=%d ORDER BY minlevel", iDBSpellsEffectsID), errbuf, &result)) {
 					safe_delete_array(query);
-					uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_Struct) * mysql_num_rows(result));
+					uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * mysql_num_rows(result));
 					npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
 					memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
 					npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;

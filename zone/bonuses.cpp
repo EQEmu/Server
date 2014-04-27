@@ -1158,14 +1158,20 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+
 			case SE_SpellEffectResistChance:
 			{
 				for(int e = 0; e < MAX_RESISTABLE_EFFECTS*2; e+=2)
 				{
-					if(!newbon->SEResist[e] || ((newbon->SEResist[e] = base2) && (newbon->SEResist[e+1] < base1)) ){
-						newbon->SEResist[e] = base2;
-						newbon->SEResist[e+1] = base1;
-					break;
+					if(newbon->SEResist[e+1] && (newbon->SEResist[e] == base2) && (newbon->SEResist[e+1] < base1)){
+						newbon->SEResist[e] = base2; //Spell Effect ID
+						newbon->SEResist[e+1] = base1; //Resist Chance
+						break;
+					}
+					else if (!newbon->SEResist[e+1]){
+						newbon->SEResist[e] = base2; //Spell Effect ID
+						newbon->SEResist[e+1] = base1; //Resist Chance
+						break;
 					}
 				}
 				break;
@@ -1791,10 +1797,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->MeleeLifetap += spells[spell_id].base[i];
 
 				else if((effect_value < 0) && (newbon->MeleeLifetap > effect_value))
-					newbon->MeleeLifetap = spells[spell_id].base[i];
+					newbon->MeleeLifetap = effect_value;
 
-				else if(newbon->MeleeLifetap < spells[spell_id].base[i])
-					newbon->MeleeLifetap = spells[spell_id].base[i];
+				else if(newbon->MeleeLifetap < effect_value)
+					newbon->MeleeLifetap = effect_value;
 				break;
 			}
 
@@ -2494,10 +2500,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				for(int e = 0; e < MAX_RESISTABLE_EFFECTS*2; e+=2)
 				{
-					if(!newbon->SEResist[e] &&
-						((newbon->SEResist[e] = base2) && (newbon->SEResist[e+1] < effect_value)) ){
-						newbon->SEResist[e] = base2;
-						newbon->SEResist[e+1] = effect_value;
+					if(newbon->SEResist[e+1] && (newbon->SEResist[e] == base2) && (newbon->SEResist[e+1] < effect_value)){
+						newbon->SEResist[e] = base2; //Spell Effect ID
+						newbon->SEResist[e+1] = effect_value; //Resist Chance
+						break;
+					}
+					else if (!newbon->SEResist[e+1]){
+						newbon->SEResist[e] = base2; //Spell Effect ID
+						newbon->SEResist[e+1] = effect_value; //Resist Chance
 						break;
 					}
 				}
@@ -2598,7 +2608,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_Screech: 
 				newbon->Screech = effect_value;
 				break;
-			
+
+			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
+			if (IsAISpellEffect) {
+				
+				//Non-Focused Effect to modify incomming spell damage by resist type.
+				case SE_FcSpellVulnerability: 
+					ModVulnerability(base2, effect_value);
+				break;
+			}
 		}
 	}
 }
