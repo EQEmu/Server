@@ -513,6 +513,14 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	else if(our_owner && our_owner == target)
 		return false;
 
+	// invalidate for swarm pets for later on if their owner is a corpse
+	if (IsNPC() && CastToNPC()->GetSwarmInfo() && our_owner &&
+			our_owner->IsCorpse() && !our_owner->IsPlayerCorpse())
+		our_owner = nullptr;
+	if (target->IsNPC() && target->CastToNPC()->GetSwarmInfo() && target_owner &&
+			target_owner->IsCorpse() && !target_owner->IsPlayerCorpse())
+		target_owner = nullptr;
+
 	//cannot hurt untargetable mobs
 	bodyType bt = target->GetBodyType();
 
@@ -1196,14 +1204,21 @@ void Mob::ClearFeignMemory() {
 
 bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 
+	/*
+	Charm formula is correct based on over 50 hours of personal live parsing - Kayen
+	Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 255 CHA (min ~ 75 CHA)
+	Charisma DOES NOT extend charm durations.
+	Base effect value of charm spells in the spell file DOES NOT effect duration OR resist rate (unclear if does anything)
+	Charm has a lower limit of 5% chance to break per tick, regardless of resist modifiers / level difference.
+	*/
+
 	if(!caster) return false;
 
 	if(spells[spell_id].ResistDiff <= -600)
 		return true;
 
-	//Applies additional Charisma bonus to resist rate
-	float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,0,0,1);
-
+	float resist_check = 0;
+	
 	if(IsCharmSpell(spell_id)) {
 
 		if (spells[spell_id].powerful_flag == -1) //If charm spell has this set(-1), it can not break till end of duration.
@@ -1213,8 +1228,13 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 		if (MakeRandomInt(0, 99) > RuleI(Spells, CharmBreakCheckChance))
 			return true;
 
+		if (RuleB(Spells, CharismaCharmDuration))
+			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster,0,0,true,true);
+		else
+			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, 0,0, false, true);
+
 		//2: The mob makes a resistance check against the charm
-		if (resist_check == 100)
+		if (resist_check == 100) 
 			return true;
 
 		else
@@ -1234,10 +1254,21 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 	else
 	{
 		// Assume this is a harmony/pacify spell
+		// If 'Lull' spell resists, do a second resist check with a charisma modifier AND regular resist checks. If resists agian you gain aggro.
+		resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, true);
+
 		if (resist_check == 100)
 			return true;
 	}
 
 	return false;
+}
+
+void Mob::RogueEvade(Mob *other)
+{
+	int amount = other->GetHateAmount(this) - (GetLevel() * 13);
+	other->SetHate(this, std::max(1, amount));
+
+	return;
 }
 

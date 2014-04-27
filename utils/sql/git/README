@@ -10,3 +10,6 @@ All updates will follow a specific format of YYYY_MM_DD_Desc.sql, this is so it'
 
 So the following is a good example of what I expect to see
 2013_02_16_GitConversion.sql
+
+
+The new bots/ folder contains two sub-folders named optional/ and required/ for updates.

@@ -632,6 +632,37 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 		perl->eval(cmd.c_str());
 
 #ifdef EMBPERL_XS_CLASSES
+
+		{
+			std::string cl = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client";
+			std::string np = (std::string)"$" + (std::string)pkgprefix + (std::string)"::npc";
+			std::string qi = (std::string)"$" + (std::string)pkgprefix + (std::string)"::questitem";
+			std::string enl = (std::string)"$" + (std::string)pkgprefix + (std::string)"::entity_list";
+			if(clear_vars_.find(cl) != clear_vars_.end()) {
+				std::string eval_str = cl;
+				eval_str += " = undef;";
+				perl->eval(eval_str.c_str());
+			}
+
+			if (clear_vars_.find(np) != clear_vars_.end()) {
+				std::string eval_str = np;
+				eval_str += " = undef;";
+				perl->eval(eval_str.c_str());
+			}
+
+			if (clear_vars_.find(qi) != clear_vars_.end()) {
+				std::string eval_str = qi;
+				eval_str += " = undef;";
+				perl->eval(eval_str.c_str());
+			}
+
+			if (clear_vars_.find(enl) != clear_vars_.end()) {
+				std::string eval_str = enl;
+				eval_str += " = undef;";
+				perl->eval(eval_str.c_str());
+			}
+		}
+
 		char namebuf[64];
 
 		//init a couple special vars: client, npc, entity_list
@@ -670,11 +701,16 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 		ret_value = perl->dosub(std::string(pkgprefix).append("::").append(event).c_str());
 
 #ifdef EMBPERL_XS_CLASSES
-		std::string eval_str = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client = undef;";
-		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::npc = undef;";
-		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::questitem = undef;";
-		eval_str += (std::string)"$" + (std::string)pkgprefix + (std::string)"::entity_list = undef;";
-		perl->eval(eval_str.c_str());
+		{
+			std::string cl = (std::string)"$" + (std::string)pkgprefix + (std::string)"::client";
+			std::string np = (std::string)"$" + (std::string)pkgprefix + (std::string)"::npc";
+			std::string qi = (std::string)"$" + (std::string)pkgprefix + (std::string)"::questitem";
+			std::string enl = (std::string)"$" + (std::string)pkgprefix + (std::string)"::entity_list";
+			clear_vars_[cl] = 1;
+			clear_vars_[np] = 1;
+			clear_vars_[qi] = 1;
+			clear_vars_[enl] = 1;
+		}
 #endif
 
 	} catch(const char * err) {
@@ -687,12 +723,37 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
             error += "::";
             error += event;
             error += " - ";
-            error += err;
+			if(strlen(err) > 0)
+				error += err;
             AddError(error);
         }
 	}
 
 	quest_manager.EndQuest();
+
+#ifdef EMBPERL_XS_CLASSES
+	if(!quest_manager.QuestsRunning()) {
+		auto iter = clear_vars_.begin();
+		std::string eval_str;
+		while(iter != clear_vars_.end()) {
+			eval_str += iter->first;
+			eval_str += " = undef;";
+			++iter;
+		}
+		clear_vars_.clear();
+
+		try {
+			perl->eval(eval_str.c_str());
+		}
+		catch (const char * err) {
+			std::string error = "Script clear error: ";
+			if (strlen(err) > 0)
+				error += err;
+			AddError(error);
+		}
+	}
+#endif
+
 	return ret_value;
 }
 

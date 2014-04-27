@@ -484,6 +484,29 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 	QTimerList.push_back(QuestTimer(milliseconds, owner, timer_name));
 }
 
+void QuestManager::settimerMS(const char *timer_name, int milliseconds, ItemInst *inst) {
+	if (inst) {
+		inst->SetTimer(timer_name, milliseconds);
+	}
+}
+
+void QuestManager::settimerMS(const char *timer_name, int milliseconds, Mob *mob) {
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+
+	end = QTimerList.end();
+	while (cur != end) {
+		if (cur->mob && cur->mob == mob && cur->name == timer_name)
+		{
+			cur->Timer_.Enable();
+			cur->Timer_.Start(milliseconds, false);
+			return;
+		}
+		++cur;
+	}
+
+	QTimerList.push_back(QuestTimer(milliseconds, mob, timer_name));
+}
+
 void QuestManager::stoptimer(const char *timer_name) {
 	QuestManagerCurrentQuestVars();
 
@@ -504,6 +527,25 @@ void QuestManager::stoptimer(const char *timer_name) {
 	}
 }
 
+void QuestManager::stoptimer(const char *timer_name, ItemInst *inst) {
+	if (inst) {
+		inst->StopTimer(timer_name);
+	}
+}
+
+void QuestManager::stoptimer(const char *timer_name, Mob *mob) {
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+
+	end = QTimerList.end();
+	while (cur != end) {
+		if (cur->mob && cur->mob == mob && cur->name == timer_name) {
+			QTimerList.erase(cur);
+			return;
+		}
+		++cur;
+	}
+}
+
 void QuestManager::stopalltimers() {
 	QuestManagerCurrentQuestVars();
 
@@ -517,6 +559,24 @@ void QuestManager::stopalltimers() {
 	end = QTimerList.end();
 	while (cur != end) {
 		if(cur->mob && cur->mob == owner)
+			cur = QTimerList.erase(cur);
+		else
+			++cur;
+	}
+}
+
+void QuestManager::stopalltimers(ItemInst *inst) {
+	if (inst) {
+		inst->ClearTimers();
+	}
+}
+
+void QuestManager::stopalltimers(Mob *mob) {
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+
+	end = QTimerList.end();
+	while (cur != end) {
+		if (cur->mob && cur->mob == mob)
 			cur = QTimerList.erase(cur);
 		else
 			++cur;
@@ -1217,16 +1277,9 @@ void QuestManager::signalwith(int npc_id, int signal_id, int wait_ms) {
 	if(wait_ms > 0) {
 		STimerList.push_back(SignalTimer(wait_ms, npc_id, signal_id));
 		return;
-	}
-
-	if (npc_id<1)
-	{
-		printf("signal() bad npcid=%i\n",npc_id);
-	}
-	else
-	{
-		//initiator* signalnpc=0;
-		entity_list.SignalMobsByNPCID(npc_id, signal_id);
+	} else {
+		STimerList.push_back(SignalTimer(0, npc_id, signal_id));
+		return;
 	}
 }
 
@@ -1680,8 +1733,8 @@ short QuestManager::get_spawn_condition(const char *zone_short, uint32 instance_
 }
 
 //toggle a spawn event
-void QuestManager::toggle_spawn_event(int event_id, bool enable, bool reset_base) {
-	zone->spawn_conditions.ToggleEvent(event_id, enable, reset_base);
+void QuestManager::toggle_spawn_event(int event_id, bool enable, bool strict, bool reset_base) {
+	zone->spawn_conditions.ToggleEvent(event_id, enable, strict, reset_base);
 }
 
 bool QuestManager::has_zone_flag(int zone_id) {
@@ -2553,6 +2606,43 @@ void QuestManager::AssignRaidToInstance(uint16 instance_id)
 		{
 			uint32 rid = r->GetID();
 			database.AssignRaidToInstance(rid, instance_id);
+		}
+	}
+}
+
+void QuestManager::RemoveFromInstance(uint16 instance_id)
+{
+	QuestManagerCurrentQuestVars();
+	if(initiator) {
+		if(database.RemoveClientFromInstance(instance_id, initiator->CharacterID())) {
+			initiator->Message(MT_Say, "Removed client from instance.");
+		} else {
+			initiator->Message(MT_Say, "Failed to remove client from instance.");
+		}
+	}
+}
+
+void QuestManager::RemoveAllFromInstance(uint16 instance_id)
+{
+	QuestManagerCurrentQuestVars();
+	if(initiator) {
+		std::list<uint32> charid_list;
+		bool removed_all = true;
+		uint16 fail_count = 0;
+		database.GetCharactersInInstance(instance_id,charid_list);
+		auto iter = charid_list.begin();
+		while(iter != charid_list.end()) {
+			if(!database.RemoveClientFromInstance(instance_id, *iter)) {
+				removed_all = false;
+				++fail_count;
+			}
+			++iter;
+		}
+		if (removed_all) {
+			initiator->Message(MT_Say, "Removed all players from instance.");
+		} else {
+			// once the expedition system is in, this message it not relevant
+			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", fail_count);
 		}
 	}
 }

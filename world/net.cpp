@@ -56,7 +56,7 @@
 	#include <sys/ipc.h>
 	#include <sys/sem.h>
 	#include <sys/shm.h>
-	#ifndef FREEBSD
+	#if not defined (FREEBSD) && not defined (DARWIN)
 		union semun {
 			int val;
 			struct semid_ds *buf;
@@ -461,7 +461,7 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
-			AsyncLoadVariables(dbasync, &database);
+			// AsyncLoadVariables(dbasync, &database);
 			ReconnectCounter++;
 			if (ReconnectCounter >= 12) { // only create thread to reconnect every 10 minutes. previously we were creating a new thread every 10 seconds
 				ReconnectCounter = 0;

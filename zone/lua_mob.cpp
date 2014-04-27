@@ -1816,6 +1816,52 @@ void Lua_Mob::SetDestructibleObject(bool set) {
 	self->SetDestructibleObject(set);
 }
 
+bool Lua_Mob::IsImmuneToSpell(int spell_id, Lua_Mob caster) {
+	Lua_Safe_Call_Bool();
+	return self->IsImmuneToSpell(spell_id, caster);
+}
+
+void Lua_Mob::BuffFadeBySpellID(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->BuffFadeBySpellID(spell_id);
+}
+
+void Lua_Mob::BuffFadeByEffect(int effect_id) {
+	Lua_Safe_Call_Void();
+	self->BuffFadeByEffect(effect_id);
+}
+
+void Lua_Mob::BuffFadeByEffect(int effect_id, int skipslot) {
+	Lua_Safe_Call_Void();
+	self->BuffFadeByEffect(effect_id, skipslot);
+}
+
+void Lua_Mob::BuffFadeAll() {
+	Lua_Safe_Call_Void();
+	self->BuffFadeAll();
+}
+
+void Lua_Mob::BuffFadeBySlot(int slot) {
+	Lua_Safe_Call_Void();
+	self->BuffFadeBySlot(slot);
+}
+
+void Lua_Mob::BuffFadeBySlot(int slot, bool recalc_bonuses) {
+	Lua_Safe_Call_Void();
+	self->BuffFadeBySlot(slot, recalc_bonuses);
+}
+
+int Lua_Mob::CanBuffStack(int spell_id, int caster_level) {
+	Lua_Safe_Call_Int();
+	return self->CanBuffStack(spell_id, caster_level);
+}
+
+int Lua_Mob::CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite) {
+	Lua_Safe_Call_Int();
+	return self->CanBuffStack(spell_id, caster_level, fail_if_overwrite);
+}
+
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2125,7 +2171,16 @@ luabind::scope lua_register_mob() {
 		.def("ProcessSpecialAbilities", (void(Lua_Mob::*)(std::string))&Lua_Mob::ProcessSpecialAbilities)
 		.def("SetAppearance", (void(Lua_Mob::*)(int))&Lua_Mob::SetAppearance)
 		.def("SetAppearance", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetAppearance)
-		.def("SetDestructibleObject", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDestructibleObject);
+		.def("SetDestructibleObject", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDestructibleObject)
+		.def("IsImmuneToSpell", (bool(Lua_Mob::*)(int,Lua_Mob))&Lua_Mob::IsImmuneToSpell)
+		.def("BuffFadeBySpellID", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySpellID)
+		.def("BuffFadeByEffect", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeByEffect)
+		.def("BuffFadeByEffect", (void(Lua_Mob::*)(int,int))&Lua_Mob::BuffFadeByEffect)
+		.def("BuffFadeAll", (void(Lua_Mob::*)(void))&Lua_Mob::BuffFadeAll)
+		.def("BuffFadeBySlot", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySlot)
+		.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
+		.def("CanBuffStack", (int(Lua_Mob::*)(int,int))&Lua_Mob::CanBuffStack)
+		.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack);
 }
 
 luabind::scope lua_register_special_abilities() {

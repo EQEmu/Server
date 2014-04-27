@@ -3478,21 +3478,23 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	}
 	if(GetClass() == ROGUE){
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage,sizeof(SimpleMessage_Struct));
-		SimpleMessage_Struct *msg=(SimpleMessage_Struct *)outapp->pBuffer;
-		msg->color=0x010E;
-		if (!auto_attack && entity_list.Fighting(this)) {
+		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
+		msg->color = 0x010E;
+		Mob *evadetar = GetTarget();
+		if (!auto_attack && (evadetar && evadetar->CheckAggro(this)
+					&& evadetar->IsNPC())) {
 			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) {
-				msg->string_id=343;
-				entity_list.Evade(this);
+				msg->string_id = EVADE_SUCCESS;
+				RogueEvade(evadetar);
 			} else {
-				msg->string_id=344;
+				msg->string_id = EVADE_FAIL;
 			}
 		} else {
 			if (hidden){
-				msg->string_id=346;
+				msg->string_id = HIDE_SUCCESS;
 			}
 			else {
-				msg->string_id=345;
+				msg->string_id = HIDE_FAIL;
 			}
 		}
 		FastQueuePacket(&outapp);
@@ -5416,6 +5418,12 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 	}
 	if (tmp->Charmed())
 	{
+		action = 0;
+	}
+
+	// 1199 I don't have time for that now. etc
+	if (!tmp->CastToNPC()->IsMerchantOpen()) {
+		tmp->Say_StringID(MakeRandomInt(1199, 1202));
 		action = 0;
 	}
 
@@ -12466,7 +12474,15 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 	//
 
 	char *GuildName = (char *)app->pBuffer;
+#ifdef DARWIN
+#if __DARWIN_C_LEVEL < 200809L
+	if (strlen(GuildName) > 60)
+#else
 	if(strnlen(GuildName, 64) > 60)
+#endif // __DARWIN_C_LEVEL
+#else
+	if(strnlen(GuildName, 64) > 60)
+#endif // DARWIN
 	{
 		Message(clientMessageError, "Guild name too long.");
 		return;
@@ -12924,7 +12940,15 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_PlayerToggle_Struct);
 			LFGuild_PlayerToggle_Struct *pts = (LFGuild_PlayerToggle_Struct *)app->pBuffer;
 
+#ifdef DARWIN
+#if __DARWIN_C_LEVEL < 200809L
+			if (strlen(pts->Comment) > 256)
+#else
 			if(strnlen(pts->Comment, 256) > 256)
+#endif // __DARWIN_C_LEVEL
+#else
+			if(strnlen(pts->Comment, 256) > 256)
+#endif // DARWIN
 				return;
 
 			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + strlen(pts->Comment) + 38);
@@ -12951,7 +12975,15 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_GuildToggle_Struct);
 			LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *)app->pBuffer;
 
-			if(strnlen(gts->Comment, 256) > 256)
+#ifdef DARWIN
+#if __DARWIN_C_LEVEL < 200809L
+                        if (strlen(gts->Comment) > 256)
+#else
+                        if(strnlen(gts->Comment, 256) > 256)
+#endif // __DARWIN_C_LEVEL
+#else
+                        if(strnlen(gts->Comment, 256) > 256)
+#endif // __DARWIN
 				return;
 
 			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + strlen(gts->Comment) + strlen(guild_mgr.GetGuildName(GuildID())) + 43);

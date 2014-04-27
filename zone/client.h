@@ -305,6 +305,7 @@ public:
 	void			SetHideMe(bool hm);
 	inline uint16	GetPort()		const { return port; }
 	bool			IsDead() const { return(dead); }
+	bool			IsUnconscious() const { return ((cur_hp <= 0) ? true : false); }
 	inline bool		IsLFP() { return LFP; }
 	void			UpdateLFP();
 
@@ -794,7 +795,7 @@ public:
 	void	QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call = false);
 	void	PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootItem_Struct** bag_item_data = 0);
 	bool	AutoPutLootInInventory(ItemInst& inst, bool try_worn = false, bool try_cursor = true, ServerLootItem_Struct** bag_item_data = 0);
-	void	SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0, bool attuned=false, uint16 to_slot=SLOT_CURSOR);
+	bool	SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0, bool attuned=false, uint16 to_slot=SLOT_CURSOR);
 	void	SetStats(uint8 type,int16 set_val);
 	void	IncStats(uint8 type,int16 increase_val);
 	void	DropItem(int16 slot_id);
@@ -1169,6 +1170,7 @@ public:
 	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillUseTypes);
 	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
+	void ExpeditionSay(const char *str, int ExpID);
 	int mod_client_damage(int damage, SkillUseTypes skillinuse, int hand, const ItemInst* weapon, Mob* other);
 	bool mod_client_message(char* message, uint8 chan_num);
 	bool mod_can_increase_skill(SkillUseTypes skillid, Mob* against_who);

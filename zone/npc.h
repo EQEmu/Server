@@ -209,6 +209,10 @@ public:
 	void SetSecSkill(uint8 skill_type)	{ sec_melee_type = skill_type; }
 
 	uint32	MerchantType;
+	bool	merchant_open;
+	inline void	MerchantOpenShop() { merchant_open = true; }
+	inline void	MerchantCloseShop() { merchant_open = false; }
+	inline bool	IsMerchantOpen() { return merchant_open; }
 	void	Depop(bool StartSpawnTimer = false);
 	void	Stun(int duration);
 	void	UnStun();
@@ -229,7 +233,7 @@ public:
 
 	uint32	GetMaxDMG() const {return max_dmg;}
 	uint32	GetMinDMG() const {return min_dmg;}
-	float	GetSlowMitigation() const {return slow_mitigation;}
+	int16	GetSlowMitigation() const {return slow_mitigation;}
 	float	GetAttackSpeed() const {return attack_speed;}
 	bool	IsAnimal() const { return(bodytype == BT_Animal); }
 	uint16	GetPetSpellID() const {return pet_spell_id;}
@@ -241,6 +245,7 @@ public:
 	void	AddLootDrop(const Item_Struct*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
+	inline bool IsTargetableWithHotkey() const { return no_target_hotkey; }
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }

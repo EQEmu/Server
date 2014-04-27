@@ -1022,11 +1022,12 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if(command_dispatch(this, message) == -2) {
 				if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
-					if(i == 0) {
+					if(i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 						Message(13, "Command '%s' not recognized.", message);
 					}
 				} else {
-					Message(13, "Command '%s' not recognized.", message);
+					if(!RuleB(Chat, SuppressCommandErrors)) 
+						Message(13, "Command '%s' not recognized.", message);
 				}
 			}
 			break;
@@ -2306,6 +2307,8 @@ uint64 Client::GetAllMoney() {
 }
 
 bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int chancemodi) {
+	if (IsDead() || IsUnconscious())
+		return false;
 	if (IsAIControlled()) // no skillups while chamred =p
 		return false;
 	if (skillid > HIGHEST_SKILL)
@@ -2349,6 +2352,10 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 }
 
 void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
+	if (IsDead() || IsUnconscious())
+		return;
+	if (IsAIControlled())
+		return;
 	if (langid >= MAX_PP_LANGUAGE)
 		return;		// do nothing if langid is an invalid language
 
@@ -2852,7 +2859,12 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	else
 		ClientFilters[FilterSpellCrits] = FilterHide;
 
-	Filter1(FilterMeleeCrits);
+	if (filter->filters[FilterMeleeCrits] == 0)
+		ClientFilters[FilterMeleeCrits] = FilterShow;
+	else if (filter->filters[FilterMeleeCrits] == 1)
+		ClientFilters[FilterMeleeCrits] = FilterShowSelfOnly;
+	else
+		ClientFilters[FilterMeleeCrits] = FilterHide;
 
 	if(filter->filters[FilterSpellDamage] == 0)
 		ClientFilters[FilterSpellDamage] = FilterShow;
@@ -2866,12 +2878,41 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter0(FilterOthersHit);
 	Filter0(FilterMissedMe);
 	Filter1(FilterDamageShields);
-	Filter1(FilterDOT);
+
+	if (GetClientVersionBit() & BIT_SoDAndLater) {
+		if (filter->filters[FilterDOT] == 0)
+			ClientFilters[FilterDOT] = FilterShow;
+		else if (filter->filters[FilterDOT] == 1)
+			ClientFilters[FilterDOT] = FilterShowSelfOnly;
+		else if (filter->filters[FilterDOT] == 2)
+			ClientFilters[FilterDOT] = FilterShowGroupOnly;
+		else
+			ClientFilters[FilterDOT] = FilterHide;
+	} else {
+		if (filter->filters[FilterDOT] == 0) // show functions as self only
+			ClientFilters[FilterDOT] = FilterShowSelfOnly;
+		else
+			ClientFilters[FilterDOT] = FilterHide;
+	}
+
 	Filter1(FilterPetHits);
 	Filter1(FilterPetMisses);
 	Filter1(FilterFocusEffects);
 	Filter1(FilterPetSpells);
-	Filter1(FilterHealOverTime);
+
+	if (GetClientVersionBit() & BIT_SoDAndLater) {
+		if (filter->filters[FilterHealOverTime] == 0)
+			ClientFilters[FilterHealOverTime] = FilterShow;
+		// This is called 'Show Mine Only' in the clients, but functions the same as show
+		// so instead of apply special logic, just set to show
+		else if (filter->filters[FilterHealOverTime] == 1)
+			ClientFilters[FilterHealOverTime] = FilterShow;
+		else
+			ClientFilters[FilterHealOverTime] = FilterHide;
+	} else {
+		// these clients don't have a 'self only' filter
+		Filter1(FilterHealOverTime);
+	}
 }
 
 // this version is for messages with no parameters
@@ -2983,8 +3024,18 @@ bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
 			return false;
 		} else if (mode == FilterShowGroupOnly) {
 			Group *g = GetGroup();
-			if (!g || !g->IsGroupMember(sender))
+			Raid *r = GetRaid();
+			if (g) {
+				if (g->IsGroupMember(sender))
+					return true;
+			} else if (r && sender->IsClient()) {
+				uint32 rgid1 = r->GetGroup(this);
+				uint32 rgid2 = r->GetGroup(sender->CastToClient());
+				if (rgid1 != 0xFFFFFFFF && rgid1 == rgid2)
+					return true;
+			} else {
 				return false;
+			}
 		}
 	}
 
@@ -3027,7 +3078,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 		type = 4;
 
 	if (!message1) {
-		Message_StringID(type, string_id);	// use the simple message instead
+		FilteredMessage_StringID(sender, type, filter, string_id);	// use the simple message instead
 		return;
 	}
 
@@ -6666,9 +6717,9 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	uint32 buff_count = GetMaxTotalSlots();
 	for (int i=0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
-			if ((HasRune() || HasPartialMeleeRune()) && buffs[i].melee_rune > 0) { rune_number += buffs[i].melee_rune; }
+			if (buffs[i].melee_rune > 0) { rune_number += buffs[i].melee_rune; }
 
-			if ((HasSpellRune() || HasPartialSpellRune()) && buffs[i].magic_rune > 0) { magic_rune_number += buffs[i].magic_rune; }
+			if (buffs[i].magic_rune > 0) { magic_rune_number += buffs[i].magic_rune; }
 		}
 	}
 
@@ -8111,7 +8162,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
        if(!auto_consume) //no message if the client consumed for us
            entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
-#if EQDEBUG >= 1
+#if EQDEBUG >= 5
        LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", (int)slot);
 #endif
    }
@@ -8128,7 +8179,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
         if(!auto_consume) //no message if the client consumed for us
             entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
-#if EQDEBUG >= 1
+#if EQDEBUG >= 5
         LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", (int)slot);
 #endif
    }
@@ -8162,4 +8213,31 @@ void Client::PlayMP3(const char* fname)
 	strncpy(buf->filename, fname, filename.length());
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+void Client::ExpeditionSay(const char *str, int ExpID) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	if (!database.RunQuery(query,MakeAnyLenString(&query, "SELECT `player_name` FROM `cust_inst_players` WHERE `inst_id` = %i", ExpID),errbuf,&result)){
+		safe_delete_array(query);
+		return;
+	}
+
+	safe_delete_array(query);
+
+	if(result)
+		this->Message(14, "You say to the expedition, '%s'", str);
+
+	while((row = mysql_fetch_row(result))) {
+		const char* CharName = row[0];
+		if(strcmp(CharName, this->GetCleanName()) != 0)
+			worldserver.SendEmoteMessage(CharName, 0, 0, 14, "%s says to the expedition, '%s'", this->GetCleanName(), str); 
+		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
+	} 
+
+	mysql_free_result(result);
+	
 }

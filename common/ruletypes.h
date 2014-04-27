@@ -135,9 +135,11 @@ RULE_CATEGORY_END()
 RULE_CATEGORY( Pets )
 RULE_REAL( Pets, AttackCommandRange, 150 )
 RULE_BOOL( Pets, UnTargetableSwarmPet, false )
+RULE_BOOL( Pets, SwarmPetNotTargetableWithHotKey, false ) //On SOF+ clients this a semi-hack to make swarm pets not F8 targetable.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( GM )
+RULE_INT ( GM, MinStatusToSummonItem, 250)
 RULE_INT ( GM, MinStatusToZoneAnywhere, 250 )
 RULE_CATEGORY_END()
 
@@ -290,14 +292,24 @@ RULE_BOOL ( Spells, NPCIgnoreBaseImmunity, true) // Whether or not NPCs get to i
 RULE_REAL ( Spells, AvgSpellProcsPerMinute, 6.0) //Adjust rate for sympathetic spell procs
 RULE_INT ( Spells, ResistFalloff, 67) //Max that level that will adjust our resist chance based on level modifiers
 RULE_INT ( Spells, CharismaEffectiveness, 10) // Deterimes how much resist modification charisma applies to charm/pacify checks. Default 10 CHA = -1 resist mod.
+RULE_INT ( Spells, CharismaEffectivenessCap, 255) // Deterimes how much resist modification charisma applies to charm/pacify checks. Default 10 CHA = -1 resist mod.
+RULE_BOOL ( Spells, CharismaCharmDuration, false) // Allow CHA resist mod to extend charm duration.
 RULE_INT ( Spells, CharmBreakCheckChance, 25) //Determines chance for a charm break check to occur each buff tick.
 RULE_INT ( Spells, MaxCastTimeReduction, 50) //Max percent your spell cast time can be reduced by spell haste
-RULE_INT ( Spells, RootBreakFromSpells, 20) //Chance for root to break when cast on.
+RULE_INT ( Spells, RootBreakFromSpells, 55) //Chance for root to break when cast on.
 RULE_INT ( Spells, DeathSaveCharismaMod, 3) //Determines how much charisma effects chance of death save firing.
 RULE_INT ( Spells, DivineInterventionHeal, 8000) //Divine intervention heal amount.
 RULE_BOOL ( Spells, AdditiveBonusValues, false) //Allow certain bonuses to be calculated by adding together the value from each item, instead of taking the highest value. (ie Add together all Cleave Effects)
 RULE_BOOL ( Spells, UseCHAScribeHack, false) //ScribeSpells and TrainDiscs quest functions will ignore entries where field 12 is CHA.  What's the best way to do this?
 RULE_BOOL ( Spells, BuffLevelRestrictions, true) //Buffs will not land on low level toons like live
+RULE_INT ( Spells, RootBreakCheckChance, 70) //Determines chance for a root break check to occur each buff tick.
+RULE_INT ( Spells, FearBreakCheckChance, 70) //Determines chance for a fear break check to occur each buff tick.
+RULE_INT ( Spells, SuccorFailChance, 2) //Determines chance for a succor spell not to teleport an invidual player
+RULE_INT ( Spells, FRProjectileItem_Titanium, 1113) // Item id for Titanium clients for Fire 'spell projectile'.
+RULE_INT ( Spells, FRProjectileItem_SOF, 80684) // Item id for SOF clients for Fire 'spell projectile'.
+RULE_INT ( Spells, FRProjectileItem_NPC, 80684) // Item id for NPC Fire 'spell projectile'.
+RULE_BOOL ( Spells, UseLiveSpellProjectileGFX, false) // Use spell projectile graphics set in the spells_new table (player_1). Server must be using UF+ spell file.
+RULE_BOOL ( Spells, FocusCombatProcs, false) //Allow all combat procs to receive focus effects.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
@@ -306,6 +318,9 @@ RULE_INT ( Combat, WarBerBaseCritChance, 3 ) //The base crit chance for warriors
 RULE_INT ( Combat, BerserkBaseCritChance, 6 ) //The bonus base crit chance you get when you're berserk
 RULE_INT ( Combat, NPCBashKickLevel, 6 ) //The level that npcs can KICK/BASH
 RULE_INT ( Combat, NPCBashKickStunChance, 15 ) //Percent chance that a bash/kick will stun
+RULE_INT ( Combat, RogueCritThrowingChance, 25) //Rogue throwing crit bonus
+RULE_INT ( Combat, RogueDeadlyStrikeChance, 80) //Rogue chance throwing from behind crit becomes a deadly strike
+RULE_INT ( Combat, RogueDeadlyStrikeMod, 2) //Deadly strike modifier to crit damage
 RULE_INT ( Combat, ClientBaseCritChance, 0 ) //The base crit chance for all clients, this will stack with warrior's/zerker's crit chance.
 RULE_BOOL ( Combat, UseIntervalAC, true)
 RULE_INT ( Combat, PetAttackMagicLevel, 30)
@@ -384,6 +399,7 @@ RULE_BOOL ( Combat, UseArcheryBonusRoll, false) //Make the 51+ archery bonus req
 RULE_INT ( Combat, ArcheryBonusChance, 50)
 RULE_INT ( Combat, BerserkerFrenzyStart, 35)
 RULE_INT ( Combat, BerserkerFrenzyEnd, 45)
+RULE_BOOL ( Combat, OneProcPerWeapon, true) //If enabled, One proc per weapon per round
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( NPC )
@@ -439,6 +455,7 @@ RULE_BOOL ( Bots, BotSpellQuest, false ) // Anita Thrall's (Anita_Thrall.pl) Bot
 RULE_INT ( Bots, BotAAExpansion, 8 ) // Bots get AAs through this expansion
 RULE_BOOL ( Bots, BotGroupXP, false ) // Determines whether client gets xp for bots outside their group.
 RULE_BOOL ( Bots, BotBardUseOutOfCombatSongs, true) // Determines whether bard bots use additional out of combat songs.
+RULE_BOOL ( Bots, BotLevelsWithOwner, false) // Auto-updates spawned bots as owner levels/de-levels (false is original behavior)
 RULE_CATEGORY_END()
 #endif
 
@@ -448,6 +465,7 @@ RULE_BOOL ( Chat, ServerWideAuction, true)
 RULE_BOOL ( Chat, EnableVoiceMacros, true)
 RULE_BOOL ( Chat, EnableMailKeyIPVerification, true)
 RULE_BOOL ( Chat, EnableAntiSpam, true)
+RULE_BOOL ( Chat, SuppressCommandErrors, false) // Do not suppress by default
 RULE_INT ( Chat, MinStatusToBypassAntiSpam, 100)
 RULE_INT ( Chat, MinimumMessagesPerInterval, 4)
 RULE_INT ( Chat, MaximumMessagesPerInterval, 12)
@@ -529,6 +547,12 @@ RULE_BOOL( QueryServ, PlayerLogDeletes, false) // Logs Player Deletes
 RULE_BOOL( QueryServ, PlayerLogMoves, false) // Logs Player Moves
 RULE_BOOL( QueryServ, MerchantLogTransactions, false) // Logs Merchant Transactions
 RULE_BOOL( QueryServ, PlayerLogPCCoordinates, false) // Logs Player Coordinates with certain events
+RULE_CATEGORY_END()
+
+RULE_CATEGORY( Inventory )
+RULE_BOOL ( Inventory, EnforceAugmentRestriction, true) // Forces augment slot restrictions
+RULE_BOOL ( Inventory, EnforceAugmentUsability, true) // Forces augmented item usability
+RULE_BOOL ( Inventory, EnforceAugmentWear, true) // Forces augment wear slot validation
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

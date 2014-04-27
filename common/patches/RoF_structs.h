@@ -4427,8 +4427,11 @@ struct AugSlotStruct
 struct ItemSecondaryBodyStruct
 {
 	uint32 augtype;
-	uint32 augrestrict;
+	// swapped augrestrict and augdistiller positions
+	// (this swap does show the proper augment restrictions in Item Information window now)
+	// unsure what the purpose of augdistiller is at this time -U 3/17/2014
 	uint32 augdistiller;	// New to December 10th 2012 client - NEW
+	uint32 augrestrict;
 	AugSlotStruct augslots[6];
 
 	uint32 ldonpoint_type;

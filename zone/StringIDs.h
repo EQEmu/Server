@@ -80,6 +80,7 @@
 #define CANNOT_AFFECT_NPC			251		//That spell can not affect this target NPC.
 #define SUSPEND_MINION_HAS_AGGRO	256		//Your pet is the focus of something's attention.
 #define NO_PET						255		//You do not have a pet.
+#define GATE_FAIL					260		//Your gate is too unstable, and collapses.
 #define CORPSE_CANT_SENSE			262		//You cannot sense any corpses for this PC in this zone.
 #define SPELL_NO_HOLD				263		//Your spell did not take hold.
 #define CANNOT_CHARM				267		//This NPC cannot be charmed.
@@ -99,6 +100,12 @@
 #define TRADESKILL_FAILED			336		//You lacked the skills to fashion the items together.
 #define TRADESKILL_TRIVIAL			338		//You can no longer advance your skill from making this item.
 #define TRADESKILL_SUCCEED			339		//You have fashioned the items together to create something new!
+#define EVADE_SUCCESS				343		//You have momentarily ducked away from the main combat.
+#define EVADE_FAIL					344		//Your attempts at ducking clear of combat fail.
+#define HIDE_FAIL					345		//You failed to hide yourself.
+#define HIDE_SUCCESS				346		//You have hidden yourself from view.
+#define SNEAK_SUCCESS				347		//You are as quiet as a cat stalking its prey.
+#define SNEAK_FAIL					348		//You are as quiet as a herd of running elephants.
 #define MEND_CRITICAL				349		//You magically mend your wounds and heal considerable damage.
 #define MEND_SUCCESS				350		//You mend your wounds and heal some damage.
 #define MEND_WORSEN					351		//You have worsened your wounds!
@@ -160,6 +167,7 @@
 #define ASSASSINATES				1016	//%1 ASSASSINATES their victim!!
 #define CRIPPLING_BLOW				1021	//%1 lands a Crippling Blow!(%2)
 #define CRITICAL_HIT				1023	//%1 scores a critical hit! (%2)
+#define DEADLY_STRIKE				1024	//%1 scores a Deadly Strike!(%2)
 #define RESISTS_URGE				1025	//%1 resists their urge to flee.
 #define BERSERK_START				1027	//%1 goes into a berserker frenzy!
 #define DEATH_PACT					1028	//%1's death pact has been benevolently fulfilled!
@@ -201,6 +209,7 @@
 #define AA_POINTS					1215	//points
 #define SPELL_FIZZLE_OTHER			1218	//%1's spell fizzles!
 #define MISSED_NOTE_OTHER			1219	//A missed note brings %1's song to a close!
+#define SPELL_LEVEL_REQ				1226	//This spell only works on people who are level %1 and under.
 #define CORPSE_DECAY_NOW			1227	//This corpse is waiting to expire.
 #define SURNAME_REJECTED			1374	//Your new surname was rejected. Please try a different name.
 #define DUEL_DECLINE				1383	//%1 has declined your challenge to duel to the death.
@@ -234,24 +243,26 @@
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
 #define EXPEDITION_MIN_REMAIN		3551	//You only have %1 minutes remaining before this expedition comes to an end.
 #define REWIND_WAIT					4059	//You must wait a bit longer before using the rewind command again.
-#define CORPSEDRAG_LIMIT		4061	//You are already dragging as much as you can!
-#define CORPSEDRAG_ALREADY		4062	//You are already dragging %1.
+#define CORPSEDRAG_LIMIT			4061	//You are already dragging as much as you can!
+#define CORPSEDRAG_ALREADY			4062	//You are already dragging %1.
 #define CORPSEDRAG_SOMEONE_ELSE		4063	//Someone else is dragging %1.
-#define CORPSEDRAG_BEGIN		4064	//You begin to drag %1.
-#define CORPSEDRAG_STOPALL		4065	//You stop dragging the corpses.
-#define CORPSEDRAG_STOP			4066	//You stop dragging the corpse.
+#define CORPSEDRAG_BEGIN			4064	//You begin to drag %1.
+#define CORPSEDRAG_STOPALL			4065	//You stop dragging the corpses.
+#define CORPSEDRAG_STOP				4066	//You stop dragging the corpse.
 #define WHOALL_NO_RESULTS			5029	//There are no players in EverQuest that match those who filters.
 #define PETITION_NO_DELETE			5053	//You do not have a petition in the queue.
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
 #define GAIN_RAIDEXP				5085	//You gained raid experience!
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
+#define SUCCOR_FAIL					5169	//The portal collapes before you can escape!
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!
 #define MELEE_SILENCE				5806	//You *CANNOT* use this melee ability, you are suffering from amnesia!
 #define DISCIPLINE_REUSE_MSG		5807	//You can use the ability %1 again in %2 hour(s) %3 minute(s) %4 seconds.
 #define DISCIPLINE_REUSE_MSG2		5808	//You can use the ability %1 again in %2 minute(s) %3 seconds.
 #define FAILED_TAUNT				5811	//You have failed to taunt your target.
+#define PHYSICAL_RESIST_FAIL		5817	//Your target avoided your %1 ability.
 #define AA_NO_TARGET				5825	//You must first select a target for this ability!
 #define FORAGE_MASTERY				6012	//Your forage mastery has enabled you to find something else!
 #define GUILD_BANK_CANNOT_DEPOSIT	6097	// Cannot deposit this item. Containers must be empty, and only one of each LORE and no NO TRADE or TEMPORARY items may be deposited.
@@ -289,8 +300,13 @@
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
 #define FEAR_TOO_HIGH				9035	//Your target is too high of a level for your fear spell.
+#define SLOW_MOSTLY_SUCCESSFUL		9029	//Your spell was mostly successful.
+#define SLOW_PARTIALLY_SUCCESSFUL	9030	// Your spell was partially successful.
+#define SLOW_SLIGHTLY_SUCCESSFUL	9031	//Your spell was slightly successful.
+#define SPELL_OPPOSITE_EFFECT		9032	//Your spell may have had the opposite effect of what you desired.
+#define HAS_BEEN_AWAKENED			9037	//%1 has been awakened by %2.
 #define YOU_HEAL					9068	//You have healed %1 for %2 points of damage.
-#define OTHER_HIT_DOT				9072	//%1 has taken %2 damage from your %3.
+#define YOUR_HIT_DOT				9072	//%1 has taken %2 damage from your %3.
 #define HIT_NON_MELEE				9073	//%1 hit %2 for %3 points of non-melee damage.
 #define SHAKE_OFF_STUN				9077
 #define STRIKETHROUGH_STRING		9078	//You strike through your opponent's defenses!
@@ -323,6 +339,7 @@
 #define ALREADY_CASTING				12442	//You are already casting a spell!
 #define SENSE_CORPSE_NOT_NAME		12446	//You don't sense any corpses of that name.
 #define SENSE_CORPSE_NONE			12447	//You don't sense any corpses.
+#define SCREECH_BUFF_BLOCK			12448	//Your immunity buff protected you from the spell %1!
 #define NOT_HOLDING_ITEM			12452	//You are not holding an item!
 #define SENSE_UNDEAD				12471	//You sense undead in this direction.
 #define SENSE_ANIMAL				12472	//You sense an animal in this direction.
@@ -353,10 +370,14 @@
 #define NOW_INVISIBLE				12950	//%1 is now Invisible.
 #define NOW_VISIBLE					12951	//%1 is now Visible.
 #define GUILD_NOT_MEMBER2			12966	//You are not in a guild.
+#define HOT_HEAL_SELF				12976 	//You have been healed for %1 hit points by your %2.
+#define HOT_HEAL_OTHER				12997	//You have healed %1 for %2 hit points with your %3.
+#define HOT_HEALED_OTHER			12998	//%1 healed you for %2 hit points by %3.
 #define DISC_LEVEL_USE_ERROR		13004	//You are not sufficient level to use this discipline.
 #define TOGGLE_ON					13172	//Asking server to turn ON your incoming tells.
 #define TOGGLE_OFF					13173	//Asking server to turn OFF all incoming tells for you.
 #define DUEL_INPROGRESS				13251	//You have already accepted a duel with someone else cowardly dog.
+#define OTHER_HIT_DOT				13327	//%1 has taken %2 damage from %3 by %4.
 #define GENERIC_MISS				15041	//%1 missed %2
 
 #endif

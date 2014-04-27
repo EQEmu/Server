@@ -79,12 +79,12 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	if (spell_id == SPELL_IMP_HARM_TOUCH) //Improved Harm Touch
 		value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
 
-	int chance = RuleI(Spells, BaseCritChance);
+	int chance = RuleI(Spells, BaseCritChance); //Wizard base critical chance is 2% (Does not scale with level)
 		chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
 
 		chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
-	if (chance > 0){
+	if (chance > 0 || (GetClass() == WIZARD && GetLevel() >= RuleI(Spells, WizCritLevel))) {
 
 		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
@@ -99,7 +99,7 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		}
 
 		else if (GetClass() == WIZARD && (GetLevel() >= RuleI(Spells, WizCritLevel)) && (MakeRandomInt(1,100) <= RuleI(Spells, WizCritChance))) {
-			ratio = MakeRandomInt(1,100); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio.
+			ratio += MakeRandomInt(20,70); //Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio. (20-70 is parse confirmed)
 			Critical = true;
 		}
 

@@ -168,12 +168,36 @@ void lua_set_timer(const char *timer, int time_ms) {
 	quest_manager.settimerMS(timer, time_ms);
 }
 
+void lua_set_timer(const char *timer, int time_ms, Lua_ItemInst inst) {
+	quest_manager.settimerMS(timer, time_ms, inst);
+}
+
+void lua_set_timer(const char *timer, int time_ms, Lua_Mob mob) {
+	quest_manager.settimerMS(timer, time_ms, mob);
+}
+
 void lua_stop_timer(const char *timer) {
 	quest_manager.stoptimer(timer);
 }
 
+void lua_stop_timer(const char *timer, Lua_ItemInst inst) {
+	quest_manager.stoptimer(timer, inst);
+}
+
+void lua_stop_timer(const char *timer, Lua_Mob mob) {
+	quest_manager.stoptimer(timer, mob);
+}
+
 void lua_stop_all_timers() {
 	quest_manager.stopalltimers();
+}
+
+void lua_stop_all_timers(Lua_ItemInst inst) {
+	quest_manager.stopalltimers(inst);
+}
+
+void lua_stop_all_timers(Lua_Mob mob) {
+	quest_manager.stopalltimers(mob);
 }
 
 void lua_depop() {
@@ -348,8 +372,8 @@ int lua_get_spawn_condition(const char *zone, uint32 instance_id, int condition_
 	return quest_manager.get_spawn_condition(zone, instance_id, condition_id);
 }
 
-void lua_toggle_spawn_event(int event_id, bool enable, bool reset) {
-	quest_manager.toggle_spawn_event(event_id, enable, reset);
+void lua_toggle_spawn_event(int event_id, bool enable, bool strict, bool reset) {
+	quest_manager.toggle_spawn_event(event_id, enable, strict, reset);
 }
 
 void lua_summon_burried_player_corpse(uint32 char_id, float x, float y, float z, float h) {
@@ -657,6 +681,14 @@ void lua_assign_group_to_instance(uint32 instance_id) {
 
 void lua_assign_raid_to_instance(uint32 instance_id) {
 	quest_manager.AssignRaidToInstance(instance_id);
+}
+
+void lua_remove_from_instance(uint32 instance_id) {
+	quest_manager.RemoveFromInstance(instance_id);
+}
+
+void lua_remove_all_from_instance(uint32 instance_id) {
+	quest_manager.RemoveAllFromInstance(instance_id);
 }
 
 void lua_flag_instance_by_group_leader(uint32 zone, uint32 version) {
@@ -1091,9 +1123,15 @@ luabind::scope lua_register_general() {
 		luabind::def("spawn_from_spawn2", (Lua_Mob(*)(uint32))&lua_spawn_from_spawn2),
 		luabind::def("enable_spawn2", &lua_enable_spawn2),
 		luabind::def("disable_spawn2", &lua_disable_spawn2),
-		luabind::def("set_timer", &lua_set_timer),
-		luabind::def("stop_timer", &lua_stop_timer),
-		luabind::def("stop_all_timers", &lua_stop_all_timers),
+		luabind::def("set_timer", (void(*)(const char*, int))&lua_set_timer),
+		luabind::def("set_timer", (void(*)(const char*, int, Lua_ItemInst))&lua_set_timer),
+		luabind::def("set_timer", (void(*)(const char*, int, Lua_Mob))&lua_set_timer),
+		luabind::def("stop_timer", (void(*)(const char*))&lua_stop_timer),
+		luabind::def("stop_timer", (void(*)(const char*, Lua_ItemInst))&lua_stop_timer),
+		luabind::def("stop_timer", (void(*)(const char*, Lua_Mob))&lua_stop_timer),
+		luabind::def("stop_all_timers", (void(*)(void))&lua_stop_all_timers),
+		luabind::def("stop_all_timers", (void(*)(Lua_ItemInst))&lua_stop_all_timers),
+		luabind::def("stop_all_timers", (void(*)(Lua_Mob))&lua_stop_all_timers),
 		luabind::def("depop", (void(*)(void))&lua_depop),
 		luabind::def("depop", (void(*)(int))&lua_depop),
 		luabind::def("depop_with_timer", (void(*)(void))&lua_depop_with_timer),
@@ -1195,6 +1233,8 @@ luabind::scope lua_register_general() {
 		luabind::def("assign_to_instance", &lua_assign_to_instance),
 		luabind::def("assign_group_to_instance", &lua_assign_group_to_instance),
 		luabind::def("assign_raid_to_instance", &lua_assign_raid_to_instance),
+		luabind::def("remove_from_instance", &lua_remove_from_instance),
+		luabind::def("remove_all_from_instance", &lua_remove_all_from_instance),
 		luabind::def("flag_instance_by_group_leader", &lua_flag_instance_by_group_leader),
 		luabind::def("flag_instance_by_raid_leader", &lua_flag_instance_by_raid_leader),
 		luabind::def("fly_mode", &lua_fly_mode),

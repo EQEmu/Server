@@ -35,29 +35,20 @@ static const char* FileNames[EQEMuLog::MaxLogID] = { "logs/eqemu", "logs/eqemu",
 static const char* LogNames[EQEMuLog::MaxLogID] = { "Status", "Normal", "Error", "Debug", "Quest", "Command", "Crash" };
 
 EQEMuLog::EQEMuLog() {
-//	MOpen = new Mutex;
-//	MLog = new Mutex*[MaxLogID];
-//	fp = new FILE*[MaxLogID];
-//	pLogStatus = new uint8[MaxLogID];
 	for (int i=0; i<MaxLogID; i++) {
 		fp[i] = 0;
-//		MLog[i] = new Mutex;
-#if EQDEBUG >= 2
-		pLogStatus[i] = 1 | 2;
-#else
-		pLogStatus[i] = 0;
-#endif
 		logCallbackFmt[i] = nullptr;
 		logCallbackBuf[i] = nullptr;
 		logCallbackPva[i] = nullptr;
 	}
-// TODO: Make this read from an ini or something, everyone has different opinions on what it should be
-#if EQDEBUG < 2
-	pLogStatus[Status] = 2;
-	pLogStatus[Error] = 2;
-	pLogStatus[Quest] = 2;
-	pLogStatus[Commands] = 1;
-#endif
+	
+	pLogStatus[Status] = LOG_LEVEL_STATUS;
+	pLogStatus[Normal] = LOG_LEVEL_NORMAL;
+	pLogStatus[Error] = LOG_LEVEL_ERROR;
+	pLogStatus[Debug] = LOG_LEVEL_DEBUG;
+	pLogStatus[Quest] = LOG_LEVEL_QUEST;
+	pLogStatus[Commands] = LOG_LEVEL_COMMANDS;
+	pLogStatus[Crash] = LOG_LEVEL_CRASH;
 	logFileValid = true;
 }
 
@@ -68,10 +59,6 @@ EQEMuLog::~EQEMuLog() {
 		if (fp[i])
 			fclose(fp[i]);
 	}
-//	safe_delete_array(fp);
-//	safe_delete_array(MLog);
-//	safe_delete_array(pLogStatus);
-//	safe_delete(MOpen);
 }
 
 bool EQEMuLog::open(LogIDs id) {

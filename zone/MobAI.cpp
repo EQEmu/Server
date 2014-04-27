@@ -1627,11 +1627,32 @@ void NPC::AI_DoMovement() {
 
 		if (gridno > 0 || cur_wp==-2) {
 			if (movetimercompleted==true) { // time to pause at wp is over
+
+				int32 spawn_id = this->GetSpawnPointID();
+				LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+				iterator.Reset();
+				Spawn2 *found_spawn = nullptr;
+
+				while(iterator.MoreElements())
+				{
+					Spawn2* cur = iterator.GetData();
+					iterator.Advance();
+					if(cur->GetID() == spawn_id)
+					{
+						found_spawn = cur;
+						break;
+					}
+				}
+
 				if (wandertype == 4 && cur_wp == CastToNPC()->GetMaxWp()) {
 					CastToNPC()->Depop(true); //depop and resart spawn timer
+					if(found_spawn)
+						found_spawn->SetNPCPointerNull();
 				}
 				else if (wandertype == 6 && cur_wp == CastToNPC()->GetMaxWp()) {
 					CastToNPC()->Depop(false);//depop without spawn timer
+					if(found_spawn)
+						found_spawn->SetNPCPointerNull();
 				}
 				else {
 					movetimercompleted=false;

@@ -3151,9 +3151,9 @@ void Bot::SpellProcess()
 void Bot::BotMeditate(bool isSitting) {
 	if(isSitting) {
 		// If the bot is a caster has less than 99% mana while its not engaged, he needs to sit to meditate
-		if(GetManaRatio() < 99.0f)
+		if(GetManaRatio() < 99.0f || GetHPRatio() < 99.0f)
 		{
-			if(!IsSitting())
+			if (!IsEngaged() && !IsSitting())
 				Sit();
 		}
 		else
@@ -3236,6 +3236,9 @@ void Bot::BotRangedAttack(Mob* other) {
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}
+
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
 
 	if(hidden || improved_hidden){
 		hidden = false;
@@ -5281,6 +5284,28 @@ uint32 Bot::GetBotOwnerCharacterID(uint32 botID, std::string* errorMessage) {
 	return Result;
 }
 
+void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {
+	// This essentially performs a '#bot update,' with appearance packets, based on the current methods.
+	// This should not be called outside of Client::SetEXP() due to it's lack of rule checks.
+	if(client) {
+		std::list<Bot*> blist = entity_list.GetBotsByBotOwnerCharacterID(client->CharacterID());
+
+		for(std::list<Bot*>::iterator biter = blist.begin(); biter != blist.end(); ++biter) {
+			Bot* bot = *biter;
+			if(bot && (bot->GetLevel() != client->GetLevel())) {
+				bot->SetPetChooser(false); // not sure what this does, but was in bot 'update' code
+				bot->CalcBotStats(false);
+				if(sendlvlapp)
+					bot->SendLevelAppearance();
+				// modified from Client::SetLevel()
+				bot->SendAppearancePacket(AT_WhoLevel, level, true, true); // who level change
+			}
+		}
+
+		blist.clear();
+	}
+}
+
 std::string Bot::ClassIdToString(uint16 classId) {
 	std::string Result;
 
@@ -6639,6 +6664,9 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
+
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
 
 	if(GetTarget())
 		TriggerDefensiveProcs(weapon, other, Hand, damage);
@@ -14967,7 +14995,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				return;
 			}
 
-			Bot* targetedBot;
+			Bot *targetedBot = nullptr;
 
 			if(c->GetTarget() != nullptr) {
 				if (c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner() == c))

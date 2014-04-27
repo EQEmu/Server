@@ -326,7 +326,18 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		}
 		else
 			Message(15, "Welcome to level %i!", check_level);
+
+#ifdef BOTS
+		uint8 myoldlevel = GetLevel();
+#endif
+
 		SetLevel(check_level);
+
+#ifdef BOTS
+		if(RuleB(Bots, BotLevelsWithOwner))
+			// hack way of doing this..but, least invasive... (same criteria as gain level for sendlvlapp)
+			Bot::LevelBotWithClient(this, GetLevel(), (myoldlevel==check_level-1));
+#endif
 	}
 
 	//If were at max level then stop gaining experience if we make it to the cap

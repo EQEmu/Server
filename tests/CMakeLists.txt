@@ -11,6 +11,8 @@ SET(tests_headers
 	fixed_memory_variable_test.h
 	ipc_mutex_test.h
 	memory_mapped_file_test.h
+	atobool_test.h
+	hextoi_32_64_test.h
 )
 
 ADD_EXECUTABLE(tests ${tests_sources} ${tests_headers})
@@ -30,7 +32,9 @@ IF(UNIX)
 	TARGET_LINK_LIBRARIES(tests "${CMAKE_DL_LIBS}")
 	TARGET_LINK_LIBRARIES(tests "z")
 	TARGET_LINK_LIBRARIES(tests "m")
-	TARGET_LINK_LIBRARIES(tests "rt")
+        IF(NOT DARWIN)
+                TARGET_LINK_LIBRARIES(loginserver "rt")
+        ENDIF(NOT DARWIN)
 	TARGET_LINK_LIBRARIES(tests "pthread")
 	ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)

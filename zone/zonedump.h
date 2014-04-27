@@ -75,6 +75,7 @@ struct NPCType
 	int16	PR;
 	int16	DR;
 	int16	Corrup;
+	int16   PhR;
 	uint8	haircolor;
 	uint8	beardcolor;
 	uint8	eyecolor1;			// the eyecolors always seem to be the same, maybe left and right eye?
@@ -110,7 +111,7 @@ struct NPCType
 	int		accuracy_rating;	//10 = 1% accuracy
 	bool	findable;		//can be found with find command
 	bool	trackable;
-	float	slow_mitigation;	// Slow mitigation % in decimal form.
+	int16	slow_mitigation;	
 	uint8	maxlevel;
 	uint32	scalerate;
 	bool	private_corpse;
@@ -119,6 +120,7 @@ struct NPCType
 	uint32	emoteid;
 	float	spellscale;
 	float	healscale;
+	bool	no_target_hotkey;
 };
 
 /*
