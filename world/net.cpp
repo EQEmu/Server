@@ -56,7 +56,7 @@
 	#include <sys/ipc.h>
 	#include <sys/sem.h>
 	#include <sys/shm.h>
-	#ifndef FREEBSD
+	#if not defined (FREEBSD) && not defined (DARWIN)
 		union semun {
 			int val;
 			struct semid_ds *buf;

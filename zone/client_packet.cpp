@@ -12483,7 +12483,15 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 	//
 
 	char *GuildName = (char *)app->pBuffer;
+#ifdef DARWIN
+#if __DARWIN_C_LEVEL < 200809L
+	if (strlen(GuildName) > 60)
+#else
 	if(strnlen(GuildName, 64) > 60)
+#endif // __DARWIN_C_LEVEL
+#else
+	if(strnlen(GuildName, 64) > 60)
+#endif // DARWIN
 	{
 		Message(clientMessageError, "Guild name too long.");
 		return;
@@ -12941,7 +12949,15 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_PlayerToggle_Struct);
 			LFGuild_PlayerToggle_Struct *pts = (LFGuild_PlayerToggle_Struct *)app->pBuffer;
 
+#ifdef DARWIN
+#if __DARWIN_C_LEVEL < 200809L
+			if (strlen(pts->Comment) > 256)
+#else
 			if(strnlen(pts->Comment, 256) > 256)
+#endif // __DARWIN_C_LEVEL
+#else
+			if(strnlen(pts->Comment, 256) > 256)
+#endif // DARWIN
 				return;
 
 			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + strlen(pts->Comment) + 38);
@@ -12968,7 +12984,15 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_GuildToggle_Struct);
 			LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *)app->pBuffer;
 
-			if(strnlen(gts->Comment, 256) > 256)
+#ifdef DARWIN
+#if __DARWIN_C_LEVEL < 200809L
+                        if (strlen(gts->Comment) > 256)
+#else
+                        if(strnlen(gts->Comment, 256) > 256)
+#endif // __DARWIN_C_LEVEL
+#else
+                        if(strnlen(gts->Comment, 256) > 256)
+#endif // __DARWIN
 				return;
 
 			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + strlen(gts->Comment) + strlen(guild_mgr.GetGuildName(GuildID())) + 43);

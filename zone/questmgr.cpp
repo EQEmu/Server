@@ -1733,8 +1733,8 @@ short QuestManager::get_spawn_condition(const char *zone_short, uint32 instance_
 }
 
 //toggle a spawn event
-void QuestManager::toggle_spawn_event(int event_id, bool enable, bool reset_base) {
-	zone->spawn_conditions.ToggleEvent(event_id, enable, reset_base);
+void QuestManager::toggle_spawn_event(int event_id, bool enable, bool strict, bool reset_base) {
+	zone->spawn_conditions.ToggleEvent(event_id, enable, strict, reset_base);
 }
 
 bool QuestManager::has_zone_flag(int zone_id) {

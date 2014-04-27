@@ -1,5 +1,16 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/25/2014 ==
+cavedude: Corrected a crash in spawn_conditions caused by NPCs on a one way path.
+cavedude: Added strict column to spawn_events which will prevent an event from enabling if it's mid-cycle.
+cavedude: Prevented disabled or strict spawn_events from enabling when the zone first boots.
+cavedude: Fixed the quest function toggle_spawn_event under Perl.
+
+If you're using the quest function toggle_spawn_event (worked on Lua only) it has changed syntax to: 
+toggle_spawn_event(int event_id, bool enable, bool strict, bool reset_base)
+
+Required SQL: utils/sql/git/required/2014_04_25_spawn_events.sql
+
 == 04/23/2014 ==
 Kayen: Improved SE_LimitCombatSkills will now more accurately determine if a spell is a combat proc.
 Kayen: SE_LimitInstant will now also work when set to include instant spells.
