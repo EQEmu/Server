@@ -1,6 +1,8 @@
 #include "RaycastMesh.h"
 #include <math.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <vector>
 
 // This code snippet allows you to create an axis aligned bounding volume tree for a triangle mesh so that you can do
