@@ -49,6 +49,7 @@ INSERT INTO `npc_spells_effects` VALUES ('28', 'Increase Spell Vulnerability [Al
 INSERT INTO `npc_spells_effects` VALUES ('29', 'Decrease Spell Vulnerability [FR]', '0');
 INSERT INTO `npc_spells_effects` VALUES ('30', 'Movement Speed', '0');
 
+
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
@@ -59,8 +60,8 @@ CREATE TABLE `npc_spells_effects_entries` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `npc_spells_effects_id` int(11) NOT NULL DEFAULT '0',
   `spell_effect_id` smallint(5) NOT NULL DEFAULT '0',
-  `minlevel` tinyint(3) NOT NULL DEFAULT '0',
-  `maxlevel` tinyint(3) NOT NULL DEFAULT '255',
+  `minlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `maxlevel` tinyint(3) unsigned NOT NULL DEFAULT '255',
   `se_base` int(11) NOT NULL DEFAULT '0',
   `se_limit` int(11) NOT NULL DEFAULT '0',
   `se_max` int(11) NOT NULL DEFAULT '0',
@@ -101,4 +102,3 @@ INSERT INTO `npc_spells_effects_entries` VALUES ('27', '27', '382', '0', '255', 
 INSERT INTO `npc_spells_effects_entries` VALUES ('28', '28', '296', '0', '255', '1000', '-1', '0');
 INSERT INTO `npc_spells_effects_entries` VALUES ('29', '29', '296', '0', '255', '-50', '2', '0');
 INSERT INTO `npc_spells_effects_entries` VALUES ('30', '30', '3', '0', '255', '60', '0', '0');
-
