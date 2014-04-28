@@ -53,6 +53,7 @@ struct NPCType
 	uint8	helmtexture;
 	uint32	loottable_id;
 	uint32	npc_spells_id;
+	uint32	npc_spells_effects_id;
 	int32	npc_faction_id;
 	uint32	merchanttype;
 	uint32	alt_currency_type;

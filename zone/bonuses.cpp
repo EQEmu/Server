@@ -1158,14 +1158,20 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+
 			case SE_SpellEffectResistChance:
 			{
 				for(int e = 0; e < MAX_RESISTABLE_EFFECTS*2; e+=2)
 				{
-					if(!newbon->SEResist[e] || ((newbon->SEResist[e] = base2) && (newbon->SEResist[e+1] < base1)) ){
-						newbon->SEResist[e] = base2;
-						newbon->SEResist[e+1] = base1;
-					break;
+					if(newbon->SEResist[e+1] && (newbon->SEResist[e] == base2) && (newbon->SEResist[e+1] < base1)){
+						newbon->SEResist[e] = base2; //Spell Effect ID
+						newbon->SEResist[e+1] = base1; //Resist Chance
+						break;
+					}
+					else if (!newbon->SEResist[e+1]){
+						newbon->SEResist[e] = base2; //Spell Effect ID
+						newbon->SEResist[e+1] = base1; //Resist Chance
+						break;
 					}
 				}
 				break;
@@ -1258,6 +1264,10 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 		}
 	}
 
+	//Applies any perma NPC spell bonuses from npc_spells_effects table.
+	if (IsNPC())
+		CastToNPC()->ApplyAISpellEffects(newbon);
+
 	//Removes the spell bonuses that are effected by a 'negate' debuff.
 	if (spellbonuses.NegateEffects){
 		for(i = 0; i < buff_count; i++) {
@@ -1270,12 +1280,13 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	if (GetClass() == BARD) newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }
 
-void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterId, bool item_bonus, uint32 ticsremaining, int buffslot)
+void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterId, bool item_bonus, uint32 ticsremaining, int buffslot,
+							 bool IsAISpellEffect, uint16 effect_id, int32 se_base, int32 se_limit, int32 se_max)
 {
-	int i, effect_value;
+	int i, effect_value, base2, max, effectid;
 	Mob *caster = nullptr;
 
-	if(!IsValidSpell(spell_id))
+	if(!IsAISpellEffect && !IsValidSpell(spell_id))
 		return;
 
 	if(casterId > 0)
@@ -1283,19 +1294,35 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{
-		if(IsBlankSpellEffect(spell_id, i))
-			continue;
+		//Buffs/Item effects
+		if (!IsAISpellEffect) {
 
-		uint8 focus = IsFocusEffect(spell_id, i);
-		if (focus)
-		{
-			newbon->FocusEffects[focus] = spells[spell_id].effectid[i];
-			continue;
+			if(IsBlankSpellEffect(spell_id, i))
+				continue;
+
+			uint8 focus = IsFocusEffect(spell_id, i);
+			if (focus)
+			{
+				newbon->FocusEffects[focus] = spells[spell_id].effectid[i];
+				continue;
+			}
+
+		
+			effectid = spells[spell_id].effectid[i];
+			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, caster, ticsremaining);
+			base2 = spells[spell_id].base2[i];
+			max = spells[spell_id].max[i];
+		}
+		//Use AISpellEffects
+		else {
+			effectid = effect_id;
+			effect_value = se_base;
+			base2 = se_limit;
+			max = se_max;
+			i = EFFECT_COUNT; //End the loop
 		}
 
-		effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, caster, ticsremaining);
-
-		switch (spells[spell_id].effectid[i])
+		switch (effectid)
 		{
 			case SE_CurrentHP: //regens
 				if(effect_value > 0) {
@@ -1631,27 +1658,27 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_CriticalHitChance:
 			{
-
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus) {
-					if(spells[spell_id].base2[i] == -1)
+					if(base2 == -1)
 						newbon->CriticalHitChance[HIGHEST_SKILL+1] += effect_value;
 					else
-						newbon->CriticalHitChance[spells[spell_id].base2[i]] += effect_value;
+						newbon->CriticalHitChance[base2] += effect_value;
 				}
 
 				else if(effect_value < 0) {
 
-					if(spells[spell_id].base2[i] == -1 && newbon->CriticalHitChance[HIGHEST_SKILL+1] > effect_value)
+					if(base2 == -1 && newbon->CriticalHitChance[HIGHEST_SKILL+1] > effect_value)
 						newbon->CriticalHitChance[HIGHEST_SKILL+1] = effect_value;
-					else if(spells[spell_id].base2[i] != -1 && newbon->CriticalHitChance[spells[spell_id].base2[i]] > effect_value)
-						newbon->CriticalHitChance[spells[spell_id].base2[i]] = effect_value;
+					else if(base2 != -1 && newbon->CriticalHitChance[base2] > effect_value)
+						newbon->CriticalHitChance[base2] = effect_value;
 				}
 
 
-				else if(spells[spell_id].base2[i] == -1 && newbon->CriticalHitChance[HIGHEST_SKILL+1] < effect_value)
+				else if(base2 == -1 && newbon->CriticalHitChance[HIGHEST_SKILL+1] < effect_value)
 						newbon->CriticalHitChance[HIGHEST_SKILL+1] = effect_value;
-				else if(spells[spell_id].base2[i] != -1 && newbon->CriticalHitChance[spells[spell_id].base2[i]] < effect_value)
-						newbon->CriticalHitChance[spells[spell_id].base2[i]] = effect_value;
+				else if(base2 != -1 && newbon->CriticalHitChance[base2] < effect_value)
+						newbon->CriticalHitChance[base2] = effect_value;
+
 				break;
 			}
 
@@ -1770,10 +1797,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->MeleeLifetap += spells[spell_id].base[i];
 
 				else if((effect_value < 0) && (newbon->MeleeLifetap > effect_value))
-					newbon->MeleeLifetap = spells[spell_id].base[i];
+					newbon->MeleeLifetap = effect_value;
 
-				else if(newbon->MeleeLifetap < spells[spell_id].base[i])
-					newbon->MeleeLifetap = spells[spell_id].base[i];
+				else if(newbon->MeleeLifetap < effect_value)
+					newbon->MeleeLifetap = effect_value;
 				break;
 			}
 
@@ -1812,7 +1839,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_HundredHands:
 			{
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
-					newbon->HundredHands += spells[spell_id].base[i];
+					newbon->HundredHands += effect_value;
 
 				if (effect_value > 0 && effect_value > newbon->HundredHands)
 					newbon->HundredHands = effect_value; //Increase Weapon Delay
@@ -1825,7 +1852,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				if(newbon->MeleeSkillCheck < effect_value) {
 					newbon->MeleeSkillCheck = effect_value;
-					newbon->MeleeSkillCheckSkill = spells[spell_id].base2[i]==-1?255:spells[spell_id].base2[i];
+					newbon->MeleeSkillCheckSkill = base2==-1?255:base2;
 				}
 				break;
 			}
@@ -1834,13 +1861,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus){
-					if(spells[spell_id].base2[i] == -1)
+					if(base2 == -1)
 						newbon->HitChanceEffect[HIGHEST_SKILL+1] += effect_value;
 					else
-						newbon->HitChanceEffect[spells[spell_id].base2[i]] += effect_value;
+						newbon->HitChanceEffect[base2] += effect_value;
 				}
 
-				else if(spells[spell_id].base2[i] == -1){
+				else if(base2 == -1){
 
 					if ((effect_value < 0) && (newbon->HitChanceEffect[HIGHEST_SKILL+1] > effect_value))
 						newbon->HitChanceEffect[HIGHEST_SKILL+1] = effect_value;
@@ -1852,12 +1879,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 				else {
 
-					if ((effect_value < 0) && (newbon->HitChanceEffect[spells[spell_id].base2[i]] > effect_value))
-						newbon->HitChanceEffect[spells[spell_id].base2[i]] = effect_value;
+					if ((effect_value < 0) && (newbon->HitChanceEffect[base2] > effect_value))
+						newbon->HitChanceEffect[base2] = effect_value;
 
-					else if (!newbon->HitChanceEffect[spells[spell_id].base2[i]] ||
-							((newbon->HitChanceEffect[spells[spell_id].base2[i]] > 0) && (newbon->HitChanceEffect[spells[spell_id].base2[i]] < effect_value)))
-							newbon->HitChanceEffect[spells[spell_id].base2[i]] = effect_value;
+					else if (!newbon->HitChanceEffect[base2] ||
+							((newbon->HitChanceEffect[base2] > 0) && (newbon->HitChanceEffect[base2] < effect_value)))
+							newbon->HitChanceEffect[base2] = effect_value;
 				}
 
 				break;
@@ -1866,19 +1893,19 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_DamageModifier:
 			{
-				if(spells[spell_id].base2[i] == -1)
+				if(base2 == -1)
 					newbon->DamageModifier[HIGHEST_SKILL+1] += effect_value;
 				else
-					newbon->DamageModifier[spells[spell_id].base2[i]] += effect_value;
+					newbon->DamageModifier[base2] += effect_value;
 				break;
 			}
 
 			case SE_MinDamageModifier:
 			{
-				if(spells[spell_id].base2[i] == -1)
+				if(base2 == -1)
 					newbon->MinDamageModifier[HIGHEST_SKILL+1] += effect_value;
 				else
-					newbon->MinDamageModifier[spells[spell_id].base2[i]] += effect_value;
+					newbon->MinDamageModifier[base2] += effect_value;
 				break;
 			}
 
@@ -1921,8 +1948,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->DeathSave[0] = effect_value; //1='Partial' 2='Full'
 					newbon->DeathSave[1] = buffslot;
 					//These are used in later expansion spell effects.
-					newbon->DeathSave[2] = spells[spell_id].base2[i];//Min level for HealAmt
-					newbon->DeathSave[3] = spells[spell_id].max[i];//HealAmt
+					newbon->DeathSave[2] = base2;//Min level for HealAmt
+					newbon->DeathSave[3] = max;//HealAmt
 				}
 				break;
 			}
@@ -1937,7 +1964,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				else if(newbon->DivineSaveChance[0] < effect_value)
 				{
 					newbon->DivineSaveChance[0] = effect_value;
-					newbon->DivineSaveChance[1] = spells[spell_id].base2[i];
+					newbon->DivineSaveChance[1] = base2;
 					//SetDeathSaveChance(true);
 				}
 				break;
@@ -1972,10 +1999,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_SkillDamageTaken:
 			{
-				if(spells[spell_id].base2[i] == -1)
+				if(base2 == -1)
 					newbon->SkillDmgTaken[HIGHEST_SKILL+1] += effect_value;
 				else
-					newbon->SkillDmgTaken[spells[spell_id].base2[i]] += effect_value;
+					newbon->SkillDmgTaken[base2] += effect_value;
 				break;
 			}
 
@@ -2000,8 +2027,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				newbon->CriticalSpellChance += effect_value;
 				
-				if (spells[spell_id].base2[i] > newbon->SpellCritDmgIncNoStack)
-					newbon->SpellCritDmgIncNoStack = spells[spell_id].base2[i];
+				if (base2 > newbon->SpellCritDmgIncNoStack)
+					newbon->SpellCritDmgIncNoStack = base2;
 				break;
 			}
 
@@ -2053,9 +2080,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					if(!newbon->SpellOnKill[e])
 					{
 						// Base2 = Spell to fire | Base1 = % chance | Base3 = min level
-						newbon->SpellOnKill[e] = spells[spell_id].base2[i];
+						newbon->SpellOnKill[e] = base2;
 						newbon->SpellOnKill[e+1] = effect_value;
-						newbon->SpellOnKill[e+2] = spells[spell_id].max[i];
+						newbon->SpellOnKill[e+2] = max;
 						break;
 					}
 				}
@@ -2069,7 +2096,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					if(!newbon->SpellOnDeath[e])
 					{
 						// Base2 = Spell to fire | Base1 = % chance
-						newbon->SpellOnDeath[e] = spells[spell_id].base2[i];
+						newbon->SpellOnDeath[e] = base2;
 						newbon->SpellOnDeath[e+1] = effect_value;
 						break;
 					}
@@ -2079,26 +2106,26 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_CriticalDamageMob:
 			{
-				if(spells[spell_id].base2[i] == -1)
+				if(base2 == -1)
 					newbon->CritDmgMob[HIGHEST_SKILL+1] += effect_value;
 				else
-					newbon->CritDmgMob[spells[spell_id].base2[i]] += effect_value;
+					newbon->CritDmgMob[base2] += effect_value;
 				break;
 			}
 
 			case SE_ReduceSkillTimer:
 			{
-				if(newbon->SkillReuseTime[spells[spell_id].base2[i]] < effect_value)
-					newbon->SkillReuseTime[spells[spell_id].base2[i]] = effect_value;
+				if(newbon->SkillReuseTime[base2] < effect_value)
+					newbon->SkillReuseTime[base2] = effect_value;
 				break;
 			}
 
 			case SE_SkillDamageAmount:
 			{
-				if(spells[spell_id].base2[i] == -1)
+				if(base2 == -1)
 					newbon->SkillDamageAmount[HIGHEST_SKILL+1] += effect_value;
 				else
-					newbon->SkillDamageAmount[spells[spell_id].base2[i]] += effect_value;
+					newbon->SkillDamageAmount[base2] += effect_value;
 				break;
 			}
 
@@ -2188,10 +2215,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_SkillDamageAmount2:
 			{
-				if(spells[spell_id].base2[i] == -1)
+				if(base2 == -1)
 					newbon->SkillDamageAmount2[HIGHEST_SKILL+1] += effect_value;
 				else
-					newbon->SkillDamageAmount2[spells[spell_id].base2[i]] += effect_value;
+					newbon->SkillDamageAmount2[base2] += effect_value;
 				break;
 			}
 
@@ -2219,7 +2246,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MeleeThresholdGuard[0] < effect_value){
 					newbon->MeleeThresholdGuard[0] = effect_value;
 					newbon->MeleeThresholdGuard[1] = buffslot;
-					newbon->MeleeThresholdGuard[2] = spells[spell_id].base2[i];
+					newbon->MeleeThresholdGuard[2] = base2;
 				}
 				break;
 			}
@@ -2229,7 +2256,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->SpellThresholdGuard[0] < effect_value){
 					newbon->SpellThresholdGuard[0] = effect_value;
 					newbon->SpellThresholdGuard[1] = buffslot;
-					newbon->SpellThresholdGuard[2] = spells[spell_id].base2[i];
+					newbon->SpellThresholdGuard[2] = base2;
 				}
 				break;
 			}
@@ -2263,20 +2290,20 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_TriggerMeleeThreshold:
 			{
-				if (newbon->TriggerMeleeThreshold[2] < spells[spell_id].base2[i]){
+				if (newbon->TriggerMeleeThreshold[2] < base2){
 					newbon->TriggerMeleeThreshold[0] = effect_value;
 					newbon->TriggerMeleeThreshold[1] = buffslot;
-					newbon->TriggerMeleeThreshold[2] = spells[spell_id].base2[i];
+					newbon->TriggerMeleeThreshold[2] = base2;
 				}
 				break;
 			}
 
 			case SE_TriggerSpellThreshold:
 			{
-				if (newbon->TriggerSpellThreshold[2] < spells[spell_id].base2[i]){
+				if (newbon->TriggerSpellThreshold[2] < base2){
 					newbon->TriggerSpellThreshold[0] = effect_value;
 					newbon->TriggerSpellThreshold[1] = buffslot;
-					newbon->TriggerSpellThreshold[2] = spells[spell_id].base2[i];
+					newbon->TriggerSpellThreshold[2] = base2;
 				}
 				break;
 			}
@@ -2291,7 +2318,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_ShieldEquipDmgMod:
 				newbon->ShieldEquipDmgMod[0] += effect_value;
-				newbon->ShieldEquipDmgMod[1] += spells[spell_id].base2[i];
+				newbon->ShieldEquipDmgMod[1] += base2;
 				break;
 
 			case SE_BlockBehind:
@@ -2380,7 +2407,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 
 			case SE_AddSingingMod:
-				switch (spells[spell_id].base2[i])
+				switch (base2)
 				{
 					case ItemTypeWindInstrument:
 						newbon->windMod += effect_value;
@@ -2473,10 +2500,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				for(int e = 0; e < MAX_RESISTABLE_EFFECTS*2; e+=2)
 				{
-					if(!newbon->SEResist[e] &&
-						((newbon->SEResist[e] = spells[spell_id].base2[i]) && (newbon->SEResist[e+1] < effect_value)) ){
-						newbon->SEResist[e] = spells[spell_id].base2[i];
-						newbon->SEResist[e+1] = effect_value;
+					if(newbon->SEResist[e+1] && (newbon->SEResist[e] == base2) && (newbon->SEResist[e+1] < effect_value)){
+						newbon->SEResist[e] = base2; //Spell Effect ID
+						newbon->SEResist[e+1] = effect_value; //Resist Chance
+						break;
+					}
+					else if (!newbon->SEResist[e+1]){
+						newbon->SEResist[e] = base2; //Spell Effect ID
+						newbon->SEResist[e+1] = effect_value; //Resist Chance
 						break;
 					}
 				}
@@ -2493,7 +2524,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_GiveDoubleRiposte:
 			{
 				//Only allow for regular double riposte chance.
-				if(newbon->GiveDoubleRiposte[spells[spell_id].base2[i]] == 0){
+				if(newbon->GiveDoubleRiposte[base2] == 0){
 					if(newbon->GiveDoubleRiposte[0] < effect_value)
 						newbon->GiveDoubleRiposte[0] = effect_value;
 				}
@@ -2504,7 +2535,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				if(newbon->SlayUndead[1] < effect_value)
 					newbon->SlayUndead[0] = effect_value; // Rate
-					newbon->SlayUndead[1] = spells[spell_id].base2[i]; // Damage Modifier
+					newbon->SlayUndead[1] = base2; // Damage Modifier
 				break;
 			}
 
@@ -2520,7 +2551,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_ImprovedTaunt:
 				if (newbon->ImprovedTaunt[0] < effect_value) {
 					newbon->ImprovedTaunt[0] = effect_value;
-					newbon->ImprovedTaunt[1] = spells[spell_id].base2[i];
+					newbon->ImprovedTaunt[1] = base2;
 					newbon->ImprovedTaunt[2] = buffslot;
 				}
 				break;
@@ -2531,7 +2562,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 
 			case SE_FrenziedDevastation:
-				newbon->FrenziedDevastation += spells[spell_id].base2[i];
+				newbon->FrenziedDevastation += base2;
 				break;
 
 			case SE_Root:
@@ -2577,7 +2608,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_Screech: 
 				newbon->Screech = effect_value;
 				break;
-			
+
+			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
+			if (IsAISpellEffect) {
+				
+				//Non-Focused Effect to modify incomming spell damage by resist type.
+				case SE_FcSpellVulnerability: 
+					ModVulnerability(base2, effect_value);
+				break;
+			}
 		}
 	}
 }
