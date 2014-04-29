@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/29/2014 ==
+KLS: Implemented new map code based on some of Derision's earlier work.  Old maps still work with this system and don't need to be regenerated. We're still working on a new azone solution for better/more efficient maps.
+
 == 04/27/2014 ==
 Kayen: Implemented new table 'npc_spells_effects' and 'npc_spells_effects_entires'.
        Implemented new field in 'npc_spell_effects_id' in npc_types.
