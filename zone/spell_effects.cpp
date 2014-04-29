@@ -5675,7 +5675,7 @@ uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
 	if(!IsValidSpell(spell_id))
 		return 0;
 
-	if (!aabonuses.SEResist[0] && !spellbonuses.SEResist[0] && !itembonuses.SEResist[0])
+	if (!aabonuses.SEResist[1] && !spellbonuses.SEResist[1] && !itembonuses.SEResist[1])
 		return 0;
 
 	uint16 resist_chance = 0;

@@ -231,6 +231,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	npc_spells_id = 0;
 	HasAISpell = false;
+	HasAISpellEffects = false;
 
 	if(GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs))
 	{

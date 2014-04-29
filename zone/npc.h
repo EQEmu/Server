@@ -66,6 +66,13 @@ struct AISpells_Struct {
 	int16	resist_adjust;
 };
 
+struct AISpellsEffects_Struct {
+	uint16	spelleffectid;		
+	int32	base;		
+	int32	limit;	
+	int32	max;	
+};
+
 class AA_SwarmPetInfo;
 
 class NPC : public Mob
@@ -96,8 +103,11 @@ public:
 	virtual void	AI_Stop();
 	void			AI_DoMovement();
 	bool			AI_AddNPCSpells(uint32 iDBSpellsID);
+	bool			AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID);
 	virtual bool	AI_EngagedCastCheck();
 	bool			AI_HasSpells() { return HasAISpell; }
+	bool			AI_HasSpellsEffects() { return HasAISpellEffects; }
+	void			ApplyAISpellEffects(StatBonuses* newbon);
 
 	virtual bool	AI_PursueCastCheck();
 	virtual bool	AI_IdleCastCheck();
@@ -289,6 +299,7 @@ public:
 
 	inline void GiveNPCTypeData(NPCType *ours) { NPCTypedata_ours = ours; }
 	inline const uint32 GetNPCSpellsID()	const { return npc_spells_id; }
+	inline const uint32 GetNPCSpellsEffectsID()	const { return npc_spells_effects_id; }
 
 	ItemList	itemlist; //kathgar - why is this public? Doing other things or I would check the code
 
@@ -339,6 +350,7 @@ public:
 
 	uint32 GetAdventureTemplate() const { return adventure_template_id; }
 	void AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint16 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust);
+	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
 	void RemoveSpellFromNPCList(int16 spell_id);
 	Timer *GetRefaceTimer() const { return reface_timer; }
 	const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }
@@ -400,8 +412,11 @@ protected:
 	bool HasAISpell;
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
-
-
+	
+	uint32	npc_spells_effects_id;
+	std::vector<AISpellsEffects_Struct> AIspellsEffects;
+	bool HasAISpellEffects;
+	
 	uint32	max_dmg;
 	uint32	min_dmg;
 	int32	accuracy_rating;
