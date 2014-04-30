@@ -1358,7 +1358,7 @@ void Client::SendAA(uint32 id, int seq) {
 
 	if (aa_stack){
 
-		if (saa->sof_current_level > 1 && value == 0)
+		if (saa->sof_current_level >= 1 && value == 0)
 			saa->current_level = saa->sof_current_level+1;
 
 		saa->max_level = saa->sof_max_level;
