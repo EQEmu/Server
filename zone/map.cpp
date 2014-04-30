@@ -32,8 +32,8 @@ float Map::FindBestZ(Vertex &start, Vertex *result) const {
 		result = &tmp;
 
 	start.z += RuleI(Map, FindBestZHeightAdjust);
-	Vertex from = { start.x, start.y, start.z };
-	Vertex to = { start.x, start.y, BEST_Z_INVALID };
+	Vertex from(start.x, start.y, start.z);
+	Vertex to(start.x, start.y, BEST_Z_INVALID);
 	float hit_distance;
 	bool hit = false;
 

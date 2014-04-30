@@ -1185,7 +1185,7 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 		stepy = (stepy / factor)*step_size;
 		stepz = (stepz / factor)*step_size;
 
-		Map::Vertex TestPoint = { curx, cury, curz };
+		Map::Vertex TestPoint(curx, cury, curz);
 		float NewZ = zone->zonemap->FindBestZ(TestPoint, nullptr);
 		if (ABS(NewZ - last_z) > 5.0f)
 		{
@@ -1204,7 +1204,7 @@ bool PathManager::NoHazardsAccurate(Map::Vertex From, Map::Vertex To)
 
 			if (zone->watermap->InLiquid(TestPoint.x, TestPoint.y, NewZ))
 			{
-				Map::Vertex TestPointWater = { TestPoint.x, TestPoint.y, NewZ - 0.5f };
+				Map::Vertex TestPointWater(TestPoint.x, TestPoint.y, NewZ - 0.5f);
 				Map::Vertex TestPointWaterDest = TestPointWater;
 				Map::Vertex hit;
 				TestPointWaterDest.z -= 500;
