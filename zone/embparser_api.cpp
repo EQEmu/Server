@@ -1678,14 +1678,15 @@ XS(XS__toggle_spawn_event);
 XS(XS__toggle_spawn_event)
 {
 	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: toggle_spawn_event(event_id, enabled?, reset_base)");
+	if (items != 4)
+		Perl_croak(aTHX_ "Usage: toggle_spawn_event(event_id, enabled?, strict, reset_base)");
 
 	uint32	event_id = (int)SvIV(ST(0));
 	bool	enabled = ((int)SvIV(ST(1))) == 0?false:true;
-	bool	reset_base = ((int)SvIV(ST(1))) == 0?false:true;
+	bool	strict = ((int)SvIV(ST(2))) == 0?false:true;
+	bool	reset_base = ((int)SvIV(ST(3))) == 0?false:true;
 
-	quest_manager.toggle_spawn_event(event_id, enabled, reset_base);
+	quest_manager.toggle_spawn_event(event_id, enabled, strict, reset_base);
 
 	XSRETURN_EMPTY;
 }

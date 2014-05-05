@@ -33,8 +33,11 @@ ZoneDatabase::ZoneDatabase(const char* host, const char* user, const char* passw
 void ZoneDatabase::ZDBInitVars() {
 	memset(door_isopen_array, 0, sizeof(door_isopen_array));
 	npc_spells_maxid = 0;
+	npc_spellseffects_maxid = 0;
 	npc_spells_cache = 0;
+	npc_spellseffects_cache = 0;
 	npc_spells_loadtried = 0;
+	npc_spellseffects_loadtried = 0;
 	max_faction = 0;
 	faction_array = nullptr;
 }
@@ -48,6 +51,14 @@ ZoneDatabase::~ZoneDatabase() {
 		safe_delete_array(npc_spells_cache);
 	}
 	safe_delete_array(npc_spells_loadtried);
+
+	if (npc_spellseffects_cache) {
+		for (x=0; x<=npc_spellseffects_maxid; x++) {
+			safe_delete_array(npc_spellseffects_cache[x]);
+		}
+		safe_delete_array(npc_spellseffects_cache);
+	}
+	safe_delete_array(npc_spellseffects_loadtried);
 
 	if (faction_array != nullptr) {
 		for (x=0; x <= max_faction; x++) {
@@ -1053,6 +1064,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.attack_count,"
 			"npc_types.special_abilities,"
 			"npc_types.npc_spells_id,"
+			"npc_types.npc_spells_effects_id,"
 			"npc_types.d_meele_texture1,"
 			"npc_types.d_meele_texture2,"
 			"npc_types.prim_melee_type,"
@@ -1099,7 +1111,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.underwater,"
 			"npc_types.emoteid,"
 			"npc_types.spellscale,"
-			"npc_types.healscale";
+			"npc_types.healscale,"
+			"npc_types.no_target_hotkey";
 
 		MakeAnyLenString(&query, "%s FROM npc_types WHERE id=%d", basic_query, id);
 
@@ -1150,6 +1163,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->attack_count = atoi(row[r++]);
 				strn0cpy(tmpNPCType->special_abilities, row[r++], 512);
 				tmpNPCType->npc_spells_id = atoi(row[r++]);
+				tmpNPCType->npc_spells_effects_id = atoi(row[r++]);
 				tmpNPCType->d_meele_texture1 = atoi(row[r++]);
 				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
 				tmpNPCType->prim_melee_type = atoi(row[r++]);
@@ -1191,7 +1205,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF) << 8;
 				tmpNPCType->armor_tint[0] |= (atoi(row[r++]) & 0xFF);
 				tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
-
+				
 				int i;
 				if (armor_tint_id > 0)
 				{
@@ -1272,7 +1286,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->see_improved_hide = atoi(row[r++])==0?false:true;
 				tmpNPCType->ATK = atoi(row[r++]);
 				tmpNPCType->accuracy_rating = atoi(row[r++]);
-				tmpNPCType->slow_mitigation = atof(row[r++]);
+				tmpNPCType->slow_mitigation = atoi(row[r++]);
 				tmpNPCType->maxlevel = atoi(row[r++]);
 				tmpNPCType->scalerate = atoi(row[r++]);
 				tmpNPCType->private_corpse = atoi(row[r++]) == 1 ? true : false;
@@ -1281,7 +1295,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->emoteid = atoi(row[r++]);
 				tmpNPCType->spellscale = atoi(row[r++]);
 				tmpNPCType->healscale = atoi(row[r++]);
-
+				tmpNPCType->no_target_hotkey = atoi(row[r++]) == 1 ? true : false;
+				
 				// If NPC with duplicate NPC id already in table,
 				// free item we attempted to add.
 				if (zone->npctable.find(tmpNPCType->npc_id) != zone->npctable.end())

@@ -31,7 +31,7 @@ struct NeighbourNode {
 
 struct PathNode {
 	uint16 id;
-	VERTEX v;
+	Map::Vertex v;
 	float bestz;
 	NeighbourNode Neighbours[PATHNODENEIGHBOURS];
 };
@@ -61,17 +61,17 @@ public:
 	static PathManager *LoadPathFile(const char *ZoneName);
 	bool loadPaths(FILE *fp);
 	void PrintPathing();
-	std::list<int> FindRoute(VERTEX Start, VERTEX End);
+	std::list<int> FindRoute(Map::Vertex Start, Map::Vertex End);
 	std::list<int> FindRoute(int startID, int endID);
 
-	VERTEX GetPathNodeCoordinates(int NodeNumber, bool BestZ = true);
-	bool CheckLosFN(VERTEX a, VERTEX b);
+	Map::Vertex GetPathNodeCoordinates(int NodeNumber, bool BestZ = true);
+	bool CheckLosFN(Map::Vertex a, Map::Vertex b);
 	void SpawnPathNodes();
 	void MeshTest();
 	void SimpleMeshTest();
-	int FindNearestPathNode(VERTEX Position);
-	bool NoHazards(VERTEX From, VERTEX To);
-	bool NoHazardsAccurate(VERTEX From, VERTEX To);
+	int FindNearestPathNode(Map::Vertex Position);
+	bool NoHazards(Map::Vertex From, Map::Vertex To);
+	bool NoHazardsAccurate(Map::Vertex From, Map::Vertex To);
 	void OpenDoors(int Node1, int Node2, Mob* ForWho);
 
 	PathNode* FindPathNodeByCoordinates(float x, float y, float z);

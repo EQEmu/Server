@@ -66,7 +66,7 @@ SET(zone_sources
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
-	Map.cpp
+	map.cpp
 	merc.cpp
 	mob.cpp
 	MobAI.cpp
@@ -95,6 +95,7 @@ SET(zone_sources
 	questmgr.cpp
 	QuestParserCollection.cpp
 	raids.cpp
+	RaycastMesh.cpp
 	spawn2.cpp
 	spawn2.h
 	spawngroup.cpp
@@ -183,6 +184,7 @@ SET(zone_headers
 	QuestParserCollection.h
 	raid.h
 	raids.h
+	RaycastMesh.h
 	skills.h
 	spawn2.cpp
 	spawn2.h
@@ -230,7 +232,9 @@ IF(UNIX)
 	TARGET_LINK_LIBRARIES(zone "${CMAKE_DL_LIBS}")
 	TARGET_LINK_LIBRARIES(zone "z")
 	TARGET_LINK_LIBRARIES(zone "m")
-	TARGET_LINK_LIBRARIES(zone "rt")
+	IF(NOT DARWIN)
+		TARGET_LINK_LIBRARIES(zone "rt")
+	ENDIF(NOT DARWIN)
 	TARGET_LINK_LIBRARIES(zone "pthread")
 	ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)

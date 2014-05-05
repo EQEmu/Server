@@ -677,11 +677,9 @@ bool IsCombatSkill(uint16 spell_id)
 {
 	if (!IsValidSpell(spell_id))
 		return false;
-
-	//Check if Discipline OR melee proc (from non-castable spell)
-	if ((spells[spell_id].mana == 0 &&
-			(spells[spell_id].EndurCost || spells[spell_id].EndurUpkeep)) || 
-			((spells[spell_id].cast_time == 0) && (spells[spell_id].recast_time == 0) && (spells[spell_id].recovery_time == 0)))
+	
+	//Check if Discipline
+	if ((spells[spell_id].mana == 0 &&	(spells[spell_id].EndurCost || spells[spell_id].EndurUpkeep)))			
 		return true;
 
 	return false;

@@ -2120,7 +2120,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 	if(p_depop == true)
 		return false;
-
+	
+	HasAISpellEffects = false;
 	BuffFadeAll();
 	uint8 killed_level = GetLevel();
 
@@ -3616,6 +3617,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		//fade mez if we are mezzed
 		if (IsMezzed()) {
 			mlog(COMBAT__HITS, "Breaking mez due to attack.");
+			entity_list.MessageClose_StringID(this, true, 100, MT_WornOff,
+					HAS_BEEN_AWAKENED, GetCleanName(), attacker->GetCleanName());
 			BuffFadeByEffect(SE_Mez);
 		}
 

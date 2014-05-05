@@ -1,10 +1,91 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/29/2014 ==
+KLS: Implemented new map code based on some of Derision's earlier work.  Old maps still work with this system and don't need to be regenerated. We're still working on a new azone solution for better/more efficient maps.
+
+== 04/27/2014 ==
+Kayen: Implemented new table 'npc_spells_effects' and 'npc_spells_effects_entires'.
+       Implemented new field in 'npc_spell_effects_id' in npc_types.
+       
+
+These are used to directly apply spell effect bonuses to NPC's without requirings spells/buffs.
+Example: Allow an npc to spawn with an innate 50 pt damage shield and a 5% chance to critical hit.
+Please see the wiki page: http://wiki.eqemulator.org/p?npc_spell_effects_entries for details.
+*NPC's can now do critical heals / damage spells if bonus is applied from table.
+
+Required SQL: utils/sql/git/required/2014_04_27_AISpellEffects.sql
+Note: 30 examples of spell effects have been included by default in this sql. Edited/removed as needed.
+
+
+== 04/25/2014 ==
+cavedude: Corrected a crash in spawn_conditions caused by NPCs on a one way path.
+cavedude: Added strict column to spawn_events which will prevent an event from enabling if it's mid-cycle.
+cavedude: Prevented disabled or strict spawn_events from enabling when the zone first boots.
+cavedude: Fixed the quest function toggle_spawn_event under Perl.
+
+If you're using the quest function toggle_spawn_event (worked on Lua only) it has changed syntax to: 
+toggle_spawn_event(int event_id, bool enable, bool strict, bool reset_base)
+
+Required SQL: utils/sql/git/required/2014_04_25_spawn_events.sql
+
+== 04/23/2014 ==
+Kayen: Improved SE_LimitCombatSkills will now more accurately determine if a spell is a combat proc.
+Kayen: SE_LimitInstant will now also work when set to include instant spells.
+
+Optional SQL: utils/sql/git/optional/2014_04_23_FocusComabtProcs.sql
+Note: Set to false, if enabled will allow all combat procs to receive spell focuses.
+
+== 04/21/2014 ==
+Secrets: Crash fix for more hatelist crashes.
+Secrets: Hate list fixes, again.
+Secrets: Revert of hatelist changes.
+
+== 04/20/2014 ==
+Secrets: Changed the functionality of EQDEBUG cmake flag. It now suppresses logs, but shows crashes in any scenario when set to 1. It will also now show crashes even if the log system is disabled.
+KLS: Change to how quest signals work, signals with no delay will now be added to the signal queue.  This addresses an odd timing issue where NPCs are in a state of life/death flux when a signal from event_death goes off.
+KLS: Added cmake flags to define how logging behavior works for each different log type.
+Secrets: Crash fix for Hatelist crash observed
+
+== 04/18/2014 ==
+Akkadius: Added #command error message suppression for those who don't want to see 'Command is not recognized' constantly
+	- You need to have rule 'Chat:SuppressCommandErrors' set to true, this is set to false by default
+	- Required SQL: 2014_04_18_Suppress_Command_Error.sql
+
+== 04/15/2014 ==
+Akkadius: Exported $client->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg) - Will be available for simple plugin use
+Akkadius: Exported $client->ExpeditionMessage(THIS, ExpdID, Message) - In use with custom expedition mod that will be released soon
+
+== 04/12/2014 ==
+Kayen: Fixed an with the slow mitigation code that would cause it to spam the message. Optimized the way the variable is handled for slow mitigation.
+
+Required SQL: utils/sql/git/required/2014_04_12_SlowMitigation.sql
+Note: This changes the variable type in the sql table from FLOAT to INT and updates your database.
+(When setting slow mitigation 50 = 50%, 100 = 100% ect. You can also set > 100 which will cause slow to become haste now with appropriate in game msg given)
+
+== 04/10/2014 ==
+Kayen: Added 'no_target_hotkey' field to npc_types table. This will prevent the NPC from being targeted with F8 (Warning: Will also turn it's name YELLOW)
+Kayen: Added a rule to make all (Player cast) Swarm Pets not targetable with F8 (nearest NPC) by default (Warning: Will also turn pets names YELLOW). This is semi-hack but it works.
+Kayen: Player cast swarm pets can now be healed and buffed consistent with live.
+
+Optional SQL: utils/sql/git/optional/2014_04_10_SwarmPetNotTargetableWithHotKey.sql
+Required SQL: utils/sql/git/required/2014_04_10_No_Target_With_Hotkey.sql
+Note: For the required new npc_types field you DO NOT need to set values for swarm pets if you enable the above rule.
+
+== 04/09/2014 ==
+Kayen: Implemented ability to use the actual live spell projectile graphics that are defined in the modern spell file.
+   *This is disabled by default. Recommend enabling if your server uses an UF+ spell file AND most of your players use UF+ clients.
+Kayen: Expanded the PERL ProjectileAnim(mob, item_id, [IsArrow?, speed, angle, tilt, arc, IDFile]) so you can now just set the weapon model graphic IT####
+Example: ProjectileAnim($npc, 0, 0, 1, 0, 0, 0, "IT10747")  This will shoot an SK 2.0 sword.
+Kayen: Updated wizard innate critical damage modifier to be from 20-70% of base damage (based on live parses)
+
+
+Optional SQL: utils/sql/git/optional/2014_04_09_SpellProjectileRule.sql
+Note: This sql also contains a query to check if your spell file is compatible.
+
 == 04/06/2014 ==
 Uleat: Changed Mob::CanThisClassDualWield() behavior. This should let non-monk/beastlord dual-wielding classes attack with either fist as long as the other hand is occupied.
 Notes:
 	See this thread for more information and to provide feedback: http://www.eqemulator.org/forums/showthread.php?p=229328#post229328
-	
 
 == 04/05/2014 ==
 Akkadius: Fix for the Fix for the Fix: Rule Combat:OneProcPerWeapon was created so that you can revert to the original proc functionality 

@@ -60,14 +60,16 @@ void HateList::Wipe()
 	while(iterator != list.end())
 	{
 		Mob* m = (*iterator)->ent;
-		parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), m, "0", 0);
-		//iterator
+		if(m)
+		{
+			parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), m, "0", 0);
 
+			if(m->IsClient())
+				m->CastToClient()->DecrementAggroCount();
+		}
 		delete (*iterator);
 		iterator = list.erase(iterator);
 
-		if(m->IsClient())
-			m->CastToClient()->DecrementAggroCount();
 	}
 }
 
@@ -203,6 +205,9 @@ void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAd
 
 bool HateList::RemoveEnt(Mob *ent)
 {
+	if (!ent)
+		return false;
+
 	bool found = false;
 	auto iterator = list.begin();
 
@@ -210,15 +215,18 @@ bool HateList::RemoveEnt(Mob *ent)
 	{
 		if((*iterator)->ent == ent)
 		{
+			if(ent)
 			parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "0", 0);
-			delete (*iterator);
-			iterator = list.erase(iterator);
 			found = true;
 
-			if(ent->IsClient())
+			
+			if(ent && ent->IsClient())
 				ent->CastToClient()->DecrementAggroCount();
 
-			}
+			delete (*iterator);
+			iterator = list.erase(iterator);
+
+		}
 		else
 			++iterator;
 	}
@@ -445,6 +453,17 @@ Mob *HateList::GetMostHate(){
 Mob *HateList::GetRandom()
 {
 	int count = list.size();
+	if(count == 0) //If we don't have any entries it'll crash getting a random 0, -1 position.
+		return NULL;
+
+	if(count == 1) //No need to do all that extra work if we only have one hate entry
+	{
+		if(*list.begin()) // Just in case tHateEntry is invalidated somehow...
+			return (*list.begin())->ent;
+
+		return NULL;
+	}
+
 	auto iterator = list.begin();
 	int random = MakeRandomInt(0, count - 1);
 	for (int i = 0; i < random; i++)

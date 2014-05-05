@@ -891,7 +891,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
-	ns->spawn.IsMercenary = IsMerc() ? 1 : 0;
+	ns->spawn.IsMercenary = (IsMerc() || no_target_hotkey) ? 1 : 0;
+		
 	ns->spawn.petOwnerId	= ownerid;
 
 	ns->spawn.haircolor = haircolor;
@@ -1626,7 +1627,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	la->parm4 = parm4;
 	la->parm5 = parm5;
 	// Note that setting the b values to 0 will disable the related effect from the corresponding parameter.
-	// Setting the a value appears to have no affect at all.
+	// Setting the a value appears to have no affect at all.s
 	la->value1a = 1;
 	la->value1b = 1;
 	la->value2a = 1;
@@ -2948,22 +2949,17 @@ void Mob::SetTarget(Mob* mob) {
 float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
 {
 	float ret = -999999;
-	if (zone->zonemap != 0)
+	if (zone->zonemap != nullptr)
 	{
-		NodeRef pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), new_x, new_y );
-		if (pnode != NODE_NONE)
+		Map::Vertex me;
+		me.x = new_x;
+		me.y = new_y;
+		me.z = z_pos+z_offset;
+		Map::Vertex hit;
+		float best_z = zone->zonemap->FindBestZ(me, &hit);
+		if (best_z != -999999)
 		{
-			VERTEX me;
-			me.x = new_x;
-			me.y = new_y;
-			me.z = z_pos+z_offset;
-			VERTEX hit;
-			FACE *onhit;
-			float best_z = zone->zonemap->FindBestZ(pnode, me, &hit, &onhit);
-			if (best_z != -999999)
-			{
-				ret = best_z;
-			}
+			ret = best_z;
 		}
 	}
 	return ret;
@@ -2975,20 +2971,15 @@ float Mob::GetGroundZ(float new_x, float new_y, float z_offset)
 	float ret = -999999;
 	if (zone->zonemap != 0)
 	{
-		NodeRef pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), new_x, new_y );
-		if (pnode != NODE_NONE)
+		Map::Vertex me;
+		me.x = new_x;
+		me.y = new_y;
+		me.z = z_pos+z_offset;
+		Map::Vertex hit;
+		float best_z = zone->zonemap->FindBestZ(me, &hit);
+		if (best_z != -999999)
 		{
-			VERTEX me;
-			me.x = new_x;
-			me.y = new_y;
-			me.z = z_pos+z_offset;
-			VERTEX hit;
-			FACE *onhit;
-			float best_z = zone->zonemap->FindBestZ(pnode, me, &hit, &onhit);
-			if (best_z != -999999)
-			{
-				ret = best_z;
-			}
+			ret = best_z;
 		}
 	}
 	return ret;
@@ -4149,10 +4140,10 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 			for (int i = 0; i < EFFECT_COUNT; i++) {
 				if (spells[spell_id].effectid[i] == SE_SpellOnKill2)
 				{
-					if (spells[spell_id].max[i] <= level)
+					if (IsValidSpell(spells[spell_id].base2[i]) && spells[spell_id].max[i] <= level)
 					{
 						if(MakeRandomInt(0,99) < spells[spell_id].base[i])
-							SpellFinished(spells[spell_id].base2[i], this);
+							SpellFinished(spells[spell_id].base2[i], this, 10, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
 					}
 				}
 			}
@@ -4165,19 +4156,19 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 	// Allow to check AA, items and buffs in all cases. Base2 = Spell to fire | Base1 = % chance | Base3 = min level
 	for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3) {
 
-		if(aabonuses.SpellOnKill[i] && (level >= aabonuses.SpellOnKill[i + 2])) {
+		if(aabonuses.SpellOnKill[i] && IsValidSpell(aabonuses.SpellOnKill[i]) && (level >= aabonuses.SpellOnKill[i + 2])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(aabonuses.SpellOnKill[i + 1]))
-				SpellFinished(aabonuses.SpellOnKill[i], this);
+				SpellFinished(aabonuses.SpellOnKill[i], this, 10, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
-		if(itembonuses.SpellOnKill[i] && (level >= itembonuses.SpellOnKill[i + 2])){
+		if(itembonuses.SpellOnKill[i] && IsValidSpell(itembonuses.SpellOnKill[i]) && (level >= itembonuses.SpellOnKill[i + 2])){
 			if(MakeRandomInt(0, 99) < static_cast<int>(itembonuses.SpellOnKill[i + 1]))
-				SpellFinished(itembonuses.SpellOnKill[i], this);
+				SpellFinished(itembonuses.SpellOnKill[i], this, 10, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
-		if(spellbonuses.SpellOnKill[i] && (level >= spellbonuses.SpellOnKill[i + 2])) {
+		if(spellbonuses.SpellOnKill[i] && IsValidSpell(spellbonuses.SpellOnKill[i]) && (level >= spellbonuses.SpellOnKill[i + 2])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(spellbonuses.SpellOnKill[i + 1]))
-				SpellFinished(spellbonuses.SpellOnKill[i], this);
+				SpellFinished(spellbonuses.SpellOnKill[i], this, 10, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
 	}
@@ -4192,21 +4183,21 @@ bool Mob::TrySpellOnDeath()
 		return false;
 
 	for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
-		if(IsClient() && aabonuses.SpellOnDeath[i]) {
+		if(IsClient() && aabonuses.SpellOnDeath[i] && IsValidSpell(aabonuses.SpellOnDeath[i])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(aabonuses.SpellOnDeath[i + 1])) {
-				SpellFinished(aabonuses.SpellOnDeath[i], this);
+				SpellFinished(aabonuses.SpellOnDeath[i], this, 10, 0, -1, spells[aabonuses.SpellOnDeath[i]].ResistDiff);
 			}
 		}
 
-		if(itembonuses.SpellOnDeath[i]) {
+		if(itembonuses.SpellOnDeath[i] && IsValidSpell(itembonuses.SpellOnDeath[i])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(itembonuses.SpellOnDeath[i + 1])) {
-				SpellFinished(itembonuses.SpellOnDeath[i], this);
+				SpellFinished(itembonuses.SpellOnDeath[i], this, 10, 0, -1, spells[itembonuses.SpellOnDeath[i]].ResistDiff);
 			}
 		}
 
-		if(spellbonuses.SpellOnDeath[i]) {
+		if(spellbonuses.SpellOnDeath[i] && IsValidSpell(spellbonuses.SpellOnDeath[i])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(spellbonuses.SpellOnDeath[i + 1])) {
-				SpellFinished(spellbonuses.SpellOnDeath[i], this);
+				SpellFinished(spellbonuses.SpellOnDeath[i], this, 10, 0, -1, spells[spellbonuses.SpellOnDeath[i]].ResistDiff);
 				}
 			}
 		}
@@ -4650,33 +4641,21 @@ void Mob::CastOnNumHitFade(uint32 spell_id)
 	}
 }
 
-int Mob::SlowMitigation(bool slow_msg, Mob *caster, int slow_value)
+void Mob::SlowMitigation(Mob* caster)
 {
-	float int_slow_mitigation = slow_mitigation * 100.0f;
-
-	if (int_slow_mitigation > 100.0f)
-		return 0;
-
-	if (slow_msg)
+	if (GetSlowMitigation() && caster && caster->IsClient())
 	{
-		if (caster && caster->IsClient())
-		{
-			if ((int_slow_mitigation > 0.0f) && (int_slow_mitigation < 26.0f))
-				caster->Message(262, "Your spell was mostly successful");
+		if ((GetSlowMitigation() > 0) && (GetSlowMitigation() < 26))
+			caster->Message_StringID(MT_SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
 
-			else if ((int_slow_mitigation >= 26.0f) && (int_slow_mitigation < 74.0f))
-				caster->Message(262, "Your spell was partially successful");
+		else if ((GetSlowMitigation() >= 26) && (GetSlowMitigation() < 74))
+			caster->Message_StringID(MT_SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
 
-			else if ((int_slow_mitigation >= 74.0f) && (int_slow_mitigation < 101.0f))
-				caster->Message(262, "Your spell was slightly successful");
-		}
-		return 0;
-	}
+		else if ((GetSlowMitigation() >= 74) && (GetSlowMitigation() < 101))
+			caster->Message_StringID(MT_SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
 
-	else
-	{
-		slow_value -= (slow_value * static_cast<int>(int_slow_mitigation) / 100);
-		return slow_value;
+		else if (GetSlowMitigation() > 100) 
+			caster->Message_StringID(MT_SpellFailure, SPELL_OPPOSITE_EFFECT);
 	}
 }
 

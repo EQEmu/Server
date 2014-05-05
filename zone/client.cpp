@@ -1022,11 +1022,12 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if(command_dispatch(this, message) == -2) {
 				if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
-					if(i == 0) {
+					if(i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
 						Message(13, "Command '%s' not recognized.", message);
 					}
 				} else {
-					Message(13, "Command '%s' not recognized.", message);
+					if(!RuleB(Chat, SuppressCommandErrors)) 
+						Message(13, "Command '%s' not recognized.", message);
 				}
 			}
 			break;
@@ -8167,7 +8168,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
        if(!auto_consume) //no message if the client consumed for us
            entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
-#if EQDEBUG >= 1
+#if EQDEBUG >= 5
        LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", (int)slot);
 #endif
    }
@@ -8184,7 +8185,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
         if(!auto_consume) //no message if the client consumed for us
             entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
-#if EQDEBUG >= 1
+#if EQDEBUG >= 5
         LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", (int)slot);
 #endif
    }
@@ -8218,4 +8219,31 @@ void Client::PlayMP3(const char* fname)
 	strncpy(buf->filename, fname, filename.length());
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+void Client::ExpeditionSay(const char *str, int ExpID) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	if (!database.RunQuery(query,MakeAnyLenString(&query, "SELECT `player_name` FROM `cust_inst_players` WHERE `inst_id` = %i", ExpID),errbuf,&result)){
+		safe_delete_array(query);
+		return;
+	}
+
+	safe_delete_array(query);
+
+	if(result)
+		this->Message(14, "You say to the expedition, '%s'", str);
+
+	while((row = mysql_fetch_row(result))) {
+		const char* CharName = row[0];
+		if(strcmp(CharName, this->GetCleanName()) != 0)
+			worldserver.SendEmoteMessage(CharName, 0, 0, 14, "%s says to the expedition, '%s'", this->GetCleanName(), str); 
+		// ChannelList->CreateChannel(ChannelName, ChannelOwner, ChannelPassword, true, atoi(row[3]));
+	} 
+
+	mysql_free_result(result);
+	
 }

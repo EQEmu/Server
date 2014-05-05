@@ -30,6 +30,10 @@
 #ifdef FREEBSD //Timothy Whitman - January 7, 2003
 	#define MSG_NOSIGNAL 0
 #endif
+#ifdef DARWIN
+	#define MSG_NOSIGNAL SO_NOSIGPIPE // Corysia Taware - Sept. 27, 2013
+	// See http://lists.apple.com/archives/macnetworkprog/2002/Dec/msg00091.html
+#endif	// DARWIN
 
 #ifdef _WINDOWS
 InitWinsock winsock;

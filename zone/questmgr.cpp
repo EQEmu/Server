@@ -1277,16 +1277,9 @@ void QuestManager::signalwith(int npc_id, int signal_id, int wait_ms) {
 	if(wait_ms > 0) {
 		STimerList.push_back(SignalTimer(wait_ms, npc_id, signal_id));
 		return;
-	}
-
-	if (npc_id<1)
-	{
-		printf("signal() bad npcid=%i\n",npc_id);
-	}
-	else
-	{
-		//initiator* signalnpc=0;
-		entity_list.SignalMobsByNPCID(npc_id, signal_id);
+	} else {
+		STimerList.push_back(SignalTimer(0, npc_id, signal_id));
+		return;
 	}
 }
 
@@ -1740,8 +1733,8 @@ short QuestManager::get_spawn_condition(const char *zone_short, uint32 instance_
 }
 
 //toggle a spawn event
-void QuestManager::toggle_spawn_event(int event_id, bool enable, bool reset_base) {
-	zone->spawn_conditions.ToggleEvent(event_id, enable, reset_base);
+void QuestManager::toggle_spawn_event(int event_id, bool enable, bool strict, bool reset_base) {
+	zone->spawn_conditions.ToggleEvent(event_id, enable, strict, reset_base);
 }
 
 bool QuestManager::has_zone_flag(int zone_id) {

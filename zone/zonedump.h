@@ -53,6 +53,7 @@ struct NPCType
 	uint8	helmtexture;
 	uint32	loottable_id;
 	uint32	npc_spells_id;
+	uint32	npc_spells_effects_id;
 	int32	npc_faction_id;
 	uint32	merchanttype;
 	uint32	alt_currency_type;
@@ -111,7 +112,7 @@ struct NPCType
 	int		accuracy_rating;	//10 = 1% accuracy
 	bool	findable;		//can be found with find command
 	bool	trackable;
-	float	slow_mitigation;	// Slow mitigation % in decimal form.
+	int16	slow_mitigation;	
 	uint8	maxlevel;
 	uint32	scalerate;
 	bool	private_corpse;
@@ -120,6 +121,7 @@ struct NPCType
 	uint32	emoteid;
 	float	spellscale;
 	float	healscale;
+	bool	no_target_hotkey;
 };
 
 /*

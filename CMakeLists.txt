@@ -99,6 +99,10 @@ IF(UNIX)
 		ADD_DEFINITIONS(-DFREEBSD)
 		SET(FREEBSD TRUE)
 	ENDIF(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+	IF(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+		ADD_DEFINITIONS(-DDARWIN)
+		SET(DARWIN TRUE)
+	ENDIF(CMAKE_SYSTEM_NAME MATCHES "Darwin")
 ENDIF(UNIX)
 
 #use stdint.h types if they exist for this platform (we have to guess otherwise)
@@ -117,6 +121,78 @@ SET(EQEMU_DEBUG_LEVEL 5 CACHE STRING "EQEmu debug level:
 	5 - Maximum debug release errors and status
 	10 - More errors than you ever wanted to see"
 )
+
+SET(EQEMU_LOG_LEVEL_STATUS 2 CACHE STRING "EQEmu logging level for [Status]:
+	0 - Disabled
+	1 - Ouput to File Enabled
+	2 - Output to stdout Enabled
+	3 - Output to File and stdout Enabled
+	8 - Output to stderr Enabled
+	9 - Output to File and stderr Enabled
+	11 - Output to File, stdout and stderr Enabled"
+)
+
+SET(EQEMU_LOG_LEVEL_NORMAL 3 CACHE STRING "EQEmu logging level for [Normal]:
+	0 - Disabled
+	1 - Ouput to File Enabled
+	2 - Output to stdout Enabled
+	3 - Output to File and stdout Enabled
+	8 - Output to stderr Enabled
+	9 - Output to File and stderr Enabled
+	11 - Output to File, stdout and stderr Enabled"
+)
+
+SET(EQEMU_LOG_LEVEL_ERROR 2 CACHE STRING "EQEmu logging level for [Error]:
+	0 - Disabled
+	1 - Ouput to File Enabled
+	2 - Output to stdout Enabled
+	3 - Output to File and stdout Enabled
+	8 - Output to stderr Enabled
+	9 - Output to File and stderr Enabled
+	11 - Output to File, stdout and stderr Enabled"
+)
+
+SET(EQEMU_LOG_LEVEL_DEBUG 3 CACHE STRING "EQEmu logging level for [Debug]:
+	0 - Disabled
+	1 - Ouput to File Enabled
+	2 - Output to stdout Enabled
+	3 - Output to File and stdout Enabled
+	8 - Output to stderr Enabled
+	9 - Output to File and stderr Enabled
+	11 - Output to File, stdout and stderr Enabled"
+)
+
+SET(EQEMU_LOG_LEVEL_QUEST 2 CACHE STRING "EQEmu logging level for [Quest]:
+	0 - Disabled
+	1 - Ouput to File Enabled
+	2 - Output to stdout Enabled
+	3 - Output to File and stdout Enabled
+	8 - Output to stderr Enabled
+	9 - Output to File and stderr Enabled
+	11 - Output to File, stdout and stderr Enabled"
+)
+
+SET(EQEMU_LOG_LEVEL_COMMANDS 1 CACHE STRING "EQEmu logging level for [Commands]:
+	0 - Disabled
+	1 - Ouput to File Enabled
+	2 - Output to stdout Enabled
+	3 - Output to File and stdout Enabled
+	8 - Output to stderr Enabled
+	9 - Output to File and stderr Enabled
+	11 - Output to File, stdout and stderr Enabled"
+)
+
+SET(EQEMU_LOG_LEVEL_CRASH 3 CACHE STRING "EQEmu logging level for [Crash]:
+	0 - Disabled
+	1 - Ouput to File Enabled
+	2 - Output to stdout Enabled
+	3 - Output to File and stdout Enabled
+	8 - Output to stderr Enabled
+	9 - Output to File and stderr Enabled
+	11 - Output to File, stdout and stderr Enabled"
+)
+
+MARK_AS_ADVANCED(EQEMU_LOG_LEVEL_STATUS EQEMU_LOG_LEVEL_NORMAL EQEMU_LOG_LEVEL_ERROR EQEMU_LOG_LEVEL_DEBUG EQEMU_LOG_LEVEL_QUEST EQEMU_LOG_LEVEL_COMMANDS EQEMU_LOG_LEVEL_CRASH)
 
 SET(EQEMU_STREAM_SEND_RATE 1048576 CACHE STRING "Advanced: Base amount of data stream can send before throttle.")
 SET(EQEMU_STREAM_DECAY_RATE 78642 CACHE STRING "Advanced: Base amount of data stream recovers per tic.")
@@ -182,6 +258,14 @@ ADD_DEFINITIONS(-DDECAYBASE=${EQEMU_STREAM_DECAY_RATE})
 ADD_DEFINITIONS(-DRETRANSMIT_TIMEOUT_MULT=${EQEMU_STREAM_RETRANSMIT_TIMEOUT_MUL})
 ADD_DEFINITIONS(-DRETRANSMIT_TIMEOUT_MAX=${EQEMU_STREAM_RETRANSMIT_TIMEOUT_MAX})
 ADD_DEFINITIONS(-DAVERAGE_DELTA_MAX=${EQEMU_STREAM_AVERAGE_DELTA_MAX})
+ADD_DEFINITIONS(-DLOG_LEVEL_STATUS=${EQEMU_LOG_LEVEL_STATUS})
+ADD_DEFINITIONS(-DLOG_LEVEL_NORMAL=${EQEMU_LOG_LEVEL_NORMAL})
+ADD_DEFINITIONS(-DLOG_LEVEL_ERROR=${EQEMU_LOG_LEVEL_ERROR})
+ADD_DEFINITIONS(-DLOG_LEVEL_DEBUG=${EQEMU_LOG_LEVEL_DEBUG})
+ADD_DEFINITIONS(-DLOG_LEVEL_QUEST=${EQEMU_LOG_LEVEL_QUEST})
+ADD_DEFINITIONS(-DLOG_LEVEL_COMMANDS=${EQEMU_LOG_LEVEL_COMMANDS})
+ADD_DEFINITIONS(-DLOG_LEVEL_CRASH=${EQEMU_LOG_LEVEL_CRASH})
+
 IF(EQEMU_STREAM_RETRANSMIT_ACKED_PACKETS)
 	ADD_DEFINITIONS(-DRETRANSMIT_ACKED_PACKETS=true)
 ELSE(EQEMU_STREAM_RETRANSMIT_ACKED_PACKETS)

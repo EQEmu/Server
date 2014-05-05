@@ -225,7 +225,7 @@ bool Client::CanFish() {
 		return false;
 	}
 
-	if(zone->zonemap!=nullptr && zone->watermap != nullptr && RuleB(Watermap, CheckForWaterWhenFishing)) {
+	if(zone->zonemap != nullptr && zone->watermap != nullptr && RuleB(Watermap, CheckForWaterWhenFishing)) {
 		float RodX, RodY, RodZ;
 		// Tweak Rod and LineLength if required
 		const float RodLength = RuleR(Watermap, FishingRodLength);
@@ -240,24 +240,22 @@ bool Client::CanFish() {
 
 		// Do BestZ to find where the line hanging from the rod intersects the water (if it is water).
 		// and go 1 unit into the water.
-		VERTEX dest;
+		Map::Vertex dest;
 		dest.x = RodX;
 		dest.y = RodY;
 		dest.z = z_pos+10;
-		NodeRef n = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), dest.x, dest.y);
-		if(n != NODE_NONE) {
-			RodZ = zone->zonemap->FindBestZ(n, dest, nullptr, nullptr) - 1;
-			bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
-			bool in_water = zone->watermap->InWater(RodX, RodY, RodZ) || zone->watermap->InVWater(RodX, RodY, RodZ);
-			//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
-			if (in_lava) {
-				Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
-				return false;
-			}
-			if((!in_water) || (z_pos-RodZ)>LineLength) {	//Didn't hit the water OR the water is too far below us
-				Message_StringID(MT_Skills, FISHING_LAND);	//Trying to catch land sharks perhaps?
-				return false;
-			}
+
+		RodZ = zone->zonemap->FindBestZ(dest, nullptr) - 1;
+		bool in_lava = zone->watermap->InLava(RodX, RodY, RodZ);
+		bool in_water = zone->watermap->InWater(RodX, RodY, RodZ) || zone->watermap->InVWater(RodX, RodY, RodZ);
+		//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
+		if (in_lava) {
+			Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
+			return false;
+		}
+		if((!in_water) || (z_pos-RodZ)>LineLength) {	//Didn't hit the water OR the water is too far below us
+			Message_StringID(MT_Skills, FISHING_LAND);	//Trying to catch land sharks perhaps?
+			return false;
 		}
 	}
 	return true;

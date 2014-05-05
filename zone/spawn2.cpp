@@ -303,11 +303,13 @@ void Spawn2::ForceDespawn()
 			{
 				npcthis->Depop(true);
 				IsDespawned = true;
+				npcthis = nullptr;
 				return;
 			}
 			else
 			{
 				npcthis->Depop(false);
+				npcthis = nullptr;
 			}
 		}
 	}
@@ -555,6 +557,7 @@ SpawnEvent::SpawnEvent() {
 	action = ActionSet;
 	argument = 0;
 	period = 0xFFFFFFFF;
+	strict = false;
 	memset(&next, 0, sizeof(next));
 }
 
@@ -586,26 +589,28 @@ void SpawnConditionManager::Process() {
 		for(; cur != end; ++cur) {
 			SpawnEvent &cevent = *cur;
 
-			if(!cevent.enabled)
-				continue;
+			if(cevent.enabled)
+			{
+				if(EQTime::IsTimeBefore(&tod, &cevent.next)) {
+					//this event has been triggered.
+					//execute the event
+					if(!cevent.strict || (cevent.strict && cevent.next.hour == tod.hour && cevent.next.day == tod.day && cevent.next.month == tod.month && cevent.next.year == tod.year))
+						ExecEvent(cevent, true);
 
-			if(EQTime::IsTimeBefore(&tod, &cevent.next)) {
-				//this event has been triggered.
-				//execute the event
-				ExecEvent(cevent, true);
-				//add the period of the event to the trigger time
-				EQTime::AddMinutes(cevent.period, &cevent.next);
-				std::string t;
-				EQTime::ToString(&cevent.next, t);
-				_log(SPAWNS__CONDITIONS, "Event %d: Will trigger again in %d EQ minutes at %s.", cevent.id, cevent.period, t.c_str());
-				//save the next event time in the DB
-				UpdateDBEvent(cevent);
-				//find the next closest event timer.
-				FindNearestEvent();
-				//minor optimization, if theres no more possible events,
-				//then stop trying... I dunno how worth while this is.
-				if(EQTime::IsTimeBefore(&next_event, &tod))
-					return;
+					//add the period of the event to the trigger time
+					EQTime::AddMinutes(cevent.period, &cevent.next);
+					std::string t;
+					EQTime::ToString(&cevent.next, t);
+					_log(SPAWNS__CONDITIONS, "Event %d: Will trigger again in %d EQ minutes at %s.", cevent.id, cevent.period, t.c_str());
+					//save the next event time in the DB
+					UpdateDBEvent(cevent);
+					//find the next closest event timer.
+					FindNearestEvent();
+					//minor optimization, if theres no more possible events,
+					//then stop trying... I dunno how worth while this is.
+					if(EQTime::IsTimeBefore(&next_event, &tod))
+						return;
+				}
 			}
 		}
 	}
@@ -617,6 +622,14 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 	if(condi == spawn_conditions.end()) {
 		_log(SPAWNS__CONDITIONS, "Event %d: Unable to find condition %d to execute on.", event.id, event.condition_id);
 		return;	//unable to find the spawn condition to operate on
+	}
+
+	TimeOfDay_Struct tod;
+	zone->zone_time.getEQTimeOfDay(&tod);
+	if(event.strict && (event.next.hour != tod.hour || event.next.day != tod.day || event.next.month != tod.month || event.next.year != tod.year))
+	{
+		_log(SPAWNS__CONDITIONS, "Event %d: Unable to execute. Condition is strict, and event time has already passed.", event.id);
+		return;
 	}
 
 	SpawnCondition &cond = condi->second;
@@ -666,10 +679,10 @@ void SpawnConditionManager::UpdateDBEvent(SpawnEvent &event) {
 	len = MakeAnyLenString(&query,
 		"UPDATE spawn_events SET "
 		"next_minute=%d, next_hour=%d, next_day=%d, next_month=%d, "
-		"next_year=%d, enabled=%d "
+		"next_year=%d, enabled=%d, strict=%d "
 		"WHERE id=%d",
 		event.next.minute, event.next.hour, event.next.day, event.next.month,
-		event.next.year, event.enabled?1:0, event.id
+		event.next.year, event.enabled?1:0, event.strict?1:0,event.id
 	);
 	if(!database.RunQuery(query, len, errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Unable to update spawn event '%s': %s\n", query, errbuf);
@@ -703,7 +716,7 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
 	bool ret = false;
 
 	len = MakeAnyLenString(&query,
-		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument,zone "
+		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument,strict,zone "
 		"FROM spawn_events WHERE id=%d", event_id);
 	if (database.RunQuery(query, len, errbuf, &result)) {
 		safe_delete_array(query);
@@ -721,12 +734,13 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
 			event.enabled = atoi(row[8])==0?false:true;
 			event.action = (SpawnEvent::Action) atoi(row[9]);
 			event.argument = atoi(row[10]);
-			zone_name = row[11];
+			event.strict = atoi(row[11])==0?false:true;
+			zone_name = row[12];
 
 			std::string t;
 			EQTime::ToString(&event.next, t);
-			_log(SPAWNS__CONDITIONS, "Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d. Will trigger at %s",
-				event.enabled?"enabled":"disabled", event.id, event.condition_id, event.period, event.action, event.argument, t.c_str());
+			_log(SPAWNS__CONDITIONS, "(LoadDBEvent) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d. Will trigger at %s",
+				event.enabled?"enabled":"disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict, t.c_str());
 
 			ret = true;
 		}
@@ -794,7 +808,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	//load spawn events
 	SpawnEvent event;
 	len = MakeAnyLenString(&query,
-		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument "
+		"SELECT id,cond_id,period,next_minute,next_hour,next_day,next_month,next_year,enabled,action,argument,strict "
 		"FROM spawn_events WHERE zone='%s'", zone_name);
 	if (database.RunQuery(query, len, errbuf, &result)) {
 		safe_delete_array(query);
@@ -816,10 +830,11 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 			event.enabled = atoi(row[8])==0?false:true;
 			event.action = (SpawnEvent::Action) atoi(row[9]);
 			event.argument = atoi(row[10]);
+			event.strict = atoi(row[11])==0?false:true;
 			spawn_events.push_back(event);
 
-			_log(SPAWNS__CONDITIONS, "Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d",
-				event.enabled?"enabled":"disabled", event.id, event.condition_id, event.period, event.action, event.argument);
+			_log(SPAWNS__CONDITIONS, "(LoadSpawnConditions) Loaded %s spawn event %d on condition %d with period %d, action %d, argument %d, strict %d",
+				event.enabled?"enabled":"disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict);
 		}
 		mysql_free_result(result);
 	} else {
@@ -847,34 +862,48 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	for(; cur != end; ++cur) {
 		SpawnEvent &cevent = *cur;
 
-		if(!cevent.enabled)
-			continue;
+		bool StrictCheck = false;
+		if(cevent.strict && 
+			cevent.next.hour == tod.hour && 
+			cevent.next.day == tod.day && 
+			cevent.next.month == tod.month && 
+			cevent.next.year == tod.year)
+			StrictCheck = true;
 
-		//watch for special case of all 0s, which means to reset next to now
-		if(cevent.next.year == 0 && cevent.next.month == 0 && cevent.next.day == 0 && cevent.next.hour == 0 && cevent.next.minute == 0) {
-			_log(SPAWNS__CONDITIONS, "Initial next trigger time set for spawn event %d", cevent.id);
-			memcpy(&cevent.next, &tod, sizeof(cevent.next));
-			//add one period
-			EQTime::AddMinutes(cevent.period, &cevent.next);
-			//save it in the db.
-			UpdateDBEvent(cevent);
-			continue;	//were done with this event.
-		}
+		//If event is disabled, or we failed the strict check, set initial spawn_condition to 0.
+		if(!cevent.enabled || !StrictCheck)
+			SetCondition(zone->GetShortName(), zone->GetInstanceID(),cevent.condition_id,0);
 
-		ran = false;
-		while(EQTime::IsTimeBefore(&tod, &cevent.next)) {
-			_log(SPAWNS__CONDITIONS, "Catch up triggering on event %d", cevent.id);
-			//this event has been triggered.
-			//execute the event
-			ExecEvent(cevent, false);
-			//add the period of the event to the trigger time
-			EQTime::AddMinutes(cevent.period, &cevent.next);
-			ran = true;
-		}
-		//only write it out if the event actually ran
-		if(ran) {
-			//save the event in the DB
-			UpdateDBEvent(cevent);
+		if(cevent.enabled)
+		{
+			//watch for special case of all 0s, which means to reset next to now
+			if(cevent.next.year == 0 && cevent.next.month == 0 && cevent.next.day == 0 && cevent.next.hour == 0 && cevent.next.minute == 0) {
+				_log(SPAWNS__CONDITIONS, "Initial next trigger time set for spawn event %d", cevent.id);
+				memcpy(&cevent.next, &tod, sizeof(cevent.next));
+				//add one period
+				EQTime::AddMinutes(cevent.period, &cevent.next);
+				//save it in the db.
+				UpdateDBEvent(cevent);
+				continue;	//were done with this event.
+			}
+
+			ran = false;
+			while(EQTime::IsTimeBefore(&tod, &cevent.next)) {
+				_log(SPAWNS__CONDITIONS, "Catch up triggering on event %d", cevent.id);
+				//this event has been triggered.
+				//execute the event
+				if(!cevent.strict || StrictCheck)
+					ExecEvent(cevent, false);
+		
+				//add the period of the event to the trigger time
+				EQTime::AddMinutes(cevent.period, &cevent.next);
+				ran = true;
+			}
+			//only write it out if the event actually ran
+			if(ran) {
+				//save the event in the DB
+				UpdateDBEvent(cevent);
+			}
 		}
 	}
 
@@ -894,14 +923,14 @@ void SpawnConditionManager::FindNearestEvent() {
 	int next_id = -1;
 	for(; cur != end; ++cur) {
 		SpawnEvent &cevent = *cur;
-
-		if(!cevent.enabled)
-			continue;
-
-		//see if this event is before our last nearest
-		if(EQTime::IsTimeBefore(&next_event, &cevent.next)) {
-			memcpy(&next_event, &cevent.next, sizeof(next_event));
-			next_id = cevent.id;
+		if(cevent.enabled)
+		{
+			//see if this event is before our last nearest
+			if(EQTime::IsTimeBefore(&next_event, &cevent.next)) 
+			{
+				memcpy(&next_event, &cevent.next, sizeof(next_event));
+				next_id = cevent.id;
+			}
 		}
 	}
 	if(next_id == -1)
@@ -1035,7 +1064,7 @@ void SpawnConditionManager::ReloadEvent(uint32 event_id) {
 	FindNearestEvent();
 }
 
-void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool reset_base) {
+void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool strict, bool reset_base) {
 
 	_log(SPAWNS__CONDITIONS, "Request to %s spawn event %d %sresetting trigger time", enabled?"enable":"disable", event_id, reset_base?"":"without ");
 
@@ -1048,8 +1077,9 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool rese
 
 		if(cevent.id == event_id) {
 			//make sure were actually changing something
-			if(cevent.enabled != enabled || reset_base) {
+			if(cevent.enabled != enabled || reset_base || cevent.strict != strict) {
 				cevent.enabled = enabled;
+				cevent.strict = strict;
 				if(reset_base) {
 					_log(SPAWNS__CONDITIONS, "Spawn event %d located in this zone. State set. Trigger time reset (period %d).", event_id, cevent.period);
 					//start with the time now

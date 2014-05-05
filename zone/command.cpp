@@ -7497,8 +7497,8 @@ void command_path(Client *c, const Seperator *sep)
 
 			if(zone->zonemap)
 			{
-				VERTEX loc(px, py, pz);
-				best_z = zone->zonemap->FindBestZ(MAP_ROOT_NODE, loc, nullptr, nullptr);
+				Map::Vertex loc(px, py, pz);
+				best_z = zone->zonemap->FindBestZ(loc, nullptr);
 			}
 			else
 			{
@@ -7524,8 +7524,8 @@ void command_path(Client *c, const Seperator *sep)
 
 			if(zone->zonemap)
 			{
-				VERTEX loc(px, py, pz);
-				best_z = zone->zonemap->FindBestZ(MAP_ROOT_NODE, loc, nullptr, nullptr);
+				Map::Vertex loc(px, py, pz);
+				best_z = zone->zonemap->FindBestZ(loc, nullptr);
 			}
 			else
 			{
@@ -7657,8 +7657,8 @@ void command_path(Client *c, const Seperator *sep)
 		{
 			if(c && c->GetTarget())
 			{
-				if(zone->pathing->NoHazardsAccurate(VERTEX(c->GetX(),c->GetY(),c->GetZ()),
-					VERTEX(c->GetTarget()->GetX(),c->GetTarget()->GetY(),c->GetTarget()->GetZ())))
+				if (zone->pathing->NoHazardsAccurate(Map::Vertex(c->GetX(), c->GetY(), c->GetZ()),
+					Map::Vertex(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ())))
 				{
 					c->Message(0, "No hazards.");
 				}
@@ -7734,7 +7734,7 @@ void command_path(Client *c, const Seperator *sep)
 		{
 			Mob *m = c->GetTarget();
 
-			VERTEX Position(m->GetX(), m->GetY(), m->GetZ());
+			Map::Vertex Position(m->GetX(), m->GetY(), m->GetZ());
 
 			int Node = zone->pathing->FindNearestPathNode(Position);
 
@@ -7867,35 +7867,19 @@ void command_bestz(Client *c, const Seperator *sep) {
 		return;
 	}
 
-	NodeRef pnode;
-	if(c->GetTarget()) {
-		pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), c->GetTarget()->GetX(), c->GetTarget()->GetY() );
-	} else {
-		pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), c->GetX(), c->GetY() );
-	}
-	if (pnode == NODE_NONE) {
-		c->Message(0,"Unable to find your node.");
-		return;
-	}
-
-	VERTEX me;
+	Map::Vertex me;
 	me.x = c->GetX();
 	me.y = c->GetY();
 	me.z = c->GetZ() + (c->GetSize()==0.0?6:c->GetSize()) * HEAD_POSITION;
-	VERTEX hit;
-	VERTEX bme(me);
+	Map::Vertex hit;
+	Map::Vertex bme(me);
 	bme.z -= 500;
 
-	float best_z = zone->zonemap->FindBestZ(pnode, me, &hit, nullptr);
-
-	float best_z2 = -999990;
-	if(zone->zonemap->LineIntersectsNode(pnode, me, bme, &hit, nullptr)) {
-		best_z2 = hit.z;
-	}
+	float best_z = zone->zonemap->FindBestZ(me, &hit);
 
 	if (best_z != -999999)
 	{
-		c->Message(0,"Z is %.3f or %.3f at (%.3f, %.3f).", best_z, best_z2, me.x, me.y);
+		c->Message(0,"Z is %.3f at (%.3f, %.3f).", best_z, me.x, me.y);
 	}
 	else
 	{
