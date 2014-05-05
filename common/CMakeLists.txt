@@ -323,4 +323,11 @@ IF(UNIX)
 
 ENDIF(UNIX)
 
+IF(MSVC)
+	STRING(REGEX REPLACE "/W3" "/W" perlCompileFlags "${${COMPILE_FLAGS}}")
+	MESSAGE(STATUS "${perlCompileFlags}=${${perlCompileFlags}}")
+	MESSAGE(STATUS "${COMPILE_FLAGS}=${${COMPILE_FLAGS}}")
+	SET_PROPERTY(SOURCE "perl_EQDB.cpp" "perl_EQDBRes.cpp" PROPERTY perlCompileFlags)
+ENDIF(MSVC)
+
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)
