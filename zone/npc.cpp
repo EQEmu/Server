@@ -158,6 +158,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	FR = d->FR;
 	PR = d->PR;
 	Corrup = d->Corrup;
+	PhR = d->PhR;
 
 	STR = d->STR;
 	STA = d->STA;
@@ -199,6 +200,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	SetMana(GetMaxMana());
 
 	MerchantType = d->merchanttype;
+	merchant_open = GetClass() == MERCHANT;
 	adventure_template_id = d->adventure_template;
 	org_x = x;
 	org_y = y;
@@ -222,11 +224,14 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	p_depop = false;
 	loottable_id = d->loottable_id;
 
+	no_target_hotkey = d->no_target_hotkey;
+
 	primary_faction = 0;
 	SetNPCFactionID(d->npc_faction_id);
 
 	npc_spells_id = 0;
 	HasAISpell = false;
+	HasAISpellEffects = false;
 
 	if(GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs))
 	{
@@ -657,6 +662,9 @@ bool NPC::Process()
 		if(viral_timer_counter > 999)
 			viral_timer_counter = 0;
 	}
+
+	if(projectile_timer.Check())
+		SpellProjectileEffect();
 
 	if(spellbonuses.GravityEffect == 1) {
 		if(gravity_timer.Check())
@@ -1714,6 +1722,22 @@ bool Mob::HasNPCSpecialAtk(const char* parse) {
 void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 {
 	Mob::FillSpawnStruct(ns, ForWho);
+
+	//Basic settings to make sure swarm pets work properly.
+	if  (GetSwarmOwner()) {
+		Client *c = entity_list.GetClientByID(GetSwarmOwner());
+			if(c) {
+				SetAllowBeneficial(1); //Allow client cast swarm pets to be heal/buffed.
+				//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
+				if (RuleB(Pets, SwarmPetNotTargetableWithHotKey))
+					ns->spawn.IsMercenary = 1;
+			}
+			//NPC cast swarm pets should still be targetable with F8.
+			else
+				ns->spawn.IsMercenary = 0;
+	}
+	
+	//Not recommended if using above (However, this will work better on older clients).
 	if (RuleB(Pets, UnTargetableSwarmPet)) {
 		if(GetOwnerID() || GetSwarmOwner()) {
 			ns->spawn.is_pet = 1;
@@ -1862,6 +1886,12 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 		return;
 	}
 
+	if(id == "PhR")
+	{
+		PhR = atoi(val.c_str());
+		return;
+	}
+
 	if(id == "runspeed")
 	{
 		runspeed = (float)atof(val.c_str());
@@ -1975,7 +2005,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "slow_mitigation")
 	{
-		slow_mitigation = atof(val.c_str());
+		slow_mitigation = atoi(val.c_str());
 		return;
 	}
 	if(id == "loottable_id")
@@ -2058,6 +2088,8 @@ void NPC::CalcNPCResists() {
 		PR = (GetLevel() * 11)/10;
 	if (!Corrup)
 		Corrup = 15;
+	if (!PhR)
+		PhR = 10;
 	return;
 }
 

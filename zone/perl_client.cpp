@@ -5898,6 +5898,64 @@ XS(XS_Client_PlayMP3)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_ExpeditionMessage); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_ExpeditionMessage)
+{
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::ExpeditionMessage(THIS, ExpdID, Message)");
+	{
+		Client *		THIS;
+		int ExpdID =	(int)SvUV(ST(1));
+		const char *	Message = (const char *)SvPV_nolen(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->ExpeditionSay(Message, ExpdID);
+	}
+	XSRETURN_EMPTY;
+}
+
+//Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg)
+
+XS(XS_Client_SendMarqueeMessage); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SendMarqueeMessage)
+{
+	dXSARGS;
+	if (items != 7)
+		Perl_croak(aTHX_ "Usage: Client::SendMarqueeMessage(THIS, type, priority, fade_in, fade_out, duration, msg)");
+	{
+		Client *		THIS;
+		uint32 type =	(uint32)SvUV(ST(1));
+		uint32 priority =	(uint32)SvUV(ST(2));
+		uint32 fade_in =	(uint32)SvUV(ST(3));
+		uint32 fade_out =	(uint32)SvUV(ST(4));
+		uint32 duration =	(uint32)SvUV(ST(5));
+		std::string msg = (std::string)SvPV_nolen(ST(6));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6134,6 +6192,8 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
 		newXSproto(strcpy(buf, "PlayMP3"), XS_Client_PlayMP3, file, "$;$");
 		newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
+		newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
+		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
 		XSRETURN_YES;
 }
 

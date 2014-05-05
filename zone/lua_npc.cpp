@@ -408,7 +408,7 @@ void Lua_NPC::SetSpellFocusHeal(int focus) {
 }
 
 float Lua_NPC::GetSlowMitigation() {
-	Lua_Safe_Call_Real();
+	Lua_Safe_Call_Int();
 	return self->GetSlowMitigation();
 }
 
@@ -430,6 +430,16 @@ int Lua_NPC::GetSpawnKillCount() {
 int Lua_NPC::GetScore() {
 	Lua_Safe_Call_Int();
 	return self->GetScore();
+}
+
+void Lua_NPC::MerchantOpenShop() {
+	Lua_Safe_Call_Void();
+	self->MerchantOpenShop();
+}
+
+void Lua_NPC::MerchantCloseShop() {
+	Lua_Safe_Call_Void();
+	self->MerchantCloseShop();
 }
 
 
@@ -516,11 +526,13 @@ luabind::scope lua_register_npc() {
 		.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
 		.def("SetSpellFocusDMG", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusDMG)
 		.def("SetSpellFocusHeal", (void(Lua_NPC::*)(int))&Lua_NPC::SetSpellFocusHeal)
-		.def("GetSlowMitigation", (float(Lua_NPC::*)(void))&Lua_NPC::GetSlowMitigation)
+		.def("GetSlowMitigation", (int(Lua_NPC::*)(void))&Lua_NPC::GetSlowMitigation)
 		.def("GetAttackSpeed", (float(Lua_NPC::*)(void))&Lua_NPC::GetAttackSpeed)
 		.def("GetAccuracyRating", (int(Lua_NPC::*)(void))&Lua_NPC::GetAccuracyRating)
 		.def("GetSpawnKillCount", (int(Lua_NPC::*)(void))&Lua_NPC::GetSpawnKillCount)
-		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore);
+		.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore)
+		.def("MerchantOpenShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantOpenShop)
+		.def("MerchantCloseShop", (void(Lua_NPC::*)(void))&Lua_NPC::MerchantCloseShop);
 }
 
 #endif

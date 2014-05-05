@@ -235,9 +235,9 @@ void NPC::UpdateWaypoint(int wp_index)
 		if(!RuleB(Watermap, CheckForWaterAtWaypoints) || !zone->HasWaterMap() ||
 			(zone->HasWaterMap() && !zone->watermap->InWater(cur_wp_x, cur_wp_y, cur_wp_z)))
 		{
-			VERTEX dest(cur_wp_x, cur_wp_y, cur_wp_z);
+			Map::Vertex dest(cur_wp_x, cur_wp_y, cur_wp_z);
 
-			float newz = zone->zonemap->FindBestZ(MAP_ROOT_NODE, dest, nullptr, nullptr);
+			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
 			if( (newz > -2000) && ABS(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaWaypoint))
 				cur_wp_z = newz + 1;
@@ -565,9 +565,9 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
 				(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
 			{
-				VERTEX dest(x_pos, y_pos, z_pos);
+				Map::Vertex dest(x_pos, y_pos, z_pos);
 
-				float newz = zone->zonemap->FindBestZ(MAP_ROOT_NODE, dest, nullptr, nullptr);
+				float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
 				mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
@@ -694,9 +694,9 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
 			(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
 		{
-			VERTEX dest(x_pos, y_pos, z_pos);
+			Map::Vertex dest(x_pos, y_pos, z_pos);
 
-			float newz = zone->zonemap->FindBestZ(MAP_ROOT_NODE, dest, nullptr, nullptr);
+			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
 			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
@@ -819,9 +819,9 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
 			(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
 		{
-			VERTEX dest(x_pos, y_pos, z_pos);
+			Map::Vertex dest(x_pos, y_pos, z_pos);
 
-			float newz = zone->zonemap->FindBestZ(MAP_ROOT_NODE, dest, nullptr, nullptr);
+			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
 			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
@@ -927,9 +927,9 @@ void NPC::AssignWaypoints(int32 grid) {
 						if(!RuleB(Watermap, CheckWaypointsInWaterWhenLoading) || !zone->HasWaterMap() ||
 						(zone->HasWaterMap() && !zone->watermap->InWater(newwp.x, newwp.y, newwp.z)))
 						{
-							VERTEX dest(newwp.x, newwp.y, newwp.z);
+							Map::Vertex dest(newwp.x, newwp.y, newwp.z);
 
-							float newz = zone->zonemap->FindBestZ(MAP_ROOT_NODE, dest, nullptr, nullptr);
+							float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
 							if( (newz > -2000) && ABS(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaLoading))
 								newwp.z = newz + 1;
@@ -982,9 +982,9 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 		if(!RuleB(Watermap, CheckForWaterOnSendTo) || !zone->HasWaterMap() ||
 			(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
 		{
-			VERTEX dest(x_pos, y_pos, z_pos);
+			Map::Vertex dest(x_pos, y_pos, z_pos);
 
-			float newz = zone->zonemap->FindBestZ(MAP_ROOT_NODE, dest, nullptr, nullptr);
+			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
 			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 
@@ -1013,9 +1013,9 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 		if(!RuleB(Watermap, CheckForWaterOnSendTo) || !zone->HasWaterMap() ||
 			(zone->HasWaterMap() && !zone->watermap->InWater(x_pos, y_pos, z_pos)))
 		{
-			VERTEX dest(x_pos, y_pos, z_pos);
+			Map::Vertex dest(x_pos, y_pos, z_pos);
 
-			float newz = zone->zonemap->FindBestZ(MAP_ROOT_NODE, dest, nullptr, nullptr);
+			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
 			mlog(AI__WAYPOINTS, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,x_pos,y_pos,z_pos);
 

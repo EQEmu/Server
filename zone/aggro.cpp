@@ -880,133 +880,6 @@ bool Mob::CombatRange(Mob* other)
 	return false;
 }
 
-//Old LOS function, prolly not used anymore
-//Not removed because I havent looked it over to see if anything
-//useful is in here before we delete it.
-bool Mob::CheckLos(Mob* other) {
-	if (zone->zonemap == 0)
-	{
-		return true;
-	}
-	float tmp_x = GetX();
-	float tmp_y = GetY();
-	float tmp_z = GetZ();
-	float trg_x = other->GetX();
-	float trg_y = other->GetY();
-	float trg_z = other->GetZ();
-	float perwalk_x = 0.5;
-	float perwalk_y = 0.5;
-	float perwalk_z = 0.5;
-	float dist_x = tmp_x - trg_x;
-	if (dist_x < 0)
-		dist_x *= -1;
-	float dist_y = tmp_y - trg_y;
-	if (dist_y < 0)
-		dist_y *= -1;
-	float dist_z = tmp_z - trg_z;
-	if (dist_z < 0)
-		dist_z *= -1;
-	if (dist_x < dist_y && dist_z < dist_y)
-	{
-		perwalk_x /= (dist_y/dist_x);
-		perwalk_z /= (dist_y/dist_z);
-	}
-	else if (dist_y < dist_x && dist_z < dist_x)
-	{
-		perwalk_y /= (dist_x/dist_y);
-		perwalk_z /= (dist_x/dist_z);
-	}
-	else if (dist_x < dist_z && dist_y < dist_z)
-	{
-		perwalk_x /= (dist_z/dist_x);
-		perwalk_y /= (dist_z/dist_y);
-	}
-	float steps = (dist_x/perwalk_x + dist_y/perwalk_y + dist_z/perwalk_z)*10; //Just a safety check to prevent endless loops.
-	while (steps > 0) {
-		steps--;
-		if (tmp_x < trg_x)
-		{
-			if (tmp_x + perwalk_x < trg_x)
-				tmp_x += perwalk_x;
-			else
-				tmp_x = trg_x;
-		}
-		if (tmp_y < trg_y)
-		{
-			if (tmp_y + perwalk_y < trg_y)
-				tmp_y += perwalk_y;
-			else
-				tmp_y = trg_y;
-		}
-		if (tmp_z < trg_z)
-		{
-			if (tmp_z + perwalk_z < trg_z)
-				tmp_z += perwalk_z;
-			else
-				tmp_z = trg_z;
-		}
-		if (tmp_x > trg_x)
-		{
-			if (tmp_x - perwalk_x > trg_x)
-				tmp_x -= perwalk_x;
-			else
-				tmp_x = trg_x;
-		}
-		if (tmp_y > trg_y)
-		{
-			if (tmp_y - perwalk_y > trg_y)
-				tmp_y -= perwalk_y;
-			else
-				tmp_y = trg_y;
-		}
-		if (tmp_z > trg_z)
-		{
-			if (tmp_z - perwalk_z > trg_z)
-				tmp_z -= perwalk_z;
-			else
-				tmp_z = trg_z;
-		}
-		if (tmp_y == trg_y && tmp_x == trg_x && tmp_z == trg_z)
-		{
-			return true;
-		}
-
-//I believe this is contributing to breaking mob spawns when a map is loaded
-//		NodeRef pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), tmp_x, tmp_y );
-		NodeRef pnode = NODE_NONE;
-		if (pnode != NODE_NONE)
-		{
-			const int *iface = zone->zonemap->SeekFace( pnode, tmp_x, tmp_y );
-			if (*iface == -1) {
-				return false;
-			}
-			float temp_z = 0;
-			float best_z = 999999;
-			while(*iface != -1)
-			{
-				temp_z = zone->zonemap->GetFaceHeight( *iface, x_pos, y_pos );
-//UMM.. OMG... sqrtf(pow(x, 2)) == x.... retards
-				float best_dist = sqrtf((float)(pow(best_z-tmp_z, 2)));
-				float tmp_dist = sqrtf((float)(pow(tmp_z-tmp_z, 2)));
-				if (tmp_dist < best_dist)
-				{
-					best_z = temp_z;
-				}
-				iface++;
-			}
-/*	solar: our aggro code isn't using this right now, just spells, so i'm
-	taking out the +-10 check for now to make it work right on hills
-			if (best_z - 10 > trg_z || best_z + 10 < trg_z)
-			{
-				return false;
-			}
-*/
-		}
-	}
-	return true;
-}
-
-
 //Father Nitwit's LOS code
 bool Mob::CheckLosFN(Mob* other) {
 	bool Result = false;
@@ -1028,8 +901,8 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 #endif
 	}
 
-	VERTEX myloc;
-	VERTEX oloc;
+	Map::Vertex myloc;
+	Map::Vertex oloc;
 
 #define LOS_DEFAULT_HEIGHT 6.0f
 
@@ -1044,72 +917,7 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 #if LOSDEBUG>=5
 	LogFile->write(EQEMuLog::Debug, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
 #endif
-
-	FACE *onhit;
-	NodeRef mynode;
-	NodeRef onode;
-
-	VERTEX hit;
-	//see if anything in our node is in the way
-	mynode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), myloc.x, myloc.y);
-	if(mynode != NODE_NONE) {
-		if(zone->zonemap->LineIntersectsNode(mynode, myloc, oloc, &hit, &onhit)) {
-#if LOSDEBUG>=5
-			LogFile->write(EQEMuLog::Debug, "Check LOS for %s target position, cannot see.", GetName());
-			LogFile->write(EQEMuLog::Debug, "\tPoly: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n",
-				onhit->a.x, onhit->a.y, onhit->a.z,
-				onhit->b.x, onhit->b.y, onhit->b.z,
-				onhit->c.x, onhit->c.y, onhit->c.z);
-#endif
-			return(false);
-		}
-	}
-#if LOSDEBUG>=5
-	else {
-		LogFile->write(EQEMuLog::Debug, "WTF, I have no node, what am I standing on??? (%.2f, %.2f).", myloc.x, myloc.y);
-	}
-#endif
-
-	//see if they are in a different node.
-	//if so, see if anything in their node is blocking me.
-	if(! zone->zonemap->LocWithinNode(mynode, oloc.x, oloc.y)) {
-		onode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), oloc.x, oloc.y);
-		if(onode != NODE_NONE && onode != mynode) {
-			if(zone->zonemap->LineIntersectsNode(onode, myloc, oloc, &hit, &onhit)) {
-#if LOSDEBUG>=5
-			LogFile->write(EQEMuLog::Debug, "Check LOS for %s target position, cannot see (2).", GetName());
-			LogFile->write(EQEMuLog::Debug, "\tPoly: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n",
-				onhit->a.x, onhit->a.y, onhit->a.z,
-				onhit->b.x, onhit->b.y, onhit->b.z,
-				onhit->c.x, onhit->c.y, onhit->c.z);
-#endif
-				return(false);
-			}
-		}
-#if LOSDEBUG>=5
-		else if(onode == NODE_NONE) {
-			LogFile->write(EQEMuLog::Debug, "WTF, They have no node, what are they standing on??? (%.2f, %.2f).", myloc.x, myloc.y);
-		}
-#endif
-	}
-
-	/*
-	if(zone->zonemap->LineIntersectsZone(myloc, oloc, CHECK_LOS_STEP, &onhit)) {
-#if LOSDEBUG>=5
-		LogFile->write(EQEMuLog::Debug, "Check LOS for %s target %s, cannot see.", GetName(), other->GetName() );
-		LogFile->write(EQEMuLog::Debug, "\tPoly: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n",
-			onhit->a.x, onhit->a.y, onhit->a.z,
-			onhit->b.x, onhit->b.y, onhit->b.z,
-			onhit->c.x, onhit->c.y, onhit->c.z);
-#endif
-		return(false);
-	}*/
-
-#if LOSDEBUG>=5
-			LogFile->write(EQEMuLog::Debug, "Check LOS for %s target position, CAN SEE.", GetName());
-#endif
-
-	return(true);
+	return zone->zonemap->CheckLoS(myloc, oloc);
 }
 
 //offensive spell aggro

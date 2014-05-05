@@ -276,6 +276,14 @@ Mob::Mob(const char* in_name,
 	casting_spell_inventory_slot = 0;
 	target = 0;
 
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_spell_id[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_target_id[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_increment[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_x[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_y[i] = 0; }
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) { projectile_z[i] = 0; }
+	projectile_timer.Disable();
+
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	memset(&spellbonuses, 0, sizeof(StatBonuses));
 	memset(&aabonuses, 0, sizeof(StatBonuses));
@@ -883,7 +891,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
-	ns->spawn.IsMercenary = IsMerc() ? 1 : 0;
+	ns->spawn.IsMercenary = (IsMerc() || no_target_hotkey) ? 1 : 0;
+		
 	ns->spawn.petOwnerId	= ownerid;
 
 	ns->spawn.haircolor = haircolor;
@@ -1618,7 +1627,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	la->parm4 = parm4;
 	la->parm5 = parm5;
 	// Note that setting the b values to 0 will disable the related effect from the corresponding parameter.
-	// Setting the a value appears to have no affect at all.
+	// Setting the a value appears to have no affect at all.s
 	la->value1a = 1;
 	la->value1b = 1;
 	la->value2a = 1;
@@ -2080,27 +2089,35 @@ void Mob::SetAttackTimer() {
 
 }
 
-bool Mob::CanThisClassDualWield(void) const
-{
-	if (!IsClient()) {
+bool Mob::CanThisClassDualWield(void) const {
+	if(!IsClient()) {
 		return(GetSkill(SkillDualWield) > 0);
-	} else {
-		const ItemInst* inst = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+	}
+	else if(CastToClient()->HasSkill(SkillDualWield)) {
+		const ItemInst* pinst = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+		const ItemInst* sinst = CastToClient()->GetInv().GetItem(SLOT_SECONDARY);
+
 		// 2HS, 2HB, or 2HP
-		if (inst && inst->IsType(ItemClassCommon)) {
-			const Item_Struct* item = inst->GetItem();
-			if ((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
+		if(pinst && pinst->IsWeapon()) {
+			const Item_Struct* item = pinst->GetItem();
+
+			if((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
 				return false;
-		} else {
-			//No weapon in hand... using hand-to-hand...
-			//only monks and beastlords? can dual wield their fists.
-			if(class_ != MONK && class_ != MONKGM && class_ != BEASTLORD && class_ != BEASTLORDGM) {
-				return false;
-			}
 		}
 
-		return (CastToClient()->HasSkill(SkillDualWield));	// No skill = no chance
+		// OffHand Weapon
+		if(sinst && !sinst->IsWeapon())
+			return false;
+
+		// Dual-Wielding Empty Fists
+		if(!pinst && !sinst)
+			if(class_ != MONK && class_ != MONKGM && class_ != BEASTLORD && class_ != BEASTLORDGM)
+				return false;
+
+		return true;
 	}
+
+	return false;
 }
 
 bool Mob::CanThisClassDoubleAttack(void) const
@@ -2450,13 +2467,18 @@ bool Mob::RemoveFromHateList(Mob* mob)
 
 	return bFound;
 }
+
 void Mob::WipeHateList()
 {
 	if(IsEngaged())
 	{
+		hate_list.Wipe();
 		AI_Event_NoLongerEngaged();
 	}
-	hate_list.Wipe();
+	else
+	{
+		hate_list.Wipe();
+	}
 }
 
 uint32 Mob::RandomTimer(int min,int max) {
@@ -2927,22 +2949,17 @@ void Mob::SetTarget(Mob* mob) {
 float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
 {
 	float ret = -999999;
-	if (zone->zonemap != 0)
+	if (zone->zonemap != nullptr)
 	{
-		NodeRef pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), new_x, new_y );
-		if (pnode != NODE_NONE)
+		Map::Vertex me;
+		me.x = new_x;
+		me.y = new_y;
+		me.z = z_pos+z_offset;
+		Map::Vertex hit;
+		float best_z = zone->zonemap->FindBestZ(me, &hit);
+		if (best_z != -999999)
 		{
-			VERTEX me;
-			me.x = new_x;
-			me.y = new_y;
-			me.z = z_pos+z_offset;
-			VERTEX hit;
-			FACE *onhit;
-			float best_z = zone->zonemap->FindBestZ(pnode, me, &hit, &onhit);
-			if (best_z != -999999)
-			{
-				ret = best_z;
-			}
+			ret = best_z;
 		}
 	}
 	return ret;
@@ -2954,20 +2971,15 @@ float Mob::GetGroundZ(float new_x, float new_y, float z_offset)
 	float ret = -999999;
 	if (zone->zonemap != 0)
 	{
-		NodeRef pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), new_x, new_y );
-		if (pnode != NODE_NONE)
+		Map::Vertex me;
+		me.x = new_x;
+		me.y = new_y;
+		me.z = z_pos+z_offset;
+		Map::Vertex hit;
+		float best_z = zone->zonemap->FindBestZ(me, &hit);
+		if (best_z != -999999)
 		{
-			VERTEX me;
-			me.x = new_x;
-			me.y = new_y;
-			me.z = z_pos+z_offset;
-			VERTEX hit;
-			FACE *onhit;
-			float best_z = zone->zonemap->FindBestZ(pnode, me, &hit, &onhit);
-			if (best_z != -999999)
-			{
-				ret = best_z;
-			}
+			ret = best_z;
 		}
 	}
 	return ret;
@@ -4128,10 +4140,10 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 			for (int i = 0; i < EFFECT_COUNT; i++) {
 				if (spells[spell_id].effectid[i] == SE_SpellOnKill2)
 				{
-					if (spells[spell_id].max[i] <= level)
+					if (IsValidSpell(spells[spell_id].base2[i]) && spells[spell_id].max[i] <= level)
 					{
 						if(MakeRandomInt(0,99) < spells[spell_id].base[i])
-							SpellFinished(spells[spell_id].base2[i], this);
+							SpellFinished(spells[spell_id].base2[i], this, 10, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
 					}
 				}
 			}
@@ -4144,19 +4156,19 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 	// Allow to check AA, items and buffs in all cases. Base2 = Spell to fire | Base1 = % chance | Base3 = min level
 	for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3) {
 
-		if(aabonuses.SpellOnKill[i] && (level >= aabonuses.SpellOnKill[i + 2])) {
+		if(aabonuses.SpellOnKill[i] && IsValidSpell(aabonuses.SpellOnKill[i]) && (level >= aabonuses.SpellOnKill[i + 2])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(aabonuses.SpellOnKill[i + 1]))
-				SpellFinished(aabonuses.SpellOnKill[i], this);
+				SpellFinished(aabonuses.SpellOnKill[i], this, 10, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
-		if(itembonuses.SpellOnKill[i] && (level >= itembonuses.SpellOnKill[i + 2])){
+		if(itembonuses.SpellOnKill[i] && IsValidSpell(itembonuses.SpellOnKill[i]) && (level >= itembonuses.SpellOnKill[i + 2])){
 			if(MakeRandomInt(0, 99) < static_cast<int>(itembonuses.SpellOnKill[i + 1]))
-				SpellFinished(itembonuses.SpellOnKill[i], this);
+				SpellFinished(itembonuses.SpellOnKill[i], this, 10, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
-		if(spellbonuses.SpellOnKill[i] && (level >= spellbonuses.SpellOnKill[i + 2])) {
+		if(spellbonuses.SpellOnKill[i] && IsValidSpell(spellbonuses.SpellOnKill[i]) && (level >= spellbonuses.SpellOnKill[i + 2])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(spellbonuses.SpellOnKill[i + 1]))
-				SpellFinished(spellbonuses.SpellOnKill[i], this);
+				SpellFinished(spellbonuses.SpellOnKill[i], this, 10, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
 		}
 
 	}
@@ -4171,21 +4183,21 @@ bool Mob::TrySpellOnDeath()
 		return false;
 
 	for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
-		if(IsClient() && aabonuses.SpellOnDeath[i]) {
+		if(IsClient() && aabonuses.SpellOnDeath[i] && IsValidSpell(aabonuses.SpellOnDeath[i])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(aabonuses.SpellOnDeath[i + 1])) {
-				SpellFinished(aabonuses.SpellOnDeath[i], this);
+				SpellFinished(aabonuses.SpellOnDeath[i], this, 10, 0, -1, spells[aabonuses.SpellOnDeath[i]].ResistDiff);
 			}
 		}
 
-		if(itembonuses.SpellOnDeath[i]) {
+		if(itembonuses.SpellOnDeath[i] && IsValidSpell(itembonuses.SpellOnDeath[i])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(itembonuses.SpellOnDeath[i + 1])) {
-				SpellFinished(itembonuses.SpellOnDeath[i], this);
+				SpellFinished(itembonuses.SpellOnDeath[i], this, 10, 0, -1, spells[itembonuses.SpellOnDeath[i]].ResistDiff);
 			}
 		}
 
-		if(spellbonuses.SpellOnDeath[i]) {
+		if(spellbonuses.SpellOnDeath[i] && IsValidSpell(spellbonuses.SpellOnDeath[i])) {
 			if(MakeRandomInt(0, 99) < static_cast<int>(spellbonuses.SpellOnDeath[i + 1])) {
-				SpellFinished(spellbonuses.SpellOnDeath[i], this);
+				SpellFinished(spellbonuses.SpellOnDeath[i], this, 10, 0, -1, spells[spellbonuses.SpellOnDeath[i]].ResistDiff);
 				}
 			}
 		}
@@ -4352,6 +4364,49 @@ bool Mob::TryReflectSpell(uint32 spell_id)
 
 	return false;
 }
+
+void Mob::SpellProjectileEffect()
+{
+	bool time_disable = false;
+
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
+
+		if (projectile_increment[i] == 0){
+			continue;
+		}
+
+		Mob* target = entity_list.GetMobID(projectile_target_id[i]);
+		
+		float dist = 0;
+		
+		if (target) 
+				dist = target->CalculateDistance(projectile_x[i], projectile_y[i],  projectile_z[i]);
+	
+		int increment_end = 0;
+		increment_end = (dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
+
+		if (increment_end <= projectile_increment[i]){
+
+			if (target && IsValidSpell(projectile_spell_id[i]))
+				SpellOnTarget(projectile_spell_id[i], target, false, true, spells[projectile_spell_id[i]].ResistDiff, true);
+
+			projectile_spell_id[i] = 0;
+			projectile_target_id[i] = 0;
+			projectile_x[i] = 0, projectile_y[i] = 0, projectile_z[i] = 0;
+			projectile_increment[i] = 0;
+			time_disable = true;
+		}
+
+		else {
+			projectile_increment[i]++;
+			time_disable = false;
+		}
+	}
+
+	if (time_disable)
+		projectile_timer.Disable();
+}
+
 
 void Mob::DoGravityEffect()
 {
@@ -4586,33 +4641,21 @@ void Mob::CastOnNumHitFade(uint32 spell_id)
 	}
 }
 
-int Mob::SlowMitigation(bool slow_msg, Mob *caster, int slow_value)
+void Mob::SlowMitigation(Mob* caster)
 {
-	float int_slow_mitigation = slow_mitigation * 100.0f;
-
-	if (int_slow_mitigation > 100.0f)
-		return 0;
-
-	if (slow_msg)
+	if (GetSlowMitigation() && caster && caster->IsClient())
 	{
-		if (caster && caster->IsClient())
-		{
-			if ((int_slow_mitigation > 0.0f) && (int_slow_mitigation < 26.0f))
-				caster->Message(262, "Your spell was mostly successful");
+		if ((GetSlowMitigation() > 0) && (GetSlowMitigation() < 26))
+			caster->Message_StringID(MT_SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
 
-			else if ((int_slow_mitigation >= 26.0f) && (int_slow_mitigation < 74.0f))
-				caster->Message(262, "Your spell was partially successful");
+		else if ((GetSlowMitigation() >= 26) && (GetSlowMitigation() < 74))
+			caster->Message_StringID(MT_SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
 
-			else if ((int_slow_mitigation >= 74.0f) && (int_slow_mitigation < 101.0f))
-				caster->Message(262, "Your spell was slightly successful");
-		}
-		return 0;
-	}
+		else if ((GetSlowMitigation() >= 74) && (GetSlowMitigation() < 101))
+			caster->Message_StringID(MT_SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
 
-	else
-	{
-		slow_value -= (slow_value * static_cast<int>(int_slow_mitigation) / 100);
-		return slow_value;
+		else if (GetSlowMitigation() > 100) 
+			caster->Message_StringID(MT_SpellFailure, SPELL_OPPOSITE_EFFECT);
 	}
 }
 
@@ -5003,3 +5046,54 @@ void Mob::ProcessSpecialAbilities(const std::string str) {
 		}
 	}
 }
+
+// derived from client to keep these functions more consistent
+// if anything seems weird, blame SoE
+bool Mob::IsFacingMob(Mob *other)
+{
+	if (!other)
+		return false;
+	float angle = HeadingAngleToMob(other);
+	// what the client uses appears to be 2x our internal heading
+	float heading = GetHeading() * 2.0;
+
+	if (angle > 472.0 && heading < 40.0)
+		angle = heading;
+	if (angle < 40.0 && heading > 472.0)
+		angle = heading;
+
+	if (fabs(angle - heading) <= 80.0)
+		return true;
+
+	return false;
+}
+
+// All numbers derived from the client
+float Mob::HeadingAngleToMob(Mob *other)
+{
+	float mob_x = other->GetX();
+	float mob_y = other->GetY();
+	float this_x = GetX();
+	float this_y = GetY();
+
+	float y_diff = fabs(this_y - mob_y);
+	float x_diff = fabs(this_x - mob_x);
+	if (y_diff < 0.0000009999999974752427)
+		y_diff = 0.0000009999999974752427;
+
+	float angle = atan2(x_diff, y_diff) * 180.0 * 0.3183099014828645; // angle, nice "pi"
+
+	// return the right thing based on relative quadrant
+	// I'm sure this could be improved for readability, but whatever
+	if (this_y >= mob_y) {
+		if (mob_x >= this_x)
+			return (90.0 - angle + 90.0) * 511.5 * 0.0027777778;
+		if (mob_x <= this_x)
+			return (angle + 180.0) * 511.5 * 0.0027777778;
+	}
+	if (this_y > mob_y || mob_x > this_x)
+		return angle * 511.5 * 0.0027777778;
+	else
+		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
+}
+

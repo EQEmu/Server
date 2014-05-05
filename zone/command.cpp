@@ -449,7 +449,11 @@ int command_init(void) {
 		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
 		command_add("enablerecipe", "[recipe_id] - Enables a recipe using the recipe id.", 80, command_enablerecipe) ||
 		command_add("disablerecipe", "[recipe_id] - Disables a recipe using the recipe id.", 80, command_disablerecipe) ||
-		command_add("npctype_cache", "[id] or all - Clears the npc type cache for either the id or all npcs.", 250, command_npctype_cache)
+		command_add("npctype_cache", "[id] or all - Clears the npc type cache for either the id or all npcs.", 250, command_npctype_cache) ||
+		command_add("merchant_open_shop", "Opens a merchants shop", 100, command_merchantopenshop) ||
+		command_add("open_shop", nullptr, 100, command_merchantopenshop) ||
+		command_add("merchant_close_shop", "Closes a merchant shop", 100, command_merchantcloseshop) ||
+		command_add("close_shop", nullptr, 100, command_merchantcloseshop)
 		)
 	{
 		command_deinit();
@@ -2638,19 +2642,35 @@ void command_makepet(Client *c, const Seperator *sep)
 void command_level(Client *c, const Seperator *sep)
 {
 	uint16 level = atoi(sep->arg[1]);
-	if ((level <= 0) || ((level > RuleI(Character, MaxLevel)) && (c->Admin() < commandLevelAboveCap)) )
+
+	if ((level <= 0) || ((level > RuleI(Character, MaxLevel)) && (c->Admin() < commandLevelAboveCap))) {
 		c->Message(0, "Error: #Level: Invalid Level");
-	else if (c->Admin() < 100)
+	}
+	else if (c->Admin() < 100) {
 		c->SetLevel(level, true);
-	else if (!c->GetTarget())
+#ifdef BOTS
+		if(RuleB(Bots, BotLevelsWithOwner))
+			Bot::LevelBotWithClient(c, level, true);
+#endif
+	}
+	else if (!c->GetTarget()) {
 		c->Message(0, "Error: #Level: No target");
-	else
-		if (!c->GetTarget()->IsNPC() && ((c->Admin() < commandLevelNPCAboveCap) && (level > RuleI(Character, MaxLevel))))
+	}
+	else {
+		if (!c->GetTarget()->IsNPC() && ((c->Admin() < commandLevelNPCAboveCap) && (level > RuleI(Character, MaxLevel)))) {
 			c->Message(0, "Error: #Level: Invalid Level");
-		else
+		}
+		else {
 			c->GetTarget()->SetLevel(level, true);
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		c->GetTarget()->CastToClient()->SendLevelAppearance();
+			if(c->GetTarget()->IsClient()) {
+				c->GetTarget()->CastToClient()->SendLevelAppearance();
+#ifdef BOTS
+				if(RuleB(Bots, BotLevelsWithOwner))
+					Bot::LevelBotWithClient(c->GetTarget()->CastToClient(), level, true);
+#endif
+			}
+		}
+	}
 }
 
 void command_spawn(Client *c, const Seperator *sep)
@@ -7467,8 +7487,8 @@ void command_path(Client *c, const Seperator *sep)
 
 			if(zone->zonemap)
 			{
-				VERTEX loc(px, py, pz);
-				best_z = zone->zonemap->FindBestZ(MAP_ROOT_NODE, loc, nullptr, nullptr);
+				Map::Vertex loc(px, py, pz);
+				best_z = zone->zonemap->FindBestZ(loc, nullptr);
 			}
 			else
 			{
@@ -7494,8 +7514,8 @@ void command_path(Client *c, const Seperator *sep)
 
 			if(zone->zonemap)
 			{
-				VERTEX loc(px, py, pz);
-				best_z = zone->zonemap->FindBestZ(MAP_ROOT_NODE, loc, nullptr, nullptr);
+				Map::Vertex loc(px, py, pz);
+				best_z = zone->zonemap->FindBestZ(loc, nullptr);
 			}
 			else
 			{
@@ -7627,8 +7647,8 @@ void command_path(Client *c, const Seperator *sep)
 		{
 			if(c && c->GetTarget())
 			{
-				if(zone->pathing->NoHazardsAccurate(VERTEX(c->GetX(),c->GetY(),c->GetZ()),
-					VERTEX(c->GetTarget()->GetX(),c->GetTarget()->GetY(),c->GetTarget()->GetZ())))
+				if (zone->pathing->NoHazardsAccurate(Map::Vertex(c->GetX(), c->GetY(), c->GetZ()),
+					Map::Vertex(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ())))
 				{
 					c->Message(0, "No hazards.");
 				}
@@ -7704,7 +7724,7 @@ void command_path(Client *c, const Seperator *sep)
 		{
 			Mob *m = c->GetTarget();
 
-			VERTEX Position(m->GetX(), m->GetY(), m->GetZ());
+			Map::Vertex Position(m->GetX(), m->GetY(), m->GetZ());
 
 			int Node = zone->pathing->FindNearestPathNode(Position);
 
@@ -7837,35 +7857,19 @@ void command_bestz(Client *c, const Seperator *sep) {
 		return;
 	}
 
-	NodeRef pnode;
-	if(c->GetTarget()) {
-		pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), c->GetTarget()->GetX(), c->GetTarget()->GetY() );
-	} else {
-		pnode = zone->zonemap->SeekNode( zone->zonemap->GetRoot(), c->GetX(), c->GetY() );
-	}
-	if (pnode == NODE_NONE) {
-		c->Message(0,"Unable to find your node.");
-		return;
-	}
-
-	VERTEX me;
+	Map::Vertex me;
 	me.x = c->GetX();
 	me.y = c->GetY();
 	me.z = c->GetZ() + (c->GetSize()==0.0?6:c->GetSize()) * HEAD_POSITION;
-	VERTEX hit;
-	VERTEX bme(me);
+	Map::Vertex hit;
+	Map::Vertex bme(me);
 	bme.z -= 500;
 
-	float best_z = zone->zonemap->FindBestZ(pnode, me, &hit, nullptr);
-
-	float best_z2 = -999990;
-	if(zone->zonemap->LineIntersectsNode(pnode, me, bme, &hit, nullptr)) {
-		best_z2 = hit.z;
-	}
+	float best_z = zone->zonemap->FindBestZ(me, &hit);
 
 	if (best_z != -999999)
 	{
-		c->Message(0,"Z is %.3f or %.3f at (%.3f, %.3f).", best_z, best_z2, me.x, me.y);
+		c->Message(0,"Z is %.3f at (%.3f, %.3f).", best_z, me.x, me.y);
 	}
 	else
 	{
@@ -11481,3 +11485,26 @@ void command_npctype_cache(Client *c, const Seperator *sep)
 		c->Message(0, "#npctype_cache all");
 	}
 }
+
+void command_merchantopenshop(Client *c, const Seperator *sep)
+{
+	Mob *merchant = c->GetTarget();
+	if (!merchant || merchant->GetClass() != MERCHANT) {
+		c->Message(0, "You must target a merchant to open their shop.");
+		return;
+	}
+
+	merchant->CastToNPC()->MerchantOpenShop();
+}
+
+void command_merchantcloseshop(Client *c, const Seperator *sep)
+{
+	Mob *merchant = c->GetTarget();
+	if (!merchant || merchant->GetClass() != MERCHANT) {
+		c->Message(0, "You must target a merchant to close their shop.");
+		return;
+	}
+
+	merchant->CastToNPC()->MerchantCloseShop();
+}
+

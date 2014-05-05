@@ -284,20 +284,31 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Percental Heal: %+i (%d%% max)", spell.max[i], effect_value);
 #endif
-				//im not 100% sure about this implementation.
-				//the spell value forumula dosent work for these... at least spell 3232 anyways
-				int32 val = spell.max[i];
+				int32 val = GetMaxHP() * spell.base[i] / 100;
 
-				if(caster)
-					val = caster->GetActSpellHealing(spell_id, val, this);
+				//This effect can also do damage by percent.
+				if (val < 0) {
 
-				int32 mhp = GetMaxHP();
-				int32 cap = mhp * spell.base[i] / 100;
+					if (-val > spell.max[i])
+						val = -spell.max[i];
 
-				if(cap < val)
-					val = cap;
+					if (caster)
+						val = caster->GetActSpellDamage(spell_id, val, this);
 
-				if(val > 0)
+				}
+
+				else
+				{
+					if (val > spell.max[i])
+						val = spell.max[i];
+
+					if(caster)
+						val = caster->GetActSpellHealing(spell_id, val, this);
+				}
+
+				if (val < 0)
+					Damage(caster, -val, spell_id, spell.skill, false, buffslot, false);
+				else
 					HealDamage(val, caster);
 
 				break;
@@ -326,7 +337,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(inuse)
 					break;
 
-				Heal();
+				int32 val = 0;
+				val = 7500*effect_value;
+				val = caster->GetActSpellHealing(spell_id, val, this);
+
+				if (val > 0)
+					HealDamage(val, caster);
+
 				break;
 			}
 
@@ -396,10 +413,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			}
 
 			case SE_Succor:
-			{
+			{				
+				
 				float x, y, z, heading;
 				const char *target_zone;
-
+				
 				x = spell.base[1];
 				y = spell.base[0];
 				z = spell.base[2];
@@ -426,6 +444,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if(IsClient())
 				{
+					if(MakeRandomInt(0, 99) < RuleI(Spells, SuccorFailChance)) { //2% Fail chance by default
+
+						if(IsClient()) {
+							CastToClient()->Message_StringID(MT_SpellFailure,SUCCOR_FAIL);
+						}
+						break;
+					}
+
 					// Below are the spellid's for known evac/succor spells that send player
 					// to the current zone's safe points.
 
@@ -441,10 +467,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 						LogFile->write(EQEMuLog::Debug, "Succor/Evacuation Spell In Same Zone.");
 #endif
-						if(IsClient())
-							CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
-						else
-							GMMove(x, y, z, heading);
+							if(IsClient())
+								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
+							else
+								GMMove(x, y, z, heading);
 					}
 					else {
 #ifdef SPELL_EFFECT_SPAM
@@ -457,7 +483,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				break;
 			}
-			case SE_YetAnotherGate: //Shin: Used on Teleport Bind.
+			case SE_GateCastersBindpoint: //Shin: Used on Teleport Bind.
 			case SE_Teleport:	// gates, rings, circles, etc
 			case SE_Teleport2:
 			{
@@ -489,7 +515,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 				}
 
-				if (effect == SE_YetAnotherGate && caster->IsClient())
+				if (effect == SE_GateCastersBindpoint && caster->IsClient())
 				{ //Shin: Teleport Bind uses caster's bind point
 					x = caster->CastToClient()->GetBindX();
 					y = caster->CastToClient()->GetBindY();
@@ -857,7 +883,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_BindAffinity:
+			case SE_BindAffinity: //TO DO: Add support for secondary and tertiary gate abilities
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Bind Affinity");
@@ -989,13 +1015,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_Gate:
+			case SE_Gate: //TO DO: Add support for secondary and tertiary gate abilities (base2)
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Gate");
 #endif
-				if(!spellbonuses.AntiGate)
-					Gate();
+				if(!spellbonuses.AntiGate){
+
+					if(MakeRandomInt(0, 99) < effect_value)
+						Gate();						
+					else
+						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
+				}
 				break;
 			}
 
@@ -1378,7 +1409,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					(
 						spell.base[i],
 						Mob::GetDefaultGender(spell.base[i], GetGender()),
-						spell.base2[i]
+						spell.base2[i],
+						spell.max[i]
 					);
 					if(spell.base[i] == OGRE){
 						SendAppearancePacket(AT_Size, 9);
@@ -1554,8 +1586,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(spell_id == 2488) //Dook- Lifeburn fix
 					break;
 
-				if(IsClient())
-					CastToClient()->SetFeigned(true);
+				if(IsClient()) {
+
+					if (MakeRandomInt(0, 99) > spells[spell_id].base[i]) {
+						CastToClient()->SetFeigned(false);
+						entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
+						}
+					else
+						CastToClient()->SetFeigned(true);
+				}
 				break;
 			}
 
@@ -1644,6 +1683,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				{
 					CastToClient()->SummonHorse(spell_id);
 				}
+
+
 				break;
 			}
 
@@ -1691,19 +1732,25 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					// Now we should either be casting this on self or its being cast on a valid group member
 					if(TargetClient) {
-						Corpse *corpse = entity_list.GetCorpseByOwner(TargetClient);
-						if(corpse) {
-							if(TargetClient == this->CastToClient())
-								Message_StringID(4, SUMMONING_CORPSE, TargetClient->CastToMob()->GetCleanName());
-							else
-								Message_StringID(4, SUMMONING_CORPSE_OTHER, TargetClient->CastToMob()->GetCleanName());
 
-							corpse->Summon(CastToClient(), true, true);
+						if (TargetClient->GetLevel() <= effect_value){
+
+							Corpse *corpse = entity_list.GetCorpseByOwner(TargetClient);
+							if(corpse) {
+								if(TargetClient == this->CastToClient())
+									Message_StringID(4, SUMMONING_CORPSE, TargetClient->CastToMob()->GetCleanName());
+								else
+									Message_StringID(4, SUMMONING_CORPSE_OTHER, TargetClient->CastToMob()->GetCleanName());
+
+								corpse->Summon(CastToClient(), true, true);
+							}
+							else {
+								// No corpse found in the zone
+								Message_StringID(4, CORPSE_CANT_SENSE);
+							}
 						}
-						else {
-							// No corpse found in the zone
-							Message_StringID(4, CORPSE_CANT_SENSE);
-						}
+						else
+							caster->Message_StringID(MT_SpellFailure, SPELL_LEVEL_REQ);
 					}
 					else {
 						Message_StringID(4, TARGET_NOT_FOUND);
@@ -2590,13 +2637,36 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						HealDamage(dmg, caster);
 					}
 				}
+
+				break;
 			}
 
 			case SE_Taunt:
 			{
 				if (IsNPC())
 					caster->Taunt(this->CastToNPC(), false, spell.base[i]);
+
+				break;
 			}
+
+			case SE_AttackSpeed:
+				if (spell.base[i] < 100)
+					SlowMitigation(caster);
+				break;
+
+			case SE_AttackSpeed2:
+				if (spell.base[i] < 100)
+					SlowMitigation(caster);
+				break;
+
+			case SE_AttackSpeed3:
+				if (spell.base[i] < 0)
+					SlowMitigation(caster);
+				break;
+
+			case SE_AttackSpeed4:
+				SlowMitigation(caster);
+				break;
 
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
@@ -2683,10 +2753,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_DivineSave:
 			case SE_Accuracy:
 			case SE_Flurry:
-			case SE_AttackSpeed:
-			case SE_AttackSpeed2:
-			case SE_AttackSpeed3:
-			case SE_AttackSpeed4:
 			case SE_ImprovedDamage:
 			case SE_ImprovedHeal:
 			case SE_IncreaseSpellHaste:
@@ -3317,10 +3383,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			case SE_Root: {
 				
 				/* Root formula derived from extensive personal live parses - Kayen
-				ROOT has a 40% chance to do a resist check to break.
-				Resist check has NO LOWER bounds.
-				If multiple roots on target. Root in first slot will be checked first to break from nukes.
-				If multiple roots on target and broken by spell. Roots are removed ONE at a time in order of buff slot.
+				ROOT has a 70% chance to do a resist check to break.
 				*/
 
 				if (MakeRandomInt(0, 99) < RuleI(Spells, RootBreakCheckChance)){
@@ -3936,6 +3999,15 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 
 	bool LimitFailure = false;
 	bool LimitInclude[MaxLimitInclude] = { false }; 
+	/* Certain limits require only one of several Include conditions to be true. Ie. Add damage to fire OR ice spells.
+	0/1   SE_LimitResist
+	2/3   SE_LimitSpell
+	4/5   SE_LimitEffect
+	6/7   SE_LimitTarget
+	8/9   SE_LimitSpellGroup:
+	10/11 SE_LimitCastingSkill:
+	Remember: Update MaxLimitInclude in spdat.h if adding new limits that require Includes
+	*/ 
 	int FocusCount = 0;
 
 	std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aa_ID);
@@ -3950,7 +4022,7 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 		base1 = iter->second.base1;
 		base2 = iter->second.base2;
 		slot = iter->second.slot;
-
+		
 		/*
 		AA Foci's can contain multiple focus effects within the same AA.
 		To handle this we will not automatically return zero if a limit is found.
@@ -4004,8 +4076,11 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 
 			case SE_LimitInstant:
-				if(spell.buffduration)
+				if(base1 == 1 && spell.buffduration) //Fail if not instant
 					LimitFailure = true;
+				if(base1 == 0 && (spell.buffduration == 0)) //Fail if instant
+					LimitFailure = true;
+
 				break;
 			
 			case SE_LimitMaxLevel:
@@ -4053,13 +4128,14 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 			case SE_LimitMinDur:
 				if (base1 > CalcBuffDuration_formula(GetLevel(), spell.buffdurationformula, spell.buffduration))
 					LimitFailure = true;
-					break;
+
+				break;
 
 			case SE_LimitEffect:
 				if(base1 < 0){
 					if(IsEffectInSpell(spell_id,-base1)) //Exclude
 						LimitFailure = true;
-					}
+				}
 				else{
 					LimitInclude[4] = true;
 					if(IsEffectInSpell(spell_id,base1)) //Include
@@ -4104,10 +4180,11 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 
 			case SE_LimitCombatSkills:
-				if (base1 == 0 && IsCombatSkill(spell_id)) //Exclude Discs
+				if (base1 == 0 && (IsCombatSkill(spell_id) || IsCombatProc(spell_id))) //Exclude Discs / Procs
 					LimitFailure = true;
-				else if (base1 == 1 && !IsCombatSkill(spell_id)) //Exclude Spells
+				else if (base1 == 1 && (!IsCombatSkill(spell_id) || !IsCombatProc(spell_id))) //Exclude Spells
 					LimitFailure = true;
+
 			break;
 
 			case SE_LimitSpellGroup:
@@ -4138,7 +4215,7 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
 			if (!PassLimitClass(base1, GetClass()))
 				LimitFailure = true;
-				break;
+			break;
 
 			case SE_LimitRace:
 				if (base1 != GetRace())
@@ -4399,8 +4476,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 		
 		case SE_LimitInstant:
-			if(spell.buffduration)
+			if(focus_spell.base[i] == 1 && spell.buffduration) //Fail if not instant
 				return 0;
+			if(focus_spell.base[i] == 0 && (spell.buffduration == 0)) //Fail if instant
+				return 0;
+
 			break;
 
 		case SE_LimitMaxLevel:
@@ -4505,10 +4585,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_LimitCombatSkills:
-			if (focus_spell.base[i] == 0 && IsCombatSkill(spell_id)) //Exclude Disc
-				return 0;				
-			else if (focus_spell.base[i] == 1 && !IsCombatSkill(spell_id)) //Include Spells
+			if (focus_spell.base[i] == 0 && (IsCombatSkill(spell_id) || IsCombatProc(spell_id))) //Exclude Discs / Procs
 				return 0;
+			else if (focus_spell.base[i] == 1 && (!IsCombatSkill(spell_id) || !IsCombatProc(spell_id))) //Exclude Spells
+				return 0;
+
 			break;
 
 		case SE_LimitSpellGroup:
@@ -5594,7 +5675,7 @@ uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
 	if(!IsValidSpell(spell_id))
 		return 0;
 
-	if (!aabonuses.SEResist[0] && !spellbonuses.SEResist[0] && !itembonuses.SEResist[0])
+	if (!aabonuses.SEResist[1] && !spellbonuses.SEResist[1] && !itembonuses.SEResist[1])
 		return 0;
 
 	uint16 resist_chance = 0;
@@ -5985,4 +6066,83 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 						
 	return false;
 }
+
+bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
+
+	/*For mage 'Bolt' line and other various spells.
+	-This is mostly accurate for how the modern clients handle this effect.
+	-It was changed at some point to use an actual projectile as done here (opposed to a particle effect in classic)
+	-The projectile graphic appears to be that of 'Ball of Sunlight' ID 80648 and will be visible to anyone in SoF+
+	-There is no LOS check to prevent a bolt from being cast. If you don't have LOS your bolt simply goes into whatever barrier
+	and you lose your mana. If there is LOS the bolt will lock onto your target and the damage is applied when it hits the target.
+	-If your target moves the bolt moves with it in any direction or angle (consistent with other projectiles).
+	-The way this is written once a bolt is cast a timer checks the distance from the initial cast to the target repeatedly
+	and calculates at what predicted time the bolt should hit that target in client_process (therefore accounting for any target movement). 
+	When bolt hits its predicted point the damage is then done to target.
+	Note: Projectile speed of 1 takes 3 seconds to go 100 distance units. Calculations are based on this constant.
+	Live Bolt speed: Projectile speed of X takes 5 seconds to go 300 distance units. 
+	Pending Implementation: What this code can not do is prevent damage if the bolt hits a barrier after passing the initial LOS check
+	because the target has moved while the bolt is in motion. (it is rare to actual get this to occur on live in normal game play)
+	*/
+
+	if (!spell_target)
+		return false;
+	
+	uint8 anim = spells[spell_id].CastingAnim; 
+	int bolt_id = -1;
+
+	//Make sure there is an avialable bolt to be cast.
+	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
+		if (projectile_spell_id[i] == 0){
+			bolt_id = i;
+			break;
+		}
+	}
+
+	if (bolt_id < 0)
+		return false;
+
+	if (CheckLosFN(spell_target)) {
+		
+		projectile_spell_id[bolt_id] = spell_id;
+		projectile_target_id[bolt_id] = spell_target->GetID();
+		projectile_x[bolt_id] = GetX(), projectile_y[bolt_id] = GetY(), projectile_z[bolt_id] = GetZ();
+		projectile_increment[bolt_id] = 1;
+		projectile_timer.Start(250);
+	}
+
+	//This will use the correct graphic as defined in the player_1 field of spells_new table. Found in UF+ spell files.
+	if (RuleB(Spells, UseLiveSpellProjectileGFX)) {
+		ProjectileAnimation(spell_target,0, false, 1.5,0,0,0, spells[spell_id].player_1);
+	}
+
+	//This allows limited support for server using older spell files that do not contain data for bolt graphics. 
+	else {
+		//Only use fire graphic for fire spells.
+		if (spells[spell_id].resisttype == RESIST_FIRE) {
+		
+			if (IsClient()){
+				if (CastToClient()->GetClientVersionBit() <= 4) //Titanium needs alternate graphic.
+					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, 1.5);
+				else 
+					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, 1.5);
+				}
+		
+			else
+				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, 1.5);
+
+		}
+
+		//Default to an arrow if not using a mage bolt (Use up to date spell file and enable above rules for best results)
+		else
+			ProjectileAnimation(spell_target,0, 1, 1.5);
+	}
+
+	if (spells[spell_id].CastingAnim == 64)
+		anim = 44; //Corrects for animation error.
+
+	DoAnim(anim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells); //Override the default projectile animation.
+	return true;
+}			
+
 

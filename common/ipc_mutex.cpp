@@ -55,9 +55,21 @@ namespace EQEmu {
 		std::string final_name = name;
 		final_name += ".lock";
 
+#ifdef __DARWIN
+#if __DARWIN_C_LEVEL < 200809L
+		imp_->fd_ = open(final_name.c_str(),
+			O_RDWR | O_CREAT,
+			S_IRUSR | S_IWUSR);
+#else
 		imp_->fd_ = open(final_name.c_str(),
 			O_RDWR | O_CREAT | O_CLOEXEC,
 			S_IRUSR | S_IWUSR);
+#endif
+#else
+		imp_->fd_ = open(final_name.c_str(),
+			O_RDWR | O_CREAT | O_CLOEXEC,
+			S_IRUSR | S_IWUSR);
+#endif
 
 		if(imp_->fd_ == -1) {
 				EQ_EXCEPT("IPC Mutex", "Could not create mutex.");

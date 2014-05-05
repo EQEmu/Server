@@ -361,13 +361,13 @@ bool Client::Process() {
 					aa_los_them.z = aa_los_them_mob->GetZ();
 					los_status = CheckLosFN(auto_attack_target);
 					aa_los_me_heading = GetHeading();
-					los_status_facing = aa_los_them_mob->InFrontMob(this, aa_los_them.x, aa_los_them.y);
+					los_status_facing = IsFacingMob(aa_los_them_mob);
 				}
 				// If only our heading changes, we can skip the CheckLosFN call
 				// but above we still need to update los_status_facing
 				if (aa_los_me_heading != GetHeading()) {
 					aa_los_me_heading = GetHeading();
-					los_status_facing = aa_los_them_mob->InFrontMob(this, aa_los_them.x, aa_los_them.y);
+					los_status_facing = IsFacingMob(aa_los_them_mob);
 				}
 			}
 			else
@@ -381,7 +381,7 @@ bool Client::Process() {
 				aa_los_them.y = aa_los_them_mob->GetY();
 				aa_los_them.z = aa_los_them_mob->GetZ();
 				los_status = CheckLosFN(auto_attack_target);
-				los_status_facing = aa_los_them_mob->InFrontMob(this, aa_los_them.x, aa_los_them.y);
+				los_status_facing = IsFacingMob(aa_los_them_mob);
 			}
 
 			if (!CombatRange(auto_attack_target))
@@ -570,6 +570,9 @@ bool Client::Process() {
 				viral_timer_counter = 0;
 		}
 
+		if(projectile_timer.Check())
+			SpellProjectileEffect();
+					
 		if(spellbonuses.GravityEffect == 1) {
 			if(gravity_timer.Check())
 				DoGravityEffect();

@@ -305,6 +305,7 @@ public:
 	void			SetHideMe(bool hm);
 	inline uint16	GetPort()		const { return port; }
 	bool			IsDead() const { return(dead); }
+	bool			IsUnconscious() const { return ((cur_hp <= 0) ? true : false); }
 	inline bool		IsLFP() { return LFP; }
 	void			UpdateLFP();
 
@@ -1169,6 +1170,7 @@ public:
 	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillUseTypes);
 	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
+	void ExpeditionSay(const char *str, int ExpID);
 	int mod_client_damage(int damage, SkillUseTypes skillinuse, int hand, const ItemInst* weapon, Mob* other);
 	bool mod_client_message(char* message, uint8 chan_num);
 	bool mod_can_increase_skill(SkillUseTypes skillid, Mob* against_who);
@@ -1208,8 +1210,8 @@ protected:
 
 	Mob*	bind_sight_target;
 
-	VERTEX aa_los_me;
-	VERTEX aa_los_them;
+	Map::Vertex aa_los_me;
+	Map::Vertex aa_los_them;
 	Mob *aa_los_them_mob;
 	bool los_status;
 	float aa_los_me_heading;

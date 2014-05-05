@@ -1972,14 +1972,6 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 				Task->Activity[ActivityID].GoalCount,
 				ActivityID);
 
-		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST)
-		{
-			char buf[24];
-			snprintf(buf, 23, "%d %d", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID);
-			buf[23] = '\0';
-			parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, c, buf, 0);
-		}
-
 		// Flag the activity as complete
 		ActiveTasks[TaskIndex].Activity[ActivityID].State = ActivityCompleted;
 		// Unlock subsequent activities for this task
@@ -1991,6 +1983,15 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 		taskmanager->SendSingleActiveTaskToClient(c, TaskIndex, TaskComplete, false);
 		// Inform the client the task has been updated, both by a chat message
 		c->Message(0, "Your task '%s' has been updated.", Task->Title);
+		
+		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST)
+		{
+			char buf[24];
+			snprintf(buf, 23, "%d %d", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID);
+			buf[23] = '\0';
+			parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, c, buf, 0);
+		}
+		
 		// If this task is now complete, the Completed tasks will have been
 		// updated in UnlockActivities. Send the completed task list to the
 		// client. This is the same sequence the packets are sent on live.

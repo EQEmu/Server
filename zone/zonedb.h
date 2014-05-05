@@ -30,12 +30,29 @@ struct DBnpcspells_entries_Struct {
 };
 #pragma pack()
 
+#pragma pack(1)
+struct DBnpcspellseffects_entries_Struct {
+	int16	spelleffectid;
+	uint8	minlevel;
+	uint8	maxlevel;
+	int32	base;
+	int32	limit;
+	int32	max;
+};
+#pragma pack()
+
 struct DBnpcspells_Struct {
 	uint32	parent_list;
 	int16	attack_proc;
 	uint8	proc_chance;
 	uint32	numentries;
 	DBnpcspells_entries_Struct entries[0];
+};
+
+struct DBnpcspellseffects_Struct {
+	uint32	parent_list;
+	uint32	numentries;
+	DBnpcspellseffects_entries_Struct entries[0];
 };
 
 struct DBTradeskillRecipe_Struct {
@@ -345,7 +362,9 @@ public:
 	void	AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat);
 	void	AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* itemlist, uint8 droplimit, uint8 mindrop);
 	uint32	GetMaxNPCSpellsID();
+	uint32	GetMaxNPCSpellsEffectsID();
 	DBnpcspells_Struct* GetNPCSpells(uint32 iDBSpellsID);
+	DBnpcspellseffects_Struct* GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
 
 	/*
 	* Mercs
@@ -475,8 +494,11 @@ protected:
 	uint32				max_faction;
 	Faction**			faction_array;
 	uint32 npc_spells_maxid;
+	uint32 npc_spellseffects_maxid;
 	DBnpcspells_Struct** npc_spells_cache;
 	bool*				npc_spells_loadtried;
+	DBnpcspellseffects_Struct** npc_spellseffects_cache;
+	bool*				npc_spellseffects_loadtried;
 	uint8 door_isopen_array[255];
 };
 

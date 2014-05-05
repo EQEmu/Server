@@ -447,7 +447,7 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
-			AsyncLoadVariables(dbasync, &database);
+			// AsyncLoadVariables(dbasync, &database);
 			entity_list.UpdateWho();
 			if (worldserver.TryReconnect() && (!worldserver.Connected()))
 				worldserver.AsyncConnect();

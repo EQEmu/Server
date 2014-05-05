@@ -2023,7 +2023,7 @@ XS(XS_NPC_GetSlowMitigation)
 		Perl_croak(aTHX_ "Usage: NPC::GetSlowMitigation(THIS)");
 	{
 		NPC *		THIS;
-		float		RETVAL;
+		int16		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "NPC")) {
@@ -2036,7 +2036,7 @@ XS(XS_NPC_GetSlowMitigation)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSlowMitigation();
-		XSprePUSH; PUSHn((double)RETVAL);
+		XSprePUSH; PUSHn((UV)RETVAL);
 	}
 	XSRETURN(1);
 }

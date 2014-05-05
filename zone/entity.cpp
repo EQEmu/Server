@@ -2605,8 +2605,8 @@ void EntityList::FindPathsToAllNPCs()
 
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
-		VERTEX Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
-		VERTEX Dest(it->second->GetX(), it->second->GetY(), it->second->GetZ());
+		Map::Vertex Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
+		Map::Vertex Dest(it->second->GetX(), it->second->GetY(), it->second->GetZ());
 		std::list<int> Route = zone->pathing->FindRoute(Node0, Dest);
 		if (Route.size() == 0)
 			printf("Unable to find a route to %s\n", it->second->GetName());
@@ -3415,9 +3415,14 @@ void EntityList::ReloadAllClientsTaskState(int TaskID)
 
 bool EntityList::IsMobInZone(Mob *who)
 {
-	auto it = mob_list.find(who->GetID());
-	if (it != mob_list.end())
-		return who == it->second;
+	//We don't use mob_list.find(who) because this code needs to be able to handle dangling pointers for the quest code.
+	auto it = mob_list.begin();
+	while(it != mob_list.end()) {
+		if(it->second == who) {
+			return true;
+		}
+		++it;
+	}
 	return false;
 }
 
@@ -3605,9 +3610,9 @@ bool Entity::CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
 	if (zone->zonemap == nullptr)
 		return true;
 
-	VERTEX myloc;
-	VERTEX oloc;
-	VERTEX hit;
+	Map::Vertex myloc;
+	Map::Vertex oloc;
+	Map::Vertex hit;
 
 	myloc.x = cur_x;
 	myloc.y = cur_y;
@@ -3620,9 +3625,7 @@ bool Entity::CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
 	if (myloc.x == oloc.x && myloc.y == oloc.y && myloc.z == oloc.z)
 		return true;
 
-	FACE *onhit;
-
-	if (!zone->zonemap->LineIntersectsZoneNoZLeaps(myloc,oloc,perwalk,&hit,&onhit))
+	if (!zone->zonemap->LineIntersectsZoneNoZLeaps(myloc,oloc,perwalk,&hit))
 		return true;
 	return false;
 }
