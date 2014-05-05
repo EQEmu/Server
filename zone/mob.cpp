@@ -5051,6 +5051,8 @@ void Mob::ProcessSpecialAbilities(const std::string str) {
 // if anything seems weird, blame SoE
 bool Mob::IsFacingMob(Mob *other)
 {
+	if (!other)
+		return false;
 	float angle = HeadingAngleToMob(other);
 	// what the client uses appears to be 2x our internal heading
 	float heading = GetHeading() * 2.0;
