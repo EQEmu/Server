@@ -6833,7 +6833,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set special_abilities='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
-	}special_abilities
+	}
 	else if ( strcasecmp( sep->arg[1], "spell" ) == 0 )
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
