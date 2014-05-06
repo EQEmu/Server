@@ -592,7 +592,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		if (RuleB(Combat, OldACSoftcapRules))
 			softcap += (softcap * (aa_mit * RuleR(Combat, AAMitigationACFactor)));
 		if (armor > softcap) {
-			int softcap_armor = armor - softcap;
+			int softcap_armor = (int)(armor - softcap);
 			if (RuleB(Combat, OldACSoftcapRules)) {
 				if (GetClass() == WARRIOR)
 					softcap_armor = softcap_armor * RuleR(Combat, WarriorACSoftcapReturn);
@@ -721,7 +721,7 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	if (atk_roll > mit_roll) {
 		float a_diff = atk_roll - mit_roll;
 		float thac0 = atk_rating * RuleR(Combat, ACthac0Factor);
-		float thac0cap = attacker->GetLevel() * 9 + 20;
+		float thac0cap = attacker->GetLevel() * 9.0f + 20.0f;
 		if (thac0 > thac0cap)
 			thac0 = thac0cap;
 
@@ -729,7 +729,7 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	} else if (mit_roll > atk_roll) {
 		float m_diff = mit_roll - atk_roll;
 		float thac20 = mit_rating * RuleR(Combat, ACthac20Factor);
-		float thac20cap = GetLevel() * 9 + 20;
+		float thac20cap = GetLevel() * 9.0f + 20.0f;
 		if (thac20 > thac20cap)
 			thac20 = thac20cap;
 
@@ -771,7 +771,7 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	if (atk_roll > mit_roll) {
 		float a_diff = atk_roll - mit_roll;
 		float thac0 = atk_rating * RuleR(Combat, ACthac0Factor);
-		float thac0cap = attacker->GetLevel() * 9 + 20;
+		float thac0cap = attacker->GetLevel() * 9.0f + 20.0f;
 		if (thac0 > thac0cap)
 			thac0 = thac0cap;
 
@@ -779,7 +779,7 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	} else if (mit_roll > atk_roll) {
 		float m_diff = mit_roll - atk_roll;
 		float thac20 = mit_rating * RuleR(Combat, ACthac20Factor);
-		float thac20cap = GetLevel() * 9 + 20;
+		float thac20cap = GetLevel() * 9.0f + 20.0f;
 		if (thac20 > thac20cap)
 			thac20 = thac20cap;
 
@@ -3990,7 +3990,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 		if (bDefensiveProc){
 			for (int i = 0; i < MAX_PROCS; i++) {
 				if (DefensiveProcs[i].spellID != SPELL_UNKNOWN) {
-					int chance = ProcChance * (DefensiveProcs[i].chance);
+					int chance = (int)(ProcChance * DefensiveProcs[i].chance);
 					if ((MakeRandomInt(0, 100) < chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
 						CheckNumHitsRemaining(10,0,DefensiveProcs[i].base_spellID);
@@ -4552,7 +4552,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 	for (int i = 0; i < MAX_PROCS; i++) {
 		if (SkillProcs[i].spellID != SPELL_UNKNOWN){
 			if (PassLimitToSkill(SkillProcs[i].base_spellID,skill)){
-				int ProcChance = chance * (float)SkillProcs[i].chance;
+				int ProcChance = (int)(chance * SkillProcs[i].chance);
 				if ((MakeRandomInt(0, 100) < ProcChance)) {
 					ExecWeaponProc(nullptr, SkillProcs[i].spellID, on);
 					CheckNumHitsRemaining(11,0, SkillProcs[i].base_spellID);
