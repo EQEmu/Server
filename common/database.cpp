@@ -1169,11 +1169,11 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 		if (mysql_num_rows(result) > 0) {
 			row = mysql_fetch_row(result);
 			if (safe_x != 0)
-				*safe_x = atof(row[0]);
+				*safe_x = (float)atof(row[0]);
 			if (safe_y != 0)
-				*safe_y = atof(row[1]);
+				*safe_y = (float)atof(row[1]);
 			if (safe_z != 0)
-				*safe_z = atof(row[2]);
+				*safe_z = (float)atof(row[2]);
 			if (minstatus != 0)
 				*minstatus = atoi(row[3]);
 			if (minlevel != 0)
@@ -1221,11 +1221,11 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 					strcpy(file_name, row[1]);
 			}
 			if (safe_x != 0)
-				*safe_x = atof(row[2]);
+				*safe_x = (float)atof(row[2]);
 			if (safe_y != 0)
-				*safe_y = atof(row[3]);
+				*safe_y = (float)atof(row[3]);
 			if (safe_z != 0)
-				*safe_z = atof(row[4]);
+				*safe_z = (float)atof(row[4]);
 			if (graveyard_id != 0)
 				*graveyard_id = atoi(row[5]);
 			if (maxclients)
@@ -1283,13 +1283,13 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 			if(graveyard_zoneid != 0)
 				*graveyard_zoneid = atoi(row[0]);
 			if(graveyard_x != 0)
-				*graveyard_x = atof(row[1]);
+				*graveyard_x = (float)atof(row[1]);
 			if(graveyard_y != 0)
-				*graveyard_y = atof(row[2]);
+				*graveyard_y = (float)atof(row[2]);
 			if(graveyard_z != 0)
-				*graveyard_z = atof(row[3]);
+				*graveyard_z = (float)atof(row[3]);
 			if(graveyard_heading != 0)
-				*graveyard_heading = atof(row[4]);
+				*graveyard_heading = (float)atof(row[4]);
 			mysql_free_result(result);
 			return true;
 		}
@@ -1852,11 +1852,11 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 			if(oInstanceID)
 				*oInstanceID = atoi(row[3]);
 			if (oX)
-				*oX = atof(row[4]);
+				*oX = (float)atof(row[4]);
 			if (oY)
-				*oY = atof(row[5]);
+				*oY = (float)atof(row[5]);
 			if (oZ)
-				*oZ = atof(row[6]);
+				*oZ = (float)atof(row[6]);
 			mysql_free_result(result);
 			return charid;
 		}

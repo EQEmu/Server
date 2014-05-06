@@ -1899,7 +1899,7 @@ ENCODE(OP_ZoneSpawns)
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->spawnId);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
-			VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7);	// Eye Height?
+			VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7f);	// Eye Height?
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
 
 			structs::Spawn_Struct_Bitfields *Bitfields = (structs::Spawn_Struct_Bitfields*)Buffer;

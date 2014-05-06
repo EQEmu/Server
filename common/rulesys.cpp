@@ -171,7 +171,7 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 		_log(RULES__CHANGE, "Set rule %s to value %d", rule_name, m_RuleIntValues[index]);
 		break;
 	case RealRule:
-		m_RuleRealValues[index] = atof(rule_value);
+		m_RuleRealValues[index] = (float)atof(rule_value);
 		_log(RULES__CHANGE, "Set rule %s to value %.13f", rule_name, m_RuleRealValues[index]);
 		break;
 	case BoolRule:

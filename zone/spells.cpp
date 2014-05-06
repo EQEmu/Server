@@ -716,15 +716,15 @@ bool Client::CheckFizzle(uint16 spell_id)
 	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
 	if(GetClass() == BARD)
 	{
-		diff -= (GetCHA() - 110) / 20.0;
+		diff -= (float)(GetCHA() - 110) / 20.0;
 	}
 	else if (GetCasterClass() == 'W')
 	{
-		diff -= (GetWIS() - 125) / 20.0;
+		diff -= (float)(GetWIS() - 125) / 20.0;
 	}
 	else if (GetCasterClass() == 'I')
 	{
-		diff -= (GetINT() - 125) / 20.0;
+		diff -= (float)(GetINT() - 125) / 20.0;
 	}
 
 	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever

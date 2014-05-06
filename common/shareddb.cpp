@@ -1220,9 +1220,9 @@ bool SharedDatabase::GetPlayerProfile(uint32 account_id, char* name, PlayerProfi
 				if (current_zone)
 					strcpy(current_zone, row[1]);
 				pp->zone_id = GetZoneID(row[1]);
-				pp->x = atof(row[2]);
-				pp->y = atof(row[3]);
-				pp->z = atof(row[4]);
+				pp->x = (float)atof(row[2]);
+				pp->y = (float)atof(row[3]);
+				pp->z = (float)atof(row[4]);
 				pp->zoneInstance = atoi(row[6]);
 				if (pp->x == -1 && pp->y == -1 && pp->z == -1)
 					GetSafePoints(pp->zone_id, GetInstanceVersion(pp->zoneInstance), &pp->x, &pp->y, &pp->z);

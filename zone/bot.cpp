@@ -3667,7 +3667,7 @@ void Bot::AI_Process() {
 		float meleeDistance = GetMaxMeleeRangeToTarget(GetTarget());
 
 		if(botClass == SHADOWKNIGHT || botClass == PALADIN || botClass == WARRIOR) {
-			meleeDistance = meleeDistance * .30;
+			meleeDistance = meleeDistance * .30f;
 		}
 		else {
 			meleeDistance *= (float)MakeRandomFloat(.50, .85);
@@ -4141,8 +4141,8 @@ void Bot::PetAIProcess() {
 						{
 							if(botPet->GetOwner()->GetLevel() >= 24)
 							{
-								float DualWieldProbability = (botPet->GetSkill(SkillDualWield) + botPet->GetLevel()) / 400.0f;
-								DualWieldProbability -= MakeRandomFloat(0, 1);
+								float DualWieldProbability = (float)((botPet->GetSkill(SkillDualWield) + botPet->GetLevel()) / 400.0f);
+								DualWieldProbability -= (float)MakeRandomFloat(0, 1);
 								if(DualWieldProbability < 0){
 									botPet->Attack(botPet->GetTarget(), 14);
 									if (botPet->CanThisClassDoubleAttack())
@@ -7814,7 +7814,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		skill = GetSkill(SkillRiposte);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
+			bonus = 2.0f + skill/60.0f + (GetDEX()/200);
 			bonus *= riposte_chance;
 			RollTable[0] = bonus + (itembonuses.HeroicDEX / 25); // 25 heroic = 1%, applies to ripo, parry, block
 		}
@@ -7850,7 +7850,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		skill = GetSkill(SkillBlock);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/35.0 + (GetDEX()/200);
+			bonus = 2.0f + skill/35.0f + (GetDEX()/200);
 			RollTable[1] = RollTable[0] + (bonus * block_chance) - riposte_chance;
 			block_chance *= bonus; // set this so we can remove it from the parry calcs
 		}
@@ -7898,7 +7898,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		skill = GetSkill(SkillParry);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
+			bonus = 2.0f + skill/60.0f + (GetDEX()/200);
 			bonus *= parry_chance;
 			RollTable[2] = RollTable[1] + bonus - block_chance;
 		}
@@ -7917,7 +7917,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		skill = GetSkill(SkillDodge);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetAGI()/200);
+			bonus = 2.0f + skill/60.0f + (GetAGI()/200);
 			bonus *= dodge_chance;
 			RollTable[3] = RollTable[2] + bonus - (itembonuses.HeroicDEX / 25) + (itembonuses.HeroicAGI / 25) - parry_chance; // Remove the dex as it doesnt count for dodge
 		}
@@ -9382,11 +9382,11 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 		break;
 	}
 
-	bonus += 0.05 * GetAA(aaAdvancedSpellCastingMastery);
+	bonus += 0.05f * GetAA(aaAdvancedSpellCastingMastery);
 
 	if(SuccessChance <= (SpecializeSkill * 0.3 * bonus))
 	{
-		PercentManaReduction = 1 + 0.05 * SpecializeSkill;
+		PercentManaReduction = 1.05f * SpecializeSkill;
 		switch(GetAA(aaSpellCastingMastery))
 		{
 		case 1:
@@ -9418,7 +9418,7 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 
 	if(focus_redux > 0)
 	{
-		PercentManaReduction += MakeRandomFloat(1, (double)focus_redux);
+		PercentManaReduction += (float)MakeRandomFloat(1, (double)focus_redux);
 	}
 
 	cost -= (cost * (PercentManaReduction / 100));

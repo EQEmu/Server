@@ -1337,7 +1337,7 @@ void command_zone(Client *c, const Seperator *sep)
 
 	if (sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4)){
 		//zone to specific coords
-		c->MovePC(zoneid, (float)atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), 0.0f, 0);
+		c->MovePC(zoneid, (float)atof(sep->arg[2]), (float)atof(sep->arg[3]), (float)atof(sep->arg[4]), 0.0f, 0);
 		}
 	else
 		//zone to safe coords
@@ -1759,16 +1759,16 @@ void command_zclip(Client *c, const Seperator *sep)
 	else if(atoi(sep->arg[1])>atoi(sep->arg[2]))
 		c->Message(0, "ERROR: Min clip is greater than max clip!");
 	else {
-		zone->newzone_data.minclip = atof(sep->arg[1]);
-		zone->newzone_data.maxclip = atof(sep->arg[2]);
+		zone->newzone_data.minclip = (float)atof(sep->arg[1]);
+		zone->newzone_data.maxclip = (float)atof(sep->arg[2]);
 		if(sep->arg[3][0]!=0)
-			zone->newzone_data.fog_minclip[0]=atof(sep->arg[3]);
+			zone->newzone_data.fog_minclip[0]=(float)atof(sep->arg[3]);
 		if(sep->arg[4][0]!=0)
-			zone->newzone_data.fog_minclip[1]=atof(sep->arg[4]);
+			zone->newzone_data.fog_minclip[1]=(float)atof(sep->arg[4]);
 		if(sep->arg[5][0]!=0)
-			zone->newzone_data.fog_maxclip[0]=atof(sep->arg[5]);
+			zone->newzone_data.fog_maxclip[0]=(float)atof(sep->arg[5]);
 		if(sep->arg[6][0]!=0)
-			zone->newzone_data.fog_maxclip[1]=atof(sep->arg[6]);
+			zone->newzone_data.fog_maxclip[1]=(float)atof(sep->arg[6]);
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
@@ -4355,7 +4355,7 @@ void command_zuwcoords(Client *c, const Seperator *sep)
 	if(sep->arg[1][0]==0)
 		c->Message(0, "Usage: #zuwcoords <under world coords>");
 	else {
-		zone->newzone_data.underworld = atof(sep->arg[1]);
+		zone->newzone_data.underworld = (float)atof(sep->arg[1]);
 		//float newdata = atof(sep->arg[1]);
 		//memcpy(&zone->zone_header_data[130], &newdata, sizeof(float));
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
@@ -4370,7 +4370,7 @@ void command_zunderworld(Client *c, const Seperator *sep)
 	if(sep->arg[1][0]==0)
 		c->Message(0, "Usage: #zunderworld <zcoord>");
 	else {
-		zone->newzone_data.underworld = atof(sep->arg[1]);
+		zone->newzone_data.underworld = (float)atof(sep->arg[1]);
 	}
 }
 
@@ -4380,9 +4380,9 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 	if(sep->arg[3][0]==0)
 		c->Message(0, "Usage: #zsafecoords <safe x> <safe y> <safe z>");
 	else {
-		zone->newzone_data.safe_x = atof(sep->arg[1]);
-		zone->newzone_data.safe_y = atof(sep->arg[2]);
-		zone->newzone_data.safe_z = atof(sep->arg[3]);
+		zone->newzone_data.safe_x = (float)atof(sep->arg[1]);
+		zone->newzone_data.safe_y = (float)atof(sep->arg[2]);
+		zone->newzone_data.safe_z = (float)atof(sep->arg[3]);
 		//float newdatax = atof(sep->arg[1]);
 		//float newdatay = atof(sep->arg[2]);
 		//float newdataz = atof(sep->arg[3]);
@@ -9457,10 +9457,10 @@ void command_object(Client *c, const Seperator *sep)
 				{
 					col = 0;
 					id = atoi(row[col++]);
-					od.x = atof(row[col++]);
-					od.y = atof(row[col++]);
-					od.z = atof(row[col++]);
-					od.heading = atof(row[col++]);
+					od.x = (float)atof(row[col++]);
+					od.y = (float)atof(row[col++]);
+					od.z = (float)atof(row[col++]);
+					od.heading = (float)atof(row[col++]);
 					itemid = atoi(row[col++]);
 					strn0cpy(od.object_name, row[col++], sizeof(od.object_name));
 					od.object_name[sizeof(od.object_name) - 1] = '\0'; // Required if strlen(row[col++]) exactly == sizeof(object_name)
@@ -10135,10 +10135,10 @@ void command_object(Client *c, const Seperator *sep)
 			}
 			else // Move to x, y, z [h]
 			{
-				od.x = atof(sep->arg[3]);
+				od.x = (float)atof(sep->arg[3]);
 				if (sep->argnum > 3)
 				{
-					od.y = atof(sep->arg[4]);
+					od.y = (float)atof(sep->arg[4]);
 				}
 				else
 				{
@@ -10147,7 +10147,7 @@ void command_object(Client *c, const Seperator *sep)
 
 				if (sep->argnum > 4)
 				{
-					od.z = atof(sep->arg[5]);
+					od.z = (float)atof(sep->arg[5]);
 				}
 				else
 				{
@@ -10707,10 +10707,10 @@ void command_object(Client *c, const Seperator *sep)
 			memset(&od, 0, sizeof(od));
 
 			col = 0;
-			od.x = atof(row[col++]);
-			od.y = atof(row[col++]);
-			od.z = atof(row[col++]);
-			od.heading = atof(row[col++]);
+			od.x = (float)atof(row[col++]);
+			od.y = (float)atof(row[col++]);
+			od.z = (float)atof(row[col++]);
+			od.heading = (float)atof(row[col++]);
 			strn0cpy(od.object_name, row[col++], sizeof(od.object_name));
 			od.object_type = atoi(row[col++]);
 			icon = atoi(row[col++]);

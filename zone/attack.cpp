@@ -222,22 +222,22 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	{
 		if(level_difference >= -range)
 		{
-			chancetohit += (level_difference / range) * RuleR(Combat,HitFalloffMinor); //5
+			chancetohit += (float)((level_difference / range) * RuleR(Combat,HitFalloffMinor)); //5
 		}
 		else if (level_difference >= -(range+3.0))
 		{
 			chancetohit -= RuleR(Combat,HitFalloffMinor);
-			chancetohit += ((level_difference+range) / (3.0)) * RuleR(Combat,HitFalloffModerate); //7
+			chancetohit += (float)(((level_difference+range) / (3.0)) * RuleR(Combat,HitFalloffModerate)); //7
 		}
 		else
 		{
 			chancetohit -= (RuleR(Combat,HitFalloffMinor) + RuleR(Combat,HitFalloffModerate));
-			chancetohit += ((level_difference+range+3.0)/12.0) * RuleR(Combat,HitFalloffMajor); //50
+			chancetohit += (float)(((level_difference+range+3.0)/12.0) * RuleR(Combat,HitFalloffMajor)); //50
 		}
 	}
 	else
 	{
-		chancetohit += (RuleR(Combat,HitBonusPerLevel) * level_difference);
+		chancetohit += (float)(RuleR(Combat,HitBonusPerLevel) * level_difference);
 	}
 
 	mlog(COMBAT__TOHIT, "Chance to hit after level diff calc %.2f", chancetohit);
@@ -340,7 +340,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	// Did we hit?
 	//
 
-	float tohit_roll = MakeRandomFloat(0, 100);
+	float tohit_roll = (float)MakeRandomFloat(0, 100);
 
 	mlog(COMBAT__TOHIT, "Final hit chance: %.2f%%. Hit roll %.2f", chancetohit, tohit_roll);
 
@@ -393,7 +393,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		}
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
+			bonus = 2.0f + skill/60.0f + (GetDEX()/200);
 			bonus *= riposte_chance;
 			bonus = mod_riposte_chance(bonus, attacker);
 			RollTable[0] = bonus + (itembonuses.HeroicDEX / 25); // 25 heroic = 1%, applies to ripo, parry, block
@@ -433,7 +433,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		}
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/35.0 + (GetDEX()/200);
+			bonus = 2.0f + skill/35.0f + (GetDEX()/200);
 			bonus = mod_block_chance(bonus, attacker);
 			RollTable[1] = RollTable[0] + (bonus * block_chance);
 		}
@@ -477,7 +477,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		}
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
+			bonus = 2.0f + skill/60.0f + (GetDEX()/200);
 			bonus *= parry_chance;
 			bonus = mod_parry_chance(bonus, attacker);
 			RollTable[2] = RollTable[1] + bonus;
@@ -500,7 +500,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		}
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetAGI()/200);
+			bonus = 2.0f + skill/60.0f + (GetAGI()/200);
 			bonus *= dodge_chance;
 			//DCBOOMKAR
 			bonus = mod_dodge_chance(bonus, attacker);
@@ -512,7 +512,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	}
 
 	if(damage > 0){
-		roll = MakeRandomFloat(0,100);
+		roll = (float)MakeRandomFloat(0,100);
 		if(roll <= RollTable[0]){
 			damage = -3;
 		}
@@ -544,8 +544,8 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 			spellbonuses.CombatStability) / 100.0f;
 
 	if (RuleB(Combat, UseIntervalAC)) {
-		float softcap = (GetSkill(SkillDefense) + GetLevel()) *
-			RuleR(Combat, SoftcapFactor) * (1.0 + aa_mit);
+		float softcap = (float)((GetSkill(SkillDefense) + GetLevel()) *
+			RuleR(Combat, SoftcapFactor) * (1.0f + aa_mit));
 		float mitigation_rating = 0.0;
 		float attack_rating = 0.0;
 		int shield_ac = 0;
@@ -557,7 +557,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 
 		if (IsClient()) {
 			armor = CastToClient()->GetRawACNoShield(shield_ac);
-			weight = (CastToClient()->CalcCurrentWeight() / 10.0);
+			weight = (CastToClient()->CalcCurrentWeight() / 10.0f);
 		} else if (IsNPC()) {
 			armor = CastToNPC()->GetRawAC();
 
@@ -634,17 +634,17 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 
 		if (GetClass() == WIZARD || GetClass() == MAGICIAN ||
 				GetClass() == NECROMANCER || GetClass() == ENCHANTER)
-			mitigation_rating = ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10) / 4.0) + armor + 1;
+			mitigation_rating = ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10) / 4.0f) + armor + 1;
 		else
-			mitigation_rating = ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10) / 3.0) + (armor * 1.333333) + 1;
-		mitigation_rating *= 0.847;
+			mitigation_rating = ((GetSkill(SkillDefense) + itembonuses.HeroicAGI/10) / 3.0f) + (armor * 1.333333f) + 1;
+		mitigation_rating *= 0.847f;
 
 		mitigation_rating = mod_mitigation_rating(mitigation_rating, attacker);
 
 		if (attacker->IsClient())
-			attack_rating = (attacker->CastToClient()->CalcATK() + ((attacker->GetSTR()-66) * 0.9) + (attacker->GetSkill(SkillOffense)*1.345));
+			attack_rating = (attacker->CastToClient()->CalcATK() + ((attacker->GetSTR()-66) * 0.9f) + (attacker->GetSkill(SkillOffense)*1.345f));
 		else
-			attack_rating = (attacker->GetATK() + (attacker->GetSkill(SkillOffense)*1.345) + ((attacker->GetSTR()-66) * 0.9));
+			attack_rating = (attacker->GetATK() + (attacker->GetSkill(SkillOffense)*1.345f) + ((attacker->GetSTR()-66) * 0.9f));
 
 		attack_rating = attacker->mod_attack_rating(attack_rating, this);
 
@@ -673,7 +673,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 				int acrandom=300;
 				if (database.GetVariable("ACreduction", tmp, 9))
 				{
-					acreduction=atof(tmp);
+					acreduction=(float)atof(tmp);
 					if (acreduction>100) acreduction=100;
 				}
 
@@ -715,8 +715,8 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 		float mit_rating, float atk_rating)
 {
 	float d = 10.0;
-	float mit_roll = MakeRandomFloat(0, mit_rating);
-	float atk_roll = MakeRandomFloat(0, atk_rating);
+	float mit_roll = (float)MakeRandomFloat(0, mit_rating);
+	float atk_roll = (float)MakeRandomFloat(0, atk_rating);
 
 	if (atk_roll > mit_roll) {
 		float a_diff = atk_roll - mit_roll;
@@ -725,7 +725,7 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 		if (thac0 > thac0cap)
 			thac0 = thac0cap;
 
-		d -= 10.0 * (a_diff / thac0);
+		d -= (float)10.0 * (a_diff / thac0);
 	} else if (mit_roll > atk_roll) {
 		float m_diff = mit_roll - atk_roll;
 		float thac20 = mit_rating * RuleR(Combat, ACthac20Factor);
@@ -733,7 +733,7 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 		if (thac20 > thac20cap)
 			thac20 = thac20cap;
 
-		d += 10.0 * (m_diff / thac20);
+		d += 10.0f * (m_diff / thac20);
 	}
 
 	if (d < 0.0)
@@ -741,7 +741,7 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	else if (d > 20.0)
 		d = 20.0;
 
-	float interval = (damage - minhit) / 20.0;
+	float interval = (damage - minhit) / 20.0f;
 	damage -= ((int)d * interval);
 
 	damage -= (minhit * itembonuses.MeleeMitigation / 100);
@@ -757,16 +757,16 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 		return Mob::GetMeleeMitDmg(attacker, damage, minhit, mit_rating, atk_rating);
 	int d = 10;
 	// floats for the rounding issues
-	float dmg_interval = (damage - minhit) / 19.0;
+	float dmg_interval = (damage - minhit) / 19.0f;
 	float dmg_bonus = minhit - dmg_interval;
-	float spellMeleeMit = spellbonuses.MeleeMitigation / 100.0;
+	float spellMeleeMit = spellbonuses.MeleeMitigation / 100.0f;
 	if (GetClass() == WARRIOR)
 		spellMeleeMit += 0.05;
-	dmg_bonus -= dmg_bonus * (itembonuses.MeleeMitigation / 100.0);
+	dmg_bonus -= (float)(dmg_bonus * (itembonuses.MeleeMitigation / 100.0));
 	dmg_interval -= dmg_interval * spellMeleeMit;
 
-	float mit_roll = MakeRandomFloat(0, mit_rating);
-	float atk_roll = MakeRandomFloat(0, atk_rating);
+	float mit_roll = (float)MakeRandomFloat(0, mit_rating);
+	float atk_roll = (float)MakeRandomFloat(0, atk_rating);
 
 	if (atk_roll > mit_roll) {
 		float a_diff = atk_roll - mit_roll;
@@ -4294,7 +4294,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 			if(MakeRandomFloat(0, 1) < critChance){
 				int16 SlayDmgBonus = aabonuses.SlayUndead[1] + itembonuses.SlayUndead[1] + spellbonuses.SlayUndead[1];
-				damage = (damage*SlayDmgBonus*2.25)/100;
+				damage = (damage*SlayDmgBonus*2.25f)/100;
 				entity_list.MessageClose(this, false, 200, MT_CritMelee, "%s cleanses %s target!(%d)", GetCleanName(), this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its", damage);
 				return;
 			}
