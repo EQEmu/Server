@@ -748,6 +748,9 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		curmob = it->second;
+		// test to fix possible cause of random zone crashes..external methods accessing client properties before they're initialized
+		if (curmob->IsClient() && !curmob->CastToClient()->Connected())
+			continue;
 		if (curmob == center)	//do not affect center
 			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
