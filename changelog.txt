@@ -1,6 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 05/05/2014 ==
+Uleat: Oops! Wrong state check (conn_state != client_state)
 Uleat: Test fix to eliminate seemingly random crashes when an AE spell is being used. (Possible access to uninstantiated pointers during client connection process when someone casts a beneficial AE spell within range of a connecting client.)
 
 == 04/29/2014 ==
