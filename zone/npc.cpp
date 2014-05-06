@@ -2010,7 +2010,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	}
 	if(id == "loottable_id")
 	{
-		loottable_id = atof(val.c_str());
+		loottable_id = (uint32)atof(val.c_str());
 		return;
 	}
 	if(id == "healscale")
