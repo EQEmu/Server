@@ -552,7 +552,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		int armor = 0;
 		float weight = 0.0;
 
-		float monkweight = RuleI(Combat, MonkACBonusWeight);
+		float monkweight = (float)RuleI(Combat, MonkACBonusWeight);
 		monkweight = mod_monk_weight(monkweight, attacker);
 
 		if (IsClient()) {
@@ -575,16 +575,16 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		if (RuleB(Combat, OldACSoftcapRules)) {
 			if (GetClass() == WIZARD || GetClass() == MAGICIAN ||
 					GetClass() == NECROMANCER || GetClass() == ENCHANTER)
-				softcap = RuleI(Combat, ClothACSoftcap);
+				softcap = (float)RuleI(Combat, ClothACSoftcap);
 			else if (GetClass() == MONK && weight <= monkweight)
-				softcap = RuleI(Combat, MonkACSoftcap);
+				softcap = (float)RuleI(Combat, MonkACSoftcap);
 			else if(GetClass() == DRUID || GetClass() == BEASTLORD || GetClass() == MONK)
-				softcap = RuleI(Combat, LeatherACSoftcap);
+				softcap = (float)RuleI(Combat, LeatherACSoftcap);
 			else if(GetClass() == SHAMAN || GetClass() == ROGUE ||
 					GetClass() == BERSERKER || GetClass() == RANGER)
-				softcap = RuleI(Combat, ChainACSoftcap);
+				softcap = (float)RuleI(Combat, ChainACSoftcap);
 			else
-				softcap = RuleI(Combat, PlateACSoftcap);
+				softcap = (float)RuleI(Combat, PlateACSoftcap);
 		}
 
 		softcap += shield_ac;
