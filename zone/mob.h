@@ -599,7 +599,7 @@ public:
 	bool PassCastRestriction(bool UseCastRestriction = true, int16 value = 0, bool IsDamage = true);
 	bool ImprovedTaunt();
 	bool TryRootFadeByDamage(int buffslot, Mob* attacker);
-	int16 GetSlowMitigation() const {return slow_mitigation;}
+	int16 GetSlowMitigation() const {return (int16)slow_mitigation;}
 
 	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
 	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);

@@ -562,13 +562,13 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 			armor = CastToNPC()->GetRawAC();
 
 			if (!IsPet())
-				armor = (armor / RuleR(Combat, NPCACFactor));
+				armor = (int)(armor / RuleR(Combat, NPCACFactor));
 
 			armor += spellbonuses.AC + itembonuses.AC + 1;
 		}
 
 		if (opts) {
-			armor *= (1.0f - opts->armor_pen_percent);
+			armor *= (int)(1.0f - opts->armor_pen_percent);
 			armor -= opts->armor_pen_flat;
 		}
 
@@ -595,41 +595,41 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 			int softcap_armor = (int)(armor - softcap);
 			if (RuleB(Combat, OldACSoftcapRules)) {
 				if (GetClass() == WARRIOR)
-					softcap_armor = softcap_armor * RuleR(Combat, WarriorACSoftcapReturn);
+					softcap_armor = (int)(softcap_armor * RuleR(Combat, WarriorACSoftcapReturn));
 				else if (GetClass() == SHADOWKNIGHT || GetClass() == PALADIN ||
 						(GetClass() == MONK && weight <= monkweight))
-					softcap_armor = softcap_armor * RuleR(Combat, KnightACSoftcapReturn);
+					softcap_armor = (int)(softcap_armor * RuleR(Combat, KnightACSoftcapReturn));
 				else if (GetClass() == CLERIC || GetClass() == BARD ||
 						GetClass() == BERSERKER || GetClass() == ROGUE ||
 						GetClass() == SHAMAN || GetClass() == MONK)
-					softcap_armor = softcap_armor * RuleR(Combat, LowPlateChainACSoftcapReturn);
+					softcap_armor = (int)(softcap_armor * RuleR(Combat, LowPlateChainACSoftcapReturn));
 				else if (GetClass() == RANGER || GetClass() == BEASTLORD)
-					softcap_armor = softcap_armor * RuleR(Combat, LowChainLeatherACSoftcapReturn);
+					softcap_armor = (int)(softcap_armor * RuleR(Combat, LowChainLeatherACSoftcapReturn));
 				else if (GetClass() == WIZARD || GetClass() == MAGICIAN ||
 						GetClass() == NECROMANCER || GetClass() == ENCHANTER ||
 						GetClass() == DRUID)
-					softcap_armor = softcap_armor * RuleR(Combat, CasterACSoftcapReturn);
+					softcap_armor = (int)(softcap_armor * RuleR(Combat, CasterACSoftcapReturn));
 				else
-					softcap_armor = softcap_armor * RuleR(Combat, MiscACSoftcapReturn);
+					softcap_armor = (int)(softcap_armor * RuleR(Combat, MiscACSoftcapReturn));
 			} else {
 				if (GetClass() == WARRIOR)
-					softcap_armor *= RuleR(Combat, WarACSoftcapReturn);
+					softcap_armor *= (int)RuleR(Combat, WarACSoftcapReturn);
 				else if (GetClass() == PALADIN || GetClass() == SHADOWKNIGHT)
-					softcap_armor *= RuleR(Combat, PalShdACSoftcapReturn);
+					softcap_armor *= (int)RuleR(Combat, PalShdACSoftcapReturn);
 				else if (GetClass() == CLERIC || GetClass() == RANGER ||
 						GetClass() == MONK || GetClass() == BARD)
-					softcap_armor *= RuleR(Combat, ClrRngMnkBrdACSoftcapReturn);
+					softcap_armor *= (int)RuleR(Combat, ClrRngMnkBrdACSoftcapReturn);
 				else if (GetClass() == DRUID || GetClass() == NECROMANCER ||
 						GetClass() == WIZARD || GetClass() == ENCHANTER ||
 						GetClass() == MAGICIAN)
-					softcap_armor *= RuleR(Combat, DruNecWizEncMagACSoftcapReturn);
+					softcap_armor *= (int)RuleR(Combat, DruNecWizEncMagACSoftcapReturn);
 				else if (GetClass() == ROGUE || GetClass() == SHAMAN ||
 						GetClass() == BEASTLORD || GetClass() == BERSERKER)
-					softcap_armor *= RuleR(Combat, RogShmBstBerACSoftcapReturn);
+					softcap_armor *= (int)RuleR(Combat, RogShmBstBerACSoftcapReturn);
 				else
-					softcap_armor *= RuleR(Combat, MiscACSoftcapReturn);
+					softcap_armor *= (int)RuleR(Combat, MiscACSoftcapReturn);
 			}
-			armor = softcap + softcap_armor;
+			armor = (int)(softcap + softcap_armor);
 		}
 
 		if (GetClass() == WIZARD || GetClass() == MAGICIAN ||
@@ -655,7 +655,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		// use serverop variables to set values
 		int myac = GetAC();
 		if(opts) {
-			myac *= (1.0f - opts->armor_pen_percent);
+			myac *= (int)(1.0f - opts->armor_pen_percent);
 			myac -= opts->armor_pen_flat;
 		}
 
@@ -696,7 +696,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 			}
 		}
 
-		damage -= (aa_mit * damage);
+		damage -= (int32)(aa_mit * damage);
 
 		if(damage != 0 && damage < minhit)
 			damage = minhit;
@@ -742,7 +742,7 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 		d = 20.0;
 
 	float interval = (damage - minhit) / 20.0f;
-	damage -= ((int)d * interval);
+	damage -= (int32)(d * interval);
 
 	damage -= (minhit * itembonuses.MeleeMitigation / 100);
 	damage -= (damage * spellbonuses.MeleeMitigation / 100);
@@ -775,7 +775,7 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 		if (thac0 > thac0cap)
 			thac0 = thac0cap;
 
-		d += 10 * (a_diff / thac0);
+		d += (int)(10 * (a_diff / thac0));
 	} else if (mit_roll > atk_roll) {
 		float m_diff = mit_roll - atk_roll;
 		float thac20 = mit_rating * RuleR(Combat, ACthac20Factor);
@@ -783,7 +783,7 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 		if (thac20 > thac20cap)
 			thac20 = thac20cap;
 
-		d -= 10 * (m_diff / thac20);
+		d -= (int)(10 * (m_diff / thac20));
 	}
 
 	if (d < 1)
@@ -1019,7 +1019,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 
 			if(eledmg)
 			{
-				eledmg = (eledmg * against->ResistSpell(weapon_item->GetItem()->ElemDmgType, 0, this) / 100);
+				eledmg = (int)(eledmg * against->ResistSpell(weapon_item->GetItem()->ElemDmgType, 0, this) / 100);
 			}
 		}
 
@@ -1027,7 +1027,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
 				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 					if(weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt)
-						eledmg += (weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt * against->ResistSpell(weapon_item->GetAugment(x)->GetItem()->ElemDmgType, 0, this) / 100);
+						eledmg += (int)(weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt * against->ResistSpell(weapon_item->GetAugment(x)->GetItem()->ElemDmgType, 0, this) / 100);
 				}
 			}
 		}
@@ -1274,7 +1274,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, mylevel);
 
 		if(opts) {
-			damage *= opts->damage_percent;
+			damage *= (int)opts->damage_percent;
 			damage += opts->damage_flat;
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
@@ -1416,7 +1416,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 		if(other->IsNPC() && !other->IsPet())
 		{
 			float npcspellscale = other->CastToNPC()->GetSpellScale();
-			damage = ((float)damage * npcspellscale) / (float)100;
+			damage = (int32)((damage * npcspellscale) / 100);
 		}
 	}
 
@@ -1896,9 +1896,9 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
 
 			if(opts) {
-				damage *= opts->damage_percent;
+				damage *= (int)opts->damage_percent;
 				damage += opts->damage_flat;
-				hate *= opts->hate_percent;
+				hate *= (int32)opts->hate_percent;
 				hate += opts->hate_flat;
 			}
 
@@ -1908,9 +1908,9 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		} else {
 			if(opts) {
-				damage *= opts->damage_percent;
+				damage *= (int)opts->damage_percent;
 				damage += opts->damage_flat;
-				hate *= opts->hate_percent;
+				hate *= (int32)opts->hate_percent;
 				hate += opts->hate_flat;
 			}
 
@@ -2506,9 +2506,9 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 		if(top && top != other) {
 			if(tv_mod) {
 				float tv = tv_mod / 100.0f;
-				hate *= tv;
+				hate *= (int32)tv;
 			} else {
-				hate *= RuleR(Aggro, TunnelVisionAggroMod);
+				hate *= (int32)RuleR(Aggro, TunnelVisionAggroMod);
 			}
 		}
 	}
@@ -4294,7 +4294,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 			if(MakeRandomFloat(0, 1) < critChance){
 				int16 SlayDmgBonus = aabonuses.SlayUndead[1] + itembonuses.SlayUndead[1] + spellbonuses.SlayUndead[1];
-				damage = (damage*SlayDmgBonus*2.25f)/100;
+				damage = (int32)((damage*SlayDmgBonus*2.25f)/100);
 				entity_list.MessageClose(this, false, 200, MT_CritMelee, "%s cleanses %s target!(%d)", GetCleanName(), this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its", damage);
 				return;
 			}

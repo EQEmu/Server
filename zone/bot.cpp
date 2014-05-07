@@ -1405,17 +1405,17 @@ int32 Bot::GenerateBaseHitPoints()
 
 		if(level < 41)
 		{
-			new_base_hp = (5 + (GetLevel() * hp_factor / 12) + ((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
+			new_base_hp = (int)(5 + (GetLevel() * hp_factor / 12) + ((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
 		}
 		else if(level < 81)
 		{
-			new_base_hp = (5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
+			new_base_hp = (int)(5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
 				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * (GetLevel() - 40) * hp_factor / 1800));
 		}
 		else
 		{
-			new_base_hp = (5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
+			new_base_hp = (int)(5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
 				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * hp_factor / 45));
 		}
@@ -4735,7 +4735,7 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage) {
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
 				NPCType DefaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(DataRow[2]), std::string(DataRow[3]), atoi(DataRow[4]), atoi(DataRow[5]), atoi(DataRow[6]), atoi(DataRow[7]));
-				NPCType TempNPCStruct = FillNPCTypeStruct(atoi(DataRow[1]), std::string(DataRow[2]), std::string(DataRow[3]), atoi(DataRow[4]), atoi(DataRow[5]), atoi(DataRow[6]), atoi(DataRow[7]), atof(DataRow[8]), atoi(DataRow[9]), atoi(DataRow[10]), atoi(DataRow[11]), atoi(DataRow[12]), atoi(DataRow[13]), atoi(DataRow[14]), atoi(DataRow[15]), atoi(DataRow[16]), atoi(DataRow[17]), atoi(DataRow[18]), atoi(DataRow[19]), atoi(DataRow[20]), DefaultNPCTypeStruct.MR, DefaultNPCTypeStruct.CR, DefaultNPCTypeStruct.DR, DefaultNPCTypeStruct.FR, DefaultNPCTypeStruct.PR, DefaultNPCTypeStruct.Corrup, DefaultNPCTypeStruct.AC, DefaultNPCTypeStruct.STR, DefaultNPCTypeStruct.STA, DefaultNPCTypeStruct.DEX, DefaultNPCTypeStruct.AGI, DefaultNPCTypeStruct.INT, DefaultNPCTypeStruct.WIS, DefaultNPCTypeStruct.CHA, DefaultNPCTypeStruct.ATK);
+				NPCType TempNPCStruct = FillNPCTypeStruct(atoi(DataRow[1]), std::string(DataRow[2]), std::string(DataRow[3]), atoi(DataRow[4]), atoi(DataRow[5]), atoi(DataRow[6]), atoi(DataRow[7]), (float)atof(DataRow[8]), atoi(DataRow[9]), atoi(DataRow[10]), atoi(DataRow[11]), atoi(DataRow[12]), atoi(DataRow[13]), atoi(DataRow[14]), atoi(DataRow[15]), atoi(DataRow[16]), atoi(DataRow[17]), atoi(DataRow[18]), atoi(DataRow[19]), atoi(DataRow[20]), DefaultNPCTypeStruct.MR, DefaultNPCTypeStruct.CR, DefaultNPCTypeStruct.DR, DefaultNPCTypeStruct.FR, DefaultNPCTypeStruct.PR, DefaultNPCTypeStruct.Corrup, DefaultNPCTypeStruct.AC, DefaultNPCTypeStruct.STR, DefaultNPCTypeStruct.STA, DefaultNPCTypeStruct.DEX, DefaultNPCTypeStruct.AGI, DefaultNPCTypeStruct.INT, DefaultNPCTypeStruct.WIS, DefaultNPCTypeStruct.CHA, DefaultNPCTypeStruct.ATK);
 				Result = new Bot(botID, atoi(DataRow[0]), atoi(DataRow[1]), atof(DataRow[38]), atoi(DataRow[39]), TempNPCStruct);
 				break;
 			}
@@ -6550,7 +6550,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, GetLevel());
 
 		if(opts) {
-			damage *= opts->damage_percent;
+			damage *= (int)opts->damage_percent;
 			damage += opts->damage_flat;
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
@@ -9421,7 +9421,7 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 		PercentManaReduction += (float)MakeRandomFloat(1, (double)focus_redux);
 	}
 
-	cost -= (cost * (PercentManaReduction / 100));
+	cost -= (int32)(cost * (PercentManaReduction / 100));
 
 	// Gift of Mana - reduces spell cost to 1 mana
 	if(focus_redux >= 100) {
@@ -10578,7 +10578,7 @@ int32 Bot::CalcManaRegen()
 	if(mana_regen_rate < 0.0f)
 		mana_regen_rate = 0.0f;
 
-	regen = regen * mana_regen_rate; // 90% of people wouldnt guess that manaregen would decrease the larger the number they input, this makes more sense
+	regen = (int32)(regen * mana_regen_rate); // 90% of people wouldnt guess that manaregen would decrease the larger the number they input, this makes more sense
 
 	return regen;
 }
@@ -10638,12 +10638,12 @@ int32 Bot::CalcMaxHP() {
 
 	nd += aabonuses.MaxHP;	//Natural Durability, Physical Enhancement, Planar Durability
 
-	bot_hp = (float)bot_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
+	bot_hp = (int32)(bot_hp * nd / 10000); //this is to fix the HP-above-495k issue
 	bot_hp += spellbonuses.HP + aabonuses.HP;
 
 	bot_hp += GroupLeadershipAAHealthEnhancement();
 
-	bot_hp += bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	bot_hp += (int32)(bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 	max_hp = bot_hp;
 
 	if (cur_hp > max_hp)
