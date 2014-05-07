@@ -691,13 +691,13 @@ bool Client::CheckFizzle(uint16 spell_id)
 	if(specialize > 0) {
 		switch(GetAA(aaSpellCastingMastery)){
 		case 1:
-			specialize = specialize * 1.05;
+			specialize = specialize * 1.05f;
 			break;
 		case 2:
-			specialize = specialize * 1.15;
+			specialize = specialize * 1.15f;
 			break;
 		case 3:
-			specialize = specialize * 1.3;
+			specialize = specialize * 1.3f;
 			break;
 		}
 		if(((specialize/6.0f) + 15.0f) < MakeRandomFloat(0, 100)) {
@@ -716,20 +716,20 @@ bool Client::CheckFizzle(uint16 spell_id)
 	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
 	if(GetClass() == BARD)
 	{
-		diff -= (float)(GetCHA() - 110) / 20.0;
+		diff -= (GetCHA() - 110) / 20.0f;
 	}
 	else if (GetCasterClass() == 'W')
 	{
-		diff -= (float)(GetWIS() - 125) / 20.0;
+		diff -= (GetWIS() - 125) / 20.0f;
 	}
 	else if (GetCasterClass() == 'I')
 	{
-		diff -= (float)(GetINT() - 125) / 20.0;
+		diff -= (GetINT() - 125) / 20.0f;
 	}
 
 	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever
 	float basefizzle = 10;
-	float fizzlechance = basefizzle - specialize + diff / 5.0;
+	float fizzlechance = basefizzle - specialize + diff / 5.0f;
 
 	// always at least 1% chance to fail or 5% to succeed
 	fizzlechance = fizzlechance < 1 ? 1 : (fizzlechance > 95 ? 95 : fizzlechance);
@@ -742,7 +742,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 	}
 	*/
 
-	float fizzle_roll = MakeRandomFloat(0, 100);
+	float fizzle_roll = (float)MakeRandomFloat(0, 100);
 
 	mlog(SPELLS__CASTING, "Check Fizzle %s  spell %d  fizzlechance: %0.2f%%   diff: %0.2f  roll: %0.2f", GetName(), spell_id, fizzlechance, diff, fizzle_roll);
 
@@ -2369,8 +2369,8 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 						spu->x_pos		= FloatToEQ19(GetX());
 						spu->y_pos		= FloatToEQ19(GetY());
 						spu->z_pos		= FloatToEQ19(GetZ());
-						spu->delta_x	= NewFloatToEQ13(new_x);
-						spu->delta_y	= NewFloatToEQ13(new_y);
+						spu->delta_x	= NewFloatToEQ13((float)new_x);
+						spu->delta_y	= NewFloatToEQ13((float)new_y);
 						spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
 						spu->heading	= FloatToEQ19(GetHeading());
 						spu->padding0002	=0;
@@ -3675,8 +3675,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				spu->x_pos		= FloatToEQ19(spelltar->GetX());
 				spu->y_pos		= FloatToEQ19(spelltar->GetY());
 				spu->z_pos		= FloatToEQ19(spelltar->GetZ());
-				spu->delta_x	= NewFloatToEQ13(new_x);
-				spu->delta_y	= NewFloatToEQ13(new_y);
+				spu->delta_x	= NewFloatToEQ13((float)new_x);
+				spu->delta_y	= NewFloatToEQ13((float)new_y);
 				spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
 				spu->heading	= FloatToEQ19(spelltar->GetHeading());
 				spu->padding0002	=0;
