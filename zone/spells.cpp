@@ -2049,7 +2049,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			std::list<Mob*> targets_in_range;
 			std::list<Mob*>::iterator iter;
 
-			entity_list.GetTargetsForConeArea(this, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
+			entity_list.GetTargetsForConeArea(this, (uint32)spells[spell_id].aoerange, (uint32)spells[spell_id].aoerange / 2, targets_in_range);
 			iter = targets_in_range.begin();
 			while(iter != targets_in_range.end())
 			{
