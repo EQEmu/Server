@@ -1213,11 +1213,18 @@ void Mob::AI_Process() {
 						}
 					}
 
-					if (IsPet()) {
-						Mob *owner = GetOwner();
+					if (IsPet() || (IsNPC() && CastToNPC()->GetSwarmOwner())) {
+						Mob *owner = nullptr;
+		
+						if (IsPet())
+							owner = GetOwner();
+						else 
+							owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+							
 						if (owner) {
 						int16 flurry_chance = owner->aabonuses.PetFlurry +
 							owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
+						
 							if (flurry_chance && (MakeRandomInt(0, 99) < flurry_chance))
 								Flurry(nullptr);
 						}
