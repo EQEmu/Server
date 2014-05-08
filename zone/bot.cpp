@@ -1349,7 +1349,7 @@ uint16 Bot::GetPrimarySkillValue()
 }
 
 uint16 Bot::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
-	return(database.GetSkillCap(class_, skillid, level));
+	return(database.GetSkillCap((uint8)class_, skillid, (uint8)level));
 }
 
 uint16 Bot::GetTotalATK()
@@ -1358,7 +1358,7 @@ uint16 Bot::GetTotalATK()
 	uint16 WornCap = itembonuses.ATK;
 
 	if(IsBot()) {
-		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
+		AttackRating = (uint16)((WornCap * 1.342f) + (GetSkill(SkillOffense) * 1.345f) + ((GetSTR() - 66) * 0.9f) + (GetPrimarySkillValue() * 2.69f));
 		AttackRating += aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 
 		if (AttackRating < 10)
@@ -1376,7 +1376,7 @@ uint16 Bot::GetATKRating()
 {
 	uint16 AttackRating = 0;
 	if(IsBot()) {
-		AttackRating = (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
+		AttackRating = (uint16)((GetSkill(SkillOffense) * 1.345f) + ((GetSTR() - 66) * 0.9f) + (GetPrimarySkillValue() * 2.69f));
 
 		if (AttackRating < 10)
 			AttackRating = 10;
@@ -1397,7 +1397,7 @@ int32 Bot::GenerateBaseHitPoints()
 		float SoDPost255;
 
 		if(((NormalSTA - 255) / 2) > 0)
-			SoDPost255 = ((NormalSTA - 255) / 2);
+			SoDPost255 = (int)((NormalSTA - 255) / 2.0f);
 		else
 			SoDPost255 = 0;
 
@@ -1409,13 +1409,13 @@ int32 Bot::GenerateBaseHitPoints()
 		}
 		else if(level < 81)
 		{
-			new_base_hp = (5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
+			new_base_hp = (int)(5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
 				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * (GetLevel() - 40) * hp_factor / 1800));
 		}
 		else
 		{
-			new_base_hp = (5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
+			new_base_hp = (int)(5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
 				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * hp_factor / 45));
 		}
@@ -10838,13 +10838,13 @@ bool Bot::IsArcheryRange(Mob *target) {
 	bool result = false;
 
 	if(target) {
-		float range = GetBotArcheryRange() + 5.0; //Fudge it a little, client will let you hit something at 0 0 0 when you are at 205 0 0
+		float range = GetBotArcheryRange() + 5.0f; //Fudge it a little, client will let you hit something at 0 0 0 when you are at 205 0 0
 
 		range *= range;
 
 		float targetDistance = DistNoRootNoZ(*target);
 
-		float minRuleDistance = RuleI(Combat, MinRangedAttackDist) * RuleI(Combat, MinRangedAttackDist);
+		float minRuleDistance = (float)(RuleI(Combat, MinRangedAttackDist) * RuleI(Combat, MinRangedAttackDist));
 
 		if((targetDistance > range) || (targetDistance < minRuleDistance))
 			result = false;
@@ -11018,7 +11018,7 @@ bool Bot::CalculateNewPosition2(float x, float y, float z, float speed, bool che
 	// This sets the movement animation rate with the client
 	// Use this block if using 2.5625 as the ratio.
 	// pRunAnimSpeed = speed;
-	pRunAnimSpeed = ((serverOverClientRatio * 10.0f) * speed) * 10.0f;
+	pRunAnimSpeed = (uint8)(((serverOverClientRatio * 10.0f) * speed) * 10.0f);
 
 	// Now convert our "speed" from the value necessary for the client to animate the correct movement type rate to the server side speed
 	// Use this block if using 2.5625 as the ratio.
