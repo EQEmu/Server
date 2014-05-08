@@ -835,7 +835,7 @@ bool BaseGuildManager::GetBankerFlag(uint32 CharID)
 
 	row = mysql_fetch_row(result);
 
-	bool IsBanker = atoi(row[0]);
+	bool IsBanker = atoi(row[0]) != 0;
 
 	mysql_free_result(result);
 
@@ -877,7 +877,7 @@ bool BaseGuildManager::GetAltFlag(uint32 CharID)
 
 	row = mysql_fetch_row(result);
 
-	bool IsAlt = atoi(row[0]);
+	bool IsAlt = atoi(row[0]) != 0;
 
 	mysql_free_result(result);
 

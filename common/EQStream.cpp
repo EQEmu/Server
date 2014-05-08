@@ -357,7 +357,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			if (!Session)
 				Session=ntohl(Response->Session);
 			compressed=(Response->Format&FLAG_COMPRESSED);
-			encoded=(Response->Format&FLAG_ENCODED);
+			encoded=(Response->Format&FLAG_ENCODED) != 0;
 
 			_log(NET__NET_TRACE, _L "Received OP_SessionResponse: session %lu, maxlen %d, key %lu, compressed? %s, encoded? %s" __L, (unsigned long)Session, MaxLen, (unsigned long)Key, compressed?"yes":"no", encoded?"yes":"no");
 
