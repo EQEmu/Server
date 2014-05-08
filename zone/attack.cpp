@@ -568,7 +568,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		}
 
 		if (opts) {
-			armor *= (int)(1.0f - opts->armor_pen_percent);
+			armor = (int)(armor * (1.0f - opts->armor_pen_percent));
 			armor -= opts->armor_pen_flat;
 		}
 
@@ -696,7 +696,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 			}
 		}
 
-		damage -= (int32)(aa_mit * damage);
+		damage = (int32)(damage - (aa_mit * damage));
 
 		if(damage != 0 && damage < minhit)
 			damage = minhit;
