@@ -3952,7 +3952,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_DistanceRemoval:
-					spellbonuses.DistanceRemoval = effect_value;
+					spellbonuses.DistanceRemoval = effect_value != 0;
 					break;
 
 				case SE_ImprovedTaunt:

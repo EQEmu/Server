@@ -1619,7 +1619,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Cost);
 			StatValue = atoi(Row[8]);
 			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, StatValue);
-			bool Stackable = atoi(Row[10]);
+			bool Stackable = atoi(Row[10]) != 0;
 			if(Stackable) {
 				int Charges = atoi(Row[9]);
 				sprintf(Name, "%s(%i)", Row[7], Charges);

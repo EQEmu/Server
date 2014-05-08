@@ -473,11 +473,11 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 			row = mysql_fetch_row(result);
 
 			into->npc_type = atoi(row[0]);
-			into->temporary = atoi(row[1]);
+			into->temporary = atoi(row[1]) != 0;
 			into->petpower = atoi(row[2]);
 			into->petcontrol = atoi(row[3]);
 			into->petnaming = atoi(row[4]);
-			into->monsterflag = atoi(row[5]);
+			into->monsterflag = atoi(row[5]) != 0;
 			into->equipmentset = atoi(row[6]);
 
 			mysql_free_result(result);

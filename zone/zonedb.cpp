@@ -389,9 +389,9 @@ bool ZoneDatabase::GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin
 		if (gmspeed)
 			*gmspeed = atoi(row[3]);
 		if (revoked)
-			*revoked = atoi(row[4]);
+			*revoked = atoi(row[4]) != 0;
 		if(gmhideme)
-			*gmhideme = atoi(row[5]);
+			*gmhideme = atoi(row[5]) != 0;
 		if(account_creation)
 			*account_creation = atoul(row[6]);
 
@@ -961,10 +961,10 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 			*level = atoi(row[10]);
 
 		if(LFP)
-			*LFP = atoi(row[11]);
+			*LFP = atoi(row[11]) != 0;
 
 		if(LFG)
-			*LFG = atoi(row[12]);
+			*LFG = atoi(row[12]) != 0;
 
 		if(NumXTargets)
 		{

@@ -4010,7 +4010,7 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 
 	bool NewBankerStatus = gmb->enabled & 0x01;
 
-	bool NewAltStatus = gmb->enabled & 0x02;
+	bool NewAltStatus = gmb->enabled & 0x02 != 0;
 
 	if((IsCurrentlyABanker != NewBankerStatus) && !guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
 	{
@@ -11685,8 +11685,8 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 			strn0cpy(TimeOfDeath, Row[5], sizeof(TimeOfDeath));
 
-			bool CorpseRezzed = atoi(Row[6]);
-			bool CorpseBuried = atoi(Row[7]);
+			bool CorpseRezzed = atoi(Row[6]) != 0;
+			bool CorpseBuried = atoi(Row[7]) != 0;
 
 			sprintf(Buffer, "<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
 				CharName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, TimeOfDeath,
@@ -12331,7 +12331,7 @@ void Client::Handle_OP_ClearBlockedBuffs(const EQApplicationPacket *app)
 		return;
 	}
 
-	bool Pet = app->pBuffer[0];
+	bool Pet = app->pBuffer[0] != 0;
 
 	if(Pet)
 		PetBlockedBuffs.clear();
@@ -13302,7 +13302,7 @@ void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
 		return;
 	}
 
-	XTargetAutoAddHaters = app->ReadUInt8(0);
+	XTargetAutoAddHaters = app->ReadUInt8(0) != 0;
 }
 
 void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)

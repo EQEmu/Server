@@ -207,7 +207,7 @@ bool TaskManager::LoadTasks(int SingleTask) {
 			Tasks[TaskID]->StartZone = atoi(row[9]);
 			Tasks[TaskID]->MinLevel = atoi(row[10]);
 			Tasks[TaskID]->MaxLevel = atoi(row[11]);
-			Tasks[TaskID]->Repeatable = atoi(row[12]);
+			Tasks[TaskID]->Repeatable = atoi(row[12]) != 0;
 			Tasks[TaskID]->ActivityCount = 0;
 			Tasks[TaskID]->SequenceMode = ActivitiesSequential;
 			Tasks[TaskID]->LastStep = 0;
@@ -297,7 +297,7 @@ bool TaskManager::LoadTasks(int SingleTask) {
 			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].GoalCount = atoi(row[9]);
 			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].DeliverToNPC = atoi(row[10]);
 			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].ZoneID = atoi(row[11]);
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Optional = atoi(row[12]);
+			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Optional = atoi(row[12]) != 0;
 
 			_log(TASKS__GLOBALLOAD, "Activity Slot %2i: ID %i for Task %5i. Type: %3i, GoalID: %8i, "
 					"GoalMethod: %i, GoalCount: %3i, ZoneID:%3i",
@@ -638,7 +638,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 			}
 
 			int DoneCount = atoi(row[2]);
-			bool Completed = atoi(row[3]);
+			bool Completed = atoi(row[3]) != 0;
 			state->ActiveTasks[ActiveTaskIndex].Activity[ActivityID].ActivityID = ActivityID;
 			state->ActiveTasks[ActiveTaskIndex].Activity[ActivityID].DoneCount = DoneCount;
 			if(Completed) state->ActiveTasks[ActiveTaskIndex].Activity[ActivityID].State = ActivityCompleted;
@@ -1617,7 +1617,7 @@ bool ClientTaskState::UpdateTasksOnSpeakWith(Client *c, int NPCTypeID) {
 
 bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeID) {
 
-	int Ret = false;
+	bool Ret = false;
 
 	_log(TASKS__UPDATE, "ClientTaskState::UpdateTasks for NPCTypeID: %d", NPCTypeID);
 

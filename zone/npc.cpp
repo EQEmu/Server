@@ -1927,7 +1927,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "trackable")
 	{
-		trackable = atoi(val.c_str());
+		trackable = atoi(val.c_str()) != 0;
 		return;
 	}
 
@@ -1957,7 +1957,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "see_invis_undead")
 	{
-		see_invis_undead = atoi(val.c_str());
+		see_invis_undead = atoi(val.c_str()) != 0;
 		return;
 	}
 
@@ -1969,7 +1969,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "see_improved_hide")
 	{
-		see_improved_hide = atoi(val.c_str());
+		see_improved_hide = atoi(val.c_str()) != 0;
 		return;
 	}
 

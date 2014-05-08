@@ -4136,7 +4136,7 @@ void Client::UpdateLFP() {
 uint16 Client::GetPrimarySkillValue()
 {
 	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(13);
+	bool equiped = m_inv.GetItem(13) != nullptr;
 
 	if (!equiped)
 		skill = SkillHandtoHand;

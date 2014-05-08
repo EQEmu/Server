@@ -155,7 +155,7 @@ int32 Client::LevelRegen()
 	bool sitting = IsSitting();
 	bool feigned = GetFeigned();
 	int level = GetLevel();
-	bool bonus = GetRaceBitmask(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces);
+	bool bonus = GetRaceBitmask(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces) != 0;
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int32 hp = 0;
 
@@ -873,7 +873,7 @@ int16 Client::CalcAC() {
 
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(14);
+		bool equiped = CastToClient()->m_inv.GetItem(14) != nullptr;
 		if(equiped) {
 			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
 			if(shield == ItemTypeShield)
@@ -903,7 +903,7 @@ int16 Client::GetACMit() {
 
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(14);
+		bool equiped = CastToClient()->m_inv.GetItem(14) != nullptr;
 		if(equiped) {
 			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
 			if(shield == ItemTypeShield)

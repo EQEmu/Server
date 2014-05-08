@@ -6472,7 +6472,7 @@ void command_revoke(Client *c, const Seperator *sep)
 				RevokeStruct* revoke = (RevokeStruct*)outapp->pBuffer;
 				strn0cpy(revoke->adminname, c->GetName(), 64);
 				strn0cpy(revoke->name, sep->arg[1], 64);
-				revoke->toggle = flag;
+				revoke->toggle = flag != 0;
 				worldserver.SendPacket(outapp);
 				safe_delete(outapp);
 			}

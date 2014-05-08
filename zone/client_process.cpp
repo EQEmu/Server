@@ -699,7 +699,7 @@ bool Client::Process() {
 	{
 		while(ret && (app = (EQApplicationPacket *)eqs->PopPacket())) {
 			if(app)
-				ret = HandlePacket(app);
+				ret = HandlePacket(app) != 0;
 			safe_delete(app);
 		}
 	}
@@ -1182,7 +1182,7 @@ void Client::OPTGB(const EQApplicationPacket *app)
 	if(tgb_flag == 2)
 		Message_StringID(0, TGB() ? TGB_ON : TGB_OFF);
 	else
-		tgb = tgb_flag;
+		tgb = tgb_flag != 0;
 }
 
 void Client::OPMemorizeSpell(const EQApplicationPacket* app)

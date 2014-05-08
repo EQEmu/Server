@@ -1319,7 +1319,7 @@ void Raid::GetRaidDetails()
 		}
 		row = mysql_fetch_row(result);
 		if(row){
-			locked = atoi(row[0]);
+			locked = atoi(row[0]) != 0;
 			LootType = atoi(row[1]);
 		}
 		mysql_free_result(result);
@@ -1354,9 +1354,9 @@ bool Raid::LearnMembers()
 				members[i].GroupNumber = GroupNum;
 			members[i]._class = atoi(row[2]);
 			members[i].level = atoi(row[3]);
-			members[i].IsGroupLeader = atoi(row[4]);
-			members[i].IsRaidLeader = atoi(row[5]);
-			members[i].IsLooter = atoi(row[6]);
+			members[i].IsGroupLeader = atoi(row[4]) != 0;
+			members[i].IsRaidLeader = atoi(row[5]) != 0;
+			members[i].IsLooter = atoi(row[6]) != 0;
 			i++;
 		}
 		mysql_free_result(result);

@@ -146,7 +146,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 				uint32 itemid = lds->Entries[item].item_id;
 
 				const Item_Struct* dbitem = GetItem(itemid);
-				npc->AddLootDrop(dbitem, itemlist, lds->Entries[item].item_charges, lds->Entries[item].minlevel, lds->Entries[item].maxlevel, lds->Entries[item].equip_item, false);
+				npc->AddLootDrop(dbitem, itemlist, lds->Entries[item].item_charges, lds->Entries[item].minlevel, lds->Entries[item].maxlevel, lds->Entries[item].equip_item != 0, false);
 				pickedcharges++;
 			}
 		}

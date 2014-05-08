@@ -787,7 +787,7 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_OOCMute: {
-			oocmuted = *(pack->pBuffer);
+			oocmuted = *(pack->pBuffer) != 0;
 			break;
 		}
 		case ServerOP_Revoke: {

@@ -1291,7 +1291,7 @@ void Bot::GenerateArmorClass()
 uint16 Bot::GetPrimarySkillValue()
 {
 	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(SLOT_PRIMARY);
+	bool equiped = m_inv.GetItem(SLOT_PRIMARY) != nullptr;
 
 	if(!equiped)
 	{
@@ -5070,7 +5070,7 @@ bool Bot::DoesBotGroupNameExist(std::string botGroupName) {
 						std::string tempBotGroupName = std::string(DataRow[1]);
 
 						if(botGroupName == tempBotGroupName) {
-							result = tempBotGroupId;
+							result = tempBotGroupId != 0;
 							break;
 						}
 					}
@@ -7861,7 +7861,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0 && (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
 		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped = GetBotItem(SLOT_SECONDARY);
+		bool equiped = GetBotItem(SLOT_SECONDARY) != nullptr;
 		if(equiped) {
 			uint8 shield = GetBotItem(SLOT_SECONDARY)->GetItem()->ItemType;
 			float bonusShieldBlock = 0.0f;
@@ -7876,7 +7876,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
 		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped2 = GetBotItem(SLOT_PRIMARY);
+		bool equiped2 = GetBotItem(SLOT_PRIMARY) != nullptr;
 		if(equiped2) {
 			uint8 TwoHandBlunt = GetBotItem(SLOT_PRIMARY)->GetItem()->ItemType;
 			float bonusStaffBlock = 0.0f;
@@ -10477,7 +10477,7 @@ void Bot::CalcRestState() {
 int32 Bot::LevelRegen()
 {
 	int level = GetLevel();
-	bool bonus = GetRaceBitmask(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces);
+	bool bonus = GetRaceBitmask(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces) != 0;
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int32 hp = 0;
 
