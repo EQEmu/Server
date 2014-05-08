@@ -2076,7 +2076,7 @@ void Mob::SetAttackTimer() {
 					if(max_quiver > 0)
 					{
 						float quiver_haste = 1 / (1 + max_quiver / 100);
-						speed *= (int)quiver_haste;
+						speed = (int)(speed * quiver_haste);
 					}
 				}
 			}

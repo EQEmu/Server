@@ -1405,17 +1405,17 @@ int32 Bot::GenerateBaseHitPoints()
 
 		if(level < 41)
 		{
-			new_base_hp = (int)(5 + (GetLevel() * hp_factor / 12) + ((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
+			new_base_hp = (5 + (GetLevel() * hp_factor / 12) + ((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
 		}
 		else if(level < 81)
 		{
-			new_base_hp = (int)(5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
+			new_base_hp = (5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
 				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * (GetLevel() - 40) * hp_factor / 1800));
 		}
 		else
 		{
-			new_base_hp = (int)(5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
+			new_base_hp = (5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
 				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * hp_factor / 45));
 		}
@@ -6550,7 +6550,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, GetLevel());
 
 		if(opts) {
-			damage *= (int)opts->damage_percent;
+			damage *= opts->damage_percent;
 			damage += opts->damage_flat;
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
