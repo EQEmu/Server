@@ -2011,7 +2011,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 				current_id = id;
 			}
 
-			if(current_entry > 1260) {
+			if(current_entry >= 1260) {
 				continue;
 			}
 
