@@ -1276,7 +1276,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if(opts) {
 			damage *= (int)opts->damage_percent;
 			damage += opts->damage_flat;
-			hate *= opts->hate_percent;
+			hate = (uint32)(hate * opts->hate_percent);
 			hate += opts->hate_flat;
 		}
 
@@ -1849,7 +1849,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			}
 
 			if(weapon->ElemDmgAmt){
-				eleBane += (weapon->ElemDmgAmt * other->ResistSpell(weapon->ElemDmgType, 0, this) / 100);
+				eleBane = (uint16)(eleBane + weapon->ElemDmgAmt * other->ResistSpell(weapon->ElemDmgType, 0, this) / 100);
 			}
 		}
 
@@ -3832,7 +3832,7 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 	if (caster && amount > 0) {
 		if (caster->IsNPC() && !caster->IsPet()) {
 			float npchealscale = caster->CastToNPC()->GetHealScale();
-			amount = (static_cast<float>(amount) * npchealscale) / 100.0f;
+			amount = (uint32)(amount * npchealscale) / 100.0f);
 		}
 	}
 

@@ -917,8 +917,8 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 
 					if(dobonus)
 					{
-						MaxDmg *= (float)2;
-						hate *= (float)2;
+						MaxDmg *= 2;
+						hate *= 2;
 						MaxDmg = mod_archery_bonus_damage(MaxDmg, RangeWeapon);
 
 						mlog(COMBAT__RANGED, "Ranger. Double damage success roll, doubling damage to %d", MaxDmg);

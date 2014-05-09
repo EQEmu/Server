@@ -912,7 +912,7 @@ int32 Merc::CalcMaxHP() {
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
 
-	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	max_hp = (int32)(max_hp + max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 
 	if (cur_hp > max_hp)
 		cur_hp = max_hp;
@@ -2943,7 +2943,7 @@ int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
 		PercentManaReduction += MakeRandomFloat(1, (double)focus_redux);
 	}
 
-	cost -= (cost * (PercentManaReduction / 100));
+	cost = (int32)(cost - (cost * (PercentManaReduction / 100)));
 
 	// Gift of Mana - reduces spell cost to 1 mana
 	if(focus_redux >= 100) {
@@ -4689,7 +4689,7 @@ void Merc::DoClassAttacks(Mob *target) {
 		}
 	}
 
-	classattack_timer.Start(reuse*HasteModifier/100);
+	classattack_timer.Start((uint32)(reuse*HasteModifier/1000));
 }
 
 bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
