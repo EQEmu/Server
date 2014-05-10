@@ -1328,7 +1328,7 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 			aa_los_them.y = aa_los_them_mob->GetY();
 			aa_los_them.z = aa_los_them_mob->GetZ();
 			los_status = CheckLosFN(aa_los_them_mob);
-			los_status_facing = aa_los_them_mob->InFrontMob(this, aa_los_them.x, aa_los_them.y);
+			los_status_facing = IsFacingMob(aa_los_them_mob);
 		}
 		else
 		{

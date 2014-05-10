@@ -125,6 +125,8 @@ public:
 	// less than 56 is in front, greater than 56 is usually where the client generates the messages
 	inline bool InFrontMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const
 		{ return (!other || other == this) ? true : MobAngle(other, ourx, oury) < 56.0f; }
+	bool IsFacingMob(Mob *other); // kind of does the same as InFrontMob, but derived from client
+	float HeadingAngleToMob(Mob *other); // to keep consistent with client generated messages
 	virtual void RangedAttack(Mob* other) { }
 	virtual void ThrowingAttack(Mob* other) { }
 	uint16 GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg);

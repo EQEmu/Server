@@ -5046,3 +5046,54 @@ void Mob::ProcessSpecialAbilities(const std::string str) {
 		}
 	}
 }
+
+// derived from client to keep these functions more consistent
+// if anything seems weird, blame SoE
+bool Mob::IsFacingMob(Mob *other)
+{
+	if (!other)
+		return false;
+	float angle = HeadingAngleToMob(other);
+	// what the client uses appears to be 2x our internal heading
+	float heading = GetHeading() * 2.0;
+
+	if (angle > 472.0 && heading < 40.0)
+		angle = heading;
+	if (angle < 40.0 && heading > 472.0)
+		angle = heading;
+
+	if (fabs(angle - heading) <= 80.0)
+		return true;
+
+	return false;
+}
+
+// All numbers derived from the client
+float Mob::HeadingAngleToMob(Mob *other)
+{
+	float mob_x = other->GetX();
+	float mob_y = other->GetY();
+	float this_x = GetX();
+	float this_y = GetY();
+
+	float y_diff = fabs(this_y - mob_y);
+	float x_diff = fabs(this_x - mob_x);
+	if (y_diff < 0.0000009999999974752427)
+		y_diff = 0.0000009999999974752427;
+
+	float angle = atan2(x_diff, y_diff) * 180.0 * 0.3183099014828645; // angle, nice "pi"
+
+	// return the right thing based on relative quadrant
+	// I'm sure this could be improved for readability, but whatever
+	if (this_y >= mob_y) {
+		if (mob_x >= this_x)
+			return (90.0 - angle + 90.0) * 511.5 * 0.0027777778;
+		if (mob_x <= this_x)
+			return (angle + 180.0) * 511.5 * 0.0027777778;
+	}
+	if (this_y > mob_y || mob_x > this_x)
+		return angle * 511.5 * 0.0027777778;
+	else
+		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
+}
+
