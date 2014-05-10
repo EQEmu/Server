@@ -320,7 +320,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 
 	if(item->Attack > 0) {
 
-		int cap = RuleI(Character, ItemATKCap);
+		uint32 cap = RuleI(Character, ItemATKCap);
 		cap += itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
 
 		if((newbon->ATK + item->Attack) > cap)
