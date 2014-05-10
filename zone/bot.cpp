@@ -3865,7 +3865,7 @@ void Bot::AI_Process() {
 							int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 							DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
-							float random = MakeRandomFloat(0, 1);
+							float random = (float)MakeRandomFloat(0, 1);
 
 							if (random < DualWieldProbability){ // Max 78% of DW
 

@@ -2347,7 +2347,7 @@ void command_size(Client *c, const Seperator *sep)
 	if (!sep->IsNumber(1))
 		c->Message(0, "Usage: #size [0 - 255] (Decimal increments are allowed)");
 	else {
-		float newsize = atof(sep->arg[1]);
+		float newsize = (float)atof(sep->arg[1]);
 		if (newsize > 255)
 			c->Message(0, "Error: #size: Size can not be greater than 255.");
 		else if (newsize < 0)

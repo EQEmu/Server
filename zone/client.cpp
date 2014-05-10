@@ -1576,7 +1576,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 	switch(type){
 		case STAT_STR:
 			if(set_val>0)
-				iss->str=set_val;
+				iss->str=(uint8)set_val;
 			if(set_val<0)
 				m_pp.STR=0;
 			else if(set_val>255)
@@ -1586,7 +1586,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_STA:
 			if(set_val>0)
-				iss->sta=set_val;
+				iss->sta=(uint8)set_val;
 			if(set_val<0)
 				m_pp.STA=0;
 			else if(set_val>255)
@@ -1596,7 +1596,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_AGI:
 			if(set_val>0)
-				iss->agi=set_val;
+				iss->agi=(uint8)set_val;
 			if(set_val<0)
 				m_pp.AGI=0;
 			else if(set_val>255)
@@ -1606,7 +1606,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_DEX:
 			if(set_val>0)
-				iss->dex=set_val;
+				iss->dex=(uint8)set_val;
 			if(set_val<0)
 				m_pp.DEX=0;
 			else if(set_val>255)
@@ -1616,7 +1616,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_INT:
 			if(set_val>0)
-				iss->int_=set_val;
+				iss->int_=(uint8)set_val;
 			if(set_val<0)
 				m_pp.INT=0;
 			else if(set_val>255)
@@ -1626,7 +1626,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_WIS:
 			if(set_val>0)
-				iss->wis=set_val;
+				iss->wis=(uint8)set_val;
 			if(set_val<0)
 				m_pp.WIS=0;
 			else if(set_val>255)
@@ -1636,7 +1636,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_CHA:
 			if(set_val>0)
-				iss->cha=set_val;
+				iss->cha=(uint8)set_val;
 			if(set_val<0)
 				m_pp.CHA=0;
 			else if(set_val>255)
@@ -1659,7 +1659,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 	switch(type){
 		case STAT_STR:
 			if(increase_val>0)
-				iss->str=increase_val;
+				iss->str=(uint8)increase_val;
 			if((m_pp.STR+increase_val*2)<0)
 				m_pp.STR=0;
 			else if((m_pp.STR+increase_val*2)>255)
@@ -1669,7 +1669,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_STA:
 			if(increase_val>0)
-				iss->sta=increase_val;
+				iss->sta=(uint8)increase_val;
 			if((m_pp.STA+increase_val*2)<0)
 				m_pp.STA=0;
 			else if((m_pp.STA+increase_val*2)>255)
@@ -1679,7 +1679,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_AGI:
 			if(increase_val>0)
-				iss->agi=increase_val;
+				iss->agi=(uint8)increase_val;
 			if((m_pp.AGI+increase_val*2)<0)
 				m_pp.AGI=0;
 			else if((m_pp.AGI+increase_val*2)>255)
@@ -1689,7 +1689,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_DEX:
 			if(increase_val>0)
-				iss->dex=increase_val;
+				iss->dex=(uint8)increase_val;
 			if((m_pp.DEX+increase_val*2)<0)
 				m_pp.DEX=0;
 			else if((m_pp.DEX+increase_val*2)>255)
@@ -1699,7 +1699,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_INT:
 			if(increase_val>0)
-				iss->int_=increase_val;
+				iss->int_=(uint8)increase_val;
 			if((m_pp.INT+increase_val*2)<0)
 				m_pp.INT=0;
 			else if((m_pp.INT+increase_val*2)>255)
@@ -1709,7 +1709,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_WIS:
 			if(increase_val>0)
-				iss->wis=increase_val;
+				iss->wis=(uint8)increase_val;
 			if((m_pp.WIS+increase_val*2)<0)
 				m_pp.WIS=0;
 			else if((m_pp.WIS+increase_val*2)>255)
@@ -1719,7 +1719,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_CHA:
 			if(increase_val>0)
-				iss->cha=increase_val;
+				iss->cha=(uint8)increase_val;
 			if((m_pp.CHA+increase_val*2)<0)
 				m_pp.CHA=0;
 			else if((m_pp.CHA+increase_val*2)>255)
@@ -5106,7 +5106,7 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 	{
 	case 2:
 		{
-			float delta = (x-(-713.6));
+			float delta = (x-(-713.6f));
 			delta *= delta;
 			float distance = delta;
 			delta = (y-(-160.2));
@@ -5136,13 +5136,13 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 		}
 	case 9:
 	{
-		float delta = (x-(-682.5));
+		float delta = (x-(-682.5f));
 		delta *= delta;
 		float distance = delta;
-		delta = (y-(147.0));
+		delta = (y-(147.0f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(-9.9));
+		delta = (z-(-9.9f));
 		delta *= delta;
 		distance += delta;
 
@@ -5179,13 +5179,13 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 
 	case 24:
 	{
-		float delta = (x-(-183.0));
+		float delta = (x-(-183.0f));
 		delta *= delta;
 		float distance = delta;
-		delta = (y-(-773.3));
+		delta = (y-(-773.3f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(54.1));
+		delta = (z-(54.1f));
 		delta *= delta;
 		distance += delta;
 

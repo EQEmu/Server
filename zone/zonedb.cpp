@@ -2408,12 +2408,12 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 			if(row){
 				into[r].spellid = atoi(row[1]);
 				into[r].type = atoi(row[2]);
-				into[r].x = atof(row[3]);
-				into[r].y = atof(row[4]);
-				into[r].z = atof(row[5]);
-				into[r].xdiff = atof(row[6]);
-				into[r].ydiff = atof(row[7]);
-				into[r].zdiff = atof(row[8]);
+				into[r].x = (float)atof(row[3]);
+				into[r].y = (float)atof(row[4]);
+				into[r].z = (float)atof(row[5]);
+				into[r].xdiff = (float)atof(row[6]);
+				into[r].ydiff = (float)atof(row[7]);
+				into[r].zdiff = (float)atof(row[8]);
 				strn0cpy(into[r].message, row[9], 255);
 			}
 		}
@@ -2848,7 +2848,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 			pi->SpellID = atoi(row[3]);
 			pi->HP = atoul(row[4]);
 			pi->Mana = atoul(row[5]);
-			pi->size = atof(row[6]);
+			pi->size = (float)atof(row[6]);
 		}
 		mysql_free_result(result);
 	}

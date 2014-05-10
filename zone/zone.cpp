@@ -641,8 +641,8 @@ void Zone::LoadLevelEXPMods(){
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
 			uint32 index = atoi(DataRow[0]);
-			float exp_mod = atof(DataRow[1]);
-			float aa_exp_mod = atof(DataRow[2]);
+			float exp_mod = (float)atof(DataRow[1]);
+			float aa_exp_mod = (float)atof(DataRow[2]);
 			level_exp_mod[index].ExpMod = exp_mod;
 			level_exp_mod[index].AAExpMod = aa_exp_mod;
 		}

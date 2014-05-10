@@ -5081,7 +5081,7 @@ float Mob::HeadingAngleToMob(Mob *other)
 	if (y_diff < 0.0000009999999974752427)
 		y_diff = 0.0000009999999974752427;
 
-	float angle = atan2(x_diff, y_diff) * 180.0 * 0.3183099014828645; // angle, nice "pi"
+	float angle = atan2(x_diff, y_diff) * 180.0f * 0.3183099014828645f; // angle, nice "pi"
 
 	// return the right thing based on relative quadrant
 	// I'm sure this could be improved for readability, but whatever

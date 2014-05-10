@@ -927,7 +927,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	_log(TRADESKILLS__TRACE, "...Current skill: %d , Trivial: %d , Success chance: %f percent", user_skill , spec->trivial , chance);
 	_log(TRADESKILLS__TRACE, "...Bonusstat: %d , INT: %d , WIS: %d , DEX: %d , STR: %d", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
 
-	float res = MakeRandomFloat(0, 99);
+	float res = (float)MakeRandomFloat(0, 99);
 	int AAChance = 0;
 
 	//AA modifiers

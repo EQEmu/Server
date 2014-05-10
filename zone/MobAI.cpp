@@ -1591,7 +1591,7 @@ void NPC::AI_DoMovement() {
 			)
 		{
 			float movedist = roambox_distance*roambox_distance;
-			float movex = MakeRandomFloat(0, movedist);
+			float movex = (float)MakeRandomFloat(0, movedist);
 			float movey = movedist - movex;
 			movex = sqrtf(movex);
 			movey = sqrtf(movey);

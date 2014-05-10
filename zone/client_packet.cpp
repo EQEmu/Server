@@ -3417,7 +3417,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		CheckIncreaseSkill(SkillSneak, nullptr, 5);
 	}
 	float hidechance = ((GetSkill(SkillSneak)/300.0f) + .25) * 100;
-	float random = MakeRandomFloat(0, 99);
+	float random = (float)MakeRandomFloat(0, 99);
 	if(!was && random < hidechance) {
 		sneaking = true;
 	}
@@ -3458,8 +3458,8 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	int reuse = HideReuseTime - GetAA(209);
 	p_timers.Start(pTimerHide, reuse-1);
 
-	float hidechance = ((GetSkill(SkillHide)/250.0f) + .25) * 100;
-	float random = MakeRandomFloat(0, 100);
+	float hidechance = ((GetSkill(SkillHide)/250.0f) + .25f) * 100.0f;
+	float random = (float)MakeRandomFloat(0, 100);
 	CheckIncreaseSkill(SkillHide, nullptr, 5);
 	if (random < hidechance) {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
@@ -11679,9 +11679,9 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 			uint32 ZoneID = atoi(Row[1]);
 
-			float CorpseX = atof(Row[2]);
-			float CorpseY = atof(Row[3]);
-			float CorpseZ = atof(Row[4]);
+			float CorpseX = (float)atof(Row[2]);
+			float CorpseY = (float)atof(Row[3]);
+			float CorpseZ = (float)atof(Row[4]);
 
 			strn0cpy(TimeOfDeath, Row[5], sizeof(TimeOfDeath));
 
