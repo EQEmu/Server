@@ -111,11 +111,11 @@ const EQClientVersion Strategy::ClientVersion() const
 static inline structs::ItemSlotStruct TitaniumToRoFSlot(uint32 TitaniumSlot)
 {
 	structs::ItemSlotStruct RoFSlot;
-	RoFSlot.SlotType = 0xffff;
+	RoFSlot.SlotType = 0xff;
 	RoFSlot.Unknown02 = 0;
-	RoFSlot.MainSlot = 0xffff;
-	RoFSlot.SubSlot = 0xffff;
-	RoFSlot.AugSlot = 0xffff;
+	RoFSlot.MainSlot = 0xff;
+	RoFSlot.SubSlot = 0xff;
+	RoFSlot.AugSlot = 0xff;
 	RoFSlot.Unknown01 = 0;
 	uint32 TempSlot = 0;
 
@@ -359,9 +359,9 @@ static inline uint32 MainInvRoFToTitaniumSlot(structs::MainInvItemSlotStruct RoF
 static inline structs::MainInvItemSlotStruct MainInvTitaniumToRoFSlot(uint32 TitaniumSlot)
 {
 	structs::MainInvItemSlotStruct RoFSlot;
-	RoFSlot.MainSlot = 0xffff;
-	RoFSlot.SubSlot = 0xffff;
-	RoFSlot.AugSlot = 0xffff;
+	RoFSlot.MainSlot = 0xff;
+	RoFSlot.SubSlot = 0xff;
+	RoFSlot.AugSlot = 0xff;
 	RoFSlot.Unknown01 = 0;
 	uint32 TempSlot = 0;
 
@@ -2863,9 +2863,9 @@ ENCODE(OP_RecipeAutoCombine) {
 	structs::ItemSlotStruct RoFSlot;
 	RoFSlot.SlotType = 8;	// Observed
 	RoFSlot.Unknown02 = 0;
-	RoFSlot.MainSlot = 0xffff;
-	RoFSlot.SubSlot = 0xffff;
-	RoFSlot.AugSlot = 0xffff;
+	RoFSlot.MainSlot = 0xff;
+	RoFSlot.SubSlot = 0xff;
+	RoFSlot.AugSlot = 0xff;
 	RoFSlot.Unknown01 = 0;
 	eq->unknown_slot = RoFSlot;
 	OUT(recipe_id);
