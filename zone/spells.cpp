@@ -3287,7 +3287,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				Group* pBasicGroupTargetPet = 0;
 				uint32 nGroupTargetPet = 0; //raid group
 
-				const uint32 cnWTF = 0xFFFFFFFF + 1; //this should be zero unless on 64bit? forced uint64?
 
 				//Caster client pointers
 				pClient = this->CastToClient();
@@ -3325,7 +3324,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 						!(
 							(pBasicGroup && ((pBasicGroup == pBasicGroupTarget) || (pBasicGroup == pBasicGroupTargetPet))) || //Basic Group
 
-							((nGroup != cnWTF) && ((nGroup == nGroupTarget) || (nGroup == nGroupTargetPet))) || //Raid group
+							((nGroup != 0) && ((nGroup == nGroupTarget) || (nGroup == nGroupTargetPet))) || //Raid group
 
 							(spelltar == GetPet()) //should be able to cast grp spells on self and pet despite grped status.
 						)
