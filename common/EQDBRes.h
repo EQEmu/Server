@@ -32,8 +32,8 @@ public:
 	~EQDBRes()	{ finish(); }
 
 //BEGIN PERL EXPORT
-	unsigned long	num_rows() { return (res) ? mysql_num_rows(res) : 0; }
-	unsigned long	num_fields() { return (res) ? mysql_num_fields(res) : 0; }
+	unsigned long	num_rows() { return (res) ? (unsigned long)mysql_num_rows(res) : 0; }
+	unsigned long	num_fields() { return (res) ? (unsigned long)mysql_num_fields(res) : 0; }
 	void		DESTROY() { }
 	void		finish() { if (res) mysql_free_result(res); res=nullptr; };
 	std::vector<std::string>	fetch_row_array();
