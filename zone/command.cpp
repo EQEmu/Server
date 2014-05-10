@@ -2643,7 +2643,7 @@ void command_makepet(Client *c, const Seperator *sep)
 
 void command_level(Client *c, const Seperator *sep)
 {
-	uint16 level = atoi(sep->arg[1]);
+	uint8 level = atoi(sep->arg[1]);
 
 	if ((level <= 0) || ((level > RuleI(Character, MaxLevel)) && (c->Admin() < commandLevelAboveCap))) {
 		c->Message(0, "Error: #Level: Invalid Level");
@@ -2699,7 +2699,7 @@ void command_spawn(Client *c, const Seperator *sep)
 void command_texture(Client *c, const Seperator *sep)
 {
 
-	uint16 texture;
+	uint8 texture;
 	if (sep->IsNumber(1) && atoi(sep->arg[1]) >= 0 && atoi(sep->arg[1]) <= 255) {
 		texture = atoi(sep->arg[1]);
 		uint8 helm = 0xFF;
