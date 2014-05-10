@@ -6461,7 +6461,7 @@ void command_revoke(Client *c, const Seperator *sep)
 			if(revokee)
 			{
 				c->Message(0, "Found %s in this zone.", revokee->GetName());
-				revokee->SetRevoked(flag);
+				revokee->SetRevoked(flag != 0);
 			}
 			else
 			{
