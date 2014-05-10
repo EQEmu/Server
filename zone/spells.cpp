@@ -4390,7 +4390,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 				resist_chance = 1;
 			}
 
-			int partial_modifier = ((150 * (roll - resist_chance)) / resist_chance);
+			float partial_modifier = ((150 * (roll - resist_chance)) / resist_chance);
 
 			if(IsNPC())
 			{
@@ -4414,7 +4414,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			{
 				if((GetLevel() - caster->GetLevel()) >= 20)
 				{
-					partial_modifier += (GetLevel() - caster->GetLevel()) * 1.5;
+					partial_modifier = partial_modifier+(GetLevel() - caster->GetLevel()) * 1.5f;
 				}
 			}
 
@@ -4428,7 +4428,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 				return 100;
 			}
 
-			return (float)partial_modifier;
+			return partial_modifier;
 		}
 	}
 }
@@ -4641,7 +4641,7 @@ void NPC::Stun(int duration) {
 
 void NPC::UnStun() {
 	Mob::UnStun();
-	SetRunAnimSpeed(this->GetRunspeed());
+	SetRunAnimSpeed((int8)this->GetRunspeed());
 	SendPosition();
 }
 
