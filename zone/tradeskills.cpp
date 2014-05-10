@@ -1308,7 +1308,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 		}
 		safe_delete_array(query);
 
-		uint32 resultRowTotal = mysql_num_rows(result);
+		uint32 resultRowTotal = (uint32)mysql_num_rows(result);
 
 		if(resultRowTotal == 0) { //Recipe contents matched more than 1 recipe, but not in this container
 			LogFile->write(EQEMuLog::Error, "Combine error: Incorrect container is being used!");

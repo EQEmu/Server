@@ -2578,7 +2578,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 				mysql_free_result(result);
 				if (RunQuery(query, MakeAnyLenString(&query, "SELECT spellid, type, minlevel, maxlevel, manacost, recast_delay, priority, resist_adjust from npc_spells_entries where npc_spells_id=%d ORDER BY minlevel", iDBSpellsID), errbuf, &result)) {
 					safe_delete_array(query);
-					uint32 tmpSize = sizeof(DBnpcspells_Struct) + (sizeof(DBnpcspells_entries_Struct) * mysql_num_rows(result));
+					uint32 tmpSize = sizeof(DBnpcspells_Struct) + (sizeof(DBnpcspells_entries_Struct) * (uint32)mysql_num_rows(result));
 					npc_spells_cache[iDBSpellsID] = (DBnpcspells_Struct*) new uchar[tmpSize];
 					memset(npc_spells_cache[iDBSpellsID], 0, tmpSize);
 					npc_spells_cache[iDBSpellsID]->parent_list = tmpparent_list;
@@ -2694,7 +2694,7 @@ DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 				mysql_free_result(result);
 				if (RunQuery(query, MakeAnyLenString(&query, "SELECT spell_effect_id, minlevel, maxlevel,se_base, se_limit, se_max from npc_spells_effects_entries where npc_spells_effects_id=%d ORDER BY minlevel", iDBSpellsEffectsID), errbuf, &result)) {
 					safe_delete_array(query);
-					uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * mysql_num_rows(result));
+					uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * (uint32)mysql_num_rows(result));
 					npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
 					memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
 					npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;

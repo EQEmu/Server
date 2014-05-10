@@ -2100,7 +2100,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		}
 		else
 		{
-			m_pp.copper = copperpp;
+			m_pp.copper = (int32)copperpp;
 			if(updateclient)
 				SendMoneyUpdate();
 			Save();
@@ -2114,8 +2114,8 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		}
 		else
 		{
-			m_pp.silver = silver/10;
-			m_pp.copper += (silver-(m_pp.silver*10));
+			m_pp.silver = (int32)(silver/10);
+			m_pp.copper = (int32)(m_pp.copper + silver-(m_pp.silver*10));
 			if(updateclient)
 				SendMoneyUpdate();
 			Save();
@@ -2131,7 +2131,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		}
 		else
 		{
-			m_pp.gold = gold/100;
+			m_pp.gold = (int32)(gold/100);
 			uint64 silvertest = (gold-(static_cast<uint64>(m_pp.gold)*100))/10;
 			m_pp.silver =(int32)(m_pp.silver + silvertest);
 			uint64 coppertest = (gold-(static_cast<uint64>(m_pp.gold)*100+silvertest*10));
@@ -2146,11 +2146,11 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 
 		//Impossible for plat to be negative, already checked above
 
-		m_pp.platinum = platinum/1000;
+		m_pp.platinum = (int32)(platinum/1000);
 		uint64 goldtest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000))/100;
 		m_pp.gold = (int32)(m_pp.gold +goldtest);
 		uint64 silvertest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000+goldtest*100))/10;
-		m_pp.silver += silvertest;
+		m_pp.silver = (int32)(m_pp.silver+ silvertest);
 		uint64 coppertest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000+goldtest*100+silvertest*10));
 		m_pp.copper = (int32)coppertest;
 		if(updateclient)
