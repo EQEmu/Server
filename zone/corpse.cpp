@@ -1861,7 +1861,7 @@ Corpse* ZoneDatabase::LoadPlayerCorpse(uint32 player_corpse_id) {
 		lengths = mysql_fetch_lengths(result);
 		if(row && lengths)
 		{
-		NewCorpse = Corpse::LoadFromDBData(atoi(row[0]), atoi(row[1]), row[2], (uchar*) row[7], lengths[7], atof(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), row[8],atoi(row[9])==1, atoi(row[10]));
+		NewCorpse = Corpse::LoadFromDBData(atoi(row[0]), atoi(row[1]), row[2], (uchar*) row[7], lengths[7], atof(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), row[8],atoi(row[9])==1, atoi(row[10]) != 0);
 		entity_list.AddCorpse(NewCorpse);
 		}
 		mysql_free_result(result);

@@ -1963,7 +1963,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "see_hide")
 	{
-		see_hide = atoi(val.c_str());
+		see_hide = atoi(val.c_str()) != 0;
 		return;
 	}
 

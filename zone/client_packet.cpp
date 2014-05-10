@@ -5242,7 +5242,7 @@ void Client::Handle_OP_LFGCommand(const EQApplicationPacket *app)
 			}
 			LFGFromLevel = lfg->FromLevel;
 			LFGToLevel = lfg->ToLevel;
-			LFGMatchFilter = lfg->MatchFilter;
+			LFGMatchFilter = lfg->MatchFilter != 0;
 			strcpy(LFGComments, lfg->Comments);
 			break;
 		default:
