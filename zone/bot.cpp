@@ -6022,7 +6022,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		// TODO: Figure out what the actual max slot id is
 		const int MAX_SLOT_ID = 3179;
 		uint32 items[MAX_SLOT_ID] = {0};
-		uint8 charges[MAX_SLOT_ID] = {0};
+		uint16 charges[MAX_SLOT_ID] = {0};
 		bool botCanWear[MAX_SLOT_ID] = {0};
 
 		for(int16 i=beginSlotID; i<=endSlotID; ++i) {
@@ -8035,7 +8035,7 @@ void Bot::DoRiposte(Mob* defender) {
 
 	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
 		if (defender->GetClass() == MONK)
-			defender->MonkSpecialAttack(this, defender->GetAABonuses().GiveDoubleRiposte[2]);
+			defender->MonkSpecialAttack(this, (uint8)defender->GetAABonuses().GiveDoubleRiposte[2]);
 		else if (defender->IsBot())
 			defender->CastToClient()->DoClassAttacks(this,defender->GetAABonuses().GiveDoubleRiposte[2], true);
 	}
@@ -8354,7 +8354,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	}
 	int32 dmg = 0;
 
-	uint16 skill_to_use = -1;
+	uint8 skill_to_use = -1;
 
 	int level = GetLevel();
 	int reuse = TauntReuseTime * 1000;	//make this very long since if they dont use it once, they prolly never will
@@ -9528,7 +9528,7 @@ void Bot::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 	Mob::DoBuffTic(spell_id, slot, ticsremaining, caster_level, caster);
 }
 
-bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {
+bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint8 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {
 	bool Result = false;
 
 	if(zone && !zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
@@ -9548,7 +9548,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 				if(IsAmnesiad() && IsDiscipline(spell_id))
 					Message_StringID(13, MELEE_SILENCE);
 				if(casting_spell_id)
-					AI_Event_SpellCastFinished(false, casting_spell_slot);
+					AI_Event_SpellCastFinished(false, (uint8)casting_spell_slot);
 				return(false);
 			}
 		}
@@ -9556,7 +9556,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 		if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()){
 			Message_StringID(13, SPELL_WOULDNT_HOLD);
 			if(casting_spell_id)
-				AI_Event_SpellCastFinished(false, casting_spell_slot);
+				AI_Event_SpellCastFinished(false, (uint8)casting_spell_slot);
 			return(false);
 		}
 
