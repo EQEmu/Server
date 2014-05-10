@@ -10428,7 +10428,7 @@ void command_object(Client *c, const Seperator *sep)
 					door.size = 100;
 				}
 
-				switch (door.opentype = od.unknown010) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
+				switch (door.opentype = (uint8)od.unknown010) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
 				{
 					case 0:
 						door.opentype = 31;
@@ -11272,7 +11272,7 @@ void command_mysql(Client *c, const Seperator *sep)
 					unsigned int num_fields = mysql_num_fields(result);
 					std::stringstream LineText;
 					std::vector<std::string> LineVec;
-					for(int i = 0; i < num_fields; i++) {
+					for(unsigned int i = 0; i < num_fields; i++) {
 						//split lines that could overflow the buffer in Client::Message and get cut off
 						//This will crash MQ2 @ 4000 since their internal buffer is only 2048.
 						//Reducing it to 2000 fixes that but splits more results from tables with a lot of columns.
@@ -11290,7 +11290,7 @@ void command_mysql(Client *c, const Seperator *sep)
 					if(Optionh) { //This option will highlight every other row
 						HText = 1 - HText;
 					}
-					for(int lineNum = 0; lineNum < LineVec.size(); ++lineNum)
+					for(unsigned int lineNum = 0; lineNum < LineVec.size(); ++lineNum)
 					{
 						c->Message(HText, LineVec[lineNum].c_str());
 					}
