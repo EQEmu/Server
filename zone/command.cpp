@@ -6030,7 +6030,7 @@ void command_wpadd(Client *c, const Seperator *sep)
 			}
 		}
 		if (strcmp("-h",sep->arg[2]) == 0)
-			heading = c->GetHeading();
+			heading = (int)c->GetHeading();
 		uint32 tmp_grid = database.AddWPForSpawn(c, s2info->GetID(), c->GetX(),c->GetY(),c->GetZ(), pause, type1, type2, zone->GetZoneID(), heading);
 		if (tmp_grid)
 			t->CastToNPC()->SetGrid(tmp_grid);

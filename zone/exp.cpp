@@ -178,8 +178,8 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
 	if(RuleB(Zone, LevelBasedEXPMods)){
 		if(zone->level_exp_mod[GetLevel()].ExpMod){
-			add_exp *= zone->level_exp_mod[GetLevel()].ExpMod;
-			add_aaxp *= zone->level_exp_mod[GetLevel()].AAExpMod;
+			add_exp = (uint32)(add_exp * zone->level_exp_mod[GetLevel()].ExpMod);
+			add_aaxp = (uint32)(add_aaxp * zone->level_exp_mod[GetLevel()].AAExpMod);
 		}
 	}
 

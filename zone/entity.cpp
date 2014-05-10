@@ -3669,8 +3669,8 @@ Corpse *EntityList::GetClosestCorpse(Mob *sender, const char *Name)
 		if (Name && strcasecmp(CurrentCorpse->GetOwnerName(), Name))
 			continue;
 
-		CurrentDistance = ((CurrentCorpse->GetY() - sender->GetY()) * (CurrentCorpse->GetY() - sender->GetY())) +
-					((CurrentCorpse->GetX() - sender->GetX()) * (CurrentCorpse->GetX() - sender->GetX()));
+		CurrentDistance = (int32)(((CurrentCorpse->GetY() - sender->GetY()) * (CurrentCorpse->GetY() - sender->GetY())) +
+					((CurrentCorpse->GetX() - sender->GetX()) * (CurrentCorpse->GetX() - sender->GetX())));
 
 		if (CurrentDistance < ClosestDistance) {
 			ClosestDistance = CurrentDistance;
@@ -4528,8 +4528,8 @@ Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)
 		if (CurrentMob->GetBodyType() != BodyType)
 			continue;
 
-		CurrentDistance = ((CurrentMob->GetY() - sender->GetY()) * (CurrentMob->GetY() - sender->GetY())) +
-					((CurrentMob->GetX() - sender->GetX()) * (CurrentMob->GetX() - sender->GetX()));
+		CurrentDistance = (uint32)(((CurrentMob->GetY() - sender->GetY()) * (CurrentMob->GetY() - sender->GetY())) +
+					((CurrentMob->GetX() - sender->GetX()) * (CurrentMob->GetX() - sender->GetX())));
 
 		if (CurrentDistance < ClosestDistance) {
 			ClosestDistance = CurrentDistance;
