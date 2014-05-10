@@ -10477,7 +10477,7 @@ void Bot::CalcRestState() {
 int32 Bot::LevelRegen()
 {
 	int level = GetLevel();
-	bool bonus = GetRaceBitmask(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces) != 0;
+	bool bonus = (GetRaceBitmask(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces)) != 0;
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int32 hp = 0;
 

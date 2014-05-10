@@ -4010,7 +4010,7 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 
 	bool NewBankerStatus = gmb->enabled & 0x01;
 
-	bool NewAltStatus = gmb->enabled & 0x02 != 0;
+	bool NewAltStatus = (gmb->enabled & 0x02) != 0;
 
 	if((IsCurrentlyABanker != NewBankerStatus) && !guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
 	{
