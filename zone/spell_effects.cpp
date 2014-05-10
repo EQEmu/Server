@@ -418,10 +418,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				float x, y, z, heading;
 				const char *target_zone;
 				
-				x = spell.base[1];
-				y = spell.base[0];
-				z = spell.base[2];
-				heading = spell.base[3];
+				x = (float)spell.base[1];
+				y = (float)spell.base[0];
+				z = (float)spell.base[2];
+				heading = (float)spell.base[3];
 
 				if(!strcmp(spell.teleport_zone, "same"))
 				{
@@ -490,10 +490,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				float x, y, z, heading;
 				const char *target_zone;
 
-				x = spell.base[1];
-				y = spell.base[0];
-				z = spell.base[2];
-				heading = spell.base[3];
+				x = (float)spell.base[1];
+				y = (float)spell.base[0];
+				z = (float)spell.base[2];
+				heading = (float)spell.base[3];
 
 				if(!strcmp(spell.teleport_zone, "same"))
 				{
@@ -791,7 +791,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if (!bBreak)
 				{
-					int resistMod = partial + (GetCHA()/25);
+					int resistMod = (int)(partial + (GetCHA()/25));
 					resistMod = resistMod > 100 ? 100 : resistMod;
 					buffs[buffslot].ticsremaining = resistMod * buffs[buffslot].ticsremaining / 100;
 				}
@@ -867,7 +867,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					if(IsClient())
 					{
 						AI_Start();
-						animation = GetRunspeed() * 21; //set our animation to match our speed about
+						animation = (uint16)(GetRunspeed() * 21); //set our animation to match our speed about
 					}
 
 					CalculateNewFearpoint();
@@ -1459,7 +1459,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							caster->GetTarget()->GetGender(),
 							caster->GetTarget()->GetTexture()
 						);
-						caster->SendAppearancePacket(AT_Size, caster->GetTarget()->GetSize());
+						caster->SendAppearancePacket(AT_Size, (uint32)caster->GetTarget()->GetSize());
 						for(int x = 0; x < 7; x++){
 							caster->SendWearChange(x);
 						}
@@ -1654,7 +1654,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Model Size: %d%%", effect_value);
 #endif
-				ChangeSize(GetSize() * (effect_value / 100.0));
+				ChangeSize(GetSize() * (effect_value / 100.0f));
 				break;
 			}
 
@@ -2038,7 +2038,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if(IsNPC())
 				{
-					Stun(toss_amt);
+					Stun((int)toss_amt);
 				}
 				toss_amt = sqrt(toss_amt)-2.0;
 
@@ -2071,9 +2071,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				spu->x_pos		= FloatToEQ19(GetX());
 				spu->y_pos		= FloatToEQ19(GetY());
 				spu->z_pos		= FloatToEQ19(GetZ());
-				spu->delta_x	= NewFloatToEQ13(new_x);
-				spu->delta_y	= NewFloatToEQ13(new_y);
-				spu->delta_z	= NewFloatToEQ13(toss_amt);
+				spu->delta_x	= NewFloatToEQ13((float)new_x);
+				spu->delta_y	= NewFloatToEQ13((float)new_y);
+				spu->delta_z	= NewFloatToEQ13((float)toss_amt);
 				spu->heading	= FloatToEQ19(GetHeading());
 				spu->padding0002	=0;
 				spu->padding0006	=7;
@@ -2393,7 +2393,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceHP(spell.base[i], gid, spell.range, caster);
+						r->BalanceHP(spell.base[i], gid, (int32)spell.range, caster);
 						break;
 					}
 				}
@@ -2403,7 +2403,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceHP(spell.base[i], spell.range, caster);
+				g->BalanceHP(spell.base[i], (int32)spell.range, caster);
 				break;
 			}
 
@@ -2421,7 +2421,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceMana(spell.base[i], gid, spell.range, caster);
+						r->BalanceMana(spell.base[i], gid, (int32)spell.range, caster);
 						break;
 					}
 				}
@@ -2431,7 +2431,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceMana(spell.base[i], spell.range, caster);
+				g->BalanceMana(spell.base[i], (int32)spell.range, caster);
 				break;
 			}
 
@@ -2503,7 +2503,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->HealGroup(heal_amt,caster, gid, spell.range);
+						r->HealGroup(heal_amt,caster, gid, (int32)spell.range);
 						break;
 					}
 				}
@@ -2515,7 +2515,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					break;
 				}
 
-				g->HealGroup(heal_amt, caster, spell.range);
+				g->HealGroup(heal_amt, caster, (int32)spell.range);
 				break;
 			}
 
@@ -2644,7 +2644,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_Taunt:
 			{
 				if (IsNPC())
-					caster->Taunt(this->CastToNPC(), false, spell.base[i]);
+					caster->Taunt(this->CastToNPC(), false, (float)spell.base[i]);
 
 				break;
 			}
