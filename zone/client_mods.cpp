@@ -155,7 +155,7 @@ int32 Client::LevelRegen()
 	bool sitting = IsSitting();
 	bool feigned = GetFeigned();
 	int level = GetLevel();
-	bool bonus = GetRaceBitmask(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces) != 0;
+	bool bonus = (GetRaceBitmask(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces)) != 0;
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int32 hp = 0;
 
