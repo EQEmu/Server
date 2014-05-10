@@ -2018,7 +2018,7 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 	if (database.RunQuery(Query,MakeAnyLenString(&Query, "select * from buyer where itemname like '%%%s%%' order by charid limit %i",
 							EscSearchString, RuleI(Bazaar, MaxBarterSearchResults)), errbuf, &Result)) {
 
-		int NumberOfRows = mysql_num_rows(Result);
+		int NumberOfRows = (int)mysql_num_rows(Result);
 
 		if(NumberOfRows == RuleI(Bazaar, MaxBarterSearchResults))
 			Message(15, "Your search found too many results; some are not displayed.");

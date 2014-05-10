@@ -1025,7 +1025,7 @@ bool Database::LoadVariables_result(MYSQL_RES* result) {
 				varcache_array[i] = 0;
 		}
 		else {
-			uint32 tmpnewmax = varcache_max + mysql_num_rows(result);
+			uint32 tmpnewmax = (uint32)varcache_max + mysql_num_rows(result);
 			VarCache_Struct** tmp = new VarCache_Struct*[tmpnewmax];
 			for (i=0; i<tmpnewmax; i++)
 				tmp[i] = 0;
@@ -1588,7 +1588,7 @@ bool Database::CheckUsedName(const char* name)
 	}
 	else { // It was a valid Query, so lets do our counts!
 		safe_delete_array(query);
-		uint32 tmp = mysql_num_rows(result);
+		uint32 tmp = (uint32)mysql_num_rows(result);
 		mysql_free_result(result);
 		if (tmp > 0) // There is a Name! No change (Return False)
 			return false;

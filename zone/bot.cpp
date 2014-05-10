@@ -4886,7 +4886,7 @@ std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string*
 			*errorMessage = std::string(ErrBuf);
 		}
 		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
 				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
@@ -4986,7 +4986,7 @@ std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* err
 				*errorMessage = std::string(ErrBuf);
 			}
 			else {
-				uint32 RowCount = mysql_num_rows(DatasetResult);
+				uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 				if(RowCount > 0) {
 					for(int iCounter = 0; iCounter < RowCount; iCounter++) {
@@ -5025,7 +5025,7 @@ std::list<BotGroupList> Bot::GetBotGroupListByBotOwnerCharacterId(uint32 botOwne
 			*errorMessage = std::string(ErrBuf);
 		}
 		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
 				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
@@ -5059,7 +5059,7 @@ bool Bot::DoesBotGroupNameExist(std::string botGroupName) {
 		MYSQL_ROW DataRow;
 
 		if(database.RunQuery(Query, MakeAnyLenString(&Query, "select BotGroupId from vwBotGroups where BotGroupName = '%s'", botGroupName.c_str()), 0, &DatasetResult)) {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
 				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
@@ -5099,7 +5099,7 @@ uint32 Bot::CanLoadBotGroup(uint32 botOwnerCharacterId, std::string botGroupName
 			*errorMessage = std::string(ErrBuf);
 		}
 		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
 				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
@@ -5139,7 +5139,7 @@ uint32 Bot::GetBotGroupIdByBotGroupName(std::string botGroupName, std::string* e
 			*errorMessage = std::string(ErrBuf);
 		}
 		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
 				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
@@ -5170,7 +5170,7 @@ uint32 Bot::GetBotGroupLeaderIdByBotGroupName(std::string botGroupName) {
 		MYSQL_ROW DataRow;
 
 		if(database.RunQuery(Query, MakeAnyLenString(&Query, "select BotGroupLeaderBotId from vwBotGroups where BotGroupName = '%s'", botGroupName.c_str()), 0, &DatasetResult)) {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
 				for(int iCounter = 0; iCounter < RowCount; iCounter++) {

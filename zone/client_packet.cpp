@@ -11649,7 +11649,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 								EscSearchString, MaxResults), errbuf, &Result))
 	{
 
-		int NumberOfRows = mysql_num_rows(Result);
+		int NumberOfRows = (int)mysql_num_rows(Result);
 
 		if(NumberOfRows == MaxResults)
 			Message(clientMessageError, "Your search found too many results; some are not displayed.");

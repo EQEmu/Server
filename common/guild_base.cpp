@@ -1331,7 +1331,7 @@ uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)
 	}
 	safe_delete_array(query);
 
-	uint32 Rows = mysql_num_rows(result);
+	uint32 Rows = (uint32)mysql_num_rows(result);
 	mysql_free_result(result);
 
 	return Rows;
