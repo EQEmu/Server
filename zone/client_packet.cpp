@@ -3416,7 +3416,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 	else {
 		CheckIncreaseSkill(SkillSneak, nullptr, 5);
 	}
-	float hidechance = ((GetSkill(SkillSneak)/300.0f) + .25) * 100;
+	float hidechance = ((GetSkill(SkillSneak)/300.0f) + .25f) * 1000.f;
 	float random = (float)MakeRandomFloat(0, 99);
 	if(!was && random < hidechance) {
 		sneaking = true;

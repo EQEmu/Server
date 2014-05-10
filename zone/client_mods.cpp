@@ -250,7 +250,7 @@ int32 Client::CalcMaxHP() {
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
 
-	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	max_hp =(int32)(max_hp+ max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 
 	if (cur_hp > max_hp)
 		cur_hp = max_hp;
@@ -990,7 +990,7 @@ int32 Client::CalcBaseMana()
 
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if(base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10);
+					max_m = (int32)(base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10));
 				}
 			}
 			else
@@ -1025,7 +1025,7 @@ int32 Client::CalcBaseMana()
 
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if(base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10);
+					max_m = (int32)(base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10));
 				}
 			}
 			else
@@ -1914,7 +1914,7 @@ int32 Client::CalcBaseEndurance()
 
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if(base_data) {
-			base_end = base_data->base_end + (heroic_stats * 10.0f) + (base_data->endurance_factor * static_cast<int>(stats));
+			base_end = (int32)(base_data->base_end + (heroic_stats * 10.0f) + (base_data->endurance_factor * static_cast<int>(stats)));
 		}
 	}
 	else
