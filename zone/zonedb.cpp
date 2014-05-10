@@ -2641,7 +2641,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 			uint32 numhits = atoul(row[6]);
 			uint32 melee_rune = atoul(row[7]);
 			uint32 magic_rune = atoul(row[8]);
-			uint8 persistent = atoul(row[9]);
+			uint8 persistent = (uint8)atoul(row[9]);
 			uint32 dot_rune = atoul(row[10]);
 			int32 caston_x = atoul(row[11]);
 			int32 caston_y = atoul(row[12]);
