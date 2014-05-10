@@ -1025,7 +1025,7 @@ bool Database::LoadVariables_result(MYSQL_RES* result) {
 				varcache_array[i] = 0;
 		}
 		else {
-			uint32 tmpnewmax = (uint32)varcache_max + mysql_num_rows(result);
+			uint32 tmpnewmax = varcache_max + (uint32)mysql_num_rows(result);
 			VarCache_Struct** tmp = new VarCache_Struct*[tmpnewmax];
 			for (i=0; i<tmpnewmax; i++)
 				tmp[i] = 0;
@@ -1779,7 +1779,7 @@ uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 		mysql_free_result(result);
 	}
 
-	return race_cap;
+	return (uint8)race_cap;
 }
 
 uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level)
@@ -1831,7 +1831,7 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 	if (skill_cap3 > 0 && base_cap > skill_cap3)
 		base_cap = skill_cap3;
 	//Base cap is now the max value at the person's level, return it!
-	return base_cap;
+	return (uint8)base_cap;
 }
 
 uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZoneID, uint32* oInstanceID, float* oX, float* oY, float* oZ) {
