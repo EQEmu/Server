@@ -711,7 +711,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 	// > 0 --> skill is lower, higher chance of fizzle
 	// < 0 --> skill is better, lower chance of fizzle
 	// the max that diff can be is +- 235
-	float diff = par_skill + spells[spell_id].basediff - act_skill;
+	float diff = (float)(par_skill + spells[spell_id].basediff - act_skill);
 
 	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
 	if(GetClass() == BARD)
@@ -4428,7 +4428,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 				return 100;
 			}
 
-			return partial_modifier;
+			return (float)partial_modifier;
 		}
 	}
 }
@@ -4507,7 +4507,7 @@ float Mob::GetAOERange(uint16 spell_id) {
 
 		if(IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
 			//Live AA - Extended Notes, SionachiesCrescendo
-			float song_bonus = aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange;
+			float song_bonus = (float)(aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange);
 			range += range*song_bonus /100.0f;
 		}
 
