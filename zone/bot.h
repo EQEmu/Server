@@ -332,6 +332,7 @@ public:
 	void EquipBot(std::string* errorMessage);
 	bool CheckLoreConflict(const Item_Struct* item);
 	uint32 GetEquipmentColor(uint8 material_slot) const;
+	int32 GetEquipmentMaterial(uint8 material_slot) const;
 
 	// Static Class Methods
 	static void SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage);

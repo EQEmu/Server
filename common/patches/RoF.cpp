@@ -4926,13 +4926,25 @@ char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint
 		ss.write((const char*)&null_term, sizeof(uint8));
 	}
 
-	if(strlen(item->IDFile) > 0)
+	if (RuleB(Inventory,UseAugOrnamentations) && inst && inst->HasOrnamentation()) 
 	{
-		ss.write(item->IDFile, strlen(item->IDFile));
+		ItemInst* ornamentation = inst->GetOrnamentation();
+		if (ornamentation) //paranoid!
+		{
+			ss.write(ornamentation->GetItem()->IDFile, strlen(ornamentation->GetItem()->IDFile));
+		}
+		else if (strlen(item->IDFile) > 0)
+		{
+			ss.write(item->IDFile, strlen(item->IDFile));
+		}
 		ss.write((const char*)&null_term, sizeof(uint8));
 	}
-	else
+	else //original code although I shortened it
 	{
+		if (strlen(item->IDFile) > 0)
+		{
+			ss.write(item->IDFile, strlen(item->IDFile));
+		}
 		ss.write((const char*)&null_term, sizeof(uint8));
 	}
 

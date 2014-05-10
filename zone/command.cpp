@@ -4707,7 +4707,15 @@ void command_iteminfo(Client *c, const Seperator *sep)
 		const Item_Struct* item = inst->GetItem();
 		c->Message(0, "ID: %i Name: %s", item->ID, item->Name);
 		c->Message(0, "  Lore: %s  ND: %i  NS: %i  Type: %i", (item->LoreFlag) ? "true":"false", item->NoDrop, item->NoRent, item->ItemClass);
-		c->Message(0, "  IDF: %s  Size: %i  Weight: %i  icon_id: %i  Price: %i", item->IDFile, item->Size, item->Weight, item->Icon, item->Price);
+		if(RuleB(Inventory,UseAugOrnamentations) && inst->HasOrnamentation())
+		{
+			c->Message(0, "  IDF: %s  Size: %i  Weight: %i  icon_id: %i  Price: %i", inst->GetOrnamentation()->GetItem()->IDFile, item->Size, item->Weight, item->Icon, item->Price);
+		}
+		else
+		{
+			c->Message(0, "  IDF: %s  Size: %i  Weight: %i  icon_id: %i  Price: %i", item->IDFile, item->Size, item->Weight, item->Icon, item->Price);
+		}
+		
 		if (c->Admin() >= 200)
 			c->Message(0, "MinStatus: %i", item->MinStatus);
 		if (item->ItemClass==ItemClassBook)

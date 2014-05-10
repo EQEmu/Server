@@ -553,6 +553,8 @@ RULE_CATEGORY( Inventory )
 RULE_BOOL ( Inventory, EnforceAugmentRestriction, true) // Forces augment slot restrictions
 RULE_BOOL ( Inventory, EnforceAugmentUsability, true) // Forces augmented item usability
 RULE_BOOL ( Inventory, EnforceAugmentWear, true) // Forces augment wear slot validation
+RULE_BOOL ( Inventory, UseAugOrnamentations, true) // Allows use of augment ornamentations
+RULE_INT(Inventory,AugOrnamentationType,524288) // Custom servers can override default value (slot 20/524288)
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY
