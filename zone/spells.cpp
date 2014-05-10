@@ -113,7 +113,7 @@ void Mob::SpellProcess()
 	{
 		spellend_timer.Disable();
 		delaytimer = false;
-		CastedSpellFinished(casting_spell_id, casting_spell_targetid, casting_spell_slot,
+		CastedSpellFinished(casting_spell_id, casting_spell_targetid, (uint8)casting_spell_slot,
 			casting_spell_mana, casting_spell_inventory_slot, casting_spell_resist_adjust);
 	}
 
@@ -444,7 +444,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
-		CastedSpellFinished(spell_id, target_id, slot, mana_cost, item_slot, resist_adjust);
+		CastedSpellFinished(spell_id, target_id, (uint8)slot, mana_cost, item_slot, resist_adjust);
 		return(true);
 	}
 
@@ -872,7 +872,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 // NOTE: do not put range checking, etc into this function. this should
 // just check timed spell specific things before passing off to SpellFinished
 // which figures out proper targets etc
-void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
+void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint8 slot,
 							uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
 {
 	bool IsFromItem = false;
@@ -4390,7 +4390,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 				resist_chance = 1;
 			}
 
-			float partial_modifier = ((150 * (roll - resist_chance)) / resist_chance);
+			float partial_modifier = ((150.0f * (roll - resist_chance)) / resist_chance);
 
 			if(IsNPC())
 			{
