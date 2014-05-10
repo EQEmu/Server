@@ -1397,7 +1397,7 @@ int32 Bot::GenerateBaseHitPoints()
 		float SoDPost255;
 
 		if(((NormalSTA - 255) / 2) > 0)
-			SoDPost255 = (int)((NormalSTA - 255) / 2.0f);
+			SoDPost255 = (NormalSTA - 255) / 2.0f;
 		else
 			SoDPost255 = 0;
 
@@ -7868,7 +7868,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 			if(shield == ItemTypeShield) {
 
 				//Live AA - Shield Block
-				bonusShieldBlock = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
+				bonusShieldBlock = (float)(aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock);
 				RollTable[1] = RollTable[0] + bonusShieldBlock;
 			}
 		}
@@ -7882,7 +7882,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 			float bonusStaffBlock = 0.0f;
 			if(TwoHandBlunt == ItemType2HBlunt) {
 
-				bonusStaffBlock = aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock;
+				bonusStaffBlock = (float)(aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock);
 				RollTable[1] = RollTable[0] + bonusStaffBlock;
 			}
 		}
@@ -7928,7 +7928,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0)
 	{
-		roll = MakeRandomFloat(0,100);
+		roll = (float)MakeRandomFloat(0,100);
 		if(roll <= RollTable[0]){
 			damage = -3;
 		}
@@ -8347,10 +8347,10 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 	float HasteModifier = 0;
 	if(GetHaste() >= 0){
-		HasteModifier = 10000 / (100 + GetHaste());
+		HasteModifier = 10000.0f / (100.0f + GetHaste());
 	}
 	else {
-		HasteModifier = (100 - GetHaste());
+		HasteModifier = (100.0f - GetHaste());
 	}
 	int32 dmg = 0;
 
@@ -8583,7 +8583,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		TryBackstab(target,reuse);
 	}
 
-	classattack_timer.Start(reuse*HasteModifier/100);
+	classattack_timer.Start((uint32)(reuse*HasteModifier/100));
 }
 
 bool Bot::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
@@ -9493,7 +9493,7 @@ float Bot::GetAOERange(uint16 spell_id) {
 
 	if(IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
 		//Live AA - Extended Notes, SionachiesCrescendo
-		float song_bonus = aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange;
+		float song_bonus = (float)(aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange);
 		range += range*song_bonus /100.0f;
 	}
 
