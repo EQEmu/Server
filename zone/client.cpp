@@ -2133,9 +2133,9 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		{
 			m_pp.gold = gold/100;
 			uint64 silvertest = (gold-(static_cast<uint64>(m_pp.gold)*100))/10;
-			m_pp.silver += silvertest;
+			m_pp.silver =(int32)(m_pp.silver + silvertest);
 			uint64 coppertest = (gold-(static_cast<uint64>(m_pp.gold)*100+silvertest*10));
-			m_pp.copper += coppertest;
+			m_pp.copper = (int32)(m_pp.copper + coppertest);
 			if(updateclient)
 				SendMoneyUpdate();
 			Save();
@@ -2148,11 +2148,11 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 
 		m_pp.platinum = platinum/1000;
 		uint64 goldtest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000))/100;
-		m_pp.gold += goldtest;
+		m_pp.gold = (int32)(m_pp.gold +goldtest);
 		uint64 silvertest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000+goldtest*100))/10;
 		m_pp.silver += silvertest;
 		uint64 coppertest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000+goldtest*100+silvertest*10));
-		m_pp.copper = coppertest;
+		m_pp.copper = (int32)coppertest;
 		if(updateclient)
 			SendMoneyUpdate();
 		RecalcWeight();
@@ -2172,7 +2172,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	if(new_val < 0) {
 		m_pp.platinum = 0;
 	} else {
-		m_pp.platinum = m_pp.platinum + tmp2;
+		m_pp.platinum = (int32)(m_pp.platinum + tmp2);
 	}
 	tmp-=tmp2*1000;
 
@@ -2181,11 +2181,11 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	// Add Amount of Gold
 	tmp2 = tmp/100;
-	new_val = m_pp.gold + tmp2;
+	new_val = (int32)(m_pp.gold + tmp2);
 	if(new_val < 0) {
 		m_pp.gold = 0;
 	} else {
-		m_pp.gold = m_pp.gold + tmp2;
+		m_pp.gold = (int32)(m_pp.gold + tmp2);
 	}
 	tmp-=tmp2*100;
 	//if (updateclient)
@@ -2193,11 +2193,11 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	// Add Amount of Silver
 	tmp2 = tmp/10;
-	new_val = m_pp.silver + tmp2;
+	new_val = (int32)(m_pp.silver + tmp2);
 	if(new_val < 0) {
 		m_pp.silver = 0;
 	} else {
-		m_pp.silver = m_pp.silver + tmp2;
+		m_pp.silver = (int32)(m_pp.silver + tmp2);
 	}
 	tmp-=tmp2*10;
 	//if (updateclient)
@@ -2212,7 +2212,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	if(new_val < 0) {
 		m_pp.copper = 0;
 	} else {
-		m_pp.copper = m_pp.copper + tmp2;
+		m_pp.copper = (int32)(m_pp.copper + tmp2);
 	}
 
 

@@ -9798,7 +9798,7 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 	cp/=10;
 	m_pp.gold=cp%10;
 	cp/=10;
-	m_pp.platinum=cp;
+	m_pp.platinum=(int32)cp;
 
 	cp = static_cast<uint64>(m_pp.copper_bank) +
 		(static_cast<uint64>(m_pp.silver_bank) * 10) +
@@ -9811,7 +9811,7 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 	cp/=10;
 	m_pp.gold_bank=cp%10;
 	cp/=10;
-	m_pp.platinum_bank=cp;
+	m_pp.platinum_bank=(int32)cp;
 
 	bc->copper=m_pp.copper;
 	bc->silver=m_pp.silver;

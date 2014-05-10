@@ -1528,14 +1528,14 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 
 	// now we actually take it from the from bucket. if there's an error
 	// with the destination slot, they lose their money
-	*from_bucket -= amount_to_take;
+	*from_bucket = (int32)(*from_bucket - amount_to_take);
 	// why are intentionally inducing a crash here rather than letting the code attempt to stumble on?
 	// assert(*from_bucket >= 0);
 
 	if(to_bucket)
 	{
 		if(*to_bucket + amount_to_add > *to_bucket)	// overflow check
-			*to_bucket += amount_to_add;
+			*to_bucket = (int32)(*to_bucket+amount_to_add);
 
 		//shared bank plat
 		if (RuleB(Character, SharedBankPlat))
@@ -1573,7 +1573,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		tcs->slot = mc->cointype2;
 		tcs->unknown5 = 0x4fD2;
 		tcs->unknown7 = 0;
-		tcs->amount = amount_to_add;
+		tcs->amount = (uint32)amount_to_add;
 		recipient->QueuePacket(outapp);
 		safe_delete(outapp);
 	}

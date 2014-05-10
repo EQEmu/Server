@@ -3832,7 +3832,7 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 	if (caster && amount > 0) {
 		if (caster->IsNPC() && !caster->IsPet()) {
 			float npchealscale = caster->CastToNPC()->GetHealScale();
-			amount = (uint32)(amount * npchealscale) / 100.0f);
+			amount = (uint32)((amount * npchealscale) / 100.0f);
 		}
 	}
 
