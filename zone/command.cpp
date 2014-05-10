@@ -2727,7 +2727,7 @@ void command_texture(Client *c, const Seperator *sep)
 				helm = texture;
 
 			if (texture == 255) {
-				texture = 0xFFFF;	// Should be pulling these from the database instead
+				texture = 0xFF;	// Should be pulling these from the database instead
 				helm = 0xFF;
 			}
 
@@ -6005,8 +6005,9 @@ void command_wpadd(Client *c, const Seperator *sep)
 {
 	int	type1=0,
 		type2=0,
-		pause=0,
-		heading=-1;	// Defaults for a new grid
+		pause=0;
+
+	float heading=-1.0f;	// Defaults for a new grid
 
 	Mob *t=c->GetTarget();
 	if (t && t->IsNPC())
@@ -6030,7 +6031,7 @@ void command_wpadd(Client *c, const Seperator *sep)
 			}
 		}
 		if (strcmp("-h",sep->arg[2]) == 0)
-			heading = (int)c->GetHeading();
+			heading = c->GetHeading();
 		uint32 tmp_grid = database.AddWPForSpawn(c, s2info->GetID(), c->GetX(),c->GetY(),c->GetZ(), pause, type1, type2, zone->GetZoneID(), heading);
 		if (tmp_grid)
 			t->CastToNPC()->SetGrid(tmp_grid);
