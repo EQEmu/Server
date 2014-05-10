@@ -1873,11 +1873,11 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 
 		//check if we're hitting above our max or below it.
-		if((min_dmg+eleBane) != 0 && damage < (min_dmg+eleBane)) {
+		if((min_dmg+eleBane) != 0 && (uint32)damage < (min_dmg+eleBane)) {
 			mlog(COMBAT__DAMAGE, "Damage (%d) is below min (%d). Setting to min.", damage, (min_dmg+eleBane));
 			damage = (min_dmg+eleBane);
 		}
-		if((max_dmg+eleBane) != 0 && damage > (max_dmg+eleBane)) {
+		if((max_dmg+eleBane) != 0 && (uint32)damage > (max_dmg+eleBane)) {
 			mlog(COMBAT__DAMAGE, "Damage (%d) is above max (%d). Setting to max.", damage, (max_dmg+eleBane));
 			damage = (max_dmg+eleBane);
 		}
@@ -3188,7 +3188,7 @@ int32 Mob::ReduceDamage(int32 damage)
 		{
 			DisableMeleeRune = true;
 			int damage_to_reduce = damage * spellbonuses.MeleeThresholdGuard[0] / 100;
-			if(damage_to_reduce > buffs[slot].melee_rune)
+			if((uint32)damage_to_reduce > buffs[slot].melee_rune)
 			{
 				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MeleeThresholdGuard %d damage negated, %d"
 					" damage remaining, fading buff.", damage_to_reduce, buffs[slot].melee_rune);
@@ -3212,7 +3212,7 @@ int32 Mob::ReduceDamage(int32 damage)
 		if(slot >= 0)
 		{
 			int damage_to_reduce = damage * spellbonuses.MitigateMeleeRune[0] / 100;
-			if(damage_to_reduce > buffs[slot].melee_rune)
+			if((uint32)damage_to_reduce > buffs[slot].melee_rune)
 			{
 				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamage %d damage negated, %d"
 					" damage remaining, fading buff.", damage_to_reduce, buffs[slot].melee_rune);
@@ -3234,7 +3234,7 @@ int32 Mob::ReduceDamage(int32 damage)
 		slot = spellbonuses.TriggerMeleeThreshold[1];
 		
 		if (slot >= 0) {
-			if(damage > buffs[slot].melee_rune)	{
+			if((uint32)damage > buffs[slot].melee_rune)	{
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
 			}
@@ -3286,7 +3286,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			if(slot >= 0)
 			{
 				int damage_to_reduce = damage * spellbonuses.MitigateDotRune[0] / 100;
-				if(damage_to_reduce > buffs[slot].dot_rune)
+				if((uint32)damage_to_reduce > buffs[slot].dot_rune)
 				{
 					damage -= damage_to_reduce;
 					if(!TryFadeEffect(slot))
@@ -3316,7 +3316,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			{
 				DisableSpellRune = true;
 				int damage_to_reduce = damage * spellbonuses.SpellThresholdGuard[0] / 100;
-				if(damage_to_reduce > buffs[slot].magic_rune)
+				if((uint32)damage_to_reduce > buffs[slot].magic_rune)
 				{
 					damage -= damage_to_reduce;
 					if(!TryFadeEffect(slot))
@@ -3337,7 +3337,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			if(slot >= 0)
 			{
 				int damage_to_reduce = damage * spellbonuses.MitigateSpellRune[0] / 100;
-				if(damage_to_reduce > buffs[slot].magic_rune)
+				if((uint32)damage_to_reduce > buffs[slot].magic_rune)
 				{
 					mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateSpellDamage %d damage negated, %d"
 						" damage remaining, fading buff.", damage_to_reduce, buffs[slot].magic_rune);
@@ -3359,7 +3359,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			slot = spellbonuses.TriggerSpellThreshold[1];
 		
 			if (slot >= 0) {
-				if(damage > buffs[slot].magic_rune)	{
+				if((uint32)damage > buffs[slot].magic_rune)	{
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
 				}
@@ -3836,7 +3836,7 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 		}
 	}
 
-	if (amount > (maxhp - curhp))
+	if (amount > (uint32)(maxhp - curhp))
 		acthealed = (maxhp - curhp);
 	else
 		acthealed = amount;
@@ -3884,7 +3884,7 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 	}
 
 	if (curhp < maxhp) {
-		if ((curhp + amount) > maxhp)
+		if ((curhp + amount) > (uint32)maxhp)
 			curhp = maxhp;
 		else
 			curhp += amount;
@@ -4419,7 +4419,7 @@ bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 		uint32 damage = aabonuses.FinishingBlow[1];
 		uint16 levelreq = aabonuses.FinishingBlowLvl[0];
 
-		if(defender->GetLevel() <= levelreq && (chance >= MakeRandomInt(0, 1000))){
+		if(defender->GetLevel() <= levelreq && (chance >= (uint32)MakeRandomInt(0, 1000))){
 			mlog(COMBAT__ATTACKS, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
@@ -4622,7 +4622,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 			if(slot == spellbonuses.MeleeRune[1] && spellbonuses.MeleeRune[0] && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)){
 				uint32 melee_rune_left = buffs[slot].melee_rune;
 				
-				if(melee_rune_left > damage)
+				if(melee_rune_left > (uint32)damage)
 				{
 					melee_rune_left -= damage;
 					buffs[slot].melee_rune = melee_rune_left;
@@ -4646,7 +4646,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 		for(uint32 slot = 0; slot < buff_max; slot++) {
 			if(slot == spellbonuses.AbsorbMagicAtt[1] && spellbonuses.AbsorbMagicAtt[0] && buffs[slot].magic_rune && IsValidSpell(buffs[slot].spellid)){
 				uint32 magic_rune_left = buffs[slot].magic_rune;
-				if(magic_rune_left > damage)
+				if(magic_rune_left > (uint32)damage)
 				{
 					magic_rune_left -= damage;
 					buffs[slot].magic_rune = magic_rune_left;
