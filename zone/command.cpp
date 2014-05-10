@@ -1393,7 +1393,7 @@ void command_zone_instance(Client *c, const Seperator *sep)
 
 	if (sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4)){
 		//zone to specific coords
-		c->MovePC(zoneid, instanceid, atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), 0.0f, 0);
+		c->MovePC(zoneid, instanceid, (float)atof(sep->arg[2]), (float)atof(sep->arg[3]), (float)atof(sep->arg[4]), 0.0f, 0);
 	}
 	else{
 		c->MovePC(zoneid, instanceid, 0.0f, 0.0f, 0.0f, 0.0f, 0, ZoneToSafeCoords);
@@ -2098,7 +2098,7 @@ void command_ai(Client *c, const Seperator *sep)
 					tmp = atoi(sep->arg[7]);
 				if (sep->IsNumber(8))
 					tmp2 = atoi(sep->arg[8]);
-				target->CastToNPC()->AI_SetRoambox(atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]), atof(sep->arg[6]), tmp, tmp2);
+				target->CastToNPC()->AI_SetRoambox((float)atof(sep->arg[2]), (float)atof(sep->arg[3]), (float)atof(sep->arg[4]), (float)atof(sep->arg[5]), (float)atof(sep->arg[6]), tmp, tmp2);
 			}
 			else if ((sep->argnum == 3 || sep->argnum == 4) && sep->IsNumber(2) && sep->IsNumber(3)) {
 				uint32 tmp = 2500;
@@ -2107,7 +2107,7 @@ void command_ai(Client *c, const Seperator *sep)
 					tmp = atoi(sep->arg[4]);
 				if (sep->IsNumber(5))
 					tmp2 = atoi(sep->arg[5]);
-				target->CastToNPC()->AI_SetRoambox(atof(sep->arg[2]), atof(sep->arg[3]), tmp, tmp2);
+				target->CastToNPC()->AI_SetRoambox((float)atof(sep->arg[2]), (float)atof(sep->arg[3]), tmp, tmp2);
 			}
 			else {
 				c->Message(0, "Usage: #ai roambox dist max_x min_x max_y min_y [delay] [mindelay]");
@@ -4704,7 +4704,7 @@ void command_goto(Client *c, const Seperator *sep)
 	else if (!(sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)))
 		c->Message(0, "Usage: #goto [x y z]");
 	else
-		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atof(sep->arg[1]), atof(sep->arg[2]), atof(sep->arg[3]), 0.0f);
+		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), (float)atof(sep->arg[1]), (float)atof(sep->arg[2]), (float)atof(sep->arg[3]), 0.0f);
 }
 
 void command_iteminfo(Client *c, const Seperator *sep)
@@ -7832,7 +7832,7 @@ void command_aggro(Client *c, const Seperator *sep)
 		c->Message(0, "Error: you must have an NPC target.");
 		return;
 	}
-	float d = atof(sep->arg[1]);
+	float d = (float)atof(sep->arg[1]);
 	if(d == 0.0f) {
 		c->Message(13, "Error: distance argument required.");
 		return;
@@ -8136,7 +8136,7 @@ void command_mlog(Client *c, const Seperator *sep) {
 		else if(off == sep->arg[2]) onoff = false;
 		else { c->Message(13, "Invalid argument '%s'. Expected on/off.", sep->arg[2]); return; }
 
-		float radius = atof(sep->arg[3]);
+		float radius = (float)atof(sep->arg[3]);
 		if(radius <= 0) {
 			c->Message(13, "Invalid radius %f", radius);
 			return;
@@ -10156,7 +10156,7 @@ void command_object(Client *c, const Seperator *sep)
 
 				if (sep->argnum > 5)
 				{
-					o->SetHeading(atof(sep->arg[6]));
+					o->SetHeading((float)atof(sep->arg[6]));
 				}
 			}
 
@@ -10189,7 +10189,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			o->SetHeading(atof(sep->arg[3]));
+			o->SetHeading((float)atof(sep->arg[3]));
 
 			// Despawn and respawn object to reflect change
 			app = new EQApplicationPacket();

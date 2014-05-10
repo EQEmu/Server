@@ -5055,7 +5055,7 @@ bool Mob::IsFacingMob(Mob *other)
 		return false;
 	float angle = HeadingAngleToMob(other);
 	// what the client uses appears to be 2x our internal heading
-	float heading = GetHeading() * 2.0;
+	float heading = GetHeading() * 2.0f;
 
 	if (angle > 472.0 && heading < 40.0)
 		angle = heading;
@@ -5087,13 +5087,13 @@ float Mob::HeadingAngleToMob(Mob *other)
 	// I'm sure this could be improved for readability, but whatever
 	if (this_y >= mob_y) {
 		if (mob_x >= this_x)
-			return (90.0 - angle + 90.0) * 511.5 * 0.0027777778;
+			return (90.0f - angle + 90.0f) * 511.5f * 0.0027777778f;
 		if (mob_x <= this_x)
-			return (angle + 180.0) * 511.5 * 0.0027777778;
+			return (angle + 180.0f) * 511.5f * 0.0027777778f;
 	}
 	if (this_y > mob_y || mob_x > this_x)
-		return angle * 511.5 * 0.0027777778;
+		return angle * 511.5f * 0.0027777778f;
 	else
-		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
+		return (90.0f - angle + 270.0f) * 511.5f * 0.0027777778f;
 }
 

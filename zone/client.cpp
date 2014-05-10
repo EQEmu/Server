@@ -5109,23 +5109,23 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 			float delta = (x-(-713.6f));
 			delta *= delta;
 			float distance = delta;
-			delta = (y-(-160.2));
+			delta = (y-(-160.2f));
 			delta *= delta;
 			distance += delta;
-			delta = (z-(-12.8));
+			delta = (z-(-12.8f));
 			delta *= delta;
 			distance += delta;
 
 			if(distance < max_dist)
 				return true;
 
-			delta = (x-(-153.8));
+			delta = (x-(-153.8f));
 			delta *= delta;
 			distance = delta;
-			delta = (y-(-30.3));
+			delta = (y-(-30.3f));
 			delta *= delta;
 			distance += delta;
-			delta = (z-(8.2));
+			delta = (z-(8.2f));
 			delta *= delta;
 			distance += delta;
 
@@ -5149,13 +5149,13 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 		if(distance < max_dist)
 			return true;
 
-		delta = (x-(-655.4));
+		delta = (x-(-655.4f));
 		delta *= delta;
 		distance = delta;
-		delta = (y-(10.5));
+		delta = (y-(10.5f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(-51.8));
+		delta = (z-(-51.8f));
 		delta *= delta;
 		distance += delta;
 
@@ -5192,39 +5192,39 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 		if(distance < max_dist)
 			return true;
 
-		delta = (x-(-8.8));
+		delta = (x-(-8.8f));
 		delta *= delta;
 		distance = delta;
-		delta = (y-(-394.1));
+		delta = (y-(-394.1f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(41.1));
+		delta = (z-(41.1f));
 		delta *= delta;
 		distance += delta;
 
 		if(distance < max_dist)
 			return true;
 
-		delta = (x-(-310.3));
+		delta = (x-(-310.3f));
 		delta *= delta;
 		distance = delta;
-		delta = (y-(-1411.6));
+		delta = (y-(-1411.6f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(-42.8));
+		delta = (z-(-42.8f));
 		delta *= delta;
 		distance += delta;
 
 		if(distance < max_dist)
 			return true;
 
-		delta = (x-(-183.1));
+		delta = (x-(-183.1f));
 		delta *= delta;
 		distance = delta;
-		delta = (y-(-1409.8));
+		delta = (y-(-1409.8f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(37.1));
+		delta = (z-(37.1f));
 		delta *= delta;
 		distance += delta;
 
