@@ -4462,7 +4462,7 @@ void Mob::DoRiposte(Mob* defender) {
 	mlog(COMBAT__ATTACKS, "Preforming a return SPECIAL ATTACK (%d percent chance)", DoubleRipChance);
 
 		if (defender->GetClass() == MONK)
-			defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[2]);
+			defender->MonkSpecialAttack(this, (uint8)defender->aabonuses.GiveDoubleRiposte[2]);
 		else if (defender->IsClient())
 			defender->CastToClient()->DoClassAttacks(this,defender->aabonuses.GiveDoubleRiposte[2], true);
 	}
