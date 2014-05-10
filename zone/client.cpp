@@ -2168,7 +2168,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	// Add Amount of Platinum
 	tmp2 = tmp/1000;
-	int32 new_val = m_pp.platinum + tmp2;
+	int64 new_val = m_pp.platinum + tmp2;
 	if(new_val < 0) {
 		m_pp.platinum = 0;
 	} else {
