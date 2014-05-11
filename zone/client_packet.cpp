@@ -1267,7 +1267,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		PlayerPositionUpdateServer_Struct* ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
 		MakeSpawnUpdate(ppu);
 		if (gmhideme)
-			entity_list.QueueClientsStatus(this,outapp,true,Admin(),250);
+			entity_list.QueueClientsStatus(this,outapp,true,(uint8)Admin(),250);
 		else
 			entity_list.QueueCloseClients(this,outapp,true,300,nullptr,false);
 		safe_delete(outapp);

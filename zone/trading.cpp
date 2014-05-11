@@ -1060,7 +1060,7 @@ void Client::TraderUpdate(uint16 SlotID,uint32 TraderID){
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TraderItemUpdate,sizeof(TraderItemUpdate_Struct));
 	TraderItemUpdate_Struct* tus=(TraderItemUpdate_Struct*)outapp->pBuffer;
 	tus->Charges = 0xFFFF;
-	tus->FromSlot = SlotID;
+	tus->FromSlot = (uint8)SlotID;
 	tus->ToSlot = 0xFF;
 	tus->TraderID = TraderID;
 	tus->Unknown000 = 0;

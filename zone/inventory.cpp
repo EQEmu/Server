@@ -1640,7 +1640,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 	}
 
-	int matslot = SlotConvert2(dst_slot_id);
+	int matslot = SlotConvert2((uint8)dst_slot_id);
 	if (dst_slot_id<22 && matslot != 0) {
 		SendWearChange(matslot);
 	}

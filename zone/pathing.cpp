@@ -1289,7 +1289,7 @@ void PathManager::OpenDoors(int Node1, int Node2, Mob *ForWho)
 
 		if(PathNodes[Node1].Neighbours[i].DoorID >= 0)
 		{
-			Doors *d = entity_list.FindDoor(PathNodes[Node1].Neighbours[i].DoorID);
+			Doors *d = entity_list.FindDoor((uint8)PathNodes[Node1].Neighbours[i].DoorID);
 
 			if(d && !d->IsDoorOpen() )
 			{
