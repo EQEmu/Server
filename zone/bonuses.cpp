@@ -1339,7 +1339,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				// redundant to have level check here
 				if(newbon->AggroRange == -1 || effect_value < newbon->AggroRange)
 				{
-					newbon->AggroRange = effect_value;
+					newbon->AggroRange = (float)effect_value;
 				}
 				break;
 			}
@@ -1351,7 +1351,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				// take the one with less range in any case
 				if(newbon->AssistRange == -1 || effect_value < newbon->AssistRange)
 				{
-					newbon->AssistRange = effect_value;
+					newbon->AssistRange = (float)effect_value;
 				}
 				break;
 			}
@@ -2984,15 +2984,15 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_ChangeFrenzyRad:
-					spellbonuses.AggroRange = effect_value;
-					aabonuses.AggroRange = effect_value;
-					itembonuses.AggroRange = effect_value;
+					spellbonuses.AggroRange = (float)effect_value;
+					aabonuses.AggroRange = (float)effect_value;
+					itembonuses.AggroRange = (float)effect_value;
 					break;
 
 				case SE_Harmony:
-					spellbonuses.AssistRange = effect_value;
-					aabonuses.AssistRange = effect_value;
-					itembonuses.AssistRange = effect_value;
+					spellbonuses.AssistRange = (float)effect_value;
+					aabonuses.AssistRange = (float)effect_value;
+					itembonuses.AssistRange = (float)effect_value;
 					break;
 
 				case SE_AttackSpeed:

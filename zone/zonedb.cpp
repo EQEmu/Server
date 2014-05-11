@@ -1293,8 +1293,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->unique_spawn_by_name = atoi(row[r++]) == 1 ? true : false;
 				tmpNPCType->underwater = atoi(row[r++]) == 1 ? true : false;
 				tmpNPCType->emoteid = atoi(row[r++]);
-				tmpNPCType->spellscale = atoi(row[r++]);
-				tmpNPCType->healscale = atoi(row[r++]);
+				tmpNPCType->spellscale = (float)atoi(row[r++]);
+				tmpNPCType->healscale = (float)atoi(row[r++]);
 				tmpNPCType->no_target_hotkey = atoi(row[r++]) == 1 ? true : false;
 				
 				// If NPC with duplicate NPC id already in table,
@@ -1605,8 +1605,8 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				//tmpNPCType->unique_spawn_by_name = atoi(row[r++]) == 1 ? true : false;
 				//tmpNPCType->underwater = atoi(row[r++]) == 1 ? true : false;
 				//tmpNPCType->emoteid = atoi(row[r++]);
-				tmpNPCType->spellscale = atoi(row[r++]);
-				tmpNPCType->healscale = atoi(row[r++]);
+				tmpNPCType->spellscale = (float)atoi(row[r++]);
+				tmpNPCType->healscale = (float)atoi(row[r++]);
 
 				// If NPC with duplicate NPC id already in table,
 				// free item we attempted to add.

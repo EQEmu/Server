@@ -53,7 +53,7 @@ void Mob::CheckFlee() {
 
 	//see if were possibly hurt enough
 	float ratio = GetHPRatio();
-	float fleeratio = GetSpecialAbility(FLEE_PERCENT);
+	float fleeratio = (float)GetSpecialAbility(FLEE_PERCENT);
 	fleeratio = fleeratio > 0 ? fleeratio : RuleI(Combat, FleeHPRatio);
 	
 	if(ratio >= fleeratio)
@@ -112,7 +112,7 @@ void Mob::ProcessFlee() {
 	}
 
 	//see if we are still dying, if so, do nothing
-	float fleeratio = GetSpecialAbility(FLEE_PERCENT);
+	float fleeratio = (float)GetSpecialAbility(FLEE_PERCENT);
 	fleeratio = fleeratio > 0 ? fleeratio : RuleI(Combat, FleeHPRatio);
 	if(GetHPRatio() < fleeratio)
 		return;

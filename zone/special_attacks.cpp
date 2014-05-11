@@ -780,7 +780,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		}
 	}
 
-	float range = RangeItem->Range + AmmoItem->Range + 5; //Fudge it a little, client will let you hit something at 0 0 0 when you are at 205 0 0
+	float range = (float)(RangeItem->Range + AmmoItem->Range + 5); //Fudge it a little, client will let you hit something at 0 0 0 when you are at 205 0 0
 	mlog(COMBAT__RANGED, "Calculated bow range to be %.1f", range);
 	range *= range;
 	if(DistNoRootNoZ(*GetTarget()) > range) {
@@ -1455,7 +1455,7 @@ void NPC::DoClassAttacks(Mob *target) {
 
 	float HasteModifier = 0;
 	if(GetHaste() > 0)
-		HasteModifier = 10000 / (100 + GetHaste());
+		HasteModifier = (float)(10000 / (100 + GetHaste()));
 	else if(GetHaste() < 0)
 		HasteModifier = (100 - GetHaste());
 	else
@@ -1961,7 +1961,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 
 	Mob *hate_top = who->GetHateMost();
 
-	float level_difference = GetLevel() - who->GetLevel();
+	float level_difference = (float)(GetLevel() - who->GetLevel());
 
 	//Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
 	if ((RuleB(Combat,TauntOverLevel) == false) && (level_difference < 0) || who->GetSpecialAbility(IMMUNE_TAUNT)){

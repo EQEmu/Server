@@ -1877,8 +1877,8 @@ bool Merc::AI_EngagedCastCheck() {
 				}
 				break;
 			case HEALER:
-				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(SpellType_Heal), MercAISpellRange, SpellType_Heal)) {
-					if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(SpellType_Buff), MercAISpellRange, SpellType_Buff)) {
+				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(SpellType_Heal), (float)MercAISpellRange, SpellType_Heal)) {
+					if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(SpellType_Buff), (float)MercAISpellRange, SpellType_Buff)) {
 						failedToCast = true;
 					}
 				}
@@ -1931,10 +1931,10 @@ bool Merc::AI_IdleCastCheck() {
 				failedToCast = true;
 			break;
 			case HEALER:
-				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Cure)) {
-					if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Heal)) {
-						if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Resurrect)) {
-							if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Buff)) {
+				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Cure)) {
+					if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Heal)) {
+						if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Resurrect)) {
+							if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Buff)) {
 								failedToCast = true;
 							}
 						}
@@ -1943,7 +1943,7 @@ bool Merc::AI_IdleCastCheck() {
 				result = true;
 				break;
 			case MELEEDPS:
-				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Buff)) {
+				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Buff)) {
 					failedToCast = true;
 				}
 				break;
@@ -2531,7 +2531,7 @@ void Merc::CheckHateList() {
 			if(g) {
 				Mob* MercOwner = GetOwner();
 				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->IsNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
-						float range = g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+						float range = (float)(g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius));
 						range = range * range;
 						if(MercOwner->GetTarget()->DistNoRootNoZ(*this) < range) {
 							AddToHateList(MercOwner->GetTarget(), 1);
@@ -2553,7 +2553,7 @@ void Merc::CheckHateList() {
 								if(groupMember) {
 									if(npc->IsOnHatelist(groupMember)) {
 										if(!hate_list.IsOnHateList(npc)) {
-											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+											float range = (float)(g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius));
 											range *= range;
 											if(npc->DistNoRootNoZ(*this) < range) {
 												hate_list.Add(npc, 1);
@@ -4621,9 +4621,9 @@ void Merc::DoClassAttacks(Mob *target) {
 
 	float HasteModifier = 0;
 	if(GetHaste() > 0)
-		HasteModifier = 10000 / (100 + GetHaste());
+		HasteModifier = (float)(10000 / (100 + GetHaste()));
 	else if(GetHaste() < 0)
-		HasteModifier = (100 - GetHaste());
+		HasteModifier = (float)(100 - GetHaste());
 	else
 		HasteModifier = 100;
 

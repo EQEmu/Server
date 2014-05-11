@@ -121,11 +121,11 @@ void Trap::Trigger(Mob* trigger)
 		case trapTypeAlarm:
 			if (message.empty())
 			{
-				entity_list.MessageClose(trigger,false,effectvalue,13,"A loud alarm rings out through the air...");
+				entity_list.MessageClose(trigger,false,(float)effectvalue,13,"A loud alarm rings out through the air...");
 			}
 			else
 			{
-				entity_list.MessageClose(trigger,false,effectvalue,13,"%s",message.c_str());
+				entity_list.MessageClose(trigger,false,(float)effectvalue,13,"%s",message.c_str());
 			}
 
 			entity_list.SendAlarm(this,trigger,effectvalue);
@@ -144,7 +144,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-5+MakeRandomInt(0, 10), y-5+MakeRandomInt(0, 10), z-5+MakeRandomInt(0, 10), MakeRandomInt(0, 249), FlyMode3);
+					NPC* new_npc = new NPC(tmp, nullptr, x-5+MakeRandomInt(0, 10), (float)(y-5+MakeRandomInt(0, 10)), (float)(z-5+MakeRandomInt(0, 10)), (float)MakeRandomInt(0, 249), FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -165,7 +165,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-2+MakeRandomInt(0, 5), y-2+MakeRandomInt(0, 5), z-2+MakeRandomInt(0, 5), MakeRandomInt(0, 249), FlyMode3);
+					NPC* new_npc = new NPC(tmp, nullptr, (float)(x-2+MakeRandomInt(0, 5)), (float)(y-2+MakeRandomInt(0, 5)), (float)(z-2+MakeRandomInt(0, 5)), (float)(MakeRandomInt(0, 249)), FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);

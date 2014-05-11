@@ -3089,7 +3089,7 @@ void EntityList::OpenDoorsNear(NPC *who)
 
 void EntityList::SendAlarm(Trap *trap, Mob *currenttarget, uint8 kos)
 {
-	float val2 = trap->effectvalue * trap->effectvalue;
+	float val2 = (float)(trap->effectvalue * trap->effectvalue);
 
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {

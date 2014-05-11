@@ -147,8 +147,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	logging_enabled = NPC_DEFAULT_LOGGING_ENABLED;
 
-	pAggroRange = d->aggroradius;
-	pAssistRange = d->assistradius;
+	pAggroRange = (float)d->aggroradius;
+	pAssistRange = (float)d->assistradius;
 	findable = d->findable;
 	trackable = d->trackable;
 
@@ -2005,7 +2005,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "slow_mitigation")
 	{
-		slow_mitigation = atoi(val.c_str());
+		slow_mitigation = (float)atoi(val.c_str());
 		return;
 	}
 	if(id == "loottable_id")

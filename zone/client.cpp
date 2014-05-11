@@ -2938,7 +2938,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
 	sms->unknown8=0;
 
 	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+		entity_list.QueueCloseClients(this,outapp,false,(float)distance);
 	else
 		QueuePacket(outapp);
 	safe_delete(outapp);
@@ -3004,7 +3004,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 
 
 	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+		entity_list.QueueCloseClients(this,outapp,false,(float)distance);
 	else
 		QueuePacket(outapp);
 	safe_delete(outapp);
@@ -3285,13 +3285,13 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 			{
 				chaformula = (GetCHA() - 103)*((-(RuleR(Merchant, ChaBonusMod))/100)*(RuleI(Merchant, PriceBonusPct))); // This will max out price bonus.
 				if (chaformula < -1*(RuleI(Merchant, PriceBonusPct)))
-					chaformula = -1*(RuleI(Merchant, PriceBonusPct));
+					chaformula = -1.0f*(RuleI(Merchant, PriceBonusPct));
 			}
 			else if (GetCHA() < 103)
 			{
 				chaformula = (103 - GetCHA())*(((RuleR(Merchant, ChaPenaltyMod))/100)*(RuleI(Merchant, PricePenaltyPct))); // This will bottom out price penalty.
 				if (chaformula > 1*(RuleI(Merchant, PricePenaltyPct)))
-					chaformula = 1*(RuleI(Merchant, PricePenaltyPct));
+					chaformula = 1.0f*(RuleI(Merchant, PricePenaltyPct));
 			}
 		}
 		if (factionlvl <= FACTION_INDIFFERENT) // Indifferent or better.
@@ -3300,13 +3300,13 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 			{
 				chaformula = (GetCHA() - 75)*((-(RuleR(Merchant, ChaBonusMod))/100)*(RuleI(Merchant, PriceBonusPct))); // This will max out price bonus.
 				if (chaformula < -1*(RuleI(Merchant, PriceBonusPct)))
-					chaformula = -1*(RuleI(Merchant, PriceBonusPct));
+					chaformula = -1.0f*(RuleI(Merchant, PriceBonusPct));
 			}
 			else if (GetCHA() < 75)
 			{
 				chaformula = (75 - GetCHA())*(((RuleR(Merchant, ChaPenaltyMod))/100)*(RuleI(Merchant, PricePenaltyPct))); // Faction modifier keeps up from reaching bottom price penalty.
 				if (chaformula > 1*(RuleI(Merchant, PricePenaltyPct)))
-					chaformula = 1*(RuleI(Merchant, PricePenaltyPct));
+					chaformula = 1.0f*(RuleI(Merchant, PricePenaltyPct));
 			}
 		}
 	}
@@ -3839,9 +3839,9 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 	}
 	else {
 		ts->ZoneID = database.GetZoneID(Spell.teleport_zone);
-		ts->y = Spell.base[0];
-		ts->x = Spell.base[1];
-		ts->z = Spell.base[2];
+		ts->y = (float)Spell.base[0];
+		ts->x = (float)Spell.base[1];
+		ts->z = (float)Spell.base[2];
 	}
 
 	ts->unknown008 = 0;

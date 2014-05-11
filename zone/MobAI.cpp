@@ -1207,7 +1207,7 @@ void Mob::AI_Process() {
 
 							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 7);
 							if (cur > 0)
-								opts.crit_flat = cur;
+								opts.crit_flat = (float)cur;
 
 							Flurry(&opts);
 						}
@@ -1263,7 +1263,7 @@ void Mob::AI_Process() {
 
 							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 7);
 							if(cur > 0) {
-								opts.crit_flat = cur;
+								opts.crit_flat = (float)cur;
 							}
 							Rampage(&opts);
 						}
@@ -1302,7 +1302,7 @@ void Mob::AI_Process() {
 
 							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 7);
 							if(cur > 0) {
-								opts.crit_flat = cur;
+								opts.crit_flat = (float)cur;
 							}
 
 							AreaRampage(&opts);
@@ -1912,7 +1912,7 @@ bool NPC::AI_EngagedCastCheck() {
 		// try casting a heal or gate
 		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
 			// try casting a heal on nearby
-			if (!entity_list.AICheckCloseBeneficialSpells(this, 25, MobAISpellRange, SpellType_Heal)) {
+			if (!entity_list.AICheckCloseBeneficialSpells(this, 25, (float)MobAISpellRange, SpellType_Heal)) {
 				//nobody to heal, try some detrimental spells.
 				if(!AICastSpell(GetTarget(), 20, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root)) {
 					//no spell to cast, try again soon.
@@ -1947,7 +1947,7 @@ bool NPC::AI_IdleCastCheck() {
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Buff | SpellType_Pet)) {
-			if(!entity_list.AICheckCloseBeneficialSpells(this, 33, MobAISpellRange, SpellType_Heal | SpellType_Buff)) {
+			if(!entity_list.AICheckCloseBeneficialSpells(this, 33, (float)MobAISpellRange, SpellType_Heal | SpellType_Buff)) {
 				//if we didnt cast any spells, our autocast timer just resets to the
 				//last duration it was set to... try to put up a more reasonable timer...
 				AIautocastspell_timer->Start(RandomTimer(1000, 5000), false);

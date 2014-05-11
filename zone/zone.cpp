@@ -1930,7 +1930,7 @@ bool Zone::HasGraveyard() {
 	return Result;
 }
 
-void Zone::SetGraveyard(uint32 zoneid, uint32 x, uint32 y, uint32 z, uint32 heading) {
+void Zone::SetGraveyard(uint32 zoneid, float x, float y, float z, float heading) {
 	pgraveyard_zoneid = zoneid;
 	pgraveyard_x = x;
 	pgraveyard_y = y;
@@ -2343,7 +2343,7 @@ void Zone::DoAdventureActions()
 			const NPCType* tmp = database.GetNPCType(ds->data_id);
 			if(tmp)
 			{
-				NPC* npc = new NPC(tmp, 0, ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h, FlyMode3);
+				NPC* npc = new NPC(tmp, nullptr, (float)ds->assa_x, (float)ds->assa_y, (float)ds->assa_z, (float)ds->assa_h, FlyMode3);
 				npc->AddLootTable();
 				entity_list.AddNPC(npc);
 				npc->Shout("Rarrrgh!");

@@ -1032,7 +1032,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			}
 
 			// set the boat's position deltas
-			boat->SetDeltas(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
+			boat->SetDeltas(ppu->delta_x, ppu->delta_y, ppu->delta_z, (float)ppu->delta_heading);
 			// send an update to everyone nearby except the client controlling the boat
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
@@ -7970,10 +7970,10 @@ void Client::Handle_OP_GMFind(const EQApplicationPacket *app)
 	Mob* gt = entity_list.GetMob(request->charname);
 	if (gt != 0) {
 		foundplayer->success=1;
-		foundplayer->x=(int32)gt->GetX();
-		foundplayer->y=(int32)gt->GetY();
+		foundplayer->x=gt->GetX();
+		foundplayer->y=gt->GetY();
 
-		foundplayer->z=(int32)gt->GetZ();
+		foundplayer->z=gt->GetZ();
 		foundplayer->zoneID=zone->GetZoneID();
 	}
 	//Send the packet...

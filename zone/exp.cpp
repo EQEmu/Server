@@ -492,7 +492,7 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 	else
 		mod = 3.1;
 
-	float base = (check_levelm1)*(check_levelm1)*(check_levelm1);
+	float base = (float)(check_levelm1 * check_levelm1 * check_levelm1);
 
 	mod *= 1000;
 

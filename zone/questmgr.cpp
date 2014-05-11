@@ -1868,7 +1868,7 @@ void QuestManager::npcgender(int gender_id)
 void QuestManager::npcsize(int newsize)
 {
 	QuestManagerCurrentQuestVars();
-	owner->ChangeSize(newsize, true);
+	owner->ChangeSize((float)newsize, true);
 }
 void QuestManager::npctexture(int newtexture)
 {
@@ -1891,7 +1891,7 @@ void QuestManager::playergender(int gender_id)
 void QuestManager::playersize(int newsize)
 {
 	QuestManagerCurrentQuestVars();
-	initiator->ChangeSize(newsize, true);
+	initiator->ChangeSize((float)newsize, true);
 }
 
 void QuestManager::playertexture(int newtexture)
