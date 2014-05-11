@@ -2584,7 +2584,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 					npc_spells_cache[iDBSpellsID]->parent_list = tmpparent_list;
 					npc_spells_cache[iDBSpellsID]->attack_proc = tmpattack_proc;
 					npc_spells_cache[iDBSpellsID]->proc_chance = tmpproc_chance;
-					npc_spells_cache[iDBSpellsID]->numentries = mysql_num_rows(result);
+					npc_spells_cache[iDBSpellsID]->numentries = (uint32)mysql_num_rows(result);
 					int j = 0;
 					while ((row = mysql_fetch_row(result))) {
 						int spell_id = atoi(row[0]);
@@ -2698,7 +2698,7 @@ DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 					npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
 					memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
 					npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
-					npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = mysql_num_rows(result);
+					npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = (uint32)mysql_num_rows(result);
 					int j = 0;
 					while ((row = mysql_fetch_row(result))) {
 						int spell_effect_id = atoi(row[0]);

@@ -1588,7 +1588,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 			mysql_free_result(Result);
 			return;
 		}
-		Size = mysql_num_rows(Result) * sizeof(BazaarSearchResults_Struct);
+		Size = (int)(mysql_num_rows(Result) * sizeof(BazaarSearchResults_Struct));
 		uchar *buffer = new uchar[Size];
 		uchar *bufptr = buffer;
 		memset(buffer, 0, Size);

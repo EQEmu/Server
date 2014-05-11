@@ -444,7 +444,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint8)mysql_num_rows(result);
 	if(qcount < 1) {
 		LogFile->write(EQEMuLog::Error, "Error in HandleAutoCombine: no components returned");
 		user->QueuePacket(outapp);
@@ -664,7 +664,7 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsi
 
 	uint8 qcount = 0;
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint8)mysql_num_rows(result);
 	if(qcount < 1) {
 		//search gave no results... not an error
 		return;
@@ -734,7 +734,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint8)mysql_num_rows(result);
 	if(qcount < 1) {
 		LogFile->write(EQEMuLog::Error, "Error in SendTradeskillDetails: no components returned");
 		return;
@@ -1237,7 +1237,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	if(qcount > 1) {
 		//multiple recipes, partial match... do an extra query to get it exact.
 		//this happens when combining components for a smaller recipe
@@ -1275,7 +1275,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 		}
 		safe_delete_array(query);
 
-		qcount = mysql_num_rows(result);
+		qcount = (uint32)mysql_num_rows(result);
 	}
 
 	if(qcount < 1)
@@ -1399,7 +1399,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	if(qcount != 1) {
 		//just not found i guess..
 		return(false);
@@ -1435,7 +1435,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	if(qcount < 1) {
 		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecept success: no success items returned");
 		return(false);
@@ -1457,7 +1457,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	spec->onfail.clear();
 	if (RunQuery(query, qlen, errbuf, &result)) {
 
-		qcount = mysql_num_rows(result);
+		qcount = (uint32)mysql_num_rows(result);
 		uint8 r;
 		for(r = 0; r < qcount; r++) {
 			row = mysql_fetch_row(result);
@@ -1474,7 +1474,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	spec->salvage.clear();
 	// Don't bother with the query if TS is nofail
 	if (!spec->nofail && RunQuery(query, qlen, errbuf, &result)) {
-		qcount = mysql_num_rows(result);
+		qcount = (uint32)mysql_num_rows(result);
 		uint8 r;
 		for(r = 0; r < qcount; r++) {
 			row = mysql_fetch_row(result);
@@ -1528,7 +1528,7 @@ void Client::LearnRecipe(uint32 recipeID)
 		return;
 	}
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	if (qcount != 1) {
 		LogFile->write(EQEMuLog::Normal, "Client::LearnRecipe - RecipeID: %d had %d occurences.", recipeID, qcount);
 		mysql_free_result(result);

@@ -462,7 +462,7 @@ bool Database::DeleteCharacter(char *name)
 		safe_delete_array(query);
 		query = nullptr;
 	}
-	matches = mysql_num_rows(result);
+	matches = (int)mysql_num_rows(result);
 	if(matches == 1)
 	{
 		row = mysql_fetch_row(result);
@@ -1019,7 +1019,7 @@ bool Database::LoadVariables_result(MYSQL_RES* result) {
 	LockMutex lock(&Mvarcache);
 	if (mysql_num_rows(result) > 0) {
 		if (!varcache_array) {
-			varcache_max = mysql_num_rows(result);
+			varcache_max = (uint32)mysql_num_rows(result);
 			varcache_array = new VarCache_Struct*[varcache_max];
 			for (i=0; i<varcache_max; i++)
 				varcache_array[i] = 0;

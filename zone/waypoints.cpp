@@ -1132,7 +1132,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 
 // how much it's allowed to be off by
 #define _GASSIGN_TOLERANCE	1.0
-	if(!(matches = mysql_num_rows(result)))	// try a fuzzy match if that didn't find it
+	if(!(matches = (int)mysql_num_rows(result)))	// try a fuzzy match if that didn't find it
 	{
 		mysql_free_result(result);
 		if(!RunQuery(
@@ -1152,7 +1152,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 		}
 		safe_delete_array(query);
 		fuzzy = 1;
-		if(!(matches = mysql_num_rows(result)))
+		if(!(matches = (int)mysql_num_rows(result)))
 			mysql_free_result(result);
 	}
 	if(matches)

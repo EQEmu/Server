@@ -3316,7 +3316,7 @@ bool TaskGoalListManager::LoadLists() {
 
 	if(database.RunQuery(query,MakeAnyLenString(&query,CountQuery),errbuf,&result)) {
 
-		NumberOfLists = mysql_num_rows(result);
+		NumberOfLists = (int)mysql_num_rows(result);
 		_log(TASKS__GLOBALLOAD, "Database returned a count of %i lists", NumberOfLists);
 
 		TaskGoalLists = new TaskGoalList_Struct[NumberOfLists];
@@ -3354,7 +3354,7 @@ bool TaskGoalListManager::LoadLists() {
 			// at the start of this method and getting to here. It should not be possible for
 			// an INSERT to cause a problem, as the SELECT is used with a LIMIT
 			if(mysql_num_rows(result) < Size)
-				TaskGoalLists[ListIndex].Size = mysql_num_rows(result);
+				TaskGoalLists[ListIndex].Size = (int)mysql_num_rows(result);
 
 			int EntryIndex = 0;
 
