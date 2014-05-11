@@ -1506,7 +1506,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 
 			CompletedTaskInformation cti;
 			cti.TaskID = ActiveTasks[TaskIndex].TaskID;
-			cti.CompletedTime = time(nullptr);
+			cti.CompletedTime = (int)time(nullptr);
 
 			for(int i=0; i<Task->ActivityCount; i++)
 				cti.ActivityDone[i] = (ActiveTasks[TaskIndex].Activity[i].State == ActivityCompleted);
@@ -1578,7 +1578,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 			}
 			CompletedTaskInformation cti;
 			cti.TaskID = ActiveTasks[TaskIndex].TaskID;
-			cti.CompletedTime = time(nullptr);
+			cti.CompletedTime = (int)time(nullptr);
 
 			for(int i=0; i<Task->ActivityCount; i++)
 				cti.ActivityDone[i] = (ActiveTasks[TaskIndex].Activity[i].State == ActivityCompleted);
@@ -2294,7 +2294,7 @@ int ClientTaskState::TaskTimeLeft(int TaskID) {
 
 		if(ActiveTasks[i].TaskID != TaskID) continue;
 
-		int Now = time(nullptr);
+		int Now = (int)time(nullptr);
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
@@ -3222,7 +3222,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 
 
 	ActiveTasks[FreeSlot].TaskID = TaskID;
-	ActiveTasks[FreeSlot].AcceptedTime = time(nullptr);
+	ActiveTasks[FreeSlot].AcceptedTime = (int)time(nullptr);
 	ActiveTasks[FreeSlot].Updated = true;
 	ActiveTasks[FreeSlot].CurrentStep = -1;
 

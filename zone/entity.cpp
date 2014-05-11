@@ -2684,7 +2684,7 @@ void EntityList::SendPetitionToAdmins(Petition *pet)
 		strcpy(pcus->gmsenttoo, "");
 	} else {
 		pcus->color = pet->GetUrgency();	// 0x00 = green, 0x01 = yellow, 0x02 = red
-		pcus->status = pet->GetSentTime();
+		pcus->status = (uint32)pet->GetSentTime();
 		pcus->senttime = pet->GetSentTime();			// 4 has to be 0x1F
 		strcpy(pcus->accountid, pet->GetAccountName());
 		strcpy(pcus->charname, pet->GetCharName());

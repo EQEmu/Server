@@ -540,7 +540,7 @@ ENCODE(OP_TaskDescription)
 	outapp->WriteUInt32(in->ReadUInt32());	// Duration
 	outapp->WriteUInt32(in->ReadUInt32());	// Unknown
 	uint32 StartTime = in->ReadUInt32();
-	outapp->WriteUInt32(time(nullptr) - StartTime);	// RoF has elapsed time here rather than starttime
+	outapp->WriteUInt32((uint32)(time(nullptr) - StartTime));	// RoF has elapsed time here rather than starttime
 
 	// Copy the rest of the packet verbatim
 	uint32 BytesLeftToCopy = in->size - in->GetReadPosition();

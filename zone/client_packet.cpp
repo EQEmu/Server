@@ -9603,7 +9603,7 @@ void Client::CompleteConnect()
 
 	if(IsInAGuild())
 	{
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
+		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), (uint32)time(nullptr));
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
 

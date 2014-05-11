@@ -472,7 +472,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
 			GuildMemberUpdate_Struct *gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
 			char Name[64];
-			gmus->LastSeen = time(nullptr);
+			gmus->LastSeen = (uint32)time(nullptr);
 			gmus->InstanceID = 0;
 			gmus->GuildID = c->GuildID();
 			for (int i=0;i<Count;i++)

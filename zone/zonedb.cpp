@@ -922,7 +922,7 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 			pp->y = (float)atof(row[4]);
 			pp->z = (float)atof(row[5]);
 
-			pp->lastlogin = time(nullptr);
+			pp->lastlogin = (uint32)time(nullptr);
 
 			if (pp->x == -1 && pp->y == -1 && pp->z == -1)
 				GetSafePoints(pp->zone_id, database.GetInstanceVersion(pp->zoneInstance), &pp->x, &pp->y, &pp->z);

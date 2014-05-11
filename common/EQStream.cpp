@@ -941,7 +941,7 @@ void EQStream::SendSessionRequest()
 EQProtocolPacket *out=new EQProtocolPacket(OP_SessionRequest,nullptr,sizeof(SessionRequest));
 	SessionRequest *Request=(SessionRequest *)out->pBuffer;
 	memset(Request,0,sizeof(SessionRequest));
-	Request->Session=htonl(time(nullptr));
+	Request->Session=htonl((u_long)time(nullptr));
 	Request->MaxLength=htonl(512);
 
 	_log(NET__NET_TRACE, _L "Sending OP_SessionRequest: session %lu, maxlen=%d" __L, (unsigned long)ntohl(Request->Session), ntohl(Request->MaxLength));

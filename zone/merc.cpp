@@ -5497,7 +5497,7 @@ bool Merc::Suspend() {
 	SetSuspended(true);
 
 	mercOwner->GetMercInfo().IsSuspended = true;
-	mercOwner->GetMercInfo().SuspendedTime = time(nullptr) + RuleI(Mercs, SuspendIntervalS);
+	mercOwner->GetMercInfo().SuspendedTime = (uint32)(time(nullptr) + RuleI(Mercs, SuspendIntervalS));
 	mercOwner->GetMercInfo().MercTimerRemaining = mercOwner->GetMercTimer()->GetRemainingTime();
 	mercOwner->GetMercInfo().Stance = GetStance();
 	Save();

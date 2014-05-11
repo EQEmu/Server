@@ -331,7 +331,7 @@ Client::~Client() {
 	Bot::ProcessBotOwnerRefDelete(this);
 #endif
 	if(IsInAGuild())
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
+		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, (uint32)time(nullptr));
 
 	Mob* horse = entity_list.GetMob(this->CastToClient()->GetHorseId());
 	if (horse)
@@ -551,7 +551,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveBuffs(this);
 
-	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
+	TotalSecondsPlayed = (int)(TotalSecondsPlayed+(time(nullptr) - m_pp.lastlogin));
 	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
@@ -568,7 +568,7 @@ bool Client::Save(uint8 iCommitNow) {
 		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
 	}
 
-	m_pp.lastlogin = time(nullptr);
+	m_pp.lastlogin = (uint32)time(nullptr);
 	if (pQueuedSaveWorkID) {
 		dbasync->CancelWork(pQueuedSaveWorkID);
 		pQueuedSaveWorkID = 0;
