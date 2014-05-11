@@ -171,14 +171,14 @@ void WorldServer::Process() {
 			if (!ZoneLoaded) break;
 			ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 			if (scm->deliverto[0] == 0) {
-				entity_list.ChannelMessageFromWorld(scm->from, scm->to, scm->chan_num, scm->guilddbid, scm->language, scm->message);
+				entity_list.ChannelMessageFromWorld(scm->from, scm->to, (uint8)scm->chan_num, scm->guilddbid, (uint8)scm->language, scm->message);
 			}
 			else {
 				Client* client;
 				client = entity_list.GetClientByName(scm->deliverto);
 				if (client != 0) {
 					if (client->Connected()) {
-						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->message);
+						client->ChannelMessageSend(scm->from, scm->to, (uint8)scm->chan_num, (uint8)scm->language, scm->message);
 						if (!scm->noreply && scm->chan_num!=2) { //dont echo on group chat
 							// if it's a tell, echo back so it shows up
 							scm->noreply = true;

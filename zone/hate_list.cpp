@@ -247,7 +247,7 @@ void HateList::DoFactionHits(int32 nfl_id) {
 			p = nullptr;
 
 		if (p)
-			p->SetFactionLevel(p->CharacterID(), nfl_id, p->GetBaseClass(), p->GetBaseRace(), p->GetDeity());
+			p->SetFactionLevel(p->CharacterID(), nfl_id, (uint8)p->GetBaseClass(), (uint8)p->GetBaseRace(), (uint8)p->GetDeity());
 		++iterator;
 	}
 }

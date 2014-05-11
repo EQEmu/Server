@@ -1233,7 +1233,7 @@ bool Merc::CanHaveSkill(SkillUseTypes skill_id) const {
 }
 
 uint16 Merc::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
-	return(database.GetSkillCap(class_, skillid, level));
+	return(database.GetSkillCap((uint8)class_, skillid, (uint8)level));
 }
 
 void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {

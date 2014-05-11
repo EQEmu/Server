@@ -152,7 +152,7 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 	if (with && with->IsClient()) {
 		with->SendItemPacket(dest_slot_id -IDX_TRADE,inst,ItemPacketTradeView);
 		if (inst->GetItem()->ItemClass == 1) {
-			for (uint16 i=0; i<10; i++) {
+			for (uint8 i=0; i<10; i++) {
 				uint16 bagslot_id = Inventory::CalcSlotId(dest_slot_id, i);
 				const ItemInst* bagitem = trader->GetInv().GetItem(bagslot_id);
 				if (bagitem) {
@@ -266,7 +266,7 @@ void Trade::LogTrade()
 			}
 
 			database.logevents(trader->AccountName(), trader->AccountID(),
-				trader->Admin(), trader->GetName(), with->GetName(), "Trade", logtext, 6);
+				(uint8)trader->Admin(), trader->GetName(), with->GetName(), "Trade", logtext, 6);
 		}
 	}
 }
@@ -597,7 +597,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 					// pets need to look inside bags and try to equip items found there
 					if(item->ItemClass == ItemClassContainer && item->BagSlots > 0) {
 						for(int16 bslot=0; bslot < item->BagSlots; bslot++) {
-							const ItemInst* baginst = inst->GetItem(bslot);
+							const ItemInst* baginst = inst->GetItem((uint8)bslot);
 							if (baginst) {
 								const Item_Struct* bagitem = baginst->GetItem();
 								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsInstNoDrop() == false))) {
@@ -1006,7 +1006,7 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 	_log(TRADING__CLIENT, "NukeTraderItem(Slot %i, Charges %i, Quantity %i", Slot, Charges, Quantity);
 	if(Quantity < Charges) {
 		Customer->SendSingleTraderItem(this->CharacterID(), SerialNumber);
-		m_inv.DeleteItem(Slot, Quantity);
+		m_inv.DeleteItem(Slot, (uint8)Quantity);
 	}
 	else {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TraderDelItem,sizeof(TraderDelItem_Struct));
@@ -1090,7 +1090,7 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, uint16 Quantity, Client* 
 			_log(TRADING__CLIENT, "FindAndNuke %s, Charges %i, Quantity %i", item->GetItem()->Name, Charges, Quantity);
 		}
 		if(item && (Charges <= Quantity || (Charges <= 0 && Quantity==1) || !Stackable)){
-			this->DeleteItemInInventory(SlotID, Quantity);
+			this->DeleteItemInInventory(SlotID, (int8)Quantity);
 
 			TraderCharges_Struct* GetSlot = database.LoadTraderItemWithCharges(this->CharacterID());
 

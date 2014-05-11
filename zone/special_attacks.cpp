@@ -1818,8 +1818,8 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		skill_to_use == SkillTigerClaw ||
 		skill_to_use == SkillRoundKick)
 	{
-		ReuseTime = MonkSpecialAttack(ca_target, skill_to_use) - 1;
-		MonkSpecialAttack(ca_target, skill_to_use);
+		ReuseTime = MonkSpecialAttack(ca_target, (uint8)skill_to_use) - 1;
+		MonkSpecialAttack(ca_target, (uint8)skill_to_use);
 
 		if (IsRiposte)
 			return;

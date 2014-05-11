@@ -2384,11 +2384,11 @@ bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
 }
 
 uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
-	return(database.GetSkillCap(class_, skillid, level));
+	return(database.GetSkillCap((uint8)class_, skillid, (uint8)level));
 }
 
 uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_){
-	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
+	return(database.GetTrainLevel((uint8)class_, skillid, RuleI(Character, MaxLevel)));
 }
 
 uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16 maxSkill)
@@ -2576,10 +2576,10 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 	LogText += Buffer;
 
 	if (buying==true) {
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Buying from Merchant",LogText.c_str(),2);
+		database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),merchant->GetName(),"Buying from Merchant",LogText.c_str(),2);
 	}
 	else {
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Selling to Merchant",LogText.c_str(),3);
+		database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),merchant->GetName(),"Selling to Merchant",LogText.c_str(),3);
 	}
 }
 
@@ -2604,7 +2604,7 @@ void Client::LogLoot(Client* player, Corpse* corpse, const Item_Struct* item){
 		strcat(logtext,"(");
 		strcat(logtext,itemid);
 		strcat(logtext,") Looted");
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Item",logtext,4);
+		database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),corpse->orgname,"Looting Item",logtext,4);
 	}
 	else{
 		if ((corpse->GetPlatinum() + corpse->GetGold() + corpse->GetSilver() + corpse->GetCopper())>0) {
@@ -2613,9 +2613,9 @@ void Client::LogLoot(Client* player, Corpse* corpse, const Item_Struct* item){
 			logtext=coinloot;
 			strcat(logtext," Looted");
 			if (corpse->GetPlatinum()>10000)
-				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Excessive Loot!",logtext,9);
+				database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),corpse->orgname,"Excessive Loot!",logtext,9);
 			else
-				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Money",logtext,5);
+				database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),corpse->orgname,"Looting Money",logtext,5);
 		}
 	}
 }

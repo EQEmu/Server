@@ -331,7 +331,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		uint8 myoldlevel = GetLevel();
 #endif
 
-		SetLevel(check_level);
+		SetLevel((uint8)check_level);
 
 #ifdef BOTS
 		if(RuleB(Bots, BotLevelsWithOwner))

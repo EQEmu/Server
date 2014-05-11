@@ -1201,11 +1201,11 @@ void QuestManager::faction(int faction_id, int faction_value, int temp) {
 			initiator->SetFactionLevel2(
 				initiator->CharacterID(),
 				faction_id,
-				initiator->GetBaseClass(),
-				initiator->GetBaseRace(),
-				initiator->GetDeity(),
+				(uint8)initiator->GetBaseClass(),
+				(uint8)initiator->GetBaseRace(),
+				(uint8)initiator->GetDeity(),
 				faction_value,
-				temp);
+				(uint8)temp);
 		}
 	}
 }

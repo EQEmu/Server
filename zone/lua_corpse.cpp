@@ -79,7 +79,7 @@ uint32 Lua_Corpse::CountItems() {
 
 void Lua_Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5) {
 	Lua_Safe_Call_Void();
-	self->AddItem(itemnum, charges, slot, aug1, aug2, aug3, aug4, aug5);
+	self->AddItem(itemnum, (uint8)charges, slot, aug1, aug2, aug3, aug4, aug5);
 }
 
 uint32 Lua_Corpse::GetWornItem(int16 equipSlot) {
