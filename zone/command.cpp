@@ -6965,7 +6965,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
 		c->Message(15,"NPCID %u now has a Magic Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set MR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set WIS=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
