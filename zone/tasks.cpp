@@ -2347,7 +2347,7 @@ bool ClientTaskState::TaskOutOfTime(int Index) {
 
 	if((ActiveTasks[Index].TaskID <= 0) || (ActiveTasks[Index].TaskID >= MAXTASKS)) return false;
 
-	int Now = time(nullptr);
+	int Now = (int)time(nullptr);
 
 	TaskInformation* Task = taskmanager->Tasks[ActiveTasks[Index].TaskID];
 
