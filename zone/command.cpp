@@ -6594,41 +6594,56 @@ void command_npcedit(Client *c, const Seperator *sep)
 	if ( strcasecmp( sep->arg[1], "help" ) == 0 ) {
 
 		c->Message(0, "Help File for #npcedit. Syntax for commands are:");
-		c->Message(0, "#npcedit Name - Sets an NPCs name");
-		c->Message(0, "#npcedit Lastname - Sets an NPCs lastname");
-		c->Message(0, "#npcedit Level - Sets an NPCs level");
-		c->Message(0, "#npcedit Race - Sets an NPCs race");
-		c->Message(0, "#npcedit Class - Sets an NPCs class");
-		c->Message(0, "#npcedit Bodytype - Sets an NPCs bodytype");
-		c->Message(0, "#npcedit HP - Sets an NPCs hitpoints");
-		c->Message(0, "#npcedit Gender - Sets an NPCs gender");
-		c->Message(0, "#npcedit Texture - Sets an NPCs texture");
-		c->Message(0, "#npcedit Helmtexture - Sets an NPCs helmtexture");
-		c->Message(0, "#npcedit Size - Sets an NPCs size");
-		c->Message(0, "#npcedit Hpregen - Sets an NPCs hitpoint regen rate per tick");
-		c->Message(0, "#npcedit Manaregen - Sets an NPCs mana regen rate per tick");
-		c->Message(0, "#npcedit Loottable - Sets the lootable ID for an NPC ");
+		c->Message(0, "#npcedit Name - Sets an NPC's name");
+		c->Message(0, "#npcedit Lastname - Sets an NPC's lastname");
+		c->Message(0, "#npcedit Level - Sets an NPC's level");
+		c->Message(0, "#npcedit Maxlevel - Sets an NPC's maximum level");
+		c->Message(0, "#npcedit Race - Sets an NPC's race");
+		c->Message(0, "#npcedit Class - Sets an NPC's class");
+		c->Message(0, "#npcedit Bodytype - Sets an NPC's bodytype");
+		c->Message(0, "#npcedit HP - Sets an NPC's hitpoints");
+		c->Message(0, "#npcedit Gender - Sets an NPC's gender");
+		c->Message(0, "#npcedit Texture - Sets an NPC's texture");
+		c->Message(0, "#npcedit Helmtexture - Sets an NPC's helmtexture");
+		c->Message(0, "#npcedit Size - Sets an NPC's size");
+		c->Message(0, "#npcedit Hpregen - Sets an NPC's hitpoint regen rate per tick");
+		c->Message(0, "#npcedit Manaregen - Sets an NPC's mana regen rate per tick");
+		c->Message(0, "#npcedit Loottable - Sets the loottable ID for an NPC ");
 		c->Message(0, "#npcedit Merchantid - Sets the merchant ID for an NPC");
 		c->Message(0, "#npcedit alt_currency_id - Sets the Alternate Currency ID for an alterative currency Merchant");
+		c->Message(0, "#npcedit npc_spells_effects_id - Sets the NPC Spell Effects ID");
+		c->Message(0, "#npcedit adventure_template_id - Sets the NPC's Adventure Template ID");
+		c->Message(0, "#npcedit trap_template - Sets the NPC's Trap Template ID");
+		c->Message(0, "#npcedit special_abilities - Sets the NPC's Special Abilities");
 		c->Message(0, "#npcedit Spell - Sets the npc spells list ID for an NPC");
-		c->Message(0, "#npcedit Faction - Sets the NPCs faction id");
-		c->Message(0, "#npcedit Mindmg - Sets an NPCs minimum damage");
-		c->Message(0, "#npcedit Maxdmg - Sets an NPCs maximum damage");
-		c->Message(0, "#npcedit Aggroradius - Sets an NPCs aggro radius");
-		c->Message(0, "#npcedit Assistradius - Sets an NPCs assist radius");
+		c->Message(0, "#npcedit Faction - Sets the NPC's faction id");
+		c->Message(0, "#npcedit Mindmg - Sets an NPC's minimum damage");
+		c->Message(0, "#npcedit Maxdmg - Sets an NPC's maximum damage");
+		c->Message(0, "#npcedit Aggroradius - Sets an NPC's aggro radius");
+		c->Message(0, "#npcedit Assistradius - Sets an NPC's assist radius");
 		c->Message(0, "#npcedit Social - Set to 1 if an NPC should assist others on its faction");
-		c->Message(0, "#npcedit Runspeed - Sets an NPCs run speed");
-		c->Message(0, "#npcedit MR - Sets an NPCs magic resistance");
-		c->Message(0, "#npcedit PR - Sets an NPCs poisen resistance");
-		c->Message(0, "#npcedit DR - Sets an NPCs disease resistance");
-		c->Message(0, "#npcedit FR - Sets an NPCs fire resistance");
-		c->Message(0, "#npcedit CR - Sets an NPCs cold resistance");
-		c->Message(0, "#npcedit Corrup - Sets an NPCs corruption resistance");
-		c->Message(0, "#npcedit Seeinvis - Sets an NPCs ability to see invis");
-		c->Message(0, "#npcedit Seeinvisundead - Sets an NPCs ability to see through invis vs. undead");
-		c->Message(0, "#npcedit Seehide - Sets an NPCs ability to see through hide");
-		c->Message(0, "#npcedit Seeimprovedhide - Sets an NPCs ability to see through improved hide");
-		c->Message(0, "#npcedit AC - Sets an NPCs armor class");
+		c->Message(0, "#npcedit Runspeed - Sets an NPC's run speed");
+		c->Message(0, "#npcedit AGI - Sets an NPC's Agility");
+		c->Message(0, "#npcedit CHA - Sets an NPC's Charisma");
+		c->Message(0, "#npcedit DEX - Sets an NPC's Dexterity");
+		c->Message(0, "#npcedit INT - Sets an NPC's Intelligence");
+		c->Message(0, "#npcedit STA - Sets an NPC's Stamina");
+		c->Message(0, "#npcedit STR - Sets an NPC's Strength");
+		c->Message(0, "#npcedit WIS - Sets an NPC's Wisdom");
+		c->Message(0, "#npcedit MR - Sets an NPC's Magic Resistance");
+		c->Message(0, "#npcedit PR - Sets an NPC's Poison Resistance");
+		c->Message(0, "#npcedit DR - Sets an NPC's Disease Resistance");
+		c->Message(0, "#npcedit FR - Sets an NPC's Fire Resistance");
+		c->Message(0, "#npcedit CR - Sets an NPC's cold resistance");
+		c->Message(0, "#npcedit Corrup - Sets an NPC's Corruption Resistance");
+		c->Message(0, "#npcedit PhR - Sets and NPC's Physical Resistance");
+		c->Message(0, "#npcedit Seeinvis - Sets an NPC's ability to see invis");
+		c->Message(0, "#npcedit Seeinvisundead - Sets an NPC's ability to see through invis vs. undead");
+		c->Message(0, "#npcedit Seehide - Sets an NPC's ability to see through hide");
+		c->Message(0, "#npcedit Seeimprovedhide - Sets an NPC's ability to see through improved hide");
+		c->Message(0, "#npcedit AC - Sets an NPC's Armor Class");
+		c->Message(0, "#npcedit ATK - Sets an NPC's Attack");
+		c->Message(0, "#npcedit Accuracy - Sets an NPC's Accuracy");
 		c->Message(0, "#npcedit npcaggro - Sets an NPC's npc_aggro flag");
 		c->Message(0, "#npcedit qglobal - Sets an NPC's quest global flag");
 		c->Message(0, "#npcedit limit - Sets an NPC's spawn limit counter");
@@ -6637,15 +6652,21 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(0, "#npcedit wep1 - Sets an NPC's primary weapon model");
 		c->Message(0, "#npcedit wep2 - Sets an NPC's secondary weapon model");
 		c->Message(0, "#npcedit featuresave - Saves all current facial features to the database");
-		c->Message(0, "#npcedit armortint_id - Set NPC Armor tint ID");
-		c->Message(0, "#npcedit setanimation - Set NPC's animation on spawn (Stored in spawn2 table)");
+		c->Message(0, "#npcedit color - Sets an NPC's red, green, and blue armor tint");
+		c->Message(0, "#npcedit armortint_id - Set an NPC's Armor tint ID");
+		c->Message(0, "#npcedit setanimation - Set an NPC's animation on spawn (Stored in spawn2 table)");
+		c->Message(0, "#npcedit scalerate - Set an NPC's scaling rate");
+		c->Message(0, "#npcedit healscale - Set an NPC's heal scaling rate");
+		c->Message(0, "#npcedit spellscale - Set an NPC's spell scaling rate");
+		c->Message(0, "#npcedit no_target - Set an NPC's ability to be targeted with the target hotkey");
+		c->Message(0, "#npcedit version - Set an NPC's version");
 
 	}
 	else if ( strcasecmp( sep->arg[1], "name" ) == 0 )
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has the name %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(),(sep->argplus[2]));
+		c->Message(15,"NPCID %u now has the name %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),(sep->argplus[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set name='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6655,7 +6676,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has the lastname %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(),(sep->argplus[2]));
+		c->Message(15,"NPCID %u now has the lastname %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),(sep->argplus[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set lastname='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6664,7 +6685,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has the race %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has the race %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set race=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6673,7 +6694,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u is now class %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u is now class %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set class=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6682,7 +6703,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has type %i bodytype ",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has type %i bodytype.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set bodytype=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6691,7 +6712,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has %i Hitpoints",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has %i Hitpoints.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set hp=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6700,7 +6721,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u is now gender %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u is now gender %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set gender=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6709,7 +6730,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now uses texture %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now uses texture %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set texture=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6718,7 +6739,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now uses helmtexture %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now uses helmtexture %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set helmtexture=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6727,7 +6748,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u is now size %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u is now size %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set size=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6736,7 +6757,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now regens %i hitpoints per tick",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now regens %i hitpoints per tick.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set hp_regen_rate=%i where hp_regen_rate=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6745,7 +6766,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now regens %i mana per tick",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now regens %i mana per tick.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set mana_regen_rate=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6754,7 +6775,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u is now on loottable_id %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u is now on loottable_id %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set loottable_id=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6763,7 +6784,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now is merchant_id %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u is now merchant_id %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set merchant_id=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6772,8 +6793,44 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has field 'alt_currency_id' set to %s",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
+		c->Message(15,"NPCID %u now has field 'alt_currency_id' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set alt_currency_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "npc_spells_effects_id" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has field 'npc_spells_effects_id' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set npc_spells_effects_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "adventure_template_id" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has field 'adventure_template_id' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set adventure_template_id='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "trap_template" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has field 'trap_template' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set trap_template='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "special_abilities" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has field 'special_abilities' set to %s.",c->GetTarget()->CastToNPC()->GetNPCTypeID(), (sep->argplus[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set special_abilities='%s' where id=%i",(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
@@ -6849,11 +6906,74 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
+	else if ( strcasecmp( sep->arg[1], "AGI" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has %i Agility.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set AGI=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "CHA" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has %i Charisma.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set CHA=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "DEX" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has %i Dexterity.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set DEX=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "INT" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has %i Intelligence.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set _INT=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "STA" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has %i Stamina.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set STA=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "STR" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has %i Strength.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set STR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "WIS" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has a Magic Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set WIS=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
 	else if ( strcasecmp( sep->arg[1], "MR" ) == 0 )
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has a magic resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has a Magic Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set MR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6862,7 +6982,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has a disease resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has a Disease Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set DR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6871,7 +6991,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has a cold resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has a Cold Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set CR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6880,7 +7000,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has a fire resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has a Fire Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set FR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6889,7 +7009,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has a poison resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has a Poison Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set PR=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6898,8 +7018,17 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has a corruption resist of %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has a Corruption Resistance of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set corrup=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "PhR" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15, "NPCID %u now has a Physical Resistance of %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set PhR=%i where id=%i", atoi(sep->argplus[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
@@ -6907,7 +7036,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has seeinvis set to %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has seeinvis set to %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set see_invis=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6916,7 +7045,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has seeinvisundead set to %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has seeinvisundead set to %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set see_invis_undead=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6925,7 +7054,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has seehide set to %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has seehide set to %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set see_hide=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6934,7 +7063,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has seeimprovedhide set to %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u now has seeimprovedhide set to %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set see_improved_hide=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
@@ -6943,8 +7072,26 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u now has %i armor class",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
+		c->Message(15,"NPCID %u now has %i Armor Class.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set ac=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "ATK" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has %i Attack.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set atk=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "Accuracy" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has %i Accuracy.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->argplus[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set accuracy=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
@@ -6952,8 +7099,17 @@ void command_npcedit(Client *c, const Seperator *sep)
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char *query = 0;
-		c->Message(15,"NPCID %u is now level %i",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		c->Message(15,"NPCID %u is now level %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
 		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set level=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "maxlevel" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has a maximum level of %i.",c->GetTarget()->CastToNPC()->GetNPCTypeID(),atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set maxlevel=%i where id=%i",atoi(sep->argplus[2]),c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
@@ -7052,7 +7208,15 @@ void command_npcedit(Client *c, const Seperator *sep)
 		safe_delete_array(query);
 
 	}
-
+	else if ( strcasecmp( sep->arg[1], "color" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15,"NPCID %u now has %i red, %i green, and %i blue tinting on their armor.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set armortint_red=%i, armortint_green=%i, armortint_blue=%i where id=%i", atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
 	else if ( strcasecmp( sep->arg[1], "armortint_id" ) == 0 )
 	{
 		char errbuf[MYSQL_ERRMSG_SIZE];
@@ -7093,6 +7257,51 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(15,"NPCID %u now has the animation set to %i on spawn with spawngroup %i", c->GetTarget()->CastToNPC()->GetNPCTypeID(), Animation, c->GetTarget()->CastToNPC()->GetSp2() );
 		database.RunQuery(query, MakeAnyLenString(&query, "update spawn2 set animation = %i where spawngroupID=%i", Animation, c->GetTarget()->CastToNPC()->GetSp2()), errbuf);
 		c->GetTarget()->SetAppearance(EmuAppearance(Animation));
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "scalerate" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15, "NPCID %u now has a scaling rate of %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set scalerate=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "healscale" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15, "NPCID %u now has a heal scaling rate of %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set healscale=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "spellscale" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15, "NPCID %u now has a spell scaling rate of %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set spellscale=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "no_target" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15, "NPCID %u is now %s.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]) == 0 ? "targetable" : "untargetable");
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set no_target_hotkey=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
+		c->LogSQL(query);
+		safe_delete_array(query);
+	}
+	else if ( strcasecmp( sep->arg[1], "version" ) == 0 )
+	{
+		char errbuf[MYSQL_ERRMSG_SIZE];
+		char *query = 0;
+		c->Message(15, "NPCID %u is now version %i.", c->GetTarget()->CastToNPC()->GetNPCTypeID(), atoi(sep->arg[2]));
+		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set version=%i where id=%i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetNPCTypeID()), errbuf);
 		c->LogSQL(query);
 		safe_delete_array(query);
 	}
@@ -11507,4 +11716,3 @@ void command_merchantcloseshop(Client *c, const Seperator *sep)
 
 	merchant->CastToNPC()->MerchantCloseShop();
 }
-
