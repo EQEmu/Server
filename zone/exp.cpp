@@ -542,11 +542,11 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 
 	float groupmod;
 	if (membercount > 1 && membercount < 6)
-		groupmod = 1 + .2*(membercount - 1); //2members=1.2exp, 3=1.4, 4=1.6, 5=1.8
+		groupmod = 1.0f + .2f*(membercount - 1); //2members=1.2exp, 3=1.4, 4=1.6, 5=1.8
 	else if (membercount == 6)
-		groupmod = 2.16;
+		groupmod = 2.16f;
 	else
-		groupmod = 1.0;
+		groupmod = 1.0f;
 
 	groupexp += (uint32)((float)exp * groupmod * (RuleR(Character, GroupExpMultiplier)));
 

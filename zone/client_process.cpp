@@ -1010,10 +1010,10 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			ItemInst* inst = database.CreateItem(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)){
-				inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
+				inst->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
 				}
 				else
-					inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
+					inst->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
 				inst->SetMerchantSlot(ml.slot);
 				inst->SetMerchantCount(-1);		//unlimited
 				if(charges > 0)
@@ -1048,10 +1048,10 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			ItemInst* inst = database.CreateItem(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)){
-				inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
+				inst->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
 				}
 				else
-					inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
+					inst->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
 				inst->SetMerchantSlot(ml.slot);
 				inst->SetMerchantCount(ml.charges);
 				if(charges > 0)
@@ -1517,11 +1517,11 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	// will say 11, but the client will have 1 left on their cursor, so we have
 	// to figure out the conversion ourselves
 
-	amount_to_add = amount_to_take * ((float)CoinTypeCoppers(mc->cointype1) / (float)CoinTypeCoppers(mc->cointype2));
+	amount_to_add = (uint64)(amount_to_take * ((float)CoinTypeCoppers(mc->cointype1) / (float)CoinTypeCoppers(mc->cointype2)));
 
 	// the amount we're adding could be different than what was requested, so
 	// we have to adjust the amount we take as well
-	amount_to_take = amount_to_add * ((float)CoinTypeCoppers(mc->cointype2) / (float)CoinTypeCoppers(mc->cointype1));
+	amount_to_take = (uint64)(amount_to_add * ((float)CoinTypeCoppers(mc->cointype2) / (float)CoinTypeCoppers(mc->cointype1)));
 
 	// now we should have a from_bucket, a to_bucket, an amount_to_take
 	// and an amount_to_add

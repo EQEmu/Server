@@ -155,7 +155,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char* zone_name, uint16 version, SpawnG
 	{
 		safe_delete_array(query);
 		while((row = mysql_fetch_row(result))) {
-			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
+			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), (float)atof(row[3]), (float)atof(row[4]), (float)atof(row[5]), (float)atof(row[6]), (float)atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
 			spawn_group_list->AddSpawnGroup(newSpawnGroup);
 		}
 		mysql_free_result(result);
@@ -210,7 +210,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList* spawn_g
 	{
 		safe_delete_array(query);
 		while((row = mysql_fetch_row(result))) {
-			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
+			SpawnGroup* newSpawnGroup = new SpawnGroup( atoi(row[0]), row[1], atoi(row[2]), (float)atof(row[3]), (float)atof(row[4]), (float)atof(row[5]), (float)atof(row[6]), (float)atof(row[7]), atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
 			spawn_group_list->AddSpawnGroup(newSpawnGroup);
 		}
 		mysql_free_result(result);

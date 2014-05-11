@@ -1993,13 +1993,13 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "aggro")
 	{
-		pAggroRange = atof(val.c_str());
+		pAggroRange = (float)atof(val.c_str());
 		return;
 	}
 
 	if(id == "assist")
 	{
-		pAssistRange = atof(val.c_str());
+		pAssistRange = (float)atof(val.c_str());
 		return;
 	}
 
@@ -2015,12 +2015,12 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	}
 	if(id == "healscale")
 	{
-		healscale = atof(val.c_str());
+		healscale = (float)atof(val.c_str());
 		return;
 	}
 	if(id == "spellscale")
 	{
-		spellscale = atof(val.c_str());
+		spellscale = (float)atof(val.c_str());
 		return;
 	}
 }

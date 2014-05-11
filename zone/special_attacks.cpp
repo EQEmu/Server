@@ -884,7 +884,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					WDmg = 0;
 				if(ADmg < 0)
 					ADmg = 0;
-				uint32 MaxDmg = (RuleR(Combat, ArcheryBaseDamageBonus)*(WDmg+ADmg)*GetDamageTable(SkillArchery)) / 100;
+				uint32 MaxDmg = (uint32)((RuleR(Combat, ArcheryBaseDamageBonus)*(WDmg+ADmg)*GetDamageTable(SkillArchery)) / 100);
 				int32 hate = ((WDmg+ADmg));
 
 				uint16 bonusArcheryDamageModifier = aabonuses.ArcheryDamageModifier + itembonuses.ArcheryDamageModifier + spellbonuses.ArcheryDamageModifier;
@@ -1046,8 +1046,8 @@ void NPC::RangedAttack(Mob* other)
 			mlog(COMBAT__RANGED, "Ranged attack hit %s.", GetTarget()->GetName());
 			int32 TotalDmg = 0;
 
-			int32 MaxDmg = max_dmg * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
-			int32 MinDmg = min_dmg * RuleR(Combat, ArcheryNPCMultiplier);
+			int32 MaxDmg = (int32)(max_dmg * RuleR(Combat, ArcheryNPCMultiplier)); // should add a field to npc_types
+			int32 MinDmg = (int32)(min_dmg * RuleR(Combat, ArcheryNPCMultiplier));
 
 			if(RuleB(Combat, UseIntervalAC))
 				TotalDmg = MaxDmg;
@@ -1622,7 +1622,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		}
 	}
 
-	classattack_timer.Start(reuse*HasteModifier/100);
+	classattack_timer.Start((uint32)(reuse*HasteModifier/100));
 }
 
 void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)

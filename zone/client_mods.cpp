@@ -245,7 +245,7 @@ int32 Client::CalcMaxHP() {
 	//the aa description
 	nd += aabonuses.MaxHP;	//Natural Durability, Physical Enhancement, Planar Durability
 
-	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
+	max_hp = (int32)(max_hp * nd / 10000); //this is to fix the HP-above-495k issue
 	max_hp += spellbonuses.HP + aabonuses.HP;
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
@@ -381,7 +381,7 @@ int32 Client::CalcBaseHP()
 		base_hp = 5;
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if(base_data) {
-			base_hp += base_data->base_hp + (base_data->hp_factor * stats);
+			base_hp = (int32)(base_hp + base_data->base_hp + (base_data->hp_factor * stats));
 			base_hp += (GetHeroicSTA() * 10);
 		}
 	}

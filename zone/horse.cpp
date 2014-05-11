@@ -99,7 +99,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 			npc_type->loottable_id = 0;
 			npc_type->texture = atoi(row[2]);
 			npc_type->helmtexture = atoi(row[2]);
-			npc_type->runspeed = atof(row[3]);
+			npc_type->runspeed = (float)atof(row[3]);
 
 			mount_color = atoi(row[2]);
 

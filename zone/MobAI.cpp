@@ -755,7 +755,7 @@ void Client::AI_Process()
 				engaged = true;
 			} else {
 				if(AImovement_timer->Check()) {
-					animation = GetRunspeed() * 21;
+					animation = (uint16)(GetRunspeed() * 21);
 					// Check if we have reached the last fear point
 					if((ABS(GetX()-fear_walkto_x) < 0.1) && (ABS(GetY()-fear_walkto_y) <0.1)) {
 						// Calculate a new point to run to
@@ -917,7 +917,7 @@ void Client::AI_Process()
 		{
 			if(!IsRooted())
 			{
-				animation = 21 * GetRunspeed();
+				animation = (uint16)(GetRunspeed() * 21);
 				if(!RuleB(Pathing, Aggro) || !zone->pathing)
 					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
 				else
@@ -974,7 +974,7 @@ void Client::AI_Process()
 			if (dist >= 100)
 			{
 				float speed = dist >= 225 ? GetRunspeed() : GetWalkspeed();
-				animation = 21 * speed;
+				animation = (uint16)(speed * 21);
 				CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), speed);
 			}
 			else
@@ -1607,9 +1607,9 @@ void NPC::AI_DoMovement() {
 			//New coord is still invalid, ignore distance and just pick a new random coord. 
 			//If we're here we may have a roambox where one side is shorter than the specified distance. Commons, Wkarana, etc.
 			if (roambox_movingto_x > roambox_max_x || roambox_movingto_x < roambox_min_x)
-				roambox_movingto_x = MakeRandomFloat(roambox_min_x+1,roambox_max_x-1);
+				roambox_movingto_x = (float)MakeRandomFloat(roambox_min_x+1,roambox_max_x-1);
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
-				roambox_movingto_y = MakeRandomFloat(roambox_min_y+1,roambox_max_y-1);
+				roambox_movingto_y = (float)MakeRandomFloat(roambox_min_y+1,roambox_max_y-1);
 		}
 
 		mlog(AI__WAYPOINTS, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",

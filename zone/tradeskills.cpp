@@ -894,9 +894,9 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// For trivials over 68 the chance is (skill - 0.75*trivial) +51.5
 	// For trivial up to 68 the chance is (skill - trivial) + 66
 	if (spec->trivial >= 68) {
-		chance = (user_skill - (0.75*spec->trivial)) + 51.5;
+		chance = (user_skill - (0.75f*spec->trivial)) + 51.5f;
 	} else {
-		chance = (user_skill - spec->trivial) + 66;
+		chance = (user_skill - spec->trivial) + 66.0f;
 	}
 
 	int16 over_trivial = (int16)GetRawSkill(spec->tradeskill) - (int16)spec->trivial;
@@ -1146,10 +1146,10 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 			chance_stage2 = 100;
 		} else if (current_raw_skill < 175) {
 			//From skill 16 to 174 your chance of success falls linearly from 92% to 13%.
-			chance_stage2 = (200 - current_raw_skill) / 2;
+			chance_stage2 = (200 - current_raw_skill) / 2.0f;
 		} else {
 			//At skill 175, your chance of success falls linearly from 12.5% to 2.5% at skill 300.
-			chance_stage2 = 12.5 - (.08 * (current_raw_skill - 175));
+			chance_stage2 = 12.5f - (.08f * (current_raw_skill - 175));
 		}
 	}
 	   

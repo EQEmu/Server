@@ -4199,7 +4199,7 @@ uint16 Client::GetTotalATK()
 	uint16 WornCap = itembonuses.ATK;
 
 	if(IsClient()) {
-		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
+		AttackRating = (uint16)((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
 		AttackRating += aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 
 		if (AttackRating < 10)
@@ -4217,7 +4217,7 @@ uint16 Client::GetATKRating()
 {
 	uint16 AttackRating = 0;
 	if(IsClient()) {
-		AttackRating = (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
+		AttackRating =  (uint16)((GetSkill(SkillOffense) * 1.345) + (GetSTR() - 66) * 0.9 + (GetPrimarySkillValue() * 2.69));
 
 		if (AttackRating < 10)
 			AttackRating = 10;

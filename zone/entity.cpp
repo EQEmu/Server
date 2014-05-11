@@ -3058,7 +3058,7 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 thedam)
 				if (cur->CheckAggro(caster)) {
 					cur->AddToHateList(caster, thedam);
 				} else {
-					cur->AddToHateList(caster, thedam * 0.33);
+					cur->AddToHateList(caster, (uint16)(thedam * 0.33f));
 				}
 			}
 		}
@@ -4548,9 +4548,9 @@ void EntityList::GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height,
 			++it;
 			continue;
 		}
-		int32 x_diff = ptr->GetX() - start->GetX();
-		int32 y_diff = ptr->GetY() - start->GetY();
-		int32 z_diff = ptr->GetZ() - start->GetZ();
+		int32 x_diff = (int32)(ptr->GetX() - start->GetX());
+		int32 y_diff = (int32)(ptr->GetY() - start->GetY());
+		int32 z_diff = (int32)(ptr->GetZ() - start->GetZ());
 
 		x_diff *= x_diff;
 		y_diff *= y_diff;

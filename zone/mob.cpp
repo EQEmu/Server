@@ -4383,7 +4383,7 @@ void Mob::SpellProjectileEffect()
 				dist = target->CalculateDistance(projectile_x[i], projectile_y[i],  projectile_z[i]);
 	
 		int increment_end = 0;
-		increment_end = (dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
+		increment_end = (int)(dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
 
 		if (increment_end <= projectile_increment[i]){
 

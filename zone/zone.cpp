@@ -184,10 +184,10 @@ bool Zone::LoadZoneObjects() {
 					strn0cpy(d.zone_name, shortname, sizeof(d.zone_name));
 					d.db_id = 1000000000 + atoi(row[0]); // Out of range of normal use for doors.id
 					d.door_id = -1; // Client doesn't care if these are all the same door_id
-					d.pos_x = atof(row[2]); // xpos
-					d.pos_y = atof(row[3]); // ypos
-					d.pos_z = atof(row[4]); // zpos
-					d.heading = atof(row[5]); // heading
+					d.pos_x = (float)atof(row[2]); // xpos
+					d.pos_y = (float)atof(row[3]); // ypos
+					d.pos_z = (float)atof(row[4]); // zpos
+					d.heading = (float)atof(row[5]); // heading
 
 					strn0cpy(d.door_name, row[8], sizeof(d.door_name)); // objectname
 					// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
@@ -233,10 +233,10 @@ bool Zone::LoadZoneObjects() {
 
 			id							= (uint32)atoi(row[0]);
 			data.zone_id				= atoi(row[1]);
-			data.x						= atof(row[2]);
-			data.y						= atof(row[3]);
-			data.z						= atof(row[4]);
-			data.heading				= atof(row[5]);
+			data.x						= (float)atof(row[2]);
+			data.y						= (float)atof(row[3]);
+			data.z						= (float)atof(row[4]);
+			data.heading				= (float)atof(row[5]);
 			itemid						= (uint32)atoi(row[6]);
 			charges						= (int16)atoi(row[7]);
 			strcpy(data.object_name, row[8]);
@@ -1731,15 +1731,15 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 		while((row = mysql_fetch_row(result)))
 		{
 			ZonePoint* zp = new ZonePoint;
-			zp->x = atof(row[0]);
-			zp->y = atof(row[1]);
-			zp->z = atof(row[2]);
-			zp->target_x = atof(row[3]);
-			zp->target_y = atof(row[4]);
-			zp->target_z = atof(row[5]);
+			zp->x = (float)atof(row[0]);
+			zp->y = (float)atof(row[1]);
+			zp->z = (float)atof(row[2]);
+			zp->target_x = (float)atof(row[3]);
+			zp->target_y = (float)atof(row[4]);
+			zp->target_z = (float)atof(row[5]);
 			zp->target_zone_id = atoi(row[6]);
-			zp->heading = atof(row[7]);
-			zp->target_heading = atof(row[8]);
+			zp->heading = (float)atof(row[7]);
+			zp->target_heading = (float)atof(row[8]);
 			zp->number = atoi(row[9]);
 			zp->target_zone_instance = atoi(row[10]);
 			zp->client_version_mask = (uint32)strtoul(row[11], nullptr, 0);

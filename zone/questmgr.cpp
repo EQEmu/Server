@@ -1705,9 +1705,9 @@ void QuestManager::showgrid(int grid) {
 	{
 		while((row = mysql_fetch_row(result)))
 		{
-			pt.x = atof(row[0]);
-			pt.y = atof(row[1]);
-			pt.z = atof(row[2]);
+			pt.x = (float)atof(row[0]);
+			pt.y = (float)atof(row[1]);
+			pt.z = (float)atof(row[2]);
 			pts.push_back(pt);
 		}
 		mysql_free_result(result);

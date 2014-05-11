@@ -3501,12 +3501,12 @@ bool TaskProximityManager::LoadProximities(int ZoneID) {
 
 		while((row = mysql_fetch_row(result))) {
 			Proximity.ExploreID = atoi(row[0]);
-			Proximity.MinX = atof(row[1]);
-			Proximity.MaxX = atof(row[2]);
-			Proximity.MinY = atof(row[3]);
-			Proximity.MaxY = atof(row[4]);
-			Proximity.MinZ = atof(row[5]);
-			Proximity.MaxZ = atof(row[6]);
+			Proximity.MinX = (float)atof(row[1]);
+			Proximity.MaxX = (float)atof(row[2]);
+			Proximity.MinY = (float)atof(row[3]);
+			Proximity.MaxY = (float)atof(row[4]);
+			Proximity.MinZ = (float)atof(row[5]);
+			Proximity.MaxZ = (float)atof(row[6]);
 
 			TaskProximities.push_back(Proximity);
 

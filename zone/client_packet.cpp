@@ -4668,7 +4668,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		if(GetClientVersion() < EQClientSoD)
 			IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
 		else
-			IntoxicationIncrease = (270 - AlcoholTolerance) * 0.111111108 + 10;
+			IntoxicationIncrease = (int16)((270 - AlcoholTolerance) * 0.111111108 + 10.0);
 
 		if(IntoxicationIncrease < 0)
 			IntoxicationIncrease = 1;
@@ -5597,9 +5597,9 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	int SinglePrice = 0;
 	if (RuleB(Merchant, UsePriceMod))
-		SinglePrice = (item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(tmp, false));
+		SinglePrice = (int)(item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(tmp, false));
 	else
-		SinglePrice = (item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate);
+		SinglePrice = (int)(item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate);
 
 	if(item->MaxCharges > 1)
 		mpo->price = SinglePrice;
@@ -5801,10 +5801,10 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	if(charges > 0 && (freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(),itemid,charges,true)) > 0){
 		ItemInst* inst2 = inst->Clone();
 		if (RuleB(Merchant, UsePriceMod)){
-		inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor,false));
+		inst2->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor,false)));
 		}
 		else
-			inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate);
+			inst2->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
 		inst2->SetMerchantSlot(freeslot);
 
 		uint32 MerchantQuantity = zone->GetTempMerchantQuantity(vendor->GetNPCTypeID(), freeslot);
@@ -11475,9 +11475,9 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 
 		if(zoneid == StartCity) {
 			ValidCity = true;
-			x = atof(row[2]);
-			y = atof(row[3]);
-			z = atof(row[4]);
+			x = (float)atof(row[2]);
+			y = (float)atof(row[3]);
+			z = (float)atof(row[4]);
 		}
 	}
 

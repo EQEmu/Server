@@ -235,8 +235,8 @@ bool Client::CanFish() {
 		HeadingDegrees = (int) ((GetHeading()*360)/256);
 		HeadingDegrees = HeadingDegrees % 360;
 
-		RodX = x_pos + RodLength * sin(HeadingDegrees * M_PI/180.0f);
-		RodY = y_pos + RodLength * cos(HeadingDegrees * M_PI/180.0f);
+		RodX = (float)(x_pos + RodLength * sin(HeadingDegrees * M_PI/180.0f));
+		RodY = (float)(y_pos + RodLength * cos(HeadingDegrees * M_PI/180.0f));
 
 		// Do BestZ to find where the line hanging from the rod intersects the water (if it is water).
 		// and go 1 unit into the water.

@@ -433,8 +433,8 @@ void Object::RandomSpawn(bool send_packet) {
 	if(!m_ground_spawn)
 		return;
 
-	m_data.x = MakeRandomFloat(m_min_x, m_max_x);
-	m_data.y = MakeRandomFloat(m_min_y, m_max_y);
+	m_data.x = (float)MakeRandomFloat(m_min_x, m_max_x);
+	m_data.y = (float)MakeRandomFloat(m_min_y, m_max_y);
 	respawn_timer.Disable();
 
 	if(send_packet) {
@@ -651,12 +651,12 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
 		safe_delete_array(query);
 		int i=0;
 		while( (row=mysql_fetch_row(result) ) ) {
-			gs->spawn[i].max_x=atof(row[0]);
-			gs->spawn[i].max_y=atof(row[1]);
-			gs->spawn[i].max_z=atof(row[2]);
-			gs->spawn[i].min_x=atof(row[3]);
-			gs->spawn[i].min_y=atof(row[4]);
-			gs->spawn[i].heading=atof(row[5]);
+			gs->spawn[i].max_x=(float)atof(row[0]);
+			gs->spawn[i].max_y=(float)atof(row[1]);
+			gs->spawn[i].max_z=(float)atof(row[2]);
+			gs->spawn[i].min_x=(float)atof(row[3]);
+			gs->spawn[i].min_y=(float)atof(row[4]);
+			gs->spawn[i].heading=(float)atof(row[5]);
 			strcpy(gs->spawn[i].name,row[6]);
 			gs->spawn[i].item=atoi(row[7]);
 			gs->spawn[i].max_allowed=atoi(row[8]);

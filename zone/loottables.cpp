@@ -91,7 +91,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 
 			float drop_chance = 0.0f;
 			if(ltchance > 0.0 && ltchance < 100.0) {
-				drop_chance = MakeRandomFloat(0.0, 100.0);
+				drop_chance = (float)MakeRandomFloat(0.0, 100.0);
 			}
 
 			if (ltchance != 0.0 && (ltchance == 100.0 || drop_chance < ltchance)) {
@@ -136,7 +136,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 
 			float drop_chance = 0.0;
 			if(thischance != 100.0)
-				drop_chance = MakeRandomFloat(0.0, 100.0);
+				drop_chance = (float)MakeRandomFloat(0.0, 100.0);
 
 #if EQDEBUG>=11
 			LogFile->write(EQEMuLog::Debug, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);

@@ -123,19 +123,19 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 				zone_data->fog_red[i]=atoi(row[r++]);
 				zone_data->fog_green[i]=atoi(row[r++]);
 				zone_data->fog_blue[i]=atoi(row[r++]);
-				zone_data->fog_minclip[i]=atof(row[r++]);
-				zone_data->fog_maxclip[i]=atof(row[r++]);
+				zone_data->fog_minclip[i]=(float)atof(row[r++]);
+				zone_data->fog_maxclip[i]=(float)atof(row[r++]);
 			}
 
-			zone_data->fog_density = atof(row[r++]);;
+			zone_data->fog_density = (float)atof(row[r++]);;
 			zone_data->sky=atoi(row[r++]);
-			zone_data->zone_exp_multiplier=atof(row[r++]);
-			zone_data->safe_x=atof(row[r++]);
-			zone_data->safe_y=atof(row[r++]);
-			zone_data->safe_z=atof(row[r++]);
-			zone_data->underworld=atof(row[r++]);
-			zone_data->minclip=atof(row[r++]);
-			zone_data->maxclip=atof(row[r++]);
+			zone_data->zone_exp_multiplier=(float)atof(row[r++]);
+			zone_data->safe_x=(float)atof(row[r++]);
+			zone_data->safe_y=(float)atof(row[r++]);
+			zone_data->safe_z=(float)atof(row[r++]);
+			zone_data->underworld=(float)atof(row[r++]);
+			zone_data->minclip=(float)atof(row[r++]);
+			zone_data->maxclip=(float)atof(row[r++]);
 
 			zone_data->time_type=atoi(row[r++]);
 //not in the DB yet:
@@ -171,7 +171,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 				zone_data->snow_chance[i]=atoi(row[r++]);
 			}
 			for(i=0;i<4;i++){
-				zone_data->snow_duration[i]=atof(row[r++]);
+				zone_data->snow_duration[i]=(uint8)atof(row[r++]);
 			}
 			good = true;
 		}
@@ -918,9 +918,9 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 			pp->zone_id = GetZoneID(row[2]);
 			pp->zoneInstance = atoi(row[13]);
 
-			pp->x = atof(row[3]);
-			pp->y = atof(row[4]);
-			pp->z = atof(row[5]);
+			pp->x = (float)atof(row[3]);
+			pp->y = (float)atof(row[4]);
+			pp->z = (float)atof(row[5]);
 
 			pp->lastlogin = time(nullptr);
 
@@ -1137,13 +1137,13 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->gender = atoi(row[r++]);
 				tmpNPCType->texture = atoi(row[r++]);
 				tmpNPCType->helmtexture = atoi(row[r++]);
-				tmpNPCType->size = atof(row[r++]);
+				tmpNPCType->size = (float)atof(row[r++]);
 				tmpNPCType->loottable_id = atoi(row[r++]);
 				tmpNPCType->merchanttype = atoi(row[r++]);
 				tmpNPCType->alt_currency_type = atoi(row[r++]);
 				tmpNPCType->adventure_template = atoi(row[r++]);
 				tmpNPCType->trap_template = atoi(row[r++]);
-				tmpNPCType->attack_speed = atof(row[r++]);
+				tmpNPCType->attack_speed = (float)atof(row[r++]);
 				tmpNPCType->STR = atoi(row[r++]);
 				tmpNPCType->STA = atoi(row[r++]);
 				tmpNPCType->DEX = atoi(row[r++]);
@@ -1168,7 +1168,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
 				tmpNPCType->prim_melee_type = atoi(row[r++]);
 				tmpNPCType->sec_melee_type = atoi(row[r++]);
-				tmpNPCType->runspeed= atof(row[r++]);
+				tmpNPCType->runspeed= (float)atof(row[r++]);
 				tmpNPCType->findable = atoi(row[r++]) == 0? false : true;
 				tmpNPCType->trackable = atoi(row[r++]) == 0? false : true;
 				tmpNPCType->hp_regen = atoi(row[r++]);
@@ -1459,7 +1459,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				//tmpNPCType->alt_currency_type = atoi(row[r++]);
 				//tmpNPCType->adventure_template = atoi(row[r++]);
 				//tmpNPCType->trap_template = atoi(row[r++]);
-				tmpNPCType->attack_speed = atof(row[r++]);
+				tmpNPCType->attack_speed = (float)atof(row[r++]);
 				tmpNPCType->STR = atoi(row[r++]);
 				tmpNPCType->STA = atoi(row[r++]);
 				tmpNPCType->DEX = atoi(row[r++]);
@@ -1482,7 +1482,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
 				tmpNPCType->prim_melee_type = atoi(row[r++]);
 				tmpNPCType->sec_melee_type = atoi(row[r++]);
-				tmpNPCType->runspeed= atof(row[r++]);
+				tmpNPCType->runspeed= (float)atof(row[r++]);
 				//tmpNPCType->findable = atoi(row[r++]) == 0? false : true;
 				//tmpNPCType->trackable = atoi(row[r++]) == 0? false : true;
 				tmpNPCType->hp_regen = atoi(row[r++]);

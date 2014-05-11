@@ -498,9 +498,9 @@ float Mob::CalculateHeadingToTarget(float in_x, float in_y) {
 	float angle;
 
 	if (in_x-x_pos > 0)
-		angle = - 90 + atan((float)(in_y-y_pos) / (float)(in_x-x_pos)) * 180 / M_PI;
+		angle = (float)(-90.0f + atan((in_y-y_pos) / (in_x-x_pos)) * 180.0f / M_PI);
 	else if (in_x-x_pos < 0)
-		angle = + 90 + atan((float)(in_y-y_pos) / (float)(in_x-x_pos)) * 180 / M_PI;
+		angle = (float)(+90.0f + atan((in_y-y_pos) / (in_x-x_pos)) * 180.0f / M_PI);
 	else // Added?
 	{
 		if (in_y-y_pos > 0)
@@ -924,9 +924,9 @@ void NPC::AssignWaypoints(int32 grid) {
 				{
 					wplist newwp;
 					newwp.index = ++max_wp;
-					newwp.x = atof(row[0]);
-					newwp.y = atof(row[1]);
-					newwp.z = atof(row[2]);
+					newwp.x = (float)atof(row[0]);
+					newwp.y = (float)atof(row[1]);
+					newwp.z = (float)atof(row[2]);
 
 					if(zone->HasMap() && RuleB(Map, FixPathingZWhenLoading) )
 					{
@@ -943,7 +943,7 @@ void NPC::AssignWaypoints(int32 grid) {
 					}
 
 					newwp.pause = atoi(row[3]);
-					newwp.heading = atof(row[4]);
+					newwp.heading = (float)atof(row[4]);
 					Waypoints.push_back(newwp);
 				}
 			}
@@ -1004,12 +1004,12 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	if(IsNPC()) {
-		entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z + 0.1);
+		entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z + 0.1f);
 	}
 
 	x_pos = new_x;
 	y_pos = new_y;
-	z_pos = new_z + 0.1;
+	z_pos = new_z + 0.1f;
 
 	//fix up pathing Z, this shouldent be needed IF our waypoints
 	//are corrected instead
@@ -1085,11 +1085,11 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			if ( wp ) {
-				wp->x = atof( row[0] );
-				wp->y = atof( row[1] );
-				wp->z = atof( row[2] );
+				wp->x = (float)atof( row[0] );
+				wp->y = (float)atof( row[1] );
+				wp->z = (float)atof( row[2] );
 				wp->pause = atoi( row[3] );
-				wp->heading = atof( row[4] );
+				wp->heading = (float)atof( row[4] );
 			}
 			mysql_free_result(result);
 			return true;
@@ -1166,8 +1166,8 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 		{
 			row = mysql_fetch_row(result);
 			spawn2id = atoi(row[0]);
-			dbx = atof(row[1]);
-			dby = atof(row[2]);
+			dbx = (float)atof(row[1]);
+			dby = (float)atof(row[2]);
 			if(!RunQuery(
 				query,
 				MakeAnyLenString(

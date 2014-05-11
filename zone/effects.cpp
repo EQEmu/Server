@@ -260,7 +260,7 @@ int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_s
 	if (total_cast_time > 0 && total_cast_time <= 2500)
 		extra_spell_amt = extra_spell_amt*25/100; 
 	 else if (total_cast_time > 2500 && total_cast_time < 7000) 
-		 extra_spell_amt = extra_spell_amt*(0.167*((total_cast_time - 1000)/1000)); 
+		 extra_spell_amt = (int32)(extra_spell_amt*(0.167*((total_cast_time - 1000)/1000))); 
 	 else 
 		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000; 
 
@@ -408,11 +408,11 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 		break;
 	}
 
-	bonus += 0.05 * GetAA(aaAdvancedSpellCastingMastery);
+	bonus += 0.05f * GetAA(aaAdvancedSpellCastingMastery);
 
 	if(SuccessChance <= (SpecializeSkill * 0.3 * bonus))
 	{
-		PercentManaReduction = 1 + 0.05 * SpecializeSkill;
+		PercentManaReduction = 1.0f + 0.05f * SpecializeSkill;
 		switch(GetAA(aaSpellCastingMastery))
 		{
 		case 1:
@@ -444,7 +444,7 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 
 	if(focus_redux > 0)
 	{
-		PercentManaReduction += MakeRandomFloat(1, (double)focus_redux);
+		PercentManaReduction += (float)MakeRandomFloat(1, (double)focus_redux);
 	}
 
 	cost = (int32)(cost -(cost * (PercentManaReduction / 100)));
