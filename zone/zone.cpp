@@ -476,9 +476,9 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 			ml.id = merchantid;
 			ml.item = atoul(row[0]);
 			ml.slot = atoul(row[1]);
-			ml.faction_required = atoul(row[2]);
-			ml.level_required = atoul(row[3]);
-			ml.alt_currency_cost = atoul(row[3]);
+			ml.faction_required = (int16)atoul(row[2]);
+			ml.level_required = (int8)atoul(row[3]);
+			ml.alt_currency_cost = (uint16)atoul(row[3]);
 			ml.classes_required = atoul(row[4]);
 			merlist.push_back(ml);
 		}
@@ -523,9 +523,9 @@ void Zone::LoadMerchantData_result(MYSQL_RES* result) {
 
 		ml.slot = atoul(row[1]);
 		ml.item = atoul(row[2]);
-		ml.faction_required = atoul(row[3]);
-		ml.level_required = atoul(row[4]);
-		ml.alt_currency_cost = atoul(row[5]);
+		ml.faction_required = (int16)atoul(row[3]);
+		ml.level_required = (int8)atoul(row[4]);
+		ml.alt_currency_cost = (uint16)atoul(row[5]);
 		ml.classes_required = atoul(row[6]);
 		cur->second.push_back(ml);
 	}

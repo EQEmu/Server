@@ -182,7 +182,7 @@ XS(XS__summonitem)
 	if (items == 1)
 		quest_manager.summonitem(SvUV(ST(0)));
 	else if(items == 2)
-		quest_manager.summonitem(SvUV(ST(0)), SvUV(ST(1)));
+		quest_manager.summonitem(SvUV(ST(0)), (int16)SvUV(ST(1)));
 	else
 		Perl_croak(aTHX_ "Usage: summonitem(itemid, [charges])");
 	XSRETURN_EMPTY;
