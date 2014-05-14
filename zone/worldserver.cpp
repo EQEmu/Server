@@ -1843,7 +1843,7 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 		scm->fromadmin = 0;
 	} else {
 		strcpy(scm->from, from->GetName());
-		scm->fromadmin = from->Admin();
+		scm->fromadmin = (uint8)from->Admin();
 	}
 	if (to == 0) {
 		scm->to[0] = 0;
