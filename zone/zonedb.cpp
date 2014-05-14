@@ -241,8 +241,8 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 		{
 			timeval tv;
 			gettimeofday(&tv, nullptr);
-			uint32 resStart = atoi(row[0]);
-			uint32 resDuration = atoi(row[1]);
+			int32 resStart = atoi(row[0]);
+			int32 resDuration = atoi(row[1]);
 
 			//compare our values to current time
 			if((resStart + resDuration) <= tv.tv_sec)
@@ -2588,7 +2588,7 @@ void ZoneDatabase::SaveBuffs(Client *c) {
 
 	uint32 buff_count = c->GetMaxBuffSlots();
 	Buffs_Struct *buffs = c->GetBuffs();
-	for (int i = 0; i < buff_count; i++) {
+	for (uint32 i = 0; i < buff_count; i++) {
 		if(buffs[i].spellid != SPELL_UNKNOWN) {
 			if(!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `character_buffs` (character_id, slot_id, spell_id, "
 				"caster_level, caster_name, ticsremaining, counters, numhits, melee_rune, magic_rune, persistent, dot_rune, "
@@ -2607,7 +2607,7 @@ void ZoneDatabase::SaveBuffs(Client *c) {
 void ZoneDatabase::LoadBuffs(Client *c) {
 	Buffs_Struct *buffs = c->GetBuffs();
 	uint32 max_slots = c->GetMaxBuffSlots();
-	for(int i = 0; i < max_slots; ++i) {
+	for(uint32 i = 0; i < max_slots; ++i) {
 		buffs[i].spellid = SPELL_UNKNOWN;
 	}
 
@@ -2624,7 +2624,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 		safe_delete_array(query);
 		while ((row = mysql_fetch_row(result)))
 		{
-			uint32 slot_id = atoul(row[1]);
+			int slot_id = atoul(row[1]);
 			if(slot_id >= c->GetMaxBuffSlots()) {
 				continue;
 			}
@@ -2684,7 +2684,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 	}
 
 	max_slots = c->GetMaxBuffSlots();
-	for(int i = 0; i < max_slots; ++i) {
+	for(uint32 i = 0; i < max_slots; ++i) {
 		if(!IsValidSpell(buffs[i].spellid)) {
 			continue;
 		}
@@ -2877,7 +2877,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 			else
 				continue;
 
-			uint32 slot_id = atoul(row[1]);
+			int32 slot_id = atoul(row[1]);
 			if(slot_id >= RuleI(Spells, MaxTotalSlotsPET)) {
 				continue;
 			}
