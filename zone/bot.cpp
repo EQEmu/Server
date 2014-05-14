@@ -1485,7 +1485,7 @@ void Bot::LoadAAs() {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
-		int totalAAs = database.CountAAs();
+		uint32 totalAAs = database.CountAAs();
 
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
 			uint32 skill_id = 0;
@@ -1495,7 +1495,7 @@ void Bot::LoadAAs() {
 				SendAA_Struct *sendAA = zone->FindAA(skill_id);
 
 				if(sendAA) {
-					for(int i=0; i<sendAA->max_level; i++) {
+					for(uint32 i=0; i<sendAA->max_level; i++) {
 						//Get AA info & add to list
 						uint32 aaid = sendAA->id + i;
 						uint8 total_levels = 0;
@@ -1903,7 +1903,7 @@ void Bot::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_SpellOnKill:
 				for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3)
 				{
-					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == base2) && (newbon->SpellOnKill[i+1] < base1)))
+					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == (uint32)base2) && (newbon->SpellOnKill[i+1] < (uint32)base1)))
 					{
 						//base1 = chance, base2 = SpellID to be triggered, base3 = min npc level
 						newbon->SpellOnKill[i] = base2;
@@ -2339,7 +2339,7 @@ bool Bot::IsValidName() {
 	bool Result = false;
 	std::string TempBotName = std::string(this->GetCleanName());
 
-	for(int iCounter = 0; iCounter < TempBotName.length(); iCounter++) {
+	for(uint32 iCounter = 0; iCounter < TempBotName.length(); iCounter++) {
 		if(isalpha(TempBotName[iCounter]) || TempBotName[iCounter] == '_') {
 			Result = true;
 		}
@@ -2616,7 +2616,7 @@ uint32 Bot::GetPetSaveId() {
 void Bot::LoadPet() {
 	uint32 PetSaveId = GetPetSaveId();
 
-	if(PetSaveId > 0 && !GetPet() && PetSaveId <= SPDAT_RECORDS) {
+	if(PetSaveId > 0 && !GetPet() && PetSaveId <= (uint32)SPDAT_RECORDS) {
 		std::string petName;
 		uint16 petMana = 0;
 		uint16 petHitPoints = 0;
@@ -4889,7 +4889,7 @@ std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string*
 			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 					SpawnedBotsList TempSpawnedBotsList;
 					TempSpawnedBotsList.BotLeaderCharID = characterID;
@@ -4989,7 +4989,7 @@ std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* err
 				uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 				if(RowCount > 0) {
-					for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+					for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 						DataRow = mysql_fetch_row(DatasetResult);
 
 						if(DataRow) {
@@ -5028,7 +5028,7 @@ std::list<BotGroupList> Bot::GetBotGroupListByBotOwnerCharacterId(uint32 botOwne
 			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -5062,7 +5062,7 @@ bool Bot::DoesBotGroupNameExist(std::string botGroupName) {
 			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -5102,7 +5102,7 @@ uint32 Bot::CanLoadBotGroup(uint32 botOwnerCharacterId, std::string botGroupName
 			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -5142,7 +5142,7 @@ uint32 Bot::GetBotGroupIdByBotGroupName(std::string botGroupName, std::string* e
 			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -5173,7 +5173,7 @@ uint32 Bot::GetBotGroupLeaderIdByBotGroupName(std::string botGroupName) {
 			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -6689,8 +6689,8 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 	bool LimitSpellSkill = false;
 	bool SpellSkill_Found = false;
 	uint32 effect = 0;
-	int32 base1 = 0;
-	int32 base2 = 0;
+	int base1 = 0;
+	uint32 base2 = 0;
 	uint32 slot = 0;
 
 	bool LimitFound = false;
@@ -6768,7 +6768,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 					LimitFound = true;
 			break;
 			case SE_LimitCastTimeMin:
-				if (spell.cast_time < base1)
+				if (spell.cast_time < (uint32)base1)
 					LimitFound = true;
 			break;
 			case SE_LimitSpell:
@@ -7212,7 +7212,7 @@ int16 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 		int buff_slot = 0;
 		uint16 focusspellid = 0;
 		uint16 focusspell_tracker = 0;
-		uint32 buff_max = GetMaxTotalSlots();
+		int buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 			focusspellid = buffs[buff_slot].spellid;
 			if (focusspellid == 0 || focusspellid >= SPDAT_RECORDS)
@@ -7995,7 +7995,7 @@ bool Bot::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 		uint32 damage = aabonuses.FinishingBlow[1];
 		uint16 levelreq = aabonuses.FinishingBlowLvl[0];
 
-		if(defender->GetLevel() <= levelreq && (chance >= MakeRandomInt(0, 1000))){
+		if(defender->GetLevel() <= levelreq && (chance >= (uint32)MakeRandomInt(0, 1000))){
 			mlog(COMBAT__ATTACKS, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
@@ -9426,7 +9426,7 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 	// Gift of Mana - reduces spell cost to 1 mana
 	if(focus_redux >= 100) {
 		uint32 buff_max = GetMaxTotalSlots();
-		for (int buffSlot = 0; buffSlot < buff_max; buffSlot++) {
+		for (uint32 buffSlot = 0; buffSlot < buff_max; buffSlot++) {
 			if (buffs[buffSlot].spellid == 0 || buffs[buffSlot].spellid >= SPDAT_RECORDS)
 				continue;
 
@@ -9907,7 +9907,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, uint16 
 			bool noGroupSpell = false;
 			uint16 thespell = spell_id;
 
-			for(int i=0; i < AIspells.size(); i++) {
+			for(uint32 i=0; i < AIspells.size(); i++) {
 				int j = BotGetSpells(i);
 				int spelltype = BotGetSpellType(i);
 				bool spellequal = (j == thespell);
@@ -11370,7 +11370,7 @@ void Bot::CalcItemBonuses()
 					if(itemtmp->CombatEffects != 0)
 						itembonuses.ProcChance += itemtmp->CombatEffects;
 					if(itemtmp->Haste != 0)
-						if(itembonuses.haste < itemtmp->Haste)
+						if((uint32)itembonuses.haste < itemtmp->Haste)
 							itembonuses.haste = itemtmp->Haste;
 					if(GetClass() == BARD && itemtmp->BardValue != 0) {
 						if(itemtmp->BardType == ItemTypeBrassInstrument)
@@ -11454,7 +11454,7 @@ void Bot::CalcItemBonuses()
 			if(itemtmp->CombatEffects != 0)
 				itembonuses.ProcChance += itemtmp->CombatEffects;
 			if(itemtmp->Haste != 0)
-				if(itembonuses.haste < itemtmp->Haste)
+				if((uint32)itembonuses.haste < itemtmp->Haste)
 					itembonuses.haste = itemtmp->Haste;
 			if(GetClass() == BARD && itemtmp->BardValue != 0) {
 				if(itemtmp->BardType == ItemTypeBrassInstrument)
@@ -14281,7 +14281,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		Mob *target = c->GetTarget();
 		if(target && target->IsBot())
 		{
-			for(int i=0; i<target->CastToBot()->AIspells.size(); i++)
+			for(uint32 i=0; i<target->CastToBot()->AIspells.size(); i++)
 			{
 				if(target->CastToBot()->BotGetSpells(i) != 0)
 				{
@@ -16374,7 +16374,7 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 				if (NamedOnly) {
 					bool ContinueFlag = false;
 					const char *CurEntityName = cur_entity->GetName(); //Call function once
-					for (int Index = 0; Index < MyArraySize; Index++) {
+					for (uint32 Index = 0; Index < MyArraySize; Index++) {
 						if (!strncasecmp(CurEntityName, MyArray[Index], strlen(MyArray[Index])) || (Extras)) {
 							ContinueFlag = true;
 							break; //From Index for

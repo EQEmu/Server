@@ -4485,8 +4485,8 @@ NPC *EntityList::GetClosestBanker(Mob *sender, uint32 &distance)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		if (it->second->GetClass() == BANKER) {
-			uint32 nd = ((it->second->GetY() - sender->GetY()) * (it->second->GetY() - sender->GetY())) +
-				((it->second->GetX() - sender->GetX()) * (it->second->GetX() - sender->GetX()));
+			uint32 nd = (uint32)(((it->second->GetY() - sender->GetY()) * (it->second->GetY() - sender->GetY())) +
+				((it->second->GetX() - sender->GetX()) * (it->second->GetX() - sender->GetX())));
 			if (nd < distance){
 				distance = nd;
 				nc = it->second;

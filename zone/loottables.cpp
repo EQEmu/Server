@@ -194,7 +194,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 	}
 
 	item->item_id = item2->ID;
-	item->charges = charges;
+	item->charges = (uint8)charges;
 	item->aug1 = 0;
 	item->aug2 = 0;
 	item->aug3 = 0;

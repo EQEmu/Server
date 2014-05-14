@@ -577,7 +577,7 @@ bool Corpse::Save() {
 	dbpc->race = (uint8)CorpseRace;
 	dbpc->class_ = class_;
 	dbpc->gender = gender;
-	dbpc->deity = deity;
+	dbpc->deity = (uint8)deity;
 	dbpc->level = level;
 	dbpc->texture = this->texture;
 	dbpc->helmtexture = this->helmtexture;

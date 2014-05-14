@@ -5573,8 +5573,8 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 	if(tmpmer_used && (mp->quantity > prevcharges || item->MaxCharges > 1))
 	{
-		if(prevcharges > item->MaxCharges && item->MaxCharges > 1)
-			mp->quantity = item->MaxCharges;
+		if((int32)prevcharges > item->MaxCharges && item->MaxCharges > 1)
+			mp->quantity =(uint8)item->MaxCharges;
 		else
 			mp->quantity = prevcharges;
 	}
@@ -8979,7 +8979,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 		database.LoadBuffs(this);
 		uint32 max_slots = GetMaxBuffSlots();
-		for(int i = 0; i < max_slots; i++) {
+		for(uint32 i = 0; i < max_slots; i++) {
 			if(buffs[i].spellid != SPELL_UNKNOWN) {
 				m_pp.buffs[i].spellid = buffs[i].spellid;
 				m_pp.buffs[i].bard_modifier = 10;
@@ -9134,7 +9134,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440;
 
-	if(m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate))
+	if(m_pp.RestTimer > (uint32)RuleI(Character, RestRegenTimeToActivate))
 		m_pp.RestTimer = 0;
 
 	//This checksum should disappear once dynamic structs are in... each struct strategy will do it
@@ -11263,7 +11263,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	}
 	else
 	{
-		if(inst->GetCharges() < ams_in->charges)
+		if((uint32)inst->GetCharges() < ams_in->charges)
 		{
 			ams_in->charges = inst->GetCharges();
 		}
@@ -12860,7 +12860,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 		}
 		else
 		{
-			if(inst->GetCharges() < sell->charges)
+			if((uint32)inst->GetCharges() < sell->charges)
 			{
 				sell->charges = inst->GetCharges();
 			}

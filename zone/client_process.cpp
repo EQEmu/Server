@@ -1545,7 +1545,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 				if (from_bucket == &m_pp.platinum_shared)
 					amount_to_add = 0 - amount_to_take;
 
-				database.SetSharedPlatinum(AccountID(),amount_to_add);
+				database.SetSharedPlatinum(AccountID(),(uint32)amount_to_add);
 			}
 		}
 	}
