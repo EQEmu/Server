@@ -1822,7 +1822,7 @@ ENCODE(OP_Damage) {
 	OUT(type);
 	OUT(spellid);
 	OUT(damage);
-	eq->sequence = emu->sequence;
+	eq->sequence = (float)emu->sequence;
 	FINISH_ENCODE();
 }
 
@@ -1844,7 +1844,7 @@ ENCODE(OP_Action) {
 	OUT(source);
 	OUT(level);
 	eq->instrument_mod = 1.0f + (emu->instrument_mod - 10) / 10.0f;
-	eq->knockback_angle = emu->sequence;
+	eq->knockback_angle = (float)emu->sequence;
 	OUT(type);
 	OUT(spell);
 	eq->level2 = eq->level;

@@ -987,9 +987,9 @@ bool Bot::AI_IdleCastCheck() {
 		if(botClass == CLERIC || botClass == PALADIN || botClass == RANGER) {
 			if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, (float)BotAISpellRange, SpellType_Cure)) {
 				if (!AICastSpell(this, 100, SpellType_Heal)) {
-					if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
+					if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, (float)BotAISpellRange, SpellType_Heal)) {
 						if (!AICastSpell(this, 100, SpellType_Buff)) {
-							if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+							if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, (float)BotAISpellRange, SpellType_Buff)) {
 								//
 							}
 						}
