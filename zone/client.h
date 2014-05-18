@@ -621,6 +621,7 @@ public:
 	void	SendGuildURL();
 	void	SendGuildChannel();
 	void	SendGuildSpawnAppearance();
+	void	SendGuildRanks();
 	void	SendGuildMembers();
 	void	SendGuildList();
 	void	SendGuildJoin(GuildJoin_Struct* gj);
