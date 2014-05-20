@@ -1267,7 +1267,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		PlayerPositionUpdateServer_Struct* ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
 		MakeSpawnUpdate(ppu);
 		if (gmhideme)
-			entity_list.QueueClientsStatus(this,outapp,true,(uint8)Admin(),250);
+			entity_list.QueueClientsStatus(this,outapp,true,Admin(),250);
 		else
 			entity_list.QueueCloseClients(this,outapp,true,300,nullptr,false);
 		safe_delete(outapp);
@@ -3416,8 +3416,8 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 	else {
 		CheckIncreaseSkill(SkillSneak, nullptr, 5);
 	}
-	float hidechance = ((GetSkill(SkillSneak)/300.0f) + .25f) * 1000.f;
-	float random = (float)MakeRandomFloat(0, 99);
+	float hidechance = ((GetSkill(SkillSneak)/300.0f) + .25) * 100;
+	float random = MakeRandomFloat(0, 99);
 	if(!was && random < hidechance) {
 		sneaking = true;
 	}
@@ -3458,8 +3458,8 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	int reuse = HideReuseTime - GetAA(209);
 	p_timers.Start(pTimerHide, reuse-1);
 
-	float hidechance = ((GetSkill(SkillHide)/250.0f) + .25f) * 100.0f;
-	float random = (float)MakeRandomFloat(0, 100);
+	float hidechance = ((GetSkill(SkillHide)/250.0f) + .25) * 100;
+	float random = MakeRandomFloat(0, 100);
 	CheckIncreaseSkill(SkillHide, nullptr, 5);
 	if (random < hidechance) {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
@@ -4010,7 +4010,7 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 
 	bool NewBankerStatus = gmb->enabled & 0x01;
 
-	bool NewAltStatus = (gmb->enabled & 0x02) != 0;
+	bool NewAltStatus = gmb->enabled & 0x02;
 
 	if((IsCurrentlyABanker != NewBankerStatus) && !guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
 	{
@@ -4668,7 +4668,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		if(GetClientVersion() < EQClientSoD)
 			IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
 		else
-			IntoxicationIncrease = (int16)((270 - AlcoholTolerance) * 0.111111108 + 10.0);
+			IntoxicationIncrease = (270 - AlcoholTolerance) * 0.111111108 + 10;
 
 		if(IntoxicationIncrease < 0)
 			IntoxicationIncrease = 1;
@@ -5242,7 +5242,7 @@ void Client::Handle_OP_LFGCommand(const EQApplicationPacket *app)
 			}
 			LFGFromLevel = lfg->FromLevel;
 			LFGToLevel = lfg->ToLevel;
-			LFGMatchFilter = lfg->MatchFilter != 0;
+			LFGMatchFilter = lfg->MatchFilter;
 			strcpy(LFGComments, lfg->Comments);
 			break;
 		default:
@@ -5573,8 +5573,8 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 	if(tmpmer_used && (mp->quantity > prevcharges || item->MaxCharges > 1))
 	{
-		if((int32)prevcharges > item->MaxCharges && item->MaxCharges > 1)
-			mp->quantity =(uint8)item->MaxCharges;
+		if(prevcharges > item->MaxCharges && item->MaxCharges > 1)
+			mp->quantity = item->MaxCharges;
 		else
 			mp->quantity = prevcharges;
 	}
@@ -5597,9 +5597,9 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	int SinglePrice = 0;
 	if (RuleB(Merchant, UsePriceMod))
-		SinglePrice = (int)(item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(tmp, false));
+		SinglePrice = (item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(tmp, false));
 	else
-		SinglePrice = (int)(item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate);
+		SinglePrice = (item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate);
 
 	if(item->MaxCharges > 1)
 		mpo->price = SinglePrice;
@@ -5801,10 +5801,10 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	if(charges > 0 && (freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(),itemid,charges,true)) > 0){
 		ItemInst* inst2 = inst->Clone();
 		if (RuleB(Merchant, UsePriceMod)){
-		inst2->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor,false)));
+		inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(vendor,false));
 		}
 		else
-			inst2->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
+			inst2->SetPrice(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate);
 		inst2->SetMerchantSlot(freeslot);
 
 		uint32 MerchantQuantity = zone->GetTempMerchantQuantity(vendor->GetNPCTypeID(), freeslot);
@@ -7970,10 +7970,10 @@ void Client::Handle_OP_GMFind(const EQApplicationPacket *app)
 	Mob* gt = entity_list.GetMob(request->charname);
 	if (gt != 0) {
 		foundplayer->success=1;
-		foundplayer->x=gt->GetX();
-		foundplayer->y=gt->GetY();
+		foundplayer->x=(int32)gt->GetX();
+		foundplayer->y=(int32)gt->GetY();
 
-		foundplayer->z=gt->GetZ();
+		foundplayer->z=(int32)gt->GetZ();
 		foundplayer->zoneID=zone->GetZoneID();
 	}
 	//Send the packet...
@@ -8979,7 +8979,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 		database.LoadBuffs(this);
 		uint32 max_slots = GetMaxBuffSlots();
-		for(uint32 i = 0; i < max_slots; i++) {
+		for(int i = 0; i < max_slots; i++) {
 			if(buffs[i].spellid != SPELL_UNKNOWN) {
 				m_pp.buffs[i].spellid = buffs[i].spellid;
 				m_pp.buffs[i].bard_modifier = 10;
@@ -9134,7 +9134,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440;
 
-	if(m_pp.RestTimer > (uint32)RuleI(Character, RestRegenTimeToActivate))
+	if(m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate))
 		m_pp.RestTimer = 0;
 
 	//This checksum should disappear once dynamic structs are in... each struct strategy will do it
@@ -9603,7 +9603,7 @@ void Client::CompleteConnect()
 
 	if(IsInAGuild())
 	{
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), (uint32)time(nullptr));
+		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
 
@@ -9798,7 +9798,7 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 	cp/=10;
 	m_pp.gold=cp%10;
 	cp/=10;
-	m_pp.platinum=(int32)cp;
+	m_pp.platinum=cp;
 
 	cp = static_cast<uint64>(m_pp.copper_bank) +
 		(static_cast<uint64>(m_pp.silver_bank) * 10) +
@@ -9811,7 +9811,7 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 	cp/=10;
 	m_pp.gold_bank=cp%10;
 	cp/=10;
-	m_pp.platinum_bank=(int32)cp;
+	m_pp.platinum_bank=cp;
 
 	bc->copper=m_pp.copper;
 	bc->silver=m_pp.silver;
@@ -11263,7 +11263,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	}
 	else
 	{
-		if((uint32)inst->GetCharges() < ams_in->charges)
+		if(inst->GetCharges() < ams_in->charges)
 		{
 			ams_in->charges = inst->GetCharges();
 		}
@@ -11475,9 +11475,9 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 
 		if(zoneid == StartCity) {
 			ValidCity = true;
-			x = (float)atof(row[2]);
-			y = (float)atof(row[3]);
-			z = (float)atof(row[4]);
+			x = atof(row[2]);
+			y = atof(row[3]);
+			z = atof(row[4]);
 		}
 	}
 
@@ -11649,7 +11649,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 								EscSearchString, MaxResults), errbuf, &Result))
 	{
 
-		int NumberOfRows = (int)mysql_num_rows(Result);
+		int NumberOfRows = mysql_num_rows(Result);
 
 		if(NumberOfRows == MaxResults)
 			Message(clientMessageError, "Your search found too many results; some are not displayed.");
@@ -11679,14 +11679,14 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 			uint32 ZoneID = atoi(Row[1]);
 
-			float CorpseX = (float)atof(Row[2]);
-			float CorpseY = (float)atof(Row[3]);
-			float CorpseZ = (float)atof(Row[4]);
+			float CorpseX = atof(Row[2]);
+			float CorpseY = atof(Row[3]);
+			float CorpseZ = atof(Row[4]);
 
 			strn0cpy(TimeOfDeath, Row[5], sizeof(TimeOfDeath));
 
-			bool CorpseRezzed = atoi(Row[6]) != 0;
-			bool CorpseBuried = atoi(Row[7]) != 0;
+			bool CorpseRezzed = atoi(Row[6]);
+			bool CorpseBuried = atoi(Row[7]);
 
 			sprintf(Buffer, "<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
 				CharName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, TimeOfDeath,
@@ -12331,7 +12331,7 @@ void Client::Handle_OP_ClearBlockedBuffs(const EQApplicationPacket *app)
 		return;
 	}
 
-	bool Pet = app->pBuffer[0] != 0;
+	bool Pet = app->pBuffer[0];
 
 	if(Pet)
 		PetBlockedBuffs.clear();
@@ -12860,7 +12860,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app) {
 		}
 		else
 		{
-			if((uint32)inst->GetCharges() < sell->charges)
+			if(inst->GetCharges() < sell->charges)
 			{
 				sell->charges = inst->GetCharges();
 			}
@@ -13302,7 +13302,7 @@ void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
 		return;
 	}
 
-	XTargetAutoAddHaters = app->ReadUInt8(0) != 0;
+	XTargetAutoAddHaters = app->ReadUInt8(0);
 }
 
 void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)

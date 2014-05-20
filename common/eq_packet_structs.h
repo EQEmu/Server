@@ -3163,6 +3163,26 @@ struct GuildUpdateURLAndChannel_Struct
 /*4176*/
 };
 
+//Case 5 in Rain of Fear and higher clients for guild permissions.
+//RankID is the internal guild rank. There are 8 in Rain of Fear as opposed to the 3 in Titanium.
+//PermissionID is the type of permission. There are 32 total, with some unused. Live May 2014 sends and uses 26 of them. Varies through client version.
+//Permission value is a char that is either 0 or 1. Enabled for that rank/disabled for that rank.
+//The client sends this struct on changing a guild rank. The server sends each rank in 32 or less packets upon zonein if you are in a guild.
+struct GuildUpdateRanks_Struct
+{
+/*0000*/	uint32	Action;	// 0 = Update URL, 1 = Update Channel, 5 = RoF Ranks
+/*0004*/	uint32	Unknown0004; //Seen 00 00 00 00
+/*0008*/	uint32	Unknown0008; //Seen 96 29 00 00
+/*0008*/	char	Unknown0012[64]; //Seen "CharacterName"
+/*0076*/	uint32	GuildID; //Guild ID of "CharacterName"
+/*0080*/	uint32	RankID;
+/*0084*/	uint32	PermissionID;
+/*0088*/	char	PermissionVal;
+/*0089*/	char	Unknown0089[3]; //Seen 2c 01 00 ?
+/*0092*/
+};
+
+
 struct GuildStatus_Struct
 {
 /*000*/	char	Name[64];

@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 05/17/2014 ==
+Secrets: Identified the opcode/struct for guild ranks in Rain of Fear+ clients.
+Secrets: Implemented a work-around for Rain of Fear clients to have all guild permissions until proper database support is added for newer ranks.
+
+== 05/14/2014 ==
+Kayen: Rooted NPC's will no longer target players with Divine Aura effect if they are the closest target and other targets exist on the hate list.
+
 == 05/12/2014 ==
 Uleat: Re-arranged functions in Item.cpp to somewhat match the order they are declared in Item.h. Should make finding their location a little easier when using declarations as a guide. (This will facilitate readability of an upcoming change...)
 

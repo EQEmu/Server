@@ -10649,10 +10649,10 @@ int32 Bot::CalcMaxHP() {
 	if (cur_hp > max_hp)
 		cur_hp = max_hp;
 
-	int hp_perc_cap = spellbonuses.HPPercCap;
+	int hp_perc_cap = spellbonuses.HPPercCap[0];
 	if(hp_perc_cap) {
 		int curHP_cap = (max_hp * hp_perc_cap) / 100;
-		if (cur_hp > curHP_cap)
+		if (cur_hp > curHP_cap || (spellbonuses.HPPercCap[1] && cur_hp > spellbonuses.HPPercCap[1]))
 			cur_hp = curHP_cap;
 	}
 
@@ -10671,10 +10671,10 @@ int32 Bot::CalcMaxEndurance()
 		cur_end = max_end;
 	}
 
-	int end_perc_cap = spellbonuses.EndPercCap;
+	int end_perc_cap = spellbonuses.EndPercCap[0];
 	if(end_perc_cap) {
 		int curEnd_cap = (max_end * end_perc_cap) / 100;
-		if (cur_end > curEnd_cap)
+		if (cur_end > curEnd_cap || (spellbonuses.EndPercCap[1] && cur_end > spellbonuses.EndPercCap[1]))
 			cur_end = curEnd_cap;
 	}
 

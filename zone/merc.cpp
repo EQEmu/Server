@@ -917,10 +917,10 @@ int32 Merc::CalcMaxHP() {
 	if (cur_hp > max_hp)
 		cur_hp = max_hp;
 
-	int hp_perc_cap = spellbonuses.HPPercCap;
+	int hp_perc_cap = spellbonuses.HPPercCap[0];
 	if(hp_perc_cap) {
 		int curHP_cap = (max_hp * hp_perc_cap) / 100;
-		if (cur_hp > curHP_cap)
+		if (cur_hp > curHP_cap || (spellbonuses.HPPercCap[1] && cur_hp > spellbonuses.HPPercCap[1]))
 			cur_hp = curHP_cap;
 	}
 
@@ -959,10 +959,10 @@ int32 Merc::CalcMaxMana()
 		cur_mana = max_mana;
 	}
 
-	int mana_perc_cap = spellbonuses.ManaPercCap;
+	int mana_perc_cap = spellbonuses.ManaPercCap[0];
 	if(mana_perc_cap) {
 		int curMana_cap = (max_mana * mana_perc_cap) / 100;
-		if (cur_mana > curMana_cap)
+		if (cur_mana > curMana_cap  || (spellbonuses.ManaPercCap[1] && cur_mana > spellbonuses.ManaPercCap[1]))
 			cur_mana = curMana_cap;
 	}
 
@@ -1054,10 +1054,10 @@ void Merc::CalcMaxEndurance()
 		cur_end = max_end;
 	}
 
-	int end_perc_cap = spellbonuses.EndPercCap;
+	int end_perc_cap = spellbonuses.EndPercCap[0];
 	if(end_perc_cap) {
 		int curEnd_cap = (max_end * end_perc_cap) / 100;
-		if (cur_end > curEnd_cap)
+		if (cur_end > curEnd_cap || (spellbonuses.EndPercCap[1] && cur_end > spellbonuses.EndPercCap[1]))
 			cur_end = curEnd_cap;
 	}
 }
