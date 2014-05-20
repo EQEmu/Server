@@ -32,7 +32,7 @@
 #include "../common/rulesys.h"
 #include "../common/features.h"
 #include "QuestParserCollection.h"
-#include "watermap.h"
+#include "water_map.h"
 
 extern EntityList entity_list;
 

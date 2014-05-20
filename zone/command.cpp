@@ -55,7 +55,7 @@
 #include "worldserver.h"
 #include "masterentity.h"
 #include "map.h"
-#include "watermap.h"
+#include "water_map.h"
 #include "../common/features.h"
 #include "pathing.h"
 #include "client_logs.h"
@@ -8093,14 +8093,14 @@ void command_bestz(Client *c, const Seperator *sep) {
 
 		if(c->GetTarget()) {
 			z=c->GetTarget()->GetZ();
-			RegionType = zone->watermap->BSPReturnRegionType(1, c->GetTarget()->GetX(), c->GetTarget()->GetY(), z);
+			RegionType = zone->watermap->ReturnRegionType(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z);
 			c->Message(0,"InWater returns %d", zone->watermap->InWater(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z));
 			c->Message(0,"InLava returns %d", zone->watermap->InLava(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z));
 
 		}
 		else {
 			z=c->GetZ();
-			RegionType = zone->watermap->BSPReturnRegionType(1, c->GetX(), c->GetY(),z);
+			RegionType = zone->watermap->ReturnRegionType(c->GetX(), c->GetY(), z);
 			c->Message(0,"InWater returns %d", zone->watermap->InWater(c->GetX(), c->GetY(), z));
 			c->Message(0,"InLava returns %d", zone->watermap->InLava(c->GetX(), c->GetY(), z));
 

@@ -49,7 +49,7 @@
 #include "ZoneConfig.h"
 #include "../common/breakdowns.h"
 #include "map.h"
-#include "watermap.h"
+#include "water_map.h"
 #include "object.h"
 #include "petitions.h"
 #include "pathing.h"

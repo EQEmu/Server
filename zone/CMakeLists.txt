@@ -75,6 +75,7 @@ SET(zone_sources
 	npc.cpp
 	NpcAI.cpp
 	Object.cpp
+	oriented_bounding_box.cpp
 	pathing.cpp
 	perl_client.cpp
 	perl_doors.cpp
@@ -108,7 +109,9 @@ SET(zone_sources
 	trading.cpp
 	trap.cpp
 	tribute.cpp
-	watermap.cpp
+	water_map.cpp
+	water_map_v1.cpp
+	water_map_v2.cpp
 	waypoints.cpp
 	worldserver.cpp
 	zone.cpp
@@ -174,6 +177,7 @@ SET(zone_headers
 	npc.h
 	NpcAI.h
 	object.h
+	oriented_bounding_box.h
 	pathing.h
 	perlpacket.h
 	petitions.h
@@ -193,7 +197,9 @@ SET(zone_headers
 	tasks.h
 	titles.h
 	trap.h
-	watermap.h
+	water_map.h
+	water_map_v1.h
+	water_map_v2.h
 	worldserver.h
 	zone.h
 	ZoneConfig.h
