@@ -2151,28 +2151,40 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_LimitHPPercent:
 			{
-				if(newbon->HPPercCap != 0 && newbon->HPPercCap > effect_value)
-					newbon->HPPercCap = effect_value;
-				else if(newbon->HPPercCap == 0)
-					newbon->HPPercCap = effect_value;
-
+				if(newbon->HPPercCap[0] != 0 && newbon->HPPercCap[0] > effect_value){
+					newbon->HPPercCap[0] = effect_value;
+					newbon->HPPercCap[1] = base2;
+				}
+				else if(newbon->HPPercCap[0] == 0){
+					newbon->HPPercCap[0] = effect_value;
+					newbon->HPPercCap[1] = base2;
+				}
 				break;
 			}
 			case SE_LimitManaPercent:
 			{
-				if(newbon->ManaPercCap != 0 && newbon->ManaPercCap > effect_value)
-					newbon->ManaPercCap = effect_value;
-				else if(newbon->ManaPercCap == 0)
-					newbon->ManaPercCap = effect_value;
+				if(newbon->ManaPercCap[0] != 0 && newbon->ManaPercCap[0] > effect_value){
+					newbon->ManaPercCap[0] = effect_value;
+					newbon->ManaPercCap[1] = base2;
+				}
+				else if(newbon->ManaPercCap[0] == 0) {
+					newbon->ManaPercCap[0] = effect_value;
+					newbon->ManaPercCap[1] = base2;
+				}
 
 				break;
 			}
 			case SE_LimitEndPercent:
 			{
-				if(newbon->EndPercCap != 0 && newbon->EndPercCap > effect_value)
-					newbon->EndPercCap = effect_value;
-				else if(newbon->EndPercCap == 0)
-					newbon->EndPercCap = effect_value;
+				if(newbon->EndPercCap[0] != 0 && newbon->EndPercCap[0] > effect_value) {
+					newbon->EndPercCap[0] = effect_value;
+					newbon->EndPercCap[1] = base2;
+				}
+
+				else if(newbon->EndPercCap[0] == 0){
+					newbon->EndPercCap[0] = effect_value;
+					newbon->EndPercCap[1] = base2;
+				}
 
 				break;
 			}
