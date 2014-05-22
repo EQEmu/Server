@@ -57,6 +57,9 @@ public:
 	bool Load(std::string filename);
 	static Map *LoadMapFile(std::string file);
 private:
+	void RotateVertex(Vertex &v, float rx, float ry, float rz);
+	void ScaleVertex(Vertex &v, float sx, float sy, float sz);
+	void TranslateVertex(Vertex &v, float tx, float ty, float tz);
 	bool LoadV1(FILE *f);
 	bool LoadV2(FILE *f);
 	

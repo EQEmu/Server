@@ -8062,27 +8062,26 @@ void command_pf(Client *c, const Seperator *sep)
 
 void command_bestz(Client *c, const Seperator *sep) {
 	if (zone->zonemap == nullptr) {
-		c->Message(0,"Maps deactivated in this zone.");
-		return;
-	}
+		c->Message(0,"Map not loaded for this zone");
+	} else {
+		Map::Vertex me;
+		me.x = c->GetX();
+		me.y = c->GetY();
+		me.z = c->GetZ() + (c->GetSize() == 0.0 ? 6 : c->GetSize()) * HEAD_POSITION;
+		Map::Vertex hit;
+		Map::Vertex bme(me);
+		bme.z -= 500;
 
-	Map::Vertex me;
-	me.x = c->GetX();
-	me.y = c->GetY();
-	me.z = c->GetZ() + (c->GetSize()==0.0?6:c->GetSize()) * HEAD_POSITION;
-	Map::Vertex hit;
-	Map::Vertex bme(me);
-	bme.z -= 500;
+		float best_z = zone->zonemap->FindBestZ(me, &hit);
 
-	float best_z = zone->zonemap->FindBestZ(me, &hit);
-
-	if (best_z != -999999)
-	{
-		c->Message(0,"Z is %.3f at (%.3f, %.3f).", best_z, me.x, me.y);
-	}
-	else
-	{
-		c->Message(0,"Found no Z.");
+		if (best_z != -999999)
+		{
+			c->Message(0, "Z is %.3f at (%.3f, %.3f).", best_z, me.x, me.y);
+		}
+		else
+		{
+			c->Message(0, "Found no Z.");
+		}
 	}
 
 	if(zone->watermap == nullptr) {
