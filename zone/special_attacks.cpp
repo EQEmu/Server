@@ -351,19 +351,14 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 
 			//Live AA - Technique of Master Wu
 			uint16 bDoubleSpecialAttack = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
-			if( bDoubleSpecialAttack && (bDoubleSpecialAttack >= 100 || bDoubleSpecialAttack > MakeRandomInt(0,100)) ) {
+			if (bDoubleSpecialAttack && (bDoubleSpecialAttack >= 100 || bDoubleSpecialAttack > MakeRandomInt(0, 99))) {
 
 				int MonkSPA [5] = { SkillFlyingKick, SkillDragonPunch, SkillEagleStrike, SkillTigerClaw, SkillRoundKick };
-				MonkSpecialAttack(GetTarget(), MonkSPA[MakeRandomInt(0,4)]);
+				MonkSpecialAttack(GetTarget(), MonkSPA[MakeRandomInt(0, 4)]);
 
-				int TripleChance = 25;
-
-				if (bDoubleSpecialAttack > 100)
-					TripleChance += TripleChance*(100-bDoubleSpecialAttack)/100;
-
-				if(TripleChance > MakeRandomInt(0,100)) {
-					MonkSpecialAttack(GetTarget(), MonkSPA[MakeRandomInt(0,4)]);
-				}
+				// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
+				if ((bDoubleSpecialAttack / 4) > MakeRandomInt(0, 99))
+					MonkSpecialAttack(GetTarget(), MonkSPA[MakeRandomInt(0, 4)]);
 			}
 
 			if(ReuseTime < 100) {
