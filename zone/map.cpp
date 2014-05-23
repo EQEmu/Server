@@ -42,6 +42,7 @@ uint32 InflateData(const char* buffer, uint32 len, char* out_buffer, uint32 out_
 		}
 
 		zerror = inflateEnd(&zstream);
+		LogFile->write(EQEMuLog::Debug, "Map InflateData ended with code: %d", zerror);
 		return 0;
 	}
 }
@@ -215,6 +216,7 @@ bool Map::Load(std::string filename) {
 			return false;
 		}
 		
+		LogFile->write(EQEMuLog::Debug, "Map loaded with version 0x%x", version);
 		if(version == 0x01000000) {
 			bool v = LoadV1(f);
 			fclose(f);
@@ -227,6 +229,8 @@ bool Map::Load(std::string filename) {
 			fclose(f);
 			return false;
 		}
+	} else {
+		LogFile->write(EQEMuLog::Debug, "Failed to load map file: %s", filename.c_str());
 	}
 	
 	return false;
@@ -315,19 +319,24 @@ struct ModelEntry
 bool Map::LoadV2(FILE *f) {
 	uint32 data_size;
 	if (fread(&data_size, sizeof(data_size), 1, f) != 1) {
+		LogFile->write(EQEMuLog::Debug, "Failed to load map v2 data_size");
 		return false;
 	}
 
 	uint32 buffer_size;
 	if (fread(&buffer_size, sizeof(buffer_size), 1, f) != 1) {
+		LogFile->write(EQEMuLog::Debug, "Failed to load map v2 buffer_size");
 		return false;
 	}
 
 	std::vector<char> data;
 	data.resize(data_size);
 	if (fread(&data[0], data_size, 1, f) != 1) {
+		LogFile->write(EQEMuLog::Debug, "Failed to load map v2 data");
 		return false;
 	}
+
+	LogFile->write(EQEMuLog::Debug, "Map v2 data size: %u buffer size: %u", data_size, buffer_size);
 
 	std::vector<char> buffer;
 	buffer.resize(buffer_size);
@@ -839,6 +848,8 @@ bool Map::LoadV2(FILE *f) {
 
 	uint32 face_count = indices.size() / 3;
 
+	LogFile->write(EQEMuLog::Debug, "Loaded %u verts, %u faces (%u indicies)", verts.size(), face_count, indices.size());
+
 	if (imp) {
 		imp->rm->release();
 		imp->rm = nullptr;
@@ -850,11 +861,13 @@ bool Map::LoadV2(FILE *f) {
 	imp->rm = createRaycastMesh((RmUint32)verts.size(), (const RmReal*)&verts[0], face_count, &indices[0]);
 
 	if (!imp->rm) {
+		LogFile->write(EQEMuLog::Debug, "Map could not create raycast mesh");
 		delete imp;
 		imp = nullptr;
 		return false;
 	}
 
+	LogFile->write(EQEMuLog::Debug, "Map loaded successfully.");
 	return true;
 }
 
