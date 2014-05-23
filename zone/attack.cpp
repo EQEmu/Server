@@ -318,7 +318,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	chancetohit = mod_hit_chance(chancetohit, skillinuse, attacker);
 
 	// Chance to hit;   Max 95%, Min 30%
-	if(chancetohit > 1000) {
+	if(chancetohit > 1000 || chancetohit < -1000) {
 		//if chance to hit is crazy high, that means a discipline is in use, and let it stay there
 	}
 	else if(chancetohit > 95) {
