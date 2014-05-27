@@ -165,10 +165,10 @@ bool QuestParserCollection::PlayerHasQuestSubLocal(QuestEventID evt) {
 bool QuestParserCollection::PlayerHasQuestSubGlobal(QuestEventID evt) {
 	if(_global_player_quest_status == QuestUnloaded) {
 		std::string filename;	
-		QuestInterface *qi = GetQIByPlayerQuest(filename);
+		QuestInterface *qi = GetQIByGlobalPlayerQuest(filename);
 		if(qi) {
 			_global_player_quest_status = qi->GetIdentifier();
-			qi->LoadPlayerScript(filename);
+			qi->LoadGlobalPlayerScript(filename);
 			return qi->GlobalPlayerHasQuestSub(evt);
 		}
 	} else if(_global_player_quest_status != QuestFailedToLoad) {
