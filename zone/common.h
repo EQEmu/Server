@@ -310,9 +310,9 @@ struct StatBonuses {
 	int16	IncreaseBlockChance;				// overall block chance modifier
 	uint16	PersistantCasting;					// chance to continue casting through a stun
 	int	XPRateMod;							//i
-	int		HPPercCap;							//Spell effect that limits you to being healed/regening beyond a % of your max
-	int		ManaPercCap;						// ^^
-	int		EndPercCap;							// ^^
+	int		HPPercCap[2];						//Spell effect that limits you to being healed/regening beyond a % of your max
+	int		ManaPercCap[2];						// ^^ 0 = % Cap 1 = Flat Amount Cap
+	int		EndPercCap[2];						// ^^
 	bool	BlockNextSpell;						// Indicates whether the client can block a spell or not
 	//uint16	BlockSpellEffect[EFFECT_COUNT];		// Prevents spells with certain effects from landing on you *no longer used
 	bool	ImmuneToFlee;						// Bypass the fleeing flag

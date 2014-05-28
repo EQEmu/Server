@@ -170,12 +170,12 @@ public:
 	// Remove item from inventory (and take control of memory)
 	ItemInst* PopItem(int16 slot_id);
 
-	// Check whether item exists in inventory
-	// where argument specifies OR'd list of invWhere constants to look
-	int16 HasItem(uint32 item_id, uint8 quantity=0, uint8 where=0xFF);
-
 	// Check whether there is space for the specified number of the specified item.
 	bool HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity);
+
+	// Check whether item exists in inventory
+	// where argument specifies OR'd list of invWhere constants to look
+	int16 HasItem(uint32 item_id, uint8 quantity = 0, uint8 where = 0xFF);
 
 	// Check whether item exists in inventory
 	// where argument specifies OR'd list of invWhere constants to look
@@ -265,22 +265,7 @@ public:
 
 	ItemInst(SharedDatabase *db, uint32 item_id, int16 charges = 0);
 
-	ItemInst(ItemInstTypes use_type) {
-		m_use_type = use_type;
-		m_item = nullptr;
-		m_charges = 0;
-		m_price = 0;
-		m_instnodrop = false;
-		m_merchantslot = 0;
-		m_color = 0;
-
-		m_exp = 0;
-		m_evolveLvl = 0;
-		m_activated = false;
-		m_scaledItem = nullptr;
-		m_evolveInfo = nullptr;
-		m_scaling = false;
-	}
+	ItemInst(ItemInstTypes use_type);
 
 	ItemInst(const ItemInst& copy);
 
@@ -314,7 +299,7 @@ public:
 	uint32 GetItemID(uint8 slot) const;
 	inline const ItemInst* operator[](uint8 slot) const { return GetItem(slot); }
 	void PutItem(uint8 slot, const ItemInst& inst);
-	void PutItem(SharedDatabase *db, uint8 slot, uint32 item_id);
+	void PutItem(SharedDatabase *db, uint8 slot, uint32 item_id) { return; } // not defined anywhere...
 	void DeleteItem(uint8 slot);
 	ItemInst* PopItem(uint8 index);
 	void Clear();
@@ -368,11 +353,11 @@ public:
 	void SetInstNoDrop(bool flag) { m_instnodrop=flag; }
 
 	std::string GetCustomDataString() const;
+	std::string GetCustomData(std::string identifier);
 	void SetCustomData(std::string identifier, std::string value);
 	void SetCustomData(std::string identifier, int value);
 	void SetCustomData(std::string identifier, float value);
 	void SetCustomData(std::string identifier, bool value);
-	std::string GetCustomData(std::string identifier);
 	void DeleteCustomData(std::string identifier);
 
 	// Allows treatment of this object as though it were a pointer to m_item

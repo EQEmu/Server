@@ -163,7 +163,7 @@ Mob* HateList::GetClosest(Mob *hater) {
 		++iterator;
 	}
 
-	if (close == 0 && hater->IsNPC())
+	if (close == 0 && hater->IsNPC() || close->DivineAura())
 		close = hater->CastToNPC()->GetHateTop();
 
 	return close;
