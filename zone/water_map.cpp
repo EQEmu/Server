@@ -9,13 +9,10 @@
 #include "water_map_v1.h"
 #include "water_map_v2.h"
 
-WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name, std::string directory) {
+WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 	std::transform(zone_name.begin(), zone_name.end(), zone_name.begin(), ::tolower);
-	
-	if(directory.length() == 0)
-		directory = MAP_DIR;
 		
-	std::string file_path = directory + std::string("/") + zone_name + std::string(".wtr");
+	std::string file_path = MAP_DIR + std::string("/") + zone_name + std::string(".wtr");
 	FILE *f = fopen(file_path.c_str(), "rb");
 	if(f) {
 		char magic[10];

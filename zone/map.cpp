@@ -121,17 +121,17 @@ bool Map::LineIntersectsZoneNoZLeaps(Vertex start, Vertex end, float step_mag, V
 	int steps = 0;
 
 	if (step.x > 0 && step.x < 0.001f)
-	step.x = 0.001f;
+		step.x = 0.001f;
 	if (step.y > 0 && step.y < 0.001f)
-	step.y = 0.001f;
+		step.y = 0.001f;
 	if (step.z > 0 && step.z < 0.001f)
-	step.z = 0.001f;
+		step.z = 0.001f;
 	if (step.x < 0 && step.x > -0.001f)
-	step.x = -0.001f;
+		step.x = -0.001f;
 	if (step.y < 0 && step.y > -0.001f)
-	step.y = -0.001f;
+		step.y = -0.001f;
 	if (step.z < 0 && step.z > -0.001f)
-	step.z = -0.001f;
+		step.z = -0.001f;
 
 	//while we are not past end
 	//always do this once, even if start == end.
@@ -148,7 +148,7 @@ bool Map::LineIntersectsZoneNoZLeaps(Vertex start, Vertex end, float step_mag, V
 		float diff = best_z - z;
 		diff = diff < 0 ? -diff : diff;
 
-		if (z == -999999 || best_z == -999999 || diff < 12.0)
+		if (z <= BEST_Z_INVALID || best_z <= BEST_Z_INVALID || diff < 12.0)
 			z = best_z;
 		else
 			return true;

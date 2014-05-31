@@ -23,7 +23,7 @@ public:
 	WaterMap() { }
 	~WaterMap() { }
 	
-	static WaterMap* LoadWaterMapfile(std::string zone_name, std::string directory = "");
+	static WaterMap* LoadWaterMapfile(std::string zone_name);
 	virtual WaterRegionType ReturnRegionType(float y, float x, float z) const { return RegionTypeNormal; }
 	virtual bool InWater(float y, float x, float z) const { return false; }
 	virtual bool InVWater(float y, float x, float z) const { return false; }
