@@ -7936,6 +7936,9 @@ void command_bestz(Client *c, const Seperator *sep) {
 			case RegionTypeWater:	{ c->Message(0,"You/your target are in Water."); break; }
 			case RegionTypeLava:	{ c->Message(0,"You/your target are in Lava."); break; }
 			case RegionTypeVWater:	{ c->Message(0,"You/your target are in VWater (Icy Water?)."); break; }
+			case RegionTypePVP:	{ c->Message(0, "You/your target are in a pvp enabled area."); break; }
+			case RegionTypeSlime:	{ c->Message(0, "You/your target are in slime."); break; }
+			case RegionTypeIce:	{ c->Message(0, "You/your target are in ice."); break; }
 			default: c->Message(0,"You/your target are in an unknown region type.");
 		}
 	}

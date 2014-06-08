@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/8/2014 ==
+KLS: Changed lua API: eq.get_globals(client, npc) has been removed.  Use eq.get_globals(npc, client) instead.
+There's a bug with something in gcc 4.6.3 (maybe other versions) on x86 that this is attempting to combat.
+
 == 05/17/2014 ==
 Secrets: Identified the opcode/struct for guild ranks in Rain of Fear+ clients.
 Secrets: Implemented a work-around for Rain of Fear clients to have all guild permissions until proper database support is added for newer ranks.
