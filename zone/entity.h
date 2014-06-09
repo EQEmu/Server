@@ -48,11 +48,6 @@ class Trap;
 class Entity;
 class EntityList;
 
-#ifdef BOTS
-class Bot;
-class BotRaids;
-#endif
-
 extern EntityList entity_list;
 
 class Entity
@@ -102,11 +97,6 @@ public:
 	virtual const char* GetName() { return ""; }
 	virtual void DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) { pDBAsyncWorkID = 0; }
 	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
-
-#ifdef BOTS
-	virtual bool IsBot() const { return false; }
-	Bot* CastToBot();
-#endif
 
 protected:
 	friend class EntityList;
@@ -446,21 +436,6 @@ private:
 	std::queue<uint16> free_ids;
 
 	// Please Do Not Declare Any EntityList Class Members After This Comment
-#ifdef BOTS
-	public:
-		void AddBot(Bot* newBot, bool SendSpawnPacket = true, bool dontqueue = false);
-		void BotPickLock(Bot* rogue);
-		bool RemoveBot(uint16 entityID);
-		Mob* GetMobByBotID(uint32 botID);
-		Bot* GetBotByBotID(uint32 botID);
-		Bot* GetBotByBotName(std::string botName);
-		std::list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
-
-		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
-		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
-	private:
-		std::list<Bot*> bot_list;
-#endif
 };
 
 class BulkZoneSpawnPacket {

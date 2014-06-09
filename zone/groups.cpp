@@ -327,13 +327,6 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 				database.SetGroupID(newmember->GetName(), GetID(), owner->CharacterID(), true);
 			}
 		}
-#ifdef BOTS
-		for (i = 0;i < MAX_GROUP_MEMBERS; i++) {
-			if (members[i] != nullptr && members[i]->IsBot()) {
-				members[i]->CastToBot()->CalcChanceToCast();
-			}
-		}
-#endif //BOTS
 	}
 	else
 		database.SetGroupID(NewMemberName, GetID(), CharacterID, ismerc);
@@ -487,11 +480,6 @@ void Group::MemberZoned(Mob* removemob) {
 				//should NOT clear the name, it is used for world communication.
 				break;
 			}
-#ifdef BOTS
-		if (members[i] != nullptr && members[i]->IsBot()) {
-			members[i]->CastToBot()->CalcChanceToCast();
-		}
-#endif //BOTS
 	}
 	if(removemob->IsClient() && HasRole(removemob, RoleAssist))
 		SetGroupAssistTarget(0);
@@ -589,11 +577,6 @@ bool Group::DelMember(Mob* oldmember,bool ignoresender)
 			if(members[i]->IsClient())
 				members[i]->CastToClient()->QueuePacket(outapp);
 		}
-#ifdef BOTS
-		if (members[i] != nullptr && members[i]->IsBot()) {
-			members[i]->CastToBot()->CalcChanceToCast();
-		}
-#endif //BOTS
 	}
 
 	if (!ignoresender) {

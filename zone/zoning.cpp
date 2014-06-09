@@ -31,11 +31,6 @@ extern Zone* zone;
 
 
 void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
-#ifdef BOTS
-	// This block is necessary to clean up any bot objects owned by a Client
-	Bot::ProcessClientZoneChange(this);
-#endif
-
 	zoning = true;
 	if (app->size != sizeof(ZoneChange_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Wrong size: OP_ZoneChange, size=%d, expected %d", app->size, sizeof(ZoneChange_Struct));

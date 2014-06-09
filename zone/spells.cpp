@@ -987,21 +987,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				channelchance -= attacked_count * 2;
 				channelchance += channelchance * channelbonuses / 100.0f;
 			}
-#ifdef BOTS
-			else if(IsBot()) {
-				float channelbonuses = 0.0f;
-
-				if (IsFromItem)
-					channelbonuses += spellbonuses.ChannelChanceItems + itembonuses.ChannelChanceItems + aabonuses.ChannelChanceItems;
-				else
-					channelbonuses += spellbonuses.ChannelChanceSpells + itembonuses.ChannelChanceSpells + aabonuses.ChannelChanceSpells;
-
-				// max 93% chance at 252 skill
-				channelchance = 30 + GetSkill(SkillChanneling) / 400.0f * 100;
-				channelchance -= attacked_count * 2;
-				channelchance += channelchance * channelbonuses / 100.0f;
-			}
-#endif //BOTS
 			else {
 				// NPCs are just hard to interrupt, otherwise they get pwned
 				channelchance = 85;
@@ -1634,21 +1619,6 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 							group_id_caster = (owner->GetRaid()->GetGroup(CastToClient()) == 0xFFFF) ? 0 : (owner->GetRaid()->GetGroup(CastToClient()) + 1);
 						}
 					}
-#ifdef BOTS
-					else if(IsBot())
-					{
-						if(IsGrouped())
-						{
-							group_id_caster = GetGroup()->GetID();
-						}
-						else if(IsRaidGrouped())
-						{
-							if(GetOwner())
-								group_id_caster = (GetRaid()->GetGroup(GetOwner()->CastToClient()) == 0xFFFF) ? 0 : (GetRaid()->GetGroup(GetOwner()->CastToClient()) + 1);
-						}
-					}
-#endif //BOTS
-
 					if(spell_target->IsClient())
 					{
 						if(spell_target->IsGrouped())
@@ -1672,21 +1642,6 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 							group_id_target = (owner->GetRaid()->GetGroup(CastToClient()) == 0xFFFF) ? 0 : (owner->GetRaid()->GetGroup(CastToClient()) + 1);
 						}
 					}
-#ifdef BOTS
-					else if(spell_target->IsBot())
-					{
-						if(spell_target->IsGrouped())
-						{
-							group_id_target = spell_target->GetGroup()->GetID();
-						}
-						else if(spell_target->IsRaidGrouped())
-						{
-							if(spell_target->GetOwner())
-								group_id_target = (spell_target->GetRaid()->GetGroup(spell_target->GetOwner()->CastToClient()) == 0xFFFF) ? 0 : (spell_target->GetRaid()->GetGroup(spell_target->GetOwner()->CastToClient()) + 1);
-						}
-					}
-#endif //BOTS
-
 					if(group_id_caster == 0 || group_id_target == 0)
 					{
 						mlog(SPELLS__CASTING_ERR, "Spell %d canceled: Attempted to cast a Single Target Group spell on a ungrouped member.", spell_id);
@@ -1877,17 +1832,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		case CastActUnknown:
 		case SingleTarget:
 		{
-
-#ifdef BOTS
-			if(IsBot()) {
-				bool StopLogic = false;
-				if(!this->CastToBot()->DoFinishedSpellSingleTarget(spell_id, spell_target, slot, StopLogic))
-					return false;
-				if(StopLogic)
-					break;
-			}
-#endif //BOTS
-
 			if(spell_target == nullptr) {
 				mlog(SPELLS__CASTING, "Spell %d: Targeted spell, but we have no target", spell_id);
 				return(false);
@@ -1925,16 +1869,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		case AECaster:
 		case AETarget:
 		{
-#ifdef BOTS
-			if(IsBot()) {
-				bool StopLogic = false;
-				if(!this->CastToBot()->DoFinishedSpellAETarget(spell_id, spell_target, slot, StopLogic))
-					return false;
-				if(StopLogic)
-					break;
-			}
-#endif //BOTS
-
 			// we can't cast an AE spell without something to center it on
 			assert(ae_center != nullptr);
 
@@ -1959,16 +1893,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 		case GroupSpell:
 		{
-#ifdef BOTS
-			if(IsBot()) {
-				bool StopLogic = false;
-				if(!this->CastToBot()->DoFinishedSpellGroupTarget(spell_id, spell_target, slot, StopLogic))
-					return false;
-				if(StopLogic)
-					break;
-			}
-#endif //BOTS
-
 			if(spells[spell_id].can_mgb && IsClient() && CastToClient()->CheckAAEffect(aaEffectMassGroupBuff))
 			{
 				SpellOnTarget(spell_id, this);

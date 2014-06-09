@@ -2396,16 +2396,6 @@ bool Mob::HateSummon() {
 				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x_pos, y_pos, z_pos, target->GetHeading(), 0, SummonPC);
 			}
 			else {
-#ifdef BOTS
-				if(target && target->IsBot()) {
-					// set pre summoning info to return to (to get out of melee range for caster)
-					target->CastToBot()->SetHasBeenSummoned(true);
-					target->CastToBot()->SetPreSummonX(target->GetX());
-					target->CastToBot()->SetPreSummonY(target->GetY());
-					target->CastToBot()->SetPreSummonZ(target->GetZ());
-	
-				}
-#endif //BOTS
 				target->GMMove(x_pos, y_pos, z_pos, target->GetHeading());
 			}
 	

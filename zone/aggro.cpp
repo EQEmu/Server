@@ -677,14 +677,6 @@ type', in which case, the answer is yes.
 			}
 		}
 
-#ifdef BOTS
-		bool HasRuleDefined = false;
-		bool IsBotAttackAllowed = false;
-		IsBotAttackAllowed = Bot::IsBotAttackAllowed(mob1, mob2, HasRuleDefined);
-		if(HasRuleDefined)
-			return IsBotAttackAllowed;
-#endif //BOTS
-
 		// we fell through, now we swap the 2 mobs and run through again once more
 		tempmob = mob1;
 		mob1 = mob2;
@@ -763,10 +755,6 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 			{
 				return false;
 			}
-#ifdef BOTS
-			else if(mob2->IsBot())
-				return true;
-#endif
 		}
 		else if(_NPC(mob1))
 		{

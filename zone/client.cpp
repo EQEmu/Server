@@ -327,9 +327,6 @@ Client::Client(EQStreamInterface* ieqs)
 }
 
 Client::~Client() {
-#ifdef BOTS
-	Bot::ProcessBotOwnerRefDelete(this);
-#endif
 	if(IsInAGuild())
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
 
