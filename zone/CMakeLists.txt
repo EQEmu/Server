@@ -122,7 +122,6 @@ SET(zone_sources
 
 SET(zone_headers
 	AA.h
-	basic_functions.h
 	beacon.h
 	client.h
 	client_logs.h
