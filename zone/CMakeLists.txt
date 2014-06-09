@@ -183,7 +183,6 @@ SET(zone_headers
 	raid.h
 	raids.h
 	RaycastMesh.h
-	skills.h
 	spawn2.cpp
 	spawn2.h
 	spawngroup.h
