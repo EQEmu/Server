@@ -40,18 +40,6 @@ HateList::~HateList()
 {
 }
 
-// neotokyo: added for frenzy support
-// checks if target still is in frenzy mode
-void HateList::CheckFrenzyHate()
-{
-	auto iterator = list.begin();
-	while(iterator != list.end())
-	{
-		if ((*iterator)->ent->GetHPRatio() >= 20)
-			(*iterator)->bFrenzy = false;
-		++iterator;
-	}
-}
 
 void HateList::Wipe()
 {
@@ -169,8 +157,6 @@ Mob* HateList::GetClosest(Mob *hater) {
 	return close;
 }
 
-
-// neotokyo: a few comments added, rearranged code for readability
 void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAddIfNotExist)
 {
 	if(!ent)

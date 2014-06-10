@@ -54,8 +54,7 @@ public:
 	Mob *GetDamageTop(Mob *hater);
 	// used to check if mob is on hatelist
 	bool IsOnHateList(Mob *);
-	// used to remove or add frenzy hate
-	void CheckFrenzyHate();
+
 	//Gets the target with the most hate regardless of things like frenzy etc.
 	Mob* GetMostHate();
 	// Count 'Summoned' pets on hatelist
