@@ -1498,7 +1498,7 @@ void Merc::AI_Process() {
 			rest_timer.Disable();
 
 		if(IsRooted())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.getClosest(this));
 		else
 			FindTarget();
 
@@ -2552,11 +2552,11 @@ void Merc::CheckHateList() {
 								Mob* groupMember = g->members[counter];
 								if(groupMember) {
 									if(npc->IsOnHatelist(groupMember)) {
-										if(!hate_list.IsOnHateList(npc)) {
+										if(!hate_list.isHated(npc)) {
 											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 											range *= range;
 											if(npc->DistNoRootNoZ(*this) < range) {
-												hate_list.Add(npc, 1);
+												hate_list.add(npc, 1);
 											}
 										}
 									}
@@ -4751,7 +4751,7 @@ bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attac
 
 	Save();
 
-	Mob *give_exp = hate_list.GetDamageTop(this);
+	Mob *give_exp = hate_list.getHighestDamage(this);
 	Client *give_exp_client = nullptr;
 
 	if(give_exp && give_exp->IsClient())

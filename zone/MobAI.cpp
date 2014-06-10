@@ -491,7 +491,7 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 		pAggroRange = 70;
 	if (GetAssistRange() == 0)
 		pAssistRange = 70;
-	hate_list.Wipe();
+	hate_list.clear();
 
 	delta_heading = 0;
 	delta_x = 0;
@@ -548,7 +548,7 @@ void Mob::AI_Stop() {
 	safe_delete(AItarget_check_timer)
 	safe_delete(AIscanarea_timer);
 	safe_delete(AIfeignremember_timer);
-	hate_list.Wipe();
+	hate_list.clear();
 }
 
 void NPC::AI_Stop() {
@@ -784,12 +784,12 @@ void Client::AI_Process()
 	if (engaged)
 	{
 		if (IsRooted())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.getClosest(this));
 		else
 		{
 			if(AItarget_check_timer->Check())
 			{
-				SetTarget(hate_list.GetTop(this));
+				SetTarget(hate_list.getHighestHate(this));
 			}
 		}
 
@@ -1057,18 +1057,18 @@ void Mob::AI_Process() {
 	if (engaged)
 	{
 		if (IsRooted())
-			SetTarget(hate_list.GetClosest(this));
+			SetTarget(hate_list.getClosest(this));
 		else
 		{
 			if(AItarget_check_timer->Check())
 			{
 				if (IsFocused()) {
 					if (!target) {
-						SetTarget(hate_list.GetTop(this));
+						SetTarget(hate_list.getHighestHate(this));
 					}
 				} else {
 					if (!ImprovedTaunt())
-						SetTarget(hate_list.GetTop(this));
+						SetTarget(hate_list.getHighestHate(this));
 				}
 
 			}
@@ -1334,7 +1334,7 @@ void Mob::AI_Process() {
 			//underwater stuff only works with water maps in the zone!
 			if(IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
 				if(!zone->watermap->InLiquid(target->GetX(), target->GetY(), target->GetZ())) {
-					Mob *tar = hate_list.GetTop(this);
+					Mob *tar = hate_list.getHighestHate(this);
 					if(tar == target) {
 						WipeHateList();
 						Heal();

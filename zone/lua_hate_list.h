@@ -5,17 +5,17 @@
 #include "lua_ptr.h"
 
 class Lua_Mob;
-struct tHateEntry;
+struct HateEntry;
 
 luabind::scope lua_register_hate_entry();
 luabind::scope lua_register_hate_list();
 
-class Lua_HateEntry : public Lua_Ptr<tHateEntry>
+class Lua_HateEntry : public Lua_Ptr<HateEntry>
 {
-	typedef tHateEntry NativeType;
+	typedef HateEntry NativeType;
 public:
 	Lua_HateEntry() : Lua_Ptr(nullptr) { }
-	Lua_HateEntry(tHateEntry *d) : Lua_Ptr(d) { }
+	Lua_HateEntry(HateEntry *d) : Lua_Ptr(d) { }
 	virtual ~Lua_HateEntry() { }
 	
 	Lua_Mob GetEnt();
