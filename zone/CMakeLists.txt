@@ -164,7 +164,6 @@ SET(zone_headers
 	lua_spell.h
 	map.h
 	masterentity.h
-	message.h
 	merc.h
 	mob.h
 	net.h
