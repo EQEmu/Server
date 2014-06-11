@@ -19,11 +19,16 @@
 #ifndef HATELIST_H
 #define HATELIST_H
 
-struct tHateEntry
+class Mob;
+// TODO: Later fix pre-declarations. There is some crazy shit going on with include order in other files obviously.
+
+struct HateEntry
 {
-	Mob *ent;
-	int32 damage, hate;
-	bool bFrenzy;
+	HateEntry(Mob* pMOB, int32 pDamage, int32 pHate, bool pFrenzy) : mMOB(pMOB), mDamage(pDamage), mHate(pHate), mFrenzy(pFrenzy) {}
+	Mob *mMOB;
+	int32 mDamage;
+	int32 mHate;
+	bool mFrenzy;
 };
 
 class HateList
@@ -32,53 +37,68 @@ public:
 	HateList();
 	~HateList();
 
-	// adds a mob to the hatelist
-	void Add(Mob *ent, int32 in_hate=0, int32 in_dam=0, bool bFrenzy = false, bool iAddIfNotExist = true);
-	// sets existing hate
-	void Set(Mob *other, uint32 in_hate, uint32 in_dam);
-	// removes mobs from hatelist
-	bool RemoveEnt(Mob *ent);
-	// Remove all
-	void Wipe();
-	// ???
-	void DoFactionHits(int32 nfl_id);
-	// Gets Hate amount for mob
-	int32 GetEntHate(Mob *ent, bool damage = false);
-	// gets top hated mob
-	Mob *GetTop(Mob *center);
-	// gets any on the list
-	Mob *GetRandom();
-	// get closest mob or nullptr if list empty
-	Mob *GetClosest(Mob *hater);
-	// gets top mob or nullptr if hate list empty
-	Mob *GetDamageTop(Mob *hater);
-	// used to check if mob is on hatelist
-	bool IsOnHateList(Mob *);
-	// used to remove or add frenzy hate
-	void CheckFrenzyHate();
+	// Set the owner of the HateList.
+	void setOwner(Mob* pOwner) { mOwner = pOwner; }
+
+	// Returns whether the HateList is empty.
+	bool isEmpty();
+
+	// Returns the number of pets on the HateList.
+	int getSummonedPetCount();
+
+	// Removes a specific MOB from the HateList.
+	bool clear(Mob* pMOB);
+
+	// Removes all MOBs from the HateList.
+	void clear();
+
+	// Adds a MOB to the HateList.
+	// TODO: Look more into parameter 'iAddIfNotExist' .. I can't think of circumstances where this would be needed.
+	void add(Mob* pMOB, int32 pHate = 0, int32 pDamage = 0, bool pFrenzy = false, bool iAddIfNotExist = true);
+
+	// Sets a MOBs hate.
+	void set(Mob* pMOB, uint32 pHate, uint32 pDamage);
+
+	// Returns the hate value of a specific MOB. (Or Damage for fun under some circumstances...)
+	// TODO: Remove the 'damage' parameter and use getDamage where appropriate.
+	int32 getHate(Mob * pMOB, bool damage = false);
+
+	// Returns the damage value of a specific MOB.
+	int32 getDamage(Mob* pMOB);
+
+	// Returns the MOB with the highest hate value or null if none.
+	Mob *getHighestHate(Mob* pCenter);
+
+	// Returns the MOB with the highest damage value or null if none.
+	Mob *getHighestDamage(Mob* pHater);
+
+	// Returns a random MOB on the HateList.
+	Mob* getRandom();
+
+	// Returns the closest MOB.
+	Mob* getClosest(Mob* pHater);
+
+	// Returns whether the specific MOB is on the HateList.
+	bool isHated(Mob * pMOB);
+
 	//Gets the target with the most hate regardless of things like frenzy etc.
-	Mob* GetMostHate();
-	// Count 'Summoned' pets on hatelist
-	int SummonedPetCount(Mob *hater);
-
-	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
-
-	void SpellCast(Mob *caster, uint32 spell_id, float range);
-
-	bool IsEmpty();
-	void PrintToClient(Client *c);
+	Mob* getMostHate();
 
 	//For accessing the hate list via perl; don't use for anything else
-	std::list<tHateEntry*>& GetHateList() { return list; }
+	std::list<HateEntry*>& GetHateList() { return mEntries; }
 
-	//setting owner
-	void SetOwner(Mob *newOwner) { owner = newOwner; }
-
-protected:
-	tHateEntry* Find(Mob *ent);
+	// TODO: Remove, this functionality does not belong here.
+	void DoFactionHits(int32 nfl_id);
+	// TODO: Remove, this functionality does not belong here.
+	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
+	// TODO: Remove, this functionality does not belong here.
+	void SpellCast(Mob *caster, uint32 spell_id, float range);
+	// TODO: Remove, this functionality does not belong here.
+	void PrintToClient(Client *c);
 private:
-	std::list<tHateEntry*> list;
-	Mob *owner;
+	HateEntry* find(Mob* pMOB);
+	std::list<HateEntry*> mEntries;
+	Mob* mOwner;
 };
 
 #endif

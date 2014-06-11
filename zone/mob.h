@@ -427,16 +427,16 @@ public:
 	virtual void AddToHateList(Mob* other, int32 hate = 0, int32 damage = 0, bool iYellForHelp = true,
 		bool bFrenzy = false, bool iBuffTic = false);
 	bool RemoveFromHateList(Mob* mob);
-	void SetHate(Mob* other, int32 hate = 0, int32 damage = 0) { hate_list.Set(other,hate,damage);}
+	void SetHate(Mob* other, int32 hate = 0, int32 damage = 0) { hate_list.set(other,hate,damage);}
 	void HalveAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHate(other, (in_hate > 1 ? in_hate / 2 : 1)); }
 	void DoubleAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHate(other, (in_hate ? in_hate * 2 : 1)); }
-	uint32 GetHateAmount(Mob* tmob, bool is_dam = false) { return hate_list.GetEntHate(tmob,is_dam);}
-	uint32 GetDamageAmount(Mob* tmob) { return hate_list.GetEntHate(tmob, true);}
-	Mob* GetHateTop() { return hate_list.GetTop(this);}
-	Mob* GetHateDamageTop(Mob* other) { return hate_list.GetDamageTop(other);}
-	Mob* GetHateRandom() { return hate_list.GetRandom();}
-	Mob* GetHateMost() { return hate_list.GetMostHate();}
-	bool IsEngaged() { return(!hate_list.IsEmpty()); }
+	uint32 GetHateAmount(Mob* tmob, bool is_dam = false) { return hate_list.getHate(tmob,is_dam);}
+	uint32 GetDamageAmount(Mob* tmob) { return hate_list.getHate(tmob, true);}
+	Mob* GetHateTop() { return hate_list.getHighestHate(this);}
+	Mob* GetHateDamageTop(Mob* other) { return hate_list.getHighestDamage(other);}
+	Mob* GetHateRandom() { return hate_list.getRandom();}
+	Mob* GetHateMost() { return hate_list.getMostHate();}
+	bool IsEngaged() { return(!hate_list.isEmpty()); }
 	bool HateSummon();
 	void FaceTarget(Mob* MobToFace = 0);
 	void SetHeading(float iHeading) { if(heading != iHeading) { pLastChange = Timer::GetCurrentTime();
@@ -446,7 +446,7 @@ public:
 	void RemoveFromFeignMemory(Client* attacker);
 	void ClearFeignMemory();
 	void PrintHateListToClient(Client *who) { hate_list.PrintToClient(who); }
-	std::list<tHateEntry*>& GetHateList() { return hate_list.GetHateList(); }
+	std::list<HateEntry*>& GetHateList() { return hate_list.GetHateList(); }
 	bool CheckLosFN(Mob* other);
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
 	inline void SetChanged() { pLastChange = Timer::GetCurrentTime(); }
@@ -748,7 +748,7 @@ public:
 	void ProcessFlee();
 	void CheckFlee();
 
-	inline bool			CheckAggro(Mob* other) {return hate_list.IsOnHateList(other);}
+	inline bool			CheckAggro(Mob* other) {return hate_list.isHated(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y);
 	bool				CalculateNewPosition(float x, float y, float z, float speed, bool checkZ = false);
 	virtual bool		CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ = true);

@@ -2067,74 +2067,6 @@ XS(XS__npcfeature)
 
 	XSRETURN_EMPTY;
 }
-
-#ifdef BOTS
-
-XS(XS__createbotcount);
-XS(XS__createbotcount)
-{
-	dXSARGS;
-	int		RETVAL;
-	dXSTARG;
-
-	RETVAL = quest_manager.createbotcount();
-	XSprePUSH; PUSHi((IV)RETVAL);
-
-	XSRETURN(1);
-}
-
-XS(XS__spawnbotcount);
-XS(XS__spawnbotcount)
-{
-	dXSARGS;
-	int		RETVAL;
-	dXSTARG;
-
-	RETVAL = quest_manager.spawnbotcount();
-	XSprePUSH; PUSHi((IV)RETVAL);
-
-	XSRETURN(1);
-}
-
-XS(XS__botquest);
-XS(XS__botquest)
-{
-	dXSARGS;
-	bool		RETVAL;
-	dXSTARG;
-
-	RETVAL = quest_manager.botquest();
-	XSprePUSH; PUSHu((IV)RETVAL);
-
-	XSRETURN(1);
-}
-
-XS(XS__createBot);
-XS(XS__createBot)
-{
-	dXSARGS;
-	bool		RETVAL;
-	dXSTARG;
-
-	if(items != 6)
-	{
-		Perl_croak(aTHX_ "Usage: createBot(firstname, lastname, level, race, class, gender)");
-	}
-
-	char *firstname = (char *)SvPV_nolen(ST(0));
-	char *lastname = (char *)SvPV_nolen(ST(1));
-	int level = (int) SvIV(ST(2));
-	int race = (int) SvIV(ST(3));
-	int botclass = (int) SvIV(ST(4));
-	int gender = (int) SvIV(ST(5));
-
-	RETVAL = quest_manager.createBot(firstname, lastname, level, race, botclass, gender);
-	XSprePUSH; PUSHu((IV)RETVAL);
-	XSRETURN(1);
-}
-
-#endif //BOTS
-
 XS(XS__taskselector);
 XS(XS__taskselector)
 {
@@ -3510,14 +3442,6 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "playertexture"), XS__playertexture, file);
 		newXS(strcpy(buf, "playerfeature"), XS__playerfeature, file);
 		newXS(strcpy(buf, "npcfeature"), XS__npcfeature, file);
-
-#ifdef BOTS
-		newXS(strcpy(buf, "botquest"), XS__botquest, file);
-		newXS(strcpy(buf, "spawnbotcount"), XS__spawnbotcount, file);
-		newXS(strcpy(buf, "createbotcount"), XS__createbotcount, file);
-		newXS(strcpy(buf, "createBot"), XS__createBot, file);
-#endif //BOTS
-
 		newXS(strcpy(buf, "taskselector"), XS__taskselector, file);
 		newXS(strcpy(buf, "tasksetselector"), XS__tasksetselector, file);
 		newXS(strcpy(buf, "enabletask"), XS__enabletask, file);

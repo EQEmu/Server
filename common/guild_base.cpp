@@ -938,20 +938,12 @@ bool BaseGuildManager::_RunQuery(char *&query, int len, const char *errmsg) {
 	return(true);
 }
 
-//factored out so I dont have to copy this crap.
-#ifdef BOTS
 #define GuildMemberBaseQuery \
-"SELECT c.id,c.name,c.class,c.level,c.timelaston,c.zoneid," \
-" g.guild_id,g.rank,g.tribute_enable,g.total_tribute,g.last_tribute," \
-" g.banker,g.public_note,g.alt" \
-" FROM vwBotCharacterMobs AS c LEFT JOIN vwGuildMembers AS g ON c.id=g.char_id AND c.mobtype = g.mobtype "
-#else
-#define GuildMemberBaseQuery \
-"SELECT c.id,c.name,c.class,c.level,c.timelaston,c.zoneid," \
-" g.guild_id,g.rank,g.tribute_enable,g.total_tribute,g.last_tribute," \
-" g.banker,g.public_note,g.alt " \
-" FROM character_ AS c LEFT JOIN guild_members AS g ON c.id=g.char_id "
-#endif
+	"SELECT c.id,c.name,c.class,c.level,c.timelaston,c.zoneid," \
+	" g.guild_id,g.rank,g.tribute_enable,g.total_tribute,g.last_tribute," \
+	" g.banker,g.public_note,g.alt " \
+	" FROM character_ AS c LEFT JOIN guild_members AS g ON c.id=g.char_id "
+
 static void ProcessGuildMember(MYSQL_ROW &row, CharGuildInfo &into) {
 	//fields from `characer_`
 	into.char_id		= atoi(row[0]);
@@ -1066,13 +1058,7 @@ bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into) {
 	MYSQL_ROW row;
 
 	//load up the rank info for each guild.
-	if (!m_db->RunQuery(query, MakeAnyLenString(&query,
-#ifdef BOTS
-		GuildMemberBaseQuery " WHERE c.id=%d AND c.mobtype = 'C'", char_id
-#else
-		GuildMemberBaseQuery " WHERE c.id=%d", char_id
-#endif
-		), errbuf, &result)) {
+	if (!m_db->RunQuery(query, MakeAnyLenString(&query, GuildMemberBaseQuery " WHERE c.id=%d", char_id), errbuf, &result)) {
 		_log(GUILDS__ERROR, "Error loading guild member '%s': %s", query, errbuf);
 		safe_delete_array(query);
 		return(false);

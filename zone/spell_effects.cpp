@@ -6006,7 +6006,7 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 
 		//Limit to amount of pets
 		if (value >= 221 && value <= 249){
-			int count = hate_list.SummonedPetCount(this);
+			int count = hate_list.getSummonedPetCount();
 	
 			for (int base2_value = 221; base2_value <= 249; ++base2_value){
 				if (value == base2_value){

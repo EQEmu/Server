@@ -335,10 +335,5 @@ void command_profilereset(Client *c, const Seperator *sep);
 void command_packetprofile(Client *c, const Seperator *sep);
 #endif
 
-#ifdef BOTS
-#include "bot.h"
-void command_bot(Client*c, const Seperator *sep);
-#endif
-
 #endif
 

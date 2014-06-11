@@ -443,22 +443,6 @@ RULE_BOOL ( TaskSystem, KeepOneRecordPerCompletedTask, true)
 RULE_BOOL ( TaskSystem, EnableTaskProximity, true)
 RULE_CATEGORY_END()
 
-#ifdef BOTS
-RULE_CATEGORY ( Bots )
-RULE_REAL ( Bots, BotManaRegen, 2.0 ) // Adjust mana regen for bots, 1 is fast and higher numbers slow it down 3 is about the same as players.
-RULE_BOOL ( Bots, BotFinishBuffing, false ) // Allow for buffs to complete even if the bot caster is out of mana. Only affects buffing out of combat.
-RULE_INT ( Bots, CreateBotCount, 150 ) // Number of bots that each account can create
-RULE_INT ( Bots, SpawnBotCount, 71 ) // Number of bots a character can have spawned at one time, You + 71 bots is a 12 group raid
-RULE_BOOL ( Bots, BotQuest, false ) // Optional quest method to manage bot spawn limits using the quest_globals name bot_spawn_limit, see: /bazaar/Aediles_Thrall.pl
-RULE_BOOL ( Bots, BotGroupBuffing, false ) // Bots will cast single target buffs as group buffs, default is false for single. Does not make single target buffs work for MGB.
-RULE_BOOL ( Bots, BotSpellQuest, false ) // Anita Thrall's (Anita_Thrall.pl) Bot Spell Scriber quests.
-RULE_INT ( Bots, BotAAExpansion, 8 ) // Bots get AAs through this expansion
-RULE_BOOL ( Bots, BotGroupXP, false ) // Determines whether client gets xp for bots outside their group.
-RULE_BOOL ( Bots, BotBardUseOutOfCombatSongs, true) // Determines whether bard bots use additional out of combat songs.
-RULE_BOOL ( Bots, BotLevelsWithOwner, false) // Auto-updates spawned bots as owner levels/de-levels (false is original behavior)
-RULE_CATEGORY_END()
-#endif
-
 RULE_CATEGORY ( Chat )
 RULE_BOOL ( Chat, ServerWideOOC, true)
 RULE_BOOL ( Chat, ServerWideAuction, true)

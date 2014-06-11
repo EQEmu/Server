@@ -584,11 +584,7 @@ bool Database::DeleteCharacter(char *name)
 #if DEBUG >= 5
 	printf(" guild_members");
 #endif
-#ifdef BOTS
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM guild_members WHERE char_id='%d' AND GetMobTypeById(%i) = 'C'", charid), errbuf, nullptr, &affected_rows);
-#else
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM guild_members WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
-#endif
 	if(query)
 	{
 		safe_delete_array(query);

@@ -6,8 +6,6 @@ SET(zone_sources
 	attack.cpp
 	beacon.cpp
 	bonuses.cpp
-	bot.cpp
-	botspellsai.cpp
 	client.cpp
 	client_logs.cpp
 	client_mods.cpp
@@ -124,10 +122,7 @@ SET(zone_sources
 
 SET(zone_headers
 	AA.h
-	basic_functions.h
 	beacon.h
-	bot.h
-	botStructs.h
 	client.h
 	client_logs.h
 	client_packet.h
@@ -169,8 +164,6 @@ SET(zone_headers
 	lua_spell.h
 	map.h
 	masterentity.h
-	maxskill.h
-	message.h
 	merc.h
 	mob.h
 	net.h
@@ -189,7 +182,6 @@ SET(zone_headers
 	raid.h
 	raids.h
 	RaycastMesh.h
-	skills.h
 	spawn2.cpp
 	spawn2.h
 	spawngroup.h

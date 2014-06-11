@@ -31,134 +31,112 @@
 
 extern Zone *zone;
 
-HateList::HateList()
-{
-	owner = nullptr;
-}
+HateList::HateList() : mOwner(nullptr) { }
+HateList::~HateList() { }
 
-HateList::~HateList()
-{
-}
 
-// neotokyo: added for frenzy support
-// checks if target still is in frenzy mode
-void HateList::CheckFrenzyHate()
+void HateList::clear()
 {
-	auto iterator = list.begin();
-	while(iterator != list.end())
+	auto i = mEntries.begin();
+	while(i != mEntries.end())
 	{
-		if ((*iterator)->ent->GetHPRatio() >= 20)
-			(*iterator)->bFrenzy = false;
-		++iterator;
-	}
-}
-
-void HateList::Wipe()
-{
-	auto iterator = list.begin();
-
-	while(iterator != list.end())
-	{
-		Mob* m = (*iterator)->ent;
+		Mob* m = (*i)->mMOB;
 		if(m)
 		{
-			parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), m, "0", 0);
+			parse->EventNPC(EVENT_HATE_LIST, mOwner->CastToNPC(), m, "0", 0);
 
 			if(m->IsClient())
 				m->CastToClient()->DecrementAggroCount();
 		}
-		delete (*iterator);
-		iterator = list.erase(iterator);
-
+		delete (*i);
+		i = mEntries.erase(i);
 	}
 }
 
-bool HateList::IsOnHateList(Mob *mob)
+bool HateList::isHated(Mob* pMOB)
 {
-	if(Find(mob))
-		return true;
-	return false;
+	return find(pMOB) != nullptr;
 }
 
-tHateEntry *HateList::Find(Mob *ent)
+HateEntry* HateList::find(Mob* pMOB)
 {
-	auto iterator = list.begin();
-	while(iterator != list.end())
-	{
-		if((*iterator)->ent == ent)
-			return (*iterator);
-		++iterator;
-	}
+	for (auto i = mEntries.begin(); i != mEntries.end(); i++)
+		if ((*i)->mMOB == pMOB) return *i;
 	return nullptr;
 }
 
-void HateList::Set(Mob* other, uint32 in_hate, uint32 in_dam)
+void HateList::set(Mob* pMob, uint32 pHate, uint32 pDamage)
 {
-	tHateEntry *p = Find(other);
-	if(p)
+	HateEntry *entry = find(pMob);
+	if (entry)
 	{
-		if(in_dam > 0)
-			p->damage = in_dam;
-		if(in_hate > 0)
-			p->hate = in_hate;
+		if(pDamage > 0)
+			entry->mDamage = pDamage;
+		if(pHate > 0)
+			entry->mHate = pHate;
 	}
 }
 
-Mob* HateList::GetDamageTop(Mob* hater)
+Mob* HateList::getHighestDamage(Mob* hater)
 {
+	/*
+	This is called in NPC::Death
+	It calls this on it's own HateList, passing itself as the hater parameter.
+	-- Under the circumstances where there were 40 people in a raid it would calculate the total raid damage 80 times. 
+	*/
 	Mob* current = nullptr;
 	Group* grp = nullptr;
 	Raid* r = nullptr;
 	uint32 dmg_amt = 0;
 
-	auto iterator = list.begin();
-	while(iterator != list.end())
+	auto iterator = mEntries.begin();
+	while(iterator != mEntries.end())
 	{
 		grp = nullptr;
 		r = nullptr;
 
-		if((*iterator)->ent && (*iterator)->ent->IsClient()){
-			r = entity_list.GetRaidByClient((*iterator)->ent->CastToClient());
+		if((*iterator)->mMOB && (*iterator)->mMOB->IsClient()){
+			r = entity_list.GetRaidByClient((*iterator)->mMOB->CastToClient());
 		}
 
-		grp = entity_list.GetGroupByMob((*iterator)->ent);
+		grp = entity_list.GetGroupByMob((*iterator)->mMOB);
 
-		if((*iterator)->ent && r){
+		if((*iterator)->mMOB && r){
 			if(r->GetTotalRaidDamage(hater) >= dmg_amt)
 			{
-				current = (*iterator)->ent;
+				current = (*iterator)->mMOB;
 				dmg_amt = r->GetTotalRaidDamage(hater);
 			}
 		}
-		else if ((*iterator)->ent != nullptr && grp != nullptr)
+		else if ((*iterator)->mMOB != nullptr && grp != nullptr)
 		{
 			if (grp->GetTotalGroupDamage(hater) >= dmg_amt)
 			{
-				current = (*iterator)->ent;
+				current = (*iterator)->mMOB;
 				dmg_amt = grp->GetTotalGroupDamage(hater);
 			}
 		}
-		else if ((*iterator)->ent != nullptr && (uint32)(*iterator)->damage >= dmg_amt)
+		else if ((*iterator)->mMOB != nullptr && (uint32)(*iterator)->mDamage >= dmg_amt)
 		{
-			current = (*iterator)->ent;
-			dmg_amt = (*iterator)->damage;
+			current = (*iterator)->mMOB;
+			dmg_amt = (*iterator)->mDamage;
 		}
 		++iterator;
 	}
 	return current;
 }
 
-Mob* HateList::GetClosest(Mob *hater) {
+Mob* HateList::getClosest(Mob *hater) {
 	Mob* close = nullptr;
 	float closedist = 99999.9f;
 	float thisdist;
 
-	auto iterator = list.begin();
-	while(iterator != list.end()) {
-		thisdist = (*iterator)->ent->DistNoRootNoZ(*hater);
-		if((*iterator)->ent != nullptr && thisdist <= closedist) {
+	auto iterator = mEntries.begin();
+	while(iterator != mEntries.end()) {
+		thisdist = (*iterator)->mMOB->DistNoRootNoZ(*hater);
+		if((*iterator)->mMOB != nullptr && thisdist <= closedist) {
 			closedist = thisdist;
-			close = (*iterator)->ent;
+			close = (*iterator)->mMOB;
 		}
 		++iterator;
 	}
@@ -169,80 +147,65 @@ Mob* HateList::GetClosest(Mob *hater) {
 	return close;
 }
 
-
-// neotokyo: a few comments added, rearranged code for readability
-void HateList::Add(Mob *ent, int32 in_hate, int32 in_dam, bool bFrenzy, bool iAddIfNotExist)
+void HateList::add(Mob* pMOB, int32 pHate, int32 pDamage, bool pFrenzy, bool iAddIfNotExist)
 {
-	if(!ent)
-		return;
+	if (!pMOB) return;
 
-	if(ent->IsCorpse())
-		return;
+	// Do not add corpses to HateList.
+	if (pMOB->IsCorpse()) return;
 
-	if(ent->IsClient() && ent->CastToClient()->IsDead())
-		return;
+	// Do not add dead dead players to HateList.
+	if (pMOB->IsClient() && pMOB->CastToClient()->IsDead()) return;
 
-	tHateEntry *p = Find(ent);
-	if (p)
+	// Where pMOB is already on the HateList, increase Hate/Damage values.
+	HateEntry *entry = find(pMOB);
+	if (entry)
 	{
-		p->damage+=(in_dam>=0)?in_dam:0;
-		p->hate+=in_hate;
-		p->bFrenzy = bFrenzy;
+		entry->mDamage += (pDamage >= 0) ? pDamage : 0;
+		entry->mHate += pHate;
+		entry->mFrenzy = pFrenzy;
 	}
+	// Where pMOB is not on the HateList, add it.
 	else if (iAddIfNotExist) {
-		p = new tHateEntry;
-		p->ent = ent;
-		p->damage = (in_dam>=0)?in_dam:0;
-		p->hate = in_hate;
-		p->bFrenzy = bFrenzy;
-		list.push_back(p);
-		parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "1", 0);
+		entry = new HateEntry(pMOB, (pDamage >= 0) ? pDamage : 0, pHate, pFrenzy);
+		mEntries.push_back(entry);
+		parse->EventNPC(EVENT_HATE_LIST, mOwner->CastToNPC(), pMOB, "1", 0);
 
-		if(ent->IsClient())
-			ent->CastToClient()->IncrementAggroCount();
+		// Where pMOB is client, update 'Aggro Count'.
+		if (pMOB->IsClient())
+			pMOB->CastToClient()->IncrementAggroCount();
 	}
 }
 
-bool HateList::RemoveEnt(Mob *ent)
+bool HateList::clear(Mob* pMOB)
 {
-	if (!ent)
-		return false;
+	if (!pMOB) return false;
 
-	bool found = false;
-	auto iterator = list.begin();
+	for (auto i = mEntries.begin(); i != mEntries.end(); i++) {
+		if ((*i)->mMOB == pMOB) {
+			parse->EventNPC(EVENT_HATE_LIST, mOwner->CastToNPC(), pMOB, "0", 0);
+			pMOB->CastToClient()->DecrementAggroCount();
 
-	while(iterator != list.end())
-	{
-		if((*iterator)->ent == ent)
-		{
-			if(ent)
-			parse->EventNPC(EVENT_HATE_LIST, owner->CastToNPC(), ent, "0", 0);
-			found = true;
-
-			
-			if(ent && ent->IsClient())
-				ent->CastToClient()->DecrementAggroCount();
-
-			delete (*iterator);
-			iterator = list.erase(iterator);
-
+			// Clean up.
+			delete *i;
+			mEntries.erase(i);
+			return true;
 		}
-		else
-			++iterator;
 	}
-	return found;
+
+	return false;
 }
 
 void HateList::DoFactionHits(int32 nfl_id) {
 	if (nfl_id <= 0)
 		return;
-	auto iterator = list.begin();
-	while(iterator != list.end())
+	auto iterator = mEntries.begin();
+	while(iterator != mEntries.end())
 	{
 		Client *p;
 
-		if ((*iterator)->ent && (*iterator)->ent->IsClient())
-			p = (*iterator)->ent->CastToClient();
+		if ((*iterator)->mMOB && (*iterator)->mMOB->IsClient())
+			p = (*iterator)->mMOB->CastToClient();
 		else
 			p = nullptr;
 
@@ -252,26 +215,18 @@ void HateList::DoFactionHits(int32 nfl_id) {
 	}
 }
 
-int HateList::SummonedPetCount(Mob *hater) {
-
-	//Function to get number of 'Summoned' pets on a targets hate list to allow calculations for certian spell effects.
-	//Unclear from description that pets are required to be 'summoned body type'. Will not require at this time.
-	int petcount = 0;
-	auto iterator = list.begin();
-	while(iterator != list.end()) {
-
-		if((*iterator)->ent != nullptr && (*iterator)->ent->IsNPC() && 	((*iterator)->ent->CastToNPC()->IsPet() || ((*iterator)->ent->CastToNPC()->GetSwarmOwner() > 0))) 
-		{
-			++petcount;
-		}
-		
-		++iterator;
+int HateList::getSummonedPetCount() {
+	int count = 0;
+	for (auto i = mEntries.begin(); i != mEntries.end(); i++) {
+		Mob* entryMOB = (*i)->mMOB;
+		if (entryMOB && entryMOB->IsNPC() && (entryMOB->CastToNPC()->IsPet() || (entryMOB->CastToNPC()->GetSwarmOwner() > 0)))
+			count++;
 	}
 
-	return petcount;
+	return count;
 }
 
-Mob *HateList::GetTop(Mob *center)
+Mob *HateList::getHighestHate(Mob *center)
 {
 	Mob* top = nullptr;
 	int32 hate = -1;
@@ -284,10 +239,10 @@ Mob *HateList::GetTop(Mob *center)
 		int32 hateClientTypeInRange = -1;
 		int skipped_count = 0;
 
-		auto iterator = list.begin();
-		while(iterator != list.end())
+		auto iterator = mEntries.begin();
+		while(iterator != mEntries.end())
 		{
-			tHateEntry *cur = (*iterator);
+			HateEntry *cur = (*iterator);
 			int16 aggroMod = 0;
 
 			if(!cur){
@@ -295,48 +250,48 @@ Mob *HateList::GetTop(Mob *center)
 				continue;
 			}
 
-			if(!cur->ent){
+			if(!cur->mMOB){
 				++iterator;
 				continue;
 			}
 
 			if(center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if(!zone->watermap->InLiquid(cur->ent->GetX(), cur->ent->GetY(), cur->ent->GetZ())) {
+				if(!zone->watermap->InLiquid(cur->mMOB->GetX(), cur->mMOB->GetY(), cur->mMOB->GetZ())) {
 					skipped_count++;
 					++iterator;
 					continue;
 				}
 			}
 
-			if(cur->ent->DivineAura() || cur->ent->IsMezzed() || cur->ent->IsFeared()){
+			if(cur->mMOB->DivineAura() || cur->mMOB->IsMezzed() || cur->mMOB->IsFeared()){
 				if(hate == -1)
 				{
-					top = cur->ent;
+					top = cur->mMOB;
 					hate = 0;
 				}
 				++iterator;
 				continue;
 			}
 
-			int32 currentHate = cur->hate;
+			int32 currentHate = cur->mHate;
 
-			if(cur->ent->IsClient()){
+			if(cur->mMOB->IsClient()){
 
-				if(cur->ent->CastToClient()->IsSitting()){
+				if(cur->mMOB->CastToClient()->IsSitting()){
 					aggroMod += RuleI(Aggro, SittingAggroMod);
 				}
 
 				if(center){
-					if(center->GetTarget() == cur->ent)
+					if(center->GetTarget() == cur->mMOB)
 						aggroMod += RuleI(Aggro, CurrentTargetAggroMod);
 					if(RuleI(Aggro, MeleeRangeAggroMod) != 0)
 					{
-						if(center->CombatRange(cur->ent)){
+						if(center->CombatRange(cur->mMOB)){
 							aggroMod += RuleI(Aggro, MeleeRangeAggroMod);
 
-							if(currentHate > hateClientTypeInRange || cur->bFrenzy){
+							if(currentHate > hateClientTypeInRange || cur->mFrenzy){
 								hateClientTypeInRange = currentHate;
-								topClientTypeInRange = cur->ent;
+								topClientTypeInRange = cur->mMOB;
 							}
 						}
 					}
@@ -345,18 +300,18 @@ Mob *HateList::GetTop(Mob *center)
 			}
 			else{
 				if(center){
-					if(center->GetTarget() == cur->ent)
+					if(center->GetTarget() == cur->mMOB)
 						aggroMod += RuleI(Aggro, CurrentTargetAggroMod);
 					if(RuleI(Aggro, MeleeRangeAggroMod) != 0)
 					{
-						if(center->CombatRange(cur->ent)){
+						if(center->CombatRange(cur->mMOB)){
 							aggroMod += RuleI(Aggro, MeleeRangeAggroMod);
 						}
 					}
 				}
 			}
 
-			if(cur->ent->GetMaxHP() != 0 && ((cur->ent->GetHP()*100/cur->ent->GetMaxHP()) < 20)){
+			if(cur->mMOB->GetMaxHP() != 0 && ((cur->mMOB->GetHP()*100/cur->mMOB->GetMaxHP()) < 20)){
 				aggroMod += RuleI(Aggro, CriticallyWoundedAggroMod);
 			}
 
@@ -364,9 +319,9 @@ Mob *HateList::GetTop(Mob *center)
 				currentHate += (currentHate * aggroMod / 100);
 			}
 
-			if(currentHate > hate || cur->bFrenzy){
+			if(currentHate > hate || cur->mFrenzy){
 				hate = currentHate;
-				top = cur->ent;
+				top = cur->mMOB;
 			}
 
 			++iterator;
@@ -374,14 +329,6 @@ Mob *HateList::GetTop(Mob *center)
 
 		if(topClientTypeInRange != nullptr && top != nullptr) {
 			bool isTopClientType = top->IsClient();
-#ifdef BOTS
-			if(!isTopClientType) {
-				if(top->IsBot()) {
-					isTopClientType = true;
-					topClientTypeInRange = top;
-				}
-			}
-#endif //BOTS
 
 			if(!isTopClientType) {
 				if(top->IsMerc()) {
@@ -403,23 +350,23 @@ Mob *HateList::GetTop(Mob *center)
 		}
 	}
 	else{
-		auto iterator = list.begin();
+		auto iterator = mEntries.begin();
 		int skipped_count = 0;
-		while(iterator != list.end())
+		while(iterator != mEntries.end())
 		{
-			tHateEntry *cur = (*iterator);
+			HateEntry *cur = (*iterator);
 			if(center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-				if(!zone->watermap->InLiquid(cur->ent->GetX(), cur->ent->GetY(), cur->ent->GetZ())) {
+				if(!zone->watermap->InLiquid(cur->mMOB->GetX(), cur->mMOB->GetY(), cur->mMOB->GetZ())) {
 					skipped_count++;
 					++iterator;
 					continue;
 				}
 			}
 
-			if(cur->ent != nullptr && ((cur->hate > hate) || cur->bFrenzy ))
+			if(cur->mMOB != nullptr && ((cur->mHate > hate) || cur->mFrenzy ))
 			{
-				top = cur->ent;
-				hate = cur->hate;
+				top = cur->mMOB;
+				hate = cur->mHate;
 			}
 			++iterator;
 		}
@@ -431,18 +378,18 @@ Mob *HateList::GetTop(Mob *center)
 	return nullptr;
 }
 
-Mob *HateList::GetMostHate(){
+Mob *HateList::getMostHate(){
 	Mob* top = nullptr;
 	int32 hate = -1;
 
-	auto iterator = list.begin();
-	while(iterator != list.end())
+	auto iterator = mEntries.begin();
+	while(iterator != mEntries.end())
 	{
-		tHateEntry *cur = (*iterator);
-		if(cur->ent != nullptr && (cur->hate > hate))
+		HateEntry *cur = (*iterator);
+		if(cur->mMOB != nullptr && (cur->mHate > hate))
 		{
-			top = cur->ent;
-			hate = cur->hate;
+			top = cur->mMOB;
+			hate = cur->mHate;
 		}
 		++iterator;
 	}
@@ -450,57 +397,62 @@ Mob *HateList::GetMostHate(){
 }
 
 
-Mob *HateList::GetRandom()
+Mob *HateList::getRandom()
 {
-	int count = list.size();
+	int count = mEntries.size();
 	if(count == 0) //If we don't have any entries it'll crash getting a random 0, -1 position.
 		return NULL;
 
 	if(count == 1) //No need to do all that extra work if we only have one hate entry
 	{
-		if(*list.begin()) // Just in case tHateEntry is invalidated somehow...
-			return (*list.begin())->ent;
+		if(*mEntries.begin()) // Just in case tHateEntry is invalidated somehow...
+			return (*mEntries.begin())->mMOB;
 
 		return NULL;
 	}
 
-	auto iterator = list.begin();
+	auto iterator = mEntries.begin();
 	int random = MakeRandomInt(0, count - 1);
 	for (int i = 0; i < random; i++)
 		++iterator;
 	
-	return (*iterator)->ent;
+	return (*iterator)->mMOB;
 }
 
-int32 HateList::GetEntHate(Mob *ent, bool damage)
+int32 HateList::getHate(Mob* pMOB, bool pDamage)
 {
-	tHateEntry *p;
+	HateEntry* entry = find(pMOB);
+	if (entry) {
+		if (pDamage) return entry->mDamage;
+		return entry->mHate;
+	}
 
-	p = Find(ent);
-
-	if ( p && damage)
-		return p->damage;
-	else if (p)
-		return p->hate;
-	else
-		return 0;
+	return 0;
 }
 
-//looking for any mob with hate > -1
-bool HateList::IsEmpty() {
-	return(list.size() == 0);
+
+int32 HateList::getDamage(Mob* pMOB)
+{
+	HateEntry* entry = find(pMOB);
+	if (entry) return entry->mDamage;
+
+	return 0;
+}
+
+bool HateList::isEmpty() {
+	return mEntries.size() == 0;
 }
 
 // Prints hate list to a client
 void HateList::PrintToClient(Client *c)
 {
-	auto iterator = list.begin();
-	while (iterator != list.end())
+	auto iterator = mEntries.begin();
+	while (iterator != mEntries.end())
 	{
-		tHateEntry *e = (*iterator);
+		HateEntry *e = (*iterator);
 		c->Message(0, "- name: %s, damage: %d, hate: %d",
-			(e->ent && e->ent->GetName()) ? e->ent->GetName() : "(null)",
-			e->damage, e->hate);
+			(e->mMOB && e->mMOB->GetName()) ? e->mMOB->GetName() : "(null)",
+			e->mDamage, e->mHate);
 
 		++iterator;
 	}
@@ -513,16 +465,16 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 
 	int ret = 0;
 	std::list<uint32> id_list;
-	auto iterator = list.begin();
-	while (iterator != list.end())
+	auto iterator = mEntries.begin();
+	while (iterator != mEntries.end())
 	{
-		tHateEntry *h = (*iterator);
+		HateEntry *h = (*iterator);
 		++iterator;
-		if(h && h->ent && h->ent != caster)
+		if(h && h->mMOB && h->mMOB != caster)
 		{
-			if(caster->CombatRange(h->ent))
+			if(caster->CombatRange(h->mMOB))
 			{
-				id_list.push_back(h->ent->GetID());
+				id_list.push_back(h->mMOB->GetID());
 				++ret;
 			}
 		}
@@ -557,20 +509,20 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 	//So keep a list of entity ids and look up after
 	std::list<uint32> id_list;
 	range = range * range;
-	auto iterator = list.begin();
-	while (iterator != list.end())
+	auto iterator = mEntries.begin();
+	while (iterator != mEntries.end())
 	{
-		tHateEntry *h = (*iterator);
+		HateEntry *h = (*iterator);
 		if(range > 0)
 		{
-			if(caster->DistNoRoot(*h->ent) <= range)
+			if(caster->DistNoRoot(*h->mMOB) <= range)
 			{
-				id_list.push_back(h->ent->GetID());
+				id_list.push_back(h->mMOB->GetID());
 			}
 		}
 		else
 		{
-			id_list.push_back(h->ent->GetID());
+			id_list.push_back(h->mMOB->GetID());
 		}
 		++iterator;
 	}

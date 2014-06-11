@@ -234,8 +234,8 @@ public:
 
 	inline int32	GetNPCFactionID()	const { return npc_faction_id; }
 	inline int32			GetPrimaryFaction()	const { return primary_faction; }
-	int32	GetNPCHate(Mob* in_ent) {return hate_list.GetEntHate(in_ent);}
-	bool	IsOnHatelist(Mob*p) { return hate_list.IsOnHateList(p);}
+	int32	GetNPCHate(Mob* in_ent) {return hate_list.getHate(in_ent);}
+	bool	IsOnHatelist(Mob*p) { return hate_list.isHated(p);}
 
 	void	SetNPCFactionID(int32 in) { npc_faction_id = in; database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction); }
 

@@ -407,11 +407,6 @@ int command_init(void) {
 		command_add("guildlist","[guildapproveid] - Lists character names who have approved the guild specified by the approve id",0,command_guildlist) ||
 		command_add("altactivate", "[argument] - activates alternate advancement abilities, use altactivate help for more information", 0, command_altactivate) ||
 		command_add("refundaa", "- Refunds your target's AA points, will disconnect them in the process as well.", 100, command_refundaa) ||
-
-#ifdef BOTS
-		command_add("bot","- Type \"#bot help\" to the see the list of available commands for bots.", 0, command_bot) ||
-#endif
-
 		command_add("traindisc","[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)",150,command_traindisc) ||
 		command_add("setgraveyard","[zone name] - Creates a graveyard for the specified zone based on your target's LOC.", 200, command_setgraveyard) ||
 		command_add("deletegraveyard","[zone name] - Deletes the graveyard for the specified zone.", 200, command_deletegraveyard) ||
@@ -1325,12 +1320,6 @@ void command_zone(Client *c, const Seperator *sep)
 			return;
 		}
 	}
-
-#ifdef BOTS
-	// This block is necessary to clean up any bot objects owned by a Client
-	if(zoneid != c->GetZoneID())
-		Bot::ProcessClientZoneChange(c);
-#endif
 
 	if (sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4)){
 		//zone to specific coords
@@ -2647,10 +2636,6 @@ void command_level(Client *c, const Seperator *sep)
 	}
 	else if (c->Admin() < 100) {
 		c->SetLevel(level, true);
-#ifdef BOTS
-		if(RuleB(Bots, BotLevelsWithOwner))
-			Bot::LevelBotWithClient(c, level, true);
-#endif
 	}
 	else if (!c->GetTarget()) {
 		c->Message(0, "Error: #Level: No target");
@@ -2663,10 +2648,6 @@ void command_level(Client *c, const Seperator *sep)
 			c->GetTarget()->SetLevel(level, true);
 			if(c->GetTarget()->IsClient()) {
 				c->GetTarget()->CastToClient()->SendLevelAppearance();
-#ifdef BOTS
-				if(RuleB(Bots, BotLevelsWithOwner))
-					Bot::LevelBotWithClient(c->GetTarget()->CastToClient(), level, true);
-#endif
 			}
 		}
 	}
@@ -10781,12 +10762,6 @@ void command_showspellslist(Client *c, const Seperator *sep)
 }
 
 // All new code added to command.cpp ought to be BEFORE this comment line. Do no append code to this file below the BOTS code block.
-#ifdef BOTS
-// Function delegate to support the command interface for Bots with the client.
-void command_bot(Client *c, const Seperator *sep) {
-	Bot::ProcessBotCommands(c, sep);
-}
-#endif
 
 void command_raidloot(Client *c, const Seperator *sep)
 {
