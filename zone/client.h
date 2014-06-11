@@ -214,8 +214,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
-	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
-		ExtraAttackOptions *opts = nullptr);
+	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
 	virtual Raid* GetRaid() { return entity_list.GetRaidByClient(this); }
@@ -252,12 +251,7 @@ public:
 	void	Message_StringID(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
 	bool	FilteredMessageCheck(Mob *sender, eqFilterType filter);
 	void	FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
-	void	FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter,
-			uint32 string_id, const char *message1, const char *message2 = nullptr,
-			const char *message3 = nullptr, const char *message4 = nullptr,
-			const char *message5 = nullptr, const char *message6 = nullptr,
-			const char *message7 = nullptr, const char *message8 = nullptr,
-			const char *message9 = nullptr);
+	void	FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType filter,	uint32 string_id, const char *message1, const char *message2 = nullptr,	const char *message3 = nullptr, const char *message4 = nullptr,	const char *message5 = nullptr, const char *message6 = nullptr,	const char *message7 = nullptr, const char *message8 = nullptr,	const char *message9 = nullptr);
 	void	SendBazaarResults(uint32 trader_id,uint32 class_,uint32 race,uint32 stat,uint32 slot,uint32 type,char name[64],uint32 minprice,uint32 maxprice);
 	void	SendTraderItem(uint32 item_id,uint16 quantity);
 	uint16	FindTraderItem(int32 SerialNumber,uint16 Quantity);
@@ -780,8 +774,7 @@ public:
 	int16 acmod();
 
 	// Item methods
-	uint32	NukeItem(uint32 itemnum, uint8 where_to_check =
-		(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
+	uint32	NukeItem(uint32 itemnum, uint8 where_to_check =	(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
 	void	SetTint(int16 slot_id, uint32 color);
 	void	SetTint(int16 slot_id, Color_Struct& color);
 	void	SetMaterial(int16 slot_id, uint32 item_id);
@@ -1043,7 +1036,7 @@ public:
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y);
 	void DoItemEnterZone();
 	bool DoItemEnterZone(uint32 slot_x, uint32 slot_y);
-	void SummonAndRezzAllCorpses();
+	void SummonAndResurrectAllCorpses();
 	void SummonAllCorpses(float dest_x, float dest_y, float dest_z, float dest_heading);
 	void DepopAllCorpses();
 	void DepopPlayerCorpse(uint32 dbid);
@@ -1083,8 +1076,8 @@ public:
 	bool RemoveRespawnOption(std::string option_name);
 	bool RemoveRespawnOption(uint8 position);
 	void ClearRespawnOptions() { respawn_options.clear(); }
-	void SetPendingRezzData(int XP, uint32 DBID, uint16 SpellID, const char *CorpseName) { PendingRezzXP = XP; PendingRezzDBID = DBID; PendingRezzSpellID = SpellID; PendingRezzCorpseName = CorpseName; }
-	bool IsRezzPending() { return PendingRezzSpellID > 0; }
+	void SetPendingResurrectionData(int XP, uint32 DBID, uint16 SpellID, const char *CorpseName) { PendingResurrectionXP = XP; PendingResurrectionDBID = DBID; PendingResurrectionSpellID = SpellID; PendingResurrectionCorpseName = CorpseName; }
+	bool IsResurrectionPending() { return PendingResurrectionSpellID > 0; }
 	void ClearHover();
 	inline bool IsBlockedBuff(int16 SpellID) { return PlayerBlockedBuffs.find(SpellID) != PlayerBlockedBuffs.end(); }
 	inline bool IsBlockedPetBuff(int16 SpellID) { return PetBlockedBuffs.find(SpellID) != PetBlockedBuffs.end(); }
@@ -1168,7 +1161,8 @@ public:
 	int16 GetActCHA() { return( std::min(GetMaxCHA(), GetCHA()) ); }
 	void LoadAccountFlags();
 	void SetAccountFlag(std::string flag, std::string val);
-	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillUseTypes);
+	std::string GetAccountFlag(std::string flag);
+	float GetDamageMultiplier(SkillUseTypes);
 	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
 	void ExpeditionSay(const char *str, int ExpID);
@@ -1236,7 +1230,7 @@ private:
 	eqFilterMode ClientFilters[_FilterCount];
 	int32	HandlePacket(const EQApplicationPacket *app);
 	void	OPTGB(const EQApplicationPacket *app);
-	void	OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 InstanceID, float x, float y, float z);
+	void	OPResurrectionAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 InstanceID, float x, float y, float z);
 	void	OPMemorizeSpell(const EQApplicationPacket *app);
 	void	OPMoveCoin(const EQApplicationPacket* app);
 	void	MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type);
@@ -1253,7 +1247,7 @@ private:
 
 	void	HandleTraderPriceUpdate(const EQApplicationPacket *app);
 
-	int16	CalcAC();
+	int32	CalcAC();
 	int16	GetACMit();
 	int16	GetACAvoid();
 	int16	CalcATK();
@@ -1485,10 +1479,10 @@ private:
 
 	uint8 HideCorpseMode;
 	bool PendingGuildInvitation;
-	int PendingRezzXP;
-	uint32 PendingRezzDBID;
-	uint16 PendingRezzSpellID;		// Only used for resurrect while hovering.
-	std::string PendingRezzCorpseName;	// Only used for resurrect while hovering.
+	int PendingResurrectionXP;
+	uint32 PendingResurrectionDBID;
+	uint16 PendingResurrectionSpellID;		// Only used for resurrect while hovering.
+	std::string PendingResurrectionCorpseName;	// Only used for resurrect while hovering.
 
 	std::set<uint32> PlayerBlockedBuffs;
 	std::set<uint32> PetBlockedBuffs;
@@ -1507,4 +1501,3 @@ private:
 };
 
 #endif
-

@@ -51,22 +51,18 @@ public:
 	void LoadPlayerCorpseDecayTime(uint32 dbid);
 
 	bool	IsCorpse()			const { return true; }
-	bool	IsPlayerCorpse()	const { return p_PlayerCorpse; }
-	bool	IsNPCCorpse()		const { return !p_PlayerCorpse; }
-	bool	IsBecomeNPCCorpse() const { return become_npc; }
+	bool	IsPlayerCorpse()	const { return mPlayerCorpse; }
+	bool	IsNPCCorpse()		const { return !mPlayerCorpse; }
 	bool	Process();
 	bool	Save();
-	uint32	GetCharID()			{ return charid; }
-	uint32	SetCharID(uint32 iCharID) { if (IsPlayerCorpse()) { return (charid=iCharID); } return 0xFFFFFFFF; };
-	uint32	GetDecayTime()		{ if (!corpse_decay_timer.Enabled()) return 0xFFFFFFFF; else return corpse_decay_timer.GetRemainingTime(); }
-	uint32	GetResTime()		{ if (!corpse_res_timer.Enabled()) return 0; else return corpse_res_timer.GetRemainingTime(); }
+	
+	uint32	GetDecayTime()		{ if (!mDecayTimer.Enabled()) return 0xFFFFFFFF; else return mDecayTimer.GetRemainingTime(); }
+	uint32	GetResTime()		{ if (!mResurrectionTimer.Enabled()) return 0; else return mResurrectionTimer.GetRemainingTime(); }
 	void	CalcCorpseName();
-	inline void		Lock()			{ pLocked = true; }
-	inline void		UnLock()		{ pLocked = false; }
-	inline bool		IsLocked()		{ return pLocked; }
-	inline void		ResetLooter()	{ BeingLootedBy = 0xFFFFFFFF; }
-	inline bool		IsBeingLooted() { return (BeingLootedBy != 0xFFFFFFFF); }
-	inline uint32	GetDBID()		{ return dbid; }
+
+	inline void		ResetLooter()	{ mBeingLootedBy = 0xFFFFFFFF; }
+	inline bool		IsBeingLooted() { return (mBeingLootedBy != 0xFFFFFFFF); }
+	inline uint32	GetDBID()		{ return mDBID; }
 	inline char*	GetOwnerName()	{ return orgname;}
 
 	void	SetDecayTimer(uint32 decaytime);
@@ -76,68 +72,118 @@ public:
 	ServerLootItem_Struct* GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data = 0);
 	void	RemoveItem(uint16 lootslot);
 	void	RemoveItem(ServerLootItem_Struct* item_data);
-	void	SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
-	void	RemoveCash();
-	void	QueryLoot(Client* to);
-	uint32	CountItems();
+	
+	
+	
+	
 	void	Delete();
 	void	Bury();
 	virtual void	Depop();
 	virtual void	DepopCorpse();
-
-	uint32	GetCopper()		{ return copper; }
-	uint32	GetSilver()		{ return silver; }
-	uint32	GetGold()		{ return gold; }
-	uint32	GetPlatinum()	{ return platinum; }
 
 	void	FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	void	MakeLootRequestPackets(Client* client, const EQApplicationPacket* app);
 	void	LootItem(Client* client, const EQApplicationPacket* app);
 	void	EndLoot(Client* client, const EQApplicationPacket* app);
 	bool	Summon(Client* client, bool spell, bool CheckDistance);
-	void	CastRezz(uint16 spellid, Mob* Caster);
-	void	CompleteRezz();
-	void	SetPKItem(int32 id) { pkitem = id; }
-	int32	GetPKItem() { return pkitem; }
-	bool CanMobLoot(int charid);
-	void AllowMobLoot(Mob *them, uint8 slot);
-	void AddLooter(Mob *who);
-	bool Rezzed() { return rez; }
-	void Rezzed(bool in_rez) { rez = in_rez; }
+
+
+	bool canMobLoot(int charid);
+
+	void AllowMobLoot(Mob* pCharacer, uint8 pSlot);
+	void addLooter(Mob* pCharacer);
+
 	void	Spawn();
 
 	char		orgname[64];
 	uint32 GetEquipment(uint8 material_slot) const;	// returns item id
 	uint32 GetEquipmentColor(uint8 material_slot) const;
-	inline int GetRezzExp() { return rezzexp; }
+
+	// Sets the amount of coin on the corpse.
+	// (SCRIPTING)
+	void setCash(uint32 pCopper, uint32 pSilver, uint32 pGold, uint32 pPlatinum);
+
+	// Removes all cash from the corpse.
+	void removeCash();
+
+	uint32 getCopper() { return mCopper; }
+	uint32 getSilver() { return mSilver; }
+	uint32 getGold() { return mGold; }
+	uint32 getPlatinum() { return mPlatinum; }
+	
+	// Returns the amount of EXP stored on this corpse.
+	inline int getResurrectionExp() { return mResurrectionExp; }
+
+	void CastResurrection(uint16 spellid, Mob* Caster);
+	void CompleteResurrection();
+
+	// Returns whether this corpse has been resurrected.
+	bool isResurrected() { return mResurrected; }
+
+	// Sets whether this corpse has been resurrected.
+	void setResurrected(bool pResurrected) { mResurrected = pResurrected; }
+
+	void setPKItem(int32 id) { mPKItem = id; }
+	int32 getPKItem() { return mPKItem; }
+	
+	// Returns the Character ID this corpse belongs to.
+	uint32 getCharacterID() { return mCharacterID; }
+	// Sets the Character ID this corpse belongs to.
+	// (SCRIPTING)
+	uint32 setCharacterID(uint32 pCharacterID) { if (IsPlayerCorpse()) { return (mCharacterID = pCharacterID); } return 0xFFFFFFFF; };
+
+	// locks the corpse to prevent looting by non-GM characters.
+	// (SCRIPTING)
+	inline void	lock() { mLocked = true; }
+
+	// Unlocks the corpse to allow looting by non-GM characters.
+	// (SCRIPTING)
+	inline void unlock() { mLocked = false; }
+
+	// Returns whether the corpse is locked.
+	// (SCRIPTING)
+	inline bool isLocked() { return mLocked; }
+
+	// Returns the number of items on the corpse.
+	// (SCRIPTING)
+	uint32 getNumItems();
+
+	// Prints details of items/coin on corpse to client.
+	// (SCRIPTING)
+	void queryLoot(Client* pClient);
 
 protected:
 	std::list<uint32> MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot);
 
 private:
-	bool		p_PlayerCorpse;	bool		pIsChanged;
-	bool		pLocked;
-	int32		pkitem;
-	uint32		dbid;
-	uint32		charid;
-	ItemList	itemlist;
-	uint32		copper;
-	uint32		silver;
-	uint32		gold;
-	uint32		platinum;
-	bool		p_depop;
-	uint32		BeingLootedBy;
-	uint32		rezzexp;
-	bool		rez;
-	bool		can_rez;
-	bool		become_npc;
-	int			looters[MAX_LOOTERS]; // People allowed to loot the corpse, character id
-	Timer		corpse_decay_timer;
-	Timer		corpse_res_timer;
-	Timer		corpse_delay_timer;
-	Timer		corpse_graveyard_timer;
-	Timer		loot_cooldown_timer;
-	Color_Struct item_tint[9];
+
+	bool mDespawnRequested; // Flag indicating that this corpse should despawn.
+	bool mChanged; // Flag indicating whether a player corpse has been changed since last save.
+	bool mResurrected; // Flag indicating whether the corpse has been resurrected.
+	bool mLocked; // Flag indicating whether the corpse has been locked.
+	bool mPlayerCorpse; // Flag indicating whether the corpse belongs to a player.
+
+	// Coin
+	uint32 mCopper;
+	uint32 mSilver;
+	uint32 mGold;
+	uint32 mPlatinum;
+
+	int32 mPKItem; // Not completely sure what this does yet.
+	uint32 mDBID; // ID field in 'player_corpses' table.
+	uint32 mCharacterID; // Character ID who owns this corpse
+	uint32 mBeingLootedBy; // Client ID of whoever is looting this corpse.
+	uint32 mResurrectionExp; // Amount of EXP the player lost creating this corpse.
+
+	Timer mDecayTimer; // Timer controlling how long before this corpse decays.
+	Timer mResurrectionTimer; // Timer controlling how long this corpse can be resurrected.
+	Timer mCoolDownTimer; // Timer prevents anyone from looting a corpse within 10ms (No idea why).
+	Timer mGraveyardTimer; // Timer controlling when this corpse will be moved to the graveyard.
+	Timer mLockoutTimer; // Timer controlling how long before the corpse becomes open and allow anyone to loot.
+	
+	ItemList mItems; // List of items on the corpse.
+	int mLooters[MAX_LOOTERS]; // Character IDs of those allowed to loot this corpse.
+	Color_Struct mItemTints[9];
 };
 
 #endif

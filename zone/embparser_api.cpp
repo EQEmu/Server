@@ -1738,12 +1738,12 @@ XS(XS__clear_zone_flag)
 	XSRETURN_EMPTY;
 }
 
-XS(XS__summonburriedplayercorpse);
-XS(XS__summonburriedplayercorpse)
+XS(XS__summonburiedplayercorpse);
+XS(XS__summonburiedplayercorpse)
 {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: summonburriedplayercorpse(char_id,dest_x,dest_y,dest_z,dest_heading)");
+		Perl_croak(aTHX_ "Usage: summonburiedplayercorpse(char_id,dest_x,dest_y,dest_z,dest_heading)");
 
 	bool RETVAL;
 	uint32	char_id = (int)SvIV(ST(0));
@@ -1752,7 +1752,7 @@ XS(XS__summonburriedplayercorpse)
 	float	dest_z = (float)SvIV(ST(3));
 	float	dest_heading = (float)SvIV(ST(4));
 
-	RETVAL = quest_manager.summonburriedplayercorpse(char_id, dest_x, dest_y, dest_z, dest_heading);
+	RETVAL = quest_manager.summonburiedplayercorpse(char_id, dest_x, dest_y, dest_z, dest_heading);
 
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
@@ -1780,19 +1780,19 @@ XS(XS__summonallplayercorpses)
 	XSRETURN(1);
 }
 
-XS(XS__getplayerburriedcorpsecount);
-XS(XS__getplayerburriedcorpsecount)
+XS(XS__getplayerburiedcorpsecount);
+XS(XS__getplayerburiedcorpsecount)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: getplayerburriedcorpsecount(char_id)");
+		Perl_croak(aTHX_ "Usage: getplayerburiedcorpsecount(char_id)");
 
 	uint32		RETVAL;
 	dXSTARG;
 
 	uint32	char_id = (int)SvIV(ST(0));
 
-	RETVAL = quest_manager.getplayerburriedcorpsecount(char_id);
+	RETVAL = quest_manager.getplayerburiedcorpsecount(char_id);
 	XSprePUSH; PUSHu((IV)RETVAL);
 
 	XSRETURN(1);
@@ -3421,9 +3421,9 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "has_zone_flag"), XS__has_zone_flag, file);
 		newXS(strcpy(buf, "set_zone_flag"), XS__set_zone_flag, file);
 		newXS(strcpy(buf, "clear_zone_flag"), XS__clear_zone_flag, file);
-		newXS(strcpy(buf, "summonburriedplayercorpse"), XS__summonburriedplayercorpse, file);
+		newXS(strcpy(buf, "summonburiedplayercorpse"), XS__summonburiedplayercorpse, file);
 		newXS(strcpy(buf, "summonallplayercorpses"), XS__summonallplayercorpses, file);
-		newXS(strcpy(buf, "getplayerburriedcorpsecount"), XS__getplayerburriedcorpsecount, file);
+		newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
 		newXS(strcpy(buf, "buryplayercorpse"), XS__buryplayercorpse, file);
 		newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
 		newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);

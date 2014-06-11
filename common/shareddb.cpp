@@ -1355,7 +1355,7 @@ int32 SharedDatabase::DeleteStalePlayerCorpses() {
 
 	if(RuleB(Zone, EnableShadowrest))
 	{
-		if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried = 1 WHERE IsBurried=0 and "
+		if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET Isburied = 1 WHERE Isburied=0 and "
 			"(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(timeofdeath)) > %d and not timeofdeath=0",
 			(RuleI(Character, CorpseDecayTimeMS) / 1000)), errbuf, 0, &affected_rows))
 		{

@@ -103,7 +103,7 @@
 	void Handle_OP_CombatAbility(const EQApplicationPacket *app);
 	void Handle_OP_Taunt(const EQApplicationPacket *app);
 	void Handle_OP_InstillDoubt(const EQApplicationPacket *app);
-	void Handle_OP_RezzAnswer(const EQApplicationPacket *app);
+	void Handle_OP_ResurrectionAnswer(const EQApplicationPacket *app);
 	void Handle_OP_GMSummon(const EQApplicationPacket *app);
 	void Handle_OP_TradeRequest(const EQApplicationPacket *app);
 	void Handle_OP_TradeRequestAck(const EQApplicationPacket *app);

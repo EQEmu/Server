@@ -2043,7 +2043,7 @@ struct Resurrect_Struct	{
 	float	z;
 	char	your_name[64];
 	uint32	unknown88;
-	char	rezzer_name[64];
+	char	resurrecter_name[64];
 	uint32	spellid;
 	char	corpse_name[64];
 	uint32	action;

@@ -169,7 +169,7 @@ public:
 	Doors *GetDoorsByDBID(uint32 id);
 	void RemoveAllCorpsesByCharID(uint32 charid);
 	void RemoveCorpseByDBID(uint32 dbid);
-	int RezzAllCorpsesByCharID(uint32 charid);
+	int ResurrectAllCorpsesByCharID(uint32 charid);
 	bool IsMobInZone(Mob *who);
 	void ClearClientPetitionQueue();
 	bool CanAddHateForMob(Mob *p);

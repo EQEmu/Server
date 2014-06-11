@@ -1647,14 +1647,14 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 					database.GetVariable("PvPitem", tmp2, 9);
 					int pvpitem = atoi(tmp2);
 					if(pvpitem>0 && pvpitem<200000)
-						new_corpse->SetPKItem(pvpitem);
+						new_corpse->setPKItem(pvpitem);
 				}
 				else if(reward==2)
-					new_corpse->SetPKItem(-1);
+					new_corpse->setPKItem(-1);
 				else if(reward==1)
-					new_corpse->SetPKItem(1);
+					new_corpse->setPKItem(1);
 				else
-					new_corpse->SetPKItem(0);
+					new_corpse->setPKItem(0);
 				if(killerMob->CastToClient()->isgrouped) {
 					Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
 					if(group != 0)
@@ -1663,7 +1663,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 						{
 							if(group->members[i] != nullptr)
 							{
-								new_corpse->AllowMobLoot(group->members[i],i);
+								new_corpse->AllowMobLoot(group->members[i], i);
 							}
 						}
 					}
@@ -2336,7 +2336,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				if(group != 0) {
 					for(int i=0;i<6;i++) { // Doesnt work right, needs work
 						if(group->members[i] != nullptr) {
-							corpse->AllowMobLoot(group->members[i],i);
+							corpse->AllowMobLoot(group->members[i], i);
 						}
 					}
 				}

@@ -410,8 +410,8 @@ int command_init(void) {
 		command_add("traindisc","[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)",150,command_traindisc) ||
 		command_add("setgraveyard","[zone name] - Creates a graveyard for the specified zone based on your target's LOC.", 200, command_setgraveyard) ||
 		command_add("deletegraveyard","[zone name] - Deletes the graveyard for the specified zone.", 200, command_deletegraveyard) ||
-		command_add("getplayerburriedcorpsecount","- Get the target's total number of burried player corpses.", 100, command_getplayerburriedcorpsecount) ||
-		command_add("summonburriedplayercorpse","- Summons the target's oldest burried corpse, if any exist.", 100, command_summonburriedplayercorpse) ||
+		command_add("getplayerburiedcorpsecount","- Get the target's total number of buried player corpses.", 100, command_getplayerburiedcorpsecount) ||
+		command_add("summonburiedplayercorpse","- Summons the target's oldest buried corpse, if any exist.", 100, command_summonburiedplayercorpse) ||
 		command_add("refreshgroup","- Refreshes Group.", 0, command_refreshgroup) ||
 		command_add("advnpcspawn","[maketype|makegroup|addgroupentry|addgroupspawn][removegroupspawn|movespawn|editgroupbox|cleargroupbox]",150,command_advnpcspawn) ||
 		command_add("advnpc","analog for advnpcspawn [maketype|makegroup|addgroupentry|addgroupspawn][removegroupspawn|movespawn|editgroupbox|cleargroupbox]",150,command_advnpcspawn) ||
@@ -702,18 +702,18 @@ void command_resetaa(Client* c,const Seperator *sep){
 
 void command_sendop(Client *c,const Seperator *sep){
 
-	int RezSpell = 0;
+	int ResurrectionSpell = 0;
 
 	if(sep->arg[1][0]) {
-		RezSpell = atoi(sep->arg[1]);
+		ResurrectionSpell = atoi(sep->arg[1]);
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest, sizeof(Resurrect_Struct));
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ResurrectionRequest, sizeof(Resurrect_Struct));
 	Resurrect_Struct *rs = (Resurrect_Struct*)outapp->pBuffer;
 
 	strcpy(rs->your_name, c->GetName());
-	strcpy(rs->rezzer_name, "A Cleric01");
-	rs->spellid = RezSpell;
+	strcpy(rs->resurrecter_name, "A Cleric01");
+	rs->spellid = ResurrectionSpell;
 	DumpPacket(outapp);
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1062,7 +1062,7 @@ void command_npcloot(Client *c, const Seperator *sep)
 		if (c->GetTarget()->IsNPC())
 			c->GetTarget()->CastToNPC()->QueryLoot(c);
 		else if (c->GetTarget()->IsCorpse())
-			c->GetTarget()->CastToCorpse()->QueryLoot(c);
+			c->GetTarget()->CastToCorpse()->queryLoot(c);
 		else
 			c->Message(0, "Error: Target's type doesnt have loot");
 	}
@@ -3669,7 +3669,7 @@ void command_corpse(Client *c, const Seperator *sep)
 		else if (!sep->IsNumber(2))
 			c->Message(0, "Error: charid must be a number.");
 		else
-			c->Message(0, "Setting CharID=%u on PlayerCorpse '%s'", target->CastToCorpse()->SetCharID(atoi(sep->arg[2])), target->GetName());
+			c->Message(0, "Setting CharID=%u on PlayerCorpse '%s'", target->CastToCorpse()->setCharacterID(atoi(sep->arg[2])), target->GetName());
 	}
 	else if (strcasecmp(sep->arg[1], "ResetLooter") == 0) {
 		if (target == 0 || !target->IsCorpse())
@@ -3677,12 +3677,12 @@ void command_corpse(Client *c, const Seperator *sep)
 		else
 			target->CastToCorpse()->ResetLooter();
 	}
-	else if (strcasecmp(sep->arg[1], "RemoveCash") == 0) {
+	else if (strcasecmp(sep->arg[1], "removeCash") == 0) {
 		if (target == 0 || !target->IsCorpse())
 			c->Message(0, "Error: Target the corpse you wish to remove the cash from");
 		else if (!target->IsPlayerCorpse() || c->Admin() >= commandEditPlayerCorpses) {
 			c->Message(0, "Removing Cash from %s.", target->GetName());
-			target->CastToCorpse()->RemoveCash();
+			target->CastToCorpse()->removeCash();
 		}
 		else
 			c->Message(0, "Insufficient status to modify player corpse.");
@@ -3691,13 +3691,13 @@ void command_corpse(Client *c, const Seperator *sep)
 		if (target == 0 || !target->IsCorpse())
 			c->Message(0, "Error: Target must be a corpse.");
 		else
-			target->CastToCorpse()->QueryLoot(c);
+			target->CastToCorpse()->queryLoot(c);
 	}
 	else if (strcasecmp(sep->arg[1], "lock") == 0) {
 		if (target == 0 || !target->IsCorpse())
 			c->Message(0, "Error: Target must be a corpse.");
 		else {
-			target->CastToCorpse()->Lock();
+			target->CastToCorpse()->lock();
 			c->Message(0, "Locking %s...", target->GetName());
 		}
 	}
@@ -3705,7 +3705,7 @@ void command_corpse(Client *c, const Seperator *sep)
 		if (target == 0 || !target->IsCorpse())
 			c->Message(0, "Error: Target must be a corpse.");
 		else {
-			target->CastToCorpse()->UnLock();
+			target->CastToCorpse()->unlock();
 			c->Message(0, "Unlocking %s...", target->GetName());
 		}
 	}
@@ -3741,8 +3741,8 @@ void command_corpse(Client *c, const Seperator *sep)
 		c->Message(0, "  ListNPC");
 		c->Message(0, "  ListPlayer");
 		c->Message(0, "  Lock - GM locks the corpse - cannot be looted by non-GM");
-		c->Message(0, "  UnLock");
-		c->Message(0, "  RemoveCash");
+		c->Message(0, "  Unlock");
+		c->Message(0, "  removeCash");
 		c->Message(0, "  InspectLoot");
 		c->Message(0, "  [to remove items from corpses, loot them]");
 		c->Message(0, "Lead-GM status required to delete/modify player corpses");
@@ -8783,7 +8783,7 @@ void command_deletegraveyard(Client *c, const Seperator *sep)
 	return;
 }
 
-void command_summonburriedplayercorpse(Client *c, const Seperator *sep)
+void command_summonburiedplayercorpse(Client *c, const Seperator *sep)
 {
 	Client *t=c;
 
@@ -8794,15 +8794,15 @@ void command_summonburriedplayercorpse(Client *c, const Seperator *sep)
 		return;
 	}
 
-	Corpse* PlayerCorpse = database.SummonBurriedPlayerCorpse(t->CharacterID(), t->GetZoneID(), zone->GetInstanceID(), t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
+	Corpse* PlayerCorpse = database.SummonBuriedPlayerCorpse(t->CharacterID(), t->GetZoneID(), zone->GetInstanceID(), t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
 
 	if(!PlayerCorpse)
-		c->Message(0, "Your target doesn't have any burried corpses.");
+		c->Message(0, "Your target doesn't have any buried corpses.");
 
 	return;
 }
 
-void command_getplayerburriedcorpsecount(Client *c, const Seperator *sep)
+void command_getplayerburiedcorpsecount(Client *c, const Seperator *sep)
 {
 	Client *t=c;
 
@@ -8813,12 +8813,12 @@ void command_getplayerburriedcorpsecount(Client *c, const Seperator *sep)
 		return;
 	}
 
-	uint32 CorpseCount = database.GetPlayerBurriedCorpseCount(t->CharacterID());
+	uint32 CorpseCount = database.GetPlayerBuriedCorpseCount(t->CharacterID());
 
 	if(CorpseCount > 0)
-		c->Message(0, "Your target has a total of %u burried corpses.", CorpseCount);
+		c->Message(0, "Your target has a total of %u buried corpses.", CorpseCount);
 	else
-		c->Message(0, "Your target doesn't have any burried corpses.");
+		c->Message(0, "Your target doesn't have any buried corpses.");
 
 	return;
 }

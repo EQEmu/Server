@@ -655,64 +655,64 @@ void WorldServer::Process() {
 			else if (sus->status == 1) petition_list.ReadDatabase(); // Until I fix this to be better....
 			break;
 		}
-		case ServerOP_RezzPlayer: {
-			RezzPlayer_Struct* srs = (RezzPlayer_Struct*) pack->pBuffer;
-			if (srs->rezzopcode == OP_RezzRequest)
+		case ServerOP_ResurrectPlayer: {
+			ResurrectPlayer_Struct* srs = (ResurrectPlayer_Struct*) pack->pBuffer;
+			if (srs->resurrectionopcode == OP_ResurrectionRequest)
 			{
-				// The Rezz request has arrived in the zone the player to be rezzed is currently in,
+				// The resurrection request has arrived in the zone the player to be resurrected is currently in,
 				// so we send the request to their client which will bring up the confirmation box.
-				Client* client = entity_list.GetClientByName(srs->rez.your_name);
+				Client* client = entity_list.GetClientByName(srs->resurrect.your_name);
 				if (client)
 				{
-					if(client->IsRezzPending())
+					if(client->IsResurrectionPending())
 					{
-						ServerPacket * Response = new ServerPacket(ServerOP_RezzPlayerReject, strlen(srs->rez.rezzer_name) + 1);
+						ServerPacket * Response = new ServerPacket(ServerOP_ResurrectPlayerReject, strlen(srs->resurrect.resurrecter_name) + 1);
 
 						char *Buffer = (char *)Response->pBuffer;
-						sprintf(Buffer, "%s", srs->rez.rezzer_name);
+						sprintf(Buffer, "%s", srs->resurrect.resurrecter_name);
 						worldserver.SendPacket(Response);
 						safe_delete(Response);
 						break;
 					}
-					//pendingrezexp is the amount of XP on the corpse. Setting it to a value >= 0
-					//also serves to inform Client::OPRezzAnswer to expect a packet.
-					client->SetPendingRezzData(srs->exp, srs->dbid, srs->rez.spellid, srs->rez.corpse_name);
-							_log(SPELLS__REZ, "OP_RezzRequest in zone %s for %s, spellid:%i",
-							zone->GetShortName(), client->GetName(), srs->rez.spellid);
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest,
+					//pendingmRessurectionExp is the amount of XP on the corpse. Setting it to a value >= 0
+					//also serves to inform Client::OPResurrectionAnswer to expect a packet.
+					client->SetPendingResurrectionData(srs->exp, srs->dbid, srs->resurrect.spellid, srs->resurrect.corpse_name);
+							_log(SPELLS__RESURRECTION, "OP_ResurrectionRequest in zone %s for %s, spellid:%i",
+							zone->GetShortName(), client->GetName(), srs->resurrect.spellid);
+					EQApplicationPacket* outapp = new EQApplicationPacket(OP_ResurrectionRequest,
 												sizeof(Resurrect_Struct));
-					memcpy(outapp->pBuffer, &srs->rez, sizeof(Resurrect_Struct));
+					memcpy(outapp->pBuffer, &srs->resurrect, sizeof(Resurrect_Struct));
 					client->QueuePacket(outapp);
-					_pkt(SPELLS__REZ, outapp);
+					_pkt(SPELLS__RESURRECTION, outapp);
 					safe_delete(outapp);
 					break;
 				}
 			}
-			if (srs->rezzopcode == OP_RezzComplete){
-				// We get here when the Rezz complete packet has come back via the world server
+			if (srs->resurrectionopcode == OP_ResurrectionComplete){
+				// We get here when the Resurrection complete packet has come back via the world server
 				// to the zone that the corpse is in.
-				Corpse* corpse = entity_list.GetCorpseByName(srs->rez.corpse_name);
+				Corpse* corpse = entity_list.GetCorpseByName(srs->resurrect.corpse_name);
 				if (corpse && corpse->IsCorpse()) {
-					_log(SPELLS__REZ, "OP_RezzComplete received in zone %s for corpse %s",
-								zone->GetShortName(), srs->rez.corpse_name);
+					_log(SPELLS__RESURRECTION, "OP_ResurrectionComplete received in zone %s for corpse %s",
+								zone->GetShortName(), srs->resurrect.corpse_name);
 
-					_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
-					// I don't know why Rezzed is not set to true in CompleteRezz().
-					corpse->Rezzed(true);
-					corpse->CompleteRezz();
+					_log(SPELLS__RESURRECTION, "Found corpse. Marking corpse as resurrected.");
+					// I don't know why Resurrected is not set to true in CompleteResurrection().
+					corpse->setResurrected(true);
+					corpse->CompleteResurrection();
 				}
 			}
 
 			break;
 		}
-		case ServerOP_RezzPlayerReject:
+		case ServerOP_ResurrectPlayerReject:
 		{
-			char *Rezzer = (char *)pack->pBuffer;
+			char *Resurrecter = (char *)pack->pBuffer;
 
-			Client* c = entity_list.GetClientByName(Rezzer);
+			Client* c = entity_list.GetClientByName(Resurrecter);
 
 			if (c)
-				c->Message_StringID(MT_WornOff, REZZ_ALREADY_PENDING);
+				c->Message_StringID(MT_WornOff, RESURRECTION_ALREADY_PENDING);
 
 			break;
 		}
@@ -1944,20 +1944,20 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 	return Ret;
 }
 
-bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode)
+bool WorldServer::ResurrectPlayer(EQApplicationPacket* rpack, uint32 mRessurectionExp, uint32 dbid, uint16 opcode)
 {
-	_log(SPELLS__REZ, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
-	ServerPacket* pack = new ServerPacket(ServerOP_RezzPlayer, sizeof(RezzPlayer_Struct));
-	RezzPlayer_Struct* sem = (RezzPlayer_Struct*) pack->pBuffer;
-	sem->rezzopcode = opcode;
-	sem->rez = *(Resurrect_Struct*) rpack->pBuffer;
-	sem->exp = rezzexp;
+	_log(SPELLS__RESURRECTION, "WorldServer::ResurrectionPlayer mRessurectionExp is %i (0 is normal for ResurrectionComplete", mRessurectionExp);
+	ServerPacket* pack = new ServerPacket(ServerOP_ResurrectPlayer, sizeof(ResurrectPlayer_Struct));
+	ResurrectPlayer_Struct* sem = (ResurrectPlayer_Struct*) pack->pBuffer;
+	sem->resurrectionopcode = opcode;
+	sem->resurrect = *(Resurrect_Struct*) rpack->pBuffer;
+	sem->exp = mRessurectionExp;
 	sem->dbid = dbid;
 	bool ret = SendPacket(pack);
 	if (ret)
-		_log(SPELLS__REZ, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
+		_log(SPELLS__RESURRECTION, "Sending player resurrection packet to world spellid:%i", sem->resurrect.spellid);
 	else
-		_log(SPELLS__REZ, "NOT Sending player rezz packet to world");
+		_log(SPELLS__RESURRECTION, "NOT Sending player resurrection packet to world");
 
 	safe_delete(pack);
 	return ret;

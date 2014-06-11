@@ -262,13 +262,13 @@ public:
 	bool	GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes);
 	uint32	CreatePlayerCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading);
 	bool	CreatePlayerCorpseBackup(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading);
-	uint32	UpdatePlayerCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading, bool rezzed = false);
-	void	MarkCorpseAsRezzed(uint32 dbid);
+	uint32	UpdatePlayerCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading, bool isRessurected = false);
+	void	MarkCorpseAsResurrected(uint32 dbid);
 	bool	BuryPlayerCorpse(uint32 dbid);
 	bool	BuryAllPlayerCorpses(uint32 charid);
 	bool	DeletePlayerCorpse(uint32 dbid);
-	uint32	GetPlayerBurriedCorpseCount(uint32 char_id);
-	Corpse* SummonBurriedPlayerCorpse(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);
+	uint32	GetPlayerBuriedCorpseCount(uint32 char_id);
+	Corpse* SummonBuriedPlayerCorpse(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);
 	bool	SummonAllPlayerCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);
 	bool	SummonAllGraveyardCorpses(uint32 cur_zoneid, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);
 	Corpse*	LoadPlayerCorpse(uint32 player_corpse_id);

@@ -313,6 +313,7 @@ RULE_BOOL ( Spells, FocusCombatProcs, false) //Allow all combat procs to receive
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
+RULE_INT ( Combat, AvoidanceCap, 1000 ) // The avoidance cap.
 RULE_INT ( Combat, MeleeBaseCritChance, 0 ) //The base crit chance for non warriors, NOTE: This will apply to NPCs as well
 RULE_INT ( Combat, WarBerBaseCritChance, 3 ) //The base crit chance for warriors and berserkers, only applies to clients
 RULE_INT ( Combat, BerserkBaseCritChance, 6 ) //The bonus base crit chance you get when you're berserk

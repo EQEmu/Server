@@ -119,9 +119,9 @@ void load_opcode_names()
 	opcode_map[0x001f]="LiveOP_ItemLinkClick";
 	opcode_map[0x01f4]="LiveOP_ItemLinkResponse";
 	opcode_map[0x01d9]="LiveOP_ItemLinkText";
-	opcode_map[0x0a41]="LiveOP_RezzRequest";
-	opcode_map[0x00e5]="LiveOP_RezzAnswer";
-	opcode_map[0x019b]="LiveOP_RezzComplete";
+	opcode_map[0x0a41]="LiveOP_ResurrectionRequest";
+	opcode_map[0x00e5]="LiveOP_ResurrectionAnswer";
+	opcode_map[0x019b]="LiveOP_ResurrectionComplete";
 	opcode_map[0x0128]="LiveOP_MoveDoor";
 	opcode_map[0x0127]="LiveOP_ClickDoor";
 	opcode_map[0x0247]="LiveOP_SendZonepoints";

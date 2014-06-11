@@ -194,8 +194,8 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	SetEXP(exp, aaexp, resexp);
 }
 
-void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
-	_log(CLIENT__EXP, "Attempting to Set Exp for %s (XP: %u, AAXP: %u, Rez: %s)", this->GetCleanName(), set_exp, set_aaxp, isrezzexp ? "true" : "false");
+void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool ismRessurectionExp) {
+	_log(CLIENT__EXP, "Attempting to Set Exp for %s (XP: %u, AAXP: %u, Resurrect: %s)", this->GetCleanName(), set_exp, set_aaxp, ismRessurectionExp ? "true" : "false");
 	//max_AAXP = GetEXPForLevel(52) - GetEXPForLevel(51);	//GetEXPForLevel() doesn't depend on class/race, just level, so it shouldn't change between Clients
 	max_AAXP = RuleI(AA, ExpPerPoint);	//this may be redundant since we're doing this in Client::FinishConnState2()
 	if (max_AAXP == 0 || GetEXPForLevel(GetLevel()) == 0xFFFFFFFF) {
@@ -205,8 +205,8 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 
 
 	if ((set_exp + set_aaxp) > (m_pp.exp+m_pp.expAA)) {
-		if (isrezzexp)
-			this->Message_StringID(MT_Experience, REZ_REGAIN);
+		if (ismRessurectionExp)
+			this->Message_StringID(MT_Experience, RESURRECTION_REGAIN);
 		else{
 			if(this->IsGrouped())
 				this->Message_StringID(MT_Experience, GAIN_GROUPXP);

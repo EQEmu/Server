@@ -3654,42 +3654,42 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	return true;
 }
 
-void Corpse::CastRezz(uint16 spellid, Mob* Caster)
+void Corpse::CastResurrection(uint16 spellid, Mob* Caster)
 {
-	_log(SPELLS__REZ, "Corpse::CastRezz spellid %i, Rezzed() is %i, rezzexp is %i", spellid,Rezzed(),rezzexp);
+	_log(SPELLS__RESURRECTION, "Corpse::CastResurrection spellid %i, isResurrected() is %i, resurrectionxp is %i", spellid,isResurrected(),mResurrectionExp);
 
-	if(Rezzed()){
+	if(isResurrected()){
 		if(Caster && Caster->IsClient())
 			Caster->Message(13,"This character has already been resurrected.");
 
 		return;
 	}
 	/*
-	if(!can_rez) {
+	if(!can_resurrect) {
 		if(Caster && Caster->IsClient())
 			Caster->Message_StringID(0, CORPSE_TOO_OLD);
 		return;
 	}
 	*/
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest, sizeof(Resurrect_Struct));
-	Resurrect_Struct* rezz = (Resurrect_Struct*) outapp->pBuffer;
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ResurrectionRequest, sizeof(Resurrect_Struct));
+	Resurrect_Struct* resurrect = (Resurrect_Struct*) outapp->pBuffer;
 	// Why are we truncating these names to 30 characters ?
-	memcpy(rezz->your_name,this->orgname,30);
-	memcpy(rezz->corpse_name,this->name,30);
-	memcpy(rezz->rezzer_name,Caster->GetName(),30);
-	rezz->zone_id = zone->GetZoneID();
-	rezz->instance_id = zone->GetInstanceID();
-	rezz->spellid = spellid;
-	rezz->x = this->x_pos;
-	rezz->y = this->y_pos;
-	rezz->z = this->z_pos;
-	rezz->unknown000 = 0x00000000;
-	rezz->unknown020 = 0x00000000;
-	rezz->unknown088 = 0x00000000;
+	memcpy(resurrect->your_name,this->orgname,30);
+	memcpy(resurrect->corpse_name,this->name,30);
+	memcpy(resurrect->resurrecter_name,Caster->GetName(),30);
+	resurrect->zone_id = zone->GetZoneID();
+	resurrect->instance_id = zone->GetInstanceID();
+	resurrect->spellid = spellid;
+	resurrect->x = this->x_pos;
+	resurrect->y = this->y_pos;
+	resurrect->z = this->z_pos;
+	resurrect->unknown000 = 0x00000000;
+	resurrect->unknown020 = 0x00000000;
+	resurrect->unknown088 = 0x00000000;
 	// We send this to world, because it needs to go to the player who may not be in this zone.
-	worldserver.RezzPlayer(outapp, rezzexp, dbid, OP_RezzRequest);
-	_pkt(SPELLS__REZ, outapp);
+	worldserver.ResurrectPlayer(outapp, mResurrectionExp, mDBID, OP_ResurrectionRequest);
+	_pkt(SPELLS__RESURRECTION, outapp);
 	safe_delete(outapp);
 }
 

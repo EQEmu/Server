@@ -1640,10 +1640,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if (IsCorpse() && CastToCorpse()->IsPlayerCorpse()) {
 
 					if(caster)
-						mlog(SPELLS__REZ, " corpse being rezzed using spell %i by %s",
+						mlog(SPELLS__RESURRECTION, " corpse being resurrected using spell %i by %s",
 							spell_id, caster->GetName());
 
-					CastToCorpse()->CastRezz(spell_id, caster);
+					CastToCorpse()->CastResurrection(spell_id, caster);
 				}
 				break;
 			}
@@ -2438,7 +2438,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_SummonAndResAllCorpses:
 			{
 				if(IsClient())
-					CastToClient()->SummonAndRezzAllCorpses();
+					CastToClient()->SummonAndResurrectAllCorpses();
 
 				break;
 			}

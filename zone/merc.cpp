@@ -4385,7 +4385,7 @@ Corpse* Merc::GetGroupMemberCorpse() {
 				if(g->members[i] && g->members[i]->IsClient()) {
 					corpse = entity_list.GetCorpseByOwnerWithinRange(g->members[i]->CastToClient(), this, RuleI(Mercs, ResurrectRadius));
 
-					if(corpse && !corpse->Rezzed()) {
+					if(corpse && !corpse->isResurrected()) {
 						return corpse;
 					}
 				}

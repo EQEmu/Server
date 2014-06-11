@@ -232,9 +232,9 @@ Client::Client(EQStreamInterface* ieqs)
 	// initialise haste variable
 	m_tradeskill_object = nullptr;
 	delaytimer = false;
-	PendingRezzXP = -1;
-	PendingRezzDBID = 0;
-	PendingRezzSpellID = 0;
+	PendingResurrectionXP = -1;
+	PendingResurrectionDBID = 0;
+	PendingResurrectionSpellID = 0;
 	numclients++;
 	// emuerror;
 	UpdateWindowTitle();
@@ -2598,12 +2598,12 @@ void Client::LogLoot(Client* player, Corpse* corpse, const Item_Struct* item){
 		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Item",logtext,4);
 	}
 	else{
-		if ((corpse->GetPlatinum() + corpse->GetGold() + corpse->GetSilver() + corpse->GetCopper())>0) {
+		if ((corpse->getPlatinum() + corpse->getGold() + corpse->getSilver() + corpse->getCopper())>0) {
 			memset(coinloot,0,sizeof(coinloot));
-			sprintf(coinloot,"%i PP %i GP %i SP %i CP",corpse->GetPlatinum(),corpse->GetGold(),corpse->GetSilver(),corpse->GetCopper());
+			sprintf(coinloot,"%i PP %i GP %i SP %i CP",corpse->getPlatinum(),corpse->getGold(),corpse->getSilver(),corpse->getCopper());
 			logtext=coinloot;
 			strcat(logtext," Looted");
-			if (corpse->GetPlatinum()>10000)
+			if (corpse->getPlatinum()>10000)
 				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Excessive Loot!",logtext,9);
 			else
 				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Money",logtext,5);
@@ -4434,7 +4434,7 @@ void Client::SendRespawnBinds()
 	// Client will respond with a 4 byte packet that includes the number of the selection made
 	//
 
-		//If no options have been given, default to Bind + Rez
+		//If no options have been given, default to Bind + Resurrect
 	if (respawn_options.empty())
 	{
 		BindStruct* b = &m_pp.binds[0];
@@ -4447,15 +4447,15 @@ void Client::SendRespawnBinds()
 		opt.heading = b->heading;
 		respawn_options.push_front(opt);
 	}
-	//Rez is always added at the end
-	RespawnOption rez;
-	rez.name = "Resurrect";
-	rez.zoneid = zone->GetZoneID();
-	rez.x = GetX();
-	rez.y = GetY();
-	rez.z = GetZ();
-	rez.heading = GetHeading();
-	respawn_options.push_back(rez);
+	//Resurrection is always added at the end
+	RespawnOption resurrect;
+	resurrect.name = "Resurrect";
+	resurrect.zoneid = zone->GetZoneID();
+	resurrect.x = GetX();
+	resurrect.y = GetY();
+	resurrect.z = GetZ();
+	resurrect.heading = GetHeading();
+	respawn_options.push_back(resurrect);
 
 	int num_options = respawn_options.size();
 	uint32 PacketLength = 17 + (26 * num_options); //Header size + per-option invariant size
@@ -4491,7 +4491,7 @@ void Client::SendRespawnBinds()
 		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->z);
 		VARSTRUCT_ENCODE_TYPE(float, buffer, opt->heading);
 		VARSTRUCT_ENCODE_STRING(buffer, opt->name.c_str());
-		VARSTRUCT_ENCODE_TYPE(uint8, buffer, (count == num_options)); //is this one Rez (the last option)?
+		VARSTRUCT_ENCODE_TYPE(uint8, buffer, (count == num_options)); //is this one Resurrection (the last option)?
 	}
 
 	QueuePacket(outapp);
@@ -4730,9 +4730,9 @@ int	Client::LDoNChest_SkillCheck(NPC *target, int skill)
 	return 0;
 }
 
-void Client::SummonAndRezzAllCorpses()
+void Client::SummonAndResurrectAllCorpses()
 {
-	PendingRezzXP = -1;
+	PendingResurrectionXP = -1;
 
 	ServerPacket *Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
 
@@ -4756,10 +4756,10 @@ void Client::SummonAndRezzAllCorpses()
 		return;
 	}
 
-	int RezzExp = entity_list.RezzAllCorpsesByCharID(CharacterID());
+	int ResurrectionExp = entity_list.ResurrectAllCorpsesByCharID(CharacterID());
 
-	if(RezzExp > 0)
-		SetEXP(GetEXP() + RezzExp, GetAAXP(), true);
+	if(ResurrectionExp > 0)
+		SetEXP(GetEXP() + ResurrectionExp, GetAAXP(), true);
 
 	Message(clientMessageYellow, "All your corpses have been summoned to your feet and have received a 100% resurrection.");
 }

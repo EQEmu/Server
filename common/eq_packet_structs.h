@@ -2571,7 +2571,7 @@ struct Resurrect_Struct	{
 /*020*/	uint32	unknown020;
 /*024*/	char	your_name[64];
 /*088*/	uint32	unknown088;
-/*092*/	char	rezzer_name[64];
+/*092*/	char	resurrecter_name[64];
 /*156*/	uint32	spellid;
 /*160*/	char	corpse_name[64];
 /*224*/	uint32	action;

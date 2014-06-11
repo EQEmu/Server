@@ -1243,7 +1243,7 @@ void Mob::ShowStats(Client* client)
 	}
 	else if (IsCorpse()) {
 		if (IsPlayerCorpse()) {
-			client->Message(0, "  CharID: %i  PlayerCorpse: %i", CastToCorpse()->GetCharID(), CastToCorpse()->GetDBID());
+			client->Message(0, "  CharID: %i  PlayerCorpse: %i", CastToCorpse()->getCharacterID(), CastToCorpse()->GetDBID());
 		}
 		else {
 			client->Message(0, "  NPCCorpse", GetID());

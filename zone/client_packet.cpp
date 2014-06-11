@@ -201,7 +201,7 @@ void MapOpcodes() {
 	ConnectedOpcodes[OP_CombatAbility] = &Client::Handle_OP_CombatAbility;
 	ConnectedOpcodes[OP_Taunt] = &Client::Handle_OP_Taunt;
 	ConnectedOpcodes[OP_InstillDoubt] = &Client::Handle_OP_InstillDoubt;
-	ConnectedOpcodes[OP_RezzAnswer] = &Client::Handle_OP_RezzAnswer;
+	ConnectedOpcodes[OP_ResurrectionAnswer] = &Client::Handle_OP_ResurrectionAnswer;
 	ConnectedOpcodes[OP_GMSummon] = &Client::Handle_OP_GMSummon;
 	ConnectedOpcodes[OP_TradeRequest] = &Client::Handle_OP_TradeRequest;
 	ConnectedOpcodes[OP_TradeRequestAck] = &Client::Handle_OP_TradeRequestAck;
@@ -2506,7 +2506,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 			else
 				Message(0, "This corpse will decay in %i minutes and %i seconds.", min, sec);
 
-			Message(0, "This corpse %s be resurrected.", tcorpse->Rezzed()?"cannot":"can");
+			Message(0, "This corpse %s be resurrected.", tcorpse->isResurrected()?"cannot":"can");
 			/*
 			hour = 0;
 
@@ -4712,26 +4712,26 @@ void Client::Handle_OP_InstillDoubt(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
+void Client::Handle_OP_ResurrectionAnswer(const EQApplicationPacket *app)
 {
-	VERIFY_PACKET_LENGTH(OP_RezzAnswer, app, Resurrect_Struct);
+	VERIFY_PACKET_LENGTH(OP_ResurrectionAnswer, app, Resurrect_Struct);
 
 	const Resurrect_Struct* ra = (const Resurrect_Struct*) app->pBuffer;
 
-	_log(SPELLS__REZ, "Received OP_RezzAnswer from client. Pendingrezzexp is %i, action is %s",
-					PendingRezzXP, ra->action ? "ACCEPT" : "DECLINE");
+	_log(SPELLS__RESURRECTION, "Received OP_ResurrectionAnswer from client. PendingResurrectionexp is %i, action is %s",
+					PendingResurrectionXP, ra->action ? "ACCEPT" : "DECLINE");
 
-	_pkt(SPELLS__REZ, app);
+	_pkt(SPELLS__RESURRECTION, app);
 
-	OPRezzAnswer(ra->action, ra->spellid, ra->zone_id, ra->instance_id, ra->x, ra->y, ra->z);
+	OPResurrectionAnswer(ra->action, ra->spellid, ra->zone_id, ra->instance_id, ra->x, ra->y, ra->z);
 
 	if(ra->action == 1)
 	{
 		EQApplicationPacket* outapp = app->Copy();
-		// Send the OP_RezzComplete to the world server. This finds it's way to the zone that
-		// the rezzed corpse is in to mark the corpse as rezzed.
-		outapp->SetOpcode(OP_RezzComplete);
-		worldserver.RezzPlayer(outapp, 0, 0, OP_RezzComplete);
+		// Send the OP_ResurrectionComplete to the world server. This finds it's way to the zone that
+		// the resurrected corpse is in to mark the corpse as resurrected.
+		outapp->SetOpcode(OP_ResurrectionComplete);
+		worldserver.ResurrectPlayer(outapp, 0, 0, OP_ResurrectionComplete);
 		safe_delete(outapp);
 	}
 	return;
@@ -11598,22 +11598,14 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 	database.DoEscapeString(EscSearchString, gmscs->Name, strlen(gmscs->Name));
 
-	if (database.RunQuery(Query, MakeAnyLenString(&Query, "select charname, zoneid, x, y, z, timeofdeath, rezzed, IsBurried from "
-								"player_corpses where charname like '%%%s%%' order by charname limit %i",
-								EscSearchString, MaxResults), errbuf, &Result))
-	{
-
+	if (database.RunQuery(Query, MakeAnyLenString(&Query, "select charname, zoneid, x, y, z, timeofdeath, isResurrected, isBuried from player_corpses where charname like '%%%s%%' order by charname limit %i",	EscSearchString, MaxResults), errbuf, &Result)) {
 		int NumberOfRows = mysql_num_rows(Result);
-
 		if(NumberOfRows == MaxResults)
 			Message(clientMessageError, "Your search found too many results; some are not displayed.");
-		else {
-			Message(clientMessageYellow, "There are %i corpse(s) that match the search string '%s'.",
-				NumberOfRows, gmscs->Name);
-		}
+		else
+			Message(clientMessageYellow, "There are %i corpse(s) that match the search string '%s'.", NumberOfRows, gmscs->Name);
 
-		if(NumberOfRows == 0)
-		{
+		if(NumberOfRows == 0) {
 			mysql_free_result(Result);
 			safe_delete_array(Query);
 			return;
@@ -11621,51 +11613,31 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 
 		char CharName[64], TimeOfDeath[20], Buffer[512];
 
-		std::string PopupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>"
-					"Rezzed</td><td>Buried</td></tr><tr><td>&nbsp</td><td></td><td></td><td></td><td></td><td>"
-					"</td><td></td><td></td></tr>";
+		std::string PopupText = "<table><tr><td>Name</td><td>Zone</td><td>X</td><td>Y</td><td>Z</td><td>Date</td><td>Resurrected</td><td>Buried</td></tr><tr><td>&nbsp</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
 
 
-		while ((Row = mysql_fetch_row(Result)))
-		{
-
+		while ((Row = mysql_fetch_row(Result))) {
 			strn0cpy(CharName, Row[0], sizeof(CharName));
-
 			uint32 ZoneID = atoi(Row[1]);
-
 			float CorpseX = atof(Row[2]);
 			float CorpseY = atof(Row[3]);
 			float CorpseZ = atof(Row[4]);
-
 			strn0cpy(TimeOfDeath, Row[5], sizeof(TimeOfDeath));
-
-			bool CorpseRezzed = atoi(Row[6]);
+			bool CorpseResurrected = atoi(Row[6]);
 			bool CorpseBuried = atoi(Row[7]);
-
-			sprintf(Buffer, "<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-				CharName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, TimeOfDeath,
-				CorpseRezzed ? "Yes" : "No", CorpseBuried ? "Yes" : "No");
-
+			sprintf(Buffer, "<tr><td>%s</td><td>%s</td><td>%8.0f</td><td>%8.0f</td><td>%8.0f</td><td>%s</td><td>%s</td><td>%s</td></tr>", CharName, StaticGetZoneName(ZoneID), CorpseX, CorpseY, CorpseZ, TimeOfDeath, CorpseResurrected ? "Yes" : "No", CorpseBuried ? "Yes" : "No");
 			PopupText += Buffer;
-
-			if(PopupText.size() > 4000)
-			{
+			if(PopupText.size() > 4000) {
 				Message(clientMessageError, "Unable to display all the results.");
 				break;
 			}
-
 		}
-
 		PopupText += "</table>";
-
 		mysql_free_result(Result);
-
 		SendPopupToClient("Corpses", PopupText.c_str());
 	}
-	else{
+	else
 		Message(0, "Query failed: %s.", errbuf);
-
-	}
 	safe_delete_array(Query);
 	safe_delete_array(EscSearchString);
 }

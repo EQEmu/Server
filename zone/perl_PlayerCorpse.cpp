@@ -41,15 +41,15 @@
 #endif
 
 
-XS(XS_Corpse_GetCharID); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_GetCharID)
+XS(XS_Corpse_getCharacterID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_getCharacterID)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetCharID(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::getCharacterID(THIS)");
 	{
 		Corpse *		THIS;
-		uint32		RETVAL;
+		uint32			RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
@@ -61,7 +61,7 @@ XS(XS_Corpse_GetCharID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCharID();
+		RETVAL = THIS->getCharacterID();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -75,7 +75,7 @@ XS(XS_Corpse_GetDecayTime)
 		Perl_croak(aTHX_ "Usage: Corpse::GetDecayTime(THIS)");
 	{
 		Corpse *		THIS;
-		uint32		RETVAL;
+		uint32			RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
@@ -93,12 +93,12 @@ XS(XS_Corpse_GetDecayTime)
 	XSRETURN(1);
 }
 
-XS(XS_Corpse_Lock); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_Lock)
+XS(XS_Corpse_lock); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_lock)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::Lock(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::lock(THIS)");
 	{
 		Corpse *		THIS;
 
@@ -111,17 +111,17 @@ XS(XS_Corpse_Lock)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->Lock();
+		THIS->lock();
 	}
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_UnLock); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_UnLock)
+XS(XS_Corpse_unlock); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_unlock)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::UnLock(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::unlock(THIS)");
 	{
 		Corpse *		THIS;
 
@@ -134,20 +134,20 @@ XS(XS_Corpse_UnLock)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->UnLock();
+		THIS->unlock();
 	}
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_IsLocked); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_IsLocked)
+XS(XS_Corpse_isLocked); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_isLocked)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::IsLocked(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::isLocked(THIS)");
 	{
 		Corpse *		THIS;
-		bool		RETVAL;
+		bool			RETVAL;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -158,7 +158,7 @@ XS(XS_Corpse_IsLocked)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsLocked();
+		RETVAL = THIS->isLocked();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -196,7 +196,7 @@ XS(XS_Corpse_GetDBID)
 		Perl_croak(aTHX_ "Usage: Corpse::GetDBID(THIS)");
 	{
 		Corpse *		THIS;
-		uint32		RETVAL;
+		uint32			RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
@@ -222,7 +222,7 @@ XS(XS_Corpse_GetOwnerName)
 		Perl_croak(aTHX_ "Usage: Corpse::GetOwnerName(THIS)");
 	{
 		Corpse *		THIS;
-		char *		RETVAL;
+		char *			RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
@@ -248,7 +248,7 @@ XS(XS_Corpse_SetDecayTimer)
 		Perl_croak(aTHX_ "Usage: Corpse::SetDecayTimer(THIS, decaytime)");
 	{
 		Corpse *		THIS;
-		uint32		decaytime = (uint32)SvUV(ST(1));
+		uint32			decaytime = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -272,7 +272,7 @@ XS(XS_Corpse_IsEmpty)
 		Perl_croak(aTHX_ "Usage: Corpse::IsEmpty(THIS)");
 	{
 		Corpse *		THIS;
-		bool		RETVAL;
+		bool			RETVAL;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -298,9 +298,9 @@ XS(XS_Corpse_AddItem)
 		Perl_croak(aTHX_ "Usage: Corpse::AddItem(THIS, itemnum, charges, slot= 0)");
 	{
 		Corpse *		THIS;
-		uint32		itemnum = (uint32)SvUV(ST(1));
-		uint16		charges = (uint16)SvUV(ST(2));
-		int16		slot;
+		uint32			itemnum = (uint32)SvUV(ST(1));
+		uint16			charges = (uint16)SvUV(ST(2));
+		int16			slot;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -330,9 +330,9 @@ XS(XS_Corpse_GetWornItem)
 		Perl_croak(aTHX_ "Usage: Corpse::GetWornItem(THIS, equipSlot)");
 	{
 		Corpse *		THIS;
-		uint32		RETVAL;
+		uint32			RETVAL;
 		dXSTARG;
-		int16		equipSlot = (int16)SvIV(ST(1));
+		int16			equipSlot = (int16)SvIV(ST(1));
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -373,18 +373,18 @@ XS(XS_Corpse_RemoveItem)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_SetCash); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_SetCash)
+XS(XS_Corpse_setCash); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_setCash)
 {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Corpse::SetCash(THIS, in_copper, in_silver, in_gold, in_platinum)");
+		Perl_croak(aTHX_ "Usage: Corpse::setCash(THIS, in_copper, in_silver, in_gold, in_platinum)");
 	{
 		Corpse *		THIS;
-		uint16		in_copper = (uint16)SvUV(ST(1));
-		uint16		in_silver = (uint16)SvUV(ST(2));
-		uint16		in_gold = (uint16)SvUV(ST(3));
-		uint16		in_platinum = (uint16)SvUV(ST(4));
+		uint16			in_copper = (uint16)SvUV(ST(1));
+		uint16			in_silver = (uint16)SvUV(ST(2));
+		uint16			in_gold = (uint16)SvUV(ST(3));
+		uint16			in_platinum = (uint16)SvUV(ST(4));
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -395,17 +395,17 @@ XS(XS_Corpse_SetCash)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->SetCash(in_copper, in_silver, in_gold, in_platinum);
+		THIS->setCash(in_copper, in_silver, in_gold, in_platinum);
 	}
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_RemoveCash); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_RemoveCash)
+XS(XS_Corpse_removeCash); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_removeCash)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::RemoveCash(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::removeCash(THIS)");
 	{
 		Corpse *		THIS;
 
@@ -418,20 +418,20 @@ XS(XS_Corpse_RemoveCash)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveCash();
+		THIS->removeCash();
 	}
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_CountItems); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_CountItems)
+XS(XS_Corpse_getNumItems); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_getNumItems)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::CountItems(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::getNumItems(THIS)");
 	{
 		Corpse *		THIS;
-		uint32		RETVAL;
+		uint32			RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
@@ -443,7 +443,7 @@ XS(XS_Corpse_CountItems)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CountItems();
+		RETVAL = THIS->getNumItems();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -472,15 +472,15 @@ XS(XS_Corpse_Delete)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_GetCopper); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_GetCopper)
+XS(XS_Corpse_getCopper); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_getCopper)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetCopper(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::getCopper(THIS)");
 	{
 		Corpse *		THIS;
-		uint32		RETVAL;
+		uint32			RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
@@ -492,21 +492,21 @@ XS(XS_Corpse_GetCopper)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCopper();
+		RETVAL = THIS->getCopper();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
 }
 
-XS(XS_Corpse_GetSilver); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_GetSilver)
+XS(XS_Corpse_getSilver); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_getSilver)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetSilver(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::getSilver(THIS)");
 	{
 		Corpse *		THIS;
-		uint32		RETVAL;
+		uint32			RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
@@ -518,21 +518,21 @@ XS(XS_Corpse_GetSilver)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetSilver();
+		RETVAL = THIS->getSilver();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
 }
 
-XS(XS_Corpse_GetGold); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_GetGold)
+XS(XS_Corpse_getGold); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_getGold)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetGold(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::getGold(THIS)");
 	{
 		Corpse *		THIS;
-		uint32		RETVAL;
+		uint32			RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
@@ -544,21 +544,21 @@ XS(XS_Corpse_GetGold)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetGold();
+		RETVAL = THIS->getGold();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
 }
 
-XS(XS_Corpse_GetPlatinum); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_GetPlatinum)
+XS(XS_Corpse_getPlatinum); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_getPlatinum)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetPlatinum(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::getPlatinum(THIS)");
 	{
 		Corpse *		THIS;
-		uint32		RETVAL;
+		uint32			RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
@@ -570,7 +570,7 @@ XS(XS_Corpse_GetPlatinum)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetPlatinum();
+		RETVAL = THIS->getPlatinum();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -584,8 +584,8 @@ XS(XS_Corpse_Summon)
 		Perl_croak(aTHX_ "Usage: Corpse::Summon(THIS, client, spell)");
 	{
 		Corpse *		THIS;
-		Client*		client;
-		bool		spell = (bool)SvTRUE(ST(2));
+		Client*			client;
+		bool			spell = (bool)SvTRUE(ST(2));
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -610,16 +610,16 @@ XS(XS_Corpse_Summon)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_CastRezz); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_CastRezz)
+XS(XS_Corpse_CastResurrection); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_CastResurrection)
 {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Corpse::CastRezz(THIS, spellid, Caster)");
+		Perl_croak(aTHX_ "Usage: Corpse::CastResurrection(THIS, spellid, Caster)");
 	{
 		Corpse *		THIS;
-		uint16		spellid = (uint16)SvUV(ST(1));
-		Mob*		Caster;
+		uint16			spellid = (uint16)SvUV(ST(1));
+		Mob*			Caster;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -639,17 +639,17 @@ XS(XS_Corpse_CastRezz)
 		if(Caster == nullptr)
 			Perl_croak(aTHX_ "Caster is nullptr, avoiding crash.");
 
-		THIS->CastRezz(spellid, Caster);
+		THIS->CastResurrection(spellid, Caster);
 	}
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_CompleteRezz); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_CompleteRezz)
+XS(XS_Corpse_CompleteResurrection); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_CompleteResurrection)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::CompleteRezz(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::CompleteResurrection(THIS)");
 	{
 		Corpse *		THIS;
 
@@ -662,21 +662,21 @@ XS(XS_Corpse_CompleteRezz)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->CompleteRezz();
+		THIS->CompleteResurrection();
 	}
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_CanMobLoot); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_CanMobLoot)
+XS(XS_Corpse_canMobLoot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_canMobLoot)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::CanMobLoot(THIS, charid)");
+		Perl_croak(aTHX_ "Usage: Corpse::canMobLoot(THIS, charid)");
 	{
 		Corpse *		THIS;
-		bool		RETVAL;
-		int		charid = (int)SvIV(ST(1));
+		bool			RETVAL;
+		int				charid = (int)SvIV(ST(1));
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -687,7 +687,7 @@ XS(XS_Corpse_CanMobLoot)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CanMobLoot(charid);
+		RETVAL = THIS->canMobLoot(charid);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -702,8 +702,8 @@ XS(XS_Corpse_AllowMobLoot)
 		Perl_croak(aTHX_ "Usage: Corpse::AllowMobLoot(THIS, them, slot)");
 	{
 		Corpse *		THIS;
-		Mob *		them;
-		uint8		slot = (uint8)SvUV(ST(2));
+		Mob *			them;
+		uint8			slot = (uint8)SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -728,15 +728,15 @@ XS(XS_Corpse_AllowMobLoot)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_AddLooter); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_AddLooter)
+XS(XS_Corpse_addLooter); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_addLooter)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::AddLooter(THIS, who)");
+		Perl_croak(aTHX_ "Usage: Corpse::addLooter(THIS, who)");
 	{
 		Corpse *		THIS;
-		Mob *		who;
+		Mob *			who;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -756,20 +756,20 @@ XS(XS_Corpse_AddLooter)
 		if(who == nullptr)
 			Perl_croak(aTHX_ "who is nullptr, avoiding crash.");
 
-		THIS->AddLooter(who);
+		THIS->addLooter(who);
 	}
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Corpse_IsRezzed); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Corpse_IsRezzed)
+XS(XS_Corpse_isResurrected); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_isResurrected)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::IsRezzed(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::isResurrected(THIS)");
 	{
 		Corpse *		THIS;
-		bool		RETVAL;
+		bool			RETVAL;
 
 		if (sv_derived_from(ST(0), "Corpse")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -780,12 +780,36 @@ XS(XS_Corpse_IsRezzed)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->Rezzed();
+		RETVAL = THIS->isResurrected();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
 }
+
+XS(XS_Corpse_setResurrected); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_setResurrected) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Corpse::setResurrected(THIS, resurrected)");
+	{
+		Corpse *		THIS;
+		bool			resurrected = (bool)SvTRUE(ST(1));
+		
+		if (sv_derived_from(ST(0), "Corpse")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Corpse *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Corpse");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+			
+		THIS->setResurrected(resurrected);
+	}
+	XSRETURN_EMPTY;
+}
+		
 
 #ifdef __cplusplus
 extern "C"
@@ -806,11 +830,11 @@ XS(boot_Corpse)
 
 	XS_VERSION_BOOTCHECK ;
 
-		newXSproto(strcpy(buf, "GetCharID"), XS_Corpse_GetCharID, file, "$");
+		newXSproto(strcpy(buf, "getCharacterID"), XS_Corpse_getCharacterID, file, "$");
 		newXSproto(strcpy(buf, "GetDecayTime"), XS_Corpse_GetDecayTime, file, "$");
-		newXSproto(strcpy(buf, "Lock"), XS_Corpse_Lock, file, "$");
-		newXSproto(strcpy(buf, "UnLock"), XS_Corpse_UnLock, file, "$");
-		newXSproto(strcpy(buf, "IsLocked"), XS_Corpse_IsLocked, file, "$");
+		newXSproto(strcpy(buf, "lock"), XS_Corpse_lock, file, "$");
+		newXSproto(strcpy(buf, "unlock"), XS_Corpse_unlock, file, "$");
+		newXSproto(strcpy(buf, "isLocked"), XS_Corpse_isLocked, file, "$");
 		newXSproto(strcpy(buf, "ResetLooter"), XS_Corpse_ResetLooter, file, "$");
 		newXSproto(strcpy(buf, "GetDBID"), XS_Corpse_GetDBID, file, "$");
 		newXSproto(strcpy(buf, "GetOwnerName"), XS_Corpse_GetOwnerName, file, "$");
@@ -819,21 +843,21 @@ XS(boot_Corpse)
 		newXSproto(strcpy(buf, "AddItem"), XS_Corpse_AddItem, file, "$$$;$");
 		newXSproto(strcpy(buf, "GetWornItem"), XS_Corpse_GetWornItem, file, "$$");
 		newXSproto(strcpy(buf, "RemoveItem"), XS_Corpse_RemoveItem, file, "$$");
-		newXSproto(strcpy(buf, "SetCash"), XS_Corpse_SetCash, file, "$$$$$");
-		newXSproto(strcpy(buf, "RemoveCash"), XS_Corpse_RemoveCash, file, "$");
-		newXSproto(strcpy(buf, "CountItems"), XS_Corpse_CountItems, file, "$");
+		newXSproto(strcpy(buf, "setCash"), XS_Corpse_setCash, file, "$$$$$");
+		newXSproto(strcpy(buf, "removeCash"), XS_Corpse_removeCash, file, "$");
+		newXSproto(strcpy(buf, "getNumItems"), XS_Corpse_getNumItems, file, "$");
 		newXSproto(strcpy(buf, "Delete"), XS_Corpse_Delete, file, "$");
-		newXSproto(strcpy(buf, "GetCopper"), XS_Corpse_GetCopper, file, "$");
-		newXSproto(strcpy(buf, "GetSilver"), XS_Corpse_GetSilver, file, "$");
-		newXSproto(strcpy(buf, "GetGold"), XS_Corpse_GetGold, file, "$");
-		newXSproto(strcpy(buf, "GetPlatinum"), XS_Corpse_GetPlatinum, file, "$");
+		newXSproto(strcpy(buf, "getCopper"), XS_Corpse_getCopper, file, "$");
+		newXSproto(strcpy(buf, "getSilver"), XS_Corpse_getSilver, file, "$");
+		newXSproto(strcpy(buf, "getGold"), XS_Corpse_getGold, file, "$");
+		newXSproto(strcpy(buf, "getPlatinum"), XS_Corpse_getPlatinum, file, "$");
 		newXSproto(strcpy(buf, "Summon"), XS_Corpse_Summon, file, "$$$");
-		newXSproto(strcpy(buf, "CastRezz"), XS_Corpse_CastRezz, file, "$$$");
-		newXSproto(strcpy(buf, "CompleteRezz"), XS_Corpse_CompleteRezz, file, "$");
-		newXSproto(strcpy(buf, "CanMobLoot"), XS_Corpse_CanMobLoot, file, "$$");
-		newXSproto(strcpy(buf, "AllowMobLoot"), XS_Corpse_AllowMobLoot, file, "$$$");
-		newXSproto(strcpy(buf, "AddLooter"), XS_Corpse_AddLooter, file, "$$");
-		newXSproto(strcpy(buf, "IsRezzed"), XS_Corpse_IsRezzed, file, "$");
+		newXSproto(strcpy(buf, "CastResurrection"), XS_Corpse_CastResurrection, file, "$$$");
+		newXSproto(strcpy(buf, "CompleteResurrection"), XS_Corpse_CompleteResurrection, file, "$");
+		newXSproto(strcpy(buf, "canMobLoot"), XS_Corpse_canMobLoot, file, "$$");
+		newXSproto(strcpy(buf, "addLooter"), XS_Corpse_addLooter, file, "$$$");
+		newXSproto(strcpy(buf, "isResurrected"), XS_Corpse_isResurrected, file, "$");
+		newXSproto(strcpy(buf, "setResurrected"), XS_Corpse_setResurrected, file, "$$"); //Number of $ is dependent upon number of arguments needed.
 	XSRETURN_YES;
 }
 

@@ -1753,11 +1753,11 @@ void QuestManager::sethp(int hpperc) {
 	owner->Damage(owner, newhp, SPELL_UNKNOWN, SkillHandtoHand, false, 0, false);
 }
 
-bool QuestManager::summonburriedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading) {
+bool QuestManager::summonburiedplayercorpse(uint32 char_id, float dest_x, float dest_y, float dest_z, float dest_heading) {
 	bool Result = false;
 
 	if(char_id > 0) {
-		Corpse* PlayerCorpse = database.SummonBurriedPlayerCorpse(char_id, zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
+		Corpse* PlayerCorpse = database.SummonBuriedPlayerCorpse(char_id, zone->GetZoneID(), zone->GetInstanceID(), dest_x, dest_y, dest_z, dest_heading);
 		if(PlayerCorpse) {
 			Result = true;
 		}
@@ -1776,11 +1776,11 @@ bool QuestManager::summonallplayercorpses(uint32 char_id, float dest_x, float de
 	return Result;
 }
 
-uint32 QuestManager::getplayerburriedcorpsecount(uint32 char_id) {
+uint32 QuestManager::getplayerburiedcorpsecount(uint32 char_id) {
 	uint32 Result = 0;
 
 	if(char_id > 0) {
-		Result = database.GetPlayerBurriedCorpseCount(char_id);
+		Result = database.GetPlayerBuriedCorpseCount(char_id);
 	}
 	return Result;
 }

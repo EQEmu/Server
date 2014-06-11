@@ -45,7 +45,7 @@
 #define ServerOP_Petition			0x001E
 #define	ServerOP_KillPlayer			0x001F
 #define ServerOP_UpdateGM			0x0020
-#define ServerOP_RezzPlayer			0x0021
+#define ServerOP_ResurrectPlayer	0x0021
 #define ServerOP_ZoneReboot			0x0022
 #define ServerOP_ZoneToZoneRequest	0x0023
 #define ServerOP_AcceptWorldEntrance 0x0024
@@ -63,11 +63,11 @@
 #define ServerOP_GroupIDReq			0x0030
 #define ServerOP_GroupIDReply		0x0031
 #define ServerOP_GroupLeave			0x0032	// for disbanding out of zone folks
-#define ServerOP_RezzPlayerAccept	0x0033
+#define ServerOP_ResurrectPlayerAccept	0x0033
 #define ServerOP_SpawnCondition		0x0034
 #define ServerOP_SpawnEvent			0x0035
 #define ServerOP_SetLaunchName		0x0036
-#define ServerOP_RezzPlayerReject	0x0037
+#define ServerOP_ResurrectPlayerReject	0x0037
 #define ServerOP_SpawnPlayerCorpse	0x0038
 #define ServerOP_Consent			0x0039
 #define ServerOP_Consent_Response	0x003a
@@ -412,12 +412,12 @@ struct ServerZonePlayer_Struct {
 	float	z_pos;
 };
 
-struct RezzPlayer_Struct {
+struct ResurrectPlayer_Struct {
 	uint32	dbid;
 	uint32	exp;
-	uint16	rezzopcode;
+	uint16	resurrectionopcode;
 	//char	packet[160];
-	Resurrect_Struct rez;
+	Resurrect_Struct resurrect;
 };
 
 struct ServerZoneReboot_Struct {

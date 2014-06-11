@@ -517,22 +517,22 @@ bool ZoneServer::Process() {
 				break;
 			}
 
-			case ServerOP_RezzPlayerAccept: {
+			case ServerOP_ResurrectPlayerAccept: {
 				zoneserver_list.SendPacket(pack);
 				break;
 			}
-			case ServerOP_RezzPlayer: {
+			case ServerOP_ResurrectPlayer: {
 
-				RezzPlayer_Struct* sRezz = (RezzPlayer_Struct*) pack->pBuffer;
+				ResurrectPlayer_Struct* sRezz = (ResurrectPlayer_Struct*) pack->pBuffer;
 				if (zoneserver_list.SendPacket(pack)){
-					zlog(WORLD__ZONE,"Sent Rez packet for %s",sRezz->rez.your_name);
+					zlog(WORLD__ZONE,"Sent Resurrection packet for %s",sRezz->resurrect.your_name);
 				}
 				else {
-					zlog(WORLD__ZONE,"Could not send Rez packet for %s",sRezz->rez.your_name);
+					zlog(WORLD__ZONE,"Could not send Resurrection packet for %s",sRezz->resurrect.your_name);
 				}
 				break;
 			}
-			case ServerOP_RezzPlayerReject:
+			case ServerOP_ResurrectPlayerReject:
 			{
 				char *Recipient = (char *)pack->pBuffer;
 				client_list.SendPacket(Recipient, pack);

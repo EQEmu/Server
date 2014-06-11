@@ -1125,43 +1125,43 @@ uint8 Client::WithCustomer(uint16 NewCustomer){
 	return 0;
 }
 
-void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 InstanceID, float x, float y, float z)
+void Client::OPResurrectionAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 InstanceID, float x, float y, float z)
 {
-	if(PendingRezzXP < 0) {
-		// pendingrezexp is set to -1 if we are not expecting an OP_RezzAnswer
-		_log(SPELLS__REZ, "Unexpected OP_RezzAnswer. Ignoring it.");
+	if(PendingResurrectionXP < 0) {
+		// pendingmRessurectionExp is set to -1 if we are not expecting an OP_ResurrectionAnswer
+		_log(SPELLS__RESURRECTION, "Unexpected OP_ResurrectionAnswer. Ignoring it.");
 		Message(13, "You have already been resurrected.\n");
 		return;
 	}
 
 	if (Action == 1)
 	{
-		// Mark the corpse as rezzed in the database, just in case the corpse has buried, or the zone the
-		// corpse is in has shutdown since the rez spell was cast.
-		database.MarkCorpseAsRezzed(PendingRezzDBID);
-		_log(SPELLS__REZ, "Player %s got a %i Rezz, spellid %i in zone%i, instance id %i",
+		// Mark the corpse as resurrected in the database, just in case the corpse has buried, or the zone the
+		// corpse is in has shutdown since the resurrection spell was cast.
+		database.MarkCorpseAsResurrected(PendingResurrectionDBID);
+		_log(SPELLS__RESURRECTION, "Player %s got a %i Resurrection, spellid %i in zone%i, instance id %i",
 				this->name, (uint16)spells[SpellID].base[0],
 				SpellID, ZoneID, InstanceID);
 
 		this->BuffFadeNonPersistDeath();
 		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
-		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
+		// Resurrection spells with Resurrection effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if((SpellEffectDescNum == 82) || (SpellEffectDescNum == 39067)) {
 			SetMana(0);
 			SetHP(GetMaxHP()/5);
-			SpellOnTarget(756, this); // Rezz effects
+			SpellOnTarget(756, this); // Resurrection effects
 		}
 		else {
 			SetMana(GetMaxMana());
 			SetHP(GetMaxHP());
 		}
-		if(spells[SpellID].base[0] < 100 && spells[SpellID].base[0] > 0 && PendingRezzXP > 0)
+		if(spells[SpellID].base[0] < 100 && spells[SpellID].base[0] > 0 && PendingResurrectionXP > 0)
 		{
-				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base[0])))),
+				SetEXP(((int)(GetEXP()+((float)((PendingResurrectionXP / 100) * spells[SpellID].base[0])))),
 						GetAAXP(),true);
 		}
-		else if (spells[SpellID].base[0] == 100 && PendingRezzXP > 0) {
-			SetEXP((GetEXP() + PendingRezzXP), GetAAXP(), true);
+		else if (spells[SpellID].base[0] == 100 && PendingResurrectionXP > 0) {
+			SetEXP((GetEXP() + PendingResurrectionXP), GetAAXP(), true);
 		}
 
 		//Was sending the packet back to initiate client zone...
@@ -1169,8 +1169,8 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		MovePC(ZoneID, InstanceID, x, y, z, GetHeading(), 0, ZoneSolicited);
 		entity_list.RefreshClientXTargets(this);
 	}
-	PendingRezzXP = -1;
-	PendingRezzSpellID = 0;
+	PendingResurrectionXP = -1;
+	PendingResurrectionSpellID = 0;
 }
 
 void Client::OPTGB(const EQApplicationPacket *app)
@@ -2043,7 +2043,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 	RespawnFromHoverTimer.Disable();
 
 	RespawnOption* chosen = nullptr;
-	bool is_rez = false;
+	bool is_resurrected = false;
 
 	//Find the selected option
 	if (Option == 0)
@@ -2053,7 +2053,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 	else if (Option == (respawn_options.size() - 1))
 	{
 		chosen = &respawn_options.back();
-		is_rez = true; //Rez must always be the last option
+		is_resurrected = true; //Resurrection must always be the last option
 	}
 	else
 	{
@@ -2083,21 +2083,21 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		default_to_bind->z = b->z;
 		default_to_bind->heading = b->heading;
 		chosen = default_to_bind;
-		is_rez = false;
+		is_resurrected = false;
 	}
 
 	if (chosen->zoneid == zone->GetZoneID()) //If they should respawn in the current zone...
 	{
-		if (is_rez)
+		if (is_resurrected)
 		{
-			if (PendingRezzXP < 0 || PendingRezzSpellID == 0)
+			if (PendingResurrectionXP < 0 || PendingResurrectionSpellID == 0)
 			{
-				_log(SPELLS__REZ, "Unexpected Rezz from hover request.");
+				_log(SPELLS__RESURRECTION, "Unexpected Resurrection from hover request.");
 				return;
 			}
 			SetHP(GetMaxHP() / 5);
 
-			Corpse* corpse = entity_list.GetCorpseByName(PendingRezzCorpseName.c_str());
+			Corpse* corpse = entity_list.GetCorpseByName(PendingResurrectionCorpseName.c_str());
 
 			if (corpse)
 			{
@@ -2121,22 +2121,22 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 			ClearHover();
 			SendHPUpdate();
-			OPRezzAnswer(1, PendingRezzSpellID, zone->GetZoneID(), zone->GetInstanceID(), GetX(), GetY(), GetZ());
+			OPResurrectionAnswer(1, PendingResurrectionSpellID, zone->GetZoneID(), zone->GetInstanceID(), GetX(), GetY(), GetZ());
 
 			if (corpse && corpse->IsCorpse())
 			{
-				_log(SPELLS__REZ, "Hover Rez in zone %s for corpse %s",
-						zone->GetShortName(), PendingRezzCorpseName.c_str());
+				_log(SPELLS__RESURRECTION, "Hover Resurrection in zone %s for corpse %s",
+						zone->GetShortName(), PendingResurrectionCorpseName.c_str());
 
-				_log(SPELLS__REZ, "Found corpse. Marking corpse as rezzed.");
+				_log(SPELLS__RESURRECTION, "Found corpse. Marking corpse as resurrected.");
 
-				corpse->Rezzed(true);
-				corpse->CompleteRezz();
+				corpse->setResurrected(true);
+				corpse->CompleteResurrection();
 			}
 		}
-		else //Not rez
+		else //Not resurrected
 		{
-			PendingRezzSpellID = 0;
+			PendingResurrectionSpellID = 0;
 
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + chosen->name.length() + 1);
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
@@ -2166,9 +2166,9 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		}
 
 		//After they've respawned into the same zone, trigger EVENT_RESPAWN
-		parse->EventPlayer(EVENT_RESPAWN, this, static_cast<std::string>(itoa(Option)), is_rez ? 1 : 0);
+		parse->EventPlayer(EVENT_RESPAWN, this, static_cast<std::string>(itoa(Option)), is_resurrected ? 1 : 0);
 
-		//Pop Rez option from the respawn options list; 
+		//Pop Resurrection option from the respawn options list; 
 		//easiest way to make sure it stays at the end and
 		//doesn't disrupt adding/removing scripted options
 		respawn_options.pop_back();

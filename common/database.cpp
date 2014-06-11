@@ -2700,7 +2700,7 @@ void Database::BuryCorpsesInInstance(uint16 instance_id)
 	char *query = 0;
 	MYSQL_RES *result;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u",
+	if(RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET Isburied=1, instanceid=0 WHERE instanceid=%u",
 		instance_id), errbuf, &result))
 	{
 		mysql_free_result(result);
