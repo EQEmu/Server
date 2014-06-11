@@ -118,117 +118,12 @@ const char *GetRandPetName()
 	return petnames[r];
 }
 
-//not used anymore
-/*int CalcPetHp(int levelb, int classb, int STA)
-{
-	int multiplier = 0;
-	int base_hp = 0;
-	switch(classb) {
-		case WARRIOR:{
-			if (levelb < 20)
-				multiplier = 22;
-			else if (levelb < 30)
-				multiplier = 23;
-			else if (levelb < 40)
-				multiplier = 25;
-			else if (levelb < 53)
-				multiplier = 27;
-			else if (levelb < 57)
-				multiplier = 28;
-			else
-				multiplier = 30;
-			break;
-		}
-		case DRUID:
-		case CLERIC:
-		case SHAMAN:{
-			multiplier = 15;
-			break;
-		}
-		case PALADIN:
-		case SHADOWKNIGHT:{
-			if (levelb < 35)
-				multiplier = 21;
-			else if (levelb < 45)
-				multiplier = 22;
-			else if (levelb < 51)
-				multiplier = 23;
-			else if (levelb < 56)
-				multiplier = 24;
-			else if (levelb < 60)
-				multiplier = 25;
-			else
-				multiplier = 26;
-			break;
-		}
-		case MONK:
-		case BARD:
-		case ROGUE:
-		case BEASTLORD:{
-			if (levelb < 51)
-				multiplier = 18;
-			else if (levelb < 58)
-				multiplier = 19;
-			else
-				multiplier = 20;
-			break;
-		}
-		case RANGER:{
-			if (levelb < 58)
-				multiplier = 20;
-			else
-				multiplier = 21;
-			break;
-		}
-		case MAGICIAN:
-		case WIZARD:
-		case NECROMANCER:
-		case ENCHANTER:{
-			multiplier = 12;
-			break;
-		}
-		default:{
-			if (levelb < 35)
-				multiplier = 21;
-			else if (levelb < 45)
-				multiplier = 22;
-			else if (levelb < 51)
-				multiplier = 23;
-			else if (levelb < 56)
-				multiplier = 24;
-			else if (levelb < 60)
-				multiplier = 25;
-			else
-				multiplier = 26;
-			break;
-		}
-	}
-
-	if (multiplier == 0)
-	{
-		LogFile->write(EQEMuLog::Error, "Multiplier == 0 in CalcPetHp,using Generic....");;
-		multiplier=12;
-	}
-
-	base_hp = 5 + (multiplier*levelb) + ((multiplier*levelb*STA) + 1)/300;
-	return base_hp;
-}
-*/
-
 void Mob::MakePet(uint16 spell_id, const char* pettype, const char *petname) {
-	// petpower of -1 is used to get the petpower based on whichever focus is currently
-	// equipped. This should replicate the old functionality for the most part.
-	MakePoweredPet(spell_id, pettype, -1, petname);
+	MakePoweredPet(spell_id, pettype, -1, petname); // petpower of -1 is used to get the petpower based on whichever focus is currently equipped. This should replicate the old functionality for the most part.
 }
 
-// Split from the basic MakePet to allow backward compatiblity with existing code while also
-// making it possible for petpower to be retained without the focus item having to
-// stay equipped when the character zones. petpower of -1 means that the currently equipped petfocus
-// of a client is searched for and used instead.
-void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
-		const char *petname, float in_size) {
-	// Sanity and early out checking first.
-	if(HasPet() || pettype == nullptr)
+void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname, float in_size) { // Split from the basic MakePet to allow backward compatiblity with existing code while also making it possible for petpower to be retained without the focus item having to stay equipped when the character zones. petpower of -1 means that the currently equipped petfocus of a client is searched for and used instead.
+	if(HasPet() || pettype == nullptr) // Sanity and early out checking first.
 		return;
 
 	int16 act_power = 0; // The actual pet power we'll use.
@@ -239,42 +134,32 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		}
 	}
 	else if (petpower > 0)
-		act_power = petpower;
-
-	// optional rule: classic style variance in pets. Achieve this by
-	// adding a random 0-4 to pet power, since it only comes in increments
-	// of five from focus effects.
-
-	//lookup our pets table record for this type
-	PetRecord record;
+		act_power = petpower; // optional rule: classic style variance in pets. Achieve this by adding a random 0-4 to pet power, since it only comes in increments of five from focus effects.
+		
+	PetRecord record; //lookup our pets table record for this type
 	if(!database.GetPoweredPetEntry(pettype, act_power, &record)) {
 		Message(13, "Unable to find data for pet %s", pettype);
 		LogFile->write(EQEMuLog::Error, "Unable to find data for pet %s, check pets table.", pettype);
 		return;
 	}
 
-	//find the NPC data for the specified NPC type
-	const NPCType *base = database.GetNPCType(record.npc_type);
+	const NPCType *base = database.GetNPCType(record.npc_type); //find the NPC data for the specified NPC type
 	if(base == nullptr) {
 		Message(13, "Unable to load NPC data for pet %s", pettype);
 		LogFile->write(EQEMuLog::Error, "Unable to load NPC data for pet %s (NPC ID %d), check pets and npc_types tables.", pettype, record.npc_type);
 		return;
 	}
 
-	//we copy the npc_type data because we need to edit it a bit
-	NPCType *npc_type = new NPCType;
+	NPCType *npc_type = new NPCType; //we copy the npc_type data because we need to edit it a bit
 	memcpy(npc_type, base, sizeof(NPCType));
 
-	// If pet power is set to -1 in the DB, use stat scaling
-	if (this->IsClient() && record.petpower == -1)
-	{
-		float scale_power = (float)act_power / 100.0f;
-		if(scale_power > 0)
-		{
+	if (this->IsClient() && record.petpower == -1) { //If pet power is set to -1 in the DB, use stat scaling
+		float scale_power = ((float)act_power / 100.0f);
+		if(scale_power > 0) {
 			npc_type->max_hp *= (1 + scale_power);
 			npc_type->cur_hp = npc_type->max_hp;
 			npc_type->AC *= (1 + scale_power);
-			npc_type->level += 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
+			npc_type->level += (1 + ((int)act_power / 25)); //gains an additional level for every 25 pet power
 			npc_type->min_dmg = (npc_type->min_dmg * (1 + (scale_power / 2)));
 			npc_type->max_dmg = (npc_type->max_dmg * (1 + (scale_power / 2)));
 			npc_type->size *= (1 + (scale_power / 2));
@@ -282,113 +167,92 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		record.petpower = act_power;
 	}
 
-	//Live AA - Elemental Durability
-	int16 MaxHP = aabonuses.PetMaxHP + itembonuses.PetMaxHP + spellbonuses.PetMaxHP;
+	int16 MaxHP = aabonuses.PetMaxHP + itembonuses.PetMaxHP + spellbonuses.PetMaxHP; //Live AA - Elemental Durability
 
-	if (MaxHP){
-		npc_type->max_hp += (npc_type->max_hp*MaxHP)/100;
+	if (MaxHP) {
+		npc_type->max_hp += ((npc_type->max_hp*MaxHP) / 100);
 		npc_type->cur_hp = npc_type->max_hp;
 	}
 
-	//TODO: think about regen (engaged vs. not engaged)
-
-	// Pet naming:
-	// 0 - `s pet
-	// 1 - `s familiar
-	// 2 - `s Warder
-	// 3 - Random name if client, `s pet for others
-	// 4 - Keep DB name
-
-
-	if (petname != nullptr) {
-		// Name was provided, use it.
-		strn0cpy(npc_type->name, petname, 64);
-	} else if (record.petnaming == 0) {
+	if (petname != nullptr) //Pet naming: 0 - name's pet, 1 - name's familiar, 2 - name's Warder, 3 - Random name (if client), name's pet for others, 4 - Keep DB name
+		strn0cpy(npc_type->name, petname, 64); //Name was provided, use it.
+	else if (record.petnaming == 0) {
 		strcpy(npc_type->name, this->GetCleanName());
 		npc_type->name[25] = '\0';
-		strcat(npc_type->name, "`s_pet");
-	} else if (record.petnaming == 1) {
+		strcat(npc_type->name, "'s_Pet");
+	}
+	else if (record.petnaming == 1) {
 		strcpy(npc_type->name, this->GetName());
 		npc_type->name[19] = '\0';
-		strcat(npc_type->name, "`s_familiar");
-	} else if (record.petnaming == 2) {
+		strcat(npc_type->name, "'s_Familiar");
+	}
+	else if (record.petnaming == 2) {
 		strcpy(npc_type->name, this->GetName());
 		npc_type->name[21] = 0;
-		strcat(npc_type->name, "`s_Warder");
-	} else if (record.petnaming == 4) {
-		// Keep the DB name
-	} else if (record.petnaming == 3 && IsClient()) {
+		strcat(npc_type->name, "'s_Warder");
+	}
+	else if (record.petnaming == 3 && IsClient())
 		strcpy(npc_type->name, GetRandPetName());
-	} else {
+	else if (record.petnaming == 4) { } //This is here so that pets with petnaming 4 keep their real npc_types name.
+	else {
 		strcpy(npc_type->name, this->GetCleanName());
 		npc_type->name[25] = '\0';
-		strcat(npc_type->name, "`s_pet");
+		strcat(npc_type->name, "'s_Pet");
 	}
 
-	//handle beastlord pet appearance
-	if(record.petnaming == 2)
-	{
-		switch(GetBaseRace())
-		{
-		case VAHSHIR:
-			npc_type->race = TIGER;
-			npc_type->size *= 0.8f;
-			break;
-		case TROLL:
-			npc_type->race = ALLIGATOR;
-			npc_type->size *= 2.5f;
-			break;
-		case OGRE:
-			npc_type->race = BEAR;
-			npc_type->texture = 3;
-			npc_type->gender = 2;
-			break;
-		case BARBARIAN:
-			npc_type->race = WOLF;
-			npc_type->texture = 2;
-			break;
-		case IKSAR:
-			npc_type->race = WOLF;
-			npc_type->texture = 0;
-			npc_type->gender = 1;
-			npc_type->size *= 2.0f;
-			npc_type->luclinface = 0;
-			break;
-		default:
-			npc_type->race = WOLF;
-			npc_type->texture = 0;
+	if(record.petnaming == 2) { //handle beastlord pet appearance
+		switch(GetBaseRace()) {
+			case VAHSHIR:
+				npc_type->race = TIGER;
+				npc_type->size *= 0.8f;
+				break;
+			case TROLL:
+				npc_type->race = ALLIGATOR;
+				npc_type->size *= 2.5f;
+				break;
+			case OGRE:
+				npc_type->race = BEAR;
+				npc_type->texture = 3;
+				npc_type->gender = 2;
+				break;
+			case BARBARIAN:
+				npc_type->race = WOLF;
+				npc_type->texture = 2;
+				break;
+			case IKSAR:
+				npc_type->race = WOLF;
+				npc_type->texture = 0;
+				npc_type->gender = 1;
+				npc_type->size *= 2.0f;
+				npc_type->luclinface = 0;
+				break;
+			default:
+				npc_type->race = WOLF;
+				npc_type->texture = 0;
+				break;
 		}
 	}
 
-	// handle monster summoning pet appearance
-	if(record.monsterflag) {
+	if(record.monsterflag) { //handle monster summoning pet appearance
 		char errbuf[MYSQL_ERRMSG_SIZE];
 		char* query = 0;
 		MYSQL_RES *result = nullptr;
 		MYSQL_ROW row = nullptr;
 		uint32 monsterid;
 
-		// get a random npc id from the spawngroups assigned to this zone
-		if (database.RunQuery(query,	MakeAnyLenString(&query,
-			"SELECT npcID FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID) "
-			"INNER JOIN npc_types ON npc_types.id = spawnentry.npcID "
-			"WHERE spawn2.zone = '%s' AND npc_types.bodytype NOT IN (11, 33, 66, 67) "
-			"AND npc_types.race NOT IN (0,1,2,3,4,5,6,7,8,9,10,11,12,44,55,67,71,72,73,77,78,81,90,92,93,94,106,112,114,127,128,130,139,141,183,236,237,238,239,254,266,329,330,378,379,380,381,382,383,404,522) "
-			"ORDER BY RAND() LIMIT 1",	zone->GetShortName()), errbuf, &result))
-		{
-			row = mysql_fetch_row(result);
+		if (database.RunQuery(query, MakeAnyLenString(&query, "SELECT npcID FROM (spawnentry INNER JOIN spawn2 ON spawn2.spawngroupID = spawnentry.spawngroupID) INNER JOIN npc_types ON npc_types.id = spawnentry.npcID WHERE spawn2.zone = '%s' AND npc_types.bodytype NOT IN (11, 33, 66, 67) AND npc_types.race NOT IN (0,1,2,3,4,5,6,7,8,9,10,11,12,44,55,67,71,72,73,77,78,81,90,92,93,94,106,112,114,127,128,130,139,141,183,236,237,238,239,254,266,329,330,378,379,380,381,382,383,404,522) ORDER BY RAND() LIMIT 1",	zone->GetShortName()), errbuf, &result)) {// get a random npc id from the spawngroups assigned to this zone
+		row = mysql_fetch_row(result);
 			if (row)
 				monsterid = atoi(row[0]);
 			else
-				monsterid = 567;	// since we don't have any monsters, just make it look like an earth pet for now
+				monsterid = 567; //since we don't have any monsters, just make it look like an earth pet for now
 		}
-		else {	// if the database query failed
+		else {	//if the database query failed
 			LogFile->write(EQEMuLog::Error, "Error querying database for monster summoning pet in zone %s (%s)", zone->GetShortName(), errbuf);
 			monsterid = 567;
 		}
 
-		// give the summoned pet the attributes of the monster we found
-		const NPCType* monster = database.GetNPCType(monsterid);
+		const NPCType* monster = database.GetNPCType(monsterid); //give the summoned pet the attributes of the monster we found
 		if(monster) {
 			npc_type->race = monster->race;
 			npc_type->size = monster->size;
@@ -397,21 +261,13 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc_type->luclinface = monster->luclinface;
 			npc_type->helmtexture = monster->helmtexture;
 		}
-		else {
+		else
 			LogFile->write(EQEMuLog::Error, "Error loading NPC data for monster summoning pet (NPC ID %d)", monsterid);
-		}
-
 		safe_delete_array(query);
 	}
-
-	//this takes ownership of the npc_type data
-	Pet *npc = new Pet(npc_type, this, (PetType)record.petcontrol, spell_id, record.petpower);
-
-	// Now that we have an actual object to interact with, load
-	// the base items for the pet. These are always loaded
-	// so that a rank 1 suspend minion does not kill things
-	// like the special back items some focused pets may receive.
-	uint32 petinv[MAX_WORN_INVENTORY];
+	
+	Pet *npc = new Pet(npc_type, this, (PetType)record.petcontrol, spell_id, record.petpower); //this takes ownership of the npc_type data
+	uint32 petinv[MAX_WORN_INVENTORY]; // Now that we have an actual object to interact with, load the base items for the pet. These are always loaded so that a rank 1 suspend minion does not kill things like the special back items some focused pets may receive.
 	memset(petinv, 0, sizeof(petinv));
 	const Item_Struct *item = 0;
 
@@ -422,21 +278,14 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 				npc->AddLootDrop(item, &npc->itemlist, 0, 1, 127, true, true);
 			}
 	}
-
-	// finally, override size if one was provided
-	if (in_size > 0.0f)
+	
+	if (in_size > 0.0f) // finally, override size if one was provided
 		npc->size = in_size;
 
 	entity_list.AddNPC(npc, true, true);
-	SetPetID(npc->GetID());
-	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
+	SetPetID(npc->GetID()); // We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 }
-/* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
-into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
-could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/
-Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power)
-: NPC(type_data, 0, owner->GetX()+2, owner->GetY()+2, owner->GetZ(), owner->GetHeading(), FlyMode3)
-{
+Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power) : NPC(type_data, 0, owner->GetX()+2, owner->GetY()+2, owner->GetZ(), owner->GetHeading(), FlyMode3) { // This is why the pets ghost - pets were being spawned too far away from its npc owner and some into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.
 	GiveNPCTypeData(type_data);
 	typeofpet = type;
 	petpower = power;
@@ -456,22 +305,15 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (petpower <= 0) {
-		querylen = MakeAnyLenString(&query,
-			"SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset FROM pets "
-			"WHERE type='%s' AND petpower<=0", pet_type);
-	}
-	else {
-		querylen = MakeAnyLenString(&query,
-			"SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset FROM pets "
-			"WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1", pet_type, petpower);
-	}
+	if (petpower <= 0)
+		querylen = MakeAnyLenString(&query,	"SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset FROM pets WHERE type = '%s' AND petpower <= 0", pet_type);
+	else
+		querylen = MakeAnyLenString(&query, "SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset FROM pets WHERE type = '%s' AND petpower <= '%d' ORDER BY petpower DESC LIMIT 1", pet_type, petpower);
 
 	if (RunQuery(query, querylen, errbuf, &result)) {
 		safe_delete_array(query);
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
-
 			into->npc_type = atoi(row[0]);
 			into->temporary = atoi(row[1]);
 			into->petpower = atoi(row[2]);
@@ -479,7 +321,6 @@ bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetR
 			into->petnaming = atoi(row[4]);
 			into->monsterflag = atoi(row[5]);
 			into->equipmentset = atoi(row[6]);
-
 			mysql_free_result(result);
 			return(true);
 		}
@@ -512,12 +353,13 @@ Mob* Mob::GetPet() {
 
 void Mob::SetPet(Mob* newpet) {
 	Mob* oldpet = GetPet();
-	if (oldpet) {
+	if (oldpet)
 		oldpet->SetOwnerID(0);
-	}
-	if (newpet == nullptr) {
+		
+	if (newpet == nullptr)
 		SetPetID(0);
-	} else {
+		
+	else {
 		SetPetID(newpet->GetID());
 		Mob* oldowner = entity_list.GetMob(newpet->GetOwnerID());
 		if (oldowner)
@@ -531,22 +373,16 @@ void Mob::SetPetID(uint16 NewPetID) {
 		return;
 	petid = NewPetID;
 
-	if(IsClient())
-	{
+	if(IsClient()) {
 		Mob* NewPet = entity_list.GetMob(NewPetID);
 		CastToClient()->UpdateXTargetType(MyPet, NewPet);
 	}
 }
 
 void NPC::GetPetState(SpellBuff_Struct *pet_buffs, uint32 *items, char *name) {
-	//save the pet name
-	strn0cpy(name, GetName(), 64);
-
-	//save their items, we only care about what they are actually wearing
-	memcpy(items, equipment, sizeof(uint32)*MAX_WORN_INVENTORY);
-
-	//save their buffs.
-	for (int i=0; i < GetPetMaxTotalSlots(); i++) {
+	strn0cpy(name, GetName(), 64); //save the pet name
+	memcpy(items, equipment, sizeof(uint32)*MAX_WORN_INVENTORY); //save their items, we only care about what they are actually wearing
+	for (int i=0; i < GetPetMaxTotalSlots(); i++) { //save their buffs.
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 			pet_buffs[i].spellid = buffs[i].spellid;
 			pet_buffs[i].slotid = i+1;
@@ -566,18 +402,14 @@ void NPC::GetPetState(SpellBuff_Struct *pet_buffs, uint32 *items, char *name) {
 }
 
 void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
-	//restore their buffs...
-
 	int i;
-	for (i = 0; i < GetPetMaxTotalSlots(); i++) {
+	for (i = 0; i < GetPetMaxTotalSlots(); i++) { //restore their buffs...
 		for(int z = 0; z < GetPetMaxTotalSlots(); z++) {
-		// check for duplicates
-			if(buffs[z].spellid != SPELL_UNKNOWN && buffs[z].spellid == pet_buffs[i].spellid) {
+			if(buffs[z].spellid != SPELL_UNKNOWN && buffs[z].spellid == pet_buffs[i].spellid) { // check for duplicates
 				buffs[z].spellid = SPELL_UNKNOWN;
 				pet_buffs[i].spellid = 0xFFFFFFFF;
 			}
 		}
-
 		if (pet_buffs[i].spellid <= (uint32)SPDAT_RECORDS && pet_buffs[i].spellid != 0 && pet_buffs[i].duration > 0) {
 			if(pet_buffs[i].level == 0 || pet_buffs[i].level > 100)
 				pet_buffs[i].level = 1;
@@ -602,13 +434,10 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 			for (int x1=0; x1 < EFFECT_COUNT; x1++) {
 				switch (spells[buffs[j1].spellid].effectid[x1]) {
 					case SE_WeaponProc:
-						// We need to reapply buff based procs
-						// We need to do this here so suspended pets also regain their procs.
-						if (spells[buffs[j1].spellid].base2[x1] == 0) {
+						if (spells[buffs[j1].spellid].base2[x1] == 0) //We need to reapply buff based procs - We need to do this here so suspended pets also regain their procs.
 							AddProcToWeapon(GetProcID(buffs[j1].spellid,x1), false, 100, buffs[j1].spellid);
-						} else {
+						else
 							AddProcToWeapon(GetProcID(buffs[j1].spellid,x1), false, 100+spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid);
-						}
 						break;
 					case SE_Charm:
 					case SE_Rune:
@@ -621,43 +450,26 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 						pet_buffs[j1].duration = 0;
 						pet_buffs[j1].effect = 0;
 						x1 = EFFECT_COUNT;
-						break;
-					// We can't send appearance packets yet, put down at CompleteConnect
+						break; //We can't send appearance packets yet, put down at CompleteConnect
 				}
 			}
 		}
-	}
-
-	//restore their equipment...
-	for(i = 0; i < MAX_WORN_INVENTORY; i++) {
+	}	
+	for(i = 0; i < MAX_WORN_INVENTORY; i++) { //restore their equipment...
 		if(items[i] == 0)
 			continue;
 
 		const Item_Struct* item2 = database.GetItem(items[i]);
-		if (item2 && item2->NoDrop != 0) {
-			//dont bother saving item charges for now, NPCs never use them
-			//and nobody should be able to get them off the corpse..?
-			AddLootDrop(item2, &itemlist, 0, 1, 127, true, true);
-		}
+		if (item2 && item2->NoDrop != 0)	
+			AddLootDrop(item2, &itemlist, 0, 1, 127, true, true); //dont bother saving item charges for now, NPCs never use them and nobody should be able to get them off the corpse..?
 	}
 }
 
-// Load the equipmentset from the DB. Might be worthwhile to load these into
-// shared memory at some point due to the number of queries needed to load a
-// nested set.
-bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
+bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) { //Load the equipmentset from the DB. Might be worthwhile to load these into shared memory at some point due to the number of queries needed to load a nested set.
 	if (equipmentset < 0 || items == nullptr)
 		return false;
-
-	// Equipment sets can be nested. We start with the top-most one and
-	// add all items in it to the items array. Referenced equipmentsets
-	// are loaded after that, up to a max depth of 5. (Arbitrary limit
-	// so we don't go into an endless loop if the DB data is cyclic for
-	// some reason.)
-	// A slot will only get an item put in it if it is empty. That way
-	// an equipmentset can overload a slot for the set(s) it includes.
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
+		
+	char errbuf[MYSQL_ERRMSG_SIZE]; // Equipment sets can be nested. We start with the top-most one and add all items in it to the items array. Referenced equipmentsets are loaded after that, up to a max depth of 5. (Arbitrary limit so we don't go into an endless loop if the DB data is cyclic for some reason.) A slot will only get an item put in it if it is empty. That way an equipmentset can overload a slot for the set(s) it includes.
 	char *query = 0;
 	uint32 querylen = 0;
 	MYSQL_RES *result;
@@ -676,29 +488,22 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 
 	while (curset >= 0 && depth < 5) {
 		if (RunQuery(query,
-			MakeAnyLenString(&query, "SELECT nested_set FROM pets_equipmentset WHERE set_id='%s'", curset),
-			errbuf, &result))
-		{
+			MakeAnyLenString(&query, "SELECT nested_set FROM pets_equipmentset WHERE set_id='%s'", curset),	errbuf, &result)) {
 			safe_delete_array(query);
 			if (mysql_num_rows(result) == 1) {
 				row = mysql_fetch_row(result);
 				nextset = atoi(row[0]);
 				mysql_free_result(result);
 
-				if (RunQuery(query,
-					MakeAnyLenString(&query, "SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset),
-					errbuf, &result))
-				{
+				if (RunQuery(query,	MakeAnyLenString(&query, "SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset), errbuf, &result)) {
 					safe_delete_array(query);
-					while ((row = mysql_fetch_row(result)))
-					{
+					while ((row = mysql_fetch_row(result))) {
 						slot = atoi(row[0]);
 						if (slot >= MAX_WORN_INVENTORY)
 							continue;
 						if (items[slot] == 0)
 							items[slot] = atoi(row[1]);
 					}
-
 					mysql_free_result(result);
 				}
 				else {
@@ -708,22 +513,17 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 				curset = nextset;
 				depth++;
 			}
-			else
-			{
-				// invalid set reference, it doesn't exist
-				LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
+			else {				
+				LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset); //invalid set reference, it doesn't exist
 				mysql_free_result(result);
 				return false;
 			}
 		}
-		else
-		{
+		else {
 			LogFile->write(EQEMuLog::Error, "Error in GetBasePetItems query '%s': %s", query, errbuf);
 			safe_delete_array(query);
 			return false;
 		}
-	} // end while
-
+	}
 	return true;
 }
-

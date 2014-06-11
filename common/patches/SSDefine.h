@@ -142,14 +142,3 @@
 //forward this opcode to another decoder
 #define DECODE_FORWARD(other_op) \
 	Decode_##other_op(__packet);
-
-
-
-
-
-
-
-
-
-
-

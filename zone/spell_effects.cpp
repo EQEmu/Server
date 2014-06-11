@@ -2252,22 +2252,24 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				*/
 				int16 focus = 0;
 
-				if(caster->IsClient())
+				if(caster->IsClient()) {
 					focus = caster->CastToClient()->GetFocusEffect(focusFcBaseEffects, spell_id);
-
-				switch(spells[spell_id].skill)
-				{
-					case SkillThrowing:
-						caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus);
-					break;
-
-					case SkillArchery:
-						caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus);
-					break;
-
-					default:
-						caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus);
-					break;
+					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus);
+				}
+				else {
+					switch(spells[spell_id].skill) {
+						case SkillThrowing:
+							caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus);
+						break;
+	
+						case SkillArchery:
+							caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus);
+						break;
+	
+						default:
+							caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus);
+						break;
+					}
 				}
 				break;
 			}
@@ -3265,7 +3267,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				{
 					if(caster)
 					{
-						if(!caster->IsClient()){
+						if(!caster->IsClient()) {
 
 							if (!IsClient()) //Allow NPC's to generate hate if casted on other NPC's.
 								AddToHateList(caster, -effect_value);
@@ -5638,7 +5640,7 @@ int32 Mob::ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, boo
 	if (!caster)
 		return value;
 
-	if (caster->IsClient()){
+	if (caster->IsClient()) {
 		int16 focus = caster->CastToClient()->GetFocusEffect(focusFcBaseEffects, spell_id);
 
 			if (IsBard)

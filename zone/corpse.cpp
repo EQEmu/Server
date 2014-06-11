@@ -41,7 +41,6 @@
 extern EntityList entity_list;
 extern Zone* zone;
 extern WorldServer worldserver;
-extern npcDecayTimes_Struct npcCorpseDecayTimes[100];
 
 void Corpse::SendEndLootErrorPacket(Client* client) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LootComplete, 0);

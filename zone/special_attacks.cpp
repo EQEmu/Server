@@ -238,7 +238,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 		CheckIncreaseSkill(SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 3;
 		int skillmod = (100 * GetSkill(SkillFrenzy) / MaxSkill(SkillFrenzy));
-		int32 max_dmg = (26 + ((((GetLevel() - 6) * 2)*skillmod) / 100)) * ((100 + RuleI(Combat, FrenzyBonus)) / 100);
+		int32 max_dmg = ((26 + ((((GetLevel() - 6) * 2)*skillmod) / 100)) * ((100 + RuleI(Combat, FrenzyBonus)) / 100));
 		int32 min_dmg = 0;
 		DoAnim(anim2HSlashing);
 
@@ -458,7 +458,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 			CastToClient()->Message(0,"Your fierce attack is executed with such grace, your target did not see it coming!");
 
 		int chance = (10 + (GetDEX() / 10) + (itembonuses.HeroicDEX / 10)); //18.5% chance at 85 dex 40% chance at 300 dex - chance to assassinate
-		if(level >= 60 && other->GetLevel() <= 45 && !other->CastToNPC()->IsEngaged() &&	other->GetHP() <= 32000 && other->IsNPC() && MakeRandomFloat(0, 99) < chance) {// player is 60 or higher, mob 45 or under, and not aggro
+		if(level >= 60 && other->GetLevel() <= 45 && !other->CastToNPC()->IsEngaged() && other->GetHP() <= 32000 && other->IsNPC() && MakeRandomFloat(0, 99) < chance) {// player is 60 or higher, mob 45 or under, and not aggro
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
 			if(IsClient())
 				CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
@@ -528,18 +528,18 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime) {
 
 	if(primaryweapondamage > 0){
 		if(level > 25) {
-			max_hit = ((((2 * backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + ((level - 25) / 3) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100);
+			max_hit = (((((2 * backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + ((level - 25) / 3) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
 			hate = 20 * backstab_dmg * GetSkill(SkillBackstab) / 355;
 		}
 		else {
-			max_hit = ((((2 * backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100);
+			max_hit = (((((2 * backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
 			hate = 20 * backstab_dmg * GetSkill(SkillBackstab) / 355;
 		}
 
 		if (level < 51)
-			min_hit = (level * 15 / 10) * ((100 + RuleI(Combat, BackstabBonus)) / 100);
+			min_hit = ((level * 15 / 10) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
 		else
-			min_hit = ((level * (level * 5 - 105)) / 100) * ((100 + RuleI(Combat, BackstabBonus)) / 100);
+			min_hit = (((level * (level * 5 - 105)) / 100) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
 
 		if(!other->CheckHitChance(this, SkillBackstab, 0))
 			ndamage = 0;
@@ -708,7 +708,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	}
 }
 
-void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const ItemInst* Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus) {
+void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const ItemInst* Ammo, uint32 weapon_damage, int16 chance_mod, int16 focus) {
 	if (!CanDoSpecialAttack(other))
 		return;
 
@@ -721,8 +721,8 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 
 		if(!TryHeadShot(other, SkillArchery)) {
 			int32 TotalDmg = 0;
-			int16 WDmg = 0;
-			int16 ADmg = 0;
+			int32 WDmg = 0;
+			int32 ADmg = 0;
 			if (!weapon_damage) {
 				WDmg = GetWeaponDamage(other, RangeWeapon);
 				ADmg = GetWeaponDamage(other, Ammo);
@@ -849,8 +849,8 @@ void NPC::RangedAttack(Mob* other) {
 		GetTarget()->Damage(this, 0, SPELL_UNKNOWN, SkillArchery);
 	}
 	else {
-		int16 WDmg = GetWeaponDamage(GetTarget(), weapon);
-		int16 ADmg = GetWeaponDamage(GetTarget(), ammo);
+		int32 WDmg = GetWeaponDamage(GetTarget(), weapon);
+		int32 ADmg = GetWeaponDamage(GetTarget(), ammo);
 		if(WDmg > 0 || ADmg > 0) {
 			mlog(COMBAT__RANGED, "Ranged attack hit %s.", GetTarget()->GetName());
 			int32 TotalDmg = 0;
@@ -910,10 +910,8 @@ void NPC::RangedAttack(Mob* other) {
 	}
 }
 
-uint32 Mob::GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg) {
-
-	uint16 MaxDmg = (((2 * wDmg) * GetDamageTable(SkillThrowing)) / 100);
-
+uint32 Mob::GetThrownDamage(int32 wDmg, int32& TotalDmg, int& minDmg) {
+	uint32 MaxDmg = (((2 * wDmg) * GetDamageTable(SkillThrowing)) / 100);
 	if (MaxDmg == 0)
 		MaxDmg = 1;
 
@@ -985,9 +983,8 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) {
 		mlog(COMBAT__RANGED, "Throwing attack out of range... client should catch this. (%f > %f).\n", DistNoRootNoZ(*GetTarget()), range); //target is out of range, client does a message
 		return;
 	}
-	else if(DistNoRootNoZ(*GetTarget()) < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist))){
+	else if(DistNoRootNoZ(*GetTarget()) < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist)))
 		return;
-	}
 
 	if(!IsAttackAllowed(GetTarget()) || IsCasting() || IsSitting() || (DivineAura() && !GetGM()) || IsStunned() || IsFeared() || IsMezzed() || (GetAppearance() == eaDead))
 		return;
@@ -1031,7 +1028,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) {
 	}
 }
 
-void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* item, uint16 weapon_damage, int16 chance_mod, int16 focus) {
+void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* item, uint32 weapon_damage, int16 chance_mod, int16 focus) {
 	if (!CanDoSpecialAttack(other))
 		return;
 
@@ -1042,7 +1039,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 	else {
 		mlog(COMBAT__RANGED, "Throwing attack hit %s.", other->GetName());
 
-		int16 WDmg = 0;
+		int32 WDmg = 0;
 
 		if (!weapon_damage && item != nullptr)
 			WDmg = GetWeaponDamage(other, item);
@@ -1534,7 +1531,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 			int TripleChance = 25;
 
 			if (bDoubleSpecialAttack > 100)
-				TripleChance += TripleChance*(100-bDoubleSpecialAttack)/100;
+				TripleChance += (TripleChance * (100 - bDoubleSpecialAttack) / 100);
 
 			if(TripleChance > MakeRandomInt(0,100))
 				MonkSpecialAttack(ca_target, MonkSPA[MakeRandomInt(0,4)]);
@@ -1680,12 +1677,25 @@ bool Mob::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 	return Result;
 }
 
-void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod, int16 focus, bool CanRiposte) {
+void Mob::DoMeleeSkillAttackDmg(Mob* other, uint32 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod, int16 focus, bool CanRiposte) {
 	if (!CanDoSpecialAttack(other))
 		return;
 		
 	if (skillinuse == SkillBegging) //For spells using skill value 98 (feral swipe ect) server sets this to 67 automatically. - Kayen: This is unlikely to be completely accurate but use OFFENSE skill value for these effects.
 		skillinuse = SkillOffense;
+		
+	if(IsClient()) {
+		ItemInst *weapon;
+		if(skillinuse == SkillArchery)
+			weapon = CastToClient()->GetInv().GetItem(SLOT_RANGE);
+		else
+			weapon = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+			
+		if(weapon) {
+			const Item_Struct *wpn = weapon->GetItem();
+			weapon_damage = weapon_damage + wpn->Damage + wpn->ElemDmgAmt;
+		}
+	}
 
 	int damage = 0;
 	uint32 hate = 0;

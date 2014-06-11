@@ -31,33 +31,28 @@ extern WorldServer worldserver;
 // Trade implementation
 // ##########################################
 
-Trade::Trade(Mob* in_owner)
-{
+Trade::Trade(Mob* in_owner) {
 	owner = in_owner;
 	Reset();
 }
 
-Trade::~Trade()
-{
+Trade::~Trade() {
 	Reset();
 }
 
-void Trade::Reset()
-{
+void Trade::Reset() {
 	state = TradeNone;
 	with_id = 0;
 	pp=0; gp=0; sp=0; cp=0;
 }
 
-void Trade::SetTradeCash(uint32 in_pp, uint32 in_gp, uint32 in_sp, uint32 in_cp)
-{
+void Trade::SetTradeCash(uint32 in_pp, uint32 in_gp, uint32 in_sp, uint32 in_cp) {
 	pp=in_pp; gp=in_gp; sp=in_sp; cp=in_cp;
 }
 
 // Initiate a trade with another mob
 // initiate_with specifies whether to start trade with other mob as well
-void Trade::Start(uint32 mob_id, bool initiate_with)
-{
+void Trade::Start(uint32 mob_id, bool initiate_with) {
 	Reset();
 	state = Trading;
 	with_id = mob_id;
@@ -70,11 +65,8 @@ void Trade::Start(uint32 mob_id, bool initiate_with)
 	}
 }
 
-// Add item from a given slot to trade bucket (automatically does bag data too)
-void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
-{
-	if (!owner || !owner->IsClient()) {
-		// This should never happen
+void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id) { //Add item from a given slot to trade bucket (automatically does bag data too)
+	if (!owner || !owner->IsClient()) { //This should never happen
 		LogFile->write(EQEMuLog::Debug, "Programming error: NPC's should not call Trade::AddEntity()");
 		return;
 	}
@@ -103,20 +95,17 @@ void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
 		// Move item on cursor to the trade slots
 		client->PutItemInInventory(trade_slot_id, *inst);
 	}
-	else
-	{
+	else {
 		if (client->GetInv().GetItem(SLOT_CURSOR)->GetID() != client->GetInv().GetItem(trade_slot_id)->GetID()) {
 			client->Kick();
 			return;
 		}
 		new_charges = (inst2->GetCharges()+inst->GetCharges());
-		if (new_charges < inst2->GetItem()->StackSize)
-		{
+		if (new_charges < inst2->GetItem()->StackSize) {
 			inst2->SetCharges(new_charges);
 			new_charges = 0;
 		}
-		else
-		{
+		else {
 			new_charges = inst->GetCharges()-(inst2->GetItem()->StackSize-inst2->GetCharges()); //Leftover charges = charges - difference
 			inst2->SetCharges(inst2->GetItem()->StackSize);
 		}
@@ -130,8 +119,7 @@ void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
 
 // Retrieve mob the owner is trading with
 // Done like this in case 'with' mob goes LD and Mob* becomes invalid
-Mob* Trade::With()
-{
+Mob* Trade::With() {
 	return entity_list.GetMob(with_id);
 }
 
@@ -151,9 +139,8 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 			for (uint16 i=0; i<10; i++) {
 				uint16 bagslot_id = Inventory::CalcSlotId(dest_slot_id, i);
 				const ItemInst* bagitem = trader->GetInv().GetItem(bagslot_id);
-				if (bagitem) {
+				if (bagitem)
 					with->SendItemPacket(bagslot_id-IDX_TRADE,bagitem,ItemPacketTradeView);
-				}
 			}
 		}
 
@@ -162,8 +149,7 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 }
 
 // Audit trade: The part logged is what travels owner -> with
-void Trade::LogTrade()
-{
+void Trade::LogTrade() {
 	Mob* with = With();
 	if (!owner->IsClient() || !with)
 		return; // Should never happen
@@ -184,9 +170,8 @@ void Trade::LogTrade()
 		else
 			admin_level = 999;
 
-		if (zone->tradevar == 7) {
+		if (zone->tradevar == 7)
 			logtrade = true;
-		}
 		else if ((admin_level>=10) && (admin_level<20)) {
 			if ((zone->tradevar<8) && (zone->tradevar>5))
 				logtrade = true;
@@ -222,25 +207,20 @@ void Trade::LogTrade()
 		cash = this->cp + this->sp + this->gp + this->pp;
 		if ((cash>0) || (item_count>0)) {
 			sprintf(logtext, "%s gave %s ", trader->GetName(), with->GetName());
-
 			if (item_count > 0) {
 				strcat(logtext, "items {");
-
 				for (uint16 i=3000; i<=3007; i++) {
 					const ItemInst* inst = trader->GetInv().GetItem(i);
-
 					if (!comma)
 						comma = true;
 					else {
 						if (inst)
 							strcat(logtext, ",");
 					}
-
 					if (inst) {
 						char item_num[15] = {0};
 						sprintf(item_num, "%i", inst->GetItem()->ID);
 						strcat(logtext, item_num);
-
 						if (inst->IsType(ItemClassContainer)) {
 							for (uint8 j=0; j<10; j++) {
 								inst = trader->GetInv().GetItem(i, j);
@@ -254,51 +234,37 @@ void Trade::LogTrade()
 					}
 				}
 			}
-
 			if (cash > 0) {
 				char money[100] = {0};
 				sprintf(money, " %ipp, %igp, %isp, %icp", trader->trade->pp, trader->trade->gp, trader->trade->sp, trader->trade->cp);
 				strcat(logtext, money);
 			}
-
-			database.logevents(trader->AccountName(), trader->AccountID(),
-				trader->Admin(), trader->GetName(), with->GetName(), "Trade", logtext, 6);
+			database.logevents(trader->AccountName(), trader->AccountID(), trader->Admin(), trader->GetName(), with->GetName(), "Trade", logtext, 6);
 		}
 	}
 }
 
 #if (EQDEBUG >= 9)
-void Trade::DumpTrade()
-{
+void Trade::DumpTrade() {
 	Mob* with = With();
-	LogFile->write(EQEMuLog::Debug, "Dumping trade data: '%s' in TradeState %i with '%s'",
-		this->owner->GetName(), state, ((with==nullptr)?"(null)":with->GetName()));
-
+	LogFile->write(EQEMuLog::Debug, "Dumping trade data: '%s' in TradeState %i with '%s'", this->owner->GetName(), state, ((with==nullptr)?"(null)":with->GetName()));
 	if (!owner->IsClient())
 		return;
-
 	Client* trader = owner->CastToClient();
 	for (uint16 i=3000; i<=3007; i++) {
 		const ItemInst* inst = trader->GetInv().GetItem(i);
-
 		if (inst) {
-			LogFile->write(EQEMuLog::Debug, "Item %i (Charges=%i, Slot=%i, IsBag=%s)",
-				inst->GetItem()->ID, inst->GetCharges(),
-				i, ((inst->IsType(ItemClassContainer)) ? "True" : "False"));
-
+			LogFile->write(EQEMuLog::Debug, "Item %i (Charges=%i, Slot=%i, IsBag=%s)", inst->GetItem()->ID, inst->GetCharges(),	i, ((inst->IsType(ItemClassContainer)) ? "True" : "False"));
 			if (inst->IsType(ItemClassContainer)) {
 				for (uint8 j=0; j<10; j++) {
 					inst = trader->GetInv().GetItem(i, j);
 					if (inst) {
-						LogFile->write(EQEMuLog::Debug, "\tBagItem %i (Charges=%i, Slot=%i)",
-							inst->GetItem()->ID, inst->GetCharges(),
-							Inventory::CalcSlotId(i, j));
+						LogFile->write(EQEMuLog::Debug, "\tBagItem %i (Charges=%i, Slot=%i)", inst->GetItem()->ID, inst->GetCharges(), Inventory::CalcSlotId(i, j));
 					}
 				}
 			}
 		}
 	}
-
 	LogFile->write(EQEMuLog::Debug, "\tpp:%i, gp:%i, sp:%i, cp:%i", pp, gp, sp, cp);
 }
 #endif
@@ -308,22 +274,17 @@ void Client::ResetTrade() {
 	ItemInst* ins;
 	int x;
 	AddMoneyToPP(trade->cp, trade->sp, trade->gp, trade->pp, true);
-	for(x=3000; x <= 3007; x++)
-	{
+	for(x=3000; x <= 3007; x++) {
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
 		if (ins)
 			TempItem = ins->GetItem();
-		if (TempItem)
-		{
+		if (TempItem) {
 			bool is_arrow = (TempItem->ItemType == ItemTypeArrow) ? true : false;
 			int freeslotid = GetInv().FindFreeSlot(ins->IsType(ItemClassContainer), true, TempItem->Size, is_arrow);
 			if (freeslotid == SLOT_INVALID)
-			{
 				DropInst(ins);
-			}
-			else
-			{
+			else {
 				PutItemInInventory(freeslotid, *ins);
 				SendItemPacket(freeslotid, ins, ItemPacketTrade);
 			}
@@ -350,8 +311,10 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 				qsaudit = (QSPlayerLogTrade_Struct*) qspack->pBuffer;
 				QSPLT	= true;
 
-				if(finalizer) { qsaudit->char2_id = this->character_id; }
-				else { qsaudit->char1_id = this->character_id; }
+				if(finalizer)
+					qsaudit->char2_id = this->character_id;
+				else
+					qsaudit->char1_id = this->character_id;
 			}
 
 			// Move each trade slot into free inventory slot
@@ -581,7 +544,8 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			if(inst) {
 				items[i - 3000] = inst->GetItem()->ID;
 				item_list.push_back(inst);
-			} else {
+			}
+			else {
 				item_list.push_back(nullptr);
 				continue;
 			}
@@ -600,9 +564,8 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 									tradingWith->CastToNPC()->AddLootDrop(bagitem, &tradingWith->CastToNPC()->itemlist, 
 										baginst->GetCharges(), 1, 127, true, true);
 								}
-								else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
+								else if (RuleB(NPC, ReturnNonQuestNoDropItems))
 									PushItemOnCursor(*baginst, true);
-								}
 							}
 						}
 					}
@@ -654,9 +617,8 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 		parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
 
 		for(int i = 0; i < 4; ++i) {
-			if(insts[i]) {
+			if(insts[i])
 				safe_delete(insts[i]);
-			}
 		}
 	}
 }
@@ -678,13 +640,13 @@ bool Client::CheckTradeLoreConflict(Client* other)
 	return false;
 }
 
-void Client::Trader_ShowItems(){
+void Client::Trader_ShowItems() {
 	EQApplicationPacket* outapp= new EQApplicationPacket(OP_Trader, sizeof(Trader_Struct));
 
 	Trader_Struct* outints = (Trader_Struct*)outapp->pBuffer;
 	Trader_Struct* TraderItems = database.LoadTraderItem(this->CharacterID());
 
-	for(int i = 0; i < 80; i++){
+	for(int i = 0; i < 80; i++) {
 		outints->ItemCost[i] = TraderItems->ItemCost[i];
 		outints->Items[i] = TraderItems->Items[i];
 	}
@@ -696,148 +658,88 @@ void Client::Trader_ShowItems(){
 	safe_delete(TraderItems);
 }
 
-void Client::SendTraderPacket(Client* Trader, uint32 Unknown72)
-{
+void Client::SendTraderPacket(Client* Trader, uint32 Unknown72) {
 	if(!Trader)
 		return;
-
+		
 	EQApplicationPacket* outapp= new EQApplicationPacket(OP_BecomeTrader, sizeof(BecomeTrader_Struct));
-
 	BecomeTrader_Struct* bts = (BecomeTrader_Struct*)outapp->pBuffer;
-
 	bts->Code = BazaarTrader_StartTraderMode;
-
 	bts->ID = Trader->GetID();
-
 	strn0cpy(bts->Name, Trader->GetName(), sizeof(bts->Name));
-
 	bts->Unknown072 = Unknown72;
-
 	QueuePacket(outapp);
-
 	_pkt(TRADING__PACKETS, outapp);
-
 	safe_delete(outapp);
 }
 
 void Client::Trader_CustomerBrowsing(Client *Customer) {
-
 	EQApplicationPacket* outapp= new EQApplicationPacket(OP_Trader, sizeof(Trader_ShowItems_Struct));
-
 	Trader_ShowItems_Struct* sis = (Trader_ShowItems_Struct*)outapp->pBuffer;
-
 	sis->Code = BazaarTrader_CustomerBrowsing;
-
 	sis->TraderID = Customer->GetID();
-
 	QueuePacket(outapp);
 }
 
 
 void Client::Trader_StartTrader() {
-
 	Trader=true;
-
 	EQApplicationPacket* outapp= new EQApplicationPacket(OP_Trader, sizeof(Trader_ShowItems_Struct));
-
 	Trader_ShowItems_Struct* sis = (Trader_ShowItems_Struct*)outapp->pBuffer;
-
 	sis->Code = BazaarTrader_StartTraderMode;
-
 	sis->TraderID = this->GetID();
-
 	QueuePacket(outapp);
-
 	_pkt(TRADING__PACKETS, outapp);
-
 	safe_delete(outapp);
-
-	// Notify other clients we are now in trader mode
-
-	outapp= new EQApplicationPacket(OP_BecomeTrader, sizeof(BecomeTrader_Struct));
-
+	outapp= new EQApplicationPacket(OP_BecomeTrader, sizeof(BecomeTrader_Struct)); // Notify other clients we are now in trader mode
 	BecomeTrader_Struct* bts = (BecomeTrader_Struct*)outapp->pBuffer;
-
 	bts->Code = 1;
-
 	bts->ID = this->GetID();
-
 	strn0cpy(bts->Name, GetName(), sizeof(bts->Name));
-
 	entity_list.QueueClients(this, outapp, false);
-
 	_pkt(TRADING__PACKETS, outapp);
-
 	safe_delete(outapp);
 }
 
-void Client::Trader_EndTrader() {
-
-	// If someone is looking at our wares, remove all the items from the window.
-	//
+void Client::Trader_EndTrader() { //If someone is looking at our wares, remove all the items from the window.
 	if(CustomerID) {
 		Client* Customer = entity_list.GetClientByID(CustomerID);
 		GetItems_Struct* gis=GetTraderItems();
-
 		if(Customer && gis) {
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_TraderDelItem,sizeof(TraderDelItem_Struct));
 			TraderDelItem_Struct* tdis = (TraderDelItem_Struct*)outapp->pBuffer;
-
 			tdis->Unknown000 = 0;
 			tdis->TraderID = Customer->GetID();
 			tdis->Unknown012 = 0;
 			Customer->Message(13, "The Trader is no longer open for business");
 
 			for(int i = 0; i < 80; i++) {
-				if(gis->Items[i] != 0) {
-
+				if(gis->Items[i] != 0) {                           
 					tdis->ItemID = gis->SerialNumber[i];
-
 					Customer->QueuePacket(outapp);
 				}
 			}
-
 			safe_delete(outapp);
 			safe_delete(gis);
 		}
 	}
-
-	database.DeleteTraderItem(this->CharacterID());
-
-	// Notify other clients we are no longer in trader mode.
-	//
+	database.DeleteTraderItem(this->CharacterID()); //Notify other clients we are no longer in trader mode.
 	EQApplicationPacket* outapp= new EQApplicationPacket(OP_BecomeTrader, sizeof(BecomeTrader_Struct));
-
 	BecomeTrader_Struct* bts = (BecomeTrader_Struct*)outapp->pBuffer;
-
 	bts->Code = 0;
-
 	bts->ID = this->GetID();
-
 	strn0cpy(bts->Name, GetName(), sizeof(bts->Name));
-
 	entity_list.QueueClients(this, outapp, false);
-
 	_pkt(TRADING__PACKETS, outapp);
-
 	safe_delete(outapp);
-
 	outapp= new EQApplicationPacket(OP_Trader, sizeof(Trader_ShowItems_Struct));
-
 	Trader_ShowItems_Struct* sis = (Trader_ShowItems_Struct*)outapp->pBuffer;
-
 	sis->Code = BazaarTrader_EndTraderMode;
-
 	sis->TraderID = BazaarTrader_EndTraderMode;
-
 	QueuePacket(outapp);
-
 	_pkt(TRADING__PACKETS, outapp);
-
 	safe_delete(outapp);
-
 	WithCustomer(0);
-
 	this->Trader = false;
 }
 

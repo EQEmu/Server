@@ -1217,9 +1217,8 @@ void QuestManager::setsky(uint8 new_sky) {
 
 void QuestManager::setguild(uint32 new_guild_id, uint8 new_rank) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient()) {
+	if (initiator && initiator->IsClient())
 		guild_mgr.SetGuild(initiator->CharacterID(), new_guild_id, new_rank);
-	}
 }
 
 void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
@@ -1261,8 +1260,7 @@ void QuestManager::itemlink(int item_id) {
 		const ItemInst* inst = database.CreateItem(item_id);
 		char* link = 0;
 		if (initiator->MakeItemLink(link, inst))
-			initiator->Message(0, "%s tells you, %c%s%s%c", owner->GetCleanName(),
-					0x12, link, inst->GetItem()->Name, 0x12);
+			initiator->Message(0, "%s tells you, %c%s%s%c", owner->GetCleanName(), 0x12, link, inst->GetItem()->Name, 0x12);
 		safe_delete_array(link);
 		safe_delete(inst);
 	}
@@ -1272,7 +1270,8 @@ void QuestManager::signalwith(int npc_id, int signal_id, int wait_ms) {
 	if(wait_ms > 0) {
 		STimerList.push_back(SignalTimer(wait_ms, npc_id, signal_id));
 		return;
-	} else {
+	}
+	else {
 		STimerList.push_back(SignalTimer(0, npc_id, signal_id));
 		return;
 	}
@@ -1287,35 +1286,14 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 	int qgZoneid=zone->GetZoneID();
 	int qgCharid=0;
 	int qgNpcid = owner->GetNPCTypeID();
-
-	/*	options value determines the availability of global variables to NPCs when a quest begins
-	------------------------------------------------------------------
-		value		npcid		player		zone
-	------------------------------------------------------------------
-		0			this		this		this
-		1			all			this		this
-		2			this		all			this
-		3			all			all			this
-		4			this		this		all
-		5			all			this		all
-		6			this		all			all
-		7			all			all			all
-	*/
 	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
-	{
 		qgCharid=initiator->CharacterID();
-	}
-
 	else
-	{
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
-	}
+		
 	if (options < 0 || options > 7)
-	{
-		std::cerr << "Invalid options for global var " << varname << " using defaults" << std::endl;
-	}	// default = 0 (only this npcid,player and zone)
-	else
-	{
+		std::cerr << "Invalid options for global var " << varname << " using defaults" << std::endl; // default = 0 (only this npcid,player and zone)
+	else {
 		if (options & 1)
 			qgNpcid=0;
 		if (options & 2)
@@ -1323,47 +1301,29 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 		if (options & 4)
 			qgZoneid=0;
 	}
-
 	InsertQuestGlobal(qgCharid, qgNpcid, qgZoneid, varname, newvalue, QGVarDuration(duration));
 }
 
-/* Inserts global variable into quest_globals table */
-int QuestManager::InsertQuestGlobal(
-									int charid, int npcid, int zoneid,
-									const char *varname, const char *varvalue,
-									int duration)
-{
+int QuestManager::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varname, const char *varvalue, int duration) { //Inserts global variable into quest_globals table
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
 	// Make duration string either "unix_timestamp(now()) + xxx" or "NULL"
 	std::stringstream duration_ss;
 	if (duration == INT_MAX)
-	{
 		duration_ss << "NULL";
-	}
 	else
-	{
 		duration_ss << "unix_timestamp(now()) + " << duration;
-	}
 
 	//NOTE: this should be escaping the contents of arglist
 	//npcwise a malicious script can arbitrarily alter the DB
 	uint32 last_id = 0;
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate)"
-		"VALUES (%i, %i, %i, '%s', '%s', %s)",
-		charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str()
-		), errbuf, nullptr, nullptr, &last_id))
-	{
+	if (!database.RunQuery(query, MakeAnyLenString(&query, "REPLACE INTO quest_globals (charid, npcid, zoneid, name, value, expdate) VALUES (%i, %i, %i, '%s', '%s', %s)", charid, npcid, zoneid, varname, varvalue, duration_ss.str().c_str()), errbuf, nullptr, nullptr, &last_id))
 		std::cerr << "setglobal error inserting " << varname << " : " << errbuf << std::endl;
-	}
 	safe_delete_array(query);
 
-	if(zone)
-	{
-		//first delete our global
-		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
+	if(zone) {		
+		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct)); //first delete our global
 		ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct*)pack->pBuffer;
 		qgd->npc_id = npcid;
 		qgd->char_id = charid;
@@ -1371,33 +1331,24 @@ int QuestManager::InsertQuestGlobal(
 		qgd->from_zone_id = zone->GetZoneID();
 		qgd->from_instance_id = zone->GetInstanceID();
 		strcpy(qgd->name, varname);
-
 		entity_list.DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 		zone->DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
-
 		worldserver.SendPacket(pack);
-		safe_delete(pack);
-
-		//then create a new one with the new id
-		pack = new ServerPacket(ServerOP_QGlobalUpdate, sizeof(ServerQGlobalUpdate_Struct));
+		safe_delete(pack);		
+		pack = new ServerPacket(ServerOP_QGlobalUpdate, sizeof(ServerQGlobalUpdate_Struct)); //then create a new one with the new id
 		ServerQGlobalUpdate_Struct *qgu = (ServerQGlobalUpdate_Struct*)pack->pBuffer;
 		qgu->npc_id = npcid;
 		qgu->char_id = charid;
 		qgu->zone_id = zoneid;
 		if(duration == INT_MAX)
-		{
 			qgu->expdate = 0xFFFFFFFF;
-		}
 		else
-		{
 			qgu->expdate = Timer::GetTimeSeconds() + duration;
-		}
 		strcpy((char*)qgu->name, varname);
 		strn0cpy((char*)qgu->value, varvalue, 128);
 		qgu->id = last_id;
 		qgu->from_zone_id = zone->GetZoneID();
 		qgu->from_instance_id = zone->GetInstanceID();
-
 		QGlobal temp;
 		temp.npc_id = npcid;
 		temp.char_id = charid;
@@ -1407,16 +1358,13 @@ int QuestManager::InsertQuestGlobal(
 		temp.value.assign(qgu->value);
 		entity_list.UpdateQGlobal(qgu->id, temp);
 		zone->UpdateQGlobal(qgu->id, temp);
-
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
-
 	return 0;
 }
 
-void QuestManager::targlobal(const char *varname, const char *value, const char *duration, int qgNpcid, int qgCharid, int qgZoneid)
-{
+void QuestManager::targlobal(const char *varname, const char *value, const char *duration, int qgNpcid, int qgCharid, int qgZoneid) {
 	InsertQuestGlobal(qgCharid, qgNpcid, qgZoneid, varname, value, QGVarDuration(duration));
 }
 
@@ -1424,101 +1372,72 @@ void QuestManager::delglobal(const char *varname) {
 	QuestManagerCurrentQuestVars();
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-	int qgZoneid=zone->GetZoneID();
-	int qgCharid=0;
-	int qgNpcid=owner->GetNPCTypeID();
-	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
-	{
-		qgCharid=initiator->CharacterID();
-	}
-
+	int qgZoneid = zone->GetZoneID();
+	int qgCharid = 0;
+	int qgNpcid = owner->GetNPCTypeID();
+	if (initiator && initiator->IsClient()) //some events like waypoint and spawn don't have a player involved
+		qgCharid = initiator->CharacterID();
 	else
-	{
-		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
-	}
-	if (!database.RunQuery(query,
-		MakeAnyLenString(&query,
-		"DELETE FROM quest_globals WHERE name='%s'"
-		" && (npcid=0 || npcid=%i) && (charid=0 || charid=%i) && (zoneid=%i || zoneid=0)",
-		varname,qgNpcid,qgCharid,qgZoneid),errbuf))
-	{
+		qgCharid = -qgNpcid; //make char id negative npc id as a fudge
+	if (!database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM quest_globals WHERE name='%s' && (npcid=0 || npcid=%i) && (charid=0 || charid=%i) && (zoneid=%i || zoneid=0)", varname,qgNpcid,qgCharid,qgZoneid),errbuf))
 		std::cerr << "delglobal error deleting " << varname << " : " << errbuf << std::endl;
-	}
 	safe_delete_array(query);
 
-	if(zone)
-	{
+	if(zone) {
 		ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
 		ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
-
 		qgu->npc_id = qgNpcid;
 		qgu->char_id = qgCharid;
 		qgu->zone_id = qgZoneid;
 		strcpy(qgu->name, varname);
-
 		entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
 		zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
-
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
 }
 
-// Converts duration string to duration value (in seconds)
-// Return of INT_MAX indicates infinite duration
-int QuestManager::QGVarDuration(const char *fmt)
-{
-	int duration = 0;
-
-	// format:	Y#### or D## or H## or M## or S## or T###### or C#######
-
-	int len = strlen(fmt);
-
-	// Default to no duration
-	if (len < 1)
+int QuestManager::QGVarDuration(const char *fmt) { // Converts duration string to duration value (in seconds) Return of INT_MAX indicates infinite duration
+	int duration = 0;	
+	int len = strlen(fmt); // format:	Y#### or D## or H## or M## or S## or T###### or C#######
+	if (len < 1) // Default to no duration
 		return 0;
+		
+	int val = atoi(&fmt[0] + 1);// Set val to value after type character e.g., for "M3924", set to 3924
 
-	// Set val to value after type character
-	// e.g., for "M3924", set to 3924
-	int val = atoi(&fmt[0] + 1);
-
-	switch (fmt[0])
-	{
-		// Forever
-		case 'F':
+	switch (fmt[0]) {
+		case 'F': //Forever
 		case 'f':
 			duration = INT_MAX;
 			break;
-		// Years
-		case 'Y':
+		case 'Y': //Years
 		case 'y':
 			duration = val * 31556926;
 			break;
-		case 'D':
+		case 'W': //Weeks
+		case 'w':
+			duration = val * 604800;
+			break;
+		case 'D': //Days
 		case 'd':
 			duration = val * 86400;
-			break;
-		// Hours
-		case 'H':
+			break;		
+		case 'H': //Hours
 		case 'h':
 			duration = val * 3600;
-			break;
-		// Minutes
-		case 'M':
+			break;		
+		case 'M': //Minutes
 		case 'm':
 			duration = val * 60;
 			break;
-		// Seconds
-		case 'S':
+		case 'S': //Seconds
 		case 's':
 			duration = val;
 			break;
-		// Invalid
-		default:
+		default: //Invalid
 			duration = 0;
 			break;
 	}
-
 	return duration;
 }
 
@@ -1532,9 +1451,8 @@ void QuestManager::ding() {
 
 void QuestManager::rebind(int zoneid, float x, float y, float z) {
 	QuestManagerCurrentQuestVars();
-	if(initiator && initiator->IsClient()) {
+	if(initiator && initiator->IsClient())
 		initiator->SetBindPoint(zoneid, x, y, z);
-	}
 }
 
 void QuestManager::start(int32 wp) {
