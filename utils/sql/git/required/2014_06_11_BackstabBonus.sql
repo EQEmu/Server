@@ -1,0 +1,1 @@
+INSERT INTO rule_values VALUES ('Combat:BackstabBonus', 0, 'Modify Backstab skill damage by percent.');
