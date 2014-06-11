@@ -27,13 +27,10 @@ public:
 	virtual std::string GetByName(const std::string &var_name) const;
 
 private:
-
 	static ucsconfig *_chat_config;
 
 public:
-
-	// Produce a const singleton
-	static const ucsconfig *get() {
+	static const ucsconfig *get() { //Produce a const singleton
 		if (_chat_config == nullptr)
 			LoadConfig();
 		return(_chat_config);
@@ -50,6 +47,4 @@ public:
 	}
 
 };
-
 #endif
-

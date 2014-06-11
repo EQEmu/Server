@@ -39,24 +39,19 @@ extern Database database;
 
 void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message);
 
-WorldServer::WorldServer()
-: WorldConnection(EmuTCPConnection::packetModeUCS, Config->SharedKey.c_str())
-{
+WorldServer::WorldServer() : WorldConnection(EmuTCPConnection::packetModeUCS, Config->SharedKey.c_str()) {
 	pTryReconnect = true;
 }
 
-WorldServer::~WorldServer()
-{
+WorldServer::~WorldServer() {
 }
 
-void WorldServer::OnConnected()
-{
+void WorldServer::OnConnected() {
 	_log(UCS__INIT, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
-void WorldServer::Process()
-{
+void WorldServer::Process() {
 	WorldConnection::Process();
 
 	if (!Connected())
@@ -64,58 +59,41 @@ void WorldServer::Process()
 
 	ServerPacket *pack = 0;
 
-	while((pack = tcpc.PopPacket()))
-	{
+	while((pack = tcpc.PopPacket())) {
 		_log(UCS__TRACE, "Received Opcode: %4X", pack->opcode);
 
-		switch(pack->opcode)
-		{
-			case 0: {
-				break;
-			}
+		switch(pack->opcode) {
+			case 0:
 			case ServerOP_KeepAlive:
-			{
 				break;
-			}
-			case ServerOP_UCSMessage:
-			{
+			case ServerOP_UCSMessage: {
 				char *Buffer = (char *)pack->pBuffer;
-
 				char *From = new char[strlen(Buffer) + 1];
-
 				VARSTRUCT_DECODE_STRING(From, Buffer);
-
 				std::string Message = Buffer;
-
 				_log(UCS__TRACE, "Player: %s, Sent Message: %s", From, Message.c_str());
-
 				Client *c = CL->FindCharacter(From);
-
 				safe_delete_array(From);
-
+				
 				if(Message.length() < 2)
 					break;
-
-				if(!c)
-				{
+					
+				if(!c) {
 					_log(UCS__TRACE, "Client not found.");
 					break;
 				}
 
-				if(Message[0] == ';')
-				{
+				if(Message[0] == ';') {
 					c->SendChannelMessageByNumber(Message.substr(1, std::string::npos));
 				}
-				else if(Message[0] == '[')
-				{
+				else if(Message[0] == '[') {
 					CL->ProcessOPMailCommand(c, Message.substr(1, std::string::npos));
 				}
 
 				break;
 			}
 
-			case ServerOP_UCSMailMessage:
-			{
+			case ServerOP_UCSMailMessage: {
 				ServerMailMessageHeader_Struct *mail = (ServerMailMessageHeader_Struct*)pack->pBuffer;
 				database.SendMail(std::string("SOE.EQ.") + Config->ShortName + std::string(".") + std::string(mail->to),
 					std::string(mail->from),
@@ -126,8 +104,6 @@ void WorldServer::Process()
 			}
 		}
 	}
-
 	safe_delete(pack);
 	return;
 }
-
