@@ -7298,7 +7298,7 @@ XS(XS_Mob_GetItemStat)
 		Perl_croak(aTHX_ "Usage: Mob::GetItemStat(THIS, itemid, stat)");
 	{
 		Mob *		THIS;
-		uint32		RETVAL;
+		int32		RETVAL;
 		uint32		itemid = (uint32)SvUV(ST(1));
 		Const_char *	stat = (Const_char *)SvPV_nolen(ST(2));
 		dXSTARG;
@@ -7313,7 +7313,7 @@ XS(XS_Mob_GetItemStat)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetItemStat(itemid, stat);
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
 }

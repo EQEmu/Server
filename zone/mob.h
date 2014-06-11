@@ -539,7 +539,7 @@ public:
 	void Shout(const char *format, ...);
 	void Emote(const char *format, ...);
 	void QuestJournalledSay(Client *QuestInitiator, const char *str);
-	uint32 GetItemStat(uint32 itemid, const char *identifier);
+	int32 GetItemStat(uint32 itemid, const char *identifier);
 
 	int16 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false);
 	uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0);
