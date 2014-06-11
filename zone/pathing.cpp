@@ -573,8 +573,8 @@ void PathManager::SpawnPathNodes()
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 
@@ -1563,8 +1563,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 		npc_type->STR = 150;
@@ -1623,8 +1623,8 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->texture = 1;
 		npc_type->light = 0;
 		npc_type->runspeed = 0;
-		npc_type->d_meele_texture1 = 1;
-		npc_type->d_meele_texture2 = 1;
+		npc_type->d_melee_texture1 = 1;
+		npc_type->d_melee_texture2 = 1;
 		npc_type->merchanttype = 1;
 		npc_type->bodytype = 1;
 		npc_type->STR = 150;

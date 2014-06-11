@@ -6275,8 +6275,8 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->drakkin_heritage = GetDrakkinHeritage();
 	made_npc->drakkin_tattoo = GetDrakkinTattoo();
 	made_npc->drakkin_details = GetDrakkinDetails();
-	made_npc->d_meele_texture1 = GetEquipmentMaterial(7);
-	made_npc->d_meele_texture2 = GetEquipmentMaterial(8);
+	made_npc->d_melee_texture1 = GetEquipmentMaterial(7);
+	made_npc->d_melee_texture2 = GetEquipmentMaterial(8);
 	for (int i = 0; i < _MaterialCount; i++)	{
 		made_npc->armor_tint[i] = GetEquipmentColor(i);
 	}

@@ -218,13 +218,10 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	mDespawnRequested = false;
 	strcpy(orgname, in_npc->GetName());
 	strcpy(name, in_npc->GetName());
-	// Added By Hogie
-	for(int count = 0; count < 100; count++) {
-		if ((level >= npcCorpseDecayTimes[count].minlvl) && (level <= npcCorpseDecayTimes[count].maxlvl)) {
-			mDecayTimer.SetTimer(npcCorpseDecayTimes[count].seconds*1000);
-			break;
-		}
-	}
+	// Set the corpse decay time based on level (7.5mins for mobs up to 55 and 30mins for 55 and above)
+	if (level < 55) mDecayTimer.SetTimer(450000);
+	else mDecayTimer.SetTimer(1800000);
+
 	if(IsEmpty())
 	{
 		mDecayTimer.SetTimer(RuleI(NPC,EmptyNPCCorpseDecayTimeMS)+1000);

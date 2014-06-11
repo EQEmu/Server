@@ -1065,8 +1065,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.special_abilities,"
 			"npc_types.npc_spells_id,"
 			"npc_types.npc_spells_effects_id,"
-			"npc_types.d_meele_texture1,"
-			"npc_types.d_meele_texture2,"
+			"npc_types.d_melee_texture1,"
+			"npc_types.d_melee_texture2,"
 			"npc_types.prim_melee_type,"
 			"npc_types.sec_melee_type,"
 			"npc_types.runspeed,"
@@ -1164,8 +1164,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				strn0cpy(tmpNPCType->special_abilities, row[r++], 512);
 				tmpNPCType->npc_spells_id = atoi(row[r++]);
 				tmpNPCType->npc_spells_effects_id = atoi(row[r++]);
-				tmpNPCType->d_meele_texture1 = atoi(row[r++]);
-				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
+				tmpNPCType->d_melee_texture1 = atoi(row[r++]);
+				tmpNPCType->d_melee_texture2 = atoi(row[r++]);
 				tmpNPCType->prim_melee_type = atoi(row[r++]);
 				tmpNPCType->sec_melee_type = atoi(row[r++]);
 				tmpNPCType->runspeed= atof(row[r++]);
@@ -1383,8 +1383,8 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 			"vwMercNpcTypes.attack_count,"
 			"vwMercNpcTypes.special_abilities,"
 			// "vwMercNpcTypes.npc_spells_id,"
-			"vwMercNpcTypes.d_meele_texture1,"
-			"vwMercNpcTypes.d_meele_texture2,"
+			"vwMercNpcTypes.d_melee_texture1,"
+			"vwMercNpcTypes.d_melee_texture2,"
 			"vwMercNpcTypes.prim_melee_type,"
 			"vwMercNpcTypes.sec_melee_type,"
 			"vwMercNpcTypes.runspeed,"
@@ -1478,8 +1478,8 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				tmpNPCType->attack_count = atoi(row[r++]);
 				strn0cpy(tmpNPCType->special_abilities, row[r++], 512);
 				//tmpNPCType->npc_spells_id = atoi(row[r++]);
-				tmpNPCType->d_meele_texture1 = atoi(row[r++]);
-				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
+				tmpNPCType->d_melee_texture1 = atoi(row[r++]);
+				tmpNPCType->d_melee_texture2 = atoi(row[r++]);
 				tmpNPCType->prim_melee_type = atoi(row[r++]);
 				tmpNPCType->sec_melee_type = atoi(row[r++]);
 				tmpNPCType->runspeed= atof(row[r++]);
