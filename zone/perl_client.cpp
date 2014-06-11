@@ -3011,7 +3011,7 @@ XS(XS_Client_DeleteItemInInventory)
 	{
 		Client *		THIS;
 		int16		slot_id = (int16)SvIV(ST(1));
-		int8		quantity;
+		int16		quantity;
 		bool		client_update;
 
 		if (sv_derived_from(ST(0), "Client")) {
