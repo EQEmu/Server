@@ -1879,36 +1879,6 @@ bool Zone::RemoveSpawnGroup(uint32 in_id) {
 		return false;
 }
 
-
-// Added By Hogie
-bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	int i = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT varname, value FROM variables WHERE varname like 'decaytime%%' ORDER BY varname"), errbuf, &result)) {
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result))) {
-			Seperator sep(row[0]);
-			npcCorpseDecayTimes[i].minlvl = atoi(sep.arg[1]);
-			npcCorpseDecayTimes[i].maxlvl = atoi(sep.arg[2]);
-			if (atoi(row[1]) > 7200)
-				npcCorpseDecayTimes[i].seconds = 720;
-			else
-				npcCorpseDecayTimes[i].seconds = atoi(row[1]);
-			i++;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		safe_delete_array(query);
-		return false;
-	}
-	return true;
-}// Added By Hogie -- End
-
 void Zone::weatherSend()
 {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);

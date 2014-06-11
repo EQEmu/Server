@@ -94,7 +94,6 @@ char errorname[32];
 uint16 adverrornum = 0;
 extern Zone* zone;
 EQStreamFactory eqsf(ZoneStream);
-npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 DBAsyncFinishedQueue MTdbafq;
 DBAsync *dbasync = nullptr;
@@ -252,8 +251,6 @@ int main(int argc, char** argv) {
 	database.LoadAAEffects();
 	_log(ZONE__INIT, "Loading tributes");
 	database.LoadTributes();
-	_log(ZONE__INIT, "Loading corpse timers");
-	database.GetDecayTimes(npcCorpseDecayTimes);
 	_log(ZONE__INIT, "Loading commands");
 	int retval=command_init();
 	if(retval<0)

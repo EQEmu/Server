@@ -259,7 +259,6 @@ public:
 	/*
 	* Corpses
 	*/
-	bool	GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes);
 	uint32	CreatePlayerCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading);
 	bool	CreatePlayerCorpseBackup(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading);
 	uint32	UpdatePlayerCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, uchar* data, uint32 datasize, float x, float y, float z, float heading, bool isRessurected = false);
