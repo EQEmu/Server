@@ -610,9 +610,9 @@ public:
 	int16 GetModVulnerability(const uint8 resist);
 
 	void SetAllowBeneficial(bool value) { m_AllowBeneficial = value; }
-	bool GetAllowBeneficial() { return m_AllowBeneficial; }
+	bool GetAllowBeneficial() { if (m_AllowBeneficial || GetSpecialAbility(ALLOW_BENEFICIAL)){return true;} return false; }
 	void SetDisableMelee(bool value) { m_DisableMelee = value; }
-	bool IsMeleeDisabled() { return m_DisableMelee; }
+	bool IsMeleeDisabled() { if (m_DisableMelee || GetSpecialAbility(DISABLE_MELEE)){return true;} return false; }
 
 	bool IsOffHandAtk() const { return offhand; }
 	inline void OffHandAtk(bool val) { offhand = val; }
