@@ -318,6 +318,7 @@ public:
 	inline uint32 GetArmorTint(uint8 i) const { return armor_tint[(i < _MaterialCount) ? i : 0]; }
 	inline uint8 GetClass() const { return class_; }
 	inline uint8 GetLevel() const { return level; }
+	inline uint8 GetOrigLevel() const { return orig_level; }
 	inline const char* GetName() const { return name; }
 	inline const char* GetOrigName() const { return orig_name; }
 	inline const char* GetLastName() const { return lastname; }
@@ -960,6 +961,7 @@ protected:
 	bodyType orig_bodytype;
 	uint16 deity;
 	uint8 level;
+	uint8 orig_level;
 	uint32 npctype_id;
 	float x_pos;
 	float y_pos;

@@ -2641,6 +2641,26 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->Screech = effect_value;
 				break;
 
+			case SE_AlterNPCLevel:
+
+				if (IsNPC()){
+					if (!newbon->AlterNPCLevel 
+					|| ((effect_value < 0) && (newbon->AlterNPCLevel > effect_value)) 
+					|| ((effect_value > 0) && (newbon->AlterNPCLevel < effect_value))) {
+	
+						int16 tmp_lv =  GetOrigLevel() + effect_value;
+						if (tmp_lv < 1)
+							tmp_lv = 1;
+						else if (tmp_lv > 255)
+							tmp_lv = 255;
+						if ((GetLevel() != tmp_lv)){
+							newbon->AlterNPCLevel = effect_value;
+							SetLevel(tmp_lv);
+						}
+					}
+				}
+				break;
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
