@@ -840,7 +840,7 @@ uint32 GetPartialMagicRuneAmount(uint32 spell_id);
 int CalcPetHp(int levelb, int classb, int STA = 75);
 const char *GetRandPetName();
 int GetSpellEffectDescNum(uint16 spell_id);
-DmgShieldType GetDamageShieldType(uint16 spell_id);
+DmgShieldType GetDamageShieldType(uint16 spell_id, int32 DSType = 0);
 bool DetrimentalSpellAllowsRest(uint16 spell_id);
 uint32 GetNimbusEffect(uint16 spell_id);
 int32 GetFuriousBash(uint16 spell_id);

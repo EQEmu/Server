@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/13/2014 ==
+Kayen: For table 'npc_spell_effects_entries' setting se_max for damage shield effects (59) will now determine the DS Type (ie burning)
+Setting se_max to 1 for SkillDamageTaken effects (127) will allow for stackable mitigation/weakness same as quest function ModSkillDmgTaken.
+
+
 == 06/8/2014 ==
 KLS: Changed lua API: eq.get_globals(client, npc) has been removed.  Use eq.get_globals(npc, client) instead.
 There's a bug with something in gcc 4.6.3 (maybe other versions) on x86 that this is attempting to combat.

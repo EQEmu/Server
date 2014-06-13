@@ -1627,7 +1627,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				newbon->DamageShield += effect_value;
 				newbon->DamageShieldSpellID = spell_id;
-				newbon->DamageShieldType = GetDamageShieldType(spell_id);
+				//When using npc_spells_effects MAX value can be set to determine DS Type
+				if (IsAISpellEffect && max)
+					newbon->DamageShieldType = GetDamageShieldType(spell_id, max);
+				else
+					newbon->DamageShieldType = GetDamageShieldType(spell_id);
+				
 				break;
 			}
 
@@ -1635,7 +1640,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				newbon->ReverseDamageShield += effect_value;
 				newbon->ReverseDamageShieldSpellID = spell_id;
-				newbon->ReverseDamageShieldType = GetDamageShieldType(spell_id);
+
+				if (IsAISpellEffect && max)
+					newbon->ReverseDamageShieldType = GetDamageShieldType(spell_id, max);
+				else
+					newbon->ReverseDamageShieldType = GetDamageShieldType(spell_id);
 				break;
 			}
 
@@ -1999,10 +2008,21 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_SkillDamageTaken:
 			{
-				if(base2 == -1)
-					newbon->SkillDmgTaken[HIGHEST_SKILL+1] += effect_value;
-				else
-					newbon->SkillDmgTaken[base2] += effect_value;
+				//When using npc_spells_effects if MAX value set, use stackable quest based modifier.
+				if (IsAISpellEffect && max){
+					if(base2 == -1)
+						SkillDmgTaken_Mod[HIGHEST_SKILL+1] = effect_value;
+					else
+						SkillDmgTaken_Mod[base2] = effect_value;
+				}
+				else {
+
+					if(base2 == -1)
+						newbon->SkillDmgTaken[HIGHEST_SKILL+1] += effect_value;
+					else
+						newbon->SkillDmgTaken[base2] += effect_value;
+
+				}
 				break;
 			}
 
