@@ -318,6 +318,7 @@ public:
 	inline uint32 GetArmorTint(uint8 i) const { return armor_tint[(i < _MaterialCount) ? i : 0]; }
 	inline uint8 GetClass() const { return class_; }
 	inline uint8 GetLevel() const { return level; }
+	inline uint8 GetOrigLevel() const { return orig_level; }
 	inline const char* GetName() const { return name; }
 	inline const char* GetOrigName() const { return orig_name; }
 	inline const char* GetLastName() const { return lastname; }
@@ -609,9 +610,9 @@ public:
 	int16 GetModVulnerability(const uint8 resist);
 
 	void SetAllowBeneficial(bool value) { m_AllowBeneficial = value; }
-	bool GetAllowBeneficial() { return m_AllowBeneficial; }
+	bool GetAllowBeneficial() { if (m_AllowBeneficial || GetSpecialAbility(ALLOW_BENEFICIAL)){return true;} return false; }
 	void SetDisableMelee(bool value) { m_DisableMelee = value; }
-	bool IsMeleeDisabled() { return m_DisableMelee; }
+	bool IsMeleeDisabled() { if (m_DisableMelee || GetSpecialAbility(DISABLE_MELEE)){return true;} return false; }
 
 	bool IsOffHandAtk() const { return offhand; }
 	inline void OffHandAtk(bool val) { offhand = val; }
@@ -960,6 +961,7 @@ protected:
 	bodyType orig_bodytype;
 	uint16 deity;
 	uint8 level;
+	uint8 orig_level;
 	uint32 npctype_id;
 	float x_pos;
 	float y_pos;

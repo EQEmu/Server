@@ -125,7 +125,9 @@ enum {
 	NO_HARM_FROM_CLIENT = 35,
 	ALWAYS_FLEE = 36,
 	FLEE_PERCENT = 37,
-	MAX_SPECIAL_ATTACK = 38
+	ALLOW_BENEFICIAL = 38,
+	DISABLE_MELEE = 39,
+	MAX_SPECIAL_ATTACK = 40
 	
 };
 
@@ -347,6 +349,7 @@ struct StatBonuses {
 	uint16	MeleeRune[2];						// 0 = rune value 1 = buff slot
 	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
 	int8	Screech;							// -1 = Will be blocked if another Screech is +(1)
+	int16	AlterNPCLevel;						// amount of lvls +/-
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

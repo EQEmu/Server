@@ -1,5 +1,13 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/13/2014 ==
+Kayen: For table 'npc_spell_effects_entries' setting se_max for damage shield effects (59) will now determine the DS Type (ie burning)
+Setting se_max to 1 for SkillDamageTaken effects (127) will allow for stackable mitigation/weakness same as quest function ModSkillDmgTaken.
+Kayen: Implemented SE_AlterNPCLevel (not currently used on live). Will +/- to NPC level. When fade will revert back to original level.
+Kayen: Implemented 'special_abilities' 38 ALLOW_BENEFICIAL (Allows an NPC to recieve player buffs/heals)
+Kayen: Implemented 'special_abilities' 39 DISABLE_MELEE (Prevents NPC from auto attacking, will still aggro)
+Note: These two special abilities were previously implemented and still remain as quest functions. (SetDisableMelee() and SetAllowBeneficial())
+
 == 06/8/2014 ==
 KLS: Changed lua API: eq.get_globals(client, npc) has been removed.  Use eq.get_globals(npc, client) instead.
 There's a bug with something in gcc 4.6.3 (maybe other versions) on x86 that this is attempting to combat.
