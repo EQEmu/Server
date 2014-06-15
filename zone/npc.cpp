@@ -120,7 +120,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	if(mob != 0)
 		entity_list.RemoveEntity(mob->GetID());
 
-	int moblevel=GetLevel();
+	int moblevel = GetLevel();
 
 	NPCTypedata = d;
 	NPCTypedata_ours = nullptr;
@@ -178,27 +178,18 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	// Max Level and Stat Scaling if maxlevel is set
 	if(maxlevel > level)
-	{
 		LevelScale();
-	}
+	
+	CalcNPCResists(); //Set Resists if they are 0 in the DB
+	CalcNPCRegen(); //Set Mana and HP Regen Rates if they are 0 in the DB
 
-	// Set Resists if they are 0 in the DB
-	CalcNPCResists();
-
-	// Set Mana and HP Regen Rates if they are 0 in the DB
-	CalcNPCRegen();
-
-	// Set Min and Max Damage if they are 0 in the DB
-	if(max_dmg == 0){
+	if(max_dmg == 0) //Set Min and Max Damage if they are 0 in the DB
 		CalcNPCDamage();
-	}
 
 	accuracy_rating = d->accuracy_rating;
 	ATK = d->ATK;
-
 	CalcMaxMana();
 	SetMana(GetMaxMana());
-
 	MerchantType = d->merchanttype;
 	merchant_open = GetClass() == MERCHANT;
 	adventure_template_id = d->adventure_template;
@@ -206,7 +197,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	org_y = y;
 	org_z = z;
 	flymode = iflymode;
-	guard_x = -1;	//just some value we might be able to recongize as "unset"
+	guard_x = -1; //just some value we might be able to recongize as "unset"
 	guard_y = -1;
 	guard_z = -1;
 	guard_heading = 0;
@@ -223,18 +214,14 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	org_heading = heading;
 	p_depop = false;
 	loottable_id = d->loottable_id;
-
 	no_target_hotkey = d->no_target_hotkey;
-
 	primary_faction = 0;
 	SetNPCFactionID(d->npc_faction_id);
-
 	npc_spells_id = 0;
 	HasAISpell = false;
 	HasAISpellEffects = false;
 
-	if(GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs))
-	{
+	if(GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs)) {
 		LoadMercTypes();
 		LoadMercs();
 	}
@@ -271,53 +258,43 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	//give NPCs skill values...
 	int r;
-	for(r = 0; r <= HIGHEST_SKILL; r++) {
+	for(r = 0; r <= HIGHEST_SKILL; r++)
 		skills[r] = database.GetSkillCap(GetClass(),(SkillUseTypes)r,moblevel);
-	}
 
-	if(d->trap_template > 0)
-	{
+	if(d->trap_template > 0) {
 		std::map<uint32,std::list<LDoNTrapTemplate*> >::iterator trap_ent_iter;
 		std::list<LDoNTrapTemplate*> trap_list;
 
 		trap_ent_iter = zone->ldon_trap_entry_list.find(d->trap_template);
-		if(trap_ent_iter != zone->ldon_trap_entry_list.end())
-		{
+		if(trap_ent_iter != zone->ldon_trap_entry_list.end()) {
 			trap_list = trap_ent_iter->second;
-			if(trap_list.size() > 0)
-			{
+			if(trap_list.size() > 0) {
 				std::list<LDoNTrapTemplate*>::iterator trap_list_iter = trap_list.begin();
 				std::advance(trap_list_iter, MakeRandomInt(0, trap_list.size() - 1));
 				LDoNTrapTemplate* tt = (*trap_list_iter);
-				if(tt)
-				{
-					if((uint8)tt->spell_id > 0)
-					{
+				if(tt) {
+					if((uint8)tt->spell_id > 0) {
 						ldon_trapped = true;
 						ldon_spell_id = tt->spell_id;
 					}
-					else
-					{
+					else {
 						ldon_trapped = false;
 						ldon_spell_id = 0;
 					}
 
 					ldon_trap_type = (uint8)tt->type;
-					if(tt->locked > 0)
-					{
+					if(tt->locked > 0) {
 						ldon_locked = true;
 						ldon_locked_skill = tt->skill;
 					}
-					else
-					{
+					else {
 						ldon_locked = false;
 						ldon_locked_skill = 0;
 					}
 					ldon_trap_detected = 0;
 				}
 			}
-			else
-			{
+			else {
 				ldon_trapped = false;
 				ldon_trap_type = 0;
 				ldon_spell_id = 0;
@@ -326,8 +303,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 				ldon_trap_detected = 0;
 			}
 		}
-		else
-		{
+		else {
 			ldon_trapped = false;
 			ldon_trap_type = 0;
 			ldon_spell_id = 0;
@@ -336,8 +312,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 			ldon_trap_detected = 0;
 		}
 	}
-	else
-	{
+	else {
 		ldon_trapped = false;
 		ldon_trap_type = 0;
 		ldon_spell_id = 0;
@@ -357,8 +332,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	CalcBonuses();
 }
 
-NPC::~NPC()
-{
+NPC::~NPC() {
 	AI_Stop();
 
 	if(proximity != nullptr) {
@@ -369,25 +343,25 @@ NPC::~NPC()
 	safe_delete(NPCTypedata_ours);
 
 	{
-	ItemList::iterator cur,end;
-	cur = itemlist.begin();
-	end = itemlist.end();
-	for(; cur != end; ++cur) {
-		ServerLootItem_Struct* item = *cur;
-		safe_delete(item);
-	}
-	itemlist.clear();
+		ItemList::iterator cur,end;
+		cur = itemlist.begin();
+		end = itemlist.end();
+		for(; cur != end; ++cur) {
+			ServerLootItem_Struct* item = *cur;
+			safe_delete(item);
+		}
+		itemlist.clear();
 	}
 
 	{
-	std::list<struct NPCFaction*>::iterator cur,end;
-	cur = faction_list.begin();
-	end = faction_list.end();
-	for(; cur != end; ++cur) {
-		struct NPCFaction* fac = *cur;
-		safe_delete(fac);
-	}
-	faction_list.clear();
+		std::list<struct NPCFaction*>::iterator cur,end;
+		cur = faction_list.begin();
+		end = faction_list.end();
+		for(; cur != end; ++cur) {
+			struct NPCFaction* fac = *cur;
+			safe_delete(fac);
+		}
+		faction_list.clear();
 	}
 
 	safe_delete(reface_timer);
@@ -403,16 +377,14 @@ void NPC::SetTarget(Mob* mob) {
 	//our target is already set, do not turn from the course, unless our current target is dead.
 	if(GetSwarmInfo() && GetTarget() && (GetTarget()->GetHP() > 0)) {
 		Mob *targ = entity_list.GetMob(GetSwarmInfo()->target);
-		if(targ != mob){
+		if(targ != mob)
 			return;
-		}
 	}
 
-	if (mob) {
+	if (mob)
 		SetAttackTimer();
-	} else {
-		ranged_timer.Disable();
-		//attack_timer.Disable();
+	else {
+		ranged_timer.Disable(); //attack_timer.Disable();
 		attack_dw_timer.Disable();
 	}
 	Mob::SetTarget(mob);
@@ -424,9 +396,8 @@ ServerLootItem_Struct* NPC::GetItem(int slot_id) {
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
-		if (item->equipSlot == slot_id) {
+		if (item->equipSlot == slot_id)
 			return item;
-		}
 	}
 	return(nullptr);
 }
@@ -442,8 +413,7 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 			return;
 		}
 		else if (item->item_id == item_id && item->equipSlot == slot && quantity >= 1) {
-			//std::cout<<"NPC::RemoveItem"<<" equipSlot:"<<iterator.GetData()->equipSlot<<" quantity:"<< quantity<<std::endl; // iterator undefined [CODEBUG]
-			if (item->charges <= quantity)
+			if (item->charges <= quantity) //std::cout<<"NPC::RemoveItem"<<" equipSlot:"<<iterator.GetData()->equipSlot<<" quantity:"<< quantity<<std::endl; // iterator undefined [CODEBUG]
 				itemlist.erase(cur);
 			else
 				item->charges -= quantity;
@@ -452,8 +422,7 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 	}
 }
 
-void NPC::CheckMinMaxLevel(Mob *them)
-{
+void NPC::CheckMinMaxLevel(Mob *them) {
 	if(them == nullptr || !them->IsClient())
 		return;
 
@@ -461,13 +430,11 @@ void NPC::CheckMinMaxLevel(Mob *them)
 	uint8 material;
 
 	std::list<ServerLootItem_Struct*>::iterator cur = itemlist.begin();
-	while(cur != itemlist.end())
-	{
+	while(cur != itemlist.end()) {
 		if(!(*cur))
 			return;
 
-		if(themlevel < (*cur)->minlevel || themlevel > (*cur)->maxlevel)
-		{
+		if(themlevel < (*cur)->minlevel || themlevel > (*cur)->maxlevel) {
 			material = Inventory::CalcMaterialFromSlot((*cur)->equipSlot);
 			if(material != 0xFF)
 				SendWearChange(material);
@@ -502,17 +469,11 @@ void NPC::QueryLoot(Client* to) {
 		const Item_Struct* item = database.GetItem((*cur)->item_id);
 		if (item)
 			if (to->GetClientVersion() >= EQClientRoF)
-			{
 				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
-			}
 			else if (to->GetClientVersion() >= EQClientSoF)
-			{
 				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X00000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
-			}
 			else
-			{
 				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
-			}
 		else
 			LogFile->write(EQEMuLog::Error, "Database error, invalid item");
 		x++;
@@ -556,23 +517,17 @@ void NPC::RemoveCash() {
 	platinum = 0;
 }
 
-bool NPC::Process()
-{
-	if (IsStunned() && stunned_timer.Check())
-	{
+bool NPC::Process() {
+	if (IsStunned() && stunned_timer.Check()) {
 		this->stunned = false;
 		this->stunned_timer.Disable();
 		this->spun_timer.Disable();
 	}
 
-	if (p_depop)
-	{
+	if (p_depop) {
 		Mob* owner = entity_list.GetMob(this->ownerid);
-		if (owner != 0)
-		{
-			//if(GetBodyType() != BT_SwarmPet)
-			// owner->SetPetID(0);
-			this->ownerid = 0;
+		if (owner != 0) {
+			this->ownerid = 0; //if(GetBodyType() != BT_SwarmPet) - owner->SetPetID(0);
 			this->petid = 0;
 		}
 		return false;
@@ -580,8 +535,7 @@ bool NPC::Process()
 
 	SpellProcess();
 
-	if(tic_timer.Check())
-	{
+	if(tic_timer.Check()) {
 		BuffProcess();
 
 		if(curfp)
@@ -593,9 +547,8 @@ bool NPC::Process()
 			bonus+=3;
 
 		int32 OOCRegen = 0;
-		if(oocregen > 0){ //should pull from Mob class
-			OOCRegen += GetMaxHP() * oocregen / 100;
-			}
+		if(oocregen > 0) //should pull from Mob class
+			OOCRegen += (GetMaxHP() * oocregen / 100);
 		//Lieka Edit:Fixing NPC regen.NPCs should regen to full during a set duration, not based on their HPs.Increase NPC's HPs by % of total HPs / tick.
 		if((GetHP() < GetMaxHP()) && !IsPet()) {
 			if(!IsEngaged()) {//NPC out of combat
@@ -603,35 +556,33 @@ bool NPC::Process()
 					SetHP(GetHP() + hp_regen);
 				else
 					SetHP(GetHP() + OOCRegen);
-			} else
-				SetHP(GetHP()+hp_regen);
-		} else if(GetHP() < GetMaxHP() && GetOwnerID() !=0) {
-			if(!IsEngaged()) //pet
-				SetHP(GetHP()+hp_regen+bonus+(GetLevel()/5));
+			}
 			else
-				SetHP(GetHP()+hp_regen+bonus);
-		} else
-			SetHP(GetHP()+hp_regen);
-
-		if(GetMana() < GetMaxMana()) {
-			SetMana(GetMana()+mana_regen+bonus);
+				SetHP(GetHP()+hp_regen);
 		}
+		else if(GetHP() < GetMaxHP() && GetOwnerID() !=0) {
+			if(!IsEngaged()) //pet
+				SetHP(GetHP() + hp_regen + bonus + (GetLevel() / 5));
+			else
+				SetHP(GetHP() + hp_regen+bonus);
+		}
+		else
+			SetHP(GetHP() + hp_regen);
+
+		if(GetMana() < GetMaxMana())
+			SetMana(GetMana() + mana_regen+bonus);
 
 
-		if(zone->adv_data && !p_depop)
-		{
+		if(zone->adv_data && !p_depop) {
 			ServerZoneAdventureDataReply_Struct* ds = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if(ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID())
-			{
+			if(ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID()) {
 				Mob *o = GetOwner();
-				if(o && o->IsClient())
-				{
+				if(o && o->IsClient()) {
 					float x_diff = ds->dest_x - GetX();
 					float y_diff = ds->dest_y - GetY();
 					float z_diff = ds->dest_z - GetZ();
 					float dist = ((x_diff * x_diff) + (y_diff * y_diff) + (z_diff * z_diff));
-					if(dist < RuleR(Adventure, DistanceForRescueComplete))
-					{
+					if(dist < RuleR(Adventure, DistanceForRescueComplete)) {
 						zone->DoAdventureCountIncrease();
 						Say("You don't know what this means to me. Thank you so much for finding and saving me from"
 							" this wretched place. I'll find my way from here.");
@@ -643,9 +594,8 @@ bool NPC::Process()
 	}
 
 	if (sendhpupdate_timer.Check() && (IsTargeted() || (IsPet() && GetOwner() && GetOwner()->IsClient()))) {
-		if(!IsFullHP || cur_hp<max_hp){
+		if(!IsFullHP || cur_hp<max_hp)
 			SendHPUpdate();
-		}
 	}
 
 	if(HasVirus()) {
@@ -653,9 +603,8 @@ bool NPC::Process()
 			viral_timer_counter++;
 			for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
 				if(viral_spells[i])	{
-					if(viral_timer_counter % spells[viral_spells[i]].viral_timer == 0) {
+					if(viral_timer_counter % spells[viral_spells[i]].viral_timer == 0)
 						SpreadVirus(viral_spells[i], viral_spells[i+1]);
-					}
 				}
 			}
 		}
@@ -686,25 +635,17 @@ bool NPC::Process()
 		return true;
 	}
 
-	if (enraged_timer.Check()){
+	if (enraged_timer.Check())
 		ProcessEnrage();
-	}
-
-	//Handle assists...
-	if(assist_timer.Check() && IsEngaged() && !Charmed()) {
+		
+	if(assist_timer.Check() && IsEngaged() && !Charmed()) //Handle assists...
 		entity_list.AIYellForHelp(this, GetTarget());
-	}
 
-	if(qGlobals)
-	{
+	if(qGlobals) {
 		if(qglobal_purge_timer.Check())
-		{
 			qGlobals->PurgeExpiredGlobals();
-		}
 	}
-
 	AI_Process();
-
 	return true;
 }
 
@@ -718,69 +659,66 @@ void NPC::Depop(bool StartSpawnTimer) {
 		this->DoNPCEmote(ONDESPAWN,emoteid);
 	p_depop = true;
 	if (StartSpawnTimer) {
-		if (respawn2 != 0) {
+		if (respawn2 != 0)
 			respawn2->DeathReset();
-		}
 	}
 }
 
 bool NPC::DatabaseCastAccepted(int spell_id) {
 	for (int i=0; i < 12; i++) {
 		switch(spells[spell_id].effectid[i]) {
-		case SE_Stamina: {
-			if(IsEngaged() && GetHPRatio() < 100)
-				return true;
-			else
-				return false;
-			break;
-		}
-		case SE_CurrentHPOnce:
-		case SE_CurrentHP: {
-			if(this->GetHPRatio() < 100 && spells[spell_id].buffduration == 0)
-				return true;
-			else
-				return false;
-			break;
-		}
-
-		case SE_HealOverTime: {
-			if(this->GetHPRatio() < 100)
-				return true;
-			else
-				return false;
-			break;
-		}
-		case SE_DamageShield: {
-			return true;
-		}
-		case SE_NecPet:
-		case SE_SummonPet: {
-			if(GetPet()){
-#ifdef SPELLQUEUE
-				printf("%s: Attempted to make a second pet, denied.\n",GetName());
-#endif
-				return false;
+			case SE_Stamina: {
+				if(IsEngaged() && GetHPRatio() < 100)
+					return true;
+				else
+					return false;
+				break;
 			}
-			break;
-		}
-		case SE_LocateCorpse:
-		case SE_SummonCorpse: {
-			return false; //Pfft, npcs don't need to summon corpses/locate corpses!
-			break;
-		}
-		default:
-			if(spells[spell_id].goodEffect == 1 && !(spells[spell_id].buffduration == 0 && this->GetHPRatio() == 100) && !IsEngaged())
+			case SE_CurrentHPOnce:
+			case SE_CurrentHP: {
+				if(this->GetHPRatio() < 100 && spells[spell_id].buffduration == 0)
+					return true;
+				else
+					return false;
+				break;
+			}
+			case SE_HealOverTime: {
+				if(this->GetHPRatio() < 100)
+					return true;
+				else
+					return false;
+				break;
+			}
+			case SE_DamageShield: {
 				return true;
-			return false;
+			}
+			case SE_NecPet:
+			case SE_SummonPet: {
+				if(GetPet()) {
+#ifdef SPELLQUEUE
+					printf("%s: Attempted to make a second pet, denied.\n",GetName());
+#endif
+					return false;
+				}
+				break;
+			}
+			case SE_LocateCorpse:
+			case SE_SummonCorpse: {
+				return false; //Pfft, npcs don't need to summon corpses/locate corpses!
+				break;
+			}
+			default:
+				if(spells[spell_id].goodEffect == 1 && !(spells[spell_id].buffduration == 0 && this->GetHPRatio() == 100) && !IsEngaged())
+					return true;
+				return false;
 		}
 	}
-	return false;
+		return false;
 }
 
 NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z, float in_heading, Client* client) {
-	if(spawncommand == 0 || spawncommand[0] == 0) {
+	if(spawncommand == 0 || spawncommand[0] == 0)
 		return 0;
-	}
 	else {
 		Seperator sep(spawncommand);
 		//Lets see if someone didn't fill out the whole #spawn function properly
@@ -815,91 +753,82 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 			int tmplevel = atoi(sep.arg[2]);
 			switch(atoi(sep.arg[5]))
 			{
-			case WARRIOR:
-				if (tmplevel < 20)
-					multiplier = 22;
-				else if (tmplevel < 30)
-					multiplier = 23;
-				else if (tmplevel < 40)
-					multiplier = 25;
-				else if (tmplevel < 53)
-					multiplier = 27;
-				else if (tmplevel < 57)
-					multiplier = 28;
-				else
-					multiplier = 30;
-				break;
-
-			case DRUID:
-			case CLERIC:
-			case SHAMAN:
-				multiplier = 15;
-				break;
-
-			case PALADIN:
-			case SHADOWKNIGHT:
-				if (tmplevel < 35)
-					multiplier = 21;
-				else if (tmplevel < 45)
-					multiplier = 22;
-				else if (tmplevel < 51)
-					multiplier = 23;
-				else if (tmplevel < 56)
-					multiplier = 24;
-				else if (tmplevel < 60)
-					multiplier = 25;
-				else
-					multiplier = 26;
-				break;
-
-			case MONK:
-			case BARD:
-			case ROGUE:
-			//case BEASTLORD:
-				if (tmplevel < 51)
-					multiplier = 18;
-				else if (tmplevel < 58)
-					multiplier = 19;
-				else
-					multiplier = 20;
-				break;
-
-			case RANGER:
-				if (tmplevel < 58)
-					multiplier = 20;
-				else
-					multiplier = 21;
-				break;
-
-			case MAGICIAN:
-			case WIZARD:
-			case NECROMANCER:
-			case ENCHANTER:
-				multiplier = 12;
-				break;
-
-			default:
-				if (tmplevel < 35)
-					multiplier = 21;
-				else if (tmplevel < 45)
-					multiplier = 22;
-				else if (tmplevel < 51)
-					multiplier = 23;
-				else if (tmplevel < 56)
-					multiplier = 24;
-				else if (tmplevel < 60)
-					multiplier = 25;
-				else
-					multiplier = 26;
-				break;
+				case WARRIOR:
+					if (tmplevel < 20)
+						multiplier = 22;
+					else if (tmplevel < 30)
+						multiplier = 23;
+					else if (tmplevel < 40)
+						multiplier = 25;
+					else if (tmplevel < 53)
+						multiplier = 27;
+					else if (tmplevel < 57)
+						multiplier = 28;
+					else
+						multiplier = 30;
+					break;
+				case DRUID:
+				case CLERIC:
+				case SHAMAN:
+					multiplier = 15;
+					break;
+				case PALADIN:
+				case SHADOWKNIGHT:
+					if (tmplevel < 35)
+						multiplier = 21;
+					else if (tmplevel < 45)
+						multiplier = 22;
+					else if (tmplevel < 51)
+						multiplier = 23;
+					else if (tmplevel < 56)
+						multiplier = 24;
+					else if (tmplevel < 60)
+						multiplier = 25;
+					else
+						multiplier = 26;
+					break;
+				case MONK:
+				case BARD:
+				case ROGUE: //case BEASTLORD:
+					if (tmplevel < 51)
+						multiplier = 18;
+					else if (tmplevel < 58)
+						multiplier = 19;
+					else
+						multiplier = 20;
+					break;
+				case RANGER:
+					if (tmplevel < 58)
+						multiplier = 20;
+					else
+						multiplier = 21;
+					break;
+				case MAGICIAN:
+				case WIZARD:
+				case NECROMANCER:
+				case ENCHANTER:
+					multiplier = 12;
+					break;
+				default:
+					if (tmplevel < 35)
+						multiplier = 21;
+					else if (tmplevel < 45)
+						multiplier = 22;
+					else if (tmplevel < 51)
+						multiplier = 23;
+					else if (tmplevel < 56)
+						multiplier = 24;
+					else if (tmplevel < 60)
+						multiplier = 25;
+					else
+						multiplier = 26;
+					break;
 			}
-			sprintf(sep.arg[4],"%i",5+multiplier*atoi(sep.arg[2])+multiplier*atoi(sep.arg[2])*75/300);
+			sprintf(sep.arg[4],"%i",5 + multiplier * atoi(sep.arg[2]) + multiplier * atoi(sep.arg[2]) * 75 / 300);
 		}
 
-		// Autoselect NPC Gender
-		if (sep.arg[5][0] == 0) {
-			sprintf(sep.arg[5], "%i", (int) Mob::GetDefaultGender(atoi(sep.arg[1])));
-		}
+		if (sep.arg[5][0] == 0)
+			sprintf(sep.arg[5], "%i", (int) Mob::GetDefaultGender(atoi(sep.arg[1]))); //Autoselect NPC Gender
 
 		//Time to create the NPC!!
 		NPCType* npc_type = new NPCType;
@@ -940,8 +869,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 		entity_list.AddNPC(npc);
 
 		if (client) {
-			// Notify client of spawn data
-			client->Message(0, "New spawn:");
+			client->Message(0, "New spawn:"); //Notify client of spawn data
 			client->Message(0, "Name: %s", npc->name);
 			client->Message(0, "Race: %u", npc->race);
 			client->Message(0, "Level: %u", npc->level);
@@ -970,28 +898,19 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 		case 0: { // Create a new NPC and add all spawn related data
 			uint32 npc_type_id = 0;
 			uint32 spawngroupid;
-			if (extra && c && c->GetZoneID())
-			{
+			if (extra && c && c->GetZoneID()) {
 				// Set an npc_type ID within the standard range for the current zone if possible (zone_id * 1000)
 				int starting_npc_id = c->GetZoneID() * 1000;
 				if (RunQuery(query, MakeAnyLenString(&query, "SELECT MAX(id) FROM npc_types WHERE id >= %i AND id < %i", starting_npc_id, (starting_npc_id + 1000)), errbuf, &result)) {
 					row = mysql_fetch_row(result);
-					if(row)
-					{
-						if (row[0])
-						{
+					if(row)	{
+						if (row[0])	{
 							npc_type_id = atoi(row[0]) + 1;
-							// Prevent the npc_type id from exceeding the range for this zone
-							if (npc_type_id >= (starting_npc_id + 1000))
-							{
+							if (npc_type_id >= (starting_npc_id + 1000)) //Prevent the npc_type id from exceeding the range for this zone
 								npc_type_id = 0;
-							}
 						}
 						else
-						{
-							// row[0] is nullptr - No npc_type IDs set in this range yet
-							npc_type_id = starting_npc_id;
-						}
+							npc_type_id = starting_npc_id; //row[0] is nullptr - No npc_type IDs set in this range yet
 					}
 
 					safe_delete_array(query);
@@ -1000,45 +919,47 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			}
 			char tmpstr[64];
 			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->GetName(), sizeof(tmpstr)));
-			if (npc_type_id)
-			{
+			if (npc_type_id) {
 				if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (id, name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(%i,\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
 						LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 					safe_delete(query);
 					return false;
 				}
 			}
-			else
-			{
+			else {
 				if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
 						LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 					safe_delete(query);
 					return false;
 				}
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			snprintf(tmpstr, sizeof(tmpstr), "%s-%s", zone, spawn->GetName());
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (id, name) values(%i, '%s')", tmp, tmpstr), errbuf, 0, 0, &spawngroupid)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), 1200, spawn->GetHeading(), spawngroupid), errbuf, 0, 0, &tmp)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawnentry (spawngroupID, npcID, chance) values(%i, %i, %i)", spawngroupid, npc_type_id, 100), errbuf, 0)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			return true;
 			break;
@@ -1048,11 +969,12 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			char tmpstr[64];
 			snprintf(tmpstr, sizeof(tmpstr), "%s%s%i", zone, spawn->GetName(),Timer::GetCurrentTime());
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (name) values('%s')", tmpstr), errbuf, 0, 0, &last_insert_id)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 
 			uint32 respawntime = 0;
@@ -1064,26 +986,29 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			else
 				respawntime = 1200;
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) values('%s', %u, %f, %f, %f, %i, %f, %i)", zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), respawntime, spawn->GetHeading(), last_insert_id), errbuf, 0, 0, &spawnid)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawnentry (spawngroupID, npcID, chance) values(%i, %i, %i)", last_insert_id, tmp2, 100), errbuf, 0)) {
-					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
+				LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			return spawnid;
 			break;
 		}
 		case 2: { // Update npc_type appearance and other data on targeted spawn
 			if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET name=\"%s\", level=%i, race=%i, class=%i, hp=%i, gender=%i, texture=%i, helmtexture=%i, size=%i, loottable_id=%i, merchant_id=%i, face=%i, WHERE id=%i", spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID()), errbuf, 0)) {
-				if(c) c->LogSQL(query);
+				if(c)
+					c->LogSQL(query);
 				safe_delete_array(query);
 				return true;
 			}
@@ -1101,27 +1026,33 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			safe_delete_array(query);
 
 			row = mysql_fetch_row(result);
-			if (row == nullptr) return false;
-			if (row[0]) tmp = atoi(row[0]);
-			if (row[1]) tmp2 = atoi(row[1]);
+			if (row == nullptr)
+				return false;
+			if (row[0])
+				tmp = atoi(row[0]);
+			if (row[1])
+				tmp2 = atoi(row[1]);
 
 			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'", tmp), errbuf,0)) {
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawngroup WHERE id='%i'", tmp2), errbuf,0)) {
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2), errbuf,0)) {
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			return true;
 
@@ -1136,34 +1067,41 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			safe_delete_array(query);
 
 			row = mysql_fetch_row(result);
-			if (row == nullptr) return false;
-			if (row[0]) tmp = atoi(row[0]);
-			if (row[1]) tmp2 = atoi(row[1]);
+			if (row == nullptr)
+				return false;
+			if (row[0])
+				tmp = atoi(row[0]);
+			if (row[1])
+				tmp2 = atoi(row[1]);
 			mysql_free_result(result);
 
 			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn2 WHERE id='%i'", tmp), errbuf,0)) {
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawngroup WHERE id='%i'", tmp2), errbuf,0)) {
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawnentry WHERE spawngroupID='%i'", tmp2), errbuf,0)) {
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			if (!RunQuery(query, MakeAnyLenString(&query, "DELETE FROM npc_types WHERE id='%i'", spawn->GetNPCTypeID()), errbuf,0)) {
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 			return true;
 			break;
@@ -1173,12 +1111,13 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
 
 			return true;
 			break;
-			}
+		}
 		case 6: { // add npc_type
 			uint32 npc_type_id;
 			char tmpstr[64];
@@ -1187,9 +1126,11 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 				safe_delete(query);
 				return false;
 			}
-			if(c) c->LogSQL(query);
+			if(c)
+				c->LogSQL(query);
 			safe_delete_array(query);
-			if(c) c->Message(0, "%s npc_type ID %i created successfully!", tmpstr, npc_type_id);
+			if(c)
+				c->Message(0, "%s npc_type ID %i created successfully!", tmpstr, npc_type_id);
 			return true;
 			break;
 		}
@@ -1197,8 +1138,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 	return false;
 }
 
-int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
-{
+int32 NPC::GetEquipmentMaterial(uint8 material_slot) const {
 	if (material_slot >= _MaterialCount)
 		return 0;
 
@@ -1207,26 +1147,22 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 		return 0;
 	if(equipment[inv_slot] == 0) {
 		switch(material_slot) {
-		case MaterialHead:
-			return helmtexture;
-		case MaterialChest:
-			return texture;
-		case MaterialPrimary:
-			return d_melee_texture1;
-		case MaterialSecondary:
-			return d_melee_texture2;
-		default:
-			//they have nothing in the slot, and its not a special slot... they get nothing.
-			return(0);
+			case MaterialHead:
+				return helmtexture;
+			case MaterialChest:
+				return texture;
+			case MaterialPrimary:
+				return d_melee_texture1;
+			case MaterialSecondary:
+				return d_melee_texture2;
+			default:
+				return(0); //they have nothing in the slot, and its not a special slot... they get nothing.
 		}
 	}
-
-	//they have some loot item in this slot, pass it up to the default handler
-	return(Mob::GetEquipmentMaterial(material_slot));
+	return(Mob::GetEquipmentMaterial(material_slot)); //they have some loot item in this slot, pass it up to the default handler
 }
 
-uint32 NPC::GetMaxDamage(uint8 tlevel)
-{
+uint32 NPC::GetMaxDamage(uint8 tlevel) {
 	uint32 dmg = 0;
 	if (tlevel < 40)
 		dmg = tlevel*2+2;
@@ -1240,15 +1176,11 @@ uint32 NPC::GetMaxDamage(uint8 tlevel)
 }
 
 void NPC::PickPocket(Client* thief) {
-
 	thief->CheckIncreaseSkill(SkillPickPockets, nullptr, 5);
-
-	//make sure were allowed to targte them:
-	int olevel = GetLevel();
+	int olevel = GetLevel(); //make sure were allowed to targte them:
 	if(olevel > (thief->GetLevel() + THIEF_PICKPOCKET_OVER)) {
 		thief->Message(13, "You are too inexperienced to pick pocket this target");
-		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
-		//should we check aggro
+		thief->SendPickPocketResponse(this, 0, PickPocketFailed); //should we check aggro
 		return;
 	}
 
@@ -1279,26 +1211,20 @@ void NPC::PickPocket(Client* thief) {
 	memset(slot,0,50);
 	memset(steal_items,0,50);
 	memset(charges,0,50);
-	//Determine wheter to steal money or an item.
-	bool no_coin = ((money[0] + money[1] + money[2] + money[3]) == 0);
+	bool no_coin = ((money[0] + money[1] + money[2] + money[3]) == 0); //Determine wheter to steal money or an item.
 	bool steal_item = (MakeRandomInt(0, 99) < 50 || no_coin);
-	if (steal_item)
-	{
+	if (steal_item) {
 		ItemList::iterator cur,end;
 		cur = itemlist.begin();
 		end = itemlist.end();
 		for(; cur != end && x < 49; ++cur) {
 			ServerLootItem_Struct* citem = *cur;
 			const Item_Struct* item = database.GetItem(citem->item_id);
-			if (item)
-			{
+			if (item) {
 				inst = database.CreateItem(item, citem->charges);
 				bool is_arrow = (item->ItemType == ItemTypeArrow) ? true : false;
 				int slot_id = thief->GetInv().FindFreeSlot(false, true, inst->GetItem()->Size, is_arrow);
-				if (/*!Equipped(item->ID) &&*/
-					!item->Magic && item->NoDrop != 0 && !inst->IsType(ItemClassContainer) && slot_id != SLOT_INVALID
-					/*&& steal_skill > item->StealSkill*/ )
-				{
+				if (!item->Magic && item->NoDrop != 0 && !inst->IsType(ItemClassContainer) && slot_id != SLOT_INVALID) {//!Equipped(item->ID) && -- && steal_skill > item->StealSkill
 					slot[x] = slot_id;
 					steal_items[x] = item->ID;
 					if (inst->IsStackable())
@@ -1309,17 +1235,13 @@ void NPC::PickPocket(Client* thief) {
 				}
 			}
 		}
-		if (x > 0)
-		{
+		if (x > 0) {
 			int random = MakeRandomInt(0, x-1);
 			inst = database.CreateItem(steal_items[random], charges[random]);
-			if (inst)
-			{
+			if (inst) {
 				const Item_Struct* item = inst->GetItem();
-				if (item)
-				{
-					if (/*item->StealSkill || */steal_skill >= stealchance)
-					{
+				if (item) {
+					if (steal_skill >= stealchance) {/*item->StealSkill || */
 						thief->PutItemInInventory(slot[random], *inst);
 						thief->SendItemPacket(slot[random], inst, ItemPacketTrade);
 						RemoveItem(item->ID);
@@ -1335,89 +1257,73 @@ void NPC::PickPocket(Client* thief) {
 				steal_item = false;
 		}
 		else if (!no_coin)
-		{
 			steal_item = false;
-		}
-		else
-		{
+		else {
 			thief->Message(0, "This target's pockets are empty");
 			thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		}
 	}
-	if (!steal_item) //Steal money
-	{
+	if (!steal_item) {//Steal money
 		uint32 amt = MakeRandomInt(1, (steal_skill/25)+1);
 		int steal_type = 0;
-		if (!money[0])
-		{
+		if (!money[0]) {
 			steal_type = 1;
-			if (!money[1])
-			{
+			if (!money[1]) {
 				steal_type = 2;
 				if (!money[2])
-				{
 					steal_type = 3;
-				}
 			}
 		}
 
-		if (MakeRandomInt(0, 100) <= stealchance)
-		{
-			switch (steal_type)
-			{
+		if (MakeRandomInt(0, 100) <= stealchance) {
+			switch (steal_type)	{
 				case 0:{
-						if (amt > GetPlatinum())
-							amt = GetPlatinum();
-						SetPlatinum(GetPlatinum()-amt);
-						thief->AddMoneyToPP(0,0,0,amt,false);
-						thief->SendPickPocketResponse(this, amt, PickPocketPlatinum);
-						break;
+					if (amt > GetPlatinum())
+						amt = GetPlatinum();
+					SetPlatinum(GetPlatinum()-amt);
+					thief->AddMoneyToPP(0,0,0,amt,false);
+					thief->SendPickPocketResponse(this, amt, PickPocketPlatinum);
+					break;
 				}
 				case 1:{
-						if (amt > GetGold())
-							amt = GetGold();
-						SetGold(GetGold()-amt);
-						thief->AddMoneyToPP(0,0,amt,0,false);
-						thief->SendPickPocketResponse(this, amt, PickPocketGold);
-						break;
+					if (amt > GetGold())
+						amt = GetGold();
+					SetGold(GetGold()-amt);
+					thief->AddMoneyToPP(0,0,amt,0,false);
+					thief->SendPickPocketResponse(this, amt, PickPocketGold);
+					break;
 				}
 				case 2:{
-						if (amt > GetSilver())
-							amt = GetSilver();
-						SetSilver(GetSilver()-amt);
-						thief->AddMoneyToPP(0,amt,0,0,false);
-						thief->SendPickPocketResponse(this, amt, PickPocketSilver);
-						break;
+					if (amt > GetSilver())
+						amt = GetSilver();
+					SetSilver(GetSilver()-amt);
+					thief->AddMoneyToPP(0,amt,0,0,false);
+					thief->SendPickPocketResponse(this, amt, PickPocketSilver);
+					break;
 				}
 				case 3:{
-						if (amt > GetCopper())
-							amt = GetCopper();
-						SetCopper(GetCopper()-amt);
-						thief->AddMoneyToPP(amt,0,0,0,false);
-						thief->SendPickPocketResponse(this, amt, PickPocketCopper);
-						break;
+					if (amt > GetCopper())
+						amt = GetCopper();
+					SetCopper(GetCopper()-amt);
+					thief->AddMoneyToPP(amt,0,0,0,false);
+					thief->SendPickPocketResponse(this, amt, PickPocketCopper);
+					break;
 				}
 			}
 		}
 		else
-		{
 			thief->SendPickPocketResponse(this, 0, PickPocketFailed);
-		}
 	}
 	safe_delete(inst);
 }
 
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {
 	if(reset)
-	{
 		ClearSpecialAbilities();
-	}
 
 	const char* orig_parse = parse;
-	while (*parse)
-	{
-		switch(*parse)
-		{
+	while (*parse) {
+		switch(*parse) {
 			case 'E':
 				SetSpecialAbility(SPECATK_ENRAGE, remove ? 0 : 1);
 				break;
@@ -1434,21 +1340,21 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 				if(remove) {
 					SetSpecialAbility(SPECATK_SUMMON, 0);
 					StopSpecialAbilityTimer(SPECATK_SUMMON);
-				} else {
-					SetSpecialAbility(SPECATK_SUMMON, 1);
 				}
+				else
+					SetSpecialAbility(SPECATK_SUMMON, 1);
 			break;
 			case 'T':
 				SetSpecialAbility(SPECATK_TRIPLE, remove ? 0 : 1);
 				break;
 			case 'Q':
 				//quad requires triple to work properly
-				if(remove) {
+				if(remove)
 					SetSpecialAbility(SPECATK_QUAD, 0);
-				} else {
+				else {
 					SetSpecialAbility(SPECATK_TRIPLE, 1);
 					SetSpecialAbility(SPECATK_QUAD, 1);
-					}
+				}
 				break;
 			case 'b':
 				SetSpecialAbility(SPECATK_BANE, remove ? 0 : 1);
@@ -1548,23 +1454,16 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 		parse++;
 	}
 
-	if(permtag == 1 && this->GetNPCTypeID() > 0)
-	{
+	if(permtag == 1 && this->GetNPCTypeID() > 0) {
 		if(database.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
-		{
 			LogFile->write(EQEMuLog::Normal, "NPCTypeID: %i flagged to '%s' for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
-		}
 	}
 }
 
 bool Mob::HasNPCSpecialAtk(const char* parse) {
-
 	bool HasAllAttacks = true;
-
-	while (*parse && HasAllAttacks == true)
-	{
-		switch(*parse)
-		{
+	while (*parse && HasAllAttacks == true) {
+		switch(*parse) {
 			case 'E':
 				if (!GetSpecialAbility(SPECATK_ENRAGE))
 					HasAllAttacks = false;
@@ -1690,16 +1589,14 @@ bool Mob::HasNPCSpecialAtk(const char* parse) {
 					HasAllAttacks = false;
 				break;
 			case 'o':
-				if(!GetSpecialAbility(DESTRUCTIBLE_OBJECT))
-				{
+				if(!GetSpecialAbility(DESTRUCTIBLE_OBJECT)) {
 					HasAllAttacks = false;
 					SetDestructibleObject(false);
 				}
 				break;
 			case 'Z':
-				if(!GetSpecialAbility(NO_HARM_FROM_CLIENT)){
+				if(!GetSpecialAbility(NO_HARM_FROM_CLIENT))
 					HasAllAttacks = false;
-				}
 				break;
 			case 'e':
 				if(!GetSpecialAbility(ALWAYS_FLEE))
@@ -1719,26 +1616,22 @@ bool Mob::HasNPCSpecialAtk(const char* parse) {
 	return HasAllAttacks;
 }
 
-void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
-{
+void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 	Mob::FillSpawnStruct(ns, ForWho);
 
 	//Basic settings to make sure swarm pets work properly.
-	if  (GetSwarmOwner()) {
+	if(GetSwarmOwner()) {
 		Client *c = entity_list.GetClientByID(GetSwarmOwner());
 			if(c) {
-				SetAllowBeneficial(1); //Allow client cast swarm pets to be heal/buffed.
-				//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
+				SetAllowBeneficial(1); //Allow client cast swarm pets to be heal/buffed. This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
 				if (RuleB(Pets, SwarmPetNotTargetableWithHotKey))
 					ns->spawn.IsMercenary = 1;
-			}
-			//NPC cast swarm pets should still be targetable with F8.
-			else
+			}			
+			else //NPC cast swarm pets should still be targetable with F8.
 				ns->spawn.IsMercenary = 0;
 	}
 	
-	//Not recommended if using above (However, this will work better on older clients).
-	if (RuleB(Pets, UnTargetableSwarmPet)) {
+	if (RuleB(Pets, UnTargetableSwarmPet)) { //Not recommended if using above (However, this will work better on older clients).
 		if(GetOwnerID() || GetSwarmOwner()) {
 			ns->spawn.is_pet = 1;
 			if (!IsCharmed() && GetOwnerID()) {
@@ -1748,15 +1641,15 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 			}
 			else if (GetSwarmOwner()) {
 				ns->spawn.bodytype = 11;
-				if(!IsCharmed())
-				{
+				if(!IsCharmed()) {
 					Client *c = entity_list.GetClientByID(GetSwarmOwner());
 					if(c)
 						sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
 				}
 			}
 		}
-	} else {
+	} 
+	else {
 		if(GetOwnerID()) {
 			ns->spawn.is_pet = 1;
 			if (!IsCharmed() && GetOwnerID()) {
@@ -1764,82 +1657,70 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 				if(c)
 					sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
 			}
-		} else
+		}
+		else
 			ns->spawn.is_pet = 0;
 	}
 
 	ns->spawn.is_npc = 1;
 }
 
-void NPC::SetLevel(uint8 in_level, bool command)
-{
+void NPC::SetLevel(uint8 in_level, bool command) {
 	if(in_level > level)
 		SendLevelAppearance();
 	level = in_level;
 	SendAppearancePacket(AT_WhoLevel, in_level);
 }
 
-void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
-{
+void NPC::ModifyNPCStat(const char *identifier, const char *newValue) {
 	std::string id = identifier;
 	std::string val = newValue;
 	for(int i = 0; i < id.length(); ++i)
-	{
 		id[i] = std::tolower(id[i]);
-	}
 
-	if(id == "ac")
-	{
+	if(id == "ac") {
 		AC = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "str")
-	{
+	else if(id == "str") {
 		STR = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "sta")
-	{
+	else if(id == "sta") {
 		STA = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "agi")
-	{
+	else if(id == "agi") {
 		AGI = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "dex")
-	{
+	else if(id == "dex") {
 		DEX = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "wis")
-	{
+	else if(id == "wis") {
 		WIS = atoi(val.c_str());
 		CalcMaxMana();
 		return;
 	}
 
-	if(id == "int" || id == "_int")
-	{
+	else if(id == "int" || id == "_int") {
 		INT = atoi(val.c_str());
 		CalcMaxMana();
 		return;
 	}
 
-	if(id == "cha")
-	{
+	else if(id == "cha") {
 		CHA = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "max_hp")
-	{
+	else if(id == "max_hp") {
 		base_hp = atoi(val.c_str());
 		CalcMaxHP();
 		if(cur_hp > max_hp)
@@ -1847,8 +1728,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 		return;
 	}
 
-	if(id == "max_mana")
-	{
+	else if(id == "max_mana") {
 		npc_mana = atoi(val.c_str());
 		CalcMaxMana();
 		if(cur_mana > max_mana)
@@ -1856,179 +1736,148 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 		return;
 	}
 
-	if(id == "mr")
-	{
+	else if(id == "mr") {
 		MR = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "fr")
-	{
+	else if(id == "fr") {
 		FR = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "cr")
-	{
+	else if(id == "cr") {
 		CR = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "pr")
-	{
+	else if(id == "pr") {
 		PR = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "dr")
-	{
+	else if(id == "dr") {
 		DR = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "PhR")
-	{
+	else if(id == "PhR") {
 		PhR = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "runspeed")
-	{
+	else if(id == "runspeed") {
 		runspeed = (float)atof(val.c_str());
 		CalcBonuses();
 		return;
 	}
 
-	if(id == "special_attacks")
-	{
-		//Added reset flag.
-		NPCSpecialAttacks(val.c_str(), 0, 1);
+	else if(id == "special_attacks") {
+		NPCSpecialAttacks(val.c_str(), 0, 1);//Added reset flag.
 		return;
 	}
-
-	if(id == "attack_speed")
-	{
+	
+	else if(id == "attack_speed") {
 		attack_speed = (float)atof(val.c_str());
 		CalcBonuses();
 		return;
 	}
 
-	if(id == "atk")
-	{
+	else if(id == "atk") {
 		ATK = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "accuracy")
-	{
+	else if(id == "accuracy") {
 		accuracy_rating = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "trackable")
-	{
+	else if(id == "trackable") {
 		trackable = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "min_hit")
-	{
+	else if(id == "min_hit") {
 		min_dmg = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "max_hit")
-	{
+	else if(id == "max_hit") {
 		max_dmg = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "attack_count")
-	{
+	else if(id == "attack_count") {
 		attack_count = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "see_invis")
-	{
+	else if(id == "see_invis") {
 		see_invis = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "see_invis_undead")
-	{
+	else if(id == "see_invis_undead") {
 		see_invis_undead = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "see_hide")
-	{
+	else if(id == "see_hide") {
 		see_hide = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "see_improved_hide")
-	{
+	else if(id == "see_improved_hide") {
 		see_improved_hide = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "hp_regen")
-	{
+	else if(id == "hp_regen") {
 		hp_regen = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "mana_regen")
-	{
+	else if(id == "mana_regen") {
 		mana_regen = atoi(val.c_str());
 		return;
 	}
 
-	if(id == "level")
-	{
+	else if(id == "level") {
 		SetLevel(atoi(val.c_str()));
 		return;
 	}
 
-	if(id == "aggro")
-	{
+	else if(id == "aggro") {
 		pAggroRange = atof(val.c_str());
 		return;
 	}
 
-	if(id == "assist")
-	{
+	else if(id == "assist") {
 		pAssistRange = atof(val.c_str());
 		return;
 	}
 
-	if(id == "slow_mitigation")
-	{
+	else if(id == "slow_mitigation") {
 		slow_mitigation = atoi(val.c_str());
 		return;
 	}
-	if(id == "loottable_id")
-	{
+	else if(id == "loottable_id") {
 		loottable_id = atof(val.c_str());
 		return;
 	}
-	if(id == "healscale")
-	{
+	else if(id == "healscale") {
 		healscale = atof(val.c_str());
 		return;
 	}
-	if(id == "spellscale")
-	{
+	else if(id == "spellscale") {
 		spellscale = atof(val.c_str());
 		return;
 	}
 }
 
 void NPC::LevelScale() {
-
 	uint8 random_level = (MakeRandomInt(level, maxlevel));
-
 	float scaling = (((random_level / (float)level) - 1) * (scalerate / 100.0f));
 
 	// Compensate for scale rates at low levels so they don't add too much
@@ -2075,17 +1924,16 @@ void NPC::LevelScale() {
 }
 
 void NPC::CalcNPCResists() {
-
 	if (!MR)
-		MR = (GetLevel() * 11)/10;
+		MR = ((GetLevel() * 11) / 10);
 	if (!CR)
-		CR = (GetLevel() * 11)/10;
+		CR = ((GetLevel() * 11) / 10);
 	if (!DR)
-		DR = (GetLevel() * 11)/10;
+		DR = ((GetLevel() * 11) / 10);
 	if (!FR)
-		FR = (GetLevel() * 11)/10;
+		FR = ((GetLevel() * 11) / 10);
 	if (!PR)
-		PR = (GetLevel() * 11)/10;
+		PR = ((GetLevel() * 11) / 10);
 	if (!Corrup)
 		Corrup = 15;
 	if (!PhR)
@@ -2097,7 +1945,7 @@ void NPC::CalcNPCRegen() {
 
 	// Fix for lazy db-updaters (regen values left at 0)
 	if (GetCasterClass() != 'N' && mana_regen == 0)
-		mana_regen = (GetLevel() / 10) + 4;
+		mana_regen = ((GetLevel() / 10) + 4);
 	else if(mana_regen < 0)
 		mana_regen = 0;
 	else
@@ -2105,8 +1953,7 @@ void NPC::CalcNPCRegen() {
 
 	// Gives low end monsters no regen if set to 0 in database. Should make low end monsters killable
 	// Might want to lower this to /5 rather than 10.
-	if(hp_regen == 0)
-	{
+	if(hp_regen == 0) {
 		if(GetLevel() <= 6)
 			hp_regen = 1;
 		else if(GetLevel() > 6 && GetLevel() <= 10)
@@ -2127,187 +1974,140 @@ void NPC::CalcNPCRegen() {
 			hp_regen = 21;
 		else
 			hp_regen = 30;
-	} else if(hp_regen < 0) {
+	}
+	else if(hp_regen < 0)
 		hp_regen = 0;
-	} else
+	else
 		hp_regen = hp_regen;
 
 	return;
 }
 
 void NPC::CalcNPCDamage() {
-
 	int AC_adjust=12;
 
 	if (GetLevel() >= 66) {
 		if (min_dmg==0)
 			min_dmg = 220;
 		if (max_dmg==0)
-			max_dmg = ((((99000)*(GetLevel()-64))/400)*AC_adjust/10);
+			max_dmg = (((99000 * (GetLevel() - 64)) / 400) * AC_adjust / 10);
 	}
-	else if (GetLevel() >= 60 && GetLevel() <= 65){
-		if(min_dmg==0)
-			min_dmg = (GetLevel()+(GetLevel()/3));
-		if(max_dmg==0)
-			max_dmg = (GetLevel()*3)*AC_adjust/10;
-	}
-	else if (GetLevel() >= 51 && GetLevel() <= 59){
-		if(min_dmg==0)
-			min_dmg = (GetLevel()+(GetLevel()/3));
-		if(max_dmg==0)
-			max_dmg = (GetLevel()*3)*AC_adjust/10;
+	else if (GetLevel() >= 51 && GetLevel() <= 65){
+		if(min_dmg == 0)
+			min_dmg = ((GetLevel() + (GetLevel() / 3)));
+		if(max_dmg == 0)
+			max_dmg = ((GetLevel() * 3) * AC_adjust / 10);
 	}
 	else if (GetLevel() >= 40 && GetLevel() <= 50) {
-		if (min_dmg==0)
+		if (min_dmg == 0)
 			min_dmg = GetLevel();
-		if(max_dmg==0)
-			max_dmg = (GetLevel()*3)*AC_adjust/10;
+		if(max_dmg == 0)
+			max_dmg = ((GetLevel() * 3) * AC_adjust / 10);
 	}
 	else if (GetLevel() >= 28 && GetLevel() <= 39) {
-		if (min_dmg==0)
-			min_dmg = GetLevel() / 2;
-		if (max_dmg==0)
-			max_dmg = ((GetLevel()*2)+2)*AC_adjust/10;
+		if (min_dmg == 0)
+			min_dmg = (GetLevel() / 2);
+		if (max_dmg == 0)
+			max_dmg = (((GetLevel() * 2) + 2) * AC_adjust / 10);
 	}
 	else if (GetLevel() <= 27) {
-		if (min_dmg==0)
-			min_dmg=1;
-		if (max_dmg==0)
-			max_dmg = (GetLevel()*2)*AC_adjust/10;
+		if (min_dmg == 0)
+			min_dmg = 1;
+		if (max_dmg == 0)
+			max_dmg = ((GetLevel() * 2) * AC_adjust / 10);
 	}
 
 	int clfact = GetClassLevelFactor();
-	min_dmg = (min_dmg * clfact) / 220;
-	max_dmg = (max_dmg * clfact) / 220;
+	min_dmg = ((min_dmg * clfact) / 220);
+	max_dmg = ((max_dmg * clfact) / 220);
 
 	return;
 }
 
 
-uint32 NPC::GetSpawnPointID() const
-{
+uint32 NPC::GetSpawnPointID() const {
 	if(respawn2)
-	{
 		return respawn2->GetID();
-	}
 	return 0;
 }
 
-void NPC::NPCSlotTexture(uint8 slot, uint16 texture)
-{
-	if (slot == 7) {
+void NPC::NPCSlotTexture(uint8 slot, uint16 texture) {
+	if (slot == 7)
 		d_melee_texture1 = texture;
-	}
-	else if (slot == 8) {
+	else if (slot == 8)
 		d_melee_texture2 = texture;
-	}
-	else if (slot < 6) {
-		// Reserved for texturing individual armor slots
-	}
+	else if (slot < 6) { } // Reserved for texturing individual armor slots
 	return;
 }
 
-uint32 NPC::GetSwarmOwner()
-{
+uint32 NPC::GetSwarmOwner() {
 	if(GetSwarmInfo() != nullptr)
-	{
 		return GetSwarmInfo()->owner_id;
-	}
 	return 0;
 }
 
-uint32 NPC::GetSwarmTarget()
-{
+uint32 NPC::GetSwarmTarget() {
 	if(GetSwarmInfo() != nullptr)
-	{
 		return GetSwarmInfo()->target;
-	}
 	return 0;
 }
 
-void NPC::SetSwarmTarget(int target_id)
-{
+void NPC::SetSwarmTarget(int target_id) {
 	if(GetSwarmInfo() != nullptr)
-	{
 		GetSwarmInfo()->target = target_id;
-	}
 	return;
 }
 
 int32 NPC::CalcMaxMana() {
 	if(npc_mana == 0) {
-		switch (GetCasterClass()) {
-			case 'I':
-				max_mana = (((GetINT()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
-				break;
-			case 'W':
-				max_mana = (((GetWIS()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
-				break;
-			case 'N':
-			default:
-				max_mana = 0;
-				break;
-		}
-		if (max_mana < 0) {
+		max_mana = 0;
+		if (GetCasterClass() == 'I')
+			max_mana = ((((GetINT() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana);
+		else if (GetCasterClass() == 'W')
+			max_mana = ((((GetWIS() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana);
+			
+		if (max_mana < 0)
 			max_mana = 0;
-		}
 
 		return max_mana;
-	} else {
-		switch (GetCasterClass()) {
-			case 'I':
-				max_mana = npc_mana + spellbonuses.Mana + itembonuses.Mana;
-				break;
-			case 'W':
-				max_mana = npc_mana + spellbonuses.Mana + itembonuses.Mana;
-				break;
-			case 'N':
-			default:
-				max_mana = 0;
-				break;
-		}
-		if (max_mana < 0) {
+	}
+	else {
+		max_mana = 0;
+		if (GetCasterClass() == 'I' || GetCasterClass() == 'W')
+			max_mana = (npc_mana + spellbonuses.Mana + itembonuses.Mana);
+			
+		if (max_mana < 0)
 			max_mana = 0;
-		}
 
 		return max_mana;
 	}
 }
 
-void NPC::SignalNPC(int _signal_id)
-{
+void NPC::SignalNPC(int _signal_id) {
 	signal_q.push_back(_signal_id);
 }
 
 NPC_Emote_Struct* NPC::GetNPCEmote(uint16 emoteid, uint8 event_) {
 	LinkedListIterator<NPC_Emote_Struct*> iterator(zone->NPCEmoteList);
 	iterator.Reset();
-	while(iterator.MoreElements())
-	{
+	while(iterator.MoreElements()) {
 		NPC_Emote_Struct* nes = iterator.GetData();
-		if (emoteid == nes->emoteid && event_ == nes->event_) {
+		if (emoteid == nes->emoteid && event_ == nes->event_)
 			return (nes);
-		}
 		iterator.Advance();
 	}
 	return (nullptr);
 }
 
-void NPC::DoNPCEmote(uint8 event_, uint16 emoteid)
-{
+void NPC::DoNPCEmote(uint8 event_, uint16 emoteid) {
 	if(this == nullptr || emoteid == 0)
-	{
 		return;
-	}
 
 	NPC_Emote_Struct* nes = GetNPCEmote(emoteid,event_);
 	if(nes == nullptr)
-	{
 		return;
-	}
 
-	if(emoteid == nes->emoteid)
-	{
+	if(emoteid == nes->emoteid) {
 		if(nes->type == 1)
 			this->Emote("%s",nes->text);
 		else if(nes->type == 2)
@@ -2319,8 +2119,7 @@ void NPC::DoNPCEmote(uint8 event_, uint16 emoteid)
 	}
 }
 
-bool NPC::CanTalk()
-{
+bool NPC::CanTalk() {
 	//Races that should be able to talk. (Races up to Titanium)
 
 	uint16 TalkRace[473] =
@@ -2350,42 +2149,27 @@ bool NPC::CanTalk()
 	return false;
 }
 
-//this is called with 'this' as the mob being looked at, and
-//iOther the mob who is doing the looking. It should figure out
-//what iOther thinks about 'this'
-FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
+FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) { //this is called with 'this' as the mob being looked at, and iOther the mob who is doing the looking. It should figure out what iOther thinks about 'this'
 	iOther = iOther->GetOwnerOrSelf();
 	int primaryFaction= iOther->GetPrimaryFaction();
 
-	//I am pretty sure that this special faction call is backwards
-	//and should be iOther->GetSpecialFactionCon(this)
 	if (primaryFaction < 0)
-		return GetSpecialFactionCon(iOther);
+		return GetSpecialFactionCon(iOther); //I am pretty sure that this special faction call is backwards and should be iOther->GetSpecialFactionCon(this)
 
 	if (primaryFaction == 0)
 		return FACTION_INDIFFERENT;
 
-	//if we are a pet, use our owner's faction stuff
-	Mob *own = GetOwner();
+	Mob *own = GetOwner(); //if we are a pet, use our owner's faction stuff
 	if (own != nullptr)
 		return own->GetReverseFactionCon(iOther);
 
-	//make sure iOther is an npc
-	//also, if we dont have a faction, then they arnt gunna think anything of us either
-	if(!iOther->IsNPC() || GetPrimaryFaction() == 0)
+	if(!iOther->IsNPC() || GetPrimaryFaction() == 0)//make sure iOther is an npc also, if we dont have a faction, then they arnt gunna think anything of us either
 		return(FACTION_INDIFFERENT);
 
-	//if we get here, iOther is an NPC too
-
-	//otherwise, employ the npc faction stuff
-	//so we need to look at iOther's faction table to see
-	//what iOther thinks about our primary faction
-	return(iOther->CastToNPC()->CheckNPCFactionAlly(GetPrimaryFaction()));
+	return(iOther->CastToNPC()->CheckNPCFactionAlly(GetPrimaryFaction())); //if we get here, iOther is an NPC too otherwise, employ the npc faction stuff so we need to look at iOther's faction table to see what iOther thinks about our primary faction
 }
 
-//Look through our faction list and return a faction con based
-//on the npc_value for the other person's primary faction in our list.
-FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
+FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) { //Look through our faction list and return a faction con based on the npc_value for the other person's primary faction in our list.
 	std::list<struct NPCFaction*>::iterator cur,end;
 	cur = faction_list.begin();
 	end = faction_list.end();
@@ -2407,8 +2191,7 @@ bool NPC::IsFactionListAlly(uint32 other_faction) {
 	return(CheckNPCFactionAlly(other_faction) == FACTION_ALLY);
 }
 
-int NPC::GetScore()
-{
+int NPC::GetScore() {
     int lv = std::min(70, (int)GetLevel());
     int basedmg = (lv*2)*(1+(lv / 100)) - (lv / 2);
     int minx = 0;
@@ -2421,40 +2204,34 @@ int NPC::GetScore()
     int maxdmg = max_dmg;
     int final;
 
-    if(lv < 46)
-    {
-		minx = static_cast<int> (ceil( ((lv - (lv / 10.0)) - 1.0) ));
+    if(lv < 46) {
+		minx = static_cast<int> (ceil(((lv - (lv / 10.0)) - 1.0)));
 		basehp = (lv * 10) + (lv * lv);
 	}
-	else
-	{
-		minx = static_cast<int> (ceil( ((lv - (lv / 10.0)) - 1.0) - (( lv - 45.0 ) / 2.0) ));
+	else {
+		minx = static_cast<int> (ceil(((lv - (lv / 10.0)) - 1.0) - ((lv - 45.0) / 2.0)));
         basehp = (lv * 10) + ((lv * lv) * 4);
     }
 
-    if(hp > basehp)
-    {
+    if(hp > basehp) {
         hpcontrib = static_cast<int> (((hp / static_cast<float> (basehp)) * 1.5));
-        if(hpcontrib > 5) { hpcontrib = 5; }
+        if(hpcontrib > 5)
+			hpcontrib = 5;
 
         if(maxdmg > basedmg)
-        {
-            dmgcontrib = static_cast<int> (ceil( ((maxdmg / basedmg) * 1.5) ));
-        }
+            dmgcontrib = static_cast<int> (ceil(((maxdmg / basedmg) * 1.5)));
 
-        if(HasNPCSpecialAtk("E")) { spccontrib++; }    //Enrage
-        if(HasNPCSpecialAtk("F")) { spccontrib++; }    //Flurry
-        if(HasNPCSpecialAtk("R")) { spccontrib++; }    //Rampage
-        if(HasNPCSpecialAtk("r")) { spccontrib++; }    //Area Rampage
-        if(HasNPCSpecialAtk("S")) { spccontrib++; }    //Summon
-        if(HasNPCSpecialAtk("T")) { spccontrib += 2; } //Triple
-        if(HasNPCSpecialAtk("Q")) { spccontrib += 3; } //Quad
-        if(HasNPCSpecialAtk("U")) { spccontrib += 5; } //Unslowable
-        if(HasNPCSpecialAtk("L")) { spccontrib++; }    //Innate Dual Wield
+		if(HasNPCSpecialAtk("T")
+			spccontrib += 2;
+		else if(HasNPCSpecialAtk("Q")
+			spccontrib += 3;
+		else if(HasNPCSpecialAtk("U")
+			spccontrib += 5;
+		else
+			spccontrib++;
     }
 
-    if(npc_spells_id > 12)
-	{
+    if(npc_spells_id > 12) {
         if(lv < 16)
             spccontrib++;
         else
@@ -2467,15 +2244,10 @@ int NPC::GetScore()
     return(final);
 }
 
-uint32 NPC::GetSpawnKillCount()
-{
+uint32 NPC::GetSpawnKillCount() {
 	uint32 sid = GetSpawnPointID();
-
 	if(sid > 0)
-	{
 		return(zone->GetSpawnKillCount(sid));
-	}
-
 	return(0);
 }
 
@@ -2483,8 +2255,7 @@ void NPC::DoQuestPause(Mob *other) {
 	if(IsMoving() && !IsOnHatelist(other)) {
 		PauseWandering(RuleI(NPC, SayPauseTimeInSec));
 		FaceTarget(other);
-	} else if(!IsMoving()) {
-		FaceTarget(other);
 	}
-
+	else if(!IsMoving())
+		FaceTarget(other);
 }
