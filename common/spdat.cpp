@@ -818,7 +818,7 @@ int GetSpellEffectDescNum(uint16 spell_id)
 	return -1;
 }
 
-DmgShieldType GetDamageShieldType(uint16 spell_id)
+DmgShieldType GetDamageShieldType(uint16 spell_id, int32 DSType)
 {
 	// If we have a DamageShieldType for this spell from the damageshieldtypes table, return that,
 	// else, make a guess, based on the resist type. Default return value is DS_THORNS
@@ -840,6 +840,9 @@ DmgShieldType GetDamageShieldType(uint16 spell_id)
 				return DS_THORNS;
 		}
 	}
+
+	else if (DSType)
+		return (DmgShieldType) DSType;
 
 	return DS_THORNS;
 }
