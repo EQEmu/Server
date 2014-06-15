@@ -2120,8 +2120,6 @@ void NPC::DoNPCEmote(uint8 event_, uint16 emoteid) {
 }
 
 bool NPC::CanTalk() {
-	//Races that should be able to talk. (Races up to Titanium)
-
 	uint16 TalkRace[473] =
 	{1,2,3,4,5,6,7,8,9,10,11,12,0,0,15,16,0,18,19,20,0,0,23,0,25,0,0,0,0,0,0,
 	32,0,0,0,0,0,0,39,40,0,0,0,44,0,0,0,0,49,0,51,0,53,54,55,56,57,58,0,0,0,
@@ -2221,11 +2219,11 @@ int NPC::GetScore() {
         if(maxdmg > basedmg)
             dmgcontrib = static_cast<int> (ceil(((maxdmg / basedmg) * 1.5)));
 
-		if(HasNPCSpecialAtk("T")
+		if(HasNPCSpecialAtk("T"))
 			spccontrib += 2;
-		else if(HasNPCSpecialAtk("Q")
+		else if(HasNPCSpecialAtk("Q"))
 			spccontrib += 3;
-		else if(HasNPCSpecialAtk("U")
+		else if(HasNPCSpecialAtk("U"))
 			spccontrib += 5;
 		else
 			spccontrib++;

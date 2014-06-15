@@ -30,25 +30,21 @@ void ImportBaseData(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
-	set_exception_handler();
-	
+	set_exception_handler();	
 	LogFile->write(EQEMuLog::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
 		LogFile->write(EQEMuLog::Error, "Unable to load configuration file.");
 		return 1;
 	}
-
 	const EQEmuConfig *config = EQEmuConfig::get();
-	if(!load_log_settings(config->LogSettingsFile.c_str())) {
+	if(!load_log_settings(config->LogSettingsFile.c_str()))
 		LogFile->write(EQEMuLog::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
-	}
 
 	SharedDatabase database;
 	LogFile->write(EQEMuLog::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
 		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
-		LogFile->write(EQEMuLog::Error, "Unable to connect to the database, cannot continue without a "
-			"database connection");
+		LogFile->write(EQEMuLog::Error, "Unable to connect to the database, cannot continue without a database connection");
 		return 1;
 	}
 
@@ -66,13 +62,12 @@ int GetSpellColumns(SharedDatabase *db) {
 	MYSQL_ROW row;
 	int res = 0;
 	if(db->RunQuery(query, (uint32)strlen(query), errbuf, &result)) {
-		while(row = mysql_fetch_row(result)) {
+		while(row = mysql_fetch_row(result))
 			++res;
-		}
 		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in GetSpellColumns query '%s' %s", query, errbuf);
 	}
+	else
+		LogFile->write(EQEMuLog::Error, "Error in GetSpellColumns query '%s' %s", query, errbuf);
 
 	return res;
 }
@@ -108,113 +103,86 @@ void ImportSpells(SharedDatabase *db) {
 		if(line_columns >= columns) {
 			sql = "INSERT INTO spells_new VALUES(";
 			for(int i = 0; i < columns; ++i) {
-				if(i != 0) {
+				if(i != 0)
 					sql += ", '";
-				} else {
+				else
 					sql += "'";
-				}
-
 				sql += split[i];
 				sql += "'";
 			}
 
 			sql += ");";
-		} else {
+		}
+		else {
 			int i = 0;
 			sql = "INSERT INTO spells_new VALUES(";
 			for(; i < line_columns; ++i) {
-				if(i != 0) {
+				if(i != 0)
 					sql += ", '";
-				} else {
+				else
 					sql += "'";
-				}
-
 				sql += split[i];
 				sql += "'";
 			}
-
-			for(; i < columns; ++i) {
+			for(; i < columns; ++i)
 				sql += ", '0'";
-			}
-
 			sql += ");";
 		}
 
 		db->RunQuery(sql.c_str(), (uint32)sql.length());
 
 		spells_imported++;
-		if(spells_imported % 1000 == 0) {
+		if(spells_imported % 1000 == 0)
 			LogFile->write(EQEMuLog::Status, "%d spells imported.", spells_imported);
-		}
 	}
-
-	if(spells_imported % 1000 != 0) {
+	if(spells_imported % 1000 != 0)
 		LogFile->write(EQEMuLog::Status, "%d spells imported.", spells_imported);
-	}
-
 	fclose(f);
 }
 
 void ImportSkillCaps(SharedDatabase *db) {
 	LogFile->write(EQEMuLog::Status, "Importing Skill Caps...");
-
 	FILE *f = fopen("import/SkillCaps.txt", "r");
 	if(!f) {
 		LogFile->write(EQEMuLog::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
 		return;
 	}
-
 	std::string delete_sql = "DELETE FROM skill_caps";
 	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
-
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
-		
-		if(split.size() < 4) {
+		auto split = SplitString(buffer, '^');		
+		if(split.size() < 4)
 			continue;
-		}
-
 		std::string sql;
 		int class_id, skill_id, level, cap;
 		class_id = atoi(split[0].c_str());
 		skill_id = atoi(split[1].c_str());
 		level = atoi(split[2].c_str());
 		cap = atoi(split[3].c_str());
-
-		StringFormat(sql, "INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)",
-			class_id, skill_id, level, cap);
-
+		StringFormat(sql, "INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)", class_id, skill_id, level, cap);
 		db->RunQuery(sql.c_str(), (uint32)sql.length());
 	}
-
 	fclose(f);
 }
 
 void ImportBaseData(SharedDatabase *db) {
 	LogFile->write(EQEMuLog::Status, "Importing Base Data...");
-
 	FILE *f = fopen("import/BaseData.txt", "r");
 	if(!f) {
 		LogFile->write(EQEMuLog::Error, "Unable to open import/BaseData.txt to read, skipping.");
 		return;
 	}
-
 	std::string delete_sql = "DELETE FROM base_data";
 	db->RunQuery(delete_sql.c_str(), (uint32)delete_sql.length());
-
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
 		auto split = SplitString(buffer, '^');
-
-		if(split.size() < 10) {
+		if(split.size() < 10)
 			continue;
-		}
-
 		std::string sql;
 		int level, class_id;
 		double hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac;
-
 		level = atoi(split[0].c_str());
 		class_id = atoi(split[1].c_str());
 		hp = atof(split[2].c_str());
@@ -225,13 +193,8 @@ void ImportBaseData(SharedDatabase *db) {
 		hp_fac = atof(split[7].c_str());
 		mana_fac = atof(split[8].c_str());
 		end_fac = atof(split[9].c_str());
-
-		StringFormat(sql, "INSERT INTO base_data(level, class, hp, mana, end, unk1, unk2, hp_fac, "
-			"mana_fac, end_fac) VALUES(%d, %d, %f, %f, %f, %f, %f, %f, %f, %f)",
-			level, class_id, hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac);
-
+		StringFormat(sql, "INSERT INTO base_data(level, class, hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac) VALUES(%d, %d, %f, %f, %f, %f, %f, %f, %f, %f)", level, class_id, hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac);
 		db->RunQuery(sql.c_str(), (uint32)sql.length());
 	}
-
 	fclose(f);
 }

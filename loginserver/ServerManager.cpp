@@ -129,8 +129,7 @@ WorldServer* ServerManager::GetServerByAddress(unsigned int address)
 	return nullptr;
 }
 
-EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
-{
+EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c) {
 	unsigned int packet_size = sizeof(ServerListHeader_Struct);
 	unsigned int server_count = 0;
 	in_addr in;
@@ -138,10 +137,8 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 	string client_ip = inet_ntoa(in);
 
 	list<WorldServer*>::iterator iter = world_servers.begin();
-	while(iter != world_servers.end())
-	{
-		if((*iter)->IsAuthorized() == false)
-		{
+	while(iter != world_servers.end()) {
+		if((*iter)->IsAuthorized() == false) {
 			++iter;
 			continue;
 		}
@@ -150,18 +147,11 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 		string world_ip = inet_ntoa(in);
 
 		if(world_ip.compare(client_ip) == 0)
-		{
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
-		}
 		else if(client_ip.find(server.options.GetLocalNetwork()) != string::npos)
-		{
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
-		}
 		else
-		{
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetRemoteIP().size() + 24;
-		}
-
 		server_count++;
 		++iter;
 	}

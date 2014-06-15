@@ -1050,12 +1050,12 @@ uint32 Client::CalcCurrentWeight() {
 		}
 	}
 	
-	if (GetClientVersion() < EQClientSoD) // //TODO: coin weight reduction (from purses, etc), since client already calculates it. From the Wiki http://www.eqemulator.net/wiki/wikka.php?wakka=EQEmuDBSchemaitems under bagwr (thanks Trevius):	Interestingly, you can also have bags that reduce coin weight. However, in order to set bags to reduce coin weight, you MUST set the Item ID somewhere between 17201 and 17230. This is hard coded into the client.	The client is set to have certain coin weight reduction on a per Item ID basis within this range. The best way to create an new item to reduce coin weight is to examine existing bags in this range. Search for the words "coin purse" with the #finditem command in game and the Bag WR setting on those bags is the amount they will reduce coin weight. It is easiest to overwrite one of those bags if you wish to create one with the	same weight reduction amount for coins. You can use other Item IDs in this range for setting coin weight reduction, but by using an existing item, at least you will know the amount the client will reduce it by before you create it.	This is the ONLY instance I have seen where the client is hard coded to particular Item IDs to set a certain property for an item. It is very odd. - SoD client has no weight for coin
+	if (GetClientVersion() < EQClientSoD)
 		Total += ((m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4);
 
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat;
 	if (Packrat > 0)
-		Total = ((uint32)((float)Total * (1.0f - ((Packrat * 1.0f) / 100.0f))));	//AndMetal: 1% per level, up to 5% (calculated from Titanium client). verified thru client that it reduces coin weight by the same % without casting to float & back to uint32, this didn't work right
+		Total = ((uint32)((float)Total * (1.0f - ((Packrat * 1.0f) / 100.0f))));
 	return Total;
 }
 

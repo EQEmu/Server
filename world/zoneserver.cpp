@@ -1410,10 +1410,10 @@ void ZoneServer::TriggerBootup(uint32 iZoneID, uint32 iInstanceID, const char* a
 	LSBootUpdate(iZoneID, iInstanceID);
 }
 
-void ZoneServer::IncommingClient(Client* client) {
+void ZoneServer::IncomingClient(Client* client) {
 	BootingUp = true;
-	ServerPacket* pack = new ServerPacket(ServerOP_ZoneIncClient, sizeof(ServerZoneIncommingClient_Struct));
-	ServerZoneIncommingClient_Struct* s = (ServerZoneIncommingClient_Struct*) pack->pBuffer;
+	ServerPacket* pack = new ServerPacket(ServerOP_ZoneIncClient, sizeof(ServerZoneIncomingClient_Struct));
+	ServerZoneIncomingClient_Struct* s = (ServerZoneIncomingClient_Struct*) pack->pBuffer;
 	s->zoneid = GetZoneID();
 	s->instanceid = GetInstanceID();
 	s->wid = client->GetWID();

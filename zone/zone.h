@@ -152,7 +152,7 @@ public:
 	void	StartShutdownTimer(uint32 set_time = (RuleI(Zone, AutoShutdownDelay)));
 	void    ChangeWeather();
 	bool	HasWeather();
-	void	AddAuth(ServerZoneIncommingClient_Struct* szic);
+	void	AddAuth(ServerZoneIncomingClient_Struct* szic);
 	void	RemoveAuth(const char* iCharName);
 	void	ResetAuth();
 	bool	GetAuth(uint32 iIP, const char* iCharName, uint32* oWID = 0, uint32* oAccID = 0, uint32* oCharID = 0, int16* oStatus = 0, char* oLSKey = 0, bool* oTellsOff = 0);

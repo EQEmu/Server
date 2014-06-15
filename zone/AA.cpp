@@ -1068,8 +1068,6 @@ void Client::BuyAA(AA_Action* action)
 
 		SendAATable();
 
-		//we are building these messages ourself instead of using the stringID to work around patch discrepencies
-		//these are AA_GAIN_ABILITY	(410) & AA_IMPROVE (411), respectively, in both Titanium & SoF. not sure about 6.2
 		if(cur_level<1)
 			Message(15,"You have gained the ability \"%s\" at a cost of %d ability %s.", aa2->name, real_cost, (real_cost>1)?"points":"point");
 		else
@@ -1889,7 +1887,7 @@ SendAA_Struct* ZoneDatabase::GetAASkillVars(uint32 skill_id)
 				"a.sof_cost_inc, "
 				"a.sof_max_level, "
 				"a.sof_next_skill, "
-				"a.clientver, "	// Client Version 0 = None, 1 = All, 2 = Titanium/6.2, 4 = SoF 5 = SOD 6 = UF
+				"a.clientver, "	// Client Version 0 = None, 1 = All, 4 = SoF 5 = SOD 6 = UF
 				"a.account_time_required, "
 				"a.sof_current_level,"
 				"a.sof_next_id, "

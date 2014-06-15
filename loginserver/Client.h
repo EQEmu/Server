@@ -31,7 +31,6 @@ using namespace std;
 
 enum ClientVersion
 {
-	cv_titanium,
 	cv_sod
 };
 

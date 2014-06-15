@@ -6995,7 +6995,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 		}
 		if (mypet->IsFeared())
-			break; //prevent pet from attacking stuff while feared
+			break;
 
 		if (!mypet->IsAttackAllowed(GetTarget())) {
 			mypet->Say_StringID(NOT_LEGAL_TARGET);
@@ -7021,7 +7021,8 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		break;
 	}
 	case PET_BACKOFF: {
-		if (mypet->IsFeared()) break; //keeps pet running while feared
+		if (mypet->IsFeared())
+			break;
 
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
 			mypet->Say_StringID(MT_PetResponse, PET_CALMING);
@@ -7033,7 +7034,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	case PET_HEALTHREPORT: {
 		Message_StringID(MT_PetResponse, PET_REPORT_HP, ConvertArrayF(mypet->GetHPRatio(), val1));
 		mypet->ShowBuffList(this);
-		//Message(10,"%s tells you, 'I have %d percent of my hit points left.'",mypet->GetName(),(uint8)mypet->GetHPRatio());
 		break;
 	}
 	case PET_GETLOST: {
@@ -7045,25 +7045,16 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			// and continue
 			mypet->BuffFadeByEffect(SE_Charm);
 			break;
-		} else {
-			SetPet(nullptr);
 		}
-
+		else
+			SetPet(nullptr);
 		mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
 		mypet->CastToNPC()->Depop();
-
-		//Oddly, the client (Titanium) will still allow "/pet get lost" command despite me adding the code below. If someone can figure that out, you can uncomment this code and use it.
-		/*
-		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-		mypet->Say_StringID(PET_GETLOST_STRING);
-		mypet->CastToNPC()->Depop();
-		}
-		*/
-
 		break;
 	}
 	case PET_GUARDHERE: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+		if (mypet->IsFeared())
+			break;
 
 		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 1) || mypet->GetPetType() != petAnimation) {
 			if(mypet->IsNPC()) {
@@ -9700,7 +9691,7 @@ void Client::Handle_OP_RequestTitles(const EQApplicationPacket *app)
 
 void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 {
-	if(app->size != sizeof(BankerChange_Struct) && app->size!=4) //Titanium only sends 4 Bytes for this
+	if(app->size != sizeof(BankerChange_Struct) && app->size!=4)
 	{
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_BankerChange expected %i got %i", sizeof(BankerChange_Struct), app->size);
 		DumpPacket(app);

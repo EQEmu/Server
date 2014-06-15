@@ -40,7 +40,7 @@ public:
 	bool		SetZone(uint32 iZoneID, uint32 iInstanceID = 0, bool iStaticZone = false);
 	void		TriggerBootup(uint32 iZoneID = 0, uint32 iInstanceID = 0, const char* iAdminName = 0, bool iMakeStatic = false);
 	void		Disconnect() { tcpc->Disconnect(); }
-	void		IncommingClient(Client* client);
+	void		IncomingClient(Client* client);
 	void		LSBootUpdate(uint32 zoneid, uint32 iInstanceID = 0, bool startup = false);
 	void		LSSleepUpdate(uint32 zoneid);
 	void		LSShutDownUpdate(uint32 zoneid);

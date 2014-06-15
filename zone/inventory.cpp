@@ -55,20 +55,13 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 				DeleteItemInInventory(i, 0, true);
 			}
 		}
-
-		// Power Source Slot
 		if (GetItemIDAt(9999) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(9999) != INVALID_ID)) {
 			cur = m_inv.GetItem(9999);
-			if(cur && cur->GetItem()->Stackable) {
+			if(cur && cur->GetItem()->Stackable)
 				x += cur->GetCharges();
-			} else {
-				x++;
-			}
-
-			if (GetClientVersion() >= EQClientSoF)
-				DeleteItemInInventory(9999, 0, true);
 			else
-				DeleteItemInInventory(9999, 0, false);	// Prevents Titanium crash
+				x++;
+			DeleteItemInInventory(9999, 0, true);
 		}
 	}
 
@@ -1090,9 +1083,7 @@ bool Client::MakeItemLink(char* &ret_link, const ItemInst *inst) {
 }
 
 int Client::GetItemLinkHash(const ItemInst* inst) {
-	//pre-Titanium: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=70&postdays=0&postorder=asc
-	//Titanium: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=145
-	if (!inst)	//have to have an item to make the hash
+	if (!inst)
 		return 0;
 
 	const Item_Struct* item = inst->GetItem();

@@ -986,7 +986,6 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 		if(client->GetClientVersion() >= EQClientRoF) { corpselootlimit = 34; }
 		else if(client->GetClientVersion() >= EQClientSoF) { corpselootlimit = 32; }
-		else if(client->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
 		else { corpselootlimit = 30; }
 
 		for(; cur != end; ++cur) {
@@ -1313,7 +1312,6 @@ void Corpse::queryLoot(Client* pClient) {
 	int corpselootlimit;
 
 	if (pClient->GetClientVersion() >= EQClientSoF) { corpselootlimit = 32; }
-	else if (pClient->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
 	else { corpselootlimit = 30; }
 
 	for (auto i = mItems.begin(); i != mItems.end(); i++) {

@@ -3811,12 +3811,6 @@ struct LoadSpellSet_Struct {
       uint32 unknown;	//there seems to be an extra field in this packet...
 };
 
-// This is the structure for OP_ZonePlayerToBind opcode. Discovered on Feb 9 2007 by FNW from packet logs for titanium client
-// This field "zone_name" is text the Titanium client will display on player death
-// it appears to be a variable length, null-terminated string
-// In logs it has "Bind Location" text which shows up on Titanium client as ....
-// "Return to Bind Location, please wait..."
-// This can be used to send zone name instead.. On 6.2 client, this is ignored.
 struct ZonePlayerToBind_Struct {
 /*000*/	uint32 bind_zone_id;
 /*004*/	float x;

@@ -94,8 +94,6 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		};
 	}
 	else {
-		// This is to allow both 6.2 and Titanium clients to perform a proper zoning of the client when evac/succor
-		// WildcardX 27 January 2008
 		if(zone_mode == EvacToSafeCoords && zonesummon_id > 0)
 			target_zone_id = zonesummon_id;
 		else
@@ -580,15 +578,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		else if(zm == EvacToSafeCoords) {
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
 			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
-
-			// if we are in the same zone we want to evac to, client will not send OP_ZoneChange back to do an actual
-			// zoning of the client, so we have to send a viable zoneid that the client *could* zone to to make it believe
-			// we are leaving the zone, even though we are not. We have to do this because we are missing the correct op code
-			// and struct that should be used for evac/succor.
-			// 213 is Plane of War
-			// 76 is orignial Plane of Hate
-			// WildcardX 27 January 2008. Tested this for 6.2 and Titanium clients.
-
 			if(this->GetZoneID() == 1)
 				gmg->zone_id = 2;
 			else if(this->GetZoneID() == 2)

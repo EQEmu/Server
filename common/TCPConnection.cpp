@@ -71,7 +71,7 @@ TCPConnection::TCPConnection()
 
 //server version
 TCPConnection::TCPConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 irPort)
-:	ConnectionType(Incomming),
+:	ConnectionType(Incoming),
 	connection_socket(in_socket),
 	id(ID),
 	rIP(irIP),
@@ -106,7 +106,7 @@ TCPConnection::~TCPConnection() {
 	}
 #if TCPN_DEBUG_Memory >= 5
 	else {
-		std::cout << "Deconstructor on incomming TCP# " << GetID() << std::endl;
+		std::cout << "Deconstructor on incoming TCP# " << GetID() << std::endl;
 	}
 #endif
 	safe_delete_array(recvbuf);

@@ -64,12 +64,10 @@ SET(common_sources
 	worldconn.cpp
 	XMLParser.cpp
 	platform.cpp
-	patches/Client62.cpp
 	patches/patches.cpp
 	patches/SoD.cpp
 	patches/SoF.cpp
 	patches/RoF.cpp
-	patches/Titanium.cpp
 	patches/Underfoot.cpp
 	SocketLib/Base64.cpp
 	SocketLib/File.cpp
@@ -184,10 +182,6 @@ SET(common_headers
 	XMLParser.h
 	ZoneNumbers.h
 	platform.h
-	patches/Client62.h
-	patches/Client62_itemfields.h
-	patches/Client62_ops.h
-	patches/Client62_structs.h
 	patches/patches.h
 	patches/SoD.h
 	patches/SoD_itemfields.h
@@ -205,10 +199,6 @@ SET(common_headers
 	patches/RoF_itemfields.h
 	patches/RoF_ops.h
 	patches/RoF_structs.h
-	patches/Titanium.h
-	patches/Titanium_itemfields.h
-	patches/Titanium_ops.h
-	patches/Titanium_structs.h
 	patches/Underfoot.h
 	patches/Underfoot_itemfields.h
 	patches/Underfoot_ops.h
@@ -231,10 +221,6 @@ SET(common_headers
 )
 
 SOURCE_GROUP(Patches FILES
-	patches/Client62.h
-	patches/Client62_itemfields.h
-	patches/Client62_ops.h
-	patches/Client62_structs.h
 	patches/patches.h
 	patches/SoD.h
 	patches/SoD_itemfields.h
@@ -252,20 +238,14 @@ SOURCE_GROUP(Patches FILES
 	patches/RoF_itemfields.h
 	patches/RoF_ops.h
 	patches/RoF_structs.h
-	patches/Titanium.h
-	patches/Titanium_itemfields.h
-	patches/Titanium_ops.h
-	patches/Titanium_structs.h
 	patches/Underfoot.h
 	patches/Underfoot_itemfields.h
 	patches/Underfoot_ops.h
 	patches/Underfoot_structs.h
-	patches/Client62.cpp
 	patches/patches.cpp
 	patches/SoD.cpp
 	patches/SoF.cpp
 	patches/RoF.cpp
-	patches/Titanium.cpp
 	patches/Underfoot.cpp
 )
 

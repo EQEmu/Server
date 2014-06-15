@@ -1473,8 +1473,6 @@ luabind::scope lua_register_client_version() {
 		.enum_("constants")
 		[
 			luabind::value("Unknown", static_cast<int>(EQClientUnknown)),
-			luabind::value("62", static_cast<int>(EQClient62)),
-			luabind::value("Titanium", static_cast<int>(EQClientTitanium)),
 			luabind::value("SoF", static_cast<int>(EQClientSoF)),
 			luabind::value("SoD", static_cast<int>(EQClientSoD)),
 			luabind::value("Underfoot", static_cast<int>(EQClientUnderfoot)),

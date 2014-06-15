@@ -27,13 +27,9 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
-// The Client has a hard cap of 19 active tasks
 #define MAXACTIVETASKS 19
-// The Max Chooser (Task Selector entries) is capped at 40 in the Titanium Client.
 #define MAXCHOOSERENTRIES 40
-// The Client has a hard cap of 20 activities per task.
 #define MAXACTIVITIESPERTASK 20
-// This is used to determine if a client's active task slot is empty.
 #define TASKSLOTEMPTY 0
 
 // Command Codes for worldserver ServerOP_ReloadTasks

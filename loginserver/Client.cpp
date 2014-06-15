@@ -355,9 +355,7 @@ void Client::SendServerListPacket()
 	EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
 
 	if(server.options.IsDumpOutPacketsOn())
-	{
 		DumpPacket(outapp);
-	}
 
 	connection->QueuePacket(outapp);
 	delete outapp;

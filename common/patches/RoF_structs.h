@@ -2355,7 +2355,7 @@ struct GroupUpdate2_Struct {
 /*0068*/	char	membername[5][64];
 /*0388*/	char	leadersname[64];
 /*0452*/	GroupLeadershipAA_Struct leader_aas;
-/*0516*/	uint8	unknown[252];	// Titanium uses [188] here
+/*0516*/	uint8	unknown[252];
 /*0768*/
 };
 

@@ -310,11 +310,11 @@ bool Client::CheckTitle(int titleset) {
 void Client::RemoveTitle(int titleset) {
 	if (!CheckTitle(titleset))
 		return;
-
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-	if (database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i", titleset, CharacterID()), errbuf))
+	if (database.RunQuery(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE `title_set`=%i AND `char_id`=%i", titleset, CharacterID()), errbuf)) {
 		safe_delete_array(query);
+	}
 	else {
 		LogFile->write(EQEMuLog::Error, "Error in RemoveTitle query '%s': %s", query, errbuf);
 		safe_delete_array(query);

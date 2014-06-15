@@ -1132,113 +1132,65 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 }
 
 void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList) {
-
-	if (c->GetClientVersion() >= EQClientRoF)
-	{
+	if (c->GetClientVersion() >= EQClientRoF) {
 		SendTaskSelectorNew(c, mob, TaskCount, TaskList);
 		return;
 	}
-	// Titanium OpCode: 0x5e7c
 	_log(TASKS__UPDATE, "TaskSelector for %i Tasks", TaskCount);
 	char *Ptr;
 	int PlayerLevel = c->GetLevel();
-
 	AvailableTaskHeader_Struct*	AvailableTaskHeader;
 	AvailableTaskData1_Struct*	AvailableTaskData1;
 	AvailableTaskData2_Struct*	AvailableTaskData2;
 	AvailableTaskTrailer_Struct*	AvailableTaskTrailer;
-
-	// Check if any of the tasks exist
-
-
-	for(int i=0; i<TaskCount; i++) {
-
+	for(int i=0; i<TaskCount; i++)
 		if(Tasks[TaskList[i]] != nullptr) break;
-	}
-
-	// FIXME: The 10 and 5 values in this calculation are to account for the string "ABCD" we are putting in 3 times. 
-	//
-	// Calculate how big the packet needs to be pased on the number of tasks and the
-	// size of the variable length strings.
-
 	int PacketLength = sizeof(AvailableTaskHeader_Struct);
-
 	int ValidTasks = 0;
-
 	for(int i=0; i<TaskCount; i++) {
-
-		if(!AppropriateLevel(TaskList[i], PlayerLevel)) continue;
-
-		if(c->IsTaskActive(TaskList[i])) continue;
-
-		if(!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i])) continue;
-
+		if(!AppropriateLevel(TaskList[i], PlayerLevel))
+			continue;
+		if(c->IsTaskActive(TaskList[i]))
+			continue;
+		if(!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i]))
+			continue;
 		ValidTasks++;
-
-		PacketLength = PacketLength + sizeof(AvailableTaskData1_Struct) + strlen(Tasks[TaskList[i]]->Title) + 1 +
-					strlen(Tasks[TaskList[i]]->Description) + 1 + sizeof(AvailableTaskData2_Struct) + 10 +
-					sizeof(AvailableTaskTrailer_Struct) + 5;
+		PacketLength = PacketLength + sizeof(AvailableTaskData1_Struct) + strlen(Tasks[TaskList[i]]->Title) + 1 + strlen(Tasks[TaskList[i]]->Description) + 1 + sizeof(AvailableTaskData2_Struct) + 10 + sizeof(AvailableTaskTrailer_Struct) + 5;
 	}
-
-	if(ValidTasks == 0) return;
-
+	if(ValidTasks == 0)
+		return;
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
-
 	AvailableTaskHeader = (AvailableTaskHeader_Struct*)outapp->pBuffer;
-
 	AvailableTaskHeader->TaskCount = ValidTasks;
-
-	// unknown1 is always 2 in the packets I have ssen. It may be a 'Task Type'. Given that the
-	// task system was apparently first introduced for LDoN missions, type 1 may be for missions.
-	//
 	AvailableTaskHeader->unknown1 = 2;
 	AvailableTaskHeader->TaskGiver = mob->GetID();
-
 	Ptr = (char *) AvailableTaskHeader + sizeof(AvailableTaskHeader_Struct);
-
 	for(int i=0; i<TaskCount;i++) {
-
-		if(!AppropriateLevel(TaskList[i], PlayerLevel)) continue;
-
-		if(c->IsTaskActive(TaskList[i])) continue;
-
-		if(!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i])) continue;
-
+		if(!AppropriateLevel(TaskList[i], PlayerLevel))
+			continue;
+		if(c->IsTaskActive(TaskList[i]))
+			continue;
+		if(!IsTaskRepeatable(TaskList[i]) && c->IsTaskCompleted(TaskList[i]))
+			continue;
 		AvailableTaskData1 = (AvailableTaskData1_Struct*)Ptr;
-
 		AvailableTaskData1->TaskID = TaskList[i];
-
 		AvailableTaskData1->TimeLimit = Tasks[TaskList[i]]->Duration;
-
 		AvailableTaskData1->unknown2 = 0;
-
 		Ptr = (char *)AvailableTaskData1 + sizeof(AvailableTaskData1_Struct);
-
 		sprintf(Ptr, "%s", Tasks[TaskList[i]]->Title);
-
 		Ptr = Ptr + strlen(Ptr) + 1;
-
 		sprintf(Ptr, "%s", Tasks[TaskList[i]]->Description);
-
 		Ptr = Ptr + strlen(Ptr) + 1;
-
 		AvailableTaskData2 = (AvailableTaskData2_Struct*)Ptr;
-
 		AvailableTaskData2->unknown1 = 1;
 		AvailableTaskData2->unknown2 = 0;
 		AvailableTaskData2->unknown3 = 1;
 		AvailableTaskData2->unknown4 = 0;
-
 		Ptr = (char *)AvailableTaskData2 + sizeof(AvailableTaskData2_Struct);
-
-		// FIXME: In live packets, these two strings appear to be the same as the Text1 and Text2
-		// strings from the first activity in the task, however the task chooser/selector
-		// does not appear to make use of them.
 		sprintf(Ptr, "ABCD");				
 		Ptr = Ptr + strlen(Ptr) + 1;
 		sprintf(Ptr, "ABCD");	
 		Ptr = Ptr + strlen(Ptr) + 1;
-
 		AvailableTaskTrailer = (AvailableTaskTrailer_Struct*)Ptr;
 
 		// The name of this ItemCount field may be incorrect, but 1 works.
@@ -2923,66 +2875,28 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 		if(ItemID) {
 			char *RewardTmp = 0;
 			if(strlen(Tasks[TaskID]->Reward) != 0) {
-
 				switch(c->GetClientVersion()) {
-
-					case EQClient62:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%07i-00001-00001-00001-00001-000013E0ABA6B%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
+					case EQClientRoF: {
+						MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c", 0x12, ItemID, Tasks[TaskID]->Reward,0x12);
 						break;
 					}
-					case EQClientTitanium:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-						break;
-					}
-					case EQClientRoF:
-					{
-						MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
-						break;
-					}
-					default:
-					{
-						// All clients after Titanium
-						MakeAnyLenString(&RewardTmp, "%c%06X00000000000000000000000000000000000014505DC2%s%c",
-								0x12, ItemID, Tasks[TaskID]->Reward,0x12);
+					default: {
+						MakeAnyLenString(&RewardTmp, "%c%06X00000000000000000000000000000000000014505DC2%s%c", 0x12, ItemID, Tasks[TaskID]->Reward,0x12);
 					}
 				}
 
 			}
 			else {
 				const Item_Struct *Item = database.GetItem(ItemID);
-
 				if(Item) {
-
 					switch(c->GetClientVersion()) {
-
-						case EQClient62:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%07i-00001-00001-00001-00001-000013E0ABA6B%s%c",
-									0x12, ItemID, Item->Name,0x12);
+						case EQClientRoF: {
+							MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c", 0x12, ItemID, Item->Name ,0x12);
 							break;
 						}
-						case EQClientTitanium:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%06X000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
+						default: {
+							MakeAnyLenString(&RewardTmp, "%c%06X00000000000000000000000000000000000014505DC2%s%c", 0x12, ItemID, Item->Name ,0x12);
 							break;
-						}
-						case EQClientRoF:
-						{
-							MakeAnyLenString(&RewardTmp, "%c%06X0000000000000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
-							break;
-						}
-						default:
-						{
-							// All clients after Titanium
-							MakeAnyLenString(&RewardTmp, "%c%06X00000000000000000000000000000000000014505DC2%s%c",
-									0x12, ItemID, Item->Name ,0x12);
 						}
 					}
 				}
@@ -2991,81 +2905,53 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 			if(RewardTmp) RewardText += RewardTmp;
 			safe_delete_array(RewardTmp);
 		}
-		else {
+		else
 			RewardText += Tasks[TaskID]->Reward;
-		}
-
 	}
-	else {
+	else
 		RewardText += Tasks[TaskID]->Reward;
-	}
 	PacketLength += strlen(RewardText.c_str()) + 1;
-
 	char *Ptr;
 	TaskDescriptionHeader_Struct* tdh;
 	TaskDescriptionData1_Struct* tdd1;
 	TaskDescriptionData2_Struct* tdd2;
 	TaskDescriptionTrailer_Struct* tdt;
-
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskDescription, PacketLength);
-
 	tdh = (TaskDescriptionHeader_Struct*)outapp->pBuffer;
-
 	tdh->SequenceNumber = SequenceNumber;
 	tdh->TaskID = TaskID;
-
 	if(BringUpTaskJournal)
 		tdh->unknown2 = 0x00000201;
 	else
 		tdh->unknown2 = 0x00000200;
-		//tdh->unknown2 = 0x00000100; // This makes the Task Description have an S instead of Q, but the description doesn't show
-
 	tdh->unknown3 = 0x00000000;
 	tdh->unknown4 = 0x00;
-
 	Ptr = (char *) tdh + sizeof(TaskDescriptionHeader_Struct);
-
 	sprintf(Ptr, "%s", Tasks[TaskID]->Title);
 	Ptr = Ptr + strlen(Ptr) + 1;
-
 	tdd1 = (TaskDescriptionData1_Struct*)Ptr;
-
 	tdd1->Duration = Duration;
 	tdd1->unknown2 = 0x00000000;
-
 	tdd1->StartTime = StartTime;
-
 	Ptr = (char *) tdd1 + sizeof(TaskDescriptionData1_Struct);
-
 	sprintf(Ptr, "%s", Tasks[TaskID]->Description);
 	Ptr = Ptr + strlen(Ptr) + 1;
-
 	tdd2 = (TaskDescriptionData2_Struct*)Ptr;
-
-	// This next field may not be a reward count. It is always 1 in the packets I have seen. Setting it to 2 and trying
-	// to include multiple item links has so far proven futile. Setting it to 0 ends the packet after the next byte.
 	tdd2->RewardCount = 1;
-
 	if(Tasks[TaskID]->XPReward)
 		tdd2->unknown1 = 0x00000100;
 	else
 		tdd2->unknown1 = 0x00000000;
-
 	tdd2->unknown2 = 0x00000000;
 	tdd2->unknown3 = 0x0000;
 	Ptr = (char *) tdd2 + sizeof(TaskDescriptionData2_Struct);
-
 	sprintf(Ptr, "%s", RewardText.c_str());
 	Ptr = Ptr + strlen(Ptr) + 1;
-
 	tdt = (TaskDescriptionTrailer_Struct*)Ptr;
 	tdt->Points = 0x00000000; // Points Count
-
 	_pkt(TASKS__PACKETS, outapp);
-
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
-
 }
 
 bool ClientTaskState::IsTaskActivityCompleted(int index, int ActivityID) {

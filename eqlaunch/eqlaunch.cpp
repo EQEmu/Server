@@ -37,11 +37,9 @@ void CatchSignal(int sig_num);
 int main(int argc, char *argv[]) {
 	RegisterExecutablePlatform(ExePlatformLaunch);
 	set_exception_handler();
-
 	std::string launcher_name;
-	if(argc == 2) {
+	if(argc == 2)
 		launcher_name = argv[1];
-	}
 	if(launcher_name.length() < 1) {
 		_log(LAUNCHER__ERROR, "You must specfify a launcher name as the first argument to this program.");
 		return 1;
@@ -53,10 +51,6 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	const EQEmuConfig *Config = EQEmuConfig::get();
-
-	/*
-	* Setup nice signal handlers
-	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		_log(LAUNCHER__ERROR, "Could not set signal handler");
 		return 1;
@@ -70,98 +64,58 @@ int main(int argc, char *argv[]) {
 		_log(LAUNCHER__ERROR, "Could not set signal handler");
 		return 1;
 	}
-
-	/*
-	* Add '.' to LD_LIBRARY_PATH
-	*/
-	//the storage passed to putenv must remain valid... crazy unix people
+	
 	const char *pv = getenv("LD_LIBRARY_PATH");
-	if(pv == nullptr) {
+	if(pv == nullptr)
 		putenv(strdup("LD_LIBRARY_PATH=."));
-	} else {
+	else {
 		char *v = (char *) malloc(strlen(pv) + 19);
 		sprintf(v, "LD_LIBRARY_PATH=.:%s", pv);
 		putenv(v);
 	}
 	#endif
-
 	std::map<std::string, ZoneLaunch *> zones;
 	WorldServer world(zones, launcher_name.c_str(), Config);
-	if (!world.Connect()) {
+	if (!world.Connect())
 		_log(LAUNCHER__ERROR, "worldserver.Connect() FAILED! Will retry.");
-	}
-
 	std::map<std::string, ZoneLaunch *>::iterator zone, zend;
 	std::set<std::string> to_remove;
-
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
-
 	_log(LAUNCHER__INIT, "Starting main loop...");
-
-//	zones["test"] = new ZoneLaunch(&world, "./zone", "dynamic_1");
-
 	ProcLauncher *launch = ProcLauncher::get();
 	RunLoops = true;
 	while(RunLoops) {
-		//Advance the timer to our current point in time
 		Timer::SetCurrentTime();
-
-		/*
-		* Process the world connection
-		*/
 		world.Process();
-
-		/*
-		* Let the process manager look for dead children
-		*/
 		launch->Process();
-
-		/*
-		* Give all zones a chance to process.
-		*/
 		zone = zones.begin();
 		zend = zones.end();
 		for(; zone != zend; ++zone) {
 			if(!zone->second->Process())
 				to_remove.insert(zone->first);
 		}
-
-		/*
-		* Kill off any zones which have stopped
-		*/
 		while(!to_remove.empty()) {
 			std::string rem = *to_remove.begin();
 			to_remove.erase(rem);
 			zone = zones.find(rem);
-			if(zone == zones.end()) {
-				//wtf...
+			if(zone == zones.end())
 				continue;
-			}
 			delete zone->second;
 			zones.erase(rem);
 		}
-
-
 		if (InterserverTimer.Check()) {
 			if (world.TryReconnect() && (!world.Connected()))
 				world.AsyncConnect();
 		}
-
-		/*
-		* Take a nice nap until next cycle
-		*/
 		if(zones.empty())
 			Sleep(5000);
 		else
 			Sleep(2000);
 	}
-
-	//try to be semi-nice about this... without waiting too long
 	zone = zones.begin();
 	zend = zones.end();
-	for(; zone != zend; ++zone) {
+	for(; zone != zend; ++zone)
 		zone->second->Stop();
-	}
 	Sleep(1);
 	launch->Process();
 	launch->TerminateAll(false);
@@ -169,37 +123,12 @@ int main(int argc, char *argv[]) {
 	launch->Process();
 	//kill anybody left
 	launch->TerminateAll(true);
-	for(; zone != zend; ++zone) {
+	for(; zone != zend; ++zone)
 		delete zone->second;
-	}
-
 	return 0;
 }
-
 
 void CatchSignal(int sig_num) {
 	_log(LAUNCHER__STATUS, "Caught signal %d", sig_num);
 	RunLoops = false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

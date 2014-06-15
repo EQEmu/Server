@@ -1145,7 +1145,6 @@ void Client::OPResurrectionAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, 
 
 		this->BuffFadeNonPersistDeath();
 		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
-		// Resurrection spells with Resurrection effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if((SpellEffectDescNum == 82) || (SpellEffectDescNum == 39067)) {
 			SetMana(0);
 			SetHP(GetMaxHP()/5);

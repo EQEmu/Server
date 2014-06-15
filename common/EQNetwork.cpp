@@ -259,7 +259,7 @@ void EQStreamServer::RecvData(uchar* data, uint32 size, uint32 irIP, uint16 irPo
 	if (!data || size <= 4) return;
 	//if (CRC32::Generate(data, size-4) != ntohl(*((uint32*) &data[size-4]))) {
 #if EQN_DEBUG_Error >= 1
-		//cout << "Incomming Packet failed checksum" << endl;
+		//cout << "Incoming Packet failed checksum" << endl;
 #endif
 		//return;
 	//}

@@ -31,19 +31,15 @@ void ExportBaseData(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientExport);
-	set_exception_handler();
-	
+	set_exception_handler();	
 	LogFile->write(EQEMuLog::Status, "Client Files Export Utility");
 	if(!EQEmuConfig::LoadConfig()) {
 		LogFile->write(EQEMuLog::Error, "Unable to load configuration file.");
 		return 1;
 	}
-
 	const EQEmuConfig *config = EQEmuConfig::get();
-	if(!load_log_settings(config->LogSettingsFile.c_str())) {
+	if(!load_log_settings(config->LogSettingsFile.c_str()))
 		LogFile->write(EQEMuLog::Error, "Warning: unable to read %s.", config->LogSettingsFile.c_str());
-	}
-
 	SharedDatabase database;
 	LogFile->write(EQEMuLog::Status, "Connecting to database...");
 	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
@@ -51,24 +47,20 @@ int main(int argc, char **argv) {
 		LogFile->write(EQEMuLog::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
-	}
-	
+	}	
 	ExportSpells(&database);
 	ExportSkillCaps(&database);
 	ExportBaseData(&database);
-	
 	return 0;
 }
 
 void ExportSpells(SharedDatabase *db) {
 	LogFile->write(EQEMuLog::Status, "Exporting Spells...");
-
 	FILE *f = fopen("export/spells_us.txt", "w");
 	if(!f) {
 		LogFile->write(EQEMuLog::Error, "Unable to open export/spells_us.txt to write, skipping.");
 		return;
 	}
-
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = "SELECT * FROM spells_new ORDER BY id";
 	MYSQL_RES *result;
@@ -78,20 +70,16 @@ void ExportSpells(SharedDatabase *db) {
 			std::string line;
 			unsigned int fields = mysql_num_fields(result);
 			for(unsigned int i = 0; i < fields; ++i) {
-				if(i != 0) {
-					line.push_back('^');
-				}
-				
+				if(i != 0)
+					line.push_back('^');				
 				line += row[i];
-			}
-			
+			}			
 			fprintf(f, "%s\n", line.c_str());
 		}
 		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ExportSpells query '%s' %s", query, errbuf);
 	}
-	
+	else
+		LogFile->write(EQEMuLog::Error, "Error in ExportSpells query '%s' %s", query, errbuf);	
 	fclose(f);
 }
 
@@ -104,15 +92,13 @@ bool SkillUsable(SharedDatabase *db, int skill_id, int class_id) {
 	if(db->RunQuery(query, MakeAnyLenString(&query, "SELECT max(cap) FROM skill_caps WHERE class=%d AND skillID=%d",
 		class_id, skill_id), errbuf, &result)) {
 		if(row = mysql_fetch_row(result)) {
-			if(row[0] && atoi(row[0]) > 0) {
+			if(row[0] && atoi(row[0]) > 0)
 				res = true;
-			}
 		}
 		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in skill_usable query '%s' %s", query, errbuf);
 	}
-
+	else
+		LogFile->write(EQEMuLog::Error, "Error in skill_usable query '%s' %s", query, errbuf);
 	safe_delete_array(query);
 	return res;
 }
@@ -125,56 +111,47 @@ int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level) {
 	int res = 0;
 	if(db->RunQuery(query, MakeAnyLenString(&query, "SELECT cap FROM skill_caps WHERE class=%d AND skillID=%d AND level=%d",
 		class_id, skill_id, level), errbuf, &result)) {
-		if(row = mysql_fetch_row(result)) {
+		if(row = mysql_fetch_row(result))
 			res = atoi(row[0]);
-		}
 		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in get_skill query '%s' %s", query, errbuf);
 	}
-
+	else
+		LogFile->write(EQEMuLog::Error, "Error in get_skill query '%s' %s", query, errbuf);
 	safe_delete_array(query);
 	return res;
 }
 
 void ExportSkillCaps(SharedDatabase *db) {
 	LogFile->write(EQEMuLog::Status, "Exporting Skill Caps...");
-
 	FILE *f = fopen("export/SkillCaps.txt", "w");
 	if(!f) {
 		LogFile->write(EQEMuLog::Error, "Unable to open export/SkillCaps.txt to write, skipping.");
 		return;
 	}
-
 	for(int cl = 1; cl <= 16; ++cl) {
 		for(int skill = 0; skill <= 77; ++skill) {
 			if(SkillUsable(db, skill, cl)) {
 				int previous_cap = 0;
 				for(int level = 1; level <= 100; ++level) {
 					int cap = GetSkill(db, skill, cl, level);
-					if(cap < previous_cap) {
+					if(cap < previous_cap)
 						cap = previous_cap;
-					}
-
 					fprintf(f, "%d^%d^%d^%d^0\n", cl, skill, level, cap);
 					previous_cap = cap;
 				}
 			}
 		}
 	}
-
 	fclose(f);
 }
 
 void ExportBaseData(SharedDatabase *db) {
 	LogFile->write(EQEMuLog::Status, "Exporting Base Data...");
-
 	FILE *f = fopen("export/BaseData.txt", "w");
 	if(!f) {
 		LogFile->write(EQEMuLog::Error, "Unable to open export/BaseData.txt to write, skipping.");
 		return;
 	}
-
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = "SELECT * FROM base_data ORDER BY level, class";
 	MYSQL_RES *result;
@@ -184,20 +161,15 @@ void ExportBaseData(SharedDatabase *db) {
 			std::string line;
 			unsigned int fields = mysql_num_fields(result);
 			for(unsigned int i = 0; i < fields; ++i) {
-				if(i != 0) {
+				if(i != 0)
 					line.push_back('^');
-				}
-
 				line += row[i];
 			}
-
 			fprintf(f, "%s\n", line.c_str());
 		}
 		mysql_free_result(result);
-	} else {
-		LogFile->write(EQEMuLog::Error, "Error in ExportBaseData query '%s' %s", query, errbuf);
 	}
-
+	else
+		LogFile->write(EQEMuLog::Error, "Error in ExportBaseData query '%s' %s", query, errbuf);
 	fclose(f);
 }
-

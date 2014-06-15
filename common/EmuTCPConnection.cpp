@@ -107,7 +107,7 @@ EmuTCPConnection::EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, EmuTCPConne
 	RelayCount = 0;
 	RemoteID = iRemoteID;
 	pOldFormat = false;
-	ConnectionType = Incomming;
+	ConnectionType = Incoming;
 	TCPMode = modePacket;
 	PacketMode = packetModeZone;
 #if TCPN_DEBUG_Memory >= 7
@@ -717,7 +717,7 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 				SendNetErrorPacket("Switch to RelayServer mode by a Relay Client");
 				break;
 			}
-			if (ConnectionType != Incomming) {
+			if (ConnectionType != Incoming) {
 				SendNetErrorPacket("Switch to RelayServer mode on outgoing connection");
 				break;
 			}
@@ -738,7 +738,7 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 				SendNetErrorPacket("New RelayClient: wrong size, expected 11");
 				break;
 			}
-			if (ConnectionType != Incomming) {
+			if (ConnectionType != Incoming) {
 				SendNetErrorPacket("New RelayClient: illegal on outgoing connection");
 				break;
 			}
@@ -758,7 +758,7 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 			}
 			EmuTCPConnection* con = Server->FindConnection(*((uint32*)data));
 			if (con) {
-				if (ConnectionType == Incomming) {
+				if (ConnectionType == Incoming) {
 					if (con->GetRelayLink() != this) {
 						SendNetErrorPacket("Delete RelayClient: RelayLink != this");
 						break;

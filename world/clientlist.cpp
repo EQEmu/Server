@@ -1292,54 +1292,30 @@ void ClientList::GetClients(const char *zone_name, std::vector<ClientListEntry *
 	}
 }
 
-void ClientList::SendClientVersionSummary(const char *Name)
-{
-	uint32 Client62Count = 0;
-	uint32 ClientTitaniumCount = 0;
+void ClientList::SendClientVersionSummary(const char *Name) {
 	uint32 ClientSoFCount = 0;
 	uint32 ClientSoDCount = 0;
 	uint32 ClientUnderfootCount = 0;
 	uint32 ClientRoFCount = 0;
-
 	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
-
 	Iterator.Reset();
-
-	while(Iterator.MoreElements())
-	{
+	while(Iterator.MoreElements()) {
 		ClientListEntry* CLE = Iterator.GetData();
-
-		if(CLE && CLE->zone())
-		{
-			switch(CLE->GetClientVersion())
-			{
-				case 1:
-				{
-					++Client62Count;
-					break;
-				}
-				case 2:
-				{
-					++ClientTitaniumCount;
-					break;
-				}
-				case 3:
-				{
+		if(CLE && CLE->zone()) {
+			switch(CLE->GetClientVersion())	{
+				case 3:	{
 					++ClientSoFCount;
 					break;
 				}
-				case 4:
-				{
+				case 4:	{
 					++ClientSoDCount;
 					break;
 				}
-				case 5:
-				{
+				case 5: {
 					++ClientUnderfootCount;
 					break;
 				}
-				case 6:
-				{
+				case 6: {
 					++ClientRoFCount;
 					break;
 				}
@@ -1347,12 +1323,8 @@ void ClientList::SendClientVersionSummary(const char *Name)
 					break;
 			}
 		}
-
 		Iterator.Advance();
-
 	}
-
-	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i 6.2, %i Titanium, %i SoF, %i SoD, %i UF, %i RoF clients currently connected.",
-					Client62Count, ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
+	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i SoF, %i SoD, %i UF, %i RoF clients currently connected.", ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount);
 }
 

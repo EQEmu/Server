@@ -3556,7 +3556,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		}
 
 		if (skill_used)
-			CheckNumHitsRemaining(6); //Incomming Hit Success on Defender
+			CheckNumHitsRemaining(6); //Incoming Hit Success on Defender
 
 		ReduceAllDamage(damage);
 

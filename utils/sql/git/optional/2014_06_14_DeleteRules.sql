@@ -1,0 +1,1 @@
+DELETE FROM rule_values WHERE `rule_name` LIKE 'Spells:PRProjectileItem_Titanium';

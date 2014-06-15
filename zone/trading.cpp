@@ -2306,14 +2306,6 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 	if(RuleB(Bazaar, AuditTrail))
 		BazaarAuditTrail(GetName(), Buyer->GetName(), ItemName, Quantity, Quantity * Price, 1);
-
-	// We now send a packet to the Seller, which causes it to display 'You have sold <Qty> <Item> to <Player> for <money>'
-	//
-	// The PacketLength of 1016 is from the only instance of this packet I have seen, which is from Live, November 2008
-	// The Titanium/6.2 struct is slightly different in that it appears to use fixed length strings instead of variable
-	// length as used on Live. The extra space in the packet is also likely to be used for Item compensation, if we ever
-	// implement that.
-	//
 	uint32 PacketLength = 1016;
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, PacketLength);

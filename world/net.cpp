@@ -39,7 +39,6 @@
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/EQStreamIdent.h"
-//#include "../common/patches/Client62.h"
 #include "../common/rulesys.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
