@@ -790,7 +790,7 @@ bool Map::LoadV2(FILE *f) {
 				else {
 					i1 = (uint32)verts.size();
 					verts.push_back(Vertex(QuadVertex1X, QuadVertex1Y, QuadVertex1Z));
-					cur_verts[t] = i1;
+					cur_verts[std::make_tuple(QuadVertex1X, QuadVertex1Y, QuadVertex1Z)] = i1;
 				}
 
 				t = std::make_tuple(QuadVertex2X, QuadVertex2Y, QuadVertex2Z);
@@ -801,7 +801,7 @@ bool Map::LoadV2(FILE *f) {
 				else {
 					i2 = (uint32)verts.size();
 					verts.push_back(Vertex(QuadVertex2X, QuadVertex2Y, QuadVertex2Z));
-					cur_verts[t] = i2;
+					cur_verts[std::make_tuple(QuadVertex2X, QuadVertex2Y, QuadVertex2Z)] = i2;
 				}
 
 				t = std::make_tuple(QuadVertex3X, QuadVertex3Y, QuadVertex3Z);
@@ -812,7 +812,7 @@ bool Map::LoadV2(FILE *f) {
 				else {
 					i3 = (uint32)verts.size();
 					verts.push_back(Vertex(QuadVertex3X, QuadVertex3Y, QuadVertex3Z));
-					cur_verts[t] = i3;
+					cur_verts[std::make_tuple(QuadVertex3X, QuadVertex3Y, QuadVertex3Z)] = i3;
 				}
 
 				t = std::make_tuple(QuadVertex4X, QuadVertex4Y, QuadVertex4Z);
@@ -823,7 +823,7 @@ bool Map::LoadV2(FILE *f) {
 				else {
 					i4 = (uint32)verts.size();
 					verts.push_back(Vertex(QuadVertex4X, QuadVertex4Y, QuadVertex4Z));
-					cur_verts[t] = i4;
+					cur_verts[std::make_tuple(QuadVertex4X, QuadVertex4Y, QuadVertex4Z)] = i4;
 				}
 
 				indices.push_back(i4);
