@@ -26,7 +26,7 @@
 #include "masterentity.h"
 #include "NpcAI.h"
 #include "map.h"
-#include "watermap.h"
+#include "water_map.h"
 #include "../common/moremath.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"

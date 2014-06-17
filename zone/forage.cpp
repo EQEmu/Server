@@ -28,7 +28,7 @@
 #include "entity.h"
 #include "masterentity.h"
 #include "npc.h"
-#include "watermap.h"
+#include "water_map.h"
 #include "titles.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"

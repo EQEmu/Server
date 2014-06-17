@@ -40,7 +40,7 @@
 #include "../common/StringUtil.h"
 #include "../common/rulesys.h"
 #include "QuestParserCollection.h"
-#include "watermap.h"
+#include "water_map.h"
 #include "worldserver.h"
 extern WorldServer worldserver;
 

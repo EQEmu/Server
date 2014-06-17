@@ -10,7 +10,7 @@
 
 		<!-- Loginserver information.  Defaults shown -->
 		<loginserver>
-			<host>eqemulator.net</host>
+			<host>login.eqemulator.net</host>
 			<port>5998</port>
 			<account></account>
 			<password></password>

@@ -146,6 +146,7 @@ Mob::Mob(const char* in_name,
 	orig_bodytype = in_bodytype;
 	deity		= in_deity;
 	level		= in_level;
+	orig_level = in_level;
 	npctype_id	= in_npctype_id;
 	size		= in_size;
 	base_size	= size;
@@ -3415,7 +3416,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 {
 	int skilldmg_mod = 0;
-	
+
 	// All skill dmg mod + Skill specific
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];

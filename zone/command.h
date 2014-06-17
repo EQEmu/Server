@@ -263,7 +263,6 @@ void command_logs(Client *c, const Seperator *sep);
 void command_nologs(Client *c, const Seperator *sep);
 void command_logsql(Client *c, const Seperator *sep);
 void command_qglobal(Client *c, const Seperator *sep);
-void command_fear(Client *c, const Seperator *sep);
 void command_path(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);
 void command_opcode(Client *c, const Seperator *sep);
