@@ -279,6 +279,7 @@ struct StatBonuses {
 	int16	HitChance;							//HitChance/15 == % increase i = Accuracy (Item: Accuracy)
 	int16	HitChanceEffect[HIGHEST_SKILL+2];	//Spell effect Chance to Hit, straight percent increase
 	int16	DamageModifier[HIGHEST_SKILL+2];	//i
+	int16	DamageModifier2[HIGHEST_SKILL+2];	//i
 	int16	MinDamageModifier[HIGHEST_SKILL+2]; //i
 	int16	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
 	int16	ProcChanceSPA;						// ProcChance from spell effects

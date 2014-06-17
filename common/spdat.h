@@ -606,7 +606,7 @@ typedef enum {
 //#define SE_AddHateOverTimePct			456 // not used
 //#define SE_ResourceTap				457 // not used
 //#define SE_FactionModPct				458 // not used
-//#define SE_DamageModifier2			459 // *not implemented - Modifies melee damage by skill type
+#define SE_DamageModifier2				459 // implemented - Modifies melee damage by skill type
 
 // LAST
 
