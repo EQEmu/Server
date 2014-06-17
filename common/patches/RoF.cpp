@@ -111,11 +111,11 @@ const EQClientVersion Strategy::ClientVersion() const
 static inline structs::ItemSlotStruct TitaniumToRoFSlot(uint32 TitaniumSlot)
 {
 	structs::ItemSlotStruct RoFSlot;
-	RoFSlot.SlotType = 0xff;
+	RoFSlot.SlotType = (int16)0xFFFF;
 	RoFSlot.Unknown02 = 0;
-	RoFSlot.MainSlot = 0xff;
-	RoFSlot.SubSlot = 0xff;
-	RoFSlot.AugSlot = 0xff;
+	RoFSlot.MainSlot = (int16)0xFFFF;
+	RoFSlot.SubSlot = (int16)0xFFFF;
+	RoFSlot.AugSlot = (int16)0xFFFF;
 	RoFSlot.Unknown01 = 0;
 	uint32 TempSlot = 0;
 
