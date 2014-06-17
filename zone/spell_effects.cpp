@@ -2886,6 +2886,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_LimitCastTimeMax:
 			case SE_TriggerOnReqCaster:
 			case SE_FrenziedDevastation:
+			case SE_AStacker:						
+			case SE_BStacker:						
+			case SE_CStacker:						
+			case SE_DStacker:	
 			{
 				break;
 			}

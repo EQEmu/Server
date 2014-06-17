@@ -2661,6 +2661,22 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				}
 				break;
 
+			case SE_AStacker:
+				newbon->AStacker = true;
+				break;
+
+			case SE_BStacker:
+				newbon->BStacker = true;
+				break;
+
+			case SE_CStacker:
+				newbon->CStacker = true;
+				break;
+
+			case SE_DStacker:
+				newbon->DStacker = true;
+				break;
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
