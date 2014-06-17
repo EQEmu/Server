@@ -1099,6 +1099,15 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_DamageModifier2:
+			{
+				if(base2 == -1)
+					newbon->DamageModifier2[HIGHEST_SKILL+1] += base1;
+				else
+					newbon->DamageModifier2[base2] += base1;
+				break;
+			}
+
 			case SE_SlayUndead:
 			{
 				if(newbon->SlayUndead[1] < base1)
@@ -1906,6 +1915,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->DamageModifier[HIGHEST_SKILL+1] += effect_value;
 				else
 					newbon->DamageModifier[base2] += effect_value;
+				break;
+			}
+
+			case SE_DamageModifier2:
+			{
+				if(base2 == -1)
+					newbon->DamageModifier2[HIGHEST_SKILL+1] += effect_value;
+				else
+					newbon->DamageModifier2[base2] += effect_value;
 				break;
 			}
 
@@ -3450,6 +3468,17 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 						spellbonuses.DamageModifier[e] = effect_value;
 						aabonuses.DamageModifier[e] = effect_value;
 						itembonuses.DamageModifier[e] = effect_value;
+					}
+					break;
+				}
+
+				case SE_DamageModifier2:
+				{
+					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					{
+						spellbonuses.DamageModifier2[e] = effect_value;
+						aabonuses.DamageModifier2[e] = effect_value;
+						itembonuses.DamageModifier2[e] = effect_value;
 					}
 					break;
 				}
