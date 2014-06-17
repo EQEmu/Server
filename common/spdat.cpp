@@ -1009,6 +1009,19 @@ uint32 GetMorphTrigger(uint32 spell_id)
 	return 0;
 }
 
+bool IsCastonFadeDurationSpell(uint16 spell_id)
+{
+	for (int i = 0; i < EFFECT_COUNT; ++i) {
+		if (spells[spell_id].effectid[i] == SE_ImprovedSpellEffect
+			|| spells[spell_id].effectid[i] == SE_BossSpellTrigger
+			|| spells[spell_id].effectid[i] == SE_CastOnWearoff){
+
+		return true;
+		}
+	}
+	return false;
+}
+
 uint32 GetPartialMeleeRuneReduction(uint32 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i)

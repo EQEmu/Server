@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/17/2014 ==
+Kayen: Implemented SE_AStacker, SE_BStacker, SE_CStacker, SE_DStacker.
+These effects when present in buffs prevent each other from stacking, 
+Any effect with B prevents A, C prevents B, D prevents C.
+
 == 06/13/2014 ==
 Kayen: For table 'npc_spell_effects_entries' setting se_max for damage shield effects (59) will now determine the DS Type (ie burning)
 Setting se_max to 1 for SkillDamageTaken effects (127) will allow for stackable mitigation/weakness same as quest function ModSkillDmgTaken.

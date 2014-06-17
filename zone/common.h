@@ -350,6 +350,10 @@ struct StatBonuses {
 	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
 	int8	Screech;							// -1 = Will be blocked if another Screech is +(1)
 	int16	AlterNPCLevel;						// amount of lvls +/-
+	bool	AStacker;							// For buff stack blocking
+	bool	BStacker;							// For buff stack blocking
+	bool	CStacker;							// For buff stack blocking
+	bool	DStacker;							// For buff stack blocking
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
