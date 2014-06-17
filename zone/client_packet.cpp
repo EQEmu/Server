@@ -65,7 +65,7 @@
 #include "ZoneConfig.h"
 #include "guild_mgr.h"
 #include "pathing.h"
-#include "watermap.h"
+#include "water_map.h"
 #include "merc.h"
 #include "../common/ZoneNumbers.h"
 #include "QuestParserCollection.h"

@@ -1627,7 +1627,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				newbon->DamageShield += effect_value;
 				newbon->DamageShieldSpellID = spell_id;
-				newbon->DamageShieldType = GetDamageShieldType(spell_id);
+				//When using npc_spells_effects MAX value can be set to determine DS Type
+				if (IsAISpellEffect && max)
+					newbon->DamageShieldType = GetDamageShieldType(spell_id, max);
+				else
+					newbon->DamageShieldType = GetDamageShieldType(spell_id);
+				
 				break;
 			}
 
@@ -1635,7 +1640,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				newbon->ReverseDamageShield += effect_value;
 				newbon->ReverseDamageShieldSpellID = spell_id;
-				newbon->ReverseDamageShieldType = GetDamageShieldType(spell_id);
+
+				if (IsAISpellEffect && max)
+					newbon->ReverseDamageShieldType = GetDamageShieldType(spell_id, max);
+				else
+					newbon->ReverseDamageShieldType = GetDamageShieldType(spell_id);
 				break;
 			}
 
@@ -1999,10 +2008,21 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_SkillDamageTaken:
 			{
-				if(base2 == -1)
-					newbon->SkillDmgTaken[HIGHEST_SKILL+1] += effect_value;
-				else
-					newbon->SkillDmgTaken[base2] += effect_value;
+				//When using npc_spells_effects if MAX value set, use stackable quest based modifier.
+				if (IsAISpellEffect && max){
+					if(base2 == -1)
+						SkillDmgTaken_Mod[HIGHEST_SKILL+1] = effect_value;
+					else
+						SkillDmgTaken_Mod[base2] = effect_value;
+				}
+				else {
+
+					if(base2 == -1)
+						newbon->SkillDmgTaken[HIGHEST_SKILL+1] += effect_value;
+					else
+						newbon->SkillDmgTaken[base2] += effect_value;
+
+				}
 				break;
 			}
 
@@ -2619,6 +2639,26 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_Screech: 
 				newbon->Screech = effect_value;
+				break;
+
+			case SE_AlterNPCLevel:
+
+				if (IsNPC()){
+					if (!newbon->AlterNPCLevel 
+					|| ((effect_value < 0) && (newbon->AlterNPCLevel > effect_value)) 
+					|| ((effect_value > 0) && (newbon->AlterNPCLevel < effect_value))) {
+	
+						int16 tmp_lv =  GetOrigLevel() + effect_value;
+						if (tmp_lv < 1)
+							tmp_lv = 1;
+						else if (tmp_lv > 255)
+							tmp_lv = 255;
+						if ((GetLevel() != tmp_lv)){
+							newbon->AlterNPCLevel = effect_value;
+							SetLevel(tmp_lv);
+						}
+					}
+				}
 				break;
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table

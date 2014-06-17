@@ -55,7 +55,7 @@
 #include "worldserver.h"
 #include "masterentity.h"
 #include "map.h"
-#include "watermap.h"
+#include "water_map.h"
 #include "../common/features.h"
 #include "pathing.h"
 #include "client_logs.h"
@@ -389,7 +389,6 @@ int command_init(void) {
 		command_add("logsql","- enable SQL logging",200,command_logsql) ||
 		command_add("bestz","- Ask map for a good Z coord for your x,y coords.",0,command_bestz) ||
 		command_add("ginfo","- get group info on target.",20,command_ginfo) ||
-		command_add("fear","- view and edit fear grids and hints",200,command_fear) ||
 		command_add("path","- view and edit pathing",200,command_path) ||
 		command_add("flags","- displays the flags of you or your target",0,command_flags) ||
 		command_add("flagedit","- Edit zone flags on your target",100,command_flagedit) ||
@@ -7466,179 +7465,6 @@ void command_qglobal(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_fear(Client *c, const Seperator *sep) {
-/*
-	//super-command for editing fear grids and hints
-//	char errbuf[MYSQL_ERRMSG_SIZE];
-//	char *query = 0;
-	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
-		c->Message(0, "Syntax: #fear [view|close|add|link|list|del].");
-		c->Message(0, "...view - spawn an NPC at each fear grid point, and fear hint");
-		c->Message(0, "...close - spawn an NPC at the closest fear point");
-		c->Message(0, "...path [##] [draw|npc] - draw a path (or spawn an NPC) at each fear point for ## hops");
-//		c->Message(0, "...add [force|disjoint]- add a new fear hint point where your standing");
-//		c->Message(0, "....... force requires this point not move when combining nodes");
-//		c->Message(0, "....... disjoint marks the graph connected to this node as a valid disjoint graph");
-//		c->Message(0, "...link [id1] [id2] - make a fear hint link between two hint points");
-//		c->Message(0, "...list - show a list of all fear hint points for this zone");
-//		c->Message(0, "...find [range] - show a list of all fear hint points eithin range of you");
-//		c->Message(0, "...del [id] - remove the fear hint 'id'");
-//		c->Message(0, "...start - fears your target until you #fear stop them");
-//		c->Message(0, "...stop - Stops fear on your target");
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "view")) {
-		if(zone->pathing == nullptr) {
-			c->Message(13, "There is no fear grid file loaded for this zone.");
-			return;
-		}
-
-		uint32 count = zone->pathing->CountNodes();
-		uint32 r;
-		char buf[128];
-		PathNode_Struct *node = zone->pathing->GetNode(0); //assumes nodes are stored in a linear array
-		for(r = 0; r < count; r++, node++) {
-			sprintf(buf, "Fear_Point%d 3", r);
-			NPC* npc = NPC::SpawnNPC(buf, node->x, node->y, node->z, c->GetHeading(), nullptr);
-			if(npc == nullptr)
-				c->Message(13, "Unable to spawn new NPC marker.");
-			//do we need to do anything else?
-		}
-	} else if(!strcasecmp(sep->arg[1], "path")) {
-		if(zone->pathing == nullptr) {
-			c->Message(13, "There is no fear grid file loaded for this zone.");
-			return;
-		}
-
-		int dist = atoi(sep->arg[2]);
-		char buf[128];
-
-		FindPerson_Point it;
-		vector<FindPerson_Point> pts;
-		pts.reserve(dist+2);
-		bool path_mode = (strcasecmp(sep->arg[3], "npc") != 0);
-
-		MobFearState fs;
-
-		sprintf(buf, "Close_Fear_Link%d_ 3", dist);
-		if(!zone->pathing->FindNearestFear(&fs, c->GetX(), c->GetY(), c->GetZ())) {
-			c->Message(13, "Unable to locate a closest fear path.");
-			return;
-		}
-
-		if(path_mode) {
-			it.x = c->GetX();
-			it.y = c->GetY();
-			it.z = c->GetZ();
-			pts.push_back(it);
-			it.x = fs.x;
-			it.y = fs.y;
-			it.z = fs.z;
-			pts.push_back(it);
-		} else {
-			NPC* npc = NPC::SpawnNPC(buf, fs.x, fs.y, fs.z, c->GetHeading(), nullptr);
-			if(npc == nullptr)
-				c->Message(13, "Unable to spawn new NPC marker.");
-		}
-
-		for(dist--; dist > 0; dist--) {
-			sprintf(buf, "Close_Fear_Link%d_ 3", dist);
-			if(!zone->pathing->NextFearPath(&fs)) {
-				c->Message(13, "Unable to locate next fear path.");
-				return;
-			}
-
-			if(path_mode) {
-				it.x = fs.x;
-				it.y = fs.y;
-				it.z = fs.z;
-				pts.push_back(it);
-			} else {
-				NPC::SpawnNPC(buf, fs.x, fs.y, fs.z, c->GetHeading(), nullptr);
-			}
-		}
-
-		if(path_mode) {
-			c->SendPathPacket(pts);
-		}
-
-	} else if(!strcasecmp(sep->arg[1], "close")) {
-		if(zone->pathing == nullptr) {
-			c->Message(13, "There is no fear grid file loaded for this zone.");
-			return;
-		}
-		MobFearState fs;
-
-		if(!zone->pathing->FindNearestFear(&fs, c->GetX(), c->GetY(), c->GetZ())) {
-			c->Message(13, "Unable to locate a closest fear path.");
-			return;
-		}
-
-		NPC* npc = NPC::SpawnNPC("Close_Fear_Point 2", fs.x, fs.y, fs.z, c->GetHeading(), nullptr);
-		if(npc == nullptr)
-			c->Message(13, "Unable to spawn new NPC marker.");
-
-	} else if(!strcasecmp(sep->arg[1], "see")) {
-
-		vector<FindPerson_Point> points;
-
-		Mob* target = c->GetTarget();
-
-		if(target == nullptr) {
-			//empty length packet == not found.
-			EQApplicationPacket outapp(OP_FindPersonReply, 0);
-			c->QueuePacket(&outapp);
-			return;
-		}
-
-		c->Message(13, "Found NPC '%s'\n", target->GetName());
-
-		//fill in the path array...
-		points.resize(4);
-		points[0].x = c->GetX();
-		points[0].y = c->GetY();
-		points[0].z = c->GetZ();
-		points[1].x = target->GetX();
-		points[1].y = target->GetY();
-		points[1].z = target->GetZ();
-		points[2].x = 10;
-		points[2].y = 10;
-		points[2].z = 10;
-		points[3].x = 0;
-		points[3].y = 0;
-		points[3].z = 0;
-
-
-
-		if(points.size() == 0) {
-			//empty length packet == not found.
-			EQApplicationPacket outapp(OP_FindPersonReply, 0);
-			c->QueuePacket(&outapp);
-			return;
-		}
-
-		int len = sizeof(FindPersonResult_Struct) + points.size() * sizeof(FindPerson_Point);
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_FindPersonReply, len);
-		FindPersonResult_Struct* fpr=(FindPersonResult_Struct*)outapp->pBuffer;
-
-		vector<FindPerson_Point>::iterator cur, end;
-		cur = points.begin();
-		end = points.end();
-		int r;
-		for(r = 0; cur != end; cur++, r++) {
-			fpr->path[r] = *cur;
-		}
-		cur--;	//last element.
-		fpr->dest = *cur;
-
-		c->FastQueuePacket(&outapp);
-	} else {
-		c->Message(15, "Invalid action specified. use '#fear help' for help");
-	}
-	*/
-}
-
 void command_path(Client *c, const Seperator *sep)
 {
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help"))
@@ -7946,7 +7772,7 @@ void command_path(Client *c, const Seperator *sep)
 		}
 	}
 
-	return;
+	c->Message(0, "Unknown path command.");
 }
 
 void Client::Undye() {
@@ -8062,27 +7888,26 @@ void command_pf(Client *c, const Seperator *sep)
 
 void command_bestz(Client *c, const Seperator *sep) {
 	if (zone->zonemap == nullptr) {
-		c->Message(0,"Maps deactivated in this zone.");
-		return;
-	}
+		c->Message(0,"Map not loaded for this zone");
+	} else {
+		Map::Vertex me;
+		me.x = c->GetX();
+		me.y = c->GetY();
+		me.z = c->GetZ() + (c->GetSize() == 0.0 ? 6 : c->GetSize()) * HEAD_POSITION;
+		Map::Vertex hit;
+		Map::Vertex bme(me);
+		bme.z -= 500;
 
-	Map::Vertex me;
-	me.x = c->GetX();
-	me.y = c->GetY();
-	me.z = c->GetZ() + (c->GetSize()==0.0?6:c->GetSize()) * HEAD_POSITION;
-	Map::Vertex hit;
-	Map::Vertex bme(me);
-	bme.z -= 500;
+		float best_z = zone->zonemap->FindBestZ(me, &hit);
 
-	float best_z = zone->zonemap->FindBestZ(me, &hit);
-
-	if (best_z != -999999)
-	{
-		c->Message(0,"Z is %.3f at (%.3f, %.3f).", best_z, me.x, me.y);
-	}
-	else
-	{
-		c->Message(0,"Found no Z.");
+		if (best_z != -999999)
+		{
+			c->Message(0, "Z is %.3f at (%.3f, %.3f).", best_z, me.x, me.y);
+		}
+		else
+		{
+			c->Message(0, "Found no Z.");
+		}
 	}
 
 	if(zone->watermap == nullptr) {
@@ -8093,14 +7918,14 @@ void command_bestz(Client *c, const Seperator *sep) {
 
 		if(c->GetTarget()) {
 			z=c->GetTarget()->GetZ();
-			RegionType = zone->watermap->BSPReturnRegionType(1, c->GetTarget()->GetX(), c->GetTarget()->GetY(), z);
+			RegionType = zone->watermap->ReturnRegionType(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z);
 			c->Message(0,"InWater returns %d", zone->watermap->InWater(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z));
 			c->Message(0,"InLava returns %d", zone->watermap->InLava(c->GetTarget()->GetX(), c->GetTarget()->GetY(), z));
 
 		}
 		else {
 			z=c->GetZ();
-			RegionType = zone->watermap->BSPReturnRegionType(1, c->GetX(), c->GetY(),z);
+			RegionType = zone->watermap->ReturnRegionType(c->GetX(), c->GetY(), z);
 			c->Message(0,"InWater returns %d", zone->watermap->InWater(c->GetX(), c->GetY(), z));
 			c->Message(0,"InLava returns %d", zone->watermap->InLava(c->GetX(), c->GetY(), z));
 
@@ -8111,6 +7936,9 @@ void command_bestz(Client *c, const Seperator *sep) {
 			case RegionTypeWater:	{ c->Message(0,"You/your target are in Water."); break; }
 			case RegionTypeLava:	{ c->Message(0,"You/your target are in Lava."); break; }
 			case RegionTypeVWater:	{ c->Message(0,"You/your target are in VWater (Icy Water?)."); break; }
+			case RegionTypePVP:	{ c->Message(0, "You/your target are in a pvp enabled area."); break; }
+			case RegionTypeSlime:	{ c->Message(0, "You/your target are in slime."); break; }
+			case RegionTypeIce:	{ c->Message(0, "You/your target are in ice."); break; }
 			default: c->Message(0,"You/your target are in an unknown region type.");
 		}
 	}

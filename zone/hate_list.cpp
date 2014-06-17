@@ -27,7 +27,7 @@
 #include "hate_list.h"
 #include "QuestParserCollection.h"
 #include "zone.h"
-#include "watermap.h"
+#include "water_map.h"
 
 extern Zone *zone;
 

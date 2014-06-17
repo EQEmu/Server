@@ -254,7 +254,7 @@ typedef enum {
 #define SE_Translocate					104	// implemented
 #define SE_AntiGate						105	// implemented - Translocational Anchor
 #define SE_SummonBSTPet					106	// implemented
-//#define SE_AlterNPCLevel				107	// not used
+#define SE_AlterNPCLevel				107	// implemented - not used on live
 #define SE_Familiar						108	// implemented
 #define SE_SummonItemIntoBag			109	// implemented - summons stuff into container
 //#define SE_IncreaseArchery			110	// not used
@@ -606,6 +606,7 @@ typedef enum {
 //#define SE_AddHateOverTimePct			456 // not used
 //#define SE_ResourceTap				457 // not used
 //#define SE_FactionModPct				458 // not used
+//#define SE_DamageModifier2			459 // *not implemented - Modifies melee damage by skill type
 
 // LAST
 
@@ -840,7 +841,7 @@ uint32 GetPartialMagicRuneAmount(uint32 spell_id);
 int CalcPetHp(int levelb, int classb, int STA = 75);
 const char *GetRandPetName();
 int GetSpellEffectDescNum(uint16 spell_id);
-DmgShieldType GetDamageShieldType(uint16 spell_id);
+DmgShieldType GetDamageShieldType(uint16 spell_id, int32 DSType = 0);
 bool DetrimentalSpellAllowsRest(uint16 spell_id);
 uint32 GetNimbusEffect(uint16 spell_id);
 int32 GetFuriousBash(uint16 spell_id);
