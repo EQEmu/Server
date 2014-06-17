@@ -6,6 +6,7 @@ These effects when present in buffs prevent each other from stacking,
 Any effect with B prevents A, C prevents B, D prevents C.
 Kayen: Implemented SE_DamageModifier2 (Stacks with SE_DamageModifier, mods damage by skill type)
 Kayen: Implemented SE_AddHatePct (Modifies +/- your total hate on NPC by percent)
+Kayen: Implemented SE_AddHateOverTimePct (Modifies +/- your total hate on NPC by percent over time)
 
 == 06/13/2014 ==
 Kayen: For table 'npc_spell_effects_entries' setting se_max for damage shield effects (59) will now determine the DS Type (ie burning)

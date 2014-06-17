@@ -3530,6 +3530,14 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				}
 			}
 
+			case SE_AddHateOverTimePct:
+			{				
+				if (IsNPC())
+					CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100));
+
+				break;
+			}
+
 			default:
 			{
 				// do we need to do anyting here?
