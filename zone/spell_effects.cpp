@@ -2668,6 +2668,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				SlowMitigation(caster);
 				break;
 
+			case SE_AddHatePct:
+			{
+				if (IsNPC())
+					CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100));
+
+				break;
+			}
+
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
 			case SE_NegateSpellEffect:

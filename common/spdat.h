@@ -602,7 +602,7 @@ typedef enum {
 #define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
 #define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken
 #define SE_TriggerSpellThreshold		454 // implemented  Trigger effect on X amount of spell damage taken
-//#define SE_AddHatePct					455 // not used
+#define SE_AddHatePct					455 // implement - Modify total hate by %
 //#define SE_AddHateOverTimePct			456 // not used
 //#define SE_ResourceTap				457 // not used
 //#define SE_FactionModPct				458 // not used
