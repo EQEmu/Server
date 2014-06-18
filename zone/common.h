@@ -383,6 +383,7 @@ struct StatBonuses {
 	int16	PetCriticalHit;						// Allow pets to critical hit with % value.
 	int16	PetAvoidance;						// Pet avoidance chance.
 	int16	CombatStability;					// Melee damage mitigation.
+	int16	DoubleRiposte;						// Chance to double riposte
 	int16	GiveDoubleRiposte[3];				// 0=Regular Chance, 1=Skill Attack Chance, 2=Skill
 	uint16	RaiseSkillCap[2];					// Raise a specific skill cap (1 = value, 2=skill)
 	int16	Ambidexterity;						// Increase chance to duel wield by adding bonus 'skill'.

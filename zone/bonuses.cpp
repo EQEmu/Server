@@ -1116,6 +1116,11 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_DoubleRiposte:
+			{
+				newbon->DoubleRiposte += base1;
+			}
+
 			case SE_GiveDoubleRiposte:
 			{
 				//0=Regular Riposte 1=Skill Attack Riposte 2=Skill
@@ -2571,6 +2576,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_DoubleRiposte:
+			{
+				newbon->DoubleRiposte += effect_value;
+			}
+
 			case SE_GiveDoubleRiposte:
 			{
 				//Only allow for regular double riposte chance.
@@ -3976,6 +3986,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.MasteryofPast = effect_value;
 					aabonuses.MasteryofPast = effect_value;
 					itembonuses.MasteryofPast = effect_value;
+					break;
+
+				case SE_DoubleRiposte:
+					spellbonuses.DoubleRiposte = effect_value;
+					itembonuses.DoubleRiposte = effect_value;
+					aabonuses.DoubleRiposte = effect_value;
 					break;
 
 				case SE_GiveDoubleRiposte:
