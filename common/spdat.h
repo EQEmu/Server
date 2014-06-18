@@ -370,7 +370,7 @@ typedef enum {
 #define SE_SkillDamageAmount			220	// implemented
 #define SE_Packrat						221 // implemented as bonus
 #define SE_BlockBehind					222	// implemented - Chance to block from behind (with our without Shield)
-//#define SE_DoubleRiposte				223	// not used
+#define SE_DoubleRiposte				223	// implemented - Chance to double riposte [not used on live]
 #define	SE_GiveDoubleRiposte			224 // implemented[AA]
 #define SE_GiveDoubleAttack				225	// implemented[AA] - Allow any class to double attack with set chance.
 #define SE_TwoHandBash					226 // *not implemented as bonus

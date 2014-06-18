@@ -4449,6 +4449,10 @@ void Mob::DoRiposte(Mob* defender) {
 							defender->spellbonuses.GiveDoubleRiposte[0] +
 							defender->itembonuses.GiveDoubleRiposte[0];
 
+	DoubleRipChance		 =  defender->aabonuses.DoubleRiposte +
+							defender->spellbonuses.DoubleRiposte +
+							defender->itembonuses.DoubleRiposte;
+
 	//Live AA - Double Riposte
 	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
 		mlog(COMBAT__ATTACKS, "Preforming a double riposed (%d percent chance)", DoubleRipChance);
