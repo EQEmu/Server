@@ -1,5 +1,1 @@
-EQEmu - Custom Game Implementation for EverQuest
-
-Dependencies can be obtained at http://eqemu.github.io
-
-More Information: https://github.com/EQEmu/Server/wiki
+This is my repository, there is custom code, do not use this if you do not want my changes.
