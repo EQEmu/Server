@@ -3706,8 +3706,7 @@ bool Mob::FindBuff(uint16 spellid)
 }
 
 // removes all buffs
-void Mob::BuffFadeAll()
-{
+void Mob::BuffFadeAll() {
 	uint32 buff_count = GetMaxTotalSlots();
 	for (int j = 0; j < buff_count; j++) {
 		if(buffs[j].spellid != SPELL_UNKNOWN)

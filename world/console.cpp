@@ -97,22 +97,19 @@ bool Console::SendChannelMessage(const ServerChannelMessage_Struct* scm) {
 		return false;
 	switch (scm->chan_num) {
 		if(RuleB(Chat, ServerWideAuction)){
-			case 4: {
+			case 4:
 				SendMessage(1, "%s auctions, '%s'", scm->from, scm->message);
 				break;
-			}
 		}
 		if(RuleB(Chat, ServerWideOOC)){
-			case 5: {
+			case 5:
 				SendMessage(1, "%s says ooc, '%s'", scm->from, scm->message);
 				break;
-			}
 		}
-		case 6: {
+		case 6:
 			SendMessage(1, "%s BROADCASTS, '%s'", scm->from, scm->message);
 			break;
-		}
-		case 7: {
+		case 7:
 			SendMessage(1, "%s tells you, '%s'", scm->from, scm->message);
 			ServerPacket* pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1);
 			memcpy(pack->pBuffer, scm, pack->size);
@@ -122,22 +119,18 @@ bool Console::SendChannelMessage(const ServerChannelMessage_Struct* scm) {
 			client_list.SendPacket(scm->from, pack);
 			safe_delete(pack);
 			break;
-		}
-		case 11: {
+		case 11:
 			SendMessage(1, "%s GMSAYS, '%s'", scm->from, scm->message);
 			break;
-		}
-		default: {
+		default:
 			return false;
-		}
+			break;
 	}
 	return true;
 }
 
 bool Console::SendEmoteMessage(uint32 type, const char* message, ...) {
-	if (!message)
-		return false;
-	if (!pAcceptMessages)
+	if (!message || !pAcceptMessages)
 		return false;
 	va_list argptr;
 	char buffer[1024];
@@ -151,18 +144,14 @@ bool Console::SendEmoteMessage(uint32 type, const char* message, ...) {
 }
 
 bool Console::SendEmoteMessageRaw(uint32 type, const char* message) {
-	if (!message)
-		return false;
-	if (!pAcceptMessages)
+	if (!message || !pAcceptMessages)
 		return false;
 	SendMessage(1, message);
 	return true;
 }
 
 void Console::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...) {
-	if (!message)
-		return;
-	if (to_guilddbid != 0 || to_minstatus > Admin())
+	if (!message || to_guilddbid != 0 || to_minstatus > Admin())
 		return;
 	va_list argptr;
 	char buffer[1024];
@@ -175,9 +164,7 @@ void Console::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_min
 }
 
 void Console::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message) {
-	if (!message)
-		return;
-	if (to_guilddbid != 0 || to_minstatus > Admin())
+	if (!message || to_guilddbid != 0 || to_minstatus > Admin())
 		return;
 	SendMessage(1, message);
 }

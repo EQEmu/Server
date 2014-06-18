@@ -823,11 +823,9 @@ public:
 	bool	CheckDoubleAttack(bool tripleAttack = false);
 	bool	CheckDoubleRangedAttack();
 
-	//remove charges/multiple objects from inventory:
-	//bool	DecreaseByType(uint32 type, uint8 amt);
 	bool	DecreaseByID(uint32 type, uint8 amt);
-	uint8	SlotConvert2(uint8 slot);	//Maybe not needed.
-	void	Escape(); //AA Escape
+	uint8	SlotConvert2(uint8 slot);
+	void	Escape();
 	void	RemoveNoRent(bool client_update = true);
 	void	RemoveDuplicateLore(bool client_update = true);
 	void	MoveSlotNotAllowed(bool client_update = true);
@@ -846,7 +844,6 @@ public:
 	bool	CanFish();
 	void	GoFish();
 	void	ForageItem(bool guarantee = false);
-	//Calculate vendor price modifier based on CHA: (reverse==selling)
 	float	CalcPriceMod(Mob* other = 0, bool reverse = false);
 	void	ResetTrade();
 	void	DropInst(const ItemInst* inst);
@@ -862,7 +859,6 @@ public:
 	void	SendRules(Client* client);
 	std::list<std::string> consent_list;
 
-	//Anti-Cheat Stuff
 	uint32 m_TimeSinceLastPositionCheck;
 	float m_DistanceSinceLastPositionCheck;
 	bool m_CheatDetectMoved;
@@ -881,8 +877,6 @@ public:
 	const bool IsMQExemptedArea(uint32 zoneID, float x, float y, float z) const;
 	bool CanUseReport;
 
-	//This is used to later set the buff duration of the spell, in slot to duration.
-	//Doesn't appear to work directly after the client recieves an action packet.
 	void SendBuffDurationPacket(uint16 spell_id, int duration, int inlevel);
 
 	void	ProcessInspectRequest(Client* requestee, Client* requester);
@@ -901,7 +895,6 @@ public:
 	struct	Translocate_Struct PendingTranslocateData;
 	void	SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
-	// Task System Methods
 	void	LoadClientTaskState();
 	void	RemoveClientTaskState();
 	void	SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex, int TaskIncomplete=1);
@@ -909,79 +902,44 @@ public:
 	void	SendTaskComplete(int TaskIndex);
 
 	inline void CancelTask(int TaskIndex) { if(taskstate) taskstate->CancelTask(this, TaskIndex); }
-
 	inline bool SaveTaskState() { return (taskmanager ? taskmanager->SaveClientState(this, taskstate) : false); }
-
 	inline bool IsTaskStateLoaded() { return taskstate != nullptr; }
-
 	inline bool IsTaskActive(int TaskID) { return (taskstate ? taskstate->IsTaskActive(TaskID) : false); }
-
 	inline bool IsTaskActivityActive(int TaskID, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityActive(TaskID, ActivityID) : false); }
-
 	inline ActivityState GetTaskActivityState(int index, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityState(index, ActivityID) : ActivityHidden); }
-
 	inline void UpdateTaskActivity(int TaskID, int ActivityID, int Count) { if(taskstate) taskstate->UpdateTaskActivity(this, TaskID, ActivityID, Count); }
-
 	inline void ResetTaskActivity(int TaskID, int ActivityID) { if(taskstate) taskstate->ResetTaskActivity(this, TaskID, ActivityID); }
-
 	inline void UpdateTasksOnKill(int NPCTypeID) { if(taskstate) taskstate->UpdateTasksOnKill(this, NPCTypeID); }
-
 	inline void UpdateTasksForItem(ActivityType Type, int ItemID, int Count=1) { if(taskstate) taskstate->UpdateTasksForItem(this, Type, ItemID, Count); }
-
 	inline void UpdateTasksOnExplore(int ExploreID) { if(taskstate) taskstate->UpdateTasksOnExplore(this, ExploreID); }
-
 	inline bool UpdateTasksOnSpeakWith(int NPCTypeID) { if(taskstate) return taskstate->UpdateTasksOnSpeakWith(this, NPCTypeID); else return false; }
-
 	inline bool UpdateTasksOnDeliver(uint32 *Items, int Cash, int NPCTypeID) { if(taskstate) return taskstate->UpdateTasksOnDeliver(this, Items, Cash, NPCTypeID); else return false; }
-
 	inline void TaskSetSelector(Mob *mob, int TaskSetID) { if(taskmanager) taskmanager->TaskSetSelector(this, taskstate, mob, TaskSetID); }
-
 	inline void EnableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->EnableTask(CharacterID(), TaskCount, TaskList); }
-
 	inline void DisableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->DisableTask(CharacterID(), TaskCount, TaskList); }
-
 	inline bool IsTaskEnabled(int TaskID) { return (taskstate ? taskstate->IsTaskEnabled(TaskID) : false); }
-
 	inline void ProcessTaskProximities(float X, float Y, float Z) { if(taskstate) taskstate->ProcessTaskProximities(this, X, Y, Z); }
-
 	inline void AssignTask(int TaskID, int NPCID) { if(taskstate) taskstate->AcceptNewTask(this, TaskID, NPCID); }
-
 	inline int ActiveSpeakTask(int NPCID) { if(taskstate) return taskstate->ActiveSpeakTask(NPCID); else return 0; }
-
 	inline int ActiveSpeakActivity(int NPCID, int TaskID) { if(taskstate) return taskstate->ActiveSpeakActivity(NPCID, TaskID); else return 0; }
-
 	inline void FailTask(int TaskID) { if(taskstate) taskstate->FailTask(this, TaskID); }
-
 	inline int TaskTimeLeft(int TaskID) { return (taskstate ? taskstate->TaskTimeLeft(TaskID) : 0); }
-
 	inline int EnabledTaskCount(int TaskSetID) { return (taskstate ? taskstate->EnabledTaskCount(TaskSetID) : -1); }
-
 	inline int IsTaskCompleted(int TaskID) { return (taskstate ? taskstate->IsTaskCompleted(TaskID) : -1); }
-
 	inline void ShowClientTasks() { if(taskstate) taskstate->ShowClientTasks(this); }
-
 	inline void CancelAllTasks() { if(taskstate) taskstate->CancelAllTasks(this); }
-
 	inline int GetActiveTaskCount() { return (taskstate ? taskstate->GetActiveTaskCount() : 0); }
-
 	inline int GetActiveTaskID(int index) { return (taskstate ? taskstate->GetActiveTaskID(index) : -1); }
-
 	inline int GetTaskStartTime(int index) { return (taskstate ? taskstate->GetTaskStartTime(index) : -1); }
-
 	inline bool IsTaskActivityCompleted(int index, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityCompleted(index, ActivityID) : false); }
-
 	inline int GetTaskActivityDoneCount(int ClientTaskIndex, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCount(ClientTaskIndex, ActivityID) :0); }
-
 	inline int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID) :0); }
-
 	inline int ActiveTasksInSet(int TaskSet) { return (taskstate ? taskstate->ActiveTasksInSet(TaskSet) :0); }
-
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
 
 	inline const EQClientVersion GetClientVersion() const { return ClientVersion; }
 	inline const uint32 GetClientVersionBit() const { return ClientVersionBit; }
 
-	/** Adventure Stuff **/
 	void SendAdventureError(const char *error);
 	void SendAdventureDetails();
 	void SendAdventureCount(uint32 count, uint32 total);

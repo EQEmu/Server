@@ -1217,35 +1217,21 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 
 }
 
-void Client::SendBazaarWelcome(){
-
+void Client::SendBazaarWelcome() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-
 	char* query = 0;
-
 	MYSQL_RES *result;
-
 	MYSQL_ROW row;
-
 	if (database.RunQuery(query,MakeAnyLenString(&query, "select count(distinct char_id),count(char_id) from trader"),errbuf,&result)){
-		if(mysql_num_rows(result)==1){
-
+		if(mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
-
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_BazaarSearch, sizeof(BazaarWelcome_Struct));
-
 			memset(outapp->pBuffer,0,outapp->size);
-
 			BazaarWelcome_Struct* bws = (BazaarWelcome_Struct*)outapp->pBuffer;
-
 			bws->Beginning.Action = BazaarWelcome;
-
 			bws->Items = atoi(row[1]);
-
 			bws->Traders = atoi(row[0]);
-
 			QueuePacket(outapp);
-
 			safe_delete(outapp);
 		}
 		mysql_free_result(result);
@@ -1253,21 +1239,16 @@ void Client::SendBazaarWelcome(){
 	safe_delete_array(query);
 
 	if (database.RunQuery(query,MakeAnyLenString(&query, "select count(distinct charid) from buyer"),errbuf,&result)){
-		if(mysql_num_rows(result)==1) {
-
+		if(mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
-
-			Message(10, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them,"
-					" or use /buyer to set up your own Buy Lines.", atoi(row[0]));
+			Message(10, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them, or use /buyer to set up your own Buy Lines.", atoi(row[0]));
 		}
 		mysql_free_result(result);
 	}
 	safe_delete_array(query);
 }
 
-void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint32 ItemStat, uint32 Slot, uint32 Type,
-					char Name[64], uint32 MinPrice, uint32 MaxPrice) {
-
+void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint32 ItemStat, uint32 Slot, uint32 Type, char Name[64], uint32 MinPrice, uint32 MaxPrice) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* Query = 0;
 	std::string Search, Values;

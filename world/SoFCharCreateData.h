@@ -18,14 +18,6 @@ struct RaceClassCombos {
 	unsigned int Zone;
 };
 
-/*struct SoFCCData {
-	unsigned char Unknown;
-	unsigned int RaceClassStatEntryCount;
-	SoFCCRaceClassData RCData[109];
-	unsigned int Unknown2;
-	SoFCCStartZoneData StartZoneData[641];
-};
-*/
 #pragma pack()
 
 #endif

@@ -64,22 +64,16 @@ void command_logcommand(Client *c, const char *message);
 //commands
 void command_resetaa(Client* c,const Seperator *sep);
 void command_bind(Client* c,const Seperator *sep);
-void command_sendop(Client *c, const Seperator *sep);
-void command_optest(Client *c, const Seperator *sep);
 void command_setstat(Client *c, const Seperator *sep);
 void command_incstat(Client *c, const Seperator *sep);
 void command_help(Client *c, const Seperator *sep);
 void command_version(Client *c, const Seperator *sep);
 void command_setfaction(Client *c, const Seperator *sep);
 void command_serversidename(Client *c, const Seperator *sep);
-void command_testspawnkill(Client *c, const Seperator *sep);
-void command_testspawn(Client *c, const Seperator *sep);
 void command_wc(Client *c, const Seperator *sep);
-void command_numauths(Client *c, const Seperator *sep);
 void command_setanim(Client *c, const Seperator *sep);
 void command_connectworldserver(Client *c, const Seperator *sep);
 void command_serverinfo(Client *c, const Seperator *sep);
-void command_crashtest(Client *c, const Seperator *sep);
 void command_getvariable(Client *c, const Seperator *sep);
 void command_chat(Client *c, const Seperator *sep);
 void command_showpetspell(Client *c, const Seperator *sep);
@@ -118,7 +112,6 @@ void command_zsky(Client *c, const Seperator *sep);
 void command_zcolor(Client *c, const Seperator *sep);
 void command_spon(Client *c, const Seperator *sep);
 void command_spoff(Client *c, const Seperator *sep);
-void command_itemtest(Client *c, const Seperator *sep);
 void command_gassign(Client *c, const Seperator *sep);
 void command_ai(Client *c, const Seperator *sep);
 void command_worldshutdown(Client *c, const Seperator *sep);
@@ -201,14 +194,10 @@ void command_npcspecialattk(Client *c, const Seperator *sep);
 void command_kill(Client *c, const Seperator *sep);
 void command_haste(Client *c, const Seperator *sep);
 void command_damage(Client *c, const Seperator *sep);
-void command_zonespawn(Client *c, const Seperator *sep);
 void command_npcspawn(Client *c, const Seperator *sep);
 void command_spawnfix(Client *c, const Seperator *sep);
 void command_loc(Client *c, const Seperator *sep);
 void command_goto(Client *c, const Seperator *sep);
-#ifdef BUGTRACK
-void command_bug(Client *c, const Seperator *sep);
-#endif
 void command_iteminfo(Client *c, const Seperator *sep);
 void command_uptime(Client *c, const Seperator *sep);
 void command_flag(Client *c, const Seperator *sep);
@@ -265,7 +254,6 @@ void command_logsql(Client *c, const Seperator *sep);
 void command_qglobal(Client *c, const Seperator *sep);
 void command_path(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);
-void command_opcode(Client *c, const Seperator *sep);
 void command_aggro(Client *c, const Seperator *sep);
 void command_hatelist(Client *c, const Seperator *sep);
 void command_aggrozone(Client *c, const Seperator *sep);
@@ -313,7 +301,6 @@ void command_camerashake(Client *c, const Seperator *sep);
 void command_disarmtrap(Client *c, const Seperator *sep);
 void command_sensetrap(Client *c, const Seperator *sep);
 void command_picklock(Client *c, const Seperator *sep);
-void command_qtest(Client *c, const Seperator *sep);
 void command_mysql(Client *c, const Seperator *sep);
 void command_xtargets(Client *c, const Seperator *sep);
 void command_zopp(Client *c, const Seperator *sep);
@@ -325,15 +312,6 @@ void command_showspellslist(Client *c, const Seperator *sep);
 void command_npctype_cache(Client *c, const Seperator *sep);
 void command_merchantopenshop(Client *c, const Seperator *sep);
 void command_merchantcloseshop(Client *c, const Seperator *sep);
-
-#ifdef EQPROFILE
-void command_profiledump(Client *c, const Seperator *sep);
-void command_profilereset(Client *c, const Seperator *sep);
-#endif
-
-#ifdef PACKET_PROFILER
-void command_packetprofile(Client *c, const Seperator *sep);
-#endif
 
 #endif
 
