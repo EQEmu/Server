@@ -458,7 +458,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 			CastToClient()->Message(0,"Your fierce attack is executed with such grace, your target did not see it coming!");
 
 		int chance = (10 + (GetDEX() / 10) + (itembonuses.HeroicDEX / 10)); //18.5% chance at 85 dex 40% chance at 300 dex - chance to assassinate
-		if(level >= 60 && other->GetLevel() <= 45 && !other->CastToNPC()->IsEngaged() && other->GetHP() <= 32000 && other->IsNPC() && MakeRandomFloat(0, 99) < chance) {// player is 60 or higher, mob 45 or under, and not aggro
+		if(level >= 60 && other->GetLevel() <= 45 && !other->CastToNPC()->IsEngaged() && (other->GetHP() <= (other->GetHP() / 20) || other->GetHP() <= 32000 || other->GetHP() > 32000) && other->IsNPC() && MakeRandomFloat(0, 99) < chance) {// player is 60 or higher, mob 45 or under, and not aggro
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
 			if(IsClient())
 				CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
@@ -566,8 +566,12 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime) {
 }
 
 void Mob::RogueAssassinate(Mob* other) { //assassinate
-	if(GetWeaponDamage(other, IsClient() ? CastToClient()->GetInv().GetItem(SLOT_PRIMARY) : (const ItemInst*)nullptr) > 0)
-		other->Damage(this, 32000, SPELL_UNKNOWN, SkillBackstab);
+	if(GetWeaponDamage(other, IsClient() ? CastToClient()->GetInv().GetItem(SLOT_PRIMARY) : (const ItemInst*)nullptr) > 0) {
+		if ((other->GetHP() / 20) > 32000)
+			other->Damage(this, other->GetHP(), SPELL_UNKNOWN, SkillBackstab);
+		else
+			other->Damage(this, 32000, SPELL_UNKNOWN, SkillBackstab);
+	}
 	else
 		other->Damage(this, -5, SPELL_UNKNOWN, SkillBackstab);
 	DoAnim(animPiercing); //piercing animation
@@ -1665,7 +1669,10 @@ bool Mob::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 				if(AttackerChance > DefenderChance) {
 					mlog(COMBAT__ATTACKS, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
 					entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
-					defender->Damage(this, 32000, SPELL_UNKNOWN, skillInUse);
+					if (defender->GetHP() <= (defender->GetHP() / 20) && defender->GetHP() > 32000)
+						defender->Damage(this, defender->GetHP(), SPELL_UNKNOWN, skillInUse);
+					else if (defender->GetHP() <= 32000)
+						defender->Damage(this, 32000, SPELL_UNKNOWN, skillInUse);
 					Result = true;
 				}
 				else

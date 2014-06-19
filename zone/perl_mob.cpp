@@ -1097,6 +1097,29 @@ XS(XS_Mob_SetMaxHP)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_SetMaxMana); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetMaxMana)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::SetMaxMana(THIS)");
+	{
+		Mob *		THIS;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetMaxMana();
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Mob_GetLevelCon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetLevelCon)
 {

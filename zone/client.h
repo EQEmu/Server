@@ -337,6 +337,7 @@ public:
 	void	Stand();
 
 	virtual void	SetMaxHP();
+	virtual void	SetMaxMana();
 	int32	LevelRegen();
 	void	HPTick();
 	void	SetGM(bool toggle);

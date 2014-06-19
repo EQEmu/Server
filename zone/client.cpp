@@ -1189,6 +1189,14 @@ void Client::SetMaxHP() {
 	Save();
 }
 
+void Client::SetMaxMana() {
+	if (dead)
+		return;
+	SetMana(CalcMaxMana());
+	SendManaUpdatePacket();
+	Save();
+}
+
 bool Client::UpdateLDoNPoints(int32 points, uint32 theme) {
 	if(points < 0) {
 		if(m_pp.ldon_points_available < (0-points))
@@ -1844,7 +1852,7 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname) {
 
 void Client::SetGM(bool toggle) {
 	m_pp.gm = toggle ? 1 : 0;
-	Message(13, "You are %s a GM.", m_pp.gm ? "now" : "no longer");
+	Message(0, "Your GM flag has been turned %s.", m_pp.gm ? "on":"off");
 	SendAppearancePacket(AT_GM, m_pp.gm);
 	Save();
 	UpdateWho();
@@ -5248,7 +5256,7 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 	std::string bright_red = "<c \"#FF0000\">";
 	std::string heroic_color = "<c \"#d6b228\"> +";
 	std::string class_Name = itoa(GetClass());
-	std::string class_List[] = { "WAR", "CLR", "PAL", "RNG", "SK", "DRU", "MNK", "BRD", "ROG", "SHM", "NEC", "WIZ", "MAG", "ENC", "BST", "BER" };
+	std::string class_List[] = { "Warrior", "Cleric", "Paladin", "Ranger", "Shadow Knight", "Druid", "Monk", "Bard", "Rogue", "Shaman", "Necromancer", "Wizard", "Magician", "Enchanter", "Beastlord", "Berserker" };
 
 	if(GetClass() < 17 && GetClass() > 0)
 		class_Name = class_List[GetClass()-1];
@@ -5307,14 +5315,14 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 			break;
 	}
 	std::string HME_row = "";
-	std::string		cur_field = "";
-	std::string		total_field = "";
-	std::string		cur_name = "";
-	std::string		cur_spacing = "";
-	std::string		cur_color = "";
+	std::string cur_field = "";
+	std::string total_field = "";
+	std::string cur_name = "";
+	std::string cur_spacing = "";
+	std::string cur_color = "";
 
-	int				hme_rows = 3;
-	int				max_HME_value_len = 9;
+	int hme_rows = 3;
+	int max_HME_value_len = 9;
 
 	for(int hme_row_counter = 0; hme_row_counter < hme_rows; hme_row_counter++) {
 		switch(hme_row_counter) {
@@ -5353,24 +5361,24 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 		for(int a = cur_field.size(); a < max_HME_value_len; a++)
 			cur_spacing += " .";
 
-		HME_row += indM + cur_name + cur_spacing + cur_color + cur_field + "</c> / " + total_field + "<br>";
+		HME_row += indM + cur_name + cur_spacing + cur_color + cur_field + "</c>/" + bright_green + total_field + "</c><br>";
 	}
 	std::string regen_string;
-	std::string		regen_row_header = "";
-	std::string		regen_row_color = "";
-		std::string		base_regen_field = "";
-	std::string		base_regen_spacing = "";
-	std::string		item_regen_field = "";
-	std::string		item_regen_spacing = "";
-	std::string		cap_regen_field = "";
-	std::string		cap_regen_spacing = "";
-	std::string		spell_regen_field = "";
-	std::string		spell_regen_spacing = "";
-	std::string		aa_regen_field = "";
-	std::string		aa_regen_spacing = "";
-	std::string		total_regen_field = "";
-	int		regen_rows = 3;
-	int		max_regen_value_len = 5;
+	std::string regen_row_header = "";
+	std::string regen_row_color = "";
+	std::string base_regen_field = "";
+	std::string base_regen_spacing = "";
+	std::string item_regen_field = "";
+	std::string item_regen_spacing = "";
+	std::string cap_regen_field = "";
+	std::string cap_regen_spacing = "";
+	std::string spell_regen_field = "";
+	std::string spell_regen_spacing = "";
+	std::string aa_regen_field = "";
+	std::string aa_regen_spacing = "";
+	std::string total_regen_field = "";
+	int regen_rows = 3;
+	int max_regen_value_len = 5;
 
 	for(int regen_row_counter = 0; regen_row_counter < regen_rows; regen_row_counter++) {
 		switch(regen_row_counter) {
@@ -5433,8 +5441,8 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 			aa_regen_spacing += " .";
 
 		regen_string += (indS + regen_row_color + regen_row_header + base_regen_spacing + base_regen_field);
-		regen_string += (div + item_regen_spacing + item_regen_field + " (" + cap_regen_field);
-		regen_string += (") " + cap_regen_spacing + div + spell_regen_spacing + spell_regen_field);
+		regen_string += (div + item_regen_spacing + item_regen_field + " | Cap: " + cap_regen_field);
+		regen_string += (div + cap_regen_spacing + spell_regen_spacing + div + spell_regen_field);
 		regen_string += (div + aa_regen_spacing + aa_regen_field + div + total_regen_field + "</c><br>");
 	}
 	std::string stat_field = "";
@@ -5500,7 +5508,7 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 			}
 			case 5: {
 				a_stat_name = " WIS: ";
-				a_resist_name = "Cp: ";
+				a_resist_name = "COR: ";
 				a_stat = itoa(GetWIS());
 				h_stat = itoa(GetHeroicWIS());
 				a_resist = itoa(GetCorrup());
@@ -5533,20 +5541,20 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 			stat_field += (h_stat_spacing + a_resist_name + a_resist_spacing + a_resist + heroic_color + h_resist_field + "</c><br>");
 	}
 	std::string mod2_field = "";
-	std::string		mod2a = "";
-	std::string		mod2a_name = "";
-	std::string		mod2a_spacing = "";
-	std::string		mod2a_cap = "";
-	std::string		mod_row_spacing = "";
-	std::string		mod2b = "";
-	std::string		mod2b_name = "";
-	std::string		mod2b_spacing = "";
-	std::string		mod2b_cap = "";
-	int				mod2a_space_count;
-	int				mod2b_space_count;
+	std::string mod2a = "";
+	std::string mod2a_name = "";
+	std::string mod2a_spacing = "";
+	std::string mod2a_cap = "";
+	std::string mod_row_spacing = "";
+	std::string mod2b = "";
+	std::string mod2b_name = "";
+	std::string mod2b_spacing = "";
+	std::string mod2b_cap = "";
+	int mod2a_space_count;
+	int mod2b_space_count;
 
-	int		mod2_rows = 4;
-	int		max_mod2_value_len = 3;
+	int mod2_rows = 4;
+	int max_mod2_value_len = 3;
 
 	for(int mod2_row_counter = 0; mod2_row_counter < mod2_rows; mod2_row_counter++) {
 		switch (mod2_row_counter) {
@@ -5557,7 +5565,7 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 				mod2a_cap = itoa(RuleI(Character, ItemAvoidanceCap));
 				mod2b = itoa(GetCombatEffects());
 				mod2b_cap = itoa(RuleI(Character, ItemCombatEffectsCap));
-				mod2a_space_count = 2;
+				mod2a_space_count = 0;
 				mod2b_space_count = 0;
 				break;
 			}
@@ -5568,8 +5576,8 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 				mod2a_cap = itoa(RuleI(Character, ItemAccuracyCap));
 				mod2b = itoa(GetStrikeThrough());
 				mod2b_cap = itoa(RuleI(Character, ItemStrikethroughCap));
-				mod2a_space_count = 3;
-				mod2b_space_count = 1;
+				mod2a_space_count = 0;
+				mod2b_space_count = 0;
 				break;
 			}
 			case 2: {
@@ -5579,8 +5587,8 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 				mod2a_cap = itoa(RuleI(Character, ItemShieldingCap));
 				mod2b = itoa(GetSpellShield());
 				mod2b_cap = itoa(RuleI(Character, ItemSpellShieldingCap));
-				mod2a_space_count = 2;
-				mod2b_space_count = 1;
+				mod2a_space_count = 0;
+				mod2b_space_count = 0;
 				break;
 			}
 			case 3: {
@@ -5591,7 +5599,7 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 				mod2b = itoa(GetDoTShield());
 				mod2b_cap = itoa(RuleI(Character, ItemDoTShieldingCap));
 				mod2a_space_count = 0;
-				mod2b_space_count = 2;
+				mod2b_space_count = 0;
 				break;
 			}
 		}
@@ -5602,13 +5610,13 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 
 		for(int a = mod2a.size(); a < (max_mod2_value_len + mod2a_space_count); a++)
 			mod2a_spacing += " . ";
-		for(int a = mod2a_cap.size(); a < 6 ; a++)
+		for(int a = mod2a_cap.size(); a < 6; a++)
 			mod_row_spacing += " . ";
 		for(int a = mod2b.size(); a < (max_mod2_value_len + mod2b_space_count); a++)
 			mod2b_spacing += " . ";
 
-		mod2_field += (indP + mod2a_name + mod2a_spacing + mod2a + " / " + mod2a_cap + mod_row_spacing);
-		mod2_field += (mod2b_name + mod2b_spacing + mod2b + " / " + mod2b_cap + "<br>");
+		mod2_field += (indP + mod2a_name + mod2a_spacing + mod2a + " | Cap: " + mod2a_cap + "<br>");
+		mod2_field += (indP + mod2b_name + mod2b_spacing + mod2b + " | Cap: " + mod2b_cap + "<br>");
 	}
 
 	uint32 rune_number = 0;
@@ -5627,7 +5635,7 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 	int shield_ac = 0;
 	GetRawACNoShield(shield_ac);
 
-	std::string skill_list[] = {"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration","Alteration","Apply Poison","Archery","Backstab","Bind Wound","Bash","Block","Brass Instruments","Channeling","Conjuration","Defense","Disarm","Disarm Traps","Divination","Dodge","Double Attack","Dragon Punch","Dual Wield","Eagle Strike","Evocation","Feign Death","Flying Kick","Forage","Hand To Hand","Hide","Kick","Meditate","Mend","Offense","Parry","Pick Lock","Piercing","Riposte","Round Kick","Safe Fall","Sense Heading","Singing","Sneak","Specialize Abjuration","Specialize Alteration","Specialize Conjuration","Specialize Divination","Specialize Evocation","Pick Pockets","Stringed_Instruments","Swimming","Throwing","Tiger Claw","Tracking","Wind Instruments","Fishing","Make Poison","Tinkering","Research","Alchemy","Baking","Tailoring","Sense Traps","Blacksmithing","Fletching","Brewing","Alcohol_Tolerance","Begging","Jewelry Making","Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy"};
+	std::string skill_list[] = {"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration","Alteration","Apply Poison","Archery","Backstab","Bind Wound","Bash","Block","Brass Instruments","Channeling","Conjuration","Defense","Disarm","Disarm Traps","Divination","Dodge","Double Attack","Dragon Punch","Dual Wield","Eagle Strike","Evocation","Feign Death","Flying Kick","Forage","Hand To Hand","Hide","Kick","Meditate","Mend","Offense","Parry","Pick Lock","Piercing","Riposte","Round Kick","Safe Fall","Sense Heading","Singing","Sneak","Specialize Abjuration","Specialize Alteration","Specialize Conjuration","Specialize Divination","Specialize Evocation","Pick Pockets","Stringed Instruments","Swimming","Throwing","Tiger Claw","Tracking","Wind Instruments","Fishing","Make Poison","Tinkering","Research","Alchemy","Baking","Tailoring","Sense Traps","Blacksmithing","Fletching","Brewing","Alcohol_Tolerance","Begging","Jewelry Making","Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy"};
 
 	std::string skill_mods = "";
 	for(int j = 0; j <= HIGHEST_SKILL; j++) {
@@ -5667,23 +5675,23 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 	std::ostringstream final_string;
 					final_string <<
 					indP << "Class: " << class_Name << indS << "Level: " << static_cast<int>(GetLevel()) << indS << "Race: " << race_Name << "<br>" <<
-					indP << "Rune: " << rune_number << indL << indS << "Spell Rune: " << magic_rune_number << "<br>" <<
 					HME_row <<
-					indP << "DS: " << (itembonuses.DamageShield + spellbonuses.DamageShield*-1) << " (Spell: " << (spellbonuses.DamageShield*-1) << " + Item: " << itembonuses.DamageShield << " / " << RuleI(Character, ItemDamageShieldCap) << ")<br>" <<
-					indP << "<c \"#CCFF00\">ATK: " << GetTotalATK() << "</c><br>" <<
-					indP << "- Base: " << GetATKRating() << " | Item: " << itembonuses.ATK << " (" << RuleI(Character, ItemATKCap) << ")~Used: " << (itembonuses.ATK * 1.342) << " | Spell: " << spellbonuses.ATK << "<br>" <<
-					indP << "<c \"#CCFF00\">AC: " << CalcAC() << "</c><br>" <<
-					indP << "- Mit: " << GetACMit() << " | Avoid: " << GetACAvoid() << " | Spell: " << spellbonuses.AC << " | Shield: " << shield_ac << "<br>" <<
+					indP << "<c \"#CCFF00\">Damage Shield: " << (itembonuses.DamageShield + spellbonuses.DamageShield * -1) << "</c><br>" <<
+					indP << "Spell: " << (spellbonuses.DamageShield * -1) << " | Item: " << itembonuses.DamageShield << " | Cap: " << RuleI(Character, ItemDamageShieldCap) << "<br>" <<
+					indP << "<c \"#CCFF00\">Attack: " << GetTotalATK() << "</c><br>" <<
+					indP << "Base: " << GetATKRating() << " | Item: " << itembonuses.ATK << " | Cap: " << RuleI(Character, ItemATKCap) << " | Used: " << (itembonuses.ATK * 1.342) << " | Spell: " << spellbonuses.ATK << "<br>" <<
+					indP << "<c \"#CCFF00\">Armor Class: " << CalcAC() << "</c><br>" <<
+					indP << "Mitigation: " << GetACMit() << " | Avoid: " << GetACAvoid() << " | Cap: " << RuleI(Combat, AvoidanceCap) << " | Spell: " << spellbonuses.AC << " | Shield: " << shield_ac << "<br>" <<
 					indP << "<c \"#CCFF00\">Haste: " << GetHaste() << "</c><br>" <<
-					indP << " - Item: " << itembonuses.haste << " + Spell: " << (spellbonuses.haste + spellbonuses.hastetype2) << " (Cap: " << RuleI(Character, HasteCap) << ") | Over: " << (spellbonuses.hastetype3 + ExtraHaste) << "<br><br>" <<
-					indL << indS << "Regen<br>" << indS << indP << indP << " Base | Items (Cap) " << indP << " | Spell | A.A.s | Total<br>" <<
+					indP << "Item: " << itembonuses.haste << " | Spell: " << (spellbonuses.haste + spellbonuses.hastetype2) << " | Cap: " << RuleI(Character, HasteCap) << " | Over: " << (spellbonuses.hastetype3 + ExtraHaste) << "<br><br>" <<
+					indL << indS << "Regen<br>" << indS << indP << indP << " Base | Items | Cap | Spell | AAs | Total<br>" <<
 					regen_string << "<br>" <<
 					stat_field << "<br><br>" <<
 					mod2_field << "<br>" <<
-					indP << "Heal Amount: " << GetHealAmt() << " / " << RuleI(Character, ItemHealAmtCap) << "<br>" <<
-					indP << "Spell Dmg: " << GetSpellDmg() << " / " << RuleI(Character, ItemSpellDmgCap) << "<br>" <<
-					indP << "Clairvoyance: " << GetClair() << " / " << RuleI(Character, ItemClairvoyanceCap) << "<br>" <<
-					indP << "Dmg Shld Mit: " << GetDSMit() << " / " << RuleI(Character, ItemDSMitigationCap) << "<br><br>";
+					indP << "Heal Amount: " << GetHealAmt() << " | Cap: " << RuleI(Character, ItemHealAmtCap) << "<br>" <<
+					indP << "Spell Damage: " << GetSpellDmg() << " | Cap: " << RuleI(Character, ItemSpellDmgCap) << "<br>" <<
+					indP << "Clairvoyance: " << GetClair() << " | Cap: " << RuleI(Character, ItemClairvoyanceCap) << "<br>" <<
+					indP << "DS Mitigation: " << GetDSMit() << " | Cap: " << RuleI(Character, ItemDSMitigationCap) << "<br><br>";
 	if(GetClass() == BARD)
 		final_string << bard_info << "<br>";
 	if(skill_mods.size() > 0)

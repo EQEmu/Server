@@ -10454,10 +10454,8 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app) {
 }
 
 void Client::Handle_OP_CancelTask(const EQApplicationPacket *app) {
-
 	if(app->size != sizeof(CancelTask_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_CancelTask expected %i got %i",
-					sizeof(CancelTask_Struct), app->size);
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_CancelTask expected %i got %i", sizeof(CancelTask_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -10470,8 +10468,7 @@ void Client::Handle_OP_CancelTask(const EQApplicationPacket *app) {
 void Client::Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app) {
 
 	if(app->size != sizeof(TaskHistoryRequest_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_TaskHistoryRequest expected %i got %i",
-					sizeof(TaskHistoryRequest_Struct), app->size);
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_TaskHistoryRequest expected %i got %i", sizeof(TaskHistoryRequest_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -10482,12 +10479,8 @@ void Client::Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app) {
 }
 
 void Client::Handle_OP_Bandolier(const EQApplicationPacket *app) {
-
-	// Although there are three different structs for OP_Bandolier, they are all the same size.
-	//
 	if(app->size != sizeof(BandolierCreate_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_Bandolier expected %i got %i",
-					sizeof(BandolierCreate_Struct), app->size);
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_Bandolier expected %i got %i", sizeof(BandolierCreate_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -10505,7 +10498,7 @@ void Client::Handle_OP_Bandolier(const EQApplicationPacket *app) {
 			SetBandolier(app);
 			break;
 		default:
-			LogFile->write(EQEMuLog::Debug, "Uknown Bandolier action %i", bs->action);
+			LogFile->write(EQEMuLog::Debug, "Unknown Bandolier action %i", bs->action);
 
 	}
 }
@@ -10513,23 +10506,19 @@ void Client::Handle_OP_Bandolier(const EQApplicationPacket *app) {
 void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 
 	if(app->size != sizeof(PopupResponse_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PopupResponse expected %i got %i",
-					sizeof(PopupResponse_Struct), app->size);
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PopupResponse expected %i got %i", sizeof(PopupResponse_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
 	PopupResponse_Struct *prs = (PopupResponse_Struct*)app->pBuffer;
 
-	// Handle any EQEmu defined popup Ids first
-	switch(prs->popupid)
-	{
+	switch(prs->popupid) {
 		case POPUPID_UPDATE_SHOWSTATSWINDOW:
 			if(GetTarget() && GetTarget()->IsClient())
 				GetTarget()->CastToClient()->SendStatsWindow(this, true);
 			else
 				SendStatsWindow(this, true);
 			return;
-
 		default:
 			break;
 	}
@@ -10540,16 +10529,14 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app) {
 	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
 
 	Mob* Target = GetTarget();
-	if(Target && Target->IsNPC()) {
+	if(Target && Target->IsNPC())
 		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
-	}
 }
 
 void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
 
 	if(app->size != sizeof(MovePotionToBelt_Struct)) {
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PotionBelt expected %i got %i",
-					sizeof(MovePotionToBelt_Struct), app->size);
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_PotionBelt expected %i got %i", sizeof(MovePotionToBelt_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -10573,7 +10560,6 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app) {
 }
 
 void Client::Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app) {
-
 	if (app->size != sizeof(LFGGetMatchesRequest_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_LFGGetMatchesRequest, size=%i, expected %i", app->size, sizeof(LFGGetMatchesRequest_Struct));
 		DumpPacket(app);
@@ -10599,7 +10585,6 @@ void Client::Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app) {
 
 
 void Client::Handle_OP_LFPCommand(const EQApplicationPacket *app) {
-
 	if (app->size != sizeof(LFP_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_LFPCommand, size=%i, expected %i", app->size, sizeof(LFP_Struct));
 		DumpPacket(app);
@@ -10626,8 +10611,6 @@ void Client::Handle_OP_LFPCommand(const EQApplicationPacket *app) {
 	}
 
 	Group *g = GetGroup();
-
-	// Slot 0 is always for the group leader, or the player if not in a group
 	strcpy(LFPMembers[0].Name, GetName());
 	LFPMembers[0].Class = GetClass();
 	LFPMembers[0].Level = GetLevel();
@@ -10635,32 +10618,20 @@ void Client::Handle_OP_LFPCommand(const EQApplicationPacket *app) {
 	LFPMembers[0].GuildID = GuildID();
 
 	if(g) {
-		// This should not happen. The client checks if you are in a group and will not let you put LFP on if
-		// you are not the leader.
 		if(!g->IsLeader(this)) {
 			LogFile->write(EQEMuLog::Error,"Client sent LFP on for character %s who is grouped but not leader.", GetName());
 			return;
 		}
-		// Fill the LFPMembers array with the rest of the group members, excluding ourself
-		// We don't fill in the class, level or zone, because we may not be able to determine
-		// them if the other group members are not in this zone. World will fill in this information
-		// for us, if it can.
 		int NextFreeSlot = 1;
 		for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 			if(strcasecmp(g->membername[i], LFPMembers[0].Name))
 				strcpy(LFPMembers[NextFreeSlot++].Name, g->membername[i]);
 		}
 	}
-
-
-	worldserver.UpdateLFP(CharacterID(), lfp->Action, lfp->MatchFilter, lfp->FromLevel, lfp->ToLevel, lfp->Classes,
-					lfp->Comments, LFPMembers);
-
-
+	worldserver.UpdateLFP(CharacterID(), lfp->Action, lfp->MatchFilter, lfp->FromLevel, lfp->ToLevel, lfp->Classes,lfp->Comments, LFPMembers);
 }
 
 void Client::Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app) {
-
 	if (app->size != sizeof(LFPGetMatchesRequest_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_LFPGetMatchesRequest, size=%i, expected %i", app->size, sizeof(LFPGetMatchesRequest_Struct));
 		DumpPacket(app);
@@ -10686,46 +10657,30 @@ void Client::Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app) {
 	return;
 }
 
-void Client::Handle_OP_Barter(const EQApplicationPacket *app)
-{
-
-	if(app->size < 4)
-	{
+void Client::Handle_OP_Barter(const EQApplicationPacket *app) {
+	if(app->size < 4) {
 		LogFile->write(EQEMuLog::Debug, "OP_Barter packet below minimum expected size. The packet was %i bytes.", app->size);
 		DumpPacket(app);
 		return;
 	}
 
 	char* Buf = (char *)app->pBuffer;
-
-	// The first 4 bytes of the packet determine the action. A lot of Barter packets require the
-	// packet the client sent, sent back to it as an acknowledgement.
-	//
 	uint32 Action = VARSTRUCT_DECODE_TYPE(uint32, Buf);
-
 	_pkt(TRADING__BARTER, app);
 
-	switch(Action)
-	{
-
-		case Barter_BuyerSearch:
-		{
+	switch(Action) {
+		case Barter_BuyerSearch: {
 			BuyerItemSearch(app);
 			break;
 		}
-
-		case Barter_SellerSearch:
-		{
+		case Barter_SellerSearch: {
 			BarterSearchRequest_Struct *bsr = (BarterSearchRequest_Struct*)app->pBuffer;
 			SendBuyerResults(bsr->SearchString, bsr->SearchID);
 			break;
 		}
-
-		case Barter_BuyerModeOn:
-		{
-			if(!Trader) {
+		case Barter_BuyerModeOn: {
+			if(!Trader)
 				ToggleBuyerMode(true);
-			}
 			else {
 				Buf = (char *)app->pBuffer;
 				VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerModeOff);
@@ -10734,42 +10689,30 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 			QueuePacket(app);
 			break;
 		}
-
-		case Barter_BuyerModeOff:
-		{
+		case Barter_BuyerModeOff: {
 			QueuePacket(app);
 			ToggleBuyerMode(false);
 			break;
 		}
-
-		case Barter_BuyerItemUpdate:
-		{
+		case Barter_BuyerItemUpdate: {
 			UpdateBuyLine(app);
 			break;
 		}
-
-		case Barter_BuyerItemRemove:
-		{
+		case Barter_BuyerItemRemove: {
 			BuyerRemoveItem_Struct* bris = (BuyerRemoveItem_Struct*)app->pBuffer;
 			database.RemoveBuyLine(CharacterID(), bris->BuySlot);
 			QueuePacket(app);
 			break;
 		}
-
-		case Barter_SellItem:
-		{
+		case Barter_SellItem: {
 			SellToBuyer(app);
 			break;
 		}
-
-		case Barter_BuyerInspectBegin:
-		{
+		case Barter_BuyerInspectBegin: {
 			ShowBuyLines(app);
 			break;
 		}
-
-		case Barter_BuyerInspectEnd:
-		{
+		case Barter_BuyerInspectEnd: {
 			BuyerInspectRequest_Struct* bir = ( BuyerInspectRequest_Struct*)app->pBuffer;
 			Client *Buyer = entity_list.GetClientByID(bir->BuyerID);
 			if(Buyer)
@@ -10777,122 +10720,90 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 
 			break;
 		}
-
-		case Barter_BarterItemInspect:
-		{
+		case Barter_BarterItemInspect: {
 			BarterItemSearchLinkRequest_Struct* bislr = (BarterItemSearchLinkRequest_Struct*)app->pBuffer;
 
 			const Item_Struct* item = database.GetItem(bislr->ItemID);
 
 			if (!item)
 				Message(13, "Error: This item does not exist!");
-			else
-			{
+			else {
 				ItemInst* inst = database.CreateItem(item);
-				if (inst)
-				{
+				if (inst) {
 					SendItemPacket(0, inst, ItemPacketViewLink);
 					safe_delete(inst);
 				}
 			}
 			break;
 		}
-
-		case Barter_Welcome:
-		{
+		case Barter_Welcome: {
 			SendBazaarWelcome();
 			break;
 		}
-
-		case Barter_WelcomeMessageUpdate:
-		{
+		case Barter_WelcomeMessageUpdate: {
 			BuyerWelcomeMessageUpdate_Struct* bwmu = (BuyerWelcomeMessageUpdate_Struct*)app->pBuffer;
 			SetBuyerWelcomeMessage(bwmu->WelcomeMessage);
 			break;
 		}
-
-		case Barter_BuyerItemInspect:
-		{
+		case Barter_BuyerItemInspect: {
 			BuyerItemSearchLinkRequest_Struct* bislr = (BuyerItemSearchLinkRequest_Struct*)app->pBuffer;
-
 			const Item_Struct* item = database.GetItem(bislr->ItemID);
 
 			if (!item)
 				Message(13, "Error: This item does not exist!");
-			else
-			{
+			else {
 				ItemInst* inst = database.CreateItem(item);
-				if (inst)
-				{
+				if (inst) {
 					SendItemPacket(0, inst, ItemPacketViewLink);
 					safe_delete(inst);
 				}
 			}
 			break;
 		}
-
-		case Barter_Unknown23:
-		{
-				// Sent by SoD client for no discernible reason.
+		case Barter_Unknown23: {
 				break;
 		}
-
-		default:
+		default: {
 			Message(13, "Unrecognised Barter action.");
 			_log(TRADING__BARTER, "Unrecognised Barter Action %i", Action);
-
+			break;
+		}
 	}
 }
 
 void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app) {
-
 	if(app->size != sizeof(VoiceMacroIn_Struct)) {
-
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_VoiceMacroIn expected %i got %i",
-					sizeof(VoiceMacroIn_Struct), app->size);
-
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_VoiceMacroIn expected %i got %i", sizeof(VoiceMacroIn_Struct), app->size);
 		DumpPacket(app);
-
 		return;
 	}
 
-	if(!RuleB(Chat, EnableVoiceMacros)) return;
+	if(!RuleB(Chat, EnableVoiceMacros))
+		return;
 
 	VoiceMacroIn_Struct* vmi = (VoiceMacroIn_Struct*)app->pBuffer;
-
 	VoiceMacroReceived(vmi->Type, vmi->Target, vmi->MacroNumber);
-
 }
 
 void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app) {
-
 	if(app->size != sizeof(DoGroupLeadershipAbility_Struct)) {
-
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_DoGroupLeadershipAbility expected %i got %i",
-					sizeof(DoGroupLeadershipAbility_Struct), app->size);
-
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_DoGroupLeadershipAbility expected %i got %i", sizeof(DoGroupLeadershipAbility_Struct), app->size);
 		DumpPacket(app);
-
 		return;
 	}
 
 	DoGroupLeadershipAbility_Struct* dglas = (DoGroupLeadershipAbility_Struct*)app->pBuffer;
 
-	switch(dglas->Ability)
-	{
-		case GroupLeadershipAbility_MarkNPC:
-		{
-			if(GetTarget())
-			{
+	switch(dglas->Ability) {
+		case GroupLeadershipAbility_MarkNPC: {
+			if(GetTarget()) {
 				Group* g = GetGroup();
 				if(g)
 					g->MarkNPC(GetTarget(), dglas->Parameter);
 			}
 			break;
 		}
-
-		case groupAAInspectBuffs:
-		{
+		case groupAAInspectBuffs: {
 			Mob *Target = GetTarget();
 
 			if(!Target || !Target->IsClient())
@@ -10907,21 +10818,15 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app) 
 
 			break;
 		}
-
 		default:
 			break;
 	}
 }
 
 void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket *app) {
-
-	if(app->size != 0)
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_ClearNPCMarks expected 0 got %i",
-					app->size);
-
+	if(app->size != 0) {
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_ClearNPCMarks expected 0 got %i", app->size);
 		DumpPacket(app);
-
 		return;
 	}
 
@@ -10932,42 +10837,32 @@ void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket *app) {
 }
 
 void Client::Handle_OP_DelegateAbility(const EQApplicationPacket *app) {
-
-	if(app->size != sizeof(DelegateAbility_Struct))
-	{
-		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_DelegateAbility expected %i got %i",
-					sizeof(DelegateAbility_Struct), app->size);
-
+	if(app->size != sizeof(DelegateAbility_Struct)) {
+		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_DelegateAbility expected %i got %i", sizeof(DelegateAbility_Struct), app->size);
 		DumpPacket(app);
-
 		return;
 	}
 
 	DelegateAbility_Struct* das = (DelegateAbility_Struct*)app->pBuffer;
-
 	Group *g = GetGroup();
 
-	if(!g) return;
+	if(!g)
+		return;
 
-	switch(das->DelegateAbility)
-	{
-		case 0:
-		{
+	switch(das->DelegateAbility) {
+		case 0: {
 			g->DelegateMainAssist(das->Name);
 			break;
 		}
-		case 1:
-		{
+		case 1: {
 			g->DelegateMarkNPC(das->Name);
 			break;
 		}
-		case 2:
-		{
+		case 2: {
 			g->DelegateMainTank(das->Name);
 			break;
 		}
-		case 3:
-		{
+		case 3: {
 			g->DelegatePuller(das->Name);
 			break;
 		}
@@ -10990,31 +10885,23 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {
 
 	bool IsPoison = PoisonItemInstance && (PoisonItemInstance->GetItem()->ItemType == ItemTypePoison);
 
-	if(!IsPoison)
-	{
-		mlog(SPELLS__CASTING_ERR, "Item used to cast spell effect from a poison item was missing from inventory slot %d "
-						"after casting, or is not a poison!", ApplyPoisonData->inventorySlot);
-
+	if(!IsPoison) {
+		mlog(SPELLS__CASTING_ERR, "Item used to cast spell effect from a poison item was missing from inventory slot %d after casting, or is not a poison!", ApplyPoisonData->inventorySlot);
 		Message(0, "Error: item not found for inventory slot #%i or is not a poison", ApplyPoisonData->inventorySlot);
 	}
-	else if(GetClass() == ROGUE)
-	{
-		if ((PrimaryWeapon && PrimaryWeapon->GetItem()->ItemType == ItemType1HPiercing) ||
-			(SecondaryWeapon && SecondaryWeapon->GetItem()->ItemType == ItemType1HPiercing)) {
-			float SuccessChance = (GetSkill(SkillApplyPoison) + GetLevel()) / 400.0f;
+	else if(GetClass() == ROGUE) {
+		if ((PrimaryWeapon && PrimaryWeapon->GetItem()->ItemType == ItemType1HPiercing) || (SecondaryWeapon && SecondaryWeapon->GetItem()->ItemType == ItemType1HPiercing)) {
+			float SuccessChance = ((GetSkill(SkillApplyPoison) + GetLevel()) / 400.0f);
 			double ChanceRoll = MakeRandomFloat(0, 1);
 
 			CheckIncreaseSkill(SkillApplyPoison, nullptr, 10);
 
 			if(ChanceRoll < SuccessChance) {
 				ApplyPoisonSuccessResult = 1;
-				// NOTE: Someone may want to tweak the chance to proc the poison effect that is added to the weapon here.
-				// My thinking was that DEX should be apart of the calculation.
 				AddProcToWeapon(PoisonItemInstance->GetItem()->Proc.Effect, false, (GetDEX()/100) + 103);
 			}
 
 			DeleteItemInInventory(ApplyPoisonData->inventorySlot, 1, true);
-
 			LogFile->write(EQEMuLog::Debug, "Chance to Apply Poison was %f. Roll was %f. Result is %u.", SuccessChance, ChanceRoll, ApplyPoisonSuccessResult);
 		}
 	}

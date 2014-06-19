@@ -1322,9 +1322,7 @@ void EntityList::RefreshClientXTargets(Client *c)
 	}
 }
 
-void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *app,
-		bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits)
-{
+void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits) {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *c = it->second;
@@ -1345,16 +1343,18 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 		if (c == SkipThisMob)
 			continue;
 
-		if (iSendToSender)
+		if (iSendToSender) {
 			if (c == sender)
 				Send = true;
+		}
 
 		if (c != sender) {
 			if (Target == sender)
 				Send = true;
-			else if (HoTT)
+			else if (HoTT) {
 				if (TargetsTarget == sender)
 					Send = true;
+			}
 		}
 
 		if (Send && (c->GetClientVersionBit() & ClientVersionBits))
@@ -1362,17 +1362,13 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 	}
 }
 
-void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender)
-{
+void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender) {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *c = it->second;
 		++it;
 
-		if (!c || ((c == sender) && !iSendToSender))
-			continue;
-
-		if (!c->IsXTarget(sender))
+		if (!c || ((c == sender) && !iSendToSender) || !c->IsXTarget(sender))
 			continue;
 
 		c->QueuePacket(app);

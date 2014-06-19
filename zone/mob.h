@@ -296,6 +296,7 @@ public:
 	virtual void Heal();
 	virtual void HealDamage(uint32 ammount, Mob* caster = nullptr, uint16 spell_id = SPELL_UNKNOWN);
 	virtual void SetMaxHP() { cur_hp = max_hp; }
+	virtual void SetMaxMana() { cur_mana = max_mana; }
 	virtual inline uint16 GetBaseRace() const { return base_race; }
 	virtual inline uint8 GetBaseGender() const { return base_gender; }
 	virtual inline uint16 GetDeity() const { return deity; }

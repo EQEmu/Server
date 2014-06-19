@@ -1839,7 +1839,7 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 	ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 
 	if (from == 0) {
-		strcpy(scm->from, "ZServer");
+		strcpy(scm->from, "[SERVER]");
 		scm->fromadmin = 0;
 	} else {
 		strcpy(scm->from, from->GetName());
