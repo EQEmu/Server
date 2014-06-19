@@ -96,20 +96,23 @@ bool Console::SendChannelMessage(const ServerChannelMessage_Struct* scm) {
 	if (!pAcceptMessages)
 		return false;
 	switch (scm->chan_num) {
-		if(RuleB(Chat, ServerWideAuction)){
-			case 4:
+		if(RuleB(Chat, ServerWideAuction)) {
+			case 4: {
 				SendMessage(1, "%s auctions, '%s'", scm->from, scm->message);
 				break;
+			}
 		}
-		if(RuleB(Chat, ServerWideOOC)){
-			case 5:
+		if(RuleB(Chat, ServerWideOOC)) {
+			case 5: {
 				SendMessage(1, "%s says ooc, '%s'", scm->from, scm->message);
 				break;
+			}
 		}
-		case 6:
+		case 6: {
 			SendMessage(1, "%s BROADCASTS, '%s'", scm->from, scm->message);
 			break;
-		case 7:
+		}
+		case 7: {
 			SendMessage(1, "%s tells you, '%s'", scm->from, scm->message);
 			ServerPacket* pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1);
 			memcpy(pack->pBuffer, scm, pack->size);
@@ -119,12 +122,15 @@ bool Console::SendChannelMessage(const ServerChannelMessage_Struct* scm) {
 			client_list.SendPacket(scm->from, pack);
 			safe_delete(pack);
 			break;
-		case 11:
+		}
+		case 11: {
 			SendMessage(1, "%s GMSAYS, '%s'", scm->from, scm->message);
 			break;
-		default:
+		}
+		default: {
 			return false;
 			break;
+		}
 	}
 	return true;
 }
