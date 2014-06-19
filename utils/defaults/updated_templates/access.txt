@@ -1,8 +1,0 @@
-bugview.html 0
-playerview.html 0
-zoneview.html 0
-scripts/jquery.js 0
-style/style.css 0
-data/bug_data.html 0
-data/player_data.html 0
-data/zone_data.html 0
