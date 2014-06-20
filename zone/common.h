@@ -290,7 +290,8 @@ struct StatBonuses {
 	int16	FlurryChance;
 	int16	Accuracy[HIGHEST_SKILL+2];			//Accuracy/15 == % increase	[Spell Effect: Accuracy)
 	int16	HundredHands;						//extra haste, stacks with all other haste	i
-	int8	MeleeLifetap;						//i
+	int16	MeleeLifetap;						//i
+	int16	Vampirism;							//i
 	int16	HealRate;							// Spell effect that influences effectiveness of heals
 	int32	MaxHPChange;						// Spell Effect
 	int16	SkillDmgTaken[HIGHEST_SKILL+2];		// All Skills + -1
@@ -355,6 +356,7 @@ struct StatBonuses {
 	bool	BStacker;							// For buff stack blocking
 	bool	CStacker;							// For buff stack blocking
 	bool	DStacker;							// For buff stack blocking
+	bool	BerserkSPA;							// berserk effect			
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

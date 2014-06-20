@@ -1248,12 +1248,20 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_Vampirism:
+				newbon->Vampirism += base1;
+				break;			
+
 			case SE_FrenziedDevastation:
 				newbon->FrenziedDevastation += base2;
 				break;
 
 			case SE_SpellProcChance:
 				newbon->SpellProcChance += base1;
+				break;
+
+			case SE_Berserk:
+				newbon->BerserkSPA = true;
 				break;
 
 		}
@@ -1826,6 +1834,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->MeleeLifetap = effect_value;
 				break;
 			}
+
+			case SE_Vampirism:
+				newbon->Vampirism += effect_value;
+				break;	
 
 			case SE_AllInstrumentMod:
 			{
@@ -2703,6 +2715,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_DStacker:
 				newbon->DStacker = true;
+				break;
+
+			case SE_Berserk:
+				newbon->BerserkSPA = true;
 				break;
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
@@ -4093,6 +4109,18 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 				case SE_AbsorbMagicAtt:
 					spellbonuses.AbsorbMagicAtt[0] = effect_value;
 					spellbonuses.AbsorbMagicAtt[1] = -1;
+					break;
+
+				case SE_Berserk:
+					spellbonuses.BerserkSPA = false;
+					aabonuses.BerserkSPA = false;
+					itembonuses.BerserkSPA = false;
+					break;
+
+				case SE_Vampirism:
+					spellbonuses.Vampirism = effect_value;
+					aabonuses.Vampirism = effect_value;
+					itembonuses.Vampirism = effect_value;
 					break;
 				
 			}
