@@ -256,6 +256,7 @@ public:
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
 	inline bool IsTargetableWithHotkey() const { return no_target_hotkey; }
+	int32 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }

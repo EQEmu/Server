@@ -7,7 +7,11 @@ Any effect with B prevents A, C prevents B, D prevents C.
 Kayen: Implemented SE_DamageModifier2 (Stacks with SE_DamageModifier, mods damage by skill type)
 Kayen: Implemented SE_AddHatePct (Modifies +/- your total hate on NPC by percent)
 Kayen: Implemented SE_AddHateOverTimePct (Modifies +/- your total hate on NPC by percent over time)
-Kayen: Implemented SE_DoubleRiposte (Modifies +/- your double riposte chance)
+Kayen: Implemented SE_DoubleRiposte (Modifies +/- your double riposte chance) *Not used in any live effects
+Kayen: Implemented SE_Berserk (Sets client as 'Berserk' giving chance to crippling blow) *Not used in any live effects
+Kayen: Implemented SE_Vampirsm (Stackable lifetap from melee effect) *Not used in any live effects
+Kayen: Minor fixes to how lifetap from melee effects are calced. Removed arbitrary hard cap of 100%, Negative value will now dmg client.
+Kayen: Fix to issue that prevented NPC's from receiving HP Regeneration derived from spell buffs.
 
 == 06/13/2014 ==
 Kayen: For table 'npc_spell_effects_entries' setting se_max for damage shield effects (59) will now determine the DS Type (ie burning)

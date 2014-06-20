@@ -190,9 +190,9 @@ typedef enum {
 #define SE_DivineAura					40	// implemented
 #define SE_Destroy						41	// implemented - Disintegrate, Banishment of Shadows
 #define SE_ShadowStep					42	// implemented
-//#define SE_Berserk					43	// not used
-#define SE_Lycanthropy					44	// implemented
-//#define SE_Vampirism					45	// not used
+#define SE_Berserk						43	// implemented (*not used in any known live spell) Makes client 'Berserk' giving crip blow chance.
+#define SE_Lycanthropy					44	// implemented 
+#define SE_Vampirism					45	// implemented (*not used in any known live spell) Stackable lifetap from melee.
 #define SE_ResistFire					46	// implemented
 #define SE_ResistCold					47	// implemented
 #define SE_ResistPoison					48	// implemented

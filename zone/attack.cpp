@@ -4283,6 +4283,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 
 	float critChance = 0.0f;
+	bool IsBerskerSPA = false;
 
 	//1: Try Slay Undead
 	if(defender && defender->GetBodyType() == BT_Undead || defender->GetBodyType() == BT_SummonedUndead || defender->GetBodyType() == BT_Vampire){
@@ -4310,12 +4311,15 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	//are defined you will have an innate chance to hit at Level 1 regardless of bonuses.
 	//Warning: Do not define these rules if you want live like critical hits.
 	critChance += RuleI(Combat, MeleeBaseCritChance);
-
+	
 	if (IsClient()) {
-		critChance += RuleI(Combat, ClientBaseCritChance);
+		critChance  += RuleI(Combat, ClientBaseCritChance);
 
-		if ((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12) {
-			if (IsBerserk())
+		if (spellbonuses.BerserkSPA || itembonuses.BerserkSPA || aabonuses.BerserkSPA)
+				IsBerskerSPA = true;
+
+		if (((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12)  || IsBerskerSPA) {
+			if (IsBerserk() || IsBerskerSPA)
 				critChance += RuleI(Combat, BerserkBaseCritChance);
 			else
 				critChance += RuleI(Combat, WarBerBaseCritChance);
@@ -4360,15 +4364,15 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			uint16 critMod = 200;
 			bool crip_success = false;
 			int16 CripplingBlowChance = GetCrippBlowChance();
-
+			
 			//Crippling Blow Chance: The percent value of the effect is applied
 			//to the your Chance to Critical. (ie You have 10% chance to critical and you
 			//have a 200% Chance to Critical Blow effect, therefore you have a 20% Chance to Critical Blow.
-			if (CripplingBlowChance || IsBerserk()) {
-				if (!IsBerserk())
+			if (CripplingBlowChance || (IsBerserk() || IsBerskerSPA)) {
+				if (!IsBerserk() && !IsBerskerSPA)
 					critChance *= float(CripplingBlowChance)/100.0f;
 
-				if (IsBerserk() || MakeRandomFloat(0, 1) < critChance) {
+				if ((IsBerserk() || IsBerskerSPA) || MakeRandomFloat(0, 1) < critChance) {
 					critMod = 400;
 					crip_success = true;
 				}
