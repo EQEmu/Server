@@ -2897,7 +2897,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_AStacker:						
 			case SE_BStacker:						
 			case SE_CStacker:						
-			case SE_DStacker:	
+			case SE_DStacker:
+			case SE_DoubleRiposte:
+			case SE_Berserk:
+			case SE_Vampirism:
 			{
 				break;
 			}
