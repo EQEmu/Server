@@ -900,7 +900,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
 					sender = GetPet();
 
-			entity_list.ChannelMessage(sender, chan_num, language, message);
+				entity_list.ChannelMessage(sender, chan_num, language, message);
 			}
 			break;
 		}
@@ -908,7 +908,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if(RuleB(Chat, ServerWideOOC)) {
 				if(!global_channel_timer.Check()) {
 					if(strlen(targetname) == 0)
-						ChannelMessageReceived(5, language, lang_skill, message, "discard"); //Fast typer or spammer??
+						ChannelMessageReceived(5, language, lang_skill, message, "discard");
 					else
 						return;
 				}
@@ -953,7 +953,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		case 7: {
 				if(!global_channel_timer.Check()) {
 					if(strlen(targetname) == 0)
-						ChannelMessageReceived(7, language, lang_skill, message, "discard"); //Fast typer or spammer??
+						ChannelMessageReceived(7, language, lang_skill, message, "discard");
 					else
 						return;
 				}
@@ -963,11 +963,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					return;
 				}
 
-				if(TotalKarma < RuleI(Chat, KarmaGlobalChatLimit)) {
-					if(GetLevel() < RuleI(Chat, GlobalChatLevelLimit)) {
-						Message(0, "You do not have permission to send tells at this time.");
-						return;
-					}
+				if(TotalKarma < RuleI(Chat, KarmaGlobalChatLimit) || GetLevel() < RuleI(Chat, GlobalChatLevelLimit)) {
+					Message(0, "You do not have permission to send tells at this time.");
+					return;
 				}
 
 				char target_name[64];
@@ -993,9 +991,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				if(command_dispatch(this, message) == -2) {
 					if(parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 						int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
-						if(i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+						if(i == 0 && !RuleB(Chat, SuppressCommandErrors))
 							Message(13, "Command '%s' not recognized.", message);
-						}
 					}
 					else {
 						if(!RuleB(Chat, SuppressCommandErrors)) 
@@ -1061,9 +1058,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			safe_delete(outapp);
 			break;
 		}
-		default: {
+		default:
 			Message(0, "Channel (%i) not implemented", (uint16)chan_num);
-		}
+			break;
 	}
 }
 
@@ -1133,13 +1130,9 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 }
 
 void Client::Message(uint32 type, const char* message, ...) {
-	if (GetFilter(FilterSpellDamage) == FilterHide && type == MT_NonMelee)
+	if ((GetFilter(FilterSpellDamage) == FilterHide && type == MT_NonMelee) || (GetFilter(FilterMeleeCrits) == FilterHide && type == MT_CritMelee) && (GetFilter(FilterSpellCrits) == FilterHide && type == MT_SpellCrits))
 		return;
-	if (GetFilter(FilterMeleeCrits) == FilterHide && type == MT_CritMelee)
-		return;
-	if (GetFilter(FilterSpellCrits) == FilterHide && type == MT_SpellCrits)
-		return;
-
+		
 	va_list argptr;
 	char *buffer = new char[4096];
 	va_start(argptr, message);
@@ -1199,7 +1192,7 @@ void Client::SetMaxMana() {
 
 bool Client::UpdateLDoNPoints(int32 points, uint32 theme) {
 	if(points < 0) {
-		if(m_pp.ldon_points_available < (0-points))
+		if(m_pp.ldon_points_available < (0 - points))
 			return false;
 	}
 	switch(theme) {
@@ -1214,42 +1207,42 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme) {
 			splitpts=0;
 
 			if(points < 0) {
-				if(m_pp.ldon_points_available < (0-points))
+				if(m_pp.ldon_points_available < (0 - points))
 					return false;
-				if(m_pp.ldon_points_guk < (0-gukpts)) {
-					mirpts+=gukpts+m_pp.ldon_points_guk;
-					gukpts=0-m_pp.ldon_points_guk;
+				if(m_pp.ldon_points_guk < (0 - gukpts)) {
+					mirpts += (gukpts + m_pp.ldon_points_guk);
+					gukpts = (0 - m_pp.ldon_points_guk);
 				}
-				if(m_pp.ldon_points_mir < (0-mirpts)) {
-					mmcpts+=mirpts+m_pp.ldon_points_mir;
-					mirpts=0-m_pp.ldon_points_mir;
+				if(m_pp.ldon_points_mir < (0 - mirpts)) {
+					mmcpts += (mirpts + m_pp.ldon_points_mir);
+					mirpts = (0 - m_pp.ldon_points_mir);
 				}
 				if(m_pp.ldon_points_mmc < (0-mmcpts)) {
-					rujpts+=mmcpts+m_pp.ldon_points_mmc;
-					mmcpts=0-m_pp.ldon_points_mmc;
+					rujpts += (mmcpts + m_pp.ldon_points_mmc);
+					mmcpts = (0 - m_pp.ldon_points_mmc);
 				}
 				if(m_pp.ldon_points_ruj < (0-rujpts)) {
-					takpts+=rujpts+m_pp.ldon_points_ruj;
-					rujpts=0-m_pp.ldon_points_ruj;
+					takpts += (rujpts + m_pp.ldon_points_ruj);
+					rujpts = (0 - m_pp.ldon_points_ruj);
 				}
 				if(m_pp.ldon_points_tak < (0-takpts)) {
-					splitpts=takpts+m_pp.ldon_points_tak;
-					takpts=0-m_pp.ldon_points_tak;
+					splitpts = (takpts + m_pp.ldon_points_tak);
+					takpts = (0 - m_pp.ldon_points_tak);
 				}
 			}
 			m_pp.ldon_points_guk += gukpts;
-			m_pp.ldon_points_mir+=mirpts;
+			m_pp.ldon_points_mir += mirpts;
 			m_pp.ldon_points_mmc += mmcpts;
 			m_pp.ldon_points_ruj += rujpts;
 			m_pp.ldon_points_tak += takpts;
-			points-=splitpts;
+			points -= splitpts;
 			if (splitpts !=0)
 				UpdateLDoNPoints(splitpts,0);
 			break;
 		}
 		case 1: {
 			if(points < 0) {
-				if(m_pp.ldon_points_guk < (0-points))
+				if(m_pp.ldon_points_guk < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_guk += points;
@@ -1257,7 +1250,7 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme) {
 		}
 		case 2: {
 			if(points < 0) {
-				if(m_pp.ldon_points_mir < (0-points))
+				if(m_pp.ldon_points_mir < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_mir += points;
@@ -1265,7 +1258,7 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme) {
 		}
 		case 3: {
 			if(points < 0) {
-				if(m_pp.ldon_points_mmc < (0-points))
+				if(m_pp.ldon_points_mmc < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_mmc += points;
@@ -1273,7 +1266,7 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme) {
 		}
 		case 4: {
 			if(points < 0) {
-				if(m_pp.ldon_points_ruj < (0-points))
+				if(m_pp.ldon_points_ruj < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_ruj += points;
@@ -1281,7 +1274,7 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme) {
 		}
 		case 5: {
 			if(points < 0) {
-				if(m_pp.ldon_points_tak < (0-points))
+				if(m_pp.ldon_points_tak < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_tak += points;
@@ -1308,8 +1301,8 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme) {
 void Client::SetSkill(SkillUseTypes skillid, uint16 value) {
 	if (skillid > HIGHEST_SKILL)
 		return;
+		
 	m_pp.skills[skillid] = value;
-
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
 	skill->skillId=skillid;
@@ -1329,7 +1322,7 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
-	skill->skillId = 100 + skill_id;
+	skill->skillId = (100 + skill_id);
 	skill->value = m_pp.languages[skill_id];
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1339,8 +1332,10 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 void Client::AddSkill(SkillUseTypes skillid, uint16 value) {
 	if (skillid > HIGHEST_SKILL)
 		return;
+		
 	value = GetRawSkill(skillid) + value;
 	uint16 max = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
+	
 	if (value > max)
 		value = max;
 	SetSkill(skillid, value);
@@ -1350,12 +1345,12 @@ void Client::SendSound() {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, 68);
 	unsigned char x[68];
 	memset(x, 0, 68);
-	x[0]=0x22;
+	x[0] = 0x22;
 	memset(&x[4],0x8002,sizeof(uint16));
 	memset(&x[8],0x8624,sizeof(uint16));
 	memset(&x[12],0x4A01,sizeof(uint16));
-	x[16]=0x05;
-	x[28]=0x00;
+	x[16] = 0x05;
+	x[28] = 0x00;
 	memset(&x[40],0xFFFFFFFF,sizeof(uint32));
 	memset(&x[44],0xFFFFFFFF,sizeof(uint32));
 	memset(&x[48],0xFFFFFFFF,sizeof(uint32));
@@ -1369,10 +1364,9 @@ void Client::SendSound() {
 
 }
 void Client::UpdateWho(uint8 remove) {
-	if (account_id == 0)
+	if (account_id == 0 || !worldserver.Connected())
 		return;
-	if (!worldserver.Connected())
-		return;
+		
 	ServerPacket* pack = new ServerPacket(ServerOP_ClientList, sizeof(ServerClientList_Struct));
 	ServerClientList_Struct* scl = (ServerClientList_Struct*) pack->pBuffer;
 	scl->remove = remove;
@@ -1408,7 +1402,6 @@ void Client::UpdateWho(uint8 remove) {
 		scl->LFGMatchFilter = LFGMatchFilter;
 		memcpy(scl->LFGComments, LFGComments, sizeof(scl->LFGComments));
 	}
-
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
@@ -1819,10 +1812,10 @@ void Client::ChangeLastName(const char* in_lastname) {
 	strcpy(gmn->name, name);
 	strcpy(gmn->gmname, name);
 	strcpy(gmn->lastname, in_lastname);
-	gmn->unknown[0]=1;
-	gmn->unknown[1]=1;
-	gmn->unknown[2]=1;
-	gmn->unknown[3]=1;
+	gmn->unknown[0] = 1;
+	gmn->unknown[1] = 1;
+	gmn->unknown[2] = 1;
+	gmn->unknown[3] = 1;
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
 }
@@ -1909,8 +1902,8 @@ void Client::QuestReadBook(const char* text, uint8 type) {
 void Client::SendClientMoneyUpdate(uint8 type,uint32 amount){
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeMoneyUpdate,sizeof(TradeMoneyUpdate_Struct));
 	TradeMoneyUpdate_Struct* mus= (TradeMoneyUpdate_Struct*)outapp->pBuffer;
-	mus->amount=amount;
-	mus->trader=0;
+	mus->amount = amount;
+	mus->trader = 0;
 	mus->type=type;
 	QueuePacket(outapp);
 	safe_delete(outapp);

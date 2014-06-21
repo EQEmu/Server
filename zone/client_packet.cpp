@@ -7620,12 +7620,12 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	}
 	EnvDamage2_Struct* ed = (EnvDamage2_Struct*)app->pBuffer;
 	if(admin >= minStatusToAvoidFalling && GetGM()){
-		Message(13, "Your GM status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
-		SetHP(GetHP()-1);//needed or else the client wont acknowledge
+		Message(0, "Your GM status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
+		SetHP(GetHP()-1);
 		return;
 	} else if(GetInvul()) {
-		Message(13, "Your invuln status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
-		SetHP(GetHP()-1);//needed or else the client wont acknowledge
+		Message(0, "Your invulnerable status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
+		SetHP(GetHP()-1);
 		return;
 	}
 
@@ -7633,16 +7633,16 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 
 	if (ed->dmgtype == 252) {
 
-		switch(GetAA(aaAcrobatics)) { //Don't know what acrobatics effect is yet but it should be done client side via aa effect.. till then
-		case 1:
-			damage = damage * 95 / 100;
-			break;
-		case 2:
-			damage = damage * 90 / 100;
-			break;
-		case 3:
-			damage = damage * 80 / 100;
-			break;
+		switch(GetAA(aaAcrobatics)) {
+			case 1:
+				damage *= 0.95f;
+				break;
+			case 2:
+				damage *= 0.9f;
+				break;
+			case 3:
+				damage *= 0.8f;
+				break;
 		}
 	}
 
