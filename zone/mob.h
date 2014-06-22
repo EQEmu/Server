@@ -795,6 +795,8 @@ public:
 	virtual int32 CheckAggroAmount(uint16 spell_id, bool isproc = false);
 	virtual int32 CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible = 0);
 	virtual uint32 GetAA(uint32 aa_id) const { return(0); }
+	int32 GetGlobalTime(const char *varname, uint32 charid, uint32 npcid, uint32 zoneid);
+	const char* GetGlobal(const char *varname, uint32 charid, uint32 npcid, uint32 zoneid);
 
 	uint16 GetInstrumentMod(uint16 spell_id) const;
 	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, Mob *caster = nullptr, int ticsremaining = 0);

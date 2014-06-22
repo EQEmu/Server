@@ -5088,3 +5088,47 @@ float Mob::HeadingAngleToMob(Mob *other)
 		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
 }
 
+int32 Mob::GetGlobalTime(const char *varname, uint32 charid, uint32 npcid, uint32 zoneid) {
+	int32 time = 0;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT expdate FROM quest_globals WHERE name = '%s' and charid = '%u' and npcid = '%u' and zoneid = '%u'", varname, charid, npcid, zoneid), errbuf, &result)) {
+		if(mysql_num_rows(result) == 1) {
+			row = mysql_fetch_row(result);
+			if(row)
+				time = atoi(row[0]);
+			
+			if(time == 0 || time == NULL)
+				time = INT_MAX; //Infinite
+		}
+		mysql_free_result(result);
+	}
+	else
+		LogFile->write(EQEMuLog::Debug, "Error in the stupid query");
+	
+	safe_delete_array(query);
+	return time;
+}
+
+const char* Mob::GetGlobal(const char *varname, uint32 charid, uint32 npcid, uint32 zoneid) {
+	const char* value = 0;
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT value FROM quest_globals WHERE name = '%s' and charid = '%u' and npcid = '%u' and zoneid = '%u'", varname, charid, npcid, zoneid), errbuf, &result)) {
+		if(mysql_num_rows(result) == 1) {
+			row = mysql_fetch_row(result);
+			if(row)
+				value = atoi(row[0]);
+		}
+		mysql_free_result(result);
+	}
+	else
+		LogFile->write(EQEMuLog::Debug, "Error in the stupid query");
+	
+	safe_delete_array(query);
+	return value;
+}	

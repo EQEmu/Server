@@ -1659,9 +1659,8 @@ uint32 ZoneDatabase::GetPlayerBuriedCorpseCount(uint32 char_id) {
 		CorpseCount = atoi(row[0]);
 		mysql_free_result(result);
 	}
-	else {
+	else
 		std::cerr << "Error in GetPlayerBuriedCorpseCount query '" << query << "' " << errbuf << std::endl;
-	}
 
 	safe_delete_array(query);
 

@@ -1265,6 +1265,22 @@ XS(XS__setglobal)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__getguildnamebyid);
+XS(XS__getguildnamebyid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: getguildnamebyid(guild_id)");
+	dXSTARG;
+
+	Const_char * RETVAL;
+	uint32 guild_id = (int)SvUV(ST(0));
+
+	RETVAL = quest_manager.getguildnamebyid(guild_id);
+
+	sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__targlobal);
 XS(XS__targlobal)
 {
@@ -2898,22 +2914,6 @@ XS(XS__saylink) {
 		strcpy(text2,text);
 
 	RETVAL = quest_manager.saylink(text, silent, text2);
-	sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
-	XSRETURN(1);
-}
-
-XS(XS__getguildnamebyid);
-XS(XS__getguildnamebyid) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: getguildnamebyid(guild_id)");
-	dXSTARG;
-
-	Const_char * RETVAL;
-	uint32 guild_id = (int)SvUV(ST(0));
-
-	RETVAL = quest_manager.getguildnamebyid(guild_id);
-
 	sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	XSRETURN(1);
 }

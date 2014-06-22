@@ -48,8 +48,6 @@ class Client;
 #include "QGlobals.h"
 
 #ifdef _WINDOWS
-	// since windows defines these within windef.h (which windows.h include)
-	// we are required to undefine these to use min and max from <algorithm>
 	#undef min
 	#undef max
 #endif
@@ -61,8 +59,8 @@ class Client;
 
 
 #define CLIENT_TIMEOUT		90000
-#define CLIENT_LD_TIMEOUT	30000 // length of time client stays in zone after LDing
-#define TARGETING_RANGE		200	// range for /assist and /target
+#define CLIENT_LD_TIMEOUT	30000
+#define TARGETING_RANGE		200
 #define XTARGET_HARDCAP		20
 
 extern Zone* zone;
@@ -77,25 +75,24 @@ public:
 	bool ack_req;
 };
 
-enum {	//Type arguments to the Message* routines.
-	//all not explicitly listed are the same grey color
+enum {
 	clientMessageWhite0 = 0,
-	clientMessageLoot = 2,	//dark green
-	clientMessageTradeskill = 4,	//light blue
-	clientMessageTell = 5,		//magenta
+	clientMessageLoot = 2,
+	clientMessageTradeskill = 4,
+	clientMessageTell = 5,
 	clientMessageWhite = 7,
 	clientMessageWhite2 = 10,
 	clientMessageLightGrey = 12,
-	clientMessageError = 13,	//red
+	clientMessageError = 13,
 	clientMessageGreen = 14,
 	clientMessageYellow = 15,
 	clientMessageBlue = 16,
-	clientMessageGroup = 18,	//cyan
+	clientMessageGroup = 18,
 	clientMessageWhite3 = 20,
 };
 
 #define SPELLBAR_UNLOCK 0x2bc
-enum {	//scribing argument to MemorizeSpell
+enum {
 	memSpellScribing = 0,
 	memSpellMemorize = 1,
 	memSpellForget = 2,
@@ -107,16 +104,15 @@ enum {	//scribing argument to MemorizeSpell
 #define DISCIPLINE_SPELL_SLOT 10
 #define ABILITY_SPELL_SLOT 9
 
-//Modes for the zoning state of the client.
 typedef enum {
-	ZoneToSafeCoords,		// Always send ZonePlayerToBind_Struct to client: Succor/Evac
-	GMSummon,				// Always send ZonePlayerToBind_Struct to client: Only a GM Summon
-	ZoneToBindPoint,		// Always send ZonePlayerToBind_Struct to client: Death Only
-	ZoneSolicited,			// Always send ZonePlayerToBind_Struct to client: Portal, Translocate, Evac spells that have a x y z coord in the spell data
+	ZoneToSafeCoords,
+	GMSummon,
+	ZoneToBindPoint,
+	ZoneSolicited,
 	ZoneUnsolicited,
-	GateToBindPoint,		// Always send RequestClientZoneChange_Struct to client: Gate spell or Translocate To Bind Point spell
-	SummonPC,				// In-zone GMMove() always: Call of the Hero spell or some other type of in zone only summons
-	Rewind,					// Summon to /rewind location.
+	GateToBindPoint,
+	SummonPC,
+	Rewind,
 	EvacToSafeCoords
 } ZoneMode;
 
@@ -139,8 +135,7 @@ enum {
 	HideCorpseNPC = 5
 };
 
-typedef enum
-{
+typedef enum {
 	Empty = 0,
 	Auto = 1,
 	CurrentTargetPC = 2,
@@ -171,15 +166,13 @@ typedef enum
 
 } XTargetType;
 
-struct XTarget_Struct
-{
+struct XTarget_Struct {
 	XTargetType Type;
 	uint16 ID;
 	char Name[65];
 };
 
-struct RespawnOption
-{
+struct RespawnOption {
 	std::string name;
 	uint32 zoneid;
 	float x;
@@ -191,8 +184,7 @@ struct RespawnOption
 
 const uint32 POPUPID_UPDATE_SHOWSTATSWINDOW = 1000000;
 
-struct ClientReward
-{
+struct ClientReward {
 	uint32 id;
 	uint32 amount;
 };
@@ -202,16 +194,13 @@ public:
 	Client *MakeClient(EQStream* ieqs);
 };
 
-class Client : public Mob
-{
+class Client : public Mob {
 public:
-	//pull in opcode mappings:
 	#include "client_packet.h"
 
 	Client(EQStreamInterface * ieqs);
 	~Client();
 
-	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
 	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
@@ -304,7 +293,7 @@ public:
 	void			UpdateLFP();
 
 	virtual bool	Save() { return Save(0); }
-			bool	Save(uint8 iCommitNow); // 0 = delayed, 1=async now, 2=sync now
+			bool	Save(uint8 iCommitNow);
 			void	SaveBackup();
 
 	inline bool ClientDataLoaded() const { return client_data_loaded; }
@@ -390,15 +379,10 @@ public:
 	inline float ProximityZ() const { return(proximity_z); }
 	inline void ClearAllProximities() { entity_list.ProcessMove(this, FLT_MAX, FLT_MAX, FLT_MAX); proximity_x = FLT_MAX; proximity_y = FLT_MAX; proximity_z = FLT_MAX; }
 
-	/*
-		Begin client modifiers
-	*/
-
 	virtual void CalcBonuses();
-	//these are all precalculated now
 	inline virtual int16	GetAC()		const { return AC; }
-	inline virtual int16 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(SkillOffense)) * 9 / 10); }
-	inline virtual int16 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
+	inline virtual int16 GetATK() const { return (ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(SkillOffense)) * 9 / 10)); }
+	inline virtual int16 GetATKBonus() const { return (itembonuses.ATK + spellbonuses.ATK); }
 	inline virtual int	GetHaste() const { return Haste; }
 	int GetRawACNoShield(int &shield_ac) const;
 
@@ -438,7 +422,7 @@ public:
 	inline uint8	GetBaseINT()	const { return m_pp.INT; }
 	inline uint8	GetBaseAGI()	const { return m_pp.AGI; }
 	inline uint8	GetBaseWIS()	const { return m_pp.WIS; }
-	inline uint8	GetBaseCorrup()	const { return 15; } // Same for all
+	inline uint8	GetBaseCorrup()	const { return 15; }
 
 	inline virtual int16	GetHeroicSTR()	const { return itembonuses.HeroicSTR; }
 	inline virtual int16	GetHeroicSTA()	const { return itembonuses.HeroicSTA; }
@@ -453,7 +437,6 @@ public:
 	inline virtual int16	GetHeroicPR()	const { return itembonuses.HeroicPR; }
 	inline virtual int16	GetHeroicCR()	const { return itembonuses.HeroicCR; }
 	inline virtual int16	GetHeroicCorrup()	const { return itembonuses.HeroicCorrup; }
-	// Mod2
 	inline virtual int16	GetShielding()		const { return itembonuses.MeleeMitigation; }
 	inline virtual int16	GetSpellShield()	const { return itembonuses.SpellShield; }
 	inline virtual int16	GetDoTShield()		const { return itembonuses.DoTShielding; }
@@ -463,7 +446,6 @@ public:
 	inline virtual int16	GetAccuracy()		const { return itembonuses.HitChance; }
 	inline virtual int16	GetCombatEffects()	const { return itembonuses.ProcChance; }
 	inline virtual int16	GetDS()				const { return itembonuses.DamageShield; }
-	// Mod3
 	inline virtual int16	GetHealAmt()		const { return itembonuses.HealAmt; }
 	inline virtual int16	GetSpellDmg()		const { return itembonuses.SpellDmg; }
 	inline virtual int16	GetClair()			const { return itembonuses.Clairvoyance; }
@@ -507,31 +489,27 @@ public:
 	inline uint32	GetGold()		const { return m_pp.gold; }
 	inline uint32	GetPlatinum()	const { return m_pp.platinum; }
 
-
-	/*Endurance and such*/
-	void	CalcMaxEndurance();	//This calculates the maximum endurance we can have
-	int32	CalcBaseEndurance();	//Calculates Base End
-	int32	CalcEnduranceRegen();	//Calculates endurance regen used in DoEnduranceRegen()
-	int32	GetEndurance()	const {return cur_end;}	//This gets our current endurance
-	int32	GetMaxEndurance() const {return max_end;}	//This gets our endurance from the last CalcMaxEndurance() call
+	void	CalcMaxEndurance();
+	int32	CalcBaseEndurance();
+	int32	CalcEnduranceRegen();
+	int32	GetEndurance()	const {return cur_end;}
+	int32	GetMaxEndurance() const {return max_end;}
 	int32	CalcEnduranceRegenCap();
 	int32	CalcHPRegenCap();
-	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
-	void SetEndurance(int32 newEnd);	//This sets the current endurance to the new value
-	void DoEnduranceRegen();	//This Regenerates endurance
-	void DoEnduranceUpkeep();	//does the endurance upkeep
+	inline uint8 GetEndurancePercent() { return ((uint8)((float)cur_end / (float)max_end * 100.0f)); }
+	void SetEndurance(int32 newEnd);
+	void DoEnduranceRegen();
+	void DoEnduranceUpkeep();
 
-	//This calculates total Attack Rating to match very close to what the client should show
 	uint16 GetTotalATK();
 	uint16 GetATKRating();
-	//This gets the skill value of the item type equiped in the Primary Slot
 	uint16 GetPrimarySkillValue();
 
 	bool Flurry();
 	bool Rampage();
 	void DurationRampage(uint32 duration);
 
-	inline uint32	GetEXP()		const { return m_pp.exp; }
+	inline uint32	GetEXP() const { return m_pp.exp; }
 
 	bool	UpdateLDoNPoints(int32 points, uint32 theme);
 	void	SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }
@@ -685,7 +663,6 @@ public:
 	inline bool	IsDueling() const { return duelaccepted; }
 	inline void	SetDuelTarget(uint16 set_id) { duel_target=set_id; }
 	inline void	SetDueling(bool duel) { duelaccepted = duel; }
-	// use this one instead
 	void MemSpell(uint16 spell_id, int slot, bool update_client = true);
 	void UnmemSpell(int slot, bool update_client = true);
 	void UnmemSpellAll(bool update_client = true);
@@ -703,13 +680,12 @@ public:
 	inline void	SetBecomeNPC(bool flag) { npcflag = flag; }
 	inline void	SetBecomeNPCLevel(uint8 level) { npclevel = level; }
 	void SetFeigned(bool in_feigned);
-	/// this cures timing issues cuz dead animation isn't done but server side feigning is?
 	inline bool GetFeigned() const { return(feigned); }
 	EQStreamInterface* Connection() { return eqs; }
 #ifdef PACKET_PROFILER
 	void DumpPacketProfile() { if(eqs) eqs->DumpPacketProfile(); }
 #endif
-	uint32 GetEquipment(uint8 material_slot) const;	// returns item id
+	uint32 GetEquipment(uint8 material_slot) const;
 	uint32 GetEquipmentColor(uint8 material_slot) const;
 
 	inline bool AutoSplitEnabled() { return m_pp.autosplit != 0; }
@@ -737,16 +713,14 @@ public:
 
 	inline PTimerList &GetPTimers() { return(p_timers); }
 
-	//AA Methods
 	void SendAAList();
 	void ResetAA();
 	void SendAA(uint32 id, int seq=1);
 	void SendPreviousAA(uint32 id, int seq=1);
 	void BuyAA(AA_Action* action);
-	//this function is used by some AA stuff
 	void MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing);
-	void	SetAATitle(const char *Title);
-	void	SetTitleSuffix(const char *txt);
+	void SetAATitle(const char *Title);
+	void SetTitleSuffix(const char *txt);
 	inline uint32	GetMaxAAXP(void) const { return max_AAXP; }
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
 	void SendAAStats();
@@ -774,7 +748,6 @@ public:
 
 	int16 acmod();
 
-	// Item methods
 	uint32	NukeItem(uint32 itemnum, uint8 where_to_check =	(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
 	void	SetTint(int16 slot_id, uint32 color);
 	void	SetTint(int16 slot_id, Color_Struct& color);
@@ -1172,7 +1145,6 @@ protected:
 	bool los_status_facing;
 	QGlobalCache *qGlobals;
 
-	/** Adventure Variables **/
 	Timer *adventure_request_timer;
 	Timer *adventure_create_timer;
 	Timer *adventure_leave_timer;
@@ -1199,7 +1171,6 @@ private:
 	void	OPGMSummon(const EQApplicationPacket *app);
 	void	OPCombatAbility(const EQApplicationPacket *app);
 
-	// Bandolier Methods
 	void	CreateBandolier(const EQApplicationPacket *app);
 	void	RemoveBandolier(const EQApplicationPacket *app);
 	void	SetBandolier(const EQApplicationPacket *app);
@@ -1255,12 +1226,12 @@ private:
 	char				lskey[30];
 	int16				admin;
 	uint32				guild_id;
-	uint8				guildrank; // player's rank in the guild, 0-GUILD_MAX_RANK
+	uint8				guildrank;
 	bool				GuildBanker;
 	uint16				duel_target;
 	bool				duelaccepted;
 	std::list<uint32> keyring;
-	bool				tellsoff;	// GM /toggle
+	bool				tellsoff;
 	bool				gmhideme;
 	bool				LFG;
 	bool				LFP;
@@ -1285,13 +1256,13 @@ private:
 	uint16				CustomerID;
 	uint32				account_creation;
 	uint8				firstlogon;
-	uint32				mercid; // current merc
-	uint8				mercSlot; // selected merc slot
+	uint32				mercid;
+	uint8				mercSlot;
 	bool	Trader;
 	bool	Buyer;
 	std::string	BuyerWelcomeMessage;
 	bool	AbilityTimer;
-	int Haste; //precalced value
+	int Haste;
 
 	int32				max_end;
 	int32				cur_end;
@@ -1300,9 +1271,9 @@ private:
 	ExtendedProfile_Struct		m_epp;
 	Inventory					m_inv;
 	Object*						m_tradeskill_object;
-	PetInfo						m_petinfo; // current pet data, used while loading from and saving to DB
-	PetInfo						m_suspendedminion; // pet data for our suspended minion.
-	MercInfo					m_mercinfo[MAXMERCS]; // current mercenary
+	PetInfo						m_petinfo;
+	PetInfo						m_suspendedminion;
+	MercInfo					m_mercinfo[MAXMERCS];
 	InspectMessage_Struct		m_inspect_message;
 
 	void NPCSpawn(const Seperator* sep);
@@ -1315,7 +1286,6 @@ private:
 	bool	SendAllPackets();
 	LinkedList<CLIENTPACKET *> clientpackets;
 
-	//Zoning related stuff
 	void SendZoneCancel(ZoneChange_Struct *zc);
 	void SendZoneError(ZoneChange_Struct *zc, int8 err);
 	void DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instance_id, float dest_x, float dest_y, float dest_z, float dest_h, int8 ignore_r);
@@ -1332,7 +1302,7 @@ private:
 	Timer	position_timer;
 	uint8	position_timer_counter;
 
-	PTimerList p_timers;		//persistent timers
+	PTimerList p_timers;
 	Timer	hpupdate_timer;
 	Timer	camp_timer;
 	Timer	process_timer;
@@ -1344,7 +1314,7 @@ private:
 	Timer	shield_timer;
 	Timer	fishing_timer;
 	Timer	endupkeep_timer;
-	Timer	forget_timer;	// our 2 min everybody forgets you timer
+	Timer	forget_timer;
 	Timer	autosave_timer;
 #ifdef REVERSE_AGGRO
 	Timer	scanarea_timer;
@@ -1376,7 +1346,7 @@ private:
 	FILE *SQL_log;
 	uint32		max_AAXP;
 	uint32		staminacount;
-	AA_Array* aa[MAX_PP_AA_ARRAY];		//this list contains pointers into our player profile
+	AA_Array* aa[MAX_PP_AA_ARRAY];
 	std::map<uint32,uint8> aa_points;
 	bool npcflag;
 	uint8 npclevel;
@@ -1387,7 +1357,7 @@ private:
 	int32	last_reported_mana;
 	int32	last_reported_endur;
 
-	unsigned int AggroCount; // How many mobs are aggro on us.
+	unsigned int AggroCount;
 
 	unsigned int	RestRegenHP;
 	unsigned int	RestRegenMana;
@@ -1398,11 +1368,10 @@ private:
 	ClientTaskState *taskstate;
 	int TotalSecondsPlayed;
 
-	//Anti Spam Stuff
 	Timer *KarmaUpdateTimer;
 	uint32 TotalKarma;
 
-	Timer *GlobalChatLimiterTimer; //60 seconds
+	Timer *GlobalChatLimiterTimer;
 	uint32 AttemptedMessages;
 
 	EQClientVersion ClientVersion;
@@ -1419,20 +1388,16 @@ private:
 	std::map<uint32, uint32> alternate_currency;
 	std::queue<std::pair<uint32, int32>> alternate_currency_queued_operations;
 
-	//Connecting debug code.
-	enum { //connecting states, used for debugging only
-		NoPacketsReceived,		//havent gotten anything
-		//this is the point where the client changes to the loading screen
-		ReceivedZoneEntry,		//got the first packet, loading up PP
-		PlayerProfileLoaded,	//our DB work is done, sending it
-		ZoneInfoSent,		//includes PP, tributes, tasks, spawns, time and weather
-		//this is the point where the client shows a status bar zoning in
-		NewZoneRequested,	//received and sent new zone request
-		ClientSpawnRequested,	//client sent ReqClientSpawn
-		ZoneContentsSent,		//objects, doors, zone points
-		ClientReadyReceived,	//client told us its ready, send them a bunch of crap like guild MOTD, etc
-		//this is the point where the client releases the mouse
-		ClientConnectFinished	//client finally moved to finished state, were done here
+	enum {
+		NoPacketsReceived,
+		ReceivedZoneEntry,
+		PlayerProfileLoaded,
+		ZoneInfoSent,
+		NewZoneRequested,
+		ClientSpawnRequested,
+		ZoneContentsSent,
+		ClientReadyReceived,
+		ClientConnectFinished
 	} conn_state;
 	void ReportConnectingState();
 
@@ -1440,8 +1405,8 @@ private:
 	bool PendingGuildInvitation;
 	int PendingResurrectionXP;
 	uint32 PendingResurrectionDBID;
-	uint16 PendingResurrectionSpellID;		// Only used for resurrect while hovering.
-	std::string PendingResurrectionCorpseName;	// Only used for resurrect while hovering.
+	uint16 PendingResurrectionSpellID;
+	std::string PendingResurrectionCorpseName;
 
 	std::set<uint32> PlayerBlockedBuffs;
 	std::set<uint32> PetBlockedBuffs;

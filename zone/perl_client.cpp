@@ -2861,12 +2861,10 @@ XS(XS_Client_NukeItem)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		if(items < 3){
+		if(items < 3)
 			where_to_check = 0xFF;
-		}
-		if(items == 3){
+		if(items == 3)
 			where_to_check = (uint8)SvUV(ST(2));
-		}
 
 		RETVAL = THIS->NukeItem(itemnum, where_to_check);
 		XSprePUSH; PUSHu((UV)RETVAL);
@@ -4038,19 +4036,18 @@ XS(XS_Client_RefundAA) {
 		int curpt = 0;
 		bool refunded = false;
 
-		for(int x1=0;x1<aaHighestID;x1++){
+		for(int x1 = 0; x1 < aaHighestID; x1++) {
 			curpt = THIS->GetAA(x1);
-			if(curpt > 0){
+			if(curpt > 0) {
 				SendAA_Struct* curaa = zone->FindAA(x1);
-				if(curaa){
+				if(curaa) {
 					THIS->SetAA(x1, 0);
-					for(int x2=0;x2<curpt;x2++){ //add up all the AA points pt by pt to get the correct cost
+					for(int x2 = 0; x2 < curpt; x2++) {
 						THIS->GetPP().aapoints += curaa->cost + (curaa->cost_inc * x2);
 						refunded = true;
 					}
 				}
-				else //aa doesn't exist.. but if they bought it then it had at least a cost of 1 point each
-				{ //so give back what we can
+				else {
 					THIS->GetPP().aapoints += curpt;
 					THIS->SetAA(x1, 0);
 					refunded = true;
@@ -4058,9 +4055,9 @@ XS(XS_Client_RefundAA) {
 			}
 		}
 
-		if(refunded){
-			THIS->Save(); //save of course
-			THIS->Kick(); //client gets all buggy if we don't immediatly relog so just force it on them
+		if(refunded) {
+			THIS->Save();
+			THIS->Kick();
 		}
 	}
 	XSRETURN_EMPTY;
@@ -5859,15 +5856,16 @@ XS(XS_Client_SilentMessage)
                         Perl_croak(aTHX_ "THIS is not of type Client");
                 if(THIS == NULL)
                         Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-                if(THIS->GetTarget() != NULL){
-                        if(THIS->GetTarget()->IsNPC()){
-                                if (THIS->DistNoRootNoZ(*THIS->GetTarget()) <= 200) {
-                                                if(THIS->GetTarget()->CastToNPC()->IsMoving() && !THIS->GetTarget()->CastToNPC()->IsOnHatelist(THIS->GetTarget()))
-                                                        THIS->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-                                        THIS->ChannelMessageReceived(8, 0, 100, SvPV_nolen(ST(1)));
-                                }
-                        }
-                }
+                if(THIS->GetTarget() != NULL) {
+					if(THIS->GetTarget()->IsNPC()) {
+						if (THIS->DistNoRootNoZ(*THIS->GetTarget()) <= 200) {
+							if(THIS->GetTarget()->CastToNPC()->IsMoving() && !THIS->GetTarget()->CastToNPC()->IsOnHatelist(THIS->GetTarget())) {
+								THIS->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
+								THIS->ChannelMessageReceived(8, 0, 100, SvPV_nolen(ST(1)));
+							}
+						}
+					}
+				}
         }
         XSRETURN_EMPTY;
 }

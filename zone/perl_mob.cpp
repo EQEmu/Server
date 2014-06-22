@@ -8160,6 +8160,66 @@ XS(XS_Mob_GetFlurryChance)
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetGlobalTime);
+XS(XS_Mob_GetGlobalTime) {
+	dXSARGS;
+	if (items != 5)
+		Perl_croak(aTHX_ "Usage: GetGlobalTime(THIS, varname, charid, npcid, zoneid)");
+	{
+		Mob *  THIS;
+		int32  RETVAL;
+		char *  varname = (char *)SvPV_nolen(ST(1));
+		uint32  charid = (uint32)SvUV(ST(2));
+		uint32  npcid = (uint32)SvUV(ST(3));
+		uint32  zoneid = (uint32)SvUV(ST(4));
+		dXSTARG;
+		
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetGlobalTime(varname, charid, npcid, zoneid);
+		XSprePUSH; PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetGlobal);
+XS(XS_Mob_GetGlobal) {
+	dXSARGS;
+	if (items != 5)
+		Perl_croak(aTHX_ "Usage: GetGlobal(THIS, varname, charid, npcid, zoneid)");
+	{
+		Mob *  THIS;
+		Const_char *  RETVAL;
+		char *  varname = (char *)SvPV_nolen(ST(1));
+		uint32  charid = (uint32)SvUV(ST(2));
+		uint32  npcid = (uint32)SvUV(ST(3));
+		uint32  zoneid = (uint32)SvUV(ST(4));
+		dXSTARG;
+		
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetGlobal(varname, charid, npcid, zoneid);
+		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -8459,6 +8519,8 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "IsMeleeDisabled"), XS_Mob_IsMeleeDisabled, file, "$$");
 		newXSproto(strcpy(buf, "SetFlurryChance"), XS_Mob_SetFlurryChance, file, "$$");
 		newXSproto(strcpy(buf, "GetFlurryChance"), XS_Mob_GetFlurryChance, file, "$");
+		newXSproto(strcpy(buf, "GetGlobalTime"), XS_Mob_GetGlobalTime, file, "$$$$$");
+		newXSproto(strcpy(buf, "GetGlobal"), XS_Mob_GetGlobal, file, "$$$$$");
 
 	XSRETURN_YES;
 }

@@ -77,58 +77,57 @@ extern DBAsync *dbasync;
 
 Client::Client(EQStreamInterface* ieqs)
 : Mob("No name",	// name
-	"",	// lastname
-	0,	// cur_hp
-	0,	// max_hp
-	0,	// gender
-	0,	// race
-	0,	// class
-	BT_Humanoid,	// bodytype
-	0,	// deity
-	0,	// level
-	0,	// npctypeid
-	0,	// size
-	0.7,	// runspeed
-	0,	// heading
-	0,	// x
-	0,	// y
-	0,	// z
-	0,	// light
-	0xFF,	// texture
-	0xFF,	// helmtexture
-	0,	// ac
-	0,	// atk
-	0,	// str
-	0,	// sta
-	0,	// dex
-	0,	// agi
-	0,	// int
-	0,	// wis
-	0,	// cha
-	0,	// Luclin Hair Colour
-	0,	// Luclin Beard Color
-	0,	// Luclin Eye1
-	0,	// Luclin Eye2
-	0,	// Luclin Hair Style
-	0,	// Luclin Face
-	0,	// Luclin Beard
-	0,	// Drakkin Heritage
-	0,	// Drakkin Tattoo
-	0,	// Drakkin Details
-	0,	// Armor Tint
-	0xff,	// AA Title
-	0,	// see_invis
-	0,	// see_invis_undead
+	"",
 	0,
 	0,
 	0,
 	0,
-	0,	// qglobal
-	0,	// maxlevel
-	0	// scalerate
+	0,
+	BT_Humanoid,
+	0,
+	0,
+	0,
+	0,
+	0.7,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0xFF,
+	0xFF,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0xff,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0
 
 	),
-	//these must be listed in the order they appear in client.h
 	position_timer(250),
 	hpupdate_timer(1800),
 	camp_timer(29000),
@@ -211,7 +210,7 @@ Client::Client(EQStreamInterface* ieqs)
 	zonesummon_ignorerestrictions = 0;
 	zoning = false;
 	zone_mode = ZoneUnsolicited;
-	proximity_x = FLT_MAX;	//arbitrary large number
+	proximity_x = FLT_MAX;
 	proximity_y = FLT_MAX;
 	proximity_z = FLT_MAX;
 	casting_spell_id = 0;
@@ -229,14 +228,12 @@ Client::Client(EQStreamInterface* ieqs)
 	pLastUpdate = 0;
 	pLastUpdateWZ = 0;
 	m_pp.autosplit = false;
-	// initialise haste variable
 	m_tradeskill_object = nullptr;
 	delaytimer = false;
 	PendingResurrectionXP = -1;
 	PendingResurrectionDBID = 0;
 	PendingResurrectionSpellID = 0;
 	numclients++;
-	// emuerror;
 	UpdateWindowTitle();
 	horseId = 0;
 	tgb = false;
@@ -253,7 +250,6 @@ Client::Client(EQStreamInterface* ieqs)
 
 	logging_enabled = CLIENT_DEFAULT_LOGGING_ENABLED;
 
-	//for good measure:
 	memset(&m_pp, 0, sizeof(m_pp));
 	memset(&m_epp, 0, sizeof(m_epp));
 	PendingTranslocate = false;
@@ -312,8 +308,7 @@ Client::Client(EQStreamInterface* ieqs)
 	adv_requested_id = 0;
 	adv_requested_member_count = 0;
 
-	for(int i = 0; i < XTARGET_HARDCAP; ++i)
-	{
+	for(int i = 0; i < XTARGET_HARDCAP; ++i) {
 		XTargets[i].Type = Auto;
 		XTargets[i].ID = 0;
 		XTargets[i].Name[0] = 0;
@@ -381,24 +376,20 @@ Client::~Client() {
 	if(GetTarget())
 		GetTarget()->IsTargeted(-1);
 
-	//if we are in a group and we are not zoning, force leave the group
 	if(isgrouped && !zoning && ZoneLoaded)
 		LeaveGroup();
 
 	UpdateWho(2);
 
-	if(IsHoveringForRespawn())
-	{
+	if(IsHoveringForRespawn()) {
 		m_pp.zone_id = m_pp.binds[0].zoneId;
 		m_pp.zoneInstance = 0;
 		x_pos = m_pp.binds[0].x;
 		y_pos = m_pp.binds[0].y;
 		z_pos = m_pp.binds[0].z;
 	}
-
-	// we save right now, because the client might be zoning and the world
-	// will need this data right away
-	Save(2); // This fails when database destructor is called first on shutdown
+	
+	Save(2);
 
 	safe_delete(taskstate);
 	safe_delete(KarmaUpdateTimer);
@@ -419,8 +410,6 @@ Client::~Client() {
 	UpdateWindowTitle();
 	if(zone)
 	zone->RemoveAuth(GetName());
-
-	//let the stream factory know were done with this stream
 	eqs->Close();
 	eqs->ReleaseFromUse();
 
@@ -442,31 +431,31 @@ void Client::SendLogoutPackets() {
 
 void Client::ReportConnectingState() {
 	switch(conn_state) {
-	case NoPacketsReceived:		//havent gotten anything
+	case NoPacketsReceived:
 		LogFile->write(EQEMuLog::Debug, "Client has not sent us an initial zone entry packet.");
 		break;
-	case ReceivedZoneEntry:		//got the first packet, loading up PP
+	case ReceivedZoneEntry:
 		LogFile->write(EQEMuLog::Debug, "Client sent initial zone packet, but we never got their player info from the database.");
 		break;
-	case PlayerProfileLoaded:	//our DB work is done, sending it
+	case PlayerProfileLoaded:
 		LogFile->write(EQEMuLog::Debug, "We were sending the player profile, tributes, tasks, spawns, time and weather, but never finished.");
 		break;
-	case ZoneInfoSent:		//includes PP, tributes, tasks, spawns, time and weather
+	case ZoneInfoSent:
 		LogFile->write(EQEMuLog::Debug, "We successfully sent player info and spawns, waiting for client to request new zone.");
 		break;
-	case NewZoneRequested:	//received and sent new zone request
+	case NewZoneRequested:
 		LogFile->write(EQEMuLog::Debug, "We received client's new zone request, waiting for client spawn request.");
 		break;
-	case ClientSpawnRequested:	//client sent ReqClientSpawn
+	case ClientSpawnRequested:
 		LogFile->write(EQEMuLog::Debug, "We received the client spawn request, and were sending objects, doors, zone points and some other stuff, but never finished.");
 		break;
-	case ZoneContentsSent:		//objects, doors, zone points
+	case ZoneContentsSent:
 		LogFile->write(EQEMuLog::Debug, "The rest of the zone contents were successfully sent, waiting for client ready notification.");
 		break;
-	case ClientReadyReceived:	//client told us its ready, send them a bunch of crap like guild MOTD, etc
+	case ClientReadyReceived:
 		LogFile->write(EQEMuLog::Debug, "We received client ready notification, but never finished Client::CompleteConnect");
 		break;
-	case ClientConnectFinished:	//client finally moved to finished state, were done here
+	case ClientConnectFinished:
 		LogFile->write(EQEMuLog::Debug, "Client is successfully connected.");
 		break;
 	};
@@ -474,8 +463,6 @@ void Client::ReportConnectingState() {
 
 bool Client::Save(uint8 iCommitNow) {
 #if 0
-// Orig. Offset: 344 / 0x00000000
-//		Length: 36 / 0x00000024
 	unsigned char rawData[36] =
 {
 	0x0D, 0x30, 0xE1, 0x30, 0x1E, 0x10, 0x22, 0x10, 0x20, 0x10, 0x21, 0x10, 0x1C, 0x20, 0x1F, 0x10,
@@ -496,7 +483,6 @@ bool Client::Save(uint8 iCommitNow) {
 	m_pp.guildrank=guildrank;
 	m_pp.heading = heading;
 
-	// Temp Hack for signed values until we get the root of the problem changed over to signed...
 	if (m_pp.copper < 0) { m_pp.copper = 0; }
 	if (m_pp.silver < 0) { m_pp.silver = 0; }
 	if (m_pp.gold < 0) { m_pp.gold = 0; }
@@ -510,24 +496,18 @@ bool Client::Save(uint8 iCommitNow) {
 	int spentpoints=0;
 	for(int a=0;a < MAX_PP_AA_ARRAY;a++) {
 		uint32 points = aa[a]->value;
-		if(points > HIGHEST_AA_VALUE) // Unifying this
-		{
+		if(points > HIGHEST_AA_VALUE) {
 			aa[a]->value = HIGHEST_AA_VALUE;
 			points = HIGHEST_AA_VALUE;
 		}
-		if (points > 0)
-		{
+		if (points > 0) {
 			SendAA_Struct* curAA = zone->FindAA(aa[a]->AA-aa[a]->value+1);
-			if(curAA)
-			{
-				for (int rank=0; rank<points; rank++)
-				{
+			if(curAA) {
+				for (int rank=0; rank<points; rank++) {
 					std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(aa[a]->AA-aa[a]->value + 1 + rank);
 
 					if(RequiredLevel != AARequiredLevelAndCost.end())
-					{
 						spentpoints += RequiredLevel->second.Cost;
-					}
 					else
 						spentpoints += (curAA->cost + (curAA->cost_inc * rank));
 				}
@@ -535,11 +515,10 @@ bool Client::Save(uint8 iCommitNow) {
 		}
 	}
 
-	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
+	m_pp.aapoints_spent = (spentpoints + m_epp.expended_aa);
 
-	if (GetHP() <= 0) {
+	if (GetHP() <= 0)
 		m_pp.cur_hp = GetMaxHP();
-	}
 	else
 		m_pp.cur_hp = GetHP();
 
@@ -555,15 +534,12 @@ bool Client::Save(uint8 iCommitNow) {
 	if(GetMercInfo().MercTimerRemaining > RuleI(Mercs, UpkeepIntervalMS))
 		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 
-	if(GetMercTimer()->Enabled()) {
+	if(GetMercTimer()->Enabled())
 		GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime();
-	}
 
-	if (GetMerc() && !dead) {
-
-	} else {
+	if (GetMerc() && !dead) {}
+	else
 		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
-	}
 
 	m_pp.lastlogin = time(nullptr);
 	if (pQueuedSaveWorkID) {
@@ -579,23 +555,20 @@ bool Client::Save(uint8 iCommitNow) {
 		pet->GetPetState(m_petinfo.Buffs, m_petinfo.Items, m_petinfo.Name);
 		m_petinfo.petpower = pet->GetPetPower();
 		m_petinfo.size = pet->GetSize();
-	} else {
-		memset(&m_petinfo, 0, sizeof(struct PetInfo));
 	}
+	else
+		memset(&m_petinfo, 0, sizeof(struct PetInfo));
 	database.SavePetInfo(this);
 
-	if(tribute_timer.Enabled()) {
+	if(tribute_timer.Enabled())
 		m_pp.tribute_time_remaining = tribute_timer.GetRemainingTime();
-	} else {
+	else {
 		m_pp.tribute_time_remaining = 0xFFFFFFFF;
 		m_pp.tribute_active = 0;
 	}
 
 	p_timers.Store(&database);
-
-//	printf("Dumping inventory on save:\n");
-//	m_inv.dumpEntireInventory();
-
+	
 	SaveTaskState();
 	if (iCommitNow <= 1) {
 		char* query = 0;
@@ -605,9 +578,8 @@ bool Client::Save(uint8 iCommitNow) {
 		workpt.b1() = DBA_b1_Entity_Client_Save;
 		DBAsyncWork* dbaw = new DBAsyncWork(&database, &MTdbafq, workpt, DBAsync::Write, 0xFFFFFFFF);
 		dbaw->AddQuery(iCommitNow == 0 ? true : false, &query, database.SetPlayerProfile_MQ(&query, account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets), false);
-		if (iCommitNow == 0){
+		if (iCommitNow == 0)
 			pQueuedSaveWorkID = dbasync->AddWork(&dbaw, 2500);
-		}
 		else {
 			dbasync->AddWork(&dbaw, 0);
 			SaveBackup();
@@ -615,9 +587,8 @@ bool Client::Save(uint8 iCommitNow) {
 		safe_delete_array(query);
 		return true;
 	}
-	else if (database.SetPlayerProfile(account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets)) {
+	else if (database.SetPlayerProfile(account_id, character_id, &m_pp, &m_inv, &m_epp, 0, 0, MaxXTargets))
 		SaveBackup();
-	}
 	else {
 		std::cerr << "Failed to update player profile" << std::endl;
 		return false;
@@ -635,25 +606,19 @@ void Client::SaveBackup() {
 	dbasync->AddWork(&dbaw, 0);
 }
 
-CLIENTPACKET::CLIENTPACKET()
-{
+CLIENTPACKET::CLIENTPACKET() {
 	app = nullptr;
 	ack_req = false;
 }
 
-CLIENTPACKET::~CLIENTPACKET()
-{
+CLIENTPACKET::~CLIENTPACKET() {
 	safe_delete(app);
 }
 
-//this assumes we do not own pApp, and clones it.
 bool Client::AddPacket(const EQApplicationPacket *pApp, bool bAckreq) {
-	if (!pApp)
+	if (!pApp || !zoneinpacket_timer.Enabled())
 		return false;
-	if(!zoneinpacket_timer.Enabled()) {
-		//drop the packet because it will never get sent.
-		return(false);
-	}
+		
 	CLIENTPACKET *c = new CLIENTPACKET;
 
 	c->ack_req = bAckreq;
@@ -663,14 +628,10 @@ bool Client::AddPacket(const EQApplicationPacket *pApp, bool bAckreq) {
 	return true;
 }
 
-//this assumes that it owns the object pointed to by *pApp
 bool Client::AddPacket(EQApplicationPacket** pApp, bool bAckreq) {
-	if (!pApp || !(*pApp))
+	if (!pApp || !(*pApp) || !zoneinpacket_timer.Enabled())
 		return false;
-	if(!zoneinpacket_timer.Enabled()) {
-		//drop the packet because it will never get sent.
-		return(false);
-	}
+		
 	CLIENTPACKET *c = new CLIENTPACKET;
 
 	c->ack_req = bAckreq;
@@ -700,35 +661,24 @@ bool Client::SendAllPackets() {
 
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CONN_STATUS required_state, eqFilterType filter) {
 	if(filter!=FilterNone){
-		//this is incomplete... no support for FilterShowGroupOnly or FilterShowSelfOnly
 		if(GetFilter(filter) == FilterHide)
-			return; //Client has this filter on, no need to send packet
+			return;
 	}
 	if(client_state != CLIENT_CONNECTED && required_state == CLIENT_CONNECTED){
 		AddPacket(app, ack_req);
 		return;
 	}
 
-	// if the program doesnt care about the status or if the status isnt what we requested
 	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state)
-	{
-		// todo: save packets for later use
 		AddPacket(app, ack_req);
-	}
 	else
 		if(eqs)
 			eqs->QueuePacket(app, ack_req);
 }
 
 void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CONN_STATUS required_state) {
-
-	//std::cout << "Sending: 0x" << std::hex << std::setw(4) << std::setfill('0') << (*app)->GetOpcode() << std::dec << ", size=" << (*app)->size << std::endl;
-
-	// if the program doesnt care about the status or if the status isnt what we requested
 	if (required_state != CLIENT_CONNECTINGALL && client_state != required_state) {
-		// todo: save packets for later use
 		AddPacket(app, ack_req);
-//		LogFile->write(EQEMuLog::Normal, "Adding Packet to list (%d) (%d)", (*app)->GetOpcode(), (int)required_state);
 		return;
 	}
 	else {
@@ -750,20 +700,14 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		LogFile->write(EQEMuLog::Debug,"Client::ChannelMessageReceived() Channel:%i message:'%s'", chan_num, message);
 	#endif
 
-	if (targetname == nullptr) {
+	if (targetname == nullptr)
 		targetname = (!GetTarget()) ? "" : GetTarget()->GetName();
-	}
 
-	if(RuleB(Chat, EnableAntiSpam))
-	{
-		if(strcmp(targetname, "discard") != 0)
-		{
-			if(chan_num == 3 || chan_num == 4 || chan_num == 5 || chan_num == 7)
-			{
-				if(GlobalChatLimiterTimer)
-				{
-					if(GlobalChatLimiterTimer->Check(false))
-					{
+	if(RuleB(Chat, EnableAntiSpam)) {
+		if(strcmp(targetname, "discard") != 0) {
+			if(chan_num == 3 || chan_num == 4 || chan_num == 5 || chan_num == 7) {
+				if(GlobalChatLimiterTimer) {
+					if(GlobalChatLimiterTimer->Check(false)) {
 						GlobalChatLimiterTimer->Start(RuleI(Chat, IntervalDurationMS));
 						AttemptedMessages = 0;
 					}
@@ -776,21 +720,16 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					AllowedMessages = 10000;
 
 				AttemptedMessages++;
-				if(AttemptedMessages > AllowedMessages)
-				{
-					if(AttemptedMessages > RuleI(Chat, MaxMessagesBeforeKick))
-					{
+				if(AttemptedMessages > AllowedMessages) {
+					if(AttemptedMessages > RuleI(Chat, MaxMessagesBeforeKick)) {
 						Kick();
 						return;
 					}
-					if(GlobalChatLimiterTimer)
-					{
-						Message(0, "You have been rate limited, you can send more messages in %i seconds.",
-							GlobalChatLimiterTimer->GetRemainingTime() / 1000);
+					if(GlobalChatLimiterTimer) {
+						Message(0, "You have been rate limited, you can send more messages in %i seconds.", GlobalChatLimiterTimer->GetRemainingTime() / 1000);
 						return;
 					}
-					else
-					{
+					else {
 						Message(0, "You have been rate limited, you can send more messages in 60 seconds.");
 						return;
 					}
@@ -833,8 +772,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		language = 0;
 	}
 
-	switch(chan_num)
-	{
+	switch(chan_num) {
 		case 0: {
 			if (!IsInAGuild())
 				Message_StringID(MT_DefaultText, GUILD_NOT_MEMBER2);

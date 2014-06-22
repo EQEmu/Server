@@ -266,6 +266,7 @@ public:
 	bool	BuryPlayerCorpse(uint32 dbid);
 	bool	BuryAllPlayerCorpses(uint32 charid);
 	bool	DeletePlayerCorpse(uint32 dbid);
+	int32	GetGlobal(uint32 char_id, const char* varname);
 	uint32	GetPlayerBuriedCorpseCount(uint32 char_id);
 	Corpse* SummonBuriedPlayerCorpse(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);
 	bool	SummonAllPlayerCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, float dest_x, float dest_y, float dest_z, float dest_heading);

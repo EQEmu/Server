@@ -213,6 +213,25 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id) {
 	return 0;
 }
 
+int32 ZoneDatabase::GetGlobal(uint32 char_id, const char* varname) {
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	int32 value = 0;
+	
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT value FROM quest_globals WHERE charid = '%u' AND `name` = '%s'", char_id, varname), errbuf, &result)) {
+		row = mysql_fetch_row(result);
+		value = atoi(row[0]);
+		mysql_free_result(result);
+	}
+	else
+		std::cerr << "Error in GetGlobal query '" << query << "' " << errbuf << std::endl;
+		
+	safe_delete_array(query);
+	return value;
+}
+
 void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
