@@ -12,6 +12,7 @@ Kayen: Implemented SE_Berserk (Sets client as 'Berserk' giving chance to crippli
 Kayen: Implemented SE_Vampirsm (Stackable lifetap from melee effect) *Not used in any live effects
 Kayen: Minor fixes to how lifetap from melee effects are calced. Removed arbitrary hard cap of 100%, Negative value will now dmg client.
 Kayen: Fix to issue that prevented NPC's from receiving HP Regeneration derived from spell buffs.
+Kayen: Fixes and Updates for melee and spell mitigation runes.
 
 == 06/13/2014 ==
 Kayen: For table 'npc_spell_effects_entries' setting se_max for damage shield effects (59) will now determine the DS Type (ie burning)
