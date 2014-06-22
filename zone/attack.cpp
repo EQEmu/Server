@@ -3176,7 +3176,11 @@ int32 Mob::ReduceDamage(int32 damage)
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot , true);
 			}
-			return -6;
+
+			if (spellbonuses.NegateAttacks[2] && (damage > spellbonuses.NegateAttacks[2]))
+				damage -= spellbonuses.NegateAttacks[2];
+			else
+				return -6;
 		}
 	}
 
@@ -3272,7 +3276,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	int32 slot = -1;
 
 	// See if we block the spell outright first
-	if (spellbonuses.NegateAttacks[0]){
+	if (!iBuffTic && spellbonuses.NegateAttacks[0]){
 		slot = spellbonuses.NegateAttacks[1];
 		if(slot >= 0) {
 			if(--buffs[slot].numhits == 0) {
@@ -3280,7 +3284,11 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot , true);
 			}
-			return 0;
+
+			if (spellbonuses.NegateAttacks[2] && (damage > spellbonuses.NegateAttacks[2]))
+				damage -= spellbonuses.NegateAttacks[2];
+			else
+				return 0;
 		}
 	}
 

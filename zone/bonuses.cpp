@@ -2294,6 +2294,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (!newbon->NegateAttacks[0]){
 					newbon->NegateAttacks[0] = 1;
 					newbon->NegateAttacks[1] = buffslot;
+					newbon->NegateAttacks[2] = max;
 				}
 				break;
 			}
