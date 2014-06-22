@@ -307,7 +307,7 @@ typedef enum {
 #define SE_SpellDamageShield			157	// implemented - Petrad's Protection
 #define SE_Reflect						158 // implemented
 #define SE_AllStats						159	// implemented
-#define SE_MakeDrunk					160 // implemented - poorly though, should check against tolerance
+//#define SE_MakeDrunk					160 // *not implemented - Effect works entirely client side (Should check against tolerance)
 #define SE_MitigateSpellDamage			161	// implemented - rune with max value
 #define SE_MitigateMeleeDamage			162	// implemented - rune with max value
 #define SE_NegateAttacks				163	// implemented

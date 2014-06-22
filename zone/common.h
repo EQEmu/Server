@@ -329,11 +329,11 @@ struct StatBonuses {
 	bool	NegateEffects;						// Check if you contain a buff with negate effect. (only spellbonuses)
 	int16	SkillDamageAmount2[HIGHEST_SKILL+2];	// Adds skill specific damage
 	uint16	NegateAttacks[2];					// 0 = bool HasEffect 1 = Buff Slot
-	uint16	MitigateMeleeRune[2];				// 0 = Mitigation value 1 = Buff Slot
+	uint16	MitigateMeleeRune[4];				// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per hit 3 = Rune Amt
 	uint16	MeleeThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
 	uint16	SpellThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
-	uint16	MitigateSpellRune[2];				// 0 = Mitigation value 1 = Buff Slot
-	uint16	MitigateDotRune[2];					// 0 = Mitigation value 1 = Buff Slot
+	uint16	MitigateSpellRune[4];				// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per spell 3 = Rune Amt
+	uint16	MitigateDotRune[4];					// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per tick 3 = Rune Amt
 	uint32	TriggerMeleeThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint32	TriggerSpellThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint16	ManaAbsorbPercentDamage[2];			// 0 = Mitigation value 1 = Buff Slot

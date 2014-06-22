@@ -2303,6 +2303,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MitigateMeleeRune[0] < effect_value){
 					newbon->MitigateMeleeRune[0] = effect_value;
 					newbon->MitigateMeleeRune[1] = buffslot;
+					newbon->MitigateMeleeRune[2] = base2;
+					newbon->MitigateMeleeRune[3] = max;
 				}
 				break;
 			}
@@ -2333,6 +2335,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MitigateSpellRune[0] < effect_value){
 					newbon->MitigateSpellRune[0] = effect_value;
 					newbon->MitigateSpellRune[1] = buffslot;
+					newbon->MitigateSpellRune[2] = base2;
+					newbon->MitigateSpellRune[3] = max;
 				}
 				break;
 			}
@@ -2342,6 +2346,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MitigateDotRune[0] < effect_value){
 					newbon->MitigateDotRune[0] = effect_value;
 					newbon->MitigateDotRune[1] = buffslot;
+					newbon->MitigateDotRune[2] = base2;
+					newbon->MitigateDotRune[3] = max;
 				}
 				break;
 			}
