@@ -17,7 +17,9 @@ class NPC;
 
 struct lua_registered_event;
 namespace luabind {
-	class object;
+	namespace adl {
+		class object;
+	}
 }
 
 class LuaParser : public QuestInterface {
@@ -73,13 +75,13 @@ public:
 
 private:
 	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers, luabind::object *l_func = nullptr);
+		std::vector<void*> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<void*> *extra_pointers, luabind::object *l_func = nullptr);
+		std::vector<void*> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data,
-		uint32 extra_data, std::vector<void*> *extra_pointers, luabind::object *l_func = nullptr);
+		uint32 extra_data, std::vector<void*> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
-		std::vector<void*> *extra_pointers,	luabind::object *l_func = nullptr);
+		std::vector<void*> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, uint32 extra_data,
 		std::vector<void*> *extra_pointers);
 
