@@ -356,7 +356,8 @@ struct StatBonuses {
 	bool	BStacker;							// For buff stack blocking
 	bool	CStacker;							// For buff stack blocking
 	bool	DStacker;							// For buff stack blocking
-	bool	BerserkSPA;							// berserk effect			
+	bool	BerserkSPA;							// berserk effect
+	int16	Metabolism;							// Food/drink consumption rates.
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
