@@ -15,6 +15,7 @@ Kayen: Fix to issue that prevented NPC's from receiving HP Regeneration derived 
 Kayen: Fixes and Updates for melee and spell mitigation runes.
 Kayen: Update to SE_NegateAttack, 'max' value can now set upper limit of damage absorbed. DOT ticks will no longer be absorbed.
 Kayen: Implemented SE_Metabolism - Modifies food/drink consumption rates. [Data for AA is already in database]
+Kayen: Update to SE_BalanaceMana, SE_BalanceHP to support limit value which caps max mana/hp that can be taken per player.
 
 == 06/13/2014 ==
 Kayen: For table 'npc_spell_effects_entries' setting se_max for damage shield effects (59) will now determine the DS Type (ie burning)

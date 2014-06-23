@@ -2393,7 +2393,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceHP(spell.base[i], gid, spell.range, caster);
+						r->BalanceHP(spell.base[i], gid, spell.range, caster, spell.base2[i]);
 						break;
 					}
 				}
@@ -2403,7 +2403,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceHP(spell.base[i], spell.range, caster);
+				g->BalanceHP(spell.base[i], spell.range, caster, spell.base2[i]);
 				break;
 			}
 
@@ -2421,7 +2421,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceMana(spell.base[i], gid, spell.range, caster);
+						r->BalanceMana(spell.base[i], gid, spell.range, caster, spell.base2[i]);
 						break;
 					}
 				}
@@ -2431,7 +2431,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceMana(spell.base[i], spell.range, caster);
+				g->BalanceMana(spell.base[i], spell.range, caster, spell.base2[i]);
 				break;
 			}
 

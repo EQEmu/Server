@@ -8137,7 +8137,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
 	int16 metabolism_bonus = spellbonuses.Metabolism + itembonuses.Metabolism + aabonuses.Metabolism;
 
 	if (metabolism_bonus)
-		cons_mod = cons_mod * metabolism_bonus* RuleI(Character, ConsumptionMultiplier) / 10000;
+		cons_mod = cons_mod * metabolism_bonus * RuleI(Character, ConsumptionMultiplier) / 10000;
 	else
 		 cons_mod = cons_mod * RuleI(Character, ConsumptionMultiplier) / 100;
 
