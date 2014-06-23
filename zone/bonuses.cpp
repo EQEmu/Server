@@ -1264,6 +1264,10 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->BerserkSPA = true;
 				break;
 
+			case SE_Metabolism:
+				newbon->Metabolism += base1;
+				break;
+
 		}
 	}
 }
@@ -2729,6 +2733,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->BerserkSPA = true;
 				break;
 
+				
+			case SE_Metabolism:
+				newbon->Metabolism += effect_value;
+				break;
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
@@ -4129,6 +4138,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.Vampirism = effect_value;
 					aabonuses.Vampirism = effect_value;
 					itembonuses.Vampirism = effect_value;
+					break;
+
+				case SE_Metabolism:
+					spellbonuses.Metabolism = effect_value;
+					aabonuses.Metabolism = effect_value;
+					itembonuses.Metabolism = effect_value;
 					break;
 				
 			}

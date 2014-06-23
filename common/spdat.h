@@ -380,7 +380,7 @@ typedef enum {
 //#define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
 #define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
 #define SE_DivineSave					232	// implemented (base1 == % chance on death to insta-res) (base2 == spell cast on save)
-//#define SE_Metabolism					233	// *not implemented - (Crown of Feathers) Increase metabolism?
+#define SE_Metabolism					233	// implemented - Modifies food/drink consumption rates.
 //#define SE_ReduceApplyPoisonTime		234	// not implemented as bonus - reduces the time to apply poison
 #define	SE_ChannelChanceSpells			235 // implemented[AA] - chance to channel from SPELLS *No longer used on live.
 //#define SE_FreePet					236	// not used
