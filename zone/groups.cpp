@@ -447,7 +447,7 @@ bool Group::UpdatePlayer(Mob* update){
 		//update their player profile
 		PlayerProfile_Struct &pp = update->CastToClient()->GetPP();
 		for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if(membername[0] == '\0')
+			if(membername[i][0] == '\0')
 				memset(pp.groupMembers[i], 0, 64);
 			else
 				strn0cpy(pp.groupMembers[i], membername[i], 64);
