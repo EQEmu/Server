@@ -578,15 +578,17 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster, int3
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
-				if(distance <= range2){
+				if (members[gi].member->GetMaxMana() > 0) {
+					distance = caster->DistNoRoot(*members[gi].member);
+					if(distance <= range2){
 
-					manataken_tmp = members[gi].member->GetMaxMana() - members[gi].member->GetMana();
-					if (limit && (manataken_tmp > limit))
-						manataken_tmp = limit;
+						manataken_tmp = members[gi].member->GetMaxMana() - members[gi].member->GetMana();
+						if (limit && (manataken_tmp > limit))
+							manataken_tmp = limit;
 
-					manataken += (manataken_tmp);
-					numMem += 1;
+						manataken += (manataken_tmp);
+						numMem += 1;
+					}
 				}
 			}
 		}

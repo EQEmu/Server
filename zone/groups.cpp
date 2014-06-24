@@ -1160,7 +1160,7 @@ void Group::BalanceMana(int32 penalty, int32 range, Mob* caster, int32 limit)
 	unsigned int gi = 0;
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
-		if(members[gi]){			
+		if(members[gi] && (members[gi]->GetMaxMana() > 0)){			
 			distance = caster->DistNoRoot(*members[gi]);
 			if(distance <= range2){
 
