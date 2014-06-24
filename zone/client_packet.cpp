@@ -1032,7 +1032,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			}
 
 			// set the boat's position deltas
-			boat->SetDeltas(ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
+			boat->SetDeltas(ppu->delta_x, ppu->delta_y, ppu->delta_z, (float)ppu->delta_heading);
 			// send an update to everyone nearby except the client controlling the boat
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
@@ -4431,7 +4431,6 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 			}
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 				GuildBanks->SendGuildBank(this);
-			SendGuildRanks();
 
 		}
 	}
@@ -8129,10 +8128,7 @@ void Client::Handle_OP_ClientError(const EQApplicationPacket *app)
 void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
 {
 	if(IsInAGuild())
-	{
-		SendGuildRanks();
 		SendGuildMembers();
-	}
 	return;
 }
 
@@ -9607,7 +9603,6 @@ void Client::CompleteConnect()
 
 	if(IsInAGuild())
 	{
-		SendGuildRanks();
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
@@ -12533,7 +12528,6 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 				GuildBanks->SendGuildBank(this);
-			SendGuildRanks();
 		}
 	}
 }

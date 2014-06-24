@@ -35,7 +35,7 @@ class EQStreamFactory : private Timeoutable {
 		Timer *DecayTimer;
 
 		uint32 stream_timeout;
-
+        void CloseWithoutStop();
 	public:
 		EQStreamFactory(EQStreamType type, uint32 timeout = 135000) : Timeoutable(5000), stream_timeout(timeout) { ReaderRunning=false; WriterRunning=false; StreamType=type; sock=-1; }
 		EQStreamFactory(EQStreamType type, int port, uint32 timeout = 135000);
@@ -47,6 +47,7 @@ class EQStreamFactory : private Timeoutable {
 		bool Open(unsigned long port) { Port=port; return Open(); }
 		bool IsOpen() { return sock!=-1; }
 		void Close();
+
 		void ReaderLoop();
 		void WriterLoop();
 		void Stop() { StopReader(); StopWriter(); }

@@ -331,7 +331,7 @@ Client::~Client() {
 	Bot::ProcessBotOwnerRefDelete(this);
 #endif
 	if(IsInAGuild())
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
+		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, (uint32)time(nullptr));
 
 	Mob* horse = entity_list.GetMob(this->CastToClient()->GetHorseId());
 	if (horse)
@@ -551,7 +551,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveBuffs(this);
 
-	TotalSecondsPlayed += (time(nullptr) - m_pp.lastlogin);
+	TotalSecondsPlayed = (int)(TotalSecondsPlayed+(time(nullptr) - m_pp.lastlogin));
 	m_pp.timePlayedMin = (TotalSecondsPlayed / 60);
 	m_pp.RestTimer = rest_timer.GetRemainingTime() / 1000;
 
@@ -568,7 +568,7 @@ bool Client::Save(uint8 iCommitNow) {
 		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
 	}
 
-	m_pp.lastlogin = time(nullptr);
+	m_pp.lastlogin = (uint32)time(nullptr);
 	if (pQueuedSaveWorkID) {
 		dbasync->CancelWork(pQueuedSaveWorkID);
 		pQueuedSaveWorkID = 0;
@@ -1576,7 +1576,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 	switch(type){
 		case STAT_STR:
 			if(set_val>0)
-				iss->str=set_val;
+				iss->str=(uint8)set_val;
 			if(set_val<0)
 				m_pp.STR=0;
 			else if(set_val>255)
@@ -1586,7 +1586,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_STA:
 			if(set_val>0)
-				iss->sta=set_val;
+				iss->sta=(uint8)set_val;
 			if(set_val<0)
 				m_pp.STA=0;
 			else if(set_val>255)
@@ -1596,7 +1596,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_AGI:
 			if(set_val>0)
-				iss->agi=set_val;
+				iss->agi=(uint8)set_val;
 			if(set_val<0)
 				m_pp.AGI=0;
 			else if(set_val>255)
@@ -1606,7 +1606,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_DEX:
 			if(set_val>0)
-				iss->dex=set_val;
+				iss->dex=(uint8)set_val;
 			if(set_val<0)
 				m_pp.DEX=0;
 			else if(set_val>255)
@@ -1616,7 +1616,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_INT:
 			if(set_val>0)
-				iss->int_=set_val;
+				iss->int_=(uint8)set_val;
 			if(set_val<0)
 				m_pp.INT=0;
 			else if(set_val>255)
@@ -1626,7 +1626,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_WIS:
 			if(set_val>0)
-				iss->wis=set_val;
+				iss->wis=(uint8)set_val;
 			if(set_val<0)
 				m_pp.WIS=0;
 			else if(set_val>255)
@@ -1636,7 +1636,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 			break;
 		case STAT_CHA:
 			if(set_val>0)
-				iss->cha=set_val;
+				iss->cha=(uint8)set_val;
 			if(set_val<0)
 				m_pp.CHA=0;
 			else if(set_val>255)
@@ -1659,7 +1659,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 	switch(type){
 		case STAT_STR:
 			if(increase_val>0)
-				iss->str=increase_val;
+				iss->str=(uint8)increase_val;
 			if((m_pp.STR+increase_val*2)<0)
 				m_pp.STR=0;
 			else if((m_pp.STR+increase_val*2)>255)
@@ -1669,7 +1669,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_STA:
 			if(increase_val>0)
-				iss->sta=increase_val;
+				iss->sta=(uint8)increase_val;
 			if((m_pp.STA+increase_val*2)<0)
 				m_pp.STA=0;
 			else if((m_pp.STA+increase_val*2)>255)
@@ -1679,7 +1679,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_AGI:
 			if(increase_val>0)
-				iss->agi=increase_val;
+				iss->agi=(uint8)increase_val;
 			if((m_pp.AGI+increase_val*2)<0)
 				m_pp.AGI=0;
 			else if((m_pp.AGI+increase_val*2)>255)
@@ -1689,7 +1689,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_DEX:
 			if(increase_val>0)
-				iss->dex=increase_val;
+				iss->dex=(uint8)increase_val;
 			if((m_pp.DEX+increase_val*2)<0)
 				m_pp.DEX=0;
 			else if((m_pp.DEX+increase_val*2)>255)
@@ -1699,7 +1699,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_INT:
 			if(increase_val>0)
-				iss->int_=increase_val;
+				iss->int_=(uint8)increase_val;
 			if((m_pp.INT+increase_val*2)<0)
 				m_pp.INT=0;
 			else if((m_pp.INT+increase_val*2)>255)
@@ -1709,7 +1709,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_WIS:
 			if(increase_val>0)
-				iss->wis=increase_val;
+				iss->wis=(uint8)increase_val;
 			if((m_pp.WIS+increase_val*2)<0)
 				m_pp.WIS=0;
 			else if((m_pp.WIS+increase_val*2)>255)
@@ -1719,7 +1719,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 			break;
 		case STAT_CHA:
 			if(increase_val>0)
-				iss->cha=increase_val;
+				iss->cha=(uint8)increase_val;
 			if((m_pp.CHA+increase_val*2)<0)
 				m_pp.CHA=0;
 			else if((m_pp.CHA+increase_val*2)>255)
@@ -2100,7 +2100,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		}
 		else
 		{
-			m_pp.copper = copperpp;
+			m_pp.copper = (int32)copperpp;
 			if(updateclient)
 				SendMoneyUpdate();
 			Save();
@@ -2114,8 +2114,8 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		}
 		else
 		{
-			m_pp.silver = silver/10;
-			m_pp.copper += (silver-(m_pp.silver*10));
+			m_pp.silver = (int32)(silver/10);
+			m_pp.copper = (int32)(m_pp.copper + silver-(m_pp.silver*10));
 			if(updateclient)
 				SendMoneyUpdate();
 			Save();
@@ -2131,11 +2131,11 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 		}
 		else
 		{
-			m_pp.gold = gold/100;
+			m_pp.gold = (int32)(gold/100);
 			uint64 silvertest = (gold-(static_cast<uint64>(m_pp.gold)*100))/10;
-			m_pp.silver += silvertest;
+			m_pp.silver =(int32)(m_pp.silver + silvertest);
 			uint64 coppertest = (gold-(static_cast<uint64>(m_pp.gold)*100+silvertest*10));
-			m_pp.copper += coppertest;
+			m_pp.copper = (int32)(m_pp.copper + coppertest);
 			if(updateclient)
 				SendMoneyUpdate();
 			Save();
@@ -2146,13 +2146,13 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 
 		//Impossible for plat to be negative, already checked above
 
-		m_pp.platinum = platinum/1000;
+		m_pp.platinum = (int32)(platinum/1000);
 		uint64 goldtest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000))/100;
-		m_pp.gold += goldtest;
+		m_pp.gold = (int32)(m_pp.gold +goldtest);
 		uint64 silvertest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000+goldtest*100))/10;
-		m_pp.silver += silvertest;
+		m_pp.silver = (int32)(m_pp.silver+ silvertest);
 		uint64 coppertest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000+goldtest*100+silvertest*10));
-		m_pp.copper = coppertest;
+		m_pp.copper = (int32)coppertest;
 		if(updateclient)
 			SendMoneyUpdate();
 		RecalcWeight();
@@ -2168,11 +2168,11 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	// Add Amount of Platinum
 	tmp2 = tmp/1000;
-	int32 new_val = m_pp.platinum + tmp2;
+	int64 new_val = m_pp.platinum + tmp2;
 	if(new_val < 0) {
 		m_pp.platinum = 0;
 	} else {
-		m_pp.platinum = m_pp.platinum + tmp2;
+		m_pp.platinum = (int32)(m_pp.platinum + tmp2);
 	}
 	tmp-=tmp2*1000;
 
@@ -2181,11 +2181,11 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	// Add Amount of Gold
 	tmp2 = tmp/100;
-	new_val = m_pp.gold + tmp2;
+	new_val = (int32)(m_pp.gold + tmp2);
 	if(new_val < 0) {
 		m_pp.gold = 0;
 	} else {
-		m_pp.gold = m_pp.gold + tmp2;
+		m_pp.gold = (int32)(m_pp.gold + tmp2);
 	}
 	tmp-=tmp2*100;
 	//if (updateclient)
@@ -2193,11 +2193,11 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 
 	// Add Amount of Silver
 	tmp2 = tmp/10;
-	new_val = m_pp.silver + tmp2;
+	new_val = (int32)(m_pp.silver + tmp2);
 	if(new_val < 0) {
 		m_pp.silver = 0;
 	} else {
-		m_pp.silver = m_pp.silver + tmp2;
+		m_pp.silver = (int32)(m_pp.silver + tmp2);
 	}
 	tmp-=tmp2*10;
 	//if (updateclient)
@@ -2212,7 +2212,7 @@ void Client::AddMoneyToPP(uint64 copper, bool updateclient){
 	if(new_val < 0) {
 		m_pp.copper = 0;
 	} else {
-		m_pp.copper = m_pp.copper + tmp2;
+		m_pp.copper = (int32)(m_pp.copper + tmp2);
 	}
 
 
@@ -2384,11 +2384,11 @@ bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
 }
 
 uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
-	return(database.GetSkillCap(class_, skillid, level));
+	return(database.GetSkillCap((uint8)class_, skillid, (uint8)level));
 }
 
 uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_){
-	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
+	return(database.GetTrainLevel((uint8)class_, skillid, RuleI(Character, MaxLevel)));
 }
 
 uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16 maxSkill)
@@ -2576,10 +2576,10 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 	LogText += Buffer;
 
 	if (buying==true) {
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Buying from Merchant",LogText.c_str(),2);
+		database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),merchant->GetName(),"Buying from Merchant",LogText.c_str(),2);
 	}
 	else {
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Selling to Merchant",LogText.c_str(),3);
+		database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),merchant->GetName(),"Selling to Merchant",LogText.c_str(),3);
 	}
 }
 
@@ -2591,14 +2591,20 @@ void Client::LogLoot(Client* player, Corpse* corpse, const Item_Struct* item){
 	if (item!=0){
 		memset(itemid,0,sizeof(itemid));
 		memset(itemname,0,sizeof(itemid));
+
+#ifdef _WINDOWS
+		_itoa(item->ID,itemid,10);
+#else
 		itoa(item->ID,itemid,10);
+#endif
+
 		sprintf(itemname,"%s",item->Name);
 		logtext=itemname;
 
 		strcat(logtext,"(");
 		strcat(logtext,itemid);
 		strcat(logtext,") Looted");
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Item",logtext,4);
+		database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),corpse->orgname,"Looting Item",logtext,4);
 	}
 	else{
 		if ((corpse->GetPlatinum() + corpse->GetGold() + corpse->GetSilver() + corpse->GetCopper())>0) {
@@ -2607,9 +2613,9 @@ void Client::LogLoot(Client* player, Corpse* corpse, const Item_Struct* item){
 			logtext=coinloot;
 			strcat(logtext," Looted");
 			if (corpse->GetPlatinum()>10000)
-				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Excessive Loot!",logtext,9);
+				database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),corpse->orgname,"Excessive Loot!",logtext,9);
 			else
-				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Money",logtext,5);
+				database.logevents(player->AccountName(),player->AccountID(),(uint8)player->admin,player->GetName(),corpse->orgname,"Looting Money",logtext,5);
 		}
 	}
 }
@@ -2932,7 +2938,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
 	sms->unknown8=0;
 
 	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+		entity_list.QueueCloseClients(this,outapp,false,(float)distance);
 	else
 		QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2998,7 +3004,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 
 
 	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+		entity_list.QueueCloseClients(this,outapp,false,(float)distance);
 	else
 		QueuePacket(outapp);
 	safe_delete(outapp);
@@ -3279,13 +3285,13 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 			{
 				chaformula = (GetCHA() - 103)*((-(RuleR(Merchant, ChaBonusMod))/100)*(RuleI(Merchant, PriceBonusPct))); // This will max out price bonus.
 				if (chaformula < -1*(RuleI(Merchant, PriceBonusPct)))
-					chaformula = -1*(RuleI(Merchant, PriceBonusPct));
+					chaformula = -1.0f*(RuleI(Merchant, PriceBonusPct));
 			}
 			else if (GetCHA() < 103)
 			{
 				chaformula = (103 - GetCHA())*(((RuleR(Merchant, ChaPenaltyMod))/100)*(RuleI(Merchant, PricePenaltyPct))); // This will bottom out price penalty.
 				if (chaformula > 1*(RuleI(Merchant, PricePenaltyPct)))
-					chaformula = 1*(RuleI(Merchant, PricePenaltyPct));
+					chaformula = 1.0f*(RuleI(Merchant, PricePenaltyPct));
 			}
 		}
 		if (factionlvl <= FACTION_INDIFFERENT) // Indifferent or better.
@@ -3294,13 +3300,13 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 			{
 				chaformula = (GetCHA() - 75)*((-(RuleR(Merchant, ChaBonusMod))/100)*(RuleI(Merchant, PriceBonusPct))); // This will max out price bonus.
 				if (chaformula < -1*(RuleI(Merchant, PriceBonusPct)))
-					chaformula = -1*(RuleI(Merchant, PriceBonusPct));
+					chaformula = -1.0f*(RuleI(Merchant, PriceBonusPct));
 			}
 			else if (GetCHA() < 75)
 			{
 				chaformula = (75 - GetCHA())*(((RuleR(Merchant, ChaPenaltyMod))/100)*(RuleI(Merchant, PricePenaltyPct))); // Faction modifier keeps up from reaching bottom price penalty.
 				if (chaformula > 1*(RuleI(Merchant, PricePenaltyPct)))
-					chaformula = 1*(RuleI(Merchant, PricePenaltyPct));
+					chaformula = 1.0f*(RuleI(Merchant, PricePenaltyPct));
 			}
 		}
 	}
@@ -3833,9 +3839,9 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 	}
 	else {
 		ts->ZoneID = database.GetZoneID(Spell.teleport_zone);
-		ts->y = Spell.base[0];
-		ts->x = Spell.base[1];
-		ts->z = Spell.base[2];
+		ts->y = (float)Spell.base[0];
+		ts->x = (float)Spell.base[1];
+		ts->z = (float)Spell.base[2];
 	}
 
 	ts->unknown008 = 0;
@@ -4130,7 +4136,7 @@ void Client::UpdateLFP() {
 uint16 Client::GetPrimarySkillValue()
 {
 	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(13);
+	bool equiped = m_inv.GetItem(13) != nullptr;
 
 	if (!equiped)
 		skill = SkillHandtoHand;
@@ -4193,7 +4199,7 @@ uint16 Client::GetTotalATK()
 	uint16 WornCap = itembonuses.ATK;
 
 	if(IsClient()) {
-		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
+		AttackRating = (uint16)((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
 		AttackRating += aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 
 		if (AttackRating < 10)
@@ -4211,7 +4217,7 @@ uint16 Client::GetATKRating()
 {
 	uint16 AttackRating = 0;
 	if(IsClient()) {
-		AttackRating = (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
+		AttackRating =  (uint16)((GetSkill(SkillOffense) * 1.345) + (GetSTR() - 66) * 0.9 + (GetPrimarySkillValue() * 2.69));
 
 		if (AttackRating < 10)
 			AttackRating = 10;
@@ -5100,26 +5106,26 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 	{
 	case 2:
 		{
-			float delta = (x-(-713.6));
+			float delta = (x-(-713.6f));
 			delta *= delta;
 			float distance = delta;
-			delta = (y-(-160.2));
+			delta = (y-(-160.2f));
 			delta *= delta;
 			distance += delta;
-			delta = (z-(-12.8));
+			delta = (z-(-12.8f));
 			delta *= delta;
 			distance += delta;
 
 			if(distance < max_dist)
 				return true;
 
-			delta = (x-(-153.8));
+			delta = (x-(-153.8f));
 			delta *= delta;
 			distance = delta;
-			delta = (y-(-30.3));
+			delta = (y-(-30.3f));
 			delta *= delta;
 			distance += delta;
-			delta = (z-(8.2));
+			delta = (z-(8.2f));
 			delta *= delta;
 			distance += delta;
 
@@ -5130,26 +5136,26 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 		}
 	case 9:
 	{
-		float delta = (x-(-682.5));
+		float delta = (x-(-682.5f));
 		delta *= delta;
 		float distance = delta;
-		delta = (y-(147.0));
+		delta = (y-(147.0f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(-9.9));
+		delta = (z-(-9.9f));
 		delta *= delta;
 		distance += delta;
 
 		if(distance < max_dist)
 			return true;
 
-		delta = (x-(-655.4));
+		delta = (x-(-655.4f));
 		delta *= delta;
 		distance = delta;
-		delta = (y-(10.5));
+		delta = (y-(10.5f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(-51.8));
+		delta = (z-(-51.8f));
 		delta *= delta;
 		distance += delta;
 
@@ -5173,52 +5179,52 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 
 	case 24:
 	{
-		float delta = (x-(-183.0));
+		float delta = (x-(-183.0f));
 		delta *= delta;
 		float distance = delta;
-		delta = (y-(-773.3));
+		delta = (y-(-773.3f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(54.1));
-		delta *= delta;
-		distance += delta;
-
-		if(distance < max_dist)
-			return true;
-
-		delta = (x-(-8.8));
-		delta *= delta;
-		distance = delta;
-		delta = (y-(-394.1));
-		delta *= delta;
-		distance += delta;
-		delta = (z-(41.1));
+		delta = (z-(54.1f));
 		delta *= delta;
 		distance += delta;
 
 		if(distance < max_dist)
 			return true;
 
-		delta = (x-(-310.3));
+		delta = (x-(-8.8f));
 		delta *= delta;
 		distance = delta;
-		delta = (y-(-1411.6));
+		delta = (y-(-394.1f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(-42.8));
+		delta = (z-(41.1f));
 		delta *= delta;
 		distance += delta;
 
 		if(distance < max_dist)
 			return true;
 
-		delta = (x-(-183.1));
+		delta = (x-(-310.3f));
 		delta *= delta;
 		distance = delta;
-		delta = (y-(-1409.8));
+		delta = (y-(-1411.6f));
 		delta *= delta;
 		distance += delta;
-		delta = (z-(37.1));
+		delta = (z-(-42.8f));
+		delta *= delta;
+		distance += delta;
+
+		if(distance < max_dist)
+			return true;
+
+		delta = (x-(-183.1f));
+		delta *= delta;
+		distance = delta;
+		delta = (y-(-1409.8f));
+		delta *= delta;
+		distance += delta;
+		delta = (z-(37.1f));
 		delta *= delta;
 		distance += delta;
 

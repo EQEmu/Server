@@ -1291,7 +1291,7 @@ void Bot::GenerateArmorClass()
 uint16 Bot::GetPrimarySkillValue()
 {
 	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(SLOT_PRIMARY);
+	bool equiped = m_inv.GetItem(SLOT_PRIMARY) != nullptr;
 
 	if(!equiped)
 	{
@@ -1349,7 +1349,7 @@ uint16 Bot::GetPrimarySkillValue()
 }
 
 uint16 Bot::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
-	return(database.GetSkillCap(class_, skillid, level));
+	return(database.GetSkillCap((uint8)class_, skillid, (uint8)level));
 }
 
 uint16 Bot::GetTotalATK()
@@ -1358,7 +1358,7 @@ uint16 Bot::GetTotalATK()
 	uint16 WornCap = itembonuses.ATK;
 
 	if(IsBot()) {
-		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
+		AttackRating = (uint16)((WornCap * 1.342f) + (GetSkill(SkillOffense) * 1.345f) + ((GetSTR() - 66) * 0.9f) + (GetPrimarySkillValue() * 2.69f));
 		AttackRating += aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 
 		if (AttackRating < 10)
@@ -1376,7 +1376,7 @@ uint16 Bot::GetATKRating()
 {
 	uint16 AttackRating = 0;
 	if(IsBot()) {
-		AttackRating = (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
+		AttackRating = (uint16)((GetSkill(SkillOffense) * 1.345f) + ((GetSTR() - 66) * 0.9f) + (GetPrimarySkillValue() * 2.69f));
 
 		if (AttackRating < 10)
 			AttackRating = 10;
@@ -1397,7 +1397,7 @@ int32 Bot::GenerateBaseHitPoints()
 		float SoDPost255;
 
 		if(((NormalSTA - 255) / 2) > 0)
-			SoDPost255 = ((NormalSTA - 255) / 2);
+			SoDPost255 = (NormalSTA - 255) / 2.0f;
 		else
 			SoDPost255 = 0;
 
@@ -1405,17 +1405,17 @@ int32 Bot::GenerateBaseHitPoints()
 
 		if(level < 41)
 		{
-			new_base_hp = (5 + (GetLevel() * hp_factor / 12) + ((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
+			new_base_hp = (int)(5 + (GetLevel() * hp_factor / 12) + ((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
 		}
 		else if(level < 81)
 		{
-			new_base_hp = (5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
+			new_base_hp = (int)(5 + (40 * hp_factor / 12) + ((GetLevel() - 40) * hp_factor / 6) +
 				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * (GetLevel() - 40) * hp_factor / 1800));
 		}
 		else
 		{
-			new_base_hp = (5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
+			new_base_hp = (int)(5 + (80 * hp_factor / 8) + ((GetLevel() - 80) * hp_factor / 10) +
 				((NormalSTA - SoDPost255) * hp_factor / 90) +
 				((NormalSTA - SoDPost255) * hp_factor / 45));
 		}
@@ -1485,7 +1485,7 @@ void Bot::LoadAAs() {
 		errorMessage = std::string(TempErrorMessageBuffer);
 	}
 	else {
-		int totalAAs = database.CountAAs();
+		uint32 totalAAs = database.CountAAs();
 
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
 			uint32 skill_id = 0;
@@ -1495,7 +1495,7 @@ void Bot::LoadAAs() {
 				SendAA_Struct *sendAA = zone->FindAA(skill_id);
 
 				if(sendAA) {
-					for(int i=0; i<sendAA->max_level; i++) {
+					for(uint32 i=0; i<sendAA->max_level; i++) {
 						//Get AA info & add to list
 						uint32 aaid = sendAA->id + i;
 						uint8 total_levels = 0;
@@ -1903,7 +1903,7 @@ void Bot::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_SpellOnKill:
 				for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3)
 				{
-					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == base2) && (newbon->SpellOnKill[i+1] < base1)))
+					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == (uint32)base2) && (newbon->SpellOnKill[i+1] < (uint32)base1)))
 					{
 						//base1 = chance, base2 = SpellID to be triggered, base3 = min npc level
 						newbon->SpellOnKill[i] = base2;
@@ -2339,7 +2339,7 @@ bool Bot::IsValidName() {
 	bool Result = false;
 	std::string TempBotName = std::string(this->GetCleanName());
 
-	for(int iCounter = 0; iCounter < TempBotName.length(); iCounter++) {
+	for(uint32 iCounter = 0; iCounter < TempBotName.length(); iCounter++) {
 		if(isalpha(TempBotName[iCounter]) || TempBotName[iCounter] == '_') {
 			Result = true;
 		}
@@ -2616,7 +2616,7 @@ uint32 Bot::GetPetSaveId() {
 void Bot::LoadPet() {
 	uint32 PetSaveId = GetPetSaveId();
 
-	if(PetSaveId > 0 && !GetPet() && PetSaveId <= SPDAT_RECORDS) {
+	if(PetSaveId > 0 && !GetPet() && PetSaveId <= (uint32)SPDAT_RECORDS) {
 		std::string petName;
 		uint16 petMana = 0;
 		uint16 petHitPoints = 0;
@@ -3667,7 +3667,7 @@ void Bot::AI_Process() {
 		float meleeDistance = GetMaxMeleeRangeToTarget(GetTarget());
 
 		if(botClass == SHADOWKNIGHT || botClass == PALADIN || botClass == WARRIOR) {
-			meleeDistance = meleeDistance * .30;
+			meleeDistance = meleeDistance * .30f;
 		}
 		else {
 			meleeDistance *= (float)MakeRandomFloat(.50, .85);
@@ -3865,7 +3865,7 @@ void Bot::AI_Process() {
 							int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 							DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
-							float random = MakeRandomFloat(0, 1);
+							float random = (float)MakeRandomFloat(0, 1);
 
 							if (random < DualWieldProbability){ // Max 78% of DW
 
@@ -4141,8 +4141,8 @@ void Bot::PetAIProcess() {
 						{
 							if(botPet->GetOwner()->GetLevel() >= 24)
 							{
-								float DualWieldProbability = (botPet->GetSkill(SkillDualWield) + botPet->GetLevel()) / 400.0f;
-								DualWieldProbability -= MakeRandomFloat(0, 1);
+								float DualWieldProbability = (float)((botPet->GetSkill(SkillDualWield) + botPet->GetLevel()) / 400.0f);
+								DualWieldProbability -= (float)MakeRandomFloat(0, 1);
 								if(DualWieldProbability < 0){
 									botPet->Attack(botPet->GetTarget(), 14);
 									if (botPet->CanThisClassDoubleAttack())
@@ -4735,7 +4735,7 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage) {
 		else {
 			while(DataRow = mysql_fetch_row(DatasetResult)) {
 				NPCType DefaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(DataRow[2]), std::string(DataRow[3]), atoi(DataRow[4]), atoi(DataRow[5]), atoi(DataRow[6]), atoi(DataRow[7]));
-				NPCType TempNPCStruct = FillNPCTypeStruct(atoi(DataRow[1]), std::string(DataRow[2]), std::string(DataRow[3]), atoi(DataRow[4]), atoi(DataRow[5]), atoi(DataRow[6]), atoi(DataRow[7]), atof(DataRow[8]), atoi(DataRow[9]), atoi(DataRow[10]), atoi(DataRow[11]), atoi(DataRow[12]), atoi(DataRow[13]), atoi(DataRow[14]), atoi(DataRow[15]), atoi(DataRow[16]), atoi(DataRow[17]), atoi(DataRow[18]), atoi(DataRow[19]), atoi(DataRow[20]), DefaultNPCTypeStruct.MR, DefaultNPCTypeStruct.CR, DefaultNPCTypeStruct.DR, DefaultNPCTypeStruct.FR, DefaultNPCTypeStruct.PR, DefaultNPCTypeStruct.Corrup, DefaultNPCTypeStruct.AC, DefaultNPCTypeStruct.STR, DefaultNPCTypeStruct.STA, DefaultNPCTypeStruct.DEX, DefaultNPCTypeStruct.AGI, DefaultNPCTypeStruct.INT, DefaultNPCTypeStruct.WIS, DefaultNPCTypeStruct.CHA, DefaultNPCTypeStruct.ATK);
+				NPCType TempNPCStruct = FillNPCTypeStruct(atoi(DataRow[1]), std::string(DataRow[2]), std::string(DataRow[3]), atoi(DataRow[4]), atoi(DataRow[5]), atoi(DataRow[6]), atoi(DataRow[7]), (float)atof(DataRow[8]), atoi(DataRow[9]), atoi(DataRow[10]), atoi(DataRow[11]), atoi(DataRow[12]), atoi(DataRow[13]), atoi(DataRow[14]), atoi(DataRow[15]), atoi(DataRow[16]), atoi(DataRow[17]), atoi(DataRow[18]), atoi(DataRow[19]), atoi(DataRow[20]), DefaultNPCTypeStruct.MR, DefaultNPCTypeStruct.CR, DefaultNPCTypeStruct.DR, DefaultNPCTypeStruct.FR, DefaultNPCTypeStruct.PR, DefaultNPCTypeStruct.Corrup, DefaultNPCTypeStruct.AC, DefaultNPCTypeStruct.STR, DefaultNPCTypeStruct.STA, DefaultNPCTypeStruct.DEX, DefaultNPCTypeStruct.AGI, DefaultNPCTypeStruct.INT, DefaultNPCTypeStruct.WIS, DefaultNPCTypeStruct.CHA, DefaultNPCTypeStruct.ATK);
 				Result = new Bot(botID, atoi(DataRow[0]), atoi(DataRow[1]), atof(DataRow[38]), atoi(DataRow[39]), TempNPCStruct);
 				break;
 			}
@@ -4886,10 +4886,10 @@ std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string*
 			*errorMessage = std::string(ErrBuf);
 		}
 		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 					SpawnedBotsList TempSpawnedBotsList;
 					TempSpawnedBotsList.BotLeaderCharID = characterID;
@@ -4986,10 +4986,10 @@ std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* err
 				*errorMessage = std::string(ErrBuf);
 			}
 			else {
-				uint32 RowCount = mysql_num_rows(DatasetResult);
+				uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 				if(RowCount > 0) {
-					for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+					for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 						DataRow = mysql_fetch_row(DatasetResult);
 
 						if(DataRow) {
@@ -5025,10 +5025,10 @@ std::list<BotGroupList> Bot::GetBotGroupListByBotOwnerCharacterId(uint32 botOwne
 			*errorMessage = std::string(ErrBuf);
 		}
 		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -5059,10 +5059,10 @@ bool Bot::DoesBotGroupNameExist(std::string botGroupName) {
 		MYSQL_ROW DataRow;
 
 		if(database.RunQuery(Query, MakeAnyLenString(&Query, "select BotGroupId from vwBotGroups where BotGroupName = '%s'", botGroupName.c_str()), 0, &DatasetResult)) {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -5070,7 +5070,7 @@ bool Bot::DoesBotGroupNameExist(std::string botGroupName) {
 						std::string tempBotGroupName = std::string(DataRow[1]);
 
 						if(botGroupName == tempBotGroupName) {
-							result = tempBotGroupId;
+							result = tempBotGroupId != 0;
 							break;
 						}
 					}
@@ -5099,10 +5099,10 @@ uint32 Bot::CanLoadBotGroup(uint32 botOwnerCharacterId, std::string botGroupName
 			*errorMessage = std::string(ErrBuf);
 		}
 		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -5139,10 +5139,10 @@ uint32 Bot::GetBotGroupIdByBotGroupName(std::string botGroupName, std::string* e
 			*errorMessage = std::string(ErrBuf);
 		}
 		else {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -5170,10 +5170,10 @@ uint32 Bot::GetBotGroupLeaderIdByBotGroupName(std::string botGroupName) {
 		MYSQL_ROW DataRow;
 
 		if(database.RunQuery(Query, MakeAnyLenString(&Query, "select BotGroupLeaderBotId from vwBotGroups where BotGroupName = '%s'", botGroupName.c_str()), 0, &DatasetResult)) {
-			uint32 RowCount = mysql_num_rows(DatasetResult);
+			uint32 RowCount = (uint32)mysql_num_rows(DatasetResult);
 
 			if(RowCount > 0) {
-				for(int iCounter = 0; iCounter < RowCount; iCounter++) {
+				for(uint32 iCounter = 0; iCounter < RowCount; iCounter++) {
 					DataRow = mysql_fetch_row(DatasetResult);
 
 					if(DataRow) {
@@ -6022,7 +6022,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		// TODO: Figure out what the actual max slot id is
 		const int MAX_SLOT_ID = 3179;
 		uint32 items[MAX_SLOT_ID] = {0};
-		uint8 charges[MAX_SLOT_ID] = {0};
+		uint16 charges[MAX_SLOT_ID] = {0};
 		bool botCanWear[MAX_SLOT_ID] = {0};
 
 		for(int16 i=beginSlotID; i<=endSlotID; ++i) {
@@ -6550,9 +6550,9 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, GetLevel());
 
 		if(opts) {
-			damage *= opts->damage_percent;
+			damage = (int)(damage * opts->damage_percent);
 			damage += opts->damage_flat;
-			hate *= opts->hate_percent;
+			hate = (uint32)(hate * opts->hate_percent);
 			hate += opts->hate_flat;
 		}
 
@@ -6689,8 +6689,8 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 	bool LimitSpellSkill = false;
 	bool SpellSkill_Found = false;
 	uint32 effect = 0;
-	int32 base1 = 0;
-	int32 base2 = 0;
+	int base1 = 0;
+	uint32 base2 = 0;
 	uint32 slot = 0;
 
 	bool LimitFound = false;
@@ -6768,7 +6768,7 @@ int16 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 					LimitFound = true;
 			break;
 			case SE_LimitCastTimeMin:
-				if (spell.cast_time < base1)
+				if (spell.cast_time < (uint32)base1)
 					LimitFound = true;
 			break;
 			case SE_LimitSpell:
@@ -7212,7 +7212,7 @@ int16 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 		int buff_slot = 0;
 		uint16 focusspellid = 0;
 		uint16 focusspell_tracker = 0;
-		uint32 buff_max = GetMaxTotalSlots();
+		int buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 			focusspellid = buffs[buff_slot].spellid;
 			if (focusspellid == 0 || focusspellid >= SPDAT_RECORDS)
@@ -7814,7 +7814,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		skill = GetSkill(SkillRiposte);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
+			bonus = 2.0f + skill/60.0f + (GetDEX()/200);
 			bonus *= riposte_chance;
 			RollTable[0] = bonus + (itembonuses.HeroicDEX / 25); // 25 heroic = 1%, applies to ripo, parry, block
 		}
@@ -7850,7 +7850,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		skill = GetSkill(SkillBlock);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/35.0 + (GetDEX()/200);
+			bonus = 2.0f + skill/35.0f + (GetDEX()/200);
 			RollTable[1] = RollTable[0] + (bonus * block_chance) - riposte_chance;
 			block_chance *= bonus; // set this so we can remove it from the parry calcs
 		}
@@ -7861,14 +7861,14 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0 && (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
 		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped = GetBotItem(SLOT_SECONDARY);
+		bool equiped = GetBotItem(SLOT_SECONDARY) != nullptr;
 		if(equiped) {
 			uint8 shield = GetBotItem(SLOT_SECONDARY)->GetItem()->ItemType;
 			float bonusShieldBlock = 0.0f;
 			if(shield == ItemTypeShield) {
 
 				//Live AA - Shield Block
-				bonusShieldBlock = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
+				bonusShieldBlock = (float)(aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock);
 				RollTable[1] = RollTable[0] + bonusShieldBlock;
 			}
 		}
@@ -7876,13 +7876,13 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
 		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped2 = GetBotItem(SLOT_PRIMARY);
+		bool equiped2 = GetBotItem(SLOT_PRIMARY) != nullptr;
 		if(equiped2) {
 			uint8 TwoHandBlunt = GetBotItem(SLOT_PRIMARY)->GetItem()->ItemType;
 			float bonusStaffBlock = 0.0f;
 			if(TwoHandBlunt == ItemType2HBlunt) {
 
-				bonusStaffBlock = aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock;
+				bonusStaffBlock = (float)(aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock);
 				RollTable[1] = RollTable[0] + bonusStaffBlock;
 			}
 		}
@@ -7898,7 +7898,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		skill = GetSkill(SkillParry);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
+			bonus = 2.0f + skill/60.0f + (GetDEX()/200);
 			bonus *= parry_chance;
 			RollTable[2] = RollTable[1] + bonus - block_chance;
 		}
@@ -7917,7 +7917,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		skill = GetSkill(SkillDodge);
 
 		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetAGI()/200);
+			bonus = 2.0f + skill/60.0f + (GetAGI()/200);
 			bonus *= dodge_chance;
 			RollTable[3] = RollTable[2] + bonus - (itembonuses.HeroicDEX / 25) + (itembonuses.HeroicAGI / 25) - parry_chance; // Remove the dex as it doesnt count for dodge
 		}
@@ -7928,7 +7928,7 @@ bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0)
 	{
-		roll = MakeRandomFloat(0,100);
+		roll = (float)MakeRandomFloat(0,100);
 		if(roll <= RollTable[0]){
 			damage = -3;
 		}
@@ -7995,7 +7995,7 @@ bool Bot::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 		uint32 damage = aabonuses.FinishingBlow[1];
 		uint16 levelreq = aabonuses.FinishingBlowLvl[0];
 
-		if(defender->GetLevel() <= levelreq && (chance >= MakeRandomInt(0, 1000))){
+		if(defender->GetLevel() <= levelreq && (chance >= (uint32)MakeRandomInt(0, 1000))){
 			mlog(COMBAT__ATTACKS, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
@@ -8035,7 +8035,7 @@ void Bot::DoRiposte(Mob* defender) {
 
 	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
 		if (defender->GetClass() == MONK)
-			defender->MonkSpecialAttack(this, defender->GetAABonuses().GiveDoubleRiposte[2]);
+			defender->MonkSpecialAttack(this, (uint8)defender->GetAABonuses().GiveDoubleRiposte[2]);
 		else if (defender->IsBot())
 			defender->CastToClient()->DoClassAttacks(this,defender->GetAABonuses().GiveDoubleRiposte[2], true);
 	}
@@ -8347,14 +8347,14 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 	float HasteModifier = 0;
 	if(GetHaste() >= 0){
-		HasteModifier = 10000 / (100 + GetHaste());
+		HasteModifier = 10000.0f / (100.0f + GetHaste());
 	}
 	else {
-		HasteModifier = (100 - GetHaste());
+		HasteModifier = (100.0f - GetHaste());
 	}
 	int32 dmg = 0;
 
-	uint16 skill_to_use = -1;
+	uint8 skill_to_use = -1;
 
 	int level = GetLevel();
 	int reuse = TauntReuseTime * 1000;	//make this very long since if they dont use it once, they prolly never will
@@ -8583,7 +8583,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		TryBackstab(target,reuse);
 	}
 
-	classattack_timer.Start(reuse*HasteModifier/100);
+	classattack_timer.Start((uint32)(reuse*HasteModifier/100));
 }
 
 bool Bot::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
@@ -9382,11 +9382,11 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 		break;
 	}
 
-	bonus += 0.05 * GetAA(aaAdvancedSpellCastingMastery);
+	bonus += 0.05f * GetAA(aaAdvancedSpellCastingMastery);
 
 	if(SuccessChance <= (SpecializeSkill * 0.3 * bonus))
 	{
-		PercentManaReduction = 1 + 0.05 * SpecializeSkill;
+		PercentManaReduction = 1.05f * SpecializeSkill;
 		switch(GetAA(aaSpellCastingMastery))
 		{
 		case 1:
@@ -9418,15 +9418,15 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 
 	if(focus_redux > 0)
 	{
-		PercentManaReduction += MakeRandomFloat(1, (double)focus_redux);
+		PercentManaReduction += (float)MakeRandomFloat(1, (double)focus_redux);
 	}
 
-	cost -= (cost * (PercentManaReduction / 100));
+	cost -= (int32)(cost * (PercentManaReduction / 100));
 
 	// Gift of Mana - reduces spell cost to 1 mana
 	if(focus_redux >= 100) {
 		uint32 buff_max = GetMaxTotalSlots();
-		for (int buffSlot = 0; buffSlot < buff_max; buffSlot++) {
+		for (uint32 buffSlot = 0; buffSlot < buff_max; buffSlot++) {
 			if (buffs[buffSlot].spellid == 0 || buffs[buffSlot].spellid >= SPDAT_RECORDS)
 				continue;
 
@@ -9493,7 +9493,7 @@ float Bot::GetAOERange(uint16 spell_id) {
 
 	if(IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
 		//Live AA - Extended Notes, SionachiesCrescendo
-		float song_bonus = aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange;
+		float song_bonus = (float)(aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange);
 		range += range*song_bonus /100.0f;
 	}
 
@@ -9528,7 +9528,7 @@ void Bot::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 	Mob::DoBuffTic(spell_id, slot, ticsremaining, caster_level, caster);
 }
 
-bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {
+bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint8 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {
 	bool Result = false;
 
 	if(zone && !zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
@@ -9548,7 +9548,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 				if(IsAmnesiad() && IsDiscipline(spell_id))
 					Message_StringID(13, MELEE_SILENCE);
 				if(casting_spell_id)
-					AI_Event_SpellCastFinished(false, casting_spell_slot);
+					AI_Event_SpellCastFinished(false, (uint8)casting_spell_slot);
 				return(false);
 			}
 		}
@@ -9556,7 +9556,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 		if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()){
 			Message_StringID(13, SPELL_WOULDNT_HOLD);
 			if(casting_spell_id)
-				AI_Event_SpellCastFinished(false, casting_spell_slot);
+				AI_Event_SpellCastFinished(false, (uint8)casting_spell_slot);
 			return(false);
 		}
 
@@ -9907,7 +9907,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, uint16 
 			bool noGroupSpell = false;
 			uint16 thespell = spell_id;
 
-			for(int i=0; i < AIspells.size(); i++) {
+			for(uint32 i=0; i < AIspells.size(); i++) {
 				int j = BotGetSpells(i);
 				int spelltype = BotGetSpellType(i);
 				bool spellequal = (j == thespell);
@@ -10477,7 +10477,7 @@ void Bot::CalcRestState() {
 int32 Bot::LevelRegen()
 {
 	int level = GetLevel();
-	bool bonus = GetRaceBitmask(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces);
+	bool bonus = (GetRaceBitmask(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces)) != 0;
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int32 hp = 0;
 
@@ -10578,7 +10578,7 @@ int32 Bot::CalcManaRegen()
 	if(mana_regen_rate < 0.0f)
 		mana_regen_rate = 0.0f;
 
-	regen = regen * mana_regen_rate; // 90% of people wouldnt guess that manaregen would decrease the larger the number they input, this makes more sense
+	regen = (int32)(regen * mana_regen_rate); // 90% of people wouldnt guess that manaregen would decrease the larger the number they input, this makes more sense
 
 	return regen;
 }
@@ -10638,12 +10638,12 @@ int32 Bot::CalcMaxHP() {
 
 	nd += aabonuses.MaxHP;	//Natural Durability, Physical Enhancement, Planar Durability
 
-	bot_hp = (float)bot_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
+	bot_hp = (int32)(bot_hp * nd / 10000); //this is to fix the HP-above-495k issue
 	bot_hp += spellbonuses.HP + aabonuses.HP;
 
 	bot_hp += GroupLeadershipAAHealthEnhancement();
 
-	bot_hp += bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	bot_hp += (int32)(bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 	max_hp = bot_hp;
 
 	if (cur_hp > max_hp)
@@ -10838,13 +10838,13 @@ bool Bot::IsArcheryRange(Mob *target) {
 	bool result = false;
 
 	if(target) {
-		float range = GetBotArcheryRange() + 5.0; //Fudge it a little, client will let you hit something at 0 0 0 when you are at 205 0 0
+		float range = GetBotArcheryRange() + 5.0f; //Fudge it a little, client will let you hit something at 0 0 0 when you are at 205 0 0
 
 		range *= range;
 
 		float targetDistance = DistNoRootNoZ(*target);
 
-		float minRuleDistance = RuleI(Combat, MinRangedAttackDist) * RuleI(Combat, MinRangedAttackDist);
+		float minRuleDistance = (float)(RuleI(Combat, MinRangedAttackDist) * RuleI(Combat, MinRangedAttackDist));
 
 		if((targetDistance > range) || (targetDistance < minRuleDistance))
 			result = false;
@@ -11018,7 +11018,7 @@ bool Bot::CalculateNewPosition2(float x, float y, float z, float speed, bool che
 	// This sets the movement animation rate with the client
 	// Use this block if using 2.5625 as the ratio.
 	// pRunAnimSpeed = speed;
-	pRunAnimSpeed = ((serverOverClientRatio * 10.0f) * speed) * 10.0f;
+	pRunAnimSpeed = (uint8)(((serverOverClientRatio * 10.0f) * speed) * 10.0f);
 
 	// Now convert our "speed" from the value necessary for the client to animate the correct movement type rate to the server side speed
 	// Use this block if using 2.5625 as the ratio.
@@ -11370,7 +11370,7 @@ void Bot::CalcItemBonuses()
 					if(itemtmp->CombatEffects != 0)
 						itembonuses.ProcChance += itemtmp->CombatEffects;
 					if(itemtmp->Haste != 0)
-						if(itembonuses.haste < itemtmp->Haste)
+						if((uint32)itembonuses.haste < itemtmp->Haste)
 							itembonuses.haste = itemtmp->Haste;
 					if(GetClass() == BARD && itemtmp->BardValue != 0) {
 						if(itemtmp->BardType == ItemTypeBrassInstrument)
@@ -11454,7 +11454,7 @@ void Bot::CalcItemBonuses()
 			if(itemtmp->CombatEffects != 0)
 				itembonuses.ProcChance += itemtmp->CombatEffects;
 			if(itemtmp->Haste != 0)
-				if(itembonuses.haste < itemtmp->Haste)
+				if((uint32)itembonuses.haste < itemtmp->Haste)
 					itembonuses.haste = itemtmp->Haste;
 			if(GetClass() == BARD && itemtmp->BardValue != 0) {
 				if(itemtmp->BardType == ItemTypeBrassInstrument)
@@ -11722,8 +11722,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		if(!strcasecmp(sep->arg[1], "help") && !strcasecmp(sep->arg[2], "armorcolor") ){
 		//read from db
 		char* Query = 0;
-		MYSQL_RES* DatasetResult;
-		MYSQL_ROW DataRow;
 
 		c->Message(0, "-----------------#bot armorcolor help-----------------------------");
 		c->Message(0, "Armor: 17(Chest/Robe), 7(Arms), 9(Bracer), 12(Hands), 18(Legs), 19(Boots), 2(Helm)");
@@ -14283,7 +14281,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		Mob *target = c->GetTarget();
 		if(target && target->IsBot())
 		{
-			for(int i=0; i<target->CastToBot()->AIspells.size(); i++)
+			for(uint32 i=0; i<target->CastToBot()->AIspells.size(); i++)
 			{
 				if(target->CastToBot()->BotGetSpells(i) != 0)
 				{
@@ -16376,7 +16374,7 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 				if (NamedOnly) {
 					bool ContinueFlag = false;
 					const char *CurEntityName = cur_entity->GetName(); //Call function once
-					for (int Index = 0; Index < MyArraySize; Index++) {
+					for (uint32 Index = 0; Index < MyArraySize; Index++) {
 						if (!strncasecmp(CurEntityName, MyArray[Index], strlen(MyArray[Index])) || (Extras)) {
 							ContinueFlag = true;
 							break; //From Index for
@@ -16748,7 +16746,7 @@ void Bot::BotGroupSay(Mob *speaker, const char *msg, ...)
 
 bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 	//make sure we have the spell...
-	int r;
+	//int r;
 	/*for(r = 0; r < MAX_PP_DISCIPLINES; r++) {
 		if(m_pp.disciplines.values[r] == spell_id)
 			break;

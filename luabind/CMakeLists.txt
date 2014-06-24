@@ -21,7 +21,7 @@ SET(lb_sources
 )
 
 SET(lb_headers
-    
+
 )
 
 ADD_LIBRARY(luabind ${lb_sources} ${lb_headers})
@@ -29,6 +29,7 @@ ADD_LIBRARY(luabind ${lb_sources} ${lb_headers})
 
 IF(UNIX)
     ADD_DEFINITIONS(-fPIC)
+    SET_PROPERTY(SOURCE ${lb_sources} PROPERTY COMPILE_FLAGS -w)
 ENDIF(UNIX)
 
 SET(LIBRARY_OUTPUT_PATH ../Bin)

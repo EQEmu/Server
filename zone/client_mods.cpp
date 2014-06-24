@@ -155,7 +155,7 @@ int32 Client::LevelRegen()
 	bool sitting = IsSitting();
 	bool feigned = GetFeigned();
 	int level = GetLevel();
-	bool bonus = GetRaceBitmask(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces);
+	bool bonus = (GetRaceBitmask(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces)) != 0;
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int32 hp = 0;
 
@@ -245,12 +245,12 @@ int32 Client::CalcMaxHP() {
 	//the aa description
 	nd += aabonuses.MaxHP;	//Natural Durability, Physical Enhancement, Planar Durability
 
-	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
+	max_hp = (int32)(max_hp * nd / 10000); //this is to fix the HP-above-495k issue
 	max_hp += spellbonuses.HP + aabonuses.HP;
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
 
-	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	max_hp =(int32)(max_hp+ max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 
 	if (cur_hp > max_hp)
 		cur_hp = max_hp;
@@ -381,7 +381,7 @@ int32 Client::CalcBaseHP()
 		base_hp = 5;
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if(base_data) {
-			base_hp += base_data->base_hp + (base_data->hp_factor * stats);
+			base_hp = (int32)(base_hp + base_data->base_hp + (base_data->hp_factor * stats));
 			base_hp += (GetHeroicSTA() * 10);
 		}
 	}
@@ -873,7 +873,7 @@ int16 Client::CalcAC() {
 
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(14);
+		bool equiped = CastToClient()->m_inv.GetItem(14) != nullptr;
 		if(equiped) {
 			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
 			if(shield == ItemTypeShield)
@@ -903,7 +903,7 @@ int16 Client::GetACMit() {
 
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(14);
+		bool equiped = CastToClient()->m_inv.GetItem(14) != nullptr;
 		if(equiped) {
 			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
 			if(shield == ItemTypeShield)
@@ -990,7 +990,7 @@ int32 Client::CalcBaseMana()
 
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if(base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10);
+					max_m = (int32)(base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10));
 				}
 			}
 			else
@@ -1025,7 +1025,7 @@ int32 Client::CalcBaseMana()
 
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if(base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10);
+					max_m = (int32)(base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10));
 				}
 			}
 			else
@@ -1914,7 +1914,7 @@ int32 Client::CalcBaseEndurance()
 
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if(base_data) {
-			base_end = base_data->base_end + (heroic_stats * 10.0f) + (base_data->endurance_factor * static_cast<int>(stats));
+			base_end = (int32)(base_data->base_end + (heroic_stats * 10.0f) + (base_data->endurance_factor * static_cast<int>(stats)));
 		}
 	}
 	else

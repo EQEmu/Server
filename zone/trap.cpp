@@ -121,11 +121,11 @@ void Trap::Trigger(Mob* trigger)
 		case trapTypeAlarm:
 			if (message.empty())
 			{
-				entity_list.MessageClose(trigger,false,effectvalue,13,"A loud alarm rings out through the air...");
+				entity_list.MessageClose(trigger,false,(float)effectvalue,13,"A loud alarm rings out through the air...");
 			}
 			else
 			{
-				entity_list.MessageClose(trigger,false,effectvalue,13,"%s",message.c_str());
+				entity_list.MessageClose(trigger,false,(float)effectvalue,13,"%s",message.c_str());
 			}
 
 			entity_list.SendAlarm(this,trigger,effectvalue);
@@ -144,7 +144,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-5+MakeRandomInt(0, 10), y-5+MakeRandomInt(0, 10), z-5+MakeRandomInt(0, 10), MakeRandomInt(0, 249), FlyMode3);
+					NPC* new_npc = new NPC(tmp, nullptr, x-5+MakeRandomInt(0, 10), (float)(y-5+MakeRandomInt(0, 10)), (float)(z-5+MakeRandomInt(0, 10)), (float)MakeRandomInt(0, 249), FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -165,7 +165,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				if ((tmp = database.GetNPCType(effectvalue)))
 				{
-					NPC* new_npc = new NPC(tmp, 0, x-2+MakeRandomInt(0, 5), y-2+MakeRandomInt(0, 5), z-2+MakeRandomInt(0, 5), MakeRandomInt(0, 249), FlyMode3);
+					NPC* new_npc = new NPC(tmp, nullptr, (float)(x-2+MakeRandomInt(0, 5)), (float)(y-2+MakeRandomInt(0, 5)), (float)(z-2+MakeRandomInt(0, 5)), (float)(MakeRandomInt(0, 249)), FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -277,15 +277,15 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 			lengths = mysql_fetch_lengths(result);
 			Trap* trap = new Trap();
 			trap->trap_id = atoi(row[0]);
-			trap->x = atof(row[1]);
-			trap->y = atof(row[2]);
-			trap->z = atof(row[3]);
+			trap->x = (float)atof(row[1]);
+			trap->y = (float)atof(row[2]);
+			trap->z = (float)atof(row[3]);
 			trap->effect = atoi(row[4]);
 			trap->effectvalue = atoi(row[5]);
 			trap->effectvalue2 = atoi(row[6]);
 			trap->skill = atoi(row[7]);
-			trap->maxzdiff = atof(row[8]);
-			trap->radius = atof(row[9]);
+			trap->maxzdiff = (float)atof(row[8]);
+			trap->radius = (float)atof(row[9]);
 			trap->chance = atoi(row[10]);
 			trap->message = row[11];
 			trap->respawn_time = atoi(row[12]);

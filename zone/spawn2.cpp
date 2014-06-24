@@ -371,7 +371,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 			bool perl_enabled = atoi(row[11]) == 1 ? true : false;
 			uint32 spawnLeft = (GetSpawnTimeLeft(atoi(row[0]), zone->GetInstanceID()) * 1000);
-			newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atoi(row[6]), atoi(row[7]), spawnLeft, atoi(row[8]), atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
+			newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), (float)atof(row[2]), (float)atof(row[3]), (float)atof(row[4]), (float)atof(row[5]), atoi(row[6]), atoi(row[7]), spawnLeft, atoi(row[8]), atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
 			spawn2_list.Insert( newSpawn );
 		}
 		mysql_free_result(result);
@@ -398,7 +398,7 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 		{
 			row = mysql_fetch_row(result);
 			bool perl_enabled = atoi(row[11]) == 1 ? true : false;
-			Spawn2* newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]), atof(row[5]), atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]), atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
+			Spawn2* newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), (float)atof(row[2]), (float)atof(row[3]), (float)atof(row[4]), (float)atof(row[5]), atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]), atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
 			spawn2_list.Insert( newSpawn );
 			mysql_free_result(result);
 			safe_delete_array(query);

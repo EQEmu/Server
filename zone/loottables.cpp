@@ -91,7 +91,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 
 			float drop_chance = 0.0f;
 			if(ltchance > 0.0 && ltchance < 100.0) {
-				drop_chance = MakeRandomFloat(0.0, 100.0);
+				drop_chance = (float)MakeRandomFloat(0.0, 100.0);
 			}
 
 			if (ltchance != 0.0 && (ltchance == 100.0 || drop_chance < ltchance)) {
@@ -136,7 +136,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 
 			float drop_chance = 0.0;
 			if(thischance != 100.0)
-				drop_chance = MakeRandomFloat(0.0, 100.0);
+				drop_chance = (float)MakeRandomFloat(0.0, 100.0);
 
 #if EQDEBUG>=11
 			LogFile->write(EQEMuLog::Debug, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
@@ -146,7 +146,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 				uint32 itemid = lds->Entries[item].item_id;
 
 				const Item_Struct* dbitem = GetItem(itemid);
-				npc->AddLootDrop(dbitem, itemlist, lds->Entries[item].item_charges, lds->Entries[item].minlevel, lds->Entries[item].maxlevel, lds->Entries[item].equip_item, false);
+				npc->AddLootDrop(dbitem, itemlist, lds->Entries[item].item_charges, lds->Entries[item].minlevel, lds->Entries[item].maxlevel, lds->Entries[item].equip_item != 0, false);
 				pickedcharges++;
 			}
 		}
@@ -194,7 +194,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 	}
 
 	item->item_id = item2->ID;
-	item->charges = charges;
+	item->charges = (uint8)charges;
 	item->aug1 = 0;
 	item->aug2 = 0;
 	item->aug3 = 0;

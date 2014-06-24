@@ -14,6 +14,7 @@
 
 #ifdef _WINDOWS
 #define snprintf _snprintf
+#define strlwr		_strlwr
 #endif
 
 //#define PATHDEBUG
@@ -280,7 +281,7 @@ std::list<int> PathManager::FindRoute(int startID, int endID)
 
 			AStarEntry.Parent = CurrentNode.PathNodeID;
 
-			AStarEntry.Teleport = PathNodes[CurrentNode.PathNodeID].Neighbours[i].Teleport;
+			AStarEntry.Teleport = PathNodes[CurrentNode.PathNodeID].Neighbours[i].Teleport != 0;
 
 			// HCost is the estimated cost to get from this node to the end.
 			AStarEntry.HCost = VertexDistance(PathNodes[PathNodes[CurrentNode.PathNodeID].Neighbours[i].id].v,
@@ -316,7 +317,7 @@ std::list<int> PathManager::FindRoute(int startID, int endID)
 
 						(*OpenListIterator).GCost = GCostToNode;
 
-						(*OpenListIterator).Teleport = PathNodes[CurrentNode.PathNodeID].Neighbours[i].Teleport;
+						(*OpenListIterator).Teleport = PathNodes[CurrentNode.PathNodeID].Neighbours[i].Teleport != 0;
 					}
 					break;
 				}
@@ -1288,7 +1289,7 @@ void PathManager::OpenDoors(int Node1, int Node2, Mob *ForWho)
 
 		if(PathNodes[Node1].Neighbours[i].DoorID >= 0)
 		{
-			Doors *d = entity_list.FindDoor(PathNodes[Node1].Neighbours[i].DoorID);
+			Doors *d = entity_list.FindDoor((uint8)PathNodes[Node1].Neighbours[i].DoorID);
 
 			if(d && !d->IsDoorOpen() )
 			{

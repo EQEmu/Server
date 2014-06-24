@@ -128,7 +128,7 @@ void CheckEQEMuErrorAndPause() {
 	if (CheckEQEMuError()) {
 		fprintf(stdout, "Hit any key to exit\n");
 		UpdateWindowTitle("Error");
-		getch();
+		_getch();
 	}
 #endif
 }

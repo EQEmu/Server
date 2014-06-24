@@ -1047,7 +1047,7 @@ ENCODE(OP_ZoneSpawns) {
 			}
 			else
 			{
-				VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7);	// Eye Height?
+				VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7f);	// Eye Height?
 			}
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);

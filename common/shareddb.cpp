@@ -1220,9 +1220,9 @@ bool SharedDatabase::GetPlayerProfile(uint32 account_id, char* name, PlayerProfi
 				if (current_zone)
 					strcpy(current_zone, row[1]);
 				pp->zone_id = GetZoneID(row[1]);
-				pp->x = atof(row[2]);
-				pp->y = atof(row[3]);
-				pp->z = atof(row[4]);
+				pp->x = (float)atof(row[2]);
+				pp->y = (float)atof(row[3]);
+				pp->z = (float)atof(row[4]);
 				pp->zoneInstance = atoi(row[6]);
 				if (pp->x == -1 && pp->y == -1 && pp->z == -1)
 					GetSafePoints(pp->zone_id, GetInstanceVersion(pp->zoneInstance), &pp->x, &pp->y, &pp->z);
@@ -1754,7 +1754,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 int SharedDatabase::GetMaxBaseDataLevel() {
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = "SELECT MAX(level) FROM base_data";
+	const char *query = "SELECT MAX(level) FROM base_data";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	int32 ret = 0;
@@ -1783,7 +1783,7 @@ bool SharedDatabase::LoadBaseData() {
 		EQEmu::IPCMutex mutex("base_data");
 		mutex.Lock();
 		base_data_mmf = new EQEmu::MemoryMappedFile("shared/base_data");
-	
+
 		int size = 16 * (GetMaxBaseDataLevel() + 1) * sizeof(BaseDataStruct);
 		if(size == 0) {
 			EQ_EXCEPT("SharedDatabase", "Base Data size is zero");
@@ -1805,12 +1805,12 @@ bool SharedDatabase::LoadBaseData() {
 void SharedDatabase::LoadBaseData(void *data, int max_level) {
 	char *base_ptr = reinterpret_cast<char*>(data);
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = "SELECT * FROM base_data ORDER BY level, class ASC";
+	const char *query = "SELECT * FROM base_data ORDER BY level, class ASC";
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	
+
 	if(RunQuery(query, strlen(query), errbuf, &result)) {
-	
+
 		int lvl = 0;
 		int cl = 0;
 		while (row = mysql_fetch_row(result)) {

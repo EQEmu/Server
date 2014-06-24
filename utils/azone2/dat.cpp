@@ -142,12 +142,12 @@ int DATLoader::Open(char *base_path, char *zone_name, Archive *archive) {
 	printf("DATLoader::Open %s, [%s]\n", base_path, zone_name);
 	fflush(stdout);
 #endif
-	unsigned int i, j, mat_count = 0;
+	unsigned int mat_count = 0;
 
 	Zone_Model *zm;
 
 	char *buffer, *buf_start;
-	int buf_len, bone_count;
+	int buf_len;
 
 	char *filename;
 

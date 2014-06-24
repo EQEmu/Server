@@ -72,7 +72,7 @@ void EQStream::init() {
 
 	if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
 		retransmittimer = Timer::GetCurrentTime();
-		retransmittimeout = 500 * RETRANSMIT_TIMEOUT_MULT;
+		retransmittimeout = (uint32)(500 * RETRANSMIT_TIMEOUT_MULT);
 	}
 
 	OpMgr = nullptr;
@@ -357,7 +357,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			if (!Session)
 				Session=ntohl(Response->Session);
 			compressed=(Response->Format&FLAG_COMPRESSED);
-			encoded=(Response->Format&FLAG_ENCODED);
+			encoded=(Response->Format&FLAG_ENCODED) != 0;
 
 			_log(NET__NET_TRACE, _L "Received OP_SessionResponse: session %lu, maxlen %d, key %lu, compressed? %s, encoded? %s" __L, (unsigned long)Session, MaxLen, (unsigned long)Key, compressed?"yes":"no", encoded?"yes":"no");
 
@@ -478,10 +478,10 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				if(RETRANSMIT_TIMEOUT_MULT && ntohl(Stats->average_delta)) {
 					//recalculate retransmittimeout using the larger of the last rtt or average rtt, which is multiplied by the rule value
 					if((ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) > (ntohl(Stats->average_delta) * 2)) {
-						retransmittimeout = (ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) 
-							* RETRANSMIT_TIMEOUT_MULT;
+						retransmittimeout = (uint32)((ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) 
+							* RETRANSMIT_TIMEOUT_MULT);
 					} else {
-						retransmittimeout = ntohl(Stats->average_delta) * 2 * RETRANSMIT_TIMEOUT_MULT;
+						retransmittimeout = (uint32)(ntohl(Stats->average_delta) * 2 * RETRANSMIT_TIMEOUT_MULT);
 					}
 					if(retransmittimeout > RETRANSMIT_TIMEOUT_MAX)
 						retransmittimeout = RETRANSMIT_TIMEOUT_MAX;
@@ -941,7 +941,7 @@ void EQStream::SendSessionRequest()
 EQProtocolPacket *out=new EQProtocolPacket(OP_SessionRequest,nullptr,sizeof(SessionRequest));
 	SessionRequest *Request=(SessionRequest *)out->pBuffer;
 	memset(Request,0,sizeof(SessionRequest));
-	Request->Session=htonl(time(nullptr));
+	Request->Session=htonl((u_long)time(nullptr));
 	Request->MaxLength=htonl(512);
 
 	_log(NET__NET_TRACE, _L "Sending OP_SessionRequest: session %lu, maxlen=%d" __L, (unsigned long)ntohl(Request->Session), ntohl(Request->MaxLength));

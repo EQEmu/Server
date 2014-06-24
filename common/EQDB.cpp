@@ -31,11 +31,11 @@ unsigned int EQDB::field_count() {
 }
 
 unsigned long EQDB::affected_rows() {
-	return mysql_affected_rows(mysql_ref);
+	return (unsigned long)mysql_affected_rows(mysql_ref);
 }
 
 unsigned long EQDB::insert_id() {
-	return mysql_insert_id(mysql_ref);
+	return (unsigned long)mysql_insert_id(mysql_ref);
 }
 
 unsigned int EQDB::get_errno() {

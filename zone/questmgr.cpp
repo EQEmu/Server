@@ -1201,11 +1201,11 @@ void QuestManager::faction(int faction_id, int faction_value, int temp) {
 			initiator->SetFactionLevel2(
 				initiator->CharacterID(),
 				faction_id,
-				initiator->GetBaseClass(),
-				initiator->GetBaseRace(),
-				initiator->GetDeity(),
+				(uint8)initiator->GetBaseClass(),
+				(uint8)initiator->GetBaseRace(),
+				(uint8)initiator->GetDeity(),
 				faction_value,
-				temp);
+				(uint8)temp);
 		}
 	}
 }
@@ -1705,9 +1705,9 @@ void QuestManager::showgrid(int grid) {
 	{
 		while((row = mysql_fetch_row(result)))
 		{
-			pt.x = atof(row[0]);
-			pt.y = atof(row[1]);
-			pt.z = atof(row[2]);
+			pt.x = (float)atof(row[0]);
+			pt.y = (float)atof(row[1]);
+			pt.z = (float)atof(row[2]);
 			pts.push_back(pt);
 		}
 		mysql_free_result(result);
@@ -1868,7 +1868,7 @@ void QuestManager::npcgender(int gender_id)
 void QuestManager::npcsize(int newsize)
 {
 	QuestManagerCurrentQuestVars();
-	owner->ChangeSize(newsize, true);
+	owner->ChangeSize((float)newsize, true);
 }
 void QuestManager::npctexture(int newtexture)
 {
@@ -1891,7 +1891,7 @@ void QuestManager::playergender(int gender_id)
 void QuestManager::playersize(int newsize)
 {
 	QuestManagerCurrentQuestVars();
-	initiator->ChangeSize(newsize, true);
+	initiator->ChangeSize((float)newsize, true);
 }
 
 void QuestManager::playertexture(int newtexture)

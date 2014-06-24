@@ -25,6 +25,7 @@
 
 #ifdef _WINDOWS
 #include <process.h>
+#define strupr		_strupr
 #else
 #include <pthread.h>
 #include "../common/unix.h"
@@ -2683,7 +2684,7 @@ void EntityList::SendPetitionToAdmins(Petition *pet)
 		strcpy(pcus->gmsenttoo, "");
 	} else {
 		pcus->color = pet->GetUrgency();	// 0x00 = green, 0x01 = yellow, 0x02 = red
-		pcus->status = pet->GetSentTime();
+		pcus->status = (uint32)pet->GetSentTime();
 		pcus->senttime = pet->GetSentTime();			// 4 has to be 0x1F
 		strcpy(pcus->accountid, pet->GetAccountName());
 		strcpy(pcus->charname, pet->GetCharName());
@@ -3057,7 +3058,7 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 thedam)
 				if (cur->CheckAggro(caster)) {
 					cur->AddToHateList(caster, thedam);
 				} else {
-					cur->AddToHateList(caster, thedam * 0.33);
+					cur->AddToHateList(caster, (uint16)(thedam * 0.33f));
 				}
 			}
 		}
@@ -3088,7 +3089,7 @@ void EntityList::OpenDoorsNear(NPC *who)
 
 void EntityList::SendAlarm(Trap *trap, Mob *currenttarget, uint8 kos)
 {
-	float val2 = trap->effectvalue * trap->effectvalue;
+	float val2 = (float)(trap->effectvalue * trap->effectvalue);
 
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
@@ -3668,8 +3669,8 @@ Corpse *EntityList::GetClosestCorpse(Mob *sender, const char *Name)
 		if (Name && strcasecmp(CurrentCorpse->GetOwnerName(), Name))
 			continue;
 
-		CurrentDistance = ((CurrentCorpse->GetY() - sender->GetY()) * (CurrentCorpse->GetY() - sender->GetY())) +
-					((CurrentCorpse->GetX() - sender->GetX()) * (CurrentCorpse->GetX() - sender->GetX()));
+		CurrentDistance = (int32)(((CurrentCorpse->GetY() - sender->GetY()) * (CurrentCorpse->GetY() - sender->GetY())) +
+					((CurrentCorpse->GetX() - sender->GetX()) * (CurrentCorpse->GetX() - sender->GetX())));
 
 		if (CurrentDistance < ClosestDistance) {
 			ClosestDistance = CurrentDistance;
@@ -4484,8 +4485,8 @@ NPC *EntityList::GetClosestBanker(Mob *sender, uint32 &distance)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		if (it->second->GetClass() == BANKER) {
-			uint32 nd = ((it->second->GetY() - sender->GetY()) * (it->second->GetY() - sender->GetY())) +
-				((it->second->GetX() - sender->GetX()) * (it->second->GetX() - sender->GetX()));
+			uint32 nd = (uint32)(((it->second->GetY() - sender->GetY()) * (it->second->GetY() - sender->GetY())) +
+				((it->second->GetX() - sender->GetX()) * (it->second->GetX() - sender->GetX())));
 			if (nd < distance){
 				distance = nd;
 				nc = it->second;
@@ -4527,8 +4528,8 @@ Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)
 		if (CurrentMob->GetBodyType() != BodyType)
 			continue;
 
-		CurrentDistance = ((CurrentMob->GetY() - sender->GetY()) * (CurrentMob->GetY() - sender->GetY())) +
-					((CurrentMob->GetX() - sender->GetX()) * (CurrentMob->GetX() - sender->GetX()));
+		CurrentDistance = (uint32)(((CurrentMob->GetY() - sender->GetY()) * (CurrentMob->GetY() - sender->GetY())) +
+					((CurrentMob->GetX() - sender->GetX()) * (CurrentMob->GetX() - sender->GetX())));
 
 		if (CurrentDistance < ClosestDistance) {
 			ClosestDistance = CurrentDistance;
@@ -4547,9 +4548,9 @@ void EntityList::GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height,
 			++it;
 			continue;
 		}
-		int32 x_diff = ptr->GetX() - start->GetX();
-		int32 y_diff = ptr->GetY() - start->GetY();
-		int32 z_diff = ptr->GetZ() - start->GetZ();
+		int32 x_diff = (int32)(ptr->GetX() - start->GetX());
+		int32 y_diff = (int32)(ptr->GetY() - start->GetY());
+		int32 z_diff = (int32)(ptr->GetZ() - start->GetZ());
 
 		x_diff *= x_diff;
 		y_diff *= y_diff;

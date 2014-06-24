@@ -755,7 +755,7 @@ void Client::AI_Process()
 				engaged = true;
 			} else {
 				if(AImovement_timer->Check()) {
-					animation = GetRunspeed() * 21;
+					animation = (uint16)(GetRunspeed() * 21);
 					// Check if we have reached the last fear point
 					if((ABS(GetX()-fear_walkto_x) < 0.1) && (ABS(GetY()-fear_walkto_y) <0.1)) {
 						// Calculate a new point to run to
@@ -917,7 +917,7 @@ void Client::AI_Process()
 		{
 			if(!IsRooted())
 			{
-				animation = 21 * GetRunspeed();
+				animation = (uint16)(GetRunspeed() * 21);
 				if(!RuleB(Pathing, Aggro) || !zone->pathing)
 					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
 				else
@@ -974,7 +974,7 @@ void Client::AI_Process()
 			if (dist >= 100)
 			{
 				float speed = dist >= 225 ? GetRunspeed() : GetWalkspeed();
-				animation = 21 * speed;
+				animation = (uint16)(speed * 21);
 				CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), speed);
 			}
 			else
@@ -1207,7 +1207,7 @@ void Mob::AI_Process() {
 
 							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 7);
 							if (cur > 0)
-								opts.crit_flat = cur;
+								opts.crit_flat = (float)cur;
 
 							Flurry(&opts);
 						}
@@ -1263,7 +1263,7 @@ void Mob::AI_Process() {
 
 							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 7);
 							if(cur > 0) {
-								opts.crit_flat = cur;
+								opts.crit_flat = (float)cur;
 							}
 							Rampage(&opts);
 						}
@@ -1302,7 +1302,7 @@ void Mob::AI_Process() {
 
 							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 7);
 							if(cur > 0) {
-								opts.crit_flat = cur;
+								opts.crit_flat = (float)cur;
 							}
 
 							AreaRampage(&opts);
@@ -1591,7 +1591,7 @@ void NPC::AI_DoMovement() {
 			)
 		{
 			float movedist = roambox_distance*roambox_distance;
-			float movex = MakeRandomFloat(0, movedist);
+			float movex = (float)MakeRandomFloat(0, movedist);
 			float movey = movedist - movex;
 			movex = sqrtf(movex);
 			movey = sqrtf(movey);
@@ -1607,9 +1607,9 @@ void NPC::AI_DoMovement() {
 			//New coord is still invalid, ignore distance and just pick a new random coord. 
 			//If we're here we may have a roambox where one side is shorter than the specified distance. Commons, Wkarana, etc.
 			if (roambox_movingto_x > roambox_max_x || roambox_movingto_x < roambox_min_x)
-				roambox_movingto_x = MakeRandomFloat(roambox_min_x+1,roambox_max_x-1);
+				roambox_movingto_x = (float)MakeRandomFloat(roambox_min_x+1,roambox_max_x-1);
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
-				roambox_movingto_y = MakeRandomFloat(roambox_min_y+1,roambox_max_y-1);
+				roambox_movingto_y = (float)MakeRandomFloat(roambox_min_y+1,roambox_max_y-1);
 		}
 
 		mlog(AI__WAYPOINTS, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
@@ -1912,7 +1912,7 @@ bool NPC::AI_EngagedCastCheck() {
 		// try casting a heal or gate
 		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Escape | SpellType_InCombatBuff)) {
 			// try casting a heal on nearby
-			if (!entity_list.AICheckCloseBeneficialSpells(this, 25, MobAISpellRange, SpellType_Heal)) {
+			if (!entity_list.AICheckCloseBeneficialSpells(this, 25, (float)MobAISpellRange, SpellType_Heal)) {
 				//nobody to heal, try some detrimental spells.
 				if(!AICastSpell(GetTarget(), 20, SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root)) {
 					//no spell to cast, try again soon.
@@ -1947,7 +1947,7 @@ bool NPC::AI_IdleCastCheck() {
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 		if (!AICastSpell(this, 100, SpellType_Heal | SpellType_Buff | SpellType_Pet)) {
-			if(!entity_list.AICheckCloseBeneficialSpells(this, 33, MobAISpellRange, SpellType_Heal | SpellType_Buff)) {
+			if(!entity_list.AICheckCloseBeneficialSpells(this, 33, (float)MobAISpellRange, SpellType_Heal | SpellType_Buff)) {
 				//if we didnt cast any spells, our autocast timer just resets to the
 				//last duration it was set to... try to put up a more reasonable timer...
 				AIautocastspell_timer->Start(RandomTimer(1000, 5000), false);
@@ -2578,13 +2578,13 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 				mysql_free_result(result);
 				if (RunQuery(query, MakeAnyLenString(&query, "SELECT spellid, type, minlevel, maxlevel, manacost, recast_delay, priority, resist_adjust from npc_spells_entries where npc_spells_id=%d ORDER BY minlevel", iDBSpellsID), errbuf, &result)) {
 					safe_delete_array(query);
-					uint32 tmpSize = sizeof(DBnpcspells_Struct) + (sizeof(DBnpcspells_entries_Struct) * mysql_num_rows(result));
+					uint32 tmpSize = sizeof(DBnpcspells_Struct) + (sizeof(DBnpcspells_entries_Struct) * (uint32)mysql_num_rows(result));
 					npc_spells_cache[iDBSpellsID] = (DBnpcspells_Struct*) new uchar[tmpSize];
 					memset(npc_spells_cache[iDBSpellsID], 0, tmpSize);
 					npc_spells_cache[iDBSpellsID]->parent_list = tmpparent_list;
 					npc_spells_cache[iDBSpellsID]->attack_proc = tmpattack_proc;
 					npc_spells_cache[iDBSpellsID]->proc_chance = tmpproc_chance;
-					npc_spells_cache[iDBSpellsID]->numentries = mysql_num_rows(result);
+					npc_spells_cache[iDBSpellsID]->numentries = (uint32)mysql_num_rows(result);
 					int j = 0;
 					while ((row = mysql_fetch_row(result))) {
 						int spell_id = atoi(row[0]);
@@ -2694,11 +2694,11 @@ DBnpcspellseffects_Struct* ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 				mysql_free_result(result);
 				if (RunQuery(query, MakeAnyLenString(&query, "SELECT spell_effect_id, minlevel, maxlevel,se_base, se_limit, se_max from npc_spells_effects_entries where npc_spells_effects_id=%d ORDER BY minlevel", iDBSpellsEffectsID), errbuf, &result)) {
 					safe_delete_array(query);
-					uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * mysql_num_rows(result));
+					uint32 tmpSize = sizeof(DBnpcspellseffects_Struct) + (sizeof(DBnpcspellseffects_entries_Struct) * (uint32)mysql_num_rows(result));
 					npc_spellseffects_cache[iDBSpellsEffectsID] = (DBnpcspellseffects_Struct*) new uchar[tmpSize];
 					memset(npc_spellseffects_cache[iDBSpellsEffectsID], 0, tmpSize);
 					npc_spellseffects_cache[iDBSpellsEffectsID]->parent_list = tmpparent_list;
-					npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = mysql_num_rows(result);
+					npc_spellseffects_cache[iDBSpellsEffectsID]->numentries = (uint32)mysql_num_rows(result);
 					int j = 0;
 					while ((row = mysql_fetch_row(result))) {
 						int spell_effect_id = atoi(row[0]);

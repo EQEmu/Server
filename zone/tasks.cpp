@@ -207,7 +207,7 @@ bool TaskManager::LoadTasks(int SingleTask) {
 			Tasks[TaskID]->StartZone = atoi(row[9]);
 			Tasks[TaskID]->MinLevel = atoi(row[10]);
 			Tasks[TaskID]->MaxLevel = atoi(row[11]);
-			Tasks[TaskID]->Repeatable = atoi(row[12]);
+			Tasks[TaskID]->Repeatable = atoi(row[12]) != 0;
 			Tasks[TaskID]->ActivityCount = 0;
 			Tasks[TaskID]->SequenceMode = ActivitiesSequential;
 			Tasks[TaskID]->LastStep = 0;
@@ -297,7 +297,7 @@ bool TaskManager::LoadTasks(int SingleTask) {
 			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].GoalCount = atoi(row[9]);
 			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].DeliverToNPC = atoi(row[10]);
 			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].ZoneID = atoi(row[11]);
-			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Optional = atoi(row[12]);
+			Tasks[TaskID]->Activity[Tasks[TaskID]->ActivityCount].Optional = atoi(row[12]) != 0;
 
 			_log(TASKS__GLOBALLOAD, "Activity Slot %2i: ID %i for Task %5i. Type: %3i, GoalID: %8i, "
 					"GoalMethod: %i, GoalCount: %3i, ZoneID:%3i",
@@ -638,7 +638,7 @@ bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
 			}
 
 			int DoneCount = atoi(row[2]);
-			bool Completed = atoi(row[3]);
+			bool Completed = atoi(row[3]) != 0;
 			state->ActiveTasks[ActiveTaskIndex].Activity[ActivityID].ActivityID = ActivityID;
 			state->ActiveTasks[ActiveTaskIndex].Activity[ActivityID].DoneCount = DoneCount;
 			if(Completed) state->ActiveTasks[ActiveTaskIndex].Activity[ActivityID].State = ActivityCompleted;
@@ -1506,7 +1506,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 
 			CompletedTaskInformation cti;
 			cti.TaskID = ActiveTasks[TaskIndex].TaskID;
-			cti.CompletedTime = time(nullptr);
+			cti.CompletedTime = (int)time(nullptr);
 
 			for(int i=0; i<Task->ActivityCount; i++)
 				cti.ActivityDone[i] = (ActiveTasks[TaskIndex].Activity[i].State == ActivityCompleted);
@@ -1578,7 +1578,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 			}
 			CompletedTaskInformation cti;
 			cti.TaskID = ActiveTasks[TaskIndex].TaskID;
-			cti.CompletedTime = time(nullptr);
+			cti.CompletedTime = (int)time(nullptr);
 
 			for(int i=0; i<Task->ActivityCount; i++)
 				cti.ActivityDone[i] = (ActiveTasks[TaskIndex].Activity[i].State == ActivityCompleted);
@@ -1617,7 +1617,7 @@ bool ClientTaskState::UpdateTasksOnSpeakWith(Client *c, int NPCTypeID) {
 
 bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeID) {
 
-	int Ret = false;
+	bool Ret = false;
 
 	_log(TASKS__UPDATE, "ClientTaskState::UpdateTasks for NPCTypeID: %d", NPCTypeID);
 
@@ -2294,7 +2294,7 @@ int ClientTaskState::TaskTimeLeft(int TaskID) {
 
 		if(ActiveTasks[i].TaskID != TaskID) continue;
 
-		int Now = time(nullptr);
+		int Now = (int)time(nullptr);
 
 		TaskInformation* Task = taskmanager->Tasks[ActiveTasks[i].TaskID];
 
@@ -2347,7 +2347,7 @@ bool ClientTaskState::TaskOutOfTime(int Index) {
 
 	if((ActiveTasks[Index].TaskID <= 0) || (ActiveTasks[Index].TaskID >= MAXTASKS)) return false;
 
-	int Now = time(nullptr);
+	int Now = (int)time(nullptr);
 
 	TaskInformation* Task = taskmanager->Tasks[ActiveTasks[Index].TaskID];
 
@@ -3222,7 +3222,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 
 
 	ActiveTasks[FreeSlot].TaskID = TaskID;
-	ActiveTasks[FreeSlot].AcceptedTime = time(nullptr);
+	ActiveTasks[FreeSlot].AcceptedTime = (int)time(nullptr);
 	ActiveTasks[FreeSlot].Updated = true;
 	ActiveTasks[FreeSlot].CurrentStep = -1;
 
@@ -3316,7 +3316,7 @@ bool TaskGoalListManager::LoadLists() {
 
 	if(database.RunQuery(query,MakeAnyLenString(&query,CountQuery),errbuf,&result)) {
 
-		NumberOfLists = mysql_num_rows(result);
+		NumberOfLists = (int)mysql_num_rows(result);
 		_log(TASKS__GLOBALLOAD, "Database returned a count of %i lists", NumberOfLists);
 
 		TaskGoalLists = new TaskGoalList_Struct[NumberOfLists];
@@ -3354,7 +3354,7 @@ bool TaskGoalListManager::LoadLists() {
 			// at the start of this method and getting to here. It should not be possible for
 			// an INSERT to cause a problem, as the SELECT is used with a LIMIT
 			if(mysql_num_rows(result) < Size)
-				TaskGoalLists[ListIndex].Size = mysql_num_rows(result);
+				TaskGoalLists[ListIndex].Size = (int)mysql_num_rows(result);
 
 			int EntryIndex = 0;
 
@@ -3501,12 +3501,12 @@ bool TaskProximityManager::LoadProximities(int ZoneID) {
 
 		while((row = mysql_fetch_row(result))) {
 			Proximity.ExploreID = atoi(row[0]);
-			Proximity.MinX = atof(row[1]);
-			Proximity.MaxX = atof(row[2]);
-			Proximity.MinY = atof(row[3]);
-			Proximity.MaxY = atof(row[4]);
-			Proximity.MinZ = atof(row[5]);
-			Proximity.MaxZ = atof(row[6]);
+			Proximity.MinX = (float)atof(row[1]);
+			Proximity.MaxX = (float)atof(row[2]);
+			Proximity.MinY = (float)atof(row[3]);
+			Proximity.MaxY = (float)atof(row[4]);
+			Proximity.MinZ = (float)atof(row[5]);
+			Proximity.MaxZ = (float)atof(row[6]);
 
 			TaskProximities.push_back(Proximity);
 

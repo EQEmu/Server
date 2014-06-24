@@ -182,7 +182,7 @@ XS(XS__summonitem)
 	if (items == 1)
 		quest_manager.summonitem(SvUV(ST(0)));
 	else if(items == 2)
-		quest_manager.summonitem(SvUV(ST(0)), SvUV(ST(1)));
+		quest_manager.summonitem(SvUV(ST(0)), (int16)SvUV(ST(1)));
 	else
 		Perl_croak(aTHX_ "Usage: summonitem(itemid, [charges])");
 	XSRETURN_EMPTY;
@@ -399,7 +399,7 @@ XS(XS__addloot)
 	if (items > 1)
 		charges = (uint16)SvUV(ST(1));
 	if (items > 2)
-		equipitem = (bool)SvTRUE(ST(2));
+		equipitem = SvTRUE(ST(2)) != 0;
 
 	quest_manager.addloot(itemid, charges, equipitem);
 
@@ -1388,7 +1388,7 @@ XS(XS__moveto)
 		h = 0;
 
 	if(items > 4)
-		saveguard = (bool)SvTRUE(ST(4));
+		saveguard = SvTRUE(ST(4)) != 0;
 	else
 		saveguard = false;
 

@@ -1066,7 +1066,7 @@ void Group::HealGroup(uint32 heal_amt, Mob* caster, int32 range)
 		range = 200;
 	
 	float distance;
-	float range2 = range*range;
+	float range2 = (float)(range*range);
 
 
 	int numMem = 0;
@@ -1106,7 +1106,7 @@ void Group::BalanceHP(int32 penalty, int32 range, Mob* caster)
 	int dmgtaken = 0, numMem = 0;
 	
 	float distance;
-	float range2 = range*range;
+	float range2 = (float)(range*range);
 
 	unsigned int gi = 0;
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
@@ -1149,7 +1149,7 @@ void Group::BalanceMana(int32 penalty, int32 range, Mob* caster)
 		range = 200;	
 
 	float distance;
-	float range2 = range*range;
+	float range2 = (float)(range*range);
 	
 	int manataken = 0, numMem = 0;
 	unsigned int gi = 0;

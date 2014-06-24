@@ -605,7 +605,7 @@ int32 Mob::CalcMaxMana() {
 
 int32 Mob::CalcMaxHP() {
 	max_hp = (base_hp + itembonuses.HP + spellbonuses.HP);
-	max_hp += max_hp * ((aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	max_hp =(int32)(max_hp+ max_hp * ((aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 	return max_hp;
 }
 
@@ -2067,7 +2067,7 @@ void Mob::SetAttackTimer() {
 							continue;
 						if(pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagTypeQuiver)
 						{
-							float temp_wr = ( pi->GetItem()->BagWR / RuleI(Combat, QuiverWRHasteDiv) );
+							float temp_wr = (float)( pi->GetItem()->BagWR / RuleI(Combat, QuiverWRHasteDiv) );
 							if(temp_wr > max_quiver)
 							{
 								max_quiver = temp_wr;
@@ -2077,7 +2077,7 @@ void Mob::SetAttackTimer() {
 					if(max_quiver > 0)
 					{
 						float quiver_haste = 1 / (1 + max_quiver / 100);
-						speed *= quiver_haste;
+						speed = (int)(speed * quiver_haste);
 					}
 				}
 			}
@@ -4384,7 +4384,7 @@ void Mob::SpellProjectileEffect()
 				dist = target->CalculateDistance(projectile_x[i], projectile_y[i],  projectile_z[i]);
 	
 		int increment_end = 0;
-		increment_end = (dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
+		increment_end = (int)(dist / 10) - 1; //This pretty accurately determines end time for speed for 1.5 and timer of 250 ms
 
 		if (increment_end <= projectile_increment[i]){
 
@@ -5056,7 +5056,7 @@ bool Mob::IsFacingMob(Mob *other)
 		return false;
 	float angle = HeadingAngleToMob(other);
 	// what the client uses appears to be 2x our internal heading
-	float heading = GetHeading() * 2.0;
+	float heading = GetHeading() * 2.0f;
 
 	if (angle > 472.0 && heading < 40.0)
 		angle = heading;
@@ -5082,19 +5082,19 @@ float Mob::HeadingAngleToMob(Mob *other)
 	if (y_diff < 0.0000009999999974752427)
 		y_diff = 0.0000009999999974752427;
 
-	float angle = atan2(x_diff, y_diff) * 180.0 * 0.3183099014828645; // angle, nice "pi"
+	float angle = atan2(x_diff, y_diff) * 180.0f * 0.3183099014828645f; // angle, nice "pi"
 
 	// return the right thing based on relative quadrant
 	// I'm sure this could be improved for readability, but whatever
 	if (this_y >= mob_y) {
 		if (mob_x >= this_x)
-			return (90.0 - angle + 90.0) * 511.5 * 0.0027777778;
+			return (90.0f - angle + 90.0f) * 511.5f * 0.0027777778f;
 		if (mob_x <= this_x)
-			return (angle + 180.0) * 511.5 * 0.0027777778;
+			return (angle + 180.0f) * 511.5f * 0.0027777778f;
 	}
 	if (this_y > mob_y || mob_x > this_x)
-		return angle * 511.5 * 0.0027777778;
+		return angle * 511.5f * 0.0027777778f;
 	else
-		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
+		return (90.0f - angle + 270.0f) * 511.5f * 0.0027777778f;
 }
 

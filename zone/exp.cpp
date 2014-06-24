@@ -178,8 +178,8 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
 	if(RuleB(Zone, LevelBasedEXPMods)){
 		if(zone->level_exp_mod[GetLevel()].ExpMod){
-			add_exp *= zone->level_exp_mod[GetLevel()].ExpMod;
-			add_aaxp *= zone->level_exp_mod[GetLevel()].AAExpMod;
+			add_exp = (uint32)(add_exp * zone->level_exp_mod[GetLevel()].ExpMod);
+			add_aaxp = (uint32)(add_aaxp * zone->level_exp_mod[GetLevel()].AAExpMod);
 		}
 	}
 
@@ -331,7 +331,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		uint8 myoldlevel = GetLevel();
 #endif
 
-		SetLevel(check_level);
+		SetLevel((uint8)check_level);
 
 #ifdef BOTS
 		if(RuleB(Bots, BotLevelsWithOwner))
@@ -492,7 +492,7 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 	else
 		mod = 3.1;
 
-	float base = (check_levelm1)*(check_levelm1)*(check_levelm1);
+	float base = (float)(check_levelm1 * check_levelm1 * check_levelm1);
 
 	mod *= 1000;
 
@@ -542,11 +542,11 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 
 	float groupmod;
 	if (membercount > 1 && membercount < 6)
-		groupmod = 1 + .2*(membercount - 1); //2members=1.2exp, 3=1.4, 4=1.6, 5=1.8
+		groupmod = 1.0f + .2f*(membercount - 1); //2members=1.2exp, 3=1.4, 4=1.6, 5=1.8
 	else if (membercount == 6)
-		groupmod = 2.16;
+		groupmod = 2.16f;
 	else
-		groupmod = 1.0;
+		groupmod = 1.0f;
 
 	groupexp += (uint32)((float)exp * groupmod * (RuleR(Character, GroupExpMultiplier)));
 

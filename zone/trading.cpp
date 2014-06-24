@@ -24,6 +24,10 @@
 #include "worldserver.h"
 extern WorldServer worldserver;
 
+#ifdef _WINDOWS
+#define strupr		_strupr
+#endif
+
 // The maximum amount of a single bazaar/barter transaction expressed in copper.
 // Equivalent to 2 Million plat
 #define MAX_TRANSACTION_VALUE 2000000000
@@ -148,7 +152,7 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 	if (with && with->IsClient()) {
 		with->SendItemPacket(dest_slot_id -IDX_TRADE,inst,ItemPacketTradeView);
 		if (inst->GetItem()->ItemClass == 1) {
-			for (uint16 i=0; i<10; i++) {
+			for (uint8 i=0; i<10; i++) {
 				uint16 bagslot_id = Inventory::CalcSlotId(dest_slot_id, i);
 				const ItemInst* bagitem = trader->GetInv().GetItem(bagslot_id);
 				if (bagitem) {
@@ -262,7 +266,7 @@ void Trade::LogTrade()
 			}
 
 			database.logevents(trader->AccountName(), trader->AccountID(),
-				trader->Admin(), trader->GetName(), with->GetName(), "Trade", logtext, 6);
+				(uint8)trader->Admin(), trader->GetName(), with->GetName(), "Trade", logtext, 6);
 		}
 	}
 }
@@ -593,7 +597,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 					// pets need to look inside bags and try to equip items found there
 					if(item->ItemClass == ItemClassContainer && item->BagSlots > 0) {
 						for(int16 bslot=0; bslot < item->BagSlots; bslot++) {
-							const ItemInst* baginst = inst->GetItem(bslot);
+							const ItemInst* baginst = inst->GetItem((uint8)bslot);
 							if (baginst) {
 								const Item_Struct* bagitem = baginst->GetItem();
 								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsInstNoDrop() == false))) {
@@ -1002,7 +1006,7 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 	_log(TRADING__CLIENT, "NukeTraderItem(Slot %i, Charges %i, Quantity %i", Slot, Charges, Quantity);
 	if(Quantity < Charges) {
 		Customer->SendSingleTraderItem(this->CharacterID(), SerialNumber);
-		m_inv.DeleteItem(Slot, Quantity);
+		m_inv.DeleteItem(Slot, (uint8)Quantity);
 	}
 	else {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TraderDelItem,sizeof(TraderDelItem_Struct));
@@ -1056,7 +1060,7 @@ void Client::TraderUpdate(uint16 SlotID,uint32 TraderID){
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TraderItemUpdate,sizeof(TraderItemUpdate_Struct));
 	TraderItemUpdate_Struct* tus=(TraderItemUpdate_Struct*)outapp->pBuffer;
 	tus->Charges = 0xFFFF;
-	tus->FromSlot = SlotID;
+	tus->FromSlot = (uint8)SlotID;
 	tus->ToSlot = 0xFF;
 	tus->TraderID = TraderID;
 	tus->Unknown000 = 0;
@@ -1086,7 +1090,7 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, uint16 Quantity, Client* 
 			_log(TRADING__CLIENT, "FindAndNuke %s, Charges %i, Quantity %i", item->GetItem()->Name, Charges, Quantity);
 		}
 		if(item && (Charges <= Quantity || (Charges <= 0 && Quantity==1) || !Stackable)){
-			this->DeleteItemInInventory(SlotID, Quantity);
+			this->DeleteItemInInventory(SlotID, (int8)Quantity);
 
 			TraderCharges_Struct* GetSlot = database.LoadTraderItemWithCharges(this->CharacterID());
 
@@ -1584,7 +1588,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 			mysql_free_result(Result);
 			return;
 		}
-		Size = mysql_num_rows(Result) * sizeof(BazaarSearchResults_Struct);
+		Size = (int)(mysql_num_rows(Result) * sizeof(BazaarSearchResults_Struct));
 		uchar *buffer = new uchar[Size];
 		uchar *bufptr = buffer;
 		memset(buffer, 0, Size);
@@ -1615,7 +1619,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Cost);
 			StatValue = atoi(Row[8]);
 			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, StatValue);
-			bool Stackable = atoi(Row[10]);
+			bool Stackable = atoi(Row[10]) != 0;
 			if(Stackable) {
 				int Charges = atoi(Row[9]);
 				sprintf(Name, "%s(%i)", Row[7], Charges);
@@ -2014,7 +2018,7 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 	if (database.RunQuery(Query,MakeAnyLenString(&Query, "select * from buyer where itemname like '%%%s%%' order by charid limit %i",
 							EscSearchString, RuleI(Bazaar, MaxBarterSearchResults)), errbuf, &Result)) {
 
-		int NumberOfRows = mysql_num_rows(Result);
+		int NumberOfRows = (int)mysql_num_rows(Result);
 
 		if(NumberOfRows == RuleI(Bazaar, MaxBarterSearchResults))
 			Message(15, "Your search found too many results; some are not displayed.");

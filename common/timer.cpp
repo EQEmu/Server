@@ -72,7 +72,7 @@ int gettimeofday (timeval *tp, ...)
 
 	ftime (&tb);
 
-	tp->tv_sec = tb.time;
+	tp->tv_sec = (long)tb.time;
 	tp->tv_usec = tb.millitm * 1000;
 
 	return 0;

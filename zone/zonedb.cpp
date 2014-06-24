@@ -123,19 +123,19 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 				zone_data->fog_red[i]=atoi(row[r++]);
 				zone_data->fog_green[i]=atoi(row[r++]);
 				zone_data->fog_blue[i]=atoi(row[r++]);
-				zone_data->fog_minclip[i]=atof(row[r++]);
-				zone_data->fog_maxclip[i]=atof(row[r++]);
+				zone_data->fog_minclip[i]=(float)atof(row[r++]);
+				zone_data->fog_maxclip[i]=(float)atof(row[r++]);
 			}
 
-			zone_data->fog_density = atof(row[r++]);;
+			zone_data->fog_density = (float)atof(row[r++]);;
 			zone_data->sky=atoi(row[r++]);
-			zone_data->zone_exp_multiplier=atof(row[r++]);
-			zone_data->safe_x=atof(row[r++]);
-			zone_data->safe_y=atof(row[r++]);
-			zone_data->safe_z=atof(row[r++]);
-			zone_data->underworld=atof(row[r++]);
-			zone_data->minclip=atof(row[r++]);
-			zone_data->maxclip=atof(row[r++]);
+			zone_data->zone_exp_multiplier=(float)atof(row[r++]);
+			zone_data->safe_x=(float)atof(row[r++]);
+			zone_data->safe_y=(float)atof(row[r++]);
+			zone_data->safe_z=(float)atof(row[r++]);
+			zone_data->underworld=(float)atof(row[r++]);
+			zone_data->minclip=(float)atof(row[r++]);
+			zone_data->maxclip=(float)atof(row[r++]);
 
 			zone_data->time_type=atoi(row[r++]);
 //not in the DB yet:
@@ -171,7 +171,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 				zone_data->snow_chance[i]=atoi(row[r++]);
 			}
 			for(i=0;i<4;i++){
-				zone_data->snow_duration[i]=atof(row[r++]);
+				zone_data->snow_duration[i]=(uint8)atof(row[r++]);
 			}
 			good = true;
 		}
@@ -241,8 +241,8 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
 		{
 			timeval tv;
 			gettimeofday(&tv, nullptr);
-			uint32 resStart = atoi(row[0]);
-			uint32 resDuration = atoi(row[1]);
+			int32 resStart = atoi(row[0]);
+			int32 resDuration = atoi(row[1]);
 
 			//compare our values to current time
 			if((resStart + resDuration) <= tv.tv_sec)
@@ -389,9 +389,9 @@ bool ZoneDatabase::GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin
 		if (gmspeed)
 			*gmspeed = atoi(row[3]);
 		if (revoked)
-			*revoked = atoi(row[4]);
+			*revoked = atoi(row[4]) != 0;
 		if(gmhideme)
-			*gmhideme = atoi(row[5]);
+			*gmhideme = atoi(row[5]) != 0;
 		if(account_creation)
 			*account_creation = atoul(row[6]);
 
@@ -918,11 +918,11 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 			pp->zone_id = GetZoneID(row[2]);
 			pp->zoneInstance = atoi(row[13]);
 
-			pp->x = atof(row[3]);
-			pp->y = atof(row[4]);
-			pp->z = atof(row[5]);
+			pp->x = (float)atof(row[3]);
+			pp->y = (float)atof(row[4]);
+			pp->z = (float)atof(row[5]);
 
-			pp->lastlogin = time(nullptr);
+			pp->lastlogin = (uint32)time(nullptr);
 
 			if (pp->x == -1 && pp->y == -1 && pp->z == -1)
 				GetSafePoints(pp->zone_id, database.GetInstanceVersion(pp->zoneInstance), &pp->x, &pp->y, &pp->z);
@@ -961,10 +961,10 @@ bool ZoneDatabase::GetCharacterInfoForLogin_result(MYSQL_RES* result,
 			*level = atoi(row[10]);
 
 		if(LFP)
-			*LFP = atoi(row[11]);
+			*LFP = atoi(row[11]) != 0;
 
 		if(LFG)
-			*LFG = atoi(row[12]);
+			*LFG = atoi(row[12]) != 0;
 
 		if(NumXTargets)
 		{
@@ -1137,13 +1137,13 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->gender = atoi(row[r++]);
 				tmpNPCType->texture = atoi(row[r++]);
 				tmpNPCType->helmtexture = atoi(row[r++]);
-				tmpNPCType->size = atof(row[r++]);
+				tmpNPCType->size = (float)atof(row[r++]);
 				tmpNPCType->loottable_id = atoi(row[r++]);
 				tmpNPCType->merchanttype = atoi(row[r++]);
 				tmpNPCType->alt_currency_type = atoi(row[r++]);
 				tmpNPCType->adventure_template = atoi(row[r++]);
 				tmpNPCType->trap_template = atoi(row[r++]);
-				tmpNPCType->attack_speed = atof(row[r++]);
+				tmpNPCType->attack_speed = (float)atof(row[r++]);
 				tmpNPCType->STR = atoi(row[r++]);
 				tmpNPCType->STA = atoi(row[r++]);
 				tmpNPCType->DEX = atoi(row[r++]);
@@ -1168,7 +1168,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
 				tmpNPCType->prim_melee_type = atoi(row[r++]);
 				tmpNPCType->sec_melee_type = atoi(row[r++]);
-				tmpNPCType->runspeed= atof(row[r++]);
+				tmpNPCType->runspeed= (float)atof(row[r++]);
 				tmpNPCType->findable = atoi(row[r++]) == 0? false : true;
 				tmpNPCType->trackable = atoi(row[r++]) == 0? false : true;
 				tmpNPCType->hp_regen = atoi(row[r++]);
@@ -1293,8 +1293,8 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->unique_spawn_by_name = atoi(row[r++]) == 1 ? true : false;
 				tmpNPCType->underwater = atoi(row[r++]) == 1 ? true : false;
 				tmpNPCType->emoteid = atoi(row[r++]);
-				tmpNPCType->spellscale = atoi(row[r++]);
-				tmpNPCType->healscale = atoi(row[r++]);
+				tmpNPCType->spellscale = (float)atoi(row[r++]);
+				tmpNPCType->healscale = (float)atoi(row[r++]);
 				tmpNPCType->no_target_hotkey = atoi(row[r++]) == 1 ? true : false;
 				
 				// If NPC with duplicate NPC id already in table,
@@ -1459,7 +1459,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				//tmpNPCType->alt_currency_type = atoi(row[r++]);
 				//tmpNPCType->adventure_template = atoi(row[r++]);
 				//tmpNPCType->trap_template = atoi(row[r++]);
-				tmpNPCType->attack_speed = atof(row[r++]);
+				tmpNPCType->attack_speed = (float)atof(row[r++]);
 				tmpNPCType->STR = atoi(row[r++]);
 				tmpNPCType->STA = atoi(row[r++]);
 				tmpNPCType->DEX = atoi(row[r++]);
@@ -1482,7 +1482,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
 				tmpNPCType->prim_melee_type = atoi(row[r++]);
 				tmpNPCType->sec_melee_type = atoi(row[r++]);
-				tmpNPCType->runspeed= atof(row[r++]);
+				tmpNPCType->runspeed= (float)atof(row[r++]);
 				//tmpNPCType->findable = atoi(row[r++]) == 0? false : true;
 				//tmpNPCType->trackable = atoi(row[r++]) == 0? false : true;
 				tmpNPCType->hp_regen = atoi(row[r++]);
@@ -1605,8 +1605,8 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				//tmpNPCType->unique_spawn_by_name = atoi(row[r++]) == 1 ? true : false;
 				//tmpNPCType->underwater = atoi(row[r++]) == 1 ? true : false;
 				//tmpNPCType->emoteid = atoi(row[r++]);
-				tmpNPCType->spellscale = atoi(row[r++]);
-				tmpNPCType->healscale = atoi(row[r++]);
+				tmpNPCType->spellscale = (float)atoi(row[r++]);
+				tmpNPCType->healscale = (float)atoi(row[r++]);
 
 				// If NPC with duplicate NPC id already in table,
 				// free item we attempted to add.
@@ -2408,12 +2408,12 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 			if(row){
 				into[r].spellid = atoi(row[1]);
 				into[r].type = atoi(row[2]);
-				into[r].x = atof(row[3]);
-				into[r].y = atof(row[4]);
-				into[r].z = atof(row[5]);
-				into[r].xdiff = atof(row[6]);
-				into[r].ydiff = atof(row[7]);
-				into[r].zdiff = atof(row[8]);
+				into[r].x = (float)atof(row[3]);
+				into[r].y = (float)atof(row[4]);
+				into[r].z = (float)atof(row[5]);
+				into[r].xdiff = (float)atof(row[6]);
+				into[r].ydiff = (float)atof(row[7]);
+				into[r].zdiff = (float)atof(row[8]);
 				strn0cpy(into[r].message, row[9], 255);
 			}
 		}
@@ -2588,7 +2588,7 @@ void ZoneDatabase::SaveBuffs(Client *c) {
 
 	uint32 buff_count = c->GetMaxBuffSlots();
 	Buffs_Struct *buffs = c->GetBuffs();
-	for (int i = 0; i < buff_count; i++) {
+	for (uint32 i = 0; i < buff_count; i++) {
 		if(buffs[i].spellid != SPELL_UNKNOWN) {
 			if(!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `character_buffs` (character_id, slot_id, spell_id, "
 				"caster_level, caster_name, ticsremaining, counters, numhits, melee_rune, magic_rune, persistent, dot_rune, "
@@ -2607,7 +2607,7 @@ void ZoneDatabase::SaveBuffs(Client *c) {
 void ZoneDatabase::LoadBuffs(Client *c) {
 	Buffs_Struct *buffs = c->GetBuffs();
 	uint32 max_slots = c->GetMaxBuffSlots();
-	for(int i = 0; i < max_slots; ++i) {
+	for(uint32 i = 0; i < max_slots; ++i) {
 		buffs[i].spellid = SPELL_UNKNOWN;
 	}
 
@@ -2624,7 +2624,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 		safe_delete_array(query);
 		while ((row = mysql_fetch_row(result)))
 		{
-			uint32 slot_id = atoul(row[1]);
+			int slot_id = atoul(row[1]);
 			if(slot_id >= c->GetMaxBuffSlots()) {
 				continue;
 			}
@@ -2641,7 +2641,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 			uint32 numhits = atoul(row[6]);
 			uint32 melee_rune = atoul(row[7]);
 			uint32 magic_rune = atoul(row[8]);
-			uint8 persistent = atoul(row[9]);
+			uint8 persistent = (uint8)atoul(row[9]);
 			uint32 dot_rune = atoul(row[10]);
 			int32 caston_x = atoul(row[11]);
 			int32 caston_y = atoul(row[12]);
@@ -2684,7 +2684,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 	}
 
 	max_slots = c->GetMaxBuffSlots();
-	for(int i = 0; i < max_slots; ++i) {
+	for(uint32 i = 0; i < max_slots; ++i) {
 		if(!IsValidSpell(buffs[i].spellid)) {
 			continue;
 		}
@@ -2848,7 +2848,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 			pi->SpellID = atoi(row[3]);
 			pi->HP = atoul(row[4]);
 			pi->Mana = atoul(row[5]);
-			pi->size = atof(row[6]);
+			pi->size = (float)atof(row[6]);
 		}
 		mysql_free_result(result);
 	}
@@ -2877,7 +2877,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 			else
 				continue;
 
-			uint32 slot_id = atoul(row[1]);
+			int32 slot_id = atoul(row[1]);
 			if(slot_id >= RuleI(Spells, MaxTotalSlotsPET)) {
 				continue;
 			}

@@ -151,7 +151,7 @@ bool PersistentTimer::Load(Database *db) {
 	safe_delete_array(query);
 
 	bool res = false;
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	if(qcount == 1 && (row = mysql_fetch_row(result)) ) {
 		start_time = strtoul(row[0], nullptr, 10);
 		timer_time = strtoul(row[1], nullptr, 10);
@@ -337,7 +337,7 @@ bool PTimerList::Load(Database *db) {
 	bool enabled;
 
 	PersistentTimer *cur;
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	while((row = mysql_fetch_row(result)) ) {
 		type = atoi(row[0]);
 		start_time = strtoul(row[1], nullptr, 10);

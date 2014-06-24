@@ -444,7 +444,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint8)mysql_num_rows(result);
 	if(qcount < 1) {
 		LogFile->write(EQEMuLog::Error, "Error in HandleAutoCombine: no components returned");
 		user->QueuePacket(outapp);
@@ -664,7 +664,7 @@ void Client::TradeskillSearchResults(const char *query, unsigned long qlen, unsi
 
 	uint8 qcount = 0;
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint8)mysql_num_rows(result);
 	if(qcount < 1) {
 		//search gave no results... not an error
 		return;
@@ -734,7 +734,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint8)mysql_num_rows(result);
 	if(qcount < 1) {
 		LogFile->write(EQEMuLog::Error, "Error in SendTradeskillDetails: no components returned");
 		return;
@@ -894,9 +894,9 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// For trivials over 68 the chance is (skill - 0.75*trivial) +51.5
 	// For trivial up to 68 the chance is (skill - trivial) + 66
 	if (spec->trivial >= 68) {
-		chance = (user_skill - (0.75*spec->trivial)) + 51.5;
+		chance = (user_skill - (0.75f*spec->trivial)) + 51.5f;
 	} else {
-		chance = (user_skill - spec->trivial) + 66;
+		chance = (user_skill - spec->trivial) + 66.0f;
 	}
 
 	int16 over_trivial = (int16)GetRawSkill(spec->tradeskill) - (int16)spec->trivial;
@@ -927,7 +927,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	_log(TRADESKILLS__TRACE, "...Current skill: %d , Trivial: %d , Success chance: %f percent", user_skill , spec->trivial , chance);
 	_log(TRADESKILLS__TRACE, "...Bonusstat: %d , INT: %d , WIS: %d , DEX: %d , STR: %d", bonusstat , GetINT() , GetWIS() , GetDEX() , GetSTR());
 
-	float res = MakeRandomFloat(0, 99);
+	float res = (float)MakeRandomFloat(0, 99);
 	int AAChance = 0;
 
 	//AA modifiers
@@ -1146,10 +1146,10 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 			chance_stage2 = 100;
 		} else if (current_raw_skill < 175) {
 			//From skill 16 to 174 your chance of success falls linearly from 92% to 13%.
-			chance_stage2 = (200 - current_raw_skill) / 2;
+			chance_stage2 = (200 - current_raw_skill) / 2.0f;
 		} else {
 			//At skill 175, your chance of success falls linearly from 12.5% to 2.5% at skill 300.
-			chance_stage2 = 12.5 - (.08 * (current_raw_skill - 175));
+			chance_stage2 = 12.5f - (.08f * (current_raw_skill - 175));
 		}
 	}
 	   
@@ -1237,7 +1237,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	if(qcount > 1) {
 		//multiple recipes, partial match... do an extra query to get it exact.
 		//this happens when combining components for a smaller recipe
@@ -1275,7 +1275,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 		}
 		safe_delete_array(query);
 
-		qcount = mysql_num_rows(result);
+		qcount = (uint32)mysql_num_rows(result);
 	}
 
 	if(qcount < 1)
@@ -1308,7 +1308,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 		}
 		safe_delete_array(query);
 
-		uint32 resultRowTotal = mysql_num_rows(result);
+		uint32 resultRowTotal = (uint32)mysql_num_rows(result);
 
 		if(resultRowTotal == 0) { //Recipe contents matched more than 1 recipe, but not in this container
 			LogFile->write(EQEMuLog::Error, "Combine error: Incorrect container is being used!");
@@ -1399,7 +1399,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	if(qcount != 1) {
 		//just not found i guess..
 		return(false);
@@ -1435,7 +1435,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	}
 	safe_delete_array(query);
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	if(qcount < 1) {
 		LogFile->write(EQEMuLog::Error, "Error in GetTradeRecept success: no success items returned");
 		return(false);
@@ -1457,7 +1457,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	spec->onfail.clear();
 	if (RunQuery(query, qlen, errbuf, &result)) {
 
-		qcount = mysql_num_rows(result);
+		qcount = (uint32)mysql_num_rows(result);
 		uint8 r;
 		for(r = 0; r < qcount; r++) {
 			row = mysql_fetch_row(result);
@@ -1474,7 +1474,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 	spec->salvage.clear();
 	// Don't bother with the query if TS is nofail
 	if (!spec->nofail && RunQuery(query, qlen, errbuf, &result)) {
-		qcount = mysql_num_rows(result);
+		qcount = (uint32)mysql_num_rows(result);
 		uint8 r;
 		for(r = 0; r < qcount; r++) {
 			row = mysql_fetch_row(result);
@@ -1528,7 +1528,7 @@ void Client::LearnRecipe(uint32 recipeID)
 		return;
 	}
 
-	qcount = mysql_num_rows(result);
+	qcount = (uint32)mysql_num_rows(result);
 	if (qcount != 1) {
 		LogFile->write(EQEMuLog::Normal, "Client::LearnRecipe - RecipeID: %d had %d occurences.", recipeID, qcount);
 		mysql_free_result(result);

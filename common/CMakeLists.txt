@@ -44,8 +44,6 @@ SET(common_sources
 	packet_dump.cpp
 	packet_dump_file.cpp
 	packet_functions.cpp
-	perl_EQDB.cpp
-	perl_EQDBRes.cpp
 	ProcLauncher.cpp
 	ptimer.cpp
 	races.cpp
@@ -309,13 +307,25 @@ SOURCE_GROUP(TinyXML FILES
 	tinyxml/tinyxmlparser.cpp
 )
 
+SET(PerlEmbed
+    perl_EQDB.cpp
+	perl_EQDBRes.cpp
+)
+
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
-ADD_LIBRARY(Common ${common_sources} ${common_headers})
+ADD_LIBRARY(Common ${common_sources} ${common_headers} ${PerlEmbed})
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
+	SET_PROPERTY(SOURCE "perl_EQDB.cpp" "perl_EQDBRes.cpp" PROPERTY COMPILE_FLAGS -Wsyntax-only)
+	SET_PROPERTY(SOURCE "SocketLib/Base64.cpp" "SocketLib/File.cpp" "SocketLib/HttpdCookies.cpp" "SocketLib/HttpdForm.cpp" "SocketLib/HttpdSocket.cpp" "SocketLib/HTTPSocket.cpp" "SocketLib/MemFile.cpp" "SocketLib/Mime.cpp" "SocketLib/Parse.cpp" "SocketLib/socket_include.cpp" "SocketLib/Utility.cpp" PROPERTY COMPILE_FLAGS -Wsyntax-only)
 	SET_SOURCE_FILES_PROPERTIES("patches/SoD.cpp" "patches/SoF.cpp" "patches/RoF.cpp" "patches/Underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
+
 ENDIF(UNIX)
+
+IF(MSVC)
+	SET_SOURCE_FILES_PROPERTIES(SOURCE "perl_EQDB.cpp" "perl_EQDBRes.cpp" PROPERTY COMPILE_FLAGS " /W0 " )
+ENDIF(MSVC)
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)

@@ -503,7 +503,7 @@ bool Client::Process() {
 				int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 				DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
-				float random = MakeRandomFloat(0, 1);
+				float random = (float)MakeRandomFloat(0, 1);
 				CheckIncreaseSkill(SkillDualWield, auto_attack_target, -10);
 				if (random < DualWieldProbability){ // Max 78% of DW
 					if(CheckAAEffect(aaEffectRampage)) {
@@ -699,7 +699,7 @@ bool Client::Process() {
 	{
 		while(ret && (app = (EQApplicationPacket *)eqs->PopPacket())) {
 			if(app)
-				ret = HandlePacket(app);
+				ret = HandlePacket(app) != 0;
 			safe_delete(app);
 		}
 	}
@@ -1010,10 +1010,10 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			ItemInst* inst = database.CreateItem(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)){
-				inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
+				inst->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
 				}
 				else
-					inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
+					inst->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
 				inst->SetMerchantSlot(ml.slot);
 				inst->SetMerchantCount(-1);		//unlimited
 				if(charges > 0)
@@ -1048,10 +1048,10 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			ItemInst* inst = database.CreateItem(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)){
-				inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
+				inst->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate*Client::CalcPriceMod(merch,false)));
 				}
 				else
-					inst->SetPrice((item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
+					inst->SetPrice((uint32)(item->Price*(RuleR(Merchant, SellCostMod))*item->SellRate));
 				inst->SetMerchantSlot(ml.slot);
 				inst->SetMerchantCount(ml.charges);
 				if(charges > 0)
@@ -1182,7 +1182,7 @@ void Client::OPTGB(const EQApplicationPacket *app)
 	if(tgb_flag == 2)
 		Message_StringID(0, TGB() ? TGB_ON : TGB_OFF);
 	else
-		tgb = tgb_flag;
+		tgb = tgb_flag != 0;
 }
 
 void Client::OPMemorizeSpell(const EQApplicationPacket* app)
@@ -1517,25 +1517,25 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	// will say 11, but the client will have 1 left on their cursor, so we have
 	// to figure out the conversion ourselves
 
-	amount_to_add = amount_to_take * ((float)CoinTypeCoppers(mc->cointype1) / (float)CoinTypeCoppers(mc->cointype2));
+	amount_to_add = (uint64)(amount_to_take * ((float)CoinTypeCoppers(mc->cointype1) / (float)CoinTypeCoppers(mc->cointype2)));
 
 	// the amount we're adding could be different than what was requested, so
 	// we have to adjust the amount we take as well
-	amount_to_take = amount_to_add * ((float)CoinTypeCoppers(mc->cointype2) / (float)CoinTypeCoppers(mc->cointype1));
+	amount_to_take = (uint64)(amount_to_add * ((float)CoinTypeCoppers(mc->cointype2) / (float)CoinTypeCoppers(mc->cointype1)));
 
 	// now we should have a from_bucket, a to_bucket, an amount_to_take
 	// and an amount_to_add
 
 	// now we actually take it from the from bucket. if there's an error
 	// with the destination slot, they lose their money
-	*from_bucket -= amount_to_take;
+	*from_bucket = (int32)(*from_bucket - amount_to_take);
 	// why are intentionally inducing a crash here rather than letting the code attempt to stumble on?
 	// assert(*from_bucket >= 0);
 
 	if(to_bucket)
 	{
 		if(*to_bucket + amount_to_add > *to_bucket)	// overflow check
-			*to_bucket += amount_to_add;
+			*to_bucket = (int32)(*to_bucket+amount_to_add);
 
 		//shared bank plat
 		if (RuleB(Character, SharedBankPlat))
@@ -1545,7 +1545,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 				if (from_bucket == &m_pp.platinum_shared)
 					amount_to_add = 0 - amount_to_take;
 
-				database.SetSharedPlatinum(AccountID(),amount_to_add);
+				database.SetSharedPlatinum(AccountID(),(uint32)amount_to_add);
 			}
 		}
 	}
@@ -1573,7 +1573,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		tcs->slot = mc->cointype2;
 		tcs->unknown5 = 0x4fD2;
 		tcs->unknown7 = 0;
-		tcs->amount = amount_to_add;
+		tcs->amount = (uint32)amount_to_add;
 		recipient->QueuePacket(outapp);
 		safe_delete(outapp);
 	}

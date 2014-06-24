@@ -320,7 +320,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 
 	if(item->Attack > 0) {
 
-		int cap = RuleI(Character, ItemATKCap);
+		uint32 cap = RuleI(Character, ItemATKCap);
 		cap += itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
 
 		if((newbon->ATK + item->Attack) > cap)
@@ -329,7 +329,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 			newbon->ATK += item->Attack;
 	}
 	if(item->DamageShield > 0) {
-		if((newbon->DamageShield + item->DamageShield) > RuleI(Character, ItemDamageShieldCap))
+		if((int32)(newbon->DamageShield + item->DamageShield) > RuleI(Character, ItemDamageShieldCap))
 			newbon->DamageShield = RuleI(Character, ItemDamageShieldCap);
 		else
 			newbon->DamageShield += item->DamageShield;
@@ -377,7 +377,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 			newbon->ProcChance += item->CombatEffects;
 	}
 	if(item->DotShielding > 0) {
-		if((newbon->DoTShielding + item->DotShielding) > RuleI(Character, ItemDoTShieldingCap))
+		if((int32)(newbon->DoTShielding + item->DotShielding) > RuleI(Character, ItemDoTShieldingCap))
 			newbon->DoTShielding = RuleI(Character, ItemDoTShieldingCap);
 		else
 			newbon->DoTShielding += item->DotShielding;
@@ -396,14 +396,14 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 			newbon->SpellDmg += item->SpellDmg;
 	}
 	if(item->Clairvoyance > 0) {
-		if((newbon->Clairvoyance + item->Clairvoyance) > RuleI(Character, ItemClairvoyanceCap))
+		if((int32)(newbon->Clairvoyance + item->Clairvoyance) > RuleI(Character, ItemClairvoyanceCap))
 			newbon->Clairvoyance = RuleI(Character, ItemClairvoyanceCap);
 		else
 			newbon->Clairvoyance += item->Clairvoyance;
 	}
 
 	if(item->DSMitigation > 0) {
-		if((newbon->DSMitigation + item->DSMitigation) > RuleI(Character, ItemDSMitigationCap))
+		if((int32)(newbon->DSMitigation + item->DSMitigation) > RuleI(Character, ItemDSMitigationCap))
 			newbon->DSMitigation = RuleI(Character, ItemDSMitigationCap);
 		else
 			newbon->DSMitigation += item->DSMitigation;
@@ -519,7 +519,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 	}
 
 	if (item->ExtraDmgSkill != 0 && item->ExtraDmgSkill <= HIGHEST_SKILL) {
-		if((newbon->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap))
+		if((int32)(newbon->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap))
 			newbon->SkillDamageAmount[item->ExtraDmgSkill] = RuleI(Character, ItemExtraDmgCap);
 		else
 			newbon->SkillDamageAmount[item->ExtraDmgSkill] += item->ExtraDmgAmt;
@@ -990,7 +990,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_SpellOnKill:
 				for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3)
 				{
-					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == base2) && (newbon->SpellOnKill[i+1] < base1)))
+					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == base2) && ((int32)newbon->SpellOnKill[i+1] < base1)))
 					{
 						//base1 = chance, base2 = SpellID to be triggered, base3 = min npc level
 						newbon->SpellOnKill[i] = base2;
@@ -1248,14 +1248,12 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 void Mob::CalcSpellBonuses(StatBonuses* newbon)
 {
-	int i;
-
 	memset(newbon, 0, sizeof(StatBonuses));
 	newbon->AggroRange = -1;
 	newbon->AssistRange = -1;
 
 	uint32 buff_count = GetMaxTotalSlots();
-	for(i = 0; i < buff_count; i++) {
+	for(uint32 i = 0; i < buff_count; i++) {
 		if(buffs[i].spellid != SPELL_UNKNOWN){
 			ApplySpellsBonuses(buffs[i].spellid, buffs[i].casterlevel, newbon, buffs[i].casterid, false, buffs[i].ticsremaining,i);
 
@@ -1270,7 +1268,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 
 	//Removes the spell bonuses that are effected by a 'negate' debuff.
 	if (spellbonuses.NegateEffects){
-		for(i = 0; i < buff_count; i++) {
+		for(uint32 i = 0; i < buff_count; i++) {
 			if( (buffs[i].spellid != SPELL_UNKNOWN) && (IsEffectInSpell(buffs[i].spellid, SE_NegateSpellEffect)) )
 				NegateSpellsBonuses(buffs[i].spellid);
 		}
@@ -1339,7 +1337,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				// redundant to have level check here
 				if(newbon->AggroRange == -1 || effect_value < newbon->AggroRange)
 				{
-					newbon->AggroRange = effect_value;
+					newbon->AggroRange = (float)effect_value;
 				}
 				break;
 			}
@@ -1351,7 +1349,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				// take the one with less range in any case
 				if(newbon->AssistRange == -1 || effect_value < newbon->AssistRange)
 				{
-					newbon->AssistRange = effect_value;
+					newbon->AssistRange = (float)effect_value;
 				}
 				break;
 			}
@@ -2322,7 +2320,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_TriggerMeleeThreshold:
 			{
-				if (newbon->TriggerMeleeThreshold[2] < base2){
+				if (newbon->TriggerMeleeThreshold[2] < (uint32)base2){
 					newbon->TriggerMeleeThreshold[0] = effect_value;
 					newbon->TriggerMeleeThreshold[1] = buffslot;
 					newbon->TriggerMeleeThreshold[2] = base2;
@@ -2332,7 +2330,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_TriggerSpellThreshold:
 			{
-				if (newbon->TriggerSpellThreshold[2] < base2){
+				if (newbon->TriggerSpellThreshold[2] < (uint32)base2){
 					newbon->TriggerSpellThreshold[0] = effect_value;
 					newbon->TriggerSpellThreshold[1] = buffslot;
 					newbon->TriggerSpellThreshold[2] = base2;
@@ -2736,7 +2734,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 				if (cur->Worn.Effect>0 && (cur->Worn.Type == ET_WornEffect)) { // latent effects
 					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon);
 				}
-				if (cur->Haste > newbon->haste)
+				if (cur->Haste > (uint32)newbon->haste)
 					newbon->haste = cur->Haste;
 			}
 		}
@@ -2776,8 +2774,8 @@ void Client::CalcItemScale()
 bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 {
 	bool changed = false;
-	int i;
-	for (i = slot_x; i < slot_y; i++) {
+
+	for (uint32 i = slot_x; i < slot_y; i++) {
 		ItemInst* inst = m_inv.GetItem(i);
 		if(inst == 0)
 			continue;
@@ -2854,7 +2852,7 @@ void Client::DoItemEnterZone() {
 
 bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 	bool changed = false;
-	for(int i = slot_x; i < slot_y; i++) {
+	for(uint32 i = slot_x; i < slot_y; i++) {
 		ItemInst* inst = m_inv.GetItem(i);
 		if(!inst)
 			continue;
@@ -3036,15 +3034,15 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_ChangeFrenzyRad:
-					spellbonuses.AggroRange = effect_value;
-					aabonuses.AggroRange = effect_value;
-					itembonuses.AggroRange = effect_value;
+					spellbonuses.AggroRange = (float)effect_value;
+					aabonuses.AggroRange = (float)effect_value;
+					itembonuses.AggroRange = (float)effect_value;
 					break;
 
 				case SE_Harmony:
-					spellbonuses.AssistRange = effect_value;
-					aabonuses.AssistRange = effect_value;
-					itembonuses.AssistRange = effect_value;
+					spellbonuses.AssistRange = (float)effect_value;
+					aabonuses.AssistRange = (float)effect_value;
+					itembonuses.AssistRange = (float)effect_value;
 					break;
 
 				case SE_AttackSpeed:
@@ -4004,7 +4002,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_DistanceRemoval:
-					spellbonuses.DistanceRemoval = effect_value;
+					spellbonuses.DistanceRemoval = effect_value != 0;
 					break;
 
 				case SE_ImprovedTaunt:

@@ -39,6 +39,8 @@
 
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
+#define strlwr _strlwr
+#define strupr _strupr
 #endif
 
 #include "../common/debug.h"
@@ -957,10 +959,10 @@ void command_serverinfo(Client *c, const Seperator *sep)
 	char intbuffer [sizeof(unsigned long)];
 	c->Message(0, "Operating system information.");
 	c->Message(0, "	%s", Ver_name);
-	c->Message(0, "	Build number: %s", ultoa(Ver_build, intbuffer, 10));
-	c->Message(0, "	Minor version: %s", ultoa(Ver_min, intbuffer, 10));
-	c->Message(0, "	Major version: %s", ultoa(Ver_maj, intbuffer, 10));
-	c->Message(0, "	Platform Id: %s", ultoa(Ver_pid, intbuffer, 10));
+	c->Message(0, "	Build number: %s", _ultoa(Ver_build, intbuffer, 10));
+	c->Message(0, "	Minor version: %s", _ultoa(Ver_min, intbuffer, 10));
+	c->Message(0, "	Major version: %s", _ultoa(Ver_maj, intbuffer, 10));
+	c->Message(0, "	Platform Id: %s", _ultoa(Ver_pid, intbuffer, 10));
 #else
 char buffer[255];
 	c->Message(0, "Operating system information: %s",GetOS(buffer));
@@ -1334,7 +1336,7 @@ void command_zone(Client *c, const Seperator *sep)
 
 	if (sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4)){
 		//zone to specific coords
-		c->MovePC(zoneid, (float)atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), 0.0f, 0);
+		c->MovePC(zoneid, (float)atof(sep->arg[2]), (float)atof(sep->arg[3]), (float)atof(sep->arg[4]), 0.0f, 0);
 		}
 	else
 		//zone to safe coords
@@ -1390,7 +1392,7 @@ void command_zone_instance(Client *c, const Seperator *sep)
 
 	if (sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4)){
 		//zone to specific coords
-		c->MovePC(zoneid, instanceid, atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), 0.0f, 0);
+		c->MovePC(zoneid, instanceid, (float)atof(sep->arg[2]), (float)atof(sep->arg[3]), (float)atof(sep->arg[4]), 0.0f, 0);
 	}
 	else{
 		c->MovePC(zoneid, instanceid, 0.0f, 0.0f, 0.0f, 0.0f, 0, ZoneToSafeCoords);
@@ -1756,16 +1758,16 @@ void command_zclip(Client *c, const Seperator *sep)
 	else if(atoi(sep->arg[1])>atoi(sep->arg[2]))
 		c->Message(0, "ERROR: Min clip is greater than max clip!");
 	else {
-		zone->newzone_data.minclip = atof(sep->arg[1]);
-		zone->newzone_data.maxclip = atof(sep->arg[2]);
+		zone->newzone_data.minclip = (float)atof(sep->arg[1]);
+		zone->newzone_data.maxclip = (float)atof(sep->arg[2]);
 		if(sep->arg[3][0]!=0)
-			zone->newzone_data.fog_minclip[0]=atof(sep->arg[3]);
+			zone->newzone_data.fog_minclip[0]=(float)atof(sep->arg[3]);
 		if(sep->arg[4][0]!=0)
-			zone->newzone_data.fog_minclip[1]=atof(sep->arg[4]);
+			zone->newzone_data.fog_minclip[1]=(float)atof(sep->arg[4]);
 		if(sep->arg[5][0]!=0)
-			zone->newzone_data.fog_maxclip[0]=atof(sep->arg[5]);
+			zone->newzone_data.fog_maxclip[0]=(float)atof(sep->arg[5]);
 		if(sep->arg[6][0]!=0)
-			zone->newzone_data.fog_maxclip[1]=atof(sep->arg[6]);
+			zone->newzone_data.fog_maxclip[1]=(float)atof(sep->arg[6]);
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
@@ -2095,7 +2097,7 @@ void command_ai(Client *c, const Seperator *sep)
 					tmp = atoi(sep->arg[7]);
 				if (sep->IsNumber(8))
 					tmp2 = atoi(sep->arg[8]);
-				target->CastToNPC()->AI_SetRoambox(atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]), atof(sep->arg[6]), tmp, tmp2);
+				target->CastToNPC()->AI_SetRoambox((float)atof(sep->arg[2]), (float)atof(sep->arg[3]), (float)atof(sep->arg[4]), (float)atof(sep->arg[5]), (float)atof(sep->arg[6]), tmp, tmp2);
 			}
 			else if ((sep->argnum == 3 || sep->argnum == 4) && sep->IsNumber(2) && sep->IsNumber(3)) {
 				uint32 tmp = 2500;
@@ -2104,7 +2106,7 @@ void command_ai(Client *c, const Seperator *sep)
 					tmp = atoi(sep->arg[4]);
 				if (sep->IsNumber(5))
 					tmp2 = atoi(sep->arg[5]);
-				target->CastToNPC()->AI_SetRoambox(atof(sep->arg[2]), atof(sep->arg[3]), tmp, tmp2);
+				target->CastToNPC()->AI_SetRoambox((float)atof(sep->arg[2]), (float)atof(sep->arg[3]), tmp, tmp2);
 			}
 			else {
 				c->Message(0, "Usage: #ai roambox dist max_x min_x max_y min_y [delay] [mindelay]");
@@ -2344,7 +2346,7 @@ void command_size(Client *c, const Seperator *sep)
 	if (!sep->IsNumber(1))
 		c->Message(0, "Usage: #size [0 - 255] (Decimal increments are allowed)");
 	else {
-		float newsize = atof(sep->arg[1]);
+		float newsize = (float)atof(sep->arg[1]);
 		if (newsize > 255)
 			c->Message(0, "Error: #size: Size can not be greater than 255.");
 		else if (newsize < 0)
@@ -2640,7 +2642,7 @@ void command_makepet(Client *c, const Seperator *sep)
 
 void command_level(Client *c, const Seperator *sep)
 {
-	uint16 level = atoi(sep->arg[1]);
+	uint8 level = atoi(sep->arg[1]);
 
 	if ((level <= 0) || ((level > RuleI(Character, MaxLevel)) && (c->Admin() < commandLevelAboveCap))) {
 		c->Message(0, "Error: #Level: Invalid Level");
@@ -2696,7 +2698,7 @@ void command_spawn(Client *c, const Seperator *sep)
 void command_texture(Client *c, const Seperator *sep)
 {
 
-	uint16 texture;
+	uint8 texture;
 	if (sep->IsNumber(1) && atoi(sep->arg[1]) >= 0 && atoi(sep->arg[1]) <= 255) {
 		texture = atoi(sep->arg[1]);
 		uint8 helm = 0xFF;
@@ -2724,7 +2726,7 @@ void command_texture(Client *c, const Seperator *sep)
 				helm = texture;
 
 			if (texture == 255) {
-				texture = 0xFFFF;	// Should be pulling these from the database instead
+				texture = 0xFF;	// Should be pulling these from the database instead
 				helm = 0xFF;
 			}
 
@@ -4352,7 +4354,7 @@ void command_zuwcoords(Client *c, const Seperator *sep)
 	if(sep->arg[1][0]==0)
 		c->Message(0, "Usage: #zuwcoords <under world coords>");
 	else {
-		zone->newzone_data.underworld = atof(sep->arg[1]);
+		zone->newzone_data.underworld = (float)atof(sep->arg[1]);
 		//float newdata = atof(sep->arg[1]);
 		//memcpy(&zone->zone_header_data[130], &newdata, sizeof(float));
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
@@ -4367,7 +4369,7 @@ void command_zunderworld(Client *c, const Seperator *sep)
 	if(sep->arg[1][0]==0)
 		c->Message(0, "Usage: #zunderworld <zcoord>");
 	else {
-		zone->newzone_data.underworld = atof(sep->arg[1]);
+		zone->newzone_data.underworld = (float)atof(sep->arg[1]);
 	}
 }
 
@@ -4377,9 +4379,9 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 	if(sep->arg[3][0]==0)
 		c->Message(0, "Usage: #zsafecoords <safe x> <safe y> <safe z>");
 	else {
-		zone->newzone_data.safe_x = atof(sep->arg[1]);
-		zone->newzone_data.safe_y = atof(sep->arg[2]);
-		zone->newzone_data.safe_z = atof(sep->arg[3]);
+		zone->newzone_data.safe_x = (float)atof(sep->arg[1]);
+		zone->newzone_data.safe_y = (float)atof(sep->arg[2]);
+		zone->newzone_data.safe_z = (float)atof(sep->arg[3]);
 		//float newdatax = atof(sep->arg[1]);
 		//float newdatay = atof(sep->arg[2]);
 		//float newdataz = atof(sep->arg[3]);
@@ -4473,7 +4475,11 @@ void command_name(Client *c, const Seperator *sep)
 	else
 	{
 		target = c->GetTarget()->CastToClient();
+#ifdef _WINDOWS
+		char *oldname = _strdup(target->GetName());
+#else
 		char *oldname = strdup(target->GetName());
+#endif
 		if(target->ChangeFirstName(sep->arg[1], c->GetName()))
 		{
 			c->Message(0, "Successfully renamed %s to %s", oldname, sep->arg[1]);
@@ -4496,7 +4502,11 @@ void command_tempname(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #tempname newname (requires a target)");
 	else if(strlen(sep->arg[1]) > 0)
 	{
+#ifdef _WINDOWS
+		char *oldname = _strdup(target->GetName());
+#else
 		char *oldname = strdup(target->GetName());
+#endif
 		target->TempName(sep->arg[1]);
 		c->Message(0, "Renamed %s to %s", oldname, sep->arg[1]);
 		free(oldname);
@@ -4693,7 +4703,7 @@ void command_goto(Client *c, const Seperator *sep)
 	else if (!(sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)))
 		c->Message(0, "Usage: #goto [x y z]");
 	else
-		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atof(sep->arg[1]), atof(sep->arg[2]), atof(sep->arg[3]), 0.0f);
+		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), (float)atof(sep->arg[1]), (float)atof(sep->arg[2]), (float)atof(sep->arg[3]), 0.0f);
 }
 
 void command_iteminfo(Client *c, const Seperator *sep)
@@ -5994,8 +6004,9 @@ void command_wpadd(Client *c, const Seperator *sep)
 {
 	int	type1=0,
 		type2=0,
-		pause=0,
-		heading=-1;	// Defaults for a new grid
+		pause=0;
+
+	float heading=-1.0f;	// Defaults for a new grid
 
 	Mob *t=c->GetTarget();
 	if (t && t->IsNPC())
@@ -6450,7 +6461,7 @@ void command_revoke(Client *c, const Seperator *sep)
 			if(revokee)
 			{
 				c->Message(0, "Found %s in this zone.", revokee->GetName());
-				revokee->SetRevoked(flag);
+				revokee->SetRevoked(flag != 0);
 			}
 			else
 			{
@@ -6461,7 +6472,7 @@ void command_revoke(Client *c, const Seperator *sep)
 				RevokeStruct* revoke = (RevokeStruct*)outapp->pBuffer;
 				strn0cpy(revoke->adminname, c->GetName(), 64);
 				strn0cpy(revoke->name, sep->arg[1], 64);
-				revoke->toggle = flag;
+				revoke->toggle = flag != 0;
 				worldserver.SendPacket(outapp);
 				safe_delete(outapp);
 			}
@@ -7857,7 +7868,7 @@ void command_aggro(Client *c, const Seperator *sep)
 		c->Message(0, "Error: you must have an NPC target.");
 		return;
 	}
-	float d = atof(sep->arg[1]);
+	float d = (float)atof(sep->arg[1]);
 	if(d == 0.0f) {
 		c->Message(13, "Error: distance argument required.");
 		return;
@@ -8163,7 +8174,7 @@ void command_mlog(Client *c, const Seperator *sep) {
 		else if(off == sep->arg[2]) onoff = false;
 		else { c->Message(13, "Invalid argument '%s'. Expected on/off.", sep->arg[2]); return; }
 
-		float radius = atof(sep->arg[3]);
+		float radius = (float)atof(sep->arg[3]);
 		if(radius <= 0) {
 			c->Message(13, "Invalid radius %f", radius);
 			return;
@@ -9484,10 +9495,10 @@ void command_object(Client *c, const Seperator *sep)
 				{
 					col = 0;
 					id = atoi(row[col++]);
-					od.x = atof(row[col++]);
-					od.y = atof(row[col++]);
-					od.z = atof(row[col++]);
-					od.heading = atof(row[col++]);
+					od.x = (float)atof(row[col++]);
+					od.y = (float)atof(row[col++]);
+					od.z = (float)atof(row[col++]);
+					od.heading = (float)atof(row[col++]);
 					itemid = atoi(row[col++]);
 					strn0cpy(od.object_name, row[col++], sizeof(od.object_name));
 					od.object_name[sizeof(od.object_name) - 1] = '\0'; // Required if strlen(row[col++]) exactly == sizeof(object_name)
@@ -10162,10 +10173,10 @@ void command_object(Client *c, const Seperator *sep)
 			}
 			else // Move to x, y, z [h]
 			{
-				od.x = atof(sep->arg[3]);
+				od.x = (float)atof(sep->arg[3]);
 				if (sep->argnum > 3)
 				{
-					od.y = atof(sep->arg[4]);
+					od.y = (float)atof(sep->arg[4]);
 				}
 				else
 				{
@@ -10174,7 +10185,7 @@ void command_object(Client *c, const Seperator *sep)
 
 				if (sep->argnum > 4)
 				{
-					od.z = atof(sep->arg[5]);
+					od.z = (float)atof(sep->arg[5]);
 				}
 				else
 				{
@@ -10183,7 +10194,7 @@ void command_object(Client *c, const Seperator *sep)
 
 				if (sep->argnum > 5)
 				{
-					o->SetHeading(atof(sep->arg[6]));
+					o->SetHeading((float)atof(sep->arg[6]));
 				}
 			}
 
@@ -10216,7 +10227,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			o->SetHeading(atof(sep->arg[3]));
+			o->SetHeading((float)atof(sep->arg[3]));
 
 			// Despawn and respawn object to reflect change
 			app = new EQApplicationPacket();
@@ -10454,7 +10465,7 @@ void command_object(Client *c, const Seperator *sep)
 					door.size = 100;
 				}
 
-				switch (door.opentype = od.unknown010) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
+				switch (door.opentype = (uint8)od.unknown010) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
 				{
 					case 0:
 						door.opentype = 31;
@@ -10734,10 +10745,10 @@ void command_object(Client *c, const Seperator *sep)
 			memset(&od, 0, sizeof(od));
 
 			col = 0;
-			od.x = atof(row[col++]);
-			od.y = atof(row[col++]);
-			od.z = atof(row[col++]);
-			od.heading = atof(row[col++]);
+			od.x = (float)atof(row[col++]);
+			od.y = (float)atof(row[col++]);
+			od.z = (float)atof(row[col++]);
+			od.heading = (float)atof(row[col++]);
 			strn0cpy(od.object_name, row[col++], sizeof(od.object_name));
 			od.object_type = atoi(row[col++]);
 			icon = atoi(row[col++]);
@@ -11298,7 +11309,7 @@ void command_mysql(Client *c, const Seperator *sep)
 					unsigned int num_fields = mysql_num_fields(result);
 					std::stringstream LineText;
 					std::vector<std::string> LineVec;
-					for(int i = 0; i < num_fields; i++) {
+					for(unsigned int i = 0; i < num_fields; i++) {
 						//split lines that could overflow the buffer in Client::Message and get cut off
 						//This will crash MQ2 @ 4000 since their internal buffer is only 2048.
 						//Reducing it to 2000 fixes that but splits more results from tables with a lot of columns.
@@ -11316,7 +11327,7 @@ void command_mysql(Client *c, const Seperator *sep)
 					if(Optionh) { //This option will highlight every other row
 						HText = 1 - HText;
 					}
-					for(int lineNum = 0; lineNum < LineVec.size(); ++lineNum)
+					for(unsigned int lineNum = 0; lineNum < LineVec.size(); ++lineNum)
 					{
 						c->Message(HText, LineVec[lineNum].c_str());
 					}

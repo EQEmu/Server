@@ -462,7 +462,7 @@ bool Database::DeleteCharacter(char *name)
 		safe_delete_array(query);
 		query = nullptr;
 	}
-	matches = mysql_num_rows(result);
+	matches = (int)mysql_num_rows(result);
 	if(matches == 1)
 	{
 		row = mysql_fetch_row(result);
@@ -1019,13 +1019,13 @@ bool Database::LoadVariables_result(MYSQL_RES* result) {
 	LockMutex lock(&Mvarcache);
 	if (mysql_num_rows(result) > 0) {
 		if (!varcache_array) {
-			varcache_max = mysql_num_rows(result);
+			varcache_max = (uint32)mysql_num_rows(result);
 			varcache_array = new VarCache_Struct*[varcache_max];
 			for (i=0; i<varcache_max; i++)
 				varcache_array[i] = 0;
 		}
 		else {
-			uint32 tmpnewmax = varcache_max + mysql_num_rows(result);
+			uint32 tmpnewmax = varcache_max + (uint32)mysql_num_rows(result);
 			VarCache_Struct** tmp = new VarCache_Struct*[tmpnewmax];
 			for (i=0; i<tmpnewmax; i++)
 				tmp[i] = 0;
@@ -1169,11 +1169,11 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 		if (mysql_num_rows(result) > 0) {
 			row = mysql_fetch_row(result);
 			if (safe_x != 0)
-				*safe_x = atof(row[0]);
+				*safe_x = (float)atof(row[0]);
 			if (safe_y != 0)
-				*safe_y = atof(row[1]);
+				*safe_y = (float)atof(row[1]);
 			if (safe_z != 0)
-				*safe_z = atof(row[2]);
+				*safe_z = (float)atof(row[2]);
 			if (minstatus != 0)
 				*minstatus = atoi(row[3]);
 			if (minlevel != 0)
@@ -1221,11 +1221,11 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 					strcpy(file_name, row[1]);
 			}
 			if (safe_x != 0)
-				*safe_x = atof(row[2]);
+				*safe_x = (float)atof(row[2]);
 			if (safe_y != 0)
-				*safe_y = atof(row[3]);
+				*safe_y = (float)atof(row[3]);
 			if (safe_z != 0)
-				*safe_z = atof(row[4]);
+				*safe_z = (float)atof(row[4]);
 			if (graveyard_id != 0)
 				*graveyard_id = atoi(row[5]);
 			if (maxclients)
@@ -1283,13 +1283,13 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 			if(graveyard_zoneid != 0)
 				*graveyard_zoneid = atoi(row[0]);
 			if(graveyard_x != 0)
-				*graveyard_x = atof(row[1]);
+				*graveyard_x = (float)atof(row[1]);
 			if(graveyard_y != 0)
-				*graveyard_y = atof(row[2]);
+				*graveyard_y = (float)atof(row[2]);
 			if(graveyard_z != 0)
-				*graveyard_z = atof(row[3]);
+				*graveyard_z = (float)atof(row[3]);
 			if(graveyard_heading != 0)
-				*graveyard_heading = atof(row[4]);
+				*graveyard_heading = (float)atof(row[4]);
 			mysql_free_result(result);
 			return true;
 		}
@@ -1588,7 +1588,7 @@ bool Database::CheckUsedName(const char* name)
 	}
 	else { // It was a valid Query, so lets do our counts!
 		safe_delete_array(query);
-		uint32 tmp = mysql_num_rows(result);
+		uint32 tmp = (uint32)mysql_num_rows(result);
 		mysql_free_result(result);
 		if (tmp > 0) // There is a Name! No change (Return False)
 			return false;
@@ -1779,7 +1779,7 @@ uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 		mysql_free_result(result);
 	}
 
-	return race_cap;
+	return (uint8)race_cap;
 }
 
 uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level)
@@ -1831,7 +1831,7 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 	if (skill_cap3 > 0 && base_cap > skill_cap3)
 		base_cap = skill_cap3;
 	//Base cap is now the max value at the person's level, return it!
-	return base_cap;
+	return (uint8)base_cap;
 }
 
 uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZoneID, uint32* oInstanceID, float* oX, float* oY, float* oZ) {
@@ -1852,11 +1852,11 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 			if(oInstanceID)
 				*oInstanceID = atoi(row[3]);
 			if (oX)
-				*oX = atof(row[4]);
+				*oX = (float)atof(row[4]);
 			if (oY)
-				*oY = atof(row[5]);
+				*oY = (float)atof(row[5]);
 			if (oZ)
-				*oZ = atof(row[6]);
+				*oZ = (float)atof(row[6]);
 			mysql_free_result(result);
 			return charid;
 		}

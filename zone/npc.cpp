@@ -147,8 +147,8 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	logging_enabled = NPC_DEFAULT_LOGGING_ENABLED;
 
-	pAggroRange = d->aggroradius;
-	pAssistRange = d->assistradius;
+	pAggroRange = (float)d->aggroradius;
+	pAssistRange = (float)d->assistradius;
 	findable = d->findable;
 	trackable = d->trackable;
 
@@ -1927,7 +1927,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "trackable")
 	{
-		trackable = atoi(val.c_str());
+		trackable = atoi(val.c_str()) != 0;
 		return;
 	}
 
@@ -1957,19 +1957,19 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "see_invis_undead")
 	{
-		see_invis_undead = atoi(val.c_str());
+		see_invis_undead = atoi(val.c_str()) != 0;
 		return;
 	}
 
 	if(id == "see_hide")
 	{
-		see_hide = atoi(val.c_str());
+		see_hide = atoi(val.c_str()) != 0;
 		return;
 	}
 
 	if(id == "see_improved_hide")
 	{
-		see_improved_hide = atoi(val.c_str());
+		see_improved_hide = atoi(val.c_str()) != 0;
 		return;
 	}
 
@@ -1993,34 +1993,34 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 
 	if(id == "aggro")
 	{
-		pAggroRange = atof(val.c_str());
+		pAggroRange = (float)atof(val.c_str());
 		return;
 	}
 
 	if(id == "assist")
 	{
-		pAssistRange = atof(val.c_str());
+		pAssistRange = (float)atof(val.c_str());
 		return;
 	}
 
 	if(id == "slow_mitigation")
 	{
-		slow_mitigation = atoi(val.c_str());
+		slow_mitigation = (float)atoi(val.c_str());
 		return;
 	}
 	if(id == "loottable_id")
 	{
-		loottable_id = atof(val.c_str());
+		loottable_id = (uint32)atof(val.c_str());
 		return;
 	}
 	if(id == "healscale")
 	{
-		healscale = atof(val.c_str());
+		healscale = (float)atof(val.c_str());
 		return;
 	}
 	if(id == "spellscale")
 	{
-		spellscale = atof(val.c_str());
+		spellscale = (float)atof(val.c_str());
 		return;
 	}
 }

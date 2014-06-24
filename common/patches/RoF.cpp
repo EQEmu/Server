@@ -111,11 +111,11 @@ const EQClientVersion Strategy::ClientVersion() const
 static inline structs::ItemSlotStruct TitaniumToRoFSlot(uint32 TitaniumSlot)
 {
 	structs::ItemSlotStruct RoFSlot;
-	RoFSlot.SlotType = 0xffff;
+	RoFSlot.SlotType = (int16)0xFFFF;
 	RoFSlot.Unknown02 = 0;
-	RoFSlot.MainSlot = 0xffff;
-	RoFSlot.SubSlot = 0xffff;
-	RoFSlot.AugSlot = 0xffff;
+	RoFSlot.MainSlot = (int16)0xFFFF;
+	RoFSlot.SubSlot = (int16)0xFFFF;
+	RoFSlot.AugSlot = (int16)0xFFFF;
 	RoFSlot.Unknown01 = 0;
 	uint32 TempSlot = 0;
 
@@ -359,9 +359,9 @@ static inline uint32 MainInvRoFToTitaniumSlot(structs::MainInvItemSlotStruct RoF
 static inline structs::MainInvItemSlotStruct MainInvTitaniumToRoFSlot(uint32 TitaniumSlot)
 {
 	structs::MainInvItemSlotStruct RoFSlot;
-	RoFSlot.MainSlot = 0xffff;
-	RoFSlot.SubSlot = 0xffff;
-	RoFSlot.AugSlot = 0xffff;
+	RoFSlot.MainSlot = 0xff;
+	RoFSlot.SubSlot = 0xff;
+	RoFSlot.AugSlot = 0xff;
 	RoFSlot.Unknown01 = 0;
 	uint32 TempSlot = 0;
 
@@ -540,7 +540,7 @@ ENCODE(OP_TaskDescription)
 	outapp->WriteUInt32(in->ReadUInt32());	// Duration
 	outapp->WriteUInt32(in->ReadUInt32());	// Unknown
 	uint32 StartTime = in->ReadUInt32();
-	outapp->WriteUInt32(time(nullptr) - StartTime);	// RoF has elapsed time here rather than starttime
+	outapp->WriteUInt32((uint32)(time(nullptr) - StartTime));	// RoF has elapsed time here rather than starttime
 
 	// Copy the rest of the packet verbatim
 	uint32 BytesLeftToCopy = in->size - in->GetReadPosition();
@@ -1899,7 +1899,7 @@ ENCODE(OP_ZoneSpawns)
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->spawnId);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
-			VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7);	// Eye Height?
+			VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7f);	// Eye Height?
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
 
 			structs::Spawn_Struct_Bitfields *Bitfields = (structs::Spawn_Struct_Bitfields*)Buffer;
@@ -2863,9 +2863,9 @@ ENCODE(OP_RecipeAutoCombine) {
 	structs::ItemSlotStruct RoFSlot;
 	RoFSlot.SlotType = 8;	// Observed
 	RoFSlot.Unknown02 = 0;
-	RoFSlot.MainSlot = 0xffff;
-	RoFSlot.SubSlot = 0xffff;
-	RoFSlot.AugSlot = 0xffff;
+	RoFSlot.MainSlot = 0xff;
+	RoFSlot.SubSlot = 0xff;
+	RoFSlot.AugSlot = 0xff;
 	RoFSlot.Unknown01 = 0;
 	eq->unknown_slot = RoFSlot;
 	OUT(recipe_id);

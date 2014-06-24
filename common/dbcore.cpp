@@ -109,7 +109,7 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 		else if (result)
 			*result = 0;
 		if (affected_rows)
-			*affected_rows = mysql_affected_rows(&mysql);
+			*affected_rows = (uint32)mysql_affected_rows(&mysql);
 		if (last_insert_id)
 			*last_insert_id = mysql_insert_id(&mysql);
 		if (result) {

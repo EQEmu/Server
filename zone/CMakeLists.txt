@@ -230,6 +230,8 @@ ENDIF(EQEMU_BUILD_LUA)
 
 
 IF(MSVC)
+
+	SET_PROPERTY(SOURCE "perl_client.cpp" "perl_doors.cpp" "perl_entity.cpp" "perl_groups.cpp" "perl_hateentry.cpp" "perl_mob.cpp" "perl_npc.cpp" "perl_object.cpp" "perl_perlpacket.cpp" "perl_PlayerCorpse.cpp" "perl_questitem.cpp" "perl_raids.cpp" PROPERTY COMPILE_FLAGS " /W0 " )
 	SET_TARGET_PROPERTIES(zone PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
 	TARGET_LINK_LIBRARIES(zone "Ws2_32.lib")
 ENDIF(MSVC)

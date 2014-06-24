@@ -907,12 +907,12 @@ int32 Merc::CalcMaxHP() {
 	//the aa description
 	nd += aabonuses.MaxHP;	//Natural Durability, Physical Enhancement, Planar Durability
 
-	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
+	max_hp = (int32)(max_hp * nd / 10000); //this is to fix the HP-above-495k issue
 	max_hp += spellbonuses.HP + aabonuses.HP;
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
 
-	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	max_hp = (int32)(max_hp + max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 
 	if (cur_hp > max_hp)
 		cur_hp = max_hp;
@@ -1233,7 +1233,7 @@ bool Merc::CanHaveSkill(SkillUseTypes skill_id) const {
 }
 
 uint16 Merc::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
-	return(database.GetSkillCap(class_, skillid, level));
+	return(database.GetSkillCap((uint8)class_, skillid, (uint8)level));
 }
 
 void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
@@ -1584,7 +1584,7 @@ void Merc::AI_Process() {
 		float meleeDistance = GetMaxMeleeRangeToTarget(GetTarget());
 
 		if(GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || GetClass() == WARRIOR) {
-			meleeDistance = meleeDistance * .30;
+			meleeDistance = meleeDistance * .30f;
 		}
 		else {
 			meleeDistance *= (float)MakeRandomFloat(.50, .85);
@@ -1723,7 +1723,7 @@ void Merc::AI_Process() {
 							int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 							DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
-							float random = MakeRandomFloat(0, 1);
+							float random = (float)MakeRandomFloat(0, 1);
 
 							if (random < DualWieldProbability){ // Max 78% of DW
 
@@ -1877,8 +1877,8 @@ bool Merc::AI_EngagedCastCheck() {
 				}
 				break;
 			case HEALER:
-				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(SpellType_Heal), MercAISpellRange, SpellType_Heal)) {
-					if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(SpellType_Buff), MercAISpellRange, SpellType_Buff)) {
+				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(SpellType_Heal), (float)MercAISpellRange, SpellType_Heal)) {
+					if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(SpellType_Buff), (float)MercAISpellRange, SpellType_Buff)) {
 						failedToCast = true;
 					}
 				}
@@ -1931,10 +1931,10 @@ bool Merc::AI_IdleCastCheck() {
 				failedToCast = true;
 			break;
 			case HEALER:
-				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Cure)) {
-					if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Heal)) {
-						if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Resurrect)) {
-							if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Buff)) {
+				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Cure)) {
+					if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Heal)) {
+						if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Resurrect)) {
+							if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Buff)) {
 								failedToCast = true;
 							}
 						}
@@ -1943,7 +1943,7 @@ bool Merc::AI_IdleCastCheck() {
 				result = true;
 				break;
 			case MELEEDPS:
-				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, MercAISpellRange, SpellType_Buff)) {
+				if(!entity_list.Merc_AICheckCloseBeneficialSpells(this, 100, (float)MercAISpellRange, SpellType_Buff)) {
 					failedToCast = true;
 				}
 				break;
@@ -2128,7 +2128,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 							if(g->members[i]->HasPet() && g->members[i]->GetPet()->GetHPRatio() < checkHPR) {
 								if(!tar || ((g->members[i]->GetPet()->GetHPRatio() + 25) < tar->GetHPRatio())) {
 									tar = g->members[i]->GetPet();
-									checkPetHPR = g->members[i]->GetPet()->GetHPRatio() + 25;
+									checkPetHPR = (int8)(g->members[i]->GetPet()->GetHPRatio() + 25);
 								}
 							}
 
@@ -2531,7 +2531,7 @@ void Merc::CheckHateList() {
 			if(g) {
 				Mob* MercOwner = GetOwner();
 				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->IsNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
-						float range = g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+						float range = (float)(g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius));
 						range = range * range;
 						if(MercOwner->GetTarget()->DistNoRootNoZ(*this) < range) {
 							AddToHateList(MercOwner->GetTarget(), 1);
@@ -2553,7 +2553,7 @@ void Merc::CheckHateList() {
 								if(groupMember) {
 									if(npc->IsOnHatelist(groupMember)) {
 										if(!hate_list.IsOnHateList(npc)) {
-											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+											float range = (float)(g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius));
 											range *= range;
 											if(npc->DistNoRootNoZ(*this) < range) {
 												hate_list.Add(npc, 1);
@@ -2822,7 +2822,7 @@ int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
-			value = (value * GetSpellScale() / 100);	
+			value = (int32)(value * GetSpellScale() / 100);	
 				
 			entity_list.MessageClose_StringID(this, false, 100, MT_SpellCrits,
 					OTHER_CRIT_BLAST, GetName(), itoa(-value));
@@ -2849,7 +2849,7 @@ int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
          value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value); 
 
-	value = (value * GetSpellScale() / 100);		 
+	value = (int32)(value * GetSpellScale() / 100);		 
 		 
 	return value;
  }
@@ -2940,10 +2940,10 @@ int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
 
 	if(focus_redux > 0)
 	{
-		PercentManaReduction += MakeRandomFloat(1, (double)focus_redux);
+		PercentManaReduction += (float)MakeRandomFloat(1, (double)focus_redux);
 	}
 
-	cost -= (cost * (PercentManaReduction / 100));
+	cost = (int32)(cost - (cost * (PercentManaReduction / 100)));
 
 	// Gift of Mana - reduces spell cost to 1 mana
 	if(focus_redux >= 100) {
@@ -4344,7 +4344,7 @@ bool Merc::CheckAETaunt() {
 		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
 			float dist = npc->DistNoRootNoZ(*this);
-			int range = GetActSpellRange(mercSpell.spellid, spells[mercSpell.spellid].range);
+			int range = (int)GetActSpellRange(mercSpell.spellid, spells[mercSpell.spellid].range);
 			range *= range;
 
 			if(dist <= range) {
@@ -4621,9 +4621,9 @@ void Merc::DoClassAttacks(Mob *target) {
 
 	float HasteModifier = 0;
 	if(GetHaste() > 0)
-		HasteModifier = 10000 / (100 + GetHaste());
+		HasteModifier = (float)(10000 / (100 + GetHaste()));
 	else if(GetHaste() < 0)
-		HasteModifier = (100 - GetHaste());
+		HasteModifier = (float)(100 - GetHaste());
 	else
 		HasteModifier = 100;
 
@@ -4689,7 +4689,7 @@ void Merc::DoClassAttacks(Mob *target) {
 		}
 	}
 
-	classattack_timer.Start(reuse*HasteModifier/100);
+	classattack_timer.Start((uint32)(reuse*HasteModifier/1000));
 }
 
 bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
@@ -5497,7 +5497,7 @@ bool Merc::Suspend() {
 	SetSuspended(true);
 
 	mercOwner->GetMercInfo().IsSuspended = true;
-	mercOwner->GetMercInfo().SuspendedTime = time(nullptr) + RuleI(Mercs, SuspendIntervalS);
+	mercOwner->GetMercInfo().SuspendedTime = (uint32)(time(nullptr) + RuleI(Mercs, SuspendIntervalS));
 	mercOwner->GetMercInfo().MercTimerRemaining = mercOwner->GetMercTimer()->GetRemainingTime();
 	mercOwner->GetMercInfo().Stance = GetStance();
 	Save();

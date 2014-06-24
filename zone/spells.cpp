@@ -113,7 +113,7 @@ void Mob::SpellProcess()
 	{
 		spellend_timer.Disable();
 		delaytimer = false;
-		CastedSpellFinished(casting_spell_id, casting_spell_targetid, casting_spell_slot,
+		CastedSpellFinished(casting_spell_id, casting_spell_targetid, (uint8)casting_spell_slot,
 			casting_spell_mana, casting_spell_inventory_slot, casting_spell_resist_adjust);
 	}
 
@@ -180,7 +180,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		if(IsClient())
 			CastToClient()->SendSpellBarEnable(spell_id);
 		if(casting_spell_id && IsNPC())
-			CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
+			CastToNPC()->AI_Event_SpellCastFinished(false, (uint8)casting_spell_slot);
 		return(false);
 	}
 
@@ -200,7 +200,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		if(IsClient())
 			CastToClient()->SendSpellBarEnable(spell_id);
 		if(casting_spell_id && IsNPC())
-			CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
+			CastToNPC()->AI_Event_SpellCastFinished(false, (uint8)casting_spell_slot);
 		return(false);
 	}
 
@@ -444,7 +444,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
-		CastedSpellFinished(spell_id, target_id, slot, mana_cost, item_slot, resist_adjust);
+		CastedSpellFinished(spell_id, target_id, (uint8)slot, mana_cost, item_slot, resist_adjust);
 		return(true);
 	}
 
@@ -691,13 +691,13 @@ bool Client::CheckFizzle(uint16 spell_id)
 	if(specialize > 0) {
 		switch(GetAA(aaSpellCastingMastery)){
 		case 1:
-			specialize = specialize * 1.05;
+			specialize = specialize * 1.05f;
 			break;
 		case 2:
-			specialize = specialize * 1.15;
+			specialize = specialize * 1.15f;
 			break;
 		case 3:
-			specialize = specialize * 1.3;
+			specialize = specialize * 1.3f;
 			break;
 		}
 		if(((specialize/6.0f) + 15.0f) < MakeRandomFloat(0, 100)) {
@@ -711,25 +711,25 @@ bool Client::CheckFizzle(uint16 spell_id)
 	// > 0 --> skill is lower, higher chance of fizzle
 	// < 0 --> skill is better, lower chance of fizzle
 	// the max that diff can be is +- 235
-	float diff = par_skill + spells[spell_id].basediff - act_skill;
+	float diff = (float)(par_skill + spells[spell_id].basediff - act_skill);
 
 	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
 	if(GetClass() == BARD)
 	{
-		diff -= (GetCHA() - 110) / 20.0;
+		diff -= (GetCHA() - 110) / 20.0f;
 	}
 	else if (GetCasterClass() == 'W')
 	{
-		diff -= (GetWIS() - 125) / 20.0;
+		diff -= (GetWIS() - 125) / 20.0f;
 	}
 	else if (GetCasterClass() == 'I')
 	{
-		diff -= (GetINT() - 125) / 20.0;
+		diff -= (GetINT() - 125) / 20.0f;
 	}
 
 	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever
 	float basefizzle = 10;
-	float fizzlechance = basefizzle - specialize + diff / 5.0;
+	float fizzlechance = basefizzle - specialize + diff / 5.0f;
 
 	// always at least 1% chance to fail or 5% to succeed
 	fizzlechance = fizzlechance < 1 ? 1 : (fizzlechance > 95 ? 95 : fizzlechance);
@@ -742,7 +742,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 	}
 	*/
 
-	float fizzle_roll = MakeRandomFloat(0, 100);
+	float fizzle_roll = (float)MakeRandomFloat(0, 100);
 
 	mlog(SPELLS__CASTING, "Check Fizzle %s  spell %d  fizzlechance: %0.2f%%   diff: %0.2f  roll: %0.2f", GetName(), spell_id, fizzlechance, diff, fizzle_roll);
 
@@ -793,7 +793,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	}
 
 	if(casting_spell_id && IsNPC()) {
-		CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
+		CastToNPC()->AI_Event_SpellCastFinished(false, (uint8)casting_spell_slot);
 	}
 
 	if(casting_spell_type == 1 && IsClient()) { //Rest AA Timer on failed cast
@@ -872,7 +872,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 // NOTE: do not put range checking, etc into this function. this should
 // just check timed spell specific things before passing off to SpellFinished
 // which figures out proper targets etc
-void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
+void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint8 slot,
 							uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
 {
 	bool IsFromItem = false;
@@ -2049,7 +2049,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			std::list<Mob*> targets_in_range;
 			std::list<Mob*>::iterator iter;
 
-			entity_list.GetTargetsForConeArea(this, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
+			entity_list.GetTargetsForConeArea(this, (uint32)spells[spell_id].aoerange, (uint32)spells[spell_id].aoerange / 2, targets_in_range);
 			iter = targets_in_range.begin();
 			while(iter != targets_in_range.end())
 			{
@@ -2139,7 +2139,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	}
 
 	if(IsNPC())
-		CastToNPC()->AI_Event_SpellCastFinished(true, slot);
+		CastToNPC()->AI_Event_SpellCastFinished(true, (uint8)slot);
 
 	return true;
 }
@@ -2369,8 +2369,8 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 						spu->x_pos		= FloatToEQ19(GetX());
 						spu->y_pos		= FloatToEQ19(GetY());
 						spu->z_pos		= FloatToEQ19(GetZ());
-						spu->delta_x	= NewFloatToEQ13(new_x);
-						spu->delta_y	= NewFloatToEQ13(new_y);
+						spu->delta_x	= NewFloatToEQ13((float)new_x);
+						spu->delta_y	= NewFloatToEQ13((float)new_y);
 						spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
 						spu->heading	= FloatToEQ19(GetHeading());
 						spu->padding0002	=0;
@@ -3287,7 +3287,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				Group* pBasicGroupTargetPet = 0;
 				uint32 nGroupTargetPet = 0; //raid group
 
-				const uint32 cnWTF = 0xFFFFFFFF + 1; //this should be zero unless on 64bit? forced uint64?
 
 				//Caster client pointers
 				pClient = this->CastToClient();
@@ -3325,7 +3324,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 						!(
 							(pBasicGroup && ((pBasicGroup == pBasicGroupTarget) || (pBasicGroup == pBasicGroupTargetPet))) || //Basic Group
 
-							((nGroup != cnWTF) && ((nGroup == nGroupTarget) || (nGroup == nGroupTargetPet))) || //Raid group
+							((nGroup != 0) && ((nGroup == nGroupTarget) || (nGroup == nGroupTargetPet))) || //Raid group
 
 							(spelltar == GetPet()) //should be able to cast grp spells on self and pet despite grped status.
 						)
@@ -3675,8 +3674,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				spu->x_pos		= FloatToEQ19(spelltar->GetX());
 				spu->y_pos		= FloatToEQ19(spelltar->GetY());
 				spu->z_pos		= FloatToEQ19(spelltar->GetZ());
-				spu->delta_x	= NewFloatToEQ13(new_x);
-				spu->delta_y	= NewFloatToEQ13(new_y);
+				spu->delta_x	= NewFloatToEQ13((float)new_x);
+				spu->delta_y	= NewFloatToEQ13((float)new_y);
 				spu->delta_z	= NewFloatToEQ13(spells[spell_id].pushup);
 				spu->heading	= FloatToEQ19(spelltar->GetHeading());
 				spu->padding0002	=0;
@@ -4391,7 +4390,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 				resist_chance = 1;
 			}
 
-			int partial_modifier = ((150 * (roll - resist_chance)) / resist_chance);
+			float partial_modifier = ((150.0f * (roll - resist_chance)) / resist_chance);
 
 			if(IsNPC())
 			{
@@ -4415,7 +4414,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			{
 				if((GetLevel() - caster->GetLevel()) >= 20)
 				{
-					partial_modifier += (GetLevel() - caster->GetLevel()) * 1.5;
+					partial_modifier = partial_modifier+(GetLevel() - caster->GetLevel()) * 1.5f;
 				}
 			}
 
@@ -4508,7 +4507,7 @@ float Mob::GetAOERange(uint16 spell_id) {
 
 		if(IsBardSong(spell_id) && IsBeneficialSpell(spell_id)) {
 			//Live AA - Extended Notes, SionachiesCrescendo
-			float song_bonus = aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange;
+			float song_bonus = (float)(aabonuses.SongRange + spellbonuses.SongRange + itembonuses.SongRange);
 			range += range*song_bonus /100.0f;
 		}
 
@@ -4642,7 +4641,7 @@ void NPC::Stun(int duration) {
 
 void NPC::UnStun() {
 	Mob::UnStun();
-	SetRunAnimSpeed(this->GetRunspeed());
+	SetRunAnimSpeed((int8)this->GetRunspeed());
 	SendPosition();
 }
 

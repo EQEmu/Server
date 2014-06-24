@@ -470,7 +470,7 @@ void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, int32 range)
 		range = 200;
 
 	float distance;
-	float range2 = range*range;
+	float range2 = (float)(range*range);
 
 	int numMem = 0;
 	unsigned int gi = 0;
@@ -516,7 +516,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster)
 	int gi = 0;
 	
 	float distance;
-	float range2 = range*range;
+	float range2 = (float)(range*range);
 
 	for(; gi < MAX_RAID_MEMBERS; gi++)
 	{
@@ -564,7 +564,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster)
 		range = 200;
 			
 	float distance;
-	float range2 = range*range;
+	float range2 = (float)(range*range);
 
 	int manataken = 0, numMem = 0;
 	int gi = 0;
@@ -1319,7 +1319,7 @@ void Raid::GetRaidDetails()
 		}
 		row = mysql_fetch_row(result);
 		if(row){
-			locked = atoi(row[0]);
+			locked = atoi(row[0]) != 0;
 			LootType = atoi(row[1]);
 		}
 		mysql_free_result(result);
@@ -1354,9 +1354,9 @@ bool Raid::LearnMembers()
 				members[i].GroupNumber = GroupNum;
 			members[i]._class = atoi(row[2]);
 			members[i].level = atoi(row[3]);
-			members[i].IsGroupLeader = atoi(row[4]);
-			members[i].IsRaidLeader = atoi(row[5]);
-			members[i].IsLooter = atoi(row[6]);
+			members[i].IsGroupLeader = atoi(row[4]) != 0;
+			members[i].IsRaidLeader = atoi(row[5]) != 0;
+			members[i].IsLooter = atoi(row[6]) != 0;
 			i++;
 		}
 		mysql_free_result(result);

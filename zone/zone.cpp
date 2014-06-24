@@ -28,6 +28,7 @@
 #include <process.h>
 #define	snprintf	_snprintf
 #define	vsnprintf	_vsnprintf
+#define strlwr		_strlwr
 #else
 #include <pthread.h>
 #include "../common/unix.h"
@@ -183,10 +184,10 @@ bool Zone::LoadZoneObjects() {
 					strn0cpy(d.zone_name, shortname, sizeof(d.zone_name));
 					d.db_id = 1000000000 + atoi(row[0]); // Out of range of normal use for doors.id
 					d.door_id = -1; // Client doesn't care if these are all the same door_id
-					d.pos_x = atof(row[2]); // xpos
-					d.pos_y = atof(row[3]); // ypos
-					d.pos_z = atof(row[4]); // zpos
-					d.heading = atof(row[5]); // heading
+					d.pos_x = (float)atof(row[2]); // xpos
+					d.pos_y = (float)atof(row[3]); // ypos
+					d.pos_z = (float)atof(row[4]); // zpos
+					d.heading = (float)atof(row[5]); // heading
 
 					strn0cpy(d.door_name, row[8], sizeof(d.door_name)); // objectname
 					// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
@@ -232,10 +233,10 @@ bool Zone::LoadZoneObjects() {
 
 			id							= (uint32)atoi(row[0]);
 			data.zone_id				= atoi(row[1]);
-			data.x						= atof(row[2]);
-			data.y						= atof(row[3]);
-			data.z						= atof(row[4]);
-			data.heading				= atof(row[5]);
+			data.x						= (float)atof(row[2]);
+			data.y						= (float)atof(row[3]);
+			data.z						= (float)atof(row[4]);
+			data.heading				= (float)atof(row[5]);
 			itemid						= (uint32)atoi(row[6]);
 			charges						= (int16)atoi(row[7]);
 			strcpy(data.object_name, row[8]);
@@ -475,9 +476,9 @@ void Zone::LoadNewMerchantData(uint32 merchantid){
 			ml.id = merchantid;
 			ml.item = atoul(row[0]);
 			ml.slot = atoul(row[1]);
-			ml.faction_required = atoul(row[2]);
-			ml.level_required = atoul(row[3]);
-			ml.alt_currency_cost = atoul(row[3]);
+			ml.faction_required = (int16)atoul(row[2]);
+			ml.level_required = (int8)atoul(row[3]);
+			ml.alt_currency_cost = (uint16)atoul(row[3]);
 			ml.classes_required = atoul(row[4]);
 			merlist.push_back(ml);
 		}
@@ -522,9 +523,9 @@ void Zone::LoadMerchantData_result(MYSQL_RES* result) {
 
 		ml.slot = atoul(row[1]);
 		ml.item = atoul(row[2]);
-		ml.faction_required = atoul(row[3]);
-		ml.level_required = atoul(row[4]);
-		ml.alt_currency_cost = atoul(row[5]);
+		ml.faction_required = (int16)atoul(row[3]);
+		ml.level_required = (int8)atoul(row[4]);
+		ml.alt_currency_cost = (uint16)atoul(row[5]);
 		ml.classes_required = atoul(row[6]);
 		cur->second.push_back(ml);
 	}
@@ -640,8 +641,8 @@ void Zone::LoadLevelEXPMods(){
 	else {
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
 			uint32 index = atoi(DataRow[0]);
-			float exp_mod = atof(DataRow[1]);
-			float aa_exp_mod = atof(DataRow[2]);
+			float exp_mod = (float)atof(DataRow[1]);
+			float aa_exp_mod = (float)atof(DataRow[2]);
 			level_exp_mod[index].ExpMod = exp_mod;
 			level_exp_mod[index].AAExpMod = aa_exp_mod;
 		}
@@ -1730,15 +1731,15 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,
 		while((row = mysql_fetch_row(result)))
 		{
 			ZonePoint* zp = new ZonePoint;
-			zp->x = atof(row[0]);
-			zp->y = atof(row[1]);
-			zp->z = atof(row[2]);
-			zp->target_x = atof(row[3]);
-			zp->target_y = atof(row[4]);
-			zp->target_z = atof(row[5]);
+			zp->x = (float)atof(row[0]);
+			zp->y = (float)atof(row[1]);
+			zp->z = (float)atof(row[2]);
+			zp->target_x = (float)atof(row[3]);
+			zp->target_y = (float)atof(row[4]);
+			zp->target_z = (float)atof(row[5]);
 			zp->target_zone_id = atoi(row[6]);
-			zp->heading = atof(row[7]);
-			zp->target_heading = atof(row[8]);
+			zp->heading = (float)atof(row[7]);
+			zp->target_heading = (float)atof(row[8]);
 			zp->number = atoi(row[9]);
 			zp->target_zone_instance = atoi(row[10]);
 			zp->client_version_mask = (uint32)strtoul(row[11], nullptr, 0);
@@ -1929,7 +1930,7 @@ bool Zone::HasGraveyard() {
 	return Result;
 }
 
-void Zone::SetGraveyard(uint32 zoneid, uint32 x, uint32 y, uint32 z, uint32 heading) {
+void Zone::SetGraveyard(uint32 zoneid, float x, float y, float z, float heading) {
 	pgraveyard_zoneid = zoneid;
 	pgraveyard_x = x;
 	pgraveyard_y = y;
@@ -2342,7 +2343,7 @@ void Zone::DoAdventureActions()
 			const NPCType* tmp = database.GetNPCType(ds->data_id);
 			if(tmp)
 			{
-				NPC* npc = new NPC(tmp, 0, ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h, FlyMode3);
+				NPC* npc = new NPC(tmp, nullptr, (float)ds->assa_x, (float)ds->assa_y, (float)ds->assa_z, (float)ds->assa_h, FlyMode3);
 				npc->AddLootTable();
 				entity_list.AddNPC(npc);
 				npc->Shout("Rarrrgh!");

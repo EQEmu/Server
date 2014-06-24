@@ -202,7 +202,7 @@ uint32 EQProtocolPacket::serialize(unsigned char *dest) const
 		*(uint16 *)dest=opcode;
 	} else {
 		*(dest)=0;
-		*(dest+1)=opcode;
+		*(dest+1)=(unsigned char)opcode;
 	}
 	memcpy(dest+2,pBuffer,size);
 
