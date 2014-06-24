@@ -103,7 +103,7 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 	return self->Attack(other, hand, from_riposte, is_strikethrough, is_from_spell);
 }
 
-bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, luabind::object opts) {
+bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, luabind::adl::object opts) {
 	Lua_Safe_Call_Bool();
 
 	ExtraAttackOptions options;
@@ -1429,7 +1429,7 @@ void Lua_Mob::SetGender(int in) {
 	self->SendIllusionPacket(self->GetRace(), in);
 }
 
-void Lua_Mob::SendIllusionPacket(luabind::object illusion) {
+void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 	Lua_Safe_Call_Void();
 
 	if(luabind::type(illusion) != LUA_TTABLE) {
@@ -1881,7 +1881,7 @@ luabind::scope lua_register_mob() {
 		.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool))&Lua_Mob::Attack)
 		.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool,bool))&Lua_Mob::Attack)
 		.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool,bool,bool))&Lua_Mob::Attack)
-		.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool,bool,bool,luabind::object))&Lua_Mob::Attack)
+		.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool,bool,bool,luabind::adl::object))&Lua_Mob::Attack)
 		.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int))&Lua_Mob::Damage)
 		.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool))&Lua_Mob::Damage)
 		.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool,int))&Lua_Mob::Damage)
@@ -2125,7 +2125,7 @@ luabind::scope lua_register_mob() {
 		.def("SetTexture", (void(Lua_Mob::*)(int))&Lua_Mob::SetTexture)
 		.def("SetRace", (void(Lua_Mob::*)(int))&Lua_Mob::SetRace)
 		.def("SetGender", (void(Lua_Mob::*)(int))&Lua_Mob::SetGender)
-		.def("SendIllusionPacket", (void(Lua_Mob::*)(luabind::object))&Lua_Mob::SendIllusionPacket)
+		.def("SendIllusionPacket", (void(Lua_Mob::*)(luabind::adl::object))&Lua_Mob::SendIllusionPacket)
 		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client))&Lua_Mob::QuestReward)
 		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32))&Lua_Mob::QuestReward)
 		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32,uint32))&Lua_Mob::QuestReward)

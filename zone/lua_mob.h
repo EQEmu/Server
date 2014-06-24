@@ -47,7 +47,7 @@ public:
 	bool Attack(Lua_Mob other, int hand, bool from_riposte);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell);
-	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, luabind::object opts);
+	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, luabind::adl::object opts);
 	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill);
 	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable);
 	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot);
@@ -294,7 +294,7 @@ public:
 	void SetTexture(int in);
 	void SetRace(int in);
 	void SetGender(int in);
-	void SendIllusionPacket(luabind::object illusion);
+	void SendIllusionPacket(luabind::adl::object illusion);
 	void QuestReward(Lua_Client c);
 	void QuestReward(Lua_Client c, uint32 silver);
 	void QuestReward(Lua_Client c, uint32 silver, uint32 gold);
