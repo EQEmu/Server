@@ -53,8 +53,8 @@ Mob::Mob(const char* in_name,
 		uint8		in_light,
 		uint8		in_texture,
 		uint8		in_helmtexture,
-		uint16		in_ac,
-		uint16		in_atk,
+		uint32		in_ac,
+		uint32		in_atk,
 		uint16		in_str,
 		uint16		in_sta,
 		uint16		in_dex,
@@ -3390,8 +3390,8 @@ int16 Mob::GetSkillReuseTime(uint16 skill) {
 	return skill_reduction;
 }
 
-int16 Mob::GetSkillDmgAmt(uint16 skill) {
-	int skill_dmg = 0;
+uint32 Mob::GetSkillDmgAmt(uint16 skill) {
+	uint32 skill_dmg = 0;
 	skill_dmg += (spellbonuses.SkillDamageAmount[HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount[HIGHEST_SKILL + 1] + aabonuses.SkillDamageAmount[HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount[skill] + spellbonuses.SkillDamageAmount[skill] + aabonuses.SkillDamageAmount[skill]);
 	skill_dmg += (spellbonuses.SkillDamageAmount2[HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount2[HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount2[skill] + spellbonuses.SkillDamageAmount2[skill]);
 	return skill_dmg;

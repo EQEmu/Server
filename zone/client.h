@@ -209,7 +209,7 @@ public:
 	virtual Raid* GetRaid() { return entity_list.GetRaidByClient(this); }
 	virtual Group* GetGroup() { return entity_list.GetGroupByClient(this); }
 	virtual inline bool IsBerserk() { return berserk; }
-	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
+	virtual uint32 GetMeleeMitDmg(Mob *attacker, uint32 damage, uint32 minhit, float mit_rating, float atk_rating);
 
 	void	AI_Init();
 	void	AI_Start(uint32 iMoveDelay = 0);

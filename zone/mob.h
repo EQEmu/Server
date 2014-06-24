@@ -75,8 +75,8 @@ public:
 		uint8		in_light,
 		uint8		in_texture,
 		uint8		in_helmtexture,
-		uint16		in_ac,
-		uint16		in_atk,
+		uint32		in_ac,
+		uint32		in_atk,
 		uint16		in_str,
 		uint16		in_sta,
 		uint16		in_dex,
@@ -119,21 +119,21 @@ public:
 	float HeadingAngleToMob(Mob *other);
 	virtual void RangedAttack(Mob* other) { }
 	virtual void ThrowingAttack(Mob* other) { }
-	uint32 GetThrownDamage(int32 wDmg, int32& TotalDmg, int& minDmg);
+	uint32 GetThrownDamage(uint32 wDmg, uint32& TotalDmg, uint32& minDmg);
 	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) = 0;
-	int MonkSpecialAttack(Mob* other, uint8 skill_used);
+	uint32 MonkSpecialAttack(Mob* other, uint8 skill_used);
 	virtual void TryBackstab(Mob *other,int ReuseTime = 10);
 	void TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand = 13, int damage = 0);
-	virtual bool AvoidDamage(Mob* attacker, int32 &damage, bool CanRiposte = true);
+	virtual bool AvoidDamage(Mob* attacker, uint32 &damage, bool CanRiposte = true);
 	virtual bool CheckHitChance(Mob* attacker, SkillUseTypes skillinuse, int Hand, int16 chance_mod = 0);
-	virtual void TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttackOptions *opts = nullptr);
-	void TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage);
+	virtual void TryCriticalHit(Mob *defender, uint16 skill, uint32 &damage, ExtraAttackOptions *opts = nullptr);
+	void TryPetCriticalHit(Mob *defender, uint16 skill, uint32 &damage);
 	virtual bool TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse);
 	virtual bool TryHeadShot(Mob* defender, SkillUseTypes skillInUse);
 	virtual void DoRiposte(Mob* defender);
-	void ApplyMeleeDamageBonus(uint16 skill, int32 &damage);
-	virtual void MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts = nullptr);
-	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
+	void ApplyMeleeDamageBonus(uint16 skill, uint32 &damage);
+	virtual void MeleeMitigation(Mob *attacker, uint32 &damage, uint32 minhit, ExtraAttackOptions *opts = nullptr);
+	virtual uint32 GetMeleeMitDmg(Mob *attacker, uint32 damage, uint32 minhit, float mit_rating, float atk_rating);
 	bool CombatRange(Mob* other);
 	virtual inline bool IsBerserk() { return false; }
 	void RogueEvade(Mob *other);
@@ -530,7 +530,7 @@ public:
 	int16 GetCrippBlowChance();
 	int16 GetSkillReuseTime(uint16 skill);
 	int16 GetCriticalChanceBonus(uint16 skill);
-	int16 GetSkillDmgAmt(uint16 skill);
+	uint32 GetSkillDmgAmt(uint16 skill);
 	bool TryReflectSpell(uint32 spell_id);
 	bool CanBlockSpell() const { return(spellbonuses.BlockNextSpell); }
 	bool DoHPToManaCovert(uint16 mana_cost = 0);
@@ -629,7 +629,7 @@ public:
 	int32 AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
 	int32 ReduceAllDamage(int32 damage);
 
-	virtual void DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance=false);
+	virtual void DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, uint32 max_damage, uint32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance=false);
 	virtual void DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const Item_Struct* item=nullptr, uint32 weapon_damage=0, int16 chance_mod=0,int16 focus=0);
 	virtual void DoMeleeSkillAttackDmg(Mob* other, uint32 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod=0, int16 focus=0, bool CanRiposte=false);
 	virtual void DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const ItemInst* Ammo=nullptr, uint32 weapon_damage=0, int16 chance_mod=0, int16 focus=0);
@@ -924,9 +924,9 @@ protected:
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
 	int GetWeaponDamage(Mob *against, const Item_Struct *weapon_item);
 	int GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate = nullptr);
-	int GetKickDamage();
-	int GetBashDamage();
-	virtual void ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg);
+	uint32 GetKickDamage();
+	uint32 GetBashDamage();
+	virtual void ApplySpecialAttackMod(SkillUseTypes skill, uint32 &dmg, uint32 &mindmg);
 	bool HasDied();
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);

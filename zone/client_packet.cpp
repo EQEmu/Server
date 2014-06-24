@@ -1992,14 +1992,14 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	}
 
 	const ItemInst* inst = m_inv[slot_id];
-	if (!inst) {
+	if (!inst && slot_id != -1501) {
 		Message(0, "Error: item not found in inventory slot #%i", slot_id);
 		DeleteItemInInventory(slot_id,0,true);
 		return;
 	}
 
 	const Item_Struct* item = inst->GetItem();
-	if (!item) {
+	if (!item && slot_id != -1501) {
 		Message(0, "Error: item not found in inventory slot #%i", slot_id);
 		DeleteItemInInventory(slot_id,0,true);
 		return;
@@ -2007,40 +2007,20 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 	spell_id = item->Click.Effect;
 
-	if
-	(
-		spell_id > 0 &&
-		(
-			!IsValidSpell(spell_id) ||
-			casting_spell_id ||
-			delaytimer ||
-			spellend_timer.Enabled() ||
-			IsStunned() ||
-			IsFeared() ||
-			IsMezzed() ||
-			DivineAura() ||
-			(IsSilenced() && !IsDiscipline(spell_id)) ||
-			(IsAmnesiad() && IsDiscipline(spell_id)) ||
-			(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat())
-		)
-	)
-	{
+	if (spell_id > 0 && (!IsValidSpell(spell_id) || casting_spell_id || delaytimer || spellend_timer.Enabled() || IsStunned() || IsFeared() | IsMezzed() || DivineAura() || (IsSilenced() && !IsDiscipline(spell_id)) || (IsAmnesiad() && IsDiscipline(spell_id)) || (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()))) {
 		SendSpellBarEnable(spell_id);
 		return;
 	}
 
 	LogFile->write(EQEMuLog::Debug, "OP ItemVerifyRequest: spell=%i, target=%i, inv=%i", spell_id, target_id, slot_id);
 
-	if ((slot_id < 30) || (slot_id == 9999) || (slot_id > 250 && slot_id < 331 && ((item->ItemType == ItemTypePotion) || item->PotionBelt))) // sanity check
-	{
+	if ((slot_id < 30) || (slot_id == 9999) || (slot_id > 250 && slot_id < 331 && ((item->ItemType == ItemTypePotion) || item->PotionBelt))) {
 		ItemInst* p_inst = (ItemInst*)inst;
 
 		parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, nullptr, "", slot_id);
 		inst = m_inv[slot_id];
 		if(!inst)
-		{
 			return;
-		}
 
         int r;
         bool tryaug = false;
@@ -2055,8 +2035,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
             if(!aug)
                 continue;
 
-            if ( (aug->Click.Type == ET_ClickEffect) || (aug->Click.Type == ET_Expendable) || (aug->Click.Type == ET_EquipClick) || (aug->Click.Type == ET_ClickEffect2) )
-            {
+            if ((aug->Click.Type == ET_ClickEffect) || (aug->Click.Type == ET_Expendable) || (aug->Click.Type == ET_EquipClick) || (aug->Click.Type == ET_ClickEffect2)) {
                 tryaug = true;
                 clickaug = (ItemInst*)aug_i;
                 augitem = (Item_Struct*)aug;
@@ -2066,103 +2045,65 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
         }
 
 		if((spell_id <= 0) && (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol && item->ItemType != ItemTypeSpell))
-		{
 			LogFile->write(EQEMuLog::Debug, "Item with no effect right clicked by %s",GetName());
-		}
-		else if (inst->IsType(ItemClassCommon))
-		{
-			if(item->ItemType == ItemTypeSpell && (strstr((const char*)item->Name, "Tome of ") || strstr((const char*)item->Name, "Skill: ")))
-			{
+		else if (inst->IsType(ItemClassCommon)) {
+			if(item->ItemType == ItemTypeSpell && (strstr((const char*)item->Name, "Tome of ") || strstr((const char*)item->Name, "Skill: "))) {
 				DeleteItemInInventory(slot_id, 1, true);
 				TrainDiscipline(item->ID);
 			}
 			else if(item->ItemType == ItemTypeSpell)
-			{
 				return;
-			}
-			else if ((item->Click.Type == ET_ClickEffect) || (item->Click.Type == ET_Expendable) || (item->Click.Type == ET_EquipClick) || (item->Click.Type == ET_ClickEffect2))
-			{
-				if (inst->GetCharges() == 0)
-				{
-					//Message(0, "This item is out of charges.");
+			else if ((item->Click.Type == ET_ClickEffect) || (item->Click.Type == ET_Expendable) || (item->Click.Type == ET_EquipClick) || (item->Click.Type == ET_ClickEffect2)) {
+				if (inst->GetCharges() == 0) {
 					Message_StringID(13, ITEM_OUT_OF_CHARGES);
 					return;
 				}
-				if(GetLevel() >= item->Click.Level2)
-				{
+				if(GetLevel() >= item->Click.Level2) {
 					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", slot_id);
 					inst = m_inv[slot_id];
 					if(!inst)
-					{
 						return;
-					}
-
-					if(i == 0) {
+						
+					if(i == 0)
 						CastSpell(item->Click.Effect, target_id, 10, item->CastTime, 0, 0, slot_id);
-					}
 				}
-				else
-				{
+				else {
 					Message_StringID(13, ITEMS_INSUFFICIENT_LEVEL);
 					return;
 				}
 			}
-            else if (tryaug)
-            {
-                if (clickaug->GetCharges() == 0)
-                {
-                    //Message(0, "This item is out of charges.");
+            else if (tryaug) {
+                if (clickaug->GetCharges() == 0) {
                     Message_StringID(13, ITEM_OUT_OF_CHARGES);
                     return;
                 }
-                if(GetLevel() >= augitem->Click.Level2)
-                {
+                if(GetLevel() >= augitem->Click.Level2) {
 					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, nullptr, "", slot_id);
 					inst = m_inv[slot_id];
 					if(!inst)
-					{
 						return;
-					}
 
-					if(i == 0) {
+					if(i == 0)
 						CastSpell(augitem->Click.Effect, target_id, 10, augitem->CastTime, 0, 0, slot_id);
-					}
                 }
-                else
-                {
+                else {
                     Message_StringID(13, ITEMS_INSUFFICIENT_LEVEL);
                     return;
                 }
             }
-			else
-			{
-				if(GetClientVersion() >= EQClientSoD && !inst->IsEquipable(GetBaseRace(),GetClass()))
-				{
+			else {
+				if(GetClientVersion() >= EQClientSoD && !inst->IsEquipable(GetBaseRace(),GetClass())) {
 					if(item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol)
-					{
 						LogFile->write(EQEMuLog::Debug, "Error: unknown item->Click.Type (%i)", item->Click.Type);
-					}
-					else
-					{
-						//This is food/drink - consume it
+					else {
 						if (item->ItemType == ItemTypeFood && m_pp.hunger_level < 5000)
-						{
 							Consume(item, item->ItemType, slot_id, false);
-						}
 						else if (item->ItemType == ItemTypeDrink && m_pp.thirst_level < 5000)
-						{
 							Consume(item, item->ItemType, slot_id, false);
-						}
-						else if (item->ItemType == ItemTypeAlcohol)
-						{
+						else if (item->ItemType == ItemTypeAlcohol) {
 #if EQDEBUG >= 1
 							LogFile->write(EQEMuLog::Debug, "Drinking Alcohol from slot:%i", slot_id);
 #endif
-							// This Seems to be handled in OP_DeleteItem handling
-							//DeleteItemInInventory(slot_id, 1, false);
-							//entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
-							//Should add intoxication level to the PP at some point
-							//CheckIncreaseSkill(ALCOHOL_TOLERANCE, nullptr, 25);
 						}
 
 						if (m_pp.hunger_level > 6000)
@@ -2182,28 +2123,20 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 				}
 				else
-				{
 					LogFile->write(EQEMuLog::Debug, "Error: unknown item->Click.Type (%i)", item->Click.Type);
-				}
 			}
 		}
 		else
-		{
 			Message(0, "Error: item not found in inventory slot #%i", slot_id);
-		}
 	}
 	else
-	{
 		Message(0, "Error: Invalid inventory slot for using effects (inventory slot #%i)", slot_id);
-	}
 
 	return;
 }
 
-void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(AdventureMerchant_Struct))
-	{
+void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app) {
+	if (app->size != sizeof(AdventureMerchant_Struct)) {
 		LogFile->write(EQEMuLog::Error, "OP size error: OP_AdventureMerchantRequest expected:%i got:%i", sizeof(AdventureMerchant_Struct), app->size);
 		return;
 	}
@@ -2214,11 +2147,9 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 	uint32 merchantid = 0;
 
 	Mob* tmp = entity_list.GetMob(eid->entity_id);
-	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&
-		(tmp->GetClass() != DISCORD_MERCHANT) && (tmp->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (tmp->GetClass() != DARK_REIGN_MERCHANT)))
+	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) && (tmp->GetClass() != DISCORD_MERCHANT) && (tmp->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (tmp->GetClass() != DARK_REIGN_MERCHANT)))
 		return;
 
-	//you have to be somewhat close to them to be properly using them
 	if(DistNoRoot(*tmp) > USE_NPC_RANGE2)
 		return;
 
@@ -2230,47 +2161,30 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 	std::list<MerchantList>::const_iterator itr;
 	for(itr = merlist.begin();itr != merlist.end() && count<255;++itr){
 		const MerchantList &ml = *itr;
-		if(GetLevel() < ml.level_required) {
+		if(GetLevel() < ml.level_required)
 			continue;
-		}
 
 		int32 fac = tmp->GetPrimaryFaction();
-		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required)
 			continue;
-		}
 
 		item = database.GetItem(ml.item);
-		if(item)
-		{
+		if(item) {
 			uint32 theme;
 			if(item->LDoNTheme > 16)
-			{
 				theme = 0;
-			}
 			else if(item->LDoNTheme & 16)
-			{
 				theme = 5;
-			}
 			else if(item->LDoNTheme & 8)
-			{
 				theme = 4;
-			}
 			else if(item->LDoNTheme & 4)
-			{
 				theme = 3;
-			}
 			else if(item->LDoNTheme & 2)
-			{
 				theme = 2;
-			}
 			else if(item->LDoNTheme & 1)
-			{
 				theme = 1;
-			}
 			else
-			{
 				theme = 0;
-			}
 			ss << "^" << item->Name << "|";
 			ss << item->ID << "|";
 			ss << item->LDoNPrice << "|";
@@ -2282,38 +2196,24 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 			count++;
 		}
 	}
-	//Count
-	//^Item Name,Item ID,Cost in Points,Theme (0=none),0,1,races bit map,classes bitmap
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureMerchantResponse,ss.str().size()+2);
 	outapp->pBuffer[0] = count;
 	strn0cpy((char*)&outapp->pBuffer[1],ss.str().c_str(),ss.str().size());
 	FastQueuePacket(&outapp);
 }
 
-void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(Adventure_Purchase_Struct))
-	{
+void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app) {
+	if (app->size != sizeof(Adventure_Purchase_Struct))	{
 		LogFile->write(EQEMuLog::Error, "OP size error: OP_AdventureMerchantPurchase expected:%i got:%i", sizeof(Adventure_Purchase_Struct), app->size);
 		return;
 	}
 
 	Adventure_Purchase_Struct* aps = (Adventure_Purchase_Struct*)app->pBuffer;
-/*
-	Get item apc->itemid (can check NPC if thats necessary), ldon point theme check only if theme is not 0 (I am not sure what 1-5 are though for themes)
-	if(ldon_points_available >= item ldonpointcost)
-	{
-	give item (67 00 00 00 for the packettype using opcode 0x02c5)
-	ldon_points_available -= ldonpointcost;
-	}
-*/
 	uint32 merchantid = 0;
 	Mob* tmp = entity_list.GetMob(aps->npcid);
-	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&
-		(tmp->GetClass() != DISCORD_MERCHANT) && (tmp->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (tmp->GetClass() != DARK_REIGN_MERCHANT)))
+	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) && (tmp->GetClass() != DISCORD_MERCHANT) && (tmp->GetClass() != NORRATHS_KEEPERS_MERCHANT) && (tmp->GetClass() != DARK_REIGN_MERCHANT)))
 		return;
 
-	//you have to be somewhat close to them to be properly using them
 	if(DistNoRoot(*tmp) > USE_NPC_RANGE2)
 		return;
 
@@ -2326,19 +2226,17 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 
 	for(itr = merlist.begin();itr != merlist.end();++itr){
 		MerchantList ml = *itr;
-		if(GetLevel() < ml.level_required) {
+		if(GetLevel() < ml.level_required)
 			continue;
-		}
 
 		int32 fac = tmp->GetPrimaryFaction();
-		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+		if(fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required)
 			continue;
-		}
 
 		item = database.GetItem(ml.item);
 		if(!item)
 			continue;
-		if(item->ID == aps->itemid) { //This check to make sure that the item is actually on the NPC, people attempt to inject packets to get items summoned...
+		if(item->ID == aps->itemid) {
 			found = true;
 			break;
 		}
@@ -2348,113 +2246,89 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 		return;
 	}
 
-	if(aps->Type == LDoNMerchant)
-	{
+	if(aps->Type == LDoNMerchant) {
 		if(m_pp.ldon_points_available < int32(item->LDoNPrice)) {
 			Message(13, "You cannot afford that item.");
 			return;
 		}
 
-		if(item->LDoNTheme <= 16)
-		{
-			if(item->LDoNTheme & 16)
-			{
-				if(m_pp.ldon_points_tak < int32(item->LDoNPrice))
-				{
+		if(item->LDoNTheme <= 16) {
+			if(item->LDoNTheme & 16) {
+				if(m_pp.ldon_points_tak < int32(item->LDoNPrice)) {
 					Message(13, "You need at least %u points in tak to purchase this item.", int32(item->LDoNPrice));
 					return;
 				}
 			}
-			else if(item->LDoNTheme & 8)
-			{
-				if(m_pp.ldon_points_ruj < int32(item->LDoNPrice))
-				{
+			else if(item->LDoNTheme & 8) {
+				if(m_pp.ldon_points_ruj < int32(item->LDoNPrice)) {
 					Message(13, "You need at least %u points in ruj to purchase this item.", int32(item->LDoNPrice));
 					return;
 				}
 			}
-			else if(item->LDoNTheme & 4)
-			{
-				if(m_pp.ldon_points_mmc < int32(item->LDoNPrice))
-				{
+			else if(item->LDoNTheme & 4) {
+				if(m_pp.ldon_points_mmc < int32(item->LDoNPrice)) {
 					Message(13, "You need at least %u points in mmc to purchase this item.", int32(item->LDoNPrice));
 					return;
 				}
 			}
-			else if(item->LDoNTheme & 2)
-			{
-				if(m_pp.ldon_points_mir < int32(item->LDoNPrice))
-				{
+			else if(item->LDoNTheme & 2) {
+				if(m_pp.ldon_points_mir < int32(item->LDoNPrice)) {
 					Message(13, "You need at least %u points in mir to purchase this item.", int32(item->LDoNPrice));
 					return;
 				}
 			}
-			else if(item->LDoNTheme & 1)
-			{
-				if(m_pp.ldon_points_guk < int32(item->LDoNPrice))
-				{
+			else if(item->LDoNTheme & 1) {
+				if(m_pp.ldon_points_guk < int32(item->LDoNPrice)) {
 					Message(13, "You need at least %u points in guk to purchase this item.", int32(item->LDoNPrice));
 					return;
 				}
 			}
 		}
 	}
-	else if(aps->Type == DiscordMerchant)
-	{
-		if(GetPVPPoints() < item->LDoNPrice)
-		{
+	else if(aps->Type == DiscordMerchant) {
+		if(GetPVPPoints() < item->LDoNPrice) {
 			Message(13, "You need at least %u PVP points to purchase this item.", int32(item->LDoNPrice));
 			return;
 		}
 	}
-	else if(aps->Type == NorrathsKeepersMerchant)
-	{
-		if(GetRadiantCrystals() < item->LDoNPrice)
-		{
+	else if(aps->Type == NorrathsKeepersMerchant) {
+		if(GetRadiantCrystals() < item->LDoNPrice) {
 			Message(13, "You need at least %u Radiant Crystals to purchase this item.", int32(item->LDoNPrice));
 			return;
 		}
 	}
-	else if(aps->Type == DarkReignMerchant)
-	{
-		if(GetEbonCrystals() < item->LDoNPrice)
-		{
+	else if(aps->Type == DarkReignMerchant) {
+		if(GetEbonCrystals() < item->LDoNPrice) {
 			Message(13, "You need at least %u Ebon Crystals to purchase this item.", int32(item->LDoNPrice));
 			return;
 		}
 	}
-	else
-	{
+	else {
 		Message(13, "Unknown Adventure Merchant type.");
 		return;
 	}
 
 
-	if(CheckLoreConflict(item))
-	{
+	if(CheckLoreConflict(item)) {
 		Message(15,"You can only have one of a lore item.");
 		return;
 	}
 
-	if(aps->Type == LDoNMerchant)
-	{
-		int32 requiredpts = (int32)item->LDoNPrice*-1;
+	if(aps->Type == LDoNMerchant) {
+		int32 requiredpts = ((int32)item->LDoNPrice * -1);
 
 		if(!UpdateLDoNPoints(requiredpts, 6))
 			return;
 	}
-	else if(aps->Type == DiscordMerchant)
-	{
+	else if(aps->Type == DiscordMerchant) {
 		SetPVPPoints(GetPVPPoints() - (int32)item->LDoNPrice);
 		SendPVPStats();
 	}
-	else if(aps->Type == NorrathsKeepersMerchant)
-	{
+	else if(aps->Type == NorrathsKeepersMerchant) {
 		SetRadiantCrystals(GetRadiantCrystals() - (int32)item->LDoNPrice);
 		SendCrystalCounts();
 	}
-	else if(aps->Type == DarkReignMerchant)
-	{
+	else if(aps->Type == DarkReignMerchant) {
 		SetEbonCrystals(GetEbonCrystals() - (int32)item->LDoNPrice);
 		SendCrystalCounts();
 	}
@@ -2464,16 +2338,12 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 
 	ItemInst *inst = database.CreateItem(item, charges);
 	if(!AutoPutLootInInventory(*inst, true, true))
-	{
 		PutLootInInventory(SLOT_CURSOR, *inst);
-	}
 	Save(1);
 }
 
-void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(Consider_Struct))
-	{
+void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app) {
+	if (app->size != sizeof(Consider_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in Consider corpse expected %i got %i", sizeof(Consider_Struct), app->size);
 		return;
 	}
@@ -2482,23 +2352,22 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 	if (tcorpse && tcorpse->IsNPCCorpse()) {
 		uint32 min; uint32 sec; uint32 ttime;
 		if ((ttime = tcorpse->GetDecayTime()) != 0) {
-			sec = (ttime/1000)%60; // Total seconds
-			min = (ttime/60000)%60; // Total seconds / 60 drop .00
-			char val1[20]={0};
-			char val2[20]={0};
+			sec = ((ttime / 1000) % 60);
+			min = ((ttime / 60000) % 60);
+			char val1[20] = {0};
+			char val2[20] = {0};
 			Message_StringID(10,CORPSE_DECAY1,ConvertArray(min,val1),ConvertArray(sec,val2));
 		}
-		else {
+		else
 			Message_StringID(10,CORPSE_DECAY_NOW);
-		}
 	}
 	else if (tcorpse && tcorpse->IsPlayerCorpse()) {
 		uint32 day, hour, min, sec, ttime;
 		if ((ttime = tcorpse->GetDecayTime()) != 0) {
-			sec = (ttime/1000)%60; // Total seconds
-			min = (ttime/60000)%60; // Total seconds
-			hour = (ttime/3600000)%24; // Total hours
-			day = ttime/86400000; // Total Days
+			sec = ((ttime / 1000) % 60);
+			min = ((ttime / 60000) % 60);
+			hour = ((ttime / 3600000) % 24);
+			day = (ttime / 86400000);
 			if(day)
 				Message(0, "This corpse will decay in %i days, %i hours, %i minutes and %i seconds.", day, hour, min, sec);
 			else if(hour)
@@ -2507,33 +2376,14 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 				Message(0, "This corpse will decay in %i minutes and %i seconds.", min, sec);
 
 			Message(0, "This corpse %s be resurrected.", tcorpse->isResurrected()?"cannot":"can");
-			/*
-			hour = 0;
-
-			if((ttime = tcorpse->GetResTime()) != 0) {
-				sec = (ttime/1000)%60; // Total seconds
-				min = (ttime/60000)%60; // Total seconds
-				hour = (ttime/3600000)%24; // Total hours
-				if(hour)
-					Message(0, "This corpse can be resurrected for %i hours, %i minutes and %i seconds.", hour, min, sec);
-				else
-					Message(0, "This corpse can be resurrected for %i minutes and %i seconds.", min, sec);
-			}
-			else {
-				Message_StringID(0, CORPSE_TOO_OLD);
-			}
-			*/
 		}
-		else {
+		else
 			Message_StringID(10,CORPSE_DECAY_NOW);
-		}
 	}
 }
 
-void Client::Handle_OP_Consider(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(Consider_Struct))
-	{
+void Client::Handle_OP_Consider(const EQApplicationPacket *app) {
+	if (app->size != sizeof(Consider_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in Consider expected %i got %i", sizeof(Consider_Struct), app->size);
 		return;
 	}
@@ -2542,8 +2392,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	if (tmob == 0)
 		return;
 
-	if(tmob->GetClass() == LDON_TREASURE)
-	{
+	if(tmob->GetClass() == LDON_TREASURE) {
 		Message(15, "%s", tmob->GetCleanName());
 		return;
 	}
@@ -2562,31 +2411,26 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 			con->pvpcon = tmob->CastToClient()->GetPVP();
 	}
 
-	// Mongrel: If we're feigned show NPC as indifferent
-	if (tmob->IsNPC())
-	{
+	if (tmob->IsNPC()) {
 		if (GetFeigned())
 			con->faction = FACTION_INDIFFERENT;
 	}
 
-	if(!(con->faction == FACTION_SCOWLS))
-	{
-		if(tmob->IsNPC())
-		{
+	if(!(con->faction == FACTION_SCOWLS)) {
+		if(tmob->IsNPC()) {
 			if(tmob->CastToNPC()->IsOnHatelist(this))
 				con->faction = FACTION_THREATENLY;
 		}
 	}
 
-	if(con->faction == FACTION_APPREHENSIVE) {
+	if(con->faction == FACTION_APPREHENSIVE)
 		con->faction = FACTION_SCOWLS;
-	} else if(con->faction == FACTION_DUBIOUS) {
+	else if(con->faction == FACTION_DUBIOUS)
 		con->faction = FACTION_THREATENLY;
-	} else if(con->faction == FACTION_SCOWLS) {
+	else if(con->faction == FACTION_SCOWLS)
 		con->faction = FACTION_APPREHENSIVE;
-	} else if(con->faction == FACTION_THREATENLY) {
+	else if(con->faction == FACTION_THREATENLY)
 		con->faction = FACTION_DUBIOUS;
-	}
 
 	mod_consider(tmob, con);
 
@@ -2595,12 +2439,9 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_Begging(const EQApplicationPacket *app)
-{
-	if(!p_timers.Expired(&database, pTimerBeggingPickPocket, false))
-	{
+void Client::Handle_OP_Begging(const EQApplicationPacket *app) {
+	if(!p_timers.Expired(&database, pTimerBeggingPickPocket, false)) {
 		Message(13,"Ability recovery time not yet met.");
-
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Begging, sizeof(BeggingResponse_Struct));
 		BeggingResponse_Struct *brs = (BeggingResponse_Struct*) outapp->pBuffer;
 		brs->Result = 0;
@@ -2608,10 +2449,7 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 		return;
 	}
 
-	if(!HasSkill(SkillBegging) || !GetTarget())
-		return;
-
-	if(GetTarget()->GetClass() == LDON_TREASURE)
+	if(!HasSkill(SkillBegging) || !GetTarget() || GetTarget()->GetClass() == LDON_TREASURE)
 		return;
 
 	p_timers.Start(pTimerBeggingPickPocket, 8);
@@ -2619,9 +2457,8 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Begging, sizeof(BeggingResponse_Struct));
 	BeggingResponse_Struct *brs = (BeggingResponse_Struct*) outapp->pBuffer;
 
-	brs->Result = 0; // Default, Fail.
-	if(GetTarget() == this)
-	{
+	brs->Result = 0;
+	if(GetTarget() == this)	{
 		FastQueuePacket(&outapp);
 		return;
 	}
@@ -2633,13 +2470,12 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 	if(GetLevel() > GetTarget()->GetLevel())
 		ChanceToAttack = MakeRandomInt(0, 15);
 	else
-		ChanceToAttack = MakeRandomInt(((this->GetTarget()->GetLevel() - this->GetLevel())*10)-5,((this->GetTarget()->GetLevel() - this->GetLevel())*10));
+		ChanceToAttack = MakeRandomInt((((this->GetTarget()->GetLevel() - this->GetLevel()) * 10) - 5), ((this->GetTarget()->GetLevel() - this->GetLevel()) * 10));
 
 	if(ChanceToAttack < 0)
 		ChanceToAttack = -ChanceToAttack;
 
-	if(RandomChance < ChanceToAttack)
-	{
+	if(RandomChance < ChanceToAttack) {
 		GetTarget()->Attack(this);
 		QueuePacket(outapp);
 		safe_delete(outapp);
@@ -2648,21 +2484,17 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 
 	uint16 CurrentSkill = GetSkill(SkillBegging);
 
-	float ChanceToBeg=((float)(CurrentSkill/700.0f) + 0.15f) * 100;
+	float ChanceToBeg = (((float)(CurrentSkill / 700.0f) + 0.15f) * 100);
 
-	if(RandomChance < ChanceToBeg)
-	{
+	if(RandomChance < ChanceToBeg) {
 		brs->Amount = MakeRandomInt(1, 10);
-		// This needs some work to determine how much money they can beg, based on skill level etc.
-		if(CurrentSkill < 50)
-		{
-			brs->Result = 4;	// Copper
+		if(CurrentSkill < 50) {
+			brs->Result = 4;
 			AddMoneyToPP(brs->Amount, false);
 		}
-		else
-		{
-			brs->Result = 3;	// Silver
-			AddMoneyToPP(brs->Amount * 10, false);
+		else {
+			brs->Result = 3;
+			AddMoneyToPP((brs->Amount * 10), false);
 		}
 
 	}
@@ -2671,26 +2503,20 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 	CheckIncreaseSkill(SkillBegging, nullptr, -10);
 }
 
-void Client::Handle_OP_TestBuff(const EQApplicationPacket *app)
-{
-}
+void Client::Handle_OP_TestBuff(const EQApplicationPacket *app) {}
 
-void Client::Handle_OP_Surname(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(Surname_Struct))
-	{
+void Client::Handle_OP_Surname(const EQApplicationPacket *app) {
+	if (app->size != sizeof(Surname_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in Surname expected %i got %i", sizeof(Surname_Struct), app->size);
 		return;
 	}
 
-	if(!p_timers.Expired(&database, pTimerSurnameChange, false) && !GetGM())
-	{
+	if(!p_timers.Expired(&database, pTimerSurnameChange, false) && !GetGM()) {
 		Message(15, "You may only change surnames once every 7 days, your /surname is currently on cooldown.");
 		return;
 	}
 
-	if(GetLevel() < 20)
-	{
+	if(GetLevel() < 20) {
 		Message_StringID(15, SURNAME_LEVEL);
 		return;
 	}
@@ -2699,17 +2525,13 @@ void Client::Handle_OP_Surname(const EQApplicationPacket *app)
 
 	char *c = nullptr;
 	bool first = true;
-	for(c = surname->lastname; *c; c++)
-	{
-		if(first)
-		{
+	for(c = surname->lastname; *c; c++) {
+		if(first) {
 			*c = toupper(*c);
 			first = false;
 		}
 		else
-		{
 			*c = tolower(*c);
-		}
 	}
 
 	if (strlen(surname->lastname) >= 20) {
@@ -2717,8 +2539,7 @@ void Client::Handle_OP_Surname(const EQApplicationPacket *app)
 		return;
 	}
 
-	if(!database.CheckNameFilter(surname->lastname, true))
-	{
+	if(!database.CheckNameFilter(surname->lastname, true)) {
 		Message_StringID(15, SURNAME_REJECTED);
 		return;
 	}
@@ -2734,13 +2555,11 @@ void Client::Handle_OP_Surname(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_ClearSurname(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_ClearSurname(const EQApplicationPacket *app) {
 	ChangeLastName("");
 }
 
-void Client::Handle_OP_YellForHelp(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_YellForHelp(const EQApplicationPacket *app) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_YellForHelp, 4);
 	*(uint32 *)outapp->pBuffer = GetID();
 	entity_list.QueueCloseClients(this, outapp, true, 100.0);
@@ -2748,8 +2567,7 @@ void Client::Handle_OP_YellForHelp(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_Assist(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_Assist(const EQApplicationPacket *app) {
 	if (app->size != sizeof(EntityId_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_Assist expected %i got %i", sizeof(EntityId_Struct), app->size);
 		return;
@@ -2766,20 +2584,17 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 		Mob *assistee = entity->CastToMob();
 		if (assistee->GetTarget()) {
 			Mob *new_target = assistee->GetTarget();
-			if (new_target && (GetGM() ||
-					Dist(*assistee) <= TARGETING_RANGE)) {
+			if (new_target && (GetGM() || Dist(*assistee) <= TARGETING_RANGE)) {
 				SetAssistExemption(true);
 				eid->entity_id = new_target->GetID();
 			}
 		}
 	}
-
 	FastQueuePacket(&outapp);
 	return;
 }
 
-void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app) {
 	if (app->size != sizeof(EntityId_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_AssistGroup expected %i got %i", sizeof(EntityId_Struct), app->size);
 		return;
@@ -2788,8 +2603,7 @@ void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_GMTraining(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GMTraining(const EQApplicationPacket *app) {
 	if (app->size != sizeof(GMTrainee_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GMTraining expected %i got %i", sizeof(GMTrainee_Struct), app->size);
 		DumpPacket(app);
@@ -2799,8 +2613,7 @@ void Client::Handle_OP_GMTraining(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_GMEndTraining(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GMEndTraining(const EQApplicationPacket *app) {
 	if (app->size != sizeof(GMTrainEnd_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GMEndTraining expected %i got %i", sizeof(GMTrainEnd_Struct), app->size);
 		DumpPacket(app);
@@ -2810,8 +2623,7 @@ void Client::Handle_OP_GMEndTraining(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_GMTrainSkill(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GMTrainSkill(const EQApplicationPacket *app) {
 	if (app->size != sizeof(GMSkillChange_Struct)) {
 		LogFile->write(EQEMuLog::Debug, "Size mismatch in OP_GMTrainSkill expected %i got %i", sizeof(GMSkillChange_Struct), app->size);
 		DumpPacket(app);
@@ -2821,8 +2633,7 @@ void Client::Handle_OP_GMTrainSkill(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_DuelResponse(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_DuelResponse(const EQApplicationPacket *app) {
 	if(app->size != sizeof(DuelResponse_Struct))
 		return;
 	DuelResponse_Struct* ds = (DuelResponse_Struct*) app->pBuffer;
@@ -2842,8 +2653,7 @@ void Client::Handle_OP_DuelResponse(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_DuelResponse2(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_DuelResponse2(const EQApplicationPacket *app) {
 	if(app->size != sizeof(Duel_Struct))
 		return;
 
@@ -2878,8 +2688,7 @@ void Client::Handle_OP_DuelResponse2(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_RequestDuel(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_RequestDuel(const EQApplicationPacket *app) {
 	if(app->size != sizeof(Duel_Struct))
 		return;
 
@@ -2911,8 +2720,7 @@ void Client::Handle_OP_RequestDuel(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app) {
 	if (app->size != sizeof(SpawnAppearance_Struct)) {
 		std::cout << "Wrong size on OP_SpawnAppearance. Got: " << app->size << ", Expected: " << sizeof(SpawnAppearance_Struct) << std::endl;
 		return;
@@ -2923,12 +2731,9 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		return;
 
 	if (sa->type == AT_Invis) {
-		if(sa->parameter != 0)
-		{
-			if(!HasSkill(SkillHide) && GetSkill(SkillHide) == 0)
-			{
-				if(GetClientVersion() < EQClientSoF)
-				{
+		if(sa->parameter != 0) {
+			if(!HasSkill(SkillHide) && GetSkill(SkillHide) == 0) {
+				if(GetClientVersion() < EQClientSoF) {
 					char *hack_str = nullptr;
 					MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Invis: %i", sa->parameter);
 					database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
@@ -2968,7 +2773,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			playeraction = 2;
 			SetFeigned(false);
 		}
-		else if (sa->parameter == ANIM_DEATH) { // feign death too
+		else if (sa->parameter == ANIM_DEATH) {
 			SetAppearance(eaDead);
 			playeraction = 3;
 			InterruptSpell();
@@ -2978,34 +2783,19 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			playeraction = 4;
 			SetFeigned(false);
 		}
-
-		// This is from old code
-		// I have no clue what it's for
-		/*
-		else if (sa->parameter == 0x05) {
-			// Illusion
-			std::cout << "Illusion packet recv'd:" << std::endl;
-			DumpPacket(app);
-		}
-		*/
 		else {
 			std::cerr << "Client " << name << " unknown apperance " << (int)sa->parameter << std::endl;
 			return;
 		}
-
 		entity_list.QueueClients(this, app, true);
 	}
 	else if (sa->type == AT_Anon) {
-		// For Anon/Roleplay
-		if (sa->parameter == 1) { // Anon
+		if (sa->parameter == 1)
 			m_pp.anon = 1;
-		}
-		else if ((sa->parameter == 2) || (sa->parameter == 3)) { // This is Roleplay, or anon+rp
+		else if ((sa->parameter == 2) || (sa->parameter == 3))
 			m_pp.anon = 2;
-		}
-		else if (sa->parameter == 0) { // This is Non-Anon
+		else if (sa->parameter == 0)
 			m_pp.anon = 0;
-		}
 		else {
 			std::cerr << "Client " << name << " unknown Anon/Roleplay Switch " << (int)sa->parameter << std::endl;
 			return;
@@ -3013,21 +2803,17 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		entity_list.QueueClients(this, app, true);
 		UpdateWho();
 	}
-	else if ((sa->type == AT_HP) && (dead == 0)) {
+	else if ((sa->type == AT_HP) && (dead == 0))
 		return;
-	}
 	else if (sa->type == AT_AFK) {
 		this->AFK = (sa->parameter == 1);
 		entity_list.QueueClients(this, app, true);
 	}
-	else if (sa->type == AT_Split) {
+	else if (sa->type == AT_Split)
 		m_pp.autosplit = (sa->parameter == 1);
-	}
 	else if (sa->type == AT_Sneak) {
-		if(sa->parameter != 0)
-		{
-			if(!HasSkill(SkillSneak))
-			{
+		if(sa->parameter != 0) {
+			if(!HasSkill(SkillSneak)) {
 				char *hack_str = nullptr;
 				MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Sneak: %i", sa->parameter);
 				database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
@@ -3038,36 +2824,25 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		this->sneaking = 0;
 		entity_list.QueueClients(this, app, true);
 	}
-	else if (sa->type == AT_Size)
-	{
+	else if (sa->type == AT_Size) {
 		char *hack_str = nullptr;
 		MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Size: %i", sa->parameter);
 		database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
 		safe_delete_array(hack_str);
 	}
-	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
-	{
+	else if (sa->type == AT_Light)
 		entity_list.QueueClients(this, app, false);
-	}
-	else if (sa->type == AT_Levitate)
-	{
-		// don't do anything with this, we tell the client when it's
-		// levitating, not the other way around
-	}
-	else if (sa->type == AT_ShowHelm)
-	{
+	else if (sa->type == AT_Levitate) {	}
+	else if (sa->type == AT_ShowHelm) {
 		m_pp.showhelm = (sa->parameter == 1);
 		entity_list.QueueClients(this, app, true);
 	}
-	else {
-		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec
-			<< " value: 0x" << std::hex << std::setw(8) << std::setfill('0') << sa->parameter << std::dec << std::endl;
-	}
+	else
+		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec << " value: 0x" << std::hex << std::setw(8) << std::setfill('0') << sa->parameter << std::dec << std::endl;
 	return;
 }
 
-void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app) {
 	if (app->size != sizeof(BazaarInspect_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Invalid size for BazaarInspect_Struct: Expected %i, Got %i",
 			sizeof(BazaarInspect_Struct), app->size);
@@ -3093,14 +2868,12 @@ void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_Death(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_Death(const EQApplicationPacket *app) {
 	if(app->size != sizeof(Death_Struct))
 		return;
 
 	Death_Struct* ds = (Death_Struct*)app->pBuffer;
 
-	//I think this attack_skill value is really a value from SkillDamageTypes...
 	if(ds->attack_skill > HIGHEST_SKILL) {
 		mlog(CLIENT__ERROR, "Invalid skill in OP_Death: %d");
 		return;
@@ -3114,8 +2887,7 @@ void Client::Handle_OP_Death(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app) {
 	if(app->size != sizeof(MoveCoin_Struct)){
 		LogFile->write(EQEMuLog::Error, "Wrong size on OP_MoveCoin. Got: %i, Expected: %i", app->size, sizeof(MoveCoin_Struct));
 		DumpPacket(app);
@@ -3125,8 +2897,7 @@ void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app) {
 	if(app->size != sizeof(ItemViewRequest_Struct)){
 		LogFile->write(EQEMuLog::Error, "Wrong size on OP_ItemLinkClick. Got: %i, Expected: %i", app->size, sizeof(ItemViewRequest_Struct));
 		DumpPacket(app);
@@ -3134,42 +2905,33 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 	}
 	DumpPacket(app);
 	ItemViewRequest_Struct* ivrs = (ItemViewRequest_Struct*)app->pBuffer;
-
-	//todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data from the item DB
-
 	const Item_Struct* item = database.GetItem(ivrs->item_id);
 	if (!item) {
-		if (ivrs->item_id > 500000)
-		{
+		if (ivrs->item_id > 500000) {
 			std::string response = "";
 			int sayid = ivrs->item_id - 500000;
 			bool silentsaylink = false;
 
-			if (sayid > 250000)	//Silent Saylink
-			{
+			if (sayid > 250000) {
 				sayid = sayid - 250000;
 				silentsaylink = true;
 			}
 
-			if (sayid && sayid > 0)
-			{
+			if (sayid && sayid > 0) {
 				char errbuf[MYSQL_ERRMSG_SIZE];
 				char *query = 0;
 				MYSQL_RES *result;
 				MYSQL_ROW row;
 
 
-				if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid),errbuf,&result))
-				{
-					if (mysql_num_rows(result) == 1)
-					{
+				if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid),errbuf,&result)) {
+					if (mysql_num_rows(result) == 1) {
 						row = mysql_fetch_row(result);
 						response = row[0];
 					}
 					mysql_free_result(result);
 				}
-				else
-				{
+				else {
 					Message(13, "Error: The saylink (%s) was not found in the database.",response.c_str());
 					safe_delete_array(query);
 					return;
@@ -3177,40 +2939,32 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 				safe_delete_array(query);
 			}
 
-			if((response).size() > 0)
-			{
-				if( !mod_saylink(response, silentsaylink) ) { return; }
+			if((response).size() > 0) {
+				if(!mod_saylink(response, silentsaylink))
+					return;
 
-				if(GetTarget() && GetTarget()->IsNPC())
-				{
-					if(silentsaylink)
-					{
+				if(GetTarget() && GetTarget()->IsNPC()) {
+					if(silentsaylink) {
 						parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
 						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
 					}
-					else
-					{
+					else {
 						Message(7, "You say, '%s'", response.c_str());
 						ChannelMessageReceived(8, 0, 100, response.c_str());
 					}
 					return;
 				}
-				else
-				{
+				else {
 					if(silentsaylink)
-					{
 						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
-					}
-					else
-					{
+					else {
 						Message(7, "You say, '%s'", response.c_str());
 						ChannelMessageReceived(8, 0, 100, response.c_str());
 					}
 					return;
 				}
 			}
-			else
-			{
+			else {
 				Message(13, "Error: Say Link not found or is too long.");
 				return;
 			}
@@ -3244,12 +2998,9 @@ void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket *app) {
 	return;
 }
 
-void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_MoveItem(const EQApplicationPacket *app) {
 	if(!CharacterID())
-	{
 		return;
-	}
 
 	if (app->size != sizeof(MoveItem_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_MoveItem, size=%i, expected %i", app->size, sizeof(MoveItem_Struct));
@@ -3257,10 +3008,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	}
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
-	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
-	{
-		if(mi->from_slot != mi->to_slot && (mi->from_slot < 30 || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
-		{
+	if(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id)) {
+		if(mi->from_slot != mi->to_slot && (mi->from_slot < 30 || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
 			char *detect = nullptr;
 			const ItemInst *itm_from = GetInv().GetItem(mi->from_slot);
 			const ItemInst *itm_to = GetInv().GetItem(mi->to_slot);
@@ -3272,16 +3021,16 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 				casting_spell_id);
 			database.SetMQDetectionFlag(AccountName(), GetName(), detect, zone->GetShortName());
 			safe_delete_array(detect);
-			Kick(); // Kick client to prevent client and server from getting out-of-sync inventory slots
+			Kick();
 			return;
 		}
 	}
-
-	// Illegal bagslot useage checks. Currently, user only receives a message if this check is triggered.
+	
 	bool mi_hack = false;
 
 	if(mi->from_slot >= 251 && mi->from_slot <= 340) {
-		if(mi->from_slot > 330) { mi_hack = true; }
+		if(mi->from_slot > 330) 
+			mi_hack = true;
 		else {
 			int16 from_parent = m_inv.CalcSlotId(mi->from_slot);
 			if(!m_inv[from_parent]) { mi_hack = true; }
@@ -3300,9 +3049,11 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
-	if(mi_hack) { Message(15, "Caution: Illegal use of inaccessable bag slots!"); }
+	if(mi_hack)
+		Message(15, "Caution: Illegal use of inaccessable bag slots!");
 
-	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) { SwapItemResync(mi); }
+	if(!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
+		SwapItemResync(mi);
 
 	return;
 }
@@ -3311,8 +3062,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app) {
 	if(IsLFP())
 		worldserver.StopLFP(CharacterID());
 
-	if (GetGM())
-	{
+	if (GetGM()) {
 		OnDisconnect(true);
 		return;
 	}
@@ -3320,11 +3070,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app) {
 	return;
 }
 
-void Client::Handle_OP_Logout(const EQApplicationPacket *app)
-{
-	//LogFile->write(EQEMuLog::Debug, "%s sent a logout packet.", GetName());
-	//we will save when we get destroyed soon anyhow
-	//Save();
+void Client::Handle_OP_Logout(const EQApplicationPacket *app) {
 
 	SendLogoutPackets();
 
@@ -3335,8 +3081,7 @@ void Client::Handle_OP_Logout(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app) {
 	if(GetClass() != MONK)
 		return;
 	if(!p_timers.Expired(&database, pTimerFeignDeath, false)) {
@@ -3344,8 +3089,7 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 		return;
 	}
 	int reuse = FeignDeathReuseTime;
-	switch (GetAA(aaRapidFeign))
-	{
+	switch (GetAA(aaRapidFeign)) {
 		case 1:
 			reuse -= 1;
 			break;
@@ -3356,16 +3100,13 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 			reuse -= 5;
 			break;
 	}
-	p_timers.Start(pTimerFeignDeath, reuse-1);
-
-	//BreakInvis();
-
+	p_timers.Start(pTimerFeignDeath, (reuse - 1));
 	uint16 primfeign = GetSkill(SkillFeignDeath);
 	uint16 secfeign = GetSkill(SkillFeignDeath);
 	if (primfeign > 100) {
 		primfeign = 100;
-		secfeign = secfeign - 100;
-		secfeign = secfeign / 2;
+		secfeign -= 100;
+		secfeign /= 2;
 	}
 	else
 		secfeign = 0;
@@ -3375,19 +3116,16 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 		SetFeigned(false);
 		entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
 	}
-	else {
+	else
 		SetFeigned(true);
-	}
 
 	CheckIncreaseSkill(SkillFeignDeath, nullptr, 5);
 	return;
 }
 
-void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
-{
-	if(!HasSkill(SkillSneak) && GetSkill(SkillSneak) == 0) {
-		return; //You cannot sneak if you do not have sneak
-	}
+void Client::Handle_OP_Sneak(const EQApplicationPacket *app) {
+	if(!HasSkill(SkillSneak) && GetSkill(SkillSneak) == 0)
+		return;
 
 	if(!p_timers.Expired(&database, pTimerSneak, false)) {
 		Message(13,"Ability recovery time not yet met.");
@@ -3408,10 +3146,9 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
-	else {
+	else
 		CheckIncreaseSkill(SkillSneak, nullptr, 5);
-	}
-	float hidechance = ((GetSkill(SkillSneak)/300.0f) + .25) * 100;
+	float hidechance = (((GetSkill(SkillSneak) / 300.0f) + .25) * 100);
 	float random = MakeRandomFloat(0, 99);
 	if(!was && random < hidechance) {
 		sneaking = true;
@@ -3426,26 +3163,20 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 	if(GetClass() == ROGUE){
 		outapp = new EQApplicationPacket(OP_SimpleMessage,12);
 		SimpleMessage_Struct *msg=(SimpleMessage_Struct *)outapp->pBuffer;
-		msg->color=0x010E;
-		if (sneaking){
-			msg->string_id=347;
-		}
-		else {
-			msg->string_id=348;
-		}
+		msg->color = 0x010E;
+		if (sneaking)
+			msg->string_id = 347;
+		else
+			msg->string_id = 348;
 		FastQueuePacket(&outapp);
 	}
 	return;
 }
 
-void Client::Handle_OP_Hide(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_Hide(const EQApplicationPacket *app) {
 	if(!HasSkill(SkillHide) && GetSkill(SkillHide) == 0)
-	{
-		//Can not be able to train hide but still have it from racial though
-		return; //You cannot hide if you do not have hide
-	}
-
+		return;
+		
 	if(!p_timers.Expired(&database, pTimerHide, false)) {
 		Message(13,"Ability recovery time not yet met.");
 		return;
@@ -3453,7 +3184,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 	int reuse = HideReuseTime - GetAA(209);
 	p_timers.Start(pTimerHide, reuse-1);
 
-	float hidechance = ((GetSkill(SkillHide)/250.0f) + .25) * 100;
+	float hidechance = (((GetSkill(SkillHide) / 250.0f) + .25) * 100);
 	float random = MakeRandomFloat(0, 100);
 	CheckIncreaseSkill(SkillHide, nullptr, 5);
 	if (random < hidechance) {
@@ -3464,41 +3195,38 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		sa_out->parameter = 1;
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
-		if(GetAA(aaShroudofStealth)){
+		if(GetAA(aaShroudofStealth)) {
 			improved_hidden = true;
 			hidden = true;
 		}
 		else
 			hidden = true;
 	}
-	if(GetClass() == ROGUE){
+	if(GetClass() == ROGUE) {
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage,sizeof(SimpleMessage_Struct));
 		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
 		msg->color = 0x010E;
 		Mob *evadetar = GetTarget();
-		if (!auto_attack && (evadetar && evadetar->CheckAggro(this)
-					&& evadetar->IsNPC())) {
+		if (!auto_attack && (evadetar && evadetar->CheckAggro(this) && evadetar->IsNPC())) {
 			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) {
 				msg->string_id = EVADE_SUCCESS;
 				RogueEvade(evadetar);
-			} else {
+			}
+			else
 				msg->string_id = EVADE_FAIL;
-			}
-		} else {
-			if (hidden){
+		}
+		else {
+			if (hidden)
 				msg->string_id = HIDE_SUCCESS;
-			}
-			else {
+			else
 				msg->string_id = HIDE_FAIL;
-			}
 		}
 		FastQueuePacket(&outapp);
 	}
 	return;
 }
 
-void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app) {
 	ChannelMessage_Struct* cm=(ChannelMessage_Struct*)app->pBuffer;
 
 	if (app->size < sizeof(ChannelMessage_Struct)) {
@@ -3514,8 +3242,7 @@ void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_WearChange(const EQApplicationPacket *app) {
 	if (app->size != sizeof(WearChange_Struct)) {
 		std::cout << "Wrong size: OP_WearChange, size=" << app->size << ", expected " << sizeof(WearChange_Struct) << std::endl;
 		return;
@@ -3525,21 +3252,11 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 	if(wc->spawn_id != GetID())
 		return;
 
-	// we could maybe ignore this and just send our own from moveitem
 	entity_list.QueueClients(this, app, true);
 	return;
 }
 
-//in zoning.cpp
-//void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
-//}
-
-void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
-{
-	// The client will send this with his id when he zones, maybe when he disconnects too?
-	//eqs->RemoveData(); // Flushing the queue of packet data to allow for proper zoning
-
-	//just make sure this gets out
+void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
 	FastQueuePacket(&outapp);
 
@@ -3556,42 +3273,36 @@ void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_SaveOnZoneReq(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_SaveOnZoneReq(const EQApplicationPacket *app) {
 	Handle_OP_Save(app);
 }
 
-void Client::Handle_OP_Save(const EQApplicationPacket *app)
-{
-	// The payload is 192 bytes - Not sure what is contained in payload
+void Client::Handle_OP_Save(const EQApplicationPacket *app) {
 	Save();
 	return;
 }
 
-void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app) {
 	if (app->size != sizeof(Who_All_Struct)) {
 		std::cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << std::endl;
 		return;
 	}
 	Who_All_Struct* whoall = (Who_All_Struct*) app->pBuffer;
 
-	if(whoall->type == 0) // SoF only, for regular /who
+	if(whoall->type == 0)
 		entity_list.ZoneWho(this, whoall);
 	else
 		WhoAll(whoall);
 	return;
 }
 
-void Client::Handle_OP_FriendsWho(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_FriendsWho(const EQApplicationPacket *app) {
 	char *FriendsString = (char*) app->pBuffer;
 	FriendsWho(FriendsString);
 	return;
 }
 
-void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app) {
 	if (app->size != sizeof(GMZoneRequest_Struct)) {
 		std::cout << "Wrong size on OP_GMZoneRequest. Got: " << app->size << ", Expected: " << sizeof(GMZoneRequest_Struct) << std::endl;
 		return;
@@ -3616,11 +3327,9 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 		tarzone[0] = 0;
 	else
 		strcpy(tarzone, zname);
-
-	// this both loads the safe points and does a sanity check on zone name
-	if (!database.GetSafePoints(tarzone, 0, &tarx, &tary, &tarz, &minstatus, &minlevel)) {
+		
+	if (!database.GetSafePoints(tarzone, 0, &tarx, &tary, &tarz, &minstatus, &minlevel))
 		tarzone[0] = 0;
-	}
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMZoneRequest, sizeof(GMZoneRequest_Struct));
 	GMZoneRequest_Struct* gmzr2 = (GMZoneRequest_Struct*) outapp->pBuffer;
@@ -3629,7 +3338,6 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	gmzr2->x = tarx;
 	gmzr2->y = tary;
 	gmzr2->z = tarz;
-	// Next line stolen from ZoneChange as well... - This gives us a nicer message than the normal "zone is down" message...
 	if (tarzone[0] != 0 && admin >= minstatus && GetLevel() >= minlevel)
 		gmzr2->success = 1;
 	else {
@@ -3642,8 +3350,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket *app) {
 	if (this->Admin() < minStatusToBeGM) {
 		Message(13, "Your account has been reported for hacking.");
 		database.SetHackerFlag(this->account_name, this->name, "/zone");
@@ -3659,8 +3366,7 @@ void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app) {
 	if (app->size != sizeof(uint32)) {
 		std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
 		return;
@@ -3682,14 +3388,12 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 		Corpse::SendLootReqErrorPacket(this);
 		return;
 	}
-	else {
+	else
 		entity->CastToCorpse()->EndLoot(this, app);
-	}
 	return;
 }
 
-void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_LootRequest(const EQApplicationPacket *app) {
 	if (app->size != sizeof(uint32)) {
 		std::cout << "Wrong size: OP_LootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
 		return;
@@ -3703,11 +3407,9 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 		Corpse::SendLootReqErrorPacket(this);
 		return;
 	}
-	if (ent->IsCorpse())
-	{
+	if (ent->IsCorpse()) {
 		Corpse *ent_corpse = ent->CastToCorpse();
-		if(DistNoRootNoZ(ent_corpse->GetX(), ent_corpse->GetY()) > 625)
-		{
+		if(DistNoRootNoZ(ent_corpse->GetX(), ent_corpse->GetY()) > 625) {
 			Message(13, "Corpse too far away.");
 			Corpse::SendLootReqErrorPacket(this);
 			return;
@@ -3727,7 +3429,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 			BuffFadeByEffect(SE_InvisVsAnimals);
 			invisible_animals = false;
 		}
-		if(hidden || improved_hidden){
+		if(hidden || improved_hidden) {
 			hidden = false;
 			improved_hidden = false;
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
@@ -3749,22 +3451,17 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app) {
 	Mob * target = GetTarget();
 	if(target && target->IsNPC())
 		HandleLDoNOpen(target->CastToNPC());
 }
 
-void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app) {
 	Mob * target = GetTarget();
-	if(target->IsNPC())
-	{
-		if(HasSkill(SkillSenseTraps))
-		{
-			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
+	if(target->IsNPC()) {
+		if(HasSkill(SkillSenseTraps)) {
+			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse)) {
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
 			}
@@ -3775,15 +3472,11 @@ void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app) {
 	Mob * target = GetTarget();
-	if(target->IsNPC())
-	{
-		if(HasSkill(SkillDisarmTraps))
-		{
-			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
+	if(target->IsNPC()) {
+		if(HasSkill(SkillDisarmTraps)) {
+			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse)) {
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
 			}
@@ -3794,15 +3487,11 @@ void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app) {
 	Mob * target = GetTarget();
-	if(target->IsNPC())
-	{
-		if(HasSkill(SkillPickLock))
-		{
-			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
+	if(target->IsNPC())	{
+		if(HasSkill(SkillPickLock)) {
+			if(DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse)) {
 				Message(13, "%s is too far away.", target->GetCleanName());
 				return;
 			}
@@ -3813,16 +3502,14 @@ void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app) {
 	Mob * target = GetTarget();
 	if(target && target->GetClass() == LDON_TREASURE)
 		Message(15, "%s", target->GetCleanName());
 }
 
-void Client::Handle_OP_Dye(const EQApplicationPacket *app)
-{
-	if(app->size!=sizeof(DyeStruct))
+void Client::Handle_OP_Dye(const EQApplicationPacket *app) {
+	if(app->size != sizeof(DyeStruct))
 		printf("Wrong size of DyeStruct, Got: %i, Expected: %zu\n",app->size,sizeof(DyeStruct));
 	else{
 		DyeStruct* dye = (DyeStruct*)app->pBuffer;
@@ -3831,22 +3518,15 @@ void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_ConfirmDelete(const EQApplicationPacket* app){
+void Client::Handle_OP_ConfirmDelete(const EQApplicationPacket* app) {
 	return;
 }
 
-void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_LootItem(const EQApplicationPacket *app) {
 	if (app->size != sizeof(LootingItem_Struct)) {
 		LogFile->write(EQEMuLog::Error, "Wrong size: OP_LootItem, size=%i, expected %i", app->size, sizeof(LootingItem_Struct));
 		return;
 	}
-	/*
-	**	fixed the looting code so that it sends the correct opcodes
-	**	and now correctly removes the looted item the player selected
-	**	as well as gives the player the proper item.
-	**	Also fixed a few UI lock ups that would occur.
-	*/
 
 	EQApplicationPacket* outapp = 0;
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
@@ -3870,8 +3550,7 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GuildDelete");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
@@ -3881,19 +3560,16 @@ void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
 		mlog(GUILDS__ACTIONS, "Deleting guild %s (%d)", guild_mgr.GetGuildName(GuildID()), GuildID());
 		if (!guild_mgr.DeleteGuild(GuildID()))
 			Message(0, "Guild delete failed.");
-		else {
+		else
 			Message(0, "Guild successfully deleted.");
-		}
 	}
 }
 
-void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GuildPublicNote");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
 	if (app->size < sizeof(GuildUpdate_PublicNote)) {
-		// client calls for a motd on login even if they arent in a guild
 		printf("Error: app size of %i < size of OP_GuildPublicNote of %zu\n",app->size,sizeof(GuildUpdate_PublicNote));
 		return;
 	}
@@ -3914,44 +3590,37 @@ void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
 		guild_mgr.GetGuildName(GuildID()), GuildID(),
 		gpn->note);
 
-	if(!guild_mgr.SetPublicNote(gci.char_id, gpn->note)) {
+	if(!guild_mgr.SetPublicNote(gci.char_id, gpn->note))
 		Message(13, "Failed to set public note on %s", gpn->target);
-	} else {
+	else
 		Message(0, "Successfully changed public note on %s", gpn->target);
-	}
-//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
-void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildMOTD");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
 	SendGuildMOTD(true);
 
-	if(IsInAGuild())
-	{
+	if(IsInAGuild()) {
 		SendGuildURL();
 		SendGuildChannel();
 	}
 }
 
-void Client::Handle_OP_GetGuildsList(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GetGuildsList(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GetGuildsList");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
 	SendGuildList();
 }
 
-void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_SetGuildMOTD");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
 	if (app->size != sizeof(GuildMOTD_Struct)) {
-		// client calls for a motd on login even if they arent in a guild
 		printf("Error: app size of %i != size of GuildMOTD_Struct of %zu\n",app->size,sizeof(GuildMOTD_Struct));
 		return;
 	}
@@ -3969,16 +3638,13 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 	mlog(GUILDS__ACTIONS, "Setting MOTD for %s (%d) to: %s - %s",
 		guild_mgr.GetGuildName(GuildID()), GuildID(), GetName(), gmotd->motd);
 
-	if (!guild_mgr.SetGuildMOTD(GuildID(), gmotd->motd, GetName())) {
+	if (!guild_mgr.SetGuildMOTD(GuildID(), gmotd->motd, GetName()))
 		Message(0, "Motd update failed.");
-	}
 
 	return;
 }
 
-void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
-{
-
+void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Got OP_GuildManageBanker of len %d", app->size);
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 	if(app->size != sizeof(GuildManageBanker_Struct)) {
@@ -3994,31 +3660,22 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 
 	CharGuildInfo gci;
 
-	if(!guild_mgr.GetCharInfo(gmb->member, gci))
-	{
+	if(!guild_mgr.GetCharInfo(gmb->member, gci)) {
 		Message(0, "Unable to find '%s'", gmb->member);
 		return;
 	}
 	bool IsCurrentlyABanker = guild_mgr.GetBankerFlag(gci.char_id);
-
 	bool IsCurrentlyAnAlt = guild_mgr.GetAltFlag(gci.char_id);
-
-	bool NewBankerStatus = gmb->enabled & 0x01;
-
-	bool NewAltStatus = gmb->enabled & 0x02;
-
-	if((IsCurrentlyABanker != NewBankerStatus) && !guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
-	{
+	bool NewBankerStatus = (gmb->enabled & 0x01);
+	bool NewAltStatus = (gmb->enabled & 0x02);
+	if((IsCurrentlyABanker != NewBankerStatus) && !guild_mgr.IsGuildLeader(GuildID(), CharacterID())) {
 		Message(13, "Only the guild leader can assign guild bankers!");
 		return;
 	}
 
-	if(IsCurrentlyAnAlt != NewAltStatus)
-	{
+	if(IsCurrentlyAnAlt != NewAltStatus) {
 		bool IsAllowed = !strncasecmp(GetName(), gmb->member, strlen(GetName())) || (GuildRank() >= GUILD_OFFICER);
-
-		if(!IsAllowed)
-		{
+		if(!IsAllowed) {
 			Message(13, "You are not allowed to change the alt status of %s", gmb->member);
 			return;
 		}
@@ -4029,8 +3686,7 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 		return;
 	}
 
-	if(IsCurrentlyABanker != NewBankerStatus)
-	{
+	if(IsCurrentlyABanker != NewBankerStatus) {
 		if(!guild_mgr.SetBankerFlag(gci.char_id, NewBankerStatus)) {
 			Message(13, "Error setting guild banker flag.");
 			return;
@@ -4041,8 +3697,7 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 		else
 			Message(0, "%s is no longer a guild banker.", gmb->member);
 	}
-	if(IsCurrentlyAnAlt != NewAltStatus)
-	{
+	if(IsCurrentlyAnAlt != NewAltStatus) {
 		if(!guild_mgr.SetAltFlag(gci.char_id, NewAltStatus)) {
 			Message(13, "Error setting guild alt flag.");
 			return;
@@ -4055,22 +3710,19 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_GuildPeace(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GuildPeace(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Got OP_GuildPeace of len %d", app->size);
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 	return;
 }
 
-void Client::Handle_OP_GuildWar(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GuildWar(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Got OP_GuildWar of len %d", app->size);
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 	return;
 }
 
-void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GuildLeader");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
@@ -4088,17 +3740,13 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
-
-		//NOTE: we could do cross-zone lookups here...
-
 		Client* newleader = entity_list.GetClientByName(gml->target);
 		if(newleader) {
-
 			mlog(GUILDS__ACTIONS, "Transfering leadership of %s (%d) to %s (%d)",
 				guild_mgr.GetGuildName(GuildID()), GuildID(),
 				newleader->GetName(), newleader->CharacterID());
 
-			if(guild_mgr.SetGuildLeader(GuildID(), newleader->CharacterID())){
+			if(guild_mgr.SetGuildLeader(GuildID(), newleader->CharacterID())) {
 				Message(0,"Successfully Transfered Leadership to %s.",gml->target);
 				newleader->Message(15,"%s has transfered the guild leadership into your hands.",GetName());
 			}
@@ -4108,12 +3756,10 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 		else
 			Message(0,"Failed to change leader, could not find target.");
 	}
-//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
-void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GuildDemote");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
@@ -4130,7 +3776,6 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 		Message(0, "Error: World server disconnected");
 	else {
 		GuildDemoteStruct* demote = (GuildDemoteStruct*)app->pBuffer;
-
 		CharGuildInfo gci;
 		if(!guild_mgr.GetCharInfo(demote->target, gci)) {
 			Message(0, "Unable to find '%s'", demote->target);
@@ -4145,14 +3790,10 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 			Message(0, "%s cannot be demoted any further!", demote->target);
 			return;
 		}
-		uint8 rank = gci.rank - 1;
+		uint8 rank = (gci.rank - 1);
 
 
-		mlog(GUILDS__ACTIONS, "Demoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
-			demote->target, gci.char_id,
-			guild_mgr.GetRankName(GuildID(), gci.rank), gci.rank,
-			guild_mgr.GetRankName(GuildID(), rank), rank,
-			guild_mgr.GetGuildName(GuildID()), GuildID());
+		mlog(GUILDS__ACTIONS, "Demoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)", demote->target, gci.char_id, guild_mgr.GetRankName(GuildID(), gci.rank), gci.rank, guild_mgr.GetRankName(GuildID(), rank), rank, guild_mgr.GetGuildName(GuildID()), GuildID());
 
 		if(!guild_mgr.SetGuildRank(gci.char_id, rank)) {
 			Message(13, "Error while setting rank %d on '%s'.", rank, demote->target);
@@ -4160,12 +3801,10 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 		}
 		Message(0, "Successfully demoted %s to rank %d", demote->target, rank);
 	}
-//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
-void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GuildInvite");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
@@ -4183,10 +3822,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
-
-		//ok, the invite is also used for changing rank as well.
 		Mob* invitee = entity_list.GetMob(gc->othername);
-
 		if(!invitee) {
 			Message(13, "Prospective guild member %s must be in zone to preform guild operations on them.", gc->othername);
 			return;
@@ -4194,45 +3830,28 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 
 		if(invitee->IsClient()) {
 			Client* client = invitee->CastToClient();
-
-			//ok, figure out what they are trying to do.
 			if(client->GuildID() == GuildID()) {
-				//they are already in this guild, must be a promotion or demotion
 				if(gc->officer < client->GuildRank()) {
-					//demotion
 					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE)) {
 						Message(13, "You dont have permission to demote.");
 						return;
 					}
 
-					//we could send this to the member and prompt them to see if they want to
-					//be demoted (I guess), but I dont see a point in that.
-
-					mlog(GUILDS__ACTIONS, "%s (%d) is demoting %s (%d) to rank %d in guild %s (%d)",
-						GetName(), CharacterID(),
-						client->GetName(), client->CharacterID(),
-						gc->officer,
-						guild_mgr.GetGuildName(GuildID()), GuildID());
+					mlog(GUILDS__ACTIONS, "%s (%d) is demoting %s (%d) to rank %d in guild %s (%d)", GetName(), CharacterID(), client->GetName(), client->CharacterID(), gc->officer, guild_mgr.GetGuildName(GuildID()), GuildID());
 
 					if(!guild_mgr.SetGuildRank(client->CharacterID(), gc->officer)) {
 						Message(13, "There was an error during the demotion, DB may now be inconsistent.");
 						return;
 					}
 
-				} else if(gc->officer > client->GuildRank()) {
-					//promotion
+				}
+				else if(gc->officer > client->GuildRank()) {
 					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_PROMOTE)) {
 						Message(13, "You dont have permission to demote.");
 						return;
 					}
 
-					mlog(GUILDS__ACTIONS, "%s (%d) is asking to promote %s (%d) to rank %d in guild %s (%d)",
-						GetName(), CharacterID(),
-						client->GetName(), client->CharacterID(),
-						gc->officer,
-						guild_mgr.GetGuildName(GuildID()), GuildID());
-
-					//record the promotion with guild manager so we know its valid when we get the reply
+					mlog(GUILDS__ACTIONS, "%s (%d) is asking to promote %s (%d) to rank %d in guild %s (%d)", GetName(), CharacterID(), client->GetName(), client->CharacterID(), gc->officer, guild_mgr.GetGuildName(GuildID()), GuildID());
 					guild_mgr.RecordInvite(client->CharacterID(), GuildID(), gc->officer);
 
 					if(gc->guildeqid == 0)
@@ -4242,15 +3861,14 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 					mpkt(GUILDS__OUT_PACKET_TRACE, app);
 					client->QueuePacket(app);
 
-				} else {
+				}
+				else {
 					Message(13, "That member is already that rank.");
 					return;
 				}
-			} else if(!client->IsInAGuild()) {
-				//they are not in this or any other guild, this is an invite
-				//
-				if(client->GetPendingGuildInvitation())
-				{
+			}
+			else if(!client->IsInAGuild()) {
+				if(client->GetPendingGuildInvitation()) {
 					Message(13, "That person is already considering a guild invitation.");
 					return;
 				}
@@ -4260,11 +3878,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 					return;
 				}
 
-				mlog(GUILDS__ACTIONS, "Inviting %s (%d) into guild %s (%d)",
-					client->GetName(), client->CharacterID(),
-					guild_mgr.GetGuildName(GuildID()), GuildID());
-
-				//record the invite with guild manager so we know its valid when we get the reply
+				mlog(GUILDS__ACTIONS, "Inviting %s (%d) into guild %s (%d)", client->GetName(), client->CharacterID(), guild_mgr.GetGuildName(GuildID()), GuildID());
 				guild_mgr.RecordInvite(client->CharacterID(), GuildID(), gc->officer);
 
 				if(gc->guildeqid == 0)
@@ -4275,8 +3889,8 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				client->SetPendingGuildInvitation(true);
 				client->QueuePacket(app);
 
-			} else {
-				//they are in some other guild
+			}
+			else {
 				Message(13,"Player is in a guild.");
 				return;
 			}
@@ -4284,8 +3898,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GuildRemove");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
@@ -4296,7 +3909,6 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 	GuildCommand_Struct* gc = (GuildCommand_Struct*) app->pBuffer;
 	if (!IsInAGuild())
 		Message(0, "Error: You arent in a guild!");
-	// we can always remove ourself, otherwise, our rank needs remove permissions
 	else if (strcasecmp(gc->othername,GetName()) != 0 &&
 			!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_REMOVE))
 		Message(0, "You dont have permission to remove guild members.");
@@ -4316,7 +3928,8 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			mlog(GUILDS__ACTIONS, "Removing %s (%d) from guild %s (%d)",
 				client->GetName(), client->CharacterID(),
 				guild_mgr.GetGuildName(GuildID()), GuildID());
-		} else {
+		}
+		else {
 			CharGuildInfo gci;
 			if(!guild_mgr.GetCharInfo(gc->othername, gci)) {
 				Message(0, "Unable to find '%s'", gc->othername);
@@ -4327,10 +3940,7 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 				return;
 			}
 			char_id = gci.char_id;
-
-			mlog(GUILDS__ACTIONS, "Removing remote/offline %s (%d) into guild %s (%d)",
-				gci.char_name.c_str(), gci.char_id,
-				guild_mgr.GetGuildName(GuildID()), GuildID());
+			mlog(GUILDS__ACTIONS, "Removing remote/offline %s (%d) into guild %s (%d)", gci.char_name.c_str(), gci.char_id, guild_mgr.GetGuildName(GuildID()), GuildID());
 		}
 
 		if(!guild_mgr.SetGuild(char_id, GUILD_NONE, 0)) {
@@ -4345,12 +3955,10 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 		else
 			Message(0,"Unable to remove %s from your guild.",gc->othername);
 	}
-//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
-void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app) {
 	mlog(GUILDS__IN_PACKETS, "Received OP_GuildInviteAccept");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
@@ -4364,25 +3972,17 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 	GuildInviteAccept_Struct* gj = (GuildInviteAccept_Struct*) app->pBuffer;
 
 	if (gj->response == 5 || gj->response == 4) {
-		//dont care if the check fails (since we dont know the rank), just want to clear the entry.
 		guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response);
-
 		worldserver.SendEmoteMessage(gj->inviter, 0, 0, "%s has declined to join the guild.", this->GetName());
-
 		return;
 	}
-
-	//uint32 tmpeq = gj->guildeqid;
+	
 	if (IsInAGuild() && gj->response==GuildRank())
 		Message(0, "Error: You're already in a guild!");
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
-		mlog(GUILDS__ACTIONS, "Guild Invite Accept: guild %d, response %d, inviter %s, person %s",
-			gj->guildeqid, gj->response, gj->inviter, gj->newmember);
-
-		//we dont really care a lot about what this packet means, as long as
-		//it has been authorized with the guild manager
+		mlog(GUILDS__ACTIONS, "Guild Invite Accept: guild %d, response %d, inviter %s, person %s", gj->guildeqid, gj->response, gj->inviter, gj->newmember);
 		if(!guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response)) {
 			worldserver.SendEmoteMessage(gj->inviter, 0, 0, "%s has sent an invalid response to your invite!", GetName());
 			Message(13, "Invalid invite response packet!");
@@ -4390,25 +3990,15 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 		}
 
 		if(gj->guildeqid == GuildID()) {
-			//only need to change rank.
-
-			mlog(GUILDS__ACTIONS, "Changing guild rank of %s (%d) to rank %d in guild %s (%d)",
-				GetName(), CharacterID(),
-				gj->response,
-				guild_mgr.GetGuildName(GuildID()), GuildID());
+			mlog(GUILDS__ACTIONS, "Changing guild rank of %s (%d) to rank %d in guild %s (%d)", GetName(), CharacterID(), gj->response, guild_mgr.GetGuildName(GuildID()), GuildID());
 
 			if(!guild_mgr.SetGuildRank(CharacterID(), gj->response)) {
 				Message(13, "There was an error during the rank change, DB may now be inconsistent.");
 				return;
 			}
-		} else {
-
-			mlog(GUILDS__ACTIONS, "Adding %s (%d) to guild %s (%d) at rank %d",
-				GetName(), CharacterID(),
-				guild_mgr.GetGuildName(gj->guildeqid), gj->guildeqid,
-				gj->response);
-
-			//change guild and rank.
+		}
+		else {
+			mlog(GUILDS__ACTIONS, "Adding %s (%d) to guild %s (%d) at rank %d", GetName(), CharacterID(), guild_mgr.GetGuildName(gj->guildeqid), gj->guildeqid, gj->response);
 			if(!guild_mgr.SetGuild(CharacterID(), gj->guildeqid, gj->response)) {
 				Message(13, "There was an error during the invite, DB may now be inconsistent.");
 				return;
@@ -4416,15 +4006,12 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 				GuildBanks->SendGuildBank(this);
 			SendGuildRanks();
-
 		}
 	}
 }
 
-void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_ManaChange(const EQApplicationPacket *app) {
 	if(app->size == 0) {
-		// i think thats the sign to stop the songs
 		if(IsBardSong(casting_spell_id) || bardsong != 0)
 			InterruptSpell(SONG_ENDS, 0x121);
 		else
@@ -4432,23 +4019,19 @@ void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
 
 		return;
 	}
-	else	// I don't think the client sends proper manachanges
-	{			// with a length, just the 0 len ones for stopping songs
-		//ManaChange_Struct* p = (ManaChange_Struct*)app->pBuffer;
+	else {
 		printf("OP_ManaChange from client:\n");
 		DumpPacket(app);
 	}
 	return;
 }
 
-void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app) {
 	OPMemorizeSpell(app);
 	return;
 }
 
-void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app) {
 	if (app->size != sizeof(SwapSpell_Struct)) {
 		std::cout << "Wrong size on OP_SwapSpell. Got: " << app->size << ", Expected: " << sizeof(SwapSpell_Struct) << std::endl;
 		return;
@@ -4467,15 +4050,13 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_CastSpell(const EQApplicationPacket *app) {
 	if (app->size != sizeof(CastSpell_Struct)) {
 		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
 		return;
 	}
 	if (IsAIControlled()) {
 		this->Message_StringID(13, NOT_IN_CONTROL);
-		//Message(13, "You cant cast right now, you arent in control of yourself!");
 		return;
 	}
 
@@ -4493,9 +4074,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 #endif
 	LogFile->write(EQEMuLog::Debug, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 
-	if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// ITEM or POTION cast
-	{
-		//discipline, using the item spell slot
+	if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT)) {
 		if (castspell->inventoryslot == 0xFFFFFFFF) {
 			if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
 				LogFile->write(EQEMuLog::Debug, "Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
@@ -4503,52 +4082,41 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			}
 			return;
 		}
-		else if ((castspell->inventoryslot < 30) || (castspell->slot == POTION_BELT_SPELL_SLOT))	// sanity check
-		{
-			const ItemInst* inst = m_inv[castspell->inventoryslot]; //slot values are int16, need to check packet on this field
-			//bool cancast = true;
-			if (inst && inst->IsType(ItemClassCommon))
-			{
+		else if ((castspell->inventoryslot < 30) || (castspell->slot == POTION_BELT_SPELL_SLOT)) {
+			const ItemInst* inst = m_inv[castspell->inventoryslot];
+			if (inst && inst->IsType(ItemClassCommon)) {
 				const Item_Struct* item = inst->GetItem();
-				if (item->Click.Effect != (uint32)castspell->spell_id)
-				{
+				if (item->Click.Effect != (uint32)castspell->spell_id) {
 					database.SetMQDetectionFlag(account_name, name, "OP_CastSpell with item, tried to cast a different spell.", zone->GetShortName());
-					InterruptSpell(castspell->spell_id);	//CHEATER!!
+					InterruptSpell(castspell->spell_id);
 					return;
 				}
 
-				if ((item->Click.Type == ET_ClickEffect) || (item->Click.Type == ET_Expendable) || (item->Click.Type == ET_EquipClick) || (item->Click.Type == ET_ClickEffect2))
-				{
-					if (item->Click.Level2 > 0)
-					{
-						if (GetLevel() >= item->Click.Level2)
-						{
+				if ((item->Click.Type == ET_ClickEffect) || (item->Click.Type == ET_Expendable) || (item->Click.Type == ET_EquipClick) || (item->Click.Type == ET_ClickEffect2)) {
+					if (item->Click.Level2 > 0) {
+						if (GetLevel() >= item->Click.Level2) {
 							ItemInst* p_inst = (ItemInst*)inst;
 							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
-							if (i == 0) {
+							if (i == 0)
 								CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
-							}
 							else {
 								InterruptSpell(castspell->spell_id);
 								return;
 							}
 						}
-						else
-						{
+						else {
 							database.SetMQDetectionFlag(account_name, name, "OP_CastSpell with item, did not meet req level.", zone->GetShortName());
 							Message(0, "Error: level not high enough.", castspell->inventoryslot);
 							InterruptSpell(castspell->spell_id);
 						}
 					}
-					else
-					{
+					else {
 						ItemInst* p_inst = (ItemInst*)inst;
 						int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
-						if (i == 0) {
+						if (i == 0)
 							CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
-						}
 						else {
 							InterruptSpell(castspell->spell_id);
 							return;
@@ -4556,32 +4124,27 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 					}
 				}
 				else
-				{
 					Message(0, "Error: unknown item->Click.Type (0x%02x)", item->Click.Type);
-				}
 			}
-			else
-			{
+			else {
 				Message(0, "Error: item not found in inventory slot #%i", castspell->inventoryslot);
 				InterruptSpell(castspell->spell_id);
 			}
 		}
-		else
-		{
+		else {
 			Message(0, "Error: castspell->inventoryslot >= 30 (0x%04x)", castspell->inventoryslot);
 			InterruptSpell(castspell->spell_id);
 		}
 	}
-	else if (castspell->slot == DISCIPLINE_SPELL_SLOT) {	// DISCIPLINE cast
+	else if (castspell->slot == DISCIPLINE_SPELL_SLOT) {
 		if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
 			printf("Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
 			InterruptSpell(castspell->spell_id);
 			return;
 		}
 	}
-	else if (castspell->slot == ABILITY_SPELL_SLOT) {	// ABILITY cast (LoH and Harm Touch)
+	else if (castspell->slot == ABILITY_SPELL_SLOT) {
 		uint16 spell_to_cast = 0;
-
 		if (castspell->spell_id == SPELL_LAY_ON_HANDS && GetClass() == PALADIN) {
 			if (!p_timers.Expired(&database, pTimerLayHands)) {
 				Message(13, "Ability recovery time not yet met.");
@@ -4591,15 +4154,13 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			spell_to_cast = SPELL_LAY_ON_HANDS;
 			p_timers.Start(pTimerLayHands, LayOnHandsReuseTime);
 		}
-		else if ((castspell->spell_id == SPELL_HARM_TOUCH
-			|| castspell->spell_id == SPELL_HARM_TOUCH2) && GetClass() == SHADOWKNIGHT) {
+		else if ((castspell->spell_id == SPELL_HARM_TOUCH || castspell->spell_id == SPELL_HARM_TOUCH2) && GetClass() == SHADOWKNIGHT) {
 			if (!p_timers.Expired(&database, pTimerHarmTouch)) {
 				Message(13, "Ability recovery time not yet met.");
 				InterruptSpell(castspell->spell_id);
 				return;
 			}
-
-			// determine which version of HT we are casting based on level
+			
 			if (GetLevel() < 40)
 				spell_to_cast = SPELL_HARM_TOUCH;
 			else
@@ -4608,19 +4169,15 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
 		}
 		
-		if (spell_to_cast > 0)	// if we've matched LoH or HT, cast now
+		if (spell_to_cast > 0)
 			CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
-	else	// MEMORIZED SPELL (first confirm that it's a valid memmed spell slot, then validate that the spell is currently memorized)
-	{
+	else {
 		uint16 spell_to_cast = 0;
-
-		if(castspell->slot < MAX_PP_MEMSPELL)
-		{
+		if(castspell->slot < MAX_PP_MEMSPELL) {
 			spell_to_cast = m_pp.mem_spells[castspell->slot];
-			if(spell_to_cast != castspell->spell_id)
-			{
-				InterruptSpell(castspell->spell_id); //CHEATER!!!
+			if(spell_to_cast != castspell->spell_id) {
+				InterruptSpell(castspell->spell_id);
 				return;
 			}
 		}
@@ -4628,14 +4185,12 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			InterruptSpell();
 			return;
 		}
-
 		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}
 	return;
 }
 
-void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app) {
 	if (app->size != sizeof(DeleteItem_Struct)) {
 		std::cout << "Wrong size on OP_DeleteItem. Got: " << app->size << ", Expected: " << sizeof(DeleteItem_Struct) << std::endl;
 		return;
@@ -4651,9 +4206,9 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		int16 IntoxicationIncrease;
 
 		if(GetClientVersion() < EQClientSoD)
-			IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
+			IntoxicationIncrease = ((200 - AlcoholTolerance) * 30 / 200 + 10);
 		else
-			IntoxicationIncrease = (270 - AlcoholTolerance) * 0.111111108 + 10;
+			IntoxicationIncrease = ((270 - AlcoholTolerance) * 0.111111108 + 10);
 
 		if(IntoxicationIncrease < 0)
 			IntoxicationIncrease = 1;
@@ -4668,8 +4223,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app) {
 	if (app->size != sizeof(CombatAbility_Struct)) {
 		std::cout << "Wrong size on OP_CombatAbility. Got: " << app->size << ", Expected: " << sizeof(CombatAbility_Struct) << std::endl;
 		return;
@@ -4678,8 +4232,7 @@ void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_Taunt(const EQApplicationPacket *app)
-{
+void Client::Handle_OP_Taunt(const EQApplicationPacket *app) {
 	if (app->size != sizeof(ClientTarget_Struct)) {
 		std::cout << "Wrong size on OP_Taunt. Got: " << app->size << ", Expected: "<< sizeof(ClientTarget_Struct) << std::endl;
 		return;
@@ -4689,7 +4242,7 @@ void Client::Handle_OP_Taunt(const EQApplicationPacket *app)
 				Message(13,"Ability recovery time not yet met.");
 				return;
 	}
-	p_timers.Start(pTimerTaunt, TauntReuseTime-1);
+	p_timers.Start(pTimerTaunt, (TauntReuseTime - 1));
 
 	if(GetTarget() == nullptr || !GetTarget()->IsNPC())
 		return;

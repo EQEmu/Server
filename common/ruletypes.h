@@ -289,6 +289,8 @@ RULE_BOOL(Spells, FocusCombatProcs, false)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
+RULE_INT(Combat, KickBonus, 0)
+RULE_INT(Combat, BashBonus, 0)
 RULE_INT(Combat, AvoidanceCap, 1000)
 RULE_INT(Combat, MeleeBaseCritChance, 0)
 RULE_INT(Combat, WarBerBaseCritChance, 3)

@@ -1,0 +1,1 @@
+INSERT INTO rule_values (ruleset_id, rule_name, rule_value, notes) VALUES (1, "Combat:KickBonus", 0, "Modify Kick skill damage by percent."), (1, "Combat:BashBonus", 0, "Modify Bash skill damage by percent.");

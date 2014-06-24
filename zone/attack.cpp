@@ -245,7 +245,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 }
 
 
-bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte) {
+bool Mob::AvoidDamage(Mob* other, uint32 &damage, bool CanRiposte) {
 	float skill;
 	float bonus;
 	float RollTable[4] = {0,0,0,0};
@@ -377,7 +377,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte) {
 	return false;
 }
 
-void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts) {
+void Mob::MeleeMitigation(Mob *attacker, uint32 &damage, uint32 minhit, ExtraAttackOptions *opts) {
 	if (damage <= 0)
 		return;
 
@@ -537,7 +537,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		damage = 0;
 }
 
-int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating) {
+uint32 Mob::GetMeleeMitDmg(Mob *attacker, uint32 damage, uint32 minhit, float mit_rating, float atk_rating) {
 	float d = 10.0;
 	float mit_roll = MakeRandomFloat(0, mit_rating);
 	float atk_roll = MakeRandomFloat(0, atk_rating);
@@ -573,10 +573,10 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_r
 	return damage;
 }
 
-int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating) {
+uint32 Client::GetMeleeMitDmg(Mob *attacker, uint32 damage, uint32 minhit, float mit_rating, float atk_rating) {
 	if (!attacker->IsNPC() || RuleB(Combat, UseOldDamageIntervalRules))
 		return Mob::GetMeleeMitDmg(attacker, damage, minhit, mit_rating, atk_rating);
-	int d = 10;
+	uint32 d = 10;
 	float dmg_interval = ((damage - minhit) / 19.0);
 	float dmg_bonus = (minhit - dmg_interval);
 	float spellMeleeMit = (spellbonuses.MeleeMitigation / 100.0);
@@ -939,7 +939,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	AttackAnimation(skillinuse, Hand, weapon);
 	mlog(COMBAT__ATTACKS, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, skillinuse);
 
-	int damage = 0;
+	uint32 damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
 	uint32 hate = 0;
 	if (weapon)
@@ -1356,7 +1356,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 }
 
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {
-	int damage = 0;
+	uint32 damage = 0;
 	if (!other) {
 		SetTarget(nullptr);
 		LogFile->write(EQEMuLog::Error, "A null Mob object was passed to NPC::Attack() for evaluation!");
@@ -1436,7 +1436,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		}
 	}
 
-	int weapon_damage = GetWeaponDamage(other, weapon);
+	uint32 weapon_damage = GetWeaponDamage(other, weapon);
 
 	int16 charges = 0;
 	ItemInst weapon_inst(weapon, charges);
@@ -1474,11 +1474,11 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			damage = MakeRandomInt((min_dmg+eleBane),(max_dmg+eleBane));
 
 
-		if((min_dmg+eleBane) != 0 && damage < (min_dmg + eleBane)) {
+		if((min_dmg + eleBane) != 0 && damage < (min_dmg + eleBane)) {
 			mlog(COMBAT__DAMAGE, "Damage (%d) is below min (%d). Setting to min.", damage, (min_dmg + eleBane));
 			damage = (min_dmg+eleBane);
 		}
-		if((max_dmg+eleBane) != 0 && damage > (max_dmg + eleBane)) {
+		if((max_dmg + eleBane) != 0 && damage > (max_dmg + eleBane)) {
 			mlog(COMBAT__DAMAGE, "Damage (%d) is above max (%d). Setting to max.", damage, (max_dmg + eleBane));
 			damage = (max_dmg+eleBane);
 		}
@@ -3197,7 +3197,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 	return;
 }
 
-void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage) {
+void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, uint32 &damage) {
 	if(damage < 1)
 		return;
 
@@ -3238,7 +3238,7 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage) {
 	}
 }
 
-void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttackOptions *opts) {
+void Mob::TryCriticalHit(Mob *defender, uint16 skill, uint32 &damage, ExtraAttackOptions *opts) {
 	if(damage < 1)
 		return;
 
@@ -3402,11 +3402,11 @@ void Mob::DoRiposte(Mob* defender) {
 	}
 }
 
-void Mob::ApplyMeleeDamageBonus(uint16 skill, int32 &damage) {
+void Mob::ApplyMeleeDamageBonus(uint16 skill, uint32 &damage) {
 
 	if(!RuleB(Combat, UseIntervalAC)){
 		if(IsNPC()){
-			int dmgbonusmod = 0;
+			uint32 dmgbonusmod = 0;
 			dmgbonusmod += ((100 * (itembonuses.STR + spellbonuses.STR)) / 3);
 			dmgbonusmod += ((100 * (spellbonuses.ATK + itembonuses.ATK)) / 5);
 			mlog(COMBAT__DAMAGE, "Damage bonus: %d percent from ATK and STR bonuses.", (dmgbonusmod / 100));
