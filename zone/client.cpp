@@ -3526,9 +3526,9 @@ uint16 Client::GetPrimarySkillValue() {
 	return GetSkill(skill);
 }
 
-uint16 Client::GetTotalATK() {
-	uint16 AttackRating = 0;
-	uint16 WornCap = itembonuses.ATK;
+uint32 Client::GetTotalATK() {
+	uint32 AttackRating = 0;
+	uint32 WornCap = itembonuses.ATK;
 
 	if(IsClient()) {
 		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
@@ -3544,8 +3544,8 @@ uint16 Client::GetTotalATK() {
 	return AttackRating;
 }
 
-uint16 Client::GetATKRating() {
-	uint16 AttackRating = 0;
+uint32 Client::GetATKRating() {
+	uint32 AttackRating = 0;
 	if(IsClient()) {
 		AttackRating = (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
 
@@ -5372,7 +5372,7 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 			aa_regen_spacing += " .";
 
 		regen_string += (indS + regen_row_color + regen_row_header + base_regen_spacing + base_regen_field);
-		regen_string += (div + item_regen_spacing + item_regen_field + " | Cap: " + cap_regen_field);
+		regen_string += (div + item_regen_spacing + item_regen_field + div + cap_regen_field);
 		regen_string += (div + cap_regen_spacing + spell_regen_spacing + div + spell_regen_field);
 		regen_string += (div + aa_regen_spacing + aa_regen_field + div + total_regen_field + "</c><br>");
 	}
@@ -5439,7 +5439,7 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 			}
 			case 5: {
 				a_stat_name = " WIS: ";
-				a_resist_name = "COR: ";
+				a_resist_name = "CORR: ";
 				a_stat = itoa(GetWIS());
 				h_stat = itoa(GetHeroicWIS());
 				a_resist = itoa(GetCorrup());
@@ -5546,8 +5546,8 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 		for(int a = mod2b.size(); a < (max_mod2_value_len + mod2b_space_count); a++)
 			mod2b_spacing += " . ";
 
-		mod2_field += (indP + mod2a_name + mod2a_spacing + mod2a + " | Cap: " + mod2a_cap + "<br>");
-		mod2_field += (indP + mod2b_name + mod2b_spacing + mod2b + " | Cap: " + mod2b_cap + "<br>");
+		mod2_field += (indP + mod2a_name + mod2a_spacing + mod2a + indS + " | Cap: " + mod2a_cap + "<br>");
+		mod2_field += (indP + mod2b_name + mod2b_spacing + mod2b + indS + " | Cap: " + mod2b_cap + "<br>");
 	}
 
 	uint32 rune_number = 0;
@@ -5619,10 +5619,10 @@ void Client::SendStatsWindow(Client* client, bool use_window) {
 					regen_string << "<br>" <<
 					stat_field << "<br><br>" <<
 					mod2_field << "<br>" <<
-					indP << "Heal Amount: " << GetHealAmt() << " | Cap: " << RuleI(Character, ItemHealAmtCap) << "<br>" <<
-					indP << "Spell Damage: " << GetSpellDmg() << " | Cap: " << RuleI(Character, ItemSpellDmgCap) << "<br>" <<
-					indP << "Clairvoyance: " << GetClair() << " | Cap: " << RuleI(Character, ItemClairvoyanceCap) << "<br>" <<
-					indP << "DS Mitigation: " << GetDSMit() << " | Cap: " << RuleI(Character, ItemDSMitigationCap) << "<br><br>";
+					indP << "Heal Amount: " << GetHealAmt() << indS <<" | Cap: " << RuleI(Character, ItemHealAmtCap) << "<br>" <<
+					indP << "Spell Damage: " << GetSpellDmg() << indS << " | Cap: " << RuleI(Character, ItemSpellDmgCap) << "<br>" <<
+					indP << "Clairvoyance: " << GetClair() << indS << " | Cap: " << RuleI(Character, ItemClairvoyanceCap) << "<br>" <<
+					indP << "DS Mitigation: " << GetDSMit() << indS << " | Cap: " << RuleI(Character, ItemDSMitigationCap) << "<br><br>";
 	if(GetClass() == BARD)
 		final_string << bard_info << "<br>";
 	if(skill_mods.size() > 0)

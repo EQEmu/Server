@@ -60,82 +60,66 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 			LogFile->write(EQEMuLog::Debug, "Weapon skill:%i", item->ItemType);
 #endif
 		switch (item->ItemType) {
-			case ItemType1HSlash: {
+			case ItemType1HSlash:
 				skillinuse = Skill1HSlashing;
 				type = anim1HWeapon;
 				break;
-			}
-			case ItemType2HSlash: {
+			case ItemType2HSlash:
 				skillinuse = Skill2HSlashing;
 				type = anim2HSlashing;
 				break;
-			}
-			case ItemType1HPiercing: {
+			case ItemType1HPiercing:
 				skillinuse = Skill1HPiercing;
 				type = animPiercing;
 				break;
-			}
-			case ItemType1HBlunt: {
+			case ItemType1HBlunt:
 				skillinuse = Skill1HBlunt;
 				type = anim1HWeapon;
 				break;
-			}
-			case ItemType2HBlunt: {
+			case ItemType2HBlunt:
 				skillinuse = Skill2HBlunt;
 				type = anim2HSlashing;
 				break;
-			}
-			case ItemType2HPiercing: {
+			case ItemType2HPiercing:
 				skillinuse = Skill1HPiercing;
 				type = anim2HWeapon;
 				break;
-			}
-			case ItemTypeMartial: {
+			case ItemTypeMartial:
 				skillinuse = SkillHandtoHand;
 				type = animHand2Hand;
 				break;
-			}
-			default: {
+			default:
 				skillinuse = SkillHandtoHand;
 				type = animHand2Hand;
 				break;
-			}
 		}
 	}
 	else if(IsNPC()) {
 		switch (skillinuse) {
-			case Skill1HSlashing: {
+			case Skill1HSlashing:
 				type = anim1HWeapon;
 				break;
-			}
-			case Skill2HSlashing: {
+			case Skill2HSlashing:
 				type = anim2HSlashing;
 				break;
-			}
-			case Skill1HPiercing: {
+			case Skill1HPiercing:
 				type = animPiercing;
 				break;
-			}
-			case Skill1HBlunt: {
+			case Skill1HBlunt:
 				type = anim1HWeapon;
 				break;
-			}
-			case Skill2HBlunt: {
+			case Skill2HBlunt:
 				type = anim2HSlashing;
 				break;
-			}
-			case 99: {
+			case 99:
 				type = anim2HWeapon;
 				break;
-			}
-			case SkillHandtoHand: {
+			case SkillHandtoHand:
 				type = animHand2Hand;
 				break;
-			}
-			default: {
+			default:
 				type = animHand2Hand;
 				break;
-			}
 		}
 	}
 	else {
@@ -188,7 +172,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 		}
 		else {
 			chancetohit -= (RuleR(Combat,HitFalloffMinor) + RuleR(Combat,HitFalloffModerate));
-			chancetohit += ((level_difference + range + 3.0) / 12.0) * RuleR(Combat,HitFalloffMajor);
+			chancetohit += (((level_difference + range + 3.0) / 12.0) * RuleR(Combat,HitFalloffMajor));
 		}
 	}
 	else

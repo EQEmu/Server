@@ -1257,7 +1257,7 @@ XS(XS__setglobal)
 
 	char *		varname = (char *)SvPV_nolen(ST(0));
 	char *		newvalue = (char *)SvPV_nolen(ST(1));
-	int	options = (int)SvIV(ST(2));
+	uint8		options = (int)SvIV(ST(2));
 	char *		duration = (char *)SvPV_nolen(ST(3));
 
 	quest_manager.setglobal(varname, newvalue, options, duration);
@@ -1281,36 +1281,15 @@ XS(XS__getguildnamebyid) {
 	XSRETURN(1);
 }
 
-XS(XS__targlobal);
-XS(XS__targlobal)
-{
-	dXSARGS;
-	if (items != 6)
-		Perl_croak(aTHX_ "Usage: targlobal(varname, value, duration, npcid, charid, zoneid)");
-
-	char *		varname = (char *)SvPV_nolen(ST(0));
-	char *		value = (char *)SvPV_nolen(ST(1));
-	char *		duration = (char *)SvPV_nolen(ST(2));
-	int	npcid = (int)SvIV(ST(3));
-	int	charid = (int)SvIV(ST(4));
-	int	zoneid = (int)SvIV(ST(5));
-
-	quest_manager.targlobal(varname, value, duration, npcid, charid, zoneid);
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__delglobal);
-XS(XS__delglobal)
+XS(XS__deleteglobal);
+XS(XS__deleteglobal)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: delglobal(varname)");
+		Perl_croak(aTHX_ "Usage: deleteglobal(varname)");
 
-	char *		varname = (char *)SvPV_nolen(ST(0));
-
-	quest_manager.delglobal(varname);
-
+	char * varname = (char *)SvPV_nolen(ST(0));
+	quest_manager.deleteglobal(varname);
 	XSRETURN_EMPTY;
 }
 
@@ -3391,8 +3370,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "signal"), XS__signal, file);
 		newXS(strcpy(buf, "signalwith"), XS__signalwith, file);
 		newXS(strcpy(buf, "setglobal"), XS__setglobal, file);
-		newXS(strcpy(buf, "targlobal"), XS__targlobal, file);
-		newXS(strcpy(buf, "delglobal"), XS__delglobal, file);
+		newXS(strcpy(buf, "deleteglobal"), XS__deleteglobal, file);
 		newXS(strcpy(buf, "ding"), XS__ding, file);
 		newXS(strcpy(buf, "rebind"), XS__rebind, file);
 		newXS(strcpy(buf, "start"), XS__start, file);

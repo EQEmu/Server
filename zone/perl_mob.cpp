@@ -2559,7 +2559,7 @@ XS(XS_Mob_GetAC)
 		Perl_croak(aTHX_ "Usage: Mob::GetAC(THIS)");
 	{
 		Mob *		THIS;
-		uint16		RETVAL;
+		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -2585,7 +2585,7 @@ XS(XS_Mob_GetATK)
 		Perl_croak(aTHX_ "Usage: Mob::GetATK(THIS)");
 	{
 		Mob *		THIS;
-		uint16		RETVAL;
+		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -7341,98 +7341,6 @@ XS(XS_Mob_GetItemStat)
 	XSRETURN(1);
 }
 
-XS(XS_Mob_SetGlobal);
-XS(XS_Mob_SetGlobal)
-{
-	dXSARGS;
-	if (items < 5 || items > 6)
-		Perl_croak(aTHX_ "Usage: SetGlobal(THIS, varname, newvalue, options, duration, other=nullptr)");
-	{
-		Mob *		THIS;
-		char *		varname = (char *)SvPV_nolen(ST(1));
-		char *		newvalue = (char *)SvPV_nolen(ST(2));
-		int			options = (int)SvIV(ST(3));
-		char *		duration = (char *)SvPV_nolen(ST(4));
-		Mob *		other = nullptr;
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Mob *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items > 5) {
-			if (sv_derived_from(ST(5), "Mob")) {
-				IV tmp = SvIV((SV*)SvRV(ST(5)));
-				other = INT2PTR(Mob *,tmp);
-			}
-			else
-				Perl_croak(aTHX_ "THIS is not of type Mob");
-			if(other == nullptr)
-				Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		}
-
-		THIS->SetGlobal(varname, newvalue, options, duration, other);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Mob_TarGlobal);
-XS(XS_Mob_TarGlobal)
-{
-	dXSARGS;
-	if (items != 7)
-		Perl_croak(aTHX_ "Usage: TarGlobal(THIS, varname, value, duration, npcid, charid, zoneid)");
-	{
-		Mob *		THIS;
-		char *		varname = (char *)SvPV_nolen(ST(1));
-		char *		value = (char *)SvPV_nolen(ST(2));
-		char *		duration = (char *)SvPV_nolen(ST(3));
-		int	npcid = (int)SvIV(ST(4));
-		int	charid = (int)SvIV(ST(5));
-		int	zoneid = (int)SvIV(ST(6));
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Mob *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->TarGlobal(varname, value, duration, npcid, charid, zoneid);
-	}
-	XSRETURN_EMPTY;
-}
-
-XS(XS_Mob_DelGlobal);
-XS(XS_Mob_DelGlobal)
-{
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: DelGlobal(THIS, varname)");
-	{
-		Mob *		THIS;
-		char *		varname = (char *)SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Mob *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->DelGlobal(varname);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Mob_SetSlotTint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetSlotTint)
 {
@@ -8163,15 +8071,19 @@ XS(XS_Mob_GetFlurryChance)
 XS(XS_Mob_GetGlobalTime);
 XS(XS_Mob_GetGlobalTime) {
 	dXSARGS;
-	if (items != 5)
+	if (items < 3 || items > 5)
 		Perl_croak(aTHX_ "Usage: GetGlobalTime(THIS, varname, charid, npcid, zoneid)");
 	{
 		Mob *  THIS;
 		int32  RETVAL;
 		char *  varname = (char *)SvPV_nolen(ST(1));
-		uint32  charid = (uint32)SvUV(ST(2));
-		uint32  npcid = (uint32)SvUV(ST(3));
-		uint32  zoneid = (uint32)SvUV(ST(4));
+		uint32 charid = (uint32)SvUV(ST(2));
+		uint32 npcid = 0;
+		uint32 zoneid = 0;
+		if (items > 3)
+			npcid = (uint32)SvUV(ST(3));
+		if (items > 4)
+			zoneid = (uint32)SvUV(ST(4));
 		dXSTARG;
 		
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -8193,15 +8105,19 @@ XS(XS_Mob_GetGlobalTime) {
 XS(XS_Mob_GetGlobal);
 XS(XS_Mob_GetGlobal) {
 	dXSARGS;
-	if (items != 5)
+	if (items < 3 || items > 5)
 		Perl_croak(aTHX_ "Usage: GetGlobal(THIS, varname, charid, npcid, zoneid)");
 	{
 		Mob *  THIS;
 		Const_char *  RETVAL;
 		char *  varname = (char *)SvPV_nolen(ST(1));
-		uint32  charid = (uint32)SvUV(ST(2));
-		uint32  npcid = (uint32)SvUV(ST(3));
-		uint32  zoneid = (uint32)SvUV(ST(4));
+		uint32	charid = (uint32)SvUV(ST(2));
+		uint32 	npcid = 0;
+		uint32 	zoneid = 0;
+		if (items > 3)
+			npcid = (uint32)SvUV(ST(3));
+		if (items > 4)
+			zoneid = (uint32)SvUV(ST(4));
 		dXSTARG;
 		
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -8218,6 +8134,66 @@ XS(XS_Mob_GetGlobal) {
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	}
 	XSRETURN(1);
+}
+
+XS(XS_Mob_SetGlobal);
+XS(XS_Mob_SetGlobal) {
+	dXSARGS;
+	if (items < 4 || items > 5)
+		Perl_croak(aTHX_ "Usage: SetGlobal(THIS, varname, newvalue, options, duration)");
+	{
+		Mob *		THIS;
+		char *		varname = (char *)SvPV_nolen(ST(1));
+		char *		newvalue = (char *)SvPV_nolen(ST(2));
+		uint8		options = (int)SvIV(ST(3));
+		char * 		duration = (char *)SvPV_nolen(ST(4));
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (duration && duration > 0)
+			THIS->SetGlobal(varname, newvalue, options, duration);
+		else if (!duration || duration == 0)
+			THIS->SetGlobal(varname, newvalue, options);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_DeleteGlobal);
+XS(XS_Mob_DeleteGlobal) {
+	dXSARGS;
+	if (items < 3 || items > 5)
+		Perl_croak(aTHX_ "Usage: DeleteGlobal(THIS, varname, charid, npcid, zoneid)");
+	{
+		Mob *		THIS;
+		char *		varname = (char *)SvPV_nolen(ST(1));
+		uint32 		charid = (uint32)SvUV(ST(2));
+		uint32		npcid = 0;
+		uint32		zoneid = 0;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+			
+		if (items > 3)
+			npcid = (uint32)SvUV(ST(3));
+		if (items > 4)
+			zoneid = (uint32)SvUV(ST(4));
+
+		THIS->DeleteGlobal(varname, charid, npcid, zoneid);
+	}
+	XSRETURN_EMPTY;
 }
 
 #ifdef __cplusplus
@@ -8489,9 +8465,6 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "SpellEffect"), XS_Mob_SpellEffect, file, "$$;$$$$$$");
 		newXSproto(strcpy(buf, "TempName"), XS_Mob_TempName, file, "$:$");
 		newXSproto(strcpy(buf, "GetItemStat"), XS_Mob_GetItemStat, file, "$$$");
-		newXSproto(strcpy(buf, "SetGlobal"), XS_Mob_SetGlobal, file, "$$$$$;$");
-		newXSproto(strcpy(buf, "TarGlobal"), XS_Mob_TarGlobal, file, "$$$$$$$");
-		newXSproto(strcpy(buf, "DelGlobal"), XS_Mob_DelGlobal, file, "$$");
 		newXSproto(strcpy(buf, "SetSlotTint"), XS_Mob_SetSlotTint, file, "$$$$$");
 		newXSproto(strcpy(buf, "WearChange"), XS_Mob_WearChange, file, "$$$;$");
 		newXSproto(strcpy(buf, "DoKnockback"), XS_Mob_DoKnockback, file, "$$$$");
@@ -8519,8 +8492,10 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "IsMeleeDisabled"), XS_Mob_IsMeleeDisabled, file, "$$");
 		newXSproto(strcpy(buf, "SetFlurryChance"), XS_Mob_SetFlurryChance, file, "$$");
 		newXSproto(strcpy(buf, "GetFlurryChance"), XS_Mob_GetFlurryChance, file, "$");
-		newXSproto(strcpy(buf, "GetGlobalTime"), XS_Mob_GetGlobalTime, file, "$$$$$");
-		newXSproto(strcpy(buf, "GetGlobal"), XS_Mob_GetGlobal, file, "$$$$$");
+		newXSproto(strcpy(buf, "SetGlobal"), XS_Mob_SetGlobal, file, "$$$$;$");
+		newXSproto(strcpy(buf, "DeleteGlobal"), XS_Mob_DeleteGlobal, file, "$$$;$$");
+		newXSproto(strcpy(buf, "GetGlobalTime"), XS_Mob_GetGlobalTime, file, "$$$;$$");
+		newXSproto(strcpy(buf, "GetGlobal"), XS_Mob_GetGlobal, file, "$$$;$$");
 
 	XSRETURN_YES;
 }

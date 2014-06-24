@@ -1986,7 +1986,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		return;
 	}
 
-	if(slot_id < 0) {
+	if(slot_id < 0 && slot_id != -1501) {
 		LogFile->write(EQEMuLog::Debug, "Unknown slot being used by %s, slot being used is: %i",GetName(),request->slot);
 		return;
 	}

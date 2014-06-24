@@ -161,7 +161,7 @@ uint32 Mob::mod_archery_bonus_damage(uint32 MaxDmg, const ItemInst* RangeWeapon)
 int32 Mob::mod_archery_damage(int32 TotalDmg, bool hasbonus, const ItemInst* RangeWeapon) { return(TotalDmg); }
 
 //Thrown weapon damage after all other calcs
-uint16 Mob::mod_throwing_damage(uint16 MaxDmg) { return(MaxDmg); }
+uint32 Mob::mod_throwing_damage(uint32 MaxDmg) { return(MaxDmg); }
 
 //Spell cast time in milliseconds - will not sync with client cast time bar, but does work.
 int32 Mob::mod_cast_time(int32 cast_time) { return(cast_time); }

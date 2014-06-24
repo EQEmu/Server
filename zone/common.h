@@ -157,7 +157,7 @@ struct Buffs_Struct {
 };
 
 struct StatBonuses {
-	int16	AC;
+	int32	AC;
 	int32	HP;
 	int32	HPRegen;
 	int32	MaxHP;
@@ -165,7 +165,7 @@ struct StatBonuses {
 	int32	EnduranceRegen;
 	int32	Mana;
 	int32	Endurance;
-	int16	ATK;
+	int32	ATK;
 	int16	STR;
 	int16	STRCapMod;
 	int16	HeroicSTR;
@@ -369,7 +369,7 @@ struct StatBonuses {
 	int16	ItemHPRegenCap;
 	int16	SEResist[MAX_RESISTABLE_EFFECTS*2];	
 	int16	OffhandRiposteFail;
-	int16	ItemATKCap;	
+	int32	ItemATKCap;	
 	int32	FinishingBlow[2];
 	uint16	FinishingBlowLvl[2];
 	int16	ShieldEquipHateMod;

@@ -60,9 +60,9 @@ struct NPCType
 	uint32	adventure_template;
 	uint32	trap_template;
 	uint8	light;		//not loaded from DB
-	uint16	AC;
+	uint32	AC;
 	uint32	Mana;	//not loaded from DB
-	uint16	ATK;	//not loaded from DB
+	uint32	ATK;	//not loaded from DB
 	uint16	STR;
 	uint16	STA;
 	uint16	DEX;

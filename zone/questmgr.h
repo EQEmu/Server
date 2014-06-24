@@ -126,9 +126,8 @@ public:
 	void itemlink(int item_id);
 	void signal(int npc_id, int wait_ms = 0);
 	void signalwith(int npc_id, int signal_id, int wait_ms = 0);
-	void setglobal(const char *varname, const char *newvalue, int options, const char *duration);
-	void targlobal(const char *varname, const char *value, const char *duration, int npcid, int charid, int zoneid);
-	void delglobal(const char *varname);
+	void setglobal(const char* varname, const char* newvalue, uint8 options, const char* duration);
+	void deleteglobal(const char* varname);
 	void ding();
 	void rebind(int zoneid, float x, float y, float z);
 	void start(int wp);
@@ -258,7 +257,7 @@ private:
 
 	bool HaveProximitySays;
 
-	int QGVarDuration(const char *fmt);
+	uint32 QGVarDuration(const char *fmt);
 	int InsertQuestGlobal(int charid, int npcid, int zoneid, const char *name, const char *value, int expdate);
 
 	class QuestTimer {

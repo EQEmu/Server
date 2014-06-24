@@ -48,8 +48,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
-	virtual bool Attack(Mob* other, int Hand = SLOT_PRIMARY, bool FromRiposte = false, bool IsStrikethrough = false, 
-		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
+	virtual bool Attack(Mob* other, int Hand = SLOT_PRIMARY, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
 	virtual Raid* GetRaid() { return 0; }
@@ -178,9 +177,9 @@ public:
 	// stat functions
 	virtual void CalcBonuses();
 	int32	GetEndurance()	const {return cur_end;}	//This gets our current endurance
-	inline virtual int16	GetAC()		const { return AC; }
-	inline virtual int16 GetATK() const { return ATK; }
-	inline virtual int16 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
+	inline virtual int32	GetAC()		const { return AC; }
+	inline virtual int32 GetATK() const { return ATK; }
+	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
 	int GetRawACNoShield(int &shield_ac) const;
 
 	inline virtual int16	GetSTR()	const { return STR; }
@@ -281,11 +280,11 @@ protected:
 
 private:
 
-	int16	CalcAC();
-	int16	GetACMit();
-	int16	GetACAvoid();
-	int16	acmod();
-	int16	CalcATK();
+	int32	CalcAC();
+	int32	GetACMit();
+	int32	GetACAvoid();
+	int32	acmod();
+	int32	CalcATK();
 	//int	CalcHaste();
 
 	int16	CalcSTR();

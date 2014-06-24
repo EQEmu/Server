@@ -869,12 +869,12 @@ int16	Merc::CalcCorrup()
 	return(Corrup);
 }
 
-int16 Merc::CalcATK() {
+int32 Merc::CalcATK() {
 	ATK = _baseATK + itembonuses.ATK + spellbonuses.ATK + aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 	return(ATK);
 }
 
-int16 Merc::CalcAC() {
+int32 Merc::CalcAC() {
 	//spell AC bonuses are added directly to natural total
 	AC = _baseAC + spellbonuses.AC;
 	return(AC);

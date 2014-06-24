@@ -382,9 +382,9 @@ uint32 Client::GetClassHPFactor() { // This is for calculating Base HPs + STA bo
 	return factor;
 }
 
-int16 Client::GetRawItemAC() { // This should return the combined AC of all the items the player is wearing.
-	int16 Total = 0;
-	for (int16 slot_id=0; slot_id<21; slot_id++) {
+int32 Client::GetRawItemAC() { // This should return the combined AC of all the items the player is wearing.
+	int32 Total = 0;
+	for (int16 slot_id = 0; slot_id < 21; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst && inst->IsType(ItemClassCommon))
 			Total += inst->GetItem()->AC;
@@ -392,7 +392,7 @@ int16 Client::GetRawItemAC() { // This should return the combined AC of all the 
 	return Total;
 }
 
-int16 Client::acmod() {
+int32 Client::acmod() {
 	int agility = GetAGI();
 	int level = GetLevel();
 	if(agility < 1 || level < 1)
@@ -811,7 +811,7 @@ int32 Client::CalcAC() { //This is a testing formula for AC, the value this retu
 	return(AC);
 }
 
-int16 Client::GetACMit() {
+int32 Client::GetACMit() {
 	int mitigation = 0;
 	
 	if (m_pp.class_ == WIZARD || m_pp.class_ == MAGICIAN || m_pp.class_ == NECROMANCER || m_pp.class_ == ENCHANTER) {
@@ -835,7 +835,7 @@ int16 Client::GetACMit() {
 	return(mitigation * 1000 / 847);
 }
 
-int16 Client::GetACAvoid() {
+int32 Client::GetACAvoid() {
 	int avoidance = (acmod() + ((GetSkill(SkillDefense) + itembonuses.HeroicAGI / 10) * 16) / 9);
 	
 	if (avoidance < 0)
@@ -843,7 +843,10 @@ int16 Client::GetACAvoid() {
 	if (avoidance > RuleI(Combat, AvoidanceCap))
 		avoidance = RuleI(Combat, AvoidanceCap);
 
-	return(avoidance * 1000 / 847);
+	if (avoidance * 1000 / 847 <= RuleI(Combat, AvoidanceCap))
+		return(avoidance * 1000 / 847);
+	else
+		return(RuleI(Combat, AvoidanceCap));
 }
 
 int32 Client::CalcMaxMana() {

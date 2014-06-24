@@ -2000,13 +2000,10 @@ uint32 Database::GetGroupID(const char* name){
 	MYSQL_ROW row;
 	uint32 groupid=0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT groupid from group_id where name='%s'", name), errbuf, &result)) {
-		if((row = mysql_fetch_row(result)))
-		{
+		if((row = mysql_fetch_row(result))) {
 			if(row[0])
 				groupid=atoi(row[0]);
 		}
-		else
-		LogFile->write(EQEMuLog::Debug, "Character not in a group: %s", name);
 		mysql_free_result(result);
 	}
 	else

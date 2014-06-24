@@ -380,9 +380,9 @@ public:
 	inline void ClearAllProximities() { entity_list.ProcessMove(this, FLT_MAX, FLT_MAX, FLT_MAX); proximity_x = FLT_MAX; proximity_y = FLT_MAX; proximity_z = FLT_MAX; }
 
 	virtual void CalcBonuses();
-	inline virtual int16	GetAC()		const { return AC; }
-	inline virtual int16 GetATK() const { return (ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(SkillOffense)) * 9 / 10)); }
-	inline virtual int16 GetATKBonus() const { return (itembonuses.ATK + spellbonuses.ATK); }
+	inline virtual int32	GetAC()		const { return AC; }
+	inline virtual int32 GetATK() const { return (ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(SkillOffense)) * 9 / 10)); }
+	inline virtual int32 GetATKBonus() const { return (itembonuses.ATK + spellbonuses.ATK); }
 	inline virtual int	GetHaste() const { return Haste; }
 	int GetRawACNoShield(int &shield_ac) const;
 
@@ -501,8 +501,8 @@ public:
 	void DoEnduranceRegen();
 	void DoEnduranceUpkeep();
 
-	uint16 GetTotalATK();
-	uint16 GetATKRating();
+	uint32 GetTotalATK();
+	uint32 GetATKRating();
 	uint16 GetPrimarySkillValue();
 
 	bool Flurry();
@@ -572,7 +572,7 @@ public:
 
 	void	SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity);
 	void	SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp);
-	int16	GetRawItemAC();
+	int32	GetRawItemAC();
 	uint16	GetCombinedAC_TEST();
 
 	inline uint32	LSAccountID()	const { return lsaccountid; }
@@ -746,7 +746,7 @@ public:
 	void RefundAA();
 	void IncrementAA(int aa_id);
 
-	int16 acmod();
+	int32 acmod();
 
 	uint32	NukeItem(uint32 itemnum, uint8 where_to_check =	(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
 	void	SetTint(int16 slot_id, uint32 color);
@@ -1178,8 +1178,8 @@ private:
 	void	HandleTraderPriceUpdate(const EQApplicationPacket *app);
 
 	int32	CalcAC();
-	int16	GetACMit();
-	int16	GetACAvoid();
+	int32	GetACMit();
+	int32	GetACAvoid();
 	int16	CalcATK();
 	int		CalcHaste();
 
