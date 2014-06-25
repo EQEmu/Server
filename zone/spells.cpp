@@ -1250,7 +1250,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	}
 
 	if(IsClient()) {		
-		CheckNumHitsRemaining(7);
+		CheckNumHitsRemaining(NUMHIT_MatchingSpells);
 		TrySympatheticProc(target, spell_id);
 	}
 
@@ -3401,7 +3401,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			if(IsEffectInSpell(buffs[b].spellid, SE_BlockNextSpellFocus)) {
 				focus = CalcFocusEffect(focusBlockNextSpell, buffs[b].spellid, spell_id);
 				if(focus) {
-					CheckNumHitsRemaining(7,b);
+					CheckNumHitsRemaining(NUMHIT_MatchingSpells,b);
 					Message_StringID(MT_SpellFailure, SPELL_WOULDNT_HOLD);
 					safe_delete(action_packet);
 					return false;
@@ -3450,7 +3450,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 		if(reflect_chance) {
 			Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
-			CheckNumHitsRemaining(9);
+			CheckNumHitsRemaining(NUMHIT_ReflectSpell);
 			SpellOnTarget(spell_id, this, true, use_resist_adjust, resist_adjust);
 			safe_delete(action_packet);
 			return false;
@@ -3501,7 +3501,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 					}
 				}
 
-				spelltar->CheckNumHitsRemaining(3);
+				spelltar->CheckNumHitsRemaining(NUMHIT_IncomingSpells);
+				CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
 
 				safe_delete(action_packet);
 				return false;
@@ -3654,8 +3655,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	}
 
 	
-	if (spelltar && IsDetrimentalSpell(spell_id))
-		spelltar->CheckNumHitsRemaining(3); //Incoming spells
+	if (IsDetrimentalSpell(spell_id)) {
+		
+		CheckNumHitsRemaining(NUMHIT_OutgoingSpells);
+		
+		if (spelltar)
+			spelltar->CheckNumHitsRemaining(NUMHIT_IncomingSpells);
+	}
 
 	// send the action packet again now that the spell is successful
 	// NOTE: this is what causes the buff icon to appear on the client, if
