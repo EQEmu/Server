@@ -2676,6 +2676,30 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
+			case SE_Hate:{
+
+				if (buffslot >= 0)
+					break;
+
+				if(caster){
+					if(effect_value > 0){
+						if(caster){
+							if(caster->IsClient() && !caster->CastToClient()->GetFeigned())
+								AddToHateList(caster, effect_value);
+							else if(!caster->IsClient())
+								AddToHateList(caster, effect_value);
+						}
+					}else{
+						int32 newhate = GetHateAmount(caster) + effect_value;
+						if (newhate < 1) 
+							SetHate(caster,1);
+						 else 
+							SetHate(caster,newhate);
+						}	
+				}
+				break;
+			}
+
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
 			case SE_NegateSpellEffect:
@@ -2746,7 +2770,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ChangeFrenzyRad:
 			case SE_Harmony:
 			case SE_ChangeAggro:
-			case SE_Hate2:
 			case SE_Identify:
 			case SE_InstantHate:
 			case SE_ReduceHate:
@@ -3340,7 +3363,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				break;
 			}
 
-			case SE_Hate2:{
+			case SE_Hate:{
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level);
 				if(caster){
 					if(effect_value > 0){

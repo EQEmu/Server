@@ -339,7 +339,7 @@ typedef enum {
 #define SE_CurrentEndurance				189	// implemented
 #define SE_EndurancePool				190	// implemented
 #define SE_Amnesia						191	// implemented - Silence vs Melee Effect
-#define SE_Hate2						192	// implemented
+#define SE_Hate							192	// implemented - Instant and hate over time.
 #define SE_SkillAttack					193	// implemented
 #define SE_FadingMemories				194	// implemented
 #define SE_StunResist					195	// implemented
