@@ -2393,7 +2393,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceHP(spell.base[i], gid, spell.range, caster);
+						r->BalanceHP(spell.base[i], gid, spell.range, caster, spell.base2[i]);
 						break;
 					}
 				}
@@ -2403,7 +2403,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceHP(spell.base[i], spell.range, caster);
+				g->BalanceHP(spell.base[i], spell.range, caster, spell.base2[i]);
 				break;
 			}
 
@@ -2421,7 +2421,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					gid = r->GetGroup(caster->GetName());
 					if(gid < 11)
 					{
-						r->BalanceMana(spell.base[i], gid, spell.range, caster);
+						r->BalanceMana(spell.base[i], gid, spell.range, caster, spell.base2[i]);
 						break;
 					}
 				}
@@ -2431,7 +2431,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceMana(spell.base[i], spell.range, caster);
+				g->BalanceMana(spell.base[i], spell.range, caster, spell.base2[i]);
 				break;
 			}
 
@@ -2668,6 +2668,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				SlowMitigation(caster);
 				break;
 
+			case SE_AddHatePct:
+			{
+				if (IsNPC())
+					CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100));
+
+				break;
+			}
+
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
 			case SE_NegateSpellEffect:
@@ -2886,6 +2894,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_LimitCastTimeMax:
 			case SE_TriggerOnReqCaster:
 			case SE_FrenziedDevastation:
+			case SE_AStacker:						
+			case SE_BStacker:						
+			case SE_CStacker:						
+			case SE_DStacker:
+			case SE_DoubleRiposte:
+			case SE_Berserk:
+			case SE_Vampirism:
+			case SE_Metabolism:
 			{
 				break;
 			}
@@ -3516,6 +3532,14 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 					}
 					break;
 				}
+			}
+
+			case SE_AddHateOverTimePct:
+			{				
+				if (IsNPC())
+					CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100));
+
+				break;
 			}
 
 			default:

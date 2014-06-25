@@ -1,5 +1,22 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/17/2014 ==
+Kayen: Implemented SE_AStacker, SE_BStacker, SE_CStacker, SE_DStacker.
+These effects when present in buffs prevent each other from stacking, 
+Any effect with B prevents A, C prevents B, D prevents C.
+Kayen: Implemented SE_DamageModifier2 (Stacks with SE_DamageModifier, mods damage by skill type)
+Kayen: Implemented SE_AddHatePct (Modifies +/- your total hate on NPC by percent)
+Kayen: Implemented SE_AddHateOverTimePct (Modifies +/- your total hate on NPC by percent over time)
+Kayen: Implemented SE_DoubleRiposte (Modifies +/- your double riposte chance) *Not used in any live effects
+Kayen: Implemented SE_Berserk (Sets client as 'Berserk' giving chance to crippling blow) *Not used in any live effects
+Kayen: Implemented SE_Vampirsm (Stackable lifetap from melee effect) *Not used in any live effects
+Kayen: Minor fixes to how lifetap from melee effects are calced. Removed arbitrary hard cap of 100%, Negative value will now dmg client.
+Kayen: Fix to issue that prevented NPC's from receiving HP Regeneration derived from spell buffs.
+Kayen: Fixes and Updates for melee and spell mitigation runes.
+Kayen: Update to SE_NegateAttack, 'max' value can now set upper limit of damage absorbed. DOT ticks will no longer be absorbed.
+Kayen: Implemented SE_Metabolism - Modifies food/drink consumption rates. [Data for AA is already in database]
+Kayen: Update to SE_BalanaceMana, SE_BalanceHP to support limit value which caps max mana/hp that can be taken per player.
+
 == 06/13/2014 ==
 Kayen: For table 'npc_spell_effects_entries' setting se_max for damage shield effects (59) will now determine the DS Type (ie burning)
 Setting se_max to 1 for SkillDamageTaken effects (127) will allow for stackable mitigation/weakness same as quest function ModSkillDmgTaken.

@@ -3176,7 +3176,11 @@ int32 Mob::ReduceDamage(int32 damage)
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot , true);
 			}
-			return -6;
+
+			if (spellbonuses.NegateAttacks[2] && (damage > spellbonuses.NegateAttacks[2]))
+				damage -= spellbonuses.NegateAttacks[2];
+			else
+				return -6;
 		}
 	}
 
@@ -3188,11 +3192,11 @@ int32 Mob::ReduceDamage(int32 damage)
 		{
 			DisableMeleeRune = true;
 			int damage_to_reduce = damage * spellbonuses.MeleeThresholdGuard[0] / 100;
-			if(damage_to_reduce > buffs[slot].melee_rune)
+			if(damage_to_reduce >= buffs[slot].melee_rune)
 			{
 				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MeleeThresholdGuard %d damage negated, %d"
 					" damage remaining, fading buff.", damage_to_reduce, buffs[slot].melee_rune);
-				damage -= damage_to_reduce;
+				damage -= buffs[slot].melee_rune;
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
 			}
@@ -3212,11 +3216,15 @@ int32 Mob::ReduceDamage(int32 damage)
 		if(slot >= 0)
 		{
 			int damage_to_reduce = damage * spellbonuses.MitigateMeleeRune[0] / 100;
-			if(damage_to_reduce > buffs[slot].melee_rune)
+
+			if (spellbonuses.MitigateMeleeRune[2] && (damage_to_reduce > spellbonuses.MitigateMeleeRune[2]))
+					damage_to_reduce = spellbonuses.MitigateMeleeRune[2];
+			
+			if(spellbonuses.MitigateMeleeRune[3] && (damage_to_reduce >= buffs[slot].melee_rune))
 			{
 				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamage %d damage negated, %d"
 					" damage remaining, fading buff.", damage_to_reduce, buffs[slot].melee_rune);
-				damage -= damage_to_reduce;
+				damage -= buffs[slot].melee_rune;
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot);
 			}
@@ -3224,7 +3232,10 @@ int32 Mob::ReduceDamage(int32 damage)
 			{
 				mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamage %d damage negated, %d"
 					" damage remaining.", damage_to_reduce, buffs[slot].melee_rune);
-				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
+				
+				if (spellbonuses.MitigateMeleeRune[3])
+					buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
+				
 				damage -= damage_to_reduce;
 			}
 		}
@@ -3265,7 +3276,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	int32 slot = -1;
 
 	// See if we block the spell outright first
-	if (spellbonuses.NegateAttacks[0]){
+	if (!iBuffTic && spellbonuses.NegateAttacks[0]){
 		slot = spellbonuses.NegateAttacks[1];
 		if(slot >= 0) {
 			if(--buffs[slot].numhits == 0) {
@@ -3273,7 +3284,11 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 				if(!TryFadeEffect(slot))
 					BuffFadeBySlot(slot , true);
 			}
-			return 0;
+
+			if (spellbonuses.NegateAttacks[2] && (damage > spellbonuses.NegateAttacks[2]))
+				damage -= spellbonuses.NegateAttacks[2];
+			else
+				return 0;
 		}
 	}
 
@@ -3286,15 +3301,21 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			if(slot >= 0)
 			{
 				int damage_to_reduce = damage * spellbonuses.MitigateDotRune[0] / 100;
-				if(damage_to_reduce > buffs[slot].dot_rune)
+
+				if (spellbonuses.MitigateDotRune[2] && (damage_to_reduce > spellbonuses.MitigateDotRune[2]))
+					damage_to_reduce = spellbonuses.MitigateDotRune[2];
+
+				if(spellbonuses.MitigateDotRune[3] && (damage_to_reduce >= buffs[slot].dot_rune))
 				{
-					damage -= damage_to_reduce;
+					damage -= buffs[slot].dot_rune;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
 				}
 				else
 				{
-					buffs[slot].dot_rune = (buffs[slot].dot_rune - damage_to_reduce);
+					if (spellbonuses.MitigateDotRune[3])
+						buffs[slot].dot_rune = (buffs[slot].dot_rune - damage_to_reduce);
+					
 					damage -= damage_to_reduce;
 				}
 			}
@@ -3316,9 +3337,9 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			{
 				DisableSpellRune = true;
 				int damage_to_reduce = damage * spellbonuses.SpellThresholdGuard[0] / 100;
-				if(damage_to_reduce > buffs[slot].magic_rune)
+				if(damage_to_reduce >= buffs[slot].magic_rune)
 				{
-					damage -= damage_to_reduce;
+					damage -= buffs[slot].magic_rune;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
 				}
@@ -3337,11 +3358,15 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			if(slot >= 0)
 			{
 				int damage_to_reduce = damage * spellbonuses.MitigateSpellRune[0] / 100;
-				if(damage_to_reduce > buffs[slot].magic_rune)
+
+				if (spellbonuses.MitigateSpellRune[2] && (damage_to_reduce > spellbonuses.MitigateSpellRune[2]))
+					damage_to_reduce = spellbonuses.MitigateSpellRune[2];
+
+				if(spellbonuses.MitigateSpellRune[3] && (damage_to_reduce >= buffs[slot].magic_rune))
 				{
 					mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateSpellDamage %d damage negated, %d"
 						" damage remaining, fading buff.", damage_to_reduce, buffs[slot].magic_rune);
-					damage -= damage_to_reduce;
+					damage -= buffs[slot].magic_rune;
 					if(!TryFadeEffect(slot))
 						BuffFadeBySlot(slot);
 				}
@@ -3349,7 +3374,10 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 				{
 					mlog(SPELLS__EFFECT_VALUES, "Mob::ReduceDamage SE_MitigateMeleeDamage %d damage negated, %d"
 						" damage remaining.", damage_to_reduce, buffs[slot].magic_rune);
-					buffs[slot].magic_rune = (buffs[slot].magic_rune - damage_to_reduce);
+					
+					if (spellbonuses.MitigateSpellRune[3])
+						buffs[slot].magic_rune = (buffs[slot].magic_rune - damage_to_reduce);
+					
 					damage -= damage_to_reduce;
 				}
 			}
@@ -4283,6 +4311,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 
 	float critChance = 0.0f;
+	bool IsBerskerSPA = false;
 
 	//1: Try Slay Undead
 	if(defender && defender->GetBodyType() == BT_Undead || defender->GetBodyType() == BT_SummonedUndead || defender->GetBodyType() == BT_Vampire){
@@ -4310,12 +4339,15 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	//are defined you will have an innate chance to hit at Level 1 regardless of bonuses.
 	//Warning: Do not define these rules if you want live like critical hits.
 	critChance += RuleI(Combat, MeleeBaseCritChance);
-
+	
 	if (IsClient()) {
-		critChance += RuleI(Combat, ClientBaseCritChance);
+		critChance  += RuleI(Combat, ClientBaseCritChance);
 
-		if ((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12) {
-			if (IsBerserk())
+		if (spellbonuses.BerserkSPA || itembonuses.BerserkSPA || aabonuses.BerserkSPA)
+				IsBerskerSPA = true;
+
+		if (((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12)  || IsBerskerSPA) {
+			if (IsBerserk() || IsBerskerSPA)
 				critChance += RuleI(Combat, BerserkBaseCritChance);
 			else
 				critChance += RuleI(Combat, WarBerBaseCritChance);
@@ -4360,15 +4392,15 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			uint16 critMod = 200;
 			bool crip_success = false;
 			int16 CripplingBlowChance = GetCrippBlowChance();
-
+			
 			//Crippling Blow Chance: The percent value of the effect is applied
 			//to the your Chance to Critical. (ie You have 10% chance to critical and you
 			//have a 200% Chance to Critical Blow effect, therefore you have a 20% Chance to Critical Blow.
-			if (CripplingBlowChance || IsBerserk()) {
-				if (!IsBerserk())
+			if (CripplingBlowChance || (IsBerserk() || IsBerskerSPA)) {
+				if (!IsBerserk() && !IsBerskerSPA)
 					critChance *= float(CripplingBlowChance)/100.0f;
 
-				if (IsBerserk() || MakeRandomFloat(0, 1) < critChance) {
+				if ((IsBerserk() || IsBerskerSPA) || MakeRandomFloat(0, 1) < critChance) {
 					critMod = 400;
 					crip_success = true;
 				}
@@ -4448,6 +4480,10 @@ void Mob::DoRiposte(Mob* defender) {
 	int16 DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] +
 							defender->spellbonuses.GiveDoubleRiposte[0] +
 							defender->itembonuses.GiveDoubleRiposte[0];
+
+	DoubleRipChance		 =  defender->aabonuses.DoubleRiposte +
+							defender->spellbonuses.DoubleRiposte +
+							defender->itembonuses.DoubleRiposte;
 
 	//Live AA - Double Riposte
 	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {

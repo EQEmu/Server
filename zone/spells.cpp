@@ -2542,7 +2542,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 // -1 if they can't stack and spellid2 should be stopped
 //currently, a spell will not land if it would overwrite a better spell on any effect
 //if all effects are better or the same, we overwrite, else we do nothing
-int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1, Mob* caster2)
+int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1, Mob* caster2, int buffslot)
 {
 	const SPDat_Spell_Struct &sp1 = spells[spellid1];
 	const SPDat_Spell_Struct &sp2 = spells[spellid2];
@@ -2619,6 +2619,24 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 					Message_StringID(MT_SpellFailure, SCREECH_BUFF_BLOCK, sp2.name);
 					return -1;
 				}
+			}
+
+			/*Buff stacking prevention spell effects (446 - 449) works as follows... If B prevent A, if C prevent B, if D prevent C.
+			Special check is added to make sure the buffs stack properly when applied from fade on duration effect, since the buff
+			is not fully removed at the time of the trgger*/
+			if (spellbonuses.BStacker) {
+				if ((effect2 == SE_AStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_BStacker)))
+					return -1;
+			}
+
+			if (spellbonuses.CStacker) {
+				if ((effect2 == SE_BStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_CStacker)))
+					return -1;
+			}
+						
+			if (spellbonuses.DStacker) {
+				if ((effect2 == SE_CStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_DStacker)))
+					return -1;
 			}
 
 			if(effect2 == SE_StackingCommand_Overwrite)
@@ -2901,7 +2919,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		if (curbuf.spellid != SPELL_UNKNOWN) {
 			// there's a buff in this slot
 			ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spell_id,
-					caster_level, entity_list.GetMobID(curbuf.casterid), caster);
+					caster_level, entity_list.GetMobID(curbuf.casterid), caster, buffslot);
 			if (ret == -1) {	// stop the spell
 				mlog(SPELLS__BUFFS, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d",
 						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
@@ -3047,7 +3065,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 			return(-1);	//do not recast a buff we already have on, we recast fast enough that we dont need to refresh our buffs
 
 		// there's a buff in this slot
-		ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spellid, caster_level);
+		ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spellid, caster_level, nullptr, nullptr, i);
 		if(ret == 1) {
 			// should overwrite current slot
 			if(iFailIfOverwrite) {

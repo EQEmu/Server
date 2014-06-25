@@ -1099,12 +1099,26 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_DamageModifier2:
+			{
+				if(base2 == -1)
+					newbon->DamageModifier2[HIGHEST_SKILL+1] += base1;
+				else
+					newbon->DamageModifier2[base2] += base1;
+				break;
+			}
+
 			case SE_SlayUndead:
 			{
 				if(newbon->SlayUndead[1] < base1)
 					newbon->SlayUndead[0] = base1; // Rate
 					newbon->SlayUndead[1] = base2; // Damage Modifier
 				break;
+			}
+
+			case SE_DoubleRiposte:
+			{
+				newbon->DoubleRiposte += base1;
 			}
 
 			case SE_GiveDoubleRiposte:
@@ -1234,12 +1248,24 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_Vampirism:
+				newbon->Vampirism += base1;
+				break;			
+
 			case SE_FrenziedDevastation:
 				newbon->FrenziedDevastation += base2;
 				break;
 
 			case SE_SpellProcChance:
 				newbon->SpellProcChance += base1;
+				break;
+
+			case SE_Berserk:
+				newbon->BerserkSPA = true;
+				break;
+
+			case SE_Metabolism:
+				newbon->Metabolism += base1;
 				break;
 
 		}
@@ -1813,6 +1839,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_Vampirism:
+				newbon->Vampirism += effect_value;
+				break;	
+
 			case SE_AllInstrumentMod:
 			{
 				if(effect_value > newbon->singingMod)
@@ -1906,6 +1936,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->DamageModifier[HIGHEST_SKILL+1] += effect_value;
 				else
 					newbon->DamageModifier[base2] += effect_value;
+				break;
+			}
+
+			case SE_DamageModifier2:
+			{
+				if(base2 == -1)
+					newbon->DamageModifier2[HIGHEST_SKILL+1] += effect_value;
+				else
+					newbon->DamageModifier2[base2] += effect_value;
 				break;
 			}
 
@@ -2256,9 +2295,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_NegateAttacks:
 			{
-				if (!newbon->NegateAttacks[0]){
+				if (!newbon->NegateAttacks[0] || 
+					((newbon->NegateAttacks[0] && newbon->NegateAttacks[2]) && (newbon->NegateAttacks[2] < max))){
 					newbon->NegateAttacks[0] = 1;
 					newbon->NegateAttacks[1] = buffslot;
+					newbon->NegateAttacks[2] = max;
 				}
 				break;
 			}
@@ -2268,6 +2309,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MitigateMeleeRune[0] < effect_value){
 					newbon->MitigateMeleeRune[0] = effect_value;
 					newbon->MitigateMeleeRune[1] = buffslot;
+					newbon->MitigateMeleeRune[2] = base2;
+					newbon->MitigateMeleeRune[3] = max;
 				}
 				break;
 			}
@@ -2298,6 +2341,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MitigateSpellRune[0] < effect_value){
 					newbon->MitigateSpellRune[0] = effect_value;
 					newbon->MitigateSpellRune[1] = buffslot;
+					newbon->MitigateSpellRune[2] = base2;
+					newbon->MitigateSpellRune[3] = max;
 				}
 				break;
 			}
@@ -2307,6 +2352,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MitigateDotRune[0] < effect_value){
 					newbon->MitigateDotRune[0] = effect_value;
 					newbon->MitigateDotRune[1] = buffslot;
+					newbon->MitigateDotRune[2] = base2;
+					newbon->MitigateDotRune[3] = max;
 				}
 				break;
 			}
@@ -2553,6 +2600,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_DoubleRiposte:
+			{
+				newbon->DoubleRiposte += effect_value;
+			}
+
 			case SE_GiveDoubleRiposte:
 			{
 				//Only allow for regular double riposte chance.
@@ -2659,6 +2711,31 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 						}
 					}
 				}
+				break;
+
+			case SE_AStacker:
+				newbon->AStacker = true;
+				break;
+
+			case SE_BStacker:
+				newbon->BStacker = true;
+				break;
+
+			case SE_CStacker:
+				newbon->CStacker = true;
+				break;
+
+			case SE_DStacker:
+				newbon->DStacker = true;
+				break;
+
+			case SE_Berserk:
+				newbon->BerserkSPA = true;
+				break;
+
+				
+			case SE_Metabolism:
+				newbon->Metabolism += effect_value;
 				break;
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
@@ -3438,6 +3515,17 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 				}
 
+				case SE_DamageModifier2:
+				{
+					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					{
+						spellbonuses.DamageModifier2[e] = effect_value;
+						aabonuses.DamageModifier2[e] = effect_value;
+						itembonuses.DamageModifier2[e] = effect_value;
+					}
+					break;
+				}
+
 				case SE_MinDamageModifier:
 				{
 					for(int e = 0; e < HIGHEST_SKILL+1; e++)
@@ -3933,6 +4021,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.MasteryofPast = effect_value;
 					break;
 
+				case SE_DoubleRiposte:
+					spellbonuses.DoubleRiposte = effect_value;
+					itembonuses.DoubleRiposte = effect_value;
+					aabonuses.DoubleRiposte = effect_value;
+					break;
+
 				case SE_GiveDoubleRiposte:
 					spellbonuses.GiveDoubleRiposte[0] = effect_value;
 					itembonuses.GiveDoubleRiposte[0] = effect_value;
@@ -4032,6 +4126,24 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 				case SE_AbsorbMagicAtt:
 					spellbonuses.AbsorbMagicAtt[0] = effect_value;
 					spellbonuses.AbsorbMagicAtt[1] = -1;
+					break;
+
+				case SE_Berserk:
+					spellbonuses.BerserkSPA = false;
+					aabonuses.BerserkSPA = false;
+					itembonuses.BerserkSPA = false;
+					break;
+
+				case SE_Vampirism:
+					spellbonuses.Vampirism = effect_value;
+					aabonuses.Vampirism = effect_value;
+					itembonuses.Vampirism = effect_value;
+					break;
+
+				case SE_Metabolism:
+					spellbonuses.Metabolism = effect_value;
+					aabonuses.Metabolism = effect_value;
+					itembonuses.Metabolism = effect_value;
 					break;
 				
 			}

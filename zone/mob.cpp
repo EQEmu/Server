@@ -4277,6 +4277,9 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 	dmg_mod += itembonuses.DamageModifier[HIGHEST_SKILL+1] + spellbonuses.DamageModifier[HIGHEST_SKILL+1] + aabonuses.DamageModifier[HIGHEST_SKILL+1] +
 				itembonuses.DamageModifier[skill] + spellbonuses.DamageModifier[skill] + aabonuses.DamageModifier[skill];
 
+	dmg_mod += itembonuses.DamageModifier2[HIGHEST_SKILL+1] + spellbonuses.DamageModifier2[HIGHEST_SKILL+1] + aabonuses.DamageModifier2[HIGHEST_SKILL+1] +
+				itembonuses.DamageModifier2[skill] + spellbonuses.DamageModifier2[skill] + aabonuses.DamageModifier2[skill];
+
 	if (HasShieldEquiped() && !IsOffHandAtk())
 		dmg_mod += itembonuses.ShieldEquipDmgMod[0] + spellbonuses.ShieldEquipDmgMod[0] + aabonuses.ShieldEquipDmgMod[0];
 
@@ -4334,22 +4337,19 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 
 void Mob::MeleeLifeTap(int32 damage) {
 	
-	if(damage > 0 && (spellbonuses.MeleeLifetap || itembonuses.MeleeLifetap || aabonuses.MeleeLifetap ))
-	{
-		int lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap;
-		
-		if(lifetap_amt > 100)
-			lifetap_amt = 100;
+	int16 lifetap_amt = 0;
+	lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap
+				+ spellbonuses.Vampirism + itembonuses.Vampirism + aabonuses.Vampirism;
 
-		else if (lifetap_amt < -99)
-			lifetap_amt = -99;
-
+	if(lifetap_amt && damage > 0){
 
 		lifetap_amt = damage * lifetap_amt / 100;
-
 		mlog(COMBAT__DAMAGE, "Melee lifetap healing for %d damage.", damage);
-		//heal self for damage done..
-		HealDamage(lifetap_amt);
+		
+		if (lifetap_amt > 0)
+			HealDamage(lifetap_amt); //Heal self for modified damage amount.
+		else
+			Damage(this, -lifetap_amt,0, SkillEvocation,false); //Dmg self for modified damage amount.
 	}
 }
 

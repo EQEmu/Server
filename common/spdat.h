@@ -190,9 +190,9 @@ typedef enum {
 #define SE_DivineAura					40	// implemented
 #define SE_Destroy						41	// implemented - Disintegrate, Banishment of Shadows
 #define SE_ShadowStep					42	// implemented
-//#define SE_Berserk					43	// not used
-#define SE_Lycanthropy					44	// implemented
-//#define SE_Vampirism					45	// not used
+#define SE_Berserk						43	// implemented (*not used in any known live spell) Makes client 'Berserk' giving crip blow chance.
+#define SE_Lycanthropy					44	// implemented 
+#define SE_Vampirism					45	// implemented (*not used in any known live spell) Stackable lifetap from melee.
 #define SE_ResistFire					46	// implemented
 #define SE_ResistCold					47	// implemented
 #define SE_ResistPoison					48	// implemented
@@ -307,7 +307,7 @@ typedef enum {
 #define SE_SpellDamageShield			157	// implemented - Petrad's Protection
 #define SE_Reflect						158 // implemented
 #define SE_AllStats						159	// implemented
-#define SE_MakeDrunk					160 // implemented - poorly though, should check against tolerance
+//#define SE_MakeDrunk					160 // *not implemented - Effect works entirely client side (Should check against tolerance)
 #define SE_MitigateSpellDamage			161	// implemented - rune with max value
 #define SE_MitigateMeleeDamage			162	// implemented - rune with max value
 #define SE_NegateAttacks				163	// implemented
@@ -370,7 +370,7 @@ typedef enum {
 #define SE_SkillDamageAmount			220	// implemented
 #define SE_Packrat						221 // implemented as bonus
 #define SE_BlockBehind					222	// implemented - Chance to block from behind (with our without Shield)
-//#define SE_DoubleRiposte				223	// not used
+#define SE_DoubleRiposte				223	// implemented - Chance to double riposte [not used on live]
 #define	SE_GiveDoubleRiposte			224 // implemented[AA]
 #define SE_GiveDoubleAttack				225	// implemented[AA] - Allow any class to double attack with set chance.
 #define SE_TwoHandBash					226 // *not implemented as bonus
@@ -380,7 +380,7 @@ typedef enum {
 //#define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
 #define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
 #define SE_DivineSave					232	// implemented (base1 == % chance on death to insta-res) (base2 == spell cast on save)
-//#define SE_Metabolism					233	// *not implemented - (Crown of Feathers) Increase metabolism?
+#define SE_Metabolism					233	// implemented - Modifies food/drink consumption rates.
 //#define SE_ReduceApplyPoisonTime		234	// not implemented as bonus - reduces the time to apply poison
 #define	SE_ChannelChanceSpells			235 // implemented[AA] - chance to channel from SPELLS *No longer used on live.
 //#define SE_FreePet					236	// not used
@@ -593,20 +593,20 @@ typedef enum {
 #define SE_TriggerOnReqCaster			443 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
 #define SE_ImprovedTaunt				444 // implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y
 //#define SE_AddMercSlot				445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
-//#define SE_AStacker					446 // *not implementet - bufff stacking blocker ? (26219 | Qirik's Watch)
-//#define SE_BStacker					447 // *not implemented 
-//#define SE_CStacker					448 // *not implemented
-//#define SE_DStacker					449 // *not implemented 
+#define SE_AStacker						446 // implementet - bufff stacking blocker (26219 | Qirik's Watch)
+#define SE_BStacker						447 // implemented 
+#define SE_CStacker						448 // implemented
+#define SE_DStacker						449 // implemented 
 #define SE_MitigateDotDamage			450 // implemented  DOT spell mitigation rune with max value
 #define SE_MeleeThresholdGuard			451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
 #define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
 #define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken
 #define SE_TriggerSpellThreshold		454 // implemented  Trigger effect on X amount of spell damage taken
-//#define SE_AddHatePct					455 // not used
-//#define SE_AddHateOverTimePct			456 // not used
+#define SE_AddHatePct					455 // implemented  Modify total hate by %
+#define SE_AddHateOverTimePct			456 // implemented  Modify total hate by % over time.
 //#define SE_ResourceTap				457 // not used
 //#define SE_FactionModPct				458 // not used
-//#define SE_DamageModifier2			459 // *not implemented - Modifies melee damage by skill type
+#define SE_DamageModifier2				459 // implemented - Modifies melee damage by skill type
 
 // LAST
 
@@ -833,6 +833,7 @@ bool IsBuffSpell(uint16 spell_id);
 bool IsPersistDeathSpell(uint16 spell_id);
 bool IsSuspendableSpell(uint16 spell_id);
 uint32 GetMorphTrigger(uint32 spell_id);
+bool IsCastonFadeDurationSpell(uint16 spell_id);
 uint32 GetPartialMeleeRuneReduction(uint32 spell_id);
 uint32 GetPartialMagicRuneReduction(uint32 spell_id);
 uint32 GetPartialMeleeRuneAmount(uint32 spell_id);
