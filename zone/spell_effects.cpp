@@ -5275,7 +5275,7 @@ void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
 	1:  [Incoming Hit Attempts] (323=SE_DefensiveProc, 172=SE_AvoidMeleeChance, 1=SE_ArmorClass, 40=SE_DivineAura)
 	2:  [Outgoing Hit Attempts]  (185=SE_DamageModifer, 184=SE_HitChance)
 	3:  [Incoming Spells]  (180=SE_ResistSpellChance, 296=SE_FcSpellVulnerability) //Note: Determinetal spells only unless proven otherwise
-	4:  NONE
+	4:  [Outgoing Spells]
 	5:  [Outgoing Hit Successes] (220=SE_SkillDamageAmount, 178=SE_MeleeLifetap, 121=SE_ReverseDS, ?373=SE_CastOnWearoff)
 	6:  [Incoming Hit Successes] (59=SE_DamageShield, 197=SE_SkillDamageTaken, 162=define SE_MitigateMeleeDamage)
 	7:  [Matching Spells] *When focus is triggered (focus effects)
@@ -5591,7 +5591,7 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 					}
 					if ((!limit_exists) || (limit_exists && skill_found)){
 						dmg += temp_dmg;
-						CheckNumHitsRemaining(7,i);
+						CheckNumHitsRemaining(NUMHIT_MatchingSpells,i);
 					}
 				}
 
@@ -5599,7 +5599,7 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 					int32 focus = caster->CalcFocusEffect(focusFcDamageAmtIncoming, buffs[i].spellid, spell_id);
 					if(focus){
 						dmg += focus;
-						CheckNumHitsRemaining(7,i);
+						CheckNumHitsRemaining(NUMHIT_MatchingSpells,i);
 					}
 				}
 			}
@@ -5653,7 +5653,7 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 			value = tmp_focus;
 
 			if (tmp_buffslot >= 0)
-				CheckNumHitsRemaining(7, tmp_buffslot);
+				CheckNumHitsRemaining(NUMHIT_MatchingSpells, tmp_buffslot);
 		}
 
 	}

@@ -1350,7 +1350,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	MeleeLifeTap(damage);
 
 	if (damage > 0)
-		CheckNumHitsRemaining(5);
+		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 
 	//break invis when you attack
 	if(invisible) {
@@ -1965,7 +1965,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	MeleeLifeTap(damage);
 	
 	if (damage > 0)
-		CheckNumHitsRemaining(5);
+		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 
 	//break invis when you attack
 	if(invisible) {
@@ -3421,7 +3421,7 @@ int32 Mob::ReduceAllDamage(int32 damage)
 		TryTriggerOnValueAmount(false, true);
 	}
 	
-	CheckNumHitsRemaining(8);
+	CheckNumHitsRemaining(NUMHIT_IncomingDamage);
 
 	return(damage);
 }
@@ -3527,10 +3527,10 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 	}
 
 	if (spell_id == SPELL_UNKNOWN && skill_used) {
-		CheckNumHitsRemaining(1); //Incoming Hit Attempts
+		CheckNumHitsRemaining(NUMHIT_IncomingHitAttempts);
 
 		if (attacker)
-			attacker->CheckNumHitsRemaining(2); //Outgoing Hit Attempts
+			attacker->CheckNumHitsRemaining(NUMHIT_OutgoingHitAttempts);
 	}
 
 	if(attacker){
@@ -3604,7 +3604,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		}
 
 		if (skill_used)
-			CheckNumHitsRemaining(6); //Incomming Hit Success on Defender
+			CheckNumHitsRemaining(NUMHIT_IncomingHitSuccess);
 
 		ReduceAllDamage(damage);
 
@@ -4021,7 +4021,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 					int chance = ProcChance * (DefensiveProcs[i].chance);
 					if ((MakeRandomInt(0, 100) < chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
-						CheckNumHitsRemaining(10,0,DefensiveProcs[i].base_spellID);
+						CheckNumHitsRemaining(NUMHIT_DefensiveSpellProcs,0,DefensiveProcs[i].base_spellID);
 					}
 				}
 			}
@@ -4208,7 +4208,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 							"Spell proc %d procing spell %d (%.2f percent chance)",
 							i, SpellProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
-					CheckNumHitsRemaining(11, 0, SpellProcs[i].base_spellID);
+					CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs, 0, SpellProcs[i].base_spellID);
 				} else {
 					mlog(COMBAT__PROCS,
 							"Spell proc %d failed to proc %d (%.2f percent chance)",
@@ -4224,7 +4224,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 							"Ranged proc %d procing spell %d (%.2f percent chance)",
 							i, RangedProcs[i].spellID, chance);
 					ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
-					CheckNumHitsRemaining(11, 0, RangedProcs[i].base_spellID);
+					CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs, 0, RangedProcs[i].base_spellID);
 				} else {
 					mlog(COMBAT__PROCS,
 							"Ranged proc %d failed to proc %d (%.2f percent chance)",
@@ -4594,7 +4594,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 				int ProcChance = chance * (float)SkillProcs[i].chance;
 				if ((MakeRandomInt(0, 100) < ProcChance)) {
 					ExecWeaponProc(nullptr, SkillProcs[i].spellID, on);
-					CheckNumHitsRemaining(11,0, SkillProcs[i].base_spellID);
+					CheckNumHitsRemaining(NUMHIT_OffensiveSpellProcs,0, SkillProcs[i].base_spellID);
 				}
 			}
 		}
