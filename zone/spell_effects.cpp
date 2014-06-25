@@ -2183,12 +2183,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fading Memories");
 #endif
-				if(caster && caster->IsClient())
-					caster->CastToClient()->Escape();
-				else
-				{
-					entity_list.RemoveFromTargets(caster);
-					SetInvisible(1);
+				if(MakeRandomInt(0, 99) < spells[spell_id].base[i] ) {
+
+					if(caster && caster->IsClient())
+						caster->CastToClient()->Escape();
+					else
+					{
+						entity_list.RemoveFromTargets(caster);
+						SetInvisible(1);
+					}
 				}
 				break;
 			}
