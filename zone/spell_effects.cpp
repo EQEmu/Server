@@ -2646,9 +2646,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_Taunt:
 			{
-				if (IsNPC())
+				if (IsNPC()){
 					caster->Taunt(this->CastToNPC(), false, spell.base[i]);
-
+					
+					if (spell.base2[i] > 0)
+						CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) + spell.base2[i]));
+				}
 				break;
 			}
 
@@ -2673,9 +2676,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_AddHatePct:
 			{
-				if (IsNPC())
-					CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100));
+				if (IsNPC()){
+					int32 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100;
+					if (new_hate <= 0)
+						new_hate = 1;
 
+					CastToNPC()->SetHate(caster, new_hate);
+				}
 				break;
 			}
 
@@ -3562,9 +3569,13 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 
 			case SE_AddHateOverTimePct:
 			{				
-				if (IsNPC())
-					CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100));
-
+				if (IsNPC()){
+					int32 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100;
+					if (new_hate <= 0)
+						new_hate = 1;
+					
+					CastToNPC()->SetHate(caster, new_hate);
+				}
 				break;
 			}
 
