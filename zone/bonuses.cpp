@@ -953,6 +953,8 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_BlockBehind:
 				newbon->BlockBehind += base1;
 				break;
+			
+			case SE_StrikeThrough:
 			case SE_StrikeThrough2:
 				newbon->StrikeThrough += base1;
 				break;
@@ -2469,6 +2471,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->SecondaryDmgInc = true;
 				break;
 
+			case SE_StrikeThrough:
 			case SE_StrikeThrough2:
 				newbon->StrikeThrough += effect_value;
 				break;
@@ -3907,6 +3910,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.SecondaryDmgInc = false;
 					aabonuses.SecondaryDmgInc = false;
 					itembonuses.SecondaryDmgInc = false;
+					break;
+
+				case SE_StrikeThrough:
+					spellbonuses.StrikeThrough = effect_value;
+					aabonuses.StrikeThrough = effect_value;
+					itembonuses.StrikeThrough = effect_value;
 					break;
 
 				case SE_StrikeThrough2:

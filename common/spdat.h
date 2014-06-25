@@ -343,7 +343,7 @@ typedef enum {
 #define SE_SkillAttack					193	// implemented
 #define SE_FadingMemories				194	// implemented
 #define SE_StunResist					195	// implemented
-#define SE_Strikethrough				196	// implemented
+#define SE_StrikeThrough				196	// implemented
 #define SE_SkillDamageTaken				197	// implemented
 #define SE_CurrentEnduranceOnce			198	// implemented
 #define SE_Taunt						199	// implemented - % chance to taunt the target
