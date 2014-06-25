@@ -156,7 +156,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	if (HasDied())	return;
 
 	if (max_damage > 0)
-		CheckNumHitsRemaining(5);
+		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 
 	//[AA Dragon Punch] value[0] = 100 for 25%, chance value[1] = skill
 	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skill){
@@ -951,7 +951,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 
 					TryCriticalHit(other, SkillArchery, TotalDmg);
 					other->AddToHateList(this, hate, 0, false);
-					CheckNumHitsRemaining(5);
+					CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 				}
 			}
 			else
@@ -1056,7 +1056,7 @@ void NPC::RangedAttack(Mob* other)
 			TryCriticalHit(GetTarget(), SkillArchery, TotalDmg);
 			GetTarget()->AddToHateList(this, hate, 0, false);
 			GetTarget()->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillArchery);
-			CheckNumHitsRemaining(5);
+			CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 		}
 		else
 		{
@@ -1281,7 +1281,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 				TryCriticalHit(other, SkillThrowing, TotalDmg);
 				int32 hate = (2*WDmg);
 				other->AddToHateList(this, hate, 0, false);
-				CheckNumHitsRemaining(5);
+				CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 			}
 		}
 
@@ -2196,7 +2196,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 	if (HasDied())
 		return;
 
-	CheckNumHitsRemaining(5);
+	CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 
 	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skillinuse){
 		int kb_chance = 25;
