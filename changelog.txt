@@ -3,6 +3,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 
 == 06/25/2014 ==
 Kayen: Updated SE_Hate (Renamed from SE_Hate2) to now properly work for instant +/- hate spells.
+Kayen: Updated SE_FadingMemories - Base value will be properly utilized to set % chance for fade effect to work.
 
 == 06/17/2014 ==
 Kayen: Implemented SE_AStacker, SE_BStacker, SE_CStacker, SE_DStacker.
