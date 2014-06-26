@@ -2710,6 +2710,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
+			case SE_MassGroupBuff:{
+
+				SetMGB(true);
+				Message_StringID(MT_Disciplines, MGB_STRING);
+				break;
+			}
+
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
 			case SE_NegateSpellEffect:
@@ -2864,7 +2871,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ACv2:
 			case SE_ManaRegen_v2:
 			case SE_FcDamagePctCrit:
-			case  SE_FcHealAmt:
+			case SE_FcHealAmt:
 			case SE_FcHealPctIncoming:
 			case SE_CriticalHealDecay:
 			case SE_CriticalRegenDecay:
@@ -2878,6 +2885,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_PetCriticalHit:
 			case SE_SlayUndead:
 			case SE_GiveDoubleAttack:
+			case SE_StrikeThrough:
 			case SE_StrikeThrough2:
 			case SE_SecondaryDmgInc:
 			case SE_ArcheryDamageModifier:

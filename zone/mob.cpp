@@ -180,6 +180,7 @@ Mob::Mob(const char* in_name,
 	trackable	= true;
 	has_shieldequiped = false;
 	has_numhits = false;
+	has_MGB = false;
 
 	if(in_aa_title>0)
 		aa_title	= in_aa_title;

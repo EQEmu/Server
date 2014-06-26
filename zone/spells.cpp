@@ -399,7 +399,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		mana_cost = GetActSpellCost(spell_id, mana_cost);
 	}
 
-	if(IsClient() && CastToClient()->CheckAAEffect(aaEffectMassGroupBuff) && spells[spell_id].can_mgb)
+	if(HasMGB() && spells[spell_id].can_mgb)
 		mana_cost *= 2;
 
 	// mana is checked for clients on the frontend. we need to recheck it for NPCs though
@@ -1969,11 +1969,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			}
 #endif //BOTS
 
-			if(spells[spell_id].can_mgb && IsClient() && CastToClient()->CheckAAEffect(aaEffectMassGroupBuff))
+			if(spells[spell_id].can_mgb && HasMGB())
 			{
 				SpellOnTarget(spell_id, this);
 				entity_list.MassGroupBuff(this, this, spell_id, true);
-				CastToClient()->DisableAAEffect(aaEffectMassGroupBuff);
+				SetMGB(false);
 			}
 			else
 			{

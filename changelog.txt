@@ -6,6 +6,10 @@ Kayen: Updated SE_Hate (Renamed from SE_Hate2) to now properly work for instant 
 Kayen: Updated SE_FadingMemories - Base value will be properly utilized to set % chance for fade effect to work.
 Kayen: Implemented SE_StrikeThough (Was incorrectly defined as implemented previously) - Works same as item bonus.
 Kayen: Update SE_Taunt - Limit value if present will now add instant hate.
+Kayen: Implemented SE_MassGroupBuff - Allows next group buff cast to be a MGB (AA now uses this)
+
+Required SQL: utils/sql/git/required/2014_06_25_MGB_AA.sql
+
 
 == 06/17/2014 ==
 Kayen: Implemented SE_AStacker, SE_BStacker, SE_CStacker, SE_DStacker.
