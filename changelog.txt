@@ -9,7 +9,7 @@ Kayen: Update SE_Taunt - Limit value if present will now add instant hate.
 Kayen: Implemented SE_MassGroupBuff - Allows next group buff cast to be a MGB (AA now uses this)
 Kayen: Implemented SE_IllusionOther - Allows next Illusion buff (self only) cast to be cast on target. (AA now uses this)
 
-Required SQL: utils/sql/git/required/2014_06_25_MGB_AA.sql
+Required SQL: utils/sql/git/required/2014_06_25_AA_Update.sql
 
 
 == 06/17/2014 ==
