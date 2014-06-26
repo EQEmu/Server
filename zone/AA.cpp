@@ -352,11 +352,6 @@ void Client::HandleAAAction(aaID activate) {
 			entity_list.AETaunt(this);
 			break;
 
-		case aaActionMassBuff:
-			EnableAAEffect(aaEffectMassGroupBuff, 3600);
-			Message_StringID(MT_Disciplines, MGB_STRING);	//The next group buff you cast will hit all targets in range.
-			break;
-
 		case aaActionFlamingArrows:
 			//toggle it
 			if(CheckAAEffect(aaEffectFlamingArrows))

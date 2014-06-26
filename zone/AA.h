@@ -43,7 +43,7 @@ typedef enum {
 //use these for AAs which dont cast spells, yet need effects
 //if this list grows beyond 32, more work is needed in *AAEffect
 typedef enum {	//AA Effect IDs
-	aaEffectMassGroupBuff = 1,
+	aaEffectMassGroupBuff = 1, //unused - Handled via spell effect.
 	aaEffectRampage,
 	aaEffectSharedHealth,
 	aaEffectFlamingArrows,
