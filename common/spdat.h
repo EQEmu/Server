@@ -349,7 +349,7 @@ typedef enum {
 #define SE_Taunt						199	// implemented - % chance to taunt the target
 #define SE_ProcChance					200	// implemented
 #define SE_RangedProc					201	// implemented
-//#define SE_IllusionOther				202	// *not implemented as bonus(Project Illusion)
+#define SE_IllusionOther				202	// implemented - Project Illusion
 #define SE_MassGroupBuff				203	// implemented
 #define SE_GroupFearImmunity			204	// *not implemented as bonus
 #define SE_Rampage						205	// implemented

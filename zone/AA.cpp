@@ -454,12 +454,6 @@ void Client::HandleAAAction(aaID activate) {
 			}
 			break;
 
-		case aaActionProjectIllusion:
-			EnableAAEffect(aaEffectProjectIllusion, 3600);
-			Message(10, "The power of your next illusion spell will flow to your grouped target in your place.");
-			break;
-
-
 		case aaActionEscape:
 			Escape();
 			break;

@@ -181,6 +181,7 @@ Mob::Mob(const char* in_name,
 	has_shieldequiped = false;
 	has_numhits = false;
 	has_MGB = false;
+	has_ProjectIllusion = false;
 
 	if(in_aa_title>0)
 		aa_title	= in_aa_title;
