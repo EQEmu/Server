@@ -237,7 +237,7 @@ typedef enum {
 #define SE_MagnifyVision				87	// implemented - Telescope
 #define SE_Succor						88	// implemented - Evacuate/Succor lines
 #define SE_ModelSize					89	// implemented - Shrink, Growth
-#define SE_Cloak						90	// *not implemented - Used in only 2 spells
+//#define SE_Cloak						90	// *not implemented - Used in only 2 spells
 #define SE_SummonCorpse					91	// implemented
 #define SE_InstantHate					92	// implemented - add hate
 #define SE_StopRain						93	// implemented - Wake of Karana
@@ -351,7 +351,7 @@ typedef enum {
 #define SE_RangedProc					201	// implemented
 #define SE_IllusionOther				202	// implemented - Project Illusion
 #define SE_MassGroupBuff				203	// implemented
-#define SE_GroupFearImmunity			204	// *not implemented as bonus
+#define SE_GroupFearImmunity			204	// implemented - (Does not use bonus)
 #define SE_Rampage						205	// implemented
 #define SE_AETaunt						206	// implemented
 #define SE_FleshToBone					207	// implemented

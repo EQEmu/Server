@@ -2237,8 +2237,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "AE Taunt");
 #endif
-				if(caster && caster->IsClient())
-					entity_list.AETaunt(caster->CastToClient());
+				if(caster && caster->IsClient()){
+					float range = 0.0f;
+					if (spells[spell_id].base2[i])
+						range = (float)spells[spell_id].base[i];
+					
+					entity_list.AETaunt(caster->CastToClient(), range);
+				}
 				break;
 			}
 
