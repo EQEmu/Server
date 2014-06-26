@@ -1371,7 +1371,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		&& IsClient()
 		&& (IsGrouped() // still self only if not grouped
 		|| IsRaidGrouped())
-		&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
+		&& (HasProjectIllusion())){
 			mlog(AA__MESSAGE, "Project Illusion overwrote target caster: %s spell id: %d was ON", GetName(), spell_id);
 			targetType = ST_GroupClientAndPet;
 	}
@@ -1853,7 +1853,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	range = GetActSpellRange(spell_id, range);
 	if(IsPlayerIllusionSpell(spell_id)
 		&& IsClient()
-		&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
+		&& (HasProjectIllusion())){
 		range = 100;
 	}
 	if(spell_target != nullptr && spell_target != this) {
@@ -1912,9 +1912,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 			if(IsPlayerIllusionSpell(spell_id)
 			&& IsClient()
-			&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
+			&& (HasProjectIllusion())){
 				mlog(AA__MESSAGE, "Effect Project Illusion for %s on spell id: %d was ON", GetName(), spell_id);
-				CastToClient()->DisableAAEffect(aaEffectProjectIllusion);
+				SetProjectIllusion(false);
 			}
 			else{
 				mlog(AA__MESSAGE, "Effect Project Illusion for %s on spell id: %d was OFF", GetName(), spell_id);

@@ -270,6 +270,8 @@ public:
 	inline void Numhits(bool val) { has_numhits = val; }
 	bool HasMGB() const { return has_MGB; }
 	inline void SetMGB(bool val) { has_MGB = val; }
+	bool HasProjectIllusion() const { return has_ProjectIllusion ; }
+	inline void SetProjectIllusion(bool val) { has_ProjectIllusion  = val; }
 	void SpreadVirus(uint16 spell_id, uint16 casterID);
 	bool IsNimbusEffectActive(uint32 nimbus_effect);
 	void SetNimbusEffect(uint32 nimbus_effect);
@@ -1100,6 +1102,7 @@ protected:
 	bool has_shieldequiped;
 	bool has_numhits;
 	bool has_MGB;
+	bool has_ProjectIllusion;
 
 	// Bind wound
 	Timer bindwound_timer;

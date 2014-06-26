@@ -2717,6 +2717,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
+			case SE_IllusionOther: {
+				SetProjectIllusion(true);
+				Message(10, "The power of your next illusion spell will flow to your grouped target in your place.");
+				break;
+			}
+
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
 			case SE_NegateSpellEffect:
