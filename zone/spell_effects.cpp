@@ -5798,16 +5798,25 @@ uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
 
 bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 
+	/*Live 5-20-14 Patch Note: Updated all spells which use Remove Detrimental and 
+	Cancel Beneficial spell effects to use a new method. The chances for those spells to 
+	affect their targets have not changed unless otherwise noted.*/
+
+	/*This should provide a somewhat accurate conversion between pre 5/14 base values and post.
+	until more information is avialble - Kayen*/
+	if (level_modifier > 100)
+		level_modifier = level_modifier/100;
+
 	//Dispels - Check level of caster agianst buffs level (level of the caster who cast the buff)
 	//Effect value of dispels are treated as a level modifier.
 	//Values for scaling were obtain from live parses, best estimates.
 
 	caster_level += level_modifier - 1; 
-	int dispel_chance = 36; //Baseline chance if no level difference and no modifier
+	int dispel_chance = 32; //Baseline chance if no level difference and no modifier
 	int level_diff = caster_level - buff_level;
 
 	if (level_diff > 0)
-		dispel_chance += level_diff * 8;
+		dispel_chance += level_diff * 7;
 
 	else if (level_diff < 0)
 		dispel_chance += level_diff * 2;
