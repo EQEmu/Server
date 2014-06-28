@@ -422,6 +422,7 @@ struct StatBonuses {
 	int8	StunBashChance;						// chance to stun with bash.	
 	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
 	int8	CriticalMend;						// chance critical monk mend
+	int16	ImprovedReclaimEnergy;				// Modifies amount of mana returned from reclaim energy	
 };
 
 typedef struct

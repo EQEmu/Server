@@ -1270,6 +1270,15 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->Metabolism += base1;
 				break;
 
+			case SE_ImprovedReclaimEnergy:
+			{
+				if((base1 < 0) && (newbon->ImprovedReclaimEnergy > base1))
+					newbon->ImprovedReclaimEnergy = base1;
+
+				else if(newbon->ImprovedReclaimEnergy < base1)
+					newbon->ImprovedReclaimEnergy = base1;
+				break;
+			}
 		}
 	}
 }
@@ -2740,6 +2749,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_Metabolism:
 				newbon->Metabolism += effect_value;
 				break;
+
+			case SE_ImprovedReclaimEnergy:
+			{
+				if((effect_value < 0) && (newbon->ImprovedReclaimEnergy > effect_value))
+					newbon->ImprovedReclaimEnergy = effect_value;
+
+				else if(newbon->ImprovedReclaimEnergy < effect_value)
+					newbon->ImprovedReclaimEnergy = effect_value;
+				break;
+			}
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
