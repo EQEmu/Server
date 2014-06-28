@@ -1177,7 +1177,7 @@ uint32 Client::CalcCurrentWeight() {
 		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
 	}
 
-	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat;
+	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat + (float)itembonuses.Packrat;
 	if (Packrat > 0)
 		Total = (uint32)((float)Total * (1.0f - ((Packrat * 1.0f) / 100.0f)));	//AndMetal: 1% per level, up to 5% (calculated from Titanium client). verified thru client that it reduces coin weight by the same %
 																				//without casting to float & back to uint32, this didn't work right

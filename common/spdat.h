@@ -358,7 +358,7 @@ typedef enum {
 //#define SE_PurgePoison				208	// not used
 #define SE_DispelBeneficial				209 // implemented
 //#define SE_PetShield					210	// *not implemented
-#define SE_AEMelee						211	// implemented
+#define SE_AEMelee						211	// implemented TO DO: Implement to allow NPC use (client only atm).
 #define SE_FrenziedDevastation			212	// implemented - increase spell criticals + all DD spells cast 2x mana.
 #define SE_PetMaxHP						213	// implemented[AA] - increases the maximum hit points of your pet
 #define SE_MaxHPChange					214	// implemented
@@ -375,7 +375,7 @@ typedef enum {
 #define SE_GiveDoubleAttack				225	// implemented[AA] - Allow any class to double attack with set chance.
 #define SE_TwoHandBash					226 // *not implemented as bonus
 #define SE_ReduceSkillTimer				227	// implemented
-#define SE_ReduceFallDamage				228	// not implented as bonus - reduce the damage that you take from falling
+//#define SE_ReduceFallDamage			228	// not implented as bonus - reduce the damage that you take from falling
 #define SE_PersistantCasting			229 // implemented
 //#define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
 #define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
@@ -388,7 +388,7 @@ typedef enum {
 //#define SE_IllusionPersistence		238	// *not implemented - lends persistence to your illusionary disguises, causing them to last until you die or the illusion is forcibly removed.
 //#define SE_FeignedCastOnChance		239	// *not implemented as bonus - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
 //#define SE_StringUnbreakable			240	// not used [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
-#define SE_ImprovedReclaimEnergy		241	// not implemented as bonus - increase the amount of mana returned to you when reclaiming your pet.
+#define SE_ImprovedReclaimEnergy		241	// implemented - increase the amount of mana returned to you when reclaiming your pet.
 #define SE_IncreaseChanceMemwipe		242	// implemented - increases the chance to wipe hate with memory blurr
 #define SE_CharmBreakChance				243	// implemented - Total Domination
 #define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.

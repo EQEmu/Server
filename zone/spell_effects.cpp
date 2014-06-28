@@ -1551,15 +1551,22 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					GetPetType() != petCharmed
 				)
 				{
-					int lvlmod = 4;
-					if(caster->IsClient() && caster->CastToClient()->GetAA(aaImprovedReclaimEnergy))
-						lvlmod = 8;	//this is an unconfirmed number, I made it up
-					if(caster->IsClient() && caster->CastToClient()->GetAA(aaImprovedReclaimEnergy2))
-						lvlmod = 8;	//this is an unconfirmed number, I made it up
-					caster->SetMana(caster->GetMana()+(GetLevel()*lvlmod));
+				uint16 pet_spellid =  CastToNPC()->GetPetSpellID();
+				uint16 pet_ActSpellCost = caster->GetActSpellCost(pet_spellid, spells[pet_spellid].mana);
+				int16 ImprovedReclaimMod =	caster->spellbonuses.ImprovedReclaimEnergy + 
+											caster->itembonuses.ImprovedReclaimEnergy + 
+											caster->aabonuses.ImprovedReclaimEnergy;
+
+				if (!ImprovedReclaimMod)
+					ImprovedReclaimMod = 75; //Reclaim Energy default is 75% of actual mana cost
+
+				pet_ActSpellCost = pet_ActSpellCost*ImprovedReclaimMod/100;
+
+				caster->SetMana(caster->GetMana() + pet_ActSpellCost);
 
 					if(caster->IsClient())
 						caster->CastToClient()->SetPet(0);
+
 					SetOwnerID(0);	// this will kill the pet
 				}
 				break;
@@ -5804,7 +5811,7 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 
 	/*This should provide a somewhat accurate conversion between pre 5/14 base values and post.
 	until more information is avialble - Kayen*/
-	if (level_modifier > 100)
+	if (level_modifier >= 100)
 		level_modifier = level_modifier/100;
 
 	//Dispels - Check level of caster agianst buffs level (level of the caster who cast the buff)
