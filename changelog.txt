@@ -11,8 +11,12 @@ Kayen: Implemented SE_IllusionOther - Allows next Illusion buff (self only) cast
 Kayen: Update SE_AETaunt - Base value will now determine AE taunt range (This will not result in any change to currently used spells).
 Kayen: Udpated SE_ReclaimPet - Correct forumla for mana returned to properly return 75% of actual pet spell mana cost.
 Kayen: Implemented SE_ImprovedReclaimEnergy - Modifies % mana returned from SE_ReclaimPet.
+Kayen: Implemented SE_HeadShot, SE_HeadShotLevel - Defines headshot damage and level requirements.
+Revised HeadShot mechanic so damage now recieves all archery bonuses, proc chance can be set to either (lives new Proc Per minute
+system, or flat chance based on dex (formula updated).
 
 Required SQL: utils/sql/git/required/2014_06_25_AA_Update.sql
+Optional SQL: utils/sql/git/optiional/2014_06_29_HeadShotRules.sql
 
 
 == 06/17/2014 ==

@@ -1,0 +1,2 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Combat:AdjustSpecialProcPerMinute', 'false', 'Allow PPM for special abilities HeadShot, Assassinate, Decap ect.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Combat:AvgSpecialProcsPerMinute', '2.0', 'Set PPM for special abilities HeadShot, Assassinate, Decap ect. (Unknown what value live uses) .');

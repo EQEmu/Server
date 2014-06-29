@@ -1864,7 +1864,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const
 			break;
 	}
 
-	effectmodcap += aabonuses.songModCap + spellbonuses.songModCap;
+	effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap;
 
 	if (effectmod < 10)
 		effectmod = 10;

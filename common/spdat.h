@@ -364,7 +364,7 @@ typedef enum {
 #define SE_MaxHPChange					214	// implemented
 #define SE_PetAvoidance					215	// implemented[AA] - increases pet ability to avoid melee damage
 #define SE_Accuracy						216	// implemented
-//#define SE_HeadShot					217	// not implemented as bonus - ability to head shot (base2 = damage)
+#define SE_HeadShot						217	// implemented - ability to head shot (base2 = damage)
 #define SE_PetCriticalHit				218 // implemented[AA] - gives pets a baseline critical hit chance
 #define SE_SlayUndead					219	// implemented - Allow extra damage against undead (base1 = rate, base2 = damage mod).
 #define SE_SkillDamageAmount			220	// implemented
@@ -492,8 +492,8 @@ typedef enum {
 #define SE_ImmuneFleeing				342	// implemented - stop mob from fleeing
 #define SE_InterruptCasting				343	// implemented - % chance to interrupt spells being cast every tic. Cacophony (8272)
 #define SE_ChannelChanceItems			344	// implemented[AA] - chance to not have ITEM effects interrupted when you take damage.
-//#define SE_AssassinationLevel			345	// not implemented as bonus - AA Assisination max level to kill
-//#define SE_HeadShotLevel				346	// not implemented as bonus - AA HeadShot max level to kill
+#define SE_AssassinateLevel				345	// implemented as bonus - AA Assisination max level to kill
+#define SE_HeadShotLevel				346	// implemented[AA] - HeadShot max level to kill
 #define SE_DoubleRangedAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
 #define SE_LimitManaMin					348	// implemented
 #define SE_ShieldEquipHateMod			349	// implemented[AA] Increase melee hate when wearing a shield.
@@ -586,7 +586,7 @@ typedef enum {
 //#define SE_BeneficialCountDownHold	436 // not used ( 23491 | ABTest Buff Hold)
 //#define SE_TeleporttoAnchor			437 // *not implemented - Teleport Guild Hall Anchor(33099)
 //#define SE_TranslocatetoAnchor		438 // *not implemented - Translocate Primary Anchor (27750)
-//#define SE_IncreaseAssassinationLvl	439 // *not implemented[AA] - increases the maximum level of humanoid that can be affected by assassination
+#define SE_Assassinate					439 // implemented[AA] - Assassinate damage
 #define SE_FinishingBlowLvl				440 // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
 #define SE_DistanceRemoval				441 // implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
 #define SE_TriggerOnReqTarget			442 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)

@@ -141,7 +141,7 @@ public:
 	virtual void TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttackOptions *opts = nullptr);
 	void TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage);
 	virtual bool TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse);
-	virtual bool TryHeadShot(Mob* defender, SkillUseTypes skillInUse);
+	uint32 TryHeadShot(Mob* defender, SkillUseTypes skillInUse);
 	virtual void DoRiposte(Mob* defender);
 	void ApplyMeleeDamageBonus(uint16 skill, int32 &damage);
 	virtual void MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts = nullptr);
@@ -991,6 +991,7 @@ protected:
 	void ExecWeaponProc(const ItemInst* weapon, uint16 spell_id, Mob *on);
 	virtual float GetProcChances(float ProcBonus, uint16 weapon_speed = 30, uint16 hand = 13);
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
+	virtual float GetSpecialProcChances(uint16 hand = 13);
 	int GetWeaponDamage(Mob *against, const Item_Struct *weapon_item);
 	int GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate = nullptr);
 	int GetKickDamage();
