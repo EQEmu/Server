@@ -637,7 +637,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			continue;
 
 		_log(AA__BONUSES, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
-
+					
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
 		{
@@ -1279,6 +1279,23 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 					newbon->ImprovedReclaimEnergy = base1;
 				break;
 			}
+
+			case SE_HeadShot:
+			{
+				if(newbon->HeadShot[1] < base2){
+					newbon->HeadShot[0] = base1;
+					newbon->HeadShot[1] = base2;
+				}
+				break;
+			}
+
+			case SE_HeadShotLevel:
+			{
+				if(newbon->HSLevel < base1)
+					newbon->HSLevel = base1;
+				break;
+			}
+
 		}
 	}
 }
@@ -2760,6 +2777,38 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_HeadShot:
+			{
+				if(newbon->HeadShot[1] < base2){
+					newbon->HeadShot[0] = effect_value;
+					newbon->HeadShot[1] = base2;
+				}
+				break;
+			}
+
+			case SE_HeadShotLevel:
+			{
+				if(newbon->HSLevel < effect_value)
+					newbon->HSLevel = effect_value;
+				break;
+			}
+
+			case SE_Assassinate:
+			{
+				if(newbon->Assassinate[1] < base2){
+					newbon->Assassinate[0] = effect_value;
+					newbon->Assassinate[1] = base2;
+				}
+				break;
+			}
+
+			case SE_AssassinateLevel:
+			{
+				if(newbon->AssassinateLevel < effect_value)
+					newbon->AssassinateLevel = effect_value;
+				break;
+			}
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
@@ -4173,7 +4222,27 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.Metabolism = effect_value;
 					itembonuses.Metabolism = effect_value;
 					break;
-				
+
+				case SE_ImprovedReclaimEnergy:
+					spellbonuses.ImprovedReclaimEnergy = effect_value;
+					aabonuses.ImprovedReclaimEnergy = effect_value;
+					itembonuses.ImprovedReclaimEnergy = effect_value;
+					break;
+
+				case SE_HeadShot:
+					spellbonuses.HeadShot[0] = effect_value;
+					aabonuses.HeadShot[0] = effect_value;
+					itembonuses.HeadShot[0] = effect_value;
+					spellbonuses.HeadShot[1] = effect_value;
+					aabonuses.HeadShot[1] = effect_value;
+					itembonuses.HeadShot[1] = effect_value;
+					break;
+
+				case SE_HeadShotLevel:
+					spellbonuses.HSLevel = effect_value;
+					aabonuses.HSLevel = effect_value;
+					itembonuses.HSLevel = effect_value;
+
 			}
 		}
 	}

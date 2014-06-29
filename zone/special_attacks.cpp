@@ -861,8 +861,12 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 	} else {
 		mlog(COMBAT__RANGED, "Ranged attack hit %s.", other->GetName());
 
-		if(!TryHeadShot(other, SkillArchery))
-		{
+
+			bool HeadShot = false;
+			uint32 HeadShot_Dmg = TryHeadShot(other, SkillArchery);
+			if (HeadShot_Dmg)
+				HeadShot = true;
+
 			int32 TotalDmg = 0;
 			int16 WDmg = 0;
 			int16 ADmg = 0;
@@ -881,6 +885,9 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					ADmg = 0;
 				uint32 MaxDmg = (RuleR(Combat, ArcheryBaseDamageBonus)*(WDmg+ADmg)*GetDamageTable(SkillArchery)) / 100;
 				int32 hate = ((WDmg+ADmg));
+
+				if (HeadShot)
+					MaxDmg = HeadShot_Dmg;
 
 				uint16 bonusArcheryDamageModifier = aabonuses.ArcheryDamageModifier + itembonuses.ArcheryDamageModifier + spellbonuses.ArcheryDamageModifier;
 
@@ -938,7 +945,9 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					hate += (2*((GetLevel()-25)/3));
 				}
 
-				other->AvoidDamage(this, TotalDmg, false);
+				if (!HeadShot)
+					other->AvoidDamage(this, TotalDmg, false);
+
 				other->MeleeMitigation(this, TotalDmg, minDmg);
 				if(TotalDmg > 0)
 				{
@@ -957,8 +966,11 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 			else
 				TotalDmg = -5;
 
+			if (HeadShot)
+				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
+			
 			other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillArchery);
-		}
+
 	}
 
 	//try proc on hits and misses
@@ -2074,30 +2086,73 @@ void Mob::InstillDoubt(Mob *who) {
 	}
 }
 
-bool Mob::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
-	bool Result = false;
+uint32 Mob::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 
-	if(defender && skillInUse == SkillArchery) {
-		if(GetAA(aaHeadshot) && defender->GetBodyType() == BT_Humanoid) {
-			if((GetLevelCon(GetLevel(), defender->GetLevel()) == CON_LIGHTBLUE || GetLevelCon(GetLevel(), defender->GetLevel()) == CON_GREEN) && defender->GetLevel() <= 60 && !defender->IsClient()) {
-				// WildcardX: These chance formula's below are arbitrary. If someone has a better formula that is more
-				// consistent with live, feel free to update these.
-				int AttackerChance = 20 + ((GetLevel() - 51) / 2) + (itembonuses.HeroicDEX / 10);
-				int DefenderChance = MakeRandomInt(0, 100);
-				if(AttackerChance > DefenderChance) {
-					mlog(COMBAT__ATTACKS, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
-					entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
-					defender->Damage(this, 32000, SPELL_UNKNOWN, skillInUse);
-					Result = true;
-				}
-				else {
-					mlog(COMBAT__ATTACKS, "FAILED a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
-				}
+	//Only works on YOUR target.
+	if(defender && (skillInUse == SkillArchery) && (GetTarget() == defender)) {
+		
+		int32 HeadShot_Dmg = aabonuses.HeadShot[1] + spellbonuses.HeadShot[1] + itembonuses.HeadShot[1];
+		
+		uint8 HeadShot_Level = 0; //Get Highest Headshot Level
+		HeadShot_Level = aabonuses.HSLevel;
+		if (HeadShot_Level < spellbonuses.HSLevel)
+			HeadShot_Level = spellbonuses.HSLevel;
+		else if (HeadShot_Level < itembonuses.HSLevel)
+			HeadShot_Level = itembonuses.HSLevel;
+
+		if(HeadShot_Dmg && defender->GetBodyType() == BT_Humanoid) {
+			if(HeadShot_Level && (defender->GetLevel() <= HeadShot_Level) && !defender->IsClient()){
+
+				float ProcChance = GetSpecialProcChances(11);
+				if(ProcChance > MakeRandomFloat(0,1)) 
+					return HeadShot_Dmg;
+		
 			}
 		}
 	}
 
-	return Result;
+	return 0;
+}
+
+float Mob::GetSpecialProcChances(uint16 hand)
+{
+	int mydex = GetDEX();
+
+	if (mydex > 255)
+		mydex  = 255;
+
+	uint16 weapon_speed;
+	float ProcChance = 0.0f;
+	float ProcBonus = 0.0f;
+
+	switch (hand) {
+		case 13:
+			weapon_speed = attack_timer.GetDuration();
+			break;
+		case 14:
+			weapon_speed = attack_dw_timer.GetDuration();
+			break;
+		case 11:
+			weapon_speed = ranged_timer.GetDuration();
+			break;
+	}
+
+	if (weapon_speed < RuleI(Combat, MinHastedDelay))
+		weapon_speed = RuleI(Combat, MinHastedDelay);
+
+	if (RuleB(Combat, AdjustSpecialProcPerMinute)) {
+		ProcChance = (static_cast<float>(weapon_speed) *
+				RuleR(Combat, AvgSpecialProcsPerMinute) / 60000.0f); 
+		ProcBonus +=  static_cast<float>(mydex/35) + static_cast<float>(itembonuses.HeroicDEX / 25);
+		ProcChance += ProcChance * ProcBonus / 100.0f;
+	} else {
+		/*PRE 2014 CHANGE Dev Quote - "Elidroth SOE:Proc chance is a function of your base hardcapped Dexterity / 35 + Heroic Dexterity / 25.”
+		Kayen: Most reports suggest a ~ 6% chance to Headshot which consistent with above.*/
+		
+		ProcChance = (static_cast<float>(mydex/35) + static_cast<float>(itembonuses.HeroicDEX / 25))/100.0f;
+	}
+
+	return ProcChance;
 }
 
 void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod, int16 focus, bool CanRiposte)

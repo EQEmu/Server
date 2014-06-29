@@ -2922,6 +2922,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_CombatStability:
 			case SE_AddSingingMod:
 			case SE_SongModCap:
+			case SE_HeadShot:
+			case SE_HeadShotLevel:
 			case SE_PetAvoidance:
 			case SE_GiveDoubleRiposte:
 			case SE_Ambidexterity:
