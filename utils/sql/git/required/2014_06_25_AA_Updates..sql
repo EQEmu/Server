@@ -21,3 +21,14 @@ INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES (
 INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('1605', '2', '345', '51', '0');
 INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('1606', '1', '439', '0', '32000');
 INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('1606', '2', '345', '53', '0');
+
+-- AA Finishing Blow Fix
+DELETE FROM aa_effects WHERE aaid = 199 AND slot = 2;
+DELETE FROM aa_effects WHERE aaid = 200 AND slot = 2;
+DELETE FROM aa_effects WHERE aaid = 201 AND slot = 2;
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`)  VALUES ('119', '1', '278', '500', '32000');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`)  VALUES ('119', '2', '440', '50', '200');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`)  VALUES ('120', '1', '278', '500', '32000');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`)  VALUES ('120', '2', '440', '52', '200');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`)  VALUES ('121', '1', '278', '500', '32000');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`)  VALUES ('121', '2', '440', '54', '200');
