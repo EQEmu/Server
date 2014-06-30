@@ -427,6 +427,7 @@ struct StatBonuses {
 	uint8	HSLevel;							// Max Level Headshot will be effective at.
 	uint32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
 	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
+	int32	PetMeleeMitigation;					// Add AC to owner's pet.
 	
 };
 
