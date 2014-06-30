@@ -1204,7 +1204,6 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 			case SE_FinishingBlow:
 			{
-
 				//base1 = chance, base2 = damage
 				if (newbon->FinishingBlow[1] < base2){
 					newbon->FinishingBlow[0] = base1;
@@ -2825,6 +2824,26 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_FinishingBlow:
+			{
+				//base1 = chance, base2 = damage
+				if (newbon->FinishingBlow[1] < base2){
+					newbon->FinishingBlow[0] = effect_value;
+					newbon->FinishingBlow[1] = base2;
+				}
+				break;
+			}
+
+			case SE_FinishingBlowLvl:
+			{
+				//base1 = level, base2 = ??? (Set to 200 in AA data, possible proc rate mod?)
+				if (newbon->FinishingBlowLvl[0] < effect_value){
+					newbon->FinishingBlowLvl[0] = effect_value;
+					newbon->FinishingBlowLvl[1] = base2;
+				}
+				break;
+			}
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
@@ -4258,6 +4277,40 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.HSLevel = effect_value;
 					aabonuses.HSLevel = effect_value;
 					itembonuses.HSLevel = effect_value;
+					break;
+
+				case SE_Assassinate:
+					spellbonuses.Assassinate[0] = effect_value;
+					aabonuses.Assassinate[0] = effect_value;
+					itembonuses.Assassinate[0] = effect_value;
+					spellbonuses.Assassinate[1] = effect_value;
+					aabonuses.Assassinate[1] = effect_value;
+					itembonuses.Assassinate[1] = effect_value;
+					break;
+
+				case SE_AssassinateLevel:
+					spellbonuses.AssassinateLevel = effect_value;
+					aabonuses.AssassinateLevel = effect_value;
+					itembonuses.AssassinateLevel = effect_value;
+					break;
+
+				case SE_FinishingBlow:
+					spellbonuses.FinishingBlow[0] = effect_value;
+					aabonuses.FinishingBlow[0] = effect_value;
+					itembonuses.FinishingBlow[0] = effect_value;
+					spellbonuses.FinishingBlow[1] = effect_value;
+					aabonuses.FinishingBlow[1] = effect_value;
+					itembonuses.FinishingBlow[1] = effect_value;
+					break;
+
+				case SE_FinishingBlowLvl:
+					spellbonuses.FinishingBlowLvl[0] = effect_value;
+					aabonuses.FinishingBlowLvl[0] = effect_value;
+					itembonuses.FinishingBlowLvl[0] = effect_value;
+					spellbonuses.FinishingBlowLvl[1] = effect_value;
+					aabonuses.FinishingBlowLvl[1] = effect_value;
+					itembonuses.FinishingBlowLvl[1] = effect_value;
+					break;
 
 			}
 		}

@@ -17,6 +17,8 @@ system, or flat chance based on dex (formula updated).
 Kayen: Implemented SE_Assassinate, SE_AssassinateLevel - Defines assassinate damage and level requirements.
 Revised Assassinate mechanic so damage now receives all backstab bonuses, proc chance can be set to either (lives new Proc Per minute
 system, or flat chance based on dex (formula updated). Assassinate can now proc from THROW if behind target, various other adjustments.
+Kayen: Fix to AA Finishing Blow missing aa_effects data, update required SQL.
+Revised Finishing blow so that damage now receives all melee bonus. Support also for this effect if placed on items or spells.
 
 Required SQL: utils/sql/git/required/2014_06_25_AA_Update.sql
 Optional SQL: utils/sql/git/optiional/2014_06_29_HeadShotRules.sql
