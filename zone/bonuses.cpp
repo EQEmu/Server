@@ -1296,6 +1296,22 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_Assassinate:
+			{
+				if(newbon->Assassinate[1] < base2){
+					newbon->Assassinate[0] = base1;
+					newbon->Assassinate[1] = base2;
+				}
+				break;
+			}
+
+			case SE_AssassinateLevel:
+			{
+				if(newbon->AssassinateLevel < base1)
+					newbon->AssassinateLevel = base1;
+				break;
+			}
+
 		}
 	}
 }

@@ -423,9 +423,9 @@ struct StatBonuses {
 	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
 	int8	CriticalMend;						// chance critical monk mend
 	int16	ImprovedReclaimEnergy;				// Modifies amount of mana returned from reclaim energy
-	int32	HeadShot[2];						// Headshot AA (Massive dmg vs humaniod w/ archery) 0= ? 1= Dmg
+	uint32	HeadShot[2];						// Headshot AA (Massive dmg vs humaniod w/ archery) 0= ? 1= Dmg
 	uint8	HSLevel;							// Max Level Headshot will be effective at.
-	int32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
+	uint32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
 	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
 	
 };

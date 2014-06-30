@@ -13,5 +13,11 @@ INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES (
 INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('644', '1', '217', '0', '32000');
 INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('644', '2', '346', '46', '0');
 
--- spells_new update
-ALTER TABLE `spells_new` CHANGE `field175` `numhits_type` INT(11) NOT NULL DEFAULT '0';
+-- AA Anatomy (Rogue Assassinate)
+INSERT INTO `altadv_vars` (`skill_id`, `name`, `cost`, `max_level`, `hotkey_sid`, `hotkey_sid2`, `title_sid`, `desc_sid`, `type`, `spellid`, `prereq_skill`, `prereq_minpoints`, `spell_type`, `spell_refresh`, `classes`, `berserker`, `class_type`, `cost_inc`, `aa_expansion`, `special_category`, `sof_type`, `sof_cost_inc`, `sof_max_level`, `sof_next_skill`, `clientver`, `account_time_required`, `sof_current_level`,`sof_next_id`,`level_inc`) VALUES ('1604', 'Anatomy', '5', '3', '4294967295', '4294967295', '1604', '1604', '1', '4294967295', '0', '0', '0', '0', '512', '0', '60', '1', '10', '4294967295', '3', '0', '3', '1604', '1', '0', '0', '0', '0');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('1604', '1', '439', '0', '32000');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('1604', '2', '345', '48', '0');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('1605', '1', '439', '0', '32000');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('1605', '2', '345', '51', '0');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('1606', '1', '439', '0', '32000');
+INSERT INTO `aa_effects` (`aaid`, `slot`, `effectid`, `base1`, `base2`) VALUES ('1606', '2', '345', '53', '0');
