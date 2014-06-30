@@ -560,11 +560,21 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 			weight = (CastToClient()->CalcCurrentWeight() / 10.0);
 		} else if (IsNPC()) {
 			armor = CastToNPC()->GetRawAC();
+			int PetACBonus = 0;
 
 			if (!IsPet())
 				armor = (armor / RuleR(Combat, NPCACFactor));
+			else{
+				Mob *owner = nullptr;
+				owner = GetOwner();
+				if (owner){
+					PetACBonus = owner->aabonuses.PetMeleeMitigation 
+					+ owner->itembonuses.PetMeleeMitigation + 
+					owner->spellbonuses.PetMeleeMitigation;
+				}
+			}
 
-			armor += spellbonuses.AC + itembonuses.AC + 1;
+			armor += spellbonuses.AC + itembonuses.AC + PetACBonus + 1;
 		}
 
 		if (opts) {
@@ -4447,7 +4457,7 @@ bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 
 		uint32 FB_Dmg = aabonuses.FinishingBlow[1] + spellbonuses.FinishingBlow[1] + itembonuses.FinishingBlow[1];
 		
-		uint16 FB_Level = 0; //Get Highest Headshot Level
+		uint16 FB_Level = 0;
 		FB_Level = aabonuses.FinishingBlowLvl[0];
 		if (FB_Level < spellbonuses.FinishingBlowLvl[0])
 			FB_Level = spellbonuses.FinishingBlowLvl[0];

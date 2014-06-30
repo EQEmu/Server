@@ -1311,6 +1311,10 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_PetMeleeMitigation:
+				newbon->PetMeleeMitigation += base1;
+				break;
+
 		}
 	}
 }
@@ -2844,6 +2848,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_PetMeleeMitigation:
+				newbon->PetMeleeMitigation += effect_value;
+				break;
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
@@ -4073,6 +4081,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.GivePetGroupTarget = false;
 					aabonuses.GivePetGroupTarget = false;
 					itembonuses.GivePetGroupTarget = false;
+					break;
+
+				case SE_PetMeleeMitigation:
+					spellbonuses.PetMeleeMitigation = effect_value;
+					itembonuses.PetMeleeMitigation = effect_value;
+					aabonuses.PetMeleeMitigation = effect_value;
 					break;
 
 				case SE_RootBreakChance:

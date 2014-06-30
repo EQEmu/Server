@@ -544,7 +544,7 @@ typedef enum {
 #define SE_FcHealAmtIncoming			394 // implemented - Adds/Removes amount of healing on target by X value with foucs restrictions.
 #define SE_FcHealPctCritIncoming		395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
 #define SE_FcHealAmtCrit				396 // implemented - Adds a direct healing amount to spells
-//#define SE_PetMeleeMitigation			397 // *not implemented[AA] - additional mitigation to your pets.
+#define SE_PetMeleeMitigation			397 // implemented[AA] - additional mitigation to your pets. Adds AC.
 #define SE_SwarmPetDuration				398 // implemented - Affects the duration of swarm pets
 #define SE_FcTwincast					399 // implemented - cast 2 spells for every 1
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained

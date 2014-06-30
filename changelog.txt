@@ -19,6 +19,7 @@ Revised Assassinate mechanic so damage now receives all backstab bonuses, proc c
 system, or flat chance based on dex (formula updated). Assassinate can now proc from THROW if behind target, various other adjustments.
 Kayen: Fix to AA Finishing Blow missing aa_effects data, update required SQL.
 Revised Finishing blow so that damage now receives all melee bonus. Support also for this effect if placed on items or spells.
+Kayen: Implemented SE_PetMeleeMitigation - Bonus applied to pet owner. Gives AC to owner's pet.
 
 Required SQL: utils/sql/git/required/2014_06_25_AA_Update.sql
 Optional SQL: utils/sql/git/optiional/2014_06_29_HeadShotRules.sql
