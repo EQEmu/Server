@@ -2294,7 +2294,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				//meh dupe issue with npc casting this
 				if(caster->IsClient()){
-					caster->WakeTheDead(spell_id, caster->GetTarget(), spells[spell_id].max[i]);
+					int dur = spells[spell_id].max[i];
+					if (!dur)
+						dur = 60;
+
+					caster->WakeTheDead(spell_id, caster->GetTarget(), dur);
 				}
 				break;
 			}
