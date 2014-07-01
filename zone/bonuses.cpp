@@ -989,7 +989,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->CrippBlowChance += base1;
 				break;
 
-			case SE_SpellOnKill:
+			case SE_ProcOnKillShot:
 				for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3)
 				{
 					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == base2) && (newbon->SpellOnKill[i+1] < base1)))
@@ -2179,7 +2179,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->CriticalDoTChance += effect_value;
 				break;
 
-			case SE_SpellOnKill:
+			case SE_ProcOnKillShot:
 			{
 				for(int e = 0; e < MAX_SPELL_TRIGGER*3; e+=3)
 				{
@@ -3785,7 +3785,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.CriticalDoTChance = effect_value;
 					break;
 
-				case SE_SpellOnKill:
+				case SE_ProcOnKillShot:
 				{
 					for(int e = 0; e < MAX_SPELL_TRIGGER*3; e=3)
 					{
