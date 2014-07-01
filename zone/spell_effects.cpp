@@ -2294,14 +2294,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				//meh dupe issue with npc casting this
 				if(caster->IsClient()){
-					//this spell doesn't appear to actually contain the information on duration inside of it oddly
-					int dur = 60;
-					if(spell_id == 3269)
-						dur += 15;
-					else if(spell_id == 3270)
-						dur += 30;
-
-					caster->WakeTheDead(spell_id, caster->GetTarget(), dur);
+					caster->WakeTheDead(spell_id, caster->GetTarget(), spells[spell_id].max[i]);
 				}
 				break;
 			}

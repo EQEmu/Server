@@ -410,7 +410,7 @@ typedef enum {
 #define SE_AddSingingMod				260 // implemented[AA] - Instrument/Singing Mastery, base1 is the mod, base2 is the ItemType
 #define SE_SongModCap					261	// implemented[AA] - Song Mod cap increase (no longer used on live)
 #define SE_RaiseStatCap					262 // implemented
-#define	SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.
+//#define SE_TradeSkillMastery			263	// not implemented - lets you raise more than one tradeskill above master.
 //#define SE_HastenedAASkill			264 // not implemented as bonus - Use redux field in aa_actions table for this effect
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
 #define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
