@@ -506,13 +506,13 @@ typedef enum {
 //#define SE_ChangeTriggerType			356	// not used
 #define SE_FcMute						357	// implemented - silences casting of spells that contain specific spell effects (focus limited)
 #define SE_CurrentManaOnce				358	// implemented
-#define SE_Invulnerabilty				359	// *not implemented - Invulnerability (Brell's Blessing)
-#define SE_SpellOnKill					360	// implemented - a buff that has a base1 % to cast spell base2 when you kill a "challenging foe" base3 min level
+//#define SE_PassiveSenseTrap			359	// *not implemented - Invulnerability (Brell's Blessing)
+#define SE_ProcOnKillShot				360	// implemented - a buff that has a base1 % to cast spell base2 when you kill a "challenging foe" base3 min level
 #define SE_SpellOnDeath					361	// implemented - casts spell on death of buffed
 //#define SE_PotionBeltSlots			362	// *not implemented[AA] 'Quick Draw' expands the potion belt by one additional available item slot per rank.
 //#define SE_BandolierSlots				363	// *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
 #define SE_TripleAttackChance			364	// implemented
-#define SE_SpellOnKill2					365	// implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
+#define SE_ProcOnSpellKillShot			365	// implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
 #define SE_ShieldEquipDmgMod			366	// implemented[AA] Damage modifier to melee if shield equiped. (base1 = dmg mod , base2 = ?) ie Shield Specialist AA
 #define SE_SetBodyType					367	// implemented - set body type of base1 so it can be affected by spells that are limited to that type (Plant, Animal, Undead, etc)
 //#define SE_FactionMod					368	// *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2

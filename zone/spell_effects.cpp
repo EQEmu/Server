@@ -2860,8 +2860,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_CriticalHealChance:
 			case SE_CriticalHealOverTime:
 			case SE_CriticalDoTChance:
-			case SE_SpellOnKill:
-			case SE_SpellOnKill2:
+			case SE_ProcOnKillShot:
+			case SE_ProcOnSpellKillShot:
 			case SE_CriticalDamageMob:
 			case SE_LimitSpellGroup:
 			case SE_ResistCorruption:
