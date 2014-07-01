@@ -2762,19 +2762,23 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 
 			case SE_AStacker:
-				newbon->AStacker = true;
+				newbon->AStacker[0] = 1;
+				newbon->AStacker[1] = effect_value;
 				break;
 
 			case SE_BStacker:
-				newbon->BStacker = true;
+				newbon->BStacker[0] = 1;
+				newbon->BStacker[1] = effect_value;
 				break;
 
 			case SE_CStacker:
-				newbon->CStacker = true;
+				newbon->CStacker[0] = 1;
+				newbon->CStacker[1] = effect_value;
 				break;
 
 			case SE_DStacker:
-				newbon->DStacker = true;
+				newbon->DStacker[0] = 1;
+				newbon->DStacker[1] = effect_value;
 				break;
 
 			case SE_Berserk:
