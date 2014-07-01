@@ -2622,19 +2622,31 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			}
 
 			/*Buff stacking prevention spell effects (446 - 449) works as follows... If B prevent A, if C prevent B, if D prevent C.
+			If checking same type ie A vs A, which ever effect base value is higher will take hold.
 			Special check is added to make sure the buffs stack properly when applied from fade on duration effect, since the buff
 			is not fully removed at the time of the trgger*/
-			if (spellbonuses.BStacker) {
+			if (spellbonuses.AStacker[0]) {
+				if ((effect2 == SE_AStacker) && (sp2.effectid[i] <= spellbonuses.AStacker[1]))
+					return -1;
+			}
+
+			if (spellbonuses.BStacker[0]) {
+				if ((effect2 == SE_BStacker) && (sp2.effectid[i] <= spellbonuses.BStacker[1]))
+					return -1;
 				if ((effect2 == SE_AStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_BStacker)))
 					return -1;
 			}
 
-			if (spellbonuses.CStacker) {
+			if (spellbonuses.CStacker[0]) {
+				if ((effect2 == SE_CStacker) && (sp2.effectid[i] <= spellbonuses.CStacker[1]))
+					return -1;
 				if ((effect2 == SE_BStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_CStacker)))
 					return -1;
 			}
 						
-			if (spellbonuses.DStacker) {
+			if (spellbonuses.DStacker[0]) {
+				if ((effect2 == SE_DStacker) && (sp2.effectid[i] <= spellbonuses.DStacker[1]))
+					return -1;
 				if ((effect2 == SE_CStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_DStacker)))
 					return -1;
 			}
