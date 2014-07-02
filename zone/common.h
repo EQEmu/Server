@@ -373,6 +373,7 @@ struct StatBonuses {
 	bool	BerserkSPA;							// berserk effect
 	int16	Metabolism;							// Food/drink consumption rates.
 	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
+	int16   FactionModPct;						// Modifies amount of faction gained.
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
