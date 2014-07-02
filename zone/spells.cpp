@@ -399,7 +399,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		mana_cost = GetActSpellCost(spell_id, mana_cost);
 	}
 
-	if(IsClient() && CastToClient()->CheckAAEffect(aaEffectMassGroupBuff) && spells[spell_id].can_mgb)
+	if(HasMGB() && spells[spell_id].can_mgb)
 		mana_cost *= 2;
 
 	// mana is checked for clients on the frontend. we need to recheck it for NPCs though
@@ -1371,7 +1371,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		&& IsClient()
 		&& (IsGrouped() // still self only if not grouped
 		|| IsRaidGrouped())
-		&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
+		&& (HasProjectIllusion())){
 			mlog(AA__MESSAGE, "Project Illusion overwrote target caster: %s spell id: %d was ON", GetName(), spell_id);
 			targetType = ST_GroupClientAndPet;
 	}
@@ -1853,7 +1853,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	range = GetActSpellRange(spell_id, range);
 	if(IsPlayerIllusionSpell(spell_id)
 		&& IsClient()
-		&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
+		&& (HasProjectIllusion())){
 		range = 100;
 	}
 	if(spell_target != nullptr && spell_target != this) {
@@ -1912,9 +1912,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 			if(IsPlayerIllusionSpell(spell_id)
 			&& IsClient()
-			&& CastToClient()->CheckAAEffect(aaEffectProjectIllusion)){
+			&& (HasProjectIllusion())){
 				mlog(AA__MESSAGE, "Effect Project Illusion for %s on spell id: %d was ON", GetName(), spell_id);
-				CastToClient()->DisableAAEffect(aaEffectProjectIllusion);
+				SetProjectIllusion(false);
 			}
 			else{
 				mlog(AA__MESSAGE, "Effect Project Illusion for %s on spell id: %d was OFF", GetName(), spell_id);
@@ -1969,11 +1969,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			}
 #endif //BOTS
 
-			if(spells[spell_id].can_mgb && IsClient() && CastToClient()->CheckAAEffect(aaEffectMassGroupBuff))
+			if(spells[spell_id].can_mgb && HasMGB())
 			{
 				SpellOnTarget(spell_id, this);
 				entity_list.MassGroupBuff(this, this, spell_id, true);
-				CastToClient()->DisableAAEffect(aaEffectMassGroupBuff);
+				SetMGB(false);
 			}
 			else
 			{
@@ -2622,19 +2622,31 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			}
 
 			/*Buff stacking prevention spell effects (446 - 449) works as follows... If B prevent A, if C prevent B, if D prevent C.
+			If checking same type ie A vs A, which ever effect base value is higher will take hold.
 			Special check is added to make sure the buffs stack properly when applied from fade on duration effect, since the buff
 			is not fully removed at the time of the trgger*/
-			if (spellbonuses.BStacker) {
+			if (spellbonuses.AStacker[0]) {
+				if ((effect2 == SE_AStacker) && (sp2.effectid[i] <= spellbonuses.AStacker[1]))
+					return -1;
+			}
+
+			if (spellbonuses.BStacker[0]) {
+				if ((effect2 == SE_BStacker) && (sp2.effectid[i] <= spellbonuses.BStacker[1]))
+					return -1;
 				if ((effect2 == SE_AStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_BStacker)))
 					return -1;
 			}
 
-			if (spellbonuses.CStacker) {
+			if (spellbonuses.CStacker[0]) {
+				if ((effect2 == SE_CStacker) && (sp2.effectid[i] <= spellbonuses.CStacker[1]))
+					return -1;
 				if ((effect2 == SE_BStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_CStacker)))
 					return -1;
 			}
 						
-			if (spellbonuses.DStacker) {
+			if (spellbonuses.DStacker[0]) {
+				if ((effect2 == SE_DStacker) && (sp2.effectid[i] <= spellbonuses.DStacker[1]))
+					return -1;
 				if ((effect2 == SE_CStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_DStacker)))
 					return -1;
 			}

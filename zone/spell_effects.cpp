@@ -1551,15 +1551,22 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					GetPetType() != petCharmed
 				)
 				{
-					int lvlmod = 4;
-					if(caster->IsClient() && caster->CastToClient()->GetAA(aaImprovedReclaimEnergy))
-						lvlmod = 8;	//this is an unconfirmed number, I made it up
-					if(caster->IsClient() && caster->CastToClient()->GetAA(aaImprovedReclaimEnergy2))
-						lvlmod = 8;	//this is an unconfirmed number, I made it up
-					caster->SetMana(caster->GetMana()+(GetLevel()*lvlmod));
+				uint16 pet_spellid =  CastToNPC()->GetPetSpellID();
+				uint16 pet_ActSpellCost = caster->GetActSpellCost(pet_spellid, spells[pet_spellid].mana);
+				int16 ImprovedReclaimMod =	caster->spellbonuses.ImprovedReclaimEnergy + 
+											caster->itembonuses.ImprovedReclaimEnergy + 
+											caster->aabonuses.ImprovedReclaimEnergy;
+
+				if (!ImprovedReclaimMod)
+					ImprovedReclaimMod = 75; //Reclaim Energy default is 75% of actual mana cost
+
+				pet_ActSpellCost = pet_ActSpellCost*ImprovedReclaimMod/100;
+
+				caster->SetMana(caster->GetMana() + pet_ActSpellCost);
 
 					if(caster->IsClient())
 						caster->CastToClient()->SetPet(0);
+
 					SetOwnerID(0);	// this will kill the pet
 				}
 				break;
@@ -2183,12 +2190,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fading Memories");
 #endif
-				if(caster && caster->IsClient())
-					caster->CastToClient()->Escape();
-				else
-				{
-					entity_list.RemoveFromTargets(caster);
-					SetInvisible(1);
+				if(MakeRandomInt(0, 99) < spells[spell_id].base[i] ) {
+
+					if(caster && caster->IsClient())
+						caster->CastToClient()->Escape();
+					else
+					{
+						entity_list.RemoveFromTargets(caster);
+						SetInvisible(1);
+					}
 				}
 				break;
 			}
@@ -2234,8 +2244,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "AE Taunt");
 #endif
-				if(caster && caster->IsClient())
-					entity_list.AETaunt(caster->CastToClient());
+				if(caster && caster->IsClient()){
+					float range = 0.0f;
+					if (spells[spell_id].base2[i])
+						range = (float)spells[spell_id].base[i];
+					
+					entity_list.AETaunt(caster->CastToClient(), range);
+				}
 				break;
 			}
 
@@ -2279,12 +2294,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 				//meh dupe issue with npc casting this
 				if(caster->IsClient()){
-					//this spell doesn't appear to actually contain the information on duration inside of it oddly
-					int dur = 60;
-					if(spell_id == 3269)
-						dur += 15;
-					else if(spell_id == 3270)
-						dur += 30;
+					int dur = spells[spell_id].max[i];
+					if (!dur)
+						dur = 60;
 
 					caster->WakeTheDead(spell_id, caster->GetTarget(), dur);
 				}
@@ -2643,9 +2655,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_Taunt:
 			{
-				if (IsNPC())
+				if (IsNPC()){
 					caster->Taunt(this->CastToNPC(), false, spell.base[i]);
-
+					
+					if (spell.base2[i] > 0)
+						CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) + spell.base2[i]));
+				}
 				break;
 			}
 
@@ -2670,9 +2685,50 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_AddHatePct:
 			{
-				if (IsNPC())
-					CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100));
+				if (IsNPC()){
+					int32 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100;
+					if (new_hate <= 0)
+						new_hate = 1;
 
+					CastToNPC()->SetHate(caster, new_hate);
+				}
+				break;
+			}
+
+			case SE_Hate:{
+
+				if (buffslot >= 0)
+					break;
+
+				if(caster){
+					if(effect_value > 0){
+						if(caster){
+							if(caster->IsClient() && !caster->CastToClient()->GetFeigned())
+								AddToHateList(caster, effect_value);
+							else if(!caster->IsClient())
+								AddToHateList(caster, effect_value);
+						}
+					}else{
+						int32 newhate = GetHateAmount(caster) + effect_value;
+						if (newhate < 1) 
+							SetHate(caster,1);
+						 else 
+							SetHate(caster,newhate);
+						}	
+				}
+				break;
+			}
+
+			case SE_MassGroupBuff:{
+
+				SetMGB(true);
+				Message_StringID(MT_Disciplines, MGB_STRING);
+				break;
+			}
+
+			case SE_IllusionOther: {
+				SetProjectIllusion(true);
+				Message(10, "The power of your next illusion spell will flow to your grouped target in your place.");
 				break;
 			}
 
@@ -2746,7 +2802,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ChangeFrenzyRad:
 			case SE_Harmony:
 			case SE_ChangeAggro:
-			case SE_Hate2:
 			case SE_Identify:
 			case SE_InstantHate:
 			case SE_ReduceHate:
@@ -2805,8 +2860,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_CriticalHealChance:
 			case SE_CriticalHealOverTime:
 			case SE_CriticalDoTChance:
-			case SE_SpellOnKill:
-			case SE_SpellOnKill2:
+			case SE_ProcOnKillShot:
+			case SE_ProcOnSpellKillShot:
 			case SE_CriticalDamageMob:
 			case SE_LimitSpellGroup:
 			case SE_ResistCorruption:
@@ -2831,7 +2886,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ACv2:
 			case SE_ManaRegen_v2:
 			case SE_FcDamagePctCrit:
-			case  SE_FcHealAmt:
+			case SE_FcHealAmt:
 			case SE_FcHealPctIncoming:
 			case SE_CriticalHealDecay:
 			case SE_CriticalRegenDecay:
@@ -2845,6 +2900,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_PetCriticalHit:
 			case SE_SlayUndead:
 			case SE_GiveDoubleAttack:
+			case SE_StrikeThrough:
 			case SE_StrikeThrough2:
 			case SE_SecondaryDmgInc:
 			case SE_ArcheryDamageModifier:
@@ -2863,6 +2919,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_CombatStability:
 			case SE_AddSingingMod:
 			case SE_SongModCap:
+			case SE_HeadShot:
+			case SE_HeadShotLevel:
 			case SE_PetAvoidance:
 			case SE_GiveDoubleRiposte:
 			case SE_Ambidexterity:
@@ -3340,7 +3398,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				break;
 			}
 
-			case SE_Hate2:{
+			case SE_Hate:{
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level);
 				if(caster){
 					if(effect_value > 0){
@@ -3536,9 +3594,13 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 
 			case SE_AddHateOverTimePct:
 			{				
-				if (IsNPC())
-					CastToNPC()->SetHate(caster, (CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100));
-
+				if (IsNPC()){
+					int32 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100;
+					if (new_hate <= 0)
+						new_hate = 1;
+					
+					CastToNPC()->SetHate(caster, new_hate);
+				}
 				break;
 			}
 
@@ -5742,16 +5804,25 @@ uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
 
 bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 
+	/*Live 5-20-14 Patch Note: Updated all spells which use Remove Detrimental and 
+	Cancel Beneficial spell effects to use a new method. The chances for those spells to 
+	affect their targets have not changed unless otherwise noted.*/
+
+	/*This should provide a somewhat accurate conversion between pre 5/14 base values and post.
+	until more information is avialble - Kayen*/
+	if (level_modifier >= 100)
+		level_modifier = level_modifier/100;
+
 	//Dispels - Check level of caster agianst buffs level (level of the caster who cast the buff)
 	//Effect value of dispels are treated as a level modifier.
 	//Values for scaling were obtain from live parses, best estimates.
 
 	caster_level += level_modifier - 1; 
-	int dispel_chance = 36; //Baseline chance if no level difference and no modifier
+	int dispel_chance = 32; //Baseline chance if no level difference and no modifier
 	int level_diff = caster_level - buff_level;
 
 	if (level_diff > 0)
-		dispel_chance += level_diff * 8;
+		dispel_chance += level_diff * 7;
 
 	else if (level_diff < 0)
 		dispel_chance += level_diff * 2;

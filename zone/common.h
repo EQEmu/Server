@@ -366,10 +366,10 @@ struct StatBonuses {
 	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
 	int8	Screech;							// -1 = Will be blocked if another Screech is +(1)
 	int16	AlterNPCLevel;						// amount of lvls +/-
-	bool	AStacker;							// For buff stack blocking
-	bool	BStacker;							// For buff stack blocking
-	bool	CStacker;							// For buff stack blocking
-	bool	DStacker;							// For buff stack blocking
+	int16	AStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value 
+	int16	BStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
+	int16	CStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
+	int16	DStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
 	bool	BerserkSPA;							// berserk effect
 	int16	Metabolism;							// Food/drink consumption rates.
 
@@ -422,6 +422,13 @@ struct StatBonuses {
 	int8	StunBashChance;						// chance to stun with bash.	
 	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
 	int8	CriticalMend;						// chance critical monk mend
+	int16	ImprovedReclaimEnergy;				// Modifies amount of mana returned from reclaim energy
+	uint32	HeadShot[2];						// Headshot AA (Massive dmg vs humaniod w/ archery) 0= ? 1= Dmg
+	uint8	HSLevel;							// Max Level Headshot will be effective at.
+	uint32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
+	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
+	int32	PetMeleeMitigation;					// Add AC to owner's pet.
+	
 };
 
 typedef struct

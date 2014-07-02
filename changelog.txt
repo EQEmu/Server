@@ -1,5 +1,30 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 06/25/2014 ==
+Kayen: Updated SE_Hate (Renamed from SE_Hate2) to now properly work for instant +/- hate spells.
+Kayen: Updated SE_FadingMemories - Base value will be properly utilized to set % chance for fade effect to work.
+Kayen: Implemented SE_StrikeThough (Was incorrectly defined as implemented previously) - Works same as item bonus.
+Kayen: Update SE_Taunt - Limit value if present will now add instant hate.
+Kayen: Implemented SE_MassGroupBuff - Allows next group buff cast to be a MGB (AA now uses this)
+Kayen: Implemented SE_IllusionOther - Allows next Illusion buff (self only) cast to be cast on target. (AA now uses this)
+Kayen: Update SE_AETaunt - Base value will now determine AE taunt range (This will not result in any change to currently used spells).
+Kayen: Udpated SE_ReclaimPet - Correct forumla for mana returned to properly return 75% of actual pet spell mana cost.
+Kayen: Implemented SE_ImprovedReclaimEnergy - Modifies % mana returned from SE_ReclaimPet.
+Kayen: Implemented SE_HeadShot, SE_HeadShotLevel - Defines headshot damage and level requirements.
+Revised HeadShot mechanic so damage now receives all archery bonuses, proc chance can be set to either (lives new Proc Per minute
+system, or flat chance based on dex (formula updated).
+Kayen: Implemented SE_Assassinate, SE_AssassinateLevel - Defines assassinate damage and level requirements.
+Revised Assassinate mechanic so damage now receives all backstab bonuses, proc chance can be set to either (lives new Proc Per minute
+system, or flat chance based on dex (formula updated). Assassinate can now proc from THROW if behind target, various other adjustments.
+Kayen: Fix to AA Finishing Blow missing aa_effects data, update required SQL.
+Revised Finishing blow so that damage now receives all melee bonus. Support also for this effect if placed on items or spells.
+Kayen: Implemented SE_PetMeleeMitigation - Bonus applied to pet owner. Gives AC to owner's pet.
+
+Required SQL: utils/sql/git/required/2014_06_25_AA_Update.sql
+Optional SQL: utils/sql/git/optiional/2014_06_29_HeadShotRules.sql
+
+
 == 06/17/2014 ==
 Kayen: Implemented SE_AStacker, SE_BStacker, SE_CStacker, SE_DStacker.
 These effects when present in buffs prevent each other from stacking, 

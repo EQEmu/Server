@@ -333,6 +333,8 @@ RULE_REAL ( Combat, AvgProcsPerMinute, 2.0)
 RULE_REAL ( Combat, ProcPerMinDexContrib, 0.075)
 RULE_REAL ( Combat, BaseProcChance, 0.035)
 RULE_REAL ( Combat, ProcDexDivideBy, 11000)
+RULE_BOOL ( Combat, AdjustSpecialProcPerMinute, true)  //Set PPM for special abilities like HeadShot (Live does this as of 4-14)
+RULE_REAL ( Combat, AvgSpecialProcsPerMinute, 2.0) //Unclear what best value is atm.
 RULE_REAL ( Combat, BaseHitChance, 69.0)
 RULE_REAL ( Combat, NPCBonusHitChance, 26.0)
 RULE_REAL ( Combat, HitFalloffMinor, 5.0) //hit will fall off up to 5% over the initial level range

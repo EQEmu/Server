@@ -560,11 +560,21 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 			weight = (CastToClient()->CalcCurrentWeight() / 10.0);
 		} else if (IsNPC()) {
 			armor = CastToNPC()->GetRawAC();
+			int PetACBonus = 0;
 
 			if (!IsPet())
 				armor = (armor / RuleR(Combat, NPCACFactor));
+			else{
+				Mob *owner = nullptr;
+				owner = GetOwner();
+				if (owner){
+					PetACBonus = owner->aabonuses.PetMeleeMitigation 
+					+ owner->itembonuses.PetMeleeMitigation + 
+					owner->spellbonuses.PetMeleeMitigation;
+				}
+			}
 
-			armor += spellbonuses.AC + itembonuses.AC + 1;
+			armor += spellbonuses.AC + itembonuses.AC + PetACBonus + 1;
 		}
 
 		if (opts) {
@@ -4443,26 +4453,24 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 {
+	if (defender && !defender->IsClient() && defender->GetHPRatio() < 10){
 
-	if (!defender)
-		return false;
+		uint32 FB_Dmg = aabonuses.FinishingBlow[1] + spellbonuses.FinishingBlow[1] + itembonuses.FinishingBlow[1];
+		
+		uint16 FB_Level = 0;
+		FB_Level = aabonuses.FinishingBlowLvl[0];
+		if (FB_Level < spellbonuses.FinishingBlowLvl[0])
+			FB_Level = spellbonuses.FinishingBlowLvl[0];
+		else if (FB_Level < itembonuses.FinishingBlowLvl[0])
+			FB_Level = itembonuses.FinishingBlowLvl[0];
 
-	if (aabonuses.FinishingBlow[1] && !defender->IsClient() && defender->GetHPRatio() < 10){
+		//Proc Chance value of 500 = 5%
+		uint32 ProcChance = (aabonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0])/10;
 
-		uint32 chance = aabonuses.FinishingBlow[0]/10; //500 = 5% chance.
-		uint32 damage = aabonuses.FinishingBlow[1];
-		uint16 levelreq = aabonuses.FinishingBlowLvl[0];
-
-		if(defender->GetLevel() <= levelreq && (chance >= MakeRandomInt(0, 1000))){
-			mlog(COMBAT__ATTACKS, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
+		if(FB_Level && FB_Dmg && (defender->GetLevel() <= FB_Level) && (ProcChance >= MakeRandomInt(0, 1000))){
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
-			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
+			DoSpecialAttackDamage(defender, skillinuse, FB_Dmg, 1, -1, 10, false, false);
 			return true;
-		}
-		else
-		{
-			mlog(COMBAT__ATTACKS, "FAILED a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
-			return false;
 		}
 	}
 	return false;

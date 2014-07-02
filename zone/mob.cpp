@@ -180,6 +180,8 @@ Mob::Mob(const char* in_name,
 	trackable	= true;
 	has_shieldequiped = false;
 	has_numhits = false;
+	has_MGB = false;
+	has_ProjectIllusion = false;
 
 	if(in_aa_title>0)
 		aa_title	= in_aa_title;
@@ -4137,9 +4139,9 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 {
 	if (spell_id != SPELL_UNKNOWN)
 	{
-		if(IsEffectInSpell(spell_id, SE_SpellOnKill2)) {
+		if(IsEffectInSpell(spell_id, SE_ProcOnSpellKillShot)) {
 			for (int i = 0; i < EFFECT_COUNT; i++) {
-				if (spells[spell_id].effectid[i] == SE_SpellOnKill2)
+				if (spells[spell_id].effectid[i] == SE_ProcOnSpellKillShot)
 				{
 					if (IsValidSpell(spells[spell_id].base2[i]) && spells[spell_id].max[i] <= level)
 					{
