@@ -372,6 +372,7 @@ struct StatBonuses {
 	int16	DStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
 	bool	BerserkSPA;							// berserk effect
 	int16	Metabolism;							// Food/drink consumption rates.
+	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

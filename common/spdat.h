@@ -455,11 +455,11 @@ typedef enum {
 #define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
 //#define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
 //#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
-#define SE_SuspendMinion				308 // not implemented as bonus
+#define SE_SuspendMinion				308 // implemented
 #define SE_GateCastersBindpoint			309 // implemented - Gate to casters bind point
 #define SE_ReduceReuseTimer				310 // implemented
 #define SE_LimitCombatSkills			311 // implemented - Excludes focus from procs (except if proc is a memorizable spell)
-//#define SE_Sanctuary					312 // *not implemented
+#define SE_Sanctuary					312 // implemented - Places caster at bottom hate list, effect fades if cast cast spell on targets other than self.
 #define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
 #define SE_Invisibility2				314 // implemented - fixed duration invisible
 #define SE_InvisVsUndead2				315 // implemented - fixed duration ITU

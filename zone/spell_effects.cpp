@@ -2732,6 +2732,22 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
+			case SE_Sanctuary:
+			{
+				std::list<NPC*> npc_list;
+				entity_list.GetNPCList(npc_list);
+
+				for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
+				
+					NPC* npc = *itr;
+					
+					if (npc && npc->CheckAggro(this)) 
+						npc->SetHate(caster, 1);
+					
+				}
+				break;
+			}
+
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
 			case SE_NegateSpellEffect:
@@ -2960,6 +2976,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_Berserk:
 			case SE_Vampirism:
 			case SE_Metabolism:
+			case SE_FinishingBlow:
+			case SE_FinishingBlowLvl:
+			case SE_Assassinate:
+			case SE_AssassinateLevel:
 			{
 				break;
 			}
@@ -3600,6 +3620,22 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 						new_hate = 1;
 					
 					CastToNPC()->SetHate(caster, new_hate);
+				}
+				break;
+			}
+
+			case SE_Sanctuary:
+			{
+				std::list<NPC*> npc_list;
+				entity_list.GetNPCList(npc_list);
+
+				for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
+				
+					NPC* npc = *itr;
+					
+					if (npc && npc->CheckAggro(this)) 
+						npc->SetHate(caster, 1);
+					
 				}
 				break;
 			}

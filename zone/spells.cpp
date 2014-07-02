@@ -183,6 +183,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
 		return(false);
 	}
+	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
+	if (spellbonuses.Sanctuary && (spells[spell_id].targettype != ST_Self && GetTarget() != this) || IsDetrimentalSpell(spell_id))
+		BuffFadeByEffect(SE_Sanctuary);
 
 	if(IsClient()){
 		int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);

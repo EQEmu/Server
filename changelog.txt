@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/2/2014 ==
+Kayen: Implemented SE_Sanctuary - Places caster at bottom hate list, effect fades if caster cast spell on targets other than self.
+
 
 == 06/25/2014 ==
 Kayen: Updated SE_Hate (Renamed from SE_Hate2) to now properly work for instant +/- hate spells.
