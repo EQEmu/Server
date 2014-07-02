@@ -229,6 +229,7 @@ public:
 	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
 	void SpellProjectileEffect();
 	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id);
+	void ResourceTap(int32 damage, uint16 spell_id);
 
 	//Buff
 	void BuffProcess();

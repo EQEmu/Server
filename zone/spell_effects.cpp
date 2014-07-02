@@ -224,9 +224,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					dmg = (int32) (dmg * partial / 100);
 
 					//handles AAs and what not...
-					if(caster)
+					if(caster) {
 						dmg = caster->GetActSpellDamage(spell_id, dmg, this);
-					
+						caster->ResourceTap(-dmg, spell_id);
+					}
+
 					dmg = -dmg;
 					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
 				}
@@ -3367,6 +3369,8 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 
 						if(caster->IsNPC())
 							effect_value = caster->CastToNPC()->GetActSpellDamage(spell_id, effect_value, this);
+
+						caster->ResourceTap(-effect_value, spell_id);
 					}
 
 					effect_value = -effect_value;
@@ -6283,4 +6287,28 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id){
 	return true;
 }			
 
+void Mob::ResourceTap(int32 damage, uint16 spellid){
+	//'this' = caster
+	if (!IsValidSpell(spellid))
+		return;
 
+	for (int i = 0; i <= EFFECT_COUNT; i++)
+	{
+		if (spells[spellid].effectid[i] == SE_ResourceTap){
+		
+			damage += (damage * spells[spellid].base[i])/100;
+
+			if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
+				damage = spells[spellid].max[i];
+
+			if (spells[spellid].base2[i] == 0)  //HP Tap
+				SetHP((GetHP()+ damage));
+
+			if (spells[spellid].base2[i] == 1)  //Mana Tap
+				SetMana(GetMana() + damage);
+
+			if (spells[spellid].base2[i] == 2 && IsClient())  //Endurance Tap
+				CastToClient()->SetEndurance(CastToClient()->GetEndurance() + damage);
+		}
+	}
+}
