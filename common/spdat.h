@@ -600,8 +600,8 @@ typedef enum {
 #define SE_MitigateDotDamage			450 // implemented  DOT spell mitigation rune with max value
 #define SE_MeleeThresholdGuard			451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
 #define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
-#define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken
-#define SE_TriggerSpellThreshold		454 // implemented  Trigger effect on X amount of spell damage taken
+#define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken in a single hit
+#define SE_TriggerSpellThreshold		454 // implemented  Trigger effect on X amount of spell damage taken in a single hit
 #define SE_AddHatePct					455 // implemented  Modify total hate by %
 #define SE_AddHateOverTimePct			456 // implemented  Modify total hate by % over time.
 #define SE_ResourceTap					457 // implemented  Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.

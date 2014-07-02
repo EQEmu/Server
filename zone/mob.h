@@ -230,6 +230,7 @@ public:
 	void SpellProjectileEffect();
 	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id);
 	void ResourceTap(int32 damage, uint16 spell_id);
+	void TryTriggerThreshHold(int32 damage, int effect_id, Mob* attacker);
 
 	//Buff
 	void BuffProcess();

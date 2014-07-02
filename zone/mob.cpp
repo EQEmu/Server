@@ -3452,8 +3452,7 @@ bool Mob::TryFadeEffect(int slot)
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
-			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnWearoff || spells[buffs[slot].spellid].effectid[i] == SE_EffectOnFade
-				|| spells[buffs[slot].spellid].effectid[i] == SE_TriggerMeleeThreshold || spells[buffs[slot].spellid].effectid[i] == SE_TriggerSpellThreshold)
+			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnWearoff || spells[buffs[slot].spellid].effectid[i] == SE_EffectOnFade)
 			{
 				uint16 spell_id = spells[buffs[slot].spellid].base[i];
 				BuffFadeBySlot(slot);

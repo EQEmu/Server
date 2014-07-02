@@ -4,6 +4,8 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 Kayen: Implemented SE_Sanctuary - Places caster at bottom hate list, effect fades if caster cast spell on targets other than self.
 Kayen: Implemented SE_ResourceTap - Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.
 Kayen: Implemented SE_FactionModPct - Modifies faction gains and losses by percent.
+Kayen: Re-Implemented SE_TriggerMeleeThreshold and SE_TriggerSpellThreshold correctly - Trigger spell if owner of buff
+takes more than the specified damage amount in a SINGLE hit, then fade the buff.
 
 == 06/25/2014 ==
 Kayen: Updated SE_Hate (Renamed from SE_Hate2) to now properly work for instant +/- hate spells.
