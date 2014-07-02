@@ -2425,24 +2425,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			}
 
 			case SE_TriggerMeleeThreshold:
-			{
-				if (newbon->TriggerMeleeThreshold[2] < base2){
-					newbon->TriggerMeleeThreshold[0] = effect_value;
-					newbon->TriggerMeleeThreshold[1] = buffslot;
-					newbon->TriggerMeleeThreshold[2] = base2;
-				}
+				newbon->TriggerMeleeThreshold = true;
 				break;
-			}
 
 			case SE_TriggerSpellThreshold:
-			{
-				if (newbon->TriggerSpellThreshold[2] < base2){
-					newbon->TriggerSpellThreshold[0] = effect_value;
-					newbon->TriggerSpellThreshold[1] = buffslot;
-					newbon->TriggerSpellThreshold[2] = base2;
-				}
+				newbon->TriggerSpellThreshold = true;
 				break;
-			}
 
 			case SE_ShieldBlock:
 				newbon->ShieldBlock += effect_value;
@@ -4218,15 +4206,11 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break; 
 
 				case SE_TriggerMeleeThreshold:
-					spellbonuses.TriggerMeleeThreshold[0] = effect_value;
-					spellbonuses.TriggerMeleeThreshold[1] = effect_value;
-					spellbonuses.TriggerMeleeThreshold[2] = effect_value;
+					spellbonuses.TriggerMeleeThreshold = effect_value;
 					break;
 
 				case SE_TriggerSpellThreshold:
-					spellbonuses.TriggerSpellThreshold[0] = effect_value;
-					spellbonuses.TriggerSpellThreshold[1] = effect_value;
-					spellbonuses.TriggerSpellThreshold[2] = effect_value;
+					spellbonuses.TriggerSpellThreshold = effect_value;
 					break;
 
 				case SE_DivineAura:
