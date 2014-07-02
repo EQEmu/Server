@@ -605,7 +605,7 @@ typedef enum {
 #define SE_AddHatePct					455 // implemented  Modify total hate by %
 #define SE_AddHateOverTimePct			456 // implemented  Modify total hate by % over time.
 #define SE_ResourceTap					457 // implemented  Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.
-//#define SE_FactionModPct				458 // not used
+#define SE_FactionModPct				458 // implemented  Modifies faction gains and losses by percent.
 #define SE_DamageModifier2				459 // implemented - Modifies melee damage by skill type
 
 // LAST

@@ -1315,6 +1315,16 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->PetMeleeMitigation += base1;
 				break;
 
+			case SE_FactionModPct:
+			{
+				if((base1 < 0) && (newbon->FactionModPct > base1))
+					newbon->FactionModPct = base1;
+
+				else if(newbon->FactionModPct < base1)
+					newbon->FactionModPct = base1;
+				break;
+			}
+
 		}
 	}
 }
@@ -2860,6 +2870,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->Sanctuary = true;
 				break;
 
+			case SE_FactionModPct:
+			{
+				if((effect_value < 0) && (newbon->FactionModPct > effect_value))
+					newbon->FactionModPct = effect_value;
+
+				else if(newbon->FactionModPct < effect_value)
+					newbon->FactionModPct = effect_value;
+				break;
+			}
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
@@ -4336,6 +4356,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_Sanctuary:
 					spellbonuses.Sanctuary = effect_value;
+					break;
+
+				case SE_FactionModPct:
+					spellbonuses.FactionModPct = effect_value;
+					itembonuses.FactionModPct = effect_value;
+					aabonuses.FactionModPct = effect_value;
 					break;
 
 			}
