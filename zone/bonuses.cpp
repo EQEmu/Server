@@ -2856,6 +2856,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->PetMeleeMitigation += effect_value;
 				break;
 
+			case SE_Sanctuary:
+				newbon->Sanctuary = true;
+				break;
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
@@ -4328,6 +4332,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.FinishingBlowLvl[1] = effect_value;
 					aabonuses.FinishingBlowLvl[1] = effect_value;
 					itembonuses.FinishingBlowLvl[1] = effect_value;
+					break;
+
+				case SE_Sanctuary:
+					spellbonuses.Sanctuary = effect_value;
 					break;
 
 			}
