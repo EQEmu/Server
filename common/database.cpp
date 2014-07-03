@@ -239,15 +239,13 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
 }
 
 bool Database::AddGMIP(char* ip_address, char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name), errbuf)) {
-		safe_delete_array(query);
-		return false;
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name));
+
 	safe_delete_array(query);
-	return true;
+
+	return results.Success();
 }
 
 void Database::LoginIP(uint32 AccountID, const char* LoginIP)
