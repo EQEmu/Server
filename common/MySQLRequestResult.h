@@ -41,6 +41,7 @@ public:
 	uint32 RowsAffected() const {return m_RowsAffected;}
 	uint32 RowCount() const {return m_RowCount;}
 	uint32 ColumnCount() const {return m_ColumnCount;}
+	uint32 LastInsertedID() const {return m_LastInsertedID;}
 
 	MySQLRequestRow& begin() { return m_CurrentRow; }
 	MySQLRequestRow& end() { return m_OneBeyondRow;}
