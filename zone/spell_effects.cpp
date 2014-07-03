@@ -2712,6 +2712,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
+			case SE_InterruptCasting:{
+				if (buffslot >= 0)
+					break;
+
+				if(IsCasting() && MakeRandomInt(0, 100) <= spells[spell_id].base[i])
+					InterruptSpell();
+				
+				break;
+			}
+
 			case SE_MassGroupBuff:{
 
 				SetMGB(true);
@@ -2854,7 +2864,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_ApplyEffect:
 			case SE_FcTwincast:
 			case SE_DelayDeath:
-			case SE_InterruptCasting:
 			case SE_CastOnFadeEffect:
 			case SE_CastOnFadeEffectNPC:
 			case SE_CastOnFadeEffectAlways:
