@@ -2328,6 +2328,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				// SE_CurrentHP is calculated at first tick if its a dot/buff
 				if (buffslot >= 0)
 					break;
+				//This effect does no damage if target is moving.
+				if (IsMoving())
+					break;
 
 				// for offensive spells check if we have a spell rune on
 				int32 dmg = effect_value;
@@ -3391,7 +3394,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			{
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level, caster);
 
-				if (invulnerable || /*effect_value > 0 ||*/ DivineAura())
+				if (IsMoving() || invulnerable || /*effect_value > 0 ||*/ DivineAura())
 					break;
 
 				if(effect_value < 0) {

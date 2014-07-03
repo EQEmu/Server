@@ -9,6 +9,7 @@ takes more than the specified damage amount in a SINGLE hit, then fade the buff.
 Kayen: Implemented SE_LimitSpellClass - Focus Limits spell to pre defined categories. (3=Cures,3=Offensive, 6=Lifetap)
 Kayen: Changed SE_LimitMaxMana to SE_MeleeVulnerability - Weakness/Mitigation verse melee damage
 (Despite lives SPA lable as the former it clearly is not what the effect does from all spell examples)
+Kayen: Updated SE_BardAEDot to no longer damage target while target is moving (consistent with live)
 
 == 06/25/2014 ==
 Kayen: Updated SE_Hate (Renamed from SE_Hate2) to now properly work for instant +/- hate spells.
