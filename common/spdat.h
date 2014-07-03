@@ -538,7 +538,7 @@ typedef enum {
 //#define SE_SummonCorpseZone			388 // *not implemented - summons a corpse from any zone(nec AA)
 #define SE_FcTimerRefresh				389 // implemented - Refresh spell icons
 //#define SE_FcTimerLockout				390 // *not implemented - Sets recast timers to specific value, focus limited.
-#define SE_LimitManaMax					391	// implemented 
+#define SE_MeleeVulnerability			391	// implemented [Live SPA has this as LimitManaMax however that is clearly not the effect used]
 #define SE_FcHealAmt					392 // implemented - Adds or removes healing from spells
 #define SE_FcHealPctIncoming			393 // implemented - HealRate with focus restrictions.
 #define SE_FcHealAmtIncoming			394 // implemented - Adds/Removes amount of healing on target by X value with foucs restrictions.

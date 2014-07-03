@@ -1315,6 +1315,10 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->PetMeleeMitigation += base1;
 				break;
 
+			case SE_MeleeVulnerability:
+				newbon->MeleeVulnerability += base1;
+				break;
+
 			case SE_FactionModPct:
 			{
 				if((base1 < 0) && (newbon->FactionModPct > base1))
@@ -2852,6 +2856,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_PetMeleeMitigation:
 				newbon->PetMeleeMitigation += effect_value;
+				break;
+
+			case SE_MeleeVulnerability:
+				newbon->MeleeVulnerability += effect_value;
 				break;
 
 			case SE_Sanctuary:
