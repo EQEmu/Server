@@ -148,48 +148,39 @@ Return the account id or zero if no account matches.
 Zero will also be returned if there is a database error.
 */
 uint32 Database::CheckLogin(const char* name, const char* password, int16* oStatus) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+
+	char *query = nullptr;
 
 	if(strlen(name) >= 50 || strlen(password) >= 50)
 		return(0);
 
 	char tmpUN[100];
 	char tmpPW[100];
+
 	DoEscapeString(tmpUN, name, strlen(name));
 	DoEscapeString(tmpPW, password, strlen(password));
 
-	if (RunQuery(query, MakeAnyLenString(&query,
+	auto results = QueryDatabase(query, MakeAnyLenString(&query,
 		"SELECT id, status FROM account WHERE name='%s' AND password is not null "
 		"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
-		tmpUN, tmpPW, tmpPW), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-			uint32 id = atoi(row[0]);
-			if (oStatus)
-				*oStatus = atoi(row[1]);
-			mysql_free_result(result);
-			return id;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-		mysql_free_result(result);
-	}
-	else
+		tmpUN, tmpPW, tmpPW));
+
+	safe_delete_array(query);
+
+	if (!results.Success())
 	{
-		std::cerr << "Error in CheckLogin query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return false;
+		std::cerr << "Error in CheckLogin query '" << query << "' " << results.ErrorMessage() << std::endl;
+		return 0;
 	}
 
-	return 0;
+	auto row = results.begin();
+
+	uint32 id = atoi(row[0]);
+
+	if (oStatus)
+		*oStatus = atoi(row[1]);
+
+	return id;
 }
 
 
