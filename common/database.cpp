@@ -338,24 +338,22 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 }
 
 bool Database::DeleteAccount(const char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
+	char *query = nullptr;
 
 	std::cerr << "Account Attempting to be deleted:" << name << std::endl;
-	if (RunQuery(query, MakeAnyLenString(&query, "DELETE FROM account WHERE name='%s';",name), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		if (affected_rows == 1) {
-			return true;
-		}
-	}
-	else {
 
-		std::cerr << "Error in DeleteAccount query '" << query << "' " << errbuf << std::endl;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM account WHERE name='%s';",name));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in DeleteAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
+		return false;
 	}
 
-	return false;
+	safe_delete_array(query);
+
+	return results.RowsAffected() == 1;
 }
 
 bool Database::SetLocalPassword(uint32 accid, const char* password) {
