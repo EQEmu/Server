@@ -424,14 +424,14 @@ bool Database::DeleteCharacter(char *name)
 
 	if(!name ||	!strlen(name))
 	{
-		printf("DeleteCharacter: request to delete without a name (empty char slot)\n");
+		std::cerr << "DeleteCharacter: request to delete without a name (empty char slot)" << std::endl;
 		return false;
 	}
 
 // get id from character_ before deleting record so we can clean up inventory and qglobal
 
 #if DEBUG >= 5
-	printf("DeleteCharacter: Attempting to delete '%s'\n", name);
+	std::cout << "DeleteCharacter: Attempting to delete '" << name << "'" << std::endl;
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "SELECT id from character_ WHERE name='%s'", name), errbuf, &result);
 	if (query)
@@ -445,12 +445,12 @@ bool Database::DeleteCharacter(char *name)
 		row = mysql_fetch_row(result);
 		charid = atoi(row[0]);
 #if DEBUG >= 5
-		printf("DeleteCharacter: found '%s' with char id: %d\n", name, charid);
+		std::cout << "DeleteCharacter: found '" <<  name << "' with char id: " << charid << std::endl;
 #endif
 	}
 	else
 	{
-		printf("DeleteCharacter: error: got %d rows matching '%s'\n", matches, name);
+		std::cerr << "DeleteCharacter error: got " << matches << " rows matching '" << name << "'" << std::endl;
 		if(result)
 		{
 			mysql_free_result(result);
@@ -468,8 +468,8 @@ bool Database::DeleteCharacter(char *name)
 
 
 #if DEBUG >= 5
-	printf("DeleteCharacter: deleting '%s' (id %d): ", name, charid);
-	printf(" quest_globals");
+	std::cout << "DeleteCharacter: deleting << '" << name << "' (id " << charid << "): " << std::endl;
+	std::cout << " quest_globals";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from quest_globals WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -479,7 +479,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" character_tasks");
+	std::cout << " character_tasks";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_tasks WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -489,7 +489,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" character_activities");
+	std::cout << " character_activities";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_activities WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -499,7 +499,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" character_enabledtasks");
+	std::cout << " character_enabledtasks";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_enabledtasks WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -509,7 +509,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" completed_tasks");
+	std::cout << " completed_tasks";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from completed_tasks WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -519,7 +519,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" friends");
+	std::cout << " friends";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from friends WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -529,7 +529,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" mail");
+	std::cout << " mail";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from mail WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -539,7 +539,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" ptimers");
+	std::cout << " ptimers";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from timers WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -549,7 +549,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" inventory");
+	std::cout << " inventory";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from inventory WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -559,7 +559,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" guild_members");
+	std::cout << " guild_members";
 #endif
 #ifdef BOTS
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM guild_members WHERE char_id='%d' AND GetMobTypeById(%i) = 'C'", charid), errbuf, nullptr, &affected_rows);
@@ -573,7 +573,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" recipes");
+	std::cout << " recipes";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM char_recipe_list WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -583,7 +583,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" adventure_stats");
+	std::cout << " adventure_stats";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM adventure_stats WHERE player_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -593,7 +593,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" zone_flags");
+	std::cout << " zone_flags";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM zone_flags WHERE charID='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -603,7 +603,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" titles");
+	std::cout << " titles";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM titles WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -613,7 +613,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" titlesets");
+	std::cout << " titlesets";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -623,7 +623,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" keyring");
+	std::cout << " keyring";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM keyring WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -633,7 +633,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" factions");
+	std::cout << " factions";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM faction_values WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -643,7 +643,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" instances");
+	std::cout << " instances";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_list_player WHERE charid='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -653,7 +653,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" _character");
+	std::cout << " _character";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE from character_ WHERE id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -668,7 +668,7 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf(" alternate currency");
+	std::cout << " alternate currency";
 #endif
 	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM character_alt_currency WHERE char_id='%d'", charid), errbuf, nullptr, &affected_rows);
 	if(query)
@@ -678,9 +678,9 @@ bool Database::DeleteCharacter(char *name)
 	}
 
 #if DEBUG >= 5
-	printf("\n");
+	std::cout << std::endl;
 #endif
-	printf("DeleteCharacter: successfully deleted '%s' (id %d)\n", name, charid);
+	std::cout << "DeleteCharacter: successfully deleted '" << name << "' (id " << charid << ")" << std::endl;
 
 	return true;
 }
