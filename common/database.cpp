@@ -268,49 +268,39 @@ void Database::LoginIP(uint32 AccountID, const char* LoginIP)
 
 int16 Database::CheckStatus(uint32 account_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
-							" FROM `account` WHERE `id` = %i", account_id), errbuf, &result))
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
+							" FROM `account` WHERE `id` = %i", account_id));
+
+	if (!results.Success())
 	{
+		std::cerr << "Error in CheckStatus query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
-
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-
-			int16 status = atoi(row[0]);
-
-			int32 suspendeduntil = 0;
-			// MariaDB initalizes with NULL if unix_timestamp() is out of range
-			if (row[1] != NULL) {
-				suspendeduntil = atoi(row[1]);
-			}
-
-			int32 current = atoi(row[2]);
-
-			mysql_free_result(result);
-
-			if(suspendeduntil > current)
-				return -1;
-
-			return status;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-		mysql_free_result(result);
+		return 0;
 	}
-	else
+
+	safe_delete_array(query);
+
+	if (results.RowCount() == 1)
 	{
-		std::cerr << "Error in CheckStatus query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return false;
+		auto row = results.begin();
+
+		int16 status = atoi(row[0]);
+
+		int32 suspendeduntil = 0;
+
+		// MariaDB initalizes with NULL if unix_timestamp() is out of range
+		if (row[1] != nullptr) {
+			suspendeduntil = atoi(row[1]);
+		}
+
+		int32 current = atoi(row[2]);
+
+		if(suspendeduntil > current)
+			return -1;
+
+		return status;
 	}
 
 	return 0;
