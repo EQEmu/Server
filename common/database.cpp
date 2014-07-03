@@ -372,18 +372,19 @@ bool Database::SetLocalPassword(uint32 accid, const char* password) {
 }
 
 bool Database::SetAccountStatus(const char* name, int16 status) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
+	char *query = nullptr;
 
 	std::cout << "Account being GM Flagged:" << name << ", Level: " << (int16) status << std::endl;
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET status=%i WHERE name='%s';", status, name), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		return false;
-	}
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE account SET status=%i WHERE name='%s';", status, name));
+
 	safe_delete_array(query);
 
-	if (affected_rows == 0) {
+	if (!results.Success())
+		return false;
+
+	if (results.RowsAffected() == 0)
+	{
 		std::cout << "Account: " << name << " does not exist, therefore it cannot be flagged\n";
 		return false;
 	}
