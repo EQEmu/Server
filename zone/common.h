@@ -150,6 +150,20 @@ enum TradeState {
 	TradeCompleting
 };
 
+enum { //Numhits type
+	NUMHIT_IncomingHitAttempts = 1,			//Attempted incoming melee attacks (hit or miss) on YOU.
+	NUMHIT_OutgoingHitAttempts = 2,			//Attempted outgoing melee attacks (hit or miss) on YOUR TARGET.
+	NUMHIT_IncomingSpells = 3,				//Incoming detrimental spells
+	NUMHIT_OutgoingSpells = 4,				//Outgoing deterimental spells
+	NUMHIT_OutgoingHitSuccess = 5,			//Successful outgoing melee attack HIT on YOUR TARGET.
+	NUMHIT_IncomingHitSuccess = 6,			//Successful incoming melee attack HIT on YOU.
+	NUMHIT_MatchingSpells = 7,				//Any casted spell matching/triggering a focus effect.
+	NUMHIT_IncomingDamage = 8,				//Successful incoming spell or melee dmg attack on YOU
+	NUMHIT_ReflectSpell = 9,				//Incoming Reflected spells.
+	NUMHIT_DefensiveSpellProcs = 10,		//Defensive buff procs
+	NUMHIT_OffensiveSpellProcs = 11			//Offensive buff procs
+};
+
 //this is our internal representation of the BUFF struct, can put whatever we want in it
 struct Buffs_Struct {
 	uint16	spellid;
@@ -279,6 +293,7 @@ struct StatBonuses {
 	int16	HitChance;							//HitChance/15 == % increase i = Accuracy (Item: Accuracy)
 	int16	HitChanceEffect[HIGHEST_SKILL+2];	//Spell effect Chance to Hit, straight percent increase
 	int16	DamageModifier[HIGHEST_SKILL+2];	//i
+	int16	DamageModifier2[HIGHEST_SKILL+2];	//i
 	int16	MinDamageModifier[HIGHEST_SKILL+2]; //i
 	int16	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
 	int16	ProcChanceSPA;						// ProcChance from spell effects
@@ -289,7 +304,8 @@ struct StatBonuses {
 	int16	FlurryChance;
 	int16	Accuracy[HIGHEST_SKILL+2];			//Accuracy/15 == % increase	[Spell Effect: Accuracy)
 	int16	HundredHands;						//extra haste, stacks with all other haste	i
-	int8	MeleeLifetap;						//i
+	int16	MeleeLifetap;						//i
+	int16	Vampirism;							//i
 	int16	HealRate;							// Spell effect that influences effectiveness of heals
 	int32	MaxHPChange;						// Spell Effect
 	int16	SkillDmgTaken[HIGHEST_SKILL+2];		// All Skills + -1
@@ -326,12 +342,12 @@ struct StatBonuses {
 	uint16	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
 	bool	NegateEffects;						// Check if you contain a buff with negate effect. (only spellbonuses)
 	int16	SkillDamageAmount2[HIGHEST_SKILL+2];	// Adds skill specific damage
-	uint16	NegateAttacks[2];					// 0 = bool HasEffect 1 = Buff Slot
-	uint16	MitigateMeleeRune[2];				// 0 = Mitigation value 1 = Buff Slot
+	uint16	NegateAttacks[3];					// 0 = bool HasEffect 1 = Buff Slot 2 = Max damage absorbed per hit
+	uint16	MitigateMeleeRune[4];				// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per hit 3 = Rune Amt
 	uint16	MeleeThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
 	uint16	SpellThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
-	uint16	MitigateSpellRune[2];				// 0 = Mitigation value 1 = Buff Slot
-	uint16	MitigateDotRune[2];					// 0 = Mitigation value 1 = Buff Slot
+	uint16	MitigateSpellRune[4];				// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per spell 3 = Rune Amt
+	uint16	MitigateDotRune[4];					// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per tick 3 = Rune Amt
 	uint32	TriggerMeleeThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint32	TriggerSpellThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
 	uint16	ManaAbsorbPercentDamage[2];			// 0 = Mitigation value 1 = Buff Slot
@@ -350,6 +366,12 @@ struct StatBonuses {
 	bool	NegateIfCombat;						// Bool Drop buff if cast or melee
 	int8	Screech;							// -1 = Will be blocked if another Screech is +(1)
 	int16	AlterNPCLevel;						// amount of lvls +/-
+	int16	AStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value 
+	int16	BStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
+	int16	CStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
+	int16	DStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
+	bool	BerserkSPA;							// berserk effect
+	int16	Metabolism;							// Food/drink consumption rates.
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
@@ -378,6 +400,7 @@ struct StatBonuses {
 	int16	PetCriticalHit;						// Allow pets to critical hit with % value.
 	int16	PetAvoidance;						// Pet avoidance chance.
 	int16	CombatStability;					// Melee damage mitigation.
+	int16	DoubleRiposte;						// Chance to double riposte
 	int16	GiveDoubleRiposte[3];				// 0=Regular Chance, 1=Skill Attack Chance, 2=Skill
 	uint16	RaiseSkillCap[2];					// Raise a specific skill cap (1 = value, 2=skill)
 	int16	Ambidexterity;						// Increase chance to duel wield by adding bonus 'skill'.
@@ -399,6 +422,13 @@ struct StatBonuses {
 	int8	StunBashChance;						// chance to stun with bash.	
 	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
 	int8	CriticalMend;						// chance critical monk mend
+	int16	ImprovedReclaimEnergy;				// Modifies amount of mana returned from reclaim energy
+	uint32	HeadShot[2];						// Headshot AA (Massive dmg vs humaniod w/ archery) 0= ? 1= Dmg
+	uint8	HSLevel;							// Max Level Headshot will be effective at.
+	uint32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
+	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
+	int32	PetMeleeMitigation;					// Add AC to owner's pet.
+	
 };
 
 typedef struct

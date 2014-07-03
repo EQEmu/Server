@@ -352,11 +352,6 @@ void Client::HandleAAAction(aaID activate) {
 			entity_list.AETaunt(this);
 			break;
 
-		case aaActionMassBuff:
-			EnableAAEffect(aaEffectMassGroupBuff, 3600);
-			Message_StringID(MT_Disciplines, MGB_STRING);	//The next group buff you cast will hit all targets in range.
-			break;
-
 		case aaActionFlamingArrows:
 			//toggle it
 			if(CheckAAEffect(aaEffectFlamingArrows))
@@ -458,12 +453,6 @@ void Client::HandleAAAction(aaID activate) {
 				Message(0,"You have no pet to call.");
 			}
 			break;
-
-		case aaActionProjectIllusion:
-			EnableAAEffect(aaEffectProjectIllusion, 3600);
-			Message(10, "The power of your next illusion spell will flow to your grouped target in your place.");
-			break;
-
 
 		case aaActionEscape:
 			Escape();

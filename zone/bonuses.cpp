@@ -637,7 +637,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			continue;
 
 		_log(AA__BONUSES, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
-
+					
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
 		{
@@ -953,6 +953,8 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_BlockBehind:
 				newbon->BlockBehind += base1;
 				break;
+			
+			case SE_StrikeThrough:
 			case SE_StrikeThrough2:
 				newbon->StrikeThrough += base1;
 				break;
@@ -987,7 +989,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->CrippBlowChance += base1;
 				break;
 
-			case SE_SpellOnKill:
+			case SE_ProcOnKillShot:
 				for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3)
 				{
 					if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == base2) && (newbon->SpellOnKill[i+1] < base1)))
@@ -1099,12 +1101,26 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_DamageModifier2:
+			{
+				if(base2 == -1)
+					newbon->DamageModifier2[HIGHEST_SKILL+1] += base1;
+				else
+					newbon->DamageModifier2[base2] += base1;
+				break;
+			}
+
 			case SE_SlayUndead:
 			{
 				if(newbon->SlayUndead[1] < base1)
 					newbon->SlayUndead[0] = base1; // Rate
 					newbon->SlayUndead[1] = base2; // Damage Modifier
 				break;
+			}
+
+			case SE_DoubleRiposte:
+			{
+				newbon->DoubleRiposte += base1;
 			}
 
 			case SE_GiveDoubleRiposte:
@@ -1188,7 +1204,6 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 			case SE_FinishingBlow:
 			{
-
 				//base1 = chance, base2 = damage
 				if (newbon->FinishingBlow[1] < base2){
 					newbon->FinishingBlow[0] = base1;
@@ -1234,12 +1249,70 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_Vampirism:
+				newbon->Vampirism += base1;
+				break;			
+
 			case SE_FrenziedDevastation:
 				newbon->FrenziedDevastation += base2;
 				break;
 
 			case SE_SpellProcChance:
 				newbon->SpellProcChance += base1;
+				break;
+
+			case SE_Berserk:
+				newbon->BerserkSPA = true;
+				break;
+
+			case SE_Metabolism:
+				newbon->Metabolism += base1;
+				break;
+
+			case SE_ImprovedReclaimEnergy:
+			{
+				if((base1 < 0) && (newbon->ImprovedReclaimEnergy > base1))
+					newbon->ImprovedReclaimEnergy = base1;
+
+				else if(newbon->ImprovedReclaimEnergy < base1)
+					newbon->ImprovedReclaimEnergy = base1;
+				break;
+			}
+
+			case SE_HeadShot:
+			{
+				if(newbon->HeadShot[1] < base2){
+					newbon->HeadShot[0] = base1;
+					newbon->HeadShot[1] = base2;
+				}
+				break;
+			}
+
+			case SE_HeadShotLevel:
+			{
+				if(newbon->HSLevel < base1)
+					newbon->HSLevel = base1;
+				break;
+			}
+
+			case SE_Assassinate:
+			{
+				if(newbon->Assassinate[1] < base2){
+					newbon->Assassinate[0] = base1;
+					newbon->Assassinate[1] = base2;
+				}
+				break;
+			}
+
+			case SE_AssassinateLevel:
+			{
+				if(newbon->AssassinateLevel < base1)
+					newbon->AssassinateLevel = base1;
+				break;
+			}
+
+			case SE_PetMeleeMitigation:
+				newbon->PetMeleeMitigation += base1;
 				break;
 
 		}
@@ -1813,6 +1886,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_Vampirism:
+				newbon->Vampirism += effect_value;
+				break;	
+
 			case SE_AllInstrumentMod:
 			{
 				if(effect_value > newbon->singingMod)
@@ -1906,6 +1983,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 					newbon->DamageModifier[HIGHEST_SKILL+1] += effect_value;
 				else
 					newbon->DamageModifier[base2] += effect_value;
+				break;
+			}
+
+			case SE_DamageModifier2:
+			{
+				if(base2 == -1)
+					newbon->DamageModifier2[HIGHEST_SKILL+1] += effect_value;
+				else
+					newbon->DamageModifier2[base2] += effect_value;
 				break;
 			}
 
@@ -2093,7 +2179,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->CriticalDoTChance += effect_value;
 				break;
 
-			case SE_SpellOnKill:
+			case SE_ProcOnKillShot:
 			{
 				for(int e = 0; e < MAX_SPELL_TRIGGER*3; e+=3)
 				{
@@ -2256,9 +2342,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_NegateAttacks:
 			{
-				if (!newbon->NegateAttacks[0]){
+				if (!newbon->NegateAttacks[0] || 
+					((newbon->NegateAttacks[0] && newbon->NegateAttacks[2]) && (newbon->NegateAttacks[2] < max))){
 					newbon->NegateAttacks[0] = 1;
 					newbon->NegateAttacks[1] = buffslot;
+					newbon->NegateAttacks[2] = max;
 				}
 				break;
 			}
@@ -2268,6 +2356,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MitigateMeleeRune[0] < effect_value){
 					newbon->MitigateMeleeRune[0] = effect_value;
 					newbon->MitigateMeleeRune[1] = buffslot;
+					newbon->MitigateMeleeRune[2] = base2;
+					newbon->MitigateMeleeRune[3] = max;
 				}
 				break;
 			}
@@ -2298,6 +2388,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MitigateSpellRune[0] < effect_value){
 					newbon->MitigateSpellRune[0] = effect_value;
 					newbon->MitigateSpellRune[1] = buffslot;
+					newbon->MitigateSpellRune[2] = base2;
+					newbon->MitigateSpellRune[3] = max;
 				}
 				break;
 			}
@@ -2307,6 +2399,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				if (newbon->MitigateDotRune[0] < effect_value){
 					newbon->MitigateDotRune[0] = effect_value;
 					newbon->MitigateDotRune[1] = buffslot;
+					newbon->MitigateDotRune[2] = base2;
+					newbon->MitigateDotRune[3] = max;
 				}
 				break;
 			}
@@ -2422,6 +2516,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->SecondaryDmgInc = true;
 				break;
 
+			case SE_StrikeThrough:
 			case SE_StrikeThrough2:
 				newbon->StrikeThrough += effect_value;
 				break;
@@ -2553,6 +2648,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_DoubleRiposte:
+			{
+				newbon->DoubleRiposte += effect_value;
+			}
+
 			case SE_GiveDoubleRiposte:
 			{
 				//Only allow for regular double riposte chance.
@@ -2659,6 +2759,101 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 						}
 					}
 				}
+				break;
+
+			case SE_AStacker:
+				newbon->AStacker[0] = 1;
+				newbon->AStacker[1] = effect_value;
+				break;
+
+			case SE_BStacker:
+				newbon->BStacker[0] = 1;
+				newbon->BStacker[1] = effect_value;
+				break;
+
+			case SE_CStacker:
+				newbon->CStacker[0] = 1;
+				newbon->CStacker[1] = effect_value;
+				break;
+
+			case SE_DStacker:
+				newbon->DStacker[0] = 1;
+				newbon->DStacker[1] = effect_value;
+				break;
+
+			case SE_Berserk:
+				newbon->BerserkSPA = true;
+				break;
+
+				
+			case SE_Metabolism:
+				newbon->Metabolism += effect_value;
+				break;
+
+			case SE_ImprovedReclaimEnergy:
+			{
+				if((effect_value < 0) && (newbon->ImprovedReclaimEnergy > effect_value))
+					newbon->ImprovedReclaimEnergy = effect_value;
+
+				else if(newbon->ImprovedReclaimEnergy < effect_value)
+					newbon->ImprovedReclaimEnergy = effect_value;
+				break;
+			}
+
+			case SE_HeadShot:
+			{
+				if(newbon->HeadShot[1] < base2){
+					newbon->HeadShot[0] = effect_value;
+					newbon->HeadShot[1] = base2;
+				}
+				break;
+			}
+
+			case SE_HeadShotLevel:
+			{
+				if(newbon->HSLevel < effect_value)
+					newbon->HSLevel = effect_value;
+				break;
+			}
+
+			case SE_Assassinate:
+			{
+				if(newbon->Assassinate[1] < base2){
+					newbon->Assassinate[0] = effect_value;
+					newbon->Assassinate[1] = base2;
+				}
+				break;
+			}
+
+			case SE_AssassinateLevel:
+			{
+				if(newbon->AssassinateLevel < effect_value)
+					newbon->AssassinateLevel = effect_value;
+				break;
+			}
+
+			case SE_FinishingBlow:
+			{
+				//base1 = chance, base2 = damage
+				if (newbon->FinishingBlow[1] < base2){
+					newbon->FinishingBlow[0] = effect_value;
+					newbon->FinishingBlow[1] = base2;
+				}
+				break;
+			}
+
+			case SE_FinishingBlowLvl:
+			{
+				//base1 = level, base2 = ??? (Set to 200 in AA data, possible proc rate mod?)
+				if (newbon->FinishingBlowLvl[0] < effect_value){
+					newbon->FinishingBlowLvl[0] = effect_value;
+					newbon->FinishingBlowLvl[1] = base2;
+				}
+				break;
+			}
+
+			case SE_PetMeleeMitigation:
+				newbon->PetMeleeMitigation += effect_value;
 				break;
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
@@ -3438,6 +3633,17 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 				}
 
+				case SE_DamageModifier2:
+				{
+					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					{
+						spellbonuses.DamageModifier2[e] = effect_value;
+						aabonuses.DamageModifier2[e] = effect_value;
+						itembonuses.DamageModifier2[e] = effect_value;
+					}
+					break;
+				}
+
 				case SE_MinDamageModifier:
 				{
 					for(int e = 0; e < HIGHEST_SKILL+1; e++)
@@ -3583,7 +3789,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.CriticalDoTChance = effect_value;
 					break;
 
-				case SE_SpellOnKill:
+				case SE_ProcOnKillShot:
 				{
 					for(int e = 0; e < MAX_SPELL_TRIGGER*3; e=3)
 					{
@@ -3821,6 +4027,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.SecondaryDmgInc = false;
 					break;
 
+				case SE_StrikeThrough:
+					spellbonuses.StrikeThrough = effect_value;
+					aabonuses.StrikeThrough = effect_value;
+					itembonuses.StrikeThrough = effect_value;
+					break;
+
 				case SE_StrikeThrough2:
 					spellbonuses.StrikeThrough = effect_value;
 					aabonuses.StrikeThrough = effect_value;
@@ -3873,6 +4085,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.GivePetGroupTarget = false;
 					aabonuses.GivePetGroupTarget = false;
 					itembonuses.GivePetGroupTarget = false;
+					break;
+
+				case SE_PetMeleeMitigation:
+					spellbonuses.PetMeleeMitigation = effect_value;
+					itembonuses.PetMeleeMitigation = effect_value;
+					aabonuses.PetMeleeMitigation = effect_value;
 					break;
 
 				case SE_RootBreakChance:
@@ -3931,6 +4149,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.MasteryofPast = effect_value;
 					aabonuses.MasteryofPast = effect_value;
 					itembonuses.MasteryofPast = effect_value;
+					break;
+
+				case SE_DoubleRiposte:
+					spellbonuses.DoubleRiposte = effect_value;
+					itembonuses.DoubleRiposte = effect_value;
+					aabonuses.DoubleRiposte = effect_value;
 					break;
 
 				case SE_GiveDoubleRiposte:
@@ -4033,7 +4257,79 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.AbsorbMagicAtt[0] = effect_value;
 					spellbonuses.AbsorbMagicAtt[1] = -1;
 					break;
-				
+
+				case SE_Berserk:
+					spellbonuses.BerserkSPA = false;
+					aabonuses.BerserkSPA = false;
+					itembonuses.BerserkSPA = false;
+					break;
+
+				case SE_Vampirism:
+					spellbonuses.Vampirism = effect_value;
+					aabonuses.Vampirism = effect_value;
+					itembonuses.Vampirism = effect_value;
+					break;
+
+				case SE_Metabolism:
+					spellbonuses.Metabolism = effect_value;
+					aabonuses.Metabolism = effect_value;
+					itembonuses.Metabolism = effect_value;
+					break;
+
+				case SE_ImprovedReclaimEnergy:
+					spellbonuses.ImprovedReclaimEnergy = effect_value;
+					aabonuses.ImprovedReclaimEnergy = effect_value;
+					itembonuses.ImprovedReclaimEnergy = effect_value;
+					break;
+
+				case SE_HeadShot:
+					spellbonuses.HeadShot[0] = effect_value;
+					aabonuses.HeadShot[0] = effect_value;
+					itembonuses.HeadShot[0] = effect_value;
+					spellbonuses.HeadShot[1] = effect_value;
+					aabonuses.HeadShot[1] = effect_value;
+					itembonuses.HeadShot[1] = effect_value;
+					break;
+
+				case SE_HeadShotLevel:
+					spellbonuses.HSLevel = effect_value;
+					aabonuses.HSLevel = effect_value;
+					itembonuses.HSLevel = effect_value;
+					break;
+
+				case SE_Assassinate:
+					spellbonuses.Assassinate[0] = effect_value;
+					aabonuses.Assassinate[0] = effect_value;
+					itembonuses.Assassinate[0] = effect_value;
+					spellbonuses.Assassinate[1] = effect_value;
+					aabonuses.Assassinate[1] = effect_value;
+					itembonuses.Assassinate[1] = effect_value;
+					break;
+
+				case SE_AssassinateLevel:
+					spellbonuses.AssassinateLevel = effect_value;
+					aabonuses.AssassinateLevel = effect_value;
+					itembonuses.AssassinateLevel = effect_value;
+					break;
+
+				case SE_FinishingBlow:
+					spellbonuses.FinishingBlow[0] = effect_value;
+					aabonuses.FinishingBlow[0] = effect_value;
+					itembonuses.FinishingBlow[0] = effect_value;
+					spellbonuses.FinishingBlow[1] = effect_value;
+					aabonuses.FinishingBlow[1] = effect_value;
+					itembonuses.FinishingBlow[1] = effect_value;
+					break;
+
+				case SE_FinishingBlowLvl:
+					spellbonuses.FinishingBlowLvl[0] = effect_value;
+					aabonuses.FinishingBlowLvl[0] = effect_value;
+					itembonuses.FinishingBlowLvl[0] = effect_value;
+					spellbonuses.FinishingBlowLvl[1] = effect_value;
+					aabonuses.FinishingBlowLvl[1] = effect_value;
+					itembonuses.FinishingBlowLvl[1] = effect_value;
+					break;
+
 			}
 		}
 	}

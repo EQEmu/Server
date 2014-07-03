@@ -27,7 +27,7 @@ struct Appearances { };
 
 struct lua_registered_event {
 	std::string encounter_name;
-	luabind::object lua_reference;
+	luabind::adl::object lua_reference;
 	QuestEventID event_id;
 };
 
@@ -43,7 +43,7 @@ void unload_encounter(std::string name) {
 	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, 0);
 }
 
-void register_event(std::string package_name, std::string name, int evt, luabind::object func) {
+void register_event(std::string package_name, std::string name, int evt, luabind::adl::object func) {
 	lua_registered_event e;
 	e.encounter_name = name;
 	e.lua_reference = func;
@@ -84,7 +84,7 @@ void unregister_event(std::string package_name, std::string name, int evt) {
 	}
 }
 
-void register_npc_event(std::string name, int evt, int npc_id, luabind::object func) {
+void register_npc_event(std::string name, int evt, int npc_id, luabind::adl::object func) {
 	if(luabind::type(func) == LUA_TFUNCTION) {
 		std::stringstream package_name;
 		package_name << "npc_" << npc_id;
@@ -100,7 +100,7 @@ void unregister_npc_event(std::string name, int evt, int npc_id) {
 	unregister_event(package_name.str(), name, evt);
 }
 
-void register_player_event(std::string name, int evt, luabind::object func) {
+void register_player_event(std::string name, int evt, luabind::adl::object func) {
 	if(luabind::type(func) == LUA_TFUNCTION) {
 		register_event("player", name, evt, func);
 	}
@@ -110,7 +110,7 @@ void unregister_player_event(std::string name, int evt) {
 	unregister_event("player", name, evt);
 }
 
-void register_item_event(std::string name, int evt, int item_id, luabind::object func) {
+void register_item_event(std::string name, int evt, int item_id, luabind::adl::object func) {
 	std::string package_name = "item_";
 	package_name += std::to_string(static_cast<long long>(item_id));
 	
@@ -126,7 +126,7 @@ void unregister_item_event(std::string name, int evt, int item_id) {
 	unregister_event(package_name, name, evt);
 }
 
-void register_spell_event(std::string name, int evt, int spell_id, luabind::object func) {
+void register_spell_event(std::string name, int evt, int spell_id, luabind::adl::object func) {
 	if(luabind::type(func) == LUA_TFUNCTION) {
 		std::stringstream package_name;
 		package_name << "spell_" << spell_id;
@@ -392,7 +392,7 @@ bool lua_bury_player_corpse(uint32 char_id) {
 	return quest_manager.buryplayercorpse(char_id);
 }
 
-void lua_task_selector(luabind::object table) {
+void lua_task_selector(luabind::adl::object table) {
 	if(luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
@@ -422,7 +422,7 @@ void lua_task_set_selector(int task_set) {
 	quest_manager.tasksetselector(task_set);
 }
 
-void lua_enable_task(luabind::object table) {
+void lua_enable_task(luabind::adl::object table) {
 	if(luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
@@ -449,7 +449,7 @@ void lua_enable_task(luabind::object table) {
 	quest_manager.enabletask(count, tasks);
 }
 
-void lua_disable_task(luabind::object table) {
+void lua_disable_task(luabind::adl::object table) {
 	if(luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
@@ -743,8 +743,8 @@ void lua_cross_zone_message_player_by_name(uint32 type, const char *player, cons
 	quest_manager.CrossZoneMessagePlayerByName(type, player, message);
 }
 
-luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
-	luabind::object ret = luabind::newtable(L);
+luabind::adl::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
+	luabind::adl::object ret = luabind::newtable(L);
 
 	NPC *n = npc;
 	Client *c = client;
@@ -759,8 +759,8 @@ luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
 	return ret;
 }
 
-luabind::object lua_get_qglobals(lua_State *L, Lua_Client client) {
-	luabind::object ret = luabind::newtable(L);
+luabind::adl::object lua_get_qglobals(lua_State *L, Lua_Client client) {
+	luabind::adl::object ret = luabind::newtable(L);
 
 	NPC *n = nullptr;
 	Client *c = client;
@@ -775,8 +775,8 @@ luabind::object lua_get_qglobals(lua_State *L, Lua_Client client) {
 	return ret;
 }
 
-luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc) {
-	luabind::object ret = luabind::newtable(L);
+luabind::adl::object lua_get_qglobals(lua_State *L, Lua_NPC npc) {
+	luabind::adl::object ret = luabind::newtable(L);
 
 	NPC *n = npc;
 	Client *c = nullptr;
@@ -791,8 +791,8 @@ luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc) {
 	return ret;
 }
 
-luabind::object lua_get_qglobals(lua_State *L) {
-	luabind::object ret = luabind::newtable(L);
+luabind::adl::object lua_get_qglobals(lua_State *L) {
+	luabind::adl::object ret = luabind::newtable(L);
 
 	NPC *n = nullptr;
 	Client *c = nullptr;
@@ -846,8 +846,8 @@ int lua_get_zone_instance_version() {
 	return zone->GetInstanceVersion();
 }
 
-luabind::object lua_get_characters_in_instance(lua_State *L, uint16 instance_id) {
-	luabind::object ret = luabind::newtable(L);
+luabind::adl::object lua_get_characters_in_instance(lua_State *L, uint16 instance_id) {
+	luabind::adl::object ret = luabind::newtable(L);
 
 	std::list<uint32> charid_list;
 	uint16 i = 1;
@@ -868,11 +868,11 @@ int lua_get_zone_weather() {
 	return zone->zone_weather;
 }
 
-luabind::object lua_get_zone_time(lua_State *L) {
+luabind::adl::object lua_get_zone_time(lua_State *L) {
 	TimeOfDay_Struct eqTime;
 	zone->zone_time.getEQTimeOfDay(time(0), &eqTime);
 
-	luabind::object ret = luabind::newtable(L);
+	luabind::adl::object ret = luabind::newtable(L);
 	ret["zone_hour"] = eqTime.hour - 1;
 	ret["zone_minute"] = eqTime.minute;
 	ret["zone_time"] = (eqTime.hour - 1) * 100 + eqTime.minute;
@@ -909,7 +909,7 @@ void lua_remove_spawn_point(uint32 spawn2_id) {
 	}
 }
 
-void lua_add_spawn_point(luabind::object table) {
+void lua_add_spawn_point(luabind::adl::object table) {
 	if(!zone)
 		return;
 
@@ -1280,10 +1280,10 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
 		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
 		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
-		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
-		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
-		luabind::def("get_qglobals", (luabind::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
-		luabind::def("get_qglobals", (luabind::object(*)(lua_State*))&lua_get_qglobals),
+		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
+		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
+		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
+		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*))&lua_get_qglobals),
 		luabind::def("get_entity_list", &lua_get_entity_list),
 		luabind::def("get_zone_id", &lua_get_zone_id),
 		luabind::def("get_zone_long_name", &lua_get_zone_long_name),

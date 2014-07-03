@@ -504,7 +504,7 @@ void Raid::HealGroup(uint32 heal_amt, Mob* caster, uint32 gid, int32 range)
 }
 
 
-void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster)
+void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster, int32 limit)
 {
 	if (!caster)
 		return;
@@ -512,7 +512,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster)
 	if (!range)
 		range = 200;
 
-	int dmgtaken = 0, numMem = 0;
+	int dmgtaken = 0, numMem = 0, dmgtaken_tmp = 0;
 	int gi = 0;
 	
 	float distance;
@@ -525,7 +525,12 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster)
 			{
 				distance = caster->DistNoRoot(*members[gi].member);
 				if(distance <= range2){
-					dmgtaken += (members[gi].member->GetMaxHP() - members[gi].member->GetHP());
+
+					dmgtaken_tmp = members[gi].member->GetMaxHP() - members[gi].member->GetHP();
+					if (limit && (dmgtaken_tmp > limit))
+						dmgtaken_tmp = limit;
+
+					dmgtaken += (dmgtaken_tmp);
 					numMem += 1;
 				}
 			}
@@ -555,7 +560,7 @@ void Raid::BalanceHP(int32 penalty, uint32 gid, int32 range, Mob* caster)
 	}
 }
 
-void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster)
+void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster, int32 limit)
 {
 	if (!caster)
 		return;
@@ -566,17 +571,24 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster)
 	float distance;
 	float range2 = range*range;
 
-	int manataken = 0, numMem = 0;
+	int manataken = 0, numMem = 0, manataken_tmp = 0;
 	int gi = 0;
 	for(; gi < MAX_RAID_MEMBERS; gi++)
 	{
 		if(members[gi].member){
 			if(members[gi].GroupNumber == gid)
 			{
-				distance = caster->DistNoRoot(*members[gi].member);
-				if(distance <= range2){
-					manataken += (members[gi].member->GetMaxMana() - members[gi].member->GetMana());
-					numMem += 1;
+				if (members[gi].member->GetMaxMana() > 0) {
+					distance = caster->DistNoRoot(*members[gi].member);
+					if(distance <= range2){
+
+						manataken_tmp = members[gi].member->GetMaxMana() - members[gi].member->GetMana();
+						if (limit && (manataken_tmp > limit))
+							manataken_tmp = limit;
+
+						manataken += (manataken_tmp);
+						numMem += 1;
+					}
 				}
 			}
 		}
@@ -584,6 +596,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster)
 
 	manataken += manataken * penalty / 100;
 	manataken /= numMem;
+
 	for(gi = 0; gi < MAX_RAID_MEMBERS; gi++)
 	{
 		if(members[gi].member){

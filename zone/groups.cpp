@@ -447,7 +447,7 @@ bool Group::UpdatePlayer(Mob* update){
 		//update their player profile
 		PlayerProfile_Struct &pp = update->CastToClient()->GetPP();
 		for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if(membername[0] == '\0')
+			if(membername[i][0] == '\0')
 				memset(pp.groupMembers[i], 0, 64);
 			else
 				strn0cpy(pp.groupMembers[i], membername[i], 64);
@@ -1095,7 +1095,7 @@ void Group::HealGroup(uint32 heal_amt, Mob* caster, int32 range)
 }
 
 
-void Group::BalanceHP(int32 penalty, int32 range, Mob* caster)
+void Group::BalanceHP(int32 penalty, int32 range, Mob* caster, int32 limit)
 {
 	if (!caster)
 		return;
@@ -1103,7 +1103,7 @@ void Group::BalanceHP(int32 penalty, int32 range, Mob* caster)
 	if (!range)
 		range = 200;	
 		
-	int dmgtaken = 0, numMem = 0;
+	int dmgtaken = 0, numMem = 0, dmgtaken_tmp = 0;
 	
 	float distance;
 	float range2 = range*range;
@@ -1114,7 +1114,12 @@ void Group::BalanceHP(int32 penalty, int32 range, Mob* caster)
 		if(members[gi]){
 			distance = caster->DistNoRoot(*members[gi]);
 			if(distance <= range2){
-				dmgtaken += (members[gi]->GetMaxHP() - members[gi]->GetHP());
+
+				dmgtaken_tmp = members[gi]->GetMaxHP() - members[gi]->GetHP();
+				if (limit && (dmgtaken_tmp > limit))
+					dmgtaken_tmp = limit;
+
+				dmgtaken += (dmgtaken_tmp);
 				numMem += 1;
 			}
 		}
@@ -1140,7 +1145,7 @@ void Group::BalanceHP(int32 penalty, int32 range, Mob* caster)
 	}
 }
 
-void Group::BalanceMana(int32 penalty, int32 range, Mob* caster)
+void Group::BalanceMana(int32 penalty, int32 range, Mob* caster, int32 limit)
 {
 	if (!caster)
 		return;
@@ -1151,14 +1156,19 @@ void Group::BalanceMana(int32 penalty, int32 range, Mob* caster)
 	float distance;
 	float range2 = range*range;
 	
-	int manataken = 0, numMem = 0;
+	int manataken = 0, numMem = 0, manataken_tmp = 0;
 	unsigned int gi = 0;
 	for(; gi < MAX_GROUP_MEMBERS; gi++)
 	{
-		if(members[gi]){			
+		if(members[gi] && (members[gi]->GetMaxMana() > 0)){			
 			distance = caster->DistNoRoot(*members[gi]);
 			if(distance <= range2){
-				manataken += (members[gi]->GetMaxMana() - members[gi]->GetMana());
+
+				manataken_tmp = members[gi]->GetMaxMana() - members[gi]->GetMana();
+				if (limit && (manataken_tmp > limit))
+					manataken_tmp = limit;
+
+				manataken += (manataken_tmp);
 				numMem += 1;
 			}
 		}
@@ -1166,6 +1176,10 @@ void Group::BalanceMana(int32 penalty, int32 range, Mob* caster)
 
 	manataken += manataken * penalty / 100;
 	manataken /= numMem;
+
+	if (limit && (manataken > limit))
+		manataken = limit;
+
 	for(gi = 0; gi < MAX_GROUP_MEMBERS; gi++)
 	{
 		if(members[gi]){

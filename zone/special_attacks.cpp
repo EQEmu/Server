@@ -100,7 +100,8 @@ void Mob::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) 
 	}
 }
 
-void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage, int32 min_damage, int32 hate_override,int ReuseTime, bool HitChance) {
+void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage, int32 min_damage, int32 hate_override,int ReuseTime, 
+								bool HitChance, bool CanAvoid) {
 	//this really should go through the same code as normal melee damage to
 	//pick up all the special behavior there
 
@@ -135,7 +136,9 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 		if(skill == SkillThrowing || skill == SkillArchery) // changed from '&&'
 			CanRiposte = false;
 
-		who->AvoidDamage(this, max_damage, CanRiposte);
+		if (CanAvoid)
+			who->AvoidDamage(this, max_damage, CanRiposte);
+
 		who->MeleeMitigation(this, max_damage, min_damage);
 
 		if(max_damage > 0) {
@@ -156,7 +159,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	if (HasDied())	return;
 
 	if (max_damage > 0)
-		CheckNumHitsRemaining(5);
+		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 
 	//[AA Dragon Punch] value[0] = 100 for 25%, chance value[1] = skill
 	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skill){
@@ -373,8 +376,8 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 			if (ca_atk->m_atk != 100 || ca_atk->m_skill != SkillBackstab) {
 				break;
 			}
-			TryBackstab(GetTarget(), ReuseTime);
 			ReuseTime = BackstabReuseTime-1 - skill_reduction;
+			TryBackstab(GetTarget(), ReuseTime);
 			break;
 		}
 		default:
@@ -527,64 +530,47 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		if (FrontalBSChance && (FrontalBSChance > MakeRandomInt(0, 100)))
 			bCanFrontalBS = true;
 	}
-
+	
 	if (bIsBehind || bCanFrontalBS){ // Player is behind other OR can do Frontal Backstab
 
-		if (bCanFrontalBS) {
+		if (bCanFrontalBS) 
 			CastToClient()->Message(0,"Your fierce attack is executed with such grace, your target did not see it coming!");
-		}
+		
+		RogueBackstab(other,false,ReuseTime);
+		if (level > 54) {
 
-		// solar - chance to assassinate
-		int chance = 10 + (GetDEX()/10) + (itembonuses.HeroicDEX/10); //18.5% chance at 85 dex 40% chance at 300 dex
-		if(
-			level >= 60 && // player is 60 or higher
-			other->GetLevel() <= 45 && // mob 45 or under
-			!other->CastToNPC()->IsEngaged() && // not aggro
-			other->GetHP()<=32000
-			&& other->IsNPC()
-			&& MakeRandomFloat(0, 99) < chance // chance
-			) {
-			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
-			if(IsClient())
-				CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
-			RogueAssassinate(other);
-		}
-		else {
-			RogueBackstab(other);
-			if (level > 54) {
-				float DoubleAttackProbability = (GetSkill(SkillDoubleAttack) + GetLevel()) / 500.0f; // 62.4 max
-				// Check for double attack with main hand assuming maxed DA Skill (MS)
+			if(IsClient() && CastToClient()->CheckDoubleAttack(false))
+			{
+				if(other->GetHP() > 0)
+					RogueBackstab(other,false,ReuseTime);
 
-				if(MakeRandomFloat(0, 1) < DoubleAttackProbability)	// Max 62.4 % chance of DA
-				{
-					if(other->GetHP() > 0)
-						RogueBackstab(other,false,ReuseTime);
-
-					if (tripleChance && other->GetHP() > 0 && tripleChance > MakeRandomInt(0, 100))
-						RogueBackstab(other,false,ReuseTime);
-				}
+				if (tripleChance && other->GetHP() > 0 && tripleChance > MakeRandomInt(0, 100))
+					RogueBackstab(other,false,ReuseTime);
 			}
-			if(IsClient())
-				CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
 		}
+		
+		if(IsClient())
+			CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
+		
 	}
 	//Live AA - Chaotic Backstab
 	else if(aabonuses.FrontalBackstabMinDmg || itembonuses.FrontalBackstabMinDmg || spellbonuses.FrontalBackstabMinDmg) {
 
 		//we can stab from any angle, we do min damage though.
-		RogueBackstab(other, true);
+		RogueBackstab(other, true, ReuseTime);
 		if (level > 54) {
-			float DoubleAttackProbability = (GetSkill(SkillDoubleAttack) + GetLevel()) / 500.0f; // 62.4 max
-			if(IsClient())
-				CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
+
 			// Check for double attack with main hand assuming maxed DA Skill (MS)
-			if(MakeRandomFloat(0, 1) < DoubleAttackProbability)		// Max 62.4 % chance of DA
+			if(IsClient() && CastToClient()->CheckDoubleAttack(false))	
 				if(other->GetHP() > 0)
 					RogueBackstab(other,true, ReuseTime);
 
 			if (tripleChance && other->GetHP() > 0 && tripleChance > MakeRandomInt(0, 100))
 					RogueBackstab(other,false,ReuseTime);
 		}
+
+		if(IsClient())
+			CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
 	}
 	else { //We do a single regular attack if we attack from the front without chaotic stab
 		Attack(other, 13);
@@ -594,6 +580,9 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 //heko: backstab
 void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 {
+	if (!other)
+		return;
+
 	int32 ndamage = 0;
 	int32 max_hit = 0;
 	int32 min_hit = 0;
@@ -668,12 +657,20 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	}
 
 	ndamage = mod_backstab_damage(ndamage);
+	
+	uint32 Assassinate_Dmg = 0;
+	Assassinate_Dmg = TryAssassinate(other, SkillBackstab, ReuseTime);
+	
+	if (Assassinate_Dmg) {
+		ndamage = Assassinate_Dmg;
+		entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
+	}
 
-	DoSpecialAttackDamage(other, SkillBackstab, ndamage, min_hit, hate, ReuseTime);
+	DoSpecialAttackDamage(other, SkillBackstab, ndamage, min_hit, hate, ReuseTime, false, false);
 	DoAnim(animPiercing);
 }
 
-// solar - assassinate
+// solar - assassinate [Kayen: No longer used for regular assassinate 6-29-14]
 void Mob::RogueAssassinate(Mob* other)
 {
 	//can you dodge, parry, etc.. an assassinate??
@@ -861,8 +858,12 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 	} else {
 		mlog(COMBAT__RANGED, "Ranged attack hit %s.", other->GetName());
 
-		if(!TryHeadShot(other, SkillArchery))
-		{
+
+			bool HeadShot = false;
+			uint32 HeadShot_Dmg = TryHeadShot(other, SkillArchery);
+			if (HeadShot_Dmg)
+				HeadShot = true;
+
 			int32 TotalDmg = 0;
 			int16 WDmg = 0;
 			int16 ADmg = 0;
@@ -881,6 +882,9 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					ADmg = 0;
 				uint32 MaxDmg = (RuleR(Combat, ArcheryBaseDamageBonus)*(WDmg+ADmg)*GetDamageTable(SkillArchery)) / 100;
 				int32 hate = ((WDmg+ADmg));
+
+				if (HeadShot)
+					MaxDmg = HeadShot_Dmg;
 
 				uint16 bonusArcheryDamageModifier = aabonuses.ArcheryDamageModifier + itembonuses.ArcheryDamageModifier + spellbonuses.ArcheryDamageModifier;
 
@@ -938,7 +942,9 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					hate += (2*((GetLevel()-25)/3));
 				}
 
-				other->AvoidDamage(this, TotalDmg, false);
+				if (!HeadShot)
+					other->AvoidDamage(this, TotalDmg, false);
+
 				other->MeleeMitigation(this, TotalDmg, minDmg);
 				if(TotalDmg > 0)
 				{
@@ -951,14 +957,17 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 
 					TryCriticalHit(other, SkillArchery, TotalDmg);
 					other->AddToHateList(this, hate, 0, false);
-					CheckNumHitsRemaining(5);
+					CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 				}
 			}
 			else
 				TotalDmg = -5;
 
+			if (HeadShot)
+				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
+			
 			other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillArchery);
-		}
+
 	}
 
 	//try proc on hits and misses
@@ -1056,7 +1065,7 @@ void NPC::RangedAttack(Mob* other)
 			TryCriticalHit(GetTarget(), SkillArchery, TotalDmg);
 			GetTarget()->AddToHateList(this, hate, 0, false);
 			GetTarget()->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillArchery);
-			CheckNumHitsRemaining(5);
+			CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 		}
 		else
 		{
@@ -1264,13 +1273,24 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 
 		int32 TotalDmg = 0;
 
+		uint32 Assassinate_Dmg = 0;
+		if (GetClass() == ROGUE && (BehindMob(other, GetX(), GetY())))
+			Assassinate_Dmg = TryAssassinate(other, SkillThrowing, ranged_timer.GetDuration());
+
 		if(WDmg > 0)
 		{
 			int minDmg = 1;
 			uint16 MaxDmg = GetThrownDamage(WDmg, TotalDmg, minDmg);
 
+			if (Assassinate_Dmg) {
+				TotalDmg = Assassinate_Dmg;
+				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
+			}
+
 			mlog(COMBAT__RANGED, "Item DMG %d. Max Damage %d. Hit for damage %d", WDmg, MaxDmg, TotalDmg);
-			other->AvoidDamage(this, TotalDmg, false); //CanRiposte=false - Can not riposte throw attacks.
+			if (!Assassinate_Dmg)
+				other->AvoidDamage(this, TotalDmg, false); //CanRiposte=false - Can not riposte throw attacks.
+			
 			other->MeleeMitigation(this, TotalDmg, minDmg);
 			if(TotalDmg > 0)
 			{
@@ -1281,7 +1301,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 				TryCriticalHit(other, SkillThrowing, TotalDmg);
 				int32 hate = (2*WDmg);
 				other->AddToHateList(this, hate, 0, false);
-				CheckNumHitsRemaining(5);
+				CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 			}
 		}
 
@@ -1854,92 +1874,6 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	}
 }
 
-/*
-void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
-
-	if (who == nullptr)
-		return;
-
-	if(DivineAura())
-		return;
-
-	if(!CombatRange(who))
-		return;
-
-	if(!always_succeed && IsClient())
-		CastToClient()->CheckIncreaseSkill(TAUNT, who, 10);
-
-	int level = GetLevel();
-	Mob *hate_top = who->GetHateMost();
-
-	// Check to see if we're already at the top of the target's hate list
-	// a mob will not be taunted if its target's health is below 20%
-	if ((hate_top != this)
-	&& (who->GetLevel() < level)
-	&& (hate_top == nullptr || hate_top->GetHPRatio() >= 20) ) {
-		int32 newhate, tauntvalue;
-
-		float tauntchance;
-		if(always_succeed) {
-			tauntchance = 101;
-		} else {
-
-			// no idea how taunt success is actually calculated
-			// TODO: chance for level 50+ mobs should be lower
-			int level_difference = level - who->GetLevel();
-			if (level_difference <= 5) {
-				tauntchance = 25.0;	// minimum
-				tauntchance += tauntchance * (float)GetSkill(TAUNT) / 200.0;	// skill modifier
-				if (tauntchance > 65.0)
-					tauntchance = 65.0;
-			}
-			else if (level_difference <= 10) {
-				tauntchance = 30.0;	// minimum
-				tauntchance += tauntchance * (float)GetSkill(TAUNT) / 200.0;	// skill modifier
-				if (tauntchance > 85.0)
-					tauntchance = 85.0;
-			}
-			else if (level_difference <= 15) {
-				tauntchance = 40.0;	// minimum
-				tauntchance += tauntchance * (float)GetSkill(TAUNT) / 200.0;	// skill modifier
-				if (tauntchance > 90.0)
-					tauntchance = 90.0;
-			}
-			else {
-				tauntchance = 50.0;	// minimum
-				tauntchance += tauntchance * (float)GetSkill(TAUNT) / 200.0;	// skill modifier
-				if (tauntchance > 95.0)
-					tauntchance = 95.0;
-			}
-		}
-
-		if (chance_bonus)
-			tauntchance = tauntchance + (tauntchance*chance_bonus/100.0f);
-
-		if (tauntchance > MakeRandomFloat(0, 100)) {
-			// this is the max additional hate added per succesfull taunt
-			tauntvalue = (MakeRandomInt(2, 4) * level);
-			//tauntvalue = (int32) ((float)level * 10.0 * (float)rand()/(float)RAND_MAX + 1);
-			// new hate: find diff of player's hate and whoever's at top of list, add that plus tauntvalue to players hate
-			newhate = who->GetNPCHate(hate_top) - who->GetNPCHate(this) + tauntvalue;
-			// add the hate
-			who->CastToNPC()->AddToHateList(this, newhate);
-		}
-		else{
-			//generate at least some hate reguardless of the outcome.
-			who->CastToNPC()->AddToHateList(this, (MakeRandomInt(2, 4)*level));
-		}
-	}
-
-	//generate at least some hate reguardless of the outcome.
-	who->CastToNPC()->AddToHateList(this, (MakeRandomInt(2, 4)*level));
-	if (HasSkillProcs()){
-		float chance = (float)TauntReuseTime*RuleR(Combat, AvgProcsPerMinute)/60000.0f;
-		TrySkillProc(who, TAUNT, chance);
-	}
-}
-*/
-
 void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 
 	if (who == nullptr)
@@ -2074,30 +2008,134 @@ void Mob::InstillDoubt(Mob *who) {
 	}
 }
 
-bool Mob::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
-	bool Result = false;
+uint32 Mob::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 
-	if(defender && skillInUse == SkillArchery) {
-		if(GetAA(aaHeadshot) && defender->GetBodyType() == BT_Humanoid) {
-			if((GetLevelCon(GetLevel(), defender->GetLevel()) == CON_LIGHTBLUE || GetLevelCon(GetLevel(), defender->GetLevel()) == CON_GREEN) && defender->GetLevel() <= 60 && !defender->IsClient()) {
-				// WildcardX: These chance formula's below are arbitrary. If someone has a better formula that is more
-				// consistent with live, feel free to update these.
-				int AttackerChance = 20 + ((GetLevel() - 51) / 2) + (itembonuses.HeroicDEX / 10);
-				int DefenderChance = MakeRandomInt(0, 100);
-				if(AttackerChance > DefenderChance) {
-					mlog(COMBAT__ATTACKS, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
-					entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
-					defender->Damage(this, 32000, SPELL_UNKNOWN, skillInUse);
-					Result = true;
-				}
-				else {
-					mlog(COMBAT__ATTACKS, "FAILED a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
-				}
-			}
+	//Only works on YOUR target.
+	if(defender && (defender->GetBodyType() == BT_Humanoid) && !defender->IsClient() 
+		&& (skillInUse == SkillArchery) && (GetTarget() == defender)) {
+		
+		uint32 HeadShot_Dmg = aabonuses.HeadShot[1] + spellbonuses.HeadShot[1] + itembonuses.HeadShot[1];
+		
+		uint8 HeadShot_Level = 0; //Get Highest Headshot Level
+		HeadShot_Level = aabonuses.HSLevel;
+		if (HeadShot_Level < spellbonuses.HSLevel)
+			HeadShot_Level = spellbonuses.HSLevel;
+		else if (HeadShot_Level < itembonuses.HSLevel)
+			HeadShot_Level = itembonuses.HSLevel;
+
+		if(HeadShot_Dmg && HeadShot_Level && (defender->GetLevel() <= HeadShot_Level)){
+
+			float ProcChance = GetSpecialProcChances(11);
+			if(ProcChance > MakeRandomFloat(0,1)) 
+				return HeadShot_Dmg;
 		}
 	}
 
-	return Result;
+	return 0;
+}
+
+float Mob::GetSpecialProcChances(uint16 hand)
+{
+	int mydex = GetDEX();
+
+	if (mydex > 255)
+		mydex = 255;
+
+	uint16 weapon_speed;
+	float ProcChance = 0.0f;
+	float ProcBonus = 0.0f;
+
+	switch (hand) {
+		case 13:
+			weapon_speed = attack_timer.GetDuration();
+			break;
+		case 14:
+			weapon_speed = attack_dw_timer.GetDuration();
+			break;
+		case 11:
+			weapon_speed = ranged_timer.GetDuration();
+			break;
+	}
+
+	if (weapon_speed < RuleI(Combat, MinHastedDelay))
+		weapon_speed = RuleI(Combat, MinHastedDelay);
+
+	if (RuleB(Combat, AdjustSpecialProcPerMinute)) {
+		ProcChance = (static_cast<float>(weapon_speed) *
+				RuleR(Combat, AvgSpecialProcsPerMinute) / 60000.0f); 
+		ProcBonus +=  static_cast<float>(mydex/35) + static_cast<float>(itembonuses.HeroicDEX / 25);
+		ProcChance += ProcChance * ProcBonus / 100.0f;
+	} else {
+		/*PRE 2014 CHANGE Dev Quote - "Elidroth SOE:Proc chance is a function of your base hardcapped Dexterity / 35 + Heroic Dexterity / 25.”
+		Kayen: Most reports suggest a ~ 6% chance to Headshot which consistent with above.*/
+		
+		ProcChance = (static_cast<float>(mydex/35) + static_cast<float>(itembonuses.HeroicDEX / 25))/100.0f;
+	}
+
+	return ProcChance;
+}
+
+uint32 Mob::TryAssassinate(Mob* defender, SkillUseTypes skillInUse, uint16 ReuseTime) {
+
+	if(defender && (defender->GetBodyType() == BT_Humanoid) && !defender->IsClient() &&
+		(skillInUse == SkillBackstab || skillInUse == SkillThrowing)) {
+		
+		uint32 Assassinate_Dmg = aabonuses.Assassinate[1] + spellbonuses.Assassinate[1] + itembonuses.Assassinate[1];
+		
+		uint8 Assassinate_Level = 0; //Get Highest Headshot Level
+		Assassinate_Level = aabonuses.AssassinateLevel;
+		if (Assassinate_Level < spellbonuses.AssassinateLevel)
+			Assassinate_Level = spellbonuses.AssassinateLevel;
+		else if (Assassinate_Level < itembonuses.AssassinateLevel)
+			Assassinate_Level = itembonuses.AssassinateLevel;
+
+		if (GetLevel() >= 60){ //Innate Assassinate Ability if client as no bonuses.
+			if (!Assassinate_Level)
+				Assassinate_Level = 45;
+
+			if (!Assassinate_Dmg)
+				Assassinate_Dmg = 32000;
+		}
+
+		if(Assassinate_Dmg && Assassinate_Level && (defender->GetLevel() <= Assassinate_Level)){
+			float ProcChance = 0.0f;
+			
+			if (skillInUse == SkillThrowing)
+				ProcChance = GetSpecialProcChances(11);
+			else
+				ProcChance = GetAssassinateProcChances(ReuseTime);
+
+			if(ProcChance > MakeRandomFloat(0,1)) 
+				return Assassinate_Dmg;
+		}
+	}
+
+	return 0;
+}
+
+float Mob::GetAssassinateProcChances(uint16 ReuseTime)
+{
+	int mydex = GetDEX();
+
+	if (mydex > 255)
+		mydex = 255;
+
+	float ProcChance = 0.0f;
+	float ProcBonus = 0.0f;
+
+	if (RuleB(Combat, AdjustSpecialProcPerMinute)) {
+		ProcChance = (static_cast<float>(ReuseTime*1000) *
+				RuleR(Combat, AvgSpecialProcsPerMinute) / 60000.0f); 
+		ProcBonus += (10 + (static_cast<float>(mydex/10) + static_cast<float>(itembonuses.HeroicDEX /10)))/100.0f;
+		ProcChance += ProcChance * ProcBonus / 100.0f;
+
+	} else {
+		/*Kayen: Unable to find data on old proc rate of assassinate, no idea if our formula is real or made up.*/
+		ProcChance = (10 + (static_cast<float>(mydex/10) + static_cast<float>(itembonuses.HeroicDEX /10)))/100.0f;
+
+	}
+
+	return ProcChance;
 }
 
 void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod, int16 focus, bool CanRiposte)
@@ -2196,7 +2234,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 	if (HasDied())
 		return;
 
-	CheckNumHitsRemaining(5);
+	CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
 
 	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skillinuse){
 		int kb_chance = 25;
