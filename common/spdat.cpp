@@ -157,6 +157,24 @@ bool IsFearSpell(uint16 spell_id)
 	return IsEffectInSpell(spell_id, SE_Fear);
 }
 
+bool IsCureSpell(uint16 spell_id)
+{
+	const SPDat_Spell_Struct &sp = spells[spell_id];
+
+	bool CureEffect = false;
+
+	for(int i = 0; i < EFFECT_COUNT; i++){
+		if (sp.effectid[i] == SE_DiseaseCounter || sp.effectid[i] == SE_PoisonCounter 
+			|| sp.effectid[i] == SE_CurseCounter || sp.effectid[i] == SE_CorruptionCounter)
+			CureEffect = true;
+	}
+
+	if (CureEffect && IsBeneficialSpell(spell_id))
+		return true;
+
+	return false;
+}
+
 bool IsSlowSpell(uint16 spell_id)
 {
 	const SPDat_Spell_Struct &sp = spells[spell_id];

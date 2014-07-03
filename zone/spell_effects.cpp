@@ -2971,6 +2971,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_Assassinate:
 			case SE_AssassinateLevel:
 			case SE_FactionModPct:
+			case SE_LimitSpellClass:
 			{
 				break;
 			}
@@ -4128,6 +4129,8 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 	6/7   SE_LimitTarget
 	8/9   SE_LimitSpellGroup:
 	10/11 SE_LimitCastingSkill:
+	12/13 SE_LimitSpellClass:
+	14/15 SE_LimitSpellSubClass:
 	Remember: Update MaxLimitInclude in spdat.h if adding new limits that require Includes
 	*/ 
 	int FocusCount = 0;
@@ -4322,16 +4325,40 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 				break;
 
 			case SE_LimitCastingSkill:
-			if(base1 < 0) {
-				if(-base1 == spell.skill)
-					LimitFailure = true;
-			}
-			else {
-				LimitInclude[10] = true;
-				if(base1 == spell.skill)
-					LimitInclude[11] = true;
-			}
-			break;
+				if(base1 < 0) {
+					if(-base1 == spell.skill)
+						LimitFailure = true;
+				}
+				else {
+					LimitInclude[10] = true;
+					if(base1 == spell.skill)
+						LimitInclude[11] = true;
+				}
+				break;
+
+			case SE_LimitSpellClass:
+				if(base1 < 0) {	//Exclude
+					if (CheckSpellCategory(spell_id, base1, SE_LimitSpellClass));
+						return(0);
+				} 
+				else {
+					LimitInclude[12] = true;
+					if (CheckSpellCategory(spell_id, base1, SE_LimitSpellClass)); //Include
+						LimitInclude[13] = true;
+				}
+				break;
+
+			case SE_LimitSpellSubclass:
+				if(base1 < 0) {	//Exclude
+					if (CheckSpellCategory(spell_id, base1, SE_LimitSpellSubclass));
+						return(0);
+				} 
+				else {
+					LimitInclude[14] = true;
+					if (CheckSpellCategory(spell_id, base1, SE_LimitSpellSubclass)); //Include
+						LimitInclude[15] = true;
+				}
+				break;
 
 			case SE_LimitClass:
 			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
@@ -4575,6 +4602,8 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	6/7   SE_LimitTarget
 	8/9   SE_LimitSpellGroup:
 	10/11 SE_LimitCastingSkill:
+	12/13 SE_LimitSpellClass:
+	14/15 SE_LimitSpellSubClass:
 	Remember: Update MaxLimitInclude in spdat.h if adding new limits that require Includes
 	*/ 
 	
@@ -4762,6 +4791,30 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		case SE_CastonFocusEffect:
 			if (focus_spell.base[i] > 0)
 				Caston_spell_id = focus_spell.base[i];
+			break;
+
+		case SE_LimitSpellClass:
+			if(focus_spell.base[i] < 0) {	//Exclude
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass));
+					return(0);
+			} 
+			else {
+				LimitInclude[12] = true;
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass)); //Include
+					LimitInclude[13] = true;
+			}
+			break;
+
+		case SE_LimitSpellSubclass:
+			if(focus_spell.base[i] < 0) {	//Exclude
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass));
+					return(0);
+			} 
+			else {
+				LimitInclude[14] = true;
+				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass)); //Include
+					LimitInclude[15] = true;
+			}
 			break;
 
 
@@ -6343,6 +6396,54 @@ void Mob::TryTriggerThreshHold(int32 damage, int effect_id,  Mob* attacker){
 	}
 }
 
+bool Mob::CheckSpellCategory(uint16 spell_id, int category_id, int effect_id){
 
+	if (!IsValidSpell(spell_id) || !category_id)
+		return false;
 
+	int effectid = 0;
+	int category = 0;
+
+	/*Category ID SE_LimitSpellClass [(+) Include (-) Exclude]
+	1 = UNK
+	2 = Cures
+	3 = Offensive Spells
+	4 = UNK
+	5 = UNK
+	6 = Lifetap
+	*/
+
+	/*Category ID SE_LimitSpellSubClass [(+) Include (-) Exclude]
+	5 = UNK
+	8 = UNK
+	*/
+
+	if (effect_id == SE_LimitSpellClass) {
+
+		switch(category_id)
+		{
+			case 2:
+			if (IsCureSpell(spell_id))
+				return true;
+			break;
+
+			case 3:
+			if (IsDetrimentalSpell(spell_id))
+				return true;
+			break;
+
+			case 6:
+			if (spells[spell_id].targettype == ST_Tap || spells[spell_id].targettype == ST_TargetAETap)
+				return true;
+			break;
+		}
+	}
+
+	else if (effect_id == SE_LimitSpellSubclass) {
+		//Pending Implementation when category types are figured out.
+		return false;
+	}
+
+	return false;
+}
 			
