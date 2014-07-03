@@ -2942,7 +2942,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_FcIncreaseNumHits:
 			case SE_CastonFocusEffect:
 			case SE_FcHealAmtIncoming:
-			case SE_LimitManaMax:
+			case SE_MeleeVulnerability:
 			case SE_DoubleRangedAttack:
 			case SE_ShieldEquipHateMod:
 			case SE_ShieldEquipDmgMod:
@@ -4287,11 +4287,6 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 					LimitFailure = true;
 				break;
 
-			case SE_LimitManaMax:
-				if(spell.mana > base1)
-					LimitFailure = true;
-				break;
-
 			case SE_LimitTarget:
 				if (base1 < 0) {
 					if (-base1 == spell.targettype) //Exclude
@@ -4715,11 +4710,6 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_LimitManaMin:
 			if(spell.mana < focus_spell.base[i])
-				return 0;
-			break;
-
-		case SE_LimitManaMax:
-			if(spell.mana > focus_spell.base[i])
 				return 0;
 			break;
 

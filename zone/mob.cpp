@@ -3419,6 +3419,8 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 {
 	int skilldmg_mod = 0;
 
+	int16 MeleeVuln = spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
+
 	// All skill dmg mod + Skill specific
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
@@ -3426,6 +3428,8 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	//Innate SetSkillDamgeTaken(skill,value)
 	if ((SkillDmgTaken_Mod[skill_used]) || (SkillDmgTaken_Mod[HIGHEST_SKILL+1]))
 		skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+
+	skilldmg_mod += MeleeVuln;
 
 	if(skilldmg_mod < -100)
 		skilldmg_mod = -100;
@@ -3452,7 +3456,8 @@ bool Mob::TryFadeEffect(int slot)
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
-			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnFadeEffectAlways || spells[buffs[slot].spellid].effectid[i] == SE_CastOnRuneFadeEffect)
+			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnFadeEffectAlways || 
+				spells[buffs[slot].spellid].effectid[i] == SE_CastOnRuneFadeEffect)
 			{
 				uint16 spell_id = spells[buffs[slot].spellid].base[i];
 				BuffFadeBySlot(slot);
