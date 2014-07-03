@@ -36,7 +36,7 @@
 #define EFFECT_COUNT 12
 #define MAX_SPELL_TRIGGER 12	// One for each slot(only 6 for AA since AA use 2)
 #define MAX_RESISTABLE_EFFECTS 12	// Number of effects that are typcially checked agianst resists.
-#define MaxLimitInclude 12 //Number(x 0.5) of focus Limiters that have inclusive checksm used when calcing focus effects
+#define MaxLimitInclude 16 //Number(x 0.5) of focus Limiters that have inclusive checks used when calcing focus effects
 
 const int Z_AGGRO=10;
 
@@ -436,7 +436,7 @@ typedef enum {
 #define SE_FcDamageAmt					286	// implemented - adds direct spell damage
 #define SE_SpellDurationIncByTic		287 // implemented
 #define SE_SpecialAttackKBProc			288	// implemented[AA] - Chance to to do a knockback from special attacks [AA Dragon Punch].
-#define SE_ImprovedSpellEffect			289 // implemented - Triggers only if fades after natural duration.
+#define SE_CastOnFadeEffect				289 // implemented - Triggers only if fades after natural duration.
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
 #define SE_Purify						291 // implemented - Removes determental effects
 #define SE_StrikeThrough2				292	// implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
@@ -480,7 +480,7 @@ typedef enum {
 #define SE_CriticalDamageMob			330	// implemented
 #define SE_Salvage						331 // implemented - chance to recover items that would be destroyed in failed tradeskill combine
 //#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp)
-#define SE_EffectOnFade					333 // implemented
+#define SE_CastOnRuneFadeEffect					333 // implemented
 #define SE_BardAEDot					334	// implemented
 #define SE_BlockNextSpellFocus			335	// implemented - base1 chance to block next spell ie Puratus (8494)
 //#define SE_IllusionaryTarget			336	// not used
@@ -520,11 +520,11 @@ typedef enum {
 #define SE_ResistCorruption				370	// implemented
 #define SE_AttackSpeed4					371 // implemented - stackable slow effect 'Inhibit Melee'
 //#define SE_ForageSkill				372	// *not implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
-#define SE_CastOnWearoff				373 // implemented - Triggers only if fades after natural duration.
+#define SE_CastOnFadeEffectAlways		373 // implemented - Triggers if fades after natural duration OR from rune/numhits fades.
 #define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
 //#define SE_Fling						376	// *not implemented - used in 2 test spells  (12945 | Movement Test Spell 1) 
-#define SE_BossSpellTrigger				377	// implemented - Triggers only if fades after natural duration.
+#define SE_CastOnFadeEffectNPC			377	// implemented - Triggers only if fades after natural duration (On live these are usually players spells that effect an NPC).
 #define SE_SpellEffectResistChance		378	// implemented - Increase chance to resist specific spell effect (base1=value, base2=spell effect id)
 #define SE_ShadowStepDirectional		379 // implemented - handled by client
 #define SE_Knockdown					380 // implemented - small knock back(handled by client)
@@ -550,8 +550,8 @@ typedef enum {
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
 #define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
 #define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
-//#define SE_LimitSpellClass			403 // *not implemented - unclear what this refers too (not 'right click' spell bar)
-//#define SE_LimitSpellSubclass			404 // *not implemented - unclear what this refers too (not 'right click' spell bar)
+#define SE_LimitSpellClass				403 // implemented - Limits to specific types of spells (see CheckSpellCategory)
+#define SE_LimitSpellSubclass			404 // *not implemented - Limits to specific types of spells (see CheckSpellCategory) [Categories NOT defined yet]
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
 #define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied) 
@@ -787,6 +787,7 @@ bool IsSummonSpell(uint16 spellid);
 bool IsEvacSpell(uint16 spellid);
 bool IsDamageSpell(uint16 spellid);
 bool IsFearSpell(uint16 spellid);
+bool IsCureSpell(uint16 spellid);
 bool BeneficialSpell(uint16 spell_id);
 bool GroupOnlySpell(uint16 spell_id);
 int GetSpellEffectIndex(uint16 spell_id, int effect);

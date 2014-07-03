@@ -231,6 +231,8 @@ public:
 	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id);
 	void ResourceTap(int32 damage, uint16 spell_id);
 	void TryTriggerThreshHold(int32 damage, int effect_id, Mob* attacker);
+	bool CheckSpellCategory(uint16 spell_id, int category_id, int effect_id);
+	
 
 	//Buff
 	void BuffProcess();
