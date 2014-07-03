@@ -184,7 +184,7 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 }
 
 
-//Lieka: Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
+//Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
 bool Database::CheckBannedIPs(const char* loginIP)
 {
 	char *query = nullptr;
@@ -207,18 +207,20 @@ bool Database::CheckBannedIPs(const char* loginIP)
 
 bool Database::AddBannedIP(char* bannedIP, const char* notes)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes), errbuf)) {
-		std::cerr << "Error in ReserveName query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes));
+
+	safe_delete_array(query);
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in ReserveName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
-	safe_delete_array(query);
+	
 	return true;
 }
- //End Lieka Edit
 
  bool Database::CheckGMIPs(const char* ip_address, uint32 account_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
