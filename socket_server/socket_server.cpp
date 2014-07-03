@@ -64,7 +64,7 @@ void CatchSignal(int sig_num) {
 		worldserver->Disconnect();
 }
 
-/* Web Sockets Start Shit */
+/* Web Sockets Start */
 
 enum action_type {
 	SUBSCRIBE,
@@ -135,7 +135,7 @@ public:
 	void on_message(connection_hdl hdl, server::message_ptr msg) {
 		// queue message up for sending by processing thread
 		unique_lock<mutex> lock(m_action_lock);
-		msg->set_payload("Niggers");
+		msg->set_payload("Test Message");
 		// std::cout << "on_message" << std::endl;
 		m_actions.push(action(MESSAGE, hdl, msg));
 		lock.unlock();
@@ -188,7 +188,7 @@ private:
 	condition_variable m_action_cond;
 };
 
-/* Web Sockets Shit End*/
+/* Web Sockets Shit */
 
 int main() {
 
