@@ -1317,18 +1317,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_TriggerMeleeThreshold:
-			{
-				buffs[buffslot].melee_rune = spells[spell_id].base2[i];
-				break;
-			}
-			
-			case SE_TriggerSpellThreshold:
-			{
-				buffs[buffslot].magic_rune = spells[spell_id].base2[i];
-				break;
-			}
-
 			case SE_DistanceRemoval:
 			{
 				buffs[buffslot].caston_x = int(GetX());	
@@ -2864,10 +2852,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_FcTwincast:
 			case SE_DelayDeath:
 			case SE_InterruptCasting:
-			case SE_ImprovedSpellEffect:
-			case SE_BossSpellTrigger:
-			case SE_CastOnWearoff:
-			case SE_EffectOnFade:
+			case SE_CastOnFadeEffect:
+			case SE_CastOnFadeEffectNPC:
+			case SE_CastOnFadeEffectAlways:
+			case SE_CastOnRuneFadeEffect:
 			case SE_MaxHPChange:
 			case SE_SympatheticProc:
 			case SE_FcDamageAmt:
@@ -2982,6 +2970,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_FinishingBlowLvl:
 			case SE_Assassinate:
 			case SE_AssassinateLevel:
+			case SE_FactionModPct:
 			{
 				break;
 			}
@@ -3569,9 +3558,9 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				break;
 			}
 			// These effects always trigger when they fade.
-			case SE_ImprovedSpellEffect:
-			case SE_BossSpellTrigger:
-			case SE_CastOnWearoff:
+			case SE_CastOnFadeEffect:
+			case SE_CastOnFadeEffectNPC:
+			case SE_CastOnFadeEffectAlways:
 			{
 				if (ticsremaining == 1)
 				{
@@ -5378,7 +5367,7 @@ void Mob::CheckNumHitsRemaining(uint8 type, uint32 buff_slot, uint16 spell_id)
 	2:  [Outgoing Hit Attempts]  (185=SE_DamageModifer, 184=SE_HitChance)
 	3:  [Incoming Spells]  (180=SE_ResistSpellChance, 296=SE_FcSpellVulnerability) //Note: Determinetal spells only unless proven otherwise
 	4:  [Outgoing Spells]
-	5:  [Outgoing Hit Successes] (220=SE_SkillDamageAmount, 178=SE_MeleeLifetap, 121=SE_ReverseDS, ?373=SE_CastOnWearoff)
+	5:  [Outgoing Hit Successes] (220=SE_SkillDamageAmount, 178=SE_MeleeLifetap, 121=SE_ReverseDS, ?373=SE_CastOnFadeEffectAlways)
 	6:  [Incoming Hit Successes] (59=SE_DamageShield, 197=SE_SkillDamageTaken, 162=define SE_MitigateMeleeDamage)
 	7:  [Matching Spells] *When focus is triggered (focus effects)
 	8:  [Incoming Hits or Spells] (329=SE_ManaAbsorbPercentDamage)
@@ -6312,3 +6301,48 @@ void Mob::ResourceTap(int32 damage, uint16 spellid){
 		}
 	}
 }
+
+void Mob::TryTriggerThreshHold(int32 damage, int effect_id,  Mob* attacker){
+	
+	if (damage <= 0)
+		return;
+
+	if ((SE_TriggerMeleeThreshold == effect_id) && !spellbonuses.TriggerMeleeThreshold )
+		return;
+	else if ((SE_TriggerSpellThreshold == effect_id) && !spellbonuses.TriggerSpellThreshold)
+		return;
+
+	int buff_count = GetMaxTotalSlots();
+
+	for(int slot = 0; slot < buff_count; slot++) {
+
+		if(IsValidSpell(buffs[slot].spellid)){
+
+			for(int i = 0; i < EFFECT_COUNT; i++){
+
+				if (spells[buffs[slot].spellid].effectid[i] == effect_id){
+
+					uint16 spell_id = spells[buffs[slot].spellid].base[i];
+
+					if (damage > spells[buffs[slot].spellid].base2[i]){
+					
+						BuffFadeBySlot(slot);
+
+						if (IsValidSpell(spell_id)) {
+
+							if (IsBeneficialSpell(spell_id)) 
+								SpellFinished(spell_id, this, 10, 0, -1, spells[spell_id].ResistDiff);
+						
+							else if(attacker) 
+								SpellFinished(spell_id, attacker, 10, 0, -1, spells[spell_id].ResistDiff);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+			
