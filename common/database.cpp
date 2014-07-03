@@ -223,24 +223,17 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
 }
 
  bool Database::CheckGMIPs(const char* ip_address, uint32 account_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			mysql_free_result(result);
-			return true;
-		} else {
-			mysql_free_result(result);
-			return false;
-		}
-		mysql_free_result(result);
+	char *query = nullptr;
 
-	} else {
-		safe_delete_array(query);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id));
+
+	safe_delete_array(query);
+
+	if (!results.Success())
 		return false;
-	}
+
+	if (results.RowCount() == 1)
+		return true;
 
 	return false;
 }
