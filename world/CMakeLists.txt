@@ -23,6 +23,7 @@ SET(world_sources
 	perl_EQW.cpp
 	perl_HTTPRequest.cpp
 	queryserv.cpp
+	socket_server.cpp
 	ucs.cpp
 	wguild_mgr.cpp
 	world_logsys.cpp
@@ -53,6 +54,7 @@ SET(world_headers
 	LoginServerList.h
 	net.h
 	queryserv.h
+	socket_server.h
 	SoFCharCreateData.h
 	ucs.h
 	wguild_mgr.h
