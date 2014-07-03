@@ -747,27 +747,29 @@ the name "name" or zero if no character with that name was found
 Zero will also be returned if there is a database error.
 */
 uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT account_id, id FROM character_ WHERE name='%s'", charname), errbuf, &result)) {
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT account_id, id FROM character_ WHERE name='%s'", charname));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in GetAccountIDByChar query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-			uint32 tmp = atoi(row[0]); // copy to temp var because gotta free the result before exitting this function
-			if (oCharID)
-				*oCharID = atoi(row[1]);
-			mysql_free_result(result);
-			return tmp;
-		}
-		mysql_free_result(result);
+		return 0;
 	}
-	else {
-		std::cerr << "Error in GetAccountIDByChar query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+
+	safe_delete_array(query);
+
+	if (results.RowCount() == 1)
+	{
+		auto row = results.begin();
+
+		uint32 accountId = atoi(row[0]);
+
+		if (oCharID)
+			*oCharID = atoi(row[1]);
+
+		return accountId;
 	}
 
 	return 0;
