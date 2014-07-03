@@ -196,33 +196,22 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 //Lieka: Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
 bool Database::CheckBannedIPs(const char* loginIP)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	//std::cout << "Checking against Banned IPs table."<< std::endl; //Lieka: Debugging
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0)
-		{
-			//std::cout << loginIP << " was present in the banned IPs table" << std::endl; //Lieka: Debugging
-			mysql_free_result(result);
-			return true;
-		}
-		else
-		{
-			//std::cout << loginIP << " was not present in the banned IPs table." << std::endl; //Lieka: Debugging
-			mysql_free_result(result);
-			return false;
-		}
-		mysql_free_result(result);
-	}
-	else
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP));
+
+	safe_delete_array(query);
+
+	if (!results.Success())
 	{
-		std::cerr << "Error in CheckBannedIPs query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+		std::cerr << "Error in CheckBannedIPs query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return true;
 	}
-	return true;
+
+	if (results.RowCount() != 0)
+		return true;
+
+	return false;
 }
 
 bool Database::AddBannedIP(char* bannedIP, const char* notes)
