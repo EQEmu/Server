@@ -1003,7 +1003,7 @@ bool IsSuspendableSpell(uint16 spell_id)
 uint32 GetMorphTrigger(uint32 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i)
-		if (spells[spell_id].effectid[i] == SE_ImprovedSpellEffect)
+		if (spells[spell_id].effectid[i] == SE_CastOnFadeEffect)
 			return spells[spell_id].base[i];
 
 	return 0;
@@ -1012,9 +1012,9 @@ uint32 GetMorphTrigger(uint32 spell_id)
 bool IsCastonFadeDurationSpell(uint16 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
-		if (spells[spell_id].effectid[i] == SE_ImprovedSpellEffect
-			|| spells[spell_id].effectid[i] == SE_BossSpellTrigger
-			|| spells[spell_id].effectid[i] == SE_CastOnWearoff){
+		if (spells[spell_id].effectid[i] == SE_CastOnFadeEffect
+			|| spells[spell_id].effectid[i] == SE_CastOnFadeEffectNPC
+			|| spells[spell_id].effectid[i] == SE_CastOnFadeEffectAlways){
 
 		return true;
 		}
