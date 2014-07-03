@@ -165,13 +165,16 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 		"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
 		tmpUN, tmpPW, tmpPW));
 
-	safe_delete_array(query);
+	
 
 	if (!results.Success())
 	{
+		safe_delete_array(query);
 		std::cerr << "Error in CheckLogin query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
+
+	safe_delete_array(query);
 
 	auto row = results.begin();
 
@@ -191,13 +194,15 @@ bool Database::CheckBannedIPs(const char* loginIP)
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP));
 
-	safe_delete_array(query);
-
+	
 	if (!results.Success())
 	{
 		std::cerr << "Error in CheckBannedIPs query '" << query << "' " << results.ErrorMessage() << std::endl;
+		safe_delete_array(query);
 		return true;
 	}
+
+	safe_delete_array(query);
 
 	if (results.RowCount() != 0)
 		return true;
@@ -211,14 +216,15 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes));
 
-	safe_delete_array(query);
-
 	if (!results.Success())
 	{
 		std::cerr << "Error in ReserveName query '" << query << "' " << results.ErrorMessage() << std::endl;
+		safe_delete_array(query);
 		return false;
 	}
-	
+
+	safe_delete_array(query);
+
 	return true;
 }
 
@@ -250,12 +256,13 @@ bool Database::AddGMIP(char* ip_address, char* name) {
 
 void Database::LoginIP(uint32 AccountID, const char* LoginIP)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP), errbuf)) {
-		std::cerr << "Error in Log IP query '" << query << "' " << errbuf << std::endl;
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP));
+
+	if (!results.Success())
+		std::cerr << "Error in Log IP query '" << query << "' " << results.ErrorMessage() << std::endl;
+
 	safe_delete_array(query);
 }
 
