@@ -417,8 +417,8 @@ protected:
 	std::vector<AISpellsEffects_Struct> AIspellsEffects;
 	bool HasAISpellEffects;
 	
-	uint32	max_dmg;
-	uint32	min_dmg;
+	int32	max_dmg;
+	int32	min_dmg;
 	int32	accuracy_rating;
 	int16	attack_count;
 	uint32	npc_mana;

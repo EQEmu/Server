@@ -4659,13 +4659,13 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	return 0;
 }
 
-int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
+int32 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 	if (IsBardSong(spell_id) && type != focusFcBaseEffects)
 		return 0;
 
-	int16 realTotal = 0;
-	int16 realTotal2 = 0;
-	int16 realTotal3 = 0;
+	int32 realTotal = 0;
+	int32 realTotal2 = 0;
+	int32 realTotal3 = 0;
 	bool rand_effectiveness = false;
 
 	if((type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage) && RuleB(Spells, LiveLikeFocusEffects))
@@ -4675,9 +4675,9 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		const Item_Struct* TempItem = 0;
 		const Item_Struct* UsedItem = 0;
 		uint16 UsedFocusID = 0;
-		int16 Total = 0;
-		int16 focus_max = 0;
-		int16 focus_max_real = 0;
+		int32 Total = 0;
+		int32 focus_max = 0;
+		int32 focus_max_real = 0;
 
 		for(int x=0; x<=21; x++) {
 			TempItem = nullptr;
@@ -4795,9 +4795,9 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 	}
 
 	if (spellbonuses.FocusEffects[type]) {
-		int16 Total2 = 0;
-		int16 focus_max2 = 0;
-		int16 focus_max_real2 = 0;
+		int32 Total2 = 0;
+		int32 focus_max2 = 0;
+		int32 focus_max_real2 = 0;
 
 		int buff_tracker = -1;
 		int buff_slot = 0;
@@ -4846,7 +4846,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 
 
 	if (aabonuses.FocusEffects[type]) {
-		int16 Total3 = 0;
+		int32 Total3 = 0;
 		uint32 slots = 0;
 		uint32 aa_AA = 0;
 		uint32 aa_value = 0;

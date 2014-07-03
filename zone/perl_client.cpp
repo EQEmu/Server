@@ -2953,9 +2953,9 @@ XS(XS_Client_GetItemIDAt)
 		Perl_croak(aTHX_ "Usage: Client::GetItemIDAt(THIS, slot_id)");
 	{
 		Client *		THIS;
-		uint32		RETVAL;
+		int32			RETVAL;
 		dXSTARG;
-		int16		slot_id = (int16)SvIV(ST(1));
+		int16			slot_id = (int16)SvIV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -2967,7 +2967,7 @@ XS(XS_Client_GetItemIDAt)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetItemIDAt(slot_id);
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -2980,10 +2980,10 @@ XS(XS_Client_GetAugmentIDAt)
 		Perl_croak(aTHX_ "Usage: Client::GetAugmentIDAt(THIS, slot_id, augslot)");
 	{
 		Client *		THIS;
-		int32		RETVAL;
+		int32			RETVAL;
 		dXSTARG;
-		int16		slot_id = (int16)SvIV(ST(1));
-		int16		augslot = (uint8)SvIV(ST(2));
+		int16			slot_id = (int16)SvIV(ST(1));
+		int16			augslot = (uint8)SvIV(ST(2));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -3065,31 +3065,22 @@ XS(XS_Client_SummonItem)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		if (items > 2) {
+		if (items > 2)
 			charges = (int16)SvIV(ST(2));
-		}
-		if (items > 3) {
+		if (items > 3)
 			attune = (bool)SvTRUE(ST(3));
-		}
-		if (items > 4) {
+		if (items > 4)
 			aug1 = (uint32)SvUV(ST(4));
-		}
-		if (items > 5) {
+		if (items > 5)
 			aug2 = (uint32)SvUV(ST(5));
-		}
-		if (items > 6) {
+		if (items > 6)
 			aug3 = (uint32)SvUV(ST(6));
-		}
-		if (items > 7) {
+		if (items > 7)
 			aug4 = (uint32)SvUV(ST(7));
-		}
-		if (items > 8) {
+		if (items > 8)
 			aug5 = (uint32)SvUV(ST(8));
-		}
-		if (items > 9) {
+		if (items > 9)
 			slot_id = (uint16)SvUV(ST(9));
-		}
-
 		THIS->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, attune, slot_id);
 	}
 	XSRETURN_EMPTY;
@@ -4501,12 +4492,13 @@ XS(XS_Client_ReadBook); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ReadBook)
 {
 	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ReadBook(THIS, Book Text, Type)");
+	if (items > 4 || items < 3)
+		Perl_croak(aTHX_ "Usage: Client::ReadBook(THIS, Book Name, Type, Text?)");
 	{
 		Client *		THIS;
-		char*			in_txt = (char *)SvPV_nolen(ST(1));
+		char*			name = (char *)SvPV_nolen(ST(1));
 		uint8			type = (uint8)SvUV(ST(2));
+		bool			text = false;
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -4516,10 +4508,13 @@ XS(XS_Client_ReadBook)
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+			
+		if (items > 2)
+			text = (bool)SvTRUE(ST(2));
 
-			THIS->QuestReadBook(in_txt, type);
+		THIS->QuestReadBook(name, type, text);
 	}
-XSRETURN_EMPTY;
+	XSRETURN_EMPTY;
 }
 
 XS(XS_Client_UpdateGroupAAs); /* prototype to pass -Wmissing-prototypes */
@@ -6137,7 +6132,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetPVPPoints"), XS_Client_GetPVPPoints, file, "$");
 		newXSproto(strcpy(buf, "GetRadiantCrystals"), XS_Client_GetRadiantCrystals, file, "$");
 		newXSproto(strcpy(buf, "GetEbonCrystals"), XS_Client_GetEbonCrystals, file, "$");
-		newXSproto(strcpy(buf, "ReadBook"), XS_Client_ReadBook, file, "$$$");
+		newXSproto(strcpy(buf, "ReadBook"), XS_Client_ReadBook, file, "$$$;$");
 		newXSproto(strcpy(buf, "UpdateGroupAAs"), XS_Client_UpdateGroupAAs, file, "$$$");
 		newXSproto(strcpy(buf, "GetGroupPoints"), XS_Client_GetGroupPoints, file, "$");
 		newXSproto(strcpy(buf, "GetRaidPoints"), XS_Client_GetRaidPoints, file, "$");

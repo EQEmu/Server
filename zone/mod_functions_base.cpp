@@ -155,13 +155,13 @@ int32 Mob::mod_backstab_damage(int32 ndamage) { return(ndamage); }
 int Mob::mod_archery_bonus_chance(int bonuschance, const ItemInst* RangeWeapon) { return(bonuschance); }
 
 //Archery bonus damage
-uint32 Mob::mod_archery_bonus_damage(uint32 MaxDmg, const ItemInst* RangeWeapon) { return(MaxDmg); }
+int32 Mob::mod_archery_bonus_damage(int32 MaxDmg, const ItemInst* RangeWeapon) { return(MaxDmg); }
 
 //Final archery damage including bonus if it was applied.
 int32 Mob::mod_archery_damage(int32 TotalDmg, bool hasbonus, const ItemInst* RangeWeapon) { return(TotalDmg); }
 
 //Thrown weapon damage after all other calcs
-uint32 Mob::mod_throwing_damage(uint32 MaxDmg) { return(MaxDmg); }
+int32 Mob::mod_throwing_damage(int32 MaxDmg) { return(MaxDmg); }
 
 //Spell cast time in milliseconds - will not sync with client cast time bar, but does work.
 int32 Mob::mod_cast_time(int32 cast_time) { return(cast_time); }

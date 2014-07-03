@@ -88,8 +88,8 @@ struct NPCType
 	uint32	drakkin_tattoo;
 	uint32	drakkin_details;
 	uint32	armor_tint[_MaterialCount];
-	uint32	min_dmg;
-	uint32	max_dmg;
+	int32	min_dmg;
+	int32	max_dmg;
 	int16	attack_count;
 	char special_abilities[512];
 	uint16	d_melee_texture1;

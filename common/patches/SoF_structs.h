@@ -2836,8 +2836,8 @@ struct Make_Pet_Struct { //Simple struct for getting pet info
 	uint8 pettype;
 	float size;
 	uint8 type;
-	uint32 min_dmg;
-	uint32 max_dmg;
+	int32 min_dmg;
+	int32 max_dmg;
 };
 struct Ground_Spawn{
 	float max_x;

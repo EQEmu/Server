@@ -2820,7 +2820,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining) 
 	return value;
 }
 
-int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used) {
+int32 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used) {
 	int skilldmg_mod = 0;
 	skilldmg_mod += (itembonuses.SkillDmgTaken[HIGHEST_SKILL + 1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL + 1] + itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used]);
 
@@ -3362,7 +3362,7 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill) {
 	int dmg_mod = 0;
 	dmg_mod += (itembonuses.DamageModifier[HIGHEST_SKILL + 1] + spellbonuses.DamageModifier[HIGHEST_SKILL + 1] + aabonuses.DamageModifier[HIGHEST_SKILL + 1] + itembonuses.DamageModifier[skill] + spellbonuses.DamageModifier[skill] + aabonuses.DamageModifier[skill]);
 	if (HasShieldEquiped() && !IsOffHandAtk())
-		dmg_mod += itembonuses.ShieldEquipDmgMod[0] + spellbonuses.ShieldEquipDmgMod[0] + aabonuses.ShieldEquipDmgMod[0];
+		dmg_mod += (itembonuses.ShieldEquipDmgMod[0] + spellbonuses.ShieldEquipDmgMod[0] + aabonuses.ShieldEquipDmgMod[0]);
 		
 	if(dmg_mod < -100)
 		dmg_mod = -100;
@@ -3390,8 +3390,8 @@ int16 Mob::GetSkillReuseTime(uint16 skill) {
 	return skill_reduction;
 }
 
-uint32 Mob::GetSkillDmgAmt(uint16 skill) {
-	uint32 skill_dmg = 0;
+int32 Mob::GetSkillDmgAmt(uint16 skill) {
+	int32 skill_dmg = 0;
 	skill_dmg += (spellbonuses.SkillDamageAmount[HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount[HIGHEST_SKILL + 1] + aabonuses.SkillDamageAmount[HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount[skill] + spellbonuses.SkillDamageAmount[skill] + aabonuses.SkillDamageAmount[skill]);
 	skill_dmg += (spellbonuses.SkillDamageAmount2[HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount2[HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount2[skill] + spellbonuses.SkillDamageAmount2[skill]);
 	return skill_dmg;
@@ -3690,7 +3690,7 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 	if (!IsValidSpell(spell_id))
 		return false;
 
-	int spell_level = spells[spell_id].classes[(GetClass()%16) - 1]; 
+	int spell_level = spells[spell_id].classes[(GetClass() % 16) - 1]; 
 	int effect_value = 0;
 	int lvlModifier = 100;
 
@@ -4057,8 +4057,8 @@ const char* Mob::GetGlobal(const char* varname, uint32 charid, uint32 npcid, uin
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	charid = !charid ? 0 : charid;
-	zoneid = !zoneid ? 0 : npcid;
-	npcid =  !npcid  ? 0 : zoneid;
+	zoneid = !zoneid ? 0 : zoneid;
+	npcid =  !npcid  ? 0 : npcid;
 	MYSQL_RES* result;
 	MYSQL_ROW row;
 	if(database.RunQuery(query, MakeAnyLenString(&query, "SELECT value FROM quest_globals WHERE name = '%s' AND (charid = '%u' || charid = '0') AND (npcid = '%u' || npcid = '0') AND (zoneid = '%u' || zoneid = '0')", varname, charid, npcid, zoneid), errbuf, &result)) {

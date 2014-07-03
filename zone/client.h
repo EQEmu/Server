@@ -209,7 +209,7 @@ public:
 	virtual Raid* GetRaid() { return entity_list.GetRaidByClient(this); }
 	virtual Group* GetGroup() { return entity_list.GetGroupByClient(this); }
 	virtual inline bool IsBerserk() { return berserk; }
-	virtual uint32 GetMeleeMitDmg(Mob *attacker, uint32 damage, uint32 minhit, float mit_rating, float atk_rating);
+	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
 
 	void	AI_Init();
 	void	AI_Start(uint32 iMoveDelay = 0);
@@ -611,7 +611,7 @@ public:
 	void	Stun(int duration);
 	void	UnStun();
 	void	ReadBook(BookRequest_Struct *book);
-	void	QuestReadBook(const char* text, uint8 type);
+	void	QuestReadBook(const char* name, uint8 type, bool text);
 	void	SendClientMoneyUpdate(uint8 type,uint32 amount);
 	void	SendMoneyUpdate();
 	bool	TakeMoneyFromPP(uint64 copper, bool updateclient=false);
@@ -753,7 +753,7 @@ public:
 	void	SetTint(int16 slot_id, Color_Struct& color);
 	void	SetMaterial(int16 slot_id, uint32 item_id);
 	void	Undye();
-	uint32	GetItemIDAt(int16 slot_id);
+	int32	GetItemIDAt(int16 slot_id);
 	int32	GetAugmentIDAt(int16 slot_id, uint8 augslot);
 	bool	PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update = false);
 	bool	PushItemOnCursor(const ItemInst& inst, bool client_update = false);
@@ -1132,7 +1132,7 @@ protected:
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
 	bool client_data_loaded;
 
-	int16	GetFocusEffect(focusType type, uint16 spell_id);
+	int32	GetFocusEffect(focusType type, uint16 spell_id);
 	int16	GetSympatheticFocusEffect(focusType type, uint16 spell_id);
 
 	Mob*	bind_sight_target;

@@ -1822,8 +1822,8 @@ void Client::ReadBook(BookRequest_Struct *book) {
 	}
 }
 
-void Client::QuestReadBook(const char* text, uint8 type) {
-	std::string booktxt2 = text;
+void Client::QuestReadBook(const char* name, uint8 type, bool text) {
+	std::string booktxt2 = text ? name:database.GetBook(name);
 	int length = booktxt2.length();
 	if (booktxt2[0] != '\0') {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));

@@ -220,8 +220,6 @@ int command_init(void) {
 		command_add("revoke","[Character Name] [0|1] - Makes charname unable to talk on OOC",200,command_revoke) ||
 		command_add("checklos","- Check for line of sight to your target",50,command_checklos) ||
 		command_add("setadventurepoints","- Set your or your player target's available adventure points",150,command_set_adventure_points) ||
-		command_add("npcsay","[Message] - Make your NPC target say a message.",150,command_npcsay) ||
-		command_add("npcshout","[Message] - Make your NPC target shout a message.",150,command_npcshout) ||
 		command_add("timers","- Display persistent timers for target",200,command_timers) ||
 		command_add("logsql","- enable SQL logging",200,command_logsql) ||
 		command_add("groupinfo","- get group info on target.",20,command_groupinfo) ||
@@ -4460,20 +4458,6 @@ void command_set_adventure_points(Client *c, const Seperator *sep) {
 
 	c->Message(0, "Updating adventure points for %s", t->GetName());
 	t->UpdateLDoNPoints(atoi(sep->arg[1]), atoi(sep->arg[2]));
-}
-
-void command_npcsay(Client *c, const Seperator *sep) {
-	if(c->GetTarget() && c->GetTarget()->IsNPC() && sep->arg[1][0])
-		c->GetTarget()->Say(sep->argplus[1]);
-	else
-		c->Message(0, "Usage: #npcsay [Message]");
-}
-
-void command_npcshout(Client *c, const Seperator *sep) {
-	if(c->GetTarget() && c->GetTarget()->IsNPC() && sep->arg[1][0])
-		c->GetTarget()->Shout(sep->argplus[1]);
-	else
-		c->Message(0, "Usage: #npcshout [Message]");
 }
 
 void command_timers(Client *c, const Seperator *sep) {

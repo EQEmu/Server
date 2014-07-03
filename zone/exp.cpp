@@ -154,7 +154,6 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	aaexp += had_aaexp;
 	if(aaexp < had_aaexp)
 		aaexp = had_aaexp;
-
 	SetEXP(exp, aaexp, resexp);
 }
 
@@ -211,7 +210,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool ismRessurectionExp) {
 
 		set_aaxp = (set_aaxp - (max_AAXP * m_pp.aapoints));
 		m_pp.aapoints += last_unspentAA;
-		char val1[20]={0};
+		char val1[20] = {0};
 		Message_StringID(MT_Experience, GAIN_ABILITY_POINT,ConvertArray(m_pp.aapoints, val1),m_pp.aapoints == 1 ? "" : "(s)");
 	}
 
@@ -282,7 +281,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool ismRessurectionExp) {
 		char val1[20] = {0};
 		char val2[20] = {0};
 		char val3[20] = {0};
-		Message_StringID(MT_Experience, GM_GAINXP,ConvertArray(set_aaxp,val1),ConvertArray(set_exp,val2),ConvertArray(GetEXPForLevel(GetLevel()+1),val3));
+		Message_StringID(MT_Experience, GM_GAINXP,ConvertArray(set_aaxp,val1),ConvertArray(set_exp,val2),ConvertArray(GetEXPForLevel(GetLevel() + 1),val3));
 	}
 }
 

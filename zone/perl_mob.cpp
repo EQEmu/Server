@@ -7643,9 +7643,9 @@ XS(XS_Mob_ModSkillDmgTaken)
 	if (items != 3)
 		Perl_croak(aTHX_ "Usage: Mob::ModSkillDmgTaken(THIS, skill, value)");
 	{
-		Mob *		THIS;
+		Mob *			THIS;
 		SkillUseTypes	skill_num = (SkillUseTypes)SvUV(ST(1));
-		int16		value = (int16)SvIV(ST(2));
+		int32			value = (int32)SvIV(ST(2));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -7863,7 +7863,7 @@ XS(XS_Mob_DoMeleeSkillAttackDmg)
 	{
 		Mob *		THIS;
 		Mob*		target;
-		uint16		weapon_damage = (uint16)SvIV(ST(2));
+		int32		weapon_damage = (int32)SvIV(ST(2));
 		SkillUseTypes	skill = (SkillUseTypes)SvUV(ST(3));
 		int16		chance_mod = (int16)SvIV(ST(4));
 		int16		focus = (int16)SvIV(ST(5));
@@ -7903,7 +7903,7 @@ XS(XS_Mob_DoArcheryAttackDmg)
 		Mob*		target;
 		ItemInst*	RangeWeapon = nullptr;
 		ItemInst*	Ammo = nullptr;
-		uint16		weapon_damage = (uint16)SvIV(ST(4));
+		int32		weapon_damage = (int32)SvIV(ST(4));
 		int16		chance_mod = (int16)SvIV(ST(5));
 		int16		focus = (int16)SvIV(ST(6));
 
@@ -7941,7 +7941,7 @@ XS(XS_Mob_DoThrowingAttackDmg)
 		Mob*		target;
 		ItemInst*	RangeWeapon = nullptr;
 		Item_Struct* item = nullptr;
-		uint16		weapon_damage = (uint16)SvIV(ST(4));
+		int32		weapon_damage = (int32)SvIV(ST(4));
 		int16		chance_mod = (int16)SvIV(ST(5));
 		int16		focus = (int16)SvIV(ST(6));
 

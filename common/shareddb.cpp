@@ -1046,8 +1046,7 @@ const Item_Struct* SharedDatabase::IterateItems(uint32* id) {
 	return nullptr;
 }
 
-std::string SharedDatabase::GetBook(const char *txtfile)
-{
+std::string SharedDatabase::GetBook(const char *txtfile) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;

@@ -374,10 +374,10 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 			newbon->DSMitigation += item->DSMitigation;
 	}
 	
-	if (item->Worn.Effect>0 && (item->Worn.Type == ET_WornEffect))
+	if (item->Worn.Effect > 0 && (item->Worn.Type == ET_WornEffect))
 		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, true);
 
-	if (item->Focus.Effect>0 && (item->Focus.Type == ET_Focus))
+	if (item->Focus.Effect > 0 && (item->Focus.Type == ET_Focus))
 		ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0, true);
 
 	switch(item->BardType) {
@@ -559,7 +559,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon) {
 		switch (effect) {
 			case SE_Accuracy:
 				if ((base2 == -1) && (newbon->Accuracy[HIGHEST_SKILL+1] < base1))
-					newbon->Accuracy[HIGHEST_SKILL+1] = base1;
+					newbon->Accuracy[HIGHEST_SKILL + 1] = base1;
 				else if (newbon->Accuracy[base2] < base1)
 					newbon->Accuracy[base2] += base1;
 				break;
@@ -1604,12 +1604,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 						SkillDmgTaken_Mod[base2] = effect_value;
 				}
 				else {
-
 					if(base2 == -1)
 						newbon->SkillDmgTaken[HIGHEST_SKILL+1] += effect_value;
 					else
 						newbon->SkillDmgTaken[base2] += effect_value;
-
 				}
 				break;
 			case SE_TriggerOnCast:
@@ -1624,8 +1622,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				newbon->CriticalSpellChance += effect_value;
 				break;
 			case SE_CriticalSpellChance:
-				newbon->CriticalSpellChance += effect_value;
-				
+				newbon->CriticalSpellChance += effect_value;				
 				if (base2 > newbon->SpellCritDmgIncNoStack)
 					newbon->SpellCritDmgIncNoStack = base2;
 				break;
@@ -1653,7 +1650,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_MitigateDamageShield:
 				if (effect_value < 0)
 					effect_value = (effect_value * -1);
-
 				newbon->DSMitigationOffHand += effect_value;
 				break;
 			case SE_CriticalDoTChance:
@@ -2825,8 +2821,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id) {
 					}
 					break;
 				case SE_CriticalDamageMob:
-					for(int e = 0; e < (HIGHEST_SKILL + 1); e++)
-					{
+					for(int e = 0; e < (HIGHEST_SKILL + 1); e++) {
 						spellbonuses.CritDmgMob[e] = effect_value;
 						aabonuses.CritDmgMob[e] = effect_value;
 						itembonuses.CritDmgMob[e] = effect_value;
