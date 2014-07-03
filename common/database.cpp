@@ -777,25 +777,25 @@ uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
 
 // Retrieve account_id for a given char_id
 uint32 Database::GetAccountIDByChar(uint32 char_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 ret = 0;
+	char* query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT account_id FROM character_ WHERE id=%i", char_id), errbuf, &result)) {
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			ret = atoi(row[0]); // copy to temp var because gotta free the result before exitting this function
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query, errbuf);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT account_id FROM character_ WHERE id=%i", char_id));
+
+	if (!results.Success())
+	{
+		LogFile->write(EQEMuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query, results.ErrorMessage());
+		safe_delete_array(query);
+		return 0;
 	}
 
 	safe_delete_array(query);
-	return ret;
+
+	if (results.RowCount() != 1)
+		return 0;
+
+	auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* lsid) {
