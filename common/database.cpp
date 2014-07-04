@@ -1768,15 +1768,13 @@ void Database::SetLFG(uint32 CharID, bool LFG) {
 }
 
 void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) {
+	char *query = nullptr;
 
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
-	char *Query = 0;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "update character_ set firstlogon=%i where id=%i",firstlogon, CharID));
+	safe_delete_array(query);
 
-	if (!RunQuery(Query, MakeAnyLenString(&Query, "update character_ set firstlogon=%i where id=%i",firstlogon, CharID), ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error updating firstlogon for character %i : %s", CharID, ErrBuf);
-
-	safe_delete_array(Query);
-
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error updating firstlogon for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
 void Database::AddReport(std::string who, std::string against, std::string lines)
