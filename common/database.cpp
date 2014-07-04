@@ -1380,25 +1380,27 @@ uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* o
 }
 
 void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name, status FROM account WHERE id=%i", id), errbuf, &result))
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT name, status FROM account WHERE id=%i", id));
+
+	if (!results.Success())
 	{
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			if (oAccountName)
-				strcpy(oAccountName, row[0]);
-			if (oStatus)
-				*oStatus = atoi(row[1]);
-		}
-		mysql_free_result(result);
+		std::cerr << "Error in GetAccountFromID query '" << query << "' " << results.ErrorMessage() << std::endl;
+		safe_delete_array(query);
+		return;
 	}
-	else
-		std::cerr << "Error in GetAccountFromID query '" << query << "' " << errbuf << std::endl;
 	safe_delete_array(query);
+
+	if (results.RowCount() != 1)
+		return;
+
+	auto row = results.begin();
+
+	if (oAccountName)
+		strcpy(oAccountName, row[0]);
+	if (oStatus)
+		*oStatus = atoi(row[1]);
 }
 
 void Database::ClearMerchantTemp(){
