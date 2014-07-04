@@ -1093,7 +1093,7 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 
 
 bool Database::GetZoneLongName(const char* short_name, char** long_name, char* file_name, float* safe_x, float* safe_y, float* safe_z, uint32* graveyard_id, uint32* maxclients) {
-	char *query = 0;
+	char *query = nullptr;
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT long_name, file_name, safe_x, safe_y, safe_z, graveyard_id, maxclients FROM zone WHERE short_name='%s' AND version=0", short_name));
 
