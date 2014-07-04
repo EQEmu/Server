@@ -7,8 +7,8 @@
 #endif
 
 #include <mysql.h>
-#include <../common/types.h>
-#include <../common/MySQLRequestRow.h>
+#include "../common/types.h"
+#include "../common/MySQLRequestRow.h"
 #include <string>
 #include <string.h>
 #include <limits.h>
