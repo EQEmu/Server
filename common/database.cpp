@@ -1506,7 +1506,7 @@ bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
 	
 	if (!results.Success())
 	{
-		std::cerr << "Error in MoveCharacterToZone(id) query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in MoveCharacterToZone(id) query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1568,7 +1568,7 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in SetHackerFlag query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in SetHackerFlag query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1665,38 +1665,38 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 }
 
 uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZoneID, uint32* oInstanceID, float* oX, float* oY, float* oZ) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, account_id, zonename, instanceid, x, y, z FROM character_ WHERE name='%s'", iName), errbuf, &result)) {
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id, account_id, zonename, instanceid, x, y, z FROM character_ WHERE name='%s'", iName));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in GetCharacterInfo query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			uint32 charid = atoi(row[0]);
-			if (oAccID)
-				*oAccID = atoi(row[1]);
-			if (oZoneID)
-				*oZoneID = GetZoneID(row[2]);
-			if(oInstanceID)
-				*oInstanceID = atoi(row[3]);
-			if (oX)
-				*oX = atof(row[4]);
-			if (oY)
-				*oY = atof(row[5]);
-			if (oZ)
-				*oZ = atof(row[6]);
-			mysql_free_result(result);
-			return charid;
-		}
-		mysql_free_result(result);
+		return 0;
 	}
-	else {
-		std::cerr << "Error in GetCharacterInfo query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
-	return 0;
+	safe_delete_array(query);
+
+	if (results.RowCount() != 1)
+		return 0;
+
+	auto row = results.begin();
+
+	uint32 charid = atoi(row[0]);
+	if (oAccID)
+		*oAccID = atoi(row[1]);
+	if (oZoneID)
+		*oZoneID = GetZoneID(row[2]);
+	if(oInstanceID)
+		*oInstanceID = atoi(row[3]);
+	if (oX)
+		*oX = atof(row[4]);
+	if (oY)
+		*oY = atof(row[5]);
+	if (oZ)
+		*oZ = atof(row[6]);
+
+	return charid;
 }
 
 bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
