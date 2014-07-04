@@ -1184,25 +1184,24 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 }
 
 bool Database::LoadZoneNames() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT zoneidnumber, short_name FROM zone"), errbuf, &result)) {
-		safe_delete_array(query);
-		while ((row = mysql_fetch_row(result))) {
-			uint32 zoneid = atoi(row[0]);
-			std::string zonename = row[1];
-			zonename_array.insert(std::pair<uint32,std::string>(zoneid,zonename));
-		}
-	}
-	else {
+	auto results = QueryDatabase(query,MakeAnyLenString(&query, "SELECT zoneidnumber, short_name FROM zone"));
+
+	if (!results.Success())
+	{
 		std::cerr << "Error in LoadZoneNames query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
-	mysql_free_result(result);
+	safe_delete_array(query);
+
+	for (auto row= results.begin();row != results.end();++row)
+	{
+		uint32 zoneid = atoi(row[0]);
+		std::string zonename = row[1];
+		zonename_array.insert(std::pair<uint32,std::string>(zoneid,zonename));
+	}
 
 	return true;
 }
