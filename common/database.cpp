@@ -1153,39 +1153,34 @@ uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 }
 
 bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid, float* graveyard_x, float* graveyard_y, float* graveyard_z, float* graveyard_heading) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT zone_id, x, y, z, heading FROM graveyard WHERE id=%i", graveyard_id), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			if(graveyard_zoneid != 0)
-				*graveyard_zoneid = atoi(row[0]);
-			if(graveyard_x != 0)
-				*graveyard_x = atof(row[1]);
-			if(graveyard_y != 0)
-				*graveyard_y = atof(row[2]);
-			if(graveyard_z != 0)
-				*graveyard_z = atof(row[3]);
-			if(graveyard_heading != 0)
-				*graveyard_heading = atof(row[4]);
-			mysql_free_result(result);
-			return true;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in GetZoneGraveyard query '" << query << "' " << errbuf << std::endl;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT zone_id, x, y, z, heading FROM graveyard WHERE id=%i", graveyard_id));
+
+	if (!results.Success()){
+		std::cerr << "Error in GetZoneGraveyard query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
+	safe_delete_array(query);
 
-	return false;
+	if (results.RowCount() != 1)
+		return false;
+
+	auto row = results.begin();
+
+	if(graveyard_zoneid != nullptr)
+		*graveyard_zoneid = atoi(row[0]);
+	if(graveyard_x != nullptr)
+		*graveyard_x = atof(row[1]);
+	if(graveyard_y != nullptr)
+		*graveyard_y = atof(row[2]);
+	if(graveyard_z != nullptr)
+		*graveyard_z = atof(row[3]);
+	if(graveyard_heading != nullptr)
+		*graveyard_heading = atof(row[4]);
+
+	return true;
 }
 
 bool Database::LoadZoneNames() {
