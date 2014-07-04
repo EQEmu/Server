@@ -1093,48 +1093,44 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 
 
 bool Database::GetZoneLongName(const char* short_name, char** long_name, char* file_name, float* safe_x, float* safe_y, float* safe_z, uint32* graveyard_id, uint32* maxclients) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT long_name, file_name, safe_x, safe_y, safe_z, graveyard_id, maxclients FROM zone WHERE short_name='%s' AND version=0", short_name), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) > 0) {
-			row = mysql_fetch_row(result);
-			if (long_name != 0) {
-				*long_name = strcpy(new char[strlen(row[0])+1], row[0]);
-			}
-			if (file_name != 0) {
-				if (row[1] == 0)
-					strcpy(file_name, short_name);
-				else
-					strcpy(file_name, row[1]);
-			}
-			if (safe_x != 0)
-				*safe_x = atof(row[2]);
-			if (safe_y != 0)
-				*safe_y = atof(row[3]);
-			if (safe_z != 0)
-				*safe_z = atof(row[4]);
-			if (graveyard_id != 0)
-				*graveyard_id = atoi(row[5]);
-			if (maxclients)
-				*maxclients = atoi(row[6]);
-			mysql_free_result(result);
-			return true;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in GetZoneLongName query '" << query << "' " << errbuf << std::endl;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT long_name, file_name, safe_x, safe_y, safe_z, graveyard_id, maxclients FROM zone WHERE short_name='%s' AND version=0", short_name));
+
+	if (!results.Success()) {
+		std::cerr << "Error in GetZoneLongName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
+	safe_delete_array(query);
 
-	return false;
+	if (results.RowCount() == 0)
+		return false;
+
+	auto row = results.begin();
+
+	if (long_name != nullptr)
+		*long_name = strcpy(new char[strlen(row[0])+1], row[0]);
+
+	if (file_name != nullptr) {
+		if (row[1] == nullptr)
+			strcpy(file_name, short_name);
+		else
+			strcpy(file_name, row[1]);
+	}
+
+	if (safe_x != nullptr)
+		*safe_x = atof(row[2]);
+	if (safe_y != nullptr)
+		*safe_y = atof(row[3]);
+	if (safe_z != nullptr)
+		*safe_z = atof(row[4]);
+	if (graveyard_id != nullptr)
+		*graveyard_id = atoi(row[5]);
+	if (maxclients != nullptr)
+		*maxclients = atoi(row[6]);
+
+	return true;
 }
 uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
