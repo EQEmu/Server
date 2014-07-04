@@ -1030,23 +1030,21 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 }
 
 uint32 Database::GetMiniLoginAccount(char* ip){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 retid = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM account WHERE minilogin_ip='%s'", ip), errbuf, &result)) {
-		safe_delete_array(query);
-		if ((row = mysql_fetch_row(result)))
-			retid = atoi(row[0]);
-		mysql_free_result(result);
-	}
-	else
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM account WHERE minilogin_ip='%s'", ip));
+
+	if (!results.Success())
 	{
 		std::cerr << "Error in GetMiniLoginAccount query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
+		return 0;
 	}
-	return retid;
+	safe_delete_array(query);
+
+	auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 // Pyro: Get zone starting points from DB
