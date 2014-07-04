@@ -1415,21 +1415,18 @@ void Database::ClearMerchantTemp(){
 }
 
 bool Database::UpdateName(const char* oldname, const char* newname) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
+	char *query = nullptr;
 
 	std::cout << "Renaming " << oldname << " to " << newname << "..." << std::endl;
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET name='%s' WHERE name='%s';", newname, oldname), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		return false;
-	}
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE character_ SET name='%s' WHERE name='%s';", newname, oldname));
 	safe_delete_array(query);
 
-	if (affected_rows == 0)
-	{
+	if (!results.Success())
 		return false;
-	}
+
+	if (results.RowsAffected() == 0)
+		return false;
 
 	return true;
 }
