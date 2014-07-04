@@ -1618,26 +1618,21 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 {
 	uint8 skill_level = 0, skill_formula = 0;
 	uint16 base_cap = 0, skill_cap = 0, skill_cap2 = 0, skill_cap3 = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
+
 	//Fetch the data from DB.
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT level, formula, pre50cap, post50cap, post60cap from skillcaps where skill = %i && class = %i", skillid, in_class), errbuf, &result, &affected_rows))
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT level, formula, pre50cap, post50cap, post60cap from skillcaps where skill = %i && class = %i", skillid, in_class));
+	safe_delete_array(query);
+
+	if (results.Success() && results.RowsAffected() != 0)
 	{
-		if (affected_rows != 0)
-		{
-			row = mysql_fetch_row(result);
-			skill_level = atoi(row[0]);
-			skill_formula = atoi(row[1]);
-			skill_cap = atoi(row[2]);
-			if (atoi(row[3]) > skill_cap)
-				skill_cap2 = (atoi(row[3])-skill_cap)/10; //Split the post-50 skill cap into difference between pre-50 cap and post-50 cap / 10 to determine amount of points per level.
-			skill_cap3 = atoi(row[4]);
-		}
-		delete[] query;
-		mysql_free_result(result);
+		auto row = results.begin();
+		skill_level = atoi(row[0]);
+		skill_formula = atoi(row[1]);
+		skill_cap = atoi(row[2]);
+		if (atoi(row[3]) > skill_cap)
+			skill_cap2 = (atoi(row[3])-skill_cap)/10; //Split the post-50 skill cap into difference between pre-50 cap and post-50 cap / 10 to determine amount of points per level.
+		skill_cap3 = atoi(row[4]);
 	}
 
 	int race_skill = GetRaceSkill(skillid,in_race);
@@ -1656,12 +1651,15 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 		base_cap = in_level*skill_formula+skill_formula;
 	if (base_cap > skill_cap || skill_formula == 0)
 		base_cap = skill_cap;
+
 	//If post 50, add post 50 cap to base cap.
 	if (in_level > 50 && skill_cap2 > 0)
 		base_cap += skill_cap2*(in_level-50);
+
 	//No cap should ever go above its post50cap
 	if (skill_cap3 > 0 && base_cap > skill_cap3)
 		base_cap = skill_cap3;
+
 	//Base cap is now the max value at the person's level, return it!
 	return base_cap;
 }
