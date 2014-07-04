@@ -1516,34 +1516,28 @@ bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
 }
 
 uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 acctid) {
-	//TODO: Rewrite better function
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 	PlayerProfile_Struct* pp;
 	ExtendedProfile_Struct* ext;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT profile, extprofile FROM character_ WHERE name='%s'", oldname), errbuf, &result)) {
-		safe_delete_array(query);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT profile, extprofile FROM character_ WHERE name='%s'", oldname));
 
-		row = mysql_fetch_row(result);
-
-		pp = (PlayerProfile_Struct*)row[0];
-		strcpy(pp->name, newname);
-
-		ext = (ExtendedProfile_Struct*)row[1];
-
-		mysql_free_result(result);
-	}
-
-	else {
-		std::cerr << "Error in CopyCharacter read query '" << query << "' " << errbuf << std::endl;
+	if (!results.Success())
+	{
+		std::cerr << "Error in CopyCharacter read query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}
+	safe_delete_array(query);
 
-	uint32 affected_rows = 0;
+	auto row = results.begin();
+
+	pp = (PlayerProfile_Struct*)row[0];
+	strcpy(pp->name, newname);
+
+	ext = (ExtendedProfile_Struct*)row[1];
+
+
 	char query2[276 + sizeof(PlayerProfile_Struct)*2 + sizeof(ExtendedProfile_Struct)*2 + 1];
 	char* end=query2;
 
@@ -1552,6 +1546,14 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 	end += sprintf(end,"\', extprofile=\'");
 	end += DoEscapeString(end, (char*) ext, sizeof(ExtendedProfile_Struct));
 	end += sprintf(end, "\', account_id=%d, name='%s'", acctid, newname);
+
+	results = QueryDatabase(query2, (uint32) (end - query2));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in CopyCharacter query '" << query2 << "' " << results.ErrorMessage() << std::endl;
+		return 0;
+	}
 
 	if (!RunQuery(query2, (uint32) (end - query2), errbuf, 0, &affected_rows)) {
 		std::cerr << "Error in CopyCharacter query '" << query << "' " << errbuf << std::endl;
