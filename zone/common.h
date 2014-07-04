@@ -348,8 +348,8 @@ struct StatBonuses {
 	uint16	SpellThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
 	uint16	MitigateSpellRune[4];				// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per spell 3 = Rune Amt
 	uint16	MitigateDotRune[4];					// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per tick 3 = Rune Amt
-	uint32	TriggerMeleeThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
-	uint32	TriggerSpellThreshold[3];			// 0 = Spell Effect ID 1 = Buff slot 2 = Damage Amount to Trigger
+	bool	TriggerMeleeThreshold;				// Has Melee Threshhold
+	bool	TriggerSpellThreshold;				// Has Spell Threshhold
 	uint16	ManaAbsorbPercentDamage[2];			// 0 = Mitigation value 1 = Buff Slot
 	int16	ShieldBlock;						// Chance to Shield Block
 	int16	BlockBehind;						// Chance to Block Behind (with our without shield)
@@ -372,6 +372,9 @@ struct StatBonuses {
 	int16	DStacker[1];						// For buff stack blocking 0=Exists 1=Effect_value
 	bool	BerserkSPA;							// berserk effect
 	int16	Metabolism;							// Food/drink consumption rates.
+	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
+	int16   FactionModPct;						// Modifies amount of faction gained.
+	int16	MeleeVulnerability;					// Weakness/mitigation to melee damage
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

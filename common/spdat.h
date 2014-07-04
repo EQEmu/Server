@@ -36,7 +36,7 @@
 #define EFFECT_COUNT 12
 #define MAX_SPELL_TRIGGER 12	// One for each slot(only 6 for AA since AA use 2)
 #define MAX_RESISTABLE_EFFECTS 12	// Number of effects that are typcially checked agianst resists.
-#define MaxLimitInclude 12 //Number(x 0.5) of focus Limiters that have inclusive checksm used when calcing focus effects
+#define MaxLimitInclude 16 //Number(x 0.5) of focus Limiters that have inclusive checks used when calcing focus effects
 
 const int Z_AGGRO=10;
 
@@ -436,7 +436,7 @@ typedef enum {
 #define SE_FcDamageAmt					286	// implemented - adds direct spell damage
 #define SE_SpellDurationIncByTic		287 // implemented
 #define SE_SpecialAttackKBProc			288	// implemented[AA] - Chance to to do a knockback from special attacks [AA Dragon Punch].
-#define SE_ImprovedSpellEffect			289 // implemented - Triggers only if fades after natural duration.
+#define SE_CastOnFadeEffect				289 // implemented - Triggers only if fades after natural duration.
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
 #define SE_Purify						291 // implemented - Removes determental effects
 #define SE_StrikeThrough2				292	// implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
@@ -455,11 +455,11 @@ typedef enum {
 #define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
 //#define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
 //#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
-#define SE_SuspendMinion				308 // not implemented as bonus
+#define SE_SuspendMinion				308 // implemented
 #define SE_GateCastersBindpoint			309 // implemented - Gate to casters bind point
 #define SE_ReduceReuseTimer				310 // implemented
 #define SE_LimitCombatSkills			311 // implemented - Excludes focus from procs (except if proc is a memorizable spell)
-//#define SE_Sanctuary					312 // *not implemented
+#define SE_Sanctuary					312 // implemented - Places caster at bottom hate list, effect fades if cast cast spell on targets other than self.
 #define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
 #define SE_Invisibility2				314 // implemented - fixed duration invisible
 #define SE_InvisVsUndead2				315 // implemented - fixed duration ITU
@@ -480,7 +480,7 @@ typedef enum {
 #define SE_CriticalDamageMob			330	// implemented
 #define SE_Salvage						331 // implemented - chance to recover items that would be destroyed in failed tradeskill combine
 //#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp)
-#define SE_EffectOnFade					333 // implemented
+#define SE_CastOnRuneFadeEffect					333 // implemented
 #define SE_BardAEDot					334	// implemented
 #define SE_BlockNextSpellFocus			335	// implemented - base1 chance to block next spell ie Puratus (8494)
 //#define SE_IllusionaryTarget			336	// not used
@@ -520,11 +520,11 @@ typedef enum {
 #define SE_ResistCorruption				370	// implemented
 #define SE_AttackSpeed4					371 // implemented - stackable slow effect 'Inhibit Melee'
 //#define SE_ForageSkill				372	// *not implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
-#define SE_CastOnWearoff				373 // implemented - Triggers only if fades after natural duration.
+#define SE_CastOnFadeEffectAlways		373 // implemented - Triggers if fades after natural duration OR from rune/numhits fades.
 #define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
 //#define SE_Fling						376	// *not implemented - used in 2 test spells  (12945 | Movement Test Spell 1) 
-#define SE_BossSpellTrigger				377	// implemented - Triggers only if fades after natural duration.
+#define SE_CastOnFadeEffectNPC			377	// implemented - Triggers only if fades after natural duration (On live these are usually players spells that effect an NPC).
 #define SE_SpellEffectResistChance		378	// implemented - Increase chance to resist specific spell effect (base1=value, base2=spell effect id)
 #define SE_ShadowStepDirectional		379 // implemented - handled by client
 #define SE_Knockdown					380 // implemented - small knock back(handled by client)
@@ -538,7 +538,7 @@ typedef enum {
 //#define SE_SummonCorpseZone			388 // *not implemented - summons a corpse from any zone(nec AA)
 #define SE_FcTimerRefresh				389 // implemented - Refresh spell icons
 //#define SE_FcTimerLockout				390 // *not implemented - Sets recast timers to specific value, focus limited.
-#define SE_LimitManaMax					391	// implemented 
+#define SE_MeleeVulnerability			391	// implemented [Live SPA has this as LimitManaMax however that is clearly not the effect used]
 #define SE_FcHealAmt					392 // implemented - Adds or removes healing from spells
 #define SE_FcHealPctIncoming			393 // implemented - HealRate with focus restrictions.
 #define SE_FcHealAmtIncoming			394 // implemented - Adds/Removes amount of healing on target by X value with foucs restrictions.
@@ -550,8 +550,8 @@ typedef enum {
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
 #define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
 #define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
-//#define SE_LimitSpellClass			403 // *not implemented - unclear what this refers too (not 'right click' spell bar)
-//#define SE_LimitSpellSubclass			404 // *not implemented - unclear what this refers too (not 'right click' spell bar)
+#define SE_LimitSpellClass				403 // implemented - Limits to specific types of spells (see CheckSpellCategory)
+#define SE_LimitSpellSubclass			404 // *not implemented - Limits to specific types of spells (see CheckSpellCategory) [Categories NOT defined yet]
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
 #define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied) 
@@ -600,12 +600,12 @@ typedef enum {
 #define SE_MitigateDotDamage			450 // implemented  DOT spell mitigation rune with max value
 #define SE_MeleeThresholdGuard			451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
 #define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
-#define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken
-#define SE_TriggerSpellThreshold		454 // implemented  Trigger effect on X amount of spell damage taken
+#define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken in a single hit
+#define SE_TriggerSpellThreshold		454 // implemented  Trigger effect on X amount of spell damage taken in a single hit
 #define SE_AddHatePct					455 // implemented  Modify total hate by %
 #define SE_AddHateOverTimePct			456 // implemented  Modify total hate by % over time.
-//#define SE_ResourceTap				457 // not used
-//#define SE_FactionModPct				458 // not used
+#define SE_ResourceTap					457 // implemented  Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.
+#define SE_FactionModPct				458 // implemented  Modifies faction gains and losses by percent.
 #define SE_DamageModifier2				459 // implemented - Modifies melee damage by skill type
 
 // LAST
@@ -787,6 +787,7 @@ bool IsSummonSpell(uint16 spellid);
 bool IsEvacSpell(uint16 spellid);
 bool IsDamageSpell(uint16 spellid);
 bool IsFearSpell(uint16 spellid);
+bool IsCureSpell(uint16 spellid);
 bool BeneficialSpell(uint16 spell_id);
 bool GroupOnlySpell(uint16 spell_id);
 int GetSpellEffectIndex(uint16 spell_id, int effect);

@@ -1315,6 +1315,20 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->PetMeleeMitigation += base1;
 				break;
 
+			case SE_MeleeVulnerability:
+				newbon->MeleeVulnerability += base1;
+				break;
+
+			case SE_FactionModPct:
+			{
+				if((base1 < 0) && (newbon->FactionModPct > base1))
+					newbon->FactionModPct = base1;
+
+				else if(newbon->FactionModPct < base1)
+					newbon->FactionModPct = base1;
+				break;
+			}
+
 		}
 	}
 }
@@ -2415,24 +2429,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			}
 
 			case SE_TriggerMeleeThreshold:
-			{
-				if (newbon->TriggerMeleeThreshold[2] < base2){
-					newbon->TriggerMeleeThreshold[0] = effect_value;
-					newbon->TriggerMeleeThreshold[1] = buffslot;
-					newbon->TriggerMeleeThreshold[2] = base2;
-				}
+				newbon->TriggerMeleeThreshold = true;
 				break;
-			}
 
 			case SE_TriggerSpellThreshold:
-			{
-				if (newbon->TriggerSpellThreshold[2] < base2){
-					newbon->TriggerSpellThreshold[0] = effect_value;
-					newbon->TriggerSpellThreshold[1] = buffslot;
-					newbon->TriggerSpellThreshold[2] = base2;
-				}
+				newbon->TriggerSpellThreshold = true;
 				break;
-			}
 
 			case SE_ShieldBlock:
 				newbon->ShieldBlock += effect_value;
@@ -2855,6 +2857,24 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_PetMeleeMitigation:
 				newbon->PetMeleeMitigation += effect_value;
 				break;
+
+			case SE_MeleeVulnerability:
+				newbon->MeleeVulnerability += effect_value;
+				break;
+
+			case SE_Sanctuary:
+				newbon->Sanctuary = true;
+				break;
+
+			case SE_FactionModPct:
+			{
+				if((effect_value < 0) && (newbon->FactionModPct > effect_value))
+					newbon->FactionModPct = effect_value;
+
+				else if(newbon->FactionModPct < effect_value)
+					newbon->FactionModPct = effect_value;
+				break;
+			}
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
@@ -4194,15 +4214,11 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break; 
 
 				case SE_TriggerMeleeThreshold:
-					spellbonuses.TriggerMeleeThreshold[0] = effect_value;
-					spellbonuses.TriggerMeleeThreshold[1] = effect_value;
-					spellbonuses.TriggerMeleeThreshold[2] = effect_value;
+					spellbonuses.TriggerMeleeThreshold = effect_value;
 					break;
 
 				case SE_TriggerSpellThreshold:
-					spellbonuses.TriggerSpellThreshold[0] = effect_value;
-					spellbonuses.TriggerSpellThreshold[1] = effect_value;
-					spellbonuses.TriggerSpellThreshold[2] = effect_value;
+					spellbonuses.TriggerSpellThreshold = effect_value;
 					break;
 
 				case SE_DivineAura:
@@ -4328,6 +4344,16 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.FinishingBlowLvl[1] = effect_value;
 					aabonuses.FinishingBlowLvl[1] = effect_value;
 					itembonuses.FinishingBlowLvl[1] = effect_value;
+					break;
+
+				case SE_Sanctuary:
+					spellbonuses.Sanctuary = effect_value;
+					break;
+
+				case SE_FactionModPct:
+					spellbonuses.FactionModPct = effect_value;
+					itembonuses.FactionModPct = effect_value;
+					aabonuses.FactionModPct = effect_value;
 					break;
 
 			}

@@ -3251,20 +3251,6 @@ int32 Mob::ReduceDamage(int32 damage)
 		}
 	}
 
-	if (spellbonuses.TriggerMeleeThreshold[2]){
-		slot = spellbonuses.TriggerMeleeThreshold[1];
-		
-		if (slot >= 0) {
-			if(damage > buffs[slot].melee_rune)	{
-				if(!TryFadeEffect(slot))
-					BuffFadeBySlot(slot);
-			}
-			else{
-				buffs[slot].melee_rune = (buffs[slot].melee_rune - damage);
-			}
-		}
-	}
-
 	if(damage < 1)
 		return -6;
 
@@ -3393,27 +3379,13 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			}
 		}
 
-		if (spellbonuses.TriggerSpellThreshold[2]){
-			slot = spellbonuses.TriggerSpellThreshold[1];
-		
-			if (slot >= 0) {
-				if(damage > buffs[slot].magic_rune)	{
-					if(!TryFadeEffect(slot))
-						BuffFadeBySlot(slot);
-				}
-				else{
-					buffs[slot].magic_rune = (buffs[slot].magic_rune - damage);
-				}
-			}
-		}
-
 		if(damage < 1)
 			return 0;
 
 
 		if (spellbonuses.AbsorbMagicAtt[0] && spellbonuses.AbsorbMagicAtt[1] >= 0)
 			damage = RuneAbsorb(damage, SE_AbsorbMagicAtt);
-
+		
 		if(damage < 1)
 			return 0;
 	}
@@ -3599,6 +3571,8 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		if(spell_id == SPELL_UNKNOWN) {
 			damage = ReduceDamage(damage);
 			mlog(COMBAT__HITS, "Melee Damage reduced to %d", damage);
+			ReduceAllDamage(damage);
+			TryTriggerThreshHold(damage, SE_TriggerMeleeThreshold, attacker);
 		} else {
 			int32 origdmg = damage;
 			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
@@ -3610,13 +3584,12 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 				//Kayen: Probably need to add a filter for this - Not sure if this msg is correct but there should be a message for spell negate/runes.
 				Message(263, "%s tries to cast on YOU, but YOUR magical skin absorbs the spell.",attacker->GetCleanName());
 			}
-
+			ReduceAllDamage(damage);
+			TryTriggerThreshHold(damage, SE_TriggerSpellThreshold, attacker);
 		}
 
 		if (skill_used)
 			CheckNumHitsRemaining(NUMHIT_IncomingHitSuccess);
-
-		ReduceAllDamage(damage);
 
 		if(IsClient() && CastToClient()->sneaking){
 			CastToClient()->sneaking = false;
