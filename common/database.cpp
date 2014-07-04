@@ -1434,25 +1434,22 @@ bool Database::UpdateName(const char* oldname, const char* newname) {
 // If the name is used or an error occurs, it returns false, otherwise it returns true
 bool Database::CheckUsedName(const char* name)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	//if (strlen(name) > 15)
-	//	return false;
-	if (!RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM character_ where name='%s'", name), errbuf, &result)) {
-		std::cerr << "Error in CheckUsedName query '" << query << "' " << errbuf << std::endl;
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM character_ where name='%s'", name));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in CheckUsedName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
-	else { // It was a valid Query, so lets do our counts!
-		safe_delete_array(query);
-		uint32 tmp = mysql_num_rows(result);
-		mysql_free_result(result);
-		if (tmp > 0) // There is a Name! No change (Return False)
-			return false;
-		else // Everything is okay, so we go and do this.
-			return true;
-	}
+	safe_delete_array(query);
+
+	if (results.RowCount() > 0)
+		return false;
+
+	return true;
 }
 
 uint8 Database::GetServerType()
