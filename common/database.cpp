@@ -1722,7 +1722,7 @@ bool Database::GetLiveChar(uint32 account_id, char* cname) {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetLiveChar query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in GetLiveChar query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1761,7 +1761,7 @@ void Database::SetLFG(uint32 CharID, bool LFG) {
 	char *query = nullptr;
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "update character_ set lfg=%i where id=%i",LFG, CharID));
-	safe_delete_array(Query);
+	safe_delete_array(query);
 
 	if (!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
