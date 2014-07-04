@@ -384,3 +384,15 @@ std::string EscapeString(const std::string &s) {
 
 	return ret;
 }
+
+bool isAlphaNumeric(const char *text)
+{
+	for (unsigned int charIndex=0; charIndex<strlen(text); charIndex++) {
+		if ((text[charIndex] < 'a' || text[charIndex] > 'z') &&
+			(text[charIndex] < 'A' || text[charIndex] > 'Z') &&
+			(text[charIndex] < '0' || text[charIndex] > '9'))
+			return false;
+	}
+
+	return true;
+}

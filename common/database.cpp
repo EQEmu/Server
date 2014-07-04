@@ -801,18 +801,14 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* lsid) {
 	char *query = nullptr;
 
-	for (unsigned int i=0; i<strlen(accname); i++) {
-		if ((accname[i] < 'a' || accname[i] > 'z') &&
-			(accname[i] < 'A' || accname[i] > 'Z') &&
-			(accname[i] < '0' || accname[i] > '9'))
-			return 0;
-	}
+	if (!isAlphaNumeric(accname))
+		return 0;
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id, status, lsaccount_id FROM account WHERE name='%s'", accname));
 	
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetAccountIDByAcc query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in GetAccountIDByAcc query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}

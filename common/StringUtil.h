@@ -51,4 +51,6 @@ char *RemoveApostrophes(const char *s);
 
 std::vector<std::string> SplitString(const std::string &s, char delim);
 
+bool isAlphaNumeric(const char *text);
+
 #endif
