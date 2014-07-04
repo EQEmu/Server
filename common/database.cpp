@@ -863,26 +863,21 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 }
 
 void Database::GetCharName(uint32 char_id, char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name FROM character_ WHERE id='%i'", char_id), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT name FROM character_ WHERE id='%i'", char_id));
 
-			strcpy(name, row[0]);
-		}
-
-		mysql_free_result(result);
-	}
-	else {
-		safe_delete_array(query);
+	if (!results.Success())
+	{
 		std::cerr << "Error in GetCharName query '" << query << "' " << errbuf << std::endl;
+		safe_delete_array(query);
+		return;
 	}
 
+	safe_delete_array(query);
+
+	auto row = results.begin();
+	strcpy(name, row[0]);
 }
 
 bool Database::LoadVariables() {
