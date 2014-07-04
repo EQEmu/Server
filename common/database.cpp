@@ -1779,16 +1779,16 @@ void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) {
 
 void Database::AddReport(std::string who, std::string against, std::string lines)
 {
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
-	char *Query = 0;
+	char *query = nullptr;
 	char *escape_str = new char[lines.size()*2+1];
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
-	if (!RunQuery(Query, MakeAnyLenString(&Query, "INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", who.c_str(), against.c_str(), escape_str), ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error adding a report for %s: %s", who.c_str(), ErrBuf);
-
-	safe_delete_array(Query);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", who.c_str(), against.c_str(), escape_str));
+	safe_delete_array(query);
 	safe_delete_array(escape_str);
+
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error adding a report for %s: %s", who.c_str(), results.ErrorMessage().c_str());
 }
 
 void Database::SetGroupID(const char* name,uint32 id, uint32 charid, uint32 ismerc){
