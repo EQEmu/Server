@@ -1256,10 +1256,7 @@ uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 bool Database::CheckNameFilter(const char* name, bool surname)
 {
 	std::string str_name = name;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
 	if(surname)
 	{
@@ -1310,29 +1307,26 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 		}
 	}
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name FROM name_filter"), errbuf, &result)) {
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT name FROM name_filter"));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in CheckNameFilter query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)))
-		{
-			std::string current_row = row[0];
-			for(size_t x = 0; x < current_row.size(); ++x)
-			{
-				current_row[x] = tolower(current_row[x]);
-			}
-
-			if(str_name.find(current_row) != std::string::npos)
-			{
-				return false;
-			}
-		}
-
-		mysql_free_result(result);
+		// false through to true? shouldn't it be falls through to false?
 		return true;
 	}
-	else
+	safe_delete_array(query);
+
+	for (auto row = results.begin();row != results.end();++row)
 	{
-		std::cerr << "Error in CheckNameFilter query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+		std::string current_row = row[0];
+
+		for(size_t x = 0; x < current_row.size(); ++x)
+			current_row[x] = tolower(current_row[x]);
+
+		if(str_name.find(current_row) != std::string::npos)
+			return false;
 	}
 
 	return true;
