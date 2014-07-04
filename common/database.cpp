@@ -986,9 +986,7 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 }
 
 bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
+	char *query = nullptr;
 
 	char *varname,*varvalue;
 
@@ -997,32 +995,37 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 	DoEscapeString(varname, varname_in, strlen(varname_in));
 	DoEscapeString(varvalue, varvalue_in, strlen(varvalue_in));
 
-	if (RunQuery(query, MakeAnyLenString(&query, "Update variables set value='%s' WHERE varname like '%s'", varvalue, varname), errbuf, 0, &affected_rows)) {
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "Update variables set value='%s' WHERE varname like '%s'", varvalue, varname));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in SetVariable query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
-		if (affected_rows == 1) {
-			LoadVariables(); // refresh cache
-			free(varname);
-			free(varvalue);
-			return true;
-		}
-		else {
-			if (RunQuery(query, MakeAnyLenString(&query, "Insert Into variables (varname, value) values ('%s', '%s')", varname, varvalue), errbuf, 0, &affected_rows)) {
-				safe_delete_array(query);
-				if (affected_rows == 1) {
-					LoadVariables(); // refresh cache
-					free(varname);
-					free(varvalue);
-					return true;
-				}
-			}
-		}
+		free(varname);
+		free(varvalue);
+		return false;
 	}
-	else {
-		std::cerr << "Error in SetVariable query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
+
+	safe_delete_array(query);
+	
+	if (results.RowsAffected() == 1)
+	{
+		LoadVariables(); // refresh cache
+		free(varname);
+		free(varvalue);
+		return true;
 	}
+
+	results = QueryDatabase(query, MakeAnyLenString(&query, "Insert Into variables (varname, value) values ('%s', '%s')", varname, varvalue));
+	safe_delete_array(query);
 	free(varname);
 	free(varvalue);
+
+	if (results.RowsAffected() == 1) {
+		LoadVariables(); // refresh cache
+		return true;
+	}
+
 	return false;
 }
 
