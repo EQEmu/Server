@@ -19,6 +19,15 @@ MySQLRequestRow::MySQLRequestRow(MySQLRequestRow&& moveItem)
 	moveItem.m_MySQLRow = nullptr;
 }
 
+MySQLRequestRow& MySQLRequestRow::operator=(MySQLRequestRow& moveItem)
+{
+	m_Result = moveItem.m_Result;
+	m_MySQLRow = moveItem.m_MySQLRow;
+
+	moveItem.m_Result = nullptr;
+	moveItem.m_MySQLRow = nullptr;
+}
+
 MySQLRequestRow::MySQLRequestRow(MYSQL_RES *result)
 	: m_Result(result),  m_MySQLRow(mysql_fetch_row(m_Result))
 {

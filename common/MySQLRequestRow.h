@@ -23,6 +23,7 @@ public:
 	MySQLRequestRow(MYSQL_RES *result);
 	MySQLRequestRow(const MySQLRequestRow& row);
 	MySQLRequestRow(MySQLRequestRow&& moveItem);
+	MySQLRequestRow& operator=(MySQLRequestRow& moveItem);
 	MySQLRequestRow& operator++();
 	MySQLRequestRow operator++(int);
 	bool operator==(const MySQLRequestRow& rhs);
