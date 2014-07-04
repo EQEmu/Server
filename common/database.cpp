@@ -799,11 +799,7 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 }
 
 uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* lsid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
+	char *query = nullptr;
 
 	for (unsigned int i=0; i<strlen(accname); i++) {
 		if ((accname[i] < 'a' || accname[i] > 'z') &&
@@ -812,30 +808,36 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 			return 0;
 	}
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, status, lsaccount_id FROM account WHERE name='%s'", accname), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			uint32 tmp = atoi(row[0]); // copy to temp var because gotta free the result before exitting this function
-			if (status)
-				*status = atoi(row[1]);
-			if (lsid) {
-				if (row[2])
-					*lsid = atoi(row[2]);
-				else
-					*lsid = 0;
-			}
-			mysql_free_result(result);
-			return tmp;
-		}
-		mysql_free_result(result);
-	}
-	else {
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id, status, lsaccount_id FROM account WHERE name='%s'", accname));
+	
+	if (!results.Success())
+	{
 		std::cerr << "Error in GetAccountIDByAcc query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
+		return 0;
 	}
 
-	return 0;
+	safe_delete_array(query);
+
+	if (results.RowCount() != 1)
+		return 0;
+
+	auto row = results.begin();
+
+	uint32 id = atoi(row[0]);
+
+	if (status)
+		*status = atoi(row[1]);
+	
+	if (lsid) 
+	{
+		if (row[2])
+			*lsid = atoi(row[2]);
+		else
+			*lsid = 0;
+	}
+
+	return id;
 }
 
 void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID) {
