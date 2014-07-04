@@ -1577,25 +1577,21 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 	return results.RowsAffected() != 0;
 }
 
-bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) { //Utilize the "hacker" table, but also give zone information.
+bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) { 
+	//Utilize the "hacker" table, but also give zone information.
+	char *query = nullptr;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, hacked, zone));
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, hacked, zone), errbuf, 0,&affected_rows)) {
-		std::cerr << "Error in SetMQDetectionFlag query '" << query << "' " << errbuf << std::endl;
+	if (!results.Success())
+	{
+		safe_delete_array(query);
+		std::cerr << "Error in SetMQDetectionFlag query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
-
 	safe_delete_array(query);
 
-	if (affected_rows == 0)
-	{
-		return false;
-	}
-
-	return true;
+	return results.RowsAffected() != 0;
 }
 
 uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
