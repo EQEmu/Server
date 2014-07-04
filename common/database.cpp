@@ -1190,7 +1190,7 @@ bool Database::LoadZoneNames() {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in LoadZoneNames query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in LoadZoneNames query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
@@ -1233,29 +1233,24 @@ const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
 }
 
 uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	int peqzone = 0;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version), errbuf, &result))
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version));
+
+	if (!results.Success())
 	{
-		if (mysql_num_rows(result) > 0)
-		{
-			row = mysql_fetch_row(result);
-			peqzone = atoi(row[0]);
-		}
+		std::cerr << "Error in GetPEQZone query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
-		mysql_free_result(result);
-		return peqzone;
-	}
-	else
-	{
-		std::cerr << "Error in GetPEQZone query '" << query << "' " << errbuf << std::endl;
+		return 0;
 	}
 	safe_delete_array(query);
-	return peqzone;
+
+	if (results.RowCount() == 0)
+		return 0;
+
+	auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 bool Database::CheckNameFilter(const char* name, bool surname)
