@@ -1036,7 +1036,7 @@ uint32 Database::GetMiniLoginAccount(char* ip){
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetMiniLoginAccount query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in GetMiniLoginAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}
@@ -1047,51 +1047,48 @@ uint32 Database::GetMiniLoginAccount(char* ip){
 	return atoi(row[0]);
 }
 
-// Pyro: Get zone starting points from DB
+// Get zone starting points from DB
 bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, char *flag_needed) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	//	int buf_len = 256;
-	//	int chars = -1;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query,
+	auto results = QueryDatabase(query, MakeAnyLenString(&query,
 		"SELECT safe_x, safe_y, safe_z, min_status, min_level, "
 		" flag_needed FROM zone "
-		" WHERE short_name='%s' AND (version=%i OR version=0) ORDER BY version DESC", short_name, version), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) > 0) {
-			row = mysql_fetch_row(result);
-			if (safe_x != 0)
-				*safe_x = atof(row[0]);
-			if (safe_y != 0)
-				*safe_y = atof(row[1]);
-			if (safe_z != 0)
-				*safe_z = atof(row[2]);
-			if (minstatus != 0)
-				*minstatus = atoi(row[3]);
-			if (minlevel != 0)
-				*minlevel = atoi(row[4]);
-			if (flag_needed != nullptr)
-				strcpy(flag_needed, row[5]);
-			mysql_free_result(result);
-			return true;
-		}
+		" WHERE short_name='%s' AND (version=%i OR version=0) ORDER BY version DESC", short_name, version));
 
-		mysql_free_result(result);
-	}
-	else
+	if (!results.Success())
 	{
-		std::cerr << "Error in GetSafePoint query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in GetSafePoint query '" << query << "' " << results.ErrorMessage() << std::endl;
 		std::cerr << "If it errors, run the following querys:\n";
 		std::cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
 		std::cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
 		std::cerr << "ALTER TABLE `zone` ADD flag_needed VARCHAR(128) NOT NULL DEFAULT '';\n";
 
 		safe_delete_array(query);
+		return false;
 	}
-	return false;
+
+	safe_delete_array(query);
+
+	if (results.RowCount() == 0)
+		return false;
+
+	auto row = results.begin();
+
+	if (safe_x != nullptr)
+		*safe_x = atof(row[0]);
+	if (safe_y != nullptr)
+		*safe_y = atof(row[1]);
+	if (safe_z != nullptr)
+		*safe_z = atof(row[2]);
+	if (minstatus != nullptr)
+		*minstatus = atoi(row[3]);
+	if (minlevel != nullptr)
+		*minlevel = atoi(row[4]);
+	if (flag_needed != nullptr)
+		strcpy(flag_needed, row[5]);
+
+	return true;
 }
 
 
