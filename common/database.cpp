@@ -1333,21 +1333,20 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 }
 
 bool Database::AddToNameFilter(const char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
+	char *query = nullptr;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO name_filter (name) values ('%s')", name), errbuf, 0, &affected_rows)) {
-		std::cerr << "Error in AddToNameFilter query '" << query << "' " << errbuf << std::endl;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO name_filter (name) values ('%s')", name));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in AddToNameFilter query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
-
 	safe_delete_array(query);
 
-	if (affected_rows == 0) {
+	if (results.RowsAffected() == 0)
 		return false;
-	}
 
 	return true;
 }
