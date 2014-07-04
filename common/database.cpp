@@ -165,7 +165,7 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 		"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
 		tmpUN, tmpPW, tmpPW));
 
-	
+
 
 	if (!results.Success())
 	{
@@ -194,7 +194,7 @@ bool Database::CheckBannedIPs(const char* loginIP)
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP));
 
-	
+
 	if (!results.Success())
 	{
 		std::cerr << "Error in CheckBannedIPs query '" << query << "' " << results.ErrorMessage() << std::endl;
@@ -327,7 +327,7 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 		return 0;
 	}
 
-	if (results.LastInsertedID() == 0) 
+	if (results.LastInsertedID() == 0)
 	{
 		std::cerr << "Error in CreateAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
@@ -783,7 +783,7 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 
 	if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query, results.ErrorMessage());
+		LogFile->write(EQEMuLog::Error, "Error in GetAccountIDByChar query '%s': %s", query, results.ErrorMessage().c_str());
 		safe_delete_array(query);
 		return 0;
 	}
@@ -805,7 +805,7 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 		return 0;
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id, status, lsaccount_id FROM account WHERE name='%s'", accname));
-	
+
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetAccountIDByAcc query '" << query << "' " << results.ErrorMessage() << std::endl;
@@ -824,8 +824,8 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 
 	if (status)
 		*status = atoi(row[1]);
-	
-	if (lsid) 
+
+	if (lsid)
 	{
 		if (row[2])
 			*lsid = atoi(row[2]);
@@ -893,7 +893,7 @@ bool Database::LoadVariables() {
 	}
 
 	safe_delete_array(query);
-	return LoadVariables_result(results);
+	return LoadVariables_result(std::move(results));
 }
 
 uint32 Database::LoadVariables_MQ(char** query)
@@ -1007,7 +1007,7 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 	}
 
 	safe_delete_array(query);
-	
+
 	if (results.RowsAffected() == 1)
 	{
 		LoadVariables(); // refresh cache
@@ -1503,7 +1503,7 @@ bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
 	char *query = nullptr;
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s', zoneid=%i, x=-1, y=-1, z=-1 WHERE id=%i", iZonename, GetZoneID(iZonename), iCharID));
-	
+
 	if (!results.Success())
 	{
 		std::cerr << "Error in MoveCharacterToZone(id) query '" << query << "' " << results.ErrorMessage() << std::endl;
@@ -1577,7 +1577,7 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 	return results.RowsAffected() != 0;
 }
 
-bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) { 
+bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) {
 	//Utilize the "hacker" table, but also give zone information.
 	char *query = nullptr;
 
