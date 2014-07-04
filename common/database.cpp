@@ -1738,15 +1738,13 @@ bool Database::GetLiveChar(uint32 account_id, char* cname) {
 }
 
 void Database::SetLFP(uint32 CharID, bool LFP) {
+	char *query = nullptr;
 
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
-	char *Query = 0;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "update character_ set lfp=%i where id=%i",LFP, CharID));
+	safe_delete_array(query);
 
-	if (!RunQuery(Query, MakeAnyLenString(&Query, "update character_ set lfp=%i where id=%i",LFP, CharID), ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, ErrBuf);
-
-	safe_delete_array(Query);
-
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
 void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon) {
