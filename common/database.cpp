@@ -1352,38 +1352,31 @@ bool Database::AddToNameFilter(const char* name) {
 }
 
 uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* oStatus) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id, name, status FROM account WHERE lsaccount_id=%i", iLSID), errbuf, &result))
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id, name, status FROM account WHERE lsaccount_id=%i", iLSID));
+
+	if (!results.Success())
 	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			uint32 account_id = atoi(row[0]);
-			if (oAccountName)
-				strcpy(oAccountName, row[1]);
-			if (oStatus)
-				*oStatus = atoi(row[2]);
-			mysql_free_result(result);
-			return account_id;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetAccountIDFromLSID query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in GetAccountIDFromLSID query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return 0;
 	}
+	safe_delete_array(query);
 
-	return 0;
+	if (results.RowCount() != 1)
+		return 0;
+
+	auto row = results.begin();
+
+	uint32 account_id = atoi(row[0]);
+
+	if (oAccountName)
+		strcpy(oAccountName, row[1]);
+	if (oStatus)
+		*oStatus = atoi(row[2]);
+
+	return account_id;
 }
 
 void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
