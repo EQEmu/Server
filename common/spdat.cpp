@@ -157,6 +157,24 @@ bool IsFearSpell(uint16 spell_id)
 	return IsEffectInSpell(spell_id, SE_Fear);
 }
 
+bool IsCureSpell(uint16 spell_id)
+{
+	const SPDat_Spell_Struct &sp = spells[spell_id];
+
+	bool CureEffect = false;
+
+	for(int i = 0; i < EFFECT_COUNT; i++){
+		if (sp.effectid[i] == SE_DiseaseCounter || sp.effectid[i] == SE_PoisonCounter 
+			|| sp.effectid[i] == SE_CurseCounter || sp.effectid[i] == SE_CorruptionCounter)
+			CureEffect = true;
+	}
+
+	if (CureEffect && IsBeneficialSpell(spell_id))
+		return true;
+
+	return false;
+}
+
 bool IsSlowSpell(uint16 spell_id)
 {
 	const SPDat_Spell_Struct &sp = spells[spell_id];
@@ -1003,7 +1021,7 @@ bool IsSuspendableSpell(uint16 spell_id)
 uint32 GetMorphTrigger(uint32 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i)
-		if (spells[spell_id].effectid[i] == SE_ImprovedSpellEffect)
+		if (spells[spell_id].effectid[i] == SE_CastOnFadeEffect)
 			return spells[spell_id].base[i];
 
 	return 0;
@@ -1012,9 +1030,9 @@ uint32 GetMorphTrigger(uint32 spell_id)
 bool IsCastonFadeDurationSpell(uint16 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
-		if (spells[spell_id].effectid[i] == SE_ImprovedSpellEffect
-			|| spells[spell_id].effectid[i] == SE_BossSpellTrigger
-			|| spells[spell_id].effectid[i] == SE_CastOnWearoff){
+		if (spells[spell_id].effectid[i] == SE_CastOnFadeEffect
+			|| spells[spell_id].effectid[i] == SE_CastOnFadeEffectNPC
+			|| spells[spell_id].effectid[i] == SE_CastOnFadeEffectAlways){
 
 		return true;
 		}
