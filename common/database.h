@@ -223,7 +223,7 @@ public:
 	bool	SetVariable(const char* varname, const char* varvalue);
 	bool	LoadVariables();
 	uint32	LoadVariables_MQ(char** query);
-	bool	LoadVariables_result(MYSQL_RES* result);
+	bool	LoadVariables_result(MySQLRequestResult results);
 
 	/*
 	* General Queries

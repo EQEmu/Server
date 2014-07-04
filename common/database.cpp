@@ -843,7 +843,7 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetAccountName query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in GetAccountName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return;
 	}
@@ -881,82 +881,85 @@ void Database::GetCharName(uint32 char_id, char* name) {
 }
 
 bool Database::LoadVariables() {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
+	char *query = nullptr;
 
-	if (RunQuery(query, LoadVariables_MQ(&query), errbuf, &result)) {
+	auto results = QueryDatabase(query, LoadVariables_MQ(&query));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in LoadVariables query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
-		bool ret = LoadVariables_result(result);
-		mysql_free_result(result);
-		return ret;
+		return false;
 	}
-	else {
-		std::cerr << "Error in LoadVariables query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
-	return false;
+
+	safe_delete_array(query);
+	return LoadVariables_result(results);
 }
 
-uint32 Database::LoadVariables_MQ(char** query) {
-// the read of this single variable should be atomic... this was causing strange problems
-//	LockMutex lock(&Mvarcache);
+uint32 Database::LoadVariables_MQ(char** query)
+{
 	return MakeAnyLenString(query, "SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache_lastupdate);
 }
 
-bool Database::LoadVariables_result(MYSQL_RES* result) {
-	uint32 i;
-	MYSQL_ROW row;
+// always returns true? not sure about this.
+bool Database::LoadVariables_result(MySQLRequestResult results) {
+	uint32 i = 0;
 	LockMutex lock(&Mvarcache);
-	if (mysql_num_rows(result) > 0) {
-		if (!varcache_array) {
-			varcache_max = mysql_num_rows(result);
-			varcache_array = new VarCache_Struct*[varcache_max];
-			for (i=0; i<varcache_max; i++)
-				varcache_array[i] = 0;
-		}
-		else {
-			uint32 tmpnewmax = varcache_max + mysql_num_rows(result);
-			VarCache_Struct** tmp = new VarCache_Struct*[tmpnewmax];
-			for (i=0; i<tmpnewmax; i++)
-				tmp[i] = 0;
-			for (i=0; i<varcache_max; i++)
-				tmp[i] = varcache_array[i];
-			VarCache_Struct** tmpdel = varcache_array;
-			varcache_array = tmp;
-			varcache_max = tmpnewmax;
-			delete [] tmpdel;
-		}
-		while ((row = mysql_fetch_row(result))) {
-			varcache_lastupdate = atoi(row[2]);
-			for (i=0; i<varcache_max; i++) {
-				if (varcache_array[i]) {
-					if (strcasecmp(varcache_array[i]->varname, row[0]) == 0) {
-						delete varcache_array[i];
-						varcache_array[i] = (VarCache_Struct*) new uint8[sizeof(VarCache_Struct) + strlen(row[1]) + 1];
-						strn0cpy(varcache_array[i]->varname, row[0], sizeof(varcache_array[i]->varname));
-						strcpy(varcache_array[i]->value, row[1]);
-						break;
-					}
-				}
-				else {
+
+	if (results.RowCount() == 0)
+		return true;
+
+	if (!varcache_array) {
+		varcache_max = results.RowCount();
+		varcache_array = new VarCache_Struct*[varcache_max];
+		for (i=0; i<varcache_max; i++)
+			varcache_array[i] = 0;
+	}
+	else {
+		uint32 tmpnewmax = varcache_max + results.RowCount();
+		VarCache_Struct** tmp = new VarCache_Struct*[tmpnewmax];
+		for (i=0; i<tmpnewmax; i++)
+			tmp[i] = 0;
+		for (i=0; i<varcache_max; i++)
+			tmp[i] = varcache_array[i];
+		VarCache_Struct** tmpdel = varcache_array;
+		varcache_array = tmp;
+		varcache_max = tmpnewmax;
+		delete [] tmpdel;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+	{
+		varcache_lastupdate = atoi(row[2]);
+		for (i=0; i<varcache_max; i++) {
+			if (varcache_array[i]) {
+				if (strcasecmp(varcache_array[i]->varname, row[0]) == 0) {
+					delete varcache_array[i];
 					varcache_array[i] = (VarCache_Struct*) new uint8[sizeof(VarCache_Struct) + strlen(row[1]) + 1];
-					strcpy(varcache_array[i]->varname, row[0]);
+					strn0cpy(varcache_array[i]->varname, row[0], sizeof(varcache_array[i]->varname));
 					strcpy(varcache_array[i]->value, row[1]);
 					break;
 				}
 			}
-		}
-		uint32 max_used = 0;
-		for (i=0; i<varcache_max; i++) {
-			if (varcache_array[i]) {
-				if (i > max_used)
-					max_used = i;
+			else {
+				varcache_array[i] = (VarCache_Struct*) new uint8[sizeof(VarCache_Struct) + strlen(row[1]) + 1];
+				strcpy(varcache_array[i]->varname, row[0]);
+				strcpy(varcache_array[i]->value, row[1]);
+				break;
 			}
 		}
-		max_used++;
-		varcache_max = max_used;
 	}
+
+	uint32 max_used = 0;
+	for (i=0; i<varcache_max; i++) {
+		if (varcache_array[i]) {
+			if (i > max_used)
+				max_used = i;
+		}
+	}
+
+	varcache_max = max_used + 1;
+
 	return true;
 }
 
