@@ -26,6 +26,8 @@ MySQLRequestRow& MySQLRequestRow::operator=(MySQLRequestRow& moveItem)
 
 	moveItem.m_Result = nullptr;
 	moveItem.m_MySQLRow = nullptr;
+	
+	return *this;
 }
 
 MySQLRequestRow::MySQLRequestRow(MYSQL_RES *result)
