@@ -1748,27 +1748,23 @@ void Database::SetLFP(uint32 CharID, bool LFP) {
 }
 
 void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon) {
+	char *query = nullptr;
 
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
-	char *Query = 0;
+	auto results = QueryDatabase(query,MakeAnyLenString(&query, "update character_ set lfp=%i, lfg=%i, firstlogon=%i where id=%i",LFP, LFG, firstlogon, CharID));
+	safe_delete_array(query);
 
-	if (!RunQuery(Query, MakeAnyLenString(&Query, "update character_ set lfp=%i, lfg=%i, firstlogon=%i where id=%i",LFP, LFG, firstlogon, CharID), ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, ErrBuf);
-
-	safe_delete_array(Query);
-
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
 void Database::SetLFG(uint32 CharID, bool LFG) {
+	char *query = nullptr;
 
-	char ErrBuf[MYSQL_ERRMSG_SIZE];
-	char *Query = 0;
-
-	if (!RunQuery(Query, MakeAnyLenString(&Query, "update character_ set lfg=%i where id=%i",LFG, CharID), ErrBuf))
-		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, ErrBuf);
-
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "update character_ set lfg=%i where id=%i",LFG, CharID));
 	safe_delete_array(Query);
 
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
 }
 
 void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) {
