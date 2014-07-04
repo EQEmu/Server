@@ -1404,12 +1404,13 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 }
 
 void Database::ClearMerchantTemp(){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "delete from merchantlist_temp"), errbuf)) {
-		std::cerr << "Error in ClearMerchantTemp query '" << query << "' " << errbuf << std::endl;
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from merchantlist_temp"));
+
+	if (!results.Success())
+		std::cerr << "Error in ClearMerchantTemp query '" << query << "' " << results.ErrorMessage() << std::endl;
+
 	safe_delete_array(query);
 }
 
