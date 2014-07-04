@@ -1474,20 +1474,22 @@ uint8 Database::GetServerType()
 }
 
 bool Database::MoveCharacterToZone(const char* charname, const char* zonename,uint32 zoneid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
+	char *query = nullptr;
 
 	if(zonename == nullptr || strlen(zonename) == 0)
-		return(false);
+		return false;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=-1, y=-1, z=-1 WHERE name='%s'", zonename,zoneid, charname), errbuf, 0,&affected_rows)) {
-		std::cerr << "Error in MoveCharacterToZone(name) query '" << query << "' " << errbuf << std::endl;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=-1, y=-1, z=-1 WHERE name='%s'", zonename,zoneid, charname));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in MoveCharacterToZone(name) query '" << query << "' " << results.ErrorMessage() << std::endl;
+		safe_delete_array(query);
 		return false;
 	}
 	safe_delete_array(query);
 
-	if (affected_rows == 0)
+	if (results.RowsAffected() == 0)
 		return false;
 
 	return true;
@@ -1498,19 +1500,19 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename) {
 }
 
 bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s', zoneid=%i, x=-1, y=-1, z=-1 WHERE id=%i", iZonename, GetZoneID(iZonename), iCharID), errbuf, 0,&affected_rows)) {
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s', zoneid=%i, x=-1, y=-1, z=-1 WHERE id=%i", iZonename, GetZoneID(iZonename), iCharID));
+	
+	if (!results.Success())
+	{
 		std::cerr << "Error in MoveCharacterToZone(id) query '" << query << "' " << errbuf << std::endl;
+		safe_delete_array(query);
 		return false;
 	}
 	safe_delete_array(query);
 
-	if (affected_rows == 0)
-		return false;
-
-	return true;
+	return results.RowsAffected() != 0;
 }
 
 uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 acctid) {
