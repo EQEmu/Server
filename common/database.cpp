@@ -1700,15 +1700,18 @@ uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZo
 }
 
 bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET charname='%s' WHERE id=%i;",charname, lsaccount_id), errbuf)) {
-		std::cerr << "Error in UpdateLiveChar query '" << query << "' " << errbuf << std::endl;
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE account SET charname='%s' WHERE id=%i;",charname, lsaccount_id));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in UpdateLiveChar query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return false;
 	}
-
 	safe_delete_array(query);
+
 	return true;
 }
 
