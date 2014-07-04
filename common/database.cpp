@@ -1791,18 +1791,27 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 		LogFile->write(EQEMuLog::Error, "Error adding a report for %s: %s", who.c_str(), results.ErrorMessage().c_str());
 }
 
-void Database::SetGroupID(const char* name,uint32 id, uint32 charid, uint32 ismerc){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	if(id == 0){ //removing you from table
-	if (!RunQuery(query, MakeAnyLenString(&query, "delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc), errbuf))
-		LogFile->write(EQEMuLog::Error, "Error deleting character from group id: %s", errbuf);
+void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc){
+	char *query = nullptr;
+
+	if (id == 0)
+	{ 
+		// removing from group
+		auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc));
+		safe_delete_array(query);
+
+		if (!results.Success())
+			LogFile->write(EQEMuLog::Error, "Error deleting character from group id: %s", results.ErrorMessage().c_str());
+
+		return;
 	}
-	else{
-	if (!RunQuery(query, MakeAnyLenString(&query, "replace into group_id set charid=%i, groupid=%i, name='%s', ismerc='%i'",charid, id, name, ismerc), errbuf))
-		LogFile->write(EQEMuLog::Error, "Error adding character to group id: %s", errbuf);
-	}
+
+	// adding to group
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "replace into group_id set charid=%i, groupid=%i, name='%s', ismerc='%i'",charid, id, name, ismerc));
 	safe_delete_array(query);
+
+	if (!results.Success())
+		LogFile->write(EQEMuLog::Error, "Error adding character to group id: %s", results.ErrorMessage().c_str());
 }
 
 void Database::ClearGroup(uint32 gid) {
