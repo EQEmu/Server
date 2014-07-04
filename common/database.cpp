@@ -1597,25 +1597,21 @@ bool Database::SetMQDetectionFlag(const char* accountname, const char* character
 uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 {
 	uint16 race_cap = 0;
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
 	//Check for a racial cap!
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT skillcap from race_skillcaps where skill = %i && race = %i", skillid, in_race), errbuf, &result, &affected_rows))
-	{
-		if (affected_rows != 0)
-		{
-			row = mysql_fetch_row(result);
-			race_cap = atoi(row[0]);
-		}
-		delete[] query;
-		mysql_free_result(result);
-	}
 
-	return race_cap;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT skillcap from race_skillcaps where skill = %i && race = %i", skillid, in_race));
+	safe_delete_array(query);
+
+	if (!results.Success())
+		return 0;
+
+	if (results.RowCount() == 0)
+		return 0;
+
+	auto row = results.begin();
+	return atoi(row[0]);
 }
 
 uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level)
