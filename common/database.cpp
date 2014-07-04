@@ -869,7 +869,7 @@ void Database::GetCharName(uint32 char_id, char* name) {
 
 	if (!results.Success())
 	{
-		std::cerr << "Error in GetCharName query '" << query << "' " << errbuf << std::endl;
+		std::cerr << "Error in GetCharName query '" << query << "' " << results.ErrorMessage() << std::endl;
 		safe_delete_array(query);
 		return;
 	}
