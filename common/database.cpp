@@ -1716,26 +1716,25 @@ bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
 }
 
 bool Database::GetLiveChar(uint32 account_id, char* cname) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charname FROM account WHERE id=%i", account_id), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1) {
-			row = mysql_fetch_row(result);
-			strcpy(cname,row[0]);
-			mysql_free_result(result);
-			return true;
-		}
-		mysql_free_result(result);
-	}
-	else {
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT charname FROM account WHERE id=%i", account_id));
+
+	if (!results.Success())
+	{
 		std::cerr << "Error in GetLiveChar query '" << query << "' " << errbuf << std::endl;
 		safe_delete_array(query);
+		return false;
 	}
+	safe_delete_array(query);
 
-	return false;
+	if (results.RowCount() != 1)
+		return false;
+
+	auto row = results.begin();
+	strcpy(cname,row[0]);
+
+	return true;
 }
 
 void Database::SetLFP(uint32 CharID, bool LFP) {
