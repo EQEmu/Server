@@ -1454,34 +1454,23 @@ bool Database::CheckUsedName(const char* name)
 
 uint8 Database::GetServerType()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT value FROM variables WHERE varname='ServerType'"), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-			uint8 ServerType = atoi(row[0]);
-			mysql_free_result(result);
-			return ServerType;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in GetServerType query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return false;
-	}
-	return 0;
+	char *query = nullptr;
 
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT value FROM variables WHERE varname='ServerType'"));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in GetServerType query '" << query << "' " << results.ErrorMessage() << std::endl;
+		safe_delete_array(query);
+		return 0;
+	}
+	safe_delete_array(query);
+
+	if (results.RowCount() != 1)
+		return 0;
+
+	auto row = results.begin();
+	return atoi(row[0]);
 }
 
 bool Database::MoveCharacterToZone(const char* charname, const char* zonename,uint32 zoneid) {
