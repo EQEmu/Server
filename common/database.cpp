@@ -1555,34 +1555,26 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 		return 0;
 	}
 
-	if (!RunQuery(query2, (uint32) (end - query2), errbuf, 0, &affected_rows)) {
-		std::cerr << "Error in CopyCharacter query '" << query << "' " << errbuf << std::endl;
+	if (results.RowsAffected() == 0)
 		return 0;
-	}
-
-	if (affected_rows == 0) {
-		return 0;
-	}
 
 	return 1;
 }
 
 bool Database::SetHackerFlag(const char* accountname, const char* charactername, const char* hacked) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
-	if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO hackers(account,name,hacked) values('%s','%s','%s')", accountname, charactername, hacked), errbuf, 0,&affected_rows)) {
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO hackers(account,name,hacked) values('%s','%s','%s')", accountname, charactername, hacked));
+
+	if (!results.Success())
+	{
 		std::cerr << "Error in SetHackerFlag query '" << query << "' " << errbuf << std::endl;
+		safe_delete_array(query);
 		return false;
 	}
 	safe_delete_array(query);
 
-	if (affected_rows == 0)
-	{
-		return false;
-	}
-
-	return true;
+	return results.RowsAffected() != 0;
 }
 
 bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) { //Utilize the "hacker" table, but also give zone information.
