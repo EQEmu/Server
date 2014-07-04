@@ -58,6 +58,83 @@ void DBcore::ping() {
 	MDatabase.unlock();
 }
 
+MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, bool retryOnFailureOnce)
+{
+	LockMutex lock(&MDatabase);
+
+	// Reconnect if we are not connected before hand.
+	if (pStatus != Connected)
+		Open();
+
+	// request query. != 0 indicates some kind of error.
+	if (mysql_real_query(&mysql, query, querylen) != 0)
+	{
+		unsigned int errorNumber = mysql_errno(&mysql);
+
+		if (errorNumber == CR_SERVER_GONE_ERROR)
+			pStatus = Error;
+
+		// error appears to be a disconnect error, may need to try again.
+		if (errorNumber == CR_SERVER_LOST || errorNumber == CR_SERVER_GONE_ERROR) 
+		{
+
+			if (retryOnFailureOnce) 
+			{
+				std::cout << "Database Error: Lost connection, attempting to recover...." << std::endl;
+				MySQLRequestResult requestResult = QueryDatabase(query, querylen, false);
+
+				if (requestResult.Success())
+				{
+					std::cout << "Reconnection to database successful." << std::endl;
+					return requestResult;
+				}
+
+			}
+			
+			pStatus = Error;
+			
+			char *errorBuffer = new char[MYSQL_ERRMSG_SIZE];
+
+			snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+			
+			std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
+
+			return MySQLRequestResult(nullptr, 0, 0, 0, 0, (uint32)mysql_errno(&mysql), errorBuffer);
+		} 
+		
+		char *errorBuffer = new char[MYSQL_ERRMSG_SIZE];
+		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+
+#ifdef _EQDEBUG
+		std::cout << "DB Query Error #" << mysql_errno(&mysql) << ": " << mysql_error(&mysql) << std::endl;
+#endif
+		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(&mysql),errorBuffer);
+		
+	}
+
+	// successful query. get results.
+	MYSQL_RES* res = mysql_store_result(&mysql);
+	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), (uint32)mysql_num_rows(res), (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
+
+
+#if DEBUG_MYSQL_QUERIES >= 1
+	if (requestResult.Success()) 
+	{
+		std::cout << "query successful";
+		if (requestResult.Result())
+			std::cout << ", " << (int) mysql_num_rows(requestResult.Result()) << " rows returned";
+		
+		std::cout << ", " << requestResult.RowCount() << " rows affected";
+		std::cout<< std::endl;
+	}
+	else {
+		std::cout << "QUERY: query FAILED" << std::endl;
+	}
+#endif
+
+	return requestResult;
+}
+
 bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum, bool retry) {
 	if (errnum)
 		*errnum = 0;
@@ -111,7 +188,7 @@ bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RE
 		if (affected_rows)
 			*affected_rows = mysql_affected_rows(&mysql);
 		if (last_insert_id)
-			*last_insert_id = mysql_insert_id(&mysql);
+			*last_insert_id = (uint32)mysql_insert_id(&mysql);
 		if (result) {
 			if (*result) {
 				ret = true;
