@@ -602,49 +602,18 @@ bool Database::DeleteCharacter(char *name)
 
 	return true;
 }
+
 // Store new character information into the character_ and inventory tables
 bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv, ExtendedProfile_Struct *ext)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
 	char query[256+sizeof(PlayerProfile_Struct)*2+sizeof(ExtendedProfile_Struct)*2+5];
 	char* end = query;
-	uint32 affected_rows = 0;
-	int i;
+	char* invquery = nullptr;
 	uint32 charid = 0;
-	char* charidquery = 0;
-	char* invquery = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row = 0;
 	char zone[50];
 	float x, y, z;
 
-//	memset(&playeraa, 0, sizeof(playeraa));
-
-	// get the char id (used in inventory inserts below)
-	if(!RunQuery
-	(
-		charidquery,
-		MakeAnyLenString
-		(
-			&charidquery,
-			"SELECT id FROM character_ where name='%s'",
-			pp->name
-		),
-		errbuf,
-		&result
-	)) {
-		safe_delete_array(charidquery);
-		LogFile->write(EQEMuLog::Error, "Error in char store id query: %s: %s", charidquery, errbuf);
-		return(false);
-	}
-	safe_delete_array(charidquery);
-
-	if(mysql_num_rows(result) == 1)
-	{
-		row = mysql_fetch_row(result);
-		if(row[0])
-			charid = atoi(row[0]);
-	}
+	charid = GetCharacterID(pp->name);
 
 	if(!charid)
 	{
@@ -659,6 +628,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 		pp->zone_id = 1;
 	} else
 		strn0cpy(zone, zname, 49);
+
 	x=pp->x;
 	y=pp->y;
 	z=pp->z;
@@ -674,44 +644,32 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	end += DoEscapeString(end, (char*)ext, sizeof(ExtendedProfile_Struct));
 	end += sprintf(end, "\' WHERE account_id=%d AND name='%s'",account_id, pp->name);
 
-	RunQuery(query, (uint32) (end - query), errbuf, 0, &affected_rows);
+	auto results = QueryDatabase(query, (uint32) (end - query));
+	// stack assigned query, no need to delete it.
 
-	if(!affected_rows)
+	if(!results.RowsAffected())
 	{
-		LogFile->write(EQEMuLog::Error, "StoreCharacter query '%s' %s", query, errbuf);
+		LogFile->write(EQEMuLog::Error, "StoreCharacter query '%s' %s", query, results.ErrorMessage().c_str());
 		return false;
 	}
 
-	affected_rows = 0;
-
-
-	// Doodman: Is this even used?
 	// now the inventory
-
-	for (i=0; i<=2270;)
+	for (int16 i=0; i<=2270;)
 	{
-		const ItemInst* newinv = inv->GetItem((int16)i);
-		if (newinv)
+		const ItemInst* newinv = inv->GetItem(i);
+		if (!newinv)
 		{
-			MakeAnyLenString
-			(
-				&invquery,
+			auto results = QueryDatabase(invquery, MakeAnyLenString(&invquery,
 				"INSERT INTO inventory SET "
 				"charid=%0u, slotid=%0d, itemid=%0u, charges=%0d, color=%0u",
 				charid, i, newinv->GetItem()->ID,
-				newinv->GetCharges(), newinv->GetColor()
-			);
+				newinv->GetCharges(), newinv->GetColor()));
 
-			RunQuery(invquery, strlen(invquery), errbuf, 0, &affected_rows);
-			if(!affected_rows)
-			{
-				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery, errbuf);
-			}
+			if (!results.RowsAffected())
+				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery, results.ErrorMessage().c_str());
 #if EQDEBUG >= 9
 			else
-			{
-				LogFile->write(EQEMuLog::Debug, "StoreCharacter inventory succeeded. Query '%s' %s", invquery, errbuf);
-			}
+				LogFile->write(EQEMuLog::Debug, "StoreCharacter inventory succeeded. Query '%s'", invquery);
 #endif
 			safe_delete_array(invquery);
 		}
@@ -1795,7 +1753,7 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 	char *query = nullptr;
 
 	if (id == 0)
-	{ 
+	{
 		// removing from group
 		auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc));
 		safe_delete_array(query);
@@ -1819,7 +1777,7 @@ void Database::ClearGroup(uint32 gid) {
 	char *query = nullptr;
 
 	if(gid == 0)
-	{ 
+	{
 		//clear all groups
 		auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id"));
 		safe_delete_array(query);
@@ -1828,8 +1786,8 @@ void Database::ClearGroup(uint32 gid) {
 			std::cout << "Unable to clear groups: " << results.ErrorMessage() << std::endl;
 
 		return;
-	} 
-		
+	}
+
 	//clear a specific group
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id where groupid = %lu", (unsigned long)gid));
