@@ -1816,18 +1816,28 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 
 void Database::ClearGroup(uint32 gid) {
 	ClearGroupLeader(gid);
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	if(gid == 0) { //clear all groups
-		//if (!RunQuery(query, MakeAnyLenString(&query, "update group_id set groupid=0 where groupid!=0"), errbuf))
-		if (!RunQuery(query, MakeAnyLenString(&query, "delete from group_id"), errbuf))
-			printf("Unable to clear groups: %s\n",errbuf);
-	} else {	//clear a specific group
-		//if (!RunQuery(query, MakeAnyLenString(&query, "update group_id set groupid=0 where groupid = %lu", gid), errbuf))
-		if (!RunQuery(query, MakeAnyLenString(&query, "delete from group_id where groupid = %lu", (unsigned long)gid), errbuf))
-			printf("Unable to clear groups: %s\n",errbuf);
-	}
+	char *query = nullptr;
+
+	if(gid == 0)
+	{ 
+		//clear all groups
+		auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id"));
+		safe_delete_array(query);
+
+		if (!results.Success())
+			std::cout << "Unable to clear groups: " << results.ErrorMessage() << std::endl;
+
+		return;
+	} 
+		
+	//clear a specific group
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id where groupid = %lu", (unsigned long)gid));
 	safe_delete_array(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear groups: " << results.ErrorMessage() << std::endl;
+
 }
 
 uint32 Database::GetGroupID(const char* name){
