@@ -1910,17 +1910,26 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 	return leaderbuf;
 }
 
-void Database::ClearGroupLeader(uint32 gid){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	if(gid == 0) { //clear all group leaders
-		if (!RunQuery(query, MakeAnyLenString(&query, "DELETE from group_leaders"), errbuf))
-			printf("Unable to clear group leaders: %s\n",errbuf);
-	} else {	//clear a specific group leader
-		if (!RunQuery(query, MakeAnyLenString(&query, "DELETE from group_leaders where gid = %lu", (unsigned long)gid), errbuf))
-			printf("Unable to clear group leader: %s\n",errbuf);
+void Database::ClearGroupLeader(uint32 gid) {
+	char *query = nullptr;
+
+	if(gid == 0) 
+	{ 
+		//clear all group leaders
+		auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE from group_leaders"));
+		safe_delete_array(query);
+
+		if (!results.Success())
+			std::cout << "Unable to clear group leaders: " << results.ErrorMessage() << std::endl;
+
+		return;
 	}
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE from group_leaders where gid = %lu", (unsigned long)gid));
 	safe_delete_array(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear group leader: " << results.ErrorMessage() << std::endl;
 }
 
 bool FetchRowMap(MYSQL_RES *result, std::map<std::string,std::string> &rowmap)
