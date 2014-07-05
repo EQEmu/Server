@@ -17,6 +17,7 @@ class MySQLRequestResult {
 private:
 	MYSQL_RES* m_Result;
 	char* m_ErrorBuffer;
+	unsigned long* m_ColumnLengths;
 	MySQLRequestRow m_CurrentRow;
 	MySQLRequestRow m_OneBeyondRow;
 
@@ -44,6 +45,8 @@ public:
 	uint32 RowCount() const {return m_RowCount;}
 	uint32 ColumnCount() const {return m_ColumnCount;}
 	uint32 LastInsertedID() const {return m_LastInsertedID;}
+	// default to 0 index since we mostly use it that way anyways.
+	uint32 LengthOfColumn(int columnIndex = 0); 
 
 	MySQLRequestRow& begin() { return m_CurrentRow; }
 	MySQLRequestRow& end() { return m_OneBeyondRow;}
