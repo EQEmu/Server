@@ -820,6 +820,7 @@ public:
 	void SetNextIncHPEvent( int inchpevent );
 
 	bool DivineAura() const;
+	bool Sanctuary() const;
 
 	bool HasNPCSpecialAtk(const char* parse);
 	int GetSpecialAbility(int ability);
@@ -1009,7 +1010,7 @@ protected:
 	Map::Vertex UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
 	void PrintRoute();
 
-	virtual float GetSympatheticProcChances(float &ProcBonus, float &ProcChance, int32 cast_time, int16 ProcRateMod);
+	virtual float GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 ItemProcRate = 0);
 
 	enum {MAX_PROCS = 4};
 	tProc PermaProcs[MAX_PROCS];

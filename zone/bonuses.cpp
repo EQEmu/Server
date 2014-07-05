@@ -1329,6 +1329,10 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_IllusionPersistence:
+				newbon->IllusionPersistence = true;
+				break;
+
 		}
 	}
 }
@@ -2876,6 +2880,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_IllusionPersistence:
+				newbon->IllusionPersistence = true;
+				break;
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
@@ -4356,6 +4364,17 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.FactionModPct = effect_value;
 					break;
 
+				case SE_MeleeVulnerability:
+					spellbonuses.MeleeVulnerability = effect_value;
+					itembonuses.MeleeVulnerability = effect_value;
+					aabonuses.MeleeVulnerability = effect_value;
+					break;
+
+				case SE_IllusionPersistence:
+					spellbonuses.IllusionPersistence = effect_value;
+					itembonuses.IllusionPersistence = effect_value;
+					aabonuses.IllusionPersistence = effect_value;
+					break;
 			}
 		}
 	}

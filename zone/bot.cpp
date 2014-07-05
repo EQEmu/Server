@@ -7641,10 +7641,8 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 		{
 			if(bottype == BotfocusSympatheticProc)
 			{
-				float ProcChance, ProcBonus;
-				int16 ProcRateMod = focus_spell.base[i]; //Baseline is 100 for most Sympathetic foci
-				int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
-				GetSympatheticProcChances(ProcBonus, ProcChance, cast_time, ProcRateMod);
+
+				float ProcChance = GetSympatheticProcChances(spell_id, focus_spell.base[i]);
 
 				if(MakeRandomFloat(0, 1) <= ProcChance)
 					value = focus_id;

@@ -2761,6 +2761,14 @@ bool Mob::DivineAura() const
 	return false;
 }
 
+bool Mob::Sanctuary() const
+{
+	if (spellbonuses.Sanctuary)
+		return true;
+
+	return false;
+}
+
 int16 Mob::GetResist(uint8 type) const
 {
 	if (IsNPC())
