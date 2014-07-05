@@ -1770,6 +1770,19 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 		LogFile->write(EQEMuLog::Error, "Error adding character to group id: %s", results.ErrorMessage().c_str());
 }
 
+void Database::ClearAllGroups(void)
+{
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id"));
+	safe_delete_array(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear groups: " << results.ErrorMessage() << std::endl;
+
+	return;
+}
+
 void Database::ClearGroup(uint32 gid) {
 	ClearGroupLeader(gid);
 	char *query = nullptr;
@@ -1777,17 +1790,11 @@ void Database::ClearGroup(uint32 gid) {
 	if(gid == 0)
 	{
 		//clear all groups
-		auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id"));
-		safe_delete_array(query);
-
-		if (!results.Success())
-			std::cout << "Unable to clear groups: " << results.ErrorMessage() << std::endl;
-
+		ClearAllGroups();
 		return;
 	}
 
 	//clear a specific group
-
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id where groupid = %lu", (unsigned long)gid));
 	safe_delete_array(query);
 
@@ -1910,18 +1917,25 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 	return leaderbuf;
 }
 
+// Clearing all group leaders 
+void Database::ClearAllGroupLeaders(void)
+{
+	char *query = nullptr;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE from group_leaders"));
+	safe_delete_array(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear group leaders: " << results.ErrorMessage() << std::endl;
+
+	return;
+}
+
 void Database::ClearGroupLeader(uint32 gid) {
 	char *query = nullptr;
 
 	if(gid == 0) 
 	{ 
-		//clear all group leaders
-		auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE from group_leaders"));
-		safe_delete_array(query);
-
-		if (!results.Success())
-			std::cout << "Unable to clear group leaders: " << results.ErrorMessage() << std::endl;
-
+		ClearAllGroupLeaders();
 		return;
 	}
 

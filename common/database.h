@@ -207,6 +207,7 @@ public:
 	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr,
 						GroupLeadershipAA_Struct* GLAA = nullptr);
 	void	ClearGroupLeader(uint32 gid = 0);
+	
 
 	/*
 	* Raids
@@ -262,6 +263,13 @@ private:
 	uint32				varcache_max;
 	VarCache_Struct**	varcache_array;
 	uint32				varcache_lastupdate;
+
+
+	/*
+	* Groups, utility methods.
+	*/
+	void    ClearAllGroupLeaders();
+	void    ClearAllGroups();
 };
 
 bool	FetchRowMap(MYSQL_RES *result, std::map<std::string,std::string> &rowmap);
