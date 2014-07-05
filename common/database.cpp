@@ -1841,25 +1841,26 @@ void Database::ClearGroup(uint32 gid) {
 }
 
 uint32 Database::GetGroupID(const char* name){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 groupid=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT groupid from group_id where name='%s'", name), errbuf, &result)) {
-		if((row = mysql_fetch_row(result)))
-		{
-			if(row[0])
-				groupid=atoi(row[0]);
-		}
-		else
-		LogFile->write(EQEMuLog::Debug, "Character not in a group: %s", name);
-		mysql_free_result(result);
-	}
-	else
-	LogFile->write(EQEMuLog::Error, "Error getting group id: %s", errbuf);
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT groupid from group_id where name='%s'", name));
 	safe_delete_array(query);
-	return groupid;
+
+	if (!results.Success())
+	{
+		LogFile->write(EQEMuLog::Error, "Error getting group id: %s", results.ErrorMessage().c_str());
+		return 0;
+	}
+
+	if (results.RowCount() == 0)
+	{
+		LogFile->write(EQEMuLog::Debug, "Character not in a group: %s", name);
+		return 0;
+	}
+
+	auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
