@@ -1842,13 +1842,13 @@ char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
 }
 
 void Database::SetGroupLeaderName(uint32 gid, const char* name) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "Replace into group_leaders set gid=%lu, leadername='%s'",(unsigned long)gid,name), errbuf))
-		printf("Unable to set group leader: %s\n",errbuf);
-
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "Replace into group_leaders set gid=%lu, leadername='%s'",(unsigned long)gid,name));
 	safe_delete_array(query);
+	
+	if (!results.Success())
+		std::cout << "Unable to set group leader: " << results.ErrorMessage() << std::endl;
 }
 
 char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, GroupLeadershipAA_Struct* GLAA){
