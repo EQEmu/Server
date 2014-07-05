@@ -1179,15 +1179,12 @@ uint32 Database::GetZoneID(const char* zonename) {
 const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
 	auto iter = zonename_array.find(zoneID);
 
-	if (iter != zonename_array.end()) {
+	if (iter != zonename_array.end())
 		return iter->second.c_str();
-	}
-	else {
-		if (ErrorUnknown)
-			return "UNKNOWN";
-		else
-			return 0;
-	}
+	
+	if (ErrorUnknown)
+		return "UNKNOWN";
+	
 	return 0;
 }
 
