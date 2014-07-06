@@ -2370,32 +2370,19 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 
 void Database::PurgeExpiredInstances()
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	uint16 id = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where "
-			"(start_time+duration) <= UNIX_TIMESTAMP() and never_expires = 0"), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) > 0)
-		{
-			row = mysql_fetch_row(result);
-			while(row != nullptr)
-			{
-				id = atoi(row[0]);
-				DeleteInstance(id);
-				row = mysql_fetch_row(result);
-			}
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		safe_delete_array(query);
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where (start_time+duration) <= UNIX_TIMESTAMP() and never_expires = 0"));
+	safe_delete_array(query);
+
+	if (!results.Success())
+		return;
+
+	if (results.RowCount() == 0)
+		return;
+
+	for (auto row = results.begin();row != results.end();++row)
+		DeleteInstance(atoi(row[0]));
 }
 
 bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
