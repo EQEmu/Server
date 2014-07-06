@@ -2622,107 +2622,58 @@ bool Database::GlobalInstance(uint16 instance_id)
 
 void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected = 0;
+	char *query = nullptr;
 
 	std::string field;
 
-	if(win)
+	switch(theme)
 	{
-		switch(theme)
+		case 1:
 		{
-			case 1:
-			{
-				field = "guk_wins";
-				break;
-			}
-			case 2:
-			{
-				field = "mir_wins";
-				break;
-			}
-			case 3:
-			{
-				field = "mmc_wins";
-				break;
-			}
-			case 4:
-			{
-				field = "ruj_wins";
-				break;
-			}
-			case 5:
-			{
-				field = "tak_wins";
-				break;
-			}
-			default:
-			{
-				return;
-			}
+			field = "guk_";
+			break;
 		}
-	}
-	else
-	{
-		switch(theme)
+		case 2:
 		{
-			case 1:
-			{
-				field = "guk_losses";
-				break;
-			}
-			case 2:
-			{
-				field = "mir_losses";
-				break;
-			}
-			case 3:
-			{
-				field = "mmc_losses";
-				break;
-			}
-			case 4:
-			{
-				field = "ruj_losses";
-				break;
-			}
-			case 5:
-			{
-				field = "tak_losses";
-				break;
-			}
-			default:
-			{
-				return;
-			}
+			field = "mir_";
+			break;
+		}
+		case 3:
+		{
+			field = "mmc_";
+			break;
+		}
+		case 4:
+		{
+			field = "ruj_";
+			break;
+		}
+		case 5:
+		{
+			field = "tak_";
+			break;
+		}
+		default:
+		{
+			return;
 		}
 	}
 
-	if(RunQuery(query, MakeAnyLenString(&query, "UPDATE `adventure_stats` SET %s=%s+1 WHERE player_id=%u",
-		field.c_str(), field.c_str(), char_id), errbuf, nullptr, &affected))
-	{
-		safe_delete_array(query);
-	}
+	if (win)
+		field += "wins";
 	else
-	{
-		//error
-		safe_delete_array(query);
-	}
+		field += "losses";
 
-	if(affected == 0)
-	{
-		if(RunQuery(query, MakeAnyLenString(&query, "INSERT INTO `adventure_stats` SET %s=1, player_id=%u",
-			field.c_str(), char_id), errbuf))
-		{
-			safe_delete_array(query);
-		}
-		else
-		{
-			//error
-			safe_delete_array(query);
-		}
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE `adventure_stats` SET %s=%s+1 WHERE player_id=%u",
+					field.c_str(), field.c_str(), char_id));
+	safe_delete_array(query);
+
+	if (results.RowsAffected() != 0)
+		return;
+
+	QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO `adventure_stats` SET %s=1, player_id=%u",
+					field.c_str(), char_id));
+	safe_delete_array(query);
 }
 
 bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w,
