@@ -2159,20 +2159,20 @@ bool Database::CharacterInInstanceGroup(uint16 instance_id, uint32 char_id)
 
 void Database::DeleteInstance(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_list WHERE id=%u", instance_id), errbuf);
+	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM instance_list WHERE id=%u", instance_id));
 	safe_delete_array(query);
 
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_list_player WHERE id=%u", instance_id), errbuf);
+	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM instance_list_player WHERE id=%u", instance_id));
 	safe_delete_array(query);
 
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM respawn_times WHERE instance_id=%u", instance_id), errbuf);
+	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM respawn_times WHERE instance_id=%u", instance_id));
 	safe_delete_array(query);
 
-	RunQuery(query, MakeAnyLenString(&query, "DELETE FROM spawn_condition_values WHERE instance_id=%u", instance_id), errbuf);
+	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM spawn_condition_values WHERE instance_id=%u", instance_id));
 	safe_delete_array(query);
+
 	BuryCorpsesInInstance(instance_id);
 }
 
