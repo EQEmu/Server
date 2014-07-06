@@ -2114,9 +2114,7 @@ bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
 {
 	//we are not saved to this instance so set our instance to 0
 	if(!GlobalInstance(instance_id) && !CharacterInInstanceGroup(instance_id, char_id))
-	{
 		return false;
-	}
 
 	if(CheckInstanceExpired(instance_id))
 	{
@@ -2129,31 +2127,18 @@ bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
 
 bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where id=%u AND zone=%u",
-		instance_id, zone_id), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0)
-		{
-			mysql_free_result(result);
-			return true;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return false;
-		}
-	}
-	else
-	{
-		safe_delete_array(query);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where id=%u AND zone=%u",instance_id, zone_id));
+	safe_delete_array(query);
+
+	if (!results.Success())
 		return false;
-	}
-	return false;
+
+	if (results.RowCount() == 0)
+		return false;
+
+	return true;
 }
 
 bool Database::CharacterInInstanceGroup(uint16 instance_id, uint32 char_id)
