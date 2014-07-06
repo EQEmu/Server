@@ -2387,20 +2387,13 @@ void Database::PurgeExpiredInstances()
 
 bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "INSERT INTO instance_list_player(id, charid) "
-			"values(%lu, %lu)", (unsigned long)instance_id, (unsigned long)char_id), errbuf))
-	{
-		safe_delete_array(query);
-		return true;
-	}
-	else
-	{
-		safe_delete_array(query);
-		return false;
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO instance_list_player(id, charid) "
+								"values(%lu, %lu)", (unsigned long)instance_id, (unsigned long)char_id));
+	safe_delete_array(query);
+
+	return results.Success();
 }
 
 bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
