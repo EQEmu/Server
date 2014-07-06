@@ -2595,19 +2595,11 @@ void Database::FlagInstanceByRaidLeader(uint32 zone, int16 version, uint32 chari
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "UPDATE `instance_list` SET start_time=UNIX_TIMESTAMP(), "
-		"duration=%u WHERE id=%u", new_duration, instance_id), errbuf))
-	{
-		safe_delete_array(query);
-	}
-	else
-	{
-		//error
-		safe_delete_array(query);
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE `instance_list` SET start_time=UNIX_TIMESTAMP(), "
+			"duration=%u WHERE id=%u", new_duration, instance_id));
+	safe_delete_array(query);
 }
 
 bool Database::GlobalInstance(uint16 instance_id)
