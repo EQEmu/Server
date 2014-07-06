@@ -2679,37 +2679,33 @@ void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w,
 								uint32 &tak_w, uint32 &guk_l, uint32 &mir_l, uint32 &mmc_l, uint32 &ruj_l, uint32 &tak_l)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT `guk_wins`, `mir_wins`, `mmc_wins`, `ruj_wins`, `tak_wins`, "
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT `guk_wins`, `mir_wins`, `mmc_wins`, `ruj_wins`, `tak_wins`, "
 		"`guk_losses`, `mir_losses`, `mmc_losses`, `ruj_losses`, `tak_losses` FROM `adventure_stats` WHERE player_id=%u",
-		char_id), errbuf, &result))
-	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)) != nullptr)
-		{
-			guk_w = atoi(row[0]);
-			mir_w = atoi(row[1]);
-			mmc_w = atoi(row[2]);
-			ruj_w = atoi(row[3]);
-			tak_w = atoi(row[4]);
-			guk_l = atoi(row[5]);
-			mir_l = atoi(row[6]);
-			mmc_l = atoi(row[7]);
-			ruj_l = atoi(row[8]);
-			tak_l = atoi(row[9]);
-		}
-		mysql_free_result(result);
-		return true;
-	}
-	else
-	{
-		safe_delete_array(query);
+		char_id));
+	safe_delete_array(query);
+
+	if (!results.Success())
 		return false;
-	}
+
+	if (results.RowCount() == 0)
+		return false;
+
+	auto row = results.begin();
+
+	guk_w = atoi(row[0]);
+	mir_w = atoi(row[1]);
+	mmc_w = atoi(row[2]);
+	ruj_w = atoi(row[3]);
+	tak_w = atoi(row[4]);
+	guk_l = atoi(row[5]);
+	mir_l = atoi(row[6]);
+	mmc_l = atoi(row[7]);
+	ruj_l = atoi(row[8]);
+	tak_l = atoi(row[9]);
+
+	return true;
 }
 
 uint32 Database::GetGuildDBIDByCharID(uint32 char_id) {
