@@ -2021,10 +2021,13 @@ void Database::ClearAllRaids(void)
 void Database::ClearAllRaidDetails(void)
 {
 	char *query = nullptr;
-		
-	if (!RunQuery(query, MakeAnyLenString(&query, "delete from raid_details"), errbuf))
-		printf("Unable to clear raid details: %s\n",errbuf);
+	
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_details"));
 	safe_delete_array(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear raid details: " << results.ErrorMessage() << std::endl;
+
 	return;
 }
 
