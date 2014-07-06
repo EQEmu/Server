@@ -2049,27 +2049,32 @@ void Database::ClearRaidDetails(uint32 rid) {
 		std::cout << "Unable to clear raid details: " << results.ErrorMessage() << std::endl;
 }
 
+// returns 0 on error or no raid for that character, or 
+// the raid id that the character is a member of.
 uint32 Database::GetRaidID(const char* name){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 raidid=0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT raidid from raid_members where name='%s'", name),
-		errbuf, &result)) {
-		if((row = mysql_fetch_row(result)))
-		{
-			if(row[0])
-				raidid=atoi(row[0]);
-		}
-		else
-			printf("Unable to get raid id, char not found!\n");
-		mysql_free_result(result);
-	}
-	else
-			printf("Unable to get raid id: %s\n",errbuf);
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT raidid from raid_members where name='%s'", name));
 	safe_delete_array(query);
-	return raidid;
+
+	if (!results.Success())
+	{
+		std::cout << "Unable to get raid id: " << results.ErrorMessage() << std::endl;
+		return 0;
+	}
+
+	auto row = results.begin();
+
+	if (row == results.end())
+	{
+		std::cout << "Unable to get raid id, char not found!" << std::endl;
+		return 0;
+	}
+
+	if (row[0]) // would it ever be possible to have a null here?
+		return atoi(row[0]);
+
+	return 0;
 }
 
 const char *Database::GetRaidLeaderName(uint32 rid)
