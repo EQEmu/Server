@@ -7629,6 +7629,9 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 			if(npc_value[i] != 0) {
 				tmpValue = current_value + mod + npc_value[i];
 
+				int16 FactionModPct = spellbonuses.FactionModPct + itembonuses.FactionModPct + aabonuses.FactionModPct;
+				tmpValue += (tmpValue * FactionModPct) / 100; 
+
 				// Make sure faction hits don't go to GMs...
 				if (m_pp.gm==1 && (tmpValue < current_value)) {
 					tmpValue = current_value;
