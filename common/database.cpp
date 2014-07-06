@@ -2485,36 +2485,22 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 	if(!zone)
 		return 0;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint16 ret;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT instance_list.id FROM instance_list, instance_list_player "
-		"WHERE instance_list.zone=%u AND instance_list.version=%u AND instance_list.id=instance_list_player.id AND "
-		"instance_list_player.charid=%u LIMIT 1;", zone, version, charid), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0)
-		{
-			row = mysql_fetch_row(result);
-			ret = atoi(row[0]);
-			mysql_free_result(result);
-			return ret;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-	}
-	else
-	{
-		safe_delete_array(query);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT instance_list.id FROM instance_list, instance_list_player "
+							"WHERE instance_list.zone=%u AND instance_list.version=%u AND instance_list.id=instance_list_player.id AND "
+							"instance_list_player.charid=%u LIMIT 1;", zone, version, charid));
+	safe_delete_array(query);
+
+	if (!results.Success())
 		return 0;
-	}
-	return 0;
+
+	if (results.RowCount() == 0)
+		return 0;
+
+	auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &charid_list) {
