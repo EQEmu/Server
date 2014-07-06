@@ -1181,10 +1181,10 @@ const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
 
 	if (iter != zonename_array.end())
 		return iter->second.c_str();
-	
+
 	if (ErrorUnknown)
 		return "UNKNOWN";
-	
+
 	return 0;
 }
 
@@ -1853,7 +1853,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "Replace into group_leaders set gid=%lu, leadername='%s'",(unsigned long)gid,name));
 	safe_delete_array(query);
-	
+
 	if (!results.Success())
 		std::cout << "Unable to set group leader: " << results.ErrorMessage() << std::endl;
 }
@@ -1917,7 +1917,7 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 	return leaderbuf;
 }
 
-// Clearing all group leaders 
+// Clearing all group leaders
 void Database::ClearAllGroupLeaders(void)
 {
 	char *query = nullptr;
@@ -1933,8 +1933,8 @@ void Database::ClearAllGroupLeaders(void)
 void Database::ClearGroupLeader(uint32 gid) {
 	char *query = nullptr;
 
-	if(gid == 0) 
-	{ 
+	if(gid == 0)
+	{
 		ClearAllGroupLeaders();
 		return;
 	}
@@ -1992,13 +1992,13 @@ void Database::SetAgreementFlag(uint32 acctid)
 void Database::ClearRaid(uint32 rid) {
 	char *query = nullptr;
 
-	if(rid == 0) 
-	{ 
+	if(rid == 0)
+	{
 		//clear all raids
 		ClearAllRaids();
 		return;
-	} 
-	
+	}
+
 	//clear a specific group
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_members where raidid = %lu", (unsigned long)rid));
 	safe_delete_array(query);
@@ -2021,7 +2021,7 @@ void Database::ClearAllRaids(void)
 void Database::ClearAllRaidDetails(void)
 {
 	char *query = nullptr;
-	
+
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_details"));
 	safe_delete_array(query);
 
@@ -2034,12 +2034,12 @@ void Database::ClearAllRaidDetails(void)
 void Database::ClearRaidDetails(uint32 rid) {
 	char *query = nullptr;
 
-	if(rid == 0) 
-	{ 
+	if(rid == 0)
+	{
 		//clear all raids
 		ClearAllRaidDetails();
 		return;
-	} 
+	}
 
 	//clear a specific group
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_details where raidid = %lu", (unsigned long)rid));
@@ -2049,7 +2049,7 @@ void Database::ClearRaidDetails(uint32 rid) {
 		std::cout << "Unable to clear raid details: " << results.ErrorMessage() << std::endl;
 }
 
-// returns 0 on error or no raid for that character, or 
+// returns 0 on error or no raid for that character, or
 // the raid id that the character is a member of.
 uint32 Database::GetRaidID(const char* name){
 	char *query = nullptr;
@@ -2081,10 +2081,10 @@ const char* Database::GetRaidLeaderName(uint32 rid)
 {
 	// Would be a good idea to fix this to be a passed in variable and
 	// make the caller responsible. static local variables like this are
-	// not guaranteed to be thread safe (nor is the internal guard 
+	// not guaranteed to be thread safe (nor is the internal guard
 	// variable). C++0x standard states this should be thread safe
 	// but may not be fully supported in some compilers.
-	static char name[128]; 
+	static char name[128];
 	char *query = nullptr;
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1",rid));
@@ -2330,24 +2330,24 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 
 	if (results.RowCount() == 0)
 	{
-		nstance_id = 0;
+		instance_id = 0;
 		return false;
 	}
 
 	count++;
 	for (auto row = results.begin();row != results.end();++row)
 	{
-		if(count < atoi(row[0])) 
+		if(count < atoi(row[0]))
 		{
 			instance_id = count;
 			return true;
-		} 
-		
-		if(count > max) 
+		}
+
+		if(count > max)
 		{
 			instance_id = 0;
 			return false;
-		} 
+		}
 
 		count++;
 	}
@@ -2450,7 +2450,7 @@ uint16 Database::GetInstanceVersion(uint16 instance_id)
 
 	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT version FROM instance_list where id=%u", instance_id));
 	safe_delete_array(query);
-	
+
 	if (!results.Success())
 		return 0;
 
