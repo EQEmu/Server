@@ -2143,26 +2143,18 @@ bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 
 bool Database::CharacterInInstanceGroup(uint16 instance_id, uint32 char_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	bool lockout_instance_player = false;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charid FROM instance_list_player where id=%u AND charid=%u",
-		instance_id, char_id), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1)
-		{
-			lockout_instance_player = true;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		safe_delete_array(query);
-	}
-	return lockout_instance_player;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT charid FROM instance_list_player where id=%u AND charid=%u",instance_id, char_id));
+	safe_delete_array(query);
+
+	if (!results.Success())
+		return false;
+
+	if (results.RowCount() != 1)
+		return false;
+
+	return true;
 }
 
 void Database::DeleteInstance(uint16 instance_id)
