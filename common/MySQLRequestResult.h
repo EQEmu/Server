@@ -16,6 +16,7 @@
 class MySQLRequestResult {
 private:
 	MYSQL_RES* m_Result;
+	MYSQL_FIELD* m_Fields;
 	char* m_ErrorBuffer;
 	unsigned long* m_ColumnLengths;
 	MySQLRequestRow m_CurrentRow;
@@ -47,6 +48,7 @@ public:
 	uint32 LastInsertedID() const {return m_LastInsertedID;}
 	// default to 0 index since we mostly use it that way anyways.
 	uint32 LengthOfColumn(int columnIndex = 0); 
+	const std::string FieldName(int columnIndex);
 
 	MySQLRequestRow& begin() { return m_CurrentRow; }
 	MySQLRequestRow& end() { return m_OneBeyondRow;}
