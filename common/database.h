@@ -270,6 +270,12 @@ private:
 	*/
 	void    ClearAllGroupLeaders();
 	void    ClearAllGroups();
+
+
+	/*
+	* Raid, utility methods.
+	*/
+	void ClearAllRaids();
 };
 
 bool	FetchRowMap(MYSQL_RES *result, std::map<std::string,std::string> &rowmap);

@@ -1990,16 +1990,32 @@ void Database::SetAgreementFlag(uint32 acctid)
 }
 
 void Database::ClearRaid(uint32 rid) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	if(rid == 0) { //clear all raids
-		if (!RunQuery(query, MakeAnyLenString(&query, "delete from raid_members"), errbuf))
-			printf("Unable to clear raids: %s\n",errbuf);
-	} else {	//clear a specific group
-		if (!RunQuery(query, MakeAnyLenString(&query, "delete from raid_members where raidid = %lu", (unsigned long)rid), errbuf))
-			printf("Unable to clear raids: %s\n",errbuf);
-	}
+	char *query = nullptr;
+
+	if(rid == 0) 
+	{ 
+		//clear all raids
+		ClearAllRaids();
+		return;
+	} 
+	
+	//clear a specific group
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_members where raidid = %lu", (unsigned long)rid));
 	safe_delete_array(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear raids: " << results.ErrorMessage() << std::endl;
+}
+
+void Database::ClearAllRaids(void)
+{
+	char *query = nullptr;
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_members"));
+	safe_delete_array(query);
+
+	if (!results.Success())
+		std::cout << "Unable to clear raids: " << results.ErrorMessage() << std::endl;
 }
 
 void Database::ClearRaidDetails(uint32 rid) {
