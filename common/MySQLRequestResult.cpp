@@ -32,10 +32,11 @@ MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, u
 	m_RowsAffected = rowsAffected;
 	m_RowCount = rowCount;
 	m_ColumnCount = columnCount;
-	// If we actually need the column length it will be requested
-	// at that time, no need to pull it in just to cache it. 
+	// If we actually need the column length / fields it will be 
+	// requested at that time, no need to pull it in just to cache it. 
 	// Normal usage would have it as nullptr most likely anyways.
 	m_ColumnLengths = nullptr; 
+	m_Fields = nullptr;
 	m_LastInsertedID = lastInsertedID;
 	m_ErrorNumber = errorNumber;
 }
@@ -56,6 +57,7 @@ void MySQLRequestResult::ZeroOut()
 	m_Result = nullptr;
 	m_ErrorBuffer = nullptr;
 	m_ColumnLengths = nullptr;
+	m_Fields = nullptr;
 	m_RowCount = 0;
 	m_RowsAffected = 0;
 	m_LastInsertedID = 0;
@@ -88,6 +90,17 @@ uint32 MySQLRequestResult::LengthOfColumn(int columnIndex)
 	return m_ColumnLengths[columnIndex];
 }
 
+const std::string MySQLRequestResult::FieldName(int columnIndex)
+{
+	if (columnIndex >= m_ColumnCount || m_Result == nullptr)
+		return std::string();
+
+	if (m_Fields == nullptr)
+		m_Fields = mysql_fetch_fields(m_Result);
+
+	return std::string(m_Fields[columnIndex].name);
+}
+
 MySQLRequestResult::MySQLRequestResult(MySQLRequestResult&& moveItem)
 	: m_CurrentRow(moveItem.m_CurrentRow), m_OneBeyondRow()
 {
@@ -98,6 +111,7 @@ MySQLRequestResult::MySQLRequestResult(MySQLRequestResult&& moveItem)
 	m_RowsAffected = moveItem.m_RowsAffected;
 	m_LastInsertedID = moveItem.m_LastInsertedID;
 	m_ColumnLengths = moveItem.m_ColumnLengths;
+	m_Fields = moveItem.m_Fields;
 
 	// Keeps deconstructor from double freeing 
 	// pre move instance.
@@ -124,7 +138,8 @@ MySQLRequestResult& MySQLRequestResult::operator=(MySQLRequestResult&& other)
 	m_CurrentRow = other.m_CurrentRow;
 	m_OneBeyondRow = other.m_OneBeyondRow;
 	m_ColumnLengths = other.m_ColumnLengths;
-	
+	m_Fields = other.m_Fields;
+
 	// Keeps deconstructor from double freeing 
 	// pre move instance.
 	other.ZeroOut();
