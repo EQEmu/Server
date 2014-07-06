@@ -1965,26 +1965,20 @@ bool retval=false;
 
 uint8 Database::GetAgreementFlag(uint32 acctid)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES* result;
-	MYSQL_ROW row;
+	char* query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT rulesflag FROM account WHERE id=%i",acctid), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-			uint8 flag = atoi(row[0]);
-			mysql_free_result(result);
-			return flag;
-		}
-	}
-	else
-	{
-		safe_delete_array(query);
-	}
-	return 0;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT rulesflag FROM account WHERE id=%i",acctid));
+	safe_delete_array(query);
+
+	if (!results.Success())
+		return 0;
+
+	if (results.RowCount() != 1)
+		return 0;
+
+	auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 void Database::SetAgreementFlag(uint32 acctid)
