@@ -2604,32 +2604,20 @@ void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
 
 bool Database::GlobalInstance(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	bool ret;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT is_global from instance_list where id=%u LIMIT 1", instance_id), errbuf, &result))
-	{
-		safe_delete_array(query);
-		row = mysql_fetch_row(result);
-		if(row)
-		{
-			ret = (atoi(row[0]) == 1) ? true : false;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return false;
-		}
-	}
-	else
-	{
-		safe_delete_array(query);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT is_global from instance_list where id=%u LIMIT 1", instance_id));
+	safe_delete_array(query);
+
+	if (!results.Success())
 		return false;
-	}
-	return ret;
+
+	if (results.RowCount() == 0)
+		return false;
+
+	auto row = results.begin();
+
+	return (atoi(row[0]) == 1) ? true : false;
 }
 
 void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
