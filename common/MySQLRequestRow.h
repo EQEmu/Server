@@ -8,7 +8,7 @@
 
 #include <mysql.h>
 #include <iterator>
-#include <../common/types.h>
+#include "types.h"
 
 class MySQLRequestRow : public std::iterator<std::input_iterator_tag, MYSQL_ROW>
 {
