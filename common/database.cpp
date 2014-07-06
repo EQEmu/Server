@@ -2178,49 +2178,36 @@ void Database::DeleteInstance(uint16 instance_id)
 
 bool Database::CheckInstanceExpired(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
 	int32 start_time = 0;
 	int32 duration = 0;
 	uint32 never_expires = 0;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_list WHERE id=%u",
-		instance_id), errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0)
-		{
-			row = mysql_fetch_row(result);
-			start_time = atoi(row[0]);
-			duration = atoi(row[1]);
-			never_expires = atoi(row[2]);
-		}
-		else
-		{
-			mysql_free_result(result);
-			return true;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		safe_delete_array(query);
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_list WHERE id=%u", instance_id));
+	safe_delete_array(query);
+
+	if (!results.Success())
 		return true;
-	}
+
+	if (results.RowCount() == 0)
+		return true;
+
+	auto row = results.begin();
+
+	start_time = atoi(row[0]);
+	duration = atoi(row[1]);
+	never_expires = atoi(row[2]);
 
 	if(never_expires == 1)
-	{
 		return false;
-	}
 
 	timeval tv;
 	gettimeofday(&tv, nullptr);
+
 	if((start_time + duration) <= tv.tv_sec)
-	{
 		return true;
-	}
+
 	return false;
 }
 
