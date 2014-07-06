@@ -1983,14 +1983,9 @@ uint8 Database::GetAgreementFlag(uint32 acctid)
 
 void Database::SetAgreementFlag(uint32 acctid)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
+	char *query = nullptr;
 
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET rulesflag=1 where id=%i",acctid), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-	}
-	else
+	QueryDatabase(query, MakeAnyLenString(&query, "UPDATE account SET rulesflag=1 where id=%i", acctid));
 	safe_delete_array(query);
 }
 
