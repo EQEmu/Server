@@ -276,6 +276,7 @@ private:
 	* Raid, utility methods.
 	*/
 	void ClearAllRaids();
+	void ClearAllRaidDetails();
 };
 
 bool	FetchRowMap(MYSQL_RES *result, std::map<std::string,std::string> &rowmap);
