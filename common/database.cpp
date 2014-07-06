@@ -2398,64 +2398,39 @@ bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 
 bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_list_player WHERE id=%lu AND charid=%lu",
-		(unsigned long)instance_id, (unsigned long)char_id), errbuf))
-	{
-		safe_delete_array(query);
-		return true;
-	}
-	else
-	{
-		safe_delete_array(query);
-		return false;
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM instance_list_player WHERE id=%lu AND charid=%lu",
+								(unsigned long)instance_id, (unsigned long)char_id));
+	safe_delete_array(query);
+
+	return results.Success();
 }
 
 bool Database::RemoveClientsFromInstance(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "DELETE FROM instance_list_player WHERE id=%lu",
-		(unsigned long)instance_id), errbuf))
-	{
-		safe_delete_array(query);
-		return true;
-	}
-	else
-	{
-		safe_delete_array(query);
-		return false;
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM instance_list_player WHERE id=%lu", (unsigned long)instance_id));
+	safe_delete_array(query);
+
+	return results.Success();
 }
 
 bool Database::CheckInstanceExists(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT * FROM instance_list where id=%u", instance_id),
-		errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0)
-		{
-			mysql_free_result(result);
-			return true;
-		}
-		mysql_free_result(result);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT * FROM instance_list where id=%u", instance_id));
+	safe_delete_array(query);
+
+	if (!results.Success())
 		return false;
-	}
-	else
-	{
-		safe_delete_array(query);
+
+	if (results.RowCount() == 0)
 		return false;
-	}
-	return false;
+
+	return true;
 }
 
 void Database::BuryCorpsesInInstance(uint16 instance_id)
