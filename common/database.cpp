@@ -2522,30 +2522,21 @@ void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &ch
 
 void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 	uint32 zone_id = ZoneIDFromInstanceID(instance_id);
 	uint16 version = VersionFromInstanceID(instance_id);
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT charid FROM group_id WHERE groupid=%u", gid),
-		errbuf, &result))
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT charid FROM group_id WHERE groupid=%u", gid));
+	safe_delete_array(query);
+
+	if (!results.Success())
+		return;
+
+	for (auto row=results.begin();row != results.end();++row)
 	{
-		safe_delete_array(query);
-		while((row = mysql_fetch_row(result)) != nullptr)
-		{
-			uint32 charid = atoi(row[0]);
-			if(GetInstanceID(zone_id, charid, version) == 0)
-			{
-				AddClientToInstance(instance_id, charid);
-			}
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		safe_delete_array(query);
+		uint32 charid = atoi(row[0]);
+		if(GetInstanceID(zone_id, charid, version) == 0)
+			AddClientToInstance(instance_id, charid);
 	}
 }
 
