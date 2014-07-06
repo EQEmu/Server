@@ -2249,49 +2249,40 @@ uint32 Database::VersionFromInstanceID(uint16 instance_id)
 
 uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
+
 	uint32 start_time = 0;
 	uint32 duration = 0;
 	uint32 never_expires = 0;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_list WHERE id=%u",
-		instance_id), errbuf, &result))
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_list WHERE id=%u", instance_id));
+	safe_delete_array(query);
+
+	if (!results.Success())
 	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0)
-		{
-			row = mysql_fetch_row(result);
-			start_time = atoi(row[0]);
-			duration = atoi(row[1]);
-			never_expires = atoi(row[2]);
-		}
-		else
-		{
-			mysql_free_result(result);
-			is_perma = false;
-			return 0;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		safe_delete_array(query);
 		is_perma = false;
 		return 0;
 	}
+
+	if (results.RowCount() == 0)
+	{
+		is_perma = false;
+		return 0;
+	}
+
+	auto row = results.begin();
+
+	start_time = atoi(row[0]);
+	duration = atoi(row[1]);
+	never_expires = atoi(row[2]);
 
 	if(never_expires == 1)
 	{
 		is_perma = true;
 		return 0;
 	}
-	else
-	{
-		is_perma = false;
-	}
+
+	is_perma = false;
 
 	timeval tv;
 	gettimeofday(&tv, nullptr);
