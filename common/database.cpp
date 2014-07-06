@@ -2291,60 +2291,67 @@ uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 
 bool Database::GetUnusedInstanceID(uint16 &instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
 
 	uint32 count = RuleI(Zone, ReservedInstances);
 	uint32 max = 65535;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT IFNULL(MAX(id),%u)+1 FROM instance_list  WHERE id > %u", count,count), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0) {
-			row = mysql_fetch_row(result);
-			if(atoi(row[0]) <= max) {
-				count = atoi(row[0]);
-				mysql_free_result(result);
-			} else {
-				mysql_free_result(result);
-				if (RunQuery(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where id > %u ORDER BY id", count), errbuf, &result)) {
-					safe_delete_array(query);
-					if (mysql_num_rows(result) != 0) {
-						count++;
-						while((row = mysql_fetch_row(result))) {
-							if(count < atoi(row[0])) {
-								instance_id = count;
-								mysql_free_result(result);
-								return true;
-							} else if(count > max) {
-								instance_id = 0;
-								mysql_free_result(result);
-								return false;
-							} else {
-								count++;
-							}
-						}
-					} else {
-						instance_id = 0;
-						mysql_free_result(result);
-						return false;
-					}
-				} else {
-					safe_delete_array(query);
-					instance_id = 0;
-					return false;
-				}
-			}
-		} else {
-			instance_id = 0;
-			mysql_free_result(result);
-			return false;
-		}
-	} else {
-		safe_delete_array(query);
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT IFNULL(MAX(id),%u)+1 FROM instance_list  WHERE id > %u", count, count));
+	safe_delete_array(query);
+
+	if (!results.Success())
+	{
 		instance_id = 0;
 		return false;
 	}
+
+	if (results.RowCount() == 0)
+	{
+		instance_id = 0;
+		return false;
+	}
+
+	auto row = results.begin();
+
+	if (atoi(row[0]) <= max)
+	{
+		instance_id = atoi(row[0]);
+		return true;
+	}
+
+	results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where id > %u ORDER BY id", count));
+	safe_delete_array(query);
+
+	if (!results.Success())
+	{
+		instance_id = 0;
+		return false;
+	}
+
+	if (results.RowCount() == 0)
+	{
+		nstance_id = 0;
+		return false;
+	}
+
+	count++;
+	for (auto row = results.begin();row != results.end();++row)
+	{
+		if(count < atoi(row[0])) 
+		{
+			instance_id = count;
+			return true;
+		} 
+		
+		if(count > max) 
+		{
+			instance_id = 0;
+			return false;
+		} 
+
+		count++;
+	}
+
 	instance_id = count;
 	return true;
 }
