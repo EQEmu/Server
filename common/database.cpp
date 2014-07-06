@@ -2435,15 +2435,9 @@ bool Database::CheckInstanceExists(uint16 instance_id)
 
 void Database::BuryCorpsesInInstance(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
+	char *query = nullptr;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u",
-		instance_id), errbuf, &result))
-	{
-		mysql_free_result(result);
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u", instance_id));
 	safe_delete_array(query);
 }
 
