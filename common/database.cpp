@@ -2359,20 +2359,13 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 //perhaps purge any expireds too
 bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
+	char *query = nullptr;
 
-	if(RunQuery(query, MakeAnyLenString(&query, "INSERT INTO instance_list (id, zone, version, start_time, duration)"
-		" values(%lu, %lu, %lu, UNIX_TIMESTAMP(), %lu)", (unsigned long)instance_id, (unsigned long)zone_id, (unsigned long)version, (unsigned long)duration), errbuf))
-	{
-		safe_delete_array(query);
-		return true;
-	}
-	else
-	{
-		safe_delete_array(query);
-		return false;
-	}
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO instance_list (id, zone, version, start_time, duration)"
+		" values(%lu, %lu, %lu, UNIX_TIMESTAMP(), %lu)", (unsigned long)instance_id, (unsigned long)zone_id, (unsigned long)version, (unsigned long)duration));
+	safe_delete_array(query);
+
+	return results.Success();
 }
 
 void Database::PurgeExpiredInstances()
