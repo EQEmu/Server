@@ -4,8 +4,8 @@
 #ifdef _WINDOWS
 	#include <winsock.h>
 	#include <windows.h>
-	//#include <winsock.h>
 #endif
+
 #include <mysql.h>
 #include "../common/types.h"
 #include "../common/Mutex.h"
@@ -13,6 +13,7 @@
 #include "../common/queue.h"
 #include "../common/timer.h"
 #include "../common/Condition.h"
+#include "../common/MySQLRequestResult.h"
 
 class DBcore {
 public:
@@ -22,6 +23,7 @@ public:
 	~DBcore();
 	eStatus	GetStatus() { return pStatus; }
 	bool	RunQuery(const char* query, uint32 querylen, char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0, bool retry = true);
+	MySQLRequestResult	QueryDatabase(const char* query, uint32 querylen, bool retryOnFailureOnce = true);
 	uint32	DoEscapeString(char* tobuf, const char* frombuf, uint32 fromlen);
 	void	ping();
 	MYSQL*	getMySQL(){ return &mysql; }

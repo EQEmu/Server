@@ -39,6 +39,8 @@ SET(common_sources
 	MiscFunctions.cpp
 	moremath.cpp
 	Mutex.cpp
+	MySQLRequestResult.cpp
+	MySQLRequestRow.cpp
 	opcode_map.cpp
 	opcodemgr.cpp
 	packet_dump.cpp
@@ -149,6 +151,8 @@ SET(common_headers
 	MiscFunctions.h
 	moremath.h
 	Mutex.h
+	MySQLRequestResult.h
+	MySQLRequestRow.h
 	op_codes.h
 	opcode_dispatch.h
 	opcodemgr.h
