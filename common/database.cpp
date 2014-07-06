@@ -2112,7 +2112,6 @@ const char* Database::GetRaidLeaderName(uint32 rid)
 
 bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
 {
-
 	//we are not saved to this instance so set our instance to 0
 	if(!GlobalInstance(instance_id) && !CharacterInInstanceGroup(instance_id, char_id))
 	{
@@ -2124,6 +2123,7 @@ bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
 		DeleteInstance(instance_id);
 		return false;
 	}
+
 	return true;
 }
 
