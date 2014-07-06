@@ -375,6 +375,9 @@ struct StatBonuses {
 	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
 	int16   FactionModPct;						// Modifies amount of faction gained.
 	int16	MeleeVulnerability;					// Weakness/mitigation to melee damage
+	bool	LimitToSkill[HIGHEST_SKILL+2];		// Determines if we need to search for a skill proc.
+	uint16  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
+	uint16  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

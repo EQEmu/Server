@@ -1773,20 +1773,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_SkillProc2:
-			case SE_SkillProc:
-			{
-				uint16 procid = GetProcID(spell_id, i);
-#ifdef SPELL_EFFECT_SPAM
-			snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
-#endif
-				if(spells[spell_id].base2[i] == 0)
-					AddSkillProc(procid, 100, spell_id);
-				else
-					AddSkillProc(procid, spells[spell_id].base2[i]+100, spell_id);
-				break;
-			}
-
 			case SE_NegateAttacks:
 			{
 #ifdef SPELL_EFFECT_SPAM
@@ -2257,6 +2243,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				*Max is lower value then Weapon base, possibly min hit vs Weapon Damage range ie. MakeRandInt(max,base)
 				*/
 				int16 focus = 0;
+				int ReuseTime = spells[spell_id].recast_time + spells[spell_id].recovery_time;
 
 				if(caster->IsClient())
 					focus = caster->CastToClient()->GetFocusEffect(focusFcBaseEffects, spell_id);
@@ -2264,15 +2251,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				switch(spells[spell_id].skill)
 				{
 					case SkillThrowing:
-						caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus);
+						caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus, ReuseTime);
 					break;
 
 					case SkillArchery:
-						caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus);
+						caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus,ReuseTime);
 					break;
 
 					default:
-						caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus);
+						caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus, ReuseTime);
 					break;
 				}
 				break;
@@ -2970,6 +2957,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_FactionModPct:
 			case SE_LimitSpellClass:
 			case SE_Sanctuary:
+			case SE_PetMeleeMitigation:
+			case SE_SkillProc:
+			case SE_SkillProcSuccess:
 			{
 				break;
 			}
@@ -3680,14 +3670,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				uint16 procid = GetProcID(buffs[slot].spellid, i);
 				RemoveProcFromWeapon(procid, false);
-				break;
-			}
-
-			case SE_SkillProc2:
-			case SE_SkillProc:
-			{
-				uint16 procid = GetProcID(buffs[slot].spellid, i);
-				RemoveSkillProc(procid);
 				break;
 			}
 

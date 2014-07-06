@@ -7,6 +7,7 @@ Sympathetic foci on items with proc rate mod will now benefit from that modifier
 Sympathetic foci can now be placed on AA's (This should always be slot1 in the AA)
 Kayen: Implemented SE_IllusionPersistence- Allows illusions to last until you die or the illusion is forcibly removed.
 Kayen: Added rule 'PreNerftBardAEDot' for SE_BardAEDot to allow it to once again do damage to moving targets. (Set to true)
+Kayen: Completely revised SE_SkillProc, SE_LimitToSkill, SE_SkillProcSuccess to overall just work better and more accurately, AA support. 
 
 Required SQL: utils/sql/git/required/2014_07_04_AA_Update.sql
 
