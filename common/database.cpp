@@ -2213,35 +2213,20 @@ bool Database::CheckInstanceExpired(uint16 instance_id)
 
 uint32 Database::ZoneIDFromInstanceID(uint16 instance_id)
 {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 ret;
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT zone FROM instance_list where id=%u", instance_id),
-		errbuf, &result))
-	{
-		safe_delete_array(query);
-		if (mysql_num_rows(result) != 0)
-		{
-			row = mysql_fetch_row(result);
-			ret = atoi(row[0]);
-			mysql_free_result(result);
-			return ret;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-	}
-	else
-	{
-		safe_delete_array(query);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT zone FROM instance_list where id=%u", instance_id));
+	safe_delete_array(query);
+
+	if (!results.Success())
 		return 0;
-	}
-	return 0;
+
+	if (results.RowCount() == 0)
+		return 0;
+
+	auto row = results.begin();
+
+	return atoi(row[0]);
 }
 
 uint32 Database::VersionFromInstanceID(uint16 instance_id)
