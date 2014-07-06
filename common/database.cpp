@@ -2077,33 +2077,37 @@ uint32 Database::GetRaidID(const char* name){
 	return 0;
 }
 
-const char *Database::GetRaidLeaderName(uint32 rid)
+const char* Database::GetRaidLeaderName(uint32 rid)
 {
-	static char name[128];
+	// Would be a good idea to fix this to be a passed in variable and
+	// make the caller responsible. static local variables like this are
+	// not guaranteed to be thread safe (nor is the internal guard 
+	// variable). C++0x standard states this should be thread safe
+	// but may not be fully supported in some compilers.
+	static char name[128]; 
+	char *query = nullptr;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1",
-		rid), errbuf, &result)) {
-		if((row = mysql_fetch_row(result)) != nullptr)
-		{
-			memset(name, 0, 128);
-			strcpy(name, row[0]);
-			mysql_free_result(result);
-			safe_delete_array(query);
-			return name;
-		}
-		else
-			printf("Unable to get raid id, char not found!\n");
-		mysql_free_result(result);
-	}
-	else
-		printf("Unable to get raid id: %s\n",errbuf);
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1",rid));
 	safe_delete_array(query);
-	return "UNKNOWN";
+
+	if (!results.Success())
+	{
+		std::cout << "Unable to get raid id: " << results.ErrorMessage() << std::endl;
+		return "UNKNOWN";
+	}
+
+	auto row = results.begin();
+
+	if (row == results.end())
+	{
+		std::cout << "Unable to get raid id, char not found!" << std::endl;
+		return "UNKNOWN";
+	}
+
+	memset(name, 0, sizeof(name));
+	strcpy(name, row[0]);
+
+	return name;
 }
 
 bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
