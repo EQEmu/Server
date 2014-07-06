@@ -2708,22 +2708,23 @@ bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, u
 	return true;
 }
 
-uint32 Database::GetGuildDBIDByCharID(uint32 char_id) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	int retVal = 0;
+uint32 Database::GetGuildIDByCharID(uint32 char_id) 
+{
+	char *query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT guild_id FROM guild_members WHERE char_id='%i'", char_id), errbuf, &result)) {
-		if (mysql_num_rows(result) == 1) {
-			MYSQL_ROW row = mysql_fetch_row(result);
-			retVal = atoi(row[0]);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		std::cerr << "Error in GetAccountIDByChar query '" << query << "' " << errbuf << std::endl;
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT guild_id FROM guild_members WHERE char_id='%i'", char_id));
+
+	if (!results.Success())
+	{
+		std::cerr << "Error in GetGuildIDByChar query '" << query << "' " << results.ErrorMessage() << std::endl;
+		safe_delete_array(query);
+		return 0;
 	}
 	safe_delete_array(query);
-	return retVal;
+
+	if (results.RowCount() == 0)
+		return 0;
+
+	auto row = results.begin();
+	return atoi(row[0]);
 }
