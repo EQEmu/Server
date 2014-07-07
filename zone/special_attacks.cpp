@@ -875,6 +875,9 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 			else
 				WDmg = weapon_damage;
 
+			if (focus) //From FcBaseEffects
+				WDmg += WDmg*focus/100;
+
 			if((WDmg > 0) || (ADmg > 0))
 			{
 				if(WDmg < 0)
@@ -949,7 +952,6 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 				other->MeleeMitigation(this, TotalDmg, minDmg);
 				if(TotalDmg > 0)
 				{
-					TotalDmg += TotalDmg*focus/100;
 					ApplyMeleeDamageBonus(SkillArchery, TotalDmg);
 					TotalDmg += other->GetFcDamageAmtIncoming(this, 0, true, SkillArchery);
 					TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(SkillArchery) / 100) + GetSkillDmgAmt(SkillArchery);
@@ -1282,8 +1284,11 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 
 		if (!weapon_damage && item != nullptr)
 			WDmg = GetWeaponDamage(other, item);
-		else
+		else 
 			WDmg = weapon_damage;
+
+		if (focus) //From FcBaseEffects
+			WDmg += WDmg*focus/100;
 
 		int32 TotalDmg = 0;
 
@@ -1308,7 +1313,6 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 			other->MeleeMitigation(this, TotalDmg, minDmg);
 			if(TotalDmg > 0)
 			{
-				TotalDmg += TotalDmg*focus/100;
 				ApplyMeleeDamageBonus(SkillThrowing, TotalDmg);
 				TotalDmg += other->GetFcDamageAmtIncoming(this, 0, true, SkillThrowing);
 				TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(SkillThrowing) / 100) + GetSkillDmgAmt(SkillThrowing);
@@ -2175,6 +2179,9 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 
 	if(weapon_damage > 0){
 
+		if (focus) //From FcBaseEffects
+			weapon_damage += weapon_damage*focus/100;
+
 		if(GetClass() == BERSERKER){
 			int bonus = 3 + GetLevel()/10;
 			weapon_damage = weapon_damage * (100+bonus) / 100;
@@ -2210,7 +2217,6 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 			other->AvoidDamage(this, damage, CanRiposte);
 			other->MeleeMitigation(this, damage, min_hit);
 			if(damage > 0) {
-				damage += damage*focus/100;
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += other->GetFcDamageAmtIncoming(this, 0, true, skillinuse);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
