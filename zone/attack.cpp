@@ -3983,9 +3983,9 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 
 		if (bDefensiveProc){
 			for (int i = 0; i < MAX_PROCS; i++) {
-				if (DefensiveProcs[i].spellID != SPELL_UNKNOWN) {
+				if (IsValidSpell(DefensiveProcs[i].spellID)) {
 					float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance)/100.0f);
-					if ((MakeRandomInt(0, 1) <= chance)) {
+					if ((MakeRandomFloat(0, 1) <= chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
 						CheckNumHitsRemaining(NUMHIT_DefensiveSpellProcs,0,DefensiveProcs[i].base_spellID);
 					}
