@@ -1827,24 +1827,27 @@ uint32 Database::GetGroupID(const char* name){
 }
 
 char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char *query = nullptr;
+
 	PlayerProfile_Struct pp;
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT profile from character_ where name='%s'", name), errbuf, &result)) {
-		row = mysql_fetch_row(result);
-		unsigned long* lengths = mysql_fetch_lengths(result);
-		if (lengths[0] == sizeof(PlayerProfile_Struct)) {
-			memcpy(&pp, row[0], sizeof(PlayerProfile_Struct));
-			strcpy(leaderbuf,pp.groupMembers[0]);
-		}
-		mysql_free_result(result);
-	}
-	else{
-			printf("Unable to get leader name: %s\n",errbuf);
-	}
+
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT profile from character_ where name='%s'", name));
 	safe_delete_array(query);
+
+	if (!results.Success())
+	{
+		std::cout << "Unable to get leader name: " << results.ErrorMessage() << std::endl;
+		return leaderbuf;
+	}
+
+	if (results.LengthOfColumn(0) != sizeof(PlayerProfile_Struct))
+		return leaderbuf;
+
+	auto row = results.begin();
+
+	memcpy(&pp, row[0], sizeof(PlayerProfile_Struct));
+	strcpy(leaderbuf,pp.groupMembers[0]);
+
 	return leaderbuf;
 }
 
