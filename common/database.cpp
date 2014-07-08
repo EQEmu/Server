@@ -1939,23 +1939,6 @@ void Database::ClearGroupLeader(uint32 gid) {
 		std::cout << "Unable to clear group leader: " << results.ErrorMessage() << std::endl;
 }
 
-bool FetchRowMap(MYSQL_RES *result, std::map<std::string,std::string> &rowmap)
-{
-MYSQL_FIELD *fields;
-MYSQL_ROW row;
-unsigned long num_fields,i;
-bool retval=false;
-	rowmap.clear();
-	if (result && (num_fields=mysql_num_fields(result)) && (row = mysql_fetch_row(result))!=nullptr && (fields = mysql_fetch_fields(result))!=nullptr) {
-		retval=true;
-		for(i=0;i<num_fields;i++) {
-			rowmap[fields[i].name]=(row[i] ? row[i] : "");
-		}
-	}
-
-	return retval;
-}
-
 uint8 Database::GetAgreementFlag(uint32 acctid)
 {
 	char* query = nullptr;
