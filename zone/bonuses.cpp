@@ -2922,7 +2922,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_LimitToSkill:{
 				if (effect_value <= HIGHEST_SKILL){
 					newbon->LimitToSkill[effect_value] = true;
-					Shout("BONUS Set Limit = %i", effect_value);
 				}
 				break;
 			}
