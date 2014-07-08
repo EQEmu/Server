@@ -7,6 +7,7 @@
 #endif
 
 #include <mysql.h>
+#include <string.h>
 #include "../common/types.h"
 #include "../common/Mutex.h"
 #include "../common/linked_list.h"
@@ -24,6 +25,7 @@ public:
 	eStatus	GetStatus() { return pStatus; }
 	bool	RunQuery(const char* query, uint32 querylen, char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0, bool retry = true);
 	MySQLRequestResult	QueryDatabase(const char* query, uint32 querylen, bool retryOnFailureOnce = true);
+	MySQLRequestResult	QueryDatabase(std::string query, bool retryOnFailureOnce = true);
 	uint32	DoEscapeString(char* tobuf, const char* frombuf, uint32 fromlen);
 	void	ping();
 	MYSQL*	getMySQL(){ return &mysql; }
