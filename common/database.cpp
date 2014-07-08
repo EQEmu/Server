@@ -1862,60 +1862,50 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 }
 
 char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, GroupLeadershipAA_Struct* GLAA){
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES* result;
-	MYSQL_ROW row;
+	char* query = nullptr;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT leadername, maintank, assist, puller, marknpc, leadershipaa FROM group_leaders WHERE gid=%lu",(unsigned long)gid),
-			errbuf, &result)) {
+	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT leadername, maintank, assist, puller, marknpc, leadershipaa FROM group_leaders WHERE gid=%lu",(unsigned long)gid));
+	safe_delete_array(query);
 
-		safe_delete_array(query);
+	if (!results.Success() || results.RowCount() == 0)
+	{
+		if(leaderbuf)
+			strcpy(leaderbuf, "UNKNOWN");
 
-		row = mysql_fetch_row(result);
-		unsigned long* Lengths = mysql_fetch_lengths(result);
+		if(maintank)
+			maintank[0] = '\0';
 
-		if(row != nullptr){
+		if(assist)
+			assist[0] = '\0';
 
-			if(leaderbuf)
-				strcpy(leaderbuf, row[0]);
+		if(puller)
+			puller[0] = '\0';
 
-			if(maintank)
-				strcpy(maintank, row[1]);
+		if(marknpc)
+			marknpc[0] = '\0';
 
-			if(assist)
-				strcpy(assist, row[2]);
-
-			if(puller)
-				strcpy(puller, row[3]);
-
-			if(marknpc)
-				strcpy(marknpc, row[4]);
-
-			if(GLAA && (Lengths[5] == sizeof(GroupLeadershipAA_Struct)))
-				memcpy(GLAA, row[5], sizeof(GroupLeadershipAA_Struct));
-
-			mysql_free_result(result);
-			return leaderbuf;
-		}
+		return leaderbuf;
 	}
-	else
-		safe_delete_array(query);
+
+	auto row = results.begin();
 
 	if(leaderbuf)
-		strcpy(leaderbuf, "UNKNOWN");
+		strcpy(leaderbuf, row[0]);
 
 	if(maintank)
-		maintank[0] = 0;
+		strcpy(maintank, row[1]);
 
 	if(assist)
-		assist[0] = 0;
+		strcpy(assist, row[2]);
 
 	if(puller)
-		puller[0] = 0;
+		strcpy(puller, row[3]);
 
 	if(marknpc)
-		marknpc[0] = 0;
+		strcpy(marknpc, row[4]);
+
+	if(GLAA && results.LengthOfColumn(5) == sizeof(GroupLeadershipAA_Struct))
+		memcpy(GLAA, row[5], sizeof(GroupLeadershipAA_Struct));
 
 	return leaderbuf;
 }
