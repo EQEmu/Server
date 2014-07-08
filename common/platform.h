@@ -8,7 +8,7 @@ enum EQEmuExePlatform
 	ExePlatformWorld,
 	ExePlatformLogin,
 	ExePlatformQueryServ,
-	ExePlatformSocket_Server,
+	ExePlatformWebInterface,
 	ExePlatformUCS,
 	ExePlatformLaunch,
 	ExePlatformSharedMemory,

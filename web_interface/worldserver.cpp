@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -25,20 +25,13 @@
 #include <stdarg.h>
 
 #include "../common/servertalk.h"
-#include "worldserver.h"
-#include "socket_server_config.h"
-#include "database.h"
-#include "lfguild.h"
 #include "../common/packet_functions.h"
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
+#include "worldserver.h"
 
-extern WorldServer worldserver;
-extern const socket_server_config *Config;
-extern Database database;
-
-WorldServer::WorldServer()
-: WorldConnection(EmuTCPConnection::packetModeSocket_Server, Config->SharedKey.c_str()){
+WorldServer::WorldServer(std::string shared_key)
+: WorldConnection(EmuTCPConnection::packetModeWebInterface, shared_key.c_str()){
 	pTryReconnect = true;
 }
 
@@ -46,7 +39,7 @@ WorldServer::~WorldServer(){
 }
 
 void WorldServer::OnConnected(){
-	_log(SOCKET_SERVER__INIT, "Connected to World.");
+	_log(WEB_INTERFACE__INIT, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
@@ -55,9 +48,9 @@ void WorldServer::Process(){
 	if (!Connected())
 		return;
 
-	ServerPacket *pack = 0;
+	ServerPacket *pack = nullptr;
 	while((pack = tcpc.PopPacket())){
-		_log(SOCKET_SERVER__TRACE, "Received Opcode: %4X", pack->opcode);
+		_log(WEB_INTERFACE__TRACE, "Received Opcode: %4X", pack->opcode);
 		switch(pack->opcode) {
 			case 0: { break; }
 			case ServerOP_KeepAlive: { break; }

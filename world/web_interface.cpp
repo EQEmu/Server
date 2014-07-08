@@ -1,5 +1,5 @@
 #include "../common/debug.h"
-#include "socket_server.h"
+#include "web_interface.h"
 #include "WorldConfig.h"
 #include "clientlist.h"
 #include "zonelist.h"
@@ -12,33 +12,33 @@
 extern ClientList client_list;
 extern ZSList zoneserver_list;
 
-Socket_Server_Connection::Socket_Server_Connection()
+WebInterfaceConnection::WebInterfaceConnection()
 {
-	Stream = 0;
+	stream = 0;
 	authenticated = false;
 }
 
-void Socket_Server_Connection::SetConnection(EmuTCPConnection *inStream)
+void WebInterfaceConnection::SetConnection(EmuTCPConnection *inStream)
 {
-	if(Stream)
+	if(stream)
 	{
-		_log(SOCKET_SERVER__ERROR, "Incoming Socket_Server Connection while we were already connected to a Socket_Server.");
-		Stream->Disconnect();
+		_log(WEB_INTERFACE__ERROR, "Incoming WebInterface Connection while we were already connected to a WebInterface.");
+		stream->Disconnect();
 	}
 
-	Stream = inStream;
+	stream = inStream;
 
 	authenticated = false;
 }
 
-bool Socket_Server_Connection::Process()
+bool WebInterfaceConnection::Process()
 {
-	if (!Stream || !Stream->Connected())
+	if (!stream || !stream->Connected())
 		return false;
 
 	ServerPacket *pack = 0;
 
-	while((pack = Stream->PopPacket()))
+	while((pack = stream->PopPacket()))
 	{
 		if (!authenticated)
 		{
@@ -56,7 +56,7 @@ bool Socket_Server_Connection::Process()
 					{
 						struct in_addr in;
 						in.s_addr = GetIP();
-						_log(SOCKET_SERVER__ERROR, "Socket_Server authorization failed.");
+						_log(WEB_INTERFACE__ERROR, "WebInterface authorization failed.");
 						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
 						SendPacket(pack);
 						delete pack;
@@ -68,7 +68,7 @@ bool Socket_Server_Connection::Process()
 				{
 					struct in_addr in;
 					in.s_addr = GetIP();
-					_log(SOCKET_SERVER__ERROR, "Socket_Server_ authorization failed.");
+					_log(WEB_INTERFACE__ERROR, "WebInterface authorization failed.");
 					ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					delete pack;
@@ -78,7 +78,7 @@ bool Socket_Server_Connection::Process()
 			}
 			else
 			{
-				_log(SOCKET_SERVER__ERROR,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthorized zone access.");
+				_log(WEB_INTERFACE__ERROR, "**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthorized zone access.");
 				authenticated = true;
 			}
 			delete pack;
@@ -96,17 +96,12 @@ bool Socket_Server_Connection::Process()
 			}
 			case ServerOP_ZAAuth:
 			{
-				_log(SOCKET_SERVER__ERROR, "Got authentication from Socket_Server_ when they are already authenticated.");
-				break;
-			}
-			case ServerOP_LFGuildUpdate:
-			{
-				zoneserver_list.SendPacket(pack);
+				_log(WEB_INTERFACE__ERROR, "Got authentication from WebInterface when they are already authenticated.");
 				break;
 			}
 			default:
 			{
-				_log(SOCKET_SERVER__ERROR, "Unknown ServerOPcode from Socket_Server_ 0x%04x, size %d", pack->opcode, pack->size);
+				_log(WEB_INTERFACE__ERROR, "Unknown ServerOPcode from WebInterface 0x%04x, size %d", pack->opcode, pack->size);
 				DumpPacket(pack->pBuffer, pack->size);
 				break;
 			}
@@ -117,11 +112,11 @@ bool Socket_Server_Connection::Process()
 	return(true);
 }
 
-bool Socket_Server_Connection::SendPacket(ServerPacket* pack)
+bool WebInterfaceConnection::SendPacket(ServerPacket* pack)
 {
-	if(!Stream)
+	if(!stream)
 		return false;
 
-	return Stream->SendPacket(pack);
+	return stream->SendPacket(pack);
 }
 

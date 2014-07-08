@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#ifndef WORLDSERVER_H
-#define WORLDSERVER_H
+#ifndef WI_WORLDSERVER_H
+#define WI_WORLDSERVER_H
 
 #include "../common/worldconn.h"
 #include "../common/eq_packet_structs.h"
@@ -24,7 +24,7 @@
 class WorldServer : public WorldConnection
 {
 	public:
-		WorldServer();
+		WorldServer(std::string shared_key);
 		virtual ~WorldServer();
 		virtual void Process();
 

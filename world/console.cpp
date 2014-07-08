@@ -46,7 +46,7 @@
 #include "LauncherList.h"
 #include "ucs.h"
 #include "queryserv.h"
-#include "socket_server.h"
+#include "web_interface.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -61,7 +61,7 @@ extern ClientList client_list;
 extern LauncherList launcher_list;
 extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
-extern Socket_Server_Connection SSLink;
+extern WebInterfaceConnection WILink;
 extern volatile bool	RunLoops;
 
 ConsoleList console_list;
@@ -265,10 +265,10 @@ bool Console::Process() {
 			QSLink.SetConnection(tcpc);
 			tcpc = 0;
 		}  
-		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeSocket_Server)
+		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeWebInterface)
 		{
-			_log(WORLD__CONSOLE, "New Socket Server Connection from %s:%d", inet_ntoa(in), GetPort());
-			SSLink.SetConnection(tcpc);
+			_log(WORLD__CONSOLE, "New WI Connection from %s:%d", inet_ntoa(in), GetPort());
+			WILink.SetConnection(tcpc);
 			tcpc = 0;
 		}
 		else {
