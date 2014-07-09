@@ -227,11 +227,9 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
 }
 
 bool Database::AddGMIP(char* ip_address, char* name) {
-	char *query = nullptr;
+	std::string query = StringFormat("INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name));
-
-	safe_delete_array(query);
+	auto results = QueryDatabase(query);
 
 	return results.Success();
 }
