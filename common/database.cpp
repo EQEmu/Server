@@ -1329,20 +1329,17 @@ uint8 Database::GetServerType()
 }
 
 bool Database::MoveCharacterToZone(const char* charname, const char* zonename,uint32 zoneid) {
-	char *query = nullptr;
-
 	if(zonename == nullptr || strlen(zonename) == 0)
 		return false;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s',zoneid=%i,x=-1, y=-1, z=-1 WHERE name='%s'", zonename,zoneid, charname));
+	std::string query = StringFormat("UPDATE character_ SET zonename = '%s',zoneid=%i,x=-1, y=-1, z=-1 WHERE name='%s'", zonename,zoneid, charname);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in MoveCharacterToZone(name) query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-	safe_delete_array(query);
 
 	if (results.RowsAffected() == 0)
 		return false;
