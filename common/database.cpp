@@ -1352,17 +1352,15 @@ bool Database::MoveCharacterToZone(const char* charname, const char* zonename) {
 }
 
 bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE character_ SET zonename = '%s', zoneid=%i, x=-1, y=-1, z=-1 WHERE id=%i", iZonename, GetZoneID(iZonename), iCharID));
+	std::string query = StringFormat("UPDATE character_ SET zonename = '%s', zoneid=%i, x=-1, y=-1, z=-1 WHERE id=%i", iZonename, GetZoneID(iZonename), iCharID);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in MoveCharacterToZone(id) query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-	safe_delete_array(query);
 
 	return results.RowsAffected() != 0;
 }
