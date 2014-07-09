@@ -1366,19 +1366,18 @@ bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
 }
 
 uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 acctid) {
-	char *query = nullptr;
+	
 	PlayerProfile_Struct* pp;
 	ExtendedProfile_Struct* ext;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT profile, extprofile FROM character_ WHERE name='%s'", oldname));
+	std::string query = StringFormat("SELECT profile, extprofile FROM character_ WHERE name='%s'", oldname);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in CopyCharacter read query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
-	safe_delete_array(query);
 
 	auto row = results.begin();
 
@@ -1386,7 +1385,6 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 	strcpy(pp->name, newname);
 
 	ext = (ExtendedProfile_Struct*)row[1];
-
 
 	char query2[276 + sizeof(PlayerProfile_Struct)*2 + sizeof(ExtendedProfile_Struct)*2 + 1];
 	char* end=query2;
