@@ -1424,18 +1424,16 @@ bool Database::SetHackerFlag(const char* accountname, const char* charactername,
 }
 
 bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone) {
+	
 	//Utilize the "hacker" table, but also give zone information.
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, hacked, zone));
+	std::string query = StringFormat("INSERT INTO hackers(account,name,hacked,zone) values('%s','%s','%s','%s')", accountname, charactername, hacked, zone);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
-		safe_delete_array(query);
 		std::cerr << "Error in SetMQDetectionFlag query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return false;
 	}
-	safe_delete_array(query);
 
 	return results.RowsAffected() != 0;
 }
