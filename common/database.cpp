@@ -1268,14 +1268,12 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 }
 
 void Database::ClearMerchantTemp(){
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from merchantlist_temp"));
+	std::string query("delete from merchantlist_temp");
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cerr << "Error in ClearMerchantTemp query '" << query << "' " << results.ErrorMessage() << std::endl;
-
-	safe_delete_array(query);
 }
 
 bool Database::UpdateName(const char* oldname, const char* newname) {
