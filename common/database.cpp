@@ -323,17 +323,15 @@ bool Database::DeleteAccount(const char* name) {
 }
 
 bool Database::SetLocalPassword(uint32 accid, const char* password) {
-	char *query = nullptr;
+	std::string query = StringFormat("UPDATE account SET password=MD5('%s') where id=%i;", password, accid);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE account SET password=MD5('%s') where id=%i;", password, accid));
+	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
 		std::cerr << "Error in SetLocalPassword query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
 
-	safe_delete_array(query);
 	return true;
 }
 
