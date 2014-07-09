@@ -199,18 +199,15 @@ bool Database::CheckBannedIPs(const char* loginIP)
 
 bool Database::AddBannedIP(char* bannedIP, const char* notes)
 {
-	char *query = nullptr;
+	std::string query = StringFormat("INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT into Banned_IPs SET ip_address='%s', notes='%s'", bannedIP, notes));
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in ReserveName query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-
-	safe_delete_array(query);
 
 	return true;
 }
