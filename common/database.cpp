@@ -213,11 +213,9 @@ bool Database::AddBannedIP(char* bannedIP, const char* notes)
 }
 
  bool Database::CheckGMIPs(const char* ip_address, uint32 account_id) {
-	char *query = nullptr;
+	std::string query = StringFormat("SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id));
-
-	safe_delete_array(query);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return false;
