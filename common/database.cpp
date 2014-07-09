@@ -713,11 +713,8 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetAccountIDByAcc query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
-
-	safe_delete_array(query);
 
 	if (results.RowCount() != 1)
 		return 0;
@@ -741,18 +738,15 @@ uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* 
 }
 
 void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID) {
-	char *query = nullptr;
+	std::string query = StringFormat("SELECT name, lsaccount_id FROM account WHERE id='%i'", accountid);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT name, lsaccount_id FROM account WHERE id='%i'", accountid));
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetAccountName query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return;
 	}
-
-	safe_delete_array(query);
 
 	if (results.RowCount() != 1)
 		return;
