@@ -19,11 +19,12 @@
 #include <sstream>
 #include <vector>
 #include <cstdarg>
+#include <string.h>
 #include "types.h"
 
 
-void vStringFormat(std::string& output, const char* format, va_list args);
-void StringFormat(std::string& output, const char* format, ...);
+const std::string vStringFormat(const char* format, va_list args);
+const std::string StringFormat(const char* format, ...);
 std::string EscapeString(const std::string &s);
 
 const char *MakeLowerString(const char *source);

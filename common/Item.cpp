@@ -893,8 +893,7 @@ void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection)
 		if (!inst || !inst->GetItem())
 			continue;
 
-		std::string slot;
-		StringFormat(slot, "Slot %d: %s (%d)", it->first, it->second->GetItem()->Name, (inst->GetCharges() <= 0) ? 1 : inst->GetCharges());
+		std::string slot = StringFormat("Slot %d: %s (%d)", it->first, it->second->GetItem()->Name, (inst->GetCharges() <= 0) ? 1 : inst->GetCharges());
 		std::cout << slot << std::endl;
 
 		dumpBagContents(inst, &it);
@@ -913,8 +912,7 @@ void Inventory::dumpBagContents(ItemInst *inst, iter_inst *it) {
 		if (!baginst || !baginst->GetItem())
 			continue;
 
-		std::string subSlot;
-		StringFormat(subSlot, "	Slot %d: %s (%d)", Inventory::CalcSlotId((*it)->first, itb->first),
+		std::string subSlot = StringFormat("	Slot %d: %s (%d)", Inventory::CalcSlotId((*it)->first, itb->first),
 			baginst->GetItem()->Name, (baginst->GetCharges() <= 0) ? 1 : baginst->GetCharges());
 		std::cout << subSlot << std::endl;
 	}

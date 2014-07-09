@@ -38,8 +38,9 @@
 // original source: 
 // https://github.com/facebook/folly/blob/master/folly/String.cpp
 //
-void vStringFormat(std::string& output, const char* format, va_list args)
+const std::string vStringFormat(const char* format, va_list args)
 {
+	std::string output;
 	va_list tmpargs;
 
 	va_copy(tmpargs,args);
@@ -48,11 +49,8 @@ void vStringFormat(std::string& output, const char* format, va_list args)
 
 	if (characters_used < 0) {
 		// Looks like we have an invalid format string.
-		// error out.
-		std::string errorMessage("Invalid format string; snprintf returned negative with format string: ");
-		errorMessage.append(format);
-		
-		throw std::runtime_error(errorMessage);
+		// return empty string.
+		return "";
 	}
 	else if ((unsigned int)characters_used > output.capacity()) {
 		output.resize(characters_used+1);
@@ -62,12 +60,10 @@ void vStringFormat(std::string& output, const char* format, va_list args)
 
 		if (characters_used < 0) {
 			// We shouldn't have a format error by this point, but I can't imagine what error we
-			// could have by this point. Still, error out and report it.
-			std::string errorMessage("Invalid format string or unknown vsnprintf error; vsnprintf returned negative with format string: ");
-			errorMessage.append(format);
-		
-			throw std::runtime_error(errorMessage);
+			// could have by this point. Still, return empty string;
+			return "";
 		}
+		return std::move(output);
 	} 
 	else {
 		output.resize(characters_used + 1);
@@ -78,23 +74,22 @@ void vStringFormat(std::string& output, const char* format, va_list args)
 
 		if (characters_used < 0) {
 			// We shouldn't have a format error by this point, but I can't imagine what error we
-			// could have by this point. still error out and report it.
-			std::string errorMessage("Invalid format string or unknown vsnprintf error; vsnprintf returned negative with format string: ");
-			errorMessage.append(format);
-		
-			throw std::runtime_error(errorMessage);
+			// could have by this point. Still, return empty string;
+			return "";
 		}
-		
+		return std::move(output);
 	}
 }
 
-void StringFormat(std::string& output, const char* format, ...)
+const std::string StringFormat(const char* format, ...)
 {
 	va_list args;
 	va_start(args, format);
-	vStringFormat(output,format,args);
+	std::string output = vStringFormat(format,args);
 	va_end(args);
+	return std::move(output);
 }
+
 
 // normal strncpy doesnt put a null term on copied strings, this one does
 // ref: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wcecrt/htm/_wcecrt_strncpy_wcsncpy.asp

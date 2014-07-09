@@ -12,8 +12,7 @@
 
 void log_message_clientVA(LogType type, Client *who, const char *fmt, va_list args) {
 
-	std::string prefix_buffer;
-	StringFormat(prefix_buffer,"[%s] %s: ", log_type_info[type].name, who->GetAccountName());
+	std::string prefix_buffer = StringFormat("[%s] %s: ", log_type_info[type].name, who->GetAccountName());
 
 	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer.c_str(), fmt, args);
 }
@@ -31,11 +30,11 @@ void log_message_zoneVA(LogType type, ZoneServer *who, const char *fmt, va_list 
 	const char *zone_name=who->GetZoneName();
 	
 	if (zone_name == nullptr)
-        StringFormat(zone_tag,"[%d]", who->GetID());
+        zone_tag = StringFormat("[%d]", who->GetID());
 	else
-		StringFormat(zone_tag,"[%d] [%s]",who->GetID(),zone_name);
+		zone_tag = StringFormat("[%d] [%s]",who->GetID(),zone_name);
 
-	StringFormat(prefix_buffer, "[%s] %s ", log_type_info[type].name, zone_tag.c_str());
+	prefix_buffer = StringFormat("[%s] %s ", log_type_info[type].name, zone_tag.c_str());
 
 	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer.c_str(), fmt, args);
 }
