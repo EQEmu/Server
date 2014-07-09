@@ -1312,17 +1312,14 @@ bool Database::CheckUsedName(const char* name)
 
 uint8 Database::GetServerType()
 {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT value FROM variables WHERE varname='ServerType'"));
+	std::string query("SELECT value FROM variables WHERE varname='ServerType'");
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetServerType query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
-	safe_delete_array(query);
 
 	if (results.RowCount() != 1)
 		return 0;
