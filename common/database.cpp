@@ -1246,17 +1246,15 @@ uint32 Database::GetAccountIDFromLSID(uint32 iLSID, char* oAccountName, int16* o
 }
 
 void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT name, status FROM account WHERE id=%i", id));
+	
+	std::string query = StringFormat("SELECT name, status FROM account WHERE id=%i", id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetAccountFromID query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return;
 	}
-	safe_delete_array(query);
 
 	if (results.RowCount() != 1)
 		return;
