@@ -1295,17 +1295,14 @@ bool Database::UpdateName(const char* oldname, const char* newname) {
 // If the name is used or an error occurs, it returns false, otherwise it returns true
 bool Database::CheckUsedName(const char* name)
 {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM character_ where name='%s'", name));
+	std::string query = StringFormat("SELECT id FROM character_ where name='%s'", name);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in CheckUsedName query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-	safe_delete_array(query);
 
 	if (results.RowCount() > 0)
 		return false;
