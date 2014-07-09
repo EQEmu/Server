@@ -566,7 +566,6 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 {
 	char query[256+sizeof(PlayerProfile_Struct)*2+sizeof(ExtendedProfile_Struct)*2+5];
 	char* end = query;
-	char* invquery = nullptr;
 	uint32 charid = 0;
 	char zone[50];
 	float x, y, z;
@@ -612,24 +611,22 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	}
 
 	// now the inventory
+	std::string invquery;
 	for (int16 i=0; i<=2270;)
 	{
 		const ItemInst* newinv = inv->GetItem(i);
 		if (!newinv)
 		{
-			auto results = QueryDatabase(invquery, MakeAnyLenString(&invquery,
-				"INSERT INTO inventory SET "
-				"charid=%0u, slotid=%0d, itemid=%0u, charges=%0d, color=%0u",
-				charid, i, newinv->GetItem()->ID,
-				newinv->GetCharges(), newinv->GetColor()));
+			invquery = StringFormat("INSERT INTO inventory SET charid=%0u, slotid=%0d, itemid=%0u, charges=%0d, color=%0u",
+				charid, i, newinv->GetItem()->ID,newinv->GetCharges(), newinv->GetColor());
+			auto results = QueryDatabase(invquery);
 
 			if (!results.RowsAffected())
-				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery, results.ErrorMessage().c_str());
+				LogFile->write(EQEMuLog::Error, "StoreCharacter inventory failed. Query '%s' %s", invquery.c_str(), results.ErrorMessage().c_str());
 #if EQDEBUG >= 9
 			else
-				LogFile->write(EQEMuLog::Debug, "StoreCharacter inventory succeeded. Query '%s'", invquery);
+				LogFile->write(EQEMuLog::Debug, "StoreCharacter inventory succeeded. Query '%s'", invquery.c_str());
 #endif
-			safe_delete_array(invquery);
 		}
 
 		if(i==30){ //end of standard inventory/cursor, jump to internals of bags/cursor
