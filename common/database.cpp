@@ -181,19 +181,15 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 //Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
 bool Database::CheckBannedIPs(const char* loginIP)
 {
-	char *query = nullptr;
+	std::string query = StringFormat("SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT ip_address FROM Banned_IPs WHERE ip_address='%s'", loginIP));
-
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in CheckBannedIPs query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return true;
 	}
-
-	safe_delete_array(query);
 
 	if (results.RowCount() != 0)
 		return true;
