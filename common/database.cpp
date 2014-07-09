@@ -704,12 +704,11 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 }
 
 uint32 Database::GetAccountIDByName(const char* accname, int16* status, uint32* lsid) {
-	char *query = nullptr;
-
 	if (!isAlphaNumeric(accname))
 		return 0;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id, status, lsaccount_id FROM account WHERE name='%s'", accname));
+	std::string query = StringFormat("SELECT id, status, lsaccount_id FROM account WHERE name='%s'", accname);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
