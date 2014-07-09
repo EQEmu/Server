@@ -1410,17 +1410,15 @@ uint8 Database::CopyCharacter(const char* oldname, const char* newname, uint32 a
 }
 
 bool Database::SetHackerFlag(const char* accountname, const char* charactername, const char* hacked) {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO hackers(account,name,hacked) values('%s','%s','%s')", accountname, charactername, hacked));
+	
+	std::string query = StringFormat("INSERT INTO hackers(account,name,hacked) values('%s','%s','%s')", accountname, charactername, hacked);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in SetHackerFlag query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-	safe_delete_array(query);
 
 	return results.RowsAffected() != 0;
 }
