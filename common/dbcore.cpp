@@ -58,6 +58,11 @@ void DBcore::ping() {
 	MDatabase.unlock();
 }
 
+MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureOnce)
+{
+	return QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
+}
+
 MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, bool retryOnFailureOnce)
 {
 	LockMutex lock(&MDatabase);

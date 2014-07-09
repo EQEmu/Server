@@ -185,7 +185,7 @@ public:
 	virtual void RogueAssassinate(Mob* other);
 	virtual void DoClassAttacks(Mob *target, bool IsRiposte=false);
 	virtual bool TryHeadShot(Mob* defender, SkillUseTypes skillInUse);
-	virtual void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod=0, int16 focus=0, bool CanRiposte=false);
+	virtual void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod=0, int16 focus=0, bool CanRiposte=false, int ReuseTime =0);
 	virtual void ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg);
 	bool CanDoSpecialAttack(Mob *other);
 	virtual int32 CheckAggroAmount(uint16 spellid);

@@ -171,11 +171,12 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 			//who->Stun(100); Kayen: This effect does not stun on live, it only moves the NPC.
 	}
 
-	if (HasSkillProcs()){
-		float chance = (float)ReuseTime*RuleR(Combat, AvgProcsPerMinute)/60000.0f;
-		TrySkillProc(who, skill, chance);
-	}
-
+	if (HasSkillProcs())
+		TrySkillProc(who, skill, ReuseTime*1000);
+	
+	if (max_damage > 0 && HasSkillProcSuccess())
+		TrySkillProc(who, skill, ReuseTime*1000, true);
+	
 	if(max_damage == -3 && !who->HasDied())
 		DoRiposte(who);
 }
@@ -847,7 +848,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	}
 }
 
-void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const ItemInst* Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus)
+void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const ItemInst* Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime)
 {
 	if (!CanDoSpecialAttack(other))
 		return;
@@ -873,6 +874,9 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 			}
 			else
 				WDmg = weapon_damage;
+
+			if (focus) //From FcBaseEffects
+				WDmg += WDmg*focus/100;
 
 			if((WDmg > 0) || (ADmg > 0))
 			{
@@ -948,7 +952,6 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 				other->MeleeMitigation(this, TotalDmg, minDmg);
 				if(TotalDmg > 0)
 				{
-					TotalDmg += TotalDmg*focus/100;
 					ApplyMeleeDamageBonus(SkillArchery, TotalDmg);
 					TotalDmg += other->GetFcDamageAmtIncoming(this, 0, true, SkillArchery);
 					TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(SkillArchery) / 100) + GetSkillDmgAmt(SkillArchery);
@@ -967,20 +970,33 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
 			
 			other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillArchery);
-
+			
+			if (TotalDmg > 0 && HasSkillProcSuccess() && GetTarget() && other && !other->HasDied()){
+				if (ReuseTime)
+					TrySkillProc(other, SkillArchery, ReuseTime);
+				else
+					TrySkillProc(other, SkillArchery, 0, true, 11);
+			}
 	}
 
 	//try proc on hits and misses
-	if((RangeWeapon != nullptr) && GetTarget() && other && (other->GetHP() > -10))
+	if((RangeWeapon != nullptr) && GetTarget() && other && !other->HasDied())
 	{
 		TryWeaponProc(RangeWeapon, other, 11);
 	}
 
 	//Arrow procs because why not?
-    if((Ammo != NULL) && GetTarget() && other && (other->GetHP() > -10))
+    if((Ammo != NULL) && GetTarget() && other && !other->HasDied())
     {
         TryWeaponProc(Ammo, other, 11);
     }
+
+	if (HasSkillProcs() && GetTarget() && other && !other->HasDied()){
+		if (ReuseTime)
+			TrySkillProc(other, SkillArchery, ReuseTime);
+		else
+			TrySkillProc(other, SkillArchery, 0, false, 11);
+	}
 }
 
 void NPC::RangedAttack(Mob* other)
@@ -1253,7 +1269,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	}
 }
 
-void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* item, uint16 weapon_damage, int16 chance_mod,int16 focus)
+void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* item, uint16 weapon_damage, int16 chance_mod,int16 focus, int ReuseTime)
 {
 	if (!CanDoSpecialAttack(other))
 		return;
@@ -1268,8 +1284,11 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 
 		if (!weapon_damage && item != nullptr)
 			WDmg = GetWeaponDamage(other, item);
-		else
+		else 
 			WDmg = weapon_damage;
+
+		if (focus) //From FcBaseEffects
+			WDmg += WDmg*focus/100;
 
 		int32 TotalDmg = 0;
 
@@ -1294,7 +1313,6 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 			other->MeleeMitigation(this, TotalDmg, minDmg);
 			if(TotalDmg > 0)
 			{
-				TotalDmg += TotalDmg*focus/100;
 				ApplyMeleeDamageBonus(SkillThrowing, TotalDmg);
 				TotalDmg += other->GetFcDamageAmtIncoming(this, 0, true, SkillThrowing);
 				TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(SkillThrowing) / 100) + GetSkillDmgAmt(SkillThrowing);
@@ -1309,10 +1327,25 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 			TotalDmg = -5;
 
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, SkillThrowing);
+
+		if (TotalDmg > 0 && HasSkillProcSuccess() && GetTarget() && other && !other->HasDied()){
+			if (ReuseTime)
+				TrySkillProc(other, SkillThrowing, ReuseTime);
+			else
+				TrySkillProc(other, SkillThrowing, 0, true, 11);
+		}
 	}
 
 	if((RangeWeapon != nullptr) && GetTarget() && other && (other->GetHP() > -10))
 		TryWeaponProc(RangeWeapon, other, 11);
+
+	if (HasSkillProcs() && GetTarget() && other && !other->HasDied()){
+		if (ReuseTime)
+			TrySkillProc(other, SkillThrowing, ReuseTime);
+		else
+			TrySkillProc(other, SkillThrowing, 0, false, 11);
+	}
+
 }
 
 void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skillInUse) {
@@ -1891,6 +1924,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 	Mob *hate_top = who->GetHateMost();
 
 	float level_difference = GetLevel() - who->GetLevel();
+	bool Success = false;
 
 	//Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
 	if ((RuleB(Combat,TauntOverLevel) == false) && (level_difference < 0) || who->GetSpecialAbility(IMMUNE_TAUNT)){
@@ -1903,7 +1937,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 
 		int32 newhate = 0;
 		float tauntchance = 50.0f;
-
+		
 		if(always_succeed)
 			tauntchance = 101.0f;
 
@@ -1940,6 +1974,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 			if (hate_top && hate_top != this){
 				newhate = (who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + 1;
 				who->CastToNPC()->AddToHateList(this, newhate);
+				Success = true;
 			}
 			else
 				who->CastToNPC()->AddToHateList(this,12);
@@ -1955,10 +1990,12 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 	else
 		Message_StringID(MT_SpellFailure,FAILED_TAUNT);
 
-	if (HasSkillProcs()){
-		float chance = (float)TauntReuseTime*RuleR(Combat, AvgProcsPerMinute)/60000.0f;
-		TrySkillProc(who, SkillTaunt, chance);
-	}
+	if (HasSkillProcs())
+		TrySkillProc(who, SkillTaunt, TauntReuseTime*1000);
+	
+
+	if (Success && HasSkillProcSuccess())
+		TrySkillProc(who, SkillTaunt, TauntReuseTime*1000, true);
 }
 
 
@@ -2045,20 +2082,7 @@ float Mob::GetSpecialProcChances(uint16 hand)
 	float ProcChance = 0.0f;
 	float ProcBonus = 0.0f;
 
-	switch (hand) {
-		case 13:
-			weapon_speed = attack_timer.GetDuration();
-			break;
-		case 14:
-			weapon_speed = attack_dw_timer.GetDuration();
-			break;
-		case 11:
-			weapon_speed = ranged_timer.GetDuration();
-			break;
-	}
-
-	if (weapon_speed < RuleI(Combat, MinHastedDelay))
-		weapon_speed = RuleI(Combat, MinHastedDelay);
+	weapon_speed = GetWeaponSpeedbyHand(hand);
 
 	if (RuleB(Combat, AdjustSpecialProcPerMinute)) {
 		ProcChance = (static_cast<float>(weapon_speed) *
@@ -2138,7 +2162,7 @@ float Mob::GetAssassinateProcChances(uint16 ReuseTime)
 	return ProcChance;
 }
 
-void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod, int16 focus, bool CanRiposte)
+void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod, int16 focus, bool CanRiposte, int ReuseTime)
 {
 	if (!CanDoSpecialAttack(other))
 		return;
@@ -2154,6 +2178,9 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 	if (hate == 0 && weapon_damage > 1) hate = weapon_damage;
 
 	if(weapon_damage > 0){
+
+		if (focus) //From FcBaseEffects
+			weapon_damage += weapon_damage*focus/100;
 
 		if(GetClass() == BERSERKER){
 			int bonus = 3 + GetLevel()/10;
@@ -2190,7 +2217,6 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 			other->AvoidDamage(this, damage, CanRiposte);
 			other->MeleeMitigation(this, damage, min_hit);
 			if(damage > 0) {
-				damage += damage*focus/100;
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += other->GetFcDamageAmtIncoming(this, 0, true, skillinuse);
 				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
@@ -2244,10 +2270,11 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 			SpellFinished(904, other, 10, 0, -1, spells[904].ResistDiff);
 	}
 
-	if (CanSkillProc && HasSkillProcs()){
-		float chance = 10.0f*RuleR(Combat, AvgProcsPerMinute)/60000.0f;
-		TrySkillProc(other, skillinuse, chance);
-	}
+	if (CanSkillProc && HasSkillProcs())
+		TrySkillProc(other, skillinuse, ReuseTime);
+	
+	if (CanSkillProc && (damage > 0) && HasSkillProcSuccess())
+		TrySkillProc(other, skillinuse, ReuseTime, true);
 }
 
 bool Mob::CanDoSpecialAttack(Mob *other)

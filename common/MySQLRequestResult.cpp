@@ -32,6 +32,11 @@ MySQLRequestResult::MySQLRequestResult(MYSQL_RES* result, uint32 rowsAffected, u
 	m_RowsAffected = rowsAffected;
 	m_RowCount = rowCount;
 	m_ColumnCount = columnCount;
+	// If we actually need the column length / fields it will be 
+	// requested at that time, no need to pull it in just to cache it. 
+	// Normal usage would have it as nullptr most likely anyways.
+	m_ColumnLengths = nullptr; 
+	m_Fields = nullptr;
 	m_LastInsertedID = lastInsertedID;
 	m_ErrorNumber = errorNumber;
 }
@@ -51,6 +56,8 @@ void MySQLRequestResult::ZeroOut()
 	m_Success = false;
 	m_Result = nullptr;
 	m_ErrorBuffer = nullptr;
+	m_ColumnLengths = nullptr;
+	m_Fields = nullptr;
 	m_RowCount = 0;
 	m_RowsAffected = 0;
 	m_LastInsertedID = 0;
@@ -59,6 +66,39 @@ void MySQLRequestResult::ZeroOut()
 MySQLRequestResult::~MySQLRequestResult()
 {
 	FreeInternals();
+}
+
+uint32 MySQLRequestResult::LengthOfColumn(int columnIndex)
+{
+	if (m_ColumnLengths == nullptr && m_Result != nullptr)
+		m_ColumnLengths = mysql_fetch_lengths(m_Result);
+
+	// If someone screws up and tries to get the length of a
+	// column when no result occured (check Success! argh!)
+	// then we always return 0. Also applies if mysql screws
+	// up and can't get the column lengths for whatever reason.
+	if (m_ColumnLengths == nullptr)
+		return 0;
+
+	// Want to index check to be sure we don't read passed
+	// the end of the array. Just default to 0 in that case.
+	// We *shouldn't* need this or the previous checks if all
+	// interface code is correctly written.
+	if (columnIndex >= m_ColumnCount)
+		return 0;
+
+	return m_ColumnLengths[columnIndex];
+}
+
+const std::string MySQLRequestResult::FieldName(int columnIndex)
+{
+	if (columnIndex >= m_ColumnCount || m_Result == nullptr)
+		return std::string();
+
+	if (m_Fields == nullptr)
+		m_Fields = mysql_fetch_fields(m_Result);
+
+	return std::string(m_Fields[columnIndex].name);
 }
 
 MySQLRequestResult::MySQLRequestResult(MySQLRequestResult&& moveItem)
@@ -70,6 +110,8 @@ MySQLRequestResult::MySQLRequestResult(MySQLRequestResult&& moveItem)
 	m_RowCount = moveItem.m_RowCount;
 	m_RowsAffected = moveItem.m_RowsAffected;
 	m_LastInsertedID = moveItem.m_LastInsertedID;
+	m_ColumnLengths = moveItem.m_ColumnLengths;
+	m_Fields = moveItem.m_Fields;
 
 	// Keeps deconstructor from double freeing 
 	// pre move instance.
@@ -95,7 +137,9 @@ MySQLRequestResult& MySQLRequestResult::operator=(MySQLRequestResult&& other)
 	m_LastInsertedID = other.m_LastInsertedID;
 	m_CurrentRow = other.m_CurrentRow;
 	m_OneBeyondRow = other.m_OneBeyondRow;
-	
+	m_ColumnLengths = other.m_ColumnLengths;
+	m_Fields = other.m_Fields;
+
 	// Keeps deconstructor from double freeing 
 	// pre move instance.
 	other.ZeroOut();

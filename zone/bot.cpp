@@ -3292,7 +3292,7 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod, int16 focus, bool CanRiposte)
+void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod, int16 focus, bool CanRiposte, int ReuseTime)
 {
 	if (!CanDoSpecialAttack(other))
 		return;
@@ -3396,10 +3396,11 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		other->Stun(100);
 	}
 
-	if (CanSkillProc && HasSkillProcs()){
-		float chance = 10.0f*RuleR(Combat, AvgProcsPerMinute)/60000.0f;
-		TrySkillProc(other, skillinuse, chance);
-	}
+	if (CanSkillProc && HasSkillProcs())
+		TrySkillProc(other, skillinuse, ReuseTime);
+	
+	if (CanSkillProc && (damage > 0) && HasSkillProcSuccess())
+		TrySkillProc(other, skillinuse, ReuseTime, true);
 }
 
 void Bot::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) {
@@ -7641,10 +7642,8 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 		{
 			if(bottype == BotfocusSympatheticProc)
 			{
-				float ProcChance, ProcBonus;
-				int16 ProcRateMod = focus_spell.base[i]; //Baseline is 100 for most Sympathetic foci
-				int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
-				GetSympatheticProcChances(ProcBonus, ProcChance, cast_time, ProcRateMod);
+
+				float ProcChance = GetSympatheticProcChances(spell_id, focus_spell.base[i]);
 
 				if(MakeRandomFloat(0, 1) <= ProcChance)
 					value = focus_id;
@@ -8104,10 +8103,11 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 			//who->Stun(100); Kayen: This effect does not stun on live, it only moves the NPC.
 	}
 
-	if (HasSkillProcs()){
-		float chance = (float)ReuseTime*RuleR(Combat, AvgProcsPerMinute)/60000.0f;
-		TrySkillProc(who, skill, chance);
-	}
+	if (HasSkillProcs())
+		TrySkillProc(who, skill, ReuseTime*1000);
+	
+	if (max_damage > 0 && HasSkillProcSuccess())
+		TrySkillProc(who, skill, ReuseTime*1000, true);
 
 	if(max_damage == -3 && !(who->GetHP() <= 0))
 		DoRiposte(who);

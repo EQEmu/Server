@@ -233,7 +233,7 @@ OPTION(EQEMU_BUILD_SOCKET_SERVER "Build the socket server." OFF)
 OPTION(EQEMU_BUILD_TESTS "Build utility tests." OFF)
 OPTION(EQEMU_BUILD_PERL "Build Perl parser." ON)
 OPTION(EQEMU_BUILD_LUA "Build Lua parser." OFF)
-OPTION(EQEMU_BUILD_CLIENT_FILES "Build Client Inport/Export Data Programs." ON)
+OPTION(EQEMU_BUILD_CLIENT_FILES "Build Client Import/Export Data Programs." ON)
 
 #C++11 stuff
 IF(NOT MSVC)
