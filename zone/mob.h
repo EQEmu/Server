@@ -818,8 +818,8 @@ public:
 	inline int& GetNextIncHPEvent() { return nextinchpevent; }
 	void SetNextIncHPEvent( int inchpevent );
 
-	bool DivineAura() const;
-	bool Sanctuary() const;
+	inline bool DivineAura() const { return spellbonuses.DivineAura; }
+	inline bool Sanctuary() const { return spellbonuses.Sanctuary; }
 
 	bool HasNPCSpecialAtk(const char* parse);
 	int GetSpecialAbility(int ability);

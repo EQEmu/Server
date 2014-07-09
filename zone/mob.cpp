@@ -2753,22 +2753,6 @@ void Mob::Warp( float x, float y, float z )
 	SendPosition();
 }
 
-bool Mob::DivineAura() const
-{
-	if (spellbonuses.DivineAura)
-		return true;
-
-	return false;
-}
-
-bool Mob::Sanctuary() const
-{
-	if (spellbonuses.Sanctuary)
-		return true;
-
-	return false;
-}
-
 int16 Mob::GetResist(uint8 type) const
 {
 	if (IsNPC())
