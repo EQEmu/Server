@@ -1106,17 +1106,15 @@ const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
 }
 
 uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version));
+	
+	std::string query = StringFormat("SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetPEQZone query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
-	safe_delete_array(query);
 
 	if (results.RowCount() == 0)
 		return 0;
