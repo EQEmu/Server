@@ -921,17 +921,15 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 }
 
 uint32 Database::GetMiniLoginAccount(char* ip){
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM account WHERE minilogin_ip='%s'", ip));
+	std::string query = StringFormat("SELECT id FROM account WHERE minilogin_ip='%s'", ip);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetMiniLoginAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
-	safe_delete_array(query);
 
 	auto row = results.begin();
 
@@ -1044,16 +1042,14 @@ uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 }
 
 bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid, float* graveyard_x, float* graveyard_y, float* graveyard_z, float* graveyard_heading) {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT zone_id, x, y, z, heading FROM graveyard WHERE id=%i", graveyard_id));
+	
+	std::string query = StringFormat("SELECT zone_id, x, y, z, heading FROM graveyard WHERE id=%i", graveyard_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success()){
 		std::cerr << "Error in GetZoneGraveyard query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-	safe_delete_array(query);
 
 	if (results.RowCount() != 1)
 		return false;
