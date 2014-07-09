@@ -375,7 +375,7 @@ returns false on failure, true otherwise
 */
 bool Database::DeleteCharacter(char *name)
 {
-	char *query=nullptr;
+	std::string query=StringFormat("SELECT id from character_ WHERE name='%s'", name);
 	int charid;
 
 	if(!name ||	!strlen(name))
@@ -390,9 +390,7 @@ bool Database::DeleteCharacter(char *name)
 	std::cout << "DeleteCharacter: Attempting to delete '" << name << "'" << std::endl;
 #endif
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id from character_ WHERE name='%s'", name));
-
-	safe_delete_array(query);
+	auto results = QueryDatabase(query);
 
 	if(results.RowCount() != 1)
 	{
@@ -409,138 +407,138 @@ bool Database::DeleteCharacter(char *name)
 	std::cout << " quest_globals";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE from quest_globals WHERE charid='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE from quest_globals WHERE charid='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " character_tasks";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE from character_tasks WHERE charid='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE from character_tasks WHERE charid='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " character_activities";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE from character_activities WHERE charid='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE from character_activities WHERE charid='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " character_enabledtasks";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE from character_enabledtasks WHERE charid='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE from character_enabledtasks WHERE charid='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " completed_tasks";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE from completed_tasks WHERE charid='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE from completed_tasks WHERE charid='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " friends";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE from friends WHERE charid='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE from friends WHERE charid='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " mail";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE from mail WHERE charid='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat( "DELETE from mail WHERE charid='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " ptimers";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE from timers WHERE char_id='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE from timers WHERE char_id='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " inventory";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE from inventory WHERE charid='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE from inventory WHERE charid='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " guild_members";
 #endif
 
 #ifdef BOTS
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM guild_members WHERE char_id='%d' AND GetMobTypeById(%i) = 'C'", charid));
+	query = StringFormat("DELETE FROM guild_members WHERE char_id='%d' AND GetMobTypeById(%i) = 'C'", charid);
 #else
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM guild_members WHERE char_id='%d'", charid));
+	query = StringFormat("DELETE FROM guild_members WHERE char_id='%d'", charid);
 #endif
-	safe_delete_array(query);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " recipes";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM char_recipe_list WHERE char_id='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM char_recipe_list WHERE char_id='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " adventure_stats";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM adventure_stats WHERE player_id='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM adventure_stats WHERE player_id='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " zone_flags";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM zone_flags WHERE charID='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM zone_flags WHERE charID='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " titles";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM titles WHERE char_id='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM titles WHERE char_id='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " titlesets";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM player_titlesets WHERE char_id='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM player_titlesets WHERE char_id='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " keyring";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM keyring WHERE char_id='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM keyring WHERE char_id='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " factions";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM faction_values WHERE char_id='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM faction_values WHERE char_id='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " instances";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM instance_list_player WHERE charid='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM instance_list_player WHERE charid='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << " _character";
 #endif
 
-	results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE from character_ WHERE id='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE from character_ WHERE id='%d'", charid);
+	results = QueryDatabase(query);
 
 	if(results.RowsAffected() != 1)	// here we have to have a match or it's an error
 	{
@@ -552,8 +550,8 @@ bool Database::DeleteCharacter(char *name)
 	std::cout << " alternate currency";
 #endif
 
-	QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM character_alt_currency WHERE char_id='%d'", charid));
-	safe_delete_array(query);
+	query = StringFormat("DELETE FROM character_alt_currency WHERE char_id='%d'", charid);
+	QueryDatabase(query);
 
 #if DEBUG >= 5
 	std::cout << std::endl;
