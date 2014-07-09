@@ -938,12 +938,10 @@ uint32 Database::GetMiniLoginAccount(char* ip){
 
 // Get zone starting points from DB
 bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, char *flag_needed) {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query,
-		"SELECT safe_x, safe_y, safe_z, min_status, min_level, "
-		" flag_needed FROM zone "
-		" WHERE short_name='%s' AND (version=%i OR version=0) ORDER BY version DESC", short_name, version));
+	
+	std::string query = StringFormat("SELECT safe_x, safe_y, safe_z, min_status, min_level, flag_needed FROM zone "
+		" WHERE short_name='%s' AND (version=%i OR version=0) ORDER BY version DESC", short_name, version);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
@@ -952,12 +950,8 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 		std::cerr << "ALTER TABLE `zone` CHANGE `minium_level` `min_level` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
 		std::cerr << "ALTER TABLE `zone` CHANGE `minium_status` `min_status` TINYINT(3)  UNSIGNED DEFAULT \"0\" NOT NULL;\n";
 		std::cerr << "ALTER TABLE `zone` ADD flag_needed VARCHAR(128) NOT NULL DEFAULT '';\n";
-
-		safe_delete_array(query);
 		return false;
 	}
-
-	safe_delete_array(query);
 
 	if (results.RowCount() == 0)
 		return false;
