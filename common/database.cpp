@@ -1061,17 +1061,15 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 }
 
 bool Database::LoadZoneNames() {
-	char *query = nullptr;
+	std::string query("SELECT zoneidnumber, short_name FROM zone");
 
-	auto results = QueryDatabase(query,MakeAnyLenString(&query, "SELECT zoneidnumber, short_name FROM zone"));
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in LoadZoneNames query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-	safe_delete_array(query);
 
 	for (auto row= results.begin();row != results.end();++row)
 	{
