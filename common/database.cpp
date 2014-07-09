@@ -280,30 +280,26 @@ int16 Database::CheckStatus(uint32 account_id)
 }
 
 uint32 Database::CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id) {
-	char *query = nullptr;
-
-	uint32 queryLen;
+	std::string query;
 
 	if (password)
-		queryLen = MakeAnyLenString(&query, "INSERT INTO account SET name='%s', password='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name,password,status, lsaccount_id);
+		query = StringFormat("INSERT INTO account SET name='%s', password='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name,password,status, lsaccount_id);
 	else
-		queryLen = MakeAnyLenString(&query, "INSERT INTO account SET name='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name, status, lsaccount_id);
+		query = StringFormat("INSERT INTO account SET name='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name, status, lsaccount_id);
 
 	std::cerr << "Account Attempting to be created:" << name << " " << (int16) status << std::endl;
 
-	auto results = QueryDatabase(query, queryLen);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in CreateAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
 
 	if (results.LastInsertedID() == 0)
 	{
 		std::cerr << "Error in CreateAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
 
