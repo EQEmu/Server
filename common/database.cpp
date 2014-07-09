@@ -761,18 +761,15 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 }
 
 void Database::GetCharName(uint32 char_id, char* name) {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT name FROM character_ WHERE id='%i'", char_id));
+	
+	std::string query = StringFormat("SELECT name FROM character_ WHERE id='%i'", char_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetCharName query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return;
 	}
-
-	safe_delete_array(query);
 
 	auto row = results.begin();
 	strcpy(name, row[0]);
@@ -884,8 +881,7 @@ bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_
 }
 
 bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
-	char *query = nullptr;
-
+	
 	char *varname,*varvalue;
 
 	varname=(char *)malloc(strlen(varname_in)*2+1);
@@ -893,18 +889,16 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 	DoEscapeString(varname, varname_in, strlen(varname_in));
 	DoEscapeString(varvalue, varvalue_in, strlen(varvalue_in));
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "Update variables set value='%s' WHERE varname like '%s'", varvalue, varname));
+	std::string query = StringFormat("Update variables set value='%s' WHERE varname like '%s'", varvalue, varname);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in SetVariable query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		free(varname);
 		free(varvalue);
 		return false;
 	}
-
-	safe_delete_array(query);
 
 	if (results.RowsAffected() == 1)
 	{
@@ -914,17 +908,16 @@ bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
 		return true;
 	}
 
-	results = QueryDatabase(query, MakeAnyLenString(&query, "Insert Into variables (varname, value) values ('%s', '%s')", varname, varvalue));
-	safe_delete_array(query);
+	query = StringFormat("Insert Into variables (varname, value) values ('%s', '%s')", varname, varvalue);
+	results = QueryDatabase(query);
 	free(varname);
 	free(varvalue);
 
-	if (results.RowsAffected() == 1) {
-		LoadVariables(); // refresh cache
-		return true;
-	}
-
-	return false;
+	if (results.RowsAffected() != 1)
+		return false;
+	
+	LoadVariables(); // refresh cache
+	return true;
 }
 
 uint32 Database::GetMiniLoginAccount(char* ip){
