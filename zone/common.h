@@ -375,6 +375,9 @@ struct StatBonuses {
 	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
 	int16   FactionModPct;						// Modifies amount of faction gained.
 	int16	MeleeVulnerability;					// Weakness/mitigation to melee damage
+	bool	LimitToSkill[HIGHEST_SKILL+2];		// Determines if we need to search for a skill proc.
+	uint16  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
+	uint16  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
@@ -431,7 +434,7 @@ struct StatBonuses {
 	uint32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
 	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
-	
+	bool	IllusionPersistence;				// Causes illusions not to fade.
 };
 
 typedef struct

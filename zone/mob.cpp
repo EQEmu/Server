@@ -2761,6 +2761,14 @@ bool Mob::DivineAura() const
 	return false;
 }
 
+bool Mob::Sanctuary() const
+{
+	if (spellbonuses.Sanctuary)
+		return true;
+
+	return false;
+}
+
 int16 Mob::GetResist(uint8 type) const
 {
 	if (IsNPC())
@@ -3042,6 +3050,34 @@ void Mob::TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand, in
 		return;
 
 	on->TryDefensiveProc(weapon, this, hand, damage);
+
+	//Defensive Skill Procs
+	if (damage < 0 && damage >= -4) {
+		uint16 skillinuse = 0;
+		switch (damage) {
+			case (-1):
+				skillinuse = SkillBlock;
+			break;
+		
+			case (-2):
+				skillinuse = SkillParry;
+			break;
+
+			case (-3):
+				skillinuse = SkillRiposte;
+			break;
+
+			case (-4):
+				skillinuse = SkillDodge;
+			break;
+		}
+
+		if (on->HasSkillProcs())
+			on->TrySkillProc(this, skillinuse, 0, false, hand, true);
+
+		if (on->HasSkillProcSuccess())
+			on->TrySkillProc(this, skillinuse, 0, true, hand, true);
+	}
 }
 
 void Mob::SetDeltas(float dx, float dy, float dz, float dh) {
@@ -4704,6 +4740,28 @@ bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
 		}
 	}
 	return false;
+}
+
+uint16 Mob::GetWeaponSpeedbyHand(uint16 hand) {
+	
+	uint16 weapon_speed = 0;
+	switch (hand) {
+		
+		case 13:
+			weapon_speed = attack_timer.GetDuration();
+			break;
+		case 14:
+			weapon_speed = attack_dw_timer.GetDuration();
+			break;
+		case 11:
+			weapon_speed = ranged_timer.GetDuration();
+			break;
+	}
+
+	if (weapon_speed < RuleI(Combat, MinHastedDelay))
+		weapon_speed = RuleI(Combat, MinHastedDelay);
+
+	return weapon_speed;
 }
 
 int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {

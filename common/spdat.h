@@ -37,6 +37,8 @@
 #define MAX_SPELL_TRIGGER 12	// One for each slot(only 6 for AA since AA use 2)
 #define MAX_RESISTABLE_EFFECTS 12	// Number of effects that are typcially checked agianst resists.
 #define MaxLimitInclude 16 //Number(x 0.5) of focus Limiters that have inclusive checks used when calcing focus effects
+#define MAX_SKILL_PROCS 4 //Number of spells to check skill procs from. (This is arbitrary) [Single spell can have multiple proc checks]
+
 
 const int Z_AGGRO=10;
 
@@ -385,7 +387,7 @@ typedef enum {
 #define	SE_ChannelChanceSpells			235 // implemented[AA] - chance to channel from SPELLS *No longer used on live.
 //#define SE_FreePet					236	// not used
 #define SE_GivePetGroupTarget			237 // implemented[AA] - (Pet Affinity)
-//#define SE_IllusionPersistence		238	// *not implemented - lends persistence to your illusionary disguises, causing them to last until you die or the illusion is forcibly removed.
+#define SE_IllusionPersistence			238	// implemented - lends persistence to your illusionary disguises, causing them to last until you die or the illusion is forcibly removed.
 //#define SE_FeignedCastOnChance		239	// *not implemented as bonus - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
 //#define SE_StringUnbreakable			240	// not used [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
 #define SE_ImprovedReclaimEnergy		241	// implemented - increase the amount of mana returned to you when reclaiming your pet.
@@ -576,7 +578,7 @@ typedef enum {
 //#define SE_IncreaseExtTargetWindow	426 // *not implmented[AA] - increases the capacity of your extended target window
 #define SE_SkillProc					427 // implemented - chance to proc when using a skill(ie taunt)
 #define SE_LimitToSkill					428 // implemented - limits what skills will effect a skill proc
-#define SE_SkillProc2					429 // implemented - chance to proc when using a skill (most have hit limits)
+#define SE_SkillProcSuccess				429 // implemented - chance to proc when tje skill in use successfully fires.
 //#define SE_PostEffect					430 // *not implemented - Fear of the Dark(27641) - Alters vision
 //#define SE_PostEffectData				431 // *not implemented - Fear of the Dark(27641) - Alters vision
 //#define SE_ExpandMaxActiveTrophyBen	432 // not used
