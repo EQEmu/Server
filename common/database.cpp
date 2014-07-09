@@ -356,18 +356,16 @@ bool Database::SetAccountStatus(const char* name, int16 status) {
 
 bool Database::ReserveName(uint32 account_id, char* name)
 {
-	char *query = nullptr;
+	std::string query = StringFormat("INSERT into character_ SET account_id=%i, name='%s', profile=NULL", account_id, name);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT into character_ SET account_id=%i, name='%s', profile=NULL", account_id, name));
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in ReserveName query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
 
-	safe_delete_array(query);
 	return true;
 }
 
