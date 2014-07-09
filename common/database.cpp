@@ -246,42 +246,37 @@ void Database::LoginIP(uint32 AccountID, const char* LoginIP)
 
 int16 Database::CheckStatus(uint32 account_id)
 {
-	char *query = nullptr;
+	std::string query = StringFormat("SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
+							" FROM `account` WHERE `id` = %i", account_id);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT `status`, UNIX_TIMESTAMP(`suspendeduntil`) as `suspendeduntil`, UNIX_TIMESTAMP() as `current`"
-							" FROM `account` WHERE `id` = %i", account_id));
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in CheckStatus query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
 
-	safe_delete_array(query);
+	if (results.RowCount() != 1)
+		return 0;
+	
+	auto row = results.begin();
 
-	if (results.RowCount() == 1)
-	{
-		auto row = results.begin();
+	int16 status = atoi(row[0]);
 
-		int16 status = atoi(row[0]);
+	int32 suspendeduntil = 0;
 
-		int32 suspendeduntil = 0;
-
-		// MariaDB initalizes with NULL if unix_timestamp() is out of range
-		if (row[1] != nullptr) {
-			suspendeduntil = atoi(row[1]);
-		}
-
-		int32 current = atoi(row[2]);
-
-		if(suspendeduntil > current)
-			return -1;
-
-		return status;
+	// MariaDB initalizes with NULL if unix_timestamp() is out of range
+	if (row[1] != nullptr) {
+		suspendeduntil = atoi(row[1]);
 	}
 
-	return 0;
+	int32 current = atoi(row[2]);
+
+	if(suspendeduntil > current)
+		return -1;
+
+	return status;
 }
 
 uint32 Database::CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id) {
