@@ -309,18 +309,15 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 bool Database::DeleteAccount(const char* name) {
 	std::string query = StringFormat("DELETE FROM account WHERE name='%s';",name);
 
-	std::cerr << "Account Attempting to be deleted:" << name << std::endl;
+	std::cout << "Account Attempting to be deleted:" << name << std::endl;
 
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in DeleteAccount query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-
-	safe_delete_array(query);
 
 	return results.RowsAffected() == 1;
 }
