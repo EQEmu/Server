@@ -1203,17 +1203,15 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 }
 
 bool Database::AddToNameFilter(const char* name) {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO name_filter (name) values ('%s')", name));
+	
+	std::string query = StringFormat("INSERT INTO name_filter (name) values ('%s')", name);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in AddToNameFilter query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-	safe_delete_array(query);
 
 	if (results.RowsAffected() == 0)
 		return false;
