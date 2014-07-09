@@ -336,13 +336,11 @@ bool Database::SetLocalPassword(uint32 accid, const char* password) {
 }
 
 bool Database::SetAccountStatus(const char* name, int16 status) {
-	char *query = nullptr;
+	std::string query = StringFormat("UPDATE account SET status=%i WHERE name='%s';", status, name);
 
 	std::cout << "Account being GM Flagged:" << name << ", Level: " << (int16) status << std::endl;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE account SET status=%i WHERE name='%s';", status, name));
-
-	safe_delete_array(query);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return false;
