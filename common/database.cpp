@@ -43,15 +43,10 @@
 #include "database.h"
 #include "eq_packet_structs.h"
 #include "guilds.h"
-//#include "MiscFunctions.h"
 #include "StringUtil.h"
 #include "extprofile.h"
 extern Client client;
 
-/*
-This is the amount of time in seconds the client has to enter the zone
-server after the world server, or inbetween zones when that is finished
-*/
 
 /*
 Establish a connection to a mysql database with the supplied parameters
@@ -100,8 +95,6 @@ void Database::DBInitVars() {
 	varcache_lastupdate = 0;
 }
 
-
-
 void Database::HandleMysqlError(uint32 errnum) {
 /*	switch(errnum) {
 		case 0:
@@ -140,7 +133,6 @@ Database::~Database()
 		safe_delete_array(varcache_array);
 	}
 }
-
 
 /*
 Check if there is an account with name "name" and password "password"
@@ -185,7 +177,6 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 
 	return id;
 }
-
 
 //Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
 bool Database::CheckBannedIPs(const char* loginIP)
@@ -1049,7 +1040,6 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 	return true;
 }
 
-
 bool Database::GetZoneLongName(const char* short_name, char** long_name, char* file_name, float* safe_x, float* safe_y, float* safe_z, uint32* graveyard_id, uint32* maxclients) {
 	char *query = nullptr;
 
@@ -1090,6 +1080,7 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 
 	return true;
 }
+
 uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
 	char *query = nullptr;
 
