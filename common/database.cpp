@@ -1277,12 +1277,11 @@ void Database::ClearMerchantTemp(){
 }
 
 bool Database::UpdateName(const char* oldname, const char* newname) {
-	char *query = nullptr;
-
+	
 	std::cout << "Renaming " << oldname << " to " << newname << "..." << std::endl;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE character_ SET name='%s' WHERE name='%s';", newname, oldname));
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE character_ SET name='%s' WHERE name='%s';", newname, oldname);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return false;
