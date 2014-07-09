@@ -660,32 +660,27 @@ the name "name" or zero if no character with that name was found
 Zero will also be returned if there is a database error.
 */
 uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
-	char *query = nullptr;
+	std::string query = StringFormat("SELECT account_id, id FROM character_ WHERE name='%s'", charname);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT account_id, id FROM character_ WHERE name='%s'", charname));
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetAccountIDByChar query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
 
-	safe_delete_array(query);
+	if (results.RowCount() != 1)
+		return 0;
 
-	if (results.RowCount() == 1)
-	{
-		auto row = results.begin();
+	auto row = results.begin();
 
-		uint32 accountId = atoi(row[0]);
+	uint32 accountId = atoi(row[0]);
 
-		if (oCharID)
-			*oCharID = atoi(row[1]);
+	if (oCharID)
+		*oCharID = atoi(row[1]);
 
-		return accountId;
-	}
-
-	return 0;
+	return accountId;
 }
 
 // Retrieve account_id for a given char_id
