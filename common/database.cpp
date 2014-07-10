@@ -1554,17 +1554,15 @@ bool Database::UpdateLiveChar(char* charname,uint32 lsaccount_id) {
 }
 
 bool Database::GetLiveChar(uint32 account_id, char* cname) {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT charname FROM account WHERE id=%i", account_id));
+	std::string query = StringFormat("SELECT charname FROM account WHERE id=%i", account_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetLiveChar query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return false;
 	}
-	safe_delete_array(query);
 
 	if (results.RowCount() != 1)
 		return false;
