@@ -1676,10 +1676,9 @@ void Database::ClearGroup(uint32 gid) {
 }
 
 uint32 Database::GetGroupID(const char* name){
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT groupid from group_id where name='%s'", name));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT groupid from group_id where name='%s'", name);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
