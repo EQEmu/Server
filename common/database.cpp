@@ -1648,10 +1648,8 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 
 void Database::ClearAllGroups(void)
 {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id"));
-	safe_delete_array(query);
+	std::string query("delete from group_id");
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to clear groups: " << results.ErrorMessage() << std::endl;
