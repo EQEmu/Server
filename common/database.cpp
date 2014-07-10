@@ -1624,13 +1624,13 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 }
 
 void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc){
-	char *query = nullptr;
-
+	
+	std::string query;
 	if (id == 0)
 	{
 		// removing from group
-		auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc));
-		safe_delete_array(query);
+		query = StringFormat("delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc);
+		auto results = QueryDatabase(query);
 
 		if (!results.Success())
 			LogFile->write(EQEMuLog::Error, "Error deleting character from group id: %s", results.ErrorMessage().c_str());
@@ -1639,8 +1639,8 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 	}
 
 	// adding to group
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "replace into group_id set charid=%i, groupid=%i, name='%s', ismerc='%i'",charid, id, name, ismerc));
-	safe_delete_array(query);
+	query = StringFormat("replace into group_id set charid=%i, groupid=%i, name='%s', ismerc='%i'",charid, id, name, ismerc);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error adding character to group id: %s", results.ErrorMessage().c_str());
