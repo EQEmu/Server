@@ -1722,10 +1722,9 @@ char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
 }
 
 void Database::SetGroupLeaderName(uint32 gid, const char* name) {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "Replace into group_leaders set gid=%lu, leadername='%s'",(unsigned long)gid,name));
-	safe_delete_array(query);
+	std::string query = StringFormat("Replace into group_leaders set gid=%lu, leadername='%s'",(unsigned long)gid,name);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to set group leader: " << results.ErrorMessage() << std::endl;
