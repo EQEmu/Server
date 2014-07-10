@@ -1781,9 +1781,8 @@ char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* mainta
 // Clearing all group leaders
 void Database::ClearAllGroupLeaders(void)
 {
-	char *query = nullptr;
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE from group_leaders"));
-	safe_delete_array(query);
+	std::string query("DELETE from group_leaders");
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to clear group leaders: " << results.ErrorMessage() << std::endl;
