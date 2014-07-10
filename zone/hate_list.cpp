@@ -308,6 +308,16 @@ Mob *HateList::GetTop(Mob *center)
 				}
 			}
 
+			if (cur->ent->Sanctuary()) {
+				if(hate == -1)
+				{
+					top = cur->ent;
+					hate = 1;
+				}
+				++iterator;
+				continue;
+			}
+
 			if(cur->ent->DivineAura() || cur->ent->IsMezzed() || cur->ent->IsFeared()){
 				if(hate == -1)
 				{

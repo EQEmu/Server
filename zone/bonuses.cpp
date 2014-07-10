@@ -637,7 +637,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			continue;
 
 		_log(AA__BONUSES, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
-					
+			
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
 		{
@@ -1326,6 +1326,45 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 				else if(newbon->FactionModPct < base1)
 					newbon->FactionModPct = base1;
+				break;
+			}
+
+			case SE_IllusionPersistence:
+				newbon->IllusionPersistence = true;
+				break;
+
+			case SE_LimitToSkill:{
+				if (base1 <= HIGHEST_SKILL)
+					newbon->LimitToSkill[base1] = true;
+				break;
+			}
+
+			case SE_SkillProc:{
+				for(int e = 0; e < MAX_SKILL_PROCS; e++)
+				{
+					if(newbon->SkillProc[e] && newbon->SkillProc[e] == aaid)
+						break; //Do not use the same aa id more than once.
+
+					else if(!newbon->SkillProc[e]){
+						newbon->SkillProc[e] = aaid;
+						break;
+					}
+				}
+				break;
+			}
+
+			case SE_SkillProcSuccess:{
+				
+				for(int e = 0; e < MAX_SKILL_PROCS; e++)
+				{
+					if(newbon->SkillProcSuccess[e] && newbon->SkillProcSuccess[e] == aaid)
+						break; //Do not use the same spell id more than once.
+
+					else if(!newbon->SkillProcSuccess[e]){
+						newbon->SkillProcSuccess[e] = aaid;
+						break;
+					}
+				}
 				break;
 			}
 
@@ -2876,6 +2915,47 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 				break;
 			}
 
+			case SE_IllusionPersistence:
+				newbon->IllusionPersistence = true;
+				break;
+
+			case SE_LimitToSkill:{
+				if (effect_value <= HIGHEST_SKILL){
+					newbon->LimitToSkill[effect_value] = true;
+				}
+				break;
+			}
+
+			case SE_SkillProc:{
+				
+				for(int e = 0; e < MAX_SKILL_PROCS; e++)
+				{
+					if(newbon->SkillProc[e] && newbon->SkillProc[e] == spell_id)
+						break; //Do not use the same spell id more than once.
+
+					else if(!newbon->SkillProc[e]){
+						newbon->SkillProc[e] = spell_id;
+						break;
+					}
+				}
+				break;
+			}
+
+			case SE_SkillProcSuccess:{
+				
+				for(int e = 0; e < MAX_SKILL_PROCS; e++)
+				{
+					if(newbon->SkillProcSuccess[e] && newbon->SkillProcSuccess[e] == spell_id)
+						break; //Do not use the same spell id more than once.
+
+					else if(!newbon->SkillProcSuccess[e]){
+						newbon->SkillProcSuccess[e] = spell_id;
+						break;
+					}
+				}
+				break;
+			}
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 				
@@ -4356,6 +4436,17 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.FactionModPct = effect_value;
 					break;
 
+				case SE_MeleeVulnerability:
+					spellbonuses.MeleeVulnerability = effect_value;
+					itembonuses.MeleeVulnerability = effect_value;
+					aabonuses.MeleeVulnerability = effect_value;
+					break;
+
+				case SE_IllusionPersistence:
+					spellbonuses.IllusionPersistence = effect_value;
+					itembonuses.IllusionPersistence = effect_value;
+					aabonuses.IllusionPersistence = effect_value;
+					break;
 			}
 		}
 	}

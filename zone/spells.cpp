@@ -5103,37 +5103,6 @@ bool Mob::RemoveDefensiveProc(uint16 spell_id, bool bAll)
 	return true;
 }
 
-bool Mob::AddSkillProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
-{
-	if(spell_id == SPELL_UNKNOWN)
-		return(false);
-
-	int i;
-	for (i = 0; i < MAX_PROCS; i++) {
-		if (SkillProcs[i].spellID == SPELL_UNKNOWN) {
-			SkillProcs[i].spellID = spell_id;
-			SkillProcs[i].chance = iChance;
-			SkillProcs[i].base_spellID = base_spell_id;
-			mlog(SPELLS__PROCS, "Added spell-granted skill proc spell %d with chance %d to slot %d", spell_id, iChance, i);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool Mob::RemoveSkillProc(uint16 spell_id, bool bAll)
-{
-	for (int i = 0; i < MAX_PROCS; i++) {
-		if (bAll || SkillProcs[i].spellID == spell_id) {
-			SkillProcs[i].spellID = SPELL_UNKNOWN;
-			SkillProcs[i].chance = 0;
-			SkillProcs[i].base_spellID = SPELL_UNKNOWN;
-			mlog(SPELLS__PROCS, "Removed Skill proc %d from slot %d", spell_id, i);
-		}
-	}
-	return true;
-}
-
 bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 {
 	if(spell_id == SPELL_UNKNOWN)
