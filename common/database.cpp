@@ -1460,11 +1460,11 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 {
 	uint8 skill_level = 0, skill_formula = 0;
 	uint16 base_cap = 0, skill_cap = 0, skill_cap2 = 0, skill_cap3 = 0;
-	char *query = nullptr;
+	
 
 	//Fetch the data from DB.
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT level, formula, pre50cap, post50cap, post60cap from skillcaps where skill = %i && class = %i", skillid, in_class));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT level, formula, pre50cap, post50cap, post60cap from skillcaps where skill = %i && class = %i", skillid, in_class);
+	auto results = QueryDatabase(query);
 
 	if (results.Success() && results.RowsAffected() != 0)
 	{
