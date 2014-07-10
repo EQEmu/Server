@@ -1583,10 +1583,9 @@ void Database::SetLFP(uint32 CharID, bool LFP) {
 }
 
 void Database::SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon) {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query,MakeAnyLenString(&query, "update character_ set lfp=%i, lfg=%i, firstlogon=%i where id=%i",LFP, LFG, firstlogon, CharID));
-	safe_delete_array(query);
+	
+	std::string query = StringFormat("update character_ set lfp=%i, lfg=%i, firstlogon=%i where id=%i",LFP, LFG, firstlogon, CharID);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
