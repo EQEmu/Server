@@ -1731,10 +1731,9 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 }
 
 char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, GroupLeadershipAA_Struct* GLAA){
-	char* query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT leadername, maintank, assist, puller, marknpc, leadershipaa FROM group_leaders WHERE gid=%lu",(unsigned long)gid));
-	safe_delete_array(query);
+	
+	std::string query = StringFormat("SELECT leadername, maintank, assist, puller, marknpc, leadershipaa FROM group_leaders WHERE gid=%lu",(unsigned long)gid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success() || results.RowCount() == 0)
 	{
