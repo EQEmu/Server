@@ -1441,12 +1441,10 @@ bool Database::SetMQDetectionFlag(const char* accountname, const char* character
 uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 {
 	uint16 race_cap = 0;
-	char *query = nullptr;
-
+	
 	//Check for a racial cap!
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT skillcap from race_skillcaps where skill = %i && race = %i", skillid, in_race));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT skillcap from race_skillcaps where skill = %i && race = %i", skillid, in_race);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return 0;
