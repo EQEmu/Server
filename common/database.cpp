@@ -1698,12 +1698,11 @@ uint32 Database::GetGroupID(const char* name){
 }
 
 char* Database::GetGroupLeaderForLogin(const char* name,char* leaderbuf){
-	char *query = nullptr;
-
+	
 	PlayerProfile_Struct pp;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT profile from character_ where name='%s'", name));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT profile from character_ where name='%s'", name);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
