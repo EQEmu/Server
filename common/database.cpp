@@ -1601,10 +1601,9 @@ void Database::SetLFG(uint32 CharID, bool LFG) {
 }
 
 void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "update character_ set firstlogon=%i where id=%i",firstlogon, CharID));
-	safe_delete_array(query);
+	
+	std::string query = StringFormat( "update character_ set firstlogon=%i where id=%i",firstlogon, CharID);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error updating firstlogon for character %i : %s", CharID, results.ErrorMessage().c_str());
