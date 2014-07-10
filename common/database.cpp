@@ -1574,10 +1574,9 @@ bool Database::GetLiveChar(uint32 account_id, char* cname) {
 }
 
 void Database::SetLFP(uint32 CharID, bool LFP) {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "update character_ set lfp=%i where id=%i",LFP, CharID));
-	safe_delete_array(query);
+	std::string query = StringFormat("update character_ set lfp=%i where id=%i",LFP, CharID);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		LogFile->write(EQEMuLog::Error, "Error updating LFP for character %i : %s", CharID, results.ErrorMessage().c_str());
