@@ -1507,17 +1507,15 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 }
 
 uint32 Database::GetCharacterInfo(const char* iName, uint32* oAccID, uint32* oZoneID, uint32* oInstanceID, float* oX, float* oY, float* oZ) {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id, account_id, zonename, instanceid, x, y, z FROM character_ WHERE name='%s'", iName));
+	
+	std::string query = StringFormat("SELECT id, account_id, zonename, instanceid, x, y, z FROM character_ WHERE name='%s'", iName);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetCharacterInfo query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
-	safe_delete_array(query);
 
 	if (results.RowCount() != 1)
 		return 0;
