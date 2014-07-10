@@ -1659,8 +1659,7 @@ void Database::ClearAllGroups(void)
 
 void Database::ClearGroup(uint32 gid) {
 	ClearGroupLeader(gid);
-	char *query = nullptr;
-
+	
 	if(gid == 0)
 	{
 		//clear all groups
@@ -1669,12 +1668,11 @@ void Database::ClearGroup(uint32 gid) {
 	}
 
 	//clear a specific group
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from group_id where groupid = %lu", (unsigned long)gid));
-	safe_delete_array(query);
+	std::string query = StringFormat("delete from group_id where groupid = %lu", (unsigned long)gid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to clear groups: " << results.ErrorMessage() << std::endl;
-
 }
 
 uint32 Database::GetGroupID(const char* name){
