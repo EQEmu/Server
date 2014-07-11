@@ -1824,10 +1824,8 @@ uint8 Database::GetAgreementFlag(uint32 acctid)
 
 void Database::SetAgreementFlag(uint32 acctid)
 {
-	char *query = nullptr;
-
-	QueryDatabase(query, MakeAnyLenString(&query, "UPDATE account SET rulesflag=1 where id=%i", acctid));
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE account SET rulesflag=1 where id=%i", acctid);
+	QueryDatabase(query);
 }
 
 void Database::ClearRaid(uint32 rid) {
