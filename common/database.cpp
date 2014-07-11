@@ -2249,10 +2249,9 @@ bool Database::CheckInstanceExists(uint16 instance_id)
 
 void Database::BuryCorpsesInInstance(uint16 instance_id)
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE player_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u", instance_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE player_corpses SET IsBurried=1, instanceid=0 WHERE instanceid=%u", instance_id);
+	auto results = QueryDatabase(query);
 }
 
 uint16 Database::GetInstanceVersion(uint16 instance_id)
