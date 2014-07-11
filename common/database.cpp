@@ -2207,11 +2207,9 @@ void Database::PurgeExpiredInstances()
 
 bool Database::AddClientToInstance(uint16 instance_id, uint32 char_id)
 {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO instance_list_player(id, charid) "
-								"values(%lu, %lu)", (unsigned long)instance_id, (unsigned long)char_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO instance_list_player(id, charid) values(%lu, %lu)", 
+		(unsigned long)instance_id, (unsigned long)char_id);
+	auto results = QueryDatabase(query);
 
 	return results.Success();
 }
