@@ -1604,12 +1604,12 @@ void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) {
 
 void Database::AddReport(std::string who, std::string against, std::string lines)
 {
-	char *query = nullptr;
+	
 	char *escape_str = new char[lines.size()*2+1];
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", who.c_str(), against.c_str(), escape_str));
-	safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", who.c_str(), against.c_str(), escape_str);
+	auto results = QueryDatabase(query);
 	safe_delete_array(escape_str);
 
 	if (!results.Success())
