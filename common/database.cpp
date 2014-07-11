@@ -2191,10 +2191,9 @@ bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version
 
 void Database::PurgeExpiredInstances()
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where (start_time+duration) <= UNIX_TIMESTAMP() and never_expires = 0"));
-	safe_delete_array(query);
+	std::string query("SELECT id FROM instance_list where (start_time+duration) <= UNIX_TIMESTAMP() and never_expires = 0");
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return;
