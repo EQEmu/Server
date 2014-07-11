@@ -2180,11 +2180,11 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 //perhaps purge any expireds too
 bool Database::CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration)
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO instance_list (id, zone, version, start_time, duration)"
-		" values(%lu, %lu, %lu, UNIX_TIMESTAMP(), %lu)", (unsigned long)instance_id, (unsigned long)zone_id, (unsigned long)version, (unsigned long)duration));
-	safe_delete_array(query);
+	std::string query = StringFormat("INSERT INTO instance_list (id, zone, version, start_time, duration)"
+		" values(%lu, %lu, %lu, UNIX_TIMESTAMP(), %lu)", 
+		(unsigned long)instance_id, (unsigned long)zone_id, (unsigned long)version, (unsigned long)duration);
+	auto results = QueryDatabase(query);
 
 	return results.Success();
 }
