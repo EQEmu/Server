@@ -2006,14 +2006,13 @@ void Database::DeleteInstance(uint16 instance_id)
 
 bool Database::CheckInstanceExpired(uint16 instance_id)
 {
-	char *query = nullptr;
-
+	
 	int32 start_time = 0;
 	int32 duration = 0;
 	uint32 never_expires = 0;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT start_time, duration, never_expires FROM instance_list WHERE id=%u", instance_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT start_time, duration, never_expires FROM instance_list WHERE id=%u", instance_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return true;
