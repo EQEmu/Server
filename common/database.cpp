@@ -2348,12 +2348,12 @@ void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 
 void Database::AssignRaidToInstance(uint32 rid, uint32 instance_id)
 {
-	char *query = nullptr;
+	
 	uint32 zone_id = ZoneIDFromInstanceID(instance_id);
 	uint16 version = VersionFromInstanceID(instance_id);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT charid FROM raid_members WHERE raidid=%u", rid));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT charid FROM raid_members WHERE raidid=%u", rid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return;
