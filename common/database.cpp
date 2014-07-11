@@ -1973,10 +1973,9 @@ bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 
 bool Database::CharacterInInstanceGroup(uint16 instance_id, uint32 char_id)
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT charid FROM instance_list_player where id=%u AND charid=%u",instance_id, char_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT charid FROM instance_list_player where id=%u AND charid=%u",instance_id, char_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return false;
