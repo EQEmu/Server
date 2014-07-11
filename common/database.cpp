@@ -2509,17 +2509,15 @@ bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, u
 
 uint32 Database::GetGuildIDByCharID(uint32 char_id) 
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT guild_id FROM guild_members WHERE char_id='%i'", char_id));
+	std::string query = StringFormat("SELECT guild_id FROM guild_members WHERE char_id='%i'", char_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
 		std::cerr << "Error in GetGuildIDByChar query '" << query << "' " << results.ErrorMessage() << std::endl;
-		safe_delete_array(query);
 		return 0;
 	}
-	safe_delete_array(query);
 
 	if (results.RowCount() == 0)
 		return 0;
