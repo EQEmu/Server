@@ -2401,11 +2401,10 @@ void Database::FlagInstanceByRaidLeader(uint32 zone, int16 version, uint32 chari
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE `instance_list` SET start_time=UNIX_TIMESTAMP(), "
-			"duration=%u WHERE id=%u", new_duration, instance_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE `instance_list` SET start_time=UNIX_TIMESTAMP(), "
+		"duration=%u WHERE id=%u", new_duration, instance_id);
+	auto results = QueryDatabase(query);
 }
 
 bool Database::GlobalInstance(uint16 instance_id)
