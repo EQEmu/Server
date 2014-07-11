@@ -1829,8 +1829,7 @@ void Database::SetAgreementFlag(uint32 acctid)
 }
 
 void Database::ClearRaid(uint32 rid) {
-	char *query = nullptr;
-
+	
 	if(rid == 0)
 	{
 		//clear all raids
@@ -1839,8 +1838,8 @@ void Database::ClearRaid(uint32 rid) {
 	}
 
 	//clear a specific group
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_members where raidid = %lu", (unsigned long)rid));
-	safe_delete_array(query);
+	std::string query = StringFormat("delete from raid_members where raidid = %lu", (unsigned long)rid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to clear raids: " << results.ErrorMessage() << std::endl;
