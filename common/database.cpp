@@ -2114,13 +2114,11 @@ uint32 Database::GetTimeRemainingInstance(uint16 instance_id, bool &is_perma)
 
 bool Database::GetUnusedInstanceID(uint16 &instance_id)
 {
-	char *query = nullptr;
-
 	uint32 count = RuleI(Zone, ReservedInstances);
 	uint32 max = 65535;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT IFNULL(MAX(id),%u)+1 FROM instance_list  WHERE id > %u", count, count));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT IFNULL(MAX(id),%u)+1 FROM instance_list  WHERE id > %u", count, count);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
@@ -2142,8 +2140,8 @@ bool Database::GetUnusedInstanceID(uint16 &instance_id)
 		return true;
 	}
 
-	results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where id > %u ORDER BY id", count));
-	safe_delete_array(query);
+	query = StringFormat("SELECT id FROM instance_list where id > %u ORDER BY id", count);
+	results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
