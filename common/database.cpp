@@ -1847,10 +1847,9 @@ void Database::ClearRaid(uint32 rid) {
 
 void Database::ClearAllRaids(void)
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_members"));
-	safe_delete_array(query);
+	std::string query("delete from raid_members");
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to clear raids: " << results.ErrorMessage() << std::endl;
