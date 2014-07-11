@@ -1857,15 +1857,12 @@ void Database::ClearAllRaids(void)
 
 void Database::ClearAllRaidDetails(void)
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_details"));
-	safe_delete_array(query);
+	std::string query("delete from raid_details");
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to clear raid details: " << results.ErrorMessage() << std::endl;
-
-	return;
 }
 
 void Database::ClearRaidDetails(uint32 rid) {
