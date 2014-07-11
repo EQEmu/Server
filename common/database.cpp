@@ -2234,10 +2234,9 @@ bool Database::RemoveClientsFromInstance(uint16 instance_id)
 
 bool Database::CheckInstanceExists(uint16 instance_id)
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT * FROM instance_list where id=%u", instance_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT * FROM instance_list where id=%u", instance_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return false;
