@@ -1917,10 +1917,9 @@ const char* Database::GetRaidLeaderName(uint32 rid)
 	// variable). C++0x standard states this should be thread safe
 	// but may not be fully supported in some compilers.
 	static char name[128];
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1",rid));
-	safe_delete_array(query);
+	
+	std::string query = StringFormat("SELECT name FROM raid_members WHERE raidid=%u AND israidleader=1",rid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
