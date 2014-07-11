@@ -2426,8 +2426,7 @@ bool Database::GlobalInstance(uint16 instance_id)
 
 void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 {
-	char *query = nullptr;
-
+	
 	std::string field;
 
 	switch(theme)
@@ -2468,16 +2467,14 @@ void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
 	else
 		field += "losses";
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "UPDATE `adventure_stats` SET %s=%s+1 WHERE player_id=%u",
-					field.c_str(), field.c_str(), char_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("UPDATE `adventure_stats` SET %s=%s+1 WHERE player_id=%u",field.c_str(), field.c_str(), char_id);
+	auto results = QueryDatabase(query);
 
 	if (results.RowsAffected() != 0)
 		return;
 
-	QueryDatabase(query, MakeAnyLenString(&query, "INSERT INTO `adventure_stats` SET %s=1, player_id=%u",
-					field.c_str(), char_id));
-	safe_delete_array(query);
+	query = StringFormat("INSERT INTO `adventure_stats` SET %s=1, player_id=%u", field.c_str(), char_id);
+	QueryDatabase(query);
 }
 
 bool Database::GetAdventureStats(uint32 char_id, uint32 &guk_w, uint32 &mir_w, uint32 &mmc_w, uint32 &ruj_w,
