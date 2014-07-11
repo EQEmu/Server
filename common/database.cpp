@@ -1866,7 +1866,7 @@ void Database::ClearAllRaidDetails(void)
 }
 
 void Database::ClearRaidDetails(uint32 rid) {
-	char *query = nullptr;
+	
 
 	if(rid == 0)
 	{
@@ -1876,8 +1876,8 @@ void Database::ClearRaidDetails(uint32 rid) {
 	}
 
 	//clear a specific group
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "delete from raid_details where raidid = %lu", (unsigned long)rid));
-	safe_delete_array(query);
+	std::string query = StringFormat("delete from raid_details where raidid = %lu", (unsigned long)rid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to clear raid details: " << results.ErrorMessage() << std::endl;
