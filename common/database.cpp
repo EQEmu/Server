@@ -141,8 +141,6 @@ Zero will also be returned if there is a database error.
 */
 uint32 Database::CheckLogin(const char* name, const char* password, int16* oStatus) {
 
-	char *query = nullptr;
-
 	if(strlen(name) >= 50 || strlen(password) >= 50)
 		return(0);
 
@@ -152,21 +150,16 @@ uint32 Database::CheckLogin(const char* name, const char* password, int16* oStat
 	DoEscapeString(tmpUN, name, strlen(name));
 	DoEscapeString(tmpPW, password, strlen(password));
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query,
-		"SELECT id, status FROM account WHERE name='%s' AND password is not null "
+	std::string query = StringFormat("SELECT id, status FROM account WHERE name='%s' AND password is not null "
 		"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
-		tmpUN, tmpPW, tmpPW));
-
-
+		tmpUN, tmpPW, tmpPW);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
-		safe_delete_array(query);
 		std::cerr << "Error in CheckLogin query '" << query << "' " << results.ErrorMessage() << std::endl;
 		return 0;
 	}
-
-	safe_delete_array(query);
 
 	auto row = results.begin();
 
