@@ -1807,10 +1807,9 @@ void Database::ClearGroupLeader(uint32 gid) {
 
 uint8 Database::GetAgreementFlag(uint32 acctid)
 {
-	char* query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT rulesflag FROM account WHERE id=%i",acctid));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT rulesflag FROM account WHERE id=%i",acctid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return 0;
