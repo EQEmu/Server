@@ -2312,17 +2312,15 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 }
 
 void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &charid_list) {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT charid FROM instance_list_player WHERE id=%u", instance_id));
+	std::string query = StringFormat("SELECT charid FROM instance_list_player WHERE id=%u", instance_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
-		LogFile->write(EQEMuLog::Error, "Error in GetCharactersInInstace query '%s': %s", query, results.ErrorMessage().c_str());
-		safe_delete_array(query);
+		LogFile->write(EQEMuLog::Error, "Error in GetCharactersInInstace query '%s': %s", query.c_str(), results.ErrorMessage().c_str());
 		return;
 	}
-	safe_delete_array(query);
 
 	for(auto row=results.begin();row != results.end();++row)
 		charid_list.push_back(atoi(row[0]));
