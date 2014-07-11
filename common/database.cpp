@@ -2409,10 +2409,9 @@ void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
 
 bool Database::GlobalInstance(uint16 instance_id)
 {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT is_global from instance_list where id=%u LIMIT 1", instance_id));
-	safe_delete_array(query);
+	
+	std::string query = StringFormat("SELECT is_global from instance_list where id=%u LIMIT 1", instance_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return false;
