@@ -2226,10 +2226,8 @@ bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
 
 bool Database::RemoveClientsFromInstance(uint16 instance_id)
 {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE FROM instance_list_player WHERE id=%lu", (unsigned long)instance_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("DELETE FROM instance_list_player WHERE id=%lu", (unsigned long)instance_id);
+	auto results = QueryDatabase(query);
 
 	return results.Success();
 }
