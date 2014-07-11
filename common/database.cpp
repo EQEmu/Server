@@ -1867,7 +1867,6 @@ void Database::ClearAllRaidDetails(void)
 
 void Database::ClearRaidDetails(uint32 rid) {
 	
-
 	if(rid == 0)
 	{
 		//clear all raids
@@ -1886,10 +1885,9 @@ void Database::ClearRaidDetails(uint32 rid) {
 // returns 0 on error or no raid for that character, or
 // the raid id that the character is a member of.
 uint32 Database::GetRaidID(const char* name){
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT raidid from raid_members where name='%s'", name));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT raidid from raid_members where name='%s'", name);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 	{
