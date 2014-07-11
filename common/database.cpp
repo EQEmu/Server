@@ -2295,12 +2295,10 @@ uint16 Database::GetInstanceID(uint32 zone, uint32 charid, int16 version)
 	if(!zone)
 		return 0;
 
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT instance_list.id FROM instance_list, instance_list_player "
-							"WHERE instance_list.zone=%u AND instance_list.version=%u AND instance_list.id=instance_list_player.id AND "
-							"instance_list_player.charid=%u LIMIT 1;", zone, version, charid));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT instance_list.id FROM instance_list, instance_list_player "
+		"WHERE instance_list.zone=%u AND instance_list.version=%u AND instance_list.id=instance_list_player.id AND "
+		"instance_list_player.charid=%u LIMIT 1;", zone, version, charid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return 0;
