@@ -1958,10 +1958,9 @@ bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 char_id)
 
 bool Database::VerifyZoneInstance(uint32 zone_id, uint16 instance_id)
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT id FROM instance_list where id=%u AND zone=%u",instance_id, zone_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT id FROM instance_list where id=%u AND zone=%u",instance_id, zone_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return false;
