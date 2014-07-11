@@ -2259,10 +2259,8 @@ uint16 Database::GetInstanceVersion(uint16 instance_id)
 	if(instance_id == 0)
 		return 0;
 
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT version FROM instance_list where id=%u", instance_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT version FROM instance_list where id=%u", instance_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return 0;
