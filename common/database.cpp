@@ -2057,10 +2057,9 @@ uint32 Database::ZoneIDFromInstanceID(uint16 instance_id)
 
 uint32 Database::VersionFromInstanceID(uint16 instance_id)
 {
-	char *query = nullptr;
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT version FROM instance_list where id=%u", instance_id));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT version FROM instance_list where id=%u", instance_id);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return 0;
