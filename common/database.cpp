@@ -2328,12 +2328,12 @@ void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &ch
 
 void Database::AssignGroupToInstance(uint32 gid, uint32 instance_id)
 {
-	char *query = nullptr;
+	
 	uint32 zone_id = ZoneIDFromInstanceID(instance_id);
 	uint16 version = VersionFromInstanceID(instance_id);
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "SELECT charid FROM group_id WHERE groupid=%u", gid));
-	safe_delete_array(query);
+	std::string query = StringFormat("SELECT charid FROM group_id WHERE groupid=%u", gid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		return;
