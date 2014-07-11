@@ -1791,16 +1791,15 @@ void Database::ClearAllGroupLeaders(void)
 }
 
 void Database::ClearGroupLeader(uint32 gid) {
-	char *query = nullptr;
-
+	
 	if(gid == 0)
 	{
 		ClearAllGroupLeaders();
 		return;
 	}
 
-	auto results = QueryDatabase(query, MakeAnyLenString(&query, "DELETE from group_leaders where gid = %lu", (unsigned long)gid));
-	safe_delete_array(query);
+	std::string query = StringFormat("DELETE from group_leaders where gid = %lu", (unsigned long)gid);
+	auto results = QueryDatabase(query);
 
 	if (!results.Success())
 		std::cout << "Unable to clear group leader: " << results.ErrorMessage() << std::endl;
