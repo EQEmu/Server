@@ -311,6 +311,19 @@ RULE_INT ( Spells, FRProjectileItem_NPC, 80684) // Item id for NPC Fire 'spell p
 RULE_BOOL ( Spells, UseLiveSpellProjectileGFX, false) // Use spell projectile graphics set in the spells_new table (player_1). Server must be using UF+ spell file.
 RULE_BOOL ( Spells, FocusCombatProcs, false) //Allow all combat procs to receive focus effects.
 RULE_BOOL ( Spells, PreNerfBardAEDoT, false) //Allow bard AOE dots to damage targets when moving.
+RULE_INT ( Spells, AI_SpellCastFinishedFailRecast, 800) // AI spell recast time(MS) when an spell is cast but fails (ie stunned).
+RULE_INT ( Spells, AI_EngagedNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while engaged. (min time in random)
+RULE_INT ( Spells, AI_EngagedNoSpellMaxRecast, 1000) // AI spell recast time(MS) check when no spell is cast engaged.(max time in random)
+RULE_INT ( Spells, AI_EngagedBeneficialSelfChance, 100) // Chance during first AI Cast check to do a beneficial spell on self.
+RULE_INT ( Spells, AI_EngagedBeneficialOtherChance, 25) // Chance during second AI Cast check to do a beneficial spell on others.
+RULE_INT ( Spells, AI_EngagedDetrimentalChance, 20) // Chance during third AI Cast check to do a determental spell on others.
+RULE_INT ( Spells, AI_PursueNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while chasing target. (min time in random)
+RULE_INT ( Spells, AI_PursueNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
+RULE_INT ( Spells, AI_PursueDetrimentalChance, 90) // Chance while chasing target to cast a detrimental spell.
+RULE_INT ( Spells, AI_IdleNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
+RULE_INT ( Spells, AI_IdleNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
+RULE_INT ( Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
+
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )

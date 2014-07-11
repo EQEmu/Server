@@ -238,9 +238,6 @@ Mob::Mob(const char* in_name,
 		RangedProcs[j].spellID = SPELL_UNKNOWN;
 		RangedProcs[j].chance = 0;
 		RangedProcs[j].base_spellID = SPELL_UNKNOWN;
-		SkillProcs[j].spellID = SPELL_UNKNOWN;
-		SkillProcs[j].chance = 0;
-		SkillProcs[j].base_spellID = SPELL_UNKNOWN;
 	}
 
 	for (i = 0; i < _MaterialCount; i++)
@@ -3033,7 +3030,7 @@ void Mob::TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand, in
 	if (!on)
 		return;
 
-	on->TryDefensiveProc(weapon, this, hand, damage);
+	on->TryDefensiveProc(weapon, this, hand);
 
 	//Defensive Skill Procs
 	if (damage < 0 && damage >= -4) {
@@ -4702,12 +4699,43 @@ uint16 Mob::GetSkillByItemType(int ItemType)
 			return Skill2HBlunt;
 		case ItemType2HPiercing:
 			return Skill1HPiercing; // change to 2HPiercing once activated
+		case ItemTypeBow:
+			return SkillArchery;
+		case ItemTypeLargeThrowing:
+		case ItemTypeSmallThrowing:
+			return SkillThrowing;
 		case ItemTypeMartial:
 			return SkillHandtoHand;
 		default:
 			return SkillHandtoHand;
 	}
 	return SkillHandtoHand;
+ }
+
+uint8 Mob::GetItemTypeBySkill(SkillUseTypes skill)
+{
+	switch (skill)
+	{
+		case SkillThrowing:
+			return ItemTypeSmallThrowing;
+		case SkillArchery:
+			return ItemTypeArrow;
+		case Skill1HSlashing:
+			return ItemType1HSlash;
+		case Skill2HSlashing:
+			return ItemType2HSlash;
+		case Skill1HPiercing:
+			return ItemType1HPiercing;
+		case Skill1HBlunt:
+			return ItemType1HBlunt;
+		case Skill2HBlunt:
+			return ItemType2HBlunt;
+		case SkillHandtoHand:
+			return ItemTypeMartial;
+		default:
+			return ItemTypeMartial;
+	}
+	return ItemTypeMartial;
  }
 
 

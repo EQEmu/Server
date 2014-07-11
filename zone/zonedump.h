@@ -94,8 +94,10 @@ struct NPCType
 	char special_abilities[512];
 	uint16	d_meele_texture1;
 	uint16	d_meele_texture2;
+	char	ammo_idfile[30];
 	uint8	prim_melee_type;
 	uint8	sec_melee_type;
+	uint8	ranged_type;
 	int32	hp_regen;
 	int32	mana_regen;
 	int32	aggroradius; // added for AI improvement - neotokyo
