@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/14/2014 ==
+KLS: Changes to CMake build
+	-Lua builds by default now
+	-Common has been renamed common
+	-Binary files will now be put into ${CMAKE_BINARY_DIR}/bin instead of ${CMAKE_BINARY_DIR}/Bin
+	The last two are of note to people on non-windows systems as case sensitivity is important.  Edit your scripts accordingly, thank you.
+
 == 07/5/2014 ==
 Kayen: Updated SE_Sanctuary - Adjust way hate lowering effect worked to be more accurate
 Kayen: Updated SE_SympatheticProc - Revised proc rate formula to be accurate to live.
