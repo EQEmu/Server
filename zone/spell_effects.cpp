@@ -1430,7 +1430,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				for(int x = 0; x < 7; x++){
 					SendWearChange(x);
 				}
-				if(caster && caster->GetAA(aaPermanentIllusion))
+				if(caster && (caster->spellbonuses.IllusionPersistence ||  caster->aabonuses.IllusionPersistence
+					|| caster->itembonuses.IllusionPersistence))
 					buffs[buffslot].persistant_buff = 1;
 				else
 					buffs[buffslot].persistant_buff = 0;
@@ -1769,20 +1770,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					AddProcToWeapon(procid, false, 100, spell_id);
 				else
 					AddProcToWeapon(procid, false, spells[spell_id].base2[i]+100, spell_id);
-				break;
-			}
-
-			case SE_SkillProc2:
-			case SE_SkillProc:
-			{
-				uint16 procid = GetProcID(spell_id, i);
-#ifdef SPELL_EFFECT_SPAM
-			snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
-#endif
-				if(spells[spell_id].base2[i] == 0)
-					AddSkillProc(procid, 100, spell_id);
-				else
-					AddSkillProc(procid, spells[spell_id].base2[i]+100, spell_id);
 				break;
 			}
 
@@ -2256,6 +2243,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				*Max is lower value then Weapon base, possibly min hit vs Weapon Damage range ie. MakeRandInt(max,base)
 				*/
 				int16 focus = 0;
+				int ReuseTime = spells[spell_id].recast_time + spells[spell_id].recovery_time;
 
 				if(caster->IsClient())
 					focus = caster->CastToClient()->GetFocusEffect(focusFcBaseEffects, spell_id);
@@ -2263,15 +2251,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				switch(spells[spell_id].skill)
 				{
 					case SkillThrowing:
-						caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus);
+						caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus, ReuseTime);
 					break;
 
 					case SkillArchery:
-						caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus);
+						caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus,ReuseTime);
 					break;
 
 					default:
-						caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus);
+						caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus, ReuseTime);
 					break;
 				}
 				break;
@@ -2329,7 +2317,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if (buffslot >= 0)
 					break;
 				//This effect does no damage if target is moving.
-				if (IsMoving())
+				if (!RuleB(Spells, PreNerfBardAEDoT) && IsMoving())
 					break;
 
 				// for offensive spells check if we have a spell rune on
@@ -2735,22 +2723,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				break;
 			}
 
-			case SE_Sanctuary:
-			{
-				std::list<NPC*> npc_list;
-				entity_list.GetNPCList(npc_list);
-
-				for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
-				
-					NPC* npc = *itr;
-					
-					if (npc && npc->CheckAggro(this)) 
-						npc->SetHate(caster, 1);
-					
-				}
-				break;
-			}
-
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
 			case SE_NegateSpellEffect:
@@ -2984,6 +2956,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			case SE_AssassinateLevel:
 			case SE_FactionModPct:
 			case SE_LimitSpellClass:
+			case SE_Sanctuary:
+			case SE_PetMeleeMitigation:
+			case SE_SkillProc:
+			case SE_SkillProcSuccess:
 			{
 				break;
 			}
@@ -3403,7 +3379,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 			{
 				effect_value = CalcSpellEffectValue(spell_id, i, caster_level, caster);
 
-				if (IsMoving() || invulnerable || /*effect_value > 0 ||*/ DivineAura())
+				if ((!RuleB(Spells, PreNerfBardAEDoT) && IsMoving()) || invulnerable || /*effect_value > 0 ||*/ DivineAura())
 					break;
 
 				if(effect_value < 0) {
@@ -3630,21 +3606,6 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 				break;
 			}
 
-			case SE_Sanctuary:
-			{
-				std::list<NPC*> npc_list;
-				entity_list.GetNPCList(npc_list);
-
-				for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
-				
-					NPC* npc = *itr;
-					
-					if (npc && npc->CheckAggro(this)) 
-						npc->SetHate(caster, 1);
-					
-				}
-				break;
-			}
 
 			default:
 			{
@@ -3709,14 +3670,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				uint16 procid = GetProcID(buffs[slot].spellid, i);
 				RemoveProcFromWeapon(procid, false);
-				break;
-			}
-
-			case SE_SkillProc2:
-			case SE_SkillProc:
-			{
-				uint16 procid = GetProcID(buffs[slot].spellid, i);
-				RemoveSkillProc(procid);
 				break;
 			}
 
@@ -4084,39 +4037,41 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		CalcBonuses();
 }
 
-/* No longer used.
-int16 Client::CalcAAFocusEffect(focusType type, uint16 focus_spell, uint16 spell_id)
+int32 Client::GetAAEffectDataBySlot(uint32 aa_ID, uint32 slot_id, bool GetEffect, bool GetBase1, bool GetBase2)
 {
-	uint32 slots = 0;
-	uint32 aa_AA = 0;
-	uint32 aa_value = 0;
+	int32 aa_effects_data[3] = { 0 };
+	uint32 effect = 0;
+	int32 base1 = 0;
+	int32 base2 = 0;
+	uint32 slot = 0;
 
-	int32 value = 0;
-	// Iterate through all of the client's AAs
-	for (int i = 0; i < MAX_PP_AA_ARRAY; i++)
+
+	std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aa_ID);
+	if(find_iter == aa_effects.end())
+		return 0;
+
+	for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aa_ID].begin(); iter != aa_effects[aa_ID].end(); ++iter)
 	{
-		aa_AA = this->aa[i]->AA;
-		aa_value = this->aa[i]->value;
-		if (aa_AA > 0 || aa_value > 0)
-		{
-			slots = zone->GetTotalAALevels(aa_AA);
-			if (slots > 0)
-			for(int j = 1;j <= slots; j++)
-			{
-				switch (aa_effects[aa_AA][j].skill_id)
-				{
-					case SE_TriggerOnCast:
-						// If focus_spell matches the spell listed in the DB, load these restrictions
-						if(type == focusTriggerOnCast && focus_spell == aa_effects[aa_AA][j].base1)
-							value = CalcAAFocus(type, aa_AA, spell_id);
-					break;
-				}
-			}
+		effect = iter->second.skill_id;
+		base1 = iter->second.base1;
+		base2 = iter->second.base2;
+		slot = iter->second.slot;
+	
+		if (slot && slot == slot_id) {
+
+			if (GetEffect)
+				return effect;
+			
+			if (GetBase1)
+				return base1;
+			
+			if (GetBase2)
+				return base2;
 		}
 	}
-	return value;
+
+	return 0;
 }
-*/
 
 
 int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
@@ -4496,9 +4451,11 @@ int16 Client::CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id)
 					value = base1;
 				break;
 
-			case SE_SympatheticProc:
-				//No AA support at this time.
-				break;
+			//Note if using these as AA, make sure this is first focus used.
+ 			case SE_SympatheticProc:
+				if(type == focusSympatheticProc) 
+					value = base2;
+ 				break;
 
 			case SE_FcDamageAmt:
 				if(type == focusFcDamageAmt)
@@ -4962,16 +4919,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_SympatheticProc:
 			if(type == focusSympatheticProc) {
-				float ProcChance, ProcBonus;
-				int16 ProcRateMod = focus_spell.base[i]; //Baseline is 100 for most Sympathetic foci
-				int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
-				GetSympatheticProcChances(ProcBonus, ProcChance, cast_time, ProcRateMod);
-
-				if(MakeRandomFloat(0, 1) <= ProcChance)
-					value = focus_id;
-
-				else
-					value = 0;
+				value = focus_id;
 			}
 			break;
 
@@ -5089,8 +5037,8 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 		return 0;
 
 	uint16 proc_spellid = 0;
-	uint8 SizeProcList = 0;
 	uint8 MAX_SYMPATHETIC = 10;
+	float ProcChance = 0.0f;
 
 	std::vector<int> SympatheticProcList;
 
@@ -5101,7 +5049,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 		for(int x=0; x<=21; x++)
 		{
-			if (SizeProcList > MAX_SYMPATHETIC)
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC)
 				continue;
 
 			TempItem = nullptr;
@@ -5109,20 +5057,22 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			if (!ins)
 				continue;
 			TempItem = ins->GetItem();
-			if (TempItem && TempItem->Focus.Effect > 0 && TempItem->Focus.Effect != SPELL_UNKNOWN) {
+			if (TempItem && TempItem->Focus.Effect > 0 && IsValidSpell(TempItem->Focus.Effect)) {
 
-					proc_spellid = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
+				proc_spellid = CalcFocusEffect(type, TempItem->Focus.Effect, spell_id);
+					
+				if (IsValidSpell(proc_spellid)){
 
-					if (proc_spellid > 0)
-					{
-						SympatheticProcList.push_back(proc_spellid);
-						SizeProcList = SympatheticProcList.size();
-					}
+					ProcChance = GetSympatheticProcChances(spell_id, spells[TempItem->Focus.Effect].base[0], TempItem->ProcRate);
+					
+					if(MakeRandomFloat(0, 1) <= ProcChance) 
+ 						SympatheticProcList.push_back(proc_spellid);
+				}
 			}
 
 			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
 			{
-				if (SizeProcList > MAX_SYMPATHETIC)
+				if (SympatheticProcList.size() > MAX_SYMPATHETIC)
 					continue;
 
 				ItemInst *aug = nullptr;
@@ -5130,14 +5080,16 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				if(aug)
 				{
 					const Item_Struct* TempItemAug = aug->GetItem();
-					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
+					if (TempItemAug && TempItemAug->Focus.Effect > 0 && IsValidSpell(TempItemAug->Focus.Effect)) {
 
 						proc_spellid = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
 
-						if (proc_spellid > 0)
-						{
-							SympatheticProcList.push_back(proc_spellid);
-							SizeProcList = SympatheticProcList.size();
+						if (IsValidSpell(proc_spellid)){
+	
+							ProcChance = GetSympatheticProcChances(spell_id, spells[TempItem->Focus.Effect].base[0], TempItemAug->ProcRate);
+					
+							if(MakeRandomFloat(0, 1) <= ProcChance) 
+								SympatheticProcList.push_back(proc_spellid);
 						}
 					}
 				}
@@ -5152,26 +5104,57 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 		uint32 buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 
-			if (SizeProcList > MAX_SYMPATHETIC)
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC)
 				continue;
 
 			focusspellid = buffs[buff_slot].spellid;
-			if (focusspellid == 0 || focusspellid >= SPDAT_RECORDS)
+			if (IsValidSpell(focusspellid))
 				continue;
 
 				proc_spellid = CalcFocusEffect(type, focusspellid, spell_id);
 
-				if (proc_spellid > 0)
-				{
-					SympatheticProcList.push_back(proc_spellid);
-					SizeProcList = SympatheticProcList.size();
-				}
+			if (IsValidSpell(proc_spellid)){
+
+				ProcChance = GetSympatheticProcChances(spell_id, spells[focusspellid].base[0]);
+				
+				if(MakeRandomFloat(0, 1) <= ProcChance) 
+ 					SympatheticProcList.push_back(proc_spellid);
+			}
 		}
 	}
 
-	if (SizeProcList > 0)
+	/*Note: At present, ff designing custom AA to have a sympathetic proc effect, only use one focus 
+	effect within the aa_effects data for each AA*[No live AA's use this effect to my knowledge]*/
+	if (aabonuses.FocusEffects[type]){
+
+		uint32 aa_AA = 0;
+		uint32 aa_value = 0;
+
+		for (int i = 0; i < MAX_PP_AA_ARRAY; i++)
+		{
+			aa_AA = this->aa[i]->AA;
+			aa_value = this->aa[i]->value;
+			if (aa_AA < 1 || aa_value < 1)
+				continue;
+
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC)
+				continue;
+
+			proc_spellid = CalcAAFocus(type, aa_AA, spell_id);
+
+			if (IsValidSpell(proc_spellid)){
+				
+				ProcChance = GetSympatheticProcChances(spell_id, GetAABase1(aa_AA, 1));
+				
+				if(MakeRandomFloat(0, 1) <= ProcChance) 
+					SympatheticProcList.push_back(proc_spellid);
+			}
+		}
+	}
+
+	if (SympatheticProcList.size() > 0)
 	{
-		uint8 random = MakeRandomInt(0, SizeProcList-1);
+		uint8 random = MakeRandomInt(0, SympatheticProcList.size()-1);
 		int FinalSympatheticProc = SympatheticProcList[random];
 		SympatheticProcList.clear();
 		return FinalSympatheticProc;
@@ -5674,17 +5657,31 @@ bool Mob::AffectedBySpellExcludingSlot(int slot, int effect)
 	return false;
 }
 
-float Mob::GetSympatheticProcChances(float &ProcBonus, float &ProcChance, int32 cast_time, int16 ProcRateMod) {
+float Mob::GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 ItemProcRate) {
 
-	ProcChance = 0;
+	float ProcChance = 0.0f;
+	int32 total_cast_time = 0;
+	float cast_time_mod = 0.0f;
+	ProcRateMod -= 100;
+ 
 
-	if(cast_time > 0)
-	{
-		ProcChance = ((float)cast_time * RuleR(Casting, AvgSpellProcsPerMinute) / 60000.0f);
-		ProcChance = ProcChance * (float)(ProcRateMod/100);
-	}
-	return ProcChance;
-}
+	if (spells[spell_id].recast_time >= spells[spell_id].recovery_time)
+		total_cast_time = spells[spell_id].recast_time + spells[spell_id].cast_time;
+	else
+		total_cast_time = spells[spell_id].recovery_time + spells[spell_id].cast_time;
+ 
+	if (total_cast_time > 0 && total_cast_time <= 2500)
+		cast_time_mod = 0.25f; 
+	 else if (total_cast_time > 2500 && total_cast_time < 7000) 
+		 cast_time_mod = 0.167*((static_cast<float>(total_cast_time) - 1000.0f)/1000.0f); 
+	 else 
+		 cast_time_mod = static_cast<float>(total_cast_time) / 7000.0f; 
+
+	ProcChance = (RuleR(Casting, AvgSpellProcsPerMinute)/100.0f) * (static_cast<float>(100.0f + ProcRateMod) / 10.0f) 
+		* cast_time_mod * (static_cast<float>(100.0f + ItemProcRate)/100.0f);
+
+ 	return ProcChance;
+ }
 
 bool Mob::DoHPToManaCovert(uint16 mana_cost)
 {

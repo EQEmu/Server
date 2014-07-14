@@ -776,7 +776,10 @@ public:
 	int GetSpentAA() { return m_pp.aapoints_spent; }
 	void RefundAA();
 	void IncrementAA(int aa_id);
-
+	int32 GetAAEffectDataBySlot(uint32 aa_ID, uint32 slot_id, bool GetEffect, bool GetBase1, bool GetBase2);
+	int32 GetAAEffectid(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, true, false,false); }
+	int32 GetAABase1(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, false, true,false); }
+	int32 GetAABase2(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, false, false,true); }
 	int16 acmod();
 
 	// Item methods

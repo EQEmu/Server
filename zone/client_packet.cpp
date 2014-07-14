@@ -9490,13 +9490,6 @@ void Client::CompleteConnect()
 					AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100+spells[buffs[j1].spellid].base2[x1],buffs[j1].spellid);
 					break;
 					}
-				case SE_SkillProc2:
-				case SE_SkillProc:
-					{
-					AddSkillProc(GetProcID(buffs[j1].spellid, x1), 100+spells[buffs[j1].spellid].base2[x1],buffs[j1].spellid);
-					break;
-					}
-
 			}
 		}
 	}
