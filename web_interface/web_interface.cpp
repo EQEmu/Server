@@ -41,15 +41,17 @@ int main() {
 	worldserver = new WorldServer(config->SharedKey); 
 	worldserver->Connect();
 
-	while(run) { 
+		while(run) { 
 		Timer::SetCurrentTime(); 
 		if (InterserverTimer.Check()) {
 			if (worldserver->TryReconnect() && (!worldserver->Connected()))
 				worldserver->AsyncConnect();
 		}
 		worldserver->Process(); 
-		timeout_manager.CheckTimeouts(); 
-		Sleep(10);
+		timeout_manager.CheckTimeouts();
+		Sleep(1);
 	}
+
+	return 0;
 }
 

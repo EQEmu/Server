@@ -105,12 +105,6 @@ IF(UNIX)
 	ENDIF(CMAKE_SYSTEM_NAME MATCHES "Darwin")
 ENDIF(UNIX)
 
-#use stdint.h types if they exist for this platform (we have to guess otherwise)
-CHECK_INCLUDE_FILES(stdint.h HAVE_STDINT_H)
-IF(HAVE_STDINT_H)
-	ADD_DEFINITIONS(-DEQEMU_USE_STDINT)
-ENDIF(HAVE_STDINT_H)
-
 #debug level, 5 is default. Most people wont ever change this but it's there if you want to
 SET(EQEMU_DEBUG_LEVEL 5 CACHE STRING "EQEmu debug level:
 	0 - Quiet mode Errors to file Status and Normal ignored
@@ -231,7 +225,7 @@ OPTION(EQEMU_BUILD_SERVER "Build the game server." ON)
 OPTION(EQEMU_BUILD_LOGIN "Build the login server." OFF)
 OPTION(EQEMU_BUILD_TESTS "Build utility tests." OFF)
 OPTION(EQEMU_BUILD_PERL "Build Perl parser." ON)
-OPTION(EQEMU_BUILD_LUA "Build Lua parser." OFF)
+OPTION(EQEMU_BUILD_LUA "Build Lua parser." ON)
 OPTION(EQEMU_BUILD_CLIENT_FILES "Build Client Inport/Export Data Programs." ON)
 
 #C++11 stuff
@@ -289,7 +283,7 @@ IF(EQEMU_BUILD_LUA)
 	SET(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/boost")
 
 	FIND_PACKAGE(Boost REQUIRED)
-	INCLUDE_DIRECTORIES("${LUA_INCLUDE_DIR}" "${Boost_INCLUDE_DIRS}" "luabind")
+	INCLUDE_DIRECTORIES("${LUA_INCLUDE_DIR}" "${Boost_INCLUDE_DIRS}" "dependencies/luabind")
 	
 	OPTION(EQEMU_SANITIZE_LUA_LIBS "Sanitize Lua Libraries (Remove OS and IO standard libraries from being able to run)." ON)
 	IF(EQEMU_SANITIZE_LUA_LIBS)
@@ -298,10 +292,6 @@ IF(EQEMU_BUILD_LUA)
 ENDIF(EQEMU_BUILD_LUA)
 
 INCLUDE_DIRECTORIES("${ZLIB_INCLUDE_DIRS}" "${MySQL_INCLUDE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/common/glm/glm")
-
-IF(EQEMU_BUILD_LUA)
-    ADD_SUBDIRECTORY(luabind)
-ENDIF(EQEMU_BUILD_LUA)
 
 IF(EQEMU_BUILD_SERVER OR EQEMU_BUILD_LOGIN OR EQEMU_BUILD_TESTS)
 	ADD_SUBDIRECTORY(common)
@@ -312,8 +302,9 @@ IF(EQEMU_BUILD_SERVER)
 	ADD_SUBDIRECTORY(zone)
 	ADD_SUBDIRECTORY(ucs)
 	ADD_SUBDIRECTORY(queryserv)
-	ADD_SUBDIRECTORY(web_interface)
 	ADD_SUBDIRECTORY(eqlaunch)
+	ADD_SUBDIRECTORY(dependencies)
+	ADD_SUBDIRECTORY(web_interface)
 ENDIF(EQEMU_BUILD_SERVER)
 IF(EQEMU_BUILD_LOGIN)
 	ADD_SUBDIRECTORY(loginserver)

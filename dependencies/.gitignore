@@ -1,2 +1,8 @@
-*.*
-*
+boost/
+luaj_x86/
+luaj_x64/
+mysql_x86/
+mysql_x64/
+zlib_x86/
+zlib_x64/
+cyassl/

@@ -75,6 +75,12 @@ public:
 	std::string QSDatabaseDB;
 	uint16 QSDatabasePort;
 
+	// from <web_interface>
+	uint16 WebInterfacePort;
+	bool WebInterfaceUseSSL;
+	std::string WebInterfaceCert;
+	std::string WebInterfacePrivKey;
+
 	// From <files/>
 	std::string SpellsFile;
 	std::string OpCodesFile;
@@ -157,6 +163,12 @@ protected:
 		QSDatabaseUsername="eq";
 		QSDatabasePassword="eq";
 		QSDatabaseDB="eq";
+
+		// web_interface
+		WebInterfacePort = 9081;
+		WebInterfaceUseSSL = false;
+		WebInterfaceCert = "";
+		WebInterfacePrivKey = "";
 
 		// Files
 		SpellsFile="spells_us.txt";

@@ -315,11 +315,11 @@ SOURCE_GROUP(TinyXML FILES
 
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
-ADD_LIBRARY(Common ${common_sources} ${common_headers})
+ADD_LIBRARY(common ${common_sources} ${common_headers})
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
 	SET_SOURCE_FILES_PROPERTIES("patches/SoD.cpp" "patches/SoF.cpp" "patches/RoF.cpp" "patches/Underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)
 
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
