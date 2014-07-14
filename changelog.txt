@@ -1,5 +1,24 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/14/2014 ==
+KLS: Changes to CMake build
+	-Lua builds by default now
+	-Common has been renamed common
+	-Binary files will now be put into ${CMAKE_BINARY_DIR}/bin instead of ${CMAKE_BINARY_DIR}/Bin
+	The last two are of note to people on non-windows systems as case sensitivity is important.  Edit your scripts accordingly, thank you.
+
+== 07/5/2014 ==
+Kayen: Updated SE_Sanctuary - Adjust way hate lowering effect worked to be more accurate
+Kayen: Updated SE_SympatheticProc - Revised proc rate formula to be accurate to live.
+Sympathetic foci on items with proc rate mod will now benefit from that modifier.
+Sympathetic foci can now be placed on AA's (This should always be slot1 in the AA)
+Kayen: Implemented SE_IllusionPersistence- Allows illusions to last until you die or the illusion is forcibly removed.
+Kayen: Added rule 'PreNerftBardAEDot' for SE_BardAEDot to allow it to once again do damage to moving targets. (Set to true)
+Kayen: Completely revised SE_SkillProc, SE_LimitToSkill, SE_SkillProcSuccess to overall just work better and more accurately, AA support. 
+
+Required SQL: utils/sql/git/required/2014_07_04_AA_Update.sql
+
+
 == 07/2/2014 ==
 Kayen: Implemented SE_Sanctuary - Places caster at bottom hate list, effect fades if caster cast spell on targets other than self.
 Kayen: Implemented SE_ResourceTap - Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.
