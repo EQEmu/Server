@@ -53,6 +53,7 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 		session->send_queue = new std::list<std::string>();
 		break;
 	case LWS_CALLBACK_RECEIVE: {
+
 		//recv and parse commands here
 		if(len < 1)
 			break;
@@ -68,7 +69,12 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 	case LWS_CALLBACK_SERVER_WRITEABLE:
 		//send stuff here
 		for (auto iter = session->send_queue->begin(); iter != session->send_queue->end(); ++iter) {
-			auto n = libwebsocket_write(wsi, (unsigned char*)&(*iter)[0], (*iter).size(), LWS_WRITE_TEXT);
+			size_t sz = LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING + (*iter).size();
+			unsigned char *buf = new unsigned char[sz];
+			memset(buf, 0, sz);
+			memcpy(&buf[LWS_SEND_BUFFER_PRE_PADDING], &(*iter)[0], (*iter).size());
+			auto n = libwebsocket_write(wsi, &buf[LWS_SEND_BUFFER_PRE_PADDING], (*iter).size(), LWS_WRITE_TEXT);
+			delete[] buf;
 			if (n < (*iter).size()) {
 				//couldn't write the message
 				return -1;
@@ -126,7 +132,7 @@ int main() {
 
 	worldserver = new WorldServer(config->SharedKey); 
 	worldserver->Connect();
-	writable_socket_timer.Start(50);
+	writable_socket_timer.Start(10);
 
 	while(run) { 
 		Timer::SetCurrentTime(); 
