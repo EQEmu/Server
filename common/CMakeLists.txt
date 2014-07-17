@@ -14,6 +14,7 @@ SET(common_sources
 	emu_opcodes.cpp
 	EmuTCPConnection.cpp
 	EmuTCPServer.cpp
+	eq_dictionary.cpp
 	EQDB.cpp
 	EQDBRes.cpp
 	eqemu_exception.cpp
@@ -111,6 +112,7 @@ SET(common_headers
 	EmuTCPConnection.h
 	EmuTCPServer.h
 	eq_constants.h
+	eq_dictionary.h
 	eq_packet_structs.h
 	EQDB.h
 	EQDBRes.h

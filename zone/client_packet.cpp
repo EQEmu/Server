@@ -2031,7 +2031,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 	LogFile->write(EQEMuLog::Debug, "OP ItemVerifyRequest: spell=%i, target=%i, inv=%i", spell_id, target_id, slot_id);
 
-	if ((slot_id < 30) || (slot_id == 9999) || (slot_id > 250 && slot_id < 331 && ((item->ItemType == ItemTypePotion) || item->PotionBelt))) // sanity check
+	if ((slot_id < MainCursor) || (slot_id == MainPowerSource) || (slot_id > 250 && slot_id < 331 && ((item->ItemType == ItemTypePotion) || item->PotionBelt))) // sanity check
 	{
 		ItemInst* p_inst = (ItemInst*)inst;
 
@@ -2047,7 +2047,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
         ItemInst* clickaug = 0;
         Item_Struct* augitem = 0;
 
-        for(r = 0; r < MAX_AUGMENT_SLOTS; r++) {
+		for (r = 0; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
             const ItemInst* aug_i = inst->GetAugment(r);
             if(!aug_i)
                 continue;
@@ -2465,7 +2465,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	ItemInst *inst = database.CreateItem(item, charges);
 	if(!AutoPutLootInInventory(*inst, true, true))
 	{
-		PutLootInInventory(SLOT_CURSOR, *inst);
+		PutLootInInventory(MainCursor, *inst);
 	}
 	Save(1);
 }
@@ -5631,8 +5631,8 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		freeslotid = m_inv.FindFreeSlot(false, true, item->Size);
 
 	//make sure we are not completely full...
-	if(freeslotid == SLOT_CURSOR) {
-		if(m_inv.GetItem(SLOT_CURSOR) != nullptr) {
+	if (freeslotid == MainCursor) {
+		if (m_inv.GetItem(MainCursor) != nullptr) {
 			Message(13, "You do not have room for any more items.");
 			safe_delete(outapp);
 			safe_delete(inst);
@@ -5640,7 +5640,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		}
 	}
 
-	if(freeslotid == SLOT_INVALID)
+	if (freeslotid == INVALID_INDEX)
 	{
 		Message(13, "You do not have room for any more items.");
 		safe_delete(outapp);
@@ -6227,7 +6227,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CreateObject(const EQApplicationPacket *app)
 {
-	DropItem(SLOT_CURSOR);
+	DropItem(MainCursor);
 	return;
 }
 
@@ -9232,7 +9232,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			if (it==m_inv.cursor_begin())
 				continue;
 			const ItemInst *inst=*it;
-			SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
+			SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
 		}
 	}
 
@@ -11037,8 +11037,8 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app) {
 	}
 	uint32 ApplyPoisonSuccessResult = 0;
 	ApplyPoison_Struct* ApplyPoisonData = (ApplyPoison_Struct*)app->pBuffer;
-	const ItemInst* PrimaryWeapon = GetInv().GetItem(SLOT_PRIMARY);
-	const ItemInst* SecondaryWeapon = GetInv().GetItem(SLOT_SECONDARY);
+	const ItemInst* PrimaryWeapon = GetInv().GetItem(MainPrimary);
+	const ItemInst* SecondaryWeapon = GetInv().GetItem(MainSecondary);
 	const ItemInst* PoisonItemInstance = GetInv()[ApplyPoisonData->inventorySlot];
 
 	bool IsPoison = PoisonItemInstance && (PoisonItemInstance->GetItem()->ItemType == ItemTypePoison);
@@ -11822,7 +11822,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				return;
 			}
 
-			ItemInst *CursorItemInst = GetInv().GetItem(SLOT_CURSOR);
+			ItemInst *CursorItemInst = GetInv().GetItem(MainCursor);
 
 			bool Allowed = true;
 
@@ -11879,7 +11879,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			{
 				GuildBankDepositAck(false);
 
-				DeleteItemInInventory(SLOT_CURSOR, 0, false);
+				DeleteItemInInventory(MainCursor, 0, false);
 			}
 
 			break;
@@ -11900,7 +11900,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 		case GuildBankWithdraw:
 		{
-			if(GetInv()[SLOT_CURSOR])
+			if (GetInv()[MainCursor])
 			{
 				Message_StringID(13, GUILD_BANK_EMPTY_HANDS);
 
@@ -11946,7 +11946,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			{
 				PushItemOnCursor(*inst);
 
-				SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
+				SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
 
 				GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
 			}
@@ -12752,7 +12752,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app) {
 		ItemInst *inst = database.CreateItem(item, charges);
 		if(!AutoPutLootInInventory(*inst, true, true))
 		{
-			PutLootInInventory(SLOT_CURSOR, *inst);
+			PutLootInInventory(MainCursor, *inst);
 		}
 
 		Save(1);
@@ -12786,7 +12786,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app) {
 			SummonItem(item_id, max_currency);
 			SetAlternateCurrencyValue(reclaim->currency_id, 0);
 		} else {
-			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, false, SLOT_CURSOR);
+			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, false, MainCursor);
 			AddAlternateCurrencyValue(reclaim->currency_id, -((int32)reclaim->count));
 		}
 	}
