@@ -974,7 +974,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->FlurryChance += base1;
 				break;
 			case SE_PetFlurry:
-				newbon->PetFlurry = base1;
+				newbon->PetFlurry += base1;
 				break;
 			case SE_BardSongRange:
 				newbon->SongRange += base1;
