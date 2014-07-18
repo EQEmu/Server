@@ -206,10 +206,10 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 //we need this function to immediately determine, after we receive OP_Fishing, if we can even try to fish, otherwise we have to wait a while to get the failure
 bool Client::CanFish() {
 	//make sure we still have a fishing pole on:
-	const ItemInst* Pole = m_inv[SLOT_PRIMARY];
+	const ItemInst* Pole = m_inv[MainPrimary];
 	int32 bslot = m_inv.HasItemByUse(ItemTypeFishingBait, 1, invWhereWorn|invWherePersonal);
 	const ItemInst* Bait = nullptr;
-	if(bslot != SLOT_INVALID)
+	if (bslot != INVALID_INDEX)
 		Bait = m_inv.GetItem(bslot);
 
 	if(!Pole || !Pole->IsType(ItemClassCommon) || Pole->GetItem()->ItemType != ItemTypeFishingPole) {
@@ -297,7 +297,7 @@ void Client::GoFish()
 	//make sure we still have a fishing pole on:
 	int32 bslot = m_inv.HasItemByUse(ItemTypeFishingBait, 1, invWhereWorn|invWherePersonal);
 	const ItemInst* Bait = nullptr;
-	if(bslot != SLOT_INVALID)
+	if (bslot != INVALID_INDEX)
 		Bait = m_inv.GetItem(bslot);
 
 	//if the bait isnt equipped, need to add its skill bonus
@@ -358,12 +358,12 @@ void Client::GoFish()
 			else
 			{
 				PushItemOnCursor(*inst);
-				SendItemPacket(SLOT_CURSOR,inst,ItemPacketSummonItem);
+				SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
 				if(RuleB(TaskSystem, EnableTaskSystem))
 					UpdateTasksForItem(ActivityFish, food_id);
 
 				safe_delete(inst);
-				inst = m_inv.GetItem(SLOT_CURSOR);
+				inst = m_inv.GetItem(MainCursor);
 			}
 		}
 
@@ -472,12 +472,12 @@ void Client::ForageItem(bool guarantee) {
 			}
 			else {
 				PushItemOnCursor(*inst);
-				SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
+				SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
 				if(RuleB(TaskSystem, EnableTaskSystem))
 					UpdateTasksForItem(ActivityForage, foragedfood);
 
 				safe_delete(inst);
-				inst = m_inv.GetItem(SLOT_CURSOR);
+				inst = m_inv.GetItem(MainCursor);
 			}
 		}
 

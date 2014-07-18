@@ -474,13 +474,15 @@ protected:
 	uint32 roambox_min_delay;
 
 	uint16	skills[HIGHEST_SKILL+1];
-	uint32	equipment[MAX_WORN_INVENTORY];	//this is an array of item IDs
+
+	uint32	equipment[EmuConstants::EQUIPMENT_SIZE];	//this is an array of item IDs
 	uint16	d_meele_texture1;			//this is an item Material value
 	uint16	d_meele_texture2;			//this is an item Material value (offhand)
 	const char*	ammo_idfile;			//this determines projectile graphic "IT###" (see item field 'idfile')
 	uint8	prim_melee_type;			//Sets the Primary Weapon attack message and animation
 	uint8	sec_melee_type;				//Sets the Secondary Weapon attack message and animation
 	uint8   ranged_type;				//Sets the Ranged Weapon attack message and animation
+
 	AA_SwarmPetInfo *swarmInfoPtr;
 
 	bool ldon_trapped;

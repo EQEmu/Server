@@ -14,6 +14,7 @@ SET(common_sources
 	emu_opcodes.cpp
 	EmuTCPConnection.cpp
 	EmuTCPServer.cpp
+	eq_dictionary.cpp
 	EQDB.cpp
 	EQDBRes.cpp
 	eqemu_exception.cpp
@@ -111,6 +112,7 @@ SET(common_headers
 	EmuTCPConnection.h
 	EmuTCPServer.h
 	eq_constants.h
+	eq_dictionary.h
 	eq_packet_structs.h
 	EQDB.h
 	EQDBRes.h
@@ -315,11 +317,11 @@ SOURCE_GROUP(TinyXML FILES
 
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
-ADD_LIBRARY(Common ${common_sources} ${common_headers})
+ADD_LIBRARY(common ${common_sources} ${common_headers})
 
 IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
 	SET_SOURCE_FILES_PROPERTIES("patches/SoD.cpp" "patches/SoF.cpp" "patches/RoF.cpp" "patches/Underfoot.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)
 
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

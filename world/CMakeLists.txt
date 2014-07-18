@@ -23,7 +23,6 @@ SET(world_sources
 	perl_EQW.cpp
 	perl_HTTPRequest.cpp
 	queryserv.cpp
-	socket_server.cpp
 	ucs.cpp
 	wguild_mgr.cpp
 	world_logsys.cpp
@@ -54,7 +53,6 @@ SET(world_headers
 	LoginServerList.h
 	net.h
 	queryserv.h
-	socket_server.h
 	SoFCharCreateData.h
 	ucs.h
 	wguild_mgr.h
@@ -71,7 +69,7 @@ INSTALL(TARGETS world RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 ADD_DEFINITIONS(-DWORLD)
 
-TARGET_LINK_LIBRARIES(world Common ${PERL_LIBRARY} debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
+TARGET_LINK_LIBRARIES(world common ${PERL_LIBRARY} debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
 IF(MSVC)
 	SET_TARGET_PROPERTIES(world PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
@@ -93,4 +91,4 @@ IF(UNIX)
 	ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)
 
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/Bin)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

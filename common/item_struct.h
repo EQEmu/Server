@@ -42,7 +42,8 @@
  *	Made ya look! Ha!
  */
 
-#include "eq_constants.h"
+//#include "eq_constants.h"
+#include "eq_dictionary.h"
 
 /*
 ** Child struct of Item_Struct:
@@ -68,7 +69,8 @@ struct InternalSerializedItem_Struct {
 	const void * inst;
 };
 
-#define MAX_AUGMENT_SLOTS 5
+// use EmuConstants::ITEM_COMMON_SIZE
+//#define MAX_AUGMENT_SLOTS 5
 
 struct Item_Struct {
 	bool IsEquipable(uint16 Race, uint16 Class) const;
@@ -180,9 +182,9 @@ struct Item_Struct {
 	int32	FactionAmt4;	// Faction Amt 4
 	char	CharmFile[32];	// ?
 	uint32	AugType;
-	uint8	AugSlotType[MAX_AUGMENT_SLOTS];		// LDoN: Augment Slot 1-5 Type
-	uint8	AugSlotVisible[MAX_AUGMENT_SLOTS];	// LDoN: Augment Slot 1-5 Visible
-	uint8	AugSlotUnk2[MAX_AUGMENT_SLOTS];		// LDoN: Augment Slot 1-5 Unknown
+	uint8	AugSlotType[EmuConstants::ITEM_COMMON_SIZE];	// LDoN: Augment Slot 1-5 Type
+	uint8	AugSlotVisible[EmuConstants::ITEM_COMMON_SIZE];	// LDoN: Augment Slot 1-5 Visible
+	uint8	AugSlotUnk2[EmuConstants::ITEM_COMMON_SIZE];	// LDoN: Augment Slot 1-5 Unknown
 	uint32	LDoNTheme;
 	uint32	LDoNPrice;
 	uint32	LDoNSold;

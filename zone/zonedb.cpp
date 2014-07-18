@@ -1996,7 +1996,7 @@ void ZoneDatabase::LoadMercEquipment(Merc *merc) {
 		int itemCount = 0;
 
 		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			if(itemCount == MAX_WORN_INVENTORY)
+			if (itemCount == EmuConstants::EQUIPMENT_SIZE)
 				break;
 
 			if(atoi(DataRow[0]) > 0) {
@@ -2772,7 +2772,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 		}
 	}
 
-	for(i=0; i<MAX_WORN_INVENTORY; i++) {
+	for (i = 0; i<EmuConstants::EQUIPMENT_SIZE; i++) {
 		if(petinfo->Items[i]) {
 			database.RunQuery(query, MakeAnyLenString(&query,
 				"INSERT INTO `character_pet_inventory` (`char_id`, `pet`, `slot`, `item_id`) values (%u, 0, %u, %u)",
@@ -2796,7 +2796,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 	}
 	safe_delete_array(query);
 
-	for(i=0; i<MAX_WORN_INVENTORY; i++) {
+	for (i = 0; i<EmuConstants::EQUIPMENT_SIZE; i++) {
 		if(suspended->Items[i]) {
 			database.RunQuery(query, MakeAnyLenString(&query,
 				"INSERT INTO `character_pet_inventory` (`char_id`, `pet`, `slot`, `item_id`) values (%u, 1, %u, %u)",
@@ -2927,9 +2927,9 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 				pi = suspended;
 			else
 				continue;
-
+			
 			int slot = atoi(row[1]);
-			if (slot < 0 || slot > MAX_WORN_INVENTORY)
+			if (slot < 0 || slot > EmuConstants::EQUIPMENT_SIZE) // if (slot == 22) { zone.TriggerRandomCrash(); }
 				continue;
 
 			pi->Items[slot] = atoul(row[2]);

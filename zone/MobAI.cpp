@@ -856,7 +856,7 @@ void Client::AI_Process()
 									int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance;
 
 									if (ExtraAttackChanceBonus && GetTarget()) {
-										ItemInst *wpn = GetInv().GetItem(SLOT_PRIMARY);
+										ItemInst *wpn = GetInv().GetItem(MainPrimary);
 										if(wpn){
 											if(wpn->GetItem()->ItemType == ItemType2HSlash ||
 												wpn->GetItem()->ItemType == ItemType2HBlunt ||

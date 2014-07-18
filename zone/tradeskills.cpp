@@ -482,7 +482,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		//because a HasItem on items with num > 1 only returns the
 		//last-most slot... the results of this are useless to us
 		//when we go to delete them because we cannot assume it is in a single stack.
-		if(user_inv.HasItem(item, num, invWherePersonal) != SLOT_INVALID)
+		if (user_inv.HasItem(item, num, invWherePersonal) != INVALID_INDEX)
 			count += num;
 		else
 			MissingItems.push_back(item);
@@ -524,7 +524,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		//we have to loop here to delete 1 at a time in case its in multiple stacks.
 		for(k = 0; k < counts[r]; k++) {
 			slot = user_inv.HasItem(items[r], 1, invWherePersonal);
-			if(slot == SLOT_INVALID) {
+			if (slot == INVALID_INDEX) {
 				//WTF... I just checked this above, but just to be sure...
 				//we cant undo the previous deletes without a lot of work.
 				//so just call it quits, this shouldent ever happen anyways.

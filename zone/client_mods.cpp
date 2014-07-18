@@ -1969,14 +1969,14 @@ int Client::GetRawACNoShield(int &shield_ac) const
 {
 	int ac = itembonuses.AC + spellbonuses.AC;
 	shield_ac = 0;
-	const ItemInst *inst = m_inv.GetItem(SLOT_SECONDARY);
+	const ItemInst *inst = m_inv.GetItem(MainSecondary);
 	if(inst)
 	{
 		if(inst->GetItem()->ItemType == ItemTypeShield)
 		{
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for(uint8 i = 0; i < MAX_AUGMENT_SLOTS; i++)
+			for (uint8 i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++)
 			{
 				if(inst->GetAugment(i))
 				{

@@ -599,7 +599,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Flesh To Bone");
 #endif
 				if(IsClient()){
-					ItemInst* transI = CastToClient()->GetInv().GetItem(SLOT_CURSOR);
+					ItemInst* transI = CastToClient()->GetInv().GetItem(MainCursor);
 					if(transI && transI->IsType(ItemClassCommon) && transI->IsStackable()){
 						uint32 fcharges = transI->GetCharges();
 							//Does it sound like meat... maybe should check if it looks like meat too...
@@ -609,7 +609,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 								strstr(transI->GetItem()->Name, "Flesh") ||
 								strstr(transI->GetItem()->Name, "parts") ||
 								strstr(transI->GetItem()->Name, "Parts")){
-								CastToClient()->DeleteItemInInventory(SLOT_CURSOR, fcharges, true);
+								CastToClient()->DeleteItemInInventory(MainCursor, fcharges, true);
 								CastToClient()->SummonItem(13073, fcharges);
 							}
 							else{
@@ -1159,7 +1159,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 						if (SummonedItem) {
 							c->PushItemOnCursor(*SummonedItem);
-							c->SendItemPacket(SLOT_CURSOR, SummonedItem, ItemPacketSummonItem);
+							c->SendItemPacket(MainCursor, SummonedItem, ItemPacketSummonItem);
 							safe_delete(SummonedItem);
 						}
 						SummonedItem = database.CreateItem(spell.base[i], charges);
@@ -2983,7 +2983,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	if (SummonedItem) {
 		Client *c=CastToClient();
 		c->PushItemOnCursor(*SummonedItem);
-		c->SendItemPacket(SLOT_CURSOR, SummonedItem, ItemPacketSummonItem);
+		c->SendItemPacket(MainCursor, SummonedItem, ItemPacketSummonItem);
 		safe_delete(SummonedItem);
 	}
 
@@ -5070,7 +5070,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
+			for (int y = 0; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
 			{
 				if (SympatheticProcList.size() > MAX_SYMPATHETIC)
 					continue;
@@ -5226,7 +5226,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for(int y = 0; y < MAX_AUGMENT_SLOTS; ++y)
+			for (int y = 0; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
 			{
 				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
