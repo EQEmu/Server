@@ -139,21 +139,21 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
-	for (i=0; i<21; i++) {
+	for (i = MainCharm; i < MainAmmo; i++) {
 		const ItemInst* inst = m_inv[i];
 		if(inst == 0)
 			continue;
 		AddItemBonuses(inst, newbon);
 
 		//Check if item is secondary slot is a 'shield'. Required for multiple spelll effects.
-		if (i == 14 && (m_inv.GetItem(14)->GetItem()->ItemType == ItemTypeShield))
+		if (i == MainSecondary && (m_inv.GetItem(MainSecondary)->GetItem()->ItemType == ItemTypeShield))
 			ShieldEquiped(true);
 	}
 
 	//Power Source Slot
 	if (GetClientVersion() >= EQClientSoF)
 	{
-		const ItemInst* inst = m_inv[9999];
+		const ItemInst* inst = m_inv[MainPowerSource];
 		if(inst)
 			AddItemBonuses(inst, newbon);
 	}
@@ -528,7 +528,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 	if (!isAug)
 	{
 		int i;
-		for(i = 0; i < MAX_AUGMENT_SLOTS; i++) {
+		for (i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 			AddItemBonuses(inst->GetAugment(i),newbon,true);
 		}
 	}
@@ -2972,7 +2972,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 {
 	if(newbon){
 
-		for(int i = 0; i < MAX_WORN_INVENTORY; i++){
+		for(int i = 0; i < EmuConstants::EQUIPMENT_SIZE; i++){
 			const Item_Struct *cur = database.GetItem(equipment[i]);
 			if(cur){
 				//basic stats
@@ -3091,7 +3091,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y)
 		}
 
 		//iterate all augments
-		for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
+		for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
 		{
 			ItemInst * a_inst = inst->GetAugment(x);
 			if(!a_inst)
@@ -3160,7 +3160,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 			uint16 oldexp = inst->GetExp();
 
 			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
-			if(i < 22 || i == 9999) {
+			if(i <= MainAmmo || i == MainPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3170,7 +3170,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 				update_slot = true;
 			}
 		} else {
-			if(i < 22 || i == 9999) {
+			if(i <= MainAmmo || i == MainPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3178,7 +3178,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 		}
 
 		//iterate all augments
-		for(int x = 0; x < MAX_AUGMENT_SLOTS; ++x)
+		for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
 		{
 			ItemInst *a_inst = inst->GetAugment(x);
 			if(!a_inst)

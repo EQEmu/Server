@@ -439,7 +439,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 			const Item_Struct* item = GetItem(item_id);
 
 			if (item) {
-				int16 put_slot_id = SLOT_INVALID;
+				int16 put_slot_id = INVALID_INDEX;
 
 				ItemInst* inst = CreateBaseItem(item, charges);
 				if (item->ItemClass == ItemClassCommon) {
@@ -479,7 +479,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory* inv, bool is_charid) {
 				safe_delete(inst);
 
 				// Save ptr to item in inventory
-				if (put_slot_id == SLOT_INVALID) {
+				if (put_slot_id == INVALID_INDEX) {
 					LogFile->write(EQEMuLog::Error,
 						"Warning: Invalid slot_id for item in shared bank inventory: %s=%i, item_id=%i, slot_id=%i",
 						((is_charid==true) ? "charid" : "acctid"), id, item_id, slot_id);
@@ -535,7 +535,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 			const Item_Struct* item = GetItem(item_id);
 
 			if (item) {
-				int16 put_slot_id = SLOT_INVALID;
+				int16 put_slot_id = INVALID_INDEX;
 
 				ItemInst* inst = CreateBaseItem(item, charges);
 
@@ -589,7 +589,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory* inv) {
 				safe_delete(inst);
 
 				// Save ptr to item in inventory
-				if (put_slot_id == SLOT_INVALID) {
+				if (put_slot_id == INVALID_INDEX) {
 					LogFile->write(EQEMuLog::Error,
 						"Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",
 						char_id, item_id, slot_id);
@@ -641,7 +641,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 			aug[4]	= (uint32)atoi(row[8]);
 			bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
 			const Item_Struct* item = GetItem(item_id);
-			int16 put_slot_id = SLOT_INVALID;
+			int16 put_slot_id = INVALID_INDEX;
 			if(!item)
 				continue;
 
@@ -692,7 +692,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char* name, Inventory* inv)
 			safe_delete(inst);
 
 			// Save ptr to item in inventory
-			if (put_slot_id == SLOT_INVALID) {
+			if (put_slot_id == INVALID_INDEX) {
 				LogFile->write(EQEMuLog::Error,
 					"Warning: Invalid slot_id for item in inventory: name=%s, acctid=%i, item_id=%i, slot_id=%i",
 					name, account_id, item_id, slot_id);

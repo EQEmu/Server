@@ -421,7 +421,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 
 		if(cursor) { // all cursor items should be on corpse (client < SoF or RespawnFromHover = false)
 			while(!client->GetInv().CursorEmpty())
-				client->DeleteItemInInventory(SLOT_CURSOR, 0, false, false);
+				client->DeleteItemInInventory(MainCursor, 0, false, false);
 		}
 		else { // only visible cursor made it to corpse (client >= Sof and RespawnFromHover = true)
 			std::list<ItemInst*>::const_iterator start = client->GetInv().cursor_begin();
@@ -1013,7 +1013,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			// Dont display the item if it's in a bag
 
 			// Added cursor queue slots to corpse item visibility list. Nothing else should be making it to corpse.
-			if(!IsPlayerCorpse() || item_data->equipSlot <= 30 || item_data->equipSlot == 9999 || tCanLoot>=3 ||
+			if(!IsPlayerCorpse() || item_data->equipSlot <= MainCursor || item_data->equipSlot == MainPowerSource || tCanLoot>=3 ||
 				(item_data->equipSlot >= 8000 && item_data->equipSlot <= 8999)) {
 				if(i < corpselootlimit) {
 					item = database.GetItem(item_data->item_id);
@@ -1145,7 +1145,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 
 		if(inst->IsAugmented())
 		{
-			for(int i=0; i<MAX_AUGMENT_SLOTS; i++)
+			for (int i = 0; i<EmuConstants::ITEM_COMMON_SIZE; i++)
 			{
 				ItemInst *itm = inst->GetAugment(i);
 				if(itm)
@@ -1227,11 +1227,11 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		if(lootitem->auto_loot)
 		{
 			if(!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
-				client->PutLootInInventory(SLOT_CURSOR, *inst, bag_item_data);
+				client->PutLootInInventory(MainCursor, *inst, bag_item_data);
 		}
 		else
 		{
-			client->PutLootInInventory(SLOT_CURSOR, *inst, bag_item_data);
+			client->PutLootInInventory(MainCursor, *inst, bag_item_data);
 		}
 		// Update any tasks that have an activity to loot this item.
 		if(RuleB(TaskSystem, EnableTaskSystem))

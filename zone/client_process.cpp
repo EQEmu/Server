@@ -293,7 +293,7 @@ bool Client::Process() {
 		}
 
 		if(AutoFireEnabled()){
-			ItemInst *ranged = GetInv().GetItem(SLOT_RANGE);
+			ItemInst *ranged = GetInv().GetItem(MainRange);
 			if(ranged)
 			{
 				if(ranged->GetItem() && ranged->GetItem()->ItemType == ItemTypeBow){
@@ -404,7 +404,7 @@ bool Client::Process() {
 				} else {
 					Attack(auto_attack_target, 13); // Kaiyodo - added attacking hand to arguments
 				}
-				ItemInst *wpn = GetInv().GetItem(SLOT_PRIMARY);
+				ItemInst *wpn = GetInv().GetItem(MainPrimary);
 				TryWeaponProc(wpn, auto_attack_target, 13);
 
 				bool tripleAttackSuccess = false;
@@ -452,7 +452,7 @@ bool Client::Process() {
 				int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance;
 
 				if (auto_attack_target && ExtraAttackChanceBonus) {
-					ItemInst *wpn = GetInv().GetItem(SLOT_PRIMARY);
+					ItemInst *wpn = GetInv().GetItem(MainPrimary);
 					if(wpn){
 						if(wpn->GetItem()->ItemType == ItemType2HSlash ||
 							wpn->GetItem()->ItemType == ItemType2HBlunt ||
@@ -511,7 +511,7 @@ bool Client::Process() {
 					} else {
 						Attack(auto_attack_target, 14);	// Single attack with offhand
 					}
-					ItemInst *wpn = GetInv().GetItem(SLOT_SECONDARY);
+					ItemInst *wpn = GetInv().GetItem(MainSecondary);
 					TryWeaponProc(wpn, auto_attack_target, 14);
 
 					if( CanThisClassDoubleAttack() && CheckDoubleAttack()) {
@@ -1217,7 +1217,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	switch(memspell->scribing)
 	{
 		case memSpellScribing:	{	// scribing spell to book
-			const ItemInst* inst = m_inv[SLOT_CURSOR];
+			const ItemInst* inst = m_inv[MainCursor];
 
 			if(inst && inst->IsType(ItemClassCommon))
 			{
@@ -1226,7 +1226,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 				if(item && item->Scroll.Effect == (int32)(memspell->spell_id))
 				{
 					ScribeSpell(memspell->spell_id, memspell->slot);
-					DeleteItemInInventory(SLOT_CURSOR, 1, true);
+					DeleteItemInInventory(MainCursor, 1, true);
 				}
 				else
 					Message(0,"Scribing spell: inst exists but item does not or spell ids do not match.");

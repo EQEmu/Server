@@ -166,7 +166,7 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 	}
 
 	// If we're attacking with the secondary hand, play the dual wield anim
-	if (Hand == 14)	// DW anim
+	if (Hand == MainSecondary)	// DW anim
 		type = animDualWield;
 
 	DoAnim(type);
@@ -960,7 +960,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 					dmg = weapon_item->GetItem()->Damage;
 				}
 
-				for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
+				for(int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
 					if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 						dmg += weapon_item->GetAugment(x)->GetItem()->Damage;
 						if (hate) *hate += weapon_item->GetAugment(x)->GetItem()->Damage + weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt;
@@ -997,7 +997,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 					dmg = weapon_item->GetItem()->Damage;
 				}
 
-				for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
+				for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
 					if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 						dmg += weapon_item->GetAugment(x)->GetItem()->Damage;
 						if (hate) *hate += weapon_item->GetAugment(x)->GetItem()->Damage + weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt;
@@ -1034,7 +1034,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 		}
 
 		if(weapon_item){
-			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
+			for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
 				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 					if(weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt)
 						eledmg += (weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt * against->ResistSpell(weapon_item->GetAugment(x)->GetItem()->ElemDmgType, 0, this) / 100);
@@ -1063,7 +1063,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 				}
 			}
 
-			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
+			for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
 				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgBody == against->GetBodyType()){
 						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgAmt;
@@ -1108,7 +1108,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 				}
 			}
 
-			for(int x = 0; x < MAX_AUGMENT_SLOTS; x++){
+			for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
 				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
 					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgBody == against->GetBodyType()){
 						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgAmt;
@@ -1170,12 +1170,12 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 
 	ItemInst* weapon;
-	if (Hand == 14){	// Kaiyodo - Pick weapon from the attacking hand
-		weapon = GetInv().GetItem(SLOT_SECONDARY);
+	if (Hand == MainSecondary){	// Kaiyodo - Pick weapon from the attacking hand
+		weapon = GetInv().GetItem(MainSecondary);
 		OffHandAtk(true);
 	}
 	else{
-		weapon = GetInv().GetItem(SLOT_PRIMARY);
+		weapon = GetInv().GetItem(MainPrimary);
 		OffHandAtk(false);
 	}
 
@@ -1244,7 +1244,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 		int ucDamageBonus = 0;
 
-		if( Hand == 13 && GetLevel() >= 28 && IsWarriorClass() )
+		if( Hand == MainPrimary && GetLevel() >= 28 && IsWarriorClass() )
 		{
 			// Damage bonuses apply only to hits from the main hand (Hand == 13) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
@@ -1257,7 +1257,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		}
 #endif
 		//Live AA - Sinister Strikes *Adds weapon damage bonus to offhand weapon.
-		if (Hand==14) {
+		if (Hand == MainSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 
 				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
@@ -1310,7 +1310,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if (damage == -3) {
 			if (bRiposte) return false;
 			else {
-				if (Hand == 14) {// Do we even have it & was attack with mainhand? If not, don't bother with other calculations
+				if (Hand == MainSecondary) {// Do we even have it & was attack with mainhand? If not, don't bother with other calculations
 					//Live AA - SlipperyAttacks
 					//This spell effect most likely directly modifies the actual riposte chance when using offhand attack.
 					int16 OffhandRiposteFail = aabonuses.OffhandRiposteFail + itembonuses.OffhandRiposteFail + spellbonuses.OffhandRiposteFail;
@@ -1775,28 +1775,28 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	FaceTarget(GetTarget());
 
 	SkillUseTypes skillinuse = SkillHandtoHand;
-	if (Hand == 13) {
+	if (Hand == MainPrimary) {
 		skillinuse = static_cast<SkillUseTypes>(GetPrimSkill());
 		OffHandAtk(false);
 	}
-	if (Hand == 14) {
+	if (Hand == MainSecondary) {
 		skillinuse = static_cast<SkillUseTypes>(GetSecSkill());
 		OffHandAtk(true);
 	}
 
 	//figure out what weapon they are using, if any
 	const Item_Struct* weapon = nullptr;
-	if (Hand == 13 && equipment[SLOT_PRIMARY] > 0)
-		weapon = database.GetItem(equipment[SLOT_PRIMARY]);
-	else if (equipment[SLOT_SECONDARY])
-		weapon = database.GetItem(equipment[SLOT_SECONDARY]);
+	if (Hand == MainPrimary && equipment[MainPrimary] > 0)
+		weapon = database.GetItem(equipment[MainPrimary]);
+	else if (equipment[MainSecondary])
+		weapon = database.GetItem(equipment[MainSecondary]);
 
 	//We dont factor much from the weapon into the attack.
 	//Just the skill type so it doesn't look silly using punching animations and stuff while wielding weapons
 	if(weapon) {
 		mlog(COMBAT__ATTACKS, "Attacking with weapon: %s (%d) (too bad im not using it for much)", weapon->Name, weapon->ID);
 
-		if(Hand == 14 && weapon->ItemType == ItemTypeShield){
+		if(Hand == MainSecondary && weapon->ItemType == ItemTypeShield){
 			mlog(COMBAT__ATTACKS, "Attack with shield canceled.");
 			return false;
 		}
@@ -4074,7 +4074,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 		proced = false;
 
 	if (!proced && inst) {
-		for (int r = 0; r < MAX_AUGMENT_SLOTS; r++) {
+		for (int r = 0; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
 			const ItemInst *aug_i = inst->GetAugment(r);
 			if (!aug_i) // no aug, try next slot!
 				continue;
@@ -4118,11 +4118,11 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 	else
 		ProcChance = GetProcChances(ProcBonus);
 
-	if (hand != 13) //Is Archery intened to proc at 50% rate?
+	if (hand != MainPrimary) //Is Archery intened to proc at 50% rate?
 		ProcChance /= 2;
 
 	bool rangedattk = false;
-	if (weapon && hand == 11) {
+	if (weapon && hand == MainRange) {
 		if (weapon->ItemType == ItemTypeArrow ||
 				weapon->ItemType == ItemTypeLargeThrowing ||
 				weapon->ItemType == ItemTypeSmallThrowing ||
@@ -4131,7 +4131,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 	}
 
 	for (uint32 i = 0; i < MAX_PROCS; i++) {
-		if (IsPet() && hand != 13) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
+		if (IsPet() && hand != MainPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
 			continue; // If pets ever can proc from off hand, this will need to change
 
 		// Not ranged
@@ -4184,7 +4184,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 		}
 	}
 
-	if (HasSkillProcs() && hand != 11){ //We check ranged skill procs within the attack functions.
+	if (HasSkillProcs() && hand != MainRange){ //We check ranged skill procs within the attack functions.
 		uint16 skillinuse = 28;
 		if (weapon)
 			skillinuse = GetSkillByItemType(weapon->ItemType);
@@ -4430,7 +4430,7 @@ void Mob::DoRiposte(Mob* defender) {
 	if (!defender)
 		return;
 
-	defender->Attack(this, SLOT_PRIMARY, true);
+	defender->Attack(this, MainPrimary, true);
 	if (HasDied()) return;
 
 	int16 DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] +
@@ -4444,7 +4444,7 @@ void Mob::DoRiposte(Mob* defender) {
 	//Live AA - Double Riposte
 	if(DoubleRipChance && (DoubleRipChance >= MakeRandomInt(0, 100))) {
 		mlog(COMBAT__ATTACKS, "Preforming a double riposed (%d percent chance)", DoubleRipChance);
-		defender->Attack(this, SLOT_PRIMARY, true);
+		defender->Attack(this, MainPrimary, true);
 		if (HasDied()) return;
 	}
 

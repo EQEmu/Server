@@ -74,17 +74,17 @@ void Mob::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) 
 			case SkillFlyingKick:
 			case SkillRoundKick:
 			case SkillKick:
-				item_slot = SLOT_FEET;
+				item_slot = MainFeet;
 				break;
 
 			case SkillBash:
-				item_slot = SLOT_SECONDARY;
+				item_slot = MainSecondary;
 				break;
 
 			case SkillDragonPunch:
 			case SkillEagleStrike:
 			case SkillTigerClaw:
-				item_slot = SLOT_HANDS;
+				item_slot = MainHands;
 				break;
 
 			default:
@@ -113,7 +113,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	{
 		if(IsClient())
 		{
-			ItemInst *item = CastToClient()->GetInv().GetItem(SLOT_SECONDARY);
+			ItemInst *item = CastToClient()->GetInv().GetItem(MainSecondary);
 			if(item)
 			{
 				if(item->GetItem()->ItemType == ItemTypeShield)
@@ -200,7 +200,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 	//These two are not subject to the combat ability timer, as they
 	//allready do their checking in conjunction with the attack timer
 	//throwing weapons
-	if(ca_atk->m_atk == 11) {
+	if(ca_atk->m_atk == MainRange) {
 		if (ca_atk->m_skill == SkillThrowing) {
 			SetAttackTimer();
 			ThrowingAttack(GetTarget());
@@ -242,6 +242,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 
 	int32 skill_reduction = this->GetSkillReuseTime(ca_atk->m_skill);
 
+	// not sure what the '100' indicates..if ->m_atk is not used as 'slot' reference, then change MainRange above back to '11'
 	if ((ca_atk->m_atk == 100) && (ca_atk->m_skill == SkillBash)) { // SLAM - Bash without a shield equipped
 		if (GetTarget() != this) {
 
@@ -249,8 +250,8 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 			DoAnim(animTailRake);
 
 			int32 ht = 0;
-			if(GetWeaponDamage(GetTarget(), GetInv().GetItem(SLOT_SECONDARY)) <= 0 &&
-				GetWeaponDamage(GetTarget(), GetInv().GetItem(SLOT_SHOULDER)) <= 0){
+			if(GetWeaponDamage(GetTarget(), GetInv().GetItem(MainSecondary)) <= 0 &&
+				GetWeaponDamage(GetTarget(), GetInv().GetItem(MainShoulders)) <= 0){
 				dmg = -5;
 			}
 			else{
@@ -329,7 +330,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 				DoAnim(animKick);
 
 				int32 ht = 0;
-				if(GetWeaponDamage(GetTarget(), GetInv().GetItem(SLOT_FEET)) <= 0){
+				if(GetWeaponDamage(GetTarget(), GetInv().GetItem(MainFeet)) <= 0){
 					dmg = -5;
 				}
 				else{
@@ -405,7 +406,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 	int32 min_dmg = 1;
 	int reuse = 0;
 	SkillUseTypes skill_type;	//to avoid casting... even though it "would work"
-	uint8 itemslot = SLOT_FEET;
+	uint8 itemslot = MainFeet;
 
 	switch(unchecked_type)
 	{
@@ -421,7 +422,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 		case SkillDragonPunch:{
 			skill_type = SkillDragonPunch;
 			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, DragonPunchBonus) / 100) + 26;
-			itemslot = SLOT_HANDS;
+			itemslot = MainHands;
 			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
 			DoAnim(animTailRake);
 			reuse = TailRakeReuseTime;
@@ -431,7 +432,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 		case SkillEagleStrike:{
 			skill_type = SkillEagleStrike;
 			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, EagleStrikeBonus) / 100) + 19;
-			itemslot = SLOT_HANDS;
+			itemslot = MainHands;
 			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
 			DoAnim(animEagleStrike);
 			reuse = EagleStrikeReuseTime;
@@ -441,7 +442,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 		case SkillTigerClaw:{
 			skill_type = SkillTigerClaw;
 			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, TigerClawBonus) / 100) + 12;
-			itemslot = SLOT_HANDS;
+			itemslot = MainHands;
 			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
 			DoAnim(animTigerClaw);
 			reuse = TigerClawReuseTime;
@@ -511,7 +512,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 
 	//make sure we have a proper weapon if we are a client.
 	if(IsClient()) {
-		const ItemInst *wpn = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+		const ItemInst *wpn = CastToClient()->GetInv().GetItem(MainPrimary);
 		if(!wpn || (wpn->GetItem()->ItemType != ItemType1HPiercing)){
 			Message_StringID(13, BACKSTAB_WEAPON);
 			return;
@@ -593,11 +594,11 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 	if(IsClient()){
 		const ItemInst *wpn = nullptr;
-		wpn = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+		wpn = CastToClient()->GetInv().GetItem(MainPrimary);
 		if(wpn) {
 			primaryweapondamage = GetWeaponDamage(other, wpn);
 			backstab_dmg = wpn->GetItem()->BackstabDmg;
-			for(int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
+			for (int i = 0; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
 			{
 				ItemInst *aug = wpn->GetAugment(i);
 				if(aug)
@@ -676,7 +677,7 @@ void Mob::RogueAssassinate(Mob* other)
 {
 	//can you dodge, parry, etc.. an assassinate??
 	//if so, use DoSpecialAttackDamage(other, BACKSTAB, 32000); instead
-	if(GetWeaponDamage(other, IsClient()?CastToClient()->GetInv().GetItem(SLOT_PRIMARY):(const ItemInst*)nullptr) > 0){
+	if(GetWeaponDamage(other, IsClient()?CastToClient()->GetInv().GetItem(MainPrimary):(const ItemInst*)nullptr) > 0){
 		other->Damage(this, 32000, SPELL_UNKNOWN, SkillBackstab);
 	}else{
 		other->Damage(this, -5, SPELL_UNKNOWN, SkillBackstab);
@@ -695,20 +696,20 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		//Message(0, "Error: Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		return;
 	}
-	const ItemInst* RangeWeapon = m_inv[SLOT_RANGE];
+	const ItemInst* RangeWeapon = m_inv[MainRange];
 
 	//locate ammo
-	int ammo_slot = SLOT_AMMO;
-	const ItemInst* Ammo = m_inv[SLOT_AMMO];
+	int ammo_slot = MainAmmo;
+	const ItemInst* Ammo = m_inv[MainAmmo];
 
 	if (!RangeWeapon || !RangeWeapon->IsType(ItemClassCommon)) {
-		mlog(COMBAT__RANGED, "Ranged attack canceled. Missing or invalid ranged weapon (%d) in slot %d", GetItemIDAt(SLOT_RANGE), SLOT_RANGE);
-		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have no bow!", GetItemIDAt(SLOT_RANGE));
+		mlog(COMBAT__RANGED, "Ranged attack canceled. Missing or invalid ranged weapon (%d) in slot %d", GetItemIDAt(MainRange), MainRange);
+		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have no bow!", GetItemIDAt(MainRange));
 		return;
 	}
 	if (!Ammo || !Ammo->IsType(ItemClassCommon)) {
-		mlog(COMBAT__RANGED, "Ranged attack canceled. Missing or invalid ammo item (%d) in slot %d", GetItemIDAt(SLOT_AMMO), SLOT_AMMO);
-		Message(0, "Error: Ammo: GetItem(%i)==0, you have no ammo!", GetItemIDAt(SLOT_AMMO));
+		mlog(COMBAT__RANGED, "Ranged attack canceled. Missing or invalid ammo item (%d) in slot %d", GetItemIDAt(MainAmmo), MainAmmo);
+		Message(0, "Error: Ammo: GetItem(%i)==0, you have no ammo!", GetItemIDAt(MainAmmo));
 		return;
 	}
 
@@ -733,7 +734,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		//first look for quivers
 		int r;
 		bool found = false;
-		for(r = SLOT_PERSONAL_BEGIN; r <= SLOT_PERSONAL_END; r++) {
+		for(r = EmuConstants::GENERAL_BEGIN; r <= EmuConstants::GENERAL_END; r++) {
 			const ItemInst *pi = m_inv[r];
 			if(pi == nullptr || !pi->IsType(ItemClassContainer))
 				continue;
@@ -765,7 +766,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 			//if we dont find a quiver, look through our inventory again
 			//not caring if the thing is a quiver.
 			int32 aslot = m_inv.HasItem(AmmoItem->ID, 1, invWherePersonal);
-			if(aslot != SLOT_INVALID) {
+			if (aslot != INVALID_INDEX) {
 				ammo_slot = aslot;
 				Ammo = m_inv[aslot];
 				mlog(COMBAT__RANGED, "Using ammo from inventory stack at slot %d. %d in stack.", ammo_slot, Ammo->GetCharges());
@@ -1165,19 +1166,19 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		return;
 	}
 
-	int ammo_slot = SLOT_RANGE;
-	const ItemInst* RangeWeapon = m_inv[SLOT_RANGE];
+	int ammo_slot = MainRange;
+	const ItemInst* RangeWeapon = m_inv[MainRange];
 
 	if (!RangeWeapon || !RangeWeapon->IsType(ItemClassCommon)) {
-		mlog(COMBAT__RANGED, "Ranged attack canceled. Missing or invalid ranged weapon (%d) in slot %d", GetItemIDAt(SLOT_RANGE), SLOT_RANGE);
-		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing to throw!", GetItemIDAt(SLOT_RANGE));
+		mlog(COMBAT__RANGED, "Ranged attack canceled. Missing or invalid ranged weapon (%d) in slot %d", GetItemIDAt(MainRange), MainRange);
+		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing to throw!", GetItemIDAt(MainRange));
 		return;
 	}
 
 	const Item_Struct* item = RangeWeapon->GetItem();
 	if(item->ItemType != ItemTypeLargeThrowing && item->ItemType != ItemTypeSmallThrowing) {
 		mlog(COMBAT__RANGED, "Ranged attack canceled. Ranged item %d is not a throwing weapon. type %d.", item->ItemType);
-		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing useful to throw!", GetItemIDAt(SLOT_RANGE));
+		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing useful to throw!", GetItemIDAt(MainRange));
 		return;
 	}
 
@@ -1185,16 +1186,16 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 
 	if(RangeWeapon->GetCharges() == 1) {
 		//first check ammo
-		const ItemInst* AmmoItem = m_inv[SLOT_AMMO];
+		const ItemInst* AmmoItem = m_inv[MainAmmo];
 		if(AmmoItem != nullptr && AmmoItem->GetID() == RangeWeapon->GetID()) {
 			//more in the ammo slot, use it
 			RangeWeapon = AmmoItem;
-			ammo_slot = SLOT_AMMO;
+			ammo_slot = MainAmmo;
 			mlog(COMBAT__RANGED, "Using ammo from ammo slot, stack at slot %d. %d in stack.", ammo_slot, RangeWeapon->GetCharges());
 		} else {
 			//look through our inventory for more
 			int32 aslot = m_inv.HasItem(item->ID, 1, invWherePersonal);
-			if(aslot != SLOT_INVALID) {
+			if (aslot != INVALID_INDEX) {
 				//the item wont change, but the instance does, not that it matters
 				ammo_slot = aslot;
 				RangeWeapon = m_inv[aslot];
@@ -1768,8 +1769,8 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		{
 			DoAnim(animTailRake);
 
-			if(GetWeaponDamage(ca_target, GetInv().GetItem(SLOT_SECONDARY)) <= 0 &&
-				GetWeaponDamage(ca_target, GetInv().GetItem(SLOT_SHOULDER)) <= 0){
+			if(GetWeaponDamage(ca_target, GetInv().GetItem(MainSecondary)) <= 0 &&
+				GetWeaponDamage(ca_target, GetInv().GetItem(MainShoulders)) <= 0){
 				dmg = -5;
 			}
 			else{
@@ -1839,7 +1840,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		{
 			DoAnim(animKick);
 
-			if(GetWeaponDamage(ca_target, GetInv().GetItem(SLOT_FEET)) <= 0){
+			if(GetWeaponDamage(ca_target, GetInv().GetItem(MainFeet)) <= 0){
 				dmg = -5;
 			}
 			else{
@@ -2236,7 +2237,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 
 	if(skillinuse == SkillBash){
 		if(IsClient()){
-			ItemInst *item = CastToClient()->GetInv().GetItem(SLOT_SECONDARY);
+			ItemInst *item = CastToClient()->GetInv().GetItem(MainSecondary);
 			if(item){
 				if(item->GetItem()->ItemType == ItemTypeShield)	{
 					hate += item->GetItem()->AC;
