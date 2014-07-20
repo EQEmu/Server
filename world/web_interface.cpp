@@ -99,6 +99,11 @@ bool WebInterfaceConnection::Process()
 				_log(WEB_INTERFACE__ERROR, "Got authentication from WebInterface when they are already authenticated.");
 				break;
 			}
+			case ServerOP_WIServGeneric:
+			{
+				zoneserver_list.SendPacket(pack); // Send to all zones to test
+				break;
+			}
 			default:
 			{
 				_log(WEB_INTERFACE__ERROR, "Unknown ServerOPcode from WebInterface 0x%04x, size %d", pack->opcode, pack->size);

@@ -1777,6 +1777,11 @@ void WorldServer::Process() {
 
 			break;
 		}
+		case ServerOP_WIServGeneric:
+		{
+									   /* Do Nothing for now */
+			break;
+		}
 		case ServerOP_CZSignalClient:
 		{
 			CZClientSignal_Struct* CZCS = (CZClientSignal_Struct*) pack->pBuffer;
