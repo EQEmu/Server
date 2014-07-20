@@ -22,6 +22,7 @@
 #include "worldserver.h"
 #include "QuestParserCollection.h"
 #include "../common/StringUtil.h"
+#include "../common/web_interface_utils.h"
 
 #include <sstream>
 #include <math.h>
@@ -1216,6 +1217,17 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 	spu->padding0014	=0x7f;
 	spu->padding0018	=0x5df27;
 
+	/* Testing */
+	if (IsNPC()){
+		std::string str = MakeJSON("ResponseType:PositionUpdate,entity:" + IntegerToString(GetID()) + ",x:" + FloatToString(x_pos) + ",y:" + FloatToString(y_pos) + ",z:" + FloatToString(z_pos) + ",h:" + FloatToString(heading));
+		char * writable = new char[str.size() + 1];
+		std::copy(str.begin(), str.end(), writable);
+		ServerPacket* wipack = new ServerPacket(ServerOP_WIWorldResponse, str.size() + 1);
+		wipack->WriteString(writable);
+		if (worldserver.Connected()) { worldserver.SendPacket(wipack); } 
+		safe_delete(wipack);
+		delete[] writable;
+	}
 }
 
 // this is for SendPosUpdate()

@@ -89,7 +89,7 @@ XS(XS_EntityList_GetMob)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetMob(name);
+		RETVAL = THIS->GetMob(name); 
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void*)RETVAL);
 	}

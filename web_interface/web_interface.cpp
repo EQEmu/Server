@@ -6,16 +6,26 @@
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/EQEmuConfig.h"
+#include "../common/web_interface_utils.h"
 #include "worldserver.h"
 #include "lib/libwebsockets.h"
 #include <signal.h>
 #include <list>
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
 volatile bool run = true;
 TimeoutManager timeout_manager;
 const EQEmuConfig *config = nullptr;
 WorldServer *worldserver = nullptr;
 libwebsocket_context *context = nullptr;
+
+struct per_session_data_eqemu {
+	bool auth;
+	std::list<std::string> *send_queue;
+};
+
+per_session_data_eqemu *globalsession = NULL;
 
 void CatchSignal(int sig_num) {
 	run = false;
@@ -40,11 +50,6 @@ int callback_http(libwebsocket_context *context, libwebsocket *wsi, libwebsocket
 	return 0;
 }
 
-struct per_session_data_eqemu {
-	bool auth;
-	std::list<std::string> *send_queue;
-};
-
 int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocket_callback_reasons reason, void *user, void *in, size_t len) {
 	per_session_data_eqemu *session = (per_session_data_eqemu*)user;
 	switch (reason) {
@@ -61,9 +66,20 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 		std::string command;
 		command.assign((const char*)in, len);
 
+		globalsession = session;
 		if(command.compare("get_version") == 0) {
 			session->send_queue->push_back("0.8.0");
 		}
+		if (command.compare("test_json") == 0) {
+			session->send_queue->push_back(MakeJSON("niggers:tits"));
+		}
+		if (command.compare("stream_test") == 0) {
+			ServerPacket* pack = new ServerPacket(ServerOP_WIServGeneric, len + 1);
+			pack->WriteString(command.c_str());
+			worldserver->SendPacket(pack);
+			safe_delete(pack);
+		}
+
 	}
 		break;
 	case LWS_CALLBACK_SERVER_WRITEABLE:

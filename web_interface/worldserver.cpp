@@ -29,7 +29,12 @@
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
 #include "worldserver.h"
+struct per_session_data_eqemu {
+	bool auth;
+	std::list<std::string> *send_queue;
+};
 
+extern per_session_data_eqemu *globalsession;
 WorldServer::WorldServer(std::string shared_key)
 : WorldConnection(EmuTCPConnection::packetModeWebInterface, shared_key.c_str()){
 	pTryReconnect = true;
@@ -54,6 +59,12 @@ void WorldServer::Process(){
 		switch(pack->opcode) {
 			case 0: { break; }
 			case ServerOP_KeepAlive: { break; }
+			case ServerOP_WIWorldResponse: {
+				char pos_update[255];
+				pack->ReadString(pos_update);
+				globalsession->send_queue->push_back(pos_update);
+				break;
+			}
 		}
 	}
 
