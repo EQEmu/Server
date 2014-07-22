@@ -7,25 +7,29 @@
 #include "../common/crash.h"
 #include "../common/EQEmuConfig.h"
 #include "../common/web_interface_utils.h"
+#include "../common/uuid.h"
 #include "worldserver.h"
 #include "lib/libwebsockets.h"
-#include <signal.h>
-#include <list>
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
+#include <signal.h>
+#include <list>
+#include <map>
+
+#define MAX_MESSAGE_LENGTH 2048
+
+struct per_session_data_eqemu {
+	bool auth;
+	std::string uuid;
+	std::list<std::string> *send_queue;
+};
 
 volatile bool run = true;
 TimeoutManager timeout_manager;
 const EQEmuConfig *config = nullptr;
 WorldServer *worldserver = nullptr;
 libwebsocket_context *context = nullptr;
-
-struct per_session_data_eqemu {
-	bool auth;
-	std::list<std::string> *send_queue;
-};
-
-per_session_data_eqemu *globalsession = NULL;
+std::map<std::string, per_session_data_eqemu*> sessions;
 
 void CatchSignal(int sig_num) {
 	run = false;
@@ -55,7 +59,10 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 	switch (reason) {
 	case LWS_CALLBACK_ESTABLISHED:
 		session->auth = false;
+		session->uuid = CreateUUID();
 		session->send_queue = new std::list<std::string>();
+		sessions[session->uuid] = session;
+		printf("Create session %s\n", session->uuid.c_str());
 		break;
 	case LWS_CALLBACK_RECEIVE: {
 
@@ -66,31 +73,21 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 		std::string command;
 		command.assign((const char*)in, len);
 
-		globalsession = session;
 		if(command.compare("get_version") == 0) {
 			session->send_queue->push_back("0.8.0");
 		}
-		if (command.compare("test_json") == 0) {
-			session->send_queue->push_back(MakeJSON("niggers:tits"));
-		}
-		if (command.compare("stream_test") == 0) {
-			ServerPacket* pack = new ServerPacket(ServerOP_WIServGeneric, len + 1);
-			pack->WriteString(command.c_str());
-			worldserver->SendPacket(pack);
-			safe_delete(pack);
-		}
-
-	}
 		break;
-	case LWS_CALLBACK_SERVER_WRITEABLE:
-		//send stuff here
+	}
+	case LWS_CALLBACK_SERVER_WRITEABLE: {
+		//send messages here
+		char out_message[MAX_MESSAGE_LENGTH + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING + 1];
 		for (auto iter = session->send_queue->begin(); iter != session->send_queue->end(); ++iter) {
+
+			//out_message
 			size_t sz = LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING + (*iter).size();
-			unsigned char *buf = new unsigned char[sz];
-			memset(buf, 0, sz);
-			memcpy(&buf[LWS_SEND_BUFFER_PRE_PADDING], &(*iter)[0], (*iter).size());
-			auto n = libwebsocket_write(wsi, &buf[LWS_SEND_BUFFER_PRE_PADDING], (*iter).size(), LWS_WRITE_TEXT);
-			delete[] buf;
+			memset(out_message, 0, sz);
+			memcpy(&out_message[LWS_SEND_BUFFER_PRE_PADDING], &(*iter)[0], (*iter).size());
+			auto n = libwebsocket_write(wsi, (unsigned char*)&out_message[LWS_SEND_BUFFER_PRE_PADDING], (*iter).size(), LWS_WRITE_TEXT);
 			if (n < (*iter).size()) {
 				//couldn't write the message
 				return -1;
@@ -98,9 +95,19 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 		}
 		session->send_queue->clear();
 		break;
+	}
 	case LWS_CALLBACK_PROTOCOL_DESTROY:
-		//clean stuff up here
-		delete session->send_queue;
+		//clean up sessions here
+		safe_delete(session->send_queue);
+		break;
+
+	case LWS_CALLBACK_CLOSED:
+		printf("Closed session %s\n", session->uuid.c_str());
+		//Session closed but perhaps not yet destroyed, we still don't want to track it though.
+		sessions.erase(session->uuid);
+		safe_delete(session->send_queue);
+		session->uuid.clear();
+		session->auth = false;
 		break;
 	default:
 		break;

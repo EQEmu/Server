@@ -64,6 +64,7 @@ SET(common_sources
 	timeoutmgr.cpp
 	timer.cpp
 	unix.cpp
+	uuid.cpp
 	worldconn.cpp
 	XMLParser.cpp
 	platform.cpp
@@ -185,6 +186,7 @@ SET(common_headers
 	timer.h
 	types.h
 	unix.h
+	uuid.h
 	useperl.h
 	version.h
 	worldconn.h
