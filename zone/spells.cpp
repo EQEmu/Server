@@ -5107,7 +5107,7 @@ bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
-	Shout("Add Ranged Proc %i %i %i", spell_id, iChance, base_spell_id);
+
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
 		if (RangedProcs[i].spellID == SPELL_UNKNOWN) {
