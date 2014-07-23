@@ -104,6 +104,15 @@ bool WebInterfaceConnection::Process()
 				zoneserver_list.SendPacket(pack); // Send to all zones to test
 				break;
 			}
+			case ServerOP_WIClientRequest:
+			{
+				std::string Data; 					
+				WI_Client_Request_Struct* WICR = (WI_Client_Request_Struct*)pack->pBuffer;
+				Data.assign(WICR->JSON_Data, pack->size - 64);
+				_log(WEB_INTERFACE__ERROR, "Recieved ServerOPcode from WebInterface 0x%04x \nSize %d\nData '%s' from client:\n%s\n", pack->opcode, pack->size, Data.c_str(), WICR->Client_UUID);
+				zoneserver_list.SendPacket(pack); // Send to all zones to test
+				break;
+			}
 			default:
 			{
 				_log(WEB_INTERFACE__ERROR, "Unknown ServerOPcode from WebInterface 0x%04x, size %d", pack->opcode, pack->size);

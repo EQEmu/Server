@@ -1320,6 +1320,7 @@ bool ZoneServer::Process() {
 			}
 			case ServerOP_WIWorldResponse:
 			{
+				_log(WEB_INTERFACE__ERROR, "ServerOP_WIWorldResponse for WebInterface 0x%04x, size %d", pack->opcode, pack->size);
 				WILink.SendPacket(pack);
 				break;
 			}

@@ -23,16 +23,23 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <list>
+#include <map>
 
 #include "../common/servertalk.h"
 #include "../common/packet_functions.h"
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
+#include "../common/web_interface_utils.h"
 #include "worldserver.h"
+
 struct per_session_data_eqemu {
 	bool auth;
+	std::string uuid;
 	std::list<std::string> *send_queue;
 };
+
+extern std::map<std::string, per_session_data_eqemu*> sessions;
 
 WorldServer::WorldServer(std::string shared_key)
 : WorldConnection(EmuTCPConnection::packetModeWebInterface, shared_key.c_str()){
@@ -59,6 +66,17 @@ void WorldServer::Process(){
 			case 0: { break; }
 			case ServerOP_KeepAlive: { break; }
 			case ServerOP_WIWorldResponse: {
+				/* Generic Response routine: web_interface server recieves packet from World - 
+					Relays data back to client
+				*/
+				_log(WEB_INTERFACE__ERROR, "WI Recieved packet from world 0x%04x, size %d", pack->opcode, pack->size);
+				WI_Client_Request_Struct* WICR = (WI_Client_Request_Struct*)pack->pBuffer;
+				std::string Data;
+				Data.assign(WICR->JSON_Data, pack->size - 64);
+				/* Check if Session is Valid before sending data back*/
+				if (sessions[WICR->Client_UUID]){
+					sessions[WICR->Client_UUID]->send_queue->push_back(Data.c_str()); 
+				}
 				break;
 			}
 		}

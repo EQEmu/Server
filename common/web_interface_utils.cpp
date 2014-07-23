@@ -29,18 +29,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 using namespace rapidjson;
 using namespace std;
 
-std::string FloatToString(float number){
-	std::ostringstream buff;
-	buff << number;
-	return buff.str();
-}
-
-std::string IntegerToString(uint32_t number){
-	std::ostringstream buff;
-	buff << number;
-	return buff.str(); 
-}
-
 std::vector<std::string> explode(std::string const & s, char delim)
 {
 	std::vector<std::string> result;

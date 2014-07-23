@@ -32,6 +32,7 @@ extern EntityList entity_list;
 
 extern Zone* zone;
 extern WorldServer worldserver;
+extern std::string WS_Client_Connected;
 
 Mob::Mob(const char* in_name,
 		const char* in_lastname,
@@ -1218,14 +1219,16 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
 	spu->padding0018	=0x5df27;
 
 	/* Testing */
-	if (IsNPC()){
-		std::string str = MakeJSON("ResponseType:PositionUpdate,entity:" + IntegerToString(GetID()) + ",x:" + FloatToString(x_pos) + ",y:" + FloatToString(y_pos) + ",z:" + FloatToString(z_pos) + ",h:" + FloatToString(heading));
+	if (IsNPC() && WS_Client_Connected.size() != 0){ 
+		std::string str = MakeJSON("ResponseType:PositionUpdate,entity:" + std::to_string(GetID()) + ",name:" + GetName() + ",x:" + std::to_string(x_pos) + ",y:" + std::to_string(y_pos) + ",z:" + std::to_string(z_pos) + ",h:" + std::to_string(heading));
 		char * writable = new char[str.size() + 1];
 		std::copy(str.begin(), str.end(), writable);
-		ServerPacket* wipack = new ServerPacket(ServerOP_WIWorldResponse, str.size() + 1);
-		wipack->WriteString(writable);
-		if (worldserver.Connected()) { worldserver.SendPacket(wipack); } 
-		safe_delete(wipack);
+		ServerPacket* pack = new ServerPacket(ServerOP_WIWorldResponse, sizeof(WI_Client_Response_Struct)+str.length() + 1);
+		WI_Client_Response_Struct* WICR = (WI_Client_Response_Struct*)pack->pBuffer;
+		strn0cpy(WICR->Client_UUID, WS_Client_Connected.c_str(), 64);
+		strn0cpy(WICR->JSON_Data, str.c_str(), str.length() + 1);
+		if (worldserver.Connected()) { worldserver.SendPacket(pack); } 
+		safe_delete(pack);
 		delete[] writable;
 	}
 }

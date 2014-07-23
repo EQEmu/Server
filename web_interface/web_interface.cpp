@@ -7,6 +7,7 @@
 #include "../common/crash.h"
 #include "../common/EQEmuConfig.h"
 #include "../common/web_interface_utils.h"
+#include "../common/StringUtil.h"
 #include "../common/uuid.h"
 #include "worldserver.h"
 #include "lib/libwebsockets.h"
@@ -62,7 +63,7 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 		session->uuid = CreateUUID();
 		session->send_queue = new std::list<std::string>();
 		sessions[session->uuid] = session;
-		printf("Create session %s\n", session->uuid.c_str());
+		printf("Created session %s\n", session->uuid.c_str());
 		break;
 	case LWS_CALLBACK_RECEIVE: {
 
@@ -76,6 +77,17 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 		if(command.compare("get_version") == 0) {
 			session->send_queue->push_back("0.8.0");
 		}
+		if (command.compare("do_pos_update") == 0){
+			printf("Sending ServerOP_WIClientRequest with session %s Command Str %s \n", session->uuid.c_str(), command.c_str());
+			/* Test Packet */
+			ServerPacket* pack = new ServerPacket(ServerOP_WIClientRequest, sizeof(WI_Client_Request_Struct) + command.length() + 1);
+			WI_Client_Request_Struct* WICR = (WI_Client_Request_Struct*)pack->pBuffer;
+			strn0cpy(WICR->Client_UUID, session->uuid.c_str(), 64);
+			strn0cpy(WICR->JSON_Data, command.c_str(), command.length() + 1); 
+			worldserver->SendPacket(pack);
+			safe_delete(pack);
+		}
+
 		break;
 	}
 	case LWS_CALLBACK_SERVER_WRITEABLE: {

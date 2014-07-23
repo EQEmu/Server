@@ -26,11 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <vector>
 #include <utility>
 
-std::string FloatToString(float number);
-std::string IntegerToString(uint32_t number);
-std::vector<std::string> explode(std::string const & s, char delim);
 std::string MakeJSON(std::string json);
-
 
 #endif
 

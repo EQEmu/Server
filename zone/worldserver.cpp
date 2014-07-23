@@ -62,6 +62,7 @@ extern NetConnection net;
 extern PetitionList petition_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
+extern std::string WS_Client_Connected;
 
 WorldServer::WorldServer()
 : WorldConnection(EmuTCPConnection::packetModeZone)
@@ -1777,11 +1778,13 @@ void WorldServer::Process() {
 
 			break;
 		}
-		case ServerOP_WIServGeneric:
+		case ServerOP_WIClientRequest:
 		{
-									   /* Do Nothing for now */
+			WI_Client_Request_Struct* WICR = (WI_Client_Request_Struct*)pack->pBuffer;
+			WS_Client_Connected = WICR->Client_UUID;
+			_log(WEB_INTERFACE__ERROR, "Recieved packet from World, setting Client Connected to %s", WICR->Client_UUID);
 			break;
-		}
+		} 
 		case ServerOP_CZSignalClient:
 		{
 			CZClientSignal_Struct* CZCS = (CZClientSignal_Struct*) pack->pBuffer;
