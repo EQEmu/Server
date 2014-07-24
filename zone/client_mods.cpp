@@ -1967,7 +1967,7 @@ int32 Client::CalcEnduranceRegenCap() {
 
 int Client::GetRawACNoShield(int &shield_ac) const
 {
-	int ac = itembonuses.AC + spellbonuses.AC;
+	int ac = itembonuses.AC + spellbonuses.AC + aabonuses.AC;
 	shield_ac = 0;
 	const ItemInst *inst = m_inv.GetItem(MainSecondary);
 	if(inst)
