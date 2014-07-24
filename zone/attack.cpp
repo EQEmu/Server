@@ -566,15 +566,15 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 
 			if (!IsPet())
 				armor = (armor / RuleR(Combat, NPCACFactor));
-			else{
-				Mob *owner = nullptr;
+
+			Mob *owner = nullptr;
+			if (IsPet()) 
 				owner = GetOwner();
-				if (owner){
-					PetACBonus = owner->aabonuses.PetMeleeMitigation 
-					+ owner->itembonuses.PetMeleeMitigation + 
-					owner->spellbonuses.PetMeleeMitigation;
-				}
-			}
+			else if ((CastToNPC()->GetSwarmOwner()))
+				owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+
+			if (owner)
+				PetACBonus = owner->aabonuses.PetMeleeMitigation + owner->itembonuses.PetMeleeMitigation + owner->spellbonuses.PetMeleeMitigation;
 
 			armor += spellbonuses.AC + itembonuses.AC + PetACBonus + 1;
 		}
