@@ -1376,6 +1376,10 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				break;
 			}
 
+			case SE_MeleeMitigation:
+				newbon->MeleeMitigationEffect -= base1;
+				break;
+
 		}
 	}
 }
@@ -1796,7 +1800,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_MeleeMitigation:
 				//for some reason... this value is negative for increased mitigation
-				newbon->MeleeMitigation -= effect_value;
+				newbon->MeleeMitigationEffect -= effect_value;
 				break;
 
 			case SE_CriticalHitChance:
@@ -3594,9 +3598,9 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_MeleeMitigation:
-					spellbonuses.MeleeMitigation = effect_value;
-					itembonuses.MeleeMitigation = effect_value;
-					aabonuses.MeleeMitigation = effect_value;
+					spellbonuses.MeleeMitigationEffect = effect_value;
+					itembonuses.MeleeMitigationEffect = effect_value;
+					aabonuses.MeleeMitigationEffect = effect_value;
 					break;
 
 				case SE_CriticalHitChance:

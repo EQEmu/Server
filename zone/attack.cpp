@@ -715,7 +715,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		//reduce the damage from shielding item and aa based on the min dmg
 		//spells offer pure mitigation
 		damage -= (minhit * defender->itembonuses.MeleeMitigation / 100);
-		damage -= (damage * defender->spellbonuses.MeleeMitigation / 100);
+		damage -= (damage * (defender->spellbonuses.MeleeMitigationEffect + defender->itembonuses.MeleeMitigationEffect + defender->aabonuses.MeleeMitigationEffect) / 100);
 	}
 
 	if (damage < 0)
@@ -757,7 +757,7 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	damage -= ((int)d * interval);
 
 	damage -= (minhit * itembonuses.MeleeMitigation / 100);
-	damage -= (damage * spellbonuses.MeleeMitigation / 100);
+	damage -= (damage *  (spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect + aabonuses.MeleeMitigationEffect) / 100);
 	return damage;
 }
 
@@ -771,7 +771,7 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	// floats for the rounding issues
 	float dmg_interval = (damage - minhit) / 19.0;
 	float dmg_bonus = minhit - dmg_interval;
-	float spellMeleeMit = spellbonuses.MeleeMitigation / 100.0;
+	float spellMeleeMit =  (spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect + aabonuses.MeleeMitigationEffect) / 100.0;
 	if (GetClass() == WARRIOR)
 		spellMeleeMit += 0.05;
 	dmg_bonus -= dmg_bonus * (itembonuses.MeleeMitigation / 100.0);

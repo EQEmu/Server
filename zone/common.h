@@ -266,6 +266,7 @@ struct StatBonuses {
 
 	int16	StrikeThrough;						// PoP: Strike Through %
 	int16	MeleeMitigation;					//i = Shielding
+	int16	MeleeMitigationEffect;				//i = Spell Effect Melee Mitigation
 	int16	CriticalHitChance[HIGHEST_SKILL+2];	//i
 	int16	CriticalSpellChance;				//i
 	int16	SpellCritDmgIncrease;				//i
