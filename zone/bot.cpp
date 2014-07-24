@@ -7735,10 +7735,10 @@ int16 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 }
 
 //proc chance includes proc bonus
-float Bot::GetProcChances(float ProcBonus, uint16 weapon_speed, uint16 hand) {
+float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 	int mydex = GetDEX();
 	float ProcChance = 0.0f;
-
+	uint16 weapon_speed = 0;
 	switch (hand) {
 		case MainPrimary:
 			weapon_speed = attack_timer.GetDuration();

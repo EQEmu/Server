@@ -194,6 +194,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	}
 
 	accuracy_rating = d->accuracy_rating;
+	avoidance_rating = d->avoidance_rating;
 	ATK = d->ATK;
 
 	CalcMaxMana();
@@ -259,9 +260,11 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	d_meele_texture1 = d->d_meele_texture1;
 	d_meele_texture2 = d->d_meele_texture2;
+	ammo_idfile = d->ammo_idfile;
 	memset(equipment, 0, sizeof(equipment));
 	prim_melee_type = d->prim_melee_type;
 	sec_melee_type = d->sec_melee_type;
+	ranged_type = d->ranged_type;
 
 	// If Melee Textures are not set, set attack type to Hand to Hand as default
 	if(!d_meele_texture1)
@@ -1922,6 +1925,12 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	if(id == "accuracy")
 	{
 		accuracy_rating = atoi(val.c_str());
+		return;
+	}
+
+	if(id == "avoidance")
+	{
+		avoidance_rating = atoi(val.c_str());
 		return;
 	}
 

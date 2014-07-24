@@ -73,6 +73,22 @@ struct AISpellsEffects_Struct {
 	int32	max;	
 };
 
+struct AISpellsVar_Struct {
+	uint32  fail_recast;
+	uint32	engaged_no_sp_recast_min;
+	uint32	engaged_no_sp_recast_max;
+	uint8	engaged_beneficial_self_chance;
+	uint8	engaged_beneficial_other_chance;
+	uint8	engaged_detrimental_chance;
+	uint32  pursue_no_sp_recast_min;
+	uint32  pursue_no_sp_recast_max;
+	uint8   pursue_detrimental_chance;
+	uint32  idle_no_sp_recast_min;
+	uint32  idle_no_sp_recast_max;
+	uint8	idle_beneficial_chance;
+}; 
+
+
 class AA_SwarmPetInfo;
 
 class NPC : public Mob
@@ -215,8 +231,10 @@ public:
 
 	uint8 GetPrimSkill()	const { return prim_melee_type; }
 	uint8 GetSecSkill()	const { return sec_melee_type; }
+	uint8 GetRangedSkill() const { return ranged_type; }
 	void SetPrimSkill(uint8 skill_type)	{ prim_melee_type = skill_type; }
 	void SetSecSkill(uint8 skill_type)	{ sec_melee_type = skill_type; }
+	void SetRangedSkill(uint8 skill_type)	{ ranged_type = skill_type; }
 
 	uint32	MerchantType;
 	bool	merchant_open;
@@ -257,6 +275,7 @@ public:
 	void	CheckSignal();
 	inline bool IsTargetableWithHotkey() const { return no_target_hotkey; }
 	int32 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
+	inline const char* GetAmmoIDfile() const { return ammo_idfile; }
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }
@@ -314,6 +333,8 @@ public:
 
 	int32	GetAccuracyRating() const { return (accuracy_rating); }
 	void	SetAccuracyRating(int32 d) { accuracy_rating = d;}
+	int32	GetAvoidanceRating() const { return (avoidance_rating); }
+	void	SetAvoidanceRating(int32 d) { avoidance_rating = d;}
 	int32 GetRawAC() const { return AC; }
 
 	void	ModifyNPCStat(const char *identifier, const char *newValue);
@@ -413,14 +434,16 @@ protected:
 	bool HasAISpell;
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
+	AISpellsVar_Struct AISpellVar;
 	
 	uint32	npc_spells_effects_id;
 	std::vector<AISpellsEffects_Struct> AIspellsEffects;
 	bool HasAISpellEffects;
-	
+
 	uint32	max_dmg;
 	uint32	min_dmg;
 	int32	accuracy_rating;
+	int32	avoidance_rating;
 	int16	attack_count;
 	uint32	npc_mana;
 	float	spellscale;
@@ -454,11 +477,15 @@ protected:
 	uint32 roambox_min_delay;
 
 	uint16	skills[HIGHEST_SKILL+1];
+
 	uint32	equipment[EmuConstants::EQUIPMENT_SIZE];	//this is an array of item IDs
-	uint16	d_meele_texture1;							//this is an item Material value
-	uint16	d_meele_texture2;							//this is an item Material value (offhand)
-	uint8	prim_melee_type;							//Sets the Primary Weapon attack message and animation
-	uint8	sec_melee_type;								//Sets the Secondary Weapon attack message and animation
+	uint16	d_meele_texture1;			//this is an item Material value
+	uint16	d_meele_texture2;			//this is an item Material value (offhand)
+	const char*	ammo_idfile;			//this determines projectile graphic "IT###" (see item field 'idfile')
+	uint8	prim_melee_type;			//Sets the Primary Weapon attack message and animation
+	uint8	sec_melee_type;				//Sets the Secondary Weapon attack message and animation
+	uint8   ranged_type;				//Sets the Ranged Weapon attack message and animation
+
 	AA_SwarmPetInfo *swarmInfoPtr;
 
 	bool ldon_trapped;

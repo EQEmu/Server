@@ -202,7 +202,8 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	if (chance_mod >= 10000)
 	    return true;
 
-	float bonus;
+	float avoidanceBonus = 0;
+	float hitBonus = 0;
 
 	////////////////////////////////////////////////////////
 	// To hit calcs go here
@@ -214,6 +215,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	//Calculate the level difference
 
 	mlog(COMBAT__TOHIT, "Chance to hit before level diff calc %.2f", chancetohit);
+
 	double level_difference = attacker_level - defender_level;
 	double range = defender->GetLevel();
 	range = ((range / 4) + 3);
@@ -268,37 +270,32 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 		mlog(COMBAT__TOHIT, "Applied item melee skill bonus %d, yeilding %.2f", attacker->spellbonuses.MeleeSkillCheck, chancetohit);
 	}
 
-	//subtract off avoidance by the defender. (Live AA - Combat Agility)
-	bonus = defender->spellbonuses.AvoidMeleeChance + defender->itembonuses.AvoidMeleeChance + (defender->aabonuses.AvoidMeleeChance * 10);
+	//Avoidance Bonuses on defender decreases baseline hit chance by percent.
+	avoidanceBonus = defender->spellbonuses.AvoidMeleeChanceEffect + 
+				defender->itembonuses.AvoidMeleeChanceEffect + 
+				defender->aabonuses.AvoidMeleeChanceEffect +
+				(defender->itembonuses.AvoidMeleeChance / 10.0f); //Item Mod 'Avoidence'
 
-	//AA Live - Elemental Agility
-	if (IsPet()) {
-		Mob *owner = defender->GetOwner();
-		if (!owner)return false;
-		bonus += (owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance)*10;
-	}
+	Mob *owner = nullptr;
+	if (defender->IsPet()) 
+		owner = defender->GetOwner();
+	else if ((defender->IsNPC() && defender->CastToNPC()->GetSwarmOwner()))
+		owner = entity_list.GetMobID(defender->CastToNPC()->GetSwarmOwner());
+		
+	if (owner)
+		avoidanceBonus += owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
 
-	if(bonus > 0) {
-		chancetohit -= ((bonus * chancetohit) / 1000);
-		mlog(COMBAT__TOHIT, "Applied avoidance chance %.2f/10, yeilding %.2f", bonus, chancetohit);
-	}
+	if(defender->IsNPC()) 
+		avoidanceBonus += (defender->CastToNPC()->GetAvoidanceRating() / 10.0f); //Modifier from database
 
-	if(attacker->IsNPC())
-		chancetohit += (chancetohit * attacker->CastToNPC()->GetAccuracyRating() / 1000);
-
-	mlog(COMBAT__TOHIT, "Chance to hit after accuracy rating calc %.2f", chancetohit);
-
-	float hitBonus = 0;
-
-	/*
-	Kayen: Unknown if the HitChance and Accuracy effect's should modify 'chancetohit'
-	cumulatively or successively. For now all hitBonuses are cumulative.
-	*/
-
+	//Hit Chance Bonuses on attacker increases baseline hit chance by percent.
 	hitBonus +=	attacker->itembonuses.HitChanceEffect[skillinuse] +
 				attacker->spellbonuses.HitChanceEffect[skillinuse]+
+				attacker->aabonuses.HitChanceEffect[skillinuse]+
 				attacker->itembonuses.HitChanceEffect[HIGHEST_SKILL+1] +
-				attacker->spellbonuses.HitChanceEffect[HIGHEST_SKILL+1];
+				attacker->spellbonuses.HitChanceEffect[HIGHEST_SKILL+1] +
+				attacker->aabonuses.HitChanceEffect[HIGHEST_SKILL+1];
+
 
 	//Accuracy = Spell Effect , HitChance = 'Accuracy' from Item Effect
 	//Only AA derived accuracy can be skill limited. ie (Precision of the Pathfinder, Dead Aim)
@@ -306,26 +303,31 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 				attacker->spellbonuses.Accuracy[HIGHEST_SKILL+1] +
 				attacker->aabonuses.Accuracy[HIGHEST_SKILL+1] +
 				attacker->aabonuses.Accuracy[skillinuse] +
-				attacker->itembonuses.HitChance) / 15.0f;
+				attacker->itembonuses.HitChance) / 15.0f; //Item Mod 'Accuracy'
 
 	hitBonus += chance_mod; //Modifier applied from casted/disc skill attacks.
 
-	chancetohit += ((chancetohit * hitBonus) / 100.0f);
-
+	if(attacker->IsNPC())
+		hitBonus += (attacker->CastToNPC()->GetAccuracyRating() / 10.0f); //Modifier from database
+	
 	if(skillinuse == SkillArchery)
-		chancetohit -= (chancetohit * RuleR(Combat, ArcheryHitPenalty)) / 100.0f;
+		hitBonus -= hitBonus*(RuleR(Combat, ArcheryHitPenalty)*100.0f);
+
+	//Calculate final chance to hit
+	chancetohit += ((chancetohit * (hitBonus - avoidanceBonus)) / 100.0f);
+	mlog(COMBAT__TOHIT, "Chance to hit %.2f after accuracy calc %.2f and avoidance calc %.2f", chancetohit, hitBonus, avoidanceBonus);
 
 	chancetohit = mod_hit_chance(chancetohit, skillinuse, attacker);
 
-	// Chance to hit;   Max 95%, Min 30%
+	// Chance to hit;   Max 95%, Min 5% DEFAULTS
 	if(chancetohit > 1000 || chancetohit < -1000) {
 		//if chance to hit is crazy high, that means a discipline is in use, and let it stay there
 	}
-	else if(chancetohit > 95) {
-		chancetohit = 95;
+	else if(chancetohit > RuleR(Combat,MaxChancetoHit)) {
+		chancetohit = RuleR(Combat,MaxChancetoHit);
 	}
-	else if(chancetohit < 5) {
-		chancetohit = 5;
+	else if(chancetohit < RuleR(Combat,MinChancetoHit)) {
+		chancetohit = RuleR(Combat,MinChancetoHit);
 	}
 	
 	//I dont know the best way to handle a garunteed hit discipline being used
@@ -564,15 +566,15 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 
 			if (!IsPet())
 				armor = (armor / RuleR(Combat, NPCACFactor));
-			else{
-				Mob *owner = nullptr;
+
+			Mob *owner = nullptr;
+			if (IsPet()) 
 				owner = GetOwner();
-				if (owner){
-					PetACBonus = owner->aabonuses.PetMeleeMitigation 
-					+ owner->itembonuses.PetMeleeMitigation + 
-					owner->spellbonuses.PetMeleeMitigation;
-				}
-			}
+			else if ((CastToNPC()->GetSwarmOwner()))
+				owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+
+			if (owner)
+				PetACBonus = owner->aabonuses.PetMeleeMitigation + owner->itembonuses.PetMeleeMitigation + owner->spellbonuses.PetMeleeMitigation;
 
 			armor += spellbonuses.AC + itembonuses.AC + PetACBonus + 1;
 		}
@@ -713,7 +715,7 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 		//reduce the damage from shielding item and aa based on the min dmg
 		//spells offer pure mitigation
 		damage -= (minhit * defender->itembonuses.MeleeMitigation / 100);
-		damage -= (damage * defender->spellbonuses.MeleeMitigation / 100);
+		damage -= (damage * (defender->spellbonuses.MeleeMitigationEffect + defender->itembonuses.MeleeMitigationEffect + defender->aabonuses.MeleeMitigationEffect) / 100);
 	}
 
 	if (damage < 0)
@@ -755,7 +757,7 @@ int32 Mob::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	damage -= ((int)d * interval);
 
 	damage -= (minhit * itembonuses.MeleeMitigation / 100);
-	damage -= (damage * spellbonuses.MeleeMitigation / 100);
+	damage -= (damage *  (spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect + aabonuses.MeleeMitigationEffect) / 100);
 	return damage;
 }
 
@@ -769,7 +771,7 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 	// floats for the rounding issues
 	float dmg_interval = (damage - minhit) / 19.0;
 	float dmg_bonus = minhit - dmg_interval;
-	float spellMeleeMit = spellbonuses.MeleeMitigation / 100.0;
+	float spellMeleeMit =  (spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect + aabonuses.MeleeMitigationEffect) / 100.0;
 	if (GetClass() == WARRIOR)
 		spellMeleeMit += 0.05;
 	dmg_bonus -= dmg_bonus * (itembonuses.MeleeMitigation / 100.0);
@@ -1297,11 +1299,9 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		} else {	//we hit, try to avoid it
 			other->AvoidDamage(this, damage);
 			other->MeleeMitigation(this, damage, min_hit, opts);
-			if(damage > 0) {
-				ApplyMeleeDamageBonus(skillinuse, damage);
-				damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
-				TryCriticalHit(other, skillinuse, damage, opts);
-			}
+			if(damage > 0) 
+				CommonOutgoingHitSuccess(other, damage, skillinuse);
+			
 			mlog(COMBAT__DAMAGE, "Final damage after all reductions: %d", damage);
 		}
 
@@ -1365,39 +1365,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			TrySkillProc(other, skillinuse, 0, true, Hand);
 	}
 
-	//break invis when you attack
-	if(invisible) {
-		mlog(COMBAT__ATTACKS, "Removing invisibility due to melee attack.");
-		BuffFadeByEffect(SE_Invisibility);
-		BuffFadeByEffect(SE_Invisibility2);
-		invisible = false;
-	}
-	if(invisible_undead) {
-		mlog(COMBAT__ATTACKS, "Removing invisibility vs. undead due to melee attack.");
-		BuffFadeByEffect(SE_InvisVsUndead);
-		BuffFadeByEffect(SE_InvisVsUndead2);
-		invisible_undead = false;
-	}
-	if(invisible_animals){
-		mlog(COMBAT__ATTACKS, "Removing invisibility vs. animals due to melee attack.");
-		BuffFadeByEffect(SE_InvisVsAnimals);
-		invisible_animals = false;
-	}
-
-	if (spellbonuses.NegateIfCombat)
-		BuffFadeByEffect(SE_NegateIfCombat);
-
-	if(hidden || improved_hidden){
-		hidden = false;
-		improved_hidden = false;
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = GetID();
-		sa_out->type = 0x03;
-		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
-		safe_delete(outapp);
-	}
+	CommonBreakInvisible();
 
 	if(GetTarget())
 		TriggerDefensiveProcs(weapon, other, Hand, damage);
@@ -1933,16 +1901,12 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 				other->AvoidDamage(this, damage);
 				other->MeleeMitigation(this, damage, min_dmg+eleBane, opts);
 				if(damage > 0) {
-					ApplyMeleeDamageBonus(skillinuse, damage);
-					damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
-					TryCriticalHit(other, skillinuse, damage, opts);
+					CommonOutgoingHitSuccess(other, damage, skillinuse);
 				}
 				mlog(COMBAT__HITS, "Generating hate %d towards %s", hate, GetName());
 				// now add done damage to the hate list
 				if(damage > 0)
-				{
 					other->AddToHateList(this, hate);
-				}
 				else
 					other->AddToHateList(this, 0);
 			}
@@ -1964,10 +1928,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		return false;
 	}
 
-	int16 DeathHP = 0;
-	DeathHP = other->GetDelayDeath() * -1;
-
-	if(GetHP() > 0 && other->GetHP() >= DeathHP) {
+	if(GetHP() > 0 && !other->HasDied()) {
 		other->Damage(this, damage, SPELL_UNKNOWN, skillinuse, false); // Not avoidable client already had thier chance to Avoid
 	} else
 		return false;
@@ -1977,59 +1938,24 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	MeleeLifeTap(damage);
 	
-	if (damage > 0)
-		CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
-
-	//break invis when you attack
-	if(invisible) {
-		mlog(COMBAT__ATTACKS, "Removing invisibility due to melee attack.");
-		BuffFadeByEffect(SE_Invisibility);
-		BuffFadeByEffect(SE_Invisibility2);
-		invisible = false;
-	}
-	if(invisible_undead) {
-		mlog(COMBAT__ATTACKS, "Removing invisibility vs. undead due to melee attack.");
-		BuffFadeByEffect(SE_InvisVsUndead);
-		BuffFadeByEffect(SE_InvisVsUndead2);
-		invisible_undead = false;
-	}
-	if(invisible_animals){
-		mlog(COMBAT__ATTACKS, "Removing invisibility vs. animals due to melee attack.");
-		BuffFadeByEffect(SE_InvisVsAnimals);
-		invisible_animals = false;
-	}
-
-	if (spellbonuses.NegateIfCombat)
-		BuffFadeByEffect(SE_NegateIfCombat);
-
-	if(hidden || improved_hidden)
-	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = GetID();
-		sa_out->type = 0x03;
-		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
-		safe_delete(outapp);
-	}
-
-
-	hidden = false;
-	improved_hidden = false;
+	CommonBreakInvisible();
 
 	//I doubt this works...
 	if (!GetTarget())
 		return true; //We killed them
 
-	if(!bRiposte && other && other->GetHP() > 0) {
+	if(!bRiposte && !other->HasDied()) {
 		TryWeaponProc(nullptr, weapon, other, Hand);	//no weapon
-		TrySpellProc(nullptr, weapon, other, Hand);
 		
-		if (damage > 0 && HasSkillProcSuccess())
+		if (!other->HasDied())
+			TrySpellProc(nullptr, weapon, other, Hand);
+		
+		if (damage > 0 && HasSkillProcSuccess() && !other->HasDied())
 			TrySkillProc(other, skillinuse, 0, true, Hand);
 	}
 
-	TriggerDefensiveProcs(nullptr, other, Hand, damage);
+	if(GetHP() > 0 && !other->HasDied()) 
+		TriggerDefensiveProcs(nullptr, other, Hand, damage);
 
 	// now check ripostes
 	if (damage == -3) { // riposting
@@ -3923,12 +3849,12 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 }
 
 //proc chance includes proc bonus
-float Mob::GetProcChances(float ProcBonus, uint16 weapon_speed, uint16 hand)
+float Mob::GetProcChances(float ProcBonus, uint16 hand)
 {
 	int mydex = GetDEX();
 	float ProcChance = 0.0f;
 
-	weapon_speed = GetWeaponSpeedbyHand(hand);
+	uint16 weapon_speed = GetWeaponSpeedbyHand(hand);
 
 	if (RuleB(Combat, AdjustProcPerMinute)) {
 		ProcChance = (static_cast<float>(weapon_speed) *
@@ -3945,12 +3871,16 @@ float Mob::GetProcChances(float ProcBonus, uint16 weapon_speed, uint16 hand)
 	return ProcChance;
 }
 
-float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed, uint16 hand) {
-	int myagi = GetAGI();
+float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand, Mob* on) {
+	
+	if (!on)
+		return ProcChance;
+
+	int myagi = on->GetAGI();
 	ProcBonus = 0;
 	ProcChance = 0;
 
-	weapon_speed = GetWeaponSpeedbyHand(hand);
+	uint16 weapon_speed = GetWeaponSpeedbyHand(hand);
 
 	ProcChance = (static_cast<float>(weapon_speed) * RuleR(Combat, AvgDefProcsPerMinute) / 60000.0f); // compensate for weapon_speed being in ms
 	ProcBonus += static_cast<float>(myagi) * RuleR(Combat, DefProcPerMinAgiContrib) / 100.0f;
@@ -3960,7 +3890,7 @@ float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 w
 	return ProcChance;
 }
 
-void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int damage) {
+void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
 
 	if (!on) {
 		SetTarget(nullptr);
@@ -3974,10 +3904,8 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 		return;
 
 	float ProcChance, ProcBonus;
-	if(weapon!=nullptr)
-		on->GetDefensiveProcChances(ProcBonus, ProcChance, weapon->GetItem()->Delay, hand);
-	else
-		on->GetDefensiveProcChances(ProcBonus, ProcChance);
+	on->GetDefensiveProcChances(ProcBonus, ProcChance, hand , this);
+
 	if(hand != 13)
 		ProcChance /= 2;
 
@@ -4035,7 +3963,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 	float ProcBonus = static_cast<float>(aabonuses.ProcChanceSPA +
 			spellbonuses.ProcChanceSPA + itembonuses.ProcChanceSPA);
 	ProcBonus += static_cast<float>(itembonuses.ProcChance) / 10.0f; // Combat Effects
-	float ProcChance = GetProcChances(ProcBonus, weapon->Delay, hand);
+	float ProcChance = GetProcChances(ProcBonus, hand);
 
 	if (hand != 13) //Is Archery intened to proc at 50% rate?
 		ProcChance /= 2;
@@ -4113,10 +4041,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 	float ProcBonus = static_cast<float>(spellbonuses.SpellProcChance +
 			itembonuses.SpellProcChance + aabonuses.SpellProcChance);
 	float ProcChance = 0.0f;
-	if (weapon)
-		ProcChance = GetProcChances(ProcBonus, weapon->Delay, hand);
-	else
-		ProcChance = GetProcChances(ProcBonus);
+	ProcChance = GetProcChances(ProcBonus, hand);
 
 	if (hand != MainPrimary) //Is Archery intened to proc at 50% rate?
 		ProcChance /= 2;
@@ -4129,6 +4054,9 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 				weapon->ItemType == ItemTypeBow)
 			rangedattk = true;
 	}
+
+	if (!weapon && hand == 11 && GetSpecialAbility(SPECATK_RANGED_ATK))
+		rangedattk = true;
 
 	for (uint32 i = 0; i < MAX_PROCS; i++) {
 		if (IsPet() && hand != MainPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
@@ -4152,7 +4080,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 
 			// Spell procs (buffs)
 			if (SpellProcs[i].spellID != SPELL_UNKNOWN) {
-				float chance = ProcChance * (SpellProcs[i].chance / 100.0f);
+				float chance = ProcChance * (static_cast<float>(SpellProcs[i].chance) / 100.0f);
 				if (MakeRandomFloat(0, 1) <= chance) {
 					mlog(COMBAT__PROCS,
 							"Spell proc %d procing spell %d (%.2f percent chance)",
@@ -4168,8 +4096,8 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 		} else if (rangedattk) { // ranged only
 			// ranged spell procs (buffs)
 			if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
-				float chance = ProcChance * (RangedProcs[i].chance / 100.0f);
-				if (MakeRandomFloat(0, 1) <= chance) {
+				float chance = ProcChance * (static_cast<float>(RangedProcs[i].chance) / 100.0f);
+					if (MakeRandomFloat(0, 1) <= chance) {
 					mlog(COMBAT__PROCS,
 							"Ranged proc %d procing spell %d (%.2f percent chance)",
 							i, RangedProcs[i].spellID, chance);
@@ -4820,3 +4748,56 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 	return damage;
 }
 
+void Mob::CommonOutgoingHitSuccess(Mob* defender, int32 &damage, SkillUseTypes skillInUse)
+{
+	if (!defender) 
+		return;
+
+	ApplyMeleeDamageBonus(skillInUse, damage);
+	damage += (damage * defender->GetSkillDmgTaken(skillInUse) / 100) + (GetSkillDmgAmt(skillInUse) + defender->GetFcDamageAmtIncoming(this, 0, true, skillInUse));
+	TryCriticalHit(defender, skillInUse, damage);
+	CheckNumHitsRemaining(NUMHIT_OutgoingHitSuccess);
+}
+
+void Mob::CommonBreakInvisible()
+{
+	//break invis when you attack
+	if(invisible) {
+		mlog(COMBAT__ATTACKS, "Removing invisibility due to melee attack.");
+		BuffFadeByEffect(SE_Invisibility);
+		BuffFadeByEffect(SE_Invisibility2);
+		invisible = false;
+	}
+	if(invisible_undead) {
+		mlog(COMBAT__ATTACKS, "Removing invisibility vs. undead due to melee attack.");
+		BuffFadeByEffect(SE_InvisVsUndead);
+		BuffFadeByEffect(SE_InvisVsUndead2);
+		invisible_undead = false;
+	}
+	if(invisible_animals){
+		mlog(COMBAT__ATTACKS, "Removing invisibility vs. animals due to melee attack.");
+		BuffFadeByEffect(SE_InvisVsAnimals);
+		invisible_animals = false;
+	}
+
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
+
+	if(hidden || improved_hidden){
+		hidden = false;
+		improved_hidden = false;
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+		sa_out->spawn_id = GetID();
+		sa_out->type = 0x03;
+		sa_out->parameter = 0;
+		entity_list.QueueClients(this, outapp, true);
+		safe_delete(outapp);
+	}
+
+	if (spellbonuses.NegateIfCombat)
+		BuffFadeByEffect(SE_NegateIfCombat);
+
+	hidden = false;
+	improved_hidden = false;
+}

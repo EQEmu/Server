@@ -1067,8 +1067,10 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.npc_spells_effects_id,"
 			"npc_types.d_meele_texture1,"
 			"npc_types.d_meele_texture2,"
+			"npc_types.ammo_idfile,"
 			"npc_types.prim_melee_type,"
 			"npc_types.sec_melee_type,"
+			"npc_types.ranged_type,"
 			"npc_types.runspeed,"
 			"npc_types.findable,"
 			"npc_types.trackable,"
@@ -1103,6 +1105,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 			"npc_types.see_improved_hide,"
 			"npc_types.ATK,"
 			"npc_types.Accuracy,"
+			"npc_types.Avoidance,"
 			"npc_types.slow_mitigation,"
 			"npc_types.maxlevel,"
 			"npc_types.scalerate,"
@@ -1166,8 +1169,10 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->npc_spells_effects_id = atoi(row[r++]);
 				tmpNPCType->d_meele_texture1 = atoi(row[r++]);
 				tmpNPCType->d_meele_texture2 = atoi(row[r++]);
+				strn0cpy(tmpNPCType->ammo_idfile, row[r++], 30);
 				tmpNPCType->prim_melee_type = atoi(row[r++]);
 				tmpNPCType->sec_melee_type = atoi(row[r++]);
+				tmpNPCType->ranged_type = atoi(row[r++]);
 				tmpNPCType->runspeed= atof(row[r++]);
 				tmpNPCType->findable = atoi(row[r++]) == 0? false : true;
 				tmpNPCType->trackable = atoi(row[r++]) == 0? false : true;
@@ -1286,6 +1291,7 @@ const NPCType* ZoneDatabase::GetNPCType (uint32 id) {
 				tmpNPCType->see_improved_hide = atoi(row[r++])==0?false:true;
 				tmpNPCType->ATK = atoi(row[r++]);
 				tmpNPCType->accuracy_rating = atoi(row[r++]);
+				tmpNPCType->avoidance_rating = atoi(row[r++]);
 				tmpNPCType->slow_mitigation = atoi(row[r++]);
 				tmpNPCType->maxlevel = atoi(row[r++]);
 				tmpNPCType->scalerate = atoi(row[r++]);

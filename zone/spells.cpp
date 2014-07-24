@@ -5018,7 +5018,7 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 
 		for (int i = 0; i < MAX_PROCS; i++){
 			if (PermaProcs[i].spellID == spell_id || SpellProcs[i].spellID == spell_id 
-				|| SkillProcs[i].spellID == spell_id || RangedProcs[i].spellID == spell_id){
+				 || RangedProcs[i].spellID == spell_id){
 				return true;
 			}
 		}
@@ -5075,7 +5075,7 @@ bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id
 {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
-
+	
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
 		if (DefensiveProcs[i].spellID == SPELL_UNKNOWN) {

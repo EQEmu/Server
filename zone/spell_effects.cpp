@@ -5765,8 +5765,6 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 	int value = 0;
 
 	if (spellbonuses.FocusEffects[type]){
-		uint32 buff_count = GetMaxTotalSlots();
-		for(int i = 0; i < buff_count; i++){
 
 			int32 tmp_focus = 0;
 			int tmp_buffslot = -1;
@@ -5799,7 +5797,7 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 				CheckNumHitsRemaining(NUMHIT_MatchingSpells, tmp_buffslot);
 		}
 
-	}
+	
 	return value;
 }
 

@@ -150,6 +150,9 @@ public:
 	bool CombatRange(Mob* other);
 	virtual inline bool IsBerserk() { return false; } // only clients
 	void RogueEvade(Mob *other);
+	void CommonOutgoingHitSuccess(Mob* defender, int32 &damage, SkillUseTypes skillInUse);
+	void CommonBreakInvisible();
+	bool HasDied();
 
 	//Appearance
 	void SendLevelAppearance();
@@ -164,7 +167,7 @@ public:
 	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color);
 	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void ProjectileAnimation(Mob* to, int item_id, bool IsArrow = false, float speed = 0,
-		float angle = 0, float tilt = 0, float arc = 0, const char *IDFile = nullptr);
+		float angle = 0, float tilt = 0, float arc = 0, const char *IDFile = nullptr, SkillUseTypes skillInUse = SkillArchery);
 	void ChangeSize(float in_size, bool bNoRestriction = false);
 	inline uint8 SeeInvisible() const { return see_invis; }
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
@@ -480,6 +483,7 @@ public:
 	static uint32 RandomTimer(int min, int max);
 	static uint8 GetDefaultGender(uint16 in_race, uint8 in_gender = 0xFF);
 	uint16 GetSkillByItemType(int ItemType);
+	uint8 GetItemTypeBySkill(SkillUseTypes skill);
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
 	virtual void MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname = nullptr, float in_size = 0.0f);
 	bool IsWarriorClass() const;
@@ -819,7 +823,7 @@ public:
 	void SetNextIncHPEvent( int inchpevent );
 
 	inline bool DivineAura() const { return spellbonuses.DivineAura; }
-	inline bool Sanctuary() const { return spellbonuses.Sanctuary; }
+ 	inline bool Sanctuary() const { return spellbonuses.Sanctuary; }
 
 	bool HasNPCSpecialAtk(const char* parse);
 	int GetSpecialAbility(int ability);
@@ -989,13 +993,13 @@ protected:
 	void TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success = false, uint16 hand = 0, bool IsDefensive = false);
 	bool PassLimitToSkill(uint16 spell_id, uint16 skill);
 	bool PassLimitClass(uint32 Classes_, uint16 Class_);
-	void TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand = 13, int damage=0);
+	void TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand = 13);
 	void TryWeaponProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = 13);
 	void TrySpellProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = 13);
 	void TryWeaponProc(const ItemInst* weapon, Mob *on, uint16 hand = 13);
 	void ExecWeaponProc(const ItemInst* weapon, uint16 spell_id, Mob *on);
-	virtual float GetProcChances(float ProcBonus, uint16 weapon_speed = 30, uint16 hand = 13);
-	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 weapon_speed = 30, uint16 hand = 13);
+	virtual float GetProcChances(float ProcBonus, uint16 hand = 13);
+	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = 13, Mob *on = nullptr);
 	virtual float GetSpecialProcChances(uint16 hand);
 	virtual float GetAssassinateProcChances(uint16 ReuseTime);
 	virtual float GetSkillProcChances(uint16 ReuseTime, uint16 hand = 0);
@@ -1005,7 +1009,6 @@ protected:
 	int GetKickDamage();
 	int GetBashDamage();
 	virtual void ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg);
-	bool HasDied();
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	Map::Vertex UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
@@ -1018,7 +1021,6 @@ protected:
 	tProc SpellProcs[MAX_PROCS];
 	tProc DefensiveProcs[MAX_PROCS];
 	tProc RangedProcs[MAX_PROCS];
-	tProc SkillProcs[MAX_PROCS];
 
 	char name[64];
 	char orig_name[64];
