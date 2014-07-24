@@ -10,3 +10,6 @@ INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VAL
 INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_IdleNoSpellMinRecast','500','AI spell recast time(MS) check when no spell is cast while idle. (min time in random)');
 INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_IdleNoSpellMaxRecast','2000','AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)');
 INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Spells:AI_IdleBeneficialChance','100','Chance while idle to do a beneficial spell on self or others.');
+
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Combat:MinChancetoHit','5','Minimum % chance to hit with regular melee/ranged.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Combat:MaxChancetoHit','95','Maximum % chance to hit with regular melee/ranged.');

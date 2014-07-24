@@ -879,7 +879,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 				newbon->PetMaxHP += base1;
 				break;
 			case SE_AvoidMeleeChance:
-				newbon->AvoidMeleeChance += base1;
+				newbon->AvoidMeleeChanceEffect += base1;
 				break;
 			case SE_CombatStability:
 				newbon->CombatStability += base1;
@@ -988,6 +988,14 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_CrippBlowChance:
 				newbon->CrippBlowChance += base1;
 				break;
+
+			case SE_HitChance:
+			{
+				if(base2 == -1)
+					newbon->HitChanceEffect[HIGHEST_SKILL+1] += base1;
+				else
+					newbon->HitChanceEffect[base2] += base1;
+			}
 
 			case SE_ProcOnKillShot:
 				for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3)
@@ -1833,16 +1841,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_AvoidMeleeChance:
 			{
-				//multiplier is to be compatible with item effects, watching for overflow too
-				effect_value = effect_value<3000? effect_value * 10 : 30000;
 				if (RuleB(Spells, AdditiveBonusValues) && item_bonus)
-					newbon->AvoidMeleeChance += effect_value;
+					newbon->AvoidMeleeChanceEffect += effect_value;
 
-				else if((effect_value < 0) && (newbon->AvoidMeleeChance > effect_value))
-					newbon->AvoidMeleeChance = effect_value;
+				else if((effect_value < 0) && (newbon->AvoidMeleeChanceEffect > effect_value))
+					newbon->AvoidMeleeChanceEffect = effect_value;
 
-				else if(newbon->AvoidMeleeChance < effect_value)
-					newbon->AvoidMeleeChance = effect_value;
+				else if(newbon->AvoidMeleeChanceEffect < effect_value)
+					newbon->AvoidMeleeChanceEffect = effect_value;
 				break;
 			}
 
@@ -3610,9 +3616,9 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_AvoidMeleeChance:
-					spellbonuses.AvoidMeleeChance = effect_value;
-					aabonuses.AvoidMeleeChance = effect_value;
-					itembonuses.AvoidMeleeChance = effect_value;
+					spellbonuses.AvoidMeleeChanceEffect = effect_value;
+					aabonuses.AvoidMeleeChanceEffect = effect_value;
+					itembonuses.AvoidMeleeChanceEffect = effect_value;
 					break;
 
 				case SE_RiposteChance:

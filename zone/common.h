@@ -275,7 +275,8 @@ struct StatBonuses {
 	int16	CriticalHealOverTime;				//i
 	int16	CriticalDoTChance;					//i
 	int16	CrippBlowChance;					//
-	int16	AvoidMeleeChance;					//AvoidMeleeChance/10 == % chance i = Avoidance
+	int16	AvoidMeleeChance;					//AvoidMeleeChance/10 == % chance i = Avoidance (item mod)
+	int16	AvoidMeleeChanceEffect;				//AvoidMeleeChance Spell Effect
 	int16	RiposteChance;						//i
 	int16	DodgeChance;						//i
 	int16	ParryChance;						//i

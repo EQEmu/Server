@@ -44,6 +44,10 @@ Param1: Max Ranged distance (default: 250)
 Param2: Percent Chance to Hit modifier
 Param3: Percent Total Damage modifier
 
+Kayen: Updated to Chance to Hit code with how bonuses are applied to be consistent for all effects.
+Added field to npc_types 'Avoidance' which will modify chance to avoid melee 
+Added rules to set max and min chance to hit from melee/ranged (Default 95% / 5%)
+
 Required SQL: utils/sql/git/required/2014_07_10_npc_spells.sql
 Optional SQL: utils/sql/git/optional/2014_07_10_AICastingRules.sql
 

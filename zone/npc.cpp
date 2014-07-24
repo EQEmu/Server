@@ -194,6 +194,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	}
 
 	accuracy_rating = d->accuracy_rating;
+	avoidance_rating = d->avoidance_rating;
 	ATK = d->ATK;
 
 	CalcMaxMana();
@@ -1924,6 +1925,12 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	if(id == "accuracy")
 	{
 		accuracy_rating = atoi(val.c_str());
+		return;
+	}
+
+	if(id == "avoidance")
+	{
+		avoidance_rating = atoi(val.c_str());
 		return;
 	}
 

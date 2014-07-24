@@ -202,7 +202,8 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	if (chance_mod >= 10000)
 	    return true;
 
-	float bonus;
+	float avoidanceBonus = 0;
+	float hitBonus = 0;
 
 	////////////////////////////////////////////////////////
 	// To hit calcs go here
@@ -214,6 +215,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	//Calculate the level difference
 
 	mlog(COMBAT__TOHIT, "Chance to hit before level diff calc %.2f", chancetohit);
+
 	double level_difference = attacker_level - defender_level;
 	double range = defender->GetLevel();
 	range = ((range / 4) + 3);
@@ -268,37 +270,32 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 		mlog(COMBAT__TOHIT, "Applied item melee skill bonus %d, yeilding %.2f", attacker->spellbonuses.MeleeSkillCheck, chancetohit);
 	}
 
-	//subtract off avoidance by the defender. (Live AA - Combat Agility)
-	bonus = defender->spellbonuses.AvoidMeleeChance + defender->itembonuses.AvoidMeleeChance + (defender->aabonuses.AvoidMeleeChance * 10);
+	//Avoidance Bonuses on defender decreases baseline hit chance by percent.
+	avoidanceBonus = defender->spellbonuses.AvoidMeleeChanceEffect + 
+				defender->itembonuses.AvoidMeleeChanceEffect + 
+				defender->aabonuses.AvoidMeleeChanceEffect +
+				(defender->itembonuses.AvoidMeleeChance / 10.0f); //Item Mod 'Avoidence'
 
-	//AA Live - Elemental Agility
-	if (IsPet()) {
-		Mob *owner = defender->GetOwner();
-		if (!owner)return false;
-		bonus += (owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance)*10;
-	}
+	Mob *owner = nullptr;
+	if (defender->IsPet()) 
+		owner = defender->GetOwner();
+	else if ((defender->IsNPC() && defender->CastToNPC()->GetSwarmOwner()))
+		owner = entity_list.GetMobID(defender->CastToNPC()->GetSwarmOwner());
+		
+	if (owner)
+		avoidanceBonus += owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
 
-	if(bonus) {
-		chancetohit -= ((bonus * chancetohit) / 1000);
-		mlog(COMBAT__TOHIT, "Applied avoidance chance %.2f/10, yeilding %.2f", bonus, chancetohit);
-	}
+	if(defender->IsNPC()) 
+		avoidanceBonus += (defender->CastToNPC()->GetAvoidanceRating() / 10.0f); //Modifier from database
 
-	if(attacker->IsNPC())
-		chancetohit += (chancetohit * attacker->CastToNPC()->GetAccuracyRating() / 1000);
-
-	mlog(COMBAT__TOHIT, "Chance to hit after accuracy rating calc %.2f", chancetohit);
-
-	float hitBonus = 0;
-
-	/*
-	Kayen: Unknown if the HitChance and Accuracy effect's should modify 'chancetohit'
-	cumulatively or successively. For now all hitBonuses are cumulative.
-	*/
-
+	//Hit Chance Bonuses on attacker increases baseline hit chance by percent.
 	hitBonus +=	attacker->itembonuses.HitChanceEffect[skillinuse] +
 				attacker->spellbonuses.HitChanceEffect[skillinuse]+
+				attacker->aabonuses.HitChanceEffect[skillinuse]+
 				attacker->itembonuses.HitChanceEffect[HIGHEST_SKILL+1] +
-				attacker->spellbonuses.HitChanceEffect[HIGHEST_SKILL+1];
+				attacker->spellbonuses.HitChanceEffect[HIGHEST_SKILL+1] +
+				attacker->aabonuses.HitChanceEffect[HIGHEST_SKILL+1];
+
 
 	//Accuracy = Spell Effect , HitChance = 'Accuracy' from Item Effect
 	//Only AA derived accuracy can be skill limited. ie (Precision of the Pathfinder, Dead Aim)
@@ -306,26 +303,31 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 				attacker->spellbonuses.Accuracy[HIGHEST_SKILL+1] +
 				attacker->aabonuses.Accuracy[HIGHEST_SKILL+1] +
 				attacker->aabonuses.Accuracy[skillinuse] +
-				attacker->itembonuses.HitChance) / 15.0f;
+				attacker->itembonuses.HitChance) / 15.0f; //Item Mod 'Accuracy'
 
 	hitBonus += chance_mod; //Modifier applied from casted/disc skill attacks.
 
-	chancetohit += ((chancetohit * hitBonus) / 100.0f);
-
+	if(attacker->IsNPC())
+		hitBonus += (attacker->CastToNPC()->GetAccuracyRating() / 10.0f); //Modifier from database
+	
 	if(skillinuse == SkillArchery)
-		chancetohit -= (chancetohit * RuleR(Combat, ArcheryHitPenalty)) / 100.0f;
+		hitBonus -= hitBonus*RuleR(Combat, ArcheryHitPenalty);
+
+	//Calculate final chance to hit
+	chancetohit += ((chancetohit * (hitBonus - avoidanceBonus)) / 100.0f);
+	mlog(COMBAT__TOHIT, "Chance to hit %.2f after accuracy calc %.2f and avoidance calc %.2f", chancetohit, hitBonus, avoidanceBonus);
 
 	chancetohit = mod_hit_chance(chancetohit, skillinuse, attacker);
 
-	// Chance to hit;   Max 95%, Min 30%
+	// Chance to hit;   Max 95%, Min 5% DEFAULTS
 	if(chancetohit > 1000 || chancetohit < -1000) {
 		//if chance to hit is crazy high, that means a discipline is in use, and let it stay there
 	}
-	else if(chancetohit > 95) {
-		chancetohit = 95;
+	else if(chancetohit > RuleR(Combat,MaxChancetoHit)) {
+		chancetohit = RuleR(Combat,MaxChancetoHit);
 	}
-	else if(chancetohit < 5) {
-		chancetohit = 5;
+	else if(chancetohit < RuleR(Combat,MinChancetoHit)) {
+		chancetohit = RuleR(Combat,MinChancetoHit);
 	}
 	
 	//I dont know the best way to handle a garunteed hit discipline being used

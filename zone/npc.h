@@ -333,6 +333,8 @@ public:
 
 	int32	GetAccuracyRating() const { return (accuracy_rating); }
 	void	SetAccuracyRating(int32 d) { accuracy_rating = d;}
+	int32	GetAvoidanceRating() const { return (avoidance_rating); }
+	void	SetAvoidanceRating(int32 d) { avoidance_rating = d;}
 	int32 GetRawAC() const { return AC; }
 
 	void	ModifyNPCStat(const char *identifier, const char *newValue);
@@ -441,6 +443,7 @@ protected:
 	uint32	max_dmg;
 	uint32	min_dmg;
 	int32	accuracy_rating;
+	int32	avoidance_rating;
 	int16	attack_count;
 	uint32	npc_mana;
 	float	spellscale;
