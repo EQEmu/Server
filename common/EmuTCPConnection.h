@@ -30,7 +30,7 @@ class EmuTCPServer;
 class EmuTCPConnection : public TCPConnection {
 public:
 	enum eTCPMode { modeConsole, modeTransition, modePacket };
-	enum ePacketMode { packetModeZone, packetModeLauncher, packetModeLogin, packetModeUCS, packetModeQueryServ };
+	enum ePacketMode { packetModeZone, packetModeLauncher, packetModeLogin, packetModeUCS, packetModeQueryServ, packetModeWebInterface };
 
 	EmuTCPConnection(uint32 ID, EmuTCPServer* iServer, SOCKET iSock, uint32 irIP, uint16 irPort, bool iOldFormat = false);
 	EmuTCPConnection(bool iOldFormat = false, EmuTCPServer* iRelayServer = 0, eTCPMode iMode = modePacket);	// for outgoing connections

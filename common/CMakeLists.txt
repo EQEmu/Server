@@ -64,6 +64,7 @@ SET(common_sources
 	timeoutmgr.cpp
 	timer.cpp
 	unix.cpp
+	uuid.cpp
 	worldconn.cpp
 	XMLParser.cpp
 	platform.cpp
@@ -90,6 +91,7 @@ SET(common_sources
 	tinyxml/tinyxml.cpp
 	tinyxml/tinyxmlerror.cpp
 	tinyxml/tinyxmlparser.cpp
+	web_interface_utils.cpp
 )
 
 SET(common_headers
@@ -184,6 +186,7 @@ SET(common_headers
 	timer.h
 	types.h
 	unix.h
+	uuid.h
 	useperl.h
 	version.h
 	worldconn.h
@@ -234,6 +237,7 @@ SET(common_headers
 	StackWalker/StackWalker.h
 	tinyxml/tinystr.h
 	tinyxml/tinyxml.h
+	web_interface_utils.h
 )
 
 SOURCE_GROUP(Patches FILES

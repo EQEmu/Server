@@ -100,6 +100,7 @@ DBAsyncFinishedQueue MTdbafq;
 DBAsync *dbasync = nullptr;
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
+std::string WS_Client_Connected; 
 
 const SPDat_Spell_Struct* spells;
 void LoadSpells(EQEmu::MemoryMappedFile **mmf);

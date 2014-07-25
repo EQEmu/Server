@@ -24,6 +24,7 @@ SET(world_sources
 	perl_HTTPRequest.cpp
 	queryserv.cpp
 	ucs.cpp
+	web_interface.cpp
 	wguild_mgr.cpp
 	world_logsys.cpp
 	WorldConfig.cpp
@@ -55,6 +56,7 @@ SET(world_headers
 	queryserv.h
 	SoFCharCreateData.h
 	ucs.h
+	web_interface.h
 	wguild_mgr.h
 	WorldConfig.h
 	worlddb.h

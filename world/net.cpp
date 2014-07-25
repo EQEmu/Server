@@ -86,6 +86,7 @@
 #include "AdventureManager.h"
 #include "ucs.h"
 #include "queryserv.h"
+#include "web_interface.h"
 
 TimeoutManager timeout_manager;
 EQStreamFactory eqsf(WorldStream,9000);
@@ -97,6 +98,7 @@ LoginServerList loginserverlist;
 EQWHTTPServer http_server;
 UCSConnection UCSLink;
 QueryServConnection QSLink;
+WebInterfaceConnection WILink;
 LauncherList launcher_list;
 AdventureManager adventure_manager;
 DBAsync *dbasync = nullptr;
@@ -453,6 +455,8 @@ int main(int argc, char** argv) {
 		UCSLink.Process();
 
 		QSLink.Process();
+
+		WILink.Process();
 
 		LFPGroupList.Process();
 

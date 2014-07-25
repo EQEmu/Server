@@ -26,7 +26,7 @@ EQEmuConfig *EQEmuConfig::_config = nullptr;
 
 void EQEmuConfig::do_world(TiXmlElement *ele) {
 	const char *text;
-	TiXmlElement * sub_ele;;
+	TiXmlElement * sub_ele;
 
 	text= ParseTextBlock(ele,"shortname");
 	if (text)
@@ -217,6 +217,27 @@ void EQEmuConfig::do_qsdatabase(TiXmlElement *ele) {
 		QSDatabaseDB=text;
 }
 
+void EQEmuConfig::do_web_interface(TiXmlElement *ele) {
+	const char *text;
+
+	text = ParseTextBlock(ele, "port", true);
+	if (text)
+		WebInterfacePort = atoi(text);
+
+	text = ParseTextBlock(ele, "cert", true);
+	if (text)
+		WebInterfaceCert = text;
+
+	text = ParseTextBlock(ele, "priv_key", true);
+	if (text)
+		WebInterfacePrivKey = text;
+
+	TiXmlElement *sub_ele = ele->FirstChildElement("ssl");
+	if (sub_ele != nullptr) {
+		WebInterfaceUseSSL = true;
+	}
+}
+
 void EQEmuConfig::do_zones(TiXmlElement *ele) {
 	const char *text;
 	TiXmlElement *sub_ele;
@@ -372,6 +393,14 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const {
 		return(QSDatabaseDB);
 	if(var_name == "QSDatabasePort")
 		return(itoa(QSDatabasePort));
+	if (var_name == "WebInterfacePort")
+		return(itoa(WebInterfacePort));
+	if (var_name == "WebInterfaceUseSSL")
+		return(itoa(WebInterfaceUseSSL));
+	if (var_name == "WebInterfaceCert")
+		return(WebInterfaceCert);
+	if (var_name == "WebInterfacePrivKey")
+		return(WebInterfacePrivKey);
 	if(var_name == "SpellsFile")
 		return(SpellsFile);
 	if(var_name == "OpCodesFile")
@@ -433,6 +462,10 @@ void EQEmuConfig::Dump() const
 	std::cout << "QSDatabasePassword = " << QSDatabasePassword << std::endl;
 	std::cout << "QSDatabaseDB = " << QSDatabaseDB << std::endl;
 	std::cout << "QSDatabasePort = " << QSDatabasePort << std::endl;
+	std::cout << "WebInterfacePort = " << WebInterfacePort << std::endl;
+	std::cout << "WebInterfaceUseSSL = " << WebInterfaceUseSSL << std::endl;
+	std::cout << "WebInterfaceCert = " << WebInterfaceCert << std::endl;
+	std::cout << "WebInterfacePrivKey = " << WebInterfacePrivKey << std::endl;
 	std::cout << "SpellsFile = " << SpellsFile << std::endl;
 	std::cout << "OpCodesFile = " << OpCodesFile << std::endl;
 	std::cout << "EQTimeFile = " << EQTimeFile << std::endl;
@@ -443,6 +476,5 @@ void EQEmuConfig::Dump() const
 	std::cout << "ZonePortLow = " << ZonePortLow << std::endl;
 	std::cout << "ZonePortHigh = " << ZonePortHigh << std::endl;
 	std::cout << "DefaultStatus = " << (int)DefaultStatus << std::endl;
-//	std::cout << "DynamicCount = " << DynamicCount << std::endl;
 }
 
