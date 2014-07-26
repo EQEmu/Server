@@ -1,29 +1,5 @@
-#include "../common/debug.h"
-#include "../common/opcodemgr.h"
-#include "../common/EQStreamFactory.h"
-#include "../common/rulesys.h"
-#include "../common/servertalk.h"
-#include "../common/platform.h"
-#include "../common/crash.h"
-#include "../common/EQEmuConfig.h"
-#include "../common/web_interface_utils.h"
-#include "../common/StringUtil.h"
-#include "../common/uuid.h"
-#include "worldserver.h"
-#include "lib/libwebsockets.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-#include <signal.h>
-#include <list>
-#include <map>
-
-#define MAX_MESSAGE_LENGTH 2048
-
-struct per_session_data_eqemu {
-	bool auth;
-	std::string uuid;
-	std::list<std::string> *send_queue;
-};
+#include "web_interface.h"
+#include "call_handler.h"
 
 volatile bool run = true;
 TimeoutManager timeout_manager;
@@ -31,6 +7,8 @@ const EQEmuConfig *config = nullptr;
 WorldServer *worldserver = nullptr;
 libwebsocket_context *context = nullptr;
 std::map<std::string, per_session_data_eqemu*> sessions;
+std::map<std::string, CallHandler> authorized_calls;
+std::map<std::string, CallHandler> unauthorized_calls;
 
 void CatchSignal(int sig_num) {
 	run = false;
@@ -59,33 +37,51 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 	per_session_data_eqemu *session = (per_session_data_eqemu*)user;
 	switch (reason) {
 	case LWS_CALLBACK_ESTABLISHED:
-		session->auth = false;
 		session->uuid = CreateUUID();
 		session->send_queue = new std::list<std::string>();
 		sessions[session->uuid] = session;
-		printf("Created session %s\n", session->uuid.c_str());
 		break;
 	case LWS_CALLBACK_RECEIVE: {
 
 		//recv and parse commands here
 		if(len < 1)
 			break;
-
-		std::string command;
-		command.assign((const char*)in, len);
-
-		if(command.compare("get_version") == 0) {
-			session->send_queue->push_back("0.8.0");
+			
+		rapidjson::Document document;
+		if(document.Parse((const char*)in).HasParseError()) {
+			break;
 		}
-		if (command.compare("do_pos_update") == 0){
-			printf("Sending ServerOP_WIClientRequest with session %s Command Str %s \n", session->uuid.c_str(), command.c_str());
-			/* Test Packet */
-			ServerPacket* pack = new ServerPacket(ServerOP_WIClientRequest, sizeof(WI_Client_Request_Struct) + command.length() + 1);
-			WI_Client_Request_Struct* WICR = (WI_Client_Request_Struct*)pack->pBuffer;
-			strn0cpy(WICR->Client_UUID, session->uuid.c_str(), 64);
-			strn0cpy(WICR->JSON_Data, command.c_str(), command.length() + 1); 
-			worldserver->SendPacket(pack);
-			safe_delete(pack);
+
+		std::string call;
+		if(document.HasMember("call")) {
+			call = document["call"].GetString();
+		}
+
+		if(call.length() == 0) {
+			//No function called, toss this message
+			WriteWebCallResponse(session, document, "call_empty");
+			break;
+		}
+		
+		if (!CheckTokenAuthorization(session)) {
+			//check func call against functions that dont req auth
+			if (unauthorized_calls.count(call) == 0) {
+				WriteWebCallResponse(session, document, "unauthorized_call_not_found: " + call);
+				break;
+			}
+
+			auto call_func = unauthorized_calls[call];
+			call_func(session, document);
+		}
+		else {
+			//check func call against functions that req auth
+			if (authorized_calls.count(call) == 0) {
+				WriteWebCallResponse(session, document, "authorized_call_not_found: " + call);
+				break;
+			}
+
+			auto call_func = authorized_calls[call];
+			call_func(session, document);
 		}
 
 		break;
@@ -114,12 +110,10 @@ int callback_eqemu(libwebsocket_context *context, libwebsocket *wsi, libwebsocke
 		break;
 
 	case LWS_CALLBACK_CLOSED:
-		printf("Closed session %s\n", session->uuid.c_str());
 		//Session closed but perhaps not yet destroyed, we still don't want to track it though.
 		sessions.erase(session->uuid);
 		safe_delete(session->send_queue);
 		session->uuid.clear();
-		session->auth = false;
 		break;
 	default:
 		break;
@@ -136,6 +130,7 @@ static struct libwebsocket_protocols protocols[] = {
 int main() {
 	RegisterExecutablePlatform(ExePlatformWebInterface);
 	set_exception_handler();
+	register_calls();
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 	_log(WEB_INTERFACE__INIT, "Starting EQEmu Web Server.");
 	
@@ -192,5 +187,29 @@ int main() {
 	libwebsocket_context_destroy(context);
 
 	return 0;
+}
+
+void WriteWebCallResponse(per_session_data_eqemu *session, rapidjson::Document &doc, std::string status) {
+	if (doc.HasMember("id")) {
+		rapidjson::StringBuffer s;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+		writer.StartObject();
+		writer.String("id");
+		writer.String(doc["id"].GetString());
+		writer.String("status");
+		writer.String(status.c_str());
+		writer.EndObject();
+		session->send_queue->push_back(s.GetString());
+	}
+}
+
+bool CheckTokenAuthorization(per_session_data_eqemu *session) {
+	//todo: actually check this against a table of tokens that is updated periodically
+	//right now i have just one entry harded coded for testing purposes
+	if(session->auth.compare("c5b80ec8-4174-4c4c-d332-dbf3c3a551fc") == 0) {
+		return true;
+	}
+
+	return false;
 }
 
