@@ -2200,7 +2200,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Rampage");
 #endif
 				if(caster)
-					entity_list.AEAttack(caster, 30, 13, 0, true); // on live wars dont get a duration ramp, its a one shot deal
+					entity_list.AEAttack(caster, 30, MainPrimary, 0, true); // on live wars dont get a duration ramp, its a one shot deal
 
 				break;
 			}
@@ -5264,7 +5264,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		}
 
 		//Tribute Focus
-		for(int x = TRIBUTE_SLOT_START; x < (TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); ++x)
+		for(int x = EmuConstants::TRIBUTE_BEGIN; x <= EmuConstants::TRIBUTE_END; ++x)
 		{
 			TempItem = nullptr;
 			ItemInst* ins = GetInv().GetItem(x);

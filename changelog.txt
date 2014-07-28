@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/27/2014 ==
+Uleat: More updates to the dictionary. Added a 'constants' file for each client translator..these will tie-in to the dictionary. Started
+replacement of hard-coded numeric values with a pre-defined constant. This will help in the transition.
 
 == 07/16/2014 ==
 Uleat: Initial commit of new client/server 'dictionaries' - work in-progress... Changed equipment slot references to reflect new naming

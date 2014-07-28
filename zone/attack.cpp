@@ -454,9 +454,9 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
 		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped2 = CastToClient()->m_inv.GetItem(13);
+		bool equiped2 = CastToClient()->m_inv.GetItem(MainPrimary);
 		if(equiped2) {
-			uint8 TwoHandBlunt = CastToClient()->m_inv.GetItem(13)->GetItem()->ItemType;
+			uint8 TwoHandBlunt = CastToClient()->m_inv.GetItem(MainPrimary)->GetItem()->ItemType;
 			float bonusStaffBlock = 0.0f;
 			if(TwoHandBlunt == ItemType2HBlunt) {
 
@@ -4055,7 +4055,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 			rangedattk = true;
 	}
 
-	if (!weapon && hand == 11 && GetSpecialAbility(SPECATK_RANGED_ATK))
+	if (!weapon && hand == MainRange && GetSpecialAbility(SPECATK_RANGED_ATK))
 		rangedattk = true;
 
 	for (uint32 i = 0; i < MAX_PROCS; i++) {

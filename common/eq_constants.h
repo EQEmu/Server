@@ -873,8 +873,8 @@ enum InventoryMainTypes : int16 {
 	MainGeneral8,
 	//MainGeneral9,
 	//MainGeneral10,
-	MainCursor //,
-	//_MainCount,
+	MainCursor,
+	_MainCount
 };
 
 enum InventorySlot
@@ -949,5 +949,11 @@ enum InventorySlot
 #define NOT_USED		0
 #define NO_ITEM			0
 
+// yes..these are redundant... but, they help to identify and define what is actually being performed
+// plus, since they're pre-op's, they don't affect the actual binary size
+#define MAP_BEGIN	0
+#define MAIN_BEGIN	0
+#define SUB_BEGIN	0
+#define AUG_BEGIN	0
 
 #endif

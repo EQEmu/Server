@@ -277,7 +277,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	//Power Source Slot
 	/*if (GetClientVersion() >= EQClientSoF)
 	{
-		const ItemInst* inst = m_inv[9999];
+		const ItemInst* inst = m_inv[MainPowerSource];
 		if(inst)
 			AddItemBonuses(inst, newbon);
 	}*/

@@ -146,13 +146,13 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 	Client* with = mob->CastToClient();
 	Client* trader = owner->CastToClient();
 	if (with && with->IsClient()) {
-		with->SendItemPacket(dest_slot_id -IDX_TRADE,inst,ItemPacketTradeView);
+		with->SendItemPacket(dest_slot_id - EmuConstants::TRADE_BEGIN, inst, ItemPacketTradeView);
 		if (inst->GetItem()->ItemClass == 1) {
 			for (uint16 i=0; i<10; i++) {
 				uint16 bagslot_id = Inventory::CalcSlotId(dest_slot_id, i);
 				const ItemInst* bagitem = trader->GetInv().GetItem(bagslot_id);
 				if (bagitem) {
-					with->SendItemPacket(bagslot_id-IDX_TRADE,bagitem,ItemPacketTradeView);
+					with->SendItemPacket(bagslot_id - EmuConstants::TRADE_BEGIN, bagitem, ItemPacketTradeView);
 				}
 			}
 		}

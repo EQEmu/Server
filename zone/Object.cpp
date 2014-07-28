@@ -349,7 +349,7 @@ void Object::Close() {
 		ItemInst* container = this->m_inst;
 		if(container != nullptr)
 		{
-			for (uint8 i = 0; i < MAX_ITEMS_PER_BAG; i++)
+			for (uint8 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++)
 			{
 				ItemInst* inst = container->PopItem(i);
 				if(inst != nullptr)

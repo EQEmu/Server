@@ -166,63 +166,63 @@ ItemInst* Inventory::GetItem(int16 slot_id) const
 	ItemInst* result = nullptr;
 
 	// Cursor
-	if (slot_id == MainCursor) {
+	if (slot_id == EmuConstants::CURSOR) {
 		// Cursor slot
 		result = m_cursor.peek_front();
 	}
 
 	// Non bag slots
-	else if (slot_id >= 3000 && slot_id <= 3007) {
-		// Trade slots
+	else if (slot_id >= EmuConstants::TRADE_BEGIN && slot_id <= EmuConstants::TRADE_END) {
 		result = _GetItem(m_trade, slot_id);
 	}
-	else if (slot_id >= 2500 && slot_id <= 2501) {
+	else if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_END) {
 		// Shared Bank slots
 		result = _GetItem(m_shbank, slot_id);
 	}
-	else if (slot_id >= 2000 && slot_id <= 2023) {
+	else if (slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END) {
 		// Bank slots
 		result = _GetItem(m_bank, slot_id);
 	}
-	else if ((slot_id >= 22 && slot_id <= 29)) {
+	else if ((slot_id >= EmuConstants::GENERAL_BEGIN && slot_id <= EmuConstants::GENERAL_END)) {
 		// Personal inventory slots
 		result = _GetItem(m_inv, slot_id);
 	}
-	else if ((slot_id >= 0 && slot_id <= 21) || (slot_id >= 400 && slot_id <= 404) || (slot_id == 9999)) {
+	else if ((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) ||
+		(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END) || (slot_id == EmuConstants::POWER_SOURCE)) {
 		// Equippable slots (on body)
 		result = _GetItem(m_worn, slot_id);
 	}
 
 	// Inner bag slots
-	else if (slot_id >= 3031 && slot_id <= 3110) {
+	else if (slot_id >= EmuConstants::TRADE_BAGS_BEGIN && slot_id <= EmuConstants::TRADE_BAGS_END) {
 		// Trade bag slots
 		ItemInst* inst = _GetItem(m_trade, Inventory::CalcSlotId(slot_id));
 		if (inst && inst->IsType(ItemClassContainer)) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= 2531 && slot_id <= 2550) {
+	else if (slot_id >= EmuConstants::SHARED_BANK_BAGS_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
 		// Shared Bank bag slots
 		ItemInst* inst = _GetItem(m_shbank, Inventory::CalcSlotId(slot_id));
 		if (inst && inst->IsType(ItemClassContainer)) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= 2031 && slot_id <= 2270) {
+	else if (slot_id >= EmuConstants::BANK_BAGS_BEGIN && slot_id <= EmuConstants::BANK_BAGS_END) {
 		// Bank bag slots
 		ItemInst* inst = _GetItem(m_bank, Inventory::CalcSlotId(slot_id));
 		if (inst && inst->IsType(ItemClassContainer)) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= 331 && slot_id <= 340) {
+	else if (slot_id >= EmuConstants::CURSOR_BAG_BEGIN && slot_id <= EmuConstants::CURSOR_BAG_END) {
 		// Cursor bag slots
 		ItemInst* inst = m_cursor.peek_front();
 		if (inst && inst->IsType(ItemClassContainer)) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= 251 && slot_id <= 330) {
+	else if (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END) {
 		// Personal inventory bag slots
 		ItemInst* inst = _GetItem(m_inv, Inventory::CalcSlotId(slot_id));
 		if (inst && inst->IsType(ItemClassContainer)) {
@@ -651,67 +651,86 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 }
 
 // Opposite of below: Get parent bag slot_id from a slot inside of bag
-int16 Inventory::CalcSlotId(int16 slot_id)
-{
+int16 Inventory::CalcSlotId(int16 slot_id) {
 	int16 parent_slot_id = INVALID_INDEX;
 
-	if (slot_id >= 251 && slot_id <= 330)
-		parent_slot_id = IDX_INV + (slot_id - 251) / MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 331 && slot_id <= 340)
-		parent_slot_id = MainCursor;
-	else if (slot_id >= 2000 && slot_id <= 2023)
-		parent_slot_id = IDX_BANK + (slot_id - 2000) / MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 2031 && slot_id <= 2270)
-		parent_slot_id = IDX_BANK + (slot_id - 2031) / MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 2531 && slot_id <= 2550)
-		parent_slot_id = IDX_SHBANK + (slot_id - 2531) / MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 3100 && slot_id <= 3179)
-		parent_slot_id = IDX_TRADE + (slot_id - 3100) / MAX_ITEMS_PER_BAG;
+	if (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END)
+		parent_slot_id = EmuConstants::GENERAL_BEGIN + (slot_id - EmuConstants::GENERAL_BAGS_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
+
+	else if (slot_id >= EmuConstants::CURSOR_BAG_BEGIN && slot_id <= EmuConstants::CURSOR_BAG_END)
+		parent_slot_id = EmuConstants::CURSOR;
+
+	/*
+	// this is not a bag range...
+	else if (slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END)
+		parent_slot_id = EmuConstants::BANK_BEGIN + (slot_id - EmuConstants::BANK_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
+	*/
+
+	else if (slot_id >= EmuConstants::BANK_BAGS_BEGIN && slot_id <= EmuConstants::BANK_BAGS_END)
+		parent_slot_id = EmuConstants::BANK_BEGIN + (slot_id - EmuConstants::BANK_BAGS_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
+
+	else if (slot_id >= EmuConstants::SHARED_BANK_BAGS_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END)
+		parent_slot_id = EmuConstants::SHARED_BANK_BEGIN + (slot_id - EmuConstants::SHARED_BANK_BAGS_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
+
+	//else if (slot_id >= 3100 && slot_id <= 3179) should be {3031..3110}..where did this range come from!!? (verified db save range)
+	else if (slot_id >= EmuConstants::TRADE_BAGS_BEGIN && slot_id <= EmuConstants::TRADE_BAGS_END)
+		parent_slot_id = EmuConstants::TRADE_BEGIN + (slot_id - EmuConstants::TRADE_BAGS_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
 
 	return parent_slot_id;
 }
 
 // Calculate slot_id for an item within a bag
-int16 Inventory::CalcSlotId(int16 bagslot_id, uint8 bagidx)
-{
-	if (!Inventory::SupportsContainers(bagslot_id)) {
+int16 Inventory::CalcSlotId(int16 bagslot_id, uint8 bagidx) {
+	if (!Inventory::SupportsContainers(bagslot_id))
 		return INVALID_INDEX;
-	}
 
 	int16 slot_id = INVALID_INDEX;
 
-	if (bagslot_id == MainCursor || bagslot_id == 8000) // Cursor
-		slot_id = IDX_CURSOR_BAG + bagidx;
-	else if (bagslot_id >= 22 && bagslot_id <= 29) // Inventory slots
-		slot_id = IDX_INV_BAG + (bagslot_id - 22)*MAX_ITEMS_PER_BAG + bagidx;
-	else if (bagslot_id >= 2000 && bagslot_id <= 2023) // Bank slots
-		slot_id = IDX_BANK_BAG + (bagslot_id - 2000)*MAX_ITEMS_PER_BAG + bagidx;
-	else if (bagslot_id >= 2500 && bagslot_id <= 2501) // Shared bank slots
-		slot_id = IDX_SHBANK_BAG + (bagslot_id - 2500)*MAX_ITEMS_PER_BAG + bagidx;
-	else if (bagslot_id >= 3000 && bagslot_id <= 3007) // Trade window slots
-		slot_id = IDX_TRADE_BAG + (bagslot_id - 3000)*MAX_ITEMS_PER_BAG + bagidx;
+	if (bagslot_id == EmuConstants::CURSOR || bagslot_id == 8000)
+		slot_id = EmuConstants::CURSOR_BAG_BEGIN + bagidx;
+
+	else if (bagslot_id >= EmuConstants::GENERAL_BEGIN && bagslot_id <= EmuConstants::GENERAL_END)
+		slot_id = EmuConstants::GENERAL_BAGS_BEGIN + (bagslot_id - EmuConstants::GENERAL_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE + bagidx;
+
+	else if (bagslot_id >= EmuConstants::BANK_BEGIN && bagslot_id <= EmuConstants::BANK_END)
+		slot_id = EmuConstants::BANK_BAGS_BEGIN + (bagslot_id - EmuConstants::BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE + bagidx;
+
+	else if (bagslot_id >= EmuConstants::SHARED_BANK_BEGIN && bagslot_id <= EmuConstants::SHARED_BANK_END)
+		slot_id = EmuConstants::SHARED_BANK_BAGS_BEGIN + (bagslot_id - EmuConstants::SHARED_BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE + bagidx;
+
+	else if (bagslot_id >= EmuConstants::TRADE_BEGIN && bagslot_id <= EmuConstants::TRADE_END)
+		slot_id = EmuConstants::TRADE_BAGS_BEGIN + (bagslot_id - EmuConstants::TRADE_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE + bagidx;
 
 	return slot_id;
 }
 
-uint8 Inventory::CalcBagIdx(int16 slot_id)
-{
+uint8 Inventory::CalcBagIdx(int16 slot_id) {
 	uint8 index = 0;
 
-	if (slot_id >= 251 && slot_id <= 330)
-		index = (slot_id - 251) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 331 && slot_id <= 340)
-		index = (slot_id - 331) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 2000 && slot_id <= 2023)
-		index = (slot_id - 2000) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 2031 && slot_id <= 2270)
-		index = (slot_id - 2031) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 2531 && slot_id <= 2550)
-		index = (slot_id - 2531) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 3100 && slot_id <= 3179)
-		index = (slot_id - 3100) % MAX_ITEMS_PER_BAG;
-	else if (slot_id >= 4000 && slot_id <= 4009)
-		index = (slot_id - 4000) % MAX_ITEMS_PER_BAG;
+	if (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END)
+		index = (slot_id - EmuConstants::GENERAL_BAGS_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
+
+	else if (slot_id >= EmuConstants::CURSOR_BAG_BEGIN && slot_id <= EmuConstants::CURSOR_BAG_END)
+		index = (slot_id - EmuConstants::CURSOR_BAG_BEGIN); // % EmuConstants::ITEM_CONTAINER_SIZE; - not needed since range is 10 slots
+
+	/*
+	// this is not a bag range...
+	else if (slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END)
+		index = (slot_id - EmuConstants::BANK_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
+	*/
+
+	else if (slot_id >= EmuConstants::BANK_BAGS_BEGIN && slot_id <= EmuConstants::BANK_BAGS_END)
+		index = (slot_id - EmuConstants::BANK_BAGS_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
+
+	else if (slot_id >= EmuConstants::SHARED_BANK_BAGS_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END)
+		index = (slot_id - EmuConstants::SHARED_BANK_BAGS_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
+
+	else if (slot_id >= EmuConstants::TRADE_BAGS_BEGIN && slot_id <= EmuConstants::TRADE_BAGS_END)
+		index = (slot_id - EmuConstants::TRADE_BAGS_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
+
+	// odd..but, ok... (probably a range-slot conversion for ItemInst* Object::item
+	else if (slot_id >= EmuConstants::WORLD_BEGIN && slot_id <= EmuConstants::WORLD_END)
+		index = (slot_id - EmuConstants::WORLD_BEGIN); // % EmuConstants::ITEM_CONTAINER_SIZE; - not needed since range is 10 slots
 
 	return index;
 }

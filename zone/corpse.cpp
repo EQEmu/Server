@@ -367,9 +367,9 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 		for(i = 0; i <= 30; i++)
 		{
 			if(i == 21 && client->GetClientVersion() >= EQClientSoF) {
-				item = client->GetInv().GetItem(9999);
+				item = client->GetInv().GetItem(MainPowerSource);
 				if((item && (!client->IsBecomeNPC())) || (item && client->IsBecomeNPC() && !item->GetItem()->NoRent)) {
-					std::list<uint32> slot_list = MoveItemToCorpse(client, item, 9999);
+					std::list<uint32> slot_list = MoveItemToCorpse(client, item, MainPowerSource);
 					removed_list.merge(slot_list);
 				}
 
@@ -999,12 +999,8 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		end = itemlist.end();
 
 		uint8 containercount = 0;
-		int corpselootlimit;
 
-		if(client->GetClientVersion() >= EQClientRoF) { corpselootlimit = 34; }
-		else if(client->GetClientVersion() >= EQClientSoF) { corpselootlimit = 32; }
-		else if(client->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
-		else { corpselootlimit = 30; }
+		int corpselootlimit = EQLimits::InventoryMapSize(MapCorpse, client->GetClientVersion());
 
 		for(; cur != end; ++cur) {
 			ServerLootItem_Struct* item_data = *cur;
@@ -1331,17 +1327,13 @@ void Corpse::QueryLoot(Client* to) {
 	cur = itemlist.begin();
 	end = itemlist.end();
 
-	int corpselootlimit;
-
-	if (to->GetClientVersion() >= EQClientSoF) { corpselootlimit = 32; }
-	else if (to->GetClientVersion() == EQClientTitanium) { corpselootlimit = 31; }
-	else { corpselootlimit = 30; }
+	int corpselootlimit = EQLimits::InventoryMapSize(MapCorpse, to->GetClientVersion());
 
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;
 
 		if (IsPlayerCorpse()) {
-			if (sitem->equipSlot >= 251 && sitem->equipSlot <= 340)
+			if (sitem->equipSlot >= EmuConstants::GENERAL_BAGS_BEGIN && sitem->equipSlot <= EmuConstants::CURSOR_BAG_END)
 				sitem->lootslot = 0xFFFF;
 			else
 				x < corpselootlimit ? sitem->lootslot = x : sitem->lootslot = 0xFFFF;

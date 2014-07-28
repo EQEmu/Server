@@ -55,21 +55,6 @@ namespace ItemField
 	};
 };
 
-// Indexing positions to the beginning slot_id's for a bucket of slots
-#define IDX_EQUIP		0
-#define IDX_CURSOR_BAG	331
-#define IDX_INV			22
-#define IDX_INV_BAG		251
-#define IDX_TRIBUTE		400
-#define IDX_BANK		2000
-#define IDX_BANK_BAG	2031
-#define IDX_SHBANK		2500
-#define IDX_SHBANK_BAG	2531
-#define IDX_TRADE		3000
-#define IDX_TRADE_BAG	3031
-#define IDX_TRADESKILL	4000
-#define MAX_ITEMS_PER_BAG 10
-
 // Specifies usage type for item inside ItemInst
 enum ItemInstTypes
 {

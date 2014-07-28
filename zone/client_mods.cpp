@@ -873,9 +873,9 @@ int16 Client::CalcAC() {
 
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(14);
+		bool equiped = CastToClient()->m_inv.GetItem(MainSecondary);
 		if(equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
+			uint8 shield = CastToClient()->m_inv.GetItem(MainSecondary)->GetItem()->ItemType;
 			if(shield == ItemTypeShield)
 				displayed += itembonuses.HeroicSTR/2;
 		}
@@ -903,9 +903,9 @@ int16 Client::GetACMit() {
 
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(14);
+		bool equiped = CastToClient()->m_inv.GetItem(MainSecondary);
 		if(equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
+			uint8 shield = CastToClient()->m_inv.GetItem(MainSecondary)->GetItem()->ItemType;
 			if(shield == ItemTypeShield)
 				mitigation += itembonuses.HeroicSTR/2;
 		}
@@ -1127,7 +1127,7 @@ uint32 Client::CalcCurrentWeight() {
 	ItemInst* ins;
 	uint32 Total = 0;
 	int x;
-	for(x = 0; x <= 30; x++)
+	for(x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::CURSOR; x++) // include cursor or not?
 	{
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
@@ -1136,7 +1136,7 @@ uint32 Client::CalcCurrentWeight() {
 		if (TempItem)
 			Total += TempItem->Weight;
 	}
-	for (x = 251; x < 331; x++)
+	for (x = EmuConstants::GENERAL_BAGS_BEGIN; x <= EmuConstants::GENERAL_BAGS_END; x++) // include cursor bags or not?
 	{
 		int TmpWeight = 0;
 		TempItem = 0;
@@ -1147,9 +1147,11 @@ uint32 Client::CalcCurrentWeight() {
 			TmpWeight = TempItem->Weight;
 		if (TmpWeight > 0)
 		{
-			int bagslot = 22;
+			// this code indicates that weight redux bags canonly be in the first general inventory slot to be effective...
+			// is this correct? or can we scan for the highest weight redux and use that? (need client verifications)
+			int bagslot = MainGeneral1;
 			int reduction = 0;
-			for (int m = 261; m < 331; m += 10)
+			for (int m = MainGeneral2; m <= EmuConstants::GENERAL_BAGS_END; m += 10) // include cursor bags or not?
 			{
 				if (x >= m)
 					bagslot += 1;
@@ -1172,10 +1174,9 @@ uint32 Client::CalcCurrentWeight() {
 	This is the ONLY instance I have seen where the client is hard coded to particular Item IDs to set a certain property for an item. It is very odd.
 	*/
 
-	// SoD client has no weight for coin
-	if (GetClientVersion() < EQClientSoD) {
+	// SoD+ client has no weight for coin
+	if (EQLimits::CoinHasWeight(ClientVersion))
 		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
-	}
 
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat + (float)itembonuses.Packrat;
 	if (Packrat > 0)

@@ -3304,7 +3304,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 
 	int damage = 0;
 	uint32 hate = 0;
-	int Hand = 13;
+	int Hand = MainPrimary;
 	if (hate == 0 && weapon_damage > 1) hate = weapon_damage;
 
 	if(weapon_damage > 0){
@@ -4103,7 +4103,7 @@ void Bot::PetAIProcess() {
 							int32 RandRoll = MakeRandomInt(0, 99);
 							if (botPet->CanThisClassDoubleAttack() && (RandRoll < (botPet->GetLevel() + NPCDualAttackModifier)))
 							{
-								if(botPet->Attack(botPet->GetTarget(), 13))
+								if(botPet->Attack(botPet->GetTarget(), MainPrimary))
 								{}
 							}
 						}
@@ -4145,13 +4145,13 @@ void Bot::PetAIProcess() {
 								float DualWieldProbability = (botPet->GetSkill(SkillDualWield) + botPet->GetLevel()) / 400.0f;
 								DualWieldProbability -= MakeRandomFloat(0, 1);
 								if(DualWieldProbability < 0){
-									botPet->Attack(botPet->GetTarget(), 14);
+									botPet->Attack(botPet->GetTarget(), MainSecondary);
 									if (botPet->CanThisClassDoubleAttack())
 									{
 										int32 RandRoll = MakeRandomInt(0, 99);
 										if (RandRoll < (botPet->GetLevel() + 20))
 										{
-											botPet->Attack(botPet->GetTarget(), 14);
+											botPet->Attack(botPet->GetTarget(), MainSecondary);
 										}
 									}
 								}
@@ -8195,7 +8195,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 		}
 	}
 	else { //We do a single regular attack if we attack from the front without chaotic stab
-		Attack(other, 13);
+		Attack(other, MainPrimary);
 	}
 }
 
@@ -12333,30 +12333,31 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					gearbot->BotRemoveEquipItem(slotId);
 					gearbot->CalcBotStats();
 					switch(slotId) {
-						case 0:
-						case 1:
-						case 2:
-						case 3:
-						case 4:
-						case 5:
-						case 8:
-						case 9:
-						case 10:
-						case 11:
-						case 13:
-						case 14:
-						case 15:
-						case 16:
-						case 17:
-						case 20:
-						case 21:
+						case MainCharm:
+						case MainEar1:
+						case MainHead:
+						case MainFace:
+						case MainEar2:
+						case MainNeck:
+						case MainBack:
+						case MainWrist1:
+						case MainWrist2:
+						case MainRange:
+						case MainPrimary:
+						case MainSecondary:
+						case MainFinger1:
+						case MainFinger2:
+						case MainChest:
+						case MainWaist:
+						//case MainPowerSource:
+						case MainAmmo:
 							gearbot->Say("My %s is now unequipped.", equipped[slotId]);
 							break;
-						case 6:
-						case 7:
-						case 12:
-						case 18:
-						case 19:
+						case MainShoulders:
+						case MainArms:
+						case MainHands:
+						case MainLegs:
+						case MainFeet:
 							gearbot->Say("My %s are now unequipped.", equipped[slotId]);
 							break;
 						default:
@@ -12365,30 +12366,31 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				}
 				else {
 					switch(slotId) {
-						case 0:
-						case 1:
-						case 2:
-						case 3:
-						case 4:
-						case 5:
-						case 8:
-						case 9:
-						case 10:
-						case 11:
-						case 13:
-						case 14:
-						case 15:
-						case 16:
-						case 17:
-						case 20:
-						case 21:
+						case MainCharm:
+						case MainEar1:
+						case MainHead:
+						case MainFace:
+						case MainEar2:
+						case MainNeck:
+						case MainBack:
+						case MainWrist1:
+						case MainWrist2:
+						case MainRange:
+						case MainPrimary:
+						case MainSecondary:
+						case MainFinger1:
+						case MainFinger2:
+						case MainChest:
+						case MainWaist:
+						//case MainPowerSource:
+						case MainAmmo:
 							c->GetTarget()->Say("My %s is already unequipped.", equipped[slotId]);
 							break;
-						case 6:
-						case 7:
-						case 12:
-						case 18:
-						case 19:
+						case MainShoulders:
+						case MainArms:
+						case MainHands:
+						case MainLegs:
+						case MainFeet:
 							c->GetTarget()->Say("My %s are already unequipped.", equipped[slotId]);
 							break;
 						default:

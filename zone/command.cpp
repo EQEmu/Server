@@ -2957,9 +2957,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 		if(c->GetClientVersion() >= EQClientSoF)
 		{
-			const ItemInst* inst = client->GetInv().GetItem(9999);
+			const ItemInst* inst = client->GetInv().GetItem(MainPowerSource);
 			item = (inst) ? inst->GetItem() : nullptr;
-			c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", 9999,
+			c->Message((item==0), "InvSlot: %i, Item: %i (%c%06X00000000000000000000000000000000000000000000%s%c), Charges: %i", MainPowerSource,
 			((item==0)?0:item->ID),0x12, ((item==0)?0:item->ID),
 			((item==0)?"null":item->Name), 0x12,
 			((item==0)?0:inst->GetCharges()));
@@ -3034,7 +3034,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	if (bAll || (strcasecmp(sep->arg[1], "trib")==0)) {
 		// Active tribute effect items
 		bFound = true;
-		for (int16 i=TRIBUTE_SLOT_START; i<(TRIBUTE_SLOT_START + MAX_PLAYER_TRIBUTES); i++) {
+		for (int16 i = EmuConstants::TRIBUTE_BEGIN; i <= EmuConstants::TRIBUTE_END; i++) {
 			const ItemInst* inst = client->GetInv().GetItem(i);
 			item = (inst) ? inst->GetItem() : nullptr;
 			if (c->GetClientVersion() >= EQClientSoF)

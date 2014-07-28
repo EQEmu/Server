@@ -402,10 +402,10 @@ bool Client::Process() {
 				{
 					entity_list.AEAttack(this, 30);
 				} else {
-					Attack(auto_attack_target, 13); // Kaiyodo - added attacking hand to arguments
+					Attack(auto_attack_target, MainPrimary); // Kaiyodo - added attacking hand to arguments
 				}
 				ItemInst *wpn = GetInv().GetItem(MainPrimary);
-				TryWeaponProc(wpn, auto_attack_target, 13);
+				TryWeaponProc(wpn, auto_attack_target, MainPrimary);
 
 				bool tripleAttackSuccess = false;
 				if( auto_attack_target && CanThisClassDoubleAttack() ) {
@@ -416,7 +416,7 @@ bool Client::Process() {
 						if(CheckAAEffect(aaEffectRampage)) {
 							entity_list.AEAttack(this, 30);
 						} else {
-							Attack(auto_attack_target, 13, false);
+							Attack(auto_attack_target, MainPrimary, false);
 						}
 					}
 
@@ -426,13 +426,13 @@ bool Client::Process() {
 						&& CheckDoubleAttack(true))
 					{
 						tripleAttackSuccess = true;
-						Attack(auto_attack_target, 13, false);
+						Attack(auto_attack_target, MainPrimary, false);
 					}
 
 					//quad attack, does this belong here??
 					if(GetSpecialAbility(SPECATK_QUAD) && CheckDoubleAttack(true))
 					{
-						Attack(auto_attack_target, 13, false);
+						Attack(auto_attack_target, MainPrimary, false);
 					}
 				}
 
@@ -444,8 +444,8 @@ bool Client::Process() {
 					if(MakeRandomInt(0, 99) < flurrychance)
 					{
 						Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-						Attack(auto_attack_target, 13, false);
-						Attack(auto_attack_target, 13, false);
+						Attack(auto_attack_target, MainPrimary, false);
+						Attack(auto_attack_target, MainPrimary, false);
 					}
 				}
 
@@ -460,7 +460,7 @@ bool Client::Process() {
 						{
 							if(MakeRandomInt(0, 99) < ExtraAttackChanceBonus)
 							{
-								Attack(auto_attack_target, 13, false);
+								Attack(auto_attack_target, MainPrimary, false);
 							}
 						}
 					}
@@ -507,19 +507,19 @@ bool Client::Process() {
 				CheckIncreaseSkill(SkillDualWield, auto_attack_target, -10);
 				if (random < DualWieldProbability){ // Max 78% of DW
 					if(CheckAAEffect(aaEffectRampage)) {
-						entity_list.AEAttack(this, 30, 14);
+						entity_list.AEAttack(this, 30, MainSecondary);
 					} else {
-						Attack(auto_attack_target, 14);	// Single attack with offhand
+						Attack(auto_attack_target, MainSecondary);	// Single attack with offhand
 					}
 					ItemInst *wpn = GetInv().GetItem(MainSecondary);
-					TryWeaponProc(wpn, auto_attack_target, 14);
+					TryWeaponProc(wpn, auto_attack_target, MainSecondary);
 
 					if( CanThisClassDoubleAttack() && CheckDoubleAttack()) {
 						if(CheckAAEffect(aaEffectRampage)) {
-							entity_list.AEAttack(this, 30, 14);
+							entity_list.AEAttack(this, 30, MainSecondary);
 						} else {
 							if(auto_attack_target && auto_attack_target->GetHP() > -10)
-								Attack(auto_attack_target, 14);	// Single attack with offhand
+								Attack(auto_attack_target, MainSecondary);	// Single attack with offhand
 						}
 					}
 				}
@@ -878,9 +878,9 @@ void Client::BulkSendInventoryItems() {
 
 	// Power Source
 	if(GetClientVersion() >= EQClientSoF) {
-		const ItemInst* inst = m_inv[9999];
+		const ItemInst* inst = m_inv[MainPowerSource];
 		if(inst) {
-			std::string packet = inst->Serialize(9999);
+			std::string packet = inst->Serialize(MainPowerSource);
 			ser_items[i++] = packet;
 			size += packet.length();
 		}

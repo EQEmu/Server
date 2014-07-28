@@ -159,8 +159,8 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 	}
 
 	//tribute items
-	for (i = 0; i < MAX_PLAYER_TRIBUTES; i++) {
-		const ItemInst* inst = m_inv[TRIBUTE_SLOT_START + i];
+	for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++) {
+		const ItemInst* inst = m_inv[EmuConstants::TRIBUTE_BEGIN + i];
 		if(inst == 0)
 			continue;
 		AddItemBonuses(inst, newbon, false, true);
@@ -544,7 +544,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 
 	bool food = false;
 	bool drink = false;
-	for (i = 22; i <= 29; i++)
+	for (i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_BAGS_BEGIN; i++)
 	{
 		if (food && drink)
 			break;
@@ -560,7 +560,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 			AddItemBonuses(inst, newbon);
 		}
 	}
-	for (i = 251; i <= 330; i++)
+	for (i = EmuConstants::GENERAL_BAGS_BEGIN; i <= EmuConstants::GENERAL_BAGS_END; i++)
 	{
 		if (food && drink)
 			break;

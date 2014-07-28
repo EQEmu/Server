@@ -41,7 +41,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill) { return true; }
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false) { return; }
-	virtual bool Attack(Mob* other, int Hand = 13, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false,
+	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr) { return false; }
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
