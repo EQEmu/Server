@@ -52,7 +52,7 @@ namespace RoF {
 			MapGuildTrophyTribute,
 			MapOther,
 			_MapCount
-		};
+		} InventoryMaps;
 	}
 
 	namespace slots {
@@ -98,7 +98,7 @@ namespace RoF {
 			_MainGeneralBegin = MainGeneral1,
 			_MainGeneralEnd = MainGeneral10,
 			_MainGeneralCount = (_MainGeneralEnd - _MainGeneralBegin + 1)
-		};
+		} EquipmentSlots;
 	}
 
 	namespace consts {

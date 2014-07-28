@@ -901,7 +901,7 @@ bool EQLimits::CoinHasWeight(uint32 version) {
 }
 
 uint32 EQLimits::BandoliersCount(uint32 version) {
-	static const bool local[_EmuClientCount] = {
+	static const uint32 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
 /*62*/			EmuConstants::BANDOLIERS_COUNT,
 /*Titanium*/	EmuConstants::BANDOLIERS_COUNT,
@@ -921,7 +921,7 @@ uint32 EQLimits::BandoliersCount(uint32 version) {
 }
 
 uint32 EQLimits::BandolierSize(uint32 version) {
-	static const bool local[_EmuClientCount] = {
+	static const uint32 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
 /*62*/			EmuConstants::BANDOLIER_SIZE,
 /*Titanium*/	EmuConstants::BANDOLIER_SIZE,
@@ -941,7 +941,7 @@ uint32 EQLimits::BandolierSize(uint32 version) {
 }
 
 uint32 EQLimits::PotionBeltSize(uint32 version) {
-	static const bool local[_EmuClientCount] = {
+	static const uint32 local[_EmuClientCount] = {
 /*Unknown*/		NOT_USED,
 /*62*/			EmuConstants::POTION_BELT_SIZE,
 /*Titanium*/	EmuConstants::POTION_BELT_SIZE,

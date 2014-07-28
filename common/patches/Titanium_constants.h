@@ -53,7 +53,7 @@ namespace Titanium {
 			MapGuildTrophyTribute,
 			MapOther,
 			_MapCount
-		};
+		} InventoryMaps;
 	}
 
 	namespace slots {
@@ -96,7 +96,7 @@ namespace Titanium {
 			_MainGeneralBegin = MainGeneral1,
 			_MainGeneralEnd = MainGeneral8,
 			_MainGeneralCount = (_MainGeneralEnd - _MainGeneralBegin + 1)
-		};
+		} EquipmentSlots;
 	}
 
 	namespace consts {
