@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //using namespace RoF2::maps;	// server inventory maps enumeration (code and database sync'd to reference)
 //using namespace RoF::slots;	// server possessions slots enumeration (code and database sync'd to reference)
 
-typedef class {
+class EmuConstants {
 	// an immutable value is required to initialize arrays, etc... use this class as a repository for those
 public:
 	// database
@@ -158,9 +158,9 @@ public:
 	static const uint32 BANDOLIERS_COUNT = Titanium::consts::BANDOLIERS_COUNT;	// count = number of bandolier instances
 	static const uint32 BANDOLIER_SIZE = Titanium::consts::BANDOLIER_SIZE;		// size = number of equipment slots in bandolier instance
 	static const uint32 POTION_BELT_SIZE = Titanium::consts::POTION_BELT_SIZE;
-} EmuConstants;
+};
 
-typedef class {
+class EQLimits {
 	// values should default to a non-beneficial value..unless value conflicts with intended operation
 	//
 	// EmuConstants may be used as references..but, not every reference needs to be in EmuConstants (i.e., AllowsEmptyBagInBag(), CoinHasWeight(), etc...)
@@ -201,6 +201,6 @@ public:
 	static uint32	BandolierSize(uint32 version);
 
 	static uint32	PotionBeltSize(uint32 version);
-} EQLimits;
+};
 
 #endif /* EQ_LIMITS_H */
